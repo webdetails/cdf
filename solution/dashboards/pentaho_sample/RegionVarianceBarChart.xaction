@@ -13,7 +13,8 @@
     <REGION type="string"> 
       <sources> 
         <request>REGION</request> 
-      </sources> 
+      </sources>  
+      <default-value><![CDATA[Central]]></default-value> 
     </REGION> 
   </inputs>
 
@@ -36,10 +37,11 @@
       <component-definition> 
         <jndi><![CDATA[SampleData]]></jndi>  
         <live><![CDATA[true]]></live>  
-        <query><![CDATA[select department, sum(variance) as Variance
+        <query><![CDATA[select department, sum(variance)
 from QUADRANT_ACTUALS
-where region in( '{REGION}' )
-group by department]]></query> 
+where region in( {PREPARE:REGION} )
+group by department
+order by department]]></query> 
       </component-definition> 
     </action-definition>
   
@@ -48,7 +50,6 @@ group by department]]></query>
       <action-type>Bar Chart</action-type>
       <action-inputs> 
         <chart-data type="result-set" mapping="query_result"/> 
-        <REGION type="string"/>
       </action-inputs>
       <action-outputs> 
         <image-tag type="string"/> 
@@ -74,20 +75,20 @@ group by department]]></query>
           </color-palette>  
           <chart-background type="color">#FFFFFF</chart-background>  
           <plot-background type="color">#EEEEEE</plot-background>  
-          <url-template><![CDATA[#]]></url-template>  
+          <url-template><![CDATA[javascript:Dashboards.fireChange('department', '{department}')]]></url-template>  
           <series-name>department</series-name>  
           <use-base-url>false</use-base-url>  
           <url-target>_self</url-target>  
           <title-font> 
             <font-family>Arial</font-family>  
             <size>12</size>  
-            <is-bold>true</is-bold>  
+            <is-bold>false</is-bold>  
             <is-italic>false</is-italic> 
           </title-font> 
         </chart-attributes>  
         <width><![CDATA[450]]></width>  
         <height><![CDATA[300]]></height>  
-        <title><![CDATA[Headcount Variance - ]]>{REGION}</title>  
+        <title><![CDATA[Headcount Variance]]></title>  
         <by-row>true</by-row> 
       </component-definition> 
     </action-definition>

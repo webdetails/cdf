@@ -6,7 +6,7 @@
 
 	<context-param>
 		<param-name>solution-path</param-name>
-		<param-value>@SOLUTION_ABSOLUTE_PATH@</param-value>
+		<param-value>@solution.deploy.path@</param-value>
 	</context-param>
 	<!--
 		<context-param>
@@ -33,12 +33,7 @@
 	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>
-			/WEB-INF/applicationContext-acegi-security.xml
-			/WEB-INF/applicationContext-common-authorization.xml
-			/WEB-INF/applicationContext-acegi-security-memory.xml
-			/WEB-INF/applicationContext-pentaho-security-memory.xml
-		</param-value>
+          <param-value>/WEB-INF/applicationContext-acegi-security.xml /WEB-INF/applicationContext-common-authorization.xml /WEB-INF/applicationContext-acegi-security-memory.xml /WEB-INF/applicationContext-pentaho-security-memory.xml</param-value>
 	</context-param>
 
 	<!--
@@ -87,21 +82,15 @@
 	-->
 
 	<context-param>
-		<param-name>
-			com.tonbeller.wcf.controller.RequestContextFactory
-		</param-name>
-		<param-value>
-			com.tonbeller.wcf.controller.RequestContextFactoryImpl
-		</param-value>
+    <param-name>com.tonbeller.wcf.controller.RequestContextFactory</param-name>
+    <param-value>com.tonbeller.wcf.controller.RequestContextFactoryImpl</param-value>
 	</context-param>
 
 	<!-- insert additional context-params -->
 
-	<filter><!-- This must be the first filter listed in the web.xml -->
+  <filter> <!-- This must be the first filter listed in the web.xml -->
 		<filter-name>Set Character Encoding Filter</filter-name>
-		<filter-class>
-			org.pentaho.ui.servlet.PentahoAwareCharacterEncodingFilter
-		</filter-class>
+    <filter-class>org.pentaho.ui.servlet.PentahoAwareCharacterEncodingFilter</filter-class>
 		<init-param>
 			<param-name>ignore</param-name>
 			<param-value>yes</param-value>
@@ -110,9 +99,7 @@
 
 	<filter>
 		<filter-name>Acegi Filter Chain Proxy</filter-name>
-		<filter-class>
-			org.acegisecurity.util.FilterToBeanProxy
-		</filter-class>
+    <filter-class>org.acegisecurity.util.FilterToBeanProxy</filter-class>
 		<init-param>
 			<param-name>targetBean</param-name>
 			<param-value>filterChainProxy</param-value>
@@ -121,24 +108,17 @@
 
 	<filter>
 		<filter-name>SystemStatusFilter</filter-name>
-		<filter-class>
-			org.pentaho.core.system.SystemStatusFilter
-		</filter-class>
+    <filter-class>org.pentaho.core.system.SystemStatusFilter</filter-class>
 		<init-param>
 			<param-name>initFailurePage</param-name>
 			<param-value>InitFailure</param-value>
-			<description>
-				This page is displayed if the PentahoSystem fails to
-				properly initialize.
-			</description>
+      <description>This page is displayed if the PentahoSystem fails to properly initialize.</description>
 		</init-param>
 	</filter>
 
 	<filter>
 		<filter-name>JPivotController</filter-name>
-		<filter-class>
-			com.tonbeller.wcf.controller.RequestFilter
-		</filter-class>
+    <filter-class>com.tonbeller.wcf.controller.RequestFilter</filter-class>
 		<init-param>
 			<param-name>errorJSP</param-name>
 			<param-value>PivotError</param-value>
@@ -147,14 +127,12 @@
 		<init-param>
 			<param-name>busyJSP</param-name>
 			<param-value>PivotBusy</param-value>
-			<description>
-				This page is displayed if a the user clicks on a query
-				before the previous query has finished
-			</description>
+      <description>This page is displayed if a the user clicks
+        on a query before the previous query has finished</description>
 		</init-param>
 	</filter>
 
-	<!-- insert additional filters -->
+<!-- insert additional filters -->
 
 	<filter-mapping>
 		<filter-name>Set Character Encoding Filter</filter-name>
@@ -232,22 +210,14 @@
 	<servlet>
 		<servlet-name>GetChart</servlet-name>
 		<display-name>GetChart</display-name>
-		<description>
-			Default configuration created for servlet.
-		</description>
-		<servlet-class>
-			com.tonbeller.jpivot.chart.GetChart
-		</servlet-class>
+    <description>Default configuration created for servlet.</description>
+    <servlet-class>com.tonbeller.jpivot.chart.GetChart</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>Print</servlet-name>
 		<display-name>Print</display-name>
-		<description>
-			Default configuration created for servlet.
-		</description>
-		<servlet-class>
-			com.tonbeller.jpivot.print.PrintServlet
-		</servlet-class>
+    <description>Default configuration created for servlet.</description>
+    <servlet-class>com.tonbeller.jpivot.print.PrintServlet</servlet-class>
 	</servlet>
 	<!-- ********************* End JPivot Servlets ******************* -->
 
@@ -263,9 +233,7 @@
 
 	<servlet>
 		<servlet-name>ServiceAction</servlet-name>
-		<servlet-class>
-			org.pentaho.ui.servlet.HttpWebService
-		</servlet-class>
+    <servlet-class>org.pentaho.ui.servlet.HttpWebService</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -280,27 +248,19 @@
 
 	<servlet>
 		<servlet-name>GetMondrianModel</servlet-name>
-		<servlet-class>
-			org.pentaho.ui.servlet.GetMondrianModel
-		</servlet-class>
+    <servlet-class>org.pentaho.ui.servlet.GetMondrianModel</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>ShowTestResult</servlet-name>
-		<servlet-class>
-			org.pentaho.ui.servlet.ShowTestResult
-		</servlet-class>
+    <servlet-class>org.pentaho.ui.servlet.ShowTestResult</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>Xmla</servlet-name>
-		<servlet-class>
-			mondrian.xmla.impl.DefaultXmlaServlet
-		</servlet-class>
+    <servlet-class>org.pentaho.ui.servlet.PentahoXmlaServlet</servlet-class>
 		<init-param>
 			<param-name>DataSourcesConfig</param-name>
-			<param-value>
-				${pentaho.solutionpath}${pentaho.olap.xmladatasources}
-			</param-value>
+      <param-value>${pentaho.solutionpath}${pentaho.olap.xmladatasources}</param-value>
 		</init-param>
 		<init-param>
 			<param-name>CharacterEncoding</param-name>
@@ -315,9 +275,7 @@
 
 	<servlet>
 		<servlet-name>RepositoryFilePublisher</servlet-name>
-		<servlet-class>
-			org.pentaho.ui.servlet.RepositoryFilePublisher
-		</servlet-class>
+    <servlet-class>org.pentaho.ui.servlet.RepositoryFilePublisher</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -435,27 +393,30 @@
 		<servlet-name>Dashboards</servlet-name>
 		<jsp-file>/jsp/Dashboards.jsp</jsp-file>
 	</servlet>
-
 	<!-- ================================= merged servlets =================================== -->
 	<servlet>
 		<servlet-name>ManageUsers</servlet-name>
-		<servlet-class>
-			org.pentaho.ui.servlet.SubscriptionUserCleanup
-		</servlet-class>
+       <servlet-class>org.pentaho.ui.servlet.SubscriptionUserCleanup</servlet-class>
 		<init-param>
 			<param-name>password</param-name>
-			<param-value />
-			<description>
-				password used for protecting access to servlet
-			</description>
+         <param-value/>
+         <description>password used for protecting access to servlet</description>
 		</init-param>
 	</servlet>
 
 	<servlet>
 		<servlet-name>AdhocWebService</servlet-name>
-		<servlet-class>
-			org.pentaho.ui.servlet.AdhocWebService
-		</servlet-class>
+         <servlet-class>org.pentaho.ui.servlet.AdhocWebService</servlet-class>
+     </servlet>
+
+     <servlet>
+	   <servlet-name>AnalysisViewService</servlet-name>
+	   <servlet-class>org.pentaho.ui.servlet.AnalysisViewService</servlet-class>
+     </servlet>
+
+	<servlet>
+	  <servlet-name>MondrianCatalogPublisher</servlet-name>
+	  <servlet-class>org.pentaho.ui.servlet.MondrianCatalogPublisher</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -483,10 +444,8 @@
 		<jsp-file>/jsp/Login.jsp</jsp-file>
 		<init-param>
 			<param-name>send401List</param-name>
-			<param-value>AdhocWebService</param-value>
-			<description>
-				List of things to throw a 401 to when seen in the login
-			</description>
+         <param-value>AdhocWebService,AnalysisViewService,MondrianCatalogPublisher</param-value>
+         <description>List of things to throw a 401 to when seen in the login</description>
 		</init-param>
 	</servlet>
 
@@ -505,9 +464,7 @@
 	</servlet>
 	<servlet>
 		<servlet-name>GetResource</servlet-name>
-		<servlet-class>
-			org.pentaho.ui.servlet.GetResource
-		</servlet-class>
+     <servlet-class>org.pentaho.ui.servlet.GetResource</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -519,8 +476,6 @@
 		<servlet-name>NewAnalysisView</servlet-name>
 		<jsp-file>/jsp/NewAnalysisView.jsp</jsp-file>
 	</servlet>
-
-
 
 	<!-- insert additional servlets -->
 
@@ -755,12 +710,23 @@
 		<servlet-name>ResetRepository</servlet-name>
 		<url-pattern>/ResetRepository</url-pattern>
 	</servlet-mapping>
+
 	<servlet-mapping>
 		<servlet-name>AdhocWebService</servlet-name>
 		<url-pattern>/AdhocWebService</url-pattern>
 	</servlet-mapping>
 
 	   <servlet-mapping>
+      <servlet-name>AnalysisViewService</servlet-name>
+      <url-pattern>/AnalysisViewService</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+      <servlet-name>MondrianCatalogPublisher</servlet-name>
+      <url-pattern>/MondrianCatalogPublisher</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
 		   <servlet-name>SolutionRepositoryService</servlet-name>
 		   <url-pattern>/SolutionRepositoryService</url-pattern>
 	   </servlet-mapping>
@@ -769,7 +735,6 @@
 		<servlet-name>NewAnalysisView</servlet-name>
 		<url-pattern>/NewAnalysisView</url-pattern>
 	</servlet-mapping>
-
 
 
 	<!-- insert additional servlet mappings -->
@@ -788,9 +753,7 @@
 
 	<taglib>
 		<taglib-uri>http://www.tonbeller.com/jpivot</taglib-uri>
-		<taglib-location>
-			/WEB-INF/jpivot/jpivot-tags.tld
-		</taglib-location>
+       <taglib-location>/WEB-INF/jpivot/jpivot-tags.tld</taglib-location>
 	</taglib>
 
 	<!-- insert additional tag libs -->

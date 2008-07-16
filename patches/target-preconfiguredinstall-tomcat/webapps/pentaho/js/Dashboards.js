@@ -89,7 +89,9 @@ var Dashboards =
 	initMap: true,
 
 	update:function(object)	{
-				object.preExecution();
+		        if(!(typeof(object.preExecution)=='undefined')){
+					object.preExecution();
+				}
 				switch(object.type)
 				{
 					// test if object is an xaction
@@ -110,19 +112,8 @@ var Dashboards =
 						break;
 					case "select":
 					case "selectMulti":
-						//go through parameter array and update values
-						var p = new Array(object.parameters.length);
-						for(var i= 0, len = p.length; i < len; i++){
-							var key = object.parameters[i][0];
-							var value = eval(object.parameters[i][1]);
-							p[i] = [key,value];
-						} 
-						
-						//execute the xaction tp populate the selector
-						html = pentahoAction(object.solution, object.path, object.action, p,null);
-						
-						//transform the result int a javascript array
-						var myArray = this.parseArray(html,false);
+
+						var myArray = Dashboards.getValuesArray(object);
 						
 						selectHTML = "<select";
 						selectHTML += " id='" + object.name + "'";
@@ -163,20 +154,8 @@ var Dashboards =
 						break;
 					case "radio":
 					case "check":
-						//go through parameter array and update values
-						var p = new Array(object.parameters.length);
-						for(var i= 0, len = p.length; i < len; i++){
-							var key = object.parameters[i][0];
-							var value = eval(object.parameters[i][1]);
-							p[i] = [key,value];
-						} 
-						
-						//execute the xaction tp populate the selector
-						html = pentahoAction(object.solution, object.path, object.action, p,null);
-						
-						//transform the result int a javascript array
-						var myArray = this.parseArray(html,false);
-						
+						var myArray = Dashboards.getValuesArray(object);
+
 						selectHTML = "";
 						for(var i= 0, len  = myArray.length; i < len; i++){
 							selectHTML += "<input onclick='Dashboards.processChange(\"" + object.name + "\")'";
@@ -188,7 +167,7 @@ var Dashboards =
 							}else{
 								selectHTML += " type='checkbox'";
 							}
-							selectHTML += " id='" + object.name +"' name='" + object.name +"' value=" + myArray[i][1] + "> " + myArray[i][1];
+							selectHTML += " id='" + object.name +"' name='" + object.name +"' value='" + myArray[i][1] + "'> " + myArray[i][1];
 						} 
 						//update the placeholder
 						document.getElementById(object.htmlObject).innerHTML = selectHTML;
@@ -261,8 +240,30 @@ var Dashboards =
 						DashboardsMap.updateInfoWindow(pentahoAction(object.solution, object.path, object.action, DashboardsMap.selectedPointDetails ,null));
 					
 						break;
+						
+					case "jpivot":
+					
+						//Build IFrame and set url
+						var jpivotHTML = "<iframe id=\"jpivot_"+ object.htmlObject + " \" scrolling=\"tu\" frameborder=\"0\"  height = \"100%\"  width =\"100%\"  src = \"";
+						jpivotHTML += "ViewAction?solution="	+ object.solution + "&path=" + 	object.path + "&action="+ object.action
+						
+						//Add args
+						var p = new Array(object.parameters.length);
+						for(var i= 0, len = p.length; i < len; i++){
+							var arg = "&" + object.parameters[i][0] + "=";
+							jpivotHTML += arg +  eval(object.parameters[i][1]);
+						}
+						
+						//Close IFrame
+						jpivotHTML += "\"></iframe>";
+							
+						document.getElementById(object.htmlObject).innerHTML = jpivotHTML;
+						
+					break;
 				}
-				object.postExecution();
+		        if(!(typeof(object.postExecution)=='undefined')){
+					object.postExecution();
+				}
 		},
 	init:function(components){
 			 this.components=components;
@@ -308,6 +309,29 @@ var Dashboards =
 			return myArray;
 		
 		},
+	getValuesArray: function(object){
+
+		  if (typeof(object.valuesArray) == 'undefined'){
+			  //go through parameter array and update values
+			  var p = new Array(object.parameters.length);
+			  for(var i= 0, len = p.length; i < len; i++){
+				  var key = object.parameters[i][0];
+				  var value = eval(object.parameters[i][1]);
+				  p[i] = [key,value];
+			  } 
+
+			  //execute the xaction tp populate the selector
+			  html = pentahoAction(object.solution, object.path, object.action, p,null);
+
+			  //transform the result int a javascript array
+			  var myArray = this.parseArray(html,false);
+			  return myArray;
+
+		  }
+		  else{
+			  return object.valuesArray
+		  }
+	  },
 	processChange: function(object_name){
 		var object = eval(object_name);
 		var parameter = object.parameter;
@@ -358,7 +382,13 @@ var Dashboards =
 			
 			break;
 		}
+		if(!(typeof(object.preChange)=='undefined')){
+			object.preChange(value);
+		}
 		this.fireChange(parameter,value);
+		if(!(typeof(object.postChange)=='undefined')){
+			object.postChange(value);
+		}
 	},
 	fireChange: function(parameter,value){
 		busyBox.Show();
@@ -594,7 +624,7 @@ var DashboardsMap =
 		if(lat == '' || log == '')
 		{
 			placeDesc = placeDesc.replace(/&/g,",");
-			request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1&featureClass=P&coutry=PT&callback=DashboardsMap.getLocation';
+			request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1&featureClass=P&callback=DashboardsMap.getLocation';
 		}
 
 		// Create a new script object
@@ -645,10 +675,13 @@ var DashboardsMap =
 			record[4] = marker;
 		}
 
-		if(dataIdx >= data.length){
+		if(dataIdx >= data.length && dataIdx > 1){
 			var extent = markers.getDataExtent();
 			map.zoomToExtent(extent);
 		}
+		if(dataIdx >= data.length && dataIdx == 1){
+            map.setCenter(markers.markers[0].lonlat,4,false,false);
+        }
 	},
 
 	showMarker: function (oldMarker, record){
@@ -678,7 +711,6 @@ var DashboardsMap =
 
 	marker_click: function (evt){
 		click_lonlat = this.lonlat;
-		//infoWindow(this.marker, this.data);
 		var record = this.data;
 		Dashboards.fireChange("selectedPoint", record[0]);
 	},
