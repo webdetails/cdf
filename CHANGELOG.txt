@@ -1,6 +1,8 @@
 Changelog:
 
 Trunk
+
+V2.0.1
 - Html selectors lacked enclosing quotes
 - preExpressions are now optional
 - Fixed bug in selectors regarding names with spaces included
@@ -8,7 +10,7 @@ Trunk
 - For selectors, a fixed array of values are now accepted in the parameter 'valuesArray'
 - Added pivot component
 - Removed the url-template bug in samples_broadcast example (thanks to Maria Roldan)
-- Added a new steel-wheels alike example (thanks to Harris Ward)
+- Added two new steel-wheels alike example (thanks to Harris Ward)
 
 V2.0.0
 - Initial release
