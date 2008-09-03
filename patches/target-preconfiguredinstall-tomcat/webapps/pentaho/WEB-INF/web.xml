@@ -391,7 +391,15 @@
 
 	<servlet>
 		<servlet-name>Dashboards</servlet-name>
-		<jsp-file>/jsp/Dashboards.jsp</jsp-file>
+		<jsp-file>/cdf/jsp/Dashboards.jsp</jsp-file>
+	</servlet>
+	<servlet>
+		<servlet-name>JSONSolution</servlet-name>
+		<jsp-file>/cdf/jsp/JSONSolution.jsp</jsp-file>
+	</servlet>
+	<servlet>
+		<servlet-name>GetCDFResource</servlet-name>
+		<servlet-class>pt.webdetails.cdf.GetCDFResource</servlet-class>
 	</servlet>
 	<!-- ================================= merged servlets =================================== -->
 	<servlet>
@@ -658,6 +666,15 @@
 	<servlet-mapping>
 		<servlet-name>Dashboards</servlet-name>
 		<url-pattern>/Dashboards</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>JSONSolution</servlet-name>
+		<url-pattern>/JSONSolution</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>GetCDFResource</servlet-name>
+		<url-pattern>/GetCDFResource</url-pattern>
 	</servlet-mapping>
 
 	<!-- =============================== merged servlet-mappings ============================= -->

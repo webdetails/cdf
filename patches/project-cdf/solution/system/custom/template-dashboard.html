@@ -1,154 +1,120 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
-charset below is utf-8 to assist tools reading this file. The value will be replaced with the system encoding
-before returning to client. Do not modify the line below.
+
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Title      : SlashBlog
+Version    : 1.0
+Released   : 20070814
+Description: A two-column, fixed-width design ideal for 1024x768 screen resolutions. Suitable for blogs and small business websites.
+
 -->
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>Mozilla Corporation Metrics Dashboard</title>
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+		<!--link href="/pentaho-style/dashboard.css" rel="stylesheet" type="text/css" media="screen" /-->
+		<link rel="stylesheet" type="text/css" href="/pentaho-style/mozilla.css"/>
+		<link rel="stylesheet" href="/pentaho/cdf/js/jquery.tooltip.css" type="text/css" />
+		<link rel="stylesheet" href="/pentaho/cdf/js/jquery.jdMenu.css" type="text/css" />
+		<link rel="stylesheet" href="/pentaho/cdf/js/jquery.jdMenu.slate.css" type="text/css" />
 
-	<title>{system}</title>
-    <link href="/pentaho-style/styles-new.css" rel="stylesheet" type="text/css" />
-	<!-- link rel="stylesheet" type="text/css" href="/pentaho-style/active/default.css" / -->
-	<link rel="shortcut icon" href="/pentaho-style/favicon.ico" />
-	<link rel="stylesheet" type="text/css" href="/pentaho-style/menus/transmenu.css"/>
-	<script language="javascript" src="/pentaho-style/menus/transmenu.js"></script>
+
+		<script language="javascript" type="text/javascript" src="/pentaho-style/pentaho.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/js/pentaho-ajax.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/js/options.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery-ui.packed.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.bgiframe.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.dimensions.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.jdMenu.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.positionBy.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.tooltip.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.blockUI.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery-ui-draggable.packed.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/jquery.eventstack.js"></script>
+
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/greybox/AJS.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/greybox/AJS_fx.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/greybox/gb_scripts.js"></script>
+		<link href="/pentaho/cdf/js/greybox/gb_styles.css" rel="stylesheet" type="text/css" media="all" />
+
+
+		<script language="javascript" type="text/javascript" src="/pentaho/adhoc/js/common/ui/calendar/calendar.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/adhoc/js/common/ui/calendar/calendar-setup.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/adhoc/js/common/ui/calendar/lang/calendar-en.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/Dashboards.js"></script>
+		<script language="javascript" type="text/javascript" src="/pentaho/cdf/js/MetaLayer/MetaLayer.js"></script>
+		<style type="text/css">@import url(/pentaho/adhoc/js/common/ui/calendar/calendar-win2k-1.css);</style>
+
+		<!-- Javascript map libraries includes -->
+		<!--<script src="cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js"></script>-->
+		<!--<script src="cdf/js/OpenMap/open_map.js"></script>-->
+		<!--<script src="cdf/js/jsr_class.js"></script>-->
+		<!--<script src="cdf/js/OpenStreetMap.js"></script>-->
+	</head>
+<body>
+
 	<script language="javascript">
-		var backgroundAlert = "{background-alert}";
-	</script>
-
-	
-	<script language="javascript" src="/pentaho-style/pentaho.js"></script>
-	<script language="javascript" src="/pentaho/js/pentaho-ajax.js"></script>
-	<script language="javascript" src="/pentaho/js/options.js"></script>
-
-	<script type="text/javascript" src="adhoc/js/common/ui/calendar/calendar.js"></script>
-	<script type="text/javascript" src="adhoc/js/common/ui/calendar/calendar-setup.js"></script>
-	<script type="text/javascript" src="adhoc/js/common/ui/calendar/lang/calendar-en.js"></script>
-	<script type="text/javascript" src="js/Dashboards.js"></script>
-	<script type="text/javascript" src="js/CastleBusyBox.js"></script>
-	<style type="text/css">@import url(adhoc/js/common/ui/calendar/calendar-win2k-1.css);</style>
-
-	<!-- Javascript map libraries includes -->
-	<script src="js/OpenMap/OpenLayers/lib/OpenLayers.js"></script>
-	<script src="js/OpenMap/open_map.js"></script>
-	<script src="js/jsr_class.js"></script>
-	<script src="js/OpenStreetMap.js"></script>
-
-	
-	{header-content}
-</head>
-
-<body class="body" dir="{text-direction}" {body-tag} >
-
-<div class="banner" style="text-align:left">
-	<span>
-		<img border="0" height="100" src="/pentaho-style/images/client.png" />
-	</span>
-</div>
-		<div id="menu">
-			<a id="home-menu" href="Home">{home}</a>
-			<a id="navigate-menu" href="#">{navigate}</a>
-			<a id="admin-menu" href="Admin">{admin}</a>
-			<a id="logout-menu" href="Logout">{logout}</a>
-			<a id="about-menu" href="#">{about}</a>
-		</div>
-		<div id="backgroundalert" style="display:none;position:absolute;top:3px;left:103px;height:30px;width:200px;z-index:100">
-			<span style="font-size:1em">
-				<a href="UserContent" style="font-size:1em;color:white">
-					{new-content}
-				</a>
-			</span>
-		</div>
-
-<iframe id="BusyBoxIFrame" name="BusyBoxIFrame" frameBorder="0" scrolling="no" ondrop="return false;"></iframe>
-	<script language="javascript">
-	// Instantiate our BusyBox object
-	var busyBox = new BusyBox("BusyBoxIFrame", "busyBox", 4, "/pentaho-style/images/gears_ani_", ".gif", 125, 147, 207);
-
-		function docLoaded() {
-			try {
-				if( backgroundAlert == 'true' ) {
-					document.getElementById( 'backgroundalert' ).style.display='block';
-				}
-			} catch (e) {alert(e)}
-		}
-
- 		document.onload=docLoaded();
-
+		
 		isAdmin = "{isAdmin}";
 		isLoggedIn = "{isLoggedIn}";
 
-	// set up drop downs anywhere in the body of the page. I think the bottom of the page is better..
-	// but you can experiment with effect on loadtime.
-	if (TransMenu.isSupported()) {
-
-		var ms = new TransMenuSet(TransMenu.direction.down, 1, 0, TransMenu.reference.bottomLeft);
-
-		var menu1 = ms.addMenu(document.getElementById("home-menu"));
-
-		var menu2 = ms.addMenu(document.getElementById("navigate-menu"));
-		menu2.addItem("New Report", "javascript:popPage('adhoc/waqr.html')");
-		menu2.addItem("New Analysis View", "javascript:popPage('NewAnalysisView')");
-		menu2.addItem("{solutions}", "Navigate");
-		menu2.addItem("{file-cache}", "UserContent");
-		//menu2.addItem("{portal}", "/portal/portal/pentaho/default");
-
-		var menu3 = ms.addMenu(document.getElementById("admin-menu"));
-
-		var menu5 = ms.addMenu(document.getElementById("logout-menu"));
-
-		var menu4 = ms.addMenu(document.getElementById("about-menu"));
-		menu4.addItem("{pentaho.org}", "javascript:popPage('http://www.pentaho.org')");
-		//menu4.addItem("{demos}", "javascript:popPage('http://www.pentaho.com/products/demos/')");
-		//menu4.addItem("{downloads}", "javascript:popPage('http://www.pentaho.org/download')");
-		//menu4.addItem("{forums}", "javascript:popPage('http://www.pentaho.org/forums')");
-		menu4.addItem("{about}", "javascript:modalWin('About')");
-
-		TransMenu.renderAll();
-	}
 	</script>
+	
+	<!-- start header -->
+	<div id = "container">
+		<div>
+			<ul class="jd_menu">
+				<li>
+					<a href="Home" title="Main Page">Home</a>
+				</li>
+				<li>
+				<a href="Logout" title="Main Page">Logout</a>
+				</li>
+			</ul>
+		</div>
+		<div id="navObject"> </div>
+	</div>
 
-{content}
-{footer}
-<noscript>
+<script language="javascript" type="text/javascript">
 
-<td valign="top" style="fpadding: 0px 0px 0px 15px; font-size: .85em;text-align:left"><table align="center" border="0" cellpadding="0" cellspacing="0">
-      <tr>
-         <td><img border="0" src="/pentaho-style/images/fly-top-left1.png"></td>
-         <td style="background-image: url(/pentaho-style/images/fly-top1.png);background-repeat: repeat-x;"></td>
-         <td><img border="0" src="/pentaho-style/images/fly-top-right1.png"></td>
-      </tr>
+navigatorComponent = 
+{
+  name: "navigatorComponent",
+  type: "navigator",
+  listeners:[],
+  parameters: [],
+  htmlObject: "navObject",
+  executeAtStart: true,
+  mode: "horizontal",
+  includeSolutions: false
+};
 
-      <tr style="background-color: #e5e5e5;">
-         <td style="background-image: url(/pentaho-style/images/fly-left1.png);background-repeat: repeat-y;"></td>
-         <td style="padding:0px" valign="top">
+folderList = 
+{
+  name: "folderList",
+  type: "contentList",
+  listeners:[],
+  parameters: [],
+  htmlObject: "navsub",
+  executeAtStart: true,
+  mode: "2"
+};
 
-            <table id="WarningTable" style="padding: 0px 5px 5px 5px;">
-               <tr>
-                  <td colspan="2" style="font-size:1.6em" class="content_header_line">
-				  Warning !!!
-				  </td>
+// Removed folderlist
+var templateComponents = [navigatorComponent];
+Dashboards.addComponents(templateComponents);
+</script>
 
-               </tr>
-				<tr>
-                 <td colspan="2"style="font-size:1em" class="content_header">Your browser doesn't support JavaScript or you have disabled JavaScript. 
-	  Javascript should be enabled <br/> with this site. For example, the
-	  dropdown menu will not properly function without Javascript.</td>
 
-               </tr>
-             </table>
-         </td>
-         <td style="background-image: url(/pentaho-style/images/fly-right1.png);background-repeat: repeat-y;"></td>
-      </tr>
-      <tr>
-         <td><img border="0" src="/pentaho-style/images/fly-bot-left1.png"></td>
-         <td><img src="/pentaho-style/images/fly-bot1.png" height="25" width="100%"></td>
-         <td><img border="0" src="/pentaho-style/images/fly-bot-right1.png"></td>
-      </tr>
-   </table>
-</td>
-		</noscript>
+		{content}
+	</div>
+
 
 </body>
 </html>

@@ -1,0 +1,38 @@
+<br />
+
+		<div id="folderTitle_object" class="pageTitle" >&nbsp;</div>
+
+		<div id="folderContent_object" class="solutionItems" >&nbsp;</div>
+
+
+<script language="javascript" type="text/javascript">
+
+
+folderContent = 
+{
+  name: "folderContent",
+  type: "contentList",
+  listeners:[],
+  parameters: [],
+  htmlObject: "folderContent_object",
+  executeAtStart: true,
+  mode: "1"
+};
+
+
+folderTitle = 
+{
+  name: "folderTitle",
+  type: "pageTitle",
+  listeners:[],
+  parameters: [],
+  htmlObject: "folderTitle_object",
+  executeAtStart: true,
+  mode: "1"
+};
+
+
+var templateComponents = [folderContent, folderTitle];
+Dashboards.init(templateComponents);
+</script>
+
