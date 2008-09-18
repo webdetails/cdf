@@ -256,6 +256,10 @@ Dashboards.update = function(object)	{
 		case "pivotLink":
 			this.generatePivotLink(object);
 			break;
+			
+		case "tableComponent":
+			this.generateTableComponent(object);
+			break;
 
 		}
 		if(!(typeof(object.postExecution)=='undefined')){
@@ -1014,6 +1018,29 @@ Dashboards.update = function(object)	{
 	
 		var n = "00000000000000" + num;
 		return n.substring(n.length-size,n.length);
+	}
+	
+	Dashboards.generateTableComponent = function(object){
+	
+		var cd = object.chartDefinition;
+		if (cd == undefined){
+			alert("Fatal - No chart definition passed");
+			return;
+		}
+		$("#"+object.htmlObject).html("Loading...");
+		
+		$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
+				Dashboards.processTableComponentResponse(object,json);
+			});
+		
+	};
+	
+	Dashboards.processTableComponentResponse = function(object,json)
+	{
+	
+		 $("#"+object.htmlObject).html("<table id='" + object.htmlObject + "Table' class=\"tableComponent\">");
+		 $("#"+object.htmlObject+'Table').dataTable( json );
+		 $("#"+object.htmlObject).append("</table>");
 	}
 
 Dashboards.path = Dashboards.getParameter("path");

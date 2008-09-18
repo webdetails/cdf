@@ -1,0 +1,11 @@
+{
+	"sProcessing": "En traitant...",
+	"sLengthMenu": "témoigner _MENU_ articles",
+	"sZeroRecords": "On n'a pas trouvé rien d'articles d'accords",
+	"sInfo": "En témoignant _START_ à _END_ de _TOTAL_ articles",
+	"sInfoEmtpy": "Témoignant 0 à 0 de 0 articles",
+	"sInfoFiltered": "(filtré de _MAX_ entries en total)",
+	"sInfoPostFix": "",
+	"sSearch": "Recherchez:",
+	"sUrl": ""
+}

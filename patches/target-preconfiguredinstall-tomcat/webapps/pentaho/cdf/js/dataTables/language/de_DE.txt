@@ -1,0 +1,11 @@
+{
+	"sProcessing": "Bitte warten...",
+	"sLengthMenu": "_MENU_ Einträge anzeigen",
+	"sZeroRecords": "Keine Einträge vorhanden",
+	"sInfo": "_START_ bis _END_ von _TOTAL_ Einträge",
+	"sInfoEmtpy": "0 bis 0 von 0 Einträge",
+	"sInfoFiltered": "(gefiltert von _MAX_  total Einträge)",
+	"sInfoPostFix": "",
+	"sSearch": "Suchen",
+	"sUrl": ""
+}

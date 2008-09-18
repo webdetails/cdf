@@ -1,0 +1,42 @@
+.tableComponent{
+	
+	border-collapse: collapse;
+}
+
+.tableComponent th {
+	color: #0000ff;
+	width: 1000px;
+	border-bottom: 1px solid #000000;
+}
+
+.tableRowDim {
+	color: #00ff00;
+	padding: 3px 10px;
+}
+
+.tableRowValue {
+	color: #ff0000;
+	padding: 3px 2px;
+}
+
+.odd {
+	background-color: #ddffdd;
+	border: 1px;
+	border-bottom: 1px;
+}
+
+.even {
+	background-color: #eeffee;
+}
+
+.dataTables_length
+{
+	text-align: left;
+	padding: 10px 25px;
+}
+
+.dataTables_filter
+{
+	text-align: left;
+	padding: 0px 10px;
+}
