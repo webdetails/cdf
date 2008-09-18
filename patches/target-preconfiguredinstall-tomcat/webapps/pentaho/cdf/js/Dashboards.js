@@ -58,6 +58,9 @@ Dashboards.update = function(object)	{
 	case "jFreeChartComponent":
 		this.updateJFreeChartComponent(object);
 		break;
+	case "dialComponent":
+		this.updateDialComponent(object);
+		break;
 	case "timePlotComponent":
 		this.updateTimePlotComponent(object);
 		break;
@@ -872,6 +875,32 @@ Dashboards.update = function(object)	{
 		//pentahoAction(object.solution, object.path, object.action, p,function(json){ Dashboards.xactionCallback(object,json); });
 		// or sync mode
 		$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechart.xaction", parameters,null));
+
+    };
+
+	Dashboards.updateDialComponent = function( object ){
+
+		var cd = object.chartDefinition;
+		if (cd == undefined){
+			alert("Fatal - No chart definition passed");
+			return;
+		}
+	
+		//go through parametere array and update values
+		var parameters = [];
+		for(p in cd){
+			var key = p;
+			var value = typeof cd[p]=='function'?cd[p]():cd[p];
+			//alert("key: " + key + "; Value: " + value);
+			parameters.push([key,value]);
+		} 
+		// increment runningCalls
+		Dashboards.runningCalls++;
+		
+		//callback async mode
+		//pentahoAction(object.solution, object.path, object.action, p,function(json){ Dashboards.xactionCallback(object,json); });
+		// or sync mode
+		$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechartdial.xaction", parameters,null));
 
     };
 
