@@ -1,3 +1,5 @@
+$.ajaxSetup({ type: "POST", async: false });
+
 
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
@@ -263,7 +265,9 @@ Dashboards.update = function(object)	{
 		case "tableComponent":
 			this.generateTableComponent(object);
 			break;
-
+		case "queryComponent":
+			this.makeQuery(object);
+			break;
 		}
 		if(!(typeof(object.postExecution)=='undefined')){
 			object.postExecution();
@@ -1049,6 +1053,21 @@ Dashboards.update = function(object)	{
 		return n.substring(n.length-size,n.length);
 	}
 	
+	Dashboards.makeQuery = function(object){
+	
+		var cd = object.queryDefinition;
+		if (cd == undefined){
+			alert("Fatal - No query definition passed");
+			return;
+		}
+		
+		$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
+				object.result = json["aaData"];
+				//alert("obj: " + object.result);
+			});
+		
+	};
+
 	Dashboards.generateTableComponent = function(object){
 	
 		var cd = object.chartDefinition;
@@ -1056,7 +1075,6 @@ Dashboards.update = function(object)	{
 			alert("Fatal - No chart definition passed");
 			return;
 		}
-		$("#"+object.htmlObject).html("Loading...");
 		
 		$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
 				Dashboards.processTableComponentResponse(object,json);
