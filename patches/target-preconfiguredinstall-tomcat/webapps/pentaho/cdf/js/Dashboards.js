@@ -925,6 +925,7 @@ Dashboards.update = function(object)	{
 
         var timePlotValueGeometry = new Timeplot.DefaultValueGeometry({
             gridColor: "#000000",
+			min: 0,
             axisLabelsPlacement: "left",
             gridType: "short",
         });
