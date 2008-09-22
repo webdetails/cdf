@@ -14,13 +14,15 @@
       <sources>
         <request>jndi</request>
       </sources>
-      <default-value/>
+	  <default-value>java:comp/env/jdbc/aus</default-value>
     </JNDI>
     <QUERY type="string">
       <sources>
         <request>query</request>
       </sources>
-      <default-value/>
+	  <default-value>
+		  SELECT source,  cast(  ( utc_date || ' ' || utc_hour || ':' || '00') as timestamp) as to_timestamp ,count(1) FROM blocklist_requests_raw  GROUP BY source, utc_date, utc_hour order by utc_date, utc_hour 
+	  </default-value>
     </QUERY>
     <CUBE type="string">
       <sources>
@@ -44,7 +46,7 @@
       <sources>
         <request>queryType</request>
       </sources>
-      <default-value/>
+	  <default-value>sql</default-value>
     </QUERY_TYPE>
   </inputs>
   <outputs>
@@ -158,11 +160,26 @@
           <query>{QUERY}</query>
         </component-definition>
       </action-definition>
+	  <action-definition>
+		  <component-name>ResultSetCrosstabComponent</component-name>
+		  <action-type>CrossTab it</action-type>
+		  <action-inputs>
+			  <result_set type="result-set" mapping="query_result"/>
+		  </action-inputs>
+		  <action-outputs>
+			  <query-result2 type="result-set" mapping="query_result2"/>
+		  </action-outputs>
+		  <component-definition>
+			  <pivot_column>1</pivot_column>
+			  <measures_column>3</measures_column>
+			  <sort_by_column>2</sort_by_column>
+		  </component-definition>
+	  </action-definition>
       <action-definition>
         <component-name>JavascriptRule</component-name>
         <action-type>Format MDX Results</action-type>
         <action-inputs>
-          <query_result type="result-set"/>
+          <query_result type="result-set" mapping="query_result2"/>
         </action-inputs>
         <action-outputs>
           <text type="string"/>
@@ -189,7 +206,7 @@
 
 							var a = new Array();
                             for(j = 0; j < colCount; j++){
-							a[j] = query_result.getValueAt(i,j);
+							a[j] = query_result.getValueAt(i,j)||0;
                             //out.println("Iteration " + j + " of " + colCount + "; ");
                             }
                             text += a.join(",");
