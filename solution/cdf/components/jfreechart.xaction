@@ -185,12 +185,12 @@
 			</sources>
 			<default-value>#FFFFFF</default-value>
 		</BACKGROUND> 
-		<PLOT-BACKGROUND type="string">
+		<PLOTBACKGROUND type="string">
 			<sources>
 				<request>plotbgcolour</request>
 			</sources>
 			<default-value>#FFFFFF</default-value>
-		</PLOT-BACKGROUND> 
+		</PLOTBACKGROUND> 
 
 	</inputs>
 
@@ -387,7 +387,7 @@
 					<FOREGROUNDALPHA type="string"/>
 					<BACKGROUNDALPHA type="string"/>
 					<BACKGROUND type="string"/>
-					<PLOT-BACKGROUND type="string"/>
+					<PLOTBACKGROUND type="string"/>
 				</action-inputs>
 				<action-resources/>
 				<action-outputs> 
@@ -426,7 +426,7 @@
 						<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
 						<background-alpha>{BACKGROUNDALPHA}</background-alpha>
 						<chart-background type="color">{BACKGROUND}</chart-background>
-						<plot-background type="color">{PLOT-BACKGROUND}</plot-background>
+						<plot-background type="color">{PLOTBACKGROUND}</plot-background>
 						<markers-visible>false</markers-visible>
 						<color-palette> 
 							<color>#1b95d9</color>  
