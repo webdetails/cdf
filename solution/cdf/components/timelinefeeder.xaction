@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence>
+  <title>TimePlot data feeder</title>
+  <version>1</version>
+  <logging-level>WARN</logging-level>
+  <documentation>
+    <author>WebDetails</author>
+    <description>This is the datafeeder for the timeplot component</description>
+    <help/>
+    <result-type/>
+  </documentation>
+  <inputs>
+    <JNDI type="string">
+      <sources>
+        <request>jndi</request>
+      </sources>
+      <default-value/>
+    </JNDI>
+    <QUERY type="string">
+      <sources>
+        <request>query</request>
+      </sources>
+      <default-value/>
+    </QUERY>
+    <CUBE type="string">
+      <sources>
+        <request>cube</request>
+      </sources>
+      <default-value/>
+    </CUBE>
+    <ROLE type="string">
+      <sources>
+        <request>role</request>
+      </sources>
+      <default-value/>
+    </ROLE>
+    <CATALOG type="string">
+      <sources>
+        <request>catalog</request>
+      </sources>
+      <default-value/>
+    </CATALOG>
+    <QUERY_TYPE type="string">
+      <sources>
+        <request>queryType</request>
+      </sources>
+      <default-value/>
+    </QUERY_TYPE>
+  </inputs>
+  <outputs>
+    <text type="string">
+      <destinations>
+        <response>content</response>
+      </destinations>
+    </text>
+  </outputs>
+  <actions>
+    <actions>
+      <condition><![CDATA[QUERY_TYPE == "mdx"]]></condition>
+      <action-definition>
+        <component-name>MDXLookupRule</component-name>
+        <action-type>OLAP</action-type>
+        <action-inputs>
+          <QUERY type="string"/>
+          <JNDI type="string"/>
+          <CATALOG type="string"/>
+          <CUBE type="string"/>
+          <ROLE type="string"/>
+        </action-inputs>
+        <action-resources/>
+        <action-outputs>
+          <query-results type="result-set" mapping="query_result"/>
+        </action-outputs>
+        <component-definition>
+          <location><![CDATA[mondrian]]></location>
+          <query>{QUERY}</query>
+          <jndi>{JNDI}</jndi>
+          <cube>{CUBE}</cube>
+          <role>{ROLE}</role>
+          <catalog>{CATALOG}</catalog>
+        </component-definition>
+      </action-definition>
+      <action-definition>
+        <component-name>JavascriptRule</component-name>
+        <action-type>Format MDX Results</action-type>
+        <action-inputs>
+          <query_result type="result-set"/>
+        </action-inputs>
+        <action-outputs>
+          <text type="string"/>
+        </action-outputs>
+        <component-definition>
+          <script><![CDATA[
+
+					// MDX to Relation result set, needed for the 
+
+                    var text = "";
+
+					var newResults = new JavaScriptResultSet();
+
+						out.println("TIMESERIES DATASET");
+						newResults.setColumnHeaders('Series','Date','Measure');
+
+						if (query_result != null)
+						{
+
+
+						var rsmd = query_result.getMetaData() ;
+						var colHeaders = rsmd.getColumnHeaders() ;
+						var rowHeaders = rsmd.getRowHeaders() ;
+						var colCount = rsmd.getColumnCount() ;
+						var rowCount = query_result.getRowCount() ;
+
+						//Build Header
+						var resultSetHeader = new Array(colCount) ;
+						resultSetHeader[0] = 'Locations';
+
+						//resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
+						//out.println("HEADER: " + colHeaders[0][i].toString() );
+						//newResults.setColumnHeaders( resultSetHeader);
+
+						for (i=0; i<rowCount; i++) {
+
+							var a = new Array();
+							a[0] = rowHeaders[i][0];
+                            //out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+
+                            for(j = 0; j < colCount; j++){
+							a[j+1] = query_result.getValueAt(i,j);
+                            //out.println("Iteration " + j + " of " + colCount + "; ");
+                            }
+                            newResults.addRow(a);
+                            text += a.join(",");
+                            text += "\n";
+						}
+                        }
+                            text;
+
+						]]></script>
+        </component-definition>
+      </action-definition>
+    </actions>
+    <actions>
+      <condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
+      <action-definition>
+        <component-name>SQLLookupRule</component-name>
+        <action-type>Relational</action-type>
+        <action-inputs>
+          <QUERY type="string"/>
+          <JNDI type="string"/>
+        </action-inputs>
+        <action-outputs>
+          <query-result type="result-set" mapping="query_result"/>
+        </action-outputs>
+        <component-definition>
+          <jndi>{JNDI}</jndi>
+          <live><![CDATA[false]]></live>
+          <query>{QUERY}</query>
+        </component-definition>
+      </action-definition>
+      <action-definition>
+        <component-name>JavascriptRule</component-name>
+        <action-type>Format MDX Results</action-type>
+        <action-inputs>
+          <query_result type="result-set"/>
+        </action-inputs>
+        <action-outputs>
+          <text type="string"/>
+        </action-outputs>
+        <component-definition>
+          <script><![CDATA[
+
+					// MDX to Relation result set, needed for the 
+
+                    var text = "";
+
+
+						if (query_result != null)
+						{
+
+
+						var rsmd = query_result.getMetaData() ;
+						var colHeaders = rsmd.getColumnHeaders() ;
+						var rowHeaders = rsmd.getRowHeaders() ;
+						var colCount = rsmd.getColumnCount() ;
+						var rowCount = query_result.getRowCount() ;
+
+						for (i=0; i<rowCount; i++) {
+
+							var a = new Array();
+                            for(j = 0; j < colCount; j++){
+							a[j] = query_result.getValueAt(i,j);
+                            //out.println("Iteration " + j + " of " + colCount + "; ");
+                            }
+                            text += a.join(",");
+                            text += "\n";
+						}
+                        }
+                            text;
+
+						]]></script>
+        </component-definition>
+      </action-definition>
+    </actions>
+  </actions>
+</action-sequence>

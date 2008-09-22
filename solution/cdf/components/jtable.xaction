@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+  <title>Jtable</title>
+  <version>1</version>
+  <logging-level>ERROR</logging-level>
+  <documentation> 
+    <author/>  
+    <description>Empty blank action sequence document</description>  
+    <help/>  
+    <result-type/>  
+    <icon/> 
+  </documentation>
+
+  <inputs> 
+	<QUERY type="string"> 
+			<sources> 
+				<request>query</request> 
+			</sources>  
+			<default-value/>
+
+	</QUERY>  
+	
+	<PAGINATE type="string">
+		<sources> 
+			<request>paginate</request> 
+		</sources>  
+		<default-value>"true"</default-value>
+	</PAGINATE>
+	<ROWSPERPAGE type="string">
+		<sources> 
+			<request>rowsperpage</request> 
+		</sources>  
+		<default-value>10</default-value>
+	</ROWSPERPAGE>
+	<FILTER type="string">
+		<sources> 
+			<request>filter</request> 
+		</sources>  
+		<default-value>"true"</default-value>
+	</FILTER>
+	<INFO type="string">
+		<sources> 
+			<request>info</request> 
+		</sources>  
+		<default-value>"true"</default-value>
+	</INFO>
+	<DECIMALS type="string">
+		<sources> 
+			<request>decimals</request> 
+		</sources>  
+		<default-value>"2"</default-value>
+	</DECIMALS>
+	<HEADERS type="string">
+		<sources> 
+			<request>headers</request> 
+		</sources>  
+		<default-value/>
+	</HEADERS>
+  </inputs>
+
+  <outputs> 
+	<results type="string"> 
+      <destinations>
+        <response>content</response>
+      </destinations>
+    </results>
+    
+  </outputs>
+
+  <resources> 
+    <catalog> 
+      <url> 
+        <location>backlog/sales_budget.mondrian.xml</location>  
+        <mime-type>text/xml</mime-type> 
+      </url> 
+    </catalog> 
+  </resources>
+  
+  <actions> 
+  
+
+    <action-definition> 
+      <component-name>MDXLookupRule</component-name>
+      <action-type>Query MDX</action-type>
+      <action-inputs> 
+		<QUERY type="string"/> 
+      </action-inputs>
+      <action-resources> 
+        <catalog type="resource"/> 
+      </action-resources>
+      <action-outputs> 
+        <query-results type="result-set" mapping="query_result"/> 
+      </action-outputs>
+      <component-definition> 
+        <location><![CDATA[mondrian]]></location>  
+        <query>{QUERY}</query>  
+        <jndi>olap_reporting</jndi> 
+      </component-definition> 
+    </action-definition>
+  
+    <action-definition> 
+      <component-name>JavascriptRule</component-name>
+      <action-type>JavaScript</action-type>
+      <action-inputs> 
+        <query_result type="result-set"/> 
+		<PAGINATE type="string"/> 
+		<ROWSPERPAGE type="string"/> 
+		<FILTER type="string"/> 
+		<INFO type="string"/> 
+		<DECIMALS type="string"/> 
+		<HEADERS type="string"/> 
+		<query_result type="result-set"/> 
+		<query_result type="result-set"/> 
+      </action-inputs>
+      <action-outputs> 
+        <results type="string"/> 
+      </action-outputs>
+      <component-definition> 
+        <script><![CDATA[// MDX to Relation result set, needed for the 
+				
+		var newResults = new Packages.org.json.JSONStringer();
+
+		if (query_result != null)
+		{
+		
+			var rsmd = query_result.getMetaData() ;
+			var colHeaders = rsmd.getColumnHeaders() ;
+			var rowHeaders = rsmd.getRowHeaders() ;
+			var colCount = rsmd.getColumnCount() ;
+			var rowCount = query_result.getRowCount() ;
+
+			var headersArray = new Packages.org.json.JSONStringer().array();
+			newResults.object().key("bPaginate").value(eval(PAGINATE));
+			newResults.key("iDisplayLength").value(ROWSPERPAGE);
+			newResults.key("bFilter").value(eval(FILTER));
+			newResults.key("bInfo").value(eval(INFO));
+			
+			if(rowCount> 0)
+			{
+				newResults.key("aaData");
+				var values = new Packages.org.json.JSONArray();
+
+				for (i=0; i<rowCount; i++)
+				{
+					var value = new Packages.org.json.JSONArray();
+
+					for(j = 0; j < rowHeaders[i].length - 1; j++)
+					{
+						value.put(rowHeaders[i][j]);
+						if(i==0){
+							headersArray.object().key("sTitle").value("");
+							headersArray.key("sClass").value("tableRowDim");
+							headersArray.endObject();
+						}
+					}
+
+					for(j=0; j< colCount; j++)
+					{
+						value.put(parseFloat(query_result.getValueAt(i,j)).toFixed(DECIMALS).toString());
+						out.println("ROW: " + value.toString());
+					}
+					
+					values.put(value);
+				}
+				
+				//ADD HEADERS
+				if(HEADERS == "") {
+					for(i = 0; i < colCount; i++){
+						headersArray.object().key("sTitle").value(colHeaders[0][i].toString());
+						headersArray.key("sClass").value("tableRowValue");
+						headersArray.endObject();
+					}
+				}
+				else{
+					var headersNames = HEADERS.split(",");
+					for(i = 0; i < headersNames.length; i++){
+						headersArray.object().key("sTitle").value(headersNames[i]);
+						headersArray.key("sClass").value("tableRowValue");
+						headersArray.endObject();
+					}
+				}
+				
+				headersArray.endArray();
+				out.println("==> 2: " + headersArray.toString());
+				newResults.value(values);
+				newResults.key("aoColumns");
+				//To avoid caracter \" ex: "{\"sTitle\":, etc 
+				//newResults.value(headersArray);
+				newResults.value(new Packages.org.json.JSONArray(headersArray.toString()));
+				newResults.endObject();
+			
+			}
+		}
+		
+		var results = newResults.toString();
+		out.println("output: " + results);
+		results;
+		]]></script> 
+      </component-definition> 
+    </action-definition>
+ 
+  </actions> 
+</action-sequence>

@@ -53,18 +53,18 @@
 			</sources>  
 			<default-value>200</default-value>
 		</HEIGHT>  
-		<BY-ROW type="string"> 
+		<BYROW type="string"> 
 			<sources> 
 				<request>byRow</request> 
 			</sources>  
 			<default-value>false</default-value>
-		</BY-ROW>  
-		<CHART-TYPE type="string">
+		</BYROW>  
+		<CHARTTYPE type="string">
 			<sources>
 				<request>chartType</request>
 			</sources>
 			<default-value>AreaChart</default-value>
-		</CHART-TYPE>  
+		</CHARTTYPE>  
 		<TITLE type="string">
 			<sources>
 				<request>title</request>
@@ -77,103 +77,120 @@
 			</sources>
 			<default-value></default-value>
 		</SUBTITLE>  
-		<RANGE-TITLE type="string">
+		<RANGETITLE type="string">
 			<sources>
 				<request>rangeTitle</request>
 			</sources>
 			<default-value></default-value>
-		</RANGE-TITLE>  
+		</RANGETITLE>  
 		<DATASETTYPE type="string">
 			<sources>
 				<request>datasetType</request>
 			</sources>
 			<default-value>CategoryDataset</default-value>
 		</DATASETTYPE>  
-		<DOMAIN-PERIOD-TYPE type="string">
+		<DOMAINPERIODTYPE type="string">
 			<sources>
 				<request>domainPeriodType</request>
 			</sources>
 			<default-value>Day</default-value>
-		</DOMAIN-PERIOD-TYPE>  
+		</DOMAINPERIODTYPE>  
 		<ORIENTATION type="string">
 			<sources>
 				<request>orientation</request>
 			</sources>
 			<default-value>vertical</default-value>
 		</ORIENTATION>  
-		<IS-3D type="string">
+		<IS3D type="string">
 			<sources>
 				<request>is3d</request>
 			</sources>
 			<default-value>false</default-value>
-		</IS-3D>  
-		<IS-STACKED type="string">
+		</IS3D>  
+		<ISSTACKED type="string">
 			<sources>
 				<request>isStacked</request>
 			</sources>
 			<default-value>false</default-value>
-		</IS-STACKED>  
-		<DOMAIN-TICK-FONT-SIZE type="string">
+		</ISSTACKED>  
+		<DOMAINTICKFONTSIZE type="string">
 			<sources>
 				<request>domainTickFontSize</request>
 			</sources>
 			<default-value>10</default-value>
-		</DOMAIN-TICK-FONT-SIZE>  
-		<DOMAIN-LABEL-ROTATION-DIR type="string">
+		</DOMAINTICKFONTSIZE>  
+		<DOMAINLABELROTATIONDIR type="string">
 			<sources>
 				<request>domainLabelRotationDir</request>
 			</sources>
 			<default-value>down</default-value>
-		</DOMAIN-LABEL-ROTATION-DIR>  
-		<DOMAIN-LABEL-ROTATION type="string">
+		</DOMAINLABELROTATIONDIR>  
+		<DOMAINLABELROTATION type="string">
 			<sources>
 				<request>domainLabelRotation</request>
 			</sources>
 			<default-value>.9</default-value>
-		</DOMAIN-LABEL-ROTATION>  
-		<URL-TEMPLATE type="string">
+		</DOMAINLABELROTATION>  
+		<URLTEMPLATE type="string">
 			<sources>
 				<request>urlTemplate</request>
 			</sources>
 			<default-value></default-value>
-		</URL-TEMPLATE>  
-		<USE-BASE-URL type="string">
+		</URLTEMPLATE>  
+		<USEBASEURL type="string">
 			<sources>
 				<request>useBaseUrl</request>
 			</sources>
 			<default-value>false</default-value>
-		</USE-BASE-URL>  
-		<URL-TARGET type="string">
+		</USEBASEURL>  
+		<URLTARGET type="string">
 			<sources>
 				<request>urlTarget</request>
 			</sources>
 			<default-value>_self</default-value>
-		</URL-TARGET>  
-		<PARAMETER-NAME type="string">
+		</URLTARGET>  
+		<PARAMETERNAME type="string">
 			<sources>
 				<request>parameterName</request>
 			</sources>
 			<default-value></default-value>
-		</PARAMETER-NAME>
-		<INCLUDE-LEGEND type="string">
+		</PARAMETERNAME>
+		<INCLUDELEGEND type="string">
 			<sources>
 				<request>includeLegend</request>
 			</sources>
 			<default-value>true</default-value>
-		</INCLUDE-LEGEND> 
-		<FOREGROUND-ALPHA type="string">
+		</INCLUDELEGEND> 
+		<FOREGROUNDALPHA type="string">
 			<sources>
 				<request>foregroundAlpha</request>
 			</sources>
 			<default-value>1</default-value>
-		</FOREGROUND-ALPHA> 
-		<BACKGROUND-ALPHA type="string">
+		</FOREGROUNDALPHA> 
+		<BACKGROUNDALPHA type="string">
 			<sources>
 				<request>backgroundAlpha</request>
 			</sources>
 			<default-value>1</default-value>
-		</BACKGROUND-ALPHA> 
-
+		</BACKGROUNDALPHA> 
+		<QUERY_TYPE type="string">
+			<sources>
+				<request>queryType</request>
+			</sources>
+			<default-value>mdx</default-value>
+		</QUERY_TYPE> 
+		<BACKGROUND type="string">
+			<sources>
+				<request>backgroundColour</request>
+			</sources>
+			<default-value>#FFFFFF</default-value>
+		</BACKGROUND> 
+		<PLOT-BACKGROUND type="string">
+			<sources>
+				<request>plotbgcolour</request>
+			</sources>
+			<default-value>#FFFFFF</default-value>
+		</PLOT-BACKGROUND> 
 
 	</inputs>
 
@@ -185,7 +202,11 @@
 		</image-tag> 
 	</outputs>
 
+  <actions> 
+
 	<actions>
+		<condition><![CDATA[QUERY_TYPE == "mdx"]]></condition>
+		
 		<action-definition> 
 			<component-name>MDXLookupRule</component-name>
 			<action-type>OLAP</action-type>
@@ -312,35 +333,61 @@
 
 						]]></script> 
 				</component-definition> 
-			</action-definition>
-
+		</action-definition>
+		
+	</actions> 
+	
+	<actions> 
+		<condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
+			
 			<action-definition> 
+			  <component-name>SQLLookupRule</component-name>
+			  <action-type>Relational</action-type>
+			  <action-inputs>
+				<QUERY type ="string"/>
+				<JNDI type="string"/>  
+			  </action-inputs>
+			  <action-outputs> 
+				<query-result type="result-set" mapping="newResults"/> 
+			  </action-outputs>
+			  <component-definition> 
+				 <jndi>{JNDI}</jndi>  
+				 <live><![CDATA[false]]></live>  
+				 <query>{QUERY}</query> 
+			  </component-definition> 
+			</action-definition>
+			
+	</actions> 
+	
+	<action-definition> 
 				<component-name>ChartComponent</component-name>
 				<action-type>Chart</action-type>
 				<action-inputs> 
 					<chart-data type="result-set" mapping="newResults"/> 
 					<WIDTH type="string"/>
 					<HEIGHT type="string"/>
-					<BY-ROW type="string"/>
-					<CHART-TYPE type="string"/>
+					<BYROW type="string"/>
+					<CHARTTYPE type="string"/>
 					<TITLE type="string"/>
 					<SUBTITLE type="string"/>
-					<RANGE-TITLE type="string"/>
+					<RANGETITLE type="string"/>
 					<DATASETTYPE type="string"/>
-					<DOMAIN-PERIOD-TYPE type="string"/>
+					<DOMAINPERIODTYPE type="string"/>
 					<ORIENTATION type="string"/>
-					<IS-3D type="string"/>
-					<IS-STACKED type="string"/>
-					<DOMAIN-TICK-FONT-SIZE type="string"/> 
-					<DOMAIN-LABEL-ROTATION-DIR type="string"/>
-					<DOMAIN-LABEL-ROTATION type="string"/>
-					<URL-TEMPLATE type="string"/>
-					<USE-BASE-URL type="string"/>
-					<URL-TARGET type="string"/>
-					<PARAMETER-NAME type="string"/>
-					<INCLUDE-LEGEND type="string"/>
-					<FOREGROUND-ALPHA type="string"/>
-					<BACKGROUND-ALPHA type="string"/>
+					<IS3D type="string"/>
+					<ISSTACKED type="string"/>
+					<DOMAINTICKFONTSIZE type="string"/> 
+					<DOMAINLABELROTATIONDIR type="string"/>
+					<DOMAINLABELROTATION type="string"/>
+					<URLTEMPLATE type="string"/>
+					<USEBASEURL type="string"/>
+					<URLTARGET type="string"/>
+					<PARAMETERNAME type="string"/>
+					<INCLUDELEGEND type="string"/>
+					<FOREGROUNDALPHA type="string"/>
+					<BACKGROUNDALPHA type="string"/>
+					<BACKGROUND type="string"/>
+					<PLOT-BACKGROUND type="string"/>
 				</action-inputs>
 				<action-resources/>
 				<action-outputs> 
@@ -353,31 +400,33 @@
 				<component-definition> 
 					<width>{WIDTH}</width>  
 					<height>{HEIGHT}</height>  
-					<by-row>{BY-ROW}</by-row>  
+					<by-row>{BYROW}</by-row>  
 					<chart-attributes> 
-						<chart-type>{CHART-TYPE}</chart-type>  
+						<chart-type>{CHARTTYPE}</chart-type>  
 						<title>{TITLE}</title>  
 						<subtitles>
 							<subtitle>{SUBTITLE}</subtitle>  
 						</subtitles>
-						<range-title>{RANGE-TITLE}</range-title>  
+						<range-title>{RANGETITLE}</range-title>  
 						<dataset-type>{DATASETTYPE}</dataset-type>  
-						<domain-period-type>{DOMAIN-PERIOD-TYPE}</domain-period-type>  
+						<domain-period-type>{DOMAINPERIODTYPE}</domain-period-type>  
 						<orientation>{ORIENTATION}</orientation>  
-						<is-3D>{IS-3D}</is-3D>  
-						<is-stacked>{IS-STACKED}</is-stacked>  
+						<is-3D>{IS3D}</is-3D>  
+						<is-stacked>{ISSTACKED}</is-stacked>  
 						<domain-tick-font> 
-							<size>{DOMAIN-TICK-FONT-SIZE}</size> 
+							<size>{DOMAINTICKFONTSIZE}</size> 
 						</domain-tick-font>  
-						<domain-label-rotation-dir>{DOMAIN-LABEL-ROTATION-DIR}</domain-label-rotation-dir>  
-						<domain-label-rotation>{DOMAIN-LABEL-ROTATION}</domain-label-rotation>  
-						<url-template>{URL-TEMPLATE}</url-template> 
-						<use-base-url>{USE-BASE-URL}</use-base-url>  
-						<url-target>{URL-TARGET}</url-target>
-						<paramName>{PARAMETER-NAME}</paramName>  
-						<include-legend>{INCLUDE-LEGEND}</include-legend> 
-						<foreground-alpha>{FOREGROUND-ALPHA}</foreground-alpha>
-						<background-alpha>{BACKGROUND-ALPHA}</background-alpha>
+						<domain-label-rotation-dir>{DOMAINLABELROTATIONDIR}</domain-label-rotation-dir>  
+						<domain-label-rotation>{DOMAINLABELROTATION}</domain-label-rotation>  
+						<url-template>{URLTEMPLATE}</url-template> 
+						<use-base-url>{USEBASEURL}</use-base-url>  
+						<url-target>{URLTARGET}</url-target>
+						<paramName>{PARAMETERNAME}</paramName>  
+						<include-legend>{INCLUDELEGEND}</include-legend> 
+						<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
+						<background-alpha>{BACKGROUNDALPHA}</background-alpha>
+						<chart-background type="color">{BACKGROUND}</chart-background>
+						<plot-background type="color">{PLOT-BACKGROUND}</plot-background>
 						<markers-visible>false</markers-visible>
 						<color-palette> 
 							<color>#1b95d9</color>  
@@ -397,7 +446,7 @@
 						</color-palette>  
 					</chart-attributes> 
 				</component-definition> 
-			</action-definition>
-
-		</actions> 
-	</action-sequence>
+		</action-definition>
+		
+	</actions> 
+</action-sequence>
