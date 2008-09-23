@@ -174,6 +174,7 @@ public class JFreeChartEngine {
         } else {
             meter.setTickLabelsVisible(true);
             meter.setTickSize(tickSize);
+            meter.setTickLabelFont(new Font("Helvetica", Font.ITALIC, 9));
         }
         if (widget.getValueFont() != null) {
             meter.setValueFont(widget.getValueFont());

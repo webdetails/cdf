@@ -86,7 +86,7 @@ public class DialWidgetDefinition extends WidgetDefinition implements ChartDefin
 
   private Paint needlePaint = Color.blue;
 
-  private DialShape dialShape = DialShape.CHORD;
+  private DialShape dialShape = DialShape.CIRCLE;
 
   private Font titleFont;
 
@@ -282,7 +282,7 @@ public class DialWidgetDefinition extends WidgetDefinition implements ChartDefin
     if (titleFontNode != null) {
       String titleFontStr = titleFontNode.getText().trim();
       if (!"".equals(titleFontStr)) { //$NON-NLS-1$
-        widgetDefinition.setTitleFont(new Font(titleFontStr, Font.ITALIC, 24));
+        widgetDefinition.setTitleFont(new Font(titleFontStr, Font.ITALIC, 12));
       }
     }
 
@@ -290,7 +290,7 @@ public class DialWidgetDefinition extends WidgetDefinition implements ChartDefin
     if (valueFontNode != null) {
       String fontStr = valueFontNode.getText().trim();
       if (!"".equals(fontStr)) { //$NON-NLS-1$
-        widgetDefinition.setValueFont(new Font(fontStr, Font.ITALIC, 24));
+        widgetDefinition.setValueFont(new Font(fontStr, Font.ITALIC, 12));
       }
     }
 
