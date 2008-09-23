@@ -224,7 +224,6 @@
 				<thirdInterval type="string"/> 
 				<lastInterval type="string"/> 
 				<VALUE type="string"/>
-				<TITLE type="string"/>
 			</action-outputs>
 			<component-definition> 
 				<script><![CDATA[
@@ -242,7 +241,6 @@
 					var a = new Array();
 					a[0] = Math.round(query_result.getValueAt(0,0));
 					VALUE = a[0];
-					TITLE= a[0];
 
 
 					newResults.addRow(a);
@@ -399,10 +397,17 @@
 					<chart-type>{CHART-TYPE}</chart-type>  
 					<chart-background type="gradient"><x1>0</x1><y1>0</y1><x2>0</x2><y2>0</y2><color1>{BACKGROUND-COLOR}</color1>
 						<color2>{BACKGROUND-COLOR}</color2></chart-background>
+					<plot-background type="gradient">
+						<color1>#AAAAAA</color1>
+						<color2>#FFFFFF</color2>
+						<cyclic>true</cyclic>
+					</plot-background>
+					<include-legend>true</include-legend>
 					<title>{TITLE}</title>  
 					<subtitles>
 						<subtitle>{SUBTITLE}</subtitle>  
 					</subtitles>
+					<value-color>#000000</value-color>
 					<range-title>{RANGE-TITLE}</range-title>  
 					<dataset-type>{DATASET-TYPE}</dataset-type>  
 					<domain-period-type>{DOMAIN-PERIOD-TYPE}</domain-period-type>  
@@ -410,6 +415,7 @@
 					<is-3D>{IS-3D}</is-3D>  
 					<value-color>#DDDDDD</value-color>
 					<is-stacked>{IS-STACKED}</is-stacked>  
+					<title-font>Helvetica</title-font>  
 					<domain-tick-font> 
 						<size>{DOMAIN-TICK-FONT-SIZE}</size> 
 					</domain-tick-font>  
@@ -421,12 +427,12 @@
 					<include-legend>true</include-legend> 
 					<markers-visible>true</markers-visible>
 					<tick-interval>{TICKINTERVAL}</tick-interval>
-					<needle-color>#000080</needle-color>
+					<needle-color>#0000AA</needle-color>
 					<intervals>
 						<interval>
 							<label>Interval0</label><minimum>0</minimum><maximum>{INTERVAL0}</maximum>
 							<interval-background type="gradient"><x1>50</x1><y1>50</y1><x2>150</x2><y2>150</y2><color1>#ffffff</color1>
-								<color2>{INTERVALCOLOR0}</color2><cyclic>true</cyclic></interval-background><text-color>#000000</text-color>
+								<color2>{INTERVALCOLOR0}</color2><cyclic>true</cyclic></interval-background><text-font>Helvetica</text-font><text-color>#000000</text-color>
 						</interval>
 						<interval>
 							<label>Interval1</label><minimum>{INTERVAL0}</minimum><maximum>{INTERVAL1}</maximum>

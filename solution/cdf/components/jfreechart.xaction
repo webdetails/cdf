@@ -181,13 +181,13 @@
 		</QUERY_TYPE> 
 		<BACKGROUND type="string">
 			<sources>
-				<request>backgroundColour</request>
+				<request>backgroundColor</request>
 			</sources>
 			<default-value>#FFFFFF</default-value>
 		</BACKGROUND> 
 		<PLOTBACKGROUND type="string">
 			<sources>
-				<request>plotbgcolour</request>
+				<request>plotbgcolor</request>
 			</sources>
 			<default-value>#FFFFFF</default-value>
 		</PLOTBACKGROUND> 
