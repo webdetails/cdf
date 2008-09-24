@@ -1,1 +1,1 @@
-<% response.sendRedirect("/pentaho/Dashboards?solution=demo"); %>
+<% response.sendRedirect("/pentaho/Dashboards?solution=dashboards"); %>

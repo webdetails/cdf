@@ -61,6 +61,12 @@ Description: A two-column, fixed-width design ideal for 1024x768 screen resoluti
 	</head>
 <body>
 
+<div class="banner" style="text-align:left">
+	<span>
+		<img border="0" height="100" src="/pentaho-style/images/client.png" />
+	</span>
+</div>
+
 	<script language="javascript">
 		
 		isAdmin = "{isAdmin}";
@@ -81,6 +87,7 @@ Description: A two-column, fixed-width design ideal for 1024x768 screen resoluti
 			</ul>
 		</div>
 		<div id="navObject"> </div>
+		<div id="contentListObject"> </div>
 	</div>
 
 <script language="javascript" type="text/javascript">
@@ -94,7 +101,7 @@ navigatorComponent =
   htmlObject: "navObject",
   executeAtStart: true,
   mode: "horizontal",
-  includeSolutions: false
+  includeSolutions: true
 };
 
 folderList = 
@@ -103,13 +110,13 @@ folderList =
   type: "contentList",
   listeners:[],
   parameters: [],
-  htmlObject: "navsub",
+  htmlObject: "contentListObject",
   executeAtStart: true,
   mode: "2"
 };
 
 // Removed folderlist
-var templateComponents = [navigatorComponent];
+var templateComponents = [navigatorComponent,folderList];
 Dashboards.addComponents(templateComponents);
 </script>
 
