@@ -514,8 +514,9 @@ Dashboards.update = function(object)	{
 
 		var file = Dashboards.listContents(CDF_SELF);
 
-		$("#"+object.htmlObject).text(file.title + " - " + file.description);
-
+		if (file.title != undefined && file.description != undefined){
+			$("#"+object.htmlObject).text(file.title + " - " + file.description);
+		}
 	};
 
 	Dashboards.processNavigatorResponse = function(object,json){
@@ -612,6 +613,10 @@ Dashboards.update = function(object)	{
 					}
 					else{
 						cls = "action greybox";
+						if (this.url != undefined){
+							href=this.url;
+						}
+						else
 						href = "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.filename;
 						//target = "_new"
 					
@@ -785,6 +790,10 @@ Dashboards.update = function(object)	{
 	};
 	
 	Dashboards.getParentPath = function(){
+		var index = Dashboards.path.lastIndexOf("/");
+		if (index==-1){
+			return ["",""];
+		}
 		var parentPath = Dashboards.path.substring(0,Dashboards.path.lastIndexOf("/"));
 		return [parentPath, parentPath];
 	};

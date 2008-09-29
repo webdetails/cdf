@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <action-sequence> 
-	<title>Drillable Bar Chart sourced from OLAP Source</title>
+	<title>CDF JPivot Component</title>
 	<version>1</version>
 	<logging-level>WARN</logging-level>
 	<documentation> 
-		<author/>  
-		<description>This demonstrates a chart with the ChartComponent in the action sequence with data is sourced from an OLAP cube. Common settings are specified in the associated resource xml file.</description>  
+		<author>Pedro Alves</author>
+		<description>A JPivot component that can be embebed from a dashboard</description>  
 		<help/>  
 		<result-type/> 
 	</documentation>

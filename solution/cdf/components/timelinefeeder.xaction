@@ -4,7 +4,7 @@
   <version>1</version>
   <logging-level>WARN</logging-level>
   <documentation>
-    <author>WebDetails</author>
+    <author>Pedro Alves</author>
     <description>This is the datafeeder for the timeplot component</description>
     <help/>
     <result-type/>
