@@ -1,223 +1,267 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <action-sequence>
-  <title>TimePlot data feeder</title>
-  <version>1</version>
-  <logging-level>WARN</logging-level>
-  <documentation>
-    <author>Pedro Alves</author>
-    <description>This is the datafeeder for the timeplot component</description>
-    <help/>
-    <result-type/>
-  </documentation>
-  <inputs>
-    <JNDI type="string">
-      <sources>
-        <request>jndi</request>
-      </sources>
-	  <default-value>java:comp/env/jdbc/aus</default-value>
-    </JNDI>
-    <QUERY type="string">
-      <sources>
-        <request>query</request>
-      </sources>
-	  <default-value>
-		  SELECT source,  cast(  ( utc_date || ' ' || utc_hour || ':' || '00') as timestamp) as to_timestamp ,count(1) FROM blocklist_requests_raw  GROUP BY source, utc_date, utc_hour order by utc_date, utc_hour 
-	  </default-value>
-    </QUERY>
-    <CUBE type="string">
-      <sources>
-        <request>cube</request>
-      </sources>
-      <default-value/>
-    </CUBE>
-    <ROLE type="string">
-      <sources>
-        <request>role</request>
-      </sources>
-      <default-value/>
-    </ROLE>
-    <CATALOG type="string">
-      <sources>
-        <request>catalog</request>
-      </sources>
-      <default-value/>
-    </CATALOG>
-    <QUERY_TYPE type="string">
-      <sources>
-        <request>queryType</request>
-      </sources>
-	  <default-value>sql</default-value>
-    </QUERY_TYPE>
-  </inputs>
-  <outputs>
-    <text type="string">
-      <destinations>
-        <response>content</response>
-      </destinations>
-    </text>
-  </outputs>
-  <actions>
-    <actions>
-      <condition><![CDATA[QUERY_TYPE == "mdx"]]></condition>
-      <action-definition>
-        <component-name>MDXLookupRule</component-name>
-        <action-type>OLAP</action-type>
-        <action-inputs>
-          <QUERY type="string"/>
-          <JNDI type="string"/>
-          <CATALOG type="string"/>
-          <CUBE type="string"/>
-          <ROLE type="string"/>
-        </action-inputs>
-        <action-resources/>
-        <action-outputs>
-          <query-results type="result-set" mapping="query_result"/>
-        </action-outputs>
-        <component-definition>
-          <location><![CDATA[mondrian]]></location>
-          <query>{QUERY}</query>
-          <jndi>{JNDI}</jndi>
-          <cube>{CUBE}</cube>
-          <role>{ROLE}</role>
-          <catalog>{CATALOG}</catalog>
-        </component-definition>
-      </action-definition>
-      <action-definition>
-        <component-name>JavascriptRule</component-name>
-        <action-type>Format MDX Results</action-type>
-        <action-inputs>
-          <query_result type="result-set"/>
-        </action-inputs>
-        <action-outputs>
-          <text type="string"/>
-        </action-outputs>
-        <component-definition>
-          <script><![CDATA[
+	<title>TimePlot data feeder</title>
+	<version>1</version>
+	<logging-level>WARN</logging-level>
+	<documentation>
+		<author>Pedro Alves</author>
+		<description>This is the datafeeder for the timeplot component</description>
+		<help/>
+		<result-type/>
+	</documentation>
+	<inputs>
+		<JNDI type="string">
+			<sources>
+				<request>jndi</request>
+			</sources>
+			<default-value/>
+		</JNDI>
+		<QUERY type="string">
+			<sources>
+				<request>query</request>
+			</sources>
+			<default-value/>
+		</QUERY>
+		<CUBE type="string">
+			<sources>
+				<request>cube</request>
+			</sources>
+			<default-value/>
+		</CUBE>
+		<ROLE type="string">
+			<sources>
+				<request>role</request>
+			</sources>
+			<default-value/>
+		</ROLE>
+		<CATALOG type="string">
+			<sources>
+				<request>catalog</request>
+			</sources>
+			<default-value/>
+		</CATALOG>
+		<QUERY_TYPE type="string">
+			<sources>
+				<request>queryType</request>
+			</sources>
+			<default-value>mdx</default-value>
+		</QUERY_TYPE>
+		<TOPCOUNT type="string">
+			<sources>
+				<request>topCount</request>
+			</sources>
+			<default-value>2</default-value>
+		</TOPCOUNT> 
+		<TOPCOUNTAXIS type="string">
+			<sources>
+				<request>topCountAxis</request>
+			</sources>
+			<default-value>columns</default-value>
+		</TOPCOUNTAXIS> 
+	</inputs>
+	<outputs>
+		<text type="string">
+			<destinations>
+				<response>content</response>
+			</destinations>
+		</text>
+	</outputs>
+	<actions>
+		<actions>
+			<condition><![CDATA[QUERY_TYPE == "mdx"]]></condition>
+			<action-definition>
+				<component-name>MDXLookupRule</component-name>
+				<action-type>OLAP</action-type>
+				<action-inputs>
+					<QUERY type="string"/>
+					<JNDI type="string"/>
+					<CATALOG type="string"/>
+					<CUBE type="string"/>
+					<ROLE type="string"/>
+				</action-inputs>
+				<action-resources/>
+				<action-outputs>
+					<query-results type="result-set" mapping="query_result"/>
+				</action-outputs>
+				<component-definition>
+					<location><![CDATA[mondrian]]></location>
+					<query>{QUERY}</query>
+					<jndi>{JNDI}</jndi>
+					<cube>{CUBE}</cube>
+					<role>{ROLE}</role>
+					<catalog>{CATALOG}</catalog>
+				</component-definition>
+			</action-definition>
+			<action-definition>
+				<component-name>JavascriptRule</component-name>
+				<action-type>Format MDX Results</action-type>
+				<action-inputs>
+					<query_result type="result-set"/>
+					<TOPCOUNT type="string" />
+					<TOPCOUNTAXIS type="string" />
+				</action-inputs>
+				<action-outputs>
+					<text type="string"/>
+				</action-outputs>
+				<component-definition>
+					<script><![CDATA[
 
-					// MDX to Relation result set, needed for the 
+					var text = "";
 
-                    var text = "";
+					var rsmd = query_result.getMetaData() ;
+					var colHeaders = rsmd.getColumnHeaders() ;
+					var rowHeaders = rsmd.getRowHeaders() ;
+					var colCount = rsmd.getColumnCount() ;
+					var rowCount = query_result.getRowCount() ;
+					var colIteraction = colCount;
+					var rowIteraction = rowCount;
 
-					var newResults = new JavaScriptResultSet();
+					//Build Header
+					var resultSetHeader = new Array(colCount) ;
+					resultSetHeader[0] = 'Locations';
 
-						out.println("TIMESERIES DATASET");
-						newResults.setColumnHeaders('Series','Date','Measure');
+					for(i = 0; i < colCount; i++){
 
-						if (query_result != null)
-						{
-
-
-						var rsmd = query_result.getMetaData() ;
-						var colHeaders = rsmd.getColumnHeaders() ;
-						var rowHeaders = rsmd.getRowHeaders() ;
-						var colCount = rsmd.getColumnCount() ;
-						var rowCount = query_result.getRowCount() ;
-
-						//Build Header
-						var resultSetHeader = new Array(colCount) ;
-						resultSetHeader[0] = 'Locations';
-
-						//resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
+						resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
 						//out.println("HEADER: " + colHeaders[0][i].toString() );
-						//newResults.setColumnHeaders( resultSetHeader);
+					}
 
-						for (i=0; i<rowCount; i++) {
+					if (TOPCOUNTAXIS == 'rows'){
+						rowIteraction = TOPCOUNT==0||TOPCOUNT > rowCount?rowCount:TOPCOUNT ;
+						out.println("Rows: " + rowIteraction);
+					}
+					if (TOPCOUNTAXIS == 'columns'){
+						colIteraction = TOPCOUNT==0||TOPCOUNT > colCount?colCount:TOPCOUNT ;
+					}
 
-							var a = new Array();
-							a[0] = rowHeaders[i][0];
-                            //out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+					for (i=0; i<rowIteraction; i++)
+					{
+						var a = new Array();
+						a[0] = rowHeaders[i][0];
+						a[1] = rowHeaders[i][1];
 
-                            for(j = 0; j < colCount; j++){
+						for(j=0; j< colIteraction; j++){
+
 							a[j+1] = query_result.getValueAt(i,j);
-                            //out.println("Iteration " + j + " of " + colCount + "; ");
-                            }
-                            newResults.addRow(a);
-                            text += a.join(",");
-                            text += "\n";
 						}
-                        }
-                            text;
-
-						]]></script>
-        </component-definition>
-      </action-definition>
-    </actions>
-    <actions>
-      <condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
-      <action-definition>
-        <component-name>SQLLookupRule</component-name>
-        <action-type>Relational</action-type>
-        <action-inputs>
-          <QUERY type="string"/>
-          <JNDI type="string"/>
-        </action-inputs>
-        <action-outputs>
-          <query-result type="result-set" mapping="query_result"/>
-        </action-outputs>
-        <component-definition>
-          <jndi>{JNDI}</jndi>
-          <live><![CDATA[false]]></live>
-          <query>{QUERY}</query>
-        </component-definition>
-      </action-definition>
-	  <action-definition>
-		  <component-name>ResultSetCrosstabComponent</component-name>
-		  <action-type>CrossTab it</action-type>
-		  <action-inputs>
-			  <result_set type="result-set" mapping="query_result"/>
-		  </action-inputs>
-		  <action-outputs>
-			  <query-result2 type="result-set" mapping="query_result2"/>
-		  </action-outputs>
-		  <component-definition>
-			  <pivot_column>1</pivot_column>
-			  <measures_column>3</measures_column>
-			  <sort_by_column>2</sort_by_column>
-		  </component-definition>
-	  </action-definition>
-      <action-definition>
-        <component-name>JavascriptRule</component-name>
-        <action-type>Format MDX Results</action-type>
-        <action-inputs>
-          <query_result type="result-set" mapping="query_result2"/>
-        </action-inputs>
-        <action-outputs>
-          <text type="string"/>
-        </action-outputs>
-        <component-definition>
-          <script><![CDATA[
-
-					// MDX to Relation result set, needed for the 
-
-                    var text = "";
-
-
-						if (query_result != null)
-						{
-
-
-						var rsmd = query_result.getMetaData() ;
-						var colHeaders = rsmd.getColumnHeaders() ;
-						var rowHeaders = rsmd.getRowHeaders() ;
-						var colCount = rsmd.getColumnCount() ;
-						var rowCount = query_result.getRowCount() ;
-
-						for (i=0; i<rowCount; i++) {
-
-							var a = new Array();
-                            for(j = 0; j < colCount; j++){
-							a[j] = query_result.getValueAt(i,j)||0;
-                            //out.println("Iteration " + j + " of " + colCount + "; ");
-                            }
-                            text += a.join(",");
-                            text += "\n";
+						if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
+							var value = 0;
+							for (j=colIteraction; j<colCount; j++) {
+								var localValue = query_result.getValueAt(i,j) - 0;
+								value += localValue;
+								//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+							}
+							a.push(value);
+							//out.println("OTHERS: a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
 						}
-                        }
-                            text;
+						//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[0] + "; Array: " + a);
+						text += a.join(",");
+						text += "\n";
+					}
 
-						]]></script>
-        </component-definition>
-      </action-definition>
-    </actions>
-  </actions>
-</action-sequence>
+					// Other's block
+					if (TOPCOUNTAXIS == 'rows' && rowIteraction != rowCount){
+
+						// This will probably need a refactoring. All of this, actually :S
+						var value = 0;
+						var a = new Array();
+						for(j = 0 ; j < colIteraction; j++){
+
+							for (i=rowIteraction; i<rowCount; i++) {
+								var localValue = query_result.getValueAt(i,j) - 0;
+								value += localValue;
+								//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+							}
+							a[0] = 'Others';
+							a[j+1] = value;
+						}
+						//out.println("OTHERS: a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+						text += a.join(",");
+						text += "\n";
+					}
+
+					text;
+
+									]]></script>
+							</component-definition>
+						</action-definition>
+					</actions>
+					<actions>
+						<condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
+						<action-definition>
+							<component-name>SQLLookupRule</component-name>
+							<action-type>Relational</action-type>
+							<action-inputs>
+								<QUERY type="string"/>
+								<JNDI type="string"/>
+							</action-inputs>
+							<action-outputs>
+								<query-result type="result-set" mapping="query_result"/>
+							</action-outputs>
+							<component-definition>
+								<jndi>{JNDI}</jndi>
+								<live><![CDATA[false]]></live>
+								<query>{QUERY}</query>
+							</component-definition>
+						</action-definition>
+						<action-definition>
+							<component-name>ResultSetCrosstabComponent</component-name>
+							<action-type>CrossTab it</action-type>
+							<action-inputs>
+								<result_set type="result-set" mapping="query_result"/>
+							</action-inputs>
+							<action-outputs>
+								<query-result2 type="result-set" mapping="query_result2"/>
+							</action-outputs>
+							<component-definition>
+								<pivot_column>1</pivot_column>
+								<measures_column>3</measures_column>
+								<sort_by_column>2</sort_by_column>
+							</component-definition>
+						</action-definition>
+						<action-definition>
+							<component-name>JavascriptRule</component-name>
+							<action-type>Format MDX Results</action-type>
+							<action-inputs>
+								<query_result type="result-set" mapping="query_result2"/>
+							</action-inputs>
+							<action-outputs>
+								<text type="string"/>
+							</action-outputs>
+							<component-definition>
+								<script><![CDATA[
+
+									// MDX to Relation result set, needed for the 
+
+									var text = "";
+
+
+									if (query_result != null)
+									{
+
+
+									var rsmd = query_result.getMetaData() ;
+									var colHeaders = rsmd.getColumnHeaders() ;
+									var rowHeaders = rsmd.getRowHeaders() ;
+									var colCount = rsmd.getColumnCount() ;
+									var rowCount = query_result.getRowCount() ;
+
+									for (i=0; i<rowCount; i++) {
+
+										var a = new Array();
+										for(j = 0; j < colCount; j++){
+										a[j] = query_result.getValueAt(i,j)||0;
+										//out.println("Iteration " + j + " of " + colCount + "; ");
+										}
+										text += a.join(",");
+										text += "\n";
+										}
+										}
+										text;
+
+										]]></script>
+								</component-definition>
+							</action-definition>
+						</actions>
+					</actions>
+				</action-sequence>

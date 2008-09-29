@@ -4,7 +4,7 @@
 	<version>1</version>
 	<logging-level>WARN</logging-level>
 	<documentation> 
-		<author/>  
+	<author>Pedro Alves</author>  
 		<description>This demonstrates a chart with the ChartComponent in the action sequence with data is sourced from an OLAP cube. Common settings are specified in the associated resource xml file.</description>  
 		<help/>  
 		<result-type/> 
@@ -191,6 +191,18 @@
 			</sources>
 			<default-value>#FFFFFF</default-value>
 		</PLOTBACKGROUND> 
+		<TOPCOUNT type="string">
+			<sources>
+				<request>topCount</request>
+			</sources>
+			<default-value>0</default-value>
+		</TOPCOUNT> 
+		<TOPCOUNTAXIS type="string">
+			<sources>
+				<request>topCountAxis</request>
+			</sources>
+			<default-value>rows</default-value>
+		</TOPCOUNTAXIS> 
 
 	</inputs>
 
@@ -236,6 +248,8 @@
 			<action-type>Format MDX Results</action-type>
 			<action-inputs> 
 				<DATASETTYPE type="string"/>
+				<TOPCOUNT type="string" />
+				<TOPCOUNTAXIS type="string" />
 				<query_result type="result-set"/> 
 			</action-inputs>
 			<action-outputs> 
@@ -244,11 +258,29 @@
 			<component-definition> 
 				<script><![CDATA[
 
-					// MDX to Relation result set, needed for the 
+				// My code isn't usually this bad. Need to take some time to refactor it
+				// On my defense, all I can say is that it works (at least for me :p )
 
-					var newResults = new JavaScriptResultSet();
+				out.println("AXIS: " + TOPCOUNTAXIS);
 
-					if(DATASETTYPE == 'CategoryDataset'){
+				var newResults = new JavaScriptResultSet();
+
+				var rsmd = query_result.getMetaData() ;
+				var colHeaders = rsmd.getColumnHeaders() ;
+				var rowHeaders = rsmd.getRowHeaders() ;
+				var colCount = rsmd.getColumnCount() ;
+				var rowCount = query_result.getRowCount() ;
+				var colIteraction = colCount;
+				var rowIteraction = rowCount;
+
+				var resultSetHeader = new Array(colCount) ;
+				//resultSetHeader[0] = 'Locations';
+				//for(i = 0; i < colCount; i++){
+				//	resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
+				//}
+				//newResults.setColumnHeaders( resultSetHeader);
+
+				if(DATASETTYPE == 'CategoryDataset'){
 
 					out.println("CATEGORY DATASET");
 					newResults.setColumnHeaders('Series','Date','Measure');
@@ -256,80 +288,153 @@
 					if (query_result != null)
 					{
 
-
-					var rsmd = query_result.getMetaData() ;
-					var colHeaders = rsmd.getColumnHeaders() ;
-					var rowHeaders = rsmd.getRowHeaders() ;
-					var colCount = rsmd.getColumnCount() ;
-					var rowCount = query_result.getRowCount() ;
-
-					//Build Header
-					var resultSetHeader = new Array(colCount) ;
-					resultSetHeader[0] = 'Locations';
-					for(i = 0; i < colCount; i++){
-
-					resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
-					out.println("HEADER: " + colHeaders[0][i].toString() );
-					}
-					newResults.setColumnHeaders( resultSetHeader);
-
-					for (i=0; i<rowCount; i++)
-						{
-						var a = new Array();
-						a[0] = rowHeaders[i][0];
-						a[1] = rowHeaders[i][1];
-						//out.println("a0: " + a[0] + "; a1: " + a[1]);
-
-						for(j=0; j< colCount; j++){
-
-						a[j+1] = query_result.getValueAt(i,j);
-						}
-						newResults.addRow(a);
-						}
-
-						out.println("Success: New resultset with " + newResults.getRowCount() + " entries");
-						}
-
-						}
-						else{
-
-
-						out.println("TIMESERIES DATASET");
-						newResults.setColumnHeaders('Series','Date','Measure');
-
-						if (query_result != null)
-						{
-
-
-						var rsmd = query_result.getMetaData() ;
-						var colHeaders = rsmd.getColumnHeaders() ;
-						var rowHeaders = rsmd.getRowHeaders() ;
-						var colCount = rsmd.getColumnCount() ;
-						var rowCount = query_result.getRowCount() ;
-
 						//Build Header
 						var resultSetHeader = new Array(colCount) ;
 						resultSetHeader[0] = 'Locations';
-						for(j = 0; j < colCount; j++){
-						out.println("Iteration " + j + " of " + colCount + "; ");
 
-						//resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
-						//out.println("HEADER: " + colHeaders[0][i].toString() );
-						//newResults.setColumnHeaders( resultSetHeader);
+						for(i = 0; i < colCount; i++){
 
-						for (i=0; i<rowCount; i++) {
+							resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
+							//out.println("HEADER: " + colHeaders[0][i].toString() );
+						}
+						newResults.setColumnHeaders( resultSetHeader);
+
+						if (TOPCOUNTAXIS == 'rows'){
+							rowIteraction = TOPCOUNT==0||TOPCOUNT > rowCount?rowCount:TOPCOUNT ;
+							out.println("Rows: " + rowIteraction);
+						}
+						if (TOPCOUNTAXIS == 'columns'){
+							colIteraction = TOPCOUNT==0||TOPCOUNT > colCount?colCount:TOPCOUNT ;
+							out.println("Columns: " + colIteraction);
+						}
+
+						for (i=0; i<rowIteraction; i++)
+						{
 							var a = new Array();
-							a[0] = colHeaders[0][j];
-							a[1] = rowHeaders[i][0];
-							a[2] = query_result.getValueAt(i,j);
-							//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+							a[0] = rowHeaders[i][0];
+							a[1] = rowHeaders[i][1];
 
+							for(j=0; j< colIteraction; j++){
+
+								a[j+1] = query_result.getValueAt(i,j);
+							}
+							//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[0] + "; Array: " + a);
 							newResults.addRow(a);
 						}
+
+						// Other's block
+						if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
+							// This will probably need a refactoring. All of this, actually :S
+							var value = 0;
+							var a = new Array();
+							for(i = 0 ; i < rowIteraction; i++){
+
+								for (j=colIteraction; j<colCount; j++) {
+									var localValue = query_result.getValueAt(i,j) - 0;
+									value += localValue;
+									//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+								}
+								a[0] = 'Others';
+								a[colIteraction+1] = value;
+								newResults.addRow(a);
+							}
+							//out.println("OTHERS: a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
 						}
+						else if (TOPCOUNTAXIS == 'rows' && rowIteraction != rowCount){
+
+							// This will probably need a refactoring. All of this, actually :S
+							var value = 0;
+							var a = new Array();
+							for(j = 0 ; j < colIteraction; j++){
+
+								for (i=rowIteraction; i<rowCount; i++) {
+									var localValue = query_result.getValueAt(i,j) - 0;
+									value += localValue;
+									//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+								}
+								a[0] = 'Others';
+								a[j+1] = value;
+							}
+							//out.println("OTHERS: a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+							newResults.addRow(a);
 						}
+
+						//out.println("Success: New resultset with " + newResults.getRowCount() + " entries");
+					}
+
+				}
+				else{
+
+					// TIMESERIES
+					out.println("TIMESERIES DATASET");
+					newResults.setColumnHeaders('Series','Date','Measure');
+
+					if (query_result != null)
+					{
+
+						var rowIteraction = rowCount;
+						var colIteraction = colCount;
+
+						if (TOPCOUNTAXIS == 'rows'){
+							rowIteraction = TOPCOUNT==0||TOPCOUNT > rowCount?rowCount:TOPCOUNT ;
+							out.println("Rows: " + rowIteraction);
 						}
-							newResults;
+						if (TOPCOUNTAXIS == 'columns'){
+							colIteraction = TOPCOUNT==0||TOPCOUNT > colCount?colCount:TOPCOUNT ;
+							out.println("Columns: " + colIteraction + "; ColCount: " + colCount);
+						}
+
+
+						for(j = 0; j < colIteraction; j++){
+							for (i=0; i<rowIteraction; i++) {
+								var a = new Array();
+								a[0] = colHeaders[0][j];
+								a[1] = rowHeaders[i][0];
+								a[2] = query_result.getValueAt(i,j);
+								//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+
+								newResults.addRow(a);
+							}
+						}
+
+						// Other's block
+						if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
+							for (i=0; i<rowIteraction; i++) {
+								var a = new Array();
+								a[0] = 'Others';
+								a[1] = rowHeaders[i][0];
+								var value = 0;
+								for(j = colIteraction ; j < colCount; j++){
+									var localValue = query_result.getValueAt(i,j) - 0;
+									value += localValue;
+									//out.println("a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+								}
+								a[2] = value;
+								//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+								newResults.addRow(a);
+							}
+						}
+						else if (TOPCOUNTAXIS == 'rows' && rowIteraction != rowCount){
+							for (j=0; j<colIteraction; j++) {
+								var a = new Array();
+								a[0] = colHeaders[0][j];
+								a[1] = 'Others';
+								var value = 0;
+								for(i = rowIteraction ; i < rowCount; i++){
+									var localValue = query_result.getValueAt(i,j) - 0;
+									value += localValue;
+									//out.println("a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+								}
+								a[2] = value;
+								//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+								newResults.addRow(a);
+							}
+						}
+
+					}
+
+				}
+				newResults;
 
 						]]></script> 
 				</component-definition> 
