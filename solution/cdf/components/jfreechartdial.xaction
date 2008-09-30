@@ -427,7 +427,7 @@
 					<include-legend>true</include-legend> 
 					<markers-visible>true</markers-visible>
 					<tick-interval>{TICKINTERVAL}</tick-interval>
-					<needle-color>#0000AA</needle-color>
+					<needle-color>#0000CC</needle-color>
 					<intervals>
 						<interval>
 							<label>Interval0</label><minimum>0</minimum><maximum>{INTERVAL0}</maximum>
