@@ -1,5 +1,17 @@
 $.ajaxSetup({ type: "POST", async: false });
 
+// Add a clone method;
+/*
+Object.prototype.clone = function() {
+	var newObj = (this instanceof Array) ? [] : {};
+	for (i in this) {
+		if (i == 'clone') continue;
+		if (this[i] && typeof this[i] == "object") {
+			newObj[i] = this[i].clone();
+		} else newObj[i] = this[i]
+	} return newObj;
+};
+*/
 
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
@@ -13,6 +25,9 @@ $.blockUI.defaults.css.width = '170px';
 $.blockUI.defaults.css.opacity = '.8';
 $.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
 $.blockUI.defaults.css['-moz-border-radius'] = '10px';
+
+if (typeof $.SetImpromptuDefaults == 'function')
+	$.SetImpromptuDefaults({ prefix: 'colsJqi', show: 'slideDown' });
 
 var Dashboards = 
 {
@@ -917,12 +932,13 @@ Dashboards.update = function(object)	{
 
     };
 
-    Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
-    new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
-    new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
-    new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
-    new Timeplot.Color('#73F321')]
-
+	if (typeof Timeplot != "undefined"){
+		Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
+		new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
+		new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
+		new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
+		new Timeplot.Color('#73F321')]
+	}
 
 	Dashboards.updateTimePlotComponent = function( object ){
 
@@ -1103,6 +1119,126 @@ Dashboards.update = function(object)	{
 Dashboards.path = Dashboards.getParameter("path");
 
 Dashboards.solution = Dashboards.getParameter("solution");
+
+// MDXQuery
+
+Dashboards.mdxQuery = function(hash){
+	this.query = [];
+	this.update(hash);
+};
+
+Dashboards.mdxQuery.prototype.update = function(hash){
+	this.query["members"] = hash["members"]||[];
+	this.query["sets"] = hash["sets"] || [];
+	this.query["rows"] = hash["rows"]||"";
+	this.query["from"] = hash["from"] || "";
+	this.query["columns"] = hash["columns"];
+	this.query["where"] = hash["where"] || [];
+	this.query["nonEmptyRows"] = hash["nonEmptyRows"] || false;
+	this.query["nonEmptyColumns"] = hash["nonEmptyColumns"] || false;
+	this.query["swapRowsAndColumns"] = hash["swapRowsAndColumns"] || false;
+	this.query["filters"] = hash["filters"] || {rows:{},columns: {}};
+	this.query["where"] = hash["where"] || {};
+};
+
+Dashboards.mdxQuery.prototype.clone = function(){
+	return new Dashboards.mdxQuery(this.query);
+}
+
+Dashboards.mdxQuery.prototype.getQuery = function(){
+	var query = "with ";
+	// We need to evaluate the hash
+	var _eh = [];
+	for(p in this.query){
+		var key = p;
+		var value = typeof this.query[p]=='function'?this.query[p]():this.query[p];
+		_eh[key] = value;
+	} 
+
+	if(typeof _eh["sets"] == 'object' || typeof _eh["members"] == 'object' ){
+		for(s in _eh["sets"]){
+			var value = typeof _eh["sets"][s]=='function'?_eh["sets"][s]():_eh["sets"][s];
+			query += " set " + s + " as " + value + " \n";
+		}
+		for(m in _eh["members"]){
+			var value = typeof _eh["members"][m]=='function'?_eh["members"][m]():_eh["members"][m];
+			query += " member " + m + " as " + value + " \n";
+		}
+	}
+	// Generate the col/row sets
+	var columns = _eh["swapRowsAndColumns"]?_eh["rows"]:_eh["columns"];
+	var rows = _eh["swapRowsAndColumns"]?_eh["columns"]:_eh["rows"];
+	query += " set rowSet as {" + rows + "} \n";
+	query += " set colSet as {" + columns + "} \n";
+
+	var colFilter = [];
+	var rowFilter = [];
+	$.each(_eh["filters"]["rows"],function(key,obj){
+			$.each(obj,function(dim, content){
+					rowFilter.push(key + ".currentMember.Name <> '" + content+"' ");
+				})
+		});
+	if (_eh["swapRowsAndColumns"]){
+		query += " set rowFilter as " + (colFilter.length > 0?"Filter(rowSet,"+ colFilter.join(" and ") + " )":"rowSet") + "\n";
+		query += " set colFilter as " + (rowFilter.length > 0?"Filter(colSet,"+ rowFilter.join(" and ") + " )":"colSet") + "\n";
+	}
+	else{
+		query += " set rowFilter as " + (rowFilter.length > 0?"Filter(rowSet,"+ rowFilter.join(" and ") + " )":"rowSet") + "\n";
+		query += " set colFilter as " + (colFilter.length > 0?"Filter(colSet,"+ colFilter.join(" and ") + " )":"colSet") + "\n";
+	}
+
+	
+	query += "select " + (_eh["nonEmptyRows"]?" NON EMPTY ":"") + " rowFilter on rows,\n ";
+	query += " " + (_eh["nonEmptyColumns"]?" NON EMPTY ":"") + " colFilter on columns\n ";
+	query += " from " + _eh["from"] + "\n";
+
+	var whereArray = [];
+	$.each(_eh["where"],function(key,obj){
+			whereArray.push(typeof obj == 'function'?obj():obj);
+		});
+	if (whereArray.length>0){
+		query += " where ( " + whereArray.join(' , ') + " )";
+	}
+	return query;
+
+}
+
+Dashboards.mdxQuery.prototype.addFilter = function(axis, dimension, value){
+	if(axis != 'columns' && axis != 'rows'){
+		alert("Invalid filter axis " + axis);
+		return;
+	}
+	
+	var obj = this.query["filters"][axis];
+	if (obj[dimension] == undefined ){
+		obj[dimension] = [ value ];
+	}
+	else
+		obj[dimension].push(value);
+
+}
+
+Dashboards.mdxQuery.prototype.addCondition = function(key, condition){
+
+	this.query["where"][key] = condition;
+}
+
+Dashboards.mdxQuery.prototype.removeCondition = function(key){
+
+	delete this.query["where"][key];
+}
+
+Dashboards.mdxQuery.prototype.resetFilters = function(){
+	this.query["filters"] = hash["filters"] || {rows:{},columns: {}};
+}
+
+
+Dashboards.clone = function clone(obj) {
+	function Clone() { } 
+	Clone.prototype = obj;
+	return new Clone();
+}
+
 
 
 /**

@@ -155,6 +155,12 @@
 			</sources>
 			<default-value></default-value>
 		</PARAMETERNAME>
+		<SERIESNAME type="string">
+			<sources>
+				<request>seriesName</request>
+			</sources>
+			<default-value></default-value>
+		</SERIESNAME>
 		<INCLUDELEGEND type="string">
 			<sources>
 				<request>includeLegend</request>
@@ -173,6 +179,12 @@
 			</sources>
 			<default-value>1</default-value>
 		</BACKGROUNDALPHA> 
+		<INTERIORGAP type="string">
+			<sources>
+				<request>interiorGap</request>
+			</sources>
+			<default-value>0.25</default-value>
+		</INTERIORGAP> 
 		<QUERY_TYPE type="string">
 			<sources>
 				<request>queryType</request>
@@ -488,11 +500,13 @@
 					<USEBASEURL type="string"/>
 					<URLTARGET type="string"/>
 					<PARAMETERNAME type="string"/>
+					<SERIESNAME type="string"/>
 					<INCLUDELEGEND type="string"/>
 					<FOREGROUNDALPHA type="string"/>
 					<BACKGROUNDALPHA type="string"/>
 					<BACKGROUND type="string"/>
 					<PLOTBACKGROUND type="string"/>
+					<INTERIORGAP type="string"/>
 				</action-inputs>
 				<action-resources/>
 				<action-outputs> 
@@ -527,7 +541,9 @@
 						<use-base-url>{USEBASEURL}</use-base-url>  
 						<url-target>{URLTARGET}</url-target>
 						<paramName>{PARAMETERNAME}</paramName>  
+						<series-name>{SERIESNAME}</series-name>  
 						<include-legend>{INCLUDELEGEND}</include-legend> 
+						<interior-gap>{INTERIORGAP}</interior-gap> 
 						<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
 						<background-alpha>{BACKGROUNDALPHA}</background-alpha>
 						<chart-background type="color">{BACKGROUND}</chart-background>
