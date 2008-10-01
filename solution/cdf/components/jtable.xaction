@@ -19,6 +19,12 @@
 			<default-value/>
 
 	</QUERY>  
+	<CATALOG type="string">
+		<sources>
+			<request>catalog</request>
+		</sources>
+		<default-value/>
+	</CATALOG>
 	
 	<PAGINATE type="string">
 		<sources> 
@@ -70,7 +76,7 @@
   <resources> 
     <catalog> 
       <url> 
-        <location>backlog/sales_budget.mondrian.xml</location>  
+		  <location>cmc/sales/mondrian_cube_definitions/sales_budget.mondrian.xml</location>  
         <mime-type>text/xml</mime-type> 
       </url> 
     </catalog> 
@@ -83,6 +89,7 @@
       <component-name>MDXLookupRule</component-name>
       <action-type>Query MDX</action-type>
       <action-inputs> 
+		  <CATALOG type="string"/>
 		<QUERY type="string"/> 
       </action-inputs>
       <action-resources> 
