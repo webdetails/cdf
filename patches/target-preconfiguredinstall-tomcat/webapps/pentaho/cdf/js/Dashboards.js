@@ -1,17 +1,5 @@
 $.ajaxSetup({ type: "POST", async: false });
 
-// Add a clone method;
-/*
-Object.prototype.clone = function() {
-	var newObj = (this instanceof Array) ? [] : {};
-	for (i in this) {
-		if (i == 'clone') continue;
-		if (this[i] && typeof this[i] == "object") {
-			newObj[i] = this[i].clone();
-		} else newObj[i] = this[i]
-	} return newObj;
-};
-*/
 
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
@@ -1123,7 +1111,7 @@ Dashboards.solution = Dashboards.getParameter("solution");
 // MDXQuery
 
 Dashboards.mdxQuery = function(hash){
-	this.query = [];
+	this.query = {};
 	this.update(hash);
 };
 
@@ -1141,9 +1129,17 @@ Dashboards.mdxQuery.prototype.update = function(hash){
 	this.query["where"] = hash["where"] || {};
 };
 
-Dashboards.mdxQuery.prototype.clone = function(){
-	return new Dashboards.mdxQuery(this.query);
-}
+//.prototype.clone = function(){
+//	return new Dashboards.mdxQuery(this.query);
+//}
+
+// Add a clone method;
+
+Dashboards.mdxQuery.prototype.clone = function() {
+	var c = Dashboards.clone(this);
+	return c;
+};
+
 
 Dashboards.mdxQuery.prototype.getQuery = function(){
 	var query = "with ";
@@ -1228,18 +1224,105 @@ Dashboards.mdxQuery.prototype.removeCondition = function(key){
 	delete this.query["where"][key];
 }
 
+
+Dashboards.mdxQueryGroup = function(){
+	this.mdxQueries = {};
+	this.clickedIdx = -1;
+	this.clickedValue = "";
+	this.activeFilters
+};
+
+
 Dashboards.mdxQuery.prototype.resetFilters = function(){
 	this.query["filters"] = hash["filters"] || {rows:{},columns: {}};
 }
 
+Dashboards.mdxQueryGroup.prototype.addMdxQuery = function(idx,mdxQuery,filterDimension, filterAxis, chartObject){
+	this.mdxQueries[idx] = {mdxQuery: mdxQuery, filterDimension: filterDimension, filterAxis: filterAxis,chartObject:chartObject};
+};
 
-Dashboards.clone = function clone(obj) {
-	function Clone() { } 
-	Clone.prototype = obj;
-	return new Clone();
+Dashboards.mdxQueryGroup.prototype.removeMdxQuery = function(idx){
+	delete this.mdxQueries.idx;
+};
+
+Dashboards.lastClickedMdxQueryGroup;
+Dashboards.mdxQueryGroup.prototype.performAction = function(idx,value){
+	
+	if (value == 'Others')
+		return; // do nothing
+
+	this.clickedIdx = idx;
+	this.clickedValue = value;
+	Dashboards.lastClickedMdxQueryGroup = this;
+
+	var a  = $.prompt('You want to focus the other analysis on this value or exlude this value from this chart? '
+		,{buttons: { 'Focus': "condition", 'Exclude': "filter", "Cancel": "cancel" }, callback: Dashboards.mdxQueryGroupActionCallback });
+
+};
+
+Dashboards.mdxQueryGroupActionCallback = function(value,m){
+
+	if (value == "cancel")
+		return;  // do nothing.
+
+
+	var mqg = Dashboards.lastClickedMdxQueryGroup;
+	var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
+	Dashboards.blockUIwithDrag();
+	
+	if( value == "filter" ){
+		// filter: remove this from every query
+		for (i in mqg.mdxQueries){
+
+			var obj = mqg.mdxQueries[i];
+			obj.mdxQuery.addFilter(obj.filterAxis, obj.filterDimension,mqg.clickedValue);
+			Dashboards.update(obj.chartObject);
+		}
+	}
+	else if (value == "condition"){
+		// condition: place this as a condition on the others
+	
+		for (i in mqg.mdxQueries){
+			if (i == mqg.clickedIdx)
+				continue;
+
+			var obj = mqg.mdxQueries[i];
+			obj.mdxQuery.addCondition(mqg.clickedIdx, clickedObj.filterDimension + ".[" + mqg.clickedValue + "]");
+			Dashboards.update(obj.chartObject);
+		}
+	}
+	$.unblockUI();
 }
 
 
+Dashboards.clone = function clone(obj) {
+
+	var c = obj instanceof Array ? [] : {};
+
+	for (var i in obj) {
+		var prop = obj[i];
+
+		if (typeof prop == 'object') {
+			if (prop instanceof Array) {
+				c[i] = [];
+
+				for (var j = 0; j < prop.length; j++) {
+					if (typeof prop[j] != 'object') {
+						c[i].push(prop[j]);
+					} else {
+						c[i].push(Dashboards.clone(prop[j]));
+					}
+				}
+			} else {
+				c[i] = Dashboards.clone(prop);
+			}
+		} else {
+			c[i] = prop;
+		}
+	}
+
+	return c;
+}
 
 /**
 *
