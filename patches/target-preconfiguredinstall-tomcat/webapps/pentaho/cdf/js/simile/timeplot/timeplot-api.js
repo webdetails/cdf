@@ -8,6 +8,7 @@
 
 (function() {
 
+	var debug = false;
     var local = true;
 
     // obtain local mode from the document URL    
@@ -108,7 +109,7 @@
 
         var timeplotURLPrefix = (local) ? "/pentaho/cdf/js/simile/timeplot/" : Timeplot.urlPrefix;
 
-        if (local && !("console" in window)) {
+        if (debug && local && !("console" in window)) {
             var firebug = [ timeplotURLPrefix + "lib/firebug/firebug.js" ];
             SimileAjax.includeJavascriptFiles(document, "", firebug);
         }
@@ -138,7 +139,7 @@
         //};
         
         window.SimileAjax_onLoad = function() {
-            if (local && window.console.open) window.console.open();
+            if (debug && local && window.console.open) window.console.open();
             if (Timeplot.params.callback) {
                 eval(Timeplot.params.callback + "()");
             }
