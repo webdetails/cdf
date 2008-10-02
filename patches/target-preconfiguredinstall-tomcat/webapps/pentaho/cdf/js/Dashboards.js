@@ -1272,12 +1272,10 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 	
 	if( value == "filter" ){
 		// filter: remove this from every query
-		for (i in mqg.mdxQueries){
 
-			var obj = mqg.mdxQueries[i];
-			obj.mdxQuery.addFilter(obj.filterAxis, obj.filterDimension,mqg.clickedValue);
-			Dashboards.update(obj.chartObject);
-		}
+		var obj = clickedObj;
+		obj.mdxQuery.addFilter(obj.filterAxis, obj.filterDimension,mqg.clickedValue);
+		Dashboards.update(obj.chartObject);
 	}
 	else if (value == "condition"){
 		// condition: place this as a condition on the others
