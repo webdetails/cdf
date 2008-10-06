@@ -277,10 +277,17 @@
 					var intervals = INTERVALS.split(",");
 
 					var last;
-					var red = "#FF0000";
-					var yellow = "#FFFF00";
-					var green1 = "#326F2A";
-					var green2 = "#40FF40";
+					
+					var brightred = "#FF5E5E";
+					var darkred = "#FF0000";
+					var brightyellow = "#FFFF00";
+					var darkyellow = "#FFFF5E";
+					var brightgreen1 = "#9CFF9C";
+					var darkgreen1 = "#00FF00";
+					var brightgreen2 = "#40FF40";
+					var darkgreen2 = "#35D500";
+					
+					out.println("===>intervals.length" + intervals.length);
 
 					if (intervals.length==1){
 					last = VALUE>intervals[0]?VALUE:intervals[0];
@@ -288,10 +295,10 @@
 					var INTERVAL1 = last;
 					var INTERVAL2 = last;
 					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = green1;
-					var INTERVALCOLOR1 = green1;
-					var INTERVALCOLOR2 = green1;
-					var INTERVALCOLOR3 = green1;
+					var INTERVALCOLOR0 = brightgreen1;
+					var INTERVALCOLOR1 = brightgreen1;
+					var INTERVALCOLOR2 = brightgreen1;
+					var INTERVALCOLOR3 = brightgreen1;
 					}
 					else if (intervals.length == 2){
 					last = VALUE>intervals[1]?VALUE:intervals[1];
@@ -299,10 +306,10 @@
 					var INTERVAL1 = last;
 					var INTERVAL2 = last;
 					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = red;
-					var INTERVALCOLOR1 = green1;
-					var INTERVALCOLOR2 = green1;
-					var INTERVALCOLOR3 = green1;
+					var INTERVALCOLOR0 = VALUE < intervals[0] ? darkred : brightred;
+					var INTERVALCOLOR1 = VALUE >= intervals[0] ? darkgreen1: brightgreen1;
+					var INTERVALCOLOR2 = VALUE >= intervals[0] ? darkgreen1: brightgreen1;
+					var INTERVALCOLOR3 = VALUE >= intervals[0] ? darkgreen1: brightgreen1;
 					}
 					else if (intervals.length == 3){
 					last = VALUE>intervals[2]?VALUE:intervals[2];
@@ -310,10 +317,10 @@
 					var INTERVAL1 = intervals[1];
 					var INTERVAL2 = last;
 					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = red;
-					var INTERVALCOLOR1 = yellow;
-					var INTERVALCOLOR2 = green1;
-					var INTERVALCOLOR3 = green1;
+					var INTERVALCOLOR0 = VALUE < intervals[0] ? darkred : brightred;
+					var INTERVALCOLOR1 = VALUE >= intervals[0] &&  VALUE < intervals[1] ? darkyellow : brightyellow;
+					var INTERVALCOLOR2 = VALUE >= intervals[1] ? darkgreen1: brightgreen1;
+					var INTERVALCOLOR3 = VALUE >= intervals[1] ? darkgreen1: brightgreen1;
 					}
 					else if (intervals.length >= 4){
 					last = VALUE>intervals[3]?VALUE:intervals[3];
@@ -321,20 +328,20 @@
 					var INTERVAL1 = intervals[1];
 					var INTERVAL2 = intervals[2];
 					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = red;
-					var INTERVALCOLOR1 = yellow;
-					var INTERVALCOLOR2 = green1;
-					var INTERVALCOLOR3 = green2;
+					var INTERVALCOLOR0 = VALUE < intervals[0] ? darkred : brightred;
+					var INTERVALCOLOR1 = VALUE >= intervals[0] &&  VALUE < intervals[1] ? darkyellow : brightyellow;
+					var INTERVALCOLOR2 = VALUE >= intervals[1] &&  VALUE < intervals[2] ? darkgreen1: brightgreen1;
+					var INTERVALCOLOR3 = VALUE >= intervals[2] ? darkgreen2: brightgreen2;
 					}
 					else if (intervals.length == 0){
 					var INTERVAL0 = 0;
 					var INTERVAL1 = 0;
 					var INTERVAL2 = 0;
 					var INTERVAL3 = 0;
-					var INTERVALCOLOR0 = green1;
-					var INTERVALCOLOR1 = green1;
-					var INTERVALCOLOR2 = green1;
-					var INTERVALCOLOR3 = green1;
+					var INTERVALCOLOR0 = brightgreen1;
+					var INTERVALCOLOR1 = brightgreen1;
+					var INTERVALCOLOR2 = brightgreen1;
+					var INTERVALCOLOR3 = brightgreen1;
 					}
 
 					var TICKINTERVAL = Math.round(last/20,0) + "";

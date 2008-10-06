@@ -55,7 +55,7 @@ var MetaLayer ={
 	},
 	
 	
-	allValues: [["All","All"]],  // Used in the All checkboxes
+	allValues: [["All","All"]]  // Used in the All checkboxes
 };
 
 jQuery.fn.check = function(mode) {

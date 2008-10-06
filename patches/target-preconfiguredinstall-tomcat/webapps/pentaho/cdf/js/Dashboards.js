@@ -5,10 +5,10 @@ var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
 
-$.blockUI.defaults.message = '<div style="padding: 15px;"<img src="/pentaho/cdf/images/busy.gif" /> <h3>Processing...</h3></div>';
+$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="/pentaho/cdf/images/busy.gif" /> <h3>Processing...</h3></div>';
 $.blockUI.defaults.css.left = '40%';
 $.blockUI.defaults.css.top = '30%';
-$.blockUI.defaults.css.marginLeft = '85px;';
+$.blockUI.defaults.css.marginLeft = '85px';
 $.blockUI.defaults.css.width = '170px';
 $.blockUI.defaults.css.opacity = '.8';
 $.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
@@ -89,7 +89,7 @@ Dashboards.update = function(object)	{
 		if (object.type == "selectMulti"){
 			selectHTML += " multiple";
 		}
-		// selectHTML += " onchange='Dashboards.processChange(\"" + object.name + "\")'>";
+		selectHTML += ">";
 
 		for(var i= 0, len  = myArray.length; i < len; i++){
 			if(myArray[i]!= null && myArray[i].length>0)
@@ -942,14 +942,14 @@ Dashboards.updateTimePlotComponent = function( object ){
 	var timePlotTimeGeometry = new Timeplot.DefaultTimeGeometry({
 			gridColor: "#000000",
 			axisLabelsPlacement: "top",
-			gridType: "short",
+			gridType: "short"
 		});
 
 	var timePlotValueGeometry = new Timeplot.DefaultValueGeometry({
 			gridColor: "#000000",
 			min: 0,
 			axisLabelsPlacement: "left",
-			gridType: "short",
+			gridType: "short"
 		});
 
 

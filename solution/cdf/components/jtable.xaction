@@ -13,11 +13,10 @@
 
   <inputs> 
 	<QUERY type="string"> 
-			<sources> 
-				<request>query</request> 
-			</sources>  
-			<default-value/>
-
+		<sources> 
+			<request>query</request> 
+		</sources>  
+		<default-value/>
 	</QUERY>  
 	<CATALOG type="string">
 		<sources>
@@ -25,7 +24,24 @@
 		</sources>
 		<default-value/>
 	</CATALOG>
-	
+	<JNDI type="string"> 
+		<sources> 
+			<request>jndi</request> 
+		</sources>  
+		<default-value/> 
+	</JNDI>  
+	<CUBE type="string"> 
+		<sources> 
+			<request>cube</request> 
+		</sources>  
+		<default-value/> 
+	</CUBE>  
+	<ROLE type="string"> 
+		<sources> 
+			<request>role</request> 
+		</sources>  
+		<default-value/> 
+	</ROLE>  
 	<PAGINATE type="string">
 		<sources> 
 			<request>paginate</request> 
@@ -72,15 +88,6 @@
     </results>
     
   </outputs>
-
-  <resources> 
-    <catalog> 
-      <url> 
-		  <location>cmc/sales/mondrian_cube_definitions/sales_budget.mondrian.xml</location>  
-        <mime-type>text/xml</mime-type> 
-      </url> 
-    </catalog> 
-  </resources>
   
   <actions> 
   
@@ -89,19 +96,23 @@
       <component-name>MDXLookupRule</component-name>
       <action-type>Query MDX</action-type>
       <action-inputs> 
-		  <CATALOG type="string"/>
+		<CATALOG type="string"/>
+		<JNDI type="string"/>
 		<QUERY type="string"/> 
+		<CUBE type="string"/>
+		<ROLE type="string"/>
       </action-inputs>
-      <action-resources> 
-        <catalog type="resource"/> 
-      </action-resources>
+      <action-resources/>
       <action-outputs> 
         <query-results type="result-set" mapping="query_result"/> 
       </action-outputs>
       <component-definition> 
         <location><![CDATA[mondrian]]></location>  
         <query>{QUERY}</query>  
-        <jndi>olap_reporting</jndi> 
+        <jndi>{JNDI}</jndi> 
+		<cube>{CUBE}</cube>
+		<role>{ROLE}</role>
+		<catalog>{CATALOG}</catalog>
       </component-definition> 
     </action-definition>
   
