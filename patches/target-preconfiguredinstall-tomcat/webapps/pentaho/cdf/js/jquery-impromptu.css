@@ -96,7 +96,7 @@ div.colsJqi{
     position: absolute;
 	background-color: #d0dEb6;
 	padding: 10px; 
-	width: 400px;
+	width: 500px;
 	text-align: left;
 }
 div.colsJqi .colsJqiclose{
@@ -110,13 +110,13 @@ div.colsJqi .colsJqicontainer{
 	padding: 5px; 
 	color: #ffffff;
 	font-weight: bold;
-	height: 160px;
+	height: 260px;
 }
 div.colsJqi .colsJqimessage{
 	background-color: #c0cEa6;
 	padding: 10px;
-	width: 280px;
-	height: 140px;
+	width: 380px;
+	height: 240px;
 	float: left;
 }
 div.colsJqi .jqibuttons{

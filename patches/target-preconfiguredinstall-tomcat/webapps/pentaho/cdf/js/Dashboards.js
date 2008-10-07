@@ -1123,6 +1123,8 @@ Dashboards.mdxQuery = function(hash){
 	this.query = {};
 	this.originalHash = {};
 	this.update(hash);
+	this.axisPos = 0;
+	this.axisDepth = 0;
 };
 
 Dashboards.mdxQuery.prototype.reset = function(){
@@ -1141,9 +1143,13 @@ Dashboards.mdxQuery.prototype.update = function(hash){
 	this.query["members"] = hash["members"]||[];
 	this.query["sets"] = hash["sets"] || [];
 	this.query["rows"] = hash["rows"]||"";
+	this.query["rowDrill"] = hash["rowDrill"]||false;
+	this.query["rowLevels"] = hash["rowLevels"]||[];
+	this.query["orderBy"] = hash["orderBy"] || "";
 	this.query["from"] = hash["from"] || "";
 	this.query["columns"] = hash["columns"];
-	this.query["where"] = hash["where"] || [];
+	this.query["columnDrill"] = hash["columnDrill"]||false;
+	this.query["columnLevels"] = hash["columnLevels"]||[];
 	this.query["nonEmptyRows"] = hash["nonEmptyRows"] || false;
 	this.query["nonEmptyColumns"] = hash["nonEmptyColumns"] || false;
 	this.query["swapRowsAndColumns"] = hash["swapRowsAndColumns"] || false;
@@ -1161,6 +1167,25 @@ Dashboards.mdxQuery.prototype.clone = function() {
 	var c = Dashboards.clone(this);
 	return c;
 };
+
+
+Dashboards.mdxQuery.prototype.generateAxisPart = function(axisDrill, axis, axisLevels, orderBy){
+	if (axisDrill == false){
+		return axis;
+	}
+
+	var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
+	var axisLevel = this.axisPos + this.axisDepth;
+	if (axisLevel > axisLevels.length - 1){
+		axisLevel = axisLevels.length - 1
+	}
+	var q = "Descendants("  + axis + ", "+ dim + ".["  + axisLevels[axisLevel] + "])"
+	if (orderBy == "")
+		return q;
+
+	return "Order(" + q + ", " + orderBy + " , BDESC)";
+
+}
 
 
 Dashboards.mdxQuery.prototype.getQuery = function(){
@@ -1185,9 +1210,13 @@ Dashboards.mdxQuery.prototype.getQuery = function(){
 	}
 	// Generate the col/row sets
 	var columns = _eh["swapRowsAndColumns"]?_eh["rows"]:_eh["columns"];
+	var columnLevels = _eh["swapRowsAndColumns"]?_eh["rowLevels"]:_eh["columnLevels"];
+	var columnDrill = _eh["swapRowsAndColumns"]?_eh["rowDrill"]:_eh["columnDrill"];
 	var rows = _eh["swapRowsAndColumns"]?_eh["columns"]:_eh["rows"];
-	query += " set rowSet as {" + rows + "} \n";
-	query += " set colSet as {" + columns + "} \n";
+	var rowLevels = _eh["swapRowsAndColumns"]?_eh["columnLevels"]:_eh["rowLevels"];
+	var rowDrill = _eh["swapRowsAndColumns"]?_eh["columnDrill"]:_eh["rowDrill"] ;
+	query += " set rowSet as {" + this.generateAxisPart(rowDrill,rows,rowLevels,_eh.orderBy) + "} \n";
+	query += " set colSet as {" + this.generateAxisPart(columnDrill,columns,columnLevels,_eh.orderBy) + "} \n";
 
 	var colFilter = [];
 	var rowFilter = [];
@@ -1278,18 +1307,6 @@ Dashboards.updateMdxQueryGroup = function(obj){
 }
 
 
-/*
- MetaLayerDownloads1.mdxQueryGroup = new Dashboards.mdxQueryGroup();
- $(
- function(){
- MetaLayerDownloads1.mdxQueryGroup.addMdxQuery( "version", MetaLayerDownloads1.versionQuery, '[Download Product Versions].[Version String]','rows',breakdownByVersion);
- MetaLayerDownloads1.mdxQueryGroup.addMdxQuery("os", MetaLayerDownloads1.osQuery, '[User Agent Operating Systems].[OS Category]','rows',breakdownByOS);
- MetaLayerDownloads1.mdxQueryGroup.addMdxQuery("locale", MetaLayerDownloads1.localeQuery, '[Product Locale Codes].[Code]','rows',breakdownByLocale);
- MetaLayerDownloads1.mdxQueryGroup.addMdxQuery("ua", MetaLayerDownloads1.uaQuery, '[User Agent Browsers].[Browser Category]','rows',breakdownByUA);
- }
-);
-*/
-
 Dashboards.mdxQueryGroup = function(name){
 	this.name = name;
 	this.mdxQueries = {};
@@ -1308,8 +1325,19 @@ Dashboards.mdxQueryGroup.prototype.removeMdxQuery = function(idx){
 	delete this.mdxQueries.idx;
 };
 
+Dashboards.buttonsDescription = {
+		"Drill": 'Drill down to the selected value and add the condition to the other charts',
+		'Focus': "Focus on this value, adding the conditions to the other charts", 
+		'Exclude': "Exclude this value from the chart",
+		"Expand":'Expand the depth of the chart, showing an extra sublevel',
+		"Collapse":'Collapse all previous expansions to the top most level',
+		"Reset All": 'Reset all filters and conditions from this chart group, returning to the original conditions',
+		"Cancel": "Cancel" 
+}
+
 Dashboards.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
 
+	value = encode_prepare(value);
 	var mdxQueryGroup = Dashboards.mdxGroups[mdxQueryGroup];
 	if (value == 'Others')
 		return; // do nothing
@@ -1318,26 +1346,53 @@ Dashboards.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
 	mdxQueryGroup.clickedIdx = idx;
 	mdxQueryGroup.clickedValue = value;
 
-	var a  = $.prompt('You want to focus the other analysis on this value or exlude this value from this chart? '
-		,{buttons: { 'Focus': "condition", 'Exclude': "filter", "Cancel": "cancel" }, callback: Dashboards.mdxQueryGroupActionCallback });
+	var clickedObj = mdxQueryGroup.mdxQueries[idx];
+
+	var buttonsHash = { 
+		"Drill": 'drill',
+		'Focus': "condition", 
+		'Exclude': "filter",
+		"Expand":'expand',
+		"Collapse":'collapse',
+		"Reset All": 'resetall',
+		"Cancel": "cancel" 
+	};
+
+	if (clickedObj.mdxQuery.axisDepth == 0)
+		delete buttonsHash.Collapse;
+
+	//get rowLevels
+	var rl = clickedObj.mdxQuery.query.rowLevels;
+	var d = typeof rl == "function"?rl():rl;
+
+	if (clickedObj.mdxQuery.axisPos + clickedObj.mdxQuery.axisDepth >= d.length - 1){
+		delete buttonsHash.Drill;
+		delete buttonsHash.Expand;
+	}
+	else{
+		delete buttonsHash.Focus;
+	}
+
+	var msg = "Available conditions: <br/> <ul>" ;
+	$.each(buttonsHash, function(key,value){msg+="<li>" + Dashboards.buttonsDescription[key] + "</li>"});
+	msg += "</ul>";
+	$.prompt(msg
+		,{buttons: buttonsHash, callback: Dashboards.mdxQueryGroupActionCallback }
+	);
 
 }
 
 Dashboards.lastClickedMdxQueryGroup;
-Dashboards.mdxQueryGroup.prototype.performAction = function(idx,value){
-
-
-};
 
 Dashboards.mdxQueryGroup.prototype.printConditions = function(){
 
-	var out = "Filters: ";
+	var out = "";
 	var firstFilter =1;
 	var firstCond = 1;
 
 	for (i in this.activeFilters){
 		if (firstFilter++ == 1)
-			out += "Exclusions: ";
+			out += "<i>Exclusions: </i>";
 		var a = this.activeFilters[i];
 		var o = [];
 		out += " " + i + " : "
@@ -1347,7 +1402,7 @@ Dashboards.mdxQueryGroup.prototype.printConditions = function(){
 	}
 	for (i in this.activeConditions){
 		if (firstCond++ == 1)
-			out += " Focus: ";
+			out += " <i>Focus: </i>";
 		var a = this.activeConditions[i];
 		var o = [];
 		$.each(a,function(j,k){o.push(k)});
@@ -1355,7 +1410,8 @@ Dashboards.mdxQueryGroup.prototype.printConditions = function(){
 
 	}
 
-	out += " <a href='javascript:Dashboards.mdxGroups[\"" + this.name + "\"].resetAll()'>Reset</a>";
+	if (out.length>0)
+		out += " <a href='javascript:Dashboards.mdxGroups[\"" + this.name + "\"].resetAll()'>Reset</a>";
 
 	return out;
 }
@@ -1366,6 +1422,8 @@ Dashboards.mdxQueryGroup.prototype.resetAll = function(){
 	for (i in this.mdxQueries){
 		var obj = this.mdxQueries[i];
 		obj.mdxQuery.reset();
+		obj.mdxQuery.axisPos = 0;
+		obj.mdxQuery.axisDepth = 0;
 		Dashboards.update(obj.chartObject);
 	}
 	$.unblockUI();
@@ -1377,9 +1435,19 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 	if (value == "cancel")
 		return;  // do nothing.
 
-
 	var mqg = Dashboards.lastClickedMdxQueryGroup;
 	var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
+
+	// Get the dimension where condition to use in drill and focus
+	var axis = typeof clickedObj.mdxQuery.query.rows == 'function'?clickedObj.mdxQuery.query.rows():clickedObj.mdxQuery.query.rows;
+	var axisLevels = typeof clickedObj.mdxQuery.query.rowLevels == 'function'?clickedObj.mdxQuery.query.rowLevels():clickedObj.mdxQuery.query.rowLevels;
+	var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
+	var axisLevel = clickedObj.mdxQuery.axisPos + clickedObj.mdxQuery.axisDepth;
+	if (axisLevel > axisLevels.length - 1){
+		axisLevel = axisLevels.length - 1
+	}
+	var whereCond = dim + ".["  + axisLevels[axisLevel] + "].[" + mqg.clickedValue + "]";
+
 	Dashboards.blockUIwithDrag();
 
 	if( value == "filter" ){
@@ -1405,8 +1473,43 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 				continue;
 
 			var obj = mqg.mdxQueries[i];
-			obj.mdxQuery.addCondition(mqg.clickedIdx, clickedObj.filterDimension + ".[" + mqg.clickedValue + "]");
+			obj.mdxQuery.addCondition(mqg.clickedIdx, whereCond);
 			Dashboards.update(obj.chartObject);
+		}
+	}
+	else if (value == "expand"){
+		var obj = clickedObj;
+		obj.mdxQuery.axisDepth++;
+		Dashboards.update(obj.chartObject);
+
+	}
+	else if (value == "collapse"){
+		var obj = clickedObj;
+		obj.mdxQuery.axisDepth--; + mqg.clickedValue + "]"
+		Dashboards.update(obj.chartObject);
+
+	}
+	else if (value == "resetall"){
+		mqg.resetAll();
+	}
+	else if (value == "drill"){
+		// condition: place this as a condition on the others and drill this
+
+		var a = mqg.activeFilters[mqg.clickedIdx] || [];
+		a.push(clickedObj.filterDimension + ".[" + mqg.clickedValue + "]");
+		mqg.activeConditions[mqg.clickedIdx] = a;
+
+		for (i in mqg.mdxQueries){
+			var obj = mqg.mdxQueries[i];
+			if (i == mqg.clickedIdx){
+				obj.mdxQuery.query.rows = (typeof obj.mdxQuery.query.rows == "function"?obj.mdxQuery.query.rows():obj.mdxQuery.query.rows)+".[" + mqg.clickedValue + "]";
+				obj.mdxQuery.axisPos++;
+			}
+			else{
+				obj.mdxQuery.addCondition(mqg.clickedIdx, whereCond);
+			}
+			Dashboards.update(obj.chartObject);
+
 		}
 	}
 
