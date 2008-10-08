@@ -23,6 +23,12 @@
 			</sources>  
 			<default-value/> 
 		</INTERVALS>  
+		<COLORS type="string">
+			<sources> 
+				<request>colors</request> 
+			</sources>  
+			<default-value/>
+		</COLORS>
 		<JNDI type="string"> 
 			<sources> 
 				<request>jndi</request> 
@@ -241,7 +247,7 @@
 					var a = new Array();
 					a[0] = Math.round(query_result.getValueAt(0,0));
 					VALUE = a[0];
-
+					
 
 					newResults.addRow(a);
 
@@ -258,7 +264,10 @@
 			<action-type>Chart display logic</action-type>
 			<action-inputs> 
 				<INTERVALS type="string"/>
+				<COLORS type="string"/>
 				<VALUE type="string"/>
+				<WIDTH type="string"/>
+				<HEIGHT type="string"/>
 			</action-inputs>
 			<action-outputs> 
 				<TICKINTERVAL type="string"/>
@@ -270,84 +279,143 @@
 				<INTERVALCOLOR1 type="string"/>
 				<INTERVALCOLOR2 type="string"/>
 				<INTERVALCOLOR3 type="string"/>
+				<INTERVALGRADIENT0X1 type="int"/>
+				<INTERVALGRADIENT0Y1 type="string"/>
+				<INTERVALGRADIENT0X2 type="string"/>
+				<INTERVALGRADIENT0Y2 type="string"/>
+				<INTERVALGRADIENT1X1 type="string"/>
+				<INTERVALGRADIENT1Y1 type="string"/>
+				<INTERVALGRADIENT1X2 type="string"/>
+				<INTERVALGRADIENT1Y2 type="string"/>
+				<INTERVALGRADIENT2X1 type="string"/>
+				<INTERVALGRADIENT2Y1 type="string"/>
+				<INTERVALGRADIENT2X2 type="string"/>
+				<INTERVALGRADIENT2Y2 type="string"/>
+				<INTERVALGRADIENT3X1 type="string"/>
+				<INTERVALGRADIENT3Y1 type="string"/>
+				<INTERVALGRADIENT3X2 type="string"/>
+				<INTERVALGRADIENT3Y2 type="string"/>				
 			</action-outputs>
 			<component-definition> 
 				<script><![CDATA[
 
-					var intervals = INTERVALS.split(",");
+				var intervals = INTERVALS.split(",");
+				if(COLORS == "") {
+					out.println("Setting default colors #FF3E3E,#FFFF53,#5EFF5E,#53FF53 ");
+					colors = "#FF3E3E,#FFFF53,#5EFF5E,#53FF53".split(",");
+				}
+				else	
+					colors = COLORS.split(",");
+				
+				var last;
+				out.println("Inntervals length: " + intervals.length);
+				
+				var initalGradientPointX1 = WIDTH/4;
+				var initalGradientPointY1 = HEIGHT/4;
+				var initalGradientPointX2 = WIDTH ;
+				var initalGradientPointY2 = HEIGHT ;
+				
+				var INTERVALGRADIENT0X1=initalGradientPointX1, INTERVALGRADIENT2X1=initalGradientPointX1, INTERVALGRADIENT1X1=initalGradientPointX1, INTERVALGRADIENT3X1=initalGradientPointX1;
+				var INTERVALGRADIENT0Y1=initalGradientPointY1, INTERVALGRADIENT2Y1=initalGradientPointY1, INTERVALGRADIENT1Y1=initalGradientPointY1, INTERVALGRADIENT3Y1=initalGradientPointY1;
+				var INTERVALGRADIENT0X2=initalGradientPointX2, INTERVALGRADIENT1X2=initalGradientPointX2, INTERVALGRADIENT2X2=initalGradientPointX2, INTERVALGRADIENT3X2=initalGradientPointX2;  
+				var INTERVALGRADIENT0Y2=initalGradientPointY2, INTERVALGRADIENT1Y2=initalGradientPointY2, INTERVALGRADIENT2Y2=initalGradientPointY2, INTERVALGRADIENT3Y2=initalGradientPointY2;
 
-					var last;
-					
-					var brightred = "#FF5E5E";
-					var darkred = "#FF0000";
-					var brightyellow = "#FFFF00";
-					var darkyellow = "#FFFF5E";
-					var brightgreen1 = "#9CFF9C";
-					var darkgreen1 = "#00FF00";
-					var brightgreen2 = "#40FF40";
-					var darkgreen2 = "#35D500";
-					
-					out.println("===>intervals.length" + intervals.length);
-
-					if (intervals.length==1){
+				if (intervals.length==1){
 					last = VALUE>intervals[0]?VALUE:intervals[0];
 					var INTERVAL0 = last;
 					var INTERVAL1 = last;
 					var INTERVAL2 = last;
 					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = brightgreen1;
-					var INTERVALCOLOR1 = brightgreen1;
-					var INTERVALCOLOR2 = brightgreen1;
-					var INTERVALCOLOR3 = brightgreen1;
-					}
-					else if (intervals.length == 2){
+					var INTERVALCOLOR0 = COLORS == "" ? colors[2] : colors[0];
+					var INTERVALCOLOR1 = INTERVALCOLOR0;
+					var INTERVALCOLOR2 = INTERVALCOLOR0;
+					var INTERVALCOLOR3 = INTERVALCOLOR0;
+				}
+				else if (intervals.length == 2){
 					last = VALUE>intervals[1]?VALUE:intervals[1];
 					var INTERVAL0 = intervals[0];
 					var INTERVAL1 = last;
 					var INTERVAL2 = last;
 					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = VALUE < intervals[0] ? darkred : brightred;
-					var INTERVALCOLOR1 = VALUE >= intervals[0] ? darkgreen1: brightgreen1;
-					var INTERVALCOLOR2 = VALUE >= intervals[0] ? darkgreen1: brightgreen1;
-					var INTERVALCOLOR3 = VALUE >= intervals[0] ? darkgreen1: brightgreen1;
+					var INTERVALCOLOR0 = colors[0];
+					var INTERVALCOLOR1 = COLORS == "" ? colors[2] : colors[1];
+					var INTERVALCOLOR2 = INTERVALCOLOR1;
+					var INTERVALCOLOR3 = INTERVALCOLOR1;
+					if(VALUE < intervals[0]) {
+						INTERVALGRADIENT0X1 = - WIDTH;
+						INTERVALGRADIENT0Y1 = - HEIGHT;
 					}
-					else if (intervals.length == 3){
+					else{
+						INTERVALGRADIENT1X1 = - WIDTH;
+						INTERVALGRADIENT1Y1 = - HEIGHT;
+					}
+				}
+				else if (intervals.length == 3){
 					last = VALUE>intervals[2]?VALUE:intervals[2];
 					var INTERVAL0 = intervals[0];
 					var INTERVAL1 = intervals[1];
 					var INTERVAL2 = last;
-					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = VALUE < intervals[0] ? darkred : brightred;
-					var INTERVALCOLOR1 = VALUE >= intervals[0] &&  VALUE < intervals[1] ? darkyellow : brightyellow;
-					var INTERVALCOLOR2 = VALUE >= intervals[1] ? darkgreen1: brightgreen1;
-					var INTERVALCOLOR3 = VALUE >= intervals[1] ? darkgreen1: brightgreen1;
+					var INTERVAL3 = last;					
+					var INTERVALCOLOR0 = colors[0];
+					var INTERVALCOLOR1 = colors[1];
+					var INTERVALCOLOR2 = colors[2];
+					var INTERVALCOLOR3 = INTERVALCOLOR2;
+					if(VALUE < intervals[0]) {
+						INTERVALGRADIENT0X1 = - WIDTH;
+						INTERVALGRADIENT0Y1 = - HEIGHT;
 					}
-					else if (intervals.length >= 4){
+					else if(VALUE >= intervals[1]){
+						INTERVALGRADIENT2X1 = - WIDTH;
+						INTERVALGRADIENT2Y1 = - HEIGHT;
+					}
+					else{
+						INTERVALGRADIENT1X1 = - WIDTH;
+						INTERVALGRADIENT1Y1 = - HEIGHT;
+					}
+				}
+				else if (intervals.length >= 4){
 					last = VALUE>intervals[3]?VALUE:intervals[3];
 					var INTERVAL0 = intervals[0];
 					var INTERVAL1 = intervals[1];
 					var INTERVAL2 = intervals[2];
 					var INTERVAL3 = last;
-					var INTERVALCOLOR0 = VALUE < intervals[0] ? darkred : brightred;
-					var INTERVALCOLOR1 = VALUE >= intervals[0] &&  VALUE < intervals[1] ? darkyellow : brightyellow;
-					var INTERVALCOLOR2 = VALUE >= intervals[1] &&  VALUE < intervals[2] ? darkgreen1: brightgreen1;
-					var INTERVALCOLOR3 = VALUE >= intervals[2] ? darkgreen2: brightgreen2;
+					var INTERVALCOLOR0 = colors[0];
+					var INTERVALCOLOR1 = colors[1];
+					var INTERVALCOLOR2 = colors[2];
+					var INTERVALCOLOR3 = colors[3];
+					if(VALUE < intervals[0]) {
+						INTERVALGRADIENT0X1 = - WIDTH;
+						INTERVALGRADIENT0Y1 = - HEIGHT;
 					}
-					else if (intervals.length == 0){
+					else if(VALUE >= intervals[2]){
+						INTERVALGRADIENT3X1 = - WIDTH;
+						INTERVALGRADIENT3Y1 = - HEIGHT;
+					}
+					else if(VALUE >= intervals[1] &&  VALUE < intervals[2]){
+						INTERVALGRADIENT2X1 = - WIDTH;
+						INTERVALGRADIENT2Y1 = - HEIGHT;
+					}
+					else {
+						INTERVALGRADIENT1X1 = - WIDTH;
+						INTERVALGRADIENT1Y1 = - HEIGHT;
+					}
+				}
+				else if (intervals.length == 0){
 					var INTERVAL0 = 0;
 					var INTERVAL1 = 0;
 					var INTERVAL2 = 0;
 					var INTERVAL3 = 0;
-					var INTERVALCOLOR0 = brightgreen1;
-					var INTERVALCOLOR1 = brightgreen1;
-					var INTERVALCOLOR2 = brightgreen1;
-					var INTERVALCOLOR3 = brightgreen1;
-					}
+					var INTERVALCOLOR0 = COLORS == "" ? colors[2] : colors[0];
+					var INTERVALCOLOR1 = INTERVALCOLOR0;
+					var INTERVALCOLOR2 = INTERVALCOLOR0;
+					var INTERVALCOLOR3 = INTERVALCOLOR0;
+				}
+				
+				var TICKINTERVAL = Math.round(last/20,0) + "";
+				out.println("Done, printing chart: " + TICKINTERVAL);
+									
 
-					var TICKINTERVAL = Math.round(last/20,0) + "";
-					out.println("Done, printing chart: " + TICKINTERVAL);
-
-					]]></script> 
+				]]></script> 
 			</component-definition> 
 		</action-definition>
 
@@ -364,6 +432,22 @@
 				<INTERVALCOLOR1 type="string"/>
 				<INTERVALCOLOR2 type="string"/>
 				<INTERVALCOLOR3 type="string"/>
+				<INTERVALGRADIENT0X1 type="string"/>
+				<INTERVALGRADIENT0Y1 type="string"/>
+				<INTERVALGRADIENT0X2 type="string"/>
+				<INTERVALGRADIENT0Y2 type="string"/>
+				<INTERVALGRADIENT1X1 type="string"/>
+				<INTERVALGRADIENT1Y1 type="string"/>
+				<INTERVALGRADIENT1X2 type="string"/>
+				<INTERVALGRADIENT1Y2 type="string"/>
+				<INTERVALGRADIENT2X1 type="string"/>
+				<INTERVALGRADIENT2Y1 type="string"/>
+				<INTERVALGRADIENT2X2 type="string"/>
+				<INTERVALGRADIENT2Y2 type="string"/>
+				<INTERVALGRADIENT3X1 type="string"/>
+				<INTERVALGRADIENT3Y1 type="string"/>
+				<INTERVALGRADIENT3X2 type="string"/>
+				<INTERVALGRADIENT3Y2 type="string"/>
 				<chart-data type="result-set" mapping="newResults"/> 
 				<WIDTH type="string"/>
 				<HEIGHT type="string"/>
@@ -438,23 +522,47 @@
 					<intervals>
 						<interval>
 							<label>Interval0</label><minimum>0</minimum><maximum>{INTERVAL0}</maximum>
-							<interval-background type="gradient"><x1>50</x1><y1>50</y1><x2>150</x2><y2>150</y2><color1>#ffffff</color1>
-								<color2>{INTERVALCOLOR0}</color2><cyclic>true</cyclic></interval-background><text-font>Helvetica</text-font><text-color>#000000</text-color>
+							<interval-background type="gradient">
+								<x1>{INTERVALGRADIENT0X1}</x1><y1>{INTERVALGRADIENT0Y1}</y1>
+								<x2>{INTERVALGRADIENT0X2}</x2><y2>{INTERVALGRADIENT0Y2}</y2>
+								<color1>#FFFFFF</color1>
+								<color2>{INTERVALCOLOR0}</color2>
+								<cyclic>true</cyclic>
+							</interval-background>
+							<text-font>Helvetica</text-font><text-color>#ffffff</text-color>
 						</interval>
 						<interval>
 							<label>Interval1</label><minimum>{INTERVAL0}</minimum><maximum>{INTERVAL1}</maximum>
-							<interval-background type="gradient"><x1>50</x1><y1>50</y1><x2>150</x2><y2>150</y2><color1>#ffffff</color1>
-								<color2>{INTERVALCOLOR1}</color2><cyclic>true</cyclic></interval-background><text-color>#000000</text-color>
+							<interval-background type="gradient">
+								<x1>{INTERVALGRADIENT1X1}</x1><y1>{INTERVALGRADIENT1Y1}</y1>
+								<x2>{INTERVALGRADIENT1X2}</x2><y2>{INTERVALGRADIENT1Y2}</y2>
+								<color1>#FFFFFF</color1>
+								<color2>{INTERVALCOLOR1}</color2>
+								<cyclic>true</cyclic>
+							</interval-background>
+							<text-font>Helvetica</text-font><text-color>#ffffff</text-color>
 						</interval>
 						<interval>
 							<label>Interval2</label><minimum>{INTERVAL1}</minimum><maximum>{INTERVAL2}</maximum>
-							<interval-background type="gradient"><x1>50</x1><y1>50</y1><x2>150</x2><y2>150</y2><color1>#ffffff</color1>
-								<color2>{INTERVALCOLOR2}</color2><cyclic>true</cyclic></interval-background><text-color>#000000</text-color>
+							<interval-background type="gradient">
+								<x1>{INTERVALGRADIENT2X1}</x1><y1>{INTERVALGRADIENT2Y1}</y1>
+								<x2>{INTERVALGRADIENT2X2}</x2><y2>{INTERVALGRADIENT2Y2}</y2>
+								<color1>#FFFFFF</color1>
+								<color2>{INTERVALCOLOR2}</color2>
+								<cyclic>true</cyclic>
+							</interval-background>
+							<text-font>Helvetica</text-font><text-color>#ffffff</text-color>
 						</interval>
 						<interval>
 							<label>Interval3</label><minimum>{INTERVAL2}</minimum><maximum>{INTERVAL3}</maximum>
-							<interval-background type="gradient"><x1>50</x1><y1>50</y1><x2>150</x2><y2>150</y2><color1>#ffffff</color1>
-								<color2>{INTERVALCOLOR3}</color2><cyclic>true</cyclic></interval-background><text-color>#000000</text-color>
+							<interval-background type="gradient">
+								<x1>{INTERVALGRADIENT3X1}</x1><y1>{INTERVALGRADIENT3Y1}</y1>
+								<x2>{INTERVALGRADIENT3X2}</x2><y2>{INTERVALGRADIENT3Y2}</y2>
+								<color1>#FFFFFF</color1>
+								<color2>{INTERVALCOLOR3}</color2>
+								<cyclic>true</cyclic>
+							</interval-background>
+							<text-font>Helvetica</text-font><text-color>#ffffff</text-color>
 						</interval>
 					</intervals>			  
 				</chart-attributes> 

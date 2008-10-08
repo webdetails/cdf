@@ -910,6 +910,18 @@ Dashboards.updateDialComponent = function( object ){
 		alert("Fatal - No chart definition passed");
 		return;
 	}
+	
+	var intervals = cd.intervals;
+	if (intervals == undefined){
+		alert("Fatal - No intervals passed");
+		return;
+	}
+	
+	var colors = cd.colors;
+	if(colors != undefined && intervals.length != colors.length){
+		alert("Fatal - Number of intervals differs from number of colors");
+		return;
+	}
 
 	//go through parametere array and update values
 	var parameters = [];
