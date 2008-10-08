@@ -1438,6 +1438,9 @@ Dashboards.mdxQueryGroup.prototype.resetAll = function(){
 		obj.mdxQuery.axisDepth = 0;
 		Dashboards.update(obj.chartObject);
 	}
+	this.activeFilters = {};
+	this.activeConditions = {};
+	Dashboards.update(Dashboards.getComponent(this.name));
 	$.unblockUI();
 
 }
@@ -1477,7 +1480,7 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 		// condition: place this as a condition on the others
 
 		var a = mqg.activeFilters[mqg.clickedIdx] || [];
-		a.push(clickedObj.filterDimension + ".[" + mqg.clickedValue + "]");
+		a.push(whereCond);
 		mqg.activeConditions[mqg.clickedIdx] = a;
 
 		for (i in mqg.mdxQueries){
@@ -1508,7 +1511,7 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 		// condition: place this as a condition on the others and drill this
 
 		var a = mqg.activeFilters[mqg.clickedIdx] || [];
-		a.push(clickedObj.filterDimension + ".[" + mqg.clickedValue + "]");
+		a.push(whereCond);
 		mqg.activeConditions[mqg.clickedIdx] = a;
 
 		for (i in mqg.mdxQueries){
@@ -1516,6 +1519,7 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 			if (i == mqg.clickedIdx){
 				obj.mdxQuery.query.rows = (typeof obj.mdxQuery.query.rows == "function"?obj.mdxQuery.query.rows():obj.mdxQuery.query.rows)+".[" + mqg.clickedValue + "]";
 				obj.mdxQuery.axisPos++;
+				delete mqg.activeFilters[obj.filterDimension];
 			}
 			else{
 				obj.mdxQuery.addCondition(mqg.clickedIdx, whereCond);
