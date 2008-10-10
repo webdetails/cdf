@@ -1385,6 +1385,13 @@ Dashboards.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
 		delete buttonsHash.Focus;
 	}
 
+	// Expanded ones can't drill || focus
+	if (clickedObj.mdxQuery.axisDepth > 0){
+		delete buttonsHash.Drill;
+		delete buttonsHash.Focus;
+	}
+	
+
 	var msg = "Available conditions: <br/> <ul>" ;
 	$.each(buttonsHash, function(key,value){msg+="<li>" + Dashboards.buttonsDescription[key] + "</li>"});
 	msg += "</ul>";
@@ -1453,16 +1460,6 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 	var mqg = Dashboards.lastClickedMdxQueryGroup;
 	var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
 
-	// Get the dimension where condition to use in drill and focus
-	var axis = typeof clickedObj.mdxQuery.query.rows == 'function'?clickedObj.mdxQuery.query.rows():clickedObj.mdxQuery.query.rows;
-	var axisLevels = typeof clickedObj.mdxQuery.query.rowLevels == 'function'?clickedObj.mdxQuery.query.rowLevels():clickedObj.mdxQuery.query.rowLevels;
-	var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
-	var axisLevel = clickedObj.mdxQuery.axisPos + clickedObj.mdxQuery.axisDepth;
-	if (axisLevel > axisLevels.length - 1){
-		axisLevel = axisLevels.length - 1
-	}
-	var whereCond = dim + ".["  + axisLevels[axisLevel] + "].[" + mqg.clickedValue + "]";
-
 	Dashboards.blockUIwithDrag();
 
 	if( value == "filter" ){
@@ -1475,22 +1472,6 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 		mqg.activeFilters[obj.filterDimension] = a;
 
 		Dashboards.update(obj.chartObject);
-	}
-	else if (value == "condition"){
-		// condition: place this as a condition on the others
-
-		var a = mqg.activeFilters[mqg.clickedIdx] || [];
-		a.push(whereCond);
-		mqg.activeConditions[mqg.clickedIdx] = a;
-
-		for (i in mqg.mdxQueries){
-			if (i == mqg.clickedIdx)
-				continue;
-
-			var obj = mqg.mdxQueries[i];
-			obj.mdxQuery.addCondition(mqg.clickedIdx, whereCond);
-			Dashboards.update(obj.chartObject);
-		}
 	}
 	else if (value == "expand"){
 		var obj = clickedObj;
@@ -1507,8 +1488,13 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 	else if (value == "resetall"){
 		mqg.resetAll();
 	}
-	else if (value == "drill"){
+	else if (value == "condition" || value == "drill"){
 		// condition: place this as a condition on the others and drill this
+
+
+		// Get the dimension where condition to use in drill and focus
+		var axis = typeof clickedObj.mdxQuery.query.rows == 'function'?clickedObj.mdxQuery.query.rows():clickedObj.mdxQuery.query.rows;
+		var whereCond = axis + ".[" + mqg.clickedValue + "]";
 
 		var a = mqg.activeFilters[mqg.clickedIdx] || [];
 		a.push(whereCond);
@@ -1517,9 +1503,11 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 		for (i in mqg.mdxQueries){
 			var obj = mqg.mdxQueries[i];
 			if (i == mqg.clickedIdx){
-				obj.mdxQuery.query.rows = (typeof obj.mdxQuery.query.rows == "function"?obj.mdxQuery.query.rows():obj.mdxQuery.query.rows)+".[" + mqg.clickedValue + "]";
-				obj.mdxQuery.axisPos++;
-				delete mqg.activeFilters[obj.filterDimension];
+				if(value == 'drill'){
+					obj.mdxQuery.query.rows = whereCond;
+					obj.mdxQuery.axisPos++;
+					delete mqg.activeFilters[obj.filterDimension];
+				}
 			}
 			else{
 				obj.mdxQuery.addCondition(mqg.clickedIdx, whereCond);
@@ -1533,6 +1521,11 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 	$.unblockUI();
 }
 
+Dashboards.getAxisPathString = function(axis,axisPath){
+	var a = [];
+	$.each(axisPath, function(i,v){ a.push("["+ v +"]"); });
+	return axis + "." + a.join(".");
+}
 
 Dashboards.clone = function clone(obj) {
 
