@@ -10,7 +10,7 @@
     position: absolute;
     top: 0px;
     left: 0px;
-    z-index: 1000;
+    z-index: 2;
     cursor: pointer;
 }
 
@@ -20,7 +20,7 @@
     left:       35%;
     right:      35%;
     max-width:  400px;
-    z-index:    1000;
+    z-index:    2;
     display:    none;
 }
 .timeplot-message {
@@ -55,14 +55,14 @@
     text-align: center;
     background-color: #FFE57F;
     font-weight: bold;
-    z-index: 1000;
+    z-index: 2;
 }
 
 .timeplot-valueflag-line {
     display: none;
     width: 14px;
     height: 14px;
-    z-index: 1000;
+    z-index: 2;
 }
 
 .timeplot-timeflag {
@@ -72,24 +72,24 @@
     text-align: center;
     background-color: #FFE57F;
     font-weight: bold;
-    z-index: 1000;
+    z-index: 2;
 }
 
 .timeplot-timeflag-triangle {
     display: none;
     width: 11px;
     height: 6px;
-    z-index: 1001;
+    z-index: 3;
 }
 
 .timeplot-valueflag-pole {
     display: none;
     border-left: 1px solid #FFB02D;
-    z-index: 999;
+    z-index: 1;
 }
 
 .timeplot-lens {
     display: none;
     border: 1px solid #FFB02D;
-    z-index: 998;
+    z-index: 0;
 }
