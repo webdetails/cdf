@@ -1,5 +1,4 @@
-/*$.ajaxSetup({ type: "POST", async: true });*/
-$.ajaxSetup({ async: false });
+$.ajaxSetup({ type: "POST", async: false });
 
 
 var GB_ANIMATION = true;
