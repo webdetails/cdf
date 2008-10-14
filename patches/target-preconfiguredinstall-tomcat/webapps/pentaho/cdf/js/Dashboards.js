@@ -1,4 +1,5 @@
-$.ajaxSetup({ type: "POST", async: false });
+/*$.ajaxSetup({ type: "POST", async: true });*/
+$.ajaxSetup({ async: false });
 
 
 var GB_ANIMATION = true;
@@ -897,11 +898,16 @@ Dashboards.updateJFreeChartComponent = function( object ){
 	Dashboards.runningCalls++;
 
 	//callback async mode
-	//pentahoAction(object.solution, object.path, object.action, p,function(json){ Dashboards.xactionCallback(object,json); });
+	pentahoAction("cdf", "components", "jfreechart.xaction", parameters,function(json){ Dashboards.updateJFreeChartComponentCallback(object,json); });
 	// or sync mode
-	$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechart.xaction", parameters,null));
+	//$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechart.xaction", parameters,null));
 
 };
+
+Dashboards.updateJFreeChartComponentCallback = function( object , json){
+
+	$('#'+object.htmlObject).html(json);
+}
 
 Dashboards.updateDialComponent = function( object ){
 
