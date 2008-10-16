@@ -3,6 +3,6 @@
 	<name>%name</name>
 	<description>%description</description>
 	<icon>folder.png|solutions.png</icon>
-	<visible>true</visible>
+	<visible>false</visible>
 	<display-type>icons</display-type>
 </index>

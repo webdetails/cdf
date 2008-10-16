@@ -33,16 +33,11 @@
   <resources> 
     <catalog> 
       <url> 
-        <location>samples/steel-wheels/analysis/steelwheels.mondrian.xml</location>  
-        <mime-type>text/plain</mime-type> 
+        <location>solution:dashboards/home_dashboard/steelwheels.mondrian.xml</location>  
+       <mime-type>text/xml</mime-type> 
       </url> 
     </catalog>  
-    <catalog1> 
-      <solution-file> 
-        <location>samples/steel-wheels/analysis/steelwheels.mondrian.xml</location>  
-        <mime-type>text/plain</mime-type> 
-      </solution-file> 
-    </catalog1> 
+   
   </resources>
   
   <actions> 

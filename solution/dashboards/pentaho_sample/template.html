@@ -12,22 +12,35 @@ function clickOnRegion(value) {
 </SCRIPT>
 
 <!-- The page_title_object -->
-<h1><span id=page_title_object></span></h1>
+
+
+
+
 
 <!-- The dashboard layout table -->
-<table align="center" cellpadding="3">
+<table align="center" style="border: 0px solid #000;">
 	<tr>
-		<td align="center"><div id="RegionsPieChartObject"></div></td>
-		<td align="center"><div id="RegionVarianceBarChartObject"></div></td>
+		<td align="center" colspan="2">
+			<p><h3 style="font-family: Arial;" id="title"><span align="center" id=page_title_object></span></h3></p>
+		</td>
 	</tr>
 	<tr>
-		<td align="center"><div id="DepartmentDialChartObject"></div></td>
-		<td align="center"><div id="EmbeddedReportObject"></div></td>
+	<td>
+	<table style="width: 100%; text-align: left; margin-left: auto; margin-right: auto;"
+			border="0" cellpadding="2" cellspacing="2" >
+		<tr>
+			<td style="width: 50%; text-align: center; vertical-align: middle;" ><div id="RegionsPieChartObject"></div></td>
+			<td style="width: 50%; text-align: center; vertical-align: middle;"><div id="RegionVarianceBarChartObject"></div></td>
+		</tr>
+		<tr>
+			<td style="width: 50%; text-align: center; vertical-align: middle;"><div id="DepartmentDialChartObject"></div></td>
+			<td style="width: 50%; text-align: center; vertical-align: middle;"><div id="EmbeddedReportObject"></div></td>
+		</tr>
+	</table>
+	</td>
 	</tr>
-	
-	
-	
 </table>
+
 
 <script language="javascript" type="text/javascript">
 
@@ -84,7 +97,7 @@ RegionVarianceBarChart =
   parameters: [["REGION","region"]],
   htmlObject: "RegionVarianceBarChartObject",
   executeAtStart: false,
-  preExecution:function(){document.getElementById('DepartmentDialChartObject').innerHTML="";document.getElementById('EmbeddedReportObject').innerHTML="";},
+  preExecution:function(){document.getElementById('DepartmentDialChartObject').innerHTML="";document.getElementById('EmbeddedReportObject').innerHTML="";}
 }
 
 // DepartmentDialChart component generates the 
