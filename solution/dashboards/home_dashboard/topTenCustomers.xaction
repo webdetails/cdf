@@ -57,7 +57,6 @@
           <jndi>SampleData</jndi>  
           <query><![CDATA[select NON EMPTY {[Measures].[Sales]} ON COLUMNS, NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) ON ROWS from [SteelWheelsSales]]]></query>  
           <location>mondrian</location>  
-          <user-id>sa</user-id> 
         </component-definition> 
       </action-definition>
  
@@ -81,7 +80,6 @@
           <jndi>SampleData</jndi>  
           <query><![CDATA[select NON EMPTY {[Measures].[Sales]} ON COLUMNS,NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) ON ROWS from [SteelWheelsSales] where ([Markets].[All Markets].[{territory}])]]></query>  
           <location>mondrian</location>  
-          <user-id>sa</user-id> 
         </component-definition> 
       </action-definition>
  
@@ -129,7 +127,6 @@
           <jndi>SampleData</jndi>  
           <query><![CDATA[select NON EMPTY {[Measures].[Sales]} ON COLUMNS, NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) ON ROWS from [SteelWheelsSales] where ([Product].[All Products].[{productLine}], [Markets].[All Markets].[{territory}] )]]></query>  
           <location>mondrian</location>  
-          <user-id>sa</user-id> 
         </component-definition> 
       </action-definition>
  
