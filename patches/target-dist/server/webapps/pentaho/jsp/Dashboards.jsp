@@ -8,16 +8,16 @@
     org.pentaho.platform.api.engine.IPentahoSession,
     org.pentaho.platform.api.engine.IUITemplater,
 	org.pentaho.platform.util.VersionHelper,
-	org.pentaho.platform.util.messages.LocaleHelper,
+    org.pentaho.platform.util.messages.LocaleHelper,
     org.pentaho.platform.engine.services.actionsequence.ActionResource,
-org.pentaho.platform.api.ui.INavigationComponent,
-org.pentaho.platform.web.http.PentahoHttpSessionHelper,
-org.pentaho.platform.api.repository.ISolutionRepository,
-org.pentaho.platform.engine.core.system.PentahoSystem,
-org.pentaho.platform.api.engine.IActionSequenceResource,
-org.pentaho.platform.web.jsp.messages.Messages,
-org.pentaho.platform.engine.core.solution.SimpleParameterProvider,
-	java.io.*"
+    org.pentaho.platform.api.ui.INavigationComponent,
+    org.pentaho.platform.web.http.PentahoHttpSessionHelper,
+    org.pentaho.platform.api.repository.ISolutionRepository,
+    org.pentaho.platform.engine.core.system.PentahoSystem,
+    org.pentaho.platform.api.engine.IActionSequenceResource,
+    org.pentaho.platform.web.jsp.messages.Messages,
+    org.pentaho.platform.engine.core.solution.SimpleParameterProvider,
+    java.io.*"
 	 %><%
 
 /*
@@ -57,37 +57,6 @@ org.pentaho.platform.engine.core.solution.SimpleParameterProvider,
     boolean isGoogleMapsEnabled = false;
     if (requestParameters.getParameter("maps") != null)
     	isGoogleMapsEnabled = true;
-
-	boolean allowBackNavigation = solution != null; 
-	INavigationComponent navigate = PentahoSystem.getNavigationComponent(userSession);
-	navigate.setHrefUrl(hrefUrl);
-	navigate.setOnClick(onClick);
-	navigate.setSolutionParamName("solution");
-	navigate.setPathParamName("path");
-//	navigate.setAllowNavigation(new Boolean(allowBackNavigation));
-	navigate.setAllowNavigation(new Boolean(false));	
-	navigate.setOptions("");
-	navigate.setUrlFactory(urlFactory);
-	navigate.setMessages(messages);
-	// This line will override the default setting of the navigate component
-	// to allow debugging of the generated HTML.
-	//navigate.setLoggingLevel( org.pentaho.util.logging.ILogger.DEBUG );
-	navigate.validate( userSession, null );
-	navigate.setParameterProvider( "request", requestParameters ); //$NON-NLS-1$
-	navigate.setParameterProvider( "session", sessionParameters ); //$NON-NLS-1$
-
-
-	//	Set to XING-XSL for link bar
-	navigate.setXsl( "text/html", "dashboard-links.xsl" ); //$NON-NLS-1$
-
-
-
-	String navigation = navigate.getContent( "text/html" ); //$NON-NLS-1$
-	if( navigation == null ) {
-		StringBuffer buffer = new StringBuffer();
-		PentahoSystem.getMessageFormatter(userSession).formatErrorMessage( "text/html", Messages.getErrorString( "NAVIGATE.ERROR_0001_NAVIGATE_ERROR" ), messages, buffer ); //$NON-NLS-1$ //$NON-NLS-2$
-		navigation = buffer.toString();
-	}
 
 	String intro = "";
 	String footer = "";
@@ -136,8 +105,6 @@ org.pentaho.platform.engine.core.solution.SimpleParameterProvider,
 
 
 %><%= intro %>
-<!-- %= navigation %-->
-<!-- %=navigate.getXmlContent().asXML() %-->
 <%= dashboardContent %>
 <%= footer %>
 

@@ -36,19 +36,17 @@
 		<param-value>org.pentaho.platform.web.http.context.PentahoSolutionSpringApplicationContext</param-value>
 	</context-param>
 
-    <!--  Spring stuff -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<!-- These file locations are relative to the "system" folder within your pentaho solutions folder -->
 		<param-value>pentahoSystemConfig.xml adminPlugins.xml systemListeners.xml
 			sessionStartupActions.xml applicationContext-acegi-security.xml applicationContext-common-authorization.xml
-			applicationContext-acegi-security-jdbc.xml applicationContext-pentaho-security-jdbc.xml
-            pentahoObjects.spring.xml </param-value>
+			applicationContext-acegi-security-jdbc.xml applicationContext-pentaho-security-jdbc.xml</param-value>
 	</context-param>
 
 	<context-param>
-		<param-name>pentahoObjectFactory</param-name>
-		<param-value>org.pentaho.platform.web.http.context.WebSpringPentahoObjectFactory</param-value>
+		<param-name>objectFactoryCreatorClassName</param-name>
+		<param-value>org.pentaho.platform.engine.core.system.objfac.SpringObjectFactoryCreator</param-value>
 	</context-param>
 
 	<!--
@@ -58,11 +56,17 @@
 		the system will look for the file called pentahoObjects.spring.xml in the solution's system folder
 	-->
 	<context-param>
-		<param-name>pentahoObjectFactoryCfgFile</param-name>
+		<param-name>objectFactoryCreatorCfgFile</param-name>
 		<param-value>pentahoObjects.spring.xml</param-value>
 	</context-param>
 
-
+	<!--
+		<context-param> <param-name>objectFactoryCreatorClassName</param-name>
+		<param-value>org.pentaho.platform.engine.core.system.objfac.LegacyObjectFactoryCreator</param-value> </context-param>
+		<context-param> <param-name>objectFactoryCreatorCfgFile</param-name>
+		<param-value>C:/projects/pentaho.2.trunk/bi-platform-sample-solution/system/testPentaho.xml</param-value>
+		</context-param>
+	-->
 
 	<!--
 		This defaults to UTF-8. Uncomment this section and change the value for other encodings. Also change the URIEncoding
@@ -193,11 +197,6 @@
 
 	<!-- insert additional filter-mappings -->
 
-    <!--   enables session and request scoped object creation in Spring -->
-    <listener>
-        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
-    </listener>
-  
 	<!-- JPivot resources initializer -->
 	<listener>
 		<listener-class>com.tonbeller.tbutils.res.ResourcesFactoryContextListener</listener-class>
@@ -320,11 +319,6 @@
 	<servlet>
 		<servlet-name>RepositoryFilePublisher</servlet-name>
 		<servlet-class>org.pentaho.platform.web.servlet.RepositoryFilePublisher</servlet-class>
-	</servlet>
-
-	<servlet>
-    	<servlet-name>GenericServlet</servlet-name>
-		<servlet-class>org.pentaho.platform.web.servlet.GenericServlet</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -601,11 +595,6 @@
 		<url-pattern>/GetChart</url-pattern>
 	</servlet-mapping>
 	<!-- ********************* End JPivot Servlet Mappings ******************* -->
-
-	<servlet-mapping>
-		<servlet-name>GenericServlet</servlet-name>
-		<url-pattern>/content/*</url-pattern>
-	</servlet-mapping>
 
 	<!-- Pentaho JSPs -->
 	<servlet-mapping>
