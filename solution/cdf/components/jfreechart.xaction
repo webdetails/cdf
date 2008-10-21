@@ -135,7 +135,7 @@
 			<sources>
 				<request>urlTemplate</request>
 			</sources>
-			<default-value></default-value>
+			<default-value>javascript:;</default-value>
 		</URLTEMPLATE>  
 		<USEBASEURL type="string">
 			<sources>
@@ -320,7 +320,7 @@
 						}
 						if (TOPCOUNTAXIS == 'columns'){
 							colIteraction = TOPCOUNT==0||TOPCOUNT > colCount?colCount:TOPCOUNT ;
-							out.println("Columns: " + colIteraction);
+							out.println("Columns: Count = " + colCount + "; Iteraction: " + colIteraction);
 						}
 
 						for (i=0; i<rowIteraction; i++)
@@ -339,7 +339,7 @@
 
 						// Other's block
 						if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
-							// This will probably need a refactoring. All of this, actually :S
+							// TODO: Make this work
 							var value = 0;
 							var a = new Array();
 							for(i = 0 ; i < rowIteraction; i++){
