@@ -167,6 +167,30 @@
 			</sources>
 			<default-value>true</default-value>
 		</INCLUDELEGEND> 
+		<LEGENDFONTFAMILY type="string">
+			<sources>
+				<request>legendFontFamily</request>
+			</sources>
+			<default-value>Helvetica</default-value>
+		</LEGENDFONTFAMILY> 
+		<LEGENDFONTSIZE type="string">
+			<sources>
+				<request>legendFontSize</request>
+			</sources>
+			<default-value>12</default-value>
+		</LEGENDFONTSIZE> 
+		<LEGENDFONTISBOLD type="string">
+			<sources>
+				<request>legendFontIsBold</request>
+			</sources>
+			<default-value>false</default-value>
+		</LEGENDFONTISBOLD> 
+		<LEGENDFONTISITALIC type="string">
+			<sources>
+				<request>legendFontIsItalic</request>
+			</sources>
+			<default-value>false</default-value>
+		</LEGENDFONTISITALIC> 
 		<FOREGROUNDALPHA type="string">
 			<sources>
 				<request>foregroundAlpha</request>
@@ -515,6 +539,10 @@
 					<PARAMETERNAME type="string"/>
 					<SERIESNAME type="string"/>
 					<INCLUDELEGEND type="string"/>
+					<LEGENDFONTFAMILY type="string"/>
+					<LEGENDFONTSIZE type="string"/>
+					<LEGENDFONTISBOLD type="string"/>
+					<LEGENDFONTISITALIC type="string"/>
 					<FOREGROUNDALPHA type="string"/>
 					<BACKGROUNDALPHA type="string"/>
 					<BACKGROUND type="string"/>
@@ -556,6 +584,12 @@
 						<paramName>{PARAMETERNAME}</paramName>  
 						<series-name>{SERIESNAME}</series-name>  
 						<include-legend>{INCLUDELEGEND}</include-legend> 
+						<legend-font>
+							<font-family>{LEGENDFONTFAMILY}</font-family>
+							<size>{LEGENDFONTSIZE}</size>
+							<is-bold>{LEGENDFONTISBOLD}</is-bold>
+							<is-italic>{LEGENDFONTISITALIC}</is-italic>
+						</legend-font>
 						<interior-gap>{INTERIORGAP}</interior-gap> 
 						<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
 						<background-alpha>{BACKGROUNDALPHA}</background-alpha>

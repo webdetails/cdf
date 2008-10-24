@@ -1260,10 +1260,10 @@ public class JFreeChartEngine {
 
         // format legend
         ChartDefinition chartDefinition = (ChartDefinition) dataset;
-        if (chartDefinition.getLegendFont() != null) {
+        if (chartDefinition.getLegendFont() != null && chart.getLegend()!= null) {
             chart.getLegend().setItemFont(chartDefinition.getLegendFont());
         }
-        if (!chartDefinition.isLegendBorderVisible()) {
+        if (!chartDefinition.isLegendBorderVisible() && chart.getLegend()!= null) {
             chart.getLegend().setBorder(BlockBorder.NONE);
         }
         return (chart);
