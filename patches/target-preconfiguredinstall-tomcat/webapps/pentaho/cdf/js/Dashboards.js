@@ -120,14 +120,28 @@ Dashboards.update = function(object)	{
 
 			break;
 		case "dateInput":
-			$("#"+object.htmlObject).html($("<input/>").attr("id",object.name).attr("value",eval(object.parameter)).attr("size","10"));
-			/*
-			 graft(
-			 document.getElementById(object.htmlObject),
-			 ["input",
-			 {id: object.name, value:eval(object.parameter), type:'text', size: 10 }]);	
-				 */
+			$("#"+object.htmlObject).html($("<input/>").attr("id",object.name).attr("value",eval(object.parameter)).css("width","10"));
 			Calendar.setup({inputField: object.name, ifFormat : "%Y-%m-%d",  onUpdate: function(){Dashboards.processChange(object.name)} });
+			break;
+		case "dateRangeInput":
+			var dr;
+			if (object.singleInput == undefined || object.singleInput == true){
+				dr = $("<input/>").attr("id",object.name).attr("value",eval(object.parameter[0]) + " > " + eval(object.parameter[1]) ).css("width","170px");
+				$("#"+object.htmlObject).html(dr);
+
+			}
+			else{
+				dr = $("<input/>").attr("id",object.name).attr("value",eval(object.parameter[0])).css("width","80px");
+				$("#"+object.htmlObject).html(dr);
+				dr.after($("<input/>").attr("id",object.name + "2").attr("value",eval(object.parameter[1])).css("width","80px"));
+				if(object.inputSeparator != undefined){
+					dr.after(object.inputSeparator);
+				}
+			
+			}
+			var offset = dr.offset();
+			$(function(){ $("#" + object.htmlObject + " input").daterangepicker({posX: offset.left , posY: offset.top + 15, onDateSelect: function(rangeA, rangeB){ Dashboards.fireDateRangeInputChange( object.name ,rangeA,rangeB); }}); });
+			//$(function(){ dr.daterangepicker({posX: offset.left , posY: offset.top + 15}); });
 			break;
 		case "monthPicker":
 
@@ -481,6 +495,14 @@ Dashboards.isArray = function(testObject) {
 	return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
 }
 
+Dashboards.fireDateRangeInputChange = function(comp, rangeA, rangeB){
+	var parameters = eval(comp + ".parameter");
+
+	// set the second date and fireChange the first
+	eval( parameters[1] + "= encode_prepare(\"" + rangeB + "\")"); 
+	Dashboards.fireChange(parameters[0],rangeA);
+
+}
 
 Dashboards.navigatorResponse = -1;
 

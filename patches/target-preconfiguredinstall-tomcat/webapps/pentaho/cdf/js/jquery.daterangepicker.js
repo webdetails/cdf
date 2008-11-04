@@ -24,6 +24,8 @@ jQuery.fn.daterangepicker = function(options){
 			{text: 'Today', dateStart: 'today', dateEnd: 'today' },
 			{text: 'Yesterday', dateStart: 'yesterday', dateEnd: 'yesterday' },
 			{text: 'Last 7 days', dateStart: 'today-7days', dateEnd: 'today' },
+			{text: 'Last month', dateStart: function(){ var x= Date.parse('today'); x.setMonth(x.getMonth()-1); x.setDate(1); return x; },
+				dateEnd: function(){ var x= Date.parse('today'); x.setDate(0); return x; } },
 			{text: 'Month to date', dateStart: function(){ return Date.parse('today').moveToFirstDayOfMonth();  }, dateEnd: 'today' },
 			{text: 'Year to date', dateStart: function(){ var x= Date.parse('today'); x.setMonth(0); x.setDate(1); return x; }, dateEnd: 'today' }
 			//extras:

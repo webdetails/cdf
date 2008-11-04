@@ -9,6 +9,7 @@
 	padding: 5px !important;
 	width: auto;
 	display: inline;
+	font-size: 65%;
 }
 .ui-daterangepicker ul, .ui-daterangepicker .ranges, .ui-daterangepicker .range-start, .ui-daterangepicker .range-end {
 	float: left;
