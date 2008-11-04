@@ -18,6 +18,13 @@ var MetaLayer ={
 
 	},
 
+	getFirstDayOfYearDate:function(){
+
+		var currentDate=new Date();
+		return currentDate.getFullYear() + "-01-01";
+
+	},
+	
 	getLastMonthDate:function(){
 
 
