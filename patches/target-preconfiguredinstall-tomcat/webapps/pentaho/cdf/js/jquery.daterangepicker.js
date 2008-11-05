@@ -62,8 +62,10 @@ jQuery.fn.daterangepicker = function(options){
 				if(rp.find('.ui-daterangepicker-SpecificDate').is('.ui-active-state')){
 					rp.find('.range-end').datepicker('setDate', rp.find('.range-start').datepicker('getDate') ); 
 				}
-				var rangeA = fDate( rp.find('.range-start').datepicker('getDate') );
-				var rangeB = fDate( rp.find('.range-end').datepicker('getDate') );
+				inputDateA = rp.find('.range-start').datepicker('getDate');
+				inputDateB = rp.find('.range-end').datepicker('getDate');
+				var rangeA = fDate( inputDateA );
+				var rangeB = fDate( inputDateB );
 				
 				//send back to input or inputs
 				if(rangeInput.length == 2){
@@ -80,6 +82,7 @@ jQuery.fn.daterangepicker = function(options){
 						settings.onDateSelect(rangeA, rangeB);
 					}
 				}				
+				// Store the values
 			},
 			defaultDate: +0
 	}, settings.datepickeroptions);

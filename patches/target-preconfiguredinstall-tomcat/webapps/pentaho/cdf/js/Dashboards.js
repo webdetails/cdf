@@ -497,7 +497,7 @@ Dashboards.isArray = function(testObject) {
 
 Dashboards.fireDateRangeInputChange = function(comp, rangeA, rangeB){
 	var parameters = eval(comp + ".parameter");
-
+	/*console.log("Date Select: " + comp +"; Range: " +  rangeA + " > " + rangeB);*/
 	// set the second date and fireChange the first
 	eval( parameters[1] + "= encode_prepare(\"" + rangeB + "\")"); 
 	Dashboards.fireChange(parameters[0],rangeA);
