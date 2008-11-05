@@ -71,8 +71,7 @@ Dashboards.update = function(object)	{
 		this.updateTimePlotComponent(object);
 		break;
 	case "text":
-		selectHTML = eval(object.expression());
-		document.getElementById(object.htmlObject).innerHTML = selectHTML;
+		$("#"+object.htmlObject).html(object.expression());
 		break;
 	case "select":
 	case "selectMulti":
