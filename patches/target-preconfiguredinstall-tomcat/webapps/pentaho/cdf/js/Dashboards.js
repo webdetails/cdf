@@ -22,7 +22,8 @@ var Dashboards =
 		components: [],
 		initMap: true,
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-		mdxGroups: {}
+		mdxGroups: {},
+		evolutionType: "Week"
 	}
 
 Dashboards.blockUIwithDrag = function() {
@@ -1136,20 +1137,88 @@ Dashboards.generateTableComponent = function(object){
 		alert("Fatal - No chart definition passed");
 		return;
 	}
-
+	cd["tableId"] = object.htmlObject + "Table";
+	
+	//Clear previous table
+	document.getElementById(object.htmlObject).innerHTML = "";
+	
+	
+	if(cd.mdxQuery != undefined)
+	{
+		var mdxQuery = eval(cd.mdxQuery);
+		
+		if(mdxQuery != null){
+			
+			var query = mdxQuery.query;
+			
+			//Get measure
+			var columns = typeof query['columns']=='function'? query['columns'](): query['columns'];
+			var measure = "";
+			if(columns.split(",").length  > 1)
+				measure = columns.split(",")[0];
+			else
+				measure = columns;
+			
+			//Get date Dimension
+			var dateDimension = mdxQuery.originalHash.dateDimension != undefined ? mdxQuery.originalHash.dateDimension : "Date";
+			
+			//Add sets and members. Update columns
+			Dashboards.AddEvolutionMeasures(mdxQuery ,measure, dateDimension, Dashboards.evolutionType);
+			
+			//Set Table Headers and Coltypes
+			cd.coltypes =  "numeric,numeric,numeric,numeric,sparkLine";
+			if(cd.headers == undefined){
+			if(Dashboards.evolutionType == "Week")
+				cd.headers = "Requests,Week,Last Week,Week Evolution,Last 7 Days";
+			else
+				cd.headers = "Requests,Month,Last Month,Month Evolution,Last 30 Days";
+			}	
+				
+			//Add Evolution type listner
+			object.listeners.push("Dashboards.evolutionType");
+			
+			
+		}
+		
+	}
 	$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
 			Dashboards.processTableComponentResponse(object,json);
 		});
 
 };
 
+Dashboards.AddEvolutionMeasures = function(query, measure, dateDimension, evolutionType)
+{
+	
+	if(evolutionType == "Week")
+	{
+		query.addSet("week", "LastPeriods(7.0, [Date].CurrentMember)");
+		query.addSet("lastweek", "LastPeriods(7.0, [Date].CurrentMember.Lag(7))");
+		query.addMember("[Measures].[lastweek]","Aggregate([lastweek]," + measure + ")");
+		query.addMember("[Measures].[week]","Aggregate([week]," + measure + ")");
+		query.addMember("[Measures].[weekEvolution]","100.0 * ([Measures].[week] / [Measures].[lastweek] - 1.0)");
+		query.addMember("[Measures].[sparkdataweeks]","Generate([week], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
+		query.query['columns'] = measure + ",[Measures].[week],[Measures].[lastweek],[Measures].[weekEvolution],[Measures].[sparkdataweeks]";
+	}
+	else if(evolutionType == "Month")
+	{
+		query.addSet("month","LastPeriods(30.0, [Date].CurrentMember)");
+		query.addSet("lastmonth","LastPeriods(30.0, [Date].CurrentMember.Lag(30))");
+		query.addMember("[Measures].[month]","Aggregate([month]," + measure + ")");
+		query.addMember("[Measures].[lastmonth]","Aggregate([lastmonth]," + measure + ")");
+		query.addMember("[Measures].[monthEvolution]","100.0 * ([Measures].[month] / [Measures].[lastmonth] - 1.0)");
+		query.addMember("[Measures].[sparkdatamonths]","Generate([month], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
+		query.query['columns'] = measure + ",[Measures].[month],[Measures].[lastmonth],[Measures].[monthEvolution],[Measures].[sparkdatamonths]";
+	}	
+	
+};
+
 Dashboards.processTableComponentResponse = function(object,json)
 {
-
 	$("#"+object.htmlObject).html("<table id='" + object.htmlObject + "Table' class=\"tableComponent\">");
 	$("#"+object.htmlObject+'Table').dataTable( json );
 	$("#"+object.htmlObject).append("</table>");
-}
+};
 
 Dashboards.path = Dashboards.getParameter("path");
 
@@ -1313,6 +1382,17 @@ Dashboards.mdxQuery.prototype.removeCondition = function(key){
 	delete this.query["where"][key];
 }
 
+Dashboards.mdxQuery.prototype.addSet = function(key, set){
+
+	this.query["sets"][key] = set;
+}
+
+Dashboards.mdxQuery.prototype.addMember = function(key, member){
+
+	this.query["members"][key] = member;
+}
+
+
 Dashboards.initMdxQueryGroup = function(obj){
 
 	var mdxQueryGroup = new Dashboards.mdxQueryGroup(obj.name);
@@ -1329,6 +1409,10 @@ Dashboards.initMdxQueryGroup = function(obj){
 	}
 
 	Dashboards.mdxGroups[obj.name] = mdxQueryGroup;
+	
+	if(("#" + obj.htmlObject + "_evolutionType")  != undefined)
+		$("#" + obj.htmlObject+ "_evolutionType").html(mdxQueryGroup.printEvolutionType(obj.htmlObject + "_evolutionType"));
+		
 	return mdxQueryGroup;
 }
 
@@ -1461,6 +1545,38 @@ Dashboards.mdxQueryGroup.prototype.printConditions = function(){
 	return out;
 }
 
+Dashboards.mdxQueryGroup.prototype.printEvolutionType = function(object){
+	var out = "";
+	var myArray = [["Week","Week"],["Month","Month"],["Year","Year"]];
+	
+	for(var i= 0, len  = myArray.length; i < len; i++){
+		out += "<input onclick='Dashboards.changeEvolutionType(\"" + object + "radio\")'";
+		if(i==0){
+			out += " CHECKED ";
+		}		
+		out += "type='radio' id='" + object + "radio' name='" + object + "radio' value=" + myArray[i][1] + " /> " + myArray[i][1] + (object.separator == undefined?"":object.separator);
+	} 
+	
+	return out;
+}
+
+Dashboards.changeEvolutionType = function(object){
+
+	
+	var value = "";
+	var selector = document.getElementsByName(object);
+			for(var i= 0, len  = selector.length; i < len; i++){
+				if(selector[i].checked){
+					value = selector[i].value;
+					continue;
+				};
+			} 
+	
+	this.fireChange("Dashboards.evolutionType",value);
+	
+
+}
+
 Dashboards.mdxQueryGroup.prototype.resetAll = function(){
 
 	Dashboards.blockUIwithDrag();
@@ -1487,7 +1603,7 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 	var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
 
 	Dashboards.blockUIwithDrag();
-
+	
 	if( value == "filter" ){
 		// filter: remove this from every query
 
@@ -1529,6 +1645,7 @@ Dashboards.mdxQueryGroupActionCallback = function(value,m){
 		for (i in mqg.mdxQueries){
 			var obj = mqg.mdxQueries[i];
 			if (i == mqg.clickedIdx){
+				
 				if(value == 'drill'){
 					obj.mdxQuery.query.rows = whereCond;
 					obj.mdxQuery.axisPos++;
