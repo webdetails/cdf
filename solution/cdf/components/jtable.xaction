@@ -78,6 +78,48 @@
 		</sources>  
 		<default-value/>
 	</HEADERS>
+	<LENGTHCHANGE type="string">
+		<sources> 
+			<request>lengthChange</request> 
+		</sources>  
+		<default-value>"true"</default-value>
+	</LENGTHCHANGE>
+	<SORT type="string">
+		<sources> 
+			<request>sort</request> 
+		</sources>  
+		<default-value>"true"</default-value>
+	</SORT>
+	<COLTYPES type="string">
+		<sources> 
+			<request>coltypes</request> 
+		</sources>  
+		<default-value/>
+	</COLTYPES>
+	<COLWIDTHS type="string">
+		<sources> 
+			<request>colwidths</request> 
+		</sources>  
+		<default-value/>
+	</COLWIDTHS>
+	<TABLEID type="string">
+		<sources> 
+			<request>tableId</request> 
+		</sources>  
+		<default-value/>
+	</TABLEID>
+	<SPARKLINETYPE type="string">
+		<sources> 
+			<request>sparklineType</request> 
+		</sources>  
+		<default-value>"line"</default-value>
+	</SPARKLINETYPE>
+	<URLTEMPLATE type="string">
+		<sources>
+			<request>urlTemplate</request>
+		</sources>
+		<default-value></default-value>
+	</URLTEMPLATE>  
   </inputs>
 
   <outputs> 
@@ -127,6 +169,13 @@
 		<INFO type="string"/> 
 		<DECIMALS type="string"/> 
 		<HEADERS type="string"/> 
+		<LENGTHCHANGE type="string"/> 
+		<SORT type="string"/> 
+		<COLTYPES type="string"/>
+		<COLWIDTHS type="string"/>
+		<TABLEID type="string"/>
+		<URLTEMPLATE type="string"/>
+		<SPARKLINETYPE type="string"/>
 		<query_result type="result-set"/> 
 		<query_result type="result-set"/> 
       </action-inputs>
@@ -135,9 +184,22 @@
       </action-outputs>
       <component-definition> 
         <script><![CDATA[// MDX to Relation result set, needed for the 
+		
+		function addCommas(nStr)
+				{
+					nStr += '';
+					x = nStr.split('.');
+					x1 = x[0];
+					x2 = x.length > 1 ? '.' + x[1] : '';
+					var rgx = /(\d+)(\d{3})/;
+					while (rgx.test(x1)) {
+						x1 = x1.replace(rgx, '$1' + ',' + '$2');
+					}
+					return x1 + x2;
+				};
 				
 		var newResults = new Packages.org.json.JSONStringer();
-
+		
 		if (query_result != null)
 		{
 		
@@ -149,15 +211,25 @@
 
 			var headersArray = new Packages.org.json.JSONStringer().array();
 			newResults.object().key("bPaginate").value(eval(PAGINATE));
-			newResults.key("iDisplayLength").value(ROWSPERPAGE);
+			newResults.key("iDisplayLength").value(parseInt(ROWSPERPAGE));
 			newResults.key("bFilter").value(eval(FILTER));
 			newResults.key("bInfo").value(eval(INFO));
+			newResults.key("bSort").value(eval(SORT));
+			newResults.key("bAutoWidth").value(eval("false"));
+			newResults.key("bLengthChange").value(eval(LENGTHCHANGE));
+			
+			
+			
+			
 			
 			if(rowCount> 0)
 			{
 				newResults.key("aaData");
 				var values = new Packages.org.json.JSONArray();
-
+				var types = COLTYPES.split(",");
+				var widths = COLWIDTHS.split(",");
+				
+				
 				for (i=0; i<rowCount; i++)
 				{
 					var value = new Packages.org.json.JSONArray();
@@ -166,16 +238,29 @@
 					{
 						value.put(rowHeaders[i][j]);
 						if(i==0){
+							
 							headersArray.object().key("sTitle").value("");
 							headersArray.key("sClass").value("tableRowDim");
+							if(j == 0 && URLTEMPLATE != "")
+								headersArray.key("bUrl").value(URLTEMPLATE);
+							if(widths != "" && widths[i] != "")
+								headersArray.key("sWidth").value(widths[i]);
 							headersArray.endObject();
 						}
 					}
 
+					
 					for(j=0; j< colCount; j++)
 					{
-						value.put(parseFloat(query_result.getValueAt(i,j)).toFixed(DECIMALS).toString());
-						out.println("ROW: " + value.toString());
+						//value.put(addCommas(parseFloat(query_result.getValueAt(i,j)).toFixed(DECIMALS).toString()));
+						if(types != "" && types[j] == "sparkLine")
+						{
+							value.put("$('#" + TABLEID + "col"+ i + "" + j + "').sparkline([" + query_result.getValueAt(i,j) + "],{type: '" + SPARKLINETYPE + "', width:'100px' ,height :'15px'})");
+						}
+						else
+							value.put(addCommas(parseFloat(query_result.getValueAt(i,j)).toFixed(DECIMALS).toString()));
+						
+					
 					}
 					
 					values.put(value);
@@ -185,7 +270,11 @@
 				if(HEADERS == "") {
 					for(i = 0; i < colCount; i++){
 						headersArray.object().key("sTitle").value(colHeaders[0][i].toString());
+						if(types != "" && types[i] != "")
+							headersArray.key("sType").value(types[i]);
 						headersArray.key("sClass").value("tableRowValue");
+						if(widths != "" && widths[i+1] != "")
+							headersArray.key("sWidth").value(widths[i+1]);
 						headersArray.endObject();
 					}
 				}
@@ -193,25 +282,32 @@
 					var headersNames = HEADERS.split(",");
 					for(i = 0; i < headersNames.length; i++){
 						headersArray.object().key("sTitle").value(headersNames[i]);
+						if(types != "" && types[i] != "")
+							headersArray.key("sType").value(types[i]);
 						headersArray.key("sClass").value("tableRowValue");
+						if(widths != "" && widths[i+1] != "")
+							headersArray.key("sWidth").value(widths[i+1]);
 						headersArray.endObject();
 					}
 				}
 				
 				headersArray.endArray();
-				out.println("==> 2: " + headersArray.toString());
 				newResults.value(values);
 				newResults.key("aoColumns");
 				//To avoid caracter \" ex: "{\"sTitle\":, etc 
 				//newResults.value(headersArray);
 				newResults.value(new Packages.org.json.JSONArray(headersArray.toString()));
 				newResults.endObject();
+				
+				
+
 			
 			}
 		}
 		
 		var results = newResults.toString();
-		out.println("output: " + results);
+		//out.println("output: " + results);
+		
 		results;
 		]]></script> 
       </component-definition> 
