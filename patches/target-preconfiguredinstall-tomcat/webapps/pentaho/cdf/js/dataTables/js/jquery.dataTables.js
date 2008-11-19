@@ -69,8 +69,8 @@
 				"sProcessing": "Processing...",
 				"sLengthMenu": "Show _MENU_ entries",
 				"sZeroRecords": "No matching records found",
-				"sInfo": "Showing _START_ to _END_ of _TOTAL_ entries",
-				"sInfoEmtpy": "Showing 0 to 0 of 0 entries",
+				"sInfo": " _START_ to _END_ of _TOTAL_ entries",
+				"sInfoEmtpy": " 0 to 0 of 0 entries",
 				"sInfoFiltered": "(filtered from _MAX_ total entries)",
 				"sInfoPostFix": "",
 				"sSearch": "Search:",
@@ -527,7 +527,8 @@
 				"sWidth": null,
 				"sClass": null,
 				"fnRender": null,
-				"fnSort": null
+				"fnSort": null,
+				"bUrl" : null,
 			};
 			
 			/* User specified column options */
@@ -561,6 +562,9 @@
 				
 				if ( typeof oOptions.fnSort != 'undefined' )
 					oSettings.aoColumns[ iLength ].fnSort = oOptions.fnSort;
+					
+				if ( typeof oOptions.bUrl != 'undefined' )
+					oSettings.aoColumns[ iLength ].bUrl = oOptions.bUrl;
 			}
 		}
 		
@@ -700,7 +704,7 @@
 					var sWidth = '';
 					if ( oSettings.aoColumns[i].sWidth != null )
 					{
-						nTh.style.width = oSettings.aoColumns[i].sWidth;
+						nTh.style.width = oSettings.aoColumns[i].sWidth + "px";
 					}
 					
 					nTh.innerHTML = oSettings.aoColumns[i].sTitle;
@@ -767,6 +771,7 @@
 		function _fnDraw( oSettings )
 		{
 			var anRows = new Array();
+			var sparkLines =  [];
 			var sOutput = "";
 			var iRowCount = 0;
 			var nTd;
@@ -787,11 +792,15 @@
 					
 					for ( i=0 ; i<oSettings.aoColumns.length ; i++ )
 					{
+						
+						
+						
 						/* Ensure that we are allow to display this column */
 						if ( oSettings.aoColumns[i].bVisible )
 						{
 							nTd = document.createElement( 'td' );
 							nTd.setAttribute( 'valign', "top" );
+							nTd.setAttribute( 'id', oSettings.nTable.id + "col" + j + "" + (i-1) );
 							
 							if ( oSettings.iColumnSorting == i && oSettings.aoColumns[i].sClass != null )
 							{
@@ -806,6 +815,12 @@
 								nTd.className = oSettings.aoColumns[i].sClass;
 							}
 							
+							if (oSettings.aoColumns[i].bUrl != null  )
+							{
+								nTd.className = "tableRowDimLink";
+								nTd.setAttribute( 'onclick', oSettings.aoColumns[i].bUrl.replace(/{PARAM}/,oSettings.aaData[j][i]) );
+							}
+							
 							/* Check for a custom render - otherwise output the data */
 							if ( typeof oSettings.aoColumns[i].fnRender == 'function' )
 							{
@@ -816,7 +831,12 @@
 							}
 							else
 							{
-								nTd.innerHTML = oSettings.aaData[j][i];
+								var data = oSettings.aaData[j][i];
+								if(oSettings.aoColumns[i].sType == "sparkLine"){
+									sparkLines.push(data);
+								}
+								else
+									nTd.innerHTML = oSettings.aaData[j][i];
 							}
 							
 							anRows[ iRowCount ].appendChild( nTd );
@@ -912,6 +932,11 @@
 						oSettings.oLanguage.sInfoFiltered.replace('_MAX_', oSettings.aaDataMaster.length) +' '+ 
 						oSettings.oLanguage.sInfoPostFix;
 				}
+			}
+			
+			for(i = 0; i < sparkLines.length; i++)
+			{
+				eval(sparkLines[i]);
 			}
 		}
 		
@@ -1466,6 +1491,7 @@
 				{
 					iIndex = oNodes[i].getAttribute('tag_index');
 					
+					
 					oSettings.aoColumns[iIndex].sWidth = $("td", nCalcTmp)[i].offsetWidth +"px";
 				}
 				
@@ -1615,6 +1641,7 @@
 			}
 			else
 			{
+				 oSettings.aaData =  oSettings.aaDataMaster;
 				_fnCalculateEnd( oSettings );
 				_fnDraw( oSettings );
 			}
