@@ -427,7 +427,7 @@ public class ChartComponent extends ComponentBase {
           try {
             String mapId = fileResults[MAP_NAME].getName().substring(0, fileResults[MAP_NAME].getName().indexOf('.'));
             mapString = ImageMapUtilities.getImageMap(mapId, info, new StandardToolTipTagFragmentGenerator(),
-                new PentahoChartURLTagFragmentGenerator(urlTemplate, urlTarget, useBaseUrl, dataDefinition, parameterName,
+                new PentahoChartURLTagFragmentGenerator(data,urlTemplate, urlTarget, useBaseUrl, dataDefinition, parameterName,
                     outerParameterName));
 
             BufferedWriter out = new BufferedWriter(new FileWriter(fileResults[MAP_NAME]));

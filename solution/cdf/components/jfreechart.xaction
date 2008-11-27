@@ -474,16 +474,7 @@
 
 				}
 
-				URLTEMPLATE2 = URLTEMPLATE;
-				// Other custom code:
-				if (CHARTTYPE == 'AreaChart'){
-				// disable URLTEMPLATE
-				URLTEMPLATE2='javascript:';
-				}
-
-				newResults;
-				URLTEMPLATE2;
-
+				URLTEMPLATE;
 
 						]]></script> 
 				</component-definition> 
@@ -533,7 +524,7 @@
 					<DOMAINTICKFONTSIZE type="string"/> 
 					<DOMAINLABELROTATIONDIR type="string"/>
 					<DOMAINLABELROTATION type="string"/>
-					<URLTEMPLATE type="string" mapping="URLTEMPLATE2"/>
+					<URLTEMPLATE type="string"/>
 					<USEBASEURL type="string"/>
 					<URLTARGET type="string"/>
 					<PARAMETERNAME type="string"/>
