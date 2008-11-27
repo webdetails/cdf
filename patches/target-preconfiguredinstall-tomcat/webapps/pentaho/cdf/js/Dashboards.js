@@ -17,14 +17,20 @@ $.blockUI.defaults.css['-moz-border-radius'] = '10px';
 if (typeof $.SetImpromptuDefaults == 'function')
 	$.SetImpromptuDefaults({ prefix: 'colsJqi', show: 'slideDown' });
 
+
+	
 var Dashboards = 
 	{
 		components: [],
+		args: [],
 		initMap: true,
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 		mdxGroups: {},
-		evolutionType: "Week"
+		evolutionType: "Week",
+		
 	}
+	
+
 
 Dashboards.blockUIwithDrag = function() {
 	$.blockUI();
@@ -288,7 +294,11 @@ Dashboards.update = function(object)	{
 			break;
 		case "mdxQueryGroup":
 			this.updateMdxQueryGroup(object);
-		}
+			break;
+		case "executeXaction":
+			this.generateXActionComponent (object);
+			break;
+		}	
 		if(!(typeof(object.postExecution)=='undefined')){
 			object.postExecution();
 		}
@@ -300,10 +310,15 @@ Dashboards.update = function(object)	{
 				return this.components[i];
 		}
 	};
-
+	
 	Dashboards.addComponents = function(components){
 		this.components = this.components.concat(components);
 	};
+	
+	Dashboards.addArgs = function(url){
+		if(url != undefined)
+			this.args = getURLParameters(url);
+	}
 
 	Dashboards.init = function(components){
 		if(Dashboards.isArray(components)){
@@ -968,15 +983,15 @@ Dashboards.updateDialComponent = function( object ){
 
 };
 
-if (typeof Timeplot != "undefined"){
-	Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
-	new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
-	new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
-	new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
-	new Timeplot.Color('#73F321')]
-}
-
 Dashboards.updateTimePlotComponent = function( object ){
+
+	if (typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined ){
+		Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
+		new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
+		new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
+		new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
+		new Timeplot.Color('#73F321')]
+	}
 
 	var timePlotTimeGeometry = new Timeplot.DefaultTimeGeometry({
 			gridColor: "#000000",
@@ -1699,6 +1714,45 @@ Dashboards.clone = function clone(obj) {
 	return c;
 }
 
+Dashboards.generateXActionComponent = function(object){
+
+	$("#"+ object.htmlObject).bind("click", function(){
+		Dashboards.executeXAction(object);
+	});
+}
+
+Dashboards.executeXAction = function(object){
+
+	var url = "/pentaho/ViewAction?solution=" + object.solution + "&path=" + object.path + "&action=" + object.action + "&";
+
+	var p = new Array(object.parameters.length);
+	var parameters = [];
+	for(var i= 0, len = p.length; i < len; i++){
+		var key = object.parameters[i][0];
+		var value = eval(object.parameters[i][1]);
+		parameters.push(key + "=" + encodeURIComponent(value));
+	}
+	
+	url += parameters.join("&");
+
+	var _href = url.replace(/'/g,"&#39;");
+	GB_show("Report",_href, $(window).height() - 50 , $(window).width() - 100);
+};
+
+Dashboards.getArgValue  = function(key)
+{
+	for (i=0;i<this.args.length;i++){
+		if(this.args[i][0] == key){
+			return this.args[i][1];
+		}
+	}
+	
+	return undefined;
+}
+
+
+
+
 /**
  *
  * UTF-8 data encode / decode
@@ -1927,4 +1981,26 @@ var DashboardsMap =
 			document.getElementById(this.messageElementId).innerHTML = "";
 		}
 
+	};
+	
+function getURLParameters(sURL) 
+	{	
+		if (sURL.indexOf("?") > 0){
+		
+			var arrParams = sURL.split("?");
+			var arrURLParams = arrParams[1].split("&");
+			var arrParam = [];
+			
+			for (i=0;i<arrURLParams.length;i++){
+				var sParam =  arrURLParams[i].split("=");
+				
+				if (sParam[0].indexOf("param",0) == 0){
+					var parameter = [sParam[0].substring(5,sParam[0].length),unescape(sParam[1])];
+					arrParam.push(parameter);
+				}
+			}
+
+		}
+
+		return arrParam;
 	};
