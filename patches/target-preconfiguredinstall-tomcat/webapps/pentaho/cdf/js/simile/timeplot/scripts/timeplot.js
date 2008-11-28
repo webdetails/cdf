@@ -51,7 +51,8 @@ Timeplot.createPlotInfo = function(params) {
         roundValues:       ("roundValues" in params) ? params.roundValues : true,
         valuesOpacity:     ("valuesOpacity" in params) ? params.valuesOpacity : 75,
         bubbleWidth:       ("bubbleWidth" in params) ? params.bubbleWidth : 300,
-        bubbleHeight:      ("bubbleHeight" in params) ? params.bubbleHeight : 200
+        bubbleHeight:      ("bubbleHeight" in params) ? params.bubbleHeight : 200,
+		toolTipFormat: ("toolTipFormat" in params) ? params.toolTipFormat : undefined
     };
 };
 

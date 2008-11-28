@@ -39,6 +39,7 @@ Timeplot.DefaultValueGeometry = function(params) {
     this._map = this._linMap;
     this._labels = [];
     this._grid = [];
+	this.toolTipFormat = ("toolTipFormat" in params) ? params.toolTipFormat : undefined;
 }
 
 Timeplot.DefaultValueGeometry.prototype = {
@@ -113,7 +114,7 @@ Timeplot.DefaultValueGeometry.prototype = {
             var ctx = this._canvas.getContext('2d');
     
             ctx.lineJoin = 'miter';
-    
+			
             // paint grid
             if (this._gridColor) {        
                 var gridGradient = ctx.createLinearGradient(0,0,0,this._canvas.height);
@@ -128,6 +129,8 @@ Timeplot.DefaultValueGeometry.prototype = {
                     var tick = this._grid[i];
                     var y = Math.floor(tick.y) + 0.5;
                     if (typeof tick.label != "undefined") {
+						if(this.toolTipFormat != undefined &&  typeof this.toolTipFormat == 'function')
+							tick.label = this.toolTipFormat(tick.label);
                         if (this._axisLabelsPlacement == "left") {
                             var div = this._timeplot.putText(this._id + "-" + i, tick.label,"timeplot-grid-label",{
                                 left: 4,

@@ -1003,7 +1003,8 @@ Dashboards.updateTimePlotComponent = function( object ){
 			gridColor: "#000000",
 			min: 0,
 			axisLabelsPlacement: "left",
-			gridType: "short"
+			gridType: "short",
+			toolTipFormat : function (value){ return toFormatedString(value);}
 		});
 
 
@@ -1044,7 +1045,8 @@ Dashboards.updateTimePlotComponent = function( object ){
 			valueGeometry: timePlotValueGeometry,
 			timeGeometry: timePlotTimeGeometry,
 			lineColor: Dashboards.timePlotColors[i],
-			showValues: cd.showValues
+			showValues: cd.showValues,
+			toolTipFormat: function (value,plot){ return  plot._id + " = " + toFormatedString(value);}
 		};
 		if ( cd.dots == true){
 			plotInfoOpts.dotColor = Dashboards.timePlotColors[i];
@@ -2003,4 +2005,15 @@ function getURLParameters(sURL)
 		}
 
 		return arrParam;
+	};
+
+function toFormatedString(value) {
+		value += '';
+		x = value.split('.');
+		x1 = x[0];
+		x2 = x.length > 1 ? '.' + x[1] : '';
+		var rgx = /(\d+)(\d{3})/;
+		while (rgx.test(x1))
+			x1 = x1.replace(rgx, '$1' + ',' + '$2');
+		return x1 + x2;
 	};

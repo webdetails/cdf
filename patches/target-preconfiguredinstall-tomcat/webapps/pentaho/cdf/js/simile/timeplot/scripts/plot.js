@@ -26,6 +26,7 @@ Timeplot.Plot = function(timeplot, plotInfo) {
     this._dataSource = plotInfo.dataSource;
     this._eventSource = plotInfo.eventSource;
     this._bubble = null;
+	this._toolTipFormat = plotInfo.toolTipFormat;
 };
 
 Timeplot.Plot.prototype = {
@@ -79,7 +80,10 @@ Timeplot.Plot.prototype = {
                     
                     var v = plot._dataSource.getValue(t);
                     if (plot._plotInfo.roundValues) v = Math.round(v);
-                    plot._valueFlag.innerHTML = new String(v);
+					if(plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
+						plot._valueFlag.innerHTML = plot._toolTipFormat(v,plot);
+					else
+						plot._valueFlag.innerHTML = new String(v);
                     var d = new Date(t);
                     var p = plot._timeGeometry.getPeriod(); 
                     if (p < day) {

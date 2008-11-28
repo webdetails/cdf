@@ -239,6 +239,18 @@
 			</sources>
 			<default-value>rows</default-value>
 		</TOPCOUNTAXIS> 
+		<TOOLTIPCONTENT type="string">
+			<sources>
+				<request>tooltipContent</request>
+			</sources>
+			<default-value>({1},{0}) = {2})</default-value>
+		</TOOLTIPCONTENT>
+		<TOOLTIPYFORMAT type="string">
+			<sources>
+				<request>tooltipYContent</request>
+			</sources>
+			<default-value>###,###,##0.###</default-value>
+		</TOOLTIPYFORMAT>
 
 	</inputs>
 
@@ -539,6 +551,8 @@
 					<BACKGROUND type="string"/>
 					<PLOTBACKGROUND type="string"/>
 					<INTERIORGAP type="string"/>
+					<TOOLTIPCONTENT type="string"/>
+					<TOOLTIPYFORMAT type="string"/>
 				</action-inputs>
 				<action-resources/>
 				<action-outputs> 
@@ -587,6 +601,8 @@
 						<chart-background type="color">{BACKGROUND}</chart-background>
 						<plot-background type="color">{PLOTBACKGROUND}</plot-background>
 						<markers-visible>false</markers-visible>
+						<tooltip-content>{TOOLTIPCONTENT}</tooltip-content>
+						<tooltip-y-format>{TOOLTIPYFORMAT}</tooltip-y-format>
 						<color-palette> 
 							<color>#1b95d9</color>  
 							<color>#caca9e</color>  
