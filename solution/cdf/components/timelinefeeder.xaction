@@ -58,6 +58,12 @@
 			</sources>
 			<default-value>columns</default-value>
 		</TOPCOUNTAXIS> 
+		<ORDERCOLUMNS type="string">
+			<sources>
+				<request>orderColumns</request>
+			</sources>
+			<default-value/>
+		</ORDERCOLUMNS> 
 	</inputs>
 	<outputs>
 		<text type="string">
@@ -99,6 +105,7 @@
 					<query_result type="result-set"/>
 					<TOPCOUNT type="string" />
 					<TOPCOUNTAXIS type="string" />
+					<ORDERCOLUMNS type="string" />
 				</action-inputs>
 				<action-outputs>
 					<text type="string"/>
@@ -120,10 +127,18 @@
 					var resultSetHeader = new Array(colCount) ;
 					resultSetHeader[0] = 'Locations';
 
+					var headers = new Array();
 					for(i = 0; i < colCount; i++){
 
 						resultSetHeader[i+1] = colHeaders[0][i].toString() + '';
-						//out.println("HEADER: " + colHeaders[0][i].toString() );
+						if(ORDERCOLUMNS != ""){
+							headers[i] = new Array();
+							headers[i][1] = i;
+							if(ORDERCOLUMNS.indexOf(colHeaders[0][i]) != -1)
+								headers[i][0] = "";
+							else
+								headers[i][1] = "0";
+						}
 					}
 
 					if (TOPCOUNTAXIS == 'rows'){
@@ -133,26 +148,39 @@
 					if (TOPCOUNTAXIS == 'columns'){
 						colIteraction = TOPCOUNT==0||TOPCOUNT > colCount?colCount:TOPCOUNT ;
 					}
-
+										
 					for (i=0; i<rowIteraction; i++)
 					{
 						var a = new Array();
-						a[0] = rowHeaders[i][0];
-						a[1] = rowHeaders[i][1];
-
-						for(j=0; j< colIteraction; j++){
-
-							a[j+1] = query_result.getValueAt(i,j);
-						}
-						if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
-							var value = 0;
-							for (j=colIteraction; j<colCount; j++) {
-								var localValue = query_result.getValueAt(i,j) - 0;
-								value += localValue;
-								//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+						if(TOPCOUNT == 0 && ORDERCOLUMNS != "")
+						{
+							a[0] = rowHeaders[i][0];
+							for(j = 0; j < headers.length; j++){
+							
+								if(headers[j][0]=="") {
+									a[j+1] = query_result.getValueAt(i,headers[j][1])||0;									
+								}
+								else
+									a[j] = 0;
 							}
-							a.push(value);
-							//out.println("OTHERS: a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+						}
+						else
+						{
+							a[0] = rowHeaders[i][0];
+							for(j=0; j< colIteraction; j++){
+								a[j+1] = query_result.getValueAt(i,j);
+							}
+						
+							if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
+								var value = 0;
+								for (j=colIteraction; j<colCount; j++) {
+									var localValue = query_result.getValueAt(i,j) - 0;
+									value += localValue;
+									//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
+								}
+								a.push(value);
+								//out.println("OTHERS: a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
+							}
 						}
 						//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[0] + "; Array: " + a);
 						text += a.join(",");
@@ -224,6 +252,7 @@
 							<action-type>Format MDX Results</action-type>
 							<action-inputs>
 								<query_result type="result-set" mapping="query_result2"/>
+								<ORDERCOLUMNS type="string" />
 							</action-inputs>
 							<action-outputs>
 								<text type="string"/>
@@ -245,23 +274,85 @@
 									var rowHeaders = rsmd.getRowHeaders() ;
 									var colCount = rsmd.getColumnCount() ;
 									var rowCount = query_result.getRowCount() ;
+									
+									ORDERCOLUMNS = ORDERCOLUMNS.split(",");
+									
+									if(ORDERCOLUMNS != "") {
+									
+										var queryColumns = new Array();
+										for(i = 1; i < colCount; i++){
+											queryColumns[i-1] = colHeaders[0][i].toString();
+										}
+										
+										var queryColumnsStr = queryColumns.join(",");
 
-									for (i=0; i<rowCount; i++) {
+										
+										var headers = new Array();
+										headers[0] = new Array();
+										headers[0][0] = "";
+										headers[0][1] = 0;
+										for(i=0; i < ORDERCOLUMNS.length; i++){
+										
+											headers[i+1] = new Array();
+											headers[i+1][1] = 0;
+											if(queryColumnsStr.indexOf(ORDERCOLUMNS[i]) != -1)
+											{
+												headers[i+1][0] = "";
+												for(j = 0; j < queryColumns.length; j++)
+												{
+													if(queryColumns[j]==ORDERCOLUMNS[i])
+													{
+														headers[i+1][1] = j+1;
+														break;
+													}
+												}
+											}
+											else
+												headers[i+1][0] = "0";
+										}
+										
+
+										for (i=0; i<rowCount; i++) {
 
 										var a = new Array();
-										for(j = 0; j < colCount; j++){
-										a[j] = query_result.getValueAt(i,j)||0;
-										//out.println("Iteration " + j + " of " + colCount + "; ");
+										for(j = 0,k=0; j < headers.length; j++){
+										
+											if(headers[j][0]=="") {
+												a[j] = query_result.getValueAt(i,headers[j][1])||0;
+												k++;
+											}
+											else
+												a[j] = 0;
 										}
+
 										text += a.join(",");
 										text += "\n";
+										
 										}
+									}
+									else
+									{
+										for (i=0; i<rowCount; i++) {
+											var a = new Array();
+											for(j = 0; j < colCount; j++){
+												a[j] = query_result.getValueAt(i,j)||0;
+											}
+										
+										text += a.join(",");
+										text += "\n";
+										
 										}
-										text;
+									}
+								
+									text;
+									
+									}
 
-										]]></script>
+									]]></script>
 								</component-definition>
 							</action-definition>
 						</actions>
 					</actions>
 				</action-sequence>
+
+				
