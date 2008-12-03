@@ -215,6 +215,12 @@
 			</sources>
 			<default-value>mdx</default-value>
 		</QUERY_TYPE> 
+		<MAXBARWIDTH type="string">
+			<sources>
+				<request>maxBarWidth</request>
+			</sources>
+			<default-value>1</default-value>
+		</MAXBARWIDTH>
 		<BACKGROUND type="string">
 			<sources>
 				<request>backgroundColor</request>
@@ -548,6 +554,7 @@
 					<LEGENDFONTISITALIC type="string"/>
 					<FOREGROUNDALPHA type="string"/>
 					<BACKGROUNDALPHA type="string"/>
+					<MAXBARWIDTH type="string" />
 					<BACKGROUND type="string"/>
 					<PLOTBACKGROUND type="string"/>
 					<INTERIORGAP type="string"/>
@@ -598,6 +605,7 @@
 						<interior-gap>{INTERIORGAP}</interior-gap> 
 						<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
 						<background-alpha>{BACKGROUNDALPHA}</background-alpha>
+						<max-bar-width>{MAXBARWIDTH}</max-bar-width>
 						<chart-background type="color">{BACKGROUND}</chart-background>
 						<plot-background type="color">{PLOTBACKGROUND}</plot-background>
 						<markers-visible>false</markers-visible>

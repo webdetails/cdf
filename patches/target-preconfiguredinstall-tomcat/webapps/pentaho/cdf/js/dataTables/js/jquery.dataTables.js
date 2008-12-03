@@ -1,6 +1,6 @@
 /*
  * File:        jquery.dataTables.js
- * Version:     1.2.4
+ * Version:     1.3.4
  * CVS:         $Id$
  * Description: Paginate, search and sort HTML tables
  * Author:      Allan Jardine
@@ -25,14 +25,345 @@
 
 
 (function($) {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * DataTables variables
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	/*
+	 * Variable: dataTableSettings
+	 * Purpose:  Store the settings for each dataTables instance
+	 * Scope:    jQuery.fn
+	 */
+	$.fn.dataTableSettings = new Array();
+	
+	/*
+	 * Variable: dataTableExt
+	 * Purpose:  Container for customisable parts of DataTables
+	 * Scope:    jQuery.fn
+	 */
+	$.fn.dataTableExt = new Object();
+	
+	
+	
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * DataTables extensible objects
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	/*
+	 * Variable: oPagination
+	 * Purpose:  Container for the various type of pagination that dataTables supports
+	 * Scope:    jQuery.fn.dataTableExt
+	 */
+	$.fn.dataTableExt.oPagination = {
+		"two_button": {
+			/*
+			 * Function: oPagination.two_button.fnInit
+			 * Purpose:  Initalise dom elements required for pagination with forward/back buttons only
+			 * Returns:  -
+	 		 * Inputs:   object:oSettings - dataTables settings object
+	     *           function:fnCallbackDraw - draw function which must be called on update
+			 */
+			"fnInit": function ( oSettings, fnCallbackDraw )
+			{
+				oSettings.nPrevious = document.createElement( 'div' );
+				oSettings.nNext = document.createElement( 'div' );
+				
+				if ( oSettings.sTableId != "" )
+				{
+					oSettings.nPaginate.setAttribute( 'id', oSettings.sTableId+'_paginate' );
+					oSettings.nPrevious.setAttribute( 'id', oSettings.sTableId+'_previous' );
+					oSettings.nNext.setAttribute( 'id', oSettings.sTableId+'_next' );
+				}
+				
+				oSettings.nPrevious.className = "paginate_disabled_previous";
+				oSettings.nNext.className = "paginate_disabled_next";
+				
+				oSettings.nPaginate.appendChild( oSettings.nPrevious );
+				oSettings.nPaginate.appendChild( oSettings.nNext );
+				$(oSettings.nPaginate).insertAfter( oSettings.nTable );
+				
+				$(oSettings.nPrevious).click( function() {
+					oSettings.iDisplayStart -= oSettings.iDisplayLength;
+					
+					/* Correct for underrun */
+					if ( oSettings.iDisplayStart < 0 )
+					{
+					  oSettings.iDisplayStart = 0;
+					}
+					
+					fnCallbackDraw( oSettings );
+				} );
+				
+				$(oSettings.nNext).click( function() {
+					/* Make sure we are not over running the display array */
+					if ( oSettings.iDisplayStart + oSettings.iDisplayLength < oSettings.aaData.length )
+						oSettings.iDisplayStart += oSettings.iDisplayLength;
+					
+					fnCallbackDraw( oSettings );
+				} );
+			},
+			
+			/*
+			 * Function: oPagination.two_button.fnUpdate
+			 * Purpose:  Update the two button pagination at the end of the draw
+			 * Returns:  -
+	 		 * Inputs:   object:oSettings - dataTables settings object
+	     *           function:fnCallbackDraw - draw function which must be called on update
+			 */
+			"fnUpdate": function ( oSettings, fnCallbackDraw )
+			{
+				oSettings.nPrevious.className = 
+					( oSettings.iDisplayStart == 0 ) ? 
+					"paginate_disabled_previous" : "paginate_enabled_previous";
+				
+				oSettings.nNext.className = 
+					( oSettings.iDisplayEnd == oSettings.aaData.length ) ? 
+					"paginate_disabled_next" : "paginate_enabled_next";
+			}
+		},
+		
+		"full_numbers": {
+			/*
+			 * Function: oPagination.full_numbers.fnInit
+			 * Purpose:  Initalise dom elements required for pagination with a list of the pages
+			 * Returns:  -
+	 		 * Inputs:   object:oSettings - dataTables settings object
+	     *           function:fnCallbackDraw - draw function which must be called on update
+			 */
+			"fnInit": function ( oSettings, fnCallbackDraw )
+			{
+				var nFirst = document.createElement( 'span' );
+				var nPrevious = document.createElement( 'span' );
+				var nList = document.createElement( 'span' );
+				var nNext = document.createElement( 'span' );
+				var nLast = document.createElement( 'span' );
+				
+				nFirst.appendChild( document.createTextNode( oSettings.oLanguage.oPaginate.sFirst ) );
+				nPrevious.appendChild( document.createTextNode( oSettings.oLanguage.oPaginate.sPrevious ) );
+				nNext.appendChild( document.createTextNode( oSettings.oLanguage.oPaginate.sNext ) );
+				nLast.appendChild( document.createTextNode( oSettings.oLanguage.oPaginate.sLast ) );
+				
+				nFirst.className = "paginate_button";
+				nPrevious.className = "paginate_button";
+				nNext.className = "paginate_button";
+				nLast.className = "paginate_button";
+				
+				oSettings.nPaginate.appendChild( nFirst );
+				oSettings.nPaginate.appendChild( nPrevious );
+				oSettings.nPaginate.appendChild( nList );
+				oSettings.nPaginate.appendChild( nNext );
+				oSettings.nPaginate.appendChild( nLast );
+				
+				$(nFirst).click( function () {
+					oSettings.iDisplayStart = 0;
+					fnCallbackDraw( oSettings );
+				} );
+				
+				$(nPrevious).click( function() {
+					oSettings.iDisplayStart -= oSettings.iDisplayLength;
+					
+					/* Correct for underrun */
+					if ( oSettings.iDisplayStart < 0 )
+					  oSettings.iDisplayStart = 0;
+					
+					fnCallbackDraw( oSettings );
+				} );
+				
+				$(nNext).click( function() {
+					/* Make sure we are not over running the display array */
+					if ( oSettings.iDisplayStart + oSettings.iDisplayLength < (oSettings.aaData.length-1) )
+						oSettings.iDisplayStart += oSettings.iDisplayLength;
+					
+					fnCallbackDraw( oSettings );
+				} );
+				
+				$(nLast).click( function() {
+					var iPages = parseInt( (oSettings.aaData.length-1) / oSettings.iDisplayLength ) + 1;
+					oSettings.iDisplayStart = (iPages-1) * oSettings.iDisplayLength;
+					
+					fnCallbackDraw( oSettings );
+				} );
+				
+				oSettings.nPaginateList = nList;
+			},
+			
+			/*
+			 * Function: oPagination.full_numbers.fnUpdate
+			 * Purpose:  Update the list of page buttons shows
+			 * Returns:  -
+	 		 * Inputs:   object:oSettings - dataTables settings object
+	     *           function:fnCallbackDraw - draw function which must be called on update
+			 */
+			"fnUpdate": function ( oSettings, fnCallbackDraw )
+			{
+				var iPages = parseInt( (oSettings.aaData.length-1) / oSettings.iDisplayLength ) + 1;
+				var iCurrentPage = parseInt( oSettings.iDisplayStart / oSettings.iDisplayLength ) + 1;
+				var sList = "";
+				var iStartButton = iCurrentPage-5<1 ? 1 : iCurrentPage-5;
+				var iEndButton = iCurrentPage+5>iPages ? iPages : iCurrentPage+5;
+				
+				if ( iPages < 5 )
+				{
+					iStartButton = 1;
+					iEndButton = iPages;
+				}
+				else
+				{
+					if ( iCurrentPage < 3 )
+					{
+						iStartButton = 1;
+						iEndButton = 5;
+					}
+					else if ( iCurrentPage > iPages - 3 )
+					{
+						iStartButton = iPages-4;
+						iEndButton = iPages;
+					}
+					else
+					{
+						iStartButton = iCurrentPage-2;
+						iEndButton = iCurrentPage+2;
+					}
+				}
+				
+				for ( var i=iStartButton ; i<=iEndButton ; i++ )
+				{
+					if ( iCurrentPage != i )
+						sList += '<span class="paginate_button">'+i+'</span>';
+					else
+						sList += '<span class="paginate_active">'+i+'</span>';
+				}
+				
+				oSettings.nPaginateList.innerHTML = sList;
+				
+				$('span', oSettings.nPaginateList).click( function() {
+					var iTarget = (this.innerHTML * 1) - 1;
+					oSettings.iDisplayStart = iTarget * oSettings.iDisplayLength;
+					
+					fnCallbackDraw( oSettings );
+				} );
+			}
+		}
+	}
+	
+	/*
+	 * Variable: oSort
+	 * Purpose:  Wrapper for the sorting functions that can be used in DataTables
+	 * Scope:    jQuery.fn.dataTableExt
+	 */
+	$.fn.dataTableExt.oSort = {
+		/*
+		 * text sorting
+		 */
+		"string-asc": function ( a, b )
+		{
+			var x = a.toLowerCase();
+			var y = b.toLowerCase();
+			return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+		},
+		
+		"string-desc": function ( a, b )
+		{
+			var x = a.toLowerCase();
+			var y = b.toLowerCase();
+			return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+		},
+		
+		
+		/*
+		 * html sorting (ignore html tags)
+		 */
+		"html-asc": function ( a, b )
+		{
+			var x = a.replace( /<.*?>/g, "" ).toLowerCase();
+			var y = b.replace( /<.*?>/g, "" ).toLowerCase();
+			return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+		},
+		
+		"html-desc": function ( a, b )
+		{
+			var x = a.replace( /<.*?>/g, "" ).toLowerCase();
+			var y = b.replace( /<.*?>/g, "" ).toLowerCase();
+			return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+		},
+		
+		
+		/*
+		 * date sorting
+		 */
+		"date-asc": function ( a, b )
+		{
+			var x = Date.parse( a );
+			var y = Date.parse( b );
+			
+			if ( isNaN( x ) )
+			{
+    		a = Date.parse( "01/01/1970 00:00:00" );
+			}
+			if ( isNaN( y ) )
+			{
+				b =	Date.parse( "01/01/1970 00:00:00" );
+			}
+			
+			return x - y;
+		},
+		
+		"date-desc": function ( a, b )
+		{
+			var x = Date.parse( a );
+			var y = Date.parse( b );
+			
+			if ( isNaN( x ) )
+			{
+    		a = Date.parse( "01/01/1970 00:00:00" );
+			}
+			if ( isNaN( y ) )
+			{
+				b =	Date.parse( "01/01/1970 00:00:00" );
+			}
+			
+			return y - x;
+		},
+		
+		
+		/*
+		 * numerical sorting
+		 */
+		"numeric-asc": function ( a, b )
+		{
+			var x = a == "-" ? 0 : a;
+			var y = b == "-" ? 0 : b;
+			return x - y;
+		},
+		
+		"numeric-desc": function ( a, b )
+		{
+			var x = a == "-" ? 0 : a;
+			var y = b == "-" ? 0 : b;
+			return y - x;
+		}
+	};
+	
+	
+	
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * DataTables prototype
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	/*
+	 * Function: dataTable
+	 * Purpose:  DataTables information
+	 * Returns:  -
+	 * Inputs:   object:oInit - initalisation options for the table
+	 */
 	$.fn.dataTable = function( oInit )
 	{
 		/*
 		 * Variable: _aoSettings
-		 * Purpose:  Store the settings for each dataTables instance
+		 * Purpose:  Easy reference to data table settings
 		 * Scope:    jQuery.dataTable
 		 */
-		var _aoSettings = new Array();
+		var _aoSettings = $.fn.dataTableSettings;
 		
 		/*
 		 * Function: classSettings
@@ -69,12 +400,18 @@
 				"sProcessing": "Processing...",
 				"sLengthMenu": "Show _MENU_ entries",
 				"sZeroRecords": "No matching records found",
-				"sInfo": " _START_ to _END_ of _TOTAL_ entries",
-				"sInfoEmtpy": " 0 to 0 of 0 entries",
+				"sInfo": "Showing _START_ to _END_ of _TOTAL_ entries",
+				"sInfoEmtpy": "Showing 0 to 0 of 0 entries",
 				"sInfoFiltered": "(filtered from _MAX_ total entries)",
 				"sInfoPostFix": "",
 				"sSearch": "Search:",
-				"sUrl": ""
+				"sUrl": "",
+				"oPaginate": {
+					"sFirst":    "First",
+					"sPrevious": "Previous",
+					"sNext":     "Next",
+					"sLast":     "Last"
+				}
 			};			
 							
 			/*
@@ -115,6 +452,13 @@
 			this.sPreviousSearch = '';
 			
 			/*
+			 * Variable: asPreSearchCols
+			 * Purpose:  Store the previous search for each column
+			 * Scope:    jQuery.dataTable.classSettings
+			 */
+			this.asPreSearchCols = new Array();
+			
+			/*
 			 * Variable: nInfo
 			 * Purpose:  Info display for user to see what records are displayed
 			 * Scope:    jQuery.dataTable.classSettings
@@ -138,32 +482,18 @@
 			this.iDisplayEnd = 10;
 			
 			/*
-			 * Variable: iColumnSorting
-			 * Purpose:  Column sort index
+			 * Variable: aaSorting
+			 * Purpose:  Sorting information
 			 * Scope:    jQuery.dataTable.classSettings
 			 */
-			this.iColumnSorting = null;
-			
-			/*
-			 * Variable: iSortingDirection
-			 * Purpose:  Column sort direction - 0 as per Array.sort. 1 reversed
-			 * Scope:    jQuery.dataTable.classSettings
-			 */
-			this.iSortingDirection = 0;
-			
-			/*
-			 * Variable: sDefaultSortingDirection
-			 * Purpose:  Column sort direction - asc (ascending) desc (descending)
-			 * Scope:    jQuery.dataTable.classSettings
-			 */
-			this.sDefaultSortingDirection = "asc";
+			this.aaSorting = [ [0, 'asc'] ];
 			
 			/*
 			 * Variable: asStripClasses
 			 * Purpose:  Classes to use for the striping of a table
 			 * Scope:    jQuery.dataTable.classSettings
 			 */
-			this.asStripClasses = new Array();
+			this.asStripClasses = new Array( 'odd', 'even' );
 			
 			/*
 			 * Variable: fnRowCallback
@@ -172,6 +502,13 @@
 			 */
 			this.fnRowCallback = null;
 			
+			/*
+			 * Variable: fnFinalCallback
+			 * Purpose:  Call this function at the end of the draw function
+			 * Scope:    jQuery.dataTable.classSettings
+			 */
+
+			this.fnFinalCallback = null;
 			/*
 			 * Variable: fnHeaderCallback
 			 * Purpose:  Callback function for the header on each draw
@@ -228,7 +565,6 @@
 			 */
 			this.nOpenRow = null;
 			
-			
 			/*
 			 * Variable: nPaginate, nPrevious, nNext
 			 * Purpose:  Cache nodes for pagination
@@ -237,15 +573,37 @@
 			this.nPaginate = null;
 			this.nPrevious = null;
 			this.nNext = null;
+			
+			/*
+			 * Variable: sDomPositioning
+			 * Purpose:  Dictate the positioning that the created elements will take
+			 * Scope:    jQuery.dataTable.classSettings
+			 * Notes:    The following syntax is expected:
+			 *   'l' - Length changing
+			 *   'f' - Filtering input
+			 *   't' - The table!
+			 *   'i' - Information
+			 *   'p' - Pagination
+			 *   'r' - pRocessing
+			 *   '<' and '>' - div elements
+			 *   '<"class" and '>' - div with a class
+			 *    Examples: '<"wrapper"flipt>', '<lf<t>ip>'
+			 */
+			this.sDomPositioning = 'lfrtip';
+			
+			/*
+			 * Variable: sPaginationType
+			 * Purpose:  Note which type of sorting should be used
+			 * Scope:    jQuery.dataTable.classSettings
+			 */
+			this.sPaginationType = "two_button";
 		}
 		
 		
 		
-		
-		
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 		 * API functions
-		 */
+		 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		/*
 		 * Function: fnDraw
@@ -267,10 +625,32 @@
 		 * Purpose:  Filter the input based on data
 		 * Returns:  -
 		 * Inputs:   string:sInput - string to filter the table on
+		 *           int:iColumn - optional - column to limit filtering to
 		 */
-		this.fnFilter = function( sInput )
+		this.fnFilter = function( sInput, iColumn )
 		{
-			_fnFilter( _fnSettingsFromNode( this[0] ), sInput, 1 );
+			var oSettings = _fnSettingsFromNode( this[0] );
+			
+			if ( typeof iColumn == "undefined" )
+			{
+				_fnFilterComplete( oSettings, sInput, 1 );
+			}
+			else
+			{
+				oSettings.asPreSearchCols[ iColumn ] = sInput;
+				_fnFilterComplete( oSettings, oSettings.sPreviousSearch, 1 );
+			}
+		}
+		
+		/*
+		 * Function: fnSettings
+		 * Purpose:  Get the settings for a particular table for extern. manipulation
+		 * Returns:  -
+		 * Inputs:   -
+		 */
+		this.fnSettings = function( nNode  )
+		{
+			return _fnSettingsFromNode( this[0] );
 		}
 		
 		/*
@@ -280,9 +660,11 @@
 		 * Inputs:   int:iCol - the data index to sort on. Note that this will
 		 *   not match the 'display index' if you have hidden data entries
 		 */
-		this.fnSort = function( iCol )
+		this.fnSort = function( aaSort )
 		{
-			_fnSort( _fnSettingsFromNode( this[0] ), this, iCol );
+			var oSettings = _fnSettingsFromNode( this[0] );
+			oSettings.aaSorting = aaSort;
+			_fnSort( oSettings );
 		}
 		
 		/*
@@ -334,12 +716,15 @@
 			_fnBuildSearchArray( oSettings, 1 );
 			
 			/* Re-sort */
-			_fnSort( oSettings, oSettings.iColumnSorting, true );
+			if ( oSettings.oFeatures.bSort )
+			{
+				_fnSort( oSettings );
+			}
 			
 			/* But we do need to re-filter or re-draw */
 			if ( oSettings.oFeatures.bFilter )
 			{
-				_fnFilter( oSettings, oSettings.sPreviousSearch );
+				_fnFilterComplete( oSettings, oSettings.sPreviousSearch );
 			}
 			else
 			{
@@ -503,15 +888,107 @@
 		
 		
 		
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 		 * Local functions
+		 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 * Initalisation
 		 */
+		
+		/*
+		 * Function: _fnInitalise
+		 * Purpose:  Draw the table for the first time, adding all required features
+		 * Returns:  -
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnInitalise ( oSettings )
+		{
+			/* Ensure that the table data is fully initialised */
+			if ( oSettings.bInitialised == false )
+			{
+				setTimeout( function(){ _fnInitalise( oSettings ) }, 200 );
+				return;
+			}
+			
+			/* Show the display HTML options */
+			_fnAddOptionsHtml( oSettings );
+			
+			/* Draw the headers for the table */
+			_fnDrawHead( oSettings );
+			
+			/* If there is default sorting required - let's do it. The sort function
+			 * will do the drawing for us. Otherwise we draw the table
+			 */
+			if ( oSettings.oFeatures.bSort )
+			{
+				_fnSort( oSettings );
+			}
+			else
+			{
+				oSettings.aaData = oSettings.aaDataMaster.slice();
+				_fnCalculateEnd( oSettings );
+				_fnDraw( oSettings );
+			}
+		}
+		
+		
+		/*
+		 * Function: _fnLanguageProcess
+		 * Purpose:  Copy language variables from remote object to a local one
+		 * Returns:  -
+		 * Inputs:   object:oSettings - dataTables settings object
+		 *           object:oLanguage - Language information
+		 */
+		function _fnLanguageProcess( oSettings, oLanguage )
+		{
+			if ( typeof oLanguage.sProcessing != 'undefined' )
+				oSettings.oLanguage.sProcessing = oLanguage.sProcessing;
+			
+			if ( typeof oLanguage.sLengthMenu != 'undefined' )
+				oSettings.oLanguage.sLengthMenu = oLanguage.sLengthMenu;
+			
+			if ( typeof oLanguage.sZeroRecords != 'undefined' )
+				oSettings.oLanguage.sZeroRecords = oLanguage.sZeroRecords;
+			
+			if ( typeof oLanguage.sInfo != 'undefined' )
+				oSettings.oLanguage.sInfo = oLanguage.sInfo;
+			
+			if ( typeof oLanguage.sInfoEmtpy != 'undefined' )
+				oSettings.oLanguage.sInfoEmtpy = oLanguage.sInfoEmtpy;
+			
+			if ( typeof oLanguage.sInfoFiltered != 'undefined' )
+				oSettings.oLanguage.sInfoFiltered = oLanguage.sInfoFiltered;
+			
+			if ( typeof oLanguage.sInfoPostFix != 'undefined' )
+				oSettings.oLanguage.sInfoPostFix = oLanguage.sInfoPostFix;
+			
+			if ( typeof oLanguage.sSearch != 'undefined' )
+				oSettings.oLanguage.sSearch = oLanguage.sSearch;
+			
+			if ( typeof oLanguage.oPaginate != 'undefined' )
+			{
+				if ( typeof oLanguage.oPaginate != 'undefined' )
+					oSettings.oLanguage.oPaginate.sFirst = oLanguage.oPaginate.sFirst;
+				
+				if ( typeof oLanguage.oPaginate != 'undefined' )
+					oSettings.oLanguage.oPaginate.sPrevious = oLanguage.oPaginate.sPrevious;
+				
+				if ( typeof oLanguage.oPaginate != 'undefined' )
+					oSettings.oLanguage.oPaginate.sNext = oLanguage.oPaginate.sNext;
+				
+				if ( typeof oLanguage.oPaginate != 'undefined' )
+					oSettings.oLanguage.oPaginate.sLast = oLanguage.oPaginate.sLast;
+			}
+			
+			_fnInitalise( oSettings );
+		}
 		
 		/*
 		 * Function: _fnAddColumn
 		 * Purpose:  Add a column to the list used for the table
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 *           oOptions - object with sType, bVisible and bSearchable
 		 * Notes:    All options in enter column can be over-ridden by the user
 		 *   initialisation of dataTables
@@ -527,8 +1004,7 @@
 				"sWidth": null,
 				"sClass": null,
 				"fnRender": null,
-				"fnSort": null,
-				"bUrl" : null,
+				"fnSort": null
 			};
 			
 			/* User specified column options */
@@ -562,10 +1038,10 @@
 				
 				if ( typeof oOptions.fnSort != 'undefined' )
 					oSettings.aoColumns[ iLength ].fnSort = oOptions.fnSort;
-					
-				if ( typeof oOptions.bUrl != 'undefined' )
-					oSettings.aoColumns[ iLength ].bUrl = oOptions.bUrl;
 			}
+			
+			/* Add a column specific filter */
+			oSettings.asPreSearchCols[ oSettings.asPreSearchCols.length++ ] = "";
 		}
 		
 		
@@ -573,7 +1049,7 @@
 		 * Function: _fnGatherData
 		 * Purpose:  Read in the data from the target table
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 */
 		function _fnGatherData( oSettings )
 		{
@@ -597,6 +1073,9 @@
 					oSettings.nFooter = $('tfoot', oSettings.nTable)[0];
 				}
 				
+				/* Note if the user as set a type or if we should auto-detect */
+				var bUserSetType = oSettings.aoColumns[i].sType == null ? false : true;
+				
 				/* Get the data for the column */
 				$('tbody td:nth-child('+oSettings.aoColumns.length+'n+'+(i+1)+')', oSettings.nTable).each( function( index ) {
 					if ( typeof oSettings.aaData[index] != 'object' )
@@ -606,13 +1085,24 @@
 					oSettings.aaData[index][i] = this.innerHTML;
 					
 					/* Check if the user has set a type for this column, or if we should auto detect */
-					if ( oSettings.aoColumns[i].sType == null )
+					if ( !bUserSetType )
 					{
-						oSettings.aoColumns[i].sType = _fnDetectType( oSettings.aaData[index][i] );
+						if ( oSettings.aoColumns[i].sType == null )
+						{
+							oSettings.aoColumns[i].sType = _fnDetectType( oSettings.aaData[index][i] );
+						}
+						else if ( oSettings.aoColumns[i].sType == "date" || 
+						          oSettings.aoColumns[i].sType == "numeric" )
+						{
+							/* If type is date or numeric - ensure that all collected data
+							 * in the column is of the same type
+							 */
+							oSettings.aoColumns[i].sType = _fnDetectType( oSettings.aaData[index][i] );
+						}
+						/* The else would be 'type = string' we don't want to do anything
+						 * if that is the case
+						 */
 					}
-					/* Otherwise assume that the user knows what they are doing (...) and go with the type
-					 * that they provided
-					 */
 					
 					/* Check if the user has set a class for this column, or if we should auto detect */
 					if ( oSettings.aoColumns[i].sClass == null )
@@ -627,84 +1117,40 @@
 		}
 		
 		
-		/*
-		 * Function: _fnDetectType
-		 * Purpose:  Get the sort type based on an input string
-		 * Returns:  string:
-		 *   - 'string'
-		 *   - 'numeric'
-		 *   - 'date'
-		 * Inputs:   string:sData - data we wish to know the type of
+		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 * Drawing functions
 		 */
-		function _fnDetectType( sData )
-		{
-			if ( _fnIsNumeric(sData) )
-			{
-				return 'numeric';
-			}
-			else if ( ! isNaN(Date.parse(sData) ) )
-			{
-				return 'date';
-			}
-			else
-			{
-				return 'string';
-			}
-		}
-		
-		
-		/*
-		 * Function: _fnIsNumeric
-		 * Purpose:  Check to see if a string is numeric
-		 * Returns:  bool:bIsNumber - true:is number, false:not number
-		 * Inputs:   string:sText - string to check
-		 */
-		function _fnIsNumeric ( sText )
-		{
-			var ValidChars = "0123456789.-";
-			var Char;
-			
-			for ( i=0 ; i<sText.length ; i++ ) 
-			{ 
-				Char = sText.charAt(i); 
-				if (ValidChars.indexOf(Char) == -1) 
-				{
-					return false;
-				}
-			}
-			
-			return true;
-		}
-		
 		
 		/*
 		 * Function: _fnDrawHead
 		 * Purpose:  Create the HTML header for the table
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
-		 *           int:iSortCol - column being sorted on
+		 * Inputs:   object:oSettings - dataTables settings object
 		 */
-		function _fnDrawHead( oSettings, iSortCol )
+		function _fnDrawHead( oSettings )
 		{
+			var nThOriginals = oSettings.nTable.getElementsByTagName('thead')[0].getElementsByTagName('th');
 			var nTr = document.createElement( "tr" );
 			var nTrFoot = document.createElement( "tr" );
 			var nTh;
 			
+			/* Create header elements */
 			for ( var i=0 ; i<oSettings.aoColumns.length ; i++ )
 			{
 				if ( oSettings.aoColumns[i].bVisible )
 				{
 					nTh = document.createElement( "th" );
 					
-					if ( i == iSortCol )
+					if ( typeof nThOriginals[i] != "undefined" && nThOriginals[i].className != "" )
 					{
-						nTh.className = "sorting_asc";
+						nTh.className = nThOriginals[i].className;
 					}
 					
 					var sWidth = '';
 					if ( oSettings.aoColumns[i].sWidth != null )
 					{
-						nTh.style.width = oSettings.aoColumns[i].sWidth + "px";
+						nTh.style.width = oSettings.aoColumns[i].sWidth;
 					}
 					
 					nTh.innerHTML = oSettings.aoColumns[i].sTitle;
@@ -718,42 +1164,96 @@
 			/* Add sort listener */
 			if ( oSettings.oFeatures.bSort )
 			{
-				$('thead th', oSettings.nTable).click( function() {
+				/* Add classes */
+				_fnSortingClasses( oSettings );
+				
+				$('thead th', oSettings.nTable).click( function( e ) {
+					/* Convert the column index to data index */
+					var iDataIndex = $("thead th", oSettings.nTable).index(this);
+					
+					/* Take account of hidden columns */
+					iDataIndex = _fnVisibleToColumnIndex( oSettings, iDataIndex );
+					
+					/* If the column is not sortable - don't to anything */
+					if ( oSettings.aoColumns[iDataIndex].bSortable == false )
+					{
+						return;
+					}
+					
 					if ( oSettings.oFeatures.bProcessing )
 					{
 						_fnProcessingDisplay( oSettings, true );
 					}
 					
-					/* Convert the column index to data index */
-					var iDataIndex = $("thead th", oSettings.nTable).index(this); /* back up */
-					
-					for ( var i=0 ; i<oSettings.aoColumns.length ; i++ )
-					{
-						if ( this.innerHTML == oSettings.aoColumns[i].sTitle )
+					/*
+					 * XXX This is hasty has hell - but I can't see another way around it. If anyone does
+					 * know of a good way, please let me know so I can include it in later versions.
+					 * Basically the issue here is that the Javascript engine in modern browsers doesn't 
+					 * appear to allow the rendering engine to update the display while it is still excuting
+					 * it's thread (well - it does but only after long intervals). This means that the 
+					 * 'processing' display doesn't appear for a table sort. To break the js thread up a bit
+					 * I force an execution break by using setTimeout (see - nasty as hell...).
+					 */
+					setTimeout( function() {
+						if ( e.shiftKey )
 						{
-							iDataIndex = i;
-							break;
+							/* If the shift key is pressed then we are multipe column sorting */
+							var bFound = false;
+							for ( var i=0 ; i<oSettings.aaSorting.length ; i++ )
+							{
+								if ( oSettings.aaSorting[i][0] == iDataIndex )
+								{
+									if ( oSettings.aaSorting[i][1] == "asc" )
+									{
+										oSettings.aaSorting[i][1] = "desc";
+									}
+									else
+									{
+										oSettings.aaSorting.splice( i, 1 );
+									}
+									bFound = true;
+									break;
+								}
+							}
+							
+							if ( bFound == false )
+							{
+								oSettings.aaSorting.push( new Array( iDataIndex, "asc" ) );
+							}
 						}
-					}
-					
-					/* Run the sort */
-					_fnSort( oSettings, iDataIndex );
-					
-					/* Remove previous sort */
-					$("thead th", oSettings.nTable).removeClass( "sorting_asc" ).removeClass( "sorting_desc" );
-					
-					/* Set the class name for the sorting th */
-					if ( oSettings.iSortingDirection == 0 )
-						this.className = "sorting_asc";
-					else
-						this.className = "sorting_desc";
-					
-					if ( oSettings.oFeatures.bProcessing )
-					{
-						_fnProcessingDisplay( oSettings, false );
-					}
+						else
+						{
+							/* If no shift key then single column sort */
+							if ( oSettings.aaSorting.length == 1 && oSettings.aaSorting[0][0] == iDataIndex )
+							{
+								oSettings.aaSorting[0][1] = oSettings.aaSorting[0][1]=="asc" ? "desc" : "asc";
+							}
+							else
+							{
+								oSettings.aaSorting.splice( 0, oSettings.aaSorting.length );
+								oSettings.aaSorting.push( new Array( iDataIndex, "asc" ) );
+							}
+						}
+						
+						/* Remove previous sort */
+						_fnSortingClasses( oSettings );
+						
+						/* Run the sort */
+						_fnSort( oSettings );
+						
+						if ( oSettings.oFeatures.bProcessing )
+						{
+							_fnProcessingDisplay( oSettings, false );
+						}
+					}, 0 ); /* end nasty-ness */
+				} ); /* end click */
+				
+				/* Take the brutal approach to cancelling text selection due to the shift key */
+				$('thead th', oSettings.nTable).mousedown( function () {
+					this.onselectstart = function() {return false};
+					return false;
 				} );
-			}
+			} /* if feature sort */
 			
 			/* Set an absolute width for the table such that pagination doesn't
 			 * cause the table to resize
@@ -766,12 +1266,11 @@
 		 * Function: _fnDraw
 		 * Purpose:  Create the HTML needed for the table and write it to the page
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 */
 		function _fnDraw( oSettings )
 		{
 			var anRows = new Array();
-			var sparkLines =  [];
 			var sOutput = "";
 			var iRowCount = 0;
 			var nTd;
@@ -792,15 +1291,11 @@
 					
 					for ( i=0 ; i<oSettings.aoColumns.length ; i++ )
 					{
-						
-						
-						
 						/* Ensure that we are allow to display this column */
 						if ( oSettings.aoColumns[i].bVisible )
 						{
 							nTd = document.createElement( 'td' );
 							nTd.setAttribute( 'valign', "top" );
-							nTd.setAttribute( 'id', oSettings.nTable.id + "col" + j + "" + (i-1) );
 							
 							if ( oSettings.iColumnSorting == i && oSettings.aoColumns[i].sClass != null )
 							{
@@ -815,12 +1310,6 @@
 								nTd.className = oSettings.aoColumns[i].sClass;
 							}
 							
-							if (oSettings.aoColumns[i].bUrl != null  )
-							{
-								nTd.className = "tableRowDimLink";
-								nTd.setAttribute( 'onclick', oSettings.aoColumns[i].bUrl.replace(/{PARAM}/,oSettings.aaData[j][i]) );
-							}
-							
 							/* Check for a custom render - otherwise output the data */
 							if ( typeof oSettings.aoColumns[i].fnRender == 'function' )
 							{
@@ -831,12 +1320,7 @@
 							}
 							else
 							{
-								var data = oSettings.aaData[j][i];
-								if(oSettings.aoColumns[i].sType == "sparkLine"){
-									sparkLines.push(data);
-								}
-								else
-									nTd.innerHTML = oSettings.aaData[j][i];
+								nTd.innerHTML = oSettings.aaData[j][i];
 							}
 							
 							anRows[ iRowCount ].appendChild( nTd );
@@ -889,13 +1373,10 @@
 			/* Update the pagination display buttons */
 			if ( oSettings.oFeatures.bPaginate )
 			{
-				oSettings.nPrevious.className = 
-					( oSettings.iDisplayStart == 0 ) ? 
-					"paginate_disabled_previous" : "paginate_enabled_previous";
-				
-				oSettings.nNext.className = 
-					( oSettings.iDisplayEnd == oSettings.aaData.length ) ? 
-					"paginate_disabled_next" : "paginate_enabled_next";
+				$.fn.dataTableExt.oPagination[ oSettings.sPaginationType ].fnUpdate( oSettings, function( oSettings ) {
+					_fnCalculateEnd( oSettings );
+					_fnDraw( oSettings );
+				} );
 			}
 			
 			/* Show information about the table */
@@ -934,165 +1415,265 @@
 				}
 			}
 			
-			for(i = 0; i < sparkLines.length; i++)
+			// Custom final callback function - might want to manipule the end result
+			if ( typeof oSettings.fnFinalCallback == "function" )
 			{
-				eval(sparkLines[i]);
+				oSettings.fnFinalCallback(oSettings.aaData, iRowCount);
 			}
 		}
+
+
 		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 * Options (features) HTML
+		 */
 		
 		/*
 		 * Function: _fnAddOptionsHtml
 		 * Purpose:  Add the options to the page HTML for the table
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 */
-		function _fnAddOptionsHtml( oSettings )
+		function _fnAddOptionsHtml ( oSettings )
 		{
 			/*
-			 * Filter details
+			 * Create a temporary, empty, div which we can later on replace with what we have generated
+			 * we do it this way to rendering the 'options' html offline - speed :-)
 			 */
-			if ( oSettings.oFeatures.bFilter )
+			var nHolding = document.createElement( 'div' );
+			oSettings.nTable.parentNode.insertBefore( nHolding, oSettings.nTable );
+			
+			/* 
+			 * All DataTables are wrapped in a div - this is not currently optional - backwards 
+			 * compatability. It can be removed if you don't want it.
+			 */
+			var nWrapper = document.createElement( 'div' );
+			nWrapper.className = "dataTables_wrapper";
+			if ( oSettings.sTableId != "" )
 			{
-				var nFilter = document.createElement( 'div' );
-				if ( oSettings.sTableId != "" )
-				{
-					nFilter.setAttribute( 'id', oSettings.sTableId+'_filter' );
-				}
-				nFilter.className = "dataTables_filter";
-				nFilter.innerHTML = 
-					oSettings.oLanguage.sSearch+' <input type="text">';
-				oSettings.nTable.parentNode.insertBefore( nFilter, oSettings.nTable );
-				
-				$("input", nFilter).keyup( 
-					function() { _fnFilter( oSettings, this.value ); } );
+				nWrapper.setAttribute( 'id', oSettings.sTableId+'_wrapper' );
 			}
 			
-			/*
-			 * Information about the table
-			 */
-			if ( oSettings.oFeatures.bInfo )
-			{
-				oSettings.nInfo = document.createElement( 'div' );
-				if ( oSettings.sTableId != "" )
-				{
-					oSettings.nInfo.setAttribute( 'id', oSettings.sTableId+'_info' );
-				}
-				oSettings.nInfo.className = "dataTables_info";
-				$(oSettings.nInfo).insertAfter( oSettings.nTable );
-			}
+			/* Track where we want to insert the option */
+			var nInsertNode = nWrapper;
 			
-			/*
-			 * Paginate details
-			 */
-			if ( oSettings.oFeatures.bPaginate )
+			/* IE don't treat strings as arrays */
+			var sDom = oSettings.sDomPositioning.split('');
+			
+			/* Loop over the user set positioning and place the elements as needed */
+			for ( var i=0 ; i<sDom.length ; i++ )
 			{
-				oSettings.nPaginate = document.createElement( 'div' );
-				oSettings.nPrevious = document.createElement( 'div' );
-				oSettings.nNext = document.createElement( 'div' );
+				var cOption = sDom[i];
 				
-				if ( oSettings.sTableId != "" )
+				if ( cOption == '<' )
 				{
-					oSettings.nPaginate.setAttribute( 'id', oSettings.sTableId+'_paginate' );
-					oSettings.nPrevious.setAttribute( 'id', oSettings.sTableId+'_previous' );
-					oSettings.nNext.setAttribute( 'id', oSettings.sTableId+'_next' );
-				}
-				
-				oSettings.nPaginate.className = "dataTables_paginate";
-				oSettings.nPrevious.className = "paginate_disabled_previous";
-				oSettings.nNext.className = "paginate_disabled_next";
-				
-				oSettings.nPaginate.appendChild( oSettings.nPrevious );
-				oSettings.nPaginate.appendChild( oSettings.nNext );
-				$(oSettings.nPaginate).insertAfter( oSettings.nTable );
-				
-				$(oSettings.nPrevious).click( function() {
-					oSettings.iDisplayStart -= oSettings.iDisplayLength;
+					/* New container div */
+					var nNewNode = document.createElement( 'div' );
 					
-					/* Correct for underrun */
-					if ( oSettings.iDisplayStart < 0 )
-					  oSettings.iDisplayStart = 0;
-					
-					_fnCalculateEnd( oSettings );
-					_fnDraw( oSettings );
-				} );
-				
-				$(oSettings.nNext).click( function() {
-					/* Make sure we are not over running the display array */
-					if ( oSettings.iDisplayStart + oSettings.iDisplayLength < oSettings.aaData.length )
-						oSettings.iDisplayStart += oSettings.iDisplayLength;
-					
-					_fnCalculateEnd( oSettings );
-					_fnDraw( oSettings );
-				} );
-				
-				/*
-				 * Display length
-				 */
-				if ( oSettings.oFeatures.bLengthChange )
-				{
-					/* This can be overruled by not using the _MENU_ var/macro in the language variable */
-					var sName = (oSettings.sTableId == "") ? "" : 'name="'+oSettings.sTableId+'_length"';
-					var sStdMenu = 
-						'<select size="1" '+sName+'>'+
-							'<option value="10">10</option>'+
-							'<option value="25">25</option>'+
-							'<option value="50">50</option>'+
-							'<option value="100">100</option>'+
-						'</select>';
-					
-					var nLength = document.createElement( 'div' );
-					if ( oSettings.sTableId != "" )
+					/* Check to see if we should append a class name to the container */
+					var cNext = oSettings.sDomPositioning[i+1];
+					if ( cNext == "'" || cNext == '"' )
 					{
-						nLength.setAttribute( 'id', oSettings.sTableId+'_length' );
+						var sClass = "";
+						var j = 2;
+						while ( oSettings.sDomPositioning[i+j] != cNext )
+						{
+							sClass += oSettings.sDomPositioning[i+j];
+							j++;
+						}
+						nNewNode.className = sClass;
+						i += j; /* Move along the position array */
 					}
-					nLength.className = "dataTables_length";
-					nLength.innerHTML = oSettings.oLanguage.sLengthMenu.replace( '_MENU_', sStdMenu );
 					
-					oSettings.nTable.parentNode.insertBefore( nLength, oSettings.nTable );
-					$('select', nLength).change( function() {
-						oSettings.iDisplayLength = parseInt($(this).val());
-						
-						_fnCalculateEnd( oSettings );
-						_fnDraw( oSettings );
-					} );
+					nInsertNode.appendChild( nNewNode );
+					nInsertNode = nNewNode;
 				}
-				
-				/*
-				 * Create a wrapper div around the table
-				 */
-				var nWrapper = document.createElement( 'div' );
-				if ( oSettings.sTableId != "" )
+				else if ( cOption == '>' )
 				{
-					nWrapper.setAttribute( 'id', oSettings.sTableId+'_wrapper' );
+					/* End container div */
+					nInsertNode = nInsertNode.parentNode;
 				}
-				nWrapper.className = "dataTables_wrapper";
-				oSettings.nTable.parentNode.insertBefore( nWrapper, oSettings.nTable );
-				nWrapper.appendChild( oSettings.nTable );
+				else if ( cOption == 'l' && oSettings.oFeatures.bPaginate && oSettings.oFeatures.bLengthChange )
+				{
+					/* Length */
+					nInsertNode.appendChild( _fnFeatureHtmlLength( oSettings ) );
+				}
+				else if ( cOption == 'f' && oSettings.oFeatures.bFilter )
+				{
+					/* Filter */
+					nInsertNode.appendChild( _fnFeatureHtmlFilter( oSettings ) );
+				}
+				else if ( cOption == 'r' && oSettings.oFeatures.bProcessing )
+				{
+					/* pRocessing */
+					nInsertNode.appendChild( _fnFeatureHtmlProcessing( oSettings ) );
+				}
+				else if ( cOption == 't' )
+				{
+					/* Table */
+					nInsertNode.appendChild( oSettings.nTable );
+				}
+				else if ( cOption ==  'i' && oSettings.oFeatures.bInfo )
+				{
+					/* Info */
+					nInsertNode.appendChild( _fnFeatureHtmlInfo( oSettings ) );
+				}
+				else if ( cOption == 'p' && oSettings.oFeatures.bPaginate )
+				{
+					/* Pagination */
+					nInsertNode.appendChild( _fnFeatureHtmlPaginate( oSettings ) );
+				}
 			}
 			
-			/*
-			 * Processing
-			 */
-			if ( oSettings.oFeatures.bProcessing )
-			{
-				oSettings.nProcessing = document.createElement( 'div' );
-				if ( oSettings.sTableId != "" )
-				{
-					oSettings.nProcessing.setAttribute( 'id', oSettings.sTableId+'_processing' );
-				}
-				oSettings.nProcessing.appendChild( document.createTextNode( oSettings.oLanguage.sProcessing ) );
-				oSettings.nProcessing.className = "dataTables_processing";
-				oSettings.nProcessing.style.visibility = "hidden";
-				oSettings.nTable.parentNode.insertBefore( oSettings.nProcessing, oSettings.nTable );
-			}
+			/* Built our DOM structure - replace the holding div with what we want */
+			nHolding.parentNode.replaceChild( nWrapper, nHolding );
 		}
+		
+		
+		/*
+		 * Function: _fnFeatureHtmlFilter
+		 * Purpose:  Generate the node required for filtering text
+		 * Returns:  node
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnFeatureHtmlFilter ( oSettings )
+		{
+			var nFilter = document.createElement( 'div' );
+			if ( oSettings.sTableId != "" )
+			{
+				nFilter.setAttribute( 'id', oSettings.sTableId+'_filter' );
+			}
+			nFilter.className = "dataTables_filter";
+			nFilter.innerHTML = oSettings.oLanguage.sSearch+' <input type="text" />';
+			
+			$("input", nFilter).keyup( function() { 
+				_fnFilterComplete( oSettings, this.value ); 
+			} );
+			
+			return nFilter;
+		}
+		
+		
+		/*
+		 * Function: _fnFeatureHtmlInfo
+		 * Purpose:  Generate the node required for the info display
+		 * Returns:  node
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnFeatureHtmlInfo ( oSettings )
+		{
+			var nInfo = document.createElement( 'div' );
+			oSettings.nInfo = nInfo;
+			
+			if ( oSettings.sTableId != "" )
+			{
+				oSettings.nInfo.setAttribute( 'id', oSettings.sTableId+'_info' );
+			}
+			oSettings.nInfo.className = "dataTables_info";
+			return nInfo;
+		}
+		
+		
+		/*
+		 * Function: _fnFeatureHtmlPaginate
+		 * Purpose:  Generate the node required for default pagination
+		 * Returns:  node
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnFeatureHtmlPaginate ( oSettings )
+		{
+			var nPaginate = document.createElement( 'div' );
+			nPaginate.className = "dataTables_paginate";
+			
+			oSettings.nPaginate = nPaginate;
+			$.fn.dataTableExt.oPagination[ oSettings.sPaginationType ].fnInit( oSettings, function( oSettings ) {
+				_fnCalculateEnd( oSettings );
+				_fnDraw( oSettings );
+			} );
+			return nPaginate;
+		}
+		
+		
+		/*
+		 * Function: _fnFeatureHtmlLength
+		 * Purpose:  Generate the node required for user display length changing
+		 * Returns:  node
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnFeatureHtmlLength ( oSettings )
+		{
+			/* This can be overruled by not using the _MENU_ var/macro in the language variable */
+			var sName = (oSettings.sTableId == "") ? "" : 'name="'+oSettings.sTableId+'_length"';
+			var sStdMenu = 
+				'<select size="1" '+sName+'>'+
+					'<option value="10">10</option>'+
+					'<option value="25">25</option>'+
+					'<option value="50">50</option>'+
+					'<option value="100">100</option>'+
+				'</select>';
+			
+			var nLength = document.createElement( 'div' );
+			if ( oSettings.sTableId != "" )
+			{
+				nLength.setAttribute( 'id', oSettings.sTableId+'_length' );
+			}
+			nLength.className = "dataTables_length";
+			nLength.innerHTML = oSettings.oLanguage.sLengthMenu.replace( '_MENU_', sStdMenu );
+			
+			/* Set the length to the current display length - thanks to Andrea Pavlovic for this fix */
+			$('select option[@value="'+oSettings.iDisplayLength+'"]',nLength).attr("selected",true);
+			
+			$('select', nLength).change( function() {
+				oSettings.iDisplayLength = parseInt($(this).val());
+				
+				_fnCalculateEnd( oSettings );
+				
+				/* If we have space to show extra rows (backing up from the end point - then do so */
+				if ( oSettings.iDisplayEnd == oSettings.aaData.length )
+				{
+					oSettings.iDisplayStart = oSettings.iDisplayEnd - oSettings.iDisplayLength;
+					if ( oSettings.iDisplayStart < 0 )
+					{
+						oSettings.iDisplayStart = 0;
+					}
+				}
+				
+				_fnDraw( oSettings );
+			} );
+			
+			return nLength;
+		}
+		
+		
+		/*
+		 * Function: _fnFeatureHtmlProcessing
+		 * Purpose:  Generate the node required for the processing node
+		 * Returns:  node
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnFeatureHtmlProcessing ( oSettings )
+		{
+			var nProcessing = document.createElement( 'div' );
+			oSettings.nProcessing = nProcessing;
+			
+			if ( oSettings.sTableId != "" )
+			{
+				oSettings.nProcessing.setAttribute( 'id', oSettings.sTableId+'_processing' );
+			}
+			oSettings.nProcessing.appendChild( document.createTextNode( oSettings.oLanguage.sProcessing ) );
+			oSettings.nProcessing.className = "dataTables_processing";
+			oSettings.nProcessing.style.visibility = "hidden";
+			oSettings.nTable.parentNode.insertBefore( oSettings.nProcessing, oSettings.nTable );
+			
+			return nProcessing;
+		}
+		
 		
 		/*
 		 * Function: _fnProcessingDisplay
 		 * Purpose:  Display or hide the processing indicator
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 *           bool:
 		 *   true - show the processing indicator
 		 *   false - don't show
@@ -1107,35 +1688,65 @@
 		
 		
 		
-		/*
-		 * Function: _fnConvertToWidth
-		 * Purpose:  Convert a CSS unit width to pixels (e.g. 2em)
-		 * Returns:  int:iWidth - width in pixels
-		 * Inputs:   string:sWidth - width to be converted
-		 *           node:nParent - parent to get the with for (required for
-		 *             relative widths) - optional
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 * Filtering
 		 */
-		function _fnConvertToWidth ( sWidth, nParent )
+		
+		/*
+		 * Function: _fnFilterComplete
+		 * Purpose:  Filter the table using both the global filter and column based filtering
+		 * Returns:  -
+		 * Inputs:   object:oSettings - dataTables settings object
+		 *           string:sInput - string to filter on
+		 *           int:iForce - optional - force a research of the master array (1) or not (undefined or 0)
+		 */
+		function _fnFilterComplete ( oSettings, sInput, iForce, iColumn )
 		{
-			if ( !sWidth || sWidth==null || sWidth=='' )
+			/* Filter on everything */
+			_fnFilter( oSettings, sInput, iForce, false );
+			
+			/* Now do the individual column filter */
+			for ( var i=0 ; i<oSettings.asPreSearchCols.length ; i++ )
 			{
-				return 0;
+				_fnFilterColumn( oSettings, oSettings.asPreSearchCols[i], i );
 			}
 			
-			if ( typeof nParent == "undefined" )
+			/* Redraw the table */
+			oSettings.iDisplayStart = 0;
+			_fnCalculateEnd( oSettings );
+			_fnDraw( oSettings );
+			
+			/* Rebuild search array 'offline' */
+			_fnBuildSearchArray( oSettings, 0 );
+		}
+		
+		
+		/*
+		 * Function: _fnFilterColumn
+		 * Purpose:  Filter the table on a per-column basis
+		 * Returns:  -
+		 * Inputs:   object:oSettings - dataTables settings object
+		 *           string:sInput - string to filter on
+		 *           int:iColumn - column to filter
+		 */
+		function _fnFilterColumn ( oSettings, sInput, iColumn )
+		{
+			if ( sInput == "" )
 			{
-				nParent = document.getElementsByTagName('body')[0];
+				return;
 			}
 			
-			var iWidth;
-			var nTmp = document.createElement( "div" );
-			nTmp.style.width = sWidth;
+			var iIndexCorrector = 0;
+			var rpSearch = new RegExp( sInput, "i" );
 			
-			nParent.appendChild( nTmp );
-			iWidth = nTmp.offsetWidth;
-			nParent.removeChild( nTmp );
-			
-			return ( iWidth );
+			for ( i=oSettings.aaData.length-1 ; i>=0 ; i-- )
+			{
+				if ( ! rpSearch.test( oSettings.aaData[i][iColumn] ) )
+				{
+					oSettings.aaData.splice( i, 1 );
+					iIndexCorrector++;
+				}
+			}
 		}
 		
 		
@@ -1143,23 +1754,37 @@
 		 * Function: _fnFilter
 		 * Purpose:  Filter the data table based on user input and draw the table
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 *           string:sInput - string to filter on
-		 *           int:iForce - force a research of the master array (1) or not (undefined or 0)
+		 *           int:iForce - optional - force a research of the master array (1) or not (undefined or 0)
 		 */
 		function _fnFilter( oSettings, sInput, iForce )
 		{
 			var flag, i, j;
 			var aaDataSearch = new Array();
 			
+			/* Check if we are forcing or not - optional parameter */
 			if ( typeof iForce == 'undefined' || iForce == null )
+			{
 				iForce = 0;
+			}
+			
+			/* Check if we are re-drawing or not - optional parameter */
+			if ( typeof bRedraw == 'undefined' || bRedraw == null )
+			{
+				bRedraw = true;
+			}
 			
 			/* Generate the regular expression to use. Something along the lines of:
 			 * ^(?=.*?\bone\b)(?=.*?\btwo\b)(?=.*?\bthree\b).*$
 			 */
-			var asSearch = sInput.split( ' ' );
-			var sRegExpString = '^(?=.*?'+asSearch.join( ')(?=.*?' )+').*$';
+			var asSearchOr = sInput.split(';');
+			var asRegExpString=[];
+			for(var i = 0;i<asSearchOr.length;i++){
+				var asSearch = asSearchOr[i].split( ' ' );
+				asRegExpString[i] = '(?=.*?'+asSearch.join( ')(?=.*?' )+').*';
+			}
+			var sRegExpString = '^('+asRegExpString.join( ')|(')+')$';
 			var rpSearch = new RegExp( sRegExpString, "i" );
 			
 			/*
@@ -1218,135 +1843,60 @@
 				
 				oSettings.sPreviousSearch = sInput;
 			}
-			
-			/* Redraw the table */
-			oSettings.iDisplayStart = 0; /* Start the user from the first page on filter */
-			_fnCalculateEnd( oSettings );
-			_fnDraw( oSettings );
-			
-			/* Rebuild search array 'offline' */
-			_fnBuildSearchArray( oSettings, 0 );
 		}
 		
 		
-		/*
-		 * Function: _fnCalculateEnd
-		 * Purpose:  Rcalculate the end point based on the start point
-		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 * Sorting
 		 */
-		function _fnCalculateEnd( oSettings )
-		{
-			if ( oSettings.oFeatures.bPaginate == false )
-			{
-				oSettings.iDisplayEnd = oSettings.aaData.length;
-			}
-			else
-			{
-				/* Set the end point of the display - based on how many elements there are
-				 * still to display
-				 */
-				if ( oSettings.iDisplayStart + oSettings.iDisplayLength > oSettings.aaData.length )
-					oSettings.iDisplayEnd = oSettings.aaData.length;
-				else
-					oSettings.iDisplayEnd = oSettings.iDisplayStart + oSettings.iDisplayLength;
-			}
-		}
-		
 		
 		/*
 	 	 * Function: _fnSort
 		 * Purpose:  Change the order of the table
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
-		 *           int:iColumn - column number to be ordered
-		 *           bool:bForce - force a resort - optional - default false
+		 * Inputs:   object:oSettings - dataTables settings object
 		 * Notes:    We always sort the master array and then apply a filter again
 		 *   if it is needed. This probably isn't optimal - but atm I can't think
 		 *   of any other way which is (each has disadvantages)
 		 */
-		_fnSort = function ( oSettings, iColumn, bForce )
+		_fnSort = function ( oSettings )
 		{
-			/* Check if column is sortable */
-			if ( ! oSettings.aoColumns[ iColumn ].bSortable )
-			{
-				return;
-			}
+			/* Here is what we are looking to achieve here (custom sort functions add complication...)
+			 * function _fnSortText ( a, b )
+			 * {
+			 * 	var iTest;
+			 *  var oSort = $.fn.dataTableExt.oSort;
+			 * 	iTest = oSort['string-asc']( a[0], b[0] );
+			 * 	if ( iTest == 0 )
+			 * 		iTest = oSort['string-asc']( a[1], b[1] );
+			 * 		if ( iTest == 0 )
+			 * 			iTest = oSort['string-asc']( a[2], b[2] );
+			 * 	
+			 * 	return iTest;
+			 * }
+			 */
+			var sDynamicSort = "var fnLocalSorting = function(a,b){var iTest; var oSort = $.fn.dataTableExt.oSort;";
+			var aaSort = oSettings.aaSorting;
 			
-			if ( typeof bForce == 'undefined' )
-				bForce = false;
+			for ( var i=0 ; i<aaSort.length-1 ; i++ )
+			{
+				sDynamicSort += "iTest = oSort['"+oSettings.aoColumns[ aaSort[i][0] ].sType+"-"+aaSort[i][1]+"']"+
+					"( a["+aaSort[i][0]+"], b["+aaSort[i][0]+"] ); if ( iTest == 0 )";
+			}
+			sDynamicSort += "iTest = oSort['"+oSettings.aoColumns[ aaSort[aaSort.length-1][0] ].sType+"-"+aaSort[i][1]+"']"+
+				"( a["+aaSort[i][0]+"], b["+aaSort[i][0]+"] ); return iTest;}";
 			
-			/* Find out if we are reversing the order of the array */
-			if ( iColumn == oSettings.iColumnSorting && !bForce )
-			{
-				oSettings.aaDataMaster.reverse(); /* needs to be data master - and force */
-				
-				oSettings.iSortingDirection = (oSettings.iSortingDirection == 0) ? 1 : 0;
-			}
-			else
-			{
-				/* Need to sort the array */
-				oSettings.iColumnSorting = iColumn;
-				oSettings.iSortingDirection = 0;
-				
-				if ( typeof oSettings.aoColumns[ iColumn ].fnSort == 'function' )
-				{
-					/* Custom sort function */
-					oSettings.aaDataMaster.sort( oSettings.aoColumns[ iColumn ].fnSort );
-				}
-				else if ( oSettings.aoColumns[ iColumn ].sType == 'numeric' )
-				{
-					/* Use numerical sorting */
-					oSettings.aaDataMaster.sort( function ( a, b ) {
-						var x = a[iColumn] == "-" ? 0 : a[iColumn];
-						var y = b[iColumn] == "-" ? 0 : b[iColumn];
-						return x - y;
-					} );
-				}
-				else if ( oSettings.aoColumns[ iColumn ].sType == 'date' )
-				{
-					/* Use date sorting */
-					oSettings.aaDataMaster.sort( function ( a, b ) {
-						var x = Date.parse( a[iColumn] );
-						var y = Date.parse( b[iColumn] );
-						return x - y;
-					} );
-				}
-				else if ( oSettings.aoColumns[ iColumn ].sType == 'html' )
-				{
-					/* Use html sorting - strip html tags */
-					oSettings.aaDataMaster.sort( function ( a, b ) {
-						var x = a[iColumn].replace( /<.*?>/g, "" );
-						var y = b[iColumn].replace( /<.*?>/g, "" );
-						
-						x = x.toLowerCase();
-						y = y.toLowerCase();
-						return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-					} );
-				}
-				else
-				{
-					/* Use default alphabetical sorting */
-					oSettings.aaDataMaster.sort( function ( a, b ) {
-						var x = a[iColumn].toLowerCase();
-						var y = b[iColumn].toLowerCase();
-						return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-					} );
-				}
-				
-				/* Reverse if required by the default sorting direction */
-				if ( oSettings.sDefaultSortingDirection == "desc" )
-				{
-					oSettings.aaDataMaster.reverse();
-				}
-			}
+			/* The eval has to be done to a variable for IE */
+			eval( sDynamicSort );
+			oSettings.aaDataMaster.sort( fnLocalSorting );
 			
 			
 			/* Copy the master data into the draw array and re-draw */
 			if ( oSettings.oFeatures.bFilter )
 			{
 				/* _fnFilter() will redraw the table for us */
-				_fnFilter( oSettings, oSettings.sPreviousSearch, 1 );
+				_fnFilterComplete( oSettings, oSettings.sPreviousSearch, 1 );
 			}
 			else
 			{
@@ -1358,10 +1908,104 @@
 		
 		
 		/*
+		 * Function: _fnSortingClasses
+		 * Purpose:  Set the sortting classes on the header
+		 * Returns:  -
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnSortingClasses( oSettings )
+		{
+			$("thead th", oSettings.nTable).removeClass( "sorting_asc" ).removeClass( "sorting_desc" ).removeClass( "sorting" );
+			var iCorrector = 0;
+			
+			for ( var i=0 ; i<oSettings.aoColumns.length ; i++ )
+			{
+				if ( oSettings.aoColumns[i].bSortable && oSettings.aoColumns[i].bVisible )
+				{
+					var sClass = "sorting";
+					for ( var j=0 ; j<oSettings.aaSorting.length ; j++ )
+					{
+						if ( oSettings.aaSorting[j][0] == i )
+						{
+							if ( oSettings.aaSorting[j][1] == "asc" )
+								sClass = "sorting_asc";
+							else
+								sClass = "sorting_desc";
+							break;
+						}
+					}
+					$("thead th:eq("+_fnColumnIndexToVisible(oSettings, i)+")", oSettings.nTable).addClass( sClass );
+				}
+			}
+		}
+		
+		
+		/*
+		 * Function: _fnVisibleToColumnIndex
+		 * Purpose:  Covert the index of a visible column to the index in the data array (take account
+		 *   of hidden columns)
+		 * Returns:  int:i - the data index
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnVisibleToColumnIndex( oSettings, iMatch )
+		{
+			var iColumn = -1;
+			
+			for ( var i=0 ; i<oSettings.aoColumns.length ; i++ )
+			{
+				if ( oSettings.aoColumns[i].bVisible == true )
+				{
+					iColumn++;
+				}
+				
+				if ( iColumn == iMatch )
+				{
+					return i;
+				}
+			}
+			
+			return null;
+		}
+		
+		
+		/*
+		 * Function: _fnColumnIndexToVisible
+		 * Purpose:  Covert the index of an index in the data array and convert it to the visible
+		 *   column index (take account of hidden columns)
+		 * Returns:  int:i - the data index
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnColumnIndexToVisible( oSettings, iMatch )
+		{
+			var iColumn = 0;
+			
+			for ( var i=0 ; i<oSettings.aoColumns.length ; i++ )
+			{
+				if ( i == iMatch )
+				{
+					return iColumn;
+				}
+				
+				if ( oSettings.aoColumns[i].bVisible == true )
+				{
+					iColumn++;
+				}
+			}
+			
+			return null;
+		}
+		
+		
+		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 * Support functions
+		 */
+		
+		/*
 		 * Function: _fnBuildSearchArray
 		 * Purpose:  Create an array which can be quickly search through
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 *           int:iMaster - use the master data array - optional
 		 */
 		function _fnBuildSearchArray ( oSettings, iMaster )
@@ -1387,10 +2031,67 @@
 		
 		
 		/*
+		 * Function: _fnCalculateEnd
+		 * Purpose:  Rcalculate the end point based on the start point
+		 * Returns:  -
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnCalculateEnd( oSettings )
+		{
+			if ( oSettings.oFeatures.bPaginate == false )
+			{
+				oSettings.iDisplayEnd = oSettings.aaData.length;
+			}
+			else
+			{
+				/* Set the end point of the display - based on how many elements there are
+				 * still to display
+				 */
+				if ( oSettings.iDisplayStart + oSettings.iDisplayLength > oSettings.aaData.length )
+					oSettings.iDisplayEnd = oSettings.aaData.length;
+				else
+					oSettings.iDisplayEnd = oSettings.iDisplayStart + oSettings.iDisplayLength;
+			}
+		}
+		
+		
+		/*
+		 * Function: _fnConvertToWidth
+		 * Purpose:  Convert a CSS unit width to pixels (e.g. 2em)
+		 * Returns:  int:iWidth - width in pixels
+		 * Inputs:   string:sWidth - width to be converted
+		 *           node:nParent - parent to get the with for (required for
+		 *             relative widths) - optional
+		 */
+		function _fnConvertToWidth ( sWidth, nParent )
+		{
+			if ( !sWidth || sWidth==null || sWidth=='' )
+			{
+				return 0;
+			}
+			
+			if ( typeof nParent == "undefined" )
+			{
+				nParent = document.getElementsByTagName('body')[0];
+			}
+			
+			var iWidth;
+			var nTmp = document.createElement( "div" );
+			nTmp.style.width = sWidth;
+			
+			nParent.appendChild( nTmp );
+			iWidth = nTmp.offsetWidth;
+			nParent.removeChild( nTmp );
+			
+			return ( iWidth );
+		}
+		
+		
+		/*
 		 * Function: _fnCalculateColumnWidths
 		 * Purpose:  Calculate the width of columns for the table
 		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 */
 		function _fnCalculateColumnWidths ( oSettings )
 		{
@@ -1491,7 +2192,6 @@
 				{
 					iIndex = oNodes[i].getAttribute('tag_index');
 					
-					
 					oSettings.aoColumns[iIndex].sWidth = $("td", nCalcTmp)[i].offsetWidth +"px";
 				}
 				
@@ -1504,7 +2204,7 @@
 		 * Function: fnGetMaxLenString
 		 * Purpose:  Get the maximum strlen for each data column
 		 * Returns:  string: - max strlens for each column
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 *           int:iCol - column of interest
 		 */
 		function fnGetMaxLenString( oSettings, iCol )
@@ -1558,7 +2258,7 @@
 		 * Function: _fnMasterIndexFromDisplay
 		 * Purpose:  Get the master index from the display index
 		 * Returns:  int:i - index
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Inputs:   object:oSettings - dataTables settings object
 		 *           int:iIndexAAData - display array index
 		 */
 		function _fnMasterIndexFromDisplay( oSettings, iIndexAAData )
@@ -1575,76 +2275,52 @@
 		
 		
 		/*
-		 * Function: _fnLanguageProcess
-		 * Purpose:  Copy language variables from remote object to a local one
-		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
-		 *           object:oLanguage - Language information
+		 * Function: _fnDetectType
+		 * Purpose:  Get the sort type based on an input string
+		 * Returns:  string:
+		 *   - 'string'
+		 *   - 'numeric'
+		 *   - 'date'
+		 * Inputs:   string:sData - data we wish to know the type of
 		 */
-		function _fnLanguageProcess( oSettings, oLanguage )
+		function _fnDetectType( sData )
 		{
-			if ( typeof oLanguage.sProcessing != 'undefined' )
-				oSettings.oLanguage.sProcessing = oLanguage.sProcessing;
-			
-			if ( typeof oLanguage.sLengthMenu != 'undefined' )
-				oSettings.oLanguage.sLengthMenu = oLanguage.sLengthMenu;
-			
-			if ( typeof oLanguage.sZeroRecords != 'undefined' )
-				oSettings.oLanguage.sZeroRecords = oLanguage.sZeroRecords;
-			
-			if ( typeof oLanguage.sInfo != 'undefined' )
-				oSettings.oLanguage.sInfo = oLanguage.sInfo;
-			
-			if ( typeof oLanguage.sInfoEmtpy != 'undefined' )
-				oSettings.oLanguage.sInfoEmtpy = oLanguage.sInfoEmtpy;
-			
-			if ( typeof oLanguage.sInfoFiltered != 'undefined' )
-				oSettings.oLanguage.sInfoFiltered = oLanguage.sInfoFiltered;
-			
-			if ( typeof oLanguage.sInfoPostFix != 'undefined' )
-				oSettings.oLanguage.sInfoPostFix = oLanguage.sInfoPostFix;
-			
-			if ( typeof oLanguage.sSearch != 'undefined' )
-				oSettings.oLanguage.sSearch = oLanguage.sSearch;
-			
-			_fnInitalise( oSettings );
+			if ( _fnIsNumeric(sData) )
+			{
+				return 'numeric';
+			}
+			else if ( ! isNaN(Date.parse(sData) ) )
+			{
+				return 'date';
+			}
+			else
+			{
+				return 'string';
+			}
 		}
 		
 		
 		/*
-		 * Function: _fnInitalise
-		 * Purpose:  Draw the table for the first time, adding all required features
-		 * Returns:  -
-		 * Inputs:   object:oSettings - datatTables settings object
+		 * Function: _fnIsNumeric
+		 * Purpose:  Check to see if a string is numeric
+		 * Returns:  bool:bIsNumber - true:is number, false:not number
+		 * Inputs:   string:sText - string to check
 		 */
-		function _fnInitalise ( oSettings )
+		function _fnIsNumeric ( sText )
 		{
-			/* Ensure that the table data is fully initialised */
-			if ( oSettings.bInitialised == false )
-			{
-				setTimeout( function(){ _fnInitalise( oSettings ) }, 200 );
-				return;
+			var ValidChars = "0123456789.-";
+			var Char;
+			
+			for ( i=0 ; i<sText.length ; i++ ) 
+			{ 
+				Char = sText.charAt(i); 
+				if (ValidChars.indexOf(Char) == -1) 
+				{
+					return false;
+				}
 			}
 			
-			/* Show the display HTML options */
-			_fnAddOptionsHtml( oSettings );
-			
-			/* Draw the headers for the table */
-			_fnDrawHead( oSettings, oSettings.iDefaultSortIndex );
-			
-			/* If there is default sorting required - let's do it. The sort function
-			 * will do the drawing for us. Otherwise we draw the table
-			 */
-			if ( oSettings.oFeatures.bSort )
-			{
-				_fnSort( oSettings, oSettings.iDefaultSortIndex );
-			}
-			else
-			{
-				 oSettings.aaData =  oSettings.aaDataMaster;
-				_fnCalculateEnd( oSettings );
-				_fnDraw( oSettings );
-			}
+			return true;
 		}
 		
 		
@@ -1669,8 +2345,8 @@
 		
 		
 		
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-		 * Construct
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 * Constructor
 		 */
 		return this.each(function()
 		{
@@ -1722,11 +2398,12 @@
 				
 				if ( typeof oInit.asStripClasses != 'undefined' )
 					oSettings.asStripClasses = oInit.asStripClasses;
-				else
-					oSettings.asStripClasses = [ "odd", "even" ];
 				
 				if ( typeof oInit.fnRowCallback != 'undefined' )
 					oSettings.fnRowCallback = oInit.fnRowCallback;
+				
+				if ( typeof oInit.fnFinalCallback != 'undefined' )
+					oSettings.fnFinalCallback = oInit.fnFinalCallback;
 				
 				if ( typeof oInit.fnHeaderCallback != 'undefined' )
 					oSettings.fnHeaderCallback = oInit.fnHeaderCallback;
@@ -1734,14 +2411,17 @@
 				if ( typeof oInit.fnFooterCallback != 'undefined' )
 					oSettings.fnFooterCallback = oInit.fnFooterCallback;
 				
-				if ( typeof oInit.iDefaultSortIndex != 'undefined' )
-					oSettings.iDefaultSortIndex = oInit.iDefaultSortIndex;
+				if ( typeof oInit.aaSorting != 'undefined' )
+					oSettings.aaSorting = oInit.aaSorting;
 				
-				if ( typeof oInit.sDefaultSortDirection != 'undefined' )
-					oSettings.sDefaultSortingDirection = oInit.sDefaultSortDirection;
+				if ( typeof oInit.sPaginationType != 'undefined' )
+					oSettings.sPaginationType = oInit.sPaginationType;
+				
+				if ( typeof oInit.sDom != 'undefined' )
+					oSettings.sDomPositioning = oInit.sDom;
 				
 				/* Backwards compatability */
-				/* aoColumns / aoData - remove in 1.3 */
+				/* aoColumns / aoData - remove at some point... */
 				if ( typeof oInit != 'undefined' && typeof oInit.aoData != 'undefined' )
 				{
 					oInit.aoColumns = oInit.aoData;
@@ -1790,6 +2470,15 @@
 				oSettings.aaDataMaster = oInit.aaData.slice();
 				/* Add a thead and tbody to the table */
 			 	$(this).html( '<thead></thead><tbody></tbody>' );
+				
+				/* Set as strings */
+				for ( var i=0 ; i<oSettings.aoColumns.length ; i++ )
+				{
+					if ( oSettings.aoColumns[i].sType == null )
+					{
+						oSettings.aoColumns[i].sType = "string";
+					}
+				}
 			}
 			else
 			{
@@ -1816,6 +2505,6 @@
 			{
 				_fnInitalise( oSettings )
 			}
-		})
+		});
 	}
 })(jQuery);

@@ -10,11 +10,7 @@ var MetaLayer ={
 	getCurrentDate:function(){
 
 		var currentDate=new Date();
-		var currentMonth = "0" + (currentDate.getMonth() + 1);
-		var currentDay = "0" + (currentDate.getDate());
-
-		var currentDateStr = currentDate.getFullYear() + "-" + (currentMonth.substring(currentMonth.length-2, currentMonth.length)) + "-" + (currentDay.substring(currentDay.length-2, currentDay.length));
-		return currentDateStr;
+		return MetaLayer.toDateString(currentDate);
 
 	},
 
@@ -22,6 +18,23 @@ var MetaLayer ={
 
 		var currentDate=new Date();
 		return currentDate.getFullYear() + "-01-01";
+
+	},
+	
+	getFirstDayOfLastMonth:function(){
+
+		var currentDate=new Date();
+		currentDate.setMonth(currentDate.getMonth() - 1);
+		currentDate.setDate(1);
+		return MetaLayer.toDateString(currentDate);
+
+	},
+
+	getLastDayOfLastMonth:function(){
+
+		var currentDate=new Date();
+		currentDate.setDate(0);
+		return MetaLayer.toDateString(currentDate);
 
 	},
 	
@@ -36,6 +49,15 @@ var MetaLayer ={
 		var prevDateStr = prevDate.getFullYear() + "-" + (prevMonth.substring(prevMonth.length-2, prevMonth.length)) + "-" + (prevDay.substring(prevDay.length-2, prevDay.length));
 		return prevDateStr;
 
+	},
+
+	toDateString: function(d){
+		var currentMonth = "0" + (d.getMonth() + 1);
+		var currentDay = "0" + (d.getDate());
+
+		var dStr = d.getFullYear() + "-" + (currentMonth.substring(currentMonth.length-2, currentMonth.length)) + "-" + (currentDay.substring(currentDay.length-2, currentDay.length));
+		return dStr;
+	
 	},
 	
 	getMonth:function(){

@@ -87,21 +87,22 @@
 
 .dataTables_wrapper {
 	position: relative;
-	min-height: 102px;
-	* height: 102px;
+	min-height: 302px;
+	_height: 302px;
 	clear: both;
 }
 
 .dataTables_processing {
 	position: absolute;
-	top: 39px;
+	top: 0px;
 	left: 50%;
-	width: 500px;
-	margin-left: -260px;
-	padding: 20px;
-	background-color: #EFFFBD;
-	border: 1px solid #E3FE57;
+	width: 250px;
+	margin-left: -125px;
+	border: 1px solid #ddd;
 	text-align: center;
+	color: #999;
+	font-size: 11px;
+	padding: 2px 0;
 }
 
 .dataTables_length {
@@ -136,19 +137,19 @@
 }
 
 .paginate_disabled_previous {
-	background-image: url('/pentaho/cdf/js/dataTables/images/back_disabled.jpg');
+	background-image: url('../images/back_disabled.jpg');
 }
 
 .paginate_enabled_previous {
-	background-image: url('/pentaho/cdf/js/dataTables/images/back_enabled.jpg');
+	background-image: url('../images/back_enabled.jpg');
 }
 
 .paginate_disabled_next {
-	background-image: url('/pentaho/cdf/js/dataTables/images/forward_disabled.jpg');
+	background-image: url('../images/forward_disabled.jpg');
 }
 
 .paginate_enabled_next {
-	background-image: url('/pentaho/cdf/js/dataTables/images/forward_enabled.jpg');
+	background-image: url('../images/forward_enabled.jpg');
 }
 
 

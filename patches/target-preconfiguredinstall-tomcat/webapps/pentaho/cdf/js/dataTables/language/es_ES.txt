@@ -7,5 +7,11 @@
 	"sInfoFiltered": "(filtrado de _MAX_ registros en total)",
 	"sInfoPostFix": "",
 	"sSearch": "Buscar:",
-	"sUrl": ""
+	"sUrl": "",
+	"oPaginate": {
+		"sFirst":    "Primero",
+		"sPrevious": "Anterior",
+		"sNext":     "Siguiente",
+		"sLast":     "Último"
+	}
 }

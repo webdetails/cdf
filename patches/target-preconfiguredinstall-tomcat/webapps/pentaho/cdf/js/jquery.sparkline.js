@@ -2,7 +2,7 @@
 *
 * jquery.sparkline.js
 *
-* v1.1
+* v1.2.1
 * (c) Splunk, Inc 
 * Contact: Gareth Watts (gareth@splunk.com)
 * http://omnipotent.net/jquery.sparkline/
@@ -53,11 +53,17 @@
 *    <p>Sparkline: <span id="sparkline1">This text replaced if the browser is compatible</span></p>
 *    $('#sparkline1').sparkline([1,4,6,6,8,5,3,5])
 *
+* For line charts, x values can also be specified:
+*   <p>Sparkline: <span class="sparkline">1:1,2.7:4,3.4:6,5:6,6:8,8.7:5,9:3,10:5</span></p>
+*    $('#sparkline1').sparkline([ [1,1], [2.7,4], [3.4,6], [5,6], [6,8], [8.7,5], [9,3], [10,5] ])
+*
 * Supported options:
 *   lineColor - Color of the line used for the chart
 *   fillColor - Color used to fill in the chart - Set to '' or false for a transparent chart
 *   width - Width of the chart - Defaults to 3 times the number of values in pixels
 *   height - Height of the chart - Defaults to the height of the containing element
+*   chartRangeMin - Specify the minimum value to use for the range of the chart - Defaults to the minimum value supplied
+*   chartRangeMax - Specify the maximum value to use for the range of the chart - Defaults to the maximum value supplied
 *   composite - If true then don't erase any existing chart attached to the tag, but draw
 *           another chart over the top - Note that width and height are ignored if an
 *           existing chart is detected.
@@ -73,6 +79,7 @@
 *       normalRangeMax - If set draws a filled horizontal bar between these two values marking the "normal"
 *                      or expected range of values
 *       normalRangeColor - Color to use for the above bar
+*       defaultPixelsPerValue - Defaults to 3 pixels of width for each value in the chart
 *
 *   bar - Bar chart.  Options:
 *       barColor - Color of bars for postive values
@@ -103,6 +110,7 @@
 *
 *   pie - Pie chart. Options:
 *       sliceColors - An array of colors to use for pie slices
+*       offset - Angle in degrees to offset the first slice - Try -90 or +90
 *   
 *       
 *   Examples:
@@ -137,6 +145,7 @@
             type : 'line',
             lineColor : '#00f',
             fillColor : '#cdf',
+            defaultPixelsPerValue : 3,
             width : 'auto', 
             height : 'auto',
             composite : false
@@ -144,8 +153,8 @@
         
         return this.each(function() {
             var values = (uservalues=='html' || uservalues==undefined) ? $(this).text().split(',') : uservalues;
-            values = $.map(values, Number);
-            var width = options.width=='auto' ? values.length*3 : options.width;
+
+            var width = options.width=='auto' ? values.length*options.defaultPixelsPerValue : options.width;
             if (options.height == 'auto') {
                 // must be a better way to get the line height
                 var tmp = document.createElement('span');
@@ -156,7 +165,6 @@
             } else {
                 height = options.height;
             }
-            // var height = options.height=='auto' ? $(this).innerHeight() : options.height;
 
             $.fn.sparkline[options.type].call(this, values, options, width, height);
         });
@@ -170,21 +178,56 @@
             maxSpotColor : '#f80',
             normalRangeMin : undefined,
             normalRangeMax : undefined,
-            normalRangeColor : '#ccc'
+            normalRangeColor : '#ccc',
+            chartRangeMin : undefined,
+            chartRangeMax : undefined
         }, options ? options : {});
 
-        var max = Math.max.apply(Math, values);
-        var maxval = max;
-        var min = Math.min.apply(Math, values);
-        var minval = min;
-        if (options.normalRangeMin!=undefined) {
-            if (options.normalRangeMin<min)
-                min = options.normalRangeMin;
-            if (options.normalRangeMax>max)
-                max = options.normalRangeMax;
+        var xvalues = [], yvalues = [];
+        for (i=0; i<values.length; i++) {
+            var isstr = typeof(values[i])=='string';
+            var isarray = typeof(values[i])=='object' && values[i] instanceof Array;
+            var sp = isstr && values[i].split(':');
+            if (isstr && sp.length == 2) { // x:y
+                xvalues.push(Number(sp[0]));
+                yvalues.push(Number(sp[1]));
+            } else if (isarray) {
+                xvalues.push(values[i][0]);
+                yvalues.push(values[i][1]);
+            } else {
+                xvalues.push(i);
+                yvalues.push(Number(values[i]));
+            }
         }
-        var range = max-min == 0 ? 1 : max-min;
-        var vl = values.length-1;
+        if (options.xvalues) {
+            xvalues = options.xvalues;
+        }
+
+        var maxy = Math.max.apply(Math, yvalues);
+        var maxyval = maxy;
+        var miny = Math.min.apply(Math, yvalues);
+        var minyval = miny;
+
+        var maxx = Math.max.apply(Math, xvalues);
+        var maxxval = maxx;
+        var minx = Math.min.apply(Math, xvalues);
+        var minxval = minx;
+
+        if (options.normalRangeMin!=undefined) {
+            if (options.normalRangeMin<miny)
+                miny = options.normalRangeMin;
+            if (options.normalRangeMax>maxy)
+                maxy = options.normalRangeMax;
+        }
+        if (options.chartRangeMin!=undefined && options.chartRangeMin<miny) {
+            miny = options.chartRangeMin;
+        }
+        if (options.chartRangeMax!=undefined && options.chartRangeMax>maxy) {
+            maxy = options.chartRangeMax;
+        }
+        var rangex = maxx-minx == 0 ? 1 : maxx-minx;
+        var rangey = maxy-miny == 0 ? 1 : maxy-miny;
+        var vl = yvalues.length-1;
 
         if (vl<1) {
             this.innerHTML = '';
@@ -203,48 +246,51 @@
             }
             if (options.spotRadius) {
                 // adjust the canvas size as required so that spots will fit
-                if (options.minSpotColor || (options.spotColor && values[vl]==min)) 
+                if (options.minSpotColor || (options.spotColor && yvalues[vl]==miny)) 
                     canvas_height -= Math.ceil(options.spotRadius);
-                if (options.maxSpotColor || (options.spotColor && values[vl]==max)) {
+                if (options.maxSpotColor || (options.spotColor && yvalues[vl]==maxy)) {
                     canvas_height -= Math.ceil(options.spotRadius);
                     canvas_top += Math.ceil(options.spotRadius);
                 }
-                if (options.minSpotColor || options.maxSpotColor && (values[0]==min || values[0]==max)) {
+                if (options.minSpotColor || options.maxSpotColor && (yvalues[0]==miny || yvalues[0]==maxy)) {
                     canvas_left += Math.ceil(options.spotRadius);
                     canvas_width -= Math.ceil(options.spotRadius);
                 }
-                if (options.spotColor || (options.minSpotColor || options.maxSpotColor && (values[vl]==min||values[vl]==max)))
+                if (options.spotColor || (options.minSpotColor || options.maxSpotColor && (yvalues[vl]==miny||yvalues[vl]==maxy)))
                     canvas_width -= Math.ceil(options.spotRadius);
             }
 
 
             canvas_height--;
             if (options.normalRangeMin!=undefined) {
-                var ytop = canvas_top+Math.round(canvas_height-(canvas_height*((options.normalRangeMax-min)/range)));
-                var height = Math.round((canvas_height*(options.normalRangeMax-options.normalRangeMin))/range);
+                var ytop = canvas_top+Math.round(canvas_height-(canvas_height*((options.normalRangeMax-miny)/rangey)));
+                var height = Math.round((canvas_height*(options.normalRangeMax-options.normalRangeMin))/rangey);
                 target.drawRect(canvas_left, ytop, canvas_width, height, undefined, options.normalRangeColor);
             }
 
             var path = [ [canvas_left, canvas_top+canvas_height] ];
-            for(var i=0; i<values.length; i++) {
-                path.push([canvas_left+Math.round(i*(canvas_width/vl)), canvas_top+Math.round(canvas_height-(canvas_height*((values[i]-min)/range)))]);
+            for(var i=0; i<yvalues.length; i++) {
+                var x=xvalues[i], y=yvalues[i];
+                path.push([canvas_left+Math.round((x-minx)*(canvas_width/rangex)), canvas_top+Math.round(canvas_height-(canvas_height*((y-miny)/rangey)))]);
             }
             if (options.fillColor) {
                 path.push([canvas_left+canvas_width, canvas_top+canvas_height-1]);
                 target.drawShape(path, undefined, options.fillColor);
                 path.pop();
             }
-            path[0] = [ canvas_left, canvas_top+Math.round(canvas_height-(canvas_height*((values[0]-min)/range))) ];
+            path[0] = [ canvas_left, canvas_top+Math.round(canvas_height-(canvas_height*((yvalues[0]-miny)/rangey))) ];
             target.drawShape(path, options.lineColor);
             if (options.spotRadius && options.spotColor) {
-                target.drawCircle(canvas_left+canvas_width,  canvas_top+Math.round(canvas_height-(canvas_height*((values[vl]-min)/range))), options.spotRadius, undefined, options.spotColor);
+                target.drawCircle(canvas_left+canvas_width,  canvas_top+Math.round(canvas_height-(canvas_height*((yvalues[vl]-miny)/rangey))), options.spotRadius, undefined, options.spotColor);
             }
-            if (max!=Math.min.apply(Math, values)) {
+            if (maxy!=minyval) {
                 if (options.spotRadius && options.minSpotColor) {
-                    target.drawCircle(canvas_left+Math.round(values.indexOf(minval)*(canvas_width/vl)),  canvas_top+canvas_height, options.spotRadius, undefined, options.minSpotColor);
+                    var x = xvalues[yvalues.indexOf(minyval)];
+                    target.drawCircle(canvas_left+Math.round((x-minx)*(canvas_width/rangex)),  canvas_top+Math.round(canvas_height-(canvas_height*((minyval-miny)/rangey))), options.spotRadius, undefined, options.minSpotColor);
                 }
                 if (options.spotRadius && options.maxSpotColor) {
-                    target.drawCircle(canvas_left+Math.round(values.indexOf(maxval)*(canvas_width/vl)),  canvas_top, options.spotRadius, undefined, options.maxSpotColor);
+                    var x = xvalues[yvalues.indexOf(maxyval)];
+                    target.drawCircle(canvas_left+Math.round((x-minx)*(canvas_width/rangex)),  canvas_top+Math.round(canvas_height-(canvas_height*((maxyval-miny)/rangey))), options.spotRadius, undefined, options.maxSpotColor);
                 }
             }
         } else {
@@ -254,18 +300,28 @@
     };
 
     $.fn.sparkline.bar = function(values, options, width, height) {
+        values = $.map(values, Number);
         var options = $.extend({
             type : 'bar',
             barColor : '#00f',
             negBarColor : '#f44',
+            zeroColor: undefined,
             zeroAxis : undefined,
             barWidth : 4,
-            barSpacing : 1
+            barSpacing : 1,
+            chartRangeMax: undefined,
+            chartRangeMin: undefined
         }, options ? options : {});
 
         var width = (values.length * options.barWidth) + ((values.length-1) * options.barSpacing);
         var max = Math.max.apply(Math, values);
         var min = Math.min.apply(Math, values);
+        if (options.chartRangeMin!=undefined && options.chartRangeMin<min) {
+            min = options.chartRangeMin;
+        }
+        if (options.chartRangeMax!=undefined && options.chartRangeMax>max) {
+            max = options.chartRangeMax;
+        }
         if (options.zeroAxis == undefined) options.zeroAxis = min<0;
         var range = max-min+1;
 
@@ -273,18 +329,21 @@
         if (target) {
             var canvas_width = target.pixel_width;
             var canvas_height = target.pixel_height;
-            var yzero = min<0 ? Math.round(canvas_height * (Math.abs(min)/range))-1 : canvas_height-1;
+            var yzero = min<0 && options.zeroAxis ? canvas_height-Math.round(canvas_height * (Math.abs(min)/range))-1 : canvas_height-1;
 
             for(var i=0; i<values.length; i++) {
                 var x = i*(options.barWidth+options.barSpacing);
                 var val = values[i];
                 var color = (val < 0) ? options.negBarColor : options.barColor;
-                if (options.zeroAxis) {
-                    var height = val==0 ? 1 : Math.round(canvas_height*((Math.abs(val)/range)));
+                if (options.zeroAxis && min<0) {
+                    var height = Math.round(canvas_height*((Math.abs(val)/range)))+1;
                     var y = (val < 0) ? yzero : yzero-height;
                 } else {
-                    var height = val==min ? 1 : Math.round(canvas_height*((val-min)/range));
-                    var y = canvas_height-height-1;
+                    var height = Math.round(canvas_height*((val-min)/range))+1;
+                    var y = canvas_height-height;
+                }
+                if (val==0 && options.zeroColor!=undefined) {
+                    color = options.zeroColor;
                 }
                 if ($.browser.msie) // IE's bars look fuzzy without this :-/
                     target.drawRect(x, y, options.barWidth-1, height-1, color, color);
@@ -298,6 +357,7 @@
     };
 
     $.fn.sparkline.tristate = function(values, options, width, height) {
+        values = $.map(values, Number);
         var options = $.extend({
             barWidth : 4,
             barSpacing : 1,
@@ -345,10 +405,13 @@
     };
 
     $.fn.sparkline.discrete = function(values, options, width, height) {
+        values = $.map(values, Number);
         var options = $.extend({
             lineHeight: 'auto',
             thresholdColor: undefined,
-            thresholdValue : 0
+            thresholdValue : 0,
+            chartRangeMax: undefined,
+            chartRangeMin: undefined
         }, options);
 
         width = options.width=='auto' ? values.length*2 : width;
@@ -362,6 +425,12 @@
             var pheight = canvas_height - line_height;
             var min = Math.min.apply(Math, values);
             var max = Math.max.apply(Math, values);
+            if (options.chartRangeMin!=undefined && options.chartRangeMin<min) {
+                min = options.chartRangeMin;
+            }
+            if (options.chartRangeMax!=undefined && options.chartRangeMax>max) {
+                max = options.chartRangeMax;
+            }
             var range = max-min;
 
             for(var i=0; i<values.length; i++) {
@@ -378,6 +447,7 @@
     };
 
     $.fn.sparkline.bullet = function(values, options, width, height) {
+        values = $.map(values, Number);
         // target, performance, range1, range2, range3
         var options = $.extend({
             targetColor : 'red',
@@ -438,6 +508,7 @@
     };
 
     $.fn.sparkline.pie = function(values, options, width, height) {
+        values = $.map(values, Number);
         var options = $.extend({
             sliceColors : ['#f00', '#0f0', '#00f']
         }, options);
@@ -454,10 +525,17 @@
             for(var i=0; i<values.length; i++)
                 total += values[i];
             var next = 0;
+            if (options.offset) {
+                next += (2*Math.PI)*(options.offset/360);
+            }
+            // next = 0-(Math.PI/2);
             var circle = 2*Math.PI;
             for(var i=0; i<values.length; i++) {
                 var start = next;
-                var end = next + (circle*(values[i]/total));
+                var end = next;
+                if (total > 0) {  // avoid divide by zero
+                    end = next + (circle*(values[i]/total));
+                }
                 target.drawPieSlice(radius, radius, radius, start, end, undefined, options.sliceColors[i % options.sliceColors.length]);
                 next = end;
             }
@@ -668,6 +746,14 @@
         },
         
         drawPieSlice : function(x, y, radius, startAngle, endAngle, lineColor, fillColor) {
+            if (startAngle == endAngle) {
+                return;  // VML seems to have problem when start angle equals end angle.
+            }
+            if ((endAngle - startAngle) == (2*Math.PI)) {
+                startAngle = 0.0;  // VML seems to have a problem when drawing a full circle that doesn't start 0
+                endAngle = (2*Math.PI);
+            }
+
             var startx = x + Math.round(Math.cos(startAngle) * radius);
             var starty = y + Math.round(Math.sin(startAngle) * radius);
             var endx = x + Math.round(Math.cos(endAngle) * radius);

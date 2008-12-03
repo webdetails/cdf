@@ -4,6 +4,9 @@ $.ajaxSetup({ type: "POST", async: false });
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
+var TRAFFIC_RED = "cdf/images/traffic_red.png";
+var TRAFFIC_YELLOW = "cdf/images/traffic_yellow.png";
+var TRAFFIC_GREEN = "cdf/images/traffic_green.png";
 
 $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="/pentaho/cdf/images/busy.gif" /> <h3>Processing...</h3></div>';
 $.blockUI.defaults.css.left = '40%';
@@ -24,10 +27,7 @@ var Dashboards =
 		components: [],
 		args: [],
 		initMap: true,
-		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-		mdxGroups: {},
-		evolutionType: "Week",
-		
+		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 	}
 	
 
@@ -48,7 +48,11 @@ Dashboards.update = function(object)	{
 	if(!(typeof(object.preExecution)=='undefined')){
 		object.preExecution();
 	}
-	switch(object.type)
+	if (object.tooltip != undefined){
+		object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
+	}
+	var objectType = typeof object["type"]=='function'?object.type():object.type;
+	switch(objectType)
 	{
 		// test if object is an xaction
 	case "xaction":
@@ -73,6 +77,9 @@ Dashboards.update = function(object)	{
 		break;
 	case "dialComponent":
 		this.updateDialComponent(object);
+		break;
+	case "trafficComponent":
+		this.updateTrafficComponent(object);
 		break;
 	case "timePlotComponent":
 		this.updateTimePlotComponent(object);
@@ -293,7 +300,7 @@ Dashboards.update = function(object)	{
 			this.makeQuery(object);
 			break;
 		case "mdxQueryGroup":
-			this.updateMdxQueryGroup(object);
+			OlapUtils.updateMdxQueryGroup(object);
 			break;
 		case "executeXaction":
 			this.generateXActionComponent (object);
@@ -301,6 +308,10 @@ Dashboards.update = function(object)	{
 		}	
 		if(!(typeof(object.postExecution)=='undefined')){
 			object.postExecution();
+		}
+		// if we have a tooltip component, how is the time.
+		if (object._tooltip != undefined){
+			$("#" + object.htmlObject).attr("title",object._tooltip).tooltip({delay:0, track: true, fade: 250});
 		}
 	};
 
@@ -918,7 +929,7 @@ Dashboards.updateJFreeChartComponent = function( object ){
 
 	var cd = object.chartDefinition;
 	if (cd == undefined){
-		alert("Fatal - No chart definition passed");
+		alert("Fatal - No chartDefinition passed");
 		return;
 	}
 
@@ -949,7 +960,7 @@ Dashboards.updateDialComponent = function( object ){
 
 	var cd = object.chartDefinition;
 	if (cd == undefined){
-		alert("Fatal - No chart definition passed");
+		alert("Fatal - No chartDefinition passed");
 		return;
 	}
 	
@@ -982,6 +993,54 @@ Dashboards.updateDialComponent = function( object ){
 	$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechartdial.xaction", parameters,null));
 
 };
+
+Dashboards.updateTrafficComponent = function( object ){
+
+	var cd = object.trafficDefinition;
+	if (cd == undefined){
+		alert("Fatal - No trafficDefinition passed");
+		return;
+	}
+	
+	var intervals = cd.intervals;
+	if (intervals == undefined){
+		cd.intervals = [-1,1];
+	}
+
+	//go through parametere array and update values
+	var parameters = [];
+	for(p in cd){
+		var key = p;
+		var value = typeof cd[p]=='function'?cd[p]():cd[p];
+		//alert("key: " + key + "; Value: " + value);
+		parameters.push([key,value]);
+	} 
+	// increment runningCalls
+	Dashboards.runningCalls++;
+
+	//callback async mode
+	//pentahoAction(object.solution, object.path, object.action, p,function(json){ Dashboards.xactionCallback(object,json); });
+	// or sync mode
+	var result = pentahoAction("cdf", "components", "traffic.xaction", parameters,null);
+
+	if(cd.showValue != undefined && cd.showValue == true){
+		var tooltip = object._tooltip;
+		object._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+	}
+
+	//alert("Traffic result: " + result);
+	var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
+	$('#'+object.htmlObject).html(i);
+
+};
+
+if (typeof Timeplot != "undefined"){
+	Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
+	new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
+	new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
+	new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
+	new Timeplot.Color('#73F321')]
+}
 
 Dashboards.updateTimePlotComponent = function( object ){
 
@@ -1141,8 +1200,7 @@ Dashboards.makeQuery = function(object){
 	}
 
 	$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
-			object.result = json["aaData"];
-			//alert("obj: " + object.result);
+			object.result = json;
 		});
 
 };
@@ -1157,7 +1215,7 @@ Dashboards.generateTableComponent = function(object){
 	cd["tableId"] = object.htmlObject + "Table";
 	
 	//Clear previous table
-	document.getElementById(object.htmlObject).innerHTML = "";
+	$("#"+object.htmlObject).empty();
 	
 	
 	if(cd.mdxQuery != undefined)
@@ -1180,19 +1238,19 @@ Dashboards.generateTableComponent = function(object){
 			var dateDimension = mdxQuery.originalHash.dateDimension != undefined ? mdxQuery.originalHash.dateDimension : "Date";
 			
 			//Add sets and members. Update columns
-			Dashboards.AddEvolutionMeasures(mdxQuery ,measure, dateDimension, Dashboards.evolutionType);
+			Dashboards.addEvolutionMeasures(mdxQuery ,measure, dateDimension, OlapUtils.evolutionType);
 			
 			//Set Table Headers and Coltypes
-			cd.coltypes =  "numeric,numeric,numeric,numeric,sparkLine";
+			cd.colTypes =  "numeric,numeric,numeric,numeric,sparkline";
 			if(cd.headers == undefined){
-			if(Dashboards.evolutionType == "Week")
+			if(OlapUtils.evolutionType == "Week")
 				cd.headers = "Requests,Week,Last Week,Week Evolution,Last 7 Days";
 			else
 				cd.headers = "Requests,Month,Last Month,Month Evolution,Last 30 Days";
 			}	
 				
 			//Add Evolution type listner
-			object.listeners.push("Dashboards.evolutionType");
+			object.listeners.push("OlapUtils.evolutionType");
 			
 			
 		}
@@ -1204,27 +1262,27 @@ Dashboards.generateTableComponent = function(object){
 
 };
 
-Dashboards.AddEvolutionMeasures = function(query, measure, dateDimension, evolutionType)
+Dashboards.addEvolutionMeasures = function(query, measure, dateDimension, evolutionType)
 {
 	
 	if(evolutionType == "Week")
 	{
-		query.addSet("week", "LastPeriods(7.0, [Date].CurrentMember)");
-		query.addSet("lastweek", "LastPeriods(7.0, [Date].CurrentMember.Lag(7))");
-		query.addMember("[Measures].[lastweek]","Aggregate([lastweek]," + measure + ")");
-		query.addMember("[Measures].[week]","Aggregate([week]," + measure + ")");
-		query.addMember("[Measures].[weekEvolution]","100.0 * ([Measures].[week] / [Measures].[lastweek] - 1.0)");
-		query.addMember("[Measures].[sparkdataweeks]","Generate([week], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
+		query.addSet("week", "week as LastPeriods(7.0, [Date].CurrentMember)");
+		query.addSet("lastweek", " lastweek as LastPeriods(7.0, [Date].CurrentMember.Lag(7))");
+		query.addMember("[Measures].[lastweek]","[Measures].[lastweek] as Aggregate([lastweek]," + measure + ")");
+		query.addMember("[Measures].[week]","[Measures].[week] as Aggregate([week]," + measure + ")");
+		query.addMember("[Measures].[weekEvolution]","[Measures].[weekEvolution] as 100.0 * ([Measures].[week] / [Measures].[lastweek] - 1.0)");
+		query.addMember("[Measures].[sparkdataweeks]","[Measures].[sparkdataweeks] as Generate([week], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
 		query.query['columns'] = measure + ",[Measures].[week],[Measures].[lastweek],[Measures].[weekEvolution],[Measures].[sparkdataweeks]";
 	}
 	else if(evolutionType == "Month")
 	{
-		query.addSet("month","LastPeriods(30.0, [Date].CurrentMember)");
-		query.addSet("lastmonth","LastPeriods(30.0, [Date].CurrentMember.Lag(30))");
-		query.addMember("[Measures].[month]","Aggregate([month]," + measure + ")");
-		query.addMember("[Measures].[lastmonth]","Aggregate([lastmonth]," + measure + ")");
-		query.addMember("[Measures].[monthEvolution]","100.0 * ([Measures].[month] / [Measures].[lastmonth] - 1.0)");
-		query.addMember("[Measures].[sparkdatamonths]","Generate([month], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
+		query.addSet("month","month as LastPeriods(30.0, [Date].CurrentMember)");
+		query.addSet("lastmonth","lastmonth as LastPeriods(30.0, [Date].CurrentMember.Lag(30))");
+		query.addMember("[Measures].[month]","[Measures].[month] as Aggregate([month]," + measure + ")");
+		query.addMember("[Measures].[lastmonth]","[Measures].[lastmonth] as Aggregate([lastmonth]," + measure + ")");
+		query.addMember("[Measures].[monthEvolution]","[Measures].[monthEvolution] as 100.0 * ([Measures].[month] / [Measures].[lastmonth] - 1.0)");
+		query.addMember("[Measures].[sparkdatamonths]","[Measures].[sparkdatamonths] as Generate([month], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
 		query.query['columns'] = measure + ",[Measures].[month],[Measures].[lastmonth],[Measures].[monthEvolution],[Measures].[sparkdatamonths]";
 	}	
 	
@@ -1232,460 +1290,66 @@ Dashboards.AddEvolutionMeasures = function(query, measure, dateDimension, evolut
 
 Dashboards.processTableComponentResponse = function(object,json)
 {
-	$("#"+object.htmlObject).html("<table id='" + object.htmlObject + "Table' class=\"tableComponent\">");
-	$("#"+object.htmlObject+'Table').dataTable( json );
-	$("#"+object.htmlObject).append("</table>");
+	// General documentation here: http://sprymedia.co.uk/article/DataTables
+	
+	var cd = object.chartDefinition;
+	// Build a default config from the standard options
+	var dtData0 = {};
+	if(cd.info != undefined){dtData0.bInfo = cd.info};
+	if(cd.displayLength != undefined){dtData0.iDisplayLength = cd.displayLength};
+	if(cd.lengthChange != undefined){dtData0.bLengthChange = cd.lengthChange};
+	if(cd.paginate != undefined){dtData0.bPaginate = cd.paginate};
+	if(cd.sort != undefined){dtData0.bSort = cd.sort};
+	if(cd.filter != undefined){dtData0.bFilter = cd.filter};
+	dtData0.aoColumns = new Array(cd.colHeaders.length);
+	for(var i = 0; i< cd.colHeaders.length; i++){dtData0.aoColumns[i]={}};
+	$.each(cd.colHeaders,function(i,val){ dtData0.aoColumns[i].sTitle=val; });  // colHeaders
+	if(cd.colTypes!=undefined){$.each(cd.colTypes,function(i,val){ 
+				var col = dtData0.aoColumns[i];
+				if(val=='sparkline'){
+					col.sClass=val; 
+					col.bSearchable=false;
+					col.bSortable=false;
+				}
+				else{
+					col.sClass=val;
+					col.sType=val;
+				}
+			})};  // colTypes
+	if(cd.colFormats!=undefined){$.each(cd.colFormats,function(i,val){ if (val!=null){dtData0.aoColumns[i].fnRender=
+						function ( obj ) { return sprintf(val,obj.aData[obj.iDataRow][obj.iDataColumn]); }
+				}})};  // colFormats
+
+	if(cd.colWidths!=undefined){$.each(cd.colWidths,function(i,val){ if (val!=null){dtData0.aoColumns[i].sWidth=val}})}; //colWidths
+	dtData0.aaSorting=cd.sortBy;
+
+	var dtData = $.extend(dtData0,cd.dataTableOptions);
+	dtData.aaData = json;
+	$("#"+object.htmlObject).html("<table id='" + object.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
+
+	dtData.fnFinalCallback = function( aData, iRowCount ){
+		$("td.sparkline").each(function(i){
+				$(this).sparkline($(this).text().split(/,/));
+			});
+		if(cd.urlTemplate != undefined){
+			var td =$("#" + object.htmlObject + " td:nth-child(1)"); 
+			td.addClass('cdfClickable');
+			td.bind("click", function(e){
+					var regex = new RegExp("{"+cd.parameterName+"}","g");
+					var f = cd.urlTemplate.replace(regex,$(this).text());
+					/*alert (cd.parameterName + " - " + $(this).text() + " - " + f);*/
+					eval(f);
+				});
+		}
+	};
+	$("#"+object.htmlObject+'Table').dataTable( dtData );
 };
 
 Dashboards.path = Dashboards.getParameter("path");
 
 Dashboards.solution = Dashboards.getParameter("solution");
 
-// MDXQuery
 
-Dashboards.mdxQuery = function(hash){
-	this.query = {};
-	this.originalHash = {};
-	this.update(hash);
-	this.axisPos = 0;
-	this.axisDepth = 0;
-};
-
-Dashboards.mdxQuery.prototype.reset = function(){
-	this.update(this.originalHash); 
-
-};
-
-Dashboards.mdxQuery.prototype.resetFilters = function(){
-	this.query["filters"] = Dashboards.clone(this.originalHash["filters"]) || {rows:{},columns: {}};
-}
-
-
-Dashboards.mdxQuery.prototype.update = function(hash){
-
-	this.originalHash = Dashboards.clone(hash);
-	this.query["members"] = hash["members"]||[];
-	this.query["sets"] = hash["sets"] || [];
-	this.query["rows"] = hash["rows"]||"";
-	this.query["rowDrill"] = hash["rowDrill"]||false;
-	this.query["rowLevels"] = hash["rowLevels"]||[];
-	this.query["orderBy"] = hash["orderBy"] || "";
-	this.query["from"] = hash["from"] || "";
-	this.query["columns"] = hash["columns"];
-	this.query["columnDrill"] = hash["columnDrill"]||false;
-	this.query["columnLevels"] = hash["columnLevels"]||[];
-	this.query["nonEmptyRows"] = hash["nonEmptyRows"] || false;
-	this.query["nonEmptyColumns"] = hash["nonEmptyColumns"] || false;
-	this.query["swapRowsAndColumns"] = hash["swapRowsAndColumns"] || false;
-	this.query["filters"] = hash["filters"] || {rows:{},columns: {}};
-	this.query["where"] = hash["where"] || {};
-};
-
-//.prototype.clone = function(){
-//	return new Dashboards.mdxQuery(this.query);
-//}
-
-// Add a clone method;
-
-Dashboards.mdxQuery.prototype.clone = function() {
-	var c = Dashboards.clone(this);
-	return c;
-};
-
-
-Dashboards.mdxQuery.prototype.generateAxisPart = function(axisDrill, axis, axisLevels, orderBy){
-	if (axisDrill == false){
-		return axis;
-	}
-
-	var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
-	var axisLevel = this.axisPos + this.axisDepth;
-	if (axisLevel > axisLevels.length - 1){
-		axisLevel = axisLevels.length - 1
-	}
-	var q = "Descendants("  + axis + ", "+ dim + ".["  + axisLevels[axisLevel] + "])"
-	if (orderBy == "")
-		return q;
-
-	return "Order(" + q + ", " + orderBy + " , BDESC)";
-
-}
-
-
-Dashboards.mdxQuery.prototype.getQuery = function(){
-	var query = "with ";
-	// We need to evaluate the hash
-	var _eh = [];
-	for(p in this.query){
-		var key = p;
-		var value = typeof this.query[p]=='function'?this.query[p]():this.query[p];
-		_eh[key] = value;
-	} 
-
-	if(typeof _eh["sets"] == 'object' || typeof _eh["members"] == 'object' ){
-		for(s in _eh["sets"]){
-			var value = typeof _eh["sets"][s]=='function'?_eh["sets"][s]():_eh["sets"][s];
-			query += " set " + s + " as " + value + " \n";
-		}
-		for(m in _eh["members"]){
-			var value = typeof _eh["members"][m]=='function'?_eh["members"][m]():_eh["members"][m];
-			query += " member " + m + " as " + value + " \n";
-		}
-	}
-	// Generate the col/row sets
-	var columns = _eh["swapRowsAndColumns"]?_eh["rows"]:_eh["columns"];
-	var columnLevels = _eh["swapRowsAndColumns"]?_eh["rowLevels"]:_eh["columnLevels"];
-	var columnDrill = _eh["swapRowsAndColumns"]?_eh["rowDrill"]:_eh["columnDrill"];
-	var rows = _eh["swapRowsAndColumns"]?_eh["columns"]:_eh["rows"];
-	var rowLevels = _eh["swapRowsAndColumns"]?_eh["columnLevels"]:_eh["rowLevels"];
-	var rowDrill = _eh["swapRowsAndColumns"]?_eh["columnDrill"]:_eh["rowDrill"] ;
-	query += " set rowSet as {" + this.generateAxisPart(rowDrill,rows,rowLevels,_eh.orderBy) + "} \n";
-	query += " set colSet as {" + this.generateAxisPart(columnDrill,columns,columnLevels,_eh.orderBy) + "} \n";
-
-	var colFilter = [];
-	var rowFilter = [];
-	$.each(_eh["filters"]["rows"],function(key,obj){
-			$.each(obj,function(dim, content){
-					rowFilter.push(key + ".currentMember.Name <> '" + content+"' ");
-				})
-		});
-	if (_eh["swapRowsAndColumns"]){
-		query += " set rowFilter as " + (colFilter.length > 0?"Filter(rowSet,"+ colFilter.join(" and ") + " )":"rowSet") + "\n";
-		query += " set colFilter as " + (rowFilter.length > 0?"Filter(colSet,"+ rowFilter.join(" and ") + " )":"colSet") + "\n";
-	}
-	else{
-		query += " set rowFilter as " + (rowFilter.length > 0?"Filter(rowSet,"+ rowFilter.join(" and ") + " )":"rowSet") + "\n";
-		query += " set colFilter as " + (colFilter.length > 0?"Filter(colSet,"+ colFilter.join(" and ") + " )":"colSet") + "\n";
-	}
-
-
-	query += "select " + (_eh["nonEmptyRows"]?" NON EMPTY ":"") + " rowFilter on rows,\n ";
-	query += " " + (_eh["nonEmptyColumns"]?" NON EMPTY ":"") + " colFilter on columns\n ";
-	query += " from " + _eh["from"] + "\n";
-
-	var whereArray = [];
-	$.each(_eh["where"],function(key,obj){
-			whereArray.push(typeof obj == 'function'?obj():obj);
-		});
-	if (whereArray.length>0){
-		query += " where ( " + whereArray.join(' , ') + " )";
-	}
-	return query;
-
-}
-
-Dashboards.mdxQuery.prototype.addFilter = function(axis, dimension, value){
-	if(axis != 'columns' && axis != 'rows'){
-		alert("Invalid filter axis " + axis);
-		return;
-	}
-
-	var obj = this.query["filters"][axis];
-	if (obj[dimension] == undefined ){
-		obj[dimension] = [ value ];
-	}
-	else
-		obj[dimension].push(value);
-
-}
-
-Dashboards.mdxQuery.prototype.addCondition = function(key, condition){
-
-	this.query["where"][key] = condition;
-}
-
-Dashboards.mdxQuery.prototype.removeCondition = function(key){
-
-	delete this.query["where"][key];
-}
-
-Dashboards.mdxQuery.prototype.addSet = function(key, set){
-
-	this.query["sets"][key] = set;
-}
-
-Dashboards.mdxQuery.prototype.addMember = function(key, member){
-
-	this.query["members"][key] = member;
-}
-
-
-Dashboards.initMdxQueryGroup = function(obj){
-
-	var mdxQueryGroup = new Dashboards.mdxQueryGroup(obj.name);
-
-	for(m in obj.mdxQueries){
-
-		mdxQueryGroup.addMdxQuery( 
-			obj.mdxQueries[m].name,
-			obj.mdxQueries[m].query,
-			obj.mdxQueries[m].dimension,
-			obj.mdxQueries[m].axis,   
-			obj.mdxQueries[m].chart
-		);
-	}
-
-	Dashboards.mdxGroups[obj.name] = mdxQueryGroup;
-	
-	if(("#" + obj.htmlObject + "_evolutionType")  != undefined)
-		$("#" + obj.htmlObject+ "_evolutionType").html(mdxQueryGroup.printEvolutionType(obj.htmlObject + "_evolutionType"));
-		
-	return mdxQueryGroup;
-}
-
-
-Dashboards.updateMdxQueryGroup = function(obj){
-
-	var mdxGroup = Dashboards.mdxGroups[obj.name];
-	if (mdxGroup == undefined){
-		mdxGroup = Dashboards.initMdxQueryGroup(obj);
-	}
-
-	$("#" + obj.htmlObject).html(mdxGroup.printConditions());
-
-}
-
-
-Dashboards.mdxQueryGroup = function(name){
-	this.name = name;
-	this.mdxQueries = {};
-	this.clickedIdx = -1;
-	this.clickedValue = "";
-	this.activeFilters = {};
-	this.activeConditions = {};
-};
-
-
-Dashboards.mdxQueryGroup.prototype.addMdxQuery = function(idx,mdxQuery,filterDimension, filterAxis, chartObject){
-	this.mdxQueries[idx] = {mdxQuery: mdxQuery, filterDimension: filterDimension, filterAxis: filterAxis,chartObject:chartObject};
-};
-
-Dashboards.mdxQueryGroup.prototype.removeMdxQuery = function(idx){
-	delete this.mdxQueries.idx;
-};
-
-Dashboards.buttonsDescription = {
-		"Drill": 'Drill down to the selected value and add the condition to the other charts',
-		'Focus': "Focus on this value, adding the conditions to the other charts", 
-		'Exclude': "Exclude this value from the chart",
-		"Expand":'Expand the depth of the chart, showing an extra sublevel',
-		"Collapse":'Collapse all previous expansions to the top most level',
-		"Reset All": 'Reset all filters and conditions from this chart group, returning to the original conditions',
-		"Cancel": "Cancel" 
-}
-
-Dashboards.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
-
-	value = encode_prepare(value);
-	var mdxQueryGroup = Dashboards.mdxGroups[mdxQueryGroup];
-	if (value == 'Others')
-		return; // do nothing
-
-	Dashboards.lastClickedMdxQueryGroup = mdxQueryGroup;
-	mdxQueryGroup.clickedIdx = idx;
-	mdxQueryGroup.clickedValue = value;
-
-	var clickedObj = mdxQueryGroup.mdxQueries[idx];
-
-	var buttonsHash = { 
-		"Drill": 'drill',
-		'Focus': "condition", 
-		'Exclude': "filter",
-		"Expand":'expand',
-		"Collapse":'collapse',
-		"Reset All": 'resetall',
-		"Cancel": "cancel" 
-	};
-
-	if (clickedObj.mdxQuery.axisDepth == 0)
-		delete buttonsHash.Collapse;
-
-	//get rowLevels
-	var rl = clickedObj.mdxQuery.query.rowLevels;
-	var d = typeof rl == "function"?rl():rl;
-
-	if (clickedObj.mdxQuery.axisPos + clickedObj.mdxQuery.axisDepth >= d.length - 1){
-		delete buttonsHash.Drill;
-		delete buttonsHash.Expand;
-	}
-	else{
-		delete buttonsHash.Focus;
-	}
-
-	// Expanded ones can't drill || focus
-	if (clickedObj.mdxQuery.axisDepth > 0){
-		delete buttonsHash.Drill;
-		delete buttonsHash.Focus;
-	}
-	
-
-	var msg = "Available conditions: <br/> <ul>" ;
-	$.each(buttonsHash, function(key,value){msg+="<li>" + Dashboards.buttonsDescription[key] + "</li>"});
-	msg += "</ul>";
-	$.prompt(msg
-		,{buttons: buttonsHash, callback: Dashboards.mdxQueryGroupActionCallback }
-	);
-
-}
-
-Dashboards.lastClickedMdxQueryGroup;
-
-Dashboards.mdxQueryGroup.prototype.printConditions = function(){
-
-	var out = "";
-	var firstFilter =1;
-	var firstCond = 1;
-
-	for (i in this.activeFilters){
-		if (firstFilter++ == 1)
-			out += "<i>Exclusions: </i>";
-		var a = this.activeFilters[i];
-		var o = [];
-		out += " " + i + " : "
-		$.each(a,function(j,k){o.push(k)});
-		out+= o.join(" , ") + "; ";
-
-	}
-	for (i in this.activeConditions){
-		if (firstCond++ == 1)
-			out += " <i>Focus: </i>";
-		var a = this.activeConditions[i];
-		var o = [];
-		$.each(a,function(j,k){o.push(k)});
-		out+= o.join(" , ") + "; ";
-
-	}
-
-	if (out.length>0)
-		out += " <a href='javascript:Dashboards.mdxGroups[\"" + this.name + "\"].resetAll()'>Reset</a>";
-
-	return out;
-}
-
-Dashboards.mdxQueryGroup.prototype.printEvolutionType = function(object){
-	var out = "";
-	var myArray = [["Week","Week"],["Month","Month"],["Year","Year"]];
-	
-	for(var i= 0, len  = myArray.length; i < len; i++){
-		out += "<input onclick='Dashboards.changeEvolutionType(\"" + object + "radio\")'";
-		if(i==0){
-			out += " CHECKED ";
-		}		
-		out += "type='radio' id='" + object + "radio' name='" + object + "radio' value=" + myArray[i][1] + " /> " + myArray[i][1] + (object.separator == undefined?"":object.separator);
-	} 
-	
-	return out;
-}
-
-Dashboards.changeEvolutionType = function(object){
-
-	
-	var value = "";
-	var selector = document.getElementsByName(object);
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].checked){
-					value = selector[i].value;
-					continue;
-				};
-			} 
-	
-	this.fireChange("Dashboards.evolutionType",value);
-	
-
-}
-
-Dashboards.mdxQueryGroup.prototype.resetAll = function(){
-
-	Dashboards.blockUIwithDrag();
-	for (i in this.mdxQueries){
-		var obj = this.mdxQueries[i];
-		obj.mdxQuery.reset();
-		obj.mdxQuery.axisPos = 0;
-		obj.mdxQuery.axisDepth = 0;
-		Dashboards.update(obj.chartObject);
-	}
-	this.activeFilters = {};
-	this.activeConditions = {};
-	Dashboards.update(Dashboards.getComponent(this.name));
-	$.unblockUI();
-
-}
-
-Dashboards.mdxQueryGroupActionCallback = function(value,m){
-
-	if (value == "cancel")
-		return;  // do nothing.
-
-	var mqg = Dashboards.lastClickedMdxQueryGroup;
-	var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
-
-	Dashboards.blockUIwithDrag();
-	
-	if( value == "filter" ){
-		// filter: remove this from every query
-
-		var obj = clickedObj;
-		obj.mdxQuery.addFilter(obj.filterAxis, obj.filterDimension,mqg.clickedValue);
-		var a = mqg.activeFilters[obj.filterDimension] || [];
-		a.push(mqg.clickedValue);
-		mqg.activeFilters[obj.filterDimension] = a;
-
-		Dashboards.update(obj.chartObject);
-	}
-	else if (value == "expand"){
-		var obj = clickedObj;
-		obj.mdxQuery.axisDepth++;
-		Dashboards.update(obj.chartObject);
-
-	}
-	else if (value == "collapse"){
-		var obj = clickedObj;
-		obj.mdxQuery.axisDepth--; + mqg.clickedValue + "]"
-		Dashboards.update(obj.chartObject);
-
-	}
-	else if (value == "resetall"){
-		mqg.resetAll();
-	}
-	else if (value == "condition" || value == "drill"){
-		// condition: place this as a condition on the others and drill this
-
-
-		// Get the dimension where condition to use in drill and focus
-		var axis = typeof clickedObj.mdxQuery.query.rows == 'function'?clickedObj.mdxQuery.query.rows():clickedObj.mdxQuery.query.rows;
-		var whereCond = axis + ".[" + mqg.clickedValue + "]";
-
-		var a = mqg.activeFilters[mqg.clickedIdx] || [];
-		a.push(whereCond);
-		mqg.activeConditions[mqg.clickedIdx] = a;
-
-		for (i in mqg.mdxQueries){
-			var obj = mqg.mdxQueries[i];
-			if (i == mqg.clickedIdx){
-				
-				if(value == 'drill'){
-					obj.mdxQuery.query.rows = whereCond;
-					obj.mdxQuery.axisPos++;
-					delete mqg.activeFilters[obj.filterDimension];
-				}
-			}
-			else{
-				obj.mdxQuery.addCondition(mqg.clickedIdx, whereCond);
-			}
-			Dashboards.update(obj.chartObject);
-
-		}
-	}
-
-	Dashboards.update(Dashboards.getComponent(mqg.name));
-	$.unblockUI();
-}
-
-Dashboards.getAxisPathString = function(axis,axisPath){
-	var a = [];
-	$.each(axisPath, function(i,v){ a.push("["+ v +"]"); });
-	return axis + "." + a.join(".");
-}
 
 Dashboards.clone = function clone(obj) {
 
@@ -1984,7 +1648,7 @@ var DashboardsMap =
 		}
 
 	};
-	
+
 function getURLParameters(sURL) 
 	{	
 		if (sURL.indexOf("?") > 0){
@@ -2017,3 +1681,129 @@ function toFormatedString(value) {
 			x1 = x1.replace(rgx, '$1' + ',' + '$2');
 		return x1 + x2;
 	};
+
+
+sprintfWrapper = {
+
+    init : function () {
+
+        if (typeof arguments == 'undefined') { return null; }
+        if (arguments.length < 1) { return null; }
+        if (typeof arguments[0] != 'string') { return null; }
+        if (typeof RegExp == 'undefined') { return null; }
+
+        var string = arguments[0];
+        var exp = new RegExp(/(%([%]|(\-)?(\+|\x20)?(0)?(\d+)?(\.(\d)?)?([bcdfosxX])))/g);
+        var matches = new Array();
+        var strings = new Array();
+        var convCount = 0;
+        var stringPosStart = 0;
+        var stringPosEnd = 0;
+        var matchPosEnd = 0;
+        var newString = '';
+        var match = null;
+
+        while (match = exp.exec(string)) {
+            if (match[9]) { convCount += 1; }
+
+            stringPosStart = matchPosEnd;
+            stringPosEnd = exp.lastIndex - match[0].length;
+            strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
+
+            matchPosEnd = exp.lastIndex;
+            matches[matches.length] = {
+                match: match[0],
+                left: match[3] ? true : false,
+                sign: match[4] || '',
+                pad: match[5] || ' ',
+                min: match[6] || 0,
+                precision: match[8],
+                code: match[9] || '%',
+                negative: parseInt(arguments[convCount]) < 0 ? true : false,
+                argument: String(arguments[convCount])
+            };
+        }
+        strings[strings.length] = string.substring(matchPosEnd);
+
+        if (matches.length == 0) { return string; }
+        if ((arguments.length - 1) < convCount) { return null; }
+
+        var code = null;
+        var match = null;
+        var i = null;
+
+        for (i=0; i<matches.length; i++) {
+
+            if (matches[i].code == '%') { substitution = '%' }
+            else if (matches[i].code == 'b') {
+                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(2));
+                substitution = sprintfWrapper.convert(matches[i], true);
+            }
+            else if (matches[i].code == 'c') {
+                matches[i].argument = String(String.fromCharCode(parseInt(Math.abs(parseInt(matches[i].argument)))));
+                substitution = sprintfWrapper.convert(matches[i], true);
+            }
+            else if (matches[i].code == 'd') {
+                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)));
+                substitution = sprintfWrapper.convert(matches[i]);
+            }
+            else if (matches[i].code == 'f') {
+                matches[i].argument = String(Math.abs(parseFloat(matches[i].argument)).toFixed(matches[i].precision ? matches[i].precision : 6));
+                substitution = sprintfWrapper.convert(matches[i]);
+            }
+            else if (matches[i].code == 'o') {
+                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(8));
+                substitution = sprintfWrapper.convert(matches[i]);
+            }
+            else if (matches[i].code == 's') {
+                matches[i].argument = matches[i].argument.substring(0, matches[i].precision ? matches[i].precision : matches[i].argument.length)
+                substitution = sprintfWrapper.convert(matches[i], true);
+            }
+            else if (matches[i].code == 'x') {
+                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(16));
+                substitution = sprintfWrapper.convert(matches[i]);
+            }
+            else if (matches[i].code == 'X') {
+                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(16));
+                substitution = sprintfWrapper.convert(matches[i]).toUpperCase();
+            }
+            else {
+                substitution = matches[i].match;
+            }
+
+            newString += strings[i];
+            newString += substitution;
+
+        }
+        newString += strings[i];
+
+        return newString;
+
+    },
+
+    convert : function(match, nosign){
+        if (nosign) {
+            match.sign = '';
+        } else {
+            match.sign = match.negative ? '-' : match.sign;
+        }
+        var l = match.min - match.argument.length + 1 - match.sign.length;
+        var pad = new Array(l < 0 ? 0 : l).join(match.pad);
+        if (!match.left) {
+            if (match.pad == '0' || nosign) {
+                return match.sign + pad + match.argument;
+            } else {
+                return pad + match.sign + match.argument;
+            }
+        } else {
+            if (match.pad == '0' || nosign) {
+                return match.sign + match.argument + pad.replace(/0/g, ' ');
+            } else {
+                return match.sign + match.argument + pad;
+            }
+        }
+    }
+}
+
+sprintf = sprintfWrapper.init;
+	
