@@ -1,0 +1,16 @@
+.tableComponent .numeric{
+	text-align: right;
+	font-family: monospace;
+}
+
+.tableComponent .string{
+	text-align: left;
+}
+
+.tableComponent .sparkline{
+	text-align: center;
+}
+
+.cdfClickable{
+	cursor: pointer;
+}
