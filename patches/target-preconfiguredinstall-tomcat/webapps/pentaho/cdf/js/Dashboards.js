@@ -927,16 +927,18 @@ Dashboards.getParameter = function ( parameterName ) {
 Dashboards.updateJFreeChartComponent = function( object ){
 
 	var cd = object.chartDefinition;
+	// Merge the stuff with a chartOptions element
 	if (cd == undefined){
 		alert("Fatal - No chartDefinition passed");
 		return;
 	}
+	var cd0 = $.extend({},Dashboards.ev(cd.chartOptions), cd);
 
 	//go through parametere array and update values
 	var parameters = [];
-	for(p in cd){
+	for(p in cd0){
 		var key = p;
-		var value = typeof cd[p]=='function'?cd[p]():cd[p];
+		var value = typeof cd0[p]=='function'?cd0[p]():cd0[p];
 		//alert("key: " + key + "; Value: " + value);
 		parameters.push([key,value]);
 	} 
@@ -1258,7 +1260,7 @@ Dashboards.processTableComponentResponse = function(object,json)
 	var cd = object.chartDefinition;
 	// Build a default config from the standard options
 	var dtData0 = Dashboards.getDataTableOptions(cd);
-	var dtData = $.extend(dtData0,cd.dataTableOptions);
+	var dtData = $.extend(cd.dataTableOptions,dtData0);
 	dtData.aaData = json;
 	$("#"+object.htmlObject).html("<table id='" + object.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
 

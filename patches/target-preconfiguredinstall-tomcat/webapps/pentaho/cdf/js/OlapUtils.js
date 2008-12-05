@@ -44,6 +44,7 @@ OlapUtils.mdxQuery.prototype.update = function(hash){
 	this.query["swapRowsAndColumns"] = hash["swapRowsAndColumns"] || false;
 	this.query["filters"] = hash["filters"] || {rows:{},columns: {}};
 	this.query["where"] = hash["where"] || {};
+	this.query["extra"] = hash["extra"] || {};
 };
 
 //.prototype.clone = function(){
@@ -462,6 +463,8 @@ OlapUtils.GenericMdxQuery = Base.extend({
 		mdxQuery : undefined,
 
 		options : {},
+		tableDefaults: {},
+		chartDefaults: {},
 
 		genericDefaults : {
 			dateDim: '[Date]',
@@ -492,7 +495,18 @@ OlapUtils.GenericMdxQuery = Base.extend({
 			
 			
 			return this.query;
+		},
+
+		getDataTableOptions: function(options){
+			$.extend(this.tableDefaults,options);
+			return Dashboards.getDataTableOptions(this.tableDefaults);
+		},
+
+		getChartOptions: function(options){
+			$.extend(this.chartDefaults,options);
+			return this.chartDefaults;
 		}
+
 
 	}); 
 
@@ -564,15 +578,121 @@ OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
 
 		},
 
-		queryBase : {},
+		queryBase : {}
 		
-		getDataTableOptions: function(options){
-			for(o in options)
-				this.tableDefaults[o] = options[o];
-			return Dashboards.getDataTableOptions(this.tableDefaults);
-		}
+
+	});
 
 
+
+OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
+
+		translationHash: {},
+		mdxQuery : undefined,
+		thisMonth :"",
+		lastMonth :"",
+		lastYearMonth :"",
+		
+		specificDefaults : {
+			startDate: '2008-10-01',
+			endDate: '2008-11-01',
+			rows: '[Product Operating Systems]',
+			rowLevels: ["Platform","Version"],
+			measure: '[Total Requests]',
+			debug: false
+		},
+		
+		tableDefaults : {
+			colHeaders: ["Dimension",'Total', '% m/m', '% m/m-12', 'Last 12 months'],
+			colTypes: ['string', 'numeric', 'numeric', 'numeric', 'sparkline'],
+			colFormats: [null, '%.0f', '%.2f', '%.2f', null],
+			colWidths: ['100px', '50px', '50px' , '50px', '80px'],
+			displayLength: 10,
+			sparklineType: "line",
+			sortBy: [[1,'desc']]
+		},
+
+		chartDefaults : {
+				domainLabelRotationDir: "up",
+				domainLabelRotation: "0",
+				orientation: "horizontal",
+				title: "",
+				isStacked: "true",
+				is3d: false,
+				foregroundAlpha: 0.8,
+				showValues: true,
+				chartType: function(){ return this.parent.queryBase.extra.translationHash.chartType;},
+				datasetType: function(){return this.parent.queryBase.extra.translationHash.datasetType;},
+				includeLegend: function(){return this.parent.queryBase.extra.translationHash.includeLegend;},
+				topCountAxis: function(){return this.parent.queryBase.extra.translationHash.axis[1];}
+
+			},
+		
+		constructor: function(options,object){
+
+			this.options = jQuery.extend({}, this.genericDefaults, this.specificDefaults, options);
+			var options = this.options;
+
+			var chartTypesTranslation= {
+				"Pie Chart": {
+					chartType: "PieChart", 
+					datasetType: "CategoryDataset", 
+					axis:["columns","rows"], 
+					member: "([Date].[Date Range], [Measures].[Avg])", 
+					includeLegend: false
+				},
+				"Bar Chart": {
+					chartType: "BarChart", 
+					datasetType: "CategoryDataset", 
+					axis:["columns","rows"], 
+					member: "([Date].[Date Range], [Measures].[Avg])", 
+					includeLegend: false
+				},
+				"Trend Lines": {
+					chartType: "AreaChart",
+					datasetType: "TimeSeriesCollection",
+					axis:["rows","columns"], 
+					member: "a",
+					includeLegend: true
+				}
+			};
+
+			this.queryBase= {
+				from: options.from,
+				rows: options.rows,
+				rowLevels: options.rowLevels,
+				rowDrill: options.rowDrill,
+				nonEmptyRows: options.nonEmptyRows,
+				columns:  function(){return this.extra.translationHash["member"]} ,
+				swapRowsAndColumns: function(){return this.extra.translationHash["axis"][0]=="rows" },
+				orderBy: "Avg(a,[Measures].[Total Requests])",
+				sets: {
+					"a":
+					function(){return "a as '([Date].[Date].[" + options.startDate + "]:[Date].[Date].["+ options.endDate + "])'"}
+				},
+				members: {
+					"[Date].[Date Range]": "[Date].[Date Range] as Aggregate(a)",
+					"[Measures].[Avg]": "[Measures].[Avg] as 'Avg(a,[Measures].[Total Requests])'"
+				},
+				where:{
+					//measures: "[Measures].[Total Requests]",
+					version: function(){return "[Products].[Firefox]"},
+					products: "[Products and Versions].[Firefox]"
+				},
+				extra: {}
+			};
+
+			this.queryBase.extra.translationHash = chartTypesTranslation["Trend Lines"];
+
+			this.chartDefaults.parent = this;
+
+			// Init this querybase
+			this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
+
+		},
+
+		queryBase : {}
+		
 
 	});
 
