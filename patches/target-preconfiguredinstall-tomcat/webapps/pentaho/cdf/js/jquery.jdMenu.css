@@ -11,12 +11,6 @@ ul.jd_menu_vertical ul {
 ul.jd_menu li {
 	float: left;
 }
-ul.jd_menu_vertical {
-	width: 300px;
-}
-ul.jd_menu_vertical li {
-	float: none;
-}
 
 /* -- Sub-Menus -- */
 ul.jd_menu ul,
@@ -36,18 +30,13 @@ ul.jd_menu_vertical ul li {
 
 
 ul.jd_menu,
-ul.jd_menu ul,
-ul.jd_menu_vertical,
-ul.jd_menu_vertical ul {
+ul.jd_menu ul {
 	background-color: #369;
-	border: 1px solid #036;
-	border-top: 1px solid #69C;
-	border-left: 1px solid #69C;
+	border: 0px solid #036;
+	border-top: 0px solid #69C;
+	border-left: 0px solid #69C;
 	
 	height: 20px;
-}
-ul.jd_menu_vertical {
-	height: auto;
 }
 ul.jd_menu ul {
 	height: auto;
@@ -56,7 +45,7 @@ ul.jd_menu ul {
 	width: 1%;
 }
 ul.jd_menu li {
-	font-family: sans-serif;
+	font-family: "trebuchet ms",sans-serif;
 	font-size: 12px;
 	color: #FFF;
 	

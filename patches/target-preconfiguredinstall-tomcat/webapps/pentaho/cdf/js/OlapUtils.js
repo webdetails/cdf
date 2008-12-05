@@ -261,7 +261,7 @@ OlapUtils.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
 		"Reset All": 'resetall',
 		"Cancel": "cancel" 
 	};
-
+	
 	if (clickedObj.mdxQuery.axisDepth == 0)
 		delete buttonsHash.Collapse;
 
@@ -459,7 +459,7 @@ OlapUtils.getAxisPathString = function(axis,axisPath){
 
 OlapUtils.GenericMdxQuery = Base.extend({
 
-		mdxQuery : {},
+		mdxQuery : undefined,
 
 		options : {},
 
@@ -477,14 +477,20 @@ OlapUtils.GenericMdxQuery = Base.extend({
 
 		constructor: function(options){
 		},
-
+		
 		getQuery: function(){
 
-			this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
+			/*for(o in this.options)
+				this.options[o] = OlapUtils.ev(this.options[o]);*/
+				
 			this.query = this.mdxQuery.getQuery();
+				
 			if(this.options.debug == true){
 				alert(this.query);
 			}
+			
+			
+			
 			return this.query;
 		}
 
@@ -493,26 +499,38 @@ OlapUtils.GenericMdxQuery = Base.extend({
 
 OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
 
+		mdxQuery : undefined,
 		thisMonth :"",
 		lastMonth :"",
 		lastYearMonth :"",
-
+		
 		specificDefaults : {
 			baseDate: '2008-10-01',
 			rows: '[Locale Codes]',
 			rowLevels: ['Code'],
 			measure: '[Total Month Requests]',
-			debug: true
+			debug: false
 		},
-
-		constructor: function(options){
+		
+		tableDefaults : {
+			colHeaders: ["Dimension",'Total', '% m/m', '% m/m-12', 'Last 12 months'],
+			colTypes: ['string', 'numeric', 'numeric', 'numeric', 'sparkline'],
+			colFormats: [null, '%.0f', '%.2f', '%.2f', null],
+			colWidths: ['100px', '50px', '50px' , '50px', '80px'],
+			displayLength: 10,
+			sparklineType: "line",
+			sortBy: [[1,'desc']]
+		},
+		
+		
+		constructor: function(options,object){
 
 			this.options = jQuery.extend({}, this.genericDefaults, this.specificDefaults, options);
 			var options = this.options;
+			//options.baseDate = OlapUtils.ev(options.baseDate);
 			var thisMonth = options.dateDim+".[TodaysMonth]";
 			var lastMonth = options.dateDim+".[LastMonth]";
 			var lastYearMonth = options.dateDim+".[LastYearMonth]";
-
 			this.queryBase = {
 				from: options.from,
 				rows: options.rows,
@@ -524,27 +542,37 @@ OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
 				orderBy: options.orderBy,
 				sets: {
 					"last12Months":
-					function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+ options.baseDate + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
+					function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
 				},
 				members: {
-					thisMonth: thisMonth + " as 'Ancestor("+options.dateDim+"."+options.dateLevel+".["+ options.baseDate + "],"+options.dateDim+"."+options.dateLevelMonth+")' ",
-					lastMonth: lastMonth + " as Ancestor("+options.dateDim+"."+options.dateLevel+".["+ options.baseDate + "],"+options.dateDim+"."+options.dateLevelMonth+").Lag(1.0) ",
-					lastYearMonth: lastYearMonth + " as Ancestor("+options.dateDim+"."+options.dateLevel+".["+ options.baseDate + "],"+options.dateDim+"."+options.dateLevelMonth+").Lag(12.0) ",
-					lastMonthMeasure:""+options.measuresDim+".[LastMonth] as Aggregate("+options.dateDim+".[LastMonth]*"+options.measure+") ",
-					lastYearMonthMeasure:""+options.measuresDim+".[LastYearMonth] as Aggregate("+options.dateDim+".[LastYearMonth]*"+options.measure+") ",
-					mmMeasure:""+options.measuresDim+".[% m/m] as 100.0*("+options.measuresDim+"."+options.measure+" / "+options.measuresDim+".[LastMonth] - 1.0)  ",
-					mm12Measure:""+options.measuresDim+".[% m/m-12] as 100.0*("+options.measuresDim+"."+options.measure+" / "+options.measuresDim+".[LastYearMonth] - 1.0)  ",
-					sparkdatamonths:""+options.measuresDim+".[sparkdatamonths] as Generate([last12Months], Cast(("+options.measuresDim+"."+options.measure+") + 0.0 as String), \" , \") "
+					thisMonth: function(){return thisMonth + " as 'Ancestor("+options.dateDim+"."+ options.dateLevel +".["+ Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")' "},
+					lastMonth: function(){return lastMonth + " as Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+").Lag(1.0) "},
+					lastYearMonth: function(){return lastYearMonth + " as Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+").Lag(12.0) "},
+					lastMonthMeasure:function(){return ""+options.measuresDim+".[LastMonth] as Aggregate("+options.dateDim+".[LastMonth]*"+options.measure+") "},
+					lastYearMonthMeasure:function(){return ""+options.measuresDim+".[LastYearMonth] as Aggregate("+options.dateDim+".[LastYearMonth]*"+options.measure+") "},
+					mmMeasure:function(){return ""+options.measuresDim+".[% m/m] as 100.0*("+options.measuresDim+"."+options.measure+" / "+options.measuresDim+".[LastMonth] - 1.0)  "},
+					mm12Measure:function(){return ""+options.measuresDim+".[% m/m-12] as 100.0*("+options.measuresDim+"."+options.measure+" / "+options.measuresDim+".[LastYearMonth] - 1.0)  "},
+					sparkdatamonths:function(){return ""+options.measuresDim+".[sparkdatamonths] as Generate([last12Months], Cast(("+options.measuresDim+"."+options.measure+") + 0.0 as String), \" , \") "}
 				},
 				where:{
 					dateBase: ""+options.dateDim+".[TodaysMonth]",
 				}
 
 			};
+			// Init this querybase
+			this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
 
 		},
 
 		queryBase : {},
+		
+		getDataTableOptions: function(options){
+			for(o in options)
+				this.tableDefaults[o] = options[o];
+			return Dashboards.getDataTableOptions(this.tableDefaults);
+		}
+
+
 
 	});
 

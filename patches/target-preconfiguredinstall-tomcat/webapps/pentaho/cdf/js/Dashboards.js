@@ -292,7 +292,6 @@ Dashboards.update = function(object)	{
 		case "pivotLink":
 			this.generatePivotLink(object);
 			break;
-
 		case "tableComponent":
 			this.generateTableComponent(object);
 			break;
@@ -1205,6 +1204,34 @@ Dashboards.makeQuery = function(object){
 
 };
 
+/*Dashboards.uptdateEvolutionComponent = function(object){
+
+	
+	var cd = object.chartDefinition;
+	
+	if (cd == undefined){
+		alert("Fatal - No chart definition passed");
+		return;
+	}
+	
+
+	
+	if(cd.query == undefined || cd.queryNotDefined == true ){
+		
+		cd.queryNotDefined = true;
+		
+		var options = Dashboards.clone (cd)
+		for (var o in options) {
+			if(typeof options[o] == 'function')
+				options[o] = options[o]();
+		}
+		
+		object.chartDefinition.query = (new OlapUtils.EvolutionQuery(options)).getQuery();
+	}	
+	
+	Dashboards.generateTableComponent(object)
+}*/
+
 Dashboards.generateTableComponent = function(object){
 
 	var cd = object.chartDefinition;
@@ -1217,76 +1244,12 @@ Dashboards.generateTableComponent = function(object){
 	//Clear previous table
 	$("#"+object.htmlObject).empty();
 	
-	
-	if(cd.mdxQuery != undefined)
-	{
-		var mdxQuery = eval(cd.mdxQuery);
-		
-		if(mdxQuery != null){
-			
-			var query = mdxQuery.query;
-			
-			//Get measure
-			var columns = typeof query['columns']=='function'? query['columns'](): query['columns'];
-			var measure = "";
-			if(columns.split(",").length  > 1)
-				measure = columns.split(",")[0];
-			else
-				measure = columns;
-			
-			//Get date Dimension
-			var dateDimension = mdxQuery.originalHash.dateDimension != undefined ? mdxQuery.originalHash.dateDimension : "Date";
-			
-			//Add sets and members. Update columns
-			Dashboards.addEvolutionMeasures(mdxQuery ,measure, dateDimension, OlapUtils.evolutionType);
-			
-			//Set Table Headers and Coltypes
-			cd.colTypes =  "numeric,numeric,numeric,numeric,sparkline";
-			if(cd.headers == undefined){
-			if(OlapUtils.evolutionType == "Week")
-				cd.headers = "Requests,Week,Last Week,Week Evolution,Last 7 Days";
-			else
-				cd.headers = "Requests,Month,Last Month,Month Evolution,Last 30 Days";
-			}	
-				
-			//Add Evolution type listner
-			object.listeners.push("OlapUtils.evolutionType");
-			
-			
-		}
-		
-	}
 	$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
 			Dashboards.processTableComponentResponse(object,json);
 		});
 
 };
 
-Dashboards.addEvolutionMeasures = function(query, measure, dateDimension, evolutionType)
-{
-	
-	if(evolutionType == "Week")
-	{
-		query.addSet("week", "week as LastPeriods(7.0, [Date].CurrentMember)");
-		query.addSet("lastweek", " lastweek as LastPeriods(7.0, [Date].CurrentMember.Lag(7))");
-		query.addMember("[Measures].[lastweek]","[Measures].[lastweek] as Aggregate([lastweek]," + measure + ")");
-		query.addMember("[Measures].[week]","[Measures].[week] as Aggregate([week]," + measure + ")");
-		query.addMember("[Measures].[weekEvolution]","[Measures].[weekEvolution] as 100.0 * ([Measures].[week] / [Measures].[lastweek] - 1.0)");
-		query.addMember("[Measures].[sparkdataweeks]","[Measures].[sparkdataweeks] as Generate([week], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
-		query.query['columns'] = measure + ",[Measures].[week],[Measures].[lastweek],[Measures].[weekEvolution],[Measures].[sparkdataweeks]";
-	}
-	else if(evolutionType == "Month")
-	{
-		query.addSet("month","month as LastPeriods(30.0, [Date].CurrentMember)");
-		query.addSet("lastmonth","lastmonth as LastPeriods(30.0, [Date].CurrentMember.Lag(30))");
-		query.addMember("[Measures].[month]","[Measures].[month] as Aggregate([month]," + measure + ")");
-		query.addMember("[Measures].[lastmonth]","[Measures].[lastmonth] as Aggregate([lastmonth]," + measure + ")");
-		query.addMember("[Measures].[monthEvolution]","[Measures].[monthEvolution] as 100.0 * ([Measures].[month] / [Measures].[lastmonth] - 1.0)");
-		query.addMember("[Measures].[sparkdatamonths]","[Measures].[sparkdatamonths] as Generate([month], Cast((" + measure + ")/1000 + 0.0 as String), \" , \") ");
-		query.query['columns'] = measure + ",[Measures].[month],[Measures].[lastmonth],[Measures].[monthEvolution],[Measures].[sparkdatamonths]";
-	}	
-	
-};
 
 Dashboards.processTableComponentResponse = function(object,json)
 {
@@ -1294,41 +1257,13 @@ Dashboards.processTableComponentResponse = function(object,json)
 	
 	var cd = object.chartDefinition;
 	// Build a default config from the standard options
-	var dtData0 = {};
-	if(cd.info != undefined){dtData0.bInfo = cd.info};
-	if(cd.displayLength != undefined){dtData0.iDisplayLength = cd.displayLength};
-	if(cd.lengthChange != undefined){dtData0.bLengthChange = cd.lengthChange};
-	if(cd.paginate != undefined){dtData0.bPaginate = cd.paginate};
-	if(cd.sort != undefined){dtData0.bSort = cd.sort};
-	if(cd.filter != undefined){dtData0.bFilter = cd.filter};
-	dtData0.aoColumns = new Array(cd.colHeaders.length);
-	for(var i = 0; i< cd.colHeaders.length; i++){dtData0.aoColumns[i]={}};
-	$.each(cd.colHeaders,function(i,val){ dtData0.aoColumns[i].sTitle=val; });  // colHeaders
-	if(cd.colTypes!=undefined){$.each(cd.colTypes,function(i,val){ 
-				var col = dtData0.aoColumns[i];
-				if(val=='sparkline'){
-					col.sClass=val; 
-					col.bSearchable=false;
-					col.bSortable=false;
-				}
-				else{
-					col.sClass=val;
-					col.sType=val;
-				}
-			})};  // colTypes
-	if(cd.colFormats!=undefined){$.each(cd.colFormats,function(i,val){ if (val!=null){dtData0.aoColumns[i].fnRender=
-						function ( obj ) { return sprintf(val,obj.aData[obj.iDataRow][obj.iDataColumn]); }
-				}})};  // colFormats
-
-	if(cd.colWidths!=undefined){$.each(cd.colWidths,function(i,val){ if (val!=null){dtData0.aoColumns[i].sWidth=val}})}; //colWidths
-	dtData0.aaSorting=cd.sortBy;
-
+	var dtData0 = Dashboards.getDataTableOptions(cd);
 	var dtData = $.extend(dtData0,cd.dataTableOptions);
 	dtData.aaData = json;
 	$("#"+object.htmlObject).html("<table id='" + object.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
 
 	dtData.fnFinalCallback = function( aData, iRowCount ){
-		$("td.sparkline").each(function(i){
+		$("#" + object.htmlObject + " td.sparkline").each(function(i){
 				$(this).sparkline($(this).text().split(/,/));
 			});
 		if(cd.urlTemplate != undefined){
@@ -1349,7 +1284,42 @@ Dashboards.path = Dashboards.getParameter("path");
 
 Dashboards.solution = Dashboards.getParameter("solution");
 
+Dashboards.getDataTableOptions = function(options)
+{
+	var dtData = {};
+	if(options.info != undefined){dtData.bInfo = options.info};
+	if(options.displayLength != undefined){dtData.iDisplayLength = options.displayLength};
+	if(options.lengthChange != undefined){dtData.bLengthChange = options.lengthChange};
+	if(options.paginate != undefined){dtData.bPaginate = options.paginate};
+	if(options.sort != undefined){dtData.bSort = options.sort};
+	if(options.filter != undefined){dtData.bFilter = options.filter};
+	if(options.colHeaders != undefined){
+		dtData.aoColumns = new Array(options.colHeaders.length);
+		for(var i = 0; i< options.colHeaders.length; i++){dtData.aoColumns[i]={}};
+		$.each(options.colHeaders,function(i,val){ dtData.aoColumns[i].sTitle=val; });  // colHeaders
+		if(options.colTypes!=undefined){$.each(options.colTypes,function(i,val){ 
+					var col = dtData.aoColumns[i];
+					if(val=='sparkline'){
+						col.sClass=val; 
+						col.bSearchable=false;
+						col.bSortable=false;
+					}
+					else{
+						col.sClass=val;
+						col.sType=val;
+					}
+				})};  // colTypes
+		if(options.colFormats!=undefined){$.each(options.colFormats,function(i,val){ if (val!=null){dtData.aoColumns[i].fnRender=
+							function ( obj ) { return sprintf(val,obj.aData[obj.iDataRow][obj.iDataColumn]); }
+					}})};  // colFormats
 
+		if(options.colWidths!=undefined){$.each(options.colWidths,function(i,val){ if (val!=null){dtData.aoColumns[i].sWidth=val}})}; //colWidths
+		dtData.aaSorting=options.sortBy;
+	}
+	
+	return dtData;
+
+};
 
 Dashboards.clone = function clone(obj) {
 
@@ -1416,7 +1386,7 @@ Dashboards.getArgValue  = function(key)
 	return undefined;
 }
 
-
+Dashboards.ev = function(o){return typeof o == 'function'?o():o};
 
 
 /**
