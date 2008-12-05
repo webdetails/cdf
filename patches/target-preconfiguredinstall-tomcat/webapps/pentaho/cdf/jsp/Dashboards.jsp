@@ -156,7 +156,7 @@
 		/************************************************/
 		
 		Date startDate = new Date();
-		int headIndex = intro.indexOf("</head>");
+		int headIndex = intro.indexOf("<head>");
 		int length = intro.length();
 		Hashtable addedFiles = new Hashtable();
 		
