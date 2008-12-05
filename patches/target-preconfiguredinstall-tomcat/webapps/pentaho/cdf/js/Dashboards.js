@@ -1296,7 +1296,10 @@ Dashboards.getDataTableOptions = function(options)
 	if(options.colHeaders != undefined){
 		dtData.aoColumns = new Array(options.colHeaders.length);
 		for(var i = 0; i< options.colHeaders.length; i++){dtData.aoColumns[i]={}};
-		$.each(options.colHeaders,function(i,val){ dtData.aoColumns[i].sTitle=val; });  // colHeaders
+		$.each(options.colHeaders,function(i,val){ 
+			dtData.aoColumns[i].sTitle=val; 
+			if(val == "") dtData.aoColumns[i].bVisible=false;
+		});  // colHeaders
 		if(options.colTypes!=undefined){$.each(options.colTypes,function(i,val){ 
 					var col = dtData.aoColumns[i];
 					if(val=='sparkline'){
