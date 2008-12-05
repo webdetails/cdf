@@ -555,7 +555,7 @@ OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
 					sparkdatamonths:function(){return ""+options.measuresDim+".[sparkdatamonths] as Generate([last12Months], Cast(("+options.measuresDim+"."+options.measure+") + 0.0 as String), \" , \") "}
 				},
 				where:{
-					dateBase: ""+options.dateDim+".[TodaysMonth]",
+					dateBase: ""+options.dateDim+".[TodaysMonth]"
 				}
 
 			};

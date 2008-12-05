@@ -96,7 +96,7 @@ padding: 0.5em;
         left: 0px;
         background: #007788 url('images/x3.gif') top left repeat-x;
         height: 2em;
-	z-index:1000
+	z-index:5;
 }
 
 /* Menu */
