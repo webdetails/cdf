@@ -587,6 +587,7 @@ OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
 
 OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 
+		chartTypesTranslation: {},
 		translationHash: {},
 		mdxQuery : undefined,
 		thisMonth :"",
@@ -599,17 +600,16 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 			rows: '[Product Operating Systems]',
 			rowLevels: ["Platform","Version"],
 			measure: '[Total Requests]',
+			defaultChartType: "bar",
 			debug: false
 		},
 		
 		tableDefaults : {
-			colHeaders: ["Dimension",'Total', '% m/m', '% m/m-12', 'Last 12 months'],
-			colTypes: ['string', 'numeric', 'numeric', 'numeric', 'sparkline'],
-			colFormats: [null, '%.0f', '%.2f', '%.2f', null],
-			colWidths: ['100px', '50px', '50px' , '50px', '80px'],
-			displayLength: 10,
-			sparklineType: "line",
-			sortBy: [[1,'desc']]
+			colHeaders: ['Name','Value'],
+			colTypes: ['string','numeric'],
+			colFormats: [null, '%.0f'],
+			sortBy:[[1,'desc']],
+			lengthChange: false
 		},
 
 		chartDefaults : {
@@ -633,22 +633,34 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 			this.options = jQuery.extend({}, this.genericDefaults, this.specificDefaults, options);
 			var options = this.options;
 
-			var chartTypesTranslation= {
-				"Pie Chart": {
+			this.chartTypesTranslation= {
+				"pie": {
+					type: "jFreeChartComponent",
 					chartType: "PieChart", 
 					datasetType: "CategoryDataset", 
 					axis:["columns","rows"], 
-					member: "([Date].[Date Range], [Measures].[Avg])", 
+					member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])", 
 					includeLegend: false
 				},
-				"Bar Chart": {
+				"bar": {
+					type: "jFreeChartComponent",
 					chartType: "BarChart", 
 					datasetType: "CategoryDataset", 
 					axis:["columns","rows"], 
-					member: "([Date].[Date Range], [Measures].[Avg])", 
+					member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])", 
 					includeLegend: false
 				},
-				"Trend Lines": {
+				"table": {
+					type: "tableComponent",
+					chartType: "PieChart", 
+					datasetType: "CategoryDataset", 
+					axis:["columns","rows"], 
+					member: "("+options.dateDim+".[Date Range], "+options.measuresDim+".[Avg])", 
+					includeLegend: false
+				},
+				"trend": {
+					type: "jFreeChartComponent",
+
 					chartType: "AreaChart",
 					datasetType: "TimeSeriesCollection",
 					axis:["rows","columns"], 
@@ -665,30 +677,36 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 				nonEmptyRows: options.nonEmptyRows,
 				columns:  function(){return this.extra.translationHash["member"]} ,
 				swapRowsAndColumns: function(){return this.extra.translationHash["axis"][0]=="rows" },
-				orderBy: "Avg(a,[Measures].[Total Requests])",
+				orderBy: "Avg(a,"+options.measuresDim+"."+options.measure+")",
+
 				sets: {
 					"a":
-					function(){return "a as '([Date].[Date].[" + options.startDate + "]:[Date].[Date].["+ options.endDate + "])'"}
+					function(){return "a as '("+options.dateDim+"."+options.dateDim+".[" + Dashboards.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateDim+".["+ Dashboards.ev(options.endDate) + "])'"}
 				},
 				members: {
-					"[Date].[Date Range]": "[Date].[Date Range] as Aggregate(a)",
-					"[Measures].[Avg]": "[Measures].[Avg] as 'Avg(a,[Measures].[Total Requests])'"
+					daterange: ""+options.dateDim+".[Date Range] as Aggregate(a)",
+					average: ""+options.measuresDim+".[Avg] as 'Avg(a,"+options.measuresDim+"."+options.measure+")'"
 				},
 				where:{
-					//measures: "[Measures].[Total Requests]",
-					version: function(){return "[Products].[Firefox]"},
-					products: "[Products and Versions].[Firefox]"
 				},
 				extra: {}
 			};
 
-			this.queryBase.extra.translationHash = chartTypesTranslation["Trend Lines"];
+			this.setChartType(options.defaultChartType);
 
 			this.chartDefaults.parent = this;
 
 			// Init this querybase
 			this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
 
+		},
+
+		setChartType: function(chartType){
+			this.queryBase.extra.translationHash = this.chartTypesTranslation[chartType];
+		},
+
+		getComponentType: function(){
+			return this.queryBase.extra.translationHash.type;
 		},
 
 		queryBase : {}

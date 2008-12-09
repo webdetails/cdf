@@ -104,17 +104,17 @@ Dashboards.update = function(object)	{
 		}
 		selectHTML += ">";
 
+		var vid = object.valueAsId==false?false:true;
 		for(var i= 0, len  = myArray.length; i < len; i++){
 			if(myArray[i]!= null && myArray[i].length>0)
-				selectHTML += "<option value = '" + myArray[i][1] + "' >" + myArray[i][1] + "</option>";
+				selectHTML += "<option value = '" + myArray[i][vid?1:0] + "' >" + myArray[i][1] + "</option>";
 		} 
 
 		selectHTML += "</select>";
 
-		//alert(selectHTML);
-
 		//update the placeholder
-		document.getElementById(object.htmlObject).innerHTML = selectHTML;
+		$("#"+object.htmlObject).html(selectHTML)
+		$("#"+object.name).val(eval(object.parameter));
 		$("#"+object.name).change(function() {
 				Dashboards.processChange(object.name);
 			});
@@ -133,7 +133,7 @@ Dashboards.update = function(object)	{
 
 			break;
 		case "dateInput":
-			$("#"+object.htmlObject).html($("<input/>").attr("id",object.name).attr("value",eval(object.parameter)).css("width","10"));
+			$("#"+object.htmlObject).html($("<input/>").attr("id",object.name).attr("value",eval(object.parameter)).css("width","80px"));
 			Calendar.setup({inputField: object.name, ifFormat : "%Y-%m-%d",  onUpdate: function(){Dashboards.processChange(object.name)} });
 			break;
 		case "dateRangeInput":
@@ -1708,42 +1708,43 @@ sprintfWrapper = {
         var i = null;
 
         for (i=0; i<matches.length; i++) {
+			var m =matches[i];
 
-            if (matches[i].code == '%') { substitution = '%' }
-            else if (matches[i].code == 'b') {
-                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(2));
-                substitution = sprintfWrapper.convert(matches[i], true);
+            if (m.code == '%') { substitution = '%' }
+            else if (m.code == 'b') {
+                m.argument = String(Math.abs(parseInt(m.argument)).toString(2));
+                substitution = sprintfWrapper.convert(m, true);
             }
-            else if (matches[i].code == 'c') {
-                matches[i].argument = String(String.fromCharCode(parseInt(Math.abs(parseInt(matches[i].argument)))));
-                substitution = sprintfWrapper.convert(matches[i], true);
+            else if (m.code == 'c') {
+                m.argument = String(String.fromCharCode(parseInt(Math.abs(parseInt(m.argument)))));
+                substitution = sprintfWrapper.convert(m, true);
             }
-            else if (matches[i].code == 'd') {
-                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)));
-                substitution = sprintfWrapper.convert(matches[i]);
+            else if (m.code == 'd') {
+				m.argument = toFormatedString(String(Math.abs(parseInt(m.argument))));
+                substitution = sprintfWrapper.convert(m);
             }
-            else if (matches[i].code == 'f') {
-                matches[i].argument = String(Math.abs(parseFloat(matches[i].argument)).toFixed(matches[i].precision ? matches[i].precision : 6));
-                substitution = sprintfWrapper.convert(matches[i]);
+            else if (m.code == 'f') {
+				m.argument = toFormatedString(String(Math.abs(parseFloat(m.argument)).toFixed(m.precision ? m.precision : 6)));
+                substitution = sprintfWrapper.convert(m);
             }
-            else if (matches[i].code == 'o') {
-                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(8));
-                substitution = sprintfWrapper.convert(matches[i]);
+            else if (m.code == 'o') {
+                m.argument = String(Math.abs(parseInt(m.argument)).toString(8));
+                substitution = sprintfWrapper.convert(m);
             }
-            else if (matches[i].code == 's') {
-                matches[i].argument = matches[i].argument.substring(0, matches[i].precision ? matches[i].precision : matches[i].argument.length)
-                substitution = sprintfWrapper.convert(matches[i], true);
+            else if (m.code == 's') {
+                m.argument = m.argument.substring(0, m.precision ? m.precision : m.argument.length)
+                substitution = sprintfWrapper.convert(m, true);
             }
-            else if (matches[i].code == 'x') {
-                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(16));
-                substitution = sprintfWrapper.convert(matches[i]);
+            else if (m.code == 'x') {
+                m.argument = String(Math.abs(parseInt(m.argument)).toString(16));
+                substitution = sprintfWrapper.convert(m);
             }
-            else if (matches[i].code == 'X') {
-                matches[i].argument = String(Math.abs(parseInt(matches[i].argument)).toString(16));
-                substitution = sprintfWrapper.convert(matches[i]).toUpperCase();
+            else if (m.code == 'X') {
+                m.argument = String(Math.abs(parseInt(m.argument)).toString(16));
+                substitution = sprintfWrapper.convert(m).toUpperCase();
             }
             else {
-                substitution = matches[i].match;
+                substitution = m.match;
             }
 
             newString += strings[i];
@@ -1781,4 +1782,4 @@ sprintfWrapper = {
 }
 
 sprintf = sprintfWrapper.init;
-	
+
