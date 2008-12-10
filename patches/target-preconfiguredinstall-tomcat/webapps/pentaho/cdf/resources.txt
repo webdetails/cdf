@@ -59,6 +59,14 @@ tableComponentLink=\
 timePlotComponentScript=\
 /pentaho/cdf/js/simile/timeplot/timeplot-api.js?local
 
+autocompleteBoxScript=\
+/pentaho/cdf/js/autobox/jquery.templating.js,\
+/pentaho/cdf/js/autobox/jquery.ui.autobox.ext.js,\
+/pentaho/cdf/js/autobox/jquery.ui.autobox.js
+
+autocompleteBoxLink=\
+/pentaho/cdf/js/autobox/jquery.ui.autobox.css
+
 
 
 

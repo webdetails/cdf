@@ -304,6 +304,9 @@ Dashboards.update = function(object)	{
 		case "executeXaction":
 			this.generateXActionComponent (object);
 			break;
+		case "autocompleteBox":
+			this.generateAutocompleteBoxComponent (object);
+			break;
 		}	
 		if(!(typeof(object.postExecution)=='undefined')){
 			object.postExecution();
@@ -419,7 +422,7 @@ Dashboards.update = function(object)	{
 		var object = eval(object_name);
 		var parameter = object.parameter;
 		var value;
-
+	
 		//alert(document.getElementById(object.name));
 
 		switch (object.type)
@@ -481,7 +484,11 @@ Dashboards.update = function(object)	{
 					Dashboards.processChange(object.name);
 				});
 			break;
+		case "autocompleteBox":
+			value = object.value;
+			break;
 		}
+		
 		if(!(typeof(object.preChange)=='undefined')){
 			object.preChange(value);
 		}
@@ -1360,6 +1367,32 @@ Dashboards.generateXActionComponent = function(object){
 	$("#"+ object.htmlObject).bind("click", function(){
 		Dashboards.executeXAction(object);
 	});
+}
+
+Dashboards.generateAutocompleteBoxComponent = function(object){
+
+	Dashboards.makeQuery(object);
+	
+	var list = [];
+	
+	for(p in object.result){	
+		var obj = {};
+		obj.text = object.result[p][0];
+		list.push(obj);
+	}
+	
+	$("#"+ object.htmlObject).empty();
+	
+	$("#" + object.htmlObject ).autobox({
+        list: list,
+		match: function(typed) { return this.text.match(new RegExp(typed, "i")); },
+        insertText: function(o) {return o.text },
+		processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
+		multiSellection: object.selectMulti == undefined ? false : object.selectMulti,
+		checkValue: object.checkValue == undefined ? true : object.checkValue,
+		parent: object
+      });
+	
 }
 
 Dashboards.executeXAction = function(object){
