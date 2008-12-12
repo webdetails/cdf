@@ -38,15 +38,14 @@
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<!-- These file locations are relative to the "system" folder within your pentaho solutions folder -->
-		<param-value>pentahoSystemConfig.xml adminPlugins.xml systemListeners.xml
-			sessionStartupActions.xml applicationContext-acegi-security.xml applicationContext-common-authorization.xml
-			applicationContext-acegi-security-jdbc.xml applicationContext-pentaho-security-jdbc.xml</param-value>
+		<!-- This file is relative to the "system" folder within your pentaho solutions folder. -->
+		<!-- Instead of adding files here, add them as imports to pentaho-spring-beans.xml. -->
+		 <param-value>pentaho-spring-beans.xml</param-value>
 	</context-param>
 
 	<context-param>
-		<param-name>objectFactoryCreatorClassName</param-name>
-		<param-value>org.pentaho.platform.engine.core.system.objfac.SpringObjectFactoryCreator</param-value>
+		<param-name>pentahoObjectFactory</param-name>
+		<param-value>org.pentaho.platform.web.http.context.WebSpringPentahoObjectFactory</param-value>
 	</context-param>
 
 	<!--
@@ -56,17 +55,9 @@
 		the system will look for the file called pentahoObjects.spring.xml in the solution's system folder
 	-->
 	<context-param>
-		<param-name>objectFactoryCreatorCfgFile</param-name>
+		<param-name>pentahoObjectFactoryCfgFile</param-name>
 		<param-value>pentahoObjects.spring.xml</param-value>
 	</context-param>
-
-	<!--
-		<context-param> <param-name>objectFactoryCreatorClassName</param-name>
-		<param-value>org.pentaho.platform.engine.core.system.objfac.LegacyObjectFactoryCreator</param-value> </context-param>
-		<context-param> <param-name>objectFactoryCreatorCfgFile</param-name>
-		<param-value>C:/projects/pentaho.2.trunk/bi-platform-sample-solution/system/testPentaho.xml</param-value>
-		</context-param>
-	-->
 
 	<!--
 		This defaults to UTF-8. Uncomment this section and change the value for other encodings. Also change the URIEncoding
@@ -197,6 +188,11 @@
 
 	<!-- insert additional filter-mappings -->
 
+	<!--   enables session and request scoped object creation in Spring -->
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
+    
 	<!-- JPivot resources initializer -->
 	<listener>
 		<listener-class>com.tonbeller.tbutils.res.ResourcesFactoryContextListener</listener-class>
@@ -319,6 +315,11 @@
 	<servlet>
 		<servlet-name>RepositoryFilePublisher</servlet-name>
 		<servlet-class>org.pentaho.platform.web.servlet.RepositoryFilePublisher</servlet-class>
+	</servlet>
+
+	<servlet>
+    	<servlet-name>GenericServlet</servlet-name>
+		<servlet-class>org.pentaho.platform.web.servlet.GenericServlet</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -532,36 +533,15 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>MantleStyle</servlet-name>
-		<jsp-file>/mantle/MantleStyle.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
 		<servlet-name>MantleLoginService</servlet-name>
 		<servlet-class>org.pentaho.mantle.login.server.MantleLoginServlet</servlet-class>
 	</servlet>
-
-	<servlet>
-		<servlet-name>MantleStyleManager</servlet-name>
-		<servlet-class>org.pentaho.mantle.server.MantleStyleManager</servlet-class>
-	</servlet>
-
 
   <!-- insert additional servlets -->
 
 	<servlet-mapping>
 		<servlet-name>MantleService</servlet-name>
 		<url-pattern>/mantle/MantleService</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>MantleStyle</servlet-name>
-		<url-pattern>/mantle/MantleStyle.css</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>MantleStyleManager</servlet-name>
-		<url-pattern>/mantle/MantleStyleManager</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
@@ -596,6 +576,11 @@
 	</servlet-mapping>
 	<!-- ********************* End JPivot Servlet Mappings ******************* -->
 
+	<servlet-mapping>
+		<servlet-name>GenericServlet</servlet-name>
+		<url-pattern>/content/*</url-pattern>
+	</servlet-mapping>
+	
 	<!-- Pentaho JSPs -->
 	<servlet-mapping>
 		<servlet-name>Chart</servlet-name>
