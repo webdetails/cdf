@@ -72,7 +72,7 @@
   };
 
   function addBox(opt,input, text, name){
-    var li=$('<li class="bit-box"></li>').attr('id', 'bit-' + count++).text(text);
+    var li=$('<li class="bit-box"></li>').attr('id', opt.name + 'bit-' + count++).text(text);
     li.append($('<a href="#" class="closebutton"></a>')
           .bind('click', function(e) {
               li.remove();
@@ -83,16 +83,27 @@
           .attr('name', name)
           .val(text)
       );
-    input.parent().after(li);
-    input.val('');
+    //input.parent().after(li);
+    //input.val('');
+	return li;
   }
   
   function addText(opt,input, text, name){
-	if(opt.multiSellection == true && text.length > 0)
-		addBox(opt,input, text, name);
-	else
-		input.val(text);
+	if(text.length > 0)
+	{
+		var li;
+		if(opt.multiSellection != true){
+			count = 0;
+			li = addBox(opt,input, text, name);
+			$("#" +opt.name + "bit-1").replaceWith(li);
+		}
+		else
+			li = addBox(opt,input, text, name);
+			
+		input.parent().after(li);
+		input.val("");
 	}
+   }
 	
    function getSelectedValues(input){
       var vals=input.parent().parent().find('li');
@@ -112,7 +123,7 @@
 		opt.processChange(opt.parent,selectedValues);
 		}
 	else
-		opt.processChange(opt.parent,input.val());
+		opt.processChange(opt.parent,getSelectedValues(input));
 	}
 	
 	function getCurrentValsHash(input){//return the currently selected values as a hash
@@ -346,15 +357,19 @@
     function createHolder(self){
       var input=createInput();
 	  var holder;
-	  if(opt.multiSellection == true){
-      holder=$('<ul class="autobox-hldr"></ul>')
+	  
+	  var classHolder = "autobox-hldr";
+	  if(opt.multiSellection == false)
+		classHolder = "autobox-hldr-2";
+	  
+	  
+      holder=$('<ul class="'+ classHolder + '"></ul>')
         .append($('<li class="autobox-input"></li>')
         .append(input));
 		self.append(holder);
 		$.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
-	  }
-	  else
-		 self.append(input);
+	  
+	 
 		 
 	  return holder;
     }
