@@ -131,7 +131,8 @@ OlapUtils.mdxQuery.prototype.getQuery = function(){
 
 	var whereArray = [];
 	$.each(_eh["where"],function(key,obj){
-			whereArray.push(typeof obj == 'function'?obj():obj);
+			var el = typeof obj == 'function'?obj():obj
+			if(el.length>0) whereArray.push(el);
 		});
 	if (whereArray.length>0){
 		query += " where ( " + whereArray.join(' , ') + " )";
