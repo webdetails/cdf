@@ -2,19 +2,19 @@
 import="
 pt.webdetails.cdf.*,
 pt.webdetails.cdf.test.*,
-org.pentaho.messages.util.LocaleHelper,
-org.pentaho.core.system.PentahoSystem,
-org.pentaho.core.session.IPentahoSession,
-org.pentaho.core.util.UIUtil,
-org.pentaho.core.solution.HttpRequestParameterProvider,
-org.pentaho.core.solution.HttpSessionParameterProvider
+org.pentaho.platform.util.messages.LocaleHelper,
+org.pentaho.platform.engine.core.system.PentahoSystem,
+org.pentaho.platform.api.engine.IPentahoSession,
+org.pentaho.platform.web.http.PentahoHttpSessionHelper,
+org.pentaho.platform.web.http.request.HttpRequestParameterProvider,
+org.pentaho.platform.web.http.session.HttpSessionParameterProvider
 "%><%
 	response.setCharacterEncoding(LocaleHelper.getSystemEncoding());
 	HttpSession httpSession = request.getSession();
     
 	String baseUrl = PentahoSystem.getApplicationContext().getBaseUrl();
 
-	IPentahoSession userSession = UIUtil.getPentahoSession( request );
+	IPentahoSession userSession = PentahoHttpSessionHelper.getPentahoSession( request );
 
 	HttpRequestParameterProvider requestParameters = new HttpRequestParameterProvider( request );
 	HttpSessionParameterProvider sessionParameters = new HttpSessionParameterProvider( userSession );

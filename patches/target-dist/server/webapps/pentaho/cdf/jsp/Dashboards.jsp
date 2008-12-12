@@ -6,18 +6,22 @@
          java.util.Locale,
 		 java.util.Hashtable,
 		 java.util.Enumeration,	
-         org.pentaho.core.ui.SimpleUrlFactory,
-         org.pentaho.core.system.PentahoSystem,
-         org.pentaho.core.solution.HttpRequestParameterProvider,
-         org.pentaho.core.solution.HttpSessionParameterProvider,
-         org.pentaho.core.session.IPentahoSession,
-         org.pentaho.messages.Messages,
-         org.pentaho.core.util.UIUtil,
-         org.pentaho.core.util.IUITemplater,
-         org.pentaho.util.VersionHelper,
-         org.pentaho.messages.util.LocaleHelper,
-         org.pentaho.core.solution.ActionResource,
-         org.pentaho.core.solution.IActionResource,
+    org.pentaho.platform.util.web.SimpleUrlFactory,
+    org.pentaho.platform.engine.core.system.PentahoSystem,
+    org.pentaho.platform.web.http.request.HttpRequestParameterProvider,
+    org.pentaho.platform.web.http.session.HttpSessionParameterProvider,
+    org.pentaho.platform.api.engine.IPentahoSession,
+    org.pentaho.platform.api.engine.IUITemplater,
+	org.pentaho.platform.util.VersionHelper,
+    org.pentaho.platform.util.messages.LocaleHelper,
+    org.pentaho.platform.engine.services.actionsequence.ActionResource,
+    org.pentaho.platform.api.ui.INavigationComponent,
+    org.pentaho.platform.web.http.PentahoHttpSessionHelper,
+    org.pentaho.platform.api.repository.ISolutionRepository,
+    org.pentaho.platform.engine.core.system.PentahoSystem,
+    org.pentaho.platform.api.engine.IActionSequenceResource,
+    org.pentaho.platform.web.jsp.messages.Messages,
+    org.pentaho.platform.engine.core.solution.SimpleParameterProvider,
          pt.webdetails.cdf.test.*,
 		 java.net.URL,
          java.io.*"
@@ -95,7 +99,7 @@
 
         String baseUrl = PentahoSystem.getApplicationContext().getBaseUrl();
 
-        IPentahoSession userSession = UIUtil.getPentahoSession(request);
+       IPentahoSession userSession = PentahoHttpSessionHelper.getPentahoSession( request );
 		
         HttpRequestParameterProvider requestParameters = new HttpRequestParameterProvider(request);
         HttpSessionParameterProvider sessionParameters = new HttpSessionParameterProvider(userSession);
@@ -138,9 +142,9 @@
             ActionResource resource;
 
             if (PentahoSystem.getSolutionRepository(userSession).resourceExists(solution + "/" + path + "/template.html")) {
-                resource = new ActionResource("", IActionResource.SOLUTION_FILE_RESOURCE, "text/xml", solution + "/" + path + "/template.html"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", solution + "/" + path + "/template.html"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             } else {
-                resource = new ActionResource("", IActionResource.SOLUTION_FILE_RESOURCE, "text/xml", "system/custom/default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", "system/custom/default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
             dashboardContent = PentahoSystem.getSolutionRepository(userSession).getResourceAsString(resource);
 
