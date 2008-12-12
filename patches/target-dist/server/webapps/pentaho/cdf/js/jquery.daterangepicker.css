@@ -1,0 +1,87 @@
+/*styles for jquery ui daterangepicker plugin */
+
+.ui-daterangepickercontain {
+	position: absolute;
+	z-index: 999;
+}
+.ui-daterangepickercontain .ui-daterangepicker {
+	float: left;
+	padding: 5px !important;
+	width: auto;
+	display: inline;
+	font-size: 65%;
+}
+.ui-daterangepicker ul, .ui-daterangepicker .ranges, .ui-daterangepicker .range-start, .ui-daterangepicker .range-end {
+	float: left;
+	padding: 0;
+	margin: 0;
+}
+.ui-daterangepicker .ranges {
+	width: auto;
+	position: relative;
+	padding-bottom: 40px;
+}
+.ui-daterangepicker .range-start, .ui-daterangepicker .range-end {
+	margin-left: 5px;
+}
+.ui-daterangepicker button.btnDone {
+	margin: 10px 0;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	clear: both;
+	cursor: pointer;
+	font-size: 1.1em;
+}
+.ui-daterangepicker ul {
+	width: 17.6em;
+	background: none;
+	border: 0;
+}
+.ui-daterangepicker li {
+	list-style: none;
+	padding: 1px;
+	cursor: pointer;
+}
+.ui-daterangepicker li.ui-hover-state, .ui-daterangepicker li.ui-active-state {
+	padding: 0;
+}
+.ui-daterangepicker li.preset_0 {
+	margin-top: 1.5em !important;
+}
+.ui-daterangepicker li a, .ui-daterangepicker li a:hover {
+	background-position: 98% 50%;
+	display: block;
+	padding: .2em;
+}
+.ui-daterangepicker .ui-component-content a {
+	text-decoration: none !important;
+}
+.ui-daterangepicker li a {
+	margin: 1px;
+}
+.ui-daterangepicker .title {
+	display: block;
+	margin: 1em 0;
+	font-size: 1.1em;
+}
+.ui-daterangepicker .ui-datepicker-inline {
+	font-size: 1em;
+}
+.ui-daterangepicker-arrows {
+	padding: 0 16px;
+	position: relative;
+}
+.ui-daterangepicker-arrows a {
+	overflow: hidden;
+}
+.ui-daterangepicker-arrows .ui-datepicker-prev, .ui-daterangepicker-arrows .ui-datepicker-next {
+	top: 0;
+	left: 0;
+}
+.ui-daterangepicker-arrows .ui-datepicker-next {
+	left: auto;
+	right: 0;
+}
+
+
