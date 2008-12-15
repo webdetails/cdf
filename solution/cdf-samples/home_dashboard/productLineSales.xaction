@@ -7,8 +7,9 @@
     <author>Harris Ward</author>  
     <description>productLineSales</description>  
     <help/>  
-    <result-type/>  
+    <result-type>none</result-type>  
     <icon/> 
+	
   </documentation>
 
   <inputs/>

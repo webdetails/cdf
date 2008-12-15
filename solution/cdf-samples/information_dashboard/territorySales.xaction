@@ -7,7 +7,7 @@
     <author>Harris Ward</author>  
     <description>territorySales</description>  
     <help/>  
-    <result-type/>  
+    <result-type>none</result-type> 
     <icon/> 
   </documentation>
 

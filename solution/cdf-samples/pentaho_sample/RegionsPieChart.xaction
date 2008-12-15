@@ -5,7 +5,7 @@
   <logging-level>DEBUG</logging-level>
   <documentation> 
     <author>Ingo Klose</author>  
-    <result-type>chart</result-type>  
+   <result-type>none</result-type> 
     <description>The pie chart with the variance by region</description> 
   </documentation>
 

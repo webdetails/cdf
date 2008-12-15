@@ -5,7 +5,7 @@
   <logging-level>DEBUG</logging-level>
   <documentation> 
     <author>Ingo Klose</author>  
-    <result-type>chart</result-type>  
+    <result-type>none</result-type> 
     <description>Dial Chart with the headcount variance in percent for the selected region and department</description> 
   </documentation>
 

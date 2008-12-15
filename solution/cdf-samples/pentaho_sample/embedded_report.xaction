@@ -13,6 +13,7 @@
 		]]></description>  
     <icon>/style/icons/jfree1.png</icon>  
     <help/> 
+	 <result-type>none</result-type> 
   </documentation>
 
   <inputs> 

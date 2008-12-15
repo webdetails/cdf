@@ -7,7 +7,7 @@
     <author/>  
     <description>Empty blank action sequence document</description>  
     <help/>  
-    <result-type/>  
+     <result-type>none</result-type> 
     <icon/> 
   </documentation>
 

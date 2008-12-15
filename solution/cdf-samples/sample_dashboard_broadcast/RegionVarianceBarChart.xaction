@@ -5,7 +5,7 @@
   <logging-level>ERROR</logging-level>
   <documentation> 
     <author>Ingo Klose</author>  
-    <result-type>chart</result-type>  
+     <result-type>none</result-type> 
     <description>Bar chart with the regions variance by department</description> 
   </documentation>
 
