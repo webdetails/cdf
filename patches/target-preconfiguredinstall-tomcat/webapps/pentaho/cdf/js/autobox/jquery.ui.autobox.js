@@ -70,6 +70,9 @@
     UP: 38,
     DOWN: 40
   };
+  
+  
+ 
 
   function addBox(opt,input, text, name){
     var li=$('<li class="bit-box"></li>').attr('id', opt.name + 'bit-' + count++).text(text);
@@ -219,6 +222,8 @@
   };
 
   $.fn.autobox=function(opt){
+  
+   
 
     opt=$.extend({}, {
       timeout: 500,
@@ -229,7 +234,25 @@
       },
       template: function(str){ return "<li>" + opt.insertText(str) + "</li>"; },
       insertText: function(str){ return str; },
-      match: function(typed){ return this.match(new RegExp(typed)); },
+      match: function(typed){ 
+		if (opt.matchType == "fromStart")
+		{
+			this.typed = typed;
+		    this.pre_match = this.text;
+		    this.match = this.post_match = '';
+		    if (!this.ajax && !typed || typed.length == 0) { return true; }
+		      var match_at = this.text.search(new RegExp("\\b^" + typed, "i"));
+		    if (match_at != -1) {
+		       this.pre_match = this.text.slice(0,match_at);
+		       this.match = this.text.slice(match_at,match_at + typed.length);
+				this.post_match = this.text.slice(match_at + typed.length);
+		       return true;
+			}	
+			return false;
+		}
+		else
+			return this.text.match(new RegExp(typed), "i");		
+	  },
       wrapper: '<ul class="autobox-list"></ul>',
 
       resizable: {}
@@ -258,7 +281,6 @@
         var typingTimeout=$.data(input, "typingTimeout");
         if(typingTimeout) window.clearInterval(typingTimeout);
     }
-    
 
     function createInput(){
       var input=$('<input type="text"></input>')

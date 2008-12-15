@@ -127,7 +127,7 @@ Dashboards.update = function(object)	{
 		document.getElementById(object.htmlObject).innerHTML = selectHTML;
 		$("#"+object.name).change(function() {
 				Dashboards.processChange(object.name);
-			}).keyup(function() {
+			}).keyup(function(event) {
 					if (event.keyCode==13){Dashboards.processChange(object.name)}
 				});
 
@@ -1385,7 +1385,7 @@ Dashboards.generateAutocompleteBoxComponent = function(object){
 	
 	$("#" + object.htmlObject ).autobox({
         list: list,
-		match: function(typed) { return this.text.match(new RegExp(typed, "i")); },
+		matchType: object.matchType == undefined ? "fromStart" : object.matchType, /*fromStart, all*/
         insertText: function(o) {return o.text },
 		processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
 		multiSellection: object.selectMulti == undefined ? false : object.selectMulti,
