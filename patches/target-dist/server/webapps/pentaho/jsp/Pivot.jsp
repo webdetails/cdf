@@ -2,28 +2,30 @@
 	import="
 	java.util.*,
 	java.io.ByteArrayOutputStream,
+	javax.sql.DataSource,
 	org.dom4j.DocumentHelper,
 	org.dom4j.Element,
 	org.dom4j.Document,
-	org.pentaho.util.VersionHelper,
-    org.pentaho.core.session.IPentahoSession,
-    org.pentaho.core.util.UIUtil,
-	org.pentaho.core.util.XmlHelper,
-	org.pentaho.core.solution.SimpleParameterSetter,
-	org.pentaho.core.solution.SimpleOutputHandler,
-    org.pentaho.core.solution.ISolutionEngine,
-    org.pentaho.core.solution.HttpRequestParameterProvider,
-   	org.pentaho.core.solution.HttpSessionParameterProvider,
-   	org.pentaho.core.system.PentahoSystem.ActionInfo,
-	org.pentaho.core.runtime.IRuntimeContext,
-    org.pentaho.core.ui.SimpleUrlFactory,
-	org.pentaho.messages.util.LocaleHelper,
-    org.pentaho.messages.Messages,
-	org.pentaho.core.system.PentahoSystem,
-	org.pentaho.plugin.olap.PivotViewComponent,
-	org.pentaho.plugin.olap.AnalysisSaver,
-	org.pentaho.plugin.olap.MissingParameterException,
-	org.pentaho.core.subscribe.SubscriptionHelper,
+	org.pentaho.platform.util.VersionHelper,
+    org.pentaho.platform.api.engine.IPentahoSession,
+    org.pentaho.platform.api.data.IDatasourceService,
+    org.pentaho.platform.web.http.WebTemplateHelper,
+	org.pentaho.platform.engine.services.solution.SimpleParameterSetter,
+	org.pentaho.platform.engine.core.output.SimpleOutputHandler,
+    org.pentaho.platform.api.engine.ISolutionEngine,
+    org.pentaho.platform.web.http.request.HttpRequestParameterProvider,
+   	org.pentaho.platform.web.http.session.HttpSessionParameterProvider,
+    org.pentaho.platform.engine.core.solution.ActionInfo,
+    org.pentaho.platform.util.StringUtil,
+	org.pentaho.platform.api.engine.IRuntimeContext,
+    org.pentaho.platform.util.web.SimpleUrlFactory,
+	org.pentaho.platform.util.messages.LocaleHelper,
+    org.pentaho.platform.web.jsp.messages.Messages,
+	org.pentaho.platform.engine.core.system.PentahoSystem,
+	org.pentaho.platform.plugin.action.mondrian.PivotViewComponent,
+	org.pentaho.platform.plugin.action.mondrian.AnalysisSaver,
+	org.pentaho.platform.plugin.action.mondrian.MissingParameterException,
+	org.pentaho.platform.repository.subscription.SubscriptionHelper,
 	com.tonbeller.jpivot.table.TableComponent,
 	com.tonbeller.jpivot.olap.model.OlapModel,
 	com.tonbeller.jpivot.tags.OlapModelProxy,
@@ -31,10 +33,11 @@
 	com.tonbeller.jpivot.olap.query.MdxOlapModel,
 	com.tonbeller.jpivot.mondrian.MondrianModel,
 	com.tonbeller.jpivot.chart.ChartComponent,
-	com.pentaho.repository.subscribe.ISubscriptionRepository,
-	com.pentaho.repository.subscribe.Subscription"%>
+	org.pentaho.platform.api.repository.ISubscriptionRepository,
+	org.pentaho.platform.repository.subscription.Subscription,
+  org.pentaho.platform.web.http.PentahoHttpSessionHelper"%>
 <jsp:directive.page
-	import="org.pentaho.core.repository.ISolutionRepository" />
+	import="org.pentaho.platform.api.repository.ISolutionRepository" />
 <%@ 
 	 taglib uri="http://www.tonbeller.com/jpivot" prefix="jp"%>
 <%@ 
@@ -59,7 +62,7 @@
 	response.setCharacterEncoding(LocaleHelper.getSystemEncoding());
 	PentahoSystem.systemEntryPoint();
 	try {
-	IPentahoSession userSession = UIUtil.getPentahoSession( request );
+	IPentahoSession userSession = PentahoHttpSessionHelper.getPentahoSession( request );
 
 	String pivotId = "01"; //$NON-NLS-1$
 	if( pivotId == null ) {
@@ -607,19 +610,37 @@
 
 	  } 	
 	}
-	
+ 
+  if( query != null ) { 
+    IDatasourceService datasourceService = (IDatasourceService) PentahoSystem.getObjectFactory().getObject(IDatasourceService.IDATASOURCE_SERVICE, null);
+    DataSource currDataSource = null; 
+    try {
+      currDataSource = datasourceService.getDataSource(dataSource);
+    } catch (Throwable t) {
+      t.printStackTrace();
+    }
+    if (currDataSource != null) {
+      request.setAttribute("currDataSource", currDataSource);
 %>
-
-<% if( query != null ) { %>
+	<jp:mondrianQuery id="<%=queryId%>" dataSource="${currDataSource}"
+	dynResolver="mondrian.i18n.LocalizingDynamicSchemaProcessor"
+	dynLocale="<%= userSession.getLocale().toString() %>"
+	role="<%=role%>" catalogUri="<%=catalogUri%>">
+	<%=query%>
+	</jp:mondrianQuery> 
+<% 
+    } else {
+%>
 	<jp:mondrianQuery id="<%=queryId%>" dataSource="<%=dataSource%>"
 	dynResolver="mondrian.i18n.LocalizingDynamicSchemaProcessor"
 	dynLocale="<%= userSession.getLocale().toString() %>"
 	role="<%=role%>" catalogUri="<%=catalogUri%>">
 	<%=query%>
-	
 	</jp:mondrianQuery> 
-<% } %>
-
+<% 
+    }
+  }    
+%>
 <c:set var="title01" scope="session">
 	<%
 
@@ -647,7 +668,13 @@
 <!-- ****************************************************************************************** -->
 
 	<link href="adhoc/styles/repositoryBrowserStyles.css" rel="stylesheet" type="text/css" />
+    <link href="adhoc/styles/jpivot.css" rel="stylesheet" type="text/css" />
+	<!--[if IE]>
+      <link href="adhoc/styles/jpivotIE6.css" rel="stylesheet" type="text/css"/>	
+    <![endif]-->
  
+  
+    <script src="wcf/scroller.js" type="text/javascript"></script> 
 	<script src="js/ajaxslt0.7/xmltoken.js" type="text/javascript"></script>
 	<script src="js/ajaxslt0.7/util.js" type="text/javascript"></script>	
 	<script src="js/ajaxslt0.7/dom.js" type="text/javascript"></script>
@@ -714,6 +741,7 @@
 		}
 		
 		function load(){
+			xScrollerScroll(); 
 			cursor_wait();
 			controller = new PivotRepositoryBrowserController();
 			controller.setOnAfterSaveCallback( function()
@@ -721,17 +749,34 @@
 				var newActionName = encodeURI( controller.getActionName() );
 				var newSolution = encodeURI( controller.getSolution() );
 				var newActionPath = encodeURI( controller.getActionPath() );
+				var newActionTitle = encodeURI( controller.getActionTitle()!=null?controller.getActionTitle():controller.getActionName() );
 				document.location.href='<%= pageName %>?save-action=saveAs&save-path='+newSolution
-				+'/'+newActionPath+'&save-file='+newActionName+'&save-title='+newActionName;
+				+'/'+newActionPath+'&save-file='+newActionName+'&save-title='+newActionTitle;
 			});
 			cursor_clear();
+			if (saveMessage != null && "" != saveMessage) {
+			  if (window.top != null && window.top.mantle_initialized) {
+				window.top.mantle_refreshRepository();
+			    window.top.mantle_showMessage("Info", saveMessage);
+			  } else {
+			    alert(saveMessage);
+			  }
+			}
+			
+			if (window.top != null && window.top.mantle_initialized) {
+			  var tmpSaveButton = document.getElementById('folder-down');
+			  var tmpSaveAsButton = document.getElementById('folder-up');
+			  tmpSaveButton.parentNode.parentNode.removeChild(tmpSaveButton.parentNode);
+			  tmpSaveAsButton.parentNode.parentNode.removeChild(tmpSaveAsButton.parentNode);
+			}
+			window.pivot_initialized = true;
 		}
 		
 		function save()
 		{
 			cursor_wait();
 		<%
-			ActionInfo actionInfo = PentahoSystem.parseActionString( actionReference );
+			ActionInfo actionInfo = ActionInfo.parseActionString( actionReference );
 		%>
 			var newActionName = encodeURI( "<%= actionInfo.getActionName() %>" );
 			var newSolution = encodeURI( "<%= actionInfo.getSolutionName() %>" );
@@ -757,6 +802,7 @@
 
 	<script type="text/javascript">
 
+		
 		function doSubscribed() {
 		    var submitUrl = '';
 			var action= document.getElementById('subscription-action').value;
@@ -814,6 +860,9 @@
 		
 	</script>
 
+<!-- ****************************************************************************************** -->
+<!-- ****************************************************************************************** -->
+<!-- ****************************************************************************************** -->
 
 </head>
 <body class="body_dialog01" dir="<%= LocaleHelper.getTextDirection() %>" onload="javascript:load();">
@@ -826,14 +875,6 @@
 	}
 %>
 
-<table border="0" width="100%" class="content_header_line"
-	cellpadding="0" cellspacing="0">
-	<tr>
-		<td width="100%">
-		<div><%= pivotTitle %></div>
-		</td>
-	</tr>
-</table>
 <table border="0" width="100%" class="content_container2"
 	cellpadding="0" cellspacing="0">
 	<tr>
@@ -845,6 +886,7 @@
 		</c:if> <c:if test="${query01 != null}">
 
 			<%-- define table, navigator and forms --%>
+			<wcf:scroller/> 
 			<jp:table id="table01" query="#{query01}" />
 			<jp:navigator id="navi01" query="#{query01}" visible="false" />
 			<wcf:form id="mdxedit01" xmlUri="/WEB-INF/jpivot/table/mdxedit.xml"
@@ -915,7 +957,6 @@
 	session.removeAttribute( "toolbar01" ); //$NON-NLS-1$
    }
  %>
-
 			<wcf:toolbar id="toolbar01"
 				bundle="com.tonbeller.jpivot.toolbar.resources">
 				<% if( options == null ) { %>
@@ -1060,7 +1101,6 @@
 %>
 			</wcf:toolbar>
 
-
 <!-- ****************************************************************************************** -->
 <!-- ******************                   SAVE BUTTONS               ************************** -->
 <!-- ****************************************************************************************** -->
@@ -1162,8 +1202,11 @@
  </div>
  <!-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -->
 
-	<%= saveMessage %>
 			
+    <script type="text/javascript">
+      var saveMessage = '<%= saveMessage %>';
+    </script>
+    
 	<% 
 	
 	switch (saveResult) {
@@ -1173,7 +1216,7 @@
 		    
 		    	// If performing a save as.. , we need to reload the view with the newly saved 
 		    	// action sequence.
-				ActionInfo info = PentahoSystem.parseActionString(request.getParameter("save-path")+ "/" + request.getParameter("save-file"));
+				ActionInfo info = ActionInfo.parseActionString(request.getParameter("save-path")+ "/" + request.getParameter("save-file"));
 				String fileName = info.getActionName();
 				fileName = fileName.endsWith(AnalysisSaver.SUFFIX) ? fileName : fileName+AnalysisSaver.SUFFIX;
 
@@ -1206,7 +1249,7 @@
     %>
 
 	    
-			<div><%-- if there was an overflow, show error message --%> 
+			<div id="internal_content"><%-- if there was an overflow, show error message --%> 
 			<%-- note, if internal error is caused by query01.getResult(),
 			     no usable log messages make it to the user or the log system
 			     
@@ -1229,8 +1272,15 @@
 			    %><p><strong style="color:red">Error Occurred While getting Resultset</strong></p><%
 			  }
 			}	
-			%><%-- render navigator --%> <wcf:render ref="navi01"
-				xslUri="/WEB-INF/jpivot/navi/navigator.xsl" xslCache="true" /> <%-- edit mdx --%>
+			%><%-- render navigator --%> 
+			
+			<div id="navi01div">
+			<wcf:render ref="navi01"
+				xslUri="/WEB-INF/jpivot/navi/navigator.xsl" xslCache="true" /> 
+			</div>
+			
+			
+				<%-- edit mdx --%>
 			<c:if test="${mdxedit01.visible}">
 				<h3>MDX Query Editor</h3>
 				<wcf:render ref="mdxedit01" xslUri="/WEB-INF/wcf/wcf.xsl"
@@ -1292,36 +1342,17 @@
 					<td></td>
 				</tr>
 				<table>
-					</div>
-
 					</c:if>
 
-					</form>
-
-					</td>
-					</tr>
 				</table>
-				<div class="dialog01_bg">&nbsp;</div>
-				<div class="dialog01_footer">
-
-				<table border="0" cellpadding="0" cellspacing="0" width="100%">
-					<tr>
-						<td width="100%" style="text-align:right">
-						<div class="footer_source_forge_and_disclaimer">&copy; 2005-2007, Pentaho. <%= "Version: "+PentahoSystem.getVersionHelper(null).getVersionInformation()%></div>
-						</td>
-					</tr>
-					<tr>
-						<td style="top:10px"><a href="http://www.sourceforge.net/"
-							target="_blank"><img height="37" id="sflogo"
-							alt="SourceForge.net Logo" src="/pentaho-style/sfLogo.png"
-							width="125" border="0" /></a></td>
-					</tr>
-				</table>
-				</div>
+				
+				
 </body>
+
 </html>
 <% 
    } catch (Throwable t ) {
+     %> An error occurred while rendering Pivot.jsp.  Please see the log for details. <%
 	// TODO log an error
 	t.printStackTrace();
    } finally {
@@ -1332,7 +1363,7 @@
 
 	private IRuntimeContext getRuntimeForQuery( String actionReference, HttpServletRequest request, IPentahoSession userSession ) {
 
-		ActionInfo actionInfo = PentahoSystem.parseActionString( actionReference );
+		ActionInfo actionInfo = ActionInfo.parseActionString( actionReference );
 		if( actionInfo == null ) {
 			return null;
 		}

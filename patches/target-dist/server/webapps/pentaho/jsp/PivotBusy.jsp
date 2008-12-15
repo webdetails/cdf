@@ -1,10 +1,9 @@
 <%@ page
   session="true"
   contentType="text/html;" 
-  import="org.pentaho.messages.util.LocaleHelper" %><%
+  import="org.pentaho.platform.util.messages.LocaleHelper" %><%
 	response.setCharacterEncoding(LocaleHelper.getSystemEncoding());
 %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <html>
 <head>
   <title>JPivot is busy ...</title>
