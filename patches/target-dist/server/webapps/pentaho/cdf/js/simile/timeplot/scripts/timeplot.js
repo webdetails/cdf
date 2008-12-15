@@ -239,6 +239,33 @@ Timeplot._Impl.prototype = {
     },
     
     /**
+     * Load event data from the given url into the given eventSource, using
+     * the Timeline JSON event format.
+     */
+    loadJSON: function(url, eventSource) {
+        if (this._active) {
+            var tl = this;
+            
+            var fError = function(statusText, status, xmlhttp) {
+                alert("Failed to load data json from " + url + "\n" + statusText);
+                tl.hideLoadingMessage();
+            };
+            
+            var fDone = function(xmlhttp) {
+                try {
+					var data = eval('(' + xmlhttp.responseText + ')');
+					eventSource.loadJSON(data, url);
+                } finally {
+                    tl.hideLoadingMessage();
+                }
+            };
+            
+            this.showLoadingMessage();
+            window.setTimeout(function() { SimileAjax.XmlHttp.get(url, fError, fDone); }, 0);
+        }
+    },
+    
+    /**
      * Overlay a 'div' element filled with the given text and styles to this timeplot
      * This is used to implement labels since canvas does not support drawing text.
      */

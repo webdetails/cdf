@@ -1076,6 +1076,7 @@ Dashboards.updateTimePlotComponent = function( object ){
 
 
 	var timePlotEventSource = new Timeplot.DefaultEventSource();
+	var eventSource2 = new Timeplot.DefaultEventSource();
 	var timePlot;
 
 	var cd = object.chartDefinition;
@@ -1125,6 +1126,16 @@ Dashboards.updateTimePlotComponent = function( object ){
 
 	}
 
+	// support for events 
+	if(cd.events && cd.events.show == true){
+		var eventSource2 = new Timeplot.DefaultEventSource();
+		plotInfo.push(Timeplot.createPlotInfo({ 
+					id: "plot3",  eventSource: eventSource2,  
+					timeGeometry: timePlotTimeGeometry,
+					lineColor: "#FF0000"
+				})); 
+	}
+
 	$("#"+object.htmlObject).html(title);
 	$("#"+object.htmlObject).append("<div class='timeplot'></div>");
 
@@ -1148,6 +1159,39 @@ Dashboards.updateTimePlotComponent = function( object ){
 
 	var url = "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
 	timeplot.loadText(url,",", timePlotEventSource);
+	
+
+	// TODO - make configurable: aok
+	if(cd.events && cd.events.show == true){
+
+		var data = {
+			events:[
+			{
+				start:'Sep 24 2008',
+				title:'Firefox 2.0.0.17 released',
+				link:123
+			},
+			{
+				start:'Sep 26 2008',
+				title:'Firefox 3.0.3 released'
+			}
+			]
+		};
+
+		//go through parametere array and update values
+		var parameters = [];
+		for(p in cd.events){
+			var key = p;
+			var value = typeof cd.events[p]=='function'?cd.events[p]():cd.events[p];
+			parameters.push(key+"="+value);
+		} 
+
+		var url = "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
+		timeplot.loadJSON(url, eventSource2); // TODO: Make configurable - aok
+
+		//end aok
+	}
+
 };
 
 Dashboards.getMonthPicker = function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
@@ -1213,33 +1257,6 @@ Dashboards.makeQuery = function(object){
 
 };
 
-/*Dashboards.uptdateEvolutionComponent = function(object){
-
-	
-	var cd = object.chartDefinition;
-	
-	if (cd == undefined){
-		alert("Fatal - No chart definition passed");
-		return;
-	}
-	
-
-	
-	if(cd.query == undefined || cd.queryNotDefined == true ){
-		
-		cd.queryNotDefined = true;
-		
-		var options = Dashboards.clone (cd)
-		for (var o in options) {
-			if(typeof options[o] == 'function')
-				options[o] = options[o]();
-		}
-		
-		object.chartDefinition.query = (new OlapUtils.EvolutionQuery(options)).getQuery();
-	}	
-	
-	Dashboards.generateTableComponent(object)
-}*/
 
 Dashboards.generateTableComponent = function(object){
 
