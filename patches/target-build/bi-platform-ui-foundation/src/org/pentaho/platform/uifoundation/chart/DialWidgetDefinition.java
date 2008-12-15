@@ -293,17 +293,27 @@ public class DialWidgetDefinition extends WidgetDefinition implements ChartDefin
 
     Node titleFontNode = dialNode.selectSingleNode("title-font"); //$NON-NLS-1$
     if (titleFontNode != null) {
-      String titleFontStr = titleFontNode.getText().trim();
-      if (!"".equals(titleFontStr)) { //$NON-NLS-1$
-        widgetDefinition.setTitleFont(new Font(titleFontStr, Font.ITALIC, 24));
+      Node fontNode = titleFontNode.selectSingleNode("font");
+       if(fontNode != null) {
+       String titleFontStr = fontNode.getText().trim();
+       if (!"".equals(titleFontStr)) { //$NON-NLS-1$
+    	 Node titleFontSizeNode = titleFontNode.selectSingleNode("size");
+    	 int size = titleFontSizeNode != null ? Integer.parseInt(titleFontSizeNode.getText()) : 12;
+         widgetDefinition.setTitleFont(new Font(titleFontStr, Font.BOLD, size));
+       }
       }
     }
 
-    Node valueFontNode = dialNode.selectSingleNode("title-font"); //$NON-NLS-1$
+    Node valueFontNode = dialNode.selectSingleNode("domain-tick-font"); //$NON-NLS-1$
     if (valueFontNode != null) {
-      String fontStr = valueFontNode.getText().trim();
-      if (!"".equals(fontStr)) { //$NON-NLS-1$
-        widgetDefinition.setValueFont(new Font(fontStr, Font.ITALIC, 24));
+      Node fontNode = titleFontNode.selectSingleNode("font");
+      if(fontNode != null) {
+       String fontStr = fontNode.getText().trim();
+       if (!"".equals(fontStr)) { //$NON-NLS-1$
+    	 Node valueFontSizeNode = valueFontNode.selectSingleNode("size");
+    	 int size = valueFontSizeNode != null ? Integer.parseInt(valueFontSizeNode.getText()) : 12;
+         widgetDefinition.setValueFont(new Font(fontStr, Font.BOLD, size));
+       }
       }
     }
 
