@@ -63,7 +63,7 @@ var MetaLayerHome2 = {
 		parameterName: "PRODUCTLINE",
 		foregroundAlpha: 1,
 		queryType: 'mdx',
-        catalog: 'solution:samples/steel-wheels/analysis/steelwheels.mondrian.xml',
+        catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
         orientation: 'horizontal',
 		jndi: "SampleData",
 		query: function(){
