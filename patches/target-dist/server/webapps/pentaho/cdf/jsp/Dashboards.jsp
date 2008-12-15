@@ -22,7 +22,6 @@
     org.pentaho.platform.api.engine.IActionSequenceResource,
     org.pentaho.platform.web.jsp.messages.Messages,
     org.pentaho.platform.engine.core.solution.SimpleParameterProvider,
-         pt.webdetails.cdf.test.*,
 		 java.net.URL,
          java.io.*"
          %>
@@ -30,7 +29,7 @@
 		 
 		 <%! 
 
-			public String ConcatFiles(String includeString, Hashtable filesAdded, Hashtable files){
+			public String concatFiles(String includeString, Hashtable filesAdded, Hashtable files){
 				
 				String newLine = System.getProperty("line.separator");
 				Enumeration keys = files.keys();
@@ -106,6 +105,7 @@
 
         String solution = request.getParameter("solution");
         String path = request.getParameter("path");
+        String template = request.getParameter("template");
 
         if ("".equals(solution)) {
             solution = null;
@@ -113,6 +113,14 @@
         if (path == null) {
             path = "";
         }
+
+        if (template == null || template.equals("")) {
+            template = "";
+        }
+        else{
+            template = "-"+template;
+        }
+
 
         String hrefUrl = baseUrl + "Dashboards?"; //$NON-NLS-1$
         String onClick = ""; //$NON-NLS-1$
@@ -125,7 +133,7 @@
 		
         IUITemplater templater = PentahoSystem.getUITemplater(userSession);
         if (templater != null) {
-            String sections[] = templater.breakTemplate("template-dashboard.html", "", userSession); //$NON-NLS-1$ //$NON-NLS-2$
+            String sections[] = templater.breakTemplate("template-dashboard" + template + ".html", "", userSession); //$NON-NLS-1$ //$NON-NLS-2$
             if (sections != null && sections.length > 0) {
                 intro = sections[0];
             }
@@ -173,7 +181,7 @@
 		Hashtable commonLibraries = new Hashtable();
 		commonLibraries.put("script",resources.getProperty("commonLibrariesScript","").split(","));
 		commonLibraries.put("link",resources.getProperty("commonLibrariesLink","").split(","));
-		String javaScriptLibrary = ConcatFiles("",addedFiles, commonLibraries);
+		String javaScriptLibrary = concatFiles("",addedFiles, commonLibraries);
 		
 		//Add extra components libraries
 		Enumeration resourceKeys = resources.propertyNames();
@@ -192,7 +200,7 @@
 						Hashtable component = new Hashtable();
 						component.put("link",resources.getProperty(linkKey,"").split(","));
 						component.put("script",resources.getProperty(scriptkey,"").split(","));
-						javaScriptLibrary  = ConcatFiles(javaScriptLibrary,addedFiles,component);
+						javaScriptLibrary  = concatFiles(javaScriptLibrary,addedFiles,component);
 					}
 				}
 			}
