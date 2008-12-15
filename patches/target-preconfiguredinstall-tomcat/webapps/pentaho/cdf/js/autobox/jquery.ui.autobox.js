@@ -57,7 +57,7 @@
      });
   };
 
-  $.ui=$.ui || {}; $.ui.autobox=$.ui.autobox || {}; var active; var count=0;
+  $.ui=$.ui || {}; $.ui.autobox=$.ui.autobox || {}; var active; var count=0; var valueMatched=false;
 
   var KEY={
     ESC: 27,
@@ -98,7 +98,7 @@
 		if(opt.multiSellection != true){
 			count = 0;
 			li = addBox(opt,input, text, name);
-			$("#" +opt.name + "bit-1").replaceWith(li);
+			$("#" +opt.name + "bit-0").replaceWith(li);
 		}
 		else
 			li = addBox(opt,input, text, name);
@@ -155,6 +155,7 @@
       // to close it.  w/o checking the active object first this input.trigger() will barf.
       if(active && active[0] && $.data(active[0], "originalObject")){
 			var hash = getCurrentValsHash(input);
+			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, $.data(active[0], "originalObject").text, opt.name);
 				processChange(input,opt);
@@ -162,6 +163,7 @@
       }
       else if(input.val()){ 
 			var hash = getCurrentValsHash(input);
+			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, input.val(), opt.name);
 				processChange(input,opt);
@@ -188,6 +190,7 @@
       active=$("> *", container).removeClass("active").slice(selected, selected + 1).addClass("active");
       input.trigger("itemSelected.autobox", [$.data(active[0], "originalObject")]);
       input.val(opt.insertText($.data(active[0], "originalObject")));
+	  valueMatched = true;
     };
 
     container.mouseover(function(e){
@@ -318,11 +321,11 @@
 						processChange(input,opt)
 					}
 					else{
-						opt.valueMatched = false;
+						valueMatched = false;
 						$(opt.list).filter(function(){
-							opt.valueMatched = this.text == input.val() ? true : opt.valueMatched;
+							valueMatched = this.text == input.val() ? true : valueMatched;
 						});
-						if(opt.checkValue == true && opt.valueMatched){
+						if(opt.checkValue == true && valueMatched){
 							addText(opt,input, input.val(), opt.name);
 							processChange(input,opt)
 						}
@@ -340,12 +343,12 @@
         })
         .bind("autobox", function(){
           var self=$(this);
-
           self.one("updateList", function(e, list){//clear/update/redraw list
 			//opt.valueMatched = false;
+			valueMatched = false;
             list=$(list)
               .filter(function(){ 
-				//opt.valueMatched = this.text == self.val() ? true : opt.valueMatched;
+				valueMatched = this.text == self.val() ? true : valueMatched;
 				return  opt.match.call(this, self.val()); 
 				})
               .map(function(){
