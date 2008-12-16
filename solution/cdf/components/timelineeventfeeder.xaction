@@ -76,7 +76,7 @@
 
 					// out.println("Event query - Group: " + GROUP  + "; Subgroup: " + SUBGROUP + ";");
 					queryCond.push( (GROUP == null || GROUP.length==0)?" e.event_group is null ": " e.event_group = '" + GROUP.replace(/'/g,"''") + "'"  );
-					queryCond.push( (SUBGROUP == null || SUBGROUP.length==0)?" e.event_subgroup is null ": " e.event_subgroup = '" + SUBGROUP.replace(/'/g,"''") + "'"  );
+					(SUBGROUP == null || SUBGROUP.length==0)?"": queryCond.push( " e.event_subgroup = '" + SUBGROUP.replace(/'/g,"''") + "'");
 
 
 					var dateCond = "";
