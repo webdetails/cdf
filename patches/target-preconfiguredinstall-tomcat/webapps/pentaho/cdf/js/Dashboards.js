@@ -1382,7 +1382,9 @@ Dashboards.clone = function clone(obj) {
 Dashboards.generateXActionComponent = function(object){
 
 	$("#"+ object.htmlObject).bind("click", function(){
-		Dashboards.executeXAction(object);
+		var success = typeof(object.preChange)=='undefined' ? true : object.preChange();
+		if(success)
+			Dashboards.executeXAction(object);
 	});
 }
 
