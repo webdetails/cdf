@@ -86,8 +86,7 @@
           .attr('name', name)
           .val(text)
       );
-    //input.parent().after(li);
-    //input.val('');
+
 	return li;
   }
   
@@ -102,8 +101,8 @@
 		}
 		else
 			li = addBox(opt,input, text, name);
-			
-		input.parent().after(li);
+
+		input.after(li);
 		input.val("");
 	}
    }
@@ -237,6 +236,7 @@
       },
       template: function(str){ return "<li>" + opt.insertText(str) + "</li>"; },
       insertText: function(str){ return str; },
+	  minTextLenght: 0,
       match: function(typed){ 
 		if (opt.matchType == "fromStart")
 		{
@@ -346,6 +346,8 @@
           self.one("updateList", function(e, list){//clear/update/redraw list
 			//opt.valueMatched = false;
 			valueMatched = false;
+			if(opt.minTextLenght > input.val().length)
+				list = [];
             list=$(list)
               .filter(function(){ 
 				valueMatched = this.text == self.val() ? true : valueMatched;
