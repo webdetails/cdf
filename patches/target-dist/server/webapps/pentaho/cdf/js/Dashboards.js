@@ -1407,6 +1407,7 @@ Dashboards.generateAutocompleteBoxComponent = function(object){
 		processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
 		multiSellection: object.selectMulti == undefined ? false : object.selectMulti,
 		checkValue: object.checkValue == undefined ? true : object.checkValue,
+		minTextLenght: object.minTextLenght == undefined ? 0 : object.minTextLenght,
 		parent: object
       });
 	
