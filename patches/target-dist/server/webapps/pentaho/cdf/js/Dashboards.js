@@ -1385,6 +1385,7 @@ Dashboards.generateXActionComponent = function(object){
 		var success = typeof(object.preChange)=='undefined' ? true : object.preChange();
 		if(success)
 			Dashboards.executeXAction(object);
+		typeof(object.postChange)=='undefined' ? true : object.postChange();
 	});
 }
 
