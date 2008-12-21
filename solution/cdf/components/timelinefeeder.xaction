@@ -320,7 +320,7 @@
 										for(j = 0,k=0; j < headers.length; j++){
 										
 											if(headers[j][0]=="") {
-												a[j] = query_result.getValueAt(i,headers[j][1]) - 0||0;
+												a[j] = query_result.getValueAt(i,headers[j][1]) ||0;
 												k++;
 											}
 											else
@@ -337,7 +337,7 @@
 										for (i=0; i<rowCount; i++) {
 											var a = new Array();
 											for(j = 0; j < colCount; j++){
-												a[j] = query_result.getValueAt(i,j) - 0 ||0;
+												a[j] = query_result.getValueAt(i,j) ||0;
 											}
 										
 										text += a.join(",");
