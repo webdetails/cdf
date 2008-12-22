@@ -196,8 +196,7 @@ Dashboards.update = function(object)	{
 				DashboardsMap.messageElementId = object.messageElementId;
 				this.initMap = false;
 			}
-			else
-			{
+			
 				DashboardsMap.resetSearch();
 
 				var p = new Array(object.parameters.length);
@@ -219,9 +218,9 @@ Dashboards.update = function(object)	{
 						//Get point details
 						var details;
 						if(colslength > 4){
-							details = new Array(colslength-5);
-							for(var j= 5; j < colslength; j++){
-								details[j-5] = [cols[j],myArray[i][j]];
+							details = new Array(colslength-4);
+							for(var j= 4; j < colslength; j++){
+								details[j-4] = [cols[j],myArray[i][j]];
 							} 
 						}
 
@@ -233,10 +232,10 @@ Dashboards.update = function(object)	{
 
 						var icon = eval(object.expression());
 						DashboardsMap.data.push(new Array(myArray[i][0],new Array(myArray[i][1],myArray[i][2],myArray[i][3]),value,details,null,icon,null,null));
-						DashboardsMap.search(DashboardsMap.data.length - 1);
+						DashboardsMap.search(object,DashboardsMap.data.length - 1);
 					}								
 				}
-			}
+			
 			break;
 
 		case "mapBubble":
@@ -252,8 +251,18 @@ Dashboards.update = function(object)	{
 				}
 
 			}
+			
+			var parameters = Dashboards.clone(DashboardsMap.selectedPointDetails);
+			
+			if(object.parameters != undefined)
+				var p = new Array(object.parameters.length);
+				for(var i= 0, len = p.length; i < len; i++){
+					var key = object.parameters[i][0];
+					var value = eval(object.parameters[i][1]);
+					parameters.push([key,value]);
+				}
 
-			DashboardsMap.updateInfoWindow(pentahoAction(object.solution, object.path, object.action, DashboardsMap.selectedPointDetails ,null));
+			DashboardsMap.updateInfoWindow(pentahoAction(object.solution, object.path, object.action, parameters ,null));
 
 			break;
 
@@ -1565,7 +1574,7 @@ var DashboardsMap =
 		selectedPointDetails: null,
 		mapExpression: null,
 
-		search: function (idx) {
+		search: function (object,idx) {
 
 			var record = this.data[idx];
 			var place = record[1];
@@ -1573,12 +1582,13 @@ var DashboardsMap =
 			var lat = place[0];
 			var log = place[1];
 			var placeDesc = place[2];
+			var featureClass = object.featureClass != undefined ? '&featureClass=' + object.featureClass : '';
 
 			//request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(place)  + ',Portugal&maxRows=1&featureClass=P&coutry=PT&callback=getLocation';
 			if(lat == '' || log == '')
 			{
 				placeDesc = placeDesc.replace(/&/g,",");
-				request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1&featureClass=P&callback=DashboardsMap.getLocation';
+				request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1' + featureClass + '&callback=DashboardsMap.getLocation';
 			}
 
 			// Create a new script object
@@ -1598,9 +1608,8 @@ var DashboardsMap =
 			map.addLayer(markers);
 
 			this.cleanMessages();
-			document.getElementById(this.messageElementId).innerHTML = "";
 			dataIdx = 0;
-			data = new Array();
+			this.data = new Array();
 		},
 
 		// this function will be called by our JSON callback
@@ -1612,7 +1621,7 @@ var DashboardsMap =
 			if (jData == null || jData.totalResultsCount == 0) {
 				// There was a problem parsing search results
 				var placeNotFound = record[0];
-				this.addMessage("N&atilde;o encontrado: " + placeNotFound);
+				this.addMessage(placeNotFound);
 			}
 			else{
 
@@ -1629,11 +1638,11 @@ var DashboardsMap =
 				record[4] = marker;
 			}
 
-			if(dataIdx >= data.length && dataIdx > 1){
+			if(dataIdx >= this.data.length && dataIdx > 1){
 				var extent = markers.getDataExtent();
 				map.zoomToExtent(extent);
 			}
-			if(dataIdx >= data.length && dataIdx == 1){
+			if(dataIdx >= this.data.length && dataIdx == 1){
 				map.setCenter(markers.markers[0].lonlat,4,false,false);
 			}
 		},
@@ -1672,9 +1681,9 @@ var DashboardsMap =
 		updateInfoWindow: function ( content ) {
 
 			if(content != null){
-				var html = "<table border='0' height = '175' width='175' cellpadding='0' cellspacing='0'><tr><td colspan='1' align='center' width='55'><b>";
+				var html = content;/*"<table border='0' height = '175' width='175' cellpadding='0' cellspacing='0'><tr><td colspan='1' align='center' width='55'><b>";
 				html += "<b>" + this.selectedPointDetails[0][1];
-				html += "</b></td></tr><tr><td colspan='1' align='center' width='175'>"+content+"</td></tr></table>";
+				html += "</b></td></tr><tr><td colspan='1' align='center' width='175'>"+content+"</td></tr></table>";*/
 
 				show_bubble(click_lonlat,html);
 			}
@@ -1694,11 +1703,13 @@ var DashboardsMap =
 
 
 		addMessage: function (msg){
-			document.getElementById(this.messageElementId).innerHTML = document.getElementById(this.messageElementId).innerHTML + msg + "\n <br />";
+			if(this.messageElementId != undefined)
+				document.getElementById(this.messageElementId).innerHTML = document.getElementById(this.messageElementId).innerHTML + msg + "\n <br />";
 		},
 
 		cleanMessages: function (msg){
-			document.getElementById(this.messageElementId).innerHTML = "";
+			if(this.messageElementId != undefined)
+				document.getElementById(this.messageElementId).innerHTML = "";
 		}
 
 	};

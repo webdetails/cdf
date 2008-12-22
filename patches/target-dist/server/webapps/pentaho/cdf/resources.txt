@@ -67,6 +67,15 @@ autocompleteBoxScript=\
 autocompleteBoxLink=\
 /pentaho/cdf/js/autobox/jquery.ui.autobox.css
 
+mapScript=\
+/pentaho/cdf/js/OpenMap/open_map.js,\
+/pentaho/cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
+/pentaho/cdf/js/jsr_class.js,\
+/pentaho/cdf/js/OpenStreetMap.js
+
+mapLink=\
+/pentaho/cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
+/pentaho/cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
 
 
