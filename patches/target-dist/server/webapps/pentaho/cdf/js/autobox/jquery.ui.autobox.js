@@ -80,7 +80,7 @@
           .bind('click', function(e) {
               li.remove();
               e.preventDefault();
-			  processChange(input,opt);
+			  opt.processAutoBoxChange(input,opt);
           }))
       .append($('<input type="hidden" />')
           .attr('name', name)
@@ -107,26 +107,18 @@
 	}
    }
 	
-   function getSelectedValues(input){
-      var vals=input.parent().parent().find('li');
+	function getSelectedValues(input){
+	  var vals=input.parent().parent().find('li');
 	  var values = new Array();
-      for(var i=0,j=0; i<vals.length; ++i){
+	  for(var i=0,j=0; i<vals.length; ++i){
 		var value = vals[i].innerHTML.match(/^[^<]+/);
 		if(value!= null){
 			values[j] = value;j++;
 		}
-      }
-      return values;
-    }
-	
-  function processChange(input,opt){
-	if(opt.multiSellection == true){
-		var selectedValues = getSelectedValues(input);
-		opt.processChange(opt.parent,selectedValues);
-		}
-	else
-		opt.processChange(opt.parent,getSelectedValues(input));
+	  }
+	  return values;
 	}
+  
 	
 	function getCurrentValsHash(input){//return the currently selected values as a hash
       var vals=input.parent().parent().find('li');
@@ -137,7 +129,7 @@
       }
       return hash;
     }
-
+	
   $.fn.autoboxMode=function(multiSellection,container, input, size, opt){
     var original=input.val(); var selected=-1; var self=this;
 
@@ -157,7 +149,7 @@
 			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, $.data(active[0], "originalObject").text, opt.name);
-				processChange(input,opt);
+				opt.processAutoBoxChange(input,opt);
 			}
       }
       else if(input.val()){ 
@@ -165,7 +157,7 @@
 			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, input.val(), opt.name);
-				processChange(input,opt);
+				opt.processAutoBoxChange(input,opt);
 		}
 	  }
 
@@ -258,7 +250,17 @@
 	  },
       wrapper: '<ul class="autobox-list"></ul>',
 
-      resizable: {}
+      resizable: {},
+	
+	  processAutoBoxChange: function processAutoBoxChange(input,opt){
+		if(opt.multiSellection == true){
+			var selectedValues = getSelectedValues(input);
+			opt.processChange(opt.parent,selectedValues);
+			}
+		else
+			opt.processChange(opt.parent,getSelectedValues(input));
+		}
+		
     }, opt);
 
     if($.ui.autobox.ext){
@@ -318,7 +320,7 @@
 				if(hash == null || hash[input.val()] != true){
 					if(opt.checkValue == false){
 						addText(opt,input, input.val(), opt.name);
-						processChange(input,opt)
+						opt.processAutoBoxChange(input,opt)
 					}
 					else{
 						valueMatched = false;
@@ -327,7 +329,7 @@
 						});
 						if(opt.checkValue == true && valueMatched){
 							addText(opt,input, input.val(), opt.name);
-							processChange(input,opt)
+							opt.processAutoBoxChange(input,opt)
 						}
 						else
 							addText(opt,input, "", opt.name);
@@ -401,11 +403,13 @@
 	  return holder;
     }
 
-    return this.each(function(){
+    this.each(function(){
       var self=$(this);
       createHolder(self);
 	  opt.name=opt.parent.name;
     });
+	
+	return opt;
   };
 
 })(jQuery);

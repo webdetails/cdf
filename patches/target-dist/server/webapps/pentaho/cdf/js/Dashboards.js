@@ -1403,7 +1403,7 @@ Dashboards.generateAutocompleteBoxComponent = function(object){
 	
 	$("#"+ object.htmlObject).empty();
 	
-	$("#" + object.htmlObject ).autobox({
+	var opt = {
         list: list,
 		matchType: object.matchType == undefined ? "fromStart" : object.matchType, /*fromStart, all*/
         insertText: function(o) {return o.text },
@@ -1412,7 +1412,32 @@ Dashboards.generateAutocompleteBoxComponent = function(object){
 		checkValue: object.checkValue == undefined ? true : object.checkValue,
 		minTextLenght: object.minTextLenght == undefined ? 0 : object.minTextLenght,
 		parent: object
-      });
+      };
+	  
+	object.autoBoxOpt = $("#" + object.htmlObject ).autobox(opt);
+	
+	object.addFilter = function(value){
+
+		var html_obj = $("#"+object.name+"Object");
+		var input = html_obj.children().children().children();
+		var childs = html_obj.children().children().children();
+
+		for(i = childs.length;i > 1 ; ){
+			$(childs[i-1]).remove();
+			i= i -1;
+		}
+
+		var li=$('<li class="bit-box"></li>').attr('id', object.name + 'bit-0').text(encode_prepare(value));
+		li.append($('<a href="#" class="closebutton"></a>')
+          .bind('click', function(e) {
+              li.remove();
+              e.preventDefault();
+			  object.autoBoxOpt.processAutoBoxChange(input,object.autoBoxOpt);
+          })).append($('<input type="hidden" />').attr('name', object.name).val(encode_prepare(value)));
+		
+		childs = html_obj.children().children().children();
+		childs.after(li);
+	}
 	
 }
 
