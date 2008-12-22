@@ -14,3 +14,12 @@
 .cdfClickable{
 	cursor: pointer;
 }
+
+#GB_window {
+    left: 0;
+    top: 0;
+    font-size: 1px;
+    position: absolute;
+    overflow: visible;
+    z-index: 1500;
+}
