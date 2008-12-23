@@ -21,21 +21,21 @@ org.pentaho.platform.web.http.session.HttpSessionParameterProvider
 
 	String solution = request.getParameter( "solution" ); 
 	String path = request.getParameter("path");
+	String mode = request.getParameter("mode");
 	
-	if( "".equals( solution ) ) { 
-		solution = null;
-	}
-	if( path == null ) { 
-		path = "";
-	}
-    System.out.println("Solution : >" + solution + "<, " + "Path : >" + path + "<");
-    
-    
-        TestJSon jsonTest = new TestJSon();
-        String test = jsonTest.doTest();
+	 if ("".equals(solution)) {
+            solution = null;
+        }
+        if (path == null) {
+            path = "";
+        }
+        if (mode == null) {
+            mode = "";
+        }       
         
+		
         NavigateComponent nav = new NavigateComponent(userSession);
         // test = nav.getNavigationElements(solution, path); //we want the entire tree
-        test = nav.getNavigationElements("", "");
+        String json = nav.getNavigationElements(mode, solution, path);
 
-%><%= test %>
+%><%= json %>
