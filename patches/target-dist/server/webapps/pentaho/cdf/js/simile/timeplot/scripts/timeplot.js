@@ -184,7 +184,7 @@ Timeplot._Impl.prototype = {
      *     return data;
      * };</pre></p>
      */
-    loadText: function(url, separator, eventSource, filter, format) {
+    loadText: function(url, separator, eventSource, filter, format, callbackFunction) {
         if (this._active) {
             var tp = this;
             
@@ -196,10 +196,11 @@ Timeplot._Impl.prototype = {
             var fDone = function(xmlhttp) {
                 try {
                     eventSource.loadText(xmlhttp.responseText, separator, url, filter, format);
+					if(callbackFunction != undefined)callbackFunction(eventSource.getRange());
                 } catch (e) {
                     SimileAjax.Debug.exception(e);
                 } finally {
-                    tp.hideLoadingMessage();
+					tp.hideLoadingMessage();
                 }
             };
             
@@ -229,7 +230,7 @@ Timeplot._Impl.prototype = {
                     } 
                     eventSource.loadXML(xml, url);
                 } finally {
-                    tl.hideLoadingMessage();
+					tl.hideLoadingMessage();
                 }
             };
             
@@ -242,7 +243,7 @@ Timeplot._Impl.prototype = {
      * Load event data from the given url into the given eventSource, using
      * the Timeline JSON event format.
      */
-    loadJSON: function(url, eventSource) {
+    loadJSON: function(url, eventSource, eventFunction) {
         if (this._active) {
             var tl = this;
             
@@ -254,6 +255,7 @@ Timeplot._Impl.prototype = {
             var fDone = function(xmlhttp) {
                 try {
 					var data = eval('(' + xmlhttp.responseText + ')');
+					if(eventFunction != undefined) eventFunction(data);
 					eventSource.loadJSON(data, url);
                 } finally {
                     tl.hideLoadingMessage();
