@@ -613,11 +613,32 @@ Dashboards.processPageTitleResponse = function(object,json){
 	// Store the value
 	Dashboards.navigatorResponse = json;
 
-	var file = Dashboards.listContents(CDF_SELF);
+	var _id = "/solution/" + Dashboards.solution + (Dashboards.path.length > 0?"/"+Dashboards.path:"");
+	var file = Dashboards.findPageTitleObject(json.solution.folders,_id);
 
 	if (file.title != undefined && file.description != undefined){
 		$("#"+object.htmlObject).text(file.title + " - " + file.description);
 	}
+};
+
+Dashboards.findPageTitleObject = function(folders,id){
+
+	for(var i = 0; i<folders.length; i++){
+		
+		var file = folders[i];
+		if(file.id == id){
+			return file;
+		}
+		else if (id.indexOf(file.id)>=0){
+			// we're on the good path
+			return Dashboards.findPageTitleObject(file.folders,id);
+		}
+		else{
+			continue;
+		}
+		
+	}
+
 };
 
 Dashboards.processNavigatorResponse = function(object,json){
@@ -755,54 +776,6 @@ Dashboards.processContentListResponse = function(object,json){
 
 };
 
-Dashboards.listContents = function(mode){
-
-	// Start iterate
-	// 1: find the correct solution;
-	// 2: see if there are paths in there
-	// 3: if mode == CDF_SELF, we will return the position we're in.
-	//    if mode == CDF_CHILDREN, the children will be returned
-
-	var json = Dashboards.navigatorResponse;
-	var locationArray;
-
-	var files = Dashboards.getSolutionJSON(Dashboards.solution);
-
-	if (Dashboards.path == 'null' || Dashboards.path == ""){
-		if (mode ==  CDF_CHILDREN )
-			return files;
-		else
-			return json.repository;
-	}
-
-	locationArray = Dashboards.path.split('/');
-	maxLen = mode==CDF_CHILDREN?locationArray.length:locationArray.length-1;
-
-	for (var i = 0; i < maxLen; i++){
-
-		var currentPath = locationArray.slice(0,i + 1).join("/");
-		//console.log("[" + i + "] - Looking for: " + currentPath );
-		files = Dashboards.browseContent(files, currentPath);
-	}
-
-	if (mode ==  CDF_CHILDREN )
-		return files;
-	else{
-		// we still need to find the correct element
-		var file;
-		$.each(files,function(i,f){
-				if (f.type == "FILE.FOLDER" && f.path == Dashboards.path ){
-					file = f; return false;
-				}
-			});
-		if (file == undefined){
-			alert("FATAL: NOT FOUND");
-		}
-		return file;
-	}
-
-};
-
 
 Dashboards.browseContent = function(files,currentPath){
 
@@ -905,7 +878,7 @@ Dashboards.getParentPath = function(){
 		return "";
 	}
 	var parentPath = Dashboards.path.substring(0,Dashboards.path.lastIndexOf("/"));
-	return [parentPath, parentPath];
+	return parentPath;
 };
 
 Dashboards.isAncestor = function(solution,path){
