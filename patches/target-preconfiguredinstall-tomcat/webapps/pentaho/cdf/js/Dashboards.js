@@ -1134,10 +1134,12 @@ Dashboards.updateTimePlotComponent = function( object ){
 		plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
 	}
+	
 
 	// support for events 
-	if(cd.events && cd.events.show == true){
-		var eventSource2 = new Timeplot.DefaultEventSource();
+	var eventSource2 = undefined;
+	if(cd.range || (cd.events && cd.events.show == true)){
+		eventSource2 = new Timeplot.DefaultEventSource();
 		plotInfo.push(Timeplot.createPlotInfo({ 
 					id: "plot3",  eventSource: eventSource2,  
 					timeGeometry: timePlotTimeGeometry,
@@ -1166,26 +1168,10 @@ Dashboards.updateTimePlotComponent = function( object ){
 		parameters.push(key+"="+value);
 	} 
 
-	var url = "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
-	timeplot.loadText(url,",", timePlotEventSource);
+	var timePlotEventSourceUrl = "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
 	
-
 	// TODO - make configurable: aok
 	if(cd.events && cd.events.show == true){
-
-		var data = {
-			events:[
-			{
-				start:'Sep 24 2008',
-				title:'Firefox 2.0.0.17 released',
-				link:123
-			},
-			{
-				start:'Sep 26 2008',
-				title:'Firefox 3.0.3 released'
-			}
-			]
-		};
 
 		//go through parametere array and update values
 		var parameters = [];
@@ -1195,12 +1181,48 @@ Dashboards.updateTimePlotComponent = function( object ){
 			parameters.push(key+"="+value);
 		} 
 
-		var url = "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
-		timeplot.loadJSON(url, eventSource2); // TODO: Make configurable - aok
+		var eventUrl = "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
 
-		//end aok
+		timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
+			timeplot.loadJSON(eventUrl,eventSource2,function(data){
+				data.events = Dashboards.FilterEvents(data.events,range);
+				if(cd.range) //Insert date Event at start
+					{data.events = [].concat(Dashboards.getRangeEvent(cd)).concat(data.events);}
+			})
+		});
 	}
+	else
+		timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource,null,null,function(){
+			if(cd.range){
+				eventSource2.loadJSON({"dateTimeFormat":"iso8601","events":[Dashboards.getRangeEvent(cd)]}, timePlotEventSourceUrl);
+			}
+		});
+	
+	
+	
+	
 
+};
+
+Dashboards.getRangeEvent = function (cd) {
+	if(cd.range!= undefined && cd.range.startDate != undefined && cd.range.endDate != undefined){
+		var startDate = typeof cd.range.startDate =='function' ? cd.range.startDate() : cd.range.startDate;
+		var endDate = typeof cd.range.endDate =='function' ? cd.range.endDate() : cd.range.endDate;
+		return {"start":startDate,"end":endDate,"title":cd.range.title,"description":cd.range.description,"color":"#9BFF9B"};
+	}
+	return undefined;
+}
+
+Dashboards.FilterEvents = function (events, range) {
+	var result = [];
+	var min = MetaLayer.toDateString(new Date(range.earliestDate));
+	var max = MetaLayer.toDateString(new Date(range.latestDate));
+	for(i = 0; i < events.length; i++){
+		if(events[i].start >= min && ((events[i].end == undefined && events[i].start <= max) || events[i].end <= max)){
+			result.push(events[i]);
+		}
+	}
+	return result;
 };
 
 Dashboards.getMonthPicker = function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {

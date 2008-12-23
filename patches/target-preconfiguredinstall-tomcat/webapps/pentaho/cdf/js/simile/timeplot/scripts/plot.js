@@ -73,17 +73,19 @@ Timeplot.Plot.prototype = {
                     if (x > c.width) x = c.width;
                     if (isNaN(x) || x < 0) x = 0;
                     var t = plot._timeGeometry.fromScreen(x);
+					var tPrevious = plot._timeGeometry.previousFromScreen(x);
                     if (t == 0) { // something is wrong
                         plot._valueFlag.style.display = "none";
                         return;
                     }
                     
                     var v = plot._dataSource.getValue(t);
-                    if (plot._plotInfo.roundValues) v = Math.round(v);
+					var vPrevious = plot._dataSource.getValue(tPrevious);
+                    if (plot._plotInfo.roundValues){ v = Math.round(v); vPrevious = Math.round(vPrevious);}
 					if(plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
-						plot._valueFlag.innerHTML = plot._toolTipFormat(v,plot);
+						plot._valueFlag.innerHTML = plot._toolTipFormat(vPrevious,plot);
 					else
-						plot._valueFlag.innerHTML = new String(v);
+						plot._valueFlag.innerHTML = new String(vPrevious);
                     var d = new Date(t);
                     var p = plot._timeGeometry.getPeriod(); 
                     if (p < day) {
