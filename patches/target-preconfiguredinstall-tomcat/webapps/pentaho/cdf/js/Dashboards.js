@@ -1,4 +1,7 @@
-$.ajaxSetup({ type: "POST", async: false });
+$.ajaxSetup({
+		type: "POST",
+		async: false
+	});
 
 
 var GB_ANIMATION = true;
@@ -18,10 +21,13 @@ $.blockUI.defaults.css['-webkit-border-radius'] = '10px';
 $.blockUI.defaults.css['-moz-border-radius'] = '10px';
 
 if (typeof $.SetImpromptuDefaults == 'function')
-	$.SetImpromptuDefaults({ prefix: 'colsJqi', show: 'slideDown' });
+	$.SetImpromptuDefaults({
+			prefix: 'colsJqi',
+			show: 'slideDown'
+		});
 
 
-	
+
 var Dashboards = 
 	{
 		components: [],
@@ -29,14 +35,16 @@ var Dashboards =
 		initMap: true,
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 	}
-	
+
 
 
 Dashboards.blockUIwithDrag = function() {
 	$.blockUI();
 	var handle = $('<div id="blockUIDragHandle" style="cursor: pointer; width: 170px; -webkit-border-radius: 5px; -moz-border-radius: 5px; background-color: rgba(0,0,0,0.25);" align="right"><a style="padding-right: 5px; text-decoration: none; color: black; font-weight: bold; font-color: black; font-size: 8pt" href="javascript:$.unblockUI()" title="Click to unblock">X</a></div>')
 	$("div.blockUI.blockMsg").prepend(handle);
-	$("div.blockUI.blockMsg").draggable({handle: "#blockUIDragHandle"});
+	$("div.blockUI.blockMsg").draggable({
+			handle: "#blockUIDragHandle"
+		});
 }
 
 Dashboards.xactionCallback = function(object,str){
@@ -62,7 +70,7 @@ Dashboards.update = function(object)	{
 			var key = object.parameters[i][0];
 			var value = eval(object.parameters[i][1]);
 			p[i] = [key,value];
-		} 
+		}
 		// increment runningCalls
 		Dashboards.runningCalls++;
 
@@ -108,7 +116,7 @@ Dashboards.update = function(object)	{
 		for(var i= 0, len  = myArray.length; i < len; i++){
 			if(myArray[i]!= null && myArray[i].length>0)
 				selectHTML += "<option value = '" + myArray[i][vid?1:0] + "' >" + myArray[i][1] + "</option>";
-		} 
+		}
 
 		selectHTML += "</select>";
 
@@ -128,13 +136,21 @@ Dashboards.update = function(object)	{
 		$("#"+object.name).change(function() {
 				Dashboards.processChange(object.name);
 			}).keyup(function(event) {
-					if (event.keyCode==13){Dashboards.processChange(object.name)}
+					if (event.keyCode==13){
+						Dashboards.processChange(object.name)
+					}
 				});
 
 			break;
 		case "dateInput":
 			$("#"+object.htmlObject).html($("<input/>").attr("id",object.name).attr("value",eval(object.parameter)).css("width","80px"));
-			Calendar.setup({inputField: object.name, ifFormat : "%Y-%m-%d",  onUpdate: function(){Dashboards.processChange(object.name)} });
+			Calendar.setup({
+					inputField: object.name,
+					ifFormat : "%Y-%m-%d",
+					onUpdate: function(){
+						Dashboards.processChange(object.name)
+					}
+				});
 			break;
 		case "dateRangeInput":
 			var dr;
@@ -150,10 +166,18 @@ Dashboards.update = function(object)	{
 				if(object.inputSeparator != undefined){
 					dr.after(object.inputSeparator);
 				}
-			
+
 			}
 			var offset = dr.offset();
-			$(function(){ $("#" + object.htmlObject + " input").daterangepicker({posX: offset.left , posY: offset.top + 15, onDateSelect: function(rangeA, rangeB){ Dashboards.fireDateRangeInputChange( object.name ,rangeA,rangeB); }}); });
+			$(function(){
+					$("#" + object.htmlObject + " input").daterangepicker({
+							posX: offset.left ,
+							posY: offset.top + 15,
+							onDateSelect: function(rangeA, rangeB){
+								Dashboards.fireDateRangeInputChange( object.name ,rangeA,rangeB);
+							}
+						});
+				});
 			//$(function(){ dr.daterangepicker({posX: offset.left , posY: offset.top + 15}); });
 			break;
 		case "monthPicker":
@@ -184,7 +208,7 @@ Dashboards.update = function(object)	{
 					selectHTML += " type='checkbox'";
 				}
 				selectHTML += " id='" + object.name +"' name='" + object.name +"' value='" + myArray[i][1] + "' /> " + myArray[i][1] + (object.separator == undefined?"":object.separator);
-			} 
+			}
 			//update the placeholder
 			document.getElementById(object.htmlObject).innerHTML = selectHTML;
 
@@ -196,46 +220,46 @@ Dashboards.update = function(object)	{
 				DashboardsMap.messageElementId = object.messageElementId;
 				this.initMap = false;
 			}
-			
-				DashboardsMap.resetSearch();
 
-				var p = new Array(object.parameters.length);
-				for(var i= 0, len = p.length; i < len; i++){
-					var key = object.parameters[i][0];
-					var value = eval(object.parameters[i][1]);
-					p[i] = [key,value];
-				} 
+			DashboardsMap.resetSearch();
 
-				html = pentahoAction(object.solution, object.path, object.action, p,null);
+			var p = new Array(object.parameters.length);
+			for(var i= 0, len = p.length; i < len; i++){
+				var key = object.parameters[i][0];
+				var value = eval(object.parameters[i][1]);
+				p[i] = [key,value];
+			}
 
-				var myArray = this.parseArray(html,true);
-				var len = myArray.length;
-				if( len > 1){
-					var cols = myArray[0];
-					var colslength = cols.length;
+			html = pentahoAction(object.solution, object.path, object.action, p,null);
 
-					for(var i= 1; i < len; i++){
-						//Get point details
-						var details;
-						if(colslength > 4){
-							details = new Array(colslength-4);
-							for(var j= 4; j < colslength; j++){
-								details[j-4] = [cols[j],myArray[i][j]];
-							} 
-						}
+			var myArray = this.parseArray(html,true);
+			var len = myArray.length;
+			if( len > 1){
+				var cols = myArray[0];
+				var colslength = cols.length;
 
-						var value = myArray[i][4];
-						var markers = object.markers;
-						//Store expression and markers for update funtion
-						DashboardsMap.mapExpression = object.expression();
-						DashboardsMap.mapMarkers = markers;
+				for(var i= 1; i < len; i++){
+					//Get point details
+					var details;
+					if(colslength > 4){
+						details = new Array(colslength-4);
+						for(var j= 4; j < colslength; j++){
+							details[j-4] = [cols[j],myArray[i][j]];
+						} 
+					}
 
-						var icon = eval(object.expression());
-						DashboardsMap.data.push(new Array(myArray[i][0],new Array(myArray[i][1],myArray[i][2],myArray[i][3]),value,details,null,icon,null,null));
-						DashboardsMap.search(object,DashboardsMap.data.length - 1);
-					}								
-				}
-			
+					var value = myArray[i][4];
+					var markers = object.markers;
+					//Store expression and markers for update funtion
+					DashboardsMap.mapExpression = object.expression();
+					DashboardsMap.mapMarkers = markers;
+
+					var icon = eval(object.expression());
+					DashboardsMap.data.push(new Array(myArray[i][0],new Array(myArray[i][1],myArray[i][2],myArray[i][3]),value,details,null,icon,null,null));
+					DashboardsMap.search(object,DashboardsMap.data.length - 1);
+				}								
+			}
+
 			break;
 
 		case "mapBubble":
@@ -251,16 +275,16 @@ Dashboards.update = function(object)	{
 				}
 
 			}
-			
+
 			var parameters = Dashboards.clone(DashboardsMap.selectedPointDetails);
-			
+
 			if(object.parameters != undefined)
 				var p = new Array(object.parameters.length);
-				for(var i= 0, len = p.length; i < len; i++){
-					var key = object.parameters[i][0];
-					var value = eval(object.parameters[i][1]);
-					parameters.push([key,value]);
-				}
+			for(var i= 0, len = p.length; i < len; i++){
+				var key = object.parameters[i][0];
+				var value = eval(object.parameters[i][1]);
+				parameters.push([key,value]);
+			}
 
 			DashboardsMap.updateInfoWindow(pentahoAction(object.solution, object.path, object.action, parameters ,null));
 
@@ -316,13 +340,17 @@ Dashboards.update = function(object)	{
 		case "autocompleteBox":
 			this.generateAutocompleteBoxComponent (object);
 			break;
-		}	
+		}
 		if(!(typeof(object.postExecution)=='undefined')){
 			object.postExecution();
 		}
 		// if we have a tooltip component, how is the time.
 		if (object._tooltip != undefined){
-			$("#" + object.htmlObject).attr("title",object._tooltip).tooltip({delay:0, track: true, fade: 250});
+			$("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+					delay:0,
+					track: true,
+					fade: 250
+				});
 		}
 	};
 
@@ -332,11 +360,11 @@ Dashboards.update = function(object)	{
 				return this.components[i];
 		}
 	};
-	
+
 	Dashboards.addComponents = function(components){
 		this.components = this.components.concat(components);
 	};
-	
+
 	Dashboards.addArgs = function(url){
 		if(url != undefined)
 			this.args = getURLParameters(url);
@@ -346,7 +374,9 @@ Dashboards.update = function(object)	{
 		if(Dashboards.isArray(components)){
 			Dashboards.addComponents(components);
 		}
-		$(function(){Dashboards.initEngine()});
+		$(function(){
+				Dashboards.initEngine()
+			});
 	};
 
 	Dashboards.initEngine = function(){
@@ -358,7 +388,7 @@ Dashboards.update = function(object)	{
 			if(components[i].executeAtStart){
 				this.update(components[i]);
 			}
-		}  
+		}
 		$.unblockUI();
 	};
 
@@ -370,13 +400,13 @@ Dashboards.update = function(object)	{
 		var compCount = components.length;
 		for(var i= 0, len = components.length; i < len; i++){
 			this.clear(components[i]);
-		}  
+		}
 		var compCount = components.length;
 		for(var i= 0, len = components.length; i < len; i++){
 			if(components[i].executeAtStart){
 				this.update(components[i]);
 			}
-		}  
+		}
 	};
 
 	Dashboards.parseArray = function(html,includeHeader){
@@ -412,7 +442,7 @@ Dashboards.update = function(object)	{
 				var key = object.parameters[i][0];
 				var value = eval(object.parameters[i][1]);
 				p[i] = [key,value];
-			} 
+			}
 
 			//execute the xaction tp populate the selector
 			html = pentahoAction(object.solution, object.path, object.action, p,null);
@@ -431,7 +461,7 @@ Dashboards.update = function(object)	{
 		var object = eval(object_name);
 		var parameter = object.parameter;
 		var value;
-	
+
 		//alert(document.getElementById(object.name));
 
 		switch (object.type)
@@ -442,7 +472,7 @@ Dashboards.update = function(object)	{
 				if(selector[i].selected){
 					value = selector[i].value;
 				};
-			} 
+			}
 			break;
 		case "radio":
 			var selector = document.getElementsByName(object.name);
@@ -451,7 +481,7 @@ Dashboards.update = function(object)	{
 					value = selector[i].value;
 					continue;
 				};
-			} 
+			}
 			break;
 		case "check":
 		case "selectMulti":
@@ -467,7 +497,7 @@ Dashboards.update = function(object)	{
 					selection[selection_index] = selector[i].value;
 					selection_index ++;
 				};
-			} 
+			}
 			value=selection.join("','");
 			break;
 		case "textInput":
@@ -497,7 +527,7 @@ Dashboards.update = function(object)	{
 			value = object.value;
 			break;
 		}
-		
+
 		if(!(typeof(object.preChange)=='undefined')){
 			object.preChange(value);
 		}
@@ -513,7 +543,7 @@ Dashboards.fireChange = function(parameter,value){
 	Dashboards.blockUIwithDrag();
 
 	//alert("Parameter: " + parameter + "; Value: " + value);
-	eval( parameter + "= encode_prepare(\"" + value + "\")"); 
+	eval( parameter + "= encode_prepare(\"" + value + "\")");
 
 	for(var i= 0, len = components.length; i < len; i++){
 		if(Dashboards.isArray(components[i].listeners)){
@@ -526,7 +556,7 @@ Dashboards.fireChange = function(parameter,value){
 				//alert("finished parameter " + j)
 			}
 		}
-	}  
+	}
 	//alert("finish block");
 	$.unblockUI();
 
@@ -539,9 +569,9 @@ Dashboards.isArray = function(testObject) {
 Dashboards.fireDateRangeInputChange = function(comp, rangeA, rangeB){
 	var parameters = eval(comp + ".parameter");
 	/*console.log("Date Select: " + comp +"; Range: " +  rangeA + " > " + rangeB);*/
-	// set the second date and fireChange the first
-	eval( parameters[1] + "= encode_prepare(\"" + rangeB + "\")"); 
-	Dashboards.fireChange(parameters[0],rangeA);
+// set the second date and fireChange the first
+eval( parameters[1] + "= encode_prepare(\"" + rangeB + "\")");
+Dashboards.fireChange(parameters[0],rangeA);
 
 }
 
@@ -550,7 +580,7 @@ Dashboards.navigatorResponse = -1;
 Dashboards.getNavigatorComponent = function(object){
 
 	if( Dashboards.navigatorResponse == -1 ){
-		$.getJSON("JSONSolution", function(json){
+		$.getJSON("JSONSolution?mode=navigator&solution=" + Dashboards.solution +"&path=" + Dashboards.path , function(json){
 				Dashboards.processNavigatorResponse(object,json);
 			});
 	}
@@ -561,20 +591,15 @@ Dashboards.getNavigatorComponent = function(object){
 
 Dashboards.getContentList = function(object){
 
-	if( Dashboards.navigatorResponse == -1 ){
-		$.getJSON("JSONSolution", function(json){
-				Dashboards.processContentListResponse(object,json);
-			});
-	}
-	else{
-		Dashboards.processContentListResponse(object,Dashboards.navigatorResponse);
-	}
+	$.getJSON("JSONSolution?mode=contentList&solution=" + Dashboards.solution +"&path=" + Dashboards.path, function(json){
+			Dashboards.processContentListResponse(object,json);
+		});
 };
 
 Dashboards.getPageTitle = function(object){
 
 	if( Dashboards.navigatorResponse == -1 ){
-		$.getJSON("JSONSolution", function(json){
+		$.getJSON("JSONSolution?mode=navigator&solution=" + Dashboards.solution +"&path=" + Dashboards.path, function(json){
 				Dashboards.processPageTitleResponse(object,json);
 			});
 	}
@@ -600,13 +625,23 @@ Dashboards.processNavigatorResponse = function(object,json){
 	// Store the value
 	Dashboards.navigatorResponse = json;
 
-	var files = object.includeSolutions?json.repository.file:Dashboards.getSolutionJSON(Dashboards.solution);
-
+	var files = object.includeSolutions?json.solution.folders:Dashboards.getSolutionJSON(Dashboards.solution);
 	var ret = Dashboards.generateMenuFromArray(object,files, 0);
 	$("#"+object.htmlObject).html(ret);
 
-	$(function(){$('ul.jd_menu').jdMenu({activateDelay: 50, showDelay: 50, disableLinks: false})});
-	$('ul.jd_menu a').tooltip({showURL: false, track:true, delay: 1000, opacity: 0.5});
+	$(function(){
+			$('ul.jd_menu').jdMenu({
+					activateDelay: 50,
+					showDelay: 50,
+					disableLinks: false
+				})
+		});
+	$('ul.jd_menu a').tooltip({
+			showURL: false,
+			track:true,
+			delay: 1000,
+			opacity: 0.5
+		});
 
 };
 
@@ -614,14 +649,14 @@ Dashboards.processNavigatorResponse = function(object,json){
 Dashboards.getSolutionJSON = function(solution){
 
 	var json = Dashboards.navigatorResponse;
-	var files = json.repository.file;
+	var files = json.solution.folders;
 	var locationArray;
 
 	var found = 0;
 	for(i = 0; i<files.length; i++){
 		var file = files[i];
 		if(Dashboards.solution == "" || file.solution == Dashboards.solution){
-			files = file.file;
+			files = file.folders;
 			if(files.length == undefined){
 				files = [ files ];
 			}
@@ -638,14 +673,16 @@ Dashboards.getSolutionJSON = function(solution){
 
 Dashboards.processContentListResponse = function(object,json){
 
-	// Store the value
-	Dashboards.navigatorResponse = json;
-
 	// 1 - Get my solution and path from the object;
 	// 2 - get the content
 
-	var files = Dashboards.listContents(CDF_CHILDREN);
 	$("#"+object.htmlObject).empty();
+	var files = json.content || [];
+	files.sort(function(a,b){
+			var _a = (a.type=="FOLDER"?"000":"")+a.title;
+			var _b = (b.type=="FOLDER"?"000":"")+b.title;
+			return a.title > b.title
+		});
 
 	// Create the outmost ul
 	var container = $("<ul></ul>").attr("id","contentList-"+object.name).appendTo("#"+object.htmlObject);
@@ -654,11 +691,11 @@ Dashboards.processContentListResponse = function(object,json){
 	if( object.mode != 1 && Dashboards.path != ""){
 		var parentDir =  {
 			name: "Up",
-			title:"Up", 
-			type: "FILE.FOLDER", 
+			title:"Up",
+			type: "FOLDER",
 			description: "Go to parent directory",
-			visible: "true", 
-			solution: Dashboards.getParentSolution(), 
+			visible: true,
+			solution: Dashboards.getParentSolution(),
 			path: Dashboards.getParentPath()
 		};
 		files.reverse().push(parentDir);
@@ -672,29 +709,29 @@ Dashboards.processContentListResponse = function(object,json){
 			// 2 - Folders only
 			// 3 - Files and folders
 
-			if (object.mode==1 && this.type == "FILE.FOLDER"){
+			if (object.mode==1 && this.type == "FOLDER"){
 				return true; // skip
 			}
-			if (object.mode==2 && this.type != "FILE.FOLDER"){
+			if (object.mode==2 && this.type != "FOLDER"){
 				return true; // skip
 			}
 
-			if(this.visible == 'true'){
+			if(this.visible == true){
 				var cls = "";
 				var target = "";
 				var href = "";
-				if (this.type=="FILE.FOLDER"){
+				if (this.type=="FOLDER"){
 					cls = "folder";
-					href = "Dashboards?solution=" + this.solution + "&path=" + this.path[0];
+					href = "Dashboards?solution=" + this.solution + "&path=" + this.path;
 				}
 				else{
 					cls = "action greybox";
 					if (this.url != undefined){
 						href=this.url;
 					}
-					else
-						href = "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.filename;
-					//target = "_new"
+					else{
+						href = "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
+					}
 
 				}
 
@@ -705,13 +742,15 @@ Dashboards.processContentListResponse = function(object,json){
 
 		});
 
-	$('#contentList-'+object.name + ' a').tooltip({showURL: false});
+	$('#contentList-'+object.name + ' a').tooltip({
+			showURL: false
+		});
 	$("li.greybox a").click(function(){
 			var t = this.title || this.innerHTML || this.href;
-			/*$(window).scrollTop(0);*/
-var _href = this.href.replace(/'/g,"&#39;");
-GB_show(t,_href,$(window).height()-50,$(window).width() - 100 );
-return false;
+			//$(window).scrollTop(0);
+			var _href = this.href.replace(/'/g,"&#39;");
+			GB_show(t,_href,$(window).height()-50,$(window).width() - 100 );
+			return false;
 		});
 
 };
@@ -725,8 +764,6 @@ Dashboards.listContents = function(mode){
 	//    if mode == CDF_CHILDREN, the children will be returned
 
 	var json = Dashboards.navigatorResponse;
-	var files = json.repository.file;
-
 	var locationArray;
 
 	var files = Dashboards.getSolutionJSON(Dashboards.solution);
@@ -754,7 +791,7 @@ Dashboards.listContents = function(mode){
 		// we still need to find the correct element
 		var file;
 		$.each(files,function(i,f){
-				if (f.type == "FILE.FOLDER" && f.path[0] == Dashboards.path ){
+				if (f.type == "FILE.FOLDER" && f.path == Dashboards.path ){
 					file = f; return false;
 				}
 			});
@@ -771,14 +808,14 @@ Dashboards.browseContent = function(files,currentPath){
 
 	for(var i = 0; i<files.length; i++){
 		var file = files[i];
-		//console.log("Searching for " + currentPath + ", found " + file.path[0]);
-		if(file.type == "FILE.FOLDER" && file.path[0] == currentPath){
-			files = file.file;
+		//console.log("Searching for " + currentPath + ", found " + file.path);
+		if(file.type == "FILE.FOLDER" && file.path == currentPath){
+			files = file.folders;
 			/*
 			 console.log("Files found for this path:");
 			 for (var j = 0; j < files.length; j++) {
 			 if (files[j].path != undefined) {
-			 console.log(files[j].path[0]);
+			 console.log(files[j].path);
 		 }
 	 }
 	 */
@@ -805,11 +842,6 @@ Dashboards.generateMenuFromArray = function(object,files, depth){
 		return s;
 	}
 
-	if(files.length == undefined){
-		files = [ files ];
-	}
-
-
 	for(var i = 0; i< files.length; i++){
 
 		var file = files[i];
@@ -834,18 +866,20 @@ Dashboards.generateMenuFromArray = function(object,files, depth){
 Dashboards.generateMenuFromFile = function(object,file, depth){
 
 	var s = "";
-	if(file.visible == "true" && file.type == "FILE.FOLDER" ){
+	if(file.visible == true ){
 
 		var classString = Dashboards.isAncestor(file.solution, file.path)?"class=\"ancestor\"":"";
 
 		var _path = "";
 		if(file.path.length>0){
-			_path="path="+file.path[0];
+			_path="path="+file.path;
 		}
 
 		s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"Dashboards?solution=" + file.solution + "&amp;" +_path + "\">" + file.title + "</a>";
 
-		var inner = Dashboards.generateMenuFromArray(object,file.file);
+		var files = file.folders || [];
+		files.sort(function(a,b){return a.title>b.title});
+		var inner = Dashboards.generateMenuFromArray(object,files);
 
 		if (inner.length > 0 ){
 			inner = " &raquo;" + inner;
@@ -868,7 +902,7 @@ Dashboards.getParentSolution = function(){
 Dashboards.getParentPath = function(){
 	var index = Dashboards.path.lastIndexOf("/");
 	if (index==-1){
-		return ["",""];
+		return "";
 	}
 	var parentPath = Dashboards.path.substring(0,Dashboards.path.lastIndexOf("/"));
 	return [parentPath, parentPath];
@@ -891,7 +925,12 @@ Dashboards.generatePivotLink = function(object){
 	$("#"+object.htmlObject).empty();
 	$("#"+object.htmlObject).html(link);
 
-	$('a.pivotLink').tooltip({showURL: false, track:true, delay: 1000, opacity: 0.5});
+	$('a.pivotLink').tooltip({
+			showURL: false,
+			track:true,
+			delay: 1000,
+			opacity: 0.5
+		});
 };
 
 
@@ -908,7 +947,7 @@ Dashboards.openPivotLink = function(object){
 		var value = typeof qd[p]=='function'?qd[p]():qd[p];
 		//alert("key: " + key + "; Value: " + value);
 		parameters.push(key + "=" + encodeURIComponent(value));
-	} 
+	}
 	url += parameters.join("&");
 
 	var _href = url.replace(/'/g,"&#39;");
@@ -957,12 +996,14 @@ Dashboards.updateJFreeChartComponent = function( object ){
 		var value = typeof cd0[p]=='function'?cd0[p]():cd0[p];
 		//alert("key: " + key + "; Value: " + value);
 		parameters.push([key,value]);
-	} 
+	}
 	// increment runningCalls
 	Dashboards.runningCalls++;
 
 	//callback async mode
-	pentahoAction("cdf", "components", "jfreechart.xaction", parameters,function(json){ Dashboards.updateJFreeChartComponentCallback(object,json); });
+	pentahoAction("cdf", "components", "jfreechart.xaction", parameters,function(json){
+			Dashboards.updateJFreeChartComponentCallback(object,json);
+		});
 	// or sync mode
 	//$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechart.xaction", parameters,null));
 
@@ -980,13 +1021,13 @@ Dashboards.updateDialComponent = function( object ){
 		alert("Fatal - No chartDefinition passed");
 		return;
 	}
-	
+
 	var intervals = cd.intervals;
 	if (intervals == undefined){
 		alert("Fatal - No intervals passed");
 		return;
 	}
-	
+
 	var colors = cd.colors;
 	if(colors != undefined && intervals.length != colors.length){
 		alert("Fatal - Number of intervals differs from number of colors");
@@ -1000,7 +1041,7 @@ Dashboards.updateDialComponent = function( object ){
 		var value = typeof cd[p]=='function'?cd[p]():cd[p];
 		//alert("key: " + key + "; Value: " + value);
 		parameters.push([key,value]);
-	} 
+	}
 	// increment runningCalls
 	Dashboards.runningCalls++;
 
@@ -1018,7 +1059,7 @@ Dashboards.updateTrafficComponent = function( object ){
 		alert("Fatal - No trafficDefinition passed");
 		return;
 	}
-	
+
 	var intervals = cd.intervals;
 	if (intervals == undefined){
 		cd.intervals = [-1,1];
@@ -1031,7 +1072,7 @@ Dashboards.updateTrafficComponent = function( object ){
 		var value = typeof cd[p]=='function'?cd[p]():cd[p];
 		//alert("key: " + key + "; Value: " + value);
 		parameters.push([key,value]);
-	} 
+	}
 	// increment runningCalls
 	Dashboards.runningCalls++;
 
@@ -1042,7 +1083,7 @@ Dashboards.updateTrafficComponent = function( object ){
 
 	if(cd.showValue != undefined && cd.showValue == true){
 		var tooltip = object._tooltip;
-		object._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+		object._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:"");
 	}
 
 	//alert("Traffic result: " + result);
@@ -1053,9 +1094,9 @@ Dashboards.updateTrafficComponent = function( object ){
 
 if (typeof Timeplot != "undefined"){
 	Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
-	new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
-	new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
-	new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
+	new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
+	new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
+	new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
 	new Timeplot.Color('#73F321')]
 }
 
@@ -1063,9 +1104,9 @@ Dashboards.updateTimePlotComponent = function( object ){
 
 	if (typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined ){
 		Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
-		new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
-		new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
-		new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
+		new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
+		new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
+		new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
 		new Timeplot.Color('#73F321')]
 	}
 
@@ -1080,7 +1121,9 @@ Dashboards.updateTimePlotComponent = function( object ){
 			min: 0,
 			axisLabelsPlacement: "left",
 			gridType: "short",
-			toolTipFormat : function (value){ return toFormatedString(value);}
+			toolTipFormat : function (value){
+				return toFormatedString(value);
+			}
 		});
 
 
@@ -1123,7 +1166,9 @@ Dashboards.updateTimePlotComponent = function( object ){
 			timeGeometry: timePlotTimeGeometry,
 			lineColor: Dashboards.timePlotColors[i],
 			showValues: cd.showValues,
-			toolTipFormat: function (value,plot){ return  plot._id + " = " + toFormatedString(value);}
+			toolTipFormat: function (value,plot){
+				return  plot._id + " = " + toFormatedString(value);
+			}
 		};
 		if ( cd.dots == true){
 			plotInfoOpts.dotColor = Dashboards.timePlotColors[i];
@@ -1134,7 +1179,7 @@ Dashboards.updateTimePlotComponent = function( object ){
 		plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
 	}
-	
+
 
 	// support for events 
 	var eventSource2 = undefined;
@@ -1152,10 +1197,10 @@ Dashboards.updateTimePlotComponent = function( object ){
 
 	if(cd.height > 0){
 		$("#" + object.htmlObject + " > div.timeplot").css("height",cd.height);
-	} 
+	}
 	if(cd.width > 0){
 		$("#" + object.htmlObject + " > div.timeplot").css("width",cd.width);
-	} 
+	}
 
 	timeplot = Timeplot.create($("#"+object.htmlObject+" > div.timeplot")[0], plotInfo);
 
@@ -1166,11 +1211,10 @@ Dashboards.updateTimePlotComponent = function( object ){
 		var value = typeof cd[p]=='function'?cd[p]():cd[p];
 		//parameters.push(encodeURIComponent(key)+"="+encodeURIComponent(value));
 		parameters.push(key+"="+value);
-	} 
+	}
 
 	var timePlotEventSourceUrl = "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
-	
-	// TODO - make configurable: aok
+
 	if(cd.events && cd.events.show == true){
 
 		//go through parametere array and update values
@@ -1179,28 +1223,28 @@ Dashboards.updateTimePlotComponent = function( object ){
 			var key = p;
 			var value = typeof cd.events[p]=='function'?cd.events[p]():cd.events[p];
 			parameters.push(key+"="+value);
-		} 
+		}
 
 		var eventUrl = "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
 
 		timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
-			timeplot.loadJSON(eventUrl,eventSource2,function(data){
-				data.events = Dashboards.FilterEvents(data.events,range);
-				if(cd.range) //Insert date Event at start
-					{data.events = [].concat(Dashboards.getRangeEvent(cd)).concat(data.events);}
-			})
-		});
+				timeplot.loadJSON(eventUrl,eventSource2,function(data){
+						data.events = Dashboards.FilterEvents(data.events,range);
+						if(cd.range) //Insert date Event at start
+						{data.events = [].concat(Dashboards.getRangeEvent(cd)).concat(data.events);}
+					})
+			});
 	}
 	else
 		timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource,null,null,function(){
-			if(cd.range){
-				eventSource2.loadJSON({"dateTimeFormat":"iso8601","events":[Dashboards.getRangeEvent(cd)]}, timePlotEventSourceUrl);
-			}
-		});
-	
-	
-	
-	
+				if(cd.range){
+					eventSource2.loadJSON({"dateTimeFormat":"iso8601","events":[Dashboards.getRangeEvent(cd)]}, timePlotEventSourceUrl);
+				}
+			});
+
+
+
+
 
 };
 
@@ -1261,7 +1305,7 @@ Dashboards.getMonthPicker = function(object_name, object_size, initialDate, minD
 
 			selectHTML += "' >" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
 		}
-	} 
+	}
 
 	selectHTML += "</select>";
 
@@ -1297,10 +1341,10 @@ Dashboards.generateTableComponent = function(object){
 		return;
 	}
 	cd["tableId"] = object.htmlObject + "Table";
-	
+
 	//Clear previous table
 	$("#"+object.htmlObject).empty();
-	
+
 	$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
 			Dashboards.processTableComponentResponse(object,json);
 		});
@@ -1311,7 +1355,7 @@ Dashboards.generateTableComponent = function(object){
 Dashboards.processTableComponentResponse = function(object,json)
 {
 	// General documentation here: http://sprymedia.co.uk/article/DataTables
-	
+
 	var cd = object.chartDefinition;
 	// Build a default config from the standard options
 	var dtData0 = Dashboards.getDataTableOptions(cd);
@@ -1324,17 +1368,17 @@ Dashboards.processTableComponentResponse = function(object,json)
 				$(this).sparkline($(this).text().split(/,/));
 			});
 		if(cd.urlTemplate != undefined){
-			var td =$("#" + object.htmlObject + " td:nth-child(1)"); 
+			var td =$("#" + object.htmlObject + " td:nth-child(1)");
 			td.addClass('cdfClickable');
 			td.bind("click", function(e){
 					var regex = new RegExp("{"+cd.parameterName+"}","g");
 					var f = cd.urlTemplate.replace(regex,$(this).text());
 					/*alert (cd.parameterName + " - " + $(this).text() + " - " + f);*/
-					eval(f);
-				});
-		}
-	};
-	$("#"+object.htmlObject+'Table').dataTable( dtData );
+eval(f);
+			});
+	}
+};
+$("#"+object.htmlObject+'Table').dataTable( dtData );
 };
 
 Dashboards.path = Dashboards.getParameter("path");
@@ -1344,23 +1388,38 @@ Dashboards.solution = Dashboards.getParameter("solution");
 Dashboards.getDataTableOptions = function(options)
 {
 	var dtData = {};
-	if(options.info != undefined){dtData.bInfo = options.info};
-	if(options.displayLength != undefined){dtData.iDisplayLength = options.displayLength};
-	if(options.lengthChange != undefined){dtData.bLengthChange = options.lengthChange};
-	if(options.paginate != undefined){dtData.bPaginate = options.paginate};
-	if(options.sort != undefined){dtData.bSort = options.sort};
-	if(options.filter != undefined){dtData.bFilter = options.filter};
+	if(options.info != undefined){
+		dtData.bInfo = options.info
+	};
+	if(options.displayLength != undefined){
+		dtData.iDisplayLength = options.displayLength
+	};
+	if(options.lengthChange != undefined){
+		dtData.bLengthChange = options.lengthChange
+	};
+	if(options.paginate != undefined){
+		dtData.bPaginate = options.paginate
+	};
+	if(options.sort != undefined){
+		dtData.bSort = options.sort
+	};
+	if(options.filter != undefined){
+		dtData.bFilter = options.filter
+	};
 	if(options.colHeaders != undefined){
 		dtData.aoColumns = new Array(options.colHeaders.length);
-		for(var i = 0; i< options.colHeaders.length; i++){dtData.aoColumns[i]={}};
-		$.each(options.colHeaders,function(i,val){ 
-			dtData.aoColumns[i].sTitle=val; 
-			if(val == "") dtData.aoColumns[i].bVisible=false;
-		});  // colHeaders
-		if(options.colTypes!=undefined){$.each(options.colTypes,function(i,val){ 
+		for(var i = 0; i< options.colHeaders.length; i++){
+			dtData.aoColumns[i]={}
+		};
+		$.each(options.colHeaders,function(i,val){
+				dtData.aoColumns[i].sTitle=val;
+				if(val == "") dtData.aoColumns[i].bVisible=false;
+			});  // colHeaders
+		if(options.colTypes!=undefined){
+			$.each(options.colTypes,function(i,val){
 					var col = dtData.aoColumns[i];
 					if(val=='sparkline'){
-						col.sClass=val; 
+						col.sClass=val;
 						col.bSearchable=false;
 						col.bSortable=false;
 					}
@@ -1368,15 +1427,29 @@ Dashboards.getDataTableOptions = function(options)
 						col.sClass=val;
 						col.sType=val;
 					}
-				})};  // colTypes
-		if(options.colFormats!=undefined){$.each(options.colFormats,function(i,val){ if (val!=null){dtData.aoColumns[i].fnRender=
-							function ( obj ) { return sprintf(val,obj.aData[obj.iDataRow][obj.iDataColumn]); }
-					}})};  // colFormats
+				})
+		};  // colTypes
+		if(options.colFormats!=undefined){
+			$.each(options.colFormats,function(i,val){
+					if (val!=null){
+						dtData.aoColumns[i].fnRender=
+							function ( obj ) {
+								return sprintf(val,obj.aData[obj.iDataRow][obj.iDataColumn]);
+							}
+					}
+				})
+		};  // colFormats
 
-		if(options.colWidths!=undefined){$.each(options.colWidths,function(i,val){ if (val!=null){dtData.aoColumns[i].sWidth=val}})}; //colWidths
+		if(options.colWidths!=undefined){
+			$.each(options.colWidths,function(i,val){
+					if (val!=null){
+						dtData.aoColumns[i].sWidth=val
+					}
+				})
+		}; //colWidths
 		dtData.aaSorting=options.sortBy;
 	}
-	
+
 	return dtData;
 
 };
@@ -1413,40 +1486,40 @@ Dashboards.clone = function clone(obj) {
 Dashboards.generateXActionComponent = function(object){
 
 	$("#"+ object.htmlObject).bind("click", function(){
-		var success = typeof(object.preChange)=='undefined' ? true : object.preChange();
-		if(success)
-			Dashboards.executeXAction(object);
-		typeof(object.postChange)=='undefined' ? true : object.postChange();
-	});
+			var success = typeof(object.preChange)=='undefined' ? true : object.preChange();
+			if(success)
+				Dashboards.executeXAction(object);
+			typeof(object.postChange)=='undefined' ? true : object.postChange();
+		});
 }
 
 Dashboards.generateAutocompleteBoxComponent = function(object){
 
 	Dashboards.makeQuery(object);
-	
+
 	var list = [];
-	
-	for(p in object.result){	
+
+	for(p in object.result){
 		var obj = {};
 		obj.text = object.result[p][0];
 		list.push(obj);
 	}
-	
+
 	$("#"+ object.htmlObject).empty();
-	
+
 	var opt = {
-        list: list,
+		list: list,
 		matchType: object.matchType == undefined ? "fromStart" : object.matchType, /*fromStart, all*/
-        insertText: function(o) {return o.text },
+		insertText: function(o) {return o.text },
 		processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
 		multiSellection: object.selectMulti == undefined ? false : object.selectMulti,
 		checkValue: object.checkValue == undefined ? true : object.checkValue,
 		minTextLenght: object.minTextLenght == undefined ? 0 : object.minTextLenght,
 		parent: object
-      };
-	  
+	};
+
 	object.autoBoxOpt = $("#" + object.htmlObject ).autobox(opt);
-	
+
 	object.addFilter = function(value){
 
 		var html_obj = $("#"+object.name+"Object");
@@ -1460,16 +1533,16 @@ Dashboards.generateAutocompleteBoxComponent = function(object){
 
 		var li=$('<li class="bit-box"></li>').attr('id', object.name + 'bit-0').text(encode_prepare(value));
 		li.append($('<a href="#" class="closebutton"></a>')
-          .bind('click', function(e) {
-              li.remove();
-              e.preventDefault();
-			  object.autoBoxOpt.processAutoBoxChange(input,object.autoBoxOpt);
-          })).append($('<input type="hidden" />').attr('name', object.name).val(encode_prepare(value)));
-		
+			.bind('click', function(e) {
+					li.remove();
+					e.preventDefault();
+					object.autoBoxOpt.processAutoBoxChange(input,object.autoBoxOpt);
+				})).append($('<input type="hidden" />').attr('name', object.name).val(encode_prepare(value)));
+
 		childs = html_obj.children().children().children();
 		childs.after(li);
 	}
-	
+
 }
 
 Dashboards.executeXAction = function(object){
@@ -1483,7 +1556,7 @@ Dashboards.executeXAction = function(object){
 		var value = eval(object.parameters[i][1]);
 		parameters.push(key + "=" + encodeURIComponent(value));
 	}
-	
+
 	url += parameters.join("&");
 
 	var _href = url.replace(/'/g,"&#39;");
@@ -1497,11 +1570,13 @@ Dashboards.getArgValue  = function(key)
 			return this.args[i][1];
 		}
 	}
-	
+
 	return undefined;
 }
 
-Dashboards.ev = function(o){return typeof o == 'function'?o():o};
+Dashboards.ev = function(o){
+	return typeof o == 'function'?o():o
+};
 
 
 /**
@@ -1704,8 +1779,8 @@ var DashboardsMap =
 
 			if(content != null){
 				var html = content;/*"<table border='0' height = '175' width='175' cellpadding='0' cellspacing='0'><tr><td colspan='1' align='center' width='55'><b>";
-				html += "<b>" + this.selectedPointDetails[0][1];
-				html += "</b></td></tr><tr><td colspan='1' align='center' width='175'>"+content+"</td></tr></table>";*/
+									html += "<b>" + this.selectedPointDetails[0][1];
+									html += "</b></td></tr><tr><td colspan='1' align='center' width='175'>"+content+"</td></tr></table>";*/
 
 				show_bubble(click_lonlat,html);
 			}
@@ -1719,7 +1794,7 @@ var DashboardsMap =
 				var icon = eval(this.mapExpression);
 				var marker = this.data[idx][4];
 				this.data[idx][5] = icon;
-				this.data[idx][4] = this.showMarker( marker, this.data[idx] ); 
+				this.data[idx][4] = this.showMarker( marker, this.data[idx] );
 			}
 		},
 
@@ -1737,160 +1812,176 @@ var DashboardsMap =
 	};
 
 function getURLParameters(sURL) 
-	{	
-		if (sURL.indexOf("?") > 0){
-		
-			var arrParams = sURL.split("?");
-			var arrURLParams = arrParams[1].split("&");
-			var arrParam = [];
-			
-			for (i=0;i<arrURLParams.length;i++){
-				var sParam =  arrURLParams[i].split("=");
-				
-				if (sParam[0].indexOf("param",0) == 0){
-					var parameter = [sParam[0].substring(5,sParam[0].length),unescape(sParam[1])];
-					arrParam.push(parameter);
-				}
-			}
+{	
+	if (sURL.indexOf("?") > 0){
 
+		var arrParams = sURL.split("?");
+		var arrURLParams = arrParams[1].split("&");
+		var arrParam = [];
+
+		for (i=0;i<arrURLParams.length;i++){
+			var sParam =  arrURLParams[i].split("=");
+
+			if (sParam[0].indexOf("param",0) == 0){
+				var parameter = [sParam[0].substring(5,sParam[0].length),unescape(sParam[1])];
+				arrParam.push(parameter);
+			}
 		}
 
-		return arrParam;
-	};
+	}
+
+	return arrParam;
+};
 
 function toFormatedString(value) {
-		value += '';
-		x = value.split('.');
-		x1 = x[0];
-		x2 = x.length > 1 ? '.' + x[1] : '';
-		var rgx = /(\d+)(\d{3})/;
-		while (rgx.test(x1))
-			x1 = x1.replace(rgx, '$1' + ',' + '$2');
-		return x1 + x2;
-	};
+	value += '';
+	x = value.split('.');
+	x1 = x[0];
+	x2 = x.length > 1 ? '.' + x[1] : '';
+	var rgx = /(\d+)(\d{3})/;
+	while (rgx.test(x1))
+		x1 = x1.replace(rgx, '$1' + ',' + '$2');
+	return x1 + x2;
+};
 
 
 sprintfWrapper = {
 
-    init : function () {
+	init : function () {
 
-        if (typeof arguments == 'undefined') { return null; }
-        if (arguments.length < 1) { return null; }
-        if (typeof arguments[0] != 'string') { return null; }
-        if (typeof RegExp == 'undefined') { return null; }
+		if (typeof arguments == 'undefined') { 
+			return null;
+		}
+		if (arguments.length < 1) { 
+			return null;
+		}
+		if (typeof arguments[0] != 'string') { 
+			return null;
+		}
+		if (typeof RegExp == 'undefined') { 
+			return null;
+		}
 
-        var string = arguments[0];
-        var exp = new RegExp(/(%([%]|(\-)?(\+|\x20)?(0)?(\d+)?(\.(\d)?)?([bcdfosxX])))/g);
-        var matches = new Array();
-        var strings = new Array();
-        var convCount = 0;
-        var stringPosStart = 0;
-        var stringPosEnd = 0;
-        var matchPosEnd = 0;
-        var newString = '';
-        var match = null;
+		var string = arguments[0];
+		var exp = new RegExp(/(%([%]|(\-)?(\+|\x20)?(0)?(\d+)?(\.(\d)?)?([bcdfosxX])))/g);
+		var matches = new Array();
+		var strings = new Array();
+		var convCount = 0;
+		var stringPosStart = 0;
+		var stringPosEnd = 0;
+		var matchPosEnd = 0;
+		var newString = '';
+		var match = null;
 
-        while (match = exp.exec(string)) {
-            if (match[9]) { convCount += 1; }
+		while (match = exp.exec(string)) {
+			if (match[9]) { 
+				convCount += 1;
+			}
 
-            stringPosStart = matchPosEnd;
-            stringPosEnd = exp.lastIndex - match[0].length;
-            strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
+			stringPosStart = matchPosEnd;
+			stringPosEnd = exp.lastIndex - match[0].length;
+			strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
 
-            matchPosEnd = exp.lastIndex;
-            matches[matches.length] = {
-                match: match[0],
-                left: match[3] ? true : false,
-                sign: match[4] || '',
-                pad: match[5] || ' ',
-                min: match[6] || 0,
-                precision: match[8],
-                code: match[9] || '%',
-                negative: parseInt(arguments[convCount]) < 0 ? true : false,
-                argument: String(arguments[convCount])
-            };
-        }
-        strings[strings.length] = string.substring(matchPosEnd);
+			matchPosEnd = exp.lastIndex;
+			matches[matches.length] = {
+				match: match[0],
+				left: match[3] ? true : false,
+				sign: match[4] || '',
+				pad: match[5] || ' ',
+				min: match[6] || 0,
+				precision: match[8],
+				code: match[9] || '%',
+				negative: parseInt(arguments[convCount]) < 0 ? true : false,
+				argument: String(arguments[convCount])
+			};
+		}
+		strings[strings.length] = string.substring(matchPosEnd);
 
-        if (matches.length == 0) { return string; }
-        if ((arguments.length - 1) < convCount) { return null; }
+		if (matches.length == 0) { 
+			return string;
+		}
+		if ((arguments.length - 1) < convCount) { 
+			return null;
+		}
 
-        var code = null;
-        var match = null;
-        var i = null;
+		var code = null;
+		var match = null;
+		var i = null;
 
-        for (i=0; i<matches.length; i++) {
+		for (i=0; i<matches.length; i++) {
 			var m =matches[i];
 
-            if (m.code == '%') { substitution = '%' }
-            else if (m.code == 'b') {
-                m.argument = String(Math.abs(parseInt(m.argument)).toString(2));
-                substitution = sprintfWrapper.convert(m, true);
-            }
-            else if (m.code == 'c') {
-                m.argument = String(String.fromCharCode(parseInt(Math.abs(parseInt(m.argument)))));
-                substitution = sprintfWrapper.convert(m, true);
-            }
-            else if (m.code == 'd') {
+			if (m.code == '%') { 
+				substitution = '%'
+			}
+			else if (m.code == 'b') {
+				m.argument = String(Math.abs(parseInt(m.argument)).toString(2));
+				substitution = sprintfWrapper.convert(m, true);
+			}
+			else if (m.code == 'c') {
+				m.argument = String(String.fromCharCode(parseInt(Math.abs(parseInt(m.argument)))));
+				substitution = sprintfWrapper.convert(m, true);
+			}
+			else if (m.code == 'd') {
 				m.argument = toFormatedString(String(Math.abs(parseInt(m.argument))));
-                substitution = sprintfWrapper.convert(m);
-            }
-            else if (m.code == 'f') {
+				substitution = sprintfWrapper.convert(m);
+			}
+			else if (m.code == 'f') {
 				m.argument = toFormatedString(String(Math.abs(parseFloat(m.argument)).toFixed(m.precision ? m.precision : 6)));
-                substitution = sprintfWrapper.convert(m);
-            }
-            else if (m.code == 'o') {
-                m.argument = String(Math.abs(parseInt(m.argument)).toString(8));
-                substitution = sprintfWrapper.convert(m);
-            }
-            else if (m.code == 's') {
-                m.argument = m.argument.substring(0, m.precision ? m.precision : m.argument.length)
-                substitution = sprintfWrapper.convert(m, true);
-            }
-            else if (m.code == 'x') {
-                m.argument = String(Math.abs(parseInt(m.argument)).toString(16));
-                substitution = sprintfWrapper.convert(m);
-            }
-            else if (m.code == 'X') {
-                m.argument = String(Math.abs(parseInt(m.argument)).toString(16));
-                substitution = sprintfWrapper.convert(m).toUpperCase();
-            }
-            else {
-                substitution = m.match;
-            }
+				substitution = sprintfWrapper.convert(m);
+			}
+			else if (m.code == 'o') {
+				m.argument = String(Math.abs(parseInt(m.argument)).toString(8));
+				substitution = sprintfWrapper.convert(m);
+			}
+			else if (m.code == 's') {
+				m.argument = m.argument.substring(0, m.precision ? m.precision : m.argument.length)
+				substitution = sprintfWrapper.convert(m, true);
+			}
+			else if (m.code == 'x') {
+				m.argument = String(Math.abs(parseInt(m.argument)).toString(16));
+				substitution = sprintfWrapper.convert(m);
+			}
+			else if (m.code == 'X') {
+				m.argument = String(Math.abs(parseInt(m.argument)).toString(16));
+				substitution = sprintfWrapper.convert(m).toUpperCase();
+			}
+			else {
+				substitution = m.match;
+			}
 
-            newString += strings[i];
-            newString += substitution;
+			newString += strings[i];
+			newString += substitution;
 
-        }
-        newString += strings[i];
+		}
+		newString += strings[i];
 
-        return newString;
+		return newString;
 
-    },
+	},
 
-    convert : function(match, nosign){
-        if (nosign) {
-            match.sign = '';
-        } else {
-            match.sign = match.negative ? '-' : match.sign;
-        }
-        var l = match.min - match.argument.length + 1 - match.sign.length;
-        var pad = new Array(l < 0 ? 0 : l).join(match.pad);
-        if (!match.left) {
-            if (match.pad == '0' || nosign) {
-                return match.sign + pad + match.argument;
-            } else {
-                return pad + match.sign + match.argument;
-            }
-        } else {
-            if (match.pad == '0' || nosign) {
-                return match.sign + match.argument + pad.replace(/0/g, ' ');
-            } else {
-                return match.sign + match.argument + pad;
-            }
-        }
-    }
+	convert : function(match, nosign){
+		if (nosign) {
+			match.sign = '';
+		} else {
+			match.sign = match.negative ? '-' : match.sign;
+		}
+		var l = match.min - match.argument.length + 1 - match.sign.length;
+		var pad = new Array(l < 0 ? 0 : l).join(match.pad);
+		if (!match.left) {
+			if (match.pad == '0' || nosign) {
+				return match.sign + pad + match.argument;
+			} else {
+				return pad + match.sign + match.argument;
+			}
+		} else {
+			if (match.pad == '0' || nosign) {
+				return match.sign + match.argument + pad.replace(/0/g, ' ');
+			} else {
+				return match.sign + match.argument + pad;
+			}
+		}
+	}
 }
 
 sprintf = sprintfWrapper.init;
