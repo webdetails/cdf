@@ -629,7 +629,7 @@ Dashboards.findPageTitleObject = function(folders,id){
 		if(file.id == id){
 			return file;
 		}
-		else if (id.indexOf(file.id)>=0){
+		else if ((id + "/").indexOf(file.id)>=0){
 			// we're on the good path
 			return Dashboards.findPageTitleObject(file.folders,id);
 		}
