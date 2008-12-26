@@ -34,26 +34,28 @@ var Dashboards =
 
 
 Dashboards.bindControl = function(object) {
+
 	// see if there is a class defined for this object
 	var objectType = typeof object["type"]=='function'?object.type():object.type;
 	var classNames = [ // try type as class name
-	                  objectType,
-	                  // try Type as class name
-	                  objectType.substring(0,1).toUpperCase() + objectType.substring(1),
-	                  // try TypeComponent as class name
-	                  objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
-	                 ];
+	objectType,
+	// try Type as class name
+	objectType.substring(0,1).toUpperCase() + objectType.substring(1),
+	// try TypeComponent as class name
+	objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
+	];
 	var objectImpl;
 	for (var i = 0; i < classNames.length && objectImpl == null; i++) {
 		try {
 			eval('objectImpl = new ' + classNames[i]);
-			// this will add the methods from the inherited class, 
-			// without blowing away the overridden values.
-			var newObj = {};
-			jQuery.extend(newObj, objectImpl, object);
-			jQuery.extend(object, newObj);
+			// this will add the methods from the inherited class. Overrides not allowed
+			$.extend(object,objectImpl);
+			break;
 		} catch (e) {
 		}
+	}
+	if (typeof objectImpl == 'undefined'){
+		alert ("Object type " + object["type"] + " can't be mapped to a valid class");
 	}
 }
 
@@ -71,104 +73,104 @@ Dashboards.blockUIwithDrag = function() {
 //	Dashboards.runningCalls--;
 //}
 
-	Dashboards.update = function(object) {
-		if(!(typeof(object.preExecution)=='undefined')){
-			object.preExecution();
-		}
-		if (object.tooltip != undefined){
-			object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
-		}
-		// first see if there is an objectImpl
-		if ((object.update != undefined) && 
-			(typeof object['update'] == 'function')) {
-			object.update();
-		} else {
-			// unsupported update call
-		}
-		
-		if(!(typeof(object.postExecution)=='undefined')){
-			object.postExecution();
-		}
-		// if we have a tooltip component, how is the time.
-		if (object._tooltip != undefined){
-			$("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
-					delay:0,
-					track: true,
-					fade: 250
-				});
-		}
-	};
-
-	Dashboards.getComponent = function(name){
-		for (i in this.components){
-			if (this.components[i].name == name)
-				return this.components[i];
-		}
-	};
-	
-	Dashboards.addComponents = function(components) {
-		// attempt to convert over to component implementation
-		for (var i =0; i < components.length; i++) {
-			Dashboards.bindControl(components[i]);
-		}
-		this.components = this.components.concat(components);
-	};
-
-	Dashboards.addArgs = function(url){
-		if(url != undefined)
-			this.args = getURLParameters(url);
+Dashboards.update = function(object) {
+	if(!(typeof(object.preExecution)=='undefined')){
+		object.preExecution();
+	}
+	if (object.tooltip != undefined){
+		object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
+	}
+	// first see if there is an objectImpl
+	if ((object.update != undefined) && 
+		(typeof object['update'] == 'function')) {
+		object.update();
+	} else {
+		// unsupported update call
 	}
 
-	Dashboards.init = function(components){
-		if(Dashboards.isArray(components)){
-			Dashboards.addComponents(components);
-		}
-		$(function(){Dashboards.initEngine()});
-	};
+	if(!(typeof(object.postExecution)=='undefined')){
+		object.postExecution();
+	}
+	// if we have a tooltip component, how is the time.
+	if (object._tooltip != undefined){
+		$("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+				delay:0,
+				track: true,
+				fade: 250
+			});
+	}
+};
 
-	Dashboards.initEngine = function(){
-		components = this.components;
-		var compCount = components.length;
-		Dashboards.blockUIwithDrag();
+Dashboards.getComponent = function(name){
+	for (i in this.components){
+		if (this.components[i].name == name)
+			return this.components[i];
+	}
+};
 
-		for(var i= 0, len = components.length; i < len; i++){
-			if(components[i].executeAtStart){
-				this.update(components[i]);
-			}
-		}
-		$.unblockUI();
-	};
+Dashboards.addComponents = function(components) {
+	// attempt to convert over to component implementation
+	for (var i =0; i < components.length; i++) {
+		Dashboards.bindControl(components[i]);
+	}
+	this.components = this.components.concat(components);
+};
 
-	Dashboards.resetAll = function(){
-		var compCount = components.length;
-		for(var i= 0, len = components.length; i < len; i++){
-			components[i].clear();
-		}
-		var compCount = components.length;
-		for(var i= 0, len = components.length; i < len; i++){
-			if(components[i].executeAtStart){
-				this.update(components[i]);
-			}
-		}
-	};
+Dashboards.addArgs = function(url){
+	if(url != undefined)
+		this.args = getURLParameters(url);
+}
 
-	Dashboards.processChange = function(object_name){
-		var object = eval(object_name);
-		var parameter = object.parameter;
-		var value;
-		if (typeof object['getValue'] == 'function') {
-			value = object.getValue();
-		}
-		if(!(typeof(object.preChange)=='undefined')){
-			object.preChange(value);
-		}
-		this.fireChange(parameter,value);
-		if(!(typeof(object.postChange)=='undefined')){
-			object.postChange(value);
-		}
-	};
+Dashboards.init = function(components){
+	if(Dashboards.isArray(components)){
+		Dashboards.addComponents(components);
+	}
+	$(function(){Dashboards.initEngine()});
+};
 
-	/*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
+Dashboards.initEngine = function(){
+	components = this.components;
+	var compCount = components.length;
+	Dashboards.blockUIwithDrag();
+
+	for(var i= 0, len = components.length; i < len; i++){
+		if(components[i].executeAtStart){
+			this.update(components[i]);
+		}
+	}
+	$.unblockUI();
+};
+
+Dashboards.resetAll = function(){
+	var compCount = components.length;
+	for(var i= 0, len = components.length; i < len; i++){
+		components[i].clear();
+	}
+	var compCount = components.length;
+	for(var i= 0, len = components.length; i < len; i++){
+		if(components[i].executeAtStart){
+			this.update(components[i]);
+		}
+	}
+};
+
+Dashboards.processChange = function(object_name){
+	var object = eval(object_name);
+	var parameter = object.parameter;
+	var value;
+	if (typeof object['getValue'] == 'function') {
+		value = object.getValue();
+	}
+	if(!(typeof(object.preChange)=='undefined')){
+		object.preChange(value);
+	}
+	this.fireChange(parameter,value);
+	if(!(typeof(object.postChange)=='undefined')){
+		object.postChange(value);
+	}
+};
+
+/*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
 Dashboards.fireChange = function(parameter,value){
 	//alert("begin block");
 	Dashboards.blockUIwithDrag();
@@ -257,7 +259,7 @@ Dashboards.getArgValue  = function(key)
 			return this.args[i][1];
 		}
 	}
-	
+
 	return undefined;
 }
 
@@ -349,26 +351,26 @@ var Utf8 = {
 }
 
 function getURLParameters(sURL) 
-	{	
-		if (sURL.indexOf("?") > 0){
-		
-			var arrParams = sURL.split("?");
-			var arrURLParams = arrParams[1].split("&");
-			var arrParam = [];
-			
-			for (i=0;i<arrURLParams.length;i++){
-				var sParam =  arrURLParams[i].split("=");
-				
-				if (sParam[0].indexOf("param",0) == 0){
-					var parameter = [sParam[0].substring(5,sParam[0].length),unescape(sParam[1])];
-					arrParam.push(parameter);
-				}
-			}
+{	
+	if (sURL.indexOf("?") > 0){
 
+		var arrParams = sURL.split("?");
+		var arrURLParams = arrParams[1].split("&");
+		var arrParam = [];
+
+		for (i=0;i<arrURLParams.length;i++){
+			var sParam =  arrURLParams[i].split("=");
+
+			if (sParam[0].indexOf("param",0) == 0){
+				var parameter = [sParam[0].substring(5,sParam[0].length),unescape(sParam[1])];
+				arrParam.push(parameter);
+			}
 		}
 
-		return arrParam;
-	};
+	}
+
+	return arrParam;
+};
 
 function toFormatedString(value) {
 	value += '';

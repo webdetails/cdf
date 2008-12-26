@@ -216,6 +216,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 
 var ContentListComponent = NavigatorBaseComponent.extend({
 	update : function() {
+		var myself = this;
 		$.getJSON("JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
 				myself.processContentListResponse(json);
 			});
@@ -334,7 +335,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
 			if(file.id == id){
 				return file;
 			}
-			else if ((id + "/").indexOf(file.id)>=0){
+			else if ((id + "/").indexOf(file.id + "/")>=0){
 				// we're on the good path
 				return this.findPageTitleObject(file.folders,id);
 			}
