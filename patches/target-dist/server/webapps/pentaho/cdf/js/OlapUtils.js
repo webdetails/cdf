@@ -500,7 +500,7 @@ OlapUtils.GenericMdxQuery = Base.extend({
 
 		getDataTableOptions: function(options){
 			$.extend(this.tableDefaults,options);
-			return Dashboards.getDataTableOptions(this.tableDefaults);
+			return TableComponent.getDataTableOptions(this.tableDefaults);
 		},
 
 		getChartOptions: function(options){

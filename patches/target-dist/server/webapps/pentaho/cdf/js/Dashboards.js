@@ -3,7 +3,6 @@ $.ajaxSetup({
 		async: false
 	});
 
-
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
@@ -26,17 +25,39 @@ if (typeof $.SetImpromptuDefaults == 'function')
 			show: 'slideDown'
 		});
 
-
-
 var Dashboards = 
 	{
 		components: [],
 		args: [],
-		initMap: true,
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 	}
 
 
+Dashboards.bindControl = function(object) {
+
+	// see if there is a class defined for this object
+	var objectType = typeof object["type"]=='function'?object.type():object.type;
+	var classNames = [ // try type as class name
+	objectType,
+	// try Type as class name
+	objectType.substring(0,1).toUpperCase() + objectType.substring(1),
+	// try TypeComponent as class name
+	objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
+	];
+	var objectImpl;
+	for (var i = 0; i < classNames.length && objectImpl == null; i++) {
+		try {
+			eval('objectImpl = new ' + classNames[i]);
+			// this will add the methods from the inherited class. Overrides not allowed
+			$.extend(object,objectImpl);
+			break;
+		} catch (e) {
+		}
+	}
+	if (typeof objectImpl == 'undefined'){
+		alert ("Object type " + object["type"] + " can't be mapped to a valid class");
+	}
+}
 
 Dashboards.blockUIwithDrag = function() {
 	$.blockUI();
@@ -47,497 +68,109 @@ Dashboards.blockUIwithDrag = function() {
 		});
 }
 
-Dashboards.xactionCallback = function(object,str){
-	$('#'+object.htmlObject).html(str);
-	Dashboards.runningCalls--;
-}
+//Dashboards.xactionCallback = function(object,str){
+//	$('#'+object.htmlObject).html(str);
+//	Dashboards.runningCalls--;
+//}
 
-Dashboards.update = function(object)	{
+Dashboards.update = function(object) {
 	if(!(typeof(object.preExecution)=='undefined')){
 		object.preExecution();
 	}
 	if (object.tooltip != undefined){
 		object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
 	}
-	var objectType = typeof object["type"]=='function'?object.type():object.type;
-	switch(objectType)
-	{
-		// test if object is an xaction
-	case "xaction":
-		//go through parametere array and update values
-		var p = new Array(object.parameters.length);
-		for(var i= 0, len = p.length; i < len; i++){
-			var key = object.parameters[i][0];
-			var value = eval(object.parameters[i][1]);
-			p[i] = [key,value];
-		}
-		// increment runningCalls
-		Dashboards.runningCalls++;
-
-		//callback async mode
-		//pentahoAction(object.solution, object.path, object.action, p,function(json){ Dashboards.xactionCallback(object,json); });
-		// or sync mode
-		$('#'+object.htmlObject).html(pentahoAction(object.solution, object.path, object.action, p,null));
-		break;
-
-	case "jFreeChartComponent":
-		this.updateJFreeChartComponent(object);
-		break;
-	case "dialComponent":
-		this.updateDialComponent(object);
-		break;
-	case "trafficComponent":
-		this.updateTrafficComponent(object);
-		break;
-	case "timePlotComponent":
-		this.updateTimePlotComponent(object);
-		break;
-	case "text":
-		$("#"+object.htmlObject).html(object.expression());
-		break;
-	case "select":
-	case "selectMulti":
-
-		var myArray = Dashboards.getValuesArray(object);
-
-		selectHTML = "<select";
-		selectHTML += " id='" + object.name + "'";
-
-		//set size
-		if (object.size != undefined){
-			selectHTML += " size='" + object.size + "'";
-		}
-		if (object.type == "selectMulti"){
-			selectHTML += " multiple";
-		}
-		selectHTML += ">";
-
-		var vid = object.valueAsId==false?false:true;
-		for(var i= 0, len  = myArray.length; i < len; i++){
-			if(myArray[i]!= null && myArray[i].length>0)
-				selectHTML += "<option value = '" + myArray[i][vid?1:0] + "' >" + myArray[i][1] + "</option>";
-		}
-
-		selectHTML += "</select>";
-
-		//update the placeholder
-		$("#"+object.htmlObject).html(selectHTML)
-		$("#"+object.name).val(eval(object.parameter));
-		$("#"+object.name).change(function() {
-				Dashboards.processChange(object.name);
-			});
-
-		break;
-	case "textInput":
-		//selectHTML = "<input onChange='Dashboards.processChange(\"" + object.name + "\")' onKeyUp='if (event.keyCode==13){Dashboards.processChange(\"" + object.name + "\")}'";
-		selectHTML = "<input";
-		selectHTML += " type=test id='" + object.name +"' name='" + object.name +"' + value='"+ eval(object.parameter) + "'>";
-		document.getElementById(object.htmlObject).innerHTML = selectHTML;
-		$("#"+object.name).change(function() {
-				Dashboards.processChange(object.name);
-			}).keyup(function(event) {
-					if (event.keyCode==13){
-						Dashboards.processChange(object.name)
-					}
-				});
-
-			break;
-		case "dateInput":
-			$("#"+object.htmlObject).html($("<input/>").attr("id",object.name).attr("value",eval(object.parameter)).css("width","80px"));
-			Calendar.setup({
-					inputField: object.name,
-					ifFormat : "%Y-%m-%d",
-					onUpdate: function(){
-						Dashboards.processChange(object.name)
-					}
-				});
-			break;
-		case "dateRangeInput":
-			var dr;
-			if (object.singleInput == undefined || object.singleInput == true){
-				dr = $("<input/>").attr("id",object.name).attr("value",eval(object.parameter[0]) + " > " + eval(object.parameter[1]) ).css("width","170px");
-				$("#"+object.htmlObject).html(dr);
-
-			}
-			else{
-				dr = $("<input/>").attr("id",object.name).attr("value",eval(object.parameter[0])).css("width","80px");
-				$("#"+object.htmlObject).html(dr);
-				dr.after($("<input/>").attr("id",object.name + "2").attr("value",eval(object.parameter[1])).css("width","80px"));
-				if(object.inputSeparator != undefined){
-					dr.after(object.inputSeparator);
-				}
-
-			}
-			var offset = dr.offset();
-			$(function(){
-					$("#" + object.htmlObject + " input").daterangepicker({
-							posX: offset.left ,
-							posY: offset.top + 15,
-							onDateSelect: function(rangeA, rangeB){
-								Dashboards.fireDateRangeInputChange( object.name ,rangeA,rangeB);
-							}
-						});
-				});
-			//$(function(){ dr.daterangepicker({posX: offset.left , posY: offset.top + 15}); });
-			break;
-		case "monthPicker":
-
-
-			var selectHTML = Dashboards.getMonthPicker(object.name, object.size, object.initialDate, object.minDate, object.maxDate, object.months);
-
-			document.getElementById(object.htmlObject).innerHTML = selectHTML;
-
-			$("#"+object.name).change(function() {
-					Dashboards.processChange(object.name);
-				});
-
-			break;
-		case "radio":
-		case "check":
-			var myArray = Dashboards.getValuesArray(object);
-
-			selectHTML = "";
-			for(var i= 0, len  = myArray.length; i < len; i++){
-				selectHTML += "<input onclick='Dashboards.processChange(\"" + object.name + "\")'";
-				if(i==0){
-					selectHTML += " CHECKED";
-				}
-				if (object.type == 'radio'){
-					selectHTML += " type='radio'";
-				}else{
-					selectHTML += " type='checkbox'";
-				}
-				selectHTML += " id='" + object.name +"' name='" + object.name +"' value='" + myArray[i][1] + "' /> " + myArray[i][1] + (object.separator == undefined?"":object.separator);
-			}
-			//update the placeholder
-			document.getElementById(object.htmlObject).innerHTML = selectHTML;
-
-			break;
-		case "map":
-
-			if(this.initMap){
-				init_map(object.initPosLon,object.initPosLat,object.initZoom, 'true');
-				DashboardsMap.messageElementId = object.messageElementId;
-				this.initMap = false;
-			}
-
-			DashboardsMap.resetSearch();
-
-			var p = new Array(object.parameters.length);
-			for(var i= 0, len = p.length; i < len; i++){
-				var key = object.parameters[i][0];
-				var value = eval(object.parameters[i][1]);
-				p[i] = [key,value];
-			}
-
-			html = pentahoAction(object.solution, object.path, object.action, p,null);
-
-			var myArray = this.parseArray(html,true);
-			var len = myArray.length;
-			if( len > 1){
-				var cols = myArray[0];
-				var colslength = cols.length;
-
-				for(var i= 1; i < len; i++){
-					//Get point details
-					var details;
-					if(colslength > 4){
-						details = new Array(colslength-4);
-						for(var j= 4; j < colslength; j++){
-							details[j-4] = [cols[j],myArray[i][j]];
-						} 
-					}
-
-					var value = myArray[i][4];
-					var markers = object.markers;
-					//Store expression and markers for update funtion
-					DashboardsMap.mapExpression = object.expression();
-					DashboardsMap.mapMarkers = markers;
-
-					var icon = eval(object.expression());
-					DashboardsMap.data.push(new Array(myArray[i][0],new Array(myArray[i][1],myArray[i][2],myArray[i][3]),value,details,null,icon,null,null));
-					DashboardsMap.search(object,DashboardsMap.data.length - 1);
-				}								
-			}
-
-			break;
-
-		case "mapBubble":
-
-			DashboardsMap.selectedPointDetails = null;
-
-			for(var i = 0; i < DashboardsMap.data.length; i++)
-			{
-				if(selectedPoint == DashboardsMap.data[i][0])
-				{
-					DashboardsMap.selectedPointDetails = DashboardsMap.data[i][3];
-					break;
-				}
-
-			}
-
-			var parameters = Dashboards.clone(DashboardsMap.selectedPointDetails);
-
-			if(object.parameters != undefined)
-				var p = new Array(object.parameters.length);
-			for(var i= 0, len = p.length; i < len; i++){
-				var key = object.parameters[i][0];
-				var value = eval(object.parameters[i][1]);
-				parameters.push([key,value]);
-			}
-
-			DashboardsMap.updateInfoWindow(pentahoAction(object.solution, object.path, object.action, parameters ,null));
-
-			break;
-
-		case "jpivot":
-
-			//Build IFrame and set url
-			var jpivotHTML = "<iframe id=\"jpivot_"+ object.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+object.iframeHeight+"\" width=\""+object.iframeWidth+"\" src=\"";
-			jpivotHTML += "ViewAction?solution="	+ object.solution + "&path=" + 	object.path + "&action="+ object.action;
-
-			//Add args
-			var p = new Array(object.parameters.length);
-			for(var i= 0, len = p.length; i < len; i++){
-				var arg = "&" + object.parameters[i][0] + "=";
-				jpivotHTML += arg +  eval(object.parameters[i][1]);
-			}
-
-			//Close IFrame
-			jpivotHTML += "\"></iframe>";
-
-			document.getElementById(object.htmlObject).innerHTML = jpivotHTML;
-
-			break;
-		case "navigator":
-
-			this.getNavigatorComponent(object);
-			break;
-
-		case "contentList":
-			this.getContentList(object);
-			break;
-
-		case "pageTitle":
-			this.getPageTitle(object);
-			break;
-
-		case "pivotLink":
-			this.generatePivotLink(object);
-			break;
-		case "tableComponent":
-			this.generateTableComponent(object);
-			break;
-		case "queryComponent":
-			this.makeQuery(object);
-			break;
-		case "mdxQueryGroup":
-			OlapUtils.updateMdxQueryGroup(object);
-			break;
-		case "executeXaction":
-			this.generateXActionComponent (object);
-			break;
-		case "autocompleteBox":
-			this.generateAutocompleteBoxComponent (object);
-			break;
-		}
-		if(!(typeof(object.postExecution)=='undefined')){
-			object.postExecution();
-		}
-		// if we have a tooltip component, how is the time.
-		if (object._tooltip != undefined){
-			$("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
-					delay:0,
-					track: true,
-					fade: 250
-				});
-		}
-	};
-
-	Dashboards.getComponent = function(name){
-		for (i in this.components){
-			if (this.components[i].name == name)
-				return this.components[i];
-		}
-	};
-
-	Dashboards.addComponents = function(components){
-		this.components = this.components.concat(components);
-	};
-
-	Dashboards.addArgs = function(url){
-		if(url != undefined)
-			this.args = getURLParameters(url);
+	// first see if there is an objectImpl
+	if ((object.update != undefined) && 
+		(typeof object['update'] == 'function')) {
+		object.update();
+	} else {
+		// unsupported update call
 	}
 
-	Dashboards.init = function(components){
-		if(Dashboards.isArray(components)){
-			Dashboards.addComponents(components);
-		}
-		$(function(){
-				Dashboards.initEngine()
+	if(!(typeof(object.postExecution)=='undefined')){
+		object.postExecution();
+	}
+	// if we have a tooltip component, how is the time.
+	if (object._tooltip != undefined){
+		$("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+				delay:0,
+				track: true,
+				fade: 250
 			});
-	};
+	}
+};
 
-	Dashboards.initEngine = function(){
-		components = this.components;
-		var compCount = components.length;
-		Dashboards.blockUIwithDrag();
+Dashboards.getComponent = function(name){
+	for (i in this.components){
+		if (this.components[i].name == name)
+			return this.components[i];
+	}
+};
 
-		for(var i= 0, len = components.length; i < len; i++){
-			if(components[i].executeAtStart){
-				this.update(components[i]);
-			}
+Dashboards.addComponents = function(components) {
+	// attempt to convert over to component implementation
+	for (var i =0; i < components.length; i++) {
+		Dashboards.bindControl(components[i]);
+	}
+	this.components = this.components.concat(components);
+};
+
+Dashboards.addArgs = function(url){
+	if(url != undefined)
+		this.args = getURLParameters(url);
+}
+
+Dashboards.init = function(components){
+	if(Dashboards.isArray(components)){
+		Dashboards.addComponents(components);
+	}
+	$(function(){Dashboards.initEngine()});
+};
+
+Dashboards.initEngine = function(){
+	components = this.components;
+	var compCount = components.length;
+	Dashboards.blockUIwithDrag();
+
+	for(var i= 0, len = components.length; i < len; i++){
+		if(components[i].executeAtStart){
+			this.update(components[i]);
 		}
-		$.unblockUI();
-	};
+	}
+	$.unblockUI();
+};
 
-	Dashboards.clear = function(obj){
-		document.getElementById(obj.htmlObject).innerHTML = "";
-	};
-
-	Dashboards.resetAll = function(){
-		var compCount = components.length;
-		for(var i= 0, len = components.length; i < len; i++){
-			this.clear(components[i]);
+Dashboards.resetAll = function(){
+	var compCount = components.length;
+	for(var i= 0, len = components.length; i < len; i++){
+		components[i].clear();
+	}
+	var compCount = components.length;
+	for(var i= 0, len = components.length; i < len; i++){
+		if(components[i].executeAtStart){
+			this.update(components[i]);
 		}
-		var compCount = components.length;
-		for(var i= 0, len = components.length; i < len; i++){
-			if(components[i].executeAtStart){
-				this.update(components[i]);
-			}
-		}
-	};
+	}
+};
 
-	Dashboards.parseArray = function(html,includeHeader){
-		var myArray;
-		html=html.replace(/<tr>/g,"[");
-		html=html.replace(/<\/tr>/g,"],");
-		html=html.replace(/<t[hd][^\>]*>/g,"");
-		html=html.replace(/<\/t[hd]>/g,",");
-		html=html.replace(/(\[|,(?![\[\]]|$))/g,"$1\"");
-		html=html.replace(/([^\]]),/g,"$1\",");
-		html=html.replace(/,\]/g,"]");
-		var a = "var myArray = [" + html.substring(0,html.length-1) + "];"
-		try{
-			eval(a);
-		}
-		catch(err){
-			return [];
-		}
-		if (!includeHeader){
-			myArray.splice(0,1);
-		}
+Dashboards.processChange = function(object_name){
+	var object = eval(object_name);
+	var parameter = object.parameter;
+	var value;
+	if (typeof object['getValue'] == 'function') {
+		value = object.getValue();
+	}
+	if(!(typeof(object.preChange)=='undefined')){
+		object.preChange(value);
+	}
+	this.fireChange(parameter,value);
+	if(!(typeof(object.postChange)=='undefined')){
+		object.postChange(value);
+	}
+};
 
-		return myArray;
-
-	};
-
-	Dashboards.getValuesArray = function(object){
-
-		if (typeof(object.valuesArray) == 'undefined'){
-			//go through parameter array and update values
-			var p = new Array(object.parameters.length);
-			for(var i= 0, len = p.length; i < len; i++){
-				var key = object.parameters[i][0];
-				var value = eval(object.parameters[i][1]);
-				p[i] = [key,value];
-			}
-
-			//execute the xaction tp populate the selector
-			html = pentahoAction(object.solution, object.path, object.action, p,null);
-
-			//transform the result int a javascript array
-			var myArray = this.parseArray(html,false);
-			return myArray;
-
-		}
-		else{
-			return object.valuesArray
-		}
-	};
-
-	Dashboards.processChange = function(object_name){
-		var object = eval(object_name);
-		var parameter = object.parameter;
-		var value;
-
-		//alert(document.getElementById(object.name));
-
-		switch (object.type)
-		{
-		case "select":
-			var selector = document.getElementById(object.name);
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].selected){
-					value = selector[i].value;
-				};
-			}
-			break;
-		case "radio":
-			var selector = document.getElementsByName(object.name);
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].checked){
-					value = selector[i].value;
-					continue;
-				};
-			}
-			break;
-		case "check":
-		case "selectMulti":
-			if(object.type == "check"){
-				var selector = document.getElementsByName(object.name);
-			}else{
-				var selector = document.getElementById(object.name);
-			}
-			var selection = new Array();
-			var selection_index = 0;
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].checked || selector[i].selected){
-					selection[selection_index] = selector[i].value;
-					selection_index ++;
-				};
-			}
-			value=selection.join("','");
-			break;
-		case "textInput":
-		case "dateInput":
-			var selector = document.getElementById(object.name);
-			value = selector.value;
-
-			break;
-		case "monthPicker":
-
-			value = $("#" + object.name).val()
-
-			var year = value.substring(0,4);
-			var month = parseInt(value.substring(5,7) - 1);
-			var d = new Date();
-			d.setMonth(month);
-			d.setYear(year);
-
-			//rebuild picker
-			var selectHTML = Dashboards.getMonthPicker(object.name, object.size, d, object.minDate, object.maxDate, object.months);
-			$("#" + object.htmlObject).html(selectHTML);
-			$("#"+object.name).change(function() {
-					Dashboards.processChange(object.name);
-				});
-			break;
-		case "autocompleteBox":
-			value = object.value;
-			break;
-		}
-
-		if(!(typeof(object.preChange)=='undefined')){
-			object.preChange(value);
-		}
-		this.fireChange(parameter,value);
-		if(!(typeof(object.postChange)=='undefined')){
-			object.postChange(value);
-		}
-	};
-
-	/*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
+/*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
 Dashboards.fireChange = function(parameter,value){
 	//alert("begin block");
 	Dashboards.blockUIwithDrag();
@@ -566,368 +199,6 @@ Dashboards.isArray = function(testObject) {
 	return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
 }
 
-Dashboards.fireDateRangeInputChange = function(comp, rangeA, rangeB){
-	var parameters = eval(comp + ".parameter");
-	/*console.log("Date Select: " + comp +"; Range: " +  rangeA + " > " + rangeB);*/
-// set the second date and fireChange the first
-eval( parameters[1] + "= encode_prepare(\"" + rangeB + "\")");
-Dashboards.fireChange(parameters[0],rangeA);
-
-}
-
-Dashboards.navigatorResponse = -1;
-
-Dashboards.getNavigatorComponent = function(object){
-
-	if( Dashboards.navigatorResponse == -1 ){
-		$.getJSON("JSONSolution?mode=navigator&solution=" + Dashboards.solution +"&path=" + Dashboards.path , function(json){
-				Dashboards.processNavigatorResponse(object,json);
-			});
-	}
-	else{
-		Dashboards.processNavigatorResponse(object,Dashboards.navigatorResponse);
-	}
-};
-
-Dashboards.getContentList = function(object){
-
-	$.getJSON("JSONSolution?mode=contentList&solution=" + Dashboards.solution +"&path=" + Dashboards.path, function(json){
-			Dashboards.processContentListResponse(object,json);
-		});
-};
-
-Dashboards.getPageTitle = function(object){
-
-	if( Dashboards.navigatorResponse == -1 ){
-		$.getJSON("JSONSolution?mode=navigator&solution=" + Dashboards.solution +"&path=" + Dashboards.path, function(json){
-				Dashboards.processPageTitleResponse(object,json);
-			});
-	}
-	else{
-		Dashboards.processPageTitleResponse(object,Dashboards.navigatorResponse);
-	}
-};
-
-Dashboards.processPageTitleResponse = function(object,json){
-
-	// Store the value
-	Dashboards.navigatorResponse = json;
-
-	var _id = "/solution/" + Dashboards.solution + (Dashboards.path.length > 0?"/"+Dashboards.path:"");
-	var file = Dashboards.findPageTitleObject(json.solution.folders,_id);
-
-	if (file.title != undefined && file.description != undefined){
-		$("#"+object.htmlObject).text(file.title + " - " + file.description);
-	}
-};
-
-Dashboards.findPageTitleObject = function(folders,id){
-
-	for(var i = 0; i<folders.length; i++){
-		
-		var file = folders[i];
-		if(file.id == id){
-			return file;
-		}
-		else if ((id + "/").indexOf(file.id)>=0){
-			// we're on the good path
-			return Dashboards.findPageTitleObject(file.folders,id);
-		}
-		else{
-			continue;
-		}
-		
-	}
-
-};
-
-Dashboards.processNavigatorResponse = function(object,json){
-
-	// Store the value
-	Dashboards.navigatorResponse = json;
-
-	var files = object.includeSolutions?json.solution.folders:Dashboards.getSolutionJSON(Dashboards.solution);
-	var ret = Dashboards.generateMenuFromArray(object,files, 0);
-	$("#"+object.htmlObject).html(ret);
-
-	$(function(){
-			$('ul.jd_menu').jdMenu({
-					activateDelay: 50,
-					showDelay: 50,
-					disableLinks: false
-				})
-		});
-	$('ul.jd_menu a').tooltip({
-			showURL: false,
-			track:true,
-			delay: 1000,
-			opacity: 0.5
-		});
-
-};
-
-
-Dashboards.getSolutionJSON = function(solution){
-
-	var json = Dashboards.navigatorResponse;
-	var files = json.solution.folders;
-	var locationArray;
-
-	var found = 0;
-	for(i = 0; i<files.length; i++){
-		var file = files[i];
-		if(Dashboards.solution == "" || file.solution == Dashboards.solution){
-			files = file.folders;
-			if(files.length == undefined){
-				files = [ files ];
-			}
-			return files;
-		}
-
-	}
-	if (found == 0){
-		alert("Fatal: Solution " + solution +" not found in navigation object");
-		return;
-	}
-
-}
-
-Dashboards.processContentListResponse = function(object,json){
-
-	// 1 - Get my solution and path from the object;
-	// 2 - get the content
-
-	$("#"+object.htmlObject).empty();
-	var files = json.content || [];
-	files.sort(function(a,b){
-			var _a = (a.type=="FOLDER"?"000":"")+a.title;
-			var _b = (b.type=="FOLDER"?"000":"")+b.title;
-			return a.title > b.title
-		});
-
-	// Create the outmost ul
-	var container = $("<ul></ul>").attr("id","contentList-"+object.name).appendTo("#"+object.htmlObject);
-
-	// We need to append the parent dir
-	if( object.mode != 1 && Dashboards.path != ""){
-		var parentDir =  {
-			name: "Up",
-			title:"Up",
-			type: "FOLDER",
-			description: "Go to parent directory",
-			visible: true,
-			solution: Dashboards.getParentSolution(),
-			path: Dashboards.getParentPath()
-		};
-		files.reverse().push(parentDir);
-		files.reverse();
-	}
-
-
-	$.each(files,function(i,val){
-			// We want to iterate only depending on the options:
-			// 1 - Files only
-			// 2 - Folders only
-			// 3 - Files and folders
-
-			if (object.mode==1 && this.type == "FOLDER"){
-				return true; // skip
-			}
-			if (object.mode==2 && this.type != "FOLDER"){
-				return true; // skip
-			}
-
-			if(this.visible == true){
-				var cls = "";
-				var target = "";
-				var href = "";
-				if (this.type=="FOLDER"){
-					cls = "folder";
-					href = "Dashboards?solution=" + this.solution + "&path=" + this.path;
-				}
-				else{
-					cls = "action greybox";
-					if (this.url != undefined){
-						href=this.url;
-					}
-					else{
-						href = "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
-					}
-
-				}
-
-
-				var anchor = $("<a></a>").attr("href",href).attr("target",target).attr("title",this.description).text(this.title)
-				$("<li></li>").attr("class",cls).appendTo(container).append(anchor);
-			}
-
-		});
-
-	$('#contentList-'+object.name + ' a').tooltip({
-			showURL: false
-		});
-	$("li.greybox a").click(function(){
-			var t = this.title || this.innerHTML || this.href;
-			//$(window).scrollTop(0);
-			var _href = this.href.replace(/'/g,"&#39;");
-			GB_show(t,_href,$(window).height()-50,$(window).width() - 100 );
-			return false;
-		});
-
-};
-
-
-Dashboards.browseContent = function(files,currentPath){
-
-	for(var i = 0; i<files.length; i++){
-		var file = files[i];
-		//console.log("Searching for " + currentPath + ", found " + file.path);
-		if(file.type == "FILE.FOLDER" && file.path == currentPath){
-			files = file.folders;
-			/*
-			 console.log("Files found for this path:");
-			 for (var j = 0; j < files.length; j++) {
-			 if (files[j].path != undefined) {
-			 console.log(files[j].path);
-		 }
-	 }
-	 */
-			if (files == undefined){
-				return [];
-			}
-			if(files.length == undefined){
-				files = [ files ];
-			}
-			return files;
-		}
-
-	}
-	alert("Fatal: path " + Dashboards.path +" not found in navigation object");
-	return;
-
-};
-
-
-Dashboards.generateMenuFromArray = function(object,files, depth){
-	var s = "";
-
-	if (files == undefined){
-		return s;
-	}
-
-	for(var i = 0; i< files.length; i++){
-
-		var file = files[i];
-
-		s += this.generateMenuFromFile(object,file, depth + 1);
-	}
-	if (s.length > 0){
-
-		var className;
-		// class is only passed first time
-		if (depth == 0){
-			var cls=(object.mode == 'vertical')?"jd_menu jd_menu_slate jd_menu_vertical":"jd_menu jd_menu_slate";
-			className = "class=\""+cls+"\"";
-		}
-
-		s = "<ul " + className + ">"+ s + "</ul>";
-	}
-
-	return s;
-};
-
-Dashboards.generateMenuFromFile = function(object,file, depth){
-
-	var s = "";
-	if(file.visible == true ){
-
-		var classString = Dashboards.isAncestor(file.solution, file.path)?"class=\"ancestor\"":"";
-
-		var _path = "";
-		if(file.path.length>0){
-			_path="path="+file.path;
-		}
-
-		s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"Dashboards?solution=" + file.solution + "&amp;" +_path + "\">" + file.title + "</a>";
-
-		var files = file.folders || [];
-		files.sort(function(a,b){return a.title>b.title});
-		var inner = Dashboards.generateMenuFromArray(object,files);
-
-		if (inner.length > 0 ){
-			inner = " &raquo;" + inner;
-		}
-
-		s += inner+"</li>";
-	}
-	return s;
-};
-
-Dashboards.getParentSolution = function(){
-	if (Dashboards.path.length>0){
-		return Dashboards.solution;
-	}
-	else{
-		return "";
-	}
-};
-
-Dashboards.getParentPath = function(){
-	var index = Dashboards.path.lastIndexOf("/");
-	if (index==-1){
-		return "";
-	}
-	var parentPath = Dashboards.path.substring(0,Dashboards.path.lastIndexOf("/"));
-	return parentPath;
-};
-
-Dashboards.isAncestor = function(solution,path){
-	if (solution != Dashboards.solution){
-		return false;
-	}
-	else{
-		return true;
-	}
-};
-
-Dashboards.generatePivotLink = function(object){
-
-	var title = object.tooltip==undefined?"View details in a Pivot table":object.tooltip;
-	var link = $('<a class="pivotLink"> </a>').html(object.content).attr("href","javascript:Dashboards.openPivotLink("+ object.name +")").attr("title",title);
-
-	$("#"+object.htmlObject).empty();
-	$("#"+object.htmlObject).html(link);
-
-	$('a.pivotLink').tooltip({
-			showURL: false,
-			track:true,
-			delay: 1000,
-			opacity: 0.5
-		});
-};
-
-
-Dashboards.openPivotLink = function(object){
-
-
-
-	var url = "/pentaho/Pivot?solution=cdf&path=components&action=jpivot.xaction&";
-
-	var qd = object.pivotDefinition;
-	var parameters = [];
-	for(p in qd){
-		var key = p;
-		var value = typeof qd[p]=='function'?qd[p]():qd[p];
-		//alert("key: " + key + "; Value: " + value);
-		parameters.push(key + "=" + encodeURIComponent(value));
-	}
-	url += parameters.join("&");
-
-	var _href = url.replace(/'/g,"&#39;");
-	GB_show("Pivot Details",_href, $(window).height() - 50 , $(window).width() - 100);
-};
-
-
 Dashboards.getParameter = function ( parameterName ) {
 	// Add "=" to the parameter name (i.e. parameterName=value)
 	var queryString = window.top.location.search.substring(1);
@@ -950,481 +221,6 @@ Dashboards.getParameter = function ( parameterName ) {
 		// Return "" if no parameter has been found
 		return "";
 	}
-};
-
-Dashboards.updateJFreeChartComponent = function( object ){
-
-	var cd = object.chartDefinition;
-	// Merge the stuff with a chartOptions element
-	if (cd == undefined){
-		alert("Fatal - No chartDefinition passed");
-		return;
-	}
-	var cd0 = $.extend({},Dashboards.ev(cd.chartOptions), cd);
-
-	//go through parametere array and update values
-	var parameters = [];
-	for(p in cd0){
-		var key = p;
-		var value = typeof cd0[p]=='function'?cd0[p]():cd0[p];
-		//alert("key: " + key + "; Value: " + value);
-		parameters.push([key,value]);
-	}
-	// increment runningCalls
-	Dashboards.runningCalls++;
-
-	//callback async mode
-	pentahoAction("cdf", "components", "jfreechart.xaction", parameters,function(json){
-			Dashboards.updateJFreeChartComponentCallback(object,json);
-		});
-	// or sync mode
-	//$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechart.xaction", parameters,null));
-
-};
-
-Dashboards.updateJFreeChartComponentCallback = function( object , json){
-
-	$('#'+object.htmlObject).html(json);
-}
-
-Dashboards.updateDialComponent = function( object ){
-
-	var cd = object.chartDefinition;
-	if (cd == undefined){
-		alert("Fatal - No chartDefinition passed");
-		return;
-	}
-
-	var intervals = cd.intervals;
-	if (intervals == undefined){
-		alert("Fatal - No intervals passed");
-		return;
-	}
-
-	var colors = cd.colors;
-	if(colors != undefined && intervals.length != colors.length){
-		alert("Fatal - Number of intervals differs from number of colors");
-		return;
-	}
-
-	//go through parametere array and update values
-	var parameters = [];
-	for(p in cd){
-		var key = p;
-		var value = typeof cd[p]=='function'?cd[p]():cd[p];
-		//alert("key: " + key + "; Value: " + value);
-		parameters.push([key,value]);
-	}
-	// increment runningCalls
-	Dashboards.runningCalls++;
-
-	//callback async mode
-	//pentahoAction(object.solution, object.path, object.action, p,function(json){ Dashboards.xactionCallback(object,json); });
-	// or sync mode
-	$('#'+object.htmlObject).html(pentahoAction("cdf", "components", "jfreechartdial.xaction", parameters,null));
-
-};
-
-Dashboards.updateTrafficComponent = function( object ){
-
-	var cd = object.trafficDefinition;
-	if (cd == undefined){
-		alert("Fatal - No trafficDefinition passed");
-		return;
-	}
-
-	var intervals = cd.intervals;
-	if (intervals == undefined){
-		cd.intervals = [-1,1];
-	}
-
-	//go through parametere array and update values
-	var parameters = [];
-	for(p in cd){
-		var key = p;
-		var value = typeof cd[p]=='function'?cd[p]():cd[p];
-		//alert("key: " + key + "; Value: " + value);
-		parameters.push([key,value]);
-	}
-	// increment runningCalls
-	Dashboards.runningCalls++;
-
-	//callback async mode
-	//pentahoAction(object.solution, object.path, object.action, p,function(json){ Dashboards.xactionCallback(object,json); });
-	// or sync mode
-	var result = pentahoAction("cdf", "components", "traffic.xaction", parameters,null);
-
-	if(cd.showValue != undefined && cd.showValue == true){
-		var tooltip = object._tooltip;
-		object._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:"");
-	}
-
-	//alert("Traffic result: " + result);
-	var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
-	$('#'+object.htmlObject).html(i);
-
-};
-
-if (typeof Timeplot != "undefined"){
-	Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
-	new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
-	new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
-	new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
-	new Timeplot.Color('#73F321')]
-}
-
-Dashboards.updateTimePlotComponent = function( object ){
-
-	if (typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined ){
-		Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
-		new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
-		new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
-		new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
-		new Timeplot.Color('#73F321')]
-	}
-
-	var timePlotTimeGeometry = new Timeplot.DefaultTimeGeometry({
-			gridColor: "#000000",
-			axisLabelsPlacement: "top",
-			gridType: "short"
-		});
-
-	var timePlotValueGeometry = new Timeplot.DefaultValueGeometry({
-			gridColor: "#000000",
-			min: 0,
-			axisLabelsPlacement: "left",
-			gridType: "short",
-			toolTipFormat : function (value){
-				return toFormatedString(value);
-			}
-		});
-
-
-	var timePlotEventSource = new Timeplot.DefaultEventSource();
-	var eventSource2 = new Timeplot.DefaultEventSource();
-	var timePlot;
-
-	var cd = object.chartDefinition;
-	if (cd == undefined){
-		alert("Fatal - No chart definition passed");
-		return;
-	}
-
-	// Set default options:
-	if (cd.showValues == undefined){
-		cd.showValues = true;
-	}
-
-
-	var cols = typeof cd['columns']=='function'?cd['columns']():cd['columns'];
-	if (cols == undefined || cols.length == 0){
-		alert("Fatal - No 'columns' property passed in chartDefinition");
-		return;
-	}
-	// Write the title
-	var title = $('<div></div>');
-	if(cd.title != undefined){
-		title.append('<span style="text-transform: lowercase;">' + cd.title + '&nbsp; &nbsp; &nbsp;</span>');
-	}
-
-	var plotInfo = [];
-	for(var i = 0; i<cols.length; i++){
-
-		title.append('<span style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
-
-		var plotInfoOpts = {
-			id: cols[i],
-			dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
-			valueGeometry: timePlotValueGeometry,
-			timeGeometry: timePlotTimeGeometry,
-			lineColor: Dashboards.timePlotColors[i],
-			showValues: cd.showValues,
-			toolTipFormat: function (value,plot){
-				return  plot._id + " = " + toFormatedString(value);
-			}
-		};
-		if ( cd.dots == true){
-			plotInfoOpts.dotColor = Dashboards.timePlotColors[i];
-		}
-		if ( cd.fill == true){
-			plotInfoOpts.fillColor = Dashboards.timePlotColors[i].transparency(0.5);
-		}
-		plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
-
-	}
-
-
-	// support for events 
-	var eventSource2 = undefined;
-	if(cd.range || (cd.events && cd.events.show == true)){
-		eventSource2 = new Timeplot.DefaultEventSource();
-		plotInfo.push(Timeplot.createPlotInfo({ 
-					id: "plot3",  eventSource: eventSource2,  
-					timeGeometry: timePlotTimeGeometry,
-					lineColor: "#FF0000"
-				})); 
-	}
-
-	$("#"+object.htmlObject).html(title);
-	$("#"+object.htmlObject).append("<div class='timeplot'></div>");
-
-	if(cd.height > 0){
-		$("#" + object.htmlObject + " > div.timeplot").css("height",cd.height);
-	}
-	if(cd.width > 0){
-		$("#" + object.htmlObject + " > div.timeplot").css("width",cd.width);
-	}
-
-	timeplot = Timeplot.create($("#"+object.htmlObject+" > div.timeplot")[0], plotInfo);
-
-	//go through parametere array and update values
-	var parameters = [];
-	for(p in cd){
-		var key = p;
-		var value = typeof cd[p]=='function'?cd[p]():cd[p];
-		//parameters.push(encodeURIComponent(key)+"="+encodeURIComponent(value));
-		parameters.push(key+"="+value);
-	}
-
-	var timePlotEventSourceUrl = "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
-
-	if(cd.events && cd.events.show == true){
-
-		//go through parametere array and update values
-		var parameters = [];
-		for(p in cd.events){
-			var key = p;
-			var value = typeof cd.events[p]=='function'?cd.events[p]():cd.events[p];
-			parameters.push(key+"="+value);
-		}
-
-		var eventUrl = "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
-
-		timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
-				timeplot.loadJSON(eventUrl,eventSource2,function(data){
-						data.events = Dashboards.FilterEvents(data.events,range);
-						if(cd.range) //Insert date Event at start
-						{data.events = [].concat(Dashboards.getRangeEvent(cd)).concat(data.events);}
-					})
-			});
-	}
-	else
-		timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource,null,null,function(){
-				if(cd.range){
-					eventSource2.loadJSON({"dateTimeFormat":"iso8601","events":[Dashboards.getRangeEvent(cd)]}, timePlotEventSourceUrl);
-				}
-			});
-
-
-
-
-
-};
-
-Dashboards.getRangeEvent = function (cd) {
-	if(cd.range!= undefined && cd.range.startDate != undefined && cd.range.endDate != undefined){
-		var startDate = typeof cd.range.startDate =='function' ? cd.range.startDate() : cd.range.startDate;
-		var endDate = typeof cd.range.endDate =='function' ? cd.range.endDate() : cd.range.endDate;
-		return {"start":startDate,"end":endDate,"title":cd.range.title,"description":cd.range.description,"color":"#9BFF9B"};
-	}
-	return undefined;
-}
-
-Dashboards.FilterEvents = function (events, range) {
-	var result = [];
-	var min = MetaLayer.toDateString(new Date(range.earliestDate));
-	var max = MetaLayer.toDateString(new Date(range.latestDate));
-	for(i = 0; i < events.length; i++){
-		if(events[i].start >= min && ((events[i].end == undefined && events[i].start <= max) || events[i].end <= max)){
-			result.push(events[i]);
-		}
-	}
-	return result;
-};
-
-Dashboards.getMonthPicker = function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
-
-
-	var selectHTML = "<select";
-	selectHTML += " id='" + object_name + "'";
-
-	if (minDate == undefined){
-		minDate = new Date();
-		minDate.setYear(1980);
-	}
-	if (maxDate == undefined){
-		maxDate = new Date();
-		maxDate.setYear(2060);
-	}
-
-	//set size
-	if (object_size != undefined){
-		selectHTML += " size='" + object_size + "'";
-	}
-
-	var currentDate = new Date(+initialDate);
-	currentDate.setMonth(currentDate.getMonth()- monthCount/2 - 1);
-
-	for(var i= 0; i <= monthCount; i++){
-
-		currentDate.setMonth(currentDate.getMonth() + 1);
-		if(currentDate >= minDate && currentDate <= maxDate)
-		{
-			selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + Dashboards.zeroPad(currentDate.getMonth()+1,2) + "'";
-
-			if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()){
-				selectHTML += "selected='selected'"
-			}
-
-			selectHTML += "' >" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
-		}
-	}
-
-	selectHTML += "</select>";
-
-	return selectHTML;
-}
-
-Dashboards.zeroPad = function(num,size){
-
-	var n = "00000000000000" + num;
-	return n.substring(n.length-size,n.length);
-}
-
-Dashboards.makeQuery = function(object){
-
-	var cd = object.queryDefinition;
-	if (cd == undefined){
-		alert("Fatal - No query definition passed");
-		return;
-	}
-
-	$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
-			object.result = json;
-		});
-
-};
-
-
-Dashboards.generateTableComponent = function(object){
-
-	var cd = object.chartDefinition;
-	if (cd == undefined){
-		alert("Fatal - No chart definition passed");
-		return;
-	}
-	cd["tableId"] = object.htmlObject + "Table";
-
-	//Clear previous table
-	$("#"+object.htmlObject).empty();
-
-	$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
-			Dashboards.processTableComponentResponse(object,json);
-		});
-
-};
-
-
-Dashboards.processTableComponentResponse = function(object,json)
-{
-	// General documentation here: http://sprymedia.co.uk/article/DataTables
-
-	var cd = object.chartDefinition;
-	// Build a default config from the standard options
-	var dtData0 = Dashboards.getDataTableOptions(cd);
-	var dtData = $.extend(cd.dataTableOptions,dtData0);
-	dtData.aaData = json;
-	$("#"+object.htmlObject).html("<table id='" + object.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
-
-	dtData.fnFinalCallback = function( aData, iRowCount ){
-		$("#" + object.htmlObject + " td.sparkline").each(function(i){
-				$(this).sparkline($(this).text().split(/,/));
-			});
-		if(cd.urlTemplate != undefined){
-			var td =$("#" + object.htmlObject + " td:nth-child(1)");
-			td.addClass('cdfClickable');
-			td.bind("click", function(e){
-					var regex = new RegExp("{"+cd.parameterName+"}","g");
-					var f = cd.urlTemplate.replace(regex,$(this).text());
-					/*alert (cd.parameterName + " - " + $(this).text() + " - " + f);*/
-eval(f);
-			});
-	}
-};
-$("#"+object.htmlObject+'Table').dataTable( dtData );
-};
-
-Dashboards.path = Dashboards.getParameter("path");
-
-Dashboards.solution = Dashboards.getParameter("solution");
-
-Dashboards.getDataTableOptions = function(options)
-{
-	var dtData = {};
-	if(options.info != undefined){
-		dtData.bInfo = options.info
-	};
-	if(options.displayLength != undefined){
-		dtData.iDisplayLength = options.displayLength
-	};
-	if(options.lengthChange != undefined){
-		dtData.bLengthChange = options.lengthChange
-	};
-	if(options.paginate != undefined){
-		dtData.bPaginate = options.paginate
-	};
-	if(options.sort != undefined){
-		dtData.bSort = options.sort
-	};
-	if(options.filter != undefined){
-		dtData.bFilter = options.filter
-	};
-	if(options.colHeaders != undefined){
-		dtData.aoColumns = new Array(options.colHeaders.length);
-		for(var i = 0; i< options.colHeaders.length; i++){
-			dtData.aoColumns[i]={}
-		};
-		$.each(options.colHeaders,function(i,val){
-				dtData.aoColumns[i].sTitle=val;
-				if(val == "") dtData.aoColumns[i].bVisible=false;
-			});  // colHeaders
-		if(options.colTypes!=undefined){
-			$.each(options.colTypes,function(i,val){
-					var col = dtData.aoColumns[i];
-					if(val=='sparkline'){
-						col.sClass=val;
-						col.bSearchable=false;
-						col.bSortable=false;
-					}
-					else{
-						col.sClass=val;
-						col.sType=val;
-					}
-				})
-		};  // colTypes
-		if(options.colFormats!=undefined){
-			$.each(options.colFormats,function(i,val){
-					if (val!=null){
-						dtData.aoColumns[i].fnRender=
-							function ( obj ) {
-								return sprintf(val,obj.aData[obj.iDataRow][obj.iDataColumn]);
-							}
-					}
-				})
-		};  // colFormats
-
-		if(options.colWidths!=undefined){
-			$.each(options.colWidths,function(i,val){
-					if (val!=null){
-						dtData.aoColumns[i].sWidth=val
-					}
-				})
-		}; //colWidths
-		dtData.aaSorting=options.sortBy;
-	}
-
-	return dtData;
-
 };
 
 Dashboards.clone = function clone(obj) {
@@ -1455,86 +251,6 @@ Dashboards.clone = function clone(obj) {
 
 	return c;
 }
-
-Dashboards.generateXActionComponent = function(object){
-
-	$("#"+ object.htmlObject).bind("click", function(){
-			var success = typeof(object.preChange)=='undefined' ? true : object.preChange();
-			if(success)
-				Dashboards.executeXAction(object);
-			typeof(object.postChange)=='undefined' ? true : object.postChange();
-		});
-}
-
-Dashboards.generateAutocompleteBoxComponent = function(object){
-
-	Dashboards.makeQuery(object);
-
-	var list = [];
-
-	for(p in object.result){
-		var obj = {};
-		obj.text = object.result[p][0];
-		list.push(obj);
-	}
-
-	$("#"+ object.htmlObject).empty();
-
-	var opt = {
-		list: list,
-		matchType: object.matchType == undefined ? "fromStart" : object.matchType, /*fromStart, all*/
-		insertText: function(o) {return o.text },
-		processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
-		multiSellection: object.selectMulti == undefined ? false : object.selectMulti,
-		checkValue: object.checkValue == undefined ? true : object.checkValue,
-		minTextLenght: object.minTextLenght == undefined ? 0 : object.minTextLenght,
-		parent: object
-	};
-
-	object.autoBoxOpt = $("#" + object.htmlObject ).autobox(opt);
-
-	object.addFilter = function(value){
-
-		var html_obj = $("#"+object.name+"Object");
-		var input = html_obj.children().children().children();
-		var childs = html_obj.children().children().children();
-
-		for(i = childs.length;i > 1 ; ){
-			$(childs[i-1]).remove();
-			i= i -1;
-		}
-
-		var li=$('<li class="bit-box"></li>').attr('id', object.name + 'bit-0').text(encode_prepare(value));
-		li.append($('<a href="#" class="closebutton"></a>')
-			.bind('click', function(e) {
-					li.remove();
-					e.preventDefault();
-					object.autoBoxOpt.processAutoBoxChange(input,object.autoBoxOpt);
-				})).append($('<input type="hidden" />').attr('name', object.name).val(encode_prepare(value)));
-
-		childs = html_obj.children().children().children();
-		childs.after(li);
-	}
-
-}
-
-Dashboards.executeXAction = function(object){
-
-	var url = "/pentaho/ViewAction?solution=" + object.solution + "&path=" + object.path + "&action=" + object.action + "&";
-
-	var p = new Array(object.parameters.length);
-	var parameters = [];
-	for(var i= 0, len = p.length; i < len; i++){
-		var key = object.parameters[i][0];
-		var value = eval(object.parameters[i][1]);
-		parameters.push(key + "=" + encodeURIComponent(value));
-	}
-
-	url += parameters.join("&");
-
-	var _href = url.replace(/'/g,"&#39;");
-	GB_show("Report",_href, $(window).height() - 50 , $(window).width() - 100);
-};
 
 Dashboards.getArgValue  = function(key)
 {
@@ -1633,156 +349,6 @@ var Utf8 = {
 	}
 
 }
-
-var DashboardsMap = 
-	{
-
-		markers: null,
-		data : new Array(),
-		dataIdx: 0,
-		messageElementId: null,
-		selectedPointDetails: null,
-		mapExpression: null,
-
-		search: function (object,idx) {
-
-			var record = this.data[idx];
-			var place = record[1];
-
-			var lat = place[0];
-			var log = place[1];
-			var placeDesc = place[2];
-			var featureClass = object.featureClass != undefined ? '&featureClass=' + object.featureClass : '';
-
-			//request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(place)  + ',Portugal&maxRows=1&featureClass=P&coutry=PT&callback=getLocation';
-			if(lat == '' || log == '')
-			{
-				placeDesc = placeDesc.replace(/&/g,",");
-				request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1' + featureClass + '&callback=DashboardsMap.getLocation';
-			}
-
-			// Create a new script object
-			// (implementation of this class is in /export/jsr_class.js)
-			aObj = new JSONscriptRequest(request);
-			// Build the script tag
-			aObj.buildScriptTag();
-			// Execute (add) the script tag
-			aObj.addScriptTag();
-		},
-
-		resetSearch: function (){
-			map.removeLayer(markers);
-			markers.destroy();
-
-			markers = new OpenLayers.Layer.Markers( "Markers" );
-			map.addLayer(markers);
-
-			this.cleanMessages();
-			dataIdx = 0;
-			this.data = new Array();
-		},
-
-		// this function will be called by our JSON callback
-		// the parameter jData will contain an array with geonames objects
-		getLocation: function (jData) {
-
-			var record = this.data[dataIdx++];
-
-			if (jData == null || jData.totalResultsCount == 0) {
-				// There was a problem parsing search results
-				var placeNotFound = record[0];
-				this.addMessage(placeNotFound);
-			}
-			else{
-
-				var geoname = jData.geonames[0]; //we're specifically calling for just one
-				//addMessage("Place: " + geoname.name);
-
-				// Show address
-				//var marker = show_address(geoname.lng, geoname.lat,"green",record);
-				var marker = record[4];
-				var icon = record[5];
-				record[6] = geoname.lng;
-				record[7] = geoname.lat;
-				var marker = this.showMarker(marker,record);
-				record[4] = marker;
-			}
-
-			if(dataIdx >= this.data.length && dataIdx > 1){
-				var extent = markers.getDataExtent();
-				map.zoomToExtent(extent);
-			}
-			if(dataIdx >= this.data.length && dataIdx == 1){
-				map.setCenter(markers.markers[0].lonlat,4,false,false);
-			}
-		},
-
-		showMarker: function (oldMarker, record){
-
-			icon = record[5];
-
-			//create marker
-			var lon = record[6];
-			var lat = record[7];
-			var size = new OpenLayers.Size(21,25);
-			var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-			var iconObj = new OpenLayers.Icon(icon,size,offset);
-			marker = new OpenLayers.Marker(lonLatToMercator(new OpenLayers.LonLat(lon,lat)),iconObj);
-
-			//create a feature to bind marker and record array together
-			feature = new OpenLayers.Feature(markers,lonLatToMercator(new OpenLayers.LonLat(lon,lat)),record);
-			feature.marker = marker;
-
-			//create mouse down event for marker, set function to marker_click
-			marker.events.register('mousedown', feature, DashboardsMap.marker_click);
-
-			//add marker to map
-			markers.addMarker(marker);
-
-			return marker;
-		},
-
-		marker_click: function (evt){
-			click_lonlat = this.lonlat;
-			var record = this.data;
-			Dashboards.fireChange("selectedPoint", record[0]);
-		},
-
-		updateInfoWindow: function ( content ) {
-
-			if(content != null){
-				var html = content;/*"<table border='0' height = '175' width='175' cellpadding='0' cellspacing='0'><tr><td colspan='1' align='center' width='55'><b>";
-									html += "<b>" + this.selectedPointDetails[0][1];
-									html += "</b></td></tr><tr><td colspan='1' align='center' width='175'>"+content+"</td></tr></table>";*/
-
-				show_bubble(click_lonlat,html);
-			}
-		},
-
-		updateMap: function(){
-			var n = this.data.length;
-			for( idx=0; idx<n; idx++ ) {
-				var value = this.data[idx][2];
-				var markers = this.mapMarkers;
-				var icon = eval(this.mapExpression);
-				var marker = this.data[idx][4];
-				this.data[idx][5] = icon;
-				this.data[idx][4] = this.showMarker( marker, this.data[idx] );
-			}
-		},
-
-
-		addMessage: function (msg){
-			if(this.messageElementId != undefined)
-				document.getElementById(this.messageElementId).innerHTML = document.getElementById(this.messageElementId).innerHTML + msg + "\n <br />";
-		},
-
-		cleanMessages: function (msg){
-			if(this.messageElementId != undefined)
-				document.getElementById(this.messageElementId).innerHTML = "";
-		}
-
-	};
 
 function getURLParameters(sURL) 
 {	
@@ -1958,4 +524,3 @@ sprintfWrapper = {
 }
 
 sprintf = sprintfWrapper.init;
-
