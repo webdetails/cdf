@@ -22,6 +22,9 @@ commonLibrariesScript=\
 /pentaho/adhoc/js/common/ui/calendar/lang/calendar-en.js,\
 /pentaho/cdf/js/Base.js,\
 /pentaho/cdf/js/Dashboards.js,\
+/pentaho/cdf/js/CoreComponents.js,\
+/pentaho/cdf/js/NavigationComponents.js,\
+/pentaho/cdf/js/MapComponents.js,\
 /pentaho/cdf/js/OlapUtils.js,\
 /pentaho/cdf/js/MetaLayer/MetaLayer.js
 
