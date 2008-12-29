@@ -42,9 +42,9 @@ function clickOnTerritory(value) {
 <script language="javascript" type="text/javascript">
 
 
-
-var productLine = "null";
-var territory = "null";
+Dashboards.setGlobalContext(false);
+Dashboards.setParameter("productLine","null");
+Dashboards.setParameter("territory","null");
 
 titleString = 
 {
@@ -56,7 +56,10 @@ titleString =
   executeAtStart: true,
   expression: function(){return this.title},
   preExecution:function(){
-  	if( territory == "null" && productLine != "null") {
+	var territory = Dashboards.getParameterValue("territory");
+	var productLine = Dashboards.getParameterValue("productLine");
+
+	if( territory == "null" && productLine != "null") {
 		this.title = "Top Ten for " + productLine;
 	} 
 	else if ( territory != "null" && productLine == "null") {

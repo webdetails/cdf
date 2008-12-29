@@ -10,7 +10,7 @@ var BaseComponent = Base.extend({
 				var p = new Array(this.parameters.length);
 				for(var i= 0, len = p.length; i < len; i++){
 					var key = this.parameters[i][0];
-					var value = eval(this.parameters[i][1]);
+					var value = Dashboards.getParameterValue(this.parameters[i][1]);
 					p[i] = [key,value];
 				} 
 
@@ -55,7 +55,7 @@ var XactionComponent = BaseComponent.extend({
 			var p = new Array(this.parameters.length);
 			for(var i= 0, len = p.length; i < len; i++){
 				var key = this.parameters[i][0];
-				var value = eval(this.parameters[i][1]);
+				var value = Dashboards.getParameterValue(this.parameters[i][1]);
 				p[i] = [key,value];
 			} 
 			// increment runningCalls
@@ -95,7 +95,7 @@ var SelectBaseComponent = BaseComponent.extend({
 
 			// update the placeholder
 			$("#"+this.htmlObject).html(selectHTML)
-			$("#"+this.name).val(eval(this.parameter));
+			$("#"+this.name).val(Dashboards.getParameterValue(this.parameter));
 			var myself = this;
 			$("#"+this.name).change(function() {
 					Dashboards.processChange(myself.name);
@@ -419,7 +419,7 @@ var TextInputComponent = BaseComponent.extend({
 		update : function() {
 			selectHTML = "<input";
 			selectHTML += " type=test id='" + this.name +"' name='" + this.name + 
-				"' + value='"+ eval(this.parameter) + "'>";
+				"' + value='"+ Dashboards.getParameterValue(this.parameter) + "'>";
 			document.getElementById(this.htmlObject).innerHTML = selectHTML;
 			var myself = this;
 			$("#"+this.name).change(function() { Dashboards.processChange(myself.name);}).keyup(function(event) {
@@ -437,7 +437,7 @@ var TextInputComponent = BaseComponent.extend({
 var DateInputComponent = BaseComponent.extend({
 		update : function() {
 			var myself = this;
-			$("#"+this.htmlObject).html($("<input/>").attr("id",this.name).attr("value",eval(this.parameter)).css("width","80px"));
+			$("#"+this.htmlObject).html($("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter)).css("width","80px"));
 			Calendar.setup({
 					inputField: myself.name,
 					ifFormat : "%Y-%m-%d",
@@ -457,12 +457,12 @@ var DateRangeInputComponent = BaseComponent.extend({
 		update : function() {
 			var dr;
 			if (this.singleInput == undefined || this.singleInput == true){
-				dr = $("<input/>").attr("id",this.name).attr("value",eval(this.parameter[0]) + " > " + eval(this.parameter[1]) ).css("width","170px");
+				dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0]) + " > " + Dashboards.getParameterValue(this.parameter[1]) ).css("width","170px");
 				$("#"+this.htmlObject).html(dr);
 			} else {
-				dr = $("<input/>").attr("id",this.name).attr("value",eval(this.parameter[0])).css("width","80px");
+				dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0])).css("width","80px");
 				$("#"+this.htmlObject).html(dr);
-				dr.after($("<input/>").attr("id",this.name + "2").attr("value",eval(this.parameter[1])).css("width","80px"));
+				dr.after($("<input/>").attr("id",this.name + "2").attr("value",Dashboards.getParameterValue(this.parameter[1])).css("width","80px"));
 				if(this.inputSeparator != undefined){
 					dr.after(this.inputSeparator);
 				}
@@ -482,13 +482,13 @@ var DateRangeInputComponent = BaseComponent.extend({
 		}
 	},
 	{
-		fireDateRangeInputChange : function(name,rangeA, rangeB){
+		fireDateRangeInputChange : function(name, rangeA, rangeB){
 			// WPG: can we just use the parameter directly?
 			var parameters = eval(name + ".parameter");
 			/*console.log("Date Select: " + comp +"; Range: " +  rangeA + " > " + rangeB);*/
 // set the second date and fireChange the first
-eval( parameters[1] + "= encode_prepare(\"" + rangeB + "\")"); 
-Dashboards.fireChange(parameters[0],rangeA);
+			Dashboards.setParameter(parameters[1], rangeB);
+			Dashboards.fireChange(parameters[0],rangeA);
 	}
 }
 );
@@ -685,7 +685,7 @@ var JpivotComponent = BaseComponent.extend({
 			var p = new Array(this.parameters.length);
 			for(var i= 0, len = p.length; i < len; i++){
 				var arg = "&" + this.parameters[i][0] + "=";
-				jpivotHTML += arg +  eval(this.parameters[i][1]);
+				jpivotHTML += arg +  Dashboards.getParameterValue(this.parameters[i][1]);
 			}
 
 			// Close IFrame
@@ -892,7 +892,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 			var parameters = [];
 			for(var i= 0, len = p.length; i < len; i++){
 				var key = this.parameters[i][0];
-				var value = eval(this.parameters[i][1]);
+				var value = Dashboards.getParameterValue(this.parameters[i][1]);
 				parameters.push(key + "=" + encodeURIComponent(value));
 			}
 

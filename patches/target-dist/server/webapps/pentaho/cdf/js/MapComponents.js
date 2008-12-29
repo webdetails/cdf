@@ -163,7 +163,7 @@ var MapComponent = BaseComponent.extend({
 		var p = new Array(this.parameters.length);
 		for(var i= 0, len = p.length; i < len; i++){
 			var key = this.parameters[i][0];
-			var value = eval(this.parameters[i][1]);
+			var value = Dashboards.getParameterValue(this.parameters[i][1]);
 			p[i] = [key,value];
 		} 
 
@@ -216,7 +216,7 @@ var MapBubbleComponent = BaseComponent.extend({
 			var p = new Array(this.parameters.length);
 			for(var i= 0, len = p.length; i < len; i++){
 				var key = this.parameters[i][0];
-				var value = eval(this.parameters[i][1]);
+				var value = Dashboards.getParameterValue(this.parameters[i][1]);
 				parameters.push([key,value]);
 			}
 		DashboardsMap.updateInfoWindow(pentahoAction(this.solution, this.path, this.action, parameters ,null));

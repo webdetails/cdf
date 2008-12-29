@@ -27,11 +27,16 @@ if (typeof $.SetImpromptuDefaults == 'function')
 
 var Dashboards = 
 	{
+		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
 		components: [],
+		parameters: [], // only used if globalContext = false
 		args: [],
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 	}
 
+Dashboards.setGlobalContext = function(globalContext) {
+	Dashboards.globalContext = globalContext;
+}
 
 Dashboards.bindControl = function(object) {
 
@@ -108,6 +113,14 @@ Dashboards.getComponent = function(name){
 	}
 };
 
+Dashboards.getComponentByName = function(name) {
+	if (Dashboards.globalContext) {
+		return eval(name);
+	} else {
+		return Dashboards.getComponent(name);
+	}
+};
+
 Dashboards.addComponents = function(components) {
 	// attempt to convert over to component implementation
 	for (var i =0; i < components.length; i++) {
@@ -155,7 +168,7 @@ Dashboards.resetAll = function(){
 };
 
 Dashboards.processChange = function(object_name){
-	var object = eval(object_name);
+	var object = Dashboards.getComponentByName(object_name);
 	var parameter = object.parameter;
 	var value;
 	if (typeof object['getValue'] == 'function') {
@@ -171,18 +184,18 @@ Dashboards.processChange = function(object_name){
 };
 
 /*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
-Dashboards.fireChange = function(parameter,value){
+Dashboards.fireChange = function(parameter, value) {
 	//alert("begin block");
 	Dashboards.blockUIwithDrag();
 
 	//alert("Parameter: " + parameter + "; Value: " + value);
-	eval( parameter + "= encode_prepare(\"" + value + "\")");
+	Dashboards.setParameter(parameter, value);
 
 	for(var i= 0, len = components.length; i < len; i++){
 		if(Dashboards.isArray(components[i].listeners)){
 			for(var j= 0 ; j < components[i].listeners.length; j++){
 
-				if(components[i].listeners[j] == parameter){
+				if(components[i].listeners[j] == parameter) {
 					this.update(components[i]);
 					break;
 				}
@@ -197,6 +210,14 @@ Dashboards.fireChange = function(parameter,value){
 
 Dashboards.isArray = function(testObject) {
 	return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
+}
+
+Dashboards.getParameterValue = function (parameterName) {
+	if (Dashboards.globalContext) {
+		return eval(parameterName);
+	} else {
+		return Dashboards.parameters[parameterName];
+	}
 }
 
 Dashboards.getParameter = function ( parameterName ) {
@@ -222,6 +243,14 @@ Dashboards.getParameter = function ( parameterName ) {
 		return "";
 	}
 };
+
+Dashboards.setParameter = function(parameterName, parameterValue) {
+	if (Dashboards.globalContext) {
+		eval( parameterName + "= encode_prepare(\"" + parameterValue + "\")");
+	} else {
+		Dashboards.parameters[parameterName] = encode_prepare(parameterValue);
+	}
+}
 
 Dashboards.clone = function clone(obj) {
 
