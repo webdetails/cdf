@@ -50,22 +50,23 @@ titleString =
 {
   name: "titleString",
   type: "text",
+  title: "Top Ten Customers",
   listeners:["productLine", "territory"],
   htmlObject: "titleObject",
   executeAtStart: true,
-  expression: function(){return "title"},
+  expression: function(){return this.title},
   preExecution:function(){
   	if( territory == "null" && productLine != "null") {
-		title = "Top Ten for " + productLine;
+		this.title = "Top Ten for " + productLine;
 	} 
 	else if ( territory != "null" && productLine == "null") {
-		title = "Top Ten for " + territory;
+		this.title = "Top Ten for " + territory;
 	}
 	else if ( territory == "null" && productLine == "null") {
-		title = "Top Ten Customers";
+		this.title = "Top Ten Customers";
 	}
 	else  {
-		title = "Top Ten for " + territory + ", " + productLine;
+		this.title = "Top Ten for " + territory + ", " + productLine;
 	}
   },
   postExecution:function(){}
