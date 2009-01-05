@@ -220,7 +220,7 @@ Dashboards.getParameterValue = function (parameterName) {
 	}
 }
 
-Dashboards.getParameter = function ( parameterName ) {
+Dashboards.getQueryParameter = function ( parameterName ) {
 	// Add "=" to the parameter name (i.e. parameterName=value)
 	var queryString = window.top.location.search.substring(1);
 	var parameterName = parameterName + "=";
