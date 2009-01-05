@@ -312,6 +312,7 @@ var TimePlotComponent = BaseComponent.extend({
 					timeGeometry: timePlotTimeGeometry,
 					lineColor: Dashboards.timePlotColors[i],
 					showValues: cd.showValues,
+					hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
 					toolTipFormat: function (value,plot){
 						return  plot._id + " = " + toFormatedString(value);
 					}
