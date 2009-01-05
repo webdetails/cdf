@@ -28,6 +28,7 @@ if (typeof $.SetImpromptuDefaults == 'function')
 var Dashboards = 
 	{
 		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
+		runningCalls: 0, // Used to control progress indicator for async mode
 		components: [],
 		parameters: [], // only used if globalContext = false
 		args: [],
@@ -37,6 +38,29 @@ var Dashboards =
 Dashboards.setGlobalContext = function(globalContext) {
 	Dashboards.globalContext = globalContext;
 }
+
+Dashboards.showProgressIndicator = function() {
+	Dashboards.blockUIwithDrag();
+}
+
+Dashboards.hideProgressIndicator = function() {
+	if(Dashboards.runningCalls <= 0){
+		$.unblockUI();
+	}
+}
+
+Dashboards.incrementRunningCalls = function() {
+	Dashboards.runningCalls++ ;
+}
+
+Dashboards.decrementRunningCalls = function() {
+	Dashboards.runningCalls-- ;
+	if(Dashboards.runningCalls<=0){
+		Dashboards.hideProgressIndicator();
+		Dashboards.runningCalls = 0; // Just in case
+	}
+}
+
 
 Dashboards.bindControl = function(object) {
 
@@ -144,14 +168,14 @@ Dashboards.init = function(components){
 Dashboards.initEngine = function(){
 	components = this.components;
 	var compCount = components.length;
-	Dashboards.blockUIwithDrag();
+	Dashboards.showProgressIndicator();
 
 	for(var i= 0, len = components.length; i < len; i++){
 		if(components[i].executeAtStart){
 			this.update(components[i]);
 		}
 	}
-	$.unblockUI();
+	Dashboards.hideProgressIndicator();
 };
 
 Dashboards.resetAll = function(){
@@ -186,7 +210,7 @@ Dashboards.processChange = function(object_name){
 /*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
 Dashboards.fireChange = function(parameter, value) {
 	//alert("begin block");
-	Dashboards.blockUIwithDrag();
+	Dashboards.showProgressIndicator();
 
 	//alert("Parameter: " + parameter + "; Value: " + value);
 	Dashboards.setParameter(parameter, value);
@@ -204,7 +228,7 @@ Dashboards.fireChange = function(parameter, value) {
 		}
 	}
 	//alert("finish block");
-	$.unblockUI();
+	Dashboards.hideProgressIndicator();
 
 };
 
