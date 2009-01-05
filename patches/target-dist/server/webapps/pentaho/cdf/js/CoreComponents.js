@@ -58,8 +58,6 @@ var XactionComponent = BaseComponent.extend({
 				var value = Dashboards.getParameterValue(this.parameters[i][1]);
 				p[i] = [key,value];
 			} 
-			// increment runningCalls
-			Dashboards.runningCalls++;
 
 			// callback async mode
 			// pentahoAction(this.solution, this.path, this.action,
@@ -150,13 +148,14 @@ var JFreeChartComponent = BaseComponent.extend({
 				parameters.push([key,value]);
 			} 
 			// increment runningCalls
-			Dashboards.runningCalls++;
+			Dashboards.incrementRunningCalls();
 
 			var myself = this;
 			// callback async mode
 			pentahoAction("cdf", "components", "jfreechart.xaction", parameters, 
 				function(json){ 
 					$('#'+myself.htmlObject).html(json); 
+					Dashboards.decrementRunningCalls();
 				});
 			// or sync mode
 			// $('#'+object.htmlObject).html(pentahoAction("cdf", "components",
@@ -192,8 +191,6 @@ var DialComponent = BaseComponent.extend({
 				// alert("key: " + key + "; Value: " + value);
 				parameters.push([key,value]);
 			} 
-			// increment runningCalls
-			Dashboards.runningCalls++;
 
 			// callback async mode
 			// pentahoAction(object.solution, object.path, object.action,
@@ -225,8 +222,6 @@ var TrafficComponent = BaseComponent.extend({
 				// alert("key: " + key + "; Value: " + value);
 				parameters.push([key,value]);
 			} 
-			// increment runningCalls
-			Dashboards.runningCalls++;
 
 			// callback async mode
 			// pentahoAction(object.solution, object.path, object.action,

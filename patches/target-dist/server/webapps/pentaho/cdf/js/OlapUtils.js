@@ -387,7 +387,7 @@ OlapUtils.mdxQueryGroupActionCallback = function(value,m){
 	var mqg = OlapUtils.lastClickedMdxQueryGroup;
 	var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
 
-	Dashboards.blockUIwithDrag();
+	Dashboards.showProgressIndicator();
 
 	if( value == "filter" ){
 		// filter: remove this from every query
@@ -446,7 +446,7 @@ OlapUtils.mdxQueryGroupActionCallback = function(value,m){
 	}
 
 	Dashboards.update(Dashboards.getComponent(mqg.name));
-	$.unblockUI();
+	Dashboards.hideProgressIndicator();
 }
 
 OlapUtils.getAxisPathString = function(axis,axisPath){
