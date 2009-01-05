@@ -15,6 +15,9 @@
  * 
  * @constructor
  */
+ 
+var buttonGap = 22;
+  
 Timeplot.Plot = function(timeplot, plotInfo) {
     this._timeplot = timeplot;
     this._canvas = timeplot.getCanvas();
@@ -27,6 +30,7 @@ Timeplot.Plot = function(timeplot, plotInfo) {
     this._eventSource = plotInfo.eventSource;
     this._bubble = null;
 	this._toolTipFormat = plotInfo.toolTipFormat;
+	this._hideZeroToolTipValues = plotInfo.hideZeroToolTipValues;
 };
 
 Timeplot.Plot.prototype = {
@@ -74,13 +78,13 @@ Timeplot.Plot.prototype = {
                     if (isNaN(x) || x < 0) x = 0;
                     var t = plot._timeGeometry.fromScreen(x);
 					var tPrevious = plot._timeGeometry.previousFromScreen(x);
-                    if (t == 0) { // something is wrong
+					var vPrevious = plot._dataSource.getValue(tPrevious);
+                     if (t == 0 || (plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
                         plot._valueFlag.style.display = "none";
                         return;
                     }
                     
                     var v = plot._dataSource.getValue(t);
-					var vPrevious = plot._dataSource.getValue(tPrevious);
                     if (plot._plotInfo.roundValues){ v = Math.round(v); vPrevious = Math.round(vPrevious);}
 					if(plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
 						plot._valueFlag.innerHTML = plot._toolTipFormat(vPrevious,plot);
@@ -162,15 +166,17 @@ Timeplot.Plot.prototype = {
                             display: "block"
                         });
                     } else if (x + vw + 14 < c.width && y + vh + 4 > c.height) {
-                        plot._valueFlagLineRight.style.display = "none";
-                        plot._timeplot.placeDiv(plot._valueFlagLineLeft,{
-                            left: x,
-                            bottom: y - 13,
+                        //plot._valueFlagLineRight.style.display = "none";
+                        //plot._timeplot.placeDiv(plot._valueFlagLineLeft,{
+						plot._valueFlagLineLeft.style.display = "none";
+                        plot._timeplot.placeDiv(plot._valueFlagLineRight,{
+                             left: x,
+                             bottom: y, //bottom: y - 13,
                             display: "block"
                         });
                         plot._timeplot.placeDiv(plot._valueFlag,{
                             left: x + 13,
-                            bottom: y - 13,
+                           bottom: y, //bottom: y - 13,
                             display: "block"
                         });
                     } else {
@@ -186,6 +192,16 @@ Timeplot.Plot.prototype = {
                             display: "block"
                         });
                     }
+					
+					y =  parseFloat(plot._valueFlag.style["bottom"].replace(/px/g,""));
+					
+					if(plot._dataSource._column == 0){
+						timeplot.previousArray = new Array();
+						timeplot.previousArray[0] = [plot._id,vPrevious,y];
+					}
+					else
+						timeplot.previousArray[timeplot.previousArray.length] = [plot._id,vPrevious,
+							plot._resolveDivConflit(y,vPrevious,false,timeplot.previousArray)];
                 }
             }
 
@@ -399,6 +415,26 @@ Timeplot.Plot.prototype = {
             this._bubble.close();
             this._bubble = null;
         }
-    }
+    },
+	
+	_resolveDivConflit: function(y,divValue,conflict,divs) {
+		
+		for(i = 0; i < divs.length; i++){
+			var value = divs[i][1];
+			var bottom = divs[i][2];
+			var top = bottom + buttonGap;
+			if(this._id != divs[i][0] && y <= top && (y >= bottom  || (y + buttonGap >= bottom))){
+			
+				y = divValue < value ? (bottom - buttonGap - 1) > 0 ? (bottom - buttonGap - 1) : y : top + 1;
+				this._valueFlag.style["bottom"] = y + "px";
+				
+				if(!conflict) return this._resolveDivConflit(y,divValue,true,divs);
+				if((conflict && divValue < value) || y < 0) 
+					this._valueFlag.style["zIndex"] = "0";
+				
+			}
+		}
+		return y;
+	}
 
 }
