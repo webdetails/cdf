@@ -1,7 +1,7 @@
 
 var NavigatorBaseComponent = BaseComponent.extend({},{
-	path : Dashboards.getParameter("path"),
-	solution : Dashboards.getParameter("solution"),
+	path : Dashboards.getQueryParameter("path"),
+	solution : Dashboards.getQueryParameter("solution"),
 	navigatorResponse : -1,
 	getSolutionJSON : function(solution) {
 		var json = NavigatorBaseComponent.navigatorResponse;
