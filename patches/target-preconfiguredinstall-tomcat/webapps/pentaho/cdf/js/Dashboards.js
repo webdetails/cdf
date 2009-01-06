@@ -20,9 +20,9 @@ $.blockUI.defaults.css['-webkit-border-radius'] = '10px';
 $.blockUI.defaults.css['-moz-border-radius'] = '10px';
 
 var ERROR_CODES = [];
-ERROR_CODES["UNKNOWN"] = ["ERROR: ","/pentaho/cdf/error.jpg"];
-ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","/pentaho/cdf/alert.jpg"];
-ERROR_CODES["0006"] = ["Could not establish a connection to the database","/pentaho/cdf/error.jpg"];
+ERROR_CODES["UNKNOWN"] = ["ERROR: ","/pentaho/cdf/images/error.jpg"];
+ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","/pentaho/cdf/images/alert.jpg"];
+ERROR_CODES["0006"] = ["Could not establish a connection to the database","/pentaho/cdf/images/error.jpg"];
 
 if (typeof $.SetImpromptuDefaults == 'function')
 	$.SetImpromptuDefaults({
