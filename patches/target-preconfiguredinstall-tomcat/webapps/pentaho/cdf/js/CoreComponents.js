@@ -154,7 +154,7 @@ var JFreeChartComponent = BaseComponent.extend({
 			// callback async mode
 			pentahoAction("cdf", "components", "jfreechart.xaction", parameters, 
 				function(json){ 
-					$('#'+myself.htmlObject).html(json); 
+					$('#'+myself.htmlObject).html(Dashboards.parseXActionResult(cd,json)); 
 					Dashboards.decrementRunningCalls();
 				});
 			// or sync mode

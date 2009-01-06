@@ -19,6 +19,11 @@ $.blockUI.defaults.css.opacity = '.8';
 $.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
 $.blockUI.defaults.css['-moz-border-radius'] = '10px';
 
+var ERROR_CODES = [];
+ERROR_CODES["UNKNOWN"] = ["ERROR: ","/pentaho/cdf/error.jpg"];
+ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","/pentaho/cdf/alert.jpg"];
+ERROR_CODES["0006"] = ["Could not establish a connection to the database","/pentaho/cdf/error.jpg"];
+
 if (typeof $.SetImpromptuDefaults == 'function')
 	$.SetImpromptuDefaults({
 			prefix: 'colsJqi',
@@ -320,7 +325,18 @@ Dashboards.ev = function(o){
 	return typeof o == 'function'?o():o
 };
 
-
+Dashboards.parseXActionResult = function(cd,html){
+	if(html.indexOf("ERROR_")> 0){
+		var tWith = cd != undefined && cd.width != undefined ? cd.width : "200";
+		var tHeight = cd != undefined && cd.height != undefined ? cd.height : "200";
+		var errorCode = html.substring(html.indexOf("ERROR_")+6,html.indexOf("ERROR_")+10);
+		var errorMessage = ERROR_CODES[errorCode] != undefined ? ERROR_CODES[errorCode][0] : ERROR_CODES["UNKNOWN"][0] + errorCode;
+		var errorImage = ERROR_CODES[errorCode] != undefined ? ERROR_CODES[errorCode][1] : ERROR_CODES["UNKNOWN"][1];
+		return "<table class='errorMessageTable' border='0' width='" + tWith + "' height='" + tHeight + "'><tr><td><img src='"+ errorImage + "'></td><td>" + errorMessage + "</td></tr></table/>"
+	}
+	else 
+		return html;
+};
 /**
  *
  * UTF-8 data encode / decode
