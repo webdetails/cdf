@@ -1,5 +1,6 @@
 var BaseComponent = Base.extend({
 		//type : "unknown",
+		visible: true,
 		clear : function() {
 			document.getElementById(this.htmlObject).innerHTML = "";
 		},
@@ -15,7 +16,8 @@ var BaseComponent = Base.extend({
 				} 
 
 				//execute the xaction to populate the selector
-				html = pentahoAction(this.solution, this.path, this.action, p,null);
+				var myself=this;
+				html = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
 
 				//transform the result int a javascript array
 				var myArray = this.parseArray(html, false);
@@ -60,10 +62,11 @@ var XactionComponent = BaseComponent.extend({
 			} 
 
 			// callback async mode
-			// pentahoAction(this.solution, this.path, this.action,
+			// Dashboards.callPentahoAction(this.solution, this.path, this.action,
 			// p,function(json){ Dashboards.xactionCallback(object,json); });
 			// or sync mode
-			$('#'+this.htmlObject).html(pentahoAction(this.solution, this.path, this.action, p,null));
+			var myself=this;
+			$('#'+this.htmlObject).html(Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null));
 		}
 	});
 
@@ -152,13 +155,13 @@ var JFreeChartComponent = BaseComponent.extend({
 
 			var myself = this;
 			// callback async mode
-			pentahoAction("cdf", "components", "jfreechart.xaction", parameters, 
+			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechart.xaction", parameters, 
 				function(json){ 
 					$('#'+myself.htmlObject).html(json); 
 					Dashboards.decrementRunningCalls();
 				});
 			// or sync mode
-			// $('#'+object.htmlObject).html(pentahoAction("cdf", "components",
+			// $('#'+object.htmlObject).html(Dashboards.callPentahoAction(myself, "cdf", "components",
 			// "jfreechart.xaction", parameters,null));
 		}
 	});
@@ -192,11 +195,19 @@ var DialComponent = BaseComponent.extend({
 				parameters.push([key,value]);
 			} 
 
+			// increment runningCalls
+			Dashboards.incrementRunningCalls();
+
+			var myself = this;
 			// callback async mode
-			// pentahoAction(object.solution, object.path, object.action,
-			// p,function(json){ Dashboards.xactionCallback(object,json); });
+			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechartdial.xaction", parameters, 
+				function(json){ 
+					$('#'+myself.htmlObject).html(json); 
+					Dashboards.decrementRunningCalls();
+				});
 			// or sync mode
-			$('#'+this.htmlObject).html(pentahoAction("cdf", "components", "jfreechartdial.xaction", parameters,null));
+			// $('#'+object.htmlObject).html(Dashboards.callPentahoAction(myself, "cdf", "components",
+			// "jfreechartdial.xaction", parameters,null));
 
 		}
 	});
@@ -223,20 +234,25 @@ var TrafficComponent = BaseComponent.extend({
 				parameters.push([key,value]);
 			} 
 
+			// increment runningCalls
+			Dashboards.incrementRunningCalls();
+
+			var myself = this;
 			// callback async mode
-			// pentahoAction(object.solution, object.path, object.action,
-			// p,function(json){ Dashboards.xactionCallback(object,json); });
-			// or sync mode
-			var result = pentahoAction("cdf", "components", "traffic.xaction", parameters,null);
+			Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters, 
+				function(result){ 
 
-			if(cd.showValue != undefined && cd.showValue == true){
-				var tooltip = this._tooltip;
-				this._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
-			}
+					if(cd.showValue != undefined && cd.showValue == true){
+						var tooltip = myself._tooltip;
+						myself._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+					}
 
-			// alert("Traffic result: " + result);
-			var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
-			$('#'+this.htmlObject).html(i);
+					// alert("Traffic result: " + result);
+					var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
+					$('#'+myself.htmlObject).html(i);
+
+					Dashboards.decrementRunningCalls();
+				});
 		}
 	});
 
@@ -481,8 +497,7 @@ var DateRangeInputComponent = BaseComponent.extend({
 		fireDateRangeInputChange : function(name, rangeA, rangeB){
 			// WPG: can we just use the parameter directly?
 			var parameters = eval(name + ".parameter");
-			/*console.log("Date Select: " + comp +"; Range: " +  rangeA + " > " + rangeB);*/
-// set the second date and fireChange the first
+			// set the second date and fireChange the first
 			Dashboards.setParameter(parameters[1], rangeB);
 			Dashboards.fireChange(parameters[0],rangeA);
 	}
@@ -845,6 +860,7 @@ var PivotLinkComponent = BaseComponent.extend({
 	});
 
 var QueryComponent = BaseComponent.extend({
+		visible: false,
 		update : function() {
 			QueryComponent.makeQuery(this);
 		}
@@ -865,12 +881,14 @@ var QueryComponent = BaseComponent.extend({
 );
 
 var MdxQueryGroupComponent = BaseComponent.extend({
+		visible: false,
 		update : function() {
 			OlapUtils.updateMdxQueryGroup(this);
 		}
 	});
 
 var ExecuteXactionComponent = BaseComponent.extend({
+		visible: false,
 		update : function() {
 			var myself = this;
 			$("#"+ this.htmlObject).bind("click", function(){
