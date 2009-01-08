@@ -9,6 +9,8 @@ var CDF_SELF = 2;
 var TRAFFIC_RED = "cdf/images/traffic_red.png";
 var TRAFFIC_YELLOW = "cdf/images/traffic_yellow.png";
 var TRAFFIC_GREEN = "cdf/images/traffic_green.png";
+var ERROR_IMAGE = 'cdf/images/error.png';
+var CDF_ERROR_DIV = 'cdfErrorDiv';
 
 $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="/pentaho/cdf/images/busy.gif" /> <h3>Processing...</h3></div>';
 $.blockUI.defaults.css.left = '40%';
@@ -20,7 +22,7 @@ $.blockUI.defaults.css['-webkit-border-radius'] = '10px';
 $.blockUI.defaults.css['-moz-border-radius'] = '10px';
 
 var ERROR_CODES = [];
-ERROR_CODES["UNKNOWN"] = ["ERROR: ","/pentaho/cdf/images/error.jpg"];
+ERROR_CODES["UNKNOWN"] = ["ERROR: ","cdf/images/error.jpg"];
 ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","/pentaho/cdf/images/alert.jpg"];
 ERROR_CODES["0006"] = ["Could not establish a connection to the database","/pentaho/cdf/images/error.jpg"];
 
@@ -56,10 +58,13 @@ Dashboards.hideProgressIndicator = function() {
 
 Dashboards.incrementRunningCalls = function() {
 	Dashboards.runningCalls++ ;
+	Dashboards.showProgressIndicator(); 
+	//console.log("+Running calls incremented to: " + Dashboards.runningCalls);
 }
 
 Dashboards.decrementRunningCalls = function() {
 	Dashboards.runningCalls-- ;
+	//console.log("-Running calls decremented to: " + Dashboards.runningCalls);
 	if(Dashboards.runningCalls<=0){
 		Dashboards.hideProgressIndicator();
 		Dashboards.runningCalls = 0; // Just in case
@@ -108,6 +113,11 @@ Dashboards.blockUIwithDrag = function() {
 //}
 
 Dashboards.update = function(object) {
+	// Clean errors div, creating first if it doesn't exist
+	if ($("#"+CDF_ERROR_DIV).length == 0){
+		$("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
+	}
+	$("#"+CDF_ERROR_DIV).empty();
 	if(!(typeof(object.preExecution)=='undefined')){
 		object.preExecution();
 	}
@@ -133,6 +143,7 @@ Dashboards.update = function(object) {
 				fade: 250
 			});
 	}
+	$(".cdf_error").tooltip({delay:0, track: true, fade: 250, showBody: " -- "});
 };
 
 Dashboards.getComponent = function(name){
@@ -173,14 +184,14 @@ Dashboards.init = function(components){
 Dashboards.initEngine = function(){
 	components = this.components;
 	var compCount = components.length;
-	Dashboards.showProgressIndicator();
+	Dashboards.incrementRunningCalls();
 
 	for(var i= 0, len = components.length; i < len; i++){
 		if(components[i].executeAtStart){
 			this.update(components[i]);
 		}
 	}
-	Dashboards.hideProgressIndicator();
+	Dashboards.decrementRunningCalls();
 };
 
 Dashboards.resetAll = function(){
@@ -215,7 +226,7 @@ Dashboards.processChange = function(object_name){
 /*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
 Dashboards.fireChange = function(parameter, value) {
 	//alert("begin block");
-	Dashboards.showProgressIndicator();
+	Dashboards.incrementRunningCalls();
 
 	//alert("Parameter: " + parameter + "; Value: " + value);
 	Dashboards.setParameter(parameter, value);
@@ -233,7 +244,7 @@ Dashboards.fireChange = function(parameter, value) {
 		}
 	}
 	//alert("finish block");
-	Dashboards.hideProgressIndicator();
+	Dashboards.decrementRunningCalls();
 
 };
 
@@ -325,14 +336,51 @@ Dashboards.ev = function(o){
 	return typeof o == 'function'?o():o
 };
 
-Dashboards.parseXActionResult = function(cd,html){
-	if(html.indexOf("ERROR_")> 0){
-		var tWith = cd != undefined && cd.width != undefined ? cd.width : "200";
-		var tHeight = cd != undefined && cd.height != undefined ? cd.height : "200";
+Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
+	// Encapsulate pentahoAction call
+	// console.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
+
+	if(typeof callback == 'function'){
+		return pentahoAction( solution, path, action, parameters,
+			function(json){
+				callback(Dashboards.parseXActionResult(obj,json));
+			}
+		);
+	}
+	else{
+		return Dashboards.parseXActionResult(obj,pentahoAction( solution, path, action, parameters, callback ));
+	}
+}
+
+Dashboards.parseXActionResult = function(obj,html){
+	if(html.substr(0,19) == '<html><head><title>' && html.indexOf("ERROR_")> 0){
+
+		// error found. Parsing it
+		var errorMessage = "Error executing component " + obj.name;
+		var errorDetails = new Array();
+		errorDetails[0] = " Error details for component execution " + obj.name + " -- ";
+		errorDetails[1] = html.match(/(?:<span style="color:red">)(.*?)(?:<\/span><p\/>)/)[1];
+		//$.each(errorDetails,function(i,val){errorDetails[i] = val.substring(24,val.length-11)});
+		// Iterate details;
+		
+		var idx_start = html.indexOf("</span><p/>")+11;
+		var idx_end = html.indexOf("</td></tr></table><p>");
+		var details = html.substring(idx_start,idx_end).split("<br/>");
+		
+		errorDetails = errorDetails.concat(details.slice(0,5));
+		errorDetails.push("...");
+		errorDetails.push("<i>For more information contact technical support</i>");
+		
 		var errorCode = html.substring(html.indexOf("ERROR_")+6,html.indexOf("ERROR_")+10);
-		var errorMessage = ERROR_CODES[errorCode] != undefined ? ERROR_CODES[errorCode][0] : ERROR_CODES["UNKNOWN"][0] + errorCode;
-		var errorImage = ERROR_CODES[errorCode] != undefined ? ERROR_CODES[errorCode][1] : ERROR_CODES["UNKNOWN"][1];
-		return "<table class='errorMessageTable' border='0' width='" + tWith + "' height='" + tHeight + "'><tr><td><img src='"+ errorImage + "'></td><td>" + errorMessage + "</td></tr></table/>"
+		
+		var out = "<table class='errorMessageTable' border='0'><tr><td><img src='"+ ERROR_IMAGE + "'></td><td><span class=\"cdf_error\" title=\" " + errorDetails.join('<br/>') +"\" >" + errorMessage + " </span></td></tr></table/>";
+
+		// if this is a hidden component, we'll place this in the error div
+		if (obj.visible == false){
+			$("#"+CDF_ERROR_DIV).append("<br />" + out);
+		}
+		return out;
+	
 	}
 	else 
 		return html;
