@@ -53,6 +53,7 @@ Dashboards.showProgressIndicator = function() {
 Dashboards.hideProgressIndicator = function() {
 	if(Dashboards.runningCalls <= 0){
 		$.unblockUI();
+		Dashboards.showErrorTooltip();
 	}
 }
 
@@ -143,8 +144,11 @@ Dashboards.update = function(object) {
 				fade: 250
 			});
 	}
-	$(".cdf_error").tooltip({delay:0, track: true, fade: 250, showBody: " -- "});
 };
+
+Dashboards.showErrorTooltip = function(){
+	$(function(){$(".cdf_error").tooltip({delay:0, track: true, fade: 250, showBody: " -- "})});
+}
 
 Dashboards.getComponent = function(name){
 	for (i in this.components){
@@ -373,7 +377,7 @@ Dashboards.parseXActionResult = function(obj,html){
 		
 		var errorCode = html.substring(html.indexOf("ERROR_")+6,html.indexOf("ERROR_")+10);
 		
-		var out = "<table class='errorMessageTable' border='0'><tr><td><img src='"+ ERROR_IMAGE + "'></td><td><span class=\"cdf_error\" title=\" " + errorDetails.join('<br/>') +"\" >" + errorMessage + " </span></td></tr></table/>";
+		var out = "<table class='errorMessageTable' border='0'><tr><td><img src='"+ ERROR_IMAGE + "'></td><td><span class=\"cdf_error\" title=\" " + errorDetails.join('<br/>').replace(/"/g,"'") +"\" >" + errorMessage + " </span></td></tr></table/>";
 
 		// if this is a hidden component, we'll place this in the error div
 		if (obj.visible == false){
