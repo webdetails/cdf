@@ -1,1 +1,1 @@
-<% response.sendRedirect("/pentaho/Dashboards?solution=dashboards&path=information_dashboard"); %>
+<% response.sendRedirect("/pentaho/Dashboards?solution=cdf-samples&path=information_dashboard"); %>

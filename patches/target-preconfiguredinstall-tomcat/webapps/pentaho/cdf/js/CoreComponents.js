@@ -250,7 +250,6 @@ var TrafficComponent = BaseComponent.extend({
 					// alert("Traffic result: " + result);
 					var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
 					$('#'+myself.htmlObject).html(i);
-
 					Dashboards.decrementRunningCalls();
 				});
 		}
