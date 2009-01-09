@@ -25,54 +25,6 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
 			return;
 		}
 	},
-//	listContents : function(mode){
-//
-//		// Start iterate
-//		// 1: find the correct solution;
-//		// 2: see if there are paths in there
-//		// 3: if mode == CDF_SELF, we will return the position we're in.
-//		//    if mode == CDF_CHILDREN, the children will be returned
-//	
-//		var json = NavigatorBaseComponent.navigatorResponse;
-//		var files = json.repository.file;
-//	
-//		var locationArray;
-//	
-//		var files = NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
-//	
-//		if (NavigatorBaseComponent.path == 'null' || NavigatorBaseComponent.path == ""){
-//			if (mode ==  CDF_CHILDREN )
-//				return files;
-//			else
-//				return json.repository;
-//		}
-//	
-//		locationArray = NavigatorBaseComponent.path.split('/');
-//		maxLen = mode==CDF_CHILDREN?locationArray.length:locationArray.length-1;
-//	
-//		for (var i = 0; i < maxLen; i++){
-//	
-//			var currentPath = locationArray.slice(0,i + 1).join("/");
-//			//console.log("[" + i + "] - Looking for: " + currentPath );
-//			files = NavigatorBaseComponent.browseContent(files, currentPath);
-//		}
-//	
-//		if (mode ==  CDF_CHILDREN )
-//			return files;
-//		else{
-//			// we still need to find the correct element
-//			var file;
-//			$.each(files,function(i,f){
-//					if (f.type == "FILE.FOLDER" && f.path[0] == NavigatorBaseComponent.path ){
-//						file = f; return false;
-//					}
-//				});
-//			if (file == undefined){
-//				alert("FATAL: NOT FOUND");
-//			}
-//			return file;
-//		}
-//	},
 	browseContent : function(files, currentPath) {
 
 		for(var i = 0; i<files.length; i++){
@@ -142,6 +94,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 	
 		var files = this.includeSolutions?json.solution.folders:NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
 		
+		files.sort(function(a,b){return a.name>b.name});
 		var ret = this.generateMenuFromArray(files, 0);
 		$("#"+this.htmlObject).html(ret);
 	
@@ -201,7 +154,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 			s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"Dashboards?solution=" + file.solution + "&amp;" +_path + "\">" + file.title + "</a>";
 
 			var files = file.folders || [];
-			files.sort(function(a,b){return a.title>b.title});
+			files.sort(function(a,b){return a.name>b.name});
 			var inner = this.generateMenuFromArray(files);
 
 			if (inner.length > 0 ){
@@ -229,9 +182,9 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 		$("#"+this.htmlObject).empty();
 		var files = json.content || [];
 		files.sort(function(a,b){
-				var _a = (a.type=="FOLDER"?"000":"")+a.title;
-				var _b = (b.type=="FOLDER"?"000":"")+b.title;
-				return a.title > b.title
+				var _a = (a.type=="FOLDER"?"000":"")+a.name;
+				var _b = (b.type=="FOLDER"?"000":"")+b.name;
+				return _a > _b
 			});
 		// Create the outmost ul
 		var container = $("<ul></ul>").attr("id","contentList-"+this.name).appendTo("#"+this.htmlObject);
