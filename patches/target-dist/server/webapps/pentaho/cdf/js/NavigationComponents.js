@@ -223,17 +223,19 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 					var cls = "";
 					var target = "";
 					var href = "";
-					if (this.type=="FILE.FOLDER"){
+					if (this.type=="FOLDER"){
 						cls = "folder";
 						href = "Dashboards?solution=" + this.solution + "&path=" + this.path;
 					}
 					else{
-						cls = "action greybox";
 						if (this.url != undefined){
+							cls = "folder";
 							href=this.url;
 						}
-						else
+						else{
+							cls = "action greybox";
 							href = "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
+						}
 						// target = "_new"
 
 					}

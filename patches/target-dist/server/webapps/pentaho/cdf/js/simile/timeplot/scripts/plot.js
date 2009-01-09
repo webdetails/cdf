@@ -16,8 +16,8 @@
  * @constructor
  */
  
- var buttonGap = 22;
- 
+var buttonGap = 22;
+  
 Timeplot.Plot = function(timeplot, plotInfo) {
     this._timeplot = timeplot;
     this._canvas = timeplot.getCanvas();
@@ -79,7 +79,7 @@ Timeplot.Plot.prototype = {
                     var t = plot._timeGeometry.fromScreen(x);
 					var tPrevious = plot._timeGeometry.previousFromScreen(x);
 					var vPrevious = plot._dataSource.getValue(tPrevious);
-                    if (t == 0 || (plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
+                     if (t == 0 || (plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
                         plot._valueFlag.style.display = "none";
                         return;
                     }
@@ -166,17 +166,17 @@ Timeplot.Plot.prototype = {
                             display: "block"
                         });
                     } else if (x + vw + 14 < c.width && y + vh + 4 > c.height) {
-                       //plot._valueFlagLineRight.style.display = "none";
+                        //plot._valueFlagLineRight.style.display = "none";
                         //plot._timeplot.placeDiv(plot._valueFlagLineLeft,{
 						plot._valueFlagLineLeft.style.display = "none";
                         plot._timeplot.placeDiv(plot._valueFlagLineRight,{
-                            left: x,
-                            bottom: y, //bottom: y - 13,
+                             left: x,
+                             bottom: y, //bottom: y - 13,
                             display: "block"
                         });
                         plot._timeplot.placeDiv(plot._valueFlag,{
                             left: x + 13,
-                            bottom: y, //bottom: y - 13,
+                           bottom: y, //bottom: y - 13,
                             display: "block"
                         });
                     } else {
