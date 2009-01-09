@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin title="Pentaho Community Dashboard Framework">
+	<content-types>
+		<content-type type="xcdf" mime-type="text/html">
+        	<title>Dashboard</title>
+        	<description>Community Dashboard File</description>
+	        <icon-url>content/pentaho-cdf/resources/cdfFileType.png</icon-url>
+	        <operations>
+    	    	<operation>
+        			<id>RUN</id>
+        			<command>content/pentaho-cdf?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
+        		</operation>
+    	    	<operation>
+        			<id>NEWWINDOW</id>
+        			<command>content/pentaho-cdf?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
+        		</operation>        		
+	        </operations>
+    	</content-type>
+	</content-types>
+
+    <content-generator scope="session" id="pentaho-cdf" type="xcdf" url="">
+        <classname>org.pentaho.cdf.CdfContentGenerator</classname>
+        <fileinfo-classname>org.pentaho.cdf.CdfFileInfoGenerator</fileinfo-classname>
+        <title>CDF Display Handler</title>
+    </content-generator>
+    
+</plugin>

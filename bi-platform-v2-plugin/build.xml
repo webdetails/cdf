@@ -1,0 +1,164 @@
+<!--===========================================================================
+  This is the build file for the Community Dashboard Framework Plugin project.
+  
+  This build file will use the common_build.xml file as the default build
+  process and should only override the tasks that need to differ from
+  the common build file.
+  
+  See common_build.xml for more details
+============================================================================-->
+<project name="Community Dashboard Framework" basedir="." default="jar" 
+	xmlns:ivy="antlib:org.apache.ivy.ant" >
+	
+	<description>
+	  This build file is used to create the Dashboard project
+		and works with the common_build.xml file.
+	</description>
+
+	<!-- Import the common_build.xml file which contains all the default tasks -->	
+	<import file="common_build.xml"/>
+
+    <!--
+      AS STATED ABOVE, THE ONLY TASKS THAT SHOULD EXIST IN THIS BUILD FILE ARE
+      THE TASKS THAT NEED TO DIFFER FROM THE DEFAULT IMPLEMENTATION OF THE TASKS
+      FOUND IN common_build.xml.
+    --> 
+
+	  <target name="compile.compile" depends="init" description="Performs the actual javac compile">
+	    <javac destdir="${classes.dir}"
+	           debug="${javac.debug}"
+	           deprecation="${javac.deprecation}"
+	           fork="true"
+	           source="${javac.source}"
+	           target="${javac.target}">
+	      <classpath>
+	        <path refid="classpath" />
+	      </classpath>
+	      <src path="${src.dir}" />
+          <src path="../patches/target-build/bi-platform-web/src" />
+          <src path="../patches/target-build/bi-platform-web-servlet/src"/>
+	      <exclude name="**/GetCDFResource.java"/>
+	    </javac>
+	  </target>
+	
+	  <property name="plugin.name"
+	            value="pentaho-cdf"
+	            description="Name of the plugin" />
+
+	  <property name="resource.dir"
+	            value="resource"
+	            description="Name of the resource directory" />
+
+	  <property name="stage.dir"
+	            value="${bin.dir}/stage"
+	            description="Name of the resource directory" />
+	
+	  <property name="samples.stage.dir"
+	            value="${bin.dir}/stage-samples"
+	            description="Name of the resource directory" />
+
+	
+	  <target name="dist" depends="resolve,jar,dist-standalone"/>
+	  <target name="dist-compile" depends="jar,dist-standalone"/>
+	
+	  <!--=======================================================================
+		    dist
+		    
+		    Creates a distribution of this project
+		    ====================================================================-->
+	  <target name="dist-standalone" depends="dist-samples" description="Creates a distribution">
+
+	  	<!-- delete and re-create the plugin dist folder tree -->
+	    <delete dir="${stage.dir}" />
+	    <mkdir dir="${stage.dir}" />
+	    <mkdir dir="${stage.dir}/${plugin.name}" />
+	    <mkdir dir="${stage.dir}/${plugin.name}/lib" />
+        <mkdir dir="${stage.dir}/${plugin.name}-samples" />
+	  	
+	  	<!-- copy the plugin jar to the plugin dist lib folder -->
+	    <copy todir="${stage.dir}/${plugin.name}/lib">
+	      <fileset dir="${dist.dir}">
+	        <include name="${ivy.artifact.id}-${project.revision}.jar" />
+	      </fileset>
+	    </copy>
+	  	
+	  	<!-- Copy the plugin.xml and any other files from the resource dir -->
+	    <copy todir="${stage.dir}/${plugin.name}">
+	      <fileset dir="${resource.dir}">
+	        <include name="**/*" />
+	      </fileset>
+	    </copy>
+	  	
+	  	<!-- Copy js folder into dist -->
+	    <copy todir="${stage.dir}/${plugin.name}/js">
+	      <fileset dir="../patches/target-dist/server/webapps/pentaho/cdf/js">
+	        <include name="**/*" />
+	      </fileset>
+	    </copy>
+	  	
+	  	<!-- Copy custom html files to dist -->
+	    <copy todir="${stage.dir}/${plugin.name}">
+	      <fileset dir="../patches/project-cdf/solution/system/custom">
+	        <include name="**/*" />
+	      </fileset>
+	    </copy>
+	  	
+	  	<!-- Copy pentaho-style files to dist -->
+	    <copy todir="${stage.dir}/${plugin.name}/resources/style">
+	      <fileset dir="../patches/target-dist/server/webapps/pentaho-style">
+	        <include name="**/*" />
+	      </fileset>
+	    </copy>
+	  	
+	  	<!-- create a zip file -->
+	    <zip zipfile="${dist.dir}/${ivy.artifact.id}-${project.revision}.zip"
+	         basedir="${stage.dir}"
+	         includes="pentaho-cdf/**/*"
+	         excludes="**/Thumbs.db" />
+
+	  </target>
+
+	
+	  <target name="dist-samples" depends="init">
+
+	  	<mkdir dir="${samples.stage.dir}"/>
+	  	
+	  	<!-- copy over all the xactions within the cdf-samples folder -->
+	  	<copy todir="${samples.stage.dir}/cdf-samples" overwrite="true" >
+          <fileset dir="../solution/cdf-samples">
+            <include name="**/*.xaction"/>
+          	<include name="**/*.xml"/>
+          	<include name="**/*.js"/>
+          	<exclude name="**/index.xml"/>
+          </fileset>
+	  	</copy>
+	  	
+	  	<!-- copy over the template.html files -->
+	  	<copy tofile="${samples.stage.dir}/cdf-samples/charts.html" 
+	  		  file="../solution/cdf-samples/charts/template.html" overwrite="true" />
+	  	<copy tofile="${samples.stage.dir}/cdf-samples/home_dashboard.html" 
+	  		  file="../solution/cdf-samples/home_dashboard/template.html" overwrite="true" />
+	  	<copy tofile="${samples.stage.dir}/cdf-samples/home_dashboard_2.html" 
+	  		  file="../solution/cdf-samples/home_dashboard_2/template.html" overwrite="true" />
+	  	<copy tofile="${samples.stage.dir}/cdf-samples/home_dashboard_3.html" 
+	  		  file="../solution/cdf-samples/home_dashboard_3/template.html" overwrite="true" />
+	  	<copy tofile="${samples.stage.dir}/cdf-samples/information_dashboard.html" 
+	  		  file="../solution/cdf-samples/information_dashboard/template.html" overwrite="true" />
+	  	<copy tofile="${samples.stage.dir}/cdf-samples/pentaho_sample.html" 
+	  		  file="../solution/cdf-samples/pentaho_sample/template.html" overwrite="true" />
+	  	<copy tofile="${samples.stage.dir}/cdf-samples/sample_dashboard_broadcast.html" 
+	  		  file="../solution/cdf-samples/sample_dashboard_broadcast/template.html" overwrite="true" />
+	  	
+		<!-- finally, copy over the .xcdf files -->	  	
+	  	<copy todir="${samples.stage.dir}" overwrite="true">
+          <fileset dir="samples"/>
+	  	</copy>
+	  	
+	  	<zip zipfile="${dist.dir}/${ivy.artifact.id}-samples-${project.revision}.zip"
+	  		basedir="${samples.stage.dir}"
+	  		includes="**/*"
+            excludes="**/Thumbs.db" 
+  		/>
+      </target>
+	
+</project>
