@@ -136,6 +136,7 @@ public class NavigateComponent extends PentahoBase {
                 // put solution and path
 
                 String[] pathArray = path.split("\\/");
+                path = path.replace(pathArray[1], "solution");
 
                 String solutionName = pathArray.length > 2 ? pathArray[2] : "";
                 String solutionPath = pathArray.length > 3 ? path.substring(path.indexOf("/", 10) + 1) : "";
