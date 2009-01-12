@@ -8,7 +8,7 @@
 // The function is executed from the url-template tag in the territorySales.xaction
 
 function clickOnTerritory(value) {
-	productLine = "null";
+	productLine = null;
 	Dashboards.fireChange('territory',value);
 }
 
@@ -47,8 +47,9 @@ function clickOnTerritory(value) {
 
 <script language="javascript" type="text/javascript">
 
-    var territory;
-    var productLine;
+    var territory = null;
+    var productLine = null;
+	var title = "";
 
 titleString = 
 {
@@ -57,15 +58,15 @@ titleString =
   listeners:["productLine", "territory"],
   htmlObject: "titleObject",
   executeAtStart: true,
-  expression: function(){return "title"},
+  expression: function(){return title},
   preExecution:function(){
-  	if( territory == "null" && productLine != "null") {
+  	if( territory == null && productLine != null) {
 		title = "Top Ten for " + productLine;
 	} 
-	else if ( territory != "null" && productLine == "null") {
+	else if ( territory != null && productLine == null) {
 		title = "Top Ten for " + territory;
 	}
-	else if ( territory == "null" && productLine == "null") {
+	else if ( territory == null && productLine == null) {
 		title = "Top Ten Customers";
 	}
 	else  {
