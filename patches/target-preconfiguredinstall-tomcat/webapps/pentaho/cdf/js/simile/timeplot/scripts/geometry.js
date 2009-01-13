@@ -490,9 +490,14 @@ Timeplot.DefaultTimeGeometry.prototype = {
         } 
     },
 	
-	previousFromScreen: function(x) {
+	previousFromScreen: function(x, dayPeriod) {
         if (this._canvas) {
-			var previous = new Date(this._earliestDate.getFullYear(),this._earliestDate.getMonth(),this._earliestDate.getDate() - 1);
+			var previous = new Date(this._earliestDate);
+			if(dayPeriod) 
+				previous.setDate(previous.getDate()-1); 
+			else 
+				previous.setMinutes(previous.getMinutes()-1);
+				
             return this._map.inverse(this._mappedPeriod * x / this._canvas.width) + previous.getTime();
         } else {
             return 0;
