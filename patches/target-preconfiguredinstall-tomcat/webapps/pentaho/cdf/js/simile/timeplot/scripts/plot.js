@@ -31,6 +31,7 @@ Timeplot.Plot = function(timeplot, plotInfo) {
     this._bubble = null;
 	this._toolTipFormat = plotInfo.toolTipFormat;
 	this._hideZeroToolTipValues = plotInfo.hideZeroToolTipValues;
+	this._getSelectedRegion = plotInfo.getSelectedRegion;
 };
 
 Timeplot.Plot.prototype = {
@@ -39,7 +40,7 @@ Timeplot.Plot.prototype = {
      * Initialize the plot layer
      */
     initialize: function() {
-        if (this._dataSource && this._dataSource.getValue) {
+        
             this._timeFlag = this._timeplot.putDiv("timeflag","timeplot-timeflag");
             this._valueFlag = this._timeplot.putDiv(this._id + "valueflag","timeplot-valueflag");
             this._valueFlagLineLeft = this._timeplot.putDiv(this._id + "valueflagLineLeft","timeplot-valueflag-line");
@@ -71,13 +72,14 @@ Timeplot.Plot.prototype = {
             var month = 30 * day;
             
             var mouseMoveHandler = function(elmt, evt, target) {
-                if (typeof SimileAjax != "undefined" && plot._plotInfo.showValues) {
+                if (typeof SimileAjax != "undefined" && plot._plotInfo.showValues && !plot._mouseDown) {
                     var c = plot._canvas;
                     var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,plot._canvas).x);
                     if (x > c.width) x = c.width;
                     if (isNaN(x) || x < 0) x = 0;
                     var t = plot._timeGeometry.fromScreen(x);
-					var tPrevious = plot._timeGeometry.previousFromScreen(x);
+					var p = plot._timeGeometry.getPeriod(); 
+					var tPrevious = plot._timeGeometry.previousFromScreen(x, p < day ? false : true);
 					var vPrevious = plot._dataSource.getValue(tPrevious);
                      if (t == 0 || (plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
                         plot._valueFlag.style.display = "none";
@@ -90,8 +92,8 @@ Timeplot.Plot.prototype = {
 						plot._valueFlag.innerHTML = plot._toolTipFormat(vPrevious,plot);
 					else
 						plot._valueFlag.innerHTML = new String(vPrevious);
-                    var d = new Date(t);
-                    var p = plot._timeGeometry.getPeriod(); 
+					var d = new Date(t);
+					
                     if (p < day) {
                         plot._timeFlag.innerHTML = d.toLocaleTimeString();
                     } else if (p > month) {
@@ -203,12 +205,47 @@ Timeplot.Plot.prototype = {
 						timeplot.previousArray[timeplot.previousArray.length] = [plot._id,vPrevious,
 							plot._resolveDivConflit(y,vPrevious,false,timeplot.previousArray)];
                 }
+				else if(plot._mouseDown)
+				{
+					var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,plot._canvas).x);
+					var dif = x > plot.startSelectEventPos ? x - plot.startSelectEventPos : plot.startSelectEventPos - x; 
+					if(dif> 10){
+						if (x < plot._canvas.width)
+							plot._addSelectEvent(plot.startSelectEvent,plot.getSelectedDate(evt,x),plot._eventSource,undefined,false);
+						else
+							plot._mouseDown = false;
+					}
+					
+				}
             }
+			
+			 var mouseDownHandler = function(elmt, evt, target) {
+				var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,plot._canvas).x);
+				var d = plot.getSelectedDate(evt,x);
+				plot.startSelectEvent = d;
+				plot.startSelectEventPos = x;
+				plot._mouseDown = true;
+				
+			}
+			
+			 var mouseUpHandler = function(elmt, evt, target) {
+				var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,plot._canvas).x);
+				var dif = x > plot.startSelectEventPos ? x - plot.startSelectEventPos : plot.startSelectEventPos - x; 
+				if(dif> 10)
+					plot._getSelectedRegion(plot.startSelectEvent,plot.getSelectedDate(evt,x));
+				plot._mouseDown = false;
+			}
+
 
             var timeplotElement = this._timeplot.getElement();
             SimileAjax.DOM.registerEvent(timeplotElement, "mouseover", mouseOverHandler);
             SimileAjax.DOM.registerEvent(timeplotElement, "mousemove", mouseMoveHandler);
-        }
+			
+			if(plot._id == "eventPlot"){
+				SimileAjax.DOM.registerEvent(timeplotElement, "mousedown", mouseDownHandler);
+				SimileAjax.DOM.registerEvent(timeplotElement, "mouseup", mouseUpHandler);
+			}
+        
     },
 
     /**
@@ -435,6 +472,34 @@ Timeplot.Plot.prototype = {
 			}
 		}
 		return y;
-	}
+	},
+	
+	_addSelectEvent: function(start,end,events,format,checkEvents)
+	{
+		if(format != undefined){
+			var parser = events._events.getUnit().getParser(format);
+			start = parser(start);
+			end = parser(end);
+		}
 
+		var parseDateTimeFunction = events._events.getUnit().getParser("iso8601");
+		var evt = new Timeline.DefaultEventSource.Event(
+                "selectEvent",start,end,start,end,false,"Date Range","Dates",null,null,null,"#9BFF9B",/*event.color,*/undefined,/*event.textColor,*/undefined/*event.classname*/);
+			
+		var previousEvent = events.getEvent("selectEvent");
+		if( previousEvent != undefined)
+			while(events._events._events.remove(previousEvent));
+			
+		events.add(evt);
+		
+		return true;
+	},
+	
+	getSelectedDate : function(evt,x){
+	
+		var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,this._canvas).x);
+		var t = this._timeGeometry.fromScreen(x);
+		return new Date(t);
+	}
+	
 }

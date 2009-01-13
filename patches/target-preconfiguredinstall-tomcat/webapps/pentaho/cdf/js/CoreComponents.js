@@ -257,6 +257,31 @@ var TrafficComponent = BaseComponent.extend({
 
 var TimePlotComponent = BaseComponent.extend({
 		update : function() {
+		
+			var cd = this.chartDefinition;
+	
+				
+			if(this.timeplot!= undefined && cd.dateFilter != undefined){
+
+				if(this.updateFilter != false && cd.dateFilter != undefined && this.timeplot._plots.length > 0 ){
+			
+					var lastEventPlot = this.timeplot._plots[this.timeplot._plots.length -1];
+				
+					if(lastEventPlot._id == "eventPlot")
+						lastEventPlot._addSelectEvent(Dashboards.getParameterValue(this.startDateParameter),Dashboards.getParameterValue(this.endDateParameter),lastEventPlot._eventSource,"iso8601",false);
+				}
+				
+				return;
+			}
+			
+			
+			if(cd.dateFilter != undefined && this.timeplot == undefined){
+				cd.dateFilter = Dashboards.getComponent(cd.dateFilter);
+				this.startDateParameter = cd.dateFilter.parameter[0];
+				this.endDateParameter = cd.dateFilter.parameter[1];
+				this.listeners = this.listeners == undefined ? [] : this.listeners;
+				this.listeners = this.listeners.concat(this.startDateParameter).concat(this.endDateParameter);
+			}
 
 			if (typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined ){
 				Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
@@ -287,7 +312,7 @@ var TimePlotComponent = BaseComponent.extend({
 			var eventSource2 = new Timeplot.DefaultEventSource();
 			var timePlot;
 
-			var cd = this.chartDefinition;
+			var obj = this;
 			if (cd == undefined){
 				alert("Fatal - No chart definition passed");
 				return;
@@ -336,19 +361,22 @@ var TimePlotComponent = BaseComponent.extend({
 				plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
 			}
-
+			
 
 			// support for events
 			var eventSource2 = undefined;
-			if(cd.range || (cd.events && cd.events.show == true)){
+			if(cd.dateFilter != undefined){
 				eventSource2 = new Timeplot.DefaultEventSource();
 				plotInfo.push(Timeplot.createPlotInfo({ 
-							id: "plot3",  eventSource: eventSource2,  
+							id: "eventPlot",  eventSource: eventSource2,  
 							timeGeometry: timePlotTimeGeometry,
-							lineColor: "#FF0000"
+							lineColor: "#FF0000",
+							getSelectedRegion: function(start,end){
+								myself.updateFilters(start,end);
+							}
 						})); 
 			}
-
+			
 			$("#"+this.htmlObject).html(title);
 			$("#"+this.htmlObject).append("<div class='timeplot'></div>");
 
@@ -360,6 +388,7 @@ var TimePlotComponent = BaseComponent.extend({
 			} 
 
 			timeplot = Timeplot.create($("#"+this.htmlObject+" > div.timeplot")[0], plotInfo);
+			obj.timeplot = timeplot;
 
 			// go through parametere array and update values
 			var parameters = [];
@@ -369,7 +398,7 @@ var TimePlotComponent = BaseComponent.extend({
 				// parameters.push(encodeURIComponent(key)+"="+encodeURIComponent(value));
 				parameters.push(key+"="+value);
 			} 
-
+			var allData = undefined;
 			var timePlotEventSourceUrl = "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
 			var myself = this;
 			if(cd.events && cd.events.show == true){
@@ -386,7 +415,7 @@ var TimePlotComponent = BaseComponent.extend({
 
 				timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
 						timeplot.loadJSON(eventUrl,eventSource2,function(data){
-								data.events = myself.FilterEvents(data.events, range);
+								data.events = myself.filterEvents(data.events, range);
 								if(cd.range) // Insert date Event at start
 								{data.events = [].concat(myself.getRangeEvent(cd)).concat(data.events);}
 							})
@@ -403,11 +432,11 @@ var TimePlotComponent = BaseComponent.extend({
 			if(cd.range!= undefined && cd.range.startDate != undefined && cd.range.endDate != undefined){
 				var startDate = typeof cd.range.startDate =='function' ? cd.range.startDate() : cd.range.startDate;
 				var endDate = typeof cd.range.endDate =='function' ? cd.range.endDate() : cd.range.endDate;
-				return {"start":startDate,"end":endDate,"title":cd.range.title,"description":cd.range.description,"color":"#9BFF9B"};
+				return {id:"selectEvent", "start":startDate,"end":endDate,"title":cd.range.title,"description":cd.range.description,"color":"#9BFF9B"};
 			}
 			return undefined;
 		},
-		FilterEvents : function (events, range) {
+		filterEvents : function (events, range) {
 			var result = [];
 			var min = MetaLayer.toDateString(new Date(range.earliestDate));
 			var max = MetaLayer.toDateString(new Date(range.latestDate));
@@ -417,6 +446,21 @@ var TimePlotComponent = BaseComponent.extend({
 				}
 			}
 			return result;
+		},
+		updateFilters: function(start,end){
+			var toDateString = function(d){
+				var currentMonth = "0" + (d.getMonth() + 1);
+				var currentDay = "0" + (d.getDate());
+				return d.getFullYear() + "-" + (currentMonth.substring(currentMonth.length-2, currentMonth.length)) + "-" + (currentDay.substring(currentDay.length-2, currentDay.length));
+			};
+			if(this.chartDefinition.dateFilter != undefined ){
+				Dashboards.setParameter(this.startDateParameter, toDateString(start));
+				Dashboards.setParameter(this.endDateParameter , toDateString(end));
+				this.updateTimeplot = false;
+				Dashboards.update(this.chartDefinition.dateFilter);
+				Dashboards.fireChange(this.startDateParameter,toDateString(start));
+				this.updateTimeplot = true;
+			}
 		}
 	});
 

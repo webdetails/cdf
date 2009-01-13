@@ -53,6 +53,7 @@ Timeplot.createPlotInfo = function(params) {
         bubbleWidth:       ("bubbleWidth" in params) ? params.bubbleWidth : 300,
         bubbleHeight:      ("bubbleHeight" in params) ? params.bubbleHeight : 200,
 		toolTipFormat: ("toolTipFormat" in params) ? params.toolTipFormat : undefined,
+		getSelectedRegion: ("getSelectedRegion" in params) ? params.getSelectedRegion : undefined,
 		hideZeroToolTipValues: ("hideZeroToolTipValues" in params) ? params.hideZeroToolTipValues : undefined
     };
 };
@@ -513,6 +514,7 @@ Timeplot._Impl.prototype = {
             var timeplot = this;
             var painter = {
                 onAddMany: function() { timeplot.update(); },
+				onAddOne: function() { timeplot.update(); },
                 onClear:   function() { timeplot.update(); }
             }
 
