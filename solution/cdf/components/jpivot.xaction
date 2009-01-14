@@ -44,7 +44,7 @@
 		</cube>  
 		<role type="string"> 
 			<sources> 
-				<request>role</request> 
+				<session>role</session> 
 			</sources>  
 			<default-value/> 
 		</role>  
