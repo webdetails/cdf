@@ -34,7 +34,7 @@ Timeplot.Plot = function(timeplot, plotInfo) {
 	this._headerFormat = plotInfo.headerFormat;
 	this._hideZeroToolTipValues = plotInfo.hideZeroToolTipValues;
 	this._getSelectedRegion = plotInfo.getSelectedRegion;
-	this._showValuesInHeader = plotInfo.showValuesInHeader;
+	this._showValuesMode = plotInfo.showValuesMode;
 	this._rangeColor = plotInfo.rangeColor;
 };
 
@@ -76,7 +76,7 @@ Timeplot.Plot.prototype = {
             var month = 30 * day;
             
             var mouseMoveHandler = function(elmt, evt, target) {
-                if ((plot._plotInfo.showValues || plot._plotInfo.showValuesInHeader) && !plot._mouseDown) {
+                if (plot._plotInfo.showValues && !plot._mouseDown) {
                     var c = plot._canvas;
                     var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,plot._canvas).x);
                     if (x > c.width) x = c.width;
@@ -85,7 +85,7 @@ Timeplot.Plot.prototype = {
 					var p = plot._timeGeometry.getPeriod(); 
 					var tPrevious = plot._timeGeometry.previousFromScreen(x, p < day ? false : true);
 					var vPrevious = plot._dataSource.getValue(tPrevious);
-                    if (t == 0 || (!plot._plotInfo.showValuesInHeader && plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
+                    if (t == 0 || (plot._showValuesMode == "tooltip" && plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
                         plot._valueFlag.style.display = "none";
                         return;
                     }
@@ -145,10 +145,10 @@ Timeplot.Plot.prototype = {
                     }
 					
 					var vStr = vPrevious;
-					if(!plot._plotInfo.showValuesInHeader && plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
+					if(plot._showValuesMode == "tooltip" && plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
 						vStr = plot._toolTipFormat(vPrevious,plot);
 					
-					if(plot._plotInfo.showValuesInHeader){
+					if(plot._showValuesMode == "header"){
 						if(plot._headerFormat != undefined &&  typeof plot._headerFormat == 'function')
 							vStr = plot._headerFormat(vPrevious,plot);
 						$("#" + plot._id + "Header").html(vStr);

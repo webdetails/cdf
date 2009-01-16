@@ -241,15 +241,15 @@ var TrafficComponent = BaseComponent.extend({
 			// callback async mode
 			Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters, 
 				function(result){ 
-
-					if(cd.showValue != undefined && cd.showValue == true){
-						var tooltip = myself._tooltip;
-						myself._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
-					}
-
-					// alert("Traffic result: " + result);
+					
 					var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
 					$('#'+myself.htmlObject).html(i);
+					
+					if(cd.showValue != undefined && cd.showValue == true){
+						var tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+						$('#'+myself.htmlObject).attr("title",tooltip).tooltip({delay:0,track: true,fade: 250});
+					}
+					
 					Dashboards.decrementRunningCalls();
 				});
 		}
@@ -352,7 +352,7 @@ var TimePlotComponent = BaseComponent.extend({
 					lineColor: Dashboards.timePlotColors[i],
 					showValues: cd.showValues,
 					hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
-					showValuesInHeader: cd.showValuesInHeader != undefined ? cd.showValuesInHeader : false,
+					showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
 					toolTipFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value);},
 					headerFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";},
 				};
