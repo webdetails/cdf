@@ -357,7 +357,7 @@ Dashboards.callPentahoAction = function(obj, solution, path, action, parameters,
 }
 
 Dashboards.parseXActionResult = function(obj,html){
-	if(html.substr(0,19) == '<html><head><title>' && html.indexOf("ERROR_")> 0){
+	if(html != undefined && html.substr(0,19) == '<html><head><title>' && html.indexOf("ERROR_")> 0){
 
 		// error found. Parsing it
 		var errorMessage = "Error executing component " + obj.name;

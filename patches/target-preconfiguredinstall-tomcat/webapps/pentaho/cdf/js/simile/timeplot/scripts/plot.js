@@ -23,6 +23,7 @@ Timeplot.Plot = function(timeplot, plotInfo) {
     this._canvas = timeplot.getCanvas();
     this._plotInfo = plotInfo;
     this._id = plotInfo.id;
+	this._name = plotInfo.name;
     this._timeGeometry = plotInfo.timeGeometry;
     this._valueGeometry = plotInfo.valueGeometry;
     this._theme = new Timeline.getDefaultTheme();
@@ -30,8 +31,11 @@ Timeplot.Plot = function(timeplot, plotInfo) {
     this._eventSource = plotInfo.eventSource;
     this._bubble = null;
 	this._toolTipFormat = plotInfo.toolTipFormat;
+	this._headerFormat = plotInfo.headerFormat;
 	this._hideZeroToolTipValues = plotInfo.hideZeroToolTipValues;
 	this._getSelectedRegion = plotInfo.getSelectedRegion;
+	this._showValuesInHeader = plotInfo.showValuesInHeader;
+	this._rangeColor = plotInfo.rangeColor;
 };
 
 Timeplot.Plot.prototype = {
@@ -72,7 +76,7 @@ Timeplot.Plot.prototype = {
             var month = 30 * day;
             
             var mouseMoveHandler = function(elmt, evt, target) {
-                if (typeof SimileAjax != "undefined" && plot._plotInfo.showValues && !plot._mouseDown) {
+                if ((plot._plotInfo.showValues || plot._plotInfo.showValuesInHeader) && !plot._mouseDown) {
                     var c = plot._canvas;
                     var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,plot._canvas).x);
                     if (x > c.width) x = c.width;
@@ -81,17 +85,14 @@ Timeplot.Plot.prototype = {
 					var p = plot._timeGeometry.getPeriod(); 
 					var tPrevious = plot._timeGeometry.previousFromScreen(x, p < day ? false : true);
 					var vPrevious = plot._dataSource.getValue(tPrevious);
-                     if (t == 0 || (plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
+                    if (t == 0 || (!plot._plotInfo.showValuesInHeader && plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
                         plot._valueFlag.style.display = "none";
                         return;
                     }
                     
                     var v = plot._dataSource.getValue(t);
                     if (plot._plotInfo.roundValues){ v = Math.round(v); vPrevious = Math.round(vPrevious);}
-					if(plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
-						plot._valueFlag.innerHTML = plot._toolTipFormat(vPrevious,plot);
-					else
-						plot._valueFlag.innerHTML = new String(vPrevious);
+					
 					var d = new Date(t);
 					
                     if (p < day) {
@@ -101,7 +102,7 @@ Timeplot.Plot.prototype = {
                     } else {
                         plot._timeFlag.innerHTML = d.toLocaleString();
                     }
-
+					
                     var tw = plot._timeFlag.clientWidth;
                     var th = plot._timeFlag.clientHeight;
                     var tdw = Math.round(tw / 2);
@@ -142,6 +143,19 @@ Timeplot.Plot.prototype = {
                             display: "block"
                         });
                     }
+					
+					var vStr = vPrevious;
+					if(!plot._plotInfo.showValuesInHeader && plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
+						vStr = plot._toolTipFormat(vPrevious,plot);
+					
+					if(plot._plotInfo.showValuesInHeader){
+						if(plot._headerFormat != undefined &&  typeof plot._headerFormat == 'function')
+							vStr = plot._headerFormat(vPrevious,plot);
+						$("#" + plot._id + "Header").html(vStr);
+						return;
+					}
+					else
+						plot._valueFlag.innerHTML = vStr;
 
                     if (x + vw + 14 > c.width && y + vh + 4 > c.height) {
                         plot._valueFlagLineLeft.style.display = "none";
@@ -211,7 +225,7 @@ Timeplot.Plot.prototype = {
 					var dif = x > plot.startSelectEventPos ? x - plot.startSelectEventPos : plot.startSelectEventPos - x; 
 					if(dif> 10){
 						if (x < plot._canvas.width)
-							plot._addSelectEvent(plot.startSelectEvent,plot.getSelectedDate(evt,x),plot._eventSource,undefined,false);
+							plot._addSelectEvent(plot.startSelectEvent,plot.getSelectedDate(evt,x),plot._eventSource,undefined,undefined,undefined);
 						else
 							plot._mouseDown = false;
 					}
@@ -406,12 +420,14 @@ Timeplot.Plot.prototype = {
                 var plot = this;
                 var clickHandler = function(event) { 
                     return function(elmt, evt, target) { 
-                        var doc = plot._timeplot.getDocument();
-                        plot._closeBubble();
-                        var coords = SimileAjax.DOM.getEventPageCoordinates(evt);
-                        var elmtCoords = SimileAjax.DOM.getPageCoordinates(elmt);
-                        plot._bubble = SimileAjax.Graphics.createBubbleForPoint(coords.x, elmtCoords.top + plot._canvas.height, plot._plotInfo.bubbleWidth, plot._plotInfo.bubbleHeight, "bottom");
-                        event.fillInfoBubble(plot._bubble.content, plot._theme, plot._timeGeometry.getLabeler());
+						if(event._id !="selectEvent"){
+	                        var doc = plot._timeplot.getDocument();
+	                        plot._closeBubble();
+	                        var coords = SimileAjax.DOM.getEventPageCoordinates(evt);
+	                        var elmtCoords = SimileAjax.DOM.getPageCoordinates(elmt);
+	                        plot._bubble = SimileAjax.Graphics.createBubbleForPoint(coords.x, elmtCoords.top + plot._canvas.height, plot._plotInfo.bubbleWidth, plot._plotInfo.bubbleHeight, "bottom");
+	                        event.fillInfoBubble(plot._bubble.content, plot._theme, plot._timeGeometry.getLabeler());
+						}
                     }
                 };
                 var mouseOverHandler = function(elmt, evt, target) {
@@ -474,17 +490,21 @@ Timeplot.Plot.prototype = {
 		return y;
 	},
 	
-	_addSelectEvent: function(start,end,events,format,checkEvents)
+	_addSelectEvent: function(start,end,events,format,min,max)
 	{
 		if(format != undefined){
 			var parser = events._events.getUnit().getParser(format);
 			start = parser(start);
 			end = parser(end);
 		}
-
-		var parseDateTimeFunction = events._events.getUnit().getParser("iso8601");
+		
+		if(min != undefined && max != undefined){
+			start = start < min ? new Date(min) : start;
+			end = end > max ? new Date(max) : end;
+		}
+		
 		var evt = new Timeline.DefaultEventSource.Event(
-                "selectEvent",start,end,start,end,false,"Date Range","Dates",null,null,null,"#9BFF9B",/*event.color,*/undefined,/*event.textColor,*/undefined/*event.classname*/);
+                "selectEvent",start,end,start,end,false,null,null,null,null,null,this._rangeColor,/*event.color,*/undefined,/*event.textColor,*/undefined/*event.classname*/);
 			
 		var previousEvent = events.getEvent("selectEvent");
 		if( previousEvent != undefined)

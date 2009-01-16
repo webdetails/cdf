@@ -34,6 +34,7 @@ Timeplot.create = function(elmt, plotInfos) {
 Timeplot.createPlotInfo = function(params) {
     return {   
         id:                ("id" in params) ? params.id : "p" + Math.round(Math.random() * 1000000),
+		name: 			   ("name" in params) ? params.name : "",
         dataSource:        ("dataSource" in params) ? params.dataSource : null,
         eventSource:       ("eventSource" in params) ? params.eventSource : null,
         timeGeometry:      ("timeGeometry" in params) ? params.timeGeometry : new Timeplot.DefaultTimeGeometry(),
@@ -53,8 +54,11 @@ Timeplot.createPlotInfo = function(params) {
         bubbleWidth:       ("bubbleWidth" in params) ? params.bubbleWidth : 300,
         bubbleHeight:      ("bubbleHeight" in params) ? params.bubbleHeight : 200,
 		toolTipFormat: ("toolTipFormat" in params) ? params.toolTipFormat : undefined,
+		headerFormat: ("headerFormat" in params) ? params.headerFormat : undefined,
 		getSelectedRegion: ("getSelectedRegion" in params) ? params.getSelectedRegion : undefined,
-		hideZeroToolTipValues: ("hideZeroToolTipValues" in params) ? params.hideZeroToolTipValues : undefined
+		hideZeroToolTipValues: ("hideZeroToolTipValues" in params) ? params.hideZeroToolTipValues : undefined,
+		showValuesInHeader: ("showValuesInHeader" in params) ? params.showValuesInHeader : undefined,
+		rangeColor: ("rangeColor" in params) ? params.rangeColor : "#00FF00"
     };
 };
 
@@ -263,9 +267,9 @@ Timeplot._Impl.prototype = {
                     tl.hideLoadingMessage();
                 }
             };
-            
-            this.showLoadingMessage();
-            window.setTimeout(function() { SimileAjax.XmlHttp.get(url, fError, fDone); }, 0);
+
+			this.showLoadingMessage();
+			window.setTimeout(function() { SimileAjax.XmlHttp.get(url, fError, fDone); }, 0);
         }
     },
     
