@@ -341,10 +341,10 @@ var TimePlotComponent = BaseComponent.extend({
 			var plotInfo = [];
 			for(var i = 0; i<cols.length; i++){
 
-				title.append('<span id="plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
+				title.append('<span id="' + obj.name + 'Plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
 
 				var plotInfoOpts = {
-					id: "plot" + i,
+					id: obj.name + "Plot" + i,
 					name: cols[i],
 					dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
 					valueGeometry: timePlotValueGeometry,
