@@ -152,6 +152,7 @@ Timeplot.Plot.prototype = {
 						if(plot._headerFormat != undefined &&  typeof plot._headerFormat == 'function')
 							vStr = plot._headerFormat(vPrevious,plot);
 						$("#" + plot._id + "Header").html(vStr);
+						plot._valueFlag.style.display = "none";
 						return;
 					}
 					else
