@@ -500,13 +500,14 @@ var DateInputComponent = BaseComponent.extend({
 		update : function() {
 			var myself = this;
 			$("#"+this.htmlObject).html($("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter)).css("width","80px"));
-			Calendar.setup({
-					inputField: myself.name,
-					ifFormat : "%Y-%m-%d",
-					onUpdate: function(){
-						Dashboards.processChange(myself.name)
-					}
-				});
+			$(function(){ 
+					$("#" + myself.htmlObject + " input").datepicker({dateFormat: 'yy-mm-dd',
+					changeMonth: true,
+					changeYear: true,
+					onSelect:function(date, input) {
+						Dashboards.processChange(myself.name);
+					}});
+			});
 		},
 		getValue : function() {
 			var selector = document.getElementById(this.name);
