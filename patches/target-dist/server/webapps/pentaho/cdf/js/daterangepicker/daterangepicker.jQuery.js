@@ -24,7 +24,10 @@ jQuery.fn.daterangepicker = function(settings){
 	var options = jQuery.extend({
 		presetRanges: [
 			{text: 'Today', dateStart: 'today', dateEnd: 'today' },
+			{text: 'Yesterday', dateStart: 'yesterday', dateEnd: 'yesterday' },
 			{text: 'Last 7 days', dateStart: 'today-7days', dateEnd: 'today' },
+			{text: 'Last month', dateStart: function(){ var x= Date.parse('today'); x.setMonth(x.getMonth()-1); x.setDate(1); return x; },
+				dateEnd: function(){ var x= Date.parse('today'); x.setDate(0); return x; } },
 			{text: 'Month to date', dateStart: function(){ return Date.parse('today').moveToFirstDayOfMonth();  }, dateEnd: 'today' },
 			{text: 'Year to date', dateStart: function(){ var x= Date.parse('today'); x.setMonth(0); x.setDate(1); return x; }, dateEnd: 'today' }
 			//extras:
@@ -76,11 +79,15 @@ jQuery.fn.daterangepicker = function(settings){
 				//if closeOnSelect is true
 				if(options.closeOnSelect){
 					if(!rp.find('li.ui-state-active').is('.ui-daterangepicker-DateRange') && !rp.is(':animated') ){
-						settings.onDateSelect(rangeA, rangeB);
+						
+						if(rp.find('li.ui-state-active').is('.ui-daterangepicker-SpecificDate') || rp.find('li.ui-state-active').is('.ui-daterangepicker-AllDatesBefore') || 
+						   rp.find('li.ui-state-active').is('.ui-daterangepicker-AllDatesAfter')){
+							settings.onDateSelect(rangeA, rangeB);
+						}
+						
 						hideRP();
+					
 					}
-					
-					
 				}				
 			},
 			defaultDate: +0
@@ -223,6 +230,11 @@ jQuery.fn.daterangepicker = function(settings){
 				rp.find('.range-start').datepicker('setDate', dateStart).find('.ui-datepicker-current-day').trigger('click');
 				rp.find('.range-end').datepicker('setDate', dateEnd).find('.ui-datepicker-current-day').trigger('click');
 				
+				if(!rp.find('li.ui-state-active').is('.ui-daterangepicker-DateRange')){
+						settings.onDateSelect(fDate(dateStart), fDate(dateEnd));
+						hideRP();
+					}
+				
 		}
 		
 		return false;
@@ -239,7 +251,10 @@ jQuery.fn.daterangepicker = function(settings){
 		rp.find('.ui-datepicker-current-day').trigger('click');
 		var rangeA = fDate( rp.find('.range-start').datepicker('getDate') );
 		var rangeB = fDate( rp.find('.range-end').datepicker('getDate') );
-		settings.onDateSelect(rangeA, rangeB);
+		
+		if(rp.find('li.ui-state-active').is('.ui-daterangepicker-DateRange'))
+			settings.onDateSelect(rangeA, rangeB);
+		
 		hideRP();
 	})
 	.hover(

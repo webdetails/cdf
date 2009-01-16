@@ -57,7 +57,7 @@ Timeplot.createPlotInfo = function(params) {
 		headerFormat: ("headerFormat" in params) ? params.headerFormat : undefined,
 		getSelectedRegion: ("getSelectedRegion" in params) ? params.getSelectedRegion : undefined,
 		hideZeroToolTipValues: ("hideZeroToolTipValues" in params) ? params.hideZeroToolTipValues : undefined,
-		showValuesInHeader: ("showValuesInHeader" in params) ? params.showValuesInHeader : undefined,
+		showValuesMode: ("showValuesMode" in params) ? params.showValuesMode : undefined,
 		rangeColor: ("rangeColor" in params) ? params.rangeColor : "#00FF00"
     };
 };
