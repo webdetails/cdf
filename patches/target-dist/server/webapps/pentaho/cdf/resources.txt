@@ -36,7 +36,10 @@ commonLibrariesLink=\
 /pentaho/cdf/js/jquery.ui.themeroller.css,\
 /pentaho/cdf/js/greybox/gb_styles.css,\
 /pentaho/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
-/pentaho/cdf/js/cdf.css
+/pentaho/cdf/js/cdf.css,\
+/pentaho/cdf/js/daterangepicker/ui.core.css,\
+/pentaho/cdf/js/daterangepicker/ui.theme.css,\
+/pentaho/cdf/js/daterangepicker/ui.datepicker.css,\
 
 mapScript=\
 js/OpenMap/open_map.js,js/jsr_class.js,\
@@ -45,11 +48,7 @@ js/OpenStreetMap.js
 dateRangeInputScript=\
 /pentaho/cdf/js/daterangepicker/daterangepicker.jQuery.js
 
-
 dateRangeInputLink=\
-/pentaho/cdf/js/daterangepicker/ui.core.css,\
-/pentaho/cdf/js/daterangepicker/ui.theme.css,\
-/pentaho/cdf/js/daterangepicker/ui.datepicker.css,\
 /pentaho/cdf/js/daterangepicker/ui.daterangepicker.css
 
 tableComponentScript=\
