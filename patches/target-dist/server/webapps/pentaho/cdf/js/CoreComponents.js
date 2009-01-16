@@ -53,20 +53,46 @@ var BaseComponent = Base.extend({
 
 var XactionComponent = BaseComponent.extend({
 		update : function() {
-			// go through parametere array and update values
-			var p = new Array(this.parameters.length);
-			for(var i= 0, len = p.length; i < len; i++){
-				var key = this.parameters[i][0];
-				var value = Dashboards.getParameterValue(this.parameters[i][1]);
-				p[i] = [key,value];
-			} 
+			if (typeof(this.iframe) == 'undefined' || !this.iframe) {
+				// go through parameter array and update values
+				var p = new Array(this.parameters.length);
+				for(var i= 0, len = p.length; i < len; i++){
+					var key = this.parameters[i][0];
+					var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+					p[i] = [key,value];
+				} 
+	
+				// callback async mode
+				// Dashboards.callPentahoAction(this.solution, this.path, this.action,
+				// p,function(json){ Dashboards.xactionCallback(object,json); });
+				// or sync mode
+				var myself=this;
+				$('#'+this.htmlObject).html(Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null));
+			} else {
+				var xactionIFrameHTML = "<iframe id=\"iframe_"+ this.htmlObject + "\"" + 
+				" frameborder=\"0\"" +
+				" height=\"100%\"" + 
+				" width=\"100%\"" + 
+				" src=\"";
+				
+				xactionIFrameHTML += "../ViewAction?solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
 
-			// callback async mode
-			// Dashboards.callPentahoAction(this.solution, this.path, this.action,
-			// p,function(json){ Dashboards.xactionCallback(object,json); });
-			// or sync mode
-			var myself=this;
-			$('#'+this.htmlObject).html(Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null));
+				// Add args
+				var p = new Array(this.parameters.length);
+				for(var i= 0, len = p.length; i < len; i++){
+					var arg = "&" + this.parameters[i][0] + "=";
+					if (this.parameters[i].length == 3) {
+						xactionIFrameHTML += arg + this.parameters[i][2];
+					} else {
+						xactionIFrameHTML += arg + Dashboards.getParameterValue(this.parameters[i][1]);
+					}
+				}
+
+				// Close IFrame
+				xactionIFrameHTML += "\"></iframe>";
+
+				document.getElementById(this.htmlObject).innerHTML = xactionIFrameHTML;
+			}
 		}
 	});
 
@@ -88,8 +114,10 @@ var SelectBaseComponent = BaseComponent.extend({
 
 			var vid = this.valueAsId==false?false:true;
 			for(var i= 0, len  = myArray.length; i < len; i++){
-				if(myArray[i]!= null && myArray[i].length>0)
-					selectHTML += "<option value = '" + myArray[i][vid?1:0] + "' >" + myArray[i][1] + "</option>";
+				if(myArray[i]!= null && myArray[i].length>0) {
+					var ivid = vid || myArray[i][0] == null; 					
+					selectHTML += "<option value = '" + myArray[i][ivid?1:0] + "' >" + myArray[i][1] + "</option>";
+				}
 			} 
 
 			selectHTML += "</select>";
@@ -493,14 +521,14 @@ var DateRangeInputComponent = BaseComponent.extend({
 		}
 	},
 	{
-		fireDateRangeInputChange : function(name, rangeA, rangeB){
-			// WPG: can we just use the parameter directly?
-			var parameters = eval(name + ".parameter");
+		fireDateRangeInputChange : function(name, rangeA, rangeB) {
+			var component = Dashboards.getComponentByName(name);
+			var parameters = component.parameter;
 			// set the second date and fireChange the first
 			Dashboards.setParameter(parameters[1], rangeB);
 			Dashboards.fireChange(parameters[0],rangeA);
+		}
 	}
-}
 );
 
 var MonthPickerComponent = BaseComponent.extend({
