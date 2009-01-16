@@ -1,9 +1,9 @@
 /*
  * File:        jquery.dataTables.js
- * Version:     1.3.4
+ * Version:     1.3.11
  * CVS:         $Id$
  * Description: Paginate, search and sort HTML tables
- * Author:      Allan Jardine
+ * Author:      Allan Jardine (www.sprymedia.co.uk)
  * Created:     28/3/2008
  * Modified:    $Date$ by $Author$
  * Language:    Javascript
@@ -171,7 +171,7 @@
 				
 				$(nNext).click( function() {
 					/* Make sure we are not over running the display array */
-					if ( oSettings.iDisplayStart + oSettings.iDisplayLength < (oSettings.aaData.length-1) )
+					if ( oSettings.iDisplayStart + oSettings.iDisplayLength < oSettings.aaData.length )
 						oSettings.iDisplayStart += oSettings.iDisplayLength;
 					
 					fnCallbackDraw( oSettings );
@@ -298,11 +298,11 @@
 			
 			if ( isNaN( x ) )
 			{
-    		a = Date.parse( "01/01/1970 00:00:00" );
+    		x = Date.parse( "01/01/1970 00:00:00" );
 			}
 			if ( isNaN( y ) )
 			{
-				b =	Date.parse( "01/01/1970 00:00:00" );
+				y =	Date.parse( "01/01/1970 00:00:00" );
 			}
 			
 			return x - y;
@@ -315,11 +315,11 @@
 			
 			if ( isNaN( x ) )
 			{
-    		a = Date.parse( "01/01/1970 00:00:00" );
+    		x = Date.parse( "01/01/1970 00:00:00" );
 			}
 			if ( isNaN( y ) )
 			{
-				b =	Date.parse( "01/01/1970 00:00:00" );
+				y =	Date.parse( "01/01/1970 00:00:00" );
 			}
 			
 			return y - x;
@@ -401,7 +401,7 @@
 				"sLengthMenu": "Show _MENU_ entries",
 				"sZeroRecords": "No matching records found",
 				"sInfo": "Showing _START_ to _END_ of _TOTAL_ entries",
-				"sInfoEmtpy": "Showing 0 to 0 of 0 entries",
+				"sInfoEmpty": "Showing 0 to 0 of 0 entries",
 				"sInfoFiltered": "(filtered from _MAX_ total entries)",
 				"sInfoPostFix": "",
 				"sSearch": "Search:",
@@ -503,13 +503,6 @@
 			this.fnRowCallback = null;
 			
 			/*
-			 * Variable: fnFinalCallback
-			 * Purpose:  Call this function at the end of the draw function
-			 * Scope:    jQuery.dataTable.classSettings
-			 */
-
-			this.fnFinalCallback = null;
-			/*
 			 * Variable: fnHeaderCallback
 			 * Purpose:  Callback function for the header on each draw
 			 * Scope:    jQuery.dataTable.classSettings
@@ -522,6 +515,13 @@
 			 * Scope:    jQuery.dataTable.classSettings
 			 */
 			this.fnFooterCallback = null;
+			
+			/*
+			 * Variable: fnDrawCallback
+			 * Purpose:  Callback function for the whole table on each draw
+			 * Scope:    jQuery.dataTable.classSettings
+			 */
+			this.fnDrawCallback = null;
 			
 			/*
 			 * Variable: nFooter
@@ -954,8 +954,8 @@
 			if ( typeof oLanguage.sInfo != 'undefined' )
 				oSettings.oLanguage.sInfo = oLanguage.sInfo;
 			
-			if ( typeof oLanguage.sInfoEmtpy != 'undefined' )
-				oSettings.oLanguage.sInfoEmtpy = oLanguage.sInfoEmtpy;
+			if ( typeof oLanguage.sInfoEmpty != 'undefined' )
+				oSettings.oLanguage.sInfoEmpty = oLanguage.sInfoEmpty;
 			
 			if ( typeof oLanguage.sInfoFiltered != 'undefined' )
 				oSettings.oLanguage.sInfoFiltered = oLanguage.sInfoFiltered;
@@ -1004,7 +1004,7 @@
 				"sWidth": null,
 				"sClass": null,
 				"fnRender": null,
-				"fnSort": null
+				"iDataSort": oSettings.aoColumns.length-1
 			};
 			
 			/* User specified column options */
@@ -1036,8 +1036,8 @@
 				if ( typeof oOptions.fnRender != 'undefined' )
 					oSettings.aoColumns[ iLength ].fnRender = oOptions.fnRender;
 				
-				if ( typeof oOptions.fnSort != 'undefined' )
-					oSettings.aoColumns[ iLength ].fnSort = oOptions.fnSort;
+				if ( typeof oOptions.iDataSort != 'undefined' )
+					oSettings.aoColumns[ iLength ].iDataSort = oOptions.iDataSort;
 			}
 			
 			/* Add a column specific filter */
@@ -1054,6 +1054,7 @@
 		function _fnGatherData( oSettings )
 		{
 			var nDataNodes;
+			var iDataLength = $('tbody tr').length;
 			
 			if ( $('thead th', oSettings.nTable).length != oSettings.aoColumns.length )
 			{
@@ -1065,7 +1066,7 @@
 				/* Get the title of the column - unless there is a user set one */
 				if ( oSettings.aoColumns[i].sTitle == null )
 				{
-					oSettings.aoColumns[i].sTitle = $('thead th:nth-child('+(i+1)+')', oSettings.nTable).text();
+					oSettings.aoColumns[i].sTitle = $('thead th:nth-child('+(i+1)+')', oSettings.nTable).html();
 				}
 				
 				if ( oSettings.aoColumns[i].sFooter == null && typeof $('tfoot', oSettings.nTable)[0] != 'undefined' )
@@ -1075,6 +1076,13 @@
 				
 				/* Note if the user as set a type or if we should auto-detect */
 				var bUserSetType = oSettings.aoColumns[i].sType == null ? false : true;
+				
+				/* Deal with an empty table - can't really get much info from it! */
+				if ( !bUserSetType && iDataLength == 0 )
+				{
+					oSettings.aoColumns[i].sType = 'string';
+					continue;
+				}
 				
 				/* Get the data for the column */
 				$('tbody td:nth-child('+oSettings.aoColumns.length+'n+'+(i+1)+')', oSettings.nTable).each( function( index ) {
@@ -1186,7 +1194,7 @@
 					}
 					
 					/*
-					 * XXX This is hasty has hell - but I can't see another way around it. If anyone does
+					 * XXX This is nasty has hell - but I can't see another way around it. If anyone does
 					 * know of a good way, please let me know so I can include it in later versions.
 					 * Basically the issue here is that the Javascript engine in modern browsers doesn't 
 					 * appear to allow the rendering engine to update the display while it is still excuting
@@ -1258,7 +1266,10 @@
 			/* Set an absolute width for the table such that pagination doesn't
 			 * cause the table to resize
 			 */
-			oSettings.nTable.style.width = oSettings.nTable.offsetWidth+"px";
+			if ( oSettings.oFeatures.bAutoWidth )
+			{
+				oSettings.nTable.style.width = oSettings.nTable.offsetWidth+"px";
+			}
 		}
 		
 		
@@ -1296,6 +1307,7 @@
 						{
 							nTd = document.createElement( 'td' );
 							nTd.setAttribute( 'valign', "top" );
+							nTd.setAttribute( 'vAlign', "top" ); /* IE... xxx */
 							
 							if ( oSettings.iColumnSorting == i && oSettings.aoColumns[i].sClass != null )
 							{
@@ -1316,7 +1328,7 @@
 								nTd.innerHTML = oSettings.aoColumns[i].fnRender( {
 									"iDataRow": j,
 									"iDataColumn": i,
-									"aData": oSettings.aaData } );
+									"aData": oSettings.aaData.slice() } );
 							}
 							else
 							{
@@ -1386,11 +1398,11 @@
 				if ( oSettings.aaData.length == 0 && oSettings.aaData.length == oSettings.aaDataMaster.length )
 				{
 					oSettings.nInfo.innerHTML = 
-						oSettings.oLanguage.sInfoEmtpy +' '+ oSettings.oLanguage.sInfoPostFix;
+						oSettings.oLanguage.sInfoEmpty +' '+ oSettings.oLanguage.sInfoPostFix;
 				}
 				else if ( oSettings.aaData.length == 0 )
 				{
-					oSettings.nInfo.innerHTML = oSettings.oLanguage.sInfoEmtpy +' '+ 
+					oSettings.nInfo.innerHTML = oSettings.oLanguage.sInfoEmpty +' '+ 
 						oSettings.oLanguage.sInfoFiltered.replace('_MAX_', oSettings.aaDataMaster.length) +' '+ 
 						oSettings.oLanguage.sInfoPostFix;
 				}
@@ -1415,14 +1427,14 @@
 				}
 			}
 			
-			// Custom final callback function - might want to manipule the end result
-			if ( typeof oSettings.fnFinalCallback == "function" )
+			/* Drawing is finished - call the callback if there is one */
+			if ( typeof oSettings.fnDrawCallback == 'function' )
 			{
-				oSettings.fnFinalCallback(oSettings.aaData, iRowCount);
+				oSettings.fnDrawCallback();
 			}
 		}
-
-
+		
+		
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 		 * Options (features) HTML
@@ -1471,14 +1483,14 @@
 					var nNewNode = document.createElement( 'div' );
 					
 					/* Check to see if we should append a class name to the container */
-					var cNext = oSettings.sDomPositioning[i+1];
+					var cNext = sDom[i+1];
 					if ( cNext == "'" || cNext == '"' )
 					{
 						var sClass = "";
 						var j = 2;
-						while ( oSettings.sDomPositioning[i+j] != cNext )
+						while ( sDom[i+j] != cNext )
 						{
-							sClass += oSettings.sDomPositioning[i+j];
+							sClass += sDom[i+j];
 							j++;
 						}
 						nNewNode.className = sClass;
@@ -1546,7 +1558,7 @@
 			nFilter.className = "dataTables_filter";
 			nFilter.innerHTML = oSettings.oLanguage.sSearch+' <input type="text" />';
 			
-			$("input", nFilter).keyup( function() { 
+			$("input", nFilter).keyup( function() {
 				_fnFilterComplete( oSettings, this.value ); 
 			} );
 			
@@ -1620,8 +1632,11 @@
 			nLength.className = "dataTables_length";
 			nLength.innerHTML = oSettings.oLanguage.sLengthMenu.replace( '_MENU_', sStdMenu );
 			
-			/* Set the length to the current display length - thanks to Andrea Pavlovic for this fix */
-			$('select option[@value="'+oSettings.iDisplayLength+'"]',nLength).attr("selected",true);
+			/*
+			 * Set the length to the current display length - thanks to Andrea Pavlovic for this fix,
+			 * and Stefan Skopnik for fixing the fix!
+			 */
+			$('select option[value="'+oSettings.iDisplayLength+'"]',nLength).attr("selected",true);
 			
 			$('select', nLength).change( function() {
 				oSettings.iDisplayLength = parseInt($(this).val());
@@ -1878,14 +1893,21 @@
 			 */
 			var sDynamicSort = "var fnLocalSorting = function(a,b){var iTest; var oSort = $.fn.dataTableExt.oSort;";
 			var aaSort = oSettings.aaSorting;
+			var iDataSort;
+			var iDataType;
 			
 			for ( var i=0 ; i<aaSort.length-1 ; i++ )
 			{
-				sDynamicSort += "iTest = oSort['"+oSettings.aoColumns[ aaSort[i][0] ].sType+"-"+aaSort[i][1]+"']"+
-					"( a["+aaSort[i][0]+"], b["+aaSort[i][0]+"] ); if ( iTest == 0 )";
+				iDataSort = oSettings.aoColumns[ aaSort[i][0] ].iDataSort;
+				iDataType = oSettings.aoColumns[ iDataSort ].sType;
+				sDynamicSort += "iTest = oSort['"+iDataType+"-"+aaSort[i][1]+"']"+
+					"( a["+iDataSort+"], b["+iDataSort+"] ); if ( iTest == 0 )";
 			}
-			sDynamicSort += "iTest = oSort['"+oSettings.aoColumns[ aaSort[aaSort.length-1][0] ].sType+"-"+aaSort[i][1]+"']"+
-				"( a["+aaSort[i][0]+"], b["+aaSort[i][0]+"] ); return iTest;}";
+			
+			iDataSort = oSettings.aoColumns[ aaSort[aaSort.length-1][0] ].iDataSort;
+			iDataType = oSettings.aoColumns[ iDataSort ].sType;
+			sDynamicSort += "iTest = oSort['"+iDataType+"-"+aaSort[aaSort.length-1][1]+"']"+
+				"( a["+iDataSort+"], b["+iDataSort+"] ); return iTest;}";
 			
 			/* The eval has to be done to a variable for IE */
 			eval( sDynamicSort );
@@ -2023,7 +2045,14 @@
 				{
 					if ( oSettings.aoColumns[j].bSearchable )
 					{
-						oSettings.asDataSearch[i] += aArray[i][j].replace(/\n/g," ")+' ';
+						if ( typeof aArray[i][j] == "string" )
+						{
+							oSettings.asDataSearch[i] += aArray[i][j].replace(/\n/g," ")+' ';
+						}
+						else
+						{
+							oSettings.asDataSearch[i] += aArray[i][j]+' ';
+						}
 					}
 				}
 			}
@@ -2402,14 +2431,14 @@
 				if ( typeof oInit.fnRowCallback != 'undefined' )
 					oSettings.fnRowCallback = oInit.fnRowCallback;
 				
-				if ( typeof oInit.fnFinalCallback != 'undefined' )
-					oSettings.fnFinalCallback = oInit.fnFinalCallback;
-				
 				if ( typeof oInit.fnHeaderCallback != 'undefined' )
 					oSettings.fnHeaderCallback = oInit.fnHeaderCallback;
 				
 				if ( typeof oInit.fnFooterCallback != 'undefined' )
 					oSettings.fnFooterCallback = oInit.fnFooterCallback;
+				
+				if ( typeof oInit.fnDrawCallback != 'undefined' )
+					oSettings.fnDrawCallback = oInit.fnDrawCallback;
 				
 				if ( typeof oInit.aaSorting != 'undefined' )
 					oSettings.aaSorting = oInit.aaSorting;

@@ -355,13 +355,19 @@ public class TimeSeriesCollectionChartDefinition extends TimeSeriesCollection im
         }
 
     }
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd");
 
     private Date getValidDate(Object raw) {
 
         if (raw instanceof String) {
             try {
-                return formatter.parse((String) raw);
+                try {
+                    return formatter1.parse((String) raw);
+                } catch (ParseException e) {
+                    // try w/o hours
+                }
+                return formatter2.parse((String) raw);
             } catch (ParseException e) {
                 getLogger().error(
                     Messages.getString("TimeSeriesCollectionChartDefinition.ERROR_0001_INVALID_DATE", //$NON-NLS-1$

@@ -790,7 +790,7 @@ var TableComponent = BaseComponent.extend({
 
 			var myself = this;
 
-			dtData.fnFinalCallback = function( aData, iRowCount ){
+			dtData.fnDrawCallback = function( aData, iRowCount ){
 				$("#" + myself.htmlObject + " td.sparkline").each(function(i){
 						$(this).sparkline($(this).text().split(/,/));
 					});
@@ -949,12 +949,12 @@ var ExecuteXactionComponent = BaseComponent.extend({
 			$("#"+ this.htmlObject).bind("click", function(){
 					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
 					if(success) {
-						this.executeXAction();
+						myself.executeXAction();
 					}
 					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
 				});
 		},
-		executeXaction : function() {
+		executeXAction : function() {
 			var url = "/pentaho/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
 
 			var p = new Array(this.parameters.length);

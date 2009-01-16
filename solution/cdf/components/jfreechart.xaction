@@ -257,7 +257,84 @@
 			</sources>
 			<default-value>###,###,##0.###</default-value>
 		</TOOLTIPYFORMAT>
-
+		<MARKERSVISIBLE type="string">
+			<sources>
+				<request>markersVisible</request>
+			</sources>
+			<default-value>false</default-value>
+		</MARKERSVISIBLE>
+		<DIRECTORY type="string">
+			<sources>
+				<request>directory</request>
+			</sources>
+			<default-value/>
+		</DIRECTORY>
+		<TRANSFORMATION type="string">
+			<sources>
+				<request>transformation</request>
+			</sources>
+			<default-value/>
+		</TRANSFORMATION>
+		<IMPORTSTEP type="string">
+			<sources>
+				<request>importStep</request>
+			</sources>
+			<default-value>Output</default-value>
+		</IMPORTSTEP>
+		<PARAMETER1 type="string">
+			<sources>
+				<request>parameter1</request>
+			</sources>
+			<default-value/>
+		</PARAMETER1>
+		<PARAMETER2 type="string">
+			<sources>
+				<request>parameter2</request>
+			</sources>
+			<default-value/>
+		</PARAMETER2>
+		<PARAMETER3 type="string">
+			<sources>
+				<request>parameter3</request>
+			</sources>
+			<default-value/>
+		</PARAMETER3>
+		<PARAMETER4 type="string">
+			<sources>
+				<request>parameter4</request>
+			</sources>
+			<default-value/>
+		</PARAMETER4>
+		<PARAMETER5 type="string">
+			<sources>
+				<request>parameter5</request>
+			</sources>
+			<default-value/>
+		</PARAMETER5>
+		<PARAMETER6 type="string">
+			<sources>
+				<request>parameter6</request>
+			</sources>
+			<default-value/>
+		</PARAMETER6>
+		<PARAMETER7 type="string">
+			<sources>
+				<request>parameter7</request>
+			</sources>
+			<default-value/>
+		</PARAMETER7>
+		<PARAMETER8 type="string">
+			<sources>
+				<request>parameter8</request>
+			</sources>
+			<default-value/>
+		</PARAMETER8>
+		<PARAMETER9 type="string">
+			<sources>
+				<request>parameter9</request>
+			</sources>
+			<default-value/>
+		</PARAMETER9>
 	</inputs>
 
 	<outputs> 
@@ -501,7 +578,7 @@
 	</actions> 
 	
 	<actions> 
-		<condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
+		<condition><![CDATA[QUERY_TYPE == "sql"]]></condition>
 			
 			<action-definition> 
 			  <component-name>SQLLookupRule</component-name>
@@ -521,115 +598,156 @@
 			</action-definition>
 			
 	</actions> 
-	
-	<action-definition> 
-				<component-name>ChartComponent</component-name>
-				<action-type>Chart</action-type>
-				<action-inputs> 
-					<chart-data type="result-set" mapping="newResults"/> 
-					<WIDTH type="string"/>
-					<HEIGHT type="string"/>
-					<BYROW type="string"/>
-					<CHARTTYPE type="string"/>
-					<TITLE type="string"/>
-					<SUBTITLE type="string"/>
-					<RANGETITLE type="string"/>
-					<DATASETTYPE type="string"/>
-					<DOMAINPERIODTYPE type="string"/>
-					<ORIENTATION type="string"/>
-					<IS3D type="string"/>
-					<ISSTACKED type="string"/>
-					<DOMAINTICKFONTSIZE type="string"/> 
-					<DOMAINLABELROTATIONDIR type="string"/>
-					<DOMAINLABELROTATION type="string"/>
-					<URLTEMPLATE type="string"/>
-					<USEBASEURL type="string"/>
-					<URLTARGET type="string"/>
-					<PARAMETERNAME type="string"/>
-					<SERIESNAME type="string"/>
-					<INCLUDELEGEND type="string"/>
-					<LEGENDFONTFAMILY type="string"/>
-					<LEGENDFONTSIZE type="string"/>
-					<LEGENDFONTISBOLD type="string"/>
-					<LEGENDFONTISITALIC type="string"/>
-					<FOREGROUNDALPHA type="string"/>
-					<BACKGROUNDALPHA type="string"/>
-					<MAXBARWIDTH type="string" />
-					<BACKGROUND type="string"/>
-					<PLOTBACKGROUND type="string"/>
-					<INTERIORGAP type="string"/>
-					<TOOLTIPCONTENT type="string"/>
-					<TOOLTIPYFORMAT type="string"/>
-				</action-inputs>
-				<action-resources/>
-				<action-outputs> 
-					<chart-filename type="string"/>  
-					<base-url type="string"/>  
-					<chart-mapping type="string"/>  
-					<image-tag type="string"/>  
-					<chart-output type="content"/> 
-				</action-outputs>
-				<component-definition> 
-					<width>{WIDTH}</width>  
-					<height>{HEIGHT}</height>  
-					<by-row>{BYROW}</by-row>  
-					<chart-attributes> 
-						<chart-type>{CHARTTYPE}</chart-type>  
-						<title>{TITLE}</title>  
-						<subtitles>
-							<subtitle>{SUBTITLE}</subtitle>  
-						</subtitles>
-						<range-title>{RANGETITLE}</range-title>  
-						<dataset-type>{DATASETTYPE}</dataset-type>  
-						<domain-period-type>{DOMAINPERIODTYPE}</domain-period-type>  
-						<orientation>{ORIENTATION}</orientation>  
-						<is-3D>{IS3D}</is-3D>  
-						<is-stacked>{ISSTACKED}</is-stacked>  
-						<domain-tick-font> 
-							<size>{DOMAINTICKFONTSIZE}</size> 
-						</domain-tick-font>  
-						<domain-label-rotation-dir>{DOMAINLABELROTATIONDIR}</domain-label-rotation-dir>  
-						<domain-label-rotation>{DOMAINLABELROTATION}</domain-label-rotation>  
-						<url-template>{URLTEMPLATE}</url-template> 
-						<use-base-url>{USEBASEURL}</use-base-url>  
-						<url-target>{URLTARGET}</url-target>
-						<paramName>{PARAMETERNAME}</paramName>  
-						<series-name>{SERIESNAME}</series-name>  
-						<include-legend>{INCLUDELEGEND}</include-legend> 
-						<legend-font>
-							<font-family>{LEGENDFONTFAMILY}</font-family>
-							<size>{LEGENDFONTSIZE}</size>
-							<is-bold>{LEGENDFONTISBOLD}</is-bold>
-							<is-italic>{LEGENDFONTISITALIC}</is-italic>
-						</legend-font>
-						<interior-gap>{INTERIORGAP}</interior-gap> 
-						<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
-						<background-alpha>{BACKGROUNDALPHA}</background-alpha>
-						<max-bar-width>{MAXBARWIDTH}</max-bar-width>
-						<chart-background type="color">{BACKGROUND}</chart-background>
-						<plot-background type="color">{PLOTBACKGROUND}</plot-background>
-						<markers-visible>false</markers-visible>
-						<tooltip-content>{TOOLTIPCONTENT}</tooltip-content>
-						<tooltip-y-format>{TOOLTIPYFORMAT}</tooltip-y-format>
-						<color-palette> 
-							<color>#1b95d9</color>  
-							<color>#caca9e</color>  
-							<color>#6693b0</color>  
-							<color>#f05e27</color>  
-							<color>#a5bc4e</color>  
-							<color>#e48701</color>  
-							<color>#86d1e4</color>  
-							<color>#e4f9a0</color>  
-							<color>#ffd512</color>  
-							<color>#75b000</color>  
-							<color>#0662b0</color>  
-							<color>#ede8c6</color>  
-							<color>#cc3300</color>  
-							<color>#d1dfe7</color> 
-						</color-palette>  
-					</chart-attributes> 
-				</component-definition> 
+
+	<actions>
+		<condition><![CDATA[QUERY_TYPE == "kettle"]]></condition>
+		<action-definition> 
+			<component-name>KettleComponent</component-name>
+			<action-type>Execute Kettle Transformation</action-type>
+			<action-inputs>
+				<PARAMETER1 type="string"/>
+				<PARAMETER2 type="string"/>
+				<PARAMETER3 type="string"/>
+				<PARAMETER4 type="string"/>
+				<PARAMETER5 type="string"/>
+				<PARAMETER6 type="string"/>
+				<PARAMETER7 type="string"/>
+				<PARAMETER8 type="string"/>
+				<PARAMETER9 type="string"/>
+				<TRANSFORMATION type="string"/>
+				<DIRECTORY type="string"/>
+				<IMPORTSTEP type="string"/>
+			</action-inputs>
+			<action-outputs> 
+				<transformation-output type="result-set" mapping="newResults"/> 
+			</action-outputs>
+			<component-definition> 
+				<parameter1>{PARAMETER1}</parameter1>
+				<parameter2>{PARAMETER2}</parameter2>
+				<parameter3>{PARAMETER3}</parameter3>
+				<parameter4>{PARAMETER4}</parameter4>
+				<parameter5>{PARAMETER5}</parameter5>
+				<parameter6>{PARAMETER6}</parameter6>
+				<parameter7>{PARAMETER7}</parameter7>
+				<parameter8>{PARAMETER8}</parameter8>
+				<parameter9>{PARAMETER9}</parameter9>
+				<transformation>{TRANSFORMATION}</transformation>
+				<directory>{DIRECTORY}</directory>
+				<importstep>{IMPORTSTEP}</importstep> 
+			</component-definition> 
 		</action-definition>
-		
-	</actions> 
+	</actions>
+
+	<action-definition> 
+		<component-name>ChartComponent</component-name>
+		<action-type>Chart</action-type>
+		<action-inputs> 
+			<chart-data type="result-set" mapping="newResults"/> 
+			<WIDTH type="string"/>
+			<HEIGHT type="string"/>
+			<BYROW type="string"/>
+			<CHARTTYPE type="string"/>
+			<TITLE type="string"/>
+			<SUBTITLE type="string"/>
+			<RANGETITLE type="string"/>
+			<DATASETTYPE type="string"/>
+			<DOMAINPERIODTYPE type="string"/>
+			<ORIENTATION type="string"/>
+			<IS3D type="string"/>
+			<ISSTACKED type="string"/>
+			<DOMAINTICKFONTSIZE type="string"/> 
+			<DOMAINLABELROTATIONDIR type="string"/>
+			<DOMAINLABELROTATION type="string"/>
+			<URLTEMPLATE type="string"/>
+			<USEBASEURL type="string"/>
+			<URLTARGET type="string"/>
+			<PARAMETERNAME type="string"/>
+			<SERIESNAME type="string"/>
+			<INCLUDELEGEND type="string"/>
+			<LEGENDFONTFAMILY type="string"/>
+			<LEGENDFONTSIZE type="string"/>
+			<LEGENDFONTISBOLD type="string"/>
+			<LEGENDFONTISITALIC type="string"/>
+			<FOREGROUNDALPHA type="string"/>
+			<BACKGROUNDALPHA type="string"/>
+			<MAXBARWIDTH type="string" />
+			<BACKGROUND type="string"/>
+			<PLOTBACKGROUND type="string"/>
+			<INTERIORGAP type="string"/>
+			<TOOLTIPCONTENT type="string"/>
+			<TOOLTIPYFORMAT type="string"/>
+			<MARKERSVISIBLE type="string"/>
+		</action-inputs>
+		<action-resources/>
+		<action-outputs> 
+			<chart-filename type="string"/>  
+			<base-url type="string"/>  
+			<chart-mapping type="string"/>  
+			<image-tag type="string"/>  
+			<chart-output type="content"/> 
+		</action-outputs>
+		<component-definition> 
+			<width>{WIDTH}</width>  
+			<height>{HEIGHT}</height>  
+			<by-row>{BYROW}</by-row>  
+			<chart-attributes> 
+				<chart-type>{CHARTTYPE}</chart-type>  
+				<title>{TITLE}</title>  
+				<subtitles>
+					<subtitle>{SUBTITLE}</subtitle>  
+				</subtitles>
+				<range-title>{RANGETITLE}</range-title>  
+				<dataset-type>{DATASETTYPE}</dataset-type>  
+				<domain-period-type>{DOMAINPERIODTYPE}</domain-period-type>  
+				<orientation>{ORIENTATION}</orientation>  
+				<is-3D>{IS3D}</is-3D>  
+				<is-stacked>{ISSTACKED}</is-stacked>  
+				<domain-tick-font> 
+					<size>{DOMAINTICKFONTSIZE}</size> 
+				</domain-tick-font>  
+				<domain-label-rotation-dir>{DOMAINLABELROTATIONDIR}</domain-label-rotation-dir>  
+				<domain-label-rotation>{DOMAINLABELROTATION}</domain-label-rotation>  
+				<url-template>{URLTEMPLATE}</url-template> 
+				<use-base-url>{USEBASEURL}</use-base-url>  
+				<url-target>{URLTARGET}</url-target>
+				<paramName>{PARAMETERNAME}</paramName>  
+				<series-name>{SERIESNAME}</series-name>  
+				<include-legend>{INCLUDELEGEND}</include-legend> 
+				<legend-font>
+					<font-family>{LEGENDFONTFAMILY}</font-family>
+					<size>{LEGENDFONTSIZE}</size>
+					<is-bold>{LEGENDFONTISBOLD}</is-bold>
+					<is-italic>{LEGENDFONTISITALIC}</is-italic>
+				</legend-font>
+				<interior-gap>{INTERIORGAP}</interior-gap> 
+				<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
+				<background-alpha>{BACKGROUNDALPHA}</background-alpha>
+				<max-bar-width>{MAXBARWIDTH}</max-bar-width>
+				<chart-background type="color">{BACKGROUND}</chart-background>
+				<plot-background type="color">{PLOTBACKGROUND}</plot-background>
+				<markers-visible>false</markers-visible>
+				<tooltip-content>{TOOLTIPCONTENT}</tooltip-content>
+				<tooltip-y-format>{TOOLTIPYFORMAT}</tooltip-y-format>
+				<markers-visible>{MARKERSVISIBLE}</markers-visible>
+				<color-palette> 
+					<color>#1b95d9</color>  
+					<color>#caca9e</color>  
+					<color>#6693b0</color>  
+					<color>#f05e27</color>  
+					<color>#a5bc4e</color>  
+					<color>#e48701</color>  
+					<color>#86d1e4</color>  
+					<color>#e4f9a0</color>  
+					<color>#ffd512</color>  
+					<color>#75b000</color>  
+					<color>#0662b0</color>  
+					<color>#ede8c6</color>  
+					<color>#cc3300</color>  
+					<color>#d1dfe7</color> 
+				</color-palette>  
+			</chart-attributes> 
+		</component-definition> 
+	</action-definition>
+
+</actions> 
 </action-sequence>
