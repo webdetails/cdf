@@ -368,7 +368,12 @@ public class TimeTableXYDatasetChartDefinition extends TimeTableXYDataset implem
 
         if (raw instanceof String) {
             try {
-                return formatter.parse((String) raw);
+                try {
+                    return formatter1.parse((String) raw);
+                } catch (ParseException e) {
+                    // try w/o hours
+                }
+                return formatter2.parse((String) raw);
             } catch (ParseException e) {
                 getLogger().error(
                     Messages.getString("TimeSeriesCollectionChartDefinition.ERROR_0001_INVALID_DATE", //$NON-NLS-1$
