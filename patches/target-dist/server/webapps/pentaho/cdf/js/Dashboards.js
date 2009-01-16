@@ -186,7 +186,7 @@ Dashboards.init = function(components){
 };
 
 Dashboards.initEngine = function(){
-	components = this.components;
+	var components = this.components;
 	var compCount = components.length;
 	Dashboards.incrementRunningCalls();
 
@@ -199,14 +199,14 @@ Dashboards.initEngine = function(){
 };
 
 Dashboards.resetAll = function(){
-	var compCount = components.length;
-	for(var i= 0, len = components.length; i < len; i++){
-		components[i].clear();
+	var compCount = this.components.length;
+	for(var i= 0, len = this.components.length; i < len; i++){
+		this.components[i].clear();
 	}
-	var compCount = components.length;
-	for(var i= 0, len = components.length; i < len; i++){
-		if(components[i].executeAtStart){
-			this.update(components[i]);
+	var compCount = this.components.length;
+	for(var i= 0, len = this.components.length; i < len; i++){
+		if(this.components[i].executeAtStart){
+			this.update(this.components[i]);
 		}
 	}
 };
@@ -235,12 +235,11 @@ Dashboards.fireChange = function(parameter, value) {
 	//alert("Parameter: " + parameter + "; Value: " + value);
 	Dashboards.setParameter(parameter, value);
 
-	for(var i= 0, len = components.length; i < len; i++){
-		if(Dashboards.isArray(components[i].listeners)){
-			for(var j= 0 ; j < components[i].listeners.length; j++){
-
-				if(components[i].listeners[j] == parameter) {
-					this.update(components[i]);
+	for(var i= 0, len = this.components.length; i < len; i++){
+		if(Dashboards.isArray(this.components[i].listeners)){
+			for(var j= 0 ; j < this.components[i].listeners.length; j++){
+				if(this.components[i].listeners[j] == parameter) {
+					this.update(this.components[i]);
 					break;
 				}
 				//alert("finished parameter " + j)
