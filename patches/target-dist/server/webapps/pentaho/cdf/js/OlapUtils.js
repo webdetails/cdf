@@ -159,6 +159,11 @@ OlapUtils.mdxQuery.prototype.addFilter = function(axis, dimension, value){
 
 OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,drill){
 
+	if(condition == undefined && drill == undefined){
+		this.query["where"][key] = value;
+		return;
+	}
+
 	//Store initial where cause for this key
 	if(this.query["conditions"][key] == undefined && this.query["where"][key] != undefined)
 		this.query["conditions"][key+"InitialValue"] = this.query["where"][key];
@@ -184,6 +189,11 @@ OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,drill){
 
 OlapUtils.mdxQuery.prototype.removeCondition = function(key,value,condition){
 
+	if(condition == undefined){
+		delete this.query["where"][key];
+		return;
+	}
+	
 	if(this.query["conditions"][key]!= undefined && this.query["conditions"][key][value]!= undefined){
 		delete this.query["conditions"][key][value];
 		return this.setCondition(key,condition);
