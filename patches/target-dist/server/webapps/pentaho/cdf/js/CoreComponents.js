@@ -261,26 +261,27 @@ var TimePlotComponent = BaseComponent.extend({
 			var cd = this.chartDefinition;
 	
 				
-			if(this.timeplot!= undefined && cd.dateFilter != undefined){
+			if(cd.updateOnDateRangeInputChange != true && this.timeplot!= undefined && cd.dateRangeInput != undefined){
 
-				if(this.updateFilter != false && cd.dateFilter != undefined && this.timeplot._plots.length > 0 ){
+				if(this.updateTimeplot != false && this.timeplot._plots.length > 0 ){
 			
 					var lastEventPlot = this.timeplot._plots[this.timeplot._plots.length -1];
-				
 					if(lastEventPlot._id == "eventPlot")
-						lastEventPlot._addSelectEvent(Dashboards.getParameterValue(this.startDateParameter),Dashboards.getParameterValue(this.endDateParameter),lastEventPlot._eventSource,"iso8601",false);
+						lastEventPlot._addSelectEvent(Dashboards.getParameterValue(this.startDateParameter),Dashboards.getParameterValue(this.endDateParameter),
+							lastEventPlot._eventSource,"iso8601",this.geometry._earliestDate,this.geometry._latestDate);
 				}
-				
+					
 				return;
+				
 			}
 			
 			
-			if(cd.dateFilter != undefined && this.timeplot == undefined){
-				cd.dateFilter = Dashboards.getComponent(cd.dateFilter);
-				this.startDateParameter = cd.dateFilter.parameter[0];
-				this.endDateParameter = cd.dateFilter.parameter[1];
+			if(cd.dateRangeInput != undefined && this.timeplot == undefined){
+				cd.dateRangeInput = Dashboards.getComponent(cd.dateRangeInput);
+				this.startDateParameter = cd.dateRangeInput.parameter[0];
+				this.endDateParameter = cd.dateRangeInput.parameter[1];
 				this.listeners = this.listeners == undefined ? [] : this.listeners;
-				this.listeners = this.listeners.concat(this.startDateParameter).concat(this.endDateParameter);
+				this.listeners = this.listeners.concat(this.startDateParameter).concat(this.endDateParameter)
 			}
 
 			if (typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined ){
@@ -294,7 +295,9 @@ var TimePlotComponent = BaseComponent.extend({
 			var timePlotTimeGeometry = new Timeplot.DefaultTimeGeometry({
 					gridColor: "#000000",
 					axisLabelsPlacement: "top",
-					gridType: "short"
+					gridType: "short",
+					yAxisColor: "rgba(255,255,255,0)",
+					gridColor: "rgba(100,100,100,1)"
 				});
 
 			var timePlotValueGeometry = new Timeplot.DefaultValueGeometry({
@@ -302,7 +305,7 @@ var TimePlotComponent = BaseComponent.extend({
 					min: 0,
 					axisLabelsPlacement: "left",
 					gridType: "short",
-					toolTipFormat : function (value){
+					valueFormat : function (value){
 						return toFormatedString(value);
 					}
 				});
@@ -338,19 +341,20 @@ var TimePlotComponent = BaseComponent.extend({
 			var plotInfo = [];
 			for(var i = 0; i<cols.length; i++){
 
-				title.append('<span style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
+				title.append('<span id="plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
 
 				var plotInfoOpts = {
-					id: cols[i],
+					id: "plot" + i,
+					name: cols[i],
 					dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
 					valueGeometry: timePlotValueGeometry,
 					timeGeometry: timePlotTimeGeometry,
 					lineColor: Dashboards.timePlotColors[i],
 					showValues: cd.showValues,
 					hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
-					toolTipFormat: function (value,plot){
-						return  plot._id + " = " + toFormatedString(value);
-					}
+					showValuesInHeader: cd.showValuesInHeader != undefined ? cd.showValuesInHeader : false,
+					toolTipFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value);},
+					headerFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";},
 				};
 				if ( cd.dots == true){
 					plotInfoOpts.dotColor = Dashboards.timePlotColors[i];
@@ -365,16 +369,19 @@ var TimePlotComponent = BaseComponent.extend({
 
 			// support for events
 			var eventSource2 = undefined;
-			if(cd.dateFilter != undefined){
+			var eventSourcePlot = undefined;
+			if(cd.dateRangeInput != undefined || (cd.events && cd.events.show == true)){
+				this.rangeColor = "00FF00";
 				eventSource2 = new Timeplot.DefaultEventSource();
-				plotInfo.push(Timeplot.createPlotInfo({ 
-							id: "eventPlot",  eventSource: eventSource2,  
-							timeGeometry: timePlotTimeGeometry,
-							lineColor: "#FF0000",
-							getSelectedRegion: function(start,end){
-								myself.updateFilters(start,end);
-							}
-						})); 
+				eventSourcePlot = Timeplot.createPlotInfo({ 
+					id: cd.dateRangeInput != undefined ? "eventPlot" : "events", eventSource: eventSource2,  
+					timeGeometry: timePlotTimeGeometry,
+					lineColor: "#FF0000",
+					rangeColor: this.rangeColor,
+					getSelectedRegion: function(start,end){
+						myself.updateDateRangeInput(start,end);
+					}});
+				plotInfo.push(eventSourcePlot); 
 			}
 			
 			$("#"+this.htmlObject).html(title);
@@ -389,6 +396,7 @@ var TimePlotComponent = BaseComponent.extend({
 
 			timeplot = Timeplot.create($("#"+this.htmlObject+" > div.timeplot")[0], plotInfo);
 			obj.timeplot = timeplot;
+			obj.geometry = timePlotTimeGeometry 
 
 			// go through parametere array and update values
 			var parameters = [];
@@ -416,25 +424,24 @@ var TimePlotComponent = BaseComponent.extend({
 				timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
 						timeplot.loadJSON(eventUrl,eventSource2,function(data){
 								data.events = myself.filterEvents(data.events, range);
-								if(cd.range) // Insert date Event at start
-								{data.events = [].concat(myself.getRangeEvent(cd)).concat(data.events);}
+								if(cd.dateRangeInput){
+									var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
+									if(lastEventPlot._id == "eventPlot")
+										lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter),Dashboards.getParameterValue(obj.endDateParameter),
+											eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+								}
 							})
 					});
 			}
 			else
 				timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource,null,null,function(){
-						if(cd.range){
-							eventSource2.loadJSON({"dateTimeFormat":"iso8601","events":[myself.getRangeEvent(cd)]}, timePlotEventSourceUrl);
-						}
+						if(cd.dateRangeInput){
+									var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
+									if(lastEventPlot._id == "eventPlot")
+										lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter),Dashboards.getParameterValue(obj.endDateParameter),
+											eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+								}
 					});
-		},
-		getRangeEvent : function (cd) {
-			if(cd.range!= undefined && cd.range.startDate != undefined && cd.range.endDate != undefined){
-				var startDate = typeof cd.range.startDate =='function' ? cd.range.startDate() : cd.range.startDate;
-				var endDate = typeof cd.range.endDate =='function' ? cd.range.endDate() : cd.range.endDate;
-				return {id:"selectEvent", "start":startDate,"end":endDate,"title":cd.range.title,"description":cd.range.description,"color":"#9BFF9B"};
-			}
-			return undefined;
 		},
 		filterEvents : function (events, range) {
 			var result = [];
@@ -447,17 +454,17 @@ var TimePlotComponent = BaseComponent.extend({
 			}
 			return result;
 		},
-		updateFilters: function(start,end){
+		updateDateRangeInput: function(start,end){
 			var toDateString = function(d){
 				var currentMonth = "0" + (d.getMonth() + 1);
 				var currentDay = "0" + (d.getDate());
 				return d.getFullYear() + "-" + (currentMonth.substring(currentMonth.length-2, currentMonth.length)) + "-" + (currentDay.substring(currentDay.length-2, currentDay.length));
 			};
-			if(this.chartDefinition.dateFilter != undefined ){
+			if(this.chartDefinition.dateRangeInput != undefined ){
 				Dashboards.setParameter(this.startDateParameter, toDateString(start));
 				Dashboards.setParameter(this.endDateParameter , toDateString(end));
 				this.updateTimeplot = false;
-				Dashboards.update(this.chartDefinition.dateFilter);
+				Dashboards.update(this.chartDefinition.dateRangeInput);
 				Dashboards.fireChange(this.startDateParameter,toDateString(start));
 				this.updateTimeplot = true;
 			}
@@ -524,11 +531,16 @@ var DateRangeInputComponent = BaseComponent.extend({
 			}
 			var offset = dr.offset();
 			var myself = this;
+			var earliestDate = this.earliestDate != undefined  ?  Dashboards.getParameterValue(this.earliestDate) : Date.parse('-1years');
+			var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
 
 			$(function(){ 
 					$("#" + myself.htmlObject + " input").daterangepicker({
 							posX: offset.left, 
 							posY: offset.top + 15, 
+							earliestDate: earliestDate,
+							latestDate: latestDate,
+							dateFormat: 'yy-mm-dd',
 							onDateSelect: function(rangeA, rangeB) { 
 								DateRangeInputComponent.fireDateRangeInputChange( myself.name, rangeA, rangeB);
 							}
@@ -540,7 +552,7 @@ var DateRangeInputComponent = BaseComponent.extend({
 		fireDateRangeInputChange : function(name, rangeA, rangeB){
 			// WPG: can we just use the parameter directly?
 			var parameters = eval(name + ".parameter");
-			// set the second date and fireChange the first
+// set the second date and fireChange the first
 			Dashboards.setParameter(parameters[1], rangeB);
 			Dashboards.fireChange(parameters[0],rangeA);
 	}

@@ -39,7 +39,7 @@ Timeplot.DefaultValueGeometry = function(params) {
     this._map = this._linMap;
     this._labels = [];
     this._grid = [];
-	this.toolTipFormat = ("toolTipFormat" in params) ? params.toolTipFormat : undefined;
+	this._valueFormat = ("valueFormat" in params) ? params.valueFormat : undefined;
 }
 
 Timeplot.DefaultValueGeometry.prototype = {
@@ -129,8 +129,8 @@ Timeplot.DefaultValueGeometry.prototype = {
                     var tick = this._grid[i];
                     var y = Math.floor(tick.y) + 0.5;
                     if (typeof tick.label != "undefined") {
-						if(this.toolTipFormat != undefined &&  typeof this.toolTipFormat == 'function')
-							tick.label = this.toolTipFormat(tick.label);
+						if(this._valueFormat != undefined &&  typeof this._valueFormat == 'function')
+							tick.label = this._valueFormat(tick.label);
                         if (this._axisLabelsPlacement == "left") {
                             var div = this._timeplot.putText(this._id + "-" + i, tick.label,"timeplot-grid-label",{
                                 left: 4,
@@ -420,6 +420,7 @@ Timeplot.DefaultTimeGeometry = function(params) {
         this._max = dateParser(this._max);
     }
     this._grid = [];
+	this._yAxisColor =  ("yAxisColor" in params) ? params.yAxisColor : "rgba(255,255,255,0.9)";
 }
 
 Timeplot.DefaultTimeGeometry.prototype = {
@@ -542,7 +543,7 @@ Timeplot.DefaultTimeGeometry.prototype = {
             // paint grid
             if (this._gridColor) {        
                 gradient.addColorStop(0, this._gridColor.toString());
-                gradient.addColorStop(1, "rgba(255,255,255,0.9)");
+                gradient.addColorStop(1, this._yAxisColor);
     
                 for (var i = 0; i < this._grid.length; i++) {
                     var tick = this._grid[i];

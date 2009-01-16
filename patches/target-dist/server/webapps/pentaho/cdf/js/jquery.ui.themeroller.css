@@ -326,8 +326,8 @@ body .ui-resizable-autohide .ui-resizable-handle { display: none; } /* use 'body
 
 /*datepicker*/
 /* Main Style Sheet for jQuery UI date picker */
-.ui-datepicker-div, .ui-datepicker-inline, #ui-datepicker-div {
-	/*resets*/margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
+/*.ui-datepicker-div, .ui-datepicker-inline, #ui-datepicker-div {
+	margin: 0; padding: 0; border: 0; outline: 0; line-height: 1.3; text-decoration: none; font-size: 100%; list-style: none;
 	font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
 	background: #f3f3f3 url(images/f3f3f3_40x100_textures_01_flat_0.png) 0 0 repeat-x;
 	font-size: 1.2em;
@@ -337,7 +337,7 @@ body .ui-resizable-autohide .ui-resizable-handle { display: none; } /* use 'body
 	position: relative;
 }
 .ui-datepicker-div, #ui-datepicker-div {
-	z-index: 9999; /*must have*/
+	z-index: 9999;
 	display: none;
 }
 .ui-datepicker-inline {
@@ -451,7 +451,7 @@ table.ui-datepicker .ui-datepicker-title-row td a {
 	width: 193px;
 	height: 200px;
 }
-
+*/
 
 
 
