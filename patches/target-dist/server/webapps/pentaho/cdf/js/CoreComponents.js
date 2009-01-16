@@ -898,7 +898,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
 				});
 		},
-		executeXaction : function() {
+		executeXAction : function() {
 			var url = "/pentaho/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
 
 			var p = new Array(this.parameters.length);
