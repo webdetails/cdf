@@ -77,12 +77,12 @@
 			</sources>
 			<default-value/>
 		</TRANSFORMATION>
-		<IMPORTSTEP type="string">
+		<importstep type="string">
 			<sources>
 				<request>importStep</request>
 			</sources>
 			<default-value>Output</default-value>
-		</IMPORTSTEP>
+		</importstep>
 		<PARAMETER1 type="string">
 			<sources>
 				<request>parameter1</request>
@@ -445,7 +445,7 @@
 										<PARAMETER9 type="string"/>
 										<TRANSFORMATION type="string"/>
 										<DIRECTORY type="string"/>
-										<IMPORTSTEP type="string"/>
+										<importstep type="string"/>
 									</action-inputs>
 									<action-outputs> 
 										<transformation-output type="result-set" mapping="query_result"/> 
@@ -453,7 +453,7 @@
 									<component-definition> 
 										<transformation>{TRANSFORMATION}</transformation>
 										<directory>{DIRECTORY}</directory>
-										<importstep>{IMPORTSTEP}</importstep> 
+										<importstep>{importstep}</importstep> 
 									</component-definition> 
 								</action-definition>
 								<action-definition>
