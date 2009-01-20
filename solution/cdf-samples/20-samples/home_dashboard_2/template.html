@@ -1,18 +1,6 @@
 <script type="text/javascript"
-    src="GetCDFResource?resource=/cdf-samples/home_dashboard_2/MetaLayer.js"></script>
+    src="GetCDFResource?resource=/cdf-samples/20-samples/home_dashboard_2/MetaLayer.js"></script>
 
-<SCRIPT LANGUAGE="JavaScript">
-
-// This is a custom function that is fired when a user selects a productLine and then want to select a territory
-// Its purpose is to reset the productLine variable back to null and pass the territory that has been selected
-// The function is executed from the url-template tag in the territorySales.xaction
-
-function clickOnTerritory(value) {
-	productLine = null;
-	Dashboards.fireChange('territory',value);
-}
-
-</SCRIPT>
 
 
 <table align="center" style="border: 1px solid #000;">
@@ -47,32 +35,15 @@ function clickOnTerritory(value) {
 
 <script language="javascript" type="text/javascript">
 
-    var territory = null;
-    var productLine = null;
-	var title = "";
-
 titleString = 
 {
   name: "titleString",
   type: "text",
-  listeners:["productLine", "territory"],
+  listeners:["MetaLayerHome2.filterMeasure"],
   htmlObject: "titleObject",
   executeAtStart: true,
-  expression: function(){return title},
-  preExecution:function(){
-  	if( territory == null && productLine != null) {
-		title = "Top Ten for " + productLine;
-	} 
-	else if ( territory != null && productLine == null) {
-		title = "Top Ten for " + territory;
-	}
-	else if ( territory == null && productLine == null) {
-		title = "Top Ten Customers";
-	}
-	else  {
-		title = "Top Ten for " + territory + ", " + productLine;
-	}
-  },
+  expression: function(){return MetaLayerHome2.title},
+  preExecution:function(){},
   postExecution:function(){}
 }
 
@@ -81,7 +52,7 @@ topTenCustomers =
   name: "topTenCustomers",
   type: "jFreeChartComponent",
   chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
-  listeners:["productLine", "territory"],
+  listeners:["MetaLayerHome2.filterMeasure"],
   parameters: [["productLine", "productLine"], ["territory", "territory"]],
   htmlObject: "topTenCustomersObject",
   executeAtStart: true,
