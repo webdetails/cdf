@@ -77,12 +77,12 @@
 			</sources>
 			<default-value/>
 		</TRANSFORMATION>
-		<importstep type="string">
+		<IMPORTSTEP type="string">
 			<sources>
 				<request>importStep</request>
 			</sources>
 			<default-value>Output</default-value>
-		</importstep>
+		</IMPORTSTEP>
 		<PARAMETER1 type="string">
 			<sources>
 				<request>parameter1</request>
@@ -445,7 +445,7 @@
 										<PARAMETER9 type="string"/>
 										<TRANSFORMATION type="string"/>
 										<DIRECTORY type="string"/>
-										<importstep type="string"/>
+										<IMPORTSTEP type="string"/>
 									</action-inputs>
 									<action-outputs>
 										<newResults type="result-set"/> 
@@ -460,7 +460,7 @@
 									<component-name>JavascriptRule</component-name>
 									<action-type>Format Kettle Results</action-type>
 									<action-inputs>
-										<query_result type="result-set"/>
+										<newResults type="result-set"/>
 										<TOPCOUNT type="string"/>
 										<TOPCOUNTAXIS type="string"/>
 										<ORDERCOLUMNS type="string"/>
@@ -473,11 +473,11 @@
 
 											var text = "";
 
-											var rsmd = query_result.getMetaData() ;
+											var rsmd = newResults.getMetaData() ;
 
 											var colHeaders = rsmd.getColumnHeaders() ;
 											var colCount = rsmd.getColumnCount() ;
-											var rowCount = query_result.getRowCount() ;
+											var rowCount = newResults.getRowCount() ;
 											out.println("Columns: " + colCount + "; Rows: " + rowCount);
 											var colIteraction = colCount;
 											var rowIteraction = rowCount;
@@ -525,7 +525,7 @@
 												if(TOPCOUNT == 0 && ORDERCOLUMNS != ""){
 													for(j = 0; j < headers.length; j++){
 														if(headers[j][0]=="") {									
-															a[j+1] = query_result.getValueAt(i,headers[j][1])||0;									
+															a[j+1] = newResults.getValueAt(i,headers[j][1])||0;									
 														}
 														else
 															a[j+1] = 0;
@@ -534,13 +534,13 @@
 												else{
 
 													for(j=0; j< colIteraction; j++){
-														a[j] = query_result.getValueAt(i,j) || 0;
+														a[j] = newResults.getValueAt(i,j) || 0;
 													}
 
 													if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
 														var value = 0;
 														for (j=colIteraction; j<colCount; j++) {
-															var localValue = query_result.getValueAt(i,j);
+															var localValue = newResults.getValueAt(i,j);
 															value += localValue;
 															//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
 														}
@@ -562,7 +562,7 @@
 												for(j = 0 ; j < colIteraction; j++){
 
 													for (i=rowIteraction; i<rowCount; i++) {
-														var localValue = query_result.getValueAt(i,j);
+														var localValue = newResults.getValueAt(i,j);
 														value += localValue;
 														//out.println("j: " + j + ", a1: " + a[1] + "; col: " + colHeaders[0][j] + "; Value: " + localValue);
 													}
