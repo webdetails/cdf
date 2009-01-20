@@ -208,7 +208,8 @@ public class NavigateComponent extends PentahoBase {
 
         Node tree = navDoc.getRootElement();
 
-        StringBuffer _id = new StringBuffer("/solution");
+        String solutionPrefix = tree.valueOf("/tree/branch/@id");
+        StringBuffer _id = new StringBuffer(solutionPrefix);
         if (_solution.length() > 0) {
             _id.append("/" + _solution);
         }
@@ -247,7 +248,7 @@ public class NavigateComponent extends PentahoBase {
                 json.put("path", _path + (_path.length() > 0 ? "/" : "") + name);
                 json.put("type", TYPE_DIR);
 
-                if (path.startsWith("/solution/")) {
+                if (path.startsWith((solutionPrefix + "/"))) {
                     String resourcePath = path.substring(9);
                     //try {
                     String resourceName = resourcePath + "/" + SolutionRepositoryBase.INDEX_FILENAME;
@@ -313,7 +314,8 @@ public class NavigateComponent extends PentahoBase {
 
                     json.put("type", TYPE_XACTION);
 
-                    String resourcePath = path.substring(9);
+                    String resourcePath = path.replace(solutionPrefix,"solution").substring(9);
+
                     String resourceName = resourcePath;
                     if (solutionRepository.resourceExists(resourceName)) {
                         System.out.println("Processing file " + resourcePath);
@@ -337,7 +339,7 @@ public class NavigateComponent extends PentahoBase {
                 } else if (name.toLowerCase().endsWith(".url")) {
 
                     json.put("type", TYPE_URL);
-                    String resourcePath = path.substring(9);
+                    String resourcePath = path.replace(solutionPrefix,"solution").substring(9);
                     String resourceName = resourcePath;
                     ISolutionFile file = solutionRepository.getFileByPath(resourceName);
                     processUrl(file, node, resourceName);
