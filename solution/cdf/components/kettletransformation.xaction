@@ -1,85 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <action-sequence> 
-	<title>Drillable Bar Chart sourced from OLAP Source</title>
+	<title>Kettle Transformation</title>
 	<version>1</version>
-	<logging-level>WARN</logging-level>
+	<logging-level>debug</logging-level>
 	<documentation> 
 	<author>Pedro Alves</author>  
-		<description>This demonstrates a chart with the ChartComponent in the action sequence with data is sourced from an OLAP cube. Common settings are specified in the associated resource xml file.</description>  
+		<description></description>  
 		<help/>  
-		<result-type/> 
+		<result-type/>
 	</documentation>
 
 	<inputs> 
 		<DIRECTORY type="string">
 			<sources>
-				<request>directory</request>
+				<request>DIRECTORY</request>
 			</sources>
 			<default-value/>
 		</DIRECTORY>
 		<TRANSFORMATION type="string">
 			<sources>
-				<request>transformation</request>
+				<request>TRANSFORMATION</request>
 			</sources>
 			<default-value/>
 		</TRANSFORMATION>
-		<importstep type="string">
+		<IMPORTSTEP type="string">
 			<sources>
-				<request>importStep</request>
+				<request>IMPORTSTEP</request>
 			</sources>
 			<default-value>Output</default-value>
-		</importstep>
+		</IMPORTSTEP>
 		<PARAMETER1 type="string">
 			<sources>
-				<request>parameter1</request>
+				<request>PARAMETER1</request>
 			</sources>
 			<default-value/>
 		</PARAMETER1>
 		<PARAMETER2 type="string">
 			<sources>
-				<request>parameter2</request>
+				<request>PARAMETER2</request>
 			</sources>
 			<default-value/>
 		</PARAMETER2>
 		<PARAMETER3 type="string">
 			<sources>
-				<request>parameter3</request>
+				<request>PARAMETER3</request>
 			</sources>
 			<default-value/>
 		</PARAMETER3>
 		<PARAMETER4 type="string">
 			<sources>
-				<request>parameter4</request>
+				<request>PARAMETER4</request>
 			</sources>
 			<default-value/>
 		</PARAMETER4>
 		<PARAMETER5 type="string">
 			<sources>
-				<request>parameter5</request>
+				<request>PARAMETER5</request>
 			</sources>
 			<default-value/>
 		</PARAMETER5>
 		<PARAMETER6 type="string">
 			<sources>
-				<request>parameter6</request>
+				<request>PARAMETER6</request>
 			</sources>
 			<default-value/>
 		</PARAMETER6>
 		<PARAMETER7 type="string">
 			<sources>
-				<request>parameter7</request>
+				<request>PARAMETER7</request>
 			</sources>
 			<default-value/>
 		</PARAMETER7>
 		<PARAMETER8 type="string">
 			<sources>
-				<request>parameter8</request>
+				<request>PARAMETER8</request>
 			</sources>
 			<default-value/>
 		</PARAMETER8>
 		<PARAMETER9 type="string">
 			<sources>
-				<request>parameter9</request>
+				<request>PARAMETER9</request>
 			</sources>
 			<default-value/>
 		</PARAMETER9>
@@ -90,7 +90,6 @@
 	</outputs>
 
 	<actions>
-		<condition><![CDATA[QUERY_TYPE == "kettle"]]></condition>
 		<action-definition> 
 			<component-name>KettleComponent</component-name>
 			<action-type>Execute Kettle Transformation</action-type>
@@ -106,7 +105,7 @@
 				<PARAMETER9 type="string"/>
 				<TRANSFORMATION type="string"/>
 				<DIRECTORY type="string"/>
-				<importstep type="string"/>
+				<IMPORTSTEP type="string"/>
 			</action-inputs>
 			<action-outputs> 
 				<transformation-output type="result-set" mapping="newResults"/> 
@@ -114,7 +113,7 @@
 			<component-definition> 
 				<transformation>{TRANSFORMATION}</transformation>
 				<directory>{DIRECTORY}</directory>
-				<importstep>{importstep}</importstep> 
+				<importstep>{IMPORTSTEP}</importstep> 
 			</component-definition> 
 		</action-definition>
 	</actions>

@@ -275,12 +275,12 @@
 			</sources>
 			<default-value/>
 		</TRANSFORMATION>
-		<importstep type="string">
+		<IMPORTSTEP type="string">
 			<sources>
 				<request>importStep</request>
 			</sources>
 			<default-value>Output</default-value>
-		</importstep>
+		</IMPORTSTEP>
 		<PARAMETER1 type="string">
 			<sources>
 				<request>parameter1</request>
@@ -616,7 +616,7 @@
 				<PARAMETER9 type="string"/>
 				<TRANSFORMATION type="string"/>
 				<DIRECTORY type="string"/>
-				<importstep type="string"/>
+				<IMPORTSTEP type="string"/>
 			</action-inputs>
 			<action-outputs>
 				<newResults type="result-set"/> 
