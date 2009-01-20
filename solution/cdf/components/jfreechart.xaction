@@ -601,9 +601,9 @@
 
 	<actions>
 		<condition><![CDATA[QUERY_TYPE == "kettle"]]></condition>
-		<action-definition> 
-			<component-name>KettleComponent</component-name>
-			<action-type>Execute Kettle Transformation</action-type>
+		<action-definition>
+			<component-name>SubActionComponent</component-name>
+			<action-type>Pentaho BI Process</action-type>
 			<action-inputs>
 				<PARAMETER1 type="string"/>
 				<PARAMETER2 type="string"/>
@@ -618,14 +618,14 @@
 				<DIRECTORY type="string"/>
 				<importstep type="string"/>
 			</action-inputs>
-			<action-outputs> 
-				<transformation-output type="result-set" mapping="newResults"/> 
+			<action-outputs>
+				<newResults type="result-set"/> 
 			</action-outputs>
-			<component-definition> 
-				<transformation>{TRANSFORMATION}</transformation>
-				<directory>{DIRECTORY}</directory>
-				<importstep>{importstep}</importstep> 
-			</component-definition> 
+			<component-definition>
+				<solution><![CDATA[cdf]]></solution>
+				<path><![CDATA[components]]></path>
+				<action><![CDATA[kettletransformation.xaction]]></action>
+			</component-definition>
 		</action-definition>
 	</actions>
 
