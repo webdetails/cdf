@@ -81,7 +81,7 @@ var SelectBaseComponent = BaseComponent.extend({
 			if (this.size != undefined){
 				selectHTML += " size='" + this.size + "'";
 			}
-			if (this.type == "selectMulti"){
+			if (this.type == "selectMultiComponent" || this.type == "selectMulti"){
 				selectHTML += " multiple";
 			}
 			selectHTML += ">";
