@@ -411,7 +411,7 @@ Timeplot.Plot.prototype = {
                     var w = end - start - 1;
                 }
 
-                var div = this._timeplot.putDiv(event.getID(),"timeplot-event-box",{
+                var div = this._timeplot.putDiv(event.getID(),event.getID() != "selectEvent" ? "timeplot-event-box" : "timeplot-selectevent-box",{
                     left: Math.round(x),
                     width: Math.round(w),
                     top: 0,
@@ -505,7 +505,7 @@ Timeplot.Plot.prototype = {
 		}
 		
 		var evt = new Timeline.DefaultEventSource.Event(
-                "selectEvent",start,end,start,end,false,null,null,null,null,null,this._rangeColor,/*event.color,*/undefined,/*event.textColor,*/undefined/*event.classname*/);
+                "selectEvent",start,end,start,end,false,null,null,null,null,null,this._rangeColor,null,null,null);
 			
 		var previousEvent = events.getEvent("selectEvent");
 		if( previousEvent != undefined)
