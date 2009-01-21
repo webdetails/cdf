@@ -42,6 +42,11 @@
 
 .timeplot-event-box {
     cursor: pointer;
+	z-index: 1;
+}
+
+.timeplot-selectevent-box {
+	z-index: 0;
 }
 
 .timeplot-event-box-highlight {

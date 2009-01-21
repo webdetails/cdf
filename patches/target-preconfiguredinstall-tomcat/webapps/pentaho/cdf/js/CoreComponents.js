@@ -267,7 +267,7 @@ var TimePlotComponent = BaseComponent.extend({
 			
 					var lastEventPlot = this.timeplot._plots[this.timeplot._plots.length -1];
 					if(lastEventPlot._id == "eventPlot")
-						lastEventPlot._addSelectEvent(Dashboards.getParameterValue(this.startDateParameter),Dashboards.getParameterValue(this.endDateParameter),
+						lastEventPlot._addSelectEvent(Dashboards.getParameterValue(this.startDateParameter)+ " 00:00:00",Dashboards.getParameterValue(this.endDateParameter)+ " 23:59:59",
 							lastEventPlot._eventSource,"iso8601",this.geometry._earliestDate,this.geometry._latestDate);
 				}
 					
@@ -427,7 +427,7 @@ var TimePlotComponent = BaseComponent.extend({
 								if(cd.dateRangeInput){
 									var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
 									if(lastEventPlot._id == "eventPlot")
-										lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter),Dashboards.getParameterValue(obj.endDateParameter),
+										lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter) + " 00:00:00",Dashboards.getParameterValue(obj.endDateParameter)+ " 23:59:59",
 											eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
 								}
 							})
@@ -438,7 +438,7 @@ var TimePlotComponent = BaseComponent.extend({
 						if(cd.dateRangeInput){
 									var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
 									if(lastEventPlot._id == "eventPlot")
-										lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter),Dashboards.getParameterValue(obj.endDateParameter),
+										lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter) + " 00:00:00",Dashboards.getParameterValue(obj.endDateParameter)+ " 23:59:59",
 											eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
 								}
 					});
@@ -461,6 +461,7 @@ var TimePlotComponent = BaseComponent.extend({
 				return d.getFullYear() + "-" + (currentMonth.substring(currentMonth.length-2, currentMonth.length)) + "-" + (currentDay.substring(currentDay.length-2, currentDay.length));
 			};
 			if(this.chartDefinition.dateRangeInput != undefined ){
+				if(start > end){var aux = start; start = end; end = aux;}
 				Dashboards.setParameter(this.startDateParameter, toDateString(start));
 				Dashboards.setParameter(this.endDateParameter , toDateString(end));
 				this.updateTimeplot = false;
