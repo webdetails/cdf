@@ -222,15 +222,22 @@ Timeplot.DataSource.prototype = {
     /**
      * Return the value associated with the given time in this time series
      */
-    getValue: function(t) {
+	getValue: function(t) {
         if (this._data) {
             for (var i = 0; i < this._data.times.length; i++) {
                 var l = this._data.times[i];
-                if (l >= t) {
-                    return this._data.values[i];
-                }
+				var p = new Date(t);
+				if (l == t)
+					return this._data.values[i];
+                if (l > t)
+                    return this._data.values[i-1];
+				
             }
         }
+		
+		if(this._data.times.length > 0)
+			return this._data.values[this._data.times.length-1];
+			
         return 0;
     },
 
