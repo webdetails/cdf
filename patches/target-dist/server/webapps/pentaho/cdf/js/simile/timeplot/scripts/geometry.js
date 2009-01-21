@@ -490,21 +490,7 @@ Timeplot.DefaultTimeGeometry.prototype = {
             return 0;
         } 
     },
-	
-	previousFromScreen: function(x, dayPeriod) {
-        if (this._canvas) {
-			var previous = new Date(this._earliestDate);
-			if(dayPeriod) 
-				previous.setDate(previous.getDate()-1); 
-			else 
-				previous.setMinutes(previous.getMinutes()-1);
-				
-            return this._map.inverse(this._mappedPeriod * x / this._canvas.width) + previous.getTime();
-        } else {
-            return 0;
-        } 
-    },
-    
+
     /**
      * Get a period (in milliseconds) this time geometry spans.
      */

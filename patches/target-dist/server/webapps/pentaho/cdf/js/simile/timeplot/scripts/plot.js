@@ -79,19 +79,18 @@ Timeplot.Plot.prototype = {
                 if (plot._plotInfo.showValues && !plot._mouseDown) {
                     var c = plot._canvas;
                     var x = Math.round(SimileAjax.DOM.getEventRelativeCoordinates(evt,plot._canvas).x);
-                    if (x > c.width) x = c.width;
-                    if (isNaN(x) || x < 0) x = 0;
+                    if (x > c.width){x = c.width;}
+					x = isNaN(x) || x < 0 ? 0 : x ;
                     var t = plot._timeGeometry.fromScreen(x);
 					var p = plot._timeGeometry.getPeriod(); 
-					var tPrevious = plot._timeGeometry.previousFromScreen(x, p < day ? false : true);
-					var vPrevious = plot._dataSource.getValue(tPrevious);
-                    if (t == 0 || (plot._showValuesMode == "tooltip" && plot._hideZeroToolTipValues && Math.round(vPrevious) == 0)) {
+					var v = plot._dataSource.getValue(t);
+                    if (t == 0 || (plot._showValuesMode == "tooltip" && plot._hideZeroToolTipValues && Math.round(v) == 0)) {
                         plot._valueFlag.style.display = "none";
                         return;
                     }
                     
                     var v = plot._dataSource.getValue(t);
-                    if (plot._plotInfo.roundValues){ v = Math.round(v); vPrevious = Math.round(vPrevious);}
+                    if (plot._plotInfo.roundValues){ v = Math.round(v);}
 					
 					var d = new Date(t);
 					
@@ -144,13 +143,13 @@ Timeplot.Plot.prototype = {
                         });
                     }
 					
-					var vStr = vPrevious;
+					var vStr = v;
 					if(plot._showValuesMode == "tooltip" && plot._toolTipFormat != undefined &&  typeof plot._toolTipFormat == 'function')
-						vStr = plot._toolTipFormat(vPrevious,plot);
+						vStr = plot._toolTipFormat(v,plot);
 					
 					if(plot._showValuesMode == "header"){
 						if(plot._headerFormat != undefined &&  typeof plot._headerFormat == 'function')
-							vStr = plot._headerFormat(vPrevious,plot);
+							vStr = plot._headerFormat(v,plot);
 						$("#" + plot._id + "Header").html(vStr);
 						plot._valueFlag.style.display = "none";
 						return;
@@ -214,11 +213,11 @@ Timeplot.Plot.prototype = {
 					
 					if(plot._dataSource._column == 0){
 						timeplot.previousArray = new Array();
-						timeplot.previousArray[0] = [plot._id,vPrevious,y];
+						timeplot.previousArray[0] = [plot._id,v,y];
 					}
 					else
-						timeplot.previousArray[timeplot.previousArray.length] = [plot._id,vPrevious,
-							plot._resolveDivConflit(y,vPrevious,false,timeplot.previousArray)];
+						timeplot.previousArray[timeplot.previousArray.length] = [plot._id,v,
+							plot._resolveDivConflit(y,v,false,timeplot.previousArray)];
                 }
 				else if(plot._mouseDown)
 				{
