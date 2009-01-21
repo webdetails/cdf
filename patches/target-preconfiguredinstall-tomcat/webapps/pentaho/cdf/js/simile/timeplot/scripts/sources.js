@@ -233,10 +233,12 @@ Timeplot.DataSource.prototype = {
                     return this._data.values[i-1];
 				
             }
+			
+			if(this._data.times.length > 0)
+				return this._data.values[this._data.times.length-1];
         }
 		
-		if(this._data.times.length > 0)
-			return this._data.values[this._data.times.length-1];
+		
 			
         return 0;
     },
