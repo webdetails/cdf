@@ -1,0 +1,47 @@
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Template Files</h2>
+		
+		<p> 
+
+		Once again, the main goal is to reduced  time and effort to make a new dashboard. 
+		The dashboard template files were build to <b>avoid adding always the same content</b> 
+		(Navigation bar, javascript libraries, header, etc) to all the dashboards templates files. 
+		Another objective that was accomplished with this solution was to <b>avoid the creation of a 
+		template file for all the solution folders</b>. Finally, but not less important, all the  
+		libraries  present in the template  are dynamically added by the Dashbaord.jsp <b>reducing the 
+		size and computation of the templates.</b></p>
+
+		<p>Here are the tree types of template files, used by cdf framework, 
+		that are concatenated to the user template files:</p>
+		
+		<ul>
+			<li>template-dashboard: 
+			This template contains the header, the navigation bar and all the necessary JavaScript libraries</li><br>
+
+			<li>template-dashboard-mantle:
+			This template contains the header and all the necessary JavaScript  libraries. The navigation 
+			menu was excluded, because mantle already have is own navigation approach.</li><br>
+				
+			<li>default-dashboard-template:
+			When no template is present in the current solution folder, this template is present to the user.
+			Can be used to present a content navigation page</li><br>
+		</ul>
+		
+		<p>Two questions are raised here:<br>
+		<br><b>How can we choose beteween the template-dashboard-mantle and the template-dashboard?</b>
+		The answer is simple, just invoke the dashboard.jsp with the template request argument.(example: template=mantle).<br>
+		<br><b>Can i modify the templates?</b> Of course, that's the purpose of template files. Just don't forget to include the navigatorComponent.
+		
+		
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>
