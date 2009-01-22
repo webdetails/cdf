@@ -7,12 +7,13 @@
 
 	<div class="contents">
 
-		<h2>SelectComponent</h2>
+		<h2>MonthPickerComponent</h2>
 
 		<h3>Description</h3>
 		<p>
-		Renders a select box to choose the correct option from. Will read values from a xaction result set or from an array of values 
-		unless the parameter <code>valuesArray</code> is specified.
+		Renders a selection box to collect a month from user input. It's usually faster/more 
+		intuitive than classic datepickers.
+
 		</p>
 
 		<h3>Options</h3>
@@ -22,28 +23,28 @@
 			<dd>The name of the component</dd>
 
 			<dt>type</dt>
-			<dd><code>selectComponent</code></dd>
+			<dd><code>monthPickerComponent</code></dd>
 
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
 
-			<dt>parameters</dt>
-			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
-
 			<dt>parameter</dt>
-			<dd>Variable where the selection is stored</dd>
+			<dd>Variable where the input is stored</dd>
 
-			<dt>valueAsId</dt>
-			<dd><i>Boolean</i> False indicates the selector will have id/value. True indicates it will use value/value. Default: <i>true</i></dd>
+			<dt>initialDate</dt>
+			<dd>Initial date to display in the selector</dd>
 
-			<dt>valuesArray</dt>
-			<dd><i>Array of Arrays - </i> Use this to pass a default value to the selector</dd>
+			<dt>months</dt>
+			<dd>The number of months to display</dd>
 
-			<dt>solution</dt>
-			<dd>Solution where the xaction solution is</dd>
+			<dt>size</dt>
+			<dd>The vertical size of the component. Default: 1</dd>
 
-			<dt>path</dt>
-			<dd>Path where the xaction file is</dd>
+			<dt>maxDate</dt>
+			<dd>Maximum date to display in the selector. Default: no restriction</dd>
+
+			<dt>minDate</dt>
+			<dd>Minimum date to display in the selector. Default: no restriction</dd>
 
 			<dt>htmlObject</dt>
 			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
@@ -60,12 +61,18 @@
 			<dt>postExecution</dt>
 			<dd><i>Function - </i> Function to be called after the component is executed</dd>
 
+			<dt>preChange</dt>
+			<dd><i>Function(date) - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function(date) - </i> Function to be called after the component is changed</dd>
+
 
 		</dl>
 
 		<h3>Sample</h3>
 
-		<div id="example">
+		<div id="example" class="flora">
 			<ul>
 
 				<li><a href="#sample"><span>Sample</span></a></li>
@@ -80,19 +87,24 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-regionSelector = 
+d = new Date();
+d.setYear(2006);
+myInput = 
 {
-	name: "regionSelector",
-	type: "select",
-	parameters:[],
-	valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
-	parameter:"region",
-	valueAsId: false,
+	name: "myInput",
+	type: "monthPickerComponent",
+	parameter: "input",
+	months: 10,
+	size: 1,
+	initialDate: d,
 	htmlObject: "sampleObject",
 	executeAtStart: true,
-	postChange: function(){alert("You chose: " + region);}
+	tooltip: "Click me to select a month",
+	postChange: function(date){alert("You chose: " + date);}
 };
-Dashboards.init([regionSelector]);
+
+Dashboards.init([myInput]);
+
 					</textarea>
 					<br />
 					<button onclick="evaluateCode(true)">Try me</button>
@@ -103,8 +115,8 @@ Dashboards.init([regionSelector]);
 	</div>
 
 	<script language="javascript" type="text/javascript">
-		var region;
-		var regionSelector;
+		var input = "2009-01-01";
+		var myInput;
 		var tabs = $("#example").tabs();
 		evaluateCode(false);
 	</script>

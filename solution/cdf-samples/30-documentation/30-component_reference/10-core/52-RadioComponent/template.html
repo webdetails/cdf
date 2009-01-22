@@ -7,11 +7,11 @@
 
 	<div class="contents">
 
-		<h2>SelectComponent</h2>
+		<h2>RadioComponent</h2>
 
 		<h3>Description</h3>
 		<p>
-		Renders a select box to choose the correct option from. Will read values from a xaction result set or from an array of values 
+		Renders radio buttons to choose the correct option from. Will read values from a xaction result set or from an array of values 
 		unless the parameter <code>valuesArray</code> is specified.
 		</p>
 
@@ -22,7 +22,7 @@
 			<dd>The name of the component</dd>
 
 			<dt>type</dt>
-			<dd><code>selectComponent</code></dd>
+			<dd><code>radioComponent</code></dd>
 
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
@@ -45,6 +45,9 @@
 			<dt>path</dt>
 			<dd>Path where the xaction file is</dd>
 
+			<dt>separator</dt>
+			<dd>How to separate the options</dd>
+
 			<dt>htmlObject</dt>
 			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
 
@@ -60,12 +63,18 @@
 			<dt>postExecution</dt>
 			<dd><i>Function - </i> Function to be called after the component is executed</dd>
 
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is changed</dd>
+
 
 		</dl>
 
 		<h3>Sample</h3>
 
-		<div id="example">
+		<div id="example" class="flora">
 			<ul>
 
 				<li><a href="#sample"><span>Sample</span></a></li>
@@ -83,16 +92,21 @@
 regionSelector = 
 {
 	name: "regionSelector",
-	type: "select",
+	type: "radioComponent",
 	parameters:[],
-	valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
+	solution: "cdf-samples",
+	path: "20-samples/sample_dashboard_broadcast",
+	action: "regions.xaction",
 	parameter:"region",
-	valueAsId: false,
+	separator: ",&nbsp;",
+	valueAsId: true,
 	htmlObject: "sampleObject",
 	executeAtStart: true,
-	postChange: function(){alert("You chose: " + region);}
+	postChange: function(){alert("you chose: " + region);}
 };
+
 Dashboards.init([regionSelector]);
+
 					</textarea>
 					<br />
 					<button onclick="evaluateCode(true)">Try me</button>

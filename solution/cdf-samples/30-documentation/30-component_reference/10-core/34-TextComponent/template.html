@@ -7,12 +7,11 @@
 
 	<div class="contents">
 
-		<h2>SelectComponent</h2>
+		<h2>TextComponent</h2>
 
 		<h3>Description</h3>
 		<p>
-		Renders a select box to choose the correct option from. Will read values from a xaction result set or from an array of values 
-		unless the parameter <code>valuesArray</code> is specified.
+		Simple component that renders text returned from a function specified in the <i>expression</i> property.
 		</p>
 
 		<h3>Options</h3>
@@ -22,7 +21,7 @@
 			<dd>The name of the component</dd>
 
 			<dt>type</dt>
-			<dd><code>selectComponent</code></dd>
+			<dd><code>textComponent</code></dd>
 
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
@@ -30,20 +29,8 @@
 			<dt>parameters</dt>
 			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
 
-			<dt>parameter</dt>
-			<dd>Variable where the selection is stored</dd>
-
-			<dt>valueAsId</dt>
-			<dd><i>Boolean</i> False indicates the selector will have id/value. True indicates it will use value/value. Default: <i>true</i></dd>
-
-			<dt>valuesArray</dt>
-			<dd><i>Array of Arrays - </i> Use this to pass a default value to the selector</dd>
-
-			<dt>solution</dt>
-			<dd>Solution where the xaction solution is</dd>
-
-			<dt>path</dt>
-			<dd>Path where the xaction file is</dd>
+			<dt>expression</dt>
+			<dd>Javascript expression to be evaluated</dd>
 
 			<dt>htmlObject</dt>
 			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
@@ -80,19 +67,16 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-regionSelector = 
+var textElement = 
 {
 	name: "regionSelector",
-	type: "select",
+	type: "textComponent",
 	parameters:[],
-	valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
-	parameter:"region",
-	valueAsId: false,
+	expression: function(){return "My text generated in " + new Date()},
 	htmlObject: "sampleObject",
-	executeAtStart: true,
-	postChange: function(){alert("You chose: " + region);}
+	executeAtStart: true
 };
-Dashboards.init([regionSelector]);
+Dashboards.init([textElement]);
 					</textarea>
 					<br />
 					<button onclick="evaluateCode(true)">Try me</button>
@@ -103,8 +87,6 @@ Dashboards.init([regionSelector]);
 	</div>
 
 	<script language="javascript" type="text/javascript">
-		var region;
-		var regionSelector;
 		var tabs = $("#example").tabs();
 		evaluateCode(false);
 	</script>
