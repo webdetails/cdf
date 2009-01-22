@@ -11,14 +11,26 @@ var BaseComponent = Base.extend({
 				var p = new Array(this.parameters.length);
 				for(var i= 0, len = p.length; i < len; i++){
 					var key = this.parameters[i][0];
-					var value = Dashboards.getParameterValue(this.parameters[i][1]);
+					var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
 					p[i] = [key,value];
 				} 
 
 				//execute the xaction to populate the selector
 				var myself=this;
-				html = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
-
+				if (this.url) {
+					var query = "";
+					var idx;
+					for( idx=0; idx<p.length; idx++ ) {
+						if (query != "") {
+							query += "&";
+						}
+						query += encodeURIComponent( p[idx][0] ) + "=" + encodeURIComponent( p[idx][1] );
+					}
+					
+					html = Dashboards.parseXActionResult(myself, pentahoPost(this.url, query));
+				} else {
+					html = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
+				}
 				//transform the result int a javascript array
 				var myArray = this.parseArray(html, false);
 				return myArray;
