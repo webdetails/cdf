@@ -242,15 +242,17 @@ var TrafficComponent = BaseComponent.extend({
 			Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters, 
 				function(result){ 
 
-					if(cd.showValue != undefined && cd.showValue == true){
-						var tooltip = myself._tooltip;
-						myself._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
-					}
-
-					// alert("Traffic result: " + result);
 					var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
 					$('#'+myself.htmlObject).html(i);
+
+					if(cd.showValue != undefined && cd.showValue == true){
+						var tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+						$('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({delay:0,track: true,fade: 250});
+					}
+
 					Dashboards.decrementRunningCalls();
+
+
 				});
 		}
 	});

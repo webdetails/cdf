@@ -1,5 +1,7 @@
 <script type="text/javascript"
 	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/ui.tabs.js"></script>
+<script type="text/javascript"
+	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
 <div class="shadow">
 
 	<div class="contents">
@@ -21,7 +23,7 @@
 			<dd>The name of the component</dd>
 
 			<dt>type</dt>
-			<dd><code>DiaComponent</code></dd>
+			<dd><code>DialComponent</code></dd>
 
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
@@ -153,8 +155,7 @@
 
 
 				<div id="code">
-					<code>
-						<pre>
+					<textarea cols="80" rows="40" id="samplecode">
 var MetaLayer =  {
 	dialChartDefinition : {
 		width: 300,
@@ -188,8 +189,10 @@ var dialChart =
 		htmlObject: "sampleObject",
 		executeAtStart: true
 	};
-						</pre>
-					</code>
+Dashboards.init([dialChart]);
+</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
 				</div>
 			</div>
 
@@ -197,43 +200,6 @@ var dialChart =
 	</div>
 
 	<script language="javascript" type="text/javascript">
-
-	var MetaLayer =  {
-		dialChartDefinition : {
-			width: 300,
-			height: 200,
-			chartType: "DialChart",
-			queryType: 'mdx',
-			is3d: 'true',
-			jndi: "SampleData",
-			title: "Check current budget",
-			catalog: "solution:steel-wheels/analysis/SampleData.mondrian.xml",
-			colors: ["#F16C3A","#FFFF00","#B0D837"],
-			intervals: [7000000,70000000,150000000],
-			includeLegend: true,
-
-			query: function(){
-
-				var query =  " select NON EMPTY [Measures].[Budget] ON COLUMNS," +
-					" NON EMPTY ([Department].[All Departments]) ON ROWS " +
-					" from [Quadrant Analysis]";
-
-				return query;
-			}
-		}
-	};
-
-	var dialChart = 
-		{
-			name: "dialChart",
-			type: "dialComponent",
-			chartDefinition: MetaLayer.dialChartDefinition,
-			htmlObject: "sampleObject",
-			executeAtStart: true
-		};
-
-
-	$("#example").tabs();
-	Dashboards.init([dialChart]);
-
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
 	</script>

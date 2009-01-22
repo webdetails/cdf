@@ -1,5 +1,7 @@
 <script type="text/javascript"
 	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/ui.tabs.js"></script>
+<script type="text/javascript"
+	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
 
 <div class="shadow">
 
@@ -77,11 +79,8 @@
 
 
 				<div id="code">
-					<code>
-						<pre>
-var region;
-
-var regionSelector = 
+					<textarea cols="80" rows="20" id="samplecode">
+regionSelector = 
 {
 	name: "regionSelector",
 	type: "select",
@@ -93,8 +92,10 @@ var regionSelector =
 	executeAtStart: true,
 	postChange: function(){alert("You chose: " + region);}
 };
-						</pre>
-					</code>
+Dashboards.init([regionSelector]);
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
 				</div>
 			</div>
 
@@ -102,23 +103,8 @@ var regionSelector =
 	</div>
 
 	<script language="javascript" type="text/javascript">
-
 		var region;
-
-		var regionSelector = 
-			{
-				name: "regionSelector",
-				type: "select",
-				parameters:[],
-				valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
-				parameter:"region",
-				valueAsId: false,
-				htmlObject: "sampleObject",
-				executeAtStart: true,
-				postChange: function(){alert("You chose: " + region);}
-		};
-
-		$("#example").tabs();
-		Dashboards.init([regionSelector]);
-
-		</script>
+		var regionSelector;
+		var tabs = $("#example").tabs();
+		evaluateCode(false);
+	</script>

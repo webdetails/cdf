@@ -1,5 +1,7 @@
 <script type="text/javascript"
 	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/ui.tabs.js"></script>
+<script type="text/javascript"
+	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
 <div class="shadow">
 
 	<div class="contents">
@@ -195,8 +197,7 @@
 
 
 				<div id="code">
-					<code>
-						<pre>
+					<textarea cols="80" rows="40" id="samplecode">
 
 var MetaLayerHome2 = {
 topTenCustomerDefinition: {
@@ -235,8 +236,10 @@ var topTenCustomers =
 	htmlObject: "sampleObject",
 	executeAtStart: true
 };
-						</pre>
-					</code>
+Dashboards.init([topTenCustomers]);
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
 				</div>
 			</div>
 
@@ -245,46 +248,7 @@ var topTenCustomers =
 
 	<script language="javascript" type="text/javascript">
 
-	
-	var MetaLayerHome2 = {
-		topTenCustomerDefinition: {
-			width: 500,
-			height: 300,
-			chartType: "BarChart",
-			datasetType: "CategoryDataset",
-			is3d: false,
-			byRow: false,
-			isStacked: false,
-			includeLegend: false,
-			domainLabelRotation: 0,
-			backgroundColor: "#F3F3F3",
-			title: "Top 10 Customers",
-			parameterName: "PRODUCTLINE",
-			urlTemplate: "javascript:alert(\"You clicked \" + encode_prepare(\"{PRODUCTLINE}\"))",
-			orientation: 'horizontal',
-			queryType: 'mdx',
-			catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
-			jndi: "SampleData",
-			query: function(){
-
-				var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-					" NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) "+  
-				" ON ROWS from [SteelWheelsSales]"
-				return query;
-			}
-		}
-	};
-
-	var topTenCustomers = 
-		{
-			name: "topTenCustomers",
-			type: "jFreeChartComponent",
-			chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
-			htmlObject: "sampleObject",
-			executeAtStart: true
-		};
-
-	$("#example").tabs();
-	Dashboards.init([topTenCustomers]);
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
 
 </script>

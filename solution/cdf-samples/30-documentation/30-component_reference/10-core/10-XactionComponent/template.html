@@ -1,5 +1,8 @@
 <script type="text/javascript"
 	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/ui.tabs.js"></script>
+<script type="text/javascript"
+	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+
 <div class="shadow">
 
 	<div class="contents">
@@ -38,6 +41,9 @@
 			<dt>executeAtStart</dt>
 			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
 
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
 			<dt>preExecution</dt>
 			<dd><i>Function - </i> Function to be called before the component is executed</dd>
 
@@ -69,8 +75,7 @@
 
 
 				<div id="code">
-					<code>
-						<pre>
+					<textarea cols="80" rows="20" id="samplecode">
 var topTenCustomers = 
 {
   name: "topTenCustomers",
@@ -84,8 +89,10 @@ var topTenCustomers =
   executeAtStart: true,
   tooltip: "My first dashboard"
 }
-						</pre>
-					</code>
+Dashboards.init([topTenCustomers]);
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
 				</div>
 			</div>
 
@@ -94,22 +101,6 @@ var topTenCustomers =
 
 	<script language="javascript" type="text/javascript">
 
-
-var topTenCustomers = 
-{
-  name: "topTenCustomers",
-  type: "xaction",
-  solution: "cdf-samples",
-  path: "20-samples/home_dashboard",
-  action: "topTenCustomers.xaction",
-  listeners:["productLine", "territory"],
-  parameters: [["productLine", null], ["territory", null]],
-  htmlObject: "sampleObject",
-  executeAtStart: true,
-  tooltip: "My first dashboard"
-}
-
-		$("#example").tabs();
-		Dashboards.init([topTenCustomers]);
-
-		</script>
+		var tabs = $("#example").tabs();
+		evaluateCode(false);
+	</script>
