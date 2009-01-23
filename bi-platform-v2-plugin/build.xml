@@ -170,11 +170,11 @@
 	  	
 	  	<!-- copy over all the xactions within the cdf-samples folder -->
 	  	<copy todir="${solution.stage.dir}" overwrite="true" >
-	        <fileset dir="../solution/cdf">
-	          <include name="**/*.xaction"/>
-	       	  <include name="**/*.xml"/>
-	          <include name="**/*.js"/>
-	          <exclude name="**/index.xml"/>
+	        <fileset dir="../solution">
+	          <include name="cdf/**/*.xaction"/>
+	       	  <include name="cdf/**/*.xml"/>
+	          <include name="cdf/**/*.js"/>
+	          <exclude name="cdf/**/index.xml"/>
 	        </fileset>
 	  	</copy>
 
