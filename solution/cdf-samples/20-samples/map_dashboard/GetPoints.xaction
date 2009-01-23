@@ -7,7 +7,7 @@
     <author>Pedro Alves</author>  
     <description>Get the territory points</description>  
     <help/>  
-    <result-type/>  
+   <result-type>none</result-type> 
     <icon/> 
   </documentation>
 

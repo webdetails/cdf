@@ -8,7 +8,7 @@
 		<author>Pedro Alves</author>
 		<description>Pivot table sample for Community Dashboard Framework</description>
 		<help/>
-		<result-type>report</result-type>
+		<result-type>none</result-type> 
 		<icon/>
 	</documentation>
 	<inputs>

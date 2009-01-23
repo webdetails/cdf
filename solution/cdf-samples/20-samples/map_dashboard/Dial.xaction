@@ -7,7 +7,7 @@
 	<documentation> 
 		<author>Pedro Alves</author>  
 		<description></description>  
-		<result-type>rule</result-type> 
+		<result-type>none</result-type> 
 	</documentation>
 
 	<inputs> 

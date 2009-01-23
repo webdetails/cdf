@@ -8,7 +8,7 @@
 		<author>Pedro Alves</author>  
 		<description>BarChart component demonstration</description>  
 		<help/>  
-		<result-type>chart</result-type>  
+		<result-type>none</result-type> 
 		<icon/> 
 	</documentation>
 
