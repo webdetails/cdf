@@ -275,6 +275,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
       }
     }
 
+    // adjust the relative path of pentahoRoot
+    javaScriptLibrary += "<script>Dashboards.pentahoRoot='../';</script>\n";
+
     //Concat libraries to html head content
     intro = intro.substring(0,headIndex-1) + javaScriptLibrary + intro.substring(headIndex,length-1);
     
