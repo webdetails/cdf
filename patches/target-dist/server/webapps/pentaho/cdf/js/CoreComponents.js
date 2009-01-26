@@ -903,7 +903,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 			$("#"+ this.htmlObject).bind("click", function(){
 					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
 					if(success) {
-						this.executeXAction();
+						myself.executeXAction();
 					}
 					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
 				});

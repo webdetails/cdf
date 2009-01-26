@@ -43,7 +43,7 @@ pageTitleString =
   listeners:["region", "department"],
   htmlObject: "page_title_object",
   executeAtStart: true,
-  expression: function(){return "title"},
+  expression: function(){return title},
   preExecution:function(){
     if(region == "null" && department == "null") {
       title="Select a region";
