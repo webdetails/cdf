@@ -38,9 +38,7 @@ commonLibrariesLink=\
 /pentaho/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
 /pentaho/cdf/js/cdf.css
 
-mapScript=\
-js/OpenMap/open_map.js,js/jsr_class.js,\
-js/OpenStreetMap.js
+
 
 dateRangeInputScript=\
 /pentaho/cdf/js/jquery.daterangepicker.js

@@ -13,7 +13,7 @@
 		<p>
 			This component allow the user to navigate through the map and see information about marked locations. 
 			This locations are obtained with a Pentaho Action that must return a result set with this format:
-
+		</p>
 		<h3>Locations Result Set</h3>			
 		<dl class="documentation">
 				<dt>Column 1</dt>
@@ -28,8 +28,7 @@
 				<dd>Location value</dd>
 				<dt>Column 6</dt>
 				<dd>Location title - used by MapBubble component</dd>
-			</dl>
-		</p>
+		</dl>
 
 		<h3>Options</h3>
 
@@ -65,22 +64,22 @@
 			<dd><i>Function - </i> Function to be called after the component is executed</dd>
 			
 			<dt>messageElementId</dt>
-			<dd><i>Id of the component (usually a div or a span tag) to be replaced by the map error/info messages</dd>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the map error/info messages</dd>
 			
 			<dt>initPosLon</dt>
-			<dd><i>Initial longitude position</dd>
+			<dd>Initial longitude position</dd>
 			
 			<dt>initPosLat</dt>
-			<dd><i>Initial latitude position</dd>
+			<dd>Initial latitude position</dd>
 			
 			<dt>initZoom</dt>
-			<dd><i>Initial map zoom</dd>
+			<dd>Initial map zoom</dd>
 			
 			<dt>markers</dt>
-			<dd><i>Markers Array </dd>
+			<dd>Markers Array </dd>
 			
 			<dt>expression</dt>
-			<dd><i>Javascript expression to be evaluated. Returns the correct marker for each position</dd>
+			<dd>Javascript expression to be evaluated. Returns the correct marker for each position</dd>
 
 		</dl>
 
@@ -93,11 +92,9 @@
 				<li><a href="#code"><span>Code</span></a></li>
 			</ul>
 			<div id="sample">
-<span id="messages">&nbsp;</span>
+				<span id="messages">&nbsp;</span>
 				<div id="sampleObject">&nbsp;</div>
-				<div id="map" style="width: 600px; height: 200px; z-index:1000;">&nbsp;</div>
-				
-
+				<div id="map" style="width: 600px; height: 200px; z-index:0;">&nbsp;</div>
 			</div>
 
 
