@@ -223,17 +223,19 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 					var cls = "";
 					var target = "";
 					var href = "";
-					if (this.type=="FILE.FOLDER"){
+					if (this.type=="FOLDER"){
 						cls = "folder";
 						href = "Dashboards?solution=" + this.solution + "&path=" + this.path;
 					}
 					else{
-						cls = "action greybox";
 						if (this.url != undefined){
+							cls = "folder";
 							href=this.url;
 						}
-						else
+						else{
+							cls = "action greybox";
 							href = "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
+						}
 						// target = "_new"
 
 					}
@@ -275,7 +277,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
 		// Store the value
 		NavigatorBaseComponent.navigatorResponse = json;
 	
-		var _id = "/solution/" + NavigatorBaseComponent.solution + (NavigatorBaseComponent.path.length > 0?"/"+NavigatorBaseComponent.path:"");
+		var _id = json.solution.id +"/" + NavigatorBaseComponent.solution + (NavigatorBaseComponent.path.length > 0?"/"+NavigatorBaseComponent.path:"");
 		var file = this.findPageTitleObject(json.solution.folders,_id);
 
 		if (file.title != undefined && file.description != undefined){
