@@ -223,7 +223,7 @@
 					</actions>
 					<actions>
 						<condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
-						<!--action-definition>
+						<action-definition>
 							<component-name>SQLLookupRule</component-name>
 							<action-type>Relational</action-type>
 							<action-inputs>
@@ -238,7 +238,7 @@
 								<live><![CDATA[false]]></live>
 								<query>{QUERY}</query>
 							</component-definition>
-						</action-definition-->
+						</action-definition>
 						<action-definition>
 							<component-name>ResultSetCrosstabComponent</component-name>
 							<action-type>CrossTab it</action-type>

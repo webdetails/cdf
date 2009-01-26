@@ -14,6 +14,9 @@
 		from a mdx or sql query. In case of mdx queries, a role will be passed to mondrian if the session variable 'role' is
 		defined, allowing row level security.
 
+		<b>Note:</b> Due to security restrictions, sql execution is disabled by default. If you want to enable sql copy the file 
+		"cdf/components/timelinefeeder.xaction.sql" to "cdf/components/timelinefeeder.xaction" in the solutions directory.
+
 		All parameters can optionally be functions.
 		</p>
 
@@ -119,12 +122,12 @@ timePlotDefinition: {
 	width: 500,
 	height: 300,
 	title: "Total order income",
-	queryType: 'sql',
+	queryType: 'mdx',
 	jndi: "SampleData",
+	catalog: "solution:cdf-samples/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
 	query: function(){
 
-		var query = "SELECT  'Monthly sales' as title, substr(o.ORDERDATE,0,8)|| '01',  sum(o.TOTALPRICE) FROM ORDERFACT o " +
-		" group by substr(o.ORDERDATE,0,8)|| '01' order by substr(o.ORDERDATE,0,8)|| '01';"
+		var query = "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
 		return query;
 	},
 	columns: ["Total Price"],
