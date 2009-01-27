@@ -72,8 +72,8 @@
   };
   
   
- 
 
+  
   function addBox(opt,input, text, name){
     var li=$('<li class="bit-box"></li>').attr('id', opt.name + 'bit-' + count++).text(text);
     li.append($('<a href="#" class="closebutton"></a>')
@@ -90,7 +90,7 @@
 	return li;
   }
   
-  function addText(opt,input, text, name){
+    function addText(opt,input, text, name){
 	if(text.length > 0)
 	{
 		var li;
@@ -103,7 +103,6 @@
 			li = addBox(opt,input, text, name);
 
 		input.after(li);
-		input.val("");
 	}
    }
 	
@@ -118,14 +117,36 @@
 	  }
 	  return values;
 	}
+	
+	function valueChecked(container,value){
+	
+		return true;
+	}
+		
+	function removeValue(input,value){
+	    var vals=input.parent().parent().find('li');
+		var values = new Array();
+		for(var i=0; i<vals.length; ++i){
+			var v = vals[i].innerHTML.match(/^[^<]+/);	
+			if(v!= null && value == v ){
+				$(vals[i]).remove();
+				return;
+			}
+		}
+	}
   
 	
-	function getCurrentValsHash(input){//return the currently selected values as a hash
+	function getCurrentValsHash(input,opt){//return the currently selected values as a hash
       var vals=input.parent().parent().find('li');
       var hash={};
       for(var i=0; i<vals.length; ++i){
         var s=vals[i].innerHTML.match(/^[^<]+/);
-        if(s){ hash[s]=true; }
+        if(s){ 
+			if(!opt.multiSellectionCheckBox) 
+				hash[s]=true; 
+			else
+				hash[s[0]]=true; 
+		}
       }
       return hash;
     }
@@ -141,28 +162,35 @@
       input.val(original);
     });
 
-    $("body").one("activate.autobox", function(){
+	
+    $("body").bind("activate.autobox", function(){
+		
       // Try hitting return to activate autobox and then hitting it again on blank input
       // to close it.  w/o checking the active object first this input.trigger() will barf.
       if(active && active[0] && $.data(active[0], "originalObject")){
-			var hash = getCurrentValsHash(input);
+			var hash = getCurrentValsHash(input,opt);
 			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
-				addText(opt,input, $.data(active[0], "originalObject").text, opt.name);
-				opt.processAutoBoxChange(input,opt);
+				var value = $.data(active[0], "originalObject").text;
+				if(!opt.multiSellectionCheckBox || active[0].childNodes[0].checked)
+					addText(opt,input,value, opt.name);
+				if(!opt.multiSellectionCheckBox)
+					opt.processAutoBoxChange(input,opt);
 			}
+			
+			if(!opt.multiSellectionCheckBox)
+				$("body").trigger("off.autobox");
       }
       else if(input.val()){ 
-			var hash = getCurrentValsHash(input);
-			if(valueMatched)
+		var hash = getCurrentValsHash(input,opt);
+		if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, input.val(), opt.name);
 				opt.processAutoBoxChange(input,opt);
-		}
+				$("body").trigger("off.autobox");
+			}
 	  }
-
-      active && input.trigger("activate.autobox", [$.data(active[0], "originalObject")]);
-      $("body").trigger("off.autobox");
+		//active && input.trigger("activate.autobox", [$.data(active[0], "originalObject")]);
     });
 
     $("body").one("off.autobox", function(e, reset){
@@ -174,7 +202,8 @@
 
     // If a click bubbles all the way up to the window, close the autobox
     $(window).bind("click.autobox", function(){
-      $("body").trigger("cancel.autobox");
+	   if(!opt.multiSellectionCheckBox)
+			$("body").trigger("cancel.autobox");
     });
 
     function select(){
@@ -184,14 +213,23 @@
 	  valueMatched = true;
     };
 
+	container.mouseleave(function(e){
+		if(opt.multiSellectionCheckBox){
+			opt.processAutoBoxChange(input,opt);
+			$("body").trigger("off.autobox");
+		}
+	});
+	
     container.mouseover(function(e){
       // If you hover over the container, but not its children, return
-      if(e.target == container[0]) return;
+      if(e.target == container[0])return;
       // Set the selected item to the item hovered over and make it active
       selected=$("> *", container).index($(e.target).is('li') ? $(e.target)[0] : $(e.target).parents('li')[0]);
       select();
     }).bind("click.autobox", function(e){
-      $("body").trigger("activate.autobox");
+	  if(opt.multiSellectionCheckBox && e.target.childNodes.length > 0) 
+		 e.target.childNodes[0].checked = true;
+	  $("body").trigger("activate.autobox");
       $.data(document.body, "suppressKey", false);
     });
 
@@ -201,7 +239,9 @@
         if(k == KEY.ESC){ $("body").trigger("cancel.autobox"); }
         else if(k == KEY.RETURN){ $("body").trigger("activate.autobox"); e.preventDefault(); }
         else if(k == KEY.UP || k == KEY.TAB || k == KEY.DOWN){
+		 
           switch(k){
+		 
             case KEY.DOWN:
             case KEY.TAB:
               selected=selected >= size - 1 ? 0 : selected + 1; break;
@@ -226,8 +266,15 @@
           if(hash){ list=$(list).filter(function(){  return !hash[this.text]; }); }
           input.trigger("updateList", [list]);
       },
-      template: function(str){ return "<li>" + opt.insertText(str) + "</li>"; },
-      insertText: function(str){ return str; },
+      template: function(str){ 
+		if(!opt.multiSellectionCheckBox) 
+			return "<li>" + opt.insertText(str) + "</li>";
+		else
+			return "<li>" +  "<input name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
+	  },
+	  //template: function(str){ var a = "<input name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>"; 
+	//	return a},
+      insertText: function(str){ return unescape(escape(str.text)); },
 	  minTextLenght: 0,
       match: function(typed){ 
 		if (opt.matchType == "fromStart")
@@ -249,6 +296,7 @@
 			return this.text.match(new RegExp(typed), "i");		
 	  },
       wrapper: '<ul class="autobox-list"></ul>',
+	  //wrapper: '<input></input>',
 
       resizable: {},
 	
@@ -256,9 +304,11 @@
 		if(opt.multiSellection == true){
 			var selectedValues = getSelectedValues(input);
 			opt.processChange(opt.parent,selectedValues);
-			}
+		}
 		else
 			opt.processChange(opt.parent,getSelectedValues(input));
+			
+		input.val("");
 		}
 		
     }, opt);
@@ -316,7 +366,7 @@
           else if(k == KEY.RETURN){
             if(input.val()){ 	
 			
-				var hash = getCurrentValsHash(input);
+				var hash = getCurrentValsHash(input,opt);
 				if(hash == null || hash[input.val()] != true){
 					if(opt.checkValue == false){
 						addText(opt,input, input.val(), opt.name);
@@ -352,11 +402,19 @@
 				list = [];
             list=$(list)
               .filter(function(){ 
-				valueMatched = this.text == self.val() ? true : valueMatched;
+				valueMatched = this.text.replace(/^\s*|\s*$/g,'') == self.val().replace(/^\s*|\s*$/g,'') ? true : valueMatched;
 				return  opt.match.call(this, self.val()); 
 				})
               .map(function(){
                 var node=$(opt.template(this))[0];
+				if(opt.multiSellectionCheckBox){
+					var el = node.childNodes[0];
+					$(el).click(function () { 
+						if(!el.checked){
+							removeValue(input,el.value);
+						}
+					});
+				}
                 $.data(node, "originalObject", this);
                 return node;
               });
@@ -379,7 +437,7 @@
             $("body").autoboxMode(opt.multiSellection,container, self, list.length, opt);
           });
 
-          opt.getList(self, getCurrentValsHash(self));
+          opt.getList(self, getCurrentValsHash(self,opt));
         });
         return input;
     }
