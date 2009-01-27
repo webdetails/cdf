@@ -35,7 +35,6 @@
 	        <path refid="classpath" />
 	      </classpath>
 	      <src path="${src.dir}" />
-          <src path="../patches/target-build/bi-platform-web/src" />
           <src path="../patches/target-build/bi-platform-web-servlet/src"/>
 	      <exclude name="**/GetCDFResource.java"/>
 	    </javac>
@@ -60,10 +59,6 @@
 	  <property name="solution.stage.dir"
 	            value="${bin.dir}/stage-solution"
 	            description="Name of the resource directory" />
-
-	  <property name="json.stage.dir"
-	            value="${bin.dir}/stage-json"
-	            description="Name of the resource directory" />
 	
 	  <target name="dist" depends="resolve,jar,dist-standalone"/>
 	  <target name="dist-compile" depends="jar,dist-standalone"/>
@@ -73,7 +68,7 @@
 		    
 		    Creates a distribution of this project
 		    ====================================================================-->
-	  <target name="dist-standalone" depends="dist-samples, dist-solution, dist-json" description="Creates a distribution">
+	  <target name="dist-standalone" depends="dist-samples, dist-solution" description="Creates a distribution">
 
 	  	<!-- delete and re-create the plugin dist folder tree -->
 	    <delete dir="${stage.dir}" />
@@ -191,22 +186,4 @@
           excludes="**/Thumbs.db" 
 		/>
     </target>
-	
-	  <target name="dist-json" depends="init">
-
-	  	<mkdir dir="${json.stage.dir}"/>
-	  	
-	  	<!-- copy over all the custom org.json classes -->
-	  	<copy todir="${json.stage.dir}" overwrite="true" >
-	        <fileset dir="../patches/target-build/bi-platform-web/src">
-	          <include name="**/*"/>
-	        </fileset>
-	  	</copy>
-
-	  	<zip zipfile="${dist.dir}/${ivy.artifact.id}-json-${project.revision}.zip"
-	  		basedir="${json.stage.dir}"
-	  		includes="**/*"
-        excludes="**/Thumbs.db" 
-		/>
-  </target>
 </project>
