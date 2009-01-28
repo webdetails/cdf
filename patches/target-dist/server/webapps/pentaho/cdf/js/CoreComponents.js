@@ -131,8 +131,16 @@ var SelectBaseComponent = BaseComponent.extend({
 			var vid = this.valueAsId==false?false:true;
 			for(var i= 0, len  = myArray.length; i < len; i++){
 				if(myArray[i]!= null && myArray[i].length>0) {
-					var ivid = vid || myArray[i][0] == null; 					
-					selectHTML += "<option value = '" + myArray[i][ivid?1:0] + "' >" + myArray[i][1] + "</option>";
+					var ivid = vid || myArray[i][0] == null;
+					var value, label;
+					if (myArray[i].length > 1) {
+						value = myArray[i][ivid?1:0];
+						label = myArray[i][1];
+					} else {
+						value = myArray[i][0];
+						label = myArray[i][0];
+					}
+					selectHTML += "<option value = '" + value + "' >" + label + "</option>";
 				}
 			} 
 
