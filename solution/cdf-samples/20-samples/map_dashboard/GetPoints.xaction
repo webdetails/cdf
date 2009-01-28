@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<action-sequence> 
+  <title>GetPointsCode</title>
+  <version>1</version>
+  <logging-level>ERROR</logging-level>
+  <documentation> 
+    <author>Pedro Alves</author>  
+    <description>Get the territory points</description>  
+    <help/>  
+	<result-type>none</result-type> 
+    <icon/> 
+  </documentation>
+
+  <inputs> 
+    <territory type="string"> 
+      <sources> 
+        <request>territory</request> 
+      </sources>  
+      <default-value><![CDATA[]]></default-value> 
+    </territory>  
+  </inputs>
+
+   <outputs> 
+    <query_result type="result-set"/> 
+  </outputs>
+
+  <resources/>
+  
+  <actions> 
+      <actions>
+          <condition><![CDATA[territory != "NULL"]]></condition>
+          <action-definition> 
+              <component-name>SQLLookupRule</component-name>
+              <action-type>Relational</action-type>
+              <action-inputs> 
+                  <territory type="string"/> 
+              </action-inputs>
+              <action-outputs> 
+                  <query-result type="result-set" mapping="query_result"/>  
+                  <region_name type="string"/> 
+              </action-outputs>
+              <component-definition> 
+                  <jndi><![CDATA[SampleData]]></jndi>  
+                  <query><![CDATA[
+                      select 
+                      OFFICES.CITY as id,
+                      '' as lat,
+                      '' as log,
+                      OFFICES.CITY as localidade,
+                      cast(SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) as varchar(16)) as value, 
+                      OFFICES.CITY as title
+                      FROM ORDERS
+                      INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER
+                      INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE
+                      INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER
+                      INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER
+                      INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE
+                      where offices.TERRITORY={PREPARE:territory}
+                      GROUP BY OFFICES.CITY
+                      ORDER BY 2 DESC
+                      ]]></query>  
+                  <live><![CDATA[true]]></live> 
+              </component-definition> 
+          </action-definition>
+      </actions>
+      <actions>
+          <condition><![CDATA[territory == ""]]></condition>
+          <action-definition> 
+              <component-name>SQLLookupRule</component-name>
+              <action-type>Relational</action-type>
+              <action-inputs> 
+                  <territory type="string"/> 
+              </action-inputs>
+              <action-outputs> 
+                  <query-result type="result-set" mapping="query_result"/>  
+                  <region_name type="string"/> 
+              </action-outputs>
+              <component-definition> 
+                  <jndi><![CDATA[SampleData]]></jndi>  
+                  <query><![CDATA[
+                      select 
+                      OFFICES.CITY as id,
+                      '' as lat,
+                      '' as log,
+                      OFFICES.CITY as localidade,
+                      cast(SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) as varchar(16)) as value, 
+                      OFFICES.CITY as title
+                      FROM ORDERS
+                      INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER
+                      INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE
+                      INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER
+                      INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER
+                      INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE
+                      GROUP BY OFFICES.CITY
+                      ORDER BY 2 DESC
+                      ]]></query>  
+                  <live><![CDATA[true]]></live> 
+              </component-definition> 
+          </action-definition>
+      </actions>
+
+  </actions> 
+</action-sequence>
