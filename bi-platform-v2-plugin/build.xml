@@ -81,10 +81,14 @@
 	    <copy todir="${stage.dir}/${plugin.name}/lib">
 	      <fileset dir="${dist.dir}">
 	        <include name="${ivy.artifact.id}-${project.revision}.jar" />
-	      	<include name="json-${dependency.json.revision}.jar" />
 	      </fileset>
 	    </copy>
-	  	
+	    
+	  	<copy todir="${dist.dir}/${plugin.name}/lib">
+	      <fileset dir="${lib.dir}">
+	        <include name="json-${dependency.json.revision}.jar" />
+	      </fileset>
+	    </copy>
 	  	<!-- Copy the plugin.xml and any other files from the resource dir -->
 	    <copy todir="${stage.dir}/${plugin.name}">
 	      <fileset dir="${resource.dir}">
