@@ -281,7 +281,7 @@ var TimePlotComponent = BaseComponent.extend({
 				this.startDateParameter = cd.dateRangeInput.parameter[0];
 				this.endDateParameter = cd.dateRangeInput.parameter[1];
 				this.listeners = this.listeners == undefined ? [] : this.listeners;
-				this.listeners = this.listeners.concat(this.startDateParameter).concat(this.endDateParameter)
+				this.listeners = this.listeners.concat(this.startDateParameter).concat(this.endDateParameter);
 			}
 
 			if (typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined ){
@@ -289,7 +289,7 @@ var TimePlotComponent = BaseComponent.extend({
 				new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'), 
 				new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'), 
 				new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'), 
-				new Timeplot.Color('#73F321')]
+				new Timeplot.Color('#73F321')];
 			}
 
 			var timePlotTimeGeometry = new Timeplot.DefaultTimeGeometry({
@@ -396,7 +396,7 @@ var TimePlotComponent = BaseComponent.extend({
 
 			timeplot = Timeplot.create($("#"+this.htmlObject+" > div.timeplot")[0], plotInfo);
 			obj.timeplot = timeplot;
-			obj.geometry = timePlotTimeGeometry 
+			obj.geometry = timePlotTimeGeometry;
 
 			// go through parametere array and update values
 			var parameters = [];
@@ -699,16 +699,16 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 			$("#"+ this.htmlObject).empty();
 
 			var myself = this;
+			
+			myself.selectMulti = myself.selectMulti == undefined ? false : myself.selectMulti;
+			myself.multiSellectionCheckBox = myself.multiSellectionCheckBox == undefined ? false : myself.multiSellectionCheckBox;
 
 			var opt = {
 				list: list,
-				matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*
-																							* fromStart,
-																							* all
-																							*/
-				insertText: function(o) {return o.text },
+				matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
 				processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
-				multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
+				multiSellection: myself.selectMulti || myself.multiSellectionCheckBox,
+				multiSellectionCheckBox: myself.multiSellectionCheckBox,
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
 				parent: myself

@@ -226,20 +226,15 @@ Timeplot.DataSource.prototype = {
         if (this._data) {
             for (var i = 0; i < this._data.times.length; i++) {
                 var l = this._data.times[i];
-				var p = new Date(t);
 				if (l == t)
 					return this._data.values[i];
                 if (l > t)
                     return this._data.values[i-1];
-				
             }
 			
 			if(this._data.times.length > 0)
 				return this._data.values[this._data.times.length-1];
-        }
-		
-		
-			
+        }	
         return 0;
     },
 
