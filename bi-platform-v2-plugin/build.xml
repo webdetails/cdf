@@ -84,7 +84,7 @@
 	      </fileset>
 	    </copy>
 	    
-	  	<copy todir="${dist.dir}/${plugin.name}/lib">
+	  	<copy todir="${stage.dir}/${plugin.name}/lib">
 	      <fileset dir="${lib.dir}">
 	        <include name="json-${dependency.json.revision}.jar" />
 	      </fileset>
