@@ -699,13 +699,16 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 			$("#"+ this.htmlObject).empty();
 
 			var myself = this;
+			
+			myself.selectMulti = myself.selectMulti == undefined ? false : myself.selectMulti;
+			myself.multiSellectionCheckBox = myself.multiSellectionCheckBox == undefined ? false : myself.multiSellectionCheckBox;
 
 			var opt = {
 				list: list,
 				matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
 				processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
-				multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
-				multiSellectionCheckBox: myself.multiSellectionCheckBox == undefined ? false : myself.multiSellectionCheckBox,
+				multiSellection: myself.selectMulti || myself.multiSellectionCheckBox,
+				multiSellectionCheckBox: myself.multiSellectionCheckBox,
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
 				parent: myself
