@@ -81,7 +81,7 @@ var SelectBaseComponent = BaseComponent.extend({
 			if (this.size != undefined){
 				selectHTML += " size='" + this.size + "'";
 			}
-			if (this.type == "selectMulti"){
+			if (this.type == "selectMultiComponent" || this.type == "selectMulti"){
 				selectHTML += " multiple";
 			}
 			selectHTML += ">";
@@ -242,15 +242,17 @@ var TrafficComponent = BaseComponent.extend({
 			Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters, 
 				function(result){ 
 
-					if(cd.showValue != undefined && cd.showValue == true){
-						var tooltip = myself._tooltip;
-						myself._tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
-					}
-
-					// alert("Traffic result: " + result);
 					var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
 					$('#'+myself.htmlObject).html(i);
+
+					if(cd.showValue != undefined && cd.showValue == true){
+						var tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+						$('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({delay:0,track: true,fade: 250});
+					}
+
 					Dashboards.decrementRunningCalls();
+
+
 				});
 		}
 	});
@@ -495,17 +497,24 @@ var DateRangeInputComponent = BaseComponent.extend({
 	{
 		fireDateRangeInputChange : function(name, rangeA, rangeB){
 			// WPG: can we just use the parameter directly?
+			var object = Dashboards.getComponentByName(name);
+			if(!(typeof(object.preChange)=='undefined')){
+				object.preChange(rangeA, rangeB);
+			}
 			var parameters = eval(name + ".parameter");
 			// set the second date and fireChange the first
 			Dashboards.setParameter(parameters[1], rangeB);
 			Dashboards.fireChange(parameters[0],rangeA);
+			if(!(typeof(object.postChange)=='undefined')){
+				object.postChange(rangeA, rangeB);
+			}
 	}
 }
 );
 
 var MonthPickerComponent = BaseComponent.extend({
 		update : function() {
-			var selectHTML = Dashboards.getMonthPicker(this.name, this.size, this.initialDate, this.minDate, this.maxDate, this.months);
+			var selectHTML = this.getMonthPicker(this.name, this.size, this.initialDate, this.minDate, this.maxDate, this.months);
 			document.getElementById(this.htmlObject).innerHTML = selectHTML;
 			var myself = this;
 			$("#"+this.name).change(function() {
@@ -522,7 +531,7 @@ var MonthPickerComponent = BaseComponent.extend({
 			d.setYear(year);
 
 			// rebuild picker
-			var selectHTML = Dashboards.getMonthPicker(this.name, this.size, d, this.minDate, this.maxDate, this.months);
+			var selectHTML = this.getMonthPicker(this.name, this.size, d, this.minDate, this.maxDate, this.months);
 			$("#" + this.htmlObject).html(selectHTML);
 			var myself = this;
 			$("#"+this.name).change(function() {
@@ -558,7 +567,7 @@ var MonthPickerComponent = BaseComponent.extend({
 				currentDate.setMonth(currentDate.getMonth() + 1);
 				if(currentDate >= minDate && currentDate <= maxDate)
 				{
-					selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + Dashboards.zeroPad(currentDate.getMonth()+1,2) + "'";
+					selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "'";
 
 					if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()){
 						selectHTML += "selected='selected'"
@@ -588,12 +597,13 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 				if(i==0){
 					selectHTML += " CHECKED";
 				}
-				if (this.type == 'radio'){
+				if (this.type == 'radio' || this.type == 'radioComponent'){
 					selectHTML += " type='radio'";
 				}else{
 					selectHTML += " type='checkbox'";
 				}
-				selectHTML += " id='" + this.name +"' name='" + this.name +"' value='" + myArray[i][1] + "' /> " + myArray[i][1] + (this.separator == undefined?"":this.separator);
+				var vid = this.valueAsId==false?0:1;
+				selectHTML += " id='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + (this.separator == undefined?"":this.separator);
 			} 
 			// update the placeholder
 			document.getElementById(this.htmlObject).innerHTML = selectHTML;
@@ -893,7 +903,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 			$("#"+ this.htmlObject).bind("click", function(){
 					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
 					if(success) {
-						this.executeXAction();
+						myself.executeXAction();
 					}
 					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
 				});

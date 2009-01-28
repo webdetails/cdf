@@ -318,7 +318,7 @@ public class NavigateComponent extends PentahoMessenger {
                         Document indexFile = solutionRepository.getResourceAsDocument(resourceName);
                         solutionRepository.localizeDoc(indexFile, file);
 
-                        json.put("visible", indexFile.selectNodes("/action-sequence/documentation/result-type").size() == 0 ? Boolean.FALSE : Boolean.TRUE);
+                        json.put("visible", indexFile.selectNodes("/action-sequence/documentation/result-type").size() == 0 || indexFile.valueOf("/action-sequence/documentation/result-type").equals("none") ? Boolean.FALSE : Boolean.TRUE);
                         json.put("title", indexFile.valueOf("/action-sequence/title"));
                         json.put("description", indexFile.valueOf("/action-sequence/documentation/description"));
 

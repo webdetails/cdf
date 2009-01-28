@@ -32,7 +32,7 @@ OpenLayers.Util.getElement = function() {
  * Maintain $() from prototype
  */
 if ($ == null) {
-    var $ = OpenLayers.Util.getElement;
+    //var $ = OpenLayers.Util.getElement;
 }
 
 /**
