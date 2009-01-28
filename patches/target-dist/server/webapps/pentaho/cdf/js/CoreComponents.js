@@ -127,7 +127,7 @@ var SelectBaseComponent = BaseComponent.extend({
 				selectHTML += " multiple";
 			}
 			selectHTML += ">";
-
+			var firstVal;
 			var vid = this.valueAsId==false?false:true;
 			for(var i= 0, len  = myArray.length; i < len; i++){
 				if(myArray[i]!= null && myArray[i].length>0) {
@@ -140,6 +140,9 @@ var SelectBaseComponent = BaseComponent.extend({
 						value = myArray[i][0];
 						label = myArray[i][0];
 					}
+					if (i == 0) {
+						firstVal = value;
+					}
 					selectHTML += "<option value = '" + value + "' >" + label + "</option>";
 				}
 			} 
@@ -147,8 +150,13 @@ var SelectBaseComponent = BaseComponent.extend({
 			selectHTML += "</select>";
 
 			// update the placeholder
-			$("#"+this.htmlObject).html(selectHTML)
-			$("#"+this.name).val(Dashboards.getParameterValue(this.parameter));
+			$("#"+this.htmlObject).html(selectHTML);
+			var currentVal = Dashboards.getParameterValue(this.parameter);
+			if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
+				Dashboards.setParameter(this.parameter, firstVal);
+			} else {
+				$("#"+this.name).val(currentVal);
+			}
 			var myself = this;
 			$("#"+this.name).change(function() {
 					Dashboards.processChange(myself.name);
