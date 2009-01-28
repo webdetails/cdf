@@ -81,6 +81,7 @@
 	    <copy todir="${stage.dir}/${plugin.name}/lib">
 	      <fileset dir="${dist.dir}">
 	        <include name="${ivy.artifact.id}-${project.revision}.jar" />
+	      	<include name="json-${dependency.json.revision}.jar" />
 	      </fileset>
 	    </copy>
 	  	
