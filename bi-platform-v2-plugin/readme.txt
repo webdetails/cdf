@@ -6,9 +6,38 @@ http://wiki.pentaho.com/display/ServerDoc2x/BI+Platform+Plugins+in+V2
 The goal of this project is to have CDF be a runtime drop-in to the BI Platform,
 with zero changes to the webapp.
 
-To build dist/pentaho-cdf.zip and dist/pentaho-cdf-samples.zip, run "ant dist".
+BUILD AND INSTALL
+-----------------
+
+To build dist/pentaho-cdf.zip, dist/pentaho-cdf-solution.zip and 
+dist/pentaho-cdf-samples.zip, run "ant dist".
 
 The plugin must be installed in the pentaho-solutions/system/pentaho-cdf folder.
+
+In order for the MetaLayer to be functional, you must install the pentaho-cdf 
+solution folder "cdf" within pentaho-solutions.  Note that at this time there are 
+some security implications, so it does not come installed by default.
+
+XCDF File Format
+----------------
+The XCDF file format is XML, and contains a root element "cdf".  The child 
+elements supported are:
+
+title       - the Title displayed in the Pentaho User Console
+author      - the Author displayed in the Pentaho User Console
+description - the Discription displayed in the Pentaho User Console
+icon        - the Icon displayed in the Pentaho User Console
+template    - the html template file to render, this contains the CDF widgets.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Dashboard Title</title>
+	<author>CDF Developer</author>
+	<description>A Dashboard</description>
+	<icon></icon>
+	<template>mycdftemplate.html</template>
+</cdf>
+
 
 TODO:
 - complete implementation of entire widget set (requires additional examples of widgets / etc)
