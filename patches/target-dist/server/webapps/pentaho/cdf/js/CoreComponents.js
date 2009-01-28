@@ -65,6 +65,7 @@ var BaseComponent = Base.extend({
 
 var XactionComponent = BaseComponent.extend({
 		update : function() {
+		  try {
 			if (typeof(this.iframe) == 'undefined' || !this.iframe) {
 				// go through parameter array and update values
 				var p = new Array(this.parameters.length);
@@ -105,6 +106,9 @@ var XactionComponent = BaseComponent.extend({
 
 				document.getElementById(this.htmlObject).innerHTML = xactionIFrameHTML;
 			}
+		  } catch (e) {
+			  // don't cause the rest of CDF to fail if xaction component fails for whatever reason
+		  }
 		}
 	});
 
