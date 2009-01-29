@@ -535,11 +535,12 @@ var DateRangeInputComponent = BaseComponent.extend({
 			var myself = this;
 			var earliestDate = this.earliestDate != undefined  ?  Dashboards.getParameterValue(this.earliestDate) : Date.parse('-1years');
 			var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
-
+			var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
+			var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
 			$(function(){ 
 					$("#" + myself.htmlObject + " input").daterangepicker({
-							posX: offset.left, 
-							posY: offset.top + 15, 
+							posX: offset.left + leftOffset, 
+							posY: offset.top + topOffset, 
 							earliestDate: earliestDate,
 							latestDate: latestDate,
 							dateFormat: 'yy-mm-dd',
