@@ -96,6 +96,12 @@
 	      </fileset>
 	    </copy>
 	  	
+	  	<copy todir="${stage.dir}/${plugin.name}">
+	  		<fileset dir="${basedir}">
+	  			<include name="readme.txt"/>
+	  		</fileset>
+  		</copy>
+	  	
 	  	<!-- Copy js folder into dist -->
 	    <copy todir="${stage.dir}/${plugin.name}/js">
 	      <fileset dir="../patches/target-dist/server/webapps/pentaho/cdf/js">
