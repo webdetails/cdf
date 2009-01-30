@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <action-sequence> 
   <title>Jtable</title>
   <version>1</version>
@@ -53,8 +53,7 @@
     
   </outputs>
   
-  <actions> 
-  
+  <actions>
 
     <action-definition> 
       <component-name>MDXLookupRule</component-name>
@@ -92,7 +91,6 @@
       <component-definition> 
         <script><![CDATA[// MDX to Relation result set, needed for the 
 		
-		var newResults = new Packages.org.json.JSONStringer();
 		var values = new Packages.org.json.JSONArray();
 		
 		if (query_result != null)
@@ -104,11 +102,8 @@
 			var colCount = rsmd.getColumnCount() ;
 			var rowCount = query_result.getRowCount() ;
 
-			
 			if(rowCount> 0)
-			{
-			//newResults.key("aaData");
-				
+			{		
 				for (i=0; i<rowCount; i++)
 				{
 					var value = new Packages.org.json.JSONArray();
@@ -123,16 +118,10 @@
 					values.put(value);
 				}
 				
-				/*
-				newResults.value(values);
-				newResults.value(new Packages.org.json.JSONArray(headersArray.toString()));
-				newResults.endObject();
-				*/
 			}
 		}
 		
-		var results = values.toString();
-		
+		var results = new java.lang.String(values.toString().getBytes("utf8"));
 		results;
 		]]></script> 
       </component-definition> 
