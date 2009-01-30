@@ -354,7 +354,7 @@ var TimePlotComponent = BaseComponent.extend({
 					hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
 					showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
 					toolTipFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value);},
-					headerFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";},
+					headerFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";}
 				};
 				if ( cd.dots == true){
 					plotInfoOpts.dotColor = Dashboards.timePlotColors[i];
