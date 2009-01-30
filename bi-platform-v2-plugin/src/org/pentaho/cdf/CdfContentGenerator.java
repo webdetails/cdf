@@ -107,6 +107,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
           String json = nav.getNavigationElements(mode, solution, path);
           PrintWriter pw = new PrintWriter(out);
           pw.println(json);
+          pw.flush();
           return;
         }
         

@@ -81,7 +81,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
 		if( NavigatorBaseComponent.navigatorResponse == -1 ){
-			$.getJSON("JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
+			$.getJSON(Dashboards.pentahoRoot + "JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
 					myself.processNavigatorResponse(json);
 				});
 		}
@@ -170,7 +170,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 var ContentListComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
-		$.getJSON("JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+		$.getJSON(Dashboards.pentahoRoot +"JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
 				myself.processContentListResponse(json);
 			});
 	},
@@ -265,7 +265,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
 		if( NavigatorBaseComponent.navigatorResponse == -1 ){
-			$.getJSON("JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+			$.getJSON(Dashboards.pentahoRoot +"JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
 					myself.processPageTitleResponse(json);
 				});
 		}
