@@ -183,22 +183,30 @@
 		while (resourceKeys.hasMoreElements()) {
 		
 			String scriptkey = (String) resourceKeys.nextElement();
-			
-			if(scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1 ){
 
-				String key = scriptkey.replaceAll("Script","");
-				String linkKey = scriptkey.replaceAll("Script","Link");
+            String key = null;
+            String type = null;
+
+			if(scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1 ){
+				key = scriptkey.replaceAll("Script$","");
+                type = "script";
+            }
+			else if(scriptkey.indexOf("Link") != -1 && scriptkey.indexOf("commonLibraries") == -1 ){
+				key = scriptkey.replaceAll("Link$","");
+                type = "link";
+            }
+            else{
+                continue;
+            }
 			
-				int keyIndex = dashboardContent.indexOf(key);
-				if(keyIndex != -1) {
-					if(matchComponent(keyIndex, key, dashboardContent)){
-						Hashtable component = new Hashtable();
-						component.put("link",resources.getProperty(linkKey,"").split(","));
-						component.put("script",resources.getProperty(scriptkey,"").split(","));
-						javaScriptLibrary  = concatFiles(javaScriptLibrary,addedFiles,component);
-					}
-				}
-			}
+            int keyIndex = dashboardContent.indexOf(key);
+            if(keyIndex != -1) {
+                if(matchComponent(keyIndex, key, dashboardContent)){
+                    Hashtable component = new Hashtable();
+                    component.put(type,resources.getProperty(scriptkey).split(","));
+                    javaScriptLibrary  = concatFiles(javaScriptLibrary,addedFiles,component);
+                }
+            }
 		}
 		
 		//Concat libraries to html head content
