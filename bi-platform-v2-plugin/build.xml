@@ -62,6 +62,11 @@
 	
 	  <target name="dist" depends="resolve,jar,dist-standalone"/>
 	  <target name="dist-compile" depends="jar,dist-standalone"/>
+  
+      <property name="plugin.artifact.id" value="${plugin.name}"/>
+      <property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
+      <property name="plugin.samples.zipfile" value="${plugin.artifact.id}-samples-${project.revision}.zip"/>
+      <property name="plugin.solution.zipfile" value="${plugin.artifact.id}-solution-${project.revision}.zip"/>
 	
 	  <!--=======================================================================
 		    dist
@@ -124,7 +129,7 @@
 	    </copy>
 	  	
 	  	<!-- create a zip file -->
-	    <zip zipfile="${dist.dir}/${ivy.artifact.id}-${project.revision}.zip"
+	    <zip zipfile="${dist.dir}/${plugin.zipfile}"
 	         basedir="${stage.dir}"
 	         includes="pentaho-cdf/**/*"
 	         excludes="**/Thumbs.db" />
@@ -170,7 +175,7 @@
           <fileset dir="samples"/>
 	  	</copy>
 	  	
-	  	<zip zipfile="${dist.dir}/${ivy.artifact.id}-samples-${project.revision}.zip"
+	  	<zip zipfile="${dist.dir}/${plugin.samples.zipfile}"
 	  		basedir="${samples.stage.dir}"
 	  		includes="**/*"
             excludes="**/Thumbs.db" 
@@ -191,10 +196,46 @@
 	        </fileset>
 	  	</copy>
 
-	  	<zip zipfile="${dist.dir}/${ivy.artifact.id}-solution-${project.revision}.zip"
+	  	<zip zipfile="${dist.dir}/${plugin.solution.zipfile}"
 	  		basedir="${solution.stage.dir}"
 	  		includes="**/*"
           excludes="**/Thumbs.db" 
 		/>
     </target>
+  
+  
+  <!--=======================================================================
+	    publish-pentaho-nojar (override)
+	    
+	    Publishes the jar and plugin zip package to the Maven repository
+	    ====================================================================-->
+  <target name="publish-pentaho-nojar"
+          depends="install-antcontrib,create-pom,ivy.deliver">
+    <ant antfile="common_build.xml" target="publish-pentaho-nojar" />
+    
+    <ivy:makepom ivyfile="package-ivy.xml" pomfile="plugin-pom.xml" />
+    <ivy:makepom ivyfile="package-ivy.xml" pomfile="samples-pom.xml" />
+    <ivy:makepom ivyfile="package-ivy.xml" pomfile="solution-pom.xml" />
+    
+    <replace file="plugin-pom.xml" token="jar" value="zip" />
+    <replace file="plugin-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}" />
+    <antcall target="maven-publish-artifact">
+      <param name="publish.pomFile" value="plugin-pom.xml" />
+      <param name="publish.file" value="${dist.dir}/${plugin.zipfile}" />
+    </antcall>
+
+    <replace file="samples-pom.xml" token="jar" value="zip" />
+    <replace file="samples-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-samples" />
+    <antcall target="maven-publish-artifact">
+      <param name="publish.pomFile" value="samples-pom.xml" />
+      <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
+    </antcall>
+    
+    <replace file="solution-pom.xml" token="jar" value="zip" />
+    <replace file="solution-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-solution" />
+    <antcall target="maven-publish-artifact">
+      <param name="publish.pomFile" value="solution-pom.xml" />
+      <param name="publish.file" value="${dist.dir}/${plugin.solution.zipfile}" />
+    </antcall>
+  </target>
 </project>
