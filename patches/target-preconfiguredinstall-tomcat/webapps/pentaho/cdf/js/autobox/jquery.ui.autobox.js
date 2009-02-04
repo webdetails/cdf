@@ -181,8 +181,8 @@
 			if(!opt.multiSellectionCheckBox)
 				$("body").trigger("off.autobox");
 			else if(key == KEY.RETURN){
-				opt.processAutoBoxChange(input,opt);
 				$("body").trigger("off.autobox");
+				opt.processAutoBoxChange(input,opt);
 			}
       }
       else if(input.val()){ 
@@ -218,9 +218,13 @@
     };
 
 	container.bind("keydown", function(e){
+		var k=e.which || e.keyCode;
 		if(opt.multiSellectionCheckBox){
-			opt.processAutoBoxChange(input,opt);
-			$("body").trigger("off.autobox");
+			if(k == KEY.RETURN){
+				$("body").trigger("off.autobox");
+				opt.processAutoBoxChange(input,opt);
+				
+			}
 		}
 	});
 	
