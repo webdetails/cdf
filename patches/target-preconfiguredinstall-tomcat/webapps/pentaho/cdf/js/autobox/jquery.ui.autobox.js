@@ -190,8 +190,8 @@
 		if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, input.val(), opt.name);
-				opt.processAutoBoxChange(input,opt);
 				$("body").trigger("off.autobox");
+				opt.processAutoBoxChange(input,opt);
 			}
 	  }
 		//active && input.trigger("activate.autobox", [$.data(active[0], "originalObject")]);
