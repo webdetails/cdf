@@ -163,7 +163,7 @@
     });
 
 	
-    $("body").bind("activate.autobox", function(){
+    $("body").bind("activate.autobox", function(e, key){
 		
       // Try hitting return to activate autobox and then hitting it again on blank input
       // to close it.  w/o checking the active object first this input.trigger() will barf.
@@ -172,7 +172,7 @@
 			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				var value = $.data(active[0], "originalObject").text;
-				if(!opt.multiSellectionCheckBox || active[0].childNodes[0].checked)
+				if((!opt.multiSellectionCheckBox || key == KEY.RETURN)|| active[0].childNodes[0].checked)
 					addText(opt,input,value, opt.name);
 				if(!opt.multiSellectionCheckBox)
 					opt.processAutoBoxChange(input,opt);
@@ -180,6 +180,10 @@
 			
 			if(!opt.multiSellectionCheckBox)
 				$("body").trigger("off.autobox");
+			else if(key == KEY.RETURN){
+				opt.processAutoBoxChange(input,opt);
+				$("body").trigger("off.autobox");
+			}
       }
       else if(input.val()){ 
 		var hash = getCurrentValsHash(input,opt);
@@ -213,7 +217,7 @@
 	  valueMatched = true;
     };
 
-	container.mouseleave(function(e){
+	container.bind("keydown", function(e){
 		if(opt.multiSellectionCheckBox){
 			opt.processAutoBoxChange(input,opt);
 			$("body").trigger("off.autobox");
@@ -237,7 +241,7 @@
       .bind("keydown.autobox", function(e){
         var k=e.which || e.keyCode;
         if(k == KEY.ESC){ $("body").trigger("cancel.autobox"); }
-        else if(k == KEY.RETURN){ $("body").trigger("activate.autobox"); e.preventDefault(); }
+        else if(k == KEY.RETURN){ $("body").trigger("activate.autobox",[k]); e.preventDefault(); }
         else if(k == KEY.UP || k == KEY.TAB || k == KEY.DOWN){
 		 
           switch(k){
