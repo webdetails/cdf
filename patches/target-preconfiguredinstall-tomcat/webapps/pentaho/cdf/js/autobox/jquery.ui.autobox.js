@@ -72,15 +72,26 @@
   };
   
   
-
+  function showApplyButton(applyButtom){
+	if(applyButtom.is(":hidden"))
+		applyButtom.show('slow');
+  }
+	
+  function hideApplyButton(applyButtom){
+	applyButtom.hide('slow');
+  }
   
-  function addBox(opt,input, text, name){
+  function addBox(opt,input,applyButtom, text, name){
     var li=$('<li class="bit-box"></li>').attr('id', opt.name + 'bit-' + count++).text(text);
-    li.append($('<a href="#" class="closebutton"></a>')
+    li.append($('<a href="" class="closebutton"></a>')
           .bind('click', function(e) {
               li.remove();
               e.preventDefault();
-			  opt.processAutoBoxChange(input,opt);
+			  if(!opt.multiSellection)
+				opt.processAutoBoxChange(input,opt);
+			
+			  showApplyButton(applyButtom);
+				
           }))
       .append($('<input type="hidden" />')
           .attr('name', name)
@@ -90,19 +101,23 @@
 	return li;
   }
   
-    function addText(opt,input, text, name){
+    function addText(opt,input,applyButtom, text, name){
 	if(text.length > 0)
 	{
 		var li;
 		if(opt.multiSellection != true){
 			count = 0;
-			li = addBox(opt,input, text, name);
+			li = addBox(opt,input,applyButtom, text, name);
 			$("#" +opt.name + "bit-0").replaceWith(li);
 		}
 		else
-			li = addBox(opt,input, text, name);
+			li = addBox(opt,input,applyButtom, text, name);
 
+		if(opt.multiSellection && applyButtom.is(":hidden"))
+			showApplyButton(applyButtom);
+			
 		input.after(li);
+		input.val("");
 	}
    }
 	
@@ -118,18 +133,19 @@
 	  return values;
 	}
 	
-	function valueChecked(container,value){
-	
-		return true;
+	function emptyValues(input){
+		return (input.parent().parent().find('li').length == 1);
 	}
 		
-	function removeValue(input,value){
+	function removeValue(opt,input,applyButtom,value){
 	    var vals=input.parent().parent().find('li');
 		var values = new Array();
 		for(var i=0; i<vals.length; ++i){
 			var v = vals[i].innerHTML.match(/^[^<]+/);	
 			if(v!= null && value == v ){
 				$(vals[i]).remove();
+				if(opt.multiSellection && emptyValues(input))
+					applyButtom.hide('slow');
 				return;
 			}
 		}
@@ -142,7 +158,7 @@
       for(var i=0; i<vals.length; ++i){
         var s=vals[i].innerHTML.match(/^[^<]+/);
         if(s){ 
-			if(!opt.multiSellectionCheckBox) 
+			if(!opt.multiSellection) 
 				hash[s]=true; 
 			else
 				hash[s[0]]=true; 
@@ -151,7 +167,7 @@
       return hash;
     }
 	
-  $.fn.autoboxMode=function(multiSellection,container, input, size, opt){
+  $.fn.autoboxMode=function(multiSellection,container, input, applyButtom, size, opt){
     var original=input.val(); var selected=-1; var self=this;
 
     $.data(document.body, "autoboxMode", true);
@@ -163,8 +179,7 @@
     });
 
 	
-    $("body").bind("activate.autobox", function(e, key){
-		
+    $("body").bind("activate.autobox", function(e, k){
       // Try hitting return to activate autobox and then hitting it again on blank input
       // to close it.  w/o checking the active object first this input.trigger() will barf.
       if(active && active[0] && $.data(active[0], "originalObject")){
@@ -172,32 +187,32 @@
 			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				var value = $.data(active[0], "originalObject").text;
-				if((!opt.multiSellectionCheckBox || key == KEY.RETURN)|| active[0].childNodes[0].checked)
-					addText(opt,input,value, opt.name);
-				if(!opt.multiSellectionCheckBox)
+				if(!opt.multiSellection || (active[0].childNodes[0].checked || k == KEY.RETURN))
+					addText(opt,input,applyButtom,value, opt.name);
+				if(!opt.multiSellection)
 					opt.processAutoBoxChange(input,opt);
 			}
 			
-			if(!opt.multiSellectionCheckBox)
+			if(!opt.multiSellection || k == KEY.RETURN){				
 				$("body").trigger("off.autobox");
-			else if(key == KEY.RETURN){
-				$("body").trigger("off.autobox");
-				opt.processAutoBoxChange(input,opt);
 			}
       }
       else if(input.val()){ 
 		var hash = getCurrentValsHash(input,opt);
+		if(!valueMatched)
+			var aux = $(opt.list).filter(function(){valueMatched = this.text == input.val() ? true : valueMatched;});
 		if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
-				addText(opt,input, input.val(), opt.name);
+				addText(opt,input,applyButtom, input.val(), opt.name);
+				if(!opt.multiSellection)
+					opt.processAutoBoxChange(input,opt);
 				$("body").trigger("off.autobox");
-				opt.processAutoBoxChange(input,opt);
 			}
 	  }
 		//active && input.trigger("activate.autobox", [$.data(active[0], "originalObject")]);
     });
 
-    $("body").one("off.autobox", function(e, reset){
+    $("body").bind("off.autobox", function(e, reset){
       container.remove();
       $.data(document.body, "autoboxMode", false);
       input.unbind("keydown.autobox");
@@ -205,10 +220,10 @@
     });
 
     // If a click bubbles all the way up to the window, close the autobox
-    $(window).bind("click.autobox", function(){
-	   if(!opt.multiSellectionCheckBox)
+    /* $(window).bind("click.autobox", function(){
+	   if(!opt.multiSellection)
 			$("body").trigger("cancel.autobox");
-    });
+	});*/
 
     function select(){
       active=$("> *", container).removeClass("active").slice(selected, selected + 1).addClass("active");
@@ -216,17 +231,6 @@
       input.val(opt.insertText($.data(active[0], "originalObject")));
 	  valueMatched = true;
     };
-
-	container.bind("keydown", function(e){
-		var k=e.which || e.keyCode;
-		if(opt.multiSellectionCheckBox){
-			if(k == KEY.RETURN){
-				$("body").trigger("off.autobox");
-				opt.processAutoBoxChange(input,opt);
-				
-			}
-		}
-	});
 	
     container.mouseover(function(e){
       // If you hover over the container, but not its children, return
@@ -235,12 +239,12 @@
       selected=$("> *", container).index($(e.target).is('li') ? $(e.target)[0] : $(e.target).parents('li')[0]);
       select();
     }).bind("click.autobox", function(e){
-	  if(opt.multiSellectionCheckBox && e.target.childNodes.length > 0) 
+	  if(opt.multiSellection && e.target.childNodes.length > 0) 
 		 e.target.childNodes[0].checked = true;
 	  $("body").trigger("activate.autobox");
       $.data(document.body, "suppressKey", false);
     });
-
+	
     input
       .bind("keydown.autobox", function(e){
         var k=e.which || e.keyCode;
@@ -265,8 +269,6 @@
 
   $.fn.autobox=function(opt){
   
-   
-
     opt=$.extend({}, {
       timeout: 500,
       getList: function(input, hash){
@@ -275,13 +277,12 @@
           input.trigger("updateList", [list]);
       },
       template: function(str){ 
-		if(!opt.multiSellectionCheckBox) 
+		if(!opt.multiSellection) 
 			return "<li>" + opt.insertText(str) + "</li>";
 		else
 			return "<li>" +  "<input name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
 	  },
-	  //template: function(str){ var a = "<input name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>"; 
-	//	return a},
+	
       insertText: function(str){ return unescape(escape(str.text)); },
 	  minTextLenght: 0,
       match: function(typed){ 
@@ -290,8 +291,9 @@
 			this.typed = typed;
 		    this.pre_match = this.text;
 		    this.match = this.post_match = '';
-		    if (!this.ajax && !typed || typed.length == 0) { return true; }
-		      var match_at = this.text.search(new RegExp("\\b^" + typed, "i"));
+		    if (!this.ajax && !typed || typed.length == 0)
+				return true;
+		    var match_at = this.text.search(new RegExp("\\b^" + typed, "i"));
 		    if (match_at != -1) {
 		       this.pre_match = this.text.slice(0,match_at);
 		       this.match = this.text.slice(match_at,match_at + typed.length);
@@ -304,7 +306,6 @@
 			return this.text.match(new RegExp(typed), "i");		
 	  },
       wrapper: '<ul class="autobox-list"></ul>',
-	  //wrapper: '<input></input>',
 
       resizable: {},
 	
@@ -345,11 +346,15 @@
         if(typingTimeout) window.clearInterval(typingTimeout);
     }
 
-    function createInput(){
+    function createInput(applyButtom){
       var input=$('<input type="text"></input>')
       input
         .keydown(function(e){
           preventTabInAutocompleteMode(e);
+        })
+		.click(function(e){
+		  if(input.val().length == 0)
+			input.trigger("autobox");
         })
         .keyup(function(e){
           var k=e.which || e.keyCode;
@@ -377,8 +382,9 @@
 				var hash = getCurrentValsHash(input,opt);
 				if(hash == null || hash[input.val()] != true){
 					if(opt.checkValue == false){
-						addText(opt,input, input.val(), opt.name);
-						opt.processAutoBoxChange(input,opt)
+						addText(opt,input,applyButtom, input.val(), opt.name);
+						if(!opt.multiSellection)
+							opt.processAutoBoxChange(input,opt)
 					}
 					else{
 						valueMatched = false;
@@ -386,14 +392,15 @@
 							valueMatched = this.text == input.val() ? true : valueMatched;
 						});
 						if(opt.checkValue == true && valueMatched){
-							addText(opt,input, input.val(), opt.name);
-							opt.processAutoBoxChange(input,opt)
+							addText(opt,input,applyButtom, input.val(), opt.name);
+							if(!opt.multiSellection)
+								opt.processAutoBoxChange(input,opt)
 						}
 						else
-							addText(opt,input, "", opt.name);
+							addText(opt,input,applyButtom, "", opt.name);
 					}	
 				}else
-					addText(opt,input, "", opt.name);
+					addText(opt,input,applyButtom, "", opt.name);
 			}
             e.preventDefault();
           }
@@ -415,13 +422,14 @@
 				})
               .map(function(){
                 var node=$(opt.template(this))[0];
-				if(opt.multiSellectionCheckBox){
+				if(opt.multiSellection){
 					var el = node.childNodes[0];
 					$(el).click(function () { 
 						if(!el.checked){
-							removeValue(input,el.value);
+							removeValue(opt,input,applyButtom,el.value);
 						}
 					});
+					
 				}
                 $.data(node, "originalObject", this);
                 return node;
@@ -435,37 +443,54 @@
             // IE seems to wrap the wrapper in a random div wrapper so
             // drill down to the node in opt.wrapper.
             var wrapper_tagName=$(opt.wrapper)[0].tagName;
-            for(;container[0].tagName !== wrapper_tagName; container=container.children(':first')){}
+            for(;container[0].tagName !== wrapper_tagName; container=container.children(':first'));
 
             var offset=self.offset();
+
             opt.container=container
               .css({top: offset.top + self.outerHeight(), left: offset.left, width: self.width()})
               .appendTo("body");
 
-            $("body").autoboxMode(opt.multiSellection,container, self, list.length, opt);
+            $("body").autoboxMode(opt.multiSellection,container, self, applyButtom, list.length, opt);
           });
 
           opt.getList(self, getCurrentValsHash(self,opt));
         });
         return input;
     }
+	
+	function createApplyButton(input){
+      var button=$('<a href="#" class="applybutton" ></a>')
+       .bind('click', function(e) {
+			//button.hide(0);
+			button.hide('slow');
+			opt.processAutoBoxChange($(button.parent().children()[0]),opt);
+			$("body").trigger("off.autobox");
+	   });
+	   button.hide(0);
+	   return button;
+	}
+	  
+	 
     function createHolder(self){
-      var input=createInput();
+      var applyButton = createApplyButton(input);
+	  var input=createInput(applyButton);
 	  var holder;
+	  
 	  
 	  var classHolder = "autobox-hldr";
 	  if(opt.multiSellection == false)
 		classHolder = "autobox-hldr-2";
-	  
-	  
-      holder=$('<ul class="'+ classHolder + '"></ul>')
-        .append($('<li class="autobox-input"></li>')
-        .append(input));
-		self.append(holder);
-		$.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
-	  
-	 
-		 
+
+      holder=$('<ul class="'+ classHolder + '"></ul>');
+	  var li = $('<li class="autobox-input"></li>');
+	  holder.append(li.append(input));
+	  if(opt.multiSellection)
+		li.append(applyButton);
+		
+	  self.append(holder);
+	  $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
+
 	  return holder;
     }
 
