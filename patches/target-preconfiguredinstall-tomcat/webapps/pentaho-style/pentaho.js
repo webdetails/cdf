@@ -384,15 +384,18 @@ function changeFlyTab( tabNo ) {
 
 function hideFly2(  ) {
 	if( flyStatus == DYING ) {
-		var div=document.getElementById('flydiv'); div.style.top='-1000px';
-		document.getElementById('flyTab1').style.display='block'; 
-		document.getElementById('flyTab2').style.display='none'; 
-		try {
-		document.getElementById('img-t1').blur(); 
-		document.getElementById('img-t2').blur(); 
-		} catch (e) {}
-		document.getElementById('img-t1').src='/pentaho-style/images/btn_info_active.png'; 
-		document.getElementById('img-t2').src='/pentaho-style/images/btn_actions.png'; 
+		var div=document.getElementById('flydiv'); 
+		if(div != null){
+			div.style.top='-1000px';
+			document.getElementById('flyTab1').style.display='block'; 
+			document.getElementById('flyTab2').style.display='none'; 		
+			try {
+			document.getElementById('img-t1').blur(); 
+			document.getElementById('img-t2').blur(); 
+			} catch (e) {}
+			document.getElementById('img-t1').src='/pentaho-style/images/btn_info_active.png'; 
+			document.getElementById('img-t2').src='/pentaho-style/images/btn_actions.png'; 
+		}
 	}
 	flyStatus = HIDDEN;
 }
