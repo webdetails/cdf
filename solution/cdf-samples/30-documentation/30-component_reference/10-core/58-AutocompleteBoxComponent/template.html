@@ -41,17 +41,19 @@
 			<dt>queryDefinition</dt>
 			<dd>MetaLayer object with the definition of the query (see MetaLayer options)</dd>
 			
-			<dt>selectMulti</dt>
+			<dt>multiSellection</dt>
 			<dd>Allow multiple selection. Default: false</dd>
-			
-			<dt>multiSellectionCheckBox</dt>
-			<dd>The user can choose multiple values at the sime time. Default: false</dd>
 			
 			<dt>minTextLenght</dt>
 			<dd>The minimal word length to check if there is a match</dd>
 			
 			<dt>matchType</dt>
 			<dd>The type of the word match (fromStart/all). Default: fromStart </dd>
+			
+			<dt>scrollHeight</dt>
+			<dd>The size of the scrollbar. Default: Not defined (without scrollbar) </dd>
+			
+			
 			
 			
 		</dl>	
@@ -113,6 +115,7 @@ clientSelector =
   queryDefinition: MetaLayerHome2.clientSelectorDefinition,
   multiSellectionCheckBox: true,
   minTextLenght: 0,
+  scrollHeight: 100,
   parameter:"clients",
   htmlObject: "sampleObject",
   executeAtStart: true

@@ -1,9 +1,10 @@
 /* autobox-list is the dropdown list */
 ul.autobox-list {
   position: absolute;
-  overflow: hidden;
   background-color: #fff;
   border: 1px solid #aaa;
+  overflow-x:hidden;
+  overflow-y:auto;
   margin: 0px;
   padding: 0;
   list-style: none;

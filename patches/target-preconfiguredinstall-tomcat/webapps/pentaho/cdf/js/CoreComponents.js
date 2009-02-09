@@ -716,6 +716,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 				multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
+				scrollHeight: myself.scrollHeight,
 				parent: myself
 			};
 

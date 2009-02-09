@@ -211,6 +211,13 @@
 	  }
 		//active && input.trigger("activate.autobox", [$.data(active[0], "originalObject")]);
     });
+	
+	
+	
+	 $("body").bind("click", function(e) {
+		if(e.target.id != "autoboxInput" && e.target.id != "listElement" && e.target.id != "listElementCheckBox")
+			$("body").trigger("cancel.autobox");
+	 });
 
     $("body").bind("off.autobox", function(e, reset){
       container.remove();
@@ -278,9 +285,9 @@
       },
       template: function(str){ 
 		if(!opt.multiSellection) 
-			return "<li>" + opt.insertText(str) + "</li>";
+			return "<li id=\"listElement\">" + opt.insertText(str) + "</li>";
 		else
-			return "<li>" +  "<input name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
+			return "<li id=\"listElement\">" +  "<input id=\"listElementCheckBox\" name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
 	  },
 	
       insertText: function(str){ return unescape(escape(str.text)); },
@@ -305,7 +312,7 @@
 		else
 			return this.text.match(new RegExp(typed), "i");		
 	  },
-      wrapper: '<ul class="autobox-list"></ul>',
+      wrapper: '<ul ' + (opt.scrollHeight != undefined ? 'style="height:' + opt.scrollHeight + 'px;"' : '')  + 'class="autobox-list"></ul>',
 
       resizable: {},
 	
@@ -347,7 +354,7 @@
     }
 
     function createInput(applyButtom){
-      var input=$('<input type="text"></input>')
+      var input=$('<input id="autoboxInput" type="text"></input>')
       input
         .keydown(function(e){
           preventTabInAutocompleteMode(e);
@@ -464,8 +471,8 @@
        .bind('click', function(e) {
 			//button.hide(0);
 			button.hide('slow');
-			opt.processAutoBoxChange($(button.parent().children()[0]),opt);
 			$("body").trigger("off.autobox");
+			opt.processAutoBoxChange($(button.parent().children()[0]),opt);
 	   });
 	   button.hide(0);
 	   return button;
