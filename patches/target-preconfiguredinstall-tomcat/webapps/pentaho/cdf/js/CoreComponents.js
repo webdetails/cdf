@@ -28,14 +28,14 @@ var BaseComponent = Base.extend({
 		},
 		parseArray : function(html,includeHeader){
 			var myArray;
-			html=html.replace(/<tr>/g,"[");
-			html=html.replace(/<\/tr>/g,"],");
-			html=html.replace(/<t[hd][^\>]*>/g,"");
-			html=html.replace(/<\/t[hd]>/g,",");
-			html=html.replace(/(\[|,(?![\[\]]|$))/g,"$1\"");
-			html=html.replace(/([^\]]),/g,"$1\",");
-			html=html.replace(/,\]/g,"]");
-			var a = "var myArray = [" + html.substring(0,html.length-1) + "];"
+			html=html.replace(/<tr>/g,"["); 						/*1. GET ROWS*/
+			html=html.replace(/<\/tr>/g,"],");						/*2. GET ROWS*/
+			html=html.replace(/<t[hd][^\>]*>/g,"@BEGIN_ELEMENT@");  /*3. GET COLUMNS*/
+			html=html.replace(/<\/t[hd]>/g,"@END_ELEMENT@");	 	/*4. GET COLUMNS*/
+			html=html.replace(/@BEGIN_ELEMENT@/g,"\"");				/*5. SEPARATE COLUMNS by "," */
+			html=html.replace(/@END_ELEMENT@\]/g,"\"]");			/*6. SEPARATE COLUMNS by "," */
+			html=html.replace(/@END_ELEMENT@/g,"\",");				/*7. SEPARATE COLUMNS by "," */
+			var a = "var myArray = [" + html.substring(0,html.length-1) + "];"	/*REMOVE LAST  "," ADDED  at 2 */
 			try{
 				eval(a);
 			}
