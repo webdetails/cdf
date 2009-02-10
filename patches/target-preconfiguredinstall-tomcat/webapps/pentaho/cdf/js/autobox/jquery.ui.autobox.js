@@ -90,7 +90,8 @@
 			  if(!opt.multiSellection)
 				opt.processAutoBoxChange(input,opt);
 			
-			  showApplyButton(applyButtom);
+			  if(opt.showApplyButton != false)
+				 showApplyButton(applyButtom);
 				
           }))
       .append($('<input type="hidden" />')
@@ -113,7 +114,7 @@
 		else
 			li = addBox(opt,input,applyButtom, text, name);
 
-		if(opt.multiSellection && applyButtom.is(":hidden"))
+		if(opt.multiSellection && applyButtom.is(":hidden") && opt.showApplyButton != false)
 			showApplyButton(applyButtom);
 			
 		input.after(li);
@@ -450,7 +451,7 @@
             // IE seems to wrap the wrapper in a random div wrapper so
             // drill down to the node in opt.wrapper.
             var wrapper_tagName=$(opt.wrapper)[0].tagName;
-            for(;container[0].tagName !== wrapper_tagName; container=container.children(':first'));
+            for(;container[0] != undefined && container[0].tagName !== wrapper_tagName; container=container.children(':first'));
 
             var offset=self.offset();
 
@@ -482,6 +483,7 @@
     function createHolder(self){
       var applyButton = createApplyButton(input);
 	  var input=createInput(applyButton);
+	  opt.input = input;
 	  var holder;
 	  
 	  
@@ -497,7 +499,7 @@
 		
 	  self.append(holder);
 	  $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
-
+	  
 	  return holder;
     }
 

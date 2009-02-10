@@ -717,14 +717,15 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
 				scrollHeight: myself.scrollHeight,
+				showApplyButton: myself.showApplyButton,
 				parent: myself
 			};
 
+			var html_obj = $("#"+myself.name+"Object");
 			this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
+			this.input = this.autoBoxOpt.input;
 
 			this.addFilter = function(value){
-				var html_obj = $("#"+myself.name+"Object");
-				var input = html_obj.children().children().children();
 				var childs = html_obj.children().children().children();
 
 				for(i = childs.length;i > 1 ; ){
@@ -737,7 +738,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 					.bind('click', function(e) {
 							li.remove();
 							e.preventDefault();
-							myself.autoBoxOpt.processAutoBoxChange(input,myself.autoBoxOpt);
+							myself.autoBoxOpt.processAutoBoxChange(myself.input,myself.autoBoxOpt);
 						})).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
 				childs = html_obj.children().children().children();
@@ -746,6 +747,9 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 		},
 		getValue : function() {
 			return this.value;
+		},
+		processAutoBoxChange : function() {
+			this.autoBoxOpt.processAutoBoxChange(this.input,this.autoBoxOpt);
 		}
 	});
 
