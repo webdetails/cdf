@@ -65,7 +65,8 @@ OlapUtils.mdxQuery.prototype.generateAxisPart = function(axisDrill, axis, axisLe
 		return axis;
 	}
 
-	var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
+	//var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
+	var dim = axis.indexOf("].") == -1?axis:axis.substr(0,axis.indexOf("].")+1);
 	var axisLevel = this.axisPos + this.axisDepth;
 	if (axisLevel > axisLevels.length - 1){
 		axisLevel = axisLevels.length - 1
