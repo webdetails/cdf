@@ -18,7 +18,7 @@
     	</content-type>
 	</content-types>
 
-    <content-generator scope="session" id="pentaho-cdf" type="xcdf" url="">
+    <content-generator scope="local" id="pentaho-cdf" type="xcdf" url="">
         <classname>org.pentaho.cdf.CdfContentGenerator</classname>
         <fileinfo-classname>org.pentaho.cdf.CdfFileInfoGenerator</fileinfo-classname>
         <title>CDF Display Handler</title>
