@@ -39,14 +39,15 @@ var BaseComponent = Base.extend({
 			}
 		},
 		parseArray : function(html,includeHeader){
-			var myArray;
-			html=html.replace(/<tr>/g,"[");
-			html=html.replace(/<\/tr>/g,"],");
-			html=html.replace(/<t[hd][^\>]*>/g,"");
-			html=html.replace(/<\/t[hd]>/g,",");
-			html=html.replace(/(\[|,(?![\[\]]|$))/g,"$1\"");
-			html=html.replace(/([^\]]),/g,"$1\",");
-			html=html.replace(/,\]/g,"]");
+            var myArray;
+            html=html.replace(/<tr>/g,"[");
+            html=html.replace(/<\/tr>/g,"],");
+            // first escape all the quotes
+            html=html.replace(/\"/g,"\\\"");
+            // then replace the <td></td>s with quotes
+            html=html.replace(/<t[hd][^\>]*>/g,"\"");
+            html=html.replace(/<\/t[hd]>/g,"\",");
+            html=html.replace(/,\]/g,"]");
 			var a = "var myArray = [" + html.substring(0,html.length-1) + "];"
 			try{
 				eval(a);
