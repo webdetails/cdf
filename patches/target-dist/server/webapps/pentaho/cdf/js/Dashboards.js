@@ -400,14 +400,12 @@ Dashboards.parseXActionResult = function(obj,html){
 
 function encode_prepare( s )
 {
-	if ($.browser == "mozilla"){
-		alert("OK");
+	if (s != null) {
+		s = s.replace(/\+/g," ");
+		if ($.browser == "msie" || $.browser == "opera"){
+			return Utf8.decode(s);
+		}
 	}
-	s = s.replace(/\+/g," ");
-	if ($.browser == "msie" || $.browser == "opera"){
-		return Utf8.decode(s);
-	}
-
 	return s;
 }
 
