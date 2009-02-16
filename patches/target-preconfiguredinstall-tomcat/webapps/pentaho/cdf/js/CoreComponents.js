@@ -8,11 +8,12 @@ var BaseComponent = Base.extend({
 
 			if ( typeof(this.valuesArray) == 'undefined') {
 				//go through parameter array and update values
-				var p = new Array(this.parameters.length);
-				for(var i= 0, len = p.length; i < len; i++){
+				var p = new Array();
+				for(var i= 0, len = this.parameters.length; i < len; i++){
 					var key = this.parameters[i][0];
 					var value = Dashboards.getParameterValue(this.parameters[i][1]);
-					p[i] = [key,value];
+					if (typeof value != 'undefined')
+						p.push([key,value]);
 				} 
 
 				//execute the xaction to populate the selector
@@ -650,7 +651,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 
 			selectHTML = "";
 			for(var i= 0, len  = myArray.length; i < len; i++){
-				selectHTML += "<input onclick='Dashboards.processChange(\"" + this.name + "\")'";
+				selectHTML += "<input onchange='Dashboards.processChange(\"" + this.name + "\")'";
 				if(i==0){
 					selectHTML += " CHECKED";
 				}
