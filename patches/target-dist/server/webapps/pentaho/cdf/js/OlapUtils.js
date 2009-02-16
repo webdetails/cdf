@@ -65,7 +65,8 @@ OlapUtils.mdxQuery.prototype.generateAxisPart = function(axisDrill, axis, axisLe
 		return axis;
 	}
 
-	var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
+	//var dim = axis.indexOf(".") == -1?axis:axis.substr(0,axis.indexOf("."));
+	var dim = axis.indexOf("].") == -1?axis:axis.substr(0,axis.indexOf("].")+1);
 	var axisLevel = this.axisPos + this.axisDepth;
 	if (axisLevel > axisLevels.length - 1){
 		axisLevel = axisLevels.length - 1
@@ -163,7 +164,7 @@ OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,drill){
 		this.query["where"][key] = value;
 		return;
 	}
-
+	
 	//Store initial where cause for this key
 	if(this.query["conditions"][key] == undefined && this.query["where"][key] != undefined)
 		this.query["conditions"][key+"InitialValue"] = this.query["where"][key];

@@ -8,11 +8,12 @@ var BaseComponent = Base.extend({
 
 			if ( typeof(this.valuesArray) == 'undefined') {
 				//go through parameter array and update values
-				var p = new Array(this.parameters.length);
-				for(var i= 0, len = p.length; i < len; i++){
+				var p = new Array();
+				for(var i= 0, len = this.parameters.length; i < len; i++){
 					var key = this.parameters[i][0];
 					var value = Dashboards.getParameterValue(this.parameters[i][1]);
-					p[i] = [key,value];
+					if (typeof value != 'undefined')
+						p.push([key,value]);
 				} 
 
 				//execute the xaction to populate the selector
@@ -28,14 +29,14 @@ var BaseComponent = Base.extend({
 		},
 		parseArray : function(html,includeHeader){
 			var myArray;
-			html=html.replace(/<tr>/g,"[");
-			html=html.replace(/<\/tr>/g,"],");
-			html=html.replace(/<t[hd][^\>]*>/g,"");
-			html=html.replace(/<\/t[hd]>/g,",");
-			html=html.replace(/(\[|,(?![\[\]]|$))/g,"$1\"");
-			html=html.replace(/([^\]]),/g,"$1\",");
-			html=html.replace(/,\]/g,"]");
-			var a = "var myArray = [" + html.substring(0,html.length-1) + "];"
+			html=html.replace(/<tr>/g,"["); 						/*1. GET ROWS*/
+			html=html.replace(/<\/tr>/g,"],");						/*2. GET ROWS*/
+			html=html.replace(/<t[hd][^\>]*>/g,"@BEGIN_ELEMENT@");  /*3. GET COLUMNS*/
+			html=html.replace(/<\/t[hd]>/g,"@END_ELEMENT@");	 	/*4. GET COLUMNS*/
+			html=html.replace(/@BEGIN_ELEMENT@/g,"\"");				/*5. SEPARATE COLUMNS by "," */
+			html=html.replace(/@END_ELEMENT@\]/g,"\"]");			/*6. SEPARATE COLUMNS by "," */
+			html=html.replace(/@END_ELEMENT@/g,"\",");				/*7. SEPARATE COLUMNS by "," */
+			var a = "var myArray = [" + html.substring(0,html.length-1) + "];"	/*REMOVE LAST  "," ADDED  at 2 */
 			try{
 				eval(a);
 			}
@@ -354,7 +355,7 @@ var TimePlotComponent = BaseComponent.extend({
 					hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
 					showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
 					toolTipFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value);},
-					headerFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";},
+					headerFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";}
 				};
 				if ( cd.dots == true){
 					plotInfoOpts.dotColor = Dashboards.timePlotColors[i];
@@ -535,11 +536,12 @@ var DateRangeInputComponent = BaseComponent.extend({
 			var myself = this;
 			var earliestDate = this.earliestDate != undefined  ?  Dashboards.getParameterValue(this.earliestDate) : Date.parse('-1years');
 			var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
-
+			var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
+			var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
 			$(function(){ 
 					$("#" + myself.htmlObject + " input").daterangepicker({
-							posX: offset.left, 
-							posY: offset.top + 15, 
+							posX: offset.left + leftOffset, 
+							posY: offset.top + topOffset, 
 							earliestDate: earliestDate,
 							latestDate: latestDate,
 							dateFormat: 'yy-mm-dd',
@@ -649,7 +651,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 
 			selectHTML = "";
 			for(var i= 0, len  = myArray.length; i < len; i++){
-				selectHTML += "<input onclick='Dashboards.processChange(\"" + this.name + "\")'";
+				selectHTML += "<input onchange='Dashboards.processChange(\"" + this.name + "\")'";
 				if(i==0){
 					selectHTML += " CHECKED";
 				}
@@ -708,25 +710,23 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
 			var myself = this;
 			
-			myself.selectMulti = myself.selectMulti == undefined ? false : myself.selectMulti;
-			myself.multiSellectionCheckBox = myself.multiSellectionCheckBox == undefined ? false : myself.multiSellectionCheckBox;
-
 			var opt = {
 				list: list,
 				matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
 				processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
-				multiSellection: myself.selectMulti || myself.multiSellectionCheckBox,
-				multiSellectionCheckBox: myself.multiSellectionCheckBox,
+				multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
+				scrollHeight: myself.scrollHeight,
+				showApplyButton: myself.showApplyButton,
 				parent: myself
 			};
 
+			var html_obj = $("#"+myself.name+"Object");
 			this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
+			this.input = this.autoBoxOpt.input;
 
 			this.addFilter = function(value){
-				var html_obj = $("#"+myself.name+"Object");
-				var input = html_obj.children().children().children();
 				var childs = html_obj.children().children().children();
 
 				for(i = childs.length;i > 1 ; ){
@@ -739,7 +739,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 					.bind('click', function(e) {
 							li.remove();
 							e.preventDefault();
-							myself.autoBoxOpt.processAutoBoxChange(input,myself.autoBoxOpt);
+							myself.autoBoxOpt.processAutoBoxChange(myself.input,myself.autoBoxOpt);
 						})).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
 				childs = html_obj.children().children().children();
@@ -748,6 +748,9 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 		},
 		getValue : function() {
 			return this.value;
+		},
+		processAutoBoxChange : function() {
+			this.autoBoxOpt.processAutoBoxChange(this.input,this.autoBoxOpt);
 		}
 	});
 

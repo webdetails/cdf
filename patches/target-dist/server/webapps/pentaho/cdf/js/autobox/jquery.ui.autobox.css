@@ -1,9 +1,10 @@
 /* autobox-list is the dropdown list */
 ul.autobox-list {
   position: absolute;
-  overflow: hidden;
   background-color: #fff;
   border: 1px solid #aaa;
+  overflow-x:hidden;
+  overflow-y:auto;
   margin: 0px;
   padding: 0;
   list-style: none;
@@ -23,7 +24,7 @@ ul.autobox-list li.active {
 
 /* autobx-hldr is the selected list */
 ul.autobox-hldr {
-  _width: 500px;
+width: 175px;
   position:relative;
   top: -10px;
   border: 1px solid #999;
@@ -51,6 +52,9 @@ ul.autobox-hldr li.bit-box {
   padding-right: 15px;
   position: relative;
 }
+ul.autobox-hldr li.autobox-input{
+ width: 165px;
+}
 ul.autobox-hldr li.autobox-input input {
   width: 150px;
   margin: 0;
@@ -65,6 +69,14 @@ ul.autobox-hldr li.bit-box a.closebutton {
   width: 7px; height: 7px;
   font-size: 1px;
   background: url('close.gif'); }
+ ul.autobox-hldr  a.applybutton {
+  position: absolute;
+  display: block;
+  left:166px;
+  top: 8px;
+  width: 15px; height: 15px;
+  font-size: 2px;
+  background: url('search.png'); }
 ul.autobox-hldr li.bit-box a.closebutton:hover {
   background-position: 7px;
 }
