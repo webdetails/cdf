@@ -346,7 +346,7 @@
 		hideApplyButton: function hideApplyButton(){
 			this.applyButton.fadeOut("fast");
 			this.applyButton.buttonApplyMessage.fadeOut("fast");
-		},
+		}
 		
     }, opt);
 
