@@ -511,9 +511,12 @@
 	 
     function createHolder(self){
 	  var input=createInput();
-	  var applyButton = createApplyButton();
 	  opt.input = input;
-	  opt.applyButton = applyButton[0];
+	  var applyButton;
+	  if(opt.applyButton != false){
+		applyButton	= createApplyButton();
+		opt.applyButton = applyButton[0];
+	  }
 	  
 	  var holder;
 	  var classHolder = "autobox-hldr";
@@ -523,7 +526,7 @@
       holder=$('<ul class="'+ classHolder + '"></ul>');
 	  var li = $('<li class="autobox-input"></li>');
 	  holder.append(li.append(input));
-	  if(opt.multiSellection){
+	   if(opt.multiSellection && opt.applyButton != false){
 		li.append(applyButton[0]);
 		self.append(applyButton[1]);
 	  }
