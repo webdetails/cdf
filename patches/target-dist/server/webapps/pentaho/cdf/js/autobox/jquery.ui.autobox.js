@@ -72,16 +72,8 @@
   };
   
   
-  function showApplyButton(applyButtom){
-	if(applyButtom.is(":hidden"))
-		applyButtom.show('slow');
-  }
-	
-  function hideApplyButton(applyButtom){
-	applyButtom.hide('slow');
-  }
   
-  function addBox(opt,input,applyButtom, text, name){
+  function addBox(opt,input, text, name){
     var li=$('<li class="bit-box"></li>').attr('id', opt.name + 'bit-' + count++).text(text);
     li.append($('<a href="" class="closebutton"></a>')
           .bind('click', function(e) {
@@ -90,8 +82,8 @@
 			  if(!opt.multiSellection)
 				opt.processAutoBoxChange(input,opt);
 			
-			  if(opt.showApplyButton != false)
-				 showApplyButton(applyButtom);
+			  if(opt.multiSellection && opt.applyButton != false)
+				 opt.showApplyButton();
 				
           }))
       .append($('<input type="hidden" />')
@@ -102,56 +94,25 @@
 	return li;
   }
   
-    function addText(opt,input,applyButtom, text, name){
+    function addText(opt,input, text, name){
 	if(text.length > 0)
 	{
 		var li;
 		if(opt.multiSellection != true){
 			count = 0;
-			li = addBox(opt,input,applyButtom, text, name);
+			li = addBox(opt,input, text, name);
 			$("#" +opt.name + "bit-0").replaceWith(li);
 		}
 		else
-			li = addBox(opt,input,applyButtom, text, name);
+			li = addBox(opt,input, text, name);
 
-		if(opt.multiSellection && applyButtom.is(":hidden") && opt.showApplyButton != false)
-			showApplyButton(applyButtom);
+		if(opt.multiSellection && opt.applyButton != false)
+			opt.showApplyButton();
 			
 		input.after(li);
 		input.val("");
 	}
    }
-	
-	function getSelectedValues(input){
-	  var vals=input.parent().parent().find('li');
-	  var values = new Array();
-	  for(var i=0,j=0; i<vals.length; ++i){
-		var value = vals[i].innerHTML.match(/^[^<]+/);
-		if(value!= null){
-			values[j] = value;j++;
-		}
-	  }
-	  return values;
-	}
-	
-	function emptyValues(input){
-		return (input.parent().parent().find('li').length == 1);
-	}
-		
-	function removeValue(opt,input,applyButtom,value){
-	    var vals=input.parent().parent().find('li');
-		var values = new Array();
-		for(var i=0; i<vals.length; ++i){
-			var v = vals[i].innerHTML.match(/^[^<]+/);	
-			if(v!= null && value == v ){
-				$(vals[i]).remove();
-				if(opt.multiSellection && emptyValues(input))
-					applyButtom.hide('slow');
-				return;
-			}
-		}
-	}
-  
 	
 	function getCurrentValsHash(input,opt){//return the currently selected values as a hash
       var vals=input.parent().parent().find('li');
@@ -168,7 +129,7 @@
       return hash;
     }
 	
-  $.fn.autoboxMode=function(multiSellection,container, input, applyButtom, size, opt){
+  $.fn.autoboxMode=function(multiSellection,container, input, size, opt){
     var original=input.val(); var selected=-1; var self=this;
 
     $.data(document.body, "autoboxMode", true);
@@ -189,7 +150,7 @@
 			if(hash == null || hash[input.val()] != true){
 				var value = $.data(active[0], "originalObject").text;
 				if(!opt.multiSellection || (active[0].childNodes[0].checked || k == KEY.RETURN))
-					addText(opt,input,applyButtom,value, opt.name);
+					addText(opt,input,value, opt.name);
 				if(!opt.multiSellection)
 					opt.processAutoBoxChange(input,opt);
 			}
@@ -204,7 +165,7 @@
 			var aux = $(opt.list).filter(function(){valueMatched = this.text == input.val() ? true : valueMatched;});
 		if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
-				addText(opt,input,applyButtom, input.val(), opt.name);
+				addText(opt,input, input.val(), opt.name);
 				if(!opt.multiSellection)
 					opt.processAutoBoxChange(input,opt);
 				$("body").trigger("off.autobox");
@@ -316,17 +277,76 @@
       wrapper: '<ul ' + (opt.scrollHeight != undefined ? 'style="height:' + opt.scrollHeight + 'px;"' : '')  + 'class="autobox-list"></ul>',
 
       resizable: {},
-	
-	  processAutoBoxChange: function processAutoBoxChange(input,opt){
-		if(opt.multiSellection == true){
-			var selectedValues = getSelectedValues(input);
-			opt.processChange(opt.parent,selectedValues);
-		}
-		else
-			opt.processChange(opt.parent,getSelectedValues(input));
+		
+		emptyValues: function(){
+			return (this.input.parent().parent().find('li').length == 1);
+		},
+		
+		removeValue: function(value){
+		    var vals=this.input.parent().parent().find('li');
+			var values = new Array();
+			for(var i=0; i<vals.length; ++i){
+				var v = vals[i].innerHTML.match(/^[^<]+/);	
+				if(v!= null && value == v ){
+					$(vals[i]).remove();
+					if(this.multiSellection && this.applyButton && this.emptyValues())
+						this.hideApplyButton();
+					return;
+				}
+			}
+		},
+		
+	    getSelectedValues: function(){
+		  var vals= this.input.parent().parent().find('li');
+		  var values = new Array();
+		  for(var i=0,j=0; i<vals.length; ++i){
+			var value = vals[i].innerHTML.match(/^[^<]+/);
+			if(value!= null){
+				values[j] = value;j++;
+			}
+		  }
+		  return values;
+		},
+		
+		valueAlreadySelected: function(value){
+			var vals= this.input.parent().parent().find('li');
+			var values = new Array();
+			for(var i=0,j=0; i<vals.length; ++i){
+				var v = vals[i].innerHTML.match(/^[^<]+/);
+				if(v!= null && v == value)
+					return true;
+			}
+			return false;
+		},
+		
+		processAutoBoxChange: function processAutoBoxChange(){
+			if(this.multiSellection == true){
+				var selectedValues = this.getSelectedValues();
+				this.processChange(this.parent,selectedValues);
+			}
+			else
+				this.processChange(this.parent,this.getSelectedValues());
 			
-		input.val("");
-		}
+			this.input.val("");
+		},
+		
+		showApplyButton: function showApplyButton(){
+				if(this.applyButton.is(":hidden")){
+					this.applyButton.css("left",this.applyButton.parent().width());
+					this.applyButton.fadeIn('normal');
+					this.applyButton.buttonApplyMessage.css("left",this.applyButton.offset().left+5);
+					this.applyButton.buttonApplyMessage.css("top",this.applyButton.offset().top+20);					
+					this.applyButton.buttonApplyMessage.fadeIn('normal', function(){
+						$("#applybuttontooltip").fadeOut(4000)});
+				}
+				
+				//this.applyButton.buttonApplyMessage.fadeOut(4000);
+		},
+	
+		hideApplyButton: function hideApplyButton(){
+			this.applyButton.fadeOut("fast");
+			this.applyButton.buttonApplyMessage.fadeOut("fast");
+		},
 		
     }, opt);
 
@@ -354,7 +374,7 @@
         if(typingTimeout) window.clearInterval(typingTimeout);
     }
 
-    function createInput(applyButtom){
+    function createInput(){
       var input=$('<input id="autoboxInput" type="text"></input>')
       input
         .keydown(function(e){
@@ -390,7 +410,7 @@
 				var hash = getCurrentValsHash(input,opt);
 				if(hash == null || hash[input.val()] != true){
 					if(opt.checkValue == false){
-						addText(opt,input,applyButtom, input.val(), opt.name);
+						addText(opt,input, input.val(), opt.name);
 						if(!opt.multiSellection)
 							opt.processAutoBoxChange(input,opt)
 					}
@@ -400,15 +420,15 @@
 							valueMatched = this.text == input.val() ? true : valueMatched;
 						});
 						if(opt.checkValue == true && valueMatched){
-							addText(opt,input,applyButtom, input.val(), opt.name);
+							addText(opt,input, input.val(), opt.name);
 							if(!opt.multiSellection)
 								opt.processAutoBoxChange(input,opt)
 						}
 						else
-							addText(opt,input,applyButtom, "", opt.name);
+							addText(opt,input, "", opt.name);
 					}	
 				}else
-					addText(opt,input,applyButtom, "", opt.name);
+					addText(opt,input, "", opt.name);
 			}
             e.preventDefault();
           }
@@ -434,7 +454,7 @@
 					var el = node.childNodes[0];
 					$(el).click(function () { 
 						if(!el.checked){
-							removeValue(opt,input,applyButtom,el.value);
+							opt.removeValue(el.value);
 						}
 					});
 					
@@ -459,7 +479,7 @@
               .css({top: offset.top + self.outerHeight(), left: offset.left, width: self.width()})
               .appendTo("body");
 
-            $("body").autoboxMode(opt.multiSellection,container, self, applyButtom, list.length, opt);
+            $("body").autoboxMode(opt.multiSellection,container, self, list.length, opt);
           });
 
           opt.getList(self, getCurrentValsHash(self,opt));
@@ -467,26 +487,38 @@
         return input;
     }
 	
-	function createApplyButton(input){
+	function createApplyButton(){
       var button=$('<a href="#" class="applybutton" ></a>')
        .bind('click', function(e) {
-			//button.hide(0);
-			button.hide('slow');
+			opt.hideApplyButton();
+			//button.hide('slow');
 			$("body").trigger("off.autobox");
 			opt.processAutoBoxChange($(button.parent().children()[0]),opt);
 	   });
+	   
+	   button.attr("title","Click it to Apply");
 	   button.hide(0);
-	   return button;
+	   
+	   var buttonApplyMessage =$('<div id="applybuttontooltip" class="applybutton" >' + opt.tooltipMessage + '</div>');
+	   buttonApplyMessage.hide(0);
+	   
+	   button.buttonApplyMessage = buttonApplyMessage;
+	  
+	   
+	   return [button,buttonApplyMessage];
 	}
 	  
 	 
     function createHolder(self){
-      var applyButton = createApplyButton(input);
-	  var input=createInput(applyButton);
+	  var input=createInput();
 	  opt.input = input;
+	  var applyButton;
+	  if(opt.applyButton != false){
+		applyButton	= createApplyButton();
+		opt.applyButton = applyButton[0];
+	  }
+	  
 	  var holder;
-	  
-	  
 	  var classHolder = "autobox-hldr";
 	  if(opt.multiSellection == false)
 		classHolder = "autobox-hldr-2";
@@ -494,8 +526,10 @@
       holder=$('<ul class="'+ classHolder + '"></ul>');
 	  var li = $('<li class="autobox-input"></li>');
 	  holder.append(li.append(input));
-	  if(opt.multiSellection)
-		li.append(applyButton);
+	   if(opt.multiSellection && opt.applyButton != false){
+		li.append(applyButton[0]);
+		self.append(applyButton[1]);
+	  }
 		
 	  self.append(holder);
 	  $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));

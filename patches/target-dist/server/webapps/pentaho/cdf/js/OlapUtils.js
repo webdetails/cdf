@@ -158,9 +158,9 @@ OlapUtils.mdxQuery.prototype.addFilter = function(axis, dimension, value){
 
 }
 
-OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,drill){
+OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,op,level){
 
-	if(condition == undefined && drill == undefined){
+	if(condition == undefined && op == undefined){
 		this.query["where"][key] = value;
 		return;
 	}
@@ -169,23 +169,23 @@ OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,drill){
 	if(this.query["conditions"][key] == undefined && this.query["where"][key] != undefined)
 		this.query["conditions"][key+"InitialValue"] = this.query["where"][key];
 
-	//Add condition
-	if(this.query["conditions"][key] == undefined || drill)
+	//If drill delete all
+	if(this.query["conditions"][key] == undefined || op == 'drill')
 		this.query["conditions"][key] = [];
 	if(this.query["members"][key] == undefined)
 		this.addMember(key,condition + " as Aggregate(" + key + "Filter)");
 		
-	this.query["conditions"][key][value] = drill;
+	this.query["conditions"][key][value] = op /*!= 'condition';*/
 	
-	//If focus remove drills
-	if(!drill){
+	//If focus ('condition') remove drills and excludes, if exclude('filter') remove focus and drills
+	if(op != 'drill'){
 		var aux = [];
 		for(v in this.query["conditions"][key])
-			if(!this.query["conditions"][key][v])aux[v] = false;
+			if(this.query["conditions"][key][v] == op)	aux[v] = op;
 		this.query["conditions"][key] = aux;
 	}
 	
-	return this.setCondition(key,condition);	
+	return this.setCondition(key,condition,op,level);	
 }
 
 OlapUtils.mdxQuery.prototype.removeCondition = function(key,value,condition){
@@ -202,14 +202,27 @@ OlapUtils.mdxQuery.prototype.removeCondition = function(key,value,condition){
 	return undefined;
 }
 
-OlapUtils.mdxQuery.prototype.setCondition = function(key,condition)
+OlapUtils.mdxQuery.prototype.removeConditions = function(key,condition){
+	this.query["conditions"][key] = [];
+	this.setCondition(key,condition);
+}
+
+OlapUtils.mdxQuery.prototype.setCondition = function(key,condition,op,level)
 {	
 	var set = [];
 	for(v in this.query["conditions"][key])
 		set.push(v);
 		
 	if(set.length > 0){
-		this.addSet(key,key + "Filter as {" + set.join(",") + "}");
+		if(op != 'filter')
+			this.addSet(key,key + "Filter as {" + set.join(",") + "}");
+		else{
+			var dim = set[0].substr(0,set[0].lastIndexOf("].")+1);
+			if(set[0].lastIndexOf("].") != set[0].indexOf("]."))
+				this.addSet(key,key + "Filter as Except(" + dim +  ".Children,{" + set.join(",") + "})");
+			else
+				this.addSet(key,key + "Filter as Except(" + dim +  ".[" + level + "].Members,{" + set.join(",") + "})");
+		}
 		this.query["where"][key] = condition;
 	}
 	else{
@@ -366,7 +379,7 @@ OlapUtils.mdxQueryGroup.prototype.printConditions = function(){
 			out += "<i>Exclusions: </i>";
 		var a = this.activeFilters[i];
 		var o = [];
-		out += " " + i + " : "
+		//out += " " + i + " : "
 		$.each(a,function(j,k){o.push(k)});
 		out+= o.join(" , ") + "; ";
 
@@ -451,13 +464,16 @@ OlapUtils.mdxQueryGroupActionCallback = function(value,m){
 	var whereCond = clickedObj.filterDimension + ".[Filter]";
 
 	if( value == "filter" ){
-		// filter: remove this from every query
+		
+		
+		//CLean previous conditions and drill messages for this id
+		if(mqg.activeConditions != undefined) delete mqg.activeConditions[mqg.clickedIdx];
 
 		var obj = clickedObj;
 		obj.mdxQuery.addFilter(obj.filterAxis, obj.filterDimension,mqg.clickedValue);
-		var a = mqg.activeFilters[obj.filterDimension] || [];
-		a.push(mqg.clickedValue);
-		mqg.activeFilters[obj.filterDimension] = a;
+		var a = mqg.activeFilters[mqg.clickedIdx] || [];
+		a.push(axis + ".[" + mqg.clickedValue + "]");
+		mqg.activeFilters[mqg.clickedIdx] = a;
 		Dashboards.update(obj.chartObject);
 		
 		var focusCondition = undefined;
@@ -466,8 +482,8 @@ OlapUtils.mdxQueryGroupActionCallback = function(value,m){
 			var query = mqg.mdxQueries[ob];
 			if (ob != mqg.clickedIdx){
 				focusCondition = query.mdxQuery.removeCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]",whereCond);
-				if(focusCondition != undefined)
-					Dashboards.update(query.chartObject);
+				query.mdxQuery.addCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]",whereCond,value,obj.mdxQuery.query.rowLevels[obj.mdxQuery.axisDepth]);
+				Dashboards.update(query.chartObject);
 			}
 		}
 		
@@ -496,26 +512,48 @@ OlapUtils.mdxQueryGroupActionCallback = function(value,m){
 	else if (value == "condition" || value == "drill"){
 		// Get the dimension where condition to use in drill and focus
 		var filterInfo = whereCond;
+		
+		//CLean previous conditions,drill, and exclude messages for this id
+		if(mqg.activeFilters != undefined) delete mqg.activeFilters[mqg.clickedIdx];
+		if(mqg.activeConditions != undefined) delete mqg.activeConditions[mqg.clickedIdx];
+			
 		for (i in mqg.mdxQueries){
 			var obj = mqg.mdxQueries[i];
+			
 			if (i == mqg.clickedIdx){
 
 				if(value == 'drill'){
 					obj.mdxQuery.query.rows = axis + ".[" + mqg.clickedValue + "]";
 					obj.mdxQuery.axisPos++;
 					delete mqg.activeFilters[obj.filterDimension];
+					Dashboards.update(obj.chartObject);
 				}
 			}
 			else{
-				filterInfo = obj.mdxQuery.addCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]",whereCond,value == 'drill');
+				//Add condition or drill
+				if(typeof mqg.clickedValue == "string"){
+					filterInfo = obj.mdxQuery.addCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]",whereCond,value);
+				}
+				else{//Add multiple conditions at once (array value. ex: used by multiple selections components)
+					obj.mdxQuery.removeConditions(mqg.clickedIdx,whereCond);
+					if(mqg.clickedValue.length > 0){
+						for(i = 0; i < mqg.clickedValue.length; i++){
+							filterInfo = obj.mdxQuery.addCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue[i] + "]",whereCond,value);
+						}
+					}
+					else
+						delete mqg.activeConditions[mqg.clickedIdx];
+				}
+				
+					
+				Dashboards.update(obj.chartObject);
 			}
-			Dashboards.update(obj.chartObject);
-
 		}
-		
-		var a = mqg.activeFilters[mqg.clickedIdx] || [];
-		a.push(filterInfo);
-		mqg.activeConditions[mqg.clickedIdx] = a;
+		if(filterInfo.length > 0){
+			var a = mqg.activeConditions[mqg.clickedIdx] || [];
+			a.push(filterInfo);
+			mqg.activeConditions[mqg.clickedIdx] = a;
+		}
 	}
 
 	Dashboards.update(Dashboards.getComponent(mqg.name));
