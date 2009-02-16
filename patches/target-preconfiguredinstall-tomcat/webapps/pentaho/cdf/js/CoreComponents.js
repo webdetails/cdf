@@ -651,7 +651,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 
 			selectHTML = "";
 			for(var i= 0, len  = myArray.length; i < len; i++){
-				selectHTML += "<input onchange='Dashboards.processChange(\"" + this.name + "\")'";
+				selectHTML += "<input onclick='Dashboards.processChange(\"" + this.name + "\")'";
 				if(i==0){
 					selectHTML += " CHECKED";
 				}
@@ -709,48 +709,63 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 			$("#"+ this.htmlObject).empty();
 
 			var myself = this;
+			var processChange = myself.processChange == undefined ? function(objName){Dashboards.processChange(objName);} : function(objName) {myself.processChange();};
 			
 			var opt = {
 				list: list,
 				matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
-				processChange: function(obj,obj_value) {obj.value = obj_value;Dashboards.processChange(obj.name);},
+				processChange: function(obj,obj_value) {obj.value = obj_value; processChange(obj.name);},
 				multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
 				scrollHeight: myself.scrollHeight,
-				showApplyButton: myself.showApplyButton,
+				applyButton: myself.showApplyButton,
+				tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
 				parent: myself
 			};
 
 			var html_obj = $("#"+myself.name+"Object");
 			this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
-			this.input = this.autoBoxOpt.input;
 
 			this.addFilter = function(value){
+				
+				if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
+					return;
+				
 				var childs = html_obj.children().children().children();
 
-				for(i = childs.length;i > 1 ; ){
-					$(childs[i-1]).remove();
-					i= i -1;
+				if(!opt.multiSellection){
+					for(i = childs.length;i > 1 ; ){
+						$(childs[i-1]).remove();
+						i= i -1;
+					}
 				}
+				
+				if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
+					myself.autoBoxOpt.showApplyButton();
 
 				var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
 				li.append($('<a href="#" class="closebutton"></a>')
 					.bind('click', function(e) {
 							li.remove();
 							e.preventDefault();
-							myself.autoBoxOpt.processAutoBoxChange(myself.input,myself.autoBoxOpt);
+							
+							if(!opt.multiSellection)
+								myself.autoBoxOpt.processAutoBoxChange();
+		
+							if(myself.autoBoxOpt.applyButton != false)
+								myself.autoBoxOpt.showApplyButton();
+							
 						})).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
-				childs = html_obj.children().children().children();
-				childs.after(li);
+				this.autoBoxOpt.input.after(li);
 			}
 		},
 		getValue : function() {
 			return this.value;
 		},
 		processAutoBoxChange : function() {
-			this.autoBoxOpt.processAutoBoxChange(this.input,this.autoBoxOpt);
+			this.autoBoxOpt.processAutoBoxChange();
 		}
 	});
 

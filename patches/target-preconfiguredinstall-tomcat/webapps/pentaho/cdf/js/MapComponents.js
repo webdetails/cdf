@@ -24,6 +24,9 @@ var DashboardsMap =
 				placeDesc = placeDesc.replace(/&/g,",");
 				request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1' + featureClass + '&callback=DashboardsMap.getLocation';
 			}
+			else
+				return DashboardsMap.getLocation({totalResultsCount:1, geonames: [{lat:lat,lng:log}]});
+
 
 			// Create a new script object
 			// (implementation of this class is in /export/jsr_class.js)

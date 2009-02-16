@@ -72,11 +72,21 @@ ul.autobox-hldr li.bit-box a.closebutton {
  ul.autobox-hldr  a.applybutton {
   position: absolute;
   display: block;
-  left:166px;
+  /*left:166px;*/
   top: 8px;
   width: 15px; height: 15px;
   font-size: 2px;
   background: url('search.png'); }
+div.applybutton {
+  position: absolute;
+  display: block;
+  z-index: 30000;
+  border: 1px solid #111;
+  background-color: #eee;
+  padding: 5px;
+  opacity: 0.85;
+  font-size: 12px;
+  }
 ul.autobox-hldr li.bit-box a.closebutton:hover {
   background-position: 7px;
 }
