@@ -73,7 +73,20 @@ var XactionComponent = BaseComponent.extend({
 
 var SelectBaseComponent = BaseComponent.extend({
 		update : function() {
-			var myArray = this.getValuesArray();
+			var myArray = new Array();
+			var myself=this;
+			if(typeof(this.queryDefinition) == 'undefined')
+				myArray = this.getValuesArray();
+			else{
+				QueryComponent.makeQuery(this);
+				var myArray = new Array();
+				for(p in this.result){	
+					if(myself.queryDefinition.queryType != "sql")
+						myArray.push([this.result[p][0],this.result[p][0]]);
+					else
+						myArray.push([this.result[p][0],this.result[p][1]]);
+				}
+			}
 
 			selectHTML = "<select";
 			selectHTML += " id='" + this.name + "'";
