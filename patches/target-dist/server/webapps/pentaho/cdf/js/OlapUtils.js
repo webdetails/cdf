@@ -542,7 +542,7 @@ OlapUtils.mdxQueryGroupActionCallback = function(value,m){
 						}
 					}
 					else
-						delete mqg.activeConditions[mqg.clickedIdx];
+						filterInfo = "";
 				}
 				
 					
