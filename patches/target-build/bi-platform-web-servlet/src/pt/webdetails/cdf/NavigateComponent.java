@@ -51,7 +51,7 @@ public class NavigateComponent extends PentahoBase {
     
     public NavigateComponent(IPentahoSession userSession) {
         
-        solutionRepository = PentahoSystem.get(ISolutionRepository.class,userSession);// PentahoSystem.getSolutionRepository(userSession);// g etSolutionRepository(userSession);
+        solutionRepository = PentahoSystem.get(ISolutionRepository.class,userSession);// PentahoSystem.get(ISolutionRepository.class, userSession);// g etSolutionRepository(userSession);
         this.userSession = userSession;
         cacheManager = PentahoSystem.getCacheManager(userSession);
         cachingAvailable = cacheManager != null && cacheManager.cacheEnabled();
