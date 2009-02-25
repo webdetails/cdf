@@ -8,18 +8,29 @@ var BaseComponent = Base.extend({
 
 			if ( typeof(this.valuesArray) == 'undefined') {
 				//go through parameter array and update values
-				var p = new Array();
-				for(var i= 0, len = this.parameters.length; i < len; i++){
+				var p = new Array(this.parameters.length);
+				for(var i= 0, len = p.length; i < len; i++){
 					var key = this.parameters[i][0];
-					var value = Dashboards.getParameterValue(this.parameters[i][1]);
-					if (typeof value != 'undefined')
-						p.push([key,value]);
+					var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+					p[i] = [key,value];
 				} 
 
 				//execute the xaction to populate the selector
 				var myself=this;
-				html = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
-
+				if (this.url) {
+					var query = "";
+					var idx;
+					for( idx=0; idx<p.length; idx++ ) {
+						if (query != "") {
+							query += "&";
+						}
+						query += encodeURIComponent( p[idx][0] ) + "=" + encodeURIComponent( p[idx][1] );
+					}
+					
+					html = Dashboards.parseXActionResult(myself, pentahoPost(this.url, query));
+				} else {
+					html = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
+				}
 				//transform the result int a javascript array
 				var myArray = this.parseArray(html, false);
 				return myArray;
@@ -54,20 +65,50 @@ var BaseComponent = Base.extend({
 
 var XactionComponent = BaseComponent.extend({
 		update : function() {
-			// go through parametere array and update values
-			var p = new Array(this.parameters.length);
-			for(var i= 0, len = p.length; i < len; i++){
-				var key = this.parameters[i][0];
-				var value = Dashboards.getParameterValue(this.parameters[i][1]);
-				p[i] = [key,value];
-			} 
+		  try {
+			if (typeof(this.iframe) == 'undefined' || !this.iframe) {
+				// go through parameter array and update values
+				var p = new Array(this.parameters.length);
+				for(var i= 0, len = p.length; i < len; i++){
+					var key = this.parameters[i][0];
+					var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+					p[i] = [key,value];
+				} 
+	
+				// callback async mode
+				// Dashboards.callPentahoAction(this.solution, this.path, this.action,
+				// p,function(json){ Dashboards.xactionCallback(object,json); });
+				// or sync mode
+				var myself=this;
+				$('#'+this.htmlObject).html(Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null));
+			} else {
+				var xactionIFrameHTML = "<iframe id=\"iframe_"+ this.htmlObject + "\"" + 
+				" frameborder=\"0\"" +
+				" height=\"100%\"" + 
+				" width=\"100%\"" + 
+				" src=\"";
+				
+				xactionIFrameHTML += Dashboards.pentahoRoot + "ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
 
-			// callback async mode
-			// Dashboards.callPentahoAction(this.solution, this.path, this.action,
-			// p,function(json){ Dashboards.xactionCallback(object,json); });
-			// or sync mode
-			var myself=this;
-			$('#'+this.htmlObject).html(Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null));
+				// Add args
+				var p = new Array(this.parameters.length);
+				for(var i= 0, len = p.length; i < len; i++){
+					var arg = "&" + this.parameters[i][0] + "=";
+					if (this.parameters[i].length == 3) {
+						xactionIFrameHTML += arg + this.parameters[i][2];
+					} else {
+						xactionIFrameHTML += arg + Dashboards.getParameterValue(this.parameters[i][1]);
+					}
+				}
+
+				// Close IFrame
+				xactionIFrameHTML += "\"></iframe>";
+
+				document.getElementById(this.htmlObject).innerHTML = xactionIFrameHTML;
+			}
+		  } catch (e) {
+			  // don't cause the rest of CDF to fail if xaction component fails for whatever reason
+		  }
 		}
 	});
 
@@ -99,18 +140,36 @@ var SelectBaseComponent = BaseComponent.extend({
 				selectHTML += " multiple";
 			}
 			selectHTML += ">";
-
+			var firstVal;
 			var vid = this.valueAsId==false?false:true;
 			for(var i= 0, len  = myArray.length; i < len; i++){
-				if(myArray[i]!= null && myArray[i].length>0)
-					selectHTML += "<option value = '" + myArray[i][vid?1:0] + "' >" + myArray[i][1] + "</option>";
+				if(myArray[i]!= null && myArray[i].length>0) {
+					var ivid = vid || myArray[i][0] == null;
+					var value, label;
+					if (myArray[i].length > 1) {
+						value = myArray[i][ivid?1:0];
+						label = myArray[i][1];
+					} else {
+						value = myArray[i][0];
+						label = myArray[i][0];
+					}
+					if (i == 0) {
+						firstVal = value;
+					}
+					selectHTML += "<option value = '" + value + "' >" + label + "</option>";
+				}
 			} 
 
 			selectHTML += "</select>";
 
 			// update the placeholder
-			$("#"+this.htmlObject).html(selectHTML)
-			$("#"+this.name).val(Dashboards.getParameterValue(this.parameter));
+			$("#"+this.htmlObject).html(selectHTML);
+			var currentVal = Dashboards.getParameterValue(this.parameter);
+			if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
+				Dashboards.setParameter(this.parameter, firstVal);
+			} else {
+				$("#"+this.name).val(currentVal);
+			}
 			var myself = this;
 			$("#"+this.name).change(function() {
 					Dashboards.processChange(myself.name);
@@ -355,11 +414,10 @@ var TimePlotComponent = BaseComponent.extend({
 			var plotInfo = [];
 			for(var i = 0; i<cols.length; i++){
 
-				title.append('<span id="' + obj.name + 'Plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
+				title.append('<span style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
 
 				var plotInfoOpts = {
-					id: obj.name + "Plot" + i,
-					name: cols[i],
+					id: cols[i],
 					dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
 					valueGeometry: timePlotValueGeometry,
 					timeGeometry: timePlotTimeGeometry,
@@ -421,7 +479,7 @@ var TimePlotComponent = BaseComponent.extend({
 				parameters.push(key+"="+value);
 			} 
 			var allData = undefined;
-			var timePlotEventSourceUrl = "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
+			var timePlotEventSourceUrl = Dashboards.pentahoRoot +"ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
 			var myself = this;
 			if(cd.events && cd.events.show == true){
 
@@ -433,7 +491,7 @@ var TimePlotComponent = BaseComponent.extend({
 					parameters.push(key+"="+value);
 				} 
 
-				var eventUrl = "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
+				var eventUrl = Dashboards.pentahoRoot + "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
 
 				timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
 						timeplot.loadJSON(eventUrl,eventSource2,function(data){
@@ -786,7 +844,7 @@ var JpivotComponent = BaseComponent.extend({
 		update : function() {
 			// Build IFrame and set url
 			var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-			jpivotHTML += "ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
+			jpivotHTML += Dashboards.pentahoRoot + "ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
 
 			// Add args
 			var p = new Array(this.parameters.length);
@@ -814,7 +872,7 @@ var TableComponent = BaseComponent.extend({
 			// Clear previous table
 			$("#"+this.htmlObject).empty();
 			var myself = this;
-			$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
+			$.getJSON(Dashboards.pentahoRoot +"ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
 					myself.processTableComponentResponse(json);
 				});
 		},
@@ -831,7 +889,7 @@ var TableComponent = BaseComponent.extend({
 
 			var myself = this;
 
-			dtData.fnDrawCallback = function( aData, iRowCount ){
+			dtData.fnFinalCallback = function( aData, iRowCount ){
 				$("#" + myself.htmlObject + " td.sparkline").each(function(i){
 						$(this).sparkline($(this).text().split(/,/));
 					});
@@ -969,7 +1027,7 @@ var QueryComponent = BaseComponent.extend({
 				return;
 			}
 
-			$.getJSON("ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
+			$.getJSON(Dashboards.pentahoRoot + "ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
 					object.result = json;
 				});
 		}
@@ -995,8 +1053,8 @@ var ExecuteXactionComponent = BaseComponent.extend({
 					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
 				});
 		},
-		executeXAction : function() {
-			var url = "/pentaho/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
+		executeXaction : function() {
+			var url = Dashboards.pentahoRoot + "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
 
 			var p = new Array(this.parameters.length);
 			var parameters = [];

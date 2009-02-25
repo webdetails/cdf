@@ -12,19 +12,26 @@ var TRAFFIC_GREEN = "cdf/images/traffic_green.png";
 var ERROR_IMAGE = 'cdf/images/error.png';
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
-$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="/pentaho/cdf/images/busy.gif" /> <h3>Processing...</h3></div>';
-$.blockUI.defaults.css.left = '40%';
-$.blockUI.defaults.css.top = '30%';
+$.blockUI.defaults.message = '';
+$.blockUI.defaults.css.left = '0%';
+$.blockUI.defaults.css.top = '0%';
 $.blockUI.defaults.css.marginLeft = '85px';
-$.blockUI.defaults.css.width = '170px';
-$.blockUI.defaults.css.opacity = '.8';
+$.blockUI.defaults.css.width = '100%';
+$.blockUI.defaults.css.height = '100%';
+$.blockUI.defaults.css.opacity = '1';
+$.blockUI.defaults.css.backgroundColor = '#ffffcc';
 $.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
 $.blockUI.defaults.css['-moz-border-radius'] = '10px';
+$.blockUI.defaults.overlayCSS.backgroundColor = 'transparent';
+$.blockUI.defaults.overlayCSS.opacity = '0.6';
+$.blockUI.defaults.overlayCSS.cursor = 'wait';
+
 
 var ERROR_CODES = [];
 ERROR_CODES["UNKNOWN"] = ["ERROR: ","cdf/images/error.jpg"];
 ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","/pentaho/cdf/images/alert.jpg"];
 ERROR_CODES["0006"] = ["Could not establish a connection to the database","/pentaho/cdf/images/error.jpg"];
+
 
 if (typeof $.SetImpromptuDefaults == 'function')
 	$.SetImpromptuDefaults({
@@ -39,7 +46,8 @@ var Dashboards =
 		components: [],
 		parameters: [], // only used if globalContext = false
 		args: [],
-		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+	    pentahoRoot : ''
 	}
 
 Dashboards.setGlobalContext = function(globalContext) {
@@ -185,8 +193,9 @@ Dashboards.init = function(components){
 	$(function(){Dashboards.initEngine()});
 };
 
+
 Dashboards.initEngine = function(){
-	components = this.components;
+	var components = this.components;
 	var compCount = components.length;
 	Dashboards.incrementRunningCalls();
 
@@ -198,15 +207,16 @@ Dashboards.initEngine = function(){
 	Dashboards.decrementRunningCalls();
 };
 
+
 Dashboards.resetAll = function(){
-	var compCount = components.length;
-	for(var i= 0, len = components.length; i < len; i++){
-		components[i].clear();
+	var compCount = this.components.length;
+	for(var i= 0, len = this.components.length; i < len; i++){
+		this.components[i].clear();
 	}
-	var compCount = components.length;
-	for(var i= 0, len = components.length; i < len; i++){
-		if(components[i].executeAtStart){
-			this.update(components[i]);
+	var compCount = this.components.length;
+	for(var i= 0, len = this.components.length; i < len; i++){
+		if(this.components[i].executeAtStart){
+			this.update(this.components[i]);
 		}
 	}
 };
@@ -235,12 +245,12 @@ Dashboards.fireChange = function(parameter, value) {
 	//alert("Parameter: " + parameter + "; Value: " + value);
 	Dashboards.setParameter(parameter, value);
 
-	for(var i= 0, len = components.length; i < len; i++){
-		if(Dashboards.isArray(components[i].listeners)){
-			for(var j= 0 ; j < components[i].listeners.length; j++){
 
-				if(components[i].listeners[j] == parameter) {
-					this.update(components[i]);
+	for(var i= 0, len = this.components.length; i < len; i++){
+		if(Dashboards.isArray(this.components[i].listeners)){
+			for(var j= 0 ; j < this.components[i].listeners.length; j++){
+				if(this.components[i].listeners[j] == parameter) {
+					this.update(this.components[i]);
 					break;
 				}
 				//alert("finished parameter " + j)
@@ -251,6 +261,8 @@ Dashboards.fireChange = function(parameter, value) {
 	Dashboards.decrementRunningCalls();
 
 };
+
+
 
 Dashboards.isArray = function(testObject) {
 	return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
@@ -265,6 +277,7 @@ Dashboards.getParameterValue = function (parameterName) {
 }
 
 Dashboards.getQueryParameter = function ( parameterName ) {
+
 	// Add "=" to the parameter name (i.e. parameterName=value)
 	var queryString = window.location.search.substring(1);
 	var parameterName = parameterName + "=";
@@ -343,7 +356,6 @@ Dashboards.ev = function(o){
 Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
 	// Encapsulate pentahoAction call
 	// console.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
-
 	if(typeof callback == 'function'){
 		return pentahoAction( solution, path, action, parameters,
 			function(json){
@@ -389,6 +401,7 @@ Dashboards.parseXActionResult = function(obj,html){
 	else 
 		return html;
 };
+
 /**
  *
  * UTF-8 data encode / decode
@@ -398,14 +411,12 @@ Dashboards.parseXActionResult = function(obj,html){
 
 function encode_prepare( s )
 {
-	if ($.browser == "mozilla"){
-		alert("OK");
+	if (s != null) {
+		s = s.replace(/\+/g," ");
+		if ($.browser == "msie" || $.browser == "opera"){
+			return Utf8.decode(s);
+		}
 	}
-	s = s.replace(/\+/g," ");
-	if ($.browser == "msie" || $.browser == "opera"){
-		return Utf8.decode(s);
-	}
-
 	return s;
 }
 
