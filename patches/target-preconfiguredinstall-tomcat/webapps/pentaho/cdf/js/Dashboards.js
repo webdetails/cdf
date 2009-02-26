@@ -363,7 +363,8 @@ Dashboards.parseXActionResult = function(obj,html){
 		var errorMessage = "Error executing component " + obj.name;
 		var errorDetails = new Array();
 		errorDetails[0] = " Error details for component execution " + obj.name + " -- ";
-		errorDetails[1] = html.match(/(?:<span style="color:red">)(.*?)(?:<\/span><p\/>)/)[1];
+		var log = html.match(/(?:<span style="color:red">)([\s\S]*?)(?:<\/span><p\/>)/);
+		errorDetails[1] = (log != null && log.length>=1) ? log[1]:" -- ";
 		//$.each(errorDetails,function(i,val){errorDetails[i] = val.substring(24,val.length-11)});
 		// Iterate details;
 		

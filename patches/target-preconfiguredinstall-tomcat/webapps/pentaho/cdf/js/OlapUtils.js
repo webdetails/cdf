@@ -158,7 +158,7 @@ OlapUtils.mdxQuery.prototype.addFilter = function(axis, dimension, value){
 
 }
 
-OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,op,level){
+OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,op){
 
 	if(condition == undefined && op == undefined){
 		this.query["where"][key] = value;
@@ -185,7 +185,7 @@ OlapUtils.mdxQuery.prototype.addCondition = function(key,value,condition,op,leve
 		this.query["conditions"][key] = aux;
 	}
 	
-	return this.setCondition(key,condition,op,level);	
+	return this.setCondition(key,condition,op);	
 }
 
 OlapUtils.mdxQuery.prototype.removeCondition = function(key,value,condition){
@@ -207,7 +207,7 @@ OlapUtils.mdxQuery.prototype.removeConditions = function(key,condition){
 	this.setCondition(key,condition);
 }
 
-OlapUtils.mdxQuery.prototype.setCondition = function(key,condition,op,level)
+OlapUtils.mdxQuery.prototype.setCondition = function(key,condition,op)
 {	
 	var set = [];
 	for(v in this.query["conditions"][key])
@@ -217,11 +217,12 @@ OlapUtils.mdxQuery.prototype.setCondition = function(key,condition,op,level)
 		if(op != 'filter')
 			this.addSet(key,key + "Filter as {" + set.join(",") + "}");
 		else{
+			// If the parent level is the dimension, we need to use DefaultMember for this to work
 			var dim = set[0].substr(0,set[0].lastIndexOf("].")+1);
-			if(set[0].lastIndexOf("].") != set[0].indexOf("]."))
+			if(dim.indexOf("].") > -1)
 				this.addSet(key,key + "Filter as Except(" + dim +  ".Children,{" + set.join(",") + "})");
 			else
-				this.addSet(key,key + "Filter as Except(" + dim +  ".[" + level + "].Members,{" + set.join(",") + "})");
+				this.addSet(key,key + "Filter as Except(" + dim +  ".DefaultMember.Children,{" + set.join(",") + "})");
 		}
 		this.query["where"][key] = condition;
 	}
@@ -482,7 +483,7 @@ OlapUtils.mdxQueryGroupActionCallback = function(value,m){
 			var query = mqg.mdxQueries[ob];
 			if (ob != mqg.clickedIdx){
 				focusCondition = query.mdxQuery.removeCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]",whereCond);
-				query.mdxQuery.addCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]",whereCond,value,obj.mdxQuery.query.rowLevels[obj.mdxQuery.axisDepth]);
+				query.mdxQuery.addCondition(mqg.clickedIdx,axis + ".[" + mqg.clickedValue + "]",whereCond,value);
 				Dashboards.update(query.chartObject);
 			}
 		}
@@ -793,7 +794,7 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 
 				sets: {
 					"a":
-					function(){return "a as '("+options.dateDim+"."+options.dateDim+".[" + Dashboards.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateDim+".["+ Dashboards.ev(options.endDate) + "])'"}
+					function(){return "a as '("+options.dateDim+"."+options.dateLevel+".[" + Dashboards.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateLevel+".["+ Dashboards.ev(options.endDate) + "])'"}
 				},
 				members: {
 					daterange: ""+options.dateDim+".[Date Range] as Aggregate(a)",
