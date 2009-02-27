@@ -279,6 +279,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
     // adjust the relative path of pentahoRoot
     javaScriptLibrary += "<script>Dashboards.pentahoRoot='../';</script>\n";
 
+    // setting the displayWaitBox boolean to false. This is required for cdf to not show wait box and 
+    // render transparent glass pane
+    
+    javaScriptLibrary += "<script>Dashboards.displayWaitBox=false;</script>\n";
+
     //Concat libraries to html head content
     intro = intro.substring(0,headIndex-1) + javaScriptLibrary + intro.substring(headIndex,length-1);
     
