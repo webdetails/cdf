@@ -1,7 +1,7 @@
 <script type="text/javascript"
-	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/ui.tabs.js"></script>
+	src="GetCDFResource?resource=/bi-developers/cdf-samples/30-documentation/30-component_reference/ui.tabs.js"></script>
 <script type="text/javascript"
-	src="GetCDFResource?resource=/cdf-samples/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+	src="GetCDFResource?resource=/bi-developers/cdf-samples/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
 <div class="shadow">
 
 	<div class="contents">
@@ -124,7 +124,7 @@ timePlotDefinition: {
 	title: "Total order income",
 	queryType: 'mdx',
 	jndi: "SampleData",
-	catalog: "solution:cdf-samples/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
+	catalog: "solution:/bi-developers/cdf-samples/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
 	query: function(){
 
 		var query = "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
