@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Concepts</title>
+	<author>Webdetails</author>
+	<description>CDF Concepts</description>
+	<icon></icon>
+	<template>template.html</template>
+</cdf>
