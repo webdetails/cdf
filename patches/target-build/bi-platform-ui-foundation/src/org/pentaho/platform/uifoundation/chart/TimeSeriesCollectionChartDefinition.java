@@ -231,13 +231,15 @@ public class TimeSeriesCollectionChartDefinition extends TimeSeriesCollection im
 
     // get the paint sequence
     setPaintSequence(chartAttributes.selectSingleNode(ChartDefinition.PALETTE_NODE_NAME));
-	
-	// set the alfa layers
-    setBackgroundAlpha(chartAttributes.selectSingleNode(BACKGROUND_ALPHA_NODE_NAME));
+	 Node backgroundAlphaNode = chartAttributes.selectSingleNode(ChartDefinition.BACKGROUND_ALPHA_NODE_NAME);
+    Node foregroundAlphaNode = chartAttributes.selectSingleNode(ChartDefinition.FOREGROUND_ALPHA_NODE_NAME);
 
-    setForegroundAlpha(chartAttributes.selectSingleNode(FOREGROUND_ALPHA_NODE_NAME));
-
-
+    if(backgroundAlphaNode != null) {
+      setBackgroundAlpha(chartAttributes.selectSingleNode(ChartDefinition.BACKGROUND_ALPHA_NODE_NAME));  
+    }
+    if(foregroundAlphaNode != null) {
+      setForegroundAlpha(chartAttributes.selectSingleNode(ChartDefinition.FOREGROUND_ALPHA_NODE_NAME));  
+    }
     // get the stacked value
     setStacked(chartAttributes.selectSingleNode(ChartDefinition.STACKED_NODE_NAME));
 
@@ -1343,7 +1345,6 @@ public class TimeSeriesCollectionChartDefinition extends TimeSeriesCollection im
       setTooltipYFormat(node.getText());
     }
   }
-  
 	public Float getBackgroundAlpha() {
 		return backgroundAlpha;
 	}

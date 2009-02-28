@@ -443,19 +443,7 @@
 		<jsp-file>/jsp/Map.jsp</jsp-file>
 	</servlet>
 	
-	<servlet>
-		<servlet-name>Dashboards</servlet-name>
-		<jsp-file>/cdf/jsp/Dashboards.jsp</jsp-file>
-	</servlet>
 	
-	<servlet>
-		<servlet-name>JSONSolution</servlet-name>
-		<jsp-file>/cdf/jsp/JSONSolution.jsp</jsp-file>
-	</servlet>
-	<servlet>
-		<servlet-name>GetCDFResource</servlet-name>
-		<servlet-class>pt.webdetails.cdf.GetCDFResource</servlet-class>
-	</servlet>
 
 	<!-- ================================= merged servlets =================================== -->
 	<servlet>
@@ -659,20 +647,6 @@
 	<servlet-mapping>
 		<servlet-name>SWDashboard</servlet-name>
 		<url-pattern>/SWDashboard</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>Dashboards</servlet-name>
-		<url-pattern>/Dashboards</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>JSONSolution</servlet-name>
-		<url-pattern>/JSONSolution</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>GetCDFResource</servlet-name>
-		<url-pattern>/GetCDFResource</url-pattern>
 	</servlet-mapping>
 
 	<!-- Pentaho Servlets -->

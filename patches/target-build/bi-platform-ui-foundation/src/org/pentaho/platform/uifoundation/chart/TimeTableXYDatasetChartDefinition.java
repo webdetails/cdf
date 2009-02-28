@@ -200,11 +200,15 @@ public class TimeTableXYDatasetChartDefinition extends TimeTableXYDataset implem
     // get the chart title
     setTitle(chartAttributes.selectSingleNode(ChartDefinition.TITLE_NODE_NAME));
 
-	 // set the alfa layers
-    setBackgroundAlpha(chartAttributes.selectSingleNode(BACKGROUND_ALPHA_NODE_NAME));
+	 Node backgroundAlphaNode = chartAttributes.selectSingleNode(ChartDefinition.BACKGROUND_ALPHA_NODE_NAME);
+    Node foregroundAlphaNode = chartAttributes.selectSingleNode(ChartDefinition.FOREGROUND_ALPHA_NODE_NAME);
 
-    setForegroundAlpha(chartAttributes.selectSingleNode(FOREGROUND_ALPHA_NODE_NAME));
-    
+    if(backgroundAlphaNode != null) {
+      setBackgroundAlpha(chartAttributes.selectSingleNode(ChartDefinition.BACKGROUND_ALPHA_NODE_NAME));  
+    }
+    if(foregroundAlphaNode != null) {
+      setForegroundAlpha(chartAttributes.selectSingleNode(ChartDefinition.FOREGROUND_ALPHA_NODE_NAME));  
+    }
     // get the chart subtitles
 
     // A list of <subtitle> nodes should not be allowed to exist as a child of the main XML element (for XML schema to 
@@ -362,7 +366,8 @@ public class TimeTableXYDatasetChartDefinition extends TimeTableXYDataset implem
 
   }
   
-  SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+  SimpleDateFormat formatter1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd");
 
     private Date getValidDate(Object raw) {
 
