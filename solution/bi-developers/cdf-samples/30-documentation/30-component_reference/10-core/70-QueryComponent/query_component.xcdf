@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>PivotLinkComponent</title>
+	<author>Webdetails</author>
+	<description>PivotLinkComponent</description>
+	<icon></icon>
+	<template>template.html</template>
+</cdf>
