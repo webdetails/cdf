@@ -322,16 +322,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
 		//Concat libraries to html head content
 		intro = intro.substring(0,headIndex-1) + javaScriptLibrary + intro.substring(headIndex,length-1);
 
-		// clean up any references to pentaho-styles, replaced with references to plugin folder
-		/*	intro = intro.replaceAll("/pentaho-style", "/pentaho/content/" + PLUGIN_NAME + RESOURCE_PATH + "style");
-		dashboardContent = dashboardContent.replaceAll("/pentaho-style", "/pentaho/content/" + PLUGIN_NAME + RESOURCE_PATH + "style");    
-		footer = footer.replaceAll("/pentaho-style", "/pentaho/content/" + PLUGIN_NAME + RESOURCE_PATH + "style");*/
-
-		// update the url of the cdf location
-		/*	intro = intro.replaceAll("GetCDFResource", PLUGIN_NAME + "/GetCDFResource");
-		dashboardContent = dashboardContent.replaceAll("GetCDFResource", PLUGIN_NAME + "/GetCDFResource");
-		footer = footer.replaceAll("GetCDFResource", PLUGIN_NAME + "/GetCDFResource");*/
-
 		System.out.println("*** Finish: " + (new Date().getTime() - startDate.getTime()));
 		PrintWriter pw = new PrintWriter(out);
 		pw.println(intro);
