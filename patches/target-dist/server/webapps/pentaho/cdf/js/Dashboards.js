@@ -6,10 +6,10 @@ $.ajaxSetup({
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
-var TRAFFIC_RED = "cdf/images/traffic_red.png";
-var TRAFFIC_YELLOW = "cdf/images/traffic_yellow.png";
-var TRAFFIC_GREEN = "cdf/images/traffic_green.png";
-var ERROR_IMAGE = 'cdf/images/error.png';
+var TRAFFIC_RED = "resources/style/images/traffic_red.png";
+var TRAFFIC_YELLOW = "resources/style/images/traffic_yellow.png";
+var TRAFFIC_GREEN = "resources/style/images/traffic_green.png";
+var ERROR_IMAGE = 'resources/style/images/error.png';
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
 $.blockUI.defaults.message = '';
@@ -28,9 +28,9 @@ $.blockUI.defaults.overlayCSS.cursor = 'wait';
 
 
 var ERROR_CODES = [];
-ERROR_CODES["UNKNOWN"] = ["ERROR: ","cdf/images/error.jpg"];
-ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","/pentaho/cdf/images/alert.jpg"];
-ERROR_CODES["0006"] = ["Could not establish a connection to the database","/pentaho/cdf/images/error.jpg"];
+ERROR_CODES["UNKNOWN"] = ["ERROR: ","resources/style/images/error.jpg"];
+ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","resources/style/images/alert.jpg"];
+ERROR_CODES["0006"] = ["Could not establish a connection to the database","resources/style/images/error.jpg"];
 
 
 if (typeof $.SetImpromptuDefaults == 'function')
