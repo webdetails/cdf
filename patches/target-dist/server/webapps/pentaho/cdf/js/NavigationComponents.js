@@ -234,7 +234,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 						}
 						else{
 							cls = "action greybox";
-							href = Dashboards.pentahoRoot + "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
+							href = "/pentaho/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
 						}
 						// target = "_new"
 
