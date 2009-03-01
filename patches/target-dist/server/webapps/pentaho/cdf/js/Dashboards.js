@@ -12,19 +12,14 @@ var TRAFFIC_GREEN = "resources/style/images/traffic_green.png";
 var ERROR_IMAGE = 'resources/style/images/error.png';
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
-$.blockUI.defaults.message = '';
-$.blockUI.defaults.css.left = '0%';
-$.blockUI.defaults.css.top = '0%';
+$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="resources/style/images/busy.gif" /> <h3>Processing...</h3></div>';
+$.blockUI.defaults.css.left = '40%';
+$.blockUI.defaults.css.top = '30%';
 $.blockUI.defaults.css.marginLeft = '85px';
-$.blockUI.defaults.css.width = '100%';
-$.blockUI.defaults.css.height = '100%';
-$.blockUI.defaults.css.opacity = '1';
-$.blockUI.defaults.css.backgroundColor = '#ffffcc';
+$.blockUI.defaults.css.width = '170px';
+$.blockUI.defaults.css.opacity = '.8';
 $.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
 $.blockUI.defaults.css['-moz-border-radius'] = '10px';
-$.blockUI.defaults.overlayCSS.backgroundColor = 'transparent';
-$.blockUI.defaults.overlayCSS.opacity = '0.6';
-$.blockUI.defaults.overlayCSS.cursor = 'wait';
 
 
 var ERROR_CODES = [];
@@ -262,8 +257,6 @@ Dashboards.fireChange = function(parameter, value) {
 
 };
 
-
-
 Dashboards.isArray = function(testObject) {
 	return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
 }
@@ -277,7 +270,6 @@ Dashboards.getParameterValue = function (parameterName) {
 }
 
 Dashboards.getQueryParameter = function ( parameterName ) {
-
 	// Add "=" to the parameter name (i.e. parameterName=value)
 	var queryString = window.location.search.substring(1);
 	var parameterName = parameterName + "=";

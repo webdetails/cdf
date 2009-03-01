@@ -14,6 +14,14 @@ var MetaLayer ={
 
 	},
 
+	getYesterdayDate:function(){
+
+		var currentDate=new Date();
+		currentDate.setDate(currentDate.getDate()-1);
+		return MetaLayer.toDateString(currentDate);
+
+	},
+
 	getFirstDayOfYearDate:function(){
 
 		var currentDate=new Date();

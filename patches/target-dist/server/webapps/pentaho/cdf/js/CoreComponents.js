@@ -414,10 +414,11 @@ var TimePlotComponent = BaseComponent.extend({
 			var plotInfo = [];
 			for(var i = 0; i<cols.length; i++){
 
-				title.append('<span style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
+				title.append('<span id="' + obj.name + 'Plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
 
 				var plotInfoOpts = {
-					id: cols[i],
+					id: obj.name + "Plot" + i,
+					name: cols[i],
 					dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
 					valueGeometry: timePlotValueGeometry,
 					timeGeometry: timePlotTimeGeometry,
@@ -790,7 +791,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
 				scrollHeight: myself.scrollHeight,
-				applyButton: myself.showApplyButton,
+				applyButton: myself.showApplyButton == undefined ? false : myself.showApplyButton,
 				tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
 				parent: myself
 			};
@@ -1053,7 +1054,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
 				});
 		},
-		executeXaction : function() {
+		executeXAction : function() {
 			var url = Dashboards.pentahoRoot + "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
 
 			var p = new Array(this.parameters.length);
