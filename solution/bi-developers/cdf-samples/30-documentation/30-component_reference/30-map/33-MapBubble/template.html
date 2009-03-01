@@ -76,8 +76,8 @@ mapComponent =
 {
 name: "mapComponent",
 type: "map",
-solution: "cdf-samples",
-path: "20-samples/map_dashboard",
+solution: "bi-developers",
+path: "cdf-samples/20-samples/map_dashboard",
 action: "GetPoints.xaction",
 parameters:[],
 listeners:[],
@@ -89,7 +89,7 @@ initZoom: 1,
 expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
 preExecution:function(){},
 postExecution:function(){},
-markers: ["cdf/js/OpenMap/OpenLayers/img/marker-green.png","cdf/js/OpenMap/OpenLayers/img/marker-gold.png","cdf/js/OpenMap/OpenLayers/img/marker.png"]
+markers: ["js/OpenMap/OpenLayers/img/marker-green.png","js/OpenMap/OpenLayers/img/marker-gold.png","js/OpenMap/OpenLayers/img/marker.png"]
 }
 
 
@@ -98,8 +98,8 @@ mapBubble =
 name: "mapBubble",
 type: "mapBubble",
 listeners:["selectedPoint"],
-solution: "cdf-samples",
-path: "30-documentation/30-component_reference/30-map/33-MapBubble",
+solution: "bi-developers",
+path: "cdf-samples/30-documentation/30-component_reference/30-map/33-MapBubble",
 action: "cityDetails.xaction",
 parameters:[["city","selectedPoint"]],
 executeAtStart: false,
