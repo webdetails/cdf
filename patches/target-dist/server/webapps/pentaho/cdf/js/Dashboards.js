@@ -47,7 +47,7 @@ var Dashboards =
 		parameters: [], // only used if globalContext = false
 		args: [],
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-	    pentahoRoot : ''
+	    pentahoRoot : '../../'
 	}
 
 Dashboards.setGlobalContext = function(globalContext) {

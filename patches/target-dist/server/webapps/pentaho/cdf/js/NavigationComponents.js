@@ -81,7 +81,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
 		if( NavigatorBaseComponent.navigatorResponse == -1 ){
-			$.getJSON(Dashboards.pentahoRoot + "JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
+			$.getJSON("JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
 					myself.processNavigatorResponse(json);
 				});
 		}
@@ -151,7 +151,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 				_path="path="+file.path;
 			}
 
-			s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + Dashboards.pentahoRoot + "RenderHTML?solution=" + file.solution + "&amp;" +_path + "\">" + file.title + "</a>";
+			s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + "RenderHTML?solution=" + file.solution + "&amp;" +_path + "\">" + file.title + "</a>";
 
 			var files = file.folders || [];
 			files.sort(function(a,b){return a.name>b.name});
@@ -170,7 +170,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 var ContentListComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
-		$.getJSON(Dashboards.pentahoRoot + "JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+		$.getJSON("JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
 				myself.processContentListResponse(json);
 			});
 	},
@@ -225,7 +225,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 					var href = "";
 					if (this.type=="FOLDER"){
 						cls = "folder";
-						href = Dashboards.pentahoRoot + "RenderHTML?solution=" + this.solution + "&path=" + this.path;
+						href = "RenderHTML?solution=" + this.solution + "&path=" + this.path;
 					}
 					else{
 						if (this.url != undefined){
@@ -265,7 +265,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
 		if( NavigatorBaseComponent.navigatorResponse == -1 ){
-			$.getJSON(Dashboards.pentahoRoot + "JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+			$.getJSON("JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
 					myself.processPageTitleResponse(json);
 				});
 		}
