@@ -35,27 +35,27 @@ commonLibrariesLink=\
 /pentaho/content/pentaho-cdf/js/jquery.ui.themeroller.css,\
 /pentaho/content/pentaho-cdf/js/greybox/gb_styles.css,\
 /pentaho/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
-/pentaho/content/pentaho-cdf/js/cdf.css
+/pentaho/content/pentaho-cdf/js/cdf.css,\
+/pentaho/content/pentaho-cdf/js/daterangepicker/ui.core.css,\
+/pentaho/content/pentaho-cdf/js/daterangepicker/ui.theme.css,\
+/pentaho/content/pentaho-cdf/js/daterangepicker/ui.datepicker.css,\
 
 mapScript=\
 js/OpenMap/open_map.js,js/jsr_class.js,\
 js/OpenStreetMap.js
 
 dateRangeInputScript=\
-/pentaho/content/pentaho-cdf/js/jquery.daterangepicker.js
+/pentaho/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
 
 dateRangeInputLink=\
-jquery.daterangepicker.css
-
-dateRangeInputLink=\
-/pentaho/content/pentaho-cdf/js/jquery.daterangepicker.css
+/pentaho/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
 
 tableComponentScript=\
-/pentaho/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
+/pentaho/content/pentaho-cdf/resources/style/jquery.jTable.css,\
 /pentaho/content/pentaho-cdf/js/jquery.sparkline.js
 
 tableComponentLink=\
-/pentaho-style/jquery.jTable.css,\
+/pentaho/content/pentaho-cdf/resources/style/jquery.jTable.css,\
 /pentaho/content/pentaho-cdf/js/dataTables/css/demos.css
 
 timePlotComponentScript=\
