@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-	<title>Licence and Support</title>
+	<title>License and Support</title>
 	<author>Webdetails</author>
-	<description>Licence and Support</description>
+	<description>License and Support</description>
 	<icon></icon>
 	<template>template.html</template>
 </cdf>
