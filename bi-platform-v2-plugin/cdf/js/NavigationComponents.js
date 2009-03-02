@@ -277,7 +277,8 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
 		// Store the value
 		NavigatorBaseComponent.navigatorResponse = json;
 	
-		var _id = json.solution.id +"/" + NavigatorBaseComponent.solution + (NavigatorBaseComponent.path.length > 0? "/"+ NavigatorBaseComponent.path:"");
+		var _id = json.solution.id +"/" + NavigatorBaseComponent.solution + (NavigatorBaseComponent.path.length > 0? 
+			(NavigatorBaseComponent.path.charAt(0) == '/' ? NavigatorBaseComponent.path : '/' + NavigatorBaseComponent.path) : "");
 		var file = this.findPageTitleObject(json.solution.folders,_id);
 
 		if (file.title != undefined && file.description != undefined){
