@@ -96,7 +96,7 @@
 	      </fileset>
 	    </copy>
 	    
-	  	<copy todir="${stage.dir}/${plugin.name}/lib">
+	  	<copy todir="../patches/target-dist/server/webapps/pentaho/lib">
 	      <fileset dir="${lib.dir}">
 	        <include name="json-${dependency.json.revision}.jar" />
 	      </fileset>
@@ -116,7 +116,7 @@
 	  	
 	  	<!-- Copy js folder into dist -->
 	    <copy todir="${stage.dir}/${plugin.name}/js">
-	      <fileset dir="../patches/target-dist/server/webapps/pentaho/cdf/js">
+	      <fileset dir="cdf/js">
 	        <include name="**/*" />
 	      </fileset>
 	    </copy>
@@ -137,7 +137,7 @@
 		
 		<!-- Copy pentaho-cdf image files to dist -->
 		<copy todir="${stage.dir}/${plugin.name}/resources/style/images">
-	      <fileset dir="../patches/target-dist/server/webapps/pentaho/cdf/images">
+	      <fileset dir="cdf/images">
 	        <include name="**/*" />
 	      </fileset>
 	    </copy>
