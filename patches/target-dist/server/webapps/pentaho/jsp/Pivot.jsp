@@ -7,24 +7,28 @@
 	org.dom4j.Element,
 	org.dom4j.Document,
 	org.pentaho.platform.util.VersionHelper,
-    org.pentaho.platform.api.engine.IPentahoSession,
+	org.pentaho.platform.util.UUIDUtil,
+    org.pentaho.platform.util.StringUtil,
+	org.pentaho.platform.util.web.SimpleUrlFactory,
+	org.pentaho.platform.util.messages.LocaleHelper,
     org.pentaho.platform.api.data.IDatasourceService,
-    org.pentaho.platform.web.http.WebTemplateHelper,
-	org.pentaho.platform.engine.services.solution.SimpleParameterSetter,
-	org.pentaho.platform.engine.core.output.SimpleOutputHandler,
+    org.pentaho.platform.api.engine.IPentahoSession,
     org.pentaho.platform.api.engine.ISolutionEngine,
+    org.pentaho.platform.api.engine.IRuntimeContext,
+    org.pentaho.platform.api.repository.ISubscriptionRepository,
+	org.pentaho.platform.engine.core.output.SimpleOutputHandler,
+	org.pentaho.platform.engine.core.system.PentahoSystem,
+	org.pentaho.platform.engine.services.solution.SimpleParameterSetter,
+	org.pentaho.platform.engine.core.solution.ActionInfo,
+	org.pentaho.platform.web.http.PentahoHttpSessionHelper,
+    org.pentaho.platform.web.http.WebTemplateHelper,
     org.pentaho.platform.web.http.request.HttpRequestParameterProvider,
    	org.pentaho.platform.web.http.session.HttpSessionParameterProvider,
-    org.pentaho.platform.engine.core.solution.ActionInfo,
-    org.pentaho.platform.util.StringUtil,
-	org.pentaho.platform.api.engine.IRuntimeContext,
-    org.pentaho.platform.util.web.SimpleUrlFactory,
-	org.pentaho.platform.util.messages.LocaleHelper,
     org.pentaho.platform.web.jsp.messages.Messages,
-	org.pentaho.platform.engine.core.system.PentahoSystem,
 	org.pentaho.platform.plugin.action.mondrian.PivotViewComponent,
 	org.pentaho.platform.plugin.action.mondrian.AnalysisSaver,
 	org.pentaho.platform.plugin.action.mondrian.MissingParameterException,
+	org.pentaho.platform.repository.subscription.Subscription,
 	org.pentaho.platform.repository.subscription.SubscriptionHelper,
 	com.tonbeller.jpivot.table.TableComponent,
 	com.tonbeller.jpivot.olap.model.OlapModel,
@@ -33,9 +37,8 @@
 	com.tonbeller.jpivot.olap.query.MdxOlapModel,
 	com.tonbeller.jpivot.mondrian.MondrianModel,
 	com.tonbeller.jpivot.chart.ChartComponent,
-	org.pentaho.platform.api.repository.ISubscriptionRepository,
-	org.pentaho.platform.repository.subscription.Subscription,
-  org.pentaho.platform.web.http.PentahoHttpSessionHelper"%>
+	com.tonbeller.wcf.form.FormComponent
+  "%>
 <jsp:directive.page
 	import="org.pentaho.platform.api.repository.ISolutionRepository" />
 <%@ 
@@ -47,7 +50,7 @@
 <%
 
 /*
- * Copyright 2006 Pentaho Corporation.  All rights reserved. 
+ * Copyright 2006-2009 Pentaho Corporation.  All rights reserved. 
  * This software was developed by Pentaho Corporation and is provided under the terms 
  * of the Mozilla Public License, Version 1.1, or any later version. You may not use 
  * this file except in compliance with the license. If you need a copy of the license, 
@@ -64,17 +67,45 @@
 	try {
 	IPentahoSession userSession = PentahoHttpSessionHelper.getPentahoSession( request );
 
-	String pivotId = "01"; //$NON-NLS-1$
-	if( pivotId == null ) {
-		// TODO need to log an error here
-		return;
+	String pivotId = null;
+	if (request.getParameter("pivotId") != null) {
+		pivotId = request.getParameter("pivotId");
+	} else {
+		pivotId = UUIDUtil.getUUIDAsString();
+		if( pivotId == null ) {
+			// TODO need to log an error here
+			return;
+		}
 	}
 
+	// this allows navigation renderer to have access to the pivotId, which it uses
+	// in an href link back to itself.
+	Map map = new HashMap();
+	map.put("pivotId", pivotId);
+	request.setAttribute("com.tonbeller.wcf.component.RendererParameters", map);
+	
 	int saveResult = 0;
 	String saveMessage = "";
 	String queryId = "query"+pivotId; //$NON-NLS-1$
-	String titleId = PivotViewComponent.TITLE+pivotId; //$NON-NLS-1$
+	String mdxEditId = "mdxedit" + pivotId;
+	String tableId = "table" + pivotId;
+	String titleId = PivotViewComponent.TITLE+pivotId;
 	String optionsId = "pivot-"+PivotViewComponent.OPTIONS+"-"+pivotId; //$NON-NLS-1$
+	String chartId = "chart" + pivotId;
+	String naviId = "navi" + pivotId;
+	String sortFormId = "sortform" + pivotId;
+	String chartFormId = "chartform" + pivotId;
+	String printId = "print" + pivotId;
+	String printFormId = "printform" + pivotId;
+	String drillThroughTableId = queryId + ".drillthroughtable";
+	String toolbarId = "toolbar" + pivotId;
+
+	// Internal JPivot References, if available.  Note that these references change
+	// after each creation tag within the JSP.
+	OlapModel _olapModel = (OlapModel)session.getAttribute(queryId);
+	FormComponent _mdxEdit = (FormComponent)session.getAttribute(mdxEditId);
+	TableComponent _table = (TableComponent) session.getAttribute(tableId);
+	ChartComponent _chart = (ChartComponent) session.getAttribute(chartId);
 
 	boolean authenticated = userSession.getName() != null;
 	String pageName = "Pivot"; //$NON-NLS-1$
@@ -99,8 +130,8 @@
 	boolean chartChange = false;
 	boolean showGrid = true;
 	
-	if( session.getAttribute( "save-message-"+pivotId ) != null ) {
-		saveMessage = ((String) session.getAttribute("save-message-"+pivotId));
+	if( session.getAttribute( "save-message-01") != null ) {
+		saveMessage = ((String) session.getAttribute("save-message-01"));
 	}
 	
 	if( session.getAttribute( "pivot-"+PivotViewComponent.SHOWGRID+"-"+pivotId ) != null ) {
@@ -502,11 +533,10 @@
 	// Take care of saving this xaction
 	if ( saveAction != null ) {
 	  // Get the current mdx
-	  TableComponent table = (TableComponent) session.getAttribute("table01"); //$NON-NLS-1$
 	  String mdx = null;
 	  String connectString = null;
-	  if( table != null ) {
-		OlapModel olapModel = table.getOlapModel();
+	  if( _table != null ) {
+		OlapModel olapModel = _table.getOlapModel();
 		while( olapModel != null ) {
 		  if( olapModel instanceof OlapModelProxy ) {
 			OlapModelProxy proxy = (OlapModelProxy) olapModel;
@@ -524,8 +554,6 @@
 		}
 	  }
 	  	
-	  ChartComponent chart = (ChartComponent) session.getAttribute( "chart01" );
-	  
 	  HashMap props = new HashMap();
 	  	
 	  props.put(PivotViewComponent.MODEL, catalogUri);
@@ -537,42 +565,42 @@
 	  props.put(PivotViewComponent.TITLE, request.getParameter("save-title"));
 	  props.put("actionreference", actionReference);
 	
-	  if(chart != null){
-		  props.put(PivotViewComponent.CHARTTYPE, new Integer(chart.getChartType()));
-		  props.put(PivotViewComponent.CHARTWIDTH, new Integer(chart.getChartWidth()));
-		  props.put(PivotViewComponent.CHARTHEIGHT, new Integer(chart.getChartHeight()));
-		  if (chart.isVisible() && chartLocation.equalsIgnoreCase("none")){
+	  if(_chart != null){
+		  props.put(PivotViewComponent.CHARTTYPE, new Integer(_chart.getChartType()));
+		  props.put(PivotViewComponent.CHARTWIDTH, new Integer(_chart.getChartWidth()));
+		  props.put(PivotViewComponent.CHARTHEIGHT, new Integer(_chart.getChartHeight()));
+		  if (_chart.isVisible() && chartLocation.equalsIgnoreCase("none")){
 		    chartLocation = "bottom";
 		  }
-		  props.put(PivotViewComponent.CHARTLOCATION, chart.isVisible() ? chartLocation : "none");
-		  props.put(PivotViewComponent.CHARTDRILLTHROUGHENABLED, new Boolean(chart.isDrillThroughEnabled()));
-		  props.put(PivotViewComponent.CHARTTITLE, chart.getChartTitle());
-		  props.put(PivotViewComponent.CHARTTITLEFONTFAMILY, chart.getFontName());
-		  props.put(PivotViewComponent.CHARTTITLEFONTSTYLE, new Integer(chart.getFontStyle()));
-		  props.put(PivotViewComponent.CHARTTITLEFONTSIZE, new Integer(chart.getFontSize()));
-		  props.put(PivotViewComponent.CHARTHORIZAXISLABEL, chart.getHorizAxisLabel());
-		  props.put(PivotViewComponent.CHARTVERTAXISLABEL, chart.getVertAxisLabel());
-		  props.put(PivotViewComponent.CHARTAXISLABELFONTFAMILY, chart.getAxisFontName());
-		  props.put(PivotViewComponent.CHARTAXISLABELFONTSTYLE, new Integer(chart.getAxisFontStyle()));
-		  props.put(PivotViewComponent.CHARTAXISLABELFONTSIZE, new Integer(chart.getAxisFontSize()));
-		  props.put(PivotViewComponent.CHARTAXISTICKFONTFAMILY, chart.getAxisTickFontName());
-		  props.put(PivotViewComponent.CHARTAXISTICKFONTSTYLE, new Integer(chart.getAxisTickFontStyle()));
-		  props.put(PivotViewComponent.CHARTAXISTICKFONTSIZE, new Integer(chart.getAxisTickFontSize()));
-		  props.put(PivotViewComponent.CHARTAXISTICKLABELROTATION, new Integer(chart.getTickLabelRotate()));
-		  props.put(PivotViewComponent.CHARTSHOWLEGEND, new Boolean(chart.getShowLegend()));
-		  props.put(PivotViewComponent.CHARTLEGENDLOCATION, new Integer(chart.getLegendPosition()));
-		  props.put(PivotViewComponent.CHARTLEGENDFONTFAMILY, chart.getLegendFontName());
-    	  props.put(PivotViewComponent.CHARTLEGENDFONTSTYLE, new Integer(chart.getLegendFontStyle()));
-    	  props.put(PivotViewComponent.CHARTLEGENDFONTSIZE, new Integer(chart.getLegendFontSize()));
- 		  props.put(PivotViewComponent.CHARTSHOWSLICER, new Boolean(chart.isShowSlicer()));
-    	  props.put(PivotViewComponent.CHARTSLICERLOCATION, new Integer(chart.getSlicerPosition()));
-    	  props.put(PivotViewComponent.CHARTSLICERALIGNMENT, new Integer(chart.getSlicerAlignment()));
-   		  props.put(PivotViewComponent.CHARTSLICERFONTFAMILY, chart.getSlicerFontName());
-    	  props.put(PivotViewComponent.CHARTSLICERFONTSTYLE, new Integer(chart.getSlicerFontStyle()));
-    	  props.put(PivotViewComponent.CHARTSLICERFONTSIZE, new Integer(chart.getSlicerFontSize()));
- 		  props.put(PivotViewComponent.CHARTBACKGROUNDR, new Integer(chart.getBgColorR()));
-    	  props.put(PivotViewComponent.CHARTBACKGROUNDG, new Integer(chart.getBgColorG()));
-    	  props.put(PivotViewComponent.CHARTBACKGROUNDB, new Integer(chart.getBgColorB()));
+		  props.put(PivotViewComponent.CHARTLOCATION, _chart.isVisible() ? chartLocation : "none");
+		  props.put(PivotViewComponent.CHARTDRILLTHROUGHENABLED, new Boolean(_chart.isDrillThroughEnabled()));
+		  props.put(PivotViewComponent.CHARTTITLE, _chart.getChartTitle());
+		  props.put(PivotViewComponent.CHARTTITLEFONTFAMILY, _chart.getFontName());
+		  props.put(PivotViewComponent.CHARTTITLEFONTSTYLE, new Integer(_chart.getFontStyle()));
+		  props.put(PivotViewComponent.CHARTTITLEFONTSIZE, new Integer(_chart.getFontSize()));
+		  props.put(PivotViewComponent.CHARTHORIZAXISLABEL, _chart.getHorizAxisLabel());
+		  props.put(PivotViewComponent.CHARTVERTAXISLABEL, _chart.getVertAxisLabel());
+		  props.put(PivotViewComponent.CHARTAXISLABELFONTFAMILY, _chart.getAxisFontName());
+		  props.put(PivotViewComponent.CHARTAXISLABELFONTSTYLE, new Integer(_chart.getAxisFontStyle()));
+		  props.put(PivotViewComponent.CHARTAXISLABELFONTSIZE, new Integer(_chart.getAxisFontSize()));
+		  props.put(PivotViewComponent.CHARTAXISTICKFONTFAMILY, _chart.getAxisTickFontName());
+		  props.put(PivotViewComponent.CHARTAXISTICKFONTSTYLE, new Integer(_chart.getAxisTickFontStyle()));
+		  props.put(PivotViewComponent.CHARTAXISTICKFONTSIZE, new Integer(_chart.getAxisTickFontSize()));
+		  props.put(PivotViewComponent.CHARTAXISTICKLABELROTATION, new Integer(_chart.getTickLabelRotate()));
+		  props.put(PivotViewComponent.CHARTSHOWLEGEND, new Boolean(_chart.getShowLegend()));
+		  props.put(PivotViewComponent.CHARTLEGENDLOCATION, new Integer(_chart.getLegendPosition()));
+		  props.put(PivotViewComponent.CHARTLEGENDFONTFAMILY, _chart.getLegendFontName());
+		  props.put(PivotViewComponent.CHARTLEGENDFONTSTYLE, new Integer(_chart.getLegendFontStyle()));
+		  props.put(PivotViewComponent.CHARTLEGENDFONTSIZE, new Integer(_chart.getLegendFontSize()));
+ 		  props.put(PivotViewComponent.CHARTSHOWSLICER, new Boolean(_chart.isShowSlicer()));
+		  props.put(PivotViewComponent.CHARTSLICERLOCATION, new Integer(_chart.getSlicerPosition()));
+		  props.put(PivotViewComponent.CHARTSLICERALIGNMENT, new Integer(_chart.getSlicerAlignment()));
+   		  props.put(PivotViewComponent.CHARTSLICERFONTFAMILY, _chart.getSlicerFontName());
+		  props.put(PivotViewComponent.CHARTSLICERFONTSTYLE, new Integer(_chart.getSlicerFontStyle()));
+		  props.put(PivotViewComponent.CHARTSLICERFONTSIZE, new Integer(_chart.getSlicerFontSize()));
+ 		  props.put(PivotViewComponent.CHARTBACKGROUNDR, new Integer(_chart.getBgColorR()));
+		  props.put(PivotViewComponent.CHARTBACKGROUNDG, new Integer(_chart.getBgColorG()));
+		  props.put(PivotViewComponent.CHARTBACKGROUNDB, new Integer(_chart.getBgColorB()));
 	  }
 
 	  if (( "save".equals(saveAction)) || ("saveAs".equals(saveAction)))  {    
@@ -584,6 +612,8 @@
 			switch (saveResult) {
 				case ISolutionRepository.FILE_ADD_SUCCESSFUL: 
 					saveMessage = Messages.getString("UI.USER_SAVE_SUCCESS");
+					// only set the session attribute on success, it's the only path that requires it
+					session.setAttribute( "save-message-01", saveMessage); //$NON-NLS-1$
 					break;
 				case ISolutionRepository.FILE_EXISTS:
 					// Shouldn't ever get here, since we pass overwrite=true;
@@ -599,20 +629,17 @@
 					break;
 				case 0:
 				  	saveMessage="";
-				  	session.setAttribute( "save-message-"+pivotId, saveMessage); //$NON-NLS-1$
 				  	break;
 			}	
 	    } catch (Throwable e){
 		  saveResult = ISolutionRepository.FILE_ADD_FAILED;
 	      saveMessage = e.getMessage();
 	    }
-		session.setAttribute( "save-message-"+pivotId, saveMessage); //$NON-NLS-1$
-
-	  } 	
+	  }
 	}
  
   if( query != null ) { 
-    IDatasourceService datasourceService = datasourceService = PentahoSystem.getObjectFactory().get(IDatasourceService.class, null);
+    IDatasourceService datasourceService = PentahoSystem.getObjectFactory().get(IDatasourceService.class, null);
     DataSource currDataSource = null; 
     try {
       currDataSource = datasourceService.getDataSource(dataSource);
@@ -622,34 +649,28 @@
     if (currDataSource != null) {
       request.setAttribute("currDataSource", currDataSource);
 %>
-	<jp:mondrianQuery id="<%=queryId%>" dataSource="${currDataSource}"
+<jp:mondrianQuery id="<%=queryId%>" dataSource="${currDataSource}"
 	dynResolver="mondrian.i18n.LocalizingDynamicSchemaProcessor"
 	dynLocale="<%= userSession.getLocale().toString() %>"
 	role="<%=role%>" catalogUri="<%=catalogUri%>">
 	<%=query%>
-	</jp:mondrianQuery> 
-<% 
+</jp:mondrianQuery>
+<%
     } else {
 %>
-	<jp:mondrianQuery id="<%=queryId%>" dataSource="<%=dataSource%>"
+<jp:mondrianQuery id="<%=queryId%>" dataSource="<%=dataSource%>"
 	dynResolver="mondrian.i18n.LocalizingDynamicSchemaProcessor"
 	dynLocale="<%= userSession.getLocale().toString() %>"
 	role="<%=role%>" catalogUri="<%=catalogUri%>">
 	<%=query%>
-	</jp:mondrianQuery> 
+</jp:mondrianQuery>
 <% 
     }
-  }    
-%>
-<c:set var="title01" scope="session">
-	<%
+  }
 
-	out.print( pivotTitle );
-
-%>
-</c:set>
-
-<html>
+  _olapModel =  (OlapModel)session.getAttribute(queryId);
+  session.setAttribute(titleId, pivotTitle);
+%><html>
 <head>
 <title><%= Messages.getString("UI.USER_ANALYSIS") %></title>
 <meta http-equiv="Content-Type"
@@ -667,65 +688,65 @@
 <!-- ****************        JAVASCRIPT FOR SAVE DIALOGS              ************************* -->
 <!-- ****************************************************************************************** -->
 
-	<link href="adhoc/styles/repositoryBrowserStyles.css" rel="stylesheet" type="text/css" />
-    <link href="adhoc/styles/jpivot.css" rel="stylesheet" type="text/css" />
-	<!--[if IE]>
+<link href="adhoc/styles/repositoryBrowserStyles.css" rel="stylesheet" type="text/css" />
+<link href="adhoc/styles/jpivot.css" rel="stylesheet" type="text/css" />
+<!--[if IE]>
       <link href="adhoc/styles/jpivotIE6.css" rel="stylesheet" type="text/css"/>	
     <![endif]-->
- 
-  
-    <script src="wcf/scroller.js" type="text/javascript"></script> 
-	<script src="js/ajaxslt0.7/xmltoken.js" type="text/javascript"></script>
-	<script src="js/ajaxslt0.7/util.js" type="text/javascript"></script>	
-	<script src="js/ajaxslt0.7/dom.js" type="text/javascript"></script>
-	<script src="js/ajaxslt0.7/xpath.js" type="text/javascript"></script>
-	<script src="js/ajaxslt0.7/xslt.js" type="text/javascript"></script>
 
-	<script src="js/pentaho-ajax.js" type="text/javascript"></script>
-	<script src="js/utils.js" type="text/javascript"></script>
-	<script type="text/javascript">
+
+<script src="wcf/scroller.js" type="text/javascript"></script>
+<script src="js/ajaxslt0.7/xmltoken.js" type="text/javascript"></script>
+<script src="js/ajaxslt0.7/util.js" type="text/javascript"></script>
+<script src="js/ajaxslt0.7/dom.js" type="text/javascript"></script>
+<script src="js/ajaxslt0.7/xpath.js" type="text/javascript"></script>
+<script src="js/ajaxslt0.7/xslt.js" type="text/javascript"></script>
+
+<script src="js/pentaho-ajax.js" type="text/javascript"></script>
+<script src="js/utils.js" type="text/javascript"></script>
+<script type="text/javascript">
 		djConfig = { isDebug: false};
 	</script>
 
-	<script src="js/dojo.js" type="text/javascript"></script>
-	
-	<script type="text/javascript">
+<script src="js/dojo.js" type="text/javascript"></script>
+
+<script type="text/javascript">
 		dojo.registerModulePath("adhoc", "../adhoc/js");
 	</script>
-	
-	<script src="adhoc/js/common/ui/messages/Messages.js" type="text/javascript"></script>
-	
-	<script type="text/javascript">
+
+<script src="adhoc/js/common/ui/messages/Messages.js" type="text/javascript"></script>
+
+<script type="text/javascript">
 		Messages.addBundle("adhoc.ui.messages", "message_strings");
 	</script>
-	
-  <script src="adhoc/js/common/ui/MessageCtrl.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/server/WebServiceProxy.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/util/StringUtils.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/util/Status.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/util/XmlUtil.js" type="text/javascript"></script>
-	
-	<script src="adhoc/js/model/SolutionRepository.js" type="text/javascript"></script>
-	
-	<script src="adhoc/js/common/ui/UIUtil.js" type="text/javascript"></script>	
-	<script type="text/javascript">
+
+<script src="adhoc/js/common/ui/MessageCtrl.js" type="text/javascript"></script>
+<script src="adhoc/js/common/server/WebServiceProxy.js" type="text/javascript"></script>
+<script src="adhoc/js/common/util/StringUtils.js" type="text/javascript"></script>
+<script src="adhoc/js/common/util/Status.js" type="text/javascript"></script>
+<script src="adhoc/js/common/util/XmlUtil.js" type="text/javascript"></script>
+
+<script src="adhoc/js/model/SolutionRepository.js" type="text/javascript"></script>
+
+<script src="adhoc/js/common/ui/UIUtil.js" type="text/javascript"></script>
+<script type="text/javascript">
 		UIUtil.setImageFolderPath( "adhoc/images/" );
 	</script>
-	<script src="adhoc/js/common/ui/HTMLCtrl.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/ui/Logger.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/ui/BusyCtrl.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/ui/PickListCtrl.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/ui/ListCtrl.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/ui/ComboCtrl.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/ui/Dialog.js" type="text/javascript"></script>
-	 
-	<script src="adhoc/js/common/ui/ButtonCtrl.js" type="text/javascript"></script>
-	<script src="adhoc/js/common/ui/MessageCtrl.js" type="text/javascript"></script>
-	
-	<script src="adhoc/js/ui/RepositoryBrowser.js" type="text/javascript"></script>
-	<script src="js/pivot/PivotRepositoryBrowserController.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/HTMLCtrl.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/Logger.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/BusyCtrl.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/PickListCtrl.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/ListCtrl.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/ComboCtrl.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/Dialog.js" type="text/javascript"></script>
 
-	<script type="text/javascript">
+<script src="adhoc/js/common/ui/ButtonCtrl.js" type="text/javascript"></script>
+<script src="adhoc/js/common/ui/MessageCtrl.js" type="text/javascript"></script>
+
+<script src="adhoc/js/ui/RepositoryBrowser.js" type="text/javascript"></script>
+<script src="js/pivot/PivotRepositoryBrowserController.js" type="text/javascript"></script>
+
+<script type="text/javascript">
 		
 		var controller = null;
 		var newActionName = null;
@@ -751,7 +772,7 @@
 				var newActionPath = encodeURI( controller.getActionPath() );
 				var newActionTitle = encodeURI( controller.getActionTitle()!=null?controller.getActionTitle():controller.getActionName() );
 				document.location.href='<%= pageName %>?save-action=saveAs&save-path='+newSolution
-				+'/'+newActionPath+'&save-file='+newActionName+'&save-title='+newActionTitle;
+				+'/'+newActionPath+'&save-file='+newActionName+'&save-title='+newActionTitle + '&pivotId=<%=pivotId%>';
 			});
 			cursor_clear();
 			if (saveMessage != null && "" != saveMessage) {
@@ -783,7 +804,7 @@
 			var newActionPath = encodeURI( "<%= actionInfo.getPath() %>" );
 			var title = encodeURI( "<%= actionTitle %>" );
 			document.location.href='<%= pageName %>?save-action=saveAs&save-path='+newSolution
-			+'/'+newActionPath+'&save-file='+newActionName+'&save-title=' + title;
+			+'/'+newActionPath+'&save-file='+newActionName+'&save-title=' + title + '&pivotId=<%=pivotId%>';
 			cursor_clear();
 		}
 
@@ -795,12 +816,12 @@
 
 	</script>
 
-<!-- ****************************************************************************************** -->
-<!-- ****************************************************************************************** -->
-<!-- ****************************************************************************************** -->
+<%-- ****************************************************************************************** --%>
+<%-- ****************************************************************************************** --%>
+<%-- ****************************************************************************************** --%>
 
 
-	<script type="text/javascript">
+<script type="text/javascript">
 
 		
 		function doSubscribed() {
@@ -860,14 +881,13 @@
 		
 	</script>
 
-<!-- ****************************************************************************************** -->
-<!-- ****************************************************************************************** -->
-<!-- ****************************************************************************************** -->
+<%-- ****************************************************************************************** --%>
+<%-- ****************************************************************************************** --%>
+<%-- ****************************************************************************************** --%>
 
 </head>
 <body class="body_dialog01" dir="<%= LocaleHelper.getTextDirection() %>" onload="javascript:load();">
 <div class="dialog01_content">
-
 <%
 	if( subscribeResult != null ) {
 		out.println( subscribeResult );
@@ -880,274 +900,282 @@
 	<tr>
 		<td class="content_body">
 
-		<form action="<%= pageName %>" method="post"><c:if
-			test="${query01 == null}">
-			<%= Messages.getString("UI.USER_ANALYSIS_INVALID_PAGE") %>
-		</c:if> <c:if test="${query01 != null}">
+		<form action="<%= pageName %>" method="post">
+			<%-- this allows us to remember which pivot we're working with --%>
+			<input type="hidden" name="pivotId" value="<%=pivotId%>">
+			<% if (_olapModel == null) { %>
+				<%= Messages.getString("UI.USER_ANALYSIS_INVALID_PAGE") %> 
+			<% } else { %>
+			<%-- define table, navigator and forms --%> 
+			<wcf:scroller />
+			<jp:table id="<%=tableId%>" query="<%=queryId%>" />
+			<jp:navigator id="<%=naviId%>" query="<%=queryId%>" visible="false" /> 
+			<%
+			String wrappedQueryId = "#{" + queryId + "}";
+			String wrappedTableId = "#{" + tableId + "}";
+			String wrappedPrintId = "#{" + printId + "}";
+			%> 
+			<wcf:form id="<%=mdxEditId%>" xmlUri="/WEB-INF/jpivot/table/mdxedit.xml"
+				model="<%=wrappedQueryId%>" visible="false" />
+			<wcf:form id="<%=sortFormId%>" xmlUri="/WEB-INF/jpivot/table/sortform.xml"
+				model="<%=wrappedTableId%>" visible="false" />
 
-			<%-- define table, navigator and forms --%>
-			<wcf:scroller/> 
-			<jp:table id="table01" query="#{query01}" />
-			<jp:navigator id="navi01" query="#{query01}" visible="false" />
-			<wcf:form id="mdxedit01" xmlUri="/WEB-INF/jpivot/table/mdxedit.xml"
-				model="#{query01}" visible="false" />
-			<wcf:form id="sortform01" xmlUri="/WEB-INF/jpivot/table/sortform.xml"
-				model="#{table01}" visible="false" />
-
-			<jp:print id="print01" />
-			<wcf:form id="printform01"
+			<jp:print id="<%=printId%>" />
+			<wcf:form id="<%=printFormId%>"
 				xmlUri="/WEB-INF/jpivot/print/printpropertiesform.xml"
-				model="#{print01}" visible="false" />
+				model="<%=wrappedPrintId%>" visible="false" />
+			<jp:chart
+			id="<%=chartId%>" query="<%=wrappedQueryId%>" visible="false" /> <% 
+			
+	// we've reloaded the following session objects
+	_table =  (TableComponent) session.getAttribute(tableId);
+	_mdxEdit = (FormComponent)session.getAttribute(mdxEditId);
+	_chart = (ChartComponent) session.getAttribute( chartId );
 
-			<jp:chart id="chart01" query="#{query01}" visible="false" />
-			<% 
-	ChartComponent thischart = (ChartComponent) session.getAttribute( "chart01" );
 	if( chartChange ) {
-		thischart.setChartType( chartType );
-		thischart.setVisible( (chartLocation != null) && !chartLocation.equals( "none" ) );
+		_chart.setChartType( chartType );
+		_chart.setVisible( (chartLocation != null) && !chartLocation.equals( "none" ) );
 		if (chartWidth > 0) {
-			thischart.setChartWidth(chartWidth);
+			_chart.setChartWidth(chartWidth);
 		} else {
-			thischart.setChartWidth(500);		// 500 is the default that the ChartCompoent uses
+			_chart.setChartWidth(500);		// 500 is the default that the ChartCompoent uses
 		}
 		if (chartHeight > 0) {
-			thischart.setChartHeight(chartHeight);
+			_chart.setChartHeight(chartHeight);
 		} else {
-			thischart.setChartHeight(300);	// 300 is the default that the ChartComponent uses
+			_chart.setChartHeight(300);	// 300 is the default that the ChartComponent uses
 		}
-		thischart.setChartTitle(chartTitle);
-		thischart.setDrillThroughEnabled(chartDrillThroughEnabled);
-		thischart.setFontName(chartTitleFontFamily);
-		thischart.setFontStyle(chartTitleFontStyle);
-		thischart.setFontSize(chartTitleFontSize);
-		thischart.setHorizAxisLabel(chartHorizAxisLabel);
-		thischart.setVertAxisLabel(chartVertAxisLabel);
-		thischart.setAxisFontName(chartAxisLabelFontFamily);
-		thischart.setAxisFontStyle(chartAxisLabelFontStyle);
-		thischart.setAxisFontSize(chartAxisLabelFontSize);
-		thischart.setAxisTickFontName(chartAxisTickFontFamily);
-		thischart.setAxisTickFontStyle(chartAxisTickFontStyle);
-		thischart.setAxisTickFontSize(chartAxisTickFontSize);
-		thischart.setTickLabelRotate(chartAxisTickLabelRotation);
-		thischart.setShowLegend(chartShowLegend);
-		thischart.setLegendPosition(chartLegendLocation);
-		thischart.setLegendFontName(chartLegendFontFamily);
-		thischart.setLegendFontStyle(chartLegendFontStyle);
-		thischart.setLegendFontSize(chartLegendFontSize);
-    	thischart.setShowSlicer(chartShowSlicer);
-    	thischart.setSlicerPosition(chartSlicerLocation);
-    	thischart.setSlicerAlignment(chartSlicerAlignment);
-    	thischart.setSlicerFontName(chartSlicerFontFamily);
-    	thischart.setSlicerFontStyle(chartSlicerFontStyle);
-    	thischart.setSlicerFontSize(chartSlicerFontSize);
-    	thischart.setBgColorR(chartBackgroundR);
-    	thischart.setBgColorG(chartBackgroundG);
-    	thischart.setBgColorB(chartBackgroundB);   	
+		_chart.setChartTitle(chartTitle);
+		_chart.setDrillThroughEnabled(chartDrillThroughEnabled);
+		_chart.setFontName(chartTitleFontFamily);
+		_chart.setFontStyle(chartTitleFontStyle);
+		_chart.setFontSize(chartTitleFontSize);
+		_chart.setHorizAxisLabel(chartHorizAxisLabel);
+		_chart.setVertAxisLabel(chartVertAxisLabel);
+		_chart.setAxisFontName(chartAxisLabelFontFamily);
+		_chart.setAxisFontStyle(chartAxisLabelFontStyle);
+		_chart.setAxisFontSize(chartAxisLabelFontSize);
+		_chart.setAxisTickFontName(chartAxisTickFontFamily);
+		_chart.setAxisTickFontStyle(chartAxisTickFontStyle);
+		_chart.setAxisTickFontSize(chartAxisTickFontSize);
+		_chart.setTickLabelRotate(chartAxisTickLabelRotation);
+		_chart.setShowLegend(chartShowLegend);
+		_chart.setLegendPosition(chartLegendLocation);
+		_chart.setLegendFontName(chartLegendFontFamily);
+		_chart.setLegendFontStyle(chartLegendFontStyle);
+		_chart.setLegendFontSize(chartLegendFontSize);
+		_chart.setShowSlicer(chartShowSlicer);
+		_chart.setSlicerPosition(chartSlicerLocation);
+		_chart.setSlicerAlignment(chartSlicerAlignment);
+		_chart.setSlicerFontName(chartSlicerFontFamily);
+		_chart.setSlicerFontStyle(chartSlicerFontStyle);
+		_chart.setSlicerFontSize(chartSlicerFontSize);
+		_chart.setBgColorR(chartBackgroundR);
+		_chart.setBgColorG(chartBackgroundG);
+		_chart.setBgColorB(chartBackgroundB);   	
     }
-%>
-		 	<wcf:form id="chartform01"
-				xmlUri="/WEB-INF/jpivot/chart/chartpropertiesform.xml"
-				model="#{chart01}" visible="false" />
-			<wcf:table id="query01.drillthroughtable" visible="false"
-				selmode="none" editable="true" />
+	
+	String wrappedChartId = "#{" + chartId + "}";
+%> 
+		<wcf:form id="<%=chartFormId%>"
+			xmlUri="/WEB-INF/jpivot/chart/chartpropertiesform.xml"
+			model="<%=wrappedChartId%>" visible="false" />
+		<wcf:table
+			id="<%=drillThroughTableId%>" visible="false"
+			selmode="none" editable="true" />
+			
+<% 
+		// define a toolbar
+		
+		if( options != null ) {
+			session.removeAttribute( toolbarId ); //$NON-NLS-1$
+		}
+	  	String wrappedNaviVisible = "#{" + naviId + ".visible}";
+	  	String wrappedMdxEditVisible = "#{" + mdxEditId + ".visible}";
+	  	String wrappedSortFormVisible = "#{" + sortFormId + ".visible}";
+	  	String wrappedTableLevelStyle = "#{" + tableId + ".extensions.axisStyle.levelStyle}";
+	  	String wrappedTableHideSpans = "#{" + tableId + ".extensions.axisStyle.hideSpans}";
+	  	String wrappedTableShowProperties = "#{" + tableId + ".rowAxisBuilder.axisConfig.propertyConfig.showProperties}";
+	  	String wrappedTableNonEmptyButtonPressed = "#{" + tableId + ".extensions.nonEmpty.buttonPressed}";
+	  	String wrappedTableSwapAxesButtonPressed = "#{" + tableId + ".extensions.swapAxes.buttonPressed}";
+	  	String wrappedTableDrillMemberEnabled = "#{" + tableId + ".extensions.drillMember.enabled}";
+	  	String wrappedTableDrillPositionEnabled = "#{" + tableId + ".extensions.drillPosition.enabled}";
+	  	String wrappedTableDrillReplaceEnabled = "#{" + tableId + ".extensions.drillReplace.enabled}";
+	  	String wrappedTableDrillThroughEnabled = "#{" + tableId + ".extensions.drillThrough.enabled}";
+	  	String wrappedChartVisible = "#{" + chartId + ".visible}";
+	  	String wrappedChartFormVisible = "#{" + chartFormId + ".visible}";
+	  	String wrappedPrintFormVisible = "#{" + printFormId + ".visible}";
+			
+ %> <wcf:toolbar id="<%=toolbarId%>"
+			bundle="com.tonbeller.jpivot.toolbar.resources">
+			<% if( options == null ) {
 
-			<%-- define a toolbar --%>
-
-			<% if( options != null ) {
-	session.removeAttribute( "toolbar01" ); //$NON-NLS-1$
-   }
- %>
-			<wcf:toolbar id="toolbar01"
-				bundle="com.tonbeller.jpivot.toolbar.resources">
-				<% if( options == null ) { %>
-				<wcf:scriptbutton id="cubeNaviButton" tooltip="toolb.cube"
-					img="cube" model="#{navi01.visible}" />
-				<wcf:scriptbutton id="mdxEditButton" tooltip="toolb.mdx.edit"
-					img="mdx-edit" model="#{mdxedit01.visible}" />
-				<wcf:scriptbutton id="sortConfigButton" tooltip="toolb.table.config"
-					img="sort-asc" model="#{sortform01.visible}" />
-				<wcf:separator />
-				<wcf:scriptbutton id="levelStyle" tooltip="toolb.level.style"
-					img="level-style"
-					model="#{table01.extensions.axisStyle.levelStyle}" />
-				<wcf:scriptbutton id="hideSpans" tooltip="toolb.hide.spans"
-					img="hide-spans" model="#{table01.extensions.axisStyle.hideSpans}" />
-				<wcf:scriptbutton id="propertiesButton" tooltip="toolb.properties"
-					img="properties"
-					model="#{table01.rowAxisBuilder.axisConfig.propertyConfig.showProperties}" />
-				<wcf:scriptbutton id="nonEmpty" tooltip="toolb.non.empty"
-					img="non-empty"
-					model="#{table01.extensions.nonEmpty.buttonPressed}" />
-				<wcf:scriptbutton id="swapAxes" tooltip="toolb.swap.axes"
-					img="swap-axes"
-					model="#{table01.extensions.swapAxes.buttonPressed}" />
-				<wcf:separator />
-				<wcf:scriptbutton model="#{table01.extensions.drillMember.enabled}"
-					tooltip="toolb.navi.member" radioGroup="navi" id="drillMember"
-					img="navi-member" />
-				<wcf:scriptbutton
-					model="#{table01.extensions.drillPosition.enabled}"
-					tooltip="toolb.navi.position" radioGroup="navi" id="drillPosition"
-					img="navi-position" />
-				<wcf:scriptbutton model="#{table01.extensions.drillReplace.enabled}"
-					tooltip="toolb.navi.replace" radioGroup="navi" id="drillReplace"
-					img="navi-replace" />
-				<wcf:scriptbutton model="#{table01.extensions.drillThrough.enabled}"
-					tooltip="toolb.navi.drillthru" id="drillThrough01"
-					img="navi-through" />
-				<wcf:separator />
-				<wcf:scriptbutton id="chartButton01" tooltip="toolb.chart"
-					img="chart" model="#{chart01.visible}" />
-				<wcf:scriptbutton id="chartPropertiesButton01"
-					tooltip="toolb.chart.config" img="chart-config"
-					model="#{chartform01.visible}" />
-				<wcf:separator />
-				<wcf:scriptbutton id="printPropertiesButton01"
-					tooltip="toolb.print.config" img="print-config"
-					model="#{printform01.visible}" />
-				<wcf:imgbutton id="printpdf" tooltip="toolb.print" img="print"
-					href="./Print?cube=01&type=1" />
-				<wcf:imgbutton id="printxls" tooltip="toolb.excel" img="excel"
-					href="./Print?cube=01&type=0" />
-				<% } else {
-	Iterator iterator = options.iterator();
-	while( iterator.hasNext() ) {
-		String optionName = (String) iterator.next();
-		if( "cube-nav".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="cubeNaviButton" tooltip="toolb.cube"
-					img="cube" model="#{navi01.visible}" />
-				<%  } else
-		if( "mdx-edit".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="mdxEditButton" tooltip="toolb.mdx.edit"
-					img="mdx-edit" model="#{mdxedit01.visible}" />
-				<%  } else
-		if( "sort-conf".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="sortConfigButton" tooltip="toolb.table.config"
-					img="sort-asc" model="#{sortform01.visible}" />
-				<%  } else
-		if( "spacer".equals( optionName ) ) { %>
-				<wcf:separator />
-				<%  } else
-		if( "level-style".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="levelStyle" tooltip="toolb.level.style"
-					img="level-style"
-					model="#{table01.extensions.axisStyle.levelStyle}" />
-				<%  } else
-		if( "hide-spans".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="hideSpans" tooltip="toolb.hide.spans"
-					img="hide-spans" model="#{table01.extensions.axisStyle.hideSpans}" />
-				<%  } else
-		if( "properties".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="propertiesButton" tooltip="toolb.properties"
-					img="properties"
-					model="#{table01.rowAxisBuilder.axisConfig.propertyConfig.showProperties}" />
-				<%  } else
-		if( "non-empty".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="nonEmpty" tooltip="toolb.non.empty"
-					img="non-empty"
-					model="#{table01.extensions.nonEmpty.buttonPressed}" />
-				<%  } else
-		if( "swap-axes".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="swapAxes" tooltip="toolb.swap.axes"
-					img="swap-axes"
-					model="#{table01.extensions.swapAxes.buttonPressed}" />
-				<%  } else
-		if( "drill-member".equals( optionName ) ) { %>
-				<wcf:scriptbutton model="#{table01.extensions.drillMember.enabled}"
-					tooltip="toolb.navi.member" radioGroup="navi" id="drillMember"
-					img="navi-member" />
-				<%  } else
-		if( "drill-position".equals( optionName ) ) { %>
-				<wcf:scriptbutton
-					model="#{table01.extensions.drillPosition.enabled}"
-					tooltip="toolb.navi.position" radioGroup="navi" id="drillPosition"
-					img="navi-position" />
-				<%  } else
-		if( "drill-replace".equals( optionName ) ) { %>
-				<wcf:scriptbutton model="#{table01.extensions.drillReplace.enabled}"
-					tooltip="toolb.navi.replace" radioGroup="navi" id="drillReplace"
-					img="navi-replace" />
-				<%  } else
-		if( "drill-thru".equals( optionName ) ) { %>
-				<wcf:scriptbutton model="#{table01.extensions.drillThrough.enabled}"
-					tooltip="toolb.navi.drillthru" id="drillThrough01"
-					img="navi-through" />
-				<%  } else
-		if( "chart".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="chartButton01" tooltip="toolb.chart"
-					img="chart" model="#{chart01.visible}" />
-				<%  } else
-		if( "chart-conf".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="chartPropertiesButton01"
-					tooltip="toolb.chart.config" img="chart-config"
-					model="#{chartform01.visible}" />
-				<%  } else
+				%>
+			<wcf:scriptbutton id="cubeNaviButton" tooltip="toolb.cube" img="cube"
+				model="<%=wrappedNaviVisible%>" />
+			<wcf:scriptbutton id="mdxEditButton" tooltip="toolb.mdx.edit"
+				img="mdx-edit" model="<%=wrappedMdxEditVisible%>" />
+			<wcf:scriptbutton id="sortConfigButton" tooltip="toolb.table.config"
+				img="sort-asc" model="<%=wrappedSortFormVisible%>" />
+			<wcf:separator />
+			<wcf:scriptbutton id="levelStyle" tooltip="toolb.level.style"
+				img="level-style" model="<%=wrappedTableLevelStyle%>" />
+			<wcf:scriptbutton id="hideSpans" tooltip="toolb.hide.spans"
+				img="hide-spans" model="<%=wrappedTableHideSpans%>" />
+			<wcf:scriptbutton id="propertiesButton" tooltip="toolb.properties"
+				img="properties" model="<%=wrappedTableShowProperties%>" />
+			<wcf:scriptbutton id="nonEmpty" tooltip="toolb.non.empty"
+				img="non-empty" model="<%=wrappedTableNonEmptyButtonPressed%>" />
+			<wcf:scriptbutton id="swapAxes" tooltip="toolb.swap.axes"
+				img="swap-axes" model="<%=wrappedTableSwapAxesButtonPressed%>" />
+			<wcf:separator />
+			<wcf:scriptbutton model="<%=wrappedTableDrillMemberEnabled%>"
+				tooltip="toolb.navi.member" radioGroup="navi" id="drillMember"
+				img="navi-member" />
+			<wcf:scriptbutton model="<%=wrappedTableDrillPositionEnabled%>"
+				tooltip="toolb.navi.position" radioGroup="navi" id="drillPosition"
+				img="navi-position" />
+			<wcf:scriptbutton model="<%=wrappedTableDrillReplaceEnabled%>"
+				tooltip="toolb.navi.replace" radioGroup="navi" id="drillReplace"
+				img="navi-replace" />
+			<wcf:scriptbutton model="<%=wrappedTableDrillThroughEnabled%>"
+				tooltip="toolb.navi.drillthru" id="drillThrough01"
+				img="navi-through" />
+			<wcf:separator />
+			<wcf:scriptbutton id="chartButton01" tooltip="toolb.chart"
+				img="chart" model="<%=wrappedChartVisible%>" />
+			<wcf:scriptbutton id="chartPropertiesButton01"
+				tooltip="toolb.chart.config" img="chart-config"
+				model="<%=wrappedChartFormVisible%>" />
+			<wcf:separator />
+			<wcf:scriptbutton id="printPropertiesButton01"
+				tooltip="toolb.print.config" img="print-config"
+				model="<%=wrappedPrintFormVisible%>" />
+			<wcf:imgbutton id="printpdf" tooltip="toolb.print" img="print"
+				href="<%= \"./Print?cube=\" + pivotId + \"&type=1\" %>" />
+			<wcf:imgbutton id="printxls" tooltip="toolb.excel" img="excel"
+				href="<%= \"./Print?cube=\" + pivotId + \"&type=0\" %>" />
+			<% } else {
+		Iterator iterator = options.iterator();
+		while( iterator.hasNext() ) {
+			String optionName = (String) iterator.next();
+			if( "cube-nav".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="cubeNaviButton" tooltip="toolb.cube" img="cube"
+				model="<%=wrappedNaviVisible%>" />
+			<%  } else
+			if( "mdx-edit".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="mdxEditButton" tooltip="toolb.mdx.edit"
+				img="mdx-edit" model="<%=wrappedMdxEditVisible%>" />
+			<%  } else
+			if( "sort-conf".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="sortConfigButton" tooltip="toolb.table.config"
+				img="sort-asc" model="<%=wrappedSortFormVisible%>" />
+			<%  } else
+			if( "spacer".equals( optionName ) ) { %>
+			<wcf:separator />
+			<%  } else
+			if( "level-style".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="levelStyle" tooltip="toolb.level.style"
+				img="level-style" model="<%=wrappedTableLevelStyle%>" />
+			<%  } else
+			if( "hide-spans".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="hideSpans" tooltip="toolb.hide.spans"
+				img="hide-spans" model="<%=wrappedTableHideSpans%>" />
+			<%  } else
+			if( "properties".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="propertiesButton" tooltip="toolb.properties"
+				img="properties" model="<%=wrappedTableShowProperties%>" />
+			<%  } else
+			if( "non-empty".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="nonEmpty" tooltip="toolb.non.empty"
+				img="non-empty" model="<%=wrappedTableNonEmptyButtonPressed%>" />
+			<%  } else
+			if( "swap-axes".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="swapAxes" tooltip="toolb.swap.axes"
+				img="swap-axes" model="<%=wrappedTableSwapAxesButtonPressed%>" />
+			<%  } else
+			if( "drill-member".equals( optionName ) ) { %>
+			<wcf:scriptbutton model="<%=wrappedTableDrillMemberEnabled%>"
+				tooltip="toolb.navi.member" radioGroup="navi" id="drillMember"
+				img="navi-member" />
+			<%  } else
+			if( "drill-position".equals( optionName ) ) { %>
+			<wcf:scriptbutton model="<%=wrappedTableDrillPositionEnabled%>"
+				tooltip="toolb.navi.position" radioGroup="navi" id="drillPosition"
+				img="navi-position" />
+			<%  } else
+			if( "drill-replace".equals( optionName ) ) { %>
+			<wcf:scriptbutton model="<%=wrappedTableDrillReplaceEnabled%>"
+				tooltip="toolb.navi.replace" radioGroup="navi" id="drillReplace"
+				img="navi-replace" />
+			<%  } else
+			if( "drill-thru".equals( optionName ) ) { %>
+			<wcf:scriptbutton model="<%=wrappedTableDrillThroughEnabled%>"
+				tooltip="toolb.navi.drillthru" id="drillThrough01"
+				img="navi-through" />
+			<%  } else
+			if( "chart".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="chartButton01" tooltip="toolb.chart"
+				img="chart" model="<%=wrappedChartVisible%>" />
+			<%  } else
+			if( "chart-conf".equals( optionName ) ) { %>
+			<wcf:scriptbutton id="chartPropertiesButton01"
+				tooltip="toolb.chart.config" img="chart-config"
+				model="<%=wrappedChartFormVisible%>" />
+			<%  } else
 		if( "print-conf".equals( optionName ) ) { %>
-				<wcf:scriptbutton id="printPropertiesButton01"
-					tooltip="toolb.print.config" img="print-config"
-					model="#{printform01.visible}" />
-				<%  } else
+			<wcf:scriptbutton id="printPropertiesButton01"
+				tooltip="toolb.print.config" img="print-config"
+				model="<%=wrappedPrintFormVisible%>" />
+			<%  } else
 		if( "print-pdf".equals( optionName ) ) { %>
-				<wcf:imgbutton id="printpdf" tooltip="toolb.print" img="print"
-					href="./Print?cube=01&type=1" />
-				<%  } else
+			<wcf:imgbutton id="printpdf" tooltip="toolb.print" img="print"
+				href="<%= \"./Print?cube=\" + pivotId + \"&type=1\" %>" />
+			<%  } else
 		if( "excel".equals( optionName ) ) { %>
-				<wcf:imgbutton id="printxls" tooltip="toolb.excel" img="excel"
-					href="./Print?cube=01&type=0" />
-				<%  } 
+			<wcf:imgbutton id="printxls" tooltip="toolb.excel" img="excel"
+				href="<%= \"./Print?cube=\" + pivotId + \"&type=0\" %>" />
+			<%  } 
 
 	}
    } 
 %>
-			</wcf:toolbar>
+		</wcf:toolbar> 
+		<%-- ****************************************************************************************** --%>
+		<%-- ******************                   SAVE BUTTONS               ************************** --%>
+		<%-- ****************************************************************************************** --%>
 
-<!-- ****************************************************************************************** -->
-<!-- ******************                   SAVE BUTTONS               ************************** -->
-<!-- ****************************************************************************************** -->
+		<div id="folder-options" style="display: block">
+		<table cellpadding="0" cellspacing="0">
+			<tr>
+				<% if( authenticated ) { %>
+				<td><span id="folder-down" style="display: block"> <img
+					src="./jpivot/toolbar/jpivot_save.png" onclick="javascript:save();"
+					alt="Save" title="Save" /> </span></td>
+				<td><span id="folder-up" style="display: block"> <img
+					src="./jpivot/toolbar/jpivot_saveas.png"
+					onclick="javascript:saveAs();" alt="Save As" title="Save As" /> </span></td>
+				<% } %>
 
-		<div id="folder-options" style="display:block">
-			<table cellpadding="0" cellspacing="0">
-				<tr>
-					<% if( authenticated ) { %>
-					<td>
-						<span id="folder-down" style="display:block">
-						<img
-							src="./jpivot/toolbar/jpivot_save.png"
-							onclick="javascript:save();"
-							alt="Save" title="Save"/>
-						</span>			
-					</td>
-					<td>
-						<span id="folder-up" style="display:block">
-						<img 
-							src="./jpivot/toolbar/jpivot_saveas.png"
-							onclick="javascript:saveAs();"
-							alt="Save As" title="Save As"/>
-						</span>
-					</td>					
-					<% } %>
-
-<!-- ****************************************************************************************** -->
-<!-- ****************************************************************************************** -->
-<!-- ****************************************************************************************** -->
+				<%-- ****************************************************************************************** --%>
+				<%-- ****************************************************************************************** --%>
+				<%-- ****************************************************************************************** --%>
 
 
-					<td>
-						<%-- render toolbar --%> 
-						<wcf:render ref="toolbar01"	xslUri="/WEB-INF/jpivot/toolbar/htoolbar.xsl" xslCache="true" />
-					</td>
-				</tr>
-			</table>
+				<td><%-- render toolbar --%> <wcf:render ref="<%=toolbarId%>"
+					xslUri="/WEB-INF/jpivot/toolbar/htoolbar.xsl" xslCache="true" /></td>
+			</tr>
+		</table>
 		</div>
 
 
- <!-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -->
+		<%-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --%>
 
-<div id="browser.modalDiv" class='browser'>
-	<!-- ======================================================
+		<div id="browser.modalDiv" class='browser'>
+    <%-- ======================================================
 		 ==  SAVEAS DIALOG                                   ==
-		 ====================================================== -->
-	<div id="browser.saveasDialog" style="display:none; position:absolute; top:100px; left:200px; height:25px;">
+		 ====================================================== --%>
+		<div id="browser.saveasDialog" style="display: none; position: absolute; top: 100px; left: 200px; height: 25px;">
 		<table border="0" cellspacing="0" cellpadding="0" class="popupDialog_table">
 			<tr>
 				<td class="popupDialog_header">
@@ -1156,58 +1184,54 @@
 			</tr>
 			<tr>
 				<td valign="top" style="padding: 15px;">
-					<table style="width:40em;height:100%;" border="0" cellspacing="2px" cellpadding="2px">
-						<tr>
-							<td id="saveDlgSaveAsPrompt" style='width:25%'>Save As:</td>
-							<td style='width:75%'><input type="text" id="browser.saveAsNameInputText" tabindex='0' name="textfield" class="browserSaveAsText"/></td>
-						</tr>
-						<tr>
-							<td id="saveDlgWherePrompt">Where:</td>
-							<td>
-								<table style='width:100%;' border="0" cellspacing="0" cellpadding="0">
-									<tr>
-										<td style="width:100%;padding-right:5px;" id="browser.comboContainer"></td>
-										<td><img id='browser.upImg' src="adhoc/images/up.png" alt="up"/></td>
-									</tr>
-								</table>
-							</td>
-						</tr>
-						<tr>
-							<td id="saveDlgSelectSltnTitle" colspan='2'>Select a Solution</td>
-						</tr>
-						<tr>
-							<td id="browser.solutionFolderListTd" height="100%" colspan='2'>
-							</td>
-						</tr>
-					</table>
+				<table style="width: 40em; height: 100%;" border="0" cellspacing="2px" cellpadding="2px">
+					<tr>
+						<td id="saveDlgSaveAsPrompt" style='width: 25%'>Save As:</td>
+						<td style='width: 75%'><input type="text" id="browser.saveAsNameInputText" tabindex='0' name="textfield" class="browserSaveAsText" /></td>
+					</tr>
+					<tr>
+						<td id="saveDlgWherePrompt">Where:</td>
+						<td>
+						<table style='width: 100%;' border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td style="width: 100%; padding-right: 5px;" id="browser.comboContainer"></td>
+								<td><img id='browser.upImg' src="adhoc/images/up.png" alt="up" /></td>
+							</tr>
+						</table>
+						</td>
+					</tr>
+					<tr>
+						<td id="saveDlgSelectSltnTitle" colspan='2'>Select a Solution</td>
+					</tr>
+					<tr>
+						<td id="browser.solutionFolderListTd" height="100%" colspan='2'>
+						</td>
+					</tr>
+				</table>
 				</td>
 			</tr>
 			<tr>
 				<td style="border-top: 1px solid #818f49; background-color: #ffffff;">
-					<table border="0" cellpadding="0" cellspacing="0" align="right">
-						<tr>
-							<td id="browser.saveBtnContainer" width="75">
-							</td>
-							<td id="browser.cancelBtnContainer" width="85">
-							</td>
-						</tr>
-					</table>
+				<table border="0" cellpadding="0" cellspacing="0" align="right">
+					<tr>
+						<td id="browser.saveBtnContainer" width="75"></td>
+						<td id="browser.cancelBtnContainer" width="85"></td>
+					</tr>
+				</table>
 				</td>
 			</tr>
 		</table>
-	</div>
-	<!-- ======================================================
+		</div>
+	<%-- ======================================================
 		 ==  END SAVEAS DIALOG                               ==
-		 ====================================================== -->
- </div>
- <!-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -->
+		 ====================================================== --%>
+</div>
+		<%-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --%>
 
-			
-    <script type="text/javascript">
+
+		<script type="text/javascript">
       var saveMessage = '<%= saveMessage %>';
-    </script>
-    
-	<% 
+    </script> <% 
 	
 	switch (saveResult) {
 		case ISolutionRepository.FILE_ADD_SUCCESSFUL: 
@@ -1220,17 +1244,13 @@
 				String fileName = info.getActionName();
 				fileName = fileName.endsWith(AnalysisSaver.SUFFIX) ? fileName : fileName+AnalysisSaver.SUFFIX;
 
-	%> 
-		   
-				<script type="text/javascript">
+	%> <script type="text/javascript">
 					var path = encodeURI( "<%= info.getPath() %>" );
 					var fileName = encodeURI( "<%= fileName %>" );
 					var solutionName = encodeURI( "<%= info.getSolutionName() %>" );
 					var uri = "ViewAction?solution=" + solutionName + "&path=" + path + "&action=" + fileName;
 					document.location.href = uri;
-				</script>
-
-	<%
+				</script> <%
 			}
 			break;
 		case ISolutionRepository.FILE_EXISTS:
@@ -1243,116 +1263,106 @@
 		  break;
 		case 0:
 		  saveMessage="";
-		  session.setAttribute( "save-message-"+pivotId, saveMessage); //$NON-NLS-1$
+		  session.setAttribute( "save-message-01", saveMessage); //$NON-NLS-1$
 		  break;
 	}	
     %>
 
-	    
-			<div id="internal_content"><%-- if there was an overflow, show error message --%> 
-			<%-- note, if internal error is caused by query01.getResult(),
-			     no usable log messages make it to the user or the log system
-			     
-			  --%>
-			  <%
-			Object _testQuery01 = session.getAttribute("query01");
-			if (_testQuery01 != null) {
-			  OlapModel _testQuery01OlapModel = (OlapModel)_testQuery01;
-			  try {
-    			  _testQuery01OlapModel.getResult();
-    			  
-    			%><c:if
-    				test="${query01.result.overflowOccured}">
-    				<p><strong style="color:red">Resultset overflow occured</strong>
-    				<p>
-    			</c:if><%
-    			  
+
+		<div id="internal_content">
+			<%
+			// if there was an overflow, show error message
+			// note, if internal error is caused by query.getResult(),
+			// no usable log messages make it to the user or the log system
+
+			if (_olapModel != null) {
+				try {
+					_olapModel.getResult();
+					if (_olapModel.getResult().isOverflowOccured()) {
+    				%><p><strong style="color: red">Resultset overflow occured</strong></p><%
+					}
 			  } catch (Throwable t) {
 			    	t.printStackTrace();
-			    %><p><strong style="color:red">Error Occurred While getting Resultset</strong></p><%
+			    %><p><strong style="color: red">Error Occurred While getting Resultset</strong></p><%
 			  }
 			}	
-			%><%-- render navigator --%> 
-			
-			<div id="navi01div">
-			<wcf:render ref="navi01"
-				xslUri="/WEB-INF/jpivot/navi/navigator.xsl" xslCache="true" /> 
-			</div>
-			
-			
-				<%-- edit mdx --%>
-			<c:if test="${mdxedit01.visible}">
-				<h3>MDX Query Editor</h3>
-				<wcf:render ref="mdxedit01" xslUri="/WEB-INF/wcf/wcf.xsl"
-					xslCache="true" />
-			</c:if> <%-- sort properties --%> <wcf:render ref="sortform01"
-				xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" /> <%-- chart properties --%>
-			<wcf:render ref="chartform01" xslUri="/WEB-INF/wcf/wcf.xsl"
-				xslCache="true" /> <%-- print properties --%> <wcf:render
-				ref="printform01" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" />
+			%>
+		<%-- render navigator --%>
+		<div id="<%=naviId%>div"><wcf:render ref="<%=naviId%>"
+			xslUri="/WEB-INF/jpivot/navi/navigator.xsl" xslCache="true" /></div>
 
-			<table border="0">
-				<tr>
-					<td></td>
-					<td>
-					<% 
+<%	if (_mdxEdit.isVisible()) { %>
+		<h3>MDX Query Editor</h3>
+		<%-- edit mdx --%>
+		<wcf:render ref="<%=mdxEditId%>" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" /> <% } %> 
+		<%-- sort properties --%>
+		<wcf:render ref="<%=sortFormId%>" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" /> 
+		<%-- chart properties --%> 
+		<wcf:render ref="<%=chartFormId%>" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" /> 
+		<%-- print properties --%>
+		<wcf:render ref="<%=printFormId%>" xslUri="/WEB-INF/wcf/wcf.xsl" xslCache="true" />
+
+		<table border="0">
+			<tr>
+				<td></td>
+				<td>
+				<% 
 						boolean chartRendered = false;
-					    if("top".equals(chartLocation) ) { %> <wcf:render ref="chart01"
-							xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true" /> <% 
+					    if("top".equals(chartLocation) ) { %> <wcf:render ref="<%=chartId%>"
+					    	xslUri="/WEB-INF/jpivot/chart/chart.xsl"
+					xslCache="true" /> <% 
 							chartRendered = true;
 						} 
 					%>
-					</td>
-					<td></td>
-				</tr>
-				<tr>
-					<td valign="top">
-					<% if("left".equals(chartLocation) && !chartRendered) { %> <wcf:render ref="chart01"
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td valign="top">
+				<% if("left".equals(chartLocation) && !chartRendered) { %> <wcf:render ref="<%=chartId%>"
 						xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true" /> <% 
 						chartRendered = true;
 					} %>
-					</td>
-					<td valign="top"><!-- render the table --> <% if (showGrid) { %>
-					<p><wcf:render ref="table01"
-						xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" /> <% } %>
-					
-					<p><font size="2"> Slicer: <wcf:render ref="table01"
-						xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true" /> </font>
-					<p><!-- drill through table --> <wcf:render
-						ref="query01.drillthroughtable" xslUri="/WEB-INF/wcf/wcf.xsl"
-						xslCache="true" />
-					</td>
-					<td valign="top">
-					<% if("right".equals(chartLocation) && !chartRendered) { %> <wcf:render ref="chart01"
-						xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true" /> <% 
-						chartRendered = true;
-					} %>
-					</td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-					<% 
-					ChartComponent chart = (ChartComponent) session.getAttribute( "chart01" );
-					if(("bottom".equals(chartLocation) || chart.isVisible()) && !chartRendered) { %> <wcf:render ref="chart01"
-						xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true" /> <% 
-						chartRendered = true;
-					} %>
-					</td>
-					<td></td>
-				</tr>
-				<table>
-					</c:if>
-
-				</table>
+				</td>
+				<td valign="top"><!-- render the table --> <% if (showGrid) { %>
+				<p><wcf:render ref="<%=tableId%>"
+					xslUri="/WEB-INF/jpivot/table/mdxtable.xsl" xslCache="true" /> <% } %>
 				
-				
+				<p><font size="2"> Slicer: <wcf:render ref="<%=tableId%>"
+					xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true" /> </font>
+				<p><!-- drill through table --> <wcf:render
+					ref="<%=drillThroughTableId%>" xslUri="/WEB-INF/wcf/wcf.xsl"
+					xslCache="true" />
+				</td>
+				<td valign="top">
+				<% if("right".equals(chartLocation) && !chartRendered) { %> <wcf:render
+					ref="<%=chartId%>" xslUri="/WEB-INF/jpivot/chart/chart.xsl"
+					xslCache="true" /> <% 
+						chartRendered = true;
+					} %>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+				<% 
+				if(("bottom".equals(chartLocation) || _chart.isVisible()) && !chartRendered) { %>
+				<wcf:render ref="<%=chartId%>"
+					xslUri="/WEB-INF/jpivot/chart/chart.xsl" xslCache="true" /> <% 
+						chartRendered = true;
+				} %>
+				</td>
+				<td></td>
+			</tr>
+			<table>
+				<% } %>
+			</table>
 </body>
 
 </html>
 <% 
    } catch (Throwable t ) {
-     %> An error occurred while rendering Pivot.jsp.  Please see the log for details. <%
+     %> An error occurred while rendering Pivot.jsp. Please see the log for details. <%
 	// TODO log an error
 	t.printStackTrace();
    } finally {

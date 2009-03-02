@@ -156,7 +156,7 @@ if(GB_CURRENT){
 GB_CURRENT.setOverlayDimension();
 }
 };
-AJS.preloadImages(GB_ROOT_DIR+"../../images/busy.gif");
+AJS.preloadImages(GB_ROOT_DIR+"../../resources/style/images/busy.gif");
 script_loaded=true;
 var GB_SETS={};
 function decoGreyboxLinks(){
