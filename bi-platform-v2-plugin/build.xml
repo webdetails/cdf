@@ -129,11 +129,11 @@
 	    </copy>
 	  	
 	  	<!-- Copy pentaho-style files to dist -->
-	    <copy todir="${stage.dir}/${plugin.name}/resources/style">
+	    <!--copy todir="${stage.dir}/${plugin.name}/resources/style">
 	      <fileset dir="../patches/target-dist/server/webapps/pentaho-style">
 	        <include name="**/*" />
 	      </fileset>
-	    </copy>
+	    </copy-->
 		
 		<!-- Copy pentaho-cdf image files to dist -->
 		<copy todir="${stage.dir}/${plugin.name}/resources/style/images">
