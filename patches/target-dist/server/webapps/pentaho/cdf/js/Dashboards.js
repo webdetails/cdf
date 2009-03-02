@@ -42,8 +42,7 @@ var Dashboards =
 		parameters: [], // only used if globalContext = false
 		args: [],
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-	    pentahoRoot : '',
-	    displayWaitBox: true // this will display the wait box and a translucent glass pane. If set to false it will not display wait box and transparent glass pane 
+	    pentahoRoot : ''
 	}
 
 Dashboards.setGlobalContext = function(globalContext) {
@@ -104,30 +103,12 @@ Dashboards.bindControl = function(object) {
 }
 
 Dashboards.blockUIwithDrag = function() {
-	if (!Dashboards.displayWaitBox) {
-		$.blockUI.defaults.message = '';
-		$.blockUI.defaults.css.left = '0%';
-		$.blockUI.defaults.css.top = '0%';
-		$.blockUI.defaults.css.marginLeft = '85px';
-		$.blockUI.defaults.css.width = '100%';
-		$.blockUI.defaults.css.height = '100%';
-		$.blockUI.defaults.css.opacity = '1';
-		$.blockUI.defaults.css.backgroundColor = '#ffffcc';
-		$.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
-		$.blockUI.defaults.css['-moz-border-radius'] = '10px';
-
-		$.blockUI.defaults.overlayCSS.backgroundColor = 'transparent';
-		$.blockUI.defaults.overlayCSS.opacity = '0.6';
-		$.blockUI.defaults.overlayCSS.cursor = 'wait';
-		$.blockUI();
-	} else {
-		$.blockUI();
-		var handle = $('<div id="blockUIDragHandle" style="cursor: pointer; width: 170px; -webkit-border-radius: 5px; -moz-border-radius: 5px; background-color: rgba(0,0,0,0.25);" align="right"><a style="padding-right: 5px; text-decoration: none; color: black; font-weight: bold; font-color: black; font-size: 8pt" href="javascript:$.unblockUI()" title="Click to unblock">X</a></div>')
-		$("div.blockUI.blockMsg").prepend(handle);
-		$("div.blockUI.blockMsg").draggable({
-				handle: "#blockUIDragHandle"
-			});
-	}
+	$.blockUI();
+	var handle = $('<div id="blockUIDragHandle" style="cursor: pointer; width: 170px; -webkit-border-radius: 5px; -moz-border-radius: 5px; background-color: rgba(0,0,0,0.25);" align="right"><a style="padding-right: 5px; text-decoration: none; color: black; font-weight: bold; font-color: black; font-size: 8pt" href="javascript:$.unblockUI()" title="Click to unblock">X</a></div>')
+	$("div.blockUI.blockMsg").prepend(handle);
+	$("div.blockUI.blockMsg").draggable({
+			handle: "#blockUIDragHandle"
+		});
 }
 
 //Dashboards.xactionCallback = function(object,str){
