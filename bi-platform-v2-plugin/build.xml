@@ -96,7 +96,7 @@
 	      </fileset>
 	    </copy>
 	    
-	  	<copy todir="../patches/target-dist/server/webapps/pentaho/lib">
+	  	<copy todir="../patches/target-dist/server/webapps/pentaho/WEB-INF/lib">
 	      <fileset dir="${lib.dir}">
 	        <include name="json-${dependency.json.revision}.jar" />
 	      </fileset>
