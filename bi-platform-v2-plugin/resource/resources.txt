@@ -51,7 +51,7 @@ dateRangeInputLink=\
 /pentaho/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
 
 tableComponentScript=\
-/pentaho/content/pentaho-cdf/resources/style/jquery.jTable.css,\
+/pentaho/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 /pentaho/content/pentaho-cdf/js/jquery.sparkline.js
 
 tableComponentLink=\
