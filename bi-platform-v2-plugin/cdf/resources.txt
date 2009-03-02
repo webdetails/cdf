@@ -1,5 +1,5 @@
 commonLibrariesScript=\
-/pentaho-style/pentaho.js,\
+/pentaho/content/pentaho-cdf/resources/style/pentaho.js,\
 /pentaho/js/pentaho-ajax.js,\
 /pentaho/js/options.js,\
 /pentaho/content/pentaho-cdf/js/jquery.js,\
@@ -56,7 +56,7 @@ tableComponentScript=\
 /pentaho/content/pentaho-cdf/js/jquery.sparkline.js
 
 tableComponentLink=\
-/pentaho-style/jquery.jTable.css,\
+/pentaho/content/pentaho-cdf/resources/style/jquery.jTable.css,\
 /pentaho/content/pentaho-cdf/js/dataTables/css/demos.css
 
 timePlotComponentScript=\

@@ -120,20 +120,6 @@
 	        <include name="**/*" />
 	      </fileset>
 	    </copy>
-	  	
-	  	<!-- Copy custom html files to dist -->
-	    <copy todir="${stage.dir}/${plugin.name}">
-	      <fileset dir="../patches/project-cdf/solution/system/custom">
-	        <include name="**/*" />
-	      </fileset>
-	    </copy>
-	  	
-	  	<!-- Copy pentaho-style files to dist -->
-	    <!--copy todir="${stage.dir}/${plugin.name}/resources/style">
-	      <fileset dir="../patches/target-dist/server/webapps/pentaho-style">
-	        <include name="**/*" />
-	      </fileset>
-	    </copy-->
 		
 		<!-- Copy pentaho-cdf image files to dist -->
 		<copy todir="${stage.dir}/${plugin.name}/resources/style/images">
