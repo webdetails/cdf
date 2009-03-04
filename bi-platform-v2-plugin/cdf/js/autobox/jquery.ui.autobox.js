@@ -334,10 +334,11 @@
 				if(this.applyButton.is(":hidden")){
 					this.applyButton.css("left",this.applyButton.parent().width());
 					this.applyButton.fadeIn('normal');
-					this.applyButton.buttonApplyMessage.css("left",this.applyButton.offset().left+5);
-					this.applyButton.buttonApplyMessage.css("top",this.applyButton.offset().top+20);					
-					this.applyButton.buttonApplyMessage.fadeIn('normal', function(){
-						$("#applybuttontooltip").fadeOut(4000)});
+					var tooltip = this.applyButton.buttonApplyMessage;
+					tooltip.css("left",this.applyButton.offset().left+5);
+					tooltip.css("top",this.applyButton.offset().top+20);
+					tooltip.fadeIn('normal', function(){
+						tooltip.fadeOut(4000)});
 				}
 				
 				//this.applyButton.buttonApplyMessage.fadeOut(4000);
@@ -499,7 +500,7 @@
 	   button.attr("title","Click it to Apply");
 	   button.hide(0);
 	   
-	   var buttonApplyMessage =$('<div id="applybuttontooltip" class="applybutton" >' + opt.tooltipMessage + '</div>');
+	   var buttonApplyMessage =$('<div class="applybutton" >' + opt.tooltipMessage + '</div>');
 	   buttonApplyMessage.hide(0);
 	   
 	   button.buttonApplyMessage = buttonApplyMessage;

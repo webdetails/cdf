@@ -791,7 +791,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
 				minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
 				scrollHeight: myself.scrollHeight,
-				applyButton: myself.showApplyButton == undefined ? false : myself.showApplyButton,
+				applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
 				tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
 				parent: myself
 			};
