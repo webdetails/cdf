@@ -32,13 +32,10 @@ commonLibrariesLink=\
 /pentaho/content/pentaho-cdf/js/jquery.jdMenu.css,\
 /pentaho/content/pentaho-cdf/js/jquery.jdMenu.slate.css,\
 /pentaho/content/pentaho-cdf/js/jquery-impromptu.css,\
-/pentaho/content/pentaho-cdf/js/jquery.ui.themeroller.css,\
+/pentaho/content/pentaho-cdf/js/theme/ui.all.css,\
 /pentaho/content/pentaho-cdf/js/greybox/gb_styles.css,\
 /pentaho/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
-/pentaho/content/pentaho-cdf/js/cdf.css,\
-/pentaho/content/pentaho-cdf/js/daterangepicker/ui.core.css,\
-/pentaho/content/pentaho-cdf/js/daterangepicker/ui.theme.css,\
-/pentaho/content/pentaho-cdf/js/daterangepicker/ui.datepicker.css,\
+/pentaho/content/pentaho-cdf/js/cdf.css
 
 mapScript=\
 js/OpenMap/open_map.js,js/jsr_class.js,\

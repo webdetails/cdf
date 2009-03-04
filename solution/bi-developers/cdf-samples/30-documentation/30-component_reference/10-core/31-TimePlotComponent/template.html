@@ -14,6 +14,11 @@
 		from a mdx or sql query. In case of mdx queries, a role will be passed to mondrian if the session variable 'role' is
 		defined, allowing row level security.
 
+		Kettle transformations need to use db repository.
+
+		</p>
+		<p>
+
 		<b>Note:</b> Due to security restrictions, sql execution is disabled by default. If you want to enable sql copy the file 
 		"cdf/components/timelinefeeder.xaction.sql" to "cdf/components/timelinefeeder.xaction" in the solutions directory.
 
@@ -75,6 +80,19 @@
 
 			<dt>catalog</dt> 
 			<dd>Mondrian schema to use when queryType is mdx</dd>
+
+			<dt>transformation</dt> 
+			<dd>Kettle transformation to use</dd>
+
+			<dt>directory</dt> 
+			<dd>Kettle db repository directory</dd>
+
+			<dt>importStep</dt> 
+			<dd>Kettle transformation's import step</dd>
+
+			<dt>parameterN</dt> 
+			<dd>with N being 0 to 10 (eg: parameter0), this are the parameters passed 
+			to the kettle transformation</dd>
 
 			<dt>width</dt> 
 			<dd>Width of the chart. Default: 200</dd>

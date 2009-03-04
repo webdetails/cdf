@@ -10,13 +10,23 @@
 
 		<h3>Description</h3>
 		<p>
-		This is a component that can easily generate a chart whithout needing a xaction file. The resultset is returned
-		from a mdx or sql query. In case of mdx queries, a role will be passed to mondrian if the session variable 'role' is
-		defined, allowing row level security.
 
-		<b>Note:</b> Due to security restrictions, sql execution is disabled by default. If you want to enable sql copy the file 
-		"cdf/components/jfreechart.xaction.sql" to "cdf/components/jfreechart.xaction" in the solutions directory.
-		All parameters can optionally be functions.
+		This is a component that can easily generate a chart whithout needing a
+		xaction file. The resultset is returned from a mdx or sql query or a
+		kettle transformation. In case of mdx queries, a role will be passed to
+		mondrian if the session variable 'role' is defined, allowing row level
+		security.
+
+		Kettle transformations need to use db repository.
+
+		</p>
+		<p>
+
+		<b>Note:</b> Due to security restrictions, sql execution is disabled by
+		default. If you want to enable sql copy the file
+		"cdf/components/jfreechart.xaction.sql" to
+		"cdf/components/jfreechart.xaction" in the solutions directory.  All
+		parameters can optionally be functions.
 
 		</p>
 
@@ -59,19 +69,32 @@
 		<dl class="documentation">
 
 			<dt>queryType</dt>
-			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+			<dd>Type of query to read results from. Can be sql, mdx or kettle. Default: mdx</dd>
 
 			<dt>jndi</dt> 
 			<dd>Connection to use for the query</dd>
 
 			<dt>query</dt> 
-			<dd>sql or mdx Query to execute</dd>
+			<dd>sql, or mdx Query to execute</dd>
 
 			<dt>cube</dt> 
 			<dd>Cube name to use when queryType is mdx</dd>
 
 			<dt>catalog</dt> 
 			<dd>Mondrian schema to use when queryType is mdx</dd>
+
+			<dt>transformation</dt> 
+			<dd>Kettle transformation to use</dd>
+
+			<dt>directory</dt> 
+			<dd>Kettle db repository directory</dd>
+
+			<dt>importStep</dt> 
+			<dd>Kettle transformation's import step</dd>
+
+			<dt>parameterN</dt> 
+			<dd>with N being 0 to 10 (eg: parameter0), this are the parameters passed 
+			to the kettle transformation</dd>
 
 			<dt>width</dt> 
 			<dd>Width of the chart. Default: 200</dd>
