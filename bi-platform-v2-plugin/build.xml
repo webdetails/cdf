@@ -74,7 +74,7 @@
 		    
 		    Creates a distribution of this project's plugin zip
 		    ====================================================================-->
-	   <target name="dist-plugin" description="Creates a distribution">
+	   <target name="dist-plugin" depends="jar" description="Creates a distribution">
 	   
 	  	<!-- delete and re-create the plugin dist folder tree -->
 	    <mkdir dir="${stage.dir}" />
@@ -88,11 +88,6 @@
 	      </fileset>
 	    </copy>
 	    
-	  	<copy todir="../patches/target-dist/server/webapps/pentaho/WEB-INF/lib" overwrite="true">
-	      <fileset dir="${lib.dir}">
-	        <include name="json-${dependency.json.revision}.jar" />
-	      </fileset>
-	    </copy>
 	  	<!-- Copy the plugin.xml and any other files from the resource dir -->
 	    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
 	      <fileset dir="${resource.dir}">
@@ -113,13 +108,6 @@
 	      </fileset>
 	    </copy>
 		
-		<!-- Copy pentaho-cdf image files to dist -->
-		<copy todir="${stage.dir}/${plugin.name}/resources/style/images" overwrite="true">
-	      <fileset dir="cdf/images">
-	        <include name="**/*" />
-	      </fileset>
-	    </copy>
-	  	
 	  	<!-- create a zip file -->
 	    <zip zipfile="${dist.dir}/${plugin.zipfile}"
 	         basedir="${stage.dir}"
