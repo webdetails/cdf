@@ -60,8 +60,8 @@
 	            value="${bin.dir}/stage-solution"
 	            description="Name of the resource directory" />
 	
-	  <target name="dist" depends="resolve,jar,dist-standalone"/>
-	  <target name="dist-compile" depends="jar,dist-standalone"/>
+	  <target name="dist" depends="resolve,jar,dist-plugin,dist-solution,dist-samples"/>
+	  <target name="dist-compile" depends="jar,dist-plugin"/>
   
       <property name="plugin.artifact.id" value="${plugin.name}"/>
       <property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
@@ -72,57 +72,49 @@
 	  <!--=======================================================================
 		    dist
 		    
-		    Creates a distribution of this project dist-samples
+		    Creates a distribution of this project's plugin zip
 		    ====================================================================-->
-	   <target name="dist-standalone" depends="dist-solution" description="Creates a distribution">
-	   
-	   <condition property="run-dist-samples">
-			<equals arg1="${build.samples}" arg2="yes" />
-	   </condition>
-	   
-	   <antcall target="dist-samples"/>
+	   <target name="dist-plugin" description="Creates a distribution">
 	   
 	  	<!-- delete and re-create the plugin dist folder tree -->
-	    <delete dir="${stage.dir}" />
 	    <mkdir dir="${stage.dir}" />
 	    <mkdir dir="${stage.dir}/${plugin.name}" />
 	    <mkdir dir="${stage.dir}/${plugin.name}/lib" />
-        <mkdir dir="${stage.dir}/${plugin.name}-samples" />
 	  	
 	  	<!-- copy the plugin jar to the plugin dist lib folder -->
-	    <copy todir="${stage.dir}/${plugin.name}/lib">
+	    <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
 	      <fileset dir="${dist.dir}">
 	        <include name="${ivy.artifact.id}-${project.revision}.jar" />
 	      </fileset>
 	    </copy>
 	    
-	  	<copy todir="../patches/target-dist/server/webapps/pentaho/WEB-INF/lib">
+	  	<copy todir="../patches/target-dist/server/webapps/pentaho/WEB-INF/lib" overwrite="true">
 	      <fileset dir="${lib.dir}">
 	        <include name="json-${dependency.json.revision}.jar" />
 	      </fileset>
 	    </copy>
 	  	<!-- Copy the plugin.xml and any other files from the resource dir -->
-	    <copy todir="${stage.dir}/${plugin.name}">
+	    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
 	      <fileset dir="${resource.dir}">
 	        <include name="**/*" />
 	      </fileset>
 	    </copy>
 	  	
-	  	<copy todir="${stage.dir}/${plugin.name}">
+	  	<copy todir="${stage.dir}/${plugin.name}" overwrite="true">
 	  		<fileset dir="${basedir}">
 	  			<include name="readme.txt"/>
 	  		</fileset>
   		</copy>
 	  	
 	  	<!-- Copy js folder into dist -->
-	    <copy todir="${stage.dir}/${plugin.name}/js">
+	    <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
 	      <fileset dir="cdf/js">
 	        <include name="**/*" />
 	      </fileset>
 	    </copy>
 		
 		<!-- Copy pentaho-cdf image files to dist -->
-		<copy todir="${stage.dir}/${plugin.name}/resources/style/images">
+		<copy todir="${stage.dir}/${plugin.name}/resources/style/images" overwrite="true">
 	      <fileset dir="cdf/images">
 	        <include name="**/*" />
 	      </fileset>
@@ -137,13 +129,13 @@
 	  </target>
 
 	
-	  <target name="dist-samples" depends="init" if="run-dist-samples">
+	  <target name="dist-samples" depends="init">
 
 	  	<mkdir dir="${samples.stage.dir}"/>
 	  	
 	  	<!-- copy over all the xactions within the cdf-samples folder -->
-	  	<copy todir="${samples.stage.dir}/cdf-samples" overwrite="true" >
-          <fileset dir="../solution/bi-developers/cdf-samples/"></fileset>
+	  	<copy todir="${samples.stage.dir}/bi-developers" overwrite="true" >
+          <fileset dir="../solution/bi-developers"></fileset>
 	  	</copy>
 
 	  	<zip zipfile="${dist.dir}/${plugin.samples.zipfile}"
