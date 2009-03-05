@@ -35,8 +35,6 @@
 	        <path refid="classpath" />
 	      </classpath>
 	      <src path="${src.dir}" />
-          <!--src path="../patches/target-build/bi-platform-web-servlet/src"/>
-		    <exclude name="**/GetCDFResource.java"/-->
 	    </javac>
 	  </target>
 	
@@ -114,8 +112,25 @@
 	         includes="pentaho-cdf/**/*"
 	         excludes="**/Thumbs.db" />
 
+
 	  </target>
 
+
+	  <!--=======================================================================
+		    install-plugin
+		    
+		    Installs the plugin locally
+		    ====================================================================-->
+	  <target name="install-plugin" depends="dist-plugin" description="Installs the plugin locally in solution/system/pentaho-cdf">
+
+		  <delete dir="../solution/system/${plugin.name}"/>
+		  <copy todir="../solution/system/${plugin.name}">
+			  <fileset dir="${stage.dir}/${plugin.name}">
+				  <include name="**/*" />
+			  </fileset>
+		  </copy>
+
+	  </target>
 	
 	  <target name="dist-samples" depends="init">
 
