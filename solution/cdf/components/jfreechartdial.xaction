@@ -11,6 +11,12 @@
 	</documentation>
 
 	<inputs> 
+		<QUERY_TYPE type="string">
+			<sources>
+				<request>queryType</request>
+			</sources>
+			<default-value>mdx</default-value>
+		</QUERY_TYPE> 
 		<ROLE type="string"> 
 			<sources> 
 				<session>role</session> 
@@ -191,29 +197,51 @@
 	</outputs>
 
 	<actions>
-		<action-definition> 
-			<component-name>MDXLookupRule</component-name>
-			<action-type>OLAP</action-type>
-			<action-inputs> 
-				<QUERY type="string"/>  
-				<JNDI type="string"/>  
-				<CATALOG type="string"/>  
-				<CUBE type="string"/>
-				<ROLE type="string"/>
-			</action-inputs>
-			<action-resources/> 
-			<action-outputs> 
-				<query-results type="result-set" mapping="query_result"/> 
-			</action-outputs>
-			<component-definition> 
-				<location><![CDATA[mondrian]]></location>  
-				<query>{QUERY}</query>  
-				<jndi>{JNDI}</jndi> 
-				<cube>{CUBE}</cube>
-				<role>{ROLE}</role>
-				<catalog>{CATALOG}</catalog>
-			</component-definition> 
-		</action-definition>
+		<actions>
+			<condition><![CDATA[QUERY_TYPE == "mdx"]]></condition>
+			<action-definition> 
+				<component-name>MDXLookupRule</component-name>
+				<action-type>OLAP</action-type>
+				<action-inputs> 
+					<QUERY type="string"/>  
+					<JNDI type="string"/>  
+					<CATALOG type="string"/>  
+					<CUBE type="string"/>
+					<ROLE type="string"/>
+				</action-inputs>
+				<action-resources/> 
+				<action-outputs> 
+					<query-results type="result-set" mapping="query_result"/> 
+				</action-outputs>
+				<component-definition> 
+					<location><![CDATA[mondrian]]></location>  
+					<query>{QUERY}</query>  
+					<jndi>{JNDI}</jndi> 
+					<cube>{CUBE}</cube>
+					<role>{ROLE}</role>
+					<catalog>{CATALOG}</catalog>
+				</component-definition> 
+			</action-definition>
+		</actions>
+		<actions>
+			<condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
+			<!--action-definition>
+				<component-name>SQLLookupRule</component-name>
+				<action-type>Relational</action-type>
+				<action-inputs>
+					<QUERY type ="string"/>
+					<JNDI type="string"/>
+				</action-inputs>
+				<action-outputs>
+					<query-result type="result-set" mapping="query_result"/>
+				</action-outputs>
+				<component-definition>
+					<jndi>{JNDI}</jndi>
+					<live><![CDATA[false]]></live>
+					<query>{QUERY}</query>
+				</component-definition>
+			</action-definition-->
+		</actions>
 
 		<action-definition> 
 			<component-name>JavascriptRule</component-name>
