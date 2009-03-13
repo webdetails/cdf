@@ -204,6 +204,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 			String dashboardMetadata = repository.getResourceAsString(resource);
 			Document doc = DocumentHelper.parseText(dashboardMetadata);
 			templateName = XmlDom4JHelper.getNodeText( "/cdf/template", doc, "");
+            // If a "style" tag exists, use that one
+            if(doc.selectSingleNode("/cdf/style") != null ){
+                template = XmlDom4JHelper.getNodeText("/cdf/style", doc);
+            }
 		}
 		renderHtmlDashboard(out,solution,path,templateName,template);
 	}
