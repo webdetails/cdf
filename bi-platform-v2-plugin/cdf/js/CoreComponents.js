@@ -890,7 +890,7 @@ var TableComponent = BaseComponent.extend({
 
 			var myself = this;
 
-			dtData.fnFinalCallback = function( aData, iRowCount ){
+			dtData.fnDrawCallback = function( aData, iRowCount ){
 				$("#" + myself.htmlObject + " td.sparkline").each(function(i){
 						$(this).sparkline($(this).text().split(/,/));
 					});

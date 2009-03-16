@@ -2,7 +2,7 @@
 *
 * jquery.sparkline.js
 *
-* v1.2.1
+* v1.4
 * (c) Splunk, Inc 
 * Contact: Gareth Watts (gareth@splunk.com)
 * http://omnipotent.net/jquery.sparkline/
@@ -15,7 +15,7 @@
 *
 * License: New BSD License
 * 
-* Copyright (c) 2008, Splunk Inc.
+* Copyright (c) 2009, Splunk Inc.
 * All rights reserved.
 * 
 * Redistribution and use in source and binary forms, with or without modification, 
@@ -68,8 +68,8 @@
 *           another chart over the top - Note that width and height are ignored if an
 *           existing chart is detected.
 *
-* There are 6 types of sparkline, selected by supplying a "type" option of 'line' (default),
-* 'bar', 'tristate', 'bullet', 'discrete' or 'pie'
+* There are 7 types of sparkline, selected by supplying a "type" option of 'line' (default),
+* 'bar', 'tristate', 'bullet', 'discrete', 'pie' or 'box'
 *    line - Line chart.  Options:
 *       spotColor - Set to '' to not end each line in a circular spot
 *       minSpotColor - If set, color of spot at minimum value
@@ -111,6 +111,23 @@
 *   pie - Pie chart. Options:
 *       sliceColors - An array of colors to use for pie slices
 *       offset - Angle in degrees to offset the first slice - Try -90 or +90
+*
+*   box - Box plot. Options:
+*       raw - Set to true to supply pre-computed plot points as values
+*             values should be: low_outlier, low_whisker, q1, median, q3, high_whisker, high_outlier
+*             When set to false you can supply any number of values and the box plot will
+*             be computed for you.  Default is false.
+*       showOutliers - Set to true (default) to display outliers as circles
+*       outlierIRQ - Interquartile range used to determine outliers.  Default 1.5
+*       boxLineColor - Outline color of the box
+*       boxFillColor - Fill color for the box
+*       whiskerColor - Line color used for whiskers
+*       outlierLineColor - Outline color of outlier circles
+*       outlierFillColor - Fill color of the outlier circles
+*       spotRadius - Radius of outlier circles
+*       medianColor - Line color of the median line
+*       target - Draw a target cross hair at the supplied value (default undefined)
+*      
 *   
 *       
 *   Examples:
@@ -121,7 +138,6 @@
 *   $('#bullet').sparkline([10,12,12,9,7], { type:'bullet' });
 *   $('#pie').sparkline([1,1,2], { type:'pie' });
 */
-
 
 
 (function($) {
@@ -140,6 +156,8 @@
         }
     };
 
+    var pending = [];
+
     $.fn.sparkline = function(uservalues, options) {
         var options = $.extend({
             type : 'line',
@@ -152,22 +170,42 @@
         }, options ? options : {});
         
         return this.each(function() {
-            var values = (uservalues=='html' || uservalues==undefined) ? $(this).text().split(',') : uservalues;
+            var render = function() {
+                var values = (uservalues=='html' || uservalues==undefined) ? $(this).text().split(',') : uservalues;
 
-            var width = options.width=='auto' ? values.length*options.defaultPixelsPerValue : options.width;
-            if (options.height == 'auto') {
-                // must be a better way to get the line height
-                var tmp = document.createElement('span');
-                tmp.innerHTML = 'a';
-                $(this).append(tmp);
-                height = $(tmp).innerHeight();
-                $(tmp).remove();
-            } else {
-                height = options.height;
+                var width = options.width=='auto' ? values.length*options.defaultPixelsPerValue : options.width;
+                if (options.height == 'auto') {
+                    if (!options.composite || !this.vcanvas) {
+                        // must be a better way to get the line height
+                        var tmp = document.createElement('span');
+                        tmp.innerHTML = 'a';
+                        $(this).html(tmp);
+                        height = $(tmp).innerHeight();
+                        $(tmp).remove();
+                    }
+                } else {
+                    height = options.height;
+                }
+
+                $.fn.sparkline[options.type].call(this, values, options, width, height);
             }
-
-            $.fn.sparkline[options.type].call(this, values, options, width, height);
+            if ($(this).is(':hidden') || $(this).parents().is(':hidden')) {
+                pending.push([this, render]);
+            } else {
+                render.call(this);
+            }
         });
+    };
+
+
+    $.sparkline_display_visible = function() {
+        for (var i=pending.length-1; i>=0; i--) {
+            var el = pending[i][0];
+            if ($(el).is(':visible') && !$(el).parents().is(':hidden')) {
+                pending[i][1].call(el);
+                pending.splice(i, 1);
+            }
+        }
     };
 
     $.fn.sparkline.line = function(values, options, width, height) {
@@ -323,7 +361,7 @@
             max = options.chartRangeMax;
         }
         if (options.zeroAxis == undefined) options.zeroAxis = min<0;
-        var range = max-min+1;
+        var range = max-min == 0 ? 1 : max-min;
 
         var target = $(this).simpledraw(width, height);
         if (target) {
@@ -345,10 +383,7 @@
                 if (val==0 && options.zeroColor!=undefined) {
                     color = options.zeroColor;
                 }
-                if ($.browser.msie) // IE's bars look fuzzy without this :-/
-                    target.drawRect(x, y, options.barWidth-1, height-1, color, color);
-                else
-                    target.drawRect(x, y, options.barWidth, height, undefined, color);
+                target.drawRect(x, y, options.barWidth-1, height-1, color, color);
             }
         } else {
             // Remove the tag contents if sparklines aren't supported
@@ -393,10 +428,7 @@
                 if (options.colorMap[values[i]]) {
                     color = options.colorMap[values[i]];
                 }
-                if ($.browser.msie) // IE's bars look fuzzy without this :-/
-                    target.drawRect(x, y, options.barWidth-1, height-1, color, color);
-                else
-                    target.drawRect(x, y, options.barWidth, height, undefined, color);
+                target.drawRect(x, y, options.barWidth-1, height-1, color, color);
             }
         } else {
             // Remove the tag contents if sparklines aren't supported
@@ -478,29 +510,20 @@
             for(i=2; i<values.length; i++) {
                 var rangeval = parseInt(values[i]);
                 var rangewidth = Math.round(canvas_width*((rangeval-min)/range));
-                if ($.browser.msie)
-                    target.drawRect(0, 0, rangewidth-1, canvas_height-1, options.rangeColors[i-2], options.rangeColors[i-2]);
-                else
-                    target.drawRect(0, 0, rangewidth, canvas_height, undefined, options.rangeColors[i-2]);
+                target.drawRect(0, 0, rangewidth-1, canvas_height-1, options.rangeColors[i-2], options.rangeColors[i-2]);
             }
 
             // draw the performance bar
             var perfval = parseInt(values[1]);
             var perfwidth = Math.round(canvas_width*((perfval-min)/range));
-            if ($.browser.msie)
-                target.drawRect(0, Math.round(canvas_height*0.3), perfwidth-1, Math.round(canvas_height*0.4)-1, options.performanceColor, options.performanceColor);
-            else
-                target.drawRect(0, Math.round(canvas_height*0.3), perfwidth, Math.round(canvas_height*0.4), undefined, options.performanceColor);
+            target.drawRect(0, Math.round(canvas_height*0.3), perfwidth-1, Math.round(canvas_height*0.4)-1, options.performanceColor, options.performanceColor);
 
             // draw the target linej
             var targetval = parseInt(values[0]);
             var x = Math.round(canvas_width*((targetval-min)/range)-(options.targetWidth/2));
             var targettop = Math.round(canvas_height*0.10);
             var targetheight = canvas_height-(targettop*2);
-            if ($.browser.msie)
-                target.drawRect(x, targettop, options.targetWidth-1, targetheight-1, options.targetColor, options.targetColor);
-            else
-                target.drawRect(x, targettop, options.targetWidth, targetheight, undefined, options.targetColor);
+            target.drawRect(x, targettop, options.targetWidth-1, targetheight-1, options.targetColor, options.targetColor);
         }  else {
             // Remove the tag contents if sparklines aren't supported
             this.innerHTML = '';
@@ -513,7 +536,7 @@
             sliceColors : ['#f00', '#0f0', '#00f']
         }, options);
 
-        width = options.width=='auto' ? options.height : width;
+        width = options.width=='auto' ? height : width;
 
         var target = $(this).simpledraw(width, height);
         if (target && values.length>1) {
@@ -528,7 +551,6 @@
             if (options.offset) {
                 next += (2*Math.PI)*(options.offset/360);
             }
-            // next = 0-(Math.PI/2);
             var circle = 2*Math.PI;
             for(var i=0; i<values.length; i++) {
                 var start = next;
@@ -539,6 +561,144 @@
                 target.drawPieSlice(radius, radius, radius, start, end, undefined, options.sliceColors[i % options.sliceColors.length]);
                 next = end;
             }
+        }
+    };
+
+    function quartile(values, q) {
+        if (q==2) {
+            var vl2 = Math.floor(values.length/2);
+            return values.length % 2 ? values[vl2] : (values[vl2]+values[vl2+1])/2;
+        } else {
+            var vl4 = Math.floor(values.length/4);
+            return values.length % 2 ? (values[vl4*q]+values[vl4*q+1])/2 : values[vl4*q];
+        }
+    };
+
+    $.fn.sparkline.box = function(values, options, width, height) {
+        values = $.map(values, Number);
+        var options = $.extend({
+            raw: false,
+            boxLineColor: 'black',
+            boxFillColor: '#cdf',
+            whiskerColor: 'black',
+            outlierLineColor: '#333',
+            outlierFillColor: 'white',
+            medianColor: 'red',
+            showOutliers: true,
+            outlierIQR: 1.5,
+            spotRadius: 1.5,
+            target: undefined,
+            targetColor: '#4a2',
+            chartRangeMax: undefined,
+            chartRangeMin: undefined
+        }, options);
+
+        width = options.width=='auto' ? '4.0em' : width;
+
+        minvalue = options.chartRangeMin==undefined ? Math.min.apply(Math, values) : options.chartRangeMin;
+        maxvalue = options.chartRangeMax==undefined ? Math.max.apply(Math, values) : options.chartRangeMax;
+        var target = $(this).simpledraw(width, height);
+        if (target && values.length>1) {
+            var canvas_width = target.pixel_width;
+            var canvas_height = target.pixel_height;
+            if (options.raw) {
+                if (options.showOutliers && values.length>5) {
+                    var loutlier=values[0], lwhisker=values[1], q1=values[2], q2=values[3], q3=values[4], rwhisker=values[5], routlier=values[6];
+                } else {
+                    var lwhisker=values[0], q1=values[1], q2=values[2], q3=values[3], rwhisker=values[4];
+                }
+            } else {
+                values.sort(function(a, b) { return a-b; });
+                var q1 = quartile(values, 1);
+                var q2 = quartile(values, 2);
+                var q3 = quartile(values, 3);
+                var iqr = q3-q1;
+                if (options.showOutliers) {
+                    var lwhisker=undefined, rwhisker=undefined;
+                    for(var i=0; i<values.length; i++) {
+                        if (lwhisker==undefined && values[i] > q1-(iqr*options.outlierIQR))
+                            lwhisker = values[i];
+                        if (values[i] < q3+(iqr*options.outlierIQR))
+                            rwhisker = values[i];
+                    }
+                    var loutlier = values[0];
+                    var routlier = values[values.length-1];
+                } else {
+                    var lwhisker = values[0];
+                    var rwhisker = values[values.length-1];
+                }
+            }
+
+            var unitsize = canvas_width / (maxvalue-minvalue+1);
+            var canvas_left = 0;
+            if (options.showOutliers) {
+                canvas_left = Math.ceil(options.spotRadius);
+                canvas_width -= 2*Math.ceil(options.spotRadius);
+                var unitsize = canvas_width / (maxvalue-minvalue+1);
+                if (loutlier < lwhisker)
+                    target.drawCircle((loutlier-minvalue)*unitsize+canvas_left, canvas_height/2, options.spotRadius, options.outlierLineColor, options.outlierFillColor);
+                if (routlier > rwhisker)
+                    target.drawCircle((routlier-minvalue)*unitsize+canvas_left, canvas_height/2, options.spotRadius, options.outlierLineColor, options.outlierFillColor);
+            }
+
+            // box
+            target.drawRect(
+                Math.round((q1-minvalue)*unitsize+canvas_left),
+                Math.round(canvas_height*0.1),
+                Math.round((q3-q1)*unitsize), 
+                Math.round(canvas_height*0.8), 
+                options.boxLineColor, 
+                options.boxFillColor);
+            // left whisker
+            target.drawLine(
+                Math.round((lwhisker-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height/2), 
+                Math.round((q1-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height/2), 
+                options.lineColor);
+            target.drawLine(
+                Math.round((lwhisker-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height/4), 
+                Math.round((lwhisker-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height-canvas_height/4), 
+                options.whiskerColor);
+            // right whisker
+            target.drawLine(Math.round((rwhisker-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height/2), 
+                Math.round((q3-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height/2), 
+                options.lineColor);
+            target.drawLine(
+                Math.round((rwhisker-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height/4), 
+                Math.round((rwhisker-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height-canvas_height/4), 
+                options.whiskerColor);
+            // median line
+            target.drawLine(
+                Math.round((q2-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height*0.1),
+                Math.round((q2-minvalue)*unitsize+canvas_left), 
+                Math.round(canvas_height*0.9),
+                options.medianColor);
+            if (options.target) {
+                var size = Math.ceil(options.spotRadius);
+                target.drawLine(
+                    Math.round((options.target-minvalue)*unitsize+canvas_left), 
+                    Math.round((canvas_height/2)-size), 
+                    Math.round((options.target-minvalue)*unitsize+canvas_left), 
+                    Math.round((canvas_height/2)+size), 
+                    options.targetColor);
+                target.drawLine(
+                    Math.round((options.target-minvalue)*unitsize+canvas_left-size), 
+                    Math.round(canvas_height/2), 
+                    Math.round((options.target-minvalue)*unitsize+canvas_left+size), 
+                    Math.round(canvas_height/2), 
+                    options.targetColor);
+            }
+        }  else {
+            // Remove the tag contents if sparklines aren't supported
+            this.innerHTML = '';
         }
     };
 
@@ -558,8 +718,7 @@
     // This is accessible as $(foo).simpledraw()
 
     if ($.browser.msie && !document.namespaces['v']) {
-        document.namespaces.add("v", "urn:schemas-microsoft-com:vml");
-        document.createStyleSheet().cssText = "v\\:*{behavior:url(#default#VML); display:inline-block; padding:0px; margin:0px;}";
+        document.namespaces.add('v', 'urn:schemas-microsoft-com:vml', '#default#VML');
     }
 
     if ($.browser.hasCanvas == undefined) {
@@ -620,12 +779,13 @@
             this.canvas = document.createElement('canvas');
             if (target[0]) target=target[0];
             target.vcanvas = this;
-            $(this.canvas).css({ display:'inline', width:width, height:height });
+            $(this.canvas).css({ display:'inline-block', width:width, height:height, verticalAlign:'top' });
             this._insert(this.canvas, target);
             this.pixel_height = $(this.canvas).height();
             this.pixel_width = $(this.canvas).width();
             this.canvas.width = this.pixel_width;
             this.canvas.height = this.pixel_height;
+            $(this.canvas).css({width: this.pixel_width, height: this.pixel_height});
         },
 
         _getContext : function(lineColor, fillColor) {
@@ -681,11 +841,7 @@
         },
 
         drawRect : function(x, y, width, height, lineColor, fillColor) {
-            var context = this._getContext(lineColor, fillColor);
-            if (fillColor != undefined) 
-                context.fillRect(x, y, width, height); 
-            if (lineColor != undefined)
-                context.strokeRect(x, y, width, height); 
+            return this.drawShape([ [x,y], [x+width, y], [x+width, y+height], [x, y+height], [x, y] ], lineColor, fillColor);
         }
         
     });
@@ -702,7 +858,7 @@
             if (target[0]) target=target[0];
             target.vcanvas = this;
             this.canvas = document.createElement('span');
-            $(this.canvas).css({ display:'inline-block', position: 'relative', overflow:'hidden', width:width, height:height, margin:'0px', padding:'0px' });
+            $(this.canvas).css({ display:'inline-block', position: 'relative', overflow:'hidden', width:width, height:height, margin:'0px', padding:'0px', verticalAlign: 'top'});
             this._insert(this.canvas, target);
             this.pixel_height = $(this.canvas).height();
             this.pixel_width = $(this.canvas).width();
