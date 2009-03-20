@@ -714,7 +714,8 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 			rowLevels: ["Platform","Version"],
 			measure: '[Total Requests]',
 			defaultChartType: "bar",
-			debug: false
+			debug: false,
+			where: {}
 		},
 		
 		tableDefaults : {
@@ -800,8 +801,7 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 					daterange: ""+options.dateDim+".[Date Range] as Aggregate(a)",
 					average: ""+options.measuresDim+".[Avg] as 'Avg(a,"+options.measuresDim+"."+options.measure+")'"
 				},
-				where:{
-				},
+				where: options.where,				
 				extra: {}
 			};
 
