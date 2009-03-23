@@ -11,6 +11,12 @@
 	</documentation>
 
 	<inputs> 
+		<QUERY_TYPE type="string">
+			<sources>
+				<request>queryType</request>
+			</sources>
+			<default-value>mdx</default-value>
+		</QUERY_TYPE> 
 		<ROLE type="string"> 
 			<sources> 
 				<session>role</session> 
@@ -191,29 +197,51 @@
 	</outputs>
 
 	<actions>
-		<action-definition> 
-			<component-name>MDXLookupRule</component-name>
-			<action-type>OLAP</action-type>
-			<action-inputs> 
-				<QUERY type="string"/>  
-				<JNDI type="string"/>  
-				<CATALOG type="string"/>  
-				<CUBE type="string"/>
-				<ROLE type="string"/>
-			</action-inputs>
-			<action-resources/> 
-			<action-outputs> 
-				<query-results type="result-set" mapping="query_result"/> 
-			</action-outputs>
-			<component-definition> 
-				<location><![CDATA[mondrian]]></location>  
-				<query>{QUERY}</query>  
-				<jndi>{JNDI}</jndi> 
-				<cube>{CUBE}</cube>
-				<role>{ROLE}</role>
-				<catalog>{CATALOG}</catalog>
-			</component-definition> 
-		</action-definition>
+		<actions>
+			<condition><![CDATA[QUERY_TYPE == "mdx"]]></condition>
+			<action-definition> 
+				<component-name>MDXLookupRule</component-name>
+				<action-type>OLAP</action-type>
+				<action-inputs> 
+					<QUERY type="string"/>  
+					<JNDI type="string"/>  
+					<CATALOG type="string"/>  
+					<CUBE type="string"/>
+					<ROLE type="string"/>
+				</action-inputs>
+				<action-resources/> 
+				<action-outputs> 
+					<query-results type="result-set" mapping="query_result"/> 
+				</action-outputs>
+				<component-definition> 
+					<location><![CDATA[mondrian]]></location>  
+					<query>{QUERY}</query>  
+					<jndi>{JNDI}</jndi> 
+					<cube>{CUBE}</cube>
+					<role>{ROLE}</role>
+					<catalog>{CATALOG}</catalog>
+				</component-definition> 
+			</action-definition>
+		</actions>
+		<actions>
+			<condition><![CDATA[QUERY_TYPE != "mdx"]]></condition>
+			<!--action-definition>
+				<component-name>SQLLookupRule</component-name>
+				<action-type>Relational</action-type>
+				<action-inputs>
+					<QUERY type ="string"/>
+					<JNDI type="string"/>
+				</action-inputs>
+				<action-outputs>
+					<query-result type="result-set" mapping="query_result"/>
+				</action-outputs>
+				<component-definition>
+					<jndi>{JNDI}</jndi>
+					<live><![CDATA[false]]></live>
+					<query>{QUERY}</query>
+				</component-definition>
+			</action-definition-->
+		</actions>
 
 		<action-definition> 
 			<component-name>JavascriptRule</component-name>
@@ -506,10 +534,13 @@
 					<is-3D>{IS-3D}</is-3D>  
 					<value-color>#DDDDDD</value-color>
 					<is-stacked>{IS-STACKED}</is-stacked>  
-					<title-font>Helvetica</title-font>  
-					<domain-tick-font> 
+					<title-font>
+						<font>Helvetica</font>
+					</title-font>  
+					<domain-tick-font>
+						<font>Helvetica</font>
 						<size>{DOMAIN-TICK-FONT-SIZE}</size> 
-					</domain-tick-font>  
+					</domain-tick-font>
 					<domain-label-rotation-dir>{DOMAIN-LABEL-ROTATION-DIR}</domain-label-rotation-dir>  
 					<domain-label-rotation>{DOMAIN-LABEL-ROTATION}</domain-label-rotation>  
 					<url-template>{URL-TEMPLATE}</url-template>
@@ -562,7 +593,7 @@
 								<color2>{INTERVALCOLOR3}</color2>
 								<cyclic>true</cyclic>
 							</interval-background>
-							<text-font>Helvetica</text-font><text-color>#ffffff</text-color>
+							<text-font>SansSerif</text-font><text-color>#ffffff</text-color>
 						</interval>
 					</intervals>			  
 				</chart-attributes> 

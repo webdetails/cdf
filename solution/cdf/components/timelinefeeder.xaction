@@ -297,7 +297,7 @@
 					</actions>
 					<actions>
 						<condition><![CDATA[QUERY_TYPE == "sql"]]></condition>
-						<action-definition>
+						<!--action-definition>
 							<component-name>SQLLookupRule</component-name>
 							<action-type>Relational</action-type>
 							<action-inputs>
@@ -426,7 +426,7 @@
 
 											]]></script>
 									</component-definition>
-								</action-definition>
+								</action-definition-->
 							</actions>
 							<actions>
 								<condition><![CDATA[QUERY_TYPE == "kettle"]]></condition>

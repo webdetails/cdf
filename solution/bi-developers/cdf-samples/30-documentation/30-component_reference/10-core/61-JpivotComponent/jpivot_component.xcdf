@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>JpivotComponent</title>
+	<author>Webdetails</author>
+	<description>JpivotComponent</description>
+	<icon></icon>
+	<template>template.html</template>
+</cdf>

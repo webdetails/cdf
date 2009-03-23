@@ -1,0 +1,390 @@
+/*
+	Design by Free CSS Templates
+	http://www.freecsstemplates.org
+	Released for free under a Creative Commons Attribution 2.5 License
+*/
+/* Basic */
+*
+{
+	margin: 0em;
+//	padding: 0em;
+}
+
+h1,h2
+{
+}
+
+body
+{
+	font-family: "trebuchet ms", sans-serif;
+	font-size: 10pt;
+	background-color: #fff;
+	color: #555;
+}
+
+a
+{
+	color: #007788;
+	text-decoration: underline;
+}
+
+a:hover
+{
+	text-decoration: none;
+}
+
+.clear
+{
+	clear: both;
+}
+
+/* Outer */
+#outerouter
+{
+	position: relative;
+	background: #dbdbdb;
+	padding: 0.5em;
+}
+#outer
+{
+	position: relative;
+	margin: 2em;
+}
+
+/* Header */
+
+#header
+{
+	position: absolute;
+	top: 50px;
+	background: #073C4C url('images/header.jpg') top right no-repeat;
+	height: 135px;
+	width: 100%;
+	margin: 0 auto;
+}
+
+#header h1
+{
+	position: relative;
+	top: 20px;
+	left: 25px; 
+	font-size: 39px;
+	color: #fff;
+}
+
+#header h2
+{
+	position: relative;
+	top: 25px;
+	left: 40px; 
+	font-size: 15px;
+	font-weight: normal;
+	color: #fff;
+}
+
+#header a
+{
+	color: #fff;
+	text-decoration: none;
+}
+
+#submenu
+{
+	position: absolute;
+        width: 100%;
+        top: 185px;
+        left: 0px;
+        background: #007788 url('images/x3.gif') top left repeat-x;
+        height: 2em;
+	z-index:5;
+}
+
+/* Menu */
+
+#menu
+{
+	position: absolute;
+	width: 100%;
+	top: 0px;
+	left: 0px;
+	background: #007788 url('images/x3.gif') top left repeat-x;
+	height: 50px;
+}
+
+#menu ul
+{
+	list-style: none;
+	position: absolute;
+	bottom: 0em;
+	left: 0em;
+}
+
+#menu li
+{
+	display: block;
+	float: left;
+}	
+
+#menu li a
+{
+	color: #fff;
+	display: block;
+	padding: 0.75em 1.25em 1.25em 1.25em;
+	text-decoration: none;
+}
+
+#menu li a:hover
+{
+	background: #007788 url('images/x4.gif') top left repeat-x;
+}
+
+/* Content */
+
+#content
+{
+	line-height: 1.7em;
+	padding-top: 210px;
+	background: white;
+}
+
+#content p
+{
+	margin-bottom: 1.5em;
+}
+
+#content h2,h3,h4,h5,h6
+{
+	width: 100%;
+	position: relative;
+	left: -14px;
+	margin: 0em -22px 1.2em 0em;
+	color: #333;
+	padding: 1.1em 14px 0.0em 14px;
+	font-size: 1.1em;
+
+}
+
+#content h2 {
+	font-weight: bold;
+}
+
+#content h2 span, #content h3 span
+{
+	position: absolute;
+	top: 0em;
+	right: 0em;
+	background: #fff url('images/x1.gif') top right no-repeat;
+	width: 16px;
+	height: 28px;
+}
+
+
+#content blockquote
+{
+	border: dashed 1px #BFB793;
+	background: #FFFEFB url('images/x5.gif') top left repeat-x;
+	padding: 1em;
+	margin-bottom: 1.5em;
+}
+
+#content blockquote p
+{
+	margin-bottom: 0em;
+}
+
+#content table
+{
+	margin-bottom: 1.5em;
+}
+
+#content table th
+{
+	text-align: left;
+	font-weight: bold;
+	padding: 0.5em;
+}
+
+#content table td
+{
+	padding: 0.5em;
+}
+
+#content table tr.rowA
+{
+	background: #FDFEFE url('images/x6.gif') top left repeat-x;
+	color: inherit;
+}
+
+#content table tr.rowB
+{
+	background: #FFFEFC url('images/x7.gif') top left repeat-x;
+	color: inherit;
+}
+
+/* Primary Content */
+
+#primaryContentContainer
+{
+	position: relative;
+	float: left;
+	margin-right: -36em;
+	width: 100%;
+
+}
+
+#primaryContent
+{
+	margin: 0em 33em 0em 0em;
+	padding: 1.5em;
+	float:left;
+}
+
+/* Secondary Content */
+
+#secondaryContent
+{
+	/*        position: relative;
+        float: right;
+        width: 12em;
+        padding: 1.5em;
+        margin-right: 1em;*/
+}
+
+#secondaryContent
+{
+	padding-top: 280px;
+	position: relative;
+	padding: 1.5em;
+	margin-right: 1em;
+	float: right;
+        width: 240px;
+
+}
+#boxContent ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+	background: url(images/middle.jpg) repeat-y;
+}
+
+#boxContent li {
+        background: url(images/top.jpg) no-repeat;
+}
+
+#boxContent li ul {
+        padding: 20px 20px 10px 20px;
+        background: url(images/bottom.jpg) no-repeat left bottom;
+}
+
+#boxContent li li {
+        padding: 0;
+        background: url(images/spacer.gif);
+        color: #FFFFFF;
+}
+
+#boxContent h2 {
+        margin: 0;
+        padding: 20px 20px 0 20px;
+        text-transform: uppercase;
+        font-family: "Arial Black", Arial, Helvetica, sans-serif;
+        font-size: .8em;
+        color: #FFFFFF;
+	background: none;
+}
+
+#boxContent a {
+        color: #FFFFFF;
+}
+
+#menuContent ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+}
+
+#menuContent li {
+        background: url(images/top.jpg) no-repeat;
+}
+
+#menuContent li ul {
+        padding: 20px 20px 10px 20px;
+        background: url(images/bottom.jpg) no-repeat left bottom;
+}
+
+#menuContent li li {
+        padding: 0;
+        background: url(images/spacer.gif);
+        color: #FFFFFF;
+}
+
+#menuContent h2 {
+        margin: 0;
+        padding: 20px 20px 0 20px;
+        text-transform: uppercase;
+        font-family: "Arial Black", Arial, Helvetica, sans-serif;
+        font-size: .8em;
+        color: #FFFFFF;
+        background: none;
+}
+
+#menuContent a {
+        color: #FFFFFF;
+}
+
+/* Footer */
+
+#footer
+{
+	padding: 1.5em;
+	background: #fff url('images/x2.gif') top left repeat-x;
+}
+
+#footer img
+{
+	border: none;
+}
+
+.contents, .shadow {
+	position: relative;
+	bottom: 4px;
+	right: 4px;
+	min-width:700x
+}
+.shadow { background-color: #ccc; }
+.contents {
+	background-color: #fff;
+	color: #000;
+	border: 1px solid #000;
+	padding: 0.5em;
+	min-width:700px
+}
+#content h2 {
+	font-weight: bold;
+}
+
+dl.documentation {
+	margin: 1em 0;
+	padding: 0;
+	line-height: 1em;
+	font-size: 80%;
+}
+
+.documentation dt
+{
+	position: relative;
+	left: 2em;
+	top: 1.1em;
+	width: 5em;
+	font-family: monospace;
+}
+
+.documentation dd
+{
+	border-left: 1px solid #000;
+	margin: 0 0 0 20em;
+	padding: 0 0 .0em 1em;
+}
+
+pre{
+	font-size: 8pt;
+}

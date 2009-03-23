@@ -1,0 +1,207 @@
+<!--===========================================================================
+  This is the build file for the Community Dashboard Framework Plugin project.
+  
+  This build file will use the common_build.xml file as the default build
+  process and should only override the tasks that need to differ from
+  the common build file.
+  
+  See common_build.xml for more details
+============================================================================-->
+<project name="Community Dashboard Framework" basedir="." default="jar" 
+	xmlns:ivy="antlib:org.apache.ivy.ant" >
+	
+	<description>
+	  This build file is used to create the Dashboard project
+		and works with the common_build.xml file.
+	</description>
+
+	<!-- Import the common_build.xml file which contains all the default tasks -->	
+	<import file="common_build.xml"/>
+
+    <!--
+      AS STATED ABOVE, THE ONLY TASKS THAT SHOULD EXIST IN THIS BUILD FILE ARE
+      THE TASKS THAT NEED TO DIFFER FROM THE DEFAULT IMPLEMENTATION OF THE TASKS
+      FOUND IN common_build.xml.
+    --> 
+
+	  <target name="compile.compile" depends="init" description="Performs the actual javac compile">
+	    <javac destdir="${classes.dir}"
+	           debug="${javac.debug}"
+	           deprecation="${javac.deprecation}"
+	           fork="true"
+	           source="${javac.source}"
+	           target="${javac.target}">
+	      <classpath>
+	        <path refid="classpath" />
+	      </classpath>
+	      <src path="${src.dir}" />
+	    </javac>
+	  </target>
+	
+	  <property name="plugin.name"
+	            value="pentaho-cdf"
+	            description="Name of the plugin" />
+
+	  <property name="resource.dir"
+	            value="resource"
+	            description="Name of the resource directory" />
+
+	  <property name="stage.dir"
+	            value="${bin.dir}/stage"
+	            description="Name of the resource directory" />
+	
+	  <property name="samples.stage.dir"
+	            value="${bin.dir}/stage-samples"
+	            description="Name of the resource directory" />
+
+	  <property name="solution.stage.dir"
+	            value="${bin.dir}/stage-solution"
+	            description="Name of the resource directory" />
+	
+	  <target name="dist" depends="resolve,jar,dist-plugin,dist-solution,dist-samples"/>
+	  <target name="dist-compile" depends="jar,dist-plugin"/>
+  
+      <property name="plugin.artifact.id" value="${plugin.name}"/>
+      <property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
+      <property name="plugin.samples.zipfile" value="${plugin.artifact.id}-samples-${project.revision}.zip"/>
+      <property name="plugin.solution.zipfile" value="${plugin.artifact.id}-solution-${project.revision}.zip"/>
+	
+	  
+	  <!--=======================================================================
+		    dist
+		    
+		    Creates a distribution of this project's plugin zip
+		    ====================================================================-->
+	   <target name="dist-plugin" depends="jar" description="Creates a distribution">
+	   
+	  	<!-- delete and re-create the plugin dist folder tree -->
+	    <mkdir dir="${stage.dir}" />
+	    <mkdir dir="${stage.dir}/${plugin.name}" />
+	    <mkdir dir="${stage.dir}/${plugin.name}/lib" />
+	  	
+	  	<!-- copy the plugin jar to the plugin dist lib folder -->
+	    <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
+	      <fileset dir="${dist.dir}">
+	        <include name="${ivy.artifact.id}-${project.revision}.jar" />
+	      </fileset>
+	    </copy>
+	    
+	  	<!-- Copy the plugin.xml and any other files from the resource dir -->
+	    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
+	      <fileset dir="${resource.dir}">
+	        <include name="**/*" />
+	      </fileset>
+	    </copy>
+	  	
+	  	<copy todir="${stage.dir}/${plugin.name}" overwrite="true">
+	  		<fileset dir="${basedir}">
+	  			<include name="readme.txt"/>
+	  		</fileset>
+  		</copy>
+	  	
+	  	<!-- Copy js folder into dist -->
+	    <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
+	      <fileset dir="cdf/js">
+	        <include name="**/*" />
+	      </fileset>
+	    </copy>
+		
+	  	<!-- create a zip file -->
+	    <zip zipfile="${dist.dir}/${plugin.zipfile}"
+	         basedir="${stage.dir}"
+	         includes="pentaho-cdf/**/*"
+	         excludes="**/Thumbs.db" />
+
+
+	  </target>
+
+
+	  <!--=======================================================================
+		    install-plugin
+		    
+		    Installs the plugin locally
+		    ====================================================================-->
+	  <target name="install-plugin" depends="dist-plugin" description="Installs the plugin locally in solution/system/pentaho-cdf">
+
+		  <delete dir="../solution/system/${plugin.name}"/>
+		  <copy todir="../solution/system/${plugin.name}">
+			  <fileset dir="${stage.dir}/${plugin.name}">
+				  <include name="**/*" />
+			  </fileset>
+		  </copy>
+
+	  </target>
+	
+	  <target name="dist-samples" depends="init">
+
+	  	<mkdir dir="${samples.stage.dir}"/>
+	  	
+	  	<!-- copy over all the xactions within the cdf-samples folder -->
+	  	<copy todir="${samples.stage.dir}/bi-developers" overwrite="true" >
+          <fileset dir="../solution/bi-developers"></fileset>
+	  	</copy>
+
+	  	<zip zipfile="${dist.dir}/${plugin.samples.zipfile}"
+	  		basedir="${samples.stage.dir}"
+	  		includes="**/*"
+            excludes="**/Thumbs.db" 
+  		/>
+      </target>
+
+	  <target name="dist-solution" depends="init">
+
+	  	<mkdir dir="${solution.stage.dir}"/>
+	  	
+	  	<!-- copy over all the xactions within the cdf folder -->
+	  	<copy todir="${solution.stage.dir}" overwrite="true" >
+	        <fileset dir="../solution">
+	          <include name="cdf/**/*.xaction"/>
+	       	  <include name="cdf/**/*.xml"/>
+	          <include name="cdf/**/*.js"/>
+	          <exclude name="cdf/**/index.xml"/>
+	        </fileset>
+	  	</copy>
+
+	  	<zip zipfile="${dist.dir}/${plugin.solution.zipfile}"
+	  		basedir="${solution.stage.dir}"
+	  		includes="**/*"
+          excludes="**/Thumbs.db" 
+		/>
+    </target>
+  
+  
+  <!--=======================================================================
+	    publish-pentaho-nojar (override)
+	    
+	    Publishes the jar and plugin zip package to the Maven repository
+	    ====================================================================-->
+  <target name="publish-pentaho-nojar"
+          depends="install-antcontrib,create-pom,ivy.deliver">
+    <ant antfile="common_build.xml" target="publish-pentaho-nojar" />
+    
+    <ivy:makepom ivyfile="package-ivy.xml" pomfile="plugin-pom.xml" />
+    <ivy:makepom ivyfile="package-ivy.xml" pomfile="samples-pom.xml" />
+    <ivy:makepom ivyfile="package-ivy.xml" pomfile="solution-pom.xml" />
+    
+    <replace file="plugin-pom.xml" token="jar" value="zip" />
+    <replace file="plugin-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}" />
+    <antcall target="maven-publish-artifact">
+      <param name="publish.pomFile" value="plugin-pom.xml" />
+      <param name="publish.file" value="${dist.dir}/${plugin.zipfile}" />
+    </antcall>
+
+    <replace file="samples-pom.xml" token="jar" value="zip" />
+    <replace file="samples-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-samples" />
+    <antcall target="maven-publish-artifact">
+      <param name="publish.pomFile" value="samples-pom.xml" />
+      <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
+    </antcall>
+    
+    <replace file="solution-pom.xml" token="jar" value="zip" />
+    <replace file="solution-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-solution" />
+    <antcall target="maven-publish-artifact">
+      <param name="publish.pomFile" value="solution-pom.xml" />
+      <param name="publish.file" value="${dist.dir}/${plugin.solution.zipfile}" />
+    </antcall>
+  </target>
+</project>
