@@ -90,16 +90,16 @@ var XactionComponent = BaseComponent.extend({
 				" src=\"";
 				
 				xactionIFrameHTML += Dashboards.pentahoRoot + "ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
-
+				
 				// Add args
 				var p = new Array(this.parameters.length);
 				for(var i= 0, len = p.length; i < len; i++){
-					var arg = "&" + this.parameters[i][0] + "=";
-					if (this.parameters[i].length == 3) {
-						xactionIFrameHTML += arg + this.parameters[i][2];
-					} else {
-						xactionIFrameHTML += arg + Dashboards.getParameterValue(this.parameters[i][1]);
-					}
+				  var arg = "&" + encodeURIComponent(this.parameters[i][0]) + "=";
+				  if (this.parameters[i].length == 3) {
+				    xactionIFrameHTML += arg + encodeURIComponent(this.parameters[i][2]);
+				  } else {
+				    xactionIFrameHTML += arg + encodeURIComponent(Dashboards.getParameterValue(this.parameters[i][1]));
+				  }
 				}
 
 				// Close IFrame
