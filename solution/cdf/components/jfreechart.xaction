@@ -339,9 +339,6 @@
 
 	<outputs> 
 		<image-tag type="string"> 
-			<destinations> 
-				<response>content</response> 
-			</destinations> 
 		</image-tag> 
 	</outputs>
 
@@ -459,10 +456,10 @@
 						// Other's block
 						if (TOPCOUNTAXIS == 'columns' && colIteraction != colCount){
 							// TODO: Make this work
-							var value = 0;
 							var a = new Array();
 							for(i = 0 ; i < rowIteraction; i++){
 
+								var value = 0;
 								for (j=colIteraction; j<colCount; j++) {
 									var localValue = query_result.getValueAt(i,j) - 0;
 									value += localValue;
@@ -477,10 +474,10 @@
 						else if (TOPCOUNTAXIS == 'rows' && rowIteraction != rowCount){
 
 							// This will probably need a refactoring. All of this, actually :S
-							var value = 0;
 							var a = new Array();
 							for(j = 0 ; j < colIteraction; j++){
 
+								var value = 0;
 								for (i=rowIteraction; i<rowCount; i++) {
 									var localValue = query_result.getValueAt(i,j) - 0;
 									value += localValue;

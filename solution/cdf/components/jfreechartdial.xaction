@@ -189,11 +189,7 @@
 	</inputs>
 
 	<outputs> 
-		<image-tag type="string"> 
-			<destinations> 
-				<response>content</response> 
-			</destinations> 
-		</image-tag> 
+		<image-tag type="string"/> 
 	</outputs>
 
 	<actions>
