@@ -1,80 +1,80 @@
 commonLibrariesScript=\
 /pentaho-style/pentaho.js,\
-/pentaho/js/pentaho-ajax.js,\
-/pentaho/js/options.js,\
-/pentaho/content/pentaho-cdf/js/jquery.js,\
-/pentaho/content/pentaho-cdf/js/jquery-impromptu.1.5.js,\
-/pentaho/content/pentaho-cdf/js/jquery.ui.js,\
-/pentaho/content/pentaho-cdf/js/jquery.bgiframe.js,\
-/pentaho/content/pentaho-cdf/js/jquery.dimensions.js,\
-/pentaho/content/pentaho-cdf/js/jquery.jdMenu.js,\
-/pentaho/content/pentaho-cdf/js/jquery.positionBy.js,\
-/pentaho/content/pentaho-cdf/js/jquery.tooltip.js,\
-/pentaho/content/pentaho-cdf/js/jquery.blockUI.js,\
-/pentaho/content/pentaho-cdf/js/jquery.eventstack.js,\
-/pentaho/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
-/pentaho/content/pentaho-cdf/js/greybox/AJS.js,\
-/pentaho/content/pentaho-cdf/js/greybox/AJS_fx.js,\
-/pentaho/content/pentaho-cdf/js/greybox/gb_scripts.js,\
-/pentaho/adhoc/js/common/ui/calendar/calendar.js,\
-/pentaho/adhoc/js/common/ui/calendar/calendar-setup.js,\
-/pentaho/adhoc/js/common/ui/calendar/lang/calendar-en.js,\
-/pentaho/content/pentaho-cdf/js/Base.js,\
-/pentaho/content/pentaho-cdf/js/Dashboards.js,\
-/pentaho/content/pentaho-cdf/js/CoreComponents.js,\
-/pentaho/content/pentaho-cdf/js/NavigationComponents.js,\
-/pentaho/content/pentaho-cdf/js/MapComponents.js,\
-/pentaho/content/pentaho-cdf/js/OlapUtils.js,\
-/pentaho/content/pentaho-cdf/js/MetaLayer/MetaLayer.js
+@BASE_URL@/js/pentaho-ajax.js,\
+@BASE_URL@/js/options.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery-impromptu.1.5.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.ui.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.bgiframe.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.dimensions.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.jdMenu.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.positionBy.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.tooltip.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.blockUI.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.eventstack.js,\
+@BASE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
+@BASE_URL@/content/pentaho-cdf/js/greybox/AJS.js,\
+@BASE_URL@/content/pentaho-cdf/js/greybox/AJS_fx.js,\
+@BASE_URL@/content/pentaho-cdf/js/greybox/gb_scripts.js,\
+@BASE_URL@/adhoc/js/common/ui/calendar/calendar.js,\
+@BASE_URL@/adhoc/js/common/ui/calendar/calendar-setup.js,\
+@BASE_URL@/adhoc/js/common/ui/calendar/lang/calendar-en.js,\
+@BASE_URL@/content/pentaho-cdf/js/Base.js,\
+@BASE_URL@/content/pentaho-cdf/js/Dashboards.js,\
+@BASE_URL@/content/pentaho-cdf/js/CoreComponents.js,\
+@BASE_URL@/content/pentaho-cdf/js/NavigationComponents.js,\
+@BASE_URL@/content/pentaho-cdf/js/MapComponents.js,\
+@BASE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
+@BASE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js
 
 commonLibrariesLink=\
-/pentaho/content/pentaho-cdf/js/jquery.tooltip.css,\
-/pentaho/content/pentaho-cdf/js/jquery.jdMenu.css,\
-/pentaho/content/pentaho-cdf/js/jquery.jdMenu.slate.css,\
-/pentaho/content/pentaho-cdf/js/jquery-impromptu.css,\
-/pentaho/content/pentaho-cdf/js/theme/ui.all.css,\
-/pentaho/content/pentaho-cdf/js/greybox/gb_styles.css,\
-/pentaho/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
-/pentaho/content/pentaho-cdf/js/cdf.css
+@BASE_URL@/content/pentaho-cdf/js/jquery.tooltip.css,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.jdMenu.css,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.jdMenu.slate.css,\
+@BASE_URL@/content/pentaho-cdf/js/jquery-impromptu.css,\
+@BASE_URL@/content/pentaho-cdf/js/theme/ui.all.css,\
+@BASE_URL@/content/pentaho-cdf/js/greybox/gb_styles.css,\
+@BASE_URL@/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
+@BASE_URL@/content/pentaho-cdf/js/cdf.css
 
 mapScript=\
 js/OpenMap/open_map.js,js/jsr_class.js,\
 js/OpenStreetMap.js
 
 dateRangeInputScript=\
-/pentaho/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
+@BASE_URL@/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
 
 dateRangeInputLink=\
-/pentaho/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
+@BASE_URL@/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
 
 tableComponentScript=\
-/pentaho/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
-/pentaho/content/pentaho-cdf/js/jquery.sparkline.js
+@BASE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
 tableComponentLink=\
-/pentaho/content/pentaho-cdf/resources/style/jquery.jTable.css,\
-/pentaho/content/pentaho-cdf/js/dataTables/css/demos.css
+@BASE_URL@/content/pentaho-cdf/resources/style/jquery.jTable.css,\
+@BASE_URL@/content/pentaho-cdf/js/dataTables/css/demos.css
 
 timePlotComponentScript=\
-/pentaho/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js?local
+@BASE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js?local
 
 autocompleteBoxScript=\
-/pentaho/content/pentaho-cdf/js/autobox/jquery.templating.js,\
-/pentaho/content/pentaho-cdf/js/autobox/jquery.ui.autobox.ext.js,\
-/pentaho/content/pentaho-cdf/js/autobox/jquery.ui.autobox.js
+@BASE_URL@/content/pentaho-cdf/js/autobox/jquery.templating.js,\
+@BASE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.ext.js,\
+@BASE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.js
 
 autocompleteBoxLink=\
-/pentaho/content/pentaho-cdf/js/autobox/jquery.ui.autobox.css
+@BASE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.css
 
 mapScript=\
-/pentaho/content/pentaho-cdf/js/OpenMap/open_map.js,\
-/pentaho/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
-/pentaho/content/pentaho-cdf/js/jsr_class.js,\
-/pentaho/content/pentaho-cdf/js/OpenStreetMap.js
+@BASE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
+@BASE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
+@BASE_URL@/content/pentaho-cdf/js/jsr_class.js,\
+@BASE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
 mapLink=\
-/pentaho/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
-/pentaho/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
+@BASE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
+@BASE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
 
 

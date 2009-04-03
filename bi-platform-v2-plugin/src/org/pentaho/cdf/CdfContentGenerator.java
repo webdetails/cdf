@@ -53,7 +53,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
 	public static final String JSON_SOLUTION = "/JSONSolution"; //$NON-NLS-1$
 	public static final String GET_CDF_RESOURCE = "/GetCDFResource"; //$NON-NLS-1$  
 
-
+	// CDF Resource BaseURL
+	private static final String BASE_URL_TAG = "@BASE_URL@";
+	private static final String BASE_URL = "/" + PentahoSystem.getApplicationContext().getBaseUrl().split("[/]+")[2];
 
 	@Override
 	public void createContent() throws Exception {
@@ -356,9 +358,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
 					
 					filesAdded.put(includeFiles[i],'1');
 					if(key.equals("script"))
-						includeString += "<script language=\"javascript\" type=\"text/javascript\" src=\"" +  includeFiles[i] + "\"></script>" + newLine;
+						includeString += "<script language=\"javascript\" type=\"text/javascript\" src=\"" + includeFiles[i].replaceAll(BASE_URL_TAG,BASE_URL) + "\"></script>" + newLine;
 					else
-						includeString += "<link rel=\"stylesheet\" href=\"" + includeFiles[i] + "\" type=\"text/css\" />";
+						includeString += "<link rel=\"stylesheet\" href=\"" + includeFiles[i].replaceAll(BASE_URL_TAG,BASE_URL) + "\" type=\"text/css\" />";
 						
 				}
 			}

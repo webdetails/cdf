@@ -88,7 +88,7 @@ var XactionComponent = BaseComponent.extend({
 				" width=\"100%\"" + 
 				" src=\"";
 				
-				xactionIFrameHTML += "/pentaho/ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
+				xactionIFrameHTML += webAppPath + "/ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
 
 				// Add args
 				var p = new Array(this.parameters.length);
@@ -480,7 +480,7 @@ var TimePlotComponent = BaseComponent.extend({
 				parameters.push(key+"="+value);
 			} 
 			var allData = undefined;
-			var timePlotEventSourceUrl = "/pentaho/ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
+			var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
 			var myself = this;
 			if(cd.events && cd.events.show == true){
 
@@ -492,7 +492,7 @@ var TimePlotComponent = BaseComponent.extend({
 					parameters.push(key+"="+value);
 				} 
 
-				var eventUrl = "/pentaho/ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
+				var eventUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
 
 				timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
 						timeplot.loadJSON(eventUrl,eventSource2,function(data){
@@ -845,7 +845,7 @@ var JpivotComponent = BaseComponent.extend({
 		update : function() {
 			// Build IFrame and set url
 			var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-			jpivotHTML += "/pentaho/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
+			jpivotHTML += webAppPath + "/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
 
 			// Add args
 			var p = new Array(this.parameters.length);
@@ -873,7 +873,7 @@ var TableComponent = BaseComponent.extend({
 			// Clear previous table
 			$("#"+this.htmlObject).empty();
 			var myself = this;
-			$.getJSON("/pentaho/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
+			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
 					myself.processTableComponentResponse(json);
 				});
 		},
@@ -997,7 +997,7 @@ var PivotLinkComponent = BaseComponent.extend({
 		}
 	},{
 		openPivotLink : function(object) {
-			var url = "/pentaho/Pivot?solution=cdf&path=components&action=jpivot.xaction&";
+			var url = webAppPath + "/Pivot?solution=cdf&path=components&action=jpivot.xaction&";
 
 			var qd = object.pivotDefinition;
 			var parameters = [];
@@ -1028,7 +1028,7 @@ var QueryComponent = BaseComponent.extend({
 				return;
 			}
 
-			$.getJSON("/pentaho/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
+			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
 					object.result = json;
 				});
 		}
@@ -1055,7 +1055,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 				});
 		},
 		executeXAction : function() {
-			var url = "/pentaho/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
+			var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
 
 			var p = new Array(this.parameters.length);
 			var parameters = [];
