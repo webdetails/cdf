@@ -3,10 +3,11 @@ Notice: I feel so dirty doing this, but its the only way to make it cross browse
 -->
 <html>
 <head>
-		<script language="javascript" type="text/javascript" src="/pentaho/content/pentaho-cdf/js/jquery.js"></script>
-		<script language="javascript" type="text/javascript" src="/pentaho/content/pentaho-cdf/js/jquery.ui.js"></script>
-		<script language="javascript" type="text/javascript" src="/pentaho/content/pentaho-cdf/js/jquery.blockUI.js"></script>
-		<script language="javascript" type="text/javascript" src="/pentaho/content/pentaho-cdf/js/Dashboards.js"></script>
+		<script>var webAppPath = "/" + window.location.pathname.split( '/' )[1];</script>
+		<script language="javascript" type="text/javascript" src="../jquery.js"></script>
+		<script language="javascript" type="text/javascript" src="../jquery.ui.js"></script>
+		<script language="javascript" type="text/javascript" src="../jquery.blockUI.js"></script>
+		<script language="javascript" type="text/javascript" src="../Dashboards.js"></script>
   <script>
     var GB = parent.GB_CURRENT;
     document.write('<script type="text/javascript" src="AJS.js"><\/script>');
