@@ -183,7 +183,7 @@ Dashboards.addArgs = function(url){
 }
 
 Dashboards.init = function(components){
-	if(Dashboards.isArray(components)){
+	if($.isArray(components)){
 		Dashboards.addComponents(components);
 	}
 	$(function(){Dashboards.initEngine()});
@@ -249,7 +249,7 @@ Dashboards.fireChange = function(parameter, value) {
 
 
 	for(var i= 0, len = this.components.length; i < len; i++){
-		if(Dashboards.isArray(this.components[i].listeners)){
+		if($.isArray(this.components[i].listeners)){
 			for(var j= 0 ; j < this.components[i].listeners.length; j++){
 				if(this.components[i].listeners[j] == parameter) {
 					this.update(this.components[i]);
@@ -264,9 +264,6 @@ Dashboards.fireChange = function(parameter, value) {
 
 };
 
-Dashboards.isArray = function(testObject) {
-	return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
-}
 
 Dashboards.getParameterValue = function (parameterName) {
 	if (Dashboards.globalContext) {
@@ -310,7 +307,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
 
 Dashboards.serializeValue = function(value){
 
-	if (Dashboards.isArray(value)){
+	if ($.isArray(value)){
 		var a = new Array(value.length);
 		$.each(value,function(i,val){
 				a[i] = '"' + encode_prepare(val.replace(/"/g,'\\"')) + '"';

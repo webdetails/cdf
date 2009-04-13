@@ -2,7 +2,7 @@ var BaseComponent = Base.extend({
 		//type : "unknown",
 		visible: true,
 		clear : function() {
-			document.getElementById(this.htmlObject).innerHTML = "";
+			$("#"+this.htmlObject).empty();
 		},
 		getValuesArray : function() {
 
@@ -112,7 +112,7 @@ var XactionComponent = BaseComponent.extend({
 				// Close IFrame
 				xactionIFrameHTML += "\"></iframe>";
 
-				document.getElementById(this.htmlObject).innerHTML = xactionIFrameHTML;
+				$("#"+this.htmlObject).html(xactionIFrameHTML);
 			}
 		  } catch (e) {
 			  // don't cause the rest of CDF to fail if xaction component fails for whatever reason
@@ -195,18 +195,6 @@ var SelectComponent = SelectBaseComponent.extend({
 var SelectMultiComponent = SelectBaseComponent.extend({
 		getValue : function() {
 			return $("#"+this.name).val();
-			/*
-			var selector = document.getElementById(this.name);
-			var selection = new Array();
-			var selection_index = 0;
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].checked || selector[i].selected){
-					selection[selection_index] = selector[i].value;
-					selection_index ++;
-				};
-			} 
-			return selection.join("','");
-			*/
 		}
 	});
 
@@ -566,7 +554,7 @@ var TextInputComponent = BaseComponent.extend({
 			selectHTML = "<input";
 			selectHTML += " type=test id='" + this.name +"' name='" + this.name + 
 				"' + value='"+ Dashboards.getParameterValue(this.parameter) + "'>";
-			document.getElementById(this.htmlObject).innerHTML = selectHTML;
+			$("#"+this.htmlObject).html(selectHTML);
 			var myself = this;
 			$("#"+this.name).change(function() { Dashboards.processChange(myself.name);}).keyup(function(event) {
 					if (event.keyCode==13){
@@ -653,7 +641,7 @@ var DateRangeInputComponent = BaseComponent.extend({
 var MonthPickerComponent = BaseComponent.extend({
 		update : function() {
 			var selectHTML = this.getMonthPicker(this.name, this.size, this.initialDate, this.minDate, this.maxDate, this.months);
-			document.getElementById(this.htmlObject).innerHTML = selectHTML;
+			$("#" + this.htmlObject).html(selectHTML);
 			var myself = this;
 			$("#"+this.name).change(function() {
 					Dashboards.processChange(myself.name);
@@ -855,7 +843,7 @@ var JpivotComponent = BaseComponent.extend({
 			// Close IFrame
 			jpivotHTML += "\"></iframe>";
 
-			document.getElementById(this.htmlObject).innerHTML = jpivotHTML;
+			$("#"+this.htmlObject).html(jpivotHTML);
 		}
 	});
 
