@@ -302,7 +302,7 @@
 		  for(var i=0,j=0; i<vals.length; ++i){
 			var value = vals[i].innerHTML.match(/^[^<]+/);
 			if(value!= null){
-				values[j] = value;j++;
+				values[j] = value[0];j++;
 			}
 		  }
 		  return values;
