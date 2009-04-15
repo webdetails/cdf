@@ -234,7 +234,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 						}
 						else{
 							cls = "action greybox";
-							href = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
+							href = WEB_CONTEXT_BASE + "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
 						}
 						// target = "_new"
 

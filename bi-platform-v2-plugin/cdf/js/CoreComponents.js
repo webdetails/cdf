@@ -47,7 +47,7 @@ var BaseComponent = Base.extend({
 
 			var myArray = new Array();
 			
-			var jHeaders = jData.find("COLUMN-HDR-ITEM");
+			var jHeaders = $(jData).find("COLUMN-HDR-ITEM");
 			if (includeHeader && jHeaders.size() > 0 ){
 				var _a = new Array();
 				jHeaders.each(function(){
@@ -56,7 +56,7 @@ var BaseComponent = Base.extend({
 				myArray.push(_a);
 			}
 
-			var jDetails = jData.find("DATA-ROW");
+			var jDetails = $(jData).find("DATA-ROW");
 			jDetails.each(function(){
 					var _a = new Array();
 					$(this).children("DATA-ITEM").each(function(){
@@ -96,7 +96,7 @@ var XactionComponent = BaseComponent.extend({
 				" width=\"100%\"" + 
 				" src=\"";
 				
-				xactionIFrameHTML += webAppPath + "/ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
+				xactionIFrameHTML += WEB_CONTEXT_BASE + "ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
 
 				// Add args
 				var p = new Array(this.parameters.length);
@@ -312,12 +312,12 @@ var TrafficComponent = BaseComponent.extend({
 			// callback async mode
 			Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters, 
 				function(result){ 
-					
-					var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
+					var value = $(result).find("VALUE").text();
+					var i = $("<img>").attr("src",value<=cd.intervals[0]?TRAFFIC_RED:(value>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
 					$('#'+myself.htmlObject).html(i);
 					
 					if(cd.showValue != undefined && cd.showValue == true){
-						var tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+						var tooltip = "Value: " + value + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
 						$('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({delay:0,track: true,fade: 250});
 					}
 					
@@ -478,7 +478,7 @@ var TimePlotComponent = BaseComponent.extend({
 				parameters.push(key+"="+value);
 			} 
 			var allData = undefined;
-			var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
+			var timePlotEventSourceUrl = WEB_CONTEXT_BASE + "ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
 			var myself = this;
 			if(cd.events && cd.events.show == true){
 
@@ -490,7 +490,7 @@ var TimePlotComponent = BaseComponent.extend({
 					parameters.push(key+"="+value);
 				} 
 
-				var eventUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
+				var eventUrl = WEB_CONTEXT_BASE + "ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
 
 				timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
 						timeplot.loadJSON(eventUrl,eventSource2,function(data){
@@ -831,7 +831,7 @@ var JpivotComponent = BaseComponent.extend({
 		update : function() {
 			// Build IFrame and set url
 			var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-			jpivotHTML += webAppPath + "/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
+			jpivotHTML += WEB_CONTEXT_BASE + "ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
 
 			// Add args
 			var p = new Array(this.parameters.length);
@@ -859,7 +859,7 @@ var TableComponent = BaseComponent.extend({
 			// Clear previous table
 			$("#"+this.htmlObject).empty();
 			var myself = this;
-			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
+			$.getJSON(WEB_CONTEXT_BASE + "ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
 					myself.processTableComponentResponse(json);
 				});
 		},
@@ -983,7 +983,7 @@ var PivotLinkComponent = BaseComponent.extend({
 		}
 	},{
 		openPivotLink : function(object) {
-			var url = webAppPath + "/Pivot?solution=cdf&path=components&action=jpivot.xaction&";
+			var url = WEB_CONTEXT_BASE + "Pivot?solution=cdf&path=components&action=jpivot.xaction&";
 
 			var qd = object.pivotDefinition;
 			var parameters = [];
@@ -1014,7 +1014,7 @@ var QueryComponent = BaseComponent.extend({
 				return;
 			}
 
-			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
+			$.getJSON(WEB_CONTEXT_BASE + "ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
 					object.result = json;
 				});
 		}
@@ -1041,7 +1041,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 				});
 		},
 		executeXAction : function() {
-			var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
+			var url = WEB_CONTEXT_BASE + "ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
 
 			var p = new Array(this.parameters.length);
 			var parameters = [];
