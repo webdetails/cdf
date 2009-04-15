@@ -326,7 +326,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 		}		
 
 		//Concat libraries to html head content
-		intro = intro.substring(0,headIndex-1) + javaScriptLibrary + intro.substring(headIndex,length-1);
+		intro = intro.substring(0,headIndex+6) + javaScriptLibrary + intro.substring(headIndex+7,length-1);
 
 		System.out.println("*** Finish: " + (new Date().getTime() - startDate.getTime()));
 		PrintWriter pw = new PrintWriter(out);
