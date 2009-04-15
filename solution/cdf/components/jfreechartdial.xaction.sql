@@ -323,13 +323,13 @@
 			<component-definition> 
 				<script><![CDATA[
 
-				var intervals = INTERVALS.split(",");
+				var intervals = INTERVALS;
 				if(COLORS == "") {
 					out.println("Setting default colors #FF3E3E,#FFFF53,#5EFF5E,#53FF53 ");
 					colors = "#FF3E3E,#FFFF53,#5EFF5E,#53FF53".split(",");
 				}
 				else	
-					colors = COLORS.split(",");
+					colors = COLORS;
 				
 				var last;
 				out.println("Inntervals length: " + intervals.length);
