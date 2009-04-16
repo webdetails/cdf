@@ -992,7 +992,10 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 
 			this.setChartType(options.defaultChartType);
 
-			this.chartDefaults.parent = this;
+			// pass the properties of this to the chartDefaults
+			var _chart = Dashboards.clone(this);
+			delete _chart.chartDefaults;
+			this.chartDefaults.parent = _chart;
 
 			// Init this querybase
 			this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
