@@ -55,7 +55,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
 	// CDF Resource BaseURL
 	private static final String BASE_URL_TAG = "@BASE_URL@";
-	private static final String BASE_URL = PentahoSystem.getApplicationContext().getBaseUrl().replaceAll("/$","");
+	private static final String BASE_URL = "/" + PentahoSystem.getApplicationContext().getBaseUrl().split("[/]+")[2];
 
 	@Override
 	public void createContent() throws Exception {
