@@ -2,10 +2,11 @@ var BaseComponent = Base.extend({
 		//type : "unknown",
 		visible: true,
 		clear : function() {
-			document.getElementById(this.htmlObject).innerHTML = "";
+			$("#"+this.htmlObject).empty();
 		},
 		getValuesArray : function() {
 
+			var jXML;
 			if ( typeof(this.valuesArray) == 'undefined') {
 				//go through parameter array and update values
 				var p = new Array(this.parameters.length);
@@ -29,34 +30,40 @@ var BaseComponent = Base.extend({
 					
 					html = Dashboards.parseXActionResult(myself, pentahoPost(this.url, query));
 				} else {
-					html = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
+					jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
 				}
 				//transform the result int a javascript array
-				var myArray = this.parseArray(html, false);
+				var myArray = this.parseArray(jXML, false);
 				return myArray;
 			} else {
 				return this.valuesArray
 			}
 		},
-		parseArray : function(html,includeHeader){
-			var myArray;
-			html=html.replace(/<tr>/g,"["); 						/*1. GET ROWS*/
-			html=html.replace(/<\/tr>/g,"],");						/*2. GET ROWS*/
-			html=html.replace(/<t[hd][^\>]*>/g,"@BEGIN_ELEMENT@");  /*3. GET COLUMNS*/
-			html=html.replace(/<\/t[hd]>/g,"@END_ELEMENT@");	 	/*4. GET COLUMNS*/
-			html=html.replace(/@BEGIN_ELEMENT@/g,"\"");				/*5. SEPARATE COLUMNS by "," */
-			html=html.replace(/@END_ELEMENT@\]/g,"\"]");			/*6. SEPARATE COLUMNS by "," */
-			html=html.replace(/@END_ELEMENT@/g,"\",");				/*7. SEPARATE COLUMNS by "," */
-			var a = "var myArray = [" + html.substring(0,html.length-1) + "];"	/*REMOVE LAST  "," ADDED  at 2 */
-			try{
-				eval(a);
+		parseArray : function(jData,includeHeader){
+
+			if(jData == null){
+				return []; //we got an error...
 			}
-			catch(err){
-				return [];
+
+			var myArray = new Array();
+			
+			var jHeaders = $(jData).find("COLUMN-HDR-ITEM");
+			if (includeHeader && jHeaders.size() > 0 ){
+				var _a = new Array();
+				jHeaders.each(function(){
+						_a.push($(this).text())
+					});
+				myArray.push(_a);
 			}
-			if (!includeHeader){
-				myArray.splice(0,1);
-			}
+
+			var jDetails = $(jData).find("DATA-ROW");
+			jDetails.each(function(){
+					var _a = new Array();
+					$(this).children("DATA-ITEM").each(function(){
+							_a.push($(this).text());
+						})
+					myArray.push(_a);
+				});
 
 			return myArray;
 
@@ -75,12 +82,13 @@ var XactionComponent = BaseComponent.extend({
 					p[i] = [key,value];
 				} 
 	
-				// callback async mode
-				// Dashboards.callPentahoAction(this.solution, this.path, this.action,
-				// p,function(json){ Dashboards.xactionCallback(object,json); });
-				// or sync mode
 				var myself=this;
-				$('#'+this.htmlObject).html(Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null));
+				var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
+			
+				if(jXML != null){
+					$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+				}
+
 			} else {
 				var xactionIFrameHTML = "<iframe id=\"iframe_"+ this.htmlObject + "\"" + 
 				" frameborder=\"0\"" +
@@ -104,7 +112,7 @@ var XactionComponent = BaseComponent.extend({
 				// Close IFrame
 				xactionIFrameHTML += "\"></iframe>";
 
-				document.getElementById(this.htmlObject).innerHTML = xactionIFrameHTML;
+				$("#"+this.htmlObject).html(xactionIFrameHTML);
 			}
 		  } catch (e) {
 			  // don't cause the rest of CDF to fail if xaction component fails for whatever reason
@@ -113,6 +121,7 @@ var XactionComponent = BaseComponent.extend({
 	});
 
 var SelectBaseComponent = BaseComponent.extend({
+		visible: false,
 		update : function() {
 			var myArray = new Array();
 			var myself=this;
@@ -179,28 +188,13 @@ var SelectBaseComponent = BaseComponent.extend({
 
 var SelectComponent = SelectBaseComponent.extend({
 		getValue : function() {
-			var selector = document.getElementById(this.name);
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].selected){
-					value = selector[i].value;
-				};
-			}
-			return value;
+			return $("#"+this.name).val();
 		}
 	});
 
 var SelectMultiComponent = SelectBaseComponent.extend({
 		getValue : function() {
-			var selector = document.getElementById(this.name);
-			var selection = new Array();
-			var selection_index = 0;
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].checked || selector[i].selected){
-					selection[selection_index] = selector[i].value;
-					selection_index ++;
-				};
-			} 
-			return selection.join("','");
+			return $("#"+this.name).val();
 		}
 	});
 
@@ -228,11 +222,15 @@ var JFreeChartComponent = BaseComponent.extend({
 
 			var myself = this;
 			// callback async mode
-			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechart.xaction", parameters, 
-				function(json){ 
-					$('#'+myself.htmlObject).html(json); 
+			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechart.xaction", parameters,function(jXML){
+				
+					if(jXML != null){
+						$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+					}
 					Dashboards.decrementRunningCalls();
+
 				});
+
 			// or sync mode
 			// $('#'+object.htmlObject).html(Dashboards.callPentahoAction(myself, "cdf", "components",
 			// "jfreechart.xaction", parameters,null));
@@ -273,14 +271,14 @@ var DialComponent = BaseComponent.extend({
 
 			var myself = this;
 			// callback async mode
-			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechartdial.xaction", parameters, 
-				function(json){ 
-					$('#'+myself.htmlObject).html(json); 
+			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechartdial.xaction", parameters,function(jXML){
+				
+					if(jXML != null){
+						$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+					}
 					Dashboards.decrementRunningCalls();
+
 				});
-			// or sync mode
-			// $('#'+object.htmlObject).html(Dashboards.callPentahoAction(myself, "cdf", "components",
-			// "jfreechartdial.xaction", parameters,null));
 
 		}
 	});
@@ -314,12 +312,12 @@ var TrafficComponent = BaseComponent.extend({
 			// callback async mode
 			Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters, 
 				function(result){ 
-					
-					var i = $("<img>").attr("src",result<=cd.intervals[0]?TRAFFIC_RED:(result>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
+					var value = $(result).find("VALUE").text();
+					var i = $("<img>").attr("src",value<=cd.intervals[0]?TRAFFIC_RED:(value>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
 					$('#'+myself.htmlObject).html(i);
 					
 					if(cd.showValue != undefined && cd.showValue == true){
-						var tooltip = "Value: " + result + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+						var tooltip = "Value: " + value + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
 						$('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({delay:0,track: true,fade: 250});
 					}
 					
@@ -556,7 +554,7 @@ var TextInputComponent = BaseComponent.extend({
 			selectHTML = "<input";
 			selectHTML += " type=test id='" + this.name +"' name='" + this.name + 
 				"' + value='"+ Dashboards.getParameterValue(this.parameter) + "'>";
-			document.getElementById(this.htmlObject).innerHTML = selectHTML;
+			$("#"+this.htmlObject).html(selectHTML);
 			var myself = this;
 			$("#"+this.name).change(function() { Dashboards.processChange(myself.name);}).keyup(function(event) {
 					if (event.keyCode==13){
@@ -565,8 +563,7 @@ var TextInputComponent = BaseComponent.extend({
 				});
 		},
 		getValue : function() {
-			var selector = document.getElementById(this.name);
-			return selector.value;
+			return $("#"+this.name).val();
 		}
 	});
 
@@ -584,8 +581,7 @@ var DateInputComponent = BaseComponent.extend({
 			});
 		},
 		getValue : function() {
-			var selector = document.getElementById(this.name);
-			return selector.value;
+			return $("#"+this.name).val();
 		}
 	});
 
@@ -645,7 +641,7 @@ var DateRangeInputComponent = BaseComponent.extend({
 var MonthPickerComponent = BaseComponent.extend({
 		update : function() {
 			var selectHTML = this.getMonthPicker(this.name, this.size, this.initialDate, this.minDate, this.maxDate, this.months);
-			document.getElementById(this.htmlObject).innerHTML = selectHTML;
+			$("#" + this.htmlObject).html(selectHTML);
 			var myself = this;
 			$("#"+this.name).change(function() {
 					Dashboards.processChange(myself.name);
@@ -733,36 +729,26 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 					selectHTML += " type='checkbox'";
 				}
 				var vid = this.valueAsId==false?0:1;
-				selectHTML += " id='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + (this.separator == undefined?"":this.separator);
+				selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + (this.separator == undefined?"":this.separator);
 			} 
 			// update the placeholder
-			document.getElementById(this.htmlObject).innerHTML = selectHTML;
+			$("#" + this.htmlObject).html(selectHTML);
 		}
 	});
 
 var RadioComponent = ToggleButtonBaseComponent.extend({
 		getValue : function() {
-			var selector = document.getElementsByName(this.name);
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].checked){
-					return selector[i].value;
-				};
-			}
+			return $("#"+this.htmlObject + " ."+this.name+":checked").val()
 		}
 	});
 
 var CheckComponent = ToggleButtonBaseComponent.extend({
 		getValue : function() {
-			var selector = document.getElementsByName(this.name);
-			var selection = new Array();
-			var selection_index = 0;
-			for(var i= 0, len  = selector.length; i < len; i++){
-				if(selector[i].checked || selector[i].selected){
-					selection[selection_index] = selector[i].value;
-					selection_index ++;
-				};
-			} 
-			return selection.join("','");
+			var a = new Array()
+			$("#"+this.htmlObject + " ."+this.name + ":checked").each(function(i,val){
+					a.push($(this).val());
+				});
+			return a;
 		}
 	});
 
@@ -857,7 +843,7 @@ var JpivotComponent = BaseComponent.extend({
 			// Close IFrame
 			jpivotHTML += "\"></iframe>";
 
-			document.getElementById(this.htmlObject).innerHTML = jpivotHTML;
+			$("#"+this.htmlObject).html(jpivotHTML);
 		}
 	});
 

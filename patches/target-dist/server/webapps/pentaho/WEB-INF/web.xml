@@ -321,6 +321,11 @@
     	<servlet-name>GenericServlet</servlet-name>
 		<servlet-class>org.pentaho.platform.web.servlet.GenericServlet</servlet-class>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>WebContextServlet</servlet-name>
+		<servlet-class>org.pentaho.platform.web.servlet.WebContextServlet</servlet-class>
+	</servlet>
 
 	<servlet>
 		<servlet-name>Pivot</servlet-name>
@@ -366,11 +371,6 @@
 	<servlet>
 		<servlet-name>UpdateSampleEmails</servlet-name>
 		<jsp-file>/jsp/UpdateSampleEmails.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
-		<servlet-name>Widgets</servlet-name>
-		<jsp-file>/jsp/Widgets.jsp</jsp-file>
 	</servlet>
 
 	<servlet>
@@ -443,8 +443,6 @@
 		<jsp-file>/jsp/Map.jsp</jsp-file>
 	</servlet>
 	
-	
-
 	<!-- ================================= merged servlets =================================== -->
 	<servlet>
 		<servlet-name>ManageUsers</servlet-name>
@@ -620,11 +618,6 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>Widgets</servlet-name>
-		<url-pattern>/Widgets</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
 		<servlet-name>SolutionManager</servlet-name>
 		<url-pattern>/SolutionManager</url-pattern>
 	</servlet-mapping>
@@ -749,6 +742,11 @@
 	<servlet-mapping>
 		<servlet-name>Map</servlet-name>
 		<url-pattern>/Map</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>WebContextServlet</servlet-name>
+		<url-pattern>/js/webcontext.js</url-pattern>
 	</servlet-mapping>
 
 	<!-- =============================== merged servlet-mappings ============================= -->

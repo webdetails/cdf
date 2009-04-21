@@ -12,6 +12,9 @@ var TRAFFIC_GREEN = "resources/style/images/traffic_green.png";
 var ERROR_IMAGE = 'resources/style/images/error.png';
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
+var pathArray = window.location.pathname.split( '/' );
+var webAppPath = "/" + pathArray[1];
+
 $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /> <h3>Processing...</h3></div>';
 $.blockUI.defaults.css.left = '40%';
 $.blockUI.defaults.css.top = '30%';
@@ -116,11 +119,6 @@ Dashboards.blockUIwithDrag = function() {
 //}
 
 Dashboards.update = function(object) {
-	// Clean errors div, creating first if it doesn't exist
-	if ($("#"+CDF_ERROR_DIV).length == 0){
-		$("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
-	}
-	$("#"+CDF_ERROR_DIV).empty();
 	if(!(typeof(object.preExecution)=='undefined')){
 		object.preExecution();
 	}
@@ -147,6 +145,13 @@ Dashboards.update = function(object) {
 			});
 	}
 };
+
+Dashboards.createAndCleanErrorDiv = function(){
+	if ($("#"+CDF_ERROR_DIV).length == 0){
+		$("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
+	}
+	$("#"+CDF_ERROR_DIV).empty();
+}
 
 Dashboards.showErrorTooltip = function(){
 	$(function(){$(".cdf_error").tooltip({delay:0, track: true, fade: 250, showBody: " -- "})});
@@ -181,7 +186,7 @@ Dashboards.addArgs = function(url){
 }
 
 Dashboards.init = function(components){
-	if(Dashboards.isArray(components)){
+	if($.isArray(components)){
 		Dashboards.addComponents(components);
 	}
 	$(function(){Dashboards.initEngine()});
@@ -192,6 +197,7 @@ Dashboards.initEngine = function(){
 	var components = this.components;
 	var compCount = components.length;
 	Dashboards.incrementRunningCalls();
+	Dashboards.createAndCleanErrorDiv();
 
 	for(var i= 0, len = components.length; i < len; i++){
 		if(components[i].executeAtStart){
@@ -203,6 +209,7 @@ Dashboards.initEngine = function(){
 
 
 Dashboards.resetAll = function(){
+	Dashboards.createAndCleanErrorDiv();
 	var compCount = this.components.length;
 	for(var i= 0, len = this.components.length; i < len; i++){
 		this.components[i].clear();
@@ -222,6 +229,9 @@ Dashboards.processChange = function(object_name){
 	if (typeof object['getValue'] == 'function') {
 		value = object.getValue();
 	}
+	if (value == null) // We won't process changes on null values
+		return;
+	
 	if(!(typeof(object.preChange)=='undefined')){
 		object.preChange(value);
 	}
@@ -234,6 +244,7 @@ Dashboards.processChange = function(object_name){
 /*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
 Dashboards.fireChange = function(parameter, value) {
 	//alert("begin block");
+	Dashboards.createAndCleanErrorDiv();
 	Dashboards.incrementRunningCalls();
 
 	//alert("Parameter: " + parameter + "; Value: " + value);
@@ -241,7 +252,7 @@ Dashboards.fireChange = function(parameter, value) {
 
 
 	for(var i= 0, len = this.components.length; i < len; i++){
-		if(Dashboards.isArray(this.components[i].listeners)){
+		if($.isArray(this.components[i].listeners)){
 			for(var j= 0 ; j < this.components[i].listeners.length; j++){
 				if(this.components[i].listeners[j] == parameter) {
 					this.update(this.components[i]);
@@ -256,9 +267,6 @@ Dashboards.fireChange = function(parameter, value) {
 
 };
 
-Dashboards.isArray = function(testObject) {
-	return testObject && !(testObject.propertyIsEnumerable('length')) && typeof testObject === 'object' && typeof testObject.length === 'number';
-}
 
 Dashboards.getParameterValue = function (parameterName) {
 	if (Dashboards.globalContext) {
@@ -294,10 +302,25 @@ Dashboards.getQueryParameter = function ( parameterName ) {
 
 Dashboards.setParameter = function(parameterName, parameterValue) {
 	if (Dashboards.globalContext) {
-		eval( parameterName + "= encode_prepare(\"" + parameterValue + "\")");
+		eval( parameterName + " = " + Dashboards.serializeValue(parameterValue) );
 	} else {
-		Dashboards.parameters[parameterName] = encode_prepare(parameterValue);
+		Dashboards.parameters[parameterName] = eval(Dashboards.serializeValue(parameterValue))
 	}
+}
+
+Dashboards.serializeValue = function(value){
+
+	if ($.isArray(value)){
+		var a = new Array(value.length);
+		$.each(value,function(i,val){
+				a[i] = '"' + encode_prepare(val.replace(/"/g,'\\"')) + '"';
+			});
+		return "["+a.join(",")+"]";
+	}
+	else{
+		return '"' + encode_prepare(value.replace(/"/g,'\\"')) + '"';
+	}
+
 }
 
 Dashboards.clone = function clone(obj) {
@@ -344,53 +367,104 @@ Dashboards.ev = function(o){
 	return typeof o == 'function'?o():o
 };
 
+//For now call CDF Pentaho Action Function instead of pentahoAction present in pentaho.js. (until bug fix)
 Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
 	// Encapsulate pentahoAction call
 	// console.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
 	if(typeof callback == 'function'){
-		return pentahoAction( solution, path, action, parameters,
+		return Dashboards.pentahoAction( solution, path, action, parameters,
 			function(json){
 				callback(Dashboards.parseXActionResult(obj,json));
 			}
 		);
 	}
 	else{
-		return Dashboards.parseXActionResult(obj,pentahoAction( solution, path, action, parameters, callback ));
+		return Dashboards.parseXActionResult(obj,Dashboards.pentahoAction( solution, path, action, parameters, callback ));
 	}
 }
 
-Dashboards.parseXActionResult = function(obj,html){
-	if(html != undefined && html.substr(0,19) == '<html><head><title>' && html.indexOf("ERROR_")> 0){
-
-		// error found. Parsing it
-		var errorMessage = "Error executing component " + obj.name;
-		var errorDetails = new Array();
-		errorDetails[0] = " Error details for component execution " + obj.name + " -- ";
-		errorDetails[1] = html.match(/(?:<span style="color:red">)(.*?)(?:<\/span><p\/>)/)[1];
-		//$.each(errorDetails,function(i,val){errorDetails[i] = val.substring(24,val.length-11)});
-		// Iterate details;
-		
-		var idx_start = html.indexOf("</span><p/>")+11;
-		var idx_end = html.indexOf("</td></tr></table><p>");
-		var details = html.substring(idx_start,idx_end).split("<br/>");
-		
-		errorDetails = errorDetails.concat(details.slice(0,5));
-		errorDetails.push("...");
-		errorDetails.push("<i>For more information contact technical support</i>");
-		
-		var errorCode = html.substring(html.indexOf("ERROR_")+6,html.indexOf("ERROR_")+10);
-		
-		var out = "<table class='errorMessageTable' border='0'><tr><td><img src='"+ ERROR_IMAGE + "'></td><td><span class=\"cdf_error\" title=\" " + errorDetails.join('<br/>').replace(/"/g,"'") +"\" >" + errorMessage + " </span></td></tr></table/>";
-
-		// if this is a hidden component, we'll place this in the error div
-		if (obj.visible == false){
-			$("#"+CDF_ERROR_DIV).append("<br />" + out);
-		}
-		return out;
+Dashboards.pentahoAction = function( solution, path, action, params, func ) {
+	// execute an Action Sequence on the server
 	
+	var url = webAppPath + "/ServiceAction";
+	
+	// Add the solution to the params
+	var arr = {};
+	arr.wrapper = false;
+	arr.solution = solution;
+	arr.path = path;
+	arr.action = action;
+	$.each(params,function(i,val){
+			arr[val[0]]=val[1];
+		});
+
+	if (typeof func == "function"){
+		// async
+		return $.ajax({
+				url: url,
+				type: "POST",
+				dataType: "xml",
+				async: true,
+				data: arr,
+				complete: function (XMLHttpRequest, textStatus) {
+					func(XMLHttpRequest.responseXML);
+				},
+				error: function (XMLHttpRequest, textStatus, errorThrown) {
+					alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
+				}
+
+			}
+		);
 	}
-	else 
-		return html;
+	
+	// Sync
+	return $.ajax({
+			url: url,
+			type: "POST",
+			dataType: "xml",
+			async: false,
+			data: arr,
+			error: function (XMLHttpRequest, textStatus, errorThrown) {
+				alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
+			}
+
+		}
+	).responseXML;
+
+}    
+
+Dashboards.parseXActionResult = function(obj,html){
+
+	var jXML = $(html);
+	var error = jXML.find("SOAP-ENV\\:Fault");
+	if (error.length == 0){
+		return jXML;
+	}
+
+	// error found. Parsing it
+	var errorMessage = "Error executing component " + obj.name;
+	var errorDetails = new Array();
+	errorDetails[0] = " Error details for component execution " + obj.name + " -- ";
+	errorDetails[1] = error.find("SOAP-ENV\\:faultstring").find("SOAP-ENV\\:Text:eq(0)").text();
+	error.find("SOAP-ENV\\:Detail").find("message").each(function(){errorDetails.push($(this).text())});
+	if (errorDetails.length > 8){
+		errorDetails = errorDetails.slice(0,7);
+		errorDetails.push("...");
+	}
+
+	var out = "<table class='errorMessageTable' border='0'><tr><td><img src='"+ ERROR_IMAGE + "'></td><td><span class=\"cdf_error\" title=\" " + errorDetails.join('<br/>').replace(/"/g,"'") +"\" >" + errorMessage + " </span></td></tr></table/>";
+
+	// if this is a hidden component, we'll place this in the error div
+	if (obj.visible == false){
+		$("#"+CDF_ERROR_DIV).append("<br />" + out);
+	}
+	else{
+		$('#'+obj.htmlObject).html(out);
+	}
+
+
+	return null;
+
 };
 
 /**
