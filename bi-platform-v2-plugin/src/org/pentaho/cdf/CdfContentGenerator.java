@@ -7,6 +7,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -138,7 +140,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 		renderXCDFDashboard( out, solution, path, action, template );
 	}
 	
-	private void jsonSolution(OutputStream out, IParameterProvider requestParams)throws JSONException {
+	private void jsonSolution(OutputStream out, IParameterProvider requestParams)throws JSONException, ParserConfigurationException {
 		if( requestParams == null ) {
 			error( Messages.getErrorString("CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS") ); //$NON-NLS-1$
 			throw new InvalidParameterException( Messages.getString("CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS") );  //$NON-NLS-1$

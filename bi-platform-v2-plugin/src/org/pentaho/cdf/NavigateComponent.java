@@ -5,36 +5,30 @@
 
 package org.pentaho.cdf;
 
-import java.io.IOException;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
-
-import org.dom4j.Element;
+import javax.xml.parsers.ParserConfigurationException;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.api.engine.ICacheManager;
-import org.pentaho.platform.repository.solution.SolutionRepositoryBase;
-import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
+import org.pentaho.platform.web.servlet.SolutionRepositoryService;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import org.dom4j.Node;
-import org.dom4j.XPath;
-import org.pentaho.platform.api.engine.ISolutionFile;
+import org.dom4j.io.DOMReader;
 import org.json.JSONObject;
 import org.json.JSONArray;
-import org.json.XML;
 import org.json.JSONException;
 
 /**
  *
  * @author pedro
  */
+@SuppressWarnings("serial")
 public class NavigateComponent extends PentahoBase {
 
 	private static final String NAVIGATOR = "navigator";
@@ -43,11 +37,13 @@ public class NavigateComponent extends PentahoBase {
 	private static final String TYPE_XACTION = "XACTION";
 	private static final String TYPE_URL = "URL";
 	private static final String CACHE_NAVIGATOR = "CDF_NAVIGATOR_JSON";
+	private static final String CACHE_REPOSITORY_DOCUMENT = "CDF_REPOSITORY_DOCUMENT";
 	protected static final Log logger = LogFactory.getLog(NavigateComponent.class);
     ISolutionRepository solutionRepository = null;
     IPentahoSession userSession;
     ICacheManager cacheManager;
     boolean cachingAvailable;
+    private static final String BASE_URL = "/" + PentahoSystem.getApplicationContext().getBaseUrl().split("[/]+")[2];
     
     public NavigateComponent(IPentahoSession userSession) {
         
@@ -58,7 +54,7 @@ public class NavigateComponent extends PentahoBase {
 
     }
     
-    public String getNavigationElements(String mode, String solution, String path) throws JSONException {
+    public String getNavigationElements(String mode, String solution, String path) throws JSONException, ParserConfigurationException {
 
 
         if (mode.equals(NAVIGATOR)) {
@@ -79,27 +75,51 @@ public class NavigateComponent extends PentahoBase {
     public Log getLogger() {
         return logger;
     }
+    private Document getRepositoryDocument(IPentahoSession userSession) throws ParserConfigurationException {    	//
+    	 Document repositoryDocument;
+    	if (cachingAvailable && (repositoryDocument = (Document) cacheManager.getFromSessionCache(userSession, CACHE_REPOSITORY_DOCUMENT)) != null){
+    		getLogger().debug("Repository Document found in cache");
+    		return repositoryDocument;
+    	}
+    	else{
+    		//System.out.println(Calendar.getInstance().getTime() + ": Getting repository Document");
+    		DOMReader reader = new DOMReader();
+    		repositoryDocument =  reader.read(new SolutionRepositoryService().getSolutionRepositoryDoc(userSession,new String [0]));
+    		cacheManager.putInSessionCache(userSession, CACHE_REPOSITORY_DOCUMENT, repositoryDocument);
+    		//System.out.println(Calendar.getInstance().getTime() + ": Repository Document Returned");
+    	}
+		return repositoryDocument;
+	}
 
-    private String getNavigatorJSON(String solution, String path) throws JSONException {
+    private String getNavigatorJSON(String solution, String path) {
 
         String jsonString = null;
 
         if (cachingAvailable && (jsonString = (String) cacheManager.getFromSessionCache(userSession, CACHE_NAVIGATOR)) != null) {
-            debug("Navigator found in cache");
+        	debug("Navigator found in cache");
         } else {
-            Document navDoc = solutionRepository.getSolutionTree(ISolutionRepository.ACTION_EXECUTE);
-
-            // Get it and build the tree
-
-            JSONObject json = new JSONObject();
-
-            Node tree = navDoc.getRootElement();
-            JSONArray array = processTree(tree);
-            json.put("solution", array.get(0));
-
-            jsonString = json.toString(2);
-            // Store in cache:
-            cacheManager.putInSessionCache(userSession, CACHE_NAVIGATOR, jsonString);
+        	
+			try {
+				
+				Document navDoc = getRepositoryDocument(this.userSession);
+           
+	            // Get it and build the tree
+	            JSONObject json = new JSONObject();
+	
+	            Node tree = navDoc.getRootElement();
+	            JSONArray array = processTree(tree,"/");
+	            json.put("solution", array.get(0));
+	
+	            jsonString = json.toString(2);
+	            // Store in cache:
+	            cacheManager.putInSessionCache(userSession, CACHE_NAVIGATOR, jsonString);
+	            
+	            //System.out.println(Calendar.getInstance().getTime() + ": Returning Navigator");
+	            
+			} catch (Exception e) {
+				 System.out.println("Error: " + e.getClass().getName() + " - " + e.getMessage());
+		         warn("Error: " + e.getClass().getName() + " - " + e.getMessage());
+			}
         }
 
         return jsonString;
@@ -107,83 +127,66 @@ public class NavigateComponent extends PentahoBase {
 
     }
 
-    private JSONArray processTree(Node tree) throws JSONException {
+    @SuppressWarnings("unchecked")
+	private JSONArray processTree(Node tree,String parentPath)  {
 
-
-        String xPathDir = "./branch[@isDir='true']"; //$NON-NLS-1$
+        String xPathDir =  "./file[@isDirectory='true']" ; //$NON-NLS-1$
         JSONArray array = null;
-
+        
         try {
-            List nodes = tree.selectNodes(xPathDir); //$NON-NLS-1$
+            
+        	List nodes = tree.selectNodes(xPathDir); //$NON-NLS-1$
             if (!nodes.isEmpty()) {
                 array = new JSONArray();
             }
+        
+            String[] parentPathArray = parentPath.split("/");
+            String solutionName = parentPathArray.length > 2 ? parentPathArray[2] : ""; 
+            String solutionPath = parentPathArray.length > 3 ? parentPath.substring(parentPath.indexOf(solutionName) + solutionName.length()+1,parentPath.length()) + "/" : "";
 
             Iterator nodeIterator = nodes.iterator();
             while (nodeIterator.hasNext()) {
-                Node node = (Node) nodeIterator.next();
-                boolean processChildren = true;
-
-
-                // String name = node.getText();
-                String path = node.valueOf("@id");
-                String name = node.valueOf("branchText");
-                //debug("Processing branch: " + path);
-
+                
+            	Node node = (Node) nodeIterator.next();
                 JSONObject json = new JSONObject();
-                json.put("name", name);
-                json.put("id", path);
-                // put solution and path
-
-                String[] pathArray = path.split("\\/");
-                path = path.replace(pathArray[1], "solution");
-
-                String solutionName = pathArray.length > 2 ? pathArray[2] : "";
-                String solutionPath = pathArray.length > 3 ? path.substring(path.indexOf("/", 10) + 1) : "";
-                json.put("solution", solutionName);
-                json.put("path", solutionPath);
-                json.put("type", TYPE_DIR);
-
-                if (path.startsWith("/solution/")) {
-                    String resourcePath = path.substring(9);
-                    //try {
-                    String resourceName = resourcePath + "/" + SolutionRepositoryBase.INDEX_FILENAME;
-                    if (solutionRepository.resourceExists(resourceName)) {
-                        System.out.println("Processing folder " + resourcePath);
-
-                        ISolutionFile file = solutionRepository.getFileByPath(resourceName);
-                        Document indexFile = solutionRepository.getResourceAsDocument(resourceName);
-                        solutionRepository.localizeDoc(indexFile, file);
-
-                        boolean visible = Boolean.parseBoolean(indexFile.valueOf("/index/visible"));
-                        json.put("visible", visible);
-                        json.put("title", indexFile.valueOf("/index/name"));
-                        json.put("description", indexFile.valueOf("/index/description"));
-                        if (!visible) {
-                            processChildren = false;
-                        }
-                    //System.out.println("... done processing folder " + resourcePath);
-
-                    } else {
-                        json.put("visible", false);
-                        json.put("title", "Hidden");
-
-                        processChildren = false;
-
+                JSONArray children = null;
+                String name = node.valueOf("@name");
+               
+                if (parentPathArray.length > 0){
+                	
+                	
+                    String localizedName = node.valueOf("@localized-name");
+                	String description = node.valueOf("@description");
+                	boolean visible = node.valueOf("@visible").equals("true");
+                	boolean isDirectory = node.valueOf("@isDirectory").equals("true");
+                	
+	                json.put("id",parentPath + "/" + name );
+	                json.put("name", name);
+	                json.put("solution", solutionName.length() == 0 ? name : solutionName);
+	                json.put("path", solutionName.length() == 0 ? "" : solutionPath + name);
+	                json.put("type", TYPE_DIR);
+                	json.put("visible", visible);
+                    json.put("title", visible ? localizedName:  "Hidden" );
+                    json.put("description",description);
+                	
+                    if (visible && isDirectory){
+                        children = processTree(node,parentPath + "/" + name);
                     }
+                    
 
                 } else {
                     // root dir
+ 	                json.put("id",tree.valueOf("@path"));
+ 	                json.put("name", solutionName);
+ 	                json.put("path", solutionPath);
                     json.put("visible", true);
                     json.put("title", "Solution");
+                    children = processTree(tree,tree.valueOf("@path"));
                 }
 
                 //System.out.println("  Processing getting children ");
-                if (processChildren) {
-                    JSONArray children = processTree(node);
-                    if (children != null) {
-                        json.put("folders", children);
-                    }
+                if (children != null) {
+                    json.put("folders", children);
                 }
 
                 array.put(json);
@@ -198,233 +201,104 @@ public class NavigateComponent extends PentahoBase {
         return array;
     }
 
-    private String getContentListJSON(String _solution, String _path) throws JSONException {
-
-        Document navDoc = solutionRepository.getSolutionTree(ISolutionRepository.ACTION_EXECUTE);
-
-        // Get it and build the tree
-
-        JSONObject contentListJSON = new JSONObject();
-
-        Node tree = navDoc.getRootElement();
-
-        String solutionPrefix = tree.valueOf("/tree/branch/@id");
-        StringBuffer _id = new StringBuffer(solutionPrefix);
-        if (_solution.length() > 0) {
-            _id.append("/" + _solution);
-        }
-        if (_path.length() > 0) {
-            _id.append("/" + _path);
-        }
-
-        //branch[@id='/solution/admin' and @isDir='true']/leaf
-        String xPathDirBranch = "//branch[@id='" + _id.toString() + "' and @isDir='true']/branch";
-        String xPathDirLeaf = "//branch[@id='" + _id.toString() + "' and @isDir='true']/leaf";
-
-        JSONArray array = null;
-
-        // Iterate through branches
-
-        try {
+    @SuppressWarnings("unchecked")
+	private String getContentListJSON(String _solution, String _path) {
+    	
+    	 String jsonString = null;
+    	 JSONArray array = null;
+    	  
+    	 try {
+    		 
+	    	 JSONObject contentListJSON = new JSONObject();
+	    	 
+	    	 Document navDoc = getRepositoryDocument(this.userSession);
+	    	 Node tree = navDoc.getRootElement();
+	    	 String xPathDir =  "./file[@name='" + _solution + "']" ; //$NON-NLS-1$
             
-            List nodes = tree.selectNodes(xPathDirBranch); //$NON-NLS-1$
-            if (!nodes.isEmpty()) {
-                array = new JSONArray();
-            }
+        	 List nodes = tree.selectNodes(xPathDir); //$NON-NLS-1$
+             if (!nodes.isEmpty() && nodes.size() == 1) {
 
-            Iterator nodeIterator = nodes.iterator();
-            while (nodeIterator.hasNext()) {
-                Node node = (Node) nodeIterator.next();
+            	 array = new JSONArray();
 
-                // String name = node.getText();
-                String path = node.valueOf("@id");
-                String name = node.valueOf("branchText");
-                //debug("Processing branch: " + path);
-
-                JSONObject json = new JSONObject();
-                json.put("name", name);
-                json.put("id", path);
-                json.put("solution", _solution);
-                json.put("path", _path + (_path.length() > 0 ? "/" : "") + name);
-                json.put("type", TYPE_DIR);
-
-                if (path.startsWith((solutionPrefix + "/"))) {
-                    String resourcePath = path.substring(9);
-                    //try {
-                    String resourceName = resourcePath + "/" + SolutionRepositoryBase.INDEX_FILENAME;
-                    if (solutionRepository.resourceExists(resourceName)) {
-                        System.out.println("Processing folder " + resourcePath);
-
-                        ISolutionFile file = solutionRepository.getFileByPath(resourceName);
-                        Document indexFile = solutionRepository.getResourceAsDocument(resourceName);
-                        solutionRepository.localizeDoc(indexFile, file);
-
-                        json.put("visible", new Boolean(indexFile.valueOf("/index/visible")));
-                        json.put("title", indexFile.valueOf("/index/name"));
-                        json.put("description", indexFile.valueOf("/index/description"));
-
-                    //System.out.println("... done processing folder " + resourcePath);
-
-                    } else {
-                        json.put("visible", false);
-                        json.put("title", "Hidden");
-
-                    }
-
-                } else {
-                    // root dir
-                    json.put("visible", true);
-                    json.put("title", "Solution");
+            	 //Add Folder
+            	 Node node = getDirectoryNode((Node) nodes.get(0),_path);
+	        	 JSONObject json = new JSONObject();
+	             json.put("name", node.valueOf("@name"));
+	             json.put("id", _solution + "/" + _path);
+	             json.put("solution", _solution);
+	             json.put("path", _path);
+	             json.put("type", TYPE_DIR);
+	             json.put("visible", false);
+	             json.put("title", "Hidden");
+	             array.put(json);
+	             
+	             nodes = node.selectNodes("./file");
+	        	 Iterator nodeIterator = nodes.iterator();
+	        	 	
+	             //Add Folder Content
+	        	 while (nodeIterator.hasNext()) {
+                     
+                 	Node chilNode = (Node) nodeIterator.next();
+                 	String name = chilNode.valueOf("@name");
+                 	String localizedName = chilNode.valueOf("@localized-name");
+                 	String description = chilNode.valueOf("@description");
+                 	String type =  chilNode.valueOf("@isDirectory").equals("true") ? TYPE_DIR :name.endsWith(".xaction") ? TYPE_XACTION :name.endsWith(".url") ? TYPE_URL : null;
+                 	boolean visible = chilNode.valueOf("@visible").equals("true");
+                 		 
+                 	if(type != null){
+                 		
+                 		String path = type.equals(TYPE_DIR) ? (_path.length() > 0 ? _path + "/" + name : name) : _path;
+                        String url = type != null && type.equals(TYPE_URL) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(BASE_URL) && !chilNode.valueOf("@url").startsWith("/") ? BASE_URL + "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url") ) : null;
+						
+                        json = new JSONObject();
+						json.put("name", name);
+						json.put("id", _solution + "/" + _path + "/" + name);
+						json.put("solution", _solution);
+						json.put("path",path);
+						json.put("type",type);
+						json.put("visible", visible);
+						json.put("title", localizedName);
+						json.put("description", description);
+						if(type.equals(TYPE_XACTION)) json.put("action", name);
+						if(type.equals(TYPE_URL)) json.put("url",url);
+						array.put(json);
+                 	}
                 }
-
-                array.put(json);
-
-            }
-
-        } catch (Exception e) {
+	        }
+             
+             contentListJSON.put("content", array);
+             jsonString = contentListJSON.toString(2);
+    	}
+        catch (Exception e) {
             System.out.println("Error: " + e.getClass().getName() + " - " + e.getMessage());
             warn("Error: " + e.getClass().getName() + " - " + e.getMessage());
         }
 
-        // Iterate through leaves
-
-        try {
-            List nodes = tree.selectNodes(xPathDirLeaf); //$NON-NLS-1$
-            if (array == null && !nodes.isEmpty()) {
-                array = new JSONArray();
-            }
-
-            Iterator nodeIterator = nodes.iterator();
-            while (nodeIterator.hasNext()) {
-                Element node = (Element) nodeIterator.next();
-
-                // String name = node.getText();
-                String path = node.valueOf("path");
-                String name = node.valueOf("leafText");
-
-                JSONObject json = new JSONObject();
-                json.put("name", name);
-                json.put("id", path);
-                json.put("solution", _solution);
-                json.put("path", _path);
-                json.put("action", name);
-
-                // we only care for: .xactions and .url files
-                if (name.toLowerCase().endsWith(".xaction")) {
-
-                    json.put("type", TYPE_XACTION);
-
-                    String resourcePath = path.replace(solutionPrefix,"solution").substring(9);
-
-                    String resourceName = resourcePath;
-                    if (solutionRepository.resourceExists(resourceName)) {
-                        System.out.println("Processing file " + resourcePath);
-
-                        ISolutionFile file = solutionRepository.getFileByPath(resourceName);
-                        Document indexFile = solutionRepository.getResourceAsDocument(resourceName);
-                        solutionRepository.localizeDoc(indexFile, file);
-
-                        json.put("visible", indexFile.selectNodes("/action-sequence/documentation/result-type").size() == 0 || indexFile.valueOf("/action-sequence/documentation/result-type").equals("none") ? Boolean.FALSE : Boolean.TRUE);
-                        json.put("title", indexFile.valueOf("/action-sequence/title"));
-                        json.put("description", indexFile.valueOf("/action-sequence/documentation/description"));
-
-                    //System.out.println("... done processing folder " + resourcePath);
-
-                    } else {
-                        json.put("visible", false);
-                        json.put("title", "Hidden");
-                    }
-
-
-                } else if (name.toLowerCase().endsWith(".url")) {
-
-                    json.put("type", TYPE_URL);
-                    String resourcePath = path.replace(solutionPrefix,"solution").substring(9);
-                    String resourceName = resourcePath;
-                    ISolutionFile file = solutionRepository.getFileByPath(resourceName);
-                    processUrl(file, node, resourceName);
-                    json.put("visible", new Boolean(node.valueOf("file/@visible")));
-                    json.put("title", node.valueOf("file/title"));
-                    json.put("description", node.valueOf("file/description"));
-                    json.put("url", node.valueOf("file/url"));
-
-                } else { //ignore other files
-                    continue;
-                }
-                array.put(json);
-
-
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getClass().getName() + " - " + e.getMessage());
-            warn("Error: " + e.getClass().getName() + " - " + e.getMessage());
-        }
-
-
-
-        contentListJSON.put("content", array);
-
-        String jsonString = contentListJSON.toString(2);
         //debug("Finished processing tree");
-
-        //RepositoryFile file = (RepositoryFile) getFileByPath(fullPath);
-
         return jsonString;
 
     }
 
-    private void processUrl(ISolutionFile file, Element parentNode, String resourceName) {
+    @SuppressWarnings("unchecked")
+	private Node getDirectoryNode(Node node ,String _path){
+    	
+    	String[] pathArray = _path.split("/");
+    	if(pathArray.length > 0){
+    		
+    		String path = pathArray[0];
+    		 String xPathDir =  "./file[@name='" + path + "']" ; //$NON-NLS-1$
+    		 List nodes = node.selectNodes(xPathDir); //$NON-NLS-1$
+    		 if (!nodes.isEmpty() && nodes.size() == 1) {
+    			 node = (Node) nodes.get(0);
+    			 if(!_path.equals(path))
+    				 node = getDirectoryNode(node,_path.substring(_path.indexOf(path)+ path.length() + 1,_path.length()));
+            	 
+             }
+             else
+            	 return node;
 
-        // parse the .url file to get the contents
-        try {
-            String urlContent = solutionRepository.getResourceAsString(resourceName);
-            StringTokenizer tokenizer = new StringTokenizer(urlContent, "\n"); //$NON-NLS-1$
-            String title = null;
-            String url = null;
-            String description = null;
-            String target = null;
-            while (tokenizer.hasMoreTokens()) {
-                String line = tokenizer.nextToken();
-                int pos = line.indexOf('=');
-                if (pos > 0) {
-                    String name = line.substring(0, pos);
-                    String value = line.substring(pos + 1);
-                    if ((value != null) && (value.length() > 0) && (value.charAt(value.length() - 1) == '\r')) {
-                        value = value.substring(0, value.length() - 1);
-                    }
-                    if ("URL".equalsIgnoreCase(name)) { //$NON-NLS-1$
-                        url = value;
-                    }
-                    if ("name".equalsIgnoreCase(name)) { //$NON-NLS-1$
-                        title = value;
-                    }
-                    if ("description".equalsIgnoreCase(name)) { //$NON-NLS-1$
-                        description = value;
-                    }
-                    if ("target".equalsIgnoreCase(name)) { //$NON-NLS-1$
-                        target = value;
-                    }
-                }
-            }
-            if (url != null) {
-                // now create an entry for the database
-                Element dirNode = parentNode.addElement("file"); //$NON-NLS-1$
-                dirNode.addAttribute("type", TYPE_URL); //$NON-NLS-1$
-                dirNode.addElement("filename").setText(title); //$NON-NLS-1$
-                dirNode.addElement("title").setText(title); //$NON-NLS-1$
-                if (target != null) {
-                    dirNode.addElement("target").setText(target); //$NON-NLS-1$
-                }
-                if (description != null) {
-                    dirNode.addElement("description").setText(description); //$NON-NLS-1$
-                }
-                dirNode.addElement("url").setText(url); //$NON-NLS-1$
-                dirNode.addAttribute("visible", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-                solutionRepository.localizeDoc(dirNode, file);
-            }
-        } catch (IOException e) {
-            warn("Error processing url file: " + e.getClass().getName() + " - " + e.getMessage());
-        }
+    	}
+    	
+    	return node;
     }
 }

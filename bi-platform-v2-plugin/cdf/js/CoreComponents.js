@@ -200,14 +200,19 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 
 var JFreeChartComponent = BaseComponent.extend({
 		update : function() {
-
+			this.callPentahoAction("jfreechart.xaction");
+		},
+		
+		getParameters: function() {
+		
 			var cd = this.chartDefinition;
 			// Merge the stuff with a chartOptions element
 			if (cd == undefined){
 				alert("Fatal - No chartDefinition passed");
 				return;
 			}
-			var cd0 = $.extend({},Dashboards.ev(cd.chartOptions), cd);
+			
+			var cd0 = cd.chartOptions != undefined ? $.extend({},Dashboards.ev(cd.chartOptions), cd) : cd;
 
 			// go through parametere array and update values
 			var parameters = [];
@@ -216,29 +221,118 @@ var JFreeChartComponent = BaseComponent.extend({
 				var value = typeof cd0[p]=='function'?cd0[p]():cd0[p];
 				// alert("key: " + key + "; Value: " + value);
 				parameters.push([key,value]);
-			} 
+			}
+			
+			return parameters;
+		
+		},
+		
+		callPentahoAction: function(action) {
 			// increment runningCalls
 			Dashboards.incrementRunningCalls();
 
 			var myself = this;
 			// callback async mode
-			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechart.xaction", parameters,function(jXML){
+			Dashboards.callPentahoAction(myself,"cdf", "components", action, this.getParameters(),function(jXML){
 				
 					if(jXML != null){
-						$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+						if(myself.chartDefinition.caption != undefined)
+							myself.buildCaptionWrapper($(jXML.find("ExecuteActivityResponse:first-child").text()),action);
+						else
+							$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
 					}
 					Dashboards.decrementRunningCalls();
 
 				});
+		},
+		
+		buildCaptionWrapper: function(chart,cdfComponent){
+		
+			var myself = this;
+			var cd = myself.chartDefinition;
+			var captionOptions = $.extend({
+				title:{
+					title: cd.title != undefined ? cd.title : "Details", 
+					oclass: 'title'
+				},
+				zoom: {
+					title:'Zoom', 
+					icon:'resources/style/images/magnify.png', 
+					oclass: 'options', 
+					callback: function(){
+						Dashboards.incrementRunningCalls();
+						var parameters = myself.getParameters();
+						var width = 200,height = 200; var urlTemplate,parameterName = "";
+						for(p in parameters){
+							if(parameters[p][0] == 'width'){width += parameters[p][1]; parameters[p] = ['width',width]};
+							if(parameters[p][0] == 'height'){height += parameters[p][1]; parameters[p] = ['height',height]};
+							if(parameters[p][0] == 'parameterName'){parameterName = parameters[p][1]; parameters[p] = ['parameterName','parameterValue']};
+							if(parameters[p][0] == 'urlTemplate'){urlTemplate = parameters[p][1]; parameters[p] = ['urlTemplate',"javascript:chartClick('" + myself.name +"','{parameterValue}');"]};
+						}
+						myself.zoomCallBack = function(value){eval(urlTemplate.replace("{" + parameterName + "}",value));};
+						Dashboards.callPentahoAction(myself,"cdf", "components", cdfComponent, parameters,function(jXML){
+							if(jXML != null){
+								var openWindow = window.open("js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
+								setTimeout(function(){openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())},500);
+							}
+							Dashboards.decrementRunningCalls();
+						});
+						
+						
+					}
+				},
+				details:{
+					title:'Details', 
+					icon:'resources/style/images/table.png', 
+					oclass: 'options', 
+					callback: function(){
+						myself.pivotDefinition = {jndi: cd.jndi, catalog:cd.catalog, query:cd.query};
+						PivotLinkComponent.openPivotLink(myself);
+					}
+						
+				}
 
-			// or sync mode
-			// $('#'+object.htmlObject).html(Dashboards.callPentahoAction(myself, "cdf", "components",
-			// "jfreechart.xaction", parameters,null));
-		}
+			}, cd.captionOptions);
+				
+			var captionId = myself.htmlObject + 'caption';
+			var caption = $('<div id="' + captionId + '" ></div>');
+			
+			chart.attr("id",myself.htmlObject + 'image');
+			chart.attr("rel",myself.htmlObject + "caption");
+			chart.attr("class","captify");
+			
+			for(o in captionOptions){
+			
+				var op = captionOptions[o].icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + captionOptions[o].icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
+				op.attr("class",captionOptions[o].oclass != undefined ? captionOptions[o].oclass : "options");
+				op.attr("title",captionOptions[o].title);
+				caption.append(op);
+			};
+			
+			$("#" + myself.htmlObject).empty();
+			$("#" + myself.htmlObject).append(chart);
+			$("#" + myself.htmlObject).append(caption);
+			
+			$('img.captify').captify($.extend({spanWidth: '95%',hideDelay:250,hasButton:false,opacity:'0.5'}, cd.caption));	
+			
+			//Add events after captify has finished.
+			$(document).one('capityFinished',function(e,wrapper){
+				if(chart.length > 1){
+					$('area',chart[0]).hover(function(){wrapper.setOverImage(true)},function(){wrapper.setOverImage(false)});
+				}
+				for(o in captionOptions)
+					if(captionOptions[o].callback != undefined)
+						$("#" + captionId + o).bind("click",captionOptions[o].callback);
+				});
+			
+		},
+		
 	});
-
-var DialComponent = BaseComponent.extend({
+	
+var DialComponent = JFreeChartComponent.extend({
+		
 		update : function() {
+			
 			var cd = this.chartDefinition;
 			if (cd == undefined){
 				alert("Fatal - No chartDefinition passed");
@@ -257,30 +351,43 @@ var DialComponent = BaseComponent.extend({
 				return;
 			}
 
-			// go through parametere array and update values
-			var parameters = [];
-			for(p in cd){
-				var key = p;
-				var value = typeof cd[p]=='function'?cd[p]():cd[p];
-				// alert("key: " + key + "; Value: " + value);
-				parameters.push([key,value]);
-			} 
-
-			// increment runningCalls
-			Dashboards.incrementRunningCalls();
-
-			var myself = this;
-			// callback async mode
-			Dashboards.callPentahoAction(myself,"cdf", "components", "jfreechartdial.xaction", parameters,function(jXML){
-				
-					if(jXML != null){
-						$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
-					}
-					Dashboards.decrementRunningCalls();
-
-				});
+			this.callPentahoAction("jfreechartdial.xaction");
 
 		}
+	});
+	
+var OpenFlashChartComponent = JFreeChartComponent.extend({
+
+	callPentahoAction: function() {
+	
+		Dashboards.incrementRunningCalls();
+
+		var myself = this;
+	
+		Dashboards.callPentahoAction(myself,"cdf", "components", "openflashchart.xaction", this.getParameters(),function(jXML){
+			
+				if(jXML != null){
+					var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
+					getDataFuntion = result.match(/getData.*\(\)/gi);
+					$('#'+myself.htmlObject).html(result);
+				}
+				Dashboards.decrementRunningCalls();
+
+			});
+			
+		OpenFlashChartComponent.prototype.onClick = function(value) {
+			if(getDataFuntion != null && myself.chartDefinition.urlTemplate != undefined && myself.chartDefinition.parameterName != undefined){
+				myself.data = myself.data != undefined ? myself.data : eval('(' + eval(getDataFuntion[0]) + ')');
+				if(myself.data.x_axis != undefined){
+					var urlTemplate = myself.chartDefinition.urlTemplate.replace("{" + myself.chartDefinition.parameterName + "}",myself.data.x_axis.labels.labels[value]);
+					eval(urlTemplate);
+				}
+				
+			}
+		};
+	
+	}
+	
 	});
 
 var TrafficComponent = BaseComponent.extend({

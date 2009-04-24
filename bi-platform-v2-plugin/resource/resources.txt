@@ -23,7 +23,8 @@ commonLibrariesScript=\
 @BASE_URL@/content/pentaho-cdf/js/NavigationComponents.js,\
 @BASE_URL@/content/pentaho-cdf/js/MapComponents.js,\
 @BASE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
-@BASE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js
+@BASE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
+@BASE_URL@/content/pentaho-cdf/js/captify/captify.js
 
 commonLibrariesLink=\
 @BASE_URL@/content/pentaho-cdf/js/jquery.tooltip.css,\
@@ -33,7 +34,8 @@ commonLibrariesLink=\
 @BASE_URL@/content/pentaho-cdf/js/theme/ui.all.css,\
 @BASE_URL@/content/pentaho-cdf/js/greybox/gb_styles.css,\
 @BASE_URL@/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
-@BASE_URL@/content/pentaho-cdf/js/cdf.css
+@BASE_URL@/content/pentaho-cdf/js/cdf.css,\
+@BASE_URL@/content/pentaho-cdf/js/captify/captify.css
 
 mapScript=\
 js/OpenMap/open_map.js,js/jsr_class.js,\
