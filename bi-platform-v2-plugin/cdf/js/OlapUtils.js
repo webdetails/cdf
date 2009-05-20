@@ -959,7 +959,6 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 				},
 				"trend": {
 					type: "jFreeChartComponent",
-
 					chartType: "AreaChart",
 					datasetType: "TimeSeriesCollection",
 					axis:["rows","columns"], 
@@ -990,12 +989,12 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 				extra: {}
 			};
 
-			this.setChartType(options.defaultChartType);
-
 			// pass the properties of this to the chartDefaults
 			var _chart = Dashboards.clone(this);
 			delete _chart.chartDefaults;
 			this.chartDefaults.parent = _chart;
+			
+			this.setChartType(options.defaultChartType);
 
 			// Init this querybase
 			this.mdxQuery = new OlapUtils.mdxQuery(this.queryBase);
@@ -1004,10 +1003,11 @@ OlapUtils.DimensionAnalysisQuery = OlapUtils.GenericMdxQuery.extend({
 
 		setChartType: function(chartType){
 			this.queryBase.extra.translationHash = this.chartTypesTranslation[chartType];
+			this.chartDefaults.parent.queryBase.extra.translationHash = this.chartTypesTranslation[chartType];
 		},
 
 		getComponentType: function(){
-			return this.queryBase.extra.translationHash.type;
+			return this.chartDefaults.parent.queryBase.extra.translationHash.type;
 		},
 
 		queryBase : {}
