@@ -827,7 +827,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 			
 			selectHTML = "";
 			for(var i= 0, len  = myArray.length; i < len; i++){
-				selectHTML += "<input onclick='Dashboards.processChange(\"" + this.name + "\")'";
+				selectHTML += "<input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 				if(i==0){
 					selectHTML += " CHECKED";
 				}
@@ -841,6 +841,9 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 			} 
 			// update the placeholder
 			$("#" + this.htmlObject).html(selectHTML);
+		},
+		callAjaxAfterRender: function(name){
+			setTimeout(function(){Dashboards.processChange(name)},1);
 		}
 	});
 
