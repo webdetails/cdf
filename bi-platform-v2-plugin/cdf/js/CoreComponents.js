@@ -517,9 +517,10 @@ var TimePlotComponent = BaseComponent.extend({
 			}
 
 			var plotInfo = [];
-			for(var i = 0; i<cols.length; i++){
+			for(var i = 0,j=0; i<cols.length; i++,j++){
 
-				title.append('<span id="' + obj.name + 'Plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[i].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
+				j = j > 7 ? 0 : j;
+				title.append('<span id="' + obj.name + 'Plot' + i + 'Header" style="color:' + Dashboards.timePlotColors[j].toHexString() + '">'+cols[i]+' &nbsp;&nbsp;</span>');
 
 				var plotInfoOpts = {
 					id: obj.name + "Plot" + i,
@@ -527,7 +528,7 @@ var TimePlotComponent = BaseComponent.extend({
 					dataSource: new Timeplot.ColumnSource(timePlotEventSource,i + 1),
 					valueGeometry: timePlotValueGeometry,
 					timeGeometry: timePlotTimeGeometry,
-					lineColor: Dashboards.timePlotColors[i],
+					lineColor: Dashboards.timePlotColors[j],
 					showValues: cd.showValues,
 					hideZeroToolTipValues: cd.hideZeroToolTipValues != undefined ? cd.hideZeroToolTipValues : false,
 					showValuesMode: cd.showValuesMode != undefined ? cd.showValuesMode : "header",
@@ -535,10 +536,10 @@ var TimePlotComponent = BaseComponent.extend({
 					headerFormat: function (value,plot){return  plot._name + " = " + toFormatedString(value) + "&nbsp;&nbsp;";}
 				};
 				if ( cd.dots == true){
-					plotInfoOpts.dotColor = Dashboards.timePlotColors[i];
+					plotInfoOpts.dotColor = Dashboards.timePlotColors[j];
 				}
 				if ( cd.fill == true){
-					plotInfoOpts.fillColor = Dashboards.timePlotColors[i].transparency(0.5);
+					plotInfoOpts.fillColor = Dashboards.timePlotColors[j].transparency(0.5);
 				}
 				plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
@@ -823,7 +824,7 @@ var MonthPickerComponent = BaseComponent.extend({
 var ToggleButtonBaseComponent = BaseComponent.extend({
 		update : function() {
 			var myArray = this.getValuesArray();
-
+			
 			selectHTML = "";
 			for(var i= 0, len  = myArray.length; i < len; i++){
 				selectHTML += "<input onclick='Dashboards.processChange(\"" + this.name + "\")'";
