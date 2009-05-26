@@ -1141,8 +1141,10 @@ var MdxQueryGroupComponent = BaseComponent.extend({
 
 var ExecuteXactionComponent = BaseComponent.extend({
 		visible: false,
+		
 		update : function() {
 			var myself = this;
+			$("#"+ this.htmlObject).unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
 			$("#"+ this.htmlObject).bind("click", function(){
 					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
 					if(success) {
@@ -1151,15 +1153,23 @@ var ExecuteXactionComponent = BaseComponent.extend({
 					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
 				});
 		},
+
 		executeXAction : function() {
 			var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
 
 			var p = new Array(this.parameters.length);
 			var parameters = [];
+
 			for(var i= 0, len = p.length; i < len; i++){
-				var key = this.parameters[i][0];
-				var value = Dashboards.getParameterValue(this.parameters[i][1]);
-				parameters.push(key + "=" + encodeURIComponent(value));
+ 				var key = this.parameters[i][0];
+ 				var value = Dashboards.getParameterValue(this.parameters[i][1]);
+
+				if($.isArray(value))
+					$(value).each(function(p) {
+						parameters.push(key + "=" + encodeURIComponent(this));
+					});
+				else
+					parameters.push(key + "=" + encodeURIComponent(value));
 			}
 
 			url += parameters.join("&");
