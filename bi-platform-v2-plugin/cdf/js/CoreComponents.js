@@ -325,7 +325,7 @@ var JFreeChartComponent = BaseComponent.extend({
 						$("#" + captionId + o).bind("click",captionOptions[o].callback);
 				});
 			
-		},
+		}
 		
 	});
 	
