@@ -521,7 +521,7 @@
 								var a = new Array();
 								a[0] = colHeaders[0][j];
 								a[1] = rowHeaders[i][0];
-								a[2] = query_result.getValueAt(i,j);
+								a[2] = query_result.getValueAt(i,j) - 0;
 								//out.println("a0: " + a[0] + "; a1: " + a[1] + "; a2: " + a[2]);
 
 								newResults.addRow(a);
