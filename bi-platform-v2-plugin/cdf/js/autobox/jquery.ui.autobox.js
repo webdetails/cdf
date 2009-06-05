@@ -81,6 +81,8 @@
               e.preventDefault();
 			  if(!opt.multiSellection)
 				opt.processAutoBoxChange(input,opt);
+			  else if(opt.processElementChange!= undefined)
+				opt.processAutoBoxElement();
 			
 			  if(opt.multiSellection && opt.applyButton != false)
 				 opt.showApplyButton();
@@ -95,39 +97,50 @@
   }
   
     function addText(opt,input, text, name){
-	if(text.length > 0)
-	{
-		var li;
-		if(opt.multiSellection != true){
-			count = 0;
-			li = addBox(opt,input, text, name);
-			$("#" +opt.name + "bit-0").replaceWith(li);
-		}
-		else
-			li = addBox(opt,input, text, name);
+		if(text.length > 0)
+		{
+			if(opt.addTextElements){
+				var li;
+				if(opt.multiSellection != true){
+					count = 0;
+					li = addBox(opt,input, text, name);
+					$("#" +opt.name + "bit-0").replaceWith(li);
+				}
+				else
+					li = addBox(opt,input, text, name);
 
-		if(opt.multiSellection && opt.applyButton != false)
-			opt.showApplyButton();
-			
-		input.after(li);
-		input.val("");
-	}
+				if(opt.multiSellection && opt.applyButton != false)
+					opt.showApplyButton();
+					
+				input.after(li);
+				input.val("");
+			}
+			else{
+				opt.selectedValues = opt.selectedValues  == undefined ? {} : opt.selectedValues;
+				opt.selectedValues[text] = true;
+			}
+		}
    }
 	
 	function getCurrentValsHash(input,opt){//return the currently selected values as a hash
-      var vals=input.parent().parent().find('li');
-      var hash={};
-      for(var i=0; i<vals.length; ++i){
-        var s=vals[i].innerHTML.match(/^[^<]+/);
-        if(s){ 
-			if(!opt.multiSellection) 
-				hash[s]=true; 
-			else
-				hash[s[0]]=true; 
+		if(opt.addTextElements){
+	      var vals=input.parent().parent().find('li');
+	      var hash={};
+	      for(var i=0; i<vals.length; ++i){
+	        var s=vals[i].innerHTML.match(/^[^<]+/);
+	        if(s){ 
+				if(!opt.multiSellection) 
+					hash[s]=true; 
+				else
+					hash[s[0]]=true; 
+			}
+	      }
+	      return hash;
 		}
-      }
-      return hash;
+		else
+			return opt.selectedValues;
     }
+	
 	
   $.fn.autoboxMode=function(multiSellection,container, input, size, opt){
     var original=input.val(); var selected=-1; var self=this;
@@ -153,6 +166,8 @@
 					addText(opt,input,value, opt.name);
 				if(!opt.multiSellection)
 					opt.processAutoBoxChange(input,opt);
+				else if(opt.processElementChange!= undefined)
+					opt.processAutoBoxElement();
 			}
 			
 			if(!opt.multiSellection || k == KEY.RETURN){				
@@ -168,6 +183,8 @@
 				addText(opt,input, input.val(), opt.name);
 				if(!opt.multiSellection)
 					opt.processAutoBoxChange(input,opt);
+				else if(opt.processElementChange!= undefined)
+					opt.processAutoBoxElement();
 				$("body").trigger("off.autobox");
 			}
 	  }
@@ -237,19 +254,23 @@
   };
 
   $.fn.autobox=function(opt){
-  
+	opt.selectedValues = [];
     opt=$.extend({}, {
       timeout: 500,
       getList: function(input, hash){
           var list=opt.list;
-          if(hash){ list=$(list).filter(function(){  return !hash[this.text]; }); }
+          if(hash && opt.addTextElements){ list=$(list).filter(function(){  return !hash[this.text]; }); }
           input.trigger("updateList", [list]);
       },
       template: function(str){ 
 		if(!opt.multiSellection) 
 			return "<li id=\"listElement\">" + opt.insertText(str) + "</li>";
-		else
+		else if(opt.addTextElements)
 			return "<li id=\"listElement\">" +  "<input id=\"listElementCheckBox\" name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
+		else{
+			var value =  opt.insertText(str);
+			return "<li id=\"listElement\">" +  "<input " + (opt.selectedValues[value] ? 'checked="yes"' : "") + "\" id=\"listElementCheckBox\" name=\"" + value + "\" value=\"" +value+ "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
+		}
 	  },
 	
       insertText: function(str){ return unescape(escape(str.text)); },
@@ -283,29 +304,40 @@
 		},
 		
 		removeValue: function(value){
-		    var vals=this.input.parent().parent().find('li');
-			var values = new Array();
-			for(var i=0; i<vals.length; ++i){
-				var v = vals[i].innerHTML.match(/^[^<]+/);	
-				if(v!= null && value == v ){
-					$(vals[i]).remove();
-					if(this.multiSellection && this.applyButton && this.emptyValues())
-						this.hideApplyButton();
-					return;
+			if(opt.addTextElements){
+			    var vals=this.input.parent().parent().find('li');
+				var values = new Array();
+				for(var i=0; i<vals.length; ++i){
+					var v = vals[i].innerHTML.match(/^[^<]+/);	
+					if(v!= null && value == v ){
+						$(vals[i]).remove();
+						if(this.multiSellection && this.applyButton && this.emptyValues())
+							this.hideApplyButton();
+						return;
+					}
 				}
 			}
+			else if(this.selectedValues[value])
+				delete this.selectedValues[value];
 		},
 		
 	    getSelectedValues: function(){
-		  var vals= this.input.parent().parent().find('li');
-		  var values = new Array();
-		  for(var i=0,j=0; i<vals.length; ++i){
-			var value = vals[i].innerHTML.match(/^[^<]+/);
-			if(value!= null){
-				values[j] = value[0];j++;
+			var values = new Array();
+			if(opt.addTextElements){
+			  var vals= this.input.parent().parent().find('li');
+			  for(var i=0,j=0; i<vals.length; ++i){
+				var value = vals[i].innerHTML.match(/^[^<]+/);
+				if(value!= null){
+					values[j] = value[0];j++;
+				}
+			  }
 			}
-		  }
-		  return values;
+			else{
+				for(v in opt.selectedValues)
+					values.push(v);
+			}
+			
+			return values;
 		},
 		
 		valueAlreadySelected: function(value){
@@ -328,6 +360,10 @@
 				this.processChange(this.parent,this.getSelectedValues());
 			
 			this.input.val("");
+		},
+		
+		processAutoBoxElement: function processAutoBoxChange(){
+			this.processElementChange(this.getSelectedValues());
 		},
 		
 		showApplyButton: function showApplyButton(){
@@ -414,6 +450,8 @@
 						addText(opt,input, input.val(), opt.name);
 						if(!opt.multiSellection)
 							opt.processAutoBoxChange(input,opt)
+						else if(opt.processElementChange!= undefined)
+							opt.processAutoBoxElement();
 					}
 					else{
 						valueMatched = false;
@@ -424,6 +462,8 @@
 							addText(opt,input, input.val(), opt.name);
 							if(!opt.multiSellection)
 								opt.processAutoBoxChange(input,opt)
+							else if(opt.processElementChange!= undefined)
+								opt.processAutoBoxElement();
 						}
 						else
 							addText(opt,input, "", opt.name);
@@ -521,7 +561,7 @@
 	  
 	  var holder;
 	  var classHolder = "autobox-hldr";
-	  if(opt.multiSellection == false)
+	  if(opt.multiSellection == false || opt.addTextElements == false)
 		classHolder = "autobox-hldr-2";
 
       holder=$('<ul class="'+ classHolder + '"></ul>');

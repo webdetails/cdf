@@ -1,6 +1,7 @@
 package org.pentaho.cdf;
 
 import java.io.*;
+
 import java.security.InvalidParameterException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -13,9 +14,14 @@ import org.apache.commons.logging.Log;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.pentaho.cdf.export.Export;
+import org.pentaho.cdf.export.ExportCSV;
+import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.platform.api.engine.IActionSequenceResource;
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
+import org.pentaho.platform.api.engine.IOutputHandler;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
@@ -27,6 +33,7 @@ import org.pentaho.platform.engine.services.actionsequence.ActionResource;
 import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
 import org.pentaho.platform.util.web.MimeHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
+
 
 
 /**
@@ -53,7 +60,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 	public static final String RENDER_HTML = "/RenderHTML";
 	public static final String RENDER_XCDF = "/RenderXCDF";
 	public static final String JSON_SOLUTION = "/JSONSolution"; //$NON-NLS-1$
-	public static final String GET_CDF_RESOURCE = "/GetCDFResource"; //$NON-NLS-1$  
+	public static final String GET_CDF_RESOURCE = "/GetCDFResource"; //$NON-NLS-1$
+	public static final String EXPORT = "/Export"; //$NON-NLS-1$
+	public static final String SETTINGS = "/Settings"; //$NON-NLS-1$
+	public static final String CALLACTION = "/CallAction"; //$NON-NLS-1$  
 
 	// CDF Resource BaseURL
 	private static final String BASE_URL_TAG = "@BASE_URL@";
@@ -68,9 +78,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
 			error( Messages.getErrorString("CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER") ); //$NON-NLS-1$
 			throw new InvalidParameterException( Messages.getString("CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER") );  //$NON-NLS-1$
 		}
-
+		
 		IContentItem contentItem = outputHandler.getOutputContentItem( "response", "content", "", instanceId, MIMETYPE); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
+	
 		if( contentItem == null ) {
 			error( Messages.getErrorString("CdfContentGenerator.ERROR_0002_NO_CONTENT_ITEM") ); //$NON-NLS-1$
 			throw new InvalidParameterException( Messages.getString("CdfContentGenerator.ERROR_0002_NO_CONTENT_ITEM") );  //$NON-NLS-1$
@@ -111,13 +121,25 @@ public class CdfContentGenerator extends BaseContentGenerator {
 		else  if (urlPath.equals(GET_CDF_RESOURCE)){
 
 			getCDFResource(urlPath, contentItem, out, requestParams);
-
 		}
+		
 		else if (urlPath.equals(RENDER_HTML)){
 
 			renderHtml(out, requestParams);
 		}
-
+		
+		else if (urlPath.equals(EXPORT)){
+			exportFile(requestParams, outputHandler);
+		}
+		
+		else if (urlPath.equals(SETTINGS)){
+			cdfSetttings(requestParams, out);
+		}
+		
+		else if (urlPath.equals(CALLACTION)){
+			callAction(requestParams, out);
+		}
+		
 		else{
 			// we'll be providing the actual content with cache
 			returnResource(urlPath, contentItem, out);	
@@ -339,6 +361,53 @@ public class CdfContentGenerator extends BaseContentGenerator {
 		pw.println(footer);
 		pw.flush();
 	}
+	
+	private void exportFile(IParameterProvider requestParams,IOutputHandler outputHandler) {
+		
+		try {
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+		
+			ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
+			if(serviceCallAction.execute(requestParams, userSession, out)){
+		
+				String exportType = requestParams.getStringParameter("exportType", null);
+			
+				Export export = exportType.equals("csv") ? new ExportCSV(outputHandler) : new ExportExcel(outputHandler);
+			
+				export.exportFile(new JSONObject(out.toString()));
+			}
+		
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void cdfSetttings(IParameterProvider requestParams,OutputStream out) throws IOException, JSONException{
+		
+		String method = requestParams.getStringParameter("method", null);
+		String key = requestParams.getStringParameter("key", null);
+
+		if(method.equals("set")){
+			CdfSettings.getInstance().setValue(key,requestParams.getParameter("value"),userSession);
+		}
+		else{
+				Object value = CdfSettings.getInstance().getValue(key, userSession);
+				PrintWriter pw = new PrintWriter(out);
+				pw.println(value!= null ? value.toString() : "");
+				pw.flush();
+		}
+	}
+	
+	private void callAction(IParameterProvider requestParams,OutputStream out) throws JSONException {
+	
+		ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
+		serviceCallAction.execute(requestParams, userSession, out);
+	}
+
 
 	@Override
 	public Log getLogger() {

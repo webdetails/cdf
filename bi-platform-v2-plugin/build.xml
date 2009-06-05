@@ -84,6 +84,9 @@
 	      <fileset dir="${dist.dir}">
 	        <include name="${ivy.artifact.id}-${project.revision}.jar" />
 	      </fileset>
+		  <fileset dir="${devlib.dir}">
+		    <include name="jxl.jar" />
+	      </fileset>
 	    </copy>
 	    
 	  	<!-- Copy the plugin.xml and any other files from the resource dir -->

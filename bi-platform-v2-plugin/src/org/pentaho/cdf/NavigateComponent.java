@@ -5,7 +5,6 @@
 
 package org.pentaho.cdf;
 
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;

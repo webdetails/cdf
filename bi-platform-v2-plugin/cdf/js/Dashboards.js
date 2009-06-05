@@ -323,6 +323,16 @@ Dashboards.serializeValue = function(value){
 
 }
 
+Dashboards.post = function(url,obj){
+
+	var form = '<form action="' + url + '" method="post">';
+	for(o in obj){
+		form += '"<input type="hidden" name="' + o + '" value="' + (typeof obj[o] =='function'? obj[o]():obj[o]) + '"/>';
+	}
+	form += '</form>';
+	jQuery(form).appendTo('body').submit().remove();
+}
+
 Dashboards.clone = function clone(obj) {
 
 	var c = obj instanceof Array ? [] : {};
@@ -464,6 +474,25 @@ Dashboards.parseXActionResult = function(obj,html){
 
 	return null;
 
+};
+
+Dashboards.setSettingsValue = function(name,object){
+			
+	var data = {
+		method: "set",
+		key: name,
+		value: JSON.stringify(object)
+	};
+	$.post("Settings", data, function(){});
+};
+
+Dashboards.getSettingsValue = function(key,value){
+
+	var callback = typeof value == 'function' ? value : function(json){
+		value = json; 
+	};
+	
+	$.getJSON("Settings?method=get&key=" + key , callback);
 };
 
 /**

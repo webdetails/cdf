@@ -248,12 +248,43 @@ var JFreeChartComponent = BaseComponent.extend({
 		
 		buildCaptionWrapper: function(chart,cdfComponent){
 		
+			var exportFile = function(type,cd){
+				var obj = $.extend({solution: "cdf",path: "components",action:"jtable.xaction",exportType: type},cd);
+				Dashboards.post("Export",obj);
+			};
+			
 			var myself = this;
 			var cd = myself.chartDefinition;
 			var captionOptions = $.extend({
 				title:{
 					title: cd.title != undefined ? cd.title : "Details", 
 					oclass: 'title'
+				},
+				chartType:{
+					title: "Chart Type",
+					show: function(){ return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")},
+					icon: function(){ return cd.chartType == "BarChart" ? 'resources/style/images/pie_icon.png': 'resources/style/images/bar_icon.png';},
+					oclass: 'options', 
+					callback: function(){
+						cd.chartType = cd.chartType == "BarChart" ? "PieChart" : "BarChart";
+						myself.update();
+					}
+				},
+				excel: {
+					title: "Excel",
+					icon:'resources/style/images/excel_icon.png', 
+					oclass: 'options', 
+					callback: function(){
+						exportFile("excel",cd);
+					}
+				},
+				csv: {
+					title: "CSV",
+					icon:'resources/style/images/csv_icon.gif', 
+					oclass: 'options', 
+					callback: function(){
+						exportFile("csv",cd);
+					}
 				},
 				zoom: {
 					title:'Zoom', 
@@ -277,8 +308,6 @@ var JFreeChartComponent = BaseComponent.extend({
 							}
 							Dashboards.decrementRunningCalls();
 						});
-						
-						
 					}
 				},
 				details:{
@@ -302,30 +331,35 @@ var JFreeChartComponent = BaseComponent.extend({
 			chart.attr("class","captify");
 			
 			for(o in captionOptions){
-			
-				var op = captionOptions[o].icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + captionOptions[o].icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
-				op.attr("class",captionOptions[o].oclass != undefined ? captionOptions[o].oclass : "options");
-				op.attr("title",captionOptions[o].title);
-				caption.append(op);
+				var show = captionOptions[o].show == undefined || (typeof captionOptions[o].show=='function'?captionOptions[o].show():captionOptions[o].show) ? true : false; 
+				if(show){
+					var icon = captionOptions[o].icon != undefined ? (typeof captionOptions[o].icon=='function'?captionOptions[o].icon():captionOptions[o].icon) : undefined;
+					var op = icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
+					op.attr("class",captionOptions[o].oclass != undefined ? captionOptions[o].oclass : "options");
+					op.attr("title",captionOptions[o].title);
+					caption.append(op);
+				}
 			};
 			
 			$("#" + myself.htmlObject).empty();
-			$("#" + myself.htmlObject).append(chart);
-			$("#" + myself.htmlObject).append(caption);
 			
-			$('img.captify').captify($.extend({spanWidth: '95%',hideDelay:250,hasButton:false,opacity:'0.5'}, cd.caption));	
+			$("#" + myself.htmlObject).append(caption);
+			$("#" + myself.htmlObject).append(chart);
+			
+			$('img.captify').captify($.extend({spanWidth: '95%',hideDelay:2500,hasButton:false,opacity:'0.5'}, cd.caption));	
 			
 			//Add events after captify has finished.
 			$(document).one('capityFinished',function(e,wrapper){
 				if(chart.length > 1){
-					$('area',chart[0]).hover(function(){wrapper.setOverImage(true)},function(){wrapper.setOverImage(false)});
+					//Append map after image
+					$(chart[1]).append(chart[0]);
 				}
 				for(o in captionOptions)
 					if(captionOptions[o].callback != undefined)
 						$("#" + captionId + o).bind("click",captionOptions[o].callback);
 				});
 			
-		}
+		},
 		
 	});
 	
@@ -879,10 +913,12 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
 			var myself = this;
 			var processChange = myself.processChange == undefined ? function(objName){Dashboards.processChange(objName);} : function(objName) {myself.processChange();};
-			
+			var processElementChange = myself.processElementChange == true ? function(value){Dashboards.fireChange(myself.parameter+"_value",value)} : undefined;
+			if(processElementChange!= undefined)eval(myself.parameter+'_value=""');
 			var opt = {
 				list: list,
 				matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
+				processElementChange:  processElementChange,
 				processChange: function(obj,obj_value) {obj.value = obj_value; processChange(obj.name);},
 				multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
 				checkValue: myself.checkValue == undefined ? true : myself.checkValue,
@@ -890,6 +926,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 				scrollHeight: myself.scrollHeight,
 				applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
 				tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
+				addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
 				parent: myself
 			};
 
@@ -971,7 +1008,7 @@ var TableComponent = BaseComponent.extend({
 			$("#"+this.htmlObject).empty();
 			var myself = this;
 			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
-					myself.processTableComponentResponse(json);
+					myself.processTableComponentResponse(json.values);
 				});
 		},
 		processTableComponentResponse : function(json)
@@ -1126,7 +1163,7 @@ var QueryComponent = BaseComponent.extend({
 			}
 
 			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
-					object.result = json;
+					object.result = json.values;
 				});
 		}
 	}
