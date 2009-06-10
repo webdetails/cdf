@@ -468,11 +468,20 @@ var TrafficComponent = BaseComponent.extend({
 	});
 
 var TimePlotComponent = BaseComponent.extend({
+		
+		reset: function(){
+			this.timeplot = undefined;
+			this.chartDefinition.dateRangeInput = this.InitialDateRangeInput;
+			this.listeners = this.InitialListeners;
+		},
+		
 		update : function() {
 		
 			var cd = this.chartDefinition;
 	
-				
+			this.InitialListeners = this.InitialListeners == undefined ? this.listeners : this.InitialListeners;
+			this.InitialDateRangeInput = this.InitialDateRangeInput == undefined ? cd.dateRangeInput : this.InitialDateRangeInput;
+		
 			if(cd.updateOnDateRangeInputChange != true && this.timeplot!= undefined && cd.dateRangeInput != undefined){
 
 				if(this.updateTimeplot != false && this.timeplot._plots.length > 0 ){
