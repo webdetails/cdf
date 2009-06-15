@@ -166,8 +166,8 @@ OlapUtils.mdxQuery.prototype.update = function(hash){
 	this.query["columns"] = hash["columns"];
 	this.query["columnDrill"] = hash["columnDrill"]||false;
 	this.query["columnLevels"] = hash["columnLevels"]||[];
-	this.query["nonEmptyRows"] = hash["nonEmptyRows"] || false;
-	this.query["nonEmptyColumns"] = hash["nonEmptyColumns"] || false;
+	this.query["nonEmptyRows"] = hash["nonEmptyRows"] || true;
+	this.query["nonEmptyColumns"] = hash["nonEmptyColumns"] || true;
 	this.query["swapRowsAndColumns"] = hash["swapRowsAndColumns"] || false;
 	this.query["filters"] = hash["filters"] || {rows:[],columns: []};
 	this.query["where"] = hash["where"] || {};
@@ -260,6 +260,7 @@ OlapUtils.mdxQuery.prototype.getQuery = function(){
 	if (whereArray.length>0){
 		query += " where ( " + whereArray.join(' , ') + " )";
 	}
+	//alert(query);
 	return query;
 
 }
@@ -315,7 +316,8 @@ OlapUtils.mdxQuery.prototype.removeCondition = function(key,value,op){
 		}
 	}
 	
-	this.setCondition(key,undefined,op);
+	var condition = value.substr(0,value.indexOf("]")+1) + ".[Filter]"; 
+	this.setCondition(key,condition,op);
 	return false;
 }
 
@@ -354,8 +356,14 @@ OlapUtils.mdxQuery.prototype.addConditionAux = function(key,value,op){
 			this.query["conditions"][key+"InitialValue"] = this.query["where"][key];
 	}
 	
-	if(this.query["members"][key] == undefined)
-		this.addMember(key,condition + " as Aggregate(" + key + "Filter)");
+	if(this.query["members"][key] == undefined){
+		if (op == 'exclude'){
+			//this.addMember(key,condition + " as (( "+value+".parent) - ("+value+"))");
+		}
+		else
+			this.addMember(key,condition + " as Aggregate(" + key + "Filter)");
+	
+	}
 		
 	this.query["conditions"][key][value] = op
 	
@@ -389,12 +397,7 @@ OlapUtils.mdxQuery.prototype.setCondition = function(key,condition,op)
 		if(op == "focus" || op == "drill")
 			this.addSet(key,key + "Filter as {" + set.join(",") + "}");
 		else{
-			// If the parent level is the dimension, we need to use DefaultMember for this to work
-			var dim = set[0].substr(0,set[0].lastIndexOf("].")+1);
-			if(dim.indexOf("].") > -1)
-				this.addSet(key,key + "Filter as Except(" + dim +  ".Children,{" + set.join(",") + "})");
-			else
-				this.addSet(key,key + "Filter as Except(" + dim +  ".DefaultMember.Children,{" + set.join(",") + "})");
+			this.addMember(key,condition + " as ( ( "+ set[0] +".parent) - ("+ set.join(") - (") +"))");
 		}
 		if(condition != undefined)
 			this.query["where"][key] = condition;

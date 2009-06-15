@@ -124,7 +124,8 @@ div.colsJqi .jqibuttons{
 	padding: 5px 0 0 0;
 }
 div.colsJqi button{
-	background: url(../images/button_bg.jpg) top left repeat-x #ffffff;
+	/*background: url(../images/button_bg.jpg) top left repeat-x #ffffff;*/
+	background: #ffffff;
 	border: solid #777777 1px;
 	font-size: 12px;
 	padding: 3px 10px 3px 10px;
