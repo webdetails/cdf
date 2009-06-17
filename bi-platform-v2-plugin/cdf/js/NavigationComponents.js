@@ -2,6 +2,7 @@
 var NavigatorBaseComponent = BaseComponent.extend({},{
 	path : Dashboards.getQueryParameter("path"),
 	solution : Dashboards.getQueryParameter("solution"),
+	template: Dashboards.getQueryParameter("template"),
 	navigatorResponse : -1,
 	getSolutionJSON : function(solution) {
 		var json = NavigatorBaseComponent.navigatorResponse;
@@ -150,8 +151,10 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 			if(file.path.length>0){
 				_path="path="+file.path;
 			}
+			
+			var _template = NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
 
-			s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + "RenderHTML?solution=" + file.solution + "&amp;" +_path + "\">" + file.title + "</a>";
+			s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + "RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
 
 			var files = file.folders || [];
 			files.sort(function(a,b){return a.name>b.name});
@@ -170,7 +173,8 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 var ContentListComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
-		$.getJSON("JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+		var path = this.mode != 4  ? NavigatorBaseComponent.path : NavigatorBaseComponent.getParentPath();
+		$.getJSON("JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + path, function(json){
 				myself.processContentListResponse(json);
 			});
 	},
@@ -190,7 +194,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 		var container = $("<ul></ul>").attr("id","contentList-"+this.name).appendTo("#"+this.htmlObject);
 
 		// We need to append the parent dir
-		if( this.mode != 1 && NavigatorBaseComponent.path != ""){
+		if( this.mode != 1 && this.mode != 4 && NavigatorBaseComponent.path != ""){
 			var parentDir =  {
 				name: "Up",
 				title:"Up", 
@@ -223,9 +227,11 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 					var cls = "";
 					var target = "";
 					var href = "";
+					var template =  NavigatorBaseComponent.template.length > 0 ? "&template=" + NavigatorBaseComponent.template : "";
+		
 					if (this.type=="FOLDER"){
 						cls = "folder";
-						href = "RenderHTML?solution=" + this.solution + "&path=" + this.path;
+						href = "RenderHTML?solution=" + this.solution + "&path=" + this.path + template;
 					}
 					else{
 						if (this.url != undefined){
