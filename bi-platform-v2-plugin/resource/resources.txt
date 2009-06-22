@@ -23,6 +23,7 @@ commonLibrariesScript=\
 @BASE_URL@/content/pentaho-cdf/js/NavigationComponents.js,\
 @BASE_URL@/content/pentaho-cdf/js/MapComponents.js,\
 @BASE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
+@BASE_URL@/content/pentaho-cdf/js/json.js,\
 @BASE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
 @BASE_URL@/content/pentaho-cdf/js/captify/captify.js
 

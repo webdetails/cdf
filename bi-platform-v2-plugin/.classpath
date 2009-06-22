@@ -2,17 +2,19 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/pentaho-bi-platform-web-servlet-3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/pentaho-bi-platform-plugin-services-3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/pentaho-bi-platform-repository-3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/pentaho-bi-platform-engine-services-3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/pentaho-bi-platform-engine-core-3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/pentaho-bi-platform-util-3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/pentaho-bi-platform-api-3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/commons-lang-2.2.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/commons-logging-1.1.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/lib/json-3.jar"/>
-	<classpathentry kind="lib" path="D:/Projects/project-cdf-3.1-Lisbon-backlog/bi-platform-v2-plugin/dev-lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/commons-lang-2.2.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/json-3.1.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-api-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-engine-core-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-engine-services-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-plugin-services-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-repository-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-util-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-web-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/pentaho-bi-platform-web-servlet-3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/lib/servlet-api-2.4.jar"/>
+	<classpathentry kind="lib" path="D:/Projects/project-cdf/bi-platform-v2-plugin/dev-lib/jxl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
