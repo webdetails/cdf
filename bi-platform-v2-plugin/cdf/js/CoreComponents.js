@@ -831,6 +831,12 @@ var MonthPickerComponent = BaseComponent.extend({
 				maxDate.setYear(2060);
 			}
 
+			// if monthCount is not defined we'll use everything between max and mindate
+			if(monthCount == undefined || monthCount == 0) {
+				var monthsToAdd = (maxDate.getFullYear() - minDate.getFullYear())*12;
+				monthCount = (maxDate.getMonth() - minDate.getMonth()) + monthsToAdd;
+			}
+
 			//set size
 			if (object_size != undefined){
 				selectHTML += " size='" + object_size + "'";
