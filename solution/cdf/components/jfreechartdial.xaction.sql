@@ -269,7 +269,7 @@
 					{
 					var rsmd = query_result.getMetaData() ;
 					var a = new Array();
-					a[0] = Math.round(query_result.getValueAt(0,0));
+					a[0] = parseFloat(query_result.getValueAt(0,0));
 					VALUE = a[0];
 					
 

@@ -3,6 +3,7 @@ commonLibrariesScript=\
 @BASE_URL@/content/pentaho-cdf/js/jquery.js,\
 @BASE_URL@/content/pentaho-cdf/js/jquery-impromptu.1.5.js,\
 @BASE_URL@/content/pentaho-cdf/js/jquery.ui.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.corner.js,\
 @BASE_URL@/content/pentaho-cdf/js/jquery.bgiframe.js,\
 @BASE_URL@/content/pentaho-cdf/js/jquery.dimensions.js,\
 @BASE_URL@/content/pentaho-cdf/js/jquery.jdMenu.js,\
