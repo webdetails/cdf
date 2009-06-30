@@ -250,7 +250,7 @@ var JFreeChartComponent = BaseComponent.extend({
 		
 			var exportFile = function(type,cd){
 				var obj = $.extend({solution: "cdf",path: "components",action:"jtable.xaction",exportType: type},cd);
-				Dashboards.post("Export",obj);
+				Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj);
 			};
 			
 			var myself = this;
@@ -263,7 +263,7 @@ var JFreeChartComponent = BaseComponent.extend({
 				chartType:{
 					title: "Chart Type",
 					show: function(){ return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")},
-					icon: function(){ return cd.chartType == "BarChart" ? 'resources/style/images/pie_icon.png': 'resources/style/images/bar_icon.png';},
+					icon: function(){ return cd.chartType == "BarChart" ? webAppPath + '/content/pentaho-cdf/resources/style/images/pie_icon.png': webAppPath + '/content/pentaho-cdf/resources/style/images/bar_icon.png';},
 					oclass: 'options', 
 					callback: function(){
 						cd.chartType = cd.chartType == "BarChart" ? "PieChart" : "BarChart";
@@ -272,7 +272,7 @@ var JFreeChartComponent = BaseComponent.extend({
 				},
 				excel: {
 					title: "Excel",
-					icon:'resources/style/images/excel_icon.png', 
+					icon: webAppPath + '/content/pentaho-cdf/resources/style/images/excel_icon.png', 
 					oclass: 'options', 
 					callback: function(){
 						exportFile("excel",cd);
@@ -280,7 +280,7 @@ var JFreeChartComponent = BaseComponent.extend({
 				},
 				csv: {
 					title: "CSV",
-					icon:'resources/style/images/csv_icon.gif', 
+					icon: webAppPath + '/content/pentaho-cdf/resources/style/images/csv_icon.gif', 
 					oclass: 'options', 
 					callback: function(){
 						exportFile("csv",cd);
@@ -288,7 +288,7 @@ var JFreeChartComponent = BaseComponent.extend({
 				},
 				zoom: {
 					title:'Zoom', 
-					icon:'resources/style/images/magnify.png', 
+					icon: webAppPath + '/content/pentaho-cdf/resources/style/images/magnify.png', 
 					oclass: 'options', 
 					callback: function(){
 						Dashboards.incrementRunningCalls();
@@ -303,7 +303,7 @@ var JFreeChartComponent = BaseComponent.extend({
 						myself.zoomCallBack = function(value){eval(urlTemplate.replace("{" + parameterName + "}",value));};
 						Dashboards.callPentahoAction(myself,"cdf", "components", cdfComponent, parameters,function(jXML){
 							if(jXML != null){
-								var openWindow = window.open("js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
+								var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
 								setTimeout(function(){openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())},500);
 							}
 							Dashboards.decrementRunningCalls();
@@ -312,7 +312,7 @@ var JFreeChartComponent = BaseComponent.extend({
 				},
 				details:{
 					title:'Details', 
-					icon:'resources/style/images/table.png', 
+					icon:webAppPath + '/content/pentaho-cdf/resources/style/images/table.png', 
 					oclass: 'options', 
 					callback: function(){
 						myself.pivotDefinition = {jndi: cd.jndi, catalog:cd.catalog, query:cd.query};
@@ -321,7 +321,7 @@ var JFreeChartComponent = BaseComponent.extend({
 						
 				}
 
-			}, cd.captionOptions);
+			}, cd.caption);
 				
 			var captionId = myself.htmlObject + 'caption';
 			var caption = $('<div id="' + captionId + '" ></div>');

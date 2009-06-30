@@ -1,5 +1,4 @@
-
-var GB_ROOT_DIR = "js/greybox/";
+var GB_ROOT_DIR = WEB_CONTEXT_BASE + "/content/pentaho-cdf/js/greybox/";
 var GB_CURRENT=null;
 GB_hide=function(cb){
 GB_CURRENT.hide(cb);
