@@ -3,17 +3,17 @@ $.ajaxSetup({
 		async: false
 	});
 
+var pathArray = window.location.pathname.split( '/' );
+var webAppPath = "/" + pathArray[1];
+
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
-var TRAFFIC_RED = "resources/style/images/traffic_red.png";
-var TRAFFIC_YELLOW = "resources/style/images/traffic_yellow.png";
-var TRAFFIC_GREEN = "resources/style/images/traffic_green.png";
-var ERROR_IMAGE = 'resources/style/images/error.png';
+var TRAFFIC_RED = webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png";
+var TRAFFIC_YELLOW = webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png";
+var TRAFFIC_GREEN = webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png";
+var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
-
-var pathArray = window.location.pathname.split( '/' );
-var webAppPath = "/" + pathArray[1];
 
 $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /> <h3>Processing...</h3></div>';
 $.blockUI.defaults.css.left = '40%';
