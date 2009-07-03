@@ -331,7 +331,8 @@ Timeplot.Plot.prototype = {
                 ctx.beginPath();
                 ctx.moveTo(0,0);
                 this._plot(function(x,y) {
-                    ctx.lineTo(x,y);
+					if(!isNaN(x) && !isNaN(y))
+						ctx.lineTo(x,y);
                 });
                 if (this._plotInfo.fillFrom == Number.NEGATIVE_INFINITY) {
                     ctx.lineTo(this._canvas.width, 0);
@@ -350,11 +351,13 @@ Timeplot.Plot.prototype = {
                 ctx.beginPath();
                 var first = true;
                 this._plot(function(x,y) {
+					if(!isNaN(x) && !isNaN(y)){
                         if (first) {
                              first = false;
                              ctx.moveTo(x,y);
                         }
                     ctx.lineTo(x,y);
+					}
                 });
                 ctx.stroke();
             }
