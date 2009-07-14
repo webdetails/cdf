@@ -481,7 +481,7 @@ Dashboards.setSettingsValue = function(name,object){
 	var data = {
 		method: "set",
 		key: name,
-		value: JSON.stringify(object)
+		value: JSON.toJSONString(object)
 	};
 	$.post("Settings", data, function(){});
 };
