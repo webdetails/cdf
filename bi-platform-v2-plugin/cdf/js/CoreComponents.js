@@ -304,7 +304,12 @@ var JFreeChartComponent = BaseComponent.extend({
 						Dashboards.callPentahoAction(myself,"cdf", "components", cdfComponent, parameters,function(jXML){
 							if(jXML != null){
 								var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
-								setTimeout(function(){openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())},500);
+								var maxTries = 10;
+								var loadChart = function(){
+									if(openWindow.loadChart != undefined)openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())
+									else if(maxTries> 0) {maxTries-=1;setTimeout(loadChart,500);}
+								};
+								loadChart();
 							}
 							Dashboards.decrementRunningCalls();
 						});
