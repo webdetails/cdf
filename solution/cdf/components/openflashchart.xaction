@@ -225,7 +225,7 @@
 			<sources>
 				<request>backgroundColor</request>
 			</sources>
-			<default-value>#000000</default-value>
+			<default-value>#FFFFFF</default-value>
 		</BACKGROUNDCOLOR> 
 		<PLOTBACKGROUND type="string">
 			<sources>
@@ -439,7 +439,7 @@
 
 						//Build Header
 						var resultSetHeader = new Array(colCount) ;
-						resultSetHeader[0] = 'Locations';
+						resultSetHeader[0] = '';
 
 						for(i = 0; i < colCount; i++){
 
