@@ -33,7 +33,7 @@
 	</subtitles>
 
     <!-- General Chart Propeties --> 
-	<chart-background type="color">#FFFFFF</chart-background>
+	<chart-background type="color">{BACKGROUNDCOLOR}</chart-background>
 	<plot-background type="color">#EEEEEE</plot-background>
 	<border-visible>false</border-visible>
 	<border-paint>#000000</border-paint>

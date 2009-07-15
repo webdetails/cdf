@@ -11,7 +11,7 @@ jQuery.fn.extend({
 		var o = $.extend({
 			speedOver: 'fast',				// speed of the mouseover effect
 			speedOut: 'normal',				// speed of the mouseout effect
-			hideDelay: 500,					// how long to delay the hiding of the caption after mouseout (ms)
+			hideDelay: 3000,					// how long to delay the hiding of the caption after mouseout (ms)
 			animation: 'slide',				// 'fade', 'slide', 'always-on'
 			prefix: '',						// text/html to be placed at the beginning of every caption
 			opacity: '0.35',				// opacity of the caption on mouse over
@@ -30,11 +30,8 @@ jQuery.fn.extend({
 				var over_caption = false;
 				var over_img = false;
 				var over_map = false;
-				var bottomUp = false;
 				var close = 0;
-				
-				
-
+			
 				//pull the label from another element if there is a 
 				//valid element id inside the rel="..." attribute, otherwise,
 				//just use the text in the alt="..." attribute.
@@ -123,13 +120,22 @@ jQuery.fn.extend({
 					}
 					
 				};
+				
+				var timeOut = function(){
+					if(!close){
+						close = true;
+						cHide();
+					}
+				};
 
 				if (o.animation != 'always-on'){
 					//when the mouse is over the image
-					$(this).hover(
+					//$(this).hover(
+					$(this).bind("mouseenter",
 						function() {
 							over_img = true;
 							if (!over_caption && !close) {
+
 								var props = o.animation == 'fade'
 									? { opacity: o.opacity }
 									: { marginTop: captionPosition.show };
@@ -137,30 +143,10 @@ jQuery.fn.extend({
 								if (o.animation == 'fade'){
 									captionContent.animate({opacity: 1}, o.speedOver/2);
 								}
+								
+								window.setTimeout(timeOut, o.hideDelay);
 							}
-						},
-						function() {
-							over_img = false; 
-							window.setTimeout(cHide, 250);
-						}
-					);
-					$(this).click(function(){
-						close = true;
-						window.setTimeout(cHide, 0);
-					});
-					
-					$('div', wrapper).click(function(){
-						close = true;
-						window.setTimeout(cHide, 0);
-					});
-					
-					$('div', wrapper).bind("mouseenter",function() { over_caption = true; });
-					$('div', wrapper).bind("mouseleave",
-						function() { over_caption=false; if(!over_img)window.setTimeout(cHide, 250);}
-					);
-					$('div', wrapper).mousemove(
-						function() { over_caption = true; }
-					);
+						});
 				}
 				
 				this.setOverImage = function(over){over_img = over;};
@@ -168,12 +154,6 @@ jQuery.fn.extend({
 				$('body').trigger('capityFinished',[this]);
 				
 			});
-			
-			//if the image has already loaded (due to being cached), force the load function to be called
-			if (this.complete || this.naturalWidth > 0) {
-				
-			}
-
 		});
 	}
 });

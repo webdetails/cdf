@@ -221,12 +221,12 @@
 			</sources>
 			<default-value>1</default-value>
 		</MAXBARWIDTH>
-		<BACKGROUND type="string">
+		<BACKGROUNDCOLOR type="string">
 			<sources>
 				<request>backgroundColor</request>
 			</sources>
-			<default-value>#FFFFFF</default-value>
-		</BACKGROUND> 
+			<default-value>#000000</default-value>
+		</BACKGROUNDCOLOR> 
 		<PLOTBACKGROUND type="string">
 			<sources>
 				<request>plotbgcolor</request>
@@ -676,10 +676,10 @@
 		  <LEGENDFONTSIZE type="string"/>
 		  <LEGENDFONTISBOLD type="string"/>
 		  <LEGENDFONTISITALIC type="string"/>
+		  <BACKGROUNDCOLOR type="string"/>
 		  <!--FOREGROUNDALPHA type="string"/>
 		  <BACKGROUNDALPHA type="string"/>
 		  <MAXBARWIDTH type="string" />
-		  <BACKGROUND type="string"/>
 		  <PLOTBACKGROUND type="string"/-->
 		  <INTERIORGAP type="string"/>
 		  <!--TOOLTIPCONTENT type="string"/-->
