@@ -31,16 +31,11 @@ var BaseComponent = Base.extend({
 				//execute the xaction to populate the selector
 				var myself=this;
 				if (this.url) {
-					var query = "";
-					var idx;
-					for( idx=0; idx<p.length; idx++ ) {
-						if (query != "") {
-							query += "&";
-						}
-						query += encodeURIComponent( p[idx][0] ) + "=" + encodeURIComponent( p[idx][1] );
-					}
-					
-					html = Dashboards.parseXActionResult(myself, pentahoPost(this.url, query));
+					var arr = {};
+					$.each(p,function(i,val){
+						arr[val[0]]=val[1];
+					});
+					jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
 				} else {
 					jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
 				}

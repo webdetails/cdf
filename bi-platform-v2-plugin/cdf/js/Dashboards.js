@@ -304,7 +304,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
 	if (Dashboards.globalContext) {
 		eval( parameterName + " = " + Dashboards.serializeValue(parameterValue) );
 	} else {
-		Dashboards.parameters[parameterName] = eval(Dashboards.serializeValue(parameterValue))
+		Dashboards.parameters[parameterName] = Dashboards.serializeValue(parameterValue);
 	}
 }
 
@@ -392,21 +392,8 @@ Dashboards.callPentahoAction = function(obj, solution, path, action, parameters,
 	}
 }
 
-Dashboards.pentahoAction = function( solution, path, action, params, func ) {
-	// execute an Action Sequence on the server
-	
-	var url = webAppPath + "/ServiceAction";
-	
-	// Add the solution to the params
-	var arr = {};
-	arr.wrapper = false;
-	arr.solution = solution;
-	arr.path = path;
-	arr.action = action;
-	$.each(params,function(i,val){
-			arr[val[0]]=val[1];
-		});
-
+Dashboards.urlAction = function( url, params, func ) {
+	// execute a url
 	if (typeof func == "function"){
 		// async
 		return $.ajax({
@@ -414,7 +401,7 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 				type: "POST",
 				dataType: "xml",
 				async: true,
-				data: arr,
+				data: params,
 				complete: function (XMLHttpRequest, textStatus) {
 					func(XMLHttpRequest.responseXML);
 				},
@@ -432,7 +419,7 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 			type: "POST",
 			dataType: "xml",
 			async: false,
-			data: arr,
+			data: params,
 			error: function (XMLHttpRequest, textStatus, errorThrown) {
 				alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
 			}
@@ -440,6 +427,24 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 		}
 	).responseXML;
 
+} 
+
+Dashboards.pentahoAction = function( solution, path, action, params, func ) {
+	// execute an Action Sequence on the server
+
+	var url = webAppPath + "/ServiceAction";
+	
+	// Add the solution to the params
+	var arr = {};
+	arr.wrapper = false;
+	arr.solution = solution;
+	arr.path = path;
+	arr.action = action;
+	$.each(params,function(i,val){
+			arr[val[0]]=val[1];
+		});
+	
+	return Dashboards.urlAction(url, arr, func);
 }    
 
 Dashboards.parseXActionResult = function(obj,html){
