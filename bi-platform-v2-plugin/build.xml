@@ -159,6 +159,7 @@
 	  	<copy todir="${solution.stage.dir}" overwrite="true" >
 	        <fileset dir="../solution">
 	          <include name="cdf/**/*.xaction"/>
+	          <include name="cdf/**/*.xaction.sql"/>
 	       	  <include name="cdf/**/*.xml"/>
 	          <include name="cdf/**/*.js"/>
 	          <exclude name="cdf/**/index.xml"/>
