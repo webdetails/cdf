@@ -37,7 +37,7 @@
 			<dd><i>Boolean</i> False indicates the selector will have id/value. True indicates it will use value/value. Default: <i>true</i></dd>
 
 			<dt>queryDefinition</dt>
-			<dd>MetaLayer object with the definition of pivot (see MetaLayer options)</dd>
+			<dd>MetaLayer object with the query definition (see MetaLayer options)</dd>
 			
 			<dt>valuesArray</dt>
 			<dd><i>Array of Arrays - </i> Use this to pass a default value to the selector</dd>
@@ -76,6 +76,25 @@
 			<dd><i>Function - </i> Function to be called after the component is changed</dd>
 
 
+	</dl>
+
+		<h3>MetaLayer options</h3>
+
+		<dl class="documentation">
+			<dt>queryType</dt>
+			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+			<dt>jndi</dt> 
+			<dd>Connection to use for the query</dd>
+
+			<dt>query</dt> 
+			<dd>sql or mdx Query to execute</dd>
+
+			<dt>cube</dt> 
+			<dd>Cube name to use when queryType is mdx</dd>
+
+			<dt>catalog</dt> 
+			<dd>Mondrian schema to use when queryType is mdx</dd>
 		</dl>
 
 		<h3>Sample</h3>
