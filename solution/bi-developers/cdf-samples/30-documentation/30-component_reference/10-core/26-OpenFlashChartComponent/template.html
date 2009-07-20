@@ -6,7 +6,7 @@
 
 	<div class="contents">
 
-		<h2>jFreeChartComponent</h2>
+		<h2>OpenFlashChartComponent</h2>
 
 		<h3>Description</h3>
 		<p>
@@ -18,15 +18,6 @@
 		security.
 
 		Kettle transformations need to use db repository.
-
-		</p>
-		<p>
-
-		<b>Note:</b> Due to security restrictions, sql execution is disabled by
-		default. If you want to enable sql copy the file
-		"cdf/components/jfreechart.xaction.sql" to
-		"cdf/components/jfreechart.xaction" in the solutions directory.  All
-		parameters can optionally be functions.
 
 		</p>
 
@@ -95,9 +86,6 @@
 			<dt>parameterN</dt> 
 			<dd>with N being 0 to 10 (eg: parameter0), this are the parameters passed 
 			to the kettle transformation</dd>
-			
-			<dt>caption</dt> 
-			<dd>Chart Caption Options. (eg: {cdf: {title: "Cdf",icon: "resources/style/images/cdf-icon-small.png", callback: function(){alert("Icon cdf clicked");}}}</dd>
 
 			<dt>width</dt> 
 			<dd>Width of the chart. Default: 200</dd>
@@ -226,29 +214,26 @@
 					<textarea cols="80" rows="40" id="samplecode">
 
 var MetaLayerHome2 = {
+
 topTenCustomerDefinition: {
-	width: 500,
-	height: 300,
-	chartType: "BarChart",
+	width: "500",
+	height: "500",
+	chartType: "PieChart",
 	datasetType: "CategoryDataset",
-	is3d: false,
-	byRow: false,
+	is3d: "true",
 	isStacked: false,
 	includeLegend: false,
-	domainLabelRotation: 0,
-	backgroundColor: "#F3F3F3",
 	title: "Top 10 Customers",
 	parameterName: "PRODUCTLINE",
-	caption:{},
-	urlTemplate: "javascript:alert(\"You clicked \" + encode_prepare(\"{PRODUCTLINE}\"))",
+	urlTemplate: "alert('You clicked ' + encode_prepare('{PRODUCTLINE}'))",
 	orientation: 'horizontal',
 	queryType: 'mdx',
 	catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
 	jndi: "SampleData",
 	query: function(){
 
-		var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-			" NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) "+  
+		var query = "select NON EMPTY [Measures].[Sales] ON COLUMNS,"+
+			" NON EMPTY TopCount([Customers].[All Customers].Children, 10, [Measures].[Sales]) "+  
 		" ON ROWS from [SteelWheelsSales]"
 		return query;
 	}
@@ -258,7 +243,7 @@ topTenCustomerDefinition: {
 var topTenCustomers = 
 {
 	name: "topTenCustomers",
-	type: "jFreeChartComponent",
+	type: "openFlashChartComponent",
 	chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
 	htmlObject: "sampleObject",
 	executeAtStart: true
