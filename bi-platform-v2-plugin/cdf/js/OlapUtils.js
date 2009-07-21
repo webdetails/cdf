@@ -103,6 +103,7 @@ OlapUtils.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
 	if (clickedObj.mdxQuery.axisDepth > 0){
 		delete buttonsHash["Drill Down"];
 		delete buttonsHash.Focus;
+		delete buttonsHash.Exclude;
 	}
 
 

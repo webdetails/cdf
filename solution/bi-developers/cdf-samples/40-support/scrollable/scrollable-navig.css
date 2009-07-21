@@ -94,7 +94,7 @@ a.prev, a.next {
 	float:left;
 	width:214px;
 	height:300px;
-	background:#333 url(GetCDFResource?resource=/bi-developers/cdf-samples/40-support/scrollable/scrollable-gradient.png) repeat-x 0 146px;
+	background:#333 url(GetCDFResource?resource=/bi-developers/cdf-samples/40-support/scrollable/scrollable-gradient.png) repeat-x 0 170px;
 	color:#fff;
 	border-left:1px solid #333;
 	cursor:pointer;
