@@ -1,0 +1,52 @@
+*  v3.2
+    * NEW FEATURES:
+          o New OpenFashChart Component.
+          o JfreeChart Caption feature: Zoom , Export Chart (Excel,CSV), Change Type (BarChart,PieChart) and Show pivot details.
+          o DialChart now supports float values.
+          o Navigate Component:
+                + Render Optimization.
+                + Current template included in folder links.
+          o ContentList Component new mode that shows parent folders
+          o OlapUtils Improvements:
+                + Exclude optimization.
+                + DrillUp Support.
+                + Allow single filter reset.
+          o Implemented array support in parameters (Now non scalar parameters are sent to Pentaho as multi key/values)
+          o Allow the MonthpickerComponent to display the months within the max and min date range.
+          o ToggleButtonsComponents with query definition.
+    * BUG FIXES:
+          o Timeplot:
+                + Timeplot error for datasources with NAN(not a number) values.
+                + Plots after the seventh plot have always the same plotcolor.
+          o JfrreChartComponent:
+                + An error is thrown when no data exists.
+                + Miscalculated topCount for category datasets.
+                + Values enconding problem
+          o OlapUtils:
+                + Dimension analysis error.
+                + Exclude after expand not working.
+          o Unable to close window for ExecuteXaction component.
+          o Unable to change checkBox previous selected value.
+* v3.1
+          o Moved to the plugin architecture
+          o Released with pentaho 3.0
+
+* v3.0 - Moved all new trunk/ functionalities into stable release
+
+* v2.1-RC1
+          o Same features as 2.0.1 but compatible with pentaho 2.0-RC1
+          o Removed dashboard links since they don't make sense to use with mantle
+
+* v2.0.1
+          o Html selectors lacked enclosing quotes
+          o preExpressions are now optional
+          o Fixed bug in selectors regarding names with spaces included
+          o Implemented preChange and postChange in selector (thanks to Kevin Haas)
+          o For selectors, a fixed array of values are now accepted in the parameter 'valuesArray'
+          o Added pivot component
+          o Removed the url-template bug in samples_broadcast example (thanks to Maria Roldan)
+          o Added 2 new steel-wheels alike example (thanks to Harris Ward)
+          o CBF 2.0 compatible
+* v2.0.0
+          o Initial release
+
