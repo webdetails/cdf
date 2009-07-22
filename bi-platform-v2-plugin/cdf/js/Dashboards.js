@@ -304,7 +304,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
 	if (Dashboards.globalContext) {
 		eval( parameterName + " = " + Dashboards.serializeValue(parameterValue) );
 	} else {
-		Dashboards.parameters[parameterName] = Dashboards.serializeValue(parameterValue);
+		Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
 	}
 }
 
@@ -506,6 +506,19 @@ Dashboards.getSettingsValue = function(key,value){
  * http://www.webtoolkit.info/
  *
  **/
+
+function encode_prepare_arr(value) {
+	if ($.isArray(value)){
+		var a = new Array(value.length);
+		$.each(value,function(i,val){
+				a[i] = encode_prepare(val);
+			});
+		return a;
+	}
+	else{
+		return encode_prepare(value);
+	}
+}
 
 function encode_prepare( s )
 {
