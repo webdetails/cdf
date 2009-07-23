@@ -2,7 +2,7 @@
 *
 * jquery.sparkline.js
 *
-* v1.4
+* v1.4.2
 * (c) Splunk, Inc 
 * Contact: Gareth Watts (gareth@splunk.com)
 * http://omnipotent.net/jquery.sparkline/
@@ -189,7 +189,8 @@
 
                 $.fn.sparkline[options.type].call(this, values, options, width, height);
             }
-            if ($(this).is(':hidden') || $(this).parents().is(':hidden')) {
+            // jQuery 1.3.0 completely changed the meaning of :hidden :-/
+            if (($(this).html() && $(this).is(':hidden')) || ($.fn.jquery < "1.3.0" && $(this).parents().is(':hidden'))) {
                 pending.push([this, render]);
             } else {
                 render.call(this);
@@ -873,7 +874,7 @@
         drawShape : function(path, lineColor, fillColor) {
             var vpath = [];
             for(var i=0; i<path.length; i++) {
-                vpath[i] = ''+(path[i][0]-1)+','+(path[i][1]-1);
+                vpath[i] = ''+(path[i][0])+','+(path[i][1]);
             }
             var initial = vpath.splice(0,1);
             var stroke = lineColor == undefined ? ' stroked="false" ' : ' strokeWeight="1" strokeColor="'+lineColor+'" ';
@@ -896,7 +897,7 @@
             var vel = '<v:oval '
                 + stroke
                 + fill
-                +' style="position:absolute;top:'+y+'; left:'+x+'; width:'+(radius*2)+'; height:'+(radius*2)+'"></v:oval>';
+                +' style="position:absolute;top:'+y+'px; left:'+x+'px; width:'+(radius*2)+'px; height:'+(radius*2)+'px"></v:oval>';
             this.group.insertAdjacentHTML('beforeEnd', vel);
             
         },
