@@ -120,7 +120,9 @@
       </action-outputs>
       <component-definition> 
         <script><![CDATA[// MDX to Relation result set, needed for the 
-		
+
+		var obj = new Packages.org.json.JSONStringer();	
+		var metadata = new Packages.org.json.JSONArray();
 		var values = new Packages.org.json.JSONArray();
 		
 		if (query_result != null)
@@ -131,7 +133,11 @@
 			var rowHeaders = rsmd.getRowHeaders() ;
 			var colCount = rsmd.getColumnCount() ;
 			var rowCount = query_result.getRowCount() ;
-
+			
+			for(j = 0; j < colCount; j++){
+				metadata.put(colHeaders[0][j].toString() + '');
+			}
+			
 			if(rowCount> 0)
 			{		
 				for (i=0; i<rowCount; i++)
@@ -152,7 +158,14 @@
 			}
 		}
 		
-		var results = new java.lang.String(values.toString().getBytes("utf8"));
+		
+		
+		obj.object();
+		obj.key("metadata").value(metadata);
+		obj.key("values").value(values);
+		obj.endObject();
+		
+		var results = new java.lang.String(obj.toString().getBytes("utf8"));
 		results;
 		]]></script> 
       </component-definition> 
