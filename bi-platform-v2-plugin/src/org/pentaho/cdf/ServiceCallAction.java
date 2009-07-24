@@ -11,10 +11,9 @@ import org.pentaho.platform.engine.services.solution.SolutionHelper;
 
 public class ServiceCallAction  {
 
-	private static ServiceCallAction serviceCallAction = null;
+	private static ServiceCallAction serviceCallAction = new ServiceCallAction();
 	
 	static ServiceCallAction getInstance() {
-		if(serviceCallAction == null) serviceCallAction = new ServiceCallAction();
 		return serviceCallAction;
 	}
 	
