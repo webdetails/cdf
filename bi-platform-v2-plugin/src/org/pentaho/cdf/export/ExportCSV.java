@@ -20,9 +20,9 @@ public class ExportCSV extends Export implements IExport {
     
     public void export(String[][] resultSet){
     	
+    	PrintWriter pw = new PrintWriter(outputStream);
+    	
     	try {
-			
-    		PrintWriter pw = new PrintWriter(outputStream);
 			
 			for(int i =  0; i < resultSet.length; i++){
 				String[] vs = resultSet[i];
@@ -36,12 +36,13 @@ public class ExportCSV extends Export implements IExport {
 			}
 			
 			pw.flush();
-			pw.close();
-			
 			
     	} catch (Exception e) {
 			logger.error( Messages.getErrorString("CdfExportCSV.ERROR_0001_BUILDING_CSV") );
 		}
+    	finally{
+    		pw.close();
+    	}
 	}
     
 	public void setContentType() {

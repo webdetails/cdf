@@ -371,10 +371,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 			ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
 			if(serviceCallAction.execute(requestParams, userSession, out)){
 		
-				String exportType = requestParams.getStringParameter("exportType", null);
+				String exportType = requestParams.getStringParameter("exportType", "excel");
 			
 				Export export = exportType.equals("csv") ? new ExportCSV(outputHandler) : new ExportExcel(outputHandler);
-			
+					
 				export.exportFile(new JSONObject(out.toString()));
 			}
 		

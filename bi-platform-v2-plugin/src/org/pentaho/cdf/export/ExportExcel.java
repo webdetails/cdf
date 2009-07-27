@@ -31,10 +31,12 @@ public class ExportExcel extends Export implements IExport {
 
 	public void export(String[][] resultSet) {
 		
+		
+		WritableWorkbook  wb = null;
+		
 		try {
 	 
-			WritableWorkbook  wb = Workbook.createWorkbook(outputStream);
-			
+			wb = Workbook.createWorkbook(outputStream);
 			WritableSheet sheet = wb.createSheet("Sheet", 0);
 			setCellsStyles();
 			WritableCellFormat cf;
@@ -63,7 +65,6 @@ public class ExportExcel extends Export implements IExport {
 	    	
     		
     		wb.write();
-    		wb.close();
     		
 		} catch (IOException e) {
 			logger.error( Messages.getErrorString("CdfExportExcel.ERROR_0001_OPENING_CLOSING_EXCEL") );
@@ -71,6 +72,13 @@ public class ExportExcel extends Export implements IExport {
 			logger.error( Messages.getErrorString("CdfExportExcel.ERROR_0002_WRITING_EXCEL") );
 		} catch (Exception e) {
 			logger.error( Messages.getErrorString("CdfExportExcel.ERROR_0003_BUILDING_EXCEL") );
+		}
+		finally{
+		    try {
+		    	wb.close();
+			} catch (Exception e){
+				logger.error( Messages.getErrorString("CdfExportExcel.ERROR_0001_OPENING_CLOSING_EXCEL") );
+			}
 		}
 	}
 

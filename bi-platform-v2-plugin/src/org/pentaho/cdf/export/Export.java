@@ -42,7 +42,7 @@ public abstract class Export extends PentahoBase implements IExport {
 	    	results[0][0] = "No results Returned";
 	    	
 	    	int nCols = 0,nRows = 0;
-	    	if( metaData.length() > 0 && (nRows = values.length()) > 0 && (nCols = values.getJSONArray(0).length()) > 0){
+	    	if( metaData.length() > 0 && (nRows = values.length()) > 0 && values.length() > 0 && (nCols = values.getJSONArray(0).length()) > 0){
 	    		
 	    		results = new String[nRows + 1][nCols+1];
 	    		results[0][0] = "";
@@ -59,7 +59,7 @@ public abstract class Export extends PentahoBase implements IExport {
 	    	httpHandler.getResponse().setHeader("content-disposition","attachment");
 			httpHandler.getResponse().setHeader("filename","export" + getExtension());
 	    	setContentType();
-    	export(results);
+	    	export(results);
     	
 		} catch (JSONException e) {
 			logger.error( Messages.getErrorString("CdfExpor.ERROR_0001_PARSING_RESULTS") );

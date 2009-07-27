@@ -1,7 +1,6 @@
 package org.pentaho.cdf;
 
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 public class CdfSettings  {
 	
@@ -13,12 +12,12 @@ public class CdfSettings  {
 		return cdfSettings;
 	}
 	
-	public void setValue(String name, Object obj, IPentahoSession userSession){
-		 PentahoSystem.getCacheManager(userSession).putInSessionCache(userSession,name,obj);
+	public void setValue(String key, Object obj, IPentahoSession userSession){
+		CdfSessionCache.getInstance().putInCdfSessionCache(userSession, key, obj);
 	}
 	
-	public Object getValue(String name, IPentahoSession userSession){
-		return PentahoSystem.getCacheManager(userSession).getFromSessionCache(userSession, name);
+	public Object getValue(String key, IPentahoSession userSession){
+		return CdfSessionCache.getInstance().getFromCdfSessionCache(userSession, key);
 	}
 	
 }
