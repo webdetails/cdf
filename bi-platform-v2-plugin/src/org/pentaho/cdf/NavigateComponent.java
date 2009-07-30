@@ -35,6 +35,8 @@ public class NavigateComponent extends PentahoBase {
 	private static final String TYPE_DIR = "FOLDER";
 	private static final String TYPE_XACTION = "XACTION";
 	private static final String TYPE_URL = "URL";
+	private static final String TYPE_XCDF = "XCDF";
+	private static final String TYPE_WCDF = "WCDF";
 	private static final String CACHE_NAVIGATOR = "CDF_NAVIGATOR_JSON";
 	private static final String CACHE_REPOSITORY_DOCUMENT = "CDF_REPOSITORY_DOCUMENT";
 	protected static final Log logger = LogFactory.getLog(NavigateComponent.class);
@@ -148,7 +150,9 @@ public class NavigateComponent extends PentahoBase {
                 
             	Node node = (Node) nodeIterator.next();
                 JSONObject json = new JSONObject();
+                JSONObject jsonChild = new JSONObject();
                 JSONArray children = null;
+                JSONArray files = null;
                 String name = node.valueOf("@name");
                
                 if (parentPathArray.length > 0){
@@ -169,10 +173,32 @@ public class NavigateComponent extends PentahoBase {
                     json.put("description",description);
                 	
                     if (visible && isDirectory){
-                        children = processTree(node,parentPath + "/" + name);
+                    	children = processTree(node,parentPath + "/" + name);
+                    	files = new JSONArray();
+                    	
+                    	//Process directory wcdf/xcdf files
+                    	List fileNodes = node.selectNodes("./file[@isDirectory='false'][ends-with(string(@name),'.xcdf') or ends-with(string(@name),'.wcdf')]");
+                    	
+                    	Iterator fileNodesIterator = fileNodes.iterator();
+                        while (fileNodesIterator.hasNext()) {
+                        	
+                        	Node chilNode = (Node) fileNodesIterator.next();
+                        	name = chilNode.valueOf("@name");
+                        	String type = name.substring(name.lastIndexOf(".")+1,name.length());	
+                        		
+                        	jsonChild = new JSONObject();
+                        	jsonChild.put("file", name);
+                        	jsonChild.put("solution",json.get("solution"));
+                        	jsonChild.put("path",json.get("path"));
+                        	jsonChild.put("type",type);
+                        	jsonChild.put("visible", chilNode.valueOf("@visible").equals("true"));
+                        	jsonChild.put("title",  chilNode.valueOf("@localized-name"));
+                        	jsonChild.put("description",  chilNode.valueOf("@description"));
+                        	files.put(jsonChild);
+                        }
+                        json.put("files",files);
                     }
                     
-
                 } else {
                     // root dir
  	                json.put("id",tree.valueOf("@path"));
@@ -241,7 +267,7 @@ public class NavigateComponent extends PentahoBase {
                  	String name = chilNode.valueOf("@name");
                  	String localizedName = chilNode.valueOf("@localized-name");
                  	String description = chilNode.valueOf("@description");
-                 	String type =  chilNode.valueOf("@isDirectory").equals("true") ? TYPE_DIR :name.endsWith(".xaction") ? TYPE_XACTION :name.endsWith(".url") ? TYPE_URL : null;
+                 	String type =  chilNode.valueOf("@isDirectory").equals("true") ? TYPE_DIR :name.endsWith(".xaction") ? TYPE_XACTION :name.endsWith(".url") ? TYPE_URL : name.endsWith(".xcdf") ? TYPE_XCDF : name.endsWith(".wcdf") ? TYPE_WCDF : null;
                  	boolean visible = chilNode.valueOf("@visible").equals("true");
                  		 
                  	if(type != null){
@@ -258,6 +284,7 @@ public class NavigateComponent extends PentahoBase {
 						json.put("visible", visible);
 						json.put("title", localizedName);
 						json.put("description", description);
+						if(type.equals(TYPE_XCDF) || type.equals(TYPE_WCDF)) json.put("file",name);
 						if(type.equals(TYPE_XACTION)) json.put("action", name);
 						if(type.equals(TYPE_URL)) json.put("url",url);
 						array.put(json);

@@ -12,10 +12,16 @@ ul.jd_menu_vertical {
 	width: 200px;
 	height: auto;
 	clear: both;
-	/*background-color: #007788;*/
-	background: #073c4c url('../resources/style/images/x3.gif') top left repeat-x;
+	background-color: #007788;
+	background: #007788 url('../resources/style/images/x3.gif') top left repeat-x;
 }
 
+ul.jd_menu_vertical {
+	
+}
+ul.jd_menu_vertical li {
+	float: none;
+}
 
 ul.jd_menu_slate a, 
 ul.jd_menu_slate a:active,

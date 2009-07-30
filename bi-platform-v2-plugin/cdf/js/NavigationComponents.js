@@ -13,9 +13,8 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
 		for(i = 0; i<files.length; i++){
 			var file = files[i];
 			if(NavigatorBaseComponent.solution == "" || file.solution == NavigatorBaseComponent.solution){
-				files = file.folders;
-				if(files.length == undefined){
-					files = [ files ];
+				if(file.folders != undefined && file.folders.length == undefined){
+					files = [ file.folders ];
 				}
 				return files;
 			}
@@ -82,7 +81,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
 		if( NavigatorBaseComponent.navigatorResponse == -1 ){
-			$.getJSON("JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
+			$.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
 					myself.processNavigatorResponse(json);
 				});
 		}
@@ -126,6 +125,8 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 
 			s += this.generateMenuFromFile(file, depth + 1);
 		}
+		
+		
 		if (s.length > 0){
 
 			var className;
@@ -134,8 +135,9 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 				var cls=(this.mode == 'vertical')?"jd_menu jd_menu_slate jd_menu_vertical":"jd_menu jd_menu_slate";
 				className = "class=\""+cls+"\"";
 			}
-
+		
 			s = "<ul " + className + ">"+ s + "</ul>";
+				
 		}
 
 		return s;
@@ -153,18 +155,30 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 			}
 			
 			var _template = NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
-
-			s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + "RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+			
+			if(file.type == "wcdf")
+				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf-dd/Render?solution=" + file.solution + "&amp;path=" + file.path + "&amp;file=" + file.file + "\">" + file.title + "</a>";
+			else if (file.type == "xcdf")
+				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf/RenderXCDF?solution=" + file.solution + "&amp;path=" + file.path + "&amp;action=" + file.file + "\">" + file.title + "</a>";
+			else
+				s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+				
 
 			var files = file.folders || [];
 			files.sort(function(a,b){return a.name>b.name});
-			var inner = this.generateMenuFromArray(files);
-
+			
+			var childFiles = file.files || [];
+			childFiles.sort(function(a,b){return a.name>b.name});
+			
+			var inner = this.generateMenuFromArray(files.concat(childFiles));
+			
 			if (inner.length > 0 ){
 				inner = " &raquo;" + inner;
 			}
 
 			s += inner+"</li>";
+			
+			
 		}
 		return s;
 	}
@@ -174,7 +188,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
 		var path = this.mode != 4  ? NavigatorBaseComponent.path : NavigatorBaseComponent.getParentPath();
-		$.getJSON("JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + path, function(json){
+		$.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + path, function(json){
 				myself.processContentListResponse(json);
 			});
 	},
@@ -231,12 +245,18 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 		
 					if (this.type=="FOLDER"){
 						cls = "folder";
-						href = "RenderHTML?solution=" + this.solution + "&path=" + this.path + template;
+						href = webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + this.solution + "&path=" + this.path + template;
 					}
 					else{
 						if (this.url != undefined){
 							cls = "folder";
 							href=this.url;
+						}
+						else if(this.file != undefined){
+							if(this.type == "WCDF")
+								href = webAppPath + "/content/pentaho-cdf-dd/Render?solution=" + this.solution + "&path=" + this.path + "&file=" + this.file;
+							else
+								href = webAppPath + "/content/pentaho-cdf/RenderXCDF?solution=" + this.solution + "&path=" + this.path + "&action=" + this.file;
 						}
 						else{
 							cls = "action greybox";
@@ -271,7 +291,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
 	update : function() {
 		var myself = this;
 		if( NavigatorBaseComponent.navigatorResponse == -1 ){
-			$.getJSON("JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+			$.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
 					myself.processPageTitleResponse(json);
 				});
 		}
