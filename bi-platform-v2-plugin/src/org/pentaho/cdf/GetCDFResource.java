@@ -26,6 +26,8 @@ import org.pentaho.platform.util.StringUtil;
  */
 public class GetCDFResource extends ServletBase {
 
+    private static final long serialVersionUID = 8251622066287622726L;
+    
     private static final Log logger = LogFactory.getLog(GetCDFResource.class);
 
     /** 
@@ -54,7 +56,7 @@ public class GetCDFResource extends ServletBase {
             return;
         }
         ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class,session);// PentahoSystem.getSolutionRepository(session);
-        InputStream in = repository.getResourceInputStream(resourcePath, true);
+        InputStream in = repository.getResourceInputStream(resourcePath, true, ISolutionRepository.ACTION_EXECUTE);
         if (in == null) {
             error(Messages.getErrorString("GetResource.ERROR_0003_RESOURCE_MISSING", resourcePath)); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
