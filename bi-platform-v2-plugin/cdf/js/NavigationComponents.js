@@ -13,10 +13,32 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
 		for(i = 0; i<files.length; i++){
 			var file = files[i];
 			if(NavigatorBaseComponent.solution == "" || file.solution == NavigatorBaseComponent.solution){
-				if(file.folders != undefined && file.folders.length == undefined){
-					files = [ file.folders ];
+				
+				var solutionFiles = [];
+				
+				// Process subFolders;
+				var subFolders = file.folders;
+				if(subFolders != undefined && subFolders.length == undefined){
+					// only one folder inside
+					solutionFiles.push(subFolders);
 				}
-				return files;
+				else if(subFolders != undefined && subFolders.length > 0){
+					// We have an array of files
+					solutionFiles = solutionFiles.concat(subFolders);
+				}
+				
+				// Process subFiles;
+				var subFiles = file.files;
+				if(subFiles != undefined && subFiles.length == undefined){
+					// only one file inside
+					solutionFiles.push(subFiles);
+				}
+				else if(subFiles != undefined && subFiles.length > 0){
+					// We have an array of files
+					solutionFiles = solutionFiles.concat(subFiles);
+				}
+
+				return solutionFiles;
 			}
 	
 		}
