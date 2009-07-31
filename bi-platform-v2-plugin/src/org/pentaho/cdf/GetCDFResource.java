@@ -56,7 +56,7 @@ public class GetCDFResource extends ServletBase {
             return;
         }
         ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class,session);// PentahoSystem.getSolutionRepository(session);
-        InputStream in = repository.getResourceInputStream(resourcePath, true, ISolutionRepository.ACTION_EXECUTE);
+        InputStream in = repository.getResourceInputStream(resourcePath, true);
         if (in == null) {
             error(Messages.getErrorString("GetResource.ERROR_0003_RESOURCE_MISSING", resourcePath)); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
