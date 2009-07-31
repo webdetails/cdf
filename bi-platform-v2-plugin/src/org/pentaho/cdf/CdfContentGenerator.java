@@ -227,10 +227,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
 		ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
 		String templateName = null;
-		if (repository.resourceExists(fullPath, ISolutionRepository.ACTION_EXECUTE)) {
+		if (repository.resourceExists(fullPath)) {
 			ActionResource resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", 
 					fullPath); 
-			String dashboardMetadata = repository.getResourceAsString(resource, ISolutionRepository.ACTION_EXECUTE);
+			String dashboardMetadata = repository.getResourceAsString(resource);
 			Document doc = DocumentHelper.parseText(dashboardMetadata);
 			templateName = XmlDom4JHelper.getNodeText( "/cdf/template", doc, "");
             // If a "style" tag exists, use that one
@@ -259,7 +259,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 		IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
 		if (templater != null) {
 			ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", "system/" + PLUGIN_NAME + "/" + dashboardTemplate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			String templateContent = repository.getResourceAsString(templateResource, ISolutionRepository.ACTION_EXECUTE);
+			String templateContent = repository.getResourceAsString(templateResource);
 			String sections[] = templater.breakTemplateString(templateContent, "", userSession); //$NON-NLS-1$
 			if (sections != null && sections.length > 0) {
 				intro = sections[0];
@@ -285,7 +285,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 			}
 		}
 
-		if (fullTemplatePath != null && repository.resourceExists(fullTemplatePath, ISolutionRepository.ACTION_EXECUTE)) {
+		if (fullTemplatePath != null && repository.resourceExists(fullTemplatePath)) {
 			resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", //$NON-NLS-1$ //$NON-NLS-2$ 
 					fullTemplatePath); 
 		} else {
@@ -293,7 +293,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 					"system/" + PLUGIN_NAME + "/default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		dashboardContent = repository.getResourceAsString(resource, ISolutionRepository.ACTION_EXECUTE);
+		dashboardContent = repository.getResourceAsString(resource);
 
 		intro = intro.replaceAll("\\{load\\}", "onload=\"load()\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -483,7 +483,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
 	public void getSolutionFile( String resourcePath, OutputStream out, ILogger logger ) throws Exception {
 		ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
-		InputStream in = repository.getResourceInputStream(resourcePath, true, ISolutionRepository.ACTION_EXECUTE);
+		InputStream in = repository.getResourceInputStream(resourcePath, true);
 		byte buff[] = new byte[4096];
 		int n = in.read( buff );
 		while( n != -1 ) {
