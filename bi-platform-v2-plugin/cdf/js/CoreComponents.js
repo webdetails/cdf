@@ -342,16 +342,25 @@ var JFreeChartComponent = BaseComponent.extend({
 			
 			$("#" + myself.htmlObject).empty();
 			
-			$("#" + myself.htmlObject).append(caption);
+			var bDetails = $('<div class="caption-details">Details</div>');
+			$("#" + myself.htmlObject).append(bDetails);
 			$("#" + myself.htmlObject).append(chart);
+			$("#" + myself.htmlObject).append(caption);
 			
-			$('img.captify').captify($.extend({spanWidth: '95%',hideDelay:2500,hasButton:false,opacity:'0.5'}, cd.caption));	
+			
+			$('img.captify').captify($.extend({bDetails:bDetails, spanWidth: '95%',hideDelay:3000,hasButton:false,opacity:'0.5'}, cd.caption));	
 			
 			//Add events after captify has finished.
-			$(document).one('capityFinished',function(e,wrapper){
-				if(chart.length > 1){
-					//Append map after image
+			bDetails.one('capityFinished',function(e,wrapper){
+				var chartOffset = chart.offset();
+				var bDetailsOffset = bDetails.offset();
+				if(chart.length > 1){					
+					bDetails.bind("mouseenter",function(){$("#" + myself.htmlObject + 'image').trigger('detailsClick',[this]);});
+					bDetails.css("left",bDetails.position().left + $(chart[1]).width() - bDetails.width() - 5);
+					bDetails.css("top",bDetails.position().top + $(chart[1]).height() - bDetails.height() );
+					//Append map after image				
 					$(chart[1]).append(chart[0]);
+					
 				}
 				for(o in captionOptions)
 					if(captionOptions[o].callback != undefined)

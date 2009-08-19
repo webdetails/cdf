@@ -11,7 +11,7 @@ jQuery.fn.extend({
 		var o = $.extend({
 			speedOver: 'fast',				// speed of the mouseover effect
 			speedOut: 'normal',				// speed of the mouseout effect
-			hideDelay: 3000,					// how long to delay the hiding of the caption after mouseout (ms)
+			hideDelay: 4000,					// how long to delay the hiding of the caption after mouseout (ms)
 			animation: 'slide',				// 'fade', 'slide', 'always-on'
 			prefix: '',						// text/html to be placed at the beginning of every caption
 			opacity: '0.35',				// opacity of the caption on mouse over
@@ -27,10 +27,8 @@ jQuery.fn.extend({
 					return false;
 				}
 				this.hasInit = true;
-				var over_caption = false;
-				var over_img = false;
-				var over_map = false;
 				var close = 0;
+				var invoker;
 			
 				//pull the label from another element if there is a 
 				//valid element id inside the rel="..." attribute, otherwise,
@@ -108,11 +106,12 @@ jQuery.fn.extend({
 				
 				//function to push the caption out of view
 				var cHide = function() {
-					if (close || (!over_caption && !over_img)){//(!over_caption && !over_img && !over_map)){
+					if (close){
 						var props = o.animation == 'fade'
 							? { opacity: 0 }
 							: { marginTop: captionPosition.hide };
 						caption.animate(props, 250,null,function(){close = false});
+						invoker.animate(props, 250);
 						if (o.animation == 'fade'){
 							captionContent.animate({opacity: 0}, o.speedOver,null,function(){close = false});
 						}
@@ -121,37 +120,31 @@ jQuery.fn.extend({
 					
 				};
 				
-				var timeOut = function(){
-					if(!close){
-						close = true;
-						cHide();
-					}
-				};
+				
 
 				if (o.animation != 'always-on'){
 					//when the mouse is over the image
 					//$(this).hover(
-					$(this).bind("mouseenter",
-						function() {
-							over_img = true;
-							if (!over_caption && !close) {
-
+					$(this).bind("detailsClick",
+						function(e,obj) {
+							if (!close) {
+								close = true;
+								invoker = $(obj);
 								var props = o.animation == 'fade'
 									? { opacity: o.opacity }
 									: { marginTop: captionPosition.show };
 								caption.animate(props, o.speedOver);
+								invoker.animate(props, o.speedOver);
 								if (o.animation == 'fade'){
 									captionContent.animate({opacity: 1}, o.speedOver/2);
 								}
 								
-								window.setTimeout(timeOut, o.hideDelay);
+								window.setTimeout(cHide, o.hideDelay);
 							}
 						});
 				}
 				
-				this.setOverImage = function(over){over_img = over;};
-				
-				$('body').trigger('capityFinished',[this]);
+				o.bDetails.trigger('capityFinished',[this]);
 				
 			});
 		});
