@@ -168,6 +168,7 @@ var SelectBaseComponent = BaseComponent.extend({
 			// update the placeholder
 			$("#"+this.htmlObject).html(selectHTML);
 			var currentVal = Dashboards.getParameterValue(this.parameter);
+			currentVal = typeof currentVal == 'function' ? currentVal(): currentVal;
 			if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
 				Dashboards.setParameter(this.parameter, firstVal);
 			} else {
