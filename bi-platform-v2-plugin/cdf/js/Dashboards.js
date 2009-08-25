@@ -233,7 +233,8 @@ Dashboards.processChange = function(object_name){
 		return;
 	
 	if(!(typeof(object.preChange)=='undefined')){
-		object.preChange(value);
+		var preChangeResult = object.preChange(value);
+		value = preChangeResult != undefined ? preChangeResult : value;
 	}
 	this.fireChange(parameter,value);
 	if(!(typeof(object.postChange)=='undefined')){
