@@ -1048,7 +1048,7 @@ var TableComponent = BaseComponent.extend({
 
 			var myself = this;
 
-			dtData.fnDrawCallback = function( aData, iRowCount ){
+			dtData.fnDrawCallback = function(){
 				$("#" + myself.htmlObject + " td.sparkline").each(function(i){
 						$(this).sparkline($(this).text().split(/,/));
 					});
@@ -1060,6 +1060,10 @@ var TableComponent = BaseComponent.extend({
 							var f = cd.urlTemplate.replace(regex,$(this).text());
 							eval(f);
 						});
+				}
+
+				if(typeof cd.drawCallback == 'function'){
+					cd.drawCallback(myself);
 				}
 			};
 			$("#"+this.htmlObject+'Table').dataTable( dtData );
