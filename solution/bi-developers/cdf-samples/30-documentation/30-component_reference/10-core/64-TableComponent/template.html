@@ -10,9 +10,14 @@
 
 		<h3>Description</h3>
 		<p>
-		This is a component that can easily generate a data table whithout needing a xaction file. The resultset is returned
-		from a mdx or sql query. In case of mdx queries, a role will be passed to mondrian if the session variable 'role' is
-		defined, allowing row level security.
+
+		This is a component that can easily generate a data table whithout
+		needing a xaction file. The underlying plugin use is
+		http://datatables.net/
+		
+		The resultset is returned from a mdx or sql query. In case of mdx
+		queries, a role will be passed to mondrian if the session variable
+		'role' is defined, allowing row level security.
 
 		</p>
 
@@ -74,26 +79,48 @@
 			<dd>The table column types.</dd>
 			
 			<dt>colFormats</dt> 
-			<dd>The table column formats.</dd>
+			<dd>The table column formats in sprinf format</dd>
 			
 			<dt>paginate</dt> 
-			<dd>Paginate option. Default: true</dd>
+			<dd>Enables or disables pagination. Default: true</dd>
 
 			<dt>filter</dt> 
-			<dd>Filter option. Default: true</dd>
+			<dd>Enable or disable filtering of data. Note that filtering in DataTables is smart in that it allows the end user to input multiple words (space separated) and will match a row containing those words, even if not in the order that was specified (this allow matching across multiple columns). Default: true</dd>
 			
 			<dt>info</dt> 
-			<dd>Display filter information. Default: true</dd>
+			<dd>Enable or disable the table information display. This shows information about the data that is currently visible on the page, including information about filtered data if that action is being performed. Default: true</dd>
 			
 			<dt>sort</dt> 
 			<dd>Sorts the data. Default: true</dd>
 			
+			<dt>sortBy</dt> 
+			<dd>If sorting is enabled, then DataTables will perform a first pass sort on initialisation. You can define which column(s) the sort is performed upon, and the sorting direction, with this variable. For each column an array must be specified where the first element is an int of the data index, and the second is 'asc' or 'desc' for the sorting direction Example of multiple column sorting: "[[0,'asc'], [1,'asc']]"</dd>
+			
 			<dt>displayLength</dt> 
-			<dd>The page lengh</dd>
+			<dd>Number of rows to display on a single page when using pagination. If feature enabled (bLengthChange) then the end user will be able to over-ride this to a custom setting using a pop-up menu. Default: 10</dd>
+			
+			<dt>lengthChange</dt> 
+			<dd>Allows the end user to select the size of a formatted page from a select menu (sizes are 10, 25, 50 and 100). Default: true</dd>
 			
 			<dt>drawCallback</dt> 
 			<dd>Optinal function to be called when a page of the table is rendered. Takes the component object
 			as argument. Example: function(component){if (typeof component == 'undefined'){return}; alert("Page draw")}
+			</dd>
+
+			<dt>sDom</dt>
+			<dd>
+			This initialisation variable allows you to specify exactly where in the DOM you want DataTables to inject the various controls it adds to the page (for example you might want the pagination controls at the top of the table). DIV elements (with or without a custom class) can also be added to aid styling. See http://datatables.net/usage/options for more details
+			</dd>
+			
+		</dl>
+
+		<h3>Component objects</h3>
+
+		<dl class="documentation">
+
+			<dt>dataTable</dt>
+			<dd>After the datatable plugin is applied, the base object can be access through this object</dd>
+
 
 			</dd>
 			
@@ -122,6 +149,7 @@ topTenCustomerDefinition: {
 	colHeaders: ["Customers","Sales"],
 	colTypes: ['string','numeric'],
 	colFormats: [null,'%.0f'],
+	colWidths: ['500px',null],
 	queryType: 'mdx',
 	displayLength: 5,
 	
