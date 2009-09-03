@@ -55,7 +55,7 @@ tableComponentScript=\
 
 tableComponentLink=\
 @BASE_URL@/content/pentaho-cdf/resources/style/jquery.jTable.css,\
-@BASE_URL@/content/pentaho-cdf/js/dataTables/css/demos.css
+@BASE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css
 
 timePlotComponentScript=\
 @BASE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js?local
