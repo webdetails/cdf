@@ -1037,36 +1037,55 @@ var TableComponent = BaseComponent.extend({
 		},
 		processTableComponentResponse : function(json)
 		{
-			// General documentation here: http://sprymedia.co.uk/article/DataTables
+			// General documentation here: http://datatables.net
 
 			var cd = this.chartDefinition;
 			// Build a default config from the standard options
 			var dtData0 = TableComponent.getDataTableOptions(cd);
 			var dtData = $.extend(cd.dataTableOptions,dtData0);
-			dtData.aaData = json;
-			$("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
 
+
+			// Sparklines still applied to drawcallback
 			var myself = this;
-
-			dtData.fnDrawCallback = function(){
-				$("#" + myself.htmlObject + " td.sparkline").each(function(i){
+			dtData.fnDrawCallback = function() {
+				$("#" + myself.htmlObject + " td.sparkline:visible").each(function(i){
 						$(this).sparkline($(this).text().split(/,/));
+						$(this).removeClass("sparkline");
 					});
-				if(cd.urlTemplate != undefined){
-					var td =$("#" + myself.htmlObject + " td:nth-child(1)"); 
-					td.addClass('cdfClickable');
-					td.bind("click", function(e){
-							var regex = new RegExp("{"+cd.parameterName+"}","g");
-							var f = cd.urlTemplate.replace(regex,$(this).text());
-							eval(f);
-						});
-				}
 
 				if(typeof cd.drawCallback == 'function'){
-					cd.drawCallback(myself);
+					cd.drawCallback();
 				}
+
 			};
-			$("#"+this.htmlObject+'Table').dataTable( dtData );
+
+			dtData.aaData = json;
+			$("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
+			this.dataTable = $("#"+this.htmlObject+'Table').dataTable( dtData );
+
+
+			// Apply the formats
+			if(cd.colFormats != undefined){
+				$.each(cd.colFormats,function(colNo,val){
+						if(val != null){
+							var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child("+ (colNo + 1) +")");
+							td.each(function(){
+									$(this).text( sprintf( val, $(this).text() ) );
+								});
+						}
+					});
+			}
+
+			if(cd.urlTemplate != undefined){
+				var td =$("#" + myself.htmlObject + " td:nth-child(1)"); 
+				td.addClass('cdfClickable');
+				td.bind("click", function(e){
+						var regex = new RegExp("{"+cd.parameterName+"}","g");
+						var f = cd.urlTemplate.replace(regex,$(this).text());
+						eval(f);
+					});
+			}
+
 		}
 	},
 	{
@@ -1089,6 +1108,9 @@ var TableComponent = BaseComponent.extend({
 			};
 			if(options.filter != undefined){
 				dtData.bFilter = options.filter
+			};
+			if(options.sDom != undefined){
+				dtData.sDom = options.sDom
 			};
 			if(options.colHeaders != undefined){
 				dtData.aoColumns = new Array(options.colHeaders.length);
@@ -1114,15 +1136,8 @@ var TableComponent = BaseComponent.extend({
 						})
 				};  // colTypes
 				if(options.colFormats!=undefined){
-					
-					$.each(options.colFormats,function(i,val){
-							if (val != null){
-								dtData.aoColumns[i].fnRender=
-									function ( obj ) {
-										return sprintf(val,obj.aData[obj.iDataRow][obj.iDataColumn]);
-									}
-							}
-						})
+					// Changes are made directly to the json
+
 				};  // colFormats
 
 				if(options.colWidths!=undefined){
