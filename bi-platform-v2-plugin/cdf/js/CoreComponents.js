@@ -1091,6 +1091,7 @@ var TableComponent = BaseComponent.extend({
 	{
 		getDataTableOptions : function(options) {
 			var dtData = {};
+			if(options.info != undefined){
 				dtData.bInfo = options.info
 			};
 			if(options.displayLength != undefined){
