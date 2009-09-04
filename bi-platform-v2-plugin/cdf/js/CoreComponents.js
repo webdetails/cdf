@@ -1091,31 +1091,20 @@ var TableComponent = BaseComponent.extend({
 	{
 		getDataTableOptions : function(options) {
 			var dtData = {};
-			if(options.info != undefined){
-				dtData.bInfo = options.info
-			};
-			if(options.displayLength != undefined){
-				dtData.iDisplayLength = options.displayLength
-			};
-			if(options.lengthChange != undefined){
-				dtData.bLengthChange = options.lengthChange
-			};
-			if(options.paginate != undefined){
-				dtData.bPaginate = options.paginate
-			};
-			if(options.sort != undefined){
-				dtData.bSort = options.sort
-			};
-			if(options.filter != undefined){
-				dtData.bFilter = options.filter
-			};
-			if(options.sDom != undefined){
-				dtData.sDom = options.sDom
-			};
+			dtData.bInfo = options.info
+			dtData.iDisplayLength = options.displayLength
+			dtData.bLengthChange = options.lengthChange
+			dtData.bPaginate = options.paginate
+			dtData.bSort = options.sort
+			dtData.bFilter = options.filter
+			dtData.sDom = options.sDom
+			dtData.sPaginationType = options.paginationType;
+
 			if(options.colHeaders != undefined){
 				dtData.aoColumns = new Array(options.colHeaders.length);
 				for(var i = 0; i< options.colHeaders.length; i++){
 					dtData.aoColumns[i]={}
+					dtData.aoColumns[i].sClass="column"+i;
 				};
 				$.each(options.colHeaders,function(i,val){
 						dtData.aoColumns[i].sTitle=val;
@@ -1124,13 +1113,13 @@ var TableComponent = BaseComponent.extend({
 				if(options.colTypes!=undefined){
 					$.each(options.colTypes,function(i,val){
 							var col = dtData.aoColumns[i];
+							col.sClass+=" "+val;
+
 							if(val=='sparkline'){
-								col.sClass=val;
 								col.bSearchable=false;
 								col.bSortable=false;
 							}
 							else{
-								col.sClass=val;
 								col.sType=val;
 							}
 						})
@@ -1147,7 +1136,8 @@ var TableComponent = BaseComponent.extend({
 							}
 						})
 				}; //colWidths
-				dtData.aaSorting=options.sortBy;
+				dtData.aaSorting = options.sortBy;
+				dtData.sDom = options.sDom;
 			}
 
 			return dtData;

@@ -1,13 +1,17 @@
-.tableComponent .numeric{
+.tableComponent th{
+	text-align: center;
+}
+
+.tableComponent td.numeric{
 	text-align: right;
 	font-family: monospace;
 }
 
-.tableComponent .string{
+.tableComponent td.string{
 	text-align: left;
 }
 
-.tableComponent .sparkline{
+.tableComponent td.sparkline{
 	text-align: center;
 }
 
