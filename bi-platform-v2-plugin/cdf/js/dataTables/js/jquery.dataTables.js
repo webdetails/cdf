@@ -1,6 +1,6 @@
 /*
  * File:        jquery.dataTables.js
- * Version:     1.5.1
+ * Version:     1.5.2
  * CVS:         $Id$
  * Description: Paginate, search and sort HTML tables
  * Author:      Allan Jardine (www.sprymedia.co.uk)
@@ -67,7 +67,7 @@
 	 * Purpose:  Version string for plug-ins to check compatibility
 	 * Scope:    jQuery.fn.dataTableExt
 	 */
-	_oExt.sVersion = "1.5.1";
+	_oExt.sVersion = "1.5.2";
 	
 	/*
 	 * Variable: iApiIndex
@@ -111,6 +111,102 @@
 	_oExt.ofnSearch = { };
 	
 	/*
+	 * Variable: oStdClasses
+	 * Purpose:  Storage for the various classes that DataTables uses
+	 * Scope:    jQuery.fn.dataTableExt
+	 */
+	_oExt.oStdClasses = {
+		/* Two buttons buttons */
+		"sPagePrevEnabled": "paginate_enabled_previous",
+		"sPagePrevDisabled": "paginate_disabled_previous",
+		"sPageNextEnabled": "paginate_enabled_next",
+		"sPageNextDisabled": "paginate_disabled_next",
+		"sPageJUINext": "",
+		"sPageJUIPrev": "",
+		
+		/* Full numbers paging buttons */
+		"sPageButton": "paginate_button",
+		"sPageButtonActive": "paginate_active",
+		"sPageButtonStaticActive": "paginate_button",
+		"sPageFirst": "first",
+		"sPagePrevious": "previous",
+		"sPageNext": "next",
+		"sPageLast": "last",
+		
+		/* Stripping classes */
+		"sStripOdd": "odd",
+		"sStripEven": "even",
+		
+		/* Empty row */
+		"sRowEmpty": "dataTables_empty",
+		
+		/* Features */
+		"sWrapper": "dataTables_wrapper",
+		"sFilter": "dataTables_filter",
+		"sInfo": "dataTables_info",
+		"sPaging": "dataTables_paginate paging_", /* Note that the type is postfixed */
+		"sLength": "dataTables_length",
+		"sProcessing": "dataTables_processing",
+		
+		/* Sorting */
+		"sSortAsc": "sorting_asc",
+		"sSortDesc": "sorting_desc",
+		"sSortable": "sorting",
+		"sSortColumn": "sorting_", /* Note that an int is postfixed for the sorting order */
+		"sSortJUIAsc": "",
+		"sSortJUIDesc": "",
+		"sSortJUI": ""
+	};
+	
+	/*
+	 * Variable: oJUIClasses
+	 * Purpose:  Storage for the various classes that DataTables uses - jQuery UI suitable
+	 * Scope:    jQuery.fn.dataTableExt
+	 */
+	_oExt.oJUIClasses = {
+		/* Two buttons buttons */
+		"sPagePrevEnabled": "fg-button ui-state-default ui-corner-left",
+		"sPagePrevDisabled": "fg-button ui-state-default ui-corner-left ui-state-disabled",
+		"sPageNextEnabled": "fg-button ui-state-default ui-corner-right",
+		"sPageNextDisabled": "fg-button ui-state-default ui-corner-right ui-state-disabled",
+		"sPageJUINext": "ui-icon ui-icon-circle-arrow-e",
+		"sPageJUIPrev": "ui-icon ui-icon-circle-arrow-w",
+		
+		/* Full numbers paging buttons */
+		"sPageButton": "fg-button ui-state-default",
+		"sPageButtonActive": "fg-button ui-state-default ui-state-disabled",
+		"sPageButtonStaticActive": "fg-button ui-state-default ui-state-disabled",
+		"sPageFirst": "first ui-corner-tl ui-corner-bl",
+		"sPagePrevious": "previous",
+		"sPageNext": "next",
+		"sPageLast": "last ui-corner-tr ui-corner-br",
+		
+		/* Stripping classes */
+		"sStripOdd": "odd",
+		"sStripEven": "even",
+		
+		/* Empty row */
+		"sRowEmpty": "dataTables_empty",
+		
+		/* Features */
+		"sWrapper": "dataTables_wrapper",
+		"sFilter": "dataTables_filter",
+		"sInfo": "dataTables_info",
+		"sPaging": "dataTables_paginate fg-buttonset fg-buttonset-multi paging_", /* Note that the type is postfixed */
+		"sLength": "dataTables_length",
+		"sProcessing": "dataTables_processing",
+		
+		/* Sorting */
+		"sSortAsc": "ui-state-default",
+		"sSortDesc": "ui-state-default",
+		"sSortable": "ui-state-default",
+		"sSortColumn": "sorting_", /* Note that an int is postfixed for the sorting order */
+		"sSortJUIAsc": "css_right ui-icon ui-icon-triangle-1-n",
+		"sSortJUIDesc": "css_right ui-icon ui-icon-triangle-1-s",
+		"sSortJUI": "css_right ui-icon ui-icon-triangle-2-n-s"
+	};
+	
+	/*
 	 * Variable: oPagination
 	 * Purpose:  Container for the various type of pagination that dataTables supports
 	 * Scope:    jQuery.fn.dataTableExt
@@ -136,8 +232,24 @@
 				/* Store the next and previous elements in the oSettings object as they can be very
 				 * usful for automation - particularly testing
 				 */
-				oSettings.nPrevious = document.createElement( 'div' );
-				oSettings.nNext = document.createElement( 'div' );
+				if ( !oSettings.bJUI )
+				{
+					oSettings.nPrevious = document.createElement( 'div' );
+					oSettings.nNext = document.createElement( 'div' );
+				}
+				else
+				{
+					oSettings.nPrevious = document.createElement( 'a' );
+					oSettings.nNext = document.createElement( 'a' );
+					
+					var nNextInner = document.createElement('span');
+					nNextInner.className = oSettings.oClasses.sPageJUINext;
+					oSettings.nNext.appendChild( nNextInner );
+					
+					var nPreviousInner = document.createElement('span');
+					nPreviousInner.className = oSettings.oClasses.sPageJUIPrev;
+					oSettings.nPrevious.appendChild( nPreviousInner );
+				}
 				
 				if ( oSettings.sTableId !== '' )
 				{
@@ -146,8 +258,8 @@
 					oSettings.nNext.setAttribute( 'id', oSettings.sTableId+'_next' );
 				}
 				
-				oSettings.nPrevious.className = "paginate_disabled_previous";
-				oSettings.nNext.className = "paginate_disabled_next";
+				oSettings.nPrevious.className = oSettings.oClasses.sPagePrevDisabled;
+				oSettings.nNext.className = oSettings.oClasses.sPageNextDisabled;
 				
 				oSettings.nPrevious.title = oSettings.oLanguage.oPaginate.sPrevious;
 				oSettings.nNext.title = oSettings.oLanguage.oPaginate.sNext;
@@ -199,11 +311,11 @@
 				
 				oSettings.nPrevious.className = 
 					( oSettings._iDisplayStart === 0 ) ? 
-					"paginate_disabled_previous" : "paginate_enabled_previous";
+					oSettings.oClasses.sPagePrevDisabled : oSettings.oClasses.sPagePrevEnabled;
 				
 				oSettings.nNext.className = 
 					( oSettings.fnDisplayEnd() == oSettings.fnRecordsDisplay() ) ? 
-					"paginate_disabled_next" : "paginate_enabled_next";
+					oSettings.oClasses.sPageNextDisabled : oSettings.oClasses.sPageNextEnabled;
 			}
 		},
 		
@@ -242,15 +354,16 @@
 				nNext.innerHTML = oSettings.oLanguage.oPaginate.sNext;
 				nLast.innerHTML = oSettings.oLanguage.oPaginate.sLast;
 				
-				nFirst.className = "paginate_button first";
-				nPrevious.className = "paginate_button previous";
-				nNext.className="paginate_button next";
-				nLast.className = "paginate_button last";
+				var oClasses = oSettings.oClasses;
+				nFirst.className = oClasses.sPageButton+" "+oClasses.sPageFirst;
+				nPrevious.className = oClasses.sPageButton+" "+oClasses.sPagePrevious;
+				nNext.className= oClasses.sPageButton+" "+oClasses.sPageNext;
+				nLast.className = oClasses.sPageButton+" "+oClasses.sPageLast;
 				
 				if ( oSettings.sTableId !== '' )
 				{
 					nPaging.setAttribute( 'id', oSettings.sTableId+'_paginate' );
-					nPrevious.setAttribute( 'id', oSettings.sTableId+'_previous' );
+					nFirst.setAttribute( 'id', oSettings.sTableId+'_first' );
 					nPrevious.setAttribute( 'id', oSettings.sTableId+'_previous' );
 					nNext.setAttribute( 'id', oSettings.sTableId+'_next' );
 					nLast.setAttribute( 'id', oSettings.sTableId+'_last' );
@@ -324,6 +437,7 @@
 				var sList = "";
 				var iStartButton;
 				var iEndButton;
+				var oClasses = oSettings.oClasses;
 				
 				if (iPages < iPageCount)
 				{
@@ -356,11 +470,11 @@
 				{
 					if ( iCurrentPage != i )
 					{
-						sList += '<span class="paginate_button">'+i+'</span>';
+						sList += '<span class="'+oClasses.sPageButton+'">'+i+'</span>';
 					}
 					else
 					{
-						sList += '<span class="paginate_active">'+i+'</span>';
+						sList += '<span class="'+oClasses.sPageButtonActive+'">'+i+'</span>';
 					}
 				}
 				
@@ -377,6 +491,32 @@
 					fnCallbackDraw( oSettings );
 					return false;
 				} );
+				
+				/* Update the 'premanent botton's classes */
+				var nButtons = $('span', oSettings.anFeatures.p);
+				var nStatic = [ nButtons[0], nButtons[1], nButtons[nButtons.length-2], nButtons[nButtons.length-1] ];
+				$(nStatic).removeClass( oClasses.sPageButton+" "+oClasses.sPageButtonActive );
+				if ( iCurrentPage == 1 )
+				{
+					nStatic[0].className += " "+oClasses.sPageButtonStaticActive;
+					nStatic[1].className += " "+oClasses.sPageButtonStaticActive;
+				}
+				else
+				{
+					nStatic[0].className += " "+oClasses.sPageButton;
+					nStatic[1].className += " "+oClasses.sPageButton;
+				}
+				
+				if ( iCurrentPage == iPages )
+				{
+					nStatic[2].className += " "+oClasses.sPageButtonStaticActive;
+					nStatic[3].className += " "+oClasses.sPageButtonStaticActive;
+				}
+				else
+				{
+					nStatic[2].className += " "+oClasses.sPageButton;
+					nStatic[3].className += " "+oClasses.sPageButton;
+				}
 			}
 		}
 	};
@@ -781,7 +921,7 @@
 			 * Purpose:  Classes to use for the striping of a table
 			 * Scope:    jQuery.dataTable.classSettings
 			 */
-			this.asStripClasses = [ 'odd', 'even' ];
+			this.asStripClasses = [];
 			
 			/*
 			 * Variable: fnRowCallback
@@ -933,6 +1073,20 @@
 			 */
 			this._iRecordsTotal = 0;
 			this._iRecordsDisplay = 0;
+			
+			/*
+			 * Variable: bJUI
+			 * Purpose:  Should we add the markup needed for jQuery UI theming?
+			 * Scope:    jQuery.dataTable.classSettings
+			 */
+			this.bJUI = false;
+			
+			/*
+			 * Variable: bJUI
+			 * Purpose:  Should we add the markup needed for jQuery UI theming?
+			 * Scope:    jQuery.dataTable.classSettings
+			 */
+			this.oClasses = _oExt.oStdClasses;
 		}
 		
 		/*
@@ -1289,7 +1443,7 @@
 			{
 				for ( i=0 ; i<oSettings.aoData.length ; i++ )
 				{
-					if ( oSettings.aoData[i].nTr == nNode )
+					if ( oSettings.aoData[i] !== null && oSettings.aoData[i].nTr == nNode )
 					{
 						return i;
 					}
@@ -1305,7 +1459,8 @@
 						if ( oSettings.aoColumns[j].bVisible )
 						{
 							//$('>td', oSettings.aoData[i].nTr)[j-iCorrector] == nNode )
-							if ( oSettings.aoData[i].nTr.getElementsByTagName('td')[j-iCorrector] == nNode )
+							if ( oSettings.aoData[i] !== null &&
+								oSettings.aoData[i].nTr.getElementsByTagName('td')[j-iCorrector] == nNode )
 							{
 								return [ i, j-iCorrector, j ];
 							}
@@ -1626,11 +1781,17 @@
 				_fnProcessingDisplay( oSettings, true );
 				
 				$.getJSON( oSettings.sAjaxSource, null, function(json) {
+					
 					/* Got the data - add it to the table */
 					for ( var i=0 ; i<json.aaData.length ; i++ )
 					{
 						_fnAddData( oSettings, json.aaData[i] );
 					}
+					
+					/* Reset the init display for cookie saving. We've already done a filter, and
+					 * therefore cleared it before. So we need to make it appear 'fresh'
+					 */
+					oSettings.iInitDisplayStart = oSettings._iDisplayStart;
 					
 					if ( oSettings.oFeatures.bSort )
 					{
@@ -1775,7 +1936,7 @@
 			/* Sanity check the length of the new array */
 			if ( aData.length != oSettings.aoColumns.length )
 			{
-				alert( "Warning - added data does not match known column length" );
+				alert( "Warning - added data does not match known number of columns" );
 				return -1;
 			}
 			
@@ -2041,6 +2202,15 @@
 				$('thead', oSettings.nTable).html( '' )[0].appendChild( nTr );
 			}
 			
+			/* Add the extra markup needed by jQuery UI's themes */
+			if ( oSettings.bJUI )
+			{
+				for ( i=0, iLen=oSettings.aoColumns.length ; i<iLen ; i++ )
+				{
+					var nSpan = document.createElement('span');
+					oSettings.aoColumns[i].nTh.appendChild( nSpan );
+				}
+			}
 			
 			/* Add sort listener */
 			if ( oSettings.oFeatures.bSort )
@@ -2267,7 +2437,7 @@
 				var nTd = document.createElement( 'td' );
 				nTd.setAttribute( 'valign', "top" );
 				nTd.colSpan = oSettings.aoColumns.length;
-				nTd.className = 'dataTables_empty';
+				nTd.className = oSettings.oClasses.sRowEmpty;
 				nTd.innerHTML = oSettings.oLanguage.sZeroRecords;
 				
 				anRows[ iRowCount ].appendChild( nTd );
@@ -2554,7 +2724,7 @@
 			 * compatability. It can be removed if you don't want it.
 			 */
 			var nWrapper = document.createElement( 'div' );
-			nWrapper.className = "dataTables_wrapper";
+			nWrapper.className = oSettings.oClasses.sWrapper;
 			if ( oSettings.sTableId !== '' )
 			{
 				nWrapper.setAttribute( 'id', oSettings.sTableId+'_wrapper' );
@@ -2674,7 +2844,7 @@
 			{
 				nFilter.setAttribute( 'id', oSettings.sTableId+'_filter' );
 			}
-			nFilter.className = "dataTables_filter";
+			nFilter.className = oSettings.oClasses.sFilter;
 			var sSpace = oSettings.oLanguage.sSearch==="" ? "" : " ";
 			nFilter.innerHTML = oSettings.oLanguage.sSearch+sSpace+'<input type="text" />';
 			
@@ -2706,7 +2876,7 @@
 			{
 				nInfo.setAttribute( 'id', oSettings.sTableId+'_info' );
 			}
-			nInfo.className = "dataTables_info";
+			nInfo.className = oSettings.oClasses.sInfo;
 			return nInfo;
 		}
 		
@@ -2719,7 +2889,7 @@
 		function _fnFeatureHtmlPaginate ( oSettings )
 		{
 			var nPaginate = document.createElement( 'div' );
-			nPaginate.className = "dataTables_paginate paging_"+oSettings.sPaginationType;
+			nPaginate.className = oSettings.oClasses.sPaging+oSettings.sPaginationType;
 			oSettings.anFeatures.p = nPaginate; /* Need this stored in order to call paging plug-ins */
 			
 			_oExt.oPagination[ oSettings.sPaginationType ].fnInit( oSettings, function( oSettings ) {
@@ -2752,7 +2922,7 @@
 			{
 				nLength.setAttribute( 'id', oSettings.sTableId+'_length' );
 			}
-			nLength.className = "dataTables_length";
+			nLength.className = oSettings.oClasses.sLength;
 			nLength.innerHTML = oSettings.oLanguage.sLengthMenu.replace( '_MENU_', sStdMenu );
 			
 			/*
@@ -2802,7 +2972,7 @@
 				nProcessing.setAttribute( 'id', oSettings.sTableId+'_processing' );
 			}
 			nProcessing.innerHTML = oSettings.oLanguage.sProcessing;
-			nProcessing.className = "dataTables_processing";
+			nProcessing.className = oSettings.oClasses.sProcessing;
 			oSettings.nTable.parentNode.insertBefore( nProcessing, oSettings.nTable );
 			
 			return nProcessing;
@@ -3178,12 +3348,15 @@
 		 */
 		function _fnSortingClasses( oSettings )
 		{
-			var i;
-			var aaSort;
+			var i, j, iFound;
+			var aaSort, sClass;
 			var iColumns = oSettings.aoColumns.length;
+			var oClasses = oSettings.oClasses;
+			
 			for ( i=0 ; i<iColumns ; i++ )
 			{
-				$(oSettings.aoColumns[i].nTh).removeClass( "sorting_asc sorting_desc sorting" );
+				$(oSettings.aoColumns[i].nTh).removeClass( oClasses.sSortAsc +" "+ oClasses.sSortDesc +
+				 	" "+ oClasses.sSortable );
 			}
 			
 			if ( oSettings.aaSortingFixed !== null )
@@ -3200,17 +3373,43 @@
 			{
 				if ( oSettings.aoColumns[i].bSortable && oSettings.aoColumns[i].bVisible )
 				{
-					var sClass = "sorting";
-					for ( var j=0 ; j<aaSort.length ; j++ )
+					sClass = oClasses.sSortable;
+					iFound = -1;
+					for ( j=0 ; j<aaSort.length ; j++ )
 					{
 						if ( aaSort[j][0] == i )
 						{
 							sClass = ( aaSort[j][1] == "asc" ) ?
-								"sorting_asc" : "sorting_desc";
+								oClasses.sSortAsc : oClasses.sSortDesc;
+							iFound = j;
 							break;
 						}
 					}
 					$(oSettings.aoColumns[i].nTh).addClass( sClass );
+					
+					if ( oSettings.bJUI )
+					{
+						/* jQuery UI uses extra markup */
+						var jqSpan = $("span", oSettings.aoColumns[i].nTh);
+						jqSpan.removeClass(oClasses.sSortJUIAsc +" "+ oClasses.sSortJUIDesc +" "+ 
+							oClasses.sSortJUI);
+						
+						var sSpanClass;
+						if ( iFound == -1 )
+						{
+						 	sSpanClass = oClasses.sSortJUI;
+						}
+						else if ( aaSort[iFound][1] == "asc" )
+						{
+							sSpanClass = oClasses.sSortJUIAsc;
+						}
+						else
+						{
+							sSpanClass = oClasses.sSortJUIDesc;
+						}
+						
+						jqSpan.addClass( sSpanClass );
+					}
 				}
 			}
 			
@@ -3222,7 +3421,8 @@
 			if ( oSettings.oFeatures.bSortClasses )
 			{
 				var nTrs = _fnGetTrNodes( oSettings );
-				$('td', nTrs).removeClass( 'sorting_1 sorting_2 sorting_3' );
+				sClass = oClasses.sSortColumn;
+				$('td', nTrs).removeClass( sClass+"1 "+sClass+"2 "+sClass+"3" );
 				
 				var iClass = 1;
 				for ( i=0 ; i<aaSort.length ; i++ )
@@ -3233,11 +3433,11 @@
 						/* Limit the number of classes to three */
 						if ( iClass <= 2 )
 						{
-							$('td:eq('+iVis+')', nTrs).addClass( 'sorting_'+iClass );
+							$('td:eq('+iVis+')', nTrs).addClass( sClass+iClass );
 						}
 						else
 						{
-							$('td:eq('+iVis+')', nTrs).addClass( 'sorting_3' );
+							$('td:eq('+iVis+')', nTrs).addClass( sClass+'3' );
 						}
 						iClass++;
 					}
@@ -3657,7 +3857,14 @@
 			var iLen = oSettings.aoData.length;
 			for ( var i=0 ; i<iLen; i++ )
 			{
-				aData.push( oSettings.aoData[i]._aData );
+				if ( oSettings.aoData[i] === null )
+				{
+					aData.push( null );
+				}
+				else
+				{
+					aData.push( oSettings.aoData[i]._aData );
+				}
 			}
 			return aData;
 		}
@@ -3674,7 +3881,14 @@
 			var iLen = oSettings.aoData.length;
 			for ( var i=0 ; i<iLen ; i++ )
 			{
-				aNodes.push( oSettings.aoData[i].nTr );
+				if ( oSettings.aoData[i] === null )
+				{
+					aNodes.push( null );
+				}
+				else
+				{
+					aNodes.push( oSettings.aoData[i].nTr );
+				}
 			}
 			return aNodes;
 		}
@@ -3961,7 +4175,7 @@
 			
 			/* Otherwise we need to figure out the layout array to get the nodes */
 			var aLayout = [], aReturn = [];
-			var ROWSPAN = 2, COLSPAN = 3;
+			var ROWSPAN = 2, COLSPAN = 3, TDELEM = 4;
 			var i, j, k, iLen, jLen, iColumnShifted;
 			var fnShiftCol = function ( a, i, j ) {
 				while ( typeof a[i][j] != 'undefined' ) {
@@ -3980,7 +4194,15 @@
 			{
 				fnAddRow( i );
 				var iColumn = 0;
-				var nTds = nTrs[i].getElementsByTagName('th');
+				var nTds = [];
+				
+				for ( j=0, jLen=nTrs[i].childNodes.length ; j<jLen ; j++ )
+				{
+					if ( nTrs[i].childNodes[j].nodeName == "TD" || nTrs[i].childNodes[j].nodeName == "TH" )
+					{
+						nTds.push( nTrs[i].childNodes[j] );
+					}
+				}
 				
 				for ( j=0, jLen=nTds.length ; j<jLen ; j++ )
 				{
@@ -3990,7 +4212,7 @@
 					if ( !iColspan || iColspan===0 || iColspan===1 )
 					{
 						iColumnShifted = fnShiftCol( aLayout, i, iColumn );
-						aLayout[i][iColumnShifted] = nTds[j];
+						aLayout[i][iColumnShifted] = (nTds[j].nodeName=="TD") ? TDELEM : nTds[j];
 						if ( iRowspan || iRowspan===0 || iRowspan===1 )
 						{
 							for ( k=1 ; k<iRowspan ; k++ )
@@ -4166,6 +4388,24 @@
 				_fnMap( oSettings, oInit, "oSearch", "oPreviousSearch" );
 				_fnMap( oSettings, oInit, "aoSearchCols", "aoPreSearchCols" );
 				_fnMap( oSettings, oInit, "iDisplayLength", "_iDisplayLength" );
+				_fnMap( oSettings, oInit, "bJQueryUI", "bJUI" );
+				
+				if ( typeof oInit.bJQueryUI != 'undefined' )
+				{
+					/* Use the JUI classes object for display. You could clone the oStdClasses object if 
+					 * you want to have multiple tables with multiple independent classes 
+					 */
+					oSettings.oClasses = _oExt.oJUIClasses;
+					
+					if ( typeof oInit.sDom == 'undefined' )
+					{
+						/* Set the DOM to use a layout suitable for jQuery UI's theming */
+						oSettings.sDomPositioning = 
+							'<"fg-toolbar ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix"lfr>'+
+							't'+
+							'<"fg-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix"ip>';
+					}
+				}
 				
 				if ( typeof oInit.iDisplayStart != 'undefined' && 
 				     typeof oSettings.iInitDisplayStart == 'undefined' ) {
@@ -4180,7 +4420,6 @@
 					oSettings.oFeatures.bStateSave = oInit.bStateSave;
 					_fnLoadState( oSettings, oInit );
 				}
-				
 				
 				if ( typeof oInit.aaData != 'undefined' ) {
 					bUsePassedData = true;
@@ -4214,6 +4453,13 @@
 				 * below is complete. The reason for spliting it like this is optimisation - we can fire
 				 * off the XHR (if needed) and then continue processing the data.
 				 */
+			}
+				
+			/* Add the strip classes now that we know which classes to apply - unless overruled */
+			if ( typeof oInit == 'undefined' || typeof oInit.asStripClasses == 'undefined' )
+			{
+				oSettings.asStripClasses.push( oSettings.oClasses.sStripOdd );
+				oSettings.asStripClasses.push( oSettings.oClasses.sStripEven );
 			}
 			
 			/* See if we should load columns automatically or use defined ones - a bit messy this... */

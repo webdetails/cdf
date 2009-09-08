@@ -1,14 +1,14 @@
 /*
- *  File:         demo_table.css
+ *  File:         demo_table_jui.css
  *  CVS:          $Id$
  *  Description:  CSS descriptions for DataTables demo pages
  *  Author:       Allan Jardine
  *  Created:      Tue May 12 06:47:22 BST 2009
  *  Modified:     $Date$ by $Author$
- *  Language:     C#
- *  Project:      RCAD/USB VPN creation utility
+ *  Language:     CSS
+ *  Project:      DataTables
  *
- *  Copyright 2009 U4EA. All Rights Reserved.
+ *  Copyright 2009 Allan Jardine. All Rights Reserved.
  *
  * ***************************************************************************
  * DESCRIPTION
@@ -25,6 +25,51 @@
  *   Note that the path used for Images is relative. All images are by default located in
  *     ../images/ - relative to this CSS file.
  */
+
+
+/*
+ * jQuery UI specific styling
+ */
+
+.paging_two_button .fg-button {
+	float: left;
+	cursor: pointer;
+	* cursor: hand;
+}
+
+.paging_full_numbers .fg-button {
+	padding: 2px 6px;
+	cursor: pointer;
+	* cursor: hand;
+}
+
+.paging_full_numbers {
+	width: 350px !important;
+}
+
+.fg-toolbar {
+	padding: 5px;
+}
+
+.dataTables_paginate {
+	width: auto;
+}
+
+table.display thead th {
+	padding: 3px 0px 3px 10px;
+	cursor: pointer;
+	* cursor: hand;
+}
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Everything below this line is the same as demo_table.css. This file is
+ * required for 'cleanliness' of the markup
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables features
@@ -62,13 +107,11 @@
 }
 
 .dataTables_info {
-	width: 60%;
+	width: 50%;
 	float: left;
 }
 
 .dataTables_paginate {
-	width: 44px;
-	* width: 50px;
 	float: right;
 	text-align: right;
 }
@@ -106,14 +149,6 @@ table.display {
 	margin: 0 auto;
 	width: 100%;
 	clear: both;
-}
-
-table.display thead th {
-	padding: 3px 18px 3px 10px;
-	border-bottom: 1px solid black;
-	font-weight: bold;
-	cursor: pointer;
-	* cursor: hand;
 }
 
 table.display tfoot th {
@@ -259,12 +294,6 @@ td.details {
 
 .example_alt_pagination div.dataTables_info {
 	width: 40%;
-}
-
-.paging_full_numbers {
-	width: 400px;
-	height: 22px;
-	line-height: 22px;
 }
 
 .paging_full_numbers span.paginate_button,
