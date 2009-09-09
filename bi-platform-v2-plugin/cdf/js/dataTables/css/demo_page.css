@@ -27,6 +27,10 @@
 	margin: 30px auto 0 auto;
 }
 
+#dt_example .demo_jui {
+	margin: 30px auto 0 auto;
+}
+
 #dt_example .big {
 	font-size: 1.3em;
 	font-weight: bold;
@@ -78,4 +82,12 @@
 
 #dt_example ul {
 	color: #B0BED9;
+}
+
+.css_right {
+	float: right;
+}
+
+.css_left {
+	float: left;
 }

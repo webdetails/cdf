@@ -1,3 +1,8 @@
+
+.tableComponent{
+	margin-bottom:0em;
+}
+
 .tableComponent th{
 	text-align: center;
 }

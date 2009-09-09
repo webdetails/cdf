@@ -1091,31 +1091,19 @@ var TableComponent = BaseComponent.extend({
 	{
 		getDataTableOptions : function(options) {
 			var dtData = {};
-			dtData.bJQueryUI = false;
-			if(options.info != undefined){
-				dtData.bInfo = options.info
-			};
-			if(options.displayLength != undefined){
-				dtData.iDisplayLength = options.displayLength
-			};
-			if(options.lengthChange != undefined){
-				dtData.bLengthChange = options.lengthChange
-			};
-			if(options.paginate != undefined){
-				dtData.bPaginate = options.paginate
-			};
-			if(options.sort != undefined){
-				dtData.bSort = options.sort
-			};
-			if(options.filter != undefined){
-				dtData.bFilter = options.filter
-			};
-			if(options.paginationType != undefined){
-				dtData.sPaginationType = options.paginationType
-			};
-			if(options.sDom != undefined){
-				dtData.sDom = options.sDom
-			};
+
+			if(options.tableStyle == "themeroller"){
+				dtData.bJQueryUI = true;
+			}
+			dtData.bInfo = options.info;
+			dtData.iDisplayLength = options.displayLength;
+			dtData.bLengthChange = options.lengthChange;
+			dtData.bPaginate = options.paginate;
+			dtData.bSort = options.sort;
+			dtData.bFilter = options.filter;
+			dtData.sPaginationType = options.paginationType;
+			dtData.sDom = options.sDom;
+			dtData.aaSorting = options.sortBy;
 
 			if(options.colHeaders != undefined){
 				dtData.aoColumns = new Array(options.colHeaders.length);
@@ -1153,8 +1141,6 @@ var TableComponent = BaseComponent.extend({
 							}
 						})
 				}; //colWidths
-				dtData.aaSorting = options.sortBy;
-				dtData.sDom = options.sDom;
 			}
 
 			return dtData;
