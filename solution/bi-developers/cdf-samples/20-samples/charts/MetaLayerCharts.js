@@ -41,7 +41,7 @@ MetaLayerCharts =  {
 		queryType: 'mdx',
 		jndi: "SampleData",
 		catalog: "solution:steel-wheels/analysis/SampleData.mondrian.xml",
-		urlTemplate: "javascript:MetaLayerCharts.pieChartClicked('{region}')",
+		urlTemplate: "javascript:MetaLayerCharts.pieChartClicked( encode_prepare('{region}') )",
 		parameterName: "region",
 		title: "First choose region:",
 		query: function(){
