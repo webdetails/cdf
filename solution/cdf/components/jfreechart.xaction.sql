@@ -207,7 +207,7 @@
 			<sources>
 				<request>interiorGap</request>
 			</sources>
-			<default-value>0.25</default-value>
+			<default-value>0.085</default-value>
 		</INTERIORGAP> 
 		<QUERY_TYPE type="string">
 			<sources>
