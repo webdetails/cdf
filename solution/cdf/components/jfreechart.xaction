@@ -70,7 +70,19 @@
 				<request>title</request>
 			</sources>
 			<default-value/>
-		</TITLE>  
+		</TITLE>
+		<DOMAINTITLEFONTFAMILY type="string">
+			<sources>
+				<request>domainTitleFontFamily</request>
+			</sources>
+			<default-value>Helvetica</default-value>
+		</DOMAINTITLEFONTFAMILY>
+		<DOMAINTITLEFONTSIZE type="string">
+			<sources>
+				<request>domainTitleFontSize</request>
+			</sources>
+			<default-value>12</default-value>
+		</DOMAINTITLEFONTSIZE>
 		<SUBTITLE type="string">
 			<sources>
 				<request>subtitle</request>
@@ -112,13 +124,19 @@
 				<request>isStacked</request>
 			</sources>
 			<default-value>false</default-value>
-		</ISSTACKED>  
+		</ISSTACKED>
+		<DOMAINTICKFONTFAMILY type="string">
+			<sources>
+				<request>domainTickFontFamily</request>
+			</sources>
+			<default-value>Helvetica</default-value>
+		</DOMAINTICKFONTFAMILY>
 		<DOMAINTICKFONTSIZE type="string">
 			<sources>
 				<request>domainTickFontSize</request>
 			</sources>
 			<default-value>10</default-value>
-		</DOMAINTICKFONTSIZE>  
+		</DOMAINTICKFONTSIZE>
 		<DOMAINLABELROTATIONDIR type="string">
 			<sources>
 				<request>domainLabelRotationDir</request>
@@ -130,7 +148,21 @@
 				<request>domainLabelRotation</request>
 			</sources>
 			<default-value>.9</default-value>
-		</DOMAINLABELROTATION>  
+		</DOMAINLABELROTATION>
+		
+		<RANGETICKFONTFAMILY type="string">
+			<sources>
+				<request>rangeTickFontFamily</request>
+			</sources>
+			<default-value>Helvetica</default-value>
+		</RANGETICKFONTFAMILY>
+		<RANGETICKFONTSIZE type="string">
+			<sources>
+				<request>rangeTickFontSize</request>
+			</sources>
+			<default-value>10</default-value>
+		</RANGETICKFONTSIZE>
+		
 		<URLTEMPLATE type="string">
 			<sources>
 				<request>urlTemplate</request>
@@ -636,6 +668,8 @@
 			<BYROW type="string"/>
 			<CHARTTYPE type="string"/>
 			<TITLE type="string"/>
+			<DOMAINTITLEFONTSIZE type="string"/>
+			<DOMAINTITLEFONTFAMILY type="string"/> 
 			<SUBTITLE type="string"/>
 			<RANGETITLE type="string"/>
 			<DATASETTYPE type="string"/>
@@ -643,9 +677,12 @@
 			<ORIENTATION type="string"/>
 			<IS3D type="string"/>
 			<ISSTACKED type="string"/>
-			<DOMAINTICKFONTSIZE type="string"/> 
+			<DOMAINTICKFONTSIZE type="string"/>
+			<DOMAINTICKFONTFAMILY type="string"/> 
 			<DOMAINLABELROTATIONDIR type="string"/>
 			<DOMAINLABELROTATION type="string"/>
+			<RANGETICKFONTSIZE type="string"/>
+			<RANGETICKFONTFAMILY type="string"/> 
 			<URLTEMPLATE type="string"/>
 			<USEBASEURL type="string"/>
 			<URLTARGET type="string"/>
@@ -680,7 +717,11 @@
 			<by-row>{BYROW}</by-row>  
 			<chart-attributes> 
 				<chart-type>{CHARTTYPE}</chart-type>  
-				<title>{TITLE}</title>  
+				<title>{TITLE}</title> 
+				<domain-title-font>
+					<font-family>{DOMAINTITLEFONTFAMILY}</font-family>
+					<size>{DOMAINTITLEFONTSIZE}</size> 
+				</domain-title-font>
 				<subtitles>
 					<subtitle>{SUBTITLE}</subtitle>  
 				</subtitles>
@@ -690,11 +731,16 @@
 				<orientation>{ORIENTATION}</orientation>  
 				<is-3D>{IS3D}</is-3D>  
 				<is-stacked>{ISSTACKED}</is-stacked>  
-				<domain-tick-font> 
+				<domain-tick-font>
+					<font-family>{DOMAINTICKFONTFAMILY}</font-family>
 					<size>{DOMAINTICKFONTSIZE}</size> 
-				</domain-tick-font>  
+				</domain-tick-font>
 				<domain-label-rotation-dir>{DOMAINLABELROTATIONDIR}</domain-label-rotation-dir>  
-				<domain-label-rotation>{DOMAINLABELROTATION}</domain-label-rotation>  
+				<domain-label-rotation>{DOMAINLABELROTATION}</domain-label-rotation>
+				<range-tick-font>
+					<font-family>{RANGETICKFONTFAMILY}</font-family>
+					<size>{RANGETICKFONTSIZE}</size> 
+				</range-tick-font>
 				<url-template>{URLTEMPLATE}</url-template> 
 				<use-base-url>{USEBASEURL}</use-base-url>  
 				<url-target>{URLTARGET}</url-target>

@@ -71,12 +71,6 @@
 			</sources>  
 			<default-value>200</default-value>
 		</HEIGHT>  
-		<BY-ROW type="string"> 
-			<sources> 
-				<request>by-row</request> 
-			</sources>  
-			<default-value>false</default-value>
-		</BY-ROW>  
 		<CHART-TYPE type="string">
 			<sources>
 				<request>chartType</request>
@@ -89,66 +83,30 @@
 			</sources>
 			<default-value/>
 		</TITLE>  
+		<TITLE-FONT-FAMILY type="string">
+			<sources>
+				<request>titleFontFamily</request>
+			</sources>
+			<default-value>Helvetica</default-value>
+		</TITLE-FONT-FAMILY>
+		<TITLE-FONT-SIZE type="string">
+			<sources>
+				<request>titleFontSize</request>
+			</sources>
+			<default-value>12</default-value>
+		</TITLE-FONT-SIZE>
 		<SUBTITLE type="string">
 			<sources>
 				<request>subtitle</request>
 			</sources>
 			<default-value></default-value>
-		</SUBTITLE>  
-		<RANGE-TITLE type="string">
-			<sources>
-				<request>rangeTitle</request>
-			</sources>
-			<default-value></default-value>
-		</RANGE-TITLE>  
-		<DATASET-TYPE type="string">
-			<sources>
-				<request>datasetType</request>
-			</sources>
-			<default-value>CategoryDataset</default-value>
-		</DATASET-TYPE>  
-		<DOMAIN-PERIOD-TYPE type="string">
-			<sources>
-				<request>domainPeriodType</request>
-			</sources>
-			<default-value>Day</default-value>
-		</DOMAIN-PERIOD-TYPE>  
-		<ORIENTATION type="string">
-			<sources>
-				<request>orientation</request>
-			</sources>
-			<default-value>vertical</default-value>
-		</ORIENTATION>  
+		</SUBTITLE> 
 		<IS-3D type="string">
 			<sources>
 				<request>is3d</request>
 			</sources>
 			<default-value>false</default-value>
 		</IS-3D>  
-		<IS-STACKED type="string">
-			<sources>
-				<request>isStacked</request>
-			</sources>
-			<default-value>false</default-value>
-		</IS-STACKED>  
-		<DOMAIN-TICK-FONT-SIZE type="string">
-			<sources>
-				<request>domainTickFontSize</request>
-			</sources>
-			<default-value>10</default-value>
-		</DOMAIN-TICK-FONT-SIZE>  
-		<DOMAIN-LABEL-ROTATION-DIR type="string">
-			<sources>
-				<request>domainLabelRotationDir</request>
-			</sources>
-			<default-value>down</default-value>
-		</DOMAIN-LABEL-ROTATION-DIR>  
-		<DOMAIN-LABEL-ROTATION type="string">
-			<sources>
-				<request>domainLabelRotation</request>
-			</sources>
-			<default-value>.95</default-value>
-		</DOMAIN-LABEL-ROTATION>  
 		<URL-TEMPLATE type="string">
 			<sources>
 				<request>urlTemplate</request>
@@ -475,19 +433,12 @@
 				<chart-data type="result-set" mapping="newResults"/> 
 				<WIDTH type="string"/>
 				<HEIGHT type="string"/>
-				<BY-ROW type="string"/>
 				<CHART-TYPE type="string"/>
 				<TITLE type="string"/>
+				<TITLE-FONT-FAMILY type="string"/>
+				<TITLE-FONT-SIZE type="string"/>
 				<SUBTITLE type="string"/>
-				<RANGE-TITLE type="string"/>
-				<DATASET-TYPE type="string"/>
-				<DOMAIN-PERIOD-TYPE type="string"/>
-				<ORIENTATION type="string"/>
 				<IS-3D type="string"/>
-				<IS-STACKED type="string"/>
-				<DOMAIN-TICK-FONT-SIZE type="string"/> 
-				<DOMAIN-LABEL-ROTATION-DIR type="string"/>
-				<DOMAIN-LABEL-ROTATION type="string"/>
 				<URL-TEMPLATE type="string"/>
 				<USE-BASE-URL type="string"/>
 				<URL-TARGET type="string"/>
@@ -506,8 +457,7 @@
 			</action-outputs>
 			<component-definition> 
 				<width>{WIDTH}</width>  
-				<height>{HEIGHT}</height>  
-				<by-row>{BY-ROW}</by-row>  
+				<height>{HEIGHT}</height>   
 				<chart-attributes> 
 					<chart-type>{CHART-TYPE}</chart-type>  
 					<chart-background type="gradient"><x1>0</x1><y1>0</y1><x2>0</x2><y2>0</y2><color1>{BACKGROUND-COLOR}</color1>
@@ -517,32 +467,21 @@
 						<color2>#FFFFFF</color2>
 						<cyclic>true</cyclic>
 					</plot-background>
-					<include-legend>true</include-legend>
-					<title>{TITLE}</title>  
+					<include-legend>{INCLUDE-LEGEND}</include-legend>
+					<title>{TITLE}</title>
+					<title-font>
+						<font-family>{TITLE-FONT-FAMILY}</font-family>
+						<size>{TITLE-FONT-SIZE}</size>
+					</title-font>
 					<subtitles>
 						<subtitle>{SUBTITLE}</subtitle>  
 					</subtitles>
 					<value-color>#000000</value-color>
-					<range-title>{RANGE-TITLE}</range-title>  
-					<dataset-type>{DATASET-TYPE}</dataset-type>  
-					<domain-period-type>{DOMAIN-PERIOD-TYPE}</domain-period-type>  
-					<orientation>{ORIENTATION}</orientation>  
 					<is-3D>{IS-3D}</is-3D>  
-					<value-color>#DDDDDD</value-color>
-					<is-stacked>{IS-STACKED}</is-stacked>  
-					<title-font>
-						<font>Helvetica</font>
-					</title-font>  
-					<domain-tick-font>
-						<font>Helvetica</font>
-						<size>{DOMAIN-TICK-FONT-SIZE}</size> 
-					</domain-tick-font>
-					<domain-label-rotation-dir>{DOMAIN-LABEL-ROTATION-DIR}</domain-label-rotation-dir>  
-					<domain-label-rotation>{DOMAIN-LABEL-ROTATION}</domain-label-rotation>  
+					<value-color>#DDDDDD</value-color>  
 					<url-template>{URL-TEMPLATE}</url-template>
 					<use-base-url>{USE-BASE-URL}</use-base-url>  
 					<url-target>{URL-TARGET}</url-target>
-					<include-legend>true</include-legend> 
 					<markers-visible>true</markers-visible>
 					<tick-interval>{TICKINTERVAL}</tick-interval>
 					<needle-color>#0000CC</needle-color>
