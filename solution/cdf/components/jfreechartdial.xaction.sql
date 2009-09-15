@@ -76,7 +76,8 @@
 				<request>chartType</request>
 			</sources>
 			<default-value>AreaChart</default-value>
-		</CHART-TYPE>  
+		</CHART-TYPE>
+		
 		<TITLE type="string">
 			<sources>
 				<request>title</request>
@@ -95,18 +96,40 @@
 			</sources>
 			<default-value>12</default-value>
 		</TITLE-FONT-SIZE>
+		
 		<SUBTITLE type="string">
 			<sources>
 				<request>subtitle</request>
 			</sources>
 			<default-value></default-value>
-		</SUBTITLE> 
-		<IS-3D type="string">
+		</SUBTITLE>  
+		
+		<DOMAIN-TICK-FONT-SIZE type="string">
 			<sources>
-				<request>is3d</request>
+				<request>domainTickFontSize</request>
 			</sources>
-			<default-value>false</default-value>
-		</IS-3D>  
+			<default-value>10</default-value>
+		</DOMAIN-TICK-FONT-SIZE> 
+		<VALUE-COLOR type="string">
+			<sources>
+				<request>valueColor</request>
+			</sources>
+			<default-value>#000000</default-value>
+		</VALUE-COLOR>
+		
+		<NEEDLE-COLOR type="string">
+			<sources>
+				<request>needleColor</request>
+			</sources>
+			<default-value>#0000CC</default-value>
+		</NEEDLE-COLOR>
+		<TICK-COLOR type="string">
+			<sources>
+				<request>tickColor</request>
+			</sources>
+			<default-value>#0000CC</default-value>
+		</TICK-COLOR>
+		
 		<URL-TEMPLATE type="string">
 			<sources>
 				<request>urlTemplate</request>
@@ -125,25 +148,12 @@
 			</sources>
 			<default-value>_self</default-value>
 		</URL-TARGET>  
-		<INCLUDE-LEGEND type="string">
-			<sources>
-				<request>includeLegend</request>
-			</sources>
-			<default-value>true</default-value>
-		</INCLUDE-LEGEND> 
-		<FOREGROUND-ALPHA type="string">
-			<sources>
-				<request>foregroundAlpha</request>
-			</sources>
-			<default-value>1</default-value>
-		</FOREGROUND-ALPHA> 
 		<BACKGROUND-COLOR type="string">
 			<sources>
 				<request>backgroundColor</request>
 			</sources>
 			<default-value>#FFFFFF</default-value>
 		</BACKGROUND-COLOR> 
-
 	</inputs>
 
 	<outputs> 
@@ -437,14 +447,18 @@
 				<TITLE type="string"/>
 				<TITLE-FONT-FAMILY type="string"/>
 				<TITLE-FONT-SIZE type="string"/>
+				
 				<SUBTITLE type="string"/>
-				<IS-3D type="string"/>
+				
+				<DOMAIN-TICK-FONT-SIZE type="string"/>
+				<VALUE-COLOR type="string"/>
+				
+				<NEEDLE-COLOR type="string"/>
+				<TICK-COLOR type="string"/>
+				
 				<URL-TEMPLATE type="string"/>
 				<USE-BASE-URL type="string"/>
 				<URL-TARGET type="string"/>
-				<INCLUDE-LEGEND type="string"/>
-				<FOREGROUND-ALPHA type="string"/>
-				<BACKGROUND-ALPHA type="string"/>
 				<BACKGROUND-COLOR type="string"/>
 			</action-inputs>
 			<action-resources/>
@@ -457,7 +471,7 @@
 			</action-outputs>
 			<component-definition> 
 				<width>{WIDTH}</width>  
-				<height>{HEIGHT}</height>   
+				<height>{HEIGHT}</height>  
 				<chart-attributes> 
 					<chart-type>{CHART-TYPE}</chart-type>  
 					<chart-background type="gradient"><x1>0</x1><y1>0</y1><x2>0</x2><y2>0</y2><color1>{BACKGROUND-COLOR}</color1>
@@ -467,24 +481,33 @@
 						<color2>#FFFFFF</color2>
 						<cyclic>true</cyclic>
 					</plot-background>
-					<include-legend>{INCLUDE-LEGEND}</include-legend>
+					
 					<title>{TITLE}</title>
 					<title-font>
-						<font-family>{TITLE-FONT-FAMILY}</font-family>
+						<!-- 'font' and NOT 'font-family'(bug in wiki documentation) -->
+						<font>{TITLE-FONT-FAMILY}</font>
 						<size>{TITLE-FONT-SIZE}</size>
 					</title-font>
+					
 					<subtitles>
 						<subtitle>{SUBTITLE}</subtitle>  
 					</subtitles>
-					<value-color>#000000</value-color>
-					<is-3D>{IS-3D}</is-3D>  
-					<value-color>#DDDDDD</value-color>  
+					
+					<domain-tick-font>
+						<!-- Same font-family as title -->
+						<size>{DOMAIN-TICK-FONT-SIZE}</size> 
+					</domain-tick-font>
+					<value-color>{VALUE-COLOR}</value-color>
+					
+					<tick-color>{TICK-COLOR}</tick-color>
+					<needle-color>{NEEDLE-COLOR}</needle-color>
+					
+					
 					<url-template>{URL-TEMPLATE}</url-template>
 					<use-base-url>{USE-BASE-URL}</use-base-url>  
 					<url-target>{URL-TARGET}</url-target>
-					<markers-visible>true</markers-visible>
 					<tick-interval>{TICKINTERVAL}</tick-interval>
-					<needle-color>#0000CC</needle-color>
+					
 					<intervals>
 						<interval>
 							<label>Interval0</label><minimum>0</minimum><maximum>{INTERVAL0}</maximum>

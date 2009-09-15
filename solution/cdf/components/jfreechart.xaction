@@ -65,12 +65,51 @@
 			</sources>
 			<default-value>AreaChart</default-value>
 		</CHARTTYPE>  
+		
 		<TITLE type="string">
 			<sources>
 				<request>title</request>
 			</sources>
 			<default-value/>
 		</TITLE>
+		<TITLEFONTFAMILY type="string">
+			<sources>
+				<request>titleFontFamily</request>
+			</sources>
+			<default-value>Helvetica</default-value>
+		</TITLEFONTFAMILY>
+		<TITLEFONTSIZE type="string">
+			<sources>
+				<request>titleFontSize</request>
+			</sources>
+			<default-value>12</default-value>
+		</TITLEFONTSIZE>
+		<TITLEFONTISBOLD type="string">
+			<sources>
+				<request>titleFontIsBold</request>
+			</sources>
+			<default-value>false</default-value>
+		</TITLEFONTISBOLD> 
+		<TITLEFONTISITALIC type="string">
+			<sources>
+				<request>titleFontIsItalic</request>
+			</sources>
+			<default-value>false</default-value>
+		</TITLEFONTISITALIC> 
+		
+		<SUBTITLE type="string">
+			<sources>
+				<request>subtitle</request>
+			</sources>
+			<default-value></default-value>
+		</SUBTITLE>  
+		
+		<DOMAINTITLE type="string">
+			<sources>
+				<request>domainTitle</request>
+			</sources>
+			<default-value></default-value>
+		</DOMAINTITLE>  
 		<DOMAINTITLEFONTFAMILY type="string">
 			<sources>
 				<request>domainTitleFontFamily</request>
@@ -81,32 +120,66 @@
 			<sources>
 				<request>domainTitleFontSize</request>
 			</sources>
-			<default-value>12</default-value>
+			<default-value>10</default-value>
 		</DOMAINTITLEFONTSIZE>
-		<SUBTITLE type="string">
+		<DOMAINTITLEFONTISBOLD type="string">
 			<sources>
-				<request>subtitle</request>
+				<request>domainTitleFontIsBold</request>
 			</sources>
-			<default-value></default-value>
-		</SUBTITLE>  
+			<default-value>false</default-value>
+		</DOMAINTITLEFONTISBOLD> 
+		<DOMAINTITLEFONTISITALIC type="string">
+			<sources>
+				<request>domainTitleFontIsItalic</request>
+			</sources>
+			<default-value>false</default-value>
+		</DOMAINTITLEFONTISITALIC> 
+		
 		<RANGETITLE type="string">
 			<sources>
 				<request>rangeTitle</request>
 			</sources>
 			<default-value></default-value>
-		</RANGETITLE>  
+		</RANGETITLE> 
+		<RANGETITLEFONTFAMILY type="string">
+			<sources>
+				<request>rangeTitleFontFamily</request>
+			</sources>
+			<default-value>Helvetica</default-value>
+		</RANGETITLEFONTFAMILY>
+		<RANGETITLEFONTSIZE type="string">
+			<sources>
+				<request>rangeTitleFontSize</request>
+			</sources>
+			<default-value>10</default-value>
+		</RANGETITLEFONTSIZE>
+		<RANGETITLEFONTISBOLD type="string">
+			<sources>
+				<request>rangeTitleFontIsBold</request>
+			</sources>
+			<default-value>false</default-value>
+		</RANGETITLEFONTISBOLD> 
+		<RANGETITLEFONTISITALIC type="string">
+			<sources>
+				<request>rangeTitleFontIsItalic</request>
+			</sources>
+			<default-value>false</default-value>
+		</RANGETITLEFONTISITALIC> 
+		
 		<DATASETTYPE type="string">
 			<sources>
 				<request>datasetType</request>
 			</sources>
 			<default-value>CategoryDataset</default-value>
 		</DATASETTYPE>  
+		
 		<DOMAINPERIODTYPE type="string">
 			<sources>
 				<request>domainPeriodType</request>
 			</sources>
 			<default-value>Day</default-value>
 		</DOMAINPERIODTYPE>  
+		
 		<ORIENTATION type="string">
 			<sources>
 				<request>orientation</request>
@@ -125,6 +198,8 @@
 			</sources>
 			<default-value>false</default-value>
 		</ISSTACKED>
+		
+		
 		<DOMAINTICKFONTFAMILY type="string">
 			<sources>
 				<request>domainTickFontFamily</request>
@@ -137,6 +212,20 @@
 			</sources>
 			<default-value>10</default-value>
 		</DOMAINTICKFONTSIZE>
+		
+		<DOMAINTICKFONTISBOLD type="string">
+			<sources>
+				<request>domainTickFontIsBold</request>
+			</sources>
+			<default-value>false</default-value>
+		</DOMAINTICKFONTISBOLD> 
+		<DOMAINTICKFONTISITALIC type="string">
+			<sources>
+				<request>domainTickFontIsItalic</request>
+			</sources>
+			<default-value>false</default-value>
+		</DOMAINTICKFONTISITALIC> 
+
 		<DOMAINLABELROTATIONDIR type="string">
 			<sources>
 				<request>domainLabelRotationDir</request>
@@ -150,6 +239,7 @@
 			<default-value>.9</default-value>
 		</DOMAINLABELROTATION>
 		
+		
 		<RANGETICKFONTFAMILY type="string">
 			<sources>
 				<request>rangeTickFontFamily</request>
@@ -162,6 +252,18 @@
 			</sources>
 			<default-value>10</default-value>
 		</RANGETICKFONTSIZE>
+		<RANGETICKFONTISBOLD type="string">
+			<sources>
+				<request>rangeTickFontIsBold</request>
+			</sources>
+			<default-value>false</default-value>
+		</RANGETICKFONTISBOLD> 
+		<RANGETICKFONTISITALIC type="string">
+			<sources>
+				<request>rangeTickFontIsItalic</request>
+			</sources>
+			<default-value>false</default-value>
+		</RANGETICKFONTISITALIC> 
 		
 		<URLTEMPLATE type="string">
 			<sources>
@@ -193,6 +295,7 @@
 			</sources>
 			<default-value></default-value>
 		</SERIESNAME>
+		
 		<INCLUDELEGEND type="string">
 			<sources>
 				<request>includeLegend</request>
@@ -210,7 +313,7 @@
 				<request>legendFontSize</request>
 			</sources>
 			<default-value>12</default-value>
-		</LEGENDFONTSIZE> 
+		</LEGENDFONTSIZE>
 		<LEGENDFONTISBOLD type="string">
 			<sources>
 				<request>legendFontIsBold</request>
@@ -223,6 +326,7 @@
 			</sources>
 			<default-value>false</default-value>
 		</LEGENDFONTISITALIC> 
+		
 		<FOREGROUNDALPHA type="string">
 			<sources>
 				<request>foregroundAlpha</request>
@@ -235,18 +339,21 @@
 			</sources>
 			<default-value>1</default-value>
 		</BACKGROUNDALPHA> 
+		
 		<INTERIORGAP type="string">
 			<sources>
 				<request>interiorGap</request>
 			</sources>
 			<default-value>0.085</default-value>
 		</INTERIORGAP> 
+		
 		<QUERY_TYPE type="string">
 			<sources>
 				<request>queryType</request>
 			</sources>
 			<default-value>mdx</default-value>
 		</QUERY_TYPE> 
+		
 		<MAXBARWIDTH type="string">
 			<sources>
 				<request>maxBarWidth</request>
@@ -667,32 +774,58 @@
 			<HEIGHT type="string"/>
 			<BYROW type="string"/>
 			<CHARTTYPE type="string"/>
+			
 			<TITLE type="string"/>
-			<DOMAINTITLEFONTSIZE type="string"/>
-			<DOMAINTITLEFONTFAMILY type="string"/> 
+			<TITLEFONTFAMILY type="string"/> 
+			<TITLEFONTSIZE type="string"/>
+			<TITLEFONTISBOLD type="string"/>
+			<TITLEFONTISITALIC type="string"/>
+			
 			<SUBTITLE type="string"/>
+			
+			<DOMAINTITLE type="string"/>
+			<DOMAINTITLEFONTFAMILY type="string"/> 
+			<DOMAINTITLEFONTSIZE type="string"/>
+			<DOMAINTITLEFONTISBOLD type="string"/>
+			<DOMAINTITLEFONTISITALIC type="string"/>
+			
 			<RANGETITLE type="string"/>
+			<RANGETITLEFONTFAMILY type="string"/> 
+			<RANGETITLEFONTSIZE type="string"/>
+			<RANGETITLEFONTISBOLD type="string"/>
+			<RANGETITLEFONTISITALIC type="string"/>
+
 			<DATASETTYPE type="string"/>
 			<DOMAINPERIODTYPE type="string"/>
 			<ORIENTATION type="string"/>
 			<IS3D type="string"/>
 			<ISSTACKED type="string"/>
+			
 			<DOMAINTICKFONTSIZE type="string"/>
-			<DOMAINTICKFONTFAMILY type="string"/> 
+			<DOMAINTICKFONTFAMILY type="string"/>
+			<DOMAINTICKFONTISBOLD type="string"/>
+			<DOMAINTICKFONTISITALIC type="string"/>
+			
 			<DOMAINLABELROTATIONDIR type="string"/>
 			<DOMAINLABELROTATION type="string"/>
+			
 			<RANGETICKFONTSIZE type="string"/>
-			<RANGETICKFONTFAMILY type="string"/> 
+			<RANGETICKFONTFAMILY type="string"/>
+			<RANGETICKFONTISBOLD type="string"/>
+			<RANGETICKFONTISITALIC type="string"/>
+			
 			<URLTEMPLATE type="string"/>
 			<USEBASEURL type="string"/>
 			<URLTARGET type="string"/>
 			<PARAMETERNAME type="string"/>
 			<SERIESNAME type="string"/>
+			
 			<INCLUDELEGEND type="string"/>
 			<LEGENDFONTFAMILY type="string"/>
 			<LEGENDFONTSIZE type="string"/>
 			<LEGENDFONTISBOLD type="string"/>
 			<LEGENDFONTISITALIC type="string"/>
+			
 			<FOREGROUNDALPHA type="string"/>
 			<BACKGROUNDALPHA type="string"/>
 			<MAXBARWIDTH type="string" />
@@ -716,36 +849,65 @@
 			<height>{HEIGHT}</height>  
 			<by-row>{BYROW}</by-row>  
 			<chart-attributes> 
-				<chart-type>{CHARTTYPE}</chart-type>  
+				<chart-type>{CHARTTYPE}</chart-type>
+				
 				<title>{TITLE}</title> 
-				<domain-title-font>
-					<font-family>{DOMAINTITLEFONTFAMILY}</font-family>
-					<size>{DOMAINTITLEFONTSIZE}</size> 
-				</domain-title-font>
+				<title-font>
+					<font-family>{TITLEFONTFAMILY}</font-family>
+					<size>{TITLEFONTSIZE}</size>
+					<is-bold>{TITLEFONTISBOLD}</is-bold>
+					<is-italic>{TITLEFONTISITALIC}</is-italic>
+				</title-font>
+				
 				<subtitles>
 					<subtitle>{SUBTITLE}</subtitle>  
 				</subtitles>
-				<range-title>{RANGETITLE}</range-title>  
+				
+				<domain-title>{DOMAINTITLE}</domain-title> 
+				<domain-title-font>
+					<font-family>{DOMAINTITLEFONTFAMILY}</font-family>
+					<size>{DOMAINTITLEFONTSIZE}</size>
+					<is-bold>{DOMAINTITLEFONTISBOLD}</is-bold>
+					<is-italic>{DOMAINTITLEFONTISITALIC}</is-italic>
+				</domain-title-font>
+				
+				<range-title>{RANGETITLE}</range-title>
+				<range-title-font>
+					<font-family>{RANGETITLEFONTFAMILY}</font-family>
+					<size>{RANGETITLEFONTSIZE}</size>
+					<is-bold>{RANGETITLEFONTISBOLD}</is-bold>
+					<is-italic>{RANGETITLEFONTISITALIC}</is-italic>
+				</range-title-font>
+				
 				<dataset-type>{DATASETTYPE}</dataset-type>  
 				<domain-period-type>{DOMAINPERIODTYPE}</domain-period-type>  
 				<orientation>{ORIENTATION}</orientation>  
 				<is-3D>{IS3D}</is-3D>  
 				<is-stacked>{ISSTACKED}</is-stacked>  
+				
 				<domain-tick-font>
 					<font-family>{DOMAINTICKFONTFAMILY}</font-family>
-					<size>{DOMAINTICKFONTSIZE}</size> 
+					<size>{DOMAINTICKFONTSIZE}</size>
+					<is-bold>{DOMAINTICKFONTISBOLD}</is-bold>
+					<is-italic>{DOMAINTICKFONTISITALIC}</is-italic>
 				</domain-tick-font>
+				
 				<domain-label-rotation-dir>{DOMAINLABELROTATIONDIR}</domain-label-rotation-dir>  
 				<domain-label-rotation>{DOMAINLABELROTATION}</domain-label-rotation>
+				
 				<range-tick-font>
 					<font-family>{RANGETICKFONTFAMILY}</font-family>
-					<size>{RANGETICKFONTSIZE}</size> 
+					<size>{RANGETICKFONTSIZE}</size>
+					<is-bold>{RANGETICKFONTISBOLD}</is-bold>
+					<is-italic>{RANGETICKFONTISITALIC}</is-italic>
 				</range-tick-font>
+				
 				<url-template>{URLTEMPLATE}</url-template> 
 				<use-base-url>{USEBASEURL}</use-base-url>  
 				<url-target>{URLTARGET}</url-target>
 				<paramName>{PARAMETERNAME}</paramName>  
-				<series-name>{SERIESNAME}</series-name>  
+				<series-name>{SERIESNAME}</series-name>
+				
 				<include-legend>{INCLUDELEGEND}</include-legend> 
 				<legend-font>
 					<font-family>{LEGENDFONTFAMILY}</font-family>
@@ -753,16 +915,16 @@
 					<is-bold>{LEGENDFONTISBOLD}</is-bold>
 					<is-italic>{LEGENDFONTISITALIC}</is-italic>
 				</legend-font>
+				
 				<interior-gap>{INTERIORGAP}</interior-gap> 
 				<foreground-alpha>{FOREGROUNDALPHA}</foreground-alpha>
 				<background-alpha>{BACKGROUNDALPHA}</background-alpha>
 				<max-bar-width>{MAXBARWIDTH}</max-bar-width>
 				<chart-background type="color">{BACKGROUND}</chart-background>
 				<plot-background type="color">{PLOTBACKGROUND}</plot-background>
-				<markers-visible>false</markers-visible>
+				<markers-visible>{MARKERSVISIBLE}</markers-visible>
 				<tooltip-content>{TOOLTIPCONTENT}</tooltip-content>
 				<tooltip-y-format>{TOOLTIPYFORMAT}</tooltip-y-format>
-				<markers-visible>{MARKERSVISIBLE}</markers-visible>
 				<color-palette> 
 					<color>#1b95d9</color>  
 					<color>#caca9e</color>  

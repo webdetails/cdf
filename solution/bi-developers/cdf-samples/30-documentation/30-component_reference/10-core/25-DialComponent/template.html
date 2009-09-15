@@ -94,6 +94,9 @@
 
 			<dt>height</dt> 
 			<dd>Height of the chart. Default: 200</dd>
+			
+			<dt>chartType</dt>
+			<dd>Please check jFreeChart action documentation. Default: DialChart</dd>
 
 			<dt>title</dt>
 			<dd>Please check jFreeChart action documentation. </dd>
@@ -106,44 +109,23 @@
 
 			<dt>subtitle</dt>
 			<dd>Please check jFreeChart action documentation. </dd>
-
-			<dt>urlTemplate</dt>
-			<dd>Please check jFreeChart action documentation. Default: javascript:;</dd>
-
-			<dt>useBaseUrl</dt>
-			<dd>Please check jFreeChart action documentation. Default: false</dd>
-
-			<dt>urlTarget</dt>
-			<dd>Please check jFreeChart action documentation. Default: _self</dd>
-
-			<dt>parameterName</dt>
-			<dd>Please check jFreeChart action documentation. </dd>
-
-			<dt>seriesName</dt>
-			<dd>Please check jFreeChart action documentation. </dd>
-
-			<dt>includeLegend</dt>
-			<dd>Please check jFreeChart action documentation. Default: true</dd>
-
-			<dt>legendFontFamily</dt>
-			<dd>Please check jFreeChart action documentation. Default: Helvetica</dd>
-
-			<dt>legendFontSize</dt>
-			<dd>Please check jFreeChart action documentation. Default: 12</dd>
-
-			<dt>legendFontIsBold</dt>
-			<dd>Please check jFreeChart action documentation. Default: false</dd>
-
-			<dt>legendFontIsItalic</dt>
-			<dd>Please check jFreeChart action documentation. Default: false</dd>
-
+			
+			<dt>domainTickFontSize</dt>
+			<dd>Please check jFreeChart action documentation. Default: 10</dd>
+			
+			<dt>valueColor</dt>
+			<dd>Please check jFreeChart action documentation. Default: #000000</dd>
+			
+			<dt>needleColor</dt>
+			<dd>Please check jFreeChart action documentation. Default: #0000CC</dd>
+			
+			<dt>tickColor</dt>
+			<dd>Please check jFreeChart action documentation. Default: #0000CC</dd>
+			
 			<dt>foregroundAlpha</dt>
 			<dd>Please check jFreeChart action documentation. Default: 1</dd>
 
 			<dt>backgroundAlpha</dt>
-			<dd>Please check jFreeChart action documentation. Default: 1</dd>
-
-			<dt>maxBarWidth</dt>
 			<dd>Please check jFreeChart action documentation. Default: 1</dd>
 
 			<dt>backgroundColor</dt>
@@ -151,7 +133,15 @@
 
 			<dt>plotbgcolor</dt>
 			<dd>Please check jFreeChart action documentation. Default: #FFFFFF</dd>
+			
+			<dt>urlTemplate</dt>
+			<dd>Please check jFreeChart action documentation. Default: javascript: ;</dd>
 
+			<dt>useBaseUrl</dt>
+			<dd>Please check jFreeChart action documentation. Default: false</dd>
+
+			<dt>urlTarget</dt>
+			<dd>Please check jFreeChart action documentation. Default: _self</dd>
 
 		</dl>
 
@@ -178,13 +168,11 @@ var MetaLayer =  {
 		height: 200,
 		chartType: "DialChart",
 		queryType: 'mdx',
-		is3d: 'true',
 		jndi: "SampleData",
 		title: "Check current budget",
 		catalog: "solution:steel-wheels/analysis/SampleData.mondrian.xml",
 		colors: ["#F16C3A","#FFFF00","#B0D837"],
 		intervals: [7000000,70000000,150000000],
-		includeLegend: true,
 
 		query: function(){
 
