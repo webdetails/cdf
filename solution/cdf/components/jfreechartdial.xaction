@@ -130,11 +130,18 @@
 			<default-value>#0000CC</default-value>
 		</TICK-COLOR>
 		
+		<BACKGROUND-COLOR type="string">
+			<sources>
+				<request>backgroundColor</request>
+			</sources>
+			<default-value>#FFFFFF</default-value>
+		</BACKGROUND-COLOR> 
+		
 		<URL-TEMPLATE type="string">
 			<sources>
 				<request>urlTemplate</request>
 			</sources>
-			<default-value></default-value>
+			<default-value>javascript: ;</default-value>
 		</URL-TEMPLATE>  
 		<USE-BASE-URL type="string">
 			<sources>
@@ -148,12 +155,7 @@
 			</sources>
 			<default-value>_self</default-value>
 		</URL-TARGET>  
-		<BACKGROUND-COLOR type="string">
-			<sources>
-				<request>backgroundColor</request>
-			</sources>
-			<default-value>#FFFFFF</default-value>
-		</BACKGROUND-COLOR> 
+		
 	</inputs>
 
 	<outputs> 
@@ -456,11 +458,13 @@
 				<NEEDLE-COLOR type="string"/>
 				<TICK-COLOR type="string"/>
 				
+				<BACKGROUND-COLOR type="string"/>
+				
 				<URL-TEMPLATE type="string"/>
 				<USE-BASE-URL type="string"/>
 				<URL-TARGET type="string"/>
-				<BACKGROUND-COLOR type="string"/>
 			</action-inputs>
+			
 			<action-resources/>
 			<action-outputs> 
 				<chart-filename type="string"/>  

@@ -199,7 +199,6 @@
 			<default-value>false</default-value>
 		</ISSTACKED>
 		
-		
 		<DOMAINTICKFONTFAMILY type="string">
 			<sources>
 				<request>domainTickFontFamily</request>
