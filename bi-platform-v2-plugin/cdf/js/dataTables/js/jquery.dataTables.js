@@ -1684,6 +1684,18 @@
 			_fnSaveState( oSettings );
 		};
 		
+		/*
+		 * Function: fnDisplayLength
+		 * Purpose:  Changes the display length
+		 * Returns:  -
+		 * Inputs:   int:length - the column whose display should be changed
+		 */
+		this.fnDisplayLength = function ( len )
+		{
+
+			var oSettings = _fnSettingsFromNode( this[_oExt.iApiIndex] );
+			_fnFeatureHtmlLengthChange(oSettings,len);
+		}
 		
 		/*
 		 * Plugin API functions
@@ -2932,29 +2944,40 @@
 			$('select option[value="'+oSettings._iDisplayLength+'"]',nLength).attr("selected",true);
 			
 			$('select', nLength).change( function(e) {
-				oSettings._iDisplayLength = parseInt($(this).val(), 10);
-				
-				_fnCalculateEnd( oSettings );
-				
-				/* If we have space to show extra rows (backing up from the end point - then do so */
-				if ( oSettings._iDisplayEnd == oSettings.aiDisplay.length )
-				{
-					oSettings._iDisplayStart = oSettings._iDisplayEnd - oSettings._iDisplayLength;
-					if ( oSettings._iDisplayStart < 0 )
-					{
-						oSettings._iDisplayStart = 0;
-					}
-				}
-				
-				if ( oSettings._iDisplayLength == -1 )
-				{
-					oSettings._iDisplayStart = 0;
-				}
-				
-				_fnDraw( oSettings );
+
+				_fnFeatureHtmlLengthChange(oSettings, parseInt($(this).val(), 10));
 			} );
 			
 			return nLength;
+		}
+		/*
+		 * Function: _fnFeatureHtmlLengthChange
+		 * Purpose:  Handles length change
+		 * Returns:  node
+		 * Inputs:   object:oSettings - dataTables settings object
+		 */
+		function _fnFeatureHtmlLengthChange ( oSettings, length )
+		{
+			oSettings._iDisplayLength = length;
+			
+			_fnCalculateEnd( oSettings );
+			
+			/* If we have space to show extra rows (backing up from the end point - then do so */
+			if ( oSettings._iDisplayEnd == oSettings.aiDisplay.length )
+			{
+				oSettings._iDisplayStart = oSettings._iDisplayEnd - oSettings._iDisplayLength;
+				if ( oSettings._iDisplayStart < 0 )
+				{
+					oSettings._iDisplayStart = 0;
+				}
+			}
+			
+			if ( oSettings._iDisplayLength == -1 )
+			{
+				oSettings._iDisplayStart = 0;
+			}
+			
+			_fnDraw( oSettings );
 		}
 		
 		/*
