@@ -90,10 +90,15 @@ var XactionComponent = BaseComponent.extend({
 				} 
 	
 				var myself=this;
-				var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
-			
-				if(jXML != null){
-					$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+				if (typeof(this.serviceMethod) == 'undefined' || this.serviceMethod == 'ServiceAction') {
+					var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
+				
+					if(jXML != null){
+						$('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+					}
+				} else {
+					var html = Dashboards.pentahoServiceAction(this.serviceMethod, 'html', this.solution, this.path, this.action, p, null);
+					$('#'+myself.htmlObject).html(html);	
 				}
 
 			} else {
@@ -122,6 +127,7 @@ var XactionComponent = BaseComponent.extend({
 				$("#"+this.htmlObject).html(xactionIFrameHTML);
 			}
 		  } catch (e) {
+			alert(e);
 			  // don't cause the rest of CDF to fail if xaction component fails for whatever reason
 		  }
 		}
