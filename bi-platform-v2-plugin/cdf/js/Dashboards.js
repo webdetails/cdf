@@ -393,14 +393,18 @@ Dashboards.callPentahoAction = function(obj, solution, path, action, parameters,
 	}
 }
 
-Dashboards.urlAction = function( url, params, func ) {
+Dashboards.urlAction = function ( url, params, func) {
+	return Dashboards.executeAjax('xml', url, params, func);
+}
+
+Dashboards.executeAjax = function( returnType, url, params, func ) {
 	// execute a url
 	if (typeof func == "function"){
 		// async
 		return $.ajax({
 				url: url,
 				type: "POST",
-				dataType: "xml",
+				dataType: returnType,
 				async: true,
 				data: params,
 				complete: function (XMLHttpRequest, textStatus) {
@@ -415,25 +419,33 @@ Dashboards.urlAction = function( url, params, func ) {
 	}
 	
 	// Sync
-	return $.ajax({
+	var result = $.ajax({
 			url: url,
 			type: "POST",
-			dataType: "xml",
+			dataType:returnType,
 			async: false,
 			data: params,
 			error: function (XMLHttpRequest, textStatus, errorThrown) {
 				alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
 			}
 
-		}
-	).responseXML;
+		});
+	if (returnType == 'xml') {
+		return result.responseXML;
+	} else {
+		return result.responseText;
+	}
 
 } 
 
 Dashboards.pentahoAction = function( solution, path, action, params, func ) {
+	return Dashboards.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
+}
+
+Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
 	// execute an Action Sequence on the server
 
-	var url = webAppPath + "/ServiceAction";
+	var url = webAppPath + "/" + serviceMethod;
 	
 	// Add the solution to the params
 	var arr = {};
@@ -444,8 +456,7 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 	$.each(params,function(i,val){
 			arr[val[0]]=val[1];
 		});
-	
-	return Dashboards.urlAction(url, arr, func);
+	return Dashboards.executeAjax(returntype, url, arr, func);
 }    
 
 Dashboards.parseXActionResult = function(obj,html){
