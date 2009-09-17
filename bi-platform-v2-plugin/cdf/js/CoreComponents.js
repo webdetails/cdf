@@ -127,7 +127,6 @@ var XactionComponent = BaseComponent.extend({
 				$("#"+this.htmlObject).html(xactionIFrameHTML);
 			}
 		  } catch (e) {
-			alert(e);
 			  // don't cause the rest of CDF to fail if xaction component fails for whatever reason
 		  }
 		}
