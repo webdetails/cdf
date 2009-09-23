@@ -29,7 +29,14 @@ public class ExportCSV extends Export implements IExport {
 				for(int j = 0; j < vs.length ; j++){
 					String value = vs[j];
 					if(value == null)break;
-					pw.append(isDouble(value) ? new Double(value).toString(): vs[j]);
+					//pw.append(isDouble(value) ? new Double(value).toString(): vs[j]);
+                    if ( isDouble(value) ){
+                         pw.append(new Double(value).toString());
+                    }
+                    else{
+                        String aux = value.replaceAll("\"", "\\\\\"");
+                        pw.append( '\"'+aux+'\"' );
+                    }
 	    			if(j+1 < vs.length) pw.append(',');
 				}
 				pw.append('\n');

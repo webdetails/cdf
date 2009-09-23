@@ -1146,6 +1146,15 @@ var TableComponent = BaseComponent.extend({
 							}
 						})
 				}; //colWidths
+				
+				if(options.colSortable!=undefined){
+					$.each(options.colSortable,function(i,val){
+							if (val!=null){
+								dtData.aoColumns[i].bSortable=val
+							}
+						})
+				}; //colSortable
+				
 			}
 
 			return dtData;
