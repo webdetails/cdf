@@ -1149,8 +1149,8 @@ var TableComponent = BaseComponent.extend({
 				
 				if(options.colSortable!=undefined){
 					$.each(options.colSortable,function(i,val){
-							if (val!=null){
-								dtData.aoColumns[i].bSortable=val
+							if (val!=null && ( !val || val == "false" ) ){
+								dtData.aoColumns[i].bSortable=false
 							}
 						})
 				}; //colSortable
