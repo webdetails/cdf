@@ -39,25 +39,27 @@
 	  </target>
 	
 	  <property name="plugin.name"
-	            value="pentaho-cdf"
-	            description="Name of the plugin" />
+		  value="pentaho-cdf"
+		  description="Name of the plugin" />
 
 	  <property name="resource.dir"
-	            value="resource"
-	            description="Name of the resource directory" />
+		  value="resource"
+		  description="Name of the resource directory" />
 
 	  <property name="stage.dir"
-	            value="${bin.dir}/stage"
-	            description="Name of the resource directory" />
-	
+		  value="${bin.dir}/stage"
+		  description="Name of the resource directory" />
+
 	  <property name="samples.stage.dir"
-	            value="${bin.dir}/stage-samples"
-	            description="Name of the resource directory" />
+		  value="${bin.dir}/stage-samples"
+		  description="Name of the resource directory" />
 
 	  <property name="solution.stage.dir"
-	            value="${bin.dir}/stage-solution"
-	            description="Name of the resource directory" />
-	
+		  value="${bin.dir}/stage-solution"
+		  description="Name of the resource directory" />
+
+	  <property name="plugin.local.install.solutions.dir" value="../solution" /> 
+
 	  <target name="dist" depends="resolve,jar,dist-plugin,dist-solution,dist-samples"/>
 	  <target name="dist-compile" depends="jar,dist-plugin"/>
   
@@ -126,12 +128,16 @@
 		    ====================================================================-->
 	  <target name="install-plugin" depends="dist-plugin" description="Installs the plugin locally in solution/system/pentaho-cdf">
 
-		  <delete dir="../solution/system/${plugin.name}"/>
-		  <copy todir="../solution/system/${plugin.name}">
+
+		  <fail message="plugin.local.install.solutions.dir not set - cannot copy" unless="plugin.local.install.solutions.dir"/>
+
+		  <delete dir="${plugin.local.install.solutions.dir}/system/${plugin.name}"/>
+		  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}">
 			  <fileset dir="${stage.dir}/${plugin.name}">
 				  <include name="**/*" />
 			  </fileset>
 		  </copy>
+		  <get src="http://127.0.0.1:8080/pentaho/Publish?publish=now&amp;class=org.pentaho.platform.plugin.services.pluginmgr.PluginAdapter&amp;userid=${plugin.local.install.user}&amp;password=${plugin.local.install.pass}" dest="${stage.dir}/blah.html"/>
 
 	  </target>
 	

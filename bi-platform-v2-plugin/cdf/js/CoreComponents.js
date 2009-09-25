@@ -1163,6 +1163,132 @@ var TableComponent = BaseComponent.extend({
 	}
 );
 
+var CommentsComponent = BaseComponent.extend({
+		update : function() {
+			
+			// Set page start and length - for pagination
+			if(typeof this.firstResult == 'undefined'){
+				this.firstResult = 0;
+			}
+			if(typeof this.maxResults == 'undefined'){
+				this.maxResults = 4;
+			}
+
+			if (this.page == undefined){
+				alert("Fatal - no page definition passed");
+				return;
+			}
+			
+			this.firePageUpdate();
+
+		},
+		firePageUpdate: function(json){
+
+			// Clear previous table
+			var placeHolder = $("#"+this.htmlObject);
+			placeHolder.empty();
+			placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
+			var myself = this;
+			var args = {action: "list", page: this.page, firstResult: this.firstResult, maxResults: this.maxResults};
+			$.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
+					myself.processCommentsList(json);
+				});
+		},
+
+		processCommentsList : function(json)
+		{
+			// Add the possibility to add new comments
+			var myself = this;
+			var placeHolder = $("#"+this.htmlObject + " dl ");
+			myself.addCommentContainer = $('<dt class="ui-widget-header comment-body"><textarea/></dt>'+
+					'<dl class="ui-widget-header comment-footer">'+
+					'<a class="cdfAddComment">Add Comment</a>'+
+					' <a class="cdfCancelComment">Cancel</a></dl>'
+			);
+			myself.addCommentContainer.find("a").addClass("ui-state-default");
+			myself.addCommentContainer.find("a").hover(
+				function(){ $(this).addClass("ui-state-hover"); },
+				function(){ $(this).removeClass("ui-state-hover"); }
+			)
+
+			// Cancel
+			$(".cdfCancelComment",myself.addCommentContainer).bind('click',function(e){
+					myself.addCommentContainer.hide("slow");
+					myself.addCommentContainer.find("textarea").val('');
+				});
+
+			// Add comment
+			$(".cdfAddComment",myself.addCommentContainer).bind('click',function(e){
+					var code = $("textarea",myself.addCommentContainer).val();
+					var args = {action: "add", page: myself.page, comment: code};
+					$.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
+							myself.processCommentsAdd(json);
+						});
+					myself.addCommentContainer.hide("slow");
+				});
+
+			myself.addCommentContainer.hide();
+			myself.addCommentContainer.appendTo(placeHolder);
+
+			// Add comment option
+			var addCodeStr = '<div class="cdfAddComment"><a> Add comment</a></div>';
+
+			$(addCodeStr).insertBefore(placeHolder).bind('click',function(e){
+					myself.addCommentContainer.show("slow");
+					$("textarea",myself.addCommentContainer).focus();
+				});
+
+			if (json.result.length == 0 ){
+				placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
+			}
+			$.each(json.result,function(i,comment){
+
+				var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
+					placeHolder.append('<dt class="'+ bodyClass +' comment-body"><p>'+comment.comment+'</p></dt>');
+					placeHolder.append('<dl class="ui-widget-header comment-footer ">'+comment.user+ ",  " + comment.createdOn +  '</dl>');
+	
+				});
+
+
+			// Add pagination support;
+			var paginationContent = $('<div class="cdfCommentsPagination ui-helper-clearfix"><ul class="ui-widget"></ul></div>');
+			var ul = $("ul",paginationContent);
+			if(this.firstResult > 0){
+				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
+				ul.find(".cdfCommentPagePrev").bind("click",function(){
+						myself.firstResult -= 4;
+						myself.firePageUpdate();
+					});
+			}
+
+			if(this.maxResults == json.result.length){
+				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
+				ul.find(".cdfCommentPageNext").bind("click",function(){
+						myself.firstResult += 4;
+						myself.firePageUpdate();
+					});
+			}
+			paginationContent.insertAfter(placeHolder);
+
+
+		},
+		processCommentsAdd: function(json){
+			// json response
+			var result = json.result;
+			var placeHolder = $("#"+this.htmlObject + " dl ");
+
+			var container = $('<dt class="ui-widget-header comment-body">'+ result.comment +'</dt>'+
+					'<dl class="ui-widget-header comment-footer">'+ result.user +
+					", " + result.createdOn + '</dl>'
+			);
+			container.hide();
+			container.insertAfter($("dl:eq(0)",placeHolder));
+			container.show("slow");
+
+		}
+	}
+);
+
 var PivotLinkComponent = BaseComponent.extend({
 		update : function() {
 			var title = this.tooltip==undefined?"View details in a Pivot table":this.tooltip;
