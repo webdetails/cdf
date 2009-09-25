@@ -1171,7 +1171,7 @@ var CommentsComponent = BaseComponent.extend({
 				this.firstResult = 0;
 			}
 			if(typeof this.maxResults == 'undefined'){
-				this.maxResults = 4;
+				this.maxResults = 10;
 			}
 
 			if (this.page == undefined){
@@ -1256,7 +1256,7 @@ var CommentsComponent = BaseComponent.extend({
 			if(this.firstResult > 0){
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
 				ul.find(".cdfCommentPagePrev").bind("click",function(){
-						myself.firstResult -= 4;
+						myself.firstResult -= 10;
 						myself.firePageUpdate();
 					});
 			}
@@ -1264,7 +1264,7 @@ var CommentsComponent = BaseComponent.extend({
 			if(this.maxResults == json.result.length){
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
 				ul.find(".cdfCommentPageNext").bind("click",function(){
-						myself.firstResult += 4;
+						myself.firstResult += 10;
 						myself.firePageUpdate();
 					});
 			}
