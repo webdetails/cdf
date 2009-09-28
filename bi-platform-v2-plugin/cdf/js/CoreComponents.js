@@ -1083,6 +1083,7 @@ var TableComponent = BaseComponent.extend({
 
 			if(cd.urlTemplate != undefined){
 				var td =$("#" + myself.htmlObject + " td:nth-child(1)"); 
+				var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child(1)");
 				td.addClass('cdfClickable');
 				td.bind("click", function(e){
 						var regex = new RegExp("{"+cd.parameterName+"}","g");
@@ -1171,7 +1172,7 @@ var CommentsComponent = BaseComponent.extend({
 				this.firstResult = 0;
 			}
 			if(typeof this.maxResults == 'undefined'){
-				this.maxResults = 10;
+				this.maxResults = 4;
 			}
 
 			if (this.page == undefined){
@@ -1256,7 +1257,7 @@ var CommentsComponent = BaseComponent.extend({
 			if(this.firstResult > 0){
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
 				ul.find(".cdfCommentPagePrev").bind("click",function(){
-						myself.firstResult -= 10;
+						myself.firstResult -= 4;
 						myself.firePageUpdate();
 					});
 			}
@@ -1264,7 +1265,7 @@ var CommentsComponent = BaseComponent.extend({
 			if(this.maxResults == json.result.length){
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
 				ul.find(".cdfCommentPageNext").bind("click",function(){
-						myself.firstResult += 10;
+						myself.firstResult += 4;
 						myself.firePageUpdate();
 					});
 			}
