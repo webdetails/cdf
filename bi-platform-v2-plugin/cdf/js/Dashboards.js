@@ -4,7 +4,12 @@ $.ajaxSetup({
 	});
 
 var pathArray = window.location.pathname.split( '/' );
-var webAppPath = "/" + pathArray[1];
+var webAppPath;
+if (!(typeof(WEB_CONTEXT_BASE) == 'undefined') && WEB_CONTEXT_BASE.split('[/]+').length == 1) {
+  webAppPath = "";
+} else {
+   webAppPath = "/" + pathArray[1];
+}
 
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
