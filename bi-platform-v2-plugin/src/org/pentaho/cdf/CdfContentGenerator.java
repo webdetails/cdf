@@ -67,10 +67,18 @@ public class CdfContentGenerator extends BaseContentGenerator {
     public static final String CALLACTION = "/CallAction"; //$NON-NLS-1$
     public static final String COMMENTS = "/Comments"; //$NON-NLS-1$
 
-    // CDF Resource BaseURL
-    private static final String BASE_URL_TAG = "@BASE_URL@";
-    private static final String BASE_URL = "/" + PentahoSystem.getApplicationContext().getBaseUrl().split("[/]+")[2];
-
+	// CDF Resource BaseURL
+	private static final String BASE_URL_TAG = "@BASE_URL@";
+	public static final String BASE_URL;
+	
+	static {
+	  String urlSplit[] = PentahoSystem.getApplicationContext().getBaseUrl().split("[/]+");
+	  String path = "";
+	  if (urlSplit.length > 2) {
+	    path = "/" + urlSplit[2];
+	  }
+	  BASE_URL = path;
+	}
     @Override
     public void createContent() throws Exception {
 

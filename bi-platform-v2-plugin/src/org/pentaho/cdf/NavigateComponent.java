@@ -44,7 +44,6 @@ public class NavigateComponent extends PentahoBase {
     IPentahoSession userSession;
     ICacheManager cacheManager;
     boolean cachingAvailable;
-    private static final String BASE_URL = "/" + PentahoSystem.getApplicationContext().getBaseUrl().split("[/]+")[2];
     
     public NavigateComponent(IPentahoSession userSession) {
         
@@ -273,7 +272,7 @@ public class NavigateComponent extends PentahoBase {
                  	if(type != null){
                  		
                  		String path = type.equals(TYPE_DIR) ? (_path.length() > 0 ? _path + "/" + name : name) : _path;
-                        String url = type != null && type.equals(TYPE_URL) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(BASE_URL) && !chilNode.valueOf("@url").startsWith("/") ? BASE_URL + "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url") ) : null;
+                        String url = type != null && type.equals(TYPE_URL) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(CdfContentGenerator.BASE_URL) && !chilNode.valueOf("@url").startsWith("/") ? CdfContentGenerator.BASE_URL + "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url") ) : null;
 						
                         json = new JSONObject();
 						json.put("name", name);
