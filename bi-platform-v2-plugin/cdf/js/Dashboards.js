@@ -5,9 +5,16 @@ $.ajaxSetup({
 
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
-if (!(typeof(WEB_CONTEXT_BASE) == 'undefined') && WEB_CONTEXT_BASE.split('[/]+').length == 1) {
-  webAppPath = "";
-} else {
+if (!(typeof(WEB_CONTEXT_BASE) == 'undefined')){
+  var base = WEB_CONTEXT_BASE;
+  if((/^(.*)\/$/).test(base)){
+    base = RegExp.$1;
+  }
+  if(base.split(/[\/]+/).length == 2) {
+    webAppPath = "";
+  }
+}
+if(webAppPath == undefined){
    webAppPath = "/" + pathArray[1];
 }
 
