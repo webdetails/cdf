@@ -844,31 +844,35 @@ OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
 			this.options = jQuery.extend({}, this.genericDefaults, this.specificDefaults, options);
 			var options = this.options;
 			//options.baseDate = OlapUtils.ev(options.baseDate);
-			var thisMonth = options.dateDim+".[TodaysMonth]";
-			var lastMonth = options.dateDim+".[LastMonth]";
-			var lastYearMonth = options.dateDim+".[LastYearMonth]";
+			var thisPeriod = options.dateDim+".[This Period]";
+			var lastPeriod = options.dateDim+".[Previous Period]";
+			var lastYearPeriod = options.dateDim+".[Last Year Period]";
+			var nonEmptyMeasure = ".[Not Null Measure]";		
+			
 			this.queryBase = {
 				from: options.from,
 				rows: options.rows,
 				rowLevels: options.rowLevels,
 				rowDrill: options.rowDrill,
 				nonEmptyRows: options.nonEmptyRows,
-				columns:  ""+options.measuresDim+"."+options.measure+","+options.measuresDim+".[% m/m],"+options.measuresDim+".[% m/m-12],"+options.measuresDim+".[sparkdatamonths]",
+				columns:  ""+options.measuresDim+nonEmptyMeasure+","+options.measuresDim+".[% m/m],"+options.measuresDim+".[% m/m-12],"+options.measuresDim+".[sparkdatamonths]",
 				swapRowsAndColumns: false,
 				orderBy: options.orderBy,
 				sets: {
-					"last12Months":
-					function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
+					"now": function(){return "now as [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(30.0)" + ":" + " [Date].[Date].[" + Dashboards.ev(options.baseDate) + "]" },
+					"oneMonthAgo": function(){return "oneMonthAgo as [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(60.0)" + ":" + " [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(30.0)" },
+					"oneYearAgo": function(){return "oneYearAgo as [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(395.0)" + ":" + " [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(365.0)" },
+					"last12Months":	function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
 				},
 				members: {
-					thisMonth: function(){return thisMonth + " as 'Ancestor("+options.dateDim+"."+ options.dateLevel +".["+ Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")' "},
-					lastMonth: function(){return lastMonth + " as Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+").Lag(1.0) "},
-					lastYearMonth: function(){return lastYearMonth + " as Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+").Lag(12.0) "},
-					lastMonthMeasure:function(){return ""+options.measuresDim+".[LastMonth] as Aggregate("+options.dateDim+".[LastMonth]*"+options.measure+") "},
-					lastYearMonthMeasure:function(){return ""+options.measuresDim+".[LastYearMonth] as Aggregate("+options.dateDim+".[LastYearMonth]*"+options.measure+") "},
-					mmMeasure:function(){return ""+options.measuresDim+".[% m/m] as 100.0*("+options.measuresDim+"."+options.measure+" / "+options.measuresDim+".[LastMonth] - 1.0)  "},
-					mm12Measure:function(){return ""+options.measuresDim+".[% m/m-12] as 100.0*("+options.measuresDim+"."+options.measure+" / "+options.measuresDim+".[LastYearMonth] - 1.0)  "},
-					sparkdatamonths:function(){return ""+options.measuresDim+".[sparkdatamonths] as Generate([last12Months], Cast(("+options.measuresDim+"."+options.measure+") + 0.0 as String), \" , \") "}
+					todaysMonth: function(){return "[Date].[TodaysMonth] as Aggregate( now )"},
+					notNullMeasure: function(){return ""+options.measuresDim+nonEmptyMeasure + " as Iif(isEmpty(" + options.measuresDim+"."+options.measure + "), 0 ," + options.measure + ") "},
+					thisPeriodMeasure: function(){return ""+options.measuresDim+".[This Period] as Aggregate(now*"+options.measuresDim+nonEmptyMeasure+") "},
+					previousPeriodMeasure:function(){return ""+options.measuresDim+".[Previous Period] as Aggregate(oneMonthAgo*"+options.measuresDim+nonEmptyMeasure+") "},
+					lastYearPeriodMeasure:function(){return ""+options.measuresDim+".[Last Year Period] as Aggregate(oneYearAgo*"+options.measuresDim+nonEmptyMeasure+") "},
+					mmMeasure:function(){return ""+options.measuresDim+".[% m/m] as 100.0*("+options.measuresDim+nonEmptyMeasure+" / "+options.measuresDim+".[Previous Period] - 1.0)  "},
+					mm12Measure:function(){return ""+options.measuresDim+".[% m/m-12] as 100.0*("+options.measuresDim+nonEmptyMeasure+" / "+options.measuresDim+".[Last Year Period] - 1.0)  "},
+					sparkdatamonths:function(){return ""+options.measuresDim+".[sparkdatamonths] as Generate([last12Months], Cast(("+options.measuresDim+nonEmptyMeasure+") + 0.0 as String), \" , \") "}
 				},
 				where:{
 					dateBase: ""+options.dateDim+".[TodaysMonth]"

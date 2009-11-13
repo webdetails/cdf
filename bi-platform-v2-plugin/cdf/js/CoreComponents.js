@@ -1075,7 +1075,11 @@ var TableComponent = BaseComponent.extend({
 						if(val != null){
 							var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child("+ (colNo + 1) +")");
 							td.each(function(){
-									$(this).text( sprintf( val, $(this).text() ) );
+									if ($(this).text() != "null" ) {
+										$(this).text( sprintf( val, $(this).text() ) );
+									} else {
+										$(this).text('0');
+									}
 								});
 						}
 					});
