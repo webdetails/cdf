@@ -1398,103 +1398,126 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
 	});
 
-var PrptComponent = BaseComponent.extend({
+			var PrptComponent = BaseComponent.extend({
 
-  // gets the runUrl and paramServiceUrl from the server then alerts the caller via the callback
-  setSolutionPathAction : function(solution, path, action, callback) {
+				  // gets the runUrl and paramServiceUrl from the server then alerts the caller via the callback
+				  setSolutionPathAction : function(solution, path, action, callback) {
 
-    this.solution = solution;
-    this.path = path;
-    this.action = action;
+				    this.solution = solution;
+				    this.path = path;
+				    this.action = action;
+				    
+				    
+				    //Set the prpt Viewer options for pagination and parameters
+				    var prpt_options = this.prptViewerOptions();
+				   
 
-    // parameter service url from file details; tells us how to render the content;
-    var paramServiceUrl = '';
-    var runUrl = '';
-    var prptref = this.genXaction();
-    // get the base url so that we can call the sol repo service
-    // save a reference to this for use in nested functions
-      
-    var thisComponent = this;
+				    // parameter service url from file details; tells us how to render the content;
+				    var paramServiceUrl = '';
+				    var runUrl = '';
+				    var prptref = this.genXaction();
+				    // get the base url so that we can call the sol repo service
+				    // save a reference to this for use in nested functions
+				      
+				    var thisComponent = this;
 
-     $.ajax({
-         url: webAppPath+ '/SolutionRepositoryService?component=getSolutionRepositoryFileDetails&fullPath=' + prptref,
-         async:   false,
-         success: function(data2) {
-        $('file', data2).each(function() {
-          thisComponent.paramServiceUrl = $(this).attr('param-service-url') + '&renderMode=xml';
-          thisComponent.runUrl = $(this).attr('url') + '&showParameters=false';
-          if(callback){
-            callback.onfinish();
-          }
-        });
-      }
-    });
-      
-  },
+				     $.ajax({
+				         url: webAppPath+ '/SolutionRepositoryService?component=getSolutionRepositoryFileDetails&fullPath=' + prptref,
+				         async:   false,
+				         success: function(data2) {
+				        $('file', data2).each(function() {
+				          thisComponent.paramServiceUrl = $(this).attr('param-service-url') + '&renderMode=xml';
+				          thisComponent.runUrl = $(this).attr('url') + prpt_options;
+				          if(callback){
+				            callback.onfinish();
+				          }
+				        });
+				      }
+				    });
+				      
+				  },
 
-  preExecution: function(){
-    this.setSolutionPathAction(this.solution, this.path, this.action);
-  }, 
+				  preExecution: function(){
+				    this.setSolutionPathAction(this.solution, this.path, this.action);
+				  }, 
 
-  getQueryStringFragment : function() {
-    // save a reference to this for use in nested functions
-    var thisComponent = this;
+				  getQueryStringFragment : function() {
+				    // save a reference to this for use in nested functions
+				    var thisComponent = this;
 
-    var queryStringFragment = '';
-    for (var i = 0; i < thisComponent.parameters.length; i++) {
-      var paramId = null;
-      if(thisComponent.paramExtraInfo == undefined){
-         paramId = this.parameters[i][1];
-      } else if (i == 0 && typeof(thisComponent.paramExtraInfo.id) != "undefined") {
-        paramId = thisComponent.paramExtraInfo.id;
-      } else {
-        paramId = thisComponent.paramExtraInfo[i].id;
-      }
-      var paramValue = '';
-      if (this.staticParameters && thisComponent.parameters[i].length == 3) {
-        paramValue = thisComponent.parameters[i][2];
-      } else if(thisComponent.parameters[i][1] != ""){
-        paramValue = Dashboards.getParameterValue(thisComponent.parameters[i][1]);
-      } else {
-        paramValue = Dashboards.getParameterValue(paramId);
-      }
-        
-      if (paramValue != undefined && paramValue != '') {
-        queryStringFragment += '&' + encodeURIComponent(paramId) + '=' + encodeURIComponent(paramValue);
-      }
-    }
-    return queryStringFragment
-  },
+				    var queryStringFragment = '';
+				    for (var i = 0; i < thisComponent.parameters.length; i++) {
+				      var paramId = null;
+				      if(thisComponent.paramExtraInfo == undefined){
+				         paramId = this.parameters[i][1];
+				      } else if (i == 0 && typeof(thisComponent.paramExtraInfo.id) != "undefined") {
+				        paramId = thisComponent.paramExtraInfo.id;
+				      } else {
+				        paramId = thisComponent.paramExtraInfo[i].id;
+				      }
+				      var paramValue = '';
+				      if (this.staticParameters && thisComponent.parameters[i].length == 3) {
+				        paramValue = thisComponent.parameters[i][2];
+				      } else if(thisComponent.parameters[i][1] != ""){
+				        paramValue = Dashboards.getParameterValue(thisComponent.parameters[i][1]);
+				      } else {
+				        paramValue = Dashboards.getParameterValue(paramId);
+				      }
+				        
+				      if (paramValue != undefined && paramValue != '') {
+				        queryStringFragment += '&' + encodeURIComponent(paramId) + '=' + encodeURIComponent(paramValue);
+				      }
+				    }
+				    return queryStringFragment
+				  },
 
-  update : function() {
+				  update : function() {
 
-    var htmlObject = document.getElementById(this.htmlObject);
-    if(!htmlObject){
-      // Widget defined, but template does not have a space for it.
-      return;
-    }
-    var queryStringFragment = this.getQueryStringFragment();
+				    var htmlObject = document.getElementById(this.htmlObject);
+				    if(!htmlObject){
+				      // Widget defined, but template does not have a space for it.
+				      return;
+				    }
+				    var queryStringFragment = this.getQueryStringFragment();
 
-    htmlObject.innerHTML = "<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + this.runUrl + queryStringFragment + "' />";
-    
-  },
-  genXaction : function() {
-    var gen = this.solution == null ? '' : this.solution;
-    if (this.path != null) {
-      if (gen.length > 0 && gen.substr(gen.length - 1, 1) != '/') {
-        gen += '/';
-      }
-      gen += this.path;
-    }
-    if (this.action != null) {
-      if (gen.length > 0 && gen.substr(gen.length - 1, 1) != '/') {
-        gen += '/';
-      }
-      gen += this.action;
-    }
-    return gen;
-  },
-  type : "PrptComponent",
-  executeAtStart : true,
-  iconImgSrc : '../images/file.png'
+				    htmlObject.innerHTML = "<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + this.runUrl + queryStringFragment + "' />";
+				    
+				  },
+				  genXaction : function() {
+				    var gen = this.solution == null ? '' : this.solution;
+				    if (this.path != null) {
+				      if (gen.length > 0 && gen.substr(gen.length - 1, 1) != '/') {
+				        gen += '/';
+				      }
+				      gen += this.path;
+				    }
+				    if (this.action != null) {
+				      if (gen.length > 0 && gen.substr(gen.length - 1, 1) != '/') {
+				        gen += '/';
+				      }
+				      gen += this.action;
+				    }
+				    return gen;
+				  },
+				  prptViewerOptions : function() {
+				    //default settings
+				    var showParameters = false;
+				    var myPaginate = true;
+				    
+				    //set to defined values
+				    if (this.paginate != undefined) {
+				      myPaginate = this.paginate;
+				    }
+				    
+				    if (this.showParameters != undefined) {
+				      showParameters = this.showParameters;
+				    }
+				    
+				    
+				    var options = '&showParameters='+showParameters+'&paginate='+myPaginate;
+				    return options;
+				  },
+				  type : "PrptComponent",
+				  executeAtStart : true,
+				  iconImgSrc : '../images/file.png'
 });
