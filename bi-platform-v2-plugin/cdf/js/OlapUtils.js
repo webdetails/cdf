@@ -57,9 +57,31 @@ OlapUtils.buttonsDescription = {
 	"Cancel": "Cancel" 
 }
 
-OlapUtils.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
 
-	value = encode_prepare(value);
+OlapUtils.fireMdxGroupAction = function(mdxQueryGroup,idx,param1, param2, param3){
+
+	/**         http://jira.pentaho.com/browse/BISERVER-3542	   *
+	 *								   *
+	 * Prior to Pentaho 3.5, this function received only 3 parameters: *
+	 *(query,idx,PARAM). 						   *
+	 * In Pentaho 3.5, the behavior	of the x/y and TimeSeries Charts   *
+	 *changed, and this function passed to receive 5 parameters:
+	 *(query,idx,chartDefinition,PARAM,SERIES).			   *
+	 * When chartType == AreaChart, the value used to drill through is *
+	 *SERIES, otherwise it's PARAM.					   */
+
+	if(param2 != undefined && param3 != undefined){
+	  cType = Dashboards.ev(param1.chartType);
+
+	    if(cType == "AreaChart")
+	      value = encode_prepare(param3);
+	    else 
+	      value = encode_prepare(param2);
+	}
+	else
+	  value = encode_prepare(param1);
+
+
 	var mdxQueryGroup = OlapUtils.mdxGroups[mdxQueryGroup];
 	if (value == 'Others')
 		return; // do nothing
@@ -115,6 +137,7 @@ OlapUtils.fireMdxGroupAction = function( mdxQueryGroup,idx, value){
 	);
 
 }
+
 	
 /******************************************************************************************************/
 /***************************************** MDX QUERY ************************************************/
