@@ -424,6 +424,8 @@
 
 								}
 
+								text;
+
 											]]></script>
 									</component-definition>
 								</action-definition>
