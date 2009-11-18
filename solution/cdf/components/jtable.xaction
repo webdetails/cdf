@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <action-sequence> 
   <title>Jtable</title>
   <version>1</version>
@@ -131,6 +131,10 @@
 			var rsmd = query_result.getMetaData() ;
 			var colHeaders = rsmd.getColumnHeaders() ;
 			var rowHeaders = rsmd.getRowHeaders() ;
+			
+			//ingo: adding count of row headers
+			var rowHeadersCount = rowHeaders[0].length;
+			
 			var colCount = rsmd.getColumnCount() ;
 			var rowCount = query_result.getRowCount() ;
 			
@@ -144,7 +148,14 @@
 				{
 					var value = new Packages.org.json.JSONArray();
 					if(QUERY_TYPE == "mdx")
-						value.put(rowHeaders[i][0]);
+						//old 
+						// value.put(rowHeaders[i][0]);
+						//ingo: adding all rowheaders to result set
+						for (k=0; k<rowHeadersCount; k++)
+						{
+							value.put(rowHeaders[i][k]);
+						}
+						
 					
 					for(j=0; j< colCount; j++)
 					{
