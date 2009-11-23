@@ -37,10 +37,10 @@
 	</context-param>
 
 	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<!-- This file is relative to the "system" folder within your pentaho solutions folder. -->
-		<!-- Instead of adding files here, add them as imports to pentaho-spring-beans.xml. -->
-		 <param-value>pentaho-spring-beans.xml</param-value>
+      <param-name>contextConfigLocation</param-name>
+      <!-- This file is relative to the "system" folder within your pentaho solutions folder. -->
+      <!-- Instead of adding files here, add them as imports to pentaho-spring-beans.xml. -->
+      <param-value>pentaho-spring-beans.xml</param-value>
 	</context-param>
 
 	<context-param>
@@ -58,7 +58,7 @@
 		<param-name>pentahoObjectFactoryCfgFile</param-name>
 		<param-value>pentahoObjects.spring.xml</param-value>
 	</context-param>
-
+  
 	<!--
 		This defaults to UTF-8. Uncomment this section and change the value for other encodings. Also change the URIEncoding
 		in Tomcat's server.xml.
@@ -90,8 +90,8 @@
 	</filter>
 
 	<filter>
-		<filter-name>Acegi Filter Chain Proxy</filter-name>
-		<filter-class>org.acegisecurity.util.FilterToBeanProxy</filter-class>
+		<filter-name>Spring Security Filter Chain Proxy</filter-name>
+		<filter-class>org.springframework.security.util.FilterToBeanProxy</filter-class>
 		<init-param>
 			<param-name>targetBean</param-name>
 			<param-value>filterChainProxy</param-value>
@@ -105,22 +105,6 @@
 			<param-name>initFailurePage</param-name>
 			<param-value>InitFailure</param-value>
 			<description>This page is displayed if the PentahoSystem fails to properly initialize.</description>
-		</init-param>
-	</filter>
-
-	<filter>
-		<filter-name>JPivotController</filter-name>
-		<filter-class>com.tonbeller.wcf.controller.RequestFilter</filter-class>
-		<init-param>
-			<param-name>errorJSP</param-name>
-			<param-value>PivotError</param-value>
-			<description>URI of error page</description>
-		</init-param>
-		<init-param>
-			<param-name>busyJSP</param-name>
-			<param-value>PivotBusy</param-value>
-			<description>This page is displayed if a the user clicks
-				on a query before the previous query has finished</description>
 		</init-param>
 	</filter>
 
@@ -147,33 +131,28 @@
 	</filter-mapping>
 
 	<filter-mapping>
-		<filter-name>JPivotController</filter-name>
-		<url-pattern>/Pivot</url-pattern>
+		<filter-name>Proxy Trusting Filter</filter-name>
+		<url-pattern>/SchedulerAdminService</url-pattern>
 	</filter-mapping>
 
 	<filter-mapping>
 		<filter-name>Proxy Trusting Filter</filter-name>
-		<url-pattern>/SchedulerAdmin</url-pattern>
+		<url-pattern>/SubscriptionAdminService</url-pattern>
 	</filter-mapping>
 
 	<filter-mapping>
 		<filter-name>Proxy Trusting Filter</filter-name>
-		<url-pattern>/SubscriptionAdmin</url-pattern>
+		<url-pattern>/ServiceActionService</url-pattern>
 	</filter-mapping>
 
 	<filter-mapping>
 		<filter-name>Proxy Trusting Filter</filter-name>
-		<url-pattern>/ServiceAction</url-pattern>
+		<url-pattern>/PublishService</url-pattern>
 	</filter-mapping>
 
 	<filter-mapping>
 		<filter-name>Proxy Trusting Filter</filter-name>
-		<url-pattern>/Publish</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>Proxy Trusting Filter</filter-name>
-		<url-pattern>/ResetRepository</url-pattern>
+		<url-pattern>/ResetRepositoryService</url-pattern>
 	</filter-mapping>
 
 	<filter-mapping>
@@ -182,13 +161,13 @@
 	</filter-mapping>
 	<!-- Filter mapping for security. Note that all objects are locked down. We could change this here as desired. -->
 	<filter-mapping>
-		<filter-name>Acegi Filter Chain Proxy</filter-name>
+		<filter-name>Spring Security Filter Chain Proxy</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
 	<!-- insert additional filter-mappings -->
 
-	<!--   enables session and request scoped object creation in Spring -->
+    <!--   enables session and request scoped object creation in Spring -->
     <listener>
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
@@ -202,6 +181,10 @@
 		<listener-class>org.pentaho.platform.web.http.session.PentahoHttpSessionListener</listener-class>
 	</listener>
 
+	<listener>
+		<listener-class>org.pentaho.platform.web.http.request.PentahoHttpRequestListener</listener-class>
+	</listener>
+
 	<!-- NEXT TWO LISTENERS ARE ORDER DEPENDENT -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -213,7 +196,7 @@
 	<!-- END OF ORDER DEPENDENCE -->
 
 	<listener>
-		<listener-class>org.acegisecurity.ui.session.HttpSessionEventPublisher</listener-class>
+		<listener-class>org.springframework.security.ui.session.HttpSessionEventPublisher</listener-class>
 	</listener>
 
 	<listener>
@@ -280,18 +263,8 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>GetMondrianModel</servlet-name>
-		<servlet-class>org.pentaho.platform.web.servlet.GetMondrianModel</servlet-class>
-	</servlet>
-
-	<servlet>
 		<servlet-name>SubscriptionAdmin</servlet-name>
 		<servlet-class>org.pentaho.platform.web.servlet.SubscriptionAdminServlet</servlet-class>
-	</servlet>
-
-	<servlet>
-		<servlet-name>ShowTestResult</servlet-name>
-		<servlet-class>org.pentaho.platform.web.servlet.ShowTestResult</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -320,6 +293,16 @@
 	<servlet>
     	<servlet-name>GenericServlet</servlet-name>
 		<servlet-class>org.pentaho.platform.web.servlet.GenericServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+    	<servlet-name>GwtRpcPluginProxyServlet</servlet-name>
+		<servlet-class>org.pentaho.platform.web.servlet.GwtRpcPluginProxyServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>WebContextServlet</servlet-name>
+		<servlet-class>org.pentaho.platform.web.servlet.WebContextServlet</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -359,21 +342,6 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>TestSuite</servlet-name>
-		<jsp-file>/jsp/TestSuite.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
-		<servlet-name>UpdateSampleEmails</servlet-name>
-		<jsp-file>/jsp/UpdateSampleEmails.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
-		<servlet-name>Widgets</servlet-name>
-		<jsp-file>/jsp/Widgets.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
 		<servlet-name>PivotError</servlet-name>
 		<jsp-file>/jsp/PivotError.jsp</jsp-file>
 	</servlet>
@@ -386,26 +354,6 @@
 	<servlet>
 		<servlet-name>SolutionManager</servlet-name>
 		<jsp-file>/jsp/SolutionManager.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
-		<servlet-name>SampleDashboard</servlet-name>
-		<jsp-file>/jsp/SampleDashboard.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
-		<servlet-name>ChartSamplesDashboard</servlet-name>
-		<jsp-file>/jsp/ChartSamplesDashboard.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
-		<servlet-name>SampleDrill</servlet-name>
-		<jsp-file>/jsp/SampleDrill.jsp</jsp-file>
-	</servlet>
-
-	<servlet>
-		<servlet-name>SWDashboard</servlet-name>
-		<jsp-file>/jsp/SWDashboard.jsp</jsp-file>
 	</servlet>
 
 	<servlet>
@@ -438,24 +386,14 @@
 		<jsp-file>/jsp/UserContent.jsp</jsp-file>
 	</servlet>
 
-	<servlet>
-		<servlet-name>Map</servlet-name>
-		<jsp-file>/jsp/Map.jsp</jsp-file>
-	</servlet>
-	
-	
+  	<!--   Temporary fix for GWT localization BISERVER-3640 -->
+    <servlet>
+      <servlet-name>BrowserLocale</servlet-name>
+      <jsp-file>/jsp/browserLocale.jsp</jsp-file>
+    </servlet>
+  	<!--   End BISERVER-3640 -->
 
 	<!-- ================================= merged servlets =================================== -->
-	<servlet>
-		<servlet-name>ManageUsers</servlet-name>
-		<servlet-class>org.pentaho.platform.web.servlet.SubscriptionUserCleanup</servlet-class>
-		<init-param>
-			<param-name>password</param-name>
-			<param-value />
-			<description>password used for protecting access to servlet</description>
-		</init-param>
-	</servlet>
-
 	<servlet>
 		<servlet-name>AdhocWebService</servlet-name>
 		<servlet-class>org.pentaho.platform.web.servlet.AdhocWebService</servlet-class>
@@ -496,7 +434,7 @@
 		<jsp-file>/jsp/PUCLogin.jsp</jsp-file>
 		<init-param>
 			<param-name>send401List</param-name>
-			<param-value>AdhocWebService,AnalysisViewService,MondrianCatalogPublisher</param-value>
+			<param-value>AdhocWebService,AnalysisViewService,MondrianCatalogPublisher, SchedulerAdminService, SubscriptionAdminService, PublishService, ResetRepositoryService, ServiceActionService,SolutionRepositoryService,gwtrpc,mantle/images/spacer.gif</param-value>
 			<description>List of things to throw a 401 to when seen in the login</description>
 		</init-param>
 	</servlet>
@@ -507,10 +445,6 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>SampleFlashDashboard</servlet-name>
-		<jsp-file>/jsp/SampleFlashDashboard.jsp</jsp-file>
-	</servlet>
-	<servlet>
 		<servlet-name>GetResource</servlet-name>
 		<servlet-class>org.pentaho.platform.web.servlet.GetResource</servlet-class>
 	</servlet>
@@ -518,10 +452,6 @@
 	<servlet>
 		<servlet-name>ResetRepository</servlet-name>
 		<jsp-file>/jsp/ResetRepository.jsp</jsp-file>
-	</servlet>
-	<servlet>
-		<servlet-name>NewAnalysisView</servlet-name>
-		<jsp-file>/jsp/NewAnalysisView.jsp</jsp-file>
 	</servlet>
 
 	<servlet>
@@ -534,7 +464,64 @@
 		<servlet-class>org.pentaho.mantle.login.server.MantleLoginServlet</servlet-class>
 	</servlet>
 
+  	<servlet>
+		<servlet-name>UploadService</servlet-name>
+		<servlet-class>org.pentaho.platform.web.servlet.UploadFileServlet</servlet-class>
+	</servlet>
+
+	<!-- [BEGIN SAMPLE SERVLETS] -->
+	<servlet>
+		<servlet-name>UpdateSampleEmails</servlet-name>
+		<jsp-file>/jsp/UpdateSampleEmails.jsp</jsp-file>
+	</servlet>
+
+	<servlet>
+		<servlet-name>Widgets</servlet-name>
+		<jsp-file>/jsp/Widgets.jsp</jsp-file>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>SampleDashboard</servlet-name>
+		<jsp-file>/jsp/SampleDashboard.jsp</jsp-file>
+	</servlet>
+
+	<servlet>
+		<servlet-name>ChartSamplesDashboard</servlet-name>
+		<jsp-file>/jsp/ChartSamplesDashboard.jsp</jsp-file>
+	</servlet>
+
+	<servlet>
+		<servlet-name>SampleDrill</servlet-name>
+		<jsp-file>/jsp/SampleDrill.jsp</jsp-file>
+	</servlet>
+
+	<servlet>
+		<servlet-name>SWDashboard</servlet-name>
+		<jsp-file>/jsp/SWDashboard.jsp</jsp-file>
+	</servlet>
+		
+	<servlet>
+		<servlet-name>Map</servlet-name>
+		<jsp-file>/jsp/Map.jsp</jsp-file>
+	</servlet>	
+	
+	<servlet>
+		<servlet-name>SampleFlashDashboard</servlet-name>
+		<jsp-file>/jsp/SampleFlashDashboard.jsp</jsp-file>
+	</servlet>	
+	<!-- [END SAMPLE SERVLETS] -->
+
   <!-- insert additional servlets -->
+
+	<servlet-mapping>
+    	<servlet-name>WebContextServlet</servlet-name>
+    	<url-pattern>/js/webcontext.js</url-pattern>
+  	</servlet-mapping>
+
+  	<servlet-mapping>
+    	<servlet-name>UploadService</servlet-name>
+    	<url-pattern>/UploadService</url-pattern>
+  	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>MantleService</servlet-name>
@@ -577,7 +564,12 @@
 		<servlet-name>GenericServlet</servlet-name>
 		<url-pattern>/content/*</url-pattern>
 	</servlet-mapping>
-	
+
+	<servlet-mapping>
+		<servlet-name>GwtRpcPluginProxyServlet</servlet-name>
+		<url-pattern>/gwtrpc/*</url-pattern>
+	</servlet-mapping>
+
 	<!-- Pentaho JSPs -->
 	<servlet-mapping>
 		<servlet-name>Chart</servlet-name>
@@ -600,8 +592,18 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
+		<servlet-name>Publish</servlet-name>
+		<url-pattern>/PublishService</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
 		<servlet-name>SchedulerAdmin</servlet-name>
 		<url-pattern>/SchedulerAdmin</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>SchedulerAdmin</servlet-name>
+		<url-pattern>/SchedulerAdminService</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
@@ -610,43 +612,8 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>TestSuite</servlet-name>
-		<url-pattern>/TestSuite</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>UpdateSampleEmails</servlet-name>
-		<url-pattern>/UpdateSampleEmails</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>Widgets</servlet-name>
-		<url-pattern>/Widgets</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
 		<servlet-name>SolutionManager</servlet-name>
 		<url-pattern>/SolutionManager</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>SampleDashboard</servlet-name>
-		<url-pattern>/SampleDashboard</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>ChartSamplesDashboard</servlet-name>
-		<url-pattern>/ChartSamplesDashboard</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>SampleDrill</servlet-name>
-		<url-pattern>/SampleDrill</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>SWDashboard</servlet-name>
-		<url-pattern>/SWDashboard</url-pattern>
 	</servlet-mapping>
 
 	<!-- Pentaho Servlets -->
@@ -672,6 +639,11 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
+		<servlet-name>ServiceAction</servlet-name>
+		<url-pattern>/ServiceActionService</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
 		<servlet-name>GetImage</servlet-name>
 		<url-pattern>/getImage</url-pattern>
 	</servlet-mapping>
@@ -679,16 +651,6 @@
 	<servlet-mapping>
 		<servlet-name>GetContent</servlet-name>
 		<url-pattern>/GetContent</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>GetMondrianModel</servlet-name>
-		<url-pattern>/GetMondrianModel</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>ShowTestResult</servlet-name>
-		<url-pattern>/ShowTestResult</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
@@ -746,12 +708,14 @@
 		<url-pattern>/UserContent</url-pattern>
 	</servlet-mapping>
 
-	<servlet-mapping>
-		<servlet-name>Map</servlet-name>
-		<url-pattern>/Map</url-pattern>
-	</servlet-mapping>
-
-	<!-- =============================== merged servlet-mappings ============================= -->
+  	<!--   Temporary fix for GWT localization BISERVER-3640 -->
+    <servlet-mapping>
+      <servlet-name>BrowserLocale</servlet-name>
+      <url-pattern>/js/browserLocale.js</url-pattern>
+    </servlet-mapping>
+  	<!--   End BISERVER-3640 -->
+    
+<!-- =============================== merged servlet-mappings ============================= -->
 	<servlet-mapping>
 		<servlet-name>RepositoryTree</servlet-name>
 		<url-pattern>/RepositoryTree</url-pattern>
@@ -773,18 +737,13 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>SampleFlashDashboard</servlet-name>
-		<url-pattern>/SampleFlashDashboard</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
 		<servlet-name>SubscriptionAdmin</servlet-name>
 		<url-pattern>/SubscriptionAdmin</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ManageUsers</servlet-name>
-		<url-pattern>/ManageUsers</url-pattern>
+		<servlet-name>SubscriptionAdmin</servlet-name>
+		<url-pattern>/SubscriptionAdminService</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
@@ -800,6 +759,11 @@
 	<servlet-mapping>
 		<servlet-name>ResetRepository</servlet-name>
 		<url-pattern>/ResetRepository</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>ResetRepository</servlet-name>
+		<url-pattern>/ResetRepositoryService</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
@@ -822,10 +786,48 @@
 		<url-pattern>/SolutionRepositoryService</url-pattern>
 	</servlet-mapping>
 
+    <!-- [BEGIN SAMPLE SERVLET MAPPINGS] -->
 	<servlet-mapping>
-		<servlet-name>NewAnalysisView</servlet-name>
-		<url-pattern>/NewAnalysisView</url-pattern>
+		<servlet-name>UpdateSampleEmails</servlet-name>
+		<url-pattern>/UpdateSampleEmails</url-pattern>
 	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>Widgets</servlet-name>
+		<url-pattern>/Widgets</url-pattern>
+	</servlet-mapping>
+	    
+	<servlet-mapping>
+		<servlet-name>SampleDashboard</servlet-name>
+		<url-pattern>/SampleDashboard</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>ChartSamplesDashboard</servlet-name>
+		<url-pattern>/ChartSamplesDashboard</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>SampleDrill</servlet-name>
+		<url-pattern>/SampleDrill</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>SWDashboard</servlet-name>
+		<url-pattern>/SWDashboard</url-pattern>
+	</servlet-mapping>	
+	
+	<servlet-mapping>
+		<servlet-name>Map</servlet-name>
+		<url-pattern>/Map</url-pattern>
+	</servlet-mapping>	
+
+	<servlet-mapping>
+		<servlet-name>SampleFlashDashboard</servlet-name>
+		<url-pattern>/SampleFlashDashboard</url-pattern>
+	</servlet-mapping>	
+    <!-- [END SAMPLE SERVLET MAPPINGS] -->
+
 	<!-- insert additional servlet mappings -->
 	<session-config>
 		<session-timeout>30</session-timeout>
