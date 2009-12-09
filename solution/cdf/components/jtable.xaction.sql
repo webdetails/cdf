@@ -132,9 +132,6 @@
 			var colHeaders = rsmd.getColumnHeaders() ;
 			var rowHeaders = rsmd.getRowHeaders() ;
 			
-			//ingo: adding count of row headers
-			var rowHeadersCount = rowHeaders[0].length;
-			
 			var colCount = rsmd.getColumnCount() ;
 			var rowCount = query_result.getRowCount() ;
 			
@@ -151,6 +148,7 @@
 						//old 
 						// value.put(rowHeaders[i][0]);
 						//ingo: adding all rowheaders to result set
+						var rowHeadersCount = rowHeaders[0].length;
 						for (k=0; k<rowHeadersCount; k++)
 						{
 							value.put(rowHeaders[i][k]);

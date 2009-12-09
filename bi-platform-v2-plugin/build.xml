@@ -132,11 +132,28 @@
 		  <fail message="plugin.local.install.solutions.dir not set - cannot copy" unless="plugin.local.install.solutions.dir"/>
 
 		  <delete dir="${plugin.local.install.solutions.dir}/system/${plugin.name}"/>
+		  <!-- Copy plugin -->
 		  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}">
 			  <fileset dir="${stage.dir}/${plugin.name}">
 				  <include name="**/*" />
 			  </fileset>
 		  </copy>
+		  
+		  <!-- Copy solution -->
+		  <copy todir="${plugin.local.install.solutions.dir}/">
+			  <fileset dir="${solution.stage.dir}/">
+				  <include name="**/*" />
+			  </fileset>
+		  </copy>
+
+		  <!-- Copy samples -->
+		  <copy todir="${plugin.local.install.solutions.dir}/">
+			  <fileset dir="${samples.stage.dir}/">
+				  <include name="**/*" />
+			  </fileset>
+		  </copy>
+
+
 		  <get src="http://127.0.0.1:8080/pentaho/Publish?publish=now&amp;class=org.pentaho.platform.plugin.services.pluginmgr.PluginAdapter&amp;userid=${plugin.local.install.user}&amp;password=${plugin.local.install.pass}" dest="${stage.dir}/blah.html"/>
 
 	  </target>
