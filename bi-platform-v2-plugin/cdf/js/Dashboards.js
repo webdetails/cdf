@@ -340,7 +340,14 @@ Dashboards.post = function(url,obj){
 
 	var form = '<form action="' + url + '" method="post">';
 	for(o in obj){
-		form += '"<input type="hidden" name="' + o + '" value="' + (typeof obj[o] =='function'? obj[o]():obj[o]) + '"/>';
+
+		var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
+
+		if (typeof v == 'string') {
+			  v = v.replace(/"/g , "\'")
+		}
+
+		form += '"<input type="hidden" name="' + o + '" value="' + v + '"/>';
 	}
 	form += '</form>';
 	jQuery(form).appendTo('body').submit().remove();
