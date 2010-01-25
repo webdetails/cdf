@@ -271,21 +271,14 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 					}
 					else{
 						if (this.url != undefined){
-							cls = "folder";
-							href=this.url;
-						}
-						else if(this.file != undefined){
-							if(this.type == "WCDF")
-								href = webAppPath + "/content/pentaho-cdf-dd/Render?solution=" + this.solution + "&path=" + this.path + "&file=" + this.file;
-							else
-								href = webAppPath + "/content/pentaho-cdf/RenderXCDF?solution=" + this.solution + "&path=" + this.path + "&action=" + this.file;
-						}
-						else{
+							//cls = "folder";
 							cls = "action greybox";
-							href = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.name;
+							href=webAppPath + this.url;
 						}
-						// target = "_new"
-
+						else 
+							{cls = "action greybox";
+							href = webAppPath + this.link;}
+							
 					}
 
 
