@@ -7,14 +7,20 @@ var BaseComponent = Base.extend({
 		getValuesArray : function() {
 		
 			if(typeof(this.queryDefinition) != 'undefined'){
+				
+				var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
+				if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
+					vid = "mdx";
+				}
 				QueryComponent.makeQuery(this);
 				var myArray = new Array();
 				for(p in this.result){	
-					if(this.queryDefinition.queryType != "sql")
-						myArray.push([this.result[p][0],this.result[p][0]]);
-					else
-						myArray.push([this.result[p][0],this.result[p][1]]);
-				}
+					switch(vid){
+						case "sql": myArray.push([this.result[p][0],this.result[p][1]]);break;
+						case "mdx": myArray.push([this.result[p][1],this.result[p][0]]);break;
+						default: myArray.push([this.result[p][0],this.result[p][0]]);break;
+					}
+                                }
 				return myArray;
 			}
 
@@ -336,7 +342,9 @@ var JFreeChartComponent = BaseComponent.extend({
 			chart.attr("class","captify");
 			
 			for(o in captionOptions){
-				var show = captionOptions[o].show == undefined || (typeof captionOptions[o].show=='function'?captionOptions[o].show():captionOptions[o].show) ? true : false; 
+				var show = captionOptions[o].show == undefined || (typeof captionOptions[o].show=='function'?captionOptions[o].show():captionOptions[o].show) ? true : false;
+				
+				if (this.chartDefinition.queryType != "mdx" && captionOptions[o].title == "Details") {show = false;};
 				if(show){
 					var icon = captionOptions[o].icon != undefined ? (typeof captionOptions[o].icon=='function'?captionOptions[o].icon():captionOptions[o].icon) : undefined;
 					var op = icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
