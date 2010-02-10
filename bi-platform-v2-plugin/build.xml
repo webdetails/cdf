@@ -126,7 +126,7 @@
 		    
 		    Installs the plugin locally
 		    ====================================================================-->
-	  <target name="install-plugin" depends="dist-plugin" description="Installs the plugin locally in solution/system/pentaho-cdf">
+	  <target name="install-plugin" depends="dist-solution" description="Installs the plugin locally in solution/system/pentaho-cdf">
 
 
 		  <fail message="plugin.local.install.solutions.dir not set - cannot copy" unless="plugin.local.install.solutions.dir"/>

@@ -326,12 +326,12 @@ Dashboards.serializeValue = function(value){
 	if ($.isArray(value)){
 		var a = new Array(value.length);
 		$.each(value,function(i,val){
-				a[i] = '"' + encode_prepare(val.replace(/"/g,'\\"')) + '"';
+				a[i] = '"' + (typeof(val)=="string"?encode_prepare(val.replace(/"/g,'\\"')):val) + '"';
 			});
 		return "["+a.join(",")+"]";
 	}
 	else{
-		return '"' + encode_prepare(value.replace(/"/g,'\\"')) + '"';
+		return '"' + (typeof(value)=="string"?encode_prepare(value.replace(/"/g,'\\"')):value) + '"';
 	}
 
 }
