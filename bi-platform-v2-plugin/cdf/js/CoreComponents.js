@@ -1202,7 +1202,12 @@ var CommentsComponent = BaseComponent.extend({
 			placeHolder.empty();
 			placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
 			var myself = this;
-			var args = {action: "list", page: this.page, firstResult: this.firstResult, maxResults: this.maxResults};
+			var args = {
+				action: "list",
+				page: this.page,
+				firstResult: this.firstResult,
+				maxResults: this.maxResults + 1 // Add 1 to maxResults for pagination look-ahead
+			};
 			$.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
 					myself.processCommentsList(json);
 				});
@@ -1232,7 +1237,9 @@ var CommentsComponent = BaseComponent.extend({
 
 			// Add comment
 			$(".cdfAddComment",myself.addCommentContainer).bind('click',function(e){
-					var code = $("textarea",myself.addCommentContainer).val();
+					var tarea = $("textarea",myself.addCommentContainer);
+					var code = tarea.val();
+					tarea.val('');
 					var args = {action: "add", page: myself.page, comment: code};
 					$.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
 							myself.processCommentsAdd(json);
@@ -1254,9 +1261,9 @@ var CommentsComponent = BaseComponent.extend({
 			if (json.result.length == 0 ){
 				placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
 			}
-			$.each(json.result,function(i,comment){
-
-				var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
+			$.each(json.result.slice(0,this.maxResults), // We drop the lookahead item, if any
+				function(i,comment){
+					var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
 					placeHolder.append('<dt class="'+ bodyClass +' comment-body"><p>'+comment.comment+'</p></dt>');
 					placeHolder.append('<dl class="ui-widget-header comment-footer ">'+comment.user+ ",  " + comment.createdOn +  '</dl>');
 	
@@ -1269,15 +1276,15 @@ var CommentsComponent = BaseComponent.extend({
 			if(this.firstResult > 0){
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
 				ul.find(".cdfCommentPagePrev").bind("click",function(){
-						myself.firstResult -= 4;
+						myself.firstResult -= this.maxResults;
 						myself.firePageUpdate();
 					});
 			}
-
-			if(this.maxResults == json.result.length){
+			// check if we got a lookahead hit
+			if(this.maxResults < json.result.length) {
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
 				ul.find(".cdfCommentPageNext").bind("click",function(){
-						myself.firstResult += 4;
+						myself.firstResult += this.maxResults;
 						myself.firePageUpdate();
 					});
 			}
