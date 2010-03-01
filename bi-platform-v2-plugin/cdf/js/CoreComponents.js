@@ -1044,9 +1044,7 @@ var TableComponent = BaseComponent.extend({
 			// Clear previous table
 			$("#"+this.htmlObject).empty();
 			var myself = this;
-			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json) {
-					myself.processTableComponentResponse(json.values);
-				});
+			Dashboards.fetchData(cd, this.cdaParams, function(values) {myself.processTableComponentResponse(values);});
 		},
 		processTableComponentResponse : function(json)
 		{
@@ -1357,10 +1355,8 @@ var QueryComponent = BaseComponent.extend({
 				alert("Fatal - No query definition passed");
 				return;
 			}
+			Dashboards.fetchData(cd, object.cdaParams, function(values) {object.result = values;})
 
-			$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd, function(json){
-					object.result = json.values;
-				});
 		}
 	}
 );

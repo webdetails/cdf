@@ -531,6 +531,26 @@ Dashboards.getSettingsValue = function(key,value){
 	$.getJSON("Settings?method=get&key=" + key , callback);
 };
 
+Dashboards.fetchData = function(cd, params, callback) {
+	// Detect and handle CDA data sources
+	if (cd != undefined && cd.dataAccessId != undefined) {
+		for (param in params) {
+			cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
+		}
+		$.getJSON(webAppPath + "/content/cda/doQuery?", cd,
+			function(json) { callback(json);});
+	}
+	// When we're not working with a CDA data source, we default to using jtable to fetch the data...
+	else if (cd != undefined){
+	
+		$.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd,
+			function(json) { callback(json.values);});
+	}
+	// ... or just call the callback when no valid definition is passed
+	else {
+				callback([]);
+	}
+}
 /**
  *
  * UTF-8 data encode / decode
