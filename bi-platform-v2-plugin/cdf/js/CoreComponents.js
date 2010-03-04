@@ -1274,7 +1274,7 @@ var CommentsComponent = BaseComponent.extend({
 			if(this.firstResult > 0){
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
 				ul.find(".cdfCommentPagePrev").bind("click",function(){
-						myself.firstResult -= this.maxResults;
+						myself.firstResult -= myself.maxResults;
 						myself.firePageUpdate();
 					});
 			}
@@ -1282,7 +1282,7 @@ var CommentsComponent = BaseComponent.extend({
 			if(this.maxResults < json.result.length) {
 				ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
 				ul.find(".cdfCommentPageNext").bind("click",function(){
-						myself.firstResult += this.maxResults;
+						myself.firstResult += myself.maxResults;
 						myself.firePageUpdate();
 					});
 			}
