@@ -1302,7 +1302,7 @@ var CommentsComponent = BaseComponent.extend({
 			container.hide();
 			container.insertAfter($("dl:eq(0)",placeHolder));
 			container.show("slow");
-
+                        this.update();
 		}
 	}
 );
