@@ -537,7 +537,7 @@ Dashboards.fetchData = function(cd, params, callback) {
 		for (param in params) {
 			cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
 		}
-		$.getJSON(webAppPath + "/content/cda/doQuery?", cd,
+		executeAjax('json',webAppPath + "/content/cda/doQuery?", cd,
 			function(json) { callback(json);});
 	}
 	// When we're not working with a CDA data source, we default to using jtable to fetch the data...
