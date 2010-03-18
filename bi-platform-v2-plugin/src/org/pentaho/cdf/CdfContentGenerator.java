@@ -361,7 +361,17 @@ public class CdfContentGenerator extends BaseContentGenerator
           "system/" + PLUGIN_NAME + "/default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    dashboardContent = repository.getResourceAsString(resource);
+    // TESTING to localize the template
+    //dashboardContent = repository.getResourceAsString(resource);
+    InputStream is = repository.getResourceInputStream(resource, true);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    StringBuilder sb = new StringBuilder();
+    String line = null;
+    while ((line = reader.readLine()) != null) {
+      sb.append(line + "\n");
+    }
+    is.close();
+    dashboardContent = sb.toString();
 
     intro = intro.replaceAll("\\{load\\}", "onload=\"load()\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
