@@ -15,7 +15,6 @@ commonLibrariesScript=\
 @BASE_URL@/content/pentaho-cdf/js/greybox/AJS.js,\
 @BASE_URL@/content/pentaho-cdf/js/greybox/AJS_fx.js,\
 @BASE_URL@/content/pentaho-cdf/js/greybox/gb_scripts.js,\
-@BASE_URL@/content/pentaho-cdf/js/fgmenu/fg.menu.js,\
 @BASE_URL@/adhoc/js/common/ui/calendar/calendar.js,\
 @BASE_URL@/adhoc/js/common/ui/calendar/calendar-setup.js,\
 @BASE_URL@/adhoc/js/common/ui/calendar/lang/calendar-en.js,\
@@ -27,8 +26,7 @@ commonLibrariesScript=\
 @BASE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
 @BASE_URL@/content/pentaho-cdf/js/json.js,\
 @BASE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
-@BASE_URL@/content/pentaho-cdf/js/captify/captify.js,\
-@BASE_URL@/content/pentaho-cdf/js/protovis-d3.1.js
+@BASE_URL@/content/pentaho-cdf/js/captify/captify.js
 
 commonLibrariesLink=\
 @BASE_URL@/content/pentaho-cdf/js/jquery.tooltip.css,\
@@ -39,7 +37,6 @@ commonLibrariesLink=\
 @BASE_URL@/content/pentaho-cdf/js/greybox/gb_styles.css,\
 @BASE_URL@/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
 @BASE_URL@/content/pentaho-cdf/js/cdf.css,\
-@BASE_URL@/content/pentaho-cdf/js/fgmenu/fg.menu.css,\
 @BASE_URL@/content/pentaho-cdf/js/captify/captify.css
 
 mapScript=\
