@@ -273,7 +273,15 @@ public class CdfContentGenerator extends BaseContentGenerator
 
     final String fullPath = ActionInfo.buildSolutionPath(solution, path, action);
 
+    // Check for access permissions
+
     final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
+    if (repository.getSolutionFile(fullPath, ISolutionRepository.ACTION_EXECUTE) == null)
+    {
+      out.write("Access Denied".getBytes("UTF-8"));
+      return;
+    }
+
     String templateName = null;
     if (repository.resourceExists(fullPath))
     {
@@ -307,7 +315,16 @@ public class CdfContentGenerator extends BaseContentGenerator
       template = "-" + template;
     }
 
+
     final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
+
+    // Check for access permissions
+    if (repository.getSolutionFile(ActionInfo.buildSolutionPath(solution, path, templateName), ISolutionRepository.ACTION_EXECUTE) == null)
+    {
+      out.write("Access Denied".getBytes("UTF-8"));
+      return;
+    }
+
 
     String intro = ""; //$NON-NLS-1$
     String footer = ""; //$NON-NLS-1$
@@ -351,6 +368,7 @@ public class CdfContentGenerator extends BaseContentGenerator
         fullTemplatePath = ActionInfo.buildSolutionPath(solution, path, templateName);
       }
     }
+
 
     if (fullTemplatePath != null && repository.resourceExists(fullTemplatePath))
     {
