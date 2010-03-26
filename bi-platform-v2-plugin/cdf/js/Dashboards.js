@@ -132,7 +132,9 @@ Dashboards.blockUIwithDrag = function() {
 
 Dashboards.update = function(object) {
 	if(!(typeof(object.preExecution)=='undefined')){
-		object.preExecution();
+		var ret = object.preExecution();
+		if (typeof ret != "undefined" && !ret)
+			return; // if preExecution returns false, we'll skip the update
 	}
 	if (object.tooltip != undefined){
 		object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;

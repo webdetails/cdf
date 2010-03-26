@@ -27,7 +27,7 @@ var BaseComponent = Base.extend({
 			var jXML;
 			if ( typeof(this.valuesArray) == 'undefined') {
 				//go through parameter array and update values
-				var p = new Array(this.parameters.length);
+				var p = new Array(this.parameters?this.parameters.length:0);
 				for(var i= 0, len = p.length; i < len; i++){
 					var key = this.parameters[i][0];
 					var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
@@ -88,7 +88,7 @@ var XactionComponent = BaseComponent.extend({
 		  try {
 			if (typeof(this.iframe) == 'undefined' || !this.iframe) {
 				// go through parameter array and update values
-				var p = new Array(this.parameters.length);
+				var p = new Array(this.parameters?this.parameters.length:0);
 				for(var i= 0, len = p.length; i < len; i++){
 					var key = this.parameters[i][0];
 					var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
@@ -825,9 +825,7 @@ var MonthPickerComponent = BaseComponent.extend({
 
 			var year = value.substring(0,4);
 			var month = parseInt(value.substring(5,7) - 1);
-			var d = new Date();
-			d.setMonth(month);
-			d.setYear(year);
+			var d = new Date(year,month,1);
 
 			// rebuild picker
 			var selectHTML = this.getMonthPicker(this.name, this.size, d, this.minDate, this.maxDate, this.months);
@@ -1165,6 +1163,13 @@ var TableComponent = BaseComponent.extend({
 							}
 						})
 				}; //colSortable
+				if(options.colSearchable!=undefined){
+					$.each(options.colSearchable,function(i,val){
+							if (val!=null && ( !val || val == "false" ) ){
+								dtData.aoColumns[i].bSearchable=false
+							}
+						})
+				}; //colSearchable
 				
 			}
 

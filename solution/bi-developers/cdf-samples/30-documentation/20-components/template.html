@@ -47,7 +47,8 @@
 			<dd>For components where user input is required, this is where the input is stored for later use</dd>
 
 			<dt>preExecution/postExecution</dt>
-			<dd>This functions are executed before/after the component is initialized or updated or presented to the user</dd>
+			<dd>This functions are executed before/after the component is initialized or updated or presented to the user.
+			If the preExecution returns false, the component is not updated</dd>
 			
 			<dt>preChange/postChange</dt>
 			<dd>For selectors, before/after the input value is updated, this functions are executed. Useful for validating user input, for instance </dd>
