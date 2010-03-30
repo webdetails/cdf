@@ -91,6 +91,7 @@
 				<options type="list"/>  
 				<title type="string"/>  
 				<url type="string"/>
+				<role type="string"/>
 			</action-outputs>
 			<component-definition> 
 				<viewer><![CDATA[Pivot]]></viewer>  

@@ -508,12 +508,7 @@
 
             if(!list.length) return false;
 
-            var container=list.wrapAll(opt.wrapper).parents(":last").children();
-            // IE seems to wrap the wrapper in a random div wrapper so
-            // drill down to the node in opt.wrapper.
-            var wrapper_tagName=$(opt.wrapper)[0].tagName;
-            for(;container[0] != undefined && container[0].tagName !== wrapper_tagName; container=container.children(':first'));
-
+			var container=list.wrapAll(opt.wrapper).parent();
             var offset=self.offset();
 
             opt.container=container
@@ -538,10 +533,10 @@
 	   });
 	   
 	   button.attr("title","Click it to Apply");
-	   button.hide(0);
+	   button.hide();
 	   
 	   var buttonApplyMessage =$('<div class="applybutton" >' + opt.tooltipMessage + '</div>');
-	   buttonApplyMessage.hide(0);
+	   buttonApplyMessage.hide();
 	   
 	   button.buttonApplyMessage = buttonApplyMessage;
 	  
@@ -565,14 +560,14 @@
 		classHolder = "autobox-hldr-2";
 
       holder=$('<ul class="'+ classHolder + '"></ul>');
+	  self.append(holder);
 	  var li = $('<li class="autobox-input"></li>');
 	  holder.append(li.append(input));
 	   if(opt.multiSellection && opt.applyButton != false){
 		li.append(applyButton[0]);
-		self.append(applyButton[1]);
+		li.append(applyButton[1]);
 	  }
 		
-	  self.append(holder);
 	  $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
 	  
 	  return holder;
