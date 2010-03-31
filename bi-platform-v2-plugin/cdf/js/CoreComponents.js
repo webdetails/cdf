@@ -476,11 +476,11 @@ var TrafficComponent = BaseComponent.extend({
 			Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters, 
 				function(result){ 
 					var value = $(result).find("VALUE").text();
-					var i = $("<img>").attr("src",value<=cd.intervals[0]?TRAFFIC_RED:(value>=cd.intervals[1]?TRAFFIC_GREEN:TRAFFIC_YELLOW));
+					var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
 					$('#'+myself.htmlObject).html(i);
 					
 					if(cd.showValue != undefined && cd.showValue == true){
-						var tooltip = "Value: " + value + " <br /><img align='middle' src='" + TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
+						var tooltip = "Value: " + value + " <br /><img align='middle' src='" + Dashboards.TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + Dashboards.TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + Dashboards.TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:""); 
 						$('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({delay:0,track: true,fade: 250});
 					}
 					
@@ -1343,7 +1343,7 @@ var PivotLinkComponent = BaseComponent.extend({
 			url += parameters.join("&");
 
 			var _href = url.replace(/'/g,"&#39;");
-			GB_show("Pivot Details",_href, $(window).height() - 50 , $(window).width() - 100);
+			$.fancybox({type:"iframe", href:_href, width: $(window).width(), height:$(window).height()});
 		}
 	});
 
@@ -1417,7 +1417,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 			url += parameters.join("&");
 
 			var _href = url.replace(/'/g,"&#39;");
-			GB_show("Report",_href, $(window).height() - 50 , $(window).width() - 100);
+			$.fancybox({type:"iframe", href:_href, width: $(window).width(), height:$(window).height() - 50});
 		}
 
 	});
