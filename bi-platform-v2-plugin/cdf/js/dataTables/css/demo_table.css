@@ -33,21 +33,25 @@
 .dataTables_wrapper {
 	position: relative;
 	min-height: 302px;
-	_height: 302px;
 	clear: both;
+	_height: 302px;
+	zoom: 1; /* Feeling sorry for IE */
 }
 
 .dataTables_processing {
 	position: absolute;
-	top: 0px;
+	top: 50%;
 	left: 50%;
 	width: 250px;
+	height: 30px;
 	margin-left: -125px;
+	margin-top: -15px;
+	padding: 14px 0 2px 0;
 	border: 1px solid #ddd;
 	text-align: center;
 	color: #999;
-	font-size: 11px;
-	padding: 2px 0;
+	font-size: 14px;
+	background-color: white;
 }
 
 .dataTables_length {
@@ -141,16 +145,25 @@ table.display td.center {
  */
 
 .sorting_asc {
-	background: url('../images/sort_asc.jpg') no-repeat center right;
+	background: url('../images/sort_asc.png') no-repeat center right;
 }
 
 .sorting_desc {
-	background: url('../images/sort_desc.jpg') no-repeat center right;
+	background: url('../images/sort_desc.png') no-repeat center right;
 }
 
 .sorting {
-	background: url('../images/sort_both.jpg') no-repeat center right;
+	background: url('../images/sort_both.png') no-repeat center right;
 }
+
+.sorting_asc_disabled {
+	background: url('../images/sort_asc_disabled.png') no-repeat center right;
+}
+
+.sorting_desc_disabled {
+	background: url('../images/sort_desc_disabled.png') no-repeat center right;
+}
+
 
 
 
@@ -165,9 +178,6 @@ table.display tr.odd.gradeA {
 table.display tr.even.gradeA {
 	background-color: #eeffee;
 }
-
-
-
 
 table.display tr.odd.gradeA {
 	background-color: #ddffdd;
@@ -444,4 +454,40 @@ tr.even.gradeU td.sorting_3 {
 
 .ex_highlight #example tbody tr.odd:hover, #example tbody tr.odd td.highlighted {
 	background-color: #E6FF99;
+}
+
+
+/*
+ * KeyTable
+ */
+table.KeyTable td {
+	border: 3px solid transparent;
+}
+
+table.KeyTable td.focus {
+	border: 3px solid #3366FF;
+}
+
+table.display tr.gradeA {
+	background-color: #eeffee;
+}
+
+table.display tr.gradeC {
+	background-color: #ddddff;
+}
+
+table.display tr.gradeX {
+	background-color: #ffdddd;
+}
+
+table.display tr.gradeU {
+	background-color: #ddd;
+}
+
+div.box {
+	height: 100px;
+	padding: 10px;
+	overflow: auto;
+	border: 1px solid #8080FF;
+	background-color: #E5E5FF;
 }

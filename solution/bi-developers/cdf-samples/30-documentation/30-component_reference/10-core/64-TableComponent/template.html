@@ -1,6 +1,4 @@
 <script type="text/javascript"
-	src="GetCDFResource?resource=/bi-developers/cdf-samples/30-documentation/30-component_reference/ui.tabs.js"></script>
-<script type="text/javascript"
 	src="GetCDFResource?resource=/bi-developers/cdf-samples/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
 <div class="shadow">
 
@@ -84,6 +82,12 @@
 			<dt>colWidths</dt> 
 			<dd>The table column widths. Works with percentages or points</dd>
 			
+			<dt>colSortable</dt> 
+			<dd>Array that indicates if the columns are sortable</dd>
+			
+			<dt>colSearchable</dt> 
+			<dd>Array that indicates if the columns are searchable</dd>
+			
 			<dt>paginate</dt> 
 			<dd>Enables or disables pagination. Default: true</dd>
 
@@ -109,7 +113,7 @@
 			<dd>Allows the end user to select the size of a formatted page from a select menu (sizes are 10, 25, 50 and 100). Default: true</dd>
 			
 			<dt>tableStyle</dt> 
-			<dd>The style of the table to render. Possible values: classic and themeroller. Default: themeroller</dd>
+			<dd>The style of the table to render. Possible values: classic and themeroller. Default: classic</dd>
 			
 			<dt>drawCallback</dt> 
 			<dd>Optinal function to be called when a page of the table is rendered. Takes the component object

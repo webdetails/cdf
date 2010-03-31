@@ -2,7 +2,7 @@
 *
 * jquery.sparkline.js
 *
-* v1.4.2
+* v1.5.1
 * (c) Splunk, Inc 
 * Contact: Gareth Watts (gareth@splunk.com)
 * http://omnipotent.net/jquery.sparkline/
@@ -15,7 +15,7 @@
 *
 * License: New BSD License
 * 
-* Copyright (c) 2009, Splunk Inc.
+* Copyright (c) 2010, Splunk Inc.
 * All rights reserved.
 * 
 * Redistribution and use in source and binary forms, with or without modification, 
@@ -49,9 +49,10 @@
 *   $('.sparkline').sparkline();
 * There must be no spaces in the enclosed data set
 *
-* Otherwise values must be an array of numbers
+* Otherwise values must be an array of numbers or null values
 *    <p>Sparkline: <span id="sparkline1">This text replaced if the browser is compatible</span></p>
 *    $('#sparkline1').sparkline([1,4,6,6,8,5,3,5])
+*    $('#sparkline2').sparkline([1,4,6,null,null,5,3,5])
 *
 * For line charts, x values can also be specified:
 *   <p>Sparkline: <span class="sparkline">1:1,2.7:4,3.4:6,5:6,6:8,8.7:5,9:3,10:5</span></p>
@@ -62,8 +63,11 @@
 *   fillColor - Color used to fill in the chart - Set to '' or false for a transparent chart
 *   width - Width of the chart - Defaults to 3 times the number of values in pixels
 *   height - Height of the chart - Defaults to the height of the containing element
-*   chartRangeMin - Specify the minimum value to use for the range of the chart - Defaults to the minimum value supplied
-*   chartRangeMax - Specify the maximum value to use for the range of the chart - Defaults to the maximum value supplied
+*   chartRangeMin - Specify the minimum value to use for the Y range of the chart - Defaults to the minimum value supplied
+*   chartRangeMax - Specify the maximum value to use for the Y range of the chart - Defaults to the maximum value supplied
+*   chartRangeClip - Clip out of range values to the max/min specified by chartRangeMin and chartRangeMax
+*   chartRangeMinX - Specify the minimum value to use for the X range of the chart - Defaults to the minimum value supplied
+*   chartRangeMaxX - Specify the maximum value to use for the X range of the chart - Defaults to the maximum value supplied
 *   composite - If true then don't erase any existing chart attached to the tag, but draw
 *           another chart over the top - Note that width and height are ignored if an
 *           existing chart is detected.
@@ -75,6 +79,7 @@
 *       minSpotColor - If set, color of spot at minimum value
 *       maxSpotColor - If set, color of spot at maximum value
 *       spotRadius - Radius in pixels
+*       lineWidth - Width of line in pixels
 *       normalRangeMin 
 *       normalRangeMax - If set draws a filled horizontal bar between these two values marking the "normal"
 *                      or expected range of values
@@ -84,7 +89,11 @@
 *   bar - Bar chart.  Options:
 *       barColor - Color of bars for postive values
 *       negBarColor - Color of bars for negative values
+*       zeroColor - Color of bars with zero values
+*       nullColor - Color of bars with null values - Defaults to omitting the bar entirely
 *       barWidth - Width of bars in pixels
+*       colorMap - Optional mappnig of values to colors to override the *BarColor values above
+*                  can be an Array of values to control the color of individual bars
 *       barSpacing - Gap between bars in pixels
 *       zeroAxis - Centers the y-axis around zero if true
 *
@@ -95,6 +104,7 @@
 *       barWidth - Width of bars in pixels
 *       barSpacing - Gap between bars in pixels
 *       colorMap - Optional mappnig of values to colors to override the *BarColor values above
+*                  can be an Array of values to control the color of individual bars
 *
 *   discrete - Options:
 *       lineHeight - Height of each line in pixels - Defaults to 30% of the graph height
@@ -215,36 +225,47 @@
             spotRadius : 1.5,
             minSpotColor : '#f80',
             maxSpotColor : '#f80',
+            lineWidth: 1, 
             normalRangeMin : undefined,
             normalRangeMax : undefined,
             normalRangeColor : '#ccc',
             chartRangeMin : undefined,
-            chartRangeMax : undefined
+            chartRangeMax : undefined,
+            chartRangeMinX : undefined,
+            chartRangeMaxX : undefined
         }, options ? options : {});
 
-        var xvalues = [], yvalues = [];
+        var xvalues = [], yvalues = [], yminmax = [];
         for (i=0; i<values.length; i++) {
+            var v = values[i];
             var isstr = typeof(values[i])=='string';
             var isarray = typeof(values[i])=='object' && values[i] instanceof Array;
             var sp = isstr && values[i].split(':');
             if (isstr && sp.length == 2) { // x:y
                 xvalues.push(Number(sp[0]));
                 yvalues.push(Number(sp[1]));
+                yminmax.push(Number(sp[1]));
             } else if (isarray) {
                 xvalues.push(values[i][0]);
                 yvalues.push(values[i][1]);
+                yminmax.push(values[i][1]);
             } else {
                 xvalues.push(i);
-                yvalues.push(Number(values[i]));
+                if (values[i]===null || values[i]=='null') {
+                    yvalues.push(null);
+                } else {
+                    yvalues.push(Number(values[i]));
+                    yminmax.push(Number(values[i]));
+                }
             }
         }
         if (options.xvalues) {
             xvalues = options.xvalues;
         }
 
-        var maxy = Math.max.apply(Math, yvalues);
+        var maxy = Math.max.apply(Math, yminmax);
         var maxyval = maxy;
-        var miny = Math.min.apply(Math, yvalues);
+        var miny = Math.min.apply(Math, yminmax);
         var minyval = miny;
 
         var maxx = Math.max.apply(Math, xvalues);
@@ -258,11 +279,17 @@
             if (options.normalRangeMax>maxy)
                 maxy = options.normalRangeMax;
         }
-        if (options.chartRangeMin!=undefined && options.chartRangeMin<miny) {
+        if (options.chartRangeMin!=undefined && (options.chartRangeClip ||  options.chartRangeMin<miny)) {
             miny = options.chartRangeMin;
         }
-        if (options.chartRangeMax!=undefined && options.chartRangeMax>maxy) {
+        if (options.chartRangeMax!=undefined && (options.chartRangeClip || options.chartRangeMax>maxy)) {
             maxy = options.chartRangeMax;
+        }
+        if (options.chartRangeMinX!=undefined && (options.chartRangeClipX || options.chartRangeMinX<minx)) {
+            minx = options.chartRangeMinX;
+        }
+        if (options.chartRangeMaxX!=undefined && (options.chartRangeClipX || options.chartRangeMaxX>maxx)) {
+            maxx = options.chartRangeMaxX;
         }
         var rangex = maxx-minx == 0 ? 1 : maxx-minx;
         var rangey = maxy-miny == 0 ? 1 : maxy-miny;
@@ -307,20 +334,46 @@
                 target.drawRect(canvas_left, ytop, canvas_width, height, undefined, options.normalRangeColor);
             }
 
-            var path = [ [canvas_left, canvas_top+canvas_height] ];
-            for(var i=0; i<yvalues.length; i++) {
+            var path = [];
+            var paths = [path];
+            for(var i=0, vlen=yvalues.length; i<vlen; i++) {
                 var x=xvalues[i], y=yvalues[i];
-                path.push([canvas_left+Math.round((x-minx)*(canvas_width/rangex)), canvas_top+Math.round(canvas_height-(canvas_height*((y-miny)/rangey)))]);
+                if (y===null) {
+                    if (i) {
+                        if (yvalues[i-1]!==null) {
+                            path = [];
+                            paths.push(path);
+                        }
+                    }
+                } else {
+                    if (y < miny) y=miny;
+                    if (y > maxy) y=maxy;
+                    if (!path.length) {
+                        // previous value was null
+                        path.push([canvas_left+Math.round((x-minx)*(canvas_width/rangex)), canvas_top+canvas_height]);
+                    }
+                    path.push([canvas_left+Math.round((x-minx)*(canvas_width/rangex)), canvas_top+Math.round(canvas_height-(canvas_height*((y-miny)/rangey)))]);
+                }
             }
-            if (options.fillColor) {
-                path.push([canvas_left+canvas_width, canvas_top+canvas_height-1]);
-                target.drawShape(path, undefined, options.fillColor);
-                path.pop();
+            for(var i=0, plen=paths.length; i<plen; i++) {
+                path = paths[i];
+                if (!path.length)
+                    continue; // last value was null
+                if (options.fillColor) {
+                    path.push([path[path.length-1][0], canvas_top+canvas_height-1]);
+                    target.drawShape(path, undefined, options.fillColor);
+                    path.pop();
+                }
+                // if there's only a single point in this path, then we want to display it as a vertical line
+                // which means we keep path[0]  as is
+                if (path.length>2) {
+                    // else we want the first value 
+                    path[0] = [ path[0][0], path[1][1] ];
+                }
+                target.drawShape(path, options.lineColor, undefined, options.lineWidth);
             }
-            path[0] = [ canvas_left, canvas_top+Math.round(canvas_height-(canvas_height*((yvalues[0]-miny)/rangey))) ];
-            target.drawShape(path, options.lineColor);
             if (options.spotRadius && options.spotColor) {
-                target.drawCircle(canvas_left+canvas_width,  canvas_top+Math.round(canvas_height-(canvas_height*((yvalues[vl]-miny)/rangey))), options.spotRadius, undefined, options.spotColor);
+                target.drawCircle(canvas_left+Math.round(xvalues[xvalues.length-1]*(canvas_width/rangex)),  canvas_top+Math.round(canvas_height-(canvas_height*((yvalues[vl]-miny)/rangey))), options.spotRadius, undefined, options.spotColor);
             }
             if (maxy!=minyval) {
                 if (options.spotRadius && options.minSpotColor) {
@@ -339,50 +392,90 @@
     };
 
     $.fn.sparkline.bar = function(values, options, width, height) {
-        values = $.map(values, Number);
         var options = $.extend({
             type : 'bar',
             barColor : '#00f',
             negBarColor : '#f44',
             zeroColor: undefined,
+            nullColor: undefined,
             zeroAxis : undefined,
             barWidth : 4,
             barSpacing : 1,
             chartRangeMax: undefined,
-            chartRangeMin: undefined
+            chartRangeMin: undefined,
+            chartRangeClip: false,
+            colorMap : undefined
         }, options ? options : {});
 
         var width = (values.length * options.barWidth) + ((values.length-1) * options.barSpacing);
-        var max = Math.max.apply(Math, values);
-        var min = Math.min.apply(Math, values);
-        if (options.chartRangeMin!=undefined && options.chartRangeMin<min) {
+        var num_values = [];
+        for(var i=0, vlen=values.length; i<vlen; i++) {
+            if (values[i]=='null' || values[i]===null) {
+                values[i] = null;
+            } else {
+                values[i] = Number(values[i]);
+                num_values.push(Number(values[i]));
+            }
+        }
+        var max = Math.max.apply(Math, num_values);
+        var min = Math.min.apply(Math, num_values);
+        if (options.chartRangeMin!=undefined && (options.chartRangeClip || options.chartRangeMin<min)) {
             min = options.chartRangeMin;
         }
-        if (options.chartRangeMax!=undefined && options.chartRangeMax>max) {
+        if (options.chartRangeMax!=undefined && (options.chartRangeClip || options.chartRangeMax>max)) {
             max = options.chartRangeMax;
         }
         if (options.zeroAxis == undefined) options.zeroAxis = min<0;
         var range = max-min == 0 ? 1 : max-min;
 
-        var target = $(this).simpledraw(width, height);
+        if ($.isArray(options.colorMap)) {
+            var colorMapByIndex = options.colorMap;
+            var colorMapByValue = null;
+        } else {
+            var colorMapByIndex = null;
+            var colorMapByValue = options.colorMap;
+        }
+
+        var target = $(this).simpledraw(width, height, options.composite);
         if (target) {
             var canvas_width = target.pixel_width;
             var canvas_height = target.pixel_height;
             var yzero = min<0 && options.zeroAxis ? canvas_height-Math.round(canvas_height * (Math.abs(min)/range))-1 : canvas_height-1;
 
-            for(var i=0; i<values.length; i++) {
+            for(var i=0, vlen=values.length; i<vlen; i++) {
                 var x = i*(options.barWidth+options.barSpacing);
                 var val = values[i];
-                var color = (val < 0) ? options.negBarColor : options.barColor;
-                if (options.zeroAxis && min<0) {
-                    var height = Math.round(canvas_height*((Math.abs(val)/range)))+1;
-                    var y = (val < 0) ? yzero : yzero-height;
+                if (val===null) {
+                    if (options.nullColor) {
+                        color = options.nullColor;
+                        val = (options.zeroAxis && min<0) ? 0 : min;
+                        var height = 1;
+                        var y = (options.zeroAxis && min<0) ? yzero : canvas_height - height;
+                    } else {
+                        continue;
+                    }
                 } else {
-                    var height = Math.round(canvas_height*((val-min)/range))+1;
-                    var y = canvas_height-height;
-                }
-                if (val==0 && options.zeroColor!=undefined) {
-                    color = options.zeroColor;
+                    if (val < min) val=min;
+                    if (val > max) val=max;
+                    var color = (val < 0) ? options.negBarColor : options.barColor;
+                    if (options.zeroAxis && min<0) {
+                        var height = Math.round(canvas_height*((Math.abs(val)/range)))+1;
+                        var y = (val < 0) ? yzero : yzero-height;
+                    } else {
+                        var height = Math.round(canvas_height*((val-min)/range))+1;
+                        var y = canvas_height-height;
+                    }
+                    if (val==0 && options.zeroColor!=undefined) {
+                        color = options.zeroColor;
+                    }
+                    if (colorMapByValue && colorMapByValue[val]) {
+                        color = colorMapByValue[val];
+                    } else if (colorMapByIndex && colorMapByIndex.length>i) {
+                        color = colorMapByIndex[i];
+                    }
+                    if (color===null) {
+                        continue;
+                    }
                 }
                 target.drawRect(x, y, options.barWidth-1, height-1, color, color);
             }
@@ -405,13 +498,21 @@
 
         var width = (values.length * options.barWidth) + ((values.length-1) * options.barSpacing);
 
-        var target = $(this).simpledraw(width, height);
+        if ($.isArray(options.colorMap)) {
+            var colorMapByIndex = options.colorMap;
+            var colorMapByValue = null;
+        } else {
+            var colorMapByIndex = null;
+            var colorMapByValue = options.colorMap;
+        }
+
+        var target = $(this).simpledraw(width, height, options.composite);
         if (target) {
             var canvas_width = target.pixel_width;
             var canvas_height = target.pixel_height;
             var half_height = Math.round(canvas_height/2);
 
-            for(var i=0; i<values.length; i++) {
+            for(var i=0, vlen=values.length; i<vlen; i++) {
                 var x = i*(options.barWidth+options.barSpacing);
                 if (values[i] < 0) {
                     var y = half_height;
@@ -426,8 +527,13 @@
                     var height = 2;
                     var color = options.zeroBarColor;
                 }
-                if (options.colorMap[values[i]]) {
-                    color = options.colorMap[values[i]];
+                if (colorMapByValue && colorMapByValue[values[i]]) {
+                    color = colorMapByValue[values[i]];
+                } else if (colorMapByIndex && colorMapByIndex.length>i) {
+                    color = colorMapByIndex[i];
+                }
+                if (color===null) {
+                    continue;
                 }
                 target.drawRect(x, y, options.barWidth-1, height-1, color, color);
             }
@@ -444,13 +550,14 @@
             thresholdColor: undefined,
             thresholdValue : 0,
             chartRangeMax: undefined,
-            chartRangeMin: undefined
+            chartRangeMin: undefined,
+            chartRangeClip: false
         }, options);
 
         width = options.width=='auto' ? values.length*2 : width;
         var interval = Math.floor(width / values.length);
 
-        var target = $(this).simpledraw(width, height);
+        var target = $(this).simpledraw(width, height, options.composite);
         if (target) {
             var canvas_width = target.pixel_width;
             var canvas_height = target.pixel_height;
@@ -458,16 +565,18 @@
             var pheight = canvas_height - line_height;
             var min = Math.min.apply(Math, values);
             var max = Math.max.apply(Math, values);
-            if (options.chartRangeMin!=undefined && options.chartRangeMin<min) {
+            if (options.chartRangeMin!=undefined && (options.chartRangeClip || options.chartRangeMin<min)) {
                 min = options.chartRangeMin;
             }
-            if (options.chartRangeMax!=undefined && options.chartRangeMax>max) {
+            if (options.chartRangeMax!=undefined && (options.chartRangeClip  || options.chartRangeMax>max)) {
                 max = options.chartRangeMax;
             }
             var range = max-min;
 
-            for(var i=0; i<values.length; i++) {
+            for(var i=0, vlen=values.length; i<vlen; i++) {
                 var val = values[i];
+                if (val < min) val=min;
+                if (val > max) val=max;
                 var x = (i*interval);
                 var ytop = Math.round(pheight-pheight*((val-min)/range));
                 target.drawLine(x, ytop, x, ytop+line_height, (options.thresholdColor && val < options.thresholdValue) ? options.thresholdColor : options.lineColor);
@@ -493,7 +602,7 @@
         
         width = options.width=='auto' ? '4.0em' : width;
 
-        var target = $(this).simpledraw(width, height);
+        var target = $(this).simpledraw(width, height, options.composite);
         if (target && values.length>1) {
             var canvas_width = target.pixel_width-Math.ceil(options.targetWidth/2);
             var canvas_height = target.pixel_height;
@@ -508,7 +617,7 @@
             var range = max-min;
 
             // draw range values
-            for(i=2; i<values.length; i++) {
+            for(i=2, vlen=values.length; i<vlen; i++) {
                 var rangeval = parseInt(values[i]);
                 var rangewidth = Math.round(canvas_width*((rangeval-min)/range));
                 target.drawRect(0, 0, rangewidth-1, canvas_height-1, options.rangeColors[i-2], options.rangeColors[i-2]);
@@ -539,21 +648,21 @@
 
         width = options.width=='auto' ? height : width;
 
-        var target = $(this).simpledraw(width, height);
+        var target = $(this).simpledraw(width, height, options.composite);
         if (target && values.length>1) {
             var canvas_width = target.pixel_width;
             var canvas_height = target.pixel_height;
                 
             var radius = Math.floor(Math.min(canvas_width, canvas_height)/2);
             var total = 0;
-            for(var i=0; i<values.length; i++)
+            for(var i=0, vlen=values.length; i<vlen; i++)
                 total += values[i];
             var next = 0;
             if (options.offset) {
                 next += (2*Math.PI)*(options.offset/360);
             }
             var circle = 2*Math.PI;
-            for(var i=0; i<values.length; i++) {
+            for(var i=0, vlen=values.length; i<vlen; i++) {
                 var start = next;
                 var end = next;
                 if (total > 0) {  // avoid divide by zero
@@ -598,7 +707,7 @@
 
         minvalue = options.chartRangeMin==undefined ? Math.min.apply(Math, values) : options.chartRangeMin;
         maxvalue = options.chartRangeMax==undefined ? Math.max.apply(Math, values) : options.chartRangeMax;
-        var target = $(this).simpledraw(width, height);
+        var target = $(this).simpledraw(width, height, options.composite);
         if (target && values.length>1) {
             var canvas_width = target.pixel_width;
             var canvas_height = target.pixel_height;
@@ -616,7 +725,7 @@
                 var iqr = q3-q1;
                 if (options.showOutliers) {
                     var lwhisker=undefined, rwhisker=undefined;
-                    for(var i=0; i<values.length; i++) {
+                    for(var i=0, vlen=values.length; i<vlen; i++) {
                         if (lwhisker==undefined && values[i] > q1-(iqr*options.outlierIQR))
                             lwhisker = values[i];
                         if (values[i] < q3+(iqr*options.outlierIQR))
@@ -707,7 +816,7 @@
     // IE doesn't provide an indexOf method for arrays :-(
     if (!Array.prototype.indexOf) {
         Array.prototype.indexOf = function(entry) {
-            for(var i=0; i<this.length; i++) {
+            for(var i=0, vlen=this.length; i<vlen; i++) {
                 if (this[i] == entry)
                     return i;
             }
@@ -739,12 +848,12 @@
             target.vcanvas = this;
         },
 
-        drawShape : function(path, lineColor, fillColor) {
+        drawShape : function(path, lineColor, fillColor, lineWidth) {
             alert('drawShape not implemented');
         },
 
-        drawLine : function(x1, y1, x2, y2, lineColor) {
-            return this.drawShape([ [x1,y1], [x2,y2] ], lineColor);
+        drawLine : function(x1, y1, x2, y2, lineColor, lineWidth) {
+            return this.drawShape([ [x1,y1], [x2,y2] ], lineColor, lineWidth);
         },
 
         drawCircle : function(x, y, radius, lineColor, fillColor) {
@@ -789,21 +898,21 @@
             $(this.canvas).css({width: this.pixel_width, height: this.pixel_height});
         },
 
-        _getContext : function(lineColor, fillColor) {
+        _getContext : function(lineColor, fillColor, lineWidth) {
             var context = this.canvas.getContext('2d');
             if (lineColor != undefined)
                 context.strokeStyle = lineColor;
-            context.lineWidth = 1;
+            context.lineWidth = lineWidth==undefined ? 1 : lineWidth;
             if (fillColor != undefined)
                 context.fillStyle = fillColor;
             return context;
         },
 
-        drawShape : function(path, lineColor, fillColor) {
-            var context = this._getContext(lineColor, fillColor);
+        drawShape : function(path, lineColor, fillColor, lineWidth) {
+            var context = this._getContext(lineColor, fillColor, lineWidth);
             context.beginPath();
             context.moveTo(path[0][0]+0.5, path[0][1]+0.5);
-            for(var i=1; i<path.length; i++) {
+            for(var i=1, plen=path.length; i<plen; i++) {
                 context.lineTo(path[i][0]+0.5, path[i][1]+0.5); // the 0.5 offset gives us crisp pixel-width lines
             }
             if (lineColor != undefined) {
@@ -871,13 +980,14 @@
             this.group = $(this.canvas).children()[0];
         },
 
-        drawShape : function(path, lineColor, fillColor) {
+        drawShape : function(path, lineColor, fillColor, lineWidth) {
             var vpath = [];
-            for(var i=0; i<path.length; i++) {
+            for(var i=0, plen=path.length; i<plen; i++) {
                 vpath[i] = ''+(path[i][0])+','+(path[i][1]);
             }
             var initial = vpath.splice(0,1);
-            var stroke = lineColor == undefined ? ' stroked="false" ' : ' strokeWeight="1" strokeColor="'+lineColor+'" ';
+            lineWidth = lineWidth == undefined ? 1 : lineWidth;
+            var stroke = lineColor == undefined ? ' stroked="false" ' : ' strokeWeight="'+lineWidth+'" strokeColor="'+lineColor+'" ';
             var fill = fillColor == undefined ? ' filled="false"' : ' fillColor="'+fillColor+'" filled="true" ';
             var closed = vpath[0] == vpath[vpath.length-1] ? 'x ' : '';
             var vel = '<v:shape coordorigin="0 0" coordsize="'+this.pixel_width+' '+this.pixel_height+'" '
@@ -915,6 +1025,10 @@
             var starty = y + Math.round(Math.sin(startAngle) * radius);
             var endx = x + Math.round(Math.cos(endAngle) * radius);
             var endy = y + Math.round(Math.sin(endAngle) * radius);
+
+            // Prevent very small slices from being mistaken as a whole pie
+            if (startx==endx && starty==endy && (endAngle-startAngle) < Math.PI)
+                return;
 
             var vpath = [  x-radius, y-radius, x+radius, y+radius, startx, starty, endx, endy ]; 
             var stroke = lineColor == undefined ? ' stroked="false" ' : ' strokeWeight="1" strokeColor="'+lineColor+'" ';

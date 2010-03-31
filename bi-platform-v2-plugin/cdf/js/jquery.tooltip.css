@@ -1,6 +1,6 @@
 #tooltip {
 	position: absolute;
-	z-index: 30000;
+	z-index: 3000;
 	border: 1px solid #111;
 	background-color: #eee;
 	padding: 5px;
