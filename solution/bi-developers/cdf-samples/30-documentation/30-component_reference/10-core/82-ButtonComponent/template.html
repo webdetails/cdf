@@ -5,11 +5,11 @@
 
 	<div class="contents">
 
-		<h2>ExecuteXactionComponent</h2>
+		<h2>ButtonComponent</h2>
 
 		<h3>Description</h3>
 		<p>
-		Excecutes a Action Sequence and displays the result on a new pop-up window.
+		Generates a button to execute a custom command
 		</p>
 
 		<h3>Options</h3>
@@ -19,42 +19,26 @@
 			<dd>The name of the component</dd>
 
 			<dt>type</dt>
-			<dd><code>executeXaction</code></dd>
+			<dd><code>button</code></dd>
 
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
 
-			<dt>parameters</dt>
-			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
-
-			<dt>solution</dt>
-			<dd>Solution where the xaction is</dd>
-
-			<dt>path</dt>
-			<dd>Path where the xaction file is</dd>
-
-			<dt>action</dt>
-			<dd>Xaction file name</dd>
 
 			<dt>htmlObject</dt>
-			<dd>Id of the component (usually a div or a span tag) to be replaced by the result. It can point to a button or link</dd>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
 
 			<dt>label</dt>
 			<dd>Text to be used on the generated button (only used if htmlObject points to a div/span)</dd>
+
+			<dt>action</dt>
+			<dd>javascript code to be executed</dd>
 
 			<dt>executeAtStart</dt>
 			<dd>True to execute the component at start, false otherwise</dd>
 
 			<dt>tooltip</dt>
 			<dd>Tooltip to be displayed when mouse hovers</dd>
-
-
-			<dt>preChange</dt>
-			<dd><i>Function - </i> Function to be called before the xaction is exectuded. The xaction will be executed only if the result of preChange equals true.</dd>
-
-			<dt>postChange</dt>
-			<dd><i>Function - </i> Function to be called after the xaction is exectuded</dd>
-
 
 		</dl>
 
@@ -68,7 +52,7 @@
 			</ul>
 			<div id="sample">
 
-					<span id="sampleObject">Execute Xaction</span>
+				<span id="sampleObject"/>
 
 			</div>
 
@@ -78,14 +62,11 @@
 var executeTopTenCustomers = 
 {
   name: "executeTopTenCustomers",
-  type: "ExecuteXaction",
-  solution: "bi-developers",
-  path: "cdf-samples/20-samples/home_dashboard",
-  action: "topTenCustomers.xaction",
+  type: "Button",
   listeners:["productLine", "territory"],
-  parameters: [["productLine", null], ["territory", null]],
   htmlObject: "sampleObject",
-  label: "Execute XAction",
+  label: "A button",
+  action: function(){alert('Button was clicked')},
   executeAtStart: true,
   preChange: function(){return true;},
   postChange: function(){return true;},

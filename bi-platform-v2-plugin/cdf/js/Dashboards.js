@@ -1,6 +1,7 @@
 $.ajaxSetup({
 		type: "POST",
-		async: false
+		async: false,
+		traditional: true
 	});
 
 var pathArray = window.location.pathname.split( '/' );
