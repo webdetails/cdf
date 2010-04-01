@@ -1067,8 +1067,13 @@ var TableComponent = BaseComponent.extend({
 				}
 
 			};
-
-			dtData.aaData = json;
+                        // We need to make sure we're getting data from the right place,
+                        // depending on whether we're using CDA
+                        if (this.cd.DataAccessId != undefined) {
+			    dtData.aaData = json.resultset;
+                        } else {
+			    dtData.aaData = json;
+                        }
 			$("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
 			this.dataTable = $("#"+this.htmlObject+'Table').dataTable( dtData );
 
