@@ -1069,7 +1069,7 @@ var TableComponent = BaseComponent.extend({
 			};
                         // We need to make sure we're getting data from the right place,
                         // depending on whether we're using CDA
-                        if (this.cd.DataAccessId != undefined) {
+                        if (cd.dataAccessId != undefined) {
 			    dtData.aaData = json.resultset;
                         } else {
 			    dtData.aaData = json;
