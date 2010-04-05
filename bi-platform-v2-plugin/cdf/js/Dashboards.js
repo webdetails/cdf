@@ -534,9 +534,14 @@ Dashboards.getSettingsValue = function(key,value){
 	$.getJSON("Settings?method=get&key=" + key , callback);
 };
 
-Dashboards.fetchData = function(cd, params, callback) {
+Dashboards.fetchData = function(settings, params, callback) {
 	// Detect and handle CDA data sources
-	if (cd != undefined && cd.dataAccessId != undefined) {
+	if (settings != undefined && settings.dataAccessId != undefined) {
+                cd = {};
+                cd.dataAccessId = settings.dataAccessId;
+                cd.path = settings.path;
+                cd.file = settings.file;
+                cd.solution = settings.solution;
 		for (param in params) {
 			cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
 		}
