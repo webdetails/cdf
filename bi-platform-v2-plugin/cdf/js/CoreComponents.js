@@ -6,7 +6,10 @@ var BaseComponent = Base.extend({
 		},
 		getValuesArray : function() {
 		
-			if(typeof(this.queryDefinition) != 'undefined'){
+		
+			var jXML;
+			if ( typeof(this.valuesArray) == 'undefined') {
+	if(typeof(this.queryDefinition) != 'undefined'){
 				
 				var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
 				if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
@@ -22,10 +25,8 @@ var BaseComponent = Base.extend({
 					}
                                 }
 				return myArray;
-			}
+			} else {
 
-			var jXML;
-			if ( typeof(this.valuesArray) == 'undefined') {
 				//go through parameter array and update values
 				var p = new Array(this.parameters?this.parameters.length:0);
 				for(var i= 0, len = p.length; i < len; i++){
@@ -47,7 +48,7 @@ var BaseComponent = Base.extend({
 				}
 				//transform the result int a javascript array
 				var myArray = this.parseArray(jXML, false);
-				return myArray;
+				return myArray; }
 			} else {
 				return this.valuesArray
 			}
