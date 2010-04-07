@@ -8,7 +8,7 @@ var BaseComponent = Base.extend({
 		
 		
 			var jXML;
-			if ( typeof(this.valuesArray) == 'undefined') {
+			if ( typeof(this.valuesArray) == 'undefined' || this.valuesArray.length == 0) {
 	if(typeof(this.queryDefinition) != 'undefined'){
 				
 				var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
