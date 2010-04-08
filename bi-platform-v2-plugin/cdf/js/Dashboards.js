@@ -99,6 +99,10 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 		  }
 	}
 	
+	var clearQueue = function(){
+		if(refreshQueue.length > 0) refreshQueue.splice(0,refreshQueue.length);
+	}
+	
 	//binary search for elem's position in coll (nextRefresh asc order)
 	var getSortedInsertPosition = function(coll, elem){
 		var high = coll.length - 1;
@@ -171,11 +175,14 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 			//set a component's refresh period and clears it from the queue if there;
 			//processComponent must be called to activate the refresh timer for the component
 			registerComponent : function(component, refreshPeriod){
+				if(!component) return false;
+				
 				component.refreshPeriod = (refreshPeriod > 0)? refreshPeriod : NO_REFRESH;
 				var wasFirst =  isFirstInQueue(component);
 				clearFromQueue(component);
 				if(wasFirst) restartTimer();
-				return true;//dbg
+				
+				return true;
 			},
 			
 			getRefreshPeriod : function(component){
@@ -190,8 +197,9 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 				return true;//dbg
 			},
 			
-			//sets next refresh for all components, restarts timer 
+			//clears queue, sets next refresh for all components, restarts timer 
 			processComponents : function(){
+				clearQueue();
 				for(var i=0; i<Dashboards.components.length;i++){
 					insertInQueue(Dashboards.components[i]);
 				}
