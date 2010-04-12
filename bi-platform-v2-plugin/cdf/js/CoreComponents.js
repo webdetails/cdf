@@ -8,7 +8,7 @@ var BaseComponent = Base.extend({
 		
 		
 			var jXML;
-			if ( typeof(this.valuesArray) == 'undefined' || this.valuesArray.length == 0) {
+			if ( typeof(this.valuesArray) == 'undefined') {
 	if(typeof(this.queryDefinition) != 'undefined'){
 				
 				var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
@@ -1431,7 +1431,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 var ButtonComponent = BaseComponent.extend({
 		update : function() {
 			$("#"+ this.htmlObject).empty().append("<button/>").button().text(this.label).unbind("click").bind("click", this.action);
-		},
+		}
 	});
 
 var PrptComponent = BaseComponent.extend({
