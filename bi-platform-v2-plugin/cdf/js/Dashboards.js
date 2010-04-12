@@ -229,7 +229,10 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 			fireGlobalRefresh: function(){
 				for(i=0;i<Dashboards.components.length;i++){
 					var comp = Dashboards.components[i];
-					if( !(comp.refreshPeriod > 0)) refreshComponent(comp); 
+					if (!(comp.refreshPeriod > 0) //only update those without refresh 
+						&& comp.type != "select") { //and that are not pov widgets
+						refreshComponent(comp);
+					} 
 				}
 			},
 			
