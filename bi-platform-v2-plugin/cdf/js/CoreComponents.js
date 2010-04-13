@@ -8,8 +8,8 @@ var BaseComponent = Base.extend({
 		
 		
 			var jXML;
-			if ( typeof(this.valuesArray) == 'undefined') {
-	if(typeof(this.queryDefinition) != 'undefined'){
+			if ( typeof(this.valuesArray) == 'undefined' || this.valuesArray.length == 0) {
+                        if(typeof(this.queryDefinition) != 'undefined'){
 				
 				var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
 				if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
@@ -50,12 +50,12 @@ var BaseComponent = Base.extend({
 				var myArray = this.parseArray(jXML, false);
 				return myArray; }
 			} else {
-				return this.valuesArray
+				return this.valuesArray;
 			}
 		},
 		parseArray : function(jData,includeHeader){
 
-			if(jData == null){
+			if(jData === null){
 				return []; //we got an error...
 			}
 
@@ -65,7 +65,7 @@ var BaseComponent = Base.extend({
 			if (includeHeader && jHeaders.size() > 0 ){
 				var _a = new Array();
 				jHeaders.each(function(){
-						_a.push($(this).text())
+						_a.push($(this).text());
 					});
 				myArray.push(_a);
 			}
@@ -75,7 +75,7 @@ var BaseComponent = Base.extend({
 					var _a = new Array();
 					$(this).children("DATA-ITEM").each(function(){
 							_a.push($(this).text());
-						})
+						});
 					myArray.push(_a);
 				});
 
