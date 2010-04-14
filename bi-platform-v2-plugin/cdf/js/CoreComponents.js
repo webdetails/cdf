@@ -1431,7 +1431,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
 var ButtonComponent = BaseComponent.extend({
 		update : function() {
-			$("<button/>").text(this.label).unbind("click").bind("click", this.action).button().appendTo($("#"+ this.htmlObject).empty());
+			$("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
 		}
 	});
 

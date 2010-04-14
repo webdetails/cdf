@@ -31,7 +31,7 @@
 			<dt>label</dt>
 			<dd>Text to be used on the generated button (only used if htmlObject points to a div/span)</dd>
 
-			<dt>action</dt>
+			<dt>exoression</dt>
 			<dd>javascript code to be executed</dd>
 
 			<dt>executeAtStart</dt>
@@ -66,7 +66,7 @@ var executeTopTenCustomers =
   listeners:["productLine", "territory"],
   htmlObject: "sampleObject",
   label: "A button",
-  action: function(){alert('Button was clicked')},
+  expression: function(){alert('Button was clicked')},
   executeAtStart: true,
   preChange: function(){return true;},
   postChange: function(){return true;},
