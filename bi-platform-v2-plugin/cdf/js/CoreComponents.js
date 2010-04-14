@@ -1068,13 +1068,13 @@ var TableComponent = BaseComponent.extend({
 				}
 
 			};
-                        // We need to make sure we're getting data from the right place,
-                        // depending on whether we're using CDA
-                        if (cd.dataAccessId != undefined) {
-			    dtData.aaData = json.resultset;
-                        } else {
-			    dtData.aaData = json;
-                        }
+			// We need to make sure we're getting data from the right place,
+			// depending on whether we're using CDA
+			if (cd.dataAccessId != undefined) {
+				dtData.aaData = json.resultset;
+			} else {
+				dtData.aaData = json;
+			}
 			$("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
 			this.dataTable = $("#"+this.htmlObject+'Table').dataTable( dtData );
 
@@ -1388,8 +1388,9 @@ var ExecuteXactionComponent = BaseComponent.extend({
 			var o = $("#"+ this.htmlObject);
 			if ($.inArray(["SPAN","DIV"],o[0].tagName)){
 				// create a button
-				o = o.empty().append("<button/>");
-				if (this.label != undefined) o.text(this.label);
+				o = $("<button/>").appendTo(o.empty());
+        if (o[0].tagName=="DIV") o.wrap("<span/>");
+        if (this.label != undefined) o.text(this.label);
 				o.button();
 			}
 			o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
@@ -1430,7 +1431,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
 var ButtonComponent = BaseComponent.extend({
 		update : function() {
-			$("#"+ this.htmlObject).empty().append("<button/>").button().text(this.label).unbind("click").bind("click", this.action);
+			$("<button/>").text(this.label).unbind("click").bind("click", this.action).button().appendTo($("#"+ this.htmlObject).empty());
 		}
 	});
 
