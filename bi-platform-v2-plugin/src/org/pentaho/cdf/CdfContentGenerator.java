@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
@@ -77,6 +78,9 @@ public class CdfContentGenerator extends BaseContentGenerator
   private static final String MIME_HTML = "text/xml";
   private static final String MIME_CSS = "text/css";
   private static final String MIME_JS = "text/javascript";
+  private static final String MIME_PLAIN = "text/plain";
+  private static final String MIME_CSV = "text/csv";
+  private static final String MIME_XLS = "application/vnd.ms-excel";
 
 
   // CDF Resource BaseURL
@@ -193,16 +197,29 @@ public class CdfContentGenerator extends BaseContentGenerator
 
     final JSONObject context = new JSONObject();
     Calendar cal = Calendar.getInstance();
-    context.put("serverDate", cal.getTime().getTime());
-    context.put("serverTimeZone", cal.getTimeInMillis());
+    context.put("serverLocalDate", cal.getTimeInMillis());
+    context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
+    context.put("user", userSession.getName());
+    context.put("roles", PentahoSystem.getUserDetailsRoleListService().getRolesForUser(userSession.getName()));
+
+    JSONObject params = new JSONObject();
+
+    Iterator it = requestParams.getParameterNames();
+    while (it.hasNext())
+    {
+      String p = (String) it.next();
+      if(p.indexOf("parameters") == 0){
+        params.put(p.substring(5), requestParams.getParameter(p));
+      }
+    }
+    context.put("params",params);
 
     final StringBuilder s = new StringBuilder();
     s.append("<script language=\"javascript\" type=\"text/javascript\">\n");
     s.append("  Dashboards.context = ");
     s.append(context.toString(2) + "\n");
     s.append("</script>");
-
-    setResponseHeaders(MIME_JS,0,null);
+    // setResponseHeaders(MIME_PLAIN,0,null);
     out.write(s.toString().getBytes("UTF-8"));
 
   }
@@ -221,7 +238,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
 
     final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
-    renderXCDFDashboard(out, solution, path, action, template);
+    renderXCDFDashboard(requestParams, out, solution, path, action, template);
   }
 
   private void jsonSolution(final OutputStream out,
@@ -273,7 +290,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
     final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
     final String templateName = requestParams.getStringParameter("dashboard", null);
-    renderHtmlDashboard(out, solution, path, templateName == null ? "template.html" : templateName, template);
+    renderHtmlDashboard(requestParams, out, solution, path, templateName == null ? "template.html" : templateName, template);
   }
 
   private void returnResource(final String urlPath,
@@ -294,7 +311,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     getContent(urlPath, out, this);
   }
 
-  public void renderXCDFDashboard(final OutputStream out,
+  public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out,
                                   final String solution,
                                   final String path,
                                   final String action,
@@ -326,10 +343,10 @@ public class CdfContentGenerator extends BaseContentGenerator
         template = XmlDom4JHelper.getNodeText("/cdf/style", doc);
       }
     }
-    renderHtmlDashboard(out, solution, path, templateName, template);
+    renderHtmlDashboard(requestParams, out, solution, path, templateName, template);
   }
 
-  public void renderHtmlDashboard(final OutputStream out,
+  public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
                                   final String solution,
                                   final String path,
                                   final String templateName,
@@ -492,13 +509,19 @@ public class CdfContentGenerator extends BaseContentGenerator
     {
       logger.debug("*** Finish: " + (new Date().getTime() - startDate.getTime()));
     }
-    final PrintWriter pw = new PrintWriter(out);
-    pw.println(intro);
-    pw.println("<div id=\"dashboardContent\">");
-    pw.println(dashboardContent);
-    pw.println("</div>");
-    pw.println(footer);
-    pw.flush();
+
+    out.write(intro.getBytes("UTF-8"));
+
+    // Add context
+    generateContext(requestParams, out);
+
+    out.write("<div id=\"dashboardContent\">".getBytes("UTF-8"));
+    out.write(dashboardContent.getBytes("UTF-8"));
+    out.write("</div>".getBytes("UTF-8"));
+    out.write(footer.getBytes("UTF-8"));
+
+    
+    setResponseHeaders(MIME_HTML,0,null);
   }
 
   private void exportFile(final IParameterProvider requestParams, final IOutputHandler outputHandler)
@@ -515,7 +538,16 @@ public class CdfContentGenerator extends BaseContentGenerator
 
         final String exportType = requestParams.getStringParameter("exportType", "excel");
 
-        final Export export = exportType.equals("csv") ? new ExportCSV(outputHandler) : new ExportExcel(outputHandler);
+        Export export ;
+
+        if(exportType.equals("csv")){
+          export = new ExportCSV(outputHandler);
+          setResponseHeaders(MIME_CSV,0,"export.csv");
+        }
+        else{
+          export = new ExportExcel(outputHandler);
+          setResponseHeaders(MIME_XLS,0,"export.xls");
+        }
 
         export.exportFile(new JSONObject(out.toString()));
       }
