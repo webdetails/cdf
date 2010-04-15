@@ -142,10 +142,10 @@ var XactionComponent = BaseComponent.extend({
 var SelectBaseComponent = BaseComponent.extend({
 		visible: false,
 		update : function() {
+			var ph = $("#"+this.htmlObject);
 			var myArray = this.getValuesArray();
 
 			selectHTML = "<select";
-			selectHTML += " id='" + this.name + "'";
 
 			// set size
 			if (this.size != undefined){
@@ -178,16 +178,16 @@ var SelectBaseComponent = BaseComponent.extend({
 			selectHTML += "</select>";
 
 			// update the placeholder
-			$("#"+this.htmlObject).html(selectHTML);
+			ph.html(selectHTML);
 			var currentVal = Dashboards.getParameterValue(this.parameter);
 			currentVal = typeof currentVal == 'function' ? currentVal(): currentVal;
 			if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
 				Dashboards.setParameter(this.parameter, firstVal);
 			} else {
-				$("#"+this.name).val(currentVal);
+				$("select",ph).val(currentVal);
 			}
 			var myself = this;
-			$("#"+this.name).change(function() {
+			$("select",ph).change(function() {
 					Dashboards.processChange(myself.name);
 				});
 		}
@@ -195,13 +195,13 @@ var SelectBaseComponent = BaseComponent.extend({
 
 var SelectComponent = SelectBaseComponent.extend({
 		getValue : function() {
-			return $("#"+this.name).val();
+			return $("#"+this.htmlObject + " > select").val();
 		}
 	});
 
 var SelectMultiComponent = SelectBaseComponent.extend({
 		getValue : function() {
-			return $("#"+this.name).val();
+			return $("#"+this.htmlObject + " > select").val();
 		}
 	});
 
