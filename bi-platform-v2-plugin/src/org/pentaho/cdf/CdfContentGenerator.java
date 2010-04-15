@@ -1,15 +1,16 @@
 package org.pentaho.cdf;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.security.InvalidParameterException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -64,14 +65,19 @@ public class CdfContentGenerator extends BaseContentGenerator
   private static final String MIMETYPE = "text/html"; //$NON-NLS-1$
 
   // Possible actions
-  public static final String RENDER_HTML = "/RenderHTML";
-  public static final String RENDER_XCDF = "/RenderXCDF";
-  public static final String JSON_SOLUTION = "/JSONSolution"; //$NON-NLS-1$
-  public static final String GET_CDF_RESOURCE = "/GetCDFResource"; //$NON-NLS-1$
-  public static final String EXPORT = "/Export"; //$NON-NLS-1$
-  public static final String SETTINGS = "/Settings"; //$NON-NLS-1$
-  public static final String CALLACTION = "/CallAction"; //$NON-NLS-1$
-  public static final String COMMENTS = "/Comments"; //$NON-NLS-1$
+  private static final String RENDER_HTML = "/RenderHTML";
+  private static final String RENDER_XCDF = "/RenderXCDF";
+  private static final String JSON_SOLUTION = "/JSONSolution"; //$NON-NLS-1$
+  private static final String GET_CDF_RESOURCE = "/GetCDFResource"; //$NON-NLS-1$
+  private static final String EXPORT = "/Export"; //$NON-NLS-1$
+  private static final String SETTINGS = "/Settings"; //$NON-NLS-1$
+  private static final String CALLACTION = "/CallAction"; //$NON-NLS-1$
+  private static final String COMMENTS = "/Comments"; //$NON-NLS-1$
+  private static final String CONTEXT = "/Context"; //$NON-NLS-1$
+  private static final String MIME_HTML = "text/xml";
+  private static final String MIME_CSS = "text/css";
+  private static final String MIME_JS = "text/javascript";
+
 
   // CDF Resource BaseURL
   private static final String BASE_URL_TAG = "@BASE_URL@";
@@ -169,6 +175,10 @@ public class CdfContentGenerator extends BaseContentGenerator
     {
       processComments(requestParams, out);
     }
+    else if (urlPath.equals(CONTEXT))
+    {
+      generateContext(requestParams, out);
+    }
     else
     {
       // we'll be providing the actual content with cache
@@ -177,6 +187,26 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
 
   }
+
+  private void generateContext(final IParameterProvider requestParams, final OutputStream out) throws Exception
+  {
+
+    final JSONObject context = new JSONObject();
+    Calendar cal = Calendar.getInstance();
+    context.put("serverDate", cal.getTime().getTime());
+    context.put("serverTimeZone", cal.getTimeInMillis());
+
+    final StringBuilder s = new StringBuilder();
+    s.append("<script language=\"javascript\" type=\"text/javascript\">\n");
+    s.append("  Dashboards.context = ");
+    s.append(context.toString(2) + "\n");
+    s.append("</script>");
+
+    setResponseHeaders(MIME_JS,0,null);
+    out.write(s.toString().getBytes("UTF-8"));
+
+  }
+
 
   private void renderXcdf(final OutputStream out, final IParameterProvider requestParams) throws Exception
   {
@@ -387,7 +417,8 @@ public class CdfContentGenerator extends BaseContentGenerator
     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     StringBuilder sb = new StringBuilder();
     String line = null;
-    while ((line = reader.readLine()) != null) {
+    while ((line = reader.readLine()) != null)
+    {
       sb.append(line + "\n");
     }
     is.close();
@@ -657,4 +688,26 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
     in.close();
   }
+
+
+  private void setResponseHeaders(final String mimeType, final int cacheDuration , final String attachmentName)
+  {
+    // Make sure we have the correct mime type
+    final HttpServletResponse response = (HttpServletResponse) parameterProviders.get("path").getParameter("httpresponse");
+    response.setHeader("Content-Type", mimeType);
+
+    if (attachmentName != null)
+    {
+      response.setHeader("content-disposition", "attachment; filename=" + attachmentName);
+    }
+
+    // Cache?
+    if (cacheDuration > 0){
+      response.setHeader("Cache-Control", "max-age=" + cacheDuration);
+    }else{
+      response.setHeader("Cache-Control", "max-age=0, no-store");
+    }
+  }
+
+
 }
