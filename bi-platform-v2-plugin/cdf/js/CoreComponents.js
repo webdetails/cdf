@@ -1486,7 +1486,7 @@ var PrptComponent = BaseComponent.extend({
 			for (var i = 0; i < thisComponent.parameters.length; i++) {
 				var paramId = null;
 				if(thisComponent.paramExtraInfo == undefined){
-					paramId = this.parameters[i][1];
+          			paramId = this.parameters[i][0];
 				} else if (i == 0 && typeof(thisComponent.paramExtraInfo.id) != "undefined") {
 					paramId = thisComponent.paramExtraInfo.id;
 				} else {
@@ -1540,6 +1540,7 @@ var PrptComponent = BaseComponent.extend({
 			//default settings
 			var showParameters = false;
 			var myPaginate = true;
+			var autoSubmit = true;
 
 			//set to defined values
 			if (this.paginate != undefined) {
@@ -1550,11 +1551,20 @@ var PrptComponent = BaseComponent.extend({
 				showParameters = this.showParameters;
 			}
 
+			if (this.autoSubmit != undefined) {
+			  autoSubmit = this.autoSubmit;
+			}
 
-			var options = '&showParameters='+showParameters+'&paginate='+myPaginate;
+			var options = '&autoSubmit='+autoSubmit+'&showParameters='+showParameters+'&paginate='+myPaginate;
 			return options;
 		},
 		type : "PrptComponent",
-		executeAtStart : true,
+		startOptions : function() {
+			var executeAtStart = true;
+
+			if (this.executeAtStart != undefined) {
+				executeAtStart = this.executeAtStart ;
+			}
+		},
 		iconImgSrc : '../images/file.png'
 	});
