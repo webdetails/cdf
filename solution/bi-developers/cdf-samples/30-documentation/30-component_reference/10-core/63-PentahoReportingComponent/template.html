@@ -68,7 +68,7 @@
 				<li><a href="#code"><span>Code</span></a></li>
 			</ul>
 			<div id="sample">
-
+				<div id="selectorObject"></div>
 				<div id="sampleObject"></div>
 				<br/>
 			</div>
@@ -77,15 +77,31 @@
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
 
+
+output_type = "";
+
+outputSelector = 
+{
+	name: "outputSelector",
+	type: "select",
+	parameters:[],
+	valuesArray:[["text/html","HTML"],["application/pdf","PDF"]],
+	parameter:"output_type",
+	valueAsId: false,
+	htmlObject: "selectorObject",
+	executeAtStart: true,
+	postChange:function(){}
+};
+
 orderStatusReport = 
 {
   name: "orderStatus",
   type: "prpt",
   solution: "steel-wheels",
   path: "reports",
-  action: "Order Status.prpt",
-  listeners:[],
-  parameters: [],
+  action: "Sales Summary.prpt",
+  listeners:["output_type"],
+  parameters: [["output-type","output_type"]],
   htmlObject: "sampleObject",
   paginate: false,
   showParameters: true,
@@ -93,7 +109,9 @@ orderStatusReport =
   postExecution:function(){}
 }
 
-Dashboards.init([orderStatusReport]);
+Dashboards.init([outputSelector,orderStatusReport]);
+					
+Dashboards.init([outputSelector,orderStatusReport]);
 					</textarea>
 					<br />
 					<button onclick="evaluateCode(true)">Try me</button>

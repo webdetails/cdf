@@ -1486,8 +1486,9 @@ var PrptComponent = BaseComponent.extend({
 			for (var i = 0; i < thisComponent.parameters.length; i++) {
 				var paramId = null;
 				if(thisComponent.paramExtraInfo == undefined){
-          			paramId = this.parameters[i][0];
-				} else if (i == 0 && typeof(thisComponent.paramExtraInfo.id) != "undefined") {
+<<<<<<< .mine          			paramId = this.parameters[i][0];
+=======          paramId = this.parameters[i][0];
+>>>>>>> .theirs				} else if (i == 0 && typeof(thisComponent.paramExtraInfo.id) != "undefined") {
 					paramId = thisComponent.paramExtraInfo.id;
 				} else {
 					paramId = thisComponent.paramExtraInfo[i].id;
