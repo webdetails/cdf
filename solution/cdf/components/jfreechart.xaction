@@ -401,6 +401,18 @@
 			</sources>
 			<default-value>false</default-value>
 		</MARKERSVISIBLE>
+		<LINEWIDTH type="string">
+			<sources>
+				<request>lineWidth</request>
+			</sources>
+			<default-value>1.5</default-value>
+		</LINEWIDTH>
+		<LINESTYLE type="string">
+			<sources>
+				<request>lineStyle</request>
+			</sources>
+			<default-value/>
+		</LINESTYLE>
 		<DIRECTORY type="string">
 			<sources>
 				<request>directory</request>
@@ -834,6 +846,8 @@
 			<TOOLTIPCONTENT type="string"/>
 			<TOOLTIPYFORMAT type="string"/>
 			<MARKERSVISIBLE type="string"/>
+			<LINEWIDTH      type="string"/>
+			<LINESTYLE      type="string"/>
 		</action-inputs>
 		<action-resources/>
 		<action-outputs> 
@@ -924,6 +938,8 @@
 				<markers-visible>{MARKERSVISIBLE}</markers-visible>
 				<tooltip-content>{TOOLTIPCONTENT}</tooltip-content>
 				<tooltip-y-format>{TOOLTIPYFORMAT}</tooltip-y-format>
+				<line-width>{LINEWIDTH}</line-width>
+				<line-style>{LINESTYLE}</line-style>
 				<color-palette> 
 					<color>#1b95d9</color>  
 					<color>#caca9e</color>  
