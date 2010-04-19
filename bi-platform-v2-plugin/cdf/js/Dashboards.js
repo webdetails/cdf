@@ -3,7 +3,7 @@ $.ajaxSetup({
 		async: false,
 		traditional: true,
 		scriptCharset: "utf-8",
-		contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+		contentType: "application/x-www-form-urlencoded;charset=UTF-8"
 	});
 
 var pathArray = window.location.pathname.split( '/' );
@@ -24,9 +24,6 @@ if(webAppPath == undefined){
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
-var TRAFFIC_RED = webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png";
-var TRAFFIC_YELLOW = webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png";
-var TRAFFIC_GREEN = webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png";
 var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
@@ -54,6 +51,9 @@ if (typeof $.SetImpromptuDefaults == 'function')
 
 var Dashboards = 
 	{
+		TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
+		TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
+		TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
 		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
 		runningCalls: 0, // Used to control progress indicator for async mode
 		components: [],
