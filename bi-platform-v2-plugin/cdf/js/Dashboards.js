@@ -1,7 +1,9 @@
 $.ajaxSetup({
 		type: "POST",
 		async: false,
-		traditional: true
+		traditional: true,
+		scriptCharset: "utf-8",
+		contentType: "application/x-www-form-urlencoded; charset=UTF-8"
 	});
 
 var pathArray = window.location.pathname.split( '/' );
@@ -712,7 +714,7 @@ Dashboards.setSettingsValue = function(name,object){
 	var data = {
 		method: "set",
 		key: name,
-		value: JSON.toJSONString(object)
+		value: JSON.stringify(object)
 	};
 	$.post("Settings", data, function(){});
 };
