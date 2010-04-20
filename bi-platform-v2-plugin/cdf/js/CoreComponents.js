@@ -1418,7 +1418,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 			// 2 modes of working; if it's a div, create a button inside it
 			var myself = this;
 			var o = $("#"+ this.htmlObject);
-			if ($.inArray(["SPAN","DIV"],o[0].tagName.toUpperCase()) > -1){
+			if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
 				// create a button
 				o = $("<button/>").appendTo(o.empty());
         if (o[0].tagName=="DIV") o.wrap("<span/>");
