@@ -77,7 +77,9 @@
 	   <target name="dist-plugin" depends="jar" description="Creates a distribution">
 	   
 	  	<!-- delete and re-create the plugin dist folder tree -->
-	    <mkdir dir="${stage.dir}" />
+      <delete dir="${bin.dir}"/>
+
+      <mkdir dir="${stage.dir}" />
 	    <mkdir dir="${stage.dir}/${plugin.name}" />
 	    <mkdir dir="${stage.dir}/${plugin.name}/lib" />
 	  	
