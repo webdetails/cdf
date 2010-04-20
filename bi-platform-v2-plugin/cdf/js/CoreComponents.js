@@ -1394,7 +1394,11 @@ var QueryComponent = BaseComponent.extend({
 				alert("Fatal - No query definition passed");
 				return;
 			}
-			Dashboards.fetchData(cd, object.cdaParams, function(values) {object.result = values;})
+			Dashboards.fetchData(cd, object.cdaParams, function(values) {
+					// We need to make sure we're getting data from the right place,
+					// depending on whether we're using CDA
+					object.result = values.resultset != undefined ? values.resultset: values;
+				})
 
 		}
 	}
