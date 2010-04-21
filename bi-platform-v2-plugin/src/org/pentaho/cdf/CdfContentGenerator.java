@@ -208,11 +208,12 @@ public class CdfContentGenerator extends BaseContentGenerator
     while (it.hasNext())
     {
       String p = (String) it.next();
-      if(p.indexOf("parameters") == 0){
+      if (p.indexOf("parameters") == 0)
+      {
         params.put(p.substring(5), requestParams.getParameter(p));
       }
     }
-    context.put("params",params);
+    context.put("params", params);
 
     final StringBuilder s = new StringBuilder();
     s.append("<script language=\"javascript\" type=\"text/javascript\">\n");
@@ -364,9 +365,37 @@ public class CdfContentGenerator extends BaseContentGenerator
 
 
     final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
+    final ActionResource resource;
+
+    String fullTemplatePath = null;
+
+    if (templateName != null)
+    {
+      if (templateName.startsWith("/") || templateName.startsWith("\\"))
+      { //$NON-NLS-1$ //$NON-NLS-2$
+        fullTemplatePath = templateName;
+      }
+      else
+      {
+        fullTemplatePath = ActionInfo.buildSolutionPath(solution, path, templateName);
+      }
+    }
+
+
+    if (fullTemplatePath != null && repository.resourceExists(fullTemplatePath))
+    {
+      resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", //$NON-NLS-1$ //$NON-NLS-2$
+          fullTemplatePath);
+    }
+    else
+    {
+      resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", //$NON-NLS-1$ //$NON-NLS-2$
+          "system/" + PLUGIN_NAME + "/default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
 
     // Check for access permissions
-    if (repository.getSolutionFile(ActionInfo.buildSolutionPath(solution, path, templateName), ISolutionRepository.ACTION_EXECUTE) == null)
+    if (repository.getSolutionFile(resource, ISolutionRepository.ACTION_EXECUTE) == null)
     {
       out.write("Access Denied".getBytes("UTF-8"));
       return;
@@ -400,33 +429,6 @@ public class CdfContentGenerator extends BaseContentGenerator
 
     final String dashboardContent;
 
-    final ActionResource resource;
-
-    String fullTemplatePath = null;
-
-    if (templateName != null)
-    {
-      if (templateName.startsWith("/") || templateName.startsWith("\\"))
-      { //$NON-NLS-1$ //$NON-NLS-2$
-        fullTemplatePath = templateName;
-      }
-      else
-      {
-        fullTemplatePath = ActionInfo.buildSolutionPath(solution, path, templateName);
-      }
-    }
-
-
-    if (fullTemplatePath != null && repository.resourceExists(fullTemplatePath))
-    {
-      resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", //$NON-NLS-1$ //$NON-NLS-2$
-          fullTemplatePath);
-    }
-    else
-    {
-      resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", //$NON-NLS-1$ //$NON-NLS-2$
-          "system/" + PLUGIN_NAME + "/default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$
-    }
 
     // TESTING to localize the template
     //dashboardContent = repository.getResourceAsString(resource);
@@ -520,8 +522,8 @@ public class CdfContentGenerator extends BaseContentGenerator
     out.write("</div>".getBytes("UTF-8"));
     out.write(footer.getBytes("UTF-8"));
 
-    
-    setResponseHeaders(MIME_HTML,0,null);
+
+    setResponseHeaders(MIME_HTML, 0, null);
   }
 
   private void exportFile(final IParameterProvider requestParams, final IOutputHandler outputHandler)
@@ -538,15 +540,17 @@ public class CdfContentGenerator extends BaseContentGenerator
 
         final String exportType = requestParams.getStringParameter("exportType", "excel");
 
-        Export export ;
+        Export export;
 
-        if(exportType.equals("csv")){
+        if (exportType.equals("csv"))
+        {
           export = new ExportCSV(outputHandler);
-          setResponseHeaders(MIME_CSV,0,"export.csv");
+          setResponseHeaders(MIME_CSV, 0, "export.csv");
         }
-        else{
+        else
+        {
           export = new ExportExcel(outputHandler);
-          setResponseHeaders(MIME_XLS,0,"export.xls");
+          setResponseHeaders(MIME_XLS, 0, "export.xls");
         }
 
         export.exportFile(new JSONObject(out.toString()));
@@ -722,7 +726,7 @@ public class CdfContentGenerator extends BaseContentGenerator
   }
 
 
-  private void setResponseHeaders(final String mimeType, final int cacheDuration , final String attachmentName)
+  private void setResponseHeaders(final String mimeType, final int cacheDuration, final String attachmentName)
   {
     // Make sure we have the correct mime type
     final HttpServletResponse response = (HttpServletResponse) parameterProviders.get("path").getParameter("httpresponse");
@@ -734,9 +738,12 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
 
     // Cache?
-    if (cacheDuration > 0){
+    if (cacheDuration > 0)
+    {
       response.setHeader("Cache-Control", "max-age=" + cacheDuration);
-    }else{
+    }
+    else
+    {
       response.setHeader("Cache-Control", "max-age=0, no-store");
     }
   }
