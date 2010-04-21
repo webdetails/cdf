@@ -46,12 +46,6 @@
 
 			<dt>postExecution</dt>
 			<dd><i>Function - </i> Function to be called after the component is executed</dd>
-
-			<dt>preChange</dt>
-			<dd><i>Function - </i> Function to be called before the component is changed</dd>
-
-			<dt>postChange</dt>
-			<dd><i>Function - </i> Function to be called after the component is changed</dd>
 			
 			<dt>solution</dt>
 			<dd>Solution where the Pentaho Reporting file is</dd>
@@ -100,8 +94,7 @@ outputSelector =
 	parameter:"output_type",
 	valueAsId: false,
 	htmlObject: "selectorObject",
-	executeAtStart: true,
-	postChange:function(){}
+	executeAtStart: true
 };
 
 orderStatusReport = 
@@ -116,8 +109,7 @@ orderStatusReport =
   htmlObject: "sampleObject",
   paginate: false,
   showParameters: true,
-  executeAtStart: true,
-  postExecution:function(){}
+  executeAtStart: true
 }
 
 Dashboards.init([outputSelector,orderStatusReport]);
