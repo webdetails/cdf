@@ -1,132 +1,54 @@
-/* ------------------------------------*/
-/* << BEGIN COPY                       */
-/* ------------------------------------*/
-
-/* caption styling */
 
 .caption-top, .caption-bottom {
-	color: #ffffff;	
-	padding: 1.2em;	
+	color: #000000;	
+	padding-left: 1em;	
+	padding-top: 0.4em;	
+	text-align: right;
 	font-weight: bold;
-	font-size: 13px;	
+	font-size: 15px;	
 	font-family: arial;	
 	cursor: default;
 	border: 0px solid #334143;
 	background: #000000;
-	text-shadow: 1px 1px 0 #202020;
+	
 }
+
 .caption-top {
    border-width: 0px 0px 8px 0px;
 }
-.caption-bottom {
-   border-width: 8px 0px 0px 0px;
-}
-.caption a, .caption a {
-	border: 0 none;
-	text-decoration: none;
-	background: #000000;
-	padding: 0.3em;
-}
-.caption a:hover, .caption a:hover {
-	background: #202020;
-}
-.caption-wrapper {
-	float: left;
-}
+
 br.c { clear: both; }
 
-/* ------------------------------------*/
-/* END COPY >>>                        */
-/* ------------------------------------*/
-
-/* ignore the nonsense below, you don't need it for your projects */
-
-body {
-	background: #fff;
-	font-family: 'trebuchet MS', arial, verdana, sans-serif;
-	font-size: 0.85em;
-	margin:0;
-	padding: 3em 5em;
+.caption-bottom .options {
+text-decoration:none;
+font-size: 11px;	
+color: #ffffff;
+right:5px;
+border-left:5px solid #7F7F7F;
+position:relative;
 }
 
-#wrapper {
-	width: 550px;
+.caption-bottom .options .img{
+	border:5px solid #00ff00;
 }
 
-code {
-	padding: 1em;
-	background: #fdf6f2;
-	border-top: 1px solid #e3cbbb;
-	border-bottom: 1px solid #e3cbbb;
-	display: block;
-	color: #3b3430;
-	overflow: hidden;
-}
-code strong {
-	color: #ca3000;
-	border: 1px solid #e3cbbb;
-	padding: 0.5em;
-	background: #ffffff;
-}
-code .comment {
-	color: #9c8c83;
+.caption-bottom .title {
+text-decoration:none;
+font-size: 17px;	
+color: #ffffff;
+display: inline;
+float:left;
 }
 
-h1 {
-	font-size: 2.2em;
-	font-family: "Palatino Linotype", Palatino, Palladio, "URW Palladio L", "Book Antiqua", Baskerville, "Bookman Old Style", "Bitstream Charter", "Nimbus Roman No9 L", Garamond, "Apple Garamond", "ITC Garamond Narrow", "New Century Schoolbook", "Century Schoolbook", "Century Schoolbook L", Georgia, serif;
-	font-style: italic;
-	color: #202020;
-}
-
-h1 .ver {
-	font-size: 0.5em;
-}
-
-h2 {
-	font-size: 1.4em;
-}
-
-h3 {
-	font-size: 1.2em;
-	clear: both;
-	font-family: georgia;
-	color: #6c6361;
-	font-weight: normal;
-	text-transform: uppercase;
-}
-
-p {
-	line-height: 180%;
-}
-
-.note {
-	font-family: times, serif;
-	color: #988d81;
-}
-
-a {
-	background: #edf9fb;
-	color: #00a3bb;
-	font-weight: bold;
-	padding: 0.2em;
-	text-decoration: none;
-}
-
-a:hover {
-	background: #a33823;
+.caption-details {
 	color: #ffffff;
-}
-
-a img { 
-	border: 3px solid #ece7e6; 
-	margin-right: 8px; 
-	margin-bottom: 8px;
-}
-.images a:hover img {
-	border-color: #cdaf92;
-}
-.images a {
-	background: none;
-	padding: 0;
+	background: #000000;
+	position:absolute;
+	width:70px;
+	height:17px;
+	text-align:center;
+	opacity:0.5;
+	border-bottom: none;
+	-moz-border-radius: 4px 4px 0px 0px;
+	-webkit-border-radius: 4px 4px 0px 0px;
 }
