@@ -8,8 +8,8 @@
 
 		<h3>Description</h3>
 		<p>
-		This is a component that can execute the new Pentaho Reporting unified file format. the result is displayed in the PUC Report Viewer, 
-		including the new parameter and pagination features. For better use in CDF, parameter and pagination in the report viewer can be turned onn or off.
+		This is a component that can execute the new Pentaho Reporting unified file format. The result is displayed in the PUC Report Viewer, 
+		including the new parameter and pagination features. For better use in CDF, parameter and pagination in the report viewer can be turned on or off.
 		</p>
 
 		<h3>Options</h3>
@@ -41,6 +41,12 @@
 
 			<dt>postExecution</dt>
 			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is changed</dd>
 			
 			<dt>solution</dt>
 			<dd>Solution where the Pentaho Reporting file is</dd>
@@ -110,8 +116,7 @@ orderStatusReport =
 }
 
 Dashboards.init([outputSelector,orderStatusReport]);
-					
-Dashboards.init([outputSelector,orderStatusReport]);
+
 					</textarea>
 					<br />
 					<button onclick="evaluateCode(true)">Try me</button>
