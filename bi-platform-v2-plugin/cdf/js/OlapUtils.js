@@ -218,7 +218,7 @@ OlapUtils.mdxQuery.prototype.generateAxisPart = function(axisDrill, axis, axisLe
 	if (axisLevel > axisLevels.length - 1){
 		axisLevel = axisLevels.length - 1
 	}
-	var q = "Descendants("  + axis + ", "+ dim + ".["  + axisLevels[axisLevel] + "])"
+	var q = "Descendants("  + axis + ", "+ dim + ".["  + axisLevels[axisLevel] + "],SELF)"
 	if (orderBy == "")
 		return q;
 
