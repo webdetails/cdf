@@ -16,6 +16,7 @@ commonLibrariesScript=\
 @BASE_URL@/adhoc/js/common/ui/calendar/calendar.js,\
 @BASE_URL@/adhoc/js/common/ui/calendar/calendar-setup.js,\
 @BASE_URL@/adhoc/js/common/ui/calendar/lang/calendar-en.js,\
+@BASE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @BASE_URL@/content/pentaho-cdf/js/Base.js,\
 @BASE_URL@/content/pentaho-cdf/js/Dashboards.js,\
 @BASE_URL@/content/pentaho-cdf/js/CoreComponents.js,\
@@ -35,25 +36,18 @@ commonLibrariesLink=\
 @BASE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.1.css,\
 @BASE_URL@/adhoc/js/common/ui/calendar/calendar-win2k-1.css,\
 @BASE_URL@/content/pentaho-cdf/js/cdf.css,\
+@BASE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
+@BASE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table_jui.css,\
 @BASE_URL@/content/pentaho-cdf/js/captify/captify.css
 
-mapScript=\
-js/OpenMap/open_map.js,js/jsr_class.js,\
-js/OpenStreetMap.js
+tableComponentScript=\
+@BASE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
 dateRangeInputScript=\
 @BASE_URL@/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
 
 dateRangeInputLink=\
 @BASE_URL@/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
-
-tableComponentScript=\
-@BASE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
-@BASE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
-
-tableComponentLink=\
-@BASE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
-@BASE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table_jui.css
 
 timePlotComponentScript=\
 @BASE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js?local
@@ -75,6 +69,3 @@ mapScript=\
 mapLink=\
 @BASE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @BASE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
-
-
-
