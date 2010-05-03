@@ -75,7 +75,7 @@ public class CdfContentGenerator extends BaseContentGenerator
   private static final String CALLACTION = "/CallAction"; //$NON-NLS-1$
   private static final String COMMENTS = "/Comments"; //$NON-NLS-1$
   private static final String CONTEXT = "/Context"; //$NON-NLS-1$
-  private static final String MIME_HTML = "text/xml";
+  private static final String MIME_HTML = "text/html";
   private static final String MIME_CSS = "text/css";
   private static final String MIME_JS = "text/javascript";
   private static final String MIME_PLAIN = "text/plain";
