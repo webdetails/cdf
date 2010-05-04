@@ -1066,7 +1066,7 @@ var JpivotComponent = BaseComponent.extend({
  * Inputs:   object:oSettings - DataTables settings object
  *           int:iDisplay - New display length
  */
-if(typeof $.fn.dataTablesExt != undefined){ // Ensure we load dataTables before this line. If not, just keep going
+if($.fn.dataTablesExt != undefined){ // Ensure we load dataTables before this line. If not, just keep going
 	$.fn.dataTableExt.oApi.fnLengthChange = function ( oSettings, iDisplay )
 	{
 		oSettings._iDisplayLength = iDisplay;
