@@ -22,13 +22,6 @@
             <pathelement location="dev-lib/ant-contrib-1.0b3.jar"/>
           </classpath>
         </taskdef>
-        <!--Include the YUI Compressor task-->
-        <taskdef name='yui-compressor' classname="net.noha.tools.ant.yuicompressor.tasks.YuiCompressorTask">
-          <classpath>
-            <pathelement location="dev-lib/yui-compressor-ant-task-0.5.jar"/>
-            <pathelement location="dev-lib/yuicompressor-2.3.6.jar"/>
-          </classpath>
-        </taskdef>
 
           <!-- Global properties -->
           <property name='CLIENT' value='cdf/js' />
