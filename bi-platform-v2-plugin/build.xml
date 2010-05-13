@@ -15,6 +15,26 @@
 		and works with the common_build.xml file.
 	</description>
 
+       <!--Include the ant-contrib tasks-->
+
+        <taskdef resource="net/sf/antcontrib/antlib.xml">
+          <classpath>
+            <pathelement location="dev-lib/ant-contrib-1.0b3.jar"/>
+          </classpath>
+        </taskdef>
+        <!--Include the YUI Compressor task-->
+        <taskdef name='yui-compressor' classname="net.noha.tools.ant.yuicompressor.tasks.YuiCompressorTask">
+          <classpath>
+            <pathelement location="dev-lib/yui-compressor-ant-task-0.5.jar"/>
+            <pathelement location="dev-lib/yuicompressor-2.3.6.jar"/>
+          </classpath>
+        </taskdef>
+
+          <!-- Global properties -->
+          <property name='CLIENT' value='cdf/js' />
+          <property file='${CLIENT}/includes.properties' />
+
+
 	<!-- Import the common_build.xml file which contains all the default tasks -->	
 	<import file="common_build.xml"/>
 
@@ -235,5 +255,59 @@
       <param name="publish.pomFile" value="solution-pom.xml" />
       <param name="publish.file" value="${dist.dir}/${plugin.solution.zipfile}" />
     </antcall>
+  </target>
+
+  <target name="minify-client">
+    <concat destfile="${CLIENT}/scripts.js">
+      <filelist dir='${CLIENT}' files='${scripts}'/>
+    </concat>
+    <concat destfile="${CLIENT}/styles.css">
+      <filelist dir='${CLIENT}' files='${styles}'/>
+    </concat>
+    <yui-compressor 
+        warn="false" 
+        munge="false" 
+        preserveallsemicolons="false" 
+        fromdir="${CLIENT}" 
+        todir="${CLIENT}/mini/">
+
+      <include name="scripts.js" />
+    </yui-compressor>
+    <yui-compressor 
+        warn="false" 
+        preserveallsemicolons="false" 
+        fromdir="${CLIENT}" 
+        todir="${CLIENT}/mini">
+
+      <include name="styles.css" />
+    </yui-compressor>
+    <checksum file='${CLIENT}/mini/scripts-min.js' algorithm='md5' property='scriptsMD5'/>
+    <checksum file='${CLIENT}/mini/styles-min.css' algorithm='md5' property='stylesMD5'/>
+    <copy file='${CLIENT}/mini/scripts-min.js' tofile='${CLIENT}/js/${scriptsMD5}.js' />
+    <copy file='${CLIENT}/mini/styles-min.css' tofile='${CLIENT}/css/${stylesMD5}.css' />
+    <property name='versions.file' value='resource/versions.properties'/>
+    <echo file='${versions.file}' append='false'/>
+    <echo file='${versions.file}' append='true'>scripts.file: js/${scriptsMD5}.js&#13;&#10;</echo>
+    <echo file='${versions.file}' append='true'>styles.file: css/${stylesMD5}.css&#13;&#10;</echo>
+
+  </target>
+
+  <target name='write-patches'>
+    <property name="scripts.patch" value="resource/resources/scripts.html" />
+    <property name="styles.patch" value="resource/resources/styles.html" />
+
+    <echo file='${scripts.patch}' append='false'/>
+    <for list='${scripts}' param='filename'>
+        <sequential>
+            <echo file='${scripts.patch}' append='true'>&lt;script language="javascript" type="text/javascript" src="@{filename}"/&gt;&lt;/script&gt;&#13;&#10;</echo>
+        </sequential>
+    </for>
+
+    <echo file='${styles.patch}' append='false'/>
+    <for list='${styles}' param='filename'>
+        <sequential>
+            <echo file='${styles.patch}' append='true'>&lt;link href="@{filename}" rel="stylesheet" type="text/css"/&gt;&#13;&#10;</echo>
+        </sequential>
+    </for>
   </target>
 </project>
