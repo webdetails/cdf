@@ -768,7 +768,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         String fname = stylesList.get(i);
         stylesList.set(i, fname.replaceAll(BASE_URL_TAG + "/content/pentaho-cdf", ""));
       }
-      packager.registerPackage("styles", Packager.Filetype.JS, rootdir, rootdir + "/js/styles.css", stylesList.toArray(new String[stylesList.size()]));
+      packager.registerPackage("styles", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles.css", stylesList.toArray(new String[stylesList.size()]));
     }
   }
 }
