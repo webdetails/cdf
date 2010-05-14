@@ -121,7 +121,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         pathParams = parameterProviders.get("path");
         contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
         out = (OutputStream) iface.get("output");
-        method =  "/" + (String) iface.get("method");
+        method = "/" + (String) iface.get("method");
       } else { // if not, we handle the request normally
         pathParams = parameterProviders.get("path");
         contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
@@ -668,34 +668,50 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   private ArrayList<String> getExtraScripts(String dashboardContent, Properties resources) {
     ArrayList<String> scripts = new ArrayList<String>();
-    if (dashboardContent != null && !dashboardContent.isEmpty()) {
+    boolean all;
+    if (dashboardContent == null || dashboardContent.isEmpty()) {
+      all = true;
+    } else {
+      all = false;
+    }
 
-      final Enumeration resourceKeys = resources.propertyNames();
-      while (resourceKeys.hasMoreElements()) {
+    final Enumeration resourceKeys = resources.propertyNames();
+    while (resourceKeys.hasMoreElements()) {
 
-        final String scriptkey = (String) resourceKeys.nextElement();
+      final String scriptkey = (String) resourceKeys.nextElement();
 
-        final String key;
+      final String key;
 
-        if (scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
-          key = scriptkey.replaceAll("Script$", "");
-        } else {
-          continue;
-        }
+      if (scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
+        key = scriptkey.replaceAll("Script$", "");
+      } else {
+        continue;
+      }
 
-        final int keyIndex = dashboardContent.indexOf(key);
-        if (keyIndex != -1) {
-          if (matchComponent(keyIndex, key, dashboardContent)) {
-            scripts.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
+      final int keyIndex = all ? 0 : dashboardContent.indexOf(key);
+      if (keyIndex != -1) {
+        if (all || matchComponent(keyIndex, key, dashboardContent)) {
+          // ugly hack -- if we don't know for sure we need OpenStreetMaps, don't load it!
+          if (all && scriptkey.indexOf("mapScript") != -1) {
+            continue;
           }
+          scripts.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
         }
       }
     }
+
     return scripts;
   }
 
   private ArrayList<String> getExtraStyles(String dashboardContent, Properties resources) {
     ArrayList<String> styles = new ArrayList<String>();
+    boolean all;
+    if (dashboardContent == null || dashboardContent.isEmpty()) {
+      all = true;
+    } else {
+      all = false;
+    }
+
     if (dashboardContent != null && !dashboardContent.isEmpty()) {
       final Enumeration resourceKeys = resources.propertyNames();
       while (resourceKeys.hasMoreElements()) {
@@ -711,7 +727,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
           continue;
         }
 
-        final int keyIndex = dashboardContent.indexOf(key);
+        final int keyIndex = all ? 0 : dashboardContent.indexOf(key);
         if (keyIndex != -1) {
           if (matchComponent(keyIndex, key, dashboardContent)) {
             styles.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
