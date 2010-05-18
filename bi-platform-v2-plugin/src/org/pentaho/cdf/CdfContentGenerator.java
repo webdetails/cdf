@@ -47,6 +47,7 @@ import org.pentaho.platform.engine.core.solution.ActionInfo;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.services.actionsequence.ActionResource;
 import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
+import org.pentaho.platform.api.engine.IUserDetailsRoleListService;
 import org.pentaho.platform.util.web.MimeHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 import pt.webdetails.packager.Packager;
@@ -196,7 +197,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     context.put("serverLocalDate", cal.getTimeInMillis());
     context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
     context.put("user", userSession.getName());
-    context.put("roles", PentahoSystem.getUserDetailsRoleListService().getRolesForUser(userSession.getName()));
+	context.put("roles", PentahoSystem.get(IUserDetailsRoleListService.class).getRolesForUser(userSession.getName()));
 
     JSONObject params = new JSONObject();
 
