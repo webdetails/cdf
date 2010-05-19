@@ -4,7 +4,6 @@
  */
 package pt.webdetails.packager;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.File;
@@ -19,7 +18,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
@@ -69,7 +67,7 @@ public class Packager
       fileHandles.add(new File((root + "/" + file).replaceAll("/+", "/")));
     }
 
-    registerPackage(name, type, root, filename, (File[]) fileHandles.toArray(new File[fileHandles.size()]));
+    registerPackage(name, type, root, filename, fileHandles.toArray(new File[fileHandles.size()]));
   }
 
   public void registerPackage(String name, Filetype type, String root, String output, File[] files)
@@ -172,12 +170,13 @@ class FileSet
           jsmin.jsmin();
           break;
         case CSS:
-          int input; 
+          int input;
           FileWriter wout = new FileWriter(location);
           while ((input = freader.read()) != -1)
           {
             wout.append((char) input);
           }
+          wout.close();
           //CSSMin.formatFile(freader, new FileOutputStream(location));
           break;
       }

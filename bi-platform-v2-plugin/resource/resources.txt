@@ -38,7 +38,8 @@ commonLibrariesLink=\
 @BASE_URL@/content/pentaho-cdf/js/cdf.css,\
 @BASE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
 @BASE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table_jui.css,\
-@BASE_URL@/content/pentaho-cdf/js/captify/captify.css
+@BASE_URL@/content/pentaho-cdf/js/captify/captify.css,\
+@BASE_URL@/content/pentaho-cdf/js/blueprint/screen.css
 
 
 mapScript=\

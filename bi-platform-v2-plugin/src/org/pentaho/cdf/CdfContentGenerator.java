@@ -146,7 +146,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
       findMethod(method, contentItem, out);
 
     } catch (Exception e) {
-      error(e.getMessage());
+      logger.error("Error creating cdf content: " + e.getMessage());
     }
   }
 
@@ -197,7 +197,15 @@ public class CdfContentGenerator extends BaseContentGenerator {
     context.put("serverLocalDate", cal.getTimeInMillis());
     context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
     context.put("user", userSession.getName());
-	context.put("roles", PentahoSystem.get(IUserDetailsRoleListService.class).getRolesForUser(userSession.getName()));
+
+    // The first method works in 3.6, for 3.5 it's a different method. We'll try both
+    IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
+    if (service == null) {
+      // TODO - Remove this block of code once we drop support for older versions than SUGAR
+      service = PentahoSystem.getUserDetailsRoleListService();
+    }
+
+    context.put("roles", service.getRolesForUser(userSession.getName()));
 
     JSONObject params = new JSONObject();
 
@@ -658,6 +666,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
     for (String header : styles) {
       stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"/>\n");
     }
+
+    // Add ie8 blueprint condition
+    stylesBuilders.append("<!--[if lt IE 8]><link rel=\"stylesheet\" href=\"" + BASE_URL + "/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
+
     StringBuilder stuff = new StringBuilder();
     includes.put("scripts", scriptsBuilders.toString());
     includes.put("styles", stylesBuilders.toString());
