@@ -1111,7 +1111,7 @@ var TableComponent = BaseComponent.extend({
 			// Clear previous table
 			$("#"+this.htmlObject).empty();
 			var myself = this;
-			Dashboards.fetchData(cd, this.cdaParams, function(values) {myself.processTableComponentResponse(values);});
+			Dashboards.fetchData(cd, this.parameters, function(values) {myself.processTableComponentResponse(values);});
 		},
 		processTableComponentResponse : function(json)
 		{
@@ -1435,7 +1435,7 @@ var QueryComponent = BaseComponent.extend({
 				alert("Fatal - No query definition passed");
 				return;
 			}
-			Dashboards.fetchData(cd, object.cdaParams, function(values) {
+			Dashboards.fetchData(cd, object.parameters, function(values) {
 					// We need to make sure we're getting data from the right place,
 					// depending on whether we're using CDA
 					object.result = values.resultset != undefined ? values.resultset: values;
