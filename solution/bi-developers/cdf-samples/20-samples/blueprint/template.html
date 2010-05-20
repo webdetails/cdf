@@ -1,0 +1,122 @@
+<script type="text/javascript" src="GetCDFResource?resource=/bi-developers/cdf-samples/20-samples/charts/MetaLayerCharts.js"></script>
+
+<style type="text/css">
+
+	.alt {
+		color:#666666;
+		font-family:"Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;
+		font-style:italic;
+		font-weight:normal;
+	}
+
+</style>
+
+
+
+<div class="container showgrid">
+	<div class="span-24 clearfix">
+	
+	
+		<h1>
+			Blueprint css framework
+		</h1>
+
+		<hr />
+
+		<h2 class="alt"> This sample page demonstrates how CDF can be integrated with Blueprint css framework </h2>
+
+		<hr />
+
+	</div>
+
+	<div class="span-8 clearfix border">
+		Test 1
+	</div>
+
+	<div class="span-8 border">
+		Test 2
+	</div>
+
+	<div class="span-8 last">
+		test 3
+	</div>
+
+	<div class="span-12 clearfix">
+		<div id="pieChart_object"></div>
+	</div>
+
+	<div class="span-12 last">
+		<div id="barChart_object"></div>
+	</div>
+
+
+	<div class="span-12 last">
+		<div id="dialChart_object"></div>
+	</div>
+
+</div>
+
+
+
+<script language="javascript" type="text/javascript">
+
+
+
+	var productLine = "null";
+	var territory = "null";
+
+	title =
+{
+name: "title",
+	  type: "text",
+	  htmlObject: "title_object",
+	  executeAtStart: true,
+	  expression: function(){return "Charts examples"}
+}
+
+pieChart =
+{
+name: "pieChart",
+	  type: "jFreeChartComponent",
+	  listeners:["MetaLayerCharts.regionsMeasure"],
+	  chartDefinition: MetaLayerCharts.pieChartDefinition,
+	  htmlObject: "pieChart_object",
+	  executeAtStart: true
+}
+
+barChart =
+{
+name: "barChart",
+	  type: "jFreeChartComponent",
+	  listeners:["MetaLayerCharts.selectedRegionMeasure"],
+	  chartDefinition: MetaLayerCharts.barChartDefinition,
+	  htmlObject: "barChart_object",
+	  executeAtStart: true
+}
+
+dialChart =
+{
+name: "dialChart",
+	  type: "dialComponent",
+	  listeners:["MetaLayerCharts.departmentMeasure"],
+	  chartDefinition: MetaLayerCharts.dialChartDefinition,
+	  htmlObject: "dialChart_object",
+	  executeAtStart: true
+}
+
+
+
+
+var components = [pieChart,barChart,dialChart];
+
+</script>
+
+<script language="javascript" type="text/javascript">
+
+	function load(){
+		Dashboards.init(components);
+	}
+
+load();
+
+</script>
