@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
+import org.apache.commons.lang.StringUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -682,7 +683,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
   private ArrayList<String> getExtraScripts(String dashboardContent, Properties resources) {
     ArrayList<String> scripts = new ArrayList<String>();
     boolean all;
-    if (dashboardContent == null || dashboardContent.isEmpty()) {
+    if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
       all = true;
     } else {
       all = false;
@@ -719,13 +720,13 @@ public class CdfContentGenerator extends BaseContentGenerator {
   private ArrayList<String> getExtraStyles(String dashboardContent, Properties resources) {
     ArrayList<String> styles = new ArrayList<String>();
     boolean all;
-    if (dashboardContent == null || dashboardContent.isEmpty()) {
+    if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
       all = true;
     } else {
       all = false;
     }
 
-    if (dashboardContent != null && !dashboardContent.isEmpty()) {
+    if (dashboardContent != null && !StringUtils.isEmpty(dashboardContent)) {
       final Enumeration resourceKeys = resources.propertyNames();
       while (resourceKeys.hasMoreElements()) {
 

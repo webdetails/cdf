@@ -4,6 +4,7 @@
  */
 package pt.webdetails.packager;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.File;
@@ -18,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
@@ -67,7 +69,7 @@ public class Packager
       fileHandles.add(new File((root + "/" + file).replaceAll("/+", "/")));
     }
 
-    registerPackage(name, type, root, filename, fileHandles.toArray(new File[fileHandles.size()]));
+    registerPackage(name, type, root, filename, (File[]) fileHandles.toArray(new File[fileHandles.size()]));
   }
 
   public void registerPackage(String name, Filetype type, String root, String output, File[] files)
@@ -78,7 +80,7 @@ public class Packager
     }
     try
     {
-      FileSet fileSet = new FileSet(output, type, files);
+      FileSet fileSet = new FileSet(output, type, files, root);
       this.fileSets.put(name, fileSet);
     }
     catch (IOException ex)
@@ -123,6 +125,7 @@ class FileSet
   private ArrayList<File> files;
   private File location;
   private Packager.Filetype filetype;
+  private String rootdir;
 
   public void addFile(String file)
   {
@@ -138,7 +141,7 @@ class FileSet
     }
   }
 
-  public FileSet(String location, Packager.Filetype type, File[] fileSet) throws IOException, NoSuchAlgorithmException
+  public FileSet(String location, Packager.Filetype type, File[] fileSet, String rootdir) throws IOException, NoSuchAlgorithmException
   {
     this.files = new ArrayList<File>();
     this.files.addAll(Arrays.asList(fileSet));
@@ -146,6 +149,7 @@ class FileSet
     this.filetype = type;
     this.latestVersion = "";
     this.dirty = true;
+    this.rootdir = rootdir;
   }
 
   public FileSet() throws IOException, NoSuchAlgorithmException
@@ -160,24 +164,30 @@ class FileSet
   {
     try
     {
-      InputStream concatenatedStream = Concatenate.concat(this.files.toArray(new File[this.files.size()]));
-      Reader freader = new InputStreamReader(concatenatedStream, "UTF8");
+      InputStream concatenatedStream;
+      Reader freader;
       FileWriter output = new FileWriter(location);
       switch (this.filetype)
       {
         case JS:
+          concatenatedStream = Concatenate.concat(this.files.toArray(new File[this.files.size()]));
+          freader = new InputStreamReader(concatenatedStream, "UTF8");
+
           JSMin jsmin = new JSMin(concatenatedStream, new FileOutputStream(location));
           jsmin.jsmin();
           break;
         case CSS:
+          concatenatedStream = Concatenate.concat(this.files.toArray(new File[this.files.size()]), rootdir);
+          freader = new InputStreamReader(concatenatedStream, "UTF8");
+
           int input;
           FileWriter wout = new FileWriter(location);
           while ((input = freader.read()) != -1)
           {
-            wout.append((char) input);
+            wout.write(input);
           }
-          wout.close();
           //CSSMin.formatFile(freader, new FileOutputStream(location));
+          wout.close();
           break;
       }
       FileInputStream script = new FileInputStream(location);
