@@ -41,9 +41,10 @@
 			<dt>postExecution</dt>
 			<dd><i>Function - </i> Function to be called after the component is executed</dd>
 
-			<dt>result</dt>
-			<dd>Where the query result will be stored</dd>
-			
+			<dt>resulvart</dt>
+			<dd>variable where the result will be stored (note: the old method of accessing
+      this object's  property "restult" is still supported</dd>
+
 			<dt>queryDefinition</dt>
 			<dd>MetaLayer object with the definition of pivot (see MetaLayer options)</dd>
 		</dl>	
@@ -83,6 +84,8 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
+
+var result="";
 					
 MetaLayerHome2 = {
 executeQueryComponentDefinition: {
@@ -104,9 +107,10 @@ name: "executeQueryComponent",
 type: "queryComponent",
 htmlObject: "sampleObject",
 executeAtStart: true,
+resultvar: "result",
 queryDefinition: MetaLayerHome2.executeQueryComponentDefinition,
-postExecution: function(){
-	$('#sampleObjectResult').html("" + this.result[3]);
+postFetch: function(){
+	$('#sampleObjectResult').html("" + result[3]);
 	}
 }
 
