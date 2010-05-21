@@ -116,6 +116,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     final IContentItem contentItem;
     final IParameterProvider pathParams;
     final String method;
+    final String payload;
     try {
       // If callbacks is properly setup, we assume we're being called from another plugin
       if (this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance(callbacks.get(0))) {
@@ -124,11 +125,13 @@ public class CdfContentGenerator extends BaseContentGenerator {
         contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
         out = (OutputStream) iface.get("output");
         method = "/" + (String) iface.get("method");
+        payload = (String) iface.get("payload");
       } else { // if not, we handle the request normally
         pathParams = parameterProviders.get("path");
         contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
         out = contentItem.getOutputStream(null);
         method = pathParams.getStringParameter("path", null);
+        payload = null;
       }
 
 
@@ -144,14 +147,14 @@ public class CdfContentGenerator extends BaseContentGenerator {
         throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM"));  //$NON-NLS-1$
       }
 
-      findMethod(method, contentItem, out);
+      findMethod(method, contentItem, out, payload);
 
     } catch (Exception e) {
       logger.error("Error creating cdf content: " + e.getMessage());
     }
   }
 
-  private void findMethod(final String urlPath, final IContentItem contentItem, final OutputStream out) throws Exception {
+  private void findMethod(final String urlPath, final IContentItem contentItem, final OutputStream out, String payload) throws Exception {
 
     // Each block will call a different method. If in the future this extends a lot we can think
     // about using reflection for class loading, but I don't expect that to happen.
@@ -182,7 +185,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     } else if (urlPath.equals(CONTEXT)) {
       generateContext(requestParams, out);
     } else if (urlPath.equals(GETHEADERS)) {
-      getHeaders(null, requestParams, out);
+      getHeaders(payload, requestParams, out);
     } else {
       // we'll be providing the actual content with cache
       returnResource(urlPath, contentItem, out);
