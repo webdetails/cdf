@@ -1538,7 +1538,6 @@ var QueryComponent = BaseComponent.extend({
       if (object.resultvar != undefined){
         Dashboards.setParameter(object.resultvar, object.result);
       }
-      alert("object: " + typeof(object) + "; Type2: " + typeof(object.postFetch))
       if((typeof(object.postFetch)=='function')){
         object.postFetch();
       }
