@@ -41,6 +41,7 @@ class Concatenate {
         while (fr.ready()) {
           tmp.append(fr.readLine());
         }
+        rootpath = rootpath.replaceAll("/+","/");
         String fileLocation = file.getPath().replaceAll(file.getName(), "").replaceAll(rootpath, "..");
         buffer.append(tmp.toString() //
                 // We need to replace all the URL formats
