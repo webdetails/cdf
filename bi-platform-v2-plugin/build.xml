@@ -105,6 +105,9 @@
 	  			<include name="readme.txt"/>
 	  		</fileset>
   		</copy>
+
+		<!-- create the version file -->
+		<echo file="${stage.dir}/${plugin.name}/VERSION.txt">${project.version}</echo>
 	  	
 	  	<!-- Copy js folder into dist -->
 	    <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
