@@ -27,7 +27,7 @@ var CDF_SELF = 2;
 var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
-$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /> <h3>Processing...</h3></div>';
+$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
 $.blockUI.defaults.css.left = '40%';
 $.blockUI.defaults.css.top = '30%';
 $.blockUI.defaults.css.marginLeft = '85px';
@@ -50,17 +50,18 @@ if (typeof $.SetImpromptuDefaults == 'function')
   });
 
 var Dashboards = 
-{
-  TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
-  TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
-  TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
-  globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
-  runningCalls: 0, // Used to control progress indicator for async mode
-  components: [],
-  parameters: [], // only used if globalContext = false
-  args: [],
-  monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-}
+	{
+		TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
+		TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
+		TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
+		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
+		runningCalls: 0, // Used to control progress indicator for async mode
+		components: [],
+		parameters: [], // only used if globalContext = false
+		args: [],
+		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        i18nSupport : null  // Reference to i18n objects
+	}
 
 // REFRESH ENGINE begin
 
@@ -403,7 +404,13 @@ Dashboards.addArgs = function(url){
     this.args = getURLParameters(url);
 }
 
-Dashboards.init = function(components){
+Dashboards.init = function(components, i18n){
+
+    // Update global reference to i18n objects if needed
+    if (i18n !== "undefined") {
+       Dashboards.i18nSupport = i18n;
+    }
+    
   if($.isArray(components)){
     Dashboards.addComponents(components);
   }

@@ -16,6 +16,7 @@ commonLibrariesScript=\
 @BASE_URL@/content/pentaho-cdf/js/jquery.tooltip.js,\
 @BASE_URL@/content/pentaho-cdf/js/jquery.blockUI.js,\
 @BASE_URL@/content/pentaho-cdf/js/jquery.eventstack.js,\
+@BASE_URL@/content/pentaho-cdf/js/jquery.i18n.properties.js,\
 @BASE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
 @BASE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.1.js,\
 @BASE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\

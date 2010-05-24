@@ -219,12 +219,18 @@ var JFreeChartComponent = BaseComponent.extend({
 		
   getParameters: function() {
 		
-    var cd = this.chartDefinition;
-    // Merge the stuff with a chartOptions element
-    if (cd == undefined){
-      alert("Fatal - No chartDefinition passed");
-      return;
-    }
+			var cd = this.chartDefinition;
+			// Merge the stuff with a chartOptions element
+			if (cd == undefined){
+				alert("Fatal - No chartDefinition passed");
+				return;
+			}
+
+            // If the user filled titleKey get the title value from language files 
+            if (cd.titleKey !== "undefined" && Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+				cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
+			}
+
 			
     var cd0 = cd.chartOptions != undefined ? $.extend({},Dashboards.ev(cd.chartOptions), cd) : cd;
 

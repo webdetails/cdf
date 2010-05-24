@@ -24,6 +24,17 @@
 <script language="javascript" type="text/javascript">
 
 
+// Init jQuery i18n plugin
+loadMessageBundles = function(lang) {
+
+			jQuery.i18n.properties({
+			    name:'Messages',
+			    path:'resources/languages/',
+			    mode:'both',
+			    language:(lang == 'browser' ? jQuery.i18n.browserLang() : lang)
+			});
+		}
+    
 folderContent = 
 {
   name: "folderContent",
@@ -49,5 +60,12 @@ folderTitle =
 
 var templateComponents = [folderContent, folderTitle];
 Dashboards.init(templateComponents);
+
+$(document).ready(function(){
+    // Initialize jquery.i18n plugin - load message files
+    var userLocale = '#{LANGUAGE_CODE}';
+    loadMessageBundles(userLocale);
+});
+    
 </script>
 

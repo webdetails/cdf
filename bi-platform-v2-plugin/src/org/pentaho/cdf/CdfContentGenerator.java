@@ -10,17 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang.StringUtils;
@@ -48,6 +38,7 @@ import org.pentaho.platform.engine.core.solution.ActionInfo;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.services.actionsequence.ActionResource;
 import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
+import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.api.engine.IUserDetailsRoleListService;
 import org.pentaho.platform.util.web.MimeHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
@@ -388,9 +379,14 @@ public class CdfContentGenerator extends BaseContentGenerator {
     final String dashboardTemplate = "template-dashboard" + template + ".html"; //$NON-NLS-1$
 
     final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
+    ArrayList<String> i18nTagsList = new ArrayList<String>();
     if (templater != null) {
       final ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", "system/" + PLUGIN_NAME + "/" + dashboardTemplate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-      final String templateContent = repository.getResourceAsString(templateResource);
+      String templateContent = repository.getResourceAsString(templateResource, ISolutionRepository.ACTION_EXECUTE);
+      // Process i18n on dashboard outer template
+      templateContent = updateUserLanguageKey(templateContent);
+      templateContent = processi18nTags(templateContent, i18nTagsList);
+      // Process i18n on dashboard outer template - end
       final String[] sections = templater.breakTemplateString(templateContent, "", userSession); //$NON-NLS-1$
       if (sections != null && sections.length > 0) {
         intro = sections[0];
@@ -407,21 +403,24 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     // TESTING to localize the template
     //dashboardContent = repository.getResourceAsString(resource);
-    InputStream is = repository.getResourceInputStream(resource, true);
+    InputStream is = repository.getResourceInputStream(resource, true, ISolutionRepository.ACTION_EXECUTE);
     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     StringBuilder sb = new StringBuilder();
     String line = null;
     while ((line = reader.readLine()) != null) {
+      // Process i18n for each line of the dashboard output
+      line = processi18nTags(line, i18nTagsList);
+      // Process i18n - end
       sb.append(line + "\n");
     }
     is.close();
     dashboardContent = sb.toString();
 
     intro = intro.replaceAll("\\{load\\}", "onload=\"load()\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
     intro = intro.replaceAll("\\{body-tag-unload\\}", "");
-
-    /************************************************/
+    intro = intro.replaceAll("#\\{MESSAGE_SET\\}", buildMessageSetCode(i18nTagsList));
+      
+      /************************************************/
     /*      Add cdf libraries
     /************************************************/
     final Date startDate = new Date();
@@ -436,15 +435,66 @@ public class CdfContentGenerator extends BaseContentGenerator {
     // Add context
     generateContext(requestParams, out);
     out.write("<div id=\"dashboardContent\">".getBytes("UTF-8"));
+
     out.write(dashboardContent.getBytes("UTF-8"));
     out.write("</div>".getBytes("UTF-8"));
     out.write(footer.getBytes("UTF-8"));
-
-
+    
     setResponseHeaders(MIME_HTML, 0, null);
   }
 
-  private void exportFile(final IParameterProvider requestParams, final IOutputHandler outputHandler) {
+    private String buildMessageSetCode(ArrayList<String> tagsList) {
+       StringBuffer messageCodeSet = new StringBuffer();
+       for(String tag : tagsList) {
+           messageCodeSet.append("\\$('#").append(updateSelectorName(tag)).append("').html(jQuery.i18n.prop('").append(tag).append("'));\n");
+       }
+       return messageCodeSet.toString();
+    }
+
+  private String processi18nTags(String content, ArrayList<String> tagsList) {
+     String tagPattern = "CDF.i18n\\(\"";
+     String[] test = content.split(tagPattern);
+     if (test.length == 1) return content;
+     StringBuffer resBuffer = new StringBuffer();
+     int i;
+     String tagValue;
+     resBuffer.append(test[0]);
+     for (i=1; i<test.length; i++) {
+
+         // First tag is processed differently that other because is the only case where I don't
+         // have key in first position
+         resBuffer.append("<span id=\"");
+         if (i != 0) {
+            // Right part of the string with the value of the tag herein
+            tagValue = test[i].substring(0, test[i].indexOf("\")"));
+            tagsList.add(tagValue);
+            resBuffer.append(updateSelectorName(tagValue));
+            resBuffer.append("\"/>");
+            resBuffer.append(test[i].substring(test[i].indexOf("\")")+2, test[i].length()));
+         }
+     }
+     return resBuffer.toString();
+  }
+
+  private String updateSelectorName(String name) {
+      // If we've the character . in the message key substitute it conventionally to _
+      // when dynamically generating the selector name. The "." character is not permitted in the
+      // selector id name
+      return  name.replace(".", "_");
+  }
+  private String updateUserLanguageKey(String intro) {
+      
+        // Fill the template with the correct user locale
+        Locale locale = LocaleHelper.getLocale();
+        if (logger.isDebugEnabled())
+        {
+          logger.debug("Current Pentaho user locale: " + locale.toString());
+        }
+        intro = intro.replaceAll("#\\{LANGUAGE_CODE\\}", locale.toString());
+        return intro;
+  }
+
+    private void exportFile(final IParameterProvider requestParams, final IOutputHandler outputHandler) {
 
     try {
 

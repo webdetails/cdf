@@ -11,17 +11,17 @@
     <body>
         <script language="javascript" type="text/javascript">
 
-            navigatorComponent =
-{
-name: "navigatorComponent",
-      type: "navigator",
-      listeners:[],
-      parameters: [],
-      htmlObject: "navObject",
-      executeAtStart: true,
-      mode: "horizontal",
-      includeSolutions: true
-};
+//            navigatorComponent =
+//{
+//name: "navigatorComponent",
+//      type: "navigator",
+//      listeners:[],
+//      parameters: [],
+//      htmlObject: "navObject",
+//      executeAtStart: true,
+//      mode: "horizontal",
+//      includeSolutions: true
+//};
 
 // To use with mantle there's no need for a navigate component
 //var templateComponents = [navigatorComponent];
@@ -32,12 +32,31 @@ name: "navigatorComponent",
     isAdmin = "{isAdmin}";
     isLoggedIn = "{isLoggedIn}";
 
+// Init jQuery i18n plugin
+    loadMessageBundles = function(lang) {
+        jQuery.i18n.properties({
+            name:'Messages',
+            path:'resources/languages/',
+            mode:'both',
+            language:(lang == 'browser' ? jQuery.i18n.browserLang() : lang),
+            callback: function() {
+                #{MESSAGE_SET}
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        // Initialize jquery.i18n plugin - load message files
+        var userLocale = '#{LANGUAGE_CODE}';
+        loadMessageBundles(userLocale);
+    });
+
 </script>
 <div id="outerouter">
     <div id="outer">
         <div id="header">
             <h1><a href="#"><img src="resources/style/images/logotext.png" border="0"/></a></h1>
-            <h2>dashboards made easy!</h2>
+            <h2>CDF.i18n("header.message1")</h2>
         </div>
         <div id="submenu"><div id="navObject"> </div></div>
 
@@ -85,11 +104,7 @@ name: "navigatorComponent",
 
         <div id="footer">
             <a href="http://www.webdetails.pt"><img width="100" height="25" src="resources/style/images/webdetails.png"/></a>
-            <br/>
-            Dashboard Framework (Version 4.0RC1) 
-            Authored and Maintained By <a href="mailto:pedro.alves@webdetails.pt">Pedro Alves</a>, 
-            <a href="mailto:ingo.klose@yahoo.de">Ingo Klose</a> <i>et al</i>..
-            Template Design by <a href="mailto:tom@wamonline.org.uk">Tom Barber</a> 
+            <br/>CDF.i18n("template.footer")
         </div>
     </div>
 </div>
