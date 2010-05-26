@@ -1195,10 +1195,14 @@ var TableComponent = BaseComponent.extend({
     $("#"+this.htmlObject).empty();
     var myself = this;
     Dashboards.fetchData(cd, this.parameters, function(values) {
-      myself.processTableComponentResponse(values);
+      changedValues = undefined;
       if((typeof(object.postFetch)=='function')){
-        object.postFetch();
+        changedValues = object.postFetch(values);
       }
+      if (changedValues != undefined) {
+        values = changedValues;
+      }
+      myself.processTableComponentResponse(values);
     });
   },
   processTableComponentResponse : function(json)
@@ -1540,12 +1544,16 @@ var QueryComponent = BaseComponent.extend({
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
       object.result = values.resultset != undefined ? values.resultset: values;
+        changedValues = undefined;
+      if((typeof(object.postFetch)=='function')){
+        changedValues = object.postFetch(values);
+      }
+      if (changedValues != undefined){
+        values = changedValues;
+      }
       // if resultvar is defined, store it on that var
       if (object.resultvar != undefined){
         Dashboards.setParameter(object.resultvar, object.result);
-      }
-      if((typeof(object.postFetch)=='function')){
-        object.postFetch();
       }
     })
 
