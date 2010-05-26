@@ -1196,8 +1196,8 @@ var TableComponent = BaseComponent.extend({
     var myself = this;
     Dashboards.fetchData(cd, this.parameters, function(values) {
       changedValues = undefined;
-      if((typeof(object.postFetch)=='function')){
-        changedValues = object.postFetch(values);
+      if((typeof(myself.postFetch)=='function')){
+        changedValues = myself.postFetch(values);
       }
       if (changedValues != undefined) {
         values = changedValues;
