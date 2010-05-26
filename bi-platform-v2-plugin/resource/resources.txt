@@ -53,7 +53,10 @@ dateRangeInputScript=\
 dateRangeInputLink=\
 @BASE_URL@/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
 
+# we need to support both CDE and CDF-style calls
 tableComponentScript=\
+@BASE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
+TableScript=\
 @BASE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
 timePlotComponentScript=\
