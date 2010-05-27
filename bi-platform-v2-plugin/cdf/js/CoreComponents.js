@@ -1194,7 +1194,11 @@ var TableComponent = BaseComponent.extend({
     // Clear previous table
     $("#"+this.htmlObject).empty();
     var myself = this;
-    Dashboards.fetchData(cd, this.parameters, function(values) {
+    // remove drawCallback from the parameters, or
+    // it'll be called before we have an actual table...
+    var croppedCd = $.extend({},cd);
+    croppedCd.drawCallback = undefined;
+    Dashboards.fetchData(croppedCd, this.parameters, function(values) {
       changedValues = undefined;
       if((typeof(myself.postFetch)=='function')){
         changedValues = myself.postFetch(values);
