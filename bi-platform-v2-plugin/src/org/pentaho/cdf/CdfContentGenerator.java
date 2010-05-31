@@ -165,7 +165,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
     else if (urlPath.equals(EXPORT))
     {
-      exportFile(requestParams, outputHandler);
+      exportFile(requestParams, out);
     }
     else if (urlPath.equals(SETTINGS))
     {
@@ -526,7 +526,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     setResponseHeaders(MIME_HTML, 0, null);
   }
 
-  private void exportFile(final IParameterProvider requestParams, final IOutputHandler outputHandler)
+  private void exportFile(final IParameterProvider requestParams, final OutputStream output)
   {
 
     try
@@ -544,13 +544,13 @@ public class CdfContentGenerator extends BaseContentGenerator
 
         if (exportType.equals("csv"))
         {
-          export = new ExportCSV(outputHandler);
-          setResponseHeaders(MIME_CSV, 0, "export.csv");
+          export = new ExportCSV(output);
+          setResponseHeaders(MIME_CSV, 0, "export" + export.getExtension());
         }
         else
         {
-          export = new ExportExcel(outputHandler);
-          setResponseHeaders(MIME_XLS, 0, "export.xls");
+          export = new ExportExcel(output);
+          setResponseHeaders(MIME_XLS, 0, "export" + export.getExtension());
         }
 
         export.exportFile(new JSONObject(out.toString()));
