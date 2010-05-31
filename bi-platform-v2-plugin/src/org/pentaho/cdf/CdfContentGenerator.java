@@ -56,7 +56,8 @@ import pt.webdetails.packager.Packager;
  *
  * @author Will Gorman (wgorman@pentaho.com)
  */
-public class CdfContentGenerator extends BaseContentGenerator {
+public class CdfContentGenerator extends BaseContentGenerator
+{
 
   private static final long serialVersionUID = 5608691656289862706L;
   private static final Log logger = LogFactory.getLog(CdfContentGenerator.class);
@@ -83,41 +84,52 @@ public class CdfContentGenerator extends BaseContentGenerator {
   private static final String BASE_URL_TAG = "@BASE_URL@";
   public static final String BASE_URL;
 
-  static {
+  static
+  {
     final String[] urlSplit = PentahoSystem.getApplicationContext().getBaseUrl().split("[/]+");
     String path = "";
-    if (urlSplit.length > 2) {
+    if (urlSplit.length > 2)
+    {
       path = "/" + urlSplit[2];
     }
     BASE_URL = path;
   }
   private Packager packager;
 
-  public CdfContentGenerator() {
-    try {
+  public CdfContentGenerator()
+  {
+    try
+    {
       this.init();
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       logger.error("Failed to initialize CDF");
     }
   }
 
   @Override
-  public void createContent() throws Exception {
+  public void createContent() throws Exception
+  {
     final OutputStream out;
     final IContentItem contentItem;
     final IParameterProvider pathParams;
     final String method;
     final String payload;
-    try {
+    try
+    {
       // If callbacks is properly setup, we assume we're being called from another plugin
-      if (this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance(callbacks.get(0))) {
+      if (this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance(callbacks.get(0)))
+      {
         HashMap<String, Object> iface = (HashMap<String, Object>) callbacks.get(0);
         pathParams = parameterProviders.get("path");
         contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
         out = (OutputStream) iface.get("output");
         method = "/" + (String) iface.get("method");
         payload = (String) iface.get("payload");
-      } else { // if not, we handle the request normally
+      }
+      else
+      { // if not, we handle the request normally
         pathParams = parameterProviders.get("path");
         contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
         out = contentItem.getOutputStream(null);
@@ -127,57 +139,86 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
 
       // make sure we have a workable state
-      if (outputHandler == null) {
+      if (outputHandler == null)
+      {
         error(Messages.getErrorString("CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER")); //$NON-NLS-1$
         throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER"));  //$NON-NLS-1$
-      } else if (contentItem == null) {
+      }
+      else if (contentItem == null)
+      {
         error(Messages.getErrorString("CdfContentGenerator.ERROR_0002_NO_CONTENT_ITEM")); //$NON-NLS-1$
         throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0002_NO_CONTENT_ITEM"));  //$NON-NLS-1$
-      } else if (out == null) {
+      }
+      else if (out == null)
+      {
         error(Messages.getErrorString("CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM")); //$NON-NLS-1$
         throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM"));  //$NON-NLS-1$
       }
 
       findMethod(method, contentItem, out, payload);
 
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       logger.error("Error creating cdf content: " + e.getMessage());
     }
   }
 
-  private void findMethod(final String urlPath, final IContentItem contentItem, final OutputStream out, String payload) throws Exception {
+  private void findMethod(final String urlPath, final IContentItem contentItem, final OutputStream out, String payload) throws Exception
+  {
 
     // Each block will call a different method. If in the future this extends a lot we can think
     // about using reflection for class loading, but I don't expect that to happen.
 
     final IParameterProvider requestParams = parameterProviders.get(IParameterProvider.SCOPE_REQUEST);
 
-    if (urlPath.equals(RENDER_XCDF)) {
+    if (urlPath.equals(RENDER_XCDF))
+    {
 
       renderXcdf(out, requestParams);
 
-    } else if (urlPath.equals(JSON_SOLUTION)) {
+    }
+    else if (urlPath.equals(JSON_SOLUTION))
+    {
 
       jsonSolution(out, requestParams);
-    } else if (urlPath.equals(GET_CDF_RESOURCE)) {
+    }
+    else if (urlPath.equals(GET_CDF_RESOURCE))
+    {
 
       getCDFResource(urlPath, contentItem, out, requestParams);
-    } else if (urlPath.equals(RENDER_HTML)) {
+    }
+    else if (urlPath.equals(RENDER_HTML))
+    {
 
       renderHtml(out, requestParams);
-    } else if (urlPath.equals(EXPORT)) {
+    }
+    else if (urlPath.equals(EXPORT))
+    {
       exportFile(requestParams, out);
-    } else if (urlPath.equals(SETTINGS)) {
+    }
+    else if (urlPath.equals(SETTINGS))
+    {
       cdfSettings(requestParams, out);
-    } else if (urlPath.equals(CALLACTION)) {
+    }
+    else if (urlPath.equals(CALLACTION))
+    {
       callAction(requestParams, out);
-    } else if (urlPath.equals(COMMENTS)) {
+    }
+    else if (urlPath.equals(COMMENTS))
+    {
       processComments(requestParams, out);
-    } else if (urlPath.equals(CONTEXT)) {
+    }
+    else if (urlPath.equals(CONTEXT))
+    {
       generateContext(requestParams, out);
-    } else if (urlPath.equals(GETHEADERS)) {
+    }
+    else if (urlPath.equals(GETHEADERS))
+    {
       getHeaders(payload, requestParams, out);
-    } else {
+    }
+    else
+    {
       // we'll be providing the actual content with cache
       returnResource(urlPath, contentItem, out);
 
@@ -185,7 +226,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   }
 
-  private void generateContext(final IParameterProvider requestParams, final OutputStream out) throws Exception {
+  private void generateContext(final IParameterProvider requestParams, final OutputStream out) throws Exception
+  {
 
     final JSONObject context = new JSONObject();
     Calendar cal = Calendar.getInstance();
@@ -195,7 +237,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     // The first method works in 3.6, for 3.5 it's a different method. We'll try both
     IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
-    if (service == null) {
+    if (service == null)
+    {
       // TODO - Remove this block of code once we drop support for older versions than SUGAR
       service = PentahoSystem.getUserDetailsRoleListService();
     }
@@ -205,9 +248,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
     JSONObject params = new JSONObject();
 
     Iterator it = requestParams.getParameterNames();
-    while (it.hasNext()) {
+    while (it.hasNext())
+    {
       String p = (String) it.next();
-      if (p.indexOf("parameters") == 0) {
+      if (p.indexOf("parameters") == 0)
+      {
         params.put(p.substring(5), requestParams.getParameter(p));
       }
     }
@@ -223,9 +268,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   }
 
-  private void renderXcdf(final OutputStream out, final IParameterProvider requestParams) throws Exception {
+  private void renderXcdf(final OutputStream out, final IParameterProvider requestParams) throws Exception
+  {
     final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-    if (mimeTypeListener != null) {
+    if (mimeTypeListener != null)
+    {
       mimeTypeListener.setMimeType(MIMETYPE);
     }
 
@@ -238,8 +285,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
   }
 
   private void jsonSolution(final OutputStream out,
-          final IParameterProvider requestParams) throws JSONException, ParserConfigurationException {
-    if (requestParams == null) {
+          final IParameterProvider requestParams) throws JSONException, ParserConfigurationException
+  {
+    if (requestParams == null)
+    {
       error(Messages.getErrorString("CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS")); //$NON-NLS-1$
       throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS"));  //$NON-NLS-1$
     }
@@ -259,8 +308,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
           final IContentItem contentItem,
           final OutputStream out,
           final IParameterProvider requestParams)
-          throws Exception {
-    if (requestParams == null) {
+          throws Exception
+  {
+    if (requestParams == null)
+    {
       error(Messages.getErrorString("CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS")); //$NON-NLS-1$
       throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS"));  //$NON-NLS-1$
     }
@@ -270,9 +321,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
     getSolutionFile(resource, out, this);
   }
 
-  private void renderHtml(final OutputStream out, final IParameterProvider requestParams) throws Exception {
+  private void renderHtml(final OutputStream out, final IParameterProvider requestParams) throws Exception
+  {
     final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-    if (mimeTypeListener != null) {
+    if (mimeTypeListener != null)
+    {
       mimeTypeListener.setMimeType(MIMETYPE);
     }
 
@@ -285,14 +338,16 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   private void returnResource(final String urlPath,
           final IContentItem contentItem,
-          final OutputStream out) throws Exception {
+          final OutputStream out) throws Exception
+  {
     final IParameterProvider pathParams = parameterProviders.get("path"); //$NON-NLS-1$
     contentItem.setMimeType(MimeHelper.getMimeTypeFromFileName(urlPath));
 
     final IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
-    final String maxAge = resLoader.getPluginSetting(CdfContentGenerator.class, "pentaho-cdf/max-age");
+    final String maxAge = resLoader.getPluginSetting(CdfContentGenerator.class, "settings/max-age");
     final HttpServletResponse response = (HttpServletResponse) pathParams.getParameter("httpresponse");
-    if (maxAge != null && response != null) {
+    if (maxAge != null && response != null)
+    {
       response.setHeader("Cache-Control", "max-age=" + maxAge);
     }
 
@@ -303,27 +358,31 @@ public class CdfContentGenerator extends BaseContentGenerator {
           final String solution,
           final String path,
           final String action,
-          String template) throws Exception {
+          String template) throws Exception
+  {
 
     final String fullPath = ActionInfo.buildSolutionPath(solution, path, action);
 
     // Check for access permissions
 
     final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
-    if (repository.getSolutionFile(fullPath, ISolutionRepository.ACTION_EXECUTE) == null) {
+    if (repository.getSolutionFile(fullPath, ISolutionRepository.ACTION_EXECUTE) == null)
+    {
       out.write("Access Denied".getBytes("UTF-8"));
       return;
     }
 
     String templateName = null;
-    if (repository.resourceExists(fullPath)) {
+    if (repository.resourceExists(fullPath))
+    {
       final ActionResource resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml",
               fullPath);
       final String dashboardMetadata = repository.getResourceAsString(resource);
       final Document doc = DocumentHelper.parseText(dashboardMetadata);
       templateName = XmlDom4JHelper.getNodeText("/cdf/template", doc, "");
       // If a "style" tag exists, use that one
-      if (doc.selectSingleNode("/cdf/style") != null) {
+      if (doc.selectSingleNode("/cdf/style") != null)
+      {
         template = XmlDom4JHelper.getNodeText("/cdf/style", doc);
       }
     }
@@ -334,11 +393,15 @@ public class CdfContentGenerator extends BaseContentGenerator {
           final String solution,
           final String path,
           final String templateName,
-          String template) throws Exception {
+          String template) throws Exception
+  {
 
-    if (template == null || template.equals("")) {
+    if (template == null || template.equals(""))
+    {
       template = "";
-    } else {
+    }
+    else
+    {
       template = "-" + template;
     }
 
@@ -348,26 +411,34 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     String fullTemplatePath = null;
 
-    if (templateName != null) {
-      if (templateName.startsWith("/") || templateName.startsWith("\\")) { //$NON-NLS-1$ //$NON-NLS-2$
+    if (templateName != null)
+    {
+      if (templateName.startsWith("/") || templateName.startsWith("\\"))
+      { //$NON-NLS-1$ //$NON-NLS-2$
         fullTemplatePath = templateName;
-      } else {
+      }
+      else
+      {
         fullTemplatePath = ActionInfo.buildSolutionPath(solution, path, templateName);
       }
     }
 
 
-    if (fullTemplatePath != null && repository.resourceExists(fullTemplatePath)) {
+    if (fullTemplatePath != null && repository.resourceExists(fullTemplatePath))
+    {
       resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", //$NON-NLS-1$ //$NON-NLS-2$
               fullTemplatePath);
-    } else {
+    }
+    else
+    {
       resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", //$NON-NLS-1$ //$NON-NLS-2$
               "system/" + PLUGIN_NAME + "/default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
 
     // Check for access permissions
-    if (repository.getSolutionFile(resource, ISolutionRepository.ACTION_EXECUTE) == null) {
+    if (repository.getSolutionFile(resource, ISolutionRepository.ACTION_EXECUTE) == null)
+    {
       out.write("Access Denied".getBytes("UTF-8"));
       return;
     }
@@ -380,7 +451,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
     ArrayList<String> i18nTagsList = new ArrayList<String>();
-    if (templater != null) {
+    if (templater != null)
+    {
       final ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", "system/" + PLUGIN_NAME + "/" + dashboardTemplate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
       String templateContent = repository.getResourceAsString(templateResource, ISolutionRepository.ACTION_EXECUTE);
       // Process i18n on dashboard outer template
@@ -388,13 +460,17 @@ public class CdfContentGenerator extends BaseContentGenerator {
       templateContent = processi18nTags(templateContent, i18nTagsList);
       // Process i18n on dashboard outer template - end
       final String[] sections = templater.breakTemplateString(templateContent, "", userSession); //$NON-NLS-1$
-      if (sections != null && sections.length > 0) {
+      if (sections != null && sections.length > 0)
+      {
         intro = sections[0];
       }
-      if (sections != null && sections.length > 1) {
+      if (sections != null && sections.length > 1)
+      {
         footer = sections[1];
       }
-    } else {
+    }
+    else
+    {
       intro = Messages.getErrorString("CdfContentGenerator.ERROR_0005_BAD_TEMPLATE_OBJECT");
     }
 
@@ -407,7 +483,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
     BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     StringBuilder sb = new StringBuilder();
     String line = null;
-    while ((line = reader.readLine()) != null) {
+    while ((line = reader.readLine()) != null)
+    {
       // Process i18n for each line of the dashboard output
       line = processi18nTags(line, i18nTagsList);
       // Process i18n - end
@@ -419,8 +496,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
     intro = intro.replaceAll("\\{load\\}", "onload=\"load()\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     intro = intro.replaceAll("\\{body-tag-unload\\}", "");
     intro = intro.replaceAll("#\\{MESSAGE_SET\\}", buildMessageSetCode(i18nTagsList));
-      
-      /************************************************/
+
+    /************************************************/
     /*      Add cdf libraries
     /************************************************/
     final Date startDate = new Date();
@@ -439,78 +516,95 @@ public class CdfContentGenerator extends BaseContentGenerator {
     out.write(dashboardContent.getBytes("UTF-8"));
     out.write("</div>".getBytes("UTF-8"));
     out.write(footer.getBytes("UTF-8"));
-    
+
     setResponseHeaders(MIME_HTML, 0, null);
   }
 
-    private String buildMessageSetCode(ArrayList<String> tagsList) {
-       StringBuffer messageCodeSet = new StringBuffer();
-       for(String tag : tagsList) {
-           messageCodeSet.append("\\$('#").append(updateSelectorName(tag)).append("').html(jQuery.i18n.prop('").append(tag).append("'));\n");
-       }
-       return messageCodeSet.toString();
+  private String buildMessageSetCode(ArrayList<String> tagsList)
+  {
+    StringBuffer messageCodeSet = new StringBuffer();
+    for (String tag : tagsList)
+    {
+      messageCodeSet.append("\\$('#").append(updateSelectorName(tag)).append("').html(jQuery.i18n.prop('").append(tag).append("'));\n");
     }
-
-  private String processi18nTags(String content, ArrayList<String> tagsList) {
-     String tagPattern = "CDF.i18n\\(\"";
-     String[] test = content.split(tagPattern);
-     if (test.length == 1) return content;
-     StringBuffer resBuffer = new StringBuffer();
-     int i;
-     String tagValue;
-     resBuffer.append(test[0]);
-     for (i=1; i<test.length; i++) {
-
-         // First tag is processed differently that other because is the only case where I don't
-         // have key in first position
-         resBuffer.append("<span id=\"");
-         if (i != 0) {
-            // Right part of the string with the value of the tag herein
-            tagValue = test[i].substring(0, test[i].indexOf("\")"));
-            tagsList.add(tagValue);
-            resBuffer.append(updateSelectorName(tagValue));
-            resBuffer.append("\"/>");
-            resBuffer.append(test[i].substring(test[i].indexOf("\")")+2, test[i].length()));
-         }
-     }
-     return resBuffer.toString();
+    return messageCodeSet.toString();
   }
 
-  private String updateSelectorName(String name) {
-      // If we've the character . in the message key substitute it conventionally to _
-      // when dynamically generating the selector name. The "." character is not permitted in the
-      // selector id name
-      return  name.replace(".", "_");
-  }
-  private String updateUserLanguageKey(String intro) {
-      
-        // Fill the template with the correct user locale
-        Locale locale = LocaleHelper.getLocale();
-        if (logger.isDebugEnabled())
-        {
-          logger.debug("Current Pentaho user locale: " + locale.toString());
-        }
-        intro = intro.replaceAll("#\\{LANGUAGE_CODE\\}", locale.toString());
-        return intro;
+  private String processi18nTags(String content, ArrayList<String> tagsList)
+  {
+    String tagPattern = "CDF.i18n\\(\"";
+    String[] test = content.split(tagPattern);
+    if (test.length == 1)
+    {
+      return content;
+    }
+    StringBuffer resBuffer = new StringBuffer();
+    int i;
+    String tagValue;
+    resBuffer.append(test[0]);
+    for (i = 1; i < test.length; i++)
+    {
+
+      // First tag is processed differently that other because is the only case where I don't
+      // have key in first position
+      resBuffer.append("<span id=\"");
+      if (i != 0)
+      {
+        // Right part of the string with the value of the tag herein
+        tagValue = test[i].substring(0, test[i].indexOf("\")"));
+        tagsList.add(tagValue);
+        resBuffer.append(updateSelectorName(tagValue));
+        resBuffer.append("\"/>");
+        resBuffer.append(test[i].substring(test[i].indexOf("\")") + 2, test[i].length()));
+      }
+    }
+    return resBuffer.toString();
   }
 
-      private void exportFile(final IParameterProvider requestParams, final OutputStream output) {
+  private String updateSelectorName(String name)
+  {
+    // If we've the character . in the message key substitute it conventionally to _
+    // when dynamically generating the selector name. The "." character is not permitted in the
+    // selector id name
+    return name.replace(".", "_");
+  }
 
-    try {
+  private String updateUserLanguageKey(String intro)
+  {
+
+    // Fill the template with the correct user locale
+    Locale locale = LocaleHelper.getLocale();
+    if (logger.isDebugEnabled())
+    {
+      logger.debug("Current Pentaho user locale: " + locale.toString());
+    }
+    intro = intro.replaceAll("#\\{LANGUAGE_CODE\\}", locale.toString());
+    return intro;
+  }
+
+  private void exportFile(final IParameterProvider requestParams, final OutputStream output)
+  {
+
+    try
+    {
 
       final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
       final ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
-      if (serviceCallAction.execute(requestParams, userSession, out)) {
+      if (serviceCallAction.execute(requestParams, userSession, out))
+      {
 
         final String exportType = requestParams.getStringParameter("exportType", "excel");
 
         Export export;
 
-        if (exportType.equals("csv")) {
+        if (exportType.equals("csv"))
+        {
           export = new ExportCSV(output);
           setResponseHeaders(MIME_CSV, 0, "export" + export.getExtension());
-        } else {
+        }
+        else
+        {
           export = new ExportExcel(output);
           setResponseHeaders(MIME_XLS, 0, "export" + export.getExtension());
         }
@@ -518,22 +612,30 @@ public class CdfContentGenerator extends BaseContentGenerator {
         export.exportFile(new JSONObject(out.toString()));
       }
 
-    } catch (IOException e) {
+    }
+    catch (IOException e)
+    {
       e.printStackTrace();
-    } catch (JSONException e) {
+    }
+    catch (JSONException e)
+    {
       e.printStackTrace();
     }
 
   }
 
-  private void cdfSettings(final IParameterProvider requestParams, final OutputStream out) {
+  private void cdfSettings(final IParameterProvider requestParams, final OutputStream out)
+  {
 
     final String method = requestParams.getStringParameter("method", null);
     final String key = requestParams.getStringParameter("key", null);
 
-    if (method.equals("set")) {
+    if (method.equals("set"))
+    {
       CdfSettings.getInstance().setValue(key, requestParams.getParameter("value"), userSession);
-    } else {
+    }
+    else
+    {
       final Object value = CdfSettings.getInstance().getValue(key, userSession);
       final PrintWriter pw = new PrintWriter(out);
       pw.println(value != null ? value.toString() : "");
@@ -541,22 +643,27 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
   }
 
-  private void callAction(final IParameterProvider requestParams, final OutputStream out) {
+  private void callAction(final IParameterProvider requestParams, final OutputStream out)
+  {
 
     final ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
     serviceCallAction.execute(requestParams, userSession, out);
   }
 
-  private void processComments(final IParameterProvider requestParams, final OutputStream out) throws JSONException {
+  private void processComments(final IParameterProvider requestParams, final OutputStream out) throws JSONException
+  {
 
     String result;
 
-    try {
+    try
+    {
 
       final CommentsEngine commentsEngine = CommentsEngine.getInstance();
       result = commentsEngine.process(requestParams, userSession);
 
-    } catch (InvalidCdfOperationException ex) {
+    }
+    catch (InvalidCdfOperationException ex)
+    {
 
       final String errMessage = ex.getCause().getClass().getName() + " - " + ex.getMessage();
       logger.error("Error processing comment: " + errMessage);
@@ -573,27 +680,35 @@ public class CdfContentGenerator extends BaseContentGenerator {
   }
 
   @Override
-  public Log getLogger() {
+  public Log getLogger()
+  {
     // TODO Auto-generated method stub
     return null;
   }
 
-  public String concatFiles(String includeString, final Hashtable filesAdded, final Hashtable files) {
+  public String concatFiles(String includeString, final Hashtable filesAdded, final Hashtable files)
+  {
 
     final String newLine = System.getProperty("line.separator");
     final Enumeration keys = files.keys();
-    while (keys.hasMoreElements()) {
+    while (keys.hasMoreElements())
+    {
 
       final String key = (String) keys.nextElement();
       final String[] includeFiles = (String[]) files.get(key);
 
-      for (int i = 0; i < includeFiles.length; i++) {
-        if (!filesAdded.containsKey(includeFiles[i])) {
+      for (int i = 0; i < includeFiles.length; i++)
+      {
+        if (!filesAdded.containsKey(includeFiles[i]))
+        {
 
           filesAdded.put(includeFiles[i], '1');
-          if (key.equals("script")) {
+          if (key.equals("script"))
+          {
             includeString += "<script language=\"javascript\" type=\"text/javascript\" src=\"" + includeFiles[i].replaceAll(BASE_URL_TAG, BASE_URL) + "\"></script>" + newLine;
-          } else {
+          }
+          else
+          {
             includeString += "<link rel=\"stylesheet\" href=\"" + includeFiles[i].replaceAll(BASE_URL_TAG, BASE_URL) + "\" type=\"text/css\" />";
           }
         }
@@ -603,14 +718,20 @@ public class CdfContentGenerator extends BaseContentGenerator {
     return includeString;
   }
 
-  public boolean matchComponent(int keyIndex, final String key, final String content) {
+  public boolean matchComponent(int keyIndex, final String key, final String content)
+  {
 
-    for (int i = keyIndex - 1; i > 0; i--) {
-      if (content.charAt(i) == ':' || content.charAt(i) == '"' || ("" + content.charAt(i)).trim().equals("")) {
+    for (int i = keyIndex - 1; i > 0; i--)
+    {
+      if (content.charAt(i) == ':' || content.charAt(i) == '"' || ("" + content.charAt(i)).trim().equals(""))
+      {
         //noinspection UnnecessaryContinue
         continue;
-      } else {
-        if ((i - 3) > 0 && content.substring((i - 3), i + 1).equals("type")) {
+      }
+      else
+      {
+        if ((i - 3) > 0 && content.substring((i - 3), i + 1).equals("type"))
+        {
           return true;
         }
 
@@ -619,14 +740,16 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
 
     keyIndex = content.indexOf(key, keyIndex + key.length());
-    if (keyIndex != -1) {
+    if (keyIndex != -1)
+    {
       return matchComponent(keyIndex, key, content);
     }
 
     return false;
   }
 
-  public void getContent(final String fileName, final OutputStream out, final ILogger logger) throws Exception {
+  public void getContent(final String fileName, final OutputStream out, final ILogger logger) throws Exception
+  {
 
     // write out the scripts
     // TODO support caching
@@ -635,43 +758,52 @@ public class CdfContentGenerator extends BaseContentGenerator {
     final InputStream in = new FileInputStream(file);
     final byte[] buff = new byte[4096];
     int n = in.read(buff);
-    while (n != -1) {
+    while (n != -1)
+    {
       out.write(buff, 0, n);
       n = in.read(buff);
     }
     in.close();
   }
 
-  public void getSolutionFile(final String resourcePath, final OutputStream out, final ILogger logger) throws Exception {
+  public void getSolutionFile(final String resourcePath, final OutputStream out, final ILogger logger) throws Exception
+  {
     final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
     final InputStream in = repository.getResourceInputStream(resourcePath, true);
     final byte[] buff = new byte[4096];
     int n = in.read(buff);
-    while (n != -1) {
+    while (n != -1)
+    {
       out.write(buff, 0, n);
       n = in.read(buff);
     }
     in.close();
   }
 
-  private void setResponseHeaders(final String mimeType, final int cacheDuration, final String attachmentName) {
+  private void setResponseHeaders(final String mimeType, final int cacheDuration, final String attachmentName)
+  {
     // Make sure we have the correct mime type
     final HttpServletResponse response = (HttpServletResponse) parameterProviders.get("path").getParameter("httpresponse");
     response.setHeader("Content-Type", mimeType);
 
-    if (attachmentName != null) {
+    if (attachmentName != null)
+    {
       response.setHeader("content-disposition", "attachment; filename=" + attachmentName);
     }
 
     // Cache?
-    if (cacheDuration > 0) {
+    if (cacheDuration > 0)
+    {
       response.setHeader("Cache-Control", "max-age=" + cacheDuration);
-    } else {
+    }
+    else
+    {
       response.setHeader("Cache-Control", "max-age=0, no-store");
     }
   }
 
-  private void getHeaders(final String dashboardContent, final IParameterProvider requestParams, final OutputStream out) throws Exception {
+  private void getHeaders(final String dashboardContent, final IParameterProvider requestParams, final OutputStream out) throws Exception
+  {
 
     final File file = new File(PentahoSystem.getApplicationContext().getSolutionPath(
             "system/" + PLUGIN_NAME + "/resources.txt"));
@@ -696,16 +828,21 @@ public class CdfContentGenerator extends BaseContentGenerator {
     StringBuilder stylesBuilders = new StringBuilder();
 
     // Add common libraries
-    if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true")) {
+    if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true"))
+    {
       //DEBUG MODE
-      for (String header : miniscripts) {
+      for (String header : miniscripts)
+      {
         scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"></script>\n");
       }
-      for (String header : ministyles) {
+      for (String header : ministyles)
+      {
         stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"/>\n");
       }
 
-    } else {
+    }
+    else
+    {
       // NORMAL MODE
       String stylesHash = packager.minifyPackage("styles");
       String scriptsHash = packager.minifyPackage("scripts");
@@ -714,10 +851,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
     //Add extra components libraries
 
-    for (String header : scripts) {
+    for (String header : scripts)
+    {
       scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"></script>\n");
     }
-    for (String header : styles) {
+    for (String header : styles)
+    {
       stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"/>\n");
     }
 
@@ -727,39 +866,51 @@ public class CdfContentGenerator extends BaseContentGenerator {
     StringBuilder stuff = new StringBuilder();
     includes.put("scripts", scriptsBuilders.toString());
     includes.put("styles", stylesBuilders.toString());
-    for (String key : includes.keySet()) {
+    for (String key : includes.keySet())
+    {
       stuff.append(includes.get(key));
     }
     out.write(stuff.toString().getBytes("UTF8"));
   }
 
-  private ArrayList<String> getExtraScripts(String dashboardContent, Properties resources) {
+  private ArrayList<String> getExtraScripts(String dashboardContent, Properties resources)
+  {
     ArrayList<String> scripts = new ArrayList<String>();
     boolean all;
-    if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
+    if (dashboardContent == null || StringUtils.isEmpty(dashboardContent))
+    {
       all = true;
-    } else {
+    }
+    else
+    {
       all = false;
     }
 
     final Enumeration resourceKeys = resources.propertyNames();
-    while (resourceKeys.hasMoreElements()) {
+    while (resourceKeys.hasMoreElements())
+    {
 
       final String scriptkey = (String) resourceKeys.nextElement();
 
       final String key;
 
-      if (scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
+      if (scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1)
+      {
         key = scriptkey.replaceAll("Script$", "");
-      } else {
+      }
+      else
+      {
         continue;
       }
 
       final int keyIndex = all ? 0 : dashboardContent.indexOf(key);
-      if (keyIndex != -1) {
-        if (all || matchComponent(keyIndex, key, dashboardContent)) {
+      if (keyIndex != -1)
+      {
+        if (all || matchComponent(keyIndex, key, dashboardContent))
+        {
           // ugly hack -- if we don't know for sure we need OpenStreetMaps, don't load it!
-          if (all && scriptkey.indexOf("mapScript") != -1) {
+          if (all && scriptkey.indexOf("mapScript") != -1)
+          {
             continue;
           }
           scripts.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
@@ -770,33 +921,44 @@ public class CdfContentGenerator extends BaseContentGenerator {
     return scripts;
   }
 
-  private ArrayList<String> getExtraStyles(String dashboardContent, Properties resources) {
+  private ArrayList<String> getExtraStyles(String dashboardContent, Properties resources)
+  {
     ArrayList<String> styles = new ArrayList<String>();
     boolean all;
-    if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
+    if (dashboardContent == null || StringUtils.isEmpty(dashboardContent))
+    {
       all = true;
-    } else {
+    }
+    else
+    {
       all = false;
     }
 
-    if (dashboardContent != null && !StringUtils.isEmpty(dashboardContent)) {
+    if (dashboardContent != null && !StringUtils.isEmpty(dashboardContent))
+    {
       final Enumeration resourceKeys = resources.propertyNames();
-      while (resourceKeys.hasMoreElements()) {
+      while (resourceKeys.hasMoreElements())
+      {
 
         final String scriptkey = (String) resourceKeys.nextElement();
 
         final String key;
 
 
-        if (scriptkey.indexOf("Link") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
+        if (scriptkey.indexOf("Link") != -1 && scriptkey.indexOf("commonLibraries") == -1)
+        {
           key = scriptkey.replaceAll("Link$", "");
-        } else {
+        }
+        else
+        {
           continue;
         }
 
         final int keyIndex = all ? 0 : dashboardContent.indexOf(key);
-        if (keyIndex != -1) {
-          if (matchComponent(keyIndex, key, dashboardContent)) {
+        if (keyIndex != -1)
+        {
+          if (matchComponent(keyIndex, key, dashboardContent))
+          {
             styles.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
           }
         }
@@ -805,7 +967,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
     return styles;
   }
 
-  private void init() throws Exception {
+  private void init() throws Exception
+  {
 
     String rootdir = PentahoSystem.getApplicationContext().getSolutionPath(
             "system/" + PLUGIN_NAME);
@@ -820,18 +983,22 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     boolean scriptsAvailable = packager.isPackageRegistered("scripts");
     boolean stylesAvailable = packager.isPackageRegistered("styles");
-    if (!scriptsAvailable) {
+    if (!scriptsAvailable)
+    {
       scriptsList.addAll(Arrays.asList(resources.get("commonLibrariesScript").toString().split(",")));
-      for (int i = 0; i < scriptsList.size(); i++) {
+      for (int i = 0; i < scriptsList.size(); i++)
+      {
         String fname = scriptsList.get(i);
         scriptsList.set(i, fname.replaceAll(BASE_URL_TAG + "/content/pentaho-cdf", ""));
       }
       packager.registerPackage("scripts", Packager.Filetype.JS, rootdir, rootdir + "/js/scripts.js", scriptsList.toArray(new String[scriptsList.size()]));
     }
 
-    if (!stylesAvailable) {
+    if (!stylesAvailable)
+    {
       stylesList.addAll(Arrays.asList(resources.get("commonLibrariesLink").toString().split(",")));
-      for (int i = 0; i < stylesList.size(); i++) {
+      for (int i = 0; i < stylesList.size(); i++)
+      {
         String fname = stylesList.get(i);
         stylesList.set(i, fname.replaceAll(BASE_URL_TAG + "/content/pentaho-cdf", ""));
       }
