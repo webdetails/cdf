@@ -873,8 +873,12 @@ public class CdfContentGenerator extends BaseContentGenerator
     out.write(stuff.toString().getBytes("UTF8"));
   }
 
-  private ArrayList<String> getExtraScripts(String dashboardContent, Properties resources)
+  private ArrayList<String> getExtraScripts(String dashboardContentOrig, Properties resources)
   {
+
+    // Compare this ignoring case
+    final String dashboardContent = dashboardContentOrig.toLowerCase();
+
     ArrayList<String> scripts = new ArrayList<String>();
     boolean all;
     if (dashboardContent == null || StringUtils.isEmpty(dashboardContent))
@@ -903,10 +907,10 @@ public class CdfContentGenerator extends BaseContentGenerator
         continue;
       }
 
-      final int keyIndex = all ? 0 : dashboardContent.indexOf(key);
+      final int keyIndex = all ? 0 : dashboardContent.indexOf(key.toLowerCase());
       if (keyIndex != -1)
       {
-        if (all || matchComponent(keyIndex, key, dashboardContent))
+        if (all || matchComponent(keyIndex, key.toLowerCase(), dashboardContent))
         {
           // ugly hack -- if we don't know for sure we need OpenStreetMaps, don't load it!
           if (all && scriptkey.indexOf("mapScript") != -1)
@@ -921,8 +925,11 @@ public class CdfContentGenerator extends BaseContentGenerator
     return scripts;
   }
 
-  private ArrayList<String> getExtraStyles(String dashboardContent, Properties resources)
+  private ArrayList<String> getExtraStyles(String dashboardContentOrig, Properties resources)
   {
+    // Compare this ignoring case
+    final String dashboardContent = dashboardContentOrig.toLowerCase();
+
     ArrayList<String> styles = new ArrayList<String>();
     boolean all;
     if (dashboardContent == null || StringUtils.isEmpty(dashboardContent))
@@ -954,10 +961,10 @@ public class CdfContentGenerator extends BaseContentGenerator
           continue;
         }
 
-        final int keyIndex = all ? 0 : dashboardContent.indexOf(key);
+        final int keyIndex = all ? 0 : dashboardContent.indexOf(key.toLowerCase());
         if (keyIndex != -1)
         {
-          if (matchComponent(keyIndex, key, dashboardContent))
+          if (matchComponent(keyIndex, key.toLowerCase(), dashboardContent))
           {
             styles.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
           }
