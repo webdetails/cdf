@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.Messages;
-import org.pentaho.platform.api.engine.IOutputHandler;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 import org.pentaho.platform.web.http.HttpOutputHandler;
 
@@ -25,10 +24,9 @@ public abstract class Export extends PentahoBase implements IExport
   protected HttpOutputHandler httpHandler = null;
   protected OutputStream outputStream = null;
 
-  public Export(IOutputHandler httpHandler) throws IOException
+  public Export(final OutputStream out) throws IOException
   {
-    this.httpHandler = (HttpOutputHandler) httpHandler;
-    this.outputStream = this.httpHandler.getOutputContent().getOutputStream(null);
+    this.outputStream = out;
   }
 
   ;

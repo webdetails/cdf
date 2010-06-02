@@ -7,5 +7,4 @@ public interface IExport {
 	
 	public abstract String getExtension();
 	
-	public abstract void setContentType();
 }

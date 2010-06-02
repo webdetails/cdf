@@ -5,9 +5,9 @@
 package org.pentaho.cdf.export;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.pentaho.cdf.Messages;
-import org.pentaho.platform.api.engine.IOutputHandler;
 import jxl.*;
 import jxl.format.Border;
 import jxl.format.BorderLineStyle;
@@ -24,8 +24,8 @@ public class ExportExcel extends Export implements IExport {
   WritableCellFormat csn;
   public static final String extensionFile = ".xls";
 
-  public ExportExcel(IOutputHandler httpHandler) throws IOException {
-    super(httpHandler);
+  public ExportExcel(final OutputStream out) throws IOException {
+    super(out);
   }
 
   public void export(String[][] resultSet) {
@@ -106,8 +106,4 @@ public class ExportExcel extends Export implements IExport {
     return extensionFile;
   }
 
-  public void setContentType() {
-    httpHandler.getOutputContent().setMimeType("application/vnd.ms-excel");
-    httpHandler.getResponse().setHeader("filename", "export.xls");
-  }
 }
