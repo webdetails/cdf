@@ -1598,6 +1598,5 @@ var PrptComponent = BaseComponent.extend({
 				executeAtStart = this.executeAtStart ;
 			}
 		},
-		iconImgSrc : '../images/file.png',
-		executeAtStart: true
+		iconImgSrc : '../images/file.png'
 	});
