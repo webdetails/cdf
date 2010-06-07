@@ -28,8 +28,8 @@ import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.platform.api.engine.IActionSequenceResource;
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
-import org.pentaho.platform.api.engine.IOutputHandler;
 import org.pentaho.platform.api.engine.IParameterProvider;
+import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
 import org.pentaho.platform.api.repository.IContentItem;
@@ -127,6 +127,7 @@ public class CdfContentGenerator extends BaseContentGenerator
         out = (OutputStream) iface.get("output");
         method = "/" + (String) iface.get("method");
         payload = (String) iface.get("payload");
+        this.userSession = this.userSession != null ? this.userSession : (IPentahoSession) iface.get("usersession");
       }
       else
       { // if not, we handle the request normally
