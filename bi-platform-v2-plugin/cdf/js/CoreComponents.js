@@ -1069,110 +1069,111 @@ var CheckComponent = ToggleButtonBaseComponent.extend({
 });
 
 var MultiButtonComponent = ToggleButtonBaseComponent.extend({
-    indexes: [],//used as static
-    update: function(){
-        var myArray = this.getValuesArray();
-        var cssClass= "toggleButton";
-        selectHTML = "";
-        var firstVal;
-        var valIdx = this.valueAsId ? 1 : 0;
-        var lblIdx = 1;
+  indexes: [],//used as static
+  update: function(){
+	  var myArray = this.getValuesArray();
+    var cssClass= "toggleButton";
+    selectHTML = "";
+    var firstVal;
+    var valIdx = this.valueAsId ? 1 : 0;
+    var lblIdx = 1;
         
-        if (this.isMultiple == undefined) 
-            this.isMultiple = false;
+	  if (this.isMultiple == undefined) this.isMultiple = false;
         
-        for (var i = 0, len = myArray.length; i < len; i++) {
-            var value = myArray[i][valIdx];
-            var label = myArray[i][lblIdx];
-            
-            selectHTML += "<button onclick='MultiButtonComponent.prototype.clickButton(\"" +
-	            this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ")'";
-            selectHTML += "class='" + cssClass + "' name='" + this.name + "' value='" + value + "'> "
-            selectHTML += label + "</button>" + (this.separator == undefined ? "" : this.separator);
-            
-            if (i == 0) 
-                firstVal = value;
-        }
-        // update the placeholder
-        var ph = $("#" + this.htmlObject);
-        ph.html(selectHTML);
+    for (var i = 0, len = myArray.length; i < len; i++){
+	    var value = myArray[i][valIdx];
+      var label = myArray[i][lblIdx];
+
+      selectHTML += "<button onclick='MultiButtonComponent.prototype.clickButton(\"" +
+        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ")'";
+        selectHTML += "class='" + cssClass + "' name='" + this.name + "' value='" + value + "'> "
+        selectHTML += label + "</button>" + (this.separator == undefined ? "" : this.separator);
+
+      if (i == 0) firstVal = value;
+    }
+
+    // update the placeholder
+    var ph = $("#" + this.htmlObject);
+    ph.html(selectHTML);
         
-        //default
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    //default
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
         
-       // if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
-       if(currentVal == null) Dashboards.setParameter(this.parameter, firstVal);
-       // }
-        else {
-            for (var i = 0; i < myArray.length; i++) {
-                if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
-                    MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
-                    break;//ToDo: if isMultiple, don't break
-                }
-            }
-        }
-    },
+   	if(currentVal == null){ 
+			Dashboards.setParameter(this.parameter, firstVal);
+		}
+	  else {
+	    for (var i = 0; i < myArray.length; i++) {
+        if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
+        	MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
+        	break;//ToDo: if isMultiple, don't break
+    		}
+    	}
+    }
+  },
     
-    getValue: function(){
-        //return $("#"+this.htmlObject + " ."+this.name)[MultiButtonComponent.prototype.getSelectedIndex(this.name)].value;
-				if(this.isMultiple){
-					var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
-					var a = new Array();
-					for(var i=0; i < indexes.length; i++){
-						a.push(this.getValueByIdx(indexes[i]));
-					}
-					return a;
-				}
-				else {
-        	return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
-				}
-    },
+  getValue: function(){
+		if(this.isMultiple){
+			var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
+			var a = new Array();
+			for(var i=0; i < indexes.length; i++){
+				a.push(this.getValueByIdx(indexes[i]));
+			}
+			return a;
+		}
+		else {
+    	return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
+		}
+  },
     
-    getValueByIdx: function(idx){
-        return $("#" + this.htmlObject + " button")[idx].value;
-    },
+  getValueByIdx: function(idx){
+    return $("#" + this.htmlObject + " button")[idx].value;
+  },
     
-    //static MultiButtonComponent.prototype.clickButton
-    clickButton: function(htmlObject, name, index, isMultiple){
+  //static MultiButtonComponent.prototype.clickButton
+  clickButton: function(htmlObject, name, index, isMultiple){
 		var cssClass= "toggleButton";
 		var cssClassSelected= "toggleButtonPressed";
 
-        var buttons = $("#" + htmlObject + " button");
-        if (isMultiple) {//toggle button
-            if (this.indexes[name] == undefined) this.indexes[name] = [];
-						else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];
+		var buttons = $("#" + htmlObject + " button");
+    if (isMultiple) {//toggle button
+    	if (this.indexes[name] == undefined) this.indexes[name] = [];
+			else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
 				
-            var disable = false;
-            for (var i = 0; i < this.indexes[name].length; ++i) {
-                if (this.indexes[name][i] == index) {
-                    disable = true;
-                    this.indexes[name].splice(i, 1);
-                    break;
-                }
-            }
-            if (disable) 
-			   buttons[index].className = cssClass;
-            else {
-			   	buttons[index].className = cssClassSelected;
-                this.indexes[name].push(index);
-            }
+	    var disable = false;
+      for (var i = 0; i < this.indexes[name].length; ++i) {
+	      if (this.indexes[name][i] == index) {
+          disable = true;
+          this.indexes[name].splice(i, 1);
+          break;
         }
-        else {//de-select old, select new
-            if (this.indexes[name] != undefined) {
-                //buttons[this.indexes[name]].style.backgroundColor = unselectedBG;
-				buttons[this.indexes[name]].className = cssClass;
-            }
-            this.indexes[name] = index;
-           // buttons[index].style.backgroundColor = selectedBG;
+      }
+      if (disable) buttons[index].className = cssClass;
+      else {
+		   	buttons[index].className = cssClassSelected;
+        this.indexes[name].push(index);
+      }
+  	}
+    else {//de-select old, select new
+      if (this.indexes[name] != undefined) {
+				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
+					for(var i = 0; i < this.indexes[name].length; i++){
+						buttons[this.indexes[name][i]].className = cssClass;
+					}
+				}
+				else buttons[this.indexes[name]].className = cssClass;
+      }
+      this.indexes[name] = index;
 			buttons[index].className = cssClassSelected;
-        }
-        this.callAjaxAfterRender(name);
-    },
-    //static MultiButtonComponent.prototype.getSelectedIndex
-    getSelectedIndex: function(name){
-        return this.indexes[name];
-    }
+	  }
+    this.callAjaxAfterRender(name);
+  },
+ 
+ //static MultiButtonComponent.prototype.getSelectedIndex
+  getSelectedIndex: function(name){
+    return this.indexes[name];
+  }
 });
 
 var AutocompleteBoxComponent = BaseComponent.extend({

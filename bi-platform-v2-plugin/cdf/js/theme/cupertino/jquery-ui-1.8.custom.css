@@ -478,3 +478,19 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 ----------------------------------*/
 .ui-progressbar { height:2em; text-align: left; }
 .ui-progressbar .ui-progressbar-value {margin: -1px; height:100%; }
+
+/* MultiButton */
+.toggleButton {
+	background:url("images/ui-bg_glass_80_d7ebf9_1x400.png") repeat-x scroll 50% 50% #D7EBF9;
+	border:1px solid #AED0EA;
+	color:#2779AA;
+	font-weight:bold;
+	cursor:pointer;
+	padding: .4em 1em;
+}
+.toggleButtonPressed {
+	background:url("images/ui-bg_glass_50_3baae3_1x400.png") repeat-x scroll 50% 50% #6C767D;
+	color:#ffffff;
+	font-weight:bold;
+	padding: .4em 1em;
+}

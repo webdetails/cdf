@@ -36,7 +36,30 @@
 			<dt>refreshPeriod</dt>
 			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
 
+			<dt>dateFormat</dt>
+			<dd><i>String - </i>Format used for date output and parsing (including <i>startDate</i> and <i>endDate</i> fields). Must be a jquery datePicker format string:
+				<ul>
+					<li> d  - day of month (no leading zero)</li>
+					<li> dd - day of month (two digit)</li>
+					<li> D  - day name short</li>
+					<li> DD - day name long</li>
+					<li> m  - month of year (no leading zero)</li>
+					<li> mm - month of year (two digit)</li>
+					<li> M  - month name short</li>
+					<li> MM - month name long</li>
+					<li> y  - year (two digit)</li>
+					<li> yy - year (four digit)</li>
+					<li> @  - Unix timestamp (also known as epoch seconds or POSIX time) in milliseconds since 01/01/1970</li>
+					<li> '...' - literal text</li>
+					<li> '' - single quote</li>
+					<li> anything else - literal text</li>
+				</ul>Default is 'yy-mm-dd'.</dd>
 
+			<dt>startDate</dt>
+			<dd><i>String - </i>Component will only allow selection of dates after this value. Value is a string containing a date compliant to this component's <i>dateFormat</i>. Special value 'TODAY' will translate to current date whenever the component is updated. Empty by default (no restriction)</dd>
+
+			<dt>endDate</dt>
+			<dd><i>String - </i>Component will only allow selection of dates before this value. Value is a string containing a date compliant to this component's <i>dateFormat</i>. Special value 'TODAY' will translate to current date whenever the component is updated. Empty by default (no restriction)</dd>
 
 			<dt>executeAtStart</dt>
 			<dd>True to execute the component at start, false otherwise</dd>
@@ -83,6 +106,9 @@ myInput =
 	parameters:[],
 	parameter: "input",
 	htmlObject: "sampleObject",
+	dateFormat: "yy-mm-dd",
+	startDate: "2006-05-31",
+	endDate: "TODAY",
 	executeAtStart: true,
 	tooltip: "Click me to select a date",
 	postChange: function(){alert("You chose: " + input);}
