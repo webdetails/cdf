@@ -86,12 +86,30 @@ var DashboardsMap =
 
 		showMarker: function (oldMarker, record){
 
-			icon = record[5];
+			//2010-06-29 - Ingo Klose
+			// Adding support to set marker size 
+			var icon;
+			var size;
 
 			//create marker
 			var lon = record[6];
 			var lat = record[7];
-			var size = new OpenLayers.Size(21,25);
+			
+			
+			// Test if icon is an array
+			// markers: [["js/OpenMap/OpenLayers/img/marker-green.png",42,50],["js/OpenMap/OpenLayers/img/marker-gold.png",21,25],["js/OpenMap/OpenLayers/img/marker.png",21,25]]
+			if (record[5] instanceof Array) {
+				var icon_array = record[5];
+				icon = icon_array[0];
+				size = new OpenLayers.Size(icon_array[1],icon_array[2])
+			}
+			// default behavior is backward compatible
+			else{
+				icon = record[5];
+				size = new OpenLayers.Size(21,25);
+			}
+			
+			
 			var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
 			var iconObj = new OpenLayers.Icon(icon,size,offset);
 			marker = new OpenLayers.Marker(lonLatToMercator(new OpenLayers.LonLat(lon,lat)),iconObj);
