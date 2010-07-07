@@ -35,12 +35,12 @@
 // Init jQuery i18n plugin
     loadMessageBundles = function(lang) {
         jQuery.i18n.properties({
-            name:'Messages',
-            path:'resources/languages/',
+            name:'#{GLOBAL_MESSAGE_SET_NAME}',
+            path:'#{GLOBAL_MESSAGE_SET_PATH}',
             mode:'both',
             language:(lang == 'browser' ? jQuery.i18n.browserLang() : lang),
             callback: function() {
-                #{MESSAGE_SET}
+                #{GLOBAL_MESSAGE_SET}
             }
         });
     }
@@ -104,7 +104,8 @@
 
         <div id="footer">
             <a href="http://www.webdetails.pt"><img width="100" height="25" src="resources/style/images/webdetails.png"/></a>
-            <br/>CDF.i18n("template.footer")
+            <br/>CDF.i18n("template.footer1")
+            <br/>CDF.i18n("template.footer2")
         </div>
     </div>
 </div>
