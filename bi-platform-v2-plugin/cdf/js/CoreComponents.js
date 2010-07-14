@@ -65,6 +65,10 @@ var BaseComponent = Base.extend({
     if(jData === null){
       return []; //we got an error...
     }
+    
+    if($(jData).find("CdaExport").size() > 0){
+      return this.parseArrayCda(jData, includeHeader);
+    }
 
     var myArray = new Array();
 			
@@ -81,6 +85,31 @@ var BaseComponent = Base.extend({
     jDetails.each(function(){
       var _a = new Array();
       $(this).children("DATA-ITEM").each(function(){
+        _a.push($(this).text());
+      });
+      myArray.push(_a);
+    });
+
+    return myArray;
+
+  },
+  parseArrayCda : function(jData,includeHeader){
+//ToDo: refactor with parseArray?..use as parseArray?..
+    var myArray = new Array();
+			
+    var jHeaders = $(jData).find("ColumnMetaData");
+    if (includeHeader && jHeaders.size() > 0 ){
+      var _a = new Array();
+      jHeaders.each(function(){
+        _a.push($(this).attr("name"));
+      });
+      myArray.push(_a);
+    }
+
+    var jDetails = $(jData).find("Row");
+    jDetails.each(function(){
+      var _a = new Array();
+      $(this).children("Col").each(function(){
         _a.push($(this).text());
       });
       myArray.push(_a);
@@ -869,7 +898,7 @@ var DateInputComponent = BaseComponent.extend({
         $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
         $(function(){
             $("#" + myself.htmlObject + " input").datepicker({
-                dateFormat: myself.dateFormat,
+                dateFormat: format,
                 changeMonth: true,
                 changeYear: true,
 				minDate: startDate,
@@ -1102,15 +1131,14 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         
    	if(currentVal == null){ 
 			Dashboards.setParameter(this.parameter, firstVal);
+			currentVal = firstVal;
+	}
+	for (var i = 0; i < myArray.length; i++) {
+	if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
+		MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
+		if(!this.isMultiple) break;
 		}
-	  else {
-	    for (var i = 0; i < myArray.length; i++) {
-        if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
-        	MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
-        	break;//ToDo: if isMultiple, don't break
-    		}
-    	}
-    }
+	}
   },
     
   getValue: function(){
@@ -1156,7 +1184,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
   	}
     else {//de-select old, select new
-      if (this.indexes[name] != undefined) {
+      if (this.indexes[name] != undefined && this.indexes[name] > buttons.length) {
 				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
 					for(var i = 0; i < this.indexes[name].length; i++){
 						buttons[this.indexes[name][i]].className = cssClass;
