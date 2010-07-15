@@ -1058,7 +1058,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 		var hasCurrentVal = typeof currentval != undefined;
         
         for (var i = 0, len = myArray.length; i < len; i++) {
-            selectHTML += "<input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+            selectHTML += "<label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
             if ((i == 0 && !hasCurrentVal) ||
 				(hasCurrentVal && (myArray[i][0] == currentVal || myArray[i][1] == currentVal ))) {
                 selectHTML += " CHECKED";
@@ -1069,7 +1069,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         selectHTML += " type='checkbox'";
       }
       var vid = this.valueAsId==false?0:1;
-      selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + (this.separator == undefined?"":this.separator);
+      selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label>" + (this.separator == undefined?"":this.separator);
     }
     // update the placeholder
     $("#" + this.htmlObject).html(selectHTML);

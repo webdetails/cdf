@@ -95,6 +95,7 @@ public class CommentsEngine {
 
         session.beginTransaction();
         session.save(commentEntry);
+        session.flush();
         session.getTransaction().commit();
 
         // Get it and build the tree
