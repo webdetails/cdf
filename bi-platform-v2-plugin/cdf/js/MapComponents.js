@@ -7,6 +7,7 @@ var DashboardsMap =
 		messageElementId: null,
 		selectedPointDetails: null,
 		mapExpression: null,
+		useMercator:'true',
 
 		search: function (object,idx) {
 
@@ -93,9 +94,8 @@ var DashboardsMap =
 
 			//create marker
 			var lon = record[6];
-			var lat = record[7];
-			
-			
+			var lat = record[7];	
+	
 			// Test if icon is an array
 			// markers: [["js/OpenMap/OpenLayers/img/marker-green.png",42,50],["js/OpenMap/OpenLayers/img/marker-gold.png",21,25],["js/OpenMap/OpenLayers/img/marker.png",21,25]]
 			if (record[5] instanceof Array) {
@@ -112,10 +112,19 @@ var DashboardsMap =
 			
 			var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
 			var iconObj = new OpenLayers.Icon(icon,size,offset);
-			marker = new OpenLayers.Marker(lonLatToMercator(new OpenLayers.LonLat(lon,lat)),iconObj);
-
-			//create a feature to bind marker and record array together
-			feature = new OpenLayers.Feature(markers,lonLatToMercator(new OpenLayers.LonLat(lon,lat)),record);
+			
+			
+			//2010-07-15 Ingo: enable Mercator switch
+			if(this.useMercator =='true'){
+				marker = new OpenLayers.Marker(lonLatToMercator(new OpenLayers.LonLat(lon,lat)),iconObj);
+		
+				//create a feature to bind marker and record array together
+				feature = new OpenLayers.Feature(markers,lonLatToMercator(new OpenLayers.LonLat(lon,lat)),record);
+			}else{
+				marker = new OpenLayers.Marker(new OpenLayers.LonLat(lon,lat),iconObj);
+				feature = new OpenLayers.Feature(markers,new OpenLayers.LonLat(lon,lat),record);
+			}
+			
 			feature.marker = marker;
 
 			//create mouse down event for marker, set function to marker_click
@@ -172,9 +181,37 @@ var DashboardsMap =
 var MapComponent = BaseComponent.extend({
 	initMap : true, // should this be static?
 	update : function() {
+		//2010-06-29 enable MapDiv parameter
+		var div = 'map';
+		if (this.mapDiv != null){
+		   div = this.mapDiv;
+		}
 	
+		//2010-06-29 Ingo: Enable/Dispable Layer Selector
+		var b_layer_control = true;
+		var b_custom_map = false;
+		var b_use_mercator = true;
+		var str_custom_map ="";
+		
+		if (this.showLayerSelector == false){
+		   b_layer_control = this.showLayerSelector
+		}
+		
+		//2010-07-14 Ingo: Enable custom Map code
+		if (this.showCustomMap){
+			b_custom_map ='true';
+			str_custom_map = this.customMapCode
+		}
+		
+		//2010-07-15 Ingo: Enable Mercator switch (default = true)
+		if ( this.useMercator == false){
+			b_use_mercator = 'false'
+			DashboardsMap.useMercator = 'false';
+		}
+	
+			
 		if (this.initMap){
-			init_map(this.initPosLon,this.initPosLat,this.initZoom, 'true');
+			init_map(div, this.initPosLon,this.initPosLat,this.initZoom, b_use_mercator, b_layer_control, b_custom_map, str_custom_map);
 			DashboardsMap.messageElementId = this.messageElementId;
 			this.initMap = false;
 		}
@@ -207,6 +244,7 @@ var MapComponent = BaseComponent.extend({
 				}
 
 				var value = myArray[i][4];
+				
 				var markers = this.markers;
 				// Store expression and markers for update funtion
 				DashboardsMap.mapExpression = this.expression();

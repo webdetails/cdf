@@ -80,10 +80,10 @@
 			<dd>Turn on custom map support (defualt = false)</dd>
 			
 			<dt>customMapCode</dt>
-			<dd>JS Code to add the map object and the layers - this is an optional feature and the property does not have to be included</dd>
+			<dd>JS Code to add the map object and the layers</dd>
 			
 			<dt>useMercator</dt>
-			<dd>Depending on the used map server you need to turn off the Mercator transformation for the coordinates (Default = 'true')</dd>
+			<dd>Depending on the used map server you need to turn off the Mercator transformation for the coordinates (default = true)</dd>
 			
 			<dt>markers</dt>
 			<dd>Markers Array - Marker is represented either as a URL-string or with an array consisting of URL-string, width, height</dd>
@@ -142,6 +142,9 @@ name: "mapComponent",
 	  initPosLat: 39.8,
 	  initZoom: 1,
 	  mapDiv:"myMap",
+	  showCustomMap:true,
+	  customMapCode:"map = new OpenLayers.Map( map_div );layer = new OpenLayers.Layer.MapServer('OpenLayers WMS', 'http://labs.metacarta.com/wms/vmap0', {layers: 'basic'},{gutter: 15}); map.addLayer(layer);",
+	  useMercator:false,
 	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
 	  preExecution:function(){},
 	  postExecution:function(){},

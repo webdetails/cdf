@@ -8,7 +8,10 @@ var show_layer_control;
 var popup;
 var feature;
 var marker;
-var zoom_level
+var zoom_level;
+var show_custom_map;
+var custom_map_code;
+var use_mercator;
 
 
 /** 
@@ -38,19 +41,36 @@ function lonLatToMercator(ll) {
     * lat - {Float} The latitude coordinate.
     * zoom - {Integer} Zoomlevel for initial display.
     * b_layer_control - {String} 'true' to show Layer selector
+    * b_use_mercator - {String} 'true' to show custom map
+    * b_custom_map - {String} 'true' to show custom map
+    * str_custom_map - {String} custom map definition
     */
-function init_map(lon, lat, zoom, b_layer_control){
+function init_map(div, lon, lat, zoom, b_use_mercator, b_layer_control, b_custom_map, str_custom_map){
+
+	map_div = div; 
 
 	center_lon = lon;
 	center_lat = lat;
 	show_layer_control = b_layer_control;
 	zoom_level = zoom; 
 	
-	center_point = lonLatToMercator(new OpenLayers.LonLat(lon,lat));
+	use_mercator = b_use_mercator;
+	
+	if(use_mercator == 'true'){
+		center_point = lonLatToMercator(new OpenLayers.LonLat(lon,lat));
+	}else{
+		center_point = new OpenLayers.LonLat(lon,lat);
+	}
+	
+	//2010-07-14 Custom map support
+	show_custom_map = b_custom_map;
+	custom_map_code = str_custom_map;
 	
 	show_map(zoom_level);
 	
-	if( b_layer_control = true){
+
+	
+	if( b_layer_control = 'true'){
 		show_layers();
 	}
 }
@@ -61,21 +81,25 @@ function init_map(lon, lat, zoom, b_layer_control){
     * Sets the inital layer and displays the map.
     */
 function show_map (){
-
-	//for now only one OpenStreetMap layer is supported
-	map = new OpenLayers.Map('map', {maxExtent: new OpenLayers.Bounds(-20037508,-20037508,20037508,20037508),
+	if(show_custom_map == 'true'){
+		eval(custom_map_code);	
+	}else{
+		//for now only one OpenStreetMap layer is supported
+		map = new OpenLayers.Map(map_div, {maxExtent: new OpenLayers.Bounds(-20037508,-20037508,20037508,20037508),
                       numZoomLevels: 18,
                       maxResolution: 156543,
                       units: 'm',
                       projection: "EPSG:41001" });
-	layer = new OpenLayers.Layer.TMS(
+		layer = new OpenLayers.Layer.TMS(
                 "OpenStreetMap","http://tile.openstreetmap.org/",
 	           {
-type: 'png', getURL: osm_getTileURL, transparent: 'true',
+				 type: 'png', getURL: osm_getTileURL, transparent: 'true',
 	             displayOutsideMaxExtent: true}
 	            );
-    // add the OpenStreetMap layer to the map          
-	map.addLayer(layer);
+    	// add the OpenStreetMap layer to the map          
+		map.addLayer(layer);
+    }
+
 
     // add a layer for the markers                                             
 	markers = new OpenLayers.Layer.Markers( "Markers" );
@@ -83,6 +107,8 @@ type: 'png', getURL: osm_getTileURL, transparent: 'true',
 	
 	//set center and zoomlevel of the map
 	map.setCenter(center_point, zoom_level);
+	
+	
 }
 
 /** 
