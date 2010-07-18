@@ -14,7 +14,7 @@ var BaseComponent = Base.extend({
         var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
         if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
           vid = "mdx";
-        } else if (this.dataAccessId !== undefined && !this.valueAsId) {
+        } else if (this.queryDefinition.dataAccessId !== undefined && !this.valueAsId) {
             vid = 'cda';
         }
         QueryComponent.makeQuery(this);
