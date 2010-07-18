@@ -14,6 +14,8 @@ var BaseComponent = Base.extend({
         var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
         if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
           vid = "mdx";
+        } else if (this.dataAccessId !== undefined && !this.valueAsId) {
+            vid = 'cda';
         }
         QueryComponent.makeQuery(this);
         var myArray = new Array();
@@ -25,6 +27,9 @@ var BaseComponent = Base.extend({
             case "mdx":
               myArray.push([this.result[p][1],this.result[p][0]]);
               break;
+            case 'cda':
+              myArray.push([this.result[p][0],this.result[p][1]]);
+            break;
             default:
               myArray.push([this.result[p][0],this.result[p][0]]);
               break;
