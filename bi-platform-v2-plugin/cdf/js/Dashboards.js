@@ -410,19 +410,22 @@ Dashboards.addArgs = function(url){
     this.args = getURLParameters(url);
 }
 
-Dashboards.init = function(components, i18n){
-
+Dashboards.setI18nSupport = function(i18nRef) {
     // Update global reference to i18n objects if needed
-    if (i18n !== "undefined") {
-       Dashboards.i18nSupport = i18n;
+    if (i18nRef !== "undefined") {
+        Dashboards.i18nSupport = i18nRef;
     }
-    
-  if($.isArray(components)){
-    Dashboards.addComponents(components);
-  }
-  $(function(){
-    Dashboards.initEngine()
-  });
+
+}
+
+Dashboards.init = function(components){
+
+    if ($.isArray(components)) {
+        Dashboards.addComponents(components);
+    }
+    $(function() {
+        Dashboards.initEngine()
+    });
 };
 
 
