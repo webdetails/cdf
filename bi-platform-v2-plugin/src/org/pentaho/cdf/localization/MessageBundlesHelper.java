@@ -38,7 +38,7 @@ public class MessageBundlesHelper {
     }
 
     public void saveI18NMessageFilesToCache() throws IOException {
-        createCacheDirIfNoExists(targetDashboardCacheDir);
+        createCacheDirIfNotExists(targetDashboardCacheDir);
 
         appendBaseMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
         appendLocalizedMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
@@ -62,7 +62,7 @@ public class MessageBundlesHelper {
         sourceDashboardBaseMsgFile = baseUrl + File.separator + ActionInfo.buildSolutionPath(dashboardSolution, dashboardPath, dashboardsMessagesBaseFilename);
     }
 
-    protected void createCacheDirIfNoExists(String targetDashboardCacheDir) {
+    protected void createCacheDirIfNotExists(String targetDashboardCacheDir) {
         File fBaseMsgTargetDir = new File(targetDashboardCacheDir);
         if (!fBaseMsgTargetDir.exists()) {
             fBaseMsgTargetDir.mkdirs();

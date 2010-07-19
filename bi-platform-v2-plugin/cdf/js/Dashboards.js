@@ -312,6 +312,11 @@ Dashboards.bindControl = function(object) {
 }
 
 Dashboards.blockUIwithDrag = function() {
+    if (Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        // If i18n support is enabled process the message accordingly
+        $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
+    }
+
   $.blockUI();
   var handle = $('<div id="blockUIDragHandle" style="cursor: pointer; width: 170px; -webkit-border-radius: 5px; -moz-border-radius: 5px; background-color: rgba(0,0,0,0.25);" align="right"><a style="padding-right: 5px; text-decoration: none; color: black; font-weight: bold; font-color: black; font-size: 8pt" href="javascript:$.unblockUI()" title="Click to unblock">X</a></div>')
   $("div.blockUI.blockMsg").prepend(handle);
