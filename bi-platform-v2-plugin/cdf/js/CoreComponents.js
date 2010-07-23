@@ -1847,10 +1847,6 @@ var PrptComponent = BaseComponent.extend({
 
   },
 
-  preExecution: function(){
-    this.setSolutionPathAction(this.solution, this.path, this.action);
-  },
-
   getQueryStringFragment : function() {
     // save a reference to this for use in nested functions
     var thisComponent = this;
@@ -1883,6 +1879,7 @@ var PrptComponent = BaseComponent.extend({
 
   update : function() {
 
+    this.setSolutionPathAction(this.solution, this.path, this.action);
     var htmlObject = document.getElementById(this.htmlObject);
     if(!htmlObject){
       // Widget defined, but template does not have a space for it.
