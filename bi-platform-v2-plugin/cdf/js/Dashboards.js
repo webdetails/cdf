@@ -432,7 +432,7 @@ Dashboards.init = function(components){
     }
     $(function() {
         Dashboards.initEngine();
-        if(typeof myself.events.postInit == 'function') {
+        if(typeof myself.events != 'undefined' && typeof myself.events.postInit == 'function') {
             myself.events.postInit()
         }
     });
