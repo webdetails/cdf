@@ -405,6 +405,13 @@ Dashboards.addComponents = function(components) {
   this.components = this.components.concat(components);
 };
 
+Dashboards.registerEvent = function (ev, callback) {
+    if (typeof this.events == 'undefined') {
+        this.events = {};
+    }
+    this.events[ev] = callback;
+};
+
 Dashboards.addArgs = function(url){
   if(url != undefined)
     this.args = getURLParameters(url);
@@ -419,12 +426,15 @@ Dashboards.setI18nSupport = function(i18nRef) {
 }
 
 Dashboards.init = function(components){
-
+    var myself = this;
     if ($.isArray(components)) {
         Dashboards.addComponents(components);
     }
     $(function() {
-        Dashboards.initEngine()
+        Dashboards.initEngine();
+        if(typeof myself.events.postInit == 'function') {
+            myself.events.postInit()
+        }
     });
 };
 
