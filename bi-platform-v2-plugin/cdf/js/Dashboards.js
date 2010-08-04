@@ -773,6 +773,50 @@ Dashboards.fetchData = function(cd, params, callback) {
     callback([]);
   }
 }
+
+
+// STORAGE ENGINE
+
+// Default object
+Dashboards.storage = {};
+
+// Operations
+Dashboards.loadStorage = function(){
+
+      var args = {
+        action: "read"
+      };
+	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+			  Dashboards.storage = json;
+		  });
+}
+
+Dashboards.saveStorage = function(){
+
+      var args = {
+        action: "store",
+		storageValue: JSON.stringify(Dashboards.storage)
+      };
+	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+			  if(json.result != true && typeof console != "undefined"){
+				  console.log("Error saving storage")
+			  }
+		  });
+}
+
+Dashboards.cleanStorage = function(){
+
+      var args = {
+        action: "delete"
+      };
+	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+			  if(json.result != true && typeof console != "undefined"){
+				  console.log("Error deleting storage")
+			  }
+		  });
+}
+
+
 /**
  *
  * UTF-8 data encode / decode
