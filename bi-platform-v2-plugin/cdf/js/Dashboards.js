@@ -427,13 +427,14 @@ Dashboards.setI18nSupport = function(i18nRef) {
 
 Dashboards.init = function(components){
     var myself = this;
+    this.loadStorage();
     if ($.isArray(components)) {
         Dashboards.addComponents(components);
     }
     $(function() {
         Dashboards.initEngine();
-        if(typeof myself.events != 'undefined' && typeof myself.events.postInit == 'function') {
-            myself.events.postInit()
+        if(typeof myself.postInit == 'function') {
+            myself.postInit();
         }
     });
 };
@@ -492,16 +493,20 @@ Dashboards.processChange = function(object_name){
 Dashboards.fireChange = function(parameter, value) {
   //alert("begin block");
   Dashboards.createAndCleanErrorDiv();
-  Dashboards.incrementRunningCalls();
 
   //alert("Parameter: " + parameter + "; Value: " + value);
   Dashboards.setParameter(parameter, value);
 
-
+  var workDone = false;
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
       for(var j= 0 ; j < this.components[i].listeners.length; j++){
         if(this.components[i].listeners[j] == parameter) {
+          // We only show the 'working' message if we ever do anything useful.
+          if (!workDone) {
+            workDone = true;
+            Dashboards.incrementRunningCalls();
+          }
           this.update(this.components[i]);
           break;
         }
@@ -510,8 +515,9 @@ Dashboards.fireChange = function(parameter, value) {
     }
   }
   //alert("finish block");
-  Dashboards.decrementRunningCalls();
-
+  if (workDone) {
+    Dashboards.decrementRunningCalls();
+  }
 };
 
 
