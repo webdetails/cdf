@@ -8,6 +8,7 @@ var DashboardsMap =
 		selectedPointDetails: null,
 		mapExpression: null,
 		useMercator:'true',
+		showToolTip:'false',
 
 		search: function (object,idx) {
 
@@ -129,6 +130,16 @@ var DashboardsMap =
 
 			//create mouse down event for marker, set function to marker_click
 			marker.events.register('mousedown', feature, DashboardsMap.marker_click);
+			
+			//2010-08-06 Ingo: enable tool tips
+			if(this.showToolTip == 'true'){
+				//create mouse events for tool tips
+				marker.events.register('mouseover', feature, DashboardsMap.marker_over);
+				marker.events.register('mouseout', feature, DashboardsMap.marker_out);
+				
+				ttips = new OpenLayers.Control.ToolTips({bgColor:"black",textColor:"white", bold : true, opacity : 0.50});
+				map.addControl(ttips);
+			}
 
 			//add marker to map
 			markers.addMarker(marker);
@@ -140,6 +151,15 @@ var DashboardsMap =
 			click_lonlat = this.lonlat;
 			var record = this.data;
 			Dashboards.fireChange("selectedPoint", record[0]);
+		},
+		
+		marker_over: function (evt){
+			record = this.data;
+			ttips.show({html:record[0] +': '+ record[2]});
+		},
+
+		marker_out: function (evt){
+			ttips.hide();
 		},
 
 		updateInfoWindow: function ( content ) {
@@ -207,6 +227,11 @@ var MapComponent = BaseComponent.extend({
 		if ( this.useMercator == false){
 			b_use_mercator = 'false'
 			DashboardsMap.useMercator = 'false';
+		}
+		
+		//2010-08-06 Ingo: Enable tool tips (default = false)
+		if ( this.showToolTip == true){
+			DashboardsMap.showToolTip = 'true';
 		}
 	
 			

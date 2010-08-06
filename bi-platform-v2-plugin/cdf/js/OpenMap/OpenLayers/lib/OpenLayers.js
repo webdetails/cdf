@@ -161,6 +161,7 @@
             "OpenLayers/Control/Panel.js",
             "OpenLayers/Control/SelectFeature.js",
             "OpenLayers/Control/NavigationHistory.js",
+			"OpenLayers/Control/ToolTips.js",
             "OpenLayers/Geometry.js",
             "OpenLayers/Geometry/Rectangle.js",
             "OpenLayers/Geometry/Collection.js",
