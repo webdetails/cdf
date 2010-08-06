@@ -150,6 +150,8 @@ var DashboardsMap =
 		marker_click: function (evt){
 			click_lonlat = this.lonlat;
 			var record = this.data;
+			// Hide tooltips when marker is clicked
+			ttips.hide();
 			Dashboards.fireChange("selectedPoint", record[0]);
 		},
 		
