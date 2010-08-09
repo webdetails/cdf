@@ -1,5 +1,8 @@
 package org.pentaho.cdf.storage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.pentaho.cdf.PluginHibernateException;
 import org.pentaho.cdf.comments.*;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -15,11 +18,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.InvalidCdfOperationException;
 import org.pentaho.cdf.Messages;
+import org.pentaho.cdf.utils.PluginHibernateUtil;
+import org.pentaho.cdf.utils.Util;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.pentaho.platform.repository.hibernate.HibernateUtil;
 
 /**
  *
@@ -43,9 +47,17 @@ public class StorageEngine
 
   public StorageEngine()
   {
-    logger.info("Creating CommentsEngine instance");
+    try
+    {
+      logger.info("Creating CommentsEngine instance");
+      initialize();
+    }
+    catch (PluginHibernateException ex)
+    {
+      logger.fatal("Could not create CommentsEngine: " + Util.getExceptionDescription(ex)); //$NON-NLS-1$
+      return;
+    }
 
-    initialize();
   }
 
   public String process(IParameterProvider requestParams, IPentahoSession userSession) throws InvalidCdfOperationException
@@ -79,7 +91,7 @@ public class StorageEngine
 
   }
 
-  public String store(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException
+  public String store(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
 
 
@@ -126,7 +138,7 @@ public class StorageEngine
 
   }
 
-  public String read(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException
+  public String read(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
 
     logger.debug("Reading storage");
@@ -145,7 +157,7 @@ public class StorageEngine
 
   }
 
-  public String delete(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException
+  public String delete(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
 
 
@@ -166,7 +178,7 @@ public class StorageEngine
     }
     session.flush();
     session.getTransaction().commit();
-    
+
     // Return success
     JSONObject json = new JSONObject();
     json.put("result", Boolean.TRUE);
@@ -174,14 +186,14 @@ public class StorageEngine
 
   }
 
-  private Session getSession()
+  private Session getSession() throws PluginHibernateException
   {
 
-    return HibernateUtil.getSession();
+    return PluginHibernateUtil.getSession();
 
   }
 
-  private void initialize()
+  private void initialize() throws PluginHibernateException
   {
 
 
@@ -190,9 +202,9 @@ public class StorageEngine
     InputStream in = resLoader.getResourceAsStream(StorageEngine.class, "resources/hibernate/Storage.hbm.xml");
 
     // Close session and rebuild
-    HibernateUtil.closeSession();
-    HibernateUtil.getConfiguration().addInputStream(in);
-    HibernateUtil.rebuildSessionFactory();
+    PluginHibernateUtil.closeSession();
+    PluginHibernateUtil.getConfiguration().addInputStream(in);
+    PluginHibernateUtil.rebuildSessionFactory();
 
   }
 
