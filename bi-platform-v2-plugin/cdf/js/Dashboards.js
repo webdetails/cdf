@@ -312,7 +312,7 @@ Dashboards.bindControl = function(object) {
 }
 
 Dashboards.blockUIwithDrag = function() {
-    if (Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
         // If i18n support is enabled process the message accordingly
         $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
     }
