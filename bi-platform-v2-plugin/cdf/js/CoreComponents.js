@@ -269,7 +269,7 @@ var JFreeChartComponent = BaseComponent.extend({
 			}
 
             // If the user filled titleKey get the title value from language files 
-            if (cd.titleKey !== "undefined" && Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+            if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
 				cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
 			}
 
