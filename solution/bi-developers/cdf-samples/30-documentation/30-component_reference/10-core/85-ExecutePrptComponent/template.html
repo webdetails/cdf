@@ -5,11 +5,11 @@
 
 	<div class="contents">
 
-		<h2>XactionComponent</h2>
+		<h2>ExecuteXactionComponent</h2>
 
 		<h3>Description</h3>
 		<p>
-		This is the most generic component. Allows the user to input the result of a xaction into where he wants on the page.
+		Excecutes a prpt and displays the result on a new pop-up window.
 		</p>
 
 		<h3>Options</h3>
@@ -19,13 +19,13 @@
 			<dd>The name of the component</dd>
 
 			<dt>type</dt>
-			<dd><code>xactionComponent</code></dd>
+			<dd><code>executeXaction</code></dd>
 
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
 
 			<dt>parameters</dt>
-			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
+			<dd><i>Array of Arrays - </i> Parameters to pass to the report</dd>
 
 			<dt>solution</dt>
 			<dd>Solution where the xaction is</dd>
@@ -34,17 +34,18 @@
 			<dd>Path where the xaction file is</dd>
 
 			<dt>action</dt>
-			<dd>Xaction file name</dd>
+			<dd>Location of the report</dd>
 
 			<dt>htmlObject</dt>
-			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result. It can point to a button or link</dd>
 
 			<dt>refreshPeriod</dt>
 			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
 
-			<dt>iframe</dt> 
-			<dd> Wheather to render the xaction inside an iframe or inline. Default: false</dd>
 
+
+			<dt>label</dt>
+			<dd>Text to be used on the generated button (only used if htmlObject points to a div/span)</dd>
 
 			<dt>executeAtStart</dt>
 			<dd>True to execute the component at start, false otherwise</dd>
@@ -52,14 +53,19 @@
 			<dt>tooltip</dt>
 			<dd>Tooltip to be displayed when mouse hovers</dd>
 
-			<dt>serviceMethod</dt>
-			<dd>Optional, defaults to ServiceAction.  Setting this value to ViewAction calls the traditional BI Platform action servlet</dd>
 
-			<dt>preExecution</dt>
-			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the xaction is exectuded. The xaction will be executed only if the result of preChange equals true.</dd>
 
-			<dt>postExecution</dt>
-			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the xaction is exectuded</dd>
+
+			<dt>paginate</dt> 
+			<dd>Pentaho Report Viewer paginate option. Default: true</dd>
+			
+			<dt>showParameters</dt> 
+			<dd>Pentaho Report Viewer parameter option: false</dd>
+
 		</dl>
 
 		<h3>Sample</h3>
@@ -72,27 +78,32 @@
 			</ul>
 			<div id="sample">
 
-				<div id="sampleObject"></div>
+					<span id="sampleObject">Execute Xaction</span>
 
 			</div>
 
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-var topTenCustomers = 
+var executeTopTenCustomers = 
 {
-  name: "topTenCustomers",
-  type: "xaction",
-  solution: "bi-developers",
-  path: "cdf-samples/20-samples/home_dashboard",
-  action: "topTenCustomers.xaction",
+  name: "executeTopTenCustomers",
+  type: "ExecutePrpt",
+  solution: "steel-wheels",
+  path: "reports",
+  action: "Sales Summary.prpt",
   listeners:["productLine", "territory"],
   parameters: [["productLine", null], ["territory", null]],
   htmlObject: "sampleObject",
+  paginate: false,
+  showParameters: true,
+  label: "Execute Prpt",
   executeAtStart: true,
+  preChange: function(){return true;},
+  postChange: function(){return true;},
   tooltip: "My first dashboard"
 }
-Dashboards.init([topTenCustomers]);
+Dashboards.init([executeTopTenCustomers]);
 					</textarea>
 					<br />
 					<button onclick="evaluateCode(true)">Try me</button>

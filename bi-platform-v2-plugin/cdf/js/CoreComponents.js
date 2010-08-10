@@ -1,4 +1,4 @@
-var BaseComponent = Base.extend({
+BaseComponent = Base.extend({
   //type : "unknown",
   visible: true,
   clear : function() {
@@ -1803,138 +1803,101 @@ var ExecuteXactionComponent = BaseComponent.extend({
 });
 
 var ButtonComponent = BaseComponent.extend({
-  update : function() {
-    $("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
-  }
-});
+		update : function() {
+			$("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
+		}
+	});
+
 
 var PrptComponent = BaseComponent.extend({
 
-  // gets the runUrl and paramServiceUrl from the server then alerts the caller via the callback
-  setSolutionPathAction : function(solution, path, action, callback) {
+		update: function(){
+		
+			this.clear();
 
-    this.solution = solution;
-    this.path = path;
-    this.action = action;
+			var options = this.getOptions();
+
+			if(options["dashboard-mode"]){
+				var url = webAppPath + '/content/reporting';
+				var myself=this;
+				$.ajax({url: url, data: options, dataType:"html", success: function(json){
+						$("#"+myself.htmlObject).html(json);
+					}});
+			}
+			else{
+				var url = webAppPath + '/content/reporting/reportviewer/report.html';
+				var a=[];
+				$.each(options,function(k,v){
+						a.push(k+"="+encodeURIComponent(v));
+					});
+				$("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
+			}
+		},
+
+		getOptions: function(){
+					
+			var options = {
+				paginate : this.paginate || false,
+				showParameters: this.showParameters || false,
+				autoSubmit: this.autoSubmit || false,
+				"dashboard-mode": this.iframe==undefined?false:!this.iframe,
+				solution: this.solution,
+				path: this.path,
+				action: this.action,
+				"output-type": "text/html"
+			};
+
+			// process params and update options
+			$.map(this.parameters,function(k){
+					options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+				});
+
+			return options;
+
+		}
+	});
 
 
-    //Set the prpt Viewer options for pagination and parameters
-    var prpt_options = this.prptViewerOptions();
+var ExecutePrptComponent = PrptComponent.extend({
+		visible: false,
 
+		update : function() {
+			// 2 modes of working; if it's a div, create a button inside it
+			var myself = this;
+			var o = $("#"+ this.htmlObject);
+			if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
+				// create a button
+				o = $("<button/>").appendTo(o.empty());
+				if (o[0].tagName=="DIV") o.wrap("<span/>");
+				if (this.label != undefined) o.text(this.label);
+				o.button();
+			}
+			o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+			o.bind("click", function(){
+					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
+					if(success) {
+						myself.executePrptComponent();
+					}
+					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
+				});
+		},
 
-    // parameter service url from file details; tells us how to render the content;
-    var paramServiceUrl = '';
-    var runUrl = '';
-    var prptref = this.genXaction();
-    // get the base url so that we can call the sol repo service
-    // save a reference to this for use in nested functions
+		executePrptComponent: function(){
 
-    var thisComponent = this;
+			var options = this.getOptions();
+			var url = webAppPath + '/content/reporting/reportviewer/report.html';
+			var a=[];
+			$.each(options,function(k,v){
+					a.push(k+"="+encodeURIComponent(v));
+				});
+			$.fancybox({
+					type:"iframe",
+					href: url + "?"+ a.join('&') ,
+					width: $(window).width(),
+					height:$(window).height() - 50
+				});
 
-    $.ajax({
-      url: webAppPath+ '/SolutionRepositoryService?component=getSolutionRepositoryFileDetails&fullPath=' + prptref,
-      async:   false,
-      success: function(data2) {
-        $('file', data2).each(function() {
-          thisComponent.paramServiceUrl = $(this).attr('param-service-url') + '&renderMode=xml';
-          thisComponent.runUrl = $(this).attr('url') + prpt_options;
-          if(callback){
-            callback.onfinish();
-          }
-        });
-      }
-    });
+		}
+	}
+);
 
-  },
-
-  getQueryStringFragment : function() {
-    // save a reference to this for use in nested functions
-    var thisComponent = this;
-
-    var queryStringFragment = '';
-    for (var i = 0; i < thisComponent.parameters.length; i++) {
-      var paramId = null;
-      if(thisComponent.paramExtraInfo == undefined){
-        paramId = this.parameters[i][0];
-      } else if (i == 0 && typeof(thisComponent.paramExtraInfo.id) != "undefined") {
-        paramId = thisComponent.paramExtraInfo.id;
-      } else {
-        paramId = thisComponent.paramExtraInfo[i].id;
-      }
-      var paramValue = '';
-      if (this.staticParameters && thisComponent.parameters[i].length == 3) {
-        paramValue = thisComponent.parameters[i][2];
-      } else if(thisComponent.parameters[i][1] != ""){
-        paramValue = Dashboards.getParameterValue(thisComponent.parameters[i][1]);
-      } else {
-        paramValue = Dashboards.getParameterValue(paramId);
-      }
-
-      if (paramValue != undefined && paramValue != '') {
-        queryStringFragment += '&' + encodeURIComponent(paramId) + '=' + encodeURIComponent(paramValue);
-      }
-    }
-    return queryStringFragment
-  },
-
-  update : function() {
-
-    this.setSolutionPathAction(this.solution, this.path, this.action);
-    var htmlObject = document.getElementById(this.htmlObject);
-    if(!htmlObject){
-      // Widget defined, but template does not have a space for it.
-      return;
-    }
-    var queryStringFragment = this.getQueryStringFragment();
-
-    htmlObject.innerHTML = "<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + this.runUrl + queryStringFragment + "' />";
-
-  },
-  genXaction : function() {
-    var gen = this.solution == null ? '' : this.solution;
-    if (this.path != null) {
-      if (gen.length > 0 && gen.substr(gen.length - 1, 1) != '/') {
-        gen += '/';
-      }
-      gen += this.path;
-    }
-    if (this.action != null) {
-      if (gen.length > 0 && gen.substr(gen.length - 1, 1) != '/') {
-        gen += '/';
-      }
-      gen += this.action;
-    }
-    return gen;
-  },
-  prptViewerOptions : function() {
-    //default settings
-    var showParameters = false;
-    var myPaginate = true;
-    var autoSubmit = true;
-
-    //set to defined values
-    if (this.paginate != undefined) {
-      myPaginate = this.paginate;
-    }
-
-    if (this.showParameters != undefined) {
-      showParameters = this.showParameters;
-    }
-
-    if (this.autoSubmit != undefined) {
-      autoSubmit = this.autoSubmit;
-    }
-
-    var options = '&autoSubmit='+autoSubmit+'&showParameters='+showParameters+'&paginate='+myPaginate;
-    return options;
-  },
-  type : "PrptComponent",
-  startOptions : function() {
-    var executeAtStart = true;
-
-    if (this.executeAtStart != undefined) {
-      executeAtStart = this.executeAtStart ;
-    }
-  },
-  iconImgSrc : '../images/file.png'
-});
