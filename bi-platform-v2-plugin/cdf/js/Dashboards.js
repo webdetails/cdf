@@ -64,6 +64,13 @@ var Dashboards =
         i18nSupport : null  // Reference to i18n objects
 	}
 
+// Log
+Dashboards.log = function(m){
+  if (typeof console != "undefined" ){
+    console.log("CDF: " + m);
+  }
+}
+
 // REFRESH ENGINE begin
 
 Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
@@ -272,12 +279,12 @@ Dashboards.hideProgressIndicator = function() {
 Dashboards.incrementRunningCalls = function() {
   Dashboards.runningCalls++ ;
   Dashboards.showProgressIndicator();
-//console.log("+Running calls incremented to: " + Dashboards.runningCalls);
+//Dashboards.log("+Running calls incremented to: " + Dashboards.runningCalls);
 }
 
 Dashboards.decrementRunningCalls = function() {
   Dashboards.runningCalls-- ;
-  //console.log("-Running calls decremented to: " + Dashboards.runningCalls);
+  //Dashboards.log("-Running calls decremented to: " + Dashboards.runningCalls);
   if(Dashboards.runningCalls<=0){
     Dashboards.hideProgressIndicator();
     Dashboards.runningCalls = 0; // Just in case
@@ -625,7 +632,7 @@ Dashboards.ev = function(o){
 
 Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
   // Encapsulate pentahoAction call
-  // console.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
+  // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
   if(typeof callback == 'function'){
     return Dashboards.pentahoAction( solution, path, action, parameters,
       function(json){
@@ -805,7 +812,7 @@ Dashboards.saveStorage = function(){
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
 			  if(json.result != true && typeof console != "undefined"){
-				  console.log("Error saving storage")
+				  Dashboards.log("Error saving storage")
 			  }
 		  });
 }
@@ -817,7 +824,7 @@ Dashboards.cleanStorage = function(){
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
 			  if(json.result != true && typeof console != "undefined"){
-				  console.log("Error deleting storage")
+				  Dashboards.log("Error deleting storage")
 			  }
 		  });
 }
