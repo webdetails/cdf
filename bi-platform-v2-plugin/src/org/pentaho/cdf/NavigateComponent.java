@@ -278,7 +278,7 @@ public class NavigateComponent extends PentahoBase {
             String link = "";
 
             final String path = type.equals(TYPE_DIR) ? (_path.length() > 0 ? _path + "/" + name : name) : _path;
-            final String url = (type != null && type.equals(TYPE_URL)) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(CdfContentGenerator.BASE_URL) && !chilNode.valueOf("@url").startsWith("/") ? /*CdfContentGenerator.BASE_URL +*/ "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url")) : null;
+            final String url = (type != null && type.equals(TYPE_URL)) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(CdfContentGenerator.RELATIVE_URL) && !chilNode.valueOf("@url").startsWith("/") ? /*CdfContentGenerator.BASE_URL +*/ "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url")) : null;
 
             /*create the link*/
             final String lowType = type.toLowerCase();
