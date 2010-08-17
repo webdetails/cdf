@@ -79,16 +79,10 @@ public class CdfContentGenerator extends BaseContentGenerator
   private static final String MIME_XLS = "application/vnd.ms-excel";
   // CDF Resource BaseURL
   private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
-  public static final String RELATIVE_URL;
+  public String RELATIVE_URL;
 
   static
   {
-    // This is the relative path to pentaho webapp 
-    RELATIVE_URL = PentahoRequestContextHolder.getRequestContext().getContextPath();
-    
-    if(RELATIVE_URL.endsWith("/")) {
-      RELATIVE_URL.substring(0, RELATIVE_URL.length() - 1);
-    }
   }
   private Packager packager;
 
@@ -114,6 +108,13 @@ public class CdfContentGenerator extends BaseContentGenerator
     final String payload;
     try
     {
+      RELATIVE_URL = PentahoRequestContextHolder.getRequestContext().getContextPath();
+      
+      if(RELATIVE_URL.endsWith("/")) {
+        RELATIVE_URL = RELATIVE_URL.substring(0, RELATIVE_URL.length() - 1);
+      }
+
+
       // If callbacks is properly setup, we assume we're being called from another plugin
       if (this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance(callbacks.get(0)))
       {
@@ -1057,6 +1058,7 @@ public class CdfContentGenerator extends BaseContentGenerator
   private void init() throws Exception
   {
 
+    // This is the relative path to pentaho webapp 
     String rootdir = PentahoSystem.getApplicationContext().getSolutionPath(
             "system/" + PLUGIN_NAME);
     final File file = new File(rootdir + "/resources.txt");

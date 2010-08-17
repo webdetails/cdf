@@ -17,6 +17,7 @@ import org.pentaho.platform.api.engine.ICacheManager;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.engine.core.system.PentahoBase;
+import org.pentaho.platform.engine.core.system.PentahoRequestContextHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.web.servlet.SolutionRepositoryService;
 
@@ -276,9 +277,13 @@ public class NavigateComponent extends PentahoBase {
             /* Get the hashTable that contains the pairs:  supported-file-type -> associated url to use */
             final Hashtable<String, String> readAbility = PluginCatalogEngine.getInstance().getPlugins();
             String link = "";
-
+            String relativeUrl = PentahoRequestContextHolder.getRequestContext().getContextPath();
+            
+            if(relativeUrl.endsWith("/")) {
+              relativeUrl = relativeUrl.substring(0, relativeUrl.length() - 1);
+            }
             final String path = type.equals(TYPE_DIR) ? (_path.length() > 0 ? _path + "/" + name : name) : _path;
-            final String url = (type != null && type.equals(TYPE_URL)) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(CdfContentGenerator.RELATIVE_URL) && !chilNode.valueOf("@url").startsWith("/") ? /*CdfContentGenerator.BASE_URL +*/ "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url")) : null;
+            final String url = (type != null && type.equals(TYPE_URL)) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(relativeUrl) && !chilNode.valueOf("@url").startsWith("/") ? /*CdfContentGenerator.BASE_URL +*/ "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url")) : null;
 
             /*create the link*/
             final String lowType = type.toLowerCase();
