@@ -48,7 +48,12 @@ function lonLatToMercator(ll) {
 function init_map(div, lon, lat, zoom, b_use_mercator, b_layer_control, b_custom_map, str_custom_map){
 
 	map_div = div; 
-
+	//2010-08-18 Ingo
+	//empty map div in case a map has added before
+	//get the div Object
+	oDiv = this.document.getElementById(map_div);
+	oDiv.innerHTML="";
+	
 	center_lon = lon;
 	center_lat = lat;
 	show_layer_control = b_layer_control;

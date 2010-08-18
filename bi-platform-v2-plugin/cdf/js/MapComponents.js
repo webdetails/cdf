@@ -151,7 +151,9 @@ var DashboardsMap =
 			click_lonlat = this.lonlat;
 			var record = this.data;
 			// Hide tooltips when marker is clicked
-			ttips.hide();
+			if(DashboardsMap.showToolTip == 'true'){
+				ttips.hide();
+			};
 			Dashboards.fireChange("selectedPoint", record[0]);
 		},
 		
@@ -234,6 +236,8 @@ var MapComponent = BaseComponent.extend({
 		//2010-08-06 Ingo: Enable tool tips (default = false)
 		if ( this.showToolTip == true){
 			DashboardsMap.showToolTip = 'true';
+		}else{
+			DashboardsMap.showToolTip = 'false';
 		}
 	
 			
@@ -290,7 +294,7 @@ var MapBubbleComponent = BaseComponent.extend({
 		DashboardsMap.selectedPointDetails = null;
 		for(var i = 0; i < DashboardsMap.data.length; i++)
 		{
-			if(selectedPoint == DashboardsMap.data[i][0])
+			if(Dashboards.getParameterValue("selectedPoint")  == DashboardsMap.data[i][0])
 			{
 				DashboardsMap.selectedPointDetails = DashboardsMap.data[i][3];
 				break;
