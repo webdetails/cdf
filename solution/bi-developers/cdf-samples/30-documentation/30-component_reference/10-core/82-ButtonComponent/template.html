@@ -30,8 +30,6 @@
 			<dt>refreshPeriod</dt>
 			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
 
-
-
 			<dt>label</dt>
 			<dd>Text to be used on the generated button (only used if htmlObject points to a div/span)</dd>
 
@@ -40,6 +38,12 @@
 
 			<dt>executeAtStart</dt>
 			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
 
 			<dt>preChange</dt>
 			<dd><i>Function(value) - </i> Function to be called before the component is changed</dd>
@@ -62,8 +66,8 @@
 				<div id="sampleObject"></div>
 			</div>
 
-				<div id="code">
-					<textarea cols="80" rows="20" id="samplecode">
+			<div id="code">
+				<textarea cols="80" rows="20" id="samplecode">
 var executeTopTenCustomers = 
 {
   name: "executeTopTenCustomers",
@@ -78,17 +82,16 @@ var executeTopTenCustomers =
   tooltip: "My first dashboard"
 }
 Dashboards.init([executeTopTenCustomers]);
-					</textarea>
-					<br />
-					<button onclick="evaluateCode(true)">Try me</button>
-				</div>
+				</textarea>
+				<br />
+				<button onclick="evaluateCode(true)">Try me</button>
 			</div>
-
 		</div>
+
 	</div>
+</div>
 
-	<script language="javascript" type="text/javascript">
-
-		var tabs = $("#example").tabs();
-		evaluateCode(false);
-	</script>
+<script language="javascript" type="text/javascript">
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+</script>
