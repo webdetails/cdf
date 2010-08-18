@@ -8,8 +8,11 @@
 
 /**
  * Class: OpenLayers.Control.Attribution
- * Add attribution from layers to the map display. Uses 'attribution' property
- * of each layer.
+ * The attribution control adds attribution from layers to the map display. 
+ * It uses 'attribution' property of each layer.
+ *
+ * Inherits from:
+ *  - <OpenLayers.Control>
  */
 OpenLayers.Control.Attribution = 
   OpenLayers.Class(OpenLayers.Control, {
@@ -19,7 +22,7 @@ OpenLayers.Control.Attribution =
      * {String} String used to seperate layers.
      */
     separator: ", ",
-       
+    
     /**
      * Constructor: OpenLayers.Control.Attribution 
      * 
@@ -75,12 +78,16 @@ OpenLayers.Control.Attribution =
     updateAttribution: function() {
         var attributions = [];
         if (this.map && this.map.layers) {
-            for(var i=0; i < this.map.layers.length; i++) {
+            for(var i=0, len=this.map.layers.length; i<len; i++) {
                 var layer = this.map.layers[i];
                 if (layer.attribution && layer.getVisibility()) {
-                    attributions.push( layer.attribution );
+                    // add attribution only if attribution text is unique
+                    if (OpenLayers.Util.indexOf(
+                                    attributions, layer.attribution) === -1) {
+                        attributions.push( layer.attribution );
+                    }
                 }
-            }  
+            } 
             this.div.innerHTML = attributions.join(this.separator);
         }
     },

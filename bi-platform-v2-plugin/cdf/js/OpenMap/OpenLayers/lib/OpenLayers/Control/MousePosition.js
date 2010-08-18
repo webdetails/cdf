@@ -9,6 +9,11 @@
 
 /**
  * Class: OpenLayers.Control.MousePosition
+ * The MousePosition control displays geographic coordinates of the mouse
+ * pointer, as it is moved about the map.
+ *
+ * Inherits from:
+ *  - <OpenLayers.Control>
  */
 OpenLayers.Control.MousePosition = OpenLayers.Class(OpenLayers.Control, {
     
@@ -40,24 +45,31 @@ OpenLayers.Control.MousePosition = OpenLayers.Class(OpenLayers.Control, {
      * APIProperty: numDigits
      * {Integer}
      */
-    numdigits: 5,
+    numDigits: 5,
     
     /** 
      * APIProperty: granularity
      * {Integer} 
      */
     granularity: 10,
+
+    /**
+     * APIProperty: emptyString 
+     * {String} Set this to some value to set when the mouse is outside the
+     *     map.
+     */
+    emptyString: null,
     
     /** 
      * Property: lastXy
-     * {<OpenLayers.LonLat>}
+     * {<OpenLayers.Pixel>}
      */
     lastXy: null,
 
     /**
      * APIProperty: displayProjection
-     * {<OpenLayers.Projection>} A projection that the 
-     * mousecontrol will display.
+     * {<OpenLayers.Projection>} The projection in which the 
+     * mouse position is displayed
      */
     displayProjection: null, 
     
@@ -65,7 +77,7 @@ OpenLayers.Control.MousePosition = OpenLayers.Class(OpenLayers.Control, {
      * Constructor: OpenLayers.Control.MousePosition
      * 
      * Parameters:
-     * options - {DOMElement} Options for control.
+     * options - {Object} Options for control.
      */
     initialize: function(options) {
         OpenLayers.Control.prototype.initialize.apply(this, arguments);
@@ -106,7 +118,8 @@ OpenLayers.Control.MousePosition = OpenLayers.Class(OpenLayers.Control, {
         var lonLat;
 
         if (evt == null) {
-            lonLat = new OpenLayers.LonLat(0, 0);
+            this.reset();
+            return;
         } else {
             if (this.lastXy == null ||
                 Math.abs(evt.xy.x - this.lastXy.x) > this.granularity ||
@@ -137,6 +150,15 @@ OpenLayers.Control.MousePosition = OpenLayers.Class(OpenLayers.Control, {
     },
 
     /**
+     * Method: reset
+     */
+    reset: function(evt) {
+        if (this.emptyString != null) {
+            this.element.innerHTML = this.emptyString;
+        }
+    },
+
+    /**
      * Method: formatOutput
      * Override to provide custom display output
      *
@@ -144,7 +166,7 @@ OpenLayers.Control.MousePosition = OpenLayers.Class(OpenLayers.Control, {
      * lonLat - {<OpenLayers.LonLat>} Location to display
      */
     formatOutput: function(lonLat) {
-        var digits = parseInt(this.numdigits);
+        var digits = parseInt(this.numDigits);
         var newHtml =
             this.prefix +
             lonLat.lon.toFixed(digits) +
@@ -160,6 +182,7 @@ OpenLayers.Control.MousePosition = OpenLayers.Class(OpenLayers.Control, {
     setMap: function() {
         OpenLayers.Control.prototype.setMap.apply(this, arguments);
         this.map.events.register( 'mousemove', this, this.redraw);
+        this.map.events.register( 'mouseout', this, this.reset);
     },     
 
     CLASS_NAME: "OpenLayers.Control.MousePosition"

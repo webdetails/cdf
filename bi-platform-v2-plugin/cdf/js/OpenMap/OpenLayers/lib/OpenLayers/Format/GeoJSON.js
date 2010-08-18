@@ -11,6 +11,7 @@
  * @requires OpenLayers/Geometry/MultiLineString.js
  * @requires OpenLayers/Geometry/Polygon.js
  * @requires OpenLayers/Geometry/MultiPolygon.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
@@ -23,6 +24,13 @@
  */
 OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
 
+    /**
+     * APIProperty: ignoreExtraDims
+     * {Boolean} Ignore dimensions higher than 2 when reading geometry
+     * coordinates.
+     */ 
+    ignoreExtraDims: false,
+    
     /**
      * Constructor: OpenLayers.Format.GeoJSON
      * Create a new parser for GeoJSON.
@@ -104,7 +112,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
                             }
                             break;
                         case "FeatureCollection":
-                            for(var i=0; i<obj.features.length; ++i) {
+                            for(var i=0, len=obj.features.length; i<len; ++i) {
                                 try {
                                     results.push(this.parseFeature(obj.features[i]));
                                 } catch(err) {
@@ -178,15 +186,19 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
      * {<OpenLayers.Feature.Vector>} A feature.
      */
     parseFeature: function(obj) {
-        var feature, geometry, attributes;
+        var feature, geometry, attributes, bbox;
         attributes = (obj.properties) ? obj.properties : {};
+        bbox = (obj.geometry && obj.geometry.bbox) || obj.bbox;
         try {
-            geometry = this.parseGeometry(obj.geometry);            
+            geometry = this.parseGeometry(obj.geometry);
         } catch(err) {
             // deal with bad geometries
             throw err;
         }
         feature = new OpenLayers.Feature.Vector(geometry, attributes);
+        if(bbox) {
+            feature.bounds = OpenLayers.Bounds.fromArray(bbox);
+        }
         if(obj.id) {
             feature.fid = obj.id;
         }
@@ -204,7 +216,10 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
      * {<OpenLayers.Geometry>} A geometry.
      */
     parseGeometry: function(obj) {
-        var geometry;
+        if (obj == null) {
+            return null;
+        }
+        var geometry, collection = false;
         if(obj.type == "GeometryCollection") {
             if(!(obj.geometries instanceof Array)) {
                 throw "GeometryCollection must have geometries array: " + obj;
@@ -217,6 +232,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
                 );
             }
             geometry = new OpenLayers.Geometry.Collection(components);
+            collection = true;
         } else {
             if(!(obj.coordinates instanceof Array)) {
                 throw "Geometry must have coordinates array: " + obj;
@@ -233,7 +249,9 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
                 throw err;
             }
         }
-        if (this.internalProjection && this.externalProjection) {
+        // We don't reproject collections because the children are reprojected
+        // for us when they are created.
+        if (this.internalProjection && this.externalProjection && !collection) {
             geometry.transform(this.externalProjection, 
                                this.internalProjection); 
         }                       
@@ -258,8 +276,9 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          * {<OpenLayers.Geometry>} A geometry.
          */
         "point": function(array) {
-            if(array.length != 2) {
-                throw "Only 2D points are supported: " + array;
+            if (this.ignoreExtraDims == false && 
+                  array.length != 2) {
+                    throw "Only 2D points are supported: " + array;
             }
             return new OpenLayers.Geometry.Point(array[0], array[1]);
         },
@@ -278,7 +297,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
         "multipoint": function(array) {
             var points = [];
             var p = null;
-            for(var i=0; i<array.length; ++i) {
+            for(var i=0, len=array.length; i<len; ++i) {
                 try {
                     p = this.parseCoords["point"].apply(this, [array[i]]);
                 } catch(err) {
@@ -303,7 +322,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
         "linestring": function(array) {
             var points = [];
             var p = null;
-            for(var i=0; i<array.length; ++i) {
+            for(var i=0, len=array.length; i<len; ++i) {
                 try {
                     p = this.parseCoords["point"].apply(this, [array[i]]);
                 } catch(err) {
@@ -328,7 +347,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
         "multilinestring": function(array) {
             var lines = [];
             var l = null;
-            for(var i=0; i<array.length; ++i) {
+            for(var i=0, len=array.length; i<len; ++i) {
                 try {
                     l = this.parseCoords["linestring"].apply(this, [array[i]]);
                 } catch(err) {
@@ -350,7 +369,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
         "polygon": function(array) {
             var rings = [];
             var r, l;
-            for(var i=0; i<array.length; ++i) {
+            for(var i=0, len=array.length; i<len; ++i) {
                 try {
                     l = this.parseCoords["linestring"].apply(this, [array[i]]);
                 } catch(err) {
@@ -376,7 +395,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
         "multipolygon": function(array) {
             var polys = [];
             var p = null;
-            for(var i=0; i<array.length; ++i) {
+            for(var i=0, len=array.length; i<len; ++i) {
                 try {
                     p = this.parseCoords["polygon"].apply(this, [array[i]]);
                 } catch(err) {
@@ -532,6 +551,9 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          * {Object} An object representing the geometry.
          */
         'geometry': function(geometry) {
+            if (geometry == null) {
+                return null;
+            }
             if (this.internalProjection && this.externalProjection) {
                 geometry = geometry.clone();
                 geometry.transform(this.internalProjection, 
@@ -582,7 +604,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          */
         'multipoint': function(multipoint) {
             var array = [];
-            for(var i=0; i<multipoint.components.length; ++i) {
+            for(var i=0, len=multipoint.components.length; i<len; ++i) {
                 array.push(this.extract.point.apply(this, [multipoint.components[i]]));
             }
             return array;
@@ -601,7 +623,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          */
         'linestring': function(linestring) {
             var array = [];
-            for(var i=0; i<linestring.components.length; ++i) {
+            for(var i=0, len=linestring.components.length; i<len; ++i) {
                 array.push(this.extract.point.apply(this, [linestring.components[i]]));
             }
             return array;
@@ -620,7 +642,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          */
         'multilinestring': function(multilinestring) {
             var array = [];
-            for(var i=0; i<multilinestring.components.length; ++i) {
+            for(var i=0, len=multilinestring.components.length; i<len; ++i) {
                 array.push(this.extract.linestring.apply(this, [multilinestring.components[i]]));
             }
             return array;
@@ -638,7 +660,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          */
         'polygon': function(polygon) {
             var array = [];
-            for(var i=0; i<polygon.components.length; ++i) {
+            for(var i=0, len=polygon.components.length; i<len; ++i) {
                 array.push(this.extract.linestring.apply(this, [polygon.components[i]]));
             }
             return array;
@@ -657,7 +679,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          */
         'multipolygon': function(multipolygon) {
             var array = [];
-            for(var i=0; i<multipolygon.components.length; ++i) {
+            for(var i=0, len=multipolygon.components.length; i<len; ++i) {
                 array.push(this.extract.polygon.apply(this, [multipolygon.components[i]]));
             }
             return array;

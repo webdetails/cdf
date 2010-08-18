@@ -8,18 +8,33 @@
 
 /**
  * Class: OpenLayers.Control.LayerSwitcher
+ * The LayerSwitcher control displays a table of contents for the map. This 
+ * allows the user interface to switch between BaseLasyers and to show or hide
+ * Overlays. By default the switcher is shown minimized on the right edge of 
+ * the map, the user may expand it by clicking on the handle.
  *
+ * To create the LayerSwitcher outside of the map, pass the Id of a html div 
+ * as the first argument to the constructor.
+ * 
  * Inherits from:
  *  - <OpenLayers.Control>
  */
 OpenLayers.Control.LayerSwitcher = 
   OpenLayers.Class(OpenLayers.Control, {
 
-    /**  
-     * Property: activeColor
-     * {String}
+    /**
+     * APIProperty: roundedCorner
+     * {Boolean} If true the Rico library is used for rounding the corners
+     *     of the layer switcher div, defaults to true.
      */
-    activeColor: "darkblue",
+    roundedCorner: true,
+
+    /**  
+     * APIProperty: roundedCornerColor
+     * {String} The color of the rounded corners, only applies if roundedCorner
+     *     is true, defaults to "darkblue".
+     */
+    roundedCornerColor: "darkblue",
     
     /**  
      * Property: layerStates 
@@ -177,7 +192,7 @@ OpenLayers.Control.LayerSwitcher =
     clearLayersArray: function(layersType) {
         var layers = this[layersType + "Layers"];
         if (layers) {
-            for(var i=0; i < layers.length; i++) {
+            for(var i=0, len=layers.length; i<len ; i++) {
                 var layer = layers[i];
                 OpenLayers.Event.stopObservingElement(layer.inputElem);
                 OpenLayers.Event.stopObservingElement(layer.labelSpan);
@@ -201,7 +216,7 @@ OpenLayers.Control.LayerSwitcher =
              (this.map.layers.length != this.layerStates.length) ) {
             redraw = true;
         } else {
-            for (var i=0; i < this.layerStates.length; i++) {
+            for (var i=0, len=this.layerStates.length; i<len; i++) {
                 var layerState = this.layerStates[i];
                 var layer = this.map.layers[i];
                 if ( (layerState.name != layer.name) || 
@@ -243,8 +258,9 @@ OpenLayers.Control.LayerSwitcher =
         // We save this before redrawing, because in the process of redrawing
         // we will trigger more visibility changes, and we want to not redraw
         // and enter an infinite loop.
-        this.layerStates = new Array(this.map.layers.length);
-        for (var i = 0; i < this.map.layers.length; i++) {
+        var len = this.map.layers.length;
+        this.layerStates = new Array(len);
+        for (var i=0; i <len; i++) {
             var layer = this.map.layers[i];
             this.layerStates[i] = {
                 'name': layer.name, 
@@ -256,7 +272,7 @@ OpenLayers.Control.LayerSwitcher =
 
         var layers = this.map.layers.slice();
         if (!this.ascending) { layers.reverse(); }
-        for( var i = 0; i < layers.length; i++) {
+        for(var i=0, len=layers.length; i<len; i++) {
             var layer = layers[i];
             var baseLayer = layer.isBaseLayer;
 
@@ -275,8 +291,8 @@ OpenLayers.Control.LayerSwitcher =
     
                 // create input element
                 var inputElem = document.createElement("input");
-                inputElem.id = "input_" + layer.name;
-                inputElem.name = (baseLayer) ? "baseLayers" : layer.name;
+                inputElem.id = this.id + "_input_" + layer.name;
+                inputElem.name = (baseLayer) ? this.id + "_baseLayers" : layer.name;
                 inputElem.type = (baseLayer) ? "radio" : "checkbox";
                 inputElem.value = layer.name;
                 inputElem.checked = checked;
@@ -297,6 +313,7 @@ OpenLayers.Control.LayerSwitcher =
                 
                 // create span
                 var labelSpan = document.createElement("span");
+                OpenLayers.Element.addClass(labelSpan, "labelSpan")
                 if (!baseLayer && !layer.inRange) {
                     labelSpan.style.color = "gray";
                 }
@@ -387,7 +404,7 @@ OpenLayers.Control.LayerSwitcher =
     updateMap: function() {
 
         // set the newly selected base layer        
-        for(var i=0; i < this.baseLayers.length; i++) {
+        for(var i=0, len=this.baseLayers.length; i<len; i++) {
             var layerEntry = this.baseLayers[i];
             if (layerEntry.inputElem.checked) {
                 this.map.setBaseLayer(layerEntry.layer, false);
@@ -395,7 +412,7 @@ OpenLayers.Control.LayerSwitcher =
         }
 
         // set the correct visibilities for the overlays
-        for(var i=0; i < this.dataLayers.length; i++) {
+        for(var i=0, len=this.dataLayers.length; i<len; i++) {
             var layerEntry = this.dataLayers[i];   
             layerEntry.layer.setVisibility(layerEntry.inputElem.checked);
         }
@@ -411,8 +428,9 @@ OpenLayers.Control.LayerSwitcher =
      */
     maximizeControl: function(e) {
 
-        //HACK HACK HACK - find a way to auto-size this layerswitcher
-        this.div.style.width = "20em";
+        // set the div's width and height to empty values, so
+        // the div dimensions can be controlled by CSS
+        this.div.style.width = "";
         this.div.style.height = "";
 
         this.showControls(false);
@@ -432,6 +450,10 @@ OpenLayers.Control.LayerSwitcher =
      */
     minimizeControl: function(e) {
 
+        // to minimize the control we set its div's width
+        // and height to 0px, we cannot just set "display"
+        // to "none" because it would hide the maximize
+        // div
         this.div.style.width = "0px";
         this.div.style.height = "0px";
 
@@ -465,19 +487,7 @@ OpenLayers.Control.LayerSwitcher =
     loadContents: function() {
 
         //configure main div
-        this.div.style.position = "absolute";
-        this.div.style.top = "25px";
-        this.div.style.right = "0px";
-        this.div.style.left = "";
-        this.div.style.fontFamily = "sans-serif";
-        this.div.style.fontWeight = "bold";
-        this.div.style.marginTop = "3px";
-        this.div.style.marginLeft = "3px";
-        this.div.style.marginBottom = "3px";
-        this.div.style.fontSize = "smaller";   
-        this.div.style.color = "white";   
-        this.div.style.backgroundColor = "transparent";
-    
+
         OpenLayers.Event.observe(this.div, "mouseup", 
             OpenLayers.Function.bindAsEventListener(this.mouseUp, this));
         OpenLayers.Event.observe(this.div, "click",
@@ -486,44 +496,24 @@ OpenLayers.Control.LayerSwitcher =
             OpenLayers.Function.bindAsEventListener(this.mouseDown, this));
         OpenLayers.Event.observe(this.div, "dblclick", this.ignoreEvent);
 
-
         // layers list div        
         this.layersDiv = document.createElement("div");
-        this.layersDiv.id = "layersDiv";
-        this.layersDiv.style.paddingTop = "5px";
-        this.layersDiv.style.paddingLeft = "10px";
-        this.layersDiv.style.paddingBottom = "5px";
-        this.layersDiv.style.paddingRight = "75px";
-        this.layersDiv.style.backgroundColor = this.activeColor;        
-
-        // had to set width/height to get transparency in IE to work.
-        // thanks -- http://jszen.blogspot.com/2005/04/ie6-opacity-filter-caveat.html
-        //
-        this.layersDiv.style.width = "100%";
-        this.layersDiv.style.height = "100%";
-
+        this.layersDiv.id = this.id + "_layersDiv";
+        OpenLayers.Element.addClass(this.layersDiv, "layersDiv");
 
         this.baseLbl = document.createElement("div");
         this.baseLbl.innerHTML = OpenLayers.i18n("baseLayer");
-        this.baseLbl.style.marginTop = "3px";
-        this.baseLbl.style.marginLeft = "3px";
-        this.baseLbl.style.marginBottom = "3px";
+        OpenLayers.Element.addClass(this.baseLbl, "baseLbl");
         
         this.baseLayersDiv = document.createElement("div");
-        this.baseLayersDiv.style.paddingLeft = "10px";
-        /*OpenLayers.Event.observe(this.baseLayersDiv, "click", 
-            OpenLayers.Function.bindAsEventListener(this.onLayerClick, this));
-        */
-                     
+        OpenLayers.Element.addClass(this.baseLayersDiv, "baseLayersDiv");
 
         this.dataLbl = document.createElement("div");
         this.dataLbl.innerHTML = OpenLayers.i18n("overlays");
-        this.dataLbl.style.marginTop = "3px";
-        this.dataLbl.style.marginLeft = "3px";
-        this.dataLbl.style.marginBottom = "3px";
+        OpenLayers.Element.addClass(this.dataLbl, "dataLbl");
         
         this.dataLayersDiv = document.createElement("div");
-        this.dataLayersDiv.style.paddingLeft = "10px";
+        OpenLayers.Element.addClass(this.dataLayersDiv, "dataLayersDiv");
 
         if (this.ascending) {
             this.layersDiv.appendChild(this.baseLbl);
@@ -539,12 +529,15 @@ OpenLayers.Control.LayerSwitcher =
  
         this.div.appendChild(this.layersDiv);
 
-        OpenLayers.Rico.Corner.round(this.div, {corners: "tl bl",
-                                        bgColor: "transparent",
-                                        color: this.activeColor,
-                                        blend: false});
-
-        OpenLayers.Rico.Corner.changeOpacity(this.layersDiv, 0.75);
+        if(this.roundedCorner) {
+            OpenLayers.Rico.Corner.round(this.div, {
+                corners: "tl bl",
+                bgColor: "transparent",
+                color: this.roundedCornerColor,
+                blend: false
+            });
+            OpenLayers.Rico.Corner.changeOpacity(this.layersDiv, 0.75);
+        }
 
         var imgLocation = OpenLayers.Util.getImagesLocation();
         var sz = new OpenLayers.Size(18,18);        
@@ -557,9 +550,7 @@ OpenLayers.Control.LayerSwitcher =
                                     sz, 
                                     img, 
                                     "absolute");
-        this.maximizeDiv.style.top = "5px";
-        this.maximizeDiv.style.right = "0px";
-        this.maximizeDiv.style.left = "";
+        OpenLayers.Element.addClass(this.maximizeDiv, "maximizeDiv");
         this.maximizeDiv.style.display = "none";
         OpenLayers.Event.observe(this.maximizeDiv, "click", 
             OpenLayers.Function.bindAsEventListener(this.maximizeControl, this)
@@ -576,9 +567,7 @@ OpenLayers.Control.LayerSwitcher =
                                     sz, 
                                     img, 
                                     "absolute");
-        this.minimizeDiv.style.top = "5px";
-        this.minimizeDiv.style.right = "0px";
-        this.minimizeDiv.style.left = "";
+        OpenLayers.Element.addClass(this.minimizeDiv, "minimizeDiv");
         this.minimizeDiv.style.display = "none";
         OpenLayers.Event.observe(this.minimizeDiv, "click", 
             OpenLayers.Function.bindAsEventListener(this.minimizeControl, this)

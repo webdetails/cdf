@@ -78,6 +78,9 @@ OpenLayers.Icon = OpenLayers.Class({
      * references and memory leaks
      */
     destroy: function() {
+        // erase any drawn elements
+        this.erase();
+
         OpenLayers.Event.stopObservingElement(this.imageDiv.firstChild); 
         this.imageDiv.innerHTML = "";
         this.imageDiv = null;
@@ -143,6 +146,16 @@ OpenLayers.Icon = OpenLayers.Class({
         return this.imageDiv;
     }, 
 
+    /** 
+     * Method: erase
+     * Erase the underlying image element.
+     *
+     */
+    erase: function() {
+        if (this.imageDiv != null && this.imageDiv.parentNode != null) {
+            OpenLayers.Element.remove(this.imageDiv);
+        }
+    }, 
     
     /** 
      * Method: setOpacity
@@ -192,6 +205,22 @@ OpenLayers.Icon = OpenLayers.Class({
      */
     display: function(display) {
         this.imageDiv.style.display = (display) ? "" : "none"; 
+    },
+    
+
+    /**
+     * APIMethod: isDrawn
+     * 
+     * Returns:
+     * {Boolean} Whether or not the icon is drawn.
+     */
+    isDrawn: function() {
+        // nodeType 11 for ie, whose nodes *always* have a parentNode
+        // (of type document fragment)
+        var isDrawn = (this.imageDiv && this.imageDiv.parentNode && 
+                       (this.imageDiv.parentNode.nodeType != 11));    
+
+        return isDrawn;   
     },
 
     CLASS_NAME: "OpenLayers.Icon"

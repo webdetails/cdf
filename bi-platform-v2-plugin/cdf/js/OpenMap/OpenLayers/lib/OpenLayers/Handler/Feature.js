@@ -56,13 +56,13 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
     up: null,
     
     /**
-     * Property: clickoutTolerance
-     * {Number} The number of pixels the mouse can move during a click that
-     *     still constitutes a click out.  When dragging the map, clicks should
-     *     not trigger the clickout property unless this tolerance is reached.
-     *     Default is 4.
+     * Property: clickTolerance
+     * {Number} The number of pixels the mouse can move between mousedown
+     *     and mouseup for the event to still be considered a click.
+     *     Dragging the map should not trigger the click and clickout callbacks
+     *     unless the map is moved by less than this tolerance. Defaults to 4.
      */
-    clickoutTolerance: 4,
+    clickTolerance: 4,
 
     /**
      * Property: geometryTypes
@@ -96,22 +96,16 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
      * {Boolean} If stopUp is set to true, handled mouseups do not
      *      propagate to other mouseup listeners. Otherwise, handled mouseups
      *      do propagate. Unhandled mouseups always propagate, whatever the
-     *      value of stopUp. Defaults to true.
+     *      value of stopUp. Defaults to false.
      */
-    stopUp: true,
-
-    /**
-     * Property: layerIndex
-     * {Int}
-     */
-    layerIndex: null,
+    stopUp: false,
     
     /**
      * Constructor: OpenLayers.Handler.Feature
      *
      * Parameters:
      * control - {<OpenLayers.Control>} 
-     * layers - {Array(<OpenLayers.Layer.Vector>)}
+     * layer - {<OpenLayers.Layer.Vector>}
      * callbacks - {Object} An object with a 'over' property whos value is
      *     a function to be called when the mouse is over a feature. The 
      *     callback should expect to recieve a single argument, the feature.
@@ -176,6 +170,9 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
      * {Boolean}
      */
     mousemove: function(evt) {
+        if (!this.callbacks['over'] && !this.callbacks['out']) {
+            return true;
+        }     
         this.handle(evt);
         return true;
     },
@@ -221,18 +218,32 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
      * {Boolean} The event occurred over a relevant feature.
      */
     handle: function(evt) {
+        if(this.feature && !this.feature.layer) {
+            // feature has been destroyed
+            this.feature = null;
+        }
         var type = evt.type;
         var handled = false;
         var previouslyIn = !!(this.feature); // previously in a feature
         var click = (type == "click" || type == "dblclick");
         this.feature = this.layer.getFeatureFromEvent(evt);
+        if(this.feature && !this.feature.layer) {
+            // feature has been destroyed
+            this.feature = null;
+        }
+        if(this.lastFeature && !this.lastFeature.layer) {
+            // last feature has been destroyed
+            this.lastFeature = null;
+        }
         if(this.feature) {
             var inNew = (this.feature != this.lastFeature);
             if(this.geometryTypeMatches(this.feature)) {
                 // in to a feature
                 if(previouslyIn && inNew) {
                     // out of last feature and in to another
-                    this.triggerCallback(type, 'out', [this.lastFeature]);
+                    if(this.lastFeature) {
+                        this.triggerCallback(type, 'out', [this.lastFeature]);
+                    }
                     this.triggerCallback(type, 'in', [this.feature]);
                 } else if(!previouslyIn || click) {
                     // in feature for the first time
@@ -242,7 +253,7 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
                 handled = true;
             } else {
                 // not in to a feature
-                if(previouslyIn && inNew || (click && this.lastFeature)) {
+                if(this.lastFeature && (previouslyIn && inNew || click)) {
                     // out of last feature for the first time
                     this.triggerCallback(type, 'out', [this.lastFeature]);
                 }
@@ -254,7 +265,7 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
                 this.feature = null;
             }
         } else {
-            if(previouslyIn || (click && this.lastFeature)) {
+            if(this.lastFeature && (previouslyIn || click)) {
                 this.triggerCallback(type, 'out', [this.lastFeature]);
             }
         }
@@ -264,7 +275,7 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
     /**
      * Method: triggerCallback
      * Call the callback keyed in the event map with the supplied arguments.
-     *     For click out, the <clickoutTolerance> is checked first.
+     *     For click and clickout, the <clickTolerance> is checked first.
      *
      * Parameters:
      * type - {String}
@@ -272,13 +283,13 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
     triggerCallback: function(type, mode, args) {
         var key = this.EVENTMAP[type][mode];
         if(key) {
-            if(type == 'click' && mode == 'out' && this.up && this.down) {
-                // for clickout, only trigger callback if tolerance is met
+            if(type == 'click' && this.up && this.down) {
+                // for click/clickout, only trigger callback if tolerance is met
                 var dpx = Math.sqrt(
                     Math.pow(this.up.x - this.down.x, 2) +
                     Math.pow(this.up.y - this.down.y, 2)
                 );
-                if(dpx <= this.clickoutTolerance) {
+                if(dpx <= this.clickTolerance) {
                     this.callback(key, args);
                 }
             } else {
@@ -297,16 +308,20 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
     activate: function() {
         var activated = false;
         if(OpenLayers.Handler.prototype.activate.apply(this, arguments)) {
-            this.layerIndex = this.layer.div.style.zIndex;
-            this.layer.div.style.zIndex = this.map.Z_INDEX_BASE['Popup'] - 1;
+            this.moveLayerToTop();
+            this.map.events.on({
+                "removelayer": this.handleMapEvents,
+                "changelayer": this.handleMapEvents,
+                scope: this
+            });
             activated = true;
         }
         return activated;
     },
     
     /**
-     * Method: activate 
-     * Turn of the handler.  Returns false if the handler was already active.
+     * Method: deactivate 
+     * Turn off the handler.  Returns false if the handler was already active.
      *
      * Returns: 
      * {Boolean}
@@ -314,16 +329,58 @@ OpenLayers.Handler.Feature = OpenLayers.Class(OpenLayers.Handler, {
     deactivate: function() {
         var deactivated = false;
         if(OpenLayers.Handler.prototype.deactivate.apply(this, arguments)) {
-            if (this.layer && this.layer.div) {
-                this.layer.div.style.zIndex = this.layerIndex;
-            }
+            this.moveLayerBack();
             this.feature = null;
             this.lastFeature = null;
             this.down = null;
             this.up = null;
+            this.map.events.un({
+                "removelayer": this.handleMapEvents,
+                "changelayer": this.handleMapEvents,
+                scope: this
+            });
             deactivated = true;
         }
         return deactivated;
+    },
+    
+    /**
+     * Method handleMapEvents
+     * 
+     * Parameters:
+     * evt - {Object}
+     */
+    handleMapEvents: function(evt) {
+        if (!evt.property || evt.property == "order") {
+            this.moveLayerToTop();
+        }
+    },
+    
+    /**
+     * Method: moveLayerToTop
+     * Moves the layer for this handler to the top, so mouse events can reach
+     * it.
+     */
+    moveLayerToTop: function() {
+        var index = Math.max(this.map.Z_INDEX_BASE['Feature'] - 1,
+            this.layer.getZIndex()) + 1;
+        this.layer.setZIndex(index);
+        
+    },
+    
+    /**
+     * Method: moveLayerBack
+     * Moves the layer back to the position determined by the map's layers
+     * array.
+     */
+    moveLayerBack: function() {
+        var index = this.layer.getZIndex() - 1;
+        if (index >= this.map.Z_INDEX_BASE['Feature']) {
+            this.layer.setZIndex(index);
+        } else {
+            this.map.setLayerZIndex(this.layer,
+                this.map.getLayerIndex(this.layer));
+        }
     },
 
     CLASS_NAME: "OpenLayers.Handler.Feature"

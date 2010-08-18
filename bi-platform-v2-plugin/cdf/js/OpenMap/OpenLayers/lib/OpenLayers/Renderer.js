@@ -27,11 +27,28 @@ OpenLayers.Renderer = OpenLayers.Class({
      */
     container: null,
     
+    /**
+     * Property: root
+     * {DOMElement}
+     */
+    root: null,
+
     /** 
      * Property: extent
      * {<OpenLayers.Bounds>}
      */
     extent: null,
+
+    /**
+     * Property: locked
+     * {Boolean} If the renderer is currently in a state where many things
+     *     are changing, the 'locked' property is set to true. This means 
+     *     that renderers can expect at least one more drawFeature event to be
+     *     called with the 'locked' property set to 'true': In some renderers,
+     *     this might make sense to use as a 'only update local information'
+     *     flag. 
+     */  
+    locked: false,
     
     /** 
      * Property: size
@@ -56,8 +73,10 @@ OpenLayers.Renderer = OpenLayers.Class({
      *
      * Parameters:
      * containerID - {<String>} 
+     * options - {Object} options for this renderer. See sublcasses for
+     *     supported options.
      */
-    initialize: function(containerID) {
+    initialize: function(containerID, options) {
         this.container = OpenLayers.Util.getElement(containerID);
     },
     
@@ -90,13 +109,19 @@ OpenLayers.Renderer = OpenLayers.Class({
      * Resolution has probably changed, so we nullify the resolution 
      * cache (this.resolution) -- this way it will be re-computed when 
      * next it is needed.
+     * We nullify the resolution cache (this.resolution) if resolutionChanged
+     * is set to true - this way it will be re-computed on the next
+     * getResolution() request.
      *
      * Parameters:
-     * extent - {<OpenLayers.Bounds>} 
+     * extent - {<OpenLayers.Bounds>}
+     * resolutionChanged - {Boolean}
      */
-    setExtent: function(extent) {
+    setExtent: function(extent, resolutionChanged) {
         this.extent = extent.clone();
-        this.resolution = null;
+        if (resolutionChanged) {
+            this.resolution = null;
+        }
     },
     
     /**
@@ -135,14 +160,37 @@ OpenLayers.Renderer = OpenLayers.Class({
      *
      * Parameters:
      * feature - {<OpenLayers.Feature.Vector>} 
-     * style - {<Object>} 
+     * style - {<Object>}
+     * 
+     * Returns:
+     * {Boolean} true if the feature has been drawn completely, false if not,
+     *     undefined if the feature had no geometry
      */
     drawFeature: function(feature, style) {
         if(style == null) {
             style = feature.style;
         }
         if (feature.geometry) {
-            this.drawGeometry(feature.geometry, style, feature.id);
+            var bounds = feature.geometry.getBounds();
+            if(bounds) {
+                if (!bounds.intersectsBounds(this.extent)) {
+                    style = {display: "none"};
+                }
+                var rendered = this.drawGeometry(feature.geometry, style, feature.id);
+                if(style.display != "none" && style.label && rendered !== false) {
+                    var location = feature.geometry.getCentroid(); 
+                    if(style.labelXOffset || style.labelYOffset) {
+                        xOffset = isNaN(style.labelXOffset) ? 0 : style.labelXOffset;
+                        yOffset = isNaN(style.labelYOffset) ? 0 : style.labelYOffset;
+                        var res = this.getResolution();
+                        location.move(xOffset*res, yOffset*res);
+                    }
+                    this.drawText(feature.id, style, location);
+                } else {
+                    this.removeText(feature.id);
+                }
+                return rendered;
+            }
         }
     },
 
@@ -161,6 +209,28 @@ OpenLayers.Renderer = OpenLayers.Class({
      */
     drawGeometry: function(geometry, style, featureId) {},
         
+    /**
+     * Method: drawText
+     * Function for drawing text labels.
+     * This method is only called by the renderer itself.
+     * 
+     * Parameters: 
+     * featureId - {String}
+     * style -
+     * location - {<OpenLayers.Geometry.Point>}
+     */
+    drawText: function(featureId, style, location) {},
+
+    /**
+     * Method: removeText
+     * Function for removing text labels.
+     * This method is only called by the renderer itself.
+     * 
+     * Parameters: 
+     * featureId - {String}
+     */
+    removeText: function(featureId) {},
+    
     /**
      * Method: clear
      * Clear all vectors from the renderer.
@@ -194,8 +264,9 @@ OpenLayers.Renderer = OpenLayers.Class({
         if(!(features instanceof Array)) {
             features = [features];
         }
-        for(var i=0; i<features.length; ++i) {
+        for(var i=0, len=features.length; i<len; ++i) {
             this.eraseGeometry(features[i].geometry);
+            this.removeText(features[i].id);
         }
     },
     
@@ -208,6 +279,30 @@ OpenLayers.Renderer = OpenLayers.Class({
      * geometry - {<OpenLayers.Geometry>} 
      */
     eraseGeometry: function(geometry) {},
+    
+    /**
+     * Method: moveRoot
+     * moves this renderer's root to a (different) renderer.
+     * To be implemented by subclasses that require a common renderer root for
+     * feature selection.
+     * 
+     * Parameters:
+     * renderer - {<OpenLayers.Renderer>} target renderer for the moved root
+     */
+    moveRoot: function(renderer) {},
+
+    /**
+     * Method: getRenderLayerId
+     * Gets the layer that this renderer's output appears on. If moveRoot was
+     * used, this will be different from the id of the layer containing the
+     * features rendered by this renderer.
+     * 
+     * Returns:
+     * {String} the id of the output layer.
+     */
+    getRenderLayerId: function() {
+        return this.container.id;
+    },
 
     CLASS_NAME: "OpenLayers.Renderer"
 });

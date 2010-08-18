@@ -3,6 +3,10 @@
  * full text of the license. */
 
 /**
+ * @requires OpenLayers/Console.js
+ */
+
+/**
  * Class: OpenLayers.Control
  * Controls affect the display or behavior of the map. They allow everything
  * from panning and zooming to displaying a scale indicator. Controls by 
@@ -43,7 +47,7 @@
  * >     },
  * >
  * >     notice: function (bounds) {
- * >         alert(bounds);
+ * >         OpenLayers.Console.userError(bounds);
  * >     }
  * > }); 
  * > map.addControl(control);
@@ -101,9 +105,16 @@ OpenLayers.Control = OpenLayers.Class({
     */ 
     title: "",
 
+    /**
+     * APIProperty: autoActivate
+     * {Boolean} Activate the control when it is added to a map.  Default is
+     *     false.
+     */
+    autoActivate: false,
+
     /** 
      * Property: active 
-     * {boolean} null
+     * {Boolean} The control is active.
      */
     active: null,
 
@@ -141,14 +152,14 @@ OpenLayers.Control = OpenLayers.Class({
      *     properties of this event depends on exactly what happened.
      *
      * All event objects have at least the following properties:
-     *  - *object* {Object} A reference to control.events.object (a reference
+     * object - {Object} A reference to control.events.object (a reference
      *      to the control).
-     *  - *element* {DOMElement} A reference to control.events.element (which
+     * element - {DOMElement} A reference to control.events.element (which
      *      will be null unless documented otherwise).
      *
      * Supported map event types:
-     *  - *activate* Triggered when activated.
-     *  - *deactivate* Triggered when deactivated.
+     * activate - Triggered when activated.
+     * deactivate - Triggered when deactivated.
      */
     EVENT_TYPES: ["activate", "deactivate"],
 
@@ -176,7 +187,9 @@ OpenLayers.Control = OpenLayers.Class({
         if(this.eventListeners instanceof Object) {
             this.events.on(this.eventListeners);
         }
-        this.id = OpenLayers.Util.createUniqueID(this.CLASS_NAME + "_");
+        if (this.id == null) {
+            this.id = OpenLayers.Util.createUniqueID(this.CLASS_NAME + "_");
+        }
     },
 
     /**
@@ -252,7 +265,7 @@ OpenLayers.Control = OpenLayers.Class({
             if (!this.allowSelection) {
                 this.div.className += " olControlNoSelect";
                 this.div.setAttribute("unselectable", "on", 0);
-                this.div.onselectstart = function() { return(false); }; 
+                this.div.onselectstart = OpenLayers.Function.False; 
             }    
             if (this.title != "") {
                 this.div.title = this.title;
@@ -298,6 +311,12 @@ OpenLayers.Control = OpenLayers.Class({
             this.handler.activate();
         }
         this.active = true;
+        if(this.map) {
+            OpenLayers.Element.addClass(
+                this.map.viewPortDiv,
+                this.displayClass.replace(/ /g, "") + "Active"
+            );
+        }
         this.events.triggerEvent("activate");
         return true;
     },
@@ -317,6 +336,12 @@ OpenLayers.Control = OpenLayers.Class({
                 this.handler.deactivate();
             }
             this.active = false;
+            if(this.map) {
+                OpenLayers.Element.removeClass(
+                    this.map.viewPortDiv,
+                    this.displayClass.replace(/ /g, "") + "Active"
+                );
+            }
             this.events.triggerEvent("deactivate");
             return true;
         }

@@ -22,8 +22,8 @@ OpenLayers.Layer.Markers = OpenLayers.Class(OpenLayers.Layer, {
     isBaseLayer: false,
     
     /** 
-     * Property: markers 
-     * Array({<OpenLayers.Marker>}) internal marker list 
+     * APIProperty: markers 
+     * {Array(<OpenLayers.Marker>)} internal marker list 
      */
     markers: null,
 
@@ -69,7 +69,7 @@ OpenLayers.Layer.Markers = OpenLayers.Class(OpenLayers.Layer, {
     setOpacity: function(opacity) {
         if (opacity != this.opacity) {
             this.opacity = opacity;
-            for (var i = 0; i < this.markers.length; i++) {
+            for (var i=0, len=this.markers.length; i<len; i++) {
                 this.markers[i].setOpacity(this.opacity);
             }
         }
@@ -87,7 +87,7 @@ OpenLayers.Layer.Markers = OpenLayers.Class(OpenLayers.Layer, {
         OpenLayers.Layer.prototype.moveTo.apply(this, arguments);
 
         if (zoomChanged || !this.drawn) {
-            for(var i=0; i < this.markers.length; i++) {
+            for(var i=0, len=this.markers.length; i<len; i++) {
                 this.drawMarker(this.markers[i]);
             }
             this.drawn = true;
@@ -122,11 +122,7 @@ OpenLayers.Layer.Markers = OpenLayers.Class(OpenLayers.Layer, {
     removeMarker: function(marker) {
         if (this.markers && this.markers.length) {
             OpenLayers.Util.removeItem(this.markers, marker);
-            if ((marker.icon != null) && (marker.icon.imageDiv != null) &&
-                (marker.icon.imageDiv.parentNode == this.div) ) {
-                this.div.removeChild(marker.icon.imageDiv);    
-                marker.drawn = false;
-            }
+            marker.erase();
         }
     },
 
@@ -156,10 +152,11 @@ OpenLayers.Layer.Markers = OpenLayers.Class(OpenLayers.Layer, {
         if (px == null) {
             marker.display(false);
         } else {
-            var markerImg = marker.draw(px);
-            if (!marker.drawn) {
+            if (!marker.isDrawn()) {
+                var markerImg = marker.draw(px);
                 this.div.appendChild(markerImg);
-                marker.drawn = true;
+            } else if(marker.icon) {
+                marker.icon.moveTo(px);
             }
         }
     },
@@ -176,7 +173,7 @@ OpenLayers.Layer.Markers = OpenLayers.Class(OpenLayers.Layer, {
         
         if ( this.markers && (this.markers.length > 0)) {
             var maxExtent = new OpenLayers.Bounds();
-            for(var i=0; i < this.markers.length; i++) {
+            for(var i=0, len=this.markers.length; i<len; i++) {
                 var marker = this.markers[i];
                 maxExtent.extend(marker.lonlat);
             }

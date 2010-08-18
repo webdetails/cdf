@@ -5,12 +5,13 @@
  
 /**
  * @requires OpenLayers/Layer/MapServer.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
  * Class: OpenLayers.Layer.MapServer.Untiled
- * Deprecated, to be removed in 3.0 - instead use OpenLayers.Layer.MapServer and 
- *     pass the option 'singleTile' as true.
+ * *Deprecated*.  To be removed in 3.0.  Instead use OpenLayers.Layer.MapServer
+ *     and pass the option 'singleTile' as true.
  * 
  * Inherits from: 
  *  - <OpenLayers.Layer.MapServer>
@@ -55,14 +56,14 @@ OpenLayers.Layer.MapServer.Untiled = OpenLayers.Class(OpenLayers.Layer.MapServer
             obj = new OpenLayers.Layer.MapServer.Untiled(this.name,
                                                          this.url,
                                                          this.params,
-                                                         this.options);
+                                                         this.getOptions());
         }
 
         //get all additions from superclasses
         obj = OpenLayers.Layer.MapServer.prototype.clone.apply(this, [obj]);
 
         // copy/set any non-init, non-simple values here
-
+        
         return obj;
     }, 
 

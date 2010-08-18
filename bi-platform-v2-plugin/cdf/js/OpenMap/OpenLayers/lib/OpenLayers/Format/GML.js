@@ -11,6 +11,7 @@
  * @requires OpenLayers/Geometry/MultiLineString.js
  * @requires OpenLayers/Geometry/Polygon.js
  * @requires OpenLayers/Geometry/MultiPolygon.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
@@ -50,7 +51,7 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
     layerName: "features",
     
     /**
-     * APIProperty: geometry
+     * APIProperty: geometryName
      * {String} Name of geometry element.  Defaults to "geometry".
      */
     geometryName: "geometry",
@@ -136,17 +137,17 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
      * node - {DOMElement} A GML feature node. 
      */
     parseFeature: function(node) {
-        // only accept on geometry per feature - look for highest "order"
+        // only accept one geometry per feature - look for highest "order"
         var order = ["MultiPolygon", "Polygon",
                      "MultiLineString", "LineString",
-                     "MultiPoint", "Point", "Envelope"];
+                     "MultiPoint", "Point", "Envelope", "Box"];
         var type, nodeList, geometry, parser;
         for(var i=0; i<order.length; ++i) {
             type = order[i];
             nodeList = this.getElementsByTagNameNS(node, this.gmlns, type);
             if(nodeList.length > 0) {
                 // only deal with first geometry of this type
-                var parser = this.parseGeometry[type.toLowerCase()];
+                parser = this.parseGeometry[type.toLowerCase()];
                 if(parser) {
                     geometry = parser.apply(this, [nodeList[0]]);
                     if (this.internalProjection && this.externalProjection) {
@@ -168,6 +169,21 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
             attributes = this.parseAttributes(node);
         }
         var feature = new OpenLayers.Feature.Vector(geometry, attributes);
+        
+        feature.gml = {
+            featureType: node.firstChild.nodeName.split(":")[1],
+            featureNS: node.firstChild.namespaceURI,
+            featureNSPrefix: node.firstChild.prefix
+        };
+                
+        var boundedByNodes = this.getElementsByTagNameNS(node, this.gmlns, 'boundedBy');
+        if (boundedByNodes.length === 1) {
+            parser = this.parseGeometry['box']; 
+            if (parser) { 
+                feature.bounds = parser.apply(this, [boundedByNodes[0]]);
+            }            
+        }
+                
         // assign fid - this can come from a "fid" or "id" attribute
         var childNode = node.firstChild;
         var fid;
@@ -315,7 +331,7 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
             // look for <gml:posList>
             nodeList = this.getElementsByTagNameNS(node, this.gmlns, "posList");
             if(nodeList.length > 0) {
-                coordString = this.concatChildValues(nodeList[0]);
+                coordString = this.getChildValue(nodeList[0]);
                 coordString = coordString.replace(this.regExes.trimSpace, "");
                 coords = coordString.split(this.regExes.splitSpace);
                 var dim = parseInt(nodeList[0].getAttribute("dimension"));
@@ -338,7 +354,7 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
                 nodeList = this.getElementsByTagNameNS(node, this.gmlns,
                                                        "coordinates");
                 if(nodeList.length > 0) {
-                    coordString = this.concatChildValues(nodeList[0]);
+                    coordString = this.getChildValue(nodeList[0]);
                     coordString = coordString.replace(this.regExes.trimSpace,
                                                       "");
                     coordString = coordString.replace(this.regExes.trimComma,
@@ -514,7 +530,40 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
                 envelope = new OpenLayers.Geometry.Polygon([ring]);
             }
             return envelope; 
+        },
+
+        /**
+         * Method: parseGeometry.box
+         * Given a GML node representing a box geometry, create an
+         *     OpenLayers.Bounds.
+         *
+         * Parameters:
+         * node - {DOMElement} A GML node.
+         *
+         * Returns:
+         * {<OpenLayers.Bounds>} A bounds representing the box.
+         */
+        box: function(node) {
+            var nodeList = this.getElementsByTagNameNS(node, this.gmlns,
+                                                   "coordinates");
+            var coordString;
+            var coords, beginPoint = null, endPoint = null;
+            if (nodeList.length > 0) {
+                coordString = nodeList[0].firstChild.nodeValue;
+                coords = coordString.split(" ");
+                if (coords.length == 2) {
+                    beginPoint = coords[0].split(",");
+                    endPoint = coords[1].split(",");
+                }
+            }
+            if (beginPoint !== null && endPoint !== null) {
+                return new OpenLayers.Bounds(parseFloat(beginPoint[0]),
+                    parseFloat(beginPoint[1]),
+                    parseFloat(endPoint[0]),
+                    parseFloat(endPoint[1]) );
+            }
         }
+        
     },
     
     /**
@@ -550,6 +599,12 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
                                                 this.regExes.trimSpace, "");
                                 attributes[name] = value;
                             }
+                        } else {
+                            // If child has no childNodes (grandchildren),
+                            // set an attribute with null value.
+                            // e.g. <prefix:fieldname/> becomes
+                            // {fieldname: null}
+                            attributes[child.nodeName.split(":").pop()] = null;
                         }
                     }
                 }
@@ -797,6 +852,23 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
                 gml.appendChild(polyMember);
             }
             return gml;
+
+        },
+ 
+        /**
+         * Method: buildGeometry.bounds
+         * Given an OpenLayers bounds, create a GML box.
+         *
+         * Parameters:
+         * bounds - {<OpenLayers.Geometry.Bounds>} A bounds object.
+         *
+         * Returns:
+         * {DOMElement} A GML box node.
+         */
+        bounds: function(bounds) {
+            var gml = this.createElementNS(this.gmlns, "gml:Box");
+            gml.appendChild(this.buildCoordinatesNode(bounds));
+            return gml;
         }
     },
 
@@ -818,11 +890,17 @@ OpenLayers.Format.GML = OpenLayers.Class(OpenLayers.Format.XML, {
         coordinatesNode.setAttribute("decimal", ".");
         coordinatesNode.setAttribute("cs", ",");
         coordinatesNode.setAttribute("ts", " ");
-        
-        var points = (geometry.components) ? geometry.components : [geometry];
+
         var parts = [];
-        for(var i=0; i<points.length; i++) {
-            parts.push(points[i].x + "," + points[i].y);
+
+        if(geometry instanceof OpenLayers.Bounds){
+            parts.push(geometry.left + "," + geometry.bottom);
+            parts.push(geometry.right + "," + geometry.top);
+        } else {
+            var points = (geometry.components) ? geometry.components : [geometry];
+            for(var i=0; i<points.length; i++) {
+                parts.push(points[i].x + "," + points[i].y);                
+            }            
         }
 
         var txtNode = this.createTextNode(parts.join(" "));

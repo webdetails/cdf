@@ -4,13 +4,17 @@
 
 /**
  * @requires OpenLayers/Layer/Vector.js
- * @requires OpenLayers/Ajax.js
+ * @requires OpenLayers/Request/XMLHttpRequest.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
  * Class: OpenLayers.Layer.GML
  * Create a vector layer by parsing a GML file. The GML file is
  *     passed in as a parameter.
+ * *Deprecated*.  To be removed in 3.0.  Instead use OpenLayers.Layer.Vector
+ *     with Protocol.HTTP and Strategy.Fixed. Provide the protocol with a 
+ *     format parameter to get the parser you want for your data.
  *
  * Inherits from:
  *  - <OpenLayers.Layer.Vector>
@@ -90,7 +94,6 @@ OpenLayers.Layer.GML = OpenLayers.Class(OpenLayers.Layer.Vector, {
         // loaded after the GML is paited.
         // See http://trac.openlayers.org/ticket/404
         if(this.visibility && !this.loaded){
-            this.events.triggerEvent("loadstart");
             this.loadGML();
         }
     },
@@ -100,7 +103,13 @@ OpenLayers.Layer.GML = OpenLayers.Class(OpenLayers.Layer.Vector, {
      */
     loadGML: function() {
         if (!this.loaded) {
-            var results = OpenLayers.loadURL(this.url, null, this, this.requestSuccess, this.requestFailure);
+            this.events.triggerEvent("loadstart");
+            OpenLayers.Request.GET({
+                url: this.url,
+                success: this.requestSuccess,
+                failure: this.requestFailure,
+                scope: this
+            });
             this.loaded = true;
         }    
     },    
@@ -116,14 +125,13 @@ OpenLayers.Layer.GML = OpenLayers.Class(OpenLayers.Layer.Vector, {
         this.url = url;
         this.destroyFeatures();
         this.loaded = false;
-        this.events.triggerEvent("loadstart");
         this.loadGML();
     },
     
     /**
      * Method: requestSuccess
      * Process GML after it has been loaded.
-     * Called by initialise() and loadUrl() after the GML has been loaded.
+     * Called by initialize() and loadUrl() after the GML has been loaded.
      *
      * Parameters:
      * request - {String} 
@@ -151,13 +159,13 @@ OpenLayers.Layer.GML = OpenLayers.Class(OpenLayers.Layer.Vector, {
     /**
      * Method: requestFailure
      * Process a failed loading of GML.
-     * Called by initialise() and loadUrl() if there was a problem loading GML.
+     * Called by initialize() and loadUrl() if there was a problem loading GML.
      *
      * Parameters:
      * request - {String} 
      */
     requestFailure: function(request) {
-        alert(OpenLayers.i18n("errorLoadingGML", {'url':this.url}));
+        OpenLayers.Console.userError(OpenLayers.i18n("errorLoadingGML", {'url':this.url}));
         this.events.triggerEvent("loadend");
     },
 

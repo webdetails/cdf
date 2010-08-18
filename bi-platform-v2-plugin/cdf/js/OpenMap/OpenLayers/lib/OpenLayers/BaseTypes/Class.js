@@ -17,6 +17,8 @@
  * To create a new OpenLayers-style class with multiple inheritance, use the
  *     following syntax:
  * > var MyClass = OpenLayers.Class(Class1, Class2, prototype);
+ * Note that instanceof reflection will only reveil Class1 as superclass.
+ * Class2 ff are mixins.
  *
  */
 OpenLayers.Class = function() {
@@ -33,9 +35,25 @@ OpenLayers.Class = function() {
         }
     };
     var extended = {};
-    var parent;
-    for(var i=0; i<arguments.length; ++i) {
+    var parent, initialize;
+    for(var i=0, len=arguments.length; i<len; ++i) {
         if(typeof arguments[i] == "function") {
+            // make the class passed as the first argument the superclass
+            if(i == 0 && len > 1) {
+                initialize = arguments[i].prototype.initialize;
+                // replace the initialize method with an empty function,
+                // because we do not want to create a real instance here
+                arguments[i].prototype.initialize = function() {};
+                // the line below makes sure that the new class has a
+                // superclass
+                extended = new arguments[i];
+                // restore the original initialize method
+                if(initialize === undefined) {
+                    delete arguments[i].prototype.initialize;
+                } else {
+                    arguments[i].prototype.initialize = initialize;
+                }
+            }
             // get the prototype of the superclass
             parent = arguments[i].prototype;
         } else {
@@ -85,7 +103,7 @@ OpenLayers.Class.create = function() {
 OpenLayers.Class.inherit = function () {
     var superClass = arguments[0];
     var proto = new superClass(OpenLayers.Class.isPrototype);
-    for (var i = 1; i < arguments.length; i++) {
+    for (var i=1, len=arguments.length; i<len; i++) {
         if (typeof arguments[i] == "function") {
             var mixin = arguments[i];
             arguments[i] = new mixin(OpenLayers.Class.isPrototype);

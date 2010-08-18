@@ -89,7 +89,7 @@ OpenLayers.Layer.HTTPRequest = OpenLayers.Class(OpenLayers.Layer, {
             obj = new OpenLayers.Layer.HTTPRequest(this.name,
                                                    this.url,
                                                    this.params,
-                                                   this.options);
+                                                   this.getOptions());
         }
         
         //get all additions from superclasses
@@ -121,7 +121,14 @@ OpenLayers.Layer.HTTPRequest = OpenLayers.Class(OpenLayers.Layer, {
      */
     mergeNewParams:function(newParams) {
         this.params = OpenLayers.Util.extend(this.params, newParams);
-        return this.redraw();
+        var ret = this.redraw();
+        if(this.map != null) {
+            this.map.events.triggerEvent("changelayer", {
+                layer: this,
+                property: "params"
+            });
+        }
+        return ret;
     },
 
     /**
@@ -160,7 +167,7 @@ OpenLayers.Layer.HTTPRequest = OpenLayers.Class(OpenLayers.Layer, {
      */
     selectUrl: function(paramString, urls) {
         var product = 1;
-        for (var i = 0; i < paramString.length; i++) { 
+        for (var i=0, len=paramString.length; i<len; i++) { 
             product *= paramString.charCodeAt(i) * this.URL_HASH_FACTOR; 
             product -= Math.floor(product); 
         }
@@ -215,25 +222,7 @@ OpenLayers.Layer.HTTPRequest = OpenLayers.Class(OpenLayers.Layer, {
         }
         paramsString = OpenLayers.Util.getParameterString(allParams);
         
-        // requestString always starts with url
-        var requestString = url;        
-        
-        if (paramsString != "") {
-            var lastServerChar = url.charAt(url.length - 1);
-            if ((lastServerChar == "&") || (lastServerChar == "?")) {
-                requestString += paramsString;
-            } else {
-                if (url.indexOf('?') == -1) {
-                    //serverPath has no ? -- add one
-                    requestString += '?' + paramsString;
-                } else {
-                    //serverPath contains ?, so must already have 
-                    // paramsString at the end
-                    requestString += '&' + paramsString;
-                }
-            }
-        }
-        return requestString;
+        return OpenLayers.Util.urlAppend(url, paramsString);
     },
 
     CLASS_NAME: "OpenLayers.Layer.HTTPRequest"

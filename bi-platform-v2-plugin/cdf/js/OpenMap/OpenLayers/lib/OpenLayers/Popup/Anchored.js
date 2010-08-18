@@ -18,9 +18,23 @@ OpenLayers.Popup.Anchored =
 
     /** 
      * Parameter: relativePosition
-     * {String} Relative position of the popup ("lr", "ll", "tr", or "tl").
+     * {String} Relative position of the popup ("br", "tr", "tl" or "bl").
      */
     relativePosition: null,
+    
+    /**
+     * APIProperty: keepInMap 
+     * {Boolean} If panMapIfOutOfView is false, and this property is true, 
+     *     contrain the popup such that it always fits in the available map
+     *     space. By default, this is set. If you are creating popups that are
+     *     near map edges and not allowing pannning, and especially if you have
+     *     a popup which has a fixedRelativePosition, setting this to false may
+     *     be a smart thing to do.
+     *   
+     *     For anchored popups, default is true, since subclasses will
+     *     usually want this functionality.
+     */
+    keepInMap: true,
 
     /**
      * Parameter: anchor
@@ -35,17 +49,18 @@ OpenLayers.Popup.Anchored =
     * Parameters:
     * id - {String}
     * lonlat - {<OpenLayers.LonLat>}
-    * size - {<OpenLayers.Size>}
+    * contentSize - {<OpenLayers.Size>}
     * contentHTML - {String}
     * anchor - {Object} Object which must expose a 'size' <OpenLayers.Size> 
     *     and 'offset' <OpenLayers.Pixel> (generally an <OpenLayers.Icon>).
     * closeBox - {Boolean}
     * closeBoxCallback - {Function} Function to be called on closeBox click.
     */
-    initialize:function(id, lonlat, size, contentHTML, anchor, closeBox,
+    initialize:function(id, lonlat, contentSize, contentHTML, anchor, closeBox,
                         closeBoxCallback) {
-        var newArguments = new Array(id, lonlat, size, contentHTML, closeBox,
-                                     closeBoxCallback);
+        var newArguments = [
+            id, lonlat, contentSize, contentHTML, closeBox, closeBoxCallback
+        ];
         OpenLayers.Popup.prototype.initialize.apply(this, newArguments);
 
         this.anchor = (anchor != null) ? anchor 
@@ -108,9 +123,10 @@ OpenLayers.Popup.Anchored =
      * APIMethod: setSize
      * 
      * Parameters:
-     * size - {<OpenLayers.Size>}
+     * contentSize - {<OpenLayers.Size>} the new size for the popup's 
+     *     contents div (in pixels).
      */
-    setSize:function(size) { 
+    setSize:function(contentSize) { 
         OpenLayers.Popup.prototype.setSize.apply(this, arguments);
 
         if ((this.lonlat) && (this.map)) {
@@ -126,7 +142,7 @@ OpenLayers.Popup.Anchored =
      * px - {<OpenLayers.Pixel>}
      * 
      * Returns:
-     * {String} The relative position ("br" "tr" "tl "bl") at which the popup
+     * {String} The relative position ("br" "tr" "tl" "bl") at which the popup
      *     should be placed.
      */
     calculateRelativePosition:function(px) {
@@ -164,12 +180,15 @@ OpenLayers.Popup.Anchored =
      */
     calculateNewPx:function(px) {
         var newPx = px.offset(this.anchor.offset);
+        
+        //use contentSize if size is not already set
+        var size = this.size || this.contentSize;
 
         var top = (this.relativePosition.charAt(0) == 't');
-        newPx.y += (top) ? -this.size.h : this.anchor.size.h;
+        newPx.y += (top) ? -size.h : this.anchor.size.h;
         
         var left = (this.relativePosition.charAt(1) == 'l');
-        newPx.x += (left) ? -this.size.w : this.anchor.size.w;
+        newPx.x += (left) ? -size.w : this.anchor.size.w;
 
         return newPx;   
     },

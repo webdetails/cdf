@@ -3,7 +3,7 @@
  * full text of the license. */
 
 /**
- * @requires OpenLayers/Ajax.js
+ * @requires OpenLayers/Request/XMLHttpRequest.js
  * @requires OpenLayers/Layer/Grid.js
  */
 
@@ -23,14 +23,45 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
      **/
     isBaseLayer: true,
     
+    /**
+     * APIProperty: useHttpTile
+     * {Boolean} use a tile cache exposed directly via a webserver rather than the 
+	   *    via mapguide server. This does require extra configuration on the Mapguide Server,
+	   *    and will only work when singleTile is false. The url for the layer must be set to the
+	   *    webserver path rather than the Mapguide mapagent.	  
+	   *    See http://trac.osgeo.org/mapguide/wiki/CodeSamples/Tiles/ServingTilesViaHttp 
+     **/
+    useHttpTile: false,
+    
     /** 
      * APIProperty: singleTile
-     * {Boolean} use tile server or request single tile image. Note that using
-     *    singleTile *and* isBaseLayer false is *not recommend*: it uses synchronous
-     *    XMLHttpRequests to load tiles, and this will *lock up users browsers*
-     *    during requests.
+     * {Boolean} use tile server or request single tile image. 
      **/
     singleTile: false,
+    
+    /** 
+     * APIProperty: useOverlay
+     * {Boolean} flag to indicate if the layer should be retrieved using
+     * GETMAPIMAGE (default) or using GETDYNAMICOVERLAY requests.
+     **/
+    useOverlay: false,
+    
+    /** 
+     * APIProperty: useAsyncOverlay
+     * {Boolean} indicates if the MapGuide site supports the asynchronous 
+     * GETDYNAMICOVERLAY requests which is available in MapGuide Enterprise 2010
+     * and MapGuide Open Source v2.0.3 or higher. The newer versions of MG 
+     * is called asynchronously, allows selections to be drawn separately from 
+     * the map and offers styling options.
+     * 
+     * With older versions of MapGuide, set useAsyncOverlay=false.  Note that in
+     * this case a synchronous AJAX call is issued and the mapname and session
+     * parameters must be used to initialize the layer, not the mapdefinition
+     * parameter. Also note that this will issue a synchronous AJAX request 
+     * before the image request can be issued so the users browser may lock
+     * up if the MG Web tier does not respond in a timely fashion.
+     **/
+    useAsyncOverlay: true,
     
     /**
      * Constant: TILE_PARAMS
@@ -53,6 +84,31 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
         version: '1.0.0'
     },
     
+    /**
+     * Constant: OVERLAY_PARAMS
+     * {Object} Hashtable of default parameter key/value pairs for untiled layer
+     */
+    OVERLAY_PARAMS: {
+        operation: 'GETDYNAMICMAPOVERLAYIMAGE',
+        format: 'PNG',
+        locale: 'en',
+        clip: '1',
+        version: '2.0.0'
+    },
+    
+    /** 
+     * Constant: FOLDER_PARAMS
+     * {Object} Hashtable of parameter key/value pairs which describe 
+     * the folder structure for tiles as configured in the mapguide 
+     * serverconfig.ini section [TileServiceProperties]
+     */
+    FOLDER_PARAMS: {
+        tileColumnsPerFolder: 30,
+        tileRowsPerFolder: 30,
+        format: 'png',
+        querystring: null
+    },	
+
     /** 
      * Property: defaultSize
      * {<OpenLayers.Size>} Tile size as produced by MapGuide server
@@ -63,18 +119,27 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
      * Constructor: OpenLayers.Layer.MapGuide
      * Create a new Mapguide layer, either tiled or untiled.  
      *
-     * For tiled layers, the 'groupName' and 'mapDefnition' options 
-     * must be specified as options.
+     * For tiled layers, the 'groupName' and 'mapDefinition' values 
+     * must be specified as parameters in the constructor.
      *
-     * For untiled layers, specify either combination of 'mapName' and
-     * 'session', or 'mapDefinition' and 'locale'.
+     * For untiled base layers, specify either combination of 'mapName' and
+     * 'session', or 'mapDefinition' and 'locale'.  
+     *
+     * For older versions of MapGuide and overlay layers, set useAsyncOverlay 
+     * to false and in this case mapName and session are required parameters 
+     * for the constructor.
+     *
+     * NOTE: MapGuide OS uses a DPI value and degrees to meters conversion 
+     * factor that are different than the defaults used in OpenLayers, 
+     * so these must be adjusted accordingly in your application.  
+     * See the MapGuide example for how to set these values for MGOS.
      *
      * Parameters:
      * name - {String} Name of the layer displayed in the interface
      * url - {String} Location of the MapGuide mapagent executable
      *            (e.g. http://localhost:8008/mapguide/mapagent/mapagent.fcgi)
      * params - {Object} hashtable of additional parameters to use. Some
-     *     parameters may require additional code on the serer. The ones that
+     *     parameters may require additional code on the server. The ones that
      *     you may want to use are: 
      *   - mapDefinition - {String} The MapGuide resource definition
      *            (e.g. Library://Samples/Gmap/Maps/gmapTiled.MapDefinition)
@@ -110,18 +175,39 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
                                 (this.transparent != true));
         }
 
+        if (options && options.useOverlay!=null) {
+          this.useOverlay = options.useOverlay;
+        }
+        
         //initialize for untiled layers
         if (this.singleTile) {
+          if (this.useOverlay) {
+            OpenLayers.Util.applyDefaults(
+                           this.params,
+                           this.OVERLAY_PARAMS
+                           );
+            if (!this.useAsyncOverlay) {
+              this.params.version = "1.0.0";
+            }
+          } else {
             OpenLayers.Util.applyDefaults(
                            this.params,
                            this.SINGLE_TILE_PARAMS
                            );
+          }         
         } else {
             //initialize for tiled layers
-            OpenLayers.Util.applyDefaults(
-                           this.params,
-                           this.TILE_PARAMS
-                           );
+            if (this.useHttpTile) {
+                OpenLayers.Util.applyDefaults(
+                               this.params,
+                               this.FOLDER_PARAMS
+                               );
+            } else {
+                OpenLayers.Util.applyDefaults(
+                               this.params,
+                               this.TILE_PARAMS
+                               );
+            }
             this.setTileSize(this.defaultSize); 
         }
     },
@@ -138,7 +224,7 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
             obj = new OpenLayers.Layer.MapGuide(this.name,
                                            this.url,
                                            this.params,
-                                           this.options);
+                                           this.getOptions());
       }
       //get all additions from superclasses
       obj = OpenLayers.Layer.Grid.prototype.clone.apply(this, [obj]);
@@ -178,38 +264,33 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
     getURL: function (bounds) {
         var url;
         var center = bounds.getCenterLonLat();
-        var mapSize = this.map.getCurrentSize();
+        var mapSize = this.map.getSize();
 
         if (this.singleTile) {
-          //set up the call for GETMAPIMAGE or GETDYNAMICMAPOVERLAY
-          var params = {};
-          params.setdisplaydpi = OpenLayers.DOTS_PER_INCH;   
-          params.setdisplayheight = mapSize.h*this.ratio;
-          params.setdisplaywidth = mapSize.w*this.ratio;
-          params.setviewcenterx = center.lon;
-          params.setviewcentery = center.lat;
-          params.setviewscale = this.map.getScale();
+          //set up the call for GETMAPIMAGE or GETDYNAMICMAPOVERLAY with
+          //dynamic map parameters
+          var params = {
+            setdisplaydpi: OpenLayers.DOTS_PER_INCH,
+            setdisplayheight: mapSize.h*this.ratio,
+            setdisplaywidth: mapSize.w*this.ratio,
+            setviewcenterx: center.lon,
+            setviewcentery: center.lat,
+            setviewscale: this.map.getScale()
+          };
           
-          if (!this.isBaseLayer) {
-            // in this case the main image operation is remapped to this
-            this.params.operation = "GETDYNAMICMAPOVERLAYIMAGE";
-            
-            //but we first need to call GETVISIBLEMAPEXTENT to set the extent
+          if (this.useOverlay && !this.useAsyncOverlay) {
+            //first we need to call GETVISIBLEMAPEXTENT to set the extent
             var getVisParams = {};
+            getVisParams = OpenLayers.Util.extend(getVisParams, params);
             getVisParams.operation = "GETVISIBLEMAPEXTENT";
             getVisParams.version = "1.0.0";
             getVisParams.session = this.params.session;
             getVisParams.mapName = this.params.mapName;
             getVisParams.format = 'text/xml';
-            getVisParams = OpenLayers.Util.extend(getVisParams, params);
-                
-            new OpenLayers.Ajax.Request(this.url, 
-                  { parameters: getVisParams,
-                    method: 'get',
-                    asynchronous: false   //must be synchronous call to return control here
-                  });
+            url = this.getFullRequestString( getVisParams );
+            
+            OpenLayers.Request.GET({url: url, async: false});
           }
-          
           //construct the full URL
           url = this.getFullRequestString( params );
         } else {
@@ -221,15 +302,24 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
           var rowidx = Math.floor((this.maxExtent.top-bounds.top)/currentRes);
           rowidx = Math.round(rowidx/this.tileSize.h);
 
-          url = this.getFullRequestString(
-                       {
-                           tilecol: colidx,
-                           tilerow: rowidx,
-                           scaleindex: this.resolutions.length - this.map.zoom - 1
-                        });
-         }
-        
-        return url;
+          if (this.useHttpTile){
+	          url = this.getImageFilePath(
+                   {
+                       tilecol: colidx,
+                       tilerow: rowidx,
+                       scaleindex: this.resolutions.length - this.map.zoom - 1
+                    });
+		  
+          } else {
+            url = this.getFullRequestString(
+                   {
+                       tilecol: colidx,
+                       tilerow: rowidx,
+                       scaleindex: this.resolutions.length - this.map.zoom - 1
+                    });
+          }
+       }
+       return url;
     },
 
     /**
@@ -296,6 +386,68 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
         return requestString;
     },
 
+     /** 
+     * Method: getImageFilePath
+     * special handler to request mapguide tiles from an http exposed tilecache 
+     *
+     * Parameters:
+     * altUrl - {String} Alternative base URL to use.
+     *
+     * Returns:
+     * {String} A string with the url for the tile image
+     */
+    getImageFilePath:function(newParams, altUrl) {
+        // use layer's url unless altUrl passed in
+        var url = (altUrl == null) ? this.url : altUrl;
+        
+        // if url is not a string, it should be an array of strings, 
+        //  in which case we will randomly select one of them in order
+        //  to evenly distribute requests to different urls.
+        if (typeof url == "object") {
+            url = url[Math.floor(Math.random()*url.length)];
+        }   
+        // requestString always starts with url
+        var requestString = url;        
+
+        var tileRowGroup = "";
+        var tileColGroup = "";
+        
+        if (newParams.tilerow < 0) {
+          tileRowGroup =  '-';
+        }
+          
+        if (newParams.tilerow == 0 ) {
+          tileRowGroup += '0';
+        } else {
+          tileRowGroup += Math.floor(Math.abs(newParams.tilerow/this.params.tileRowsPerFolder)) * this.params.tileRowsPerFolder;
+        }
+          
+        if (newParams.tilecol < 0) {
+          tileColGroup =  '-';
+        }
+        
+        if (newParams.tilecol == 0) {
+          tileColGroup += '0';
+        } else {
+          tileColGroup += Math.floor(Math.abs(newParams.tilecol/this.params.tileColumnsPerFolder)) * this.params.tileColumnsPerFolder;
+        }					
+        
+        var tilePath = '/S' + Math.floor(newParams.scaleindex)
+                + '/' + this.params.basemaplayergroupname
+                + '/R' + tileRowGroup
+                + '/C' + tileColGroup
+                + '/' + (newParams.tilerow % this.params.tileRowsPerFolder) 
+                + '_' + (newParams.tilecol % this.params.tileColumnsPerFolder) 
+                + '.' + this.params.format;
+    
+        if (this.params.querystring) {
+               tilePath += "?" + this.params.querystring;
+        }
+        
+        requestString += tilePath;
+        return requestString;
+    },
+    
     /** 
      * Method: calculateGridLayout
      * Generate parameters for the grid layout. This  

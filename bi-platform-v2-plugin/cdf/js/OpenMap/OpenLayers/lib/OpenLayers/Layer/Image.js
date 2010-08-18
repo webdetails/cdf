@@ -30,7 +30,10 @@ OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
 
     /**
      * Property: extent
-     * {<OpenLayers.Bounds>} The image bounds in map units
+     * {<OpenLayers.Bounds>} The image bounds in map units.  This extent will
+     *     also be used as the default maxExtent for the layer.  If you wish
+     *     to have a maxExtent that is different than the image extent, set the
+     *     maxExtent property of the options argument (as with any other layer).
      */
     extent: null,
     
@@ -67,6 +70,7 @@ OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
     initialize: function(name, url, extent, size, options) {
         this.url = url;
         this.extent = extent;
+        this.maxExtent = extent;
         this.size = size;
         OpenLayers.Layer.prototype.initialize.apply(this, [name, options]);
 
@@ -80,6 +84,7 @@ OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
      */
     destroy: function() {
         if (this.tile) {
+            this.removeTileMonitoringHooks(this.tile);
             this.tile.destroy();
             this.tile = null;
         }
@@ -103,7 +108,7 @@ OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
                                                this.url,
                                                this.extent,
                                                this.size,
-                                               this.options);
+                                               this.getOptions());
         }
 
         //get all additions from superclasses
@@ -162,6 +167,7 @@ OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
                 //create the new tile
                 this.tile = new OpenLayers.Tile.Image(this, ulPx, this.extent, 
                                                       null, this.tileSize);
+                this.addTileMonitoringHooks(this.tile);
             } else {
                 //just resize the tile and set it's new position
                 this.tile.size = this.tileSize.clone();
@@ -180,6 +186,45 @@ OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
         this.tileSize = new OpenLayers.Size(tileWidth, tileHeight);
     },
 
+    /** 
+     * Method: addTileMonitoringHooks
+     * This function takes a tile as input and adds the appropriate hooks to 
+     *     the tile so that the layer can keep track of the loading tiles.
+     * 
+     * Parameters: 
+     * tile - {<OpenLayers.Tile>}
+     */
+    addTileMonitoringHooks: function(tile) {
+        tile.onLoadStart = function() {
+            this.events.triggerEvent("loadstart");
+        };
+        tile.events.register("loadstart", this, tile.onLoadStart);
+      
+        tile.onLoadEnd = function() {
+            this.events.triggerEvent("loadend");
+        };
+        tile.events.register("loadend", this, tile.onLoadEnd);
+        tile.events.register("unload", this, tile.onLoadEnd);
+    },
+
+    /** 
+     * Method: removeTileMonitoringHooks
+     * This function takes a tile as input and removes the tile hooks 
+     *     that were added in <addTileMonitoringHooks>.
+     * 
+     * Parameters: 
+     * tile - {<OpenLayers.Tile>}
+     */
+    removeTileMonitoringHooks: function(tile) {
+        tile.unload();
+        tile.events.un({
+            "loadstart": tile.onLoadStart,
+            "loadend": tile.onLoadEnd,
+            "unload": tile.onLoadEnd,
+            scope: this
+        });
+    },
+    
     /**
      * APIMethod: setUrl
      * 

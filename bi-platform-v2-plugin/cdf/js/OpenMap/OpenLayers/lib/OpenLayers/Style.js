@@ -48,14 +48,14 @@ OpenLayers.Style = OpenLayers.Class({
      
     /** 
      * Property: rules 
-     * Array({<OpenLayers.Rule>}) 
+     * {Array(<OpenLayers.Rule>)}
      */
     rules: null,
     
     /**
      * Property: context
      * {Object} An optional object with properties that symbolizers' property
-     * values should be evaluatad against. If no context is specified,
+     * values should be evaluated against. If no context is specified,
      * feature.attributes will be used
      */
     context: null,
@@ -64,9 +64,20 @@ OpenLayers.Style = OpenLayers.Class({
      * Property: defaultStyle
      * {Object} hash of style properties to use as default for merging
      * rule-based style symbolizers onto. If no rules are defined,
-     * createSymbolizer will return this style.
+     * createSymbolizer will return this style. If <defaultsPerSymbolizer> is set to
+     * true, the defaultStyle will only be taken into account if there are
+     * rules defined.
      */
     defaultStyle: null,
+    
+    /**
+     * Property: defaultsPerSymbolizer
+     * {Boolean} If set to true, the <defaultStyle> will extend the symbolizer
+     * of every rule. Properties of the <defaultStyle> will also be used to set
+     * missing symbolizer properties if the symbolizer has stroke, fill or
+     * graphic set to true. Default is false.
+     */
+    defaultsPerSymbolizer: false,
     
     /**
      * Property: propertyStyles
@@ -85,21 +96,29 @@ OpenLayers.Style = OpenLayers.Class({
      *                used as default style for this style object. This style
      *                applies if no rules are specified. Symbolizers defined in
      *                rules will extend this default style.
-     * options      - {Object} An optional object with properties to set on the
-     *                userStyle
+     * options - {Object} An optional object with properties to set on the
+     *     style.
+     *
+     * Valid options:
+     * rules - {Array(<OpenLayers.Rule>)} List of rules to be added to the
+     *     style.
      * 
      * Return:
      * {<OpenLayers.Style>}
      */
     initialize: function(style, options) {
+
+        OpenLayers.Util.extend(this, options);
         this.rules = [];
+        if(options && options.rules) {
+            this.addRules(options.rules);
+        }
 
         // use the default style from OpenLayers.Feature.Vector if no style
         // was given in the constructor
-        this.setDefaultStyle(style || 
-                OpenLayers.Feature.Vector.style["default"]);
-        
-        OpenLayers.Util.extend(this, options);
+        this.setDefaultStyle(style ||
+                             OpenLayers.Feature.Vector.style["default"]);
+
     },
 
     /** 
@@ -107,7 +126,7 @@ OpenLayers.Style = OpenLayers.Class({
      * nullify references to prevent circular references and memory leaks
      */
     destroy: function() {
-        for (var i=0; i<this.rules.length; i++) {
+        for (var i=0, len=this.rules.length; i<len; i++) {
             this.rules[i].destroy();
             this.rules[i] = null;
         }
@@ -127,7 +146,7 @@ OpenLayers.Style = OpenLayers.Class({
      * {Object} symbolizer hash
      */
     createSymbolizer: function(feature) {
-        var style = this.createLiterals(
+        var style = this.defaultsPerSymbolizer ? {} : this.createLiterals(
             OpenLayers.Util.extend({}, this.defaultStyle), feature);
         
         var rules = this.rules;
@@ -135,7 +154,7 @@ OpenLayers.Style = OpenLayers.Class({
         var rule, context;
         var elseRules = [];
         var appliedRules = false;
-        for(var i=0; i<rules.length; i++) {
+        for(var i=0, len=rules.length; i<len; i++) {
             rule = rules[i];
             // does the rule apply?
             var applies = rule.evaluate(feature);
@@ -153,7 +172,7 @@ OpenLayers.Style = OpenLayers.Class({
         // if no other rules apply, apply the rules with else filters
         if(appliedRules == false && elseRules.length > 0) {
             appliedRules = true;
-            for(var i=0; i<elseRules.length; i++) {
+            for(var i=0, len=elseRules.length; i<len; i++) {
                 this.applySymbolizer(elseRules[i], style, feature);
             }
         }
@@ -161,8 +180,6 @@ OpenLayers.Style = OpenLayers.Class({
         // don't display if there were rules but none applied
         if(rules.length > 0 && appliedRules == false) {
             style.display = "none";
-        } else {
-            style.display = "";
         }
         
         return style;
@@ -185,6 +202,40 @@ OpenLayers.Style = OpenLayers.Class({
                 OpenLayers.Style.SYMBOLIZER_PREFIXES[0];
 
         var symbolizer = rule.symbolizer[symbolizerPrefix] || rule.symbolizer;
+        
+        if(this.defaultsPerSymbolizer === true) {
+            var defaults = this.defaultStyle;
+            OpenLayers.Util.applyDefaults(symbolizer, {
+                pointRadius: defaults.pointRadius
+            });
+            if(symbolizer.stroke === true || symbolizer.graphic === true) {
+                OpenLayers.Util.applyDefaults(symbolizer, {
+                    strokeWidth: defaults.strokeWidth,
+                    strokeColor: defaults.strokeColor,
+                    strokeOpacity: defaults.strokeOpacity,
+                    strokeDashstyle: defaults.strokeDashstyle,
+                    strokeLinecap: defaults.strokeLinecap
+                });
+            }
+            if(symbolizer.fill === true || symbolizer.graphic === true) {
+                OpenLayers.Util.applyDefaults(symbolizer, {
+                    fillColor: defaults.fillColor,
+                    fillOpacity: defaults.fillOpacity
+                });
+            }
+            if(symbolizer.graphic === true) {
+                OpenLayers.Util.applyDefaults(symbolizer, {
+                    pointRadius: this.defaultStyle.pointRadius,
+                    externalGraphic: this.defaultStyle.externalGraphic,
+                    graphicName: this.defaultStyle.graphicName,
+                    graphicOpacity: this.defaultStyle.graphicOpacity,
+                    graphicWidth: this.defaultStyle.graphicWidth,
+                    graphicHeight: this.defaultStyle.graphicHeight,
+                    graphicXOffset: this.defaultStyle.graphicXOffset,
+                    graphicYOffset: this.defaultStyle.graphicYOffset
+                });
+            }
+        }
 
         // merge the style with the current style
         return this.createLiterals(
@@ -205,10 +256,11 @@ OpenLayers.Style = OpenLayers.Class({
      * {Object} the modified style
      */
     createLiterals: function(style, feature) {
-        var context = this.context || feature.attributes || feature.data;
+        var context = OpenLayers.Util.extend({}, feature.attributes || feature.data);
+        OpenLayers.Util.extend(context, this.context);
         
         for (var i in this.propertyStyles) {
-            style[i] = OpenLayers.Style.createLiteral(style[i], context, feature);
+            style[i] = OpenLayers.Style.createLiteral(style[i], context, feature, i);
         }
         return style;
     },
@@ -233,8 +285,8 @@ OpenLayers.Style = OpenLayers.Class({
         // walk through all rules to check for properties in their symbolizer
         var rules = this.rules;
         var symbolizer, value;
-        for (var i=0; i<rules.length; i++) {
-            var symbolizer = rules[i].symbolizer;
+        for (var i=0, len=rules.length; i<len; i++) {
+            symbolizer = rules[i].symbolizer;
             for (var key in symbolizer) {
                 value = symbolizer[key];
                 if (typeof value == "object") {
@@ -310,7 +362,7 @@ OpenLayers.Style = OpenLayers.Class({
      */
     getSymbolizerPrefix: function(geometry) {
         var prefixes = OpenLayers.Style.SYMBOLIZER_PREFIXES;
-        for (var i=0; i<prefixes.length; i++) {
+        for (var i=0, len=prefixes.length; i<len; i++) {
             if (geometry.CLASS_NAME.indexOf(prefixes[i]) != -1) {
                 return prefixes[i];
             }
@@ -332,17 +384,20 @@ OpenLayers.Style = OpenLayers.Class({
  *         will be replaced by the value of the "bar" attribute of the passed
  *         feature.
  * context - {Object} context to take attribute values from
- * feature - {OpenLayers.Feature.Vector} The feature that will be passed
- *     to <OpenLayers.String.format> for evaluating functions in the context.
+ * feature - {<OpenLayers.Feature.Vector>} optional feature to pass to
+ *           <OpenLayers.String.format> for evaluating functions in the
+ *           context.
+ * property - {String} optional, name of the property for which the literal is
+ *            being created for evaluating functions in the context.
  * 
  * Returns:
  * {String} the parsed value. In the example of the value parameter above, the
  * result would be "foo valueOfBar", assuming that the passed feature has an
  * attribute named "bar" with the value "valueOfBar".
  */
-OpenLayers.Style.createLiteral = function(value, context, feature) {
+OpenLayers.Style.createLiteral = function(value, context, feature, property) {
     if (typeof value == "string" && value.indexOf("${") != -1) {
-        value = OpenLayers.String.format(value, context, [feature]);
+        value = OpenLayers.String.format(value, context, [feature, property]);
         value = (isNaN(value) || !value) ? value : parseFloat(value);
     }
     return value;
@@ -353,4 +408,4 @@ OpenLayers.Style.createLiteral = function(value, context, feature) {
  * {Array} prefixes of the sld symbolizers. These are the
  * same as the main geometry types
  */
-OpenLayers.Style.SYMBOLIZER_PREFIXES = ['Point', 'Line', 'Polygon'];
+OpenLayers.Style.SYMBOLIZER_PREFIXES = ['Point', 'Line', 'Polygon', 'Text'];

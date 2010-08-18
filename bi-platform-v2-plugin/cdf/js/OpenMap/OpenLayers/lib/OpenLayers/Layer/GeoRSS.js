@@ -5,7 +5,7 @@
 
 /**
  * @requires OpenLayers/Layer/Markers.js
- * @requires OpenLayers/Ajax.js
+ * @requires OpenLayers/Request/XMLHttpRequest.js
  */
 
 /**
@@ -26,7 +26,7 @@ OpenLayers.Layer.GeoRSS = OpenLayers.Class(OpenLayers.Layer.Markers, {
 
     /** 
      * Property: features 
-     * Array({<OpenLayers.Feature>}) 
+     * {Array(<OpenLayers.Feature>)} 
      */
     features: null,
     
@@ -100,7 +100,11 @@ OpenLayers.Layer.GeoRSS = OpenLayers.Class(OpenLayers.Layer.Markers, {
     loadRSS: function() {
         if (!this.loaded) {
             this.events.triggerEvent("loadstart");
-            OpenLayers.loadURL(this.location, null, this, this.parseData);
+            OpenLayers.Request.GET({
+                url: this.location,
+                success: this.parseData,
+                scope: this
+            });
             this.loaded = true;
         }    
     },    
@@ -117,7 +121,6 @@ OpenLayers.Layer.GeoRSS = OpenLayers.Class(OpenLayers.Layer.Markers, {
     moveTo:function(bounds, zoomChanged, minor) {
         OpenLayers.Layer.Markers.prototype.moveTo.apply(this, arguments);
         if(this.visibility && !this.loaded){
-            this.events.triggerEvent("loadstart");
             this.loadRSS();
         }
     },
@@ -127,7 +130,7 @@ OpenLayers.Layer.GeoRSS = OpenLayers.Class(OpenLayers.Layer.Markers, {
      * Parse the data returned from the Events call.
      *
      * Parameters:
-     * ajaxRequest - {XMLHttpRequest} 
+     * ajaxRequest - {<OpenLayers.Request.XMLHttpRequest>} 
      */
     parseData: function(ajaxRequest) {
         var doc = ajaxRequest.responseXML;
@@ -160,7 +163,7 @@ OpenLayers.Layer.GeoRSS = OpenLayers.Class(OpenLayers.Layer.Markers, {
         var format = new OpenLayers.Format.GeoRSS(options);
         var features = format.read(doc);
         
-        for (var i = 0; i < features.length; i++) {
+        for (var i=0, len=features.length; i<len; i++) {
             var data = {};
             var feature = features[i];
             
@@ -190,6 +193,10 @@ OpenLayers.Layer.GeoRSS = OpenLayers.Class(OpenLayers.Layer.Markers, {
                              new OpenLayers.Size(250, 120);
             
             if (title || description) {
+                // we have supplemental data, store them.
+                data.title = title;
+                data.description = description;
+            
                 var contentHTML = '<div class="olLayerGeoRSSClose">[x]</div>'; 
                 contentHTML += '<div class="olLayerGeoRSSTitle">';
                 if (link) {
@@ -223,14 +230,14 @@ OpenLayers.Layer.GeoRSS = OpenLayers.Class(OpenLayers.Layer.Markers, {
     markerClick: function(evt) {
         var sameMarkerClicked = (this == this.layer.selectedFeature);
         this.layer.selectedFeature = (!sameMarkerClicked) ? this : null;
-        for(var i=0; i < this.layer.map.popups.length; i++) {
+        for(var i=0, len=this.layer.map.popups.length; i<len; i++) {
             this.layer.map.removePopup(this.layer.map.popups[i]);
         }
         if (!sameMarkerClicked) {
             var popup = this.createPopup();
             OpenLayers.Event.observe(popup.div, "click",
                 OpenLayers.Function.bind(function() { 
-                    for(var i=0; i < this.layer.map.popups.length; i++) { 
+                    for(var i=0, len=this.layer.map.popups.length; i<len; i++) { 
                         this.layer.map.removePopup(this.layer.map.popups[i]); 
                     }
                 }, this)

@@ -4,6 +4,7 @@
 
 /**
  * @requires OpenLayers/Util.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
@@ -12,6 +13,12 @@
  *     of OpenLayers.Format are expected to have read and write methods.
  */
 OpenLayers.Format = OpenLayers.Class({
+    
+    /**
+     * Property: options
+     * {Object} A reference to options passed to the constructor.
+     */
+    options: null,
     
     /**
      * APIProperty: externalProjection
@@ -42,6 +49,20 @@ OpenLayers.Format = OpenLayers.Class({
     internalProjection: null,
 
     /**
+     * APIProperty: data
+     * {Object} When <keepData> is true, this is the parsed string sent to
+     *     <read>.
+     */
+    data: null,
+
+    /**
+     * APIProperty: keepData
+     * {Object} Maintain a reference (<data>) to the most recently read data.
+     *     Default is false.
+     */
+    keepData: false,
+
+    /**
      * Constructor: OpenLayers.Format
      * Instances of this class are not useful.  See one of the subclasses.
      *
@@ -49,11 +70,23 @@ OpenLayers.Format = OpenLayers.Class({
      * options - {Object} An optional object with properties to set on the
      *           format
      *
+     * Valid options:
+     * keepData - {Boolean} If true, upon <read>, the data property will be
+     *     set to the parsed object (e.g. the json or xml object).
+     *
      * Returns:
      * An instance of OpenLayers.Format
      */
     initialize: function(options) {
         OpenLayers.Util.extend(this, options);
+        this.options = options;
+    },
+    
+    /**
+     * APIMethod: destroy
+     * Clean up.
+     */
+    destroy: function() {
     },
 
     /**
@@ -68,7 +101,7 @@ OpenLayers.Format = OpenLayers.Class({
      * Depends on the subclass
      */
     read: function(data) {
-        alert(OpenLayers.i18n("readNotImplemented"));
+        OpenLayers.Console.userError(OpenLayers.i18n("readNotImplemented"));
     },
     
     /**
@@ -82,7 +115,7 @@ OpenLayers.Format = OpenLayers.Class({
      * {String} A string representation of the object.
      */
     write: function(object) {
-        alert(OpenLayers.i18n("writeNotImplemented"));
+        OpenLayers.Console.userError(OpenLayers.i18n("writeNotImplemented"));
     },
 
     CLASS_NAME: "OpenLayers.Format"

@@ -42,12 +42,9 @@ OpenLayers.Layer.MapServer = OpenLayers.Class(OpenLayers.Layer.Grid, {
         newArguments.push(name, url, params, options);
         OpenLayers.Layer.Grid.prototype.initialize.apply(this, newArguments);
 
-        if (arguments.length > 0) {
-            OpenLayers.Util.applyDefaults(
-                           this.params,
-                           this.DEFAULT_PARAMS
-                           );
-        }
+        this.params = OpenLayers.Util.applyDefaults(
+            this.params, this.DEFAULT_PARAMS
+        );
 
         // unless explicitly set in options, if the layer is transparent, 
         // it will be an overlay
@@ -69,7 +66,7 @@ OpenLayers.Layer.MapServer = OpenLayers.Class(OpenLayers.Layer.Grid, {
             obj = new OpenLayers.Layer.MapServer(this.name,
                                            this.url,
                                            this.params,
-                                           this.options);
+                                           this.getOptions());
         }
         //get all additions from superclasses
         obj = OpenLayers.Layer.Grid.prototype.clone.apply(this, [obj]);

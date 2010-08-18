@@ -29,6 +29,32 @@ OpenLayers.Handler.MouseWheel = OpenLayers.Class(OpenLayers.Handler, {
     mousePosition: null,
 
     /**
+     * Property: interval
+     * {Integer} In order to increase server performance, an interval (in 
+     *     milliseconds) can be set to reduce the number of up/down events 
+     *     called. If set, a new up/down event will not be set until the 
+     *     interval has passed. 
+     *     Defaults to 0, meaning no interval. 
+     */
+    interval: 0,
+    
+    /**
+     * Property: delta
+     * {Integer} When interval is set, delta collects the mousewheel z-deltas
+     *     of the events that occur within the interval.
+     *      See also the cumulative option
+     */
+    delta: 0,
+    
+    /**
+     * Property: cumulative
+     * {Boolean} When interval is set: true to collect all the mousewheel 
+     *     z-deltas, false to only record the delta direction (positive or
+     *     negative)
+     */
+    cumulative: true,
+
+    /**
      * Constructor: OpenLayers.Handler.MouseWheel
      *
      * Parameters:
@@ -103,7 +129,7 @@ OpenLayers.Handler.MouseWheel = OpenLayers.Class(OpenLayers.Handler, {
             }
 
             if (!overLayerDiv) {
-                for(var i=0; i < this.map.layers.length; i++) {
+                for(var i=0, len=this.map.layers.length; i<len; i++) {
                     // Are we in the layer div? Note that we have two cases
                     // here: one is to catch EventPane layers, which have a 
                     // pane above the layer (layer.pane)
@@ -138,7 +164,31 @@ OpenLayers.Handler.MouseWheel = OpenLayers.Class(OpenLayers.Handler, {
         //
         if (!overScrollableDiv && overMapDiv) {
             if (overLayerDiv) {
-                this.wheelZoom(e);
+                var delta = 0;
+                if (!e) {
+                    e = window.event;
+                }
+                if (e.wheelDelta) {
+                    delta = e.wheelDelta/120; 
+                    if (window.opera && window.opera.version() < 9.2) {
+                        delta = -delta;
+                    }
+                } else if (e.detail) {
+                    delta = -e.detail / 3;
+                }
+                this.delta = this.delta + delta;
+
+                if(this.interval) {
+                    window.clearTimeout(this._timeoutId);
+                    this._timeoutId = window.setTimeout(
+                        OpenLayers.Function.bind(function(){
+                            this.wheelZoom(e);
+                        }, this),
+                        this.interval
+                    );
+                } else {
+                    this.wheelZoom(e);
+                }
             }
             OpenLayers.Event.stop(e);
         }
@@ -153,19 +203,9 @@ OpenLayers.Handler.MouseWheel = OpenLayers.Class(OpenLayers.Handler, {
      * e - {Event}
      */
     wheelZoom: function(e) {
+        var delta = this.delta;
+        this.delta = 0;
         
-        var delta = 0;
-        if (!e) {
-            e = window.event;
-        }
-        if (e.wheelDelta) {
-            delta = e.wheelDelta/120; 
-            if (window.opera && window.opera.version() < 9.2) {
-                delta = -delta;
-            }
-        } else if (e.detail) {
-            delta = -e.detail / 3;
-        }
         if (delta) {
             // add the mouse position to the event because mozilla has 
             // a bug with clientX and clientY (see 
@@ -185,9 +225,9 @@ OpenLayers.Handler.MouseWheel = OpenLayers.Class(OpenLayers.Handler, {
                 );
             }
             if (delta < 0) {
-               this.callback("down", [e, delta]);
+                this.callback("down", [e, this.cumulative ? delta : -1]);
             } else {
-               this.callback("up", [e, delta]);
+                this.callback("up", [e, this.cumulative ? delta : 1]);
             }
         }
     },

@@ -115,16 +115,19 @@ OpenLayers.Handler.RegularPolygon = OpenLayers.Class(OpenLayers.Handler.Drag, {
      *
      * Parameters:
      * control - {<OpenLayers.Control>} The control that owns this handler
-     * callbacks - {Array} An object with a 'done' property whos value is a
-     *     function to be called when the polygon drawing is finished.
-     *     The callback should expect to recieve a single argument,
-     *     the polygon geometry.  If the callbacks object contains a
-     *     'cancel' property, this function will be called when the
-     *     handler is deactivated while drawing.  The cancel should
-     *     expect to receive a geometry.
+     * callbacks - {Object} An object with a properties whose values are
+     *     functions.  Various callbacks described below.
      * options - {Object} An object with properties to be set on the handler.
      *     If the options.sides property is not specified, the number of sides
      *     will default to 4.
+     *
+     * Named callbacks:
+     * create - Called when a sketch is first created.  Callback called with
+     *     the creation point geometry and sketch feature.
+     * done - Called when the sketch drawing is finished.  The callback will
+     *     recieve a single argument, the sketch geometry.
+     * cancel - Called when the handler is deactivated while drawing.  The
+     *     cancel callback will receive a geometry.
      */
     initialize: function(control, callbacks, options) {
         this.style = OpenLayers.Util.extend(OpenLayers.Feature.Vector.style['default'], {});
@@ -156,7 +159,14 @@ OpenLayers.Handler.RegularPolygon = OpenLayers.Class(OpenLayers.Handler.Drag, {
         var activated = false;
         if(OpenLayers.Handler.prototype.activate.apply(this, arguments)) {
             // create temporary vector layer for rendering geometry sketch
-            var options = {displayInLayerSwitcher: false};
+            var options = {
+                displayInLayerSwitcher: false,
+                // indicate that the temp vector layer will never be out of range
+                // without this, resolution properties must be specified at the
+                // map-level for this temporary layer to init its resolutions
+                // correctly
+                calculateInRange: OpenLayers.Function.True
+            };
             this.layer = new OpenLayers.Layer.Vector(this.CLASS_NAME, options);
             this.map.addLayer(this.layer);
             activated = true;
@@ -197,7 +207,7 @@ OpenLayers.Handler.RegularPolygon = OpenLayers.Class(OpenLayers.Handler.Drag, {
     },
     
     /**
-     * Method: downFeature
+     * Method: down
      * Start drawing a new feature
      *
      * Parameters:
@@ -218,6 +228,7 @@ OpenLayers.Handler.RegularPolygon = OpenLayers.Class(OpenLayers.Handler.Drag, {
         }
         this.feature = new OpenLayers.Feature.Vector();
         this.createGeometry();
+        this.callback("create", [this.origin, this.feature]);
         this.layer.addFeatures([this.feature], {silent: true});
         this.layer.drawFeature(this.feature, this.style);
     },
@@ -267,6 +278,12 @@ OpenLayers.Handler.RegularPolygon = OpenLayers.Class(OpenLayers.Handler.Drag, {
      */
     up: function(evt) {
         this.finalize();
+        // the mouseup method of superclass doesn't call the
+        // "done" callback if there's been no move between
+        // down and up
+        if (this.start == this.last) {
+            this.callback("done", [evt.xy]);
+        }
     },
 
     /**
@@ -306,7 +323,7 @@ OpenLayers.Handler.RegularPolygon = OpenLayers.Class(OpenLayers.Handler.Drag, {
         // if the number of sides ever changes, create a new geometry
         if(ring.components.length != (this.sides + 1)) {
             this.createGeometry();
-             ring = this.feature.geometry.components[0];
+            ring = this.feature.geometry.components[0];
         }
         for(var i=0; i<this.sides; ++i) {
             point = ring.components[i];

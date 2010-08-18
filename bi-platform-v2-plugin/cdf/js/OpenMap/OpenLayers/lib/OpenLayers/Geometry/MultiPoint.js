@@ -4,6 +4,7 @@
 
 /**
  * @requires OpenLayers/Geometry/Collection.js
+ * @requires OpenLayers/Geometry/Point.js
  */
 
 /**
@@ -31,7 +32,7 @@ OpenLayers.Geometry.MultiPoint = OpenLayers.Class(
      * Create a new MultiPoint Geometry
      *
      * Parameters:
-     * components - Array({<OpenLayers.Geometry.Point>}) 
+     * components - {Array(<OpenLayers.Geometry.Point>)} 
      *
      * Returns:
      * {<OpenLayers.Geometry.MultiPoint>}

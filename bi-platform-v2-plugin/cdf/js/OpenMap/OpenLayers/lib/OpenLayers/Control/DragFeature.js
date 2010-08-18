@@ -11,8 +11,8 @@
 
 /**
  * Class: OpenLayers.Control.DragFeature
- * Move a feature with a drag.  Create a new control with the
- *     <OpenLayers.Control.DragFeature> constructor.
+ * The DragFeature control moves a feature with a drag of the mouse. Create a
+ * new control with the <OpenLayers.Control.DragFeature> constructor.
  *
  * Inherits From:
  *  - <OpenLayers.Control>
@@ -65,6 +65,13 @@ OpenLayers.Control.DragFeature = OpenLayers.Class(OpenLayers.Control, {
     onComplete: function(feature, pixel) {},
 
     /**
+     * APIProperty: documentDrag
+     * {Boolean} If set to true, mouse dragging will continue even if the
+     *     mouse cursor leaves the map viewport. Default is false.
+     */
+    documentDrag: false,
+    
+    /**
      * Property: layer
      * {<OpenLayers.Layer.Vector>}
      */
@@ -115,7 +122,9 @@ OpenLayers.Control.DragFeature = OpenLayers.Class(OpenLayers.Control, {
                     up: this.upFeature,
                     out: this.cancel,
                     done: this.doneDragging
-                }, this.dragCallbacks)
+                }, this.dragCallbacks), {
+                    documentDrag: this.documentDrag
+                }
             ),
             feature: new OpenLayers.Handler.Feature(
                 this, this.layer, OpenLayers.Util.extend({
@@ -162,6 +171,9 @@ OpenLayers.Control.DragFeature = OpenLayers.Class(OpenLayers.Control, {
         this.feature = null;
         this.dragging = false;
         this.lastPixel = null;
+        OpenLayers.Element.removeClass(
+            this.map.viewPortDiv, this.displayClass + "Over"
+        );
         return OpenLayers.Control.prototype.deactivate.apply(this, arguments);
     },
 
@@ -178,8 +190,7 @@ OpenLayers.Control.DragFeature = OpenLayers.Class(OpenLayers.Control, {
             this.feature = feature;
             this.handlers.drag.activate();
             this.over = true;
-            // TBD replace with CSS classes
-            this.map.div.style.cursor = "move";
+            OpenLayers.Element.addClass(this.map.viewPortDiv, this.displayClass + "Over");
         } else {
             if(this.feature.id == feature.id) {
                 this.over = true;
@@ -220,8 +231,7 @@ OpenLayers.Control.DragFeature = OpenLayers.Class(OpenLayers.Control, {
 
     /**
      * Method: upFeature
-     * Called when the drag handler detects a mouse-up.  Also calls the
-     *     optional onComplete method.
+     * Called when the drag handler detects a mouse-up.
      * 
      * Parameters:
      * pixel - {<OpenLayers.Pixel>} Location of the mouse event.
@@ -229,9 +239,6 @@ OpenLayers.Control.DragFeature = OpenLayers.Class(OpenLayers.Control, {
     upFeature: function(pixel) {
         if(!this.over) {
             this.handlers.drag.deactivate();
-            this.feature = null;
-            // TBD replace with CSS classes
-            this.map.div.style.cursor = "default";
         }
     },
 
@@ -258,8 +265,9 @@ OpenLayers.Control.DragFeature = OpenLayers.Class(OpenLayers.Control, {
         if(!this.handlers.drag.dragging) {
             this.over = false;
             this.handlers.drag.deactivate();
-            // TBD replace with CSS classes
-            this.map.div.style.cursor = "default";
+            OpenLayers.Element.removeClass(
+                this.map.viewPortDiv, this.displayClass + "Over"
+            );
             this.feature = null;
         } else {
             if(this.feature.id == feature.id) {

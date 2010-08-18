@@ -4,6 +4,7 @@
 
 /**
  * @requires OpenLayers/Control.js
+ * @requires OpenLayers/Control/Button.js
  */
 
 /**
@@ -16,7 +17,7 @@
  *     when there are no states to restore.
  *
  * Inherits from:
- *  - <OpenLayers.Control.Control>
+ *  - <OpenLayers.Control>
  */
 OpenLayers.Control.NavigationHistory = OpenLayers.Class(OpenLayers.Control, {
 
@@ -32,7 +33,7 @@ OpenLayers.Control.NavigationHistory = OpenLayers.Class(OpenLayers.Control, {
 
     /**
      * APIProperty: previous
-     * {OpenLayers.Control} A button type control whose trigger method restores
+     * {<OpenLayers.Control>} A button type control whose trigger method restores
      *     the previous state managed by this control.
      */
     previous: null,
@@ -46,7 +47,7 @@ OpenLayers.Control.NavigationHistory = OpenLayers.Class(OpenLayers.Control, {
     
     /**
      * APIProperty: next
-     * {OpenLayers.Control} A button type control whose trigger method restores
+     * {<OpenLayers.Control>} A button type control whose trigger method restores
      *     the next state managed by this control.
      */
     next: null,
@@ -66,11 +67,11 @@ OpenLayers.Control.NavigationHistory = OpenLayers.Class(OpenLayers.Control, {
     limit: 50,
 
     /**
-     * Property: activateOnDraw
-     * {Boolean} Activate the control when it is first added to the map.
-     *     Default is true.
+     * APIProperty: autoActivate
+     * {Boolean} Activate the control when it is added to a map.  Default is
+     *     true.
      */
-    activateOnDraw: true,
+    autoActivate: true,
 
     /**
      * Property: clearOnDeactivate
@@ -125,30 +126,24 @@ OpenLayers.Control.NavigationHistory = OpenLayers.Class(OpenLayers.Control, {
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
         
         this.registry = OpenLayers.Util.extend({
-            "moveend": function() {
-                return {
-                    center: this.map.getCenter(),
-                    resolution: this.map.getResolution()                
-                };
-            }
+            "moveend": this.getState
         }, this.registry);
         
-        this.clear();
-
         var previousOptions = {
             trigger: OpenLayers.Function.bind(this.previousTrigger, this),
-            displayClass: this.displayClass + "Previous"
+            displayClass: this.displayClass + " " + this.displayClass + "Previous"
         };
         OpenLayers.Util.extend(previousOptions, this.previousOptions);
         this.previous = new OpenLayers.Control.Button(previousOptions);
         
         var nextOptions = {
             trigger: OpenLayers.Function.bind(this.nextTrigger, this),
-            displayClass: this.displayClass + "Next"
+            displayClass: this.displayClass + " " + this.displayClass + "Next"
         };
         OpenLayers.Util.extend(nextOptions, this.nextOptions);
         this.next = new OpenLayers.Control.Button(nextOptions);
 
+        this.clear();
     },
     
     /**
@@ -223,9 +218,6 @@ OpenLayers.Control.NavigationHistory = OpenLayers.Class(OpenLayers.Control, {
         OpenLayers.Control.prototype.draw.apply(this, arguments);
         this.next.draw();
         this.previous.draw();
-        if(this.activateOnDraw) {
-            this.activate();
-        }
     },
     
     /**
@@ -287,7 +279,23 @@ OpenLayers.Control.NavigationHistory = OpenLayers.Class(OpenLayers.Control, {
      */
     clear: function() {
         this.previousStack = [];
+        this.previous.deactivate();
         this.nextStack = [];
+        this.next.deactivate();
+    },
+
+    /**
+     * Method: getState
+     * Get the current state and return it.
+     *
+     * Returns:
+     * {Object} An object representing the current state.
+     */
+    getState: function() {
+        return {
+            center: this.map.getCenter(),
+            resolution: this.map.getResolution()
+        };
     },
 
     /**

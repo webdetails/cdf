@@ -5,7 +5,8 @@
 
 /**
  * @requires OpenLayers/Layer/Markers.js
- * @requires OpenLayers/Ajax.js
+ * @requires OpenLayers/Format/Text.js
+ * @requires OpenLayers/Request/XMLHttpRequest.js
  */
 
 /**
@@ -21,7 +22,7 @@
  *      - *point* lat,lon of the point where a marker is to be placed
  *      - *lat*  Latitude of the point where a marker is to be placed
  *      - *lon*  Longitude of the point where a marker is to be placed
- *      - *iconURL* URL of marker icon to use.
+ *      - *icon* or *image* URL of marker icon to use.
  *      - *iconSize* Size of Icon to use.
  *      - *iconOffset* Where the top-left corner of the icon is to be placed
  *            relative to the latitude and longitude of the point.
@@ -50,7 +51,7 @@ OpenLayers.Layer.Text = OpenLayers.Class(OpenLayers.Layer.Markers, {
 
     /** 
      * Property: features
-     * Array({<OpenLayers.Feature>}) 
+     * {Array(<OpenLayers.Feature>)} 
      */
     features: null,
     
@@ -109,8 +110,12 @@ OpenLayers.Layer.Text = OpenLayers.Class(OpenLayers.Layer.Markers, {
                 };
 
                 this.events.triggerEvent("loadstart");
-                OpenLayers.loadURL(this.location, null, 
-                                   this, this.parseData, onFail);
+                OpenLayers.Request.GET({
+                    url: this.location,
+                    success: this.parseData,
+                    failure: onFail,
+                    scope: this
+                });
                 this.loaded = true;
             }
         }    
@@ -128,7 +133,6 @@ OpenLayers.Layer.Text = OpenLayers.Class(OpenLayers.Layer.Markers, {
     moveTo:function(bounds, zoomChanged, minor) {
         OpenLayers.Layer.Markers.prototype.moveTo.apply(this, arguments);
         if(this.visibility && !this.loaded){
-            this.events.triggerEvent("loadstart");
             this.loadText();
         }
     },
@@ -137,7 +141,7 @@ OpenLayers.Layer.Text = OpenLayers.Class(OpenLayers.Layer.Markers, {
      * Method: parseData
      *
      * Parameters:
-     * ajaxRequest - {XMLHttpRequest} 
+     * ajaxRequest - {<OpenLayers.Request.XMLHttpRequest>} 
      */
     parseData: function(ajaxRequest) {
         var text = ajaxRequest.responseText;
@@ -152,8 +156,8 @@ OpenLayers.Layer.Text = OpenLayers.Class(OpenLayers.Layer.Markers, {
         }    
         
         var parser = new OpenLayers.Format.Text(options);
-        features = parser.read(text);
-        for (var i = 0; i < features.length; i++) {
+        var features = parser.read(text);
+        for (var i=0, len=features.length; i<len; i++) {
             var data = {};
             var feature = features[i];
             var location;
@@ -170,9 +174,19 @@ OpenLayers.Layer.Text = OpenLayers.Class(OpenLayers.Layer.Markers, {
             }        
             
             // FIXME: At the moment, we only use this if we have an 
-            // externalGraphic, because icon has no setOffset API Method.  
-            if (feature.style.graphicXOffset 
-                && feature.style.graphicYOffset) {
+            // externalGraphic, because icon has no setOffset API Method.
+            /**
+             * FIXME FIRST!!
+             * The Text format does all sorts of parseFloating
+             * The result of a parseFloat for a bogus string is NaN.  That
+             * means the three possible values here are undefined, NaN, or a
+             * number.  The previous check was an identity check for null.  This
+             * means it was failing for all undefined or NaN.  A slightly better
+             * check is for undefined.  An even better check is to see if the
+             * value is a number (see #1441).
+             */
+            if (feature.style.graphicXOffset !== undefined
+                && feature.style.graphicYOffset !== undefined) {
                 iconOffset = new OpenLayers.Pixel(
                     feature.style.graphicXOffset, 
                     feature.style.graphicYOffset);
@@ -223,7 +237,7 @@ OpenLayers.Layer.Text = OpenLayers.Class(OpenLayers.Layer.Markers, {
     markerClick: function(evt) {
         var sameMarkerClicked = (this == this.layer.selectedFeature);
         this.layer.selectedFeature = (!sameMarkerClicked) ? this : null;
-        for(var i=0; i < this.layer.map.popups.length; i++) {
+        for(var i=0, len=this.layer.map.popups.length; i<len; i++) {
             this.layer.map.removePopup(this.layer.map.popups[i]);
         }
         if (!sameMarkerClicked) {

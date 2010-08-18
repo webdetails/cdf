@@ -10,7 +10,8 @@
 
 /**
  * Class: OpenLayers.Control.DrawFeature
- * Draws features on a vector layer when active.
+ * The DrawFeature control draws point, line or polygon features on a vector
+ * layer when active.
  *
  * Inherits from:
  *  - <OpenLayers.Control>
@@ -29,6 +30,21 @@ OpenLayers.Control.DrawFeature = OpenLayers.Class(OpenLayers.Control, {
      */
     callbacks: null,
     
+    /**
+     * Constant: EVENT_TYPES
+     *
+     * Supported event types:
+     * featureadded - Triggered when a feature is added
+     */
+    EVENT_TYPES: ["featureadded"],
+    
+    /**
+     * APIProperty: multi
+     * {Boolean} Cast features to multi-part geometries before passing to the
+     *     layer.  Default is false.
+     */
+    multi: false,
+
     /**
      * APIProperty: featureAdded
      * {Function} Called after each feature is added
@@ -50,10 +66,42 @@ OpenLayers.Control.DrawFeature = OpenLayers.Class(OpenLayers.Control, {
      * options - {Object} 
      */
     initialize: function(layer, handler, options) {
+        
+        // concatenate events specific to vector with those from the base
+        this.EVENT_TYPES =
+            OpenLayers.Control.DrawFeature.prototype.EVENT_TYPES.concat(
+            OpenLayers.Control.prototype.EVENT_TYPES
+        );
+        
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
-        this.callbacks = OpenLayers.Util.extend({done: this.drawFeature},
-                                                this.callbacks);
+        this.callbacks = OpenLayers.Util.extend(
+            {
+                done: this.drawFeature,
+                modify: function(vertex, feature) {
+                    this.layer.events.triggerEvent(
+                        "sketchmodified", {vertex: vertex, feature: feature}
+                    );
+                },
+                create: function(vertex, feature) {
+                    this.layer.events.triggerEvent(
+                        "sketchstarted", {vertex: vertex, feature: feature}
+                    );
+                }
+            },
+            this.callbacks
+        );
         this.layer = layer;
+        this.handlerOptions = this.handlerOptions || {};
+        if (!("multi" in this.handlerOptions)) {
+            this.handlerOptions.multi = this.multi;
+        }
+        var sketchStyle = this.layer.styleMap && this.layer.styleMap.styles.temporary;
+        if(sketchStyle) {
+            this.handlerOptions.layerOptions = OpenLayers.Util.applyDefaults(
+                this.handlerOptions.layerOptions,
+                {styleMap: new OpenLayers.StyleMap({"default": sketchStyle})}
+            );
+        }
         this.handler = new handler(this, this.callbacks, this.handlerOptions);
     },
 
@@ -62,8 +110,15 @@ OpenLayers.Control.DrawFeature = OpenLayers.Class(OpenLayers.Control, {
      */
     drawFeature: function(geometry) {
         var feature = new OpenLayers.Feature.Vector(geometry);
-        this.layer.addFeatures([feature]);
-        this.featureAdded(feature);
+        var proceed = this.layer.events.triggerEvent(
+            "sketchcomplete", {feature: feature}
+        );
+        if(proceed !== false) {
+            feature.state = OpenLayers.State.INSERT;
+            this.layer.addFeatures([feature]);
+            this.featureAdded(feature);
+            this.events.triggerEvent("featureadded",{feature : feature});
+        }
     },
 
     CLASS_NAME: "OpenLayers.Control.DrawFeature"

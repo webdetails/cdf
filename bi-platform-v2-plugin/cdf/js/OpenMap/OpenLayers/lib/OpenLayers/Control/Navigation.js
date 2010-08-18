@@ -30,6 +30,19 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
      */
     dragPan: null,
 
+    /**
+     * APIProprety: dragPanOptions
+     * {Object} Options passed to the DragPan control.
+     */
+    dragPanOptions: null,
+
+    /**
+     * APIProperty: documentDrag
+     * {Boolean} Allow panning of the map by dragging outside map viewport.
+     *     Default is false.
+     */
+    documentDrag: false,
+
     /** 
      * Property: zoomBox
      * {<OpenLayers.Control.ZoomBox>}
@@ -37,10 +50,47 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
     zoomBox: null,
 
     /**
+     * APIProperty: zoomBoxEnabled
+     * {Boolean} Whether the user can draw a box to zoom
+     */
+    zoomBoxEnabled: true, 
+
+    /**
      * APIProperty: zoomWheelEnabled
      * {Boolean} Whether the mousewheel should zoom the map
      */
-    zoomWheelEnabled: true, 
+    zoomWheelEnabled: true,
+    
+    /**
+     * Property: mouseWheelOptions
+     * {Object} Options passed to the MouseWheel control (only useful if
+     *     <zoomWheelEnabled> is set to true)
+     */
+    mouseWheelOptions: null,
+
+    /**
+     * APIProperty: handleRightClicks
+     * {Boolean} Whether or not to handle right clicks. Default is false.
+     */
+    handleRightClicks: false,
+
+    /**
+     * APIProperty: zoomBoxKeyMask
+     * {Integer} <OpenLayers.Handler> key code of the key, which has to be
+     *    pressed, while drawing the zoom box with the mouse on the screen. 
+     *    You should probably set handleRightClicks to true if you use this
+     *    with MOD_CTRL, to disable the context menu for machines which use
+     *    CTRL-Click as a right click.
+     * Default: <OpenLayers.Handler.MOD_SHIFT
+     */
+    zoomBoxKeyMask: OpenLayers.Handler.MOD_SHIFT,
+    
+    /**
+     * APIProperty: autoActivate
+     * {Boolean} Activate the control when it is added to a map.  Default is
+     *     true.
+     */
+    autoActivate: true,
 
     /**
      * Constructor: OpenLayers.Control.Navigation
@@ -85,7 +135,9 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
             this.handlers.wheel.activate();
         }    
         this.handlers.click.activate();
-        this.zoomBox.activate();
+        if (this.zoomBoxEnabled) {
+            this.zoomBox.activate();
+        }
         return OpenLayers.Control.prototype.activate.apply(this,arguments);
     },
 
@@ -104,21 +156,36 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
      * Method: draw
      */
     draw: function() {
-        this.handlers.click = new OpenLayers.Handler.Click(this, 
-                                        { 'dblclick': this.defaultDblClick },
-                                        {
-                                          'double': true, 
-                                          'stopDouble': true
-                                        });
-        this.dragPan = new OpenLayers.Control.DragPan({map: this.map});
+        // disable right mouse context menu for support of right click events
+        if (this.handleRightClicks) {
+            this.map.viewPortDiv.oncontextmenu = OpenLayers.Function.False;
+        }
+
+        var clickCallbacks = { 
+            'dblclick': this.defaultDblClick, 
+            'dblrightclick': this.defaultDblRightClick 
+        };
+        var clickOptions = {
+            'double': true, 
+            'stopDouble': true
+        };
+        this.handlers.click = new OpenLayers.Handler.Click(
+            this, clickCallbacks, clickOptions
+        );
+        this.dragPan = new OpenLayers.Control.DragPan(
+            OpenLayers.Util.extend({
+                map: this.map,
+                documentDrag: this.documentDrag
+            }, this.dragPanOptions)
+        );
         this.zoomBox = new OpenLayers.Control.ZoomBox(
-                    {map: this.map, keyMask: OpenLayers.Handler.MOD_SHIFT});
+                    {map: this.map, keyMask: this.zoomBoxKeyMask});
         this.dragPan.draw();
         this.zoomBox.draw();
         this.handlers.wheel = new OpenLayers.Handler.MouseWheel(
                                     this, {"up"  : this.wheelUp,
-                                           "down": this.wheelDown} );
-        this.activate();
+                                           "down": this.wheelDown},
+                                    this.mouseWheelOptions );
     },
 
     /**
@@ -133,6 +200,17 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
     },
 
     /**
+     * Method: defaultDblRightClick 
+     * 
+     * Parameters:
+     * evt - {Event} 
+     */
+    defaultDblRightClick: function (evt) {
+        var newCenter = this.map.getLonLatFromViewPortPx( evt.xy ); 
+        this.map.setCenter(newCenter, this.map.zoom - 1);
+    },
+    
+    /**
      * Method: wheelChange  
      *
      * Parameters:
@@ -140,8 +218,11 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
      * deltaZ - {Integer}
      */
     wheelChange: function(evt, deltaZ) {
-        var newZoom = this.map.getZoom() + deltaZ;
-        if (!this.map.isValidZoomLevel(newZoom)) {
+        var currentZoom = this.map.getZoom();
+        var newZoom = this.map.getZoom() + Math.round(deltaZ);
+        newZoom = Math.max(newZoom, 0);
+        newZoom = Math.min(newZoom, this.map.getNumZoomLevels());
+        if (newZoom === currentZoom) {
             return;
         }
         var size    = this.map.getSize();
@@ -161,9 +242,10 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
      * 
      * Parameters:
      * evt - {Event}
+     * delta - {Integer}
      */
-    wheelUp: function(evt) {
-        this.wheelChange(evt, 1);
+    wheelUp: function(evt, delta) {
+        this.wheelChange(evt, delta || 1);
     },
 
     /** 
@@ -172,9 +254,28 @@ OpenLayers.Control.Navigation = OpenLayers.Class(OpenLayers.Control, {
      * 
      * Parameters:
      * evt - {Event}
+     * delta - {Integer}
      */
-    wheelDown: function(evt) {
-        this.wheelChange(evt, -1);
+    wheelDown: function(evt, delta) {
+        this.wheelChange(evt, delta || -1);
+    },
+    
+    /**
+     * Method: disableZoomBox
+     */
+    disableZoomBox : function() {
+        this.zoomBoxEnabled = false;
+        this.zoomBox.deactivate();       
+    },
+    
+    /**
+     * Method: enableZoomBox
+     */
+    enableZoomBox : function() {
+        this.zoomBoxEnabled = true;
+        if (this.active) {
+            this.zoomBox.activate();
+        }    
     },
     
     /**

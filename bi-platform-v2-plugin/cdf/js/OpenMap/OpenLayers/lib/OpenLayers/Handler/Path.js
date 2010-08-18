@@ -48,17 +48,22 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
      * Create a new path hander
      *
      * Parameters:
-     * control - {<OpenLayers.Control>} 
-     * callbacks - {Object} An object with a 'done' property whos value is a
-     *     function to be called when the path drawing is finished. The 
-     *     callback should expect to recieve a single argument, the line 
-     *     string geometry. If the callbacks object contains a 'point' 
-     *     property, this function will be sent each point as they are added.  
-     *     If the callbacks object contains a 'cancel' property, this function 
-     *     will be called when the handler is deactivated while drawing. The 
-     *     cancel should expect to receive a geometry.
+     * control - {<OpenLayers.Control>} The control that owns this handler
+     * callbacks - {Object} An object with a properties whose values are
+     *     functions.  Various callbacks described below.
      * options - {Object} An optional object with properties to be set on the
      *           handler
+     *
+     * Named callbacks:
+     * create - Called when a sketch is first created.  Callback called with
+     *     the creation point geometry and sketch feature.
+     * modify - Called with each move of a vertex with the vertex (point)
+     *     geometry and the sketch feature.
+     * point - Called as each point is added.  Receives the new point geometry.
+     * done - Called when the point drawing is finished.  The callback will
+     *     recieve a single argument, the linestring geometry.
+     * cancel - Called when the handler is deactivated while drawing.  The
+     *     cancel callback will receive a geometry.
      */
     initialize: function(control, callbacks, options) {
         OpenLayers.Handler.Point.prototype.initialize.apply(this, arguments);
@@ -67,12 +72,22 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
     /**
      * Method: createFeature
      * Add temporary geometries
+     *
+     * Parameters:
+     * pixel - {<OpenLayers.Pixel>} The initial pixel location for the new
+     *     feature.
      */
-    createFeature: function() {
-        this.line = new OpenLayers.Feature.Vector(
-                                        new OpenLayers.Geometry.LineString());
+    createFeature: function(pixel) {
+        var lonlat = this.control.map.getLonLatFromPixel(pixel);
         this.point = new OpenLayers.Feature.Vector(
-                                        new OpenLayers.Geometry.Point());
+            new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat)
+        );
+        this.line = new OpenLayers.Feature.Vector(
+            new OpenLayers.Geometry.LineString([this.point.geometry])
+        );
+        this.callback("create", [this.point.geometry, this.getSketch()]);
+        this.point.geometry.clearBounds();
+        this.layer.addFeatures([this.line, this.point], {silent: true});
     },
         
     /**
@@ -81,21 +96,39 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
      */
     destroyFeature: function() {
         OpenLayers.Handler.Point.prototype.destroyFeature.apply(this);
-        if(this.line) {
-            this.line.destroy();
-        }
         this.line = null;
+    },
+
+    /**
+     * Method: removePoint
+     * Destroy the temporary point.
+     */
+    removePoint: function() {
+        if(this.point) {
+            this.layer.removeFeatures([this.point]);
+        }
     },
     
     /**
      * Method: addPoint
      * Add point to geometry.  Send the point index to override
      * the behavior of LinearRing that disregards adding duplicate points.
+     *
+     * Parameters:
+     * pixel - {<OpenLayers.Pixel>} The pixel location for the new point.
      */
-    addPoint: function() {
-        this.line.geometry.addComponent(this.point.geometry.clone(),
-                                        this.line.geometry.components.length);
-        this.callback("point", [this.point.geometry]);
+    addPoint: function(pixel) {
+        this.layer.removeFeatures([this.point]);
+        var lonlat = this.control.map.getLonLatFromPixel(pixel);
+        this.point = new OpenLayers.Feature.Vector(
+            new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat)
+        );
+        this.line.geometry.addComponent(
+            this.point.geometry, this.line.geometry.components.length
+        );
+        this.callback("point", [this.point.geometry, this.getGeometry()]);
+        this.callback("modify", [this.point.geometry, this.getSketch()]);
+        this.drawFeature();
     },
     
     /**
@@ -113,14 +146,20 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
     /**
      * Method: modifyFeature
      * Modify the existing geometry given the new point
+     *
+     * Parameters:
+     * pixel - {<OpenLayers.Pixel>} The updated pixel location for the latest
+     *     point.
      */
-    modifyFeature: function() {
-        var index = this.line.geometry.components.length - 1;
-        this.line.geometry.components[index].x = this.point.geometry.x;
-        this.line.geometry.components[index].y = this.point.geometry.y;
-        this.line.geometry.components[index].clearBounds();
+    modifyFeature: function(pixel) {
+        var lonlat = this.control.map.getLonLatFromPixel(pixel);
+        this.point.geometry.x = lonlat.lon;
+        this.point.geometry.y = lonlat.lat;
+        this.callback("modify", [this.point.geometry, this.getSketch()]);
+        this.point.geometry.clearBounds();
+        this.drawFeature();
     },
-    
+
     /**
      * Method: drawFeature
      * Render geometries on the temporary layer.
@@ -131,14 +170,30 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
     },
 
     /**
-     * Method: geometryClone
-     * Return a clone of the relevant geometry.
+     * Method: getSketch
+     * Return the sketch feature.
+     *
+     * Returns:
+     * {<OpenLayers.Feature.Vector>}
+     */
+    getSketch: function() {
+        return this.line;
+    },
+
+    /**
+     * Method: getGeometry
+     * Return the sketch geometry.  If <multi> is true, this will return
+     *     a multi-part geometry.
      *
      * Returns:
      * {<OpenLayers.Geometry.LineString>}
      */
-    geometryClone: function() {
-        return this.line.geometry.clone();
+    getGeometry: function() {
+        var geometry = this.line && this.line.geometry;
+        if(geometry && this.multi) {
+            geometry = new OpenLayers.Geometry.MultiLineString([geometry]);
+        }
+        return geometry;
     },
 
     /**
@@ -158,17 +213,15 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
             return false;
         }
         if(this.lastDown == null) {
-            this.createFeature();
+            if(this.persist) {
+                this.destroyFeature();
+            }
+            this.createFeature(evt.xy);
+        } else if((this.lastUp == null) || !this.lastUp.equals(evt.xy)) {
+            this.addPoint(evt.xy);
         }
         this.mouseDown = true;
         this.lastDown = evt.xy;
-        var lonlat = this.control.map.getLonLatFromPixel(evt.xy);
-        this.point.geometry.x = lonlat.lon;
-        this.point.geometry.y = lonlat.lat;
-        if((this.lastUp == null) || !this.lastUp.equals(evt.xy)) {
-            this.addPoint();
-        }
-        this.drawFeature();
         this.drawing = true;
         return false;
     },
@@ -186,15 +239,11 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
      */
     mousemove: function (evt) {
         if(this.drawing) { 
-            var lonlat = this.map.getLonLatFromPixel(evt.xy);
-            this.point.geometry.x = lonlat.lon;
-            this.point.geometry.y = lonlat.lat;
             if(this.mouseDown && this.freehandMode(evt)) {
-                this.addPoint();
+                this.addPoint(evt.xy);
             } else {
-                this.modifyFeature();
+                this.modifyFeature(evt.xy);
             }
-            this.drawFeature();
         }
         return true;
     },
@@ -214,10 +263,11 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
         this.mouseDown = false;
         if(this.drawing) {
             if(this.freehandMode(evt)) {
+                this.removePoint();
                 this.finalize();
             } else {
                 if(this.lastUp == null) {
-                   this.addPoint();
+                   this.addPoint(evt.xy);
                 }
                 this.lastUp = evt.xy;
             }
@@ -241,6 +291,7 @@ OpenLayers.Handler.Path = OpenLayers.Class(OpenLayers.Handler.Point, {
         if(!this.freehandMode(evt)) {
             var index = this.line.geometry.components.length - 1;
             this.line.geometry.removeComponent(this.line.geometry.components[index]);
+            this.removePoint();
             this.finalize();
         }
         return false;

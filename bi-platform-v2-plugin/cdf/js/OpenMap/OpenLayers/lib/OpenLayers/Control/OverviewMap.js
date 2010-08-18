@@ -10,8 +10,10 @@
 
 /**
  * Class: OpenLayers.Control.OverviewMap
- * Create an overview map to display the extent of your main map and provide
- * additional navigation control.  Create a new overview map with the
+ * The OverMap control creates a small overview map, useful to display the 
+ * extent of a zoomed map and your main map and provide additional 
+ * navigation options to the User.  By default the overview map is drawn in
+ * the lower right corner of the main map. Create a new overview map with the
  * <OpenLayers.Control.OverviewMap> constructor.
  *
  * Inerits from:
@@ -27,7 +29,7 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
     
     /**
      * APIProperty: ovmap
-     * {<OpenLayers.Map>} A reference to the overvew map itself.
+     * {<OpenLayers.Map>} A reference to the overview map itself.
      */
     ovmap: null,
 
@@ -78,30 +80,45 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
     /**
      * APIProperty: minRatio
      * {Float} The ratio of the overview map resolution to the main map
-     * resolution at which to zoom farther out on the overview map.
+     *     resolution at which to zoom farther out on the overview map.
      */
     minRatio: 8,
 
     /**
      * APIProperty: maxRatio
      * {Float} The ratio of the overview map resolution to the main map
-     * resolution at which to zoom farther in on the overview map.
+     *     resolution at which to zoom farther in on the overview map.
      */
     maxRatio: 32,
-
+    
     /**
      * APIProperty: mapOptions
      * {Object} An object containing any non-default properties to be sent to
-     * the overview map's map constructor.  These should include any non-default
-     * options that the main map was constructed with.
+     *     the overview map's map constructor.  These should include any
+     *     non-default options that the main map was constructed with.
      */
     mapOptions: null,
+
+    /**
+     * APIProperty: autoPan
+     * {Boolean} Always pan the overview map, so the extent marker remains in
+     *     the center.  Default is false.  If true, when you drag the extent
+     *     marker, the overview map will update itself so the marker returns
+     *     to the center.
+     */
+    autoPan: false,
     
     /**
      * Property: handlers
      * {Object}
      */
     handlers: null,
+
+    /**
+     * Property: resolutionFactor
+     * {Object}
+     */
+    resolutionFactor: 1,
 
     /**
      * Constructor: OpenLayers.Control.OverviewMap
@@ -126,15 +143,25 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
         if (!this.mapDiv) { // we've already been destroyed
             return;
         }
-        this.handlers.click.destroy();
+        if (this.handlers.click) {
+            this.handlers.click.destroy();
+        }
+        if (this.handlers.drag) {
+            this.handlers.drag.destroy();
+        }
 
         this.mapDiv.removeChild(this.extentRectangle);
         this.extentRectangle = null;
-        this.rectEvents.destroy();
-        this.rectEvents = null;
 
-        this.ovmap.destroy();
-        this.ovmap = null;
+        if (this.rectEvents) {
+            this.rectEvents.destroy();
+            this.rectEvents = null;
+        }
+
+        if (this.ovmap) {
+            this.ovmap.destroy();
+            this.ovmap = null;
+        }
         
         this.element.removeChild(this.mapDiv);
         this.mapDiv = null;
@@ -153,7 +180,7 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
             this.div.removeChild(this.minimizeDiv);
             this.minimizeDiv = null;
         }
-        
+
         this.map.events.un({
             "moveend": this.update,
             "changebaselayer": this.baseLayerDraw,
@@ -240,7 +267,7 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
             
             var eventsToStop = ['dblclick','mousedown'];
             
-            for (var i = 0; i < eventsToStop.length; i++) {
+            for (var i=0, len=eventsToStop.length; i<len; i++) {
 
                 OpenLayers.Event.observe(this.maximizeDiv, 
                                          eventsToStop[i], 
@@ -381,7 +408,7 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
             this.createMap();
         }
         
-        if(!this.isSuitableOverview()) {
+        if(this.autoPan || !this.isSuitableOverview()) {
             this.updateOverview();
         }
         
@@ -402,6 +429,13 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
                                 Math.max(mapExtent.bottom, maxExtent.bottom),
                                 Math.min(mapExtent.right, maxExtent.right),
                                 Math.min(mapExtent.top, maxExtent.top));        
+
+        if (this.ovmap.getProjection() != this.map.getProjection()) {
+            testExtent = testExtent.transform(
+                this.map.getProjectionObject(),
+                this.ovmap.getProjectionObject() );
+        }
+
         var resRatio = this.ovmap.getResolution() / this.map.getResolution();
         return ((resRatio > this.minRatio) &&
                 (resRatio <= this.maxRatio) &&
@@ -423,8 +457,16 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
             // zoom out overview map
             targetRes = this.maxRatio * mapRes;
         }
-        this.ovmap.setCenter(this.map.center,
-                            this.ovmap.getZoomForResolution(targetRes));
+        var center;
+        if (this.ovmap.getProjection() != this.map.getProjection()) {
+            center = this.map.center.clone();
+            center.transform(this.map.getProjectionObject(),
+                this.ovmap.getProjectionObject() );
+        } else {
+            center = this.map.center;
+        }
+        this.ovmap.setCenter(center, this.ovmap.getZoomForResolution(
+            targetRes * this.resolutionFactor));
         this.updateRectToMap();
     },
     
@@ -486,6 +528,15 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
             }
         });
 
+        if (this.ovmap.getProjection() != this.map.getProjection()) {
+            var sourceUnits = this.map.getProjectionObject().getUnits() ||
+                this.map.units || this.map.baseLayer.units;
+            var targetUnits = this.ovmap.getProjectionObject().getUnits() ||
+                this.ovmap.units || this.ovmap.baseLayer.units;
+            this.resolutionFactor = sourceUnits && targetUnits ?
+                OpenLayers.INCHES_PER_UNIT[sourceUnits] /
+                OpenLayers.INCHES_PER_UNIT[targetUnits] : 1;
+        }
     },
         
     /**
@@ -493,14 +544,16 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
      * Updates the extent rectangle position and size to match the map extent
      */
     updateRectToMap: function() {
-        // The base layer for overview map needs to be in the same projection
-        // as the base layer for the main map.  This should be made more robust.
-        if(this.map.units != 'degrees') {
-            if(this.ovmap.getProjection() && (this.map.getProjection() != this.ovmap.getProjection())) {
-                alert(OpenLayers.i18n("sameProjection"));
-            }
+        // If the projections differ we need to reproject
+        var bounds;
+        if (this.ovmap.getProjection() != this.map.getProjection()) {
+            bounds = this.map.getExtent().transform(
+                this.map.getProjectionObject(), 
+                this.ovmap.getProjectionObject() );
+        } else {
+            bounds = this.map.getExtent();
         }
-        var pxBounds = this.getRectBoundsFromMapBounds(this.map.getExtent());
+        var pxBounds = this.getRectBoundsFromMapBounds(bounds);
         if (pxBounds) {
             this.setRectPxBounds(pxBounds);
         }
@@ -512,6 +565,11 @@ OpenLayers.Control.OverviewMap = OpenLayers.Class(OpenLayers.Control, {
      */
     updateMapToRect: function() {
         var lonLatBounds = this.getMapBoundsFromRectBounds(this.rectPxBounds);
+        if (this.ovmap.getProjection() != this.map.getProjection()) {
+            lonLatBounds = lonLatBounds.transform(
+                this.ovmap.getProjectionObject(),
+                this.map.getProjectionObject() );
+        }
         this.map.panTo(lonLatBounds.getCenterLonLat());
     },
 

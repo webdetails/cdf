@@ -5,6 +5,7 @@
 
 /**
  * @requires OpenLayers/Layer/Grid.js
+ * @requires OpenLayers/Tile/Image.js
  */
 
 /**
@@ -32,6 +33,13 @@ OpenLayers.Layer.TMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
      * {<OpenLayers.Pixel>}
      */
     tileOrigin: null,
+
+    /**
+     * APIProperty: serverResolutions
+     * {Array} A list of all resolutions available on the server.  Only set this 
+     *     property if the map resolutions differs from the server.
+     */
+    serverResolutions: null,
 
     /**
      * Constructor: OpenLayers.Layer.TMS
@@ -70,7 +78,7 @@ OpenLayers.Layer.TMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
         if (obj == null) {
             obj = new OpenLayers.Layer.TMS(this.name,
                                            this.url,
-                                           this.options);
+                                           this.getOptions());
         }
 
         //get all additions from superclasses
@@ -97,7 +105,9 @@ OpenLayers.Layer.TMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
         var res = this.map.getResolution();
         var x = Math.round((bounds.left - this.tileOrigin.lon) / (res * this.tileSize.w));
         var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
-        var z = this.map.getZoom();
+        var z = this.serverResolutions != null ?
+            OpenLayers.Util.indexOf(this.serverResolutions, res) :
+            this.map.getZoom();
         var path = this.serviceVersion + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type; 
         var url = this.url;
         if (url instanceof Array) {

@@ -4,6 +4,7 @@
 
 /**
  * @requires OpenLayers/Geometry/Collection.js
+ * @requires OpenLayers/Geometry/LinearRing.js
  */
 
 /**
@@ -33,7 +34,7 @@ OpenLayers.Geometry.Polygon = OpenLayers.Class(
      *
      *
      * Parameters:
-     * components - Array({<OpenLayers.Geometry.LinearRing>}) 
+     * components - {Array(<OpenLayers.Geometry.LinearRing>)} 
      */
     initialize: function(components) {
         OpenLayers.Geometry.Collection.prototype.initialize.apply(this, 
@@ -52,8 +53,37 @@ OpenLayers.Geometry.Polygon = OpenLayers.Class(
         var area = 0.0;
         if ( this.components && (this.components.length > 0)) {
             area += Math.abs(this.components[0].getArea());
-            for (var i = 1; i < this.components.length; i++) {
+            for (var i=1, len=this.components.length; i<len; i++) {
                 area -= Math.abs(this.components[i].getArea());
+            }
+        }
+        return area;
+    },
+
+    /** 
+     * APIMethod: getGeodesicArea
+     * Calculate the approximate area of the polygon were it projected onto
+     *     the earth.
+     *
+     * Parameters:
+     * projection - {<OpenLayers.Projection>} The spatial reference system
+     *     for the geometry coordinates.  If not provided, Geographic/WGS84 is
+     *     assumed.
+     * 
+     * Reference:
+     * Robert. G. Chamberlain and William H. Duquette, "Some Algorithms for
+     *     Polygons on a Sphere", JPL Publication 07-03, Jet Propulsion
+     *     Laboratory, Pasadena, CA, June 2007 http://trs-new.jpl.nasa.gov/dspace/handle/2014/40409
+     *
+     * Returns:
+     * {float} The approximate geodesic area of the polygon in square meters.
+     */
+    getGeodesicArea: function(projection) {
+        var area = 0.0;
+        if(this.components && (this.components.length > 0)) {
+            area += Math.abs(this.components[0].getGeodesicArea(projection));
+            for(var i=1, len=this.components.length; i<len; i++) {
+                area -= Math.abs(this.components[i].getGeodesicArea(projection));
             }
         }
         return area;
@@ -112,13 +142,13 @@ OpenLayers.Geometry.Polygon = OpenLayers.Class(
      */
     intersects: function(geometry) {
         var intersect = false;
-        var i;
+        var i, len;
         if(geometry.CLASS_NAME == "OpenLayers.Geometry.Point") {
             intersect = this.containsPoint(geometry);
         } else if(geometry.CLASS_NAME == "OpenLayers.Geometry.LineString" ||
                   geometry.CLASS_NAME == "OpenLayers.Geometry.LinearRing") {
             // check if rings/linestrings intersect
-            for(i=0; i<this.components.length; ++i) {
+            for(i=0, len=this.components.length; i<len; ++i) {
                 intersect = geometry.intersects(this.components[i]);
                 if(intersect) {
                     break;
@@ -126,7 +156,7 @@ OpenLayers.Geometry.Polygon = OpenLayers.Class(
             }
             if(!intersect) {
                 // check if this poly contains points of the ring/linestring
-                for(i=0; i<geometry.components.length; ++i) {
+                for(i=0, len=geometry.components.length; i<len; ++i) {
                     intersect = this.containsPoint(geometry.components[i]);
                     if(intersect) {
                         break;
@@ -134,7 +164,7 @@ OpenLayers.Geometry.Polygon = OpenLayers.Class(
                 }
             }
         } else {
-            for(i=0; i<geometry.components.length; ++ i) {
+            for(i=0, len=geometry.components.length; i<len; ++ i) {
                 intersect = this.intersects(geometry.components[i]);
                 if(intersect) {
                     break;
@@ -145,7 +175,7 @@ OpenLayers.Geometry.Polygon = OpenLayers.Class(
         if(!intersect && geometry.CLASS_NAME == "OpenLayers.Geometry.Polygon") {
             // exterior ring points will be contained in the other geometry
             var ring = this.components[0];
-            for(i=0; i<ring.components.length; ++i) {
+            for(i=0, len=ring.components.length; i<len; ++i) {
                 intersect = geometry.containsPoint(ring.components[i]);
                 if(intersect) {
                     break;
@@ -153,6 +183,47 @@ OpenLayers.Geometry.Polygon = OpenLayers.Class(
             }
         }
         return intersect;
+    },
+
+    /**
+     * APIMethod: distanceTo
+     * Calculate the closest distance between two geometries (on the x-y plane).
+     *
+     * Parameters:
+     * geometry - {<OpenLayers.Geometry>} The target geometry.
+     * options - {Object} Optional properties for configuring the distance
+     *     calculation.
+     *
+     * Valid options:
+     * details - {Boolean} Return details from the distance calculation.
+     *     Default is false.
+     * edge - {Boolean} Calculate the distance from this geometry to the
+     *     nearest edge of the target geometry.  Default is true.  If true,
+     *     calling distanceTo from a geometry that is wholly contained within
+     *     the target will result in a non-zero distance.  If false, whenever
+     *     geometries intersect, calling distanceTo will return 0.  If false,
+     *     details cannot be returned.
+     *
+     * Returns:
+     * {Number | Object} The distance between this geometry and the target.
+     *     If details is true, the return will be an object with distance,
+     *     x0, y0, x1, and y1 properties.  The x0 and y0 properties represent
+     *     the coordinates of the closest point on this geometry. The x1 and y1
+     *     properties represent the coordinates of the closest point on the
+     *     target geometry.
+     */
+    distanceTo: function(geometry, options) {
+        var edge = !(options && options.edge === false);
+        var result;
+        // this is the case where we might not be looking for distance to edge
+        if(!edge && this.intersects(geometry)) {
+            result = 0;
+        } else {
+            result = OpenLayers.Geometry.Collection.prototype.distanceTo.apply(
+                this, [geometry, options]
+            );
+        }
+        return result;
     },
 
     CLASS_NAME: "OpenLayers.Geometry.Polygon"

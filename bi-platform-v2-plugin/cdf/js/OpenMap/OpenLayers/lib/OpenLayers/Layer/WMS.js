@@ -54,7 +54,24 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
      * but some services want it that way. Default false.
      */
     encodeBBOX: false,
- 
+    
+    /** 
+     * APIProperty: noMagic 
+     * {Boolean} If true, the image format will not be automagicaly switched 
+     *     from image/jpeg to image/png or image/gif when using 
+     *     TRANSPARENT=TRUE. Also isBaseLayer will not changed by the  
+     *     constructor. Default false. 
+     */ 
+    noMagic: false,
+    
+    /**
+     * Property: yx
+     * {Array} Array of strings with the EPSG codes for which the axis order
+     *     is to be reversed (yx instead of xy, LatLon instead of LonLat). This
+     *     is only relevant for WMS versions >= 1.3.0.
+     */
+    yx: ['EPSG:4326'],
+    
     /**
      * Constructor: OpenLayers.Layer.WMS
      * Create a new WMS layer object
@@ -87,7 +104,7 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
 
 
         //layer is transparent        
-        if (this.params.TRANSPARENT && 
+        if (!this.noMagic && this.params.TRANSPARENT && 
             this.params.TRANSPARENT.toString().toLowerCase() == "true") {
             
             // unless explicitly set in options, make layer an overlay
@@ -128,7 +145,7 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
             obj = new OpenLayers.Layer.WMS(this.name,
                                            this.url,
                                            this.params,
-                                           this.options);
+                                           this.getOptions());
         }
 
         //get all additions from superclasses
@@ -138,6 +155,20 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
 
         return obj;
     },    
+    
+    /**
+     * APIMethod: reverseAxisOrder
+     * Returns true if the axis order is reversed for the WMS version and
+     * projection of the layer.
+     * 
+     * Returns:
+     * {Boolean} true if the axis order is reversed, false otherwise.
+     */
+    reverseAxisOrder: function() {
+        return (parseFloat(this.params.VERSION) >= 1.3 && 
+            OpenLayers.Util.indexOf(this.yx, 
+            this.map.getProjectionObject().getCode()) !== -1)
+    },
     
     /**
      * Method: getURL
@@ -155,12 +186,15 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
     getURL: function (bounds) {
         bounds = this.adjustBounds(bounds);
         
-        var imageSize = this.getImageSize(); 
-        var newParams = {
-            'BBOX': this.encodeBBOX ?  bounds.toBBOX() : bounds.toArray(),
-            'WIDTH': imageSize.w,
-            'HEIGHT': imageSize.h
-        };
+        var imageSize = this.getImageSize();
+        var newParams = {};
+        // WMS 1.3 introduced axis order
+        var reverseAxisOrder = this.reverseAxisOrder();
+        newParams.BBOX = this.encodeBBOX ?
+            bounds.toBBOX(null, reverseAxisOrder) :
+            bounds.toArray(reverseAxisOrder);
+        newParams.WIDTH = imageSize.w;
+        newParams.HEIGHT = imageSize.h;
         var requestString = this.getFullRequestString(newParams);
         return requestString;
     },
@@ -186,7 +220,8 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
      * Catch changeParams and uppercase the new params to be merged in
      *     before calling changeParams on the super class.
      * 
-     *     Once params have been changed, we will need to re-init our tiles.
+     *     Once params have been changed, the tiles will be reloaded with
+     *     the new parameters.
      * 
      * Parameters:
      * newParams - {Object} Hashtable of new params to use
@@ -199,7 +234,7 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
     },
 
     /** 
-     * Method: getFullRequestString
+     * APIMethod: getFullRequestString
      * Combine the layer's url with its params and these newParams. 
      *   
      *     Add the SRS parameter from projection -- this is probably
@@ -215,7 +250,12 @@ OpenLayers.Layer.WMS = OpenLayers.Class(OpenLayers.Layer.Grid, {
      */
     getFullRequestString:function(newParams, altUrl) {
         var projectionCode = this.map.getProjection();
-        this.params.SRS = (projectionCode == "none") ? null : projectionCode;
+        var value = (projectionCode == "none") ? null : projectionCode
+        if (parseFloat(this.params.VERSION) >= 1.3) {
+            this.params.CRS = value;
+        } else {
+            this.params.SRS = value;
+        }
 
         return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(
                                                     this, arguments);

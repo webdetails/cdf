@@ -5,6 +5,7 @@
  
 /**
  * @requires OpenLayers/Tile.js
+ * @requires OpenLayers/Request/XMLHttpRequest.js
  */
 
 /**
@@ -32,7 +33,7 @@ OpenLayers.Tile.WFS = OpenLayers.Class(OpenLayers.Tile, {
     
     /** 
      * Property: request 
-     * {OpenLayers.Ajax.Request} 
+     * {<OpenLayers.Request.XMLHttpRequest>} 
      */ 
     request: null,     
     
@@ -100,8 +101,7 @@ OpenLayers.Tile.WFS = OpenLayers.Class(OpenLayers.Tile, {
 
     /** 
     * Method: loadFeaturesForRegion
-    * get the full request string from the ds and the tile params 
-    *     and call the AJAX loadURL(). 
+    * Abort any pending requests and issue another request for data. 
     *
     * Input are function pointers for what to do on success and failure.
     *
@@ -113,7 +113,12 @@ OpenLayers.Tile.WFS = OpenLayers.Class(OpenLayers.Tile, {
         if(this.request) {
             this.request.abort();
         }
-        this.request = OpenLayers.loadURL(this.url, null, this, success);
+        this.request = OpenLayers.Request.GET({
+            url: this.url,
+            success: success,
+            failure: failure,
+            scope: this
+        });
     },
     
     /**
@@ -122,19 +127,23 @@ OpenLayers.Tile.WFS = OpenLayers.Class(OpenLayers.Tile, {
     * layer.addFeatures in vector mode, addResults otherwise. 
     *
     * Parameters:
-    * request - {XMLHttpRequest}
+    * request - {<OpenLayers.Request.XMLHttpRequest>}
     */
     requestSuccess:function(request) {
         if (this.features) {
             var doc = request.responseXML;
             if (!doc || !doc.documentElement) {
-                doc = OpenLayers.Format.XML.prototype.read(request.responseText);
+                doc = request.responseText; 
             }
             if (this.layer.vectorMode) {
                 this.layer.addFeatures(this.layer.formatObject.read(doc));
             } else {
-                var resultFeatures = OpenLayers.Ajax.getElementsByTagNameNS(
-                    doc, "http://www.opengis.net/gml", "gml", "featureMember"
+                var xml = new OpenLayers.Format.XML();
+                if (typeof doc == "string") {
+                    doc = xml.read(doc);
+                }
+                var resultFeatures = xml.getElementsByTagNameNS(
+                    doc, "http://www.opengis.net/gml", "featureMember"
                 );
                 this.addResults(resultFeatures);
             }

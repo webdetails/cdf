@@ -8,6 +8,8 @@
 
 /**
  * Class: OpenLayers.Control.Panel
+ * The Panel control is a container for other controls. With it toolbars
+ * may be composed.
  *
  * Inherits from:
  *  - <OpenLayers.Control>
@@ -15,13 +17,20 @@
 OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
     /**
      * Property: controls
-     * Array({<OpenLayers.Control>})
+     * {Array(<OpenLayers.Control>)}
      */
     controls: null,    
     
+    /**
+     * APIProperty: autoActivate
+     * {Boolean} Activate the control when it is added to a map.  Default is
+     *     true.
+     */
+    autoActivate: true,
+
     /** 
      * APIProperty: defaultControl
-     * <OpenLayers.Control> The control which is activated when the control is
+     * {<OpenLayers.Control>} The control which is activated when the control is
      * activated (turned on), which also happens at instantiation.
      */
     defaultControl: null, 
@@ -62,7 +71,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      */
     activate: function() {
         if (OpenLayers.Control.prototype.activate.apply(this, arguments)) {
-            for(var i = 0; i < this.controls.length; i++) {
+            for(var i=0, len=this.controls.length; i<len; i++) {
                 if (this.controls[i] == this.defaultControl) {
                     this.controls[i].activate();
                 }
@@ -79,7 +88,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      */
     deactivate: function() {
         if (OpenLayers.Control.prototype.deactivate.apply(this, arguments)) {
-            for(var i = 0; i < this.controls.length; i++) {
+            for(var i=0, len=this.controls.length; i<len; i++) {
                 this.controls[i].deactivate();
             }    
             return true;
@@ -96,7 +105,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      */    
     draw: function() {
         OpenLayers.Control.prototype.draw.apply(this, arguments);
-        for (var i = 0; i < this.controls.length; i++) {
+        for (var i=0, len=this.controls.length; i<len; i++) {
             this.map.addControl(this.controls[i]);
             this.controls[i].deactivate();
             this.controls[i].events.on({
@@ -105,7 +114,6 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
                 scope: this
             });
         }
-        this.activate();
         return this.div;
     },
 
@@ -115,7 +123,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
     redraw: function() {
         this.div.innerHTML = "";
         if (this.active) {
-            for (var i = 0; i < this.controls.length; i++) {
+            for (var i=0, len=this.controls.length; i<len; i++) {
                 var element = this.controls[i].panel_div;
                 if (this.controls[i].active) {
                     element.className = this.controls[i].displayClass + "ItemActive";
@@ -137,6 +145,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
         if (!this.active) { return false; }
         if (control.type == OpenLayers.Control.TYPE_BUTTON) {
             control.trigger();
+            this.redraw();
             return;
         }
         if (control.type == OpenLayers.Control.TYPE_TOGGLE) {
@@ -145,9 +154,10 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
             } else {
                 control.activate();
             }
+            this.redraw();
             return;
         }
-        for (var i = 0; i < this.controls.length; i++) {
+        for (var i=0, len=this.controls.length; i<len; i++) {
             if (this.controls[i] != control) {
                 if (this.controls[i].type != OpenLayers.Control.TYPE_TOGGLE) {
                     this.controls[i].deactivate();
@@ -177,21 +187,22 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
         // control added to the panel.
         // Also, stop mousedowns and clicks, but don't stop mouseup,
         // since they need to pass through.
-        for (var i = 0; i < controls.length; i++) {
+        for (var i=0, len=controls.length; i<len; i++) {
             var element = document.createElement("div");
-            var textNode = document.createTextNode(" ");
             controls[i].panel_div = element;
             if (controls[i].title != "") {
                 controls[i].panel_div.title = controls[i].title;
             }
             OpenLayers.Event.observe(controls[i].panel_div, "click", 
                 OpenLayers.Function.bind(this.onClick, this, controls[i]));
+            OpenLayers.Event.observe(controls[i].panel_div, "dblclick", 
+                OpenLayers.Function.bind(this.onDoubleClick, this, controls[i]));
             OpenLayers.Event.observe(controls[i].panel_div, "mousedown", 
                 OpenLayers.Function.bindAsEventListener(OpenLayers.Event.stop));
         }    
 
         if (this.map) { // map.addControl() has already been called on the panel
-            for (var i = 0; i < controls.length; i++) {
+            for (var i=0, len=controls.length; i<len; i++) {
                 this.map.addControl(controls[i]);
                 controls[i].deactivate();
                 controls[i].events.on({
@@ -210,6 +221,13 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
     onClick: function (ctrl, evt) {
         OpenLayers.Event.stop(evt ? evt : window.event);
         this.activateControl(ctrl);
+    },
+
+    /**
+     * Method: onDoubleClick
+     */
+    onDoubleClick: function(ctrl, evt) {
+        OpenLayers.Event.stop(evt ? evt : window.event);
     },
 
     /**

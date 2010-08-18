@@ -27,18 +27,18 @@ OpenLayers.Layer.TileCache = OpenLayers.Class(OpenLayers.Layer.Grid, {
      */
     isBaseLayer: true,
     
-    /**
-     * APIProperty: tileOrigin
-     * {<OpenLayers.LonLat>} Location of the tile lattice origin.  Default is
-     *     bottom left of the maxExtent.
-     */
-    tileOrigin: null,
-
     /** 
      * APIProperty: format
      * {String} Mime type of the images returned.  Default is image/png.
      */
     format: 'image/png',
+
+    /**
+     * APIProperty: serverResolutions
+     * {Array} A list of all resolutions available on the server.  Only set this 
+     *     property if the map resolutions differs from the server.
+     */
+    serverResolutions: null,
 
     /**
      * Constructor: OpenLayers.Layer.TileCache
@@ -78,7 +78,7 @@ OpenLayers.Layer.TileCache = OpenLayers.Class(OpenLayers.Layer.Grid, {
             obj = new OpenLayers.Layer.TileCache(this.name,
                                                  this.url,
                                                  this.layername,
-                                                 this.options);
+                                                 this.getOptions());
         }
 
         //get all additions from superclasses
@@ -105,7 +105,9 @@ OpenLayers.Layer.TileCache = OpenLayers.Class(OpenLayers.Layer.Grid, {
         var size = this.tileSize;
         var tileX = Math.round((bounds.left - bbox.left) / (res * size.w));
         var tileY = Math.round((bounds.bottom - bbox.bottom) / (res * size.h));
-        var tileZ = this.map.zoom;
+        var tileZ = this.serverResolutions != null ?
+            OpenLayers.Util.indexOf(this.serverResolutions, res) :
+            this.map.getZoom();
         /**
          * Zero-pad a positive integer.
          * number - {Int} 
@@ -157,22 +159,6 @@ OpenLayers.Layer.TileCache = OpenLayers.Class(OpenLayers.Layer.Grid, {
         return new OpenLayers.Tile.Image(this, position, bounds, 
                                              url, this.tileSize);
     },
-
-    /** 
-     * Method: setMap
-     * When the layer is added to a map, then we can fetch our origin 
-     *     (if we don't have one.) 
-     * 
-     * Parameters:
-     * map - {<OpenLayers.Map>} 
-     */
-    setMap: function(map) {
-        OpenLayers.Layer.Grid.prototype.setMap.apply(this, arguments);
-        if (!this.tileOrigin) { 
-            this.tileOrigin = new OpenLayers.LonLat(this.map.maxExtent.left,
-                                                    this.map.maxExtent.bottom);
-        }
-    },
-
+    
     CLASS_NAME: "OpenLayers.Layer.TileCache"
 });

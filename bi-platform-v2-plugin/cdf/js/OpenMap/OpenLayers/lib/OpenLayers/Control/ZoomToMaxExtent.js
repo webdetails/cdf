@@ -8,16 +8,20 @@
 
 /**
  * Class: OpenLayers.Control.ZoomToMaxExtent 
- * Imlements a very simple button control. Designed to be used with a 
+ * The ZoomToMaxExtent control is a button that zooms out to the maximum
+ * extent of the map. It is designed to be used with a 
  * <OpenLayers.Control.Panel>.
  * 
  * Inherits from:
  *  - <OpenLayers.Control>
  */
 OpenLayers.Control.ZoomToMaxExtent = OpenLayers.Class(OpenLayers.Control, {
+
     /**
      * Property: type
-     * TYPE_BUTTON.
+     * {String} The type of <OpenLayers.Control> -- When added to a 
+     *     <Control.Panel>, 'type' is used by the panel to determine how to 
+     *     handle our events.
      */
     type: OpenLayers.Control.TYPE_BUTTON,
     

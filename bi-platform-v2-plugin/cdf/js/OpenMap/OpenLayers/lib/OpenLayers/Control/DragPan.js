@@ -9,7 +9,7 @@
 
 /**
  * Class: OpenLayers.Control.DragPan
- * DragPan control.
+ * The DragPan control pans the map with a drag of the mouse.
  *
  * Inherits from:
  *  - <OpenLayers.Control>
@@ -29,13 +29,34 @@ OpenLayers.Control.DragPan = OpenLayers.Class(OpenLayers.Control, {
     panned: false,
     
     /**
+     * Property: interval
+     * {Integer} The number of milliseconds that should ellapse before
+     *     panning the map again. Set this to increase dragging performance.
+     *     Defaults to 25 milliseconds.
+     */
+    interval: 25,
+    
+    /**
+     * APIProperty: documentDrag
+     * {Boolean} If set to true, mouse dragging will continue even if the
+     *     mouse cursor leaves the map viewport. Default is false.
+     */
+    documentDrag: false,
+    
+    /**
      * Method: draw
-     * Creates a Drag handler, using <OpenLayers.Control.PanMap.panMap> and
-     * <OpenLayers.Control.PanMap.panMapDone> as callbacks.
+     * Creates a Drag handler, using <panMap> and
+     * <panMapDone> as callbacks.
      */    
     draw: function() {
-        this.handler = new OpenLayers.Handler.Drag(this,
-                            {"move": this.panMap, "done": this.panMapDone});
+        this.handler = new OpenLayers.Handler.Drag(this, {
+                "move": this.panMap,
+                "done": this.panMapDone
+            }, {
+                interval: this.interval,
+                documentDrag: this.documentDrag
+            }
+        );
     },
 
     /**

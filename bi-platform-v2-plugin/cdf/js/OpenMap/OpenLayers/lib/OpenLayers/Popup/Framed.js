@@ -85,7 +85,7 @@ OpenLayers.Popup.Framed =
      * Parameters:
      * id - {String}
      * lonlat - {<OpenLayers.LonLat>}
-     * size - {<OpenLayers.Size>}
+     * contentSize - {<OpenLayers.Size>}
      * contentHTML - {String}
      * anchor - {Object} Object to which we'll anchor the popup. Must expose 
      *     a 'size' (<OpenLayers.Size>) and 'offset' (<OpenLayers.Pixel>) 
@@ -93,7 +93,7 @@ OpenLayers.Popup.Framed =
      * closeBox - {Boolean}
      * closeBoxCallback - {Function} Function to be called on closeBox click.
      */
-    initialize:function(id, lonlat, size, contentHTML, anchor, closeBox, 
+    initialize:function(id, lonlat, contentSize, contentHTML, anchor, closeBox, 
                         closeBoxCallback) {
 
         OpenLayers.Popup.Anchored.prototype.initialize.apply(this, arguments);
@@ -103,8 +103,8 @@ OpenLayers.Popup.Framed =
             // this keeps us from getting into trouble 
             this.updateRelativePosition();
             
-            //make calculateRelativePosition always returnt the specified
-            // fiexed position.
+            //make calculateRelativePosition always return the specified
+            // fixed position.
             this.calculateRelativePosition = function(px) {
                 return this.relativePosition;
             };
@@ -188,9 +188,10 @@ OpenLayers.Popup.Framed =
      *     of the popup has changed.
      * 
      * Parameters:
-     * size - {<OpenLayers.Size>}
+     * contentSize - {<OpenLayers.Size>} the new size for the popup's 
+     *     contents div (in pixels).
      */
-    setSize:function(size) { 
+    setSize:function(contentSize) { 
         OpenLayers.Popup.Anchored.prototype.setSize.apply(this, arguments);
 
         this.updateBlocks();
@@ -248,15 +249,18 @@ OpenLayers.Popup.Framed =
      * Method: createBlocks
      */
     createBlocks: function() {
-        if (!this.relativePosition) {
-            // this.relativePosition can't be set until we have a map
-            // set: if it's not set, we can't create blocks. (See #1479) 
-            return false; 
-        }    
-        
         this.blocks = [];
 
-        var position = this.positionBlocks[this.relativePosition];
+        //since all positions contain the same number of blocks, we can 
+        // just pick the first position and use its blocks array to create
+        // our blocks array
+        var firstPosition = null;
+        for(var key in this.positionBlocks) {
+            firstPosition = key;
+            break;
+        }
+        
+        var position = this.positionBlocks[firstPosition];
         for (var i = 0; i < position.blocks.length; i++) {
 
             var block = {};
@@ -280,8 +284,6 @@ OpenLayers.Popup.Framed =
             block.div.appendChild(block.image);
             this.groupDiv.appendChild(block.div);
         }
-        
-        return true;
     },
 
     /**
@@ -292,50 +294,48 @@ OpenLayers.Popup.Framed =
      */
     updateBlocks: function() {
         if (!this.blocks) {
-            var cont = this.createBlocks();
-            if (!cont) { 
-                return false;
-            }     
+            this.createBlocks();
         }
         
-        
-        var position = this.positionBlocks[this.relativePosition];
-        for (var i = 0; i < position.blocks.length; i++) {
-
-            var positionBlock = position.blocks[i];
-            var block = this.blocks[i];
-
-            // adjust sizes
-            var l = positionBlock.anchor.left;
-            var b = positionBlock.anchor.bottom;
-            var r = positionBlock.anchor.right;
-            var t = positionBlock.anchor.top;
-
-            //note that we use the isNaN() test here because if the 
-            // size object is initialized with a "auto" parameter, the 
-            // size constructor calls parseFloat() on the string, 
-            // which will turn it into NaN
-            //
-            var w = (isNaN(positionBlock.size.w)) ? this.size.w - (r + l) 
-                                                  : positionBlock.size.w;
-
-            var h = (isNaN(positionBlock.size.h)) ? this.size.h - (b + t) 
-                                                  : positionBlock.size.h;
-
-            block.div.style.width = w + 'px';
-            block.div.style.height = h + 'px';
-
-            block.div.style.left = (l != null) ? l + 'px' : '';
-            block.div.style.bottom = (b != null) ? b + 'px' : '';
-            block.div.style.right = (r != null) ? r + 'px' : '';            
-            block.div.style.top = (t != null) ? t + 'px' : '';
-
-            block.image.style.left = positionBlock.position.x + 'px';
-            block.image.style.top = positionBlock.position.y + 'px';
+        if (this.size && this.relativePosition) {
+            var position = this.positionBlocks[this.relativePosition];
+            for (var i = 0; i < position.blocks.length; i++) {
+    
+                var positionBlock = position.blocks[i];
+                var block = this.blocks[i];
+    
+                // adjust sizes
+                var l = positionBlock.anchor.left;
+                var b = positionBlock.anchor.bottom;
+                var r = positionBlock.anchor.right;
+                var t = positionBlock.anchor.top;
+    
+                //note that we use the isNaN() test here because if the 
+                // size object is initialized with a "auto" parameter, the 
+                // size constructor calls parseFloat() on the string, 
+                // which will turn it into NaN
+                //
+                var w = (isNaN(positionBlock.size.w)) ? this.size.w - (r + l) 
+                                                      : positionBlock.size.w;
+    
+                var h = (isNaN(positionBlock.size.h)) ? this.size.h - (b + t) 
+                                                      : positionBlock.size.h;
+    
+                block.div.style.width = (w < 0 ? 0 : w) + 'px';
+                block.div.style.height = (h < 0 ? 0 : h) + 'px';
+    
+                block.div.style.left = (l != null) ? l + 'px' : '';
+                block.div.style.bottom = (b != null) ? b + 'px' : '';
+                block.div.style.right = (r != null) ? r + 'px' : '';            
+                block.div.style.top = (t != null) ? t + 'px' : '';
+    
+                block.image.style.left = positionBlock.position.x + 'px';
+                block.image.style.top = positionBlock.position.y + 'px';
+            }
+    
+            this.contentDiv.style.left = this.padding.left + "px";
+            this.contentDiv.style.top = this.padding.top + "px";
         }
-
-        this.contentDiv.style.left = this.padding.left + "px";
-        this.contentDiv.style.top = this.padding.top + "px";
     },
 
     CLASS_NAME: "OpenLayers.Popup.Framed"

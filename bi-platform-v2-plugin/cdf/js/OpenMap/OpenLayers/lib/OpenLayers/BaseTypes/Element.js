@@ -28,7 +28,7 @@ OpenLayers.Element = {
      * element - {DOMElement} Actually user can pass any number of elements
      */
     toggle: function() {
-        for (var i = 0; i < arguments.length; i++) {
+        for (var i=0, len=arguments.length; i<len; i++) {
             var element = OpenLayers.Util.getElement(arguments[i]);
             var display = OpenLayers.Element.visible(element) ? 'hide' 
                                                               : 'show';
@@ -45,7 +45,7 @@ OpenLayers.Element = {
      * element - {DOMElement} Actually user can pass any number of elements
      */
     hide: function() {
-        for (var i = 0; i < arguments.length; i++) {
+        for (var i=0, len=arguments.length; i<len; i++) {
             var element = OpenLayers.Util.getElement(arguments[i]);
             element.style.display = 'none';
         }
@@ -59,7 +59,7 @@ OpenLayers.Element = {
      * element - {DOMElement} Actually user can pass any number of elements
      */
     show: function() {
-        for (var i = 0; i < arguments.length; i++) {
+        for (var i=0, len=arguments.length; i<len; i++) {
             var element = OpenLayers.Util.getElement(arguments[i]);
             element.style.display = '';
         }
@@ -93,6 +93,7 @@ OpenLayers.Element = {
 
     /**
      * APIFunction: getDimensions
+     * *Deprecated*. Returns dimensions of the element passed in.
      *  
      * Parameters:
      * element - {DOMElement}
@@ -112,15 +113,96 @@ OpenLayers.Element = {
         var els = element.style;
         var originalVisibility = els.visibility;
         var originalPosition = els.position;
+        var originalDisplay = els.display;
         els.visibility = 'hidden';
         els.position = 'absolute';
         els.display = '';
         var originalWidth = element.clientWidth;
         var originalHeight = element.clientHeight;
-        els.display = 'none';
+        els.display = originalDisplay;
         els.position = originalPosition;
         els.visibility = originalVisibility;
         return {width: originalWidth, height: originalHeight};
+    },
+
+    /**
+     * Function: hasClass
+     * Tests if an element has the given CSS class name.
+     *
+     * Parameters:
+     * element - {DOMElement} A DOM element node.
+     * name - {String} The CSS class name to search for.
+     *
+     * Returns:
+     * {Boolean} The element has the given class name.
+     */
+    hasClass: function(element, name) {
+        var names = element.className;
+        return (!!names && new RegExp("(^|\\s)" + name + "(\\s|$)").test(names));
+    },
+    
+    /**
+     * Function: addClass
+     * Add a CSS class name to an element.  Safe where element already has
+     *     the class name.
+     *
+     * Parameters:
+     * element - {DOMElement} A DOM element node.
+     * name - {String} The CSS class name to add.
+     *
+     * Returns:
+     * {DOMElement} The element.
+     */
+    addClass: function(element, name) {
+        if(!OpenLayers.Element.hasClass(element, name)) {
+            element.className += (element.className ? " " : "") + name;
+        }
+        return element;
+    },
+
+    /**
+     * Function: removeClass
+     * Remove a CSS class name from an element.  Safe where element does not
+     *     have the class name.
+     *
+     * Parameters:
+     * element - {DOMElement} A DOM element node.
+     * name - {String} The CSS class name to remove.
+     *
+     * Returns:
+     * {DOMElement} The element.
+     */
+    removeClass: function(element, name) {
+        var names = element.className;
+        if(names) {
+            element.className = OpenLayers.String.trim(
+                names.replace(
+                    new RegExp("(^|\\s+)" + name + "(\\s+|$)"), " "
+                )
+            );
+        }
+        return element;
+    },
+
+    /**
+     * Function: toggleClass
+     * Remove a CSS class name from an element if it exists.  Add the class name
+     *     if it doesn't exist.
+     *
+     * Parameters:
+     * element - {DOMElement} A DOM element node.
+     * name - {String} The CSS class name to toggle.
+     *
+     * Returns:
+     * {DOMElement} The element.
+     */
+    toggleClass: function(element, name) {
+        if(OpenLayers.Element.hasClass(element, name)) {
+            OpenLayers.Element.removeClass(element, name);
+        } else {
+            OpenLayers.Element.addClass(element, name);
+        }
+        return element;
     },
 
     /**
@@ -135,23 +217,27 @@ OpenLayers.Element = {
      */
     getStyle: function(element, style) {
         element = OpenLayers.Util.getElement(element);
-        var value = element.style[OpenLayers.String.camelize(style)];
-        if (!value) {
-            if (document.defaultView && 
-                document.defaultView.getComputedStyle) {
-                
-                var css = document.defaultView.getComputedStyle(element, null);
-                value = css ? css.getPropertyValue(style) : null;
-            } else if (element.currentStyle) {
-                value = element.currentStyle[OpenLayers.String.camelize(style)];
+
+        var value = null;
+        if (element && element.style) {
+            value = element.style[OpenLayers.String.camelize(style)];
+            if (!value) {
+                if (document.defaultView && 
+                    document.defaultView.getComputedStyle) {
+                    
+                    var css = document.defaultView.getComputedStyle(element, null);
+                    value = css ? css.getPropertyValue(style) : null;
+                } else if (element.currentStyle) {
+                    value = element.currentStyle[OpenLayers.String.camelize(style)];
+                }
             }
-        }
-    
-        var positions = ['left', 'top', 'right', 'bottom'];
-        if (window.opera &&
-            (OpenLayers.Util.indexOf(positions,style) != -1) &&
-            (OpenLayers.Element.getStyle(element, 'position') == 'static')) { 
-            value = 'auto';
+        
+            var positions = ['left', 'top', 'right', 'bottom'];
+            if (window.opera &&
+                (OpenLayers.Util.indexOf(positions,style) != -1) &&
+                (OpenLayers.Element.getStyle(element, 'position') == 'static')) { 
+                value = 'auto';
+            }
         }
     
         return value == 'auto' ? null : value;

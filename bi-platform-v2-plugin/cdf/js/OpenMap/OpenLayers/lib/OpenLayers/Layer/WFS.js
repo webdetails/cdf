@@ -4,12 +4,16 @@
 
 
 /**
+ * @requires OpenLayers/Tile/WFS.js
  * @requires OpenLayers/Layer/Vector.js
  * @requires OpenLayers/Layer/Markers.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
  * Class: OpenLayers.Layer.WFS
+ * *Deprecated*.  To be removed in 3.0.  Instead use OpenLayers.Layer.Vector
+ *     with a Protocol.WFS and one or more Strategies.
  * 
  * Inherits from:
  *  - <OpenLayers.Layer.Vector>
@@ -32,8 +36,13 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
     
     /**
      * APIProperty: ratio
-     * {Float} the ratio of image/tile size to map size (this is the untiled
-     *     buffer)
+     * {Float} The ratio property determines the size of the serverside query
+     *    relative to the map viewport size. By default, we load an area twice
+     *    as big as the map, to allow for panning without immediately reload.
+     *    Setting this to 1 will cause the area of the WFS request to match
+     *    the map area exactly. It is recommended to set this to some number
+     *    at least slightly larger than 1, otherwise accidental clicks can
+     *    cause a data reload, by moving the map only 1 pixel.
      */
     ratio: 2,
 
@@ -58,6 +67,8 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
       * APIProperty: format
       * {<OpenLayers.Format>} The format you want the data to be parsed with.
       * Must be passed in the constructor. Should be a class, not an instance.
+      * This option can only be used if no featureClass is passed / vectorMode
+      * is false: if a featureClass is passed, then this parameter is ignored.
       */
     format: null,
 
@@ -77,7 +88,8 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
 
     /**
      * Property: vectorMode
-     * {Boolean} Should be calculated automatically.
+     * {Boolean} Should be calculated automatically. Determines whether the
+     *     layer is in vector mode or marker mode.
      */
     vectorMode: true, 
     
@@ -114,6 +126,9 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
             !OpenLayers.Feature.Vector) {
             this.vectorMode = false;
         }    
+
+        // Uppercase params
+        params = OpenLayers.Util.upperCaseObject(params);
         
         // Turn off error reporting, browsers like Safari may work
         // depending on the setup, and we don't want an unneccesary alert.
@@ -138,11 +153,10 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
             this.options.geometry_column = "the_geom";
         }    
         
-        this.params = params;
-        OpenLayers.Util.applyDefaults(
-                       this.params, 
-                       OpenLayers.Util.upperCaseObject(this.DEFAULT_PARAMS)
-                       );
+        this.params = OpenLayers.Util.applyDefaults(
+            params, 
+            OpenLayers.Util.upperCaseObject(this.DEFAULT_PARAMS)
+        );
         this.url = url;
     },    
     
@@ -275,15 +289,27 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
             //formulate request url string
             var url = this.getFullRequestString();
         
-            var params = {BBOX: this.encodeBBOX ? tileBounds.toBBOX() 
-                                                : tileBounds.toArray()};
+            var params = null;
+
+            // Cant combine "filter" and "BBOX". This is a cheap hack to help
+            // people out who can't migrate to the WFS protocol immediately.
+            var filter = this.params.filter || this.params.FILTER;
+            if (filter) {
+                params = {FILTER: filter};
+            }
+            else {
+                params = {BBOX: this.encodeBBOX ? tileBounds.toBBOX() 
+                                                    : tileBounds.toArray()};
+            }
             
             if (this.map && !this.projection.equals(this.map.getProjectionObject())) {
                 var projectedBounds = tileBounds.clone();
                 projectedBounds.transform(this.map.getProjectionObject(), 
                                           this.projection);
-                params.BBOX = this.encodeBBOX ? projectedBounds.toBBOX() 
-                                              : projectedBounds.toArray();
+                if (!filter){
+                    params.BBOX = this.encodeBBOX ? projectedBounds.toBBOX() 
+                                                : projectedBounds.toArray();
+                }
             }                                  
 
             url += "&" + OpenLayers.Util.getParameterString(params);
@@ -377,6 +403,20 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
     },
     
     /**
+     * Method: display
+     * Call the display method of the appropriate parent class. 
+     */
+    display: function() {
+        if(this.vectorMode) {
+            OpenLayers.Layer.Vector.prototype.display.apply(this, 
+                                                                arguments);
+        } else {
+            OpenLayers.Layer.Markers.prototype.display.apply(this, 
+                                                                 arguments);
+        }
+    },
+    
+    /**
      * APIMethod: mergeNewParams
      * Modify parameters for the layer and redraw.
      * 
@@ -405,7 +445,7 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
             obj = new OpenLayers.Layer.WFS(this.name,
                                            this.url,
                                            this.params,
-                                           this.options);
+                                           this.getOptions());
         }
 
         //get all additions from superclasses
@@ -433,7 +473,7 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
      * altUrl - {String} Use this as the url instead of the layer's url
      */
     getFullRequestString:function(newParams, altUrl) {
-        var projectionCode = this.map.getProjection();
+        var projectionCode = this.projection.getCode() || this.map.getProjection();
         this.params.SRS = (projectionCode == "none") ? null : projectionCode;
 
         return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(
@@ -456,21 +496,14 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
         }
 
         var data = this.writer.write(this.features);
-        
-        var url = this.url;
 
-        var success = OpenLayers.Function.bind(this.commitSuccess, this);
-
-        var failure = OpenLayers.Function.bind(this.commitFailure, this);
-        
-        // from prototype.js
-        new OpenLayers.Ajax.Request(url, 
-                         {   method: 'post', 
-                             postBody: data,
-                             onComplete: success, 
-                             onFailure: failure
-                          }
-                         );
+        OpenLayers.Request.POST({
+            url: this.url,
+            data: data,
+            success: this.commitSuccess,
+            failure: this.commitFailure,
+            scope: this
+        });
     },
 
     /**
@@ -515,7 +548,7 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
      * response - {String} full XML response
      */
     commitReport: function(string, response) {
-        alert(string);
+        OpenLayers.Console.userError(string);
     },
 
     
@@ -534,6 +567,41 @@ OpenLayers.Layer.WFS = OpenLayers.Class(
             }    
             this.tile.draw();
         }
+    },
+    
+    /** 
+     * APIMethod: getDataExtent
+     * Calculates the max extent which includes all of the layer data.
+     * 
+     * Returns:
+     * {<OpenLayers.Bounds>}
+     */
+    getDataExtent: function () {
+        var extent; 
+        //get all additions from superclasses
+        if (this.vectorMode) {
+            extent = OpenLayers.Layer.Vector.prototype.getDataExtent.apply(this);
+        } else {
+            extent = OpenLayers.Layer.Markers.prototype.getDataExtent.apply(this);
+        }    
+
+        return extent;
+    },
+    
+    /** 
+     * APIMethod: setOpacity 
+     * Call the setOpacity method of the appropriate parent class to set the
+     *     opacity.  
+     * 
+     * Parameter: 
+     * opacity - {Float} 
+     */
+    setOpacity: function (opacity) {
+        if (this.vectorMode) {
+            OpenLayers.Layer.Vector.prototype.setOpacity.apply(this, [opacity]);
+        } else {
+            OpenLayers.Layer.Markers.prototype.setOpacity.apply(this, [opacity]);
+        }    
     },
 
     CLASS_NAME: "OpenLayers.Layer.WFS"

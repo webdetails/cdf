@@ -7,6 +7,7 @@
  * @requires OpenLayers/Layer/SphericalMercator.js
  * @requires OpenLayers/Layer/EventPane.js
  * @requires OpenLayers/Layer/FixedZoomLevels.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
@@ -29,9 +30,9 @@ OpenLayers.Layer.Google = OpenLayers.Class(
     
     /** 
      * Constant: MAX_ZOOM_LEVEL
-     * {Integer} 19
+     * {Integer} 21
      */
-    MAX_ZOOM_LEVEL: 19,
+    MAX_ZOOM_LEVEL: 21,
 
     /** 
      * Constant: RESOLUTIONS
@@ -58,7 +59,9 @@ OpenLayers.Layer.Google = OpenLayers.Class(
         0.00002145767211914062, 
         0.00001072883605957031,
         0.00000536441802978515, 
-        0.00000268220901489257
+        0.00000268220901489257,
+        0.0000013411045074462891,
+        0.00000067055225372314453
     ],
 
     /**
@@ -83,6 +86,18 @@ OpenLayers.Layer.Google = OpenLayers.Class(
      */
     dragObject: null, 
 
+    /**
+     * Property: termsOfUse
+     * {DOMElement} Div for Google's copyright and terms of use link
+     */
+    termsOfUse: null, 
+
+    /**
+     * Property: poweredBy
+     * {DOMElement} Div for Google's powered by logo and link
+     */
+    poweredBy: null, 
+
     /** 
      * Constructor: OpenLayers.Layer.Google
      * 
@@ -102,96 +117,297 @@ OpenLayers.Layer.Google = OpenLayers.Class(
         }    
     },
     
+    /**
+     * Method: clone
+     * Create a clone of this layer
+     *
+     * Returns:
+     * {<OpenLayers.Layer.Google>} An exact clone of this layer
+     */
+    clone: function() {
+        /**
+         * This method isn't intended to be called by a subclass and it
+         * doesn't call the same method on the superclass.  We don't call
+         * the super's clone because we don't want properties that are set
+         * on this layer after initialize (i.e. this.mapObject etc.).
+         */
+        return new OpenLayers.Layer.Google(
+            this.name, this.getOptions()
+        );
+    },
+    
     /** 
      * Method: loadMapObject
      * Load the GMap and register appropriate event listeners. If we can't 
      *     load GMap2, then display a warning message.
      */
     loadMapObject:function() {
-        
-        //has gmaps library has been loaded?
-        try {
-            // create GMap, hide nav controls
-            this.mapObject = new GMap2( this.div );
-            
-            //since v 2.93 getDragObject is now available.
-            if(typeof this.mapObject.getDragObject == "function") {
-                this.dragObject = this.mapObject.getDragObject();
-            } else {
-                this.dragPanMapObject = null;
+        if (!this.type) {
+            this.type = G_NORMAL_MAP;
+        }
+        var mapObject, termsOfUse, poweredBy;
+        var cache = OpenLayers.Layer.Google.cache[this.map.id];
+        if (cache) {
+            // there are already Google layers added to this map
+            mapObject = cache.mapObject;
+            termsOfUse = cache.termsOfUse;
+            poweredBy = cache.poweredBy;
+            // increment the layer count
+            ++cache.count;
+        } else {
+            // this is the first Google layer for this map
+
+            var container = this.map.viewPortDiv;
+            var div = document.createElement("div");
+            div.id = this.map.id + "_GMap2Container";
+            div.style.position = "absolute";
+            div.style.width = "100%";
+            div.style.height = "100%";
+            container.appendChild(div);
+
+            // create GMap and shuffle elements
+            try {
+                mapObject = new GMap2(div);
+                
+                // move the ToS and branding stuff up to the container div
+                termsOfUse = div.lastChild;
+                container.appendChild(termsOfUse);
+                termsOfUse.style.zIndex = "1100";
+                termsOfUse.style.right = "";
+                termsOfUse.style.bottom = "";
+                termsOfUse.className = "olLayerGoogleCopyright";
+
+                poweredBy = div.lastChild;
+                container.appendChild(poweredBy);
+                poweredBy.style.zIndex = "1100";
+                poweredBy.style.right = "";
+                poweredBy.style.bottom = "";
+                poweredBy.className = "olLayerGooglePoweredBy gmnoprint";
+                
+            } catch (e) {
+                OpenLayers.Console.error(e);
+                return;
             }
-
-
-            // move the ToS and branding stuff up to the pane
-            // thanks a *mil* Erik for thinking of this
-            var poweredBy = this.div.lastChild;
-            this.div.removeChild(poweredBy);
-            this.pane.appendChild(poweredBy);
-            poweredBy.className = "olLayerGooglePoweredBy gmnoprint";
-            poweredBy.style.left = "";
-            poweredBy.style.bottom = "";
-
-            var termsOfUse = this.div.lastChild;
-            this.div.removeChild(termsOfUse);
-            this.pane.appendChild(termsOfUse);
-            termsOfUse.className = "olLayerGoogleCopyright";
-            termsOfUse.style.right = "";
-            termsOfUse.style.bottom = "";
-
-        } catch (e) {
-            OpenLayers.Console.error(e);
+            // cache elements for use by any other google layers added to
+            // this same map
+            OpenLayers.Layer.Google.cache[this.map.id] = {
+                mapObject: mapObject,
+                termsOfUse: termsOfUse,
+                poweredBy: poweredBy,
+                count: 1
+            };
         }
-               
-    },
 
-    /** 
-     * APIMethod: setMap
-     * Overridden from EventPane because if a map type has been specified, 
-     *     we need to attach a listener for the first moveend -- this is how 
-     *     we will know that the map has been centered. Only once the map has 
-     *     been centered is it safe to change the gmap object's map type. 
-     * 
-     * Parameters:
-     * map - {<OpenLayers.Map>}
-     */
-    setMap: function(map) {
-        OpenLayers.Layer.EventPane.prototype.setMap.apply(this, arguments);
-
-        if (this.type != null) {
-            this.map.events.register("moveend", this, this.setMapType);
+        this.mapObject = mapObject;
+        this.termsOfUse = termsOfUse;
+        this.poweredBy = poweredBy;
+        
+        // ensure this layer type is one of the mapObject types
+        if (OpenLayers.Util.indexOf(this.mapObject.getMapTypes(),
+                                    this.type) === -1) {
+            this.mapObject.addMapType(this.type);
         }
-    },
-    
-    /** 
-     * Method: setMapType
-     * The map has been centered, and a map type was specified, so we 
-     *     set the map type on the gmap object, then unregister the listener
-     *     so that we dont keep doing this every time the map moves.
-     */
-    setMapType: function() {
-        if (this.mapObject.getCenter() != null) {
-            
-            // Support for custom map types.
-            if (OpenLayers.Util.indexOf(this.mapObject.getMapTypes(),
-                                        this.type) == -1) {
-                this.mapObject.addMapType(this.type);
-            }    
 
-            this.mapObject.setMapType(this.type);
-            this.map.events.unregister("moveend", this, this.setMapType);
+        //since v 2.93 getDragObject is now available.
+        if(typeof mapObject.getDragObject == "function") {
+            this.dragObject = mapObject.getDragObject();
+        } else {
+            this.dragPanMapObject = null;
         }
+        
+        if(this.isBaseLayer === false) {
+            this.setGMapVisibility(this.div.style.display !== "none");
+        }
+
     },
 
     /**
      * APIMethod: onMapResize
-     * 
-     * Parameters:
-     * evt - {Event}
      */
     onMapResize: function() {
-        this.mapObject.checkResize();  
+        // workaround for resizing of invisible or not yet fully loaded layers
+        // where GMap2.checkResize() does not work. We need to load the GMap
+        // for the old div size, then checkResize(), and then call
+        // layer.moveTo() to trigger GMap.setCenter() (which will finish
+        // the GMap initialization).
+        if(this.visibility && this.mapObject.isLoaded()) {
+            this.mapObject.checkResize();
+        } else {
+            if(!this._resized) {
+                var layer = this;
+                var handle = GEvent.addListener(this.mapObject, "load", function() {
+                    GEvent.removeListener(handle);
+                    delete layer._resized;
+                    layer.mapObject.checkResize();
+                    layer.moveTo(layer.map.getCenter(), layer.map.getZoom());
+                });
+            }
+            this._resized = true;
+        }
     },
 
+    /**
+     * APIMethod: setVisibility
+     * Set the visibility flag for the layer and hide/show & redraw 
+     *     accordingly. Fire event unless otherwise specified
+     * 
+     * Note that visibility is no longer simply whether or not the layer's
+     *     style.display is set to "block". Now we store a 'visibility' state 
+     *     property on the layer class, this allows us to remember whether or 
+     *     not we *desire* for a layer to be visible. In the case where the 
+     *     map's resolution is out of the layer's range, this desire may be 
+     *     subverted.
+     * 
+     * Parameters:
+     * visible - {Boolean} Display the layer (if in range)
+     */
+    setVisibility: function(visible) {
+        this.setGMapVisibility(visible);
+        // sharing a map container, opacity has to be set per layer
+        var opacity = this.opacity == null ? 1 : this.opacity;
+        OpenLayers.Layer.EventPane.prototype.setVisibility.apply(this, arguments);
+        this.setOpacity(opacity);
+    },
+    
+    /**
+     * Method: setGMapVisibility
+     * Display the GMap container and associated elements.
+     * 
+     * Parameters:
+     * visible - {Boolean} Display the GMap elements.
+     */
+    setGMapVisibility: function(visible) {
+        var cache = OpenLayers.Layer.Google.cache[this.map.id];
+        if (cache) {
+            var container = this.mapObject.getContainer();
+            if (visible === true) {
+                this.mapObject.setMapType(this.type);
+                container.style.display = "";
+                this.termsOfUse.style.left = "";
+                this.termsOfUse.style.display = "";
+                this.poweredBy.style.display = "";            
+                cache.displayed = this.id;
+            } else {
+                if (cache.displayed === this.id) {
+                    delete cache.displayed;
+                }
+                if (!cache.displayed) {
+                    container.style.display = "none";
+                    this.termsOfUse.style.display = "none";
+                    // move ToU far to the left in addition to setting display
+                    // to "none", because at the end of the GMap2 load
+                    // sequence, display: none will be unset and ToU would be
+                    // visible after loading a map with a google layer that is
+                    // initially hidden. 
+                    this.termsOfUse.style.left = "-9999px";
+                    this.poweredBy.style.display = "none";
+                }
+            }
+        }
+    },
+    
+    /**
+     * APIMethod: setOpacity
+     * Sets the opacity for the entire layer (all images)
+     * 
+     * Parameter:
+     * opacity - {Float}
+     */
+    setOpacity: function(opacity) {
+        if (opacity !== this.opacity) {
+            if (this.map != null) {
+                this.map.events.triggerEvent("changelayer", {
+                    layer: this,
+                    property: "opacity"
+                });
+            }
+            this.opacity = opacity;
+        }
+        // Though this layer's opacity may not change, we're sharing a container
+        // and need to update the opacity for the entire container.
+        if (this.getVisibility()) {
+            var container = this.mapObject.getContainer();
+            OpenLayers.Util.modifyDOMElement(
+                container, null, null, null, null, null, null, opacity
+            );
+        }
+    },
+
+    /**
+     * APIMethod: destroy
+     * Clean up this layer.
+     */
+    destroy: function() {
+        /**
+         * We have to override this method because the event pane destroy
+         * deletes the mapObject reference before removing this layer from
+         * the map.
+         */
+        if (this.map) {
+            this.setGMapVisibility(false);
+            var cache = OpenLayers.Layer.Google.cache[this.map.id];
+            if (cache && cache.count <= 1) {
+                this.removeGMapElements(false);
+            }            
+        }
+        OpenLayers.Layer.EventPane.prototype.destroy.apply(this, arguments);
+    },
+    
+    /**
+     * Method: removeGMapElements
+     * Remove all elements added to the dom.  This should only be called if
+     * this is the last of the Google layers for the given map.
+     */
+    removeGMapElements: function() {
+        var cache = OpenLayers.Layer.Google.cache[this.map.id];
+        if (cache) {
+            // remove shared elements from dom
+            var container = this.mapObject && this.mapObject.getContainer();                
+            if (container && container.parentNode) {
+                container.parentNode.removeChild(container);
+            }
+            var termsOfUse = cache.termsOfUse;
+            if (termsOfUse && termsOfUse.parentNode) {
+                termsOfUse.parentNode.removeChild(termsOfUse);
+            }
+            var poweredBy = cache.poweredBy;
+            if (poweredBy && poweredBy.parentNode) {
+                poweredBy.parentNode.removeChild(poweredBy);
+            }
+        }
+    },
+
+    /**
+     * APIMethod: removeMap
+     * On being removed from the map, also remove termsOfUse and poweredBy divs
+     * 
+     * Parameters:
+     * map - {<OpenLayers.Map>}
+     */
+    removeMap: function(map) {
+        // hide layer before removing
+        if (this.visibility && this.mapObject) {
+            this.setGMapVisibility(false);
+        }
+        // check to see if last Google layer in this map
+        var cache = OpenLayers.Layer.Google.cache[map.id];
+        if (cache) {
+            if (cache.count <= 1) {
+                this.removeGMapElements();
+                delete OpenLayers.Layer.Google.cache[map.id];
+            } else {
+                // decrement the layer count
+                --cache.count;
+            }
+        }
+        // remove references to gmap elements
+        delete this.termsOfUse;
+        delete this.poweredBy;
+        delete this.mapObject;
+        delete this.dragObject;
+        OpenLayers.Layer.EventPane.prototype.removeMap.apply(this, arguments);
+    },
+    
     /**
      * APIMethod: getZoomForExtent
      * 
@@ -524,3 +740,9 @@ OpenLayers.Layer.Google = OpenLayers.Class(
 
     CLASS_NAME: "OpenLayers.Layer.Google"
 });
+
+/**
+ * Property: OpenLayers.Layer.Google.cache
+ * {Object} Cache for elements that should only be created once per map.
+ */
+OpenLayers.Layer.Google.cache = {};

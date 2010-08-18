@@ -8,6 +8,12 @@
 
 /**
  * Class: OpenLayers.Control.MouseDefaults
+ * This class is DEPRECATED in 2.4 and will be removed by 3.0.
+ * If you need this functionality, use <OpenLayers.Control.Navigation> 
+ * instead!!!
+ *
+ * This class is DEPRECATED in 2.4 and will be removed by 3.0.
+ *     If you need this functionality, use Control.Navigation instead!!!
  *
  * Inherits from:
  *  - <OpenLayers.Control>
@@ -160,7 +166,7 @@ OpenLayers.Control.MouseDefaults = OpenLayers.Class(OpenLayers.Control, {
             this.zoomBox.style.zIndex = this.map.Z_INDEX_BASE["Popup"] - 1;
             this.map.viewPortDiv.appendChild(this.zoomBox);
         }
-        document.onselectstart=function() { return false; };
+        document.onselectstart = OpenLayers.Function.False;
         OpenLayers.Event.stop(evt);
     },
 

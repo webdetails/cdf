@@ -9,6 +9,9 @@
 
 /**
  * Class: OpenLayers.Control.ZoomBox
+ * The ZoomBox control enables zooming directly to a given extent, by drawing 
+ * a box on the map. The box is drawn by holding down shift, whilst dragging 
+ * the mouse.
  *
  * Inherits from:
  *  - <OpenLayers.Control>
@@ -27,6 +30,12 @@ OpenLayers.Control.ZoomBox = OpenLayers.Class(OpenLayers.Control, {
     out: false,
 
     /**
+     * Property: alwaysZoom
+     * {Boolean} Always zoom in/out, when box drawed 
+     */
+    alwaysZoom: false,
+
+    /**
      * Method: draw
      */    
     draw: function() {
@@ -42,12 +51,13 @@ OpenLayers.Control.ZoomBox = OpenLayers.Class(OpenLayers.Control, {
      */
     zoomBox: function (position) {
         if (position instanceof OpenLayers.Bounds) {
+            var bounds;
             if (!this.out) {
                 var minXY = this.map.getLonLatFromPixel(
                             new OpenLayers.Pixel(position.left, position.bottom));
                 var maxXY = this.map.getLonLatFromPixel(
                             new OpenLayers.Pixel(position.right, position.top));
-                var bounds = new OpenLayers.Bounds(minXY.lon, minXY.lat,
+                bounds = new OpenLayers.Bounds(minXY.lon, minXY.lat,
                                                maxXY.lon, maxXY.lat);
             } else {
                 var pixWidth = Math.abs(position.right-position.left);
@@ -61,9 +71,14 @@ OpenLayers.Control.ZoomBox = OpenLayers.Class(OpenLayers.Control, {
                 var xmax = center.lon + (extent.getWidth()/2)*zoomFactor;
                 var ymin = center.lat - (extent.getHeight()/2)*zoomFactor;
                 var ymax = center.lat + (extent.getHeight()/2)*zoomFactor;
-                var bounds = new OpenLayers.Bounds(xmin, ymin, xmax, ymax);
+                bounds = new OpenLayers.Bounds(xmin, ymin, xmax, ymax);
             }
+            // always zoom in/out 
+            var lastZoom = this.map.getZoom(); 
             this.map.zoomToExtent(bounds);
+            if (lastZoom == this.map.getZoom() && this.alwaysZoom == true){ 
+                this.map.zoomTo(lastZoom + (this.out ? -1 : 1)); 
+            }
         } else { // it's a pixel
             if (!this.out) {
                 this.map.setCenter(this.map.getLonLatFromPixel(position),

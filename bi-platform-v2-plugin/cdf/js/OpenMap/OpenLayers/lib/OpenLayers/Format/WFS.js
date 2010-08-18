@@ -4,11 +4,15 @@
 
 /**
  * @requires OpenLayers/Format/GML.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
  * Class: OpenLayers.Format.WFS
  * Read/Write WFS. 
+ *
+ * Inherits from:
+ *  - <OpenLayers.Format.GML>
  */
 OpenLayers.Format.WFS = OpenLayers.Class(OpenLayers.Format.GML, {
     
@@ -129,9 +133,10 @@ OpenLayers.Format.WFS = OpenLayers.Class(OpenLayers.Format.GML, {
      * feature - {<OpenLayers.Feature.Vector>} 
      */
     update: function(feature) {
-        if (!feature.fid) { alert(OpenLayers.i18n("noFID")); }
+        if (!feature.fid) { OpenLayers.Console.userError(OpenLayers.i18n("noFID")); }
         var updateNode = this.createElementNS(this.wfsns, 'wfs:Update');
-        updateNode.setAttribute("typeName", this.layerName);
+        updateNode.setAttribute("typeName", this.featurePrefix + ':' + this.featureName); 
+        updateNode.setAttribute("xmlns:" + this.featurePrefix, this.featureNS); 
 
         var propertyNode = this.createElementNS(this.wfsns, 'wfs:Property');
         var nameNode = this.createElementNS(this.wfsns, 'wfs:Name');
@@ -186,11 +191,12 @@ OpenLayers.Format.WFS = OpenLayers.Class(OpenLayers.Format.GML, {
      */
     remove: function(feature) {
         if (!feature.fid) { 
-            alert(OpenLayers.i18n("noFID")); 
+            OpenLayers.Console.userError(OpenLayers.i18n("noFID")); 
             return false; 
         }
         var deleteNode = this.createElementNS(this.wfsns, 'wfs:Delete');
-        deleteNode.setAttribute("typeName", this.layerName);
+        deleteNode.setAttribute("typeName", this.featurePrefix + ':' + this.featureName); 
+        deleteNode.setAttribute("xmlns:" + this.featurePrefix, this.featureNS); 
 
         var filterNode = this.createElementNS(this.ogcns, 'ogc:Filter');
         var filterIdNode = this.createElementNS(this.ogcns, 'ogc:FeatureId');

@@ -9,7 +9,12 @@
 
 /**
  * Class: OpenLayers.Control.ArgParser
- * 
+ * The ArgParser control adds location bar querystring parsing functionality 
+ * to an OpenLayers Map.
+ * When added to a Map control, on a page load/refresh, the Map will 
+ * automatically take the href string and parse it for lon, lat, zoom, and 
+ * layers information. 
+ *
  * Inherits from:
  *  - <OpenLayers.Control>
  */
@@ -37,6 +42,7 @@ OpenLayers.Control.ArgParser = OpenLayers.Class(OpenLayers.Control, {
      * APIProperty: displayProjection
      * {<OpenLayers.Projection>} Requires proj4js support. 
      *     Projection used when reading the coordinates from the URL. This will
+     *
      *     reproject the map coordinates from the URL into the map's
      *     projection.
      *
@@ -68,7 +74,7 @@ OpenLayers.Control.ArgParser = OpenLayers.Class(OpenLayers.Control, {
         OpenLayers.Control.prototype.setMap.apply(this, arguments);
 
         //make sure we dont already have an arg parser attached
-        for(var i=0; i< this.map.controls.length; i++) {
+        for(var i=0, len=this.map.controls.length; i<len; i++) {
             var control = this.map.controls[i];
             if ( (control != this) &&
                  (control.CLASS_NAME == "OpenLayers.Control.ArgParser") ) {
@@ -141,7 +147,7 @@ OpenLayers.Control.ArgParser = OpenLayers.Class(OpenLayers.Control, {
         if (this.layers.length == this.map.layers.length) { 
             this.map.events.unregister('addlayer', this, this.configureLayers);
 
-            for(var i=0; i < this.layers.length; i++) {
+            for(var i=0, len=this.layers.length; i<len; i++) {
                 
                 var layer = this.map.layers[i];
                 var c = this.layers.charAt(i);

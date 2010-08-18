@@ -90,6 +90,10 @@ OpenLayers.Feature = OpenLayers.Class({
                 this.layer.map.removePopup(this.popup);
             }
         }
+        // remove the marker from the layer
+        if (this.layer != null && this.marker != null) {
+            this.layer.removeMarker(this.marker);
+        }
 
         this.layer = null;
         this.id = null;
@@ -161,6 +165,10 @@ OpenLayers.Feature = OpenLayers.Class({
      *  
      *  If no 'lonlat' is set, returns null. 
      *  If no this.marker has been created, no anchor is sent.
+     *
+     *  Note - the returned popup object is 'owned' by the feature, so you
+     *      cannot use the popup's destroy method to discard the popup.
+     *      Instead, you must use the feature's destroyPopup
      * 
      *  Note - this.popup is set to return value
      * 

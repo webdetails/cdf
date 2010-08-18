@@ -5,11 +5,12 @@
  
 /**
  * @requires OpenLayers/Layer/WMS.js
+ * @requires OpenLayers/Console.js
  */
 
 /**
  * Class: OpenLayers.Layer.WMS.Untiled
- * Deprecated, to be removed in 3.0 - instead use OpenLayers.Layer.WMS and 
+ * *Deprecated*.  To be removed in 3.0.  Instead use OpenLayers.Layer.WMS and 
  *     pass the option 'singleTile' as true.
  * 
  * Inherits from: 
@@ -55,7 +56,7 @@ OpenLayers.Layer.WMS.Untiled = OpenLayers.Class(OpenLayers.Layer.WMS, {
             obj = new OpenLayers.Layer.WMS.Untiled(this.name,
                                                    this.url,
                                                    this.params,
-                                                   this.options);
+                                                   this.getOptions());
         }
 
         //get all additions from superclasses

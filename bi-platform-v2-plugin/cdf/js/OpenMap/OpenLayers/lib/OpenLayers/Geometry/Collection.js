@@ -74,7 +74,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      */
     clone: function() {
         var geometry = eval("new " + this.CLASS_NAME + "()");
-        for(var i=0; i<this.components.length; i++) {
+        for(var i=0, len=this.components.length; i<len; i++) {
             geometry.addComponent(this.components[i].clone());
         }
         
@@ -93,7 +93,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      */
     getComponentsString: function(){
         var strings = [];
-        for(var i = 0; i < this.components.length; i++) {
+        for(var i=0, len=this.components.length; i<len; i++) {
             strings.push(this.components[i].toShortString()); 
         }
         return strings.join(",");
@@ -108,7 +108,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
         this.bounds = null;
         if ( this.components && this.components.length > 0) {
             this.setBounds(this.components[0].getBounds());
-            for (var i = 1; i < this.components.length; i++) {
+            for (var i=1, len=this.components.length; i<len; i++) {
                 this.extendBounds(this.components[i].getBounds());
             }
         }
@@ -125,7 +125,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
         if(!(components instanceof Array)) {
             components = [components];
         }
-        for(var i=0; i < components.length; i++) {
+        for(var i=0, len=components.length; i<len; i++) {
             this.addComponent(components[i]);
         }
     },
@@ -209,7 +209,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      */
     getLength: function() {
         var length = 0.0;
-        for (var i = 0; i < this.components.length; i++) {
+        for (var i=0, len=this.components.length; i<len; i++) {
             length += this.components[i].getLength();
         }
         return length;
@@ -225,22 +225,91 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      */
     getArea: function() {
         var area = 0.0;
-        for (var i = 0; i < this.components.length; i++) {
+        for (var i=0, len=this.components.length; i<len; i++) {
             area += this.components[i].getArea();
         }
         return area;
     },
 
-    /**
-     * APIMethod: move
-     * Moves a collection in place
+    /** 
+     * APIMethod: getGeodesicArea
+     * Calculate the approximate area of the polygon were it projected onto
+     *     the earth.
      *
      * Parameters:
-     * x - {Float} The x-displacement (in map units)
-     * y - {Float} The y-displacement (in map units)
+     * projection - {<OpenLayers.Projection>} The spatial reference system
+     *     for the geometry coordinates.  If not provided, Geographic/WGS84 is
+     *     assumed.
+     * 
+     * Reference:
+     * Robert. G. Chamberlain and William H. Duquette, "Some Algorithms for
+     *     Polygons on a Sphere", JPL Publication 07-03, Jet Propulsion
+     *     Laboratory, Pasadena, CA, June 2007 http://trs-new.jpl.nasa.gov/dspace/handle/2014/40409
+     *
+     * Returns:
+     * {float} The approximate geodesic area of the geometry in square meters.
+     */
+    getGeodesicArea: function(projection) {
+        var area = 0.0;
+        for(var i=0, len=this.components.length; i<len; i++) {
+            area += this.components[i].getGeodesicArea(projection);
+        }
+        return area;
+    },
+    
+    /**
+     * APIMethod: getCentroid
+     *
+     * Returns:
+     * {<OpenLayers.Geometry.Point>} The centroid of the collection
+     */
+    getCentroid: function() {
+        return this.components.length && this.components[0].getCentroid();
+        /*
+        var centroid;
+        for (var i=0, len=this.components.length; i<len; i++) {
+            if (!centroid) {
+                centroid = this.components[i].getCentroid();
+            } else {
+                centroid.resize(this.components[i].getCentroid(), 0.5);
+            }
+        }
+        return centroid;
+        */
+    },
+
+    /**
+     * APIMethod: getGeodesicLength
+     * Calculate the approximate length of the geometry were it projected onto
+     *     the earth.
+     *
+     * projection - {<OpenLayers.Projection>} The spatial reference system
+     *     for the geometry coordinates.  If not provided, Geographic/WGS84 is
+     *     assumed.
+     * 
+     * Returns:
+     * {Float} The appoximate geodesic length of the geometry in meters.
+     */
+    getGeodesicLength: function(projection) {
+        var length = 0.0;
+        for(var i=0, len=this.components.length; i<len; i++) {
+            length += this.components[i].getGeodesicLength(projection);
+        }
+        return length;
+    },
+
+    /**
+     * APIMethod: move
+     * Moves a geometry by the given displacement along positive x and y axes.
+     *     This modifies the position of the geometry and clears the cached
+     *     bounds.
+     *
+     * Parameters:
+     * x - {Float} Distance to move geometry in positive x direction. 
+     * y - {Float} Distance to move geometry in positive y direction.
      */
     move: function(x, y) {
-        for(var i = 0; i < this.components.length; i++) {
+        for(var i=0, len=this.components.length; i<len; i++) {
             this.components[i].move(x, y);
         }
     },
@@ -255,7 +324,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      * origin - {<OpenLayers.Geometry.Point>} Center point for the rotation
      */
     rotate: function(angle, origin) {
-        for(var i=0; i<this.components.length; ++i) {
+        for(var i=0, len=this.components.length; i<len; ++i) {
             this.components[i].rotate(angle, origin);
         }
     },
@@ -272,22 +341,73 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      *                 will have four times the area).
      * origin - {<OpenLayers.Geometry.Point>} Point of origin for resizing
      * ratio - {Float} Optional x:y ratio for resizing.  Default ratio is 1.
+     * 
+     * Returns:
+     * {OpenLayers.Geometry} - The current geometry. 
      */
     resize: function(scale, origin, ratio) {
         for(var i=0; i<this.components.length; ++i) {
             this.components[i].resize(scale, origin, ratio);
         }
+        return this;
     },
 
     /**
-     * APIMethod: equals
-     * Tests for equivalent geometries
+     * APIMethod: distanceTo
+     * Calculate the closest distance between two geometries (on the x-y plane).
      *
      * Parameters:
-     * geometry - {<OpenLayers.Geometry>}
+     * geometry - {<OpenLayers.Geometry>} The target geometry.
+     * options - {Object} Optional properties for configuring the distance
+     *     calculation.
+     *
+     * Valid options:
+     * details - {Boolean} Return details from the distance calculation.
+     *     Default is false.
+     * edge - {Boolean} Calculate the distance from this geometry to the
+     *     nearest edge of the target geometry.  Default is true.  If true,
+     *     calling distanceTo from a geometry that is wholly contained within
+     *     the target will result in a non-zero distance.  If false, whenever
+     *     geometries intersect, calling distanceTo will return 0.  If false,
+     *     details cannot be returned.
      *
      * Returns:
-     * {Boolean} The coordinates are equivalent
+     * {Number | Object} The distance between this geometry and the target.
+     *     If details is true, the return will be an object with distance,
+     *     x0, y0, x1, and y1 properties.  The x0 and y0 properties represent
+     *     the coordinates of the closest point on this geometry. The x1 and y1
+     *     properties represent the coordinates of the closest point on the
+     *     target geometry.
+     */
+    distanceTo: function(geometry, options) {
+        var edge = !(options && options.edge === false);
+        var details = edge && options && options.details;
+        var result, best, distance;
+        var min = Number.POSITIVE_INFINITY;
+        for(var i=0, len=this.components.length; i<len; ++i) {
+            result = this.components[i].distanceTo(geometry, options);
+            distance = details ? result.distance : result;
+            if(distance < min) {
+                min = distance;
+                best = result;
+                if(min == 0) {
+                    break;
+                }
+            }
+        }
+        return best;
+    },
+
+    /** 
+     * APIMethod: equals
+     * Determine whether another geometry is equivalent to this one.  Geometries
+     *     are considered equivalent if all components have the same coordinates.
+     * 
+     * Parameters:
+     * geom - {<OpenLayers.Geometry>} The geometry to test. 
+     *
+     * Returns:
+     * {Boolean} The supplied geometry is equivalent to this geometry.
      */
     equals: function(geometry) {
         var equivalent = true;
@@ -298,7 +418,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
                   (geometry.components.length != this.components.length)) {
             equivalent = false;
         } else {
-            for(var i=0; i<this.components.length; ++i) {
+            for(var i=0, len=this.components.length; i<len; ++i) {
                 if(!this.components[i].equals(geometry.components[i])) {
                     equivalent = false;
                     break;
@@ -321,11 +441,12 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      */
     transform: function(source, dest) {
         if (source && dest) {
-            for (var i = 0; i < this.components.length; i++) {  
+            for (var i=0, len=this.components.length; i<len; i++) {  
                 var component = this.components[i];
                 component.transform(source, dest);
             }
-        }   
+            this.bounds = null;
+        }
         return this;
     },
 
@@ -341,7 +462,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      */
     intersects: function(geometry) {
         var intersect = false;
-        for(var i=0; i<this.components.length; ++ i) {
+        for(var i=0, len=this.components.length; i<len; ++ i) {
             intersect = geometry.intersects(this.components[i]);
             if(intersect) {
                 break;
@@ -350,6 +471,29 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
         return intersect;
     },
 
-    /** @final @type String */
+    /**
+     * APIMethod: getVertices
+     * Return a list of all points in this geometry.
+     *
+     * Parameters:
+     * nodes - {Boolean} For lines, only return vertices that are
+     *     endpoints.  If false, for lines, only vertices that are not
+     *     endpoints will be returned.  If not provided, all vertices will
+     *     be returned.
+     *
+     * Returns:
+     * {Array} A list of all vertices in the geometry.
+     */
+    getVertices: function(nodes) {
+        var vertices = [];
+        for(var i=0, len=this.components.length; i<len; ++i) {
+            Array.prototype.push.apply(
+                vertices, this.components[i].getVertices(nodes)
+            );
+        }
+        return vertices;
+    },
+
+
     CLASS_NAME: "OpenLayers.Geometry.Collection"
 });

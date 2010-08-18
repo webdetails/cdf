@@ -4,6 +4,7 @@
 
 
 /**
+ * @requires OpenLayers/Layer/SphericalMercator.js
  * @requires OpenLayers/Layer/EventPane.js
  * @requires OpenLayers/Layer/FixedZoomLevels.js
  */
@@ -27,9 +28,9 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
     
     /** 
      * Constant: MAX_ZOOM_LEVEL
-     * {Integer} 17
+     * {Integer} 19
      */
-    MAX_ZOOM_LEVEL: 17,
+    MAX_ZOOM_LEVEL: 19,
 
     /** 
      * Constant: RESOLUTIONS
@@ -52,7 +53,10 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
         0.00034332275390625, 
         0.000171661376953125, 
         0.0000858306884765625, 
-        0.00004291534423828125
+        0.00004291534423828125,
+        0.00002145767211914062, 
+        0.00001072883605957031,
+        0.00000536441802978515
     ],
 
     /**
@@ -68,7 +72,15 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
      *     projection, which allows support for vector drawing, overlaying
      *     other maps, etc. 
      */
-    sphericalMercator: false, 
+    sphericalMercator: false,
+    
+    /**
+     * APIProperty: animationEnabled
+     * {Boolean} If set to true, the transition between zoom levels will be
+     *     animated. Set to false to match the zooming experience of other
+     *     layer types. Default is true.
+     */
+    animationEnabled: true, 
 
     /** 
      * Constructor: OpenLayers.Layer.VirtualEarth
@@ -95,8 +107,8 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
         // create div and set to same size as map
         var veDiv = OpenLayers.Util.createDiv(this.name);
         var sz = this.map.getSize();
-        veDiv.style.width = sz.w;
-        veDiv.style.height = sz.h;
+        veDiv.style.width = sz.w + "px";
+        veDiv.style.height = sz.h + "px";
         this.div.appendChild(veDiv);
 
         try { // crash prevention
@@ -111,10 +123,13 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
                 // http://blogs.msdn.com/virtualearth/archive/2007/09/28/locking-a-virtual-earth-map.aspx
                 //
                 this.mapObject.LoadMap(null, null, this.type, true);
-                this.mapObject.AttachEvent("onmousedown", function() {return true; });
+                this.mapObject.AttachEvent("onmousedown", OpenLayers.Function.True);
 
             } catch (e) { }
             this.mapObject.HideDashboard();
+            if(typeof this.mapObject.SetAnimationEnabled == "function") {
+                this.mapObject.SetAnimationEnabled(this.animationEnabled);
+            }
         }
 
         //can we do smooth panning? this is an unpublished method, so we need 
@@ -127,6 +142,13 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
             this.dragPanMapObject = null;
         }
 
+    },
+
+    /**
+     * Method: onMapResize
+     */
+    onMapResize: function() {
+        this.mapObject.Resize(this.map.size.w, this.map.size.h);
     },
 
     /** 
@@ -209,7 +231,10 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
      * {Object} MapObject LonLat translated from MapObject Pixel
      */
     getMapObjectLonLatFromMapObjectPixel: function(moPixel) {
-        return this.mapObject.PixelToLatLong(moPixel.x, moPixel.y);
+        //the conditional here is to test if we are running the v6 of VE
+        return (typeof VEPixel != 'undefined') 
+            ? this.mapObject.PixelToLatLong(moPixel)
+            : this.mapObject.PixelToLatLong(moPixel.x, moPixel.y);
     },
 
     /**
@@ -325,7 +350,9 @@ OpenLayers.Layer.VirtualEarth = OpenLayers.Class(
      * {Object} MapObject Pixel from x and y parameters
      */
     getMapObjectPixelFromXY: function(x, y) {
-        return new Msn.VE.Pixel(x, y);
+        //the conditional here is to test if we are running the v6 of VE
+        return (typeof VEPixel != 'undefined') ? new VEPixel(x, y)
+                         : new Msn.VE.Pixel(x, y);
     },
 
     CLASS_NAME: "OpenLayers.Layer.VirtualEarth"

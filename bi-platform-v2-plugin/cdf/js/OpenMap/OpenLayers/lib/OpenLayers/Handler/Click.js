@@ -79,7 +79,7 @@ OpenLayers.Handler.Click = OpenLayers.Class(OpenLayers.Handler, {
 
     /**
      * Property: timerId
-     * {Number} The id of the timeout waiting to clear the <delayedEvent>.
+     * {Number} The id of the timeout waiting to clear the <delayedCall>.
      */
     timerId: null,
     
@@ -88,6 +88,13 @@ OpenLayers.Handler.Click = OpenLayers.Class(OpenLayers.Handler, {
      * {<OpenLayers.Pixel>} The pixel location of the last mousedown.
      */
     down: null,
+    
+    /**
+     * Property: rightclickTimerId
+     * {Number} The id of the right mouse timeout waiting to clear the 
+     *     <delayedEvent>.
+     */
+    rightclickTimerId: null,
     
     /**
      * Constructor: OpenLayers.Handler.Click
@@ -125,6 +132,78 @@ OpenLayers.Handler.Click = OpenLayers.Class(OpenLayers.Handler, {
      * {Boolean} Continue propagating this event.
      */
     mousedown: null,
+
+    /**
+     * Method: mouseup
+     * Handle mouseup.  Installed to support collection of right mouse events.
+     * 
+     * Returns:
+     * {Boolean} Continue propagating this event.
+     */
+    mouseup:  function (evt) {
+        var propagate = true;
+
+        // Collect right mouse clicks from the mouseup
+        //  IE - ignores the second right click in mousedown so using
+        //  mouseup instead
+        if (this.checkModifiers(evt) && 
+            this.control.handleRightClicks && 
+            OpenLayers.Event.isRightClick(evt)) {
+          propagate = this.rightclick(evt);
+        }
+
+        return propagate;
+    },
+    
+    /**
+     * Method: rightclick
+     * Handle rightclick.  For a dblrightclick, we get two clicks so we need 
+     *     to always register for dblrightclick to properly handle single 
+     *     clicks.
+     *     
+     * Returns:
+     * {Boolean} Continue propagating this event.
+     */
+    rightclick: function(evt) {
+        if(this.passesTolerance(evt)) {
+           if(this.rightclickTimerId != null) {
+                //Second click received before timeout this must be 
+                // a double click
+                this.clearTimer();      
+                this.callback('dblrightclick', [evt]);
+                return !this.stopDouble;
+            } else { 
+                //Set the rightclickTimerId, send evt only if double is 
+                // true else trigger single
+                var clickEvent = this['double'] ?
+                    OpenLayers.Util.extend({}, evt) : 
+                    this.callback('rightclick', [evt]);
+
+                var delayedRightCall = OpenLayers.Function.bind(
+                    this.delayedRightCall, 
+                    this, 
+                    clickEvent
+                );
+                this.rightclickTimerId = window.setTimeout(
+                    delayedRightCall, this.delay
+                );
+            } 
+        }
+        return !this.stopSingle;
+    },
+    
+    /**
+     * Method: delayedRightCall
+     * Sets <rightclickTimerId> to null.  And optionally triggers the 
+     *     rightclick callback if evt is set.
+     */
+    delayedRightCall: function(evt) {
+        this.rightclickTimerId = null;
+        if (evt) {
+           this.callback('rightclick', [evt]);
+        }
+        return !this.stopSingle;
+    },
     
     /**
      * Method: dblclick
@@ -205,6 +284,10 @@ OpenLayers.Handler.Click = OpenLayers.Class(OpenLayers.Handler, {
         if(this.timerId != null) {
             window.clearTimeout(this.timerId);
             this.timerId = null;
+        }
+        if(this.rightclickTimerId != null) {
+            window.clearTimeout(this.rightclickTimerId);
+            this.rightclickTimerId = null;
         }
     },
     

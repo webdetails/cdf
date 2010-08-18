@@ -10,7 +10,7 @@
 
 /**
  * Class: OpenLayers.Rule
- * This class represents a OGC Rule, as being used for rule-based SLD styling.
+ * This class represents an SLD Rule, as being used for rule-based SLD styling.
  */
 OpenLayers.Rule = OpenLayers.Class({
     
@@ -41,10 +41,16 @@ OpenLayers.Rule = OpenLayers.Class({
     /**
      * Property: context
      * {Object} An optional object with properties that the rule should be
-     * evaluatad against. If no context is specified, feature.attributes will
+     * evaluated against. If no context is specified, feature.attributes will
      * be used.
      */
     context: null,
+    
+    /**
+     * Property: filter
+     * {<OpenLayers.Filter>} Optional filter for the rule.
+     */
+    filter: null,
 
     /**
      * Property: elseFilter
@@ -59,7 +65,11 @@ OpenLayers.Rule = OpenLayers.Class({
     /**
      * Property: symbolizer
      * {Object} Symbolizer or hash of symbolizers for this rule. If hash of
-     * symbolizers, keys are one or more of ["Point", "Line", "Polygon"]
+     * symbolizers, keys are one or more of ["Point", "Line", "Polygon"]. The
+     * latter if useful if it is required to style e.g. vertices of a line
+     * with a point symbolizer. Note, however, that this is not implemented
+     * yet in OpenLayers, but it is the way how symbolizers are defined in
+     * SLD.
      */
     symbolizer: null,
     
@@ -91,10 +101,9 @@ OpenLayers.Rule = OpenLayers.Class({
      * {<OpenLayers.Rule>}
      */
     initialize: function(options) {
-        this.id = OpenLayers.Util.createUniqueID(this.CLASS_NAME + "_");
         this.symbolizer = {};
-
         OpenLayers.Util.extend(this, options);
+        this.id = OpenLayers.Util.createUniqueID(this.CLASS_NAME + "_");
     },
 
     /** 
@@ -116,7 +125,7 @@ OpenLayers.Rule = OpenLayers.Class({
      * feature - {<OpenLayers.Feature>} feature to apply the rule to.
      * 
      * Returns:
-     * {boolean} true if the rule applies, false if it does not.
+     * {Boolean} true if the rule applies, false if it does not.
      * This rule is the default rule and always returns true.
      */
     evaluate: function(feature) {
@@ -136,6 +145,16 @@ OpenLayers.Rule = OpenLayers.Class({
             applies = scale < OpenLayers.Style.createLiteral(
                     this.maxScaleDenominator, context);
         }
+        
+        // check if optional filter applies
+        if(applies && this.filter) {
+            // feature id filters get the feature, others get the context
+            if(this.filter.CLASS_NAME == "OpenLayers.Filter.FeatureId") {
+                applies = this.filter.evaluate(feature);
+            } else {
+                applies = this.filter.evaluate(context);
+            }
+        }
 
         return applies;
     },
@@ -153,7 +172,37 @@ OpenLayers.Rule = OpenLayers.Class({
         if (!context) {
             context = feature.attributes || feature.data;
         }
+        if (typeof this.context == "function") {
+            context = this.context(feature);
+        }
         return context;
+    },
+    
+    /**
+     * APIMethod: clone
+     * Clones this rule.
+     * 
+     * Returns:
+     * {<OpenLayers.Rule>} Clone of this rule.
+     */
+    clone: function() {
+        var options = OpenLayers.Util.extend({}, this);
+        // clone symbolizer
+        options.symbolizer = {};
+        for(var key in this.symbolizer) {
+            value = this.symbolizer[key];
+            type = typeof value;
+            if(type === "object") {
+                options.symbolizer[key] = OpenLayers.Util.extend({}, value);
+            } else if(type === "string") {
+                options.symbolizer[key] = value;
+            }
+        }
+        // clone filter
+        options.filter = this.filter && this.filter.clone();
+        // clone context
+        options.context = this.context && OpenLayers.Util.extend({}, this.context);
+        return new OpenLayers.Rule(options);
     },
         
     CLASS_NAME: "OpenLayers.Rule"

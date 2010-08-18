@@ -64,13 +64,9 @@ OpenLayers.Layer.KaMap = OpenLayers.Class(OpenLayers.Layer.Grid, {
         var newArguments = [];
         newArguments.push(name, url, params, options);
         OpenLayers.Layer.Grid.prototype.initialize.apply(this, newArguments);
-        this.params = (params ? params : {});
-        if (params) {
-            OpenLayers.Util.applyDefaults(
-                           this.params, 
-                           this.DEFAULT_PARAMS
-                           );
-        }
+        this.params = OpenLayers.Util.applyDefaults(
+            this.params, this.DEFAULT_PARAMS
+        );
     },
 
     /**
@@ -166,7 +162,7 @@ OpenLayers.Layer.KaMap = OpenLayers.Class(OpenLayers.Layer.Grid, {
             obj = new OpenLayers.Layer.KaMap(this.name,
                                             this.url,
                                             this.params,
-                                            this.options);
+                                            this.getOptions());
         }
 
         //get all additions from superclasses

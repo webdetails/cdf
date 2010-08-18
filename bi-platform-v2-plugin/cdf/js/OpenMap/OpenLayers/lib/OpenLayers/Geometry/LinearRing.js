@@ -109,14 +109,16 @@ OpenLayers.Geometry.LinearRing = OpenLayers.Class(
     
     /**
      * APIMethod: move
-     * Moves a collection in place
+     * Moves a geometry by the given displacement along positive x and y axes.
+     *     This modifies the position of the geometry and clears the cached
+     *     bounds.
      *
      * Parameters:
-     * x - {Float} The x-displacement (in map units)
-     * y - {Float} The y-displacement (in map units)
+     * x - {Float} Distance to move geometry in positive x direction. 
+     * y - {Float} Distance to move geometry in positive y direction.
      */
     move: function(x, y) {
-        for(var i = 0; i < this.components.length - 1; i++) {
+        for(var i = 0, len=this.components.length; i<len - 1; i++) {
             this.components[i].move(x, y);
         }
     },
@@ -131,7 +133,7 @@ OpenLayers.Geometry.LinearRing = OpenLayers.Class(
      * origin - {<OpenLayers.Geometry.Point>} Center point for the rotation
      */
     rotate: function(angle, origin) {
-        for(var i=0; i<this.components.length - 1; ++i) {
+        for(var i=0, len=this.components.length; i<len - 1; ++i) {
             this.components[i].rotate(angle, origin);
         }
     },
@@ -148,11 +150,15 @@ OpenLayers.Geometry.LinearRing = OpenLayers.Class(
      *                 will have four times the area).
      * origin - {<OpenLayers.Geometry.Point>} Point of origin for resizing
      * ratio - {Float} Optional x:y ratio for resizing.  Default ratio is 1.
+     * 
+     * Returns:
+     * {OpenLayers.Geometry} - The current geometry. 
      */
     resize: function(scale, origin, ratio) {
-        for(var i=0; i<this.components.length - 1; ++i) {
+        for(var i=0, len=this.components.length; i<len - 1; ++i) {
             this.components[i].resize(scale, origin, ratio);
         }
+        return this;
     },
     
     /**
@@ -168,12 +174,38 @@ OpenLayers.Geometry.LinearRing = OpenLayers.Class(
      */
     transform: function(source, dest) {
         if (source && dest) {
-            for (var i = 0; i < this.components.length - 1; i++) {
+            for (var i=0, len=this.components.length; i<len - 1; i++) {
                 var component = this.components[i];
                 component.transform(source, dest);
             }
+            this.bounds = null;
         }
         return this;
+    },
+    
+    /**
+     * APIMethod: getCentroid
+     *
+     * Returns:
+     * {<OpenLayers.Geometry.Point>} The centroid of the collection
+     */
+    getCentroid: function() {
+        if (this.components && (this.components.length > 2)) {
+            var sumX = 0.0;
+            var sumY = 0.0;
+            for (var i = 0; i < this.components.length - 1; i++) {
+                var b = this.components[i];
+                var c = this.components[i+1];
+                sumX += (b.x + c.x) * (b.x * c.y - c.x * b.y);
+                sumY += (b.y + c.y) * (b.x * c.y - c.x * b.y);
+            }
+            var area = -1 * this.getArea();
+            var x = sumX / (6 * area);
+            var y = sumY / (6 * area);
+            return new OpenLayers.Geometry.Point(x, y);
+        } else {
+            return null;
+        }
     },
 
     /**
@@ -188,12 +220,56 @@ OpenLayers.Geometry.LinearRing = OpenLayers.Class(
         var area = 0.0;
         if ( this.components && (this.components.length > 2)) {
             var sum = 0.0;
-            for (var i = 0; i < this.components.length - 1; i++) {
+            for (var i=0, len=this.components.length; i<len - 1; i++) {
                 var b = this.components[i];
                 var c = this.components[i+1];
                 sum += (b.x + c.x) * (c.y - b.y);
             }
             area = - sum / 2.0;
+        }
+        return area;
+    },
+    
+    /**
+     * APIMethod: getGeodesicArea
+     * Calculate the approximate area of the polygon were it projected onto
+     *     the earth.  Note that this area will be positive if ring is oriented
+     *     clockwise, otherwise it will be negative.
+     *
+     * Parameters:
+     * projection - {<OpenLayers.Projection>} The spatial reference system
+     *     for the geometry coordinates.  If not provided, Geographic/WGS84 is
+     *     assumed.
+     * 
+     * Reference:
+     * Robert. G. Chamberlain and William H. Duquette, "Some Algorithms for
+     *     Polygons on a Sphere", JPL Publication 07-03, Jet Propulsion
+     *     Laboratory, Pasadena, CA, June 2007 http://trs-new.jpl.nasa.gov/dspace/handle/2014/40409
+     *
+     * Returns:
+     * {float} The approximate signed geodesic area of the polygon in square
+     *     meters.
+     */
+    getGeodesicArea: function(projection) {
+        var ring = this;  // so we can work with a clone if needed
+        if(projection) {
+            var gg = new OpenLayers.Projection("EPSG:4326");
+            if(!gg.equals(projection)) {
+                ring = this.clone().transform(projection, gg);
+            }
+        }
+        var area = 0.0;
+        var len = ring.components && ring.components.length;
+        if(len > 2) {
+            var p1, p2;
+            for(var i=0; i<len-1; i++) {
+                p1 = ring.components[i];
+                p2 = ring.components[i+1];
+                area += OpenLayers.Util.rad(p2.x - p1.x) *
+                        (2 + Math.sin(OpenLayers.Util.rad(p1.y)) +
+                        Math.sin(OpenLayers.Util.rad(p2.y)));
+            }
+            area = area * 6378137.0 * 6378137.0 / 2.0;
         }
         return area;
     },
@@ -309,7 +385,7 @@ OpenLayers.Geometry.LinearRing = OpenLayers.Class(
             );
         } else {
             // check for component intersections
-            for(var i=0; i<geometry.components.length; ++ i) {
+            for(var i=0, len=geometry.components.length; i<len; ++ i) {
                 intersect = geometry.components[i].intersects(this);
                 if(intersect) {
                     break;
@@ -317,6 +393,23 @@ OpenLayers.Geometry.LinearRing = OpenLayers.Class(
             }
         }
         return intersect;
+    },
+
+    /**
+     * APIMethod: getVertices
+     * Return a list of all points in this geometry.
+     *
+     * Parameters:
+     * nodes - {Boolean} For lines, only return vertices that are
+     *     endpoints.  If false, for lines, only vertices that are not
+     *     endpoints will be returned.  If not provided, all vertices will
+     *     be returned.
+     *
+     * Returns:
+     * {Array} A list of all vertices in the geometry.
+     */
+    getVertices: function(nodes) {
+        return (nodes === true) ? [] : this.components.slice(0, this.components.length-1);
     },
 
     CLASS_NAME: "OpenLayers.Geometry.LinearRing"

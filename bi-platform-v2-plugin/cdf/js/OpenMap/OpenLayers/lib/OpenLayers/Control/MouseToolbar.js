@@ -11,7 +11,8 @@
 /**
  * Class: OpenLayers.Control.MouseToolbar
  * This class is DEPRECATED in 2.4 and will be removed by 3.0.
- * If you need this functionality, use Control.NavToolbar instead!!! 
+ * If you need this functionality, use <OpenLayers.Control.NavToolbar>
+ * instead!!! 
  */
 OpenLayers.Control.MouseToolbar = OpenLayers.Class(
                                             OpenLayers.Control.MouseDefaults, {
@@ -253,7 +254,7 @@ OpenLayers.Control.MouseToolbar = OpenLayers.Class(
                 this.map.div.style.cursor = "move";
                 break;
         }
-        document.onselectstart = function() { return false; };
+        document.onselectstart = OpenLayers.Function.False;
         OpenLayers.Event.stop(evt);
     },
 
@@ -271,7 +272,7 @@ OpenLayers.Control.MouseToolbar = OpenLayers.Class(
                 OpenLayers.Util.modifyAlphaImageDiv(this.buttons[this.mode], null, null, null, this.buttons[this.mode].imgLocation);
             }
             if (this.mode == "measure" && mode != "measure") {
-                for(var i = 0; i < this.measureDivs.length; i++) {
+                for(var i=0, len=this.measureDivs.length; i<len; i++) {
                     if (this.measureDivs[i]) { 
                         this.map.layerContainerDiv.removeChild(this.measureDivs[i]);
                     }

@@ -16,6 +16,12 @@
 OpenLayers.Popup.FramedCloud = 
   OpenLayers.Class(OpenLayers.Popup.Framed, {
 
+    /** 
+     * Property: contentDisplayClass
+     * {String} The CSS class of the popup content div.
+     */
+    contentDisplayClass: "olFramedCloudPopupContent",
+
     /**
      * APIProperty: autoSize
      * {Boolean} Framed Cloud is autosizing by default.
@@ -68,19 +74,19 @@ OpenLayers.Popup.FramedCloud =
                     position: new OpenLayers.Pixel(-638, 0)
                 },
                 { //bottom-left
-                    size: new OpenLayers.Size('auto', 21),
-                    anchor: new OpenLayers.Bounds(0, 32, 80, null),
-                    position: new OpenLayers.Pixel(0, -629)
+                    size: new OpenLayers.Size('auto', 19),
+                    anchor: new OpenLayers.Bounds(0, 32, 22, null),
+                    position: new OpenLayers.Pixel(0, -631)
                 },
                 { //bottom-right
-                    size: new OpenLayers.Size(22, 21),
+                    size: new OpenLayers.Size(22, 18),
                     anchor: new OpenLayers.Bounds(null, 32, 0, null),
-                    position: new OpenLayers.Pixel(-638, -629)
+                    position: new OpenLayers.Pixel(-638, -632)
                 },
                 { // stem
-                    size: new OpenLayers.Size(81, 54),
+                    size: new OpenLayers.Size(81, 35),
                     anchor: new OpenLayers.Bounds(null, 0, 0, null),
-                    position: new OpenLayers.Pixel(0, -668)
+                    position: new OpenLayers.Pixel(0, -688)
                 }
             ]
         },
@@ -99,19 +105,19 @@ OpenLayers.Popup.FramedCloud =
                     position: new OpenLayers.Pixel(-638, 0)
                 },
                 { //bottom-left
-                    size: new OpenLayers.Size('auto', 21),
+                    size: new OpenLayers.Size('auto', 19),
                     anchor: new OpenLayers.Bounds(0, 32, 22, null),
-                    position: new OpenLayers.Pixel(0, -629)
+                    position: new OpenLayers.Pixel(0, -631)
                 },
                 { //bottom-right
-                    size: new OpenLayers.Size(22, 21),
+                    size: new OpenLayers.Size(22, 19),
                     anchor: new OpenLayers.Bounds(null, 32, 0, null),
-                    position: new OpenLayers.Pixel(-638, -629)
+                    position: new OpenLayers.Pixel(-638, -631)
                 },
                 { // stem
-                    size: new OpenLayers.Size(81, 54),
+                    size: new OpenLayers.Size(81, 35),
                     anchor: new OpenLayers.Bounds(0, 0, null, null),
-                    position: new OpenLayers.Pixel(-215, -668)
+                    position: new OpenLayers.Pixel(-215, -687)
                 }
             ]
         },
@@ -140,7 +146,7 @@ OpenLayers.Popup.FramedCloud =
                     position: new OpenLayers.Pixel(-638, -629)
                 },
                 { // stem
-                    size: new OpenLayers.Size(81, 54),
+                    size: new OpenLayers.Size(81, 33),
                     anchor: new OpenLayers.Bounds(null, null, 0, 0),
                     position: new OpenLayers.Pixel(-101, -674)
                 }
@@ -171,7 +177,7 @@ OpenLayers.Popup.FramedCloud =
                     position: new OpenLayers.Pixel(-638, -629)
                 },
                 { // stem
-                    size: new OpenLayers.Size(81, 54),
+                    size: new OpenLayers.Size(81, 33),
                     anchor: new OpenLayers.Bounds(0, null, null, 0),
                     position: new OpenLayers.Pixel(-311, -674)
                 }
@@ -197,7 +203,7 @@ OpenLayers.Popup.FramedCloud =
      * Parameters:
      * id - {String}
      * lonlat - {<OpenLayers.LonLat>}
-     * size - {<OpenLayers.Size>}
+     * contentSize - {<OpenLayers.Size>}
      * contentHTML - {String}
      * anchor - {Object} Object to which we'll anchor the popup. Must expose 
      *     a 'size' (<OpenLayers.Size>) and 'offset' (<OpenLayers.Pixel>) 
@@ -205,12 +211,12 @@ OpenLayers.Popup.FramedCloud =
      * closeBox - {Boolean}
      * closeBoxCallback - {Function} Function to be called on closeBox click.
      */
-    initialize:function(id, lonlat, size, contentHTML, anchor, closeBox, 
+    initialize:function(id, lonlat, contentSize, contentHTML, anchor, closeBox, 
                         closeBoxCallback) {
 
         this.imageSrc = OpenLayers.Util.getImagesLocation() + 'cloud-popup-relative.png';
         OpenLayers.Popup.Framed.prototype.initialize.apply(this, arguments);
-        this.contentDiv.className = "olFramedCloudPopupContent";
+        this.contentDiv.className = this.contentDisplayClass;
     },
 
     /** 

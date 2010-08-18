@@ -24,7 +24,7 @@ OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
      * Constant: KEY_EVENTS
      * keydown, keypress, keyup
      */
-    KEY_EVENTS: ["keydown", "keypress", "keyup"],
+    KEY_EVENTS: ["keydown", "keyup"],
 
     /** 
     * Property: eventListener
@@ -70,9 +70,9 @@ OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
      */
     activate: function() {
         if (OpenLayers.Handler.prototype.activate.apply(this, arguments)) {
-            for (var i = 0; i < this.KEY_EVENTS.length; i++) {
+            for (var i=0, len=this.KEY_EVENTS.length; i<len; i++) {
                 OpenLayers.Event.observe(
-                    window, this.KEY_EVENTS[i], this.eventListener);
+                    document, this.KEY_EVENTS[i], this.eventListener);
             }
             return true;
         } else {
@@ -86,9 +86,9 @@ OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
     deactivate: function() {
         var deactivated = false;
         if (OpenLayers.Handler.prototype.deactivate.apply(this, arguments)) {
-            for (var i = 0; i < this.KEY_EVENTS.length; i++) {
+            for (var i=0, len=this.KEY_EVENTS.length; i<len; i++) {
                 OpenLayers.Event.stopObserving(
-                    window, this.KEY_EVENTS[i], this.eventListener);
+                    document, this.KEY_EVENTS[i], this.eventListener);
             }
             deactivated = true;
         }
@@ -100,7 +100,7 @@ OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
      */
     handleKeyEvent: function (evt) {
         if (this.checkModifiers(evt)) {
-            this.callback(evt.type, [evt.charCode || evt.keyCode]);
+            this.callback(evt.type, [evt]);
         }
     },
 

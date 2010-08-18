@@ -15,15 +15,15 @@ OpenLayers.StyleMap = OpenLayers.Class({
     /**
      * Property: styles
      * Hash of {<OpenLayers.Style>}, keyed by names of well known
-     * rendering intents (e.g. "default", "temporary", "select").
+     * rendering intents (e.g. "default", "temporary", "select", "delete").
      */
     styles: null,
     
     /**
      * Property: extendDefault
      * {Boolean} if true, every render intent will extend the symbolizers
-     * specified for the "default" intent. Otherwise, every rendering intent
-     * is treated as a completely independent symbolizer.
+     * specified for the "default" intent at rendering time. Otherwise, every
+     * rendering intent will be treated as a completely independent style.
      */
     extendDefault: true,
     
@@ -33,7 +33,9 @@ OpenLayers.StyleMap = OpenLayers.Class({
      * Parameters:
      * style   - {Object} Optional. Either a style hash, or a style object, or
      *           a hash of style objects (style hashes) keyed by rendering
-     *           intent
+     *           intent. If just one style hash or style object is passed,
+     *           this will be used for all known render intents (default,
+     *           select, temporary)
      * options - {Object} optional hash of additional options for this
      *           instance
      */
@@ -44,7 +46,9 @@ OpenLayers.StyleMap = OpenLayers.Class({
             "select": new OpenLayers.Style(
                 OpenLayers.Feature.Vector.style["select"]),
             "temporary": new OpenLayers.Style(
-                OpenLayers.Feature.Vector.style["temporary"])
+                OpenLayers.Feature.Vector.style["temporary"]),
+            "delete": new OpenLayers.Style(
+                OpenLayers.Feature.Vector.style["delete"])
         };
         
         // take whatever the user passed as style parameter and convert it
@@ -52,6 +56,9 @@ OpenLayers.StyleMap = OpenLayers.Class({
         if(style instanceof OpenLayers.Style) {
             // user passed a style object
             this.styles["default"] = style;
+            this.styles["select"] = style;
+            this.styles["temporary"] = style;
+            this.styles["delete"] = style;
         } else if(typeof style == "object") {
             for(var key in style) {
                 if(style[key] instanceof OpenLayers.Style) {
@@ -63,6 +70,9 @@ OpenLayers.StyleMap = OpenLayers.Class({
                 } else {
                     // user passed a style hash (i.e. symbolizer)
                     this.styles["default"] = new OpenLayers.Style(style);
+                    this.styles["select"] = new OpenLayers.Style(style);
+                    this.styles["temporary"] = new OpenLayers.Style(style);
+                    this.styles["delete"] = new OpenLayers.Style(style);
                     break;
                 }
             }
@@ -124,15 +134,23 @@ OpenLayers.StyleMap = OpenLayers.Class({
      *                rules for
      * symbolizers  - {Object} Hash of symbolizers, keyed by the desired
      *                property values 
+     * context      - {Object} An optional object with properties that
+     *                symbolizers' property values should be evaluated
+     *                against. If no context is specified, feature.attributes
+     *                will be used
      */
-    addUniqueValueRules: function(renderIntent, property, symbolizers) {
+    addUniqueValueRules: function(renderIntent, property, symbolizers, context) {
         var rules = [];
         for (var value in symbolizers) {
-            rules.push(new OpenLayers.Rule.Comparison({
-                type: OpenLayers.Rule.Comparison.EQUAL_TO,
-                property: property,
-                value: value,
-                symbolizer: symbolizers[value]}));
+            rules.push(new OpenLayers.Rule({
+                symbolizer: symbolizers[value],
+                context: context,
+                filter: new OpenLayers.Filter.Comparison({
+                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                    property: property,
+                    value: value
+                })
+            }));
         }
         this.styles[renderIntent].addRules(rules);
     },

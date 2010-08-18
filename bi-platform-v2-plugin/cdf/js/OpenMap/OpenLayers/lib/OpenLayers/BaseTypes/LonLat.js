@@ -3,6 +3,10 @@
  * full text of the license. */
 
 /**
+ * @requires OpenLayers/Console.js
+ */
+
+/**
  * Class: OpenLayers.LonLat
  * This class represents a longitude and latitude pair
  */
@@ -33,8 +37,8 @@ OpenLayers.LonLat = OpenLayers.Class({
      *     it will be the y coordinate of the map location in your map units.
      */
     initialize: function(lon, lat) {
-        this.lon = parseFloat(lon);
-        this.lat = parseFloat(lat);
+        this.lon = OpenLayers.Util.toFloat(lon);
+        this.lat = OpenLayers.Util.toFloat(lat);
     },
     
     /**
@@ -114,7 +118,8 @@ OpenLayers.LonLat = OpenLayers.Class({
 
     /**
      * APIMethod: transform
-     * Transform the LonLat object from source to dest. 
+     * Transform the LonLat object from source to dest. This transformation is
+     *    *in place*: if you want a *new* lonlat, use .clone() first.
      *
      * Parameters: 
      * source - {<OpenLayers.Projection>} Source projection. 

@@ -45,11 +45,47 @@ OpenLayers.Geometry.Curve = OpenLayers.Class(OpenLayers.Geometry.MultiPoint, {
     getLength: function() {
         var length = 0.0;
         if ( this.components && (this.components.length > 1)) {
-            for(var i=1; i < this.components.length; i++) {
+            for(var i=1, len=this.components.length; i<len; i++) {
                 length += this.components[i-1].distanceTo(this.components[i]);
             }
         }
         return length;
+    },
+
+    /**
+     * APIMethod: getGeodesicLength
+     * Calculate the approximate length of the geometry were it projected onto
+     *     the earth.
+     *
+     * projection - {<OpenLayers.Projection>} The spatial reference system
+     *     for the geometry coordinates.  If not provided, Geographic/WGS84 is
+     *     assumed.
+     * 
+     * Returns:
+     * {Float} The appoximate geodesic length of the geometry in meters.
+     */
+    getGeodesicLength: function(projection) {
+        var geom = this;  // so we can work with a clone if needed
+        if(projection) {
+            var gg = new OpenLayers.Projection("EPSG:4326");
+            if(!gg.equals(projection)) {
+                geom = this.clone().transform(projection, gg);
+            }
+        }
+        var length = 0.0;
+        if(geom.components && (geom.components.length > 1)) {
+            var p1, p2;
+            for(var i=1, len=geom.components.length; i<len; i++) {
+                p1 = geom.components[i-1];
+                p2 = geom.components[i];
+                // this returns km and requires lon/lat properties
+                length += OpenLayers.Util.distVincenty(
+                    {lon: p1.x, lat: p1.y}, {lon: p2.x, lat: p2.y}
+                );
+            }
+        }
+        // convert to m
+        return length * 1000;
     },
 
     CLASS_NAME: "OpenLayers.Geometry.Curve"
