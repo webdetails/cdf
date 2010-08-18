@@ -5,6 +5,7 @@
 /* 
  * @requires OpenLayers/BaseTypes.js
  * @requires OpenLayers/Lang/en.js
+ * @requires OpenLayers/Console.js
  */ 
 
 (function() {
@@ -15,6 +16,12 @@
      * case with single file builds.
      */
     var singleFile = (typeof OpenLayers == "object" && OpenLayers.singleFile);
+    
+    /**
+     * Cache for the script location returned from
+     * OpenLayers._getScriptLocation
+     */
+    var scriptLocation;
     
     /**
      * Namespace: OpenLayers
@@ -36,28 +43,25 @@
          * {String} Path to this script
          */
         _getScriptLocation: function () {
-            var scriptLocation = "";
-            var scriptName = OpenLayers._scriptName;
+            if (scriptLocation != undefined) {
+                return scriptLocation;
+            }
+            scriptLocation = "";            
+            var isOL = new RegExp("(^|(.*?\\/))(" + OpenLayers._scriptName + ")(\\?|$)");
          
             var scripts = document.getElementsByTagName('script');
-            for (var i = 0; i < scripts.length; i++) {
+            for (var i=0, len=scripts.length; i<len; i++) {
                 var src = scripts[i].getAttribute('src');
                 if (src) {
-                    var index = src.lastIndexOf(scriptName); 
-                    // set path length for src up to a query string
-                    var pathLength = src.lastIndexOf('?');
-                    if (pathLength < 0) {
-                        pathLength = src.length;
-                    }
-                    // is it found, at the end of the URL?
-                    if ((index > -1) && (index + scriptName.length == pathLength)) {
-                        scriptLocation = src.slice(0, pathLength - scriptName.length);
+                    var match = src.match(isOL);
+                    if(match) {
+                        scriptLocation = match[1];
                         break;
                     }
                 }
             }
             return scriptLocation;
-         }
+        }
     };
     /**
      * OpenLayers.singleFile is a flag indicating this file is being included
@@ -85,6 +89,8 @@
             "Rico/Color.js",
             "OpenLayers/Ajax.js",
             "OpenLayers/Events.js",
+            "OpenLayers/Request.js",
+            "OpenLayers/Request/XMLHttpRequest.js",
             "OpenLayers/Projection.js",
             "OpenLayers/Map.js",
             "OpenLayers/Layer.js",
@@ -94,6 +100,7 @@
             "OpenLayers/Popup.js",
             "OpenLayers/Tile.js",
             "OpenLayers/Tile/Image.js",
+            "OpenLayers/Tile/Image/IFrame.js",
             "OpenLayers/Tile/WFS.js",
             "OpenLayers/Layer/Image.js",
             "OpenLayers/Layer/SphericalMercator.js",
@@ -108,16 +115,22 @@
             "OpenLayers/Layer/MapServer.js",
             "OpenLayers/Layer/MapServer/Untiled.js",
             "OpenLayers/Layer/KaMap.js",
+            "OpenLayers/Layer/KaMapCache.js",
             "OpenLayers/Layer/MultiMap.js",
             "OpenLayers/Layer/Markers.js",
             "OpenLayers/Layer/Text.js",
             "OpenLayers/Layer/WorldWind.js",
+            "OpenLayers/Layer/ArcGIS93Rest.js",
             "OpenLayers/Layer/WMS.js",
             "OpenLayers/Layer/WMS/Untiled.js",
+            "OpenLayers/Layer/WMS/Post.js",
+            "OpenLayers/Layer/ArcIMS.js",
             "OpenLayers/Layer/GeoRSS.js",
             "OpenLayers/Layer/Boxes.js",
+            "OpenLayers/Layer/XYZ.js",
             "OpenLayers/Layer/TMS.js",
             "OpenLayers/Layer/TileCache.js",
+            "OpenLayers/Layer/Zoomify.js",
             "OpenLayers/Popup/Anchored.js",
             "OpenLayers/Popup/AnchoredBubble.js",
             "OpenLayers/Popup/Framed.js",
@@ -154,6 +167,8 @@
             "OpenLayers/Control/Permalink.js",
             "OpenLayers/Control/Scale.js",
             "OpenLayers/Control/ScaleLine.js",
+            "OpenLayers/Control/Snapping.js",
+            "OpenLayers/Control/Split.js",
             "OpenLayers/Control/LayerSwitcher.js",
             "OpenLayers/Control/DrawFeature.js",
             "OpenLayers/Control/DragFeature.js",
@@ -161,6 +176,10 @@
             "OpenLayers/Control/Panel.js",
             "OpenLayers/Control/SelectFeature.js",
             "OpenLayers/Control/NavigationHistory.js",
+            "OpenLayers/Control/Measure.js",
+            "OpenLayers/Control/WMSGetFeatureInfo.js",
+            "OpenLayers/Control/Graticule.js",
+            "OpenLayers/Control/TransformFeature.js",
 			"OpenLayers/Control/ToolTips.js",
             "OpenLayers/Geometry.js",
             "OpenLayers/Geometry/Rectangle.js",
@@ -177,27 +196,74 @@
             "OpenLayers/Renderer.js",
             "OpenLayers/Renderer/Elements.js",
             "OpenLayers/Renderer/SVG.js",
+            "OpenLayers/Renderer/Canvas.js",
             "OpenLayers/Renderer/VML.js",
             "OpenLayers/Layer/Vector.js",
+            "OpenLayers/Layer/Vector/RootContainer.js",
+            "OpenLayers/Strategy.js",
+            "OpenLayers/Strategy/Fixed.js",
+            "OpenLayers/Strategy/Cluster.js",
+            "OpenLayers/Strategy/Paging.js",
+            "OpenLayers/Strategy/BBOX.js",
+            "OpenLayers/Strategy/Save.js",
+            "OpenLayers/Strategy/Refresh.js",
+            "OpenLayers/Filter.js",
+            "OpenLayers/Filter/FeatureId.js",
+            "OpenLayers/Filter/Logical.js",
+            "OpenLayers/Filter/Comparison.js",
+            "OpenLayers/Filter/Spatial.js",
+            "OpenLayers/Protocol.js",
+            "OpenLayers/Protocol/HTTP.js",
+            "OpenLayers/Protocol/SQL.js",
+            "OpenLayers/Protocol/SQL/Gears.js",
+            "OpenLayers/Protocol/WFS.js",
+            "OpenLayers/Protocol/WFS/v1.js",
+            "OpenLayers/Protocol/WFS/v1_0_0.js",
+            "OpenLayers/Protocol/WFS/v1_1_0.js",
+            "OpenLayers/Protocol/SOS.js",
+            "OpenLayers/Protocol/SOS/v1_0_0.js",
             "OpenLayers/Layer/PointTrack.js",
             "OpenLayers/Layer/GML.js",
             "OpenLayers/Style.js",
             "OpenLayers/StyleMap.js",
             "OpenLayers/Rule.js",
-            "OpenLayers/Rule/FeatureId.js",
-            "OpenLayers/Rule/Logical.js",
-            "OpenLayers/Rule/Comparison.js",
             "OpenLayers/Format.js",
             "OpenLayers/Format/XML.js",
+            "OpenLayers/Format/ArcXML.js",
+            "OpenLayers/Format/ArcXML/Features.js",
             "OpenLayers/Format/GML.js",
+            "OpenLayers/Format/GML/Base.js",
+            "OpenLayers/Format/GML/v2.js",
+            "OpenLayers/Format/GML/v3.js",
+            "OpenLayers/Format/Atom.js",
             "OpenLayers/Format/KML.js",
             "OpenLayers/Format/GeoRSS.js",
             "OpenLayers/Format/WFS.js",
+            "OpenLayers/Format/WFSCapabilities.js",
+            "OpenLayers/Format/WFSCapabilities/v1.js",
+            "OpenLayers/Format/WFSCapabilities/v1_0_0.js",
+            "OpenLayers/Format/WFSCapabilities/v1_1_0.js",
+            "OpenLayers/Format/WFSDescribeFeatureType.js",
+            "OpenLayers/Format/WMSDescribeLayer.js",
+            "OpenLayers/Format/WMSDescribeLayer/v1_1.js",
             "OpenLayers/Format/WKT.js",
             "OpenLayers/Format/OSM.js",
+            "OpenLayers/Format/GPX.js",
+            "OpenLayers/Format/Filter.js",
+            "OpenLayers/Format/Filter/v1.js",
+            "OpenLayers/Format/Filter/v1_0_0.js",
+            "OpenLayers/Format/Filter/v1_1_0.js",
             "OpenLayers/Format/SLD.js",
             "OpenLayers/Format/SLD/v1.js",
             "OpenLayers/Format/SLD/v1_0_0.js",
+            "OpenLayers/Format/CSWGetDomain.js",
+            "OpenLayers/Format/CSWGetDomain/v2_0_2.js",
+            "OpenLayers/Format/CSWGetRecords.js",
+            "OpenLayers/Format/CSWGetRecords/v2_0_2.js",
+            "OpenLayers/Format/WFST.js",
+            "OpenLayers/Format/WFST/v1.js",
+            "OpenLayers/Format/WFST/v1_0_0.js",
+            "OpenLayers/Format/WFST/v1_1_0.js",
             "OpenLayers/Format/Text.js",
             "OpenLayers/Format/JSON.js",
             "OpenLayers/Format/GeoJSON.js",
@@ -205,9 +271,28 @@
             "OpenLayers/Format/WMC/v1.js",
             "OpenLayers/Format/WMC/v1_0_0.js",
             "OpenLayers/Format/WMC/v1_1_0.js",
+            "OpenLayers/Format/WMSCapabilities.js",
+            "OpenLayers/Format/WMSCapabilities/v1.js",
+            "OpenLayers/Format/WMSCapabilities/v1_1.js",
+            "OpenLayers/Format/WMSCapabilities/v1_1_0.js",
+            "OpenLayers/Format/WMSCapabilities/v1_1_1.js",
+            "OpenLayers/Format/WMSCapabilities/v1_3.js",
+            "OpenLayers/Format/WMSCapabilities/v1_3_0.js",
+            "OpenLayers/Format/WMSGetFeatureInfo.js",
+            "OpenLayers/Format/OWSCommon/v1_1_0.js",
+            "OpenLayers/Format/SOSCapabilities.js",
+            "OpenLayers/Format/SOSCapabilities/v1_0_0.js",
+            "OpenLayers/Format/SOSGetObservation.js",
+            "OpenLayers/Format/SOSGetFeatureOfInterest.js",
             "OpenLayers/Layer/WFS.js",
+            "OpenLayers/Control/GetFeature.js",
             "OpenLayers/Control/MouseToolbar.js",
             "OpenLayers/Control/NavToolbar.js",
+            "OpenLayers/Control/PanPanel.js",
+            "OpenLayers/Control/Pan.js",
+            "OpenLayers/Control/ZoomIn.js",
+            "OpenLayers/Control/ZoomOut.js",
+            "OpenLayers/Control/ZoomPanel.js",
             "OpenLayers/Control/EditingToolbar.js",
             "OpenLayers/Lang.js",
             "OpenLayers/Lang/en.js"
@@ -219,7 +304,7 @@
             var allScriptTags = new Array(jsfiles.length);
         }
         var host = OpenLayers._getScriptLocation() + "lib/";    
-        for (var i = 0; i < jsfiles.length; i++) {
+        for (var i=0, len=jsfiles.length; i<len; i++) {
             if (docWrite) {
                 allScriptTags[i] = "<script src='" + host + jsfiles[i] +
                                    "'></script>"; 
@@ -241,4 +326,4 @@
 /**
  * Constant: VERSION_NUMBER
  */
-OpenLayers.VERSION_NUMBER="$Revision: 6718 $";
+OpenLayers.VERSION_NUMBER="OpenLayers 2.9.1 -- $Revision: 10129 $";
