@@ -2,11 +2,12 @@ package org.pentaho.cdf;
 
 import java.io.InputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
 import org.pentaho.platform.api.engine.IFileInfo;
-import org.pentaho.platform.api.engine.IFileInfoGenerator;
-import org.pentaho.platform.api.engine.ILogger;
+import org.pentaho.platform.api.engine.ISolutionFile;
+import org.pentaho.platform.api.engine.SolutionFileMetaAdapter;
 import org.pentaho.platform.engine.core.solution.FileInfo;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 
@@ -16,20 +17,28 @@ import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
  * 
  * @author Will Gorman (wgorman@pentaho.com)
  */
-public class CdfFileInfoGenerator implements IFileInfoGenerator {
+public class CdfFileInfoGenerator extends SolutionFileMetaAdapter {
 
-  private ILogger logger;
+  private Log logger = LogFactory.getLog(CdfFileInfoGenerator.class);
 
   public CdfFileInfoGenerator() {
   }
 
-  public ContentType getContentType() {
-    return ContentType.DOM4JDOC;
-  }
-
-  public IFileInfo getFileInfo(String solution, String path, String filename,
-          Document doc) {
-
+  @Override
+  public IFileInfo getFileInfo(ISolutionFile solutionFile, InputStream in) {
+    // TODO Auto-generated method stub
+    Document doc = null;
+    try {
+      doc = XmlDom4JHelper.getDocFromStream(in);
+    } catch (Exception e) {
+      logger.error(Messages.getErrorString("CdfFileInfoGenerator.ERROR_0001_PARSING_XCDF"), e); //$NON-NLS-1$
+      return null;
+    }
+    if (doc == null) {
+      logger.error(Messages.getErrorString("CdfFileInfoGenerator.ERROR_0001_PARSING_XCDF")); //$NON-NLS-1$
+      return null;
+    }
+    
     String result = "dashboard";  //$NON-NLS-1$
 
     String author = XmlDom4JHelper.getNodeText("/cdf/author", doc, "");  //$NON-NLS-1$ //$NON-NLS-2$
@@ -44,36 +53,5 @@ public class CdfFileInfoGenerator implements IFileInfoGenerator {
     info.setIcon(icon);
     info.setTitle(title);
     return info;
-  }
-
-  public IFileInfo getFileInfo(String solution, String path, String filename,
-          InputStream in) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public IFileInfo getFileInfo() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public IFileInfo getFileInfo(String solution, String path, String filename,
-          byte[] bytes) {
-
-    return getFileInfo(solution, path, filename, new String(bytes));
-  }
-
-  public IFileInfo getFileInfo(String solution, String path, String filename,
-          String str) {
-    try {
-      return getFileInfo(solution, path, filename, DocumentHelper.parseText(str));
-    } catch (Exception e) {
-      logger.error(Messages.getErrorString("CdfFileInfoGenerator.ERROR_0001_PARSING_XCDF")); //$NON-NLS-1$
-      return null;
-    }
-  }
-
-  public void setLogger(ILogger logger) {
-    this.logger = logger;
   }
 }
