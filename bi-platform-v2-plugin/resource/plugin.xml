@@ -11,6 +11,7 @@
         	<title>Dashboard</title>
         	<description>Community Dashboard File</description>
 	        <icon-url>content/pentaho-cdf/resources/cdfFileType.png</icon-url>
+	        <meta-provider>org.pentaho.cdf.CdfFileInfoGenerator</meta-provider>
 	        <operations>
     	    	<operation>
         			<id>RUN</id>
@@ -24,10 +25,6 @@
     	</content-type>
 	</content-types>
 
-    <content-generator scope="local" id="pentaho-cdf" type="xcdf" url="">
-        <classname>org.pentaho.cdf.CdfContentGenerator</classname>
-        <fileinfo-classname>org.pentaho.cdf.CdfFileInfoGenerator</fileinfo-classname>
-        <title>CDF Display Handler</title>
-    </content-generator>
+    <content-generator id="pentaho-cdf" type="xcdf" title="CDF Display Handler" class="org.pentaho.cdf.CdfContentGenerator"/>
     
 </plugin>
