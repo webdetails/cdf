@@ -1,6 +1,7 @@
 package org.pentaho.cdf;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.util.*;
 import javax.servlet.http.HttpServletResponse;
@@ -508,7 +509,11 @@ public class CdfContentGenerator extends BaseContentGenerator
     // TESTING to localize the template
     //dashboardContent = repository.getResourceAsString(resource);
     InputStream is = repository.getResourceInputStream(resource, true, ISolutionRepository.ACTION_EXECUTE);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+    // Fixed ISSUE #CDF-113
+    //BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName(LocaleHelper.getSystemEncoding())));
+
     StringBuilder sb = new StringBuilder();
     String line = null;
     while ((line = reader.readLine()) != null)
@@ -522,22 +527,16 @@ public class CdfContentGenerator extends BaseContentGenerator
     dashboardContent = sb.toString();
 
     String messageSetPath = null;
-    // Enable dashboard specific language support only if the messages element is present in daashboard definition
-    if (dashboardsMessagesBaseFilename != null)
-    {
-      // Merge dashboard related message file with global message file and save it in the dashboard cache
-      MessageBundlesHelper mbh = new MessageBundlesHelper(CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME,
-              solution,
-              path,
-              dashboardsMessagesBaseFilename);
-      mbh.saveI18NMessageFilesToCache();
-      messageSetPath = mbh.getMessageFilesCacheUrl() + "/";
-    }
-    else
-    {
-      messageSetPath = CdfConstants.BASE_GLOBAL_MESSAGE_SET_URL;
+    // Merge dashboard related message file with global message file and save it in the dashboard cache
+    MessageBundlesHelper mbh = new MessageBundlesHelper(solution,
+                                                        path,
+                                                        dashboardsMessagesBaseFilename);
+    mbh.saveI18NMessageFilesToCache();
+    messageSetPath = mbh.getMessageFilesCacheUrl() + "/";
+
+    // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
+    if (dashboardsMessagesBaseFilename == null)
       dashboardsMessagesBaseFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
-    }
 
     intro = intro.replaceAll("\\{load\\}", "onload=\"load()\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     intro = intro.replaceAll("\\{body-tag-unload\\}", "");
@@ -627,9 +626,9 @@ public class CdfContentGenerator extends BaseContentGenerator
     Locale locale = LocaleHelper.getLocale();
     if (logger.isDebugEnabled())
     {
-      logger.debug("Current Pentaho user locale: " + locale.toString());
+      logger.debug("Current Pentaho user locale: " + locale.getLanguage());
     }
-    intro = intro.replaceAll("#\\{LANGUAGE_CODE\\}", locale.toString());
+    intro = intro.replaceAll("#\\{LANGUAGE_CODE\\}", locale.getLanguage());
     return intro;
   }
 

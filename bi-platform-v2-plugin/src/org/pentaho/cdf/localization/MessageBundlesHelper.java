@@ -27,11 +27,10 @@ public class MessageBundlesHelper {
     private String languagesCacheUrl;
 
 
-    public MessageBundlesHelper(String baseGlobalMessageSetFilename,
-                                String dashboardSolution,
+    public MessageBundlesHelper(String dashboardSolution,
                                 String dashboardPath,
                                 String dashboardsMessagesBaseFilename) {
-        init(baseGlobalMessageSetFilename,
+        init(CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME,
              dashboardSolution,
              dashboardPath,
              dashboardsMessagesBaseFilename);
@@ -39,9 +38,12 @@ public class MessageBundlesHelper {
 
     public void saveI18NMessageFilesToCache() throws IOException {
         createCacheDirIfNotExists(targetDashboardCacheDir);
-
-        appendBaseMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
-        appendLocalizedMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
+        copyStdGlobalMessageFileToCache();
+        if (sourceDashboardBaseMsgFile != null) {
+            appendMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
+        } else {
+            appendMessageFiles(globalBaseMessageFile, targetDashboardBaseMsgFile);
+        }
     }
 
 
@@ -58,8 +60,13 @@ public class MessageBundlesHelper {
         globalBaseMessageFile = baseUrl + ActionInfo.buildSolutionPath("system", PENTAHO_CDF_GLOBAL_LANGUAGES_DIR, baseGlobalMessageSetFilename);
         languagesCacheUrl = CdfConstants.BASE_CDF_CACHE_DIR + File.separator + dashboardSolution + dashboardPath;
         targetDashboardCacheDir = baseUrl + File.separator + ActionInfo.buildSolutionPath("system", PENTAHO_CDF_DIR + languagesCacheUrl, "");
-        targetDashboardBaseMsgFile = baseUrl + File.separator + ActionInfo.buildSolutionPath("system", PENTAHO_CDF_DIR + languagesCacheUrl, dashboardsMessagesBaseFilename);
-        sourceDashboardBaseMsgFile = baseUrl + File.separator + ActionInfo.buildSolutionPath(dashboardSolution, dashboardPath, dashboardsMessagesBaseFilename);
+        // Name the dashboard target i18n messages file. If we have a dashboard specific language file it will be named
+        // the same otherwise it will have the name of the global message file. The target message file contains globals and local translations
+        // (if the dashboard has a specific set of translations) or the name of the global one if no translations are specified.
+        // This way we eliminate fake error messages that are given by the unexpected unavailability of message files.
+        targetDashboardBaseMsgFile = baseUrl + File.separator + ActionInfo.buildSolutionPath("system", PENTAHO_CDF_DIR + languagesCacheUrl, (dashboardsMessagesBaseFilename!=null ? dashboardsMessagesBaseFilename : baseGlobalMessageSetFilename));
+        if (dashboardsMessagesBaseFilename != null)
+            sourceDashboardBaseMsgFile = baseUrl + File.separator + ActionInfo.buildSolutionPath(dashboardSolution, dashboardPath, dashboardsMessagesBaseFilename);
     }
 
     protected void createCacheDirIfNotExists(String targetDashboardCacheDir) {
@@ -69,54 +76,72 @@ public class MessageBundlesHelper {
         }
     }
 
-    protected void appendBaseMessageFiles(String sourceDashboardBaseMsgFile,
-                                    String globalBaseMessageFile,
-                                    String targetDashboardBaseMsgFile) throws IOException {
 
-        appendMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
+    protected void appendMessageFiles(String globalBaseMessageFile,
+                                     String targetDashboardBaseMsgFile) throws IOException {
+        appendMessageFiles(null, globalBaseMessageFile, targetDashboardBaseMsgFile);
     }
-
-    protected void appendLocalizedMessageFiles(String sourceDashboardBaseMsgFile,
-                                    String globalBaseMessageFile,
-                                    String targetDashboardBaseMsgFile) throws IOException {
-
-        Locale locale = LocaleHelper.getLocale();
-        // Manage selected language file
-        sourceDashboardBaseMsgFile = sourceDashboardBaseMsgFile + "_" + locale.toString();
-        globalBaseMessageFile = globalBaseMessageFile + "_" + locale.toString();
-        targetDashboardBaseMsgFile = targetDashboardBaseMsgFile + "_" + locale.toString();
-
-        appendMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
-    }
-
-
+    
     protected void appendMessageFiles(String sourceDashboardBaseMsgFile,
                                     String globalBaseMessageFile,
                                     String targetDashboardBaseMsgFile) throws IOException {
 
-        File fBaseMsgDashboard = new File(sourceDashboardBaseMsgFile + ".properties");
-        File fBaseMsgGlobal = new File(globalBaseMessageFile + ".properties");
+        Locale locale = LocaleHelper.getLocale();
+        targetDashboardBaseMsgFile = targetDashboardBaseMsgFile + "_" + locale.getLanguage();
+        File fBaseMsgGlobal = new File(globalBaseMessageFile + "_" + locale.getLanguage() + ".properties");
         File fBaseMsgTarget = new File(targetDashboardBaseMsgFile + ".properties");
-
+        
         String theLine;
         if (!fBaseMsgTarget.exists()) {
             fBaseMsgTarget.createNewFile();
             BufferedWriter bwBaseMsgTarget = new BufferedWriter(new FileWriter(fBaseMsgTarget, true));
-            if (fBaseMsgGlobal.exists()) {
-                BufferedReader brBaseMsgGlobal = new BufferedReader(new FileReader(fBaseMsgGlobal));
-                while ((theLine = brBaseMsgGlobal.readLine()) != null) {
-                    bwBaseMsgTarget.write(theLine + "\n");
-                }
-                brBaseMsgGlobal.close();
+            // If localized global message file doesn't exists then use the standard base global message file
+            // and generate a fake global message file. So this way we're sure that we always have the file
+            if (!fBaseMsgGlobal.exists())
+                fBaseMsgGlobal = new File(globalBaseMessageFile  + ".properties");
+            BufferedReader brBaseMsgGlobal = new BufferedReader(new FileReader(fBaseMsgGlobal));
+            while ((theLine = brBaseMsgGlobal.readLine()) != null) {
+                bwBaseMsgTarget.write(theLine + "\n");
             }
-            if (fBaseMsgDashboard.exists()) {
-                BufferedReader brBaseMsgDashboard = new BufferedReader(new FileReader(fBaseMsgDashboard));
-                while ((theLine = brBaseMsgDashboard.readLine()) != null) {
-                    bwBaseMsgTarget.write(theLine + "\n");
+            brBaseMsgGlobal.close();
+
+            // Append specific message file only if it exists otherwise just use the global message files
+            if (sourceDashboardBaseMsgFile != null) {
+                sourceDashboardBaseMsgFile = sourceDashboardBaseMsgFile + "_" + locale.getLanguage();
+                File fBaseMsgDashboard = new File(sourceDashboardBaseMsgFile + ".properties");
+                if (fBaseMsgDashboard.exists()) {
+                    BufferedReader brBaseMsgDashboard = new BufferedReader(new FileReader(fBaseMsgDashboard));
+                    while ((theLine = brBaseMsgDashboard.readLine()) != null) {
+                        bwBaseMsgTarget.write(theLine + "\n");
+                    }
+                    brBaseMsgDashboard.close();
                 }
-                brBaseMsgDashboard.close();
             }
             bwBaseMsgTarget.close();
         }
+    }
+
+    protected void copyStdGlobalMessageFileToCache() throws IOException {
+
+        String standardGlobalMessageFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME + ".properties";
+        String fromFile = baseUrl + ActionInfo.buildSolutionPath("system", PENTAHO_CDF_GLOBAL_LANGUAGES_DIR, standardGlobalMessageFilename);
+        String toFile = targetDashboardCacheDir + "/" + standardGlobalMessageFilename;
+
+        File outputFile = new File(toFile);
+        if (outputFile.exists()) return;
+        outputFile.createNewFile();
+        
+        File inputFile = new File(fromFile);
+
+        FileReader in = new FileReader(inputFile);
+        FileWriter out = new FileWriter(outputFile);
+        int c;
+
+        while ((c = in.read()) != -1)
+          out.write(c);
+
+        in.close();
+        out.close();
+
     }
 }
