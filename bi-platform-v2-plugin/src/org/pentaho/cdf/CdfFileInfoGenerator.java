@@ -26,7 +26,7 @@ public class CdfFileInfoGenerator extends SolutionFileMetaAdapter {
 
   @Override
   public IFileInfo getFileInfo(ISolutionFile solutionFile, InputStream in) {
-    // TODO Auto-generated method stub
+    // TODO Auto-generated method stubT
     Document doc = null;
     try {
       doc = XmlDom4JHelper.getDocFromStream(in);
