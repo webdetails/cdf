@@ -1373,7 +1373,8 @@ var TableComponent = BaseComponent.extend({
     // it'll be called before we have an actual table...
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
-    Dashboards.fetchData(croppedCd, this.parameters, function(values) {
+    this.queryState = new Query(croppedCd);
+    this.queryState.fetchData(this.parameters, function(values) {
       changedValues = undefined;
       if((typeof(myself.postFetch)=='function')){
         changedValues = myself.postFetch(values);

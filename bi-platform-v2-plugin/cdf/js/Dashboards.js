@@ -767,6 +767,9 @@ Dashboards.getSettingsValue = function(key,value){
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
+  if (typeof console != 'undefined') {
+    console.warn('Dashboards.fetchData() is deprecated. Use Query objects instead');
+  }
   // Detect and handle CDA data sources
   if (cd != undefined && cd.dataAccessId != undefined) {
     for (param in params) {
@@ -1097,3 +1100,209 @@ sprintfWrapper = {
 }
 
 sprintf = sprintfWrapper.init;
+
+Query = function() {
+
+    // Constants, or what passes for them... Pretty please leave these alone.
+    var CDA_PATH = webAppPath + "/content/cda/doQuery?";
+    var LEGACY_QUERY_PATH = webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction";
+
+    /*
+     * Private fields
+     */
+
+    // Datasource type definition
+    var _mode = 'CDA';
+    // CDA uses file+id, Legacy uses a raw query
+    var _file = '';
+    var _id = '';
+    var _query = '';
+    // Callback for the data handler
+    var _callback = null;
+    // Result caching
+    var _lastResultSet = null;
+    // Paging and sorting
+    var _page = 0;
+    var _pageSize = 0;
+    var _sortBy = "";
+
+    var _params = [];
+    /*
+     * Initialization code
+     */
+
+    //
+    (function(args){switch (args.length) {
+        case 1:
+            var cd = args[0];
+            if (typeof cd.query !== 'undefined') {
+                // got a valid legacy cd object
+                _mode = 'Legacy';
+                _query = args[0];
+            } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
+                // CDA-style cd object
+                _mode = 'CDA';
+                _file = cd.path;
+                _id = cd.dataAccessId;
+            } else {
+                throw 'InvalidQuery';
+            }
+            break;
+        case 2:
+            _mode = 'CDA';
+            var file = args[0];
+            var id = args[1];
+            if (typeof file != 'string' || typeof id != 'string') {
+                throw 'InvalidQuery';
+            } else {
+                // Seems like we have valid parameters
+                _id = id;
+                _file = file;
+            }
+            break;
+        default:
+            throw "InvalidQuery";
+    } 
+    }(arguments));
+    /*
+     * Private methods
+     */
+
+    var doQuery = function(){
+        if (typeof _callback != 'function') {
+            throw 'QueryNotInitialized';
+        }
+        var url;
+        var queryDefinition = {};
+        if (_mode == 'CDA') {
+            for (var param in _params) {
+                if(_params.hasOwnProperty(param)) {
+                    queryDefinition['param' + _params[param][0]] = Dashboards.getParameterValue(_params[param][1]);
+                }
+            }
+            queryDefinition.path = _file;
+            queryDefinition.dataAccessId = _id;
+            queryDefinition.pageSize = _pageSize;
+            queryDefinition.pageStart = _page;
+            queryDefinition.sortBy = _sortBy;
+            url = CDA_PATH;
+            // Assemble parameters
+        } else if (_mode == 'Legacy') {
+            queryDefinition = _query;
+            url = LEGACY_QUERY_PATH;
+        }
+        $.getJSON(url, queryDefinition, function(json) {_lastResultSet = json;_callback(_mode == 'CDA' ? json : json.values);});
+    };
+
+    /*
+     * Public interface
+     */
+
+    // Entry point
+
+    this.fetchData = function(params, callback) {
+        if(typeof callback == 'function') {
+            _params = params;
+            _callback = callback;
+            return doQuery();
+        } else {
+            throw "InvalidInput";
+        }
+    };
+
+    // Result caching
+    this.lastResults = function(){
+        if (_lastResultSet !== null) {
+            return _lastResultSet;
+        } else {
+            throw "NoCachedResults";
+        }
+    };
+    // Sorting
+
+    this.sortBy = function(sortBy) {
+        // we want to accept 'a' and 'd' even though kettle demands capitals
+        sortBy = sortBy.toUpperCase();
+        // Valid sortBy Strings are column numbers, optionally
+        // succeeded by A or D (ascending or descending), and separated by commas
+        if (typeof sortBy == 'string' && sortBy.match("^(?:[0-9]+[AD]?,?)*$") !== null) {
+            // Break the string into its constituent terms, filter out empty terms, if any
+            _sortBy = sortBy.split(',').filter(function(e){return e !== "";});
+        } else if (sortBy === '') {
+            _sortBy = '';
+        } else{
+            throw "InvalidSortExpression";
+        }
+        if (_callback !== null) {
+            return doQuery();
+        }
+    };
+
+    // Pagination
+    // We paginate by having an initial position (_page) and page size (_pageSize)
+    // Paginating consists of incrementing/decrementing the initial position by the page size
+    // All paging operations change the paging cursor.
+
+    // Gets the next _pageSize results
+    this.nextPage = function() {
+        if (_pageSize > 0) {
+            _page += _pageSize;
+            return doQuery();
+        } else {
+            throw "InvalidPageSize";
+        }
+    };
+
+    // Gets the previous _pageSize results
+    this.prevPage = function() {
+        if (_page > _pageSize) {
+            _page -= _pageSize;
+            return doQuery();
+        } else if (_pageSize > 0) {
+            _page = 0;
+            return doQuery();
+        } else {
+            throw "AtBeggining";
+        }
+    };
+
+    // Gets the page-th set of _pageSize results (0-indexed)
+    this.getPage = function(page) {
+        if (typeof page == 'number' && page > 0) {
+            _page = page * _pageSize;
+            return doQuery();
+        } else {
+            throw "InvalidPage";
+        }
+    };
+
+    // Gets _pageSize results starting at page
+    this.pageStartingAt = function(page) {
+        if (typeof page == 'number' && page > 0) {
+            _page = page;
+            return doQuery();
+        } else {
+            throw "InvalidPage";
+        }
+    };
+
+    // Sets the page size
+    this.setPageSize = function(pageSize) {
+        if (typeof pageSize == 'number' && pageSize > 0) {
+            _pageSize = pageSize;
+        } else {
+            throw "InvalidPageSize";
+        }
+    };
+
+    // sets _pageSize to pageSize, and gets the first page of results
+    this.initPage = function(pageSize) {
+        if (typeof pageSize == 'number' && pageSize > 0) {
+            _page = 0;
+            _pageSize = pageSize;
+            return doQuery();
+        } else {
+            throw "InvalidPageSize";
+        }
+    };
+};
