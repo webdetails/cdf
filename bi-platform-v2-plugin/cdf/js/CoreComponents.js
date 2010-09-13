@@ -103,14 +103,35 @@ BaseComponent = Base.extend({
     var myArray = new Array();
 			
     var jHeaders = $(jData).find("ColumnMetaData");
-    if (includeHeader && jHeaders.size() > 0 ){
-      var _a = new Array();
-      jHeaders.each(function(){
-        _a.push($(this).attr("name"));
-      });
-      myArray.push(_a);
+    if (jHeaders.size() > 0 ){
+	  if(includeHeader){//get column names
+		var _a = new Array();
+		jHeaders.each(function(){
+		  _a.push($(this).attr("name"));
+		});
+		myArray.push(_a);
+	  }
+	//  //set output column type 'valueOutputType' from cda column type if possible
+	//  //TODO: testing; for ee dashboard editor
+	//  var valIdx = 0;
+	//  if(this.parameters){
+	//	for(var i =0; i < this.parameters.length;i++){
+	//	  if(this.parameters[i][0] == 'validx'){
+	//		valIdx = this.parameters[2];
+	//		break;
+	//	  }
+	//	}
+	//  }
+	//  var typesArray = new Array();
+	//  jHeaders.each(function(){
+	//	typesArray.push($(this).attr("type"));
+	//  });
+	//  if(typesArray.length > valIdx){
+	//	this.valueOutputType = typesArray[valIdx];
+	//  }
     }
-
+	
+	//get contents
     var jDetails = $(jData).find("Row");
     jDetails.each(function(){
       var _a = new Array();
@@ -1105,17 +1126,17 @@ var CheckComponent = ToggleButtonBaseComponent.extend({
 var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
-	  var myArray = this.getValuesArray();
+	var myArray = this.getValuesArray();
     var cssClass= "toggleButton";
     selectHTML = "";
     var firstVal;
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
         
-	  if (this.isMultiple == undefined) this.isMultiple = false;
+	if (this.isMultiple == undefined) this.isMultiple = false;
         
     for (var i = 0, len = myArray.length; i < len; i++){
-	    var value = myArray[i][valIdx];
+	  var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
 
       selectHTML += "<button onclick='MultiButtonComponent.prototype.clickButton(\"" +
@@ -1138,11 +1159,18 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 			Dashboards.setParameter(this.parameter, firstVal);
 			currentVal = firstVal;
 	}
+	
+	var foundDefault = false;
 	for (var i = 0; i < myArray.length; i++) {
-	if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
+	  if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
 		MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
+		foundDefault = true;
 		if(!this.isMultiple) break;
-		}
+	  }
+	}
+	if(!foundDefault && !this.isMultiple && myArray.length > 0){
+	  //select first value
+	  MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
 	}
   },
     
@@ -1156,7 +1184,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 			return a;
 		}
 		else {
-    	return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
+		  return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
 		}
   },
     
@@ -1166,17 +1194,17 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple){
-		var cssClass= "toggleButton";
-		var cssClassSelected= "toggleButtonPressed";
+	var cssClass= "toggleButton";
+	var cssClassSelected= "toggleButtonPressed";
 
-		var buttons = $("#" + htmlObject + " button");
+	var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
-    	if (this.indexes[name] == undefined) this.indexes[name] = [];
-			else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
+      if (this.indexes[name] == undefined) this.indexes[name] = [];
+	  else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
 				
-	    var disable = false;
+	  var disable = false;
       for (var i = 0; i < this.indexes[name].length; ++i) {
-	      if (this.indexes[name][i] == index) {
+	    if (this.indexes[name][i] == index) {
           disable = true;
           this.indexes[name].splice(i, 1);
           break;
@@ -1184,12 +1212,12 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
       if (disable) buttons[index].className = cssClass;
       else {
-		   	buttons[index].className = cssClassSelected;
+		buttons[index].className = cssClassSelected;
         this.indexes[name].push(index);
       }
   	}
     else {//de-select old, select new
-      if (this.indexes[name] != undefined && this.indexes[name] > buttons.length) {
+      if (this.indexes[name] != undefined && this.indexes[name] < buttons.length) {
 				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
 					for(var i = 0; i < this.indexes[name].length; i++){
 						buttons[this.indexes[name][i]].className = cssClass;
