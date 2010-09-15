@@ -906,17 +906,18 @@ public class CdfContentGenerator extends BaseContentGenerator
     StringBuilder scriptsBuilders = new StringBuilder();
     StringBuilder stylesBuilders = new StringBuilder();
 
+    final String absRoot = requestParams.hasParameter("root") ? requestParams.getParameter("root").toString() : "";
     // Add common libraries
     if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true"))
     {
       //DEBUG MODE
       for (String header : miniscripts)
       {
-        scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"></script>\n");
+        scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@BASE_URL@", absRoot + BASE_URL) + "\"></script>\n");
       }
       for (String header : ministyles)
       {
-        stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"/>\n");
+        stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@BASE_URL@", absRoot + BASE_URL) + "\"/>\n");
       }
 
     }
@@ -925,22 +926,22 @@ public class CdfContentGenerator extends BaseContentGenerator
       // NORMAL MODE
       String stylesHash = packager.minifyPackage("styles");
       String scriptsHash = packager.minifyPackage("scripts");
-      stylesBuilders.append("<link href=\"" + BASE_URL + "/content/pentaho-cdf/js/styles.css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
-      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + BASE_URL + "/content/pentaho-cdf/js/scripts.js?version=" + scriptsHash + "\"></script>");
+      stylesBuilders.append("<link href=\"" + absRoot + BASE_URL + "/content/pentaho-cdf/js/styles.css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
+      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + absRoot + BASE_URL + "/content/pentaho-cdf/js/scripts.js?version=" + scriptsHash + "\"></script>");
     }
     //Add extra components libraries
 
     for (String header : scripts)
     {
-      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"></script>\n");
+      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@BASE_URL@", absRoot + BASE_URL) + "\"></script>\n");
     }
     for (String header : styles)
     {
-      stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@BASE_URL@", BASE_URL) + "\"/>\n");
+      stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@BASE_URL@", absRoot + BASE_URL) + "\"/>\n");
     }
 
     // Add ie8 blueprint condition
-    stylesBuilders.append("<!--[if lt IE 8]><link rel=\"stylesheet\" href=\"" + BASE_URL + "/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
+    stylesBuilders.append("<!--[if lt IE 8]><link rel=\"stylesheet\" href=\"" + absRoot + BASE_URL + "/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
 
     StringBuilder stuff = new StringBuilder();
     includes.put("scripts", scriptsBuilders.toString());
