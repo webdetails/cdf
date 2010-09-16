@@ -906,7 +906,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     StringBuilder scriptsBuilders = new StringBuilder();
     StringBuilder stylesBuilders = new StringBuilder();
 
-    final String absRoot = requestParams.hasParameter("root") ? requestParams.getParameter("root").toString() : "";
+    final String absRoot = requestParams.hasParameter("root") ? "http://" + requestParams.getParameter("root").toString() : "";
     // Add common libraries
     if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true"))
     {
