@@ -10,8 +10,8 @@
 		<p>
 
 		This is a component that can easily generate a chart whithout needing a
-		xaction file. The resultset is returned from a mdx or sql query or a
-		kettle transformation. In case of mdx queries, a role will be passed to
+		xaction file. The resultset is returned from a mdx or sql query, a
+		kettle transformation or a cda file. In case of mdx queries, a role will be passed to
 		mondrian if the session variable 'role' is defined, allowing row level
 		security.
 
@@ -72,7 +72,7 @@
 		<dl class="documentation">
 
 			<dt>queryType</dt>
-			<dd>Type of query to read results from. Can be sql, mdx or kettle. Default: mdx</dd>
+			<dd>Type of query to read results from. Can be sql, mdx, kettle or cda. Default: mdx</dd>
 
 			<dt>jndi</dt> 
 			<dd>Connection to use for the query</dd>
@@ -98,6 +98,15 @@
 			<dt>parameterN</dt> 
 			<dd>with N being 0 to 10 (eg: parameter0), this are the parameters passed 
 			to the kettle transformation</dd>
+
+			<dt>cdaFile</dt> 
+			<dd>CDA file to use when queryType is cda</dd>
+
+			<dt>dataAccessId</dt> 
+			<dd>DataAccess ID to use in CDA file when queryType is cda</dd>
+
+			<dt>cdaParameterString</dt> 
+			<dd>A string containing the query parameters to pass to cda, in the form "<i>name1</i><b>=</b><i>value1</i><b>;</b><i>name2</i><b>=</b><i>value2</i>"</dd>
 			
 			<dt>caption</dt> 
 			<dd>Chart Caption Options. (eg: {cdf: {title: "Cdf",icon: "resources/style/images/cdf-icon-small.png", callback: function(){alert("Icon cdf clicked");}}}</dd>

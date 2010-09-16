@@ -473,6 +473,24 @@
 			</sources>
 			<default-value/>
 		</PARAMETER9>
+		<CDAFILE type ="string">
+			<sources>
+				<request>cdaFile</request>
+			</sources>
+			<default-value/>
+		</CDAFILE>
+		<DATAACCESSID type ="string">
+			<sources>
+				<request>dataAccessId</request>
+			</sources>
+			<default-value/>
+		</DATAACCESSID>
+		<CDAPARAMETERSTRING type ="string">
+			<sources>
+				<request>cdaParameterString</request>
+			</sources>
+			<default-value/>
+		</CDAPARAMETERSTRING>
 	</inputs>
 
 	<outputs> 
@@ -711,6 +729,28 @@
 		</action-definition>
 		
 	</actions> 
+
+  <actions> 
+    <condition><![CDATA[QUERY_TYPE == "cda"]]></condition>
+
+    <action-definition> 
+      <component-name>CdaQueryComponent</component-name>
+      <action-type>CDA Query</action-type>
+      <action-inputs> 
+				<CDAFILE type ="string"/>
+				<DATAACCESSID type="string"/>  
+				<CDAPARAMETERSTRING type="string" />
+      </action-inputs>
+      <action-outputs> 
+        <resultSet type="result-set" mapping="newResults"/> 
+      </action-outputs>
+      <component-definition> 
+        <file>{CDAFILE}</file>  
+        <dataAccessId>{DATAACCESSID}</dataAccessId>
+      </component-definition> 
+    </action-definition>
+ 
+  </actions> 
 	
 	<actions> 
 		<condition><![CDATA[QUERY_TYPE == "sql"]]></condition>
