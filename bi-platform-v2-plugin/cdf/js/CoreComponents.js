@@ -282,22 +282,43 @@ var JFreeChartComponent = BaseComponent.extend({
 		
   getParameters: function() {
 		
-			var cd = this.chartDefinition;
-			// Merge the stuff with a chartOptions element
-			if (cd == undefined){
-				alert("Fatal - No chartDefinition passed");
-				return;
-			}
+	var cd = this.chartDefinition;
+	// Merge the stuff with a chartOptions element
+	if (cd == undefined){
+		alert("Fatal - No chartDefinition passed");
+		return;
+	}
 
-            // If the user filled titleKey get the title value from language files 
-            if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-				cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
-			}
-
+	// If the user filled titleKey get the title value from language files 
+	if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+		cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
+	}
+	
+	//set parameters string if using cda
+	var cdaParameterString = null;
+	if(cd.queryType == "cda"){
+	  if ($.isArray(this.parameters)){
+		var param;
+		for(var i = 0; i < this.parameters.length; i++){
+		  param = this.parameters[i];
+		  if($.isArray(param) && param.length >= 2){
+			var name = param[0];
+			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
+			//escape ';'s
+			if(value) value = value.replace(";",";;");
+			
+			if(i == 0) cdaParameterString = "";
+			else cdaParameterString += ";";
+			
+			cdaParameterString += name + "=" + value;
+		  }
+		}
+	  }
+	}
 			
     var cd0 = cd.chartOptions != undefined ? $.extend({},Dashboards.ev(cd.chartOptions), cd) : cd;
 
-    // go through parametere array and update values
+    // go through parameters array and update values
     var parameters = [];
     for(p in cd0){
       var key = p;
@@ -305,6 +326,9 @@ var JFreeChartComponent = BaseComponent.extend({
       // alert("key: " + key + "; Value: " + value);
       parameters.push([key,value]);
     }
+	if(cdaParameterString != null){
+	  parameters.push(["cdaParameterString", cdaParameterString]);
+	}
 			
     return parameters;
 		

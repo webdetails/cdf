@@ -40,6 +40,9 @@
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
 
+		    <dt>parameters</dt> 
+			<dd><i>Array - </i> Jagged array with the parameters to be passed to the query when queryType is cda (eg:<b>[ ["</b><i>name1</i><b>","</b><i>value1</i><b>"], ["</b><i>name2</i><b>","</b><i>value2</i><b>"] ]</b>) </dd>
+
 			<dt>chartDefinition</dt>
 			<dd>MetaLayer object with the definition of chart (see MetaLayer options)</dd>
 
@@ -100,13 +103,10 @@
 			to the kettle transformation</dd>
 
 			<dt>cdaFile</dt> 
-			<dd>CDA file to use when queryType is cda</dd>
+			<dd>Path to the CDA file to use when queryType is cda</dd>
 
 			<dt>dataAccessId</dt> 
 			<dd>DataAccess ID to use in CDA file when queryType is cda</dd>
-
-			<dt>cdaParameterString</dt> 
-			<dd>A string containing the query parameters to pass to cda, in the form "<i>name1</i><b>=</b><i>value1</i><b>;</b><i>name2</i><b>=</b><i>value2</i>"</dd>
 			
 			<dt>caption</dt> 
 			<dd>Chart Caption Options. (eg: {cdf: {title: "Cdf",icon: "resources/style/images/cdf-icon-small.png", callback: function(){alert("Icon cdf clicked");}}}</dd>

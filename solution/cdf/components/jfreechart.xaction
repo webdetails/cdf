@@ -502,7 +502,7 @@
 			<sources>
 				<request>cdaParameterString</request>
 			</sources>
-			<default-value/>
+			<default-value></default-value>
 		</CDAPARAMETERSTRING>
 	</inputs>
 
