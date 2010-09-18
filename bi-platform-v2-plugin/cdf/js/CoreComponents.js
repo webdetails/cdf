@@ -947,6 +947,11 @@ var DateInputComponent = BaseComponent.extend({
 		
         $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
         $(function(){
+            // Add JQuery DatePicker standard localization support only if the dashboard is localized
+            // Reset to standard language
+            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+                $.datepicker.setDefaults($.datepicker.regional['']);
+            }
             $("#" + myself.htmlObject + " input").datepicker({
                 dateFormat: format,
                 changeMonth: true,
@@ -957,6 +962,10 @@ var DateInputComponent = BaseComponent.extend({
                     Dashboards.processChange(myself.name);
                 }
             });
+            // Add JQuery DatePicker standard localization support only if the dashboard is localized
+            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+                $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+            }
         });
     },
   getValue : function() {

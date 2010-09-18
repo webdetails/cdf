@@ -61,6 +61,7 @@ var Dashboards =
 		parameters: [], // only used if globalContext = false
 		args: [],
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        i18nCurrentLanguageCode : null,  // Reference to current language code . Used in every place where jquery plugins used in CDF hasm native internationalization support (ex: Datepicker)
         i18nSupport : null  // Reference to i18n objects
 	}
 
@@ -424,9 +425,10 @@ Dashboards.addArgs = function(url){
     this.args = getURLParameters(url);
 }
 
-Dashboards.setI18nSupport = function(i18nRef) {
+Dashboards.setI18nSupport = function(lc, i18nRef) {
     // Update global reference to i18n objects if needed
-    if (i18nRef !== "undefined") {
+    if (i18nRef !== "undefined" && lc !== "undefined") {
+        Dashboards.i18nCurrentLanguageCode = lc;
         Dashboards.i18nSupport = i18nRef;
     }
 
