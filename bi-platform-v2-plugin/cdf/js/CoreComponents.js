@@ -1817,7 +1817,7 @@ var PrptComponent = BaseComponent.extend({
 				solution: this.solution,
 				path: this.path,
 				action: this.action,
-				"output-type": "text/html"
+				"output-target": "text/html"
 			};
 
 			// process params and update options
