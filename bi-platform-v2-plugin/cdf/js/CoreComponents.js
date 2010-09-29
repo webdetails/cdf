@@ -1863,7 +1863,7 @@ var PrptComponent = BaseComponent.extend({
 				var url = webAppPath + '/content/reporting/reportviewer/report.html';
 				var a=[];
 				$.each(options,function(k,v){
-						a.push(k+"="+encodeURIComponent(v));
+						a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
 					});
 				$("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
 			}
