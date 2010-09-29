@@ -5,6 +5,11 @@
 
 package org.pentaho.cdf;
 
+import java.util.Hashtable;
+import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
@@ -19,10 +24,6 @@ import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.web.servlet.SolutionRepositoryService;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.util.Hashtable;
-import java.util.List;
 
 /**
  * @author pedro
@@ -45,14 +46,17 @@ public class NavigateComponent extends PentahoBase {
   IPentahoSession userSession;
   ICacheManager cacheManager;
   boolean cachingAvailable;
+  String contextPath;
 
 
-  public NavigateComponent(final IPentahoSession userSession) {
+  public NavigateComponent(final IPentahoSession userSession, String contextPath) {
 
     solutionRepository = PentahoSystem.get(ISolutionRepository.class, userSession);// PentahoSystem.getSolutionRepository(userSession);// g etSolutionRepository(userSession);
     this.userSession = userSession;
     cacheManager = PentahoSystem.getCacheManager(userSession);
     cachingAvailable = cacheManager != null && cacheManager.cacheEnabled();
+    this.contextPath = contextPath;
+
   }
 
   public String getNavigationElements(final String mode, final String solution, final String path) throws JSONException, ParserConfigurationException {
@@ -276,9 +280,13 @@ public class NavigateComponent extends PentahoBase {
             /* Get the hashTable that contains the pairs:  supported-file-type -> associated url to use */
             final Hashtable<String, String> readAbility = PluginCatalogEngine.getInstance().getPlugins();
             String link = "";
-
+            String relativeUrl = contextPath;
+            
+            if(relativeUrl.endsWith("/")) {
+              relativeUrl = relativeUrl.substring(0, relativeUrl.length() - 1);
+            }
             final String path = type.equals(TYPE_DIR) ? (_path.length() > 0 ? _path + "/" + name : name) : _path;
-            final String url = (type != null && type.equals(TYPE_URL)) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(CdfContentGenerator.BASE_URL) && !chilNode.valueOf("@url").startsWith("/") ? /*CdfContentGenerator.BASE_URL +*/ "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url")) : null;
+            final String url = (type != null && type.equals(TYPE_URL)) ? (!chilNode.valueOf("@url").startsWith("http") && !chilNode.valueOf("@url").startsWith(relativeUrl) && !chilNode.valueOf("@url").startsWith("/") ? /*CdfContentGenerator.BASE_URL +*/ "/" + chilNode.valueOf("@url") : chilNode.valueOf("@url")) : null;
 
             /*create the link*/
             final String lowType = type.toLowerCase();

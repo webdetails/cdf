@@ -567,34 +567,7 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
       if(jXML != null){
         var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
         getDataFuntion = result.match(/getData.*\(\)/gi);
-
-        // IE will strip out script tags without this block of code (CDF-72)
-        // Make sure we only apply this to Flash chart rendering...
-        if (document.all) { // check for IE
-          var needIEFix=((result.indexOf("embed")!=-1) &&
-            (result.indexOf("object")!=-1) &&
-            (result.indexOf("script")!=-1));
-          if (needIEFix){
-            //Split Script and Object
-            var newResult = result.split("}</script>");
-						
-            //Add scoped element "<br>"  - this fix will not work without a prefixed
-            // scoped element - see CDF-72
-            var resultJS =  "<br>" + newResult[0] + "}";
-						
-            // Add DEFER attribute
-            resultJS = resultJS.replace("<script", "<script defer");
-						
-            //Create new string for IE
-            var resCombined = resultJS + "<" + "/script>" + newResult[1];
-            eval(myself.htmlObject).innerHTML=resCombined;
-          }else { // all other components...
-            $("#"+myself.htmlObject).html(result);
-          }
-        }
-        else { // all other browsers...
-          $("#"+myself.htmlObject).html(result);
-        }
+        $("#"+myself.htmlObject).html(result);
       }
       Dashboards.decrementRunningCalls();
 
@@ -1906,7 +1879,7 @@ var PrptComponent = BaseComponent.extend({
 				solution: this.solution,
 				path: this.path,
 				action: this.action,
-				"output-type": "text/html"
+				"output-target": "text/html"
 			};
 
 			// process params and update options

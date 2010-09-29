@@ -6,19 +6,19 @@ $.ajaxSetup({
   contentType: "application/x-www-form-urlencoded;charset=UTF-8"
 });
 
+String.prototype.endsWith = function(str){return (this.match(str+"$")==str)}
+
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
-if (!(typeof(WEB_CONTEXT_BASE) == 'undefined')){
-  var base = WEB_CONTEXT_BASE;
-  if((/^(.*)\/$/).test(base)){
-    base = RegExp.$1;
-  }
-  if(base.split(/[\/]+/).length == 2) {
-    webAppPath = "";
-  }
+if (!(typeof(CONTEXT_PATH) == 'undefined')){
+  webAppPath = CONTEXT_PATH;
 }
 if(webAppPath == undefined){
   webAppPath = "/" + pathArray[1];
+}
+
+if(webAppPath.endsWith("/")) {
+  webAppPath = webAppPath.substr(0, webAppPath.length-1);
 }
 
 var GB_ANIMATION = true;
