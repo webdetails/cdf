@@ -135,7 +135,7 @@ public class CdfContentGenerator extends BaseContentGenerator
         contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
         out = contentItem.getOutputStream(null);
         method = pathParams.getStringParameter("path", null);
-        payload = null;
+        payload = "";
       }
 
 
