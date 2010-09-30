@@ -1861,10 +1861,22 @@ var PrptComponent = BaseComponent.extend({
 			}
 			else{
 				var url = webAppPath + '/content/reporting/reportviewer/report.html';
+                                var encodeArray = function(k,v) {
+                                    var arr = [];
+                                    for (var i = 0; i < v.length;i++) {
+                                        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+                                    }
+                                    return arr;
+                                };
 				var a=[];
-				$.each(options,function(k,v){
-						a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-					});
+	        		$.each(options,function(k,v){
+                                        if (typeof v == 'object') {
+                                            a.push.apply(a,encodeArray(k,v));     
+                                        } else {
+					    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+                                        }
+				});
+
 				$("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
 			}
 		},
@@ -1922,8 +1934,19 @@ var ExecutePrptComponent = PrptComponent.extend({
 			var options = this.getOptions();
 			var url = webAppPath + '/content/reporting/reportviewer/report.html';
 			var a=[];
+                        var encodeArray = function(k,v) {
+                            var arr = [];
+                            for (var i = 0; i < v.length;i++) {
+                                arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+                            }
+                            return arr;
+                        };
 			$.each(options,function(k,v){
-					a.push(k+"="+encodeURIComponent(v));
+                                if (typeof v == 'object') {
+                                    a.push.apply(a,encodeArray(k,v));     
+                                } else {
+				    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+                                }
 				});
 			$.fancybox({
 					type:"iframe",
