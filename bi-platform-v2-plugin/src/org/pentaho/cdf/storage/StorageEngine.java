@@ -77,7 +77,7 @@ public class StorageEngine {
 
     }
 
-    public synchronized String store(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+    public String store(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
 
 
         String user = userSession.getName();
@@ -122,7 +122,7 @@ public class StorageEngine {
 
     }
 
-    public synchronized String read(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+    public String read(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
 
         logger.debug("Reading storage");
 
