@@ -108,12 +108,12 @@ public class PluginHibernateUtil
    *
    * @return Session
    */
-  public static Session getSession() throws PluginHibernateException
+  public static synchronized Session getSession() throws PluginHibernateException
   {
     Session s = (Session) PluginHibernateUtil.threadSession.get();
     try
     {
-      if (s == null)
+      if (s == null || !s.isOpen())
       {
 
         s = PluginHibernateUtil.getSessionFactory().openSession();
@@ -148,7 +148,7 @@ public class PluginHibernateUtil
   /**
    * Closes the Session local to the thread.
    */
-  public static void closeSession() throws PluginHibernateException
+  public static synchronized void closeSession() throws PluginHibernateException
   {
     try
     {
