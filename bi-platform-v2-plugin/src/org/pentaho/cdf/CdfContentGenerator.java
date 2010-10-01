@@ -901,7 +901,6 @@ public class CdfContentGenerator extends BaseContentGenerator
     final ArrayList<String> scripts = new ArrayList<String>();
     final ArrayList<String> styles = new ArrayList<String>();
 
-    scripts.addAll(Arrays.asList(resources.getProperty("context", "").split(",")));
     miniscripts.addAll(Arrays.asList(resources.getProperty("commonLibrariesScript", "").split(",")));
     ministyles.addAll(Arrays.asList(resources.getProperty("commonLibrariesLink", "").split(",")));
     scripts.addAll(getExtraScripts(dashboardContent, resources));
