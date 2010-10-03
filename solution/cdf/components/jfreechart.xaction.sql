@@ -294,6 +294,18 @@
 			</sources>
 			<default-value></default-value>
 		</SERIESNAME>
+		<BARSERIES type="string">
+			<sources>
+				<request>barSeries</request>
+			</sources>
+			<default-value></default-value>
+		</BARSERIES>
+		<LINESERIES type="string">
+			<sources>
+				<request>lineSeries</request>
+			</sources>
+			<default-value></default-value>
+		</LINESERIES>
 		
 		<INCLUDELEGEND type="string">
 			<sources>
@@ -858,6 +870,8 @@
 			<URLTARGET type="string"/>
 			<PARAMETERNAME type="string"/>
 			<SERIESNAME type="string"/>
+			<BARSERIES type="string"/>
+			<LINESERIES type="string"/>
 			
 			<INCLUDELEGEND type="string"/>
 			<LEGENDFONTFAMILY type="string"/>
@@ -946,6 +960,8 @@
 				<url-target>{URLTARGET}</url-target>
 				<paramName>{PARAMETERNAME}</paramName>  
 				<series-name>{SERIESNAME}</series-name>
+				<bar-series><series>{BARSERIES}</series></bar-series>
+				<line-series><series>{LINESERIES}</series></line-series>
 				
 				<include-legend>{INCLUDELEGEND}</include-legend> 
 				<legend-font>
