@@ -1758,7 +1758,10 @@ var QueryComponent = BaseComponent.extend({
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
       object.result = values.resultset != undefined ? values.resultset: values;
-        changedValues = undefined;
+      if (typeof values.resultset != "undefined"){
+        object.metadata = values.metadata;
+      }
+      changedValues = undefined;
       if((typeof(object.postFetch)=='function')){
         changedValues = object.postFetch(values);
       }

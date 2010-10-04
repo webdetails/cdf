@@ -353,7 +353,7 @@
 			return from;
 		},
 
-		fancybox_show = function() {
+		fancybox_show = function(type) {
 			loading.hide();
 
 			if (wrap.is(":visible") && $.isFunction(currentOpts.onCleanup)) {
@@ -482,7 +482,11 @@
 						width		: Math.max(final_pos.width	- (currentOpts.padding * 2), 1),
 						height		: Math.max(final_pos.height	- (currentOpts.padding * 2) - titleh, 1)
 					})
-					.html( tmp.contents() );
+					.html( type=="iframe"?
+						'<iframe id="fancybox-frame" name="fancybox-frame' + new Date().getTime() + 
+							'" frameborder="0" hspace="0" scrolling="' + selectedOpts.scrolling + 
+							'" src="' + selectedOpts.href + '"></iframe>'
+						:tmp.contents() );
 
 				wrap.css( final_pos ).fadeIn( currentOpts.transitionIn == 'none' ? 0 : currentOpts.speedIn, _finish );
 			}
@@ -694,8 +698,8 @@
 				break;
 
 				case 'iframe' :
-					$('<iframe id="fancybox-frame" name="fancybox-frame' + new Date().getTime() + '" frameborder="0" hspace="0" scrolling="' + selectedOpts.scrolling + '" src="' + selectedOpts.href + '"></iframe>').appendTo(tmp);
-					fancybox_show();
+					//$('<iframe id="fancybox-frame" name="fancybox-frame' + new Date().getTime() + '" frameborder="0" hspace="0" scrolling="' + selectedOpts.scrolling + '" src="' + selectedOpts.href + '"></iframe>').appendTo(tmp);
+					fancybox_show(type);
 				break;
 			}
 		},
