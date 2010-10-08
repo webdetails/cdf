@@ -1089,15 +1089,19 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 		var hasCurrentVal = typeof currentval != undefined;
         
-        for (var i = 0, len = myArray.length; i < len; i++) {
-            selectHTML += "<nobr><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
-            if ((i == 0 && !hasCurrentVal) ||
-				(hasCurrentVal && (myArray[i][0] == currentVal || myArray[i][1] == currentVal ))) {
-                selectHTML += " CHECKED";
-            }
+    for (var i = 0, len = myArray.length; i < len; i++) {
+      selectHTML += "<nobr><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
       if (this.type == 'radio' || this.type == 'radioComponent'){
+	      if ((i == 0 && !hasCurrentVal) ||
+						(hasCurrentVal && (myArray[i][0] == currentVal || myArray[i][1] == currentVal ))) {
+                selectHTML += " CHECKED";
+				}
         selectHTML += " type='radio'";
       }else{
+	      if ((i == 0 && !hasCurrentVal) ||
+						(hasCurrentVal && (currentVal.indexOf(myArray[i][0]) >= 0 || currentVal.indexOf(myArray[i][1]) >= 0))) {
+          selectHTML += " CHECKED";
+				}
         selectHTML += " type='checkbox'";
       }
       var vid = this.valueAsId==false?0:1;
