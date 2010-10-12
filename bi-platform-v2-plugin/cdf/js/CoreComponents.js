@@ -1091,20 +1091,20 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<nobr><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+      var vid = this.valueAsId==false?0:1;
       if (this.type == 'radio' || this.type == 'radioComponent'){
 	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (myArray[i][0] == currentVal || myArray[i][1] == currentVal ))) {
+						(hasCurrentVal && (myArray[i][vid] == currentVal ))) {
                 selectHTML += " CHECKED";
 				}
         selectHTML += " type='radio'";
       }else{
 	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (currentVal.indexOf(myArray[i][0]) >= 0 || currentVal.indexOf(myArray[i][1]) >= 0))) {
+						(hasCurrentVal && (currentVal.indexOf(myArray[i][vid]) >= 0))) {
           selectHTML += " CHECKED";
 				}
         selectHTML += " type='checkbox'";
       }
-      var vid = this.valueAsId==false?0:1;
       selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></nobr>" + (this.separator == undefined?"":this.separator);
     }
     // update the placeholder
