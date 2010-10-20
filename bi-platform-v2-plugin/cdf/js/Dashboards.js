@@ -805,7 +805,7 @@ Dashboards.loadStorage = function(){
         action: "read"
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  Dashboards.storage = json;
+			  $.extend(Dashboards.storage,json);
 		  });
 }
 
