@@ -292,30 +292,32 @@ Dashboards.decrementRunningCalls = function() {
   }
 }
 
-
 Dashboards.bindControl = function(object) {
 
   // see if there is a class defined for this object
   var objectType = typeof object["type"]=='function'?object.type():object.type;
-  var classNames = [ // try type as class name
+  var classNames = [
+  // try type as class name
   objectType,
-  // try Type as class name
+  // try Type as class name with first letter uppercase
   objectType.substring(0,1).toUpperCase() + objectType.substring(1),
   // try TypeComponent as class name
   objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
   ];
+  
   var objectImpl;
-  for (var i = 0; i < classNames.length && objectImpl == null; i++) {
+  for (var i = 0; i < classNames.length && (objectImpl == null || typeof objectImpl == 'undefined'); i++) {
     try {
       eval('objectImpl = new ' + classNames[i]);
-      // this will add the methods from the inherited class. Overrides not allowed
-      $.extend(object,objectImpl);
-      break;
     } catch (e) {
     }
   }
+  
   if (typeof objectImpl == 'undefined'){
     alert ("Object type " + object["type"] + " can't be mapped to a valid class");
+  } else {
+	// this will add the methods from the inherited class. Overrides not allowed
+	$.extend(object,objectImpl);
   }
 }
 
