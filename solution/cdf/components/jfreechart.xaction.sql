@@ -745,7 +745,7 @@
   <actions> 
     <condition><![CDATA[QUERY_TYPE == "cda"]]></condition>
 
-    <action-definition> 
+    <!--<action-definition> 
       <component-name>CdaQueryComponent</component-name>
       <action-type>CDA Query</action-type>
       <action-inputs> 
@@ -760,7 +760,7 @@
         <file>{CDAFILE}</file>  
         <dataAccessId>{DATAACCESSID}</dataAccessId>
       </component-definition> 
-    </action-definition>
+    </action-definition>-->
  
   </actions> 
 	
