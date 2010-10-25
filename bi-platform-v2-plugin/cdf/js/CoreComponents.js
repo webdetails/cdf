@@ -252,6 +252,7 @@ var SelectBaseComponent = BaseComponent.extend({
         currentVal = typeof currentVal == 'function' ? currentVal() : currentVal;
         if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
             Dashboards.setParameter(this.parameter, firstVal);
+            Dashboards.processChange(this.name);
         }
         else {
             $("select", ph).val(currentVal);
