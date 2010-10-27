@@ -22,7 +22,7 @@
       <generator class="native" />
     </id>
     <property name="user" type="string" not-null="false">
-      <column name="user" length="255" not-null="false" index="cdf_storage_user_idx"/>
+      <column name="pentahouser" length="255" not-null="false" index="cdf_storage_user_idx"/>
     </property>
     <property name="storageValue" type="text" not-null="false">
       <column name="storagevalue" not-null="false" />
