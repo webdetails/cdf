@@ -5,12 +5,12 @@ BaseComponent = Base.extend({
     $("#"+this.htmlObject).empty();
   },
   getValuesArray : function() {
-		
-		
+
+
     var jXML;
     if ( typeof(this.valuesArray) == 'undefined' || this.valuesArray.length == 0) {
       if(typeof(this.queryDefinition) != 'undefined'){
-				
+
         var vid = (this.queryDefinition.queryType == "sql")?"sql":"none";
         if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
           vid = "mdx";
@@ -70,13 +70,13 @@ BaseComponent = Base.extend({
     if(jData === null){
       return []; //we got an error...
     }
-    
+
     if($(jData).find("CdaExport").size() > 0){
       return this.parseArrayCda(jData, includeHeader);
     }
 
     var myArray = new Array();
-			
+
     var jHeaders = $(jData).find("COLUMN-HDR-ITEM");
     if (includeHeader && jHeaders.size() > 0 ){
       var _a = new Array();
@@ -101,7 +101,7 @@ BaseComponent = Base.extend({
   parseArrayCda : function(jData,includeHeader){
 //ToDo: refactor with parseArray?..use as parseArray?..
     var myArray = new Array();
-			
+
     var jHeaders = $(jData).find("ColumnMetaData");
     if (jHeaders.size() > 0 ){
 	  if(includeHeader){//get column names
@@ -130,7 +130,7 @@ BaseComponent = Base.extend({
 	//	this.valueOutputType = typesArray[valIdx];
 	//  }
     }
-	
+
 	//get contents
     var jDetails = $(jData).find("Row");
     jDetails.each(function(){
@@ -157,11 +157,11 @@ var XactionComponent = BaseComponent.extend({
           var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
           p[i] = [key,value];
         }
-	
+
         var myself=this;
         if (typeof(this.serviceMethod) == 'undefined' || this.serviceMethod == 'ServiceAction') {
           var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
-				
+
           if(jXML != null){
             $('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
           }
@@ -176,7 +176,7 @@ var XactionComponent = BaseComponent.extend({
         " height=\"100%\"" +
         " width=\"100%\"" +
         " src=\"";
-				
+
         xactionIFrameHTML += webAppPath + "/ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
 
         // Add args
@@ -189,7 +189,7 @@ var XactionComponent = BaseComponent.extend({
             xactionIFrameHTML += arg + encodeURIComponent(Dashboards.getParameterValue(this.parameters[i][1]));
           }
         }
-				
+
         // Close IFrame
         xactionIFrameHTML += "\"></iframe>";
 
@@ -206,9 +206,9 @@ var SelectBaseComponent = BaseComponent.extend({
     update: function(){
         var ph = $("#" + this.htmlObject);
         var myArray = this.getValuesArray();
-        
+
         selectHTML = "<select";
-        
+
         // set size
         if (this.size != undefined) {
             selectHTML += " size='" + this.size + "'";
@@ -217,7 +217,7 @@ var SelectBaseComponent = BaseComponent.extend({
             if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
                 selectHTML += " multiple";
             }
-            else 
+            else
                 if (!this.isMultiple && this.size == undefined) {
                     selectHTML += " size='" + myArray.length + "'";
                 }
@@ -243,9 +243,9 @@ var SelectBaseComponent = BaseComponent.extend({
                 selectHTML += "<option value = '" + value + "' >" + label + "</option>";
             }
         }
-        
+
         selectHTML += "</select>";
-        
+
         // update the placeholder
         ph.html(selectHTML);
         var currentVal = Dashboards.getParameterValue(this.parameter);
@@ -280,9 +280,9 @@ var JFreeChartComponent = BaseComponent.extend({
   update : function() {
     this.callPentahoAction("jfreechart.xaction");
   },
-		
+
   getParameters: function() {
-		
+
 	var cd = this.chartDefinition;
 	// Merge the stuff with a chartOptions element
 	if (cd == undefined){
@@ -290,11 +290,11 @@ var JFreeChartComponent = BaseComponent.extend({
 		return;
 	}
 
-	// If the user filled titleKey get the title value from language files 
+	// If the user filled titleKey get the title value from language files
 	if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
 		cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
 	}
-	
+
 	//set parameters string if using cda
 	var cdaParameterString = null;
 	if(cd.queryType == "cda"){
@@ -307,16 +307,16 @@ var JFreeChartComponent = BaseComponent.extend({
 			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
 			//escape ';'s
 			if(value) value = value.replace(";",";;");
-			
+
 			if(i == 0) cdaParameterString = "";
 			else cdaParameterString += ";";
-			
+
 			cdaParameterString += name + "=" + value;
 		  }
 		}
 	  }
 	}
-			
+
     var cd0 = cd.chartOptions != undefined ? $.extend({},Dashboards.ev(cd.chartOptions), cd) : cd;
 
     // go through parameters array and update values
@@ -330,11 +330,11 @@ var JFreeChartComponent = BaseComponent.extend({
 	if(cdaParameterString != null){
 	  parameters.push(["cdaParameterString", cdaParameterString]);
 	}
-			
+
     return parameters;
-		
+
   },
-		
+
   callPentahoAction: function(action) {
     // increment runningCalls
     Dashboards.incrementRunningCalls();
@@ -342,7 +342,7 @@ var JFreeChartComponent = BaseComponent.extend({
     var myself = this;
     // callback async mode
     Dashboards.callPentahoAction(myself,"cdf", "components", action, this.getParameters(),function(jXML){
-				
+
       if(jXML != null){
         if(myself.chartDefinition.caption != undefined)
           myself.buildCaptionWrapper($(jXML.find("ExecuteActivityResponse:first-child").text()),action);
@@ -353,9 +353,9 @@ var JFreeChartComponent = BaseComponent.extend({
 
     });
   },
-		
+
   buildCaptionWrapper: function(chart,cdfComponent){
-		
+
     var exportFile = function(type,cd){
       var obj = $.extend({
         solution: "cdf",
@@ -365,7 +365,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },cd);
       Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj);
     };
-			
+
     var myself = this;
     var cd = myself.chartDefinition;
     var captionOptions = $.extend({
@@ -462,21 +462,21 @@ var JFreeChartComponent = BaseComponent.extend({
           };
           PivotLinkComponent.openPivotLink(myself);
         }
-						
+
       }
 
     }, cd.caption);
-				
+
     var captionId = myself.htmlObject + 'caption';
     var caption = $('<div id="' + captionId + '" ></div>');
-			
+
     chart.attr("id",myself.htmlObject + 'image');
     chart.attr("rel",myself.htmlObject + "caption");
     chart.attr("class","captify");
-			
+
     for(o in captionOptions){
       var show = captionOptions[o].show == undefined || (typeof captionOptions[o].show=='function'?captionOptions[o].show():captionOptions[o].show) ? true : false;
-				
+
       if (this.chartDefinition.queryType != "mdx" && captionOptions[o].title == "Details") {
         show = false;
       };
@@ -488,15 +488,15 @@ var JFreeChartComponent = BaseComponent.extend({
         caption.append(op);
       }
     };
-			
+
     $("#" + myself.htmlObject).empty();
-			
+
     var bDetails = $('<div class="caption-details">Details</div>');
     $("#" + myself.htmlObject).append(bDetails);
     $("#" + myself.htmlObject).append(chart);
     $("#" + myself.htmlObject).append(caption);
-			
-			
+
+
     $('img.captify').captify($.extend({
       bDetails:bDetails,
       spanWidth: '95%',
@@ -504,7 +504,7 @@ var JFreeChartComponent = BaseComponent.extend({
       hasButton:false,
       opacity:'0.5'
     }, cd.caption));
-			
+
     //Add events after captify has finished.
     bDetails.one('capityFinished',function(e,wrapper){
       var chartOffset = chart.offset();
@@ -517,21 +517,21 @@ var JFreeChartComponent = BaseComponent.extend({
         bDetails.css("top",bDetails.position().top + $(chart[1]).height() - bDetails.height() );
         //Append map after image
         $(chart[1]).append(chart[0]);
-					
+
       }
       for(o in captionOptions)
         if(captionOptions[o].callback != undefined)
           $("#" + captionId + o).bind("click",captionOptions[o].callback);
     });
-			
+
   }
-		
+
 });
-	
+
 var DialComponent = JFreeChartComponent.extend({
-		
+
   update : function() {
-			
+
     var cd = this.chartDefinition;
     if (cd == undefined){
       alert("Fatal - No chartDefinition passed");
@@ -554,17 +554,17 @@ var DialComponent = JFreeChartComponent.extend({
 
   }
 });
-	
+
 var OpenFlashChartComponent = JFreeChartComponent.extend({
 
   callPentahoAction: function() {
-	
+
     Dashboards.incrementRunningCalls();
 
     var myself = this;
-	
+
     Dashboards.callPentahoAction(myself,"cdf", "components", "openflashchart.xaction", this.getParameters(),function(jXML){
-			
+
       if(jXML != null){
         var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
         getDataFuntion = result.match(/getData.*\(\)/gi);
@@ -573,7 +573,7 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
       Dashboards.decrementRunningCalls();
 
     });
-			
+
     OpenFlashChartComponent.prototype.onClick = function(value) {
       if(getDataFuntion != null && myself.chartDefinition.urlTemplate != undefined && myself.chartDefinition.parameterName != undefined){
         myself.data = myself.data != undefined ? myself.data : eval('(' + eval(getDataFuntion[0]) + ')');
@@ -581,12 +581,12 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
           var urlTemplate = myself.chartDefinition.urlTemplate.replace("{" + myself.chartDefinition.parameterName + "}",myself.data.x_axis.labels.labels[value]);
           eval(urlTemplate);
         }
-				
+
       }
     };
-	
+
   }
-	
+
 });
 
 var TrafficComponent = BaseComponent.extend({
@@ -621,7 +621,7 @@ var TrafficComponent = BaseComponent.extend({
         var value = $(result).find("VALUE").text();
         var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
         $('#'+myself.htmlObject).html(i);
-					
+
         if(cd.showValue != undefined && cd.showValue == true){
           var tooltip = "Value: " + value + " <br /><img align='middle' src='" + Dashboards.TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + Dashboards.TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + Dashboards.TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:"");
           $('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({
@@ -630,42 +630,42 @@ var TrafficComponent = BaseComponent.extend({
             fade: 250
           });
         }
-					
+
         Dashboards.decrementRunningCalls();
       });
   }
 });
 
 var TimePlotComponent = BaseComponent.extend({
-		
+
   reset: function(){
     this.timeplot = undefined;
     this.chartDefinition.dateRangeInput = this.InitialDateRangeInput;
     this.listeners = this.InitialListeners;
   },
-		
+
   update : function() {
-		
+
     var cd = this.chartDefinition;
-	
+
     this.InitialListeners = this.InitialListeners == undefined ? this.listeners : this.InitialListeners;
     this.InitialDateRangeInput = this.InitialDateRangeInput == undefined ? cd.dateRangeInput : this.InitialDateRangeInput;
-		
+
     if(cd.updateOnDateRangeInputChange != true && this.timeplot!= undefined && cd.dateRangeInput != undefined){
 
       if(this.updateTimeplot != false && this.timeplot._plots.length > 0 ){
-			
+
         var lastEventPlot = this.timeplot._plots[this.timeplot._plots.length -1];
         if(lastEventPlot._id == "eventPlot")
           lastEventPlot._addSelectEvent(Dashboards.getParameterValue(this.startDateParameter)+ " 00:00:00",Dashboards.getParameterValue(this.endDateParameter)+ " 23:59:59",
             lastEventPlot._eventSource,"iso8601",this.geometry._earliestDate,this.geometry._latestDate);
       }
-					
+
       return;
-				
+
     }
-			
-			
+
+
     if(cd.dateRangeInput != undefined && this.timeplot == undefined){
       cd.dateRangeInput = Dashboards.getComponent(cd.dateRangeInput);
       this.startDateParameter = cd.dateRangeInput.parameter[0];
@@ -760,7 +760,7 @@ var TimePlotComponent = BaseComponent.extend({
       plotInfo.push(new Timeplot.createPlotInfo(plotInfoOpts));
 
     }
-			
+
 
     // support for events
     var eventSource2 = undefined;
@@ -780,7 +780,7 @@ var TimePlotComponent = BaseComponent.extend({
       });
       plotInfo.push(eventSourcePlot);
     }
-			
+
     $("#"+this.htmlObject).html(title);
     $("#"+this.htmlObject).append("<div class='timeplot'></div>");
 
@@ -907,18 +907,18 @@ var DateInputComponent = BaseComponent.extend({
     update: function(){
         var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
 	    var myself = this;
-		
+
 		var startDate, endDate;
-		
+
 		if(this.startDate == 'TODAY') startDate = new Date();
 		else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
-		
+
 		if(this.endDate == 'TODAY') endDate = new Date();
 		else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
-		
+
 		//ToDo: stretch interval to catch defaultValue?..
 		//Dashboards.getParameterValue(this.parameter))
-		
+
         $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
         $(function(){
             // Add JQuery DatePicker standard localization support only if the dashboard is localized
@@ -1082,14 +1082,14 @@ var MonthPickerComponent = BaseComponent.extend({
 var ToggleButtonBaseComponent = BaseComponent.extend({
     update: function(){
         var myArray = this.getValuesArray();
-        
+
         selectHTML = "";
-		
+
 		//default
         var currentVal = Dashboards.getParameterValue(this.parameter);
         currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 		var hasCurrentVal = typeof currentval != undefined;
-        
+
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<nobr><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
       var vid = this.valueAsId==false?0:1;
@@ -1143,9 +1143,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var firstVal;
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
-        
+
 	if (this.isMultiple == undefined) this.isMultiple = false;
-        
+
     for (var i = 0, len = myArray.length; i < len; i++){
 	  var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
@@ -1161,16 +1161,16 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     // update the placeholder
     var ph = $("#" + this.htmlObject);
     ph.html(selectHTML);
-        
+
     //default
     var currentVal = Dashboards.getParameterValue(this.parameter);
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-        
-   	if(currentVal == null){ 
+
+   	if(currentVal == null){
 			Dashboards.setParameter(this.parameter, firstVal);
 			currentVal = firstVal;
 	}
-	
+
 	var foundDefault = false;
 	for (var i = 0; i < myArray.length; i++) {
 	  if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
@@ -1184,7 +1184,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 	  MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
 	}
   },
-    
+
   getValue: function(){
 		if(this.isMultiple){
 			var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
@@ -1198,11 +1198,11 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 		  return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
 		}
   },
-    
+
   getValueByIdx: function(idx){
     return $("#" + this.htmlObject + " button")[idx].value;
   },
-    
+
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple){
 	var cssClass= "toggleButton";
@@ -1212,7 +1212,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
 	  else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
-				
+
 	  var disable = false;
       for (var i = 0; i < this.indexes[name].length; ++i) {
 	    if (this.indexes[name][i] == index) {
@@ -1241,7 +1241,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 	  }
     this.callAjaxAfterRender(name);
   },
- 
+
  //static MultiButtonComponent.prototype.getSelectedIndex
   getSelectedIndex: function(name){
     return this.indexes[name];
@@ -1294,10 +1294,10 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
 
     this.addFilter = function(value){
-				
+
       if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
         return;
-				
+
       var childs = html_obj.children().children().children();
 
       if(!opt.multiSellection){
@@ -1306,7 +1306,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
           i= i -1;
         }
       }
-				
+
       if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
         myself.autoBoxOpt.showApplyButton();
 
@@ -1315,13 +1315,13 @@ var AutocompleteBoxComponent = BaseComponent.extend({
         .bind('click', function(e) {
           li.remove();
           e.preventDefault();
-							
+
           if(!opt.multiSellection)
             myself.autoBoxOpt.processAutoBoxChange();
-		
+
           if(myself.autoBoxOpt.applyButton != false)
             myself.autoBoxOpt.showApplyButton();
-							
+
         })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
       this.autoBoxOpt.input.after(li);
@@ -1388,7 +1388,7 @@ if($.fn.dataTableExt != undefined){ // Ensure we load dataTables before this lin
 
     $('select', oSettings.oFeatures.l).val( iDisplay );
   };
-/* Example 
+/* Example
 	 * $(document).ready(function() {
 	 *    var oTable = $('#example').dataTable();
 	 *    oTable.fnLengthChange( 100 );
@@ -1541,7 +1541,7 @@ var TableComponent = BaseComponent.extend({
           }
         })
       }; //colWidths
-				
+
       if(options.colSortable!=undefined){
         $.each(options.colSortable,function(i,val){
           if (val!=null && ( !val || val == "false" ) ){
@@ -1556,7 +1556,7 @@ var TableComponent = BaseComponent.extend({
           }
         })
       }; //colSearchable
-				
+
     }
 
     return dtData;
@@ -1567,7 +1567,7 @@ var TableComponent = BaseComponent.extend({
 
 var CommentsComponent = BaseComponent.extend({
   update : function() {
-			
+
     // Set page start and length - for pagination
     if(typeof this.firstResult == 'undefined'){
       this.firstResult = 0;
@@ -1580,7 +1580,7 @@ var CommentsComponent = BaseComponent.extend({
       alert("Fatal - no page definition passed");
       return;
     }
-			
+
     this.firePageUpdate();
 
   },
@@ -1663,7 +1663,7 @@ var CommentsComponent = BaseComponent.extend({
         var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
         placeHolder.append('<dt class="'+ bodyClass +' comment-body"><p>'+comment.comment+'</p></dt>');
         placeHolder.append('<dl class="ui-widget-header comment-footer ">'+comment.user+ ",  " + comment.createdOn +  '</dl>');
-	
+
       });
 
 
@@ -1792,7 +1792,7 @@ var MdxQueryGroupComponent = BaseComponent.extend({
 
 var ExecuteXactionComponent = BaseComponent.extend({
   visible: false,
-		
+
   update : function() {
     // 2 modes of working; if it's a div, create a button inside it
     var myself = this;
@@ -1855,7 +1855,7 @@ var ButtonComponent = BaseComponent.extend({
 var PrptComponent = BaseComponent.extend({
 
 		update: function(){
-		
+
 			this.clear();
 
 			var options = this.getOptions();
@@ -1879,7 +1879,7 @@ var PrptComponent = BaseComponent.extend({
 				var a=[];
 	        		$.each(options,function(k,v){
                                         if (typeof v == 'object') {
-                                            a.push.apply(a,encodeArray(k,v));     
+                                            a.push.apply(a,encodeArray(k,v));
                                         } else {
 					    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
                                         }
@@ -1890,16 +1890,13 @@ var PrptComponent = BaseComponent.extend({
 		},
 
 		getOptions: function(){
-					
+
 			var options = {
-				paginate : this.paginate || false,
-				showParameters: this.showParameters || false,
-				autoSubmit: this.autoSubmit || false,
 				"dashboard-mode": this.iframe==undefined?false:!this.iframe,
 				solution: this.solution,
 				path: this.path,
 				action: this.action,
-				"output-target": "text/html"
+				"output-target": "table/html;pageMode=stream"
 			};
 
 			// process params and update options
@@ -1951,7 +1948,7 @@ var ExecutePrptComponent = PrptComponent.extend({
                         };
 			$.each(options,function(k,v){
                                 if (typeof v == 'object') {
-                                    a.push.apply(a,encodeArray(k,v));     
+                                    a.push.apply(a,encodeArray(k,v));
                                 } else {
 				    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
                                 }
