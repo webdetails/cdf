@@ -292,32 +292,30 @@ Dashboards.decrementRunningCalls = function() {
   }
 }
 
+
 Dashboards.bindControl = function(object) {
 
   // see if there is a class defined for this object
   var objectType = typeof object["type"]=='function'?object.type():object.type;
-  var classNames = [
-  // try type as class name
+  var classNames = [ // try type as class name
   objectType,
-  // try Type as class name with first letter uppercase
+  // try Type as class name
   objectType.substring(0,1).toUpperCase() + objectType.substring(1),
   // try TypeComponent as class name
   objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
   ];
-  
   var objectImpl;
-  for (var i = 0; i < classNames.length && (objectImpl == null || typeof objectImpl == 'undefined'); i++) {
+  for (var i = 0; i < classNames.length && objectImpl == null; i++) {
     try {
       eval('objectImpl = new ' + classNames[i]);
+      // this will add the methods from the inherited class. Overrides not allowed
+      $.extend(object,objectImpl);
+      break;
     } catch (e) {
     }
   }
-  
   if (typeof objectImpl == 'undefined'){
     alert ("Object type " + object["type"] + " can't be mapped to a valid class");
-  } else {
-	// this will add the methods from the inherited class. Overrides not allowed
-	$.extend(object,objectImpl);
   }
 }
 
@@ -779,13 +777,13 @@ Dashboards.fetchData = function(cd, params, callback) {
     for (param in params) {
       cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
     }
-    $.getJSON(webAppPath + "/content/cda/doQuery?", cd,
+    $.post(webAppPath + "/content/cda/doQuery?", cd,
       function(json) {callback(json);});
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.getJSON(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd,
+    $.post(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd,
       function(json) {  callback(json.values); });
   }
   // ... or just call the callback when no valid definition is passed
@@ -807,7 +805,7 @@ Dashboards.loadStorage = function(){
         action: "read"
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  $.extend(Dashboards.storage,json);
+			  Dashboards.storage = json;
 		  });
 }
 
@@ -1195,7 +1193,7 @@ Query = function() {
             queryDefinition = _query;
             url = LEGACY_QUERY_PATH;
         }
-        $.getJSON(url, queryDefinition, function(json) {_lastResultSet = json;_callback(_mode == 'CDA' ? json : json.values);});
+        $.post(url, queryDefinition, function(json) {_lastResultSet = json;_callback(_mode == 'CDA' ? json : json.values);});
     };
 
     /*
