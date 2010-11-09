@@ -1852,7 +1852,9 @@ var ButtonComponent = BaseComponent.extend({
 	});
 
 
+
 var PrptComponent = BaseComponent.extend({
+		showParameters: false,
 
 		update: function(){
 
@@ -1892,17 +1894,27 @@ var PrptComponent = BaseComponent.extend({
 		getOptions: function(){
 
 			var options = {
+				paginate : this.paginate || false,
+				showParameters: this.showParameters || false,
+				autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
 				"dashboard-mode": this.iframe==undefined?false:!this.iframe,
 				solution: this.solution,
 				path: this.path,
-				action: this.action,
-				"output-target": "table/html;pageMode=stream"
+				action: this.action
 			};
+			if(this.paginate){
+
+				options["output-target"] = "table/html;page-mode=page";
+			} else {
+				options["output-target"] = "table/html;page-mode=stream";
+			}
 
 			// process params and update options
 			$.map(this.parameters,function(k){
-					options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
-				});
+				options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+			});
+
+			options["output-type"] = "";
 
 			return options;
 
@@ -1939,19 +1951,19 @@ var ExecutePrptComponent = PrptComponent.extend({
 			var options = this.getOptions();
 			var url = webAppPath + '/content/reporting/reportviewer/report.html';
 			var a=[];
-                        var encodeArray = function(k,v) {
-                            var arr = [];
-                            for (var i = 0; i < v.length;i++) {
-                                arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-                            }
-                            return arr;
-                        };
+      var encodeArray = function(k,v) {
+          var arr = [];
+          for (var i = 0; i < v.length;i++) {
+              arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+          }
+          return arr;
+      };
 			$.each(options,function(k,v){
-                                if (typeof v == 'object') {
-                                    a.push.apply(a,encodeArray(k,v));
-                                } else {
+          if (typeof v == 'object') {
+              a.push.apply(a,encodeArray(k,v));
+          } else {
 				    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-                                }
+          }
 				});
 			$.fancybox({
 					type:"iframe",
