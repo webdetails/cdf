@@ -254,8 +254,10 @@ var SelectBaseComponent = BaseComponent.extend({
             Dashboards.setParameter(this.parameter, firstVal);
             Dashboards.processChange(this.name);
         }
-        else {
+        else if (currentVal !== ''){
             $("select", ph).val(currentVal);
+        } else {
+            $("select", ph).val(firstVal);
         }
         var myself = this;
         $("select", ph).change(function(){
@@ -924,6 +926,9 @@ var DateInputComponent = BaseComponent.extend({
             // Add JQuery DatePicker standard localization support only if the dashboard is localized
             // Reset to standard language
             if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+                $.datepicker.setDefaults($.datepicker.regional['']);
+            } else if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
+                // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
                 $.datepicker.setDefaults($.datepicker.regional['']);
             }
             $("#" + myself.htmlObject + " input").datepicker({
