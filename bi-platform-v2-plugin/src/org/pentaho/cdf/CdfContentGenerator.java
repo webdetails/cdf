@@ -608,7 +608,7 @@ public class CdfContentGenerator extends BaseContentGenerator
         tagValue = test[i].substring(0, test[i].indexOf("\")"));
         tagsList.add(tagValue);
         resBuffer.append(updateSelectorName(tagValue));
-        resBuffer.append("\"/>");
+        resBuffer.append("\"></span>");
         resBuffer.append(test[i].substring(test[i].indexOf("\")") + 2, test[i].length()));
       }
     }
