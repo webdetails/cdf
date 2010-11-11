@@ -974,6 +974,10 @@ var DateRangeInputComponent = BaseComponent.extend({
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
     $(function(){
+      // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
+      if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
+        $.datepicker.setDefaults($.datepicker.regional['']);
+      }
       $("#" + myself.htmlObject + " input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
