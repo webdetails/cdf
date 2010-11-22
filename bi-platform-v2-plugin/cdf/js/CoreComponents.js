@@ -1447,12 +1447,13 @@ var TableComponent = BaseComponent.extend({
     var myself = this;
     dtData.fnDrawCallback = function() {
       $("#" + myself.htmlObject + " td.sparkline:visible").each(function(i){
-        $(this).sparkline($(this).text().split(/,/));
-        $(this).removeClass("sparkline");
+        var t = $(this);
+        t.sparkline(t.text().split(/,/));
+        t.removeClass("sparkline");
       });
 
       if(typeof cd.drawCallback == 'function'){
-        cd.drawCallback();
+        cd.drawCallback.apply(myself);
       }
 
     };

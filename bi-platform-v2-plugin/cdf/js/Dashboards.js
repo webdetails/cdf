@@ -342,7 +342,7 @@ Dashboards.blockUIwithDrag = function() {
 
 Dashboards.update = function(object) {
   if(!(typeof(object.preExecution)=='undefined')){
-    var ret = object.preExecution();
+    var ret = object.preExecution.apply(object);
     if (typeof ret != "undefined" && !ret)
       return; // if preExecution returns false, we'll skip the update
   }
@@ -362,7 +362,7 @@ Dashboards.update = function(object) {
   }
 
   if(!(typeof(object.postExecution)=='undefined')){
-    object.postExecution();
+    object.postExecution.apply(object);
   }
   // if we have a tooltip component, how is the time.
   if (object._tooltip != undefined){
