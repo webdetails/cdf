@@ -36,7 +36,7 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.1.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/cdf.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
-@RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table_jui.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/blueprint/screen.css
 

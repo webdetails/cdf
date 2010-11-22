@@ -1543,13 +1543,16 @@ var TableComponent = BaseComponent.extend({
 
       };  // colFormats
 
+      var bAutoWidth = true;
       if(options.colWidths!=undefined){
         $.each(options.colWidths,function(i,val){
           if (val!=null){
-            dtData.aoColumns[i].sWidth=val
+            dtData.aoColumns[i].sWidth=val;
+            bAutoWidth = false;
           }
         })
       }; //colWidths
+      dtData.bAutoWidth = bAutoWidth;
 
       if(options.colSortable!=undefined){
         $.each(options.colSortable,function(i,val){
@@ -1910,6 +1913,7 @@ var PrptComponent = BaseComponent.extend({
 				solution: this.solution,
 				path: this.path,
 				action: this.action
+				//,	"output-target": "table/html;pageMode=stream" // Uncomment for pentaho-reporting 3.6
 			};
 			if(this.paginate){
 
