@@ -42,7 +42,6 @@ public class NavigateComponent extends PentahoBase {
   private static final String CACHE_NAVIGATOR = "CDF_NAVIGATOR_JSON";
   private static final String CACHE_REPOSITORY_DOCUMENT = "CDF_REPOSITORY_DOCUMENT";
   protected static final Log logger = LogFactory.getLog(NavigateComponent.class);
-  ISolutionRepository solutionRepository = null;
   IPentahoSession userSession;
   ICacheManager cacheManager;
   boolean cachingAvailable;
@@ -51,7 +50,6 @@ public class NavigateComponent extends PentahoBase {
 
   public NavigateComponent(final IPentahoSession userSession, String contextPath) {
 
-    solutionRepository = PentahoSystem.get(ISolutionRepository.class, userSession);// PentahoSystem.getSolutionRepository(userSession);// g etSolutionRepository(userSession);
     this.userSession = userSession;
     cacheManager = PentahoSystem.getCacheManager(userSession);
     cachingAvailable = cacheManager != null && cacheManager.cacheEnabled();

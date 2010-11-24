@@ -83,7 +83,7 @@ public class PluginCatalogEngine {
       final String pluginFolder = PLUGIN_DIR + plugin + "/plugin.xml";
 
       try {
-        final Document xml = XmlDom4JHelper.getDocFromFile(pluginFolder, null);
+        final Document xml = XmlDom4JHelper.getDocFromFile(new File(pluginFolder), null);
 
         final List<Node> list = xml.selectNodes("//content-type[@type]");
 
