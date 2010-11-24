@@ -15,7 +15,7 @@
 	        <operations>
     	    	<operation>
         			<id>RUN</id>
-        			<command>content/pentaho-cdf/RenderXCDF?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
+        			<command>content/pentaho-cdf/RenderXCDF?id={id}&amp;template=mantle</command>
         		</operation>
     	    	<operation>
         			<id>NEWWINDOW</id>
