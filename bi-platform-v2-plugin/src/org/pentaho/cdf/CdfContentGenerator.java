@@ -944,7 +944,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
 
     // Add ie8 blueprint condition
-    stylesBuilders.append("<!--[if lt IE 8]><link rel=\"stylesheet\" href=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
+    stylesBuilders.append("<!--[if lte IE 8]><link rel=\"stylesheet\" href=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
 
     StringBuilder stuff = new StringBuilder();
     includes.put("scripts", scriptsBuilders.toString());
