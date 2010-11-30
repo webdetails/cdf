@@ -82,7 +82,6 @@ public class CdfContentGenerator extends BaseContentGenerator
   // CDF Resource Relative URL
   private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
   public String RELATIVE_URL;
-
   private Packager packager;
 
   public CdfContentGenerator()
@@ -107,17 +106,21 @@ public class CdfContentGenerator extends BaseContentGenerator
     final String payload;
     try
     {
-      if (parameterProviders.get("path") != null && parameterProviders.get("path").getParameter("httprequest") != null) {
-        RELATIVE_URL = ((HttpServletRequest)parameterProviders.get("path").getParameter("httprequest")).getContextPath();
-      } else {
+      if (parameterProviders.get("path") != null && parameterProviders.get("path").getParameter("httprequest") != null)
+      {
+        RELATIVE_URL = ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest")).getContextPath();
+      }
+      else
+      {
         RELATIVE_URL = "";
       }
-      
-      if(RELATIVE_URL.endsWith("/")) {
+
+      if (RELATIVE_URL.endsWith("/"))
+      {
         RELATIVE_URL = RELATIVE_URL.substring(0, RELATIVE_URL.length() - 1);
       }
 
-      
+
       // If callbacks is properly setup, we assume we're being called from another plugin
       if (this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance(callbacks.get(0)))
       {
@@ -273,19 +276,18 @@ public class CdfContentGenerator extends BaseContentGenerator
 
   }
 
-    private void generateStorage(final IParameterProvider requestParams, final OutputStream out) throws Exception
+  private void generateStorage(final IParameterProvider requestParams, final OutputStream out) throws Exception
   {
 
     final StringBuilder s = new StringBuilder();
     s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
     s.append("  Dashboards.storage = ");
-    s.append( StorageEngine.getInstance().read(requestParams, userSession) + "\n");
+    s.append(StorageEngine.getInstance().read(requestParams, userSession) + "\n");
     s.append("</script>\n");
     // setResponseHeaders(MIME_PLAIN,0,null);
     out.write(s.toString().getBytes("UTF-8"));
 
   }
-
 
   private void renderXcdf(final OutputStream out, final IParameterProvider requestParams) throws Exception
   {
@@ -315,11 +317,24 @@ public class CdfContentGenerator extends BaseContentGenerator
     final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
     final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
     final String mode = requestParams.getStringParameter("mode", null); //$NON-NLS-1$
-    final String contextPath = ((HttpServletRequest)parameterProviders.get("path").getParameter("httprequest")).getContextPath();
+    final String contextPath = ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest")).getContextPath();
     final NavigateComponent nav = new NavigateComponent(userSession, contextPath);
     final String json = nav.getNavigationElements(mode, solution, path);
+
     final PrintWriter pw = new PrintWriter(out);
-    pw.println(json);
+
+    // jsonp?
+    String callback = requestParams.getStringParameter("callback", null);
+    if (callback != null)
+    {
+      pw.println( callback + "(" + json + ");");
+
+    }
+    else
+    {
+      pw.println(json);
+    }
+
     pw.flush();
 
   }
@@ -533,14 +548,16 @@ public class CdfContentGenerator extends BaseContentGenerator
     String messageSetPath = null;
     // Merge dashboard related message file with global message file and save it in the dashboard cache
     MessageBundlesHelper mbh = new MessageBundlesHelper(solution,
-                                                        path,
-                                                        dashboardsMessagesBaseFilename);
+            path,
+            dashboardsMessagesBaseFilename);
     mbh.saveI18NMessageFilesToCache();
     messageSetPath = mbh.getMessageFilesCacheUrl() + "/";
 
     // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
     if (dashboardsMessagesBaseFilename == null)
+    {
       dashboardsMessagesBaseFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
+    }
 
     intro = intro.replaceAll("\\{load\\}", "onload=\"load()\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     intro = intro.replaceAll("\\{body-tag-unload\\}", "");
