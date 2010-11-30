@@ -1,4 +1,5 @@
 $.ajaxSetup({
+  dataType: "json",
   type: "POST",
   async: false,
   traditional: true,
