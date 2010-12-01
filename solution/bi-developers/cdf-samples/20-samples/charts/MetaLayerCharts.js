@@ -70,7 +70,7 @@ MetaLayerCharts =  {
 		jndi: "SampleData",
 		catalog: "solution:steel-wheels/analysis/SampleData.mondrian.xml",
 		title: "Then analyse departments:",
-		urlTemplate: "javascript:MetaLayerCharts.barChartClicked('{department}')",
+		urlTemplate: "javascript:MetaLayerCharts.barChartClicked(encode_prepare('{department}'))",
 		parameterName: "department",
 		query: function(){
 		

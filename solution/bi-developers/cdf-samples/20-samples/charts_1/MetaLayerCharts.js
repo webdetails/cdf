@@ -26,7 +26,7 @@ MetaLayerCharts =  {
 	barChartClicked:function(value){
 	
 		MetaLayerCharts.departmentMeasure = "[Department].[All Departments].[" + value + "]";
-		Dashboards.fireChange("MetaLayerCharts.departmentMeasure",MetaLayerCharts.departmentMeasure);
+		Dashboards.fireChange("MetaLayerCharts.departmentMeasure",encode_prepare(MetaLayerCharts.departmentMeasure));
 	},
 
 	pieChartDefinition : {

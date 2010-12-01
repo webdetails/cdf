@@ -15,7 +15,7 @@ BaseComponent = Base.extend({
         if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
           vid = "mdx";
         } else if (this.queryDefinition.dataAccessId !== undefined && !this.valueAsId) {
-            vid = 'cda';
+          vid = 'cda';
         }
         QueryComponent.makeQuery(this);
         var myArray = new Array();
@@ -29,7 +29,7 @@ BaseComponent = Base.extend({
               break;
             case 'cda':
               myArray.push([this.result[p][0],this.result[p][1]]);
-            break;
+              break;
             default:
               myArray.push([this.result[p][0],this.result[p][0]]);
               break;
@@ -99,39 +99,39 @@ BaseComponent = Base.extend({
 
   },
   parseArrayCda : function(jData,includeHeader){
-//ToDo: refactor with parseArray?..use as parseArray?..
+    //ToDo: refactor with parseArray?..use as parseArray?..
     var myArray = new Array();
 
     var jHeaders = $(jData).find("ColumnMetaData");
     if (jHeaders.size() > 0 ){
-	  if(includeHeader){//get column names
-		var _a = new Array();
-		jHeaders.each(function(){
-		  _a.push($(this).attr("name"));
-		});
-		myArray.push(_a);
-	  }
-	//  //set output column type 'valueOutputType' from cda column type if possible
-	//  //TODO: testing; for ee dashboard editor
-	//  var valIdx = 0;
-	//  if(this.parameters){
-	//	for(var i =0; i < this.parameters.length;i++){
-	//	  if(this.parameters[i][0] == 'validx'){
-	//		valIdx = this.parameters[2];
-	//		break;
-	//	  }
-	//	}
-	//  }
-	//  var typesArray = new Array();
-	//  jHeaders.each(function(){
-	//	typesArray.push($(this).attr("type"));
-	//  });
-	//  if(typesArray.length > valIdx){
-	//	this.valueOutputType = typesArray[valIdx];
-	//  }
+      if(includeHeader){//get column names
+        var _a = new Array();
+        jHeaders.each(function(){
+          _a.push($(this).attr("name"));
+        });
+        myArray.push(_a);
+      }
+    //  //set output column type 'valueOutputType' from cda column type if possible
+    //  //TODO: testing; for ee dashboard editor
+    //  var valIdx = 0;
+    //  if(this.parameters){
+    //	for(var i =0; i < this.parameters.length;i++){
+    //	  if(this.parameters[i][0] == 'validx'){
+    //		valIdx = this.parameters[2];
+    //		break;
+    //	  }
+    //	}
+    //  }
+    //  var typesArray = new Array();
+    //  jHeaders.each(function(){
+    //	typesArray.push($(this).attr("type"));
+    //  });
+    //  if(typesArray.length > valIdx){
+    //	this.valueOutputType = typesArray[valIdx];
+    //  }
     }
 
-	//get contents
+    //get contents
     var jDetails = $(jData).find("Row");
     jDetails.each(function(){
       var _a = new Array();
@@ -202,68 +202,68 @@ var XactionComponent = BaseComponent.extend({
 });
 
 var SelectBaseComponent = BaseComponent.extend({
-    visible: false,
-    update: function(){
-        var ph = $("#" + this.htmlObject);
-        var myArray = this.getValuesArray();
+  visible: false,
+  update: function(){
+    var ph = $("#" + this.htmlObject);
+    var myArray = this.getValuesArray();
 
-        selectHTML = "<select";
+    selectHTML = "<select";
 
-        // set size
-        if (this.size != undefined) {
-            selectHTML += " size='" + this.size + "'";
-        }
-        if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
-            if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
-                selectHTML += " multiple";
-            }
-            else
-                if (!this.isMultiple && this.size == undefined) {
-                    selectHTML += " size='" + myArray.length + "'";
-                }
-        }
-        selectHTML += ">";
-        var firstVal;
-        var vid = this.valueAsId == false ? false : true;
-        for (var i = 0, len = myArray.length; i < len; i++) {
-            if (myArray[i] != null && myArray[i].length > 0) {
-                var ivid = vid || myArray[i][0] == null;
-                var value, label;
-                if (myArray[i].length > 1) {
-                    value = myArray[i][ivid ? 1 : 0];
-                    label = myArray[i][1];
-                }
-                else {
-                    value = myArray[i][0];
-                    label = myArray[i][0];
-                }
-                if (i == 0) {
-                    firstVal = value;
-                }
-                selectHTML += "<option value = '" + value + "' >" + label + "</option>";
-            }
-        }
-
-        selectHTML += "</select>";
-
-        // update the placeholder
-        ph.html(selectHTML);
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = typeof currentVal == 'function' ? currentVal() : currentVal;
-        if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
-            Dashboards.setParameter(this.parameter, firstVal);
-            Dashboards.processChange(this.name);
-        }
-        else if (currentVal !== ''){
-            $("select", ph).val(currentVal);
-        } else {
-            $("select", ph).val(firstVal);
-        }
-        var myself = this;
-        $("select", ph).change(function(){
-            Dashboards.processChange(myself.name);
-        });
+    // set size
+    if (this.size != undefined) {
+      selectHTML += " size='" + this.size + "'";
     }
+    if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
+      if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
+        selectHTML += " multiple";
+      }
+      else
+      if (!this.isMultiple && this.size == undefined) {
+        selectHTML += " size='" + myArray.length + "'";
+      }
+    }
+    selectHTML += ">";
+    var firstVal;
+    var vid = this.valueAsId == false ? false : true;
+    for (var i = 0, len = myArray.length; i < len; i++) {
+      if (myArray[i] != null && myArray[i].length > 0) {
+        var ivid = vid || myArray[i][0] == null;
+        var value, label;
+        if (myArray[i].length > 1) {
+          value = myArray[i][ivid ? 1 : 0];
+          label = myArray[i][1];
+        }
+        else {
+          value = myArray[i][0];
+          label = myArray[i][0];
+        }
+        if (i == 0) {
+          firstVal = value;
+        }
+        selectHTML += "<option value = '" + value + "' >" + label + "</option>";
+      }
+    }
+
+    selectHTML += "</select>";
+
+    // update the placeholder
+    ph.html(selectHTML);
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = typeof currentVal == 'function' ? currentVal() : currentVal;
+    if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
+      Dashboards.setParameter(this.parameter, firstVal);
+      Dashboards.processChange(this.name);
+    }
+    else if (currentVal !== ''){
+      $("select", ph).val(currentVal);
+    } else {
+      $("select", ph).val(firstVal);
+    }
+    var myself = this;
+    $("select", ph).change(function(){
+      Dashboards.processChange(myself.name);
+    });
+  }
 });
 
 var SelectComponent = SelectBaseComponent.extend({
@@ -285,39 +285,39 @@ var JFreeChartComponent = BaseComponent.extend({
 
   getParameters: function() {
 
-	var cd = this.chartDefinition;
-	// Merge the stuff with a chartOptions element
-	if (cd == undefined){
-		alert("Fatal - No chartDefinition passed");
-		return;
-	}
+    var cd = this.chartDefinition;
+    // Merge the stuff with a chartOptions element
+    if (cd == undefined){
+      alert("Fatal - No chartDefinition passed");
+      return;
+    }
 
-	// If the user filled titleKey get the title value from language files
-	if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-		cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
-	}
+    // If the user filled titleKey get the title value from language files
+    if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+      cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
+    }
 
-	//set parameters string if using cda
-	var cdaParameterString = null;
-	if(cd.queryType == "cda"){
-	  if ($.isArray(this.parameters)){
-		var param;
-		for(var i = 0; i < this.parameters.length; i++){
-		  param = this.parameters[i];
-		  if($.isArray(param) && param.length >= 2){
-			var name = param[0];
-			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
-			//escape ';'s
-			if(value) value = value.replace(";",";;");
+    //set parameters string if using cda
+    var cdaParameterString = null;
+    if(cd.queryType == "cda"){
+      if ($.isArray(this.parameters)){
+        var param;
+        for(var i = 0; i < this.parameters.length; i++){
+          param = this.parameters[i];
+          if($.isArray(param) && param.length >= 2){
+            var name = param[0];
+            var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
+            //escape ';'s
+            if(value) value = value.replace(";",";;");
 
-			if(i == 0) cdaParameterString = "";
-			else cdaParameterString += ";";
+            if(i == 0) cdaParameterString = "";
+            else cdaParameterString += ";";
 
-			cdaParameterString += name + "=" + value;
-		  }
-		}
-	  }
-	}
+            cdaParameterString += name + "=" + value;
+          }
+        }
+      }
+    }
 
     var cd0 = cd.chartOptions != undefined ? $.extend({},Dashboards.ev(cd.chartOptions), cd) : cd;
 
@@ -329,9 +329,9 @@ var JFreeChartComponent = BaseComponent.extend({
       // alert("key: " + key + "; Value: " + value);
       parameters.push([key,value]);
     }
-	if(cdaParameterString != null){
-	  parameters.push(["cdaParameterString", cdaParameterString]);
-	}
+    if(cdaParameterString != null){
+      parameters.push(["cdaParameterString", cdaParameterString]);
+    }
 
     return parameters;
 
@@ -882,71 +882,71 @@ var TextComponent = BaseComponent.extend({
 });
 
 var TextInputComponent = BaseComponent.extend({
-    update: function(){
-        selectHTML = "<input";
-        selectHTML += " type=test id='" + this.name + "' name='" + this.name +
-        "' + value='" +
-        Dashboards.getParameterValue(this.parameter) +
-        (this.charWidth ? ("' + size='" + this.charWidth) : "") +
-        (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
-        "'>";
-        $("#" + this.htmlObject).html(selectHTML);
-        var myself = this;
-        $("#" + this.name).change(function(){
-            Dashboards.processChange(myself.name);
-        }).keyup(function(event){
-            if (event.keyCode == 13) {
-                Dashboards.processChange(myself.name);
-            }
-        });
-    },
+  update: function(){
+    selectHTML = "<input";
+    selectHTML += " type=test id='" + this.name + "' name='" + this.name +
+    "' + value='" +
+    Dashboards.getParameterValue(this.parameter) +
+    (this.charWidth ? ("' + size='" + this.charWidth) : "") +
+    (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
+    "'>";
+    $("#" + this.htmlObject).html(selectHTML);
+    var myself = this;
+    $("#" + this.name).change(function(){
+      Dashboards.processChange(myself.name);
+    }).keyup(function(event){
+      if (event.keyCode == 13) {
+        Dashboards.processChange(myself.name);
+      }
+    });
+  },
   getValue : function() {
     return $("#"+this.name).val();
   }
 });
 
 var DateInputComponent = BaseComponent.extend({
-    update: function(){
-        var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
-	    var myself = this;
+  update: function(){
+    var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
+    var myself = this;
 
-		var startDate, endDate;
+    var startDate, endDate;
 
-		if(this.startDate == 'TODAY') startDate = new Date();
-		else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
+    if(this.startDate == 'TODAY') startDate = new Date();
+    else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
 
-		if(this.endDate == 'TODAY') endDate = new Date();
-		else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
+    if(this.endDate == 'TODAY') endDate = new Date();
+    else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
 
-		//ToDo: stretch interval to catch defaultValue?..
-		//Dashboards.getParameterValue(this.parameter))
+    //ToDo: stretch interval to catch defaultValue?..
+    //Dashboards.getParameterValue(this.parameter))
 
-        $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
-        $(function(){
-            // Add JQuery DatePicker standard localization support only if the dashboard is localized
-            // Reset to standard language
-            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-                $.datepicker.setDefaults($.datepicker.regional['']);
-            } else if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
-                // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
-                $.datepicker.setDefaults($.datepicker.regional['']);
-            }
-            $("#" + myself.htmlObject + " input").datepicker({
-                dateFormat: format,
-                changeMonth: true,
-                changeYear: true,
-				minDate: startDate,
-				maxDate: endDate,
-                onSelect: function(date, input){
-                    Dashboards.processChange(myself.name);
-                }
-            });
-            // Add JQuery DatePicker standard localization support only if the dashboard is localized
-            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-                $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
-            }
-        });
-    },
+    $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
+    $(function(){
+      // Add JQuery DatePicker standard localization support only if the dashboard is localized
+      // Reset to standard language
+      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        $.datepicker.setDefaults($.datepicker.regional['']);
+      } else if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
+        // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
+        $.datepicker.setDefaults($.datepicker.regional['']);
+      }
+      $("#" + myself.htmlObject + " input").datepicker({
+        dateFormat: format,
+        changeMonth: true,
+        changeYear: true,
+        minDate: startDate,
+        maxDate: endDate,
+        onSelect: function(date, input){
+          Dashboards.processChange(myself.name);
+        }
+      });
+      // Add JQuery DatePicker standard localization support only if the dashboard is localized
+      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+      }
+    });
+  },
   getValue : function() {
     return $("#"+this.name).val();
   }
@@ -1089,30 +1089,30 @@ var MonthPickerComponent = BaseComponent.extend({
 });
 
 var ToggleButtonBaseComponent = BaseComponent.extend({
-    update: function(){
-        var myArray = this.getValuesArray();
+  update: function(){
+    var myArray = this.getValuesArray();
 
-        selectHTML = "";
+    selectHTML = "";
 
-		//default
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-		var hasCurrentVal = typeof currentval != undefined;
+    //default
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    var hasCurrentVal = typeof currentval != "undefined";
 
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<nobr><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
       var vid = this.valueAsId==false?0:1;
       if (this.type == 'radio' || this.type == 'radioComponent'){
-	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (myArray[i][vid] == currentVal ))) {
-                selectHTML += " CHECKED";
-				}
+        if ((i == 0 && !hasCurrentVal) ||
+          (hasCurrentVal && (myArray[i][vid] == currentVal ))) {
+          selectHTML += " CHECKED";
+        }
         selectHTML += " type='radio'";
       }else{
-	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (currentVal.indexOf(myArray[i][vid]) >= 0))) {
+        if ((i == 0 && !hasCurrentVal) ||
+          (hasCurrentVal && (currentVal.indexOf(myArray[i][vid]) >= 0))) {
           selectHTML += " CHECKED";
-				}
+        }
         selectHTML += " type='checkbox'";
       }
       selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></nobr>" + (this.separator == undefined?"":this.separator);
@@ -1146,23 +1146,23 @@ var CheckComponent = ToggleButtonBaseComponent.extend({
 var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
-	var myArray = this.getValuesArray();
+    var myArray = this.getValuesArray();
     var cssClass= "toggleButton";
     selectHTML = "";
     var firstVal;
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
 
-	if (this.isMultiple == undefined) this.isMultiple = false;
+    if (this.isMultiple == undefined) this.isMultiple = false;
 
     for (var i = 0, len = myArray.length; i < len; i++){
-	  var value = myArray[i][valIdx];
+      var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
 
       selectHTML += "<button onclick='MultiButtonComponent.prototype.clickButton(\"" +
-        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ")'";
-        selectHTML += "class='" + cssClass + "' name='" + this.name + "' value='" + value + "'> "
-        selectHTML += label + "</button>" + (this.separator == undefined ? "" : this.separator);
+      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ")'";
+      selectHTML += "class='" + cssClass + "' name='" + this.name + "' value='" + value + "'> "
+      selectHTML += label + "</button>" + (this.separator == undefined ? "" : this.separator);
 
       if (i == 0) firstVal = value;
     }
@@ -1175,37 +1175,37 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var currentVal = Dashboards.getParameterValue(this.parameter);
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 
-   	if(currentVal == null){
-			Dashboards.setParameter(this.parameter, firstVal);
-			currentVal = firstVal;
-	}
+    if(currentVal == null){
+      Dashboards.setParameter(this.parameter, firstVal);
+      currentVal = firstVal;
+    }
 
-	var foundDefault = false;
-	for (var i = 0; i < myArray.length; i++) {
-	  if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
-		MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
-		foundDefault = true;
-		if(!this.isMultiple) break;
-	  }
-	}
-	if(!foundDefault && !this.isMultiple && myArray.length > 0){
-	  //select first value
-	  MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
-	}
+    var foundDefault = false;
+    for (var i = 0; i < myArray.length; i++) {
+      if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
+        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
+        foundDefault = true;
+        if(!this.isMultiple) break;
+      }
+    }
+    if(!foundDefault && !this.isMultiple && myArray.length > 0){
+      //select first value
+      MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
+    }
   },
 
   getValue: function(){
-		if(this.isMultiple){
-			var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
-			var a = new Array();
-			for(var i=0; i < indexes.length; i++){
-				a.push(this.getValueByIdx(indexes[i]));
-			}
-			return a;
-		}
-		else {
-		  return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
-		}
+    if(this.isMultiple){
+      var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
+      var a = new Array();
+      for(var i=0; i < indexes.length; i++){
+        a.push(this.getValueByIdx(indexes[i]));
+      }
+      return a;
+    }
+    else {
+      return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
+    }
   },
 
   getValueByIdx: function(idx){
@@ -1214,17 +1214,17 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple){
-	var cssClass= "toggleButton";
-	var cssClassSelected= "toggleButtonPressed";
+    var cssClass= "toggleButton";
+    var cssClassSelected= "toggleButtonPressed";
 
-	var buttons = $("#" + htmlObject + " button");
+    var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
-	  else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
+      else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
 
-	  var disable = false;
+      var disable = false;
       for (var i = 0; i < this.indexes[name].length; ++i) {
-	    if (this.indexes[name][i] == index) {
+        if (this.indexes[name][i] == index) {
           disable = true;
           this.indexes[name].splice(i, 1);
           break;
@@ -1232,26 +1232,26 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
       if (disable) buttons[index].className = cssClass;
       else {
-		buttons[index].className = cssClassSelected;
+        buttons[index].className = cssClassSelected;
         this.indexes[name].push(index);
       }
-  	}
+    }
     else {//de-select old, select new
       if (this.indexes[name] != undefined && this.indexes[name] < buttons.length) {
-				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
-					for(var i = 0; i < this.indexes[name].length; i++){
-						buttons[this.indexes[name][i]].className = cssClass;
-					}
-				}
-				else buttons[this.indexes[name]].className = cssClass;
+        if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
+          for(var i = 0; i < this.indexes[name].length; i++){
+            buttons[this.indexes[name][i]].className = cssClass;
+          }
+        }
+        else buttons[this.indexes[name]].className = cssClass;
       }
       this.indexes[name] = index;
-			buttons[index].className = cssClassSelected;
-	  }
+      buttons[index].className = cssClassSelected;
+    }
     this.callAjaxAfterRender(name);
   },
 
- //static MultiButtonComponent.prototype.getSelectedIndex
+  //static MultiButtonComponent.prototype.getSelectedIndex
   getSelectedIndex: function(name){
     return this.indexes[name];
   }
@@ -1779,16 +1779,20 @@ var QueryComponent = BaseComponent.extend({
       if (typeof values.resultset != "undefined"){
         object.metadata = values.metadata;
       }
+      if (object.resultvar != undefined){
+        Dashboards.setParameter(object.resultvar, object.result);
+      }
       changedValues = undefined;
       if((typeof(object.postFetch)=='function')){
         changedValues = object.postFetch(values);
       }
       if (changedValues != undefined){
         values = changedValues;
-      }
-      // if resultvar is defined, store it on that var
-      if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
+        // (Call this again after postFetch)
+        if (object.resultvar != undefined){
+          Dashboards.setParameter(object.resultvar, object.result);
+        }
+
       }
     })
 
@@ -1859,141 +1863,146 @@ var ExecuteXactionComponent = BaseComponent.extend({
 });
 
 var ButtonComponent = BaseComponent.extend({
-		update : function() {
-			$("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
-		}
-	});
+  update : function() {
+    $("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
+  }
+});
 
 
 
 var PrptComponent = BaseComponent.extend({
 
-		update: function(){
+  update: function(){
 
-			this.clear();
+    this.clear();
 
-			var options = this.getOptions();
-      options.showParameters = false;
+    var options = this.getOptions();
+    options.showParameters = false;
       
-			if(options["dashboard-mode"]){
-				var url = webAppPath + '/content/reporting';
-				var myself=this;
-				$.ajax({url: url, data: options, dataType:"html", success: function(json){
-						$("#"+myself.htmlObject).html(json);
-					}});
-			}
-			else{
-				var url = webAppPath + '/content/reporting/reportviewer/report.html';
-                                var encodeArray = function(k,v) {
-                                    var arr = [];
-                                    for (var i = 0; i < v.length;i++) {
-                                        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-                                    }
-                                    return arr;
-                                };
-				var a=[];
-	        		$.each(options,function(k,v){
-                                        if (typeof v == 'object') {
-                                            a.push.apply(a,encodeArray(k,v));
-                                        } else {
-					    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-                                        }
-				});
+    if(options["dashboard-mode"]){
+      var url = webAppPath + '/content/reporting';
+      var myself=this;
+      $.ajax({
+        url: url,
+        data: options,
+        dataType:"html",
+        success: function(json){
+          $("#"+myself.htmlObject).html(json);
+        }
+      });
+    }
+    else{
+      var url = webAppPath + '/content/reporting/reportviewer/report.html';
+      var encodeArray = function(k,v) {
+        var arr = [];
+        for (var i = 0; i < v.length;i++) {
+          arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+        }
+        return arr;
+      };
+      var a=[];
+      $.each(options,function(k,v){
+        if (typeof v == 'object') {
+          a.push.apply(a,encodeArray(k,v));
+        } else {
+          a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+        }
+      });
 
-				$("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
-			}
-		},
+      $("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
+    }
+  },
 
-		getOptions: function(){
+  getOptions: function(){
 
-			var options = {
-				paginate : this.paginate || false,
-				showParameters: this.showParameters || false,
-				autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
-				"dashboard-mode": this.iframe==undefined?false:!this.iframe,
-				solution: this.solution,
-				path: this.path,
-				action: this.action
-				//,	"output-target": "table/html;pageMode=stream" // Uncomment for pentaho-reporting 3.6
-			};
-			if(this.paginate){
+    var options = {
+      paginate : this.paginate || false,
+      showParameters: this.showParameters || false,
+      autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
+      "dashboard-mode": this.iframe==undefined?false:!this.iframe,
+      solution: this.solution,
+      path: this.path,
+      action: this.action
+    //,	"output-target": "table/html;pageMode=stream" // Uncomment for pentaho-reporting 3.6
+    };
+    if(this.paginate){
 
-				options["output-target"] = "table/html;page-mode=page";
-			} else {
-				options["output-target"] = "table/html;page-mode=stream";
-			}
+      options["output-target"] = "table/html;page-mode=page";
+    } else {
+      options["output-target"] = "table/html;page-mode=stream";
+    }
 
-			// process params and update options
-			$.map(this.parameters,function(k){
-				options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
-			});
+    // process params and update options
+    $.map(this.parameters,function(k){
+      options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+    });
 
-			options["output-type"] = "";
+    options["output-type"] = "";
 
-			return options;
+    return options;
 
-		}
-	});
+  }
+});
 
 
 var ExecutePrptComponent = PrptComponent.extend({
-		visible: false,
+  visible: false,
 
-		update : function() {
-			// 2 modes of working; if it's a div, create a button inside it
-			var myself = this;
-			var o = $("#"+ this.htmlObject);
-			if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
-				// create a button
-				o = $("<button/>").appendTo(o.empty());
-				if (o[0].tagName=="DIV") o.wrap("<span/>");
-				if (this.label != undefined) o.text(this.label);
-				o.button();
-			}
-			o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-			o.bind("click", function(){
-					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
-					if(success) {
-						myself.executePrptComponent();
-					}
-					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
-				});
-		},
+  update : function() {
+    // 2 modes of working; if it's a div, create a button inside it
+    var myself = this;
+    var o = $("#"+ this.htmlObject);
+    if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
+      // create a button
+      o = $("<button/>").appendTo(o.empty());
+      if (o[0].tagName=="DIV") o.wrap("<span/>");
+      if (this.label != undefined) o.text(this.label);
+      o.button();
+    }
+    o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+    o.bind("click", function(){
+      var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
+      if(success) {
+        myself.executePrptComponent();
+      }
+      typeof(myself.postChange)=='undefined' ? true : myself.postChange();
+    });
+  },
 
-		executePrptComponent: function(){
+  executePrptComponent: function(){
 
-			var options = this.getOptions();
-			var url = webAppPath + '/content/reporting/reportviewer/report.html';
-			var a=[];
-      var encodeArray = function(k,v) {
-          var arr = [];
-          for (var i = 0; i < v.length;i++) {
-              arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-          }
-          return arr;
-      };
-			$.each(options,function(k,v){
-          if (typeof v == 'object') {
-              a.push.apply(a,encodeArray(k,v));
-          } else {
-				    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-          }
-				});
-			$.fancybox({
-					type:"iframe",
-					href: url + "?"+ a.join('&') ,
-					width: $(window).width(),
-					height:$(window).height() - 50
-				});
+    var options = this.getOptions();
+    var url = webAppPath + '/content/reporting/reportviewer/report.html';
+    var a=[];
+    var encodeArray = function(k,v) {
+      var arr = [];
+      for (var i = 0; i < v.length;i++) {
+        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+      }
+      return arr;
+    };
+    $.each(options,function(k,v){
+      if (typeof v == 'object') {
+        a.push.apply(a,encodeArray(k,v));
+      } else {
+        a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+      }
+    });
+    $.fancybox({
+      type:"iframe",
+      href: url + "?"+ a.join('&') ,
+      width: $(window).width(),
+      height:$(window).height() - 50
+    });
 
-		}
-	}
+  }
+}
 );
 
 
 var FreeformComponent = BaseComponent.extend({
-		update : function() {
-			var myself = this;
-			this.customfunction(this.parameters || []);
-		}
-	})
+  update : function() {
+    var myself = this;
+    this.customfunction(this.parameters || []);
+  }
+})
