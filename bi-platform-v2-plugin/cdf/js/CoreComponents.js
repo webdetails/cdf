@@ -1867,14 +1867,14 @@ var ButtonComponent = BaseComponent.extend({
 
 
 var PrptComponent = BaseComponent.extend({
-		showParameters: false,
 
 		update: function(){
 
 			this.clear();
 
 			var options = this.getOptions();
-
+      options.showParameters = false;
+      
 			if(options["dashboard-mode"]){
 				var url = webAppPath + '/content/reporting';
 				var myself=this;
