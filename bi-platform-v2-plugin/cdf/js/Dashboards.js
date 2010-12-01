@@ -1,5 +1,4 @@
 $.ajaxSetup({
-  dataType: "json",
   type: "POST",
   async: false,
   traditional: true,
@@ -787,7 +786,10 @@ Dashboards.fetchData = function(cd, params, callback) {
   else if (cd != undefined){
 	
     $.post(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd,
-      function(json) {  callback(json.values); });
+      function(result) {
+        var json = eval("(" + result + ")");
+        callback(json.values); 
+      });
   }
   // ... or just call the callback when no valid definition is passed
   else {
