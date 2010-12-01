@@ -26,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +53,7 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
+import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.util.web.MimeHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
@@ -77,8 +80,8 @@ public class CdfContentGenerator extends BaseContentGenerator
   public static final String PLUGIN_NAME = "pentaho-cdf"; //$NON-NLS-1$
   private static final String MIMETYPE = "text/html"; //$NON-NLS-1$
   // Possible actions
-  private static final String RENDER_HTML = "/RenderHTML";
-  private static final String RENDER_XCDF = "/RenderXCDF";
+  private static final String RENDER_HTML = "/RenderHTML"; //$NON-NLS-1$
+  private static final String RENDER_XCDF = "/RenderXCDF"; //$NON-NLS-1$
   private static final String JSON_SOLUTION = "/JSONSolution"; //$NON-NLS-1$
   private static final String GET_CDF_RESOURCE = "/GetCDFResource"; //$NON-NLS-1$
   private static final String EXPORT = "/Export"; //$NON-NLS-1$
@@ -88,14 +91,14 @@ public class CdfContentGenerator extends BaseContentGenerator
   private static final String STORAGE = "/Storage"; //$NON-NLS-1$
   private static final String GETHEADERS = "/GetHeaders"; //$NON-NLS-1$
   private static final String CONTEXT = "/Context"; //$NON-NLS-1$
-  private static final String MIME_HTML = "text/html";
-  private static final String MIME_CSS = "text/css";
-  private static final String MIME_JS = "text/javascript";
-  private static final String MIME_PLAIN = "text/plain";
-  private static final String MIME_CSV = "text/csv";
-  private static final String MIME_XLS = "application/vnd.ms-excel";
+  private static final String MIME_HTML = "text/html"; //$NON-NLS-1$
+  private static final String MIME_CSS = "text/css"; //$NON-NLS-1$
+  private static final String MIME_JS = "text/javascript"; //$NON-NLS-1$
+  private static final String MIME_PLAIN = "text/plain"; //$NON-NLS-1$
+  private static final String MIME_CSV = "text/csv"; //$NON-NLS-1$
+  private static final String MIME_XLS = "application/vnd.ms-excel"; //$NON-NLS-1$
   // CDF Resource Relative URL
-  private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
+  private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@"; //$NON-NLS-1$
   public String RELATIVE_URL;
 
   private Packager packager;
@@ -108,7 +111,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
     catch (Exception e)
     {
-      logger.error("Failed to initialize CDF");
+      logger.error("Failed to initialize CDF"); //$NON-NLS-1$
     }
   }
 
@@ -122,8 +125,8 @@ public class CdfContentGenerator extends BaseContentGenerator
     final String payload;
     try
     {
-      if (parameterProviders.get("path") != null && parameterProviders.get("path").getParameter("httprequest") != null) {
-        RELATIVE_URL = ((HttpServletRequest)parameterProviders.get("path").getParameter("httprequest")).getContextPath();
+      if (parameterProviders.get("path") != null && parameterProviders.get("path").getParameter("httprequest") != null) { //$NON-NLS-1$
+        RELATIVE_URL = ((HttpServletRequest)parameterProviders.get("path").getParameter("httprequest")).getContextPath(); //$NON-NLS-1$
       } else {
         RELATIVE_URL = "";
       }
@@ -138,11 +141,11 @@ public class CdfContentGenerator extends BaseContentGenerator
       {
         HashMap<String, Object> iface = (HashMap<String, Object>) callbacks.get(0);
         pathParams = parameterProviders.get("path");
-        contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
-        out = (OutputStream) iface.get("output");
-        method = "/" + (String) iface.get("method");
-        payload = (String) iface.get("payload");
-        this.userSession = this.userSession != null ? this.userSession : (IPentahoSession) iface.get("usersession");
+        contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML); //$NON-NLS-1$
+        out = (OutputStream) iface.get("output"); //$NON-NLS-1$
+        method = "/" + (String) iface.get("method"); //$NON-NLS-1$
+        payload = (String) iface.get("payload"); //$NON-NLS-1$
+        this.userSession = this.userSession != null ? this.userSession : (IPentahoSession) iface.get("usersession"); //$NON-NLS-1$
       }
       else
       { // if not, we handle the request normally
@@ -176,7 +179,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
     catch (Exception e)
     {
-      logger.error("Error creating cdf content: " + e.getMessage());
+      logger.error("Error creating cdf content: " + e.getMessage()); //$NON-NLS-1$
     }
   }
 
@@ -251,14 +254,14 @@ public class CdfContentGenerator extends BaseContentGenerator
 
     final JSONObject context = new JSONObject();
     Calendar cal = Calendar.getInstance();
-    context.put("serverLocalDate", cal.getTimeInMillis());
-    context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
-    context.put("user", userSession.getName());
+    context.put("serverLocalDate", cal.getTimeInMillis()); //$NON-NLS-1$
+    context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset()); //$NON-NLS-1$
+    context.put("user", userSession.getName()); //$NON-NLS-1$
 
     // The first method works in 3.6, for 3.5 it's a different method. We'll try both
     IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
 
-    context.put("roles", service.getRolesForUser(userSession.getName()));
+    context.put("roles", service.getRolesForUser(userSession.getName())); //$NON-NLS-1$
 
     JSONObject params = new JSONObject();
 
@@ -274,7 +277,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     context.put("params", params);
 
     final StringBuilder s = new StringBuilder();
-    s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
+    s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n"); //$NON-NLS-1$
     s.append("  Dashboards.context = ");
     s.append(context.toString(2) + "\n");
     s.append("</script>\n");
@@ -381,7 +384,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     String messagesBaseFilename = null;
     
     IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-    RepositoryFile xcdfFile = unifiedRepository.getFile(xcdfId);
+    RepositoryFile xcdfFile = unifiedRepository.getFileById(xcdfId);
     if (xcdfFile != null)
     {
       final Document doc = XmlDom4JHelper.getDocFromStream(unifiedRepository.getDataForRead(xcdfFile.getId(), SimpleRepositoryFileData.class).getStream());
@@ -400,9 +403,8 @@ public class CdfContentGenerator extends BaseContentGenerator
       }
       
       if (dashboardFileName != null) {
-        File dashboardFile = new File(xcdfFile.getPath(), dashboardFileName);
-        dashboardFileName = dashboardFile.getAbsolutePath();
-
+        String parentDir = FilenameUtils.getFullPathNoEndSeparator(xcdfFile.getPath());
+        dashboardFileName = FilenameUtils.separatorsToUnix(FilenameUtils.concat(parentDir, dashboardFileName));
       }
       renderHtmlDashboard(requestParams, out, dashboardFileName, template, messagesBaseFilename);
     } else {
@@ -410,66 +412,30 @@ public class CdfContentGenerator extends BaseContentGenerator
     }
 
   }
-
-  public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
-          String dashboardFile,
-          String template,
-          String dashboardsMessagesBaseFilename) throws Exception
-  {
-
-    if (template == null || template.equals("")) //$NON-NLS-1$
-    {
-      template = ""; //$NON-NLS-1$
-    }
-    else
-    {
-      template = "-" + template; //$NON-NLS-1$
-    }
-
-    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-    IPluginResourceLoader pluginResourceLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
-    
-    InputStream is = null;
-    if (dashboardFile == null || dashboardFile.trim().length() == 0) {
-      is = pluginResourceLoader.getResourceAsStream(this.getClass(), "default-dashboard-template.html"); //$NON-NLS-1$
-    } else if (dashboardFile.startsWith("/")) { //$NON-NLS-1$
-      is = unifiedRepository.getDataForRead(unifiedRepository.getFile(dashboardFile).getId(), SimpleRepositoryFileData.class).getStream();
-    } else if (dashboardFile.startsWith("\\")) { //$NON-NLS-1$
-      
-    } else {
-      is = unifiedRepository.getDataForRead(dashboardFile, SimpleRepositoryFileData.class).getStream();
-    }
-
-    String intro = ""; //$NON-NLS-1$
-    String footer = ""; //$NON-NLS-1$
-
+  
+  private void getTemplateSections(File templateFile, String[] templateSections, ArrayList<String> i18nTagsList) throws Exception{
     final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
-    ArrayList<String> i18nTagsList = new ArrayList<String>();
-    if (templater != null)
-    {
-      String templateContent = pluginResourceLoader.getResourceAsString(this.getClass(), "template-dashboard" + template + ".html"); //$NON-NLS-1$ //$NON-NLS-2$
+    if (templater == null) {
+      templateSections[0] = Messages.getErrorString("CdfContentGenerator.ERROR_0005_BAD_TEMPLATE_OBJECT"); //$NON-NLS-1$
+    } else {
+      String templateContent = IOUtils.toString(new FileInputStream(templateFile), LocaleHelper.getSystemEncoding());
       // Process i18n on dashboard outer template
       templateContent = updateUserLanguageKey(templateContent);
       templateContent = processi18nTags(templateContent, i18nTagsList);
       // Process i18n on dashboard outer template - end
-      final String[] sections = templater.breakTemplateString(templateContent, "", userSession); //$NON-NLS-1$
-      if (sections != null && sections.length > 0)
+      final String[] tempSections = templater.breakTemplateString(templateContent, "", userSession); //$NON-NLS-1$
+      if (tempSections != null && tempSections.length > 0)
       {
-        intro = sections[0];
+        templateSections[0] = tempSections[0];
       }
-      if (sections != null && sections.length > 1)
+      if (tempSections != null && tempSections.length > 1)
       {
-        footer = sections[1];
+        templateSections[1] = tempSections[1];
       }
     }
-    else
-    {
-      intro = Messages.getErrorString("CdfContentGenerator.ERROR_0005_BAD_TEMPLATE_OBJECT"); //$NON-NLS-1$
-    }
-
-    final String dashboardContent;
-
-
+  }
+  
+  private String getDashboardContent(InputStream is, ArrayList<String> i18nTagsList) throws Exception {
     // Fixed ISSUE #CDF-113
     //BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName(LocaleHelper.getSystemEncoding())));
@@ -484,15 +450,12 @@ public class CdfContentGenerator extends BaseContentGenerator
       sb.append(line + "\n"); //$NON-NLS-1$
     }
     is.close();
-    dashboardContent = sb.toString();
-
-    String messageSetPath = null;
-    // Merge dashboard related message file with global message file and save it in the dashboard cache
-    File file = new File(dashboardFile);
-    MessageBundlesHelper mbh = new MessageBundlesHelper(file.getParent(),
-                                                        dashboardsMessagesBaseFilename);
+    return sb.toString();
+  }
+  
+  private String replaceIntroParameters(String intro, MessageBundlesHelper mbh, ArrayList<String> i18nTagsList, String dashboardsMessagesBaseFilename) throws Exception{
     mbh.saveI18NMessageFilesToCache();
-    messageSetPath = mbh.getMessageFilesCacheUrl() + "/"; //$NON-NLS-1$
+    String messageSetPath = mbh.getMessageFilesCacheUrl() + "/"; //$NON-NLS-1$
 
     // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
     if (dashboardsMessagesBaseFilename == null)
@@ -503,10 +466,11 @@ public class CdfContentGenerator extends BaseContentGenerator
     intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET_NAME\\}", dashboardsMessagesBaseFilename); //$NON-NLS-1$
     intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET_PATH\\}", messageSetPath); //$NON-NLS-1$
     intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET\\}", buildMessageSetCode(i18nTagsList)); //$NON-NLS-1$
+    return intro;
 
-    /************************************************/
-    /*      Add cdf libraries
-    /************************************************/
+  }
+  
+  private void outputDashboardHtml(OutputStream out, String intro, String dashboardContent, String footer, IParameterProvider requestParams) throws Exception{
     final Date startDate = new Date();
     final int headIndex = intro.indexOf("<head>"); //$NON-NLS-1$
     final int length = intro.length();
@@ -528,6 +492,87 @@ public class CdfContentGenerator extends BaseContentGenerator
     out.write(footer.getBytes("UTF-8")); //$NON-NLS-1$
 
     setResponseHeaders(MIME_HTML, 0, null);
+  }
+  
+  public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
+      RepositoryFile dashboardFile,
+      File templateFile,
+      String dashboardsMessagesBaseFilename) throws Exception{
+    
+    ArrayList<String> i18nTagsList = new ArrayList<String>();
+    String[] templateSections = new String[] {"", ""};    
+    getTemplateSections(templateFile, templateSections, i18nTagsList);
+
+    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
+
+    // Merge dashboard related message file with global message file and save it in the dashboard cache
+    String parentDir = FilenameUtils.getFullPathNoEndSeparator(dashboardFile.getPath());
+    if (parentDir == "") {
+      parentDir = "/";
+    }
+    parentDir = FilenameUtils.separatorsToUnix(parentDir);
+
+    MessageBundlesHelper mbh = new MessageBundlesHelper(unifiedRepository.getFile(parentDir),
+                                                        dashboardsMessagesBaseFilename);
+    
+    String intro = replaceIntroParameters(templateSections[0], mbh, i18nTagsList, dashboardsMessagesBaseFilename);
+    String footer = templateSections[1];
+    
+    final String dashboardContent = getDashboardContent(unifiedRepository.getDataForRead(dashboardFile.getId(), SimpleRepositoryFileData.class).getStream(), i18nTagsList);
+    outputDashboardHtml(out, intro, dashboardContent, footer, requestParams);
+  }
+  
+  public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
+      File dashboardFile,
+      File templateFile,
+      String dashboardsMessagesBaseFilename) throws Exception{
+
+    ArrayList<String> i18nTagsList = new ArrayList<String>();
+    String[] templateSections = new String[] {"", ""};    
+    getTemplateSections(templateFile, templateSections, i18nTagsList);
+
+
+    // Merge dashboard related message file with global message file and save it in the dashboard cache
+    File file = new File(dashboardFile.getPath());
+    MessageBundlesHelper mbh = new MessageBundlesHelper(dashboardFile.getParentFile(),
+                                                        dashboardsMessagesBaseFilename);
+    
+    String intro = replaceIntroParameters(templateSections[0], mbh, i18nTagsList, dashboardsMessagesBaseFilename);
+    String footer = templateSections[1];
+    
+    final String dashboardContent = getDashboardContent(new FileInputStream(dashboardFile), i18nTagsList);
+    outputDashboardHtml(out, intro, dashboardContent, footer, requestParams);
+  }
+  
+  
+  public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
+          String dashboardFilePath,
+          String template,
+          String dashboardsMessagesBaseFilename) throws Exception
+  {
+    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
+    File dashboardFile = null;
+    RepositoryFile dashboardRepositoryFile = null;
+    
+    File pluginDir = ((PluginClassLoader)this.getClass().getClassLoader()).getPluginDir();
+    if (dashboardFilePath == null || dashboardFilePath.trim().length() == 0) {
+      dashboardFile = new File(pluginDir, "default-dashboard-template.html"); //$NON-NLS-1$
+    } else if (dashboardFilePath.startsWith("/")) { //$NON-NLS-1$
+      dashboardRepositoryFile = unifiedRepository.getFile(dashboardFilePath);
+    } else if (dashboardFilePath.startsWith("\\")) { //$NON-NLS-1$
+      
+    } else {
+      dashboardRepositoryFile = unifiedRepository.getFileById(dashboardFilePath);
+    }
+
+    template = (template == null || template.equals("") ? "" : "-" + template); //$NON-NLS-1$
+    File templateFile = new File(pluginDir, "template-dashboard" + template + ".html"); //$NON-NLS-1$
+    
+    if (dashboardFile != null) {
+      renderHtmlDashboard(requestParams, out, dashboardFile, templateFile, dashboardsMessagesBaseFilename);
+    } else if (dashboardRepositoryFile != null) {
+      renderHtmlDashboard(requestParams, out, dashboardRepositoryFile, templateFile, dashboardsMessagesBaseFilename);
+    }
   }
 
   private String buildMessageSetCode(ArrayList<String> tagsList)

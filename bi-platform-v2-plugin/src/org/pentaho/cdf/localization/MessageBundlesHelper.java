@@ -6,10 +6,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Locale;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.pentaho.cdf.CdfConstants;
-import org.pentaho.platform.engine.core.solution.ActionInfo;
+import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
+import org.pentaho.platform.api.repository2.unified.RepositoryFile;
+import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
 import org.pentaho.platform.util.messages.LocaleHelper;
 
@@ -22,21 +29,49 @@ import org.pentaho.platform.util.messages.LocaleHelper;
  */
 public class MessageBundlesHelper {
 
-    private String globalBaseMessageFile;
-    private String targetDashboardCacheDir;
-    private String targetDashboardBaseMsgFile;
+    private static File PLUGIN_DIR = ((PluginClassLoader)MessageBundlesHelper.class.getClassLoader()).getPluginDir();
+    
+    private File globalBaseMessageFile = new File(PLUGIN_DIR, PENTAHO_CDF_GLOBAL_LANGUAGES_DIR + File.separator + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME);
+    private File targetDashboardBaseMsgFile;
+    private File globalMsgCacheFile;
     private String sourceDashboardBaseMsgFile;
     private static final String PENTAHO_CDF_GLOBAL_LANGUAGES_DIR = "resources/languages";
     private String languagesCacheUrl;
+    private Object msgsDir;
 
 
-    public MessageBundlesHelper(String msgsDir,
+    public MessageBundlesHelper(File msgsDir,
+        String msgsBaseFileName) {
+      
+      this.msgsDir = msgsDir;
+      String relativeDirPath = FilenameUtils.getPath(msgsDir.getAbsolutePath()) + msgsDir.getName();
+      // Name the dashboard target i18n messages file. If we have a dashboard specific language file it will be named
+      // the same otherwise it will have the name of the global message file. The target message file contains globals and local translations
+      // (if the dashboard has a specific set of translations) or the name of the global one if no translations are specified.
+      // This way we eliminate fake error messages that are given by the unexpected unavailability of message files.
+      targetDashboardBaseMsgFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + (msgsBaseFileName!=null ? msgsBaseFileName : CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME));
+      globalMsgCacheFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME + ".properties");
+      sourceDashboardBaseMsgFile = msgsBaseFileName;
+      languagesCacheUrl = CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
+    }
+    
+    
+    public MessageBundlesHelper(RepositoryFile msgsDir,
                                 String msgsBaseFileName) {
-        init(msgsDir, msgsBaseFileName);
+      this.msgsDir = msgsDir;
+      String relativeDirPath = FilenameUtils.getPath(msgsDir.getPath()) + msgsDir.getName();
+      // Name the dashboard target i18n messages file. If we have a dashboard specific language file it will be named
+      // the same otherwise it will have the name of the global message file. The target message file contains globals and local translations
+      // (if the dashboard has a specific set of translations) or the name of the global one if no translations are specified.
+      // This way we eliminate fake error messages that are given by the unexpected unavailability of message files.
+      targetDashboardBaseMsgFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + (msgsBaseFileName!=null ? msgsBaseFileName : CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME));
+      globalMsgCacheFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME + ".properties");
+      sourceDashboardBaseMsgFile = msgsBaseFileName;
+      languagesCacheUrl = CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
     }
 
     public void saveI18NMessageFilesToCache() throws IOException {
-        createCacheDirIfNotExists(targetDashboardCacheDir);
+        targetDashboardBaseMsgFile.getParentFile().mkdirs();
         copyStdGlobalMessageFileToCache();
         if (sourceDashboardBaseMsgFile != null) {
             appendMessageFiles(sourceDashboardBaseMsgFile, globalBaseMessageFile, targetDashboardBaseMsgFile);
@@ -50,42 +85,18 @@ public class MessageBundlesHelper {
         return languagesCacheUrl.replace(File.separator, "/");
     }
 
-    protected void init(String msgsDir,
-                        String msgsBaseFileName) {
-
-        globalBaseMessageFile = PENTAHO_CDF_GLOBAL_LANGUAGES_DIR + File.separator + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
-        targetDashboardCacheDir = CdfConstants.BASE_CDF_CACHE_DIR + msgsDir;
-        // Name the dashboard target i18n messages file. If we have a dashboard specific language file it will be named
-        // the same otherwise it will have the name of the global message file. The target message file contains globals and local translations
-        // (if the dashboard has a specific set of translations) or the name of the global one if no translations are specified.
-        // This way we eliminate fake error messages that are given by the unexpected unavailability of message files.
-        targetDashboardBaseMsgFile = targetDashboardCacheDir + File.separator + (msgsBaseFileName!=null ? msgsBaseFileName : CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME);
-        if (msgsBaseFileName != null)
-            sourceDashboardBaseMsgFile = msgsDir + File.separator + msgsBaseFileName;
-    }
-
-    protected void createCacheDirIfNotExists(String targetDashboardCacheDir) {
-      PluginClassLoader loader = (PluginClassLoader)this.getClass().getClassLoader();
-      File fBaseMsgTargetDir = new File(loader.getPluginDir(), targetDashboardCacheDir);
-      if (!fBaseMsgTargetDir.exists()) {
-          fBaseMsgTargetDir.mkdirs();
-      }
-    }
-
-
-    protected void appendMessageFiles(String globalBaseMessageFile,
-                                     String targetDashboardBaseMsgFile) throws IOException {
+    protected void appendMessageFiles(File globalBaseMessageFile,
+                                      File targetDashboardBaseMsgFile) throws IOException {
         appendMessageFiles(null, globalBaseMessageFile, targetDashboardBaseMsgFile);
     }
     
     protected void appendMessageFiles(String sourceDashboardBaseMsgFile,
-                                    String globalBaseMessageFile,
-                                    String targetDashboardBaseMsgFile) throws IOException {
+                                    File globalBaseMessageFile,
+                                    File targetDashboardBaseMsgFile) throws IOException {
 
         Locale locale = LocaleHelper.getLocale();
-        targetDashboardBaseMsgFile = targetDashboardBaseMsgFile + "_" + locale.getLanguage();
         File fBaseMsgGlobal = new File(globalBaseMessageFile + "_" + locale.getLanguage() + ".properties");
-        File fBaseMsgTarget = new File(targetDashboardBaseMsgFile + ".properties");
+        File fBaseMsgTarget = new File(targetDashboardBaseMsgFile  + "_" + locale.getLanguage() + ".properties");
         
         String theLine;
         if (!fBaseMsgTarget.exists()) {
@@ -103,15 +114,28 @@ public class MessageBundlesHelper {
 
             // Append specific message file only if it exists otherwise just use the global message files
             if (sourceDashboardBaseMsgFile != null) {
-                sourceDashboardBaseMsgFile = sourceDashboardBaseMsgFile + "_" + locale.getLanguage();
-                File fBaseMsgDashboard = new File(sourceDashboardBaseMsgFile + ".properties");
+              if (msgsDir instanceof File) {
+                File fBaseMsgDashboard = new File((File)msgsDir, sourceDashboardBaseMsgFile + "_" + locale.getLanguage() + ".properties");
                 if (fBaseMsgDashboard.exists()) {
-                    BufferedReader brBaseMsgDashboard = new BufferedReader(new FileReader(fBaseMsgDashboard));
-                    while ((theLine = brBaseMsgDashboard.readLine()) != null) {
-                        bwBaseMsgTarget.write(theLine + "\n");
-                    }
-                    brBaseMsgDashboard.close();
+                  BufferedReader brBaseMsgDashboard = new BufferedReader(new FileReader(fBaseMsgDashboard));
+                  while ((theLine = brBaseMsgDashboard.readLine()) != null) {
+                      bwBaseMsgTarget.write(theLine + "\n");
+                  }
+                  brBaseMsgDashboard.close();
                 }
+              } else if (msgsDir instanceof RepositoryFile) {
+                RepositoryFile repositoryFile = (RepositoryFile)msgsDir;
+                IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
+                RepositoryFile fBaseMsgDashboard = unifiedRepository.getFileById(((RepositoryFile) msgsDir).getPath() + File.separator + sourceDashboardBaseMsgFile + "_" + locale.getLanguage() + ".properties");
+                if (fBaseMsgDashboard != null) {
+                  InputStream is = unifiedRepository.getDataForRead(fBaseMsgDashboard.getId(), SimpleRepositoryFileData.class).getStream();
+                  BufferedReader brBaseMsgDashboard = new BufferedReader(new InputStreamReader(is));
+                  while ((theLine = brBaseMsgDashboard.readLine()) != null) {
+                      bwBaseMsgTarget.write(theLine + "\n");
+                  }
+                  brBaseMsgDashboard.close();
+                }
+              }
             }
             bwBaseMsgTarget.close();
         }
@@ -119,24 +143,13 @@ public class MessageBundlesHelper {
 
     protected void copyStdGlobalMessageFileToCache() throws IOException {
 
-        String toFile = targetDashboardCacheDir + "/" + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME + ".properties";
         PluginClassLoader loader = (PluginClassLoader)this.getClass().getClassLoader();
 
-        File outputFile = new File(loader.getPluginDir(), toFile);
+        File outputFile = globalMsgCacheFile;
         if (outputFile.exists()) return;
         outputFile.createNewFile();
         
         File inputFile = new File(loader.getPluginDir(), PENTAHO_CDF_GLOBAL_LANGUAGES_DIR + File.separator + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME + ".properties");
-
-        FileReader in = new FileReader(inputFile);
-        FileWriter out = new FileWriter(outputFile);
-        int c;
-
-        while ((c = in.read()) != -1)
-          out.write(c);
-
-        in.close();
-        out.close();
-
+        IOUtils.copyLarge(new FileReader(inputFile), new FileWriter(outputFile));
     }
 }
