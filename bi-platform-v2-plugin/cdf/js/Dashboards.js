@@ -1182,7 +1182,6 @@ Query = function() {
         var url;
         var queryDefinition = {};
         if (_mode == 'CDA') {
-            // Assemble parameters
             for (var param in _params) {
                 if(_params.hasOwnProperty(param)) {
                     queryDefinition['param' + _params[param][0]] = Dashboards.getParameterValue(_params[param][1]);
@@ -1194,11 +1193,18 @@ Query = function() {
             queryDefinition.pageStart = _page;
             queryDefinition.sortBy = _sortBy;
             url = CDA_PATH;
+            // Assemble parameters
         } else if (_mode == 'Legacy') {
             queryDefinition = _query;
             url = LEGACY_QUERY_PATH;
         }
-        $.post(url, queryDefinition, function(json) {_lastResultSet = json;_callback(_mode == 'CDA' ? json : JSON.parse(json).values);});
+        $.post(url, queryDefinition, function(json) {
+				if(_mode == 'Legacy'){
+					json = eval("(" + json + ")");
+				}
+				_lastResultSet = json;
+				_callback(_mode == 'CDA' ? json : json.values);
+			});
     };
 
     /*
