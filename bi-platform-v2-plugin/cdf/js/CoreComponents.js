@@ -1100,7 +1100,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 		var hasCurrentVal = typeof currentval != undefined;
 selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
-      selectHTML += "<li><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+      selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
       var vid = this.valueAsId==false?0:1;
       if (this.type == 'radio' || this.type == 'radioComponent'){
 	      if ((i == 0 && !hasCurrentVal) ||
@@ -1115,7 +1115,7 @@ selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical"
 				}
         selectHTML += " type='checkbox'";
       }
-      selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></li>" + (this.separator == undefined?"":this.separator);
+      selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></li>" + ((this.separator == undefined || this.separator == null || this.separator == "null")?"":this.separator);
     }
 	selectHTML += "</ul>"
     // update the placeholder
