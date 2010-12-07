@@ -1199,9 +1199,14 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 		if(this.isMultiple){
 			var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
 			var a = new Array();
-			for(var i=0; i < indexes.length; i++){
-				a.push(this.getValueByIdx(indexes[i]));
-			}
+            // if it is not an array, handle that too
+			if (indexes.length == undefined) {
+			  a.push(this.getValueByIdx(indexes));
+			} else {
+  			  for(var i=0; i < indexes.length; i++){
+			    a.push(this.getValueByIdx(indexes[i]));
+			  }
+		    }
 			return a;
 		}
 		else {
