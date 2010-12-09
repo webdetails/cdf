@@ -255,9 +255,16 @@ var SelectBaseComponent = BaseComponent.extend({
             Dashboards.processChange(this.name);
         }
     else if (currentVal !== ''){
-            $("select", ph).val(currentVal);
+        $("select", ph).val(currentVal);
+		if($("select", ph).val() == null && this.defaultIfEmpty){
+		  $("select", ph).val(firstVal);
+          Dashboards.setParameter(this.parameter, firstVal);
+          Dashboards.processChange(this.name);
+		}
     } else {
       $("select", ph).val(firstVal);
+		Dashboards.setParameter(this.parameter, firstVal);
+		Dashboards.processChange(this.name);
         }
         var myself = this;
         $("select", ph).change(function(){
