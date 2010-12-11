@@ -771,9 +771,7 @@ Dashboards.getSettingsValue = function(key,value){
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
-  if (typeof console != 'undefined') {
-    console.warn('Dashboards.fetchData() is deprecated. Use Query objects instead');
-  }
+  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead');
   // Detect and handle CDA data sources
   if (cd != undefined && cd.dataAccessId != undefined) {
     for (param in params) {
