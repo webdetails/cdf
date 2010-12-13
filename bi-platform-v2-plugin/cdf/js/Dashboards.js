@@ -778,7 +778,7 @@ Dashboards.fetchData = function(cd, params, callback) {
       cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
     }
     $.post(webAppPath + "/content/cda/doQuery?", cd,
-      function(json) {callback(json);});
+      function(json) {callback(json);},'json');
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
@@ -787,7 +787,7 @@ Dashboards.fetchData = function(cd, params, callback) {
       function(result) {
         var json = eval("(" + result + ")");
         callback(json.values); 
-      });
+      },'json');
   }
   // ... or just call the callback when no valid definition is passed
   else {
