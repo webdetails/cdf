@@ -1681,6 +1681,10 @@ var CommentsComponent = BaseComponent.extend({
       $("textarea",myself.addCommentContainer).focus();
     });
 
+    if (typeof json.error != 'undefined' || typeof json.result == 'undefined') {
+      placeHolder.append('<span class="cdfNoComments">There was an error processing comments</span>' );
+      json.result = [];
+    } else
     if (json.result.length == 0 ){
       placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
     }
