@@ -785,8 +785,7 @@ Dashboards.fetchData = function(cd, params, callback) {
 	
     $.post(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd,
       function(result) {
-        var json = eval("(" + result + ")");
-        callback(json.values); 
+        callback(result.values); 
       },'json');
   }
   // ... or just call the callback when no valid definition is passed
