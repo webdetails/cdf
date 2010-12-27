@@ -343,7 +343,8 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"cdf", "components", action, this.getParameters(),function(jXML){
+    var actionPath = "/public/pentaho-solutions/cdf/components/" + action;
+    Dashboards.callPentahoAction(myself,"cdf", actionPath, action, this.getParameters(),function(jXML){
 
       if(jXML != null){
         if(myself.chartDefinition.caption != undefined)
@@ -361,7 +362,7 @@ var JFreeChartComponent = BaseComponent.extend({
     var exportFile = function(type,cd){
       var obj = $.extend({
         solution: "cdf",
-        path: "components",
+        path: "/public/pentaho-solutions/cdf/components/jtable.xaction",
         action:"jtable.xaction",
         exportType: type
       },cd);
@@ -435,7 +436,8 @@ var JFreeChartComponent = BaseComponent.extend({
           myself.zoomCallBack = function(value){
             eval(urlTemplate.replace("{" + parameterName + "}",value));
           };
-          Dashboards.callPentahoAction(myself,"cdf", "components", cdfComponent, parameters,function(jXML){
+          var componentPath = "/public/pentaho-solutions/cdf/components/" + cdfComponent;
+          Dashboards.callPentahoAction(myself,"cdf", componentPath, cdfComponent, parameters,function(jXML){
             if(jXML != null){
               var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
@@ -565,7 +567,8 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
 
     var myself = this;
 
-    Dashboards.callPentahoAction(myself,"cdf", "components", "openflashchart.xaction", this.getParameters(),function(jXML){
+    var xactionPath = "/public/pentaho-solutions/cdf/components/openflashchart.xaction";
+    Dashboards.callPentahoAction(myself,"cdf", xactionPath, "openflashchart.xaction", this.getParameters(),function(jXML){
 
       if(jXML != null){
         var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
@@ -618,7 +621,8 @@ var TrafficComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters,
+    var xactionPath = "/public/pentaho-solutions/cdf/components/traffic.xaction";
+    Dashboards.callPentahoAction(myself,"cdf", xactionPath, "traffic.xaction", parameters,
       function(result){
         var value = $(result).find("VALUE").text();
         var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
@@ -806,7 +810,7 @@ var TimePlotComponent = BaseComponent.extend({
       parameters.push(key+"="+value);
     }
     var allData = undefined;
-    var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
+    var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=cdf&path=/public/pentaho-solutions/cdf/components/timelinefeeder.xaction&action=timelinefeeder.xaction&" + parameters.join('&');
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -818,7 +822,7 @@ var TimePlotComponent = BaseComponent.extend({
         parameters.push(key+"="+value);
       }
 
-      var eventUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
+      var eventUrl = webAppPath + "/ViewAction?solution=cdf&path=/public/pentaho-solutions/cdf/components/timelinefeeder.xaction&action=timelineeventfeeder.xaction&" + parameters.join('&');
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){
@@ -1733,7 +1737,7 @@ var PivotLinkComponent = BaseComponent.extend({
   }
 },{
   openPivotLink : function(object) {
-    var url = webAppPath + "/Pivot?solution=cdf&path=components&action=jpivot.xaction&";
+    var url = webAppPath + "/Pivot?solution=cdf&path=/public/pentaho-solutions/cdf/components/jpivot.xaction&action=jpivot.xaction&";
 
     var qd = object.pivotDefinition;
     var parameters = [];

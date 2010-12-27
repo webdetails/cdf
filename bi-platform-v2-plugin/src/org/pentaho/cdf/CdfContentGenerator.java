@@ -853,15 +853,16 @@ public class CdfContentGenerator extends BaseContentGenerator
   public void getSolutionFile(final String resourcePath, final OutputStream out, final ILogger logger) throws Exception
   {
     IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-    final InputStream in = unifiedRepository.getDataForRead(resourcePath, SimpleRepositoryFileData.class).getStream();
-    final byte[] buff = new byte[4096];
-    int n = in.read(buff);
-    while (n != -1)
-    {
-      out.write(buff, 0, n);
-      n = in.read(buff);
+    RepositoryFile repositoryFile = unifiedRepository.getFile(resourcePath);
+    if (repositoryFile != null) {
+      final InputStream in = unifiedRepository.getDataForRead(repositoryFile.getId(), SimpleRepositoryFileData.class).getStream();
+      IOUtils.copy(in, out);
+      try {
+        in.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
-    in.close();
   }
 
   private void setResponseHeaders(final String mimeType, final int cacheDuration, final String attachmentName)
