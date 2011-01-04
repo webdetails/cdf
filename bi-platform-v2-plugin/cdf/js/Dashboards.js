@@ -843,9 +843,10 @@ Dashboards.cleanStorage = function(){
  * http://www.webtoolkit.info/
  *
  **/
-
 function encode_prepare_arr(value) {
-  if ($.isArray(value)){
+  if(typeof value == "number"){
+    return value;
+  } else if ($.isArray(value)){
     var a = new Array(value.length);
     $.each(value,function(i,val){
       a[i] = encode_prepare(val);
