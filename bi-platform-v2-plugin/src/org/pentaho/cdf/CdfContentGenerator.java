@@ -259,7 +259,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     while (it.hasNext())
     {
       String p = (String) it.next();
-      if (p.indexOf("parameters") == 0)
+      if (p.indexOf("param") == 0)
       {
         params.put(p.substring(5), requestParams.getParameter(p));
       }
