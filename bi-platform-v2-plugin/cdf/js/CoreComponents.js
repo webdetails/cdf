@@ -314,15 +314,16 @@ var JFreeChartComponent = BaseComponent.extend({
 		  if($.isArray(param) && param.length >= 2){
 			var name = param[0];
 			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
-			//escape ';'s
-			if(value) value = value.replace(";",";;");
-
+			
+			if(value){
+				value = doCsvQuoting(value, '=');	//quote if needed for '='
+			}
 			if(i == 0) cdaParameterString = "";
 			else cdaParameterString += ";";
 
-			cdaParameterString += name + "=" + value;
-		  }
-		}
+			cdaParameterString += doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
+					}
+			}
 	  }
 	}
 

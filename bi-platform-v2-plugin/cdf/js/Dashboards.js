@@ -842,6 +842,7 @@ Dashboards.cleanStorage = function(){
  * UTF-8 data encode / decode
  * http://www.webtoolkit.info/
  *
+ *
  **/
 function encode_prepare_arr(value) {
   if(typeof value == "number"){
@@ -962,6 +963,22 @@ function toFormatedString(value) {
   while (rgx.test(x1))
     x1 = x1.replace(rgx, '$1' + ',' + '$2');
   return x1 + x2;
+};
+
+//quote csv values in a way compatible with CSVTokenizer
+function doCsvQuoting(value, separator, alwaysEscape){
+	var QUOTE_CHAR = '"';
+	if(separator == null) {return value;}
+	if(value == null) {return null;}
+	if(value.indexOf(QUOTE_CHAR) >= 0){
+		//double them
+		value = value.replace(QUOTE_CHAR, QUOTE_CHAR.concat(QUOTE_CHAR));
+	}
+	if(alwaysEscape || value.indexOf(separator) >= 0){
+		//quote value
+		value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
+	}
+	return value;
 };
 
 
@@ -1106,6 +1123,10 @@ sprintfWrapper = {
 
 sprintf = sprintfWrapper.init;
 
+//Ctors:
+// Query(queryString) --> DEPRECATED
+// Query(queryDefinition{path, dataAccessId})
+// Query(path, dataAccessId)
 Query = function() {
 
     // Constants, or what passes for them... Pretty please leave these alone.
@@ -1182,7 +1203,13 @@ Query = function() {
         if (_mode == 'CDA') {
             for (var param in _params) {
                 if(_params.hasOwnProperty(param)) {
-                    queryDefinition['param' + _params[param][0]] = Dashboards.getParameterValue(_params[param][1]);
+					var value = Dashboards.getParameterValue(_params[param][1]);
+					var name = _params[param][0];
+					if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+						//special case where single element will wrongly be treated as a parseable array by cda
+						queryDefinition['settingForceArray'] = name;//warn this is to be treated as an array
+					}
+					queryDefinition['param' + name] = value;
                 }
             }
             queryDefinition.path = _file;
