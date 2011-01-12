@@ -1202,14 +1202,14 @@ Query = function() {
         var queryDefinition = {};
         if (_mode == 'CDA') {
             for (var param in _params) {
-                if(_params.hasOwnProperty(param)) {
-					var value = Dashboards.getParameterValue(_params[param][1]);
-					var name = _params[param][0];
-					if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-						//special case where single element will wrongly be treated as a parseable array by cda
-						queryDefinition['settingForceArray'] = name;//warn this is to be treated as an array
-					}
-					queryDefinition['param' + name] = value;
+              if(_params.hasOwnProperty(param)) {
+								var value = Dashboards.getParameterValue(_params[param][1]);
+								var name = _params[param][0];
+								if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+									//special case where single element will wrongly be treated as a parseable array by cda
+									value = doCsvQuoting(value[0],';');
+								}
+								queryDefinition['param' + name] = value;
                 }
             }
             queryDefinition.path = _file;
