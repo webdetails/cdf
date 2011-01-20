@@ -1171,7 +1171,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       selectHTML += "<button onclick='MultiButtonComponent.prototype.clickButton(\"" +
         this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'";
         selectHTML += "class='" + cssClass + "' name='" + this.name + "' value='" + value + "'> ";
-        selectHTML += label + "</button>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
+        selectHTML += "<span>" + label + "</span></button>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
 
       if (i == 0) firstVal = value;
     }
