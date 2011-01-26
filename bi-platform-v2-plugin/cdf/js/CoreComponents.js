@@ -1450,11 +1450,12 @@ var TableComponent = BaseComponent.extend({
   processTableComponentResponse : function(json)
   {
     // General documentation here: http://datatables.net
-
     var cd = this.chartDefinition;
+    var extraOptions = {};
+    $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){extraOptions[e[0]] = e[1];});
     // Build a default config from the standard options
     var dtData0 = TableComponent.getDataTableOptions(cd);
-    var dtData = $.extend(cd.dataTableOptions,dtData0);
+    var dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
 
 
     // Sparklines still applied to drawcallback
