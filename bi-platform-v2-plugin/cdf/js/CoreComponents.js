@@ -1105,7 +1105,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 		//default
         var currentVal = Dashboards.getParameterValue(this.parameter);
         currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-		var hasCurrentVal = typeof currentval != undefined;
+		var hasCurrentVal = typeof currentval != "undefined";
 selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
