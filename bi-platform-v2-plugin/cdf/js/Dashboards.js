@@ -341,36 +341,40 @@ Dashboards.blockUIwithDrag = function() {
 //}
 
 Dashboards.update = function(object) {
-  if(!(typeof(object.preExecution)=='undefined')){
-    var ret = object.preExecution.apply(object);
-    if (typeof ret != "undefined" && !ret)
-      return; // if preExecution returns false, we'll skip the update
-  }
-  if (object.tooltip != undefined){
-    object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
-  }
-  // first see if there is an objectImpl
-  if ((object.update != undefined) &&
-    (typeof object['update'] == 'function')) {
-    object.update();
-		
-    // check if component has periodic refresh and schedule next update
-    this.refreshEngine.processComponent(object);
-		
-  } else {
-  // unsupported update call
-  }
-
-  if(!(typeof(object.postExecution)=='undefined')){
-    object.postExecution.apply(object);
-  }
-  // if we have a tooltip component, how is the time.
-  if (object._tooltip != undefined){
-    $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
-      delay:0,
-      track: true,
-      fade: 250
-    });
+  try {
+    if(!(typeof(object.preExecution)=='undefined')){
+      var ret = object.preExecution.apply(object);
+      if (typeof ret != "undefined" && !ret)
+        return; // if preExecution returns false, we'll skip the update
+    }
+    if (object.tooltip != undefined){
+      object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
+    }
+    // first see if there is an objectImpl
+    if ((object.update != undefined) &&
+      (typeof object['update'] == 'function')) {
+      object.update();
+  		
+      // check if component has periodic refresh and schedule next update
+      this.refreshEngine.processComponent(object);
+  		
+    } else {
+    // unsupported update call
+    }
+  
+    if(!(typeof(object.postExecution)=='undefined')){
+      object.postExecution.apply(object);
+    }
+    // if we have a tooltip component, how is the time.
+    if (object._tooltip != undefined){
+      $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+        delay:0,
+        track: true,
+        fade: 250
+      });
+    }
+  } catch (e) {
+    this.log("Error updating " + object.name +": "+ e);
   }
 };
 
