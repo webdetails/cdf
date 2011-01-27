@@ -498,7 +498,7 @@ Dashboards.processChange = function(object_name){
     var preChangeResult = object.preChange(value);
     value = preChangeResult != undefined ? preChangeResult : value;
   }
-  this.fireChange(parameter,value);
+  if(parameter) { this.fireChange(parameter,value); }
   if(!(typeof(object.postChange)=='undefined')){
     object.postChange(value);
   }
@@ -569,7 +569,12 @@ Dashboards.getQueryParameter = function ( parameterName ) {
 };
 
 Dashboards.setParameter = function(parameterName, parameterValue) {
+  if(parameterName == undefined || parameterName == "undefined"){
+    Dashboards.log('Dashboards.setParameter: trying to set undefined!!');
+    return;  
+  }
   if (Dashboards.globalContext) {
+    //ToDo: this should really be sanitized!
     eval( parameterName + " = " + JSON.stringify(parameterValue) );
   } else {
     Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);

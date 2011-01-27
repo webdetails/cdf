@@ -1181,45 +1181,45 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     ph.html(selectHTML);
 
     //default
-    var currentVal = Dashboards.getParameterValue(this.parameter);
+    var currentVal = this.parameter ? Dashboards.getParameterValue(this.parameter) : null;
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 
-   	if(currentVal == null){
-			Dashboards.setParameter(this.parameter, firstVal);
-			currentVal = firstVal;
-	}
+    if(currentVal == null && this.parameter){
+      Dashboards.setParameter(this.parameter, firstVal);
+      currentVal = firstVal;
+    }
 
-	var foundDefault = false;
-	for (var i = 0; i < myArray.length; i++) {
-	  if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
-		MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.verticalOrientation);
-		foundDefault = true;
-		if(!this.isMultiple) break;
-	  }
-	}
-	if(!foundDefault && !this.isMultiple && myArray.length > 0){
-	  //select first value
-	  MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
-	}
+    var foundDefault = false;
+    for (var i = 0; i < myArray.length; i++) {
+      if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
+        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.verticalOrientation);
+        foundDefault = true;
+        if(!this.isMultiple) { break; }
+      }
+    }
+    if(!foundDefault && !this.isMultiple && myArray.length > 0){
+      //select first value
+      MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
+    }
   },
 
   getValue: function(){
-		if(this.isMultiple){
-			var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
-			var a = new Array();
+    if(this.isMultiple){
+      var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
+      var a = new Array();
             // if it is not an array, handle that too
-			if (indexes.length == undefined) {
-			  a.push(this.getValueByIdx(indexes));
-			} else {
-  			  for(var i=0; i < indexes.length; i++){
-			    a.push(this.getValueByIdx(indexes[i]));
-			  }
-		    }
-			return a;
-		}
-		else {
-		  return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
-		}
+      if (indexes.length == undefined) {
+        a.push(this.getValueByIdx(indexes));
+      } else {
+          for(var i=0; i < indexes.length; i++){
+            a.push(this.getValueByIdx(indexes[i]));
+          }
+        }
+      return a;
+    }
+    else {
+      return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
+    }
   },
 
   getValueByIdx: function(idx){
