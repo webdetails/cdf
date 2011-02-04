@@ -16,6 +16,7 @@ import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.core.messages.Messages;
+import org.pentaho.platform.engine.services.actionsequence.ActionSequenceResource;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.web.servlet.ServletBase;
 import org.pentaho.platform.util.StringUtil;
@@ -56,7 +57,7 @@ public class GetCDFResource extends ServletBase {
             return;
         }
         ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class,session);// PentahoSystem.getSolutionRepository(session);
-        InputStream in = repository.getResourceInputStream(resourcePath, true);
+        InputStream in = ActionSequenceResource.getInputStream(resourcePath, LocaleHelper.getLocale());
         if (in == null) {
             error(Messages.getInstance().getErrorString("GetResource.ERROR_0003_RESOURCE_MISSING", resourcePath)); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
