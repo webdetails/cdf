@@ -785,7 +785,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.post(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd,
+    $.post(webAppPath + "/ViewAction?solution=cdf&path=/public/pentaho-solutions/cdf/components/jtable.xaction&action=jtable.xaction", cd,
       function(json) {  callback(json.values); });
   }
   // ... or just call the callback when no valid definition is passed
@@ -1109,7 +1109,7 @@ Query = function() {
 
     // Constants, or what passes for them... Pretty please leave these alone.
     var CDA_PATH = webAppPath + "/content/cda/doQuery?";
-    var LEGACY_QUERY_PATH = webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction";
+    var LEGACY_QUERY_PATH = webAppPath + "/ViewAction?solution=cdf&path=/public/pentaho-solutions/cdf/components/jtable.xaction&action=jtable.xaction";
 
     /*
      * Private fields
