@@ -1155,23 +1155,26 @@ var CheckComponent = ToggleButtonBaseComponent.extend({
 var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
-	var myArray = this.getValuesArray();
+    var myArray = this.getValuesArray();
     var cssClass= "toggleButton "+ ((this.verticalOrientation)? "vertical" : "horizontal");
     selectHTML = "";
     var firstVal;
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
 
-	if (this.isMultiple == undefined) this.isMultiple = false;
+    if (this.isMultiple == undefined) this.isMultiple = false;
 
     for (var i = 0, len = myArray.length; i < len; i++){
-	  var value = myArray[i][valIdx];
+      var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
+      
+      if(value != null) { value = value.replace('"','&quot;' ); }
+      if(label != null) { label = label.replace('"','&quot;' ); }
 
-      selectHTML += "<button onclick='MultiButtonComponent.prototype.clickButton(\"" +
-        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'";
-        selectHTML += "class='" + cssClass + "' name='" + this.name + "' value='" + value + "'> ";
-        selectHTML += "<span>" + label + "</span></button>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
+      selectHTML += '<button onclick="MultiButtonComponent.prototype.clickButton(\'' +
+        this.htmlObject + '\',\'' + this.name + '\',' + i + ',' + this.isMultiple + ', '+this.verticalOrientation+')"';
+        selectHTML += 'class="' + cssClass + '" name="' + this.name + '" value="' + value + '"> ';
+        selectHTML += '<span>' + label + '</span></button>' + ((this.separator == undefined || this.separator == null || this.separator == 'null') ? '' : this.separator);
 
       if (i == 0) firstVal = value;
     }
@@ -1228,17 +1231,17 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation){
-	var cssClass= "toggleButton "+ ((verticalOrientation)? "vertical" : "horizontal");
-	var cssClassSelected= "toggleButtonPressed "+ ((verticalOrientation)? "vertical" : "horizontal");
+    var cssClass= "toggleButton "+ ((verticalOrientation)? "vertical" : "horizontal");
+    var cssClassSelected= "toggleButtonPressed "+ ((verticalOrientation)? "vertical" : "horizontal");
 
-	var buttons = $("#" + htmlObject + " button");
+    var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
-	  else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
+      else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
 
-	  var disable = false;
+      var disable = false;
       for (var i = 0; i < this.indexes[name].length; ++i) {
-	    if (this.indexes[name][i] == index) {
+      if (this.indexes[name][i] == index) {
           disable = true;
           this.indexes[name].splice(i, 1);
           break;
@@ -1246,22 +1249,22 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
       if (disable) buttons[index].className = cssClass;
       else {
-		buttons[index].className = cssClassSelected;
+        buttons[index].className = cssClassSelected;
         this.indexes[name].push(index);
       }
   	}
     else {//de-select old, select new
       if (this.indexes[name] != undefined && this.indexes[name] < buttons.length) {
-				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
-					for(var i = 0; i < this.indexes[name].length; i++){
-						buttons[this.indexes[name][i]].className = cssClass;
-					}
-				}
-				else buttons[this.indexes[name]].className = cssClass;
+        if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
+          for(var i = 0; i < this.indexes[name].length; i++){
+            buttons[this.indexes[name][i]].className = cssClass;
+          }
+        }
+        else buttons[this.indexes[name]].className = cssClass;
       }
       this.indexes[name] = index;
-			buttons[index].className = cssClassSelected;
-	  }
+      buttons[index].className = cssClassSelected;
+    }
     this.callAjaxAfterRender(name);
   },
 
