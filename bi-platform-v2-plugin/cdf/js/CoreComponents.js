@@ -314,7 +314,7 @@ var JFreeChartComponent = BaseComponent.extend({
 		  if($.isArray(param) && param.length >= 2){
 			var name = param[0];
 			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
-			
+
 			if(value){
 				value = doCsvQuoting(value, '=');	//quote if needed for '='
 			}
@@ -1105,7 +1105,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 		//default
         var currentVal = Dashboards.getParameterValue(this.parameter);
         currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-		    var hasCurrentVal = typeof currentVal != "undefined";
+		var hasCurrentVal = typeof currentval != "undefined";
 selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
@@ -1157,6 +1157,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   update: function(){
     var myArray = this.getValuesArray();
     var cssClass= "toggleButton "+ ((this.verticalOrientation)? "vertical" : "horizontal");
+  	var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal");
     selectHTML = "";
     var firstVal;
     var valIdx = this.valueAsId ? 1 : 0;
@@ -1171,10 +1172,10 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       if(value != null) { value = value.replace('"','&quot;' ); }
       if(label != null) { label = label.replace('"','&quot;' ); }
 
-      selectHTML += '<button onclick="MultiButtonComponent.prototype.clickButton(\'' +
-        this.htmlObject + '\',\'' + this.name + '\',' + i + ',' + this.isMultiple + ', '+this.verticalOrientation+')"';
-        selectHTML += 'class="' + cssClass + '" name="' + this.name + '" value="' + value + '"> ';
-        selectHTML += '<span>' + label + '</span></button>' + ((this.separator == undefined || this.separator == null || this.separator == 'null') ? '' : this.separator);
+      selectHTML += "<div class='"+cssWrapperClass+"'><button onclick='MultiButtonComponent.prototype.clickButton(\"" +
+        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'";
+        selectHTML += " name='" + this.name + "' value='" + value + "'> ";
+        selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
 
       if (i == 0) firstVal = value;
     }
@@ -1231,10 +1232,13 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation){
-    var cssClass= "toggleButton "+ ((verticalOrientation)? "vertical" : "horizontal");
-    var cssClassSelected= "toggleButtonPressed "+ ((verticalOrientation)? "vertical" : "horizontal");
+	var cssClass= "toggleButton";
+	var cssClassSelected= "toggleButtonPressed";
 
-    var buttons = $("#" + htmlObject + " button");
+	var cssWrapperClass= "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal");
+	var cssWrapperClassSelected= "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal");
+
+	var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
       else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
@@ -1247,24 +1251,27 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
           break;
         }
       }
-      if (disable) buttons[index].className = cssClass;
-      else {
-        buttons[index].className = cssClassSelected;
+      if (disable){
+        buttons[index].parentNode.className = cssWrapperClass;
+      } else {
+		buttons[index].className = cssClassSelected;
         this.indexes[name].push(index);
       }
   	}
     else {//de-select old, select new
       if (this.indexes[name] != undefined && this.indexes[name] < buttons.length) {
-        if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
-          for(var i = 0; i < this.indexes[name].length; i++){
-            buttons[this.indexes[name][i]].className = cssClass;
-          }
-        }
-        else buttons[this.indexes[name]].className = cssClass;
+				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
+					for(var i = 0; i < this.indexes[name].length; i++){
+  				  buttons[this.indexes[name][i]].parentNode.className = cssWrapperClass;
+					}
+				}
+				else {
+  			  buttons[this.indexes[name]].parentNode.className = cssWrapperClass;
+			  }
       }
       this.indexes[name] = index;
-      buttons[index].className = cssClassSelected;
-    }
+			buttons[index].parentNode.className = cssWrapperClassSelected;
+	  }
     this.callAjaxAfterRender(name);
   },
 
