@@ -1156,8 +1156,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
     var myArray = this.getValuesArray();
-    var cssClass= "toggleButton "+ ((this.verticalOrientation)? "vertical" : "horizontal");
-  	var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal");
+  	var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
     selectHTML = "";
     var firstVal;
     var valIdx = this.valueAsId ? 1 : 0;
@@ -1232,11 +1231,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation){
-	var cssClass= "toggleButton";
-	var cssClassSelected= "toggleButtonPressed";
 
-	var cssWrapperClass= "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal");
-	var cssWrapperClassSelected= "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal");
+	var cssWrapperClass= "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+	var cssWrapperClassSelected= "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal-button");
 
 	var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
@@ -1254,7 +1251,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       if (disable){
         buttons[index].parentNode.className = cssWrapperClass;
       } else {
-		buttons[index].className = cssClassSelected;
+		    buttons[index].parentNode.className = cssWrapperClassSelected;
         this.indexes[name].push(index);
       }
   	}
