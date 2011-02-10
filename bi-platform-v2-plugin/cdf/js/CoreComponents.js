@@ -154,7 +154,10 @@ var XactionComponent = BaseComponent.extend({
         var p = new Array(this.parameters?this.parameters.length:0);
         for(var i= 0, len = p.length; i < len; i++){
           var key = this.parameters[i][0];
-          var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+          var value = this.parameters[i][1] == "" ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+          if(this.value == "NIL"){
+            this.value = this.parameters[i][2];
+          }
           p[i] = [key,value];
         }
 
@@ -183,11 +186,16 @@ var XactionComponent = BaseComponent.extend({
         var p = new Array(this.parameters.length);
         for(var i= 0, len = p.length; i < len; i++){
           var arg = "&" + encodeURIComponent(this.parameters[i][0]) + "=";
-          if (this.parameters[i].length == 3) {
-            xactionIFrameHTML += arg + encodeURIComponent(this.parameters[i][2]);
+          var val = "";
+          if (this.parameters[i][1] == "") {
+            val = encodeURIComponent(this.parameters[i][2]);
           } else {
-            xactionIFrameHTML += arg + encodeURIComponent(Dashboards.getParameterValue(this.parameters[i][1]));
+            val =  encodeURIComponent(Dashboards.getParameterValue(this.parameters[i][1]));
+            if(val == "NIL"){
+              val = encodeURIComponent(this.parameters[i][2])
+            }
           }
+          xactionIFrameHTML += arg + val;
         }
 
         // Close IFrame
