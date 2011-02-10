@@ -42,7 +42,7 @@ BaseComponent = Base.extend({
         var p = new Array(this.parameters?this.parameters.length:0);
         for(var i= 0, len = p.length; i < len; i++){
           var key = this.parameters[i][0];
-          var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+          var value = this.parameters[i][1] == "" || this.parameters[i][1] == "NIL" ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
           p[i] = [key,value];
         }
 
@@ -261,18 +261,17 @@ var SelectBaseComponent = BaseComponent.extend({
         if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
             Dashboards.setParameter(this.parameter, firstVal);
             Dashboards.processChange(this.name);
-        }
-    else if (currentVal !== ''){
-        $("select", ph).val(currentVal);
-		if($("select", ph).val() == null && this.defaultIfEmpty){
-		  $("select", ph).val(firstVal);
-          Dashboards.setParameter(this.parameter, firstVal);
+        } else if (currentVal !== ''){
+          $("select", ph).val(currentVal);
+		      if($("select", ph).val() == null && this.defaultIfEmpty){
+		        $("select", ph).val(firstVal);
+		      }
+		      Dashboards.setParameter(this.parameter, firstVal);
           Dashboards.processChange(this.name);
-		}
-    } else {
-      $("select", ph).val(firstVal);
-		Dashboards.setParameter(this.parameter, firstVal);
-		Dashboards.processChange(this.name);
+        } else {
+          $("select", ph).val(firstVal);
+		      Dashboards.setParameter(this.parameter, firstVal);
+		      Dashboards.processChange(this.name);
         }
         var myself = this;
         $("select", ph).change(function(){
@@ -1179,9 +1178,8 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       if(value != null) { value = value.replace('"','&quot;' ); }
       if(label != null) { label = label.replace('"','&quot;' ); }
 
-      selectHTML += "<div class='"+cssWrapperClass+"'><button onclick='MultiButtonComponent.prototype.clickButton(\"" +
-        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'";
-        selectHTML += " name='" + this.name + "' value='" + value + "'> ";
+      selectHTML += "<div class='"+cssWrapperClass+"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
+        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><button name='" + this.name + "' value='" + value + "'> ";
         selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
 
       if (i == 0) firstVal = value;
@@ -1468,16 +1466,16 @@ var TableComponent = BaseComponent.extend({
       this.queryState.setParameters(this.parameters);
       this.processTableComponentResponse();
     } else {
-      this.queryState.fetchData(this.parameters, function(values) {
-        changedValues = undefined;
-        if((typeof(myself.postFetch)=='function')){
-          changedValues = myself.postFetch(values);
-        }
-        if (changedValues != undefined) {
-          values = changedValues;
-        }
-        myself.processTableComponentResponse(values);
-      });
+    this.queryState.fetchData(this.parameters, function(values) {
+      changedValues = undefined;
+      if((typeof(myself.postFetch)=='function')){
+        changedValues = myself.postFetch(values);
+      }
+      if (changedValues != undefined) {
+        values = changedValues;
+      }
+      myself.processTableComponentResponse(values);
+    });
     }
   },
 
@@ -1553,7 +1551,7 @@ var TableComponent = BaseComponent.extend({
     } else {
       dtData.aaData = json;
     }
-    
+
     /* If we're doing server-side pagination, we need to set up the server callback
      */
     if (dtData.bServerSide) {
