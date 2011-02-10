@@ -1203,23 +1203,24 @@ Query = function() {
      * Private methods
      */
 
-    var doQuery = function(){
+    var doQuery = function(outsideCallback){
         if (typeof _callback != 'function') {
             throw 'QueryNotInitialized';
         }
         var url;
         var queryDefinition = {};
+        var callback = (outsideCallback ? outsideCallback : _callback);
         if (_mode == 'CDA') {
             for (var param in _params) {
               if(_params.hasOwnProperty(param)) {
-								var value = Dashboards.getParameterValue(_params[param][1]);
-								var name = _params[param][0];
-								if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-									//special case where single element will wrongly be treated as a parseable array by cda
-									value = doCsvQuoting(value[0],';');
-								}
-								queryDefinition['param' + name] = value;
-                }
+		var value = Dashboards.getParameterValue(_params[param][1]);
+		var name = _params[param][0];
+		if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+		  //special case where single element will wrongly be treated as a parseable array by cda
+		  value = doCsvQuoting(value[0],';');
+		}
+		queryDefinition['param' + name] = value;
+              }
             }
             queryDefinition.path = _file;
             queryDefinition.dataAccessId = _id;
@@ -1237,7 +1238,7 @@ Query = function() {
 					json = eval("(" + json + ")");
 				}
 				_lastResultSet = json;
-				_callback(_mode == 'CDA' ? json : json.values);
+				callback(_mode == 'CDA' ? json : json.values);
 			});
     };
 
@@ -1248,13 +1249,34 @@ Query = function() {
     // Entry point
 
     this.fetchData = function(params, callback) {
-        if(typeof callback == 'function') {
-            _params = params;
-            _callback = callback;
+      switch(arguments.length) {
+        case 0:
+          if(_params && _callback) {
             return doQuery();
-        } else {
-            throw "InvalidInput";
-        }
+          }
+          break;
+        case 1:
+          if (typeof arguments[0] == "function"){
+          /* If we're receiving _only_ the callback, we're not
+           * going to change the internal callback
+           */
+            return doQuery(arguments[0]);
+          } else if( arguments[0] instanceof Array){
+            _params = arguments[0];
+            return doQuery();
+          }
+          break;
+        case 2:
+        default:
+        /* We're just going to discard anything over two params */
+         _params = params;
+         _callback = callback;
+         return doQuery();
+      }
+      /* If we haven't hit a return by this time,
+       * the user gave us some wrong input
+       */
+      throw "InvalidInput";
     };
 
     // Result caching
@@ -1265,72 +1287,163 @@ Query = function() {
             throw "NoCachedResults";
         }
     };
-    // Sorting
 
-    this.sortBy = function(sortBy) {
-        // we want to accept 'a' and 'd' even though kettle demands capitals
-        sortBy = sortBy.toUpperCase();
-        // Valid sortBy Strings are column numbers, optionally
-        // succeeded by A or D (ascending or descending), and separated by commas
-        if (typeof sortBy == 'string' && sortBy.match("^(?:[0-9]+[AD]?,?)*$") !== null) {
-            // Break the string into its constituent terms, filter out empty terms, if any
-            _sortBy = sortBy.split(',').filter(function(e){return e !== "";});
-        } else if (sortBy === '') {
-            _sortBy = '';
-        } else{
-            throw "InvalidSortExpression";
-        }
-        if (_callback !== null) {
-            return doQuery();
+    this.reprocessLastResults = function(outerCallback){
+        if (_lastResultSet !== null) {
+            var callback = outerCallback || _callback;
+            return callback(_lastResultSet);
+        } else {
+            throw "NoCachedResults";
         }
     };
 
-    // Pagination
-    // We paginate by having an initial position (_page) and page size (_pageSize)
-    // Paginating consists of incrementing/decrementing the initial position by the page size
-    // All paging operations change the paging cursor.
+    this.reprocessResults = function(outerCallback) {
+      if (_lastResultSet !== null) {
+        var callback = (outsideCallback ? outsideCallback : _callback);
+        callback(_mode == 'CDA' ? json : json.values);
+      } else {
+        throw "NoCachedResults";
+      }
+    };
+
+    /* Sorting
+     *
+     * CDA expects an array of terms consisting of a number and a letter
+     * that's either 'A' or 'D'. Each term denotes, in order, a column
+     * number and sort direction: 0A would then be sorting the first column
+     * ascending, and 1D would sort the second column in descending order.
+     * This function accepts either an array with the search terms, or
+     * a comma-separated string with the terms:  "0A,1D" would then mean
+     * the same as the array ["0A","1D"], which would sort the results
+     * first by the first column (ascending), and then by the second
+     * column (descending).
+     */
+    this.setSortBy = function(sortBy) {
+      var newSort;
+      if (sortBy === null || sortBy === undefined || sortBy === '') {
+        newSort = '';
+      }
+      /* If we have a string as input, we need to split it into
+       * an array of sort terms. Also, independently of the parameter
+       * type, we need to convert everything to upper case, since want
+       * to accept 'a' and 'd' even though CDA demands capitals.
+       */
+      else if (typeof sortBy == "string") {
+        /* Valid sortBy Strings are column numbers, optionally
+         *succeeded by A or D (ascending or descending), and separated by commas
+         */
+        if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+          throw "InvalidSortExpression";
+        }
+        /* Break the string into its constituent terms, filter out empty terms, if any */
+        newSort = sortBy.toUpperCase().split(',').filter(function(e){return e !== "";});
+      } else if (sortBy instanceof Array) {
+        newSort = sortBy.map(function(d){return d.toUpperCase();});
+      }
+      
+      /* We check whether the parameter is the same as before,
+       * and notify the user whether it changed
+       */
+      var same;
+      if (newSort instanceof Array) {
+        same = newSort.length != _sortBy.length;
+        $.each(newSort,function(i,d){
+          same = (same && d == _sortBy[i]);
+          if(!same) {return false;}
+        });
+      } else {
+        same = (newSort === _sortBy);
+      }
+      _sortBy = newSort;
+      return !same;
+    };
+
+    this.sortBy = function(sortBy,outsideCallback) {
+      /* If the parameter is not the same, and we have a valid state,
+       * we can fire the query.
+       */
+      var changed = this.setSortBy(sortBy);
+      if (!changed) {
+        return false;
+      } else if (_callback !== null) {
+        return doQuery(outsideCallback);
+      }
+    };
+
+    this.setParameters = function (params) {
+      if((params instanceof Array)) {
+        _params = params;
+      } else {
+        throw "InvalidParameters";
+      }
+    };
+
+    this.setCallback = function(callback) {
+      if(typeof callback == "function") {
+        _callback = callback;
+      } else {
+        throw "InvalidCallback";
+      }
+    };
+    /* Pagination
+     *
+     * We paginate by having an initial position (_page) and page size (_pageSize)
+     * Paginating consists of incrementing/decrementing the initial position by the page size
+     * All paging operations change the paging cursor.
+     */
 
     // Gets the next _pageSize results
-    this.nextPage = function() {
+    this.nextPage = function(outsideCallback) {
         if (_pageSize > 0) {
             _page += _pageSize;
-            return doQuery();
+            return doQuery(outsideCallback);
         } else {
             throw "InvalidPageSize";
         }
     };
 
     // Gets the previous _pageSize results
-    this.prevPage = function() {
+    this.prevPage = function(outsideCallback) {
         if (_page > _pageSize) {
             _page -= _pageSize;
-            return doQuery();
+            return doQuery(outsideCallback);
         } else if (_pageSize > 0) {
             _page = 0;
-            return doQuery();
+            return doQuery(outsideCallback);
         } else {
             throw "AtBeggining";
         }
     };
 
     // Gets the page-th set of _pageSize results (0-indexed)
-    this.getPage = function(page) {
-        if (typeof page == 'number' && page > 0) {
-            _page = page * _pageSize;
-            return doQuery();
-        } else {
-            throw "InvalidPage";
-        }
+    this.getPage = function(page, outsideCallback) {
+      if (page * _pageSize == _page) {
+        return false;
+      } else if (typeof page == 'number' && page >= 0) {
+        _page = page * _pageSize;
+        return doQuery(outsideCallback);
+      } else {
+        throw "InvalidPage";
+      }
     };
 
     // Gets _pageSize results starting at page
-    this.pageStartingAt = function(page) {
-        if (typeof page == 'number' && page > 0) {
-            _page = page;
-            return doQuery();
-        } else {
-            throw "InvalidPage";
-        }
+    this.setPageStartingAt = function(page) {
+      if (page == _page) {
+        return false;
+      } else if (typeof page == 'number' && page >= 0) {
+        _page = page;
+      } else {
+        throw "InvalidPage";
+      }
+    };
+
+    this.pageStartingAt = function(page,outsideCallback) {
+      if(this.setPageStartingAt(page)) {
+        return doQuery(outsideCallback);
+      } else {
+        return false;
+      }
     };
 
     // Sets the page size
@@ -1343,13 +1456,15 @@ Query = function() {
     };
 
     // sets _pageSize to pageSize, and gets the first page of results
-    this.initPage = function(pageSize) {
-        if (typeof pageSize == 'number' && pageSize > 0) {
-            _page = 0;
-            _pageSize = pageSize;
-            return doQuery();
-        } else {
-            throw "InvalidPageSize";
-        }
+    this.initPage = function(pageSize,outsideCallback) {
+      if (pageSize == _pageSize && _page == 0) {
+         return false;
+      } else if (typeof pageSize == 'number' && pageSize > 0) {
+        _page = 0;
+        _pageSize = pageSize;
+        return doQuery(outsideCallback);
+      } else {
+        throw "InvalidPageSize";
+      }
     };
 };

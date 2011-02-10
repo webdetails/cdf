@@ -1451,26 +1451,84 @@ var TableComponent = BaseComponent.extend({
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
     this.queryState = new Query(croppedCd);
-    this.queryState.fetchData(this.parameters, function(values) {
-      changedValues = undefined;
-      if((typeof(myself.postFetch)=='function')){
-        changedValues = myself.postFetch(values);
+    if(cd.paginateServerside) {
+      this.extraOptions.push(["bServerSide",true]);
+      this.extraOptions.push(["bProcessing",true]);
+      this.queryState.setPageSize(cd.displayLength);
+      this.queryState.setCallback(function(values) {
+        changedValues = undefined;
+        if((typeof(myself.postFetch)=='function')){
+          changedValues = myself.postFetch(values);
+        }
+        if (changedValues != undefined) {
+          values = changedValues;
+        }
+        myself.processTableComponentResponse(values);
+      });
+      this.queryState.setParameters(this.parameters);
+      this.processTableComponentResponse();
+    } else {
+      this.queryState.fetchData(this.parameters, function(values) {
+        changedValues = undefined;
+        if((typeof(myself.postFetch)=='function')){
+          changedValues = myself.postFetch(values);
+        }
+        if (changedValues != undefined) {
+          values = changedValues;
+        }
+        myself.processTableComponentResponse(values);
+      });
+    }
+  },
+
+  pagingCallback: function(url, params,callback) {
+    function p( sKey ) {
+      for ( var i=0, iLen=params.length ; i<iLen ; i++ ) {
+        if ( params[i].name == sKey ) {
+          return params[i].value;
+        }
       }
-      if (changedValues != undefined) {
-        values = changedValues;
+      return null;
+    }
+    var sortingCols = p("iSortingCols"),sort = [];
+    if (sortingCols > 0) {
+      for (var i = 0; i < sortingCols; i++) {
+        var col = p("iSortCol_" + i);
+        var dir = p("sSortDir_" + i);
+        sort.push( col + (dir == "asc" ? "A" : "D"));
       }
-      myself.processTableComponentResponse(values);
+    }
+    var query = this.queryState,
+      myself = this;
+    query.setSortBy(sort.join(","));
+    query.setPageSize(p("iDisplayLength"));
+    query.setPageStartingAt(p("iDisplayStart"));
+    query.fetchData(function(d) {
+      if (myself.chartDefinition.postFetch){
+        var mod = myself.chartDefinition.postFetch(d);
+        if (typeof mod !== undefined) {
+          d = mod;
+        }
+      }
+      var response = {iTotalRecords: d.queryInfo.totalRows, iTotalDisplayRecords: d.queryInfo.totalRows};
+      response.aaData = d.resultset;
+      response.sEcho = p("sEcho");
+      callback(response);
     });
   },
+
   processTableComponentResponse : function(json)
   {
     // General documentation here: http://datatables.net
-    var cd = this.chartDefinition;
-    var extraOptions = {};
-    $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){extraOptions[e[0]] = e[1];});
+    var myself = this,
+      cd = this.chartDefinition,
+      extraOptions = {},
+      dtData0 = TableComponent.getDataTableOptions(cd),
+      dtData;
+
     // Build a default config from the standard options
-    var dtData0 = TableComponent.getDataTableOptions(cd);
-    var dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
+    $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){extraOptions[e[0]] = e[1];});
+    dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
 
 
     // Sparklines still applied to drawcallback
@@ -1487,12 +1545,19 @@ var TableComponent = BaseComponent.extend({
       }
 
     };
-    // We need to make sure we're getting data from the right place,
-    // depending on whether we're using CDA
-    if (cd.dataAccessId != undefined) {
+    /* We need to make sure we're getting data from the right place,
+     * depending on whether we're using CDA
+     */
+    if (cd.dataAccessId != undefined && json) {
       dtData.aaData = json.resultset;
     } else {
       dtData.aaData = json;
+    }
+    
+    /* If we're doing server-side pagination, we need to set up the server callback
+     */
+    if (dtData.bServerSide) {
+      dtData.fnServerData = function(u,p,c) {myself.pagingCallback(u,p,c);};
     }
     $("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
     this.dataTable = $("#"+this.htmlObject+'Table').dataTable( dtData );
