@@ -5,6 +5,7 @@
 	<content-types>
                 <static-paths>
                         <static-path url="/pentaho-cdf/js" localFolder="js"/>
+				<static-path url="/pentaho-cdf/resources" localFolder="resources"/>
                 </static-paths> 
 
 		<content-type type="xcdf" mime-type="text/html">

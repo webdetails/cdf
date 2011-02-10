@@ -193,9 +193,13 @@ public class CdfContentGenerator extends BaseContentGenerator
 
     if (urlPath.equals(RENDER_XCDF))
     {
-
-      renderXcdf(out, requestParams);
-
+      final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
+      if (mimeTypeListener != null)
+      {
+        mimeTypeListener.setMimeType(MIMETYPE);
+      }
+      RepositoryFile xcdfFile = PentahoSystem.get(IUnifiedRepository.class, null).getFileById(requestParams.getStringParameter("id", null));
+      renderXCDFDashboard(requestParams, out, xcdfFile.getPath(), requestParams.getStringParameter("template", null)); //$NON-NLS-1$
     }
     else if (urlPath.equals(JSON_SOLUTION))
     {
@@ -240,11 +244,18 @@ public class CdfContentGenerator extends BaseContentGenerator
     {
       getHeaders(payload, requestParams, out);
     }
+    else if (urlPath.endsWith(".xcdf")) {
+      final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
+      if (mimeTypeListener != null)
+      {
+        mimeTypeListener.setMimeType(MIMETYPE);
+      }
+      renderXCDFDashboard(requestParams, out, urlPath, requestParams.getStringParameter("template", null)); //$NON-NLS-1$
+    }
     else
     {
       // we'll be providing the actual content with cache
       returnResource(urlPath, contentItem, out);
-
     }
 
   }
@@ -299,17 +310,6 @@ public class CdfContentGenerator extends BaseContentGenerator
 
   }
 
-
-  private void renderXcdf(final OutputStream out, final IParameterProvider requestParams) throws Exception
-  {
-    final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-    if (mimeTypeListener != null)
-    {
-      mimeTypeListener.setMimeType(MIMETYPE);
-    }
-
-    renderXCDFDashboard(requestParams, out, requestParams.getStringParameter("id", null), requestParams.getStringParameter("template", null)); //$NON-NLS-1$ //$NON-NLS-2$
-  }
 
   private void jsonSolution(final OutputStream out,
           final IParameterProvider requestParams) throws JSONException, ParserConfigurationException
@@ -378,13 +378,13 @@ public class CdfContentGenerator extends BaseContentGenerator
     getContent(urlPath, out, this);
   }
 
-  public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out, final String xcdfId, String template) throws Exception
+  public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out, final String xcdfFilePath, String template) throws Exception
   {
     String dashboardFileName = null;
     String messagesBaseFilename = null;
     
     IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-    RepositoryFile xcdfFile = unifiedRepository.getFileById(xcdfId);
+    RepositoryFile xcdfFile = unifiedRepository.getFile(xcdfFilePath);
     if (xcdfFile != null)
     {
       final Document doc = XmlDom4JHelper.getDocFromStream(unifiedRepository.getDataForRead(xcdfFile.getId(), SimpleRepositoryFileData.class).getStream());
@@ -565,6 +565,10 @@ public class CdfContentGenerator extends BaseContentGenerator
       dashboardRepositoryFile = unifiedRepository.getFileById(dashboardFilePath);
     }
 
+    if (template == null) {
+      IPluginResourceLoader pluginResourceLoader = PentahoSystem.get(IPluginResourceLoader.class);
+      template = pluginResourceLoader.getPluginSetting(this.getClass(), "default-template");
+    }
     template = (template == null || template.equals("") ? "" : "-" + template); //$NON-NLS-1$
     File templateFile = new File(pluginDir, "template-dashboard" + template + ".html"); //$NON-NLS-1$
     
