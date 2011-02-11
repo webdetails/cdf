@@ -52,7 +52,7 @@ public class MessageBundlesHelper {
       targetDashboardBaseMsgFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + (msgsBaseFileName!=null ? msgsBaseFileName : CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME));
       globalMsgCacheFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME + ".properties");
       sourceDashboardBaseMsgFile = msgsBaseFileName;
-      languagesCacheUrl = CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
+      languagesCacheUrl = CdfConstants.CDF_PLUGIN_URL_PREFIX + File.separator + CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
     }
     
     
@@ -67,7 +67,7 @@ public class MessageBundlesHelper {
       targetDashboardBaseMsgFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + (msgsBaseFileName!=null ? msgsBaseFileName : CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME));
       globalMsgCacheFile = new File(PLUGIN_DIR, CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath + File.separator + CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME + ".properties");
       sourceDashboardBaseMsgFile = msgsBaseFileName;
-      languagesCacheUrl = CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
+      languagesCacheUrl = CdfConstants.CDF_PLUGIN_URL_PREFIX + File.separator + CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
     }
 
     public void saveI18NMessageFilesToCache() throws IOException {
