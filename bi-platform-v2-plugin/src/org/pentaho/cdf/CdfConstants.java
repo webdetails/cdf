@@ -11,6 +11,7 @@ public class CdfConstants {
 
     // CDF localization related constants
     public static final String BASE_GLOBAL_MESSAGE_SET_FILENAME = "Messages";
+    public static final String CDF_PLUGIN_URL_PREFIX = "WEBAPP_ROOT/content/pentaho-cdf";
     public static final String BASE_CDF_CACHE_DIR = "tmp/.cache";
     public static final String BASE_GLOBAL_MESSAGE_SET_URL = "resources/languages/";
 }
