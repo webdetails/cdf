@@ -1502,8 +1502,8 @@ var TableComponent = BaseComponent.extend({
     query.setPageSize(parseInt(p("iDisplayLength")));
     query.setPageStartingAt(p("iDisplayStart"));
     query.fetchData(function(d) {
-      if (myself.chartDefinition.postFetch){
-        var mod = myself.chartDefinition.postFetch(d);
+      if (myself.postFetch){
+        var mod = myself.postFetch(d);
         if (typeof mod !== undefined) {
           d = mod;
         }
