@@ -1452,7 +1452,7 @@ var TableComponent = BaseComponent.extend({
     if(cd.paginateServerside) {
       this.extraOptions.push(["bServerSide",true]);
       this.extraOptions.push(["bProcessing",true]);
-      this.queryState.setPageSize(cd.displayLength);
+      this.queryState.setPageSize(parseInt(cd.displayLength));
       this.queryState.setCallback(function(values) {
         changedValues = undefined;
         if((typeof(myself.postFetch)=='function')){
@@ -1499,7 +1499,7 @@ var TableComponent = BaseComponent.extend({
     var query = this.queryState,
       myself = this;
     query.setSortBy(sort.join(","));
-    query.setPageSize(p("iDisplayLength"));
+    query.setPageSize(parseInt(p("iDisplayLength")));
     query.setPageStartingAt(p("iDisplayStart"));
     query.fetchData(function(d) {
       if (myself.chartDefinition.postFetch){
