@@ -210,74 +210,78 @@ var XactionComponent = BaseComponent.extend({
 });
 
 var SelectBaseComponent = BaseComponent.extend({
-    visible: false,
-    update: function(){
-        var ph = $("#" + this.htmlObject);
-        var myArray = this.getValuesArray();
+  visible: false,
+  update: function () {
+    var ph = $("#" + this.htmlObject);
+    var myArray = this.getValuesArray();
 
-        selectHTML = "<select";
+    selectHTML = "<select";
 
-        // set size
-        if (this.size != undefined) {
-            selectHTML += " size='" + this.size + "'";
-        }
-        if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
-            if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
-                selectHTML += " multiple";
-            }
-            else
-                if (!this.isMultiple && this.size == undefined) {
-                    selectHTML += " size='" + myArray.length + "'";
-                }
-        }
-        selectHTML += ">";
-        var firstVal;
-        var vid = this.valueAsId == false ? false : true;
-        for (var i = 0, len = myArray.length; i < len; i++) {
-            if (myArray[i] != null && myArray[i].length > 0) {
-                var ivid = vid || myArray[i][0] == null;
-                var value, label;
-                if (myArray[i].length > 1) {
-                    value = myArray[i][ivid ? 1 : 0];
-                    label = myArray[i][1];
-                }
-                else {
-                    value = myArray[i][0];
-                    label = myArray[i][0];
-                }
-                if (i == 0) {
-                    firstVal = value;
-                }
-                selectHTML += "<option value = '" + value + "' >" + label + "</option>";
-            }
-        }
-
-        selectHTML += "</select>";
-
-        // update the placeholder
-        ph.html(selectHTML);
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = typeof currentVal == 'function' ? currentVal() : currentVal;
-        if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
-            Dashboards.setParameter(this.parameter, firstVal);
-            Dashboards.processChange(this.name);
-        } else if (currentVal !== ''){
-          $("select", ph).val(currentVal);
-		      if($("select", ph).val() == null && this.defaultIfEmpty){
-		        $("select", ph).val(firstVal);
-		      }
-		      Dashboards.setParameter(this.parameter, firstVal);
-          Dashboards.processChange(this.name);
-        } else {
-          $("select", ph).val(firstVal);
-		      Dashboards.setParameter(this.parameter, firstVal);
-		      Dashboards.processChange(this.name);
-        }
-        var myself = this;
-        $("select", ph).change(function(){
-            Dashboards.processChange(myself.name);
-        });
+    // set size
+    if (this.size != undefined) {
+      selectHTML += " size='" + this.size + "'";
     }
+    if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
+      if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
+        selectHTML += " multiple";
+      } else
+      if (!this.isMultiple && this.size == undefined) {
+        selectHTML += " size='" + myArray.length + "'";
+      }
+    }
+    selectHTML += ">";
+    var firstVal;
+    var vid = this.valueAsId == false ? false : true;
+    for (var i = 0, len = myArray.length; i < len; i++) {
+      if (myArray[i] != null && myArray[i].length > 0) {
+        var ivid = vid || myArray[i][0] == null;
+        var value, label;
+        if (myArray[i].length > 1) {
+          value = myArray[i][ivid ? 1 : 0];
+          label = myArray[i][1];
+        } else {
+          value = myArray[i][0];
+          label = myArray[i][0];
+        }
+        if (i == 0) {
+          firstVal = value;
+        }
+        selectHTML += "<option value = '" + value + "' >" + label + "</option>";
+      }
+    }
+
+    selectHTML += "</select>";
+
+    // update the placeholder
+    ph.html(selectHTML);
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = Dashboards.ev(currentVal);
+    if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
+      if (currentVal !== firstVal) {
+        Dashboards.setParameter(this.parameter, firstVal);
+        Dashboards.processChange(this.name);
+      }
+    } else if (currentVal !== '') {
+      $("select", ph).val(currentVal);
+      if ($("select", ph).val() == null && this.defaultIfEmpty) {
+        $("select", ph).val(firstVal);
+      }
+      if (currentVal !== firstVal) {
+        Dashboards.setParameter(this.parameter, firstVal);
+        Dashboards.processChange(this.name);
+      }
+    } else {
+      $("select", ph).val(firstVal);
+      if (currentVal !== firstVal) {
+        Dashboards.setParameter(this.parameter, firstVal);
+        Dashboards.processChange(this.name);
+      }
+    }
+    var myself = this;
+    $("select", ph).change(function () {
+      Dashboards.processChange(myself.name);
+    });
+  }
 });
 
 var SelectComponent = SelectBaseComponent.extend({
