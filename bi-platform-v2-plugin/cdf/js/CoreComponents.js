@@ -1174,7 +1174,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
-      
+
       if(value != null) { value = value.replace('"','&quot;' ); }
       if(label != null) { label = label.replace('"','&quot;' ); }
 
@@ -1201,7 +1201,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var foundDefault = false;
     for (var i = 0; i < myArray.length; i++) {
       if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
-        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.verticalOrientation);
+        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation);
         foundDefault = true;
         if(!this.isMultiple) { break; }
       }
