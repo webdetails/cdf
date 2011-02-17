@@ -23,7 +23,6 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.pentaho.platform.web.servlet.SolutionRepositoryService;
 
 /**
  * @author pedro
@@ -80,16 +79,15 @@ public class NavigateComponent extends PentahoBase {
   }
 
   private Document getRepositoryDocument(final IPentahoSession userSession) throws ParserConfigurationException {      //
-    Document repositoryDocument;
+    Document repositoryDocument = null;
     if (cachingAvailable && (repositoryDocument = (Document) cacheManager.getFromSessionCache(userSession, CACHE_REPOSITORY_DOCUMENT)) != null) {
       getLogger().debug("Repository Document found in cache");
       return repositoryDocument;
     } else {
-      //System.out.println(Calendar.getInstance().getTime() + ": Getting repository Document");
       final DOMReader reader = new DOMReader();
-      repositoryDocument = reader.read(new SolutionRepositoryService().getSolutionRepositoryDoc(userSession, new String[0]));
+      // Need to replace the line below with new REST service.
+//      repositoryDocument = reader.read(new SolutionRepositoryService().getSolutionRepositoryDoc(userSession, new String[0]));
       cacheManager.putInSessionCache(userSession, CACHE_REPOSITORY_DOCUMENT, repositoryDocument);
-      //System.out.println(Calendar.getInstance().getTime() + ": Repository Document Returned");
     }
     return repositoryDocument;
   }
