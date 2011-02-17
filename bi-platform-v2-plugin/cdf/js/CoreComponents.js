@@ -177,7 +177,8 @@ var XactionComponent = BaseComponent.extend({
         " width=\"100%\"" +
         " src=\"";
 
-        xactionIFrameHTML += webAppPath + "/ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
+        xactionIFrameHTML += webAppPath + "/api/repo/files" + this.path + ":output?";
+        
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -810,7 +811,7 @@ var TimePlotComponent = BaseComponent.extend({
       parameters.push(key+"="+value);
     }
     var allData = undefined;
-    var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=cdf&path=/public/pentaho-solutions/cdf/components/timelinefeeder.xaction&action=timelinefeeder.xaction&" + parameters.join('&');
+    var timePlotEventSourceUrl = webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/timelinefeeder.xaction:output?" + parameters.join('&');
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -822,7 +823,7 @@ var TimePlotComponent = BaseComponent.extend({
         parameters.push(key+"="+value);
       }
 
-      var eventUrl = webAppPath + "/ViewAction?solution=cdf&path=/public/pentaho-solutions/cdf/components/timelinefeeder.xaction&action=timelineeventfeeder.xaction&" + parameters.join('&');
+      var eventUrl = webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/timelinefeeder.xaction:output?" + parameters.join('&');
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){
@@ -1352,7 +1353,7 @@ var JpivotComponent = BaseComponent.extend({
   update : function() {
     // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-    jpivotHTML += webAppPath + "/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
+    jpivotHTML += webAppPath + "/api/repo/files" + 	this.path + ":output?";
 
     // Add args
     var p = new Array(this.parameters.length);
@@ -1828,7 +1829,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
   },
 
   executeXAction : function() {
-    var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
+    var url = webAppPath + "/api/repo/files" + this.path + ":output?";
 
     var p = new Array(this.parameters.length);
     var parameters = [];
