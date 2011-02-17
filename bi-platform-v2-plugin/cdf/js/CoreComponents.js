@@ -1203,8 +1203,11 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     }
 
     var foundDefault = false;
+    this.clearSelections(this.htmlObject, this.name, this.verticalOrientation);
     for (var i = 0; i < myArray.length; i++) {
-      if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
+      if ( ( $.isArray(currentVal) && currentVal.indexOf(myArray[i][valIdx]) >= 0 || currentVal.indexOf(myArray[i][lblIdx]) >= 0)
+          || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
+        
         MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation);
         foundDefault = true;
         if(!this.isMultiple) { break; }
@@ -1239,11 +1242,18 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     return $("#" + this.htmlObject + " button")[idx].value;
   },
 
+  getSelecetedCss: function(verticalOrientation) {
+    return "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+  },
+  getUnselectedCss: function(verticalOrientation) {
+    return "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+  },
+
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation){
 
-	var cssWrapperClass= "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal-button");
-	var cssWrapperClassSelected= "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+	var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
+	var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
 	var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
@@ -1266,20 +1276,21 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
   	}
     else {//de-select old, select new
-      if (this.indexes[name] != undefined && this.indexes[name] < buttons.length) {
-				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
-					for(var i = 0; i < this.indexes[name].length; i++){
-  				  buttons[this.indexes[name][i]].parentNode.className = cssWrapperClass;
-					}
-				}
-				else {
-  			  buttons[this.indexes[name]].parentNode.className = cssWrapperClass;
-			  }
-      }
+      this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
 			buttons[index].parentNode.className = cssWrapperClassSelected;
 	  }
     this.callAjaxAfterRender(name);
+  },
+
+  clearSelections: function(htmlObject, name, verticalOrientation) {
+    var buttons = $("#" + htmlObject + " button");
+    var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
+    for(var i = 0; i < buttons.length; i++){
+      buttons[i].parentNode.className = cssWrapperClass;
+    }
+    
+    this.indexes[name] = [];
   },
 
  //static MultiButtonComponent.prototype.getSelectedIndex
