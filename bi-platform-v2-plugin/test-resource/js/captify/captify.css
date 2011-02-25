@@ -1,0 +1,54 @@
+
+.caption-top, .caption-bottom {
+	color: #000000;	
+	padding-left: 1em;	
+	padding-top: 0.4em;	
+	text-align: right;
+	font-weight: bold;
+	font-size: 15px;	
+	font-family: arial;	
+	cursor: default;
+	border: 0px solid #334143;
+	background: #000000;
+	
+}
+
+.caption-top {
+   border-width: 0px 0px 8px 0px;
+}
+
+br.c { clear: both; }
+
+.caption-bottom .options {
+text-decoration:none;
+font-size: 11px;	
+color: #ffffff;
+right:5px;
+border-left:5px solid #7F7F7F;
+position:relative;
+}
+
+.caption-bottom .options .img{
+	border:5px solid #00ff00;
+}
+
+.caption-bottom .title {
+text-decoration:none;
+font-size: 17px;	
+color: #ffffff;
+display: inline;
+float:left;
+}
+
+.caption-details {
+	color: #ffffff;
+	background: #000000;
+	position:absolute;
+	width:70px;
+	height:17px;
+	text-align:center;
+	opacity:0.5;
+	border-bottom: none;
+	-moz-border-radius: 4px 4px 0px 0px;
+	-webkit-border-radius: 4px 4px 0px 0px;
+}
