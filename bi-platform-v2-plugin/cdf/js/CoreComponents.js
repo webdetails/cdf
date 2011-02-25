@@ -210,74 +210,78 @@ var XactionComponent = BaseComponent.extend({
 });
 
 var SelectBaseComponent = BaseComponent.extend({
-    visible: false,
-    update: function(){
-        var ph = $("#" + this.htmlObject);
-        var myArray = this.getValuesArray();
+  visible: false,
+  update: function () {
+    var ph = $("#" + this.htmlObject);
+    var myArray = this.getValuesArray();
 
-        selectHTML = "<select";
+    selectHTML = "<select";
 
-        // set size
-        if (this.size != undefined) {
-            selectHTML += " size='" + this.size + "'";
-        }
-        if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
-            if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
-                selectHTML += " multiple";
-            }
-            else
-                if (!this.isMultiple && this.size == undefined) {
-                    selectHTML += " size='" + myArray.length + "'";
-                }
-        }
-        selectHTML += ">";
-        var firstVal;
-        var vid = this.valueAsId == false ? false : true;
-        for (var i = 0, len = myArray.length; i < len; i++) {
-            if (myArray[i] != null && myArray[i].length > 0) {
-                var ivid = vid || myArray[i][0] == null;
-                var value, label;
-                if (myArray[i].length > 1) {
-                    value = myArray[i][ivid ? 1 : 0];
-                    label = myArray[i][1];
-                }
-                else {
-                    value = myArray[i][0];
-                    label = myArray[i][0];
-                }
-                if (i == 0) {
-                    firstVal = value;
-                }
-                selectHTML += "<option value = '" + value + "' >" + label + "</option>";
-            }
-        }
-
-        selectHTML += "</select>";
-
-        // update the placeholder
-        ph.html(selectHTML);
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = typeof currentVal == 'function' ? currentVal() : currentVal;
-        if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
-            Dashboards.setParameter(this.parameter, firstVal);
-            Dashboards.processChange(this.name);
-        } else if (currentVal !== ''){
-          $("select", ph).val(currentVal);
-		      if($("select", ph).val() == null && this.defaultIfEmpty){
-		        $("select", ph).val(firstVal);
-		      }
-		      Dashboards.setParameter(this.parameter, firstVal);
-          Dashboards.processChange(this.name);
-        } else {
-          $("select", ph).val(firstVal);
-		      Dashboards.setParameter(this.parameter, firstVal);
-		      Dashboards.processChange(this.name);
-        }
-        var myself = this;
-        $("select", ph).change(function(){
-            Dashboards.processChange(myself.name);
-        });
+    // set size
+    if (this.size != undefined) {
+      selectHTML += " size='" + this.size + "'";
     }
+    if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
+      if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
+        selectHTML += " multiple";
+      } else
+      if (!this.isMultiple && this.size == undefined) {
+        selectHTML += " size='" + myArray.length + "'";
+      }
+    }
+    selectHTML += ">";
+    var firstVal;
+    var vid = this.valueAsId == false ? false : true;
+    for (var i = 0, len = myArray.length; i < len; i++) {
+      if (myArray[i] != null && myArray[i].length > 0) {
+        var ivid = vid || myArray[i][0] == null;
+        var value, label;
+        if (myArray[i].length > 1) {
+          value = myArray[i][ivid ? 1 : 0];
+          label = myArray[i][1];
+        } else {
+          value = myArray[i][0];
+          label = myArray[i][0];
+        }
+        if (i == 0) {
+          firstVal = value;
+        }
+        selectHTML += "<option value = '" + value + "' >" + label + "</option>";
+      }
+    }
+
+    selectHTML += "</select>";
+
+    // update the placeholder
+    ph.html(selectHTML);
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = Dashboards.ev(currentVal);
+    if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
+      if (currentVal !== firstVal) {
+        Dashboards.setParameter(this.parameter, firstVal);
+        Dashboards.processChange(this.name);
+      }
+    } else if (currentVal !== '') {
+      $("select", ph).val(currentVal);
+      if ($("select", ph).val() == null && this.defaultIfEmpty) {
+        $("select", ph).val(firstVal);
+      }
+      if (currentVal !== firstVal) {
+        Dashboards.setParameter(this.parameter, firstVal);
+        Dashboards.processChange(this.name);
+      }
+    } else {
+      $("select", ph).val(firstVal);
+      if (currentVal !== firstVal) {
+        Dashboards.setParameter(this.parameter, firstVal);
+        Dashboards.processChange(this.name);
+      }
+    }
+    var myself = this;
+    $("select", ph).change(function () {
+      Dashboards.processChange(myself.name);
+    });
+  }
 });
 
 var SelectComponent = SelectBaseComponent.extend({
@@ -1174,7 +1178,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
-      
+
       if(value != null) { value = value.replace('"','&quot;' ); }
       if(label != null) { label = label.replace('"','&quot;' ); }
 
@@ -1199,9 +1203,12 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     }
 
     var foundDefault = false;
+    this.clearSelections(this.htmlObject, this.name, this.verticalOrientation);
     for (var i = 0; i < myArray.length; i++) {
-      if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
-        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.verticalOrientation);
+      if ( ( $.isArray(currentVal) && currentVal.indexOf(myArray[i][valIdx]) >= 0 || currentVal.indexOf(myArray[i][lblIdx]) >= 0)
+          || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
+        
+        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation);
         foundDefault = true;
         if(!this.isMultiple) { break; }
       }
@@ -1235,11 +1242,18 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     return $("#" + this.htmlObject + " button")[idx].value;
   },
 
+  getSelecetedCss: function(verticalOrientation) {
+    return "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+  },
+  getUnselectedCss: function(verticalOrientation) {
+    return "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+  },
+
   //static MultiButtonComponent.prototype.clickButton
   clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation){
 
-	var cssWrapperClass= "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal-button");
-	var cssWrapperClassSelected= "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+	var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
+	var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
 	var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
@@ -1262,20 +1276,21 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
   	}
     else {//de-select old, select new
-      if (this.indexes[name] != undefined && this.indexes[name] < buttons.length) {
-				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
-					for(var i = 0; i < this.indexes[name].length; i++){
-  				  buttons[this.indexes[name][i]].parentNode.className = cssWrapperClass;
-					}
-				}
-				else {
-  			  buttons[this.indexes[name]].parentNode.className = cssWrapperClass;
-			  }
-      }
+      this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
 			buttons[index].parentNode.className = cssWrapperClassSelected;
 	  }
     this.callAjaxAfterRender(name);
+  },
+
+  clearSelections: function(htmlObject, name, verticalOrientation) {
+    var buttons = $("#" + htmlObject + " button");
+    var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
+    for(var i = 0; i < buttons.length; i++){
+      buttons[i].parentNode.className = cssWrapperClass;
+    }
+    
+    this.indexes[name] = [];
   },
 
  //static MultiButtonComponent.prototype.getSelectedIndex
