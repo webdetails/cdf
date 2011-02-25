@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
@@ -193,27 +194,19 @@ public class CdfContentGenerator extends BaseContentGenerator
 
     if (urlPath.equals(RENDER_XCDF))
     {
-      final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-      if (mimeTypeListener != null)
-      {
-        mimeTypeListener.setMimeType(MIMETYPE);
-      }
       RepositoryFile xcdfFile = PentahoSystem.get(IUnifiedRepository.class, null).getFileById(requestParams.getStringParameter("id", null));
       renderXCDFDashboard(requestParams, out, xcdfFile.getPath(), requestParams.getStringParameter("template", null)); //$NON-NLS-1$
     }
     else if (urlPath.equals(JSON_SOLUTION))
     {
-
       jsonSolution(out, requestParams);
     }
     else if (urlPath.equals(GET_CDF_RESOURCE))
     {
-
       getCDFResource(urlPath, contentItem, out, requestParams);
     }
     else if (urlPath.equals(RENDER_HTML))
     {
-
       renderHtml(out, requestParams);
     }
     else if (urlPath.equals(EXPORT))
@@ -245,11 +238,6 @@ public class CdfContentGenerator extends BaseContentGenerator
       getHeaders(payload, requestParams, out);
     }
     else if (urlPath.endsWith(".xcdf")) {
-      final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-      if (mimeTypeListener != null)
-      {
-        mimeTypeListener.setMimeType(MIMETYPE);
-      }
       renderXCDFDashboard(requestParams, out, urlPath, requestParams.getStringParameter("template", null)); //$NON-NLS-1$
     }
     else
@@ -297,7 +285,7 @@ public class CdfContentGenerator extends BaseContentGenerator
 
   }
 
-    private void generateStorage(final IParameterProvider requestParams, final OutputStream out) throws Exception
+  private void generateStorage(final IParameterProvider requestParams, final OutputStream out) throws Exception
   {
 
     final StringBuilder s = new StringBuilder();
@@ -349,15 +337,91 @@ public class CdfContentGenerator extends BaseContentGenerator
     getSolutionFile(resource, out, this);
   }
 
-  private void renderHtml(final OutputStream out, final IParameterProvider requestParams) throws Exception
+  public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out, final String xcdfFilePath, String template) throws Exception
   {
     final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
     if (mimeTypeListener != null)
     {
       mimeTypeListener.setMimeType(MIMETYPE);
     }
+    
+    XcdfRenderer xcdfRenderer = new XcdfRenderer();
+    
+    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
+    RepositoryFile xcdfFile = unifiedRepository.getFile(xcdfFilePath);
+    if (xcdfFile != null)
+    {
+      xcdfRenderer.setOutputStream(out);
+      xcdfRenderer.setRepositoryFile(xcdfFile);
+      xcdfRenderer.setTemplate(template);
+      xcdfRenderer.setDebug(requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true"));
+      xcdfRenderer.setBaseUrl((requestParams.hasParameter("root") ? "http://" + requestParams.getParameter("root").toString() : "") + RELATIVE_URL);
+      xcdfRenderer.setUserSession(userSession);
+      
+      Map<String, Object> parameterMap = new HashMap<String, Object>();
+      Iterator it = requestParams.getParameterNames();
+      while (it.hasNext())
+      {
+        String p = (String) it.next();
+        if (p.indexOf("parameters") == 0)
+        {
+          parameterMap.put(p, requestParams.getParameter(p));
+        }
+      }
+      xcdfRenderer.setVarArgs(parameterMap);
+      xcdfRenderer.execute();
 
-    renderHtmlDashboard(requestParams, out, requestParams.getStringParameter("id", null), requestParams.getStringParameter("template", null), requestParams.getStringParameter("messages", null));
+      setResponseHeaders(xcdfRenderer.getMimeType(null), 0, null);
+    } else {
+      out.write("Can not open file".getBytes("UTF-8"));  //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+  }
+  
+  private void renderHtml(final OutputStream out, final IParameterProvider requestParams) throws Exception
+  {
+    CdfHtmlTemplateRenderer htmlRenderer = new CdfHtmlTemplateRenderer();
+    
+    final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
+    if (mimeTypeListener != null)
+    {
+      mimeTypeListener.setMimeType(MIMETYPE);
+    }
+
+    htmlRenderer.setOutputStream(out);
+    
+    String fileId = requestParams.getStringParameter("id", null);
+    if ((fileId == null) || (fileId.trim().length() == 0)) {
+      File pluginDir = ((PluginClassLoader) this.getClass().getClassLoader()).getPluginDir();
+      htmlRenderer.setFile(new File(pluginDir, "default-dashboard-template.html"));
+    } else if (fileId.startsWith("\\")) { //$NON-NLS-1$
+
+    } else {
+      htmlRenderer.setRepositoryFile(PentahoSystem.get(IUnifiedRepository.class, null).getFile(fileId));
+    }
+
+    htmlRenderer.setTemplate(requestParams.getStringParameter("template", null));
+    htmlRenderer.setDebug(requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true"));
+    htmlRenderer.setBaseUrl((requestParams.hasParameter("root") ? "http://" + requestParams.getParameter("root").toString() : "") + RELATIVE_URL);
+    htmlRenderer.setUserSession(userSession);
+    htmlRenderer.setMsgsFileBaseName(requestParams.getStringParameter("messages", null));
+    
+    Map<String, Object> parameterMap = new HashMap<String, Object>();
+    Iterator it = requestParams.getParameterNames();
+    while (it.hasNext())
+    {
+      String p = (String) it.next();
+      if (p.indexOf("parameters") == 0)
+      {
+        parameterMap.put(p, requestParams.getParameter(p));
+      }
+    }
+    htmlRenderer.setVarArgs(parameterMap);
+    
+    htmlRenderer.execute();
+    
+    setResponseHeaders(htmlRenderer.getMimeType(null), 0, null);
+
   }
 
   private void returnResource(final String urlPath,
@@ -378,40 +442,41 @@ public class CdfContentGenerator extends BaseContentGenerator
     getContent(urlPath, out, this);
   }
 
-  public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out, final String xcdfFilePath, String template) throws Exception
-  {
-    String dashboardFileName = null;
-    String messagesBaseFilename = null;
-    
-    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-    RepositoryFile xcdfFile = unifiedRepository.getFile(xcdfFilePath);
-    if (xcdfFile != null)
-    {
-      final Document doc = XmlDom4JHelper.getDocFromStream(unifiedRepository.getDataForRead(xcdfFile.getId(), SimpleRepositoryFileData.class).getStream());
-      dashboardFileName = XmlDom4JHelper.getNodeText("/cdf/template", doc, ""); //$NON-NLS-1$
-
-      // Get message file base name if any
-      if (doc.selectSingleNode("/cdf/messages") != null) //$NON-NLS-1$
-      {
-        messagesBaseFilename = XmlDom4JHelper.getNodeText("/cdf/messages", doc); //$NON-NLS-1$
-      }
-
-      // If a "style" tag exists, use that one
-      if (doc.selectSingleNode("/cdf/style") != null) //$NON-NLS-1$
-      {
-        template = XmlDom4JHelper.getNodeText("/cdf/style", doc); //$NON-NLS-1$
-      }
-      
-      if (dashboardFileName != null) {
-        String parentDir = FilenameUtils.getFullPathNoEndSeparator(xcdfFile.getPath());
-        dashboardFileName = FilenameUtils.separatorsToUnix(FilenameUtils.concat(parentDir, dashboardFileName));
-      }
-      renderHtmlDashboard(requestParams, out, dashboardFileName, template, messagesBaseFilename);
-    } else {
-      out.write("Can not open file".getBytes("UTF-8"));  //$NON-NLS-1$ //$NON-NLS-2$
-    }
-
-  }
+  
+//  public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out, final String xcdfFilePath, String template) throws Exception
+//  {
+//    String dashboardFileName = null;
+//    String messagesBaseFilename = null;
+//    
+//    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
+//    RepositoryFile xcdfFile = unifiedRepository.getFile(xcdfFilePath);
+//    if (xcdfFile != null)
+//    {
+//      final Document doc = XmlDom4JHelper.getDocFromStream(unifiedRepository.getDataForRead(xcdfFile.getId(), SimpleRepositoryFileData.class).getStream());
+//      dashboardFileName = XmlDom4JHelper.getNodeText("/cdf/template", doc, ""); //$NON-NLS-1$
+//
+//      // Get message file base name if any
+//      if (doc.selectSingleNode("/cdf/messages") != null) //$NON-NLS-1$
+//      {
+//        messagesBaseFilename = XmlDom4JHelper.getNodeText("/cdf/messages", doc); //$NON-NLS-1$
+//      }
+//
+//      // If a "style" tag exists, use that one
+//      if (doc.selectSingleNode("/cdf/style") != null) //$NON-NLS-1$
+//      {
+//        template = XmlDom4JHelper.getNodeText("/cdf/style", doc); //$NON-NLS-1$
+//      }
+//      
+//      if (dashboardFileName != null) {
+//        String parentDir = FilenameUtils.getFullPathNoEndSeparator(xcdfFile.getPath());
+//        dashboardFileName = FilenameUtils.separatorsToUnix(FilenameUtils.concat(parentDir, dashboardFileName));
+//      }
+//      renderHtmlDashboard(requestParams, out, dashboardFileName, template, messagesBaseFilename);
+//    } else {
+//      out.write("Can not open file".getBytes("UTF-8"));  //$NON-NLS-1$ //$NON-NLS-2$
+//    }
+//
+//  }
   
   private void getTemplateSections(File templateFile, String[] templateSections, ArrayList<String> i18nTagsList) throws Exception{
     final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
