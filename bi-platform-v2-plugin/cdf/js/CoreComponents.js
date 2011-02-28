@@ -231,7 +231,11 @@ var SelectBaseComponent = BaseComponent.extend({
     }
     selectHTML += ">";
     var firstVal;
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    var hasCurrentVal = typeof currentval != undefined;
     var vid = this.valueAsId == false ? false : true;
+    var hasValueSelected = false;
     for (var i = 0, len = myArray.length; i < len; i++) {
       if (myArray[i] != null && myArray[i].length > 0) {
         var ivid = vid || myArray[i][0] == null;
@@ -246,7 +250,12 @@ var SelectBaseComponent = BaseComponent.extend({
         if (i == 0) {
           firstVal = value;
         }
-        selectHTML += "<option value = '" + value + "' >" + label + "</option>";
+        selectHTML += "<option value = '" + value + "'";
+        if ((i == 0 && !hasCurrentVal) || (hasCurrentVal && (currentVal.indexOf(myArray[i][0]) >= 0))) {
+          selectHTML += " SELECTED";
+          hasValueSelected = true;
+        }
+        selectHTML += ">" + label + "</option>";
       }
     }
 
@@ -254,27 +263,27 @@ var SelectBaseComponent = BaseComponent.extend({
 
     // update the placeholder
     ph.html(selectHTML);
-    var currentVal = Dashboards.getParameterValue(this.parameter);
-    currentVal = Dashboards.ev(currentVal);
-    if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
-      if (currentVal !== firstVal) {
-        Dashboards.setParameter(this.parameter, firstVal);
-        Dashboards.processChange(this.name);
-      }
-    } else if (currentVal !== '') {
-      $("select", ph).val(currentVal);
-      if ($("select", ph).val() == null && this.defaultIfEmpty) {
+    if(!hasValueSelected) {
+      if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
+        if (currentVal !== firstVal) {
+          Dashboards.setParameter(this.parameter, firstVal);
+          Dashboards.processChange(this.name);
+        }
+      } else if (currentVal !== '') {
+        $("select", ph).val(currentVal);
+        if ($("select", ph).val() == null && this.defaultIfEmpty) {
+          $("select", ph).val(firstVal);
+        }
+        if (currentVal !== firstVal) {
+          Dashboards.setParameter(this.parameter, firstVal);
+          Dashboards.processChange(this.name);
+        }
+      } else {
         $("select", ph).val(firstVal);
-      }
-      if (currentVal !== firstVal) {
-        Dashboards.setParameter(this.parameter, firstVal);
-        Dashboards.processChange(this.name);
-      }
-    } else {
-      $("select", ph).val(firstVal);
-      if (currentVal !== firstVal) {
-        Dashboards.setParameter(this.parameter, firstVal);
-        Dashboards.processChange(this.name);
+        if (currentVal !== firstVal) {
+          Dashboards.setParameter(this.parameter, firstVal);
+          Dashboards.processChange(this.name);
+        }
       }
     }
     var myself = this;
@@ -1207,7 +1216,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     for (var i = 0; i < myArray.length; i++) {
       if ( ( $.isArray(currentVal) && currentVal.indexOf(myArray[i][valIdx]) >= 0 || currentVal.indexOf(myArray[i][lblIdx]) >= 0)
           || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
-        
+
         MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation);
         foundDefault = true;
         if(!this.isMultiple) { break; }
@@ -1289,7 +1298,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     for(var i = 0; i < buttons.length; i++){
       buttons[i].parentNode.className = cssWrapperClass;
     }
-    
+
     this.indexes[name] = [];
   },
 
@@ -2109,9 +2118,9 @@ var ExecutePrptComponent = PrptComponent.extend({
 var AnalyzerComponent = BaseComponent.extend({
 
     update: function(){
-    
+
             this.clear();
-            
+
             var options = this.getOptions();
             var url = webAppPath + '/content/analyzer/';
             var myself=this;
@@ -2121,11 +2130,11 @@ var AnalyzerComponent = BaseComponent.extend({
             var height = this.height? this.height: "480px";
 
             var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
-            $("#"+this.htmlObject).html(iFrameHTML);                    
+            $("#"+this.htmlObject).html(iFrameHTML);
     },
 
     getOptions: function(){
-                            
+
             var options = {
                     solution : this.solution,
                     path: this.path,
@@ -2140,7 +2149,7 @@ var AnalyzerComponent = BaseComponent.extend({
             $.map(this.parameters,function(k){
                     options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
             });
-            
+
             return options;
     }
 });
@@ -2153,7 +2162,7 @@ function generateIframe(htmlObject,url,parameters,height,width){
                 " src=\""+ url +"?";
 
     var paramCounter = 0;
-    
+
     // Add args
     jQuery.each(parameters, function(i, val) {
         if(typeof val != "undefined"){
@@ -2163,11 +2172,11 @@ function generateIframe(htmlObject,url,parameters,height,width){
             arg += encodeURIComponent(i) + "=";
             iFrameHTML += arg + encodeURIComponent(val);
         };
-    });         
+    });
 
     // Close IFrame
-    iFrameHTML += "\"></iframe>";   
-       
+    iFrameHTML += "\"></iframe>";
+
     return iFrameHTML;
 };
 
