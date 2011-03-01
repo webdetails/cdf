@@ -236,6 +236,15 @@ var SelectBaseComponent = BaseComponent.extend({
     var hasCurrentVal = typeof currentval != undefined;
     var vid = this.valueAsId == false ? false : true;
     var hasValueSelected = false;
+    var isSelected = false;
+
+    var currentValArray;
+    if(currentVal instanceof Array) {
+	  currentValArray = currentVal;
+    } else {
+	  currentValArray = currentVal.split("|");
+    }
+
     for (var i = 0, len = myArray.length; i < len; i++) {
       if (myArray[i] != null && myArray[i].length > 0) {
         var ivid = vid || myArray[i][0] == null;
@@ -251,7 +260,16 @@ var SelectBaseComponent = BaseComponent.extend({
           firstVal = value;
         }
         selectHTML += "<option value = '" + value + "'";
-        if ((i == 0 && !hasCurrentVal) || (hasCurrentVal && (currentVal.indexOf(myArray[i][0]) >= 0))) {
+
+        isSelected = false;
+        for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+           isSelected = currentValArray[j] == value;
+           if(isSelected) {
+     	     break;
+           }
+	    }
+
+        if ((i == 0 && !hasCurrentVal) || (hasCurrentVal && isSelected)) {
           selectHTML += " SELECTED";
           hasValueSelected = true;
         }
@@ -2118,9 +2136,9 @@ var ExecutePrptComponent = PrptComponent.extend({
 var AnalyzerComponent = BaseComponent.extend({
 
     update: function(){
-
+    
             this.clear();
-
+            
             var options = this.getOptions();
             var url = webAppPath + '/content/analyzer/';
             var myself=this;
@@ -2130,11 +2148,11 @@ var AnalyzerComponent = BaseComponent.extend({
             var height = this.height? this.height: "480px";
 
             var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
-            $("#"+this.htmlObject).html(iFrameHTML);
+            $("#"+this.htmlObject).html(iFrameHTML);                    
     },
 
     getOptions: function(){
-
+                            
             var options = {
                     solution : this.solution,
                     path: this.path,
@@ -2149,7 +2167,7 @@ var AnalyzerComponent = BaseComponent.extend({
             $.map(this.parameters,function(k){
                     options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
             });
-
+            
             return options;
     }
 });
@@ -2162,7 +2180,7 @@ function generateIframe(htmlObject,url,parameters,height,width){
                 " src=\""+ url +"?";
 
     var paramCounter = 0;
-
+    
     // Add args
     jQuery.each(parameters, function(i, val) {
         if(typeof val != "undefined"){
@@ -2172,11 +2190,11 @@ function generateIframe(htmlObject,url,parameters,height,width){
             arg += encodeURIComponent(i) + "=";
             iFrameHTML += arg + encodeURIComponent(val);
         };
-    });
+    });         
 
     // Close IFrame
-    iFrameHTML += "\"></iframe>";
-
+    iFrameHTML += "\"></iframe>";   
+       
     return iFrameHTML;
 };
 
