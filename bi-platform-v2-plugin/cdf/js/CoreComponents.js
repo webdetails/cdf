@@ -1143,11 +1143,32 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 		//default
         var currentVal = Dashboards.getParameterValue(this.parameter);
         currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+
+    var isSelected = false;
+
+    var currentValArray;
+    if(currentVal instanceof Array) {
+	  currentValArray = currentVal;
+    } else {
+	  currentValArray = currentVal.split("|");
+    }
+
 		var hasCurrentVal = typeof currentVal != "undefined";
 selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+
       var vid = this.valueAsId==false?0:1;
+
+
+isSelected = false;
+        for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+           isSelected = currentValArray[j] == myArray[i][vid];
+           if(isSelected) {
+     	     break;
+           }
+	    }
+
       if (this.type == 'radio' || this.type == 'radioComponent'){
 	      if ((i == 0 && !hasCurrentVal) ||
 						(hasCurrentVal && (myArray[i][vid] == currentVal ))) {
@@ -1156,7 +1177,7 @@ selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical"
         selectHTML += " type='radio'";
       }else{
 	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (currentVal.indexOf(myArray[i][vid]) >= 0))) {
+						(hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
 				}
         selectHTML += " type='checkbox'";
@@ -1224,6 +1245,15 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var currentVal = this.parameter ? Dashboards.getParameterValue(this.parameter) : null;
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 
+    var isSelected = false;
+
+    var currentValArray;
+    if(currentVal instanceof Array) {
+	  currentValArray = currentVal;
+    } else {
+	  currentValArray = currentVal.split("|");
+    }
+
     if(currentVal == null && this.parameter){
       Dashboards.setParameter(this.parameter, firstVal);
       currentVal = firstVal;
@@ -1232,7 +1262,17 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var foundDefault = false;
     this.clearSelections(this.htmlObject, this.name, this.verticalOrientation);
     for (var i = 0; i < myArray.length; i++) {
-      if ( ( $.isArray(currentVal) && currentVal.indexOf(myArray[i][valIdx]) >= 0 || currentVal.indexOf(myArray[i][lblIdx]) >= 0)
+
+    isSelected = false;
+        for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+           isSelected = currentValArray[j] == myArray[i][valIdx];
+           if(isSelected) {
+     	     break;
+           }
+	    }
+
+
+      if ( ( $.isArray(currentVal) && isSelected || isSelected)
           || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
 
         MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation);
@@ -2226,3 +2266,4 @@ var FreeformComponent = BaseComponent.extend({
 			this.customfunction(this.parameters || []);
 		}
 	})
+
