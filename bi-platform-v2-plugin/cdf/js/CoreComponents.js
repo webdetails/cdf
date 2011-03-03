@@ -1338,6 +1338,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       list.push(obj);
     }
 
+    // if reloadOnUpdate only update the list
+    if(this.reloadOnUpdate&&this.autoBoxOpt!=undefined)
+    {
+      this.autoBoxOpt.list=list;
+      $(clientSelector.autoBoxOpt.input[0]).trigger("autobox");
+      return;
+    }
+
     $("#"+ this.htmlObject).empty();
 
     var myself = this;
@@ -1347,70 +1355,84 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       myself.processChange();
     };
     var processElementChange = myself.processElementChange == true ? function(value){
-      Dashboards.fireChange(myself.parameter+"_value",value)
+      Dashboards.fireChange(myself.parameter+"_value",value);
     } : undefined;
     if(processElementChange!= undefined)eval(myself.parameter+'_value=""');
     var opt = {
       list: list,
       matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
-      processElementChange:  processElementChange,
-      processChange: function(obj,obj_value) {
-        obj.value = obj_value;
-        processChange(obj.name);
-      },
-      multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
-      checkValue: myself.checkValue == undefined ? true : myself.checkValue,
-      minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
-      scrollHeight: myself.scrollHeight,
-      applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
-      tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
-      addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
-      parent: myself
-    };
+     processElementChange:  processElementChange,
+     processChange: function(obj,obj_value) {
+       obj.value = obj_value;
+       processChange(obj.name);
+     },
+     multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
+     checkValue: myself.checkValue == undefined ? true : myself.checkValue,
+     minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
+     scrollHeight: myself.scrollHeight,
+     applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
+     tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
+     addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
+     parent: myself
+   };
 
-    var html_obj = $("#"+myself.name+"Object");
-    this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
+   var html_obj = $("#"+myself.name+"Object");
+   this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
 
-    this.addFilter = function(value){
+   this.addFilter = function(value){
 
-      if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
-        return;
+     if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
+     return;
 
-      var childs = html_obj.children().children().children();
+     var childs = html_obj.children().children().children();
 
-      if(!opt.multiSellection){
-        for(i = childs.length;i > 1 ; ){
-          $(childs[i-1]).remove();
-          i= i -1;
-        }
-      }
+     if(!opt.multiSellection){
+       for(i = childs.length;i > 1 ; ){
+         $(childs[i-1]).remove();
+         i= i -1;
+       }
+     }
 
-      if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
-        myself.autoBoxOpt.showApplyButton();
+     if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
+     myself.autoBoxOpt.showApplyButton();
 
-      var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
-      li.append($('<a href="#" class="closebutton"></a>')
-        .bind('click', function(e) {
-          li.remove();
-          e.preventDefault();
+     var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
+     li.append($('<a href="#" class="closebutton"></a>')
+     .bind('click', function(e) {
+       li.remove();
+       e.preventDefault();
 
-          if(!opt.multiSellection)
-            myself.autoBoxOpt.processAutoBoxChange();
+       if(!opt.multiSellection)
+       myself.autoBoxOpt.processAutoBoxChange();
 
-          if(myself.autoBoxOpt.applyButton != false)
-            myself.autoBoxOpt.showApplyButton();
+       if(myself.autoBoxOpt.applyButton != false)
+       myself.autoBoxOpt.showApplyButton();
 
-        })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
+     })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
-      this.autoBoxOpt.input.after(li);
-    }
-  },
-  getValue : function() {
-    return this.value;
-  },
-  processAutoBoxChange : function() {
-    this.autoBoxOpt.processAutoBoxChange();
-  }
+     this.autoBoxOpt.input.after(li);
+   };
+   //have an update function
+   if(myself.autoUpdateFunction)
+   {
+     //have timeout?
+     if(!myself.autoUpdateTimeout)
+     {
+       //no.... set 4 seconds
+       myself.autoUpdateTimeout=4000;
+     }
+     //call the update function every X seconds
+     //the update function is defined in the component by the developer
+     //should do a fire change in the function
+     setInterval(myself.autoUpdateFunction,myself.autoUpdateTimeout);
+   }
+ },
+ getValue : function() {
+   return this.value;
+ },
+ processAutoBoxChange : function() {
+   this.autoBoxOpt.processAutoBoxChange();
+ }
 });
 
 var JpivotComponent = BaseComponent.extend({
