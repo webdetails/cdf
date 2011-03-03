@@ -71,6 +71,15 @@
 			<dt>tooltip</dt>
 			<dd>Tooltip to be displayed when mouse hovers</dd>
 			
+			<dt>autoUpdateFunction</dt>
+			<dd>Function to be called every X second according to the autoUpdateTimeout setting</dd>
+			
+			<dt>autoUpdateTimeout</dt>
+			<dd>timeout in milliseconds to call the function defined by autoUpdateFunction. Default 3 secs </dd>
+			
+			<dt>reloadOnUpdate</dt>
+			<dd>on update event the component should be reloaded or only update the list of values</dd>				
+			
 		</dl>	
 		
 		<h3>MetaLayer options</h3>
@@ -106,7 +115,8 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-					
+				
+var clients = "";				
 MetaLayerHome2 = {
 clientSelectorDefinition: {
 	queryType: 'mdx',
@@ -114,8 +124,9 @@ clientSelectorDefinition: {
 	catalog: "solution:steel-wheels/analysis/steelwheels.mondrian.xml",
 	query: function(){
 		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," + 
-		"NON EMPTY TopCount([Customers].[All Customers].Children," + 
-		"100.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
+		"NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"+ 
+		"(Left([Customers].CurrentMember.Name, Len(\""+clients+"\")) = \""+clients+"\")),100.0,[Measures].[Sales]) ON ROWS "+
+		"from [SteelWheelsSales]";
 		}
 	}
 }
@@ -133,9 +144,25 @@ clientSelector =
   scrollHeight: 250,
   parameter:"clients",
   htmlObject: "sampleObject",
-  executeAtStart: true
+  reloadOnUpdate:true,
+  autoUpdateTimeout:3000,
+  executeAtStart: true,
+  autoUpdateFunction:function()
+  {
+		if(!clients)
+			clients="";
+		console.log("!update");
+		var inputValue=$("#autoboxInput").val();
+		console.log("inputValue;"+inputValue);
+		console.log("clients;"+clients);
+		if(clients!=inputValue)
+		{
+			clients=inputValue;
+			Dashboards.update(clientSelector);
+		}
+  }
 }
-clients = "";
+
 Dashboards.init([clientSelector]);
 					</textarea>
 					<br />

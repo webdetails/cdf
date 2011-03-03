@@ -23,6 +23,7 @@ import org.pentaho.cdf.export.ExportCSV;
 import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
+import org.pentaho.cdf.utils.CdfAuditHelper;
 import org.pentaho.platform.api.engine.IActionSequenceResource;
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
@@ -291,18 +292,32 @@ public class CdfContentGenerator extends BaseContentGenerator
 
   private void renderXcdf(final OutputStream out, final IParameterProvider requestParams) throws Exception
   {
-    final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-    if (mimeTypeListener != null)
-    {
-      mimeTypeListener.setMimeType(MIMETYPE);
-    }
+      long start = System.currentTimeMillis();
 
-    final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
-    final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
-    final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
+      UUID uuid = CdfAuditHelper.startAudit(requestParams.getParameter("action").toString(),getObjectName(),this.userSession,this);
+      try
+      {
+          final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
+          if (mimeTypeListener != null)
+          {
+              mimeTypeListener.setMimeType(MIMETYPE);
+          }
 
-    final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
-    renderXCDFDashboard(requestParams, out, solution, path, action, template);
+          final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
+          final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
+          final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
+
+          final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
+          renderXCDFDashboard(requestParams, out, solution, path, action, template);
+
+          long end =System.currentTimeMillis();
+          CdfAuditHelper.endAudit(requestParams.getParameter("action").toString(),getObjectName(),this.userSession,this, start, uuid, end);
+
+      } catch (Exception e) {         
+          long end = System.currentTimeMillis();
+          CdfAuditHelper.endAudit(requestParams.getParameter("action").toString(),getObjectName(),this.userSession,this, start, uuid, end);
+          throw e;
+      }
   }
 
   private void jsonSolution(final OutputStream out,

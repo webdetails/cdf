@@ -236,6 +236,15 @@ var SelectBaseComponent = BaseComponent.extend({
     var hasCurrentVal = typeof currentval != undefined;
     var vid = this.valueAsId == false ? false : true;
     var hasValueSelected = false;
+    var isSelected = false;
+
+    var currentValArray;
+    if(currentVal instanceof Array) {
+	  currentValArray = currentVal;
+    } else {
+	  currentValArray = currentVal.split("|");
+    }
+
     for (var i = 0, len = myArray.length; i < len; i++) {
       if (myArray[i] != null && myArray[i].length > 0) {
         var ivid = vid || myArray[i][0] == null;
@@ -251,7 +260,16 @@ var SelectBaseComponent = BaseComponent.extend({
           firstVal = value;
         }
         selectHTML += "<option value = '" + value + "'";
-        if ((i == 0 && !hasCurrentVal) || (hasCurrentVal && (currentVal.indexOf(myArray[i][0]) >= 0))) {
+
+        isSelected = false;
+        for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+           isSelected = currentValArray[j] == value;
+           if(isSelected) {
+     	     break;
+           }
+	    }
+
+        if ((i == 0 && !hasCurrentVal) || (hasCurrentVal && isSelected)) {
           selectHTML += " SELECTED";
           hasValueSelected = true;
         }
@@ -1320,6 +1338,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       list.push(obj);
     }
 
+    // if reloadOnUpdate only update the list
+    if(this.reloadOnUpdate&&this.autoBoxOpt!=undefined)
+    {
+      this.autoBoxOpt.list=list;
+      $(clientSelector.autoBoxOpt.input[0]).trigger("autobox");
+      return;
+    }
+
     $("#"+ this.htmlObject).empty();
 
     var myself = this;
@@ -1329,70 +1355,84 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       myself.processChange();
     };
     var processElementChange = myself.processElementChange == true ? function(value){
-      Dashboards.fireChange(myself.parameter+"_value",value)
+      Dashboards.fireChange(myself.parameter+"_value",value);
     } : undefined;
     if(processElementChange!= undefined)eval(myself.parameter+'_value=""');
     var opt = {
       list: list,
       matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
-      processElementChange:  processElementChange,
-      processChange: function(obj,obj_value) {
-        obj.value = obj_value;
-        processChange(obj.name);
-      },
-      multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
-      checkValue: myself.checkValue == undefined ? true : myself.checkValue,
-      minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
-      scrollHeight: myself.scrollHeight,
-      applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
-      tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
-      addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
-      parent: myself
-    };
+     processElementChange:  processElementChange,
+     processChange: function(obj,obj_value) {
+       obj.value = obj_value;
+       processChange(obj.name);
+     },
+     multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
+     checkValue: myself.checkValue == undefined ? true : myself.checkValue,
+     minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
+     scrollHeight: myself.scrollHeight,
+     applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
+     tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
+     addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
+     parent: myself
+   };
 
-    var html_obj = $("#"+myself.name+"Object");
-    this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
+   var html_obj = $("#"+myself.name+"Object");
+   this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
 
-    this.addFilter = function(value){
+   this.addFilter = function(value){
 
-      if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
-        return;
+     if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
+     return;
 
-      var childs = html_obj.children().children().children();
+     var childs = html_obj.children().children().children();
 
-      if(!opt.multiSellection){
-        for(i = childs.length;i > 1 ; ){
-          $(childs[i-1]).remove();
-          i= i -1;
-        }
-      }
+     if(!opt.multiSellection){
+       for(i = childs.length;i > 1 ; ){
+         $(childs[i-1]).remove();
+         i= i -1;
+       }
+     }
 
-      if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
-        myself.autoBoxOpt.showApplyButton();
+     if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
+     myself.autoBoxOpt.showApplyButton();
 
-      var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
-      li.append($('<a href="#" class="closebutton"></a>')
-        .bind('click', function(e) {
-          li.remove();
-          e.preventDefault();
+     var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
+     li.append($('<a href="#" class="closebutton"></a>')
+     .bind('click', function(e) {
+       li.remove();
+       e.preventDefault();
 
-          if(!opt.multiSellection)
-            myself.autoBoxOpt.processAutoBoxChange();
+       if(!opt.multiSellection)
+       myself.autoBoxOpt.processAutoBoxChange();
 
-          if(myself.autoBoxOpt.applyButton != false)
-            myself.autoBoxOpt.showApplyButton();
+       if(myself.autoBoxOpt.applyButton != false)
+       myself.autoBoxOpt.showApplyButton();
 
-        })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
+     })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
-      this.autoBoxOpt.input.after(li);
-    }
-  },
-  getValue : function() {
-    return this.value;
-  },
-  processAutoBoxChange : function() {
-    this.autoBoxOpt.processAutoBoxChange();
-  }
+     this.autoBoxOpt.input.after(li);
+   };
+   //have an update function
+   if(myself.autoUpdateFunction)
+   {
+     //have timeout?
+     if(!myself.autoUpdateTimeout)
+     {
+       //no.... set 4 seconds
+       myself.autoUpdateTimeout=4000;
+     }
+     //call the update function every X seconds
+     //the update function is defined in the component by the developer
+     //should do a fire change in the function
+     setInterval(myself.autoUpdateFunction,myself.autoUpdateTimeout);
+   }
+ },
+ getValue : function() {
+   return this.value;
+ },
+ processAutoBoxChange : function() {
+   this.autoBoxOpt.processAutoBoxChange();
+ }
 });
 
 var JpivotComponent = BaseComponent.extend({
@@ -2118,9 +2158,9 @@ var ExecutePrptComponent = PrptComponent.extend({
 var AnalyzerComponent = BaseComponent.extend({
 
     update: function(){
-
+    
             this.clear();
-
+            
             var options = this.getOptions();
             var url = webAppPath + '/content/analyzer/';
             var myself=this;
@@ -2130,11 +2170,11 @@ var AnalyzerComponent = BaseComponent.extend({
             var height = this.height? this.height: "480px";
 
             var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
-            $("#"+this.htmlObject).html(iFrameHTML);
+            $("#"+this.htmlObject).html(iFrameHTML);                    
     },
 
     getOptions: function(){
-
+                            
             var options = {
                     solution : this.solution,
                     path: this.path,
@@ -2149,7 +2189,7 @@ var AnalyzerComponent = BaseComponent.extend({
             $.map(this.parameters,function(k){
                     options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
             });
-
+            
             return options;
     }
 });
@@ -2162,7 +2202,7 @@ function generateIframe(htmlObject,url,parameters,height,width){
                 " src=\""+ url +"?";
 
     var paramCounter = 0;
-
+    
     // Add args
     jQuery.each(parameters, function(i, val) {
         if(typeof val != "undefined"){
@@ -2172,11 +2212,11 @@ function generateIframe(htmlObject,url,parameters,height,width){
             arg += encodeURIComponent(i) + "=";
             iFrameHTML += arg + encodeURIComponent(val);
         };
-    });
+    });         
 
     // Close IFrame
-    iFrameHTML += "\"></iframe>";
-
+    iFrameHTML += "\"></iframe>";   
+       
     return iFrameHTML;
 };
 
