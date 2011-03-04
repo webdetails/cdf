@@ -575,7 +575,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
 
 Dashboards.post = function(url,obj){
 
-  var form = '<form action="' + url + '" method="post">';
+  var form = '<form action="' + url + '" method="get">';
   for(o in obj){
 
     var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
@@ -785,7 +785,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.post(webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/jtable.xaction:output?", cd,
+    $.getJSON(webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/jtable.xaction:output?", cd,
       function(json) {  callback(json.values); });
   }
   // ... or just call the callback when no valid definition is passed

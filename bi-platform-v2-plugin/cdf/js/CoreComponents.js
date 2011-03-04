@@ -1884,7 +1884,7 @@ var PrptComponent = BaseComponent.extend({
 					}});
 			}
 			else{
-				var url = webAppPath + '/content/reporting/reportviewer/report.html';
+				var url = webAppPath + '/api/repo/files' + this.path + ':output';
                                 var encodeArray = function(k,v) {
                                     var arr = [];
                                     for (var i = 0; i < v.length;i++) {
@@ -1912,9 +1912,6 @@ var PrptComponent = BaseComponent.extend({
 				showParameters: this.showParameters || false,
 				autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
 				"dashboard-mode": this.iframe==undefined?false:!this.iframe,
-				solution: this.solution,
-				path: this.path,
-				action: this.action
 			};
 			if(this.paginate){
 
@@ -1963,7 +1960,7 @@ var ExecutePrptComponent = PrptComponent.extend({
 		executePrptComponent: function(){
 
 			var options = this.getOptions();
-			var url = webAppPath + '/content/reporting/reportviewer/report.html';
+			var url = webAppPath + '/api/repo/files' + this.path + ':output';
 			var a=[];
       var encodeArray = function(k,v) {
           var arr = [];
@@ -1973,7 +1970,7 @@ var ExecutePrptComponent = PrptComponent.extend({
           return arr;
       };
 			$.each(options,function(k,v){
-          if (typeof v == 'object') {
+          if ((v != null) && (typeof v == 'object')) {
               a.push.apply(a,encodeArray(k,v));
           } else {
 				    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
