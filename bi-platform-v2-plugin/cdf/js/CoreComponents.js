@@ -1102,7 +1102,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 		//default
         var currentVal = Dashboards.getParameterValue(this.parameter);
         currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-		var hasCurrentVal = typeof currentval != undefined;
+		var hasCurrentVal = (currentVal != undefined);
 
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<nobr><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
