@@ -505,7 +505,10 @@ Dashboards.processChange = function(object_name){
 };
 
 /*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
-Dashboards.fireChange = function(parameter, value) {
+Dashboards.fireChange = function(parameter, value, forceUpdate) {
+  if(!forceUpdate && Dashboards.getParameterValue(parameter) == value){ // new value same as last, exit to prevent unnecessary updates
+    return;
+  }
   //alert("begin block");
   Dashboards.createAndCleanErrorDiv();
 
