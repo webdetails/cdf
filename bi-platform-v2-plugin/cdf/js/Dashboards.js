@@ -806,7 +806,15 @@ Dashboards.fetchData = function(cd, params, callback) {
   }
 }
 
-
+Dashboards.escapeHtml = function(input) {
+  var escaped = input
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/'/g,"&#39;")
+    .replace(/"/g,"&#34;");
+return escaped;
+}
 // STORAGE ENGINE
 
 // Default object
@@ -1182,6 +1190,9 @@ Query = function() {
                 _mode = 'CDA';
                 _file = cd.path;
                 _id = cd.dataAccessId;
+                if (cd.sortBy) {
+                  _sortBy = cd.sortBy;
+                }
             } else {
                 throw 'InvalidQuery';
             }
