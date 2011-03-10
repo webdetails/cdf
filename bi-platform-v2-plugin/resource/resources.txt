@@ -57,7 +57,7 @@ tableComponentScript=\
 TableScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
-timePlotComponentScript=\
+timePlotScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js
 
 autocompleteBoxScript=\
