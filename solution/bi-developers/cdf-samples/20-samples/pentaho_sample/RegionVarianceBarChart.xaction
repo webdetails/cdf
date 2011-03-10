@@ -75,7 +75,7 @@ order by department]]></query>
           </color-palette>  
           <chart-background type="color">#FFFFFF</chart-background>  
           <plot-background type="color">#EEEEEE</plot-background>  
-          <url-template><![CDATA[javascript:Dashboards.fireChange('department', '{department}')]]></url-template>  
+          <url-template><![CDATA[javascript:Dashboards.fireChange('department', encode_prepare('{department}'))]]></url-template>  
           <series-name>department</series-name>  
           <use-base-url>false</use-base-url>  
           <url-target>_self</url-target>  

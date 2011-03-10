@@ -104,7 +104,7 @@
 					<is-3D>true</is-3D>  
 					<foreground-alpha>0.8</foreground-alpha>
 					<background-alpha>1</background-alpha>
-					<url-template><![CDATA[javascript:Dashboards.fireChange('productLine','{productLine}')]]></url-template>  
+					<url-template><![CDATA[javascript:Dashboards.fireChange('productLine',encode_prepare('{productLine}'))]]></url-template>  
 					<paramName>productLine</paramName>  
 					<series-name>Revenue</series-name>
 					<url-target>_self</url-target>  

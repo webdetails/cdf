@@ -505,10 +505,7 @@ Dashboards.processChange = function(object_name){
 };
 
 /*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
-Dashboards.fireChange = function(parameter, value, forceUpdate) {
-  if(!forceUpdate && Dashboards.getParameterValue(parameter) == value){ // new value same as last, exit to prevent unnecessary updates
-    return;
-  }
+Dashboards.fireChange = function(parameter, value) {
   //alert("begin block");
   Dashboards.createAndCleanErrorDiv();
 
@@ -806,7 +803,15 @@ Dashboards.fetchData = function(cd, params, callback) {
   }
 }
 
-
+Dashboards.escapeHtml = function(input) {
+  var escaped = input
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/'/g,"&#39;")
+    .replace(/"/g,"&#34;");
+return escaped;
+}
 // STORAGE ENGINE
 
 // Default object
@@ -1182,6 +1187,9 @@ Query = function() {
                 _mode = 'CDA';
                 _file = cd.path;
                 _id = cd.dataAccessId;
+                if (cd.sortBy) {
+                  _sortBy = cd.sortBy;
+                }
             } else {
                 throw 'InvalidQuery';
             }

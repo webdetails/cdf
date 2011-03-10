@@ -213,7 +213,8 @@ var SelectBaseComponent = BaseComponent.extend({
   visible: false,
   update: function () {
     var ph = $("#" + this.htmlObject);
-    var myArray = this.getValuesArray();
+    var myArray = this.getValuesArray(),
+      isMultiple = false;
 
     selectHTML = "<select";
 
@@ -224,13 +225,17 @@ var SelectBaseComponent = BaseComponent.extend({
     if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
       if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
         selectHTML += " multiple";
+         isMultiple = true;
       } else
       if (!this.isMultiple && this.size == undefined) {
         selectHTML += " size='" + myArray.length + "'";
       }
     }
     selectHTML += ">";
-    var firstVal;
+    var firstVal,
+      currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
+      currentIsValid = false;
+
     var currentVal = Dashboards.getParameterValue(this.parameter);
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
     var hasCurrentVal = typeof currentval != undefined;
@@ -259,50 +264,29 @@ var SelectBaseComponent = BaseComponent.extend({
         if (i == 0) {
           firstVal = value;
         }
-        selectHTML += "<option value = '" + value + "'";
-
-        isSelected = false;
-        for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
-           isSelected = currentValArray[j] == value;
-           if(isSelected) {
-     	     break;
-           }
-	    }
-
-        if ((i == 0 && !hasCurrentVal) || (hasCurrentVal && isSelected)) {
-          selectHTML += " SELECTED";
-          hasValueSelected = true;
+        if (currentVal === value) {
+          currentIsValid = true;
         }
-        selectHTML += ">" + label + "</option>";
+        selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
       }
     }
 
     selectHTML += "</select>";
 
-    // update the placeholder
     ph.html(selectHTML);
-    if(!hasValueSelected) {
-      if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
-        if (currentVal !== firstVal) {
-          Dashboards.setParameter(this.parameter, firstVal);
-          Dashboards.processChange(this.name);
-        }
-      } else if (currentVal !== '') {
-        $("select", ph).val(currentVal);
-        if ($("select", ph).val() == null && this.defaultIfEmpty) {
-          $("select", ph).val(firstVal);
-        }
-        if (currentVal !== firstVal) {
-          Dashboards.setParameter(this.parameter, firstVal);
-          Dashboards.processChange(this.name);
-        }
-      } else {
-        $("select", ph).val(firstVal);
-        if (currentVal !== firstVal) {
-          Dashboards.setParameter(this.parameter, firstVal);
-          Dashboards.processChange(this.name);
-        }
-      }
+
+    /* If the current value for the parameter is invalid or empty, we need
+     * to pick a sensible default. If there is a defaultIfEmpty value,
+     * we use that; otherwise, we use the first value in the selector.
+     * An "invalid" value is, of course, one that's not in the values array.
+     */
+    if (isMultiple ? !currentIsValid && currentVal !== '' : !currentIsValid) {
+      var replacementValue = this.defaultIfEmpty || firstVal;
+      $("select", ph).val(replacementValue);
+      Dashboards.setParameter(this.parameter,replacementValue);
+      Dashboards.processChange(this.name);
+    } else {
+      $("select", ph).val(currentVal);
     }
     var myself = this;
     $("select", ph).change(function () {
@@ -1218,6 +1202,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   	var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
     selectHTML = "";
     var firstVal;
+
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
 
@@ -1242,8 +1227,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     ph.html(selectHTML);
 
     //default
-    var currentVal = this.parameter ? Dashboards.getParameterValue(this.parameter) : null;
-    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
     var isSelected = false;
 
@@ -1275,14 +1259,15 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       if ( ( $.isArray(currentVal) && isSelected || isSelected)
           || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
 
-        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation);
+        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation, true);
+
         foundDefault = true;
         if(!this.isMultiple) { break; }
       }
     }
     if(!foundDefault && !this.isMultiple && myArray.length > 0){
       //select first value
-      MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
+      MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
     }
   },
 
@@ -1317,7 +1302,8 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   //static MultiButtonComponent.prototype.clickButton
-  clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation){
+  // This method should be broken up so the UI state code is reusable outside of event processing
+  clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly){
 
 	var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
 	var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
@@ -1347,7 +1333,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       this.indexes[name] = index;
 			buttons[index].parentNode.className = cssWrapperClassSelected;
 	  }
-    this.callAjaxAfterRender(name);
+   if(!updateUIOnly){
+      this.callAjaxAfterRender(name);
+   }
   },
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
@@ -1583,7 +1571,7 @@ var TableComponent = BaseComponent.extend({
     }
   },
 
-  pagingCallback: function(url, params,callback) {
+  pagingCallback: function(url, params,callback,dataTable) {
     function p( sKey ) {
       for ( var i=0, iLen=params.length ; i<iLen ; i++ ) {
         if ( params[i].name == sKey ) {
@@ -1607,7 +1595,7 @@ var TableComponent = BaseComponent.extend({
     query.setPageStartingAt(p("iDisplayStart"));
     query.fetchData(function(d) {
       if (myself.postFetch){
-        var mod = myself.postFetch(d);
+        var mod = myself.postFetch(d,dataTable);
         if (typeof mod !== undefined) {
           d = mod;
         }
@@ -1659,10 +1647,11 @@ var TableComponent = BaseComponent.extend({
     /* If we're doing server-side pagination, we need to set up the server callback
      */
     if (dtData.bServerSide) {
-      dtData.fnServerData = function(u,p,c) {myself.pagingCallback(u,p,c);};
+      dtData.fnServerData = function(u,p,c) {myself.pagingCallback(u,p,c,this);};
     }
     $("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
-    this.dataTable = $("#"+this.htmlObject+'Table').dataTable( dtData );
+    // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
+    this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
 
 
     // Apply the formats
