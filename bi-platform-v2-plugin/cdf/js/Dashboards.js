@@ -460,15 +460,17 @@ Dashboards.initEngine = function(){
   var compCount = components.length;
   Dashboards.incrementRunningCalls();
   Dashboards.createAndCleanErrorDiv();
-
-  for(var i= 0, len = components.length; i < len; i++){
-    if(components[i].executeAtStart){
-      this.update(components[i]);
-    }
-  }
-  Dashboards.decrementRunningCalls();
+  setTimeout(
+    function() {
+      for(var i= 0, len = components.length; i < len; i++){
+        if(components[i].executeAtStart){
+          Dashboards.update(components[i]);
+        }
+      }
+      Dashboards.decrementRunningCalls();
+    },
+    Dashboards.renderDelay);
 };
-
 
 Dashboards.resetAll = function(){
   Dashboards.createAndCleanErrorDiv();
@@ -504,14 +506,22 @@ Dashboards.processChange = function(object_name){
   }
 };
 
-/*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
+/* fireChange must accomplish two things:
+ * first, we must change the parameters
+ * second, we execute the components that listen for
+ * changes on that parameter.
+ *
+ * Because some browsers won't draw the blockUI widgets
+ * until the script has finished, we find the list of
+ * components to update, then execute the actual update
+ * in a function wrapped in a setTimeout, so the running
+ * script has the opportunity to finish.
+ */
 Dashboards.fireChange = function(parameter, value) {
-  //alert("begin block");
   Dashboards.createAndCleanErrorDiv();
 
-  //alert("Parameter: " + parameter + "; Value: " + value);
   Dashboards.setParameter(parameter, value);
-
+  var toUpdate = [];
   var workDone = false;
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
@@ -522,19 +532,21 @@ Dashboards.fireChange = function(parameter, value) {
             workDone = true;
             Dashboards.incrementRunningCalls();
           }
-          this.update(this.components[i]);
+          toUpdate.push(this.components[i]);
           break;
         }
-      //alert("finished parameter " + j)
       }
     }
   }
-  //alert("finish block");
-  if (workDone) {
-    Dashboards.decrementRunningCalls();
-  }
+  setTimeout(function() {
+    for (var i = 0; i < toUpdate.length; i++) {
+      Dashboards.update(toUpdate(i));
+    }
+    if (workDone) {
+      Dashboards.decrementRunningCalls();
+    }
+  }, Dashboards.renderDelay);
 };
-
 
 Dashboards.getParameterValue = function (parameterName) {
   if (Dashboards.globalContext) {
