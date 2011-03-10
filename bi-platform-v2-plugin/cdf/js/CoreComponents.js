@@ -243,11 +243,11 @@ var SelectBaseComponent = BaseComponent.extend({
     var hasValueSelected = false;
     var isSelected = false;
 
-    var currentValArray;
+    var currentValArray = [];
     if(currentVal instanceof Array) {
-	  currentValArray = currentVal;
-    } else {
-	  currentValArray = currentVal.split("|");
+	    currentValArray = currentVal;
+    } else if(typeof(currentVal) == "string"){
+	    currentValArray = currentVal.split("|");
     }
 
     for (var i = 0, len = myArray.length; i < len; i++) {
@@ -264,7 +264,7 @@ var SelectBaseComponent = BaseComponent.extend({
         if (i == 0) {
           firstVal = value;
         }
-        if (currentVal === value) {
+        if (jQuery.inArray( value, currentValArray) == true) {
           currentIsValid = true;
         }
         selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
@@ -281,12 +281,12 @@ var SelectBaseComponent = BaseComponent.extend({
      * An "invalid" value is, of course, one that's not in the values array.
      */
     if (isMultiple ? !currentIsValid && currentVal !== '' : !currentIsValid) {
-      var replacementValue = this.defaultIfEmpty || firstVal;
+      var replacementValue = (this.defaultIfEmpty)? firstVal : null;
       $("select", ph).val(replacementValue);
       Dashboards.setParameter(this.parameter,replacementValue);
       Dashboards.processChange(this.name);
     } else {
-      $("select", ph).val(currentVal);
+      $("select", ph).val(currentValArray);
     }
     var myself = this;
     $("select", ph).change(function () {
@@ -1130,19 +1130,36 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 
     var isSelected = false;
 
-    var currentValArray;
+    var currentValArray = [];
     if(currentVal instanceof Array) {
 	  currentValArray = currentVal;
-    } else {
+    } else if(typeof(currentVal) == "string"){
 	  currentValArray = currentVal.split("|");
     }
 
-		var hasCurrentVal = typeof currentVal != "undefined";
+    // check to see if current selected values are in the current values array. If not check to see if we should default to the first
+    var hasCurrentVal = false;
+    for(var val in currentValArray){
+      if(jQuery.inArray(val, myArray) == true){
+        hasCurrentVal = true;
+        break;
+      }
+    }
+    var vid = this.valueAsId==false?0:1;
+    // if there will be no selected value, but we're to default if empty, select the first
+    if(!hasCurrentVal && this.defaultIfEmpty){
+      currentValArray = [myArray[0][vid]];
+
+      Dashboards.setParameter(this.parameter,currentValArray);
+      Dashboards.processChange(this.name);
+    }
+    // (currentValArray == null && this.defaultIfEmpty)? firstVal : null
+
+
 selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 
-      var vid = this.valueAsId==false?0:1;
 
 
 isSelected = false;
