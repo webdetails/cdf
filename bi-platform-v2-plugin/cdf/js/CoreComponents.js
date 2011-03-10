@@ -1202,6 +1202,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   	var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
     selectHTML = "";
     var firstVal;
+
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
 
@@ -1226,8 +1227,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     ph.html(selectHTML);
 
     //default
-    var currentVal = this.parameter ? Dashboards.getParameterValue(this.parameter) : null;
-    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
     var isSelected = false;
 
@@ -1259,14 +1259,15 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       if ( ( $.isArray(currentVal) && isSelected || isSelected)
           || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
 
-        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation);
+        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation, true);
+
         foundDefault = true;
         if(!this.isMultiple) { break; }
       }
     }
     if(!foundDefault && !this.isMultiple && myArray.length > 0){
       //select first value
-      MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
+      MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
     }
   },
 
@@ -1301,7 +1302,8 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   //static MultiButtonComponent.prototype.clickButton
-  clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation){
+  // This method should be broken up so the UI state code is reusable outside of event processing
+  clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly){
 
 	var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
 	var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
@@ -1331,7 +1333,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       this.indexes[name] = index;
 			buttons[index].parentNode.className = cssWrapperClassSelected;
 	  }
-    this.callAjaxAfterRender(name);
+   if(!updateUIOnly){
+      this.callAjaxAfterRender(name);
+   }
   },
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
