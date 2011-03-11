@@ -540,7 +540,7 @@ Dashboards.fireChange = function(parameter, value) {
   }
   setTimeout(function() {
     for (var i = 0; i < toUpdate.length; i++) {
-      Dashboards.update(toUpdate(i));
+      Dashboards.update(toUpdate[i]);
     }
     if (workDone) {
       Dashboards.decrementRunningCalls();
