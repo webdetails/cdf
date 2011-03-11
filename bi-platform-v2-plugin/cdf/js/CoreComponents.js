@@ -1616,7 +1616,7 @@ var TableComponent = BaseComponent.extend({
     query.fetchData(function(d) {
       if (myself.postFetch){
         var mod = myself.postFetch(d,dataTable);
-        if (typeof mod !== undefined) {
+        if (typeof mod !== "undefined") {
           d = mod;
         }
       }
