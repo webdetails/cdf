@@ -19,7 +19,7 @@ BaseComponent = Base.extend({
         }
         QueryComponent.makeQuery(this);
         var myArray = new Array();
-        for(p in this.result){
+        for(p in this.result) if(this.result.hasOwnProperty(p)){
           switch(vid){
             case "sql":
               myArray.push([this.result[p][0],this.result[p][1]]);
@@ -255,11 +255,11 @@ var SelectBaseComponent = BaseComponent.extend({
         var ivid = vid || myArray[i][0] == null;
         var value, label;
         if (myArray[i].length > 1) {
-          value = myArray[i][ivid ? 1 : 0];
-          label = myArray[i][1];
+          value = "" + myArray[i][ivid ? 1 : 0];
+          label = "" + myArray[i][1];
         } else {
-          value = myArray[i][0];
-          label = myArray[i][0];
+          value = "" + myArray[i][0];
+          label = "" + myArray[i][0];
         }
         if (i == 0) {
           firstVal = value;
