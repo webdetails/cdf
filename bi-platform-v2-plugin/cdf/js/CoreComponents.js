@@ -264,7 +264,7 @@ var SelectBaseComponent = BaseComponent.extend({
         if (i == 0) {
           firstVal = value;
         }
-        if (jQuery.inArray( value, currentValArray) == true) {
+        if (jQuery.inArray( value, currentValArray) > -1) {
           currentIsValid = true;
         }
         selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
@@ -1140,7 +1140,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     // check to see if current selected values are in the current values array. If not check to see if we should default to the first
     var hasCurrentVal = false;
     for(var val in currentValArray){
-      if(jQuery.inArray(val, myArray) == true){
+      if(jQuery.inArray(val, myArray) > -1){
         hasCurrentVal = true;
         break;
       }
