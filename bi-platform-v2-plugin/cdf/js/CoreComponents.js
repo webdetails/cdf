@@ -1138,14 +1138,17 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     }
 
     // check to see if current selected values are in the current values array. If not check to see if we should default to the first
-    var hasCurrentVal = false;
-    for(var val in currentValArray){
-      if(jQuery.inArray(val, myArray) > -1){
-        hasCurrentVal = true;
-        break;
-      }
-    }
     var vid = this.valueAsId==false?0:1;
+    var hasCurrentVal = false;
+    outer:
+    for(var i = 0; i < currentValArray.length; i++){
+        for(var y = 0; y < myArray.length; y++) {
+          if (currentValArray[i] == myArray[y][vid]) {
+                  hasCurrentVal = true;
+                  break outer;
+            }
+        }
+    }
     // if there will be no selected value, but we're to default if empty, select the first
     if(!hasCurrentVal && this.defaultIfEmpty){
       currentValArray = [myArray[0][vid]];
