@@ -15,7 +15,7 @@ BaseComponent = Base.extend({
         if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
           vid = "mdx";
         } else if (this.queryDefinition.dataAccessId !== undefined && !this.valueAsId) {
-            vid = 'cda';
+          vid = 'cda';
         }
         QueryComponent.makeQuery(this);
         var myArray = new Array();
@@ -29,7 +29,7 @@ BaseComponent = Base.extend({
               break;
             case 'cda':
               myArray.push([this.result[p][0],this.result[p][1]]);
-            break;
+              break;
             default:
               myArray.push([this.result[p][0],this.result[p][0]]);
               break;
@@ -99,39 +99,39 @@ BaseComponent = Base.extend({
 
   },
   parseArrayCda : function(jData,includeHeader){
-//ToDo: refactor with parseArray?..use as parseArray?..
+    //ToDo: refactor with parseArray?..use as parseArray?..
     var myArray = new Array();
 
     var jHeaders = $(jData).find("ColumnMetaData");
     if (jHeaders.size() > 0 ){
-	  if(includeHeader){//get column names
-		var _a = new Array();
-		jHeaders.each(function(){
-		  _a.push($(this).attr("name"));
-		});
-		myArray.push(_a);
-	  }
-	//  //set output column type 'valueOutputType' from cda column type if possible
-	//  //TODO: testing; for ee dashboard editor
-	//  var valIdx = 0;
-	//  if(this.parameters){
-	//	for(var i =0; i < this.parameters.length;i++){
-	//	  if(this.parameters[i][0] == 'validx'){
-	//		valIdx = this.parameters[2];
-	//		break;
-	//	  }
-	//	}
-	//  }
-	//  var typesArray = new Array();
-	//  jHeaders.each(function(){
-	//	typesArray.push($(this).attr("type"));
-	//  });
-	//  if(typesArray.length > valIdx){
-	//	this.valueOutputType = typesArray[valIdx];
-	//  }
+      if(includeHeader){//get column names
+        var _a = new Array();
+        jHeaders.each(function(){
+          _a.push($(this).attr("name"));
+        });
+        myArray.push(_a);
+      }
+    //  //set output column type 'valueOutputType' from cda column type if possible
+    //  //TODO: testing; for ee dashboard editor
+    //  var valIdx = 0;
+    //  if(this.parameters){
+    //	for(var i =0; i < this.parameters.length;i++){
+    //	  if(this.parameters[i][0] == 'validx'){
+    //		valIdx = this.parameters[2];
+    //		break;
+    //	  }
+    //	}
+    //  }
+    //  var typesArray = new Array();
+    //  jHeaders.each(function(){
+    //	typesArray.push($(this).attr("type"));
+    //  });
+    //  if(typesArray.length > valIdx){
+    //	this.valueOutputType = typesArray[valIdx];
+    //  }
     }
 
-	//get contents
+    //get contents
     var jDetails = $(jData).find("Row");
     jDetails.each(function(){
       var _a = new Array();
@@ -214,7 +214,7 @@ var SelectBaseComponent = BaseComponent.extend({
   update: function () {
     var ph = $("#" + this.htmlObject);
     var myArray = this.getValuesArray(),
-      isMultiple = false;
+    isMultiple = false;
 
     selectHTML = "<select";
 
@@ -225,7 +225,7 @@ var SelectBaseComponent = BaseComponent.extend({
     if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
       if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
         selectHTML += " multiple";
-         isMultiple = true;
+        isMultiple = true;
       } else
       if (!this.isMultiple && this.size == undefined) {
         selectHTML += " size='" + myArray.length + "'";
@@ -233,8 +233,8 @@ var SelectBaseComponent = BaseComponent.extend({
     }
     selectHTML += ">";
     var firstVal,
-      currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
-      currentIsValid = false;
+    currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
+    currentIsValid = false;
 
     var currentVal = Dashboards.getParameterValue(this.parameter);
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
@@ -245,9 +245,9 @@ var SelectBaseComponent = BaseComponent.extend({
 
     var currentValArray = [];
     if(currentVal instanceof Array) {
-	    currentValArray = currentVal;
+      currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
-	    currentValArray = currentVal.split("|");
+      currentValArray = currentVal.split("|");
     }
 
     for (var i = 0, len = myArray.length; i < len; i++) {
@@ -314,40 +314,40 @@ var JFreeChartComponent = BaseComponent.extend({
 
   getParameters: function() {
 
-	var cd = this.chartDefinition;
-	// Merge the stuff with a chartOptions element
-	if (cd == undefined){
-		alert("Fatal - No chartDefinition passed");
-		return;
-	}
+    var cd = this.chartDefinition;
+    // Merge the stuff with a chartOptions element
+    if (cd == undefined){
+      alert("Fatal - No chartDefinition passed");
+      return;
+    }
 
-	// If the user filled titleKey get the title value from language files
-	if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-		cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
-	}
+    // If the user filled titleKey get the title value from language files
+    if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+      cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
+    }
 
-	//set parameters string if using cda
-	var cdaParameterString = null;
-	if(cd.queryType == "cda"){
-	  if ($.isArray(this.parameters)){
-		var param;
-		for(var i = 0; i < this.parameters.length; i++){
-		  param = this.parameters[i];
-		  if($.isArray(param) && param.length >= 2){
-			var name = param[0];
-			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
+    //set parameters string if using cda
+    var cdaParameterString = null;
+    if(cd.queryType == "cda"){
+      if ($.isArray(this.parameters)){
+        var param;
+        for(var i = 0; i < this.parameters.length; i++){
+          param = this.parameters[i];
+          if($.isArray(param) && param.length >= 2){
+            var name = param[0];
+            var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
 
-			if(value){
-				value = doCsvQuoting(value, '=');	//quote if needed for '='
-			}
-			if(i == 0) cdaParameterString = "";
-			else cdaParameterString += ";";
+            if(value){
+              value = doCsvQuoting(value, '=');	//quote if needed for '='
+            }
+            if(i == 0) cdaParameterString = "";
+            else cdaParameterString += ";";
 
-			cdaParameterString += doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
-					}
-			}
-	  }
-	}
+            cdaParameterString += doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
+          }
+        }
+      }
+    }
 
     var cd0 = cd.chartOptions != undefined ? $.extend({},Dashboards.ev(cd.chartOptions), cd) : cd;
 
@@ -359,9 +359,9 @@ var JFreeChartComponent = BaseComponent.extend({
       // alert("key: " + key + "; Value: " + value);
       parameters.push([key,value]);
     }
-	if(cdaParameterString != null){
-	  parameters.push(["cdaParameterString", cdaParameterString]);
-	}
+    if(cdaParameterString != null){
+      parameters.push(["cdaParameterString", cdaParameterString]);
+    }
 
     return parameters;
 
@@ -912,71 +912,71 @@ var TextComponent = BaseComponent.extend({
 });
 
 var TextInputComponent = BaseComponent.extend({
-    update: function(){
-        selectHTML = "<input";
-        selectHTML += " type=test id='" + this.name + "' name='" + this.name +
-        "' + value='" +
-        Dashboards.getParameterValue(this.parameter) +
-        (this.charWidth ? ("' + size='" + this.charWidth) : "") +
-        (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
-        "'>";
-        $("#" + this.htmlObject).html(selectHTML);
-        var myself = this;
-        $("#" + this.name).change(function(){
-            Dashboards.processChange(myself.name);
-        }).keyup(function(event){
-            if (event.keyCode == 13) {
-                Dashboards.processChange(myself.name);
-            }
-        });
-    },
+  update: function(){
+    selectHTML = "<input";
+    selectHTML += " type=test id='" + this.name + "' name='" + this.name +
+    "' + value='" +
+    Dashboards.getParameterValue(this.parameter) +
+    (this.charWidth ? ("' + size='" + this.charWidth) : "") +
+    (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
+    "'>";
+    $("#" + this.htmlObject).html(selectHTML);
+    var myself = this;
+    $("#" + this.name).change(function(){
+      Dashboards.processChange(myself.name);
+    }).keyup(function(event){
+      if (event.keyCode == 13) {
+        Dashboards.processChange(myself.name);
+      }
+    });
+  },
   getValue : function() {
     return $("#"+this.name).val();
   }
 });
 
 var DateInputComponent = BaseComponent.extend({
-    update: function(){
-        var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
-	    var myself = this;
+  update: function(){
+    var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
+    var myself = this;
 
-		var startDate, endDate;
+    var startDate, endDate;
 
-		if(this.startDate == 'TODAY') startDate = new Date();
-		else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
+    if(this.startDate == 'TODAY') startDate = new Date();
+    else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
 
-		if(this.endDate == 'TODAY') endDate = new Date();
-		else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
+    if(this.endDate == 'TODAY') endDate = new Date();
+    else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
 
-		//ToDo: stretch interval to catch defaultValue?..
-		//Dashboards.getParameterValue(this.parameter))
+    //ToDo: stretch interval to catch defaultValue?..
+    //Dashboards.getParameterValue(this.parameter))
 
-        $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
-        $(function(){
-            // Add JQuery DatePicker standard localization support only if the dashboard is localized
-            // Reset to standard language
-            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-                $.datepicker.setDefaults($.datepicker.regional['']);
+    $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
+    $(function(){
+      // Add JQuery DatePicker standard localization support only if the dashboard is localized
+      // Reset to standard language
+      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        $.datepicker.setDefaults($.datepicker.regional['']);
       } else if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
         // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
         $.datepicker.setDefaults($.datepicker.regional['']);
-            }
-            $("#" + myself.htmlObject + " input").datepicker({
-                dateFormat: format,
-                changeMonth: true,
-                changeYear: true,
-				minDate: startDate,
-				maxDate: endDate,
-                onSelect: function(date, input){
-                    Dashboards.processChange(myself.name);
-                }
-            });
-            // Add JQuery DatePicker standard localization support only if the dashboard is localized
-            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-                $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
-            }
-        });
-    },
+      }
+      $("#" + myself.htmlObject + " input").datepicker({
+        dateFormat: format,
+        changeMonth: true,
+        changeYear: true,
+        minDate: startDate,
+        maxDate: endDate,
+        onSelect: function(date, input){
+          Dashboards.processChange(myself.name);
+        }
+      });
+      // Add JQuery DatePicker standard localization support only if the dashboard is localized
+      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+      }
+    });
+  },
   getValue : function() {
     return $("#"+this.name).val();
   }
@@ -1119,36 +1119,36 @@ var MonthPickerComponent = BaseComponent.extend({
 });
 
 var ToggleButtonBaseComponent = BaseComponent.extend({
-    update: function(){
-        var myArray = this.getValuesArray();
+  update: function(){
+    var myArray = this.getValuesArray();
 
-        selectHTML = "";
+    selectHTML = "";
 
-		//default
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    //default
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 
     var isSelected = false;
 
     var currentValArray = [];
     if(currentVal instanceof Array) {
-	  currentValArray = currentVal;
+      currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
-	  currentValArray = currentVal.split("|");
+      currentValArray = currentVal.split("|");
     }
 
     // check to see if current selected values are in the current values array. If not check to see if we should default to the first
     var vid = this.valueAsId==false?0:1;
     var hasCurrentVal = false;
-    outer:
-    for(var i = 0; i < currentValArray.length; i++){
+      outer:
+      for(var i = 0; i < currentValArray.length; i++){
         for(var y = 0; y < myArray.length; y++) {
           if (currentValArray[i] == myArray[y][vid]) {
-                  hasCurrentVal = true;
-                  break outer;
-            }
+            hasCurrentVal = true;
+            break outer;
+          }
         }
-    }
+      }
     // if there will be no selected value, but we're to default if empty, select the first
     if(!hasCurrentVal && this.defaultIfEmpty){
       currentValArray = [myArray[0][vid]];
@@ -1159,36 +1159,36 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     // (currentValArray == null && this.defaultIfEmpty)? firstVal : null
 
 
-selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
+    selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 
 
 
-isSelected = false;
-        for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
-           isSelected = currentValArray[j] == myArray[i][vid];
-           if(isSelected) {
-     	     break;
-           }
-	    }
+      isSelected = false;
+      for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+        isSelected = currentValArray[j] == myArray[i][vid];
+        if(isSelected) {
+          break;
+        }
+      }
 
       if (this.type == 'radio' || this.type == 'radioComponent'){
-	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (myArray[i][vid] == currentVal ))) {
-                selectHTML += " CHECKED";
-				}
+        if ((i == 0 && !hasCurrentVal) ||
+          (hasCurrentVal && (myArray[i][vid] == currentVal ))) {
+          selectHTML += " CHECKED";
+        }
         selectHTML += " type='radio'";
       }else{
-	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && isSelected)) {
+        if ((i == 0 && !hasCurrentVal) ||
+          (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
-				}
+        }
         selectHTML += " type='checkbox'";
       }
       selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></li>" + ((this.separator == undefined || this.separator == null || this.separator == "null")?"":this.separator);
     }
-	selectHTML += "</ul>"
+    selectHTML += "</ul>"
     // update the placeholder
     $("#" + this.htmlObject).html(selectHTML);
   },
@@ -1219,7 +1219,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
     var myArray = this.getValuesArray();
-  	var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
+    var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
     selectHTML = "";
     var firstVal;
 
@@ -1232,12 +1232,16 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
 
-      if(value != null) { value = value.replace('"','&quot;' ); }
-      if(label != null) { label = label.replace('"','&quot;' ); }
+      if(value != null) {
+        value = value.replace('"','&quot;' );
+      }
+      if(label != null) {
+        label = label.replace('"','&quot;' );
+      }
 
       selectHTML += "<div class='"+cssWrapperClass+"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
-        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><button name='" + this.name + "' value='" + value + "'> ";
-        selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
+      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><button name='" + this.name + "' value='" + value + "'> ";
+      selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
 
       if (i == 0) firstVal = value;
     }
@@ -1253,9 +1257,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
     var currentValArray;
     if(currentVal instanceof Array) {
-	  currentValArray = currentVal;
+      currentValArray = currentVal;
     } else {
-	  currentValArray = currentVal.split("|");
+      currentValArray = currentVal.split("|");
     }
 
     if(currentVal == null && this.parameter){
@@ -1267,22 +1271,24 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     this.clearSelections(this.htmlObject, this.name, this.verticalOrientation);
     for (var i = 0; i < myArray.length; i++) {
 
-    isSelected = false;
-        for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
-           isSelected = currentValArray[j] == myArray[i][valIdx];
-           if(isSelected) {
-     	     break;
-           }
-	    }
+      isSelected = false;
+      for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+        isSelected = currentValArray[j] == myArray[i][valIdx];
+        if(isSelected) {
+          break;
+        }
+      }
 
 
       if ( ( $.isArray(currentVal) && isSelected || isSelected)
-          || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
+        || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
 
         MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation, true);
 
         foundDefault = true;
-        if(!this.isMultiple) { break; }
+        if(!this.isMultiple) {
+          break;
+        }
       }
     }
     if(!foundDefault && !this.isMultiple && myArray.length > 0){
@@ -1295,14 +1301,14 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     if(this.isMultiple){
       var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
       var a = new Array();
-            // if it is not an array, handle that too
+      // if it is not an array, handle that too
       if (indexes.length == undefined) {
         a.push(this.getValueByIdx(indexes));
       } else {
-          for(var i=0; i < indexes.length; i++){
-            a.push(this.getValueByIdx(indexes[i]));
-          }
+        for(var i=0; i < indexes.length; i++){
+          a.push(this.getValueByIdx(indexes[i]));
         }
+      }
       return a;
     }
     else {
@@ -1325,17 +1331,17 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   // This method should be broken up so the UI state code is reusable outside of event processing
   clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly){
 
-	var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
-	var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
+    var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
+    var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
-	var buttons = $("#" + htmlObject + " button");
+    var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
       else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
 
       var disable = false;
       for (var i = 0; i < this.indexes[name].length; ++i) {
-      if (this.indexes[name][i] == index) {
+        if (this.indexes[name][i] == index) {
           disable = true;
           this.indexes[name].splice(i, 1);
           break;
@@ -1344,18 +1350,18 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       if (disable){
         buttons[index].parentNode.className = cssWrapperClass;
       } else {
-		    buttons[index].parentNode.className = cssWrapperClassSelected;
+        buttons[index].parentNode.className = cssWrapperClassSelected;
         this.indexes[name].push(index);
       }
-  	}
+    }
     else {//de-select old, select new
       this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
-			buttons[index].parentNode.className = cssWrapperClassSelected;
-	  }
-   if(!updateUIOnly){
+      buttons[index].parentNode.className = cssWrapperClassSelected;
+    }
+    if(!updateUIOnly){
       this.callAjaxAfterRender(name);
-   }
+    }
   },
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
@@ -1368,7 +1374,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     this.indexes[name] = [];
   },
 
- //static MultiButtonComponent.prototype.getSelectedIndex
+  //static MultiButtonComponent.prototype.getSelectedIndex
   getSelectedIndex: function(name){
     return this.indexes[name];
   }
@@ -1409,78 +1415,78 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var opt = {
       list: list,
       matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
-     processElementChange:  processElementChange,
-     processChange: function(obj,obj_value) {
-       obj.value = obj_value;
-       processChange(obj.name);
-     },
-     multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
-     checkValue: myself.checkValue == undefined ? true : myself.checkValue,
-     minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
-     scrollHeight: myself.scrollHeight,
-     applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
-     tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
-     addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
-     parent: myself
-   };
+      processElementChange:  processElementChange,
+      processChange: function(obj,obj_value) {
+        obj.value = obj_value;
+        processChange(obj.name);
+      },
+      multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
+      checkValue: myself.checkValue == undefined ? true : myself.checkValue,
+      minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
+      scrollHeight: myself.scrollHeight,
+      applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
+      tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
+      addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
+      parent: myself
+    };
 
-   var html_obj = $("#"+myself.name+"Object");
-   this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
+    var html_obj = $("#"+myself.name+"Object");
+    this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
 
-   this.addFilter = function(value){
+    this.addFilter = function(value){
 
-     if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
-     return;
+      if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
+        return;
 
-     var childs = html_obj.children().children().children();
+      var childs = html_obj.children().children().children();
 
-     if(!opt.multiSellection){
-       for(i = childs.length;i > 1 ; ){
-         $(childs[i-1]).remove();
-         i= i -1;
-       }
-     }
+      if(!opt.multiSellection){
+        for(i = childs.length;i > 1 ; ){
+          $(childs[i-1]).remove();
+          i= i -1;
+        }
+      }
 
-     if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
-     myself.autoBoxOpt.showApplyButton();
+      if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
+        myself.autoBoxOpt.showApplyButton();
 
-     var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
-     li.append($('<a href="#" class="closebutton"></a>')
-     .bind('click', function(e) {
-       li.remove();
-       e.preventDefault();
+      var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
+      li.append($('<a href="#" class="closebutton"></a>')
+        .bind('click', function(e) {
+          li.remove();
+          e.preventDefault();
 
-       if(!opt.multiSellection)
-       myself.autoBoxOpt.processAutoBoxChange();
+          if(!opt.multiSellection)
+            myself.autoBoxOpt.processAutoBoxChange();
 
-       if(myself.autoBoxOpt.applyButton != false)
-       myself.autoBoxOpt.showApplyButton();
+          if(myself.autoBoxOpt.applyButton != false)
+            myself.autoBoxOpt.showApplyButton();
 
-     })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
+        })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
-     this.autoBoxOpt.input.after(li);
-   };
-   //have an update function
-   if(myself.autoUpdateFunction)
-   {
-     //have timeout?
-     if(!myself.autoUpdateTimeout)
-     {
-       //no.... set 4 seconds
-       myself.autoUpdateTimeout=4000;
-     }
-     //call the update function every X seconds
-     //the update function is defined in the component by the developer
-     //should do a fire change in the function
-     setInterval(myself.autoUpdateFunction,myself.autoUpdateTimeout);
-   }
- },
- getValue : function() {
-   return this.value;
- },
- processAutoBoxChange : function() {
-   this.autoBoxOpt.processAutoBoxChange();
- }
+      this.autoBoxOpt.input.after(li);
+    };
+    //have an update function
+    if(myself.autoUpdateFunction)
+    {
+      //have timeout?
+      if(!myself.autoUpdateTimeout)
+      {
+        //no.... set 4 seconds
+        myself.autoUpdateTimeout=4000;
+      }
+      //call the update function every X seconds
+      //the update function is defined in the component by the developer
+      //should do a fire change in the function
+      setInterval(myself.autoUpdateFunction,myself.autoUpdateTimeout);
+    }
+  },
+  getValue : function() {
+    return this.value;
+  },
+  processAutoBoxChange : function() {
+    this.autoBoxOpt.processAutoBoxChange();
+  }
 });
 
 var JpivotComponent = BaseComponent.extend({
@@ -1578,16 +1584,19 @@ var TableComponent = BaseComponent.extend({
       this.queryState.setParameters(this.parameters);
       this.processTableComponentResponse();
     } else {
-    this.queryState.fetchData(this.parameters, function(values) {
-      changedValues = undefined;
-      if((typeof(myself.postFetch)=='function')){
-        changedValues = myself.postFetch(values);
-      }
-      if (changedValues != undefined) {
-        values = changedValues;
-      }
-      myself.processTableComponentResponse(values);
-    });
+
+      // make sure to clean sort options
+      this.queryState.setSortBy(null);
+      this.queryState.fetchData(this.parameters, function(values) {
+        changedValues = undefined;
+        if((typeof(myself.postFetch)=='function')){
+          changedValues = myself.postFetch(values);
+        }
+        if (changedValues != undefined) {
+          values = changedValues;
+        }
+        myself.processTableComponentResponse(values);
+      });
     }
   },
 
@@ -1609,7 +1618,7 @@ var TableComponent = BaseComponent.extend({
       }
     }
     var query = this.queryState,
-      myself = this;
+    myself = this;
     query.setSortBy(sort.join(","));
     query.setPageSize(parseInt(p("iDisplayLength")));
     query.setPageStartingAt(p("iDisplayStart"));
@@ -1620,7 +1629,10 @@ var TableComponent = BaseComponent.extend({
           d = mod;
         }
       }
-      var response = {iTotalRecords: d.queryInfo.totalRows, iTotalDisplayRecords: d.queryInfo.totalRows};
+      var response = {
+        iTotalRecords: d.queryInfo.totalRows,
+        iTotalDisplayRecords: d.queryInfo.totalRows
+        };
       response.aaData = d.resultset;
       response.sEcho = p("sEcho");
       callback(response);
@@ -1631,13 +1643,15 @@ var TableComponent = BaseComponent.extend({
   {
     // General documentation here: http://datatables.net
     var myself = this,
-      cd = this.chartDefinition,
-      extraOptions = {},
-      dtData0 = TableComponent.getDataTableOptions(cd),
-      dtData;
+    cd = this.chartDefinition,
+    extraOptions = {},
+    dtData0 = TableComponent.getDataTableOptions(cd),
+    dtData;
 
     // Build a default config from the standard options
-    $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){extraOptions[e[0]] = e[1];});
+    $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){
+      extraOptions[e[0]] = e[1];
+    });
     dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
 
 
@@ -1667,7 +1681,9 @@ var TableComponent = BaseComponent.extend({
     /* If we're doing server-side pagination, we need to set up the server callback
      */
     if (dtData.bServerSide) {
-      dtData.fnServerData = function(u,p,c) {myself.pagingCallback(u,p,c,this);};
+      dtData.fnServerData = function(u,p,c) {
+        myself.pagingCallback(u,p,c,this);
+      };
     }
     $("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
     // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
@@ -1999,9 +2015,9 @@ var QueryComponent = BaseComponent.extend({
       if (changedValues != undefined){
         values = changedValues;
         // (Call this again after postFetch)
-      if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
-      }
+        if (object.resultvar != undefined){
+          Dashboards.setParameter(object.resultvar, object.result);
+        }
 
       }
     })
@@ -2073,206 +2089,210 @@ var ExecuteXactionComponent = BaseComponent.extend({
 });
 
 var ButtonComponent = BaseComponent.extend({
-		update : function() {
-			$("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
-		}
-	});
+  update : function() {
+    $("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
+  }
+});
 
 
 
 var PrptComponent = BaseComponent.extend({
 
-		update: function(){
+  update: function(){
 
-			this.clear();
+    this.clear();
 
-			var options = this.getOptions();
+    var options = this.getOptions();
     options.showParameters = false;
 
-			if(options["dashboard-mode"]){
-				var url = webAppPath + '/content/reporting';
-				var myself=this;
-				$.ajax({url: url, data: options, dataType:"html", success: function(json){
-						$("#"+myself.htmlObject).html(json);
-			}
+    if(options["dashboard-mode"]){
+      var url = webAppPath + '/content/reporting';
+      var myself=this;
+      $.ajax({
+        url: url,
+        data: options,
+        dataType:"html",
+        success: function(json){
+          $("#"+myself.htmlObject).html(json);
+        }
       });
     }
-			else{
-				var url = webAppPath + '/content/reporting/reportviewer/report.html';
-                                var encodeArray = function(k,v) {
-                                    var arr = [];
-                                    for (var i = 0; i < v.length;i++) {
-                                        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-                                    }
-                                    return arr;
-                                };
-				var a=[];
-	        		$.each(options,function(k,v){
-                                        if (typeof v == 'object') {
-                                            a.push.apply(a,encodeArray(k,v));
-                                        } else {
-					    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-                                        }
-				});
+    else{
+      var url = webAppPath + '/content/reporting/reportviewer/report.html';
+      var encodeArray = function(k,v) {
+        var arr = [];
+        for (var i = 0; i < v.length;i++) {
+          arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+        }
+        return arr;
+      };
+      var a=[];
+      $.each(options,function(k,v){
+        if (typeof v == 'object') {
+          a.push.apply(a,encodeArray(k,v));
+        } else {
+          a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+        }
+      });
 
-				$("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
-			}
-		},
+      $("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
+    }
+  },
 
-		getOptions: function(){
+  getOptions: function(){
 
-			var options = {
-				paginate : this.paginate || false,
-				showParameters: this.showParameters || false,
-				autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
-				"dashboard-mode": this.iframe==undefined?false:!this.iframe,
-				solution: this.solution,
-				path: this.path,
-				action: this.action
-			};
-			if(this.paginate){
+    var options = {
+      paginate : this.paginate || false,
+      showParameters: this.showParameters || false,
+      autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
+      "dashboard-mode": this.iframe==undefined?false:!this.iframe,
+      solution: this.solution,
+      path: this.path,
+      action: this.action
+    };
+    if(this.paginate){
 
-				options["output-target"] = "table/html;page-mode=page";
-			} else {
-				options["output-target"] = "table/html;page-mode=stream";
-			}
+      options["output-target"] = "table/html;page-mode=page";
+    } else {
+      options["output-target"] = "table/html;page-mode=stream";
+    }
 
-			// process params and update options
-			$.map(this.parameters,function(k){
-				options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
-			});
+    // process params and update options
+    $.map(this.parameters,function(k){
+      options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+    });
 
-			options["output-type"] = "";
+    options["output-type"] = "";
 
-			return options;
+    return options;
 
-		}
-	});
+  }
+});
 
 
 var ExecutePrptComponent = PrptComponent.extend({
-		visible: false,
+  visible: false,
 
-		update : function() {
-			// 2 modes of working; if it's a div, create a button inside it
-			var myself = this;
-			var o = $("#"+ this.htmlObject);
-			if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
-				// create a button
-				o = $("<button/>").appendTo(o.empty());
-				if (o[0].tagName=="DIV") o.wrap("<span/>");
-				if (this.label != undefined) o.text(this.label);
-				o.button();
-			}
-			o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-			o.bind("click", function(){
-					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
-					if(success) {
-						myself.executePrptComponent();
-					}
-					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
-				});
-		},
+  update : function() {
+    // 2 modes of working; if it's a div, create a button inside it
+    var myself = this;
+    var o = $("#"+ this.htmlObject);
+    if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
+      // create a button
+      o = $("<button/>").appendTo(o.empty());
+      if (o[0].tagName=="DIV") o.wrap("<span/>");
+      if (this.label != undefined) o.text(this.label);
+      o.button();
+    }
+    o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+    o.bind("click", function(){
+      var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
+      if(success) {
+        myself.executePrptComponent();
+      }
+      typeof(myself.postChange)=='undefined' ? true : myself.postChange();
+    });
+  },
 
-		executePrptComponent: function(){
+  executePrptComponent: function(){
 
-			var options = this.getOptions();
-			var url = webAppPath + '/content/reporting/reportviewer/report.html';
-			var a=[];
-      var encodeArray = function(k,v) {
-          var arr = [];
-          for (var i = 0; i < v.length;i++) {
-              arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-          }
-          return arr;
-      };
-			$.each(options,function(k,v){
-          if (typeof v == 'object') {
-              a.push.apply(a,encodeArray(k,v));
-          } else {
-				    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-          }
-				});
-			$.fancybox({
-					type:"iframe",
-					href: url + "?"+ a.join('&') ,
-					width: $(window).width(),
-					height:$(window).height() - 50
-				});
+    var options = this.getOptions();
+    var url = webAppPath + '/content/reporting/reportviewer/report.html';
+    var a=[];
+    var encodeArray = function(k,v) {
+      var arr = [];
+      for (var i = 0; i < v.length;i++) {
+        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+      }
+      return arr;
+    };
+    $.each(options,function(k,v){
+      if (typeof v == 'object') {
+        a.push.apply(a,encodeArray(k,v));
+      } else {
+        a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+      }
+    });
+    $.fancybox({
+      type:"iframe",
+      href: url + "?"+ a.join('&') ,
+      width: $(window).width(),
+      height:$(window).height() - 50
+    });
 
-		}
-	}
+  }
+}
 );
 
 var AnalyzerComponent = BaseComponent.extend({
 
-    update: function(){
+  update: function(){
     
-            this.clear();
+    this.clear();
             
-            var options = this.getOptions();
-            var url = webAppPath + '/content/analyzer/';
-            var myself=this;
+    var options = this.getOptions();
+    var url = webAppPath + '/content/analyzer/';
+    var myself=this;
 
-            //create iFrame and place analyzer inside
-            this.viewOnly?url+='viewer':url+='editor';
-            var height = this.height? this.height: "480px";
+    //create iFrame and place analyzer inside
+    this.viewOnly?url+='viewer':url+='editor';
+    var height = this.height? this.height: "480px";
 
-            var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
-            $("#"+this.htmlObject).html(iFrameHTML);                    
-    },
+    var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
+    $("#"+this.htmlObject).html(iFrameHTML);
+  },
 
-    getOptions: function(){
+  getOptions: function(){
                             
-            var options = {
-                    solution : this.solution,
-                    path: this.path,
-                    action: this.action,
-                    command: this.command == undefined? "open": this.command,
-                    showFieldList: this.showFieldList == undefined? false: this.showFieldList,
-                    frameless: this.frameless,
-                    edit: this.edit
-            };
+    var options = {
+      solution : this.solution,
+      path: this.path,
+      action: this.action,
+      command: this.command == undefined? "open": this.command,
+      showFieldList: this.showFieldList == undefined? false: this.showFieldList,
+      frameless: this.frameless,
+      edit: this.edit
+    };
 
-            // process params and update options
-            $.map(this.parameters,function(k){
-                    options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
-            });
+    // process params and update options
+    $.map(this.parameters,function(k){
+      options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+    });
             
-            return options;
-    }
+    return options;
+  }
 });
 
 function generateIframe(htmlObject,url,parameters,height,width){
-    var iFrameHTML = "<iframe id=\"iframe_"+ htmlObject + "\"" +
-                " frameborder=\"0\"" +
-                " height=\""+height+"\"" +
-                " width=\""+width+"\"" +
-                " src=\""+ url +"?";
+  var iFrameHTML = "<iframe id=\"iframe_"+ htmlObject + "\"" +
+  " frameborder=\"0\"" +
+  " height=\""+height+"\"" +
+  " width=\""+width+"\"" +
+  " src=\""+ url +"?";
 
-    var paramCounter = 0;
+  var paramCounter = 0;
     
-    // Add args
-    jQuery.each(parameters, function(i, val) {
-        if(typeof val != "undefined"){
-            var arg = "";
-            if(paramCounter++ != 0)
-                arg += "&";
-            arg += encodeURIComponent(i) + "=";
-            iFrameHTML += arg + encodeURIComponent(val);
-        };
-    });         
+  // Add args
+  jQuery.each(parameters, function(i, val) {
+    if(typeof val != "undefined"){
+      var arg = "";
+      if(paramCounter++ != 0)
+        arg += "&";
+      arg += encodeURIComponent(i) + "=";
+      iFrameHTML += arg + encodeURIComponent(val);
+    };
+  });
 
-    // Close IFrame
-    iFrameHTML += "\"></iframe>";   
+  // Close IFrame
+  iFrameHTML += "\"></iframe>";
        
-    return iFrameHTML;
+  return iFrameHTML;
 };
 
 var FreeformComponent = BaseComponent.extend({
-		update : function() {
-			var myself = this;
-			this.customfunction(this.parameters || []);
-		}
-	})
+  update : function() {
+    var myself = this;
+    this.customfunction(this.parameters || []);
+  }
+})
 
