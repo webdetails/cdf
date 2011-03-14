@@ -24,11 +24,11 @@ if(webAppPath.endsWith("/")) {
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
-var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
+var ERROR_IMAGE = webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
 $.blockUI.defaults.fadeIn = 0;
-$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
+$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
 $.blockUI.defaults.css.left = '40%';
 $.blockUI.defaults.css.top = '30%';
 $.blockUI.defaults.css.marginLeft = '85px';
@@ -52,9 +52,9 @@ if (typeof $.SetImpromptuDefaults == 'function')
 
 var Dashboards = 
 	{
-		TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
-		TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
-		TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
+		TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_red.png",
+		TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_yellow.png",
+		TRAFFIC_GREEN: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_green.png",
 		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
 		runningCalls: 0, // Used to control progress indicator for async mode
 		components: [],
@@ -324,7 +324,7 @@ Dashboards.bindControl = function(object) {
 Dashboards.blockUIwithDrag = function() {
     if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
         // If i18n support is enabled process the message accordingly
-        $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
+        $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
     }
 
   $.blockUI();
@@ -575,7 +575,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
 
 Dashboards.post = function(url,obj){
 
-  var form = '<form action="' + url + '" method="get">';
+  var form = '<form action="' + url + '" method="post">';
   for(o in obj){
 
     var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
@@ -785,7 +785,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.getJSON(webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/jtable.xaction:output?", cd,
+    $.getJSON(webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:jtable.xaction/content?", cd,
       function(json) {  callback(json.values); });
   }
   // ... or just call the callback when no valid definition is passed
@@ -1109,7 +1109,7 @@ Query = function() {
 
     // Constants, or what passes for them... Pretty please leave these alone.
     var CDA_PATH = webAppPath + "/content/cda/doQuery?";
-    var LEGACY_QUERY_PATH = webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/jtable.xaction:output?";
+    var LEGACY_QUERY_PATH = webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:jtable.xaction/content";
 
     /*
      * Private fields

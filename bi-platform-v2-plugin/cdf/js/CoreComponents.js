@@ -177,7 +177,7 @@ var XactionComponent = BaseComponent.extend({
         " width=\"100%\"" +
         " src=\"";
 
-        xactionIFrameHTML += webAppPath + "/api/repo/files" + this.path + ":output?";
+        xactionIFrameHTML += webAppPath + "/api/repo/files/" + this.path.replace(/\//g, ":") + "/content?";
         
 
         // Add args
@@ -383,7 +383,7 @@ var JFreeChartComponent = BaseComponent.extend({
           return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")
         },
         icon: function(){
-          return cd.chartType == "BarChart" ? webAppPath + '/content/pentaho-cdf/resources/style/images/pie_icon.png': webAppPath + '/content/pentaho-cdf/resources/style/images/bar_icon.png';
+          return cd.chartType == "BarChart" ? webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/pie_icon.png': webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/bar_icon.png';
         },
         oclass: 'options',
         callback: function(){
@@ -393,7 +393,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       excel: {
         title: "Excel",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/excel_icon.png',
+        icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/excel_icon.png',
         oclass: 'options',
         callback: function(){
           exportFile("excel",cd);
@@ -401,7 +401,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       csv: {
         title: "CSV",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/csv_icon.gif',
+        icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/csv_icon.gif',
         oclass: 'options',
         callback: function(){
           exportFile("csv",cd);
@@ -409,7 +409,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       zoom: {
         title:'Zoom',
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/magnify.png',
+        icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/magnify.png',
         oclass: 'options',
         callback: function(){
           Dashboards.incrementRunningCalls();
@@ -440,7 +440,7 @@ var JFreeChartComponent = BaseComponent.extend({
           var componentPath = "/public/pentaho-solutions/cdf/components/" + cdfComponent;
           Dashboards.callPentahoAction(myself,"cdf", componentPath, cdfComponent, parameters,function(jXML){
             if(jXML != null){
-              var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
+              var openWindow = window.open(webAppPath + "/api/plugins/pentaho-cdf/files/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
               var loadChart = function(){
                 if(openWindow.loadChart != undefined)openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())
@@ -457,7 +457,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       details:{
         title:'Details',
-        icon:webAppPath + '/content/pentaho-cdf/resources/style/images/table.png',
+        icon:webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/table.png',
         oclass: 'options',
         callback: function(){
           myself.pivotDefinition = {
@@ -811,7 +811,7 @@ var TimePlotComponent = BaseComponent.extend({
       parameters.push(key+"="+value);
     }
     var allData = undefined;
-    var timePlotEventSourceUrl = webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/timelinefeeder.xaction:output?" + parameters.join('&');
+    var timePlotEventSourceUrl = webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:timelinefeeder.xaction/content?" + parameters.join('&');
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -823,7 +823,7 @@ var TimePlotComponent = BaseComponent.extend({
         parameters.push(key+"="+value);
       }
 
-      var eventUrl = webAppPath + "/api/repo/files/public/pentaho-solutions/cdf/components/timelinefeeder.xaction:output?" + parameters.join('&');
+      var eventUrl = webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:timelinefeeder.xaction/content?" + parameters.join('&');
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){
@@ -1353,7 +1353,7 @@ var JpivotComponent = BaseComponent.extend({
   update : function() {
     // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-    jpivotHTML += webAppPath + "/api/repo/files" + 	this.path + ":output?";
+    jpivotHTML += webAppPath + "/api/repo/files/" + this.path.replace(/\//g, ":") + "/content?";
 
     // Add args
     var p = new Array(this.parameters.length);
@@ -1829,7 +1829,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
   },
 
   executeXAction : function() {
-    var url = webAppPath + "/api/repo/files" + this.path + ":output?";
+    var url = webAppPath + "/api/repo/files/" + this.path.replace(/\//g, ":") + "/content?";
 
     var p = new Array(this.parameters.length);
     var parameters = [];
@@ -1884,7 +1884,7 @@ var PrptComponent = BaseComponent.extend({
 					}});
 			}
 			else{
-				var url = webAppPath + '/api/repo/files' + this.path + ':output';
+				var url = webAppPath + '/api/repo/files/' + this.path.replace(/\//g, ":") + '/content';
                                 var encodeArray = function(k,v) {
                                     var arr = [];
                                     for (var i = 0; i < v.length;i++) {
@@ -1960,7 +1960,7 @@ var ExecutePrptComponent = PrptComponent.extend({
 		executePrptComponent: function(){
 
 			var options = this.getOptions();
-			var url = webAppPath + '/api/repo/files' + this.path + ':output';
+			var url = webAppPath + '/api/repo/files/' + this.path.replace(/\//g, ":") + '/content';
 			var a=[];
       var encodeArray = function(k,v) {
           var arr = [];
