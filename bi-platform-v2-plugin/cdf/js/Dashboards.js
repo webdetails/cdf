@@ -1199,7 +1199,7 @@ Query = function() {
                 _mode = 'CDA';
                 _file = cd.path;
                 _id = cd.dataAccessId;
-                if (cd.sortBy) {
+                if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
                   _sortBy = cd.sortBy;
                 }
             } else {
@@ -1362,10 +1362,15 @@ Query = function() {
         newSort = sortBy.toUpperCase().split(',').filter(function(e){return e !== "";});
       } else if (sortBy instanceof Array) {
         newSort = sortBy.map(function(d){return d.toUpperCase();});
+        /* We also need to validate that each individual term is valid*/
+        var invalidEntries = newSort.filter(function(e){return !e.match("^[0-9]+[adAD]?,?$")});
+        if ( invalidEntries.length > 0) {
+            throw "InvalidSortExpression";
+        }
       }
       
       /* We check whether the parameter is the same as before,
-       * and notify the user whether it changed
+       * and notify the caller on whether it changed
        */
       var same;
       if (newSort instanceof Array) {
