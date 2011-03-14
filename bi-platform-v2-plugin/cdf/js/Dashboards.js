@@ -701,7 +701,7 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = webAppPath + "/" + serviceMethod;
+  var url = webAppPath + "/api/repo/files" + path + "/content";
 	
   // Add the solution to the params
   var arr = {};
