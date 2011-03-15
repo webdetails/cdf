@@ -204,6 +204,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 
     //sets next refresh for given component and inserts it in refreshQueue, restarts timer if needed
     processComponent : function(component){
+      clearFromQueue(component);
       insertInQueue(component);
       if(isFirstInQueue(component)) restartTimer();
       return true;//dbg
