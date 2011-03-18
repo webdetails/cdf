@@ -1235,24 +1235,26 @@ Query = function() {
         var queryDefinition = {};
         var callback = (outsideCallback ? outsideCallback : _callback);
         if (_mode == 'CDA') {
-            for (var param in _params) {
-              if(_params.hasOwnProperty(param)) {
-		var value = Dashboards.getParameterValue(_params[param][1]);
-		var name = _params[param][0];
-		if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-		  //special case where single element will wrongly be treated as a parseable array by cda
-		  value = doCsvQuoting(value[0],';');
-		}
-		queryDefinition['param' + name] = value;
+          for (var param in _params) {
+            if(_params.hasOwnProperty(param)) {
+              var value = Dashboards.getParameterValue(_params[param][1]);
+              var name = _params[param][0];
+              if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+                //special case where single element will wrongly be treated as a parseable array by cda
+                value = doCsvQuoting(value[0],';');
               }
+              //else will not be correctly handled for functions that return arrays
+              if (typeof value == 'function') value = value();
+              queryDefinition['param' + name] = value;
             }
-            queryDefinition.path = _file;
-            queryDefinition.dataAccessId = _id;
-            queryDefinition.pageSize = _pageSize;
-            queryDefinition.pageStart = _page;
-            queryDefinition.sortBy = _sortBy;
-            url = CDA_PATH;
-            // Assemble parameters
+          }
+          queryDefinition.path = _file;
+          queryDefinition.dataAccessId = _id;
+          queryDefinition.pageSize = _pageSize;
+          queryDefinition.pageStart = _page;
+          queryDefinition.sortBy = _sortBy;
+          url = CDA_PATH;
+          // Assemble parameters
         } else if (_mode == 'Legacy') {
             queryDefinition = _query;
             url = LEGACY_QUERY_PATH;

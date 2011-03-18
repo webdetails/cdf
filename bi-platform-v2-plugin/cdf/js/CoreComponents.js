@@ -1998,7 +1998,8 @@ var QueryComponent = BaseComponent.extend({
       alert("Fatal - No query definition passed");
       return;
     }
-    Dashboards.fetchData(cd, object.parameters, function(values) {
+    var query = new Query(cd);
+    query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
       object.result = values.resultset != undefined ? values.resultset: values;
@@ -2020,7 +2021,32 @@ var QueryComponent = BaseComponent.extend({
         }
 
       }
-    })
+    });
+    //TODO: Transition to Query object still under test
+    
+    //Dashboards.fetchData(cd, object.parameters, function(values) {
+    //  // We need to make sure we're getting data from the right place,
+    //  // depending on whether we're using CDA
+    //  object.result = values.resultset != undefined ? values.resultset: values;
+    //  if (typeof values.resultset != "undefined"){
+    //    object.metadata = values.metadata;
+    //  }
+    //  if (object.resultvar != undefined){
+    //    Dashboards.setParameter(object.resultvar, object.result);
+    //  }
+    //  changedValues = undefined;
+    //  if((typeof(object.postFetch)=='function')){
+    //    changedValues = object.postFetch(values);
+    //  }
+    //  if (changedValues != undefined){
+    //    values = changedValues;
+    //    // (Call this again after postFetch)
+    //    if (object.resultvar != undefined){
+    //      Dashboards.setParameter(object.resultvar, object.result);
+    //    }
+    //
+    //  }
+    //})
 
   }
 }
