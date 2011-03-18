@@ -1195,7 +1195,7 @@ Query = function() {
             queryDefinition = _query;
             url = LEGACY_QUERY_PATH;
         }
-        $.post(url, queryDefinition, function(json) {_lastResultSet = json;_callback(_mode == 'CDA' ? json : json.values);});
+        $.getJSON(url, queryDefinition, function(json) {_lastResultSet = json;_callback(_mode == 'CDA' ? json : json.values);});
     };
 
     /*
