@@ -634,18 +634,18 @@ Dashboards.ev = function(o){
   return typeof o == 'function'?o():o
 };
 
-Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
+Dashboards.callPentahoAction = function(obj, path, parameters, callback ){
   // Encapsulate pentahoAction call
   // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
   if(typeof callback == 'function'){
-    return Dashboards.pentahoAction( solution, path, action, parameters,
+    return Dashboards.pentahoAction( path, parameters,
       function(json){
         callback(Dashboards.parseXActionResult(obj,json));
       }
       );
   }
   else{
-    return Dashboards.parseXActionResult(obj,Dashboards.pentahoAction( solution, path, action, parameters, callback ));
+    return Dashboards.parseXActionResult(obj,Dashboards.pentahoAction( path, parameters, callback ));
   }
 }
 
@@ -694,11 +694,11 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
 
 } 
 
-Dashboards.pentahoAction = function( solution, path, action, params, func ) {
-  return Dashboards.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
+Dashboards.pentahoAction = function( path, params, func ) {
+  return Dashboards.pentahoServiceAction('ServiceAction', 'xml', path, params, func);
 }
 
-Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
+Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, params, func ) {
   // execute an Action Sequence on the server
 
   var url = webAppPath + "/api/repo/files/" + path.replace(/\//g, ":") + "/content";
@@ -706,9 +706,7 @@ Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution,
   // Add the solution to the params
   var arr = {};
   arr.wrapper = false;
-  arr.solution = solution;
   arr.path = path;
-  arr.action = action;
   $.each(params,function(i,val){
     arr[val[0]]=val[1];
   });

@@ -94,9 +94,7 @@ territorySelector =
 {
   name: "territorySelector",
   type: "select",
-  solution: "bi-developers",
   path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/GetTerritory.xaction",
-  action: "GetTerritory.xaction",
   parameters:[],
   parameter:"territory",
   htmlObject: "territory_selector",
@@ -111,9 +109,7 @@ firstChart =
 {
   name: "Chart",
   type: "xaction",
-  solution: "bi-developers",
   path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/PieChart1.xaction",
-  action: "PieChart1.xaction",
   parameters: [["productLine","productLine"]],
   listeners:["productLine"],
   htmlObject: "first_chart",
@@ -126,9 +122,7 @@ secondChart =
 {
   name: "Chart",
   type: "xaction",
-  solution: "bi-developers",
   path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/BarChart2.xaction",
-  action: "BarChart2.xaction",
   parameters:[["territory","territory"]],
   listeners:["territory"],
   htmlObject: "second_chart",
@@ -141,9 +135,7 @@ thirdChart =
 {
   name: "Chart",
   type: "xaction",
-  solution: "bi-developers",
   path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/LineChart3.xaction",
-  action: "LineChart3.xaction",
   parameters:[["territory","territory"],["productLine","productLine"]],
   listeners:["territory","productLine"],
   htmlObject: "third_chart",
@@ -156,9 +148,7 @@ pivot =
 {
   name: "pivot",
   type: "jpivot",
-  solution: "bi-developers",
   path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/Pivot.xaction",
-  action: "Pivot.xaction",
   parameters:[["territory","territory"],["productLine","productLine"]],
   listeners:["territory","productLine"],
   htmlObject: "pivot_object",
@@ -173,9 +163,7 @@ map =
 {
 name: "map",
 	  type: "map",
-	  solution: "bi-developers",
 	  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/GetPoints.xaction",
-	  action: "GetPoints.xaction",
 	  parameters:[["territory","territory"]],
 	  listeners:["territory"],
 	  messageElementId: "messages",

@@ -55,7 +55,7 @@ BaseComponent = Base.extend({
           });
           jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
         } else {
-          jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
+          jXML = Dashboards.callPentahoAction(myself, this.path, p,null);
         }
         //transform the result int a javascript array
         var myArray = this.parseArray(jXML, false);
@@ -160,13 +160,13 @@ var XactionComponent = BaseComponent.extend({
 
         var myself=this;
         if (typeof(this.serviceMethod) == 'undefined' || this.serviceMethod == 'ServiceAction') {
-          var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
+          var jXML = Dashboards.callPentahoAction(myself, this.path, p,null);
 
           if(jXML != null){
             $('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
           }
         } else {
-          var html = Dashboards.pentahoServiceAction(this.serviceMethod, 'html', this.solution, this.path, this.action, p, null);
+          var html = Dashboards.pentahoServiceAction(this.serviceMethod, 'html', this.path, p, null);
           $('#'+myself.htmlObject).html(html);
         }
 
@@ -345,7 +345,7 @@ var JFreeChartComponent = BaseComponent.extend({
     var myself = this;
     // callback async mode
     var actionPath = "/public/pentaho-solutions/cdf/components/" + action;
-    Dashboards.callPentahoAction(myself,"cdf", actionPath, action, this.getParameters(),function(jXML){
+    Dashboards.callPentahoAction(myself, actionPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
         if(myself.chartDefinition.caption != undefined)
@@ -438,7 +438,7 @@ var JFreeChartComponent = BaseComponent.extend({
             eval(urlTemplate.replace("{" + parameterName + "}",value));
           };
           var componentPath = "/public/pentaho-solutions/cdf/components/" + cdfComponent;
-          Dashboards.callPentahoAction(myself,"cdf", componentPath, cdfComponent, parameters,function(jXML){
+          Dashboards.callPentahoAction(myself, componentPath, parameters,function(jXML){
             if(jXML != null){
               var openWindow = window.open(webAppPath + "/api/plugins/pentaho-cdf/files/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
@@ -569,7 +569,7 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
     var myself = this;
 
     var xactionPath = "/public/pentaho-solutions/cdf/components/openflashchart.xaction";
-    Dashboards.callPentahoAction(myself,"cdf", xactionPath, "openflashchart.xaction", this.getParameters(),function(jXML){
+    Dashboards.callPentahoAction(myself, xactionPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
         var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
@@ -623,7 +623,7 @@ var TrafficComponent = BaseComponent.extend({
     var myself = this;
     // callback async mode
     var xactionPath = "/public/pentaho-solutions/cdf/components/traffic.xaction";
-    Dashboards.callPentahoAction(myself,"cdf", xactionPath, "traffic.xaction", parameters,
+    Dashboards.callPentahoAction(myself, xactionPath, parameters,
       function(result){
         var value = $(result).find("VALUE").text();
         var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
