@@ -3,7 +3,7 @@ style=\
 
 commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/jquery-impromptu.1.5.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/jquery-impromptu.3.1.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.ui.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.corner.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.bgiframe.js,\
