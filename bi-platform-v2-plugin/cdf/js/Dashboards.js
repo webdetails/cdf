@@ -1050,6 +1050,10 @@ sprintfWrapper = {
       strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
 
       matchPosEnd = exp.lastIndex;
+      
+      var negative = parseInt(arguments[convCount]) < 0 ? true : false;
+      if(negative == 0) negative = parseFloat(arguments[convCount]) < 0 ? true : false;
+      
       matches[matches.length] = {
         match: match[0],
         left: match[3] ? true : false,
@@ -1058,7 +1062,7 @@ sprintfWrapper = {
         min: match[6] || 0,
         precision: match[8],
         code: match[9] || '%',
-        negative: parseInt(arguments[convCount]) < 0 ? true : false,
+        negative: negative,
         argument: String(arguments[convCount])
       };
     }
