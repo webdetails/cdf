@@ -296,6 +296,7 @@ var SelectBaseComponent = BaseComponent.extend({
 });
 
 var SelectComponent = SelectBaseComponent.extend({
+  defaultIfEmpty: true,
   getValue : function() {
     return $("#"+this.htmlObject + " > select").val();
   }
