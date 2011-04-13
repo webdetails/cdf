@@ -1586,7 +1586,14 @@ var TableComponent = BaseComponent.extend({
     } else {
 
       // make sure to clean sort options
-      this.queryState.setSortBy(null);
+      var sortBy = this.chartDefinition.sortBy,
+        sortOptions = [];
+      for (var i = 0; i < sortBy.length; i++) {
+        var col = sortBy[i][0];
+        var dir = sortBy[i][1];
+        sortOptions.push( col + (dir == "asc" ? "A" : "D"));
+      }
+      this.queryState.setSortBy(sortOptions);
       this.queryState.fetchData(this.parameters, function(values) {
         changedValues = undefined;
         if((typeof(myself.postFetch)=='function')){
