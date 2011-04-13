@@ -442,16 +442,12 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 }
 
 Dashboards.init = function(components){
-    var myself = this;
     this.loadStorage();
     if ($.isArray(components)) {
         Dashboards.addComponents(components);
     }
     $(function() {
         Dashboards.initEngine();
-        if(typeof myself.postInit == 'function') {
-            myself.postInit();
-        }
     });
 };
 
@@ -461,6 +457,7 @@ Dashboards.initEngine = function(){
   var compCount = components.length;
   Dashboards.incrementRunningCalls();
   Dashboards.createAndCleanErrorDiv();
+  var myself = this;
   setTimeout(
     function() {
       for(var i= 0, len = components.length; i < len; i++){
@@ -468,6 +465,10 @@ Dashboards.initEngine = function(){
           Dashboards.update(components[i]);
         }
       }
+      if(typeof myself.postInit == 'function') {
+        myself.postInit();
+      }
+
       Dashboards.decrementRunningCalls();
     },
     Dashboards.renderDelay);
