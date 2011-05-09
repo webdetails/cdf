@@ -1568,6 +1568,16 @@ var TableComponent = BaseComponent.extend({
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
     this.queryState = new Query(croppedCd);
+    // make sure to clean sort options
+    var sortBy = this.chartDefinition.sortBy || [],
+      sortOptions = [];
+    for (var i = 0; i < sortBy.length; i++) {
+      var col = sortBy[i][0];
+      var dir = sortBy[i][1];
+      sortOptions.push( col + (dir == "asc" ? "A" : "D"));
+    }
+    this.queryState.setSortBy(sortOptions);
+
     if(cd.paginateServerside) {
       this.extraOptions.push(["bServerSide",true]);
       this.extraOptions.push(["bProcessing",true]);
@@ -1585,16 +1595,6 @@ var TableComponent = BaseComponent.extend({
       this.queryState.setParameters(this.parameters);
       this.processTableComponentResponse();
     } else {
-
-      // make sure to clean sort options
-      var sortBy = this.chartDefinition.sortBy || [],
-        sortOptions = [];
-      for (var i = 0; i < sortBy.length; i++) {
-        var col = sortBy[i][0];
-        var dir = sortBy[i][1];
-        sortOptions.push( col + (dir == "asc" ? "A" : "D"));
-      }
-      this.queryState.setSortBy(sortOptions);
       this.queryState.fetchData(this.parameters, function(values) {
         changedValues = undefined;
         if((typeof(myself.postFetch)=='function')){
