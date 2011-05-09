@@ -1587,7 +1587,7 @@ var TableComponent = BaseComponent.extend({
     } else {
 
       // make sure to clean sort options
-      var sortBy = this.chartDefinition.sortBy,
+      var sortBy = this.chartDefinition.sortBy || [],
         sortOptions = [];
       for (var i = 0; i < sortBy.length; i++) {
         var col = sortBy[i][0];
