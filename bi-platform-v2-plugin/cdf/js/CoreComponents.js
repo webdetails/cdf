@@ -811,7 +811,7 @@ var TimePlotComponent = BaseComponent.extend({
       parameters.push(key+"="+value);
     }
     var allData = undefined;
-    var timePlotEventSourceUrl = webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:timelinefeeder.xaction/content?" + parameters.join('&');
+    var timePlotEventSourceUrl = webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:timelinefeeder.xaction/generatedContent?" + parameters.join('&');
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -823,7 +823,7 @@ var TimePlotComponent = BaseComponent.extend({
         parameters.push(key+"="+value);
       }
 
-      var eventUrl = webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:timelinefeeder.xaction/content?" + parameters.join('&');
+      var eventUrl = webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:timelinefeeder.xaction/generatedContent?" + parameters.join('&');
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){

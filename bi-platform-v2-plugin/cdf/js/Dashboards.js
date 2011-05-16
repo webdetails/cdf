@@ -701,7 +701,7 @@ Dashboards.pentahoAction = function( path, params, func ) {
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = webAppPath + "/api/repos/" + path.replace(/\//g, ":") + "/generateContent";
+  var url = webAppPath + "/api/repos/" + path.replace(/\//g, ":") + "/generatedContent";
 	
   // Add the solution to the params
   var arr = {};
@@ -783,7 +783,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.getJSON(webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:jtable.xaction/content?", cd,
+    $.getJSON(webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:jtable.xaction/generatedContent?", cd,
       function(json) {  callback(json.values); });
   }
   // ... or just call the callback when no valid definition is passed
@@ -1107,7 +1107,7 @@ Query = function() {
 
     // Constants, or what passes for them... Pretty please leave these alone.
     var CDA_PATH = webAppPath + "/content/cda/doQuery?";
-    var LEGACY_QUERY_PATH = webAppPath + "/api/repo/files/public:pentaho-solutions:cdf:components:jtable.xaction/content";
+    var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:jtable.xaction/generatedContent";
 
     /*
      * Private fields

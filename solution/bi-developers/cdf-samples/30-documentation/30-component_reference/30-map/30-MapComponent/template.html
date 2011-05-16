@@ -1,5 +1,4 @@
-<script type="text/javascript"
-	src="../public:pentaho-solutions:bi-developers:cdf-samples:30-documentation:30-component_reference:MetaLayerSamples.js"></script>
+<script type="text/javascript" src="../../MetaLayerSamples.js"></script>
 
 <div class="shadow">
 
@@ -138,9 +137,7 @@ mapComponent =
 {
 	  name: "mapComponent",
 	  type: "map",
-	  solution: "bi-developers",
 	  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/GetPoints.xaction",
-	  action: "GetPoints.xaction",
 	  parameters:[],
 	  listeners:[],
 	  messageElementId: "messages",
@@ -153,7 +150,7 @@ mapComponent =
 	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
 	  preExecution:function(){},
 	  postExecution:function(){},
-	  markers: [["../../../plugins/pentaho-cdf/files/js/OpenMap/OpenLayers/img/marker-green.png",42,50],"../../../plugins/pentaho-cdf/files/js/OpenMap/OpenLayers/img/marker-gold.png","../../../plugins/pentaho-cdf/files/js/OpenMap/OpenLayers/img/marker.png"]
+	  markers: [["js/OpenMap/OpenLayers/img/marker-green.png",42,50],"js/OpenMap/OpenLayers/img/marker-gold.png","js/OpenMap/OpenLayers/img/marker.png"]
 }
 	
 Dashboards.init([mapComponent,textElement]);
