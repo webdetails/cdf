@@ -177,7 +177,7 @@ var XactionComponent = BaseComponent.extend({
         " width=\"100%\"" +
         " src=\"";
 
-        xactionIFrameHTML += webAppPath + "/api/repo/files/" + this.path.replace(/\//g, ":") + "/content?";
+        xactionIFrameHTML += webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
         
 
         // Add args
@@ -1353,7 +1353,7 @@ var JpivotComponent = BaseComponent.extend({
   update : function() {
     // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-    jpivotHTML += webAppPath + "/api/repo/files/" + this.path.replace(/\//g, ":") + "/content?";
+    jpivotHTML += webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
 
     // Add args
     var p = new Array(this.parameters.length);
@@ -1829,7 +1829,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
   },
 
   executeXAction : function() {
-    var url = webAppPath + "/api/repo/files/" + this.path.replace(/\//g, ":") + "/content?";
+    var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
 
     var p = new Array(this.parameters.length);
     var parameters = [];
@@ -1884,7 +1884,7 @@ var PrptComponent = BaseComponent.extend({
 					}});
 			}
 			else{
-				var url = webAppPath + '/api/repo/files/' + this.path.replace(/\//g, ":") + '/content';
+				var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
                                 var encodeArray = function(k,v) {
                                     var arr = [];
                                     for (var i = 0; i < v.length;i++) {
@@ -1960,7 +1960,7 @@ var ExecutePrptComponent = PrptComponent.extend({
 		executePrptComponent: function(){
 
 			var options = this.getOptions();
-			var url = webAppPath + '/api/repo/files/' + this.path.replace(/\//g, ":") + '/content';
+			var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
 			var a=[];
       var encodeArray = function(k,v) {
           var arr = [];
