@@ -2137,7 +2137,7 @@ var PrptComponent = BaseComponent.extend({
     this.clear();
 
     var options = this.getOptions();
-    options.showParameters = false;
+    //options.showParameters = false;
 
     if(options["dashboard-mode"]){
       var url = webAppPath + '/content/reporting';
