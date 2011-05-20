@@ -1673,7 +1673,7 @@ var TableComponent = BaseComponent.extend({
       });
 
       if(typeof cd.drawCallback == 'function'){
-        cd.drawCallback.apply(myself);
+        cd.drawCallback.apply(myself,arguments);
       }
 
     };
