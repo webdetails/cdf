@@ -116,7 +116,9 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 	
 		var files = this.includeSolutions?json.solution.folders:NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
 		
-		files.sort(function(a,b){return a.name>b.name});
+    files.sort(function(a,b){
+      return a.name>b.name
+    });
 		var ret = this.generateMenuFromArray(files, 0);
 		$("#"+this.htmlObject).html(ret);
 	
@@ -177,20 +179,32 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 			}
 			
 			var _template = NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
+      if (file.link != undefined){
+        s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + file.link + "\">" + file.title + "</a>";
 			
+      }
+      else{
+        s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+      }
+
+      /*
 			if(file.type == "wcdf")
 				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf-dd/Render?solution=" + file.solution + "&amp;path=" + file.path + "&amp;file=" + file.file + "\">" + file.title + "</a>";
 			else if (file.type == "xcdf")
 				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf/RenderXCDF?solution=" + file.solution + "&amp;path=" + file.path + "&amp;action=" + file.file + "\">" + file.title + "</a>";
 			else
 				s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
-				
+			*/
 
 			var files = file.folders || [];
-			files.sort(function(a,b){return a.name>b.name});
+      files.sort(function(a,b){
+        return a.name>b.name
+      });
 			
 			var childFiles = file.files || [];
-			childFiles.sort(function(a,b){return a.name>b.name});
+      childFiles.sort(function(a,b){
+        return a.name>b.name
+      });
 			
 			var inner = this.generateMenuFromArray(files.concat(childFiles));
 			
@@ -276,8 +290,10 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 							href=webAppPath + this.url;
 						}
 						else 
-							{cls = "action greybox";
-							href = webAppPath + this.link;}
+          {
+            cls = "action greybox";
+            href = webAppPath + this.link;
+          }
 							
 					}
 
@@ -295,7 +311,12 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 				var t = this.title || this.innerHTML || this.href;
 				//$(window).scrollTop(0);
 				var _href = this.href.replace(/'/g,"&#39;");
-				GB_show(t,_href,$(window).height()-50,$(window).width() - 100 );
+      $.fancybox({
+        type:"iframe",
+        href:_href,
+        width: $(window).width(),
+        height:$(window).height()
+      });
 				return false;
 			});
 

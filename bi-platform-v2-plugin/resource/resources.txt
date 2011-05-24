@@ -3,7 +3,7 @@ style=\
 
 commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/jquery-impromptu.1.5.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/jquery-impromptu.3.1.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.ui.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.corner.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.bgiframe.js,\
@@ -16,7 +16,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.i18n.properties.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery-ui-datepicker-i18n.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.1.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.4.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.js,\
@@ -33,10 +33,10 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.jdMenu.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.jdMenu.slate.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery-impromptu.css,\
-@RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.1.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.4.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/cdf.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
-@RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table_jui.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/blueprint/screen.css
 
@@ -57,7 +57,7 @@ tableComponentScript=\
 TableScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
-timePlotComponentScript=\
+timePlotScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js
 
 autocompleteBoxScript=\

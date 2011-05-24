@@ -19,7 +19,7 @@ BaseComponent = Base.extend({
         }
         QueryComponent.makeQuery(this);
         var myArray = new Array();
-        for(p in this.result){
+        for(p in this.result) if(this.result.hasOwnProperty(p)){
           switch(vid){
             case "sql":
               myArray.push([this.result[p][0],this.result[p][1]]);
@@ -42,7 +42,7 @@ BaseComponent = Base.extend({
         var p = new Array(this.parameters?this.parameters.length:0);
         for(var i= 0, len = p.length; i < len; i++){
           var key = this.parameters[i][0];
-          var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+          var value = this.parameters[i][1] == "" || this.parameters[i][1] == "NIL" ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
           p[i] = [key,value];
         }
 
@@ -154,7 +154,10 @@ var XactionComponent = BaseComponent.extend({
         var p = new Array(this.parameters?this.parameters.length:0);
         for(var i= 0, len = p.length; i < len; i++){
           var key = this.parameters[i][0];
-          var value = this.parameters[i].length == 3 ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+          var value = this.parameters[i][1] == "" ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+          if(this.value == "NIL"){
+            this.value = this.parameters[i][2];
+          }
           p[i] = [key,value];
         }
 
@@ -184,11 +187,16 @@ var XactionComponent = BaseComponent.extend({
         var p = new Array(this.parameters.length);
         for(var i= 0, len = p.length; i < len; i++){
           var arg = "&" + encodeURIComponent(this.parameters[i][0]) + "=";
-          if (this.parameters[i].length == 3) {
-            xactionIFrameHTML += arg + encodeURIComponent(this.parameters[i][2]);
+          var val = "";
+          if (this.parameters[i][1] == "") {
+            val = encodeURIComponent(this.parameters[i][2]);
           } else {
-            xactionIFrameHTML += arg + encodeURIComponent(Dashboards.getParameterValue(this.parameters[i][1]));
+            val =  encodeURIComponent(Dashboards.getParameterValue(this.parameters[i][1]));
+            if(val == "NIL"){
+              val = encodeURIComponent(this.parameters[i][2])
+            }
           }
+          xactionIFrameHTML += arg + val;
         }
 
         // Close IFrame
@@ -206,7 +214,8 @@ var SelectBaseComponent = BaseComponent.extend({
     visible: false,
     update: function(){
         var ph = $("#" + this.htmlObject);
-        var myArray = this.getValuesArray();
+    var myArray = this.getValuesArray(),
+    isMultiple = false;
 
         selectHTML = "<select";
 
@@ -217,48 +226,68 @@ var SelectBaseComponent = BaseComponent.extend({
         if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
             if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
                 selectHTML += " multiple";
-            }
-            else
+        isMultiple = true;
+      } else
                 if (!this.isMultiple && this.size == undefined) {
                     selectHTML += " size='" + myArray.length + "'";
                 }
         }
         selectHTML += ">";
-        var firstVal;
+    var firstVal,
+    currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
+    currentIsValid = false;
+
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    var hasCurrentVal = typeof currentval != undefined;
         var vid = this.valueAsId == false ? false : true;
+    var hasValueSelected = false;
+    var isSelected = false;
+
+    var currentValArray = [];
+    if(currentVal instanceof Array) {
+      currentValArray = currentVal;
+    } else if(typeof(currentVal) == "string"){
+      currentValArray = currentVal.split("|");
+    }
+
         for (var i = 0, len = myArray.length; i < len; i++) {
             if (myArray[i] != null && myArray[i].length > 0) {
                 var ivid = vid || myArray[i][0] == null;
                 var value, label;
                 if (myArray[i].length > 1) {
-                    value = myArray[i][ivid ? 1 : 0];
-                    label = myArray[i][1];
-                }
-                else {
-                    value = myArray[i][0];
-                    label = myArray[i][0];
+          value = "" + myArray[i][ivid ? 1 : 0];
+          label = "" + myArray[i][1];
+        } else {
+          value = "" + myArray[i][0];
+          label = "" + myArray[i][0];
                 }
                 if (i == 0) {
                     firstVal = value;
                 }
-                selectHTML += "<option value = '" + value + "' >" + label + "</option>";
+        if (jQuery.inArray( value, currentValArray) > -1) {
+          currentIsValid = true;
+        }
+        selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
             }
         }
 
         selectHTML += "</select>";
 
-        // update the placeholder
         ph.html(selectHTML);
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = typeof currentVal == 'function' ? currentVal() : currentVal;
-        if (typeof(this.defaultIfEmpty) != 'undefined' && this.defaultIfEmpty && currentVal == '') {
-            Dashboards.setParameter(this.parameter, firstVal);
+
+    /* If the current value for the parameter is invalid or empty, we need
+     * to pick a sensible default. If there is a defaultIfEmpty value,
+     * we use that; otherwise, we use the first value in the selector.
+     * An "invalid" value is, of course, one that's not in the values array.
+     */
+    if (isMultiple ? !currentIsValid && currentVal !== '' : !currentIsValid) {
+      var replacementValue = (this.defaultIfEmpty)? firstVal : null;
+      $("select", ph).val(replacementValue);
+      Dashboards.setParameter(this.parameter,replacementValue);
             Dashboards.processChange(this.name);
-        }
-        else if (currentVal !== ''){
-            $("select", ph).val(currentVal);
         } else {
-            $("select", ph).val(firstVal);
+      $("select", ph).val(currentValArray);
         }
         var myself = this;
         $("select", ph).change(function(){
@@ -268,6 +297,7 @@ var SelectBaseComponent = BaseComponent.extend({
 });
 
 var SelectComponent = SelectBaseComponent.extend({
+  defaultIfEmpty: true,
   getValue : function() {
     return $("#"+this.htmlObject + " > select").val();
   }
@@ -308,13 +338,14 @@ var JFreeChartComponent = BaseComponent.extend({
 		  if($.isArray(param) && param.length >= 2){
 			var name = param[0];
 			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
-			//escape ';'s
-			if(value) value = value.replace(";",";;");
 
+            if(value){
+              value = doCsvQuoting(value, '=');	//quote if needed for '='
+            }
 			if(i == 0) cdaParameterString = "";
 			else cdaParameterString += ";";
 
-			cdaParameterString += name + "=" + value;
+            cdaParameterString += doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
 		  }
 		}
 	  }
@@ -1102,11 +1133,52 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 		//default
         var currentVal = Dashboards.getParameterValue(this.parameter);
         currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-		var hasCurrentVal = (currentVal != undefined);
 
-    for (var i = 0, len = myArray.length; i < len; i++) {
-      selectHTML += "<nobr><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+    var isSelected = false;
+
+    var currentValArray = [];
+    if(currentVal instanceof Array) {
+      currentValArray = currentVal;
+    } else if(typeof(currentVal) == "string"){
+      currentValArray = currentVal.split("|");
+    }
+
+    // check to see if current selected values are in the current values array. If not check to see if we should default to the first
       var vid = this.valueAsId==false?0:1;
+    var hasCurrentVal = false;
+      outer:
+      for(var i = 0; i < currentValArray.length; i++){
+        for(var y = 0; y < myArray.length; y++) {
+          if (currentValArray[i] == myArray[y][vid]) {
+            hasCurrentVal = true;
+            break outer;
+          }
+        }
+      }
+    // if there will be no selected value, but we're to default if empty, select the first
+    if(!hasCurrentVal && this.defaultIfEmpty){
+      currentValArray = [myArray[0][vid]];
+
+      Dashboards.setParameter(this.parameter,currentValArray);
+      Dashboards.processChange(this.name);
+    }
+    // (currentValArray == null && this.defaultIfEmpty)? firstVal : null
+
+
+    selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
+    for (var i = 0, len = myArray.length; i < len; i++) {
+      selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+
+
+
+      isSelected = false;
+      for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+        isSelected = currentValArray[j] == myArray[i][vid];
+        if(isSelected) {
+          break;
+        }
+      }
+
       if (this.type == 'radio' || this.type == 'radioComponent'){
 	      if ((i == 0 && !hasCurrentVal) ||
 						(hasCurrentVal && (myArray[i][vid] == currentVal ))) {
@@ -1115,13 +1187,14 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         selectHTML += " type='radio'";
       }else{
 	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (currentVal.indexOf(myArray[i][vid]) >= 0))) {
+          (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
 				}
         selectHTML += " type='checkbox'";
       }
-      selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></nobr>" + (this.separator == undefined?"":this.separator);
+      selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></li>" + ((this.separator == undefined || this.separator == null || this.separator == "null")?"":this.separator);
     }
+    selectHTML += "</ul>"
     // update the placeholder
     $("#" + this.htmlObject).html(selectHTML);
   },
@@ -1152,9 +1225,10 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
 	var myArray = this.getValuesArray();
-    var cssClass= "toggleButton";
+    var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
     selectHTML = "";
     var firstVal;
+
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
 
@@ -1164,10 +1238,16 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 	  var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
 
-      selectHTML += "<button onclick='MultiButtonComponent.prototype.clickButton(\"" +
-        this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ")'";
-        selectHTML += "class='" + cssClass + "' name='" + this.name + "' value='" + value + "'> "
-        selectHTML += label + "</button>" + (this.separator == undefined ? "" : this.separator);
+      if(value != null) {
+        value = value.replace('"','&quot;' );
+      }
+      if(label != null) {
+        label = label.replace('"','&quot;' );
+      }
+
+      selectHTML += "<div class='"+cssWrapperClass+"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
+      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><button name='" + this.name + "' value='" + value + "'> ";
+      selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
 
       if (i == 0) firstVal = value;
     }
@@ -1177,25 +1257,49 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     ph.html(selectHTML);
 
     //default
-    var currentVal = Dashboards.getParameterValue(this.parameter);
-    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
-   	if(currentVal == null){
+    var isSelected = false;
+
+    var currentValArray;
+    if(currentVal instanceof Array) {
+      currentValArray = currentVal;
+    } else {
+      currentValArray = currentVal.split("|");
+    }
+
+    if(currentVal == null && this.parameter){
 			Dashboards.setParameter(this.parameter, firstVal);
 			currentVal = firstVal;
 	}
 
 	var foundDefault = false;
+    this.clearSelections(this.htmlObject, this.name, this.verticalOrientation);
 	for (var i = 0; i < myArray.length; i++) {
-	  if (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) {
-		MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i);
+
+      isSelected = false;
+      for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
+        isSelected = currentValArray[j] == myArray[i][valIdx];
+        if(isSelected) {
+          break;
+        }
+      }
+
+
+      if ( ( $.isArray(currentVal) && isSelected || isSelected)
+        || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
+
+        MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation, true);
+
 		foundDefault = true;
-		if(!this.isMultiple) break;
+        if(!this.isMultiple) {
+          break;
+        }
 	  }
 	}
 	if(!foundDefault && !this.isMultiple && myArray.length > 0){
 	  //select first value
-	  MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0);
+      MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
 	}
   },
 
@@ -1203,9 +1307,14 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 		if(this.isMultiple){
 			var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
 			var a = new Array();
+      // if it is not an array, handle that too
+      if (indexes.length == undefined) {
+        a.push(this.getValueByIdx(indexes));
+      } else {
 			for(var i=0; i < indexes.length; i++){
 				a.push(this.getValueByIdx(indexes[i]));
 			}
+      }
 			return a;
 		}
 		else {
@@ -1217,10 +1326,19 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     return $("#" + this.htmlObject + " button")[idx].value;
   },
 
+  getSelecetedCss: function(verticalOrientation) {
+    return "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+  },
+  getUnselectedCss: function(verticalOrientation) {
+    return "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+  },
+
   //static MultiButtonComponent.prototype.clickButton
-  clickButton: function(htmlObject, name, index, isMultiple){
-	var cssClass= "toggleButton";
-	var cssClassSelected= "toggleButtonPressed";
+  // This method should be broken up so the UI state code is reusable outside of event processing
+  clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly){
+
+    var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
+    var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
 	var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
@@ -1235,25 +1353,31 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
           break;
         }
       }
-      if (disable) buttons[index].className = cssClass;
-      else {
-		buttons[index].className = cssClassSelected;
+      if (disable){
+        buttons[index].parentNode.className = cssWrapperClass;
+      } else {
+        buttons[index].parentNode.className = cssWrapperClassSelected;
         this.indexes[name].push(index);
       }
   	}
     else {//de-select old, select new
-      if (this.indexes[name] != undefined && this.indexes[name] < buttons.length) {
-				if($.isArray(this.indexes[name])){//isMultiple->!isMultiple
-					for(var i = 0; i < this.indexes[name].length; i++){
-						buttons[this.indexes[name][i]].className = cssClass;
-					}
-				}
-				else buttons[this.indexes[name]].className = cssClass;
-      }
+      this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
-			buttons[index].className = cssClassSelected;
+      buttons[index].parentNode.className = cssWrapperClassSelected;
 	  }
+    if(!updateUIOnly){
     this.callAjaxAfterRender(name);
+    }
+  },
+
+  clearSelections: function(htmlObject, name, verticalOrientation) {
+    var buttons = $("#" + htmlObject + " button");
+    var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
+    for(var i = 0; i < buttons.length; i++){
+      buttons[i].parentNode.className = cssWrapperClass;
+    }
+
+    this.indexes[name] = [];
   },
 
  //static MultiButtonComponent.prototype.getSelectedIndex
@@ -1274,6 +1398,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       list.push(obj);
     }
 
+    // if reloadOnUpdate only update the list
+    if(this.reloadOnUpdate&&this.autoBoxOpt!=undefined)
+    {
+      this.autoBoxOpt.list=list;
+      $(clientSelector.autoBoxOpt.input[0]).trigger("autobox");
+      return;
+    }
+
     $("#"+ this.htmlObject).empty();
 
     var myself = this;
@@ -1283,7 +1415,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       myself.processChange();
     };
     var processElementChange = myself.processElementChange == true ? function(value){
-      Dashboards.fireChange(myself.parameter+"_value",value)
+      Dashboards.fireChange(myself.parameter+"_value",value);
     } : undefined;
     if(processElementChange!= undefined)eval(myself.parameter+'_value=""');
     var opt = {
@@ -1339,6 +1471,20 @@ var AutocompleteBoxComponent = BaseComponent.extend({
         })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
 
       this.autoBoxOpt.input.after(li);
+    };
+    //have an update function
+    if(myself.autoUpdateFunction)
+    {
+      //have timeout?
+      if(!myself.autoUpdateTimeout)
+      {
+        //no.... set 4 seconds
+        myself.autoUpdateTimeout=4000;
+      }
+      //call the update function every X seconds
+      //the update function is defined in the component by the developer
+      //should do a fire change in the function
+      setInterval(myself.autoUpdateFunction,myself.autoUpdateTimeout);
     }
   },
   getValue : function() {
@@ -1427,6 +1573,33 @@ var TableComponent = BaseComponent.extend({
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
     this.queryState = new Query(croppedCd);
+    // make sure to clean sort options
+    var sortBy = this.chartDefinition.sortBy || [],
+      sortOptions = [];
+    for (var i = 0; i < sortBy.length; i++) {
+      var col = sortBy[i][0];
+      var dir = sortBy[i][1];
+      sortOptions.push( col + (dir == "asc" ? "A" : "D"));
+    }
+    this.queryState.setSortBy(sortOptions);
+
+    if(cd.paginateServerside) {
+      this.extraOptions.push(["bServerSide",true]);
+      this.extraOptions.push(["bProcessing",true]);
+      this.queryState.setPageSize(parseInt(cd.displayLength));
+      this.queryState.setCallback(function(values) {
+        changedValues = undefined;
+        if((typeof(myself.postFetch)=='function')){
+          changedValues = myself.postFetch(values);
+        }
+        if (changedValues != undefined) {
+          values = changedValues;
+        }
+        myself.processTableComponentResponse(values);
+      });
+      this.queryState.setParameters(this.parameters);
+      this.processTableComponentResponse();
+    } else {
     this.queryState.fetchData(this.parameters, function(values) {
       changedValues = undefined;
       if((typeof(myself.postFetch)=='function')){
@@ -1437,38 +1610,96 @@ var TableComponent = BaseComponent.extend({
       }
       myself.processTableComponentResponse(values);
     });
+    }
   },
+
+  pagingCallback: function(url, params,callback,dataTable) {
+    function p( sKey ) {
+      for ( var i=0, iLen=params.length ; i<iLen ; i++ ) {
+        if ( params[i].name == sKey ) {
+          return params[i].value;
+        }
+      }
+      return null;
+    }
+    var sortingCols = p("iSortingCols"),sort = [];
+    if (sortingCols > 0) {
+      for (var i = 0; i < sortingCols; i++) {
+        var col = p("iSortCol_" + i);
+        var dir = p("sSortDir_" + i);
+        sort.push( col + (dir == "asc" ? "A" : "D"));
+      }
+    }
+    var query = this.queryState,
+    myself = this;
+    query.setSortBy(sort.join(","));
+    query.setPageSize(parseInt(p("iDisplayLength")));
+    query.setPageStartingAt(p("iDisplayStart"));
+    query.fetchData(function(d) {
+      if (myself.postFetch){
+        var mod = myself.postFetch(d,dataTable);
+        if (typeof mod !== "undefined") {
+          d = mod;
+        }
+      }
+      var response = {
+        iTotalRecords: d.queryInfo.totalRows,
+        iTotalDisplayRecords: d.queryInfo.totalRows
+        };
+      response.aaData = d.resultset;
+      response.sEcho = p("sEcho");
+      callback(response);
+    });
+  },
+
   processTableComponentResponse : function(json)
   {
     // General documentation here: http://datatables.net
+    var myself = this,
+    cd = this.chartDefinition,
+    extraOptions = {},
+    dtData0 = TableComponent.getDataTableOptions(cd),
+    dtData;
 
-    var cd = this.chartDefinition;
     // Build a default config from the standard options
-    var dtData0 = TableComponent.getDataTableOptions(cd);
-    var dtData = $.extend(cd.dataTableOptions,dtData0);
+    $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){
+      extraOptions[e[0]] = e[1];
+    });
+    dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
 
 
     // Sparklines still applied to drawcallback
     var myself = this;
     dtData.fnDrawCallback = function() {
       $("#" + myself.htmlObject + " td.sparkline:visible").each(function(i){
-        $(this).sparkline($(this).text().split(/,/));
-        $(this).removeClass("sparkline");
+        var t = $(this);
+        t.sparkline(t.text().split(/,/));
+        t.removeClass("sparkline");
       });
 
       if(typeof cd.drawCallback == 'function'){
-        cd.drawCallback();
+        cd.drawCallback.apply(myself);
       }
 
     };
-    // We need to make sure we're getting data from the right place,
-    // depending on whether we're using CDA
-    if (cd.dataAccessId != undefined) {
+    /* We need to make sure we're getting data from the right place,
+     * depending on whether we're using CDA
+     */
+    if (cd.dataAccessId != undefined && json) {
       dtData.aaData = json.resultset;
     } else {
       dtData.aaData = json;
     }
+
+    /* If we're doing server-side pagination, we need to set up the server callback
+     */
+    if (dtData.bServerSide) {
+      dtData.fnServerData = function(u,p,c) {
+        myself.pagingCallback(u,p,c,this);
+      };
+    }
     $("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
+    // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
     this.dataTable = $("#"+this.htmlObject+'Table').dataTable( dtData );
 
 
@@ -1548,13 +1779,16 @@ var TableComponent = BaseComponent.extend({
 
       };  // colFormats
 
+      var bAutoWidth = true;
       if(options.colWidths!=undefined){
         $.each(options.colWidths,function(i,val){
           if (val!=null){
-            dtData.aoColumns[i].sWidth=val
+            dtData.aoColumns[i].sWidth=val;
+            bAutoWidth = false;
           }
         })
       }; //colWidths
+      dtData.bAutoWidth = bAutoWidth;
 
       if(options.colSortable!=undefined){
         $.each(options.colSortable,function(i,val){
@@ -1669,6 +1903,10 @@ var CommentsComponent = BaseComponent.extend({
       $("textarea",myself.addCommentContainer).focus();
     });
 
+    if (typeof json.error != 'undefined' || typeof json.result == 'undefined') {
+      placeHolder.append('<span class="cdfNoComments">There was an error processing comments</span>' );
+      json.result = [];
+    } else
     if (json.result.length == 0 ){
       placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
     }
@@ -1773,12 +2011,16 @@ var QueryComponent = BaseComponent.extend({
       alert("Fatal - No query definition passed");
       return;
     }
-    Dashboards.fetchData(cd, object.parameters, function(values) {
+    var query = new Query(cd);
+    query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
       object.result = values.resultset != undefined ? values.resultset: values;
       if (typeof values.resultset != "undefined"){
         object.metadata = values.metadata;
+      }
+      if (object.resultvar != undefined){
+        Dashboards.setParameter(object.resultvar, object.result);
       }
       changedValues = undefined;
       if((typeof(object.postFetch)=='function')){
@@ -1786,12 +2028,38 @@ var QueryComponent = BaseComponent.extend({
       }
       if (changedValues != undefined){
         values = changedValues;
-      }
-      // if resultvar is defined, store it on that var
+        // (Call this again after postFetch)
       if (object.resultvar != undefined){
         Dashboards.setParameter(object.resultvar, object.result);
       }
-    })
+
+      }
+    });
+    //TODO: Transition to Query object still under test
+    
+    //Dashboards.fetchData(cd, object.parameters, function(values) {
+    //  // We need to make sure we're getting data from the right place,
+    //  // depending on whether we're using CDA
+    //  object.result = values.resultset != undefined ? values.resultset: values;
+    //  if (typeof values.resultset != "undefined"){
+    //    object.metadata = values.metadata;
+    //  }
+    //  if (object.resultvar != undefined){
+    //    Dashboards.setParameter(object.resultvar, object.result);
+    //  }
+    //  changedValues = undefined;
+    //  if((typeof(object.postFetch)=='function')){
+    //    changedValues = object.postFetch(values);
+    //  }
+    //  if (changedValues != undefined){
+    //    values = changedValues;
+    //    // (Call this again after postFetch)
+    //    if (object.resultvar != undefined){
+    //      Dashboards.setParameter(object.resultvar, object.result);
+    //    }
+    //
+    //  }
+    //})
 
   }
 }
@@ -1868,20 +2136,25 @@ var ButtonComponent = BaseComponent.extend({
 
 
 var PrptComponent = BaseComponent.extend({
-		showParameters: false,
 
 		update: function(){
 
 			this.clear();
 
 			var options = this.getOptions();
+    //options.showParameters = false;
 
 			if(options["dashboard-mode"]){
 				var url = webAppPath + '/content/reporting';
 				var myself=this;
-				$.ajax({url: url, data: options, dataType:"html", success: function(json){
+      $.ajax({
+        url: url,
+        data: options,
+        dataType:"html",
+        success: function(json){
 						$("#"+myself.htmlObject).html(json);
-					}});
+        }
+      });
 			}
 			else{
 				var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
@@ -1987,6 +2260,70 @@ var ExecutePrptComponent = PrptComponent.extend({
 	}
 );
 
+var AnalyzerComponent = BaseComponent.extend({
+
+  update: function(){
+    
+    this.clear();
+            
+    var options = this.getOptions();
+    var url = webAppPath + '/content/analyzer/';
+    var myself=this;
+
+    //create iFrame and place analyzer inside
+    this.viewOnly?url+='viewer':url+='editor';
+    var height = this.height? this.height: "480px";
+
+    var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
+    $("#"+this.htmlObject).html(iFrameHTML);
+  },
+
+  getOptions: function(){
+                            
+    var options = {
+      solution : this.solution,
+      path: this.path,
+      action: this.action,
+      command: this.command == undefined? "open": this.command,
+      showFieldList: this.showFieldList == undefined? false: this.showFieldList,
+      frameless: this.frameless,
+      edit: this.edit
+    };
+
+    // process params and update options
+    $.map(this.parameters,function(k){
+      options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+    });
+            
+    return options;
+  }
+});
+
+function generateIframe(htmlObject,url,parameters,height,width){
+  var iFrameHTML = "<iframe id=\"iframe_"+ htmlObject + "\"" +
+  " frameborder=\"0\"" +
+  " height=\""+height+"\"" +
+  " width=\""+width+"\"" +
+  " src=\""+ url +"?";
+
+  var paramCounter = 0;
+    
+  // Add args
+  jQuery.each(parameters, function(i, val) {
+    if(typeof val != "undefined"){
+      var arg = "";
+      if(paramCounter++ != 0)
+        arg += "&";
+      arg += encodeURIComponent(i) + "=";
+      iFrameHTML += arg + encodeURIComponent(val);
+    };
+  });
+
+  // Close IFrame
+  iFrameHTML += "\"></iframe>";
+       
+  return iFrameHTML;
+};
 
 var FreeformComponent = BaseComponent.extend({
 		update : function() {
@@ -1994,3 +2331,4 @@ var FreeformComponent = BaseComponent.extend({
 			this.customfunction(this.parameters || []);
 		}
 	})
+

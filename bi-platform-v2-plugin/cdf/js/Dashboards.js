@@ -204,6 +204,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 
     //sets next refresh for given component and inserts it in refreshQueue, restarts timer if needed
     processComponent : function(component){
+      clearFromQueue(component);
       insertInQueue(component);
       if(isFirstInQueue(component)) restartTimer();
       return true;//dbg
@@ -341,8 +342,9 @@ Dashboards.blockUIwithDrag = function() {
 //}
 
 Dashboards.update = function(object) {
+  try {
   if(!(typeof(object.preExecution)=='undefined')){
-    var ret = object.preExecution();
+      var ret = object.preExecution.apply(object);
     if (typeof ret != "undefined" && !ret)
       return; // if preExecution returns false, we'll skip the update
   }
@@ -362,7 +364,7 @@ Dashboards.update = function(object) {
   }
 
   if(!(typeof(object.postExecution)=='undefined')){
-    object.postExecution();
+      object.postExecution.apply(object);
   }
   // if we have a tooltip component, how is the time.
   if (object._tooltip != undefined){
@@ -371,6 +373,9 @@ Dashboards.update = function(object) {
       track: true,
       fade: 250
     });
+  }
+  } catch (e) {
+    this.log("Error updating " + object.name +": "+ e);
   }
 };
 
@@ -437,16 +442,12 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 }
 
 Dashboards.init = function(components){
-    var myself = this;
     this.loadStorage();
     if ($.isArray(components)) {
         Dashboards.addComponents(components);
     }
     $(function() {
         Dashboards.initEngine();
-        if(typeof myself.postInit == 'function') {
-            myself.postInit();
-        }
     });
 };
 
@@ -456,15 +457,22 @@ Dashboards.initEngine = function(){
   var compCount = components.length;
   Dashboards.incrementRunningCalls();
   Dashboards.createAndCleanErrorDiv();
-
+  var myself = this;
+  setTimeout(
+    function() {
   for(var i= 0, len = components.length; i < len; i++){
     if(components[i].executeAtStart){
-      this.update(components[i]);
+          Dashboards.update(components[i]);
     }
   }
-  Dashboards.decrementRunningCalls();
-};
+      if(typeof myself.postInit == 'function') {
+        myself.postInit();
+      }
 
+  Dashboards.decrementRunningCalls();
+    },
+    Dashboards.renderDelay);
+};
 
 Dashboards.resetAll = function(){
   Dashboards.createAndCleanErrorDiv();
@@ -494,20 +502,28 @@ Dashboards.processChange = function(object_name){
     var preChangeResult = object.preChange(value);
     value = preChangeResult != undefined ? preChangeResult : value;
   }
-  this.fireChange(parameter,value);
+  if(parameter) { this.fireChange(parameter,value); }
   if(!(typeof(object.postChange)=='undefined')){
     object.postChange(value);
   }
 };
 
-/*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
+/* fireChange must accomplish two things:
+ * first, we must change the parameters
+ * second, we execute the components that listen for
+ * changes on that parameter.
+ *
+ * Because some browsers won't draw the blockUI widgets
+ * until the script has finished, we find the list of
+ * components to update, then execute the actual update
+ * in a function wrapped in a setTimeout, so the running
+ * script has the opportunity to finish.
+ */
 Dashboards.fireChange = function(parameter, value) {
-  //alert("begin block");
   Dashboards.createAndCleanErrorDiv();
 
-  //alert("Parameter: " + parameter + "; Value: " + value);
   Dashboards.setParameter(parameter, value);
-
+  var toUpdate = [];
   var workDone = false;
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
@@ -518,19 +534,21 @@ Dashboards.fireChange = function(parameter, value) {
             workDone = true;
             Dashboards.incrementRunningCalls();
           }
-          this.update(this.components[i]);
+          toUpdate.push(this.components[i]);
           break;
         }
-      //alert("finished parameter " + j)
       }
     }
   }
-  //alert("finish block");
+  setTimeout(function() {
+    for (var i = 0; i < toUpdate.length; i++) {
+      Dashboards.update(toUpdate[i]);
+    }
   if (workDone) {
     Dashboards.decrementRunningCalls();
   }
+  }, Dashboards.renderDelay);
 };
-
 
 Dashboards.getParameterValue = function (parameterName) {
   if (Dashboards.globalContext) {
@@ -565,7 +583,12 @@ Dashboards.getQueryParameter = function ( parameterName ) {
 };
 
 Dashboards.setParameter = function(parameterName, parameterValue) {
+  if(parameterName == undefined || parameterName == "undefined"){
+    Dashboards.log('Dashboards.setParameter: trying to set undefined!!');
+    return;  
+  }
   if (Dashboards.globalContext) {
+    //ToDo: this should really be sanitized!
     eval( parameterName + " = " + JSON.stringify(parameterValue) );
   } else {
     Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
@@ -769,22 +792,22 @@ Dashboards.getSettingsValue = function(key,value){
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
-  if (typeof console != 'undefined') {
-    console.warn('Dashboards.fetchData() is deprecated. Use Query objects instead');
-  }
+  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead');
   // Detect and handle CDA data sources
   if (cd != undefined && cd.dataAccessId != undefined) {
     for (param in params) {
       cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
     }
     $.post(webAppPath + "/content/cda/doQuery?", cd,
-      function(json) {callback(json);});
+      function(json) {callback(json);},'json');
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.getJSON(webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:jtable.xaction/generatedContent?", cd,
-      function(json) {  callback(json.values); });
+    $.post(webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:jtable.xaction/generatedContent?", cd,
+      function(result) {
+        callback(result.values); 
+      },'json');
   }
   // ... or just call the callback when no valid definition is passed
   else {
@@ -792,7 +815,15 @@ Dashboards.fetchData = function(cd, params, callback) {
   }
 }
 
-
+Dashboards.escapeHtml = function(input) {
+  var escaped = input
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/'/g,"&#39;")
+    .replace(/"/g,"&#34;");
+return escaped;
+}
 // STORAGE ENGINE
 
 // Default object
@@ -840,10 +871,12 @@ Dashboards.cleanStorage = function(){
  * UTF-8 data encode / decode
  * http://www.webtoolkit.info/
  *
+ *
  **/
-
 function encode_prepare_arr(value) {
-  if ($.isArray(value)){
+  if(typeof value == "number"){
+    return value;
+  } else if ($.isArray(value)){
     var a = new Array(value.length);
     $.each(value,function(i,val){
       a[i] = encode_prepare(val);
@@ -961,6 +994,22 @@ function toFormatedString(value) {
   return x1 + x2;
 };
 
+//quote csv values in a way compatible with CSVTokenizer
+function doCsvQuoting(value, separator, alwaysEscape){
+	var QUOTE_CHAR = '"';
+	if(separator == null) {return value;}
+	if(value == null) {return null;}
+	if(value.indexOf(QUOTE_CHAR) >= 0){
+		//double them
+		value = value.replace(QUOTE_CHAR, QUOTE_CHAR.concat(QUOTE_CHAR));
+	}
+	if(alwaysEscape || value.indexOf(separator) >= 0){
+		//quote value
+		value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
+	}
+	return value;
+};
+
 
 sprintfWrapper = {
 
@@ -1000,6 +1049,10 @@ sprintfWrapper = {
       strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
 
       matchPosEnd = exp.lastIndex;
+      
+      var negative = parseInt(arguments[convCount]) < 0 ? true : false;
+      if(negative == 0) negative = parseFloat(arguments[convCount]) < 0 ? true : false;
+      
       matches[matches.length] = {
         match: match[0],
         left: match[3] ? true : false,
@@ -1008,7 +1061,7 @@ sprintfWrapper = {
         min: match[6] || 0,
         precision: match[8],
         code: match[9] || '%',
-        negative: parseInt(arguments[convCount]) < 0 ? true : false,
+        negative: negative,
         argument: String(arguments[convCount])
       };
     }
@@ -1103,6 +1156,10 @@ sprintfWrapper = {
 
 sprintf = sprintfWrapper.init;
 
+//Ctors:
+// Query(queryString) --> DEPRECATED
+// Query(queryDefinition{path, dataAccessId})
+// Query(path, dataAccessId)
 Query = function() {
 
     // Constants, or what passes for them... Pretty please leave these alone.
@@ -1146,6 +1203,9 @@ Query = function() {
                 _mode = 'CDA';
                 _file = cd.path;
                 _id = cd.dataAccessId;
+                if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+                  _sortBy = cd.sortBy;
+                }
             } else {
                 throw 'InvalidQuery';
             }
@@ -1170,16 +1230,25 @@ Query = function() {
      * Private methods
      */
 
-    var doQuery = function(){
+    var doQuery = function(outsideCallback){
         if (typeof _callback != 'function') {
             throw 'QueryNotInitialized';
         }
         var url;
         var queryDefinition = {};
+        var callback = (outsideCallback ? outsideCallback : _callback);
         if (_mode == 'CDA') {
             for (var param in _params) {
                 if(_params.hasOwnProperty(param)) {
-                    queryDefinition['param' + _params[param][0]] = Dashboards.getParameterValue(_params[param][1]);
+              var value = Dashboards.getParameterValue(_params[param][1]);
+              var name = _params[param][0];
+              if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+                //special case where single element will wrongly be treated as a parseable array by cda
+                value = doCsvQuoting(value[0],';');
+              }
+              //else will not be correctly handled for functions that return arrays
+              if (typeof value == 'function') value = value();
+              queryDefinition['param' + name] = value;
                 }
             }
             queryDefinition.path = _file;
@@ -1193,7 +1262,13 @@ Query = function() {
             queryDefinition = _query;
             url = LEGACY_QUERY_PATH;
         }
-        $.getJSON(url, queryDefinition, function(json) {_lastResultSet = json;_callback(_mode == 'CDA' ? json : json.values);});
+        $.post(url, queryDefinition, function(json) {
+				if(_mode == 'Legacy'){
+					json = eval("(" + json + ")");
+				}
+				_lastResultSet = json;
+				callback(_mode == 'CDA' ? json : json.values);
+			});
     };
 
     /*
@@ -1203,13 +1278,34 @@ Query = function() {
     // Entry point
 
     this.fetchData = function(params, callback) {
-        if(typeof callback == 'function') {
+      switch(arguments.length) {
+        case 0:
+          if(_params && _callback) {
+            return doQuery();
+          }
+          break;
+        case 1:
+          if (typeof arguments[0] == "function"){
+          /* If we're receiving _only_ the callback, we're not
+           * going to change the internal callback
+           */
+            return doQuery(arguments[0]);
+          } else if( arguments[0] instanceof Array){
+            _params = arguments[0];
+            return doQuery();
+          }
+          break;
+        case 2:
+        default:
+        /* We're just going to discard anything over two params */
             _params = params;
             _callback = callback;
             return doQuery();
-        } else {
-            throw "InvalidInput";
         }
+      /* If we haven't hit a return by this time,
+       * the user gave us some wrong input
+       */
+      throw "InvalidInput";
     };
 
     // Result caching
@@ -1220,72 +1316,168 @@ Query = function() {
             throw "NoCachedResults";
         }
     };
-    // Sorting
 
-    this.sortBy = function(sortBy) {
-        // we want to accept 'a' and 'd' even though kettle demands capitals
-        sortBy = sortBy.toUpperCase();
-        // Valid sortBy Strings are column numbers, optionally
-        // succeeded by A or D (ascending or descending), and separated by commas
-        if (typeof sortBy == 'string' && sortBy.match("^(?:[0-9]+[AD]?,?)*$") !== null) {
-            // Break the string into its constituent terms, filter out empty terms, if any
-            _sortBy = sortBy.split(',').filter(function(e){return e !== "";});
-        } else if (sortBy === '') {
-            _sortBy = '';
+    this.reprocessLastResults = function(outerCallback){
+        if (_lastResultSet !== null) {
+            var callback = outerCallback || _callback;
+            return callback(_lastResultSet);
         } else{
-            throw "InvalidSortExpression";
-        }
-        if (_callback !== null) {
-            return doQuery();
+            throw "NoCachedResults";
         }
     };
 
-    // Pagination
-    // We paginate by having an initial position (_page) and page size (_pageSize)
-    // Paginating consists of incrementing/decrementing the initial position by the page size
-    // All paging operations change the paging cursor.
+    this.reprocessResults = function(outerCallback) {
+      if (_lastResultSet !== null) {
+        var callback = (outsideCallback ? outsideCallback : _callback);
+        callback(_mode == 'CDA' ? json : json.values);
+      } else {
+        throw "NoCachedResults";
+      }
+    };
+
+    /* Sorting
+     *
+     * CDA expects an array of terms consisting of a number and a letter
+     * that's either 'A' or 'D'. Each term denotes, in order, a column
+     * number and sort direction: 0A would then be sorting the first column
+     * ascending, and 1D would sort the second column in descending order.
+     * This function accepts either an array with the search terms, or
+     * a comma-separated string with the terms:  "0A,1D" would then mean
+     * the same as the array ["0A","1D"], which would sort the results
+     * first by the first column (ascending), and then by the second
+     * column (descending).
+     */
+    this.setSortBy = function(sortBy) {
+      var newSort;
+      if (sortBy === null || sortBy === undefined || sortBy === '') {
+        newSort = '';
+      }
+      /* If we have a string as input, we need to split it into
+       * an array of sort terms. Also, independently of the parameter
+       * type, we need to convert everything to upper case, since want
+       * to accept 'a' and 'd' even though CDA demands capitals.
+       */
+      else if (typeof sortBy == "string") {
+        /* Valid sortBy Strings are column numbers, optionally
+         *succeeded by A or D (ascending or descending), and separated by commas
+         */
+        if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+          throw "InvalidSortExpression";
+        }
+        /* Break the string into its constituent terms, filter out empty terms, if any */
+        newSort = sortBy.toUpperCase().split(',').filter(function(e){return e !== "";});
+      } else if (sortBy instanceof Array) {
+        newSort = sortBy.map(function(d){return d.toUpperCase();});
+        /* We also need to validate that each individual term is valid*/
+        var invalidEntries = newSort.filter(function(e){return !e.match("^[0-9]+[adAD]?,?$")});
+        if ( invalidEntries.length > 0) {
+            throw "InvalidSortExpression";
+        }
+      }
+      
+      /* We check whether the parameter is the same as before,
+       * and notify the caller on whether it changed
+       */
+      var same;
+      if (newSort instanceof Array) {
+        same = newSort.length != _sortBy.length;
+        $.each(newSort,function(i,d){
+          same = (same && d == _sortBy[i]);
+          if(!same) {return false;}
+        });
+      } else {
+        same = (newSort === _sortBy);
+      }
+      _sortBy = newSort;
+      return !same;
+    };
+
+    this.sortBy = function(sortBy,outsideCallback) {
+      /* If the parameter is not the same, and we have a valid state,
+       * we can fire the query.
+       */
+      var changed = this.setSortBy(sortBy);
+      if (!changed) {
+        return false;
+      } else if (_callback !== null) {
+        return doQuery(outsideCallback);
+      }
+    };
+
+    this.setParameters = function (params) {
+      if((params instanceof Array)) {
+        _params = params;
+      } else {
+        throw "InvalidParameters";
+        }
+    };
+
+    this.setCallback = function(callback) {
+      if(typeof callback == "function") {
+        _callback = callback;
+      } else {
+        throw "InvalidCallback";
+      }
+    };
+    /* Pagination
+     *
+     * We paginate by having an initial position (_page) and page size (_pageSize)
+     * Paginating consists of incrementing/decrementing the initial position by the page size
+     * All paging operations change the paging cursor.
+     */
 
     // Gets the next _pageSize results
-    this.nextPage = function() {
+    this.nextPage = function(outsideCallback) {
         if (_pageSize > 0) {
             _page += _pageSize;
-            return doQuery();
+            return doQuery(outsideCallback);
         } else {
             throw "InvalidPageSize";
         }
     };
 
     // Gets the previous _pageSize results
-    this.prevPage = function() {
+    this.prevPage = function(outsideCallback) {
         if (_page > _pageSize) {
             _page -= _pageSize;
-            return doQuery();
+            return doQuery(outsideCallback);
         } else if (_pageSize > 0) {
             _page = 0;
-            return doQuery();
+            return doQuery(outsideCallback);
         } else {
             throw "AtBeggining";
         }
     };
 
     // Gets the page-th set of _pageSize results (0-indexed)
-    this.getPage = function(page) {
-        if (typeof page == 'number' && page > 0) {
+    this.getPage = function(page, outsideCallback) {
+      if (page * _pageSize == _page) {
+        return false;
+      } else if (typeof page == 'number' && page >= 0) {
             _page = page * _pageSize;
-            return doQuery();
+        return doQuery(outsideCallback);
         } else {
             throw "InvalidPage";
         }
     };
 
     // Gets _pageSize results starting at page
-    this.pageStartingAt = function(page) {
-        if (typeof page == 'number' && page > 0) {
+    this.setPageStartingAt = function(page) {
+      if (page == _page) {
+        return false;
+      } else if (typeof page == 'number' && page >= 0) {
             _page = page;
-            return doQuery();
         } else {
             throw "InvalidPage";
         }
+    };
+
+    this.pageStartingAt = function(page,outsideCallback) {
+      if(this.setPageStartingAt(page)) {
+        return doQuery(outsideCallback);
+      } else {
+        return false;
+      }
     };
 
     // Sets the page size
@@ -1298,11 +1490,13 @@ Query = function() {
     };
 
     // sets _pageSize to pageSize, and gets the first page of results
-    this.initPage = function(pageSize) {
-        if (typeof pageSize == 'number' && pageSize > 0) {
+    this.initPage = function(pageSize,outsideCallback) {
+      if (pageSize == _pageSize && _page == 0) {
+         return false;
+      } else if (typeof pageSize == 'number' && pageSize > 0) {
             _page = 0;
             _pageSize = pageSize;
-            return doQuery();
+        return doQuery(outsideCallback);
         } else {
             throw "InvalidPageSize";
         }

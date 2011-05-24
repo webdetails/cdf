@@ -167,7 +167,7 @@ public class MessageBundlesHelper {
               } else if (msgsDir instanceof RepositoryFile) {
                 RepositoryFile repositoryFile = (RepositoryFile)msgsDir;
                 IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-                RepositoryFile fBaseMsgDashboard = unifiedRepository.getFileById(((RepositoryFile) msgsDir).getPath() + File.separator + sourceDashboardBaseMsgFile + "_" + locale.getLanguage() + ".properties");
+                RepositoryFile fBaseMsgDashboard = unifiedRepository.getFileById(((RepositoryFile) msgsDir).getPath() + RepositoryFile.SEPARATOR + sourceDashboardBaseMsgFile + "_" + locale.getLanguage() + ".properties");
                 if (fBaseMsgDashboard != null) {
                   InputStream is = unifiedRepository.getDataForRead(fBaseMsgDashboard.getId(), SimpleRepositoryFileData.class).getStream();
                   BufferedReader brBaseMsgDashboard = new BufferedReader(new InputStreamReader(is));
