@@ -6,7 +6,7 @@ $.ajaxSetup({
   contentType: "application/x-www-form-urlencoded;charset=UTF-8"
 });
 
-String.prototype.endsWith = function(str){return (this.match(str+"$")==str)}
+String.prototype.endsWith = function(str){return (this.match(str+"$")==str)};
 
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
@@ -63,14 +63,22 @@ var Dashboards =
 		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         i18nCurrentLanguageCode : null,  // Reference to current language code . Used in every place where jquery plugins used in CDF hasm native internationalization support (ex: Datepicker)
         i18nSupport : null  // Reference to i18n objects
-	}
+	};
 
 // Log
-Dashboards.log = function(m){
+Dashboards.log = function(m,type){
   if (typeof console != "undefined" ){
-    console.log("CDF: " + m);
+    if (type && console[type]) {
+      console[type]("CDF: " + m);
+    }else if (type === 'exception' &&
+        !console.exception) {
+      console.error(m.stack);
+    }
+    else {
+      console.log("CDF: " + m);
+    }
   }
-}
+};
 
 // REFRESH ENGINE begin
 
@@ -88,7 +96,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       nextRefresh : 0,
       component : null
     };
-  }
+  };
 
   //set global refresh and (re)start interval
   var startGlobalRefresh = function(refreshPeriod){
@@ -100,7 +108,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
     if(globalRefreshPeriod != NO_REFRESH){
       globalTimer = setInterval("Dashboards.refreshEngine.fireGlobalRefresh()",globalRefreshPeriod * 1000);//ToDo: cleaner way to call
     }
-  }
+  };
 
   var clearFromQueue = function(component){
     for (var i = 0; i < refreshQueue.length; i++) {
@@ -109,11 +117,11 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
         i--;
       }
     }
-  }
+  };
 
   var clearQueue = function(){
     if(refreshQueue.length > 0) refreshQueue.splice(0,refreshQueue.length);
-  }
+  };
 
   //binary search for elem's position in coll (nextRefresh asc order)
   var getSortedInsertPosition = function(coll, elem){
@@ -132,32 +140,32 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       }
     }
     return low;
-  }
+  };
   var sortedInsert = function(rtArray,rtInfo){
     var pos = getSortedInsertPosition(rtArray,rtInfo);
     rtArray.splice(pos,0,rtInfo);
-  }
+  };
 
   var stopTimer = function(){
     if (activeTimer != null) {
       clearTimeout(activeTimer);
       activeTimer = null;
     }
-  }
+  };
 
   var restartTimer = function(){
     stopTimer();
     Dashboards.refreshEngine.fireRefresh();
-  }
+  };
 
   var getCurrentTime = function (){
     var date = new Date();
     return date.getTime();
-  }
+  };
 
   var isFirstInQueue = function(component){
     return refreshQueue.length > 0 && refreshQueue[0].component == component;
-  }
+  };
 
   var refreshComponent = function(component){
     //if refresh period is too short, progress indicator will stay in user's face
@@ -166,7 +174,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
   //			Dashboards.runningCalls = 0;
   //			Dashboards.hideProgressIndicator()
   //		}
-  }
+  };
 
   var insertInQueue = function(component){
     var time = getCurrentTime();
@@ -181,7 +189,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       info.component = component;
       sortedInsert(refreshQueue, info);
     }
-  }
+  };
   return {
 
     //set a component's refresh period and clears it from the queue if there;
@@ -257,7 +265,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       return refreshQueue;
     }
   };
-}
+};
 
 Dashboards.refreshEngine = new Dashboards.RefreshEngine();
 
@@ -265,24 +273,24 @@ Dashboards.refreshEngine = new Dashboards.RefreshEngine();
 
 Dashboards.setGlobalContext = function(globalContext) {
   Dashboards.globalContext = globalContext;
-}
+};
 
 Dashboards.showProgressIndicator = function() {
   Dashboards.blockUIwithDrag();
-}
+};
 
 Dashboards.hideProgressIndicator = function() {
   if(Dashboards.runningCalls <= 0){
     $.unblockUI();
     Dashboards.showErrorTooltip();
   }
-}
+};
 
 Dashboards.incrementRunningCalls = function() {
   Dashboards.runningCalls++ ;
   Dashboards.showProgressIndicator();
 //Dashboards.log("+Running calls incremented to: " + Dashboards.runningCalls);
-}
+};
 
 Dashboards.decrementRunningCalls = function() {
   Dashboards.runningCalls-- ;
@@ -291,7 +299,7 @@ Dashboards.decrementRunningCalls = function() {
     Dashboards.hideProgressIndicator();
     Dashboards.runningCalls = 0; // Just in case
   }
-}
+};
 
 Dashboards.bindControl = function(object) {
 
@@ -320,7 +328,7 @@ Dashboards.bindControl = function(object) {
 	// this will add the methods from the inherited class. Overrides not allowed
 	$.extend(object,objectImpl);
   }
-}
+};
 
 Dashboards.blockUIwithDrag = function() {
     if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
@@ -334,7 +342,7 @@ Dashboards.blockUIwithDrag = function() {
   $("div.blockUI.blockMsg").draggable({
     handle: "#blockUIDragHandle"
   });
-}
+};
 
 //Dashboards.xactionCallback = function(object,str){
 //	$('#'+object.htmlObject).html(str);
@@ -375,7 +383,8 @@ Dashboards.update = function(object) {
       });
     }
   } catch (e) {
-    this.log("Error updating " + object.name +": "+ e);
+    this.log("Error updating " + object.name +":",'error');
+    this.log(e,'exception');
   }
 };
 
@@ -384,7 +393,7 @@ Dashboards.createAndCleanErrorDiv = function(){
     $("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
   }
   $("#"+CDF_ERROR_DIV).empty();
-}
+};
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
@@ -395,7 +404,7 @@ Dashboards.showErrorTooltip = function(){
       showBody: " -- "
     })
   });
-}
+};
 
 Dashboards.getComponent = function(name){
   for (i in this.components){
@@ -430,7 +439,7 @@ Dashboards.registerEvent = function (ev, callback) {
 Dashboards.addArgs = function(url){
   if(url != undefined)
     this.args = getURLParameters(url);
-}
+};
 
 Dashboards.setI18nSupport = function(lc, i18nRef) {
     // Update global reference to i18n objects if needed
@@ -439,7 +448,7 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
         Dashboards.i18nSupport = i18nRef;
     }
 
-}
+};
 
 Dashboards.init = function(components){
     this.loadStorage();
@@ -465,6 +474,7 @@ Dashboards.initEngine = function(){
           Dashboards.update(components[i]);
         }
       }
+      $(window).trigger('cdfLoaded');
       if(typeof myself.postInit == 'function') {
         myself.postInit();
       }
@@ -556,7 +566,7 @@ Dashboards.getParameterValue = function (parameterName) {
   } else {
     return Dashboards.parameters[parameterName];
   }
-}
+};
 
 Dashboards.getQueryParameter = function ( parameterName ) {
   // Add "=" to the parameter name (i.e. parameterName=value)
@@ -584,7 +594,7 @@ Dashboards.getQueryParameter = function ( parameterName ) {
 
 Dashboards.setParameter = function(parameterName, parameterValue) {
   if(parameterName == undefined || parameterName == "undefined"){
-    Dashboards.log('Dashboards.setParameter: trying to set undefined!!');
+    Dashboards.log('Dashboards.setParameter: trying to set undefined!!','warn');
     return;  
   }
   if (Dashboards.globalContext) {
@@ -593,7 +603,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
   } else {
     Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
   }
-}
+};
 
 
 Dashboards.post = function(url,obj){
@@ -611,7 +621,7 @@ Dashboards.post = function(url,obj){
   }
   form += '</form>';
   jQuery(form).appendTo('body').submit().remove();
-}
+};
 
 Dashboards.clone = function clone(obj) {
 
@@ -640,7 +650,7 @@ Dashboards.clone = function clone(obj) {
   }
 
   return c;
-}
+};
 
 Dashboards.getArgValue  = function(key)
 {
@@ -651,7 +661,7 @@ Dashboards.getArgValue  = function(key)
   }
 
   return undefined;
-}
+};
 
 Dashboards.ev = function(o){
   return typeof o == 'function'?o():o
@@ -670,11 +680,11 @@ Dashboards.callPentahoAction = function(obj, solution, path, action, parameters,
   else{
     return Dashboards.parseXActionResult(obj,Dashboards.pentahoAction( solution, path, action, parameters, callback ));
   }
-}
+};
 
 Dashboards.urlAction = function ( url, params, func) {
   return Dashboards.executeAjax('xml', url, params, func);
-}
+};
 
 Dashboards.executeAjax = function( returnType, url, params, func ) {
   // execute a url
@@ -715,11 +725,11 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
     return result.responseText;
   }
 
-} 
+}; 
 
 Dashboards.pentahoAction = function( solution, path, action, params, func ) {
   return Dashboards.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
-}
+};
 
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
@@ -794,7 +804,7 @@ Dashboards.getSettingsValue = function(key,value){
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
-  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead');
+  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
   // Detect and handle CDA data sources
   if (cd != undefined && cd.dataAccessId != undefined) {
     for (param in params) {
@@ -815,7 +825,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   else {
     callback([]);
   }
-}
+};
 
 Dashboards.escapeHtml = function(input) {
   var escaped = input
@@ -825,7 +835,7 @@ Dashboards.escapeHtml = function(input) {
     .replace(/'/g,"&#39;")
     .replace(/"/g,"&#34;");
 return escaped;
-}
+};
 // STORAGE ENGINE
 
 // Default object
@@ -840,7 +850,7 @@ Dashboards.loadStorage = function(){
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
 			  $.extend(Dashboards.storage,json);
 		  });
-}
+};
 
 Dashboards.saveStorage = function(){
 
@@ -849,11 +859,11 @@ Dashboards.saveStorage = function(){
 		storageValue: JSON.stringify(Dashboards.storage)
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true && typeof console != "undefined"){
-				  Dashboards.log("Error saving storage")
+			  if(json.result != true){
+				  Dashboards.log("Error saving storage",'error');
 			  }
 		  });
-}
+};
 
 Dashboards.cleanStorage = function(){
 
@@ -861,11 +871,11 @@ Dashboards.cleanStorage = function(){
         action: "delete"
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true && typeof console != "undefined"){
-				  Dashboards.log("Error deleting storage")
+			  if(json.result != true){
+				  Dashboards.log("Error deleting storage", 'error');
 			  }
 		  });
-}
+};
 
 
 /**
@@ -888,7 +898,7 @@ function encode_prepare_arr(value) {
   else{
     return encode_prepare(value);
   }
-}
+};
 
 function encode_prepare( s )
 {
@@ -899,7 +909,7 @@ function encode_prepare( s )
     }
   }
   return s;
-}
+};
 
 var Utf8 = {
 

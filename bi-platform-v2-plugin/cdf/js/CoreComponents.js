@@ -148,6 +148,7 @@ BaseComponent = Base.extend({
 
 var XactionComponent = BaseComponent.extend({
   update : function() {
+    var myself=this;
     try {
       if (typeof(this.iframe) == 'undefined' || !this.iframe) {
         // go through parameter array and update values
@@ -161,7 +162,6 @@ var XactionComponent = BaseComponent.extend({
           p[i] = [key,value];
         }
 
-        var myself=this;
         if (typeof(this.serviceMethod) == 'undefined' || this.serviceMethod == 'ServiceAction') {
           var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
 
@@ -177,10 +177,12 @@ var XactionComponent = BaseComponent.extend({
         var xactionIFrameHTML = "<iframe id=\"iframe_"+ this.htmlObject + "\"" +
         " frameborder=\"0\"" +
         " height=\"100%\"" +
-        " width=\"100%\"" +
-        " src=\"";
-
-        xactionIFrameHTML += webAppPath + "/ViewAction?wrapper=false&solution="	+ this.solution + "&path=" + this.path + "&action="+ this.action;
+        " width=\"100%\" />",
+          iframe = $(xactionIFrameHTML),
+          url = webAppPath + "/ViewAction?wrapper=false" +
+            "&solution=" + this.solution +
+            "&path=" + this.path +
+            "&action="+ this.action;
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -195,13 +197,20 @@ var XactionComponent = BaseComponent.extend({
               val = encodeURIComponent(this.parameters[i][2])
             }
           }
-          xactionIFrameHTML += arg + val;
+          url += arg + val;
         }
-
-        // Close IFrame
-        xactionIFrameHTML += "\"></iframe>";
-
-        $("#"+this.htmlObject).html(xactionIFrameHTML);
+        if (!this.loading) {
+          this.loading = true;
+          Dashboards.incrementRunningCalls();
+        }
+        iframe.load(function(){
+          if (this.contentDocument.body.innerHTML){
+            myself.loading = false;
+            Dashboards.decrementRunningCalls();
+          }
+        });
+        $("#"+this.htmlObject).empty().append(iframe);
+        iframe[0].contentWindow.location = url;
       }
     } catch (e) {
     // don't cause the rest of CDF to fail if xaction component fails for whatever reason
@@ -239,7 +248,7 @@ var SelectBaseComponent = BaseComponent.extend({
     var currentVal = Dashboards.getParameterValue(this.parameter);
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
     var hasCurrentVal = typeof currentval != undefined;
-    var vid = this.valueAsId == false ? false : true;
+    var vid = !this.valueAsId;
     var hasValueSelected = false;
     var isSelected = false;
 
@@ -298,13 +307,13 @@ var SelectBaseComponent = BaseComponent.extend({
 var SelectComponent = SelectBaseComponent.extend({
   defaultIfEmpty: true,
   getValue : function() {
-    return $("#"+this.htmlObject + " > select").val();
+    return $("#"+this.htmlObject + " select").val();
   }
 });
 
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
-    return $("#"+this.htmlObject + " > select").val();
+    return $("#"+this.htmlObject + " select").val();
   }
 });
 
@@ -2124,7 +2133,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
 var ButtonComponent = BaseComponent.extend({
   update : function() {
-    $("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
+    $("<button type='button'/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
   }
 });
 
@@ -2168,8 +2177,30 @@ var PrptComponent = BaseComponent.extend({
           a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
         }
       });
-
-      $("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
+      /*
+       * We really shouldn't mess around with the CDF running call counter,
+       * but if we don't do so in this case, the report will count as "finished"
+       * even though nothing has been loaded into the iframe. We'll increment it
+       * here,decrement it again from the iframe's onload event.
+       */
+      var myself = this;
+      if(!this.loading){
+        this.loading = true;
+        Dashboards.incrementRunningCalls();
+      }
+      var iframe = $("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' />");
+      iframe.load(function(){
+        /* This is going to get called several times with "about:blank"-style pages.
+         * We're only interested in the one call that happens once the page is _really_
+         * loaded -- which means an actual document body.
+         */
+        if(this.contentWindow.document.body.innerHTML){
+          myself.loading = false;
+          Dashboards.decrementRunningCalls();
+        }
+      });
+      $("#"+this.htmlObject).empty().append(iframe);
+      iframe[0].contentWindow.location = url + "?"+ a.join('&');
     }
   },
 
