@@ -247,8 +247,9 @@ var SelectBaseComponent = BaseComponent.extend({
 
     var currentVal = Dashboards.getParameterValue(this.parameter);
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-    var hasCurrentVal = typeof currentval != undefined;
-    var vid = !this.valueAsId;
+    var hasCurrentVal = typeof currentVal != undefined;
+    //var vid = this.valueAsId == false ? false : true;
+    var vid = !!this.valueAsId;
     var hasValueSelected = false;
     var isSelected = false;
 
