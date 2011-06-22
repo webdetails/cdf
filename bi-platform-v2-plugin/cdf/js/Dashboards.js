@@ -50,20 +50,32 @@ if (typeof $.SetImpromptuDefaults == 'function')
     show: 'slideDown'
   });
 
-var Dashboards = 
-	{
-		TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
-		TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
-		TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
-		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
-		runningCalls: 0, // Used to control progress indicator for async mode
-		components: [],
-		parameters: [], // only used if globalContext = false
-		args: [],
-		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        i18nCurrentLanguageCode : null,  // Reference to current language code . Used in every place where jquery plugins used in CDF hasm native internationalization support (ex: Datepicker)
-        i18nSupport : null  // Reference to i18n objects
-	};
+var Dashboards = {
+  TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
+  TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
+  TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
+  /* globalContext determines if components and params are retrieved
+   * from the current window's object or from the Dashboards singleton
+   */
+  globalContext: true,
+  /* Used to control progress indicator for async mode */
+  runningCalls: 0,
+  components: [],
+  /* Holds the dashboard parameters if globalContext = false */
+  parameters: [],
+  /* measures, in miliseconds, the delay between firing blockUI and
+   * actually updating the dashboard. Necessary for IE/Chrome. Higher
+   * values have better chances of working, but are (obviously) slower
+   */
+  renderDelay: 300,
+  args: [],
+  monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  /* Reference to current language code . Used in every place where jquery
+   * plugins used in CDF hasm native internationalization support (ex: Datepicker)
+   */
+  i18nCurrentLanguageCode : null,
+  i18nSupport : null  // Reference to i18n objects
+};
 
 // Log
 Dashboards.log = function(m,type){
