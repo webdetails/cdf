@@ -1174,8 +1174,6 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 
-
-
       isSelected = false;
       for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
         isSelected = currentValArray[j] == myArray[i][vid];
@@ -1392,46 +1390,90 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 });
 
 var AutocompleteBoxComponent = BaseComponent.extend({
-  update : function() {
+  
+  searchedWord : '',
+  result: [],
+  
+  queryServer : function(searchString){
+    
+    if(!this.parameters) this.parameters = [];
+    
+    if(this.searchParamName){
+      for(var i=0; i< this.parameters.length;i++){
+        if(this.parameters[i][0] == this.searchParamName){
+          this.parameters[i][1] = this.getInnerParameterName();
+        }
+      }
+    }
+    else if (this.parameters.length > 0){
+      this.parameters[0][1] = this.getInnerParameterName();
+    }
+    
+    Dashboards.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
     QueryComponent.makeQuery(this);
-
-    var list = [];
-
-    for(p in this.result){
-      var obj = {};
-      obj.text = this.result[p][0];
-      list.push(obj);
-    }
-
-    // if reloadOnUpdate only update the list
-    if(this.reloadOnUpdate&&this.autoBoxOpt!=undefined)
-    {
-      this.autoBoxOpt.list=list;
-      $(clientSelector.autoBoxOpt.input[0]).trigger("autobox");
-      return;
-    }
-
+  },
+  
+  getTextBoxValue: function(){
+    return this.textbox.val();
+  },
+  
+  getInnerParameterName : function(){
+    return this.parameter + '_textboxValue';
+  },
+  
+  update : function() {
+    
     $("#"+ this.htmlObject).empty();
+    
+    if(this.parameter){
+      Dashboards.setParameter(this.parameter);
+    }
 
     var myself = this;
+    
+    //init parameter
+    if(!Dashboards.getParameterValue(this.getInnerParameterName)){
+      Dashboards.setParameter(this.getInnerParameterName(), '' );
+    }
+
     var processChange = myself.processChange == undefined ? function(objName){
       Dashboards.processChange(objName);
     } : function(objName) {
       myself.processChange();
     };
     var processElementChange = myself.processElementChange == true ? function(value){
-      Dashboards.fireChange(myself.parameter+"_value",value);
+      Dashboards.fireChange(myself.parameter,value);
     } : undefined;
-    if(processElementChange!= undefined)eval(myself.parameter+'_value=""');
     var opt = {
-      list: list,
+      list: function(){
+        var val = myself.textbox.val();
+        if(!(//myself.result.length==0 ||
+            val == '' ||
+           (myself.searchedWord != '' &&
+            ((myself.matchType == "fromStart")?
+            val.indexOf(myself.searchedWord) == 0 :
+            val.indexOf(myself.searchedWord) > -1)))
+           &&
+           val.length >= myself.minTextLenght)
+        {
+          myself.queryServer(val);
+          myself.searchedWord = val;
+        }
+        var list = [];
+        for(p in myself.result){
+          var obj = {};
+          obj.text = myself.result[p][0];
+          list.push(obj);
+        }
+        return list;
+      },
       matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
       processElementChange:  processElementChange,
-      processChange: function(obj,obj_value) {
-        obj.value = obj_value;
+      processChange: function(obj,value) {
+        obj.value = value;
         processChange(obj.name);
       },
-      multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
+      multiSelection: myself.selectMulti == undefined ? false : myself.selectMulti,
       checkValue: myself.checkValue == undefined ? true : myself.checkValue,
       minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
       scrollHeight: myself.scrollHeight,
@@ -1441,56 +1483,8 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       parent: myself
     };
 
-    var html_obj = $("#"+myself.name+"Object");
     this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
-
-    this.addFilter = function(value){
-
-      if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
-        return;
-
-      var childs = html_obj.children().children().children();
-
-      if(!opt.multiSellection){
-        for(i = childs.length;i > 1 ; ){
-          $(childs[i-1]).remove();
-          i= i -1;
-        }
-      }
-
-      if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
-        myself.autoBoxOpt.showApplyButton();
-
-      var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
-      li.append($('<a href="#" class="closebutton"></a>')
-        .bind('click', function(e) {
-          li.remove();
-          e.preventDefault();
-
-          if(!opt.multiSellection)
-            myself.autoBoxOpt.processAutoBoxChange();
-
-          if(myself.autoBoxOpt.applyButton != false)
-            myself.autoBoxOpt.showApplyButton();
-
-        })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
-
-      this.autoBoxOpt.input.after(li);
-    };
-    //have an update function
-    if(myself.autoUpdateFunction)
-    {
-      //have timeout?
-      if(!myself.autoUpdateTimeout)
-      {
-        //no.... set 4 seconds
-        myself.autoUpdateTimeout=4000;
-      }
-      //call the update function every X seconds
-      //the update function is defined in the component by the developer
-      //should do a fire change in the function
-      setInterval(myself.autoUpdateFunction,myself.autoUpdateTimeout);
-    }
+    this.textbox = $('#' + this.htmlObject + ' input');
   },
   getValue : function() {
     return this.value;

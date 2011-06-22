@@ -79,12 +79,12 @@
           .bind('click', function(e) {
               li.remove();
               e.preventDefault();
-			  if(!opt.multiSellection)
+			  if(!opt.multiSelection)
 				opt.processAutoBoxChange(input,opt);
 			  else if(opt.processElementChange!= undefined)
 				opt.processAutoBoxElement();
 			
-			  if(opt.multiSellection && opt.applyButton != false)
+			  if(opt.multiSelection && opt.applyButton != false)
 				 opt.showApplyButton();
 				
           }))
@@ -101,7 +101,7 @@
 		{
 			if(opt.addTextElements){
 				var li;
-				if(opt.multiSellection != true){
+				if(opt.multiSelection != true){
 					count = 0;
 					li = addBox(opt,input, text, name);
 					$("#" +opt.name + "bit-0").replaceWith(li);
@@ -109,7 +109,7 @@
 				else
 					li = addBox(opt,input, text, name);
 
-				if(opt.multiSellection && opt.applyButton != false)
+				if(opt.multiSelection && opt.applyButton != false)
 					opt.showApplyButton();
 					
 				input.after(li);
@@ -129,7 +129,7 @@
 	      for(var i=0; i<vals.length; ++i){
 	        var s=vals[i].innerHTML.match(/^[^<]+/);
 	        if(s){ 
-				if(!opt.multiSellection) 
+				if(!opt.multiSelection) 
 					hash[s]=true; 
 				else
 					hash[s[0]]=true; 
@@ -142,8 +142,10 @@
     }
 	
 	
-  $.fn.autoboxMode=function(multiSellection,container, input, size, opt){
+  $.fn.autoboxMode=function(multiSelection,container, input, size, opt){
     var original=input.val(); var selected=-1; var self=this;
+		
+		
 
     $.data(document.body, "autoboxMode", true);
 
@@ -162,26 +164,27 @@
 			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				var value = $.data(active[0], "originalObject").text;
-				if(!opt.multiSellection || (active[0].childNodes[0].checked || k == KEY.RETURN))
+				if(!opt.multiSelection || (active[0].childNodes[0].checked || k == KEY.RETURN))
 					addText(opt,input,value, opt.name);
-				if(!opt.multiSellection)
+				if(!opt.multiSelection)
 					opt.processAutoBoxChange(input,opt);
 				else if(opt.processElementChange!= undefined)
 					opt.processAutoBoxElement();
 			}
 			
-			if(!opt.multiSellection || k == KEY.RETURN){				
+			if(!opt.multiSelection || k == KEY.RETURN){				
 				$("body").trigger("off.autobox");
 			}
       }
       else if(input.val()){ 
 		var hash = getCurrentValsHash(input,opt);
-		if(!valueMatched)
+		if(!valueMatched){
 			var aux = $(opt.list).filter(function(){valueMatched = this.text == input.val() ? true : valueMatched;});
+		}
 		if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, input.val(), opt.name);
-				if(!opt.multiSellection)
+				if(!opt.multiSelection)
 					opt.processAutoBoxChange(input,opt);
 				else if(opt.processElementChange!= undefined)
 					opt.processAutoBoxElement();
@@ -207,7 +210,7 @@
 
     // If a click bubbles all the way up to the window, close the autobox
     /* $(window).bind("click.autobox", function(){
-	   if(!opt.multiSellection)
+	   if(!opt.multiSelection)
 			$("body").trigger("cancel.autobox");
 	});*/
 
@@ -225,7 +228,7 @@
       selected=$("> *", container).index($(e.target).is('li') ? $(e.target)[0] : $(e.target).parents('li')[0]);
       select();
     }).bind("click.autobox", function(e){
-	  if(opt.multiSellection && e.target.childNodes.length > 0) 
+	  if(opt.multiSelection && e.target.childNodes.length > 0) 
 		 e.target.childNodes[0].checked = true;
 	  $("body").trigger("activate.autobox");
       $.data(document.body, "suppressKey", false);
@@ -259,11 +262,15 @@
       timeout: 500,
       getList: function(input, hash){
           var list=opt.list;
+          if(typeof list == 'function'){
+            list = list();
+          }
+          
           if(hash && opt.addTextElements){ list=$(list).filter(function(){  return !hash[this.text]; }); }
           input.trigger("updateList", [list]);
       },
       template: function(str){ 
-		if(!opt.multiSellection) 
+		if(!opt.multiSelection) 
 			return "<li id=\"listElement\">" + opt.insertText(str) + "</li>";
 		else if(opt.addTextElements)
 			return "<li id=\"listElement\">" +  "<input id=\"listElementCheckBox\" name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
@@ -293,7 +300,7 @@
 			return false;
 		}
 		else
-			return this.text.match(new RegExp(typed), "i");		
+			return this.text.match(new RegExp(typed, "i"));		
 	  },
       wrapper: '<ul ' + (opt.scrollHeight != undefined ? 'style="height:' + opt.scrollHeight + 'px;"' : '')  + 'class="autobox-list"></ul>',
 
@@ -311,7 +318,7 @@
 					var v = vals[i].innerHTML.match(/^[^<]+/);	
 					if(v!= null && value == v ){
 						$(vals[i]).remove();
-						if(this.multiSellection && this.applyButton && this.emptyValues())
+						if(this.multiSelection && this.applyButton && this.emptyValues())
 							this.hideApplyButton();
 						return;
 					}
@@ -352,7 +359,7 @@
 		},
 		
 		processAutoBoxChange: function processAutoBoxChange(){
-			if(this.multiSellection == true){
+			if(this.multiSelection == true){
 				var selectedValues = this.getSelectedValues();
 				this.processChange(this.parent,selectedValues);
 			}
@@ -448,25 +455,29 @@
 				if(hash == null || hash[input.val()] != true){
 					if(opt.checkValue == false){
 						addText(opt,input, input.val(), opt.name);
-						if(!opt.multiSellection)
+						if(!opt.multiSelection)
 							opt.processAutoBoxChange(input,opt)
 						else if(opt.processElementChange!= undefined)
 							opt.processAutoBoxElement();
 					}
 					else{
 						valueMatched = false;
-						$(opt.list).filter(function(){
+						var list = (typeof opt.list == 'function')? opt.list() : opt.list;
+						$(list).filter(function(){
 							valueMatched = this.text == input.val() ? true : valueMatched;
 						});
 						if(opt.checkValue == true && valueMatched){
 							addText(opt,input, input.val(), opt.name);
-							if(!opt.multiSellection)
+							if(!opt.multiSelection){
 								opt.processAutoBoxChange(input,opt)
-							else if(opt.processElementChange!= undefined)
+							}
+							else if(opt.processElementChange!= undefined){
 								opt.processAutoBoxElement();
+							}
 						}
-						else
+						else {
 							addText(opt,input, "", opt.name);
+						}
 					}	
 				}else
 					addText(opt,input, "", opt.name);
@@ -491,7 +502,7 @@
 				})
               .map(function(){
                 var node=$(opt.template(this))[0];
-				if(opt.multiSellection){
+				if(opt.multiSelection){
 					var el = node.childNodes[0];
 					$(el).click(function () { 
 						if(!el.checked){
@@ -515,7 +526,7 @@
               .css({top: offset.top + self.outerHeight(), left: offset.left, width: self.width()})
               .appendTo("body");
 
-            $("body").autoboxMode(opt.multiSellection,container, self, list.length, opt);
+            $("body").autoboxMode(opt.multiSelection,container, self, list.length, opt);
           });
 
           opt.getList(self, getCurrentValsHash(self,opt));
@@ -556,14 +567,14 @@
 	  
 	  var holder;
 	  var classHolder = "autobox-hldr";
-	  if(opt.multiSellection == false || opt.addTextElements == false)
+	  if(opt.multiSelection == false || opt.addTextElements == false)
 		classHolder = "autobox-hldr-2";
 
       holder=$('<ul class="'+ classHolder + '"></ul>');
 	  self.append(holder);
 	  var li = $('<li class="autobox-input"></li>');
 	  holder.append(li.append(input));
-	   if(opt.multiSellection && opt.applyButton != false){
+	   if(opt.multiSelection && opt.applyButton != false){
 		li.append(applyButton[0]);
 		li.append(applyButton[1]);
 	  }
