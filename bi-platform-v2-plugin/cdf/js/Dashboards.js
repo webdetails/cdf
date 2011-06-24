@@ -1218,7 +1218,7 @@ Query = function() {
     (function(args){switch (args.length) {
         case 1:
             var cd = args[0];
-            if (typeof cd.query !== 'undefined') {
+            if (typeof cd.query != 'undefined') {
                 // got a valid legacy cd object
                 _mode = 'Legacy';
                 _query = args[0];
@@ -1229,6 +1229,9 @@ Query = function() {
                 _id = cd.dataAccessId;
                 if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
                   _sortBy = cd.sortBy;
+                }
+                if(cd.pageSize != null){
+                  _pageSize = cd.pageSize;
                 }
             } else {
                 throw 'InvalidQuery';

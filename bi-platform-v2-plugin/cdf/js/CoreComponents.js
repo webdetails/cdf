@@ -1398,17 +1398,16 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     
     if(!this.parameters) this.parameters = [];
     
-    if(this.searchParamName){
-      for(var i=0; i< this.parameters.length;i++){
-        if(this.parameters[i][0] == this.searchParamName){
-          this.parameters[i][1] = this.getInnerParameterName();
-        }
-      }
+    if(this.searchParam){
+      this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
     }
     else if (this.parameters.length > 0){
       this.parameters[0][1] = this.getInnerParameterName();
     }
     
+    if(this.maxResults){
+      this.queryDefinition.pageSize = this.maxResults;
+    }
     Dashboards.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
     QueryComponent.makeQuery(this);
   },
@@ -1447,14 +1446,15 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var opt = {
       list: function(){
         var val = myself.textbox.val();
-        if(!(//myself.result.length==0 ||
-            val == '' ||
-           (myself.searchedWord != '' &&
-            ((myself.matchType == "fromStart")?
-            val.indexOf(myself.searchedWord) == 0 :
-            val.indexOf(myself.searchedWord) > -1)))
-           &&
-           val.length >= myself.minTextLenght)
+        
+        if(val.length >= myself.minTextLenght &&
+           !(val == '' //nothing to search
+             || 
+            ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
+             myself.searchedWord != '' && 
+             ((myself.matchType == "fromStart")? 
+                val.indexOf(myself.searchedWord) == 0 :
+                val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
         {
           myself.queryServer(val);
           myself.searchedWord = val;
@@ -1480,6 +1480,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
       tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
       addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
+      externalApplyButtonId: myself.externalApplyButtonId,
       parent: myself
     };
 
@@ -2017,6 +2018,7 @@ var QueryComponent = BaseComponent.extend({
       object.result = values.resultset != undefined ? values.resultset: values;
       if (typeof values.resultset != "undefined"){
         object.metadata = values.metadata;
+        object.queryInfo = values.queryInfo;
       }
       if (object.resultvar != undefined){
         Dashboards.setParameter(object.resultvar, object.result);
@@ -2034,31 +2036,6 @@ var QueryComponent = BaseComponent.extend({
 
       }
     });
-    //TODO: Transition to Query object still under test
-    
-    //Dashboards.fetchData(cd, object.parameters, function(values) {
-    //  // We need to make sure we're getting data from the right place,
-    //  // depending on whether we're using CDA
-    //  object.result = values.resultset != undefined ? values.resultset: values;
-    //  if (typeof values.resultset != "undefined"){
-    //    object.metadata = values.metadata;
-    //  }
-    //  if (object.resultvar != undefined){
-    //    Dashboards.setParameter(object.resultvar, object.result);
-    //  }
-    //  changedValues = undefined;
-    //  if((typeof(object.postFetch)=='function')){
-    //    changedValues = object.postFetch(values);
-    //  }
-    //  if (changedValues != undefined){
-    //    values = changedValues;
-    //    // (Call this again after postFetch)
-    //    if (object.resultvar != undefined){
-    //      Dashboards.setParameter(object.resultvar, object.result);
-    //    }
-    //
-    //  }
-    //})
 
   }
 }

@@ -535,13 +535,14 @@
     }
 	
 	function createApplyButton(){
+    
       var button=$('<a href="#" class="applybutton" ></a>')
        .bind('click', function(e) {
-			opt.hideApplyButton();
-			//button.hide('slow');
-			$("body").trigger("off.autobox");
-			opt.processAutoBoxChange($(button.parent().children()[0]),opt);
-	   });
+        opt.hideApplyButton();
+        //button.hide('slow');
+        $("body").trigger("off.autobox");
+        opt.processAutoBoxChange($(button.parent().children()[0]),opt);
+       });
 	   
 	   button.attr("title","Click it to Apply");
 	   button.hide();
@@ -557,31 +558,43 @@
 	  
 	 
     function createHolder(self){
-	  var input=createInput();
-	  opt.input = input;
-	  var applyButton;
-	  if(opt.applyButton != false){
-		applyButton	= createApplyButton();
-		opt.applyButton = applyButton[0];
-	  }
-	  
-	  var holder;
-	  var classHolder = "autobox-hldr";
-	  if(opt.multiSelection == false || opt.addTextElements == false)
-		classHolder = "autobox-hldr-2";
-
+      
+      var input=createInput();
+      opt.input = input;
+      var applyButton;
+      if(opt.applyButton != false){
+        applyButton	= createApplyButton();
+        opt.applyButton = applyButton[0];
+      }
+      
+      if(opt.externalApplyButtonId){
+        var button=$('#' + opt.externalApplyButtonId);
+        if (button){
+          button.bind('click', function(e) {
+            $("body").trigger("off.autobox");
+            opt.processAutoBoxChange($(button.parent().children()[0]),opt);
+          });
+        }
+      }
+      
+      var holder;
+      var classHolder = "autobox-hldr";
+      if(opt.multiSelection == false || opt.addTextElements == false){
+        classHolder = "autobox-hldr-2";
+      }
+  
       holder=$('<ul class="'+ classHolder + '"></ul>');
-	  self.append(holder);
-	  var li = $('<li class="autobox-input"></li>');
-	  holder.append(li.append(input));
-	   if(opt.multiSelection && opt.applyButton != false){
-		li.append(applyButton[0]);
-		li.append(applyButton[1]);
-	  }
-		
-	  $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
-	  
-	  return holder;
+      self.append(holder);
+      var li = $('<li class="autobox-input"></li>');
+      holder.append(li.append(input));
+      if(opt.multiSelection && opt.applyButton != false){
+        li.append(applyButton[0]);
+        li.append(applyButton[1]);
+      }
+      
+      $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
+      
+      return holder;
     }
 
     this.each(function(){
