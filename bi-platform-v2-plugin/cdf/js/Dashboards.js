@@ -6,7 +6,7 @@ $.ajaxSetup({
   contentType: "application/x-www-form-urlencoded;charset=UTF-8"
 });
 
-String.prototype.endsWith = function(str){return (this.match(str+"$")==str)};
+String.prototype.endsWith = function(str){return (this.match(str+"$")==str)}
 
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
@@ -50,47 +50,28 @@ if (typeof $.SetImpromptuDefaults == 'function')
     show: 'slideDown'
   });
 
-var Dashboards = {
-  TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
-  TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
-  TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
-  /* globalContext determines if components and params are retrieved
-   * from the current window's object or from the Dashboards singleton
-   */
-  globalContext: true,
-  /* Used to control progress indicator for async mode */
-  runningCalls: 0,
-  components: [],
-  /* Holds the dashboard parameters if globalContext = false */
-  parameters: [],
-  /* measures, in miliseconds, the delay between firing blockUI and
-   * actually updating the dashboard. Necessary for IE/Chrome. Higher
-   * values have better chances of working, but are (obviously) slower
-   */
-  renderDelay: 300,
-  args: [],
-  monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-  /* Reference to current language code . Used in every place where jquery
-   * plugins used in CDF hasm native internationalization support (ex: Datepicker)
-   */
-  i18nCurrentLanguageCode : null,
-  i18nSupport : null  // Reference to i18n objects
-};
+var Dashboards = 
+	{
+		TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
+		TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
+		TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
+		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
+		escapeParameterValues : true,
+		runningCalls: 0, // Used to control progress indicator for async mode
+		components: [],
+		parameters: [], // only used if globalContext = false
+		args: [],
+		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        i18nCurrentLanguageCode : null,  // Reference to current language code . Used in every place where jquery plugins used in CDF hasm native internationalization support (ex: Datepicker)
+        i18nSupport : null  // Reference to i18n objects
+	}
 
 // Log
-Dashboards.log = function(m,type){
+Dashboards.log = function(m){
   if (typeof console != "undefined" ){
-    if (type && console[type]) {
-      console[type]("CDF: " + m);
-    }else if (type === 'exception' &&
-        !console.exception) {
-      console.error(m.stack);
-    }
-    else {
-      console.log("CDF: " + m);
-    }
+    console.log("CDF: " + m);
   }
-};
+}
 
 // REFRESH ENGINE begin
 
@@ -108,7 +89,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       nextRefresh : 0,
       component : null
     };
-  };
+  }
 
   //set global refresh and (re)start interval
   var startGlobalRefresh = function(refreshPeriod){
@@ -120,7 +101,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
     if(globalRefreshPeriod != NO_REFRESH){
       globalTimer = setInterval("Dashboards.refreshEngine.fireGlobalRefresh()",globalRefreshPeriod * 1000);//ToDo: cleaner way to call
     }
-  };
+  }
 
   var clearFromQueue = function(component){
     for (var i = 0; i < refreshQueue.length; i++) {
@@ -129,11 +110,11 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
         i--;
       }
     }
-  };
+  }
 
   var clearQueue = function(){
     if(refreshQueue.length > 0) refreshQueue.splice(0,refreshQueue.length);
-  };
+  }
 
   //binary search for elem's position in coll (nextRefresh asc order)
   var getSortedInsertPosition = function(coll, elem){
@@ -152,32 +133,32 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       }
     }
     return low;
-  };
+  }
   var sortedInsert = function(rtArray,rtInfo){
     var pos = getSortedInsertPosition(rtArray,rtInfo);
     rtArray.splice(pos,0,rtInfo);
-  };
+  }
 
   var stopTimer = function(){
     if (activeTimer != null) {
       clearTimeout(activeTimer);
       activeTimer = null;
     }
-  };
+  }
 
   var restartTimer = function(){
     stopTimer();
     Dashboards.refreshEngine.fireRefresh();
-  };
+  }
 
   var getCurrentTime = function (){
     var date = new Date();
     return date.getTime();
-  };
+  }
 
   var isFirstInQueue = function(component){
     return refreshQueue.length > 0 && refreshQueue[0].component == component;
-  };
+  }
 
   var refreshComponent = function(component){
     //if refresh period is too short, progress indicator will stay in user's face
@@ -186,7 +167,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
   //			Dashboards.runningCalls = 0;
   //			Dashboards.hideProgressIndicator()
   //		}
-  };
+  }
 
   var insertInQueue = function(component){
     var time = getCurrentTime();
@@ -201,7 +182,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       info.component = component;
       sortedInsert(refreshQueue, info);
     }
-  };
+  }
   return {
 
     //set a component's refresh period and clears it from the queue if there;
@@ -224,7 +205,6 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 
     //sets next refresh for given component and inserts it in refreshQueue, restarts timer if needed
     processComponent : function(component){
-      clearFromQueue(component);
       insertInQueue(component);
       if(isFirstInQueue(component)) restartTimer();
       return true;//dbg
@@ -277,7 +257,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       return refreshQueue;
     }
   };
-};
+}
 
 Dashboards.refreshEngine = new Dashboards.RefreshEngine();
 
@@ -285,24 +265,24 @@ Dashboards.refreshEngine = new Dashboards.RefreshEngine();
 
 Dashboards.setGlobalContext = function(globalContext) {
   Dashboards.globalContext = globalContext;
-};
+}
 
 Dashboards.showProgressIndicator = function() {
   Dashboards.blockUIwithDrag();
-};
+}
 
 Dashboards.hideProgressIndicator = function() {
   if(Dashboards.runningCalls <= 0){
     $.unblockUI();
     Dashboards.showErrorTooltip();
   }
-};
+}
 
 Dashboards.incrementRunningCalls = function() {
   Dashboards.runningCalls++ ;
   Dashboards.showProgressIndicator();
 //Dashboards.log("+Running calls incremented to: " + Dashboards.runningCalls);
-};
+}
 
 Dashboards.decrementRunningCalls = function() {
   Dashboards.runningCalls-- ;
@@ -311,7 +291,7 @@ Dashboards.decrementRunningCalls = function() {
     Dashboards.hideProgressIndicator();
     Dashboards.runningCalls = 0; // Just in case
   }
-};
+}
 
 Dashboards.bindControl = function(object) {
 
@@ -340,7 +320,7 @@ Dashboards.bindControl = function(object) {
 	// this will add the methods from the inherited class. Overrides not allowed
 	$.extend(object,objectImpl);
   }
-};
+}
 
 Dashboards.blockUIwithDrag = function() {
     if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
@@ -354,7 +334,7 @@ Dashboards.blockUIwithDrag = function() {
   $("div.blockUI.blockMsg").draggable({
     handle: "#blockUIDragHandle"
   });
-};
+}
 
 //Dashboards.xactionCallback = function(object,str){
 //	$('#'+object.htmlObject).html(str);
@@ -395,8 +375,7 @@ Dashboards.update = function(object) {
       });
     }
   } catch (e) {
-    this.log("Error updating " + object.name +":",'error');
-    this.log(e,'exception');
+    this.log("Error updating " + object.name +": "+ e);
   }
 };
 
@@ -405,7 +384,7 @@ Dashboards.createAndCleanErrorDiv = function(){
     $("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
   }
   $("#"+CDF_ERROR_DIV).empty();
-};
+}
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
@@ -416,7 +395,7 @@ Dashboards.showErrorTooltip = function(){
       showBody: " -- "
     })
   });
-};
+}
 
 Dashboards.getComponent = function(name){
   for (i in this.components){
@@ -451,7 +430,7 @@ Dashboards.registerEvent = function (ev, callback) {
 Dashboards.addArgs = function(url){
   if(url != undefined)
     this.args = getURLParameters(url);
-};
+}
 
 Dashboards.setI18nSupport = function(lc, i18nRef) {
     // Update global reference to i18n objects if needed
@@ -460,15 +439,19 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
         Dashboards.i18nSupport = i18nRef;
     }
 
-};
+}
 
 Dashboards.init = function(components){
+    var myself = this;
     this.loadStorage();
     if ($.isArray(components)) {
         Dashboards.addComponents(components);
     }
     $(function() {
         Dashboards.initEngine();
+        if(typeof myself.postInit == 'function') {
+            myself.postInit();
+        }
     });
 };
 
@@ -478,23 +461,15 @@ Dashboards.initEngine = function(){
   var compCount = components.length;
   Dashboards.incrementRunningCalls();
   Dashboards.createAndCleanErrorDiv();
-  var myself = this;
-  setTimeout(
-    function() {
-      for(var i= 0, len = components.length; i < len; i++){
-        if(components[i].executeAtStart){
-          Dashboards.update(components[i]);
-        }
-      }
-      $(window).trigger('cdfLoaded');
-      if(typeof myself.postInit == 'function') {
-        myself.postInit();
-      }
 
-      Dashboards.decrementRunningCalls();
-    },
-    Dashboards.renderDelay);
+  for(var i= 0, len = components.length; i < len; i++){
+    if(components[i].executeAtStart){
+      this.update(components[i]);
+    }
+  }
+  Dashboards.decrementRunningCalls();
 };
+
 
 Dashboards.resetAll = function(){
   Dashboards.createAndCleanErrorDiv();
@@ -530,22 +505,14 @@ Dashboards.processChange = function(object_name){
   }
 };
 
-/* fireChange must accomplish two things:
- * first, we must change the parameters
- * second, we execute the components that listen for
- * changes on that parameter.
- *
- * Because some browsers won't draw the blockUI widgets
- * until the script has finished, we find the list of
- * components to update, then execute the actual update
- * in a function wrapped in a setTimeout, so the running
- * script has the opportunity to finish.
- */
+/*$().ajaxStart($.blockUI).ajaxStop($.unblockUI);*/
 Dashboards.fireChange = function(parameter, value) {
+  //alert("begin block");
   Dashboards.createAndCleanErrorDiv();
 
+  //alert("Parameter: " + parameter + "; Value: " + value);
   Dashboards.setParameter(parameter, value);
-  var toUpdate = [];
+
   var workDone = false;
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
@@ -556,21 +523,19 @@ Dashboards.fireChange = function(parameter, value) {
             workDone = true;
             Dashboards.incrementRunningCalls();
           }
-          toUpdate.push(this.components[i]);
+          this.update(this.components[i]);
           break;
         }
+      //alert("finished parameter " + j)
       }
     }
   }
-  setTimeout(function() {
-    for (var i = 0; i < toUpdate.length; i++) {
-      Dashboards.update(toUpdate[i]);
-    }
-    if (workDone) {
-      Dashboards.decrementRunningCalls();
-    }
-  }, Dashboards.renderDelay);
+  //alert("finish block");
+  if (workDone) {
+    Dashboards.decrementRunningCalls();
+  }
 };
+
 
 Dashboards.getParameterValue = function (parameterName) {
   if (Dashboards.globalContext) {
@@ -578,7 +543,7 @@ Dashboards.getParameterValue = function (parameterName) {
   } else {
     return Dashboards.parameters[parameterName];
   }
-};
+}
 
 Dashboards.getQueryParameter = function ( parameterName ) {
   // Add "=" to the parameter name (i.e. parameterName=value)
@@ -606,16 +571,20 @@ Dashboards.getQueryParameter = function ( parameterName ) {
 
 Dashboards.setParameter = function(parameterName, parameterValue) {
   if(parameterName == undefined || parameterName == "undefined"){
-    Dashboards.log('Dashboards.setParameter: trying to set undefined!!','warn');
+    Dashboards.log('Dashboards.setParameter: trying to set undefined!!');
     return;  
   }
   if (Dashboards.globalContext) {
     //ToDo: this should really be sanitized!
     eval( parameterName + " = " + JSON.stringify(parameterValue) );
   } else {
-    Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
+  	if(Dashboards.escapeParameterValues) {
+	    Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
+  	} else {
+	    Dashboards.parameters[parameterName] = parameterValue;
+	}
   }
-};
+}
 
 
 Dashboards.post = function(url,obj){
@@ -633,7 +602,7 @@ Dashboards.post = function(url,obj){
   }
   form += '</form>';
   jQuery(form).appendTo('body').submit().remove();
-};
+}
 
 Dashboards.clone = function clone(obj) {
 
@@ -662,7 +631,7 @@ Dashboards.clone = function clone(obj) {
   }
 
   return c;
-};
+}
 
 Dashboards.getArgValue  = function(key)
 {
@@ -673,7 +642,7 @@ Dashboards.getArgValue  = function(key)
   }
 
   return undefined;
-};
+}
 
 Dashboards.ev = function(o){
   return typeof o == 'function'?o():o
@@ -692,11 +661,11 @@ Dashboards.callPentahoAction = function(obj, solution, path, action, parameters,
   else{
     return Dashboards.parseXActionResult(obj,Dashboards.pentahoAction( solution, path, action, parameters, callback ));
   }
-};
+}
 
 Dashboards.urlAction = function ( url, params, func) {
   return Dashboards.executeAjax('xml', url, params, func);
-};
+}
 
 Dashboards.executeAjax = function( returnType, url, params, func ) {
   // execute a url
@@ -737,11 +706,11 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
     return result.responseText;
   }
 
-}; 
+} 
 
 Dashboards.pentahoAction = function( solution, path, action, params, func ) {
   return Dashboards.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
-};
+}
 
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
@@ -816,7 +785,7 @@ Dashboards.getSettingsValue = function(key,value){
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
-  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
+  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead');
   // Detect and handle CDA data sources
   if (cd != undefined && cd.dataAccessId != undefined) {
     for (param in params) {
@@ -837,7 +806,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   else {
     callback([]);
   }
-};
+}
 
 Dashboards.escapeHtml = function(input) {
   var escaped = input
@@ -847,7 +816,7 @@ Dashboards.escapeHtml = function(input) {
     .replace(/'/g,"&#39;")
     .replace(/"/g,"&#34;");
 return escaped;
-};
+}
 // STORAGE ENGINE
 
 // Default object
@@ -862,7 +831,7 @@ Dashboards.loadStorage = function(){
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
 			  $.extend(Dashboards.storage,json);
 		  });
-};
+}
 
 Dashboards.saveStorage = function(){
 
@@ -871,11 +840,11 @@ Dashboards.saveStorage = function(){
 		storageValue: JSON.stringify(Dashboards.storage)
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true){
-				  Dashboards.log("Error saving storage",'error');
+			  if(json.result != true && typeof console != "undefined"){
+				  Dashboards.log("Error saving storage")
 			  }
 		  });
-};
+}
 
 Dashboards.cleanStorage = function(){
 
@@ -883,11 +852,11 @@ Dashboards.cleanStorage = function(){
         action: "delete"
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true){
-				  Dashboards.log("Error deleting storage", 'error');
+			  if(json.result != true && typeof console != "undefined"){
+				  Dashboards.log("Error deleting storage")
 			  }
 		  });
-};
+}
 
 
 /**
@@ -910,7 +879,7 @@ function encode_prepare_arr(value) {
   else{
     return encode_prepare(value);
   }
-};
+}
 
 function encode_prepare( s )
 {
@@ -921,7 +890,7 @@ function encode_prepare( s )
     }
   }
   return s;
-};
+}
 
 var Utf8 = {
 
@@ -1073,10 +1042,6 @@ sprintfWrapper = {
       strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
 
       matchPosEnd = exp.lastIndex;
-      
-      var negative = parseInt(arguments[convCount]) < 0 ? true : false;
-      if(negative == 0) negative = parseFloat(arguments[convCount]) < 0 ? true : false;
-      
       matches[matches.length] = {
         match: match[0],
         left: match[3] ? true : false,
@@ -1085,7 +1050,7 @@ sprintfWrapper = {
         min: match[6] || 0,
         precision: match[8],
         code: match[9] || '%',
-        negative: negative,
+        negative: parseInt(arguments[convCount]) < 0 ? true : false,
         argument: String(arguments[convCount])
       };
     }
@@ -1218,7 +1183,7 @@ Query = function() {
     (function(args){switch (args.length) {
         case 1:
             var cd = args[0];
-            if (typeof cd.query != 'undefined') {
+            if (typeof cd.query !== 'undefined') {
                 // got a valid legacy cd object
                 _mode = 'Legacy';
                 _query = args[0];
@@ -1227,11 +1192,8 @@ Query = function() {
                 _mode = 'CDA';
                 _file = cd.path;
                 _id = cd.dataAccessId;
-                if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+                if (cd.sortBy) {
                   _sortBy = cd.sortBy;
-                }
-                if(cd.pageSize != null){
-                  _pageSize = cd.pageSize;
                 }
             } else {
                 throw 'InvalidQuery';
@@ -1265,26 +1227,24 @@ Query = function() {
         var queryDefinition = {};
         var callback = (outsideCallback ? outsideCallback : _callback);
         if (_mode == 'CDA') {
-          for (var param in _params) {
-            if(_params.hasOwnProperty(param)) {
-              var value = Dashboards.getParameterValue(_params[param][1]);
-              var name = _params[param][0];
-              if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-                //special case where single element will wrongly be treated as a parseable array by cda
-                value = doCsvQuoting(value[0],';');
+            for (var param in _params) {
+              if(_params.hasOwnProperty(param)) {
+		var value = Dashboards.getParameterValue(_params[param][1]);
+		var name = _params[param][0];
+		if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+		  //special case where single element will wrongly be treated as a parseable array by cda
+		  value = doCsvQuoting(value[0],';');
+		}
+		queryDefinition['param' + name] = value;
               }
-              //else will not be correctly handled for functions that return arrays
-              if (typeof value == 'function') value = value();
-              queryDefinition['param' + name] = value;
             }
-          }
-          queryDefinition.path = _file;
-          queryDefinition.dataAccessId = _id;
-          queryDefinition.pageSize = _pageSize;
-          queryDefinition.pageStart = _page;
-          queryDefinition.sortBy = _sortBy;
-          url = CDA_PATH;
-          // Assemble parameters
+            queryDefinition.path = _file;
+            queryDefinition.dataAccessId = _id;
+            queryDefinition.pageSize = _pageSize;
+            queryDefinition.pageStart = _page;
+            queryDefinition.sortBy = _sortBy;
+            url = CDA_PATH;
+            // Assemble parameters
         } else if (_mode == 'Legacy') {
             queryDefinition = _query;
             url = LEGACY_QUERY_PATH;
@@ -1395,15 +1355,10 @@ Query = function() {
         newSort = sortBy.toUpperCase().split(',').filter(function(e){return e !== "";});
       } else if (sortBy instanceof Array) {
         newSort = sortBy.map(function(d){return d.toUpperCase();});
-        /* We also need to validate that each individual term is valid*/
-        var invalidEntries = newSort.filter(function(e){return !e.match("^[0-9]+[adAD]?,?$")});
-        if ( invalidEntries.length > 0) {
-            throw "InvalidSortExpression";
-        }
       }
       
       /* We check whether the parameter is the same as before,
-       * and notify the caller on whether it changed
+       * and notify the user whether it changed
        */
       var same;
       if (newSort instanceof Array) {
