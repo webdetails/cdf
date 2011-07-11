@@ -946,6 +946,10 @@ var TextInputComponent = BaseComponent.extend({
   }
 });
 
+
+// Start by setting a sane i18n default to datepicker
+$(function(){$.datepicker.setDefaults($.datepicker.regional[''])});
+
 var DateInputComponent = BaseComponent.extend({
   update: function(){
     var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
@@ -964,14 +968,6 @@ var DateInputComponent = BaseComponent.extend({
 
     $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
     $(function(){
-      // Add JQuery DatePicker standard localization support only if the dashboard is localized
-      // Reset to standard language
-      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        $.datepicker.setDefaults($.datepicker.regional['']);
-      } else if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
-        // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
-        $.datepicker.setDefaults($.datepicker.regional['']);
-      }
       $("#" + myself.htmlObject + " input").datepicker({
         dateFormat: format,
         changeMonth: true,
@@ -1015,10 +1011,6 @@ var DateRangeInputComponent = BaseComponent.extend({
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
     $(function(){
-      // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
-      if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
-        $.datepicker.setDefaults($.datepicker.regional['']);
-      }
       $("#" + myself.htmlObject + " input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
