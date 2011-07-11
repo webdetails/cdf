@@ -1424,8 +1424,9 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     
     $("#"+ this.htmlObject).empty();
     
+    var initialValue = null;
     if(this.parameter){
-      Dashboards.setParameter(this.parameter);
+      initialValue = Dashboards.getParameterValue(this.parameter);
     }
 
     var myself = this;
@@ -1443,13 +1444,18 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var processElementChange = myself.processElementChange == true ? function(value){
       Dashboards.fireChange(myself.parameter,value);
     } : undefined;
+    
+    var selected
+    
     var opt = {
       list: function(){
         var val = myself.textbox.val();
         
         if(val.length >= myself.minTextLenght &&
            !(val == '' //nothing to search
-             || 
+             ||
+             val == myself.searchedWord
+             ||
             ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
              myself.searchedWord != '' && 
              ((myself.matchType == "fromStart")? 
@@ -1481,10 +1487,16 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
       addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
       externalApplyButtonId: myself.externalApplyButtonId,
+  //    selectedValues: initialValue,
       parent: myself
     };
 
+
     this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
+    
+    //setInitialValue
+    this.autoBoxOpt.setInitialValue(this.htmlObject, initialValue, this.name);
+    
     this.textbox = $('#' + this.htmlObject + ' input');
   },
   getValue : function() {
