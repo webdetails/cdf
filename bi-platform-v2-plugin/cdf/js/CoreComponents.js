@@ -204,7 +204,7 @@ var XactionComponent = BaseComponent.extend({
           Dashboards.incrementRunningCalls();
         }
         iframe.load(function(){
-          if (this.contentDocument.body.innerHTML){
+          if (this.contentWindow.document.body.innerHTML){
             myself.loading = false;
             Dashboards.decrementRunningCalls();
           }
