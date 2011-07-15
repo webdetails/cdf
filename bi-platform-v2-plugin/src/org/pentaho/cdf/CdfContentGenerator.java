@@ -210,7 +210,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
             service = PentahoSystem.getUserDetailsRoleListService();
         }
 
-        context.put("roles", service.getRolesForUser(userSession.getName()));
+        String userName = userSession.getName();
+        if(!userName.equals("anonymousUser")){
+          context.put("roles", service.getRolesForUser(userName));
+        }
 
         JSONObject params = new JSONObject();
 
