@@ -8,6 +8,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
+import org.apache.commons.io.IOUtils;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -211,8 +212,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         String userName = userSession.getName();
-        if(!userName.equals("anonymousUser")){
-          context.put("roles", service.getRolesForUser(userName));
+        if (!userName.equals("anonymousUser")) {
+            context.put("roles", service.getRolesForUser(userName));
         }
 
         JSONObject params = new JSONObject();
@@ -311,7 +312,14 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         final String resource = requestParams.getStringParameter("resource", null); //$NON-NLS-1$
         contentItem.setMimeType(MimeHelper.getMimeTypeFromFileName(urlPath));
-        getSolutionFile(resource, out, this);
+        String[] allowedRoots = new String[1];
+        allowedRoots[0] = PentahoSystem.getApplicationContext().getSolutionPath(PLUGIN_NAME);
+        final HttpServletResponse response = (HttpServletResponse) parameterProviders.get("path").getParameter("httpresponse");
+        try {
+            getSolutionFile(resource, out, this);
+        } catch (SecurityException e) {
+            response.sendError(response.SC_FORBIDDEN);
+        }
     }
 
     private void renderHtml(final OutputStream out, final IParameterProvider requestParams) throws Exception {
@@ -738,6 +746,15 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
 
     public void getSolutionFile(final String resourcePath, final OutputStream out, final ILogger logger) throws Exception {
+        final IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
+        final String formats = resLoader.getPluginSetting(this.getClass(), "resources/downloadable-formats");
+
+        List allowedFormats = Arrays.asList(formats.split(","));
+        String extension = resourcePath.replaceAll(".*\\.(.*)", "$1");
+        if (allowedFormats.indexOf(extension) < 0) {
+            // We can't provide this type of file
+            throw new SecurityException("Not allowed");
+        }
         final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
         final InputStream in = repository.getResourceInputStream(resourcePath, true);
         final byte[] buff = new byte[4096];
@@ -773,8 +790,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
 
     private void getHeaders(final String dashboardContent, final IParameterProvider requestParams, final OutputStream out) throws Exception {
-        
-        
+
+
         final String dashboardType = requestParams.getStringParameter("dashboardType", "blueprint");
         final String suffix;
         final File file;
