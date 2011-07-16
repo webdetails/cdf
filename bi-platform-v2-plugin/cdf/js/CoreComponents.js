@@ -1220,7 +1220,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
     var myArray = this.getValuesArray();
-    var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
+    var cssWrapperClass= "pentaho-toggle-button pentaho-toggle-button-up "+ ((this.verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
     selectHTML = "";
     var firstVal;
 
@@ -1232,6 +1232,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx];
       var label = myArray[i][lblIdx];
+      var extraCss = this.getExtraCss(i,len,this.verticalOrientation);
 
       if(value != null) {
         value = value.replace('"','&quot;' );
@@ -1240,11 +1241,10 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         label = label.replace('"','&quot;' );
       }
 
-      selectHTML += "<div class='"+cssWrapperClass+"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
+      selectHTML += "<div class='" + cssWrapperClass + extraCss +"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
       this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><button name='" + this.name + "' value='" + value + "'> ";
       selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
 
-      if (i == 0) firstVal = value;
     }
 
     // update the placeholder
@@ -1260,7 +1260,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     if(currentVal instanceof Array) {
       currentValArray = currentVal;
     } else {
-      currentValArray = currentVal.split("|");
+      currentValArray = currentVal.toString().split("|");
     }
 
     if(currentVal == null && this.parameter){
@@ -1296,6 +1296,20 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       //select first value
       MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
     }
+
+    // set up hovering
+    $(".pentaho-toggle-button").hover(function() {
+      $(this).addClass("pentaho-toggle-button-up-hovering");
+    }, function() {
+      $(this).removeClass("pentaho-toggle-button-up-hovering");
+    });
+    // set up hovering when inner button is hovered
+    $(".pentaho-toggle-button button").hover(function() {
+      $(this).parent().addClass("pentaho-toggle-button-up-hovering");
+    }, function() {
+      // don't remove it, since it's inside the outer div it will handle that
+    });
+
   },
 
   getValue: function(){
@@ -1322,10 +1336,10 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   getSelecetedCss: function(verticalOrientation) {
-    return "buttonWrapperPressed "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+    return "pentaho-toggle-button pentaho-toggle-button-down "+ ((verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
   },
   getUnselectedCss: function(verticalOrientation) {
-    return "buttonWrapper "+ ((verticalOrientation)? "vertical" : "horizontal-button");
+    return "pentaho-toggle-button pentaho-toggle-button-up "+ ((verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
   },
 
   //static MultiButtonComponent.prototype.clickButton
@@ -1349,16 +1363,16 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         }
       }
       if (disable){
-        buttons[index].parentNode.className = cssWrapperClass;
+        buttons[index].parentNode.className = cssWrapperClass + this.getExtraCss(index,buttons.length,verticalOrientation);
       } else {
-        buttons[index].parentNode.className = cssWrapperClassSelected;
+        buttons[index].parentNode.className = cssWrapperClassSelected + this.getExtraCss(index,buttons.length,verticalOrientation);
         this.indexes[name].push(index);
       }
     }
     else {//de-select old, select new
       this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
-      buttons[index].parentNode.className = cssWrapperClassSelected;
+      buttons[index].parentNode.className = cssWrapperClassSelected + this.getExtraCss(index,buttons.length,verticalOrientation);
     }
     if(!updateUIOnly){
       this.callAjaxAfterRender(name);
@@ -1369,10 +1383,24 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var buttons = $("#" + htmlObject + " button");
     var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
     for(var i = 0; i < buttons.length; i++){
-      buttons[i].parentNode.className = cssWrapperClass;
+      buttons[i].parentNode.className = cssWrapperClass + this.getExtraCss(i,buttons.length,verticalOrientation);
     }
 
     this.indexes[name] = [];
+  },
+
+  getExtraCss: function(index, count, verticalOrientation) {
+    var css = "";
+    if (index == 0 && count == 1) {
+      // both first & last
+      return " pentaho-toggle-button-single";
+    }
+    if (index == 0) {
+      css += " "+ ((verticalOrientation) ? " pentaho-toggle-button-vertical-first" : " pentaho-toggle-button-horizontal-first");
+    } else if (index == count-1) {
+      css += " "+ ((verticalOrientation) ? " pentaho-toggle-button-vertical-last" : " pentaho-toggle-button-horizontal-last");
+    }
+    return css;
   },
 
   //static MultiButtonComponent.prototype.getSelectedIndex
