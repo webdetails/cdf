@@ -1241,9 +1241,10 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         label = label.replace('"','&quot;' );
       }
 
+      // PDB-1098 - Changing to use hidden input rather than button. IE7 does not allow different values and display text. it always uses the display text
       selectHTML += "<div class='" + cssWrapperClass + extraCss +"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
-      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><button name='" + this.name + "' value='" + value + "'> ";
-      selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
+      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><input type='hidden' name='" + this.name + "' value='" + value + "'> ";
+      selectHTML += "</input>" + label + "</div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
 
     }
 
@@ -1332,7 +1333,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   getValueByIdx: function(idx){
-    return $("#" + this.htmlObject + " button")[idx].value;
+    return $("#" + this.htmlObject + " input[type='hidden']")[idx].value;
   },
 
   getSelecetedCss: function(verticalOrientation) {
@@ -1349,7 +1350,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
     var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
-    var buttons = $("#" + htmlObject + " button");
+    var buttons = $("#" + htmlObject + " input[type='hidden']");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
       else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
@@ -1380,7 +1381,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
-    var buttons = $("#" + htmlObject + " button");
+    var buttons = $("#" + htmlObject + " input[type='hidden']");
     var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
     for(var i = 0; i < buttons.length; i++){
       buttons[i].parentNode.className = cssWrapperClass + this.getExtraCss(i,buttons.length,verticalOrientation);
@@ -2364,4 +2365,3 @@ var FreeformComponent = BaseComponent.extend({
     this.customfunction(this.parameters || []);
   }
 })
-
