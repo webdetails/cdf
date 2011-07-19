@@ -1258,7 +1258,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var isSelected = false;
 
     var currentValArray;
-    if(currentVal instanceof Array) {
+    if(typeof(currentVal) == "object" && currentVal.join ) {
       currentValArray = currentVal;
     } else {
       currentValArray = currentVal.toString().split("|");
