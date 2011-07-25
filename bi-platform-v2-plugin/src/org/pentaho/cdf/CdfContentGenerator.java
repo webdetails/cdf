@@ -1,6 +1,7 @@
 package org.pentaho.cdf;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -8,7 +9,6 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
-import org.apache.commons.io.IOUtils;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -108,6 +108,18 @@ public class CdfContentGenerator extends BaseContentGenerator {
                 RELATIVE_URL = ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest")).getContextPath();
             } else {
                 RELATIVE_URL = PentahoSystem.getApplicationContext().getBaseUrl();
+                /* If we detect an empty string, things will break.
+                 * If we detect an absolute url, things will *probably* break.
+                 * In either of these cases, we'll resort to Catalina's context,
+                 * and its getContextPath() method for better results.
+                 */
+                if ("".equals(RELATIVE_URL) || RELATIVE_URL.matches("^http://.*")) {
+                    Object context = PentahoSystem.getApplicationContext().getContext();
+                    Method getContextPath = context.getClass().getMethod("getContextPath", null);
+                    if (getContextPath != null) {
+                        RELATIVE_URL = getContextPath.invoke(context, null).toString();
+                    }
+                }
             }
 
             if (RELATIVE_URL.endsWith("/")) {
