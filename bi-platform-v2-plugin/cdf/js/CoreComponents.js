@@ -320,7 +320,8 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 
 var JFreeChartComponent = BaseComponent.extend({
   update : function() {
-    this.callPentahoAction("jfreechart.xaction");
+    var xactionFile = (this.chartDefinition.queryType == 'cda')? "jfreechart-cda.xaction" : "jfreechart.xaction";
+    this.callPentahoAction(xactionFile);
   },
 
   getParameters: function() {
@@ -387,10 +388,12 @@ var JFreeChartComponent = BaseComponent.extend({
     Dashboards.callPentahoAction(myself,"cdf", "components", action, this.getParameters(),function(jXML){
 
       if(jXML != null){
-        if(myself.chartDefinition.caption != undefined)
+        if(myself.chartDefinition.caption != undefined){
           myself.buildCaptionWrapper($(jXML.find("ExecuteActivityResponse:first-child").text()),action);
-        else
+        }
+        else {
           $('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+        }
       }
       Dashboards.decrementRunningCalls();
 
@@ -400,10 +403,11 @@ var JFreeChartComponent = BaseComponent.extend({
   buildCaptionWrapper: function(chart,cdfComponent){
 
     var exportFile = function(type,cd){
+      var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
       var obj = $.extend({
         solution: "cdf",
         path: "components",
-        action:"jtable.xaction",
+        action: xactionFile,
         exportType: type
       },cd);
       Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj);
@@ -580,12 +584,10 @@ var DialComponent = JFreeChartComponent.extend({
       alert("Fatal - No chartDefinition passed");
       return;
     }
+    
+    cd.chartType = 'DialChart';
 
     var intervals = cd.intervals;
-    if (intervals == undefined){
-      alert("Fatal - No intervals passed");
-      return;
-    }
 
     var colors = cd.colors;
     if(colors != undefined && intervals.length != colors.length){
@@ -593,9 +595,10 @@ var DialComponent = JFreeChartComponent.extend({
       return;
     }
 
-    this.callPentahoAction("jfreechartdial.xaction");
+    this.callPentahoAction(cd.queryType == 'cda' ? "jfreechartdial-cda.xaction" : "jfreechartdial.xaction");
 
   }
+  
 });
 
 var OpenFlashChartComponent = JFreeChartComponent.extend({

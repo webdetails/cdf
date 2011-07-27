@@ -357,11 +357,6 @@ Dashboards.blockUIwithDrag = function() {
   });
 };
 
-//Dashboards.xactionCallback = function(object,str){
-//	$('#'+object.htmlObject).html(str);
-//	Dashboards.runningCalls--;
-//}
-
 Dashboards.update = function(object) {
   try {
     if(!(typeof(object.preExecution)=='undefined')){
@@ -833,7 +828,9 @@ Dashboards.fetchData = function(cd, params, callback) {
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.post(webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction", cd,
+    var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
+  
+    $.post(webAppPath + "/ViewAction?solution=cdf&path=components&action=" + xactionFile, cd,
       function(result) {
         callback(result.values); 
       },'json');
