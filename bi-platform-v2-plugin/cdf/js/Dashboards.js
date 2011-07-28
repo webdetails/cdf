@@ -859,7 +859,8 @@ Dashboards.storage = {};
 Dashboards.loadStorage = function(){
 
       var args = {
-        action: "read"
+        action: "read",
+        _: (new Date()).getTime()
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
 			  $.extend(Dashboards.storage,json);
