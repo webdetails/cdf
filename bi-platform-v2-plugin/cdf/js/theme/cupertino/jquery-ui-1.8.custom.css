@@ -570,3 +570,43 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
  */
 .ui-progressbar { height:2em; text-align: left; }
 .ui-progressbar .ui-progressbar-value {margin: -1px; height:100%; }
+
+/**
+ * MultiButtonComponent default style (not in original theme)
+ **/
+
+.pentaho-toggle-button
+{
+	cursor: pointer;
+	display: inline-block;
+	margin-right: 0.1em;
+	overflow: visible;
+	padding: 4px;
+	position: relative;
+	text-align: center;
+	border-radius: 6px 6px 6px 6px;
+}
+
+.pentaho-toggle-button-down
+{
+	background: url("images/ui-bg_glass_50_3baae3_1x400.png") repeat-x scroll 50% 50% #3BAAE3;
+	border: 1px solid #2694E8;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+
+.pentaho-toggle-button-up
+{
+	background: url("images/ui-bg_glass_80_d7ebf9_1x400.png") repeat-x scroll 50% 50% #D7EBF9;
+	border: 1px solid #AED0EA;
+	color: #2779AA;
+	font-weight: bold;
+}
+
+.pentaho-toggle-button-up:hover
+{
+	background: url("images/ui-bg_glass_100_e4f1fb_1x400.png") repeat-x scroll 50% 50% #E4F1FB;
+	border: 1px solid #74B2E2;
+	color: #0070A3;
+	font-weight: bold;
+}
