@@ -254,7 +254,7 @@ var SelectBaseComponent = BaseComponent.extend({
     var isSelected = false;
 
     var currentValArray = [];
-    if(currentVal instanceof Array) {
+    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
       currentValArray = currentVal.split("|");
@@ -1137,7 +1137,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     var isSelected = false;
 
     var currentValArray = [];
-    if(currentVal instanceof Array) {
+    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
       currentValArray = currentVal.split("|");
@@ -1261,7 +1261,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var isSelected = false;
 
     var currentValArray;
-    if(typeof(currentVal) == "object" && currentVal.join ) {
+    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else {
       currentValArray = currentVal.toString().split("|");
