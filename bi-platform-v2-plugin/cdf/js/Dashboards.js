@@ -860,7 +860,7 @@ Dashboards.loadStorage = function(){
 
       var args = {
         action: "read",
-        _: (new Date()).getTime()
+        _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
 			  $.extend(Dashboards.storage,json);
@@ -871,7 +871,8 @@ Dashboards.saveStorage = function(){
 
       var args = {
         action: "store",
-		storageValue: JSON.stringify(Dashboards.storage)
+	storageValue: JSON.stringify(Dashboards.storage),
+        _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
       };
 	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
 			  if(json.result != true){
