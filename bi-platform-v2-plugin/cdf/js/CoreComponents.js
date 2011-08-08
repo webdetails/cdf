@@ -1296,7 +1296,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         }
       }
     }
-    if(!foundDefault && !this.isMultiple && myArray.length > 0){
+    if(((!foundDefault && !this.isMultiple) || (!foundDefault && this.isMultiple && this.defaultIfEmpty)) && myArray.length > 0){
       //select first value
       MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
     }
