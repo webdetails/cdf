@@ -1243,6 +1243,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       if(label != null) {
         label = label.replace('"','&quot;' );
       }
+      if(i == 0){
+        firstVal = value;
+      }
 
       // PDB-1098 - Changing to use hidden input rather than button. IE7 does not allow different values and display text. it always uses the display text
       selectHTML += "<div class='" + cssWrapperClass + extraCss +"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
@@ -1265,11 +1268,6 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       currentValArray = currentVal;
     } else {
       currentValArray = currentVal.toString().split("|");
-    }
-
-    if(currentVal == null && this.parameter){
-      Dashboards.setParameter(this.parameter, firstVal);
-      currentVal = firstVal;
     }
 
     var foundDefault = false;
@@ -1298,6 +1296,10 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     }
     if(((!foundDefault && !this.isMultiple) || (!foundDefault && this.isMultiple && this.defaultIfEmpty)) && myArray.length > 0){
       //select first value
+      if((currentVal == null || currentVal == "" || (typeof(currentVal) == "object" && currentVal.length == 0)) && this.parameter){
+        Dashboards.fireChange(this.parameter, (this.isMultiple) ? [firstVal] : firstVal);
+      }
+
       MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
     }
 
