@@ -1159,6 +1159,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     if(!hasCurrentVal && this.defaultIfEmpty){
       currentValArray = [myArray[0][vid]];
 
+      this.currentVal = currentValArray;
       Dashboards.setParameter(this.parameter,currentValArray);
       Dashboards.processChange(this.name);
     }
@@ -1195,6 +1196,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     selectHTML += "</ul>"
     // update the placeholder
     $("#" + this.htmlObject).html(selectHTML);
+    this.currentVal = null;
   },
   callAjaxAfterRender: function(name){
     setTimeout(function(){
@@ -1205,17 +1207,25 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 
 var RadioComponent = ToggleButtonBaseComponent.extend({
   getValue : function() {
-    return $("#"+this.htmlObject + " ."+this.name+":checked").val()
+    if (this.currentVal != 'undefined' && this.currentVal != null) {
+      return this.currentVal;
+    } else {
+      return $("#"+this.htmlObject + " ."+this.name+":checked").val()
+    }
   }
 });
 
 var CheckComponent = ToggleButtonBaseComponent.extend({
   getValue : function() {
-    var a = new Array()
-    $("#"+this.htmlObject + " ."+this.name + ":checked").each(function(i,val){
-      a.push($(this).val());
-    });
-    return a;
+    if (this.currentVal != 'undefined' && this.currentVal != null) {
+      return this.currentVal;
+    } else {
+      var a = new Array()
+      $("#"+this.htmlObject + " ."+this.name + ":checked").each(function(i,val){
+        a.push($(this).val());
+      });
+      return a;
+    }
   }
 });
 
