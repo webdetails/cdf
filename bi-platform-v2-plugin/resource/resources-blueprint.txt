@@ -8,7 +8,6 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.ui.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.corner.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.bgiframe.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/jquery.dimensions.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.jdMenu.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.positionBy.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.tooltip.js,\
