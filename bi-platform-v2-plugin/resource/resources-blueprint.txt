@@ -27,7 +27,8 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/json.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js
+@RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js
 
 commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.tooltip.css,\
@@ -39,6 +40,7 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/blueprint/screen.css
 
 

@@ -240,6 +240,9 @@ var SelectBaseComponent = BaseComponent.extend({
         selectHTML += " size='" + myArray.length + "'";
       }
     }
+    if (this.externalPlugin == "chosen") {
+      selectHTML += " class='chzn-select'";
+    }
     selectHTML += ">";
     var firstVal,
     currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
@@ -284,6 +287,9 @@ var SelectBaseComponent = BaseComponent.extend({
     selectHTML += "</select>";
 
     ph.html(selectHTML);
+    if( this.externalPlugin == "chosen" ){ 
+      ph.find("select.chzn-select").chosen(); 
+    }
 
     /* If the current value for the parameter is invalid or empty, we need
      * to pick a sensible default. If there is a defaultIfEmpty value,
