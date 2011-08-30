@@ -1551,8 +1551,13 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
 var JpivotComponent = BaseComponent.extend({
   update : function() {
-    // Build IFrame and set url
-    var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
+    //to be backwards compatible set default value for iframeScolling
+    // also added 20px 
+	if(this.iframeScrolling == undefined){
+		this.iframeScrolling="no";
+	}
+     // Build IFrame and set url
+    var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
     jpivotHTML += webAppPath + "/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
 
     // Add args
