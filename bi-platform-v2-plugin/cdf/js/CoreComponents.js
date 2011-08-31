@@ -2164,7 +2164,10 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
 var ButtonComponent = BaseComponent.extend({
   update : function() {
-    $("<button type='button'/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
+    var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", this.expression);
+    if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
+      b.button();
+    b.appendTo($("#"+ this.htmlObject).empty());
   }
 });
 
