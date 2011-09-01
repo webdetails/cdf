@@ -1239,6 +1239,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
     var myArray = this.getValuesArray();
+    this.cachedArray = myArray;
     var cssWrapperClass= "pentaho-toggle-button pentaho-toggle-button-up "+ ((this.verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
     selectHTML = "";
     var firstVal;
@@ -1248,32 +1249,36 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
     if (this.isMultiple == undefined) this.isMultiple = false;
 
-    for (var i = 0, len = myArray.length; i < len; i++){
-      var value = myArray[i][valIdx];
-      var label = myArray[i][lblIdx];
-      var extraCss = this.getExtraCss(i,len,this.verticalOrientation);
+    var ph = $("<div>");
 
-      if(value != null) {
-        value = value.replace('"','&quot;' );
-      }
-      if(label != null) {
-        label = label.replace('"','&quot;' );
-      }
+    for (var i = 0, len = myArray.length; i < len; i++){
+      var value = myArray[i][valIdx],
+        label = myArray[i][lblIdx],
+        classes = cssWrapperClass + this.getExtraCss(i,len,this.verticalOrientation),
+        selector;
+
+      value = (value == null ? null : value.replace('"','&quot;' ));
+      label = (label == null ? null : label.replace('"','&quot;' ));
+
       if(i == 0){
         firstVal = value;
       }
 
-      // PDB-1098 - Changing to use hidden input rather than button. IE7 does not allow different values and display text. it always uses the display text
-      selectHTML += "<div class='" + cssWrapperClass + extraCss +"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
-      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><input type='hidden' name='" + this.name + "' value='" + value + "'> ";
-      selectHTML += "</input>" + label + "</div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
-
+      selectHTML = "<div class='" + classes +"'><button name='" + this.name + "'>" + label + "</button  >" +"</div>";
+      selector = $(selectHTML);
+      // We wrap the click handler in a self-executing function so that we can capture 'i'.
+      var myself = this;
+      (function(index){ selector.click(function(){
+        MultiButtonComponent.prototype.clickButton(myself.htmlObject, myself.name, index, myself.isMultiple, myself.verticalOrientation);
+      });}(i));
+      ph.append(selector);
+      if (!(this.separator == undefined || this.separator == null || this.separator == "null") && i != myArray.length - 1) {
+        ph.append(this.separator);
+      }
     }
 
-    // update the placeholder
-    var ph = $("#" + this.htmlObject);
-    ph.html(selectHTML);
-
+    ph.appendTo($("#" + this.htmlObject).empty());
+    
     //default
     var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
@@ -1354,7 +1359,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   getValueByIdx: function(idx){
-    return $("#" + this.htmlObject + " input[type='hidden']")[idx].value;
+    return this.cachedArray[idx][this.valueAsId ? 1 : 0];
   },
 
   getSelecetedCss: function(verticalOrientation) {
@@ -1371,7 +1376,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
     var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
-    var buttons = $("#" + htmlObject + " input[type='hidden']");
+    var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
       else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
@@ -1402,7 +1407,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
-    var buttons = $("#" + htmlObject + " input[type='hidden']");
+    var buttons = $("#" + htmlObject + " button");
     var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
     for(var i = 0; i < buttons.length; i++){
       buttons[i].parentNode.className = cssWrapperClass + this.getExtraCss(i,buttons.length,verticalOrientation);
