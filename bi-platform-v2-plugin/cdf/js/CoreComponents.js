@@ -1721,8 +1721,16 @@ var TableComponent = BaseComponent.extend({
     // General documentation here: http://datatables.net
     var myself = this,
     cd = this.chartDefinition,
-    extraOptions = {},
-    dtData0 = TableComponent.getDataTableOptions(cd),
+    extraOptions = {};
+    
+    // Set defaults for headers / types
+    if(typeof cd.colHeaders === "undefined" || cd.colHeaders.length == 0)
+      cd.colHeaders = json.metadata.map(function(i){return i.colName});
+
+    if(typeof cd.colTypes === "undefined" || cd.colTypes.length == 0)
+      cd.colTypes = json.metadata.map(function(i){return i.colType.toLowerCase()});
+
+    var dtData0 = TableComponent.getDataTableOptions(cd),
     dtData;
 
     // Build a default config from the standard options
