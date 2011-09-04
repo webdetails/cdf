@@ -6,7 +6,9 @@ $.ajaxSetup({
   contentType: "application/x-www-form-urlencoded;charset=UTF-8"
 });
 
-String.prototype.endsWith = function(str){return (this.match(str+"$")==str)};
+String.prototype.endsWith = function(str){
+  return (this.match(str+"$")==str)
+};
 
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
@@ -84,7 +86,7 @@ Dashboards.log = function(m,type){
     if (type && console[type]) {
       console[type]("CDF: " + m);
     }else if (type === 'exception' &&
-        !console.exception) {
+      !console.exception) {
       console.error(m.stack);
     }
     else {
@@ -338,16 +340,16 @@ Dashboards.bindControl = function(object) {
   if (typeof objectImpl == 'undefined'){
     alert ("Object type " + object["type"] + " can't be mapped to a valid class");
   } else {
-	// this will add the methods from the inherited class. Overrides not allowed
-	$.extend(object,objectImpl);
+    // this will add the methods from the inherited class. Overrides not allowed
+    $.extend(object,objectImpl);
   }
 };
 
 Dashboards.blockUIwithDrag = function() {
-    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        // If i18n support is enabled process the message accordingly
-        $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
-    }
+  if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+    // If i18n support is enabled process the message accordingly
+    $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
+  }
 
   $.blockUI();
   var handle = $('<div id="blockUIDragHandle" style="cursor: pointer; width: 170px; -webkit-border-radius: 5px; -moz-border-radius: 5px; background-color: rgba(0,0,0,0.25);" align="right"><a style="padding-right: 5px; text-decoration: none; color: black; font-weight: bold; font-color: black; font-size: 8pt" href="javascript:$.unblockUI()" title="Click to unblock">X</a></div>')
@@ -438,10 +440,10 @@ Dashboards.addComponents = function(components) {
 };
 
 Dashboards.registerEvent = function (ev, callback) {
-    if (typeof this.events == 'undefined') {
-        this.events = {};
-    }
-    this.events[ev] = callback;
+  if (typeof this.events == 'undefined') {
+    this.events = {};
+  }
+  this.events[ev] = callback;
 };
 
 Dashboards.addArgs = function(url){
@@ -450,22 +452,22 @@ Dashboards.addArgs = function(url){
 };
 
 Dashboards.setI18nSupport = function(lc, i18nRef) {
-    // Update global reference to i18n objects if needed
-    if (i18nRef !== "undefined" && lc !== "undefined") {
-        Dashboards.i18nCurrentLanguageCode = lc;
-        Dashboards.i18nSupport = i18nRef;
-    }
+  // Update global reference to i18n objects if needed
+  if (i18nRef !== "undefined" && lc !== "undefined") {
+    Dashboards.i18nCurrentLanguageCode = lc;
+    Dashboards.i18nSupport = i18nRef;
+  }
 
 };
 
 Dashboards.init = function(components){
-    this.loadStorage();
-    if ($.isArray(components)) {
-        Dashboards.addComponents(components);
-    }
-    $(function() {
-        Dashboards.initEngine();
-    });
+  this.loadStorage();
+  if ($.isArray(components)) {
+    Dashboards.addComponents(components);
+  }
+  $(function() {
+    Dashboards.initEngine();
+  });
 };
 
 
@@ -520,7 +522,9 @@ Dashboards.processChange = function(object_name){
     var preChangeResult = object.preChange(value);
     value = preChangeResult != undefined ? preChangeResult : value;
   }
-  if(parameter) { this.fireChange(parameter,value); }
+  if(parameter) {
+    this.fireChange(parameter,value);
+  }
   if(!(typeof(object.postChange)=='undefined')){
     object.postChange(value);
   }
@@ -609,11 +613,11 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
     //ToDo: this should really be sanitized!
     eval( parameterName + " = " + JSON.stringify(parameterValue) );
   } else {
-  	if(Dashboards.escapeParameterValues) {
-	    Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
-  	} else {
-	    Dashboards.parameters[parameterName] = parameterValue;
-	}
+    if(Dashboards.escapeParameterValues) {
+      Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
+    } else {
+      Dashboards.parameters[parameterName] = parameterValue;
+    }
   }
 };
 
@@ -823,7 +827,9 @@ Dashboards.fetchData = function(cd, params, callback) {
       cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
     }
     $.post(webAppPath + "/content/cda/doQuery?", cd,
-      function(json) {callback(json);},'json');
+      function(json) {
+        callback(json);
+      },'json');
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
@@ -843,12 +849,12 @@ Dashboards.fetchData = function(cd, params, callback) {
 
 Dashboards.escapeHtml = function(input) {
   var escaped = input
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/'/g,"&#39;")
-    .replace(/"/g,"&#34;");
-return escaped;
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/'/g,"&#39;")
+  .replace(/"/g,"&#34;");
+  return escaped;
 };
 // STORAGE ENGINE
 
@@ -858,39 +864,53 @@ Dashboards.storage = {};
 // Operations
 Dashboards.loadStorage = function(){
 
-      var args = {
-        action: "read",
-        _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
-      };
-	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  $.extend(Dashboards.storage,json);
-		  });
+    // Don't do noting for anonymousUser.
+  if(Dashboards.context.user === "anonymousUser")
+    return;
+
+  var args = {
+    action: "read",
+    _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+  };
+  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+    $.extend(Dashboards.storage,json);
+  });
 };
 
 Dashboards.saveStorage = function(){
 
-      var args = {
-        action: "store",
-	storageValue: JSON.stringify(Dashboards.storage),
-        _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
-      };
-	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true){
-				  Dashboards.log("Error saving storage",'error');
-			  }
-		  });
+  // Don't do noting for anonymousUser
+  if(Dashboards.context.user === "anonymousUser")
+    return;
+
+  var args = {
+    action: "store",
+    storageValue: JSON.stringify(Dashboards.storage),
+    _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+  };
+  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+    if(json.result != true){
+      Dashboards.log("Error saving storage",'error');
+    }
+  });
 };
 
 Dashboards.cleanStorage = function(){
 
-      var args = {
-        action: "delete"
-      };
-	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true){
-				  Dashboards.log("Error deleting storage", 'error');
-			  }
-		  });
+  Dashboards.storage = {};
+
+  // Don't do noting for anonymousUser
+  if(Dashboards.context.user === "anonymousUser")
+    return;
+  
+  var args = {
+    action: "delete"
+  };
+  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+    if(json.result != true){
+      Dashboards.log("Error deleting storage", 'error');
+    }
+  });
 };
 
 
@@ -1024,18 +1044,22 @@ function toFormatedString(value) {
 
 //quote csv values in a way compatible with CSVTokenizer
 function doCsvQuoting(value, separator, alwaysEscape){
-	var QUOTE_CHAR = '"';
-	if(separator == null) {return value;}
-	if(value == null) {return null;}
-	if(value.indexOf(QUOTE_CHAR) >= 0){
-		//double them
-		value = value.replace(QUOTE_CHAR, QUOTE_CHAR.concat(QUOTE_CHAR));
-	}
-	if(alwaysEscape || value.indexOf(separator) >= 0){
-		//quote value
-		value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
-	}
-	return value;
+  var QUOTE_CHAR = '"';
+  if(separator == null) {
+    return value;
+  }
+  if(value == null) {
+    return null;
+  }
+  if(value.indexOf(QUOTE_CHAR) >= 0){
+    //double them
+    value = value.replace(QUOTE_CHAR, QUOTE_CHAR.concat(QUOTE_CHAR));
+  }
+  if(alwaysEscape || value.indexOf(separator) >= 0){
+    //quote value
+    value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
+  }
+  return value;
 };
 
 
@@ -1190,183 +1214,184 @@ sprintf = sprintfWrapper.init;
 // Query(path, dataAccessId)
 Query = function() {
 
-    // Constants, or what passes for them... Pretty please leave these alone.
-    var CDA_PATH = webAppPath + "/content/cda/doQuery?";
-    var LEGACY_QUERY_PATH = webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction";
+  // Constants, or what passes for them... Pretty please leave these alone.
+  var CDA_PATH = webAppPath + "/content/cda/doQuery?";
+  var LEGACY_QUERY_PATH = webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction";
 
-    /*
+  /*
      * Private fields
      */
 
-    // Datasource type definition
-    var _mode = 'CDA';
-    // CDA uses file+id, Legacy uses a raw query
-    var _file = '';
-    var _id = '';
-    var _query = '';
-    // Callback for the data handler
-    var _callback = null;
-    // Result caching
-    var _lastResultSet = null;
-    // Paging and sorting
-    var _page = 0;
-    var _pageSize = 0;
-    var _sortBy = "";
+  // Datasource type definition
+  var _mode = 'CDA';
+  // CDA uses file+id, Legacy uses a raw query
+  var _file = '';
+  var _id = '';
+  var _query = '';
+  // Callback for the data handler
+  var _callback = null;
+  // Result caching
+  var _lastResultSet = null;
+  // Paging and sorting
+  var _page = 0;
+  var _pageSize = 0;
+  var _sortBy = "";
 
-    var _params = [];
-    /*
+  var _params = [];
+  /*
      * Initialization code
      */
 
-    //
-    (function(args){switch (args.length) {
-        case 1:
-            var cd = args[0];
-            if (typeof cd.query != 'undefined') {
-                // got a valid legacy cd object
-                _mode = 'Legacy';
-                _query = args[0];
-            } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
-                // CDA-style cd object
-                _mode = 'CDA';
-                _file = cd.path;
-                _id = cd.dataAccessId;
-                if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-                  _sortBy = cd.sortBy;
-                }
-                if(cd.pageSize != null){
-                  _pageSize = cd.pageSize;
-                }
-            } else {
-                throw 'InvalidQuery';
-            }
-            break;
-        case 2:
-            _mode = 'CDA';
-            var file = args[0];
-            var id = args[1];
-            if (typeof file != 'string' || typeof id != 'string') {
-                throw 'InvalidQuery';
-            } else {
-                // Seems like we have valid parameters
-                _id = id;
-                _file = file;
-            }
-            break;
-        default:
-            throw "InvalidQuery";
+  //
+  (function(args){
+    switch (args.length) {
+      case 1:
+        var cd = args[0];
+        if (typeof cd.query != 'undefined') {
+          // got a valid legacy cd object
+          _mode = 'Legacy';
+          _query = args[0];
+        } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
+          // CDA-style cd object
+          _mode = 'CDA';
+          _file = cd.path;
+          _id = cd.dataAccessId;
+          if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+            _sortBy = cd.sortBy;
+          }
+          if(cd.pageSize != null){
+            _pageSize = cd.pageSize;
+          }
+        } else {
+          throw 'InvalidQuery';
+        }
+        break;
+      case 2:
+        _mode = 'CDA';
+        var file = args[0];
+        var id = args[1];
+        if (typeof file != 'string' || typeof id != 'string') {
+          throw 'InvalidQuery';
+        } else {
+          // Seems like we have valid parameters
+          _id = id;
+          _file = file;
+        }
+        break;
+      default:
+        throw "InvalidQuery";
     } 
-    }(arguments));
-    /*
+  }(arguments));
+  /*
      * Private methods
      */
 
-    var doQuery = function(outsideCallback){
-        if (typeof _callback != 'function') {
-            throw 'QueryNotInitialized';
-        }
-        var url;
-        var queryDefinition = {};
-        var callback = (outsideCallback ? outsideCallback : _callback);
-        if (_mode == 'CDA') {
-          for (var param in _params) {
-            if(_params.hasOwnProperty(param)) {
-              var value = Dashboards.getParameterValue(_params[param][1]);
-              var name = _params[param][0];
-              if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-                //special case where single element will wrongly be treated as a parseable array by cda
-                value = doCsvQuoting(value[0],';');
-              }
-              //else will not be correctly handled for functions that return arrays
-              if (typeof value == 'function') value = value();
-              queryDefinition['param' + name] = value;
-            }
+  var doQuery = function(outsideCallback){
+    if (typeof _callback != 'function') {
+      throw 'QueryNotInitialized';
+    }
+    var url;
+    var queryDefinition = {};
+    var callback = (outsideCallback ? outsideCallback : _callback);
+    if (_mode == 'CDA') {
+      for (var param in _params) {
+        if(_params.hasOwnProperty(param)) {
+          var value = Dashboards.getParameterValue(_params[param][1]);
+          var name = _params[param][0];
+          if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+            //special case where single element will wrongly be treated as a parseable array by cda
+            value = doCsvQuoting(value[0],';');
           }
-          queryDefinition.path = _file;
-          queryDefinition.dataAccessId = _id;
-          queryDefinition.pageSize = _pageSize;
-          queryDefinition.pageStart = _page;
-          queryDefinition.sortBy = _sortBy;
-          url = CDA_PATH;
-          // Assemble parameters
-        } else if (_mode == 'Legacy') {
-            queryDefinition = _query;
-            url = LEGACY_QUERY_PATH;
+          //else will not be correctly handled for functions that return arrays
+          if (typeof value == 'function') value = value();
+          queryDefinition['param' + name] = value;
         }
-        $.post(url, queryDefinition, function(json) {
-				if(_mode == 'Legacy'){
-					json = eval("(" + json + ")");
-				}
-				_lastResultSet = json;
-				callback(_mode == 'CDA' ? json : json.values);
-			});
-    };
+      }
+      queryDefinition.path = _file;
+      queryDefinition.dataAccessId = _id;
+      queryDefinition.pageSize = _pageSize;
+      queryDefinition.pageStart = _page;
+      queryDefinition.sortBy = _sortBy;
+      url = CDA_PATH;
+    // Assemble parameters
+    } else if (_mode == 'Legacy') {
+      queryDefinition = _query;
+      url = LEGACY_QUERY_PATH;
+    }
+    $.post(url, queryDefinition, function(json) {
+      if(_mode == 'Legacy'){
+        json = eval("(" + json + ")");
+      }
+      _lastResultSet = json;
+      callback(_mode == 'CDA' ? json : json.values);
+    });
+  };
 
-    /*
+  /*
      * Public interface
      */
 
-    // Entry point
+  // Entry point
 
-    this.fetchData = function(params, callback) {
-      switch(arguments.length) {
-        case 0:
-          if(_params && _callback) {
-            return doQuery();
-          }
-          break;
-        case 1:
-          if (typeof arguments[0] == "function"){
+  this.fetchData = function(params, callback) {
+    switch(arguments.length) {
+      case 0:
+        if(_params && _callback) {
+          return doQuery();
+        }
+        break;
+      case 1:
+        if (typeof arguments[0] == "function"){
           /* If we're receiving _only_ the callback, we're not
            * going to change the internal callback
            */
-            return doQuery(arguments[0]);
-          } else if( arguments[0] instanceof Array){
-            _params = arguments[0];
-            return doQuery();
-          }
-          break;
-        case 2:
-        default:
+          return doQuery(arguments[0]);
+        } else if( arguments[0] instanceof Array){
+          _params = arguments[0];
+          return doQuery();
+        }
+        break;
+      case 2:
+      default:
         /* We're just going to discard anything over two params */
-         _params = params;
-         _callback = callback;
-         return doQuery();
-      }
-      /* If we haven't hit a return by this time,
+        _params = params;
+        _callback = callback;
+        return doQuery();
+    }
+    /* If we haven't hit a return by this time,
        * the user gave us some wrong input
        */
-      throw "InvalidInput";
-    };
+    throw "InvalidInput";
+  };
 
-    // Result caching
-    this.lastResults = function(){
-        if (_lastResultSet !== null) {
-            return _lastResultSet;
-        } else {
-            throw "NoCachedResults";
-        }
-    };
+  // Result caching
+  this.lastResults = function(){
+    if (_lastResultSet !== null) {
+      return _lastResultSet;
+    } else {
+      throw "NoCachedResults";
+    }
+  };
 
-    this.reprocessLastResults = function(outerCallback){
-        if (_lastResultSet !== null) {
-            var callback = outerCallback || _callback;
-            return callback(_lastResultSet);
-        } else {
-            throw "NoCachedResults";
-        }
-    };
+  this.reprocessLastResults = function(outerCallback){
+    if (_lastResultSet !== null) {
+      var callback = outerCallback || _callback;
+      return callback(_lastResultSet);
+    } else {
+      throw "NoCachedResults";
+    }
+  };
 
-    this.reprocessResults = function(outerCallback) {
-      if (_lastResultSet !== null) {
-        var callback = (outsideCallback ? outsideCallback : _callback);
-        callback(_mode == 'CDA' ? json : json.values);
-      } else {
-        throw "NoCachedResults";
-      }
-    };
+  this.reprocessResults = function(outerCallback) {
+    if (_lastResultSet !== null) {
+      var callback = (outsideCallback ? outsideCallback : _callback);
+      callback(_mode == 'CDA' ? json : json.values);
+    } else {
+      throw "NoCachedResults";
+    }
+  };
 
-    /* Sorting
+  /* Sorting
      *
      * CDA expects an array of terms consisting of a number and a letter
      * that's either 'A' or 'D'. Each term denotes, in order, a column
@@ -1378,158 +1403,166 @@ Query = function() {
      * first by the first column (ascending), and then by the second
      * column (descending).
      */
-    this.setSortBy = function(sortBy) {
-      var newSort;
-      if (sortBy === null || sortBy === undefined || sortBy === '') {
-        newSort = '';
-      }
-      /* If we have a string as input, we need to split it into
+  this.setSortBy = function(sortBy) {
+    var newSort;
+    if (sortBy === null || sortBy === undefined || sortBy === '') {
+      newSort = '';
+    }
+    /* If we have a string as input, we need to split it into
        * an array of sort terms. Also, independently of the parameter
        * type, we need to convert everything to upper case, since want
        * to accept 'a' and 'd' even though CDA demands capitals.
        */
-      else if (typeof sortBy == "string") {
-        /* Valid sortBy Strings are column numbers, optionally
+    else if (typeof sortBy == "string") {
+      /* Valid sortBy Strings are column numbers, optionally
          *succeeded by A or D (ascending or descending), and separated by commas
          */
-        if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-          throw "InvalidSortExpression";
-        }
-        /* Break the string into its constituent terms, filter out empty terms, if any */
-        newSort = sortBy.toUpperCase().split(',').filter(function(e){return e !== "";});
-      } else if (sortBy instanceof Array) {
-        newSort = sortBy.map(function(d){return d.toUpperCase();});
-        /* We also need to validate that each individual term is valid*/
-        var invalidEntries = newSort.filter(function(e){return !e.match("^[0-9]+[adAD]?,?$")});
-        if ( invalidEntries.length > 0) {
-            throw "InvalidSortExpression";
-        }
+      if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+        throw "InvalidSortExpression";
       }
+      /* Break the string into its constituent terms, filter out empty terms, if any */
+      newSort = sortBy.toUpperCase().split(',').filter(function(e){
+        return e !== "";
+      });
+    } else if (sortBy instanceof Array) {
+      newSort = sortBy.map(function(d){
+        return d.toUpperCase();
+      });
+      /* We also need to validate that each individual term is valid*/
+      var invalidEntries = newSort.filter(function(e){
+        return !e.match("^[0-9]+[adAD]?,?$")
+      });
+      if ( invalidEntries.length > 0) {
+        throw "InvalidSortExpression";
+      }
+    }
       
-      /* We check whether the parameter is the same as before,
+    /* We check whether the parameter is the same as before,
        * and notify the caller on whether it changed
        */
-      var same;
-      if (newSort instanceof Array) {
-        same = newSort.length != _sortBy.length;
-        $.each(newSort,function(i,d){
-          same = (same && d == _sortBy[i]);
-          if(!same) {return false;}
-        });
-      } else {
-        same = (newSort === _sortBy);
-      }
-      _sortBy = newSort;
-      return !same;
-    };
+    var same;
+    if (newSort instanceof Array) {
+      same = newSort.length != _sortBy.length;
+      $.each(newSort,function(i,d){
+        same = (same && d == _sortBy[i]);
+        if(!same) {
+          return false;
+        }
+      });
+    } else {
+      same = (newSort === _sortBy);
+    }
+    _sortBy = newSort;
+    return !same;
+  };
 
-    this.sortBy = function(sortBy,outsideCallback) {
-      /* If the parameter is not the same, and we have a valid state,
+  this.sortBy = function(sortBy,outsideCallback) {
+    /* If the parameter is not the same, and we have a valid state,
        * we can fire the query.
        */
-      var changed = this.setSortBy(sortBy);
-      if (!changed) {
-        return false;
-      } else if (_callback !== null) {
-        return doQuery(outsideCallback);
-      }
-    };
+    var changed = this.setSortBy(sortBy);
+    if (!changed) {
+      return false;
+    } else if (_callback !== null) {
+      return doQuery(outsideCallback);
+    }
+  };
 
-    this.setParameters = function (params) {
-      if((params instanceof Array)) {
-        _params = params;
-      } else {
-        throw "InvalidParameters";
-      }
-    };
+  this.setParameters = function (params) {
+    if((params instanceof Array)) {
+      _params = params;
+    } else {
+      throw "InvalidParameters";
+    }
+  };
 
-    this.setCallback = function(callback) {
-      if(typeof callback == "function") {
-        _callback = callback;
-      } else {
-        throw "InvalidCallback";
-      }
-    };
-    /* Pagination
+  this.setCallback = function(callback) {
+    if(typeof callback == "function") {
+      _callback = callback;
+    } else {
+      throw "InvalidCallback";
+    }
+  };
+  /* Pagination
      *
      * We paginate by having an initial position (_page) and page size (_pageSize)
      * Paginating consists of incrementing/decrementing the initial position by the page size
      * All paging operations change the paging cursor.
      */
 
-    // Gets the next _pageSize results
-    this.nextPage = function(outsideCallback) {
-        if (_pageSize > 0) {
-            _page += _pageSize;
-            return doQuery(outsideCallback);
-        } else {
-            throw "InvalidPageSize";
-        }
-    };
+  // Gets the next _pageSize results
+  this.nextPage = function(outsideCallback) {
+    if (_pageSize > 0) {
+      _page += _pageSize;
+      return doQuery(outsideCallback);
+    } else {
+      throw "InvalidPageSize";
+    }
+  };
 
-    // Gets the previous _pageSize results
-    this.prevPage = function(outsideCallback) {
-        if (_page > _pageSize) {
-            _page -= _pageSize;
-            return doQuery(outsideCallback);
-        } else if (_pageSize > 0) {
-            _page = 0;
-            return doQuery(outsideCallback);
-        } else {
-            throw "AtBeggining";
-        }
-    };
+  // Gets the previous _pageSize results
+  this.prevPage = function(outsideCallback) {
+    if (_page > _pageSize) {
+      _page -= _pageSize;
+      return doQuery(outsideCallback);
+    } else if (_pageSize > 0) {
+      _page = 0;
+      return doQuery(outsideCallback);
+    } else {
+      throw "AtBeggining";
+    }
+  };
 
-    // Gets the page-th set of _pageSize results (0-indexed)
-    this.getPage = function(page, outsideCallback) {
-      if (page * _pageSize == _page) {
-        return false;
-      } else if (typeof page == 'number' && page >= 0) {
-        _page = page * _pageSize;
-        return doQuery(outsideCallback);
-      } else {
-        throw "InvalidPage";
-      }
-    };
+  // Gets the page-th set of _pageSize results (0-indexed)
+  this.getPage = function(page, outsideCallback) {
+    if (page * _pageSize == _page) {
+      return false;
+    } else if (typeof page == 'number' && page >= 0) {
+      _page = page * _pageSize;
+      return doQuery(outsideCallback);
+    } else {
+      throw "InvalidPage";
+    }
+  };
 
-    // Gets _pageSize results starting at page
-    this.setPageStartingAt = function(page) {
-      if (page == _page) {
-        return false;
-      } else if (typeof page == 'number' && page >= 0) {
-        _page = page;
-      } else {
-        throw "InvalidPage";
-      }
-    };
+  // Gets _pageSize results starting at page
+  this.setPageStartingAt = function(page) {
+    if (page == _page) {
+      return false;
+    } else if (typeof page == 'number' && page >= 0) {
+      _page = page;
+    } else {
+      throw "InvalidPage";
+    }
+  };
 
-    this.pageStartingAt = function(page,outsideCallback) {
-      if(this.setPageStartingAt(page)) {
-        return doQuery(outsideCallback);
-      } else {
-        return false;
-      }
-    };
+  this.pageStartingAt = function(page,outsideCallback) {
+    if(this.setPageStartingAt(page)) {
+      return doQuery(outsideCallback);
+    } else {
+      return false;
+    }
+  };
 
-    // Sets the page size
-    this.setPageSize = function(pageSize) {
-        if (typeof pageSize == 'number' && pageSize > 0) {
-            _pageSize = pageSize;
-        } else {
-            throw "InvalidPageSize";
-        }
-    };
+  // Sets the page size
+  this.setPageSize = function(pageSize) {
+    if (typeof pageSize == 'number' && pageSize > 0) {
+      _pageSize = pageSize;
+    } else {
+      throw "InvalidPageSize";
+    }
+  };
 
-    // sets _pageSize to pageSize, and gets the first page of results
-    this.initPage = function(pageSize,outsideCallback) {
-      if (pageSize == _pageSize && _page == 0) {
-         return false;
-      } else if (typeof pageSize == 'number' && pageSize > 0) {
-        _page = 0;
-        _pageSize = pageSize;
-        return doQuery(outsideCallback);
-      } else {
-        throw "InvalidPageSize";
-      }
-    };
+  // sets _pageSize to pageSize, and gets the first page of results
+  this.initPage = function(pageSize,outsideCallback) {
+    if (pageSize == _pageSize && _page == 0) {
+      return false;
+    } else if (typeof pageSize == 'number' && pageSize > 0) {
+      _page = 0;
+      _pageSize = pageSize;
+      return doQuery(outsideCallback);
+    } else {
+      throw "InvalidPageSize";
+    }
+  };
 };
