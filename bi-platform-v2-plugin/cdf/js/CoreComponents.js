@@ -2346,15 +2346,17 @@ var AnalyzerComponent = BaseComponent.extend({
     var url = webAppPath + '/content/analyzer/';
     var myself=this;
 
-    //create iFrame and place analyzer inside
+    // enable editing the view?
     this.viewOnly?url+='viewer':url+='editor';
-    var height = this.height? this.height: "480px";
 
-    var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
+    var height = this.height? this.height: "480px";
+    var width = this.width? this.width: "100%";
+
+    var iFrameHTML = this.generateIframe(this.htmlObject,url,options,height,width);
     $("#"+this.htmlObject).html(iFrameHTML);
   },
 
-  getOptions: function(){
+  getOptions: function() {
                             
     var options = {
       solution : this.solution,
@@ -2363,7 +2365,6 @@ var AnalyzerComponent = BaseComponent.extend({
       command: this.command == undefined? "open": this.command,
       showFieldList: this.showFieldList == undefined? false: this.showFieldList,
       frameless: this.frameless,
-      edit: this.edit
     };
 
     // process params and update options
@@ -2372,34 +2373,21 @@ var AnalyzerComponent = BaseComponent.extend({
     });
             
     return options;
-  }
+  },
+  
+  generateIframe: function(htmlObject,url,parameters,height,width) {
+	  var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
+	  ' frameborder="0"' +
+	  ' height="' + height + '"' +
+	  ' width="' + width + '"' +
+	  ' src="' + url + "?";
+
+	  iFrameHTML += $.param(parameters, true);
+	  iFrameHTML += "\"></iframe>";
+	       
+	  return iFrameHTML;
+	}
 });
-
-function generateIframe(htmlObject,url,parameters,height,width){
-  var iFrameHTML = "<iframe id=\"iframe_"+ htmlObject + "\"" +
-  " frameborder=\"0\"" +
-  " height=\""+height+"\"" +
-  " width=\""+width+"\"" +
-  " src=\""+ url +"?";
-
-  var paramCounter = 0;
-    
-  // Add args
-  jQuery.each(parameters, function(i, val) {
-    if(typeof val != "undefined"){
-      var arg = "";
-      if(paramCounter++ != 0)
-        arg += "&";
-      arg += encodeURIComponent(i) + "=";
-      iFrameHTML += arg + encodeURIComponent(val);
-    };
-  });
-
-  // Close IFrame
-  iFrameHTML += "\"></iframe>";
-       
-  return iFrameHTML;
-};
 
 var FreeformComponent = BaseComponent.extend({
   update : function() {
