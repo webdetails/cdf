@@ -1513,7 +1513,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
           myself.searchedWord = val;
         }
         var list = [];
-        for(p in myself.result){
+        for(p in myself.result) if (myself.result.hasOwnProperty(p)){
           var obj = {};
           obj.text = myself.result[p][0];
           list.push(obj);
