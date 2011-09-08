@@ -476,6 +476,11 @@ Dashboards.initEngine = function(){
   var compCount = components.length;
   Dashboards.incrementRunningCalls();
   Dashboards.createAndCleanErrorDiv();
+  // Fire all pre-initialization events
+  if(typeof this.preInit == 'function') {
+    this.preInit();
+  }
+  $(window).trigger('cdfAboutToLoad');
   var myself = this;
   setTimeout(
     function() {
@@ -913,6 +918,22 @@ Dashboards.cleanStorage = function(){
   });
 };
 
+Dashboards.propertiesArrayToObject = function(pArray) {
+  var obj = {};
+  for (p in pArray) if (pArray.hasOwnProperty(p)) {
+    var prop = pArray[p];
+    obj[prop[0]] = prop[1];
+  }
+  return obj;
+}
+
+Dashboards.objectToPropertiesArray = function(obj) {
+  var pArray = [];
+  for (key in obj) if (obj.hasOwnProperty(key)) {
+    pArray.push([key,obj[key]]);
+  }
+  return pArray;
+}
 
 /**
  *
