@@ -33,7 +33,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.comments.CommentsEngine;
@@ -43,14 +42,13 @@ import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.utils.CdfAuditHelper;
-import org.pentaho.platform.api.engine.IActionSequenceResource;
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
-import org.pentaho.platform.api.engine.IUserDetailsRoleListService;
+import org.pentaho.platform.api.engine.IUserRoleListService;
 import org.pentaho.platform.api.repository.IContentItem;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
@@ -60,7 +58,6 @@ import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
 import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.util.web.MimeHelper;
-import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 
 import pt.webdetails.packager.Packager;
 
@@ -264,7 +261,7 @@ public class CdfContentGenerator extends BaseContentGenerator
     context.put("user", userSession.getName()); //$NON-NLS-1$
 
     // The first method works in 3.6, for 3.5 it's a different method. We'll try both
-    IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
+    IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
 
     context.put("roles", service.getRolesForUser(userSession.getName())); //$NON-NLS-1$
 

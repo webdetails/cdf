@@ -27,7 +27,7 @@ import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
-import org.pentaho.platform.api.engine.IUserDetailsRoleListService;
+import org.pentaho.platform.api.engine.IUserRoleListService;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
@@ -251,7 +251,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   }
   
   protected List<String> getUserRoles() {
-    IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
+    IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
     return service.getRolesForUser(userSession.getName());
   }
   
