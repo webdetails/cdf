@@ -138,7 +138,7 @@ jQuery.fn.daterangepicker = function(settings){
 				})
 			.click(function(){
 				rp.find('.ui-state-active').removeClass('ui-state-active');
-				jQuery(this).addClass('ui-state-active').clickActions();
+				jQuery(this).addClass('ui-state-active').clickActions(options,settings,rp,rpPickers,doneBtn);//closure lost here!
 				return false;
 			});
 		return ul;
@@ -184,7 +184,7 @@ jQuery.fn.daterangepicker = function(settings){
 	
 					
 	//preset menu click events	
-	jQuery.fn.clickActions = function(){
+	jQuery.fn.clickActions = function(options,settings,rp,rpPickers,doneBtn){
 		
 		if(jQuery(this).is('.ui-daterangepicker-SpecificDate')){
 			doneBtn.hide();

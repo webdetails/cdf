@@ -1019,18 +1019,37 @@ var DateRangeInputComponent = BaseComponent.extend({
     var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
+    
+    
     $(function(){
-      $("#" + myself.htmlObject + " input").daterangepicker({
+      $("#" + myself.htmlObject + " input")
+      dr.daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
         latestDate: latestDate,
         dateFormat: 'yy-mm-dd',
         onDateSelect: function(rangeA, rangeB) {
-          DateRangeInputComponent.fireDateRangeInputChange( myself.name, rangeA, rangeB);
+          myself.fireInputChange(rangeA, rangeB);
         }
       });
     });
+  },
+  
+  fireInputChange : function(start, end)
+  {//TODO: review this!
+    if(this.preChange){
+      this.preChange(start, end);
+    }
+    
+    if(this.parameter && this.parameter.length == 2){
+      Dashboards.setParameter(this.parameter[1], end);
+      Dashboards.fireChange(this.parameter[0], start);
+    }
+    
+    if(this.postChange){
+      this.postChange(start, end);
+    }
   }
 },
 {
