@@ -1042,9 +1042,10 @@ var DateRangeInputComponent = BaseComponent.extend({
       this.preChange(start, end);
     }
     
-    if(this.parameter && this.parameter.length == 2){
-      Dashboards.setParameter(this.parameter[1], end);
-      Dashboards.fireChange(this.parameter[0], start);
+    if(this.parameter)
+    {
+      if( this.parameter.length == 2) Dashboards.setParameter(this.parameter[1], end);
+      if( this.parameter.length > 0) Dashboards.fireChange(this.parameter[0], start);
     }
     
     if(this.postChange){
