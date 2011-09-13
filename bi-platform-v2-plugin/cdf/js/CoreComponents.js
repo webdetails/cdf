@@ -240,6 +240,9 @@ var SelectBaseComponent = BaseComponent.extend({
         selectHTML += " size='" + myArray.length + "'";
       }
     }
+    if (this.externalPlugin == "chosen") {
+      selectHTML += " class='chzn-select'";
+    }
     selectHTML += ">";
     var firstVal,
     currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
@@ -284,6 +287,9 @@ var SelectBaseComponent = BaseComponent.extend({
     selectHTML += "</select>";
 
     ph.html(selectHTML);
+    if( this.externalPlugin == "chosen" ){ 
+      ph.find("select.chzn-select").chosen(); 
+    }
 
     /* If the current value for the parameter is invalid or empty, we need
      * to pick a sensible default. If there is a defaultIfEmpty value,
@@ -1013,18 +1019,38 @@ var DateRangeInputComponent = BaseComponent.extend({
     var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
+    
+    
     $(function(){
-      $("#" + myself.htmlObject + " input").daterangepicker({
+      $("#" + myself.htmlObject + " input")
+      dr.daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
         latestDate: latestDate,
         dateFormat: 'yy-mm-dd',
         onDateSelect: function(rangeA, rangeB) {
-          DateRangeInputComponent.fireDateRangeInputChange( myself.name, rangeA, rangeB);
+          myself.fireInputChange(rangeA, rangeB);
         }
       });
     });
+  },
+  
+  fireInputChange : function(start, end)
+  {//TODO: review this!
+    if(this.preChange){
+      this.preChange(start, end);
+    }
+    
+    if(this.parameter)
+    {
+      if( this.parameter.length == 2) Dashboards.setParameter(this.parameter[1], end);
+      if( this.parameter.length > 0) Dashboards.fireChange(this.parameter[0], start);
+    }
+    
+    if(this.postChange){
+      this.postChange(start, end);
+    }
   }
 },
 {
@@ -1233,6 +1259,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
     var myArray = this.getValuesArray();
+    this.cachedArray = myArray;
     var cssWrapperClass= "pentaho-toggle-button pentaho-toggle-button-up "+ ((this.verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
     selectHTML = "";
     var firstVal;
@@ -1242,32 +1269,36 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
     if (this.isMultiple == undefined) this.isMultiple = false;
 
-    for (var i = 0, len = myArray.length; i < len; i++){
-      var value = myArray[i][valIdx];
-      var label = myArray[i][lblIdx];
-      var extraCss = this.getExtraCss(i,len,this.verticalOrientation);
+    var ph = $("<div>");
 
-      if(value != null) {
-        value = value.replace('"','&quot;' );
-      }
-      if(label != null) {
-        label = label.replace('"','&quot;' );
-      }
+    for (var i = 0, len = myArray.length; i < len; i++){
+      var value = myArray[i][valIdx],
+        label = myArray[i][lblIdx],
+        classes = cssWrapperClass + this.getExtraCss(i,len,this.verticalOrientation),
+        selector;
+
+      value = (value == null ? null : value.replace('"','&quot;' ));
+      label = (label == null ? null : label.replace('"','&quot;' ));
+
       if(i == 0){
         firstVal = value;
       }
 
-      // PDB-1098 - Changing to use hidden input rather than button. IE7 does not allow different values and display text. it always uses the display text
-      selectHTML += "<div class='" + cssWrapperClass + extraCss +"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
-      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><input type='hidden' name='" + this.name + "' value='" + value + "'> ";
-      selectHTML += "</input>" + label + "</div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
-
+      selectHTML = "<div class='" + classes +"'><button name='" + this.name + "'>" + label + "</button  >" +"</div>";
+      selector = $(selectHTML);
+      // We wrap the click handler in a self-executing function so that we can capture 'i'.
+      var myself = this;
+      (function(index){ selector.click(function(){
+        MultiButtonComponent.prototype.clickButton(myself.htmlObject, myself.name, index, myself.isMultiple, myself.verticalOrientation);
+      });}(i));
+      ph.append(selector);
+      if (!(this.separator == undefined || this.separator == null || this.separator == "null") && i != myArray.length - 1) {
+        ph.append(this.separator);
+      }
     }
 
-    // update the placeholder
-    var ph = $("#" + this.htmlObject);
-    ph.html(selectHTML);
-
+    ph.appendTo($("#" + this.htmlObject).empty());
+    
     //default
     var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
@@ -1348,7 +1379,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   getValueByIdx: function(idx){
-    return $("#" + this.htmlObject + " input[type='hidden']")[idx].value;
+    return this.cachedArray[idx][this.valueAsId ? 1 : 0];
   },
 
   getSelecetedCss: function(verticalOrientation) {
@@ -1365,7 +1396,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
     var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
-    var buttons = $("#" + htmlObject + " input[type='hidden']");
+    var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
       else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
@@ -1396,7 +1427,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   },
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
-    var buttons = $("#" + htmlObject + " input[type='hidden']");
+    var buttons = $("#" + htmlObject + " button");
     var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
     for(var i = 0; i < buttons.length; i++){
       buttons[i].parentNode.className = cssWrapperClass + this.getExtraCss(i,buttons.length,verticalOrientation);
@@ -1502,7 +1533,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
           myself.searchedWord = val;
         }
         var list = [];
-        for(p in myself.result){
+        for(p in myself.result) if (myself.result.hasOwnProperty(p)){
           var obj = {};
           obj.text = myself.result[p][0];
           list.push(obj);
@@ -1545,8 +1576,13 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
 var JpivotComponent = BaseComponent.extend({
   update : function() {
-    // Build IFrame and set url
-    var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
+    //to be backwards compatible set default value for iframeScolling
+    // also added 20px 
+	if(this.iframeScrolling == undefined){
+		this.iframeScrolling="no";
+	}
+     // Build IFrame and set url
+    var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
     jpivotHTML += webAppPath + "/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
 
     // Add args
@@ -1705,8 +1741,16 @@ var TableComponent = BaseComponent.extend({
     // General documentation here: http://datatables.net
     var myself = this,
     cd = this.chartDefinition,
-    extraOptions = {},
-    dtData0 = TableComponent.getDataTableOptions(cd),
+    extraOptions = {};
+    
+    // Set defaults for headers / types
+    if(typeof cd.colHeaders === "undefined" || cd.colHeaders.length == 0)
+      cd.colHeaders = json.metadata.map(function(i){return i.colName});
+
+    if(typeof cd.colTypes === "undefined" || cd.colTypes.length == 0)
+      cd.colTypes = json.metadata.map(function(i){return i.colType.toLowerCase()});
+
+    var dtData0 = TableComponent.getDataTableOptions(cd),
     dtData;
 
     // Build a default config from the standard options
@@ -2153,7 +2197,10 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
 var ButtonComponent = BaseComponent.extend({
   update : function() {
-    $("<button type='button'/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
+    var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", this.expression);
+    if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
+      b.button();
+    b.appendTo($("#"+ this.htmlObject).empty());
   }
 });
 
@@ -2319,15 +2366,17 @@ var AnalyzerComponent = BaseComponent.extend({
     var url = webAppPath + '/content/analyzer/';
     var myself=this;
 
-    //create iFrame and place analyzer inside
+    // enable editing the view?
     this.viewOnly?url+='viewer':url+='editor';
-    var height = this.height? this.height: "480px";
 
-    var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
+    var height = this.height? this.height: "480px";
+    var width = this.width? this.width: "100%";
+
+    var iFrameHTML = this.generateIframe(this.htmlObject,url,options,height,width);
     $("#"+this.htmlObject).html(iFrameHTML);
   },
 
-  getOptions: function(){
+  getOptions: function() {
                             
     var options = {
       solution : this.solution,
@@ -2336,7 +2385,6 @@ var AnalyzerComponent = BaseComponent.extend({
       command: this.command == undefined? "open": this.command,
       showFieldList: this.showFieldList == undefined? false: this.showFieldList,
       frameless: this.frameless,
-      edit: this.edit
     };
 
     // process params and update options
@@ -2345,34 +2393,21 @@ var AnalyzerComponent = BaseComponent.extend({
     });
             
     return options;
-  }
+  },
+  
+  generateIframe: function(htmlObject,url,parameters,height,width) {
+	  var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
+	  ' frameborder="0"' +
+	  ' height="' + height + '"' +
+	  ' width="' + width + '"' +
+	  ' src="' + url + "?";
+
+	  iFrameHTML += $.param(parameters, true);
+	  iFrameHTML += "\"></iframe>";
+	       
+	  return iFrameHTML;
+	}
 });
-
-function generateIframe(htmlObject,url,parameters,height,width){
-  var iFrameHTML = "<iframe id=\"iframe_"+ htmlObject + "\"" +
-  " frameborder=\"0\"" +
-  " height=\""+height+"\"" +
-  " width=\""+width+"\"" +
-  " src=\""+ url +"?";
-
-  var paramCounter = 0;
-    
-  // Add args
-  jQuery.each(parameters, function(i, val) {
-    if(typeof val != "undefined"){
-      var arg = "";
-      if(paramCounter++ != 0)
-        arg += "&";
-      arg += encodeURIComponent(i) + "=";
-      iFrameHTML += arg + encodeURIComponent(val);
-    };
-  });
-
-  // Close IFrame
-  iFrameHTML += "\"></iframe>";
-       
-  return iFrameHTML;
-};
 
 var FreeformComponent = BaseComponent.extend({
   update : function() {
