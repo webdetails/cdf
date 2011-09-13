@@ -91,9 +91,9 @@ var executeTopTenCustomers =
   type: "ExecutePrpt",
   solution: "steel-wheels",
   path: "reports",
-  action: "Sales Summary.prpt",
+  action: "Order Status.prpt",
   listeners:["productLine", "territory"],
-  parameters: [["productLine", '""'], ["territory", '""']],
+  parameters: [["oStatus"," 'Shipped' "]],
   htmlObject: "sampleObject",
   paginate: false,
   showParameters: true,
@@ -105,7 +105,6 @@ var executeTopTenCustomers =
 }
 
 Dashboards.init([executeTopTenCustomers]);
-
 				</textarea>
 				<br />
 				<button onclick="evaluateCode(true)">Try me</button>
