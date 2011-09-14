@@ -109,7 +109,7 @@ orderStatusReport =
   type: "prpt",
   solution: "steel-wheels",
   path: "reports",
-  action: "Order Status.prpt",
+  action: "Sales Summary.prpt",
   listeners:["output_type"],
   parameters: [["output-type","output_type"]],
   htmlObject: "sampleObject",
@@ -118,10 +118,8 @@ orderStatusReport =
   iframe: true,
   executeAtStart: true
 }
-				
 
 Dashboards.init([outputSelector,orderStatusReport]);
-
 
 				</textarea>
 				<br />
