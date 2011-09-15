@@ -37,7 +37,7 @@
         $(this).data('rt-value', this.value.length);
     })
     .bind('keyup', function(e) {
-        var self=$(this);
+/*        var self=$(this);
         var newsize=opts.step * self.val().length;
         if (newsize <= opts.min) {
           newsize=width;
@@ -45,7 +45,7 @@
         if (!(self.val().length == self.data('rt-value') ||
               newsize <= opts.min || newsize >= opts.max)) {
           self.width(newsize);
-        }
+        }*/
      });
   };
 
