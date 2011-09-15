@@ -759,7 +759,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     public void getSolutionFile(final String resourcePath, final OutputStream out, final ILogger logger) throws Exception {
         final IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
-        final String formats = resLoader.getPluginSetting(this.getClass(), "resources/downloadable-formats");
+        final String formats = resLoader.getPluginSetting(this.getClass(), "settings/resources/downloadable-formats");
 
         List allowedFormats = Arrays.asList(formats.split(","));
         String extension = resourcePath.replaceAll(".*\\.(.*)", "$1");
