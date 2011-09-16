@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.pentaho.cdf;
 
 import java.io.IOException;
@@ -49,25 +45,16 @@ public class GetCDFResource extends ServletBase {
         }
         String resourcePath = null;
         resourcePath = resource;
-
-        if (resourcePath == null) {
-            error(Messages.getErrorString("GetResource.ERROR_0002_INVALID_FILE", resource)); //$NON-NLS-1$
-            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            return;
-        }
+        
         ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class,session);// PentahoSystem.getSolutionRepository(session);
-        InputStream in = repository.getResourceInputStream(resourcePath, true);
+        InputStream in = repository.getResourceInputStream(resourcePath, true, ISolutionRepository.ACTION_EXECUTE);
         if (in == null) {
             error(Messages.getErrorString("GetResource.ERROR_0003_RESOURCE_MISSING", resourcePath)); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             return;
         }
         String mimeType = getServletContext().getMimeType(resourcePath);
-        String resourceName = resourcePath;
-        if (resourcePath.indexOf("/") != -1) { //$NON-NLS-1$
-            resourceName = resourcePath.substring(resourcePath.lastIndexOf("/") + 1); //$NON-NLS-1$
-        }
-        //response.setHeader("content-disposition", "attachment;filename=" + resourceName); //$NON-NLS-1$ //$NON-NLS-2$
+
         if ((null == mimeType) || (mimeType.length() <= 0)) {
             // Hard coded to PNG because BIRT does not give us a mime type at
             // all...

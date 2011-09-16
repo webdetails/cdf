@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.pentaho.platform.api.engine.ICacheManager;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository.ISolutionRepository;
+import org.pentaho.platform.api.repository.ISolutionRepositoryService;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.web.servlet.SolutionRepositoryService;
@@ -104,7 +105,8 @@ public class NavigateComponent extends PentahoBase
     {
       //System.out.println(Calendar.getInstance().getTime() + ": Getting repository Document");
       final DOMReader reader = new DOMReader();
-      repositoryDocument = reader.read(new SolutionRepositoryService().getSolutionRepositoryDoc(userSession, new String[0]));
+      repositoryDocument = reader.read(PentahoSystem.get(ISolutionRepositoryService.class, userSession).getSolutionRepositoryDoc(userSession, new String[0]));
+      //repositoryDocument = reader.read(new SolutionRepositoryService().getSolutionRepositoryDoc(userSession, new String[0]));
       cacheManager.putInSessionCache(userSession, CACHE_REPOSITORY_DOCUMENT, repositoryDocument);
       //System.out.println(Calendar.getInstance().getTime() + ": Repository Document Returned");
     }

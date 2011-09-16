@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.apache.commons.logging.Log;
@@ -62,6 +64,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final Log logger = LogFactory.getLog(CdfContentGenerator.class);
     public static final String PLUGIN_NAME = "pentaho-cdf"; //$NON-NLS-1$
     private static final String MIMETYPE = "text/html"; //$NON-NLS-1$
+    public static final String SOLUTION_DIR = "cdf";    
     // Possible actions
     private static final String RENDER_HTML = "/RenderHTML";
     private static final String RENDER_XCDF = "/RenderXCDF";
@@ -84,6 +87,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
     public String RELATIVE_URL;
     private Packager packager;
+    
+    public static String ENCODING = "UTF-8";
 
     public CdfContentGenerator() {
         try {
@@ -158,7 +163,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
             findMethod(method, contentItem, out, payload);
 
         } catch (Exception e) {
-            logger.error("Error creating cdf content: " + e.getMessage());
+            logger.error("Error creating cdf content: ", e);
         }
     }
 
@@ -245,7 +250,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         s.append(context.toString(2) + "\n");
         s.append("</script>\n");
         // setResponseHeaders(MIME_PLAIN,0,null);
-        out.write(s.toString().getBytes("UTF-8"));
+        out.write(s.toString().getBytes(ENCODING));
 
     }
 
@@ -257,7 +262,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         s.append(StorageEngine.getInstance().read(requestParams, userSession) + "\n");
         s.append("</script>\n");
         // setResponseHeaders(MIME_PLAIN,0,null);
-        out.write(s.toString().getBytes("UTF-8"));
+        out.write(s.toString().getBytes(ENCODING));
 
     }
 
@@ -324,13 +329,15 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         final String resource = requestParams.getStringParameter("resource", null); //$NON-NLS-1$
         contentItem.setMimeType(MimeHelper.getMimeTypeFromFileName(urlPath));
-        String[] allowedRoots = new String[1];
-        allowedRoots[0] = PentahoSystem.getApplicationContext().getSolutionPath(PLUGIN_NAME);
+        //TODO: unused
+//        String[] allowedRoots = new String[2];
+//        allowedRoots[0] = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
+//        allowedRoots[1] = PentahoSystem.getApplicationContext().getSolutionPath(SOLUTION_DIR);
         final HttpServletResponse response = (HttpServletResponse) parameterProviders.get("path").getParameter("httpresponse");
         try {
             getSolutionFile(resource, out, this);
         } catch (SecurityException e) {
-            response.sendError(response.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
         }
     }
 
@@ -375,7 +382,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
         if (repository.getSolutionFile(fullPath, ISolutionRepository.ACTION_EXECUTE) == null) {
-            out.write("Access Denied".getBytes("UTF-8"));
+            out.write("Access Denied".getBytes(ENCODING));
             return;
         }
 
@@ -384,7 +391,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         if (repository.resourceExists(fullPath)) {
             final ActionResource resource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", fullPath);
-            final String dashboardMetadata = repository.getResourceAsString(resource);
+            final String dashboardMetadata = repository.getResourceAsString(resource, ISolutionRepository.ACTION_EXECUTE);
             final Document doc = DocumentHelper.parseText(dashboardMetadata);
             templateName = XmlDom4JHelper.getNodeText("/cdf/template", doc, "");
 
@@ -438,7 +445,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         // Check for access permissions
         if (repository.getSolutionFile(resource, ISolutionRepository.ACTION_EXECUTE) == null) {
-            out.write("Access Denied".getBytes("UTF-8"));
+            out.write("Access Denied".getBytes(ENCODING));
             return;
         }
 
@@ -450,7 +457,14 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
         ArrayList<String> i18nTagsList = new ArrayList<String>();
         if (templater != null) {
-            final ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", "system/" + PLUGIN_NAME + "/" + dashboardTemplate); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            
+          String solutionPath = "system/" + PLUGIN_NAME + "/" + dashboardTemplate;
+            if(!repository.resourceExists(solutionPath))
+            {//then try in solution
+              solutionPath = SOLUTION_DIR + "/templates/" + dashboardTemplate;
+            }
+              
+            final ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", solutionPath); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             String templateContent = repository.getResourceAsString(templateResource, ISolutionRepository.ACTION_EXECUTE);
             // Process i18n on dashboard outer template
             templateContent = updateUserLanguageKey(templateContent);
@@ -508,25 +522,25 @@ public class CdfContentGenerator extends BaseContentGenerator {
         /************************************************/
         /*      Add cdf libraries
         /************************************************/
-        final Date startDate = new Date();
+//        final Date startDate = new Date();
         final int headIndex = intro.indexOf("<head>");
         final int length = intro.length();
-        final Hashtable addedFiles = new Hashtable();
+//        final Hashtable addedFiles = new Hashtable();
 
-        out.write(intro.substring(0, headIndex + 6).getBytes("UTF-8"));
+        out.write(intro.substring(0, headIndex + 6).getBytes(ENCODING));
         // Concat libraries to html head content
         getHeaders(dashboardContent, requestParams, out);
-        out.write(intro.substring(headIndex + 7, length - 1).getBytes("UTF-8"));
+        out.write(intro.substring(headIndex + 7, length - 1).getBytes(ENCODING));
         // Add context
         generateContext(requestParams, out);
         // Add storage
         generateStorage(requestParams, out);
 
-        out.write("<div id=\"dashboardContent\">".getBytes("UTF-8"));
+        out.write("<div id=\"dashboardContent\">".getBytes(ENCODING));
 
-        out.write(dashboardContent.getBytes("UTF-8"));
-        out.write("</div>".getBytes("UTF-8"));
-        out.write(footer.getBytes("UTF-8"));
+        out.write(dashboardContent.getBytes(ENCODING));
+        out.write("</div>".getBytes(ENCODING));
+        out.write(footer.getBytes(ENCODING));
 
         setResponseHeaders(MIME_HTML, 0, null);
     }
@@ -694,7 +708,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
 
     public String concatFiles(String includeString, final Hashtable filesAdded, final Hashtable files) {
-
+//TODO: is this used?
         final String newLine = System.getProperty("line.separator");
         final Enumeration keys = files.keys();
         while (keys.hasMoreElements()) {
@@ -747,35 +761,34 @@ public class CdfContentGenerator extends BaseContentGenerator {
         // TODO support caching
         final String path = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + fileName); //$NON-NLS-1$ //$NON-NLS-2$
         final File file = new File(path);
-        final InputStream in = new FileInputStream(file);
-        final byte[] buff = new byte[4096];
-        int n = in.read(buff);
-        while (n != -1) {
-            out.write(buff, 0, n);
-            n = in.read(buff);
+        
+        final InputStream in = FileUtils.openInputStream(file);
+        try{
+          IOUtils.copy(in, out);
         }
-        in.close();
+        finally {
+          IOUtils.closeQuietly(in);
+        }
     }
 
     public void getSolutionFile(final String resourcePath, final OutputStream out, final ILogger logger) throws Exception {
         final IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
         final String formats = resLoader.getPluginSetting(this.getClass(), "settings/resources/downloadable-formats");
 
-        List allowedFormats = Arrays.asList(formats.split(","));
+        List<String> allowedFormats = Arrays.asList(StringUtils.split(formats, ','));
         String extension = resourcePath.replaceAll(".*\\.(.*)", "$1");
         if (allowedFormats.indexOf(extension) < 0) {
             // We can't provide this type of file
             throw new SecurityException("Not allowed");
         }
         final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
-        final InputStream in = repository.getResourceInputStream(resourcePath, true);
-        final byte[] buff = new byte[4096];
-        int n = in.read(buff);
-        while (n != -1) {
-            out.write(buff, 0, n);
-            n = in.read(buff);
+        final InputStream in = repository.getResourceInputStream(resourcePath, true, ISolutionRepository.ACTION_EXECUTE);
+        try{
+          IOUtils.copy(in, out);
         }
-        in.close();
+        finally {
+          IOUtils.closeQuietly(in);
+        }
     }
 
     private void setResponseHeaders(final String mimeType, final int cacheDuration, final String attachmentName) {
@@ -896,7 +909,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
             all = false;
         }
 
-        final Enumeration resourceKeys = resources.propertyNames();
+        final Enumeration<?> resourceKeys = resources.propertyNames();
         while (resourceKeys.hasMoreElements()) {
 
             final String scriptkey = (String) resourceKeys.nextElement();
@@ -938,7 +951,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         if (dashboardContent != null && !StringUtils.isEmpty(dashboardContent)) {
-            final Enumeration resourceKeys = resources.propertyNames();
+            final Enumeration<?> resourceKeys = resources.propertyNames();
             while (resourceKeys.hasMoreElements()) {
 
                 final String scriptkey = (String) resourceKeys.nextElement();
