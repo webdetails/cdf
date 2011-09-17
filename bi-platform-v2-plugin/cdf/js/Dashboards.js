@@ -361,6 +361,11 @@ Dashboards.blockUIwithDrag = function() {
 
 Dashboards.update = function(object) {
   try {
+    
+    if( object.disabled ){
+      return;
+    }
+    
     if(!(typeof(object.preExecution)=='undefined')){
       var ret = object.preExecution.apply(object);
       if (typeof ret != "undefined" && !ret)
@@ -555,7 +560,7 @@ Dashboards.fireChange = function(parameter, value) {
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
       for(var j= 0 ; j < this.components[i].listeners.length; j++){
-        if(this.components[i].listeners[j] == parameter) {
+        if(this.components[i].listeners[j] == parameter && !this.components[i].disabled) {
           // We only show the 'working' message if we ever do anything useful.
           if (!workDone) {
             workDone = true;

@@ -248,8 +248,6 @@ var SelectBaseComponent = BaseComponent.extend({
     currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
     currentIsValid = false;
 
-    var currentVal = Dashboards.getParameterValue(this.parameter);
-    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
     var hasCurrentVal = typeof currentVal != undefined;
     //var vid = this.valueAsId == false ? false : true;
     var vid = !!this.valueAsId;
@@ -285,11 +283,7 @@ var SelectBaseComponent = BaseComponent.extend({
     }
 
     selectHTML += "</select>";
-
     ph.html(selectHTML);
-    if( this.externalPlugin == "chosen" ){ 
-      ph.find("select.chzn-select").chosen(); 
-    }
 
     /* If the current value for the parameter is invalid or empty, we need
      * to pick a sensible default. If there is a defaultIfEmpty value,
@@ -304,6 +298,11 @@ var SelectBaseComponent = BaseComponent.extend({
     } else {
       $("select", ph).val(currentValArray);
     }
+    
+    if( this.externalPlugin == "chosen" ){ 
+      ph.find("select.chzn-select").chosen(); 
+    }
+    
     var myself = this;
     $("select", ph).change(function () {
       Dashboards.processChange(myself.name);
