@@ -177,12 +177,12 @@ var XactionComponent = BaseComponent.extend({
         var xactionIFrameHTML = "<iframe id=\"iframe_"+ this.htmlObject + "\"" +
         " frameborder=\"0\"" +
         " height=\"100%\"" +
-        " width=\"100%\" />",
-          iframe = $(xactionIFrameHTML),
-          url = webAppPath + "/ViewAction?wrapper=false" +
-            "&solution=" + this.solution +
-            "&path=" + this.path +
-            "&action="+ this.action;
+        " width=\"100%\" />";        
+        iframe = $(xactionIFrameHTML);        
+        url = webAppPath + "/ViewAction?wrapper=false" +
+              "&solution=" + this.solution +
+              "&path=" + this.path +
+              "&action="+ this.action;
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -2383,7 +2383,7 @@ var AnalyzerComponent = BaseComponent.extend({
       action: this.action,
       command: this.command == undefined? "open": this.command,
       showFieldList: this.showFieldList == undefined? false: this.showFieldList,
-      frameless: this.frameless,
+      frameless: this.frameless
     };
 
     // process params and update options
