@@ -334,7 +334,7 @@ var JFreeChartComponent = BaseComponent.extend({
     var cd = this.chartDefinition;
     // Merge the stuff with a chartOptions element
     if (cd == undefined){
-      alert("Fatal - No chartDefinition passed");
+     Dashboards.log("Fatal - No chartDefinition passed","error");
       return;
     }
 
@@ -586,7 +586,7 @@ var DialComponent = JFreeChartComponent.extend({
 
     var cd = this.chartDefinition;
     if (cd == undefined){
-      alert("Fatal - No chartDefinition passed");
+     Dashboards.log("Fatal - No chartDefinition passed","error");
       return;
     }
     
@@ -596,7 +596,7 @@ var DialComponent = JFreeChartComponent.extend({
 
     var colors = cd.colors;
     if(colors != undefined && intervals.length != colors.length){
-      alert("Fatal - Number of intervals differs from number of colors");
+     Dashboards.log("Fatal - Number of intervals differs from number of colors","error");
       return;
     }
 
@@ -644,7 +644,7 @@ var TrafficComponent = BaseComponent.extend({
   update : function() {
     var cd = this.trafficDefinition;
     if (cd == undefined){
-      alert("Fatal - No trafficDefinition passed");
+     Dashboards.log("Fatal - No trafficDefinition passed","error");
       return;
     }
 
@@ -758,7 +758,7 @@ var TimePlotComponent = BaseComponent.extend({
 
     var obj = this;
     if (cd == undefined){
-      alert("Fatal - No chart definition passed");
+     Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
 
@@ -770,7 +770,7 @@ var TimePlotComponent = BaseComponent.extend({
 
     var cols = typeof cd['columns']=='function'?cd['columns']():cd['columns'];
     if (cols == undefined || cols.length == 0){
-      alert("Fatal - No 'columns' property passed in chartDefinition");
+     Dashboards.log("Fatal - No 'columns' property passed in chartDefinition","error");
       return;
     }
     // Write the title
@@ -1643,7 +1643,7 @@ var TableComponent = BaseComponent.extend({
   update : function() {
     var cd = this.chartDefinition;
     if (cd == undefined){
-      alert("Fatal - No chart definition passed");
+     Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
     cd["tableId"] = this.htmlObject + "Table";
@@ -1916,7 +1916,7 @@ var CommentsComponent = BaseComponent.extend({
     }
 
     if (this.page == undefined){
-      alert("Fatal - no page definition passed");
+     Dashboards.log("Fatal - no page definition passed","error");
       return;
     }
 
@@ -2099,7 +2099,7 @@ var QueryComponent = BaseComponent.extend({
   makeQuery: function(object){
     var cd = object.queryDefinition;
     if (cd == undefined){
-      alert("Fatal - No query definition passed");
+     Dashboards.log("Fatal - No query definition passed","error");
       return;
     }
     var query = new Query(cd);

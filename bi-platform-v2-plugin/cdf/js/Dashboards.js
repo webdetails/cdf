@@ -338,7 +338,7 @@ Dashboards.bindControl = function(object) {
   }
   
   if (typeof objectImpl == 'undefined'){
-    alert ("Object type " + object["type"] + " can't be mapped to a valid class");
+    Dashboards.log ("Object type " + object["type"] + " can't be mapped to a valid class","error");
   } else {
     // this will add the methods from the inherited class. Overrides not allowed
     $.extend(object,objectImpl);
@@ -726,7 +726,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
         func(XMLHttpRequest.responseXML);
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
-        alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
+       Dashboards.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
       }
 
     }
@@ -741,7 +741,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
     async: false,
     data: params,
     error: function (XMLHttpRequest, textStatus, errorThrown) {
-      alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
+     Dashboards.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
     }
 
   });
