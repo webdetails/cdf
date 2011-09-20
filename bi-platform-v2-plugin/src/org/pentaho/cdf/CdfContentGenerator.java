@@ -328,7 +328,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         final String resource = requestParams.getStringParameter("resource", null); //$NON-NLS-1$
-        contentItem.setMimeType(MimeHelper.getMimeTypeFromFileName(urlPath));
+        contentItem.setMimeType(MimeHelper.getMimeTypeFromFileName(resource));
         //TODO: unused
 //        String[] allowedRoots = new String[2];
 //        allowedRoots[0] = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
