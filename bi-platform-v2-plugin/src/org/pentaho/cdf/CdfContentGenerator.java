@@ -220,7 +220,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
         context.put("serverLocalDate", cal.getTimeInMillis());
         context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
         context.put("user", userSession.getName());
-
+        context.put("solution",requestParams.getParameter("solution"));
+        context.put("path", requestParams.getParameter("path"));
+        context.put("file", requestParams.getParameter("file"));
+        
         // The first method works in 3.6, for 3.5 it's a different method. We'll try both
         IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
         if (service == null) {
