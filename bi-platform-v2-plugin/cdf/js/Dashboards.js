@@ -29,6 +29,7 @@ var CDF_SELF = 2;
 var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
+
 if($.blockUI){
   $.blockUI.defaults.fadeIn = 0;
   $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
@@ -875,8 +876,8 @@ Dashboards.storage = {};
 // Operations
 Dashboards.loadStorage = function(){
 
-    // Don't do anything for anonymousUser.
-  if(Dashboards.context == undefined ||  Dashboards.context.user === "anonymousUser"){
+    // Don't do noting for anonymousUser.
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser")
     return;
   }
 
@@ -891,8 +892,8 @@ Dashboards.loadStorage = function(){
 
 Dashboards.saveStorage = function(){
 
-    // Don't do anything for anonymousUser.
-  if(Dashboards.context == undefined ||  Dashboards.context.user === "anonymousUser"){
+  // Don't do noting for anonymousUser
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser")
     return;
   }
 
@@ -912,8 +913,8 @@ Dashboards.cleanStorage = function(){
 
   Dashboards.storage = {};
 
-    // Don't do anything for anonymousUser.
-  if(Dashboards.context == undefined ||  Dashboards.context.user === "anonymousUser"){
+  // Don't do noting for anonymousUser
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser")
     return;
   }
   
@@ -1266,6 +1267,8 @@ Query = function() {
   var _page = 0;
   var _pageSize = 0;
   var _sortBy = "";
+  // Exporting support
+  var _exportIframe = null;
 
   var _params = [];
   /*
@@ -1321,28 +1324,11 @@ Query = function() {
       throw 'QueryNotInitialized';
     }
     var url;
-    var queryDefinition = {};
+    var queryDefinition; 
     var callback = (outsideCallback ? outsideCallback : _callback);
     if (_mode == 'CDA') {
-      for (var param in _params) {
-        if(_params.hasOwnProperty(param)) {
-          var value = Dashboards.getParameterValue(_params[param][1]);
-          var name = _params[param][0];
-          if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-            //special case where single element will wrongly be treated as a parseable array by cda
-            value = doCsvQuoting(value[0],';');
-          }
-          //else will not be correctly handled for functions that return arrays
-          if (typeof value == 'function') value = value();
-          queryDefinition['param' + name] = value;
-        }
-      }
-      queryDefinition.path = _file;
-      queryDefinition.dataAccessId = _id;
-      queryDefinition.pageSize = _pageSize;
-      queryDefinition.pageStart = _page;
-      queryDefinition.sortBy = _sortBy;
       url = CDA_PATH;
+      queryDefinition = buildQueryDefinition();
     // Assemble parameters
     } else if (_mode == 'Legacy') {
       queryDefinition = _query;
@@ -1357,11 +1343,52 @@ Query = function() {
     });
   };
 
+  function buildQueryDefinition(overrides) {
+    overrides = overrides || {};
+    var queryDefinition = {};
+    for (var param in _params) {
+      if(_params.hasOwnProperty(param)) {
+        var value; 
+        var name = _params[param][0];
+        if (overrides.hasOwnProperty(name)) {
+            value = overrides[name];
+        } else {
+          value = Dashboards.getParameterValue(_params[param][1]);
+        }
+        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+          //special case where single element will wrongly be treated as a parseable array by cda
+          value = doCsvQuoting(value[0],';');
+        }
+        //else will not be correctly handled for functions that return arrays
+        if (typeof value == 'function') value = value();
+        queryDefinition['param' + name] = value;
+      }
+    }
+    queryDefinition.path = _file;
+    queryDefinition.dataAccessId = _id;
+    queryDefinition.pageSize = _pageSize;
+    queryDefinition.pageStart = _page;
+    queryDefinition.sortBy = _sortBy;
+    return queryDefinition;
+  }
+
   /*
      * Public interface
      */
 
   // Entry point
+
+  this.export = function(outputType, overrides) {
+    if (_mode != 'CDA') {
+      throw "UnsupportedOperation";
+    }
+    var queryDefinition = buildQueryDefinition(overrides);
+    queryDefinition.outputType = outputType;
+    _exportIframe = _exportIframe || $('<iframe style="display:none">');
+    _exportIframe.detach();
+    _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
+    _exportIframe.appendTo($('body'));
+  }
 
   this.fetchData = function(params, callback) {
     switch(arguments.length) {
