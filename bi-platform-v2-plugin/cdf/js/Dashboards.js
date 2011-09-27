@@ -876,8 +876,8 @@ Dashboards.storage = {};
 // Operations
 Dashboards.loadStorage = function(){
 
-    // Don't do noting for anonymousUser.
-  if( Dashboards.context && Dashboards.context.user === "anonymousUser")
+    // Don't do anything for anonymousUser.
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
     return;
   }
 
@@ -892,8 +892,8 @@ Dashboards.loadStorage = function(){
 
 Dashboards.saveStorage = function(){
 
-  // Don't do noting for anonymousUser
-  if( Dashboards.context && Dashboards.context.user === "anonymousUser")
+  // Don't do anything for anonymousUser
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
     return;
   }
 
@@ -914,7 +914,7 @@ Dashboards.cleanStorage = function(){
   Dashboards.storage = {};
 
   // Don't do noting for anonymousUser
-  if( Dashboards.context && Dashboards.context.user === "anonymousUser")
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
     return;
   }
   
