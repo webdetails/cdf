@@ -29,16 +29,17 @@ var CDF_SELF = 2;
 var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
-$.blockUI.defaults.fadeIn = 0;
-$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
-$.blockUI.defaults.css.left = '40%';
-$.blockUI.defaults.css.top = '30%';
-$.blockUI.defaults.css.marginLeft = '85px';
-$.blockUI.defaults.css.width = '170px';
-$.blockUI.defaults.css.opacity = '.8';
-$.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
-$.blockUI.defaults.css['-moz-border-radius'] = '10px';
-
+if($.blockUI){
+  $.blockUI.defaults.fadeIn = 0;
+  $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
+  $.blockUI.defaults.css.left = '40%';
+  $.blockUI.defaults.css.top = '30%';
+  $.blockUI.defaults.css.marginLeft = '85px';
+  $.blockUI.defaults.css.width = '170px';
+  $.blockUI.defaults.css.opacity = '.8';
+  $.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
+  $.blockUI.defaults.css['-moz-border-radius'] = '10px';
+}
 
 var ERROR_CODES = [];
 ERROR_CODES["UNKNOWN"] = ["ERROR: ","resources/style/images/error.jpg"];
@@ -874,9 +875,10 @@ Dashboards.storage = {};
 // Operations
 Dashboards.loadStorage = function(){
 
-    // Don't do noting for anonymousUser.
-  if(Dashboards.context.user === "anonymousUser")
+    // Don't do anything for anonymousUser.
+  if(Dashboards.context == undefined ||  Dashboards.context.user === "anonymousUser"){
     return;
+  }
 
   var args = {
     action: "read",
@@ -889,9 +891,10 @@ Dashboards.loadStorage = function(){
 
 Dashboards.saveStorage = function(){
 
-  // Don't do noting for anonymousUser
-  if(Dashboards.context.user === "anonymousUser")
+    // Don't do anything for anonymousUser.
+  if(Dashboards.context == undefined ||  Dashboards.context.user === "anonymousUser"){
     return;
+  }
 
   var args = {
     action: "store",
@@ -909,9 +912,10 @@ Dashboards.cleanStorage = function(){
 
   Dashboards.storage = {};
 
-  // Don't do noting for anonymousUser
-  if(Dashboards.context.user === "anonymousUser")
+    // Don't do anything for anonymousUser.
+  if(Dashboards.context == undefined ||  Dashboards.context.user === "anonymousUser"){
     return;
+  }
   
   var args = {
     action: "delete"
