@@ -178,8 +178,8 @@ var XactionComponent = BaseComponent.extend({
         " frameborder=\"0\"" +
         " height=\"100%\"" +
         " width=\"100%\" />";        
-        iframe = $(xactionIFrameHTML);        
-        url = webAppPath + "/ViewAction?wrapper=false" +
+        var iframe = $(xactionIFrameHTML);        
+        var url = webAppPath + "/ViewAction?wrapper=false" +
               "&solution=" + this.solution +
               "&path=" + this.path +
               "&action="+ this.action;
