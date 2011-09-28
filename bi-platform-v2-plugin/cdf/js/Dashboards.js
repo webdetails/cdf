@@ -1378,7 +1378,7 @@ Query = function() {
 
   // Entry point
 
-  this.export = function(outputType, overrides) {
+  this.exportData = function(outputType, overrides) {
     if (_mode != 'CDA') {
       throw "UnsupportedOperation";
     }
