@@ -1640,6 +1640,9 @@ if($.fn.dataTableExt != undefined){ // Ensure we load dataTables before this lin
 }
 
 var TableComponent = BaseComponent.extend({
+  
+  ph: undefined,
+  
   update : function() {
     var cd = this.chartDefinition;
     if (cd == undefined){
@@ -1649,7 +1652,8 @@ var TableComponent = BaseComponent.extend({
     cd["tableId"] = this.htmlObject + "Table";
 
     // Clear previous table
-    $("#"+this.htmlObject).empty();
+    this.ph = $("#"+this.htmlObject);
+    this.ph.empty();
     var myself = this;
     // remove drawCallback from the parameters, or
     // it'll be called before we have an actual table...
@@ -1741,7 +1745,10 @@ var TableComponent = BaseComponent.extend({
     var myself = this,
     cd = this.chartDefinition,
     extraOptions = {};
+   
+    myself.ph.trigger('cdfTableComponentProcessResponse');
     
+   
     // Set defaults for headers / types
     if(typeof cd.colHeaders === "undefined" || cd.colHeaders.length == 0)
       cd.colHeaders = json.metadata.map(function(i){return i.colName});
@@ -1762,7 +1769,7 @@ var TableComponent = BaseComponent.extend({
     // Sparklines still applied to drawcallback
     var myself = this;
     dtData.fnDrawCallback = function() {
-      $("#" + myself.htmlObject + " td.sparkline:visible").each(function(i){
+      myself.ph.find("td.sparkline:visible").each(function(i){
         var t = $(this);
         t.sparkline(t.text().split(/,/));
         t.removeClass("sparkline");
@@ -1789,7 +1796,7 @@ var TableComponent = BaseComponent.extend({
         myself.pagingCallback(u,p,c,this);
       };
     }
-    $("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
+    myself.ph.html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
     // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
     this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
 
@@ -1811,7 +1818,7 @@ var TableComponent = BaseComponent.extend({
     }
 
     if(cd.urlTemplate != undefined){
-      var td =$("#" + myself.htmlObject + " td:nth-child(1)");
+      var td =myself.ph.find("td:nth-child(1)");
       var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child(1)");
       td.addClass('cdfClickable');
       td.bind("click", function(e){
@@ -1820,7 +1827,7 @@ var TableComponent = BaseComponent.extend({
         eval(f);
       });
     }
-
+    myself.ph.trigger('cdfTableComponentFinishRendering');
   }
 },
 {
