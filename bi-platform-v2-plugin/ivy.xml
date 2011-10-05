@@ -42,10 +42,10 @@
         </dependency>
 
         <!--  testing dependencies -->   
-        <dependency org="pentaho" name="pentaho-bi-platform-repository-test"      rev="${project.revision}" changing="true" conf="test->default"/>     
+        <dependency org="pentaho" name="pentaho-bi-platform-repository-test"      rev="${dependency.bi-platform.revision}" changing="true" conf="test->default"/>     
         <dependency org="commons-collections" name="commons-collections" conf="test->default" rev="3.2"/>
     	<dependency org="org.slf4j" name="slf4j-log4j12" rev="1.5.8" conf="test->default" />
-    	<dependency org="pentaho" name="pentaho-bi-platform-test-foundation" rev="${project.revision}" changing="true"
+    	<dependency org="pentaho" name="pentaho-bi-platform-test-foundation" rev="${dependency.bi-platform.revision}" changing="true"
       		conf="test->default" transitive="false" />
     	<dependency org="junit" name="junit" rev="4.4" conf="test->default" />
         <dependency org="org.springframework" name="spring-test" rev="2.5.6" conf="test->default" />
