@@ -18,14 +18,10 @@
         <dependency org="org.json"            name="json"                rev="${dependency.json.revision}" transitive="false"/>        
         <dependency org="javax.servlet"       name="servlet-api"         rev="2.4" />
         <!--  pentaho dependencies -->
-        <dependency org="pentaho" name="pentaho-bi-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-util" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>        
-        <dependency org="pentaho" name="pentaho-bi-platform-engine-core" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-engine-services" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-repository" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-plugin-services" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
-		<dependency org="pentaho" name="pentaho-bi-platform-web" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-web-servlet" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
+        <dependency org="pentaho" name="pentaho-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+        <dependency org="pentaho" name="pentaho-platform-core" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>        
+        <dependency org="pentaho" name="pentaho-platform-extensions" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+        <dependency org="pentaho" name="pentaho-platform-repository" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
 		<dependency org="org.hibernate"       name="hibernate"           rev="3.2.6.ga">
 			<!--
 			 
@@ -42,10 +38,10 @@
         </dependency>
 
         <!--  testing dependencies -->   
-        <dependency org="pentaho" name="pentaho-bi-platform-repository-test"      rev="${dependency.bi-platform.revision}" changing="true" conf="test->default"/>     
+        <dependency org="pentaho" name="pentaho-platform-repository-test"      rev="${dependency.bi-platform.revision}" changing="true" conf="test->default"/>     
         <dependency org="commons-collections" name="commons-collections" conf="test->default" rev="3.2"/>
     	<dependency org="org.slf4j" name="slf4j-log4j12" rev="1.5.8" conf="test->default" />
-    	<dependency org="pentaho" name="pentaho-bi-platform-test-foundation" rev="${dependency.bi-platform.revision}" changing="true"
+    	<dependency org="pentaho" name="pentaho-platform-core-test" rev="${dependency.bi-platform.revision}" changing="true"
       		conf="test->default" transitive="false" />
     	<dependency org="junit" name="junit" rev="4.4" conf="test->default" />
         <dependency org="org.springframework" name="spring-test" rev="2.5.6" conf="test->default" />
