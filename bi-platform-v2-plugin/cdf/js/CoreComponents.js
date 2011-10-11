@@ -1817,6 +1817,24 @@ var TableComponent = BaseComponent.extend({
       });
     }
 
+    myself.ph.find ('table').bind('click',function(e) {
+      if (typeof cd.clickAction === 'function') { 
+        var state = {},
+          target = $(e.target),
+          results = myself.queryState.lastResults();
+        if(!(target.parents('tbody').length)) {
+          return;
+        }
+
+        state.colIdx = target.index();
+        state.rowIdx = target.parent().index();
+        state.series = results.resultset[state.rowIdx][0];
+        state.category = results.metadata[state.colIdx].colName;
+        state.value =  results.resultset[state.rowIdx][state.colIdx];
+        state.target = target;
+        cd.clickAction.call(myself,state);
+      }
+    });
     myself.ph.trigger('cdfTableComponentFinishRendering');
   }
 },
