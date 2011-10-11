@@ -1370,7 +1370,7 @@ Query = function() {
     queryDefinition.pageStart = _page;
     queryDefinition.sortBy = _sortBy;
     return queryDefinition;
-  }
+  };
 
   /*
      * Public interface
