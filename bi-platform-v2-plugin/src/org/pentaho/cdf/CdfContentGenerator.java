@@ -2,6 +2,8 @@ package org.pentaho.cdf;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -112,7 +114,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
                     && ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest")).getContextPath() != null) {
                 RELATIVE_URL = ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest")).getContextPath();
             } else {
-                RELATIVE_URL = PentahoSystem.getApplicationContext().getBaseUrl();
+                RELATIVE_URL = getBaseUrl();
                 /* If we detect an empty string, things will break.
                  * If we detect an absolute url, things will *probably* break.
                  * In either of these cases, we'll resort to Catalina's context,
@@ -1035,4 +1037,29 @@ public class CdfContentGenerator extends BaseContentGenerator {
             packager.registerPackage("styles-mobile", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles-mobile.css", stylesList.toArray(new String[stylesList.size()]));
         }
     }
+    
+    private static String getBaseUrl(){
+
+    String baseUrl;
+      try
+      {
+        // Note - this method is deprecated and returns different values in 3.6
+        // and 3.7. Change this in future versions -- but not yet
+// getFullyQualifiedServerUeRL only available from 3.7
+//      URI uri = new URI(PentahoSystem.getApplicationContext().getFullyQualifiedServerURL());
+        URI uri = new URI(PentahoSystem.getApplicationContext().getBaseUrl());
+        baseUrl = uri.getPath();
+        if(!baseUrl.endsWith("/")){
+          baseUrl+="/";
+        } 
+      }
+      catch (URISyntaxException ex)
+      {
+        logger.fatal("Error building BaseURL from " + PentahoSystem.getApplicationContext().getBaseUrl(),ex);
+        baseUrl = "";
+      }
+
+    return baseUrl;
+
+  }
 }
