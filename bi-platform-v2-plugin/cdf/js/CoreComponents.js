@@ -1817,16 +1817,6 @@ var TableComponent = BaseComponent.extend({
       });
     }
 
-    if(cd.urlTemplate != undefined){
-      var td =myself.ph.find("td:nth-child(1)");
-      var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child(1)");
-      td.addClass('cdfClickable');
-      td.bind("click", function(e){
-        var regex = new RegExp("{"+cd.parameterName+"}","g");
-        var f = cd.urlTemplate.replace(regex,$(this).text());
-        eval(f);
-      });
-    }
     myself.ph.trigger('cdfTableComponentFinishRendering');
   }
 },
