@@ -68,6 +68,10 @@ var Dashboards = {
   components: [],
   /* Holds the dashboard parameters if globalContext = false */
   parameters: [],
+  
+  // Holder for context
+  context:{},
+  
   /* measures, in miliseconds, the delay between firing blockUI and
    * actually updating the dashboard. Necessary for IE/Chrome. Higher
    * values have better chances of working, but are (obviously) slower
