@@ -1350,15 +1350,14 @@ Query = function() {
   function buildQueryDefinition(overrides) {
     overrides = overrides || {};
     var queryDefinition = {};
-    for (var param in _params) {
-      if(_params.hasOwnProperty(param)) {
+    
+    var p = Dashboards.objectToPropertiesArray( $.extend({},Dashboards.propertiesArrayToObject(_params), overrides) )
+
+    for (var param in p) {
+      if(p.hasOwnProperty(param)) {
         var value; 
-        var name = _params[param][0];
-        if (overrides.hasOwnProperty(name)) {
-            value = overrides[name];
-        } else {
-          value = Dashboards.getParameterValue(_params[param][1]);
-        }
+        var name = p[param][0];
+        value = Dashboards.getParameterValue(p[param][1]);
         if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
           //special case where single element will wrongly be treated as a parseable array by cda
           value = doCsvQuoting(value[0],';');

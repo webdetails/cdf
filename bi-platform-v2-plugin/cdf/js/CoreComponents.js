@@ -1660,6 +1660,7 @@ var TableComponent = BaseComponent.extend({
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
     this.queryState = new Query(croppedCd);
+    this.query = this.queryState; // for analogy with ccc component's name
     // make sure to clean sort options
     var sortBy = this.chartDefinition.sortBy || [],
       sortOptions = [];
