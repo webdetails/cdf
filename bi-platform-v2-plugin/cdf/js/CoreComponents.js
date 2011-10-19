@@ -2384,7 +2384,7 @@ var AnalyzerComponent = BaseComponent.extend({
       action: this.action,
       command: this.command == undefined? "open": this.command,
       showFieldList: this.showFieldList == undefined? false: this.showFieldList,
-      frameless: this.frameless,
+      frameless: this.frameless
     };
 
     // process params and update options
