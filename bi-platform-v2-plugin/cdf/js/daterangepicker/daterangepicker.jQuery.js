@@ -59,7 +59,12 @@ jQuery.fn.daterangepicker = function(settings){
 		appendTo: 'body',
 		onClose: function(){},
 		onOpen: function(){},
-		onChange: function(){},
+		onChange: function(){
+			var rangeA = fDate( rp.find('.range-start').datepicker('getDate') );
+			var rangeB = fDate( rp.find('.range-end').datepicker('getDate') );
+			settings.onDateSelect(rangeA, rangeB);
+		},
+		onDateSelect: function(rangeA, rangeB){},
 		datepickerOptions: null //object containing native UI datepicker API options
 	}, settings);
 	
