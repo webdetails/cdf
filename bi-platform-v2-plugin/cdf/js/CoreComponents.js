@@ -1021,8 +1021,7 @@ var DateRangeInputComponent = BaseComponent.extend({
     
     
     $(function(){
-      $("#" + myself.htmlObject + " input")
-      dr.daterangepicker({
+      $("#" + myself.htmlObject + " input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
@@ -1672,9 +1671,10 @@ var TableComponent = BaseComponent.extend({
     this.queryState.setSortBy(sortOptions);
 
     if(cd.paginateServerside) {
+      this.extraOptions = this.extraOptions || [];
       this.extraOptions.push(["bServerSide",true]);
       this.extraOptions.push(["bProcessing",true]);
-      this.queryState.setPageSize(parseInt(cd.displayLength));
+      this.queryState.setPageSize(parseInt(cd.displayLength || 10));
       this.queryState.setCallback(function(values) {
         changedValues = undefined;
         if((typeof(myself.postFetch)=='function')){
@@ -1825,6 +1825,8 @@ var TableComponent = BaseComponent.extend({
           results = myself.queryState.lastResults();
         if(!(target.parents('tbody').length)) {
           return;
+        } else if (target.get(0).tagName != 'TD') {
+          target = target.closest('td');
         }
 
         state.colIdx = target.index();
