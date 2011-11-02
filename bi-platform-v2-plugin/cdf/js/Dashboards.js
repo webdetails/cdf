@@ -1446,8 +1446,9 @@ Query = function() {
 
   this.reprocessResults = function(outerCallback) {
     if (_lastResultSet !== null) {
+      var clone = $.extend(true,{},_lastResultSet);
       var callback = (outsideCallback ? outsideCallback : _callback);
-      callback(_mode == 'CDA' ? json : json.values);
+      callback(_mode == 'CDA' ? clone : clone.values);
     } else {
       throw "NoCachedResults";
     }
