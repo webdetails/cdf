@@ -1343,7 +1343,8 @@ Query = function() {
         json = eval("(" + json + ")");
       }
       _lastResultSet = json;
-      callback(_mode == 'CDA' ? json : json.values);
+      var clone = $.extend(true,{},_lastResultSet);
+      callback(_mode == 'CDA' ? clone : clone.values);
     });
   };
 
@@ -1427,7 +1428,7 @@ Query = function() {
   // Result caching
   this.lastResults = function(){
     if (_lastResultSet !== null) {
-      return _lastResultSet;
+      return $.extend(true,{},_lastResultSet);
     } else {
       throw "NoCachedResults";
     }
@@ -1435,8 +1436,9 @@ Query = function() {
 
   this.reprocessLastResults = function(outerCallback){
     if (_lastResultSet !== null) {
+      var clone = $.extend(true,{},_lastResultSet);
       var callback = outerCallback || _callback;
-      return callback(_lastResultSet);
+      return callback(clone);
     } else {
       throw "NoCachedResults";
     }
