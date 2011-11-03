@@ -148,7 +148,8 @@ jQuery.fn.daterangepicker = function(settings){
 				})
 			.click(function(){
 				rp.find('.ui-state-active').removeClass('ui-state-active');
-				jQuery(this).addClass('ui-state-active').clickActions(rp, rpPickers, doneBtn);
+				jQuery(this).addClass('ui-state-active');
+                                clickActions($(this),rp, rpPickers, doneBtn);
 				return false;
 			});
 		return ul;
@@ -204,9 +205,9 @@ jQuery.fn.daterangepicker = function(settings){
 	rp.data('state', 'closed');
 					
 	//preset menu click events	
-	jQuery.fn.clickActions = function(rp, rpPickers, doneBtn){
+	var clickActions = function(thisObj, rp, rpPickers, doneBtn){
 		
-		if(jQuery(this).is('.ui-daterangepicker-specificDate')){
+		if(thisObj.is('.ui-daterangepicker-specificDate')){
 			doneBtn.hide();
 			rpPickers.show();
 			rp.find('.title-start').text( options.presets.specificDate );
@@ -214,7 +215,7 @@ jQuery.fn.daterangepicker = function(settings){
 			rp.find('.range-end').restoreDateFromData().hide(400);
 			setTimeout(function(){doneBtn.fadeIn();}, 400);
 		}
-		else if(jQuery(this).is('.ui-daterangepicker-allDatesBefore')){
+		else if(thisObj.is('.ui-daterangepicker-allDatesBefore')){
 			doneBtn.hide();
 			rpPickers.show();
 			rp.find('.title-end').text( options.presets.allDatesBefore );
@@ -222,7 +223,7 @@ jQuery.fn.daterangepicker = function(settings){
 			rp.find('.range-end').restoreDateFromData().show(400);
 			setTimeout(function(){doneBtn.fadeIn();}, 400);
 		}
-		else if(jQuery(this).is('.ui-daterangepicker-allDatesAfter')){
+		else if(thisObj.is('.ui-daterangepicker-allDatesAfter')){
 			doneBtn.hide();
 			rpPickers.show();
 			rp.find('.title-start').text( options.presets.allDatesAfter );
@@ -230,7 +231,7 @@ jQuery.fn.daterangepicker = function(settings){
 			rp.find('.range-end').saveDateToData().datepicker('setDate', options.latestDate).hide(400);
 			setTimeout(function(){doneBtn.fadeIn();}, 400);
 		}
-		else if(jQuery(this).is('.ui-daterangepicker-dateRange')){
+		else if(thisObj.is('.ui-daterangepicker-dateRange')){
 			doneBtn.hide();
 			rpPickers.show();
 			rp.find('.title-start').text(options.rangeStartTitle);
@@ -245,8 +246,8 @@ jQuery.fn.daterangepicker = function(settings){
 				rp.find('.range-start, .range-end').hide(400, function(){
 					rpPickers.hide();
 				});
-				var dateStart = (typeof jQuery(this).data('dateStart') == 'string') ? Date.parse(jQuery(this).data('dateStart')) : jQuery(this).data('dateStart')();
-				var dateEnd = (typeof jQuery(this).data('dateEnd') == 'string') ? Date.parse(jQuery(this).data('dateEnd')) : jQuery(this).data('dateEnd')();
+				var dateStart = (typeof thisObj.data('dateStart') == 'string') ? Date.parse(thisObj.data('dateStart')) : thisObj.data('dateStart')();
+				var dateEnd = (typeof thisObj.data('dateEnd') == 'string') ? Date.parse(thisObj.data('dateEnd')) : thisObj.data('dateEnd')();
 				rp.find('.range-start').datepicker('setDate', dateStart).find('.ui-datepicker-current-day').trigger('click');
 				rp.find('.range-end').datepicker('setDate', dateEnd).find('.ui-datepicker-current-day').trigger('click');
 		}
