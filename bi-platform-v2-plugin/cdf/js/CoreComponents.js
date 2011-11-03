@@ -1019,7 +1019,13 @@ var DateRangeInputComponent = BaseComponent.extend({
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
     
-    
+    var changed, closed;
+    function triggerWhenDone() {
+      if(changed && closed) {
+        myself.fireInputChange(myself.startValue,myself.endValue);
+        changed = closed = false;
+      }
+    };
     $(function(){
       $("#" + myself.htmlObject + " input").daterangepicker({
         posX: offset.left + leftOffset,
@@ -1027,15 +1033,26 @@ var DateRangeInputComponent = BaseComponent.extend({
         earliestDate: earliestDate,
         latestDate: latestDate,
         dateFormat: 'yy-mm-dd',
+        onOpen: function() {
+          changed = closed = false;
+          myself.startValue = null;
+          myself.endValue = null;
+        },
         onDateSelect: function(rangeA, rangeB) {
-          myself.fireInputChange(rangeA, rangeB);
+          changed = true;
+          myself.storeChanges(rangeA, rangeB);
+          triggerWhenDone();
+        },
+        onClose: function() {
+          closed = true;
+          triggerWhenDone();
         }
       });
     });
   },
   
-  fireInputChange : function(start, end)
-  {//TODO: review this!
+  fireInputChange : function(start, end){
+    //TODO: review this!
     if(this.preChange){
       this.preChange(start, end);
     }
@@ -1049,7 +1066,12 @@ var DateRangeInputComponent = BaseComponent.extend({
     if(this.postChange){
       this.postChange(start, end);
     }
-  }
+  },
+
+  storeChanges : function(start,end){
+    this.startValue = start;
+    this.endValue = end;
+  },
 },
 {
   fireDateRangeInputChange : function(name, rangeA, rangeB){
