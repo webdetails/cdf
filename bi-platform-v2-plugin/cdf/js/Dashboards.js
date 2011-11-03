@@ -1243,6 +1243,64 @@ sprintfWrapper = {
 
 sprintf = sprintfWrapper.init;
 
+Dashboards.safeClone = function(){
+	var options, name, src, copy, copyIsArray, clone,
+		target = arguments[0] || {},
+		i = 1,
+		length = arguments.length,
+		deep = false;
+
+	// Handle a deep copy situation
+	if ( typeof target === "boolean" ) {
+		deep = target;
+		target = arguments[1] || {};
+		// skip the boolean and the target
+		i = 2;
+	}
+
+	// Handle case when target is a string or something (possible in deep copy)
+	if ( typeof target !== "object" && !jQuery.isFunction(target) ) {
+		target = {};
+	}
+
+	for ( ; i < length; i++ ) {
+		// Only deal with non-null/undefined values
+		if ( (options = arguments[ i ]) != null ) {
+			// Extend the base object
+			for ( name in options ) if (options.hasOwnProperty(name)) {
+				src = target[ name ];
+				copy = options[ name ];
+
+				// Prevent never-ending loop
+				if ( target === copy ) {
+					continue;
+				}
+
+				// Recurse if we're merging plain objects or arrays
+				if ( deep && copy && ( jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)) ) ) {
+					if ( copyIsArray ) {
+						copyIsArray = false;
+						clone = src && jQuery.isArray(src) ? src : [];
+
+					} else {
+						clone = src && jQuery.isPlainObject(src) ? src : {};
+					}
+
+					// Never move original objects, clone them
+					target[ name ] = Dashboards.safeClone( deep, clone, copy );
+
+				// Don't bring in undefined values
+				} else if ( copy !== undefined ) {
+					target[ name ] = copy;
+				}
+			}
+		}
+	}
+
+	// Return the modified object
+	return target;
+}
+
 //Ctors:
 // Query(queryString) --> DEPRECATED
 // Query(queryDefinition{path, dataAccessId})
@@ -1343,7 +1401,7 @@ Query = function() {
         json = eval("(" + json + ")");
       }
       _lastResultSet = json;
-      var clone = $.extend(true,{},_lastResultSet);
+      var clone = Dashboards.safeClone(true,{},_lastResultSet);
       callback(_mode == 'CDA' ? clone : clone.values);
     });
   };
@@ -1352,7 +1410,7 @@ Query = function() {
     overrides = overrides || {};
     var queryDefinition = {};
     
-    var p = Dashboards.objectToPropertiesArray( $.extend({},Dashboards.propertiesArrayToObject(_params), overrides) )
+    var p = Dashboards.objectToPropertiesArray( Dashboards.safeClone({},Dashboards.propertiesArrayToObject(_params), overrides) )
 
     for (var param in p) {
       if(p.hasOwnProperty(param)) {
@@ -1428,7 +1486,7 @@ Query = function() {
   // Result caching
   this.lastResults = function(){
     if (_lastResultSet !== null) {
-      return $.extend(true,{},_lastResultSet);
+      return Dashboards.safeClone(true,{},_lastResultSet);
     } else {
       throw "NoCachedResults";
     }
@@ -1436,7 +1494,7 @@ Query = function() {
 
   this.reprocessLastResults = function(outerCallback){
     if (_lastResultSet !== null) {
-      var clone = $.extend(true,{},_lastResultSet);
+      var clone = Dashboards.safeClone(true,{},_lastResultSet);
       var callback = outerCallback || _callback;
       return callback(clone);
     } else {
@@ -1446,7 +1504,7 @@ Query = function() {
 
   this.reprocessResults = function(outerCallback) {
     if (_lastResultSet !== null) {
-      var clone = $.extend(true,{},_lastResultSet);
+      var clone = Dashboards.safeClone(true,{},_lastResultSet);
       var callback = (outsideCallback ? outsideCallback : _callback);
       callback(_mode == 'CDA' ? clone : clone.values);
     } else {
@@ -1629,3 +1687,5 @@ Query = function() {
     }
   };
 };
+
+
