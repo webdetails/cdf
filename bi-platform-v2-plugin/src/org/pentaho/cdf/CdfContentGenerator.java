@@ -145,7 +145,7 @@ public class CdfContentGenerator extends BaseContentGenerator
       {
         HashMap<String, Object> iface = (HashMap<String, Object>) callbacks.get(0);
         pathParams = parameterProviders.get("path");
-        contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML); //$NON-NLS-1$
+        contentItem = outputHandler.getOutputContentItem("response", "content", instanceId, MIME_HTML); //$NON-NLS-1$
         out = (OutputStream) iface.get("output"); //$NON-NLS-1$
         method = "/" + (String) iface.get("method"); //$NON-NLS-1$
         payload = (String) iface.get("payload"); //$NON-NLS-1$
@@ -154,7 +154,7 @@ public class CdfContentGenerator extends BaseContentGenerator
       else
       { // if not, we handle the request normally
         pathParams = parameterProviders.get("path");
-        contentItem = outputHandler.getOutputContentItem("response", "content", "", instanceId, MIME_HTML);
+        contentItem = outputHandler.getOutputContentItem("response", "content", instanceId, MIME_HTML);
         out = contentItem.getOutputStream(null);
         method = pathParams.getStringParameter("path", null);
         payload = "";
