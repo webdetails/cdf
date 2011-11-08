@@ -46,7 +46,7 @@ pvc.padMatrixWithZeros = function(d){
 
 pvc.cloneMatrix = function(m){
     return m.map(function(d){
-        return d.slice()
+        return d.slice();
     });
 }
 
@@ -113,8 +113,6 @@ pvc.Base = Base.extend({
     legendSource: "series",
     colors: null,
 
-    // renderCallback
-    renderCallback: undefined,
 
     constructor: function(options){
         var myself = this;
@@ -192,7 +190,13 @@ pvc.Base = Base.extend({
         this.dataEngine.setData(this.metadata,this.resultset);
         this.dataEngine.setCrosstabMode(this.options.crosstabMode);
         this.dataEngine.setSeriesInRows(this.options.seriesInRows);
+        //TODO: new
+        this.dataEngine.setMultiValued(this.options.isMultiValued);
+        this.dataEngine.setValuesIndexes(this.options.measuresIndexes);//columns where measure values are, for relational data
+        this.dataEngine.setDataOptions(this.options.dataOptions);
+        //end
         this.dataEngine.createTranslator();
+        
 
         pvc.log(this.dataEngine.getInfo());
         // Create the color info
@@ -267,10 +271,6 @@ pvc.Base = Base.extend({
                 this.preRender();
             }
 
-            if( typeof this.options.renderCallback !== "undefined" ){
-                this.options.renderCallback.call(this);
-            }
-        
             this.basePanel.getPvPanel().render();
     
             if(this.options.animate == true && !bypassAnimation){
@@ -543,7 +543,7 @@ pvc.BasePanel = Base.extend({
         right: "left"
     },
 
-    paralelLength:{
+    parallelLength:{
         top: "width",
         bottom: "width",
         right: "height",
@@ -1067,7 +1067,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             secondAxisOffset: 0,
             secondAxisColor: "blue",
             secondAxisSize: 0, // calculated
-
+            
+            panelSizeRatio: 1,
+            axisLabelFont: '10px sans-serif',
             // CvK  added extra parameter for implementation of HeatGrid
             orthoAxisOrdinal: false
         // if orientation==vertical then perpendicular-axis is the y-axis
@@ -1096,7 +1098,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     preRender: function(){
 
-
         this.base();
 
         pvc.log("Prerendering in CategoricalAbstract");
@@ -1109,6 +1110,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.options.xAxisSize = 0
         }
 
+        //TODO: font
+
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
         this.secondScale =  this.options.secondAxisIndependentScale?this.getSecondScale(): this.getLinearScale();
@@ -1116,15 +1119,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Generate axis
 
-        if(this.options.secondAxis)
+        if(this.options.secondAxis){
             this.generateSecondXAxis(); // this goes before the other because of the fullGrid
+        }
         this.generateXAxis();
-        if(this.options.secondAxis)
+        if(this.options.secondAxis){
             this.generateSecondYAxis(); // this goes before the other because of the fullGrid
+        }
         this.generateYAxis();
-
-
-
 
     },
 
@@ -1143,7 +1145,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.xAxisSize,
                 oppositeAxisSize: this.options.yAxisSize,
                 fullGrid:  this.options.xAxisFullGrid,
-                elements: this.getAxisOrdinalElements("x")
+                ordinalElements: this.getAxisOrdinalElements("x"),
+                
+                clickAction: this.options.xAxisClickAction,
+                useCompositeAxis: this.options.useCompositeAxis, 
+                font: this.options.axisLabelFont,
+                doubleClickAction: this.options.xAxisDoubleClickAction,
+                clickDelay: this.options.axisClickDelay
             });
 
             //            this.xAxisPanel.setScale(this.xScale);
@@ -1151,7 +1159,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.xAxisPanel.appendTo(this.basePanel); // Add it
 
         }
-
 
     },
 
@@ -1170,7 +1177,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.yAxisSize,
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  this.options.yAxisFullGrid,
-                elements: this.getAxisOrdinalElements("y")
+                ordinalElements: this.getAxisOrdinalElements("y"),
+                
+                clickAction: this.options.yAxisClickAction,
+                useCompositeAxis: this.options.useCompositeAxis, 
+                font: this.options.axisLabelFont,
+                doubleClickAction: this.options.yAxisDoubleClickAction,
+                clickDelay: this.options.axisClickDelay
             });
 
             this.yAxisPanel.setScale(this.yScale);
@@ -1195,7 +1208,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.secondAxisSize,
                 oppositeAxisSize: this.options.yAxisSize,
                 fullGrid:  false, // not supported
-                elements: this.getAxisOrdinalElements("x"),
+                ordinalElements: this.getAxisOrdinalElements("x"),
                 tickColor: this.options.secondAxisColor
             });
 
@@ -1219,7 +1232,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 axisSize: this.options.secondAxisSize,
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  false, // not supported
-                elements: this.getAxisOrdinalElements("y"),
+                ordinalElements: this.getAxisOrdinalElements("y"),
                 tickColor: this.options.secondAxisColor
             });
 
@@ -1289,12 +1302,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         if (this.options.orientation == "vertical") {
             scale = this.options.timeSeries  ?
-            this.getTimeseriesScale(false,true)     :
+            this.getTimeseriesScale()     :
             this.getOrdinalScale();
         } else {
             scale =  (this.options.orthoAxisOrdinal) ?
             this.getPerpOrdinalScale("x")    :
-            this.getLinearScale(false,true);
+            this.getLinearScale();
         } 
 
         return scale;
@@ -1402,7 +1415,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     },
     /**
     **/
-    getLinearScale: function(bypassAxis,bypassOffset){
+    getLinearScale: function(bypassAxis){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
@@ -1450,7 +1463,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var offset = (max - min) * this.options.axisOffset;
-        offset = bypassOffset?0:offset;
         var scale = new pv.Scale.linear(min - (this.options.originIsZero && min == 0 ? 0 : offset),max + (this.options.originIsZero && max == 0 ? 0 : offset));
 
 
@@ -1477,10 +1489,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise
      *
      */
-    getTimeseriesScale: function(bypassAxis,bypassOffset){
+    getTimeseriesScale: function(bypassAxis){
 
         var yAxisSize = bypassAxis?0:this.options.yAxisSize;
         var xAxisSize = bypassAxis?0:this.options.xAxisSize;
+        var secondAxisSize = bypassAxis?0:this.options.secondAxisSize;
 
         var size = this.options.orientation=="vertical"?
         this.basePanel.width:
@@ -1494,9 +1507,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Adding a small offset to the scale:
         var max = parser.parse(categories[categories.length -1]);
-        var min = parser.parse(categories[0]);        
+        var min = parser.parse(categories[0]);
         var offset = (max.getTime() - min.getTime()) * this.options.axisOffset;
-        offset = bypassOffset?0:offset;
 
         var scale = new pv.Scale.linear(new Date(min.getTime() - offset),new Date(max.getTime() + offset));
 
@@ -1598,8 +1610,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     panelName: "axis", // override
     scale: null,
     fullGrid: false,
-    elements: [], // To be used in ordinal scales
-
+    ordinalElements: [], // To be used in ordinal scales
+    clickAction: null,//TODO: new
 
     constructor: function(chart, options){
 
@@ -1611,7 +1623,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         // Size will depend only on the existence of the labels
 
-
         if (this.anchor == "top" || this.anchor == "bottom"){
             this.width = this._parent.width;
             this.height = this.axisSize;
@@ -1621,12 +1632,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.width = this.axisSize;
         }
 
-
         this.pvPanel = this._parent.getPvPanel().add(this.type)
         .width(this.width)
         .height(this.height)
-
-
 
         this.renderAxis();
 
@@ -1636,7 +1644,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvTicks, this.panelName + "Ticks_");
         this.extend(this.pvLabel, this.panelName + "Label_");
         this.extend(this.pvRuleGrid, this.panelName + "Grid_");
-
 
     },
 
@@ -1665,17 +1672,447 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         .strokeStyle(this.tickColor)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
         [pvc.BasePanel.relativeAnchor[this.anchor]](min)
-        [pvc.BasePanel.paralelLength[this.anchor]](max - min)
+        [pvc.BasePanel.parallelLength[this.anchor]](max - min)
 
         if (this.ordinal == true){
-            this.renderOrdinalAxis();
+            if(this.useCompositeAxis == true){
+                  this.renderCompositeOrdinalAxis();
+            }
+            else {
+                this.renderOrdinalAxis();
+            }
         }
         else{
             this.renderLinearAxis();
         }
     
     },
-  
+    
+    /////////////////////////////////////////////////
+    //begin: composite axis
+    
+    getElementsTree: function(elements){
+        var tree = {};
+       for(var i =0; i<elements.length; i++){
+            var baseElem = elements[i][0];
+            if(!tree[baseElem]){
+                tree[baseElem] = elements[i].length == 1 ? 0 : {};
+            }
+            var currObj = tree[baseElem];
+            for(var j=1;j<elements[i].length;j++){
+                var elem = elements[i][j];
+                if(!currObj[elem]){
+                  currObj[elem] = (j == elements[i].length-1) ? 0 : {};
+                }
+                currObj = currObj[elem];
+            }
+        }
+    },
+    
+    getLayoutSingleCluster: function(tree, orientation, maxDepth){
+        
+        myself = this;
+
+        var depthLength = this.axisSize;
+        //displace to take out bogus-root
+        var baseDisplacement = (1.0/++maxDepth)* depthLength;
+        baseDisplacement -= (1.0/12.0) * depthLength;//heuristic compensation
+        
+        var margin = 0;
+        
+        var scaleFactor = maxDepth*1.0/ (maxDepth -1);
+        var orthogonalLength = pvc.BasePanel.orthogonalLength[orientation];
+        //var dlen = (orthogonalLength == 'width')? 'dx' : 'dy';
+        
+        var displacement = (orthogonalLength == 'width')?
+                ((orientation == 'left')? [-baseDisplacement - margin, 0] : [baseDisplacement + margin, 0]) :
+                ((orientation == 'top')?  [0, -baseDisplacement - margin] : [0, baseDisplacement + margin]);
+           
+        this.pvRule.lineWidth(0).strokeStyle(null);
+        var panel = this.pvRule
+                        .add(pv.Panel)[orthogonalLength](depthLength)//.overflow('hidden')
+                            .strokeStyle(null).lineWidth(0) //cropping panel
+                        .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor ).strokeStyle(null).lineWidth(0);// panel resized and shifted to make bogus root disappear
+        panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
+        
+        //set full label path
+        var nodes = pv.dom(tree).root('').nodes().map(function(node){
+            var path = [];
+            path.push(node.nodeName);
+            for(var pnode = node.parentNode; pnode != null; pnode = pnode.parentNode){
+              path.push(pnode.nodeName);
+            }
+            node.nodePath = path.reverse().slice(1);
+            return node;
+        });
+        
+        //create with bogus-root;pv.Hierarchy must always have exactly one root and at least one element besides the root
+        var layout = panel.add(pv.Layout.Cluster.Fill)
+            .nodes(nodes)
+            .orient(orientation)
+            ;
+        return layout;
+    },
+    
+    getBreadthCounters: function(elements){
+       var breadthCounters = {};
+       for(var i =0; i<elements.length; i++){
+            var name = elements[i][0];
+            if(!breadthCounters[name]){
+                breadthCounters[name] = 1;
+            }
+            else {
+                breadthCounters[name] = breadthCounters[name] + 1;
+            }
+        }
+        return breadthCounters;
+    },
+    
+    renderCompositeOrdinalAxis: function(){
+        var myself = this;
+
+        var align = (this.anchor == "bottom" || this.anchor == "top") ?
+        "center" : 
+        (this.anchor == "left")  ?
+        "right" :
+        "left";
+        
+        var axisDirection = (this.anchor == 'bottom' || this.anchor == 'top')?
+            'h':
+            'v';
+
+        var elements = this.ordinalElements.slice(0);
+        //TODO: extend this to work with chart.orientation
+        if(this.anchor == 'bottom' || this.anchor == 'left') {elements.reverse();}
+        
+        //build tree with elements
+        var tree = {};
+        var sectionNames = [];
+        var xlen = elements.length;
+        for(var i =0; i<elements.length; i++){
+            var baseElem = elements[i][0];
+            if(!tree[baseElem]){
+                tree[baseElem] = elements[i].length == 1 ? 0 : {};
+                sectionNames.push(baseElem);
+            }
+            var currObj = tree[baseElem];
+            for(var j=1;j<elements[i].length;j++){
+                var elem = elements[i][j];
+                if(!currObj[elem]){
+                  currObj[elem] = (j == elements[i].length-1) ? 0 : {};
+                }
+                currObj = currObj[elem];
+            }
+        }
+        
+        var maxDepth = pv.max(elements, function(col){
+            return $.isArray(col) ? col.length : 1;
+        });
+        
+        var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
+    
+        var diagDepthCutoff = 2; //depth in [-1/(n+1), 1]
+        var vertDepthCutoff = 2;
+        //see what will fit so we get consistent rotation
+        layout.node
+            .def("fitInfo", null)
+            .height(function(d,e,f){//just iterate and get cutoff
+                var fitInfo = myself.getFitInfoSVG(d.dx, d.dy, d.nodeName, myself.font);
+                if(!fitInfo.h){
+                    
+                    if(axisDirection == 'v' && fitInfo.v ){//prefer vertical
+                        vertDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                    }
+                    else {
+                        diagDepthCutoff = Math.min(diagDepthCutoff, d.depth);
+                    }
+                }
+                this.fitInfo( fitInfo );
+                return d.dy;
+            }) ;
+        
+        //click / double click interaction
+        var ignoreClicks = 0;
+        var DBL_CLICK_MAX_DELAY = (this.clickDelay)? this.clickDelay : 300; //ms
+        var clickAction = (typeof(this.clickAction) == 'function')?
+            function(d){
+                if(ignoreClicks) { ignoreClicks--; }
+                else {
+                    myself.clickAction(d);
+                }
+            } :
+            null;
+            
+        ////TODO:testing
+        //this.doubleClickAction = function(d){
+        //    alert(d).join(', ');
+        //}
+        var doubleClickAction = (typeof(this.doubleClickAction) == 'function')?
+            function(d){
+                ignoreClicks = 2;
+                myself.doubleClickAction(d);
+            } :
+            null;
+        
+        //fill space
+        var lblBar = layout.node.add(pv.Bar)
+            .fillStyle('rgba(127,127,127,.01)')
+            .strokeStyle( function(d){
+                if(d.maxDepth == 1 || d.maxDepth ==0 ) {return null;}
+                else {return "rgba(127,127,127,0.5)";} //non-terminal items, so grouping is visible
+            })
+            .lineWidth( function(d){
+                if(d.maxDepth == 1 || d.maxDepth ==0 ) { return 0; }
+                else {return 0.5;} //non-terminal items, so grouping is visible
+            })
+            .text(function(d){
+                return d.nodeName;
+            })
+            .cursor( myself.clickAction? 'pointer' : 'default')
+            .event('click', function(d){
+                if(clickAction){
+                    if(doubleClickAction){
+                        window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
+                    }
+                    else { clickAction(d.nodePath); }
+                }
+                
+                //if(myself.clickAction){
+                //    myself.clickAction(d.nodePath);
+                //}
+            })
+            .event("mouseover", pv.Behavior.tipsy({//Tooltip
+                gravity: "n",
+                fade: true
+            }));
+        
+        //cutoffs -> snap to vertical/horizontal
+        var H_CUTOFF_ANG = 0.30;
+        var V_CUTOFF_ANG = 1.27;
+        var V_CUTOFF_RATIO = 0.8;
+        var diagMargin = this.getFontSize(this.font) / 2;
+        
+        //draw labels and make them fit
+        this.pvLabel = layout.label.add(pv.Label)
+            .def('lblDirection','h')
+            .textAngle(function(d)
+            {
+                var fitInfo = this.fitInfo();
+                
+                if(d.depth >= vertDepthCutoff && d.depth < diagDepthCutoff){
+                        this.lblDirection('v');
+                        return -Math.PI/2;
+                }
+                if(d.depth >= diagDepthCutoff)
+                {
+                    
+                    var tan = d.dy/d.dx;
+                    var angle = Math.atan(tan);
+                    var hip = Math.sqrt(d.dy*d.dy + d.dx*d.dx);
+                    
+                    if(angle > V_CUTOFF_ANG)
+                    {
+                        this.lblDirection('v');
+                        return -Math.PI/2;
+                    }
+                    else if(angle > H_CUTOFF_ANG) {
+                        this.lblDirection('d');
+                        return -angle;
+                    }
+                }
+                this.lblDirection('h');
+                return 0;//horizontal
+            })
+            .font(myself.font)
+            .text(function(d){//TODO: change
+                var fitInfo = this.fitInfo();
+                switch(this.lblDirection()){
+                    case 'h':
+                        if(!fitInfo.h){//TODO: fallback option for no svg
+                            return myself.trimToWidthSVG(d.dx, d.nodeName, myself.font, '..');
+                        }
+                        break;
+                    case 'v':
+                        if(!fitInfo.v){
+                            return myself.trimToWidthSVG(d.dy, d.nodeName, myself.font, '..');
+                        }
+                        break;
+                    case 'd':
+                       if(!fitInfo.d){
+                          var ang = Math.atan(d.dy/d.dx);
+                          var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;
+                          return myself.trimToWidthSVG(diagonalLength-diagMargin,d.nodeName, myself.font,'..');
+                        }
+                        break;
+                }
+                return d.nodeName ;
+            })
+            ;
+            
+           // double click label //TODO: need doubleclick axis action + single click prevention..
+            if(doubleClickAction)
+            {
+                lblBar.event("dblclick", function(d){
+                    doubleClickAction(d.nodePath);
+                });
+            }
+    },
+    
+    getTextSizePlaceholder : function()
+    {
+        var TEXT_SIZE_PHOLDER_APPEND='_textSizeHtmlObj';
+        if(!this.textSizeTestHolder || this.textSizeTestHolder.parent().length == 0)
+        {
+            var chartHolder = $('#' + this.chart.options.canvas);
+            var textSizeTestHolderId = chartHolder.attr('id') + TEXT_SIZE_PHOLDER_APPEND;
+            this.textSizeTestHolder = $('#' + this.chart.options.canvas + ' #' + textSizeTestHolderId);
+            if(this.textSizeTestHolder.length == 0)
+            {
+                this.textSizeTestHolder = $('<div>')
+                    .attr('id', textSizeTestHolderId)
+                    .css('position', 'absolute')
+                    .css('visibility', 'hidden')
+                    .css('width', 'auto')
+                    .css('height', 'auto');
+                chartHolder.append(this.textSizeTestHolder);
+            }
+        }
+        return this.textSizeTestHolder;
+    },
+
+    getTextSizePvLabel: function(text, font)
+    {
+        var holder = this.getTextSizePlaceholder();
+        var holderId = holder.attr('id');
+        var panel = new pv.Panel();
+        panel.canvas(holderId);
+        var lbl = panel.add(pv.Label).text(text);
+        if(font){
+            lbl.font(font);
+        }
+        return lbl;
+    },
+    
+    getTextLenSVG: function(text, font){
+        var holder = this.getTextSizePlaceholder();
+        var holderId = holder.attr('id');
+        var lbl = this.getTextSizePvLabel(text, font);// panel.add(pv.Label).text(text);//.textBaseline("middle");
+        lbl.root.render();
+        //get generated label
+        var elem = $('#' + holderId + ' text')[0];
+        var box = elem.getBBox();//bounding box
+        return box.width;
+    },
+    
+    //TODO: if not in px?..
+    getFontSize: function(font){
+        var holder = this.getTextSizePlaceholder();
+        holder.css('font', font);
+        return holder.css('font-size').slice(0,-2);
+    },
+    
+    getFitInfoSVG: function(w, h, text, font)
+    {
+        if(!pv.have_SVG){
+            return this.getFitInfo(w,h,text,font);
+        }
+        if(text == '') return {h:true, v:true, d:true};
+        var len = this.getTextLenSVG(text, font);
+        var fitInfo =
+        {
+            h: len <= w,
+            v: len <= h,
+            d: len <= Math.sqrt(w*w + h*h) -2
+        };
+        return fitInfo;
+    },
+    
+    trimToWidthSVGDiag: function(w,h,text,font,angle, trimTerminator){//TODO:discard?
+        
+        if(!pv.have_SVG){
+            return this.trimToWidth(len,text,font);
+        }
+        
+        var lbl = this.getTextSizePvLabel(text, font);
+        var holder = this.getTextSizePlaceholder();
+        var holderId = holder.attr('id'); 
+        var trimmed = false;
+        lbl.textAngle(angle);
+        lbl.root.render();
+        var elem = $('#' + holderId + ' text').parent()[0];
+        
+        for(var box =  elem.getBBox();
+            box.width > w ||
+            box.height > h;
+            text = text.slice(0,text.length -1))
+        {
+            trimmed = true;
+            lbl.text(text + trimTerminator);
+            lbl.root.render();
+           // elem = $('#' + holderId + ' text').parent()[0];
+            box = elem.getBBox();
+        }
+        return text + (trimmed? trimTerminator: '');
+    },
+    
+    trimToWidthSVG: function(len, text, font, trimTerminator){//TODO:perf?
+        if(!pv.have_SVG){
+            return this.trimToWidth(len,text,font);
+        }
+        
+        if(text == '') return text;
+        var holder = this.getTextSizePlaceholder();
+        var trimmed = false;
+        
+        for(var textLen = this.getTextLenSVG(text, font); textLen > len; text = text.slice(0,text.length -1)){
+            textLen = this.getTextLenSVG(text, font);
+            trimmed = true;
+        }
+        return text + (trimmed? trimTerminator: '');
+    },
+    
+    //whether fits horizaontally, vertical and/or in diagonal
+    getFitInfo: function(w, h, text, font)
+    {
+        var fitsH = this.doesTextSizeFit(w, text, font);
+        var fitsV =  this.doesTextSizeFit(h, text, font);
+        var fitsD = this.doesTextSizeFit(Math.sqrt(w*w + h*h)- 5, text, font);//TODO:hcoded
+        
+        var fitInfo =
+        {
+            h: fitsH,
+            v: fitsV,
+            d: fitsD 
+        };
+        return fitInfo;
+    },
+    
+    //TODO: use for IE if non-svg option kept
+    doesTextSizeFit: function(length, text, font){
+        var MARGIN = 4;//TODO: hcoded
+        var holder = this.getTextSizePlaceholder();
+        holder.text(text);
+        return holder.width() - MARGIN <= length;
+    },
+    
+    trimToWidth: function(w, text, font, trimTerminator){
+        var MARGIN = 4;//TODO: hcoded
+        var holder = this.getTextSizePlaceholder();
+        if(font){
+            holder.css("font", font);
+        }
+        var trimmed = false;
+        for(holder.text(text); holder.width() - MARGIN > w;text = text.slice(0,text.length -1)){
+            holder.text(text );//+ (trimmed? trimTerminator: ''));
+            trimmed = true;
+            holder.hide();
+            holder.show();
+        }
+        return text + (trimmed? trimTerminator: '');
+    },
+    
+    // end: composite axis
+    /////////////////////////////////////////////////
 
     renderOrdinalAxis: function(){
 
@@ -1688,8 +2125,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         "left";
 
         this.pvLabel = this.pvRule.add(pv.Label)
-        .data(this.elements)
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
+        .data(this.ordinalElements)
+        [pvc.BasePanel.parallelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](10)
         [pvc.BasePanel.relativeAnchor[this.anchor]](function(d){
             return myself.scale(d) + myself.scale.range().band/2;
@@ -1697,7 +2134,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         .textAlign(align)
         .textBaseline("middle")
         .text(pv.identity)
-        .font("9px sans-serif")
+        .font("9px sans-serif");
+        
     },
 
 
@@ -1709,7 +2147,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         this.pvTicks = this.pvRule.add(pv.Rule)
         .data(scale.ticks())
-        [pvc.BasePanel.paralelLength[this.anchor]](null)
+        [pvc.BasePanel.parallelLength[this.anchor]](null)
         [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
         [pvc.BasePanel.relativeAnchor[this.anchor]](this.scale)
         [pvc.BasePanel.orthogonalLength[this.anchor]](function(d){
@@ -1741,7 +2179,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.pvRuleGrid = this.pvRule.add(pv.Rule)
             .data(scale.ticks())
             .strokeStyle("#f0f0f0")
-            [pvc.BasePanel.paralelLength[this.anchor]](null)
+            [pvc.BasePanel.parallelLength[this.anchor]](null)
             [pvc.BasePanel.oppositeAnchor[this.anchor]](- this._parent[pvc.BasePanel.orthogonalLength[this.anchor]] +
                 this[pvc.BasePanel.orthogonalLength[this.anchor]])
             [pvc.BasePanel.relativeAnchor[this.anchor]](scale)
@@ -1759,12 +2197,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return true;
             })
         }
-
-
     }
-
-
-
 });
 
 /*
@@ -2349,11 +2782,13 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     var oScale = this.chart.getOrdinalScale(true);
     var tScale;
     if(this.timeSeries){
-      tScale = this.chart.getTimeseriesScale(true,true);
+      tScale = this.chart.getTimeseriesScale(true);
     }
     
     var parser = pv.Format.date(this.timeSeriesFormat);
     
+    var maxLineSize;
+
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
     var colorFunc = function(d){
       // return colors(d.serieIndex)
@@ -2527,6 +2962,10 @@ pvc.DataEngine = Base.extend({
     visibleCategories: undefined,
     visibleSeriesIndexes: undefined,
     visibleSeries: undefined,
+    
+    //neu
+    isMultiValued: false,
+    valuesIndexes: null,
 
     constructor: function(chart){
 
@@ -2534,7 +2973,7 @@ pvc.DataEngine = Base.extend({
         this.hiddenData = {
             series:{},
             categories:{}
-        }
+        };
       
     },
 
@@ -2550,9 +2989,12 @@ pvc.DataEngine = Base.extend({
      */
 
     createTranslator: function(){
-
-        // Create the appropriate translator
-        if(this.crosstabMode){
+        
+        if(this.isMultiValued){
+            pvc.log("Creating MultiValueTranslator");
+            this.translator = new pvc.MultiValueTranslator(this.valuesIndexes, this.crosstabMode, this.dataOptions);  //TODO: 
+        }
+        else if(this.crosstabMode){
             pvc.log("Creating CrosstabTranslator");
             this.translator = new pvc.CrosstabTranslator();
         }
@@ -2560,7 +3002,7 @@ pvc.DataEngine = Base.extend({
             pvc.log("Creating RelationalTranslator");
             this.translator = new pvc.RelationalTranslator();
         }
-
+        
         this.translator.setData(this.metadata, this.resultset);
         this.translator.prepare(this);
 
@@ -2920,9 +3362,10 @@ pvc.DataEngine = Base.extend({
         var myself = this;
         var res = this.getVisibleSeriesIndexes().map(function(sIdx){
             return myself.getVisibleValuesForSeriesIndex(sIdx)
-        })
+        });
         return res;
     },
+
 
     /*
      * Returns the values for a given series idx
@@ -3100,7 +3543,7 @@ pvc.DataEngine = Base.extend({
 
     isCrosstabMode: function(){
         return this.crosstabMode;
-        pv.range(0,this.getSeriesSize())
+        //pv.range(0,this.getSeriesSize());
     },
 
     setSeriesInRows: function(seriesInRows){
@@ -3109,11 +3552,31 @@ pvc.DataEngine = Base.extend({
 
     isSeriesInRows: function(){
         return this.seriesInRows;
+    },
+    
+    setValuesIndexes: function(valuesIndexes){
+        this.valuesIndexes = valuesIndexes;
+    },
+    
+    setMultiValued: function(multiValue){
+        this.isMultiValued = !! multiValue;
+    },
+    
+    //TODO: in multiValued mode, have all options only related to data mapping in one object?
+    setDataOptions: function(dataOptions){
+        this.dataOptions = dataOptions;
     }
 
 });
 
 
+///*
+// * DataEngine that deals with multiple measures
+// */
+//pvc.MultiValuedDataEngine = pvc.DataEngine.extend({
+//    
+//    
+//});
 
 pvc.DataTranslator = Base.extend({
 
@@ -3121,6 +3584,7 @@ pvc.DataTranslator = Base.extend({
     metadata: null,
     resultset: null,
     values: null,
+    valuesMulti: null,
     secondAxisValues: null,
 
     constructor: function(){
@@ -3135,7 +3599,6 @@ pvc.DataTranslator = Base.extend({
 
     getValues: function(){
 
-
         // Skips first row, skips first col.
         return this.values.slice(1).map(function(a){
             return a.slice(1);
@@ -3144,7 +3607,6 @@ pvc.DataTranslator = Base.extend({
     },
 
     getSecondAxisValues: function(){
-
 
         // Skips first row
         return this.secondAxisValues.slice(1);
@@ -3227,6 +3689,7 @@ pvc.CrosstabTranslator = pvc.DataTranslator.extend({
         this.values = pvc.cloneMatrix(this.resultset);
         this.values.splice(0,0,a1);
 
+        
     }
   
 });
@@ -3243,7 +3706,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
         if(this.metadata.length == 2){
             // Adding a static serie
             this.resultset.map(function(d){
-                d.splice(0,0,"Serie");
+                d.splice(0,0,"Series");
             })
             this.metadata.splice(0,0,{
                 "colIndex":2,
@@ -3288,7 +3751,7 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
         var numeratedCategories = pv.numerate(categories);
 
 
-        // Finally, itetate through the resultset and build the new values
+        // Finally, iterate through the resultset and build the new values
 
         this.values = [];
         var categoriesLength = categories.length;
@@ -3306,15 +3769,309 @@ pvc.RelationalTranslator = pvc.DataTranslator.extend({
             pvc.sumOrSet(myself.values[numeratedCategories[l[1]]][numeratedSeries[l[0]]+1], l[2]);
         })
 
-        // Create an inicial line with the categories
+        // Create an initial line with the categories
         var l1 = series;
         l1.splice(0,0,"x");
-        this.values.splice(0,0, l1)
+        this.values.splice(0,0, l1);
  
+    },
+    
+    getValueFromResultSetRow : function(resultSetRow){
+        return resultSetRow[2];
     }
 
 
 });
+
+
+
+pvc.MultiValueTranslator = pvc.DataTranslator.extend({
+    
+    constructor: function(valuesIndexes, crosstabMode, dataOptions)//measuresIdx , categoriesIndexes) //seriesIndexes, numMeasures(1), 
+    {
+        this.valuesIndexes = valuesIndexes;
+        this.crosstabMode = crosstabMode;
+        /*this.measuresIdx = measuresIdx; *///measuresIdx : when measures are normalized
+        this.dataOptions = dataOptions;
+        
+        if(this.dataOptions == null) this.dataOptions = {};//TODO:
+        
+    },
+    
+    prepareImpl: function()
+    {
+        //TODO: hcoded:
+        var separator = '~';
+        
+        //categories
+        //var categoriesIdx = this.dataOptions.categoriesIdx;
+        //if(categoriesIdx == null) { categoriesIdx = [0];}
+       // else if(!$.isArray(categoriesIdx)) { categoriesIdx = [categoriesIdx]; }
+        
+        if(this.crosstabMode){
+            
+            //2 modes here:
+            // 1) all measures in one column
+            // 2) measures with separator mixed with series (TODO!) -- regular crosstab mode
+            
+            if(!this.dataOptions.categoriesCount){//default
+                this.dataOptions.categoriesCount = 1;
+            }
+            
+            if(this.dataOptions.measuresInColumns || this.dataOptions.measuresIdx == null) //TODO: 
+            {//series1/measure1, series1/measure2...
+                // line
+                var lastColName = null;
+                var colNames = [];
+                var measures = null;
+                var measuresStart = this.dataOptions.categoriesCount;
+                
+                var cols = this.metadata.slice(measuresStart).map(function(d){
+                    return d.colName;
+                });
+                
+                if(this.dataOptions.measuresInColumns){
+                    //a1 now series1~measure1 | .. | series1~measureN | series2~measure1 |..| seriesM~measureN
+                    for(var i = 0; i< cols.length; i++){
+                        var col = cols[i];
+                        var sepIdx = col.lastIndexOf(separator);
+                        var colName = (sepIdx < 0)? '' : col.slice(0,sepIdx);
+                        if(colName != lastColName) {
+                            colNames.push(colName);
+                            lastColName = colName;
+                        }
+                    }
+                    var numMeasures = (cols.length) / colNames.length;
+                    //TODO: merge series
+                    
+                    //TODO: more measures here, single val as is; multi: will need to iterate and merge values
+                    this.values = this.mergeMeasuresInColumns(this.resultset, measuresStart, numMeasures);
+                }
+                else {
+                    colNames = cols;
+                    this.values = this.mergeMeasuresInColumns(this.resultset, measuresStart, 1);
+                }
+                
+                for(var i=0;i<colNames.length;i++){
+                    colNames[i] = colNames[i].split('~');
+                }
+                
+                this.values = this.mergeColumnNames(this.values, 0, this.dataOptions.categoriesCount);
+                //this.values = pvc.cloneMatrix(this.resultset).map(function(row){ return row.map(function(d){ return [d];}); });
+                colNames.splice(0,0,"x");
+                this.values.splice(0,0,colNames);
+                
+            }
+            else {//if(this.dataOptions.denormalizedMeasures) {//TODO: refactor
+            
+                //TODO: PASS VARS
+                var measuresIdx = this.dataOptions.measuresIdx;
+                if(measuresIdx == null) { measuresIdx = 1;}
+                var numMeasures = this.dataOptions.numMeasures;
+                if (numMeasures == null) { numMeasures = 1; } 
+                
+                var a1 = this.metadata.slice(measuresIdx + 1).map(function(d){
+                    return d.colName;
+                });
+                a1.splice(0,0,"x");
+        
+                //var values = pvc.cloneMatrix(this.resultset);
+                this.values = [];
+                var newRow = [];
+                var row;
+                for(var i=0; i<this.resultset.length; i++){
+                    var rem = i % numMeasures;
+                    row = this.resultset[i];
+                    if(rem == 0)
+                    {//first in measures batch
+                        newRow = row.slice();//clone
+                        //values = [];
+                        newRow.splice(measuresIdx,1);//remove measures' titles column
+                        for(var j=measuresIdx; j<newRow.length;j++){
+                            newRow[j] = [];    //init measures
+                        }
+                    }
+                    
+                    //add values    
+                    for(var j=measuresIdx; j<newRow.length;j++){
+                       newRow[j].push(row[j+1]);//push measures
+                    }
+                    
+                    if(rem == numMeasures -1){//measures batch complete
+                        this.values.push(newRow);
+                    }   
+                }
+                
+                this.values.splice(0,0,a1);
+            }
+        }
+        else {//TODO: refactor
+        //relational mode
+            var seriesIdx = 0;//TODO:hcoded, needs ref from chart?
+            var categoriesIdx = 1;
+    
+            var tree = pv.tree(this.resultset).keys(function(d){
+                return [d[seriesIdx],d[categoriesIdx]];
+            }).map();
+            
+            // Now, get series and categories:
+    
+            var series = pv.uniq(this.resultset.map(function(d){
+                return d[0];
+            }));
+            
+    
+            var categories = pv.uniq(this.resultset.map(function(d){
+                return d[1];
+            }))
+            
+            // Finally, iterate through the resultset and build the new values
+    
+            this.allValues = [];
+    
+            var l1 = series;//TODO:clone?
+            //add table corner
+            l1.splice(0,0,"x");
+            
+            var values = this.getMultiValuesFromResultSet(this.valuesIndexes, categories, series,categoriesIdx, seriesIdx);
+            // Create an initial line with the categories
+            values.splice(0,0, l1);
+            this.allValues = values;
+    
+            //this.values = this.getValuesFromResultSet(measuresIndexes[0],categories, series,categoriesIdx, seriesIdx);
+            //this.values.splice(0,0,l1);
+            this.values = this.allValues;
+        }
+
+    },
+    
+    
+    mergeColumnNames: function(values,start, count)
+    {
+        return values.map(function(row, rowIdx){
+            var colNames = row.slice(start,start + count);
+            var newRow = row.slice(start + count);
+            newRow.splice(0,0,colNames);
+            return newRow;
+        });
+    },
+    
+    mergeMeasuresInColumns: function(values, startIdx, numMeasures)
+    {
+      return values.map(function(row, rowIdx){
+        var newRow = row.slice(0, startIdx);
+        for(var i=startIdx;i<row.length;i+=numMeasures){
+            var value = [];
+            for(var j =0; j < numMeasures;j++){
+                value.push(row[i+j]);
+            }
+            newRow.push(value);
+        }
+        return newRow;
+      });
+    },
+    
+    addSeriesToMetadata: function(){
+        if(this.metadata.length == 2){
+            // Adding a static serie
+            this.resultset.map(function(d){
+                d.splice(0,0,"Series");
+            })
+            this.metadata.splice(0,0,{
+                "colIndex":2,
+                "colType":"String",
+                "colName":"Series"
+            })
+        }
+    },
+    
+    //overridden
+    getValues: function(idx){
+        if(idx == null){//default to first
+           // return this.values;
+            return this.values.slice(1).map(function(a){
+                return a.slice(1);
+            });
+        }
+        else if(idx > this.allValues.length || idx < 0) { throw new NoDataException(); }
+        else {
+            //return this.allValues.map(function(d){
+            //    return d[idx];
+            //});
+            return this.allValues.slice(1).map(function(a){
+                return a.slice(1);
+            }).map(function(d){
+                return d[idx];
+            });
+            //return this.allValues[idx];
+        }
+    },
+    
+    //TODO: remake
+    sumOrSetVect: function(v1, v2){
+        if (v1 == null || !$.isArray(v1)) {return v2;}
+        //TODO: check
+        var res = [];
+        for(var i=0;i<v1.length;i++){
+            if(v1[i] == null) { res[i] = v2[i];}
+            res[i] = v1[i] + v2[i];
+        }
+        return res;
+    },
+    
+    //series with x
+    getValuesFromResultSet: function(valueIndex, categories, series, categoriesIdx, seriesIdx)
+    {
+        var categoriesLength = categories.length;
+        var seriesLength = series.length;
+        var numeratedSeries = pv.numerate(series);
+        var numeratedCategories = pv.numerate(categories);
+        
+        // Initialize array
+        var values = [];                
+        pv.range(0,categoriesLength).map(function(d){
+            values[d] = new Array(seriesLength);
+            values[d][0] = categories[d];
+        });
+        // Set array values
+        this.resultset.map(function(row){
+            var i = numeratedCategories[row[categoriesIdx]];
+            var j = numeratedSeries[row[seriesIdx]];
+            values[i][j] = pvc.sumOrSet(values[i][j], row[valueIndex]);
+        });
+        return values;
+    },
+    
+    getMultiValuesFromResultSet: function(valueIndexes, categories, series, categoriesIdx, seriesIdx)
+    {
+        var categoriesLength = categories.length;
+        var seriesLength = series.length;
+        var numeratedSeries = pv.numerate(series);
+        var numeratedCategories = pv.numerate(categories);
+        
+        var myself = this;
+        // Initialize array
+        var values = [];                
+        pv.range(0,categoriesLength).map(function(d){
+            values[d] = new Array(seriesLength);
+            values[d][0] = categories[d];
+        });
+        // Set array values
+        this.resultset.map(function(row){
+            var i = numeratedCategories[row[categoriesIdx]];
+            var j = numeratedSeries[row[seriesIdx]];
+            
+            var val = [];
+            for(var k = 0; k < valueIndexes.length; k++){
+                val.push( row[valueIndexes[k]]);
+            }
+            values[i][j] = myself.sumOrSetVect(values[i][j], val);
+        });
+        return values;
+    }
+    
+});
+
 
 NoDataException = function() {};
 /**
@@ -3342,7 +4099,14 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.options.orthoAxisOrdinal = true;
         this.options.orginIsZero = true;
 
+        var self = this;
         var _defaults = {
+            colorValIdx: 0,
+            sizeValIdx: 0,
+            defaultValIdx:0,
+            measuresIndexes: [2],
+            //multi-dimensional clickable label
+            useCompositeAxis:false,
             showValues: true,
             //originIsZero: true,
             axisOffset: 0,
@@ -3355,9 +4119,21 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             numSD: 2,                 // width (only for normal distribution)
             minColor: "white",
             maxColor: "darkgreen",
-            nullColor:  "#efc5ad"  // white with a shade of orange
+            nullColor:  "#efc5ad",  // white with a shade of orange
+            xAxisClickAction: function(d){
+                //self.heatGridChartPanel.selectXValue(d);
+                self.heatGridChartPanel.selectAxisValue('x', d);
+                self.heatGridChartPanel.pvPanel.render();
+                self.heatGridChartPanel.triggerSelectionChange();
+            },
+            yAxisClickAction: function(d){ //TODO: move elsewhere?
+                //self.heatGridChartPanel.selectYValue(d);
+                self.heatGridChartPanel.selectAxisValue('y', d);
+                self.heatGridChartPanel.pvPanel.render();
+                self.heatGridChartPanel.triggerSelectionChange();
+            }
         };
-
+        
         // Apply options
         $.extend(this.options,_defaults, o);
 
@@ -3373,7 +4149,6 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.base();
 
         pvc.log("Prerendering in heatGridChart");
-
 
         this.heatGridChartPanel = new pvc.HeatGridChartPanel(this, {
             stacked: this.options.stacked,
@@ -3427,11 +4202,47 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     showValues: true,
     orientation: "vertical",
 
+    //TODO:
+    colorValIdx: 0,
+    sizeValIdx: 0,
+    defaultValIdx:0,
+    shape: "square",
+    nullShape: "cross",
+    defaultBorder: 0,
+    nullBorder: 2,
+    selectedBorder: 2,
+    //function to be invoked when a selection occurs
+    // (shape click-select, row/column click and lasso finished)
+    onSelectionChange: null,
+    
+    selections: {},
+    
+    //measuresIndexes: [2],
 
     constructor: function(chart, options){
 
         this.base(chart,options);
 
+    },
+
+    getValue: function(d, i){
+        if($.isArray(d)) {
+            if(i != null) return d[i];
+            else return d[0];
+        }
+        else return d;
+    },
+    
+    getColorValue: function(d){
+        return this.getValue(d, this.colorValIdx);
+    },
+
+
+    valuesToText: function(vals){
+        if($.isArray(vals)){
+            return vals.join(', ');
+        }
+        else return vals;
     },
 
     create: function(){
@@ -3440,10 +4251,19 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var opts = this.chart.options;
         this.width = this._parent.width;
         this.height = this._parent.height;
+        
+        this.colorValIdx = opts.colorValIdx;
+        this.sizeValIdx = opts.sizeValIdx;
+        
+        //TODO:
+        if(opts.shape != null) {this.shape = opts.shape;}
+        
+        //event triggering
+        this.onSelectionChange = opts.onSelectionChange;
 
         this.pvPanel = this._parent.getPvPanel().add(this.type)
-        .width(this.width)
-        .height(this.height)
+            .width(this.width)
+            .height(this.height);
 
         var anchor = this.orientation == "vertical"?"bottom":"left";
 
@@ -3457,10 +4277,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         // create a mapping of the data that shows the columns (rows)
         data = origData.map(function(d){
             return pv.dict(cols, function(){
-                return  d[this.index]
-            })
+                return  d[this.index];
+            });
         });
-        data.reverse();  // the colums are build from top to bottom
+        //data.reverse();  // the colums are build from top to bottom --> nope, bottom to top, left to right now
 
         // get an array of scaling functions (one per column)
         var fill = this.getColorScale(data, cols);
@@ -3469,40 +4289,53 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var w = (xScale.max - xScale.min)/xScale.domain().length;
         var h = (yScale.max - yScale.min)/yScale.domain().length;
 
-        if (anchor != "bottom") {
+        if (anchor != "bottom") {//TODO: remove and change composite axis labels!
             var tmp = w;
             w = h;
             h = tmp;
         }
+        
+        //reset selections
+        this.initSelections(false);
 
         this.pvHeatGrid = this.pvPanel.add(pv.Panel)
-        .data(cols)
-        [pvc.BasePanel.relativeAnchor[anchor]](function(){
-            return this.index * w
+            .data(cols)
+            [pvc.BasePanel.relativeAnchor[anchor]](function(){ //ex: datum.left(i=1 * w=15)
+                return this.index * w;
+                })
+            [pvc.BasePanel.parallelLength[anchor]](w)
+            .add(pv.Panel)
+            .data(data)
+            //[pvc.BasePanel.oppositeAnchor[anchor]]
+            [anchor]
+            (function(){
+                return this.index * h;
             })
-        [pvc.BasePanel.paralelLength[anchor]](w)
-        .add(pv.Panel)
-        .data(data)
-        [pvc.BasePanel.oppositeAnchor[anchor]](function(){
-            return this.index * h
-        })
-        [pvc.BasePanel.orthogonalLength[anchor]](h)
-        .fillStyle(function(dat, col){
-            return  (dat[col] != null) ? fill[col](dat[col]):opts.nullColor
-        })
-        .strokeStyle("white")
-        .lineWidth(1)
-        .antialias(false)
-        .text(function(d,f){
-          return d[f]});
+            [pvc.BasePanel.orthogonalLength[anchor]](h)
+            .antialias(false)
+            
+            .strokeStyle(null)//TODO: issue with categorical axis default label
+            .lineWidth(0)
+            .overflow('hidden'); //overflow important if showValues=true
+        
+        //tooltip text
+         this.pvHeatGrid.text(function(d,f){
+              return myself.getValue(d[f]);
+         });
+         
+        //set coloring and shape / sizes if enabled
+       if(opts.useShapes)
+       {
+            this.createHeatMap(w,h, opts, fill);
+       }
+       else
+       {//no shapes, apply color map to panel iself
+        this.pvHeatGrid.fillStyle(function(dat, col){
+             return  (dat[col] != null) ? fill[col](dat[col]) : opts.nullColor;
+         });
+       }
 
-
-        // NO SUPPORT for overflow and underflow on HeatGrids
-
-        // NO SUPPORT for SecondAxis on HeatGrids (does not make sense)
-
-        // Labels:
-
+        //Tooltip
         if(this.showTooltips){
             this.pvHeatGrid
             .event("mouseover", pv.Behavior.tipsy({
@@ -3511,6 +4344,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             }));
         }
 
+        //clickAction
         if (opts.clickable){
             this.pvHeatGrid
             .cursor("pointer")
@@ -3522,22 +4356,21 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             });
         }
 
-        if(this.showValues){
-            
+        //showValues
+        if(this.showValues)
+        {
+            var myself = this;
             var getValue = function(row, rowAgain, rowCol){
                 return row[rowCol];
             };
-            
             this.pvHeatGridLabel = this.pvHeatGrid
             .anchor("center")
             .add(pv.Label)
             .bottom(0)
             .text(getValue);
-
             // Extend heatGridLabel
             this.extend(this.pvHeatGridLabel,"heatGridLabel_");
         }
-
 
         // Extend heatGrid and heatGridPanel
         this.extend(this.pvHeatGrid,"heatGridPanel_");
@@ -3545,8 +4378,484 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
         // Extend body
         this.extend(this.pvPanel,"chart_");
-
     },
+    
+    inRubberBandSelection: function(x,y){
+        if(!this.rubberBand) { return false; }
+        
+        var r = this.rubberBand;
+        return  x > r.x && x < r.x + r.dx &&
+                y > r.y && y < r.y + r.dy ;
+        
+    },
+    
+    createSelectOverlay : function(w,h)
+    {
+        //TODO: flip support: parallelLength etc..
+        var opts = this.chart.options;
+        this.rubberBand = {x:0, y:0, dx:4, dy:4};
+        var myself = this;
+        
+        var isSelecting = false;
+        var selectFill = 'rgba(255, 127, 0, 0.15)';
+        var selectStroke = 'rgb(255,127,0)';
+        var invisibleFill = 'rgba(127,127,127,0.01)';
+        
+        //rubber band display
+        this.selectBar = this.pvPanel
+           .add(pv.Bar)
+                .visible(function() {return isSelecting;} )
+                .left(function(d) { return d.x; })
+                .top(function(d) { return d.y;})
+                .width(function(d) { return d.dx;})
+                .height(function(d) { return d.dy;})
+                .fillStyle(selectFill)
+                .strokeStyle(selectStroke);
+                
+        //rubber band selection behavior definition
+        this.pvPanel
+            .data([this.rubberBand])
+            .fillStyle(invisibleFill)
+            .event('mousedown', pv.Behavior.selector(false))
+            .event('selectstart', function(d){
+                isSelecting = true;
+                myself.selectBar.render();
+            })
+            .event('select', function(rb){
+                
+                myself.rubberBand = rb;
+                myself.selectBar.render();
+            })
+            .event('selectend', function(rb){
+                isSelecting = false;
+                //translate top to bottom
+                myself.selectBar.render();
+                myself.rubberBand.y = myself.height - rb.y - rb.dy;
+                myself.setRubberbandSelections(myself.rubberBand,w,h);
+                myself.shapes.render();
+            });
+    },
+    
+    setRubberbandSelections: function(rb,w,h)
+    {
+        var series = this.chart.dataEngine.getSeries();
+        var categories = this.chart.dataEngine.getCategories();
+        
+        var sSel = [];
+        var cSel = [];
+        
+        //find included series/categories
+        for(var i=0; i< series.length; i++){
+            var y = i*h + h/2;
+            if(y > rb.y && y < rb.y + rb.dy){
+                sSel.push(series[i]);
+            }
+        }
+        for(var i=0; i< categories.length; i++){
+            var x = i*w + w/2;
+            if(x > rb.x && x < rb.x + rb.dx){
+                cSel.push(categories[i]);
+            }
+        }
+        
+        //select shapes in intersection
+        for(var i=0; i< sSel.length; i++){
+            var s = sSel[i];
+            for(var j=0; j<cSel.length; j++){
+                var c = cSel[j];
+                this.addSelection(s,c);
+            }
+        }
+    },
+    
+    //createSelectOverlay2: function(){
+    //  var opts = this.chart.options;
+    //  
+    //  this.rubberBand = null;
+    //  var myself = this;
+    //  function update(d, t) {
+    //    myself.rubberBand = d;
+    //     //this.render();
+    //     // myself.pvPanel.render();
+    //    //this.render();
+    //    myself.selectionBar.render();
+    //    //myself.shapes.render();
+    //  };
+    //  
+    //  var underSelection = false;
+    //  //this.pvPanel.reverse(true);
+    //  
+    //  this.selectOverlay = this.pvPanel//.add(pv.Panel)
+    //    .data([{x:0, y:0, dx:50, dy:50}]) //dimensions that will be updated by pv.Behavior
+    //    //.cursor('default')
+    //    //.width(this.width)
+    //    //.height(this.height)
+    //    .fillStyle("rgba(127,127,0,.15)")
+    //    .event('mousedown', pv.Behavior.selector(false))
+    //    .event('selectstart', function(d){
+    //       rubberBand = null;
+    //    })
+    //    .event('select', update)
+    //    .event('selectend', function(d){
+    //        myself.rubberBand = null;
+    //        myself.selectionBar.render();
+    //    });
+    //    
+    //   this.selectionBar = this.selectOverlay
+    //    .add(pv.Bar)
+    //        .visible(function(d, k, t) {
+    //          return myself.rubberBand != null;
+    //        })
+    //        .left(function(d) d.x)
+    //        .top(function(d) d.y)
+    //        .width(function(d) d.dx)
+    //        .height(function(d) d.dy)
+    //        .fillStyle("rgba(255,127,0,.15)")
+    //        .strokeStyle("orange")
+    //  ;
+    // // this.selectOverlay.render();
+    //  
+    //},
+    
+    //creates new version
+    createHeatMap: function(w, h, opts, fill)
+    {
+        var myself = this;
+        //total max in data
+        var maxVal = pv.max(data, function(datum){// {col:value ..}
+            return pv.max( pv.values(datum).map(
+                function(d){ return myself.getValue(d, myself.sizeValIdx);})) ;
+        });
+    
+        var maxRadius = Math.min(w,h) / 2 -2;
+        var maxArea = maxRadius * maxRadius ;// apparently treats as square area even if circle, triangle is different
+        
+        var valueToRadius = function(value){
+            return value != null ? value/maxVal * maxRadius : Math.min(maxRadius,5) ;//TODO:hcoded
+        };
+        
+        var valueToArea =  function(value){//
+            return value != null ? value/maxVal * maxArea : Math.max(4,maxArea/16);//TODO:hcoded
+        }
+        
+        var valueToColor = function(value, i){
+            return  (value != null) ? fill[i](value) : opts.nullColor;
+        };
+        
+        
+        this.shapes =
+            this.pvHeatGrid
+                .add(pv.Dot)
+                .def("selected", function(){
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    return  myself.isSelected(s,c);
+                })
+                .shape( function(r, ra ,i){
+                    if(opts.sizeValIdx == null){
+                        return myself.shape;
+                    }
+                    return myself.getValue(r[i]) != null ? myself.shape : myself.nullShape;
+                })
+                .shapeSize(function(r,ra, i) {
+                    if(myself.sizeValIdx == null){
+                        return maxArea;
+                    }
+                    return valueToArea(myself.getValue(r[i], myself.sizeValIdx));
+                })
+                .fillStyle(function(r, ra, i){
+                    //return valueToColor(r[i], i);
+                    var color = opts.nullColor;
+                    if(myself.colorValIdx != null ){
+                        if(myself.getColorValue(r[i]) == null) return opts.nullColor;
+                        color =  fill[i](myself.getColorValue(r[i]));
+                        var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                        var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index]; 
+                        if(myself.getSelectCount() > 0 && !this.selected()){
+                            return color.alpha(0.5);
+                        }
+                    }
+                    return color;
+                })
+                .cursor("pointer") //TODO:
+                .lineWidth(function(r, ra, i)
+                {
+                    return this.selected()? myself.selectedBorder :
+                                            ( (myself.sizeValIdx == null ||
+                                               myself.getValue(r[i], myself.sizeValIdx) != null )?
+                                                    myself.defaultBorder : //0 hcoded?
+                                                    myself.nullBorder);
+                })
+                .strokeStyle(function(r, ra, i){
+                    return (this.selected() ||
+                            myself.sizeValIdx == null ||
+                            myself.getValue(r[i], myself.sizeValIdx) != null )?
+                                     "black" :
+                                     (myself.colorValIdx != null)?
+                                        (myself.getColorValue(r[i]))?
+                                            fill[i](myself.getColorValue(r[i])) :
+                                            opts.nullColor :
+                                        opts.nullColor;
+                })
+                .text(function(r,ra,i){
+                    return myself.valuesToText(r[i]);
+                })
+                .event("click", function(r,ra,i) {
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    var d = r[i];
+                    myself.toggleSelection(s,c);
+                    myself.triggerSelectionChange();
+                    //classic clickAction
+                    if($.isArray(d)) d= d[0];
+                    if(typeof(myself.chart.options.clickAction) == 'function'){
+                        myself.chart.options.clickAction(s,c,d);
+                    }
+                    myself.pvPanel.render();
+                })
+                ;
+                this.createSelectOverlay(w,h);
+    },
+    
+    /*
+     *selections - testing (start)
+     *TODO: transient, will have to change selection storage
+     */
+    
+    initSelections:function(defaultValue){
+      this.selections = {};
+      var series = this.chart.dataEngine.getSeries();
+      var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < series.length; i++ ){
+            this.selections[series[i]] = {};
+            for(var j = 0; j < cats.length; j++ ){
+                this.selections[series[i]][cats[j]] = defaultValue;
+            }
+      }
+    },
+    
+    isSelected: function(s,c){
+      return this.selections[s] ?
+        this.selections[s][c] :
+        false;
+    },
+    
+    addSelection: function(s,c){
+      if(!this.selections[s]) this.selections[s] = {};
+      this.selections[s][c] = true;
+    },
+    
+    removeSelection: function(s,c){
+      if(this.selections[s]){
+        this.selections[s][c] = false;
+      }
+    },
+    
+    toggleSelection: function(s,c){
+        if(this.isSelected(s,c)) this.removeSelection(s,c);
+        else this.addSelection(s,c);
+    },
+    
+    getSelections: function(){
+        return pv.flatten(this.selections).key("series").key("category").key("selected")
+            .array().filter(function(d) { return d.selected; });
+    },
+    
+    setSelections: function(selections){
+        this.selections = {};
+        for(var i=0;i<selections.length;i++){
+            this.addSelection(selections[i].series, selections[i].category);
+        }
+    },
+    
+    selectSeries: function(s){
+        var cats = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < cats.length; i++ ){
+            this.selections[s][cats[i]] = true;
+        }
+    },
+    
+    selectCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            //this.selections[series[i]][c] = true;
+            this.addSelection(series[i],c);
+        }
+    },
+    
+    selectAxisValue: function(axis, axisValue)
+    {
+        var type = (this.orientation == 'horizontal')?
+            ((axis == 'x')? 's' : 'c') :
+            ((axis == 'x')? 'c' : 's')
+            
+        if(this.chart.options.useCompositeAxis)
+        {
+            if(type =='c'){ this.toggleCategoriesHierarchy(axisValue); }
+            else { this.toggleSeriesHierarchy(axisValue); }
+        }
+        else
+        {
+            if(type =='c'){ this.toggleCategories(axisValue); }
+            else { this.toggleSeries(axisValue); }
+        }
+    },
+    
+    //ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+    arrayStartsWith: function(array, base)
+    {
+        if(array.length < base.length) { return false; }
+        
+        for(var i=0; i<base.length;i++){
+            if(base[i] != array[i]) {
+                return false;
+            }
+        }
+        return true;
+    },
+    
+    toggleCategoriesHierarchy: function(cbase){
+        if(this.selectCategoriesHierarchy(cbase)){
+            this.deselectCategoriesHierarchy(cbase);
+        }
+    },
+    
+    toggleSeriesHierarchy: function(sbase){
+        if(this.selectSeriesHierarchy(sbase)){
+            this.deselectSeriesHierarchy(sbase);
+        }
+    },
+    
+    //returns bool wereAllSelected
+    selectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = true;
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                selected &= this.selectCategory(c);
+            }
+        }
+        return selected;
+    },
+    
+    selectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = true;
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                selected &= this.selectSeries(s);
+            }
+        }
+        return selected;
+    },
+    
+    deselectCategoriesHierarchy: function(cbase){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i =0; i< categories.length ; i++){
+            var c = categories[i];
+            if( this.arrayStartsWith(c, cbase) ){
+                this.deselectCategory(c);
+            }
+        }
+    },
+    
+    deselectSeriesHierarchy: function(sbase){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i =0; i< series.length ; i++){
+            var s = series[i];
+            if( this.arrayStartsWith(s, sbase) ){
+                this.deselectSeries(s);
+            }
+        }
+    },
+    
+    //returns bool wereAllSelected
+    selectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var wereAllSelected = true;
+        for(var i = 0; i < series.length; i++ ){
+            var s = series[i];
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    selectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var wereAllSelected = true;
+        for(var i = 0; i < categories.length; i++ ){
+            var c = categories[i];
+            wereAllSelected &= this.isSelected(s,c);
+            this.addSelection(s,c);
+        }
+        return wereAllSelected;
+    },
+    
+    deselectCategory: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        for(var i = 0; i < series.length; i++ ){
+            this.removeSelection(series[i],c);
+        }
+    },
+
+    deselectSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        for(var i = 0; i < categories.length; i++ ){
+            this.removeSelection(s, categories[i]);
+        }
+    },
+    
+    //pseudo-toggle elements with category c:
+    // deselect all if all selected, otherwise select all
+    toggleCategories: function(c){
+        var series = this.chart.dataEngine.getSeries();
+        var selected = this.selectCategory(c);
+        if(selected){
+            this.deselectCategory(c);
+        }
+    },
+    
+    //pseudo-toggle elements with series s:
+    // deselect all if all selected, otherwise select all
+    toggleSeries: function(s){
+        var categories = this.chart.dataEngine.getCategories();
+        var selected = this.selectSeries(s);
+        if(selected){
+            this.deselectSeries(s);
+        }
+    },
+    
+    getSelectCount: function(){
+        return this.getSelections().length;
+    },
+    
+    triggerSelectionChange: function(){
+        if(typeof(this.onSelectionChange) == 'function'){
+            var selections = this.getSelections();
+            this.onSelectionChange(selections);
+        }
+    },
+    
+    /*
+     *selections - testing (end)
+     */
+    
+    /**
+     * Get label color that will contrast with given bg color
+     */
+    getLabelColor: function(r, g, b){
+        var brightness = (r*299 + g*587 + b*114) / 1000;
+        if (brightness > 125) {
+            return '#000000';
+        } else {
+            return '#ffffff';
+        }
+    },
+    
+    
   
   /***********
    * compute an array of fill-functions. Each column out of "cols" 
@@ -3557,50 +4866,51 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
    *         (where sd is the standards deviation)
    ********/
   getColorScale: function(data, cols) {
-    switch (this.chart.options.scalingType) {
-    case "normal": return this.getNormalColorScale(data, cols);
-    case "linear": return this.getLinearColorScale(data, cols);
-    default:
-      throw "Invalid option " + this.scaleType + " in HeatGrid"
+      switch (this.chart.options.scalingType) {
+      case "normal": return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
+      case "linear": return this.getLinearColorScale(data, cols, this.colorValIdx);
+      default:
+        throw "Invalid option " + this.scaleType + " in HeatGrid";
     }
   },
 
-  getLinearColorScale: function (data, cols){
+  getLinearColorScale: function (data, cols, colorIdx){
     var fill;
     var opts = this.chart.options;
     // compute the mean and standard-deviation for each column
+    var myself = this;
     var min = pv.dict(cols, function(f){
       return pv.min(data, function(d){
-        return d[f]
-      })
+        return myself.getValue(d[f],colorIdx);
+      });
     });
     var max = pv.dict(cols, function(f){
       return pv.max(data, function(d){
-        return d[f]
-      })
+        return myself.getValue(d[f], colorIdx);
+      });
     });
 
     if (opts.normPerBaseCategory)  //  compute a scale-function for each column (each key
       fill = pv.dict(cols, function(f){
         return pv.Scale.linear()
           .domain(min[f], max[f])
-          .range(opts.minColor, opts.maxColor)
+          .range(opts.minColor, opts.maxColor);
       });
-     else {   // normalize over the whole array
+    else {   // normalize over the whole array
       var theMin = min[cols[0]];
-      for (var i=1; i<cols.length; i++)
+      for (var i=1; i<cols.length; i++) {
         if (min[cols[i]] < theMin) theMin = min[cols[i]];
-
+      }
       var theMax = max[cols[0]];
-      for (var i=1; i<cols.length; i++)
-        if (max[cols[i]] < theMax) theMax = max[cols[i]];
-
+      for (var i=1; i<cols.length; i++){
+        if (max[cols[i]] > theMax) theMax = max[cols[i]];
+      }
       var scale = pv.Scale.linear()
         .domain(theMin, theMax)
         .range(opts.minColor, opts.maxColor);
       fill = pv.dict(cols, function(f){
-        return scale
-      })
+        return scale;
+      });
     }
 
     return fill;  // run an array of values to compute the colors per column
@@ -3611,14 +4921,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     var opts = this.chart.options;
     if (opts.normPerBaseCategory) {
       // compute the mean and standard-deviation for each column
+      var myself = this;
       var mean = pv.dict(cols, function(f){
         return pv.mean(data, function(d){
-          return d[f]
+          return myself.getValue(d[f]);
         })
       });
       var sd = pv.dict(cols, function(f){
         return pv.deviation(data, function(d){
-          return d[f]
+          myself.getValue(d[f]);
         })
       });
       //  compute a scale-function for each column (each key)
@@ -3626,7 +4937,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         return pv.Scale.linear()
           .domain(-opts.numSD * sd[f] + mean[f],
                   opts.numSD * sd[f] + mean[f])
-          .range(opts.minColor, opts.maxColor)
+          .range(opts.minColor, opts.maxColor);
       });
     } else {   // normalize over the whole array
       var mean = 0.0, sd = 0.0, count = 0;
@@ -3637,12 +4948,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             count++;
           }
       mean /= count;
-      for (var i=0; i<origData.length; i++)
-        for(var j=0; j<origData[i].length; j++)
+      for (var i=0; i<origData.length; i++){
+        for(var j=0; j<origData[i].length; j++){
           if (origData[i][j] != null){
             var variance = origData[i][j] - mean;
             sd += variance*variance;
           }
+        }
+      }
       sd /= count;
       sd = Math.sqrt(sd);
       
@@ -3651,15 +4964,79 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 opts.numSD * sd + mean)
         .range(opts.minColor, opts.maxColor);
       fill = pv.dict(cols, function(f){
-        return scale
-      })
+        return scale;
+      });
     }
 
     return fill;  // run an array of values to compute the colors per column
 }
 
 
-});
+});//end: HeatGridChartPanel
+
+
+/**
+ * Equal to pv.Behavior.select but doesn't necessarily
+ * force redraw of component it's in on mousemove.
+ * (default behavior matches pv.Behavior.select())
+ * @param {boolean} autoRefresh refresh parent mark automatically
+ * @param {pv.Mark} mark
+ * @return {function mousedown
+ **/
+pv.Behavior.selector = function(autoRefresh, mark) {
+  var scene, // scene context
+      index, // scene context
+      r, // region being selected
+      m1, // initial mouse position
+      redrawThis = (arguments.length > 0)?
+                    autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
+    
+  /** @private */
+  function mousedown(d) {
+    if(mark == null){
+        index = this.index;
+        scene = this.scene;
+    }
+    else {
+        index = mark.index;
+        scene = mark.scene;
+    }
+    m1 = this.mouse();
+    
+    r = d;
+    r.x = m1.x;
+    r.y = m1.y;
+    r.dx = r.dy = 0;
+    pv.Mark.dispatch("selectstart", scene, index);
+  }
+
+  /** @private */
+  function mousemove() {
+    if (!scene) return;
+    scene.mark.context(scene, index, function() {
+        var m2 = this.mouse();
+        r.x = Math.max(0, Math.min(m1.x, m2.x));
+        r.y = Math.max(0, Math.min(m1.y, m2.y));
+        r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
+        r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
+        if(redrawThis){
+            this.render();
+        }
+      });
+    pv.Mark.dispatch("select", scene, index);
+  }
+
+  /** @private */
+  function mouseup() {
+    if (!scene) return;
+    pv.Mark.dispatch("selectend", scene, index);
+    scene = null;
+  }
+
+  pv.listen(window, "mousemove", mousemove);
+  pv.listen(window, "mouseup", mouseup);
+  return mousedown;
+};
 /**
  * MetricAbstract is the base class for all chart types that have
  * a two linear axis.
@@ -4729,7 +6106,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         [anchor](function(d) {
             return d.y
         })
-        [pvc.BasePanel.paralelLength[anchor]](function(d) {
+        [pvc.BasePanel.parallelLength[anchor]](function(d) {
             return d.w
         })
         .strokeStyle("#c0c0c0");
@@ -4779,7 +6156,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .data(function(d){
                 return d
             })
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)
+            [pvc.BasePanel.parallelLength[anchor]](maxBarSize)
             .fillStyle(myself.DF.colorFunc);
 
         } else {   //  not this.stacked
@@ -4791,7 +6168,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             .data(this.getDataSet() )
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.catContainerBasePosFunc)
             [anchor](0)
-            [pvc.BasePanel.paralelLength[anchor]](myself.DF.catContainerWidth)
+            [pvc.BasePanel.parallelLength[anchor]](myself.DF.catContainerWidth)
             // pvBarPanel[X]  = this[X]  (copy the function)
             [pvc.BasePanel.orthogonalLength[anchor]](
                 this[pvc.BasePanel.orthogonalLength[anchor]])
@@ -4807,7 +6184,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.relBasePosFunc)
             [anchor](myself.DF.orthoBotPos)
             [pvc.BasePanel.orthogonalLength[anchor]](myself.DF.orthoLengthFunc)
-            [pvc.BasePanel.paralelLength[anchor]](maxBarSize)  ; 
+            [pvc.BasePanel.parallelLength[anchor]](maxBarSize)  ; 
 
         }  // end of if (stacked)
 
@@ -5129,7 +6506,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     this.pvBullets = this.pvPanel.add(pv.Panel)
     .data(data)
     [pvc.BasePanel.orthogonalLength[anchor]](size)
-    [pvc.BasePanel.paralelLength[anchor]](this.chart.options.bulletSize)
+    [pvc.BasePanel.parallelLength[anchor]](this.chart.options.bulletSize)
     .margin(20)
     .left(leftPos) // titles will be on left always
     .top(topPos);
@@ -6616,478 +7993,3 @@ return pv.Label(x);
 
 });
 
-/**
- * BoxplotChart is the main class for generating... categorical boxplotcharts.
- * 
- * The boxplot is used to represent the distribution of data using:
- *  - a box to represent the region that contains 50% of the datapoints,
- *  - the whiskers to represent the regions that contains 95% of the datapoints, and
- *  - a center line (in the box) that represents the median of the dataset.
- * For more information on boxplots you can visit  http://en.wikipedia.org/wiki/Box_plot
- *
- * If you have an issue or suggestions regarding the ccc BoxPlot-charts
- * please contact CvK at cde@vinzi.nl
- */
-
-
-
-pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
-
-    bpChartPanel : null,
-
-    constructor: function(o){
-
-        this.base(o);
-
-        var _defaults = {
-            showValues: true,
-	    //stacked: false,
-	    //            waterfall: false,
-            panelSizeRatio: 0.9,
-            boxSizeRatio: 0.9,
-            maxBarSize: 2000,
-
-            originIsZero: true,
-            axisOffset: 0,
-            showTooltips: true,
-            orientation: "vertical",
-	    /* 
-            orthoFixedMin: null,
-            orthoFixedMax: null */
-	    boxplotColor: "darkgreen"  // "grey"
-        };
-
-        // Apply options
-        $.extend(this.options,_defaults, o);
-
-        //  force stacked to be true (default of base-class is false)
-	//        this.options.stacked = true;
-
-        return;
-    },
-
-
-    preRender: function(){
-
-       this.base();
-
-       pvc.log("Prerendering in boxplotChart");
-
-
-       this.bpChartPanel = new pvc.BoxplotChartPanel(this, {
-		//stacked: this.options.stacked,
-	    //            waterfall: this.options.waterfall,
-            panelSizeRatio: this.options.panelSizeRatio,
-            boxSizeRatio: this.options.boxSizeRatio,
-            maxBarSize: this.options.maxBarSize,
-            showValues: this.options.showValues,
-            showTooltips: this.options.showTooltips,
-            orientation: this.options.orientation,
-	    // boxplot specific options
-	    boxplotColor: this.options.boxplotColor
-        });
-
-        this.bpChartPanel.appendTo(this.basePanel); // Add it
-
-        return;
-    }
-}
-);
-
-
-/*
- * Boxplot chart panel generates the actual box-plot with a categorical base-axis.
- * for more information on the options see the documentation file.
- */
-
-
-pvc.BoxplotChartPanel = pvc.BasePanel.extend({
-
-    _parent: null,
-    pvBox: null,
-    pvBoxLabel: null,
-    /*
-    pvWaterfallLine: null,
-    pvCategoryPanel: null,
-    pvSecondLie: null,
-    pvSecondDot: null,
-    data: null,
-  
-    stacked: false,
-    */
-    panelSizeRatio: 1,
-    boxSizeRatio: 0.5,
-    boxplotColor: "grey",
-    showTooltips: true,
-    maxBarSize: 200,
-    showValues: true,
-    orientation: "vertical",
-    tipsySettings: {
-        gravity: "s",
-        fade: true
-    },
-    //    ruleData: null,
-
-    hRules: null,
-    vRules: null,
-    bars: null,
-
-
-    constructor: function(chart, options){
-
-        this.base(chart,options);
-
-        return;
-    },
-
-
-
-    getDataSet:  function() {
-	    // selection on visibility does not make too much sense here
-	    // a box-plot consist of five data-series (and no legend)
-        var dataset = this.chart.dataEngine.getVisibleCategoriesIndexes();
-        return dataset;
-    } ,
-
-
-
-
-    /*
-     *   This function implements a number of helper functions in order
-     *   to increase the readibily and extendibility of the code by:
-     *    1: providing symbolic names (abstractions) to the numerous anonymous
-     *        functions that need to be passed to Protovis
-     *    2: by moving large parts of the local variabele (parameters
-     *       and scaling functions out of the 'create' function to this
-     *       prepareDataFunctions blok. 
-     *
-     *   These helper functions (closures) are all stored in 'this.DF'
-     *
-     *   Overriding this 'prepareDataFunctions' allows you to implement
-     *   a different ScatterScart, however, it is also possible to
-     *   replace specific functions from the 'this.DF' object.
-     *
-     *   Currently I still use a separate chart-type for waterfall/bar plots
-     *   and for box-plots.
-     */
-    prepareDataFunctions:  function() {
-        var myself = this;
-
-        // create empty container for the functions and data
-        this.DF = {}
-
-        var lScale = this.chart.getLinearScale(true);
-
-        var l2Scale = this.chart.getSecondScale(true);
-        var oScale = this.chart.getOrdinalScale(true);
-        var bSCale = null;
-
-        // determine barPositionOffset and bScale
-        this.DF.maxBarSize = null;
-        var barPositionOffset = 0;
-	bScale = new pv.Scale.ordinal(
-	   this.chart.dataEngine.getVisibleSeriesIndexes())
-            .splitBanded(0, oScale.range().band, this.boxSizeRatio);
-	// We need to take into account the maxValue if our band 
-        // exceeds this value
-
-	this.DF.maxBarSize = bScale.range().band;
-
-        if (this.DF.maxBarSize > this.maxBarSize) {
-            barPositionOffset = (this.DF.maxBarSize - this.maxBarSize)/2 ;
-            this.DF.maxBarSize = this.maxBarSize;
-        }
-        // export needed for generated overflow markers.
-	//        this.DF.bScale = bScale;
-
-
-     /*
-     * fuctions to determine positions along base axis.
-     */
-	/*
-        this.DF.basePositionFunc = stacked ?
-        function(d){
-            var res = oScale(this.index) + barPositionOffset;
-            // This function used this pointer instead of d !!
-            return res
-        } :
-        null;
-
-        this.DF.baseRulePosFunc = stacked ?
-        function(d){
-            var res = oScale(d) + barPositionOffset;
-            return res
-        } :
-        null;
-	*/
-
-	// find the left side of the container
-        this.DF.catContainerBasePosFunc = oScale; 
-	/*
-	function(d){
-            return oScale(this.index);
-	    };*/
-
-        this.DF.catContainerWidth = oScale.range().band;
-
-	// find the relative position within this container
-
-        this.DF.relBasePosFunc  = function(d){
-            var res = bScale(myself.chart.dataEngine
-                .getVisibleSeriesIndexes()[this.index]) + barPositionOffset;
-            return res;
-        };
-
-
-        this.DF.secBasePosFunc = 
-        function(d){
-            if(myself.timeSeries){
-                return tScale(parser.parse(d.category));
-            }
-            else{
-                return oScale(d.category) + oScale.range().band/2;
-            }
-        };
-
-    /*
-     * functions to determine positions along orthogonal axis
-     */
-        this.DF.orthoBotPos = function(d){
-            return lScale(pv.min([0,d]));
-        };
-
-        this.DF.orthoLengthFunc = function(d){
-	    //            var res = myself.chart.animate(0, 
-	    //  Math.abs(lScale(d||0) - lScale(0)));
-	    res = lScale(d);
-            return res;
-        };
-
-        this.DF.secOrthoLengthFunc = function(d){
-            return myself.chart.animate(0,l2Scale(d.value));
-        };
-
-
-    /*
-     * functions to determine the color palette.
-     */
-        var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
-
-	/*  Not used as a box-plot only contains one series??
-        // colorFunc is used for the base dataseries
-        this.DF.colorFunc = function(d){
-            var ind = this.parent.index;
-            return colors (myself.chart.dataEngine
-                .getVisibleSeriesIndexes()[ind]);
-        };
-	*/
-
-        // colorFunc2 is used for ....
-        this.DF.colorFunc2 = function(d){
-            return colors(myself.chart.dataEngine
-                .getVisibleSeriesIndexes()[this.index])
-        };
-
-        return;
-    } ,
-
-  generateBoxPlots: function() {
-    var de = this.chart.dataEngine;
-    var opts = this.chart.options;
-    var colLabels = de.getVisibleCategories();
-    var visibleSeries = de.getVisibleSeries();
-    var values = de.getValues();
-
-    var lwa = 2;   // lineWidth of average.
-
-    // store the index of the different values
-    var median = 0,
-    p25 = 1,
-    p75 = 2,
-    p5 = 3,
-    p95 = 4;
-
-    // boxplot covers third of width of container
-    var widthBox = this.DF.catContainerWidth/3; 
-    // to do: adjust for max-width and minWidth
-    var leftOffset = (this.DF.catContainerWidth - widthBox)/2;
-
-    for(var index=0;  index < colLabels.length; index++) {
-
-	// order the data elements from 5% bound to 95% bound
-	// and determine the horizontal scale
-	var dat = values[index].map(this.DF.orthoLengthFunc);
-      
-	var leftBox = this.DF.catContainerBasePosFunc(index) + leftOffset,
-	    rightBox = leftBox + widthBox,
-	    midBox = (leftBox + rightBox)/2;
-	
-        this.vRules.push({"left": midBox,
-		    "height": dat[p25] - dat[p5],
-		    "lWidth": 1,
-		    "bottom": dat[p5]});
-        this.vRules.push({"left": leftBox,
-		    "height": dat[p75] - dat[p25],
-		    "lWidth": 1,
-		    "bottom": dat[p25]});
-        this.vRules.push({"left": rightBox,
-		    "height": dat[p75] - dat[p25],
-		    "lWidth": 1,
-		    "bottom": dat[p25]});
-        this.vRules.push({"left": midBox,
-		    "height": dat[p95] - dat[p75],
-		    "lWidth": 1,
-		    "bottom": dat[p75]});
-        for(var i=0; i<dat.length; i++)
-	    this.hRules.push({"left": leftBox,
-			"bottom": dat[i],
-			"lWidth": (i == median) ? lwa : 1,
-			"width": widthBox});
-
-	this.bars.push({"left": leftBox,
-		    "bottom": dat[p25],
-		    "width": widthBox,
-		    "height": dat[p75]-dat[p25],
-		    "fillStyle": "limegreen"
-	          });
-      }
-
-    /*      sp.labels.push({left: dat[2],
-                      bottom: sp.textBottom,
-                      text: this.labelFixedDigits(avLabel),
-                      size: opts.smValueFont,
-                      color: opts.boxplotColor});
-    */
-    //    }
-  } ,
-
-
-  create: function(){
-    var myself = this;
-    this.width = this._parent.width;
-    this.height = this._parent.height;
-    
-    this.pvPanel = this._parent.getPvPanel().add(this.type)
-      .width(this.width)
-      .height(this.height)
-
-    this.hRules = [];
-    this.vRules = [];
-    this.bars = [];
-
-
-    var anchor = this.orientation == "vertical"?"bottom":"left";
-
-    // prepare data and functions when creating (rendering) the chart.
-    this.prepareDataFunctions();
-
-    this.generateBoxPlots();
-
-    var maxBarSize = this.DF.maxBarSize;
-
-    // define a panel for each category label.
-    // later the individuals bars of series will be drawn in 
-    // these panels.
-    this.pvBoxPanel = this.pvPanel.add(pv.Panel);
-
-    // add the box-plots to the chart
-      this.pvBoxPanel.add(pv.Bar)
-        .data(myself.bars)
-        .left(function(d) { return d.left})
-        .width( function(d) { return d.width})
-        .height( function(d) { return d.height})
-        .bottom( function(d) { return d.bottom})
-        .fillStyle( function(d) { return d.fillStyle; });
-
-      this.pvBoxPanel.add(pv.Rule)
-        .data(myself.hRules)
-        .left(function(d) { return d.left})
-        .width( function(d) { return d.width})
-        .bottom( function(d) { return d.bottom})
-        .lineWidth( function(d) { return d.lWidth; })
-        .strokeStyle(myself.chart.options.boxplotColor);
-
-      this.pvBoxPanel.add(pv.Rule)
-        .data(myself.vRules)
-        .left(function(d) { return d.left})
-        .height( function(d) { return d.height})
-        .bottom( function(d) { return d.bottom})
-        .lineWidth( function(d) { return d.lWidth; })
-        .strokeStyle(myself.chart.options.boxplotColor);
-
-
-        if(this.chart.options.secondAxis){
-            // Second axis - support for lines
-            this.pvSecondLine = this.pvPanel.add(pv.Line)
-            .data(function(d){
-                return myself.chart.dataEngine.getObjectsForSecondAxis(d, 
-                    this.timeSeries ? function(a,b){
-                    return parser.parse(a.category) - parser.parse(b.category);
-                    }: null)
-                })
-            .strokeStyle(this.chart.options.secondAxisColor)
-            [pvc.BasePanel.relativeAnchor[anchor]](myself.DF.secBasePosFunc)
-            [anchor](myself.DF.secOrthoLengthFunc);
-
-            this.pvSecondDot = this.pvSecondLine.add(pv.Dot)
-            .shapeSize(8)
-            .lineWidth(1.5)
-            .fillStyle(this.chart.options.secondAxisColor)
-        }
-
-        // add Labels:
-        this.pvBoxPanel
-        .text(function(d){
-            var v = myself.chart.options.valueFormat(d);
-            var s = myself.chart.dataEngine
-            .getVisibleSeries()[myself.stacked?this.parent.index:this.index]
-            var c = myself.chart.dataEngine
-            .getVisibleCategories()[myself.stacked?this.index:this.parent.index]
-            return myself.chart.options.tooltipFormat.call(myself,s,c,v);
-    
-        })
-
-        if(this.showTooltips){
-            // Extend default
-            this.extend(this.tipsySettings,"tooltip_");
-            this.pvBoxPanel
-            .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
-        }
-
-
-        if (this.chart.options.clickable){
-            this.pvBoxPanel
-            .cursor("pointer")
-            .event("click",function(d){
-                var s = myself.chart.dataEngine
-                .getSeries()[myself.stacked?this.parent.index:this.index]
-                var c = myself.chart.dataEngine
-                .getCategories()[myself.stacked?this.index:this.parent.index]
-                return myself.chart.options.clickAction(s,c, d);
-            });
-        }
-    /*  heeft geen data !!
-        if(this.showValues){
-            this.pvBoxLabel = this.pvBoxPanel
-            .anchor("center")
-            .add(pv.Label)
-            .bottom(0)
-            .text(function(d){
-                return myself.chart.options.valueFormat(d);
-            })
-      
-            // Extend barLabel
-            this.extend(this.pvBoxLabel,"barLabel_");
-        }
-    */
-        // Extend bar and barPanel
-        this.extend(this.pvBoxPanel,"boxPanel_");
-        this.extend(this.pvBoxPanel,"box_");
-    
-
-        // Extend body
-        this.extend(this.pvPanel,"chart_");
-
-    }
-
-});
