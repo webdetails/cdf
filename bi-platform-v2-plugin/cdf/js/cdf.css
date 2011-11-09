@@ -1,0 +1,134 @@
+.pentaho-toggle-button-up button {
+    background: #eee;
+    border: 1px outset white;
+}
+
+.pentaho-toggle-button-down button {
+    background: silver;
+    border: 1px inset gray;
+}
+
+
+.boxshadow .pentaho-toggle-button-up button {
+    background: #eee;
+    border: 1px solid gray;
+    box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -webkit-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -moz-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -o-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -ms-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+}
+
+.boxshadow .pentaho-toggle-button-down button {
+    background: silver;
+    border: 1px solid black;
+    box-shadow: inset 1px 1px 1px gray;
+    -webkit-box-shadow: inset 1px 1px 1px gray;
+    -moz-box-shadow: inset 1px 1px 1px gray;
+    -o-box-shadow: inset 1px 1px 1px gray;
+    -ms-box-shadow: inset 1px 1px 1px gray;
+}
+
+.tableComponent{
+	margin-bottom:0em;
+}
+
+.tableComponent th{
+	text-align: center;
+}
+
+.tableComponent td.numeric{
+	text-align: right;
+	font-family: monospace;
+}
+
+.tableComponent td.string{
+	text-align: left;
+}
+
+.tableComponent td.sparkline{
+	text-align: center;
+}
+
+.cdfClickable{
+	cursor: pointer;
+}
+
+#GB_window {
+    left: 0;
+    top: 0;
+    font-size: 1px;
+    position: absolute;
+    overflow: visible;
+    z-index: 1500;
+}
+
+ a.resetFilterButton {
+  color: #0000FF;
+  font-weight: bold;
+  font-size: 12px;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* Comments */
+
+.cdfCommentsWrapper {
+	line-height:1.6em;
+	margin:1em 0 1.5em;
+}
+
+.cdfCommentsWrapper .comment-body {
+	display:block;
+	clear:both;
+	margin:0;
+	padding:5px;
+}
+
+.cdfCommentsWrapper .comment-footer {
+	border-top: none;
+	clear:both;
+	display:block;
+	float:right;
+	font-size:0.8em;
+	margin:0 0 10px;
+	padding:3px;
+	text-transform:uppercase;
+}
+.cdfCommentsWrapper .comment-body p {
+	margin:0 0 0.75em;
+}
+
+.cdfNoComments{
+	font-style: italic;
+	font-size: 0.8em;
+}
+
+.cdfCommentsWrapper dl a{
+	padding: 5px;
+	text-decoration: none;
+}
+
+.cdfCommentsWrapper textarea{
+	width: 100%;
+}
+
+div.cdfCommentsPagination li{
+	cursor: pointer;
+	float: left;
+	list-style-type: none;
+	list-style-image: none;
+	list-style-position: outside;
+	margin: 2px;
+	padding: 4px;
+	position: relative;
+}
+
+div.cdfCommentsPagination a{
+	display: inline-block
+}

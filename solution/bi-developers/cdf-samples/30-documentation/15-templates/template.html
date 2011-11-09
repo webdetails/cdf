@@ -1,0 +1,76 @@
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Template Files</h2>
+		
+		<p> 
+
+		Once again, the main goal is to reduced  time and effort to make a new
+		dashboard.  The dashboard template files were build to <b>avoid adding
+			always the same content</b> (Navigation bar, javascript libraries,
+		layout, etc) to all the dashboards templates files and allow
+		<b>different layouts</b>.  Another objective that was accomplished with
+		this solution was to <b>avoid the creation of a template file for all
+			the solution folders</b> by using a default tempalte. Finally, but
+		not less important, all the libraries  present in the template  are
+		dynamically added by the Dashbaord.jsp <b>reducing the size and
+			computation of the templates.</b>
+		</p>
+
+		<p>
+		The templates are present in the pentaho-solutions dir under sysyem/pentaho-cdf
+		</p>
+
+		<p>There are a few types of template files, used by CDF framework: 
+		</p>
+		
+		<ul>
+
+			<li>template-dashboard.html: 
+
+			This is the outer-most template. Usually contains the common
+			layout, header, the navigation bar and all the necessary JavaScript
+			libraries are included automatically.
+			
+			</li><br>
+
+			<li>template.html: 
+
+			If this file is present in a solution folder, the Dashboards
+			generator will interpret it and present the contents to the user. All
+			components will be rendered according to de life-cycle described in
+			the components section
+			
+			</li><br>
+			<li>template-dashboard-mantle:
+			On the supplied samples, this template contains the header and all the necessary JavaScript  libraries. The navigation 
+			menu was excluded since mantle already has is own navigation approach.</li><br>
+				
+			<li>default-dashboard-template.html:
+			When no template is present in the current solution folder, this template is presented to the user.
+			Can be used to present a content navigation page</li><br>
+
+		</ul>
+		
+		<p>Two questions are raised here:<br /><br />
+		
+		<i>How can we choose between the template-dashboard-mantle and the template-dashboard?</i><br />
+		The answer is simple: just use the <i>style</i> tag in the xcdf file or call RenderHTML with
+		the template request argument.(example: template=mantle). For xcdf files the default template
+		to be used is specified in solutions/system/pentaho-cdf/plugin.xml.
+		
+		<br>
+
+		<br/><i>Can I modify the templates?</i> <br/>Of course, that's the purpose of template files.
+		
+		
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

@@ -1,0 +1,92 @@
+<SCRIPT LANGUAGE="JavaScript">
+
+function clickOnTerritory(value) {
+	productLine = "null";
+	Dashboards.fireChange('territory',value);
+}
+
+</SCRIPT>
+
+
+<table align="center" style="border: 1px solid #000;">
+	<tr>
+		<td align="center" colspan="2"><p><div id="titleObject"></div></p></td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td valign="top"><div id="territorySalesObject"></div></td>
+				</tr>
+				<tr>
+					<td valign="top"><div id="productLineSalesObject"></div></td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<table>
+				<tr>
+					<td><div id="sampleObject"></div></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+
+
+
+var render_grid = {
+	type: "cccHeatGridChart",
+	name: "render_grid",
+	chartDefinition: {
+		width: 400,
+		height: 400,
+		dataAccessId: "mdxQuery",
+path: "/bi-developers/cdf-samples/20-samples/heatgrid/cde_sample1.cda",
+		crosstabMode: true,
+		seriesInRows: false,
+		animate: false,
+		clickable: false,
+		timeSeries: false,
+		timeSeriesFormat: "%Y-%m-%d",
+		panelSizeRatio: 0.8,
+		orientation: "vertical",
+		colors: [],
+		showValues: false,
+		valuesAnchor: "right",
+		titlePosition: "top",
+		titleSize: 25,
+		showXScale: true,
+		xAxisPosition: "bottom",
+		xAxisSize: 30,
+		showYScale: true,
+		yAxisPosition: "left",
+		yAxisSize: 50,
+		xAxisFullGrid: false,
+		yAxisFullGrid: false,
+		orthoAxisOrdinal: false,
+		scalingType: "linear",
+		numSD: 2,
+		nullColor: "#efc5ad",
+		extensionPoints: [],
+                valuesAnchor: "right",
+                normPerBaseCategory: true,
+                useShapes: true,
+                minColor: "#0EDFF1",
+                maxColor: "#0119F9",
+                isMultiValued: true,
+                useCompositeAxis:true
+},
+	parameters: [],
+	executeAtStart: true,
+	htmlObject: "sampleObject",
+	listeners: []
+
+};
+Dashboards.init([render_grid]);
+					
+</script>
+

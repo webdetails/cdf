@@ -1,0 +1,152 @@
+/* autobox-list is the dropdown list */
+ul.autobox-list {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #aaa;
+  overflow-x:hidden;
+  overflow-y:auto;
+  margin: 0px;
+  padding: 0;
+  list-style: none;
+  font: normal .75em/.75em "Lucida Grande", "Verdana", sans-serif;
+  color: #333;
+}
+ul.autobox-list li {
+  display: block;
+  padding: .3em .5em .3em .3em;
+  overflow: hidden;
+  width: 100%;
+}
+ul.autobox-list li.active {
+  background-color: #3875d7;
+  color: #fff;
+}
+
+/* autobx-hldr is the selected list */
+ul.autobox-hldr {
+width: 175px;
+  position:relative;
+  top: -10px;
+  border: 1px solid #999;
+  overflow: hidden;
+  height: auto !important;
+  height: 1%;
+  padding: 4px 5px 0;
+  font: 11px "Lucida Grande", "Verdana";
+}
+ul.autobox-hldr li {
+  float: left;
+  list-style-type: none;
+  padding: 0 5px 4px 0;
+  margin-right: 5px;
+}
+ul.autobox-hldr li.bit-box {
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  _border-radius: 6px;
+  _border: 1px solid #cad8f3;
+  _background: #dee7f8;
+  _padding: 1px 5px 2px;
+}
+ul.autobox-hldr li.bit-box {
+  padding-right: 15px;
+  position: relative;
+}
+ul.autobox-hldr li.autobox-input{
+ width: 165px;
+}
+ul.autobox-hldr li.autobox-input input {
+  width: 150px;
+  margin: 0;
+  border: 1px solid #666;
+  outline: 0;
+  padding: 3px 0 2px 2px;
+} /* no left/right padding here please */
+ul.autobox-hldr li.bit-box a.closebutton {
+  position: absolute;
+  right: 4px; top: 3px;
+  display: block;
+  width: 7px; height: 7px;
+  font-size: 1px;
+  background: url('close.gif'); }
+ ul.autobox-hldr  a.applybutton {
+  position: absolute;
+  display: block;
+  /*left:166px;*/
+  top: 8px;
+  width: 15px; height: 15px;
+  font-size: 2px;
+  background: url('search.png'); }
+div.applybutton {
+  position: absolute;
+  display: block;
+  z-index: 30000;
+  border: 1px solid #111;
+  background-color: #eee;
+  padding: 5px;
+  opacity: 0.85;
+  font-size: 12px;
+  }
+ul.autobox-hldr li.bit-box a.closebutton:hover {
+  background-position: 7px;
+}
+ul.autobox-hldr li.bit-box-focus a.closebutton,
+ul.autobox-hldr li.bit-box-focus a.closebutton:hover {
+  background-position: bottom;
+}
+
+
+
+
+/* autobx-hldr is the selected list */
+ul.autobox-hldr-2 {
+  _width: 500px;
+  _border: 1px solid #999;
+  position: relative;
+  left: -5px;
+  top: -10px;
+  overflow: hidden;
+  height: auto !important;
+  _height: 1%;
+  padding: 4px 5px 0;
+  
+}
+ul.autobox-hldr-2 li {
+  float: left;
+  list-style-type: none;
+  padding: 0 5px 4px 0;
+  margin-right: 5px;
+}
+ul.autobox-hldr-2 li.bit-box {
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  _border-radius: 6px;
+  _border: 1px solid #cad8f3;
+  _background: #dee7f8;
+  _padding: 1px 5px 2px;
+}
+ul.autobox-hldr-2 li.bit-box {
+  padding-right: 15px;
+  position: relative;
+}
+ul.autobox-hldr-2 li.autobox-input input {
+  width: 150px;
+  margin: 0;
+  border: 1px solid #666;
+  outline: 0;
+  padding: 3px 0 2px 2px;
+} /* no left/right padding here please */
+ul.autobox-hldr-2 li.bit-box a.closebutton {
+  position: absolute;
+  right: 4px; top: 3px;
+  display: block;
+  width: 7px; height: 7px;
+  font-size: 1px;
+  background: url('close.gif'); }
+ul.autobox-hldr-2 li.bit-box a.closebutton:hover {
+  background-position: 7px;
+}
+ul.autobox-hldr-2 li.bit-box-focus a.closebutton,
+ul.autobox-hldr-2 li.bit-box-focus a.closebutton:hover {
+  background-position: bottom;
+}

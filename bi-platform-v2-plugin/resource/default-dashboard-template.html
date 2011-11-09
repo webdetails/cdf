@@ -1,0 +1,71 @@
+<br />
+ <STYLE type="text/css">
+.contents, .shadow {
+  position: relative;
+  bottom: 4px;
+  right: 4px;
+  max-width: 7500px
+}
+.shadow { background-color: #ccc; }
+.contents {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #000;
+  padding: 0.5em;
+  max-width: 700px
+}
+</style>
+<div class="shadow" >
+<div class="contents">
+		<div id="folderTitle_object" class="pageTitle" >&nbsp;</div><br>
+		<div id="folderContent_object" class="solutionItems" >&nbsp;</div>
+</div></div>
+
+<script language="javascript" type="text/javascript">
+
+
+// Init jQuery i18n plugin
+loadMessageBundles = function(lang) {
+
+			jQuery.i18n.properties({
+			    name:'Messages',
+			    path:'resources/languages/',
+			    mode:'both',
+			    language:(lang == 'browser' ? jQuery.i18n.browserLang() : lang)
+			});
+		}
+    
+folderContent = 
+{
+  name: "folderContent",
+  type: "contentList",
+  listeners:[],
+  parameters: [],
+  htmlObject: "folderContent_object",
+  executeAtStart: true,
+  mode: "1"
+};
+
+
+folderTitle = 
+{
+  name: "folderTitle",
+  type: "pageTitle",
+  listeners:[],
+  parameters: [],
+  htmlObject: "folderTitle_object",
+  executeAtStart: true
+};
+
+
+var templateComponents = [folderContent, folderTitle];
+Dashboards.init(templateComponents);
+
+$(document).ready(function(){
+    // Initialize jquery.i18n plugin - load message files
+    var userLocale = '#{LANGUAGE_CODE}';
+    loadMessageBundles(userLocale);
+});
+    
+</script>
+

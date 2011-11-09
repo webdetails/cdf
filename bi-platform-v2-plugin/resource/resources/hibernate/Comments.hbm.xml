@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="org.pentaho.cdf.comments.CommentEntry" table="cdf_comments">
+        <cache usage="read-write" />
+    
+    <!-- Important note: Hibernate SchemaUpdate doesn't create 
+    the index on page automatically per 
+    http://opensource.atlassian.com/projects/hibernate/browse/HHH-1012
+
+    If the table becomes larger the create index needs to be made manually
+    -->
+
+    <!--
+    private int commentId;
+    private String page;
+    private String user;
+    private String comment;
+    private boolean deleted;
+    private boolean archived;
+    private Date createdDate;
+    -->
+    
+        <id column="commentid" name="commentId" type="int"
+			unsaved-value="null" length="100">
+            <generator class="native" />
+        </id>
+        <property name="page" type="string" not-null="true" index="commentspage_idx">
+            <column name="page" length="254" not-null="true" />
+        </property>
+        <property name="user" type="string" not-null="false">
+            <column name="pentahouser" length="255" not-null="false" />
+        </property>
+        <property name="comment" type="string" not-null="false">
+            <column name="pentahocomment" length="1024" not-null="false" />
+        </property>
+        <property name="deleted" type="boolean" not-null="false">
+            <column name="deleted" not-null="false" />
+        </property>
+        <property name="archived" type="boolean" not-null="false">
+            <column name="archived" not-null="false" />
+        </property>
+        <property name="createdDate" type="timestamp" not-null="true">
+            <column name="CREATED" not-null="true" />
+        </property>
+        <query name="getCommentsByPage"><![CDATA[
+    from CommentEntry where page=:page and deleted=false and archived=false order by commentId desc
+]]>
+        </query>
+        <query name="getCommentByid"><![CDATA[
+    from CommentEntry where commentId=:commentId
+]]>
+        </query>
+    </class>
+</hibernate-mapping>
+
