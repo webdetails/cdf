@@ -8,18 +8,10 @@
     <conf name="zip" />
   </configurations>
   
-  <!--<publications>-->
-    <!--<artifact name="%artifact-name%" type="zip" />-->
-  <!--</publications>-->
-  <!---->
-	<publications>
-		<artifact name="${ivy.artifact.id}" type="jar" conf="default" />
-    <artifact name="${plugin.artifact.id}-${project.revision}" type="zip" conf="zip" />
-    <artifact name="${plugin.artifact.id}-samples-${project.revision}" type="zip" conf="zip" />
-    <artifact name="${plugin.artifact.id}-solution-${project.revision}" type="zip" conf="zip" />
+  <publications>
+    <artifact name="%artifact-name%" type="zip" />
+  </publications>
 
-	</publications>
-  
   <dependencies defaultconf="default->default">
   </dependencies>
 </ivy-module>
