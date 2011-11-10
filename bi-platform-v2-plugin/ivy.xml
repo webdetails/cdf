@@ -5,9 +5,17 @@
     
     <configurations>
     	<conf name="default"/>
+    	<conf name="source"/>
+    	<conf name="zip"/>
     	<conf name="test" visibility="private"/>
     </configurations>
-    
+
+    <publications>
+        <artifact name="pentaho-cdf" type="jar" conf="default"/>
+        <artifact name="pentaho-cdf" m:classifier="sources" type="source" ext="jar" conf="source"/>
+        <artifact name="pentaho-cdf" type="zip" conf="zip"/>
+    </publications>
+
     <dependencies defaultconf="default->default">
     
         <!--  third party dependencies -->
