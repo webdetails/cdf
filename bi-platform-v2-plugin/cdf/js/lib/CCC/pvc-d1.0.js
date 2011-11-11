@@ -1768,6 +1768,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return breadthCounters;
     },
     
+    triggerAreaSelections: function(x,y,dx,dy,mode){
+        
+    },
+    
     renderCompositeOrdinalAxis: function(){
         var myself = this;
 
@@ -1817,7 +1821,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         layout.node
             .def("fitInfo", null)
             .height(function(d,e,f){//just iterate and get cutoff
-                var fitInfo = myself.getFitInfoSVG(d.dx, d.dy, d.nodeName, myself.font);
+                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeName, myself.font, diagMargin);
                 if(!fitInfo.h){
                     
                     if(axisDirection == 'v' && fitInfo.v ){//prefer vertical
@@ -1868,23 +1872,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .text(function(d){
                 return d.nodeName;
             })
-            .cursor( myself.clickAction? 'pointer' : 'default')
-            .event('click', function(d){
-                if(clickAction){
-                    if(doubleClickAction){
-                        window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
-                    }
-                    else { clickAction(d.nodePath); }
-                }
-                
-                //if(myself.clickAction){
-                //    myself.clickAction(d.nodePath);
-                //}
-            })
-            .event("mouseover", pv.Behavior.tipsy({//Tooltip
-                gravity: "n",
-                fade: true
-            }));
+//            .cursor( myself.clickAction? 'pointer' : 'default')
+            //.event('click', function(d){
+            //    if(clickAction){
+            //        if(doubleClickAction){
+            //            window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
+            //        }
+            //        else { clickAction(d.nodePath); }
+            //    }
+            //    
+            //    //if(myself.clickAction){
+            //    //    myself.clickAction(d.nodePath);
+            //    //}
+            //})
+;
         
         //cutoffs -> snap to vertical/horizontal
         var H_CUTOFF_ANG = 0.30;
@@ -1895,6 +1896,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //draw labels and make them fit
         this.pvLabel = layout.label.add(pv.Label)
             .def('lblDirection','h')
+            //.def('ang',0)
             .textAngle(function(d)
             {
                 var fitInfo = this.fitInfo();
@@ -1924,35 +1926,61 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return 0;//horizontal
             })
             .font(myself.font)
+            //.def('title', function(){ return this.parent.text() ;})
+            .title(function(d){
+                return d.nodeName;
+                })
             .text(function(d){//TODO: change
+                //this.title(d.nodeName);
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){
                     case 'h':
                         if(!fitInfo.h){//TODO: fallback option for no svg
-                            return myself.trimToWidthSVG(d.dx, d.nodeName, myself.font, '..');
+                            return myself.trimToWidth(d.dx, d.nodeName, myself.font, '..');
                         }
                         break;
                     case 'v':
                         if(!fitInfo.v){
-                            return myself.trimToWidthSVG(d.dy, d.nodeName, myself.font, '..');
+                            return myself.trimToWidth(d.dy, d.nodeName, myself.font, '..');
                         }
                         break;
                     case 'd':
                        if(!fitInfo.d){
                           var ang = Math.atan(d.dy/d.dx);
                           var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;
-                          return myself.trimToWidthSVG(diagonalLength-diagMargin,d.nodeName, myself.font,'..');
+                          return myself.trimToWidth(diagonalLength-diagMargin,d.nodeName, myself.font,'..');
                         }
                         break;
                 }
                 return d.nodeName ;
             })
+            .cursor( myself.clickAction? 'pointer' : 'default')
+            .events('all')//labels don't have events by default
+            .event('click', function(d){
+                if(clickAction){
+                    if(doubleClickAction){
+                        //has to be closure in order to work with ie
+                        window.setTimeout(function(){clickAction(d.nodePath)}, DBL_CLICK_MAX_DELAY);
+                       // window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
+                    }
+                    else { clickAction(d.nodePath); }
+                }
+                
+                //if(myself.clickAction){
+                //    myself.clickAction(d.nodePath);
+                //}
+            })
+            .event("mouseover", pv.Behavior.tipsy({//Tooltip
+                gravity: "n",
+                fade: true,
+                offset: diagMargin * 2
+            }))
             ;
             
            // double click label //TODO: need doubleclick axis action + single click prevention..
             if(doubleClickAction)
             {
-                lblBar.event("dblclick", function(d){
+                this.pvLabel.event("dblclick", function(d){
                     doubleClickAction(d.nodePath);
                 });
             }
@@ -1993,6 +2021,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return lbl;
     },
     
+    getTextLength: function(text, font){
+      return (pv.renderer() != 'vml')?
+        this.getTextLenSVG(text, font) :
+        this.getTextLenVML(text, font) ;
+    },
+    
     getTextLenSVG: function(text, font){
         var holder = this.getTextSizePlaceholder();
         var holderId = holder.attr('id');
@@ -2004,25 +2038,28 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return box.width;
     },
     
+    getTextLenVML: function(text, font){
+        return pv.Vml.text_dims(text, font).width;
+    },
+    
     //TODO: if not in px?..
     getFontSize: function(font){
         var holder = this.getTextSizePlaceholder();
         holder.css('font', font);
-        return holder.css('font-size').slice(0,-2);
+        return parseInt(holder.css('font-size'));//.slice(0,-2);
     },
+
     
-    getFitInfoSVG: function(w, h, text, font)
-    {
-        if(!pv.have_SVG){
-            return this.getFitInfo(w,h,text,font);
-        }
+    getFitInfo: function(w, h, text, font, diagMargin)
+    {    
         if(text == '') return {h:true, v:true, d:true};
-        var len = this.getTextLenSVG(text, font);
+        var len = this.getTextLength(text, font);
+        
         var fitInfo =
         {
             h: len <= w,
             v: len <= h,
-            d: len <= Math.sqrt(w*w + h*h) -2
+            d: len <= Math.sqrt(w*w + h*h) - diagMargin
         };
         return fitInfo;
     },
@@ -2030,7 +2067,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     trimToWidthSVGDiag: function(w,h,text,font,angle, trimTerminator){//TODO:discard?
         
         if(!pv.have_SVG){
-            return this.trimToWidth(len,text,font);
+            return this.trimToWidth(Math.sqrt(w*w + h*h -2),text,font);
         }
         
         var lbl = this.getTextSizePvLabel(text, font);
@@ -2055,37 +2092,18 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return text + (trimmed? trimTerminator: '');
     },
     
-    trimToWidthSVG: function(len, text, font, trimTerminator){//TODO:perf?
-        if(!pv.have_SVG){
-            return this.trimToWidth(len,text,font);
-        }
+    trimToWidth: function(len, text, font, trimTerminator){//TODO:perf?
         
         if(text == '') return text;
-        var holder = this.getTextSizePlaceholder();
         var trimmed = false;
         
-        for(var textLen = this.getTextLenSVG(text, font); textLen > len; text = text.slice(0,text.length -1)){
-            textLen = this.getTextLenSVG(text, font);
+        for(var textLen = this.getTextLength(text, font); textLen > len; text = text.slice(0,text.length -1)){
+            textLen = this.getTextLength(text, font);
             trimmed = true;
         }
         return text + (trimmed? trimTerminator: '');
     },
     
-    //whether fits horizaontally, vertical and/or in diagonal
-    getFitInfo: function(w, h, text, font)
-    {
-        var fitsH = this.doesTextSizeFit(w, text, font);
-        var fitsV =  this.doesTextSizeFit(h, text, font);
-        var fitsD = this.doesTextSizeFit(Math.sqrt(w*w + h*h)- 5, text, font);//TODO:hcoded
-        
-        var fitInfo =
-        {
-            h: fitsH,
-            v: fitsV,
-            d: fitsD 
-        };
-        return fitInfo;
-    },
     
     //TODO: use for IE if non-svg option kept
     doesTextSizeFit: function(length, text, font){
@@ -2095,21 +2113,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return holder.width() - MARGIN <= length;
     },
     
-    trimToWidth: function(w, text, font, trimTerminator){
-        var MARGIN = 4;//TODO: hcoded
-        var holder = this.getTextSizePlaceholder();
-        if(font){
-            holder.css("font", font);
-        }
-        var trimmed = false;
-        for(holder.text(text); holder.width() - MARGIN > w;text = text.slice(0,text.length -1)){
-            holder.text(text );//+ (trimmed? trimTerminator: ''));
-            trimmed = true;
-            holder.hide();
-            holder.show();
-        }
-        return text + (trimmed? trimTerminator: '');
-    },
+
     
     // end: composite axis
     /////////////////////////////////////////////////
@@ -4149,6 +4153,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.base();
 
         pvc.log("Prerendering in heatGridChart");
+        
 
         this.heatGridChartPanel = new pvc.HeatGridChartPanel(this, {
             stacked: this.options.stacked,
@@ -4161,6 +4166,9 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         });
 
         this.heatGridChartPanel.appendTo(this.basePanel); // Add it
+
+        //make selectable
+        
 
     }
 
@@ -4396,13 +4404,38 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.rubberBand = {x:0, y:0, dx:4, dy:4};
         var myself = this;
         
+        var dMin= Math.min(w,h) /2;
+        
         var isSelecting = false;
+        var checkSelections = false;
         var selectFill = 'rgba(255, 127, 0, 0.15)';
         var selectStroke = 'rgb(255,127,0)';
         var invisibleFill = 'rgba(127,127,127,0.01)';
         
+        
+        var dispatchRubberBandSelection = function(rb)
+        {
+            var xAxis = myself.chart.xAxisPanel;
+            var yAxis = myself.chart.yAxisPanel;
+            
+            //1) Chart: translate coordinates
+            myself.rubberBand.y = myself.height - rb.y  - rb.dy;
+            if(myself.chart.options.xAxisPosition == 'top'){
+                myself.rubberBand.y += xAxis[pvc.BasePanel.orthogonalLength[xAxis.anchor]];
+            }
+            if(myself.chart.options.yAxisPosition == 'left'){
+                myself.rubberBand.x -= yAxis[pvc.BasePanel.orthogonalLength[yAxis.anchor]];
+            }
+            myself.setRubberbandSelections(myself.rubberBand,w,h);
+            
+            //axis
+            
+            
+            myself.shapes.render();
+        };
+        
         //rubber band display
-        this.selectBar = this.pvPanel
+        this.selectBar = this.pvPanel.root//TODO
            .add(pv.Bar)
                 .visible(function() {return isSelecting;} )
                 .left(function(d) { return d.x; })
@@ -4413,26 +4446,35 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 .strokeStyle(selectStroke);
                 
         //rubber band selection behavior definition
-        this.pvPanel
+        this.pvPanel.root//TODO
             .data([this.rubberBand])
             .fillStyle(invisibleFill)
             .event('mousedown', pv.Behavior.selector(false))
             .event('selectstart', function(d){
                 isSelecting = true;
-                myself.selectBar.render();
+               // myself.selectBar.render();
             })
             .event('select', function(rb){
                 
                 myself.rubberBand = rb;
-                myself.selectBar.render();
+                if(rb.dx > dMin || rb.dy > dMin){
+                    checkSelections  =true;
+                    myself.selectBar.render();
+                }
             })
             .event('selectend', function(rb){
                 isSelecting = false;
                 //translate top to bottom
-                myself.selectBar.render();
-                myself.rubberBand.y = myself.height - rb.y - rb.dy;
-                myself.setRubberbandSelections(myself.rubberBand,w,h);
-                myself.shapes.render();
+                if(checkSelections){
+                    checkSelections = false;
+                    myself.selectBar.render();//TODO: update coordinates
+                    
+                    dispatchRubberBandSelection(rb);
+                    
+                    //myself.rubberBand.y = myself.height - rb.y - rb.dy;
+                    //myself.setRubberbandSelections(myself.rubberBand,w,h);
+                    //myself.shapes.render();
+                }
             });
     },
     
@@ -4607,11 +4649,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     myself.toggleSelection(s,c);
                     myself.triggerSelectionChange();
                     //classic clickAction
-                    if($.isArray(d)) d= d[0];
                     if(typeof(myself.chart.options.clickAction) == 'function'){
+                        if($.isArray(d)) d= d[0];
                         myself.chart.options.clickAction(s,c,d);
                     }
                     myself.pvPanel.render();
+                   // myself.shapes.render();
                 })
                 ;
                 this.createSelectOverlay(w,h);
@@ -4643,12 +4686,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     addSelection: function(s,c){
       if(!this.selections[s]) this.selections[s] = {};
       this.selections[s][c] = true;
+      //TODO:
+      this.selectCount = null;
     },
     
     removeSelection: function(s,c){
       if(this.selections[s]){
         this.selections[s][c] = false;
       }
+      this.selectCount = null;
     },
     
     toggleSelection: function(s,c){
@@ -4829,7 +4875,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     getSelectCount: function(){
-        return this.getSelections().length;
+        if(this.selectCount == null){
+          this.selectCount = this.getSelections().length;
+        }
+        return this.selectCount;
     },
     
     triggerSelectionChange: function(){
