@@ -1243,6 +1243,33 @@ sprintfWrapper = {
 
 sprintf = sprintfWrapper.init;
 
+
+Dashboards.registerAddIn = function(component,slot,addIn){
+  if (!this.addIns) {
+    this.addIns = {};
+  }
+  if (!this.addIns[component]) {
+    this.addIns[component] = {};  
+  }
+  if (!this.addIns[component][slot]) {
+    this.addIns[component][slot] = {};  
+  }
+    this.addIns[component][slot][addIn.name] = addIn;  
+};
+
+Dashboards.hasAddIn = function(component,slot,addIn){
+    return Boolean(this.addIns && this.addIns[component] &&
+      this.addIns[component][slot] && this.addIns[component][slot][addIn]);
+}
+
+Dashboards.getAddIn = function(component,slot,addIn){
+  try {
+    return this.addIns[component][slot][addIn];
+  } catch (e) {
+    return null;
+  }
+}
+
 Dashboards.safeClone = function(){
 	var options, name, src, copy, copyIsArray, clone,
 		target = arguments[0] || {},
@@ -1688,4 +1715,37 @@ Query = function() {
   };
 };
 
+/*
+ * UTILITY STUFF
+ *
+ * 
+ */
 
+(function() {
+  function accessorDescriptor(field, fun)
+  {
+    var desc = { enumerable: true, configurable: true };
+    desc[field] = fun;
+    return desc;
+  }
+  
+  this.defineGetter = function defineGetter(obj, prop, get)
+  {
+    if (Object.defineProperty)
+      return Object.defineProperty(obj, prop, accessorDescriptor("get", get));
+    if (Object.prototype.__defineGetter__)
+      return obj.__defineGetter__(prop, get);
+  
+    throw new Error("browser does not support getters");
+  }
+  
+  this.defineSetter = function defineSetter(obj, prop, set)
+  {
+    if (Object.defineProperty)
+      return Object.defineProperty(obj, prop, accessorDescriptor("set", set));
+    if (Object.prototype.__defineSetter__)
+      return obj.__defineSetter__(prop, set);
+  
+    throw new Error("browser does not support setters");
+  }
+})();
