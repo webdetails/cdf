@@ -164,7 +164,7 @@ TYPICAL TARGET SEQUENCE
 
   <!-- SVN Ant Properties -->
   <property name="svnant.url"
-            value="http://subclipse.tigris.org/files/documents/906/43359/svnant-1.2.0-RC1.zip"
+            value="http://subclipse.tigris.org/files/documents/906/43359/svnant-1.2.1.zip"
             description="The URL to the current release of SVN Ant" />
   <property name="svnant.use-javahl"
             value="false"
