@@ -4,6 +4,12 @@ BaseComponent = Base.extend({
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
+  getAddIn: function (slot,addIn) {
+    return Dashboards.getAddIn(this.type,slot,addIn);
+  },
+  hasAddIn: function (slot,addIn) {
+    return Dashboards.hasAddIn(this.type,slot,addIn);
+  },
   getValuesArray : function() {
 
 
@@ -111,24 +117,6 @@ BaseComponent = Base.extend({
         });
         myArray.push(_a);
       }
-    //  //set output column type 'valueOutputType' from cda column type if possible
-    //  //TODO: testing; for ee dashboard editor
-    //  var valIdx = 0;
-    //  if(this.parameters){
-    //	for(var i =0; i < this.parameters.length;i++){
-    //	  if(this.parameters[i][0] == 'validx'){
-    //		valIdx = this.parameters[2];
-    //		break;
-    //	  }
-    //	}
-    //  }
-    //  var typesArray = new Array();
-    //  jHeaders.each(function(){
-    //	typesArray.push($(this).attr("type"));
-    //  });
-    //  if(typesArray.length > valIdx){
-    //	this.valueOutputType = typesArray[valIdx];
-    //  }
     }
 
     //get contents
@@ -143,6 +131,28 @@ BaseComponent = Base.extend({
 
     return myArray;
 
+  },
+
+  setAddInOptions: function(slot, addIn,options) {
+    if(!this.addInOptions) {
+      this.addInOptions = {};
+    }
+
+    if (!this.addInOptions[slot]) {
+      this.addInOptions[slot] = {};
+    }
+    this.addInOptions[slot][addIn] = options
+  },
+
+  getAddInOptions: function(slot,addIn) {
+    var opts = null;
+    try {
+      opts = this.addInOptions[slot][addIn];
+    } catch (e) {
+      /* opts is still null, no problem */
+    }
+    /* opts is falsy if null or undefined */
+    return opts || {};
   }
 });
 
@@ -1792,11 +1802,33 @@ var TableComponent = BaseComponent.extend({
     // Sparklines still applied to drawcallback
     var myself = this;
     dtData.fnDrawCallback = function() {
-      myself.ph.find("td.sparkline:visible").each(function(i){
-        var t = $(this);
-        t.sparkline(t.text().split(/,/));
-        t.removeClass("sparkline");
+      myself.ph.find("tr").each(function(row,tr){
+        $(tr).children("td:visible").each(function(col,td){
+            var colType = cd.colTypes[col];
+            var addIn = myself.getAddIn("colType",colType);
+            if (addIn) {
+              var state = {},
+                target = $(td),
+                results = json;
+              if(!(target.parents('tbody').length)) {
+                return;
+              } else if (target.get(0).tagName != 'TD') {
+                target = target.closest('td');
+              }
+              var position = myself.dataTable.fnGetPosition(td);
+              state.rawData = results;
+              state.tableData = myself.dataTable.fnGetData();
+              state.colIdx = position[1];
+              state.rowIdx = position[0];
+              state.series = results.resultset[state.rowIdx][0];
+              state.category = results.metadata[state.colIdx].colName;
+              state.value =  results.resultset[state.rowIdx][state.colIdx];
+              state.target = target;
+              addIn.call(td,state,myself.getAddInOptions("colType",addIn.name));
+            }
+        });
       });
+
 
       if(typeof cd.drawCallback == 'function'){
         cd.drawCallback.apply(myself,arguments);
@@ -1850,9 +1882,11 @@ var TableComponent = BaseComponent.extend({
         } else if (target.get(0).tagName != 'TD') {
           target = target.closest('td');
         }
-
-        state.colIdx = target.index();
-        state.rowIdx = target.parent().index();
+        var position = myself.dataTable.fnGetPosition(e.target);
+        state.rawData = results;
+        state.tableData = myself.dataTable.fnGetData();
+        state.colIdx = position[1];
+        state.rowIdx = position[0];
         state.series = results.resultset[state.rowIdx][0];
         state.category = results.metadata[state.colIdx].colName;
         state.value =  results.resultset[state.rowIdx][state.colIdx];

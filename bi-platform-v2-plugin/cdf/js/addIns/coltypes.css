@@ -1,0 +1,10 @@
+.trend {
+  width: 10px;
+  height: 10px;
+}
+.trend.up {
+  background: url("img/up.png");
+}
+.trend.down {
+  background: url("img/down.png");
+}

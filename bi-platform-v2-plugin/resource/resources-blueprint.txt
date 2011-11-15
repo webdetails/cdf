@@ -21,6 +21,8 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/CoreComponents.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/AddIns.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/NavigationComponents.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MapComponents.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
@@ -46,7 +48,8 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.css,\
-@RELATIVE_URL@/content/pentaho-cdf/js/blueprint/screen.css
+@RELATIVE_URL@/content/pentaho-cdf/js/blueprint/screen.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.css
 
 
 mapScript=\
