@@ -107,23 +107,25 @@
     name: "trendArrow",
     label: "Trend Arrows",
     defaults: {
-      height: 10,
-      startColor: "#55A4D6",
-      endColor: "#448FC8",
-      stroke: null,
-      max: undefined
+      includeValue: false,
+      valueFormat: function(v,format) {return sprintf(format,v);}
     },
     implementation: function(tgt, st, opt) {
-     var ph = $(tgt),
-       trendClass =  st.value < 0 ? "down" : "up";
-     var trend = $("<div>&nbsp;</div>");
-     trend.addClass('trend');
-     trend.addClass(trendClass);
-     ph.empty().append(trend);
+      var ph = $(tgt),
+        trendClass =  st.value < 0 ? "down" : "up";
+      var trend = $("<div>&nbsp;</div>");
+      trend.addClass('trend');
+      trend.addClass(trendClass);
+      ph.empty();
+      if(opt.includeValue) {
+        ph.append(opt.valueFormat(st.value, st.colFormat));
+      }
+      ph.append(trend);
     }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(trendArrow));
 
  
 })();
+
 

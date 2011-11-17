@@ -1776,8 +1776,8 @@ var TableComponent = BaseComponent.extend({
   {
     // General documentation here: http://datatables.net
     var myself = this,
-    cd = this.chartDefinition,
-    extraOptions = {};
+      cd = this.chartDefinition,
+      extraOptions = {};
    
     myself.ph.trigger('cdfTableComponentProcessResponse');
     
@@ -1806,6 +1806,9 @@ var TableComponent = BaseComponent.extend({
       myself.ph.find("tr").each(function(row,tr){
         $(tr).children("td:visible").each(function(col,td){
             var colType = cd.colTypes[col];
+            var position = dataTable.fnGetPosition(td),
+              rowIdx = position[0],
+              colIdx = position[1];
             var addIn = myself.getAddIn("colType",colType);
             if (addIn) {
               var state = {},
@@ -1816,16 +1819,24 @@ var TableComponent = BaseComponent.extend({
               } else if (target.get(0).tagName != 'TD') {
                 target = target.closest('td');
               }
-              var position = dataTable.fnGetPosition(td);
               state.rawData = results;
               state.tableData = dataTable.fnGetData();
-              state.colIdx = position[1];
-              state.rowIdx = position[0];
+              state.colIdx = colIdx;
+              state.rowIdx = rowIdx;
               state.series = results.resultset[state.rowIdx][0];
               state.category = results.metadata[state.colIdx].colName;
               state.value =  results.resultset[state.rowIdx][state.colIdx];
+              if(cd.colFormats) {
+                state.colFormat = cd.colFormats[state.colIdx];
+              }
               state.target = target;
               addIn.call(td,state,myself.getAddInOptions("colType",addIn.name));
+            } else if(cd.colFormats) {
+              var format = cd.colFormats[position[1]],
+                value = json.resultset[rowIdx][colIdx];
+              if (format && value) {
+                $(td).text(sprintf(format,value));
+              }
             }
         });
       });
@@ -1857,22 +1868,6 @@ var TableComponent = BaseComponent.extend({
     this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
 
 
-    // Apply the formats
-    if(cd.colFormats != undefined){
-      $.each(cd.colFormats,function(colNo,val){
-        if(val != null){
-          var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child("+ (colNo + 1) +")");
-          td.each(function(){
-            if ($(this).text() != "null" ) {
-              $(this).text( sprintf( val, $(this).text() ) );
-            } else {
-              $(this).text('0');
-            }
-          });
-        }
-      });
-    }
-
     myself.ph.find ('table').bind('click',function(e) {
       if (typeof cd.clickAction === 'function') { 
         var state = {},
@@ -1892,6 +1887,7 @@ var TableComponent = BaseComponent.extend({
         state.category = results.metadata[state.colIdx].colName;
         state.value =  results.resultset[state.rowIdx][state.colIdx];
         state.target = target;
+        state.colFormat = cd.colFormats[state.colIdx]; 
         cd.clickAction.call(myself,state);
       }
     });
