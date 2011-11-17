@@ -11,7 +11,7 @@
     },
     implementation: function (tgt, st, opt) {
       var t = $(tgt);
-      t.sparkline(t.text().split(/,/),opt);
+      t.sparkline(st.value.split(/,/),opt);
       t.removeClass("sparkline");
     }
   };
@@ -29,7 +29,7 @@
     },
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
-        sparklineData = ph.text(),
+        sparklineData = st.value,
         data = sparklineData.split(",");
         n = data.length,
         w = opt.width || ph.width(),
@@ -78,7 +78,7 @@
       var wtmp = ph.width();
       var htmp = opt.height;
 
-      var value = ph.text();
+      var value = st.value;
       ph.empty();
 
       var paper = Raphael(tgt, wtmp, htmp);
