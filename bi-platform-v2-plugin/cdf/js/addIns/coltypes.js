@@ -73,7 +73,7 @@
       max: undefined
     },
     implementation: function(tgt, st, opt) {
-      var max = opt.max || Math.max.apply(Math,st.results.resultset.map(function(e){return Math.abs(e[st.colIdx]);}));
+      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){return Math.abs(e[st.colIdx]);}));
       var ph = $(tgt);
       var wtmp = ph.width();
       var htmp = opt.height;

@@ -1801,7 +1801,8 @@ var TableComponent = BaseComponent.extend({
 
     // Sparklines still applied to drawcallback
     var myself = this;
-    dtData.fnDrawCallback = function() {
+    dtData.fnDrawCallback = function(dataTableSettings) {
+      var dataTable = this;
       myself.ph.find("tr").each(function(row,tr){
         $(tr).children("td:visible").each(function(col,td){
             var colType = cd.colTypes[col];
@@ -1815,9 +1816,9 @@ var TableComponent = BaseComponent.extend({
               } else if (target.get(0).tagName != 'TD') {
                 target = target.closest('td');
               }
-              var position = myself.dataTable.fnGetPosition(td);
+              var position = dataTable.fnGetPosition(td);
               state.rawData = results;
-              state.tableData = myself.dataTable.fnGetData();
+              state.tableData = dataTable.fnGetData();
               state.colIdx = position[1];
               state.rowIdx = position[0];
               state.series = results.resultset[state.rowIdx][0];
