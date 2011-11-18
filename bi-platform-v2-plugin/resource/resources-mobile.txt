@@ -32,6 +32,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/tipsy.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js
 
 commonLibrariesLink=\
