@@ -1081,7 +1081,7 @@ var DateRangeInputComponent = BaseComponent.extend({
   storeChanges : function(start,end){
     this.startValue = start;
     this.endValue = end;
-  },
+  }
 },
 {
   fireDateRangeInputChange : function(name, rangeA, rangeB){
