@@ -5,12 +5,20 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
     completionCallback: undefined,
 
     update: function() {
+      var myself = this;
       this.ph = $("#" + this.htmlObject).empty();
       this.input = $("<input type='text'>").appendTo(this.ph);
       this.query = new Query(this.queryDefinition);
       var myself = this;
       this.input.autocomplete({
-        source:function(term,callback){return myself.triggerQuery(term,callback);}
+        source:function(obj,callback){return myself.triggerQuery(obj.term,callback);}
+      });
+      this.input.change(function(){
+        Dashboards.processChange(myself.name);
+      }).keyup(function(event){
+        if (event.keyCode == 13) {
+          Dashboards.processChange(myself.name);
+        }
       });
     },
 
@@ -28,12 +36,17 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
 
     triggerQuery: function(term,callback){
       var params = $.extend([],this.parameters);
-      params.push([this.termParam,term]);
+      if (params.length) {
+        params[0][1] = "'" + term+ "'";
+      }
       if(term.length >= this.minTextLength) {
         this.query.fetchData(params,this.handleQuery(callback));
       } else {
         callback([]);
       }
+    },
+    getValue: function() {
+      return this.input.val();
     }
 })
 
