@@ -1991,7 +1991,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .cursor( myself.clickAction? 'pointer' : 'default')
             .events('all')//labels don't have events by default
-            .event('click', function(d,n0,n1,n2,n3,n4, e){
+            .event('click', function(d){
+                var e = pv.event;
                 if(clickAction){
                     if(doubleClickAction){
                         //arg has to be passed in closure in order to work with ie
@@ -4593,9 +4594,10 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
         
         this.pvPanel.root
-            .data([this.rubberBand])
-            .event("click", function(d, e) {
-                if(!e.ctrlKey){
+           // .data([this.rubberBand])
+            .data([myself.rubberBand])
+            .event("click", function(d) {
+                if(!pv.event.ctrlKey){
                     myself.clearSelections();
                     myself.shapes.render();
                 }
@@ -4612,14 +4614,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     myself.selectBar.render();
                 }
             })
-            .event('selectend', function(rb, mouseEvent){
+            .event('selectend', function(rb){
                 if(isSelecting){
                     isSelecting = false;
                     //translate top to bottom
                     if(checkSelections){
                         checkSelections = false;
                         myself.selectBar.render();//TODO: update coordinates
-                        dispatchRubberBandSelection(rb, mouseEvent);
+                        dispatchRubberBandSelection(rb, pv.event);
                     }
                 }
             });
@@ -4744,11 +4746,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 .text(function(r,ra,i){
                     return myself.valuesToText(r[i]);
                 })
-                .event("click", function(r,ra,i,n1,n2,e) {
+                .event("click", function(r,ra,i) {
                     var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                     var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                     var d = r[i];
-                    if(e.ctrlKey){
+                    if(pv.event.ctrlKey){
                         myself.toggleSelection(s,c);
                     } else {//hard select
                         myself.clearSelections();
@@ -4761,10 +4763,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         myself.chart.options.clickAction(s,c,d);
                     }
                     myself.pvPanel.render();
-                   // myself.shapes.render();
-                })
-                ;
-                this.createSelectOverlay(w,h);
+                });
+        this.createSelectOverlay(w,h);
     },
     
     /*
@@ -5202,7 +5202,7 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     r.x = m1.x;
     r.y = m1.y;
     r.dx = r.dy = 0;
-    pv.Mark.dispatch("selectstart", scene, index, e);
+    pv.Mark.dispatch("selectstart", scene, index);
   }
 
   /** @private */
@@ -5218,13 +5218,13 @@ pv.Behavior.selector = function(autoRefresh, mark) {
             this.render();
         }
       });
-    pv.Mark.dispatch("select", scene, index, e);
+    pv.Mark.dispatch("select", scene, index);
   }
 
   /** @private */
   function mouseup(e) {
     if (!scene) return;
-    pv.Mark.dispatch("selectend", scene, index, e);
+    pv.Mark.dispatch("selectend", scene, index);
     scene = null;
   }
 
