@@ -1834,7 +1834,7 @@ var TableComponent = BaseComponent.extend({
             } else if(cd.colFormats) {
               var format = cd.colFormats[position[1]],
                 value = json.resultset[rowIdx][colIdx];
-              if (format && value) {
+              if (format && (typeof value != "undefined" && value !== null)) {
                 $(td).text(sprintf(format,value));
               }
             }
