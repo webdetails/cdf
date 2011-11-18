@@ -36,8 +36,12 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
 
     triggerQuery: function(term,callback){
       var params = $.extend([],this.parameters);
-      if (params.length) {
-        params[0][1] = "'" + term+ "'";
+      var termVal = "'" + term+ "'";
+      if(this.searchParam){
+        params.push([this.searchParam, termVal]);
+      }
+      else if (params.length > 0){
+        this.parameters[0][1] = termVal;
       }
       if(term.length >= this.minTextLength) {
         this.query.fetchData(params,this.handleQuery(callback));
