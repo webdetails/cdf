@@ -4,6 +4,32 @@ BaseComponent = Base.extend({
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
+  clone: function(parameterRemap) {
+    var that;
+    that = $.extend(true,{},this);
+    if (that.parameters) {
+      that.parameters = that.parameters.map(function(param){
+        if (param[1] in parameterRemap) {
+          return [param[0],parameterRemap[param[1]]];
+        } else {
+          return param;
+        }
+      });
+    }
+    if (that.listeners) {
+      that.listeners = that.listeners.map(function(param){
+        if (param in parameterRemap) {
+          return parameterRemap[param];
+        } else {
+          return param;
+        }
+      });
+    }
+    if (that.parameter && that.parameter in parameterRemap) {
+      that.pararameter = parameterRemap[that.parameter];
+    }
+    return that;
+  },
   getAddIn: function (slot,addIn) {
     return Dashboards.getAddIn(this.type,slot,addIn);
   },
