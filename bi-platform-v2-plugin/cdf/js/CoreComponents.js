@@ -1897,7 +1897,7 @@ var TableComponent = BaseComponent.extend({
 
 
     myself.ph.find ('table').bind('click',function(e) {
-      if (typeof cd.clickAction === 'function') { 
+      if (typeof cd.clickAction === 'function' || myself.expandOnClick) { 
         var state = {},
           target = $(e.target),
           results = myself.queryState.lastResults();
@@ -1916,11 +1916,55 @@ var TableComponent = BaseComponent.extend({
         state.value =  results.resultset[state.rowIdx][state.colIdx];
         state.target = target;
         state.colFormat = cd.colFormats[state.colIdx]; 
-        cd.clickAction.call(myself,state);
+        
+        if (myself.expandOnClick) {
+        	myself.handleExpandOnClick(state);
+        }
+        if (cd.clickAction)
+	        cd.clickAction.call(myself,state);
       }
     });
     myself.ph.trigger('cdfTableComponentFinishRendering');
-  }
+  },
+
+   handleExpandOnClick:     function(event){     
+        var myself = this,
+            detailContainerObj = myself.expandContainerObject,
+            activeclass = "expandingClass";
+        if(typeof activeclass === 'undefined'){
+          activeclass = "activeRow";
+        }
+        var obj = event.target.closest("tr");
+            var a = event.target.closest("a");
+            if (a.hasClass ('info')){
+                    return;
+            }else{
+                    var row = obj.get(0);
+                   
+                    var value = event.series;
+                    var htmlContent = $("#" + detailContainerObj).html();
+                   
+                    if( obj.hasClass(activeclass) ){
+                    obj.removeClass(activeclass);
+                    myself.dataTable.fnClose( row );
+                    }
+                    else{
+                            var prev = obj.siblings('.'+activeclass).each(function(i,d){
+                                    var curr = $(d);
+                                    curr.removeClass(activeclass);
+                                    myself.dataTable.fnClose( d );
+                            });
+                            obj.addClass(activeclass);
+                            
+                            //Read parameters and fire changes
+                            var results = myself.queryState.lastResults();
+                            $(myself.expandParameters).each(function f(i, elt) {                            
+                            	Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);                            
+                            });
+                            myself.dataTable.fnOpen( row, htmlContent, activeclass );
+                    };
+            };
+    }
 },
 {
   getDataTableOptions : function(options) {
