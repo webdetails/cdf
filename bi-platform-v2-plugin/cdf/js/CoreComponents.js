@@ -1728,6 +1728,7 @@ var TableComponent = BaseComponent.extend({
         if (changedValues != undefined) {
           values = changedValues;
         }
+        myself.rawData = values;
         myself.processTableComponentResponse(values);
       });
     }
@@ -1768,6 +1769,7 @@ var TableComponent = BaseComponent.extend({
         };
       response.aaData = d.resultset;
       response.sEcho = p("sEcho");
+      myself.rawData = d;
       callback(response);
     });
   },
@@ -1813,7 +1815,7 @@ var TableComponent = BaseComponent.extend({
             if (addIn) {
               var state = {},
                 target = $(td),
-                results = json;
+                results = myself.rawData;
               if(!(target.parents('tbody').length)) {
                 return;
               } else if (target.get(0).tagName != 'TD') {
@@ -1833,7 +1835,7 @@ var TableComponent = BaseComponent.extend({
               addIn.call(td,state,myself.getAddInOptions("colType",addIn.name));
             } else if(cd.colFormats) {
               var format = cd.colFormats[position[1]],
-                value = json.resultset[rowIdx][colIdx];
+                value = myself.rawData.resultset[rowIdx][colIdx];
               if (format && (typeof value != "undefined" && value !== null)) {
                 $(td).text(sprintf(format,value));
               }
@@ -1879,7 +1881,7 @@ var TableComponent = BaseComponent.extend({
           target = target.closest('td');
         }
         var position = myself.dataTable.fnGetPosition(e.target);
-        state.rawData = results;
+        state.rawData = myself.rawData;
         state.tableData = myself.dataTable.fnGetData();
         state.colIdx = position[1];
         state.rowIdx = position[0];
