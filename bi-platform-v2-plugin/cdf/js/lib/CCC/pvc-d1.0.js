@@ -1911,10 +1911,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         
         //label space (left transparent)
         var lblBar = layout.node.add(pv.Bar)
-            .fillStyle('rgba(127,127,127,.01)')
+            .fillStyle('rgba(127,127,127,.001)')
             .strokeStyle( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) {return null;}
-                else {return "rgba(127,127,127,0.1)";} //non-terminal items, so grouping is visible
+                else {return "rgba(127,127,127,0.3)";} //non-terminal items, so grouping is visible
             })
             .lineWidth( function(d){
                 if(d.maxDepth == 1 || d.maxDepth ==0 ) { return 0; }
@@ -2043,15 +2043,24 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     getTextSizePvLabel: function(text, font)
     {
-        var holder = this.getTextSizePlaceholder();
-        var holderId = holder.attr('id');
-        var panel = new pv.Panel();
-        panel.canvas(holderId);
-        var lbl = panel.add(pv.Label).text(text);
-        if(font){
-            lbl.font(font);
+        if(!this.textSizePvLabel || this.textSizeLabelFont != font){
+            var holder = this.getTextSizePlaceholder();
+            var holderId = holder.attr('id');
+            var panel = new pv.Panel();
+            panel.canvas(holderId);
+            var lbl = panel.add(pv.Label).text(text);
+            if(font){
+                lbl.font(font);
+            }
+            panel.render();
+            this.textSizePvLabel = $('#' + holderId + ' text');
+            this.textSizeLabelFont = font;
         }
-        return lbl;
+        else {
+            this.textSizePvLabel.text(text);
+        }
+        
+        return this.textSizePvLabel[0];
     },
     
     getTextLength: function(text, font){
@@ -2061,13 +2070,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     getTextLenSVG: function(text, font){
-        var holder = this.getTextSizePlaceholder();
-        var holderId = holder.attr('id');
-        var lbl = this.getTextSizePvLabel(text, font);// panel.add(pv.Label).text(text);//.textBaseline("middle");
-        lbl.root.render();
-        //get generated label
-        var elem = $('#' + holderId + ' text')[0];
-        var box = elem.getBBox();//bounding box
+        var lbl = this.getTextSizePvLabel(text, font);
+        var box = lbl.getBBox();
         return box.width;
     },
     
@@ -2097,44 +2101,52 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         return fitInfo;
     },
     
-    trimToWidthSVGDiag: function(w,h,text,font,angle, trimTerminator){//TODO:discard?
-        
-        if(!pv.have_SVG){
-            return this.trimToWidth(Math.sqrt(w*w + h*h -2),text,font);
-        }
-        
-        var lbl = this.getTextSizePvLabel(text, font);
-        var holder = this.getTextSizePlaceholder();
-        var holderId = holder.attr('id'); 
-        var trimmed = false;
-        lbl.textAngle(angle);
-        lbl.root.render();
-        var elem = $('#' + holderId + ' text').parent()[0];
-        
-        for(var box =  elem.getBBox();
-            box.width > w ||
-            box.height > h;
-            text = text.slice(0,text.length -1))
-        {
-            trimmed = true;
-            lbl.text(text + trimTerminator);
-            lbl.root.render();
-           // elem = $('#' + holderId + ' text').parent()[0];
-            box = elem.getBBox();
-        }
-        return text + (trimmed? trimTerminator: '');
+    trimToWidth: function(len,text,font,trimTerminator){
+      if(text == '') return text;
+      var textLen = this.getTextLength(text, font);
+      
+      if(textLen <= len){
+        return text;
+      }
+      
+      if(textLen > len * 1.5){//cutoff for using other algorithm
+        return this.trimToWidthBin(len,text,font,trimTerminator);
+      }
+      
+      while(textLen > len){
+        text = text.slice(0,text.length -1);
+        textLen = this.getTextLength(text, font);
+      }
+      return text + trimTerminator;
     },
     
-    trimToWidth: function(len, text, font, trimTerminator){//TODO:perf?
+    trimToWidthBin :function(len,text,font,trimTerminator){
         
-        if(text == '') return text;
-        var trimmed = false;
+        var high = text.length-2;
+        var low = 0;
+        var mid;
+        var fits=false;
+        var textLen;
         
-        for(var textLen = this.getTextLength(text, font); textLen > len; text = text.slice(0,text.length -1)){
-            textLen = this.getTextLength(text, font);
-            trimmed = true;
+        while(low <= high && high > 0){
+            
+            mid = Math.ceil((low + high)/2);
+            //text = text.slice(0,mid);
+            textLen = this.getTextLength(text.slice(0,mid), font);
+            
+            if(textLen > len){
+                high = mid-1;
+            }
+            else {
+                if( this.getTextLength(text.slice(0,mid+1), font) < len ){
+                    low = mid+1;
+                }
+                else return text.slice(0,mid) + trimTerminator;
+            }
+            
         }
-        return text + (trimmed? trimTerminator: '');
+        
+        return text.slice(0,high) + trimTerminator; 
     },
     
     //TODO: use for IE if non-svg option kept
@@ -4178,6 +4190,10 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         this.options.orthoAxisOrdinal = true;
         this.options.legend = false;
         this.options.orginIsZero = true;
+        
+        if(this.options.useCompositeAxis){//force array support
+            this.options.isMultiValued = true;
+        }
 
     },
 
@@ -4471,8 +4487,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         
         var toGreyScale = function(color){
             //convert to greyscale using YCbCr luminance conv
-           // var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
-            var avg = Math.round( (color.r + color.g + color.b)/3);
+            var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+          //  var avg = Math.round( (color.r + color.g + color.b)/3);
             
             return pv.rgb(avg,avg,avg);
         };
@@ -4861,6 +4877,13 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.rubberBand = {x:0, y:0, dx:4, dy:4};
         var myself = this;
         
+        if(opts.orientation == 'horizontal')
+        {//switch back w,h
+            var tmp = w;
+            w=h;
+            h=tmp;
+        }
+        
         var dMin= Math.min(w,h) /2;
         
         var isSelecting = false;
@@ -4904,7 +4927,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             var y = 0, x=0;   
             //1) x axis
-            var xSelections = []
+            var xSelections = [];
             if(opts.useCompositeAxis){
                 y = rb.y - titleOffset['top'] ;
                 if(opts.xAxisPosition == 'bottom'){//chart
@@ -4935,7 +4958,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 var categories = myself.chart.dataEngine.getCategories();
                 var selectedSeries = [], selectedCategories = [],
                     sSelections, cSelections;
-                if(this.orientation == 'horizontal'){
+                if(opts.orientation == 'horizontal'){
                     sSelections = xSelections;
                     cSelections = ySelections;
                 }
@@ -5162,8 +5185,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     if(domainArgs != null && domainArgs.length > rangeArgs.length){
         domainArgs = domainArgs.slice(0, rangeArgs.length);
     }
+    if(domainArgs == null){
+        domainArgs = [];
+    }
     
-    if(domainArgs == null || domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
+    if(domainArgs.length < rangeArgs.length || opts.normPerBaseCategory){
         
         var min = pv.dict(cols, function(f){
           return pv.min(data, function(d){
