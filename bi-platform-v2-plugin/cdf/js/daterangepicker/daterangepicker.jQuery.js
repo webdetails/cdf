@@ -248,7 +248,7 @@ jQuery.fn.daterangepicker = function(settings){
 				});
 				var dateStart = (typeof thisObj.data('dateStart') == 'string') ? Date.parse(thisObj.data('dateStart')) : thisObj.data('dateStart')();
 				var dateEnd = (typeof thisObj.data('dateEnd') == 'string') ? Date.parse(thisObj.data('dateEnd')) : thisObj.data('dateEnd')();
-				rp.find('.range-start').datepicker('setDate', dateStart).find('.ui-datepicker-current-day').trigger('click');
+				rp.find('.range-start').datepicker('setDate', dateStart).find('.ui-datepicker-current-day');
 				rp.find('.range-end').datepicker('setDate', dateEnd).find('.ui-datepicker-current-day').trigger('click');
 		}
 		
