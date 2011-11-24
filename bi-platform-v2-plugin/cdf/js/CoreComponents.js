@@ -4,7 +4,7 @@ BaseComponent = Base.extend({
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
-  clone: function(parameterRemap) {
+  clone: function(parameterRemap,componentRemap,htmlRemap) {
     var that;
     that = $.extend(true,{},this);
     if (that.parameters) {
@@ -16,6 +16,16 @@ BaseComponent = Base.extend({
         }
       });
     }
+    if (that.components) {
+      that.components = that.components.map(function(comp){
+        if (comp in componentRemap) {
+          return componentRemap[comp];
+        } else {
+          return comp;
+        }
+      });
+    }
+    that.htmlObject = !that.htmlObject? undefined : htmlRemap[that.htmlObject];
     if (that.listeners) {
       that.listeners = that.listeners.map(function(param){
         if (param in parameterRemap) {
@@ -26,7 +36,7 @@ BaseComponent = Base.extend({
       });
     }
     if (that.parameter && that.parameter in parameterRemap) {
-      that.pararameter = parameterRemap[that.parameter];
+      that.parameter = parameterRemap[that.parameter];
     }
     return that;
   },
