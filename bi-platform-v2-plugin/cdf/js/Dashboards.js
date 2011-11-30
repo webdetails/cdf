@@ -1737,20 +1737,20 @@ Query = function() {
   
   this.defineGetter = function defineGetter(obj, prop, get)
   {
-    if (Object.defineProperty)
-      return Object.defineProperty(obj, prop, accessorDescriptor("get", get));
     if (Object.prototype.__defineGetter__)
       return obj.__defineGetter__(prop, get);
+    if (Object.defineProperty)
+      return Object.defineProperty(obj, prop, accessorDescriptor("get", get));
   
     throw new Error("browser does not support getters");
   }
   
   this.defineSetter = function defineSetter(obj, prop, set)
   {
-    if (Object.defineProperty)
-      return Object.defineProperty(obj, prop, accessorDescriptor("set", set));
     if (Object.prototype.__defineSetter__)
       return obj.__defineSetter__(prop, set);
+    if (Object.defineProperty)
+      return Object.defineProperty(obj, prop, accessorDescriptor("set", set));
   
     throw new Error("browser does not support setters");
   }
