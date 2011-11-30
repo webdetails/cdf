@@ -1467,12 +1467,18 @@ Query = function() {
 
   // Entry point
 
-  this.exportData = function(outputType, overrides) {
+  this.exportData = function(outputType, overrides,options) {
     if (_mode != 'CDA') {
       throw "UnsupportedOperation";
     }
     var queryDefinition = buildQueryDefinition(overrides);
     queryDefinition.outputType = outputType;
+    if (outputType == 'csv' && options.separator) {
+      queryDefinition.settingcsvSeparator = options.separator;
+    }
+    if (options.filename) {
+      queryDefinition.settingattachmentName= options.filename ;
+    }
     _exportIframe = _exportIframe || $('<iframe style="display:none">');
     _exportIframe.detach();
     _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
