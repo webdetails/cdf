@@ -1269,6 +1269,18 @@ Dashboards.getAddIn = function(component,slot,addIn){
     return null;
   }
 }
+Dashboards.listAddIns = function(component,slot) {
+  var addInList = [];
+  try {
+    var slot = this.addIns[component][slot];
+    for (addIn in slot) if (slot.hasOwnProperty(addIn)) { 
+      addInList.push([addIn, slot[addIn].label]);
+    }
+    return addInList;
+  } catch (e) {
+    return [];
+  }
+}
 
 Dashboards.safeClone = function(){
 	var options, name, src, copy, copyIsArray, clone,
