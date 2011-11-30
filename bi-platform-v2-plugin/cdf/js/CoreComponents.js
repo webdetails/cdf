@@ -1805,6 +1805,7 @@ var TableComponent = BaseComponent.extend({
       var dataTable = this;
       myself.ph.find("tr").each(function(row,tr){
         $(tr).children("td:visible").each(function(col,td){
+            if (td.className == 'expandingClass') return true; //Avoid processing for expanded rows
             var colType = cd.colTypes[col];
             var position = dataTable.fnGetPosition(td),
               rowIdx = position[0],
