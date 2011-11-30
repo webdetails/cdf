@@ -1846,12 +1846,13 @@ var TableComponent = BaseComponent.extend({
     dtData.fnDrawCallback = function(dataTableSettings) {
       var dataTable = this;
       myself.ph.find("tr").each(function(row,tr){
+          if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
+              return true;
         $(tr).children("td:visible").each(function(col,td){
-            if (td.className == 'expandingClass') return true; //Avoid processing for expanded rows
             var colType = cd.colTypes[col];
             var position = dataTable.fnGetPosition(td),
-              rowIdx = position[0],
-              colIdx = position[1];
+                rowIdx = position[0],
+                colIdx = position[1];
             var addIn = myself.getAddIn("colType",colType);
             if (addIn) {
               var state = {},
