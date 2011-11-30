@@ -4,6 +4,42 @@ BaseComponent = Base.extend({
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
+  clone: function(parameterRemap,componentRemap,htmlRemap) {
+    var that;
+    that = $.extend(true,{},this);
+    if (that.parameters) {
+      that.parameters = that.parameters.map(function(param){
+        if (param[1] in parameterRemap) {
+          return [param[0],parameterRemap[param[1]]];
+        } else {
+          return param;
+        }
+      });
+    }
+    if (that.components) {
+      that.components = that.components.map(function(comp){
+        if (comp in componentRemap) {
+          return componentRemap[comp];
+        } else {
+          return comp;
+        }
+      });
+    }
+    that.htmlObject = !that.htmlObject? undefined : htmlRemap[that.htmlObject];
+    if (that.listeners) {
+      that.listeners = that.listeners.map(function(param){
+        if (param in parameterRemap) {
+          return parameterRemap[param];
+        } else {
+          return param;
+        }
+      });
+    }
+    if (that.parameter && that.parameter in parameterRemap) {
+      that.parameter = parameterRemap[that.parameter];
+    }
+    return that;
+  },
   getAddIn: function (slot,addIn) {
     return Dashboards.getAddIn(this.type,slot,addIn);
   },
@@ -329,7 +365,11 @@ var SelectComponent = SelectBaseComponent.extend({
 
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
-    return $("#"+this.htmlObject + " select").val();
+  	var ph = $("#"+this.htmlObject + " select");
+	// caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
+	if(ph.hasClass("chzn-select") && ph.val() == null)
+		return [];
+    return ph.val();
   }
 });
 
@@ -1728,6 +1768,7 @@ var TableComponent = BaseComponent.extend({
         if (changedValues != undefined) {
           values = changedValues;
         }
+        myself.rawData = values;
         myself.processTableComponentResponse(values);
       });
     }
@@ -1768,6 +1809,7 @@ var TableComponent = BaseComponent.extend({
         };
       response.aaData = d.resultset;
       response.sEcho = p("sEcho");
+      myself.rawData = d;
       callback(response);
     });
   },
@@ -1814,7 +1856,7 @@ var TableComponent = BaseComponent.extend({
             if (addIn) {
               var state = {},
                 target = $(td),
-                results = json;
+                results = myself.rawData;
               if(!(target.parents('tbody').length)) {
                 return;
               } else if (target.get(0).tagName != 'TD') {
@@ -1834,7 +1876,7 @@ var TableComponent = BaseComponent.extend({
               addIn.call(td,state,myself.getAddInOptions("colType",addIn.name));
             } else if(cd.colFormats) {
               var format = cd.colFormats[position[1]],
-                value = json.resultset[rowIdx][colIdx];
+                value = myself.rawData.resultset[rowIdx][colIdx];
               if (format && (typeof value != "undefined" && value !== null)) {
                 $(td).text(sprintf(format,value));
               }
@@ -1880,7 +1922,7 @@ var TableComponent = BaseComponent.extend({
           target = target.closest('td');
         }
         var position = myself.dataTable.fnGetPosition(e.target);
-        state.rawData = results;
+        state.rawData = myself.rawData;
         state.tableData = myself.dataTable.fnGetData();
         state.colIdx = position[1];
         state.rowIdx = position[0];
