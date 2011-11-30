@@ -365,7 +365,11 @@ var SelectComponent = SelectBaseComponent.extend({
 
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
-    return $("#"+this.htmlObject + " select").val();
+  	var ph = $("#"+this.htmlObject + " select");
+	// caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
+	if(ph.hasClass("chzn-select") && ph.val() == null)
+		return [];
+    return ph.val();
   }
 });
 
@@ -1842,11 +1846,13 @@ var TableComponent = BaseComponent.extend({
     dtData.fnDrawCallback = function(dataTableSettings) {
       var dataTable = this;
       myself.ph.find("tr").each(function(row,tr){
+          if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
+              return true;
         $(tr).children("td:visible").each(function(col,td){
             var colType = cd.colTypes[col];
             var position = dataTable.fnGetPosition(td),
-              rowIdx = position[0],
-              colIdx = position[1];
+                rowIdx = position[0],
+                colIdx = position[1];
             var addIn = myself.getAddIn("colType",colType);
             if (addIn) {
               var state = {},
