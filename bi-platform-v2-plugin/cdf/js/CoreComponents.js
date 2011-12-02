@@ -1845,7 +1845,7 @@ var TableComponent = BaseComponent.extend({
     var myself = this;
     dtData.fnDrawCallback = function(dataTableSettings) {
       var dataTable = this;
-      myself.ph.find("tr").each(function(row,tr){
+      myself.ph.find("tbody tr").each(function(row,tr){
           if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
               return true;
         $(tr).children("td:visible").each(function(col,td){
