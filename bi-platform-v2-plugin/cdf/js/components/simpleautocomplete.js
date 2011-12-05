@@ -52,6 +52,4 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
     getValue: function() {
       return this.input.val();
     }
-})
-
-
+});
