@@ -30,11 +30,11 @@ pvc.ev = function(x){
 
 pvc.sumOrSet = function(v1,v2){
     return typeof v1 == "undefined"?v2:v1+v2;
-}
+};
 
 pvc.nonEmpty = function(d){
     return typeof d != "undefined" && d !== null;
-}
+};
 
 pvc.padMatrixWithZeros = function(d){
     return d.map(function(v){
@@ -42,14 +42,53 @@ pvc.padMatrixWithZeros = function(d){
             return typeof a == "undefined"?0:a;
         })
     })
-}
+};
 
 pvc.cloneMatrix = function(m){
     return m.map(function(d){
         return d.slice();
     });
-}
+};
 
+    /**
+     *ex.: arrayStartsWith(['EMEA','UK','London'], ['EMEA']) -> true
+     *     arrayStartsWith(a, a) -> true
+     **/
+pvc.arrayStartsWith = function(array, base)
+{
+    if(array.length < base.length) { return false; }
+    
+    for(var i=0; i<base.length;i++){
+        if(base[i] != array[i]) {
+            return false;
+        }
+    }
+    return true;
+};
+
+/**
+ * Equals for two arrays
+ * func - needed if not flat array of comparables
+ **/
+pvc.arrayEquals = function(array1, array2, func)
+{
+  if(array1 == null){return array2 == null;}
+  
+  var useFunc = typeof(func) == 'function';
+  
+  for(var i=0;i<array1.length;i++)
+  {
+    if(useFunc){
+        if(!func(array1[i],array2[i])){
+            return false;
+        }
+    }
+    else if(array1[i]!=array2[i]){
+        return false;   
+    }
+  }
+  return true;
+};
 
 /**
  *
@@ -1865,7 +1904,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
         
         var maxDepth = pv.max(elements, function(col){
-            return $.isArray(col) ? col.length : 1;
+            //return $.isArray(col) ? col.length : 1;
+            return (col != null && col[0] !== undefined) ? col.length : 1;
         });
         
         var layout = this.getLayoutSingleCluster(tree, this.anchor, maxDepth);
@@ -2064,9 +2104,20 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     getTextLength: function(text, font){
-      return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
-        this.getTextLenSVG(text, font) :
-        this.getTextLenVML(text, font) ;
+        
+        switch(pv.renderer()){
+            case 'vml':
+                return this.getTextLenVML(text, font);
+            case 'batik':
+                return getTextLenCGG(text, font);
+            case 'svg':
+            default:
+                return this.getTextLenSVG(text, font);
+        }
+      //  
+      //return (pv.renderer() != 'vml')?//TODO: support svgweb? defaulting to svg
+      //  this.getTextLenSVG(text, font) :
+      //  this.getTextLenVML(text, font) ;
     },
     
     getTextLenSVG: function(text, font){
@@ -2081,11 +2132,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     //TODO: if not in px?..
     getFontSize: function(font){
-        var holder = this.getTextSizePlaceholder();
-        holder.css('font', font);
-        return parseInt(holder.css('font-size'));//.slice(0,-2);
+        if(pv.renderer() == 'batik'){
+            var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
+            sty.setProperty('font',font);
+            return parseInt(sty.getProperty('font-size'));
+        }
+        else {
+            var holder = this.getTextSizePlaceholder();
+            holder.css('font', font);
+            return parseInt(holder.css('font-size'));//.slice(0,-2);
+        }
     },
-
     
     getFitInfo: function(w, h, text, font, diagMargin)
     {    
@@ -4055,9 +4112,8 @@ pvc.MultiValueTranslator = pvc.DataTranslator.extend({
         }
     },
     
-    //TODO: remake
     sumOrSetVect: function(v1, v2){
-        if (v1 == null || !$.isArray(v1)) {return v2;}
+         if (v1 == null || v1[0] === undefined) { return v2; }
         //TODO: check
         var res = [];
         for(var i=0;i<v1.length;i++){
@@ -4262,9 +4318,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     defaultValIdx:0,
     shape: "square",
     nullShape: "cross",
-    defaultBorder: 0,
+    defaultBorder: 1,
     nullBorder: 2,
-    selectedBorder: null,
+    selectedBorder: 2,
     //function to be invoked when a selection occurs
     // (shape click-select, row/column click and lasso finished)
     onSelectionChange: null,
@@ -4279,8 +4335,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
 
     getValue: function(d, i){
-        if($.isArray(d)) {
-            if(i != null) return d[i];
+        if(d!=null && d[0] !== undefined){
+            if(i != null && d[i] !== undefined) return d[i];//TODO:
             else return d[0];
         }
         else return d;
@@ -4292,7 +4348,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
 
     valuesToText: function(vals){
-        if($.isArray(vals)){
+        if(vals != null && vals[0] !== undefined){// $.isArray(vals)){
             return vals.join(', ');
         }
         else return vals;
@@ -4333,7 +4389,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
 
         var origData = this.chart.dataEngine.getVisibleTransposedValues();
         // create a mapping of the data that shows the columns (rows)
-        data = origData.map(function(d){
+        var data = origData.map(function(d){
             return pv.dict(cols, function(){
                 return  d[this.index];
             });
@@ -4381,7 +4437,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         //set coloring and shape / sizes if enabled
        if(opts.useShapes)
        {
-            this.createHeatMap(w,h, opts, fill);
+            this.createHeatMap(data, w,h, opts, fill);
        }
        else
        {//no shapes, apply color map to panel iself
@@ -4436,7 +4492,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     //creates new version
-    createHeatMap: function(w, h, opts, fill)
+    createHeatMap: function(data, w, h, opts, fill)
     {
         var myself = this;
         //total max in data
@@ -4483,7 +4539,11 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                         myself.nullBorder;
                 }
             }
-        }
+        };
+        
+        var getBorderColor = function(value,i,selected){
+            return getFillColor(value,i,selected).darker();
+        };
         
         var toGreyScale = function(color){
             //convert to greyscale using YCbCr luminance conv
@@ -4546,7 +4606,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     }
                     //has width
                     return (myself.getValue(r[i], myself.sizeValIdx) != null )?
-                                     "black" :
+                                    getBorderColor(r[i],i,this.selected()) :
                                      getFillColor(r[i],i,this.selected());
                 })
                 .text(function(r,ra,i){
@@ -4565,12 +4625,12 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     myself.triggerSelectionChange();
                     //classic clickAction
                     if(typeof(myself.chart.options.clickAction) == 'function'){
-                        if($.isArray(d)) d= d[0];
+                        if(d!= null && d[0] !== undefined){ d= d[0]; }
                         myself.chart.options.clickAction(s,c,d);
                     }
                     myself.pvPanel.render();
                 });
-        if(opts.isMultiValued)
+        if(opts.isMultiValued && pv.renderer() != 'batik')
         {
             this.createSelectOverlay(w,h);
         }
@@ -4625,15 +4685,15 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       }
     
       if(!this.selections[s]) this.selections[s] = {};
-      this.selections[s][c] = true;
+      this.selections[s][c] = {'series': s, 'category' : c};
       this.selectCount = null;
     },
     
     removeSelection: function(s,c){
       if(this.selections[s]){
-        this.selections[s][c] = false;
+        this.selections[s][c] = true;//TODO: delete?
       }
-      this.selectCount = null;
+      this.selectCount = false;
     },
     
     toggleSelection: function(s,c){
@@ -4646,8 +4706,21 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     },
     
     getSelections: function(){
-        return pv.flatten(this.selections).key("series").key("category").key("selected")
-            .array().filter(function(d) { return d.selected; });
+        var selections = [];
+        for(var s in this.selections){
+          if(this.selections.hasOwnProperty(s) )
+          {
+              for(var c in this.selections[s]){
+               if(this.selections[s].hasOwnProperty(c))
+               {
+                    if(this.selections[s][c]){
+                        selections.push(this.selections[s][c]);
+                    }
+               }
+              }
+          }
+        }
+        return selections;
     },
     
     setSelections: function(selections){
@@ -5048,6 +5121,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 if(!pv.event.ctrlKey){
                     myself.clearSelections();
                     myself.shapes.render();
+                    myself.triggerSelectionChange();
                 }
             })
             .event('mousedown', pv.Behavior.selector(false))
@@ -5207,11 +5281,19 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             return pv.dict(cols, function(f){
                 var fMin = min[f],
                     fMax = max[f];
-              var step = (fMax - fMin)/( rangeArgs.length -1);
-              var scale = pv.Scale.linear();
-              scale.domain.apply(scale, pv.range(fMin,fMax + step, step));
-              scale.range.apply(scale,rangeArgs);
-              return scale;
+                if(fMax == fMin)
+                {
+                    if(fMax >=1){
+                        fMin = fMax -1;
+                    } else {
+                        fMax = fMin +1;    
+                    }
+                }
+                var step = (fMax - fMin)/( rangeArgs.length -1);
+                var scale = pv.Scale.linear();
+                scale.domain.apply(scale, pv.range(fMin,fMax + step, step));
+                scale.range.apply(scale,rangeArgs);
+                return scale;
             });
         }
         else {   // normalize over the whole array
