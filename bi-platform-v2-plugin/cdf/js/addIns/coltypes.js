@@ -17,7 +17,7 @@
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(sparkline));
 
-  pvSparkline = {
+  var pvSparkline = {
     name: "pvSparkline",
     label: "Protovis Sparkline",
     defaults: {
@@ -29,40 +29,40 @@
     },
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
-        sparklineData = st.value,
-        data = sparklineData.split(",");
-        n = data.length,
-        w = opt.width || ph.width(),
-        h = opt.height,
-        min = pv.min.index(data),
-        max = pv.max.index(data);
-        ph.empty();
+      sparklineData = st.value,
+      data = sparklineData.split(",");
+      n = data.length,
+      w = opt.width || ph.width(),
+      h = opt.height,
+      min = pv.min.index(data),
+      max = pv.max.index(data);
+      ph.empty();
     
-        var container = $("<div></div>").appendTo(ph);
+      var container = $("<div></div>").appendTo(ph);
     
-        //console.log("count "+count);
+      //console.log("count "+count);
     
-        var vis = new pv.Panel()
-            .canvas(container.get(0))
-            .width(w)
-            .height(h)
-            .margin(opt.canvasMargin);
+      var vis = new pv.Panel()
+      .canvas(container.get(0))
+      .width(w)
+      .height(h)
+      .margin(opt.canvasMargin);
     
-        vis.add(pv.Line)
-            .data(data)
-            .left(pv.Scale.linear(0, n - 1).range(0, w).by(pv.index))
-            .bottom(pv.Scale.linear(data).range(0, h))
-            .strokeStyle(opt.strokeStyle)
-            .lineWidth(opt.lineWidth);        
+      vis.add(pv.Line)
+      .data(data)
+      .left(pv.Scale.linear(0, n - 1).range(0, w).by(pv.index))
+      .bottom(pv.Scale.linear(data).range(0, h))
+      .strokeStyle(opt.strokeStyle)
+      .lineWidth(opt.lineWidth);        
 
-        vis.render();
+      vis.render();
 
       
     }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(pvSparkline));
 
- dataBar = {
+  var dataBar = {
     name: "dataBar",
     label: "Data Bar",
     defaults: {
@@ -73,7 +73,9 @@
       max: undefined
     },
     implementation: function(tgt, st, opt) {
-      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){return Math.abs(e[st.colIdx]);}));
+      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){
+        return Math.abs(e[st.colIdx]);
+      }));
       var ph = $(tgt);
       var wtmp = ph.width();
       var htmp = opt.height;
@@ -87,32 +89,34 @@
 
       var leftVal=0, rightVal=parseFloat(value);
       if(leftVal>rightVal){
-      	leftVal = value;
-      	rightVal = 0;
+        leftVal = value;
+        rightVal = 0;
       }
 
       var c = paper.rect(xx(leftVal), 0, xx(rightVal) - xx(leftVal), htmp);
 
       c.attr({
-      	fill: "90-"+opt.startColor + "-" + opt.endColor,
-      	stroke: opt.stroke,
-      	title: "Value: "+ value
+        fill: "90-"+opt.startColor + "-" + opt.endColor,
+        stroke: opt.stroke,
+        title: "Value: "+ value
       });
 
     }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(dataBar));
 
-  trendArrow = {
+  var trendArrow = {
     name: "trendArrow",
     label: "Trend Arrows",
     defaults: {
       includeValue: false,
-      valueFormat: function(v,format) {return sprintf(format,v);}
+      valueFormat: function(v,format) {
+        return sprintf(format,v);
+      }
     },
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
-        trendClass =  st.value < 0 ? "down" : "up";
+      trendClass =  st.value < 0 ? "down" : "up";
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend');
       trend.addClass(trendClass);
@@ -124,6 +128,37 @@
     }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(trendArrow));
+
+
+  var link = {
+    name: "hyperlink",
+    label: "Hyperlink",
+    defaults:{
+      openInNewTab: true,
+      prependHttpIfNeeded: true,
+      regexp: null
+    },
+    
+    implementation: function(tgt, st, opt){
+      
+      var ph = $(tgt);
+      var link = st.value;
+      if (opt.prependHttpIfNeeded && !/^https?:\/\//.test(link)){
+          link = "http://" + link;
+      }
+      // is this text an hyperlink? 
+      if(opt.regexp == null || (new RegExp(opt.regexp).test(st.value))){
+        var a = $("<a></a>").attr("href",link).addClass("hyperlinkAddIn");
+        a.text(st.value);
+        if(opt.openInNewTab){
+          a.attr("target","_blank");
+        }
+        ph.empty().append(a);
+      }
+    }
+    
+  };
+  Dashboards.registerAddIn("Table", "colType", new AddIn(link));
 
  
 })();
