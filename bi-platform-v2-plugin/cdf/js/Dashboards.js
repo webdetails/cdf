@@ -1483,6 +1483,9 @@ Query = function() {
     if (_mode != 'CDA') {
       throw "UnsupportedOperation";
     }
+    if (!options) {
+      options = {};
+    }
     var queryDefinition = buildQueryDefinition(overrides);
     queryDefinition.outputType = outputType;
     if (outputType == 'csv' && options.separator) {
