@@ -17,6 +17,8 @@
  */
 
 function AddIn(options) {
+  
+  var myself = options;
   if (typeof options != "object") {
     throw TypeError;
   }
@@ -65,7 +67,7 @@ function AddIn(options) {
     options = typeof options == "function" ? options(state) : options;
     var evaluatedDefaults = typeof _defaults == "function" ? _defaults(state) : _defaults;
     var compiledOptions = jQuery.extend(true,{},evaluatedDefaults,options);
-    return _implementation(target,state,compiledOptions);
+    return _implementation.call(myself,target,state,compiledOptions);
   };
 
   this.setDefaults = function(defaults) {
