@@ -17,6 +17,8 @@
  */
 
 function AddIn(options) {
+  
+  var myself = options;
   if (typeof options != "object") {
     throw TypeError;
   }
@@ -32,11 +34,12 @@ function AddIn(options) {
     _defaults = options.defaults,
     _value = options.options;
 
-  /* Define getters for the label and name properties
-   * (we need this because they should be read-only)
-   */
-  defineGetter(this, "label", function() {return _label;});
-  defineGetter(this, "name", function() {return _name;});
+  this.getLabel = function() {
+    return _label;
+  }
+  this.getName = function() {
+    return _name;
+  }
 
   /**
    * Call the AddIn. If the AddIn is static, all parameters are
@@ -64,12 +67,16 @@ function AddIn(options) {
     options = typeof options == "function" ? options(state) : options;
     var evaluatedDefaults = typeof _defaults == "function" ? _defaults(state) : _defaults;
     var compiledOptions = jQuery.extend(true,{},evaluatedDefaults,options);
-    return _implementation(target,state,compiledOptions);
+    return _implementation.call(myself,target,state,compiledOptions);
   };
 
   this.setDefaults = function(defaults) {
-    if (typeof defaults == 'object' || typeof defaults == 'function') {
+    
+    if (typeof defaults == 'function') {
       _defaults = defaults;
+    }
+    else{
+      _defaults = jQuery.extend(true,{},_defaults,defaults);
     }
   };
 }

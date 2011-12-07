@@ -1254,13 +1254,13 @@ Dashboards.registerAddIn = function(component,slot,addIn){
   if (!this.addIns[component][slot]) {
     this.addIns[component][slot] = {};  
   }
-    this.addIns[component][slot][addIn.name] = addIn;  
+    this.addIns[component][slot][addIn.getName()] = addIn;  
 };
 
 Dashboards.hasAddIn = function(component,slot,addIn){
     return Boolean(this.addIns && this.addIns[component] &&
       this.addIns[component][slot] && this.addIns[component][slot][addIn]);
-}
+};
 
 Dashboards.getAddIn = function(component,slot,addIn){
   try {
@@ -1268,19 +1268,26 @@ Dashboards.getAddIn = function(component,slot,addIn){
   } catch (e) {
     return null;
   }
-}
+};
+
+Dashboards.setAddInDefaults = function(component, slot, addInName, defaults) {
+  var addIn = this.getAddIn(component,slot,addInName);
+  if(addIn) {
+    addIn.setDefaults(defaults);
+  }
+};
 Dashboards.listAddIns = function(component,slot) {
   var addInList = [];
   try {
     var slot = this.addIns[component][slot];
-    for (addIn in slot) if (slot.hasOwnProperty(addIn)) { 
-      addInList.push([addIn, slot[addIn].label]);
+    for (var addIn in slot) if (slot.hasOwnProperty(addIn)) { 
+      addInList.push([addIn, slot[addIn].getLabel()]);
     }
     return addInList;
   } catch (e) {
     return [];
   }
-}
+};
 
 Dashboards.safeClone = function(){
 	var options, name, src, copy, copyIsArray, clone,

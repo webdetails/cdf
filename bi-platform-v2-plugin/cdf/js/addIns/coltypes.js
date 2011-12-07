@@ -1,3 +1,4 @@
+;
 (function() {
 
   /* Sparkline AddIn, based on jquery.sparkline.js sparklines.
@@ -144,7 +145,7 @@
       var ph = $(tgt);
       var link = st.value;
       if (opt.prependHttpIfNeeded && !/^https?:\/\//.test(link)){
-          link = "http://" + link;
+        link = "http://" + link;
       }
       // is this text an hyperlink? 
       if(opt.regexp == null || (new RegExp(opt.regexp).test(st.value))){

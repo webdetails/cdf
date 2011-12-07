@@ -169,6 +169,9 @@ BaseComponent = Base.extend({
 
   },
 
+  setAddInDefaults: function(slot,addIn,defaults) {
+    Dashboards.setAddInDefaults(this.type,slot,addIn,defaults)
+  },
   setAddInOptions: function(slot, addIn,options) {
     if(!this.addInOptions) {
       this.addInOptions = {};
@@ -1874,7 +1877,7 @@ var TableComponent = BaseComponent.extend({
                 state.colFormat = cd.colFormats[state.colIdx];
               }
               state.target = target;
-              addIn.call(td,state,myself.getAddInOptions("colType",addIn.name));
+              addIn.call(td,state,myself.getAddInOptions("colType",addIn.getName()));
             } else if(cd.colFormats) {
               var format = cd.colFormats[position[1]],
                 value = myself.rawData.resultset[rowIdx][colIdx];
