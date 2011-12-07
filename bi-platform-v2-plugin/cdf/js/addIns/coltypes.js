@@ -63,45 +63,51 @@
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(pvSparkline));
 
-  var dataBar = {
+ dataBar = {
     name: "dataBar",
     label: "Data Bar",
     defaults: {
+      widthRatio:1,
       height: 10,
       startColor: "#55A4D6",
       endColor: "#448FC8",
       stroke: null,
-      max: undefined
+      max: undefined,
+      includeValue: false,
+      valueFormat: function(v, format, st) {
+        return "<span class='value'>" + sprintf(format,v) + "</span>";
+      }
     },
     implementation: function(tgt, st, opt) {
-      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){
-        return Math.abs(e[st.colIdx]);
-      }));
-      var ph = $(tgt);
-      var wtmp = ph.width();
-      var htmp = opt.height;
+      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){return Math.abs(e[st.colIdx]);}));
+      var cell = $(tgt);
+      cell.empty();
+      
+      var ph =$("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
+      var wtmp = opt.widthRatio * ph.width();
+      var htmp = opt.height;      
 
       var value = st.value;
-      ph.empty();
-
-      var paper = Raphael(tgt, wtmp, htmp);
-
-      var xx = pv.Scale.linear(0,max).range(0,wtmp);
-
       var leftVal=0, rightVal=parseFloat(value);
       if(leftVal>rightVal){
-        leftVal = value;
-        rightVal = 0;
+      	leftVal = value;
+      	rightVal = 0;
       }
-
-      var c = paper.rect(xx(leftVal), 0, xx(rightVal) - xx(leftVal), htmp);
+      var delta = rightVal - leftVal;
+      var xx = pv.Scale.linear(0,max).range(0,wtmp);      
+           
+      var paper = Raphael(ph.get(0), xx(delta), htmp);
+      var c = paper.rect(xx(leftVal), 0, xx(delta), htmp);
 
       c.attr({
-        fill: "90-"+opt.startColor + "-" + opt.endColor,
-        stroke: opt.stroke,
-        title: "Value: "+ value
-      });
+      	fill: "90-"+opt.startColor + "-" + opt.endColor,
+      	stroke: opt.stroke,
+      	title: "Value: "+ value
+      }); 
 
+      if(opt.includeValue) {
+        ph.append(opt.valueFormat(st.value, st.colFormat, st));
+      }
     }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(dataBar));
@@ -111,7 +117,7 @@
     label: "Trend Arrows",
     defaults: {
       includeValue: false,
-      valueFormat: function(v,format) {
+      valueFormat: function(v,format,st) {
         return sprintf(format,v);
       }
     },
@@ -123,7 +129,7 @@
       trend.addClass(trendClass);
       ph.empty();
       if(opt.includeValue) {
-        ph.append(opt.valueFormat(st.value, st.colFormat));
+        ph.append(opt.valueFormat(st.value, st.colFormat, st));
       }
       ph.append(trend);
     }
