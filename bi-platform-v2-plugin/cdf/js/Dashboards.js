@@ -1270,7 +1270,7 @@ Dashboards.getAddIn = function(component,slot,addIn){
   }
 };
 
-Dashboards.setAddInDefaults(component, slot, addInName, defaults) {
+Dashboards.setAddInDefaults = function(component, slot, addInName, defaults) {
   var addIn = this.getAddIn(component,slot,addInName);
   if(addin) {
     addIn.setDefaults(defaults);
