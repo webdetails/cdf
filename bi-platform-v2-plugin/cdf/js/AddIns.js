@@ -32,11 +32,12 @@ function AddIn(options) {
     _defaults = options.defaults,
     _value = options.options;
 
-  /* Define getters for the label and name properties
-   * (we need this because they should be read-only)
-   */
-  defineGetter(this, "label", function() {return _label;});
-  defineGetter(this, "name", function() {return _name;});
+  this.getLabel = function() {
+    return _label;
+  }
+  this.getName = function() {
+    return _name;
+  }
 
   /**
    * Call the AddIn. If the AddIn is static, all parameters are
