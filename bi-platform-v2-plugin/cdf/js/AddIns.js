@@ -68,8 +68,12 @@ function AddIn(options) {
   };
 
   this.setDefaults = function(defaults) {
-    if (typeof defaults == 'object' || typeof defaults == 'function') {
+    
+    if (typeof defaults == 'function') {
       _defaults = defaults;
+    }
+    else{
+      _defaults = jQuery.extend(true,{},_defaults,defaults);
     }
   };
 }

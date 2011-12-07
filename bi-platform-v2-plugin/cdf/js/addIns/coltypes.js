@@ -1,4 +1,4 @@
-(function() {
+;(function() {
 
   /* Sparkline AddIn, based on jquery.sparkline.js sparklines.
    * 
