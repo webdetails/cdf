@@ -36,7 +36,6 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
-#PEDRO @RELATIVE_URL@/content/pentaho-cdf/js/PersistentObjectsUtil.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js
 
 commonLibrariesLink=\
@@ -92,16 +91,4 @@ mapScript=\
 mapLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
-
-#newMapScript=\
-#@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
-#@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
-#@RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
-#@RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
-
-
-#newMapLink=\
-#@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
-#@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
-
 
