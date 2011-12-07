@@ -298,30 +298,18 @@
             "OpenLayers/Lang/en.js"
         ); // etc.
 
-        var agent = navigator.userAgent;
-        var docWrite = (agent.match("MSIE") || agent.match("Safari"));
-        if(docWrite) {
-            var allScriptTags = new Array(jsfiles.length);
-        }
-        var host = OpenLayers._getScriptLocation() + "lib/";    
+        var scriptTags = new Array(jsfiles.length);
+        var host = OpenLayers._getScriptLocation() + "lib/";
         for (var i=0, len=jsfiles.length; i<len; i++) {
-            if (docWrite) {
-                allScriptTags[i] = "<script src='" + host + jsfiles[i] +
-                                   "'></script>"; 
-            } else {
-                var s = document.createElement("script");
-                s.src = host + jsfiles[i];
-                var h = document.getElementsByTagName("head").length ? 
-                           document.getElementsByTagName("head")[0] : 
-                           document.body;
-                h.appendChild(s);
-            }
+            scriptTags[i] = "<script src='" + host + jsfiles[i] +
+            "'></script>";
         }
-        if (docWrite) {
-            document.write(allScriptTags.join(""));
+        if (scriptTags.length > 0) {
+            document.write(scriptTags.join(""));
         }
     }
 })();
+
 
 /**
  * Constant: VERSION_NUMBER

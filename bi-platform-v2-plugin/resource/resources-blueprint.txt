@@ -92,5 +92,3 @@ mapLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
-
-
