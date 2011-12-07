@@ -260,7 +260,7 @@ pvc.Base = Base.extend({
         this.basePanel.getPvPanel().canvas(this.options.canvas);
 
         // Title
-        if (this.options.title != null && this.options.title.lengh != ""){
+        if (this.options.title != null && this.options.title != ""){
             this.titlePanel = new pvc.TitlePanel(this, {
                 title: this.options.title,
                 anchor: this.options.titlePosition,
@@ -1189,8 +1189,10 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 clickAction: this.options.xAxisClickAction,
                 useCompositeAxis: this.options.useCompositeAxis, 
                 font: this.options.axisLabelFont,
+                
                 doubleClickAction: this.options.xAxisDoubleClickAction,
-                clickDelay: this.options.axisClickDelay
+                clickDelay: this.options.axisClickDelay,
+                getLabel: this.options.xAxisGetLabel
             });
 
             //            this.xAxisPanel.setScale(this.xScale);
@@ -1217,12 +1219,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 oppositeAxisSize: this.options.xAxisSize,
                 fullGrid:  this.options.yAxisFullGrid,
                 ordinalElements: this.getAxisOrdinalElements("y"),
-                
                 clickAction: this.options.yAxisClickAction,
                 useCompositeAxis: this.options.useCompositeAxis, 
                 font: this.options.axisLabelFont,
                 doubleClickAction: this.options.yAxisDoubleClickAction,
-                clickDelay: this.options.axisClickDelay
+                clickDelay: this.options.axisClickDelay,
+                getLabel: this.options.yAxisGetLabel
             });
 
             this.yAxisPanel.setScale(this.yScale);
@@ -1781,14 +1783,26 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                         .add(pv.Panel)[orthogonalLength](depthLength * scaleFactor ).strokeStyle(null).lineWidth(0);// panel resized and shifted to make bogus root disappear
         panel.transform(pv.Transform.identity.translate(displacement[0], displacement[1]));
         
-        //set full label path
+        //set full path and label
         var nodes = pv.dom(tree).root('').nodes().map(function(node){
+            //path
             var path = [];
             path.push(node.nodeName);
             for(var pnode = node.parentNode; pnode != null; pnode = pnode.parentNode){
               path.push(pnode.nodeName);
             }
             node.nodePath = path.reverse().slice(1);
+            //label
+            if(typeof(myself.getLabel) == 'function' ){
+                node.nodeLabel = myself.getLabel(node.nodeName);
+            }
+            else {
+                node.nodeLabel = node.nodeName;
+            }
+            if(node.nodeLabel == undefined){
+                node.nodeLabel = '';
+            }
+            
             return node;
         });
         
@@ -1916,7 +1930,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         layout.node
             .def("fitInfo", null)
             .height(function(d,e,f){//just iterate and get cutoff
-                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeName, myself.font, diagMargin);
+                var fitInfo = myself.getFitInfo(d.dx, d.dy, d.nodeLabel, myself.font, diagMargin);
                 if(!fitInfo.h){
                     
                     if(axisDirection == 'v' && fitInfo.v ){//prefer vertical
@@ -1961,7 +1975,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 else {return 0.5;} //non-terminal items, so grouping is visible
             })
             .text(function(d){
-                return d.nodeName;
+                return d.nodeLabel;
             });
         
         //cutoffs -> snap to vertical/horizontal
@@ -2004,30 +2018,30 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             })
             .font(myself.font)
             .title(function(d){
-                return d.nodeName;
+                return d.nodeLabel;
                 })
             .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){
                     case 'h':
                         if(!fitInfo.h){//TODO: fallback option for no svg
-                            return myself.trimToWidth(d.dx, d.nodeName, myself.font, '..');
+                            return myself.trimToWidth(d.dx, d.nodeLabel, myself.font, '..');
                         }
                         break;
                     case 'v':
                         if(!fitInfo.v){
-                            return myself.trimToWidth(d.dy, d.nodeName, myself.font, '..');
+                            return myself.trimToWidth(d.dy, d.nodeLabel, myself.font, '..');
                         }
                         break;
                     case 'd':
                        if(!fitInfo.d){
                           var ang = Math.atan(d.dy/d.dx);
                           var diagonalLength = Math.sqrt(d.dy*d.dy + d.dx*d.dx) ;
-                          return myself.trimToWidth(diagonalLength-diagMargin,d.nodeName, myself.font,'..');
+                          return myself.trimToWidth(diagonalLength-diagMargin,d.nodeLabel, myself.font,'..');
                         }
                         break;
                 }
-                return d.nodeName ;
+                return d.nodeLabel ;
             })
             .cursor( myself.clickAction? 'pointer' : 'default')
             .events('all')//labels don't have events by default
@@ -2043,7 +2057,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }
             })
             .event("mouseover", pv.Behavior.tipsy({//Tooltip
-                gravity: "n",
+                gravity: "s",
                 fade: true,
                 offset: diagMargin * 2
             }))
@@ -2052,8 +2066,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
            // double click label //TODO: need doubleclick axis action + single click prevention..
             if(doubleClickAction)
             {
-                this.pvLabel.event("dblclick", function(d, e){
-                    doubleClickAction(d.nodePath, e);
+                this.pvLabel.event("dblclick", function(d){
+                    doubleClickAction(d.nodePath, pv.event);
                 });
             }
             
@@ -4409,7 +4423,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
         
         //reset selections
-        this.initSelections(false);
+        this.initSelections(null);
 
         this.pvHeatGrid = this.pvPanel.add(pv.Panel)
             .data(cols)
@@ -4444,9 +4458,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         this.pvHeatGrid.fillStyle(function(dat, col){
              return  (dat[col] != null) ? fill[col](dat[col]) : opts.nullColor;
          });
-       }
-
-        //Tooltip
+                //Tooltip
         if(this.showTooltips){
             this.pvHeatGrid
             .event("mouseover", pv.Behavior.tipsy({
@@ -4454,6 +4466,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 fade: true
             }));
         }
+       }
 
         //clickAction
         if (opts.clickable) {//custom clickAction
@@ -4528,9 +4541,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             else 
             {//is null and needs border to show up
                 if(isSelected){
-                 return (myself.selectedBorder == null || myself.selectedBorder == 0 )?
-                    myself.nullBorder:
-                    myself.selectedBorder;
+                    return (myself.selectedBorder == null || myself.selectedBorder == 0 )?
+                       myself.nullBorder:
+                       myself.selectedBorder;
                 }
                 else
                 {
@@ -4562,11 +4575,42 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
            if(myself.getSelectCount() > 0 && !isSelected)
            {//non-selected items
                //return color.alpha(0.5);
-               return toGreyScale(color);
+               return toGreyScale(color);//.lighter();?
            }
            return color;
-        }
+        };
         
+        //double click + click
+        var ignoreClicks = 0;
+        var DBL_CLICK_MAX_DELAY = (this.clickDelay)? this.clickDelay : 300; //ms
+        //click
+        var clickAction = function(s,c,d,e){
+            if(ignoreClicks) { ignoreClicks--;}
+            else {
+                if(e.ctrlKey){
+                    myself.toggleSelection(s,c);
+                } else {//hard select
+                    myself.clearSelections();
+                    myself.addSelection(s,c);
+                }
+                myself.triggerSelectionChange();
+                //classic clickAction
+                if(typeof(myself.chart.options.clickAction) == 'function'){
+                    if(d!= null && d[0] !== undefined){ d= d[0]; }
+                    myself.chart.options.clickAction(s,c,d,e);
+                }
+                myself.pvPanel.render();
+            }
+        };
+        //dblClick
+        var doubleClickAction = (typeof(opts.doubleClickAction) == 'function')?
+            function(s,c,d, e){
+                ignoreClicks = 2;
+                opts.doubleClickAction(s,c,d, e);
+            } :
+            null;
+        
+        //chart generation
         this.shapes =
             this.pvHeatGrid
                 .add(pv.Dot)
@@ -4583,7 +4627,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 })
                 .shapeSize(function(r,ra, i) {
                     if(myself.sizeValIdx == null){
-                        return maxArea;
+                        if(opts.nullShape == null && myself.getValue(r[i], myself.colorValIdx) == null) return 0;
+                        else return maxArea;
                     }
                     var val = myself.getValue(r[i], myself.sizeValIdx);
                     return (val == null && opts.nullShape == null)?
@@ -4616,20 +4661,58 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                     var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                     var d = r[i];
-                    if(pv.event.ctrlKey){
-                        myself.toggleSelection(s,c);
-                    } else {//hard select
-                        myself.clearSelections();
-                        myself.addSelection(s,c);
+                    var e = pv.event;
+                    
+                    if(doubleClickAction){
+                        //arg has to be passed in closure in order to work with ie
+                        window.setTimeout(function(){clickAction(s,c,d, e)}, DBL_CLICK_MAX_DELAY);
+                       // window.setTimeout(clickAction, DBL_CLICK_MAX_DELAY, d.nodePath);
                     }
-                    myself.triggerSelectionChange();
-                    //classic clickAction
-                    if(typeof(myself.chart.options.clickAction) == 'function'){
-                        if(d!= null && d[0] !== undefined){ d= d[0]; }
-                        myself.chart.options.clickAction(s,c,d);
-                    }
-                    myself.pvPanel.render();
+                    else { clickAction(s,c,d,e); }
+                    
+                    //if(pv.event.ctrlKey){
+                    //    myself.toggleSelection(s,c);
+                    //} else {//hard select
+                    //    myself.clearSelections();
+                    //    myself.addSelection(s,c);
+                    //}
+                    //myself.triggerSelectionChange();
+                    ////classic clickAction
+                    //if(typeof(myself.chart.options.clickAction) == 'function'){
+                    //    if(d!= null && d[0] !== undefined){ d= d[0]; }
+                    //    myself.chart.options.clickAction(s,c,d);
+                    //}
+                    //myself.pvPanel.render();
                 });
+        if(opts.showTooltips){
+            this.shapes.title(function(r,ra,i){
+                if(opts.customTooltip){
+                    var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                    var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                    var d = r[i];
+                    return opts.customTooltip(s,c,d);
+                }
+                else {
+                    return myself.valuesToText(r[i]);
+                }
+            })
+            .event("mouseover", pv.Behavior.tipsy({
+                html: true,
+                gravity: "w",
+                fade: true
+            }));
+        }
+        if(doubleClickAction)
+        {
+            this.shapes.event("dblclick", function(r,ra,i){
+                var s = myself.chart.dataEngine.getSeries()[this.parent.index];
+                var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
+                var d = r[i];
+                var e = pv.event;
+                doubleClickAction(s,c,d,e);
+            });
+        }
+                
         if(opts.isMultiValued && pv.renderer() != 'batik')
         {
             this.createSelectOverlay(w,h);
@@ -4667,7 +4750,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     isSelected: function(s,c){
       return this.selections[s] ?
-        this.selections[s][c] :
+        this.selections[s][c]!=null :
         false;
     },
     
@@ -4683,7 +4766,6 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
       {//check if null
         if(this.isValueNull(s,c)){ return; }
       }
-    
       if(!this.selections[s]) this.selections[s] = {};
       this.selections[s][c] = {'series': s, 'category' : c};
       this.selectCount = null;
@@ -4691,9 +4773,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     
     removeSelection: function(s,c){
       if(this.selections[s]){
-        this.selections[s][c] = true;//TODO: delete?
+        this.selections[s][c] = null;//TODO: delete?
       }
-      this.selectCount = false;
+      this.selectCount = null;
     },
     
     toggleSelection: function(s,c){
@@ -4733,7 +4815,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     selectSeries: function(s){
         var cats = this.chart.dataEngine.getCategories();
         for(var i = 0; i < cats.length; i++ ){
-            this.selections[s][cats[i]] = true;
+            this.addSelection(s,cats[i]);
+            //this.selections[s][cats[i]] = true;
         }
     },
     
@@ -4862,6 +4945,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var wereAllSelected = true;
         for(var i = 0; i < series.length; i++ ){
             var s = series[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
             wereAllSelected &= this.isSelected(s,c);
             this.addSelection(s,c);
         }
@@ -4873,6 +4959,9 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         var wereAllSelected = true;
         for(var i = 0; i < categories.length; i++ ){
             var c = categories[i];
+            if(!this.selectNullValues && this.isValueNull(s,c)){
+                continue;
+            }
             wereAllSelected &= this.isSelected(s,c);
             this.addSelection(s,c);
         }
@@ -4989,7 +5078,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             
             //get offsets
             var titleOffset;
-            if(opts.title != null){
+            if(myself.chart.titlePanel != null){
                 titleOffset = setPositions(opts.titlePosition, myself.chart.titlePanel.titleSize);
             }
             else {
@@ -5297,14 +5386,22 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             });
         }
         else {   // normalize over the whole array
-          var theMin = min[cols[0]];
-          for (var i=1; i<cols.length; i++) {
-            if (min[cols[i]] < theMin) theMin = min[cols[i]];
-          }
-          var theMax = max[cols[0]];
-          for (var i=1; i<cols.length; i++){
-            if (max[cols[i]] > theMax) theMax = max[cols[i]];
-          }
+            var theMin = min[cols[0]];
+            for (var i=1; i<cols.length; i++) {
+              if (min[cols[i]] < theMin) theMin = min[cols[i]];
+            }
+            var theMax = max[cols[0]];
+            for (var i=1; i<cols.length; i++){
+              if (max[cols[i]] > theMax) theMax = max[cols[i]];
+            }
+            if(theMax == theMin)
+            {
+                if(theMax >=1){
+                    theMin = theMax -1;
+                } else {
+                    theMax = theMin +1;
+                }
+            } 
           //use supplied numbers
           var toPad =
                 domainArgs == null ?
