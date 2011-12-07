@@ -63,7 +63,7 @@
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(pvSparkline));
 
- dataBar = {
+  var dataBar = {
     name: "dataBar",
     label: "Data Bar",
     defaults: {
