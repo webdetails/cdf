@@ -40,8 +40,8 @@ pvc.padMatrixWithZeros = function(d){
     return d.map(function(v){
         return v.map(function(a){
             return typeof a == "undefined"?0:a;
-        })
-    })
+        });
+    });
 };
 
 pvc.cloneMatrix = function(m){
@@ -4563,7 +4563,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
           //  var avg = Math.round( (color.r + color.g + color.b)/3);
             
-            return pv.rgb(avg,avg,avg);
+            return pv.rgb(avg,avg,avg,0.6).brighter();
         };
         
         var getFillColor = function(value,i, isSelected){
@@ -4698,8 +4698,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             })
             .event("mouseover", pv.Behavior.tipsy({
                 html: true,
-                gravity: "w",
-                fade: true
+                gravity: "e",
+                fade: false
             }));
         }
         if(doubleClickAction)
