@@ -75,7 +75,7 @@
       max: undefined,
       includeValue: false,
       valueFormat: function(v, format, st) {
-        return "<span class='value'>" + sprintf(format,v) + "</span>";
+        return "<span class='value'>" + sprintf(format || "%.1f",v) + "</span>";
       }
     },
     implementation: function(tgt, st, opt) {
@@ -118,7 +118,7 @@
     defaults: {
       includeValue: false,
       valueFormat: function(v,format,st) {
-        return sprintf(format,v);
+        return sprintf(format || "%.1f",v);
       }
     },
     implementation: function(tgt, st, opt) {
