@@ -1925,7 +1925,7 @@ var TableComponent = BaseComponent.extend({
         } else if (target.get(0).tagName != 'TD') {
           target = target.closest('td');
         }
-        var position = myself.dataTable.fnGetPosition(target);
+        var position = myself.dataTable.fnGetPosition(target.get(0));
         state.rawData = myself.rawData;
         state.tableData = myself.dataTable.fnGetData();
         state.colIdx = position[1];
