@@ -2016,6 +2016,8 @@ var TableComponent = BaseComponent.extend({
       if(options.colTypes!=undefined){
         $.each(options.colTypes,function(i,val){
           var col = dtData.aoColumns[i];
+          // Specific case: hidden cols
+          if(val == "hidden") col.bVisible=false;
           col.sClass+=" "+val;
           col.sType=val;
 
