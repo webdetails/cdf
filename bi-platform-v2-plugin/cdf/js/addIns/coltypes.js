@@ -9,7 +9,31 @@
     label: "Sparkline",
     defaults: {
       type: 'line'
+    },    
+    init: function(){
+
+      // Register this for datatables sort
+      var myself = this;
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = function(a,b){
+        return myself.sort(a,b)
+      };
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = function(a,b){
+        return myself.sort(b,a)
+      };
+        
     },
+    
+    sort: function(a,b){
+      return this.sumStrArray(a) - this.sumStrArray(b);
+    },
+    
+    sumStrArray: function(arr){
+      return arr.split(',').reduce(function(prev, curr, index, array){  
+        console.log("Current " + curr +"; prev " +  prev); 
+        return parseFloat(curr) + (typeof(prev)==='number'?prev:parseFloat(prev));
+      });
+    },
+    
     implementation: function (tgt, st, opt) {
       var t = $(tgt);
       t.sparkline(st.value.split(/,/),opt);
@@ -28,6 +52,30 @@
       width: undefined,
       canvasMargin: 2
     },
+    init: function(){
+
+      // Register this for datatables sort
+      var myself = this;
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = function(a,b){
+        return myself.sort(a,b)
+      };
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = function(a,b){
+        return myself.sort(b,a)
+      };
+        
+    },
+    
+    sort: function(a,b){
+      return this.sumStrArray(a) - this.sumStrArray(b);
+    },
+    
+    sumStrArray: function(arr){
+      return arr.split(',').reduce(function(prev, curr, index, array){  
+        console.log("Current " + curr +"; prev " +  prev); 
+        return parseFloat(curr) + (typeof(prev)==='number'?prev:parseFloat(prev));
+      });
+    },
+    
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
       sparklineData = st.value,
@@ -78,8 +126,14 @@
         return "<span class='value'>" + sprintf(format || "%.1f",v) + "</span>";
       }
     },
+    init: function(){
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['numeric-asc'];
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['numeric-desc'];
+    },
     implementation: function(tgt, st, opt) {
-      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){return Math.abs(e[st.colIdx]);}));
+      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){
+        return Math.abs(e[st.colIdx]);
+      }));
       var cell = $(tgt);
       cell.empty();
       
@@ -90,8 +144,8 @@
       var value = st.value;
       var leftVal=0, rightVal=parseFloat(value);
       if(leftVal>rightVal){
-      	leftVal = value;
-      	rightVal = 0;
+        leftVal = value;
+        rightVal = 0;
       }
       var delta = rightVal - leftVal;
       var xx = pv.Scale.linear(0,max).range(0,wtmp);      
@@ -100,9 +154,9 @@
       var c = paper.rect(xx(leftVal), 0, xx(delta), htmp);
 
       c.attr({
-      	fill: "90-"+opt.startColor + "-" + opt.endColor,
-      	stroke: opt.stroke,
-      	title: "Value: "+ value
+        fill: "90-"+opt.startColor + "-" + opt.endColor,
+        stroke: opt.stroke,
+        title: "Value: "+ value
       }); 
 
       if(opt.includeValue) {
@@ -120,6 +174,10 @@
       valueFormat: function(v,format,st) {
         return sprintf(format || "%.1f",v);
       }
+    },
+    init: function(){
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['numeric-asc'];
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['numeric-desc'];
     },
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
@@ -144,6 +202,11 @@
       openInNewTab: true,
       prependHttpIfNeeded: true,
       regexp: null
+    },
+    
+    init: function(){
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['string-desc'];
     },
     
     implementation: function(tgt, st, opt){

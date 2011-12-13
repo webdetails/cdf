@@ -2017,14 +2017,8 @@ var TableComponent = BaseComponent.extend({
         $.each(options.colTypes,function(i,val){
           var col = dtData.aoColumns[i];
           col.sClass+=" "+val;
+          col.sType=val;
 
-          if(val=='sparkline'){
-            col.bSearchable=false;
-            col.bSortable=false;
-          }
-          else{
-            col.sType=val;
-          }
         })
       };  // colTypes
       if(options.colFormats!=undefined){
