@@ -1,4 +1,3 @@
-
 var pvc = {
 
   debug: false
@@ -6593,7 +6592,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 	    this.extend(this.pvWaterfallLine,"barWaterfallLine_");
 
         // Extend bar and barPanel
-        this.extend(this.pvBar,"barPanel_");
+        this.extend(this.pvBarPanel,"barPanel_");
         this.extend(this.pvBar,"bar_");
     
 
