@@ -1852,10 +1852,10 @@ var TableComponent = BaseComponent.extend({
           if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
               return true;
         $(tr).children("td:visible").each(function(col,td){
-            var colType = cd.colTypes[col];
             var position = dataTable.fnGetPosition(td),
                 rowIdx = position[0],
-                colIdx = position[1];
+                colIdx = position[2];
+            var colType = cd.colTypes[colIdx];
             var addIn = myself.getAddIn("colType",colType);
             if (addIn) {
               var state = {},
