@@ -123,7 +123,7 @@
       max: undefined,
       includeValue: false,
       valueFormat: function(v, format, st) {
-        return "<span class='value'>" + sprintf(format || "%.1f",v) + "</span>";
+        return "" + sprintf(format || "%.1f",v) ;
       }
     },
     init: function(){
@@ -160,7 +160,7 @@
       }); 
 
       if(opt.includeValue) {
-        ph.append(opt.valueFormat(st.value, st.colFormat, st));
+        ph.append("<span class='value'>" + opt.valueFormat(st.value, st.colFormat, st) + "</span>" );
       }
     }
   };
