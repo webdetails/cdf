@@ -4,11 +4,17 @@
   display: inline-block;
   margin-left: 5px;
 }
-.trend.up {
-  background: url("img/up.png");
+.trend.up.good {
+  background: url("img/up-good.png");
 }
-.trend.down {
-  background: url("img/down.png");
+.trend.down.good {
+  background: url("img/down-good.png");
+}
+.trend.up.bad {
+  background: url("img/up-bad.png");
+}
+.trend.down.bad {
+  background: url("img/down-bad.png");
 }
 
 a.hiperlinkAddIn{
