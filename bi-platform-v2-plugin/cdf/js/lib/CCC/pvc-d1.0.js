@@ -40,8 +40,8 @@ pvc.padMatrixWithZeros = function(d){
     return d.map(function(v){
         return v.map(function(a){
             return typeof a == "undefined"?0:a;
-        });
-    });
+        })
+    })
 };
 
 pvc.cloneMatrix = function(m){
@@ -2937,7 +2937,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.parallelLength[anchor]](maxLineSize)
+    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
       
     }
     else{
@@ -4563,7 +4563,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
           //  var avg = Math.round( (color.r + color.g + color.b)/3);
             
-            return pv.rgb(avg,avg,avg,0.6).brighter();
+            return pv.rgb(avg,avg,avg);
         };
         
         var getFillColor = function(value,i, isSelected){
@@ -4698,8 +4698,8 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
             })
             .event("mouseover", pv.Behavior.tipsy({
                 html: true,
-                gravity: "e",
-                fade: false
+                gravity: "w",
+                fade: true
             }));
         }
         if(doubleClickAction)
@@ -5858,7 +5858,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.parallelLength[anchor]](maxLineSize)
+    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
     */    
     }
     else {
@@ -6756,7 +6756,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 
         if(this.showValues){
             this.pvBarLabel = this.pvBar
-            .anchor("center")
+            .anchor(this.valuesAnchor?this.valuesAnchor : 'center')
             .add(pv.Label)
             .bottom(0)
             .text(function(d){
@@ -6960,7 +6960,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
   pvBullets: null,
   pvBullet: null,
   data: null,
-
+	onSelectionChange: null,
   showTooltips: true,
   showValues: true,
   tipsySettings: {
@@ -6997,7 +6997,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       ruleAnchor = "bottom";
       leftPos = this.chart.options.bulletMargin;
       topPos = function(){
-        return this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
+        return 10 + (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
       }
     }
     else
@@ -7005,7 +7005,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       size = this.height - this.chart.options.bulletMargin - 20;
       angle = -Math.PI/2;
       align = "left";
-      titleOffset = -12;
+      titleOffset =  -12 ;
       ruleAnchor = "right";
       leftPos = function(){
         return myself.chart.options.bulletMargin + this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing);
@@ -7022,6 +7022,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .left(leftPos) // titles will be on left always
     .top(topPos);
     
+    
 
     this.pvBullet = this.pvBullets.add(pv.Layout.Bullet)
     .orient(anchor)
@@ -7034,6 +7035,19 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .markers(function(d){
       return d.markers
     });
+    
+    
+    if (myself.chart.options.clickable){
+      this.pvBullet
+      .cursor("pointer")
+      .event("click",function(d){
+        var s = d.title;
+        var c = d.subtitle;
+        return myself.chart.options.clickAction(s,c, d.measures);
+      });
+    }
+    
+    
 
     this.pvBulletRange = this.pvBullet.range.add(pv.Bar);
     this.pvBulletMeasure = this.pvBullet.measure.add(pv.Bar)
@@ -7072,6 +7086,8 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .text(function(d){
       return d.title
     });
+    
+
 
     this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
     .textStyle("#666")
@@ -7082,6 +7098,28 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .text(function(d){
       return d.subtitle
     });
+
+	var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ? 
+	function(d, e) {
+		ignoreClicks = 2;
+		myself.chart.options.axisDoubleClickAction(d, e);
+		
+	}: null;
+    
+    if (doubleClickAction) {
+    	this.pvBulletTitle.events('all')  //labels don't have events by default
+            .event("dblclick", function(d){
+                    doubleClickAction(d, pv.event);
+                });
+
+    	this.pvBulletSubtitle.events('all')  //labels don't have events by default
+            .event("dblclick", function(d){
+                    doubleClickAction(d, pv.event);
+                });
+
+    }
+
+
 
     // Extension points
     this.extend(this.pvBullets,"bulletsPanel_");
@@ -7154,8 +7192,9 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             d.title = s;
             d.subtitle = v[0];
             d.measures = [v[1]];
-            d.markers = [v[2]]
-            d.ranges = v.slice(3);
+            d.markers = [v[2]];
+            if (v.length >= 3)
+	            d.ranges = v.slice(3);
         }
 
 
