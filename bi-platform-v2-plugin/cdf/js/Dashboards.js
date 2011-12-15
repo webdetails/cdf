@@ -1610,12 +1610,12 @@ Query = function() {
      */
 
   var doQuery = function(outsideCallback){
+    if (typeof _callback != 'function') {
+      throw 'QueryNotInitialized';
+    }
     var url;
     var queryDefinition; 
     var callback = (outsideCallback ? outsideCallback : _callback);
-    if (typeof callback != 'function') {
-      throw 'QueryNotInitialized';
-    }
     if (_mode == 'CDA') {
       url = CDA_PATH;
       queryDefinition = buildQueryDefinition();
