@@ -9,8 +9,15 @@ pv.Behavior.tipsy = function(opts) {
   function trigger() {
     if (tip) {
       $(tip).tipsy("hide");
-      tip.parentNode.removeChild(tip);
+      if(tip.parentNode) tip.parentNode.removeChild(tip);
       tip = null;
+    }
+  }
+  
+  function mouseMove(ev){
+    if(tip){
+      if(ev == null) ev = pv.event;
+      $(tip).tipsy("tip").css({left:ev.clientX+8+"px",top:ev.clientY+8+"px"});
     }
   }
 
@@ -34,7 +41,7 @@ pv.Behavior.tipsy = function(opts) {
     }
 
     /* Propagate the tooltip text. */
-    tip.title = this.title() || this.text();
+    tip.title = this.tooltip != null ? this.tooltip() : this.title() || this.text();
 
     /*
        * Compute bounding box. TODO support area, lines, wedges, stroke. Also
@@ -49,7 +56,6 @@ pv.Behavior.tipsy = function(opts) {
       tip.style.width = Math.ceil(this.width() * t.k) + 1 + "px";
       tip.style.height = Math.ceil(this.height() * t.k) + 1 + "px";
 
-
     } else if (this.properties.shapeRadius) {
       var r = this.shapeRadius();
       t.x -= r;
@@ -59,10 +65,13 @@ pv.Behavior.tipsy = function(opts) {
     } else if( this.properties.outerRadius){
       // Wedge
       var angle = this.endAngle() - this.angle()/2
-      tip.style.left = Math.floor(this.left() + Math.cos(angle)*this.outerRadius()*0.7 + t.x) + "px";
-      tip.style.top = Math.floor(this.top() + Math.sin(angle)*this.outerRadius()*0.7 + t.y) + "px";
+      var radius = this.outerRadius() - (this.outerRadius() - this.innerRadius())*0.3;
+      tip.style.left = Math.floor(this.left() + Math.cos(angle)*radius + t.x) + "px";
+      tip.style.top = Math.floor(this.top() + Math.sin(angle)*radius + t.y) + "px";
     }
-
+     if(opts.followMouse){
+      $(pv.event.target).mousemove(mouseMove);
+     }
     /*
        * Cleanup the tooltip span on mouseout. Immediately trigger the tooltip;
        * this is necessary for dimensionless marks. Note that the tip has
@@ -70,7 +79,10 @@ pv.Behavior.tipsy = function(opts) {
        * events, such as "click"); thus the mouseleave event handler is
        * registered on the event target rather than the tip overlay.
        */
-    if (tip.style.height) $(pv.event.target).mouseleave(trigger);
+    $(pv.event.target).mouseleave(trigger);
+    //if (tip.style.height || tip.style.width){
+    //  $(pv.event.target).mouseleave(trigger);
+    //}
     $(tip).tipsy("show");
   };
 };

@@ -2019,7 +2019,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .font(myself.font)
             .title(function(d){
                 return d.nodeLabel;
-                })
+            })
             .text(function(d){
                 var fitInfo = this.fitInfo();
                 switch(this.lblDirection()){
@@ -2937,7 +2937,6 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
       
     }
     else{
@@ -4685,21 +4684,27 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                     //myself.pvPanel.render();
                 });
         if(opts.showTooltips){
-            this.shapes.title(function(r,ra,i){
+            this.shapes
+            .def("tooltip",'')
+            .title(function(r,ra,i){
+                var tooltip = '';
                 if(opts.customTooltip){
                     var s = myself.chart.dataEngine.getSeries()[this.parent.index];
                     var c = myself.chart.dataEngine.getCategories()[this.parent.parent.index];
                     var d = r[i];
-                    return opts.customTooltip(s,c,d);
+                    tooltip = opts.customTooltip(s,c,d);
                 }
                 else {
-                    return myself.valuesToText(r[i]);
+                    tooltip = myself.valuesToText(r[i]);
                 }
+                this.tooltip(tooltip);
+                return '';//prevent browser tooltip
             })
             .event("mouseover", pv.Behavior.tipsy({
                 html: true,
                 gravity: "e",
-                fade: false
+                fade: false,
+                followMouse:true
             }));
         }
         if(doubleClickAction)
@@ -5858,7 +5863,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
       this.pvLine = this.pvArea.anchor(pvc.BasePanel.oppositeAnchor[anchor]).add(pv.Line)
       .lineWidth(this.showLines?1.5:0.001);
-    //[pvc.BasePanel.paralelLength[anchor]](maxLineSize)
+    //[pvc.BasePanel.parallelLength[anchor]](maxLineSize)
     */    
     }
     else {
@@ -6772,7 +6777,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
 	    this.extend(this.pvWaterfallLine,"barWaterfallLine_");
 
         // Extend bar and barPanel
-        this.extend(this.pvBar,"barPanel_");
+        this.extend(this.pvBarPanel,"barPanel_");
         this.extend(this.pvBar,"bar_");
     
 
