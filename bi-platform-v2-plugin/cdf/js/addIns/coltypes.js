@@ -119,6 +119,7 @@
       height: 10,
       startColor: "#55A4D6",
       endColor: "#448FC8",
+      backgroundImage: undefined,
       stroke: null,
       max: undefined,
       includeValue: false,
@@ -154,7 +155,7 @@
       var c = paper.rect(xx(leftVal), 0, xx(delta), htmp);
 
       c.attr({
-        fill: "90-"+opt.startColor + "-" + opt.endColor,
+        fill: opt.backgroundImage?"url('"+opt.backgroundImage+"')":"90-"+opt.startColor + "-" + opt.endColor,
         stroke: opt.stroke,
         title: "Value: "+ value
       }); 
