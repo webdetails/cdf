@@ -43,7 +43,8 @@ pv.Behavior.tipsy = function(opts) {
     }
 
     /* Propagate the tooltip text. */
-    tip.title = this.tooltip != null ? this.tooltip() : this.title() || this.text();
+    //tip.title =  this.tooltip != null ? this.tooltip() : this.title() || this.text();
+    tip.title = (this.instance()? this.instance().tooltip : null) || this.title() || this.text();
 
     /*
        * Compute bounding box. TODO support area, lines, wedges, stroke. Also
