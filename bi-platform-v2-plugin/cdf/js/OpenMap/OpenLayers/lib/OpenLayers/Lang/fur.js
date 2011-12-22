@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Klenje
  */
@@ -18,15 +14,15 @@
  */
 OpenLayers.Lang["fur"] = OpenLayers.Util.applyDefaults({
 
-    'permalink': "Leam Permanent",
+    'Permalink': "Leam Permanent",
 
-    'overlays': "Livei parsore",
+    'Overlays': "Livei parsore",
 
-    'baseLayer': "Livel di base",
+    'Base Layer': "Livel di base",
 
     'browserNotSupported': "Il to sgarfadôr nol supuarte la renderizazion vetoriâl. Al moment a son supuartâts:\n${renderers}",
 
-    'scale': "Scjale = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Scjale = 1 : ${scaleDenom}",
 
     'W': "O",
 

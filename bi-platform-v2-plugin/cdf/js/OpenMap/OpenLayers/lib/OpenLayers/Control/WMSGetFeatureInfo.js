@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 
@@ -54,6 +55,14 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
      */
     clickCallback: "click",
     
+    /** APIProperty: output
+     *  {String} Either "features" or "object". When triggering a 
+     *      getfeatureinfo request should we pass on an array of features
+     *      or an object with with a "features" property and other properties
+     *      (such as the url of the WMS). Default is "features".
+     */
+    output: "features",
+    
     /**
      * Property: layers
      * {Array(<OpenLayers.Layer.WMS>)} The layers to query for feature info.
@@ -87,7 +96,10 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
 
     /**
      * Property: infoFormat
-     * {String} The mimetype to request from the server
+     * {String} The mimetype to request from the server. If you are using 
+     * drillDown mode and have multiple servers that do not share a common 
+     * infoFormat, you can override the control's infoFormat by providing an 
+     * INFO_FORMAT parameter in your <OpenLayers.Layer.WMS> instance(s).
      */
     infoFormat: 'text/html',
     
@@ -149,6 +161,7 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
      * beforegetfeatureinfo - Triggered before the request is sent.
      *      The event object has an *xy* property with the position of the 
      *      mouse click or hover event that triggers the request.
+     * nogetfeatureinfo - no queryable layers were found.
      * getfeatureinfo - Triggered when a GetFeatureInfo response is received.
      *      The event object has a *text* property with the body of the
      *      response (String), a *features* property with an array of the
@@ -159,7 +172,7 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
      *      layers, *text* and *request* will only contain the response body
      *      and request object of the last request.
      */
-    EVENT_TYPES: ["beforegetfeatureinfo", "getfeatureinfo"],
+    EVENT_TYPES: ["beforegetfeatureinfo", "nogetfeatureinfo", "getfeatureinfo"],
 
     /**
      * Constructor: <OpenLayers.Control.WMSGetFeatureInfo>
@@ -287,7 +300,7 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
             layer = candidates[i];
             if(layer instanceof OpenLayers.Layer.WMS &&
                (!this.queryVisible || layer.getVisibility())) {
-                url = layer.url instanceof Array ? layer.url[0] : layer.url;
+                url = OpenLayers.Util.isArray(layer.url) ? layer.url[0] : layer.url;
                 // if the control was not configured with a url, set it
                 // to the first layer url
                 if(this.drillDown === false && !this.url) {
@@ -343,30 +356,38 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
             layerNames = layerNames.concat(layers[i].params.LAYERS);
             styleNames = styleNames.concat(this.getStyleNames(layers[i]));
         }
+        var firstLayer = layers[0];
+        // use the firstLayer's projection if it matches the map projection -
+        // this assumes that all layers will be available in this projection
+        var projection = this.map.getProjection();
+        var layerProj = firstLayer.projection;
+        if (layerProj && layerProj.equals(this.map.getProjectionObject())) {
+            projection = layerProj.getCode();
+        }
         var params = OpenLayers.Util.extend({
             service: "WMS",
-            version: layers[0].params.VERSION,
+            version: firstLayer.params.VERSION,
             request: "GetFeatureInfo",
             layers: layerNames,
             query_layers: layerNames,
             styles: styleNames,
             bbox: this.map.getExtent().toBBOX(null,
-                layers[0].reverseAxisOrder()),
+                firstLayer.reverseAxisOrder()),
             feature_count: this.maxFeatures,
             height: this.map.getSize().h,
             width: this.map.getSize().w,
             format: format,
-            info_format: this.infoFormat
-        }, (parseFloat(layers[0].params.VERSION) >= 1.3) ?
+            info_format: firstLayer.params.INFO_FORMAT || this.infoFormat
+        }, (parseFloat(firstLayer.params.VERSION) >= 1.3) ?
             {
-                crs: this.map.getProjection(),
-                i: clickPosition.x,
-                j: clickPosition.y
+                crs: projection,
+                i: parseInt(clickPosition.x),
+                j: parseInt(clickPosition.y)
             } :
             {
-                srs: this.map.getProjection(),
-                x: clickPosition.x,
-                y: clickPosition.y
+                srs: projection,
+                x: parseInt(clickPosition.x),
+                y: parseInt(clickPosition.y)
             }
         );
         OpenLayers.Util.applyDefaults(params, this.vendorParams);
@@ -374,7 +395,7 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
             url: url,
             params: OpenLayers.Util.upperCaseObject(params),
             callback: function(request) {
-                this.handleResponse(clickPosition, request);
+                this.handleResponse(clickPosition, request, url);
             },
             scope: this
         };
@@ -400,7 +421,7 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
         if (layer.params.STYLES) {
             styleNames = layer.params.STYLES;
         } else {
-            if (layer.params.LAYERS instanceof Array) {
+            if (OpenLayers.Util.isArray(layer.params.LAYERS)) {
                 styleNames = new Array(layer.params.LAYERS.length);
             } else { // Assume it's a String
                 styleNames = layer.params.LAYERS.replace(/[^,]/g, "");
@@ -424,6 +445,7 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
     request: function(clickPosition, options) {
         var layers = this.findLayers();
         if(layers.length == 0) {
+            this.events.triggerEvent("nogetfeatureinfo");
             // Reset the cursor.
             OpenLayers.Element.removeClass(this.map.viewPortDiv, "olCursorWait");
             return;
@@ -433,10 +455,10 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
         if(this.drillDown === false) {
             var wmsOptions = this.buildWMSOptions(this.url, layers,
                 clickPosition, layers[0].params.FORMAT); 
-            var response = OpenLayers.Request.GET(wmsOptions);
+            var request = OpenLayers.Request.GET(wmsOptions);
     
             if (options.hover === true) {
-                this.hoverRequest = response.priv;
+                this.hoverRequest = request;
             }
         } else {
             this._requestCount = 0;
@@ -447,7 +469,7 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
             for(var i=0, len=layers.length; i<len; i++) {
                 var layer = layers[i];
                 var service, found = false;
-                url = layer.url instanceof Array ? layer.url[0] : layer.url;
+                url = OpenLayers.Util.isArray(layer.url) ? layer.url[0] : layer.url;
                 if(url in services) {
                     services[url].push(layer);
                 } else {
@@ -473,7 +495,9 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
      * request - {XMLHttpRequest} The request object
      * xy - {<OpenLayers.Pixel>} The position on the map where the
      *     mouse event occurred.
-     * features - {Array(<OpenLayers.Feature.Vector>)}
+     * features - {Array(<OpenLayers.Feature.Vector>)} or
+     *     {Array({Object}) when output is "object". The object has a url and a
+     *     features property which contains an array of features.
      */
     triggerGetFeatureInfo: function(request, xy, features) {
         this.events.triggerEvent("getfeatureinfo", {
@@ -495,8 +519,9 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
      * xy - {<OpenLayers.Pixel>} The position on the map where the
      *     mouse event occurred.
      * request - {XMLHttpRequest} The request object.
+     * url - {String} The url which was used for this request.
      */
-    handleResponse: function(xy, request) {
+    handleResponse: function(xy, request, url) {
         
         var doc = request.responseXML;
         if(!doc || !doc.documentElement) {
@@ -507,7 +532,13 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
             this.triggerGetFeatureInfo(request, xy, features);
         } else {
             this._requestCount++;
+            if (this.output === "object") {
+                this._features = (this._features || []).concat(
+                    {url: url, features: features}
+                );
+            } else {
             this._features = (this._features || []).concat(features);
+            }
             if (this._requestCount === this._numRequests) {
                 this.triggerGetFeatureInfo(request, xy, this._features.concat()); 
                 delete this._features;
@@ -515,18 +546,6 @@ OpenLayers.Control.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Control, {
                 delete this._numRequests;
             }
         }
-    },
-   
-    /** 
-     * Method: setMap
-     * Set the map property for the control. 
-     * 
-     * Parameters:
-     * map - {<OpenLayers.Map>} 
-     */
-    setMap: function(map) {
-        this.handler.setMap(map);
-        OpenLayers.Control.prototype.setMap.apply(this, arguments);
     },
 
     CLASS_NAME: "OpenLayers.Control.WMSGetFeatureInfo"

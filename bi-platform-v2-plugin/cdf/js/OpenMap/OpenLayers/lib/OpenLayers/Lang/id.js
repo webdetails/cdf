@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Irwangatot
  *  - IvanLanin
@@ -21,13 +17,11 @@ OpenLayers.Lang["id"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Permintaan yang tak tertangani menghasilkan ${statusText}",
 
-    'permalink': "Pranala permanen",
+    'Permalink': "Pranala permanen",
 
-    'overlays': "Hamparan",
+    'Overlays': "Hamparan",
 
-    'baseLayer': "Lapisan Dasar",
-
-    'sameProjection': "Peta tinjauan hanya bekerja bila dalam proyeksi yang sama dengan peta utama",
+    'Base Layer': "Lapisan Dasar",
 
     'readNotImplemented': "Membaca tidak diterapkan.",
 
@@ -53,7 +47,7 @@ OpenLayers.Lang["id"] = OpenLayers.Util.applyDefaults({
 
     'getLayerWarning': "Lapisan ${layerType} tidak dapat dimuat dengan benar.\x3cbr\x3e\x3cbr\x3eUntuk menghilangkan pesan ini, pilih suatu BaseLayer baru melalui penukar lapisan (layer switcher) di ujung kanan atas.\x3cbr\x3e\x3cbr\x3eKemungkinan besar ini karena pustaka skrip Google Maps tidak disertakan dengan benar.\x3cbr\x3e\x3cbr\x3ePengembang: Untuk bantuan mengatasi masalah ini, \x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3eklik di sini\x3c/a\x3e",
 
-    'scale': "Sekala = 1 : $(sekala Denom)",
+    'Scale = 1 : ${scaleDenom}': "Sekala = 1 : ${scaleDenom}",
 
     'W': "B",
 
@@ -76,8 +70,6 @@ OpenLayers.Lang["id"] = OpenLayers.Util.applyDefaults({
     'pixelAddError': "Anda harus memberikan kedua nilai x dan y ke fungsi penambah.",
 
     'unsupportedGeometryType': "Tipe geometri tak didukung: ${geomType}",
-
-    'pagePositionFailed': "OpenLayers.Util.pagePosition gagal: elemen dengan id ${elemId} mungkin salah tempat.",
 
     'filterEvaluateNotImplemented': "evaluasi tidak tersedia untuk tipe filter ini."
 

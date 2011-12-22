@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Minh Nguyen
  */
@@ -20,13 +16,11 @@ OpenLayers.Lang["vi"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Không xử lý được phản hồi ${statusText} cho yêu cầu",
 
-    'permalink': "Liên kết thường trực",
+    'Permalink': "Liên kết thường trực",
 
-    'overlays': "Lấp bản đồ",
+    'Overlays': "Lấp bản đồ",
 
-    'baseLayer': "Lớp nền",
-
-    'sameProjection': "Bản đồ toàn cảnh chỉ hoạt động khi cùng phép chiếu với bản đồ chính",
+    'Base Layer': "Lớp nền",
 
     'readNotImplemented': "Chưa hỗ trợ chức năng đọc.",
 
@@ -52,7 +46,7 @@ OpenLayers.Lang["vi"] = OpenLayers.Util.applyDefaults({
 
     'getLayerWarning': "Không thể tải lớp ${layerType} đúng đắn.\x3cbr\x3e\x3cbr\x3eĐể tránh thông báo này lần sau, hãy chọn BaseLayer mới dùng điều khiển chọn lớp ở góc trên phải.\x3cbr\x3e\x3cbr\x3eChắc script thư viện ${layerLib} không được bao gồm đúng kiểu.\x3cbr\x3e\x3cbr\x3e\x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3eTrợ giúp về tính năng này\x3c/a\x3e cho người phát triển.",
 
-    'scale': "Tỷ lệ = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Tỷ lệ = 1 : ${scaleDenom}",
 
     'W': "T",
 
@@ -75,8 +69,6 @@ OpenLayers.Lang["vi"] = OpenLayers.Util.applyDefaults({
     'pixelAddError': "Cần phải cho cả giá trị x và y vào hàm add.",
 
     'unsupportedGeometryType': "Không hỗ trợ kiểu địa lý: ${geomType}",
-
-    'pagePositionFailed': "OpenLayers.Util.pagePosition bị thất bại: nguyên tố với ID ${elemId} có thể ở chỗ sai.",
 
     'filterEvaluateNotImplemented': "chưa hỗ trợ evaluate cho loại bộ lọc này."
 

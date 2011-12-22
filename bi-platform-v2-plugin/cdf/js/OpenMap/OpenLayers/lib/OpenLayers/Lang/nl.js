@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Siebrand
  */
@@ -20,13 +16,11 @@ OpenLayers.Lang["nl"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Het verzoek is niet afgehandeld met de volgende melding: ${statusText}",
 
-    'permalink': "Permanente verwijzing",
+    'Permalink': "Permanente verwijzing",
 
-    'overlays': "Overlays",
+    'Overlays': "Overlays",
 
-    'baseLayer': "Achtergrondkaart",
-
-    'sameProjection': "De overzichtskaart werkt alleen als de projectie gelijk is aan de projectie van de hoofdkaart",
+    'Base Layer': "Achtergrondkaart",
 
     'readNotImplemented': "Lezen is niet geïmplementeerd.",
 
@@ -52,7 +46,7 @@ OpenLayers.Lang["nl"] = OpenLayers.Util.applyDefaults({
 
     'getLayerWarning': "De laag ${layerType} kon niet goed geladen worden.\x3cbr /\x3e\x3cbr /\x3e\nOm deze melding niet meer te krijgen, moet u een andere achtergrondkaart kiezen in de laagwisselaar in de rechterbovenhoek.\x3cbr /\x3e\x3cbr /\x3e\nDit komt waarschijnlijk doordat de bibliotheek ${layerLib} niet correct is ingevoegd.\x3cbr /\x3e\x3cbr /\x3e\nOntwikkelaars: \x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3eklik hier\x3c/a\x3e om dit werkend te krijgen.",
 
-    'scale': "Schaal = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Schaal = 1 : ${scaleDenom}",
 
     'W': "W",
 
@@ -75,8 +69,6 @@ OpenLayers.Lang["nl"] = OpenLayers.Util.applyDefaults({
     'pixelAddError': "U moet zowel de x- als de y-waarde doorgeven aan de toevoegfunctie.",
 
     'unsupportedGeometryType': "Dit geometrietype wordt niet ondersteund: ${geomType}",
-
-    'pagePositionFailed': "OpenLayers.Util.pagePosition is mislukt: het element met id ${elemId} is wellicht onjuist geplaatst.",
 
     'filterEvaluateNotImplemented': "evalueren is niet geïmplementeerd voor dit filtertype."
 

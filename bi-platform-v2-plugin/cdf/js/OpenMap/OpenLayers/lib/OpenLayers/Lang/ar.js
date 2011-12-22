@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Meno25
  *  - Mutarjem horr
@@ -19,9 +15,9 @@
  */
 OpenLayers.Lang["ar"] = OpenLayers.Util.applyDefaults({
 
-    'permalink': "وصلة دائمة",
+    'Permalink': "وصلة دائمة",
 
-    'baseLayer': "الطبقة الاساسية",
+    'Base Layer': "الطبقة الاساسية",
 
     'readNotImplemented': "القراءة غير محققة.",
 
@@ -29,7 +25,7 @@ OpenLayers.Lang["ar"] = OpenLayers.Util.applyDefaults({
 
     'errorLoadingGML': "خطأ عند تحميل الملف جي ام ال ${url}",
 
-    'scale': "النسبة = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "النسبة = 1 : ${scaleDenom}",
 
     'W': "غ",
 
