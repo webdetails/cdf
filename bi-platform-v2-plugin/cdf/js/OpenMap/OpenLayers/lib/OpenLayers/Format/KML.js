@@ -1,8 +1,10 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
+ * @requires OpenLayers/BaseTypes/Date.js
  * @requires OpenLayers/Format/XML.js
  * @requires OpenLayers/Feature/Vector.js
  * @requires OpenLayers/Geometry/Point.js
@@ -11,6 +13,7 @@
  * @requires OpenLayers/Geometry/Collection.js
  * @requires OpenLayers/Request/XMLHttpRequest.js
  * @requires OpenLayers/Console.js
+ * @requires OpenLayers/Lang.js
  * @requires OpenLayers/Projection.js
  */
 
@@ -24,6 +27,15 @@
  */
 OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
     
+    /**
+     * Property: namespaces
+     * {Object} Mapping of namespace aliases to namespace URIs.
+     */
+    namespaces: {
+        kml: "http://www.opengis.net/kml/2.2",
+        gx: "http://www.google.com/kml/ext/2.2"
+    },
+
     /**
      * APIProperty: kmlns
      * {String} KML Namespace to use. Defaults to 2.0 namespace.
@@ -64,6 +76,26 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
      *           set to true
      */
     extractStyles: false,
+    
+    /**
+     * APIProperty: extractTracks
+     * {Boolean} Extract gx:Track elements from Placemark elements.  Default
+     *     is false.  If true, features will be generated for all points in
+     *     all gx:Track elements.  Features will have a when (Date) attribute
+     *     based on when elements in the track.  If tracks include angle
+     *     elements, features will have heading, tilt, and roll attributes.
+     *     If track point coordinates have three values, features will have
+     *     an altitude attribute with the third coordinate value.
+     */
+    extractTracks: false,
+    
+    /**
+     * APIProperty: trackAttributes
+     * {Array} If <extractTracks> is true, points within gx:Track elements will 
+     *     be parsed as features with when, heading, tilt, and roll attributes.
+     *     Any additional attribute names can be provided in <trackAttributes>.
+     */
+    trackAttributes: null,
     
     /**
      * Property: internalns
@@ -323,11 +355,10 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
         
         var types = ["LineStyle", "PolyStyle", "IconStyle", "BalloonStyle", 
                      "LabelStyle"];
-        var type, nodeList, geometry, parser;
+        var type, styleTypeNode, nodeList, geometry, parser;
         for(var i=0, len=types.length; i<len; ++i) {
             type = types[i];
-            styleTypeNode = this.getElementsByTagNameNS(node, 
-                                                   "*", type)[0];
+            styleTypeNode = this.getElementsByTagNameNS(node, "*", type)[0];
             if(!styleTypeNode) { 
                 continue;
             }
@@ -565,7 +596,7 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
      * 
      */
     parseFeatures: function(nodes, options) {
-        var features = new Array(nodes.length);
+        var features = [];
         for(var i=0, len=nodes.length; i<len; i++) {
             var featureNode = nodes[i];
             var feature = this.parseFeature.apply(this,[featureNode]) ;
@@ -593,8 +624,26 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
                     }
                 }
 
-                // add feature to list of features
-                features[i] = feature;
+                // check if gx:Track elements should be parsed
+                if (this.extractTracks) {
+                    var tracks = this.getElementsByTagNameNS(
+                        featureNode, this.namespaces.gx, "Track"
+                    );
+                    if (tracks && tracks.length > 0) {
+                        var track = tracks[0];
+                        var container = {
+                            features: [],
+                            feature: feature
+                        };
+                        this.readNode(track, container);
+                        if (container.features.length > 0) {
+                            features.push.apply(features, container.features);
+                        }
+                    }
+                } else {
+                    // add feature to list of features
+                    features.push(feature);                    
+                }
             } else {
                 throw "Bad Placemark: " + i;
             }
@@ -603,7 +652,100 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
         // add new features to existing feature list
         this.features = this.features.concat(features);
     },
-
+    
+    /**
+     * Property: readers
+     * Contains public functions, grouped by namespace prefix, that will
+     *     be applied when a namespaced node is found matching the function
+     *     name.  The function will be applied in the scope of this parser
+     *     with two arguments: the node being read and a context object passed
+     *     from the parent.
+     */
+    readers: {
+        "kml": {
+            "when": function(node, container) {
+                container.whens.push(OpenLayers.Date.parse(
+                    this.getChildValue(node)
+                ));
+            },
+            "_trackPointAttribute": function(node, container) {
+                var name = node.nodeName.split(":").pop();
+                container.attributes[name].push(this.getChildValue(node));
+            }
+        },
+        "gx": {
+            "Track": function(node, container) {
+                var obj = {
+                    whens: [],
+                    points: [],
+                    angles: []
+                };
+                if (this.trackAttributes) {
+                    var name;
+                    obj.attributes = {};
+                    for (var i=0, ii=this.trackAttributes.length; i<ii; ++i) {
+                        name = this.trackAttributes[i];
+                        obj.attributes[name] = [];
+                        if (!(name in this.readers.kml)) {
+                            this.readers.kml[name] = this.readers.kml._trackPointAttribute;
+                        }
+                    }
+                }
+                this.readChildNodes(node, obj);
+                if (obj.whens.length !== obj.points.length) {
+                    throw new Error("gx:Track with unequal number of when (" + obj.whens.length + ") and gx:coord (" + obj.points.length + ") elements.");
+                }
+                var hasAngles = obj.angles.length > 0;
+                if (hasAngles && obj.whens.length !== obj.angles.length) {
+                    throw new Error("gx:Track with unequal number of when (" + obj.whens.length + ") and gx:angles (" + obj.angles.length + ") elements.");
+                }
+                var feature, point, angles;
+                for (var i=0, ii=obj.whens.length; i<ii; ++i) {
+                    feature = container.feature.clone();
+                    feature.fid = container.feature.fid || container.feature.id;
+                    point = obj.points[i];
+                    feature.geometry = point;
+                    if ("z" in point) {
+                        feature.attributes.altitude = point.z;
+                    }
+                    if (this.internalProjection && this.externalProjection) {
+                        feature.geometry.transform(
+                            this.externalProjection, this.internalProjection
+                        ); 
+                    }
+                    if (this.trackAttributes) {
+                        for (var j=0, jj=this.trackAttributes.length; j<jj; ++j) {
+                            feature.attributes[name] = obj.attributes[this.trackAttributes[j]][i];
+                        }
+                    }
+                    feature.attributes.when = obj.whens[i];
+                    feature.attributes.trackId = container.feature.id;
+                    if (hasAngles) {
+                        angles = obj.angles[i];
+                        feature.attributes.heading = parseFloat(angles[0]);
+                        feature.attributes.tilt = parseFloat(angles[1]);
+                        feature.attributes.roll = parseFloat(angles[2]);
+                    }
+                    container.features.push(feature);
+                }
+            },
+            "coord": function(node, container) {
+                var str = this.getChildValue(node);
+                var coords = str.replace(this.regExes.trimSpace, "").split(/\s+/);
+                var point = new OpenLayers.Geometry.Point(coords[0], coords[1]);
+                if (coords.length > 2) {
+                    point.z = parseFloat(coords[2]);
+                }
+                container.points.push(point);
+            },
+            "angles": function(node, container) {
+                var str = this.getChildValue(node);
+                var parts = str.replace(this.regExes.trimSpace, "").split(/\s+/);
+                container.angles.push(parts);
+            }
+        }
+    },
+    
     /**
      * Method: parseFeature
      * This function is the core of the KML parsing code in OpenLayers.
@@ -984,13 +1126,13 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
      * Accept Feature Collection, and return a string. 
      * 
      * Parameters:
-     * features - {Array(<OpenLayers.Feature.Vector>} An array of features.
+     * features - {Array(<OpenLayers.Feature.Vector>)} An array of features.
      *
      * Returns:
      * {String} A KML string.
      */
     write: function(features) {
-        if(!(features instanceof Array)) {
+        if(!(OpenLayers.Util.isArray(features))) {
             features = [features];
         }
         var kml = this.createElementNS(this.kmlns, "kml");
@@ -1081,11 +1223,6 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
      * {DOMElement}
      */
     buildGeometryNode: function(geometry) {
-        if (this.internalProjection && this.externalProjection) {
-            geometry = geometry.clone();
-            geometry.transform(this.internalProjection, 
-                               this.externalProjection);
-        }                       
         var className = geometry.CLASS_NAME;
         var type = className.substring(className.lastIndexOf(".") + 1);
         var builder = this.buildGeometry[type.toLowerCase()];
@@ -1270,12 +1407,12 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
             var parts = new Array(numPoints);
             for(var i=0; i<numPoints; ++i) {
                 point = points[i];
-                parts[i] = point.x + "," + point.y;
+                parts[i] = this.buildCoordinates(point);
             }
             path = parts.join(" ");
         } else {
             // Point
-            path = geometry.x + "," + geometry.y;
+            path = this.buildCoordinates(geometry);
         }
         
         var txtNode = this.createTextNode(path);
@@ -1283,6 +1420,24 @@ OpenLayers.Format.KML = OpenLayers.Class(OpenLayers.Format.XML, {
         
         return coordinatesNode;
     },    
+    
+    /**
+     * Method: buildCoordinates
+     *
+     * Parameters:
+     * point - {<OpenLayers.Geometry.Point>}
+     *
+     * Returns
+     * {String} a coordinate pair
+     */
+    buildCoordinates: function(point) {
+        if (this.internalProjection && this.externalProjection) {
+            point = point.clone();
+            point.transform(this.internalProjection, 
+                               this.externalProjection);
+        }
+        return point.x + "," + point.y;                     
+    },
 
     CLASS_NAME: "OpenLayers.Format.KML" 
 });

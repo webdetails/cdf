@@ -1,3 +1,8 @@
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
+
 /**
  * @requires OpenLayers/Layer.js
  * @requires OpenLayers/Projection.js
@@ -50,6 +55,38 @@ OpenLayers.Layer.SphericalMercator = {
         return extent;
     },
 
+    /**
+     * Method: getLonLatFromViewPortPx
+     * Get a map location from a pixel location
+     * 
+     * Parameters:
+     * viewPortPx - {<OpenLayers.Pixel>}
+     *
+     * Returns:
+     *  {<OpenLayers.LonLat>} An OpenLayers.LonLat which is the passed-in view
+     *  port OpenLayers.Pixel, translated into lon/lat by map lib
+     *  If the map lib is not loaded or not centered, returns null
+     */
+    getLonLatFromViewPortPx: function (viewPortPx) {
+        return OpenLayers.Layer.prototype.getLonLatFromViewPortPx.apply(this, arguments);
+    },
+    
+    /**
+     * Method: getViewPortPxFromLonLat
+     * Get a pixel location from a map location
+     *
+     * Parameters:
+     * lonlat - {<OpenLayers.LonLat>}
+     *
+     * Returns:
+     * {<OpenLayers.Pixel>} An OpenLayers.Pixel which is the passed-in
+     * OpenLayers.LonLat, translated into view port pixels by map lib
+     * If map lib is not loaded or not centered, returns null
+     */
+    getViewPortPxFromLonLat: function (lonlat) {
+        return OpenLayers.Layer.prototype.getViewPortPxFromLonLat.apply(this, arguments);
+    },
+
     /** 
      * Method: initMercatorParameters 
      * Set up the mercator parameters on the layer: resolutions,
@@ -58,12 +95,12 @@ OpenLayers.Layer.SphericalMercator = {
     initMercatorParameters: function() {
         // set up properties for Mercator - assume EPSG:900913
         this.RESOLUTIONS = [];
-        var maxResolution = 156543.0339;
+        var maxResolution = 156543.03390625;
         for(var zoom=0; zoom<=this.MAX_ZOOM_LEVEL; ++zoom) {
             this.RESOLUTIONS[zoom] = maxResolution / Math.pow(2, zoom);
         }
         this.units = "m";
-        this.projection = "EPSG:900913";
+        this.projection = this.projection || "EPSG:900913";
     },
 
     /**
@@ -149,11 +186,32 @@ OpenLayers.Layer.SphericalMercator = {
 };
 
 /**
- * Note: Two transforms declared
- * Transforms from EPSG:4326 to EPSG:900913 and from EPSG:900913 to EPSG:4326
- *     are set by this class.
+ * Note: Transforms for web mercator <-> EPSG:4326
+ * OpenLayers recognizes EPSG:3857, EPSG:900913, EPSG:102113 and EPSG:102100.
+ * OpenLayers originally started referring to EPSG:900913 as web mercator.
+ * The EPSG has declared EPSG:3857 to be web mercator.  
+ * ArcGIS 10 recognizes the EPSG:3857, EPSG:102113, and EPSG:102100 as 
+ * equivalent.  See http://blogs.esri.com/Dev/blogs/arcgisserver/archive/2009/11/20/ArcGIS-Online-moving-to-Google-_2F00_-Bing-tiling-scheme_3A00_-What-does-this-mean-for-you_3F00_.aspx#12084
  */
-OpenLayers.Projection.addTransform("EPSG:4326", "EPSG:900913",
-    OpenLayers.Layer.SphericalMercator.projectForward);
-OpenLayers.Projection.addTransform("EPSG:900913", "EPSG:4326",
-    OpenLayers.Layer.SphericalMercator.projectInverse);
+(function() {
+    
+    // list of equivalent codes for web mercator
+    var codes = ["EPSG:900913", "EPSG:3857", "EPSG:102113", "EPSG:102100"];
+    
+    var add = OpenLayers.Projection.addTransform;
+    var merc = OpenLayers.Layer.SphericalMercator;
+    var same = OpenLayers.Projection.nullTransform;
+    
+    var i, len, code, other, j;
+    for (i=0, len=codes.length; i<len; ++i) {
+        code = codes[i];
+        add("EPSG:4326", code, merc.projectForward);
+        add(code, "EPSG:4326", merc.projectInverse);
+        for (j=i+1; j<len; ++j) {
+            other = codes[j];
+            add(code, other, same);
+            add(other, code, same);
+        }
+    }
+    
+})();

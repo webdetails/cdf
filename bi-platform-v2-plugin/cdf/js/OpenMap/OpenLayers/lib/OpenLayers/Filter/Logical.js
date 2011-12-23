@@ -1,6 +1,7 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-  * full text of the license. */
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
 
 
 /**
@@ -58,19 +59,21 @@ OpenLayers.Filter.Logical = OpenLayers.Class(OpenLayers.Filter, {
 
     /**
      * APIMethod: evaluate
-     * Evaluates this filter in a specific context.  Should be implemented by
-     *     subclasses.
+     * Evaluates this filter in a specific context.
      * 
      * Parameters:
-     * context - {Object} Context to use in evaluating the filter.
+     * context - {Object} Context to use in evaluating the filter.  A vector
+     *     feature may also be provided to evaluate feature attributes in 
+     *     comparison filters or geometries in spatial filters.
      * 
      * Returns:
      * {Boolean} The filter applies.
      */
     evaluate: function(context) {
+        var i, len;
         switch(this.type) {
             case OpenLayers.Filter.Logical.AND:
-                for (var i=0, len=this.filters.length; i<len; i++) {
+                for (i=0, len=this.filters.length; i<len; i++) {
                     if (this.filters[i].evaluate(context) == false) {
                         return false;
                     }
@@ -78,7 +81,7 @@ OpenLayers.Filter.Logical = OpenLayers.Class(OpenLayers.Filter, {
                 return true;
                 
             case OpenLayers.Filter.Logical.OR:
-                for (var i=0, len=this.filters.length; i<len; i++) {
+                for (i=0, len=this.filters.length; i<len; i++) {
                     if (this.filters[i].evaluate(context) == true) {
                         return true;
                     }
@@ -88,6 +91,7 @@ OpenLayers.Filter.Logical = OpenLayers.Class(OpenLayers.Filter, {
             case OpenLayers.Filter.Logical.NOT:
                 return (!this.filters[0].evaluate(context));
         }
+        return undefined;
     },
     
     /**

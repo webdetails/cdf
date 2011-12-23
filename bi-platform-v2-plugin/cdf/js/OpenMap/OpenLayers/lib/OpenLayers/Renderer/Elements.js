@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
@@ -56,10 +57,8 @@ OpenLayers.ElementsIndexer = OpenLayers.Class({
         this.compare = yOrdering ? 
             OpenLayers.ElementsIndexer.IndexingMethods.Z_ORDER_Y_ORDER :
             OpenLayers.ElementsIndexer.IndexingMethods.Z_ORDER_DRAWING_ORDER;
-            
-        this.order = [];
-        this.indices = {};
-        this.maxZIndex = 0;
+
+        this.clear();
     },
     
     /**
@@ -389,22 +388,10 @@ OpenLayers.Renderer.Elements = OpenLayers.Class(OpenLayers.Renderer, {
     BACKGROUND_ID_SUFFIX: "_background",
     
     /**
-     * Constant: BACKGROUND_ID_SUFFIX
+     * Constant: LABEL_ID_SUFFIX
      * {String}
      */
     LABEL_ID_SUFFIX: "_label",
-    
-    /**
-     * Property: minimumSymbolizer
-     * {Object}
-     */
-    minimumSymbolizer: {
-        strokeLinecap: "round",
-        strokeOpacity: 1,
-        strokeDashstyle: "solid",
-        fillOpacity: 1,
-        pointRadius: 0
-    },
     
     /**
      * Constructor: OpenLayers.Renderer.Elements
@@ -454,14 +441,17 @@ OpenLayers.Renderer.Elements = OpenLayers.Class(OpenLayers.Renderer, {
      * Remove all the elements from the root
      */    
     clear: function() {
-        if (this.vectorRoot) {
-            while (this.vectorRoot.childNodes.length > 0) {
-                this.vectorRoot.removeChild(this.vectorRoot.firstChild);
+        var child;
+        var root = this.vectorRoot;
+        if (root) {
+            while (child = root.firstChild) {
+                root.removeChild(child);
             }
         }
-        if (this.textRoot) {
-            while (this.textRoot.childNodes.length > 0) {
-                this.textRoot.removeChild(this.textRoot.firstChild);
+        root = this.textRoot;
+        if (root) {
+            while (child = root.firstChild) {
+                root.removeChild(child);
             }
         }
         if (this.indexer) {
@@ -517,10 +507,13 @@ OpenLayers.Renderer.Elements = OpenLayers.Class(OpenLayers.Renderer, {
         };
 
         rendered = false;
+        var removeBackground = false;
         if (style.display != "none") {
             if (style.backgroundGraphic) {
                 this.redrawBackgroundNode(geometry.id, geometry, style,
                     featureId);
+            } else {
+                removeBackground = true;
             }
             rendered = this.redrawNode(geometry.id, geometry, style,
                 featureId);
@@ -529,9 +522,15 @@ OpenLayers.Renderer.Elements = OpenLayers.Class(OpenLayers.Renderer, {
             var node = document.getElementById(geometry.id);
             if (node) {
                 if (node._style.backgroundGraphic) {
-                    node.parentNode.removeChild(document.getElementById(
-                        geometry.id + this.BACKGROUND_ID_SUFFIX));
+                    removeBackground = true;
                 }
+                node.parentNode.removeChild(node);
+            }
+        }
+        if (removeBackground) {
+            var node = document.getElementById(
+                geometry.id + this.BACKGROUND_ID_SUFFIX);
+            if (node) {
                 node.parentNode.removeChild(node);
             }
         }
@@ -552,6 +551,7 @@ OpenLayers.Renderer.Elements = OpenLayers.Class(OpenLayers.Renderer, {
      *     the geometry could not be drawn, false otherwise
      */
     redrawNode: function(id, geometry, style, featureId) {
+        style = this.applyDefaultSymbolizer(style);
         // Get the node if it's already on the map.
         var node = this.nodeFactory(id, this.getNodeType(geometry, style));
         
@@ -655,7 +655,6 @@ OpenLayers.Renderer.Elements = OpenLayers.Class(OpenLayers.Renderer, {
      */
     drawGeometryNode: function(node, geometry, style) {
         style = style || node._style;
-        OpenLayers.Util.applyDefaults(style, this.minimumSymbolizer);
 
         var options = {
             'isFilled': style.fill === undefined ?
@@ -867,14 +866,15 @@ OpenLayers.Renderer.Elements = OpenLayers.Class(OpenLayers.Renderer, {
      * 
      * Parameters:
      * geometry - {<OpenLayers.Geometry>}
+     * featureId - {String}
      */
-    eraseGeometry: function(geometry) {
+    eraseGeometry: function(geometry, featureId) {
         if ((geometry.CLASS_NAME == "OpenLayers.Geometry.MultiPoint") ||
             (geometry.CLASS_NAME == "OpenLayers.Geometry.MultiLineString") ||
             (geometry.CLASS_NAME == "OpenLayers.Geometry.MultiPolygon") ||
             (geometry.CLASS_NAME == "OpenLayers.Geometry.Collection")) {
             for (var i=0, len=geometry.components.length; i<len; i++) {
-                this.eraseGeometry(geometry.components[i]);
+                this.eraseGeometry(geometry.components[i], featureId);
             }
         } else {    
             var element = OpenLayers.Util.getElement(geometry.id);

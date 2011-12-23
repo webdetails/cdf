@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Mvrban
  */
@@ -20,13 +16,11 @@ OpenLayers.Lang["hr"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Nepodržani zahtjev ${statusText}",
 
-    'permalink': "Permalink",
+    'Permalink': "Permalink",
 
-    'overlays': "Overlays",
+    'Overlays': "Overlays",
 
-    'baseLayer': "Osnovna karta",
-
-    'sameProjection': "Pregledna karta radi jedino kao je u istoj projekciji kao i glava karta",
+    'Base Layer': "Osnovna karta",
 
     'readNotImplemented': "Čitanje nije implementirano.",
 
@@ -46,7 +40,7 @@ OpenLayers.Lang["hr"] = OpenLayers.Util.applyDefaults({
 
     'commitFailed': "WFS Transakcija: NEUSPJEŠNA ${response}",
 
-    'scale': "Mjerilo = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Mjerilo = 1 : ${scaleDenom}",
 
     'layerAlreadyAdded': "Pokušali ste dodati layer:  ${layerName} na kartu, ali je već dodan",
 
@@ -58,8 +52,6 @@ OpenLayers.Lang["hr"] = OpenLayers.Util.applyDefaults({
 
     'pixelAddError': "Morate dati obje vrijednosti ,  x i y  da bi dodali funkciju.",
 
-    'unsupportedGeometryType': "Nepodržani tip geometrije: ${geomType}",
-
-    'pagePositionFailed': "OpenLayers.Util.pagePosition nije uspjelo: element sa id ${elemId} može biti krivo smješten."
+    'unsupportedGeometryType': "Nepodržani tip geometrije: ${geomType}"
 
 });

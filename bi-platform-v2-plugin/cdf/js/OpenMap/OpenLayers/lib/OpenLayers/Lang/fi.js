@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Nike
  *  - Str4nd
@@ -19,13 +15,11 @@
  */
 OpenLayers.Lang["fi"] = OpenLayers.Util.applyDefaults({
 
-    'permalink': "Ikilinkki",
+    'Permalink': "Ikilinkki",
 
-    'overlays': "Kerrokset",
+    'Overlays': "Kerrokset",
 
-    'baseLayer': "Peruskerros",
-
-    'sameProjection': "Yleiskuvakarttaa voi käyttää vain, kun sillä on sama projektio kuin pääkartalla.",
+    'Base Layer': "Peruskerros",
 
     'W': "L",
 

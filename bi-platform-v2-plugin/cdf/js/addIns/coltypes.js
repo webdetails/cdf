@@ -111,6 +111,7 @@
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(pvSparkline));
 
+
   var dataBar = {
     name: "dataBar",
     label: "Data Bar",
@@ -119,9 +120,12 @@
       height: 10,
       startColor: "#55A4D6",
       endColor: "#448FC8",
+      backgroundImage: undefined,
       stroke: null,
       max: undefined,
+      min: undefined,
       includeValue: false,
+      absValue: true,
       valueFormat: function(v, format, st) {
         return "" + sprintf(format || "%.1f",v) ;
       }
@@ -131,33 +135,44 @@
       $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['numeric-desc'];
     },
     implementation: function(tgt, st, opt) {
-      var max = opt.max || Math.max.apply(Math,st.tableData.map(function(e){
-        return Math.abs(e[st.colIdx]);
-      }));
+      var tblMax = Math.max.apply(Math,st.tableData.map(function(e){
+                               return e[st.colIdx];
+                             })),
+          tblMin = Math.min.apply(Math,st.tableData.map(function(e){
+                               return e[st.colIdx];
+                             }));
+      if (opt.absValue){
+        var max = opt.max || Math.max( Math.abs(tblMax), Math.abs(tblMin) ),
+            min = opt.min || 0,
+            val = Math.abs(parseFloat(st.value));
+        min = Math.max(min,0);
+      }else{
+        var max = opt.max || Math.max(0, tblMax),
+            min = opt.min || Math.min(0, tblMin),
+            val = parseFloat(st.value);
+      }
+      var maxTotal = max - min;
+
+
       var cell = $(tgt);
-      cell.empty();
-      
+      cell.empty(); 
       var ph =$("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
       var wtmp = opt.widthRatio * ph.width();
       var htmp = opt.height;      
+      
+      var leftVal  = Math.min(val,0),
+          rightVal = Math.max(val,0);
+      var paperSize = Math.min(rightVal,max) - min;
 
-      var value = st.value;
-      var leftVal=0, rightVal=parseFloat(value);
-      if(leftVal>rightVal){
-        leftVal = value;
-        rightVal = 0;
-      }
-      var delta = rightVal - leftVal;
-      var xx = pv.Scale.linear(0,max).range(0,wtmp);      
-           
-      var paper = Raphael(ph.get(0), xx(delta), htmp);
-      var c = paper.rect(xx(leftVal), 0, xx(delta), htmp);
-
+      var xx = pv.Scale.linear(0,maxTotal).range(0,wtmp);               
+      var paper = Raphael(ph.get(0), Math.max(xx(paperSize),1) , htmp);
+      var c = paper.rect(xx(leftVal-min), 0, xx(rightVal - leftVal), htmp);
+    
       c.attr({
-        fill: "90-"+opt.startColor + "-" + opt.endColor,
+        fill: opt.backgroundImage?"url('"+opt.backgroundImage+"')":"90-"+opt.startColor + "-" + opt.endColor,
         stroke: opt.stroke,
-        title: "Value: "+ value
-      }); 
+        title: "Value: "+ st.value
+      });
 
       if(opt.includeValue) {
         ph.append("<span class='value'>" + opt.valueFormat(st.value, st.colFormat, st) + "</span>" );
@@ -165,6 +180,7 @@
     }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(dataBar));
+
 
   var trendArrow = {
     name: "trendArrow",

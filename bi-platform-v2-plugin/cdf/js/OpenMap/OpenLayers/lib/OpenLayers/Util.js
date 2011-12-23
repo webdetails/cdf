@@ -1,19 +1,32 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
+ * @requires OpenLayers/BaseTypes.js
+ * @requires OpenLayers/BaseTypes/Bounds.js
+ * @requires OpenLayers/BaseTypes/Element.js
+ * @requires OpenLayers/BaseTypes/LonLat.js
+ * @requires OpenLayers/BaseTypes/Pixel.js
+ * @requires OpenLayers/BaseTypes/Size.js
  * @requires OpenLayers/Console.js
+ * @requires OpenLayers/Lang.js
  */
 
 /**
  * Namespace: Util
  */
-OpenLayers.Util = {};
+OpenLayers.Util = OpenLayers.Util || {};
 
 /** 
  * Function: getElement
  * This is the old $() from prototype
+ *
+ * Parameters:
+ * e - {String or DOMElement or Window}
+ * Return:
+ * {Array(DOMElement)}
  */
 OpenLayers.Util.getElement = function() {
     var elements = [];
@@ -45,59 +58,28 @@ OpenLayers.Util.isElement = function(o) {
     return !!(o && o.nodeType === 1);
 };
 
+/**
+ * Function: isArray
+ * Tests that the provided object is an array.
+ * This test handles the cross-IFRAME case not caught
+ * by "a instanceof Array" and should be used instead.
+ * 
+ * Parameters:
+ * a - {Object} the object test.
+ * 
+ * Returns
+ * {Boolean} true if the object is an array.
+ */
+OpenLayers.Util.isArray = function(a) {
+	return (Object.prototype.toString.call(a) === '[object Array]');
+};
+
 /** 
  * Maintain existing definition of $.
  */
 if(typeof window.$  === "undefined") {
     window.$ = OpenLayers.Util.getElement;
 }
-
-/**
- * APIFunction: extend
- * Copy all properties of a source object to a destination object.  Modifies
- *     the passed in destination object.  Any properties on the source object
- *     that are set to undefined will not be (re)set on the destination object.
- *
- * Parameters:
- * destination - {Object} The object that will be modified
- * source - {Object} The object with properties to be set on the destination
- *
- * Returns:
- * {Object} The destination object.
- */
-OpenLayers.Util.extend = function(destination, source) {
-    destination = destination || {};
-    if(source) {
-        for(var property in source) {
-            var value = source[property];
-            if(value !== undefined) {
-                destination[property] = value;
-            }
-        }
-
-        /**
-         * IE doesn't include the toString property when iterating over an object's
-         * properties with the for(property in object) syntax.  Explicitly check if
-         * the source has its own toString property.
-         */
-
-        /*
-         * FF/Windows < 2.0.0.13 reports "Illegal operation on WrappedNative
-         * prototype object" when calling hawOwnProperty if the source object
-         * is an instance of window.Event.
-         */
-
-        var sourceIsEvt = typeof window.Event == "function"
-                          && source instanceof window.Event;
-
-        if(!sourceIsEvt
-           && source.hasOwnProperty && source.hasOwnProperty('toString')) {
-            destination.toString = source.toString;
-        }
-    }
-    return destination;
-};
-
 
 /** 
  * Function: removeItem
@@ -144,7 +126,7 @@ OpenLayers.Util.clearArray = function(array) {
  * 
  * Parameters:
  * array - {Array}
- * obj - {Object}
+ * obj - {*}
  * 
  * Returns:
  * {Integer} The index at, which the first object was found in the array.
@@ -173,6 +155,7 @@ OpenLayers.Util.indexOf = function(array, obj) {
  * null to an individual parameter will avoid setting the attribute.
  *
  * Parameters:
+ * element - {DOMElement} DOM element to modify.
  * id - {String} The element id attribute to set.
  * px - {<OpenLayers.Pixel>} The left and top style position.
  * sz - {<OpenLayers.Size>}  The width and height style attributes.
@@ -379,7 +362,7 @@ OpenLayers.Util.onImageLoadError = function() {
     this._attempts = (this._attempts) ? (this._attempts + 1) : 1;
     if (this._attempts <= OpenLayers.IMAGE_RELOAD_ATTEMPTS) {
         var urls = this.urls;
-        if (urls && urls instanceof Array && urls.length > 1){
+        if (urls && OpenLayers.Util.isArray(urls) && urls.length > 1){
             var src = this.src.toString();
             var current_url, k;
             for (k = 0; current_url = urls[k]; k++){
@@ -443,6 +426,7 @@ OpenLayers.Util.alphaHack = function() {
 /** 
  * Function: modifyAlphaImageDiv
  * 
+ * Parameters:
  * div - {DOMElement} Div containing Alpha-adjusted Image
  * id - {String}
  * px - {<OpenLayers.Pixel>}
@@ -450,7 +434,7 @@ OpenLayers.Util.alphaHack = function() {
  * imgURL - {String}
  * position - {String}
  * border - {String}
- * sizing {String} 'crop', 'scale', or 'image'. Default is "scale"
+ * sizing - {String} 'crop', 'scale', or 'image'. Default is "scale"
  * opacity - {Float} Fractional value (0.0 - 1.0)
  */ 
 OpenLayers.Util.modifyAlphaImageDiv = function(div, id, px, sz, imgURL, 
@@ -491,6 +475,7 @@ OpenLayers.Util.modifyAlphaImageDiv = function(div, id, px, sz, imgURL,
 /** 
  * Function: createAlphaImageDiv
  * 
+ * Parameters:
  * id - {String}
  * px - {<OpenLayers.Pixel>}
  * sz - {<OpenLayers.Size>}
@@ -709,84 +694,6 @@ OpenLayers.Util.Try = function() {
     return returnValue;
 };
 
-
-/** 
- * Function: getNodes
- * 
- * These could/should be made namespace aware?
- * 
- * Parameters:
- * p - {}
- * tagName - {String}
- * 
- * Returns:
- * {Array}
- */
-OpenLayers.Util.getNodes=function(p, tagName) {
-    var nodes = OpenLayers.Util.Try(
-        function () {
-            return OpenLayers.Util._getNodes(p.documentElement.childNodes,
-                                            tagName);
-        },
-        function () {
-            return OpenLayers.Util._getNodes(p.childNodes, tagName);
-        }
-    );
-    return nodes;
-};
-
-/**
- * Function: _getNodes
- * 
- * Parameters:
- * nodes - {Array}
- * tagName - {String}
- * 
- * Returns:
- * {Array}
- */
-OpenLayers.Util._getNodes=function(nodes, tagName) {
-    var retArray = [];
-    for (var i=0, len=nodes.length; i<len; i++) {
-        if (nodes[i].nodeName==tagName) {
-            retArray.push(nodes[i]);
-        }
-    }
-
-    return retArray;
-};
-
-
-
-/**
- * Function: getTagText
- * 
- * Parameters:
- * parent - {}
- * item - {String}
- * index - {Integer}
- * 
- * Returns:
- * {String}
- */
-OpenLayers.Util.getTagText = function (parent, item, index) {
-    var result = OpenLayers.Util.getNodes(parent, item);
-    if (result && (result.length > 0))
-    {
-        if (!index) {
-            index=0;
-        }
-        if (result[index].childNodes.length > 1) {
-            return result.childNodes[1].nodeValue; 
-        }
-        else if (result[index].childNodes.length == 1) {
-            return result[index].firstChild.nodeValue; 
-        }
-    } else { 
-        return ""; 
-    }
-};
-
 /**
  * Function: getXmlNodeValue
  * 
@@ -871,13 +778,11 @@ OpenLayers.Util.toFloat = function (number, precision) {
     if (precision == null) {
         precision = OpenLayers.Util.DEFAULT_PRECISION;
     }
-    var number;
-    if (precision == 0) {
+    if (typeof number !== "number") {
         number = parseFloat(number);
-    } else {
-        number = parseFloat(parseFloat(number).toPrecision(precision));
     }
-    return number;
+    return precision === 0 ? number :
+                             parseFloat(number.toPrecision(precision));
 };
 
 /**
@@ -892,22 +797,45 @@ OpenLayers.Util.toFloat = function (number, precision) {
 OpenLayers.Util.rad = function(x) {return x*Math.PI/180;};
 
 /**
- * Function: distVincenty
+ * Function: deg
+ *
+ * Parameters:
+ * x - {Float}
+ *
+ * Returns:
+ * {Float}
+ */
+OpenLayers.Util.deg = function(x) {return x*180/Math.PI;};
+
+/**
+ * Property: VincentyConstants
+ * {Object} Constants for Vincenty functions.
+ */
+OpenLayers.Util.VincentyConstants = {
+    a: 6378137,
+    b: 6356752.3142,
+    f: 1/298.257223563
+};
+
+/**
+ * APIFunction: distVincenty
  * Given two objects representing points with geographic coordinates, this
  *     calculates the distance between those points on the surface of an
  *     ellipsoid.
- * 
+ *
  * Parameters:
  * p1 - {<OpenLayers.LonLat>} (or any object with both .lat, .lon properties)
  * p2 - {<OpenLayers.LonLat>} (or any object with both .lat, .lon properties)
- * 
+ *
  * Returns:
  * {Float} The distance (in km) between the two input points as measured on an
  *     ellipsoid.  Note that the input point objects must be in geographic
  *     coordinates (decimal degrees) and the return distance is in kilometers.
  */
-OpenLayers.Util.distVincenty=function(p1, p2) {
-    var a = 6378137, b = 6356752.3142,  f = 1/298.257223563;
+OpenLayers.Util.distVincenty = function(p1, p2) {
+    var ct = OpenLayers.Util.VincentyConstants;
+    var a = ct.a, b = ct.b, f = ct.f;
+
     var L = OpenLayers.Util.rad(p2.lon - p1.lon);
     var U1 = Math.atan((1-f) * Math.tan(OpenLayers.Util.rad(p1.lat)));
     var U2 = Math.atan((1-f) * Math.tan(OpenLayers.Util.rad(p2.lat)));
@@ -946,6 +874,68 @@ OpenLayers.Util.distVincenty=function(p1, p2) {
 };
 
 /**
+ * APIFunction: destinationVincenty
+ * Calculate destination point given start point lat/long (numeric degrees),
+ * bearing (numeric degrees) & distance (in m).
+ * Adapted from Chris Veness work, see
+ * http://www.movable-type.co.uk/scripts/latlong-vincenty-direct.html
+ *
+ * Parameters:
+ * lonlat  - {<OpenLayers.LonLat>} (or any object with both .lat, .lon
+ *     properties) The start point.
+ * brng     - {Float} The bearing (degrees).
+ * dist     - {Float} The ground distance (meters).
+ *
+ * Returns:
+ * {<OpenLayers.LonLat>} The destination point.
+ */
+OpenLayers.Util.destinationVincenty = function(lonlat, brng, dist) {
+    var u = OpenLayers.Util;
+    var ct = u.VincentyConstants;
+    var a = ct.a, b = ct.b, f = ct.f;
+
+    var lon1 = lonlat.lon;
+    var lat1 = lonlat.lat;
+
+    var s = dist;
+    var alpha1 = u.rad(brng);
+    var sinAlpha1 = Math.sin(alpha1);
+    var cosAlpha1 = Math.cos(alpha1);
+
+    var tanU1 = (1-f) * Math.tan(u.rad(lat1));
+    var cosU1 = 1 / Math.sqrt((1 + tanU1*tanU1)), sinU1 = tanU1*cosU1;
+    var sigma1 = Math.atan2(tanU1, cosAlpha1);
+    var sinAlpha = cosU1 * sinAlpha1;
+    var cosSqAlpha = 1 - sinAlpha*sinAlpha;
+    var uSq = cosSqAlpha * (a*a - b*b) / (b*b);
+    var A = 1 + uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)));
+    var B = uSq/1024 * (256+uSq*(-128+uSq*(74-47*uSq)));
+
+    var sigma = s / (b*A), sigmaP = 2*Math.PI;
+    while (Math.abs(sigma-sigmaP) > 1e-12) {
+        var cos2SigmaM = Math.cos(2*sigma1 + sigma);
+        var sinSigma = Math.sin(sigma);
+        var cosSigma = Math.cos(sigma);
+        var deltaSigma = B*sinSigma*(cos2SigmaM+B/4*(cosSigma*(-1+2*cos2SigmaM*cos2SigmaM)-
+            B/6*cos2SigmaM*(-3+4*sinSigma*sinSigma)*(-3+4*cos2SigmaM*cos2SigmaM)));
+        sigmaP = sigma;
+        sigma = s / (b*A) + deltaSigma;
+    }
+
+    var tmp = sinU1*sinSigma - cosU1*cosSigma*cosAlpha1;
+    var lat2 = Math.atan2(sinU1*cosSigma + cosU1*sinSigma*cosAlpha1,
+        (1-f)*Math.sqrt(sinAlpha*sinAlpha + tmp*tmp));
+    var lambda = Math.atan2(sinSigma*sinAlpha1, cosU1*cosSigma - sinU1*sinSigma*cosAlpha1);
+    var C = f/16*cosSqAlpha*(4+f*(4-3*cosSqAlpha));
+    var L = lambda - (1-C) * f * sinAlpha *
+        (sigma + C*sinSigma*(cos2SigmaM+C*cosSigma*(-1+2*cos2SigmaM*cos2SigmaM)));
+
+    var revAz = Math.atan2(sinAlpha, -tmp);  // final bearing
+
+    return new OpenLayers.LonLat(lon1+u.deg(L), u.deg(lat2));
+};
+
+/**
  * Function: getParameters
  * Parse the parameters from a URL or from the current page itself into a 
  *     JavaScript Object. Note that parameter values with commas are separated
@@ -953,14 +943,15 @@ OpenLayers.Util.distVincenty=function(p1, p2) {
  * 
  * Parameters:
  * url - {String} Optional url used to extract the query string.
- *                If null, query string is taken from page location.
+ *                If url is null or is not supplied, query string is taken 
+ *                from the page location.
  * 
  * Returns:
  * {Object} An object of key/value pairs from the query string.
  */
 OpenLayers.Util.getParameters = function(url) {
     // if no url specified, take it from the location bar
-    url = url || window.location.href;
+    url = (url === null || url === undefined) ? window.location.href : url;
 
     //parse out parameters portion of url string
     var paramsString = "";
@@ -976,11 +967,25 @@ OpenLayers.Util.getParameters = function(url) {
     for(var i=0, len=pairs.length; i<len; ++i) {
         var keyValue = pairs[i].split('=');
         if (keyValue[0]) {
-            var key = decodeURIComponent(keyValue[0]);
-            var value = keyValue[1] || ''; //empty string if no value
 
-            //decode individual values (being liberal by replacing "+" with " ")
-            value = decodeURIComponent(value.replace(/\+/g, " ")).split(",");
+            var key = keyValue[0];
+            try {
+                key = decodeURIComponent(key);
+            } catch (err) {
+                key = unescape(key);
+            }
+            
+            // being liberal by replacing "+" with " "
+            var value = (keyValue[1] || '').replace(/\+/g, " ");
+
+            try {
+                value = decodeURIComponent(value);
+            } catch (err) {
+                value = unescape(value);
+            }
+            
+            // follow OGC convention of comma delimited values
+            value = value.split(",");
 
             //if there's only one value, do not return as array                    
             if (value.length == 1) {
@@ -1235,52 +1240,143 @@ OpenLayers.Util.safeStopPropagation = function(evt) {
 };
 
 /**
- * Function: pagePositon
- * Calculates the position of an element on the page. 
+ * Function: pagePosition
+ * Calculates the position of an element on the page (see
+ * http://code.google.com/p/doctype/wiki/ArticlePageOffset)
+ *
+ * OpenLayers.Util.pagePosition is based on Yahoo's getXY method, which is
+ * Copyright (c) 2006, Yahoo! Inc.
+ * All rights reserved.
+ * 
+ * Redistribution and use of this software in source and binary forms, with or
+ * without modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ * * Redistributions of source code must retain the above copyright notice,
+ *   this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * 
+ * * Neither the name of Yahoo! Inc. nor the names of its contributors may be
+ *   used to endorse or promote products derived from this software without
+ *   specific prior written permission of Yahoo! Inc.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  * Parameters:
  * forElement - {DOMElement}
  * 
  * Returns:
- * {Array} two item array, L value then T value.
+ * {Array} two item array, Left value then Top value.
  */
-OpenLayers.Util.pagePosition = function(forElement) {
-    var valueT = 0, valueL = 0;
+OpenLayers.Util.pagePosition =  function(forElement) {
+    // NOTE: If element is hidden (display none or disconnected or any the
+    // ancestors are hidden) we get (0,0) by default but we still do the
+    // accumulation of scroll position.
 
-    var element = forElement;
-    var child = forElement;
-    while(element) {
+    var pos = [0, 0];
+    var viewportElement = OpenLayers.Util.getViewportElement();
+    if (!forElement || forElement == window || forElement == viewportElement) {
+        // viewport is always at 0,0 as that defined the coordinate system for
+        // this function - this avoids special case checks in the code below
+        return pos;
+    }
 
-        if(element == document.body) {
-            if(OpenLayers.Element.getStyle(child, 'position') == 'absolute') {
-                break;
+    // Gecko browsers normally use getBoxObjectFor to calculate the position.
+    // When invoked for an element with an implicit absolute position though it
+    // can be off by one. Therefore the recursive implementation is used in
+    // those (relatively rare) cases.
+    var BUGGY_GECKO_BOX_OBJECT =
+        OpenLayers.IS_GECKO && document.getBoxObjectFor &&
+        OpenLayers.Element.getStyle(forElement, 'position') == 'absolute' &&
+        (forElement.style.top == '' || forElement.style.left == '');
+
+    var parent = null;
+    var box;
+
+    if (forElement.getBoundingClientRect) { // IE
+        box = forElement.getBoundingClientRect();
+        var scrollTop = viewportElement.scrollTop;
+        var scrollLeft = viewportElement.scrollLeft;
+
+        pos[0] = box.left + scrollLeft;
+        pos[1] = box.top + scrollTop;
+
+    } else if (document.getBoxObjectFor && !BUGGY_GECKO_BOX_OBJECT) { // gecko
+        // Gecko ignores the scroll values for ancestors, up to 1.9.  See:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=328881 and
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=330619
+
+        box = document.getBoxObjectFor(forElement);
+        var vpBox = document.getBoxObjectFor(viewportElement);
+        pos[0] = box.screenX - vpBox.screenX;
+        pos[1] = box.screenY - vpBox.screenY;
+
+    } else { // safari/opera
+        pos[0] = forElement.offsetLeft;
+        pos[1] = forElement.offsetTop;
+        parent = forElement.offsetParent;
+        if (parent != forElement) {
+            while (parent) {
+                pos[0] += parent.offsetLeft;
+                pos[1] += parent.offsetTop;
+                parent = parent.offsetParent;
             }
         }
-        
-        valueT += element.offsetTop  || 0;
-        valueL += element.offsetLeft || 0;
 
-        child = element;
-        try {
-            // wrapping this in a try/catch because IE chokes on the offsetParent
-            element = element.offsetParent;
-        } catch(e) {
-            OpenLayers.Console.error(OpenLayers.i18n(
-                                  "pagePositionFailed",{'elemId':element.id}));
-            break;
+        var browser = OpenLayers.BROWSER_NAME;
+
+        // opera & (safari absolute) incorrectly account for body offsetTop
+        if (browser == "opera" || (browser == "safari" &&
+              OpenLayers.Element.getStyle(forElement, 'position') == 'absolute')) {
+            pos[1] -= document.body.offsetTop;
+        }
+
+        // accumulate the scroll positions for everything but the body element
+        parent = forElement.offsetParent;
+        while (parent && parent != document.body) {
+            pos[0] -= parent.scrollLeft;
+            // see https://bugs.opera.com/show_bug.cgi?id=249965
+            if (browser != "opera" || parent.tagName != 'TR') {
+                pos[1] -= parent.scrollTop;
+            }
+            parent = parent.offsetParent;
         }
     }
-
-    element = forElement;
-    while(element) {
-        valueT -= element.scrollTop  || 0;
-        valueL -= element.scrollLeft || 0;
-        element = element.parentNode;
-    }
     
-    return [valueL, valueT];
+    return pos;
 };
 
+/**
+ * Function: getViewportElement
+ * Returns die viewport element of the document. The viewport element is
+ * usually document.documentElement, except in IE,where it is either
+ * document.body or document.documentElement, depending on the document's
+ * compatibility mode (see
+ * http://code.google.com/p/doctype/wiki/ArticleClientViewportElement)
+ */
+OpenLayers.Util.getViewportElement = function() {
+    var viewportElement = arguments.callee.viewportElement;
+    if (viewportElement == undefined) {
+        viewportElement = (OpenLayers.BROWSER_NAME == "msie" &&
+            document.compatMode != 'CSS1Compat') ? document.body :
+            document.documentElement;
+        arguments.callee.viewportElement = viewportElement;
+    }
+    return viewportElement;
+};
 
 /** 
  * Function: isEquivalentUrl
@@ -1440,6 +1536,44 @@ OpenLayers.Util.removeTail = function(url) {
     return head;
 };
 
+/**
+ * Constant: IS_GECKO
+ * {Boolean} True if the userAgent reports the browser to use the Gecko engine
+ */
+OpenLayers.IS_GECKO = (function() {
+    var ua = navigator.userAgent.toLowerCase();
+    return ua.indexOf("webkit") == -1 && ua.indexOf("gecko") != -1;
+})();
+
+/**
+ * Constant: BROWSER_NAME
+ * {String}
+ * A substring of the navigator.userAgent property.  Depending on the userAgent
+ *     property, this will be the empty string or one of the following:
+ *     * "opera" -- Opera
+ *     * "msie"  -- Internet Explorer
+ *     * "safari" -- Safari
+ *     * "firefox" -- Firefox
+ *     * "mozilla" -- Mozilla
+ */
+OpenLayers.BROWSER_NAME = (function() {
+    var name = "";
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf("opera") != -1) {
+        name = "opera";
+    } else if (ua.indexOf("msie") != -1) {
+        name = "msie";
+    } else if (ua.indexOf("safari") != -1) {
+        name = "safari";
+    } else if (ua.indexOf("mozilla") != -1) {
+        if (ua.indexOf("firefox") != -1) {
+            name = "firefox";
+        } else {
+            name = "mozilla";
+        }
+    }
+    return name;
+})();
 
 /**
  * Function: getBrowserName
@@ -1452,36 +1586,16 @@ OpenLayers.Util.removeTail = function(url) {
  *           * 'opera' -- Opera
  *           * 'msie'  -- Internet Explorer
  *           * 'safari' -- Safari
- *           * 'firefox' -- FireFox
+ *           * 'firefox' -- Firefox
  *           * 'mozilla' -- Mozilla
  * 
  *          If we are unable to property identify the browser, we 
  *           return an empty string.
  */
 OpenLayers.Util.getBrowserName = function() {
-    var browserName = "";
-    
-    var ua = navigator.userAgent.toLowerCase();
-    if ( ua.indexOf( "opera" ) != -1 ) {
-        browserName = "opera";
-    } else if ( ua.indexOf( "msie" ) != -1 ) {
-        browserName = "msie";
-    } else if ( ua.indexOf( "safari" ) != -1 ) {
-        browserName = "safari";
-    } else if ( ua.indexOf( "mozilla" ) != -1 ) {
-        if ( ua.indexOf( "firefox" ) != -1 ) {
-            browserName = "firefox";
-        } else {
-            browserName = "mozilla";
-        }
-    }
-    
-    return browserName;
+    return OpenLayers.BROWSER_NAME;
 };
 
-
-
-    
 /**
  * Method: getRenderedDimensions
  * Renders the contentHTML offscreen to determine actual dimensions for
@@ -1496,6 +1610,8 @@ OpenLayers.Util.getBrowserName = function() {
  *     useful in the case where we have a limit in one dimension and must 
  *     therefore meaure the flow in the other dimension.
  * options - {Object}
+ *
+ * Allowed Options:
  *     displayClass - {String} Optional parameter.  A CSS class name(s) string
  *         to provide the CSS context of the rendered content.
  *     containerElement - {DOMElement} Optional parameter. Insert the HTML to 
@@ -1672,7 +1788,10 @@ OpenLayers.Util.getFormattedLonLat = function(coordinate, axis, dmsOption) {
     if (!dmsOption) {
         dmsOption = 'dms';    //default to show degree, minutes, seconds
     }
-    var abscoordinate = Math.abs(coordinate)
+	
+	coordinate = (coordinate+540)%360 - 180; // normalize for sphere being round
+	
+    var abscoordinate = Math.abs(coordinate);
     var coordinatedegrees = Math.floor(abscoordinate);
 
     var coordinateminutes = (abscoordinate - coordinatedegrees)/(1/60);
@@ -1682,10 +1801,19 @@ OpenLayers.Util.getFormattedLonLat = function(coordinate, axis, dmsOption) {
     coordinateseconds =  Math.round(coordinateseconds*10);
     coordinateseconds /= 10;
 
+    if( coordinateseconds >= 60) { 
+        coordinateseconds -= 60; 
+        coordinateminutes += 1; 
+        if( coordinateminutes >= 60) { 
+            coordinateminutes -= 60; 
+            coordinatedegrees += 1; 
+        } 
+    }
+    
     if( coordinatedegrees < 10 ) {
         coordinatedegrees = "0" + coordinatedegrees;
     }
-    var str = coordinatedegrees + " ";  //get degree symbol here somehow for SVG/VML labelling
+    var str = coordinatedegrees + "\u00B0";
 
     if (dmsOption.indexOf('dm') >= 0) {
         if( coordinateminutes < 10 ) {

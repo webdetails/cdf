@@ -1,6 +1,11 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
+
+/**
+ * @requires OpenLayers/BaseTypes/Class.js
+ */
 
 /**
  * Class: OpenLayers.Protocol
@@ -57,19 +62,17 @@ OpenLayers.Protocol = OpenLayers.Class({
      * filter - {OpenLayers.Filter}
      */
     mergeWithDefaultFilter: function(filter) {
-        if(filter) {
-            if(this.defaultFilter) {
-                filter = new OpenLayers.Filter.Logical({
-                    type: OpenLayers.Filter.Logical.AND,
-                    filters: [this.defaultFilter, filter]
-                });
-            }
+        var merged;
+        if (filter && this.defaultFilter) {
+            merged = new OpenLayers.Filter.Logical({
+                type: OpenLayers.Filter.Logical.AND,
+                filters: [this.defaultFilter, filter]
+            });
         } else {
-            filter = this.defaultFilter;
+            merged = filter || this.defaultFilter || undefined;
         }
-        return filter;
+        return merged;
     },
-
 
     /**
      * APIMethod: destroy
@@ -244,6 +247,12 @@ OpenLayers.Protocol.Response = OpenLayers.Class({
      * Property: priv
      */
     priv: null,
+
+    /**
+     * Property: error
+     * {Object} The error object in case a service exception was encountered.
+     */
+    error: null,
 
     /**
      * Constructor: OpenLayers.Protocol.Response

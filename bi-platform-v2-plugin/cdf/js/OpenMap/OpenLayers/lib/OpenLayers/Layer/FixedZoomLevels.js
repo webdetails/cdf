@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
@@ -286,6 +287,11 @@ OpenLayers.Layer.FixedZoomLevels = OpenLayers.Class({
         var zoom = null;
         if (moZoom != null) {
             zoom = moZoom - this.minZoomLevel;
+            if (this.map.baseLayer !== this) {
+                zoom = this.map.baseLayer.getZoomForResolution(
+                    this.getResolutionForZoom(zoom)
+                )
+            }
         }
         return zoom;
     },
@@ -305,6 +311,11 @@ OpenLayers.Layer.FixedZoomLevels = OpenLayers.Class({
         var zoom = null; 
         if (olZoom != null) {
             zoom = olZoom + this.minZoomLevel;
+            if (this.map.baseLayer !== this) {
+                zoom = this.getZoomForResolution(
+                    this.map.baseLayer.getResolutionForZoom(zoom)
+                );
+            }
         }
         return zoom;
     },
