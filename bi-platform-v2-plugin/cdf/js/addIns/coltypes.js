@@ -29,7 +29,7 @@
     
     sumStrArray: function(arr){
       return arr.split(',').reduce(function(prev, curr, index, array){  
-        console.log("Current " + curr +"; prev " +  prev); 
+        Dashboards.log("Current " + curr +"; prev " +  prev); 
         return parseFloat(curr) + (typeof(prev)==='number'?prev:parseFloat(prev));
       });
     },
@@ -71,7 +71,7 @@
     
     sumStrArray: function(arr){
       return arr.split(',').reduce(function(prev, curr, index, array){  
-        console.log("Current " + curr +"; prev " +  prev); 
+        Dashboards.log("Current " + curr +"; prev " +  prev); 
         return parseFloat(curr) + (typeof(prev)==='number'?prev:parseFloat(prev));
       });
     },
@@ -183,7 +183,7 @@
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
       qualityClass = opt.good ? "good" : "bad",
-      trendClass =  st.value < 0 ? "down" : "up";
+      trendClass =  st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up";
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();

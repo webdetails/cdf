@@ -7,6 +7,11 @@
 .trend.up.good {
   background: url("img/up-good.png");
 }
+
+.trend.neutral {
+  background: url("img/neutral.png");
+}
+
 .trend.down.good {
   background: url("img/down-good.png");
 }
