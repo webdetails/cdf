@@ -2280,7 +2280,7 @@ var QueryComponent = BaseComponent.extend({
         values = changedValues;
         // (Call this again after postFetch)
         if (object.resultvar != undefined){
-          Dashboards.setParameter(object.resultvar, object.result);
+          Dashboards.setParameter(object.resultvar, values);
         }
 
       }
