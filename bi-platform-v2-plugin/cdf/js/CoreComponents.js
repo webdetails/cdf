@@ -2264,25 +2264,23 @@ var QueryComponent = BaseComponent.extend({
     query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
-      object.result = values.resultset != undefined ? values.resultset: values;
-      if (typeof values.resultset != "undefined"){
-        object.metadata = values.metadata;
-        object.queryInfo = values.queryInfo;
-      }
-      if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
-      }
+
       changedValues = undefined;
       if((typeof(object.postFetch)=='function')){
         changedValues = object.postFetch(values);
       }
       if (changedValues != undefined){
         values = changedValues;
-        // (Call this again after postFetch)
-        if (object.resultvar != undefined){
-          Dashboards.setParameter(object.resultvar, values);
-        }
 
+      }
+
+      if (object.resultvar != undefined){
+        Dashboards.setParameter(object.resultvar, object.result);
+      }
+      object.result = values.resultset != undefined ? values.resultset: values;
+      if (typeof values.resultset != "undefined"){
+        object.metadata = values.metadata;
+        object.queryInfo = values.queryInfo;
       }
     });
 
