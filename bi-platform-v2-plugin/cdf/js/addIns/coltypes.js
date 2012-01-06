@@ -158,15 +158,17 @@
       cell.empty(); 
       var ph =$("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
       var wtmp = opt.widthRatio * ph.width();
-      var htmp = opt.height;      
-      
+      var htmp = opt.height;       
+    
       var leftVal  = Math.min(val,0),
           rightVal = Math.max(val,0);
-      var paperSize = Math.min(rightVal,max) - min;
 
-      var xx = pv.Scale.linear(0,maxTotal).range(0,wtmp);               
-      var paper = Raphael(ph.get(0), Math.max(xx(paperSize),1) , htmp);
-      var c = paper.rect(xx(leftVal-min), 0, xx(rightVal - leftVal), htmp);
+      var xx = pv.Scale.linear(min,max).range(0,wtmp); 
+      
+      var paperSize = xx(Math.min(rightVal,max)) - xx(min);
+      paperSize = (paperSize>1)?paperSize:1;
+      var paper = Raphael(ph.get(0), paperSize , htmp);
+      var c = paper.rect(xx(leftVal), 0, xx(rightVal)-xx(leftVal), htmp);
     
       c.attr({
         fill: opt.backgroundImage?"url('"+opt.backgroundImage+"')":"90-"+opt.startColor + "-" + opt.endColor,
