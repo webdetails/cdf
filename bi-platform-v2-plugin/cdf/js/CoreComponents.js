@@ -2251,13 +2251,13 @@ var QueryComponent = BaseComponent.extend({
   visible: false,
   update : function() {
     QueryComponent.makeQuery(this);
-  }
-},
+  },
   warnOnce: function() {
   Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
     "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" + 
     " for more information");
     delete(this.warnOnce);
+  }
 },
 {
   makeQuery: function(object){
