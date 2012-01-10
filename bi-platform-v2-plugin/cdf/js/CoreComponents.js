@@ -1585,12 +1585,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       Dashboards.fireChange(myself.parameter,value);
     } : undefined;
     
-    var selected
+    //TODO:typo on minTextLength
+    if(this.minTextLenght == undefined){
+      this.minTextLenght = 0;
+    }
     
     var opt = {
       list: function(){
         var val = myself.textbox.val();
-        
         if(val.length >= myself.minTextLenght &&
            !(val == '' //nothing to search
              ||
