@@ -1040,7 +1040,7 @@
     // This is accessible as $(foo).simpledraw()
 
     if ($.browser.msie && !document.namespaces.v) {
-        document.namespaces.add('v', 'urn:schemas-microsoft-com:vml');
+        document.namespaces.add('v', 'urn:schemas-microsoft-com:vml', '#default#VML');
     }
 
     if ($.browser.hasCanvas === undefined) {
