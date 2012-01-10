@@ -177,7 +177,8 @@
       });
 
       if(opt.includeValue) {
-        ph.append("<span class='value'>" + opt.valueFormat(st.value, st.colFormat, st) + "</span>" );
+        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st));
+        valph.appendTo(ph);
       }
     }
   };
