@@ -43,6 +43,8 @@ if ( typeof Date.now !== 'function' ) {
   Date.now = function () { return new Date() * 1; };
 }
 
+//create namespace before sparkline has a chance
+  if ( !document.namespaces.v ) { document.namespaces.add( 'v', 'urn:schemas-microsoft-com:vml' ); }
 
 var vml = {
 

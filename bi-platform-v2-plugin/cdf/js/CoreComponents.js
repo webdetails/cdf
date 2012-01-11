@@ -1585,12 +1585,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       Dashboards.fireChange(myself.parameter,value);
     } : undefined;
     
-    var selected
+    //TODO:typo on minTextLength
+    if(this.minTextLenght == undefined){
+      this.minTextLenght = 0;
+    }
     
     var opt = {
       list: function(){
         var val = myself.textbox.val();
-        
         if(val.length >= myself.minTextLenght &&
            !(val == '' //nothing to search
              ||
@@ -2251,10 +2253,18 @@ var QueryComponent = BaseComponent.extend({
   visible: false,
   update : function() {
     QueryComponent.makeQuery(this);
+  },
+  warnOnce: function() {
+  Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
+    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" + 
+    " for more information");
+    delete(this.warnOnce);
   }
 },
 {
   makeQuery: function(object){
+
+    if (this.warnOnce) {this.warnOnce();}
     var cd = object.queryDefinition;
     if (cd == undefined){
      Dashboards.log("Fatal - No query definition passed","error");
@@ -2266,6 +2276,9 @@ var QueryComponent = BaseComponent.extend({
       // depending on whether we're using CDA
 
       changedValues = undefined;
+      object.metadata = values.metadata;
+      object.result = values.resultset != undefined ? values.resultset: values;
+      object.queryInfo = values.queryInfo;
       if((typeof(object.postFetch)=='function')){
         changedValues = object.postFetch(values);
       }
