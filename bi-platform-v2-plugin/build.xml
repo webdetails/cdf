@@ -73,8 +73,8 @@
 
 	  <property name="plugin.local.install.solutions.dir" value="../solution" /> 
 
-	  <target name="dist" depends="resolve,jar,dist-plugin,dist-solution,dist-samples"/>
-	  <target name="dist-compile" depends="jar,dist-plugin"/>
+	  <target name="dist" depends="clean-dist,resolve,jar,dist-plugin,dist-solution,dist-samples"/>
+	  <target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
 
 	  <property name="plugin.artifact.id" value="${plugin.name}"/>
 	  <property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
@@ -102,9 +102,10 @@
 				   <include name="${ivy.artifact.id}-${project.revision}.jar" />
 			   </fileset>
 			   <fileset dir="${devlib.dir}">
-				   <include name="jxl.jar" />
+				   <include name="*.jar" />
 			   </fileset>
 		   </copy>
+                   
 
 		   <!-- Copy the plugin.xml and any other files from the resource dir -->
 		   <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
@@ -128,6 +129,13 @@
 				   <include name="**/*" />
 			   </fileset>
 		   </copy>
+
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.version}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.version}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0" value="Version ${project.version}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0" value="Version ${project.version}"/> 
+
+
 
 		   <!-- create a zip file -->
 		   <zip zipfile="${dist.dir}/${plugin.zipfile}"
@@ -303,4 +311,7 @@
 		  </sequential>
 	  </for>
   </target>
+  
+  
+  
 </project>
