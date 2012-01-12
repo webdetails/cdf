@@ -43,8 +43,9 @@ if ( typeof Date.now !== 'function' ) {
   Date.now = function () { return new Date() * 1; };
 }
 
-//create namespace before sparkline has a chance
-  if ( !document.namespaces.v ) { document.namespaces.add( 'v', 'urn:schemas-microsoft-com:vml' ); }
+// TODO - may be removed this if sparkline compatibility issue is solved
+// Create namespace before sparkline has a chance
+if ( !document.namespaces.v ) { document.namespaces.add( 'v', 'urn:schemas-microsoft-com:vml' ); }
 
 var vml = {
 
@@ -844,7 +845,7 @@ pv.listen = function(target, type, listener) {
 
 pv.VmlScene.dispatch = pv.listener(function(e) {
   var t = e.target.$scene;
-  if ( t && pv.Mark.dispatch(e.type, t.scenes, t.index) ) {
+  if ( t && pv.Mark.dispatch(e.type, t.scenes, t.index, e) ) {
     e.preventDefault();
   }
 });
