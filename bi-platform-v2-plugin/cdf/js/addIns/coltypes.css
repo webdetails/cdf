@@ -12,6 +12,9 @@
   background: url("img/neutral.png");
 }
 
+.trend.invalid {
+}
+
 .trend.down.good {
   background: url("img/down-good.png");
 }

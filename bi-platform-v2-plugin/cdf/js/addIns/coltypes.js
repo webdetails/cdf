@@ -201,8 +201,14 @@
     },
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
-      qualityClass = opt.good ? "good" : "bad",
-      trendClass =  st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up";
+        qualityClass = opt.good ? "good" : "bad",
+        /* Anything that's not numeric is an invalid value.
+         * We consider "numeric" to mean either a number,
+         * or a string that is a fixed point for conversion
+         * to number and back to string.
+         */
+        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() == st.value),
+        trendClass = !isNumeric ? "invalid": (st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up");
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();
