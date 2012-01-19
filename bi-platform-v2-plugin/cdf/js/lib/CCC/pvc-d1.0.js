@@ -393,7 +393,7 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
  * */
 pv.Mark.prototype.addMargin = function(name, margin) {
     if(margin != 0){
-        var staticValue = pvc.nullTo(this.getStaticPropertyValue(name), 0); 
+        var staticValue = pvc.nullTo(this.getStaticPropertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
         this[name](function(){
@@ -2419,7 +2419,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     this.pvPanel = this._parent.getPvPanel().add(this.type)
         .width(this.width)
-        .height(this.height)    
+        .height(this.height);
 
     //********** Markers and Lines ***************************
 
@@ -2451,10 +2451,10 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     
     var computeTextStyle = function(idx){
       if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
-        return "black"
+        return "black";
       }
       else{
-        return "#ccc"
+        return "#ccc";
       }
     };
 
@@ -2922,21 +2922,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.max = this.basePanel.width;
             }
         } else {   // !orthoAxis (so normal ordinal axis)
-            var secondXAxisSize = 0,
-                secondYAxisSize = 0,
-                isX = this.isOrientationVertical();
-            
-            if(!bypassAxis){
-                if(isX){
-                    secondYAxisSize = o.secondAxisSize;
-                } else {
-                    secondXAxisSize = o.secondAxisSize;
-                }
-            }
-            
-            var rSize = isX ? this.basePanel.width : this.basePanel.height;
+            var isX = this.isOrientationVertical(),
+                rSize = isX ? this.basePanel.width : this.basePanel.height;
 
             if (isX){
+                var secondYAxisSize = bypassAxis ? 0 : o.secondAxisSize;
                 if(o.yAxisPosition == "left"){
                     scale.min = yAxisSize;
                     scale.max = rSize - secondYAxisSize;
@@ -2945,7 +2935,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                     scale.max = rSize - yAxisSize;
                 }
             } else {
-                scale.min = secondYAxisSize;
+                var secondXAxisSize = bypassAxis ? 0 : o.secondAxisSize;
+                scale.min = 0;
                 scale.max = rSize - xAxisSize - secondXAxisSize;
             }
         }  // end else-part -- if (orthoAxis)
@@ -3048,21 +3039,21 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // but titles and legends already have been...
         var rSize = isX ? this.basePanel.width : this.basePanel.height;
         if(isX){
-            var yAxisSize = bypassAxis ? 0 : o.yAxisSize;
-            
+            var yAxisSize = bypassAxis ? 0 : o.yAxisSize,
+                secondYAxisSize = bypassAxis ? 0 : o.secondAxisSize;
             if(o.yAxisPosition == "left"){
                 scale.min = yAxisSize;
-                scale.max = rSize;
+                scale.max = rSize - secondYAxisSize;
             } else {
-                scale.min = 0;
-                scale.max = rSize - yAxisSize;    
+                scale.min = secondYAxisSize;
+                scale.max = rSize - yAxisSize;
             }
 
         } else {
-            var xAxisSize = bypassAxis ? 0 : o.xAxisSize;
-            
+            var xAxisSize = bypassAxis ? 0 : o.xAxisSize,
+                secondXAxisSize = bypassAxis ? 0 : o.secondAxisSize;
             scale.min = 0;
-            scale.max = rSize - xAxisSize;
+            scale.max = rSize - xAxisSize - secondXAxisSize;
         }
 
         scale.range(scale.min, scale.max);
@@ -3089,9 +3080,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // Adding a small offset to the scale's domain:
         var dMin = parser.parse(categories[0]),
             dMax = parser.parse(categories[categories.length - 1]),
-            dOffset = (dMax.getTime() - dMin.getTime()) * o.axisOffset;
+            dOffset = 0;
         
-        dOffset = bypassOffset ? 0 : dOffset;
+        if(!bypassOffset){
+            dOffset = (dMax.getTime() - dMin.getTime()) * o.axisOffset;
+        }
 
         var scale = new pv.Scale.linear(
                                 new Date(dMin.getTime() - dOffset),
@@ -3105,19 +3098,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 isX ? o.xAxisDesiredTickCount : o.yAxisDesiredTickCount);
         
         // RANGE
-        var yAxisSize = bypassAxis ? 0 : o.yAxisSize,
-            xAxisSize = bypassAxis ? 0 : o.xAxisSize,
-            secondXAxisSize = 0, 
-            secondYAxisSize = 0,
-            rSize = isX ? this.basePanel.width : this.basePanel.height;
+        var rSize = isX ? this.basePanel.width : this.basePanel.height;
         
         if(isX){
-            secondXAxisSize = bypassAxis ? 0 : o.secondAxisSize;
-        } else {
-            secondYAxisSize = bypassAxis ? 0 : o.secondAxisSize;
-        }
-        
-        if(isX){
+            var yAxisSize = bypassAxis ? 0 : o.yAxisSize,
+                secondYAxisSize = bypassAxis ? 0 : o.secondAxisSize;
             if(o.yAxisPosition == "left"){
                 scale.min = yAxisSize;
                 scale.max = rSize - secondYAxisSize;
@@ -3126,6 +3111,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.max = rSize - yAxisSize;
             }
         } else {
+            var xAxisSize = bypassAxis ? 0 : o.xAxisSize,
+                secondXAxisSize = bypassAxis ? 0 : o.secondAxisSize;
             scale.min = 0;
             scale.max = rSize - xAxisSize - secondXAxisSize;
         }
@@ -3499,6 +3486,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
 
     renderLinearAxis: function(){
+        // NOTE: Includes time series, 
+        // so "d" may be a number or a Date object...
         
         var scale  = this.pvScale,
             ticks  = pvc.scaleTicks(
@@ -3515,7 +3504,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var pvTicks = this.pvTicks = this.pvRule.add(pv.Rule)
         	.zOrder(20)
             .data(ticks)
-            //[anchorOpposite ](0) // Inherited from pvRule
+            // [anchorOpposite ](0) // Inherited from pvRule
             [anchorLength     ](null)
             [anchorOrtho      ](scale)
             [anchorOrthoLength](this.tickLength)
@@ -3528,7 +3517,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 //.data(ticks)  // ~ inherited
                 //[anchorOpposite   ](0)   // Inherited from pvRule
                 //[anchorLength     ](null)  // Inherited from pvTicks
-                [anchorOrtho      ](function(d){ return scale(d + tickStep / 2); })
+                [anchorOrtho      ](function(d){ 
+                    return scale((+d) + (tickStep / 2)); // NOTE: (+d) converts Dates to numbers, just like d.getTime()
+                })
                 [anchorOrthoLength](this.tickLength / 2)
                 .visible(function(){
                     return (!pvTicks.scene || pvTicks.scene[this.index].visible) &&
