@@ -513,15 +513,15 @@ pvc.DataEngine = Base.extend({
     secondAxis: false, // Do we have double axis?
     secondAxisIdx: 0,
     
+    isMultiValued: false,
+    valuesIndexes: null,
+    
+    // Cache
     visibleCategoriesIndexes: undefined,
     visibleCategories: undefined,
     visibleSeriesIndexes: undefined,
     visibleSeries: undefined,
     
-    //neu
-    isMultiValued: false,
-    valuesIndexes: null,
-
     constructor: function(chart){
 
         this.chart = chart;
@@ -3541,7 +3541,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Now do the full grids
         if(this.fullGrid){
             // Grid rules are visible (only) on MAJOR ticks,
-            // except on the first tick and the last tick.
+            // except on the first tick.
+            // When EndLine is active it is drawn above the last grid line.
             var ruleLength = this._parent[anchorOrthoLength] - 
                              this[anchorOrthoLength];
             
@@ -3554,7 +3555,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorOrtho      ](scale)
                 [anchorOrthoLength]( ruleLength)
                 .visible(function(d){
-                    return (this.index > 0) && (this.index < ticks.length - 1);
+                    return (this.index > 0);
                 });
         }
     },
