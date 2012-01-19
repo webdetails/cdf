@@ -43,6 +43,9 @@ if ( typeof Date.now !== 'function' ) {
   Date.now = function () { return new Date() * 1; };
 }
 
+// TODO - may be removed this if sparkline compatibility issue is solved
+// Create namespace before sparkline has a chance
+if ( !document.namespaces.v ) { document.namespaces.add( 'v', 'urn:schemas-microsoft-com:vml' ); }
 
 var vml = {
 
@@ -285,7 +288,7 @@ var vml = {
     else {
       fill.on = 'true';
       fill.color = vml.color( attr.fill );
-      fill.opacity = parseFloat( attr['fill-opacity'] || '1' ) || '1';
+      fill.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
     }
   },
 
@@ -303,7 +306,7 @@ var vml = {
       stroke.on = 'true';
       stroke.weight = parseFloat( attr['stroke-width'] || '1' ) / 1.25;
       stroke.color = vml.color( attr.stroke ) || 'black';
-      stroke.opacity = parseFloat( attr['stroke-opacity'] || '1' ) || '1';
+      stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
       stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
     }
   },
