@@ -213,7 +213,7 @@
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();
       if(opt.includeValue) {
-        ph.append(opt.valueFormat(st.value, st.colFormat, st));
+        ph.append("<div>"+opt.valueFormat(st.value, st.colFormat, st) + "</div>");
       }
       ph.append(trend);
     }
