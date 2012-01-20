@@ -513,15 +513,15 @@ pvc.DataEngine = Base.extend({
     secondAxis: false, // Do we have double axis?
     secondAxisIdx: 0,
     
-    isMultiValued: false,
-    valuesIndexes: null,
-    
-    // Cache
     visibleCategoriesIndexes: undefined,
     visibleCategories: undefined,
     visibleSeriesIndexes: undefined,
     visibleSeries: undefined,
     
+    //neu
+    isMultiValued: false,
+    valuesIndexes: null,
+
     constructor: function(chart){
 
         this.chart = chart;
@@ -2419,7 +2419,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     this.pvPanel = this._parent.getPvPanel().add(this.type)
         .width(this.width)
-        .height(this.height);
+        .height(this.height)    
 
     //********** Markers and Lines ***************************
 
@@ -2451,10 +2451,10 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     
     var computeTextStyle = function(idx){
       if(myself.chart.dataEngine.isVisible(myself.chart.legendSource,idx)){
-        return "black";
+        return "black"
       }
       else{
-        return "#ccc";
+        return "#ccc"
       }
     };
 
@@ -3544,10 +3544,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 [anchorOpposite   ](-ruleLength)
                 [anchorLength     ](null)
                 [anchorOrtho      ](scale)
-                [anchorOrthoLength]( ruleLength)
-                .visible(function(d){
-                    return (this.index > 0);
-                });
+                [anchorOrthoLength]( ruleLength);
         }
     },
     
@@ -4795,7 +4792,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
           .data(function(d){
                 return myself.chart.dataEngine.getObjectsForSeriesIndex(
                         d, 
-                        this.timeSeries ?
+                        myself.timeSeries ?
                             function(a,b){
                                 return parser.parse(a.category) - 
                                        parser.parse(b.category);
@@ -4804,7 +4801,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
                 })
           .lineWidth(this.showLines?1.5:0.001)
           .segmented(true)
-          .visible(pvc.nonEmpty)
+          .visible(function(d) { return d.value != null; })
           [pvc.BasePanel.relativeAnchor[anchor]](
                 myself.timeSeries ?
                   function(d){ return tScale(parser.parse(d.category)); } :
