@@ -272,7 +272,8 @@ var Dashboards = {
 Dashboards.log = function(m,type){
   if (typeof console != "undefined" ){
     if (type && console[type]) {
-      console[type]("CDF: " + m);
+      console.log("CDF: " + m);
+      //console[type]("CDF: " + m);
     }else if (type === 'exception' &&
       !console.exception) {
       console.error(m.stack);
@@ -618,7 +619,12 @@ Dashboards.getComponent = function(name){
 
 Dashboards.getComponentByName = function(name) {
   if (Dashboards.globalContext) {
+    //ADG
+    try {
     return eval(name);
+    } catch(e){
+      return Dashboards.getComponent(name);
+    }
   } else {
     return Dashboards.getComponent(name);
   }
@@ -1572,8 +1578,14 @@ Query = function() {
         var cd = args[0];
         if (typeof cd.query != 'undefined') {
           // got a valid legacy cd object
-          _mode = 'Legacy';
-          _query = args[0];
+          //all the known legacy types
+          if (cd.queryType == 'mdx' || cd.queryType == 'mql' || cd.queryType == 'mql') {
+            _mode = 'Legacy';
+            _query = args[0];
+          } else {
+            _mode = 'Addin';
+            _query = args[0];
+          }
         } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
           // CDA-style cd object
           _mode = 'CDA';
@@ -1613,26 +1625,25 @@ Query = function() {
     if (typeof _callback != 'function') {
       throw 'QueryNotInitialized';
     }
-    var url;
-    var queryDefinition; 
-    var callback = (outsideCallback ? outsideCallback : _callback);
+    var url, queryDefinition, callback = (outsideCallback ? outsideCallback : _callback);
+    var addIn;
     if (_mode == 'CDA') {
-      url = CDA_PATH;
-      queryDefinition = buildQueryDefinition();
-    // Assemble parameters
-    } else if (_mode == 'Legacy') {
-      queryDefinition = _query;
-      url = LEGACY_QUERY_PATH;
-    }
-    $.post(url, queryDefinition, function(json) {
-      if(_mode == 'Legacy'){
-        json = eval("(" + json + ")");
+      addIn = Dashboards.getAddIn("Query", "queryType", "cda");      
+    } else {
+      if (_mode == 'Legacy') {
+        addIn = Dashboards.getAddIn("Query", "queryType", "legacy");
+      } else {
+        //can be any type of addin at this point
+        console.log('Addin Query');
+        addIn = Dashboards.getAddIn("Query", "queryType", _query.queryType);
       }
-      _lastResultSet = json;
-      var clone = Dashboards.safeClone(true,{},_lastResultSet);
-      callback(_mode == 'CDA' ? clone : clone.values);
-    });
-  };
+    }
+    
+    //console.log(addIn);
+    var callback = (outsideCallback ? outsideCallback : _callback);
+    addIn.call(document,_query,{callback:callback});
+    //console.log('Dashboards.js doQuery after AddIn call')
+  }
 
   function buildQueryDefinition(overrides) {
     overrides = overrides || {};

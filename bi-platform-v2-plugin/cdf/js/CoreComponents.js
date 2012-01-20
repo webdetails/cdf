@@ -1896,14 +1896,8 @@ var TableComponent = BaseComponent.extend({
       }
 
     };
-    /* We need to make sure we're getting data from the right place,
-     * depending on whether we're using CDA
-     */
-    if (cd.dataAccessId != undefined && json) {
-      dtData.aaData = json.resultset;
-    } else {
-      dtData.aaData = json;
-    }
+    // All Addins should use consistent format with metadata and resultset
+    dtData.aaData = json.resultset || [];
 
     /* If we're doing server-side pagination, we need to set up the server callback
      */
@@ -2271,6 +2265,7 @@ var QueryComponent = BaseComponent.extend({
       return;
     }
     var query = new Query(cd);
+    
     query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
