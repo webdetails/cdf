@@ -1,23 +1,27 @@
-if(!Object.keys) Object.keys = function(o){
- if (o !== Object(o))
-      throw new TypeError('Object.keys called on non-object');
- var ret=[];
- for(var p in o) if(Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
- return ret;
-};
+if(!Object.keys) {
+	Object.keys = function(o){
+		if (o !== Object(o)){
+			throw new TypeError('Object.keys called on non-object');
+		}
+		
+		var ret=[];
+		for(var p in o) 
+			if(Object.prototype.hasOwnProperty.call(o,p)) 
+				ret.push(p);
+		return ret;
+	};
+}
 
 var pvc = {
-
   debug: false
-
 };
 
+// Begin private scope
+(function(){
+    
 /**
- *
  *  Utility function for logging messages to the console
- *
  */
-
 pvc.log = function(m){
 
     if (typeof console != "undefined" && pvc.debug){
@@ -26,11 +30,8 @@ pvc.log = function(m){
 };
 
 /**
- *
  * Evaluates x if it's a function or returns the value otherwise
- *
  */
-
 pvc.ev = function(x){
     return typeof x == "function"?x():x;
 };
@@ -43,11 +44,31 @@ pvc.nonEmpty = function(d){
     return d != null;
 };
 
+pvc.get = function(o, p, dv){
+    var v;
+    return o && (v = o[p]) != null ? v : dv; 
+};
+
+pvc.number = function(d, dv){
+    var v = parseFloat(d);
+    return isNaN(d) ? (dv || 0) : v;
+};
+
+pvc.nullTo = function(v, dv){
+    return v != null ? v : dv;
+};
+
 pvc.padMatrixWithZeros = function(d){
     return d.map(function(v){
         return v.map(function(a){
             return typeof a == "undefined"?0:a;
         });
+    });
+};
+
+pvc.padArrayWithZeros = function(a){
+    return a.map(function(d){
+        return d == null ? 0 : d;
     });
 };
 
@@ -107,6 +128,8 @@ pvc.toArray = function(thing){
 	return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
 };
 
+var arraySlice = pvc.arraySlice = Array.prototype.slice;
+
 /**
  * Creates a color scheme based on the specified colors.
  * The default color scheme is "pv.Colors.category10", 
@@ -133,6 +156,303 @@ pvc.removeTipsyLegends = function(){
         // Do nothing
     }
 };
+
+pvc.compareNatural = function(a, b){
+	return (a < b) ? -1 : ((a > b) ? 1 : 0);
+};
+
+
+/* Protovis Z-Order support */
+
+// Default values
+pv.Mark.prototype._zOrder = 0;
+
+pv.Panel.prototype._hasZOrderChild = false;
+pv.Panel.prototype._needChildSort  = false;
+
+pv.Mark.prototype.zOrder = function(zOrder) {
+    if(!arguments.length){
+        return this._zOrder;
+    }
+    
+    if(this._zOrder !== zOrder){
+        this._zOrder = zOrder;
+        
+        if(this.parent){
+            this.parent._hasZOrderChild = 
+            this.parent._needChildSort  = true;
+        }
+    }
+    
+    return this;
+};
+
+// Copy normal methods' version
+var markRender = pv.Mark.prototype.render,
+    panelAdd   = pv.Panel.prototype.add;
+
+pv.Panel.prototype.add = function(){
+    this._needChildSort = this._needChildSort || this._hasZOrderChild;
+    
+    return panelAdd.apply(this, arraySlice.call(arguments));
+};
+
+pv.Mark.prototype.render = function(){
+    // ensure zOrder is up to date
+    sortChildren.call(this);
+    markRender.apply(this, arraySlice.call(arguments));
+};
+
+function sortChildren(){
+    // Sort children by their Z-Order
+    var children = this.children, L;
+    if(children && (L = children.length)){
+        var needChildSort = this._needChildSort;
+        if(needChildSort){
+            children.sort(function(m1, m2){
+                return pvc.compareNatural(m1._zOrder, m2._zOrder);
+            });
+            
+            this._needChildSort = false;
+        }
+        
+        // Fix childIndex and apply recursively
+        for(var i = 0 ; i < L ; i++){
+            var child = children[i]; 
+            if(needChildSort) { 
+                child.childIndex = i; 
+            }
+            
+            if(child instanceof pv.Panel){
+                sortChildren.call(child);
+            }
+        }
+    }
+}
+
+/* TICKS */
+/**
+ * An alternative implementation of QuantitativeScale#ticks
+ * that ensures that:
+ * (i) the returned ticks include the min. and max. domain values, 
+ * (ii) the scale's domain is extended, 
+ *      when the calculated ticks so demand and
+ * (iii) the resulting ticks are cached.
+ * <br/>
+ * Only scales with numeric domains are treated specially.
+ * The 'syncScale', when not null and falsy, 
+ * makes every case be treated solely by the protovis implementation.
+ * <br /> 
+ * In any case, the default of desiredTickCount is 5
+ * (which is different from that of the protovis implementation).
+ */
+pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
+    /* This implementation uses PROTOVIS's 
+     * implementation of QuantitativeScale#ticks
+     * as a way to not to deal with date scales
+     * and to ensure that its internal field 'tickFormat'
+     * is updated.
+     * 
+     * For the cases when the ticks do not fully enclose the domain,
+     * this implementation copies & adapts PROTOVIS's
+     * implementation, and, unfortunately, 
+     * ends up doing the same work twice.
+     * 
+     * In either case, if the ticks domain is !=
+     * from the scale's domain the later is updated to the former.
+     */
+    if(!desiredTickCount){
+        desiredTickCount = 5;
+    }
+    
+    var ticks,
+        ticksCacheKey = syncScale + "|" + desiredTickCount;
+    if(!forceCalc && 
+       scale._ticksCache && 
+       (ticks = scale._ticksCache[ticksCacheKey])){
+        return ticks;
+    }
+    
+    // Call PROTOVIS implementation
+    var ticks = scale.ticks(desiredTickCount);
+    
+    if(syncScale != null && !syncScale){
+        return ticks;
+    }
+    
+    var T = ticks.length;
+    
+    // Treat only well-formed, finite, numeric domains
+    if(T >= 2 && !(ticks[0] instanceof Date)){
+        // Assume numeric domain
+        
+        // Check if scale's domain is "included" in the ticks domain
+        var doma = scale.domain(),  // "doma/in"
+            domaBeg = doma[0],
+            domaEnd = doma[doma.length - 1],
+            
+            // Is is an ascending or descending scale?
+            // Assuming the scale is monotonic...
+            domaAsc = domaBeg < domaEnd,
+            
+            domaMin = domaAsc ? domaBeg : domaEnd,
+            domaMax = domaAsc ? domaEnd : domaBeg,
+            
+            tickMin = domaAsc ? ticks[0]     : ticks[T - 1],
+            tickMax = domaAsc ? ticks[T - 1] : ticks[0];
+        
+        if((tickMin > domaMin) || (domaMax > tickMax)){
+            // Copied & Adapted PROTOVIS algorithm
+            // To recalculate ticks that include the scale's domain
+            // at both ends.
+            
+            var domaSize  = domaMax - domaMin,
+                // 1, 10, 100, 1000, ...
+                tickStep  = pv.logFloor(domaSize / desiredTickCount, 10),
+                tickCount = (domaSize / tickStep);
+                err = desiredTickCount / tickCount;
+            
+            if      (err <= .15) tickStep *= 10;
+            else if (err <= .35) tickStep *= 5;
+            else if (err <= .75) tickStep *= 2;
+            
+            // NOTE: this is the "BIG" change to
+            //  PROTOVIS's implementation:
+            // ceil  -> floor
+            // floor -> ceil
+            tickMin = Math.floor(domaMin / tickStep) * tickStep;
+            tickMax = Math.ceil (domaMax / tickStep) * tickStep;
+            
+            // Overwrite PROTOVIS ticks
+            ticks = pv.range(tickMin, tickMax + tickStep, tickStep);
+            if(!domaAsc){
+                ticks = ticks.reverse();
+            }
+        }
+        
+        if(tickMin < domaMin || domaMax < tickMax){
+            /* Update the scale to reflect the new domain */
+            if(doma.length !== 2){
+                pvc.log("Ticks forced extending a linear scale's domain, " +
+                        "but it is not possible to update the domain because " + 
+                        "it has '" +  doma.length + "' elements.");
+            } else {
+                pvc.log("Ticks forced extending a linear scale's domain from [" +
+                        [domaMin, domaMax] + "] to [" +
+                        [tickMin, tickMax] + "]");
+                
+                scale.domain(tickMin, tickMax);
+            }
+        } // else === && ===
+    }
+    
+    // Cache ticks
+    (scale._ticksCache || (scale._ticksCache = {}))[ticksCacheKey] = ticks;
+    
+    return ticks;
+};
+
+pvc.roundScaleDomain = function(scale, roundMode, desiredTickCount){
+    // Domain rounding
+    if(roundMode){
+        switch(roundMode){
+            case 'none': 
+                break;
+                
+            case 'nice':
+                scale.nice();
+                break;
+            
+            case 'tick':
+                scale.nice();
+                pvc.scaleTicks(scale, true, desiredTickCount);
+                break;
+                
+            default:
+                pvc.log("Invalid 'roundMode' argument: '" + roundMode + "'.");
+        }
+    }
+};
+
+/* PROPERTIES */
+pv.Mark.prototype.getStaticPropertyValue = function(name) {
+    var properties = this.$properties;
+    for (var i = 0, L = properties.length; i < L; i++) {
+        var property = properties[i]; 
+        if (property.name == name) {
+            return property.value;
+        }
+    }
+    //return undefined;
+};
+  
+/* ANCHORS */
+/*
+ * name = left | right | top | bottom
+ * 
+ * */
+pv.Mark.prototype.addMargin = function(name, margin) {
+    if(margin != 0){
+        var staticValue = pvc.nullTo(this.getStaticPropertyValue(name), 0),
+            fMeasure    = pv.functor(staticValue);
+        
+        this[name](function(){
+            return margin + fMeasure.apply(this, arraySlice.call(arguments));
+        });
+    }
+    
+    return this;
+};
+
+/*
+ * margins = {
+ *      all:
+ *      left:
+ *      right:
+ *      top:
+ *      bottom:
+ * }
+ * */
+pv.Mark.prototype.addMargins = function(margins) {
+    var all = pvc.get(margins, 'all', 0);
+    
+    this.addMargin('left',   pvc.get(margins, 'left',   all));
+    this.addMargin('right',  pvc.get(margins, 'right',  all));
+    this.addMargin('top',    pvc.get(margins, 'top',    all));
+    this.addMargin('bottom', pvc.get(margins, 'bottom', all));
+    
+    return this;
+};
+
+/* BOUNDS */
+pv.Mark.prototype.toScreenTransform = function(){
+    var t = pv.Transform.identity;
+    
+    var parent = this.parent;
+    if(parent){
+        do {
+            t = t.translate(parent.left(), parent.top())
+                 .times(parent.transform());
+        } while ((parent = parent.parent));
+    }
+    
+    return t;
+};
+
+pv.Transform.prototype.transformHPosition = function(left){
+    return this.x + (this.k * left);
+};
+
+pv.Transform.prototype.transformVPosition = function(top){
+    return this.y + (this.k * top);
+};
+
+// width / height
+pv.Transform.prototype.transformLength = function(length){
+    return this.k * length;
+};
+
+})(); // End private scope
 
 /**
  *
@@ -726,7 +1046,11 @@ pvc.DataEngine = Base.extend({
 
         var myself=this;
         var max = pv.max(pv.range(0,this.getCategoriesSize()).map(function(idx){
-            return pv.sum(myself.getVisibleValuesForCategoryIndex(idx).filter(pvc.nonEmpty).map(function(e){return e < 0 ? 0 : e;}));
+            return pv.sum(
+                        myself.getVisibleValuesForCategoryIndex(idx)
+                              .map(function(e){
+                                  return Math.max(0, pvc.number(e));
+                               }));
         }));
         pvc.log("getCategoriesMaxSumOfVisibleSeries: " + max);
         return max;
@@ -1299,587 +1623,661 @@ NoDataException = function() {};
 /**
  * The main component
  */
-
-
 pvc.Base = Base.extend({
 
-    options: {},
-    isPreRendered: false,
-    isAnimating: false,
+	isPreRendered: false,
+	isAnimating:   false,
 
-    // data
-    dataEngine: null,
-    resultset:[],
-    metadata: [],
+	// data
+	dataEngine: null,
+	resultset:  [],
+	metadata:   [],
 
-    // panels
-    basePanel: null,
-    titlePanel: null,
-    legendPanel: null,
+	// panels
+	basePanel:   null,
+	titlePanel:  null,
+	legendPanel: null,
 
-    legendSource: "series",
-    colors: null,
+	legendSource: "series",
+	colors: null,
 
-    // renderCallback
-    renderCallback: undefined,
+	// renderCallback
+	renderCallback: undefined,
 
-    constructor: function(/*options*/){
-        var myself = this;
-        var _defaults = {
-            canvas: null,
-            width: 400,
-            height: 300,
-            originalWidth: 400,
-            originalHeight: 300,
-            crosstabMode: true,
-            seriesInRows: false,
-            animate: true,
+	constructor: function(/* options */) {
+		this.options = {};
 
-            title: null,
-            titlePosition: "top", // options: bottom || left || right
-            titleAlign: "center", // left / right / center
-            legend: false,
-            legendPosition: "bottom",
-            colors: null,
-            
-            /**
-             * s : series
-             * c : category
-             * v : numeric value
-             */
-            tooltipFormat: function(s,c,v){
-                return s+", "+c+":  " + myself.options.valueFormat(v) ;
-            },
+		// Apply options
+		$.extend(this.options, pvc.Base.defaultOptions);
 
-            valueFormat: function(d){
-                return pv.Format.number().fractionDigits(0, 2).format(d);//pv.Format.number().fractionDigits(0, 10).parse(d));
-            },
-            clickable: false,
-            clickAction: function(s, c, v){
-                pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
-            }
+		this.dataEngine = this.createDataEngine();
+	},
 
-        };
-    
-        this.options = {},
+	/**
+	 * Creates an appropriate DataEngine
+	 * @virtual
+	 */
+	createDataEngine: function() {
+		return new pvc.DataEngine(this);
+	},
 
-        // Apply options
-        $.extend(this.options, _defaults);
+	/**
+	 * 
+	 * Building the visualization has 2 stages: First the preRender method
+	 * prepares and builds every object that will be used; Later the render
+	 * method effectively renders.
+	 * 
+	 */
+	preRender: function() {
+		pvc.log("Prerendering in pvc");
 
-        this.dataEngine = this.createDataEngine();
-    },
-    
-    /**
-     * Creates an appropriate DataEngine
-     */
-    createDataEngine: function(){
-        return new pvc.DataEngine(this);
-    },
-    
-    initBasePanel: function(){
-        // Since we don't have a parent panel we need to manually create the points
-        this.basePanel = new pvc.BasePanel(this); // Base panel, no parent
-        this.basePanel.setSize(this.options.width, this.options.height);
-        this.basePanel.create();
-        this.basePanel.getPvPanel().canvas(this.options.canvas);
-    },
+		// Now's as good a time as any to completely clear out all 
+		//  tipsy tooltips
+		pvc.removeTipsyLegends();
+
+		// If we don't have data, we just need to set a "no data" message
+		// and go on with life.
+		if (!this.allowNoData && this.resultset.length === 0) {
+			throw new NoDataException();
+		}
+
+		// Disable animation if browser doesn't support it
+		if (!$.support.svg) {
+			this.options.animate = false;
+		}
+
+		// Getting data engine and initialize the translator
+		this.initDataEngine();
+
+		// Create color schemes
+		this.colors = pvc.createColorScheme(this.options.colors);
+		this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
+
+		this.initBasePanel();
+
+		this.initTitlePanel();
+
+		this.initLegendPanel();
+
+		this.isPreRendered = true;
+	},
+
+	/**
+	 * Initializes the data engine
+	 */
+	initDataEngine: function() {
+		var de = this.dataEngine;
+		
+		de.clearDataCache();
+		de.setData(this.metadata, this.resultset);
+		de.setCrosstabMode(this.options.crosstabMode);
+		de.setSeriesInRows(this.options.seriesInRows);
+		// TODO: new
+		de.setMultiValued(this.options.isMultiValued);
+		
+		// columns where measure values are, for relational data
+		de.setValuesIndexes(this.options.measuresIndexes);
+		
+		de.setDataOptions(this.options.dataOptions);
+		
+		// ---
+		
+		de.createTranslator();
+		
+		if(pvc.debug){ pvc.log(this.dataEngine.getInfo()); }
+	},
 	
-    /**
-     *
-     * Building the visualization has 2 stages: 
-	 * First the preRender method prepares and builds every object that will be used; 
-	 * Later the render method effectively renders.
-     *
-     */
-    preRender: function(){
-        pvc.log("Prerendering in pvc");
+	/**
+	 * Creates and initializes the base (root) panel.
+	 */
+	initBasePanel: function() {
+		// Since we don't have a parent panel 
+		// we need to manually create the points.
+	    this.originalWidth  = this.options.width;
+        this.originalHeight = this.options.height;
         
-        // Now's as good a time as any to completely clear out all tipsy tooltips
-        pvc.removeTipsyLegends();
-		
-        // If we don't have data, we just need to set a "no data" message
-        // and go on with life.
-        if (!this.allowNoData && this.resultset.length === 0) {
-            throw new NoDataException();
-        }
+		this.basePanel = new pvc.BasePanel(this);
+		this.basePanel.setSize(this.options.width, this.options.height);
+		this.basePanel.create();
+		this.basePanel.getPvPanel().canvas(this.options.canvas);
+	},
+	
+	/**
+	 * Creates and initializes the title panel, 
+	 * if the title is specified.
+	 */
+	initTitlePanel: function(){
+		if (this.options.title != null && this.options.title != "") {
+			this.titlePanel = new pvc.TitlePanel(this, {
+				title: 	    this.options.title,
+				anchor: 	this.options.titlePosition,
+				titleSize:  this.options.titleSize,
+				titleAlign: this.options.titleAlign
+			});
 
-        // Disable animation if browser doesn't support it
-        if(!$.support.svg){
-            this.options.animate = false;
-        }
+			this.titlePanel.appendTo(this.basePanel); // Add it
+		}
+	},
+	
+	/**
+	 * Creates and initializes the legend panel, 
+	 * if legend is active.
+	 */
+	initLegendPanel: function(){
+		if (this.options.legend) {
+			this.legendPanel = new pvc.LegendPanel(this, {
+				anchor: this.options.legendPosition,
+				legendSize: this.options.legendSize,
+				align: this.options.legendAlign,
+				minMarginX: this.options.legendMinMarginX,
+				minMarginY: this.options.legendMinMarginY,
+				textMargin: this.options.legendTextMargin,
+				padding: this.options.legendPadding,
+				textAdjust: this.options.legendTextAdjust,
+				shape: this.options.legendShape,
+				markerSize: this.options.legendMarkerSize,
+				drawLine: this.options.legendDrawLine,
+				drawMarker: this.options.legendDrawMarker
+			});
 
-        // Getting data engine and initialize the translator
-        var de = this.dataEngine;
-        de.clearDataCache();
-        de.setData(this.metadata,this.resultset);
-        de.setCrosstabMode(this.options.crosstabMode);
-        de.setSeriesInRows(this.options.seriesInRows);
-        //TODO: new
-        de.setMultiValued(this.options.isMultiValued);
-        de.setValuesIndexes(this.options.measuresIndexes);//columns where measure values are, for relational data
-        de.setDataOptions(this.options.dataOptions);
-        //end
-        de.createTranslator();
+			this.legendPanel.appendTo(this.basePanel); // Add it
+		}
+	},
+	
+	/**
+	 * Render the visualization. If not pre-rendered, do it now.
+	 */
+	render: function(bypassAnimation, rebuild) {
+		try {
+			if (!this.isPreRendered || rebuild) {
+				this.preRender();
+			}
 
-        pvc.log(this.dataEngine.getInfo());
-        
-        // Create color schemes
-        this.colors = pvc.createColorScheme(this.options.colors);
-        this.secondAxisColor = pvc.createColorScheme(this.options.secondAxisColor);
-		
-        // Create the basePanel.
-        this.initBasePanel();
-		
-        // Title
-        if (this.options.title != null && this.options.title != ""){
-            this.titlePanel = new pvc.TitlePanel(this, {
-                title: this.options.title,
-                anchor: this.options.titlePosition,
-                titleSize: this.options.titleSize,
-                titleAlign: this.options.titleAlign
-            });
+			if (this.options.renderCallback) {
+				this.options.renderCallback.call(this);
+			}
 
-            this.titlePanel.appendTo(this.basePanel); // Add it
-        }
+			this.basePanel.getPvPanel().render();
 
-        // Legend
-        if (this.options.legend){
-            this.legendPanel = new pvc.LegendPanel(this, {
-                anchor: this.options.legendPosition,
-                legendSize: this.options.legendSize,
-                align: this.options.legendAlign,
-                minMarginX: this.options.legendMinMarginX,
-                minMarginY: this.options.legendMinMarginY,
-                textMargin: this.options.legendTextMargin,
-                padding: this.options.legendPadding,
-                textAdjust: this.options.legendTextAdjust,
-                shape: this.options.legendShape,
-                markerSize: this.options.legendMarkerSize,
-                drawLine: this.options.legendDrawLine,
-                drawMarker: this.options.legendDrawMarker
-            });
+			if (this.options.animate && !bypassAnimation) {
+				this.isAnimating = true;
+				this.basePanel.getPvPanel()
+				        .transition()
+				        .duration(2000)
+				        .ease("cubic-in-out")
+				        .start();
+			}
+		} catch (e) {
+			if (e instanceof NoDataException) {
 
-            this.legendPanel.appendTo(this.basePanel); // Add it
-        }
+				if (!this.basePanel) {
+					pvc.log("No panel");
+					this.initBasePanel();
+				}
 
-        this.isPreRendered = true;
-    },
-
-    /**
-     *
-     * Render the visualization. If not prerendered, do it now
-     *
-     */
-    render: function(bypassAnimation, rebuild){
-        try {
-            if(!this.isPreRendered || rebuild){
-                this.preRender();
-            }
-
-            if(this.options.renderCallback){
-                this.options.renderCallback.call(this);
-            }
-        
-            this.basePanel.getPvPanel().render();
-    
-            if(this.options.animate && !bypassAnimation){
-                this.isAnimating = true;
-                this.basePanel.getPvPanel().transition()
-                    .duration( 2000)
-                    .ease("cubic-in-out")
-                    .start();
-            }
-        } catch (e) {
-            if(e instanceof NoDataException) {
-
-                if (!this.basePanel) {
-                    pvc.log("No panel");
-                    this.initBasePanel();
-                }
+				pvc.log("creating message");
+				var pvPanel = this.basePanel.getPvPanel(), message = pvPanel
+						.anchor("center").add(pv.Label);
+				message.text("No data found");
+				this.basePanel.extend(message, "noDataMessage_");
+				pvPanel.render();
 				
-                pvc.log("creating message");
-                var pvPanel = this.basePanel.getPvPanel(),
-                    message = pvPanel.anchor("center").add(pv.Label);
-                message.text("No data found");
-                this.basePanel.extend(message, "noDataMessage_");
-                pvPanel.render();
-            } else {
-                // We don't know how to handle this
-                throw e;
-            }
-        }
-    },
+			} else {
+				// We don't know how to handle this
+				throw e;
+			}
+		}
+	},
 
-    /**
-     * Method to set the data to the chart. Expected object is the same as what
-     * comes from the CDA: {metadata: [], resultset: []}
-     */
-    setData: function(data, options){
-        this.setResultset(data.resultset);
-        this.setMetadata(data.metadata);
+	/**
+	 * Method to set the data to the chart. Expected object is the same as what
+	 * comes from the CDA: {metadata: [], resultset: []}
+	 */
+	setData: function(data, options) {
+		this.setResultset(data.resultset);
+		this.setMetadata(data.metadata);
 
-        $.extend(this.options, options);
-    },
+		$.extend(this.options, options);
+	},
 
-    /**
-     * Sets the resultset that will be used to build the chart
-     */
-    setResultset: function(resultset){
-        this.resultset = resultset;
-        if (resultset.length == 0){
-            pvc.log("Warning: Resultset is empty")
-        }
-    },
+	/**
+	 * Sets the resultset that will be used to build the chart
+	 */
+	setResultset: function(resultset) {
+		this.resultset = resultset;
+		if (resultset.length == 0) {
+			pvc.log("Warning: Resultset is empty");
+		}
+	},
 
-    /**
-     * Sets the metadata that, optionally, will give more information for building
-     * the chart
-     */
-    setMetadata: function(metadata){
-        this.metadata = metadata;
-        if (metadata.length == 0){
-            pvc.log("Warning: Metadata is empty")
-        }
-    },
+	/**
+	 * Sets the metadata that, optionally, will give more information for
+	 * building the chart
+	 */
+	setMetadata: function(metadata) {
+		this.metadata = metadata;
+		if (metadata.length == 0) {
+			pvc.log("Warning: Metadata is empty");
+		}
+	},
 
-    /*
-     * Animation
-     */
-    animate: function(start, end){
-        return (!this.options.animate || this.isAnimating) 
-                ? end 
-                : start;
-    },
-    
-    isOrientationVertical: function(orientation){
-        return (orientation || this.options.orientation) === "vertical";
-    },
-    
-    isOrientationHorizontal: function(orientation){
-        return (orientation || this.options.orientation) == "horizontal";
-    }
+	/*
+	 * Animation
+	 */
+	animate: function(start, end) {
+		return (!this.options.animate || this.isAnimating) ? end : start;
+	},
+
+	isOrientationVertical: function(orientation) {
+		return (orientation || this.options.orientation) === "vertical";
+	},
+
+	isOrientationHorizontal: function(orientation) {
+		return (orientation || this.options.orientation) == "horizontal";
+	}
+}, {
+	defaultOptions: {
+		canvas:	null,
+		
+		width: 	400,
+		height: 300,
+		originalWidth: 	400,
+		originalHeight: 300,
+		
+		crosstabMode: true,
+		seriesInRows: false,
+		animate: 	  true,
+		
+		title: null,
+		titlePosition: "top", // options: bottom || left || right
+		titleAlign: "center", // left / right / center
+		
+		legend: false,
+		legendPosition: "bottom",
+		
+		colors: null,
+
+		/**
+		 * Is called like a method of the *panel* and not the chart.
+		 * s: series 
+		 * c: category 
+		 * v: numeric value
+		 */
+		tooltipFormat: function(s, c, v) {
+			return s + ", " + c + ":  " + this.chart.options.valueFormat(v);
+		},
+
+		valueFormat: function(d) {
+			return pv.Format.number().fractionDigits(0, 2).format(d);
+			// pv.Format.number().fractionDigits(0, 10).parse(d));
+		},
+
+		clickable: false,
+
+		clickAction: function(s, c, v) {
+			pvc.log("You clicked on series " + s + ", category " + c
+					+ ", value " + v);
+		}
+	}
 });
 
-
 /**
- *
- * Base panel. A lot of them will exist here, with some common properties.
- * Each class that extends pvc.base will be responsible to know how to use it
- *
+ * 
+ * Base panel. A lot of them will exist here, with some common properties. Each
+ * class that extends pvc.base will be responsible to know how to use it
+ * 
  */
 pvc.BasePanel = Base.extend({
 
-    chart: null,
-    _parent: null,
-    type: pv.Panel, // default one
-    height: null,
-    width: null,
-    anchor: "top",
-    pvPanel: null,
-    fillColor: "red",
-    margins: null,
+	chart: null,
+	_parent: null,
+	type: pv.Panel, // default one
+	height: null,
+	width: null,
+	anchor: "top",
+	pvPanel: null,
+	fillColor: "red",
+	margins: null,
 
-    constructor: function(chart, options){
+	constructor: function(chart, options) {
 
-        this.chart = chart;
-        $.extend(this, options);
+		this.chart = chart;
+		$.extend(this, options);
 
-        this.margins = {
-            top:    0,
-            right:  0,
-            bottom: 0,
-            left:   0
-        };
-    },
+		this.margins = {
+			top: 0,
+			right: 0,
+			bottom: 0,
+			left: 0
+		};
+	},
 
-    create: function(){
+	create: function() {
 
-        if(!this._parent){
-            // Should be created for the vis panel only
-            this.pvPanel = new pv.Panel();
-            this.extend(this.pvPanel, "base_");
-        } else {
-            this.pvPanel = this._parent.pvPanel.add(this.type);
-        }
+		if (!this._parent) {
+			// Should be created for the vis panel only
+			this.pvPanel = new pv.Panel();
+			this.extend(this.pvPanel, "base_");
+		} else {
+			this.pvPanel = this._parent.pvPanel.add(this.type);
+		}
 
-        this.pvPanel
-            .width(this.width)
-            .height(this.height);
-    },
+		this.pvPanel
+		    .width(this.width)
+		    .height(this.height);
+	},
 
-    /*
-     *  Create the panel, appending it to the previous one using a specified anchor.
-     *
-     *  Will:
-     *  1) create the panel.
-     *  2) subtract it's size from the previous panel's size
-     *  3) append it to the previous one in the correct position
-     *
-     */
-    appendTo: function(parent){
+	/**
+	 * Create the panel, appending it to the previous one using
+	 * a specified anchor.
+	 * 
+	 * Will: 1) create the panel. 2) subtract it's size from the
+	 * previous panel's size 3) append it to the previous one in
+	 * the correct position
+	 * 
+	 */
+	appendTo: function(parent) {
 
-        this._parent = parent;
-        this.create();
+		this._parent = parent;
+		this.create();
 
-        // Reduce size and update margins
-        var a  = this.anchor,
-            ao = this.anchorOrtho(),
-            isTopOrBottom = this.isAnchorTopOrBottom(),
-            margins = this._parent.margins;
-		
-        if(isTopOrBottom){
+		// Reduce size and update margins
+		var a = this.anchor, 
+		    ao = this.anchorOrtho(), 
+		    isTopOrBottom = this.isAnchorTopOrBottom(), 
+		    margins = this._parent.margins;
+
+		if (isTopOrBottom) {
             this._parent.height -= this.height;
-        } else {
+		} else {
             this._parent.width -= this.width;
-        }
-    
-        // See where to attach it.
-        this.pvPanel[a ](margins[a ]);
-        this.pvPanel[ao](margins[ao]);
+		}
 
-        // update margins
-        if(isTopOrBottom){
+		// See where to attach it.
+		this.pvPanel[a ](margins[a ]);
+		this.pvPanel[ao](margins[ao]);
+
+		// update margins
+		if (isTopOrBottom) {
             margins[a] += this.height;
-        } else {
+		} else {
             margins[a] += this.width;
+		}
+	},
+    
+	/**
+	 * 
+	 * This is the method to be used for the extension points
+	 * for the specific contents of the chart. already ge a pie
+	 * chart! Goes through the list of options and, if it
+	 * matches the prefix, execute that method on the mark.
+	 * WARNING: It's the user's responsibility to make sure that 
+	 * unexisting methods don't blow this.
+	 * 
+	 */
+	extend: function(mark, prefix) {
+		// if mark is null or undefined, skip
+		if (mark) {
+			var pL = prefix.length, points = this.chart.options.extensionPoints;
+			for ( var p in points) {
+				if (p.indexOf(prefix) === 0) {
+					var m = p.substring(pL);
+					// Distinguish between mark methods and
+					// properties
+					if (typeof mark[m] === "function") {
+						mark[m](points[p]);
+					} else {
+						mark[m] = points[p];
+					}
+				}
+			}
+		}
+	},
+
+	/**
+	 * Sets the size for the panel, for when the parent panel is
+	 * undefined
+	 */
+	setSize: function(w, h) {
+		this.width = w;
+		this.height = h;
+	},
+
+	/**
+	 * Returns the width of the Panel
+	 */
+	getWidth: function() {
+		return this.width;
+	},
+
+	/**
+	 * Returns the height of the Panel
+	 */
+	getHeight: function() {
+		return this.height;
+	},
+
+	/**
+	 * Returns the underlying protovis Panel.
+	 * If 'layer' is specified returns 
+	 * the protovis panel for the specified layer name.
+	 */
+	getPvPanel: function(layer) {
+	    if(!layer){
+	        return this.pvPanel;	        
+	    }
+		
+	    if(!this._parent){
+	        throw new Error("Layers are not possible on a root panel.");
+	    }
+	    
+	    if(!this.pvPanel){
+	        throw new Error(
+	           "Cannot access layer panels without having created the main panel.");
+	    }
+	    
+	    var pvPanel = null;
+	    if(!this._layers){
+	        this._layers = {};
+	    } else {
+	        pvPanel = this._layers[layer];
+	    } 
+
+        if(!pvPanel){
+            pvPanel = this._parent.pvPanel.add(this.type)
+                                .extend(this.pvPanel);
+            
+            this.initLayerPanel(pvPanel, layer);
+            
+            this._layers[layer] = pvPanel;
         }
-    },
-
-
-    /**
-     *
-     * This is the method to be used for the extension points for the specific
-     * contents of the chart.
-     *already ge a pie chart!
-     * Goes through the list of options and, if it matches the prefix, execute that
-     * method on the mark. WARNING: It's user's reponsability to make sure some
-     * unexisting method won't blow this
-     *
-     */
-    extend: function(mark, prefix){
-        // if mark is null or undefined, skip
-        if (mark){
-            var pL = prefix.length,
-                points = this.chart.options.extensionPoints;
-            for (var p in points){
-                if (p.indexOf(prefix) === 0){
-                    var m = p.substring(pL);
-                    // Distinguish between mark methods and properties
-                    if (typeof mark[m] === "function") {
-                        mark[m](points[p]);
-                    } else {
-                        mark[m] = points[p];
-                    }
-                }
-            }
-        }
-    },
-
-    /*
-     * Sets the size for the panel, for when the parent panel is undefined
-     */
-    setSize: function(w, h){
-        this.width  = w;
-        this.height = h;
-    },
-
-    /*
-     * Returns the width of the Panel
-     */
-    getWidth: function(){
-        return this.width;
-    },
-
-    /*
-     * Returns the height of the Panel
-     */
-    getHeight: function(){
-        return this.height;
-    },
-
-    /*
-     * Returns the underlying protovis Panel
-     */
-    getPvPanel: function(){
-        return this.pvPanel;
-    },
+        
+        return pvPanel;
+	},
     
-    /**
-     * Returns true if the anchor is one of the values 'top' or 'bottom'.
-     */
-    isAnchorTopOrBottom: function(anchor){
-        if(!anchor) { anchor = this.anchor; }
-        return anchor === "top" || anchor === "bottom";
-    },
-    
-    anchorOrtho: function(anchor){
-        if(!anchor) { anchor = this.anchor; }
-        return pvc.BasePanel.relativeAnchor[anchor];
-    },
-    
-    anchorOrthoMirror: function(anchor){
-        if(!anchor) { anchor = this.anchor; }
-        return pvc.BasePanel.relativeAnchorMirror[anchor];
-    },
-    
-    anchorOpposite: function(anchor){
-        if(!anchor) { anchor = this.anchor; }
-        return pvc.BasePanel.oppositeAnchor[anchor];
-    },
-    
-    anchorLength: function(anchor){
-        if(!anchor) { anchor = this.anchor; }
-        return pvc.BasePanel.parallelLength[anchor];
-    },
-    
-    anchorOrthoLength: function(anchor){
-        if(!anchor) { anchor = this.anchor; }
-        return pvc.BasePanel.orthogonalLength[anchor];
-    },
-    
-    isOrientationVertical: function(orientation){
-        return this.chart.isOrientationVertical(orientation);
-    },
-    
-    isOrientationHorizontal: function(orientation){
-        return this.chart.isOrientationHorizontal(orientation);
-    }
-},{
-    // Determine what is the associated method to 
-	//  call to position the labels correctly
-    relativeAnchor: {
-        top: "left",
-        bottom: "left",
-        left: "bottom",
-        right: "bottom"
-    },
+	/**
+	 * Initializes a new layer panel.
+	 * @virtual
+	 */
+	initLayerPanel: function(pvPanel, layer){
+	},
+	
+	/**
+	 * Returns true if the anchor is one of the values 'top' or
+	 * 'bottom'.
+	 */
+	isAnchorTopOrBottom: function(anchor) {
+		if (!anchor) {
+			anchor = this.anchor;
+		}
+		return anchor === "top" || anchor === "bottom";
+	},
 
-    relativeAnchorMirror: {
-        top: "right",
-        bottom: "right",
-        left: "top",
-        right: "top"
-    },
+	anchorOrtho: function(anchor) {
+		if (!anchor) {
+			anchor = this.anchor;
+		}
+		return pvc.BasePanel.relativeAnchor[anchor];
+	},
 
-    oppositeAnchor:{
-        top: "bottom",
-        bottom: "top",
-        left: "right",
-        right: "left"
-    },
+	anchorOrthoMirror: function(anchor) {
+		if (!anchor) {
+			anchor = this.anchor;
+		}
+		return pvc.BasePanel.relativeAnchorMirror[anchor];
+	},
 
-    parallelLength:{
-        top: "width",
-        bottom: "width",
-        right: "height",
-        left: "height"
-    },
+	anchorOpposite: function(anchor) {
+		if (!anchor) {
+			anchor = this.anchor;
+		}
+		return pvc.BasePanel.oppositeAnchor[anchor];
+	},
 
-    orthogonalLength:{
-        top: "height",
-        bottom: "height",
-        right: "width",
-        left: "width"
-    }
-})
+	anchorLength: function(anchor) {
+		if (!anchor) {
+			anchor = this.anchor;
+		}
+		return pvc.BasePanel.parallelLength[anchor];
+	},
 
+	anchorOrthoLength: function(anchor) {
+		if (!anchor) {
+			anchor = this.anchor;
+		}
+		return pvc.BasePanel.orthogonalLength[anchor];
+	},
+
+	isOrientationVertical: function(orientation) {
+		return this.chart.isOrientationVertical(orientation);
+	},
+
+	isOrientationHorizontal: function(orientation) {
+		return this.chart.isOrientationHorizontal(orientation);
+	}
+}, {
+	// Determine what is the associated method to
+	// call to position the labels correctly
+	relativeAnchor: {
+		top: "left",
+		bottom: "left",
+		left: "bottom",
+		right: "bottom"
+	},
+
+	relativeAnchorMirror: {
+		top: "right",
+		bottom: "right",
+		left: "top",
+		right: "top"
+	},
+
+	oppositeAnchor: {
+		top: "bottom",
+		bottom: "top",
+		left: "right",
+		right: "left"
+	},
+
+	parallelLength: {
+		top: "width",
+		bottom: "width",
+		right: "height",
+		left: "height"
+	},
+
+	orthogonalLength: {
+		top: "height",
+		bottom: "height",
+		right: "width",
+		left: "width"
+	}
+});
 
 /*
- * Title panel. Generates the title.
- * Specific options are:
- * <i>title</i> - text. Default: null
- * <i>titlePosition</i> - top / bottom / left / right. Default: top
- * <i>titleSize</i> - The size of the title in pixels. Default: 25
- *
+ * Title panel. Generates the title. Specific options are: <i>title</i> - text.
+ * Default: null <i>titlePosition</i> - top / bottom / left / right. Default:
+ * top <i>titleSize</i> - The size of the title in pixels. Default: 25
+ * 
  * Has the following protovis extension points:
- *
- * <i>title_</i> - for the title Panel
- * <i>titleLabel_</i> - for the title Label
+ * 
+ * <i>title_</i> - for the title Panel <i>titleLabel_</i> - for the title
+ * Label
  */
 pvc.TitlePanel = pvc.BasePanel.extend({
-  
-    _parent: null,
-    pvLabel: null,
-    anchor: "top",
-    titlePanel: null,
-    title: null,
-    titleSize: 25,
-    titleAlign: "center",
-    font: "14px sans-serif",
 
-    constructor: function(chart, options){
-        this.base(chart,options);
-    },
+	_parent: null,
+	pvLabel: null,
+	anchor: "top",
+	titlePanel: null,
+	title: null,
+	titleSize: 25,
+	titleAlign: "center",
+	font: "14px sans-serif",
 
-    create: function(){
-        // Size will depend on positioning and font size mainly
-        var isTopOrBottom = this.isAnchorTopOrBottom();
-        if (isTopOrBottom){
-            this.width  = this._parent.width;
-            this.height = this.titleSize;
-        } else{
-            this.height = this._parent.height;
-            this.width  = this.titleSize;
-        }
+	constructor: function(chart, options) {
+		this.base(chart, options);
+	},
 
-        this.pvPanel = this._parent.getPvPanel().add(this.type)
-			.width(this.width)
-			.height(this.height);
+	create: function() {
+		// Size will depend on positioning and font size mainly
+		var isTopOrBottom = this.isAnchorTopOrBottom();
+		if (isTopOrBottom) {
+			this.width = this._parent.width;
+			this.height = this.titleSize;
+		} else {
+			this.height = this._parent.height;
+			this.width = this.titleSize;
+		}
 
-        // Extend title
-        this.extend(this.pvPanel, "title_");
+		this.pvPanel = this._parent.getPvPanel().add(this.type).width(
+				this.width).height(this.height);
 
-        // Label
-        var rotationByAnchor = {
-            top:    0,
-            right:  Math.PI/2,
-            bottom: 0,
-            left:   -Math.PI/2
-        };
-		
-        this.pvLabel = this.pvPanel.add(pv.Label)
-			.text(this.title)
-			.font(this.font)
-			.textAlign("center")
-			.textBaseline("middle")
-			.bottom(this.height/2)
-			.left(this.width/2)
-			.textAngle(rotationByAnchor[this.anchor]);
+		// Extend title
+		this.extend(this.pvPanel, "title_");
 
-        // Cases:
-        if(this.titleAlign == "center"){
-            this.pvLabel
-                .bottom(this.height/2)
-                .left(this.width/2);
-        } else {
+		// Label
+		var rotationByAnchor = {
+			top: 0,
+			right: Math.PI / 2,
+			bottom: 0,
+			left: -Math.PI / 2
+		};
 
-            this.pvLabel.textAlign(this.titleAlign);
+		this.pvLabel = this.pvPanel.add(pv.Label).text(this.title).font(
+				this.font).textAlign("center").textBaseline("middle").bottom(
+				this.height / 2).left(this.width / 2).textAngle(
+				rotationByAnchor[this.anchor]);
 
-            if (isTopOrBottom){
-                this.pvLabel
-                    .bottom(null)
-                    .left(null) // reset
-                    [this.titleAlign](0)
-                    .bottom(this.height/2);
-					
-            } else if (this.anchor == "right") {
-                if(this.titleAlign == "left"){
-                    this.pvLabel.bottom(null).top(0);
-                } else {
-                    this.pvLabel.bottom(0);
-                }
-            } else if (this.anchor == "left"){
-                if(this.titleAlign == "right"){
-                    this.pvLabel.bottom(null).top(0);
-                } else {
-                    this.pvLabel.bottom(0);
-                }
-            }
-        }
+		// Cases:
+		if (this.titleAlign == "center") {
+			this.pvLabel.bottom(this.height / 2).left(this.width / 2);
+		} else {
 
-        // Extend title label
-        this.extend(this.pvLabel, "titleLabel_");
-    }
+			this.pvLabel.textAlign(this.titleAlign);
+
+			if (isTopOrBottom) {
+				this.pvLabel.bottom(null).left(null) // reset
+				[this.titleAlign](0).bottom(this.height / 2);
+
+			} else if (this.anchor == "right") {
+				if (this.titleAlign == "left") {
+					this.pvLabel.bottom(null).top(0);
+				} else {
+					this.pvLabel.bottom(0);
+				}
+			} else if (this.anchor == "left") {
+				if (this.titleAlign == "right") {
+					this.pvLabel.bottom(null).top(0);
+				} else {
+					this.pvLabel.bottom(0);
+				}
+			}
+		}
+
+		// Extend title label
+		this.extend(this.pvLabel, "titleLabel_");
+	}
 });
 /*
  * Legend panel. Generates the legend. Specific options are:
@@ -2244,47 +2642,22 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     yScale: null,
     xScale: null,
 
-    prevMax: null,
-    prevMin: null,
-    
-    defaultOptions: {
-        showAllTimeseries: false, // meaningless here
-        showXScale: true,
-        showYScale: true,
-        yAxisPosition: "left",
-        xAxisPosition: "bottom",
-        yAxisSize: 50,
-        xAxisSize: 50,
-        xAxisFullGrid: false,
-        yAxisFullGrid: false,
-
-        secondAxis: false,
-        secondAxisIdx: -1,
-        secondAxisIndependentScale: false,
-        secondAxisOriginIsZero: true,
-        secondAxisOffset: 0,
-        secondAxisColor: "blue",
-        secondAxisSize: 0, // calculated
-        
-        panelSizeRatio: 1,
-        axisLabelFont: '10px sans-serif',
-        // CvK  added extra parameter for implementation of HeatGrid
-        orthoAxisOrdinal: false
-    // if orientation==vertical then perpendicular-axis is the y-axis
-    //  else perpendicular-axis is the x-axis.
-    },
+    // TODO: DCL - ??
+    //prevMax: null,
+    //prevMin: null,
       
     constructor: function(options){
 
         this.base(options);
 
         // Apply options
-        $.extend(this.options, this.defaultOptions, options);
+        $.extend(this.options, pvc.CategoricalAbstract.defaultOptions, options);
         
-        // Sanitize some options:
+        // Sanitize some options
         if (!this.options.showYScale){
             this.options.yAxisSize = 0;
         }
+        
         if (!this.options.showXScale){
             this.options.xAxisSize = 0;
         }
@@ -2300,10 +2673,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
     preRender: function(){
 
+        // NOTE: creates root BasePanel, 
+        //  and its Title and Legend child panels.
         this.base();
 
         pvc.log("Prerendering in CategoricalAbstract");
         
+        // TODO: DCL - Again??
         // Sanitize some options:
         if (!this.options.showYScale){
             this.options.yAxisSize = 0;
@@ -2312,12 +2688,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         if (!this.options.showXScale){
             this.options.xAxisSize = 0;
         }
-
+        
+        // NOTE: must be evaluated before axis panels' creation
+        //  because getZZZZScale calls assume this (bypassAxis = false)
         this.xScale = this.getXScale();
         this.yScale = this.getYScale();
-        this.secondScale = this.options.secondAxisIndependentScale? 
-            this.getSecondScale(): 
-            this.getLinearScale();
+        this.secondScale = this.getSecondScale();
 
         // Generate X axis
         if(this.options.secondAxis){
@@ -2336,29 +2712,31 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         this.generateYAxis();
     },
 
-
-    /*
-     * Generates the X axis. It's in a separate function to allow overriding this value
+    /**
+     * Generates the X axis. It's in a separate function to allow overriding this value.
      */
     generateXAxis: function(){
-
-        if (this.options.showXScale){
+    	var o = this.options;
+        if (o.showXScale){
             this.xAxisPanel = new pvc.XAxisPanel(this, {
                 ordinal: this.isXAxisOrdinal(),
                 showAllTimeseries: false,
-                anchor: this.options.xAxisPosition,
-                axisSize: this.options.xAxisSize,
-                oppositeAxisSize: this.options.yAxisSize,
-                fullGrid:  this.options.xAxisFullGrid,
+                anchor: o.xAxisPosition,
+                axisSize: o.xAxisSize,
+                fullGrid:  o.xAxisFullGrid,
+                endLine: o.xAxisEndLine,
+                domainRoundMode:  o.xAxisDomainRoundMode,
+                desiredTickCount: o.xAxisDesiredTickCount,
+                minorTicks:  o.xAxisMinorTicks,
                 ordinalElements: this.getAxisOrdinalElements("x"),
                 
-                clickAction: this.options.xAxisClickAction,
-                useCompositeAxis: this.options.useCompositeAxis, 
-                font: this.options.axisLabelFont,
+                clickAction: o.xAxisClickAction,
+                useCompositeAxis: o.useCompositeAxis, 
+                font: o.axisLabelFont,
                 
-                doubleClickAction: this.options.xAxisDoubleClickAction,
-                clickDelay: this.options.axisClickDelay,
-                getLabel: this.options.xAxisGetLabel
+                doubleClickAction: o.xAxisDoubleClickAction,
+                clickDelay: o.axisClickDelay,
+                getLabel: o.xAxisGetLabel
             });
 
             //            this.xAxisPanel.setScale(this.xScale);
@@ -2367,26 +2745,29 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
     },
 
-    /*
-     * Generates the Y axis. It's in a separate function to allow overriding this value
+    /**
+     * Generates the Y axis. It's in a separate function to allow overriding this value.
      */
     generateYAxis: function(){
-
-        if (this.options.showYScale){
+    	var o = this.options;
+        if (o.showYScale){
             this.yAxisPanel = new pvc.YAxisPanel(this, {
                 ordinal: this.isYAxisOrdinal(),
                 showAllTimeseries: false,
-                anchor: this.options.yAxisPosition,
-                axisSize: this.options.yAxisSize,
-                oppositeAxisSize: this.options.xAxisSize,
-                fullGrid:  this.options.yAxisFullGrid,
+                anchor:   o.yAxisPosition,
+                axisSize: o.yAxisSize,
+                fullGrid: o.yAxisFullGrid,
+                endLine:  o.yAxisEndLine,
+                domainRoundMode:  o.yAxisDomainRoundMode,
+                desiredTickCount: o.yAxisDesiredTickCount,
+                minorTicks:       o.yAxisMinorTicks,
                 ordinalElements: this.getAxisOrdinalElements("y"),
-                clickAction: this.options.yAxisClickAction,
-                useCompositeAxis: this.options.useCompositeAxis, 
-                font: this.options.axisLabelFont,
-                doubleClickAction: this.options.yAxisDoubleClickAction,
-                clickDelay: this.options.axisClickDelay,
-                getLabel: this.options.yAxisGetLabel
+                useCompositeAxis: o.useCompositeAxis, 
+                font: o.axisLabelFont,
+                clickAction:       o.yAxisClickAction,
+                doubleClickAction: o.yAxisDoubleClickAction,
+                clickDelay:        o.axisClickDelay,
+                getLabel: o.yAxisGetLabel
             });
 
             this.yAxisPanel.setScale(this.yScale);
@@ -2394,22 +2775,24 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
     },
 
-    /*
-     * Generates the second axis for X, if exists and only for vertical horizontal charts
+    /**
+     * Generates the second axis for X, if exists and only for horizontal charts.
      */
     generateSecondXAxis: function(){
-
-        if(this.options.secondAxisIndependentScale && this.isOrientationHorizontal()){
+    	var o = this.options;
+        if(o.secondAxisIndependentScale && this.isOrientationHorizontal()){
            
             this.secondXAxisPanel = new pvc.SecondXAxisPanel(this, {
                 ordinal: this.isXAxisOrdinal(),
                 showAllTimeseries: false,
-                anchor: pvc.BasePanel.oppositeAnchor[this.options.xAxisPosition],
-                axisSize: this.options.secondAxisSize,
-                oppositeAxisSize: this.options.yAxisSize,
-                fullGrid:  false, // not supported
+                anchor: pvc.BasePanel.oppositeAnchor[o.xAxisPosition],
+                axisSize: o.secondAxisSize,
+                domainRoundMode:  o.secondAxisDomainRoundMode,
+                desiredTickCount: o.secondAxisDesiredTickCount,
+                minorTicks:       o.secondAxisMinorTicks,
+
                 ordinalElements: this.getAxisOrdinalElements("x"),
-                tickColor: this.options.secondAxisColor
+                tickColor: o.secondAxisColor
             });
 
             this.secondXAxisPanel.setScale(this.secondScale);
@@ -2417,23 +2800,24 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
     },
 
-    /*
-     * Generates the second axis for Y, if exists and only for vertical horizontal charts
+    /**
+     * Generates the second axis for Y, if exists and only for vertical charts.
      */
-
     generateSecondYAxis: function(){
-
-        if(this.options.secondAxisIndependentScale && this.isOrientationVertical()){
+    	var o = this.options;
+        if(o.secondAxisIndependentScale && this.isOrientationVertical()){
 
             this.secondYAxisPanel = new pvc.SecondYAxisPanel(this, {
                 ordinal: this.isYAxisOrdinal(),
                 showAllTimeseries: false,
-                anchor: pvc.BasePanel.oppositeAnchor[this.options.yAxisPosition],
-                axisSize: this.options.secondAxisSize,
-                oppositeAxisSize: this.options.xAxisSize,
-                fullGrid:  false, // not supported
+                anchor: pvc.BasePanel.oppositeAnchor[o.yAxisPosition],
+                axisSize: o.secondAxisSize,
+                domainRoundMode:  o.secondAxisDomainRoundMode,
+                desiredTickCount: o.secondAxisDesiredTickCount,
+                minorTicks:       o.secondAxisMinorTicks,
+
                 ordinalElements: this.getAxisOrdinalElements("y"),
-                tickColor: this.options.secondAxisColor
+                tickColor: o.secondAxisColor
             });
 
             this.secondYAxisPanel.setScale(this.secondScale);
@@ -2441,8 +2825,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         }
     },
 
-    /*
-     * Indicates if xx is an ordinal scale
+    /**
+     * Indicates if xx is an ordinal scale.
      */
     isXAxisOrdinal: function(){
         return this.isOrientationVertical()? 
@@ -2450,8 +2834,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.options.orthoAxisOrdinal;
     },
 
-    /*
-     * Indicates if yy is an ordinal scale
+    /**
+     * Indicates if yy is an ordinal scale.
      */
     isYAxisOrdinal: function(){
         return this.isOrientationVertical()? 
@@ -2459,8 +2843,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             !this.options.timeSeries;
     },
 
-    /*
-     *  List of elements to use in the axis ordinal
+    /**
+     *  List of elements to use in the axis ordinal.
      */
     getAxisOrdinalElements: function(axis){
         var onSeries = false;
@@ -2477,13 +2861,14 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
           this.dataEngine.getVisibleCategories();
     },
 
-    /*
-     * xx scale for categorical charts
+    /**
+     * xx scale for categorical charts.
+     * Must be called before axis panels are created (bypassAxis = false).
      */
     getXScale: function(){
         if (this.isOrientationVertical()) {
             return this.options.timeSeries? 
-                this.getTimeseriesScale(false, true): 
+                this.getTimeseriesScale(false, true) : 
                 this.getOrdinalScale();
         }
 
@@ -2492,8 +2877,9 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.getLinearScale(false, true);
     },
 
-    /*
-     * yy scale for categorical charts
+    /**
+     * yy scale for categorical charts.
+     * Must be called before axis panels are created (bypassAxis = false).
      */
     getYScale: function(){
         if (this.isOrientationVertical()) {
@@ -2507,7 +2893,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             this.getOrdinalScale();
     },
 
-    /*
+    /**
      * Helper function to facilitate  (refactoring)
      *     - getOrdinalScale()
      *     - getPerpOrdScale()
@@ -2515,27 +2901,18 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
      */
     getOrdScale: function(bypassAxis, orthoAxis){
 
-        var yAxisSize = bypassAxis ? 0 : this.options.yAxisSize,
-            xAxisSize = bypassAxis ? 0 : this.options.xAxisSize,
-            secondXAxisSize = 0,
-            secondYAxisSize = 0;
-            
-        var isVertical = this.isOrientationVertical();
+        var o = this.options,
+            yAxisSize = bypassAxis ? 0 : o.yAxisSize,
+            xAxisSize = bypassAxis ? 0 : o.xAxisSize;
         
-        var data = orthoAxis ? 
+        // DOMAIN
+        var dData = orthoAxis ? 
                 this.dataEngine.getVisibleSeries(): 
                 this.dataEngine.getVisibleCategories();
-                
-        var scale = new pv.Scale.ordinal(data);
         
-        if(!bypassAxis){
-            if(isVertical){
-                secondYAxisSize = this.options.secondAxisSize;
-            } else {
-                secondXAxisSize = this.options.secondAxisSize;
-            }
-        }
+        var scale = new pv.Scale.ordinal(dData);
         
+        // RANGE
         if (orthoAxis) {   // added by CvK
             if (orthoAxis == "y") {
                 scale.min = 0;
@@ -2545,35 +2922,45 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 scale.max = this.basePanel.width;
             }
         } else {   // !orthoAxis (so normal ordinal axis)
-            var size = isVertical ? this.basePanel.width : this.basePanel.height;
-                
-            if (isVertical && this.options.yAxisPosition == "left"){
-                scale.min = yAxisSize;
-                scale.max = size - secondYAxisSize;
-                
-            } else if (isVertical && this.options.yAxisPosition == "right"){
-                scale.min = secondYAxisSize;
-                scale.max = size - yAxisSize;
-                
+            var isX = this.isOrientationVertical(),
+                rSize = isX ? this.basePanel.width : this.basePanel.height;
+
+            if (isX){
+                var secondYAxisSize = bypassAxis ? 0 : o.secondAxisSize;
+                if(o.yAxisPosition == "left"){
+                    scale.min = yAxisSize;
+                    scale.max = rSize - secondYAxisSize;
+                } else {
+                    scale.min = secondYAxisSize;
+                    scale.max = rSize - yAxisSize;
+                }
             } else {
-                scale.min = secondYAxisSize;
-                scale.max = size - xAxisSize - secondXAxisSize;
+                var secondXAxisSize = bypassAxis ? 0 : o.secondAxisSize;
+                scale.min = 0;
+                scale.max = rSize - xAxisSize - secondXAxisSize;
             }
         }  // end else-part -- if (orthoAxis)
 
-        scale.splitBanded(scale.min, scale.max, this.options.panelSizeRatio);
+        var panelSizeRatio = o.panelSizeRatio;
+        scale.splitBanded(scale.min, scale.max, panelSizeRatio);
+        
+        var range = scale.range(),
+            step  = range.band / panelSizeRatio; // =def (band + margin)
+        
+        range.step   = step;
+        range.margin = step * (1 - panelSizeRatio);
         
         return scale;
     },
 
-    /*
-     * Scale for the ordinal axis. xx if orientation is vertical, yy otherwise
+    /**
+     * Scale for the ordinal axis. xx if orientation is vertical, yy otherwise.
      */
     getOrdinalScale: function(bypassAxis){
         return this.getOrdScale(bypassAxis, null);
     },
     
-    /*
+    /**
      * Scale for the perpendicular ordinal axis.
      *     yy if orientation is vertical,
      *     xx otherwise
@@ -2585,69 +2972,88 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         return this.getOrdScale(false, orthoAxis);
     },
     
-    /**
-     * 
-     */
     getLinearScale: function(bypassAxis, bypassOffset){
 
-        var yAxisSize  = bypassAxis ? 0 : this.options.yAxisSize,
-            xAxisSize  = bypassAxis ? 0 : this.options.xAxisSize,
-            isVertical = this.isOrientationVertical(),
-            size       = isVertical ? this.basePanel.height: this.basePanel.width,
-            max,
-            min;
-
-        if(this.options.stacked){
-            max = this.dataEngine.getCategoriesMaxSumOfVisibleSeries();
-            min = 0;
+        var o   = this.options,
+            isX = this.isOrientationHorizontal(),
+            dMin, // Domain
+            dMax;
+        
+        // DOMAIN
+        if(o.stacked){
+            dMax = this.dataEngine.getCategoriesMaxSumOfVisibleSeries();
+            dMin = 0;
         } else {
-            max = this.dataEngine.getVisibleSeriesAbsoluteMax();
-            min = this.dataEngine.getVisibleSeriesAbsoluteMin();
+            dMax = this.dataEngine.getVisibleSeriesAbsoluteMax();
+            dMin = this.dataEngine.getVisibleSeriesAbsoluteMin();
         }
         
         /* If the bounds are the same, things break,
          * so we add a wee bit of variation.
          */
-        if (min === max) {
-            min = min !== 0 ? min * 0.99 : this.options.originIsZero ? 0 : -0.1;
-            max = max !== 0 ? max * 1.01 : 0.1;
+        if (dMin === dMax) {
+            dMin = dMin !== 0 ? dMin * 0.99 : o.originIsZero ? 0 : -0.1;
+            dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
         }
         
-        if(min * max > 0 && this.options.originIsZero){
-            if(min > 0){
-                min = 0;
+        /* Both negative or both positive */
+        if(dMin * dMax > 0 && o.originIsZero){
+            if(dMin > 0){
+                dMin = 0;
             }else{
-                max = 0;
+                dMax = 0;
             }
         }
 
         // CvK:  added to set bounds
-        var bound = parseFloat(this.options.orthoFixedMin);
+        var bound = parseFloat(o.orthoFixedMin);
         if(!isNaN(bound)){
-            min = bound;
+            dMin = bound;
         }
         
-        bound = parseFloat(this.options.orthoFixedMax);
+        bound = parseFloat(o.orthoFixedMax);
         if(!isNaN(bound)){
-            max = bound;
+            dMax = bound;
         }
 
-        // Adding a small offset to the scale:
-        var offset = (max - min) * this.options.axisOffset;
-        offset = bypassOffset ? 0 : offset;
+        // Adding a small offset to the scale's dMin. and dMax.,
+        //  as long as they are not 0 and originIsZero=true.
+        // DCL: 'axisOffset' is a percentage??
+        var dOffset = (dMax - dMin) * o.axisOffset;
+        dOffset = bypassOffset ? 0 : dOffset;
+        
         var scale = new pv.Scale.linear(
-                        min - (this.options.originIsZero && min == 0 ? 0 : offset),
-                        max + (this.options.originIsZero && max == 0 ? 0 : offset));
+                        dMin - (o.originIsZero && dMin == 0 ? 0 : dOffset),
+                        dMax + (o.originIsZero && dMax == 0 ? 0 : dOffset));
+        
+        // Domain rounding
+        pvc.roundScaleDomain(
+                scale, 
+                isX ? o.xAxisDomainRoundMode  : o.yAxisDomainRoundMode,
+                isX ? o.xAxisDesiredTickCount : o.yAxisDesiredTickCount);
+        
+        // RANGE
+        
+        // NOTE: By the time this is evaluated,
+        // axis panels have not yet been created,
+        // but titles and legends already have been...
+        var rSize = isX ? this.basePanel.width : this.basePanel.height;
+        if(isX){
+            var yAxisSize = bypassAxis ? 0 : o.yAxisSize,
+                secondYAxisSize = bypassAxis ? 0 : o.secondAxisSize;
+            if(o.yAxisPosition == "left"){
+                scale.min = yAxisSize;
+                scale.max = rSize - secondYAxisSize;
+            } else {
+                scale.min = secondYAxisSize;
+                scale.max = rSize - yAxisSize;
+            }
 
-        if(!isVertical && this.options.yAxisPosition == "left"){
-            scale.min = yAxisSize;
-            scale.max = size;
-        } else if(!isVertical && this.options.yAxisPosition == "right"){
-            scale.min = 0;
-            scale.max = size - yAxisSize;
         } else {
+            var xAxisSize = bypassAxis ? 0 : o.xAxisSize,
+                secondXAxisSize = bypassAxis ? 0 : o.secondAxisSize;
             scale.min = 0;
-            scale.max = size - xAxisSize;
+            scale.max = rSize - xAxisSize - secondXAxisSize;
         }
 
         scale.range(scale.min, scale.max);
@@ -2655,101 +3061,117 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         return scale;
     },
 
-    /*
-     * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise
+    /**
+     * Scale for the timeseries axis. xx if orientation is vertical, yy otherwise.
      */
     getTimeseriesScale: function(bypassAxis, bypassOffset){
 
-        var yAxisSize  = bypassAxis ? 0 : this.options.yAxisSize,
-            xAxisSize  = bypassAxis ? 0 : this.options.xAxisSize,
-            isVertical = this.isOrientationVertical(),
-            secondXAxisSize = 0, 
-            secondYAxisSize = 0,
-            size = isVertical ? this.basePanel.width : this.basePanel.height;
+        var o = this.options,
+            isX = this.isOrientationVertical();
         
-        if(isVertical){
-            secondYAxisSize = bypassAxis ? 0 : this.options.secondAxisSize;
-        } else {
-            secondXAxisSize = bypassAxis ? 0 : this.options.secondAxisSize;
-        }
+        // DOMAIN
         
         // TODO - DCLEAO - DataEngine#getCategories already does this...??
-        var parser = pv.Format.date(this.options.timeSeriesFormat),
+        var parser = pv.Format.date(o.timeSeriesFormat),
             categories = this.dataEngine.getVisibleCategories().sort(function(a, b){
                 return parser.parse(a) - parser.parse(b);
             });
         
-        // Adding a small offset to the scale:
-        var min = parser.parse(categories[0]),
-            max = parser.parse(categories[categories.length - 1]),
-            offset = (max.getTime() - min.getTime()) * this.options.axisOffset;
+        // Adding a small offset to the scale's domain:
+        var dMin = parser.parse(categories[0]),
+            dMax = parser.parse(categories[categories.length - 1]),
+            dOffset = 0;
         
-        offset = bypassOffset ? 0 : offset;
-
-        var scale = new pv.Scale.linear(
-                                new Date(min.getTime() - offset),
-                                new Date(max.getTime() + offset));
-
-        if(isVertical && this.options.yAxisPosition == "left"){
-            scale.min = yAxisSize;
-            scale.max = size - secondYAxisSize;
-            
-        } else if(isVertical && this.options.yAxisPosition == "right"){
-            scale.min = secondYAxisSize;
-            scale.max = size - yAxisSize;
-            
-        } else {
-            scale.min = 0;
-            scale.max = size - xAxisSize - secondXAxisSize;
+        if(!bypassOffset){
+            dOffset = (dMax.getTime() - dMin.getTime()) * o.axisOffset;
         }
 
-        scale.range( scale.min , scale.max);
+        var scale = new pv.Scale.linear(
+                                new Date(dMin.getTime() - dOffset),
+                                new Date(dMax.getTime() + dOffset));
+
+        // Domain rounding
+        // TODO: pvc.scaleTicks(scale) does not like Dates...
+        pvc.roundScaleDomain(
+                scale, 
+                isX ? o.xAxisDomainRoundMode  : o.yAxisDomainRoundMode,
+                isX ? o.xAxisDesiredTickCount : o.yAxisDesiredTickCount);
+        
+        // RANGE
+        var rSize = isX ? this.basePanel.width : this.basePanel.height;
+        
+        if(isX){
+            var yAxisSize = bypassAxis ? 0 : o.yAxisSize,
+                secondYAxisSize = bypassAxis ? 0 : o.secondAxisSize;
+            if(o.yAxisPosition == "left"){
+                scale.min = yAxisSize;
+                scale.max = rSize - secondYAxisSize;
+            } else {
+                scale.min = secondYAxisSize;
+                scale.max = rSize - yAxisSize;
+            }
+        } else {
+            var xAxisSize = bypassAxis ? 0 : o.xAxisSize,
+                secondXAxisSize = bypassAxis ? 0 : o.secondAxisSize;
+            scale.min = 0;
+            scale.max = rSize - xAxisSize - secondXAxisSize;
+        }
+
+        scale.range(scale.min , scale.max);
         
         return scale;
     },
 
-    /*
-     * Scale for the linear axis. yy if orientation is vertical, xx otherwise
-     *
+    /**
+     * Scale for the second linear axis. yy if orientation is vertical, xx otherwise.
      */
-    getSecondScale: function(bypassAxis){
+    // NOTE: bypassOffset is not implemented
+    getSecondScale: function(bypassAxis, bypassOffset){
 
-        if(!this.options.secondAxis || !this.options.secondAxisIndependentScale){
-            return this.getLinearScale(bypassAxis);
+        var o = this.options;
+        
+        if(!o.secondAxis || !o.secondAxisIndependentScale){
+            return this.getLinearScale(bypassAxis, bypassOffset);
         }
+        
+        // DOMAIN
+        var dMax = this.dataEngine.getSecondAxisMax(),
+            dMin = this.dataEngine.getSecondAxisMin();
 
-        var yAxisSize = bypassAxis ? 0 : this.options.yAxisSize,
-            xAxisSize = bypassAxis ? 0 : this.options.xAxisSize,
-            isVertical = this.isOrientationVertical(),
-            size = isVertical ? this.basePanel.height : this.basePanel.width,
-            max = this.dataEngine.getSecondAxisMax(),
-            min = this.dataEngine.getSecondAxisMin();
-
-        if(min * max > 0 && this.options.secondAxisOriginIsZero){
-            if(min > 0){
-                min = 0;
+        if(dMin * dMax > 0 && o.secondAxisOriginIsZero){
+            if(dMin > 0){
+                dMin = 0;
             } else {
-                max = 0;
+                dMax = 0;
             }
         }
 
-        // Adding a small offset to the scale:
-        var offset = (max - min) * this.options.secondAxisOffset;
-        var scale = new pv.Scale.linear(
-                        min - (this.options.secondAxisOriginIsZero && min == 0 ? 0 : offset),
-                        max + (this.options.secondAxisOriginIsZero && max == 0 ? 0 : offset));
+        // Adding a small offset to the scale's domain:
+        var dOffset = (dMax - dMin) * o.secondAxisOffset,
+            scale = new pv.Scale.linear(
+                        dMin - (o.secondAxisOriginIsZero && dMin == 0 ? 0 : dOffset),
+                        dMax + (o.secondAxisOriginIsZero && dMax == 0 ? 0 : dOffset));
 
-
-        if(!isVertical && this.options.yAxisPosition == "left"){
-            scale.min = yAxisSize;
-            scale.max = size;
-
-        } else if(!isVertical && this.options.yAxisPosition == "right"){
+        // Domain rounding
+        pvc.roundScaleDomain(scale, o.secondAxisRoundDomain, o.secondAxisDesiredTickCount);
+                
+        // RANGE
+        var yAxisSize = bypassAxis ? 0 : o.yAxisSize,
+            xAxisSize = bypassAxis ? 0 : o.xAxisSize,
+            isX = this.isOrientationHorizontal(),
+            rSize = isX ? this.basePanel.width : this.basePanel.height;
+                
+        if(isX){
+            if(o.yAxisPosition == "left"){
+                scale.min = yAxisSize;
+                scale.max = rSize;
+            } else {
+                scale.min = 0;
+                scale.max = rSize - yAxisSize;
+            }
+        } else {
             scale.min = 0;
-            scale.max = size - yAxisSize;
-        } else{
-            scale.min = 0;
-            scale.max = size - xAxisSize;
+            scale.max = rSize - xAxisSize;
         }
 
         scale.range(scale.min, scale.max);
@@ -2826,93 +3248,173 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             });
     }
 
+}, {
+	defaultOptions: {
+        showAllTimeseries: false, // meaningless here
+        showXScale: true,
+        showYScale: true,
+        
+        xAxisPosition: "bottom",
+        xAxisSize: 50,
+        xAxisFullGrid: false,
+        xAxisEndLine:  false,
+        xAxisDomainRoundMode: 'none',  // for linear scales
+        xAxisDesiredTickCount: null,   // idem
+        xAxisMinorTicks:  true,   // idem
+        
+        yAxisPosition: "left",
+        yAxisSize: 50,
+        yAxisFullGrid: false,
+        yAxisEndLine:  false,
+        yAxisDomainRoundMode: 'none',
+        yAxisDesiredTickCount: null,
+        yAxisMinorTicks:  true,
+        
+        secondAxis: false,
+        secondAxisIdx: -1,
+        secondAxisIndependentScale: false,
+        secondAxisOriginIsZero: true,
+        secondAxisOffset: 0,
+        secondAxisColor: "blue",
+        //secondAxisSize: 0, // calculated
+        secondAxisDomainRoundMode: 'none',  // only with independent second scale
+        secondAxisDesiredTickCount: null,   // idem
+        secondAxisMinorTicks: true,
+        
+        panelSizeRatio: 1,
+        axisLabelFont: '10px sans-serif',
+        
+        // CvK  added extra parameter for implementation of HeatGrid
+        orthoAxisOrdinal: false
+        // if orientation==vertical then perpendicular-axis is the y-axis
+        //  else perpendicular-axis is the x-axis.
+    }
 });
 
 
-/*
+/**
  * AxisPanel panel.
- *
- * 
  */
 pvc.AxisPanel = pvc.BasePanel.extend({
 
     _parent: null,
-    pvRule: null,
-    pvTicks: null,
-    pvLabel: null,
+    
+    pvRule:     null,
+    pvTicks:    null,
+    pvLabel:    null,
     pvRuleGrid: null,
-    pvScale: null,
-
+    pvEndLine:  null,
+    pvScale:    null,
+    
     ordinal: false,
     anchor: "bottom",
     axisSize: 30,
     tickLength: 6,
     tickColor: "#aaa",
-    oppositeAxisSize: 30,
     panelName: "axis", // override
     scale: null,
     fullGrid: false,
+    endLine:  false,
+    
+    // To be used in linear scales
+    domainRoundMode: 'none',
+    desiredTickCount: null,
+    minorTicks:       true,
+    
     ordinalElements: [], // To be used in ordinal scales
-    clickAction: null,//TODO: new
-
-    constructor: function(chart, options){
-
-        this.base(chart,options);
-
-    },
-
+    clickAction: null, //TODO: new
+    
+    //constructor: function(chart, options){
+    //    this.base(chart,options);
+    //},
+    
     create: function(){
-
-        // Size will depend only on the existence of the labels
-
         if (this.isAnchorTopOrBottom()){
-            this.width = this._parent.width;
+            this.width  = this._parent.width;
             this.height = this.axisSize;
-        } else{
+        } else {
             this.height = this._parent.height;
-            this.width = this.axisSize;
+            this.width  = this.axisSize;
         }
 
-        this.pvPanel = this._parent.getPvPanel().add(this.type)
-            .width(this.width)
-            .height(this.height);
-
+        // Creates this.pvPanel
+        this.base();
+        
+        // ??
+        this.extend(this.pvScale, this.panelName + "Scale_");
+        
         this.renderAxis();
 
-        // Extend panel
-        this.extend(this.pvPanel, this.panelName + "_");
-        this.extend(this.pvRule, this.panelName + "Rule_");
-        this.extend(this.pvTicks, this.panelName + "Ticks_");
-        this.extend(this.pvLabel, this.panelName + "Label_");
-        this.extend(this.pvRuleGrid, this.panelName + "Grid_");
+        // Apply extension points
+        this.extend(this.pvPanel,    this.panelName + "_"     );
+        this.extend(this.pvRule,     this.panelName + "Rule_" );
+        this.extend(this.pvTicks,    this.panelName + "Ticks_");
+        this.extend(this.pvLabel,    this.panelName + "Label_");
+        this.extend(this.pvRuleGrid, this.panelName + "Grid_" );
+        
+        if(this.pvEndLine){
+            this.extend(this.pvEndLine, this.panelName + "EndLine_");
+        }
+        
+        if(this.pvMinorTicks){
+            this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
+        }
     },
 
     setScale: function(scale){
-        this.scale = scale;
+        this.pvScale = scale;
+        this.scale = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
     },
-
-    renderAxis: function(){
-
-        var min, max;
-        
-        this.pvScale = this.scale;
-        this.extend(this.pvScale, this.panelName + "Scale_");
-
-        if (this.ordinal) {
-            min = this.pvScale.min;
-            max = this.pvScale.max;
-        } else {
-            var scaleRange = this.pvScale.range();
-            min = scaleRange[0];
-            max = scaleRange[1];
+    
+    /**
+     * Initializes a new layer panel.
+     * @override
+     */
+    initLayerPanel: function(pvPanel, layer){
+        if(layer === 'gridLines'){
+            pvPanel.zOrder(-10);
         }
+    },
+    
+    renderAxis: function(){
+        // Z-Order
+        // ==============
+        // -10 - grid lines   (on 'gridLines' background panel)
+        //   0 - content (specific chart types should render content on this zOrder)
+        //  10 - end line     (on main foreground panel)
+        //  20 - ticks        (on main foreground panel)
+        //  30 - ruler (begin line) (on main foreground panel)
+        //  40 - labels       (on main foreground panel)
+        
+        // Range
+        var rMin  = this.pvScale.min,
+            rMax  = this.pvScale.max,
+            rSize = rMax - rMin;
         
         this.pvRule = this.pvPanel.add(pv.Rule)
+        		.zOrder(30) // see pvc.js
                 .strokeStyle('black')
-                [pvc.BasePanel.oppositeAnchor[this.anchor]](0)
-                [pvc.BasePanel.relativeAnchor[this.anchor]](min)
-                [pvc.BasePanel.parallelLength[this.anchor]](max - min);
-
+                // ex: anchor = bottom
+                [this.anchorOpposite()](0)     // top    (of the axis panel)
+                [this.anchorLength()  ](rSize) // width  
+                [this.anchorOrtho()   ](rMin); // left
+                
+        
+        if(this.endLine){
+            var anchorOrthoLength = this.anchorOrthoLength(),
+                ruleLength = this._parent[anchorOrthoLength] - 
+                             this[anchorOrthoLength];
+            
+        	this.pvEndLine = this.pvRule.add(pv.Rule)
+                    .zOrder(10)
+                    .visible(true) // break inheritance pvRule's visible property
+                    .strokeStyle("#f0f0f0")
+                    [this.anchorOpposite()](-ruleLength)
+                    [this.anchorLength()  ](null)
+                    [this.anchorOrtho()   ](rMax)
+                    [anchorOrthoLength    ]( ruleLength);
+        }
+         
         if (this.ordinal){
             if(this.useCompositeAxis){
                 this.renderCompositeOrdinalAxis();
@@ -2924,7 +3426,184 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
     },
     
-    /////////////////////////////////////////////////
+    renderOrdinalAxis: function(){
+
+        var scale = this.pvScale,
+            anchorOpposite    = this.anchorOpposite(),    
+            anchorLength      = this.anchorLength(),
+            anchorOrtho       = this.anchorOrtho(),
+            anchorOrthoLength = this.anchorOrthoLength(),
+            ticks = this.ordinalElements;
+        
+        // Ordinal ticks correspond to ordinal datums.
+        // Ordinal ticks are drawn at the center of each band,
+        //  and not at the beginning, as in a linear axis.
+        this.pvTicks = this.pvRule.add(pv.Rule)
+        	.zOrder(20) // see pvc.js
+            .data(ticks)
+            //[anchorOpposite   ](0)
+            [anchorLength     ](null)
+            [anchorOrtho      ](function(d){
+                return scale(d) + (scale.range().band / 2);
+            })
+            [anchorOrthoLength](this.tickLength)
+            .strokeStyle('rgba(0,0,0,0)'); // Transparent by default, but extensible
+
+        var align = this.isAnchorTopOrBottom() 
+                    ? "center"
+                    : (this.anchor == "left") ? "right" : "left";
+        
+        // All ordinal labels are relevant and must be visible
+        this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
+        	.zOrder(40) // see pvc.js
+            .textAlign(align)
+            //.textBaseline("middle")
+            //.text(pv.identity)
+            .font("9px sans-serif");
+        
+        if(this.fullGrid){
+            // Grid rules are visible on all ticks,
+            //  but on the first tick. 
+            // The 1st tick is not shown.
+            // The 2nd tick separates categ 1 from categ 2.
+            // The Nth tick separates categ. N-1 from categ. N
+            // No grid line is drawn at the end.
+            var ruleLength = this._parent[anchorOrthoLength] - 
+                             this[anchorOrthoLength];
+            
+            this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
+                .extend(this.pvRule)
+                .data(ticks)
+                .strokeStyle("#f0f0f0")
+                [anchorOpposite   ](-ruleLength)
+                [anchorLength     ](null)
+                [anchorOrtho      ](function(d){
+                    return scale(d) - scale.range().margin / 2;
+                })
+                [anchorOrthoLength]( ruleLength)
+                .visible(function(){ return (this.index > 0); });
+        }
+    },
+
+    renderLinearAxis: function(){
+        // NOTE: Includes time series, 
+        // so "d" may be a number or a Date object...
+        
+        var scale  = this.pvScale,
+            ticks  = pvc.scaleTicks(
+                        scale, 
+                        this.domainRoundMode === 'tick', 
+                        this.desiredTickCount),
+            anchorOpposite    = this.anchorOpposite(),    
+            anchorLength      = this.anchorLength(),
+            anchorOrtho       = this.anchorOrtho(),
+            anchorOrthoLength = this.anchorOrthoLength(),
+            tickStep = Math.abs(ticks[1] - ticks[0]); // ticks.length >= 2
+                
+        // (MAJOR) ticks
+        var pvTicks = this.pvTicks = this.pvRule.add(pv.Rule)
+        	.zOrder(20)
+            .data(ticks)
+            // [anchorOpposite ](0) // Inherited from pvRule
+            [anchorLength     ](null)
+            [anchorOrtho      ](scale)
+            [anchorOrthoLength](this.tickLength)
+            .strokeStyle('black'); // control visibility through color or through .visible
+        
+        // MINOR ticks are between major scale ticks
+        if(this.minorTicks){
+            this.pvMinorTicks = this.pvTicks.add(pv.Rule)
+                .zOrder(20) // not inherited
+                //.data(ticks)  // ~ inherited
+                //[anchorOpposite   ](0)   // Inherited from pvRule
+                //[anchorLength     ](null)  // Inherited from pvTicks
+                [anchorOrtho      ](function(d){ 
+                    return scale((+d) + (tickStep / 2)); // NOTE: (+d) converts Dates to numbers, just like d.getTime()
+                })
+                [anchorOrthoLength](this.tickLength / 2)
+                .visible(function(){
+                    return (!pvTicks.scene || pvTicks.scene[this.index].visible) &&
+                           (this.index < ticks.length - 1); 
+                });
+        }
+        
+        this.renderLinearAxisLabel(ticks);
+        
+        // Now do the full grids
+        if(this.fullGrid){
+            // Grid rules are visible (only) on MAJOR ticks,
+            // except on the first tick.
+            // When EndLine is active it is drawn above the last grid line.
+            var ruleLength = this._parent[anchorOrthoLength] - 
+                             this[anchorOrthoLength];
+            
+            this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
+                .extend(this.pvRule)
+            	.data(ticks)
+                .strokeStyle("#f0f0f0")
+                [anchorOpposite   ](-ruleLength)
+                [anchorLength     ](null)
+                [anchorOrtho      ](scale)
+                [anchorOrthoLength]( ruleLength);
+        }
+    },
+    
+    renderLinearAxisLabel: function(ticks){
+     // Labels are visible (only) on MAJOR ticks,
+        // On first and last tick care is taken
+        //  with their H/V alignment so that
+        //  the label is not drawn of the chart.
+
+        // Use this margin instead of textMargin, 
+        // which affects all margins (left, right, top and bottom).
+        // Exception is the small 0.5 textMargin set below....
+        var labelAnchor = this.pvTicks.anchor(this.anchor)
+                                .addMargin(this.anchorOpposite(), 2);
+        
+        var label = this.pvLabel = labelAnchor.add(pv.Label)
+            .zOrder(40)
+            .text(this.pvScale.tickFormat)
+            .font("9px sans-serif")
+            .textMargin(0.5) // Just enough for some labels not to be cut (vertical)
+            .visible(true);
+        
+        // Label alignment
+        var rootPanel = this.pvPanel.root;
+        if(this.isAnchorTopOrBottom()){
+            label.textAlign(function(){
+                if(this.index === 0){
+                    var absLeft = label.toScreenTransform().transformHPosition(label.left());
+                    if(absLeft <= 0){
+                        return 'left'; // the "left" of the text is anchored to the tick's anchor
+                    }
+                } else if(this.index === ticks.length - 1) { 
+                    var absLeft = label.toScreenTransform().transformHPosition(label.left());
+                    if(absLeft >= rootPanel.width()){
+                        return 'right'; // the "right" of the text is anchored to the tick's anchor
+                    }
+                }
+                return 'center';
+            });
+        } else {
+            label.textBaseline(function(){
+                if(this.index === 0){
+                    var absTop = label.toScreenTransform().transformVPosition(label.top());
+                    if(absTop >= rootPanel.height()){
+                        return 'bottom'; // the "bottom" of the text is anchored to the tick's anchor
+                    }
+                } else if(this.index === ticks.length - 1) { 
+                    var absTop = label.toScreenTransform().transformVPosition(label.top());
+                    if(absTop <= 0){
+                        return 'top'; // the "top" of the text is anchored to the tick's anchor
+                    }
+                }
+                
+                return 'middle';
+            });
+        }
+    },
+    
+/////////////////////////////////////////////////
     //begin: composite axis
     
     getElementsTree: function(elements){
@@ -2947,7 +3626,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     getLayoutSingleCluster: function(tree, orientation, maxDepth){
         
-        myself = this;
+        var myself = this;
 
         var depthLength = this.axisSize;
         //displace to take out bogus-root
@@ -3335,7 +4014,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     getTextLength: function(text, font){
         
-        switch(pv.renderer()){
+        switch(pv.renderer()){            
             case 'vml':
                 return this.getTextLenVML(text, font);
             case 'batik':
@@ -3441,89 +4120,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var holder = this.getTextSizePlaceholder();
         holder.text(text);
         return holder.width() - MARGIN <= length;
-    },
+    }
     
     // end: composite axis
     /////////////////////////////////////////////////
-
-    renderOrdinalAxis: function(){
-
-        var myself = this;
-
-        this.pvTicks = this.pvRule.add(pv.Rule)
-            .data(this.ordinalElements)
-            [this.anchorLength()     ](null)
-            [this.anchorOpposite()   ](0)
-            [this.anchorOrtho()      ](function(d){
-                return myself.scale(d) + myself.scale.range().band/2;
-            })
-            [this.anchorOrthoLength()](5)
-            .strokeStyle("rgba(0,0,0,0)");//TODO:ok?
-
-        var align = this.isAnchorTopOrBottom()?
-          "center": 
-          (this.anchor == "left") ? "right" : "left";
-        
-        this.pvLabel = this.pvTicks.anchor(this.anchor)
-            .add(pv.Label)
-            .textAlign(align)
-            //.textBaseline("middle")
-            //.text(pv.identity)
-            .font("9px sans-serif");
-    },
-
-    renderLinearAxis: function(){
-
-        var myself = this;
-    
-        this.pvTicks = this.pvRule.add(pv.Rule)
-            .data(this.scale.ticks())
-            [this.anchorLength()      ](null)
-            [this.anchorOpposite()    ](0)
-            [this.anchorOrtho()       ](this.scale)
-            [this.anchorOrthoLength() ](function(d){
-                // TL, TL/2, TL, TL/2 ....
-                return myself.tickLength / (this.index % 2 + 1);
-            })
-            .strokeStyle('black');
-
-        function isLabelOrGridRuleVisible(d){
-            // mini grids
-            if (this.index % 2){ // if odd
-                return false;
-            }
-            
-            var v = myself.scale(d);
-            // also, hide the first and last ones
-            if(v == 0  || v == myself.scale.range()[1]){
-                return false;
-            }
-            
-            return true;
-        }
-        
-        this.pvLabel = this.pvTicks
-            .anchor(this.anchor)
-            .add(pv.Label)
-            .text(this.scale.tickFormat)
-            .font("9px sans-serif")
-            .visible(isLabelOrGridRuleVisible);
-
-        // Now do the full grids
-        if(this.fullGrid){
-            var anchorOrthoLength = this.anchorOrthoLength(),
-                ruleLength = this._parent[anchorOrthoLength] - this[anchorOrthoLength];
-            
-            this.pvRuleGrid = this.pvRule.add(pv.Rule)
-                .data(this.scale.ticks())
-                .strokeStyle("#f0f0f0")
-                [this.anchorLength()  ](null)
-                [this.anchorOpposite()](-ruleLength)
-                [this.anchorOrtho()   ](this.scale)
-                [anchorOrthoLength    ]( ruleLength)
-                .visible(isLabelOrGridRuleVisible);
-        }
-    }
 });
 
 /*
@@ -3561,8 +4161,7 @@ pvc.SecondXAxisPanel = pvc.XAxisPanel.extend({
 pvc.YAxisPanel = pvc.AxisPanel.extend({
 
     anchor: "left",
-    panelName: "yAxis",
-    pvRule: null
+    panelName: "yAxis"
 
     //constructor: function(chart, options){
     //    this.base(chart,options);
@@ -3601,23 +4200,8 @@ pvc.PieChart = pvc.Base.extend({
 
     this.base(o);
 
-    var _defaults = {
-      showValues: true,
-      innerGap: 0.9,
-      explodedSliceRadius: 0,
-      explodedSliceIndex: null,
-      showTooltips: true,
-      tooltipFormat: function(s,c,v){
-        var val = this.chart.options.valueFormat(v);
-        return c+":  " + val + " (" + Math.round(v/this.sum*100,1) + "%)";
-      }
-    };
-
-
     // Apply options
-    $.extend(this.options,_defaults, o);
-
-
+    $.extend(this.options, pvc.PieChart.defaultOptions, o);
   },
 
   preRender: function(){
@@ -3639,8 +4223,19 @@ pvc.PieChart = pvc.Base.extend({
 
   }
 
-}
-);
+}, {
+	defaultOptions: {
+		showValues: true,
+		innerGap: 0.9,
+		explodedSliceRadius: 0,
+		explodedSliceIndex: null,
+		showTooltips: true,
+		tooltipFormat: function(s, c, v){
+			var val = this.chart.options.valueFormat(v);
+			return c + ":  " + val + " (" + Math.round(v / this.sum * 100, 1) + "%)";
+		}
+    }
+});
 
 
 /*
@@ -4115,6 +4710,7 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
   create: function(){
 
     var myself = this;
+    
     this.width = this._parent.width;
     this.height = this._parent.height;
     
@@ -4123,9 +4719,10 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     
     // add clipping for bounds
     if((myself.chart.options.orthoFixedMin != null) || 
-       (myself.chart.options.orthoFixedMax != null))
+       (myself.chart.options.orthoFixedMax != null)){
       this.pvPanel["overflow"]("hidden");
-
+    }
+    
     if(this.showTooltips || this.chart.options.clickable ){
       this.pvPanel
           .events("all")
@@ -4137,19 +4734,22 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
 
     // Extend body, resetting axisSizes
 
-    var lScale = this.chart.getLinearScale(true);
-    var oScale = this.chart.getOrdinalScale(true);
-    var tScale;
-    if(this.timeSeries){
-      tScale = this.chart.getTimeseriesScale(true,true);
-    }
+    var lScale = this.chart.getLinearScale(true),
+        oScale = null, // ~ eclipse warning
+        tScale = null, // ~ eclipse warning 
+        parser = null; // ~ eclipse warning
     
-    var parser = pv.Format.date(this.timeSeriesFormat);
+    if(this.timeSeries){
+        tScale = this.chart.getTimeseriesScale(true, true);
+        parser = pv.Format.date(this.timeSeriesFormat);
+    } else {
+        oScale = this.chart.getOrdinalScale(true);
+    }
     
     var colors = this.chart.colors(pv.range(this.chart.dataEngine.getSeriesSize()));
     var colorFunc = function(d){
       // return colors(d.serieIndex)
-      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.parent.index])
+      return colors(myself.chart.dataEngine.getVisibleSeriesIndexes()[this.parent.index]);
     };
 
     // Stacked?
@@ -4161,17 +4761,18 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
               // Stacked Vertical charts show series from
               //  top to bottom (according to the legend)
               .order(isVertical  ? "reverse"  : null)
-              [isVertical ? "x" : "y"](function(){
-                if(myself.timeSeries){
-                  return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
-                }
-                else{
-                  return oScale(myself.chart.dataEngine.getCategoryByIndex(this.index)) + oScale.range().band/2;
-                }
-              })
+              [isVertical ? "x" : "y"](
+                    myself.timeSeries ?
+                    function(){
+                        return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
+                    } :
+                    function(){
+                        return oScale(myself.chart.dataEngine.getCategoryByIndex(this.index)) + 
+                               oScale.range().band/2;
+                    })
               [anchor](lScale(0))
               [isVertical ? "y" : "x"](function(d){
-                return myself.chart.animate(0,lScale(d)-lScale(0));
+                return myself.chart.animate(0, lScale(d) - lScale(0));
               });
 
       this.pvArea = this.pvScatterPanel.layer.add(pv.Area)
@@ -4182,34 +4783,31 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
     } else{
 
       this.pvScatterPanel = this.pvPanel.add(pv.Panel)
-                .data(this.chart.dataEngine.getVisibleSeriesIndexes())
+                .data(this.chart.dataEngine.getVisibleSeriesIndexes());
 
       this.pvArea = this.pvScatterPanel.add(pv.Area)
-                .fillStyle(this.showAreas?colorFunc:null);
+                .fillStyle(this.showAreas ? colorFunc : null);
 
       this.pvLine = this.pvArea.add(pv.Line)
           .data(function(d){
-            return myself.chart.dataEngine.getObjectsForSeriesIndex(d, this.timeSeries?function(a,b){
-              return parser.parse(a.category) - parser.parse(b.category);
-              }: null)
-            })
+                return myself.chart.dataEngine.getObjectsForSeriesIndex(
+                        d, 
+                        myself.timeSeries ?
+                            function(a,b){
+                                return parser.parse(a.category) - 
+                                       parser.parse(b.category);
+                            } : 
+                            null);
+                })
           .lineWidth(this.showLines?1.5:0.001)
           .segmented(true)
-          .visible(function(d) {
-            return d.value==null?false:true;
-          })
-          [pvc.BasePanel.relativeAnchor[anchor]](function(d){
-
-            if(myself.timeSeries){
-              return tScale(parser.parse(d.category));
-            }
-            else{
-              return oScale(d.category) + oScale.range().band/2;
-            }
-
-          })
-          [anchor](function(d){
-            return myself.chart.animate(0,lScale(d.value));
+          .visible(function(d) { return d.value != null; })
+          [pvc.BasePanel.relativeAnchor[anchor]](
+                myself.timeSeries ?
+                  function(d){ return tScale(parser.parse(d.category)); } :
+                  function(d){ return oScale(d.category) + oScale.range().band/2; })
+          [anchor](function(d){ 
+              return myself.chart.animate(0,lScale(d.value)); 
           });
     }
 
@@ -4217,30 +4815,32 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
         .strokeStyle(colorFunc)
         .lineJoin(null)
         .text(function(d){
-          var v, c;
-          var s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index]
-          if( d != null && typeof d == "object"){
-            v = d.value;
-            c = d.category
-          }
-          else{
-            v = d
-            c = myself.chart.dataEngine.getVisibleCategories()[this.index]
-          };
-          return myself.chart.options.tooltipFormat.call(myself,s,c,v);
-        })
+            var v, 
+                c,
+                s = myself.chart.dataEngine.getVisibleSeries()[this.parent.index];
+          
+            if( d != null && typeof d == "object"){
+                v = d.value;
+                c = d.category;
+            } else {
+                v = d;
+                c = myself.chart.dataEngine.getVisibleCategories()[this.index];
+            }
+            
+            return myself.chart.options.tooltipFormat.call(myself, s, c, v);
+        });
 
     if(this.showTooltips){
       this.extend(this.chart.tipsySettings,"tooltip_");
       this.pvLine
-      .event("point", pv.Behavior.tipsy(this.chart.tipsySettings));
+        .event("point", pv.Behavior.tipsy(this.chart.tipsySettings));
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)
         .shapeSize(12)
         .lineWidth(1.5)
         .strokeStyle(this.showDots?colorFunc:null)
-        .fillStyle(this.showDots?colorFunc:null)
+        .fillStyle(this.showDots?colorFunc:null);
 
     if (this.chart.options.clickable){
       this.pvDot
@@ -4267,8 +4867,8 @@ pvc.ScatterChartPanel = pvc.BasePanel.extend({
       .add(pv.Label)
       .bottom(0)
       .text(function(d){
-        return myself.chart.options.valueFormat( (d != null && typeof d == "object")?d.value:d)
-      })
+        return myself.chart.options.valueFormat( (d != null && typeof d == "object")?d.value:d);
+      });
 
       // Extend lineLabel
       this.extend(this.pvLabel,"lineLabel_");
@@ -5401,18 +6001,14 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
           return this.getNormalColorScale(data, cols, this.colorValIdx);//TODO:
         case "linear":
           return this.getLinearColorScale(data, cols, this.colorValIdx);
-        //TODO: case "external":
+        case "discrete":
+            return this.getDiscreteColorScale(data, cols, this.chart.options, this.colorValIdx);
         default:
           throw "Invalid option " + this.scaleType + " in HeatGrid";
     }
   },
   
-  
-  getLinearColorScale: function(data, cols, colorIdx){
-
-    var opts = this.chart.options;
-    var myself = this;
-
+  getColorRangeArgs: function(opts){
     var rangeArgs = opts.colorRange;
     if(opts.minColor != null && opts.maxColor != null){
         rangeArgs = [opts.minColor,opts.maxColor];
@@ -5423,6 +6019,125 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
     else if (opts.maxColor != null){
         rangeArgs.splice(rangeArgs.length-1,1,opts.maxColor);
     }
+    return rangeArgs;
+  },
+  
+  getColorDomainArgs: function(data, cols, opts, rangeArgs, colorIdx){
+    var domainArgs = opts.colorRangeInterval;
+    if(domainArgs != null && domainArgs.length > rangeArgs.length){
+        domainArgs = domainArgs.slice(0, rangeArgs.length);
+    }
+    if(domainArgs == null){
+        domainArgs = [];
+    }
+    
+    if(domainArgs.length < rangeArgs.length){
+        var myself = this;
+        var min = pv.dict(cols, function(f){
+          return pv.min(data, function(d){
+            return myself.getValue(d[f],colorIdx);
+          });
+        });
+        var max = pv.dict(cols, function(f){
+          return pv.max(data, function(d){
+            return myself.getValue(d[f], colorIdx);
+          });
+        });
+        
+        if(opts.normPerBaseCategory){
+            return pv.dict(cols, function(category){
+              return myself.padColorDomainArgs(rangeArgs, [], min[category], max[category]);  
+            });
+        }
+        else {
+            var theMin = min[cols[0]];
+            for (var i=1; i<cols.length; i++) {
+              if (min[cols[i]] < theMin) theMin = min[cols[i]];
+            }
+            var theMax = max[cols[0]];
+            for (var i=1; i<cols.length; i++){
+              if (max[cols[i]] > theMax) theMax = max[cols[i]];
+            }
+            if(theMax == theMin)
+            {
+                if(theMax >=1){
+                    theMin = theMax -1;
+                } else {
+                    theMax = theMin +1;
+                }
+            }
+            return this.padColorDomainArgs(rangeArgs, domainArgs, theMin, theMax);
+        }
+        
+    }
+    
+    return domainArgs;
+  },
+  
+  padColorDomainArgs: function(rangeArgs, domainArgs, min, max){
+    //use supplied numbers
+    var toPad =
+          domainArgs == null ?
+          rangeArgs.length +1 :
+          rangeArgs.length +1 - domainArgs.length;
+    switch(toPad){
+      case 1:
+          //TODO: should adapt to represent middle?
+          domainArgs.push(max);
+          break;
+      case 2:
+          domainArgs = [min].concat(domainArgs).concat(max);
+          break;
+      default://build domain from range
+          var step = (max - min)/(rangeArgs.length -1);
+          domainArgs = pv.range(min, max +step , step);
+    }
+    return domainArgs;
+  },
+  
+  getDiscreteColorScale: function(data, cols, opts, colorIdx)
+  {
+    var colorRange = this.getColorRangeArgs(opts);
+    var domain = this.getColorDomainArgs(data, cols, opts, colorRange, colorIdx);
+
+    //d0--cR0--d1--cR1--d2
+    
+    var getColorVal = function(val, domain, colorRange){
+        if(val <= domain[0]) return pv.color(colorRange[0]);
+        for(var i=0; i<domain.length-1;i++){
+             if(val > domain[i] && val < domain[i+1]){
+                return pv.color(colorRange[i]);
+             }
+        }
+        return pv.color(colorRange[colorRange.length-1]);
+    };
+    
+    if(opts.normPerBaseCategory){
+        return pv.dict(cols, function (category){
+            var dom = domain[category];
+            return function(val){
+                return getColorVal(val, dom, colorRange);
+            }
+        });
+        
+    }
+    else {
+        return pv.dict(cols, function(col){
+            return function(val){
+                return getColorVal(val, domain, colorRange);
+            };
+           
+        });
+    }
+    
+  },
+  
+  getLinearColorScale: function(data, cols, colorIdx){
+
+    var opts = this.chart.options;
+    var myself = this;
+
+    var rangeArgs = this.getColorRangeArgs(opts);
     
     var domainArgs = opts.colorRangeInterval;
     if(domainArgs != null && domainArgs.length > rangeArgs.length){
@@ -5481,7 +6196,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
                 } else {
                     theMax = theMin +1;
                 }
-            } 
+            }
           //use supplied numbers
           var toPad =
                 domainArgs == null ?
@@ -5695,7 +6410,7 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
     var yAxisSize = bypassAxis?0:this.options.yAxisSize;
     var xAxisSize = bypassAxis?0:this.options.xAxisSize;
     
-    var isVertical = this.options.orientation=="vertical"
+    var isVertical = this.options.orientation=="vertical";
     
     // compute the input-domain of the scale
     var domainMin = this.dataEngine.getCategoryMin();
@@ -6235,7 +6950,7 @@ pvc.mStackedAreaChart = pvc.MetricScatterAbstract.extend({
  * Waterfall charts are basically Bar-charts with some added
  * functionality. Given the complexity of the added features this
  * class has it's own code-base. However, it would be easy to
- * derive a BarChart class from this class by swithing of a few 
+ * derive a BarChart class from this class by switching off a few 
  * features.
  * 
  * If you have an issue or suggestions regarding the Waterfall-charts
@@ -6431,8 +7146,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
     data: null,
   
     stacked: false,
-    panelSizeRatio: 1,
-    barSizeRatio: 0.5,
+    panelSizeRatio: 0.9,
+    barSizeRatio: 0.9,
     showTooltips: true,
     maxBarSize: 200,
     showValues: true,
@@ -6586,8 +7301,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
      */
     prepareDataFunctions:  function(dataset, stacked, isVertical) {
         var myself = this,
-        	chart  = this.chart,
-        	dataEngine = chart.dataEngine;
+            chart  = this.chart,
+            dataEngine = chart.dataEngine;
 
         // create empty container for the functions and data
         this.DF = {};
@@ -6624,8 +7339,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         var lScale = chart.getLinearScale(true);
         /** end fix **/
         
-        var l2Scale = chart.getSecondScale(true);
-        var oScale  = chart.getOrdinalScale(true);
+        var l2Scale = chart.getSecondScale(true),
+            oScale  = chart.getOrdinalScale(true);
         
         // determine barPositionOffset and barScale
         var barPositionOffset = 0,
@@ -6634,7 +7349,7 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         	maxBarSize = ordBand;
         
         if(!stacked){
-        	var ordDomain = dataEngine.getVisibleSeriesIndexes();
+            var ordDomain = dataEngine.getVisibleSeriesIndexes();
             if(!isVertical){
                 // Non-stacked Horizontal bar charts show series from
                 //  top to bottom (according to the legend)
@@ -6642,6 +7357,8 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             	ordDomain.reverse();
             }
             
+            // NOTE: 'barSizeRatio' affects the space between bars.
+            // Space between categories is controlled by panelSizeRatio.
             barScale = new pv.Scale.ordinal(ordDomain)
             				.splitBanded(0, ordBand, this.barSizeRatio);
             
@@ -6791,8 +7508,11 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
         this.width  = this._parent.width;
         this.height = this._parent.height;
         
-        // Creates the pvc panel
+        // Creates the pv panel
         this.base();
+        
+        // Send the panel behind the axis, title and legend, panels
+        this.pvPanel.zOrder(-10);
 
         if  ((this.chart.options.orthoFixedMin != null) || 
              (this.chart.options.orthoFixedMax != null)){
@@ -6846,8 +7566,9 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             // next add the bars to the bar-containers in pvBarPanel
             this.pvBar = this.pvBarPanel.add(pv.Bar)
                 .data(function(d){
-                        return myself.chart.dataEngine.
-                                    getVisibleValuesForCategoryIndex(d);
+                        return pvc.padArrayWithZeros(
+                                    myself.chart.dataEngine.
+                                        getVisibleValuesForCategoryIndex(d));
                     })
                 .fillStyle(this.DF.colorFunc2)
                 [anchorOrtho      ](this.DF.relBasePosFunc)
@@ -6871,10 +7592,14 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
             this.pvSecondLine = this.pvArea.add(pv.Line)
                 .segmented(true)
                 .data(function(d){
-                    return myself.chart.dataEngine.getObjectsForSecondAxis(d,
-                        this.timeSeries ? function(a,b){
-                        return parser.parse(a.category) - parser.parse(b.category);
-                        }: null)
+                    return myself.chart.dataEngine.getObjectsForSecondAxis(
+                            d,
+                            this.timeSeries 
+                                ? function(a,b){
+                                    return parser.parse(a.category) - 
+                                           parser.parse(b.category); 
+                                  }
+                                : null);
                     })
                 .strokeStyle(function(){
                     var colors = myself.chart.options.secondAxisColor;
@@ -6931,6 +7656,10 @@ pvc.WaterfallChartPanel = pvc.BasePanel.extend({
                 .anchor(this.valuesAnchor || 'center')
                 .add(pv.Label)
                 .bottom(0)
+                .visible(function(d) { //no space for text otherwise                    
+                    var v = parseFloat(d);
+                    return !isNaN(v) && Math.abs(v) >= 1; 
+                 })
                 .text(function(d){
                     return myself.chart.options.valueFormat(d);
                 });
@@ -7178,7 +7907,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       leftPos = this.chart.options.bulletMargin;
       topPos = function(){
         //TODO: 10
-        return 10 + (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
+        return (this.index * (myself.chart.options.bulletSize + myself.chart.options.bulletSpacing));
       };
     }
     else
