@@ -390,6 +390,30 @@
     
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(formattedText));
+  
+  var localizedText = {
+    name: "localizedText",
+    label: "Localized Text",
+    defaults: {
+      localize: function(v) {return Dashboards.i18nSupport.prop(v);}
+    },
+
+    init: function(){
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['string-desc'];
+    },
+    
+    implementation: function(tgt, st, opt){
+      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        var text = this.defaults.localize(st.value) ;
+      	$(tgt).empty().append(text);
+      	//change data, too, in order for search and sorting to work correctly on the localized text
+      	st.tableData[st.rowIdx][st.colIdx] = text;
+      }
+    },
+
+  };
+  Dashboards.registerAddIn("Table", "colType", new AddIn(localizedText));
 
 })();
 

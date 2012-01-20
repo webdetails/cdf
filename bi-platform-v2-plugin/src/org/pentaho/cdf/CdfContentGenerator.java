@@ -222,6 +222,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         context.put("serverLocalDate", cal.getTimeInMillis());
         context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
         context.put("user", userSession.getName());
+        context.put("locale", userSession.getLocale());
         context.put("solution",requestParams.getParameter("solution"));
         context.put("path", requestParams.getParameter("path"));
         context.put("file", requestParams.getParameter("file"));
