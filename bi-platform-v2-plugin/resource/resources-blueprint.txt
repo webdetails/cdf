@@ -27,6 +27,8 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/CoreComponents.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/AddIns.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.js,\
+@RELATIVE_URL@/content/xmla4js/src/Xmla.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/addIns/querytypes.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/NavigationComponents.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MapComponents.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
