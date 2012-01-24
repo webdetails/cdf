@@ -5,4 +5,13 @@
         <resources>
             <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf</downloadable-formats>
         </resources>
+
+
+    <!--
+        hibernate-available: flag indicating if the Hibernate database is available (not available in AGILE-BI and cause issues).
+        this flag allows agile-bi to override the default setting of true
+
+        valid values are: true | false
+     -->
+    <hibernate-available>true</hibernate-available>
 </settings>
