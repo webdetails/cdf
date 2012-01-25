@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 
@@ -206,7 +207,7 @@ OpenLayers.Control.MouseToolbar = OpenLayers.Class(
                 this.zoomBox.style.opacity = "0.50";
                 this.zoomBox.style.fontSize = "1px";
                 this.zoomBox.style.zIndex = this.map.Z_INDEX_BASE["Popup"] - 1;
-                this.map.viewPortDiv.appendChild(this.zoomBox);
+                this.map.eventsDiv.appendChild(this.zoomBox);
                 this.performedDrag = true;
                 break;
             case "measure":
@@ -373,7 +374,7 @@ OpenLayers.Control.MouseToolbar = OpenLayers.Class(
      */
     defaultMouseOut: function (evt) {
         if (this.mouseDragStart != null
-            && OpenLayers.Util.mouseLeft(evt, this.map.div)) {
+            && OpenLayers.Util.mouseLeft(evt, this.map.eventsDiv)) {
             if (this.zoomBox) {
                 this.removeZoomBox();
                 if (this.startViaKeyboard) {

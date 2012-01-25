@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -16,14 +12,11 @@ OpenLayers.Lang["nb"] = {
 
     'unhandledRequest': "Ubehandlet forespørsel returnerte ${statusText}",
 
-    'permalink': "Kobling til denne siden",
+    'Permalink': "Kobling til denne siden",
 
-    'overlays': "Kartlag",
+    'Overlays': "Kartlag",
 
-    'baseLayer': "Bakgrunnskart",
-
-    'sameProjection':
-        "Oversiktskartet fungerer bare når det har samme projeksjon som hovedkartet",
+    'Base Layer': "Bakgrunnskart",
 
     'readNotImplemented': "Lesing er ikke implementert.",
 
@@ -81,7 +74,7 @@ OpenLayers.Lang["nb"] = {
         "<a href='http://trac.openlayers.org/wiki/${layerLib}' " +
         "target='_blank'>her</a>.",
 
-    'scale': "<strong>Skala</strong> 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "<strong>Skala</strong> 1 : ${scaleDenom}",
 
     // console message
     'layerAlreadyAdded':
@@ -112,10 +105,6 @@ OpenLayers.Lang["nb"] = {
     // console message
     'unsupportedGeometryType': "Geometritypen ${geomType} er ikke støttet",
 
-    // console message
-    'pagePositionFailed':
-        "OpenLayers.Util.pagePosition feilet: elementet med id ${elemId} kan være feilplassert.",
-                    
     'end': ''
 };
 

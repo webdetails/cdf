@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -16,14 +12,11 @@ OpenLayers.Lang.it = {
 
     'unhandledRequest': "Codice di ritorno della richiesta ${statusText}",
 
-    'permalink': "Permalink",
+    'Permalink': "Permalink",
 
-    'overlays': "Overlays",
+    'Overlays': "Overlays",
 
-    'baseLayer': "Livello base",
-
-    'sameProjection':
-        "La mini mappa funziona solamente se ha la stessa proiezione della mappa principale",
+    'Base Layer': "Livello base",
 
     'readNotImplemented': "Lettura non implementata.",
 
@@ -80,7 +73,7 @@ OpenLayers.Lang.it = {
         "<a href='http://trac.openlayers.org/wiki/${layerLib}' " +
         "target='_blank'>clicca qui</a>",
 
-    'scale': "Scala = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Scala = 1 : ${scaleDenom}",
 
     // console message
     'layerAlreadyAdded':
@@ -112,9 +105,5 @@ OpenLayers.Lang.it = {
     // console message
     'unsupportedGeometryType': "Tipo di geometria non supportata: ${geomType}",
 
-    // console message
-    'pagePositionFailed':
-        "OpenLayers.Util.pagePosition fallita: l'elemento con id ${elemId} è posizionato in modo errato.",
-                    
     'end': ''
 };

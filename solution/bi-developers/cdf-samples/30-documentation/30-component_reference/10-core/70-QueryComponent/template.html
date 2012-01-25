@@ -109,8 +109,8 @@ htmlObject: "sampleObject",
 executeAtStart: true,
 resultvar: "result",
 queryDefinition: MetaLayerHome2.executeQueryComponentDefinition,
-postFetch: function(){
-	$('#sampleObjectResult').html("" + result[3]);
+postFetch: function(data){
+	$('#sampleObjectResult').html("" + data[3]);
 	}
 }
 

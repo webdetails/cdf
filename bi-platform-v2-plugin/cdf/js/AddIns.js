@@ -27,12 +27,17 @@ function AddIn(options) {
     throw TypeError;
   }
   var _name = options.name,
-    _label = options.label,
-    _type = options.implementation ? "scriptable" : "static",
-    /* It's OK if any of these ends up being undefined */
-    _implementation = options.implementation,
-    _defaults = options.defaults,
-    _value = options.options;
+  _label = options.label,
+  _type = options.implementation ? "scriptable" : "static",
+  /* It's OK if any of these ends up being undefined */
+  _implementation = options.implementation,
+  _defaults = options.defaults,
+  _value = options.options;
+    
+  /* Do we have an init method? Call it now */
+  if(typeof options.init === 'function'){
+    options.init.call(myself);
+  }
 
   this.getLabel = function() {
     return _label;
@@ -67,7 +72,10 @@ function AddIn(options) {
     options = typeof options == "function" ? options(state) : options;
     var evaluatedDefaults = typeof _defaults == "function" ? _defaults(state) : _defaults;
     var compiledOptions = jQuery.extend(true,{},evaluatedDefaults,options);
-    return _implementation.call(myself,target,state,compiledOptions);
+    try{
+      return _implementation.call(myself,target,state,compiledOptions);    
+    }
+    catch(e){Dashboards.log("Addin Error [" + this.getName() + "]: " + e,"error");}
   };
 
   this.setDefaults = function(defaults) {

@@ -1585,12 +1585,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       Dashboards.fireChange(myself.parameter,value);
     } : undefined;
     
-    var selected
+    //TODO:typo on minTextLength
+    if(this.minTextLenght == undefined){
+      this.minTextLenght = 0;
+    }
     
     var opt = {
       list: function(){
         var val = myself.textbox.val();
-        
         if(val.length >= myself.minTextLenght &&
            !(val == '' //nothing to search
              ||
@@ -1852,10 +1854,10 @@ var TableComponent = BaseComponent.extend({
           if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
               return true;
         $(tr).children("td:visible").each(function(col,td){
-            var colType = cd.colTypes[col];
             var position = dataTable.fnGetPosition(td),
                 rowIdx = position[0],
-                colIdx = position[1];
+                colIdx = position[2];
+            var colType = cd.colTypes[colIdx];
             var addIn = myself.getAddIn("colType",colType);
             if (addIn) {
               var state = {},
@@ -1902,7 +1904,6 @@ var TableComponent = BaseComponent.extend({
     } else {
       dtData.aaData = json;
     }
-
     /* If we're doing server-side pagination, we need to set up the server callback
      */
     if (dtData.bServerSide) {
@@ -1925,7 +1926,7 @@ var TableComponent = BaseComponent.extend({
         } else if (target.get(0).tagName != 'TD') {
           target = target.closest('td');
         }
-        var position = myself.dataTable.fnGetPosition(e.target);
+        var position = myself.dataTable.fnGetPosition(target.get(0));
         state.rawData = myself.rawData;
         state.tableData = myself.dataTable.fnGetData();
         state.colIdx = position[1];
@@ -2016,15 +2017,11 @@ var TableComponent = BaseComponent.extend({
       if(options.colTypes!=undefined){
         $.each(options.colTypes,function(i,val){
           var col = dtData.aoColumns[i];
+          // Specific case: hidden cols
+          if(val == "hidden") col.bVisible=false;
           col.sClass+=" "+val;
+          col.sType=val;
 
-          if(val=='sparkline'){
-            col.bSearchable=false;
-            col.bSortable=false;
-          }
-          else{
-            col.sType=val;
-          }
         })
       };  // colTypes
       if(options.colFormats!=undefined){
@@ -2255,38 +2252,48 @@ var QueryComponent = BaseComponent.extend({
   visible: false,
   update : function() {
     QueryComponent.makeQuery(this);
+  },
+  warnOnce: function() {
+  Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
+    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" + 
+    " for more information");
+    delete(this.warnOnce);
   }
 },
 {
   makeQuery: function(object){
+
+    if (this.warnOnce) {this.warnOnce();}
     var cd = object.queryDefinition;
     if (cd == undefined){
      Dashboards.log("Fatal - No query definition passed","error");
       return;
     }
     var query = new Query(cd);
+    
     query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
-      object.result = values.resultset != undefined ? values.resultset: values;
-      if (typeof values.resultset != "undefined"){
-        object.metadata = values.metadata;
-        object.queryInfo = values.queryInfo;
-      }
-      if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
-      }
+
       changedValues = undefined;
+      object.metadata = values.metadata;
+      object.result = values.resultset != undefined ? values.resultset: values;
+      object.queryInfo = values.queryInfo;
       if((typeof(object.postFetch)=='function')){
         changedValues = object.postFetch(values);
       }
       if (changedValues != undefined){
         values = changedValues;
-        // (Call this again after postFetch)
-        if (object.resultvar != undefined){
-          Dashboards.setParameter(object.resultvar, object.result);
-        }
 
+      }
+
+      if (object.resultvar != undefined){
+        Dashboards.setParameter(object.resultvar, object.result);
+      }
+      object.result = values.resultset != undefined ? values.resultset: values;
+      if (typeof values.resultset != "undefined"){
+        object.metadata = values.metadata;
+        object.queryInfo = values.queryInfo;
       }
     });
 

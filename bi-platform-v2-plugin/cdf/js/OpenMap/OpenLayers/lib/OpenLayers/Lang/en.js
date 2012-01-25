@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -16,14 +12,11 @@ OpenLayers.Lang.en = {
 
     'unhandledRequest': "Unhandled request return ${statusText}",
 
-    'permalink': "Permalink",
+    'Permalink': "Permalink",
 
-    'overlays': "Overlays",
+    'Overlays': "Overlays",
 
-    'baseLayer': "Base Layer",
-
-    'sameProjection':
-        "The overview map only works when it is in the same projection as the main map",
+    'Base Layer': "Base Layer",
 
     'readNotImplemented': "Read not implemented.",
 
@@ -80,13 +73,14 @@ OpenLayers.Lang.en = {
         "<a href='http://trac.openlayers.org/wiki/${layerLib}' " +
         "target='_blank'>click here</a>",
 
-    'scale': "Scale = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Scale = 1 : ${scaleDenom}",
     
     //labels for the graticule control
     'W': 'W',
     'E': 'E',
     'N': 'N',
     'S': 'S',
+    'Graticule': 'Graticule',
 
     // console message
     'layerAlreadyAdded':
@@ -119,11 +113,12 @@ OpenLayers.Lang.en = {
     'unsupportedGeometryType': "Unsupported geometry type: ${geomType}",
 
     // console message
-    'pagePositionFailed':
-        "OpenLayers.Util.pagePosition failed: element with id ${elemId} may be misplaced.",
-                    
-    'end': '',
+    'filterEvaluateNotImplemented': "evaluate is not implemented for this filter type.",
 
-    // console message
-    'filterEvaluateNotImplemented': "evaluate is not implemented for this filter type."
+    'proxyNeeded': "You probably need to set OpenLayers.ProxyHost to access ${url}."+
+        "See http://trac.osgeo.org/openlayers/wiki/FrequentlyAskedQuestions#ProxyHost",
+
+    // **** end ****
+    'end': ''
+    
 };

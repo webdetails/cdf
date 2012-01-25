@@ -1,3 +1,8 @@
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
+
 /**
  * @requires OpenLayers/Format/WFSCapabilities/v1.js
  */
@@ -24,6 +29,16 @@ OpenLayers.Format.WFSCapabilities.v1_1_0 = OpenLayers.Class(
         OpenLayers.Format.WFSCapabilities.v1.prototype.initialize.apply(
             this, [options]
         );
+    },
+
+    /**
+     * Method: read_cap_DefaultSRS
+     */
+    read_cap_DefaultSRS: function(obj, node) {
+        var defaultSRS = this.getChildValue(node);
+        if (defaultSRS) {
+            obj.srs = defaultSRS;
+        }
     },
 
     CLASS_NAME: "OpenLayers.Format.WFSCapabilities.v1_1_0" 

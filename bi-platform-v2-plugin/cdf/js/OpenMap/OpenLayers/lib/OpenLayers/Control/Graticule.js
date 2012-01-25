@@ -1,9 +1,11 @@
-/* Copyright (c) 2006-2009 MetaCarta, Inc., published under a modified BSD license.
- * See http://svn.openlayers.org/trunk/openlayers/repository-license.txt 
- * for the full text of the license. */
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Control.js
+ * @requires OpenLayers/Lang.js
  */
 
 /**
@@ -18,6 +20,13 @@
 OpenLayers.Control.Graticule = OpenLayers.Class(OpenLayers.Control, {
 
     /**
+     * APIProperty: autoActivate
+     * {Boolean} Activate the control when it is added to a map. Default is
+     *     true. 
+     */
+    autoActivate: true,
+    
+    /**
     * APIProperty: intervals
     * {Array(Float)} A list of possible graticule widths in degrees.
     */
@@ -27,8 +36,8 @@ OpenLayers.Control.Graticule = OpenLayers.Class(OpenLayers.Control, {
 
     /**
      * APIProperty: displayInLayerSwitcher
-     * {Boolean} Allows the Graticule control to be switched on and off. 
-     * defaults to true.
+     * {Boolean} Allows the Graticule control to be switched on and off by 
+     *     LayerSwitcher control. Defaults is true.
      */
     displayInLayerSwitcher: true,
 
@@ -53,9 +62,10 @@ OpenLayers.Control.Graticule = OpenLayers.Class(OpenLayers.Control, {
 
     /**
      * APIProperty: layerName
-     * {String} the name to be displayed in the layer switcher
+     * {String} The name to be displayed in the layer switcher, default is set 
+     *     by {<OpenLayers.Lang>}.
      */
-    layerName: "Graticule",
+    layerName: null,
 
     /**
      * APIProperty: labelled
@@ -102,6 +112,8 @@ OpenLayers.Control.Graticule = OpenLayers.Class(OpenLayers.Control, {
      *     to extend the control.
      */
     initialize: function(options) {
+        options = options || {};
+        options.layerName = options.layerName || OpenLayers.i18n("Graticule");
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
         
         this.labelSymbolizer.stroke = false;
@@ -112,6 +124,18 @@ OpenLayers.Control.Graticule = OpenLayers.Class(OpenLayers.Control, {
         this.labelSymbolizer.labelYOffset = "${yOffset}";
     },
 
+    /**
+     * APIMethod: destroy
+     */
+    destroy: function() {
+        this.deactivate();        
+        OpenLayers.Control.prototype.destroy.apply(this, arguments);        
+        if (this.gratLayer) {
+            this.gratLayer.destroy();
+            this.gratLayer = null;
+        }
+    },
+    
     /**
      * Method: draw
      *
@@ -134,13 +158,36 @@ OpenLayers.Control.Graticule = OpenLayers.Class(OpenLayers.Control, {
                 visibility: this.visible,
                 displayInLayerSwitcher: this.displayInLayerSwitcher
             });
-            this.map.addLayer(this.gratLayer);
         }
-        this.map.events.register('moveend', this, this.update);
-        this.update();
         return this.div;
     },
 
+     /**
+     * APIMethod: activate
+     */
+    activate: function() {
+        if (OpenLayers.Control.prototype.activate.apply(this, arguments)) {
+            this.map.addLayer(this.gratLayer);
+            this.map.events.register('moveend', this, this.update);     
+            this.update();
+            return true;            
+        } else {
+            return false;
+        }
+    },
+    
+    /**
+     * APIMethod: deactivate
+     */
+    deactivate: function() {
+        if (OpenLayers.Control.prototype.deactivate.apply(this, arguments)) {
+            this.map.events.unregister('moveend', this, this.update);
+            this.map.removeLayer(this.gratLayer);
+            return true;
+        } else {
+            return false;
+        }
+    },
     /**
      * Method: update
      *
