@@ -1,3 +1,5 @@
+//VERSION TRUNK-20120126
+
 if(!Object.keys) {
 	Object.keys = function(o){
 		if (o !== Object(o)){
@@ -6225,7 +6227,7 @@ pvc.HeatGridChartPanel = pvc.BasePanel.extend({
         }
     }
     var scale = pv.Scale.linear();
-    scale.domain.apply(scale,domainArgs)
+    scale.domain.apply(scale,domainArgs);
     scale.range.apply(scale,rangeArgs);
     return pv.dict(cols,function(f){ return scale;});
   },
@@ -6559,7 +6561,7 @@ pvc.MetricScatterChartPanel = pvc.BasePanel.extend({
 
     var baseScale = this.chart.getLinearBaseScale(true);
     var orthoScale = this.chart.getLinearScale(true); 
-
+	var tScale;
     if(this.timeSeries){
       tScale = this.chart.getTimeseriesScale(true);
     }
