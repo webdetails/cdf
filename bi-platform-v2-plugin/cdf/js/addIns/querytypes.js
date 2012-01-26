@@ -124,10 +124,11 @@
     name: "cda",
     label: "cda",
     defaults: {
-      url: "/content/cda/doQuery?"
+      url: webAppPath + "/content/cda/doQuery?"
     },    
     implementation: function (tgt, st, opt) {
-        $.post(cda.url, buildQueryDefinition(), function(json) {
+      console.log(opt)
+        $.post(opt.url, opt.func(), function(json) {
           _lastResultSet = json;
           var clone = Dashboards.safeClone(true,{},_lastResultSet);
           opt.callback(clone);
