@@ -12,15 +12,13 @@
   var xmla = {
     name: "xmla",
     label: "XMLA",
-    datasource: {}, //cache the datasource as there should be only one xmla server
+    xmla: null,
+    datasource: null, //cache the datasource as there should be only one xmla server
+    catalogs: null,
     defaults: {
       url: webAppPath + "/Xmla" //defaults to Pentaho's Mondrian servlet. can be overridden in options
     },
     getDataSources: function(){
-      xmla.xmla = new Xmla({
-              async: false,
-              url: xmla.defaults.url
-      });
       var datasourceCache = [],
         rowset_ds = xmla.xmla.discoverDataSources();
       if (rowset_ds.hasMoreRows()) {
@@ -45,10 +43,6 @@
         }
     },
     init: function(){
-      //TODO $.getScript('/content/xmla4js/src/Xmla.js' function(){} //only load Xmla.js when needed
-      //prefetch the datasource and catalogs
-      xmla.getDataSources();
-      xmla.getCatalogs();
     },
     transformXMLAresults: function(results){
       var rows = results.fetchAllAsArray(),
@@ -99,12 +93,32 @@
       throw new Error("Catalog: " + param.catalog + " was not found on Pentaho server.");
     },
     implementation: function (tgt, st, opt) {
-      //just execute the query each time, don't worry about metadata setup as it is done in init
-      var result = xmla.executeQuery(st, opt);
+      if (xmla.xmla == null) {
+        xmla.xmla = new Xmla({
+                async: false,
+                url: xmla.defaults.url
+        });
+      }
+      if (xmla.datasource == null) {
+        xmla.getDataSources();
+      }
+      if (xmla.catalogs == null) {
+        xmla.getCatalogs();
+      }
+
+      try {      
+        var result = xmla.executeQuery(st, opt);
+      } catch (e) {
+        Dashboards.log('unable to execute xmla addin query: ' +e+' :', 'error')
+      }
       opt.callback(this.transformXMLAresults(result));
     }
   };
-  Dashboards.registerAddIn("Query", "queryType", new AddIn(xmla));
+  try {
+    Dashboards.registerAddIn("Query", "queryType", new AddIn(xmla));
+  } catch (e) {
+    Dashboards.log(e, 'error')
+  }
 
   var cda = {
     name: "cda",
@@ -172,6 +186,10 @@
     }
   };
   
-  Dashboards.registerAddIn("Query", "queryType", new AddIn(yql));
+  try {
+    Dashboards.registerAddIn("Query", "queryType", new AddIn(yql));
+  } catch (e) {
+    Dashboards.log(e, 'error')
+  }
 
 })();

@@ -272,8 +272,7 @@ var Dashboards = {
 Dashboards.log = function(m,type){
   if (typeof console != "undefined" ){
     if (type && console[type]) {
-      console.log("CDF: " + m);
-      //console[type]("CDF: " + m);
+      console[type]("CDF: " + m);
     }else if (type === 'exception' &&
       !console.exception) {
       console.error(m.stack);
@@ -1639,10 +1638,10 @@ Query = function() {
       }
     }
     
-    //console.log(addIn);
+    console.log(addIn);
     var callback = (outsideCallback ? outsideCallback : _callback);
-    addIn.call(document,_query,{callback:callback});
-    //console.log('Dashboards.js doQuery after AddIn call')
+    addIn.call(document,_query,{callback:callback, func:buildQueryDefinition});
+    console.log('Dashboards.js doQuery after AddIn call')
   }
 
   function buildQueryDefinition(overrides) {
