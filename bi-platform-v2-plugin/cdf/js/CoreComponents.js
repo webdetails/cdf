@@ -1896,14 +1896,16 @@ var TableComponent = BaseComponent.extend({
       }
 
     };
+
+
     /* We need to make sure we're getting data from the right place,
      * depending on whether we're using CDA
      */
-    if (cd.dataAccessId != undefined && json) {
+//    if (cd.dataAccessId != undefined && json) {
       dtData.aaData = json.resultset;
-    } else {
-      dtData.aaData = json;
-    }
+  //  } else {
+    //  dtData.aaData = json;
+  //  }
     /* If we're doing server-side pagination, we need to set up the server callback
      */
     if (dtData.bServerSide) {
