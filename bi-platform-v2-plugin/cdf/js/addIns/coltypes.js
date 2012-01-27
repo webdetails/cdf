@@ -116,6 +116,7 @@
     name: "dataBar",
     label: "Data Bar",
     defaults: {
+      width: undefined,
       widthRatio:1,
       height: 10,
       startColor: "#55A4D6",
@@ -157,7 +158,8 @@
       var cell = $(tgt);
       cell.empty(); 
       var ph =$("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
-      var wtmp = opt.widthRatio * ph.width();
+      var wtmp = opt.width || ph.width();
+      wtmp *= opt.widthRatio;
       var htmp = opt.height;       
     
       var leftVal  = Math.min(val,0),
