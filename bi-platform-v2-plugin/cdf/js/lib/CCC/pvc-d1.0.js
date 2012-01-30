@@ -154,19 +154,19 @@ pvc.mergeOwn = function(to, from){
     return to;
 };
 
-pvc.forEachRange = function(min, count, fun, ctx){
+/*
+pvc.forEachRange = function(min, max, fun, ctx){
     for(var i = min ; i < max ; i++){
         fun.call(ctx, i);
     }
 };
 
-/*
+
 pvc.arrayInsertMany = function(target, index, source){
     // TODO: is there a better way: without copying source?
     target.splice.apply(target, [index, 0].concat(other));
     return target;
 };
-*/
 
 pvc.arrayAppend = function(target, source){
     for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
@@ -174,6 +174,7 @@ pvc.arrayAppend = function(target, source){
     }
     return target;
 };
+*/
 
 // Adapted from pv.range
 pvc.Range = function(start, stop, step){
@@ -2764,6 +2765,36 @@ pvc.Base = Base.extend({
         }
     },
 
+    /**
+     * This is the method to be used for the extension points
+     * for the specific contents of the chart. already ge a pie
+     * chart! Goes through the list of options and, if it
+     * matches the prefix, execute that method on the mark.
+     * WARNING: It's the user's responsibility to make sure that
+     * unexisting methods don't blow this.
+     */
+    extend: function(mark, prefix) {
+        // if mark is null or undefined, skip
+        if (mark) {
+            var points = this.options.extensionPoints;
+            if(points){
+                var pL = prefix.length;
+                for (var p in points) {
+                    // Starts with
+                    if (p.indexOf(prefix) === 0) {
+                        var m = p.substring(pL);
+                        // Distinguish between mark methods and properties
+                        if (typeof mark[m] === "function") {
+                            mark[m](points[p]);
+                        } else {
+                            mark[m] = points[p];
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     /*
      * Animation
      */
@@ -2922,22 +2953,7 @@ pvc.BasePanel = Base.extend({
      * unexisting methods don't blow this.
      */
     extend: function(mark, prefix) {
-        // if mark is null or undefined, skip
-        if (mark) {
-            var pL = prefix.length, points = this.chart.options.extensionPoints;
-            for ( var p in points) {
-                if (p.indexOf(prefix) === 0) {
-                    var m = p.substring(pL);
-                    // Distinguish between mark methods and
-                    // properties
-                    if (typeof mark[m] === "function") {
-                        mark[m](points[p]);
-                    } else {
-                        mark[m] = points[p];
-                    }
-                }
-            }
-        }
+        this.chart.extend(mark, prefix);
     },
 
     /**
@@ -3556,7 +3572,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Apply options
         $.extend(this.options, pvc.CategoricalAbstract.defaultOptions, options);
-        
+
+        if(options.showTooltips){
+            var tipsySettings = this.options.tipsySettings;
+            if(tipsySettings){
+                // Clone top-level structure. Should be deep clone, perhaps.
+                tipsySettings = this.options.tipsySettings = pvc.mergeOwn({}, tipsySettings);
+
+                this.extend(tipsySettings, "tooltip_");
+            }
+        }
+
         // Sanitize some options
         if (!this.options.showYScale){
             this.options.yAxisSize = 0;
@@ -4128,7 +4154,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var h = this.yScale.range()[1];
 
         // Detect where to place the horizontalAnchor
-        var anchor = o.horizontalAnchor;
+        //var anchor = o.horizontalAnchor;
         if( !o.forceHorizontalAnchor )
         {
             var availableSize = o.horizontalAnchor == "right"?scale.range()[1]-dpos:dpos;
@@ -4235,7 +4261,13 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 
         // Tooltips
         showTooltips: true,
-        orientation: "vertical"
+
+        orientation: "vertical",
+        
+        tipsySettings: {
+            gravity: "s",
+            fade: true
+        }
     }
 });
 
@@ -4243,11 +4275,6 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
 pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
     orientation: "vertical",
-
-    tipsySettings: {
-        gravity: "s",
-        fade: true
-    },
 
     constructor: function(chart, options){
 
@@ -4274,12 +4301,6 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         var options = this.chart.options;
         if ((options.orthoFixedMin != null) || (options.orthoFixedMax != null)){
             this.pvPanel["overflow"]("hidden");
-        }
-
-        // Must be extended before because
-        //  it is used to build tipsy behaviour during createCore
-        if(options.showTooltips){
-            this.extend(this.tipsySettings, "tooltip_");
         }
         
         // Create something usefull...
@@ -5893,7 +5914,6 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
             showLines: this.options.showLines,
             showDots: this.options.showDots,
             showAreas: this.options.showAreas,
-            showTooltips: this.options.showTooltips,
             orientation: this.options.orientation,
             timeSeries: this.options.timeSeries,
             timeSeriesFormat: this.options.timeSeriesFormat
@@ -6030,7 +6050,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             o  = chart.options,
             de = chart.dataEngine;
 
-        if(this.showTooltips || o.clickable){
+        if(o.showTooltips || o.clickable){
             this.pvPanel
               .events("all")
               .event("mousemove", pv.Behavior.point(Infinity));
@@ -6133,8 +6153,8 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 return o.tooltipFormat.call(myself, s, c, v);
             });
 
-        if(this.showTooltips){
-            this.pvLine.event("point", pv.Behavior.tipsy(this.tipsySettings));
+        if(o.showTooltips){
+            this.pvLine.event("point", pv.Behavior.tipsy(o.tipsySettings));
         }
 
         this.pvDot = this.pvLine.add(pv.Dot)
@@ -6269,7 +6289,6 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             heatGridSizeRatio:  options.heatGridSizeRatio,
             maxHeatGridSize:    options.maxHeatGridSize,
             showValues:         options.showValues,
-            showTooltips:       options.showTooltips,
             orientation:        options.orientation
         });
 
@@ -6299,7 +6318,6 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
     data: null,
 
     heatGridSizeRatio: 0.5,
-    showTooltips: true,
     maxHeatGridSize: 200,
 
     showValues: true,
@@ -6430,9 +6448,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             });
 
             // Tooltip
-            if(this.showTooltips){
+            if(opts.showTooltips){
                 this.pvHeatGrid
-                    .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                    .event("mouseover", pv.Behavior.tipsy(opts.tipsySettings));
             }
         }
 
@@ -6648,7 +6666,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                     this.tooltip(tooltip);
                     return '';//prevent browser tooltip
                 })
-                .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                .event("mouseover", pv.Behavior.tipsy(opts.tipsySettings));
         }
 
         if(opts.doubleClickAction){
@@ -7413,7 +7431,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
       })
 
     if(options.showTooltips){
-      this.pvLine.event("point", pv.Behavior.tipsy(this.tipsySettings));
+      this.pvLine.event("point", pv.Behavior.tipsy(options.tipsySettings));
     }
 
     this.pvDot = this.pvLine.add(pv.Dot)
@@ -8307,7 +8325,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                     
                     return ''; // prevent browser tooltip
                 })
-                .event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                .event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
         }
 
 
@@ -10373,7 +10391,7 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         if(this.showTooltips){
             this.pvBar.
-                event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
+                event("mouseover", pv.Behavior.tipsy(options.tipsySettings));
         }
 
 
