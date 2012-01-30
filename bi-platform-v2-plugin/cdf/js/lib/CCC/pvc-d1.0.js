@@ -3573,7 +3573,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         // Apply options
         $.extend(this.options, pvc.CategoricalAbstract.defaultOptions, options);
 
-        if(options.showTooltips){
+        if(this.options.showTooltips){
             var tipsySettings = this.options.tipsySettings;
             if(tipsySettings){
                 // Clone top-level structure. Should be deep clone, perhaps.
@@ -4738,7 +4738,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     minorTicks:       true,
     
     ordinalElements: [], // To be used in ordinal scales
-    clickAction: null, //TODO: new
+    clickAction: null,
+    doubleClickAction: null,
     
     //constructor: function(chart, options){
     //    this.base(chart,options);
@@ -7544,7 +7545,7 @@ pvc.MetricDotChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showDots: true
@@ -7566,7 +7567,7 @@ pvc.MetricLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showLines: true
@@ -7587,7 +7588,7 @@ pvc.mStackedLineChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showLines: true,
@@ -7611,7 +7612,7 @@ pvc.mStackedAreaChart = pvc.MetricScatterAbstract.extend({
 
   constructor: function(o){
 
-    this.base();
+    this.base(o);
 
     var _defaults = {
       showAreas: true,
