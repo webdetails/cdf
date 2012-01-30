@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120127
+//VERSION TRUNK-20120130
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -462,7 +462,7 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
             if(doma.length !== 2){
                 pvc.log("Ticks forced extending a linear scale's domain, " +
                         "but it is not possible to update the domain because " + 
-                        "it has '" +  doma.length + "' elements.");
+                        "it has '" +  doma.length + "' element(s).");
             } else {
                 pvc.log("Ticks forced extending a linear scale's domain from [" +
                         [domaMin, domaMax] + "] to [" +
@@ -483,7 +483,7 @@ pvc.roundScaleDomain = function(scale, roundMode, desiredTickCount){
     // Domain rounding
     if(roundMode){
         switch(roundMode){
-            case 'none': 
+            case 'none':
                 break;
                 
             case 'nice':
@@ -550,11 +550,64 @@ pv.Mark.prototype.addMargins = function(margins) {
     return this;
 };
 
+/* SCENE */
+/**
+ * Iterates through all instances that
+ * this mark has rendered.
+ */
+pv.Mark.prototype.forEachInstances = function(fun, ctx){
+    var mark = this,
+        indexes = [],
+        instances = [];
+
+    /* Go up to the root and register our way back.
+     * The root mark never "looses" its scene.
+     */
+    while(mark.parent){
+        indexes.unshift(mark.childIndex);
+        mark = mark.parent;
+    }
+
+    // mark != null
+
+    // root scene exists if rendered at least once
+    var scene = mark.scene;
+    if(scene){
+        var L = indexes.length;
+
+        function collectRecursive(scene, level, t){
+            if(level === L){
+                for(var i = 0, I = scene.length ; i < I ; i++){
+                    fun.call(ctx, scene[i], t);
+                }
+            } else {
+                var childIndex = indexes[level];
+                for(var index = 0, D = scene.length ; index < D ; index++){
+                    var instance = scene[index],
+                        childScene = instance.children[childIndex];
+
+                    // Some nodes might have not been rendered?
+                    if(childScene){
+                        var toChild = t.times(instance.transform)
+                                       .translate(instance.left, instance.top);
+
+                        collectRecursive(childScene, level + 1, toChild);
+                    }
+                }
+            }
+        }
+
+        collectRecursive(scene, 0, pv.Transform.identity);
+    }
+
+    return instances;
+};
+
 /* BOUNDS */
 pv.Mark.prototype.toScreenTransform = function(){
     var t = pv.Transform.identity;
     
-    var parent = this.parent;
+    var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
     if(parent){
         do {
             t = t.translate(parent.left(), parent.top())
@@ -602,11 +655,11 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     if(mark == null){
         index = this.index;
         scene = this.scene;
-    }
-    else {
+    } else {
         index = mark.index;
         scene = mark.scene;
     }
+    
     m1 = this.mouse();
     
     r = d;
@@ -620,15 +673,20 @@ pv.Behavior.selector = function(autoRefresh, mark) {
   function mousemove(e) {
     if (!scene) return;
     scene.mark.context(scene, index, function() {
+        // this === scene.mark
         var m2 = this.mouse();
+
         r.x = Math.max(0, Math.min(m1.x, m2.x));
         r.y = Math.max(0, Math.min(m1.y, m2.y));
-        r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
+
+        r.dx = Math.min(this.width(),  Math.max(m2.x, m1.x)) - r.x;
         r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
+
         if(redrawThis){
             this.render();
         }
       });
+
     pv.Mark.dispatch("select", scene, index, e);
   }
 
@@ -4100,6 +4158,11 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             .visible(function(d){
                 return this.index==0;
             });
+    },
+
+    clearSelections: function(){
+        this.dataEngine.clearSelections();
+        this.categoricalPanel._handleSelectionChanged();
     }
 
 }, {
@@ -4354,7 +4417,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             action.call(null, selections);
         }
     },
-
+    
     /**
      * The default implementation renders this.pvPanel,
      * which is generally in excess of what actually requires
@@ -4486,6 +4549,10 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
                 //top->bottom
                 y = myself.height - y - rb.dy;
+				
+				// Keep rubber band screen coordinates
+                rb.x0 = rb.x;
+                rb.y0 = rb.y;
 
                 rb.x = x;
                 rb.y = y;
@@ -4581,10 +4648,42 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
     _intersectsRubberBandSelection: function(startX, startY, endX, endY){
         var rb = this.rubberBand;
         return rb &&
-               ((startY >= rb.y && startY < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))) ||
-               ((endY   >= rb.y && endY   < rb.y + rb.dy) && ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx)));
-    }
+            ((startX >= rb.x && startX < rb.x + rb.dx) || (endX >= rb.x && endX < rb.x + rb.dx))
+            &&
+            ((startY >= rb.y && startY < rb.y + rb.dy) || (endY >= rb.y && endY < rb.y + rb.dy));
+    },
+	
+	// Uses screen coordinates
+    _intersectsRubberBandSelection0: function(begX, endX, begY, endY){
+        var rb = this.rubberBand;
+        return rb &&
+                // Some intersection on X
+               (rb.x0 + rb.dx > begX) &&
+               (rb.x0         < endX) &&
+               // Some intersection on Y
+               (rb.y0 + rb.dy > begY) &&
+               (rb.y0         < endY);
+    },
+	
+    _forEachInstanceInRubberBand: function(mark, fun, ctx){
+        var index = 0;
+        mark.forEachInstances(function(instance, t){
+            var begX = t.transformHPosition(instance.left),
+                endX = begX + t.transformLength(instance.width  || 0),
+                begY = t.transformVPosition(instance.top),
+                endY = begY + t.transformLength(instance.height || 0);
 
+//            pvc.log("data=" + instance.data +
+//                    " position=[" + [begX, endX, begY, endY] +  "]" +
+//                    " index=" + index);
+
+            if (this._intersectsRubberBandSelection0(begX, endX, begY, endY)){
+                fun.call(ctx, instance, index);
+            }
+
+            index++;
+        }, this);
+    }
 });
 
 
@@ -8372,90 +8471,41 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
      * @override
      */
     _collectRubberBandSelections: function(){
-        var isVertical = this.isOrientationVertical(),
-            dataEngine = this.chart.dataEngine,
+        var dataEngine = this.chart.dataEngine,
             categories = dataEngine.getVisibleCategories(),
             series = dataEngine.getVisibleSeries(),
             C = categories.length,
             S = series.length;
 
-        var where = [],
-            mark,
-            start, startX, startY, endX, endY, j, i;
+        var rb = this.rubberBand;
+        //pvc.log("rubber=[" + [rb.x0, rb.x0 + rb.dx, rb.y0, rb.y0 + rb.dy] +  "]");
 
-        // Find included series/categories
-        if(!this.stacked){
-            for(i = 0 ; i < C; i++){
-                var foo = this.pvPanel.scene[0].children[0][i],
-                    seriesParent = foo.children[0];
+        var index = 0,
+            where = [];
+        
+        this._forEachInstanceInRubberBand(this.pvBar, function(instance, index){
+            var i, j;
 
-                if (isVertical) {
-                    start  = foo.left;
-
-                    for (j = 0 ; j < S ; j++){
-                        mark = seriesParent[j];
-
-                        startX = mark.left  + start;
-                        endX   = startX + mark.width;
-
-                        startY = mark.bottom;
-                        endY   = mark.height + startY;
-
-                        if (this._intersectsRubberBandSelection(startX, startY, endX, endY)){
-                            where.push({
-                                categories: [categories[i]],
-                                series:     [series[j]]
-                            });
-                        }
-                    }
-
-                } else {
-                    start = foo.bottom;
-
-                    for (j = 0 ; j < S ; j++) {
-                        mark = seriesParent[j];
-
-                        startX = mark.left;
-                        endX   = mark.width  + startX;
-                        startY = mark.bottom + start;
-                        endY   = mark.height + startY;
-
-                        if (this._intersectsRubberBandSelection(startX, startY, endX, endY)){
-                            where.push({
-                                categories: [categories[i]],
-                                series:     [series[j]]
-                            });
-                        }
-                    }
-                }
+            if(this.stacked){
+				// index = j*C + i
+                j = Math.floor(index / C);
+                i = index % C;
+            } else {
+				// index = i*S + j
+                i = Math.floor(index / S);
+                j = index % S;
             }
-        } else {
-            // Stacked
-            // TODO: WIP
-            for (j = 0 ; j < S ; j++){
-                var foo = this.pvPanel.scene[0].children[0][0],
-                    categsParent = foo.children[0][j].children[0];
-                
-                start = foo.left;
-                
-                for(i = 0 ; i < C; i++){
-                    mark = categsParent[j];
-                    
-                    startX = mark.left  + start;
-                    endX   = startX + mark.width;
 
-                    startY = mark.bottom;
-                    endY   = mark.height + startY;
+//            pvc.log("instance data: " + instance.data +
+//                    " index: " + index +
+//                    " [" + [i,j] + "]=[" + [categories[i],series[j]]  + "]");
 
-                    if (this._intersectsRubberBandSelection(startX, startY, endX, endY)){
-                        where.push({
-                                categories: [categories[i]],
-                                series:     [series[j]]
-                            });
-                    }
-                }
-            }
-        }
+            where.push({
+                categories: [categories[i]],
+                series:     [series[j]]
+            });
+        }, this);
+
         return dataEngine.getWhere(where);
     }
     /*
