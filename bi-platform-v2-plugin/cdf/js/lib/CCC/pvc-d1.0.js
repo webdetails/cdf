@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120130
+//VERSION TRUNK-20120131
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -60,6 +60,14 @@ pvc.log = function(m){
 
     if (pvc.debug && typeof console != "undefined"){
         console.log("[pvChart]: " + m);
+    }
+};
+
+pvc.logError = function(m){
+    if (typeof console != "undefined"){
+        console.log("[pvChart ERROR]: " + m);
+    } else {
+        throw new Error("[pvChart ERROR]: " + m);
     }
 };
 
@@ -2719,14 +2727,18 @@ pvc.Base = Base.extend({
                 }
 
                 pvc.log("creating message");
-                var pvPanel = this.basePanel.getPvPanel(), message = pvPanel
-                        .anchor("center").add(pv.Label);
+                var pvPanel = this.basePanel.getPvPanel(), 
+                    message = pvPanel.anchor("center").add(pv.Label);
+                
                 message.text("No data found");
+
                 this.basePanel.extend(message, "noDataMessage_");
+                
                 pvPanel.render();
 
             } else {
                 // We don't know how to handle this
+                pvc.logError(e.message);
                 throw e;
             }
         }
@@ -4015,7 +4027,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var categories = this.dataEngine.getVisibleCategories();
         
         // Adding a small offset to the scale's domain:
-        var parser = pv.Format.date(this.options.timeSeriesFormat),
+        var parser = pv.Format.date(o.timeSeriesFormat),
             dMin = parser.parse(categories[0]),
             dMax = parser.parse(categories[categories.length - 1]),
             dOffset = 0;
@@ -4130,7 +4142,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
     
     markEvent: function(dateString, label, options){
 
-        if( this.options.timeSeries !== true){
+        if(!this.options.timeSeries){
             pvc.log("Attempting to mark an event on a non timeSeries chart");
             return;
         }
@@ -4846,7 +4858,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
 
         var scale = this.pvScale,
-            anchorOpposite    = this.anchorOpposite(),    
+            anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
@@ -5054,7 +5066,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var depthLength = this.axisSize;
         //displace to take out bogus-root
         var baseDisplacement = (1.0/++maxDepth)* depthLength;
-        var margin = (1.0/12.0) * depthLength;//heuristic compensation
+        var margin = maxDepth > 2 ? ((1.0/12.0) * depthLength) : 0;//heuristic compensation
         baseDisplacement -= margin;
         
         var scaleFactor = maxDepth*1.0/ (maxDepth -1);
@@ -5326,6 +5338,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this.lblDirection('h');
                 return 0;//horizontal
             })
+            .textMargin(1)
             //override central alignment for horizontal text in vertical axis
             .textAlign(function(d){
                 return (axisDirection != 'v' || d.depth >= vertDepthCutoff || d.depth >= diagDepthCutoff)? 'center' : align;
@@ -5915,9 +5928,7 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
             showLines: this.options.showLines,
             showDots: this.options.showDots,
             showAreas: this.options.showAreas,
-            orientation: this.options.orientation,
-            timeSeries: this.options.timeSeries,
-            timeSeriesFormat: this.options.timeSeriesFormat
+            orientation: this.options.orientation
         });
 
         return this.scatterChartPanel;
@@ -6024,9 +6035,6 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     pvLabel: null,
     pvCategoryPanel: null,
 
-    timeSeries: false,
-    timeSeriesFormat: "%Y-%m-%d",
-
     stacked: false,
     showAreas: false,
     showLines: true,
@@ -6068,9 +6076,9 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             parser = null, // - warning
             categoryComparer = null; // ~ warning
 
-        if(this.timeSeries){
+        if(o.timeSeries){
             tScale = chart.getTimeseriesScale(true, true);
-            parser = pv.Format.date(this.timeSeriesFormat);
+            parser = pv.Format.date(o.timeSeriesFormat);
             categoryComparer = pvc.createDateComparer(parser, function(d){
                 return d.category;
             });
@@ -6093,7 +6101,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 //  top to bottom (according to the legend)
                 .order(isVertical  ? "reverse"  : null)
                 [isVertical ? "x" : "y"](
-                    this.timeSeries ?
+                    o.timeSeries ?
                         function(){
                             return tScale(parser.parse(de.getCategoryByIndex(this.index)));
                         } :
@@ -6127,7 +6135,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
                 .segmented(true)
                 .visible(function(d) { return d.value != null; })
                 [pvc.BasePanel.relativeAnchor[anchor]](
-                    this.timeSeries ?
+                    o.timeSeries ?
                         function(dataItem){ return tScale(parser.parse(dataItem.category)); } :
                         function(dataItem){ return oScale(dataItem.category) + oScale.range().band/2; })
                 [anchor](function(dataItem){
@@ -7046,7 +7054,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
     }
     var scale = pv.Scale.linear();
-    scale.domain.apply(scale,domainArgs)
+    scale.domain.apply(scale,domainArgs);
     scale.range.apply(scale,rangeArgs);
     return pv.dict(cols,function(f){ return scale;});
   },
@@ -7108,6 +7116,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 
 
 });//end: HeatGridChartPanel
+
 /**
  * MetricAbstract is the base class for all chart types that have
  * a two linear axis.
@@ -7252,9 +7261,8 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
  * <i>lineLabel_</i> - for the main line label
  */
 
-
 pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
-
+    
   pvLine: null,
   pvArea: null,
   pvDot: null,
@@ -7273,7 +7281,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 //    this.base(chart,options);
 //  },
 
-  prepareDataFunctions:  function() {
+  prepareDataFunctions: function(){
     /*
         This function implements a number of helper functions via
         closures. The helper functions are all stored in this.DF
@@ -7283,14 +7291,13 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     var myself = this,
         chart = this.chart,
         dataEngine = chart.dataEngine,
-        options = chart.options;
-
-    var baseScale = chart.getLinearBaseScale(true);
-    var orthoScale = chart.getLinearScale(true),
+        options = chart.options,
+        baseScale = chart.getLinearBaseScale(true),
+        orthoScale = chart.getLinearScale(true),
         tScale,
         parser;
 
-    if(this.timeSeries){
+    if(options.timeSeries){
         parser = pv.Format.date(options.timeSeriesFormat);
         tScale = chart.getTimeseriesScale(true);
     }
@@ -7299,7 +7306,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
     myself.DF = {}
 
     myself.DF.baseValues = dataEngine.getVisibleCategories();
-    myself.DF.visibleSerieIds = dataEngine.getVisibleSeriesIndexes()
+    myself.DF.visibleSerieIds = dataEngine.getVisibleSeriesIndexes();
 //    myself.DF.data = dataEngine.getVisibleTransposedValues();
 
     // calculate a position along the base-axis
@@ -7315,7 +7322,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
     // get a data-series for the ID
     var pFunc;
-    if (this.timeSeries) {
+    if (options.timeSeries) {
         pFunc = function(a,b){
             return parser.parse(a.category) - parser.parse(b.category);
         };
@@ -7329,8 +7336,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         };
 
 
-    var colors = this.chart.colors(
-         pv.range(dataEngine.getSeriesSize()));
+    var colors = this.chart.colors(pv.range(dataEngine.getSeriesSize()));
 
     myself.DF.colorFunc = function(d){
         // return colors(d.serieIndex)
@@ -7373,7 +7379,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
       this.pvScatterPanel = this.pvPanel.add(pv.Layout.Stack)
       .layers(pvc.padMatrixWithZeros(this.chart.dataEngine.getVisibleTransposedValues()))
       [this.orientation == "vertical"?"x":"y"](function(){
-        if(myself.timeSeries){
+        if(options.timeSeries){
           return tScale(parser.parse(myself.chart.dataEngine.getCategoryByIndex(this.index)));
         }
         else{
@@ -7422,12 +7428,12 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
         var s = dataEngine.getVisibleSeries()[this.parent.index]
         if( typeof d == "object"){
           v = d.value;
-          c = d.category
+          c = d.category;
         }
         else{
-          v = d
-          c = dataEngine.getVisibleCategories()[this.index]
-        };
+          v = d;
+          c = dataEngine.getVisibleCategories()[this.index];
+        }
         return options.tooltipFormat.call(myself,s,c,v);
       })
 
@@ -8073,7 +8079,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         if(options.secondAxis){
             var parser = pv.Format.date(options.timeSeriesFormat);
             this.DF.secBasePosFunc = function(d){
-                return myself.timeSeries
+                return options.timeSeries
                        ? tScale(parser.parse(d.category))
                        : (oScale(d.category) + ordBand / 2);
             };
@@ -8088,7 +8094,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         this.DF.orthoLengthFunc = this.stacked ?
             function(d){
-                return chart.animate(0, lScale(d||0)-lScale(0) );
+                return chart.animate(0, lScale(d||0) - lScale(0));
             } :
             function(d){
                 var res = chart.animate(0,
@@ -8258,7 +8264,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.pvArea = this.pvSecondScatterPanel.add(pv.Area)
                 .fillStyle(null);
             
-            var valueComparer = this.timeSeries ?
+            var valueComparer = options.timeSeries ?
                                 pvc.createDateComparer(
                                     pv.Format.date(options.timeSeriesFormat), 
                                     function(item){ return item.category; }) :
@@ -10350,7 +10356,7 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
         if(options.secondAxis){
             var timeSeries = options.timeSeries,
                 parser = timeSeries ? 
-                            pv.Format.date(this.options.timeSeriesFormat) :
+                            pv.Format.date(options.timeSeriesFormat) :
                             null;
 
             // Second axis - support for lines
