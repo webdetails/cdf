@@ -1,4 +1,5 @@
-//VERSION TRUNK-20120130
+//VERSION TRUNK-20120131
+
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -4846,7 +4847,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     renderOrdinalAxis: function(){
 
         var scale = this.pvScale,
-            anchorOpposite    = this.anchorOpposite(),    
+            anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
@@ -5054,7 +5055,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var depthLength = this.axisSize;
         //displace to take out bogus-root
         var baseDisplacement = (1.0/++maxDepth)* depthLength;
-        var margin = (1.0/12.0) * depthLength;//heuristic compensation
+        var margin = maxDepth > 2 ? ((1.0/12.0) * depthLength) : 0;//heuristic compensation
         baseDisplacement -= margin;
         
         var scaleFactor = maxDepth*1.0/ (maxDepth -1);
@@ -5326,6 +5327,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this.lblDirection('h');
                 return 0;//horizontal
             })
+            .textMargin(1)
             //override central alignment for horizontal text in vertical axis
             .textAlign(function(d){
                 return (axisDirection != 'v' || d.depth >= vertDepthCutoff || d.depth >= diagDepthCutoff)? 'center' : align;
@@ -7046,7 +7048,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
     }
     var scale = pv.Scale.linear();
-    scale.domain.apply(scale,domainArgs)
+    scale.domain.apply(scale,domainArgs);
     scale.range.apply(scale,rangeArgs);
     return pv.dict(cols,function(f){ return scale;});
   },
@@ -7108,6 +7110,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
 
 
 });//end: HeatGridChartPanel
+
 /**
  * MetricAbstract is the base class for all chart types that have
  * a two linear axis.
