@@ -1,6 +1,5 @@
 //VERSION TRUNK-20120201
 
-
 // ECMAScript 5 shim
 if(!Object.keys) {
     Object.keys = function(o){
