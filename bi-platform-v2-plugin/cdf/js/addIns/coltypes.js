@@ -116,6 +116,7 @@
     name: "dataBar",
     label: "Data Bar",
     defaults: {
+      width: undefined,
       widthRatio:1,
       height: 10,
       startColor: "#55A4D6",
@@ -157,7 +158,8 @@
       var cell = $(tgt);
       cell.empty(); 
       var ph =$("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
-      var wtmp = opt.widthRatio * ph.width();
+      var wtmp = opt.width || ph.width();
+      wtmp *= opt.widthRatio;
       var htmp = opt.height;       
     
       var leftVal  = Math.min(val,0),
@@ -201,13 +203,19 @@
     },
     implementation: function(tgt, st, opt) {
       var ph = $(tgt),
-      qualityClass = opt.good ? "good" : "bad",
-      trendClass =  st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up";
+        qualityClass = opt.good ? "good" : "bad",
+        /* Anything that's not numeric is an invalid value.
+         * We consider "numeric" to mean either a number,
+         * or a string that is a fixed point for conversion
+         * to number and back to string.
+         */
+        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() == st.value),
+        trendClass = !isNumeric ? "invalid": (st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up");
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();
       if(opt.includeValue) {
-        ph.append(opt.valueFormat(st.value, st.colFormat, st));
+        ph.append("<div>"+opt.valueFormat(st.value, st.colFormat, st) + "</div>");
       }
       ph.append(trend);
     }
@@ -384,6 +392,30 @@
     
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(formattedText));
+  
+  var localizedText = {
+    name: "localizedText",
+    label: "Localized Text",
+    defaults: {
+      localize: function(v) {return Dashboards.i18nSupport.prop(v);}
+    },
+
+    init: function(){
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['string-desc'];
+    },
+    
+    implementation: function(tgt, st, opt){
+      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        var text = this.defaults.localize(st.value) ;
+      	$(tgt).empty().append(text);
+      	//change data, too, in order for search and sorting to work correctly on the localized text
+      	st.tableData[st.rowIdx][st.colIdx] = text;
+      }
+    },
+
+  };
+  Dashboards.registerAddIn("Table", "colType", new AddIn(localizedText));
 
 })();
 

@@ -1,7 +1,14 @@
+.trendArrow {
+  text-align: right;
+}
+
+.trendArrow > div{
+  display: inline-block;
+}
+
 .trend {
   width: 10px;
   height: 10px;
-  display: inline-block;
   margin-left: 5px;
 }
 .trend.up.good {
@@ -10,6 +17,9 @@
 
 .trend.neutral {
   background: url("img/neutral.png");
+}
+
+.trend.invalid {
 }
 
 .trend.down.good {
