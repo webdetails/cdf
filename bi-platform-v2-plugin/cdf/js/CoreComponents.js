@@ -1284,7 +1284,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         }
         selectHTML += " type='radio'";
       }else{
-        if ((i == 0 && !hasCurrentVal) ||
+        if ((i == 0 && !hasCurrentVal && this.defaultIfEmpty) ||
           (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
         }
