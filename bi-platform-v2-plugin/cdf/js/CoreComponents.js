@@ -1284,7 +1284,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         }
         selectHTML += " type='radio'";
       }else{
-        if ((i == 0 && !hasCurrentVal) ||
+        if ((i == 0 && !hasCurrentVal && this.defaultIfEmpty) ||
           (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
         }
@@ -1921,6 +1921,9 @@ var TableComponent = BaseComponent.extend({
     myself.ph.html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
     // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
     this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
+  
+    // We'll create an Array to keep track of the open expandable rows.
+    this.dataTable.anOpen = [];
 
 
     myself.ph.find ('table').bind('click',function(e) {
@@ -1971,16 +1974,29 @@ var TableComponent = BaseComponent.extend({
                     var value = event.series;
                     var htmlContent = $("#" + detailContainerObj).html();
                    
+                    var anOpen = myself.dataTable.anOpen;
+                    var i = $.inArray( row, anOpen );
+                   
                     if( obj.hasClass(activeclass) ){
-                    obj.removeClass(activeclass);
-                    myself.dataTable.fnClose( row );
+                      obj.removeClass(activeclass);
+                      myself.dataTable.fnClose( row );
+                      anOpen.splice(i,1);
                     }
                     else{
-                            var prev = obj.siblings('.'+activeclass).each(function(i,d){
+                            // Closes all open expandable rows .
+                            for ( var j=0; j < anOpen.length; j++ ){
+                                $(anOpen[j]).removeClass(activeclass);
+                                myself.dataTable.fnClose( anOpen[j] );
+                                anOpen.splice(j ,1);
+                            }
+                            
+                            //Closes previously opened expandable row.
+                           /* var prev = obj.siblings('.'+activeclass).each(function(i,d){
                                     var curr = $(d);
                                     curr.removeClass(activeclass);
                                     myself.dataTable.fnClose( d );
-                            });
+                            });*/
+
                             obj.addClass(activeclass);
                             
                             //Read parameters and fire changes
@@ -1989,6 +2005,7 @@ var TableComponent = BaseComponent.extend({
                             	Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);                            
                             });
                             myself.dataTable.fnOpen( row, htmlContent, activeclass );
+                            anOpen.push( row );
                     };
             };
     }

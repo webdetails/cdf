@@ -215,7 +215,8 @@
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();
       if(opt.includeValue) {
-        ph.append("<div>"+opt.valueFormat(st.value, st.colFormat, st) + "</div>");
+        var valph = $("<div class='value'></div>").append(opt.valueFormat(st.value, st.colFormat, st));
+        valph.appendTo(ph);
       }
       ph.append(trend);
     }
