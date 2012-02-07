@@ -1985,6 +1985,7 @@ var TableComponent = BaseComponent.extend({
                     else{
                             // Closes all open expandable rows .
                             for ( var j=0; j < anOpen.length; j++ ){
+                                $(anOpen[j]).removeClass(activeclass);
                                 myself.dataTable.fnClose( anOpen[j] );
                                 anOpen.splice(j ,1);
                             }
