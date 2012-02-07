@@ -46,10 +46,15 @@ public class PluginHibernateUtil
 
     // Start our own hibernate session, copying everything from the original
     configuration = new Configuration();
-    configuration.setProperties(HibernateUtil.getConfiguration().getProperties());
 
-    sessionFactory = configuration.buildSessionFactory();
 
+    final IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
+    final String hibernateAvailable = resLoader.getPluginSetting(PluginHibernateUtil.class, "settings/hibernate-available");
+
+    if ("true".equalsIgnoreCase(hibernateAvailable)) {
+      configuration.setProperties(HibernateUtil.getConfiguration().getProperties());
+      sessionFactory = configuration.buildSessionFactory();
+    }
     return true;
 
 

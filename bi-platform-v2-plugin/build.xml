@@ -121,7 +121,7 @@
 		   </copy>
 
 		   <!-- create the version file -->
-		   <echo file="${stage.dir}/${plugin.name}/VERSION.txt">${project.version}</echo>
+		   <echo file="${stage.dir}/${plugin.name}/VERSION.txt">${project.revision}</echo>
 
 		   <!-- Copy js folder into dist -->
 		   <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
@@ -130,10 +130,10 @@
 			   </fileset>
 		   </copy>
 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.version}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.version}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0" value="Version ${project.version}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0" value="Version ${project.version}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.revision}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.revision}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0" value="Version ${project.revision}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0" value="Version ${project.revision}"/> 
 
 
 

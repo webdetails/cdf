@@ -1425,43 +1425,58 @@ sprintfWrapper = {
 
 sprintf = sprintfWrapper.init;
 
+//Normalization - Ensure component does not finish with component and capitalize first letter
+Dashboards.normalizeAddInKey = function(key) {
+  	if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
+  		key = key.substring(0, key.length - 'Component'.length);	
+	return key.charAt(0).toUpperCase() + key.substring(1);
+}
 
 Dashboards.registerAddIn = function(component,slot,addIn){
   if (!this.addIns) {
     this.addIns = {};
   }
-  if (!this.addIns[component]) {
-    this.addIns[component] = {};  
+  
+
+  var key = this.normalizeAddInKey(component);
+  
+  
+  if (!this.addIns[key]) {
+    this.addIns[key] = {};  
   }
-  if (!this.addIns[component][slot]) {
-    this.addIns[component][slot] = {};  
+  if (!this.addIns[key][slot]) {
+    this.addIns[key][slot] = {};  
   }
-  this.addIns[component][slot][addIn.getName()] = addIn;  
+  this.addIns[key][slot][addIn.getName()] = addIn;  
 };
 
 Dashboards.hasAddIn = function(component,slot,addIn){
-  return Boolean(this.addIns && this.addIns[component] &&
-    this.addIns[component][slot] && this.addIns[component][slot][addIn]);
+	var key = this.normalizeAddInKey(component);
+  return Boolean(this.addIns && this.addIns[key] &&
+    this.addIns[key][slot] && this.addIns[key][slot][addIn]);
 };
 
 Dashboards.getAddIn = function(component,slot,addIn){
+	var key = this.normalizeAddInKey(component);
   try {
-    return this.addIns[component][slot][addIn];
+    return this.addIns[key][slot][addIn];
   } catch (e) {
     return null;
   }
 };
 
 Dashboards.setAddInDefaults = function(component, slot, addInName, defaults) {
-  var addIn = this.getAddIn(component,slot,addInName);
+var key = this.normalizeAddInKey(component);
+  var addIn = this.getAddIn(key,slot,addInName);
   if(addIn) {
     addIn.setDefaults(defaults);
   }
 };
 Dashboards.listAddIns = function(component,slot) {
+var key = this.normalizeAddInKey(component);
   var addInList = [];
   try {
-    var slot = this.addIns[component][slot];
+    var slot = this.addIns[key][slot];
     for (var addIn in slot) if (slot.hasOwnProperty(addIn)) { 
       addInList.push([addIn, slot[addIn].getLabel()]);
     }
@@ -1630,7 +1645,19 @@ Query = function() {
       }
       _lastResultSet = json;
       var clone = Dashboards.safeClone(true,{},_lastResultSet);
-      callback(_mode == 'CDA' ? clone : clone.values);
+      
+      if (_mode == 'Legacy') {
+      	var newMetadata = [{"colIndex":0,"colType":"String","colName":"Name"}];
+      	for (var i = 0 ; i < clone.metadata.length; i++) {
+      		var x = i;
+			newMetadata.push({"colIndex":x+1,"colType":"String","colName":clone.metadata[x]});
+		}      
+		clone.resultset = clone.values;
+		clone.metadata = newMetadata;
+		clone.values = null;
+      }
+      
+      callback(clone);
     });
   };
 
