@@ -190,7 +190,8 @@ pvc.mergeOwn = function(to, from){
 
 pvc.mergeDefaults = function(to, defaults, from){
     pvc.forEachOwn(defaults, function(dv, p){
-        to[p] = (from && from.hasOwnProperty(p)) ? from[p] : dv;
+        var v;
+        to[p] = (from && from.hasOwnProperty(p) && (v = from[p]) !== undefined) ? v : dv;
     });
     return to;
 };
@@ -1833,6 +1834,27 @@ pvc.DataEngine = Base.extend({
     setData: function(metadata, resultset){
         this.metadata  = metadata;
         this.resultset = resultset;
+
+        if(pvc.debug){
+            pvc.log("ROWS");
+            if(this.resultset){
+                this.resultset.forEach(function(row, index){
+                    pvc.log("row " + index + ": [" + row + "]");
+                });
+            }
+
+            pvc.log("COLS");
+            if(this.metadata){
+                this.metadata.forEach(function(col){
+                    pvc.log("column {" +
+                        "index: " + col.colIndex +
+                        ", name: "  + col.colName +
+                        ", label: "  + col.colLabel +
+                        ", type: "  + col.colType + "}"
+                    );
+                });
+            }
+        }
     },
     
     // TODO: in multiValued mode, have all options only related to data mapping in one object?
@@ -2780,6 +2802,11 @@ pvc.Base = Base.extend({
     preRender: function() {
         pvc.log("Prerendering in pvc");
 
+        /* DEBUG current options */
+        if(pvc.debug && this.options && typeof(JSON.stringify) !== 'undefined'){
+            pvc.log("OPTIONS:\n" + JSON.stringify(this.options));
+        }
+
         // Now's as good a time as any to completely clear out all
         //  tipsy tooltips
         pvc.removeTipsyLegends();
@@ -3085,7 +3112,8 @@ pvc.Base = Base.extend({
             // pv.Format.number().fractionDigits(0, 10).parse(d));
         },
 
-        clickable: false,
+        clickable:  false,
+        selectable: false,
 
         clickAction: function(s, c, v) {
             pvc.log("You clicked on series " + s + ", category " + c + ", value " + v);
@@ -4546,7 +4574,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         // Create something usefull...
         this.createCore();
         
-        if (pv.renderer() !== 'batik'){
+        if (options.selectable && pv.renderer() !== 'batik'){
             this._createSelectionOverlay();
         }
     },
@@ -4609,15 +4637,21 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
     },
 
-    _handleClick: function(mark, d, ev){
+    _shouldHandleClick: function(){
         var options = this.chart.options;
-        if(!options.clickable){
+        return options.selectable || (options.clickable && options.clickAction);
+    },
+    
+    _handleClick: function(mark, d, ev){
+        if(!this._shouldHandleClick()){
             return;
         }
 
         // Selection
         var datum = this._getRenderingDatum(mark);
         if(datum){
+            var options = this.chart.options;
+            
             if(!options.doubleClickAction){
                 this._handleClickCore(mark, datum, d, ev);
             } else {
@@ -4656,15 +4690,18 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         }
 
         // Selection
-        if(this.chart.options.ctrlSelectMode && !ev.ctrlKey){
-            // hard select
-            datum.engine.clearSelections();
-            datum.setSelected(true);
-        } else {
-            datum.toggleSelected();
-        }
+        var options = this.chart.options;
+        if(options.selectable){
+            if(options.ctrlSelectMode && !ev.ctrlKey){
+                // hard select
+                datum.engine.clearSelections();
+                datum.setSelected(true);
+            } else {
+                datum.toggleSelected();
+            }
 
-        this._handleSelectionChanged();
+            this._handleSelectionChanged();
+        }
     },
 
     _handleSelectionChanged: function(){
@@ -4735,8 +4772,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 titleOffset = setPositions();
             }
 
-            var xAxisOffset = setPositions(options.xAxisPosition, xAxisPanel.height),
-                yAxisOffset = setPositions(options.yAxisPosition, yAxisPanel.width);
+            var xAxisOffset = setPositions(options.xAxisPosition, xAxisPanel ? xAxisPanel.height : 0),
+                yAxisOffset = setPositions(options.yAxisPosition, yAxisPanel ? yAxisPanel.width  : 0);
 
             var y = 0,
                 x = 0;
@@ -4754,8 +4791,10 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     y -= myself.height;
                 }
 
-                xSelections = xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
-
+                if(xAxisPanel){
+                    xSelections = xAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+                }
+                
                 //2) y axis
                 x = rb.x - titleOffset['left'];
                 y = rb.y - titleOffset['top'] - xAxisOffset['top'];
@@ -4764,7 +4803,9 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                     x -= myself.width;
                 }
 
-                ySelections = yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+                if(yAxisPanel){
+                    ySelections = yAxisPanel.getAreaSelections(x, y, rb.dx, rb.dy);
+                }
             }
 
             var cSelections = isHorizontal ? ySelections : xSelections,
@@ -4827,11 +4868,11 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         // Rubber band
         var selectBar = this.selectBar = this.pvPanel.root//TODO
            .add(pv.Bar)
-                .visible(function() { return isSelecting; } )
-                .left(function(d) { return d.x; })
-                .top(function(d) { return d.y;})
-                .width(function(d) { return d.dx;})
-                .height(function(d) { return d.dy;})
+                .visible(function() {return isSelecting;} )
+                .left(function(d) {return d.x;})
+                .top(function(d) {return d.y;})
+                .width(function(d) {return d.dx;})
+                .height(function(d) {return d.dy;})
                 .fillStyle(options.rubberBandFill)
                 .strokeStyle(options.rubberBandLine);
 
@@ -5084,7 +5125,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Ordinal ticks are drawn at the center of each band,
         //  and not at the beginning, as in a linear axis.
         this.pvTicks = this.pvRule.add(pv.Rule)
-        	.zOrder(20) // see pvc.js
+            .zOrder(20) // see pvc.js
             .data(ticks)
             //[anchorOpposite   ](0)
             [anchorLength     ](null)
@@ -5103,7 +5144,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .zOrder(40) // see pvc.js
             .textAlign(align)
             //.textBaseline("middle")
-            .text(function(e){ return e.label; })
+            .text(function(e){return e.label;})
             .font("9px sans-serif");
         
         if(this.fullGrid){
@@ -5126,7 +5167,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     return scale(e.value) - scale.range().margin / 2;
                 })
                 [anchorOrthoLength]( ruleLength)
-                .visible(function(){ return (this.index > 0); });
+                .visible(function(){return (this.index > 0);});
         }
     },
 
@@ -5269,9 +5310,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
     },
 
-    _handleClick: function(d, ev){
+    _shouldHandleClick: function(){
         var options = this.chart.options;
-        if(!options.clickable || !d){
+        return options.selectable || (options.clickable && this.clickAction);
+    },
+
+    _handleClick: function(d, ev){
+        if(!d || !this._shouldHandleClick()){
             return;
         }
 
@@ -5283,7 +5328,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             // Delay click evaluation so that
             // it may be canceled if double click meanwhile
             // fires.
-            var myself = this;
+            var myself  = this,
+                options = this.chart.options;
             window.setTimeout(
                 function(){
                     myself._handleClickCore.call(myself, d, ev);
@@ -5305,8 +5351,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
 
         // TODO: should this be cancellable by the click action?
-        if(this.ordinal){
-            var toggle = this.chart.options.ctrlSelectMode && !ev.ctrlKey;
+        var options = this.chart.options;
+        if(options.selectable && this.ordinal){
+            var toggle = options.ctrlSelectMode && !ev.ctrlKey;
             this._selectOrdinalElement(d, toggle);
         }
     },
@@ -5597,9 +5644,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             .cursor('default')
             .events('all'); //labels don't have events by default
 
-        if(options.clickable){
+        if(this._shouldHandleClick()){
             this.pvLabel
-                .cursor('pointer')
+                .cursor("pointer")
                 .event('click', function(d){
                     var ev = arguments[arguments.length - 1];
                     return myself._handleClick(d, ev);
@@ -6142,6 +6189,9 @@ pvc.ScatterAbstract = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.ScatterAbstract.defaultOptions, options);
+
+        // This categorical chart does not support selection, yet
+        this.options.selectable = false;
     },
 
     /* @override */
@@ -6275,7 +6325,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             options  = chart.options,
             de = chart.dataEngine;
 
-        if(options.showTooltips || options.clickable){
+        if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
               .events("all")
               .event("mousemove", pv.Behavior.point(Infinity));
@@ -6388,7 +6438,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .strokeStyle(this.showDots?colorFunc:null)
             .fillStyle(this.showDots?colorFunc:null);
 
-        if (options.clickable){
+        if (this._shouldHandleClick()){
             this.pvDot
                 .cursor("pointer")
                 .event("click", function(d){
@@ -6671,7 +6721,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
         // clickAction
-        if (options.clickable){
+        if (this._shouldHandleClick()){
             this.pvHeatGrid
                 .cursor("pointer")
                 .event("click", function(row, rowCol){
@@ -6853,7 +6903,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 return myself.valuesToText(r[i]);
             });
 
-        if(options.clickable){
+        if(this._shouldHandleClick()){
             this.shapes
                 .cursor("pointer")
                 .event("click", function(r, ra,i) {
@@ -7316,6 +7366,9 @@ pvc.MetricAbstract = pvc.CategoricalAbstract.extend({
 
     constructor: function(options){
         this.base(options);
+
+        // This categorical chart does not support selection, yet
+        this.options.selectable = false;
     },
 
     /* @override */
@@ -7538,7 +7591,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             dataEngine = this.chart.dataEngine;
 
         // TODO: what's this?
-        if(options.showTooltips || options.clickable){
+        if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
                 .events("all")
                 .event("mousemove", pv.Behavior.point(Infinity));
@@ -7604,7 +7657,7 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             .strokeStyle(this.showDots ? myself.DF.colorFunc : null)
             .fillStyle(this.showDots ? myself.DF.colorFunc : null);
     
-        if (this.chart.options.clickable){
+        if (this._shouldHandleClick()){
             this.pvDot
                 .cursor("pointer")
                 .event("click", function(d){
@@ -8460,7 +8513,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
 
-        if (options.clickable){
+        if(this._shouldHandleClick()){
             this.pvBar
                 .cursor("pointer")
                 .event("click", function(d){
@@ -10312,6 +10365,9 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
         // Apply options
         pvc.mergeDefaults(this.options, pvc.BoxplotChart.defaultOptions, options);
+
+        // This categorical chart does not support selection, yet
+        this.options.selectable = false;
     },
     
     /* @override */
@@ -10457,10 +10513,10 @@ pvc.BoxplotChartPanel = pvc.CategoricalAbstractPanel.extend({
         }
 
 
-        if (this.chart.options.clickable){
+        if (this._shouldHandleClick()){
             this.pvBar
                 .cursor("pointer")
-                .event("click",function(d){
+                .event("click", function(d){
                     var s = dataEngine.getVisibleSeries()[this.parent.index];
                     var c = dataEngine.getVisibleCategories()[this.index];
 
