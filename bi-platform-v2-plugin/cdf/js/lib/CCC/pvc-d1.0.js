@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120207
+//VERSION TRUNK-20120208
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -6327,6 +6327,7 @@ pvc.ScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
+              // Receive events even if in a transparent panel (default is "painted")
               .events("all")
               .event("mousemove", pv.Behavior.point(Infinity));
         }
@@ -7590,9 +7591,9 @@ pvc.MetricScatterChartPanel = pvc.CategoricalAbstractPanel.extend({
             options = this.chart.options,
             dataEngine = this.chart.dataEngine;
 
-        // TODO: what's this?
         if(options.showTooltips || this._shouldHandleClick()){
             this.pvPanel
+                // Receive events even if in a transparent panel (default is "painted")
                 .events("all")
                 .event("mousemove", pv.Behavior.point(Infinity));
         }
