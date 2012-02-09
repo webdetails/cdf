@@ -41,10 +41,12 @@ BaseComponent = Base.extend({
     return that;
   },
   getAddIn: function (slot,addIn) {
-    return Dashboards.getAddIn(this.type,slot,addIn);
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    return Dashboards.getAddIn(type,slot,addIn);
   },
   hasAddIn: function (slot,addIn) {
-    return Dashboards.hasAddIn(this.type,slot,addIn);
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    return Dashboards.hasAddIn(type,slot,addIn);
   },
   getValuesArray : function() {
 
@@ -170,7 +172,8 @@ BaseComponent = Base.extend({
   },
 
   setAddInDefaults: function(slot,addIn,defaults) {
-    Dashboards.setAddInDefaults(this.type,slot,addIn,defaults)
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    Dashboards.setAddInDefaults(type,slot,addIn,defaults)
   },
   setAddInOptions: function(slot, addIn,options) {
     if(!this.addInOptions) {
