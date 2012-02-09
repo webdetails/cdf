@@ -362,9 +362,14 @@ var markRender = pv.Mark.prototype.render,
 
 // @replace
 pv.Panel.prototype.add = function(){
-    this._needChildSort = this._needChildSort || this._hasZOrderChild;
-    
-    return panelAdd.apply(this, arraySlice.call(arguments));
+    var mark = panelAdd.apply(this, arraySlice.call(arguments));
+
+    // Detect new child with non-zero ZOrder
+    if(!this._hasZOrderChild && mark._zOrder !== 0){
+        this._hasZOrderChild = this._needChildSort  = true;
+    }
+
+    return mark;
 };
 
 // @replace
@@ -5077,7 +5082,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             rSize = rMax - rMin;
         
         this.pvRule = this.pvPanel.add(pv.Rule)
-        		.zOrder(30) // see pvc.js
+                .zOrder(30) // see pvc.js
                 .strokeStyle('black')
                 // ex: anchor = bottom
                 [this.anchorOpposite()](0)     // top    (of the axis panel)
