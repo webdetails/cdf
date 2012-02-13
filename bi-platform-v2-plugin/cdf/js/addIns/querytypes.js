@@ -126,7 +126,7 @@
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: webAppPath + "/ViewAction?solution=cdf&path=components&action=jtable.xaction"
+      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction"
     },    
     
     implementation: function (tgt, st, opt) {
