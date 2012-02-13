@@ -312,12 +312,16 @@
 		  <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
 	  </antcall>
 
+
+<!--
 	  <replace file="solution-pom.xml" token="jar" value="zip" />
 	  <replace file="solution-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-solution" />
 	  <antcall target="maven-publish-artifact">
 		  <param name="publish.pomFile" value="solution-pom.xml" />
 		  <param name="publish.file" value="${dist.dir}/${plugin.solution.zipfile}" />
 	  </antcall>
+-->	  
+	  
   </target>
 
   <target name="minify-client">
