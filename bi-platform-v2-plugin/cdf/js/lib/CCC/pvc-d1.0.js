@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120209
+//VERSION TRUNK-20120213
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -571,6 +571,10 @@ pvc.roundScaleDomain = function(scale, roundMode, desiredTickCount){
 };
 
 /* PROPERTIES */
+/**
+ * Returns the value of a property as specified upon definition,
+ * and, thus, without evaluation.
+ */
 pv.Mark.prototype.getStaticPropertyValue = function(name) {
     var properties = this.$properties;
     for (var i = 0, L = properties.length; i < L; i++) {
@@ -581,7 +585,17 @@ pv.Mark.prototype.getStaticPropertyValue = function(name) {
     }
     //return undefined;
 };
-  
+
+/**
+ * Function used to propagate a datum received, as a singleton list.
+ * Use this to prevent re-evaluation of inherited data property functions!
+ */
+pv.dataIdentity = function(datum){
+    //pvc.log("dataIdentity " + this.type + " datum: " + 
+    //        (typeof datum.describe == 'function' ? datum.describe() : datum));
+    return [datum];
+};
+
 /* ANCHORS */
 /**
  * name = left | right | top | bottom
@@ -781,42 +795,32 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     $.support.svg = $.support.svg || 
         document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
 })(jQuery);
-pvc.Datum = Base.extend(
-/** 
- * @lends Datum# 
+/**
+ * A datum is the atomic data entity of the data model.
+ * A datum contains key properties, of specific data dimensions.
+ * A datum contains a value property.
+ * A datum belongs to a given data engine.
+ *
+ *  datum.elem["series"].value;
+ *  datum.elem.category.value;
+ *
+ * @constructs
+ */
+pvc.Datum = function(dataEngine, datumIndex, elemsByDim, value){
+    // TODO: hardcoded for 2 dimensions
+
+    this.engine = dataEngine;
+    this.index = datumIndex; // -1 => null datum
+    this.elem = elemsByDim;
+    this.value = value;
+    this._selected = false;
+};
+
+$.extend(pvc.Datum.prototype,
+/**
+ * @lends Datum#
  */
 {
-    /**
-     * A datum is the atomic data entity of the data model.
-     * A datum contains key properties, of specific data dimensions.
-     * A datum contains a value property.
-     * A datum belongs to a given data engine.
-     * @constructs
-     */
-    constructor: function(dataEngine, datumIndex, serIndex, serValue, catIndex, catValue, value){
-        // TODO: hardcoded for 2 dimensions
-        
-        this.engine = dataEngine;
-        this.index = datumIndex; // -1 => null datum
-        
-        this.keyValues = {
-            series:     serValue,
-            categories: catValue
-        };
-        
-        this.keyIndexes = {
-            series:     serIndex,
-            categories: catIndex
-        };
-        
-        this.value = value;
-        
-        this._selected = false;
-    },
-    
-    // -------------------
-    // Selected state
-    
     // Called by engine on clear
     _deselect: function(){
         this._selected = false;
@@ -854,6 +858,24 @@ pvc.Datum = Base.extend(
      */
     toggleSelected: function(){
         this.setSelected(!this._selected);
+    },
+
+    describe: function(){
+        var s = ["DATUM #" + this.index];
+
+        this.engine._dimensionList.forEach(function(dimension){
+            var name = dimension.name,
+                elem = this.elem[name];
+            s.push(
+                "\t" + name + ": " +
+                     JSON.stringify(elem.value) + "|" + elem.index);
+        }, this);
+        
+        return s.join(" ");
+    },
+
+    toString: function(){
+        return '' + this.value;
     }
 });
 pvc.DataDimension = Base.extend(
@@ -956,7 +978,7 @@ pvc.DataDimension = Base.extend(
         // NOTE: The hierarchy need not be uniform.
         // Some leaf nodes may have depth 1, while others, depth 2.
         
-        var root   = this._addElement(),
+        var root   = new pvc.DataElement(this),
             values = onlyVisible ? this.getVisibleValues() : this.getValues();
 
         if(reversed){
@@ -977,16 +999,17 @@ pvc.DataDimension = Base.extend(
 
                 var child = node.childNodesByKey[key];
                 if(!child){
-                    child = this._addElement(key, node);
+                    // Only leaf nodes receive indexes
+                    var index = k === K - 1 ? elements.length : -1;
+                    child = new pvc.DataElement(this, key, node, index);
                 }
-
-                // Some data contains duplicates.
-                // Such as in the category dimension of metric charts.
-                // Try pvcMetricScatter.js
-//                else if(k === K - 1)
-//                {
-//                    //throw new Error("Not-unique key data.");
-//                }
+                // Duplicate values are ignored
+                // This happend because not all translators return distinct
+                // per dimension values.
+                // The crosstab translator does not check whether the provided
+                // categories are unique when getCategories is called.
+                // Duplicates happen, for example in Metric charts
+                // (for example, see dataset 'testLDot2' in the pvMetricDots.html sample)
 
                 node = child;
             }
@@ -1004,44 +1027,18 @@ pvc.DataDimension = Base.extend(
         };
     },
 
-    _addElement: function(key, parent){
-        if(!parent){
-            // Parent is a dummy root
-            key = null;
-        }
-        
-        var child = new pv.Dom.Node(key); // TODO: create subclass
-        //child.nodeValue = key; // constructor does this
-        child.value    = key;
-        child.nodeName = key || "";
-        child.childNodesByKey = {};
-        child.toString = function(){ // TODO: share this function
-            return this.value;
-        };
-
-        if(!parent){
-            child.path     = [];
-            child.absValue = null;
-            child.label    = "";
-            child.absLabel = "";
-        } else {
-            child.path     = parent.path.concat(key);
-            child.absValue = pvc.join("~", parent.absValue, key);
-            child.label    = "" + (this._calcLabel ? this._calcLabel(key) : key);
-            child.absLabel = pvc.join(" ~ ", parent.absLabel, child.label);
-
-            parent.appendChild(child);
-            parent.childNodesByKey[key] = child;
-        }
-
-        return child;
-    },
-
     /**
      * Returns the nth unique value.
      */
     getValue: function(index){
         return this.getValues()[index];
+    },
+
+    /**
+     * Returns the nth unique element.
+     */
+    getElement: function(index){
+        return this.getElements()[index];
     },
     
     /**
@@ -1129,8 +1126,8 @@ pvc.DataDimension = Base.extend(
         }
         
         // Clear visible cache
-        this._visibleValues  = null;
-        this._visibleIndexes = null;
+        this._visibleValues   = null;
+        this._visibleIndexes  = null;
         this._visibleElements = null;
         
         return true;
@@ -1184,11 +1181,12 @@ pvc.DataDimension = Base.extend(
      * Most suitable for "linear" dimensions -
      * works with number, string and date value types.
      */
-    getMinValue: function() {
+    getMinValue: function(key) {
         var min;
         this.getValues().forEach(function(value, index){
-            if(index === 0 || value < min){
-                min = value;
+            var k = key ? key(value, index) : value;
+            if(index === 0 || k < min){
+                min = k;
             }
         });
         
@@ -1200,11 +1198,12 @@ pvc.DataDimension = Base.extend(
      * Most suitable for "linear" dimensions -
      * works with number, string and date value types.
      */
-    getMaxValue: function() {
+    getMaxValue: function(key) {
         var max;
         this.getValues().forEach(function(value, index){
-            if(index === 0 || value > max){
-                max = value;
+            var k = key ? key(value, index) : value;
+            if(index === 0 || k > max){
+                max = k;
             }
         });
         
@@ -1238,6 +1237,42 @@ pvc.DataDimension = Base.extend(
         }
     }
 });
+
+pvc.DataElement = function(dimension, key, parent, leafIndex){
+    if(!parent){
+        // Parent is a dummy root
+        key = null;
+    }
+
+    pv.Dom.Node.call(this, key);
+    //this.nodeValue = key; // base constructor does this
+    this.value    = key;
+    this.nodeName = key || "";
+    this.childNodesByKey = {};
+    this.leafIndex = leafIndex; // Unfortunately 'index' already is utilized by the base class according to PRE-ORDER DFS order
+    
+    if(!parent){
+        this.path     = [];
+        this.absValue = null;
+        this.label    = "";
+        this.absLabel = "";
+    } else {
+        this.path     = parent.path.concat(key);
+        this.absValue = pvc.join("~", parent.absValue, key);
+        this.label    = "" + (dimension._calcLabel ? dimension._calcLabel(key) : key);
+        this.absLabel = pvc.join(" ~ ", parent.absLabel, this.label);
+
+        parent.appendChild(this);
+        parent.childNodesByKey[key] = this;
+    }
+};
+
+pvc.DataElement.prototype = new pv.Dom.Node();
+pvc.DataElement.prototype.constructor = pvc.DataElement;
+
+pvc.DataElement.prototype.toString = function(){
+    return this.value;
+};
 pvc.DataTranslator = Base.extend({
 
     dataEngine: null,
@@ -1277,15 +1312,13 @@ pvc.DataTranslator = Base.extend({
     },
 
     getColumns: function(){
-        // First column of every row, skipping 1st entry
+        // First row, skipping 1st (dummy) element
         return this.values[0].slice(1);
     },
 
     getRows: function(){
-        // first element of every row, skipping 1st one
-        return this.values.slice(1).map(function(d){
-            return d[0];
-        });
+        // First element of every row, skipping 1st row
+        return this.values.slice(1).map(function(row){ return row[0]; });
     },
 
     getData: function(){
@@ -1325,7 +1358,7 @@ pvc.DataTranslator = Base.extend({
             for (var i = columnIndexes.length - 1 ; i >= 0 ; i--) {
                 var columnIndex = Number(columnIndexes[i]);
                 
-                // TODO: Can a column index be < 0 ? In what cases?
+                // TODO: Can a column index not be >= 0? NaN? In what cases?
                 if(columnIndex >= 0){
                     columnIndex += 1;
                 }
@@ -1348,35 +1381,34 @@ pvc.DataTranslator = Base.extend({
     },
 
     _createData: function(){
-        // Create data table
+        // Create data
         var data = [],
-            serRow;
+            //serRow,
+            dimSeries = this.dataEngine.getDimension('series'),
+            dimCategs = this.dataEngine.getDimension('category');
         
         // Crosstab to object/relational
         this.values.forEach(function(row, rowIndex){
             if(rowIndex === 0){
                 // 1st row contains series
-                serRow = row;
+                //serRow = row;
             } else {
                 // Remaining rows are 1 per category
-                var catValue,
-                    catIndex = rowIndex - 1;
+                var catIndex = rowIndex - 1,
+                    catElem  = dimCategs.getElement(catIndex);
 
                 row.forEach(function(value, colIndex){
                     if(colIndex === 0){
                         // 1st column contains the category
-                        catValue = value;
+                        // catValue = value;
                     } else if(value != null){
                         // Remaining columns the series values
-                        var serValue = serRow[colIndex],
-                            serIndex = colIndex - 1,
+                        var serIndex = colIndex - 1,
+                            serElem  = dimSeries.getElement(serIndex),
                             datum = new pvc.Datum(
                                         this.dataEngine, 
                                         data.length,
-                                        serIndex, 
-                                        serValue, 
-                                        catIndex, 
-                                        catValue,
+                                        {series: serElem, category: catElem},
                                         value);
                        data.push(datum);
                     }
@@ -1869,7 +1901,7 @@ pvc.DataEngine = Base.extend({
     
     /** 
      * Initializes the currently supported dimensions:
-     * 'series' and 'categories'.
+     * 'series' and 'category'.
      */
     _initDimensions: function(){
         // dimensionName -> state
@@ -1879,7 +1911,7 @@ pvc.DataEngine = Base.extend({
         var me = this;
         
         // Must be first, to match the order in the values matrix (lines)
-        this._defDimension('categories', {
+        this._defDimension('category', {
             fetchValues: function(){ return me._fetchCategories(); },
             calcLabel:   this.chart.options.getCategoryLabel
         });
@@ -2112,20 +2144,20 @@ pvc.DataEngine = Base.extend({
      * Returns the categories on the underlying data
      */
     getCategories: function(){
-        return this.getDimensionValues('categories');
+        return this.getDimensionValues('category');
     },
 
     getCategoryMin: function() {
-        return this.getDimension('categories').getMinValue();
+        return this.getDimension('category').getMinValue();
     },
 
     getCategoryMax: function() {
-        return this.getDimension('categories').getMaxValue();
+        return this.getDimension('category').getMaxValue();
     },
 
     /**
      * Returns the categories on the underlying data
-     * @deprecated use dataEngine.getDimensionValue('categories', idx) instead
+     * @deprecated use dataEngine.getDimensionValue('category', idx) instead
      */
     getCategoryByIndex: function(idx){
         return this.getCategories()[idx];
@@ -2133,7 +2165,7 @@ pvc.DataEngine = Base.extend({
 
     /**
      * Returns an array with the indexes for the categories
-     * @deprecated use pv.Range(dataEngine.getDimensionSize('categories'))
+     * @deprecated use pv.Range(dataEngine.getDimensionSize('category'))
      */
     getCategoriesIndexes: function(){
         // we'll just return everything
@@ -2144,14 +2176,14 @@ pvc.DataEngine = Base.extend({
      * Returns an array with the indexes for the visible categories
      */
     getVisibleCategoriesIndexes: function(){
-        return this.getDimensionVisibleIndexes('categories');
+        return this.getDimensionVisibleIndexes('category');
     },
 
     /**
      * Returns an array with the visible categories.
      */
     getVisibleCategories: function(){
-        return this.getDimensionVisibleValues('categories');
+        return this.getDimensionVisibleValues('category');
     },
 
     /**
@@ -2159,7 +2191,7 @@ pvc.DataEngine = Base.extend({
      * Returns true if category is now visible, false otherwise.
      */
     toggleCategoryVisibility: function(index){
-        return this.toggleDimensionVisible('categories', index);
+        return this.toggleDimensionVisible('category', index);
     },
     
     // ---------------------
@@ -2370,7 +2402,7 @@ pvc.DataEngine = Base.extend({
      * Returns how many categories, or data points, we have
      */
     getCategoriesSize: function(){
-        return this.getDimensionSize('categories');
+        return this.getDimensionSize('category');
     },
 
     /**
@@ -2448,14 +2480,17 @@ pvc.DataEngine = Base.extend({
         return this._dataTree;
     },
     
-    // Indexes data on a hierarchical index
+    // Indexes data on a hierarchical index,
+    //  in the order of _dimensionList.
+    // The values of key dimensions of datums
+    //  must identify amongst all.
     _createDataTree: function(){
         
         function recursive(parentDimNode, datum, dimIndex /* level*/){
             // parentDimNode has one child per != keyIndex 
             // that data have on this dimension, on this path.
             var dimName  = this._dimensionList[dimIndex].name,
-                keyIndex = datum.keyIndexes[dimName],
+                keyIndex = datum.elem[dimName].leafIndex,
                 dimNode = parentDimNode[keyIndex];
 
             if(dimIndex === lastD){
@@ -2544,10 +2579,10 @@ pvc.DataEngine = Base.extend({
         return new pvc.Datum(
                     this, 
                     -1, 
-                    datumRef.series, 
-                    this._dimensions['series'].getValue(datumRef.series),
-                    datumRef.categories, 
-                    this._dimensions['categories'].getValue(datumRef.categories),
+                    {
+                        series:   this._dimensions['series'].getElement(datumRef.series),
+                        category: this._dimensions['category'].getElement(datumRef.category)
+                    },
                     null);
     },
     
@@ -2637,14 +2672,21 @@ pvc.DataEngine = Base.extend({
     /**
      * Returns all the datums that 
      * satisfy the given 'where' specification.
+     * @see #forEachWhere
      */
-    getWhere: function(where){
+    getWhere: function(where, keyArgs){
         var data = [];
         
         this.forEachWhere(where, function(datum){
             data.push(datum);
         });
         
+        var sorter = pvc.get(keyArgs, 'sorter');
+        if(sorter){
+            // Sorts in-place
+            data.sort(sorter);
+        }
+
         return data;
     },
     
@@ -2670,7 +2712,7 @@ pvc.DataEngine = Base.extend({
      * <pre>
      * [
      *      {series: ['Green']}, // OR
-     *      {series: ['Blue'], categories: ['Bread', 'Butter']}
+     *      {series: ['Blue'], category: ['Bread', 'Butter']}
      * ]
      * </pre>
      */
@@ -2759,10 +2801,15 @@ pvc.DataEngine = Base.extend({
         return expandedOrWhere;
     }
 });
+pvc.Abstract = Base.extend({
+    invisibleLineWidth: 0.001,
+    defaultLineWidth:   1.5
+});
+
 /**
  * The main component
  */
-pvc.Base = Base.extend({
+pvc.Base = pvc.Abstract.extend({
 
     isPreRendered: false,
     isAnimating:   false,
@@ -3021,21 +3068,31 @@ pvc.Base = Base.extend({
      * WARNING: It's the user's responsibility to make sure that
      * unexisting methods don't blow this.
      */
-    extend: function(mark, prefix) {
+    extend: function(mark, prefix, keyArgs) {
         // if mark is null or undefined, skip
         if (mark) {
             var points = this.options.extensionPoints;
             if(points){
-                var pL = prefix.length;
+                var pL = prefix.length,
+                    wrapper = pvc.get(keyArgs, 'wrapper'),
+                    context = pvc.get(keyArgs, 'context');
+
                 for (var p in points) {
                     // Starts with
                     if (p.indexOf(prefix) === 0) {
-                        var m = p.substring(pL);
+                        var m = p.substring(pL),
+                            v = points[p];
+
                         // Distinguish between mark methods and properties
                         if (typeof mark[m] === "function") {
-                            mark[m](points[p]);
+                            // Now check if function wrapping is needed
+                            if(wrapper && typeof v === 'function'){
+                                v = wrapper.call(context, v);
+                            }
+                            
+                            mark[m](v);
                         } else {
-                            mark[m] = points[p];
+                            mark[m] = v;
                         }
                     }
                 }
@@ -3134,7 +3191,7 @@ pvc.Base = Base.extend({
  * Each class that extends pvc.base will be 
  * responsible to know how to use it.
  */
-pvc.BasePanel = Base.extend({
+pvc.BasePanel = pvc.Abstract.extend({
 
     chart: null,
     _parent: null,
@@ -4070,7 +4127,7 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
             onSeries = (axis == "x") ? !isVertical : isVertical;
         }
 
-        return onSeries ? 'series' : 'categories';
+        return onSeries ? 'series' : 'category';
     },
 
     /**
@@ -4632,8 +4689,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
         if(action){
             var datum = this._getRenderingDatum(mark);
             if(datum){
-                var s = datum.keyValues.series,
-                    c = datum.keyValues.categories;
+                var s = datum.elem.series.value,
+                    c = datum.elem.category.value;
 
                 this._ignoreClicks = 2;
 
@@ -4688,8 +4745,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
                 d = d[0];
             }
 
-            var s = datum.keyValues.series,
-                c = datum.keyValues.categories;
+            var s = datum.elem.series.value,
+                c = datum.elem.category.value;
 
             action.call(mark, s, c, d, ev, datum);
         }
@@ -4827,7 +4884,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             if(ySelections.length > 0 && xSelections.length > 0){
                 // Select the INTERSECTION
                 selectedData = dataEngine.getWhere([
-                    {series: sSelections, /* AND */ categories: cSelections}
+                    {series: sSelections, /* AND */ category: cSelections}
                 ]);
                 
             } else if (ySelections.length > 0 || xSelections.length > 0){
@@ -4836,7 +4893,7 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
                 selectedData = dataEngine.getWhere([
                     {series: sSelections}, // OR
-                    {categories: cSelections}
+                    {category: cSelections}
                 ]);
 
             } else {
@@ -4889,9 +4946,20 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
             this.pvPanel.root.fillStyle(invisibleFill);
         }
 
+        var selectionEndedDate;
         this.pvPanel.root
             .data([myself.rubberBand])
             .event("click", function() {
+                // It happens sometimes that the click is fired 
+                //  after mouse up, ending up clearing a just made selection.
+                if(selectionEndedDate){
+                    var timeSpan = new Date() - selectionEndedDate;
+                    if(timeSpan < 300){
+                        selectionEndedDate = null;
+                        return;
+                    }
+                }
+                
                 var ev = arguments[arguments.length - 1];
                 //if(options.ctrlSelectMode && !ev.ctrlKey)
                 dataEngine.clearSelections();
@@ -4917,6 +4985,8 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
                     // Process selection
                     dispatchRubberBandSelection(rb, ev);
+
+                    selectionEndedDate = new Date();
                 }
             });
     },
@@ -5244,10 +5314,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
     
     renderLinearAxisLabel: function(ticks){
-     // Labels are visible (only) on MAJOR ticks,
+        // Labels are visible (only) on MAJOR ticks,
         // On first and last tick care is taken
         //  with their H/V alignment so that
-        //  the label is not drawn of the chart.
+        //  the label is not drawn off the chart.
 
         // Use this margin instead of textMargin, 
         // which affects all margins (left, right, top and bottom).
@@ -5571,7 +5641,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return 0.5; //non-terminal items, so grouping is visible
             })
             .text(function(d){
-                return d.nodeLabel;
+                return d.label;
             });
 
         //cutoffs -> snap to vertical/horizontal
@@ -5919,7 +5989,7 @@ pvc.SecondYAxisPanel = pvc.YAxisPanel.extend({
 pvc.PieChart = pvc.Base.extend({
 
   pieChartPanel : null,
-  legendSource: "categories",
+  legendSource: 'category',
   tipsySettings: {
     gravity: "s",
     fade: true
@@ -6780,7 +6850,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         var serIndex = this.pvHeatGrid.index;
         if(serIndex >= 0){
             var datumRef = {
-                categories: this.pvHeatGrid.parent.index,
+                category: this.pvHeatGrid.parent.index,
                 series:     serIndex
             };
 
@@ -7036,7 +7106,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
                 var c = cSel[j];
 
                 where.push({
-                    categories: [c],
+                    category: [c],
                     series:     [s]
                 });
             }
@@ -8121,8 +8191,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 de = this.chart.dataEngine;
 
             var datumRef = {
-                categories: de.translateDimensionVisibleIndex('categories', visibleCatIndex),
-                series:     de.translateDimensionVisibleIndex('series',     visibleSerIndex)
+                category: de.translateDimensionVisibleIndex('category', visibleCatIndex),
+                series:   de.translateDimensionVisibleIndex('series',   visibleSerIndex)
             };
 
             return de.findDatum(datumRef, true);
@@ -8303,7 +8373,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
         this.DF.colorFunc = function(){
             var datum = myself._getRenderingDatum(this),
-                seriesIndex = datum.keyIndexes.series;
+                seriesIndex = datum.elem.series.leafIndex;
 
             // Change the color of the totals series
             if (myself.waterfall && seriesIndex == totalsSeriesIndex) {
@@ -8479,8 +8549,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                 // TODO: for the no series case... 's' assumes the value "Series"
                 // added by the translator
                 var datum = myself._getRenderingDatum(this),
-                    s = datum.keyValues.series,
-                    c = datum.keyValues.categories;
+                    s = datum.elem.series.value,
+                    c = datum.elem.category.value;
                     // d = datum.values
 
                 return options.tooltipFormat.call(myself, s, c, d, datum);
@@ -8501,8 +8571,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                     var tooltip;
                     if(options.customTooltip){
                         var datum = myself._getRenderingDatum(this),
-                            s = datum.keyValues.series,
-                            c = datum.keyValues.categories,
+                            s = datum.elem.series.value,
+                            c = datum.elem.category.value,
                             d = r;
 
                         tooltip = options.customTooltip.call(null, s, c, d, datum);
@@ -8709,8 +8779,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 //                    " [" + [i,j] + "]=[" + [categories[i],series[j]]  + "]");
 
             where.push({
-                categories: [categories[i]],
-                series:     [series[j]]
+                category: [categories[i]],
+                series:   [series[j]]
             });
         }, this);
 
@@ -8932,7 +9002,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("bottom")
     .left(titleOffset)
     .text(function(d){
-      return d.title;
+      return d.formattedTitle;
     });
 
     this.pvBulletSubtitle = this.pvBullet.anchor(anchor).add(pv.Label)
@@ -8942,15 +9012,15 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
     .textBaseline("top")
     .left(titleOffset)
     .text(function(d){
-      return d.subtitle;
+      return d.formattedSubtitle;
     });
 
-	var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ? 
-	function(d, e) {
-		ignoreClicks = 2;
-		myself.chart.options.axisDoubleClickAction(d, e);
-		
-	}: null;
+    var doubleClickAction = (typeof(myself.chart.options.axisDoubleClickAction) == 'function') ?
+    function(d, e) {
+            //ignoreClicks = 2;
+            myself.chart.options.axisDoubleClickAction(d, e);
+
+    }: null;
     
     if (doubleClickAction) {
     	this.pvBulletTitle.events('all')  //labels don't have events by default
@@ -9000,7 +9070,10 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
       markers:   this.chart.options.bulletMarkers  || []
     };
     
-    var data = [];
+    var data = [],
+        options = this.chart.options,
+        getSeriesLabel   = options.getSeriesLabel || pv.identity,
+        getCategoryLabel = options.getCategoryLabel || pv.identity;
 
     if(this.chart.dataEngine.getSeriesSize() == 0 ) {
       // No data
@@ -9020,18 +9093,24 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
             // Value only
             d.measures = [s];
             break;
+
           case 2:
             // Name, value and markers
             d.markers = [v[1]];
+            // NO break!
           case 1:
             // name and value
             d.title = s;
+            d.formattedTitle = getCategoryLabel(s);
             d.measures = [v[0]];
             break;
+
           default:
             // greater or equal 4
             d.title = s;
             d.subtitle = v[0];
+            d.formattedTitle = getCategoryLabel(s);
+            d.formattedSubtitle = getSeriesLabel(v[0])
             d.measures = [v[1]];
             d.markers = [v[2]];
             if (v.length >= 3){
@@ -9054,7 +9133,7 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 pvc.ParallelCoordinates = pvc.Base.extend({
 
   parCoordPanel : null,
-  legendSource: "categories",
+  legendSource: 'category',
 
   tipsySettings: {
     gravity: "s",
@@ -9690,7 +9769,7 @@ pvc.DataTree = pvc.Base.extend({
     structDataset:  null,
 
     DataTreePanel : null,
-    legendSource: "categories",
+    legendSource: 'category',
 
     constructor: function(options){
 
