@@ -1,0 +1,100 @@
+<script type="text/javascript"
+	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>ButtonComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		Generates a button to execute a custom command
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>button</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+			<dt>label</dt>
+			<dd>Text to be used on the generated button (only used if htmlObject points to a div/span)</dd>
+
+			<dt>buttonStyle</dt>
+			<dd>The style of the button to render. Possible values: classic and themeroller. Default: themeroller</dd>
+
+			<dt>expression</dt>
+			<dd>javascript code to be executed</dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function(value) - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function(value) - </i> Function to be called after the component is changed</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+				<div id="sampleObject"></div>
+			</div>
+
+			<div id="code">
+				<textarea cols="80" rows="20" id="samplecode">
+var executeTopTenCustomers = 
+{
+  name: "executeTopTenCustomers",
+  type: "Button",
+  listeners:["productLine", "territory"],
+  htmlObject: "sampleObject",
+  label: "A button",
+  expression: function(){alert('Button was clicked')},
+  executeAtStart: true,
+  preChange: function(){return true;},
+  postChange: function(){return true;},
+  tooltip: "My first dashboard"
+}
+Dashboards.init([executeTopTenCustomers]);
+				</textarea>
+				<br />
+				<button onclick="evaluateCode(true)">Try me</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script language="javascript" type="text/javascript">
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+</script>

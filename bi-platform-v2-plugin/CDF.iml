@@ -6,7 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/bin" />
     </content>
-    <content url="file://$MODULE_DIR$/../solution/bi-developers/cdf-samples" />
+    <content url="file://$MODULE_DIR$/../solution/bi-developers/pentaho-cdf" />
     <content url="file://$MODULE_DIR$/../solution/cdf" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

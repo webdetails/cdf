@@ -233,7 +233,7 @@
 
 		  <!-- Copy samples -->
 		  <copy todir="${plugin.local.install.solutions.dir}/plugin-samples">
-			  <fileset dir="${samples.stage.dir}/bi-developers">
+			  <fileset dir="${samples.stage.dir}/plugin-samples">
 				  <include name="**/*" />
 			  </fileset>
 		  </copy>
@@ -247,13 +247,13 @@
 
 		  <mkdir dir="${samples.stage.dir}"/>
 
-		  <!-- copy over all the xactions within the cdf-samples folder -->
-		  <copy todir="${samples.stage.dir}/bi-developers" overwrite="true" >
-			  <fileset dir="../solution/bi-developers"></fileset>
+		  <!-- copy over all the xactions within the pentaho-cdf folder -->
+		  <copy todir="${samples.stage.dir}/plugin-samples" overwrite="true" >
+			  <fileset dir="../solution/plugin-samples"></fileset>
 		  </copy>
 
 		  <zip zipfile="${dist.dir}/${plugin.samples.zipfile}"
-			  basedir="${samples.stage.dir}/bi-developers"
+			  basedir="${samples.stage.dir}/plugin-samples"
 			  includes="**/*"
 			  excludes="**/Thumbs.db" 
 			  />
