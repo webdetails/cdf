@@ -12,7 +12,7 @@
 
 body {
 
-    margin-top:20px;
+    margin-top:10px;
     background-color:#e0e8ec; 
     min-height:900px;
     font-family: Gudea,Verdana,Arial,Helvetica,sans-serif;
@@ -51,11 +51,17 @@ body {
 
 .webdetailsLogo{
     margin-left: 50px;
-    width: 162px;
-    height: 45px;
+    width: 182px;
+    height: 39px;
     display: inline-block;
     background: url('images/logo.png') no-repeat left;
     float: left;
+}
+
+.webdetailsLogo a{
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .webdetailsTitle{
@@ -118,8 +124,8 @@ body {
 }
 
 .webdetailsSocial{
-    
-    margin-top: 150px;
+
+    margin-top: 120px;
     margin-left: 0px;
     margin-right: 0px;
     padding-left: 5px;
@@ -196,14 +202,6 @@ body {
 
 /* Panel implmementation */
 
-.panelTitle{
-
-    height: 100px;
-    font-size: 60px;
-    color: white;
-    padding-left: 50px;
-
-}
 
 
 .panelContainer{
@@ -222,25 +220,109 @@ body {
 .webdetailsPanelContainerLeft {
     width: 50px;
     min-height: 1250px;
-    background: url('images/shad_l.png') right no-repeat;
+    background: url('images/shad_l.png') right top no-repeat;
 }
 
 .webdetailsPanelContainerCenter{
     width: 1050px;
+
 }
 
 
 .webdetailsPanelContainerRight {
     width: 50px;
     min-height: 1250px;
-    background: url('images/shad_r.png') left no-repeat;
+    background: url('images/shad_r.png') left top no-repeat;
 }
 
 .webdetailsFooter{
+
+    text-align: center;
+
+}
+
+.webdetailsFooter > div{
+    display:inline-block;
+    height: 26px;
+}
+
+.webdetailsFooter > div > a{
+    display:block;
+    width: 100%;
+    height: 100%;
     
-    min-height: 50px;
-    background: url('images/logobottom.png') center no-repeat;
-    
+}
+
+.webdetailsFooter > .webdetailsFooterWebdetails{
+    background: url('images/logobottomWebdetails.png') center no-repeat;
+    width: 292px;
+}
+
+.webdetailsFooter > .webdetailsFooterCtools{
+    background: url('images/logobottomCtools.png') center no-repeat;
+    width: 379px;
+}
+
+
+
+.webdetailsBoxShadow{
+
+    background-color: white;
+    padding: 20px;
+
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+
+    -webkit-box-shadow: 2px 2px 3px 1px rgba(149, 164, 179, 0.5);
+    -moz-box-shadow: 2px 2px 3px 1px rgba(149, 164, 179, 0.5);
+    box-shadow: 2px 2px 3px 1px rgba(149, 164, 179, 0.5); 
+
+}
+
+
+.panelTitle{
+
+    background-color: rgb(250, 105, 27);
+    background-image: url('images/panelTitleBg.png');
+    background-position: left bottom;
+    background-repeat: no-repeat;
+    color: rgb(224, 232, 236);
+}
+
+.panelTitleText{
+
+    font-size: 40px;
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+
+.panelTitleImages{
+
+    margin-top: 20px;
+    height: 266px;
+    background-image: url('images/cdfSample.png');
+    background-repeat: no-repeat;
+
+}
+
+.ctoolsLogo{
+
+    display: block;
+    background: url('images/ctools.png') no-repeat center center;
+    height: 27px;
+    width: 100%;
+
+    margin-bottom: 40px;
+
+}
+
+.pentahoLogo{
+
+    display: block;    
+    background: url('images/pentaho.png') no-repeat center center;
+    height: 27px;
+    width: 100%;
 }
 
 
@@ -381,7 +463,7 @@ a:hover
     margin-left: 50px;
     margin-right: 50px;
     margin-top: 20px;
-    
+
     color: rgb(34, 73, 79);
     font-size: 13px;
 }
@@ -395,12 +477,39 @@ a:hover
 
 #content h2 {
 
+    background: url("images/shape.png") no-repeat left top;
+
     font-size: 35px;
     color: rgb(149, 169, 179);
     letter-spacing: -1px;
     font-weight: normal;
-    mar
+
 }
+
+#content h2 > span.h2Num{
+    float: left;
+    display: block;
+    font-size: 16px;
+    height: 20px;
+    margin-right: 10px;
+    width: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: #e0e8ec;
+    line-height: inherit;
+
+}
+
+.h2NumEven{
+
+}
+
+.h2NumOdd{
+    text-align: right;
+    margin-top: 15px;
+
+}
+
 
 #content h3 {
     color: rgb(34, 73, 79);
@@ -591,7 +700,7 @@ dl.documentation {
 .documentation dt {
     float: left;
     clear: left;
-/*    width: 100px;*/
+    /*    width: 100px;*/
     text-align: right;
     font-weight: bold;
     color: rgb(153, 153, 153);
@@ -608,3 +717,80 @@ dl.documentation {
 pre{
     font-size: 8pt;
 }
+
+#example {
+    -moz-border-radius-topleft: 0px;
+    -moz-border-radius-topright: 0px;
+    -moz-border-radius-bottomright: 0px;
+    -moz-border-radius-bottomleft: 0px;
+    -webkit-border-radius: 0px 0px 0px 0px;
+    border-radius: 0px 0px 0px 0px;
+
+    -webkit-box-shadow: 2px 2px 3px 1px rgba(149, 164, 179, 0.5);
+    -moz-box-shadow: 2px 2px 3px 1px rgba(149, 164, 179, 0.5);
+    box-shadow: 2px 2px 3px 1px rgba(149, 164, 179, 0.5); 
+
+    background: white;
+}
+
+#example > ul {
+    -moz-border-radius-topleft: 0px;
+    -moz-border-radius-topright: 0px;
+    -moz-border-radius-bottomright: 0px;
+    -moz-border-radius-bottomleft: 0px;
+    -webkit-border-radius: 0px 0px 0px 0px;
+    border-radius: 0px 0px 0px 0px;
+
+    background: rgb(224, 232, 236);
+}
+
+#example > ul > li {
+    -moz-border-radius-topleft: 0px;
+    -moz-border-radius-topright: 0px;
+    -moz-border-radius-bottomright: 0px;
+    -moz-border-radius-bottomleft: 0px;
+    -webkit-border-radius: 0px 0px 0px 0px;
+    border-radius: 0px 0px 0px 0px;
+
+    border: 1px solid #829299 !important;
+    background: white;
+}
+
+#example > ul > li > a {
+    font-weight: normal;
+    font-size: 15px;
+    color: #829299;
+}
+
+
+#example > ul > li:hover {
+    border-color: #fa6914 !important;
+    color: #829299;
+}
+
+
+#example > ul > li:hover > a {
+    color: #fa6914;
+}
+
+#example > ul > li:active {
+    border-color: #fa6914 !important;
+    background-color: #fa6914;
+}
+
+
+#example > ul > li:active > a {
+    color: white;
+}
+
+
+
+#example > ul > li.ui-state-active {
+    border-color: #fa6914 !important;
+    color: #829299;
+}
+
+#example > ul > li.ui-state-active > a {
+    color: #fa6914;
+}
+
