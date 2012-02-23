@@ -787,10 +787,10 @@ pre{
 
 #example > ul > li.ui-state-active {
     border-color: #fa6914 !important;
-    color: #829299;
+    background-color: #fa6914;
 }
 
 #example > ul > li.ui-state-active > a {
-    color: #fa6914;
+    color: white;
 }
 
