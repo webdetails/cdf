@@ -1,0 +1,71 @@
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Components</h2>
+		<p>
+		
+			The Component concept was born to simply the building of dashboard objects. Therefor a Component is just 
+			a simple JavaScript object that encapsulate all the object properties  and behaviors.
+			But how much effort is necessary to make a component that:
+			<ul>
+				<li>Have a different behavior before and after execution.</li>
+				<li>That interacts with other dashboard components</li>
+				<li>At start up is just a simple bar chart but can be changed dynamically to a dial chart or even a table.</li>
+				<li>The result presented by the component should change dynamically according to one or more parameter values. </li>
+			</ul>
+		</p>
+		 
+		<p>The next paragraphs and chapters will show that all of this can be accomplished with very little effort.</p>
+
+		<h2>Basic Structure</h2>
+		
+		<p>All components have a set of "properties" that are common to almost all of them and that are used to 
+			control their life cycle and  behavior. Before the enumeration of this "properties", let's clarify
+			what is the life cycle of the component: 
+		</p>
+		<img  style="border: 1px solid #000;"  src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/20-components/diagram.png">
+		<br><br>
+
+		<h2>Generic Properties</h2>
+
+		<dl class="documentation">
+			<dt>type</dt>
+			<dd>This property assumes a variety of values like jfreechart, timeplot, datepicker, etc.</dd>
+
+			<dt>name</dt>
+			<dd> This is the identifier of the component.</dd>
+			
+			<dt>listeners</dt>
+			<dd> The variables that triggers the component update are stored in this array. This array is crucial in the iteration between components, because they can communicate using this together with their parameters. For example, if the selected value(parameter) of one selector changes, all the components that are "listening" on this parameter will react..</dd>
+			
+			<dt>parameters</dt>
+			<dd>On the case of xaction component (and some others), some parameters can be passed by specifying
+			the desirably value in an array of arrays.</dd>
+
+			<dt>parameter</dt>
+			<dd>For components where user input is required, this is where the input is stored for later use</dd>
+
+			<dt>preExecution/postExecution</dt>
+			<dd>This functions are executed before/after the component is initialized or updated or presented to the user.
+			If the preExecution returns false, the component is not updated</dd>
+			
+			<dt>preChange/postChange</dt>
+			<dd>For selectors, before/after the input value is updated, this functions are executed. Useful for validating user input, for instance </dd>
+			
+			<dt>htmlObject</dt>
+			<dd>This is the id of the html object that will be replaced by the component's content result.</dd>
+			
+			<dt>executeAtStart</dt>
+			<dd>If set to false, the component will not execute at start. It will be updated as soon as one of his listeners have changed </dd>
+		<ul>
+		
+
+		
+		
+	</div>
+</div>
+
+<script>
+	Dashboards.init([]);
+</script>

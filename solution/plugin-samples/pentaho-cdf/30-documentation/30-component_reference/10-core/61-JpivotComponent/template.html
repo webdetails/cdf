@@ -1,0 +1,110 @@
+<script type="text/javascript"
+	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>JpivotComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+			Allows the user to place a pivot table on the page.
+			
+		</p>
+
+		<h3>Options</h3>
+		
+
+		<dl class="documentation">
+		<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>jpivot</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>parameters</dt>
+			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
+
+			<dt>solution</dt>
+			<dd>Solution where the xaction is</dd>
+
+			<dt>path</dt>
+			<dd>Path where the xaction file is</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+			
+			<dt>iframeScrolling</dt>
+			<dd>Scrolling setting for iFrame. (no|yes|auto) Default is no (disabled)</dd>
+			
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+		</dl>	
+		
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+					<span id="sampleObject">&nbsp;</span>
+			</div>
+
+
+				<div id="code">
+					<textarea cols="80" rows="20" id="samplecode">
+					
+
+topTenCustomersPivot = 
+{
+type: "jpivot",
+name: "topTenCustomersPivot",
+solution: "plugin-samples",
+path: "pentaho-cdf/20-samples/map_dashboard",
+action: "Pivot.xaction",
+htmlObject: "sampleObject",
+parameters:[["territory","territory"],["productLine","productLine"]],
+iframeHeight: "500px",
+iframeWidth: "850px",
+iframeScrolling:"auto",
+executeAtStart: true
+}
+territory="";
+productLine="";
+		
+Dashboards.init([topTenCustomersPivot]);
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<script language="javascript" type="text/javascript">
+
+		
+		var tabs = $("#example").tabs();
+		evaluateCode(false);
+		
+	</script>
