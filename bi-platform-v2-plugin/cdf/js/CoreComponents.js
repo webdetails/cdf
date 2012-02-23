@@ -1346,7 +1346,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     if (this.isMultiple == undefined) this.isMultiple = false;
 
     var ph = $("<div>");
-
+    ph.appendTo($("#" + this.htmlObject).empty());
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx],
         label = myArray[i][lblIdx],
@@ -1373,7 +1373,6 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
     }
 
-    ph.appendTo($("#" + this.htmlObject).empty());
     
     //default
     var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
