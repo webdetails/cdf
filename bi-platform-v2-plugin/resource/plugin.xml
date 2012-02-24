@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin title="Pentaho Community Dashboard Framework">
+<plugin title="pentaho-cdf">
 
 	<lifecycle-listener class="org.pentaho.cdf.CdfLifecycleListener"/>
 	<content-types>

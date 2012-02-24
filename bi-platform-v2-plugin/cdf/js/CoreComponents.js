@@ -41,10 +41,12 @@ BaseComponent = Base.extend({
     return that;
   },
   getAddIn: function (slot,addIn) {
-    return Dashboards.getAddIn(this.type,slot,addIn);
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    return Dashboards.getAddIn(type,slot,addIn);
   },
   hasAddIn: function (slot,addIn) {
-    return Dashboards.hasAddIn(this.type,slot,addIn);
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    return Dashboards.hasAddIn(type,slot,addIn);
   },
   getValuesArray : function() {
 
@@ -170,7 +172,8 @@ BaseComponent = Base.extend({
   },
 
   setAddInDefaults: function(slot,addIn,defaults) {
-    Dashboards.setAddInDefaults(this.type,slot,addIn,defaults)
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    Dashboards.setAddInDefaults(type,slot,addIn,defaults)
   },
   setAddInOptions: function(slot, addIn,options) {
     if(!this.addInOptions) {
@@ -443,7 +446,7 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"cdf", "components", action, this.getParameters(),function(jXML){
+    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", action, this.getParameters(),function(jXML){
 
       if(jXML != null){
         if(myself.chartDefinition.caption != undefined){
@@ -463,8 +466,8 @@ var JFreeChartComponent = BaseComponent.extend({
     var exportFile = function(type,cd){
       var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
       var obj = $.extend({
-        solution: "cdf",
-        path: "components",
+        solution: "system",
+        path: "pentaho-cdf/actions",
         action: xactionFile,
         exportType: type
       },cd);
@@ -538,7 +541,7 @@ var JFreeChartComponent = BaseComponent.extend({
           myself.zoomCallBack = function(value){
             eval(urlTemplate.replace("{" + parameterName + "}",value));
           };
-          Dashboards.callPentahoAction(myself,"cdf", "components", cdfComponent, parameters,function(jXML){
+          Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
             if(jXML != null){
               var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
@@ -667,7 +670,7 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
 
     var myself = this;
 
-    Dashboards.callPentahoAction(myself,"cdf", "components", "openflashchart.xaction", this.getParameters(),function(jXML){
+    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML){
 
       if(jXML != null){
         var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
@@ -720,7 +723,7 @@ var TrafficComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"cdf", "components", "traffic.xaction", parameters,
+    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "traffic.xaction", parameters,
       function(result){
         var value = $(result).find("VALUE").text();
         var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
@@ -908,7 +911,7 @@ var TimePlotComponent = BaseComponent.extend({
       parameters.push(key+"="+value);
     }
     var allData = undefined;
-    var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelinefeeder.xaction&" + parameters.join('&');
+    var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelinefeeder.xaction&" + parameters.join('&');
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -920,7 +923,7 @@ var TimePlotComponent = BaseComponent.extend({
         parameters.push(key+"="+value);
       }
 
-      var eventUrl = webAppPath + "/ViewAction?solution=cdf&path=components&action=timelineeventfeeder.xaction&" + parameters.join('&');
+      var eventUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelineeventfeeder.xaction&" + parameters.join('&');
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){
@@ -1284,7 +1287,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         }
         selectHTML += " type='radio'";
       }else{
-        if ((i == 0 && !hasCurrentVal) ||
+        if ((i == 0 && !hasCurrentVal && this.defaultIfEmpty) ||
           (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
         }
@@ -1921,6 +1924,9 @@ var TableComponent = BaseComponent.extend({
     myself.ph.html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
     // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
     this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
+  
+    // We'll create an Array to keep track of the open expandable rows.
+    this.dataTable.anOpen = [];
 
 
     myself.ph.find ('table').bind('click',function(e) {
@@ -1971,16 +1977,29 @@ var TableComponent = BaseComponent.extend({
                     var value = event.series;
                     var htmlContent = $("#" + detailContainerObj).html();
                    
+                    var anOpen = myself.dataTable.anOpen;
+                    var i = $.inArray( row, anOpen );
+                   
                     if( obj.hasClass(activeclass) ){
-                    obj.removeClass(activeclass);
-                    myself.dataTable.fnClose( row );
+                      obj.removeClass(activeclass);
+                      myself.dataTable.fnClose( row );
+                      anOpen.splice(i,1);
                     }
                     else{
-                            var prev = obj.siblings('.'+activeclass).each(function(i,d){
+                            // Closes all open expandable rows .
+                            for ( var j=0; j < anOpen.length; j++ ){
+                                $(anOpen[j]).removeClass(activeclass);
+                                myself.dataTable.fnClose( anOpen[j] );
+                                anOpen.splice(j ,1);
+                            }
+                            
+                            //Closes previously opened expandable row.
+                           /* var prev = obj.siblings('.'+activeclass).each(function(i,d){
                                     var curr = $(d);
                                     curr.removeClass(activeclass);
                                     myself.dataTable.fnClose( d );
-                            });
+                            });*/
+
                             obj.addClass(activeclass);
                             
                             //Read parameters and fire changes
@@ -1989,6 +2008,7 @@ var TableComponent = BaseComponent.extend({
                             	Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);                            
                             });
                             myself.dataTable.fnOpen( row, htmlContent, activeclass );
+                            anOpen.push( row );
                     };
             };
     }
@@ -2233,7 +2253,7 @@ var PivotLinkComponent = BaseComponent.extend({
   }
 },{
   openPivotLink : function(object) {
-    var url = webAppPath + "/Pivot?solution=cdf&path=components&action=jpivot.xaction&";
+    var url = webAppPath + "/Pivot?solution=system&path=pentaho-cdf/actions&action=jpivot.xaction&";
 
     var qd = object.pivotDefinition;
     var parameters = [];

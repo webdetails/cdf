@@ -1,0 +1,256 @@
+<script type="text/javascript"
+        src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+<div class="shadow">
+
+<div class="contents">
+
+  <h2>TableComponent</h2>
+
+  <h3>Description</h3>
+
+  <p>
+
+    This is a component that can easily generate a data table whithout
+    needing a xaction file. The underlying plugin use is
+    http://datatables.net.
+
+    The resultset is returned from a mdx or sql query. In case of mdx
+    queries, a role will be passed to mondrian if the session variable
+    'role' is defined, allowing row level security.
+
+  </p>
+
+  <h3>Options</h3>
+
+  <dl class="documentation">
+    <dt>name</dt>
+    <dd>The name of the component</dd>
+
+    <dt>type</dt>
+    <dd><code>tableComponent</code></dd>
+
+    <dt>listeners</dt>
+    <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+    <dt>chartDefinition</dt>
+    <dd>MetaLayer object with the definition of chart (see MetaLayer options)</dd>
+
+    <dt>htmlObject</dt>
+    <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+    <dt>refreshPeriod</dt>
+    <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+
+
+    <dt>executeAtStart</dt>
+    <dd>True to execute the component at start, false otherwise</dd>
+
+    <dt>tooltip</dt>
+    <dd>Tooltip to be displayed when mouse hovers</dd>
+
+    <dt>preExecution</dt>
+    <dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+    <dt>postExecution</dt>
+    <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+  </dl>
+
+  <h3>MetaLayer options</h3>
+
+  <dl class="documentation">
+
+    <dt>queryType</dt>
+    <dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+    <dt>jndi</dt>
+    <dd>Connection to use for the query</dd>
+
+    <dt>query</dt>
+    <dd>sql or mdx Query to execute</dd>
+
+    <dt>cube</dt>
+    <dd>Cube name to use when queryType is mdx</dd>
+
+    <dt>catalog</dt>
+    <dd>Mondrian schema to use when queryType is mdx</dd>
+
+    <dt>colHeaders</dt>
+    <dd>The table column header. Required: true</dd>
+
+    <dt>colTypes</dt>
+    <dd>The table column types.</dd>
+
+    <dt>colFormats</dt>
+    <dd>The table column formats in sprinf format</dd>
+
+    <dt>colWidths</dt>
+    <dd>The table column widths. Works with percentages or points</dd>
+
+    <dt>colSortable</dt>
+    <dd>Array that indicates if the columns are sortable</dd>
+
+    <dt>colSearchable</dt>
+    <dd>Array that indicates if the columns are searchable</dd>
+
+    <dt>paginate</dt>
+    <dd>Enables or disables pagination. Default: true</dd>
+
+    <dt>paginationType</dt>
+    <dd>The pagination type to be used. Possible values: "two_button" and "full_numbers". Default: two_button</dd>
+
+    <dt>paginateServerSide</dt>
+    <dd>Whether the pagination should be handled by the server instead of the client. This feature requires a CDA Datasource! Default: false</dd>
+
+    <dt>filter</dt>
+    <dd>Enable or disable filtering of data. Note that filtering in DataTables is smart in that it allows the end user
+      to input multiple words (space separated) and will match a row containing those words, even if not in the order
+      that was specified (this allow matching across multiple columns). Default: true
+    </dd>
+
+    <dt>info</dt>
+    <dd>Enable or disable the table information display. This shows information about the data that is currently visible
+      on the page, including information about filtered data if that action is being performed. Default: true
+    </dd>
+
+    <dt>sort</dt>
+    <dd>Sorts the data. Default: true</dd>
+
+    <dt>sortBy</dt>
+    <dd>If sorting is enabled, then DataTables will perform a first pass sort on initialisation. You can define which
+      column(s) the sort is performed upon, and the sorting direction, with this variable. For each column an array must
+      be specified where the first element is an int of the data index, and the second is 'asc' or 'desc' for the
+      sorting direction Example of multiple column sorting: "[[0,'asc'], [1,'asc']]"
+    </dd>
+
+    <dt>displayLength</dt>
+    <dd>Number of rows to display on a single page when using pagination. If feature enabled (bLengthChange) then the
+      end user will be able to over-ride this to a custom setting using a pop-up menu. Default: 10
+    </dd>
+
+    <dt>lengthChange</dt>
+    <dd>Allows the end user to select the size of a formatted page from a select menu (sizes are 10, 25, 50 and 100).
+      Default: true
+    </dd>
+
+    <dt>tableStyle</dt>
+    <dd>The style of the table to render. Possible values: classic and themeroller. Default: classic</dd>
+
+    <dt>drawCallback</dt>
+    <dd>Optinal function to be called when a page of the table is rendered. Takes the component object
+      as argument. Example: function(component){if (typeof component == 'undefined'){return}; alert("Page draw")}
+    </dd>
+
+    <dt>sDom</dt>
+    <dd>
+      This initialisation variable allows you to specify exactly where in the DOM you want DataTables to inject the
+      various controls it adds to the page (for example you might want the pagination controls at the top of the table).
+      DIV elements (with or without a custom class) can also be added to aid styling. See
+      http://datatables.net/usage/options for more details
+    </dd>
+
+    <dt>oLanguage</dt>
+    <dd>
+      Object used for the translation. See http://datatables.net/usage/options for more details.
+
+      Example:
+        <pre>
+          oLanguage:{
+          "sProcessing": "A processar...",
+          "sLengthMenu": "Mostrar _MENU_ registos",
+          "sZeroRecords": "Não foram encontrados resultados",
+          "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
+          "sInfoEmpty": "Mostrando de 0 até 0 de 0 registros",
+          "sInfoFiltered": "(filtrado de _MAX_ registos no total)",
+          "sInfoPostFix": "",
+          "sSearch": "Procurar:",
+          "sUrl": "",
+          "oPaginate": {
+          "sFirst": "Primeiro",
+          "sPrevious": "Anterior",
+          "sNext": "Seguinte",
+          "sLast": "Último"
+          }
+          }
+        </pre>
+    </dd>
+
+
+  </dl>
+
+  <h3>Component objects</h3>
+
+  <dl class="documentation">
+
+    <dt>dataTable</dt>
+    <dd>After the datatable plugin is applied, the base object can be access through this object</dd>
+
+
+    </dd>
+
+  </dl>
+
+  <h3>Sample</h3>
+
+  <div id="example" class="flora">
+    <ul>
+
+      <li><a href="#sample"><span>Sample</span></a></li>
+      <li><a href="#code"><span>Code</span></a></li>
+    </ul>
+    <div id="sample">
+
+      <div id="sampleObject"></div>
+      <br/>
+    </div>
+
+
+    <div id="code">
+      <textarea cols="80" rows="40" id="samplecode">
+
+        var MetaLayerHome2 = {
+        topTenCustomerDefinition: {
+        colHeaders: ["Customers","Sales"],
+        colTypes: ['string','numeric'],
+        colFormats: [null,'%.0f'],
+        colWidths: ['500px',null],
+        queryType: 'mdx',
+        displayLength: 5,
+
+        catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
+        jndi: "SampleData",
+        query: function(){
+
+        var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
+        " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) " +
+        " ON ROWS from [SteelWheelsSales]"
+        return query;
+        }
+        }
+        };
+
+        var topTenCustomers =
+        {
+        name: "topTenCustomers",
+        type: "tableComponent",
+        chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+        htmlObject: "sampleObject",
+        executeAtStart: true
+        };
+        Dashboards.init([topTenCustomers]);
+      </textarea>
+      <br/>
+      <button onclick="evaluateCode(true)">Try me</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script language="javascript" type="text/javascript">
+
+  var tabs = $("#example").tabs();
+  evaluateCode(false);
+
+</script>
