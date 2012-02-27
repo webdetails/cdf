@@ -114,8 +114,14 @@
     <!-- list of optional Sonar properties -->
     <property name="sonar.binaries" value="${classes.dir}" />
     <sonar:sonar key="pt.webdetails:CDF" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>
+  </target>
 
 
+<target name="sonar-js" depends="read-sonar-props">
+<!-- Build the project.revision property -->
+  <condition property="distribution.version" value="${project.stage}-${DSTAMP}" else="${project.stage}-${project.version}">
+    <equals arg1="${project.version}" arg2="SNAPSHOT"/>
+  </condition>  
 
    	<property name="sonar.language" value="js"/>
     <property name="sonar.dynamicAnalysis" value="false"/>
@@ -123,8 +129,7 @@
     <sonar:sonar key="pt.webdetails:CDF-js" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
 
     
-  </target>
-
+</target>
 
 
 	  <!--=======================================================================
