@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215
+//VERSION TRUNK-20120215-patched-20120229
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -118,7 +118,7 @@ pvc.create = (function(){
 
 pvc.number = function(d, dv){
     var v = parseFloat(d);
-    return isNaN(d) ? (dv || 0) : v;
+    return isNaN(v) ? (dv || 0) : v;
 };
 
 // null or undefined to 'dv''
