@@ -119,7 +119,7 @@ pvc.create = (function(){
 
 pvc.number = function(d, dv){
     var v = parseFloat(d);
-    return isNaN(d) ? (dv || 0) : v;
+    return isNaN(v) ? (dv || 0) : v;
 };
 
 // null or undefined to 'dv''
