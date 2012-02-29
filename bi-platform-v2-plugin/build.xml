@@ -178,7 +178,7 @@
 
 		   <!-- create the version file -->
 		   <echo file="${stage.dir}/${plugin.name}/VERSION.txt">${project.revision}</echo>
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='STABLE'>${project.revision}&lt;/version>"/>		   
 
 		   <!-- Copy js folder into dist -->
 		   <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
