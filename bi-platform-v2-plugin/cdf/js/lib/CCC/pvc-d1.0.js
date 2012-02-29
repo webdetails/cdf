@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120229
+//VERSION TRUNK-20120215-patched-20120229-b
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -8875,7 +8875,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
                         tooltip = options.customTooltip.call(null, s, c, d, datum);
                     } else {
-                        tooltip = r[i];
+                        tooltip = r && r[i];
                     }
 
                     return tooltip;
