@@ -1,6 +1,5 @@
 //VERSION 12.02.16
 
-
 // ECMAScript 5 shim
 if(!Object.keys) {
     Object.keys = function(o){
@@ -8879,7 +8878,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
 
                         tooltip = options.customTooltip.call(null, s, c, d, datum);
                     } else {
-                        tooltip = r[i];
+                        tooltip = r && r[i];
                     }
 
                     return tooltip;
