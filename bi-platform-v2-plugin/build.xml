@@ -104,25 +104,21 @@
  
   <target name="sonar" depends='read-sonar-props'>
   
- <!-- Build the project.revision property -->
-  <property name="distribution.version"  value="${project.stage}-${project.version}"/>
   
     <!-- list of mandatories Sonar properties -->
     <property name="sonar.sources" value="${src.dir}" />
     <!-- list of optional Sonar properties -->
     <property name="sonar.binaries" value="${classes.dir}" />
-    <sonar:sonar key="pt.webdetails:CDF" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>
+    <sonar:sonar key="pt.webdetails:CDF" version="${project.revision}" xmlns:sonar="antlib:org.sonar.ant"/>
   </target>
 
 
 <target name="sonar-js" depends="read-sonar-props">
-<!-- Build the project.revision property -->
- <property name="distribution.version"  value="${project.stage}-${project.version}"/>
 
    	<property name="sonar.language" value="js"/>
     <property name="sonar.dynamicAnalysis" value="false"/>
     <property name="sonar.sources" value="cdf/js" />
-    <sonar:sonar key="pt.webdetails:CDF-js" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
+    <sonar:sonar key="pt.webdetails:CDF-js" version="${project.revision}" xmlns:sonar="antlib:org.sonar.ant"/>    
 
     
 </target>
