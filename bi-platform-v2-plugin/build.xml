@@ -178,12 +178,10 @@
 		   </copy>
 
 		   <!-- create the version file -->
-			<tstamp/>
-			<condition property="seq.build.id" value="${sequential.build.id}" else="manual-${DSTAMP}">
-				<isset property="${sequential.build.id}" />
-			</condition> 
+			<tstamp/>			
+			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
 
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${seq.build.id}'>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
 
 		   <!-- Copy js folder into dist -->
 		   <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
