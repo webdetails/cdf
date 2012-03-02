@@ -105,9 +105,7 @@
   <target name="sonar" depends='read-sonar-props'>
   
  <!-- Build the project.revision property -->
-  <condition property="distribution.version" value="${project.stage}-${DSTAMP}" else="${project.stage}-${project.version}">
-    <equals arg1="${project.version}" arg2="SNAPSHOT"/>
-  </condition>  
+  <property name="distribution.version"  value="${project.stage}-${project.version}"/>
   
     <!-- list of mandatories Sonar properties -->
     <property name="sonar.sources" value="${src.dir}" />
@@ -119,9 +117,7 @@
 
 <target name="sonar-js" depends="read-sonar-props">
 <!-- Build the project.revision property -->
-  <condition property="distribution.version" value="${project.stage}-${DSTAMP}" else="${project.stage}-${project.version}">
-    <equals arg1="${project.version}" arg2="SNAPSHOT"/>
-  </condition>  
+ <property name="distribution.version"  value="${project.stage}-${project.version}"/>
 
    	<property name="sonar.language" value="js"/>
     <property name="sonar.dynamicAnalysis" value="false"/>
@@ -182,8 +178,12 @@
 		   </copy>
 
 		   <!-- create the version file -->
-		   <echo file="${stage.dir}/${plugin.name}/VERSION.txt">${project.revision}</echo>
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
+			<tstamp/>
+			<condition property="seq.build.id" value="${sequential.build.id}" else="manual-${DSTAMP}">
+				<isset property="${sequential.build.id}" />
+			</condition> 
+
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${seq.build.id}'>${project.revision}&lt;/version>"/>		   
 
 		   <!-- Copy js folder into dist -->
 		   <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
