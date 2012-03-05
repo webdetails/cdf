@@ -1,4 +1,6 @@
-//VERSION TRUNK-20120215-patched-20120229-b
+//VERSION 12.02.16
+
+
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -821,6 +823,8 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     $.support.svg = $.support.svg || 
         document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
 })(jQuery);
+
+
 /**
  * A datum is the atomic data entity of the data model.
  * A datum contains key properties, of specific data dimensions.
@@ -3892,6 +3896,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     return this.pvLabel;
   }
 });
+
 /**
  * TimeseriesAbstract is the base class for all categorical or timeseries
  */
@@ -9097,6 +9102,8 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
      * selections (end)
      **********************/
 });
+
+
 /**
  * Bullet chart generation
  */

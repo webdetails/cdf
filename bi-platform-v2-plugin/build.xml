@@ -33,6 +33,8 @@
 	<property name='CLIENT' value='cdf/js' />
 	<property file='${CLIENT}/includes.properties' />
 
+	<property name="project.revision" value="4.5-SNAPSHOT"/>
+
 
 <property name="js.module.script.dir" value="cdf/js"/>
   <property name="js.module.script.namespace" value="cdf"/>
@@ -118,6 +120,7 @@
     <property name="sonar.sources" value="${src.dir}" />
     <!-- list of optional Sonar properties -->
     <property name="sonar.binaries" value="${classes.dir}" />
+
     <sonar:sonar key="pt.webdetails:CDF" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>
   </target>
 
@@ -131,7 +134,7 @@
    	<property name="sonar.language" value="js"/>
     <property name="sonar.dynamicAnalysis" value="false"/>
     <property name="sonar.sources" value="cdf/js" />
-    <sonar:sonar key="pt.webdetails:CDF-js" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
+    <sonar:sonar key="pt.webdetails:CDF-js-Release" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
 
     
 </target>
