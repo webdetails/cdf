@@ -464,10 +464,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
         ArrayList<String> i18nTagsList = new ArrayList<String>();
         if (templater != null) {
             
-          String solutionPath = "system/" + PLUGIN_NAME + "/" + dashboardTemplate;
+          String solutionPath = SOLUTION_DIR + "/templates/" + dashboardTemplate; 
             if(!repository.resourceExists(solutionPath))
-            {//then try in solution
-              solutionPath = SOLUTION_DIR + "/templates/" + dashboardTemplate;
+            {//then try in system
+              solutionPath = "system/" + PLUGIN_NAME + "/" + dashboardTemplate;
             }
               
             final ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", solutionPath); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

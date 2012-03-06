@@ -23,13 +23,26 @@
 		</classpath>
 	</taskdef>
 
+	 <!-- Define the Sonar task if this hasn't been done in a common script -->
+  <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+    <classpath path="sonar-ant-task-1.3.jar" />
+  </taskdef>
+  
+ 	
 	<!-- Global properties -->
 	<property name='CLIENT' value='cdf/js' />
 	<property file='${CLIENT}/includes.properties' />
 
 
+<property name="js.module.script.dir" value="cdf/js"/>
+  <property name="js.module.script.namespace" value="cdf"/>
+  <property name="ivy.repository.publish" value="file:///Users/nbaker/.m2/repository"/>
+
+
 	<!-- Import the common_build.xml file which contains all the default tasks -->	
 	<import file="common_build.xml"/>
+
+<import file="build-res/subfloor-js.xml"/>
 
 	<!--
 	  AS STATED ABOVE, THE ONLY TASKS THAT SHOULD EXIST IN THIS BUILD FILE ARE
@@ -73,13 +86,47 @@
 
 	  <property name="plugin.local.install.solutions.dir" value="../solution" /> 
 
-	  <target name="dist" depends="clean-dist,resolve,jar,dist-plugin,dist-solution,dist-samples"/>
+	  <target name="dist" depends="clean-dist,resolve,jar,dist-plugin,dist-solution,dist-samples,subfloor-js.dist-js"/>
 	  <target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
 
 	  <property name="plugin.artifact.id" value="${plugin.name}"/>
 	  <property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
 	  <property name="plugin.samples.zipfile" value="${plugin.artifact.id}-samples-${project.revision}.zip"/>
 	  <property name="plugin.solution.zipfile" value="${plugin.artifact.id}-solution-${project.revision}.zip"/>
+
+
+	  
+ <target name="check-sonar-props">
+      <available file="/home/tomcat/sonar.properties" property="sonar.props"/>    
+      <echo>${sonar.props}</echo>
+ </target>
+
+
+<target name="read-sonar-props" depends="check-sonar-props" if="sonar.props">
+<echo>Prop file exists</echo>
+<loadproperties srcFile="/home/tomcat/sonar.properties"/>
+</target>
+ 
+  <target name="sonar" depends='read-sonar-props'>
+  
+  
+    <!-- list of mandatories Sonar properties -->
+    <property name="sonar.sources" value="${src.dir}" />
+    <!-- list of optional Sonar properties -->
+    <property name="sonar.binaries" value="${classes.dir}" />
+    <sonar:sonar key="pt.webdetails:CDF" version="${project.revision}" xmlns:sonar="antlib:org.sonar.ant"/>
+  </target>
+
+
+<target name="sonar-js" depends="read-sonar-props">
+
+   	<property name="sonar.language" value="js"/>
+    <property name="sonar.dynamicAnalysis" value="false"/>
+    <property name="sonar.sources" value="cdf/js" />
+    <sonar:sonar key="pt.webdetails:CDF-js" version="${project.revision}" xmlns:sonar="antlib:org.sonar.ant"/>    
+
+    
+</target>
 
 
 	  <!--=======================================================================
@@ -96,6 +143,8 @@
 		   <mkdir dir="${stage.dir}/${plugin.name}" />
 		   <mkdir dir="${stage.dir}/${plugin.name}/lib" />
 
+<mkdir dir="${stage.dir}/${plugin.name}/actions" />
+	
 		   <!-- copy the plugin jar to the plugin dist lib folder -->
 		   <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
 			   <fileset dir="${dist.dir}">
@@ -105,7 +154,6 @@
 				   <include name="*.jar" />
 			   </fileset>
 		   </copy>
-                   
 
 		   <!-- Copy the plugin.xml and any other files from the resource dir -->
 		   <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
@@ -114,6 +162,16 @@
 			   </fileset>
 		   </copy>
 
+		   	  <!-- copy over all the xactions within the cdf folder -->
+		  <copy todir="${stage.dir}/${plugin.name}/actions" overwrite="true" >
+			  <fileset dir="../solution/cdf/components">
+				  <include name="*.xaction*"/>
+				  <include name="*.xml"/>
+				  <include name="*.js"/>
+				  <exclude name="index.xml"/>
+			  </fileset>
+		  </copy>
+
 		   <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
 			   <fileset dir="${basedir}">
 				   <include name="readme.txt"/>
@@ -121,7 +179,10 @@
 		   </copy>
 
 		   <!-- create the version file -->
-		   <echo file="${stage.dir}/${plugin.name}/VERSION.txt">${project.version}</echo>
+		   <tstamp/>			
+			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
+
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
 
 		   <!-- Copy js folder into dist -->
 		   <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
@@ -130,10 +191,10 @@
 			   </fileset>
 		   </copy>
 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.version}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.version}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0" value="Version ${project.version}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0" value="Version ${project.version}"/> 
+		   <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.revision}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.revision}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0" value="Version ${project.revision}"/> 
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0" value="Version ${project.revision}"/> 
 
 
 
@@ -166,16 +227,17 @@
 			  </fileset>
 		  </copy>
 
-		  <!-- Copy solution -->
-		  <copy todir="${plugin.local.install.solutions.dir}/">
-			  <fileset dir="${solution.stage.dir}/">
+		  <!-- Copy solution 
+		  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}/actions">
+			  <fileset dir="${solution.stage.dir}/cdf/components">
 				  <include name="**/*" />
-			  </fileset>
-		  </copy>
+</fileset>
+</copy>
+-->
 
 		  <!-- Copy samples -->
-		  <copy todir="${plugin.local.install.solutions.dir}/">
-			  <fileset dir="${samples.stage.dir}/">
+		  <copy todir="${plugin.local.install.solutions.dir}/plugin-samples">
+			  <fileset dir="${samples.stage.dir}/plugin-samples">
 				  <include name="**/*" />
 			  </fileset>
 		  </copy>
@@ -189,13 +251,13 @@
 
 		  <mkdir dir="${samples.stage.dir}"/>
 
-		  <!-- copy over all the xactions within the cdf-samples folder -->
-		  <copy todir="${samples.stage.dir}/bi-developers" overwrite="true" >
-			  <fileset dir="../solution/bi-developers"></fileset>
+		  <!-- copy over all the xactions within the pentaho-cdf folder -->
+		  <copy todir="${samples.stage.dir}/plugin-samples" overwrite="true" >
+			  <fileset dir="../solution/plugin-samples"></fileset>
 		  </copy>
 
 		  <zip zipfile="${dist.dir}/${plugin.samples.zipfile}"
-			  basedir="${samples.stage.dir}"
+			  basedir="${samples.stage.dir}/plugin-samples"
 			  includes="**/*"
 			  excludes="**/Thumbs.db" 
 			  />
@@ -203,23 +265,24 @@
 
 	  <target name="dist-solution" depends="init">
 
-		  <mkdir dir="${solution.stage.dir}"/>
-
 		  <!-- copy over all the xactions within the cdf folder -->
-		  <copy todir="${solution.stage.dir}" overwrite="true" >
+<!--
+		  		  <mkdir dir="${solution.stage.dir}"/>
+				  			  		  <copy todir="${solution.stage.dir}" overwrite="true" >
 			  <fileset dir="../solution">
 				  <include name="cdf/**/*.xaction*"/>
 				  <include name="cdf/**/*.xml"/>
 				  <include name="cdf/**/*.js"/>
 				  <exclude name="cdf/**/index.xml"/>
-			  </fileset>
-		  </copy>
+</fileset>
+</copy>
 
 		  <zip zipfile="${dist.dir}/${plugin.solution.zipfile}"
-			  basedir="${solution.stage.dir}"
-			  includes="**/*"
-			  excludes="**/Thumbs.db" 
+basedir="${solution.stage.dir}"
+includes="**/*"
+excludes="**/Thumbs.db" 
 			  />
+			  -->
 	  </target>
 
 
@@ -229,7 +292,7 @@
 		Publishes the jar and plugin zip package to the Maven repository
 		====================================================================-->
   <target name="publish-pentaho-nojar"
-	  depends="install-antcontrib,create-pom,ivy.deliver">
+	  depends="install-antcontrib,create-pom,ivy.deliver, subfloor-js.js.publish-nojar">
 	  <ant antfile="common_build.xml" target="publish-pentaho-nojar" />
 
 	  <ivy:makepom ivyfile="package-ivy.xml" pomfile="plugin-pom.xml" />
@@ -250,13 +313,15 @@
 		  <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
 	  </antcall>
 
+	  <!--
 	  <replace file="solution-pom.xml" token="jar" value="zip" />
 	  <replace file="solution-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-solution" />
 	  <antcall target="maven-publish-artifact">
 		  <param name="publish.pomFile" value="solution-pom.xml" />
 		  <param name="publish.file" value="${dist.dir}/${plugin.solution.zipfile}" />
 	  </antcall>
-  </target>
+-->	  
+		    </target>
 
   <target name="minify-client">
 	  <concat destfile="${CLIENT}/scripts.js">

@@ -8,12 +8,14 @@
     	<conf name="source"/>
     	<conf name="zip"/>
     	<conf name="test" visibility="private"/>
+      <conf name="js"/>
     </configurations>
 
     <publications>
         <artifact name="pentaho-cdf" type="jar" conf="default"/>
         <artifact name="pentaho-cdf" m:classifier="sources" type="source" ext="jar" conf="source"/>
         <artifact name="pentaho-cdf" type="zip" conf="zip"/>
+        <artifact name="pentaho-cdf" m:classifier="js" type="js" ext="zip" conf="js" />
     </publications>
 
     <dependencies defaultconf="default->default">

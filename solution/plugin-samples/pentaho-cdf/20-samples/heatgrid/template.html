@@ -1,0 +1,137 @@
+<SCRIPT LANGUAGE="JavaScript">
+
+function clickOnTerritory(value) {
+	productLine = "null";
+	Dashboards.fireChange('territory',value);
+}
+
+</SCRIPT>
+
+
+<table align="center" style="border: 1px solid #000;">
+	<tr>
+		<td align="center" colspan="2"><p><div id="titleObject"></div></p></td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td valign="top"><div id="territorySalesObject"></div></td>
+				</tr>
+				<tr>
+					<td valign="top"><div id="productLineSalesObject"></div></td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<table>
+				<tr>
+					<td><div id="sampleObject"></div></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+var testHeatGrid = {
+  "resultset":[["Product A",null,1278,321,540,110],
+  ["Product B",209,2165,5000,1019,null],
+  ["Product C",3694,5264,15444,9205,312],
+  ["Product D",1257,1040,7215,1512,18]],
+  "metadata":[{
+    "colIndex":0,
+    "colType":"String",
+    "colName":"Product-line"
+  },{
+    "colIndex":1,
+    "colType":"Numeric",
+    "colName":"APAC"
+  },{
+    "colIndex":2,
+    "colType":"Numeric",
+    "colName":"EMEA"
+  },{
+    "colIndex":3,
+    "colType":"Numeric",
+    "colName":"Japan"
+  },{
+    "colIndex":4,
+    "colType":"Numeric",
+    "colName":"NA"
+  },{
+    "colIndex":5,
+    "colType":"Numeric",
+    "colName":"RoW"
+  }]
+};
+
+
+
+var render_grid = {
+	type: "cccHeatGridChart",
+	name: "render_grid",
+	chartDefinition: {
+		width: 400,
+		height: 400,
+//		dataAccessId: "mdxQuery",
+//path: "/bi-developers/pentaho-cdf/20-samples/heatgrid/cde_sample1.cda",
+		crosstabMode: true,
+		seriesInRows: false,
+		animate: false,
+		clickable: false,
+		timeSeries: false,
+		timeSeriesFormat: "%Y-%m-%d",
+		panelSizeRatio: 0.8,
+		orientation: "vertical",
+		colors: [],
+		showValues: false,
+		valuesAnchor: "right",
+		titlePosition: "top",
+		titleSize: 25,
+		showXScale: true,
+		xAxisPosition: "bottom",
+		xAxisSize: 30,
+		showYScale: true,
+		yAxisPosition: "left",
+		yAxisSize: 50,
+		xAxisFullGrid: false,
+		yAxisFullGrid: false,
+		orthoAxisOrdinal: false,
+		scalingType: "linear",
+		numSD: 2,
+		nullColor: "#efc5ad",
+		extensionPoints: [],
+                valuesAnchor: "right",
+                normPerBaseCategory: true,
+                useShapes: true,
+                minColor: "#0EDFF1",
+                maxColor: "#0119F9",
+                isMultiValued: true,
+                useCompositeAxis:true
+},
+	parameters: [],
+	executeAtStart: true,
+	htmlObject: "sampleObject",
+	listeners: []
+
+};
+Dashboards.init([render_grid]);
+
+function initDummyData() {
+	render_grid.chart.setData(testHeatGrid,
+                                 {crosstabMode: true,
+                                  seriesInRows: false });
+	render_grid.chart.render();	
+}
+
+window.setTimeout('initDummyData()', 1000);
+
+
+
+   
+
+					
+</script>
+
