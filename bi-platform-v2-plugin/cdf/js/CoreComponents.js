@@ -1197,6 +1197,7 @@ var MonthPickerComponent = BaseComponent.extend({
     if (object_size != undefined){
       selectHTML += " size='" + object_size + "'";
     }
+    selectHTML += '>';
 
     var currentDate = new Date(+initialDate);
     currentDate.setMonth(currentDate.getMonth()- monthCount/2 - 1);
@@ -1206,13 +1207,13 @@ var MonthPickerComponent = BaseComponent.extend({
       currentDate.setMonth(currentDate.getMonth() + 1);
       if(currentDate >= minDate && currentDate <= maxDate)
       {
-        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "'";
+        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "' ";
 
         if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()){
           selectHTML += "selected='selected'"
         }
 
-        selectHTML += "' >" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
+        selectHTML += ">" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
       }
     }
 
