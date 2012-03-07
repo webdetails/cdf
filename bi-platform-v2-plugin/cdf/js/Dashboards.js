@@ -689,6 +689,7 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 
 Dashboards.init = function(components){
   this.loadStorage();
+  this.restoreBookmarkables();
   if ($.isArray(components)) {
     Dashboards.addComponents(components);
   }
@@ -720,7 +721,7 @@ Dashboards.initEngine = function(){
       if(typeof myself.postInit == 'function') {
         myself.postInit();
       }
-
+      Dashboards.finishedInit = true;
       Dashboards.decrementRunningCalls();
     },
     Dashboards.renderDelay);
@@ -804,6 +805,135 @@ Dashboards.fireChange = function(parameter, value) {
   }, Dashboards.renderDelay);
 };
 
+Dashboards.getHashValue = function(key) {
+    var hash = window.location.hash,
+        obj;
+    try {
+      obj = JSON.parse(hash.slice(1));
+    } catch (e) {
+      obj = {};
+    }
+    if (arguments.length === 0) {
+      return obj;
+    } else {
+      return obj[key];
+    }
+}
+
+Dashboards.setHashValue = function(key, value) {
+    var obj = Dashboards.getHashValue(),json;
+    if (arguments.length == 1) {
+      obj = key;
+    } else {
+      obj[key] = value;
+    }
+    json = JSON.stringify(obj);
+    /* We don't want to store empty objects */
+    if (json != "{}") {
+      window.location.hash = json;
+    } else {
+      window.location.hash = '';
+    }
+}
+Dashboards.deleteHashValue = function(key) {
+  var obj = Dashboards.getHashValue();
+  if (arguments.length === 0) {
+    window.location.hash = "";
+  } else {
+    delete obj[key];
+    Dashboards.setHashValue(obj);
+  }
+}
+Dashboards.setBookmarkable = function(parameter, value) {
+    if(!this.bookmarkables) this.bookmarkables = {};
+    if (arguments.length === 1) value = true;
+    this.bookmarkables[parameter] = value;
+}
+
+Dashboards.isBookmarkable = function(parameter) {
+    if(!this.bookmarkables) {return false;}
+    return Boolean(this.bookmarkables[parameter]);
+}
+
+Dashboards.persistBookmarkables = function(param) {
+  var bookmarkables = this.bookmarkables,
+      params = {},
+      state;
+  /* We don't want to update the hash if we were passed a
+   * non-bookmarkable parameter (why bother?), nor is there
+   * much of a point in publishing changes when we're still
+   * initializing the dashboard. That's just the code for
+   * restoreBookmarkables doing the reverse of this!
+   */
+  if(!bookmarkables[param] || !Dashboards.finishedInit) {
+    return;
+  }
+  for (k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
+    if (bookmarkables[k]) {
+      params[k] = Dashboards.getParameterValue(k);
+    }
+  }
+  Dashboards.setBookmarkState({impl: 'client',params: params});
+}
+
+Dashboards.setBookmarkState = function(state) {
+  if(window.history && window.history.pushState) {
+    var method = window.location.pathname.split('/').pop(),
+        query = window.location.search.slice(1).split('&').map(function(e){
+          return e.split('=');
+        }),
+        url;
+    query = Dashboards.propertiesArrayToObject(query);
+    query.bookmarkState = JSON.stringify(state);
+    url = method + '?' + $.param(query);
+    window.history.pushState({},'',url);
+    this.deleteHashValue('bookmark')
+  } else {
+    this.setHashValue('bookmark',state);
+  }
+};
+
+Dashboards.getBookmarkState = function() {
+  /* 
+   * browsers that don't support history.pushState
+   * can't actually safely remove bookmarkState param,
+   * so we must first check whether there is a hash-based
+   * bookmark state.
+   */
+  if (window.location.hash.length > 1) {
+  try {
+      return this.getHashValue('bookmark') || {};
+    } catch (e) {
+      /*
+       * We'll land here if the hash isn't a valid json object,
+       * so we'll go on and try getting the state from the params
+       */
+    }
+  } 
+  var query = window.location.search.slice(1).split('&').map(function(e){
+          return e.split('=');
+      }),
+      params = Dashboards.propertiesArrayToObject(query),
+      bookmarkState;
+  if(params.bookmarkState) {
+    return JSON.parse(decodeURIComponent(params.bookmarkState.replace(/\+/g,' '))) || {};
+  } else  {
+    return {};
+  }
+};
+
+Dashboards.restoreBookmarkables = function() {
+  var state;
+  try {
+    state = this.getBookmarkState().params;
+    for (k in state) if (state.hasOwnProperty(k)) {
+      Dashboards.setParameter(k,state[k]);
+    }
+  } catch (e) {
+    Dashboards.log(e,'error');
+  }
+}
+
 Dashboards.getParameterValue = function (parameterName) {
   if (Dashboards.globalContext) {
     return eval(parameterName);
@@ -851,6 +981,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
       Dashboards.parameters[parameterName] = parameterValue;
     }
   }
+  Dashboards.persistBookmarkables(parameterName);
 };
 
 
