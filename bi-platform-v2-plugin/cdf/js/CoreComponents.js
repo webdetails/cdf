@@ -1856,7 +1856,7 @@ var TableComponent = BaseComponent.extend({
       myself.ph.find("tbody tr").each(function(row,tr){
           if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
               return true;
-        $(tr).children("td:visible").each(function(col,td){
+        $(tr).children("td").each(function(col,td){
             var position = dataTable.fnGetPosition(td),
                 rowIdx = position[0],
                 colIdx = position[2];
