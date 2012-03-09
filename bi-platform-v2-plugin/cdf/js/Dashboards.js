@@ -911,7 +911,9 @@ Dashboards.getBookmarkState = function() {
     }
   } 
   var query = window.location.search.slice(1).split('&').map(function(e){
-          return e.split('=');
+          var pair = e.split('=');
+          pair[1] = decodeURIComponent(pair[1]);
+          return pair;
       }),
       params = Dashboards.propertiesArrayToObject(query),
       bookmarkState;
@@ -924,6 +926,7 @@ Dashboards.getBookmarkState = function() {
 
 Dashboards.restoreBookmarkables = function() {
   var state;
+  this.bookmarkables = this.bookmarkables || {};
   try {
     state = this.getBookmarkState().params;
     for (k in state) if (state.hasOwnProperty(k)) {
