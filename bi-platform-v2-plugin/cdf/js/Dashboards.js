@@ -880,7 +880,9 @@ Dashboards.setBookmarkState = function(state) {
   if(window.history && window.history.pushState) {
     var method = window.location.pathname.split('/').pop(),
         query = window.location.search.slice(1).split('&').map(function(e){
-          return e.split('=');
+          var entry = e.split('=');
+          entry[1] = decodeURIComponent(entry[1]);
+          return entry;
         }),
         url;
     query = Dashboards.propertiesArrayToObject(query);
