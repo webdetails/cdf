@@ -2395,7 +2395,7 @@ var ButtonComponent = BaseComponent.extend({
   update : function() {
     var myself = this;
     var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
-        return myself.expression.call(myself,arguments);
+        return myself.expression.apply(myself,arguments);
     });
     if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
       b.button();
