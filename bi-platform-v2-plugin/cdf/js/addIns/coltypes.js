@@ -418,6 +418,45 @@
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(localizedText));
 
+
+  var groupHeaders = {
+    name: "groupHeaders",
+    label: "Group Headers",
+    defaults: {
+      hide:true
+    },
+
+    init: function(){
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['string-desc'];
+    },
+    
+    implementation: function(tgt, st, opt){
+      var dt = $(tgt).parents('table').eq(0).dataTable(),
+          visColIdx = $(tgt).index();
+
+      if (opt.hide){
+         dt.find('.groupHeaders:nth-child(' + (visColIdx + 1) + ')').addClass('hiddenCol');
+      }
+
+      var $row = $(dt.fnGetNodes( st.rowIdx )),
+          visRowIdx = $row.index(),
+          count = $row.children().length,
+          $group;
+
+      if ( visRowIdx === 0 || $row.prev().hasClass('groupHeader') || ( st.value != dt.fnGetData( $row.prev().get(0) )[st.colIdx]  )) {
+          $group = $('<td/>').append( st.value );
+          $group.attr({colSpan:count});
+          $group = $('<tr/>').addClass('groupHeader group' + visColIdx).append($group);
+          $group.insertBefore($row);
+      }
+ 
+    }
+
+  };
+  Dashboards.registerAddIn("Table", "colType", new AddIn(groupHeaders));
+
+
 })();
 
 

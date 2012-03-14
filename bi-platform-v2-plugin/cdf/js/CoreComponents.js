@@ -1197,6 +1197,7 @@ var MonthPickerComponent = BaseComponent.extend({
     if (object_size != undefined){
       selectHTML += " size='" + object_size + "'";
     }
+    selectHTML += '>';
 
     var currentDate = new Date(+initialDate);
     currentDate.setMonth(currentDate.getMonth()- monthCount/2 - 1);
@@ -1206,13 +1207,13 @@ var MonthPickerComponent = BaseComponent.extend({
       currentDate.setMonth(currentDate.getMonth() + 1);
       if(currentDate >= minDate && currentDate <= maxDate)
       {
-        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "'";
+        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "' ";
 
         if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()){
           selectHTML += "selected='selected'"
         }
 
-        selectHTML += "' >" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
+        selectHTML += ">" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
       }
     }
 
@@ -1855,7 +1856,7 @@ var TableComponent = BaseComponent.extend({
       myself.ph.find("tbody tr").each(function(row,tr){
           if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
               return true;
-        $(tr).children("td:visible").each(function(col,td){
+        $(tr).children("td").each(function(col,td){
             var position = dataTable.fnGetPosition(td),
                 rowIdx = position[0],
                 colIdx = position[2];
@@ -2391,7 +2392,10 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
 var ButtonComponent = BaseComponent.extend({
   update : function() {
-    var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", this.expression);
+    var myself = this;
+    var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
+        return myself.expression.call(myself,arguments);
+    });
     if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
       b.button();
     b.appendTo($("#"+ this.htmlObject).empty());
