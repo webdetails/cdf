@@ -578,7 +578,7 @@ Dashboards.restoreDuplicates = function() {
    */
   var dupes = Dashboards.components.filter(function(c){return c.type == 'duplicate'}),
       suffixes = {},
-      params = Dashboards.getBookmarkState().params;
+      params = Dashboards.getBookmarkState().params || {};
   /*
    * First step is to go over the bookmarked parameters and find
    * all of those that end with the $nn suffix (possibly several
@@ -592,7 +592,7 @@ Dashboards.restoreDuplicates = function() {
   Object.keys(params).filter(function(e){
       return /(\$[0-9]+)+$/.test(e);
   }).map(function(e){
-      var parts = e.match(/(.*)(\$[0-9]+)+$/),
+      var parts = e.match(/(.*?)((\$[0-9]+)+)$/),
           name = parts[1],
           suffix = parts[2];
       if(!suffixes[suffix]){
