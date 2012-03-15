@@ -567,6 +567,64 @@ Dashboards.bindControl = function(object) {
   }
 };
 
+
+Dashboards.restoreDuplicates = function() {
+  /*
+   * We mark duplicates by appending a $nn tag to their names.
+   * This means that, when we read the parameters from bookmarks,
+   * we can look for the $nn suffixes, and infer from those suffixes
+   * what duplications were triggered, allowing us to reproduce that
+   * state as well.
+   */
+  var dupes = Dashboards.components.filter(function(c){return c.type == 'duplicate'}),
+      suffixes = {},
+      params = Dashboards.getBookmarkState().params;
+  /*
+   * First step is to go over the bookmarked parameters and find
+   * all of those that end with the $nn suffix (possibly several
+   * such suffixes piled up, like $1$2, as we can re-duplicate
+   * existing duplicates).
+   * 
+   * The suffixes object then maps those suffixes to a mapping of
+   * the root parameter names to their respective values.
+   * E.g. a parameter 'foo$1 = 1' yields '{$1: {foo: 1}}'
+   */
+  Object.keys(params).filter(function(e){
+      return /(\$[0-9]+)+$/.test(e);
+  }).map(function(e){
+      var parts = e.match(/(.*)(\$[0-9]+)+$/),
+          name = parts[1],
+          suffix = parts[2];
+      if(!suffixes[suffix]){
+          suffixes[suffix] = {}
+      }
+      suffixes[suffix][name] = params[e];
+      return e;
+  });
+
+
+  /*
+   * Once we have the suffix list, we'll check each suffix's 
+   * parameter list against each of the DuplicateComponents
+   * in the dashboard. We consider that a suffix matches a
+   * DuplicateComponent if the suffix contains all of the
+   * Component's Bookmarkable parameters. If we're satisfied
+   * that such a match was found, then we tell the Component
+   * to trigger a duplication with the provided values.
+   */
+  for (var s in suffixes) if (suffixes.hasOwnProperty(s)) {
+    var params = suffixes[s];
+    $.each(dupes,function(i,e){
+      var p;
+      for (p = 0; p < e.parameters.length;p++) {
+        if (!params.hasOwnProperty(e.parameters[p]) && Dashboards.isBookmarkable(e.parameters[p])) {
+          return;
+        }
+      }
+      e.duplicate(params);
+    });
+  }
+}
 Dashboards.blockUIwithDrag = function() {
   if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
@@ -721,6 +779,7 @@ Dashboards.initEngine = function(){
       if(typeof myself.postInit == 'function') {
         myself.postInit();
       }
+      Dashboards.restoreDuplicates();
       Dashboards.finishedInit = true;
       Dashboards.decrementRunningCalls();
     },
