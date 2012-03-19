@@ -1,3 +1,18 @@
+12.03.19
+	* Fixed pvc.number that caused stacked charts in crosstab format to fail.
+	* Fixed bug that caused stacked charts in crosstab format to fail, when rendering the tooltip of a null value.	
+	* Adding Javascript source publish
+	* Fix Month Picker HTML
+	* Upgrade jquery to 1.7
+	* Shim Object.keys in Dashboards.js
+	* Make ButtonComponent's "expression" callback have this point to the component itself
+	* Add support for persistent parameters
+	* Added groupHeaders addIn. Changed TableComponent in CoreComponents to render all cells ("td") and not just visible ones ("td:visible").
+	* Added marketplace snippet generation to build process
+	* Changed buttonComponent expression call
+	* Added attribution for sprintf
+
+
 12.02.24
 	* Changes in icons and documentation
 	* New template and location for samples - now at plugin-samples/pentaho-cdf
