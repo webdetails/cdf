@@ -7,7 +7,7 @@
 
   See common_build.xml for more details
 ============================================================================-->
-<project name="Community Dashboard Framework" basedir="." default="jar" 
+<project name="Community Dashboard Framework Release" basedir="." default="jar" 
 	xmlns:ivy="antlib:org.apache.ivy.ant" >
 
 	<description>
@@ -108,27 +108,24 @@
 </target>
  
   <target name="sonar" depends='read-sonar-props'>
-  
- <!-- Build the project.revision property -->
-  <condition property="distribution.version" value="${project.stage}-${DSTAMP}" else="${project.stage}-${project.version}">
-    <equals arg1="${project.version}" arg2="SNAPSHOT"/>
-  </condition>  
-  
+    
     <!-- list of mandatories Sonar properties -->
     <property name="sonar.sources" value="${src.dir}" />
     <!-- list of optional Sonar properties -->
     <property name="sonar.binaries" value="${classes.dir}" />
-    <sonar:sonar key="pt.webdetails:CDF" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>
+    <sonar:sonar key="pt.webdetails:CDF-Release" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
+  </target>
 
 
+<target name="sonar-js" depends="read-sonar-props">
 
    	<property name="sonar.language" value="js"/>
     <property name="sonar.dynamicAnalysis" value="false"/>
     <property name="sonar.sources" value="cdf/js" />
-    <sonar:sonar key="pt.webdetails:CDF-js" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
+    <sonar:sonar key="pt.webdetails:CDF-Release-js" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
 
-    
-  </target>
+
+</target>
 
 
 
@@ -207,13 +204,13 @@
 			   excludes="**/Thumbs.db" />
 
 
-	<echo file="${dist.dir}/marketplace.xml">&lt;version branch="TRUNK">
+	<echo file="${dist.dir}/marketplace.xml">&lt;version branch="STABLE">
 		&lt;version>${project.revision}&lt;/version>
-		&lt;name>Trunk&lt;/name>
-		&lt;downloadUrl>http://ci.analytical-labs.com/job/Webdetails-CDF/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-TRUNK-SNAPSHOT.zip&lt;/downloadUrl>
-		&lt;samplesDownloadUrl>http://ci.analytical-labs.com/job/Webdetails-CDF/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-TRUNK-SNAPSHOT.zip&lt;/samplesDownloadUrl>
-		&lt;description>Trunk Snapshot. Install at your own risk....&lt;/description>
-		&lt;buildId>${sequential.build.id}&lt;/buildId>
+		&lt;name>Stable&lt;/name>
+		&lt;downloadUrl>http://ci.analytical-labs.com/job/Webdetails-CDF-Release/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-${project.revision}.zip&lt;/downloadUrl>
+		&lt;samplesDownloadUrlhttp://ci.analytical-labs.com/job/Webdetails-CDF-Release/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-${project.revision}.zip&lt;/samplesDownloadUrl>
+		&lt;description>Stable Release&lt;/description>
+		&lt;buildId>&lt;/buildId>
 		&lt;/version>	</echo>         
 
 	   </target>
