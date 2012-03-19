@@ -208,7 +208,7 @@
 		&lt;version>${project.revision}&lt;/version>
 		&lt;name>Stable&lt;/name>
 		&lt;downloadUrl>http://ci.analytical-labs.com/job/Webdetails-CDF-Release/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-${project.revision}.zip&lt;/downloadUrl>
-		&lt;samplesDownloadUrlhttp://ci.analytical-labs.com/job/Webdetails-CDF-Release/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-${project.revision}.zip&lt;/samplesDownloadUrl>
+		&lt;samplesDownloadUrl>http://ci.analytical-labs.com/job/Webdetails-CDF-Release/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-${project.revision}.zip&lt;/samplesDownloadUrl>
 		&lt;description>Stable Release&lt;/description>
 		&lt;buildId>&lt;/buildId>
 		&lt;/version>	</echo>         
