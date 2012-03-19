@@ -180,7 +180,7 @@
 
 		   <!-- create the version file -->
 
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId=''>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='STABLE' buildId=''>${project.revision}&lt;/version>"/>		   
 
 
 		   <!-- Copy js folder into dist -->
