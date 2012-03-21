@@ -248,14 +248,14 @@ var CDF_ERROR_DIV = 'cdfErrorDiv';
 
 if($.blockUI){
   $.blockUI.defaults.fadeIn = 0;
-  $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
-  $.blockUI.defaults.css.left = '40%';
-  $.blockUI.defaults.css.top = '30%';
-  $.blockUI.defaults.css.marginLeft = '85px';
-  $.blockUI.defaults.css.width = '170px';
-  $.blockUI.defaults.css.opacity = '.8';
-  $.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
-  $.blockUI.defaults.css['-moz-border-radius'] = '10px';
+  $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" />';
+  $.blockUI.defaults.css.left = '50%';
+  $.blockUI.defaults.css.top = '40%';
+  $.blockUI.defaults.css.marginLeft = '-16px';
+  $.blockUI.defaults.css.width = '32px';
+  $.blockUI.defaults.css.background = 'none';
+  $.blockUI.defaults.overlayCSS = { backgroundColor: "#FFFFFF", opacity: 0.8, cursor: "wait"};
+  $.blockUI.defaults.css.border = "none";
 }
 
 var ERROR_CODES = [];
@@ -628,11 +628,11 @@ Dashboards.restoreDuplicates = function() {
 Dashboards.blockUIwithDrag = function() {
   if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
-    $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
+    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
   }
 
   $.blockUI();
-  var handle = $('<div id="blockUIDragHandle" style="cursor: pointer; width: 170px; -webkit-border-radius: 5px; -moz-border-radius: 5px; background-color: rgba(0,0,0,0.25);" align="right"><a style="padding-right: 5px; text-decoration: none; color: black; font-weight: bold; font-color: black; font-size: 8pt" href="javascript:$.unblockUI()" title="Click to unblock">X</a></div>')
+  var handle = $('<div id="blockUIDragHandle"></div>')
   $("div.blockUI.blockMsg").prepend(handle);
   $("div.blockUI.blockMsg").draggable({
     handle: "#blockUIDragHandle"
