@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +44,6 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.services.actionsequence.ActionResource;
 import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
 import org.pentaho.platform.util.messages.LocaleHelper;
-import org.pentaho.platform.api.engine.IUserDetailsRoleListService;
 import org.pentaho.platform.util.web.MimeHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 import pt.webdetails.packager.Packager;
@@ -66,7 +66,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final Log logger = LogFactory.getLog(CdfContentGenerator.class);
     public static final String PLUGIN_NAME = "pentaho-cdf"; //$NON-NLS-1$
     private static final String MIMETYPE = "text/html"; //$NON-NLS-1$
-    public static final String SOLUTION_DIR = "cdf";    
+    public static final String SOLUTION_DIR = "cdf";
     // Possible actions
     private static final String RENDER_HTML = "/RenderHTML";
     private static final String RENDER_XCDF = "/RenderXCDF";
@@ -75,6 +75,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final String EXPORT = "/Export"; //$NON-NLS-1$
     private static final String SETTINGS = "/Settings"; //$NON-NLS-1$
     private static final String CALLACTION = "/CallAction"; //$NON-NLS-1$
+    private static final String CLEAR_CACHE = "/ClearCache"; //$NON-NLS-1$
     private static final String COMMENTS = "/Comments"; //$NON-NLS-1$
     private static final String STORAGE = "/Storage"; //$NON-NLS-1$
     private static final String GETHEADERS = "/GetHeaders"; //$NON-NLS-1$
@@ -89,7 +90,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
     public String RELATIVE_URL;
     private Packager packager;
-    
     public static String ENCODING = "UTF-8";
 
     public CdfContentGenerator() {
@@ -107,7 +107,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final IParameterProvider pathParams;
         final String method;
         final String payload;
-        logger.info("CDF content generator took over: " + Long.toString((new Date()).getTime()));
+        logger.info("[Timing] CDF content generator took over: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
         try {
             if (parameterProviders.get("path") != null
                     && parameterProviders.get("path").getParameter("httprequest") != null
@@ -201,6 +201,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
             processStorage(requestParams, out);
         } else if (urlPath.equals(CONTEXT)) {
             generateContext(requestParams, out);
+        } else if (urlPath.equals(CLEAR_CACHE)) {
+            clearCache(requestParams, out);
         } else if (urlPath.equals(GETHEADERS)) {
             if (!payload.equals("")) {
                 getHeaders(payload, requestParams, out);
@@ -217,46 +219,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     private void generateContext(final IParameterProvider requestParams, final OutputStream out) throws Exception {
 
-        final JSONObject context = new JSONObject();
-        Calendar cal = Calendar.getInstance();
-        context.put("serverLocalDate", cal.getTimeInMillis());
-        context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
-        context.put("user", userSession.getName());
-        context.put("locale", userSession.getLocale());
-        context.put("solution",requestParams.getParameter("solution"));
-        context.put("path", requestParams.getParameter("path"));
-        context.put("file", requestParams.getParameter("file"));
-        
-        // The first method works in 3.6, for 3.5 it's a different method. We'll try both
-        IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
-        if (service == null) {
-            // TODO - Remove this block of code once we drop support for older versions than SUGAR
-            service = PentahoSystem.getUserDetailsRoleListService();
-        }
-
-        String userName = userSession.getName();
-        if (!userName.equals("anonymousUser")) {
-            context.put("roles", service.getRolesForUser(userName));
-        }
-
-        JSONObject params = new JSONObject();
-
-        Iterator it = requestParams.getParameterNames();
-        while (it.hasNext()) {
-            String p = (String) it.next();
-            if (p.indexOf("param") == 0) {
-                params.put(p.substring(5), requestParams.getParameter(p));
-            }
-        }
-        context.put("params", params);
-
-        final StringBuilder s = new StringBuilder();
-        s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
-        s.append("  Dashboards.context = ");
-        s.append(context.toString(2) + "\n");
-        s.append("</script>\n");
-        // setResponseHeaders(MIME_PLAIN,0,null);
-        out.write(s.toString().getBytes(ENCODING));
+        DashboardContext context = new DashboardContext(userSession);
+        out.write(context.getContext(requestParams).getBytes(ENCODING));
 
     }
 
@@ -324,7 +288,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         pw.flush();
-
     }
 
     private void getCDFResource(final String urlPath, final IContentItem contentItem, final OutputStream out, final IParameterProvider requestParams) throws Exception {
@@ -463,13 +426,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
         ArrayList<String> i18nTagsList = new ArrayList<String>();
         if (templater != null) {
-            
-          String solutionPath = SOLUTION_DIR + "/templates/" + dashboardTemplate; 
-            if(!repository.resourceExists(solutionPath))
-            {//then try in system
-              solutionPath = "system/" + PLUGIN_NAME + "/" + dashboardTemplate;
+
+            String solutionPath = SOLUTION_DIR + "/templates/" + dashboardTemplate;
+            if (!repository.resourceExists(solutionPath)) {//then try in system
+                solutionPath = "system/" + PLUGIN_NAME + "/" + dashboardTemplate;
             }
-              
+
             final ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", solutionPath); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             String templateContent = repository.getResourceAsString(templateResource, ISolutionRepository.ACTION_EXECUTE);
             // Process i18n on dashboard outer template
@@ -767,13 +729,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
         // TODO support caching
         final String path = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + fileName); //$NON-NLS-1$ //$NON-NLS-2$
         final File file = new File(path);
-        
+
         final InputStream in = FileUtils.openInputStream(file);
-        try{
-          IOUtils.copy(in, out);
-        }
-        finally {
-          IOUtils.closeQuietly(in);
+        try {
+            IOUtils.copy(in, out);
+        } finally {
+            IOUtils.closeQuietly(in);
         }
     }
 
@@ -789,11 +750,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
         final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
         final InputStream in = repository.getResourceInputStream(resourcePath, true, ISolutionRepository.ACTION_EXECUTE);
-        try{
-          IOUtils.copy(in, out);
-        }
-        finally {
-          IOUtils.closeQuietly(in);
+        try {
+            IOUtils.copy(in, out);
+        } finally {
+            IOUtils.closeQuietly(in);
         }
     }
 
@@ -832,7 +792,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
          * depending on the dashboard type, the minification engine and its file
          * set will vary.
          */
-        logger.info("opening resources file: " + Long.toString((new Date()).getTime()));
+        logger.info("[Timing] opening resources file: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
         if (dashboardType.equals("mobile")) {
             suffix = "-mobile";
             file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-mobile.txt"));
@@ -874,12 +834,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         } else {
             // NORMAL MODE
-            logger.info("starting minification: " + Long.toString((new Date()).getTime()));
+            logger.info("[Timing] starting minification: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
             String stylesHash = packager.minifyPackage("styles" + suffix);
             String scriptsHash = packager.minifyPackage("scripts" + suffix);
             stylesBuilders.append("<link href=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/styles" + suffix + ".css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
             scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/scripts" + suffix + ".js?version=" + scriptsHash + "\"></script>");
-            logger.info("finished minification: " + Long.toString((new Date()).getTime()));
+            logger.info("[Timing] finished minification: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
         }
         // Add extra components libraries
 
@@ -1039,29 +999,35 @@ public class CdfContentGenerator extends BaseContentGenerator {
             packager.registerPackage("styles-mobile", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles-mobile.css", stylesList.toArray(new String[stylesList.size()]));
         }
     }
-    
-    private static String getBaseUrl(){
 
-    String baseUrl;
-      try
-      {
-        // Note - this method is deprecated and returns different values in 3.6
-        // and 3.7. Change this in future versions -- but not yet
+    private static String getBaseUrl() {
+
+        String baseUrl;
+        try {
+            // Note - this method is deprecated and returns different values in 3.6
+            // and 3.7. Change this in future versions -- but not yet
 // getFullyQualifiedServerUeRL only available from 3.7
 //      URI uri = new URI(PentahoSystem.getApplicationContext().getFullyQualifiedServerURL());
-        URI uri = new URI(PentahoSystem.getApplicationContext().getBaseUrl());
-        baseUrl = uri.getPath();
-        if(!baseUrl.endsWith("/")){
-          baseUrl+="/";
-        } 
-      }
-      catch (URISyntaxException ex)
-      {
-        logger.fatal("Error building BaseURL from " + PentahoSystem.getApplicationContext().getBaseUrl(),ex);
-        baseUrl = "";
-      }
+            URI uri = new URI(PentahoSystem.getApplicationContext().getBaseUrl());
+            baseUrl = uri.getPath();
+            if (!baseUrl.endsWith("/")) {
+                baseUrl += "/";
+            }
+        } catch (URISyntaxException ex) {
+            logger.fatal("Error building BaseURL from " + PentahoSystem.getApplicationContext().getBaseUrl(), ex);
+            baseUrl = "";
+        }
 
-    return baseUrl;
+        return baseUrl;
 
-  }
+    }
+
+    public void clearCache(final IParameterProvider requestParams, final OutputStream out) {
+        try {
+            DashboardContext.clearCache();
+            out.write("Cache cleared".getBytes("utf-8"));
+        } catch (IOException e) {
+            logger.error("failed to clear CDFcache");
+        }
+    }
 }
