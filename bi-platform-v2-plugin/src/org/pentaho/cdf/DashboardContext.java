@@ -75,12 +75,10 @@ public class DashboardContext {
                 // TODO - Remove this block of code once we drop support for older versions than SUGAR
                 service = PentahoSystem.getUserDetailsRoleListService();
             }
-
             String userName = userSession.getName();
             if (!userName.equals("anonymousUser")) {
                 context.put("roles", service.getRolesForUser(userName));
             }
-
             JSONObject params = new JSONObject();
 
             Iterator it = requestParams.getParameterNames();
@@ -98,6 +96,8 @@ public class DashboardContext {
             s.append(context.toString(2) + "\n");
             s.append("</script>\n");
             // setResponseHeaders(MIME_PLAIN,0,null);
+            logger.info("[Timing] Finished building context: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
+
             return s.toString();
         } catch (JSONException e) {
             return "";
@@ -112,12 +112,12 @@ public class DashboardContext {
             return queries;
         }
         Document config = getConfigFile();
-        logger.info("[Timing] Getting solution repo for auto-includes: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
+        logger.info("[Timing] Getting solution repo for auto-includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         Document solution = getRepository();
         List<Node> includes, cdas;
         includes = config.selectNodes("//autoincludes/autoinclude");
         cdas = solution.selectNodes("//leaf[ends-with(leafText,'cda')]");
-        logger.info("[Timing] Starting testing includes: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
+        logger.info("[Timing] Starting testing includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         for (Node include : includes) {
             String re = XmlDom4JHelper.getNodeText("cda", include, "");
             for (Node cda : cdas) {
@@ -135,7 +135,9 @@ public class DashboardContext {
                         Map<String, Object> params = new HashMap<String, Object>();
                         params.put("dataAccessId", id);
                         params.put("path", path);
+                        logger.info("[Timing] Executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
                         String reply = InterPluginComms.callPlugin(InterPluginComms.Plugin.CDA, "doQuery", params);
+                        logger.info("[Timing] Done executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
                         try {
                             queries.put(id, new JSONObject(reply));
                         } catch (JSONException e) {
@@ -145,7 +147,7 @@ public class DashboardContext {
                 }
             }
         }
-        logger.info("[Timing] Finished testing includes: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
+        logger.info("[Timing] Finished testing includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
 
 
         return queries;
@@ -153,6 +155,7 @@ public class DashboardContext {
 
     private boolean canInclude(String path, List<Node> rules, Matcher matcher) {
         boolean canInclude = false;
+        logger.info("[Timing] Testing inclusion rule: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         /* Rules are listed from least to most important */
         matcher.find();
         for (Node rule : rules) {
@@ -173,6 +176,7 @@ public class DashboardContext {
                 logger.warn("Inclusion rule mode " + mode + " not supported.");
             }
         }
+        logger.info("[Timing] Finished testing inclusion rule: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         return canInclude;
     }
 

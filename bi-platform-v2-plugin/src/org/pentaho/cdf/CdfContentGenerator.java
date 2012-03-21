@@ -107,7 +107,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final IParameterProvider pathParams;
         final String method;
         final String payload;
-        logger.info("[Timing] CDF content generator took over: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
+        logger.info("[Timing] CDF content generator took over: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         try {
             if (parameterProviders.get("path") != null
                     && parameterProviders.get("path").getParameter("httprequest") != null
@@ -792,7 +792,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
          * depending on the dashboard type, the minification engine and its file
          * set will vary.
          */
-        logger.info("[Timing] opening resources file: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
+        logger.info("[Timing] opening resources file: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         if (dashboardType.equals("mobile")) {
             suffix = "-mobile";
             file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-mobile.txt"));
@@ -834,12 +834,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         } else {
             // NORMAL MODE
-            logger.info("[Timing] starting minification: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
+            logger.info("[Timing] starting minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
             String stylesHash = packager.minifyPackage("styles" + suffix);
             String scriptsHash = packager.minifyPackage("scripts" + suffix);
             stylesBuilders.append("<link href=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/styles" + suffix + ".css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
             scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/scripts" + suffix + ".js?version=" + scriptsHash + "\"></script>");
-            logger.info("[Timing] finished minification: " + (new SimpleDateFormat("H:m:s.S")).format(new Date()));
+            logger.info("[Timing] finished minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         }
         // Add extra components libraries
 
