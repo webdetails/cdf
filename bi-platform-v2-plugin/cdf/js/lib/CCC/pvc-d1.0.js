@@ -8424,15 +8424,21 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         //total max in data
         var maxSizeVal = pv.max(data, function(datum){// {col:value ..}
             return pv.max( pv.values(datum).map(
-                function(d){ return myself.getValue(d, myself.sizeValIdx); })) ;
+                function(d){
+                    var value = myself.getValue(d, myself.sizeValIdx);
+                    return value != null ? value : -Infinity;
+                }));
         });
 
         var minSizeVal = pv.min(data, function(datum){// {col:value ..}
             return pv.min( pv.values(datum).map(
-                function(d){ return myself.getValue(d, myself.sizeValIdx); })) ;
+                function(d){
+                    var value = myself.getValue(d, myself.sizeValIdx);
+                    return value != null ? value : +Infinity;
+                }));
         });
 
-        var maxSizeSpan = Math.abs(maxSizeVal - minSizeVal);
+        var sizeValSpan = Math.abs(maxSizeVal - minSizeVal);
 
         var maxRadius = Math.min(w,h) / 2;
         if(this.shape === 'diamond'){
@@ -8447,12 +8453,29 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         // Small margin
         maxRadius -= 2;
 
-        var maxArea = maxRadius * maxRadius;// apparently treats as square area even if circle, triangle is different
-     
-        var sizeValueToArea = function(value){
-            return 1 + (maxArea - 1) *
-                       (value == null ? 0 : (Math.abs(value - minSizeVal) / maxSizeSpan));
-        };
+        var maxArea  = maxRadius  * maxRadius, // apparently treats as square area even if circle, triangle is different
+            minArea  = 4,
+            areaSpan = maxArea - minArea;
+
+        if(areaSpan <= 1){
+            // Very little space
+            // Rescue Mode - show *something*
+            maxArea = Math.max(maxArea, 2);
+            minArea = 1;
+            areaSpan = maxArea - minArea;
+            
+            pvc.log("Using rescue mode dot area calculation due to insufficient space.");
+        }
+
+        var sizeValueToArea;
+        if(!isFinite(sizeValSpan) || sizeValSpan <= 0.001){
+            sizeValueToArea = pv.functor(maxArea);
+        } else {
+            var sizeSlope = areaSpan / sizeValSpan;
+            sizeValueToArea = function(sizeVal){
+                return minArea + sizeSlope * (sizeVal == null ? 0 : (sizeVal - minSizeVal));
+            };
+        }
         
         var getLineWidth = function(value, isSelected){
             if(myself.sizeValIdx == null ||
