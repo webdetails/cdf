@@ -1,0 +1,23 @@
+<context>
+  <!-- Query auto-includes -->
+  <autoincludes>
+
+    <autoinclude>
+      <cda><![CDATA[/solution/cdf/includes/telemetry.cda]]></cda>
+      <ids>.*</ids>
+      <dashboards>
+        <include><![CDATA[/metrics2/telemetry/.*\.cdfde]]></include>
+        <exclude><![CDATA[/metrics2/telemetry/telemetryHistogram\.cdfde]]></exclude>
+      </dashboards>
+    </autoinclude>
+    <autoinclude>
+      <cda><![CDATA[/solution/cdf/includes/(.*)/(.*?)\.cda]]></cda>
+      <ids>.*</ids>
+      <dashboards>
+        <include><![CDATA[/$1/.*\.wcdf]]></include>
+        <include><![CDATA[/$1/.*\.xcdf]]></include>
+        <include><![CDATA[/$1/.*\.cdfde]]></include>
+      </dashboards>
+    </autoinclude>
+  </autoincludes>
+</context>
