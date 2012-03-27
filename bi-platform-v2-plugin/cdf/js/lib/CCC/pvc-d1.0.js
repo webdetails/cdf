@@ -8455,7 +8455,7 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
         maxRadius -= 2;
 
         var maxArea  = maxRadius  * maxRadius, // apparently treats as square area even if circle, triangle is different
-            minArea  = 4,
+            minArea  = 12,
             areaSpan = maxArea - minArea;
 
         if(areaSpan <= 1){
