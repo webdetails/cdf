@@ -29,7 +29,7 @@
         <dependency org="javax.servlet"       name="servlet-api"         rev="2.4" />
         <!--  pentaho dependencies -->
 		<dependency org="pentaho-reporting-engine" name="pentaho-reporting-engine-classic-core-platform-plugin"
-			rev="${dependency.bi-platform.revision}" changing="true">
+			rev="${dependency.pentaho-reporting-engine-classic-core-platform-plugin.revision}" changing="true">
 		</dependency>        <dependency org="pentaho" name="pentaho-bi-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
         <dependency org="pentaho" name="pentaho-bi-platform-util" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>        
         <dependency org="pentaho" name="pentaho-bi-platform-engine-core" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
