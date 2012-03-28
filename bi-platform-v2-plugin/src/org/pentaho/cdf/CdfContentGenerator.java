@@ -23,13 +23,15 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
+
 import org.pentaho.cdf.comments.CommentsEngine;
 import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
 import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
-import org.pentaho.cdf.utils.CdfAuditHelper;
 import org.pentaho.platform.api.engine.IActionSequenceResource;
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
@@ -46,6 +48,9 @@ import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.util.web.MimeHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
+
+
+import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.packager.Packager;
 
 /**
@@ -229,7 +234,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final StringBuilder s = new StringBuilder();
         s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
         s.append("  Dashboards.storage = ");
-        s.append(StorageEngine.getInstance().read(requestParams, userSession) + "\n");
+        s.append(StorageEngine.getInstance().read(requestParams, userSession)).append("\n");
         s.append("</script>\n");
         // setResponseHeaders(MIME_PLAIN,0,null);
         out.write(s.toString().getBytes(ENCODING));
@@ -239,26 +244,30 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private void renderXcdf(final OutputStream out, final IParameterProvider requestParams) throws Exception {
         long start = System.currentTimeMillis();
 
-        UUID uuid = CdfAuditHelper.startAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this);
+        final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
+        final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
+        final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
+        final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
+        
+                
+        UUID uuid = CpfAuditHelper.startAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, requestParams);                        
+        
         try {
             final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
             if (mimeTypeListener != null) {
                 mimeTypeListener.setMimeType(MIMETYPE);
             }
 
-            final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
-            final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
-            final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
-
-            final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
+                                              
+            
             renderXCDFDashboard(requestParams, out, solution, path, action, template);
 
             long end = System.currentTimeMillis();
-            CdfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
+            CpfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
 
         } catch (Exception e) {
             long end = System.currentTimeMillis();
-            CdfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
+            CpfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
             throw e;
         }
     }
@@ -345,6 +354,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
             final String action,
             String template) throws Exception {
 
+
+        
+        
         final String fullPath = ActionInfo.buildSolutionPath(solution, path, action);
 
         // Check for access permissions
@@ -376,6 +388,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         renderHtmlDashboard(requestParams, out, solution, path, templateName, template, messagesBaseFilename);
+               
     }
 
     public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
@@ -465,7 +478,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
             // Process i18n for each line of the dashboard output
             line = processi18nTags(line, i18nTagsList);
             // Process i18n - end
-            sb.append(line + "\n");
+            sb.append(line).append("\n");
         }
         is.close();
         dashboardContent = sb.toString();
@@ -514,7 +527,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
 
     private String buildMessageSetCode(ArrayList<String> tagsList) {
-        StringBuffer messageCodeSet = new StringBuffer();
+        StringBuilder messageCodeSet = new StringBuilder();
         for (String tag : tagsList) {
             messageCodeSet.append("\\$('#").append(updateSelectorName(tag)).append("').html(jQuery.i18n.prop('").append(tag).append("'));\n");
         }
@@ -527,7 +540,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         if (test.length == 1) {
             return content;
         }
-        StringBuffer resBuffer = new StringBuffer();
+        StringBuilder resBuffer = new StringBuilder();
         int i;
         String tagValue;
         resBuffer.append(test[0]);
@@ -591,9 +604,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("IOException  exporting file", e);
         } catch (JSONException e) {
-            e.printStackTrace();
+            logger.error("JSONException exporting file", e);
         }
 
     }
@@ -826,10 +839,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
         if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true")) {
             // DEBUG MODE
             for (String header : miniscripts) {
-                scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL) + "\"></script>\n");
+                scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"></script>\n");
             }
             for (String header : ministyles) {
-                stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL) + "\"/>\n");
+                stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append( "\"/>\n");
             }
 
         } else {
@@ -837,22 +850,22 @@ public class CdfContentGenerator extends BaseContentGenerator {
             logger.info("[Timing] starting minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
             String stylesHash = packager.minifyPackage("styles" + suffix);
             String scriptsHash = packager.minifyPackage("scripts" + suffix);
-            stylesBuilders.append("<link href=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/styles" + suffix + ".css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
-            scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + absRoot + RELATIVE_URL + "/content/pentaho-cdf/js/scripts" + suffix + ".js?version=" + scriptsHash + "\"></script>");
+            stylesBuilders.append("<link href=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/styles").append(suffix).append(".css?version=").append(stylesHash).append( "\" rel=\"stylesheet\" type=\"text/css\" />");
+            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(absRoot).append( RELATIVE_URL).append("/content/pentaho-cdf/js/scripts" ).append(suffix).append(".js?version=").append(scriptsHash).append("\"></script>");
             logger.info("[Timing] finished minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         }
         // Add extra components libraries
 
         for (String header : scripts) {
-            scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL) + "\"></script>\n");
+            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"></script>\n");
         }
         for (String header : styles) {
-            stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL) + "\"/>\n");
+            stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"/>\n");
         }
 
         // Add ie8 blueprint condition
-        stylesBuilders.append("<!--[if lte IE 8]><link rel=\"stylesheet\" href=\"" + absRoot + RELATIVE_URL
-                + "/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
+        stylesBuilders.append("<!--[if lte IE 8]><link rel=\"stylesheet\" href=\"").append( absRoot).append(RELATIVE_URL)
+                .append("/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
 
         StringBuilder stuff = new StringBuilder();
         includes.put("scripts", scriptsBuilders.toString());
