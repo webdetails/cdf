@@ -216,6 +216,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
             }
         } else {
             // we'll be providing the actual content with cache
+          logger.warn("Getting resources through content generator is deprecated, please use static resources: " + urlPath);
             returnResource(urlPath, contentItem, out);
 
         }
