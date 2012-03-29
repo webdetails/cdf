@@ -136,7 +136,7 @@ public class DashboardContext {
                         params.put("dataAccessId", id);
                         params.put("path", path);
                         logger.info("[Timing] Executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-                        String reply = InterPluginComms.callPlugin(InterPluginComms.Plugin.CDA, "doQuery", params);
+                        String reply = InterPluginComms.callPlugin(InterPluginComms.Plugin.CDA, "doQuery", params, true);
                         logger.info("[Timing] Done executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
                         try {
                             queries.put(id, new JSONObject(reply));
