@@ -251,7 +251,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
         
                 
-        UUID uuid = CpfAuditHelper.startAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, requestParams);                        
+        UUID uuid = CpfAuditHelper.startAudit(PLUGIN_NAME, requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, requestParams);                        
         
         try {
             final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
@@ -264,11 +264,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
             renderXCDFDashboard(requestParams, out, solution, path, action, template);
 
             long end = System.currentTimeMillis();
-            CpfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
+            CpfAuditHelper.endAudit(PLUGIN_NAME, requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
 
         } catch (Exception e) {
             long end = System.currentTimeMillis();
-            CpfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
+            CpfAuditHelper.endAudit(PLUGIN_NAME, requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, start, uuid, end);
             throw e;
         }
     }
