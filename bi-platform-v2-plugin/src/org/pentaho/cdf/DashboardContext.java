@@ -122,6 +122,13 @@ public class DashboardContext {
             String re = XmlDom4JHelper.getNodeText("cda", include, "");
             for (Node cda : cdas) {
                 String path = (String) cda.selectObject("string(path)");
+                
+                /* There's a stupid bug in the filebased rep that makes this not work (see BISERVER-3538)
+                 * Path comes out as pentaho-solutions/<solution>/..., and filebase rep doesn't handle that well
+                 * We'll remote the initial part and that apparently works ok
+                 */
+                path = path.substring(path.indexOf('/', 1)+1);
+                
                 if (!path.matches(re)) {
                     continue;
                 }
