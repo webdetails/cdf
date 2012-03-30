@@ -1,3 +1,4 @@
+
 //VERSION 12.02.16
 
 // ECMAScript 5 shim
@@ -8921,7 +8922,9 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                         v = parseFloat(d);
                     }
                     
-                    return !isNaN(v) && Math.abs(v) >= 1;
+                    // PATCHED 20120330
+                    // Too small a bar to show any value?
+                    return myself.DF.orthoLengthFunc(v) >= 4;
                  })
                 .text(function(d){
                     if(myself.percentageNormalized){
