@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120330
+//VERSION TRUNK-20120215-patched-20120402
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -8918,9 +8918,9 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
                         v = parseFloat(d);
                     }
                     
-                    // PATCHED 20120330
+                    // PATCHED 20120402
                     // Too small a bar to show any value?
-                    return myself.DF.orthoLengthFunc(v) >= 4;
+                    return myself.DF.orthoLengthFunc.call(myself.pvBar, v) >= 4;
                  })
                 .text(function(d){
                     if(myself.percentageNormalized){
