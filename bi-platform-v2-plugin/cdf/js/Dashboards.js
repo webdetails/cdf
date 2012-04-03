@@ -915,7 +915,6 @@ Dashboards.isBookmarkable = function(parameter) {
 }
 
 Dashboards.persistBookmarkables = function(param) {
-	if(!this.bookmarkables) this.bookmarkables = {};
   var bookmarkables = this.bookmarkables,
       params = {},
       state;
@@ -925,6 +924,8 @@ Dashboards.persistBookmarkables = function(param) {
    * initializing the dashboard. That's just the code for
    * restoreBookmarkables doing the reverse of this!
    */
+   if (!bookmarkables)
+   	return;
   if(!bookmarkables[param] || !Dashboards.finishedInit) {
     return;
   }
