@@ -915,6 +915,7 @@ Dashboards.isBookmarkable = function(parameter) {
 }
 
 Dashboards.persistBookmarkables = function(param) {
+	if(!this.bookmarkables) this.bookmarkables = {};
   var bookmarkables = this.bookmarkables,
       params = {},
       state;
