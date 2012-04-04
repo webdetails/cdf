@@ -1025,7 +1025,7 @@ Dashboards.getQueryParameter = function ( parameterName ) {
         end = queryString.length
       }
       // Return the string
-      return unescape ( queryString.substring ( begin, end ) );
+      return decodeURIComponent ( queryString.substring ( begin, end ) );
     }
     // Return "" if no parameter has been found
     return "";
