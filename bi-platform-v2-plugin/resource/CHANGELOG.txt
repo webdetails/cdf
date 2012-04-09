@@ -1,3 +1,16 @@
+12.04.09
+
+	* Added support for auto-including query results in dashboard context
+	* Implemented [REDMINE 513] - Added audit support for CDF renderXcdf
+	* Solved [REDMINE CDE-528] -  Show values doesn't work on bar charts
+	* Solved [REDMINE 539] - Dashboards.getQueryParameter is using unescape(), should use decodeURIComponent()	
+	* Changed dashboardContext includes to be compatible with both dbBased and fileBased rep
+	* Added resources as a plugin path - Added warning for when content generator is used to serve static resources
+	* Updated cdf dependencies to 3.10-stable
+	* Removed an extraneous rule from dashboardContext
+	* Change the timestamp format in the timing loggers
+	* Changed blockUI to simple .gif + slightly opaque white overlay.
+
 12.03.19
 	* Fixed pvc.number that caused stacked charts in crosstab format to fail.
 	* Fixed bug that caused stacked charts in crosstab format to fail, when rendering the tooltip of a null value.	
