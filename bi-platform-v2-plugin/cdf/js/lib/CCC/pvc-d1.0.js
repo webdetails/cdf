@@ -1,5 +1,5 @@
+//VERSION TRUNK-20120215-patched-20120411
 
-//VERSION 12.02.16
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -3671,12 +3671,13 @@ pvc.LegendPanel = pvc.BasePanel.extend({
 
     //pvc.log("Debug PMartins");
     
-    var data = this.chart.legendSource == "series"
+    var data = (this.chart.legendSource == "series"
                ? this.chart.dataEngine.getSeries()
-               : this.chart.dataEngine.getCategories();
+               : this.chart.dataEngine.getCategories()).slice(0);
     
     cLen = data.length;
-
+    this.cLen = cLen;
+    
     if (this.chart.options.secondAxis) {
         var args = this.chart.dataEngine.getSecondAxisSeries();
         args.unshift(0);
@@ -3882,17 +3883,18 @@ pvc.LegendPanel = pvc.BasePanel.extend({
   },
 
   toggleVisibility: function(idx){
-    
-    pvc.log("Worked. Toggling visibility of index " + idx);
-    this.chart.dataEngine.toggleDimensionVisible(this.chart.legendSource, idx);
+    if(idx < this.cLen){
+        pvc.log("Worked. Toggling visibility of index " + idx);
+        this.chart.dataEngine.toggleDimensionVisible(this.chart.legendSource, idx);
 
-    // Forcing removal of tipsy legends
-    pvc.removeTipsyLegends();
+        // Forcing removal of tipsy legends
+        pvc.removeTipsyLegends();
 
-    // Rerender chart
-    this.chart.render(true, true);
-    
-    return this.pvLabel;
+        // Rerender chart
+        this.chart.render(true, true);
+        
+        return this.pvLabel;
+    }
   }
 });
 
