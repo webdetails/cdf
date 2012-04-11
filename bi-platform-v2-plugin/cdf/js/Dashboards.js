@@ -924,6 +924,8 @@ Dashboards.persistBookmarkables = function(param) {
    * initializing the dashboard. That's just the code for
    * restoreBookmarkables doing the reverse of this!
    */
+   if (!bookmarkables)
+   	return;
   if(!bookmarkables[param] || !Dashboards.finishedInit) {
     return;
   }
@@ -1023,7 +1025,7 @@ Dashboards.getQueryParameter = function ( parameterName ) {
         end = queryString.length
       }
       // Return the string
-      return unescape ( queryString.substring ( begin, end ) );
+      return decodeURIComponent ( queryString.substring ( begin, end ) );
     }
     // Return "" if no parameter has been found
     return "";
