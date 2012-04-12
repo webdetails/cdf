@@ -570,9 +570,9 @@ Dashboards.bindControl = function(object) {
 
 Dashboards.restoreDuplicates = function() {
   /*
-   * We mark duplicates by appending a $nn tag to their names.
+   * We mark duplicates by appending a _nn tag to their names.
    * This means that, when we read the parameters from bookmarks,
-   * we can look for the $nn suffixes, and infer from those suffixes
+   * we can look for the _nn suffixes, and infer from those suffixes
    * what duplications were triggered, allowing us to reproduce that
    * state as well.
    */
@@ -581,18 +581,18 @@ Dashboards.restoreDuplicates = function() {
       params = Dashboards.getBookmarkState().params || {};
   /*
    * First step is to go over the bookmarked parameters and find
-   * all of those that end with the $nn suffix (possibly several
-   * such suffixes piled up, like $1$2, as we can re-duplicate
+   * all of those that end with the _nn suffix (possibly several
+   * such suffixes piled up, like _1_2, as we can re-duplicate
    * existing duplicates).
    * 
    * The suffixes object then maps those suffixes to a mapping of
    * the root parameter names to their respective values.
-   * E.g. a parameter 'foo$1 = 1' yields '{$1: {foo: 1}}'
+   * E.g. a parameter 'foo_1 = 1' yields '{_1: {foo: 1}}'
    */
   Object.keys(params).filter(function(e){
-      return /(\$[0-9]+)+$/.test(e);
+      return /(_[0-9]+)+$/.test(e);
   }).map(function(e){
-      var parts = e.match(/(.*?)((\$[0-9]+)+)$/),
+      var parts = e.match(/(.*?)((_[0-9]+)+)$/),
           name = parts[1],
           suffix = parts[2];
       if(!suffixes[suffix]){
