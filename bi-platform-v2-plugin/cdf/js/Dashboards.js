@@ -865,34 +865,36 @@ Dashboards.fireChange = function(parameter, value) {
 };
 
 Dashboards.getHashValue = function(key) {
-    var hash = window.location.hash,
-        obj;
-    try {
-      obj = JSON.parse(hash.slice(1));
-    } catch (e) {
-      obj = {};
-    }
-    if (arguments.length === 0) {
-      return obj;
-    } else {
-      return obj[key];
-    }
+  var hash = window.location.hash,
+      obj;
+  try {
+    obj = JSON.parse(hash.slice(1));
+  } catch (e) {
+    obj = {};
+  }
+  if (arguments.length === 0) {
+    return obj;
+  } else {
+    return obj[key];
+  }
 }
 
 Dashboards.setHashValue = function(key, value) {
-    var obj = Dashboards.getHashValue(),json;
-    if (arguments.length == 1) {
-      obj = key;
-    } else {
-      obj[key] = value;
-    }
-    json = JSON.stringify(obj);
-    /* We don't want to store empty objects */
-    if (json != "{}") {
-      window.location.hash = json;
-    } else {
+  var obj = Dashboards.getHashValue(),json;
+  if (arguments.length == 1) {
+    obj = key;
+  } else {
+    obj[key] = value;
+  }
+  json = JSON.stringify(obj);
+  /* We don't want to store empty objects */
+  if (json != "{}") {
+    window.location.hash = json;
+  } else {
+    if (window.location.hash) {
       window.location.hash = '';
     }
+  }
 }
 Dashboards.deleteHashValue = function(key) {
   var obj = Dashboards.getHashValue();
