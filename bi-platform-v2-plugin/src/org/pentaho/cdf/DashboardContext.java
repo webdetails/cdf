@@ -109,6 +109,7 @@ public class DashboardContext {
         JSONObject queries = new JSONObject();
         /* Bail out immediately if CDA isn' available */
         if (!InterPluginComms.isPluginAvailable("cda")) {
+            logger.warn("Couldn't find CDA. Skipping auto-includes");
             return queries;
         }
         Document config = getConfigFile();
