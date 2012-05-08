@@ -32,6 +32,7 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.core.system.UserSession;
 import org.pentaho.platform.engine.security.SecurityHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
+import org.pentaho.platform.engine.security.SecurityParameterProvider;
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
@@ -69,16 +70,9 @@ public class DashboardContext {
             context.put("path", path);
             context.put("file", file);
 
-            // The first method works in 3.6, for 3.5 it's a different method. We'll try both
-            IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
-            if (service == null) {
-                // TODO - Remove this block of code once we drop support for older versions than SUGAR
-                service = PentahoSystem.getUserDetailsRoleListService();
-            }
-            String userName = userSession.getName();
-            if (!userName.equals("anonymousUser")) {
-                context.put("roles", service.getRolesForUser(userName));
-            }
+            SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
+            context.put("roles", securityParams.getParameter("principalRoles") );
+            
             JSONObject params = new JSONObject();
 
             Iterator it = requestParams.getParameterNames();
