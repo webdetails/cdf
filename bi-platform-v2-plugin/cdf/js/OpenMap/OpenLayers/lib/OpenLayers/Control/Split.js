@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
@@ -296,7 +297,7 @@ OpenLayers.Control.Split = OpenLayers.Class(OpenLayers.Control, {
      * Remove a feature from a list based on the given geometry.
      *
      * Parameters:
-     * features - {Array(<OpenLayers.Feature.Vector>} A list of features.
+     * features - {Array(<OpenLayers.Feature.Vector>)} A list of features.
      * geometry - {<OpenLayers.Geometry>} A geometry.
      */
     removeByGeometry: function(features, geometry) {
@@ -339,19 +340,19 @@ OpenLayers.Control.Split = OpenLayers.Class(OpenLayers.Control, {
      *     will be split if eligible.
      *
      * Parameters:
-     * feature - {<OpenLayers.Feature.Vector}} The newly created or modified
+     * feature - {<OpenLayers.Feature.Vector>} The newly created or modified
      *     feature.
      *
      * Returns:
      * {Boolean} The supplied feature was split (and destroyed).
      */
     considerSplit: function(feature) {
-        sourceSplit = false;
-        targetSplit = false;
+        var sourceSplit = false;
+        var targetSplit = false;
         if(!this.sourceFilter ||
            this.sourceFilter.evaluate(feature.attributes)) {
             var features = this.layer && this.layer.features || [];
-            var target, results, result, proceed;
+            var target, results, proceed;
             var additions = [], removals = [];
             var mutual = (this.layer === this.source) && this.mutual;
             var options = {

@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Veeven
  */
@@ -18,7 +14,7 @@
  */
 OpenLayers.Lang["te"] = OpenLayers.Util.applyDefaults({
 
-    'permalink': "స్థిరలింకు",
+    'Permalink': "స్థిరలింకు",
 
     'W': "ప",
 

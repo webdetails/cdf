@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
@@ -55,11 +56,6 @@ OpenLayers.Format.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Format.XML, {
      * options - {Object} An optional object whose properties will be set on
      *     this instance.
      */
-    initialize: function(options) {
-        OpenLayers.Format.XML.prototype.initialize.apply(this, arguments);
-        OpenLayers.Util.extend(this, options);
-        this.options = options;
-    },
 
     /**
      * APIMethod: read
@@ -154,10 +150,25 @@ OpenLayers.Format.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Format.XML, {
             var featureNode = featureNodes[i];
             var geom = null;
 
+            // attributes can be actual attributes on the FIELDS tag, 
+            // or FIELD children
             var attributes = {};
-            for(var j=0, jlen=featureNode.attributes.length; j<jlen; j++) {
-                var attribute = featureNode.attributes[j];
-                attributes[attribute.nodeName] = attribute.nodeValue;
+            var j;
+            var jlen = featureNode.attributes.length;
+            if (jlen > 0) {
+                for(j=0; j<jlen; j++) {
+                    var attribute = featureNode.attributes[j];
+                    attributes[attribute.nodeName] = attribute.nodeValue;
+                }
+            } else {
+                var nodes = featureNode.childNodes;
+                for (j=0, jlen=nodes.length; j<jlen; ++j) {
+                    var node = nodes[j];
+                    if (node.nodeType != 3) {
+                        attributes[node.getAttribute("name")] = 
+                            node.getAttribute("value");
+                    }
+                }
             }
 
             response.push(
@@ -229,17 +240,19 @@ OpenLayers.Format.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Format.XML, {
         var attributes = {};
         if (node.nodeType == 1) {
             var children = node.childNodes;
-            n = children.length;
+            var n = children.length;
             for (var i = 0; i < n; ++i) {
                 var child = children[i];
                 if (child.nodeType == 1) {
                     var grandchildren = child.childNodes;
-                    if (grandchildren.length == 1) {
+                    var name = (child.prefix) ?
+                        child.nodeName.split(":")[1] : child.nodeName;
+                    if (grandchildren.length == 0) {
+                        attributes[name] = null
+                    } else if (grandchildren.length == 1) {
                         var grandchild = grandchildren[0];
                         if (grandchild.nodeType == 3 ||
                             grandchild.nodeType == 4) {
-                            var name = (child.prefix) ? 
-                                child.nodeName.split(":")[1] : child.nodeName;
                             var value = grandchild.nodeValue.replace(
                                 this.regExes.trimSpace, "");
                             attributes[name] = value;
@@ -270,8 +283,8 @@ OpenLayers.Format.WMSGetFeatureInfo = OpenLayers.Class(OpenLayers.Format.XML, {
         }
         var feature = this.gmlFormat.parseFeature(node);
         var geometry, bounds = null;
-        if (feature && feature.geometry) {
-            geometry = feature.geometry.clone();
+        if (feature) {
+            geometry = feature.geometry && feature.geometry.clone();
             bounds = feature.bounds && feature.bounds.clone();
             feature.destroy();
         }

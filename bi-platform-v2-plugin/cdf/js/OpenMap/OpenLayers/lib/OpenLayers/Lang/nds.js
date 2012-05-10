@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Slomox
  */
@@ -20,13 +16,11 @@ OpenLayers.Lang["nds"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Unbehannelt Trüchmellels för de Anfraag ${statusText}",
 
-    'permalink': "Permalink",
+    'Permalink': "Permalink",
 
-    'overlays': "Overlays",
+    'Overlays': "Overlays",
 
-    'baseLayer': "Achtergrundkoort",
-
-    'sameProjection': "De Översichtskoort geiht blot, wenn de sülve Projekschoon as bi de Hööftkoort bruukt warrt",
+    'Base Layer': "Achtergrundkoort",
 
     'readNotImplemented': "Lesen is nich inricht.",
 
@@ -46,7 +40,7 @@ OpenLayers.Lang["nds"] = OpenLayers.Util.applyDefaults({
 
     'commitFailed': "WFS-Transakschoon: hett nich klappt ${response}",
 
-    'scale': "Skaal = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Skaal = 1 : ${scaleDenom}",
 
     'layerAlreadyAdded': "Du versöchst de Laag „${layerName}“ to de Koort totofögen, man de is al toföögt",
 
@@ -58,8 +52,6 @@ OpenLayers.Lang["nds"] = OpenLayers.Util.applyDefaults({
 
     'pixelAddError': "De Weert x un y, de mööt all beid an de add-Funkschoon övergeven warrn.",
 
-    'unsupportedGeometryType': "Nich ünnerstütt Geometrie-Typ: ${geomType}",
-
-    'pagePositionFailed': "OpenLayers.Util.pagePosition güng nich: Element mit de Id ${elemId} is villicht an’n verkehrten Platz."
+    'unsupportedGeometryType': "Nich ünnerstütt Geometrie-Typ: ${geomType}"
 
 });

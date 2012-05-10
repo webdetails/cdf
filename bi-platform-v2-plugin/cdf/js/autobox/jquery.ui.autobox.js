@@ -25,18 +25,10 @@
  *
  * Caret position method: Diego Perini: http://javascript.nwbox.com/cursor_position/cursor.js
  */
-(function($){
 
-  function LOG(obj){
-    if(console && console.log){
-      console.log(obj);
-    }
-    else{
-      var cons=$('#log');
-      if(!cons){cons=$('<div id="log"></div>');}
-      if(cons){cons.append(obj).append('<br/>\n');}
-    }
-  }
+//TODO: should be completely redone, using new jquery autobox; current component code is too cryptic and fragile
+
+(function($){
 
   $.fn.resizableTextbox=function(el, options) {
     var opts=$.extend({ min: 5, max: 500, step: 7 }, options);
@@ -45,7 +37,7 @@
         $(this).data('rt-value', this.value.length);
     })
     .bind('keyup', function(e) {
-        var self=$(this);
+/*        var self=$(this);
         var newsize=opts.step * self.val().length;
         if (newsize <= opts.min) {
           newsize=width;
@@ -53,7 +45,7 @@
         if (!(self.val().length == self.data('rt-value') ||
               newsize <= opts.min || newsize >= opts.max)) {
           self.width(newsize);
-        }
+        }*/
      });
   };
 
@@ -71,7 +63,7 @@
     DOWN: 40
   };
   
-  
+  var inputId='';
   
   function addBox(opt,input, text, name){
     var li=$('<li class="bit-box"></li>').attr('id', opt.name + 'bit-' + count++).text(text);
@@ -79,12 +71,12 @@
           .bind('click', function(e) {
               li.remove();
               e.preventDefault();
-			  if(!opt.multiSellection)
+			  if(!opt.multiSelection)
 				opt.processAutoBoxChange(input,opt);
 			  else if(opt.processElementChange!= undefined)
 				opt.processAutoBoxElement();
 			
-			  if(opt.multiSellection && opt.applyButton != false)
+			  if(opt.multiSelection && opt.applyButton != false)
 				 opt.showApplyButton();
 				
           }))
@@ -93,34 +85,34 @@
           .val(text)
       );
 
-	return li;
+    return li;
   }
   
     function addText(opt,input, text, name){
-		if(text.length > 0)
-		{
-			if(opt.addTextElements){
-				var li;
-				if(opt.multiSellection != true){
-					count = 0;
-					li = addBox(opt,input, text, name);
-					$("#" +opt.name + "bit-0").replaceWith(li);
-				}
-				else
-					li = addBox(opt,input, text, name);
-
-				if(opt.multiSellection && opt.applyButton != false)
-					opt.showApplyButton();
-					
-				input.after(li);
-				input.val("");
-			}
-			else{
-				opt.selectedValues = opt.selectedValues  == undefined ? {} : opt.selectedValues;
-				opt.selectedValues[text] = true;
-			}
-		}
-   }
+      if(text.length > 0)
+      {
+        if(opt.addTextElements){
+          var li;
+          if(opt.multiSelection != true){
+            count = 0;
+            li = addBox(opt,input, text, name);
+            $("#" +opt.name + "bit-0").replaceWith(li);
+          }
+          else
+            li = addBox(opt,input, text, name);
+  
+          if(opt.multiSelection && opt.applyButton != false)
+            opt.showApplyButton();
+            
+          input.after(li);
+          input.val("");
+        }
+        else{
+          opt.selectedValues = opt.selectedValues  == undefined ? {} : opt.selectedValues;
+          opt.selectedValues[text] = true;
+        }
+      }
+    }
 	
 	function getCurrentValsHash(input,opt){//return the currently selected values as a hash
 		if(opt.addTextElements){
@@ -129,11 +121,11 @@
 	      for(var i=0; i<vals.length; ++i){
 	        var s=vals[i].innerHTML.match(/^[^<]+/);
 	        if(s){ 
-				if(!opt.multiSellection) 
-					hash[s]=true; 
-				else
-					hash[s[0]]=true; 
-			}
+          if(!opt.multiSelection) 
+            hash[s]=true; 
+          else
+            hash[s[0]]=true; 
+          }
 	      }
 	      return hash;
 		}
@@ -142,8 +134,10 @@
     }
 	
 	
-  $.fn.autoboxMode=function(multiSellection,container, input, size, opt){
+  $.fn.autoboxMode=function(multiSelection,container, input, size, opt){
     var original=input.val(); var selected=-1; var self=this;
+		
+		
 
     $.data(document.body, "autoboxMode", true);
 
@@ -162,26 +156,27 @@
 			if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				var value = $.data(active[0], "originalObject").text;
-				if(!opt.multiSellection || (active[0].childNodes[0].checked || k == KEY.RETURN))
+				if(!opt.multiSelection || (active[0].childNodes[0].checked || k == KEY.RETURN))
 					addText(opt,input,value, opt.name);
-				if(!opt.multiSellection)
+				if(!opt.multiSelection)
 					opt.processAutoBoxChange(input,opt);
 				else if(opt.processElementChange!= undefined)
 					opt.processAutoBoxElement();
 			}
 			
-			if(!opt.multiSellection || k == KEY.RETURN){				
+			if(!opt.multiSelection || k == KEY.RETURN){				
 				$("body").trigger("off.autobox");
 			}
       }
       else if(input.val()){ 
 		var hash = getCurrentValsHash(input,opt);
-		if(!valueMatched)
+		if(!valueMatched){
 			var aux = $(opt.list).filter(function(){valueMatched = this.text == input.val() ? true : valueMatched;});
+		}
 		if(valueMatched)
 			if(hash == null || hash[input.val()] != true){
 				addText(opt,input, input.val(), opt.name);
-				if(!opt.multiSellection)
+				if(!opt.multiSelection)
 					opt.processAutoBoxChange(input,opt);
 				else if(opt.processElementChange!= undefined)
 					opt.processAutoBoxElement();
@@ -194,7 +189,7 @@
 	
 	
 	 $("body").bind("click", function(e) {
-		if(e.target.id != "autoboxInput" && e.target.id != "listElement" && e.target.id != "listElementCheckBox")
+		if(e.target.id != inputId && e.target.id != "listElement" && e.target.id != "listElementCheckBox")
 			$("body").trigger("cancel.autobox");
 	 });
 
@@ -207,7 +202,7 @@
 
     // If a click bubbles all the way up to the window, close the autobox
     /* $(window).bind("click.autobox", function(){
-	   if(!opt.multiSellection)
+	   if(!opt.multiSelection)
 			$("body").trigger("cancel.autobox");
 	});*/
 
@@ -225,7 +220,7 @@
       selected=$("> *", container).index($(e.target).is('li') ? $(e.target)[0] : $(e.target).parents('li')[0]);
       select();
     }).bind("click.autobox", function(e){
-	  if(opt.multiSellection && e.target.childNodes.length > 0) 
+	  if(opt.multiSelection && e.target.childNodes.length > 0) 
 		 e.target.childNodes[0].checked = true;
 	  $("body").trigger("activate.autobox");
       $.data(document.body, "suppressKey", false);
@@ -252,52 +247,76 @@
         $.data(document.body, "suppressKey", true);
       });
   };
+  
+  
+  /**
+   * AUTOBOX
+   **/
 
   $.fn.autobox=function(opt){
-	opt.selectedValues = [];
+    opt.selectedValues = [];
     opt=$.extend({}, {
       timeout: 500,
+     
+     setInitialValue: function(htmlObject, initialValue, name){ 
+      var selectedPH = $('#' + htmlObject + ' .autobox-input');
+      var input = $('input#' + inputId);
+      if($.isArray(initialValue)){
+        for(var i =0; i <initialValue.length;i++){
+          selectedPH.append(addBox(this, input, initialValue[i], name));
+        }
+      } else if(initialValue){
+        selectedPH.append(addBox(this, input, initialValue, name));
+      }
+     },
       getList: function(input, hash){
           var list=opt.list;
+          if(typeof list == 'function'){
+            list = list();
+          }
+          
           if(hash && opt.addTextElements){ list=$(list).filter(function(){  return !hash[this.text]; }); }
           input.trigger("updateList", [list]);
       },
       template: function(str){ 
-		if(!opt.multiSellection) 
-			return "<li id=\"listElement\">" + opt.insertText(str) + "</li>";
-		else if(opt.addTextElements)
-			return "<li id=\"listElement\">" +  "<input id=\"listElementCheckBox\" name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
-		else{
-			var value =  opt.insertText(str);
-			return "<li id=\"listElement\">" +  "<input " + (opt.selectedValues[value] ? 'checked="yes"' : "") + "\" id=\"listElementCheckBox\" name=\"" + value + "\" value=\"" +value+ "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
-		}
-	  },
+        if(!opt.multiSelection) {
+          return "<li id=\"listElement\">" + opt.insertText(str) + "</li>";
+        }
+        else if(opt.addTextElements) {
+          return "<li id=\"listElement\">" +  "<input id=\"listElementCheckBox\" name=\"" + opt.insertText(str) + "\" value=\"" + opt.insertText(str) + "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
+        }
+        else{
+          var value =  opt.insertText(str);
+          return "<li id=\"listElement\">" +  "<input " + (opt.selectedValues[value] ? 'checked="yes"' : "") + "\" id=\"listElementCheckBox\" name=\"" + value + "\" value=\"" +value+ "\" type=\"checkbox\">" + opt.insertText(str) + "</input>" + "</li>";
+        }
+      },
 	
-      insertText: function(str){ return unescape(escape(str.text)); },
+    insertText: function(str){ return unescape(escape(str.text)); },
 	  minTextLenght: 0,
-      match: function(typed){ 
-		if (opt.matchType == "fromStart")
-		{
-			this.typed = typed;
-		    this.pre_match = this.text;
-		    this.match = this.post_match = '';
-		    if (!this.ajax && !typed || typed.length == 0)
-				return true;
-		    var match_at = this.text.search(new RegExp("\\b^" + typed, "i"));
-		    if (match_at != -1) {
-		       this.pre_match = this.text.slice(0,match_at);
-		       this.match = this.text.slice(match_at,match_at + typed.length);
-				this.post_match = this.text.slice(match_at + typed.length);
-		       return true;
-			}	
-			return false;
-		}
-		else
-			return this.text.match(new RegExp(typed), "i");		
-	  },
-      wrapper: '<ul ' + (opt.scrollHeight != undefined ? 'style="height:' + opt.scrollHeight + 'px;"' : '')  + 'class="autobox-list"></ul>',
+    match: function(typed){ 
+      if (opt.matchType == "fromStart"){
+        this.typed = typed;
+        this.pre_match = this.text;
+        this.match = this.post_match = '';
+        if (!this.ajax && !typed || typed.length == 0){
+          return true;
+        }
+        var match_at = this.text.search(new RegExp("\\b^" + typed, "i"));
+        if (match_at != -1) {
+          this.pre_match = this.text.slice(0,match_at);
+          this.match = this.text.slice(match_at,match_at + typed.length);
+          this.post_match = this.text.slice(match_at + typed.length);
+          return true;
+        }
+        return false;
+      }
+      else {
+        return this.text.match(new RegExp(typed, "i"));
+      }
+    },
+    wrapper: '<ul ' + (opt.scrollHeight != undefined ? 'style="height:' + opt.scrollHeight + 'px;"' : '')  + 'class="autobox-list"></ul>',
 
-      resizable: {},
+    resizable: {},
 		
 		emptyValues: function(){
 			return (this.input.parent().parent().find('li').length == 1);
@@ -311,30 +330,32 @@
 					var v = vals[i].innerHTML.match(/^[^<]+/);	
 					if(v!= null && value == v ){
 						$(vals[i]).remove();
-						if(this.multiSellection && this.applyButton && this.emptyValues())
+						if(this.multiSelection && this.applyButton && this.emptyValues())
 							this.hideApplyButton();
 						return;
 					}
 				}
 			}
-			else if(this.selectedValues[value])
+			else if(this.selectedValues[value]){
 				delete this.selectedValues[value];
+			}
 		},
 		
-	    getSelectedValues: function(){
+	 getSelectedValues: function(){
 			var values = new Array();
 			if(opt.addTextElements){
 			  var vals= this.input.parent().parent().find('li');
 			  for(var i=0,j=0; i<vals.length; ++i){
-				var value = vals[i].innerHTML.match(/^[^<]+/);
-				if(value!= null){
-					values[j] = value[0];j++;
-				}
+          var value = vals[i].innerHTML.match(/^[^<]+/);
+          if(value!= null){
+            values[j] = value[0];j++;
+          }
 			  }
 			}
 			else{
-				for(v in opt.selectedValues)
+				for(v in opt.selectedValues){
 					values.push(v);
+				}
 			}
 			
 			return values;
@@ -345,19 +366,21 @@
 			var values = new Array();
 			for(var i=0,j=0; i<vals.length; ++i){
 				var v = vals[i].innerHTML.match(/^[^<]+/);
-				if(v!= null && v == value)
+				if(v!= null && v == value){
 					return true;
+				}
 			}
 			return false;
 		},
 		
 		processAutoBoxChange: function processAutoBoxChange(){
-			if(this.multiSellection == true){
+			if(this.multiSelection == true){
 				var selectedValues = this.getSelectedValues();
 				this.processChange(this.parent,selectedValues);
 			}
-			else
+			else {
 				this.processChange(this.parent,this.getSelectedValues());
+			}
 			
 			this.input.val("");
 		},
@@ -411,126 +434,138 @@
         if(typingTimeout) window.clearInterval(typingTimeout);
     }
 
-    function createInput(){
-      var input=$('<input id="autoboxInput" type="text"></input>')
-      input
-        .keydown(function(e){
-          preventTabInAutocompleteMode(e);
-        })
-		.click(function(e){
-		  if(input.val().length == 0)
-			input.trigger("autobox");
-        })
-        .keyup(function(e){
-          var k=e.which || e.keyCode;
-          if(!$.data(document.body, "autoboxMode") &&
-              (k == KEY.UP || k == KEY.DOWN)){
-            clearTypingTimeout(this);
-            startTypingTimeout(e, this, 0);
-          }
-          else{
-            preventTabInAutocompleteMode(e);
-          }
-        })
-        .keypress(function(e){
-          var k=e.keyCode || e.which; // keyCode == 0 in Gecko/FF on keypress
-          clearTypingTimeout(this);
-          if($.data(document.body, "suppressKey")){
-            $.data(document.body, "suppressKey", false);
-            //note that IE does not generate keypress for arrow/tab keys
-            if(k == KEY.TAB || k == KEY.UP || k == KEY.DOWN) return false;
-          }
-          if($.data(document.body, "autoboxMode") && k < 32 && k != KEY.BS && k != KEY.DEL) return false;
-          else if(k == KEY.RETURN){
-            if(input.val()){ 	
-			
-				var hash = getCurrentValsHash(input,opt);
-				if(hash == null || hash[input.val()] != true){
-					if(opt.checkValue == false){
-						addText(opt,input, input.val(), opt.name);
-						if(!opt.multiSellection)
-							opt.processAutoBoxChange(input,opt)
-						else if(opt.processElementChange!= undefined)
-							opt.processAutoBoxElement();
-					}
-					else{
-						valueMatched = false;
-						$(opt.list).filter(function(){
-							valueMatched = this.text == input.val() ? true : valueMatched;
-						});
-						if(opt.checkValue == true && valueMatched){
-							addText(opt,input, input.val(), opt.name);
-							if(!opt.multiSellection)
-								opt.processAutoBoxChange(input,opt)
-							else if(opt.processElementChange!= undefined)
-								opt.processAutoBoxElement();
-						}
-						else
-							addText(opt,input, "", opt.name);
-					}	
-				}else
-					addText(opt,input, "", opt.name);
-			}
-            e.preventDefault();
-          }
-          else if(k == KEY.BS || k == KEY.DEL || k > 32){ // more than ESC and RETURN and the like
-            startTypingTimeout(e, this, opt.timeout);
-          }
-        })
-        .bind("autobox", function(){
-          var self=$(this);
-          self.one("updateList", function(e, list){//clear/update/redraw list
-			//opt.valueMatched = false;
-			valueMatched = false;
-			if(opt.minTextLenght > input.val().length)
-				list = [];
-            list=$(list)
-              .filter(function(){ 
-				valueMatched = this.text.replace(/^\s*|\s*$/g,'') == self.val().replace(/^\s*|\s*$/g,'') ? true : valueMatched;
-				return  opt.match.call(this, self.val()); 
-				})
-              .map(function(){
-                var node=$(opt.template(this))[0];
-				if(opt.multiSellection){
-					var el = node.childNodes[0];
-					$(el).click(function () { 
-						if(!el.checked){
-							opt.removeValue(el.value);
-						}
-					});
-					
-				}
-                $.data(node, "originalObject", this);
-                return node;
+  function createInput(){
+    var input=$('<input id="' + inputId +'" type="text"></input>')
+    
+    input.keydown(function(e){
+       preventTabInAutocompleteMode(e);
+    });
+    
+    input.click(function(e){
+      if(input.val().length == 0){
+        input.trigger("autobox");
+      }
+    });
+    
+    input.keyup(function(e){
+      var k=e.which || e.keyCode;
+      if(!$.data(document.body, "autoboxMode") &&
+          (k == KEY.UP || k == KEY.DOWN)){
+        clearTypingTimeout(this);
+        startTypingTimeout(e, this, 0);
+      }
+      else{
+        preventTabInAutocompleteMode(e);
+      }
+    });
+        
+    input.keypress(function(e){
+      var k=e.keyCode || e.which; // keyCode == 0 in Gecko/FF on keypress
+      clearTypingTimeout(this);
+      if($.data(document.body, "suppressKey")){
+        $.data(document.body, "suppressKey", false);
+        //note that IE does not generate keypress for arrow/tab keys
+        if(k == KEY.TAB || k == KEY.UP || k == KEY.DOWN) return false;
+      }
+      if($.data(document.body, "autoboxMode") && k < 32 && k != KEY.BS && k != KEY.DEL) return false;
+      else if(k == KEY.RETURN){
+        if(input.val()){ 	
+          var hash = getCurrentValsHash(input,opt);
+          if(hash == null || hash[input.val()] != true){
+            if(opt.checkValue == false){
+              addText(opt,input, input.val(), opt.name);
+              if(!opt.multiSelection)
+                opt.processAutoBoxChange(input,opt)
+              else if(opt.processElementChange!= undefined)
+                opt.processAutoBoxElement();
+            }
+            else{
+              valueMatched = false;
+              var list = (typeof opt.list == 'function')? opt.list() : opt.list;
+              $(list).filter(function(){
+                valueMatched = this.text == input.val() ? true : valueMatched;
               });
+              if(opt.checkValue == true && valueMatched){
+                addText(opt,input, input.val(), opt.name);
+                if(!opt.multiSelection){
+                  opt.processAutoBoxChange(input,opt)
+                }
+                else if(opt.processElementChange!= undefined){
+                  opt.processAutoBoxElement();
+                }
+              }
+              else {
+                addText(opt,input, "", opt.name);
+              }
+            }	
+          }else
+            addText(opt,input, "", opt.name);
+        }
+        if(opt.selectedValue){
+          
+        }
+        e.preventDefault();
+      }
+      else if(k == KEY.BS || k == KEY.DEL || k > 32){ // more than ESC and RETURN and the like
+        startTypingTimeout(e, this, opt.timeout);
+      }
+    });
+    
+    input.bind("autobox", function(){
+      var self=$(this);
+      self.one("updateList", function(e, list){//clear/update/redraw list
+        //opt.valueMatched = false;
+        valueMatched = false;
+        if(opt.minTextLenght > input.val().length){
+          list = [];
+        }
+        list=$(list)
+          .filter(function(){ 
+            valueMatched = this.text.replace(/^\s*|\s*$/g,'') == self.val().replace(/^\s*|\s*$/g,'') ? true : valueMatched;
+            return  opt.match.call(this, self.val()); 
+          })
+          .map(function(){
+            var node=$(opt.template(this))[0];
+            if(opt.multiSelection){
+              var el = node.childNodes[0];
+              $(el).click(function () { 
+                if(!el.checked){
+                  opt.removeValue(el.value);
+                }
+              });
+            }
+            $.data(node, "originalObject", this);
+            return node;
+            });
+        $("body").trigger("off.autobox");
 
-            $("body").trigger("off.autobox");
+        if(!list.length) {
+          return false;
+        }
 
-            if(!list.length) return false;
+        var container=list.wrapAll(opt.wrapper).parent();
+        var offset=self.offset();
 
-			var container=list.wrapAll(opt.wrapper).parent();
-            var offset=self.offset();
+        opt.container=container
+          .css({top: offset.top + self.outerHeight(), left: offset.left, width: self.width()})
+          .appendTo("body");
+          $("body").autoboxMode(opt.multiSelection,container, self, list.length, opt);
+      });
+      opt.getList(self, getCurrentValsHash(self,opt));
+    });
+    
+    return input;
+  } //createInput...
 
-            opt.container=container
-              .css({top: offset.top + self.outerHeight(), left: offset.left, width: self.width()})
-              .appendTo("body");
-
-            $("body").autoboxMode(opt.multiSellection,container, self, list.length, opt);
-          });
-
-          opt.getList(self, getCurrentValsHash(self,opt));
-        });
-        return input;
-    }
-	
-	function createApplyButton(){
+  function createApplyButton(){
+    
       var button=$('<a href="#" class="applybutton" ></a>')
        .bind('click', function(e) {
-			opt.hideApplyButton();
-			//button.hide('slow');
-			$("body").trigger("off.autobox");
-			opt.processAutoBoxChange($(button.parent().children()[0]),opt);
-	   });
+        opt.hideApplyButton();
+        //button.hide('slow');
+        $("body").trigger("off.autobox");
+        opt.processAutoBoxChange($(button.parent().children()[0]),opt);
+       });
 	   
 	   button.attr("title","Click it to Apply");
 	   button.hide();
@@ -546,40 +581,53 @@
 	  
 	 
     function createHolder(self){
-	  var input=createInput();
-	  opt.input = input;
-	  var applyButton;
-	  if(opt.applyButton != false){
-		applyButton	= createApplyButton();
-		opt.applyButton = applyButton[0];
-	  }
-	  
-	  var holder;
-	  var classHolder = "autobox-hldr";
-	  if(opt.multiSellection == false || opt.addTextElements == false)
-		classHolder = "autobox-hldr-2";
-
+      
+      var input=createInput();
+      opt.input = input;
+      var applyButton;
+      if(opt.applyButton != false){
+        applyButton	= createApplyButton();
+        opt.applyButton = applyButton[0];
+      }
+      
+      if(opt.externalApplyButtonId){
+        var button=$('#' + opt.externalApplyButtonId);
+        if (button){
+          button.bind('click', function(e) {
+            $("body").trigger("off.autobox");
+            opt.processAutoBoxChange($(button.parent().children()[0]),opt);
+          });
+        }
+      }
+      
+      var holder;
+      var classHolder = "autobox-hldr";
+      if(opt.multiSelection == false || opt.addTextElements == false){
+        classHolder = "autobox-hldr-2";
+      }
+  
       holder=$('<ul class="'+ classHolder + '"></ul>');
-	  self.append(holder);
-	  var li = $('<li class="autobox-input"></li>');
-	  holder.append(li.append(input));
-	   if(opt.multiSellection && opt.applyButton != false){
-		li.append(applyButton[0]);
-		li.append(applyButton[1]);
-	  }
-		
-	  $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
-	  
-	  return holder;
+      self.append(holder);
+      var li = $('<li class="autobox-input"></li>');
+      holder.append(li.append(input));
+      if(opt.multiSelection && opt.applyButton != false){
+        li.append(applyButton[0]);
+        li.append(applyButton[1]);
+      }
+      
+      $.fn.resizableTextbox(input, $.extend(opt.resizable, { min: input.attr('offsetWidth'), max: holder.width() }));
+      
+      return holder;
     }
 
-    this.each(function(){
+    this.each(function(){//??
       var self=$(this);
+      inputId = opt.parent.htmlObject + 'autoboxInput';
       createHolder(self);
-	  opt.name=opt.parent.name;
+      opt.name=opt.parent.name;
     });
 	
-	return opt;
+    return opt;
   };
 
 })(jQuery);

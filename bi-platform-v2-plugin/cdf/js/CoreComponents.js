@@ -4,6 +4,50 @@ BaseComponent = Base.extend({
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
+  clone: function(parameterRemap,componentRemap,htmlRemap) {
+    var that;
+    that = $.extend(true,{},this);
+    if (that.parameters) {
+      that.parameters = that.parameters.map(function(param){
+        if (param[1] in parameterRemap) {
+          return [param[0],parameterRemap[param[1]]];
+        } else {
+          return param;
+        }
+      });
+    }
+    if (that.components) {
+      that.components = that.components.map(function(comp){
+        if (comp in componentRemap) {
+          return componentRemap[comp];
+        } else {
+          return comp;
+        }
+      });
+    }
+    that.htmlObject = !that.htmlObject? undefined : htmlRemap[that.htmlObject];
+    if (that.listeners) {
+      that.listeners = that.listeners.map(function(param){
+        if (param in parameterRemap) {
+          return parameterRemap[param];
+        } else {
+          return param;
+        }
+      });
+    }
+    if (that.parameter && that.parameter in parameterRemap) {
+      that.parameter = parameterRemap[that.parameter];
+    }
+    return that;
+  },
+  getAddIn: function (slot,addIn) {
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    return Dashboards.getAddIn(type,slot,addIn);
+  },
+  hasAddIn: function (slot,addIn) {
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    return Dashboards.hasAddIn(type,slot,addIn);
+  },
   getValuesArray : function() {
 
 
@@ -15,7 +59,7 @@ BaseComponent = Base.extend({
         if((this.queryDefinition.queryType == "mdx") && (!this.valueAsId)){
           vid = "mdx";
         } else if (this.queryDefinition.dataAccessId !== undefined && !this.valueAsId) {
-            vid = 'cda';
+          vid = 'cda';
         }
         QueryComponent.makeQuery(this);
         var myArray = new Array();
@@ -29,7 +73,7 @@ BaseComponent = Base.extend({
               break;
             case 'cda':
               myArray.push([this.result[p][0],this.result[p][1]]);
-            break;
+              break;
             default:
               myArray.push([this.result[p][0],this.result[p][0]]);
               break;
@@ -99,39 +143,21 @@ BaseComponent = Base.extend({
 
   },
   parseArrayCda : function(jData,includeHeader){
-//ToDo: refactor with parseArray?..use as parseArray?..
+    //ToDo: refactor with parseArray?..use as parseArray?..
     var myArray = new Array();
 
     var jHeaders = $(jData).find("ColumnMetaData");
     if (jHeaders.size() > 0 ){
-	  if(includeHeader){//get column names
-		var _a = new Array();
-		jHeaders.each(function(){
-		  _a.push($(this).attr("name"));
-		});
-		myArray.push(_a);
-	  }
-	//  //set output column type 'valueOutputType' from cda column type if possible
-	//  //TODO: testing; for ee dashboard editor
-	//  var valIdx = 0;
-	//  if(this.parameters){
-	//	for(var i =0; i < this.parameters.length;i++){
-	//	  if(this.parameters[i][0] == 'validx'){
-	//		valIdx = this.parameters[2];
-	//		break;
-	//	  }
-	//	}
-	//  }
-	//  var typesArray = new Array();
-	//  jHeaders.each(function(){
-	//	typesArray.push($(this).attr("type"));
-	//  });
-	//  if(typesArray.length > valIdx){
-	//	this.valueOutputType = typesArray[valIdx];
-	//  }
+      if(includeHeader){//get column names
+        var _a = new Array();
+        jHeaders.each(function(){
+          _a.push($(this).attr("name"));
+        });
+        myArray.push(_a);
+      }
     }
 
-	//get contents
+    //get contents
     var jDetails = $(jData).find("Row");
     jDetails.each(function(){
       var _a = new Array();
@@ -143,11 +169,38 @@ BaseComponent = Base.extend({
 
     return myArray;
 
+  },
+
+  setAddInDefaults: function(slot,addIn,defaults) {
+    var type = typeof this.type == "function" ? this.type() : this.type;
+    Dashboards.setAddInDefaults(type,slot,addIn,defaults)
+  },
+  setAddInOptions: function(slot, addIn,options) {
+    if(!this.addInOptions) {
+      this.addInOptions = {};
+    }
+
+    if (!this.addInOptions[slot]) {
+      this.addInOptions[slot] = {};
+    }
+    this.addInOptions[slot][addIn] = options
+  },
+
+  getAddInOptions: function(slot,addIn) {
+    var opts = null;
+    try {
+      opts = this.addInOptions[slot][addIn];
+    } catch (e) {
+      /* opts is still null, no problem */
+    }
+    /* opts is falsy if null or undefined */
+    return opts || {};
   }
 });
 
 var XactionComponent = BaseComponent.extend({
   update : function() {
+    var myself=this;
     try {
       if (typeof(this.iframe) == 'undefined' || !this.iframe) {
         // go through parameter array and update values
@@ -161,7 +214,6 @@ var XactionComponent = BaseComponent.extend({
           p[i] = [key,value];
         }
 
-        var myself=this;
         if (typeof(this.serviceMethod) == 'undefined' || this.serviceMethod == 'ServiceAction') {
           var jXML = Dashboards.callPentahoAction(myself, this.path, p,null);
 
@@ -177,11 +229,9 @@ var XactionComponent = BaseComponent.extend({
         var xactionIFrameHTML = "<iframe id=\"iframe_"+ this.htmlObject + "\"" +
         " frameborder=\"0\"" +
         " height=\"100%\"" +
-        " width=\"100%\"" +
-        " src=\"";
-
-        xactionIFrameHTML += webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
-        
+        " width=\"100%\" />";        
+        var iframe = $(xactionIFrameHTML);                
+        var url += webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -196,13 +246,20 @@ var XactionComponent = BaseComponent.extend({
               val = encodeURIComponent(this.parameters[i][2])
             }
           }
-          xactionIFrameHTML += arg + val;
+          url += arg + val;
         }
-
-        // Close IFrame
-        xactionIFrameHTML += "\"></iframe>";
-
-        $("#"+this.htmlObject).html(xactionIFrameHTML);
+        if (!this.loading) {
+          this.loading = true;
+          Dashboards.incrementRunningCalls();
+        }
+        iframe.load(function(){
+          if (this.contentWindow.document.body.innerHTML){
+            myself.loading = false;
+            Dashboards.decrementRunningCalls();
+          }
+        });
+        $("#"+this.htmlObject).empty().append(iframe);
+        iframe[0].contentWindow.location = url;
       }
     } catch (e) {
     // don't cause the rest of CDF to fail if xaction component fails for whatever reason
@@ -211,70 +268,72 @@ var XactionComponent = BaseComponent.extend({
 });
 
 var SelectBaseComponent = BaseComponent.extend({
-    visible: false,
-    update: function(){
-        var ph = $("#" + this.htmlObject);
+  visible: false,
+  update: function () {
+    var ph = $("#" + this.htmlObject);
     var myArray = this.getValuesArray(),
     isMultiple = false;
 
-        selectHTML = "<select";
+    selectHTML = "<select";
 
-        // set size
-        if (this.size != undefined) {
-            selectHTML += " size='" + this.size + "'";
-        }
-        if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
-            if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
-                selectHTML += " multiple";
+    // set size
+    if (this.size != undefined) {
+      selectHTML += " size='" + this.size + "'";
+    }
+    if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
+      if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
+        selectHTML += " multiple";
         isMultiple = true;
       } else
-                if (!this.isMultiple && this.size == undefined) {
-                    selectHTML += " size='" + myArray.length + "'";
-                }
-        }
-        selectHTML += ">";
+      if (!this.isMultiple && this.size == undefined) {
+        selectHTML += " size='" + myArray.length + "'";
+      }
+    }
+    if (this.externalPlugin == "chosen") {
+      selectHTML += " class='chzn-select'";
+    }
+    selectHTML += ">";
     var firstVal,
     currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
     currentIsValid = false;
 
-    var currentVal = Dashboards.getParameterValue(this.parameter);
-    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
-    var hasCurrentVal = typeof currentval != undefined;
-        var vid = this.valueAsId == false ? false : true;
+    var hasCurrentVal = typeof currentVal != undefined;
+    //var vid = this.valueAsId == false ? false : true;
+    var vid = !!this.valueAsId;
     var hasValueSelected = false;
     var isSelected = false;
 
     var currentValArray = [];
-    if(currentVal instanceof Array) {
+    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
       currentValArray = currentVal.split("|");
     }
 
-        for (var i = 0, len = myArray.length; i < len; i++) {
-            if (myArray[i] != null && myArray[i].length > 0) {
-                var ivid = vid || myArray[i][0] == null;
-                var value, label;
-                if (myArray[i].length > 1) {
+
+    for (var i = 0, len = myArray.length; i < len; i++) {
+      if (myArray[i] != null && myArray[i].length > 0) {
+        var ivid = vid || myArray[i][0] == null;
+        var value, label;
+        if (myArray[i].length > 1) {
           value = "" + myArray[i][ivid ? 1 : 0];
           label = "" + myArray[i][1];
         } else {
           value = "" + myArray[i][0];
           label = "" + myArray[i][0];
-                }
-                if (i == 0) {
-                    firstVal = value;
-                }
+        }
+        if (i == 0) {
+          firstVal = value;
+        }
         if (jQuery.inArray( value, currentValArray) > -1) {
           currentIsValid = true;
         }
         selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
-            }
-        }
+      }
+    }
 
-        selectHTML += "</select>";
-
-        ph.html(selectHTML);
+    selectHTML += "</select>";
+    ph.html(selectHTML);
 
     /* If the current value for the parameter is invalid or empty, we need
      * to pick a sensible default. If there is a defaultIfEmpty value,
@@ -285,71 +344,81 @@ var SelectBaseComponent = BaseComponent.extend({
       var replacementValue = (this.defaultIfEmpty)? firstVal : null;
       $("select", ph).val(replacementValue);
       Dashboards.setParameter(this.parameter,replacementValue);
-            Dashboards.processChange(this.name);
-        } else {
+      Dashboards.processChange(this.name);
+    } else {
       $("select", ph).val(currentValArray);
-        }
-        var myself = this;
-        $("select", ph).change(function(){
-            Dashboards.processChange(myself.name);
-        });
     }
+    
+    if( this.externalPlugin == "chosen" ){ 
+      ph.find("select.chzn-select").chosen(); 
+    }
+    
+    var myself = this;
+    $("select", ph).change(function () {
+      Dashboards.processChange(myself.name);
+    });
+  }
 });
 
 var SelectComponent = SelectBaseComponent.extend({
   defaultIfEmpty: true,
   getValue : function() {
-    return $("#"+this.htmlObject + " > select").val();
+    return $("#"+this.htmlObject + " select").val();
   }
 });
 
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
-    return $("#"+this.htmlObject + " > select").val();
+  	var ph = $("#"+this.htmlObject + " select");
+	// caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
+	if(ph.hasClass("chzn-select") && ph.val() == null)
+		return [];
+    return ph.val();
   }
 });
 
 var JFreeChartComponent = BaseComponent.extend({
   update : function() {
-    this.callPentahoAction("jfreechart.xaction");
+    var xactionFile = (this.chartDefinition.queryType == 'cda')? "jfreechart-cda.xaction" : "jfreechart.xaction";
+    this.callPentahoAction(xactionFile);
   },
 
   getParameters: function() {
 
-	var cd = this.chartDefinition;
-	// Merge the stuff with a chartOptions element
-	if (cd == undefined){
-		alert("Fatal - No chartDefinition passed");
-		return;
-	}
+    var cd = this.chartDefinition;
+    // Merge the stuff with a chartOptions element
+    if (cd == undefined){
+     Dashboards.log("Fatal - No chartDefinition passed","error");
+      return;
+    }
 
-	// If the user filled titleKey get the title value from language files
-	if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-		cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
-	}
+    // If the user filled titleKey get the title value from language files
+    if (typeof cd.titleKey !== "undefined" && typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+      cd.title = Dashboards.i18nSupport.prop(cd.titleKey);
+    }
 
-	//set parameters string if using cda
-	var cdaParameterString = null;
-	if(cd.queryType == "cda"){
-	  if ($.isArray(this.parameters)){
-		var param;
-		for(var i = 0; i < this.parameters.length; i++){
-		  param = this.parameters[i];
-		  if($.isArray(param) && param.length >= 2){
-			var name = param[0];
-			var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
+    //set parameters string if using cda
+    var cdaParameterString = null;
+    if(cd.queryType == "cda"){
+      if ($.isArray(this.parameters)){
+        var param;
+        for(var i = 0; i < this.parameters.length; i++){
+          param = this.parameters[i];
+          if($.isArray(param) && param.length >= 2){
+            var name = param[0];
+            var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
 
             if(value){
               value = doCsvQuoting(value, '=');	//quote if needed for '='
             }
-			if(i == 0) cdaParameterString = "";
-			else cdaParameterString += ";";
+            if(i == 0) cdaParameterString = "";
+            else cdaParameterString += ";";
 
             cdaParameterString += doCsvQuoting(name + "=" + value, ';'); //re-quote for ';'
-		  }
-		}
-	  }
-	}
+          }
+        }
+      }
+    }
 
     var cd0 = cd.chartOptions != undefined ? $.extend({},Dashboards.ev(cd.chartOptions), cd) : cd;
 
@@ -361,9 +430,9 @@ var JFreeChartComponent = BaseComponent.extend({
       // alert("key: " + key + "; Value: " + value);
       parameters.push([key,value]);
     }
-	if(cdaParameterString != null){
-	  parameters.push(["cdaParameterString", cdaParameterString]);
-	}
+    if(cdaParameterString != null){
+      parameters.push(["cdaParameterString", cdaParameterString]);
+    }
 
     return parameters;
 
@@ -379,10 +448,12 @@ var JFreeChartComponent = BaseComponent.extend({
     Dashboards.callPentahoAction(myself, actionPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
-        if(myself.chartDefinition.caption != undefined)
+        if(myself.chartDefinition.caption != undefined){
           myself.buildCaptionWrapper($(jXML.find("ExecuteActivityResponse:first-child").text()),action);
-        else
+        }
+        else {
           $('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
+        }
       }
       Dashboards.decrementRunningCalls();
 
@@ -392,10 +463,11 @@ var JFreeChartComponent = BaseComponent.extend({
   buildCaptionWrapper: function(chart,cdfComponent){
 
     var exportFile = function(type,cd){
+      var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
       var obj = $.extend({
-        solution: "cdf",
+        solution: "system",
         path: "/public/pentaho-solutions/cdf/components/jtable.xaction",
-        action:"jtable.xaction",
+        action: xactionFile,
         exportType: type
       },cd);
       Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj);
@@ -570,25 +642,24 @@ var DialComponent = JFreeChartComponent.extend({
 
     var cd = this.chartDefinition;
     if (cd == undefined){
-      alert("Fatal - No chartDefinition passed");
+     Dashboards.log("Fatal - No chartDefinition passed","error");
       return;
     }
+    
+    cd.chartType = 'DialChart';
 
     var intervals = cd.intervals;
-    if (intervals == undefined){
-      alert("Fatal - No intervals passed");
-      return;
-    }
 
     var colors = cd.colors;
     if(colors != undefined && intervals.length != colors.length){
-      alert("Fatal - Number of intervals differs from number of colors");
+     Dashboards.log("Fatal - Number of intervals differs from number of colors","error");
       return;
     }
 
-    this.callPentahoAction("jfreechartdial.xaction");
+    this.callPentahoAction(cd.queryType == 'cda' ? "jfreechartdial-cda.xaction" : "jfreechartdial.xaction");
 
   }
+  
 });
 
 var OpenFlashChartComponent = JFreeChartComponent.extend({
@@ -630,7 +701,7 @@ var TrafficComponent = BaseComponent.extend({
   update : function() {
     var cd = this.trafficDefinition;
     if (cd == undefined){
-      alert("Fatal - No trafficDefinition passed");
+     Dashboards.log("Fatal - No trafficDefinition passed","error");
       return;
     }
 
@@ -745,7 +816,7 @@ var TimePlotComponent = BaseComponent.extend({
 
     var obj = this;
     if (cd == undefined){
-      alert("Fatal - No chart definition passed");
+     Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
 
@@ -757,7 +828,7 @@ var TimePlotComponent = BaseComponent.extend({
 
     var cols = typeof cd['columns']=='function'?cd['columns']():cd['columns'];
     if (cols == undefined || cols.length == 0){
-      alert("Fatal - No 'columns' property passed in chartDefinition");
+     Dashboards.log("Fatal - No 'columns' property passed in chartDefinition","error");
       return;
     }
     // Write the title
@@ -918,71 +989,67 @@ var TextComponent = BaseComponent.extend({
 });
 
 var TextInputComponent = BaseComponent.extend({
-    update: function(){
-        selectHTML = "<input";
-        selectHTML += " type=test id='" + this.name + "' name='" + this.name +
-        "' + value='" +
-        Dashboards.getParameterValue(this.parameter) +
-        (this.charWidth ? ("' + size='" + this.charWidth) : "") +
-        (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
-        "'>";
-        $("#" + this.htmlObject).html(selectHTML);
-        var myself = this;
-        $("#" + this.name).change(function(){
-            Dashboards.processChange(myself.name);
-        }).keyup(function(event){
-            if (event.keyCode == 13) {
-                Dashboards.processChange(myself.name);
-            }
-        });
-    },
+  update: function(){
+    selectHTML = "<input";
+    selectHTML += " type=test id='" + this.name + "' name='" + this.name +
+    "' + value='" +
+    Dashboards.getParameterValue(this.parameter) +
+    (this.charWidth ? ("' + size='" + this.charWidth) : "") +
+    (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
+    "'>";
+    $("#" + this.htmlObject).html(selectHTML);
+    var myself = this;
+    $("#" + this.name).change(function(){
+      Dashboards.processChange(myself.name);
+    }).keyup(function(event){
+      if (event.keyCode == 13) {
+        Dashboards.processChange(myself.name);
+      }
+    });
+  },
   getValue : function() {
     return $("#"+this.name).val();
   }
 });
 
+
+// Start by setting a sane i18n default to datepicker
+$(function(){$.datepicker.setDefaults($.datepicker.regional[''])});
+
 var DateInputComponent = BaseComponent.extend({
-    update: function(){
-        var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
-	    var myself = this;
+  update: function(){
+    var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
+    var myself = this;
 
-		var startDate, endDate;
+    var startDate, endDate;
 
-		if(this.startDate == 'TODAY') startDate = new Date();
-		else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
+    if(this.startDate == 'TODAY') startDate = new Date();
+    else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
 
-		if(this.endDate == 'TODAY') endDate = new Date();
-		else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
+    if(this.endDate == 'TODAY') endDate = new Date();
+    else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
 
-		//ToDo: stretch interval to catch defaultValue?..
-		//Dashboards.getParameterValue(this.parameter))
+    //ToDo: stretch interval to catch defaultValue?..
+    //Dashboards.getParameterValue(this.parameter))
 
-        $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
-        $(function(){
-            // Add JQuery DatePicker standard localization support only if the dashboard is localized
-            // Reset to standard language
-            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-                $.datepicker.setDefaults($.datepicker.regional['']);
-            } else if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
-                // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
-                $.datepicker.setDefaults($.datepicker.regional['']);
-            }
-            $("#" + myself.htmlObject + " input").datepicker({
-                dateFormat: format,
-                changeMonth: true,
-                changeYear: true,
-				minDate: startDate,
-				maxDate: endDate,
-                onSelect: function(date, input){
-                    Dashboards.processChange(myself.name);
-                }
-            });
-            // Add JQuery DatePicker standard localization support only if the dashboard is localized
-            if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-                $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
-            }
-        });
-    },
+    $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
+    $(function(){
+      $("#" + myself.htmlObject + " input").datepicker({
+        dateFormat: format,
+        changeMonth: true,
+        changeYear: true,
+        minDate: startDate,
+        maxDate: endDate,
+        onSelect: function(date, input){
+          Dashboards.processChange(myself.name);
+        }
+      });
+      // Add JQuery DatePicker standard localization support only if the dashboard is localized
+      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+        $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+      }
+    });
+  },
   getValue : function() {
     return $("#"+this.name).val();
   }
@@ -1009,22 +1076,59 @@ var DateRangeInputComponent = BaseComponent.extend({
     var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
-    $(function(){
-      // If translations were loaded, and there's a default translation, activate it -- or we're stuck with whatever was loadded last!
-      if (typeof $.datepicker.regional != 'undefined' && $.datepicker.regional !== null && typeof $.datepicker.regional[''] !='undefined' && $.datepicker.regional[''] !==null) {
-        $.datepicker.setDefaults($.datepicker.regional['']);
+    
+    var changed, closed;
+    function triggerWhenDone() {
+      if(changed && closed) {
+        myself.fireInputChange(myself.startValue,myself.endValue);
+        changed = closed = false;
       }
+    };
+    $(function(){
       $("#" + myself.htmlObject + " input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
         latestDate: latestDate,
         dateFormat: 'yy-mm-dd',
+        onOpen: function() {
+          changed = closed = false;
+          myself.startValue = null;
+          myself.endValue = null;
+        },
         onDateSelect: function(rangeA, rangeB) {
-          DateRangeInputComponent.fireDateRangeInputChange( myself.name, rangeA, rangeB);
+          changed = true;
+          myself.storeChanges(rangeA, rangeB);
+          triggerWhenDone();
+        },
+        onClose: function() {
+          closed = true;
+          triggerWhenDone();
         }
       });
     });
+  },
+  
+  fireInputChange : function(start, end){
+    //TODO: review this!
+    if(this.preChange){
+      this.preChange(start, end);
+    }
+    
+    if(this.parameter)
+    {
+      if( this.parameter.length == 2) Dashboards.setParameter(this.parameter[1], end);
+      if( this.parameter.length > 0) Dashboards.fireChange(this.parameter[0], start);
+    }
+    
+    if(this.postChange){
+      this.postChange(start, end);
+    }
+  },
+
+  storeChanges : function(start,end){
+    this.startValue = start;
+    this.endValue = end;
   }
 },
 {
@@ -1095,6 +1199,7 @@ var MonthPickerComponent = BaseComponent.extend({
     if (object_size != undefined){
       selectHTML += " size='" + object_size + "'";
     }
+    selectHTML += '>';
 
     var currentDate = new Date(+initialDate);
     currentDate.setMonth(currentDate.getMonth()- monthCount/2 - 1);
@@ -1104,13 +1209,13 @@ var MonthPickerComponent = BaseComponent.extend({
       currentDate.setMonth(currentDate.getMonth() + 1);
       if(currentDate >= minDate && currentDate <= maxDate)
       {
-        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "'";
+        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "' ";
 
         if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()){
           selectHTML += "selected='selected'"
         }
 
-        selectHTML += "' >" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
+        selectHTML += ">" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
       }
     }
 
@@ -1125,26 +1230,26 @@ var MonthPickerComponent = BaseComponent.extend({
 });
 
 var ToggleButtonBaseComponent = BaseComponent.extend({
-    update: function(){
-        var myArray = this.getValuesArray();
+  update: function(){
+    var myArray = this.getValuesArray();
 
-        selectHTML = "";
+    selectHTML = "";
 
-		//default
-        var currentVal = Dashboards.getParameterValue(this.parameter);
-        currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
+    //default
+    var currentVal = Dashboards.getParameterValue(this.parameter);
+    currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 
     var isSelected = false;
 
     var currentValArray = [];
-    if(currentVal instanceof Array) {
+    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
       currentValArray = currentVal.split("|");
     }
 
     // check to see if current selected values are in the current values array. If not check to see if we should default to the first
-      var vid = this.valueAsId==false?0:1;
+    var vid = this.valueAsId==false?0:1;
     var hasCurrentVal = false;
       outer:
       for(var i = 0; i < currentValArray.length; i++){
@@ -1159,6 +1264,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     if(!hasCurrentVal && this.defaultIfEmpty){
       currentValArray = [myArray[0][vid]];
 
+      this.currentVal = currentValArray;
       Dashboards.setParameter(this.parameter,currentValArray);
       Dashboards.processChange(this.name);
     }
@@ -1169,8 +1275,6 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     for (var i = 0, len = myArray.length; i < len; i++) {
       selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 
-
-
       isSelected = false;
       for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
         isSelected = currentValArray[j] == myArray[i][vid];
@@ -1179,17 +1283,18 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
         }
       }
 
+
       if (this.type == 'radio' || this.type == 'radioComponent'){
-	      if ((i == 0 && !hasCurrentVal) ||
-						(hasCurrentVal && (myArray[i][vid] == currentVal ))) {
-                selectHTML += " CHECKED";
-				}
+        if ((i == 0 && !hasCurrentVal) ||
+          (hasCurrentVal && (myArray[i][vid] == currentVal ))) {
+          selectHTML += " CHECKED";
+        }
         selectHTML += " type='radio'";
       }else{
-	      if ((i == 0 && !hasCurrentVal) ||
+        if ((i == 0 && !hasCurrentVal && this.defaultIfEmpty) ||
           (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
-				}
+        }
         selectHTML += " type='checkbox'";
       }
       selectHTML += "class='" + this.name +"' name='" + this.name +"' value='" + myArray[i][vid] + "' /> " + myArray[i][1] + "</label></li>" + ((this.separator == undefined || this.separator == null || this.separator == "null")?"":this.separator);
@@ -1197,6 +1302,7 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     selectHTML += "</ul>"
     // update the placeholder
     $("#" + this.htmlObject).html(selectHTML);
+    this.currentVal = null;
   },
   callAjaxAfterRender: function(name){
     setTimeout(function(){
@@ -1207,75 +1313,89 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 
 var RadioComponent = ToggleButtonBaseComponent.extend({
   getValue : function() {
-    return $("#"+this.htmlObject + " ."+this.name+":checked").val()
+    if (this.currentVal != 'undefined' && this.currentVal != null) {
+      return this.currentVal;
+    } else {
+      return $("#"+this.htmlObject + " ."+this.name+":checked").val()
+    }
   }
 });
 
 var CheckComponent = ToggleButtonBaseComponent.extend({
   getValue : function() {
-    var a = new Array()
-    $("#"+this.htmlObject + " ."+this.name + ":checked").each(function(i,val){
-      a.push($(this).val());
-    });
-    return a;
+    if (this.currentVal != 'undefined' && this.currentVal != null) {
+      return this.currentVal;
+    } else {
+      var a = new Array()
+      $("#"+this.htmlObject + " ."+this.name + ":checked").each(function(i,val){
+        a.push($(this).val());
+      });
+      return a;
+    }
   }
 });
 
 var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   update: function(){
-	var myArray = this.getValuesArray();
-    var cssWrapperClass= "buttonWrapper "+ ((this.verticalOrientation)? "vertical" : "horizontal-button");
+    var myArray = this.getValuesArray();
+    this.cachedArray = myArray;
+    var cssWrapperClass= "pentaho-toggle-button pentaho-toggle-button-up "+ ((this.verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
     selectHTML = "";
     var firstVal;
 
     var valIdx = this.valueAsId ? 1 : 0;
     var lblIdx = 1;
 
-	if (this.isMultiple == undefined) this.isMultiple = false;
+    if (this.isMultiple == undefined) this.isMultiple = false;
 
+    var ph = $("<div>");
+    ph.appendTo($("#" + this.htmlObject).empty());
     for (var i = 0, len = myArray.length; i < len; i++){
-	  var value = myArray[i][valIdx];
-      var label = myArray[i][lblIdx];
+      var value = myArray[i][valIdx],
+        label = myArray[i][lblIdx],
+        classes = cssWrapperClass + this.getExtraCss(i,len,this.verticalOrientation),
+        selector;
 
-      if(value != null) {
-        value = value.replace('"','&quot;' );
+      value = (value == null ? null : value.replace('"','&quot;' ));
+      label = (label == null ? null : label.replace('"','&quot;' ));
+
+      if(i == 0){
+        firstVal = value;
       }
-      if(label != null) {
-        label = label.replace('"','&quot;' );
+
+      selectHTML = "<div class='" + classes +"'><button name='" + this.name + "'>" + label + "</button  >" +"</div>";
+      selector = $(selectHTML);
+      // We wrap the click handler in a self-executing function so that we can capture 'i'.
+      var myself = this;
+      (function(index){ selector.click(function(){
+        MultiButtonComponent.prototype.clickButton(myself.htmlObject, myself.name, index, myself.isMultiple, myself.verticalOrientation);
+      });}(i));
+      ph.append(selector);
+      if (!(this.separator == undefined || this.separator == null || this.separator == "null") && i != myArray.length - 1) {
+        ph.append(this.separator);
       }
-
-      selectHTML += "<div class='"+cssWrapperClass+"' onclick='MultiButtonComponent.prototype.clickButton(\"" +
-      this.htmlObject + "\",\"" + this.name + "\"," + i + "," + this.isMultiple + ", "+this.verticalOrientation+")'><button name='" + this.name + "' value='" + value + "'> ";
-      selectHTML += label + "</button></div>" + ((this.separator == undefined || this.separator == null || this.separator == "null") ? "" : this.separator);
-
-      if (i == 0) firstVal = value;
     }
 
-    // update the placeholder
-    var ph = $("#" + this.htmlObject);
-    ph.html(selectHTML);
-
+    
     //default
     var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
     var isSelected = false;
 
     var currentValArray;
-    if(currentVal instanceof Array) {
+    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else {
-      currentValArray = currentVal.split("|");
+      currentValArray = currentVal.toString().split("|");
     }
 
     if(currentVal == null && this.parameter){
-			Dashboards.setParameter(this.parameter, firstVal);
-			currentVal = firstVal;
-	}
+    }
 
-	var foundDefault = false;
+    var foundDefault = false;
     this.clearSelections(this.htmlObject, this.name, this.verticalOrientation);
-	for (var i = 0; i < myArray.length; i++) {
+    for (var i = 0; i < myArray.length; i++) {
 
       isSelected = false;
       for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
@@ -1291,39 +1411,64 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
         MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation, true);
 
-		foundDefault = true;
+        foundDefault = true;
         if(!this.isMultiple) {
           break;
         }
-	  }
-	}
-	if(!foundDefault && !this.isMultiple && myArray.length > 0){
-	  //select first value
+      }
+    }
+    if(((!foundDefault && !this.isMultiple) || (!foundDefault && this.isMultiple && this.defaultIfEmpty)) && myArray.length > 0){
+      //select first value
+      if((currentVal == null || currentVal == "" || (typeof(currentVal) == "object" && currentVal.length == 0)) && this.parameter){
+        Dashboards.fireChange(this.parameter, (this.isMultiple) ? [firstVal] : firstVal);
+      }
+
       MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
-	}
+    }
+
+    // set up hovering
+    $(".pentaho-toggle-button").hover(function() {
+      $(this).addClass("pentaho-toggle-button-up-hovering");
+    }, function() {
+      $(this).removeClass("pentaho-toggle-button-up-hovering");
+    });
+    // set up hovering when inner button is hovered
+    $(".pentaho-toggle-button button").hover(function() {
+      $(this).parent().addClass("pentaho-toggle-button-up-hovering");
+    }, function() {
+      // don't remove it, since it's inside the outer div it will handle that
+    });
+
   },
 
   getValue: function(){
-		if(this.isMultiple){
-			var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
-			var a = new Array();
+    if(this.isMultiple){
+      var indexes = MultiButtonComponent.prototype.getSelectedIndex(this.name);
+      var a = new Array();
       // if it is not an array, handle that too
       if (indexes.length == undefined) {
         a.push(this.getValueByIdx(indexes));
       } else {
-			for(var i=0; i < indexes.length; i++){
-				a.push(this.getValueByIdx(indexes[i]));
-			}
+        for(var i=0; i < indexes.length; i++){
+          a.push(this.getValueByIdx(indexes[i]));
+        }
       }
-			return a;
-		}
-		else {
-		  return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
-		}
+      return a;
+    }
+    else {
+      return this.getValueByIdx(MultiButtonComponent.prototype.getSelectedIndex(this.name));
+    }
   },
 
   getValueByIdx: function(idx){
-    return $("#" + this.htmlObject + " button")[idx].value;
+    return this.cachedArray[idx][this.valueAsId ? 1 : 0];
+  },
+
+  getSelecetedCss: function(verticalOrientation) {
+    return "pentaho-toggle-button pentaho-toggle-button-down "+ ((verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
+  },
+  getUnselectedCss: function(verticalOrientation) {
+    return "pentaho-toggle-button pentaho-toggle-button-up "+ ((verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
   },
 
   getSelecetedCss: function(verticalOrientation) {
@@ -1340,34 +1485,58 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
     var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
 
-	var buttons = $("#" + htmlObject + " button");
+    var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
       if (this.indexes[name] == undefined) this.indexes[name] = [];
-	  else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
+      else if(!$.isArray(this.indexes[name])) this.indexes[name] = [this.indexes[name]];//!isMultiple->isMultiple
 
-	  var disable = false;
+      var disable = false;
       for (var i = 0; i < this.indexes[name].length; ++i) {
-	    if (this.indexes[name][i] == index) {
+        if (this.indexes[name][i] == index) {
           disable = true;
           this.indexes[name].splice(i, 1);
           break;
         }
       }
       if (disable){
-        buttons[index].parentNode.className = cssWrapperClass;
+        buttons[index].parentNode.className = cssWrapperClass + this.getExtraCss(index,buttons.length,verticalOrientation);
       } else {
-        buttons[index].parentNode.className = cssWrapperClassSelected;
+        buttons[index].parentNode.className = cssWrapperClassSelected + this.getExtraCss(index,buttons.length,verticalOrientation);
         this.indexes[name].push(index);
       }
-  	}
+    }
     else {//de-select old, select new
       this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
-      buttons[index].parentNode.className = cssWrapperClassSelected;
-	  }
-    if(!updateUIOnly){
-    this.callAjaxAfterRender(name);
+      buttons[index].parentNode.className = cssWrapperClassSelected + this.getExtraCss(index,buttons.length,verticalOrientation);
     }
+    if(!updateUIOnly){
+      this.callAjaxAfterRender(name);
+    }
+  },
+
+  clearSelections: function(htmlObject, name, verticalOrientation) {
+    var buttons = $("#" + htmlObject + " button");
+    var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
+    for(var i = 0; i < buttons.length; i++){
+      buttons[i].parentNode.className = cssWrapperClass + this.getExtraCss(i,buttons.length,verticalOrientation);
+    }
+
+    this.indexes[name] = [];
+  },
+
+  getExtraCss: function(index, count, verticalOrientation) {
+    var css = "";
+    if (index == 0 && count == 1) {
+      // both first & last
+      return " pentaho-toggle-button-single";
+    }
+    if (index == 0) {
+      css += " "+ ((verticalOrientation) ? " pentaho-toggle-button-vertical-first" : " pentaho-toggle-button-horizontal-first");
+    } else if (index == count-1) {
+      css += " "+ ((verticalOrientation) ? " pentaho-toggle-button-vertical-last" : " pentaho-toggle-button-horizontal-last");
+    }
+    return css;
   },
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
@@ -1380,24 +1549,45 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     this.indexes[name] = [];
   },
 
- //static MultiButtonComponent.prototype.getSelectedIndex
+  //static MultiButtonComponent.prototype.getSelectedIndex
   getSelectedIndex: function(name){
     return this.indexes[name];
   }
 });
 
 var AutocompleteBoxComponent = BaseComponent.extend({
-  update : function() {
-    QueryComponent.makeQuery(this);
-
-    var list = [];
-
-    for(p in this.result){
-      var obj = {};
-      obj.text = this.result[p][0];
-      list.push(obj);
+  
+  searchedWord : '',
+  result: [],
+  
+  queryServer : function(searchString){
+    
+    if(!this.parameters) this.parameters = [];
+    
+    if(this.searchParam){
+      this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
     }
-
+    else if (this.parameters.length > 0){
+      this.parameters[0][1] = this.getInnerParameterName();
+    }
+    
+    if(this.maxResults){
+      this.queryDefinition.pageSize = this.maxResults;
+    }
+    Dashboards.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
+    QueryComponent.makeQuery(this);
+  },
+  
+  getTextBoxValue: function(){
+    return this.textbox.val();
+  },
+  
+  getInnerParameterName : function(){
+    return this.parameter + '_textboxValue';
+  },
+  
+  update : function() {
+    
     // if reloadOnUpdate only update the list
     if(this.reloadOnUpdate&&this.autoBoxOpt!=undefined)
     {
@@ -1407,85 +1597,83 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     }
 
     $("#"+ this.htmlObject).empty();
+    
+    var initialValue = null;
+    if(this.parameter){
+      initialValue = Dashboards.getParameterValue(this.parameter);
+    }
 
     var myself = this;
+    
+    //init parameter
+    if(!Dashboards.getParameterValue(this.getInnerParameterName)){
+      Dashboards.setParameter(this.getInnerParameterName(), '' );
+    }
+
     var processChange = myself.processChange == undefined ? function(objName){
       Dashboards.processChange(objName);
     } : function(objName) {
       myself.processChange();
     };
     var processElementChange = myself.processElementChange == true ? function(value){
-      Dashboards.fireChange(myself.parameter+"_value",value);
+      Dashboards.fireChange(myself.parameter,value);
     } : undefined;
-    if(processElementChange!= undefined)eval(myself.parameter+'_value=""');
+    
+    //TODO:typo on minTextLength
+    if(this.minTextLenght == undefined){
+      this.minTextLenght = 0;
+    }
+    
     var opt = {
-      list: list,
+      list: function(){
+        var val = myself.textbox.val();
+        if(val.length >= myself.minTextLenght &&
+           !(val == '' //nothing to search
+             ||
+             val == myself.searchedWord
+             ||
+            ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
+             myself.searchedWord != '' && 
+             ((myself.matchType == "fromStart")? 
+                val.indexOf(myself.searchedWord) == 0 :
+                val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
+        {
+          myself.queryServer(val);
+          myself.searchedWord = val;
+        }
+        var list = [];
+        for(p in myself.result) if (myself.result.hasOwnProperty(p)){
+          var obj = {};
+          obj.text = myself.result[p][0];
+          list.push(obj);
+        }
+        return list;
+      },
       matchType: myself.matchType == undefined ? "fromStart" : myself.matchType, /*fromStart,all*/
       processElementChange:  processElementChange,
-      processChange: function(obj,obj_value) {
-        obj.value = obj_value;
+      processChange: function(obj,value) {
+        obj.value = value;
         processChange(obj.name);
       },
-      multiSellection: myself.selectMulti == undefined ? false : myself.selectMulti,
+      multiSelection: myself.selectMulti == undefined ? false : myself.selectMulti,
       checkValue: myself.checkValue == undefined ? true : myself.checkValue,
       minTextLenght: myself.minTextLenght == undefined ? 0 : myself.minTextLenght,
       scrollHeight: myself.scrollHeight,
       applyButton: myself.showApplyButton == undefined ? true : myself.showApplyButton,
       tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
       addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
+      externalApplyButtonId: myself.externalApplyButtonId,
+  //    selectedValues: initialValue,
       parent: myself
     };
 
-    var html_obj = $("#"+myself.name+"Object");
+
     this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
-
-    this.addFilter = function(value){
-
-      if(myself.autoBoxOpt.valueAlreadySelected(encode_prepare(value)))
-        return;
-
-      var childs = html_obj.children().children().children();
-
-      if(!opt.multiSellection){
-        for(i = childs.length;i > 1 ; ){
-          $(childs[i-1]).remove();
-          i= i -1;
-        }
-      }
-
-      if(opt.multiSellection && myself.autoBoxOpt.applyButton != false)
-        myself.autoBoxOpt.showApplyButton();
-
-      var li=$('<li class="bit-box"></li>').attr('id', myself.name + 'bit-0').text(encode_prepare(value));
-      li.append($('<a href="#" class="closebutton"></a>')
-        .bind('click', function(e) {
-          li.remove();
-          e.preventDefault();
-
-          if(!opt.multiSellection)
-            myself.autoBoxOpt.processAutoBoxChange();
-
-          if(myself.autoBoxOpt.applyButton != false)
-            myself.autoBoxOpt.showApplyButton();
-
-        })).append($('<input type="hidden" />').attr('name', myself.name).val(encode_prepare(value)));
-
-      this.autoBoxOpt.input.after(li);
-    };
-    //have an update function
-    if(myself.autoUpdateFunction)
-    {
-      //have timeout?
-      if(!myself.autoUpdateTimeout)
-      {
-        //no.... set 4 seconds
-        myself.autoUpdateTimeout=4000;
-      }
-      //call the update function every X seconds
-      //the update function is defined in the component by the developer
-      //should do a fire change in the function
-      setInterval(myself.autoUpdateFunction,myself.autoUpdateTimeout);
-    }
+    
+    //setInitialValue
+    this.autoBoxOpt.setInitialValue(this.htmlObject, initialValue, this.name);
+    
+    this.textbox = $('#' + this.htmlObject + ' input');
   },
   getValue : function() {
     return this.value;
@@ -1497,8 +1685,13 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
 var JpivotComponent = BaseComponent.extend({
   update : function() {
-    // Build IFrame and set url
-    var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\"no\" onload=\"this.style.height = this.contentWindow.document.body.offsetHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
+    //to be backwards compatible set default value for iframeScolling
+    // also added 20px 
+	if(this.iframeScrolling == undefined){
+		this.iframeScrolling="no";
+	}
+     // Build IFrame and set url
+    var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
     jpivotHTML += webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
 
     // Add args
@@ -1557,22 +1750,27 @@ if($.fn.dataTableExt != undefined){ // Ensure we load dataTables before this lin
 }
 
 var TableComponent = BaseComponent.extend({
+  
+  ph: undefined,
+  
   update : function() {
     var cd = this.chartDefinition;
     if (cd == undefined){
-      alert("Fatal - No chart definition passed");
+     Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
     cd["tableId"] = this.htmlObject + "Table";
 
     // Clear previous table
-    $("#"+this.htmlObject).empty();
+    this.ph = $("#"+this.htmlObject);
+    this.ph.empty();
     var myself = this;
     // remove drawCallback from the parameters, or
     // it'll be called before we have an actual table...
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
     this.queryState = new Query(croppedCd);
+    this.query = this.queryState; // for analogy with ccc component's name
     // make sure to clean sort options
     var sortBy = this.chartDefinition.sortBy || [],
       sortOptions = [];
@@ -1584,9 +1782,10 @@ var TableComponent = BaseComponent.extend({
     this.queryState.setSortBy(sortOptions);
 
     if(cd.paginateServerside) {
+      this.extraOptions = this.extraOptions || [];
       this.extraOptions.push(["bServerSide",true]);
       this.extraOptions.push(["bProcessing",true]);
-      this.queryState.setPageSize(parseInt(cd.displayLength));
+      this.queryState.setPageSize(parseInt(cd.displayLength || 10));
       this.queryState.setCallback(function(values) {
         changedValues = undefined;
         if((typeof(myself.postFetch)=='function')){
@@ -1600,16 +1799,17 @@ var TableComponent = BaseComponent.extend({
       this.queryState.setParameters(this.parameters);
       this.processTableComponentResponse();
     } else {
-    this.queryState.fetchData(this.parameters, function(values) {
-      changedValues = undefined;
-      if((typeof(myself.postFetch)=='function')){
-        changedValues = myself.postFetch(values);
-      }
-      if (changedValues != undefined) {
-        values = changedValues;
-      }
-      myself.processTableComponentResponse(values);
-    });
+      this.queryState.fetchData(this.parameters, function(values) {
+        changedValues = undefined;
+        if((typeof(myself.postFetch)=='function')){
+          changedValues = myself.postFetch(values);
+        }
+        if (changedValues != undefined) {
+          values = changedValues;
+        }
+        myself.rawData = values;
+        myself.processTableComponentResponse(values);
+      });
     }
   },
 
@@ -1648,6 +1848,7 @@ var TableComponent = BaseComponent.extend({
         };
       response.aaData = d.resultset;
       response.sEcho = p("sEcho");
+      myself.rawData = d;
       callback(response);
     });
   },
@@ -1656,9 +1857,20 @@ var TableComponent = BaseComponent.extend({
   {
     // General documentation here: http://datatables.net
     var myself = this,
-    cd = this.chartDefinition,
-    extraOptions = {},
-    dtData0 = TableComponent.getDataTableOptions(cd),
+      cd = this.chartDefinition,
+      extraOptions = {};
+   
+    myself.ph.trigger('cdfTableComponentProcessResponse');
+    
+   
+    // Set defaults for headers / types
+    if(typeof cd.colHeaders === "undefined" || cd.colHeaders.length == 0)
+      cd.colHeaders = json.metadata.map(function(i){return i.colName});
+
+    if(typeof cd.colTypes === "undefined" || cd.colTypes.length == 0)
+      cd.colTypes = json.metadata.map(function(i){return i.colType.toLowerCase()});
+
+    var dtData0 = TableComponent.getDataTableOptions(cd),
     dtData;
 
     // Build a default config from the standard options
@@ -1670,27 +1882,79 @@ var TableComponent = BaseComponent.extend({
 
     // Sparklines still applied to drawcallback
     var myself = this;
-    dtData.fnDrawCallback = function() {
-      $("#" + myself.htmlObject + " td.sparkline:visible").each(function(i){
-        var t = $(this);
-        t.sparkline(t.text().split(/,/));
-        t.removeClass("sparkline");
+    dtData.fnDrawCallback = function(dataTableSettings) {
+      var dataTable = this;
+      myself.ph.find("tbody tr").each(function(row,tr){
+          if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
+              return true;
+        $(tr).children("td").each(function(col,td){
+            var position = dataTable.fnGetPosition(td),
+                rowIdx = position[0],
+                colIdx = position[2];
+            var colType = cd.colTypes[colIdx];
+            var addIn = myself.getAddIn("colType",colType);
+            if (addIn) {
+              var state = {},
+                target = $(td),
+                results = myself.rawData;
+              if(!(target.parents('tbody').length)) {
+                return;
+              } else if (target.get(0).tagName != 'TD') {
+                target = target.closest('td');
+              }
+              state.rawData = results;
+              state.tableData = dataTable.fnGetData();
+              state.colIdx = colIdx;
+              state.rowIdx = rowIdx;
+              state.series = results.resultset[state.rowIdx][0];
+              state.category = results.metadata[state.colIdx].colName;
+              state.value =  results.resultset[state.rowIdx][state.colIdx];
+              if(cd.colFormats) {
+                state.colFormat = cd.colFormats[state.colIdx];
+              }
+              state.target = target;
+              addIn.call(td,state,myself.getAddInOptions("colType",addIn.getName()));
+            } else if(cd.colFormats) {
+              var format = cd.colFormats[position[1]],
+                value = myself.rawData.resultset[rowIdx][colIdx];
+              if (format && (typeof value != "undefined" && value !== null)) {
+                $(td).text(sprintf(format,value));
+              }
+            }
+        });
       });
 
+	  // Old urlTemplate code. This needs to be here for backward compatibility
+	  if(cd.urlTemplate != undefined){
+		  var td =$("#" + myself.htmlObject + " td:nth-child(1)"); 
+		  td.addClass('cdfClickable');
+		  td.bind("click", function(e){
+				  var regex = new RegExp("{"+cd.parameterName+"}","g");
+				  var f = cd.urlTemplate.replace(regex,$(this).text());
+				  eval(f);
+				  });
+	  }
+
       if(typeof cd.drawCallback == 'function'){
-        cd.drawCallback.apply(myself);
+        cd.drawCallback.apply(myself,arguments);
       }
 
     };
+
+
     /* We need to make sure we're getting data from the right place,
      * depending on whether we're using CDA
      */
-    if (cd.dataAccessId != undefined && json) {
+    if (json) {
       dtData.aaData = json.resultset;
-    } else {
-      dtData.aaData = json;
-    }
-
+    } 
+    
+    ////else {
+    //  dtData.aaData = json;
+  //  }
+  
+  
+  
     /* If we're doing server-side pagination, we need to set up the server callback
      */
     if (dtData.bServerSide) {
@@ -1698,39 +1962,97 @@ var TableComponent = BaseComponent.extend({
         myself.pagingCallback(u,p,c,this);
       };
     }
-    $("#"+this.htmlObject).html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
+    myself.ph.html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
     // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
-    this.dataTable = $("#"+this.htmlObject+'Table').dataTable( dtData );
+    this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
+  
+    // We'll create an Array to keep track of the open expandable rows.
+    this.dataTable.anOpen = [];
 
 
-    // Apply the formats
-    if(cd.colFormats != undefined){
-      $.each(cd.colFormats,function(colNo,val){
-        if(val != null){
-          var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child("+ (colNo + 1) +")");
-          td.each(function(){
-            if ($(this).text() != "null" ) {
-              $(this).text( sprintf( val, $(this).text() ) );
-            } else {
-              $(this).text('0');
-            }
-          });
+    myself.ph.find ('table').bind('click',function(e) {
+      if (typeof cd.clickAction === 'function' || myself.expandOnClick) { 
+        var state = {},
+          target = $(e.target),
+          results = myself.queryState.lastResults();
+        if(!(target.parents('tbody').length)) {
+          return;
+        } else if (target.get(0).tagName != 'TD') {
+          target = target.closest('td');
         }
-      });
-    }
+        var position = myself.dataTable.fnGetPosition(target.get(0));
+        state.rawData = myself.rawData;
+        state.tableData = myself.dataTable.fnGetData();
+        state.colIdx = position[1];
+        state.rowIdx = position[0];
+        state.series = results.resultset[state.rowIdx][0];
+        state.category = results.metadata[state.colIdx].colName;
+        state.value =  results.resultset[state.rowIdx][state.colIdx];
+        state.target = target;
+        state.colFormat = cd.colFormats[state.colIdx]; 
+        
+        if (myself.expandOnClick) {
+        	myself.handleExpandOnClick(state);
+        }
+        if (cd.clickAction)
+	        cd.clickAction.call(myself,state);
+      }
+    });
+    myself.ph.trigger('cdfTableComponentFinishRendering');
+  },
 
-    if(cd.urlTemplate != undefined){
-      var td =$("#" + myself.htmlObject + " td:nth-child(1)");
-      var td = $(myself.dataTable.fnGetNodes()).find("td:nth-child(1)");
-      td.addClass('cdfClickable');
-      td.bind("click", function(e){
-        var regex = new RegExp("{"+cd.parameterName+"}","g");
-        var f = cd.urlTemplate.replace(regex,$(this).text());
-        eval(f);
-      });
-    }
+   handleExpandOnClick:     function(event){     
+        var myself = this,
+            detailContainerObj = myself.expandContainerObject,
+            activeclass = "expandingClass";
+        if(typeof activeclass === 'undefined'){
+          activeclass = "activeRow";
+        }
+        var obj = event.target.closest("tr");
+            var a = event.target.closest("a");
+            if (a.hasClass ('info')){
+                    return;
+            }else{
+                    var row = obj.get(0);
+                   
+                    var value = event.series;
+                    var htmlContent = $("#" + detailContainerObj).html();
+                   
+                    var anOpen = myself.dataTable.anOpen;
+                    var i = $.inArray( row, anOpen );
+                   
+                    if( obj.hasClass(activeclass) ){
+                      obj.removeClass(activeclass);
+                      myself.dataTable.fnClose( row );
+                      anOpen.splice(i,1);
+                    }
+                    else{
+                            // Closes all open expandable rows .
+                            for ( var j=0; j < anOpen.length; j++ ){
+                                $(anOpen[j]).removeClass(activeclass);
+                                myself.dataTable.fnClose( anOpen[j] );
+                                anOpen.splice(j ,1);
+                            }
+                            
+                            //Closes previously opened expandable row.
+                           /* var prev = obj.siblings('.'+activeclass).each(function(i,d){
+                                    var curr = $(d);
+                                    curr.removeClass(activeclass);
+                                    myself.dataTable.fnClose( d );
+                            });*/
 
-  }
+                            obj.addClass(activeclass);
+                            
+                            //Read parameters and fire changes
+                            var results = myself.queryState.lastResults();
+                            $(myself.expandParameters).each(function f(i, elt) {                            
+                            	Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);                            
+                            });
+                            myself.dataTable.fnOpen( row, htmlContent, activeclass );
+                            anOpen.push( row );
+                    };
+            };
+    }
 },
 {
   getDataTableOptions : function(options) {
@@ -1763,15 +2085,11 @@ var TableComponent = BaseComponent.extend({
       if(options.colTypes!=undefined){
         $.each(options.colTypes,function(i,val){
           var col = dtData.aoColumns[i];
+          // Specific case: hidden cols
+          if(val == "hidden") col.bVisible=false;
           col.sClass+=" "+val;
+          col.sType=val;
 
-          if(val=='sparkline'){
-            col.bSearchable=false;
-            col.bSortable=false;
-          }
-          else{
-            col.sType=val;
-          }
         })
       };  // colTypes
       if(options.colFormats!=undefined){
@@ -1825,7 +2143,7 @@ var CommentsComponent = BaseComponent.extend({
     }
 
     if (this.page == undefined){
-      alert("Fatal - no page definition passed");
+     Dashboards.log("Fatal - no page definition passed","error");
       return;
     }
 
@@ -2002,64 +2320,51 @@ var QueryComponent = BaseComponent.extend({
   visible: false,
   update : function() {
     QueryComponent.makeQuery(this);
+  },
+  warnOnce: function() {
+  Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
+    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" + 
+    " for more information");
+    delete(this.warnOnce);
   }
 },
 {
   makeQuery: function(object){
+
+    if (this.warnOnce) {this.warnOnce();}
     var cd = object.queryDefinition;
     if (cd == undefined){
-      alert("Fatal - No query definition passed");
+     Dashboards.log("Fatal - No query definition passed","error");
       return;
     }
     var query = new Query(cd);
     query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
-      object.result = values.resultset != undefined ? values.resultset: values;
-      if (typeof values.resultset != "undefined"){
-        object.metadata = values.metadata;
-      }
+
       if (object.resultvar != undefined){
         Dashboards.setParameter(object.resultvar, object.result);
       }
       changedValues = undefined;
+      object.metadata = values.metadata;
+      object.result = values.resultset != undefined ? values.resultset: values;
+      object.queryInfo = values.queryInfo;
       if((typeof(object.postFetch)=='function')){
         changedValues = object.postFetch(values);
       }
       if (changedValues != undefined){
         values = changedValues;
         // (Call this again after postFetch)
+
       if (object.resultvar != undefined){
         Dashboards.setParameter(object.resultvar, object.result);
       }
-
+      object.result = values.resultset != undefined ? values.resultset: values;
+      if (typeof values.resultset != "undefined"){
+        object.metadata = values.metadata;
+        object.queryInfo = values.queryInfo;
       }
     });
-    //TODO: Transition to Query object still under test
-    
-    //Dashboards.fetchData(cd, object.parameters, function(values) {
-    //  // We need to make sure we're getting data from the right place,
-    //  // depending on whether we're using CDA
-    //  object.result = values.resultset != undefined ? values.resultset: values;
-    //  if (typeof values.resultset != "undefined"){
-    //    object.metadata = values.metadata;
-    //  }
-    //  if (object.resultvar != undefined){
-    //    Dashboards.setParameter(object.resultvar, object.result);
-    //  }
-    //  changedValues = undefined;
-    //  if((typeof(object.postFetch)=='function')){
-    //    changedValues = object.postFetch(values);
-    //  }
-    //  if (changedValues != undefined){
-    //    values = changedValues;
-    //    // (Call this again after postFetch)
-    //    if (object.resultvar != undefined){
-    //      Dashboards.setParameter(object.resultvar, object.result);
-    //    }
-    //
-    //  }
-    //})
 
   }
 }
@@ -2128,136 +2433,164 @@ var ExecuteXactionComponent = BaseComponent.extend({
 });
 
 var ButtonComponent = BaseComponent.extend({
-		update : function() {
-			$("<button/>").text(this.label).unbind("click").bind("click", this.expression).button().appendTo($("#"+ this.htmlObject).empty());
-		}
-	});
+  update : function() {
+    var myself = this;
+    var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
+        return myself.expression.apply(myself,arguments);
+    });
+    if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
+      b.button();
+    b.appendTo($("#"+ this.htmlObject).empty());
+  }
+});
 
 
 
 var PrptComponent = BaseComponent.extend({
 
-		update: function(){
+  update: function(){
 
-			this.clear();
+    this.clear();
 
-			var options = this.getOptions();
+    var options = this.getOptions();
     //options.showParameters = false;
 
-			if(options["dashboard-mode"]){
-				var url = webAppPath + '/content/reporting';
-				var myself=this;
+    if(options["dashboard-mode"]){
+      var url = webAppPath + '/content/reporting';
+      var myself=this;
       $.ajax({
         url: url,
         data: options,
         dataType:"html",
         success: function(json){
-						$("#"+myself.htmlObject).html(json);
+          $("#"+myself.htmlObject).html(json);
         }
       });
-			}
-			else{
-				var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
-                                var encodeArray = function(k,v) {
-                                    var arr = [];
-                                    for (var i = 0; i < v.length;i++) {
-                                        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-                                    }
-                                    return arr;
-                                };
-				var a=[];
-	        		$.each(options,function(k,v){
-                                        if (typeof v == 'object') {
-                                            a.push.apply(a,encodeArray(k,v));
-                                        } else {
-					    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-                                        }
-				});
+    }
+    else{
+	var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
+      var encodeArray = function(k,v) {
+        var arr = [];
+        for (var i = 0; i < v.length;i++) {
+          arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+        }
+        return arr;
+      };
+      var a=[];
+      $.each(options,function(k,v){
+        if (typeof v == 'object') {
+          a.push.apply(a,encodeArray(k,v));
+        } else {
+          a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+        }
+      });
+      /*
+       * We really shouldn't mess around with the CDF running call counter,
+       * but if we don't do so in this case, the report will count as "finished"
+       * even though nothing has been loaded into the iframe. We'll increment it
+       * here,decrement it again from the iframe's onload event.
+       */
+      var myself = this;
+      if(!this.loading){
+        this.loading = true;
+        Dashboards.incrementRunningCalls();
+      }
+      var iframe = $("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' />");
+      iframe.load(function(){
+        /* This is going to get called several times with "about:blank"-style pages.
+         * We're only interested in the one call that happens once the page is _really_
+         * loaded -- which means an actual document body.
+         */
+        if(this.contentWindow.document.body.innerHTML){
+          myself.loading = false;
+          Dashboards.decrementRunningCalls();
+        }
+      });
+      $("#"+this.htmlObject).empty().append(iframe);
+      iframe[0].contentWindow.location = url + "?"+ a.join('&');
+    }
+  },
 
-				$("#"+this.htmlObject).html("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' src='" + url + "?"+ a.join('&') +"' />");
-			}
-		},
+  getOptions: function(){
 
-		getOptions: function(){
+    var options = {
+      paginate : this.paginate || false,
+      showParameters: this.showParameters || false,
+      autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
+      "dashboard-mode": this.iframe==undefined?false:!this.iframe,
+    };
+    if(this.paginate){
 
-			var options = {
-				paginate : this.paginate || false,
-				showParameters: this.showParameters || false,
-				autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
-				"dashboard-mode": this.iframe==undefined?false:!this.iframe,
-			};
-			if(this.paginate){
+      options["output-target"] = "table/html;page-mode=page";
+    } else {
+      options["output-target"] = "table/html;page-mode=stream";
+    }
 
-				options["output-target"] = "table/html;page-mode=page";
-			} else {
-				options["output-target"] = "table/html;page-mode=stream";
-			}
+    // process params and update options
+    $.map(this.parameters,function(k){
+      options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+    });
 
-			// process params and update options
-			$.map(this.parameters,function(k){
-				options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
-			});
+    options["output-type"] = "";
 
-			options["output-type"] = "";
+    return options;
 
-			return options;
-
-		}
-	});
+  }
+});
 
 
 var ExecutePrptComponent = PrptComponent.extend({
-		visible: false,
+  visible: false,
 
-		update : function() {
-			// 2 modes of working; if it's a div, create a button inside it
-			var myself = this;
-			var o = $("#"+ this.htmlObject);
-			if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
-				// create a button
-				o = $("<button/>").appendTo(o.empty());
-				if (o[0].tagName=="DIV") o.wrap("<span/>");
-				if (this.label != undefined) o.text(this.label);
-				o.button();
-			}
-			o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-			o.bind("click", function(){
-					var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
-					if(success) {
-						myself.executePrptComponent();
-					}
-					typeof(myself.postChange)=='undefined' ? true : myself.postChange();
-				});
-		},
+  update : function() {
+    // 2 modes of working; if it's a div, create a button inside it
+    var myself = this;
+    var o = $("#"+ this.htmlObject);
+    if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
+      // create a button
+      o = $("<button/>").appendTo(o.empty());
+      if (o[0].tagName=="DIV") o.wrap("<span/>");
+      if (this.label != undefined) o.text(this.label);
+      o.button();
+    }
+    o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+    o.bind("click", function(){
+      var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
+      if(success) {
+        myself.executePrptComponent();
+      }
+      typeof(myself.postChange)=='undefined' ? true : myself.postChange();
+    });
+  },
 
-		executePrptComponent: function(){
+  executePrptComponent: function(){
 
-			var options = this.getOptions();
-			var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
-			var a=[];
-      var encodeArray = function(k,v) {
-          var arr = [];
-          for (var i = 0; i < v.length;i++) {
-              arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-          }
-          return arr;
-      };
-			$.each(options,function(k,v){
+    var options = this.getOptions();
+	var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
+    var a=[];
+    var encodeArray = function(k,v) {
+      var arr = [];
+      for (var i = 0; i < v.length;i++) {
+        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+      }
+      return arr;
+    };
+    $.each(options,function(k,v){
           if ((v != null) && (typeof v == 'object')) {
-              a.push.apply(a,encodeArray(k,v));
-          } else {
-				    a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-          }
-				});
-			$.fancybox({
-					type:"iframe",
-					href: url + "?"+ a.join('&') ,
-					width: $(window).width(),
-					height:$(window).height() - 50
-				});
+        a.push.apply(a,encodeArray(k,v));
+      } else {
+        a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+      }
+    });
+    $.fancybox({
+      type:"iframe",
+      href: url + "?"+ a.join('&') ,
+      width: $(window).width(),
+      height:$(window).height() - 50
+    });
 
-		}
-	}
+  }
+}
 );
 
 var AnalyzerComponent = BaseComponent.extend({
@@ -2270,15 +2603,17 @@ var AnalyzerComponent = BaseComponent.extend({
     var url = webAppPath + '/content/analyzer/';
     var myself=this;
 
-    //create iFrame and place analyzer inside
+    // enable editing the view?
     this.viewOnly?url+='viewer':url+='editor';
-    var height = this.height? this.height: "480px";
 
-    var iFrameHTML = generateIframe(this.htmlObject,url,options,height,"100%");
+    var height = this.height? this.height: "480px";
+    var width = this.width? this.width: "100%";
+
+    var iFrameHTML = this.generateIframe(this.htmlObject,url,options,height,width);
     $("#"+this.htmlObject).html(iFrameHTML);
   },
 
-  getOptions: function(){
+  getOptions: function() {
                             
     var options = {
       solution : this.solution,
@@ -2286,8 +2621,7 @@ var AnalyzerComponent = BaseComponent.extend({
       action: this.action,
       command: this.command == undefined? "open": this.command,
       showFieldList: this.showFieldList == undefined? false: this.showFieldList,
-      frameless: this.frameless,
-      edit: this.edit
+      frameless: this.frameless
     };
 
     // process params and update options
@@ -2296,39 +2630,26 @@ var AnalyzerComponent = BaseComponent.extend({
     });
             
     return options;
-  }
+  },
+  
+  generateIframe: function(htmlObject,url,parameters,height,width) {
+	  var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
+	  ' frameborder="0"' +
+	  ' height="' + height + '"' +
+	  ' width="' + width + '"' +
+	  ' src="' + url + "?";
+
+	  iFrameHTML += $.param(parameters, true);
+	  iFrameHTML += "\"></iframe>";
+	       
+	  return iFrameHTML;
+	}
 });
 
-function generateIframe(htmlObject,url,parameters,height,width){
-  var iFrameHTML = "<iframe id=\"iframe_"+ htmlObject + "\"" +
-  " frameborder=\"0\"" +
-  " height=\""+height+"\"" +
-  " width=\""+width+"\"" +
-  " src=\""+ url +"?";
-
-  var paramCounter = 0;
-    
-  // Add args
-  jQuery.each(parameters, function(i, val) {
-    if(typeof val != "undefined"){
-      var arg = "";
-      if(paramCounter++ != 0)
-        arg += "&";
-      arg += encodeURIComponent(i) + "=";
-      iFrameHTML += arg + encodeURIComponent(val);
-    };
-  });
-
-  // Close IFrame
-  iFrameHTML += "\"></iframe>";
-       
-  return iFrameHTML;
-};
-
 var FreeformComponent = BaseComponent.extend({
-		update : function() {
-			var myself = this;
-			this.customfunction(this.parameters || []);
-		}
-	})
+  update : function() {
+    var myself = this;
+    this.customfunction(this.parameters || []);
+  }
+})
 

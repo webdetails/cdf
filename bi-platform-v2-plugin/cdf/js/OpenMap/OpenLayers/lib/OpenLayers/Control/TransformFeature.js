@@ -1,6 +1,7 @@
-/* Copyright (c) 2009 MetaCarta, Inc., published under the Clear BSD license.
- * See http://svn.openlayers.org/trunk/openlayers/license.txt 
- * for the full text of the license. */
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
 
 
 /**
@@ -47,7 +48,7 @@ OpenLayers.Control.TransformFeature = OpenLayers.Class(OpenLayers.Control, {
      *      <OpenLayers.Geometry.Point> object with the new center of the
      *      transformed feature, the others are Floats with the scale, ratio
      *      or rotation change of the feature since the last transformation.
-     *  - *transformcomplete" Triggered after dragging. Listeners receive
+     *  - *transformcomplete* Triggered after dragging. Listeners receive
      *      an event object with the transformed *feature*.
      */
     EVENT_TYPES: ["beforesetfeature", "setfeature", "beforetransform",
@@ -231,6 +232,9 @@ OpenLayers.Control.TransformFeature = OpenLayers.Class(OpenLayers.Control, {
             this.dragControl.deactivate();
             deactivated = true;
         }
+        if (deactivated) {
+        	this.unsetFeature();
+        }
         return deactivated;
     },
     
@@ -264,13 +268,15 @@ OpenLayers.Control.TransformFeature = OpenLayers.Class(OpenLayers.Control, {
             scale: 1,
             ratio: 1
         });
-        var evt = {feature: feature};
-        
+
         var oldRotation = this.rotation;
         var oldCenter = this.center;
         OpenLayers.Util.extend(this, initialParams);
 
-        if(this.events.triggerEvent("beforesetfeature", evt) === false) {
+        var cont = this.events.triggerEvent("beforesetfeature",
+            {feature: feature}
+        );
+        if (cont === false) {
             return;
         }
 
@@ -302,7 +308,23 @@ OpenLayers.Control.TransformFeature = OpenLayers.Class(OpenLayers.Control, {
         
         delete this._setfeature;
 
-        this.events.triggerEvent("setfeature", evt);
+        this.events.triggerEvent("setfeature", {feature: feature});
+    },
+    
+    /**
+     * APIMethod: unsetFeature
+     * Remove the transformation box off any feature.
+     * If the control is active, it will be deactivated first.
+     */
+    unsetFeature: function() {
+    	if (this.active) {
+    		this.deactivate();
+    	} else {
+	    	this.feature = null;
+	    	this.rotation = 0;
+	    	this.scale = 1;
+	    	this.ratio = 1;
+    	}
     },
     
     /**
@@ -479,7 +501,6 @@ OpenLayers.Control.TransformFeature = OpenLayers.Class(OpenLayers.Control, {
             },
             // transform while dragging
             onDrag: function(feature, pixel) {
-                var geom = feature.geometry;
                 if(feature === control.box) {
                     control.transformFeature({center: control.center});
                     control.drawHandles();
@@ -500,7 +521,7 @@ OpenLayers.Control.TransformFeature = OpenLayers.Class(OpenLayers.Control, {
             },
             onComplete: function(feature, pixel) {
                 control.events.triggerEvent("transformcomplete",
-                    {feature: feature});
+                    {feature: control.feature});
             }
         });
     },
@@ -567,7 +588,7 @@ OpenLayers.Control.TransformFeature = OpenLayers.Class(OpenLayers.Control, {
             geom._handle = null;
             geom._rotationHandle && geom._rotationHandle.destroy();
             geom._rotationHandle = null;
-        };
+        }
         this.box.destroy();
         this.box = null;
         this.layer = null;
