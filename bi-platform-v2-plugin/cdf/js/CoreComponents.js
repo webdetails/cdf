@@ -990,12 +990,10 @@ var TextInputComponent = BaseComponent.extend({
   update: function(){
     selectHTML = "<input";
     selectHTML += " type=test id='" + this.name + "' name='" + this.name +
-    "' + value='" +
-    Dashboards.getParameterValue(this.parameter) +
     (this.charWidth ? ("' + size='" + this.charWidth) : "") +
     (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
     "'>";
-    $("#" + this.htmlObject).html(selectHTML);
+    $("#" + this.htmlObject).append($(selectHTML).val(Dashboards.getParameterValue(this.parameter)));
     var myself = this;
     $("#" + this.name).change(function(){
       Dashboards.processChange(myself.name);
