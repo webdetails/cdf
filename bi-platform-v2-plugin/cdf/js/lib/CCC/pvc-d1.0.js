@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120411
+//VERSION TRUNK-20120215-patched-20120508
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -4103,6 +4103,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:  options.xAxisDomainRoundMode,
                 desiredTickCount: options.xAxisDesiredTickCount,
                 minorTicks:  options.xAxisMinorTicks,
+                overlappedLabelsHide: options.xAxisOverlappedLabelsHide,
+                overlappedLabelsMaxPct: options.xAxisOverlappedLabelsMaxPct,
                 ordinalDimensionName: this.getAxisOrdinalDimension('x'),
                 useCompositeAxis: options.useCompositeAxis,
                 font: options.axisLabelFont,
@@ -4131,6 +4133,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 endLine:  options.yAxisEndLine,
                 domainRoundMode:  options.yAxisDomainRoundMode,
                 desiredTickCount: options.yAxisDesiredTickCount,
+                overlappedLabelsHide: options.yAxisOverlappedLabelsHide,
+                overlappedLabelsMaxPct: options.yAxisOverlappedLabelsMaxPct,
                 minorTicks:       options.yAxisMinorTicks,
                 ordinalDimensionName: this.getAxisOrdinalDimension('y'),
                 useCompositeAxis: options.useCompositeAxis,
@@ -4713,12 +4717,17 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         xAxisClickAction: null,
         xAxisDoubleClickAction: null,
         
+        xAxisOverlappedLabelsHide: false,
+        xAxisOverlappedLabelsMaxPct: 0.1,
+                
         yAxisPosition: "left",
         yAxisSize: 50,
         yAxisFullGrid: false,
         yAxisEndLine:  false,
         yAxisDomainRoundMode: 'none',
         yAxisDesiredTickCount: null,
+        yAxisOverlappedLabelsHide: false,
+        yAxisOverlappedLabelsMaxPct: 0.1,
         yAxisMinorTicks:  true,
         yAxisClickAction: null,
         yAxisDoubleClickAction: null,
@@ -5238,6 +5247,9 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     desiredTickCount: null,
     minorTicks:       true,
     
+    overlappedLabelsHide: false,
+    overlappedLabelsMaxPct: 0.1,
+    
     clickAction: null,
     doubleClickAction: null,
 
@@ -5308,6 +5320,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             rMax  = this.pvScale.max,
             rSize = rMax - rMin;
         
+        this._rSize = rSize;
+        
         this.pvRule = this.pvPanel.add(pv.Rule)
                 .zOrder(30) // see pvc.js
                 .strokeStyle('black')
@@ -5351,7 +5365,23 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
             ordinalDimension  = this.chart.dataEngine.getDimension(this.ordinalDimensionName),
-            ticks =  ordinalDimension.getVisibleElements();
+            ticks =  ordinalDimension.getVisibleElements(),
+            itemCount = ticks.length,
+            includeModulo;
+        
+        if(this.overlappedLabelsHide && itemCount > 0 && this._rSize > 0) {
+            var overlapFactor = this.overlappedLabelsMaxPct || 0.1;
+            var textHeight = 10 * (1 - overlapFactor); // TODO: no text height function
+            includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
+            
+            //pvc.log({overlapFactor: overlapFactor, itemCount: itemCount, textHeight: textHeight, Size: this._rSize, modulo: (itemCount * textHeight) / this._rSize, itemSpan: itemCount * textHeight, itemAvailSpace: this._rSize / itemCount});
+            
+            if(pvc.debug && includeModulo > 1) {
+                pvc.log("Hiding every " + includeModulo + " labels in axis " + this.panelName);
+            }
+        } else {
+            includeModulo = 1;
+        }
         
         // Ordinal ticks correspond to ordinal datums.
         // Ordinal ticks are drawn at the center of each band,
@@ -5375,7 +5405,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
             .zOrder(40) // see pvc.js
             .textAlign(align)
-            //.textBaseline("middle")
+            .visible(function() { return (this.index % includeModulo) === 0; })
             .text(function(e){return e.label;})
             .font("9px sans-serif");
         
@@ -8911,7 +8941,7 @@ pvc.WaterfallChartPanel = pvc.CategoricalAbstractPanel.extend({
             this.pvBarLabel = this.pvBar
                 .anchor(this.valuesAnchor || 'center')
                 .add(pv.Label)
-                .bottom(0)
+                //.bottom(0) // PATCH: valuesAnchor top
                 .visible(function(d) { //no space for text otherwise
                     var v;
                     if(myself.percentageNormalized){

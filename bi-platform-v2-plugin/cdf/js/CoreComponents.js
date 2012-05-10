@@ -1891,6 +1891,16 @@ var TableComponent = BaseComponent.extend({
         });
       });
 
+	  // Old urlTemplate code. This needs to be here for backward compatibility
+	  if(cd.urlTemplate != undefined){
+		  var td =$("#" + myself.htmlObject + " td:nth-child(1)"); 
+		  td.addClass('cdfClickable');
+		  td.bind("click", function(e){
+				  var regex = new RegExp("{"+cd.parameterName+"}","g");
+				  var f = cd.urlTemplate.replace(regex,$(this).text());
+				  eval(f);
+				  });
+	  }
 
       if(typeof cd.drawCallback == 'function'){
         cd.drawCallback.apply(myself,arguments);
