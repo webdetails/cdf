@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,7 +62,12 @@ public class DashboardContext {
                     fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
             Calendar cal = Calendar.getInstance();
-            context.put("queryData", processAutoIncludes(fullPath));
+            
+            Document config = getConfigFile();
+            
+            context.put("queryData", processAutoIncludes(fullPath, config));
+            context.put("sessionAttributes", processSessionAttributes(config));
+            
             context.put("serverLocalDate", cal.getTimeInMillis());
             context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
             context.put("user", userSession.getName());
@@ -98,7 +104,29 @@ public class DashboardContext {
         }
     }
 
-    private JSONObject processAutoIncludes(String dashboardPath) {
+    private JSONObject processSessionAttributes(Document config) {
+      
+      JSONObject result = new JSONObject();
+      
+      @SuppressWarnings("unchecked")
+      List<Node> attributes = config.selectNodes("//sessionattributes/attribute");      
+      for(Node attribute: attributes){
+        
+        String name = attribute.getText();
+        String key = XmlDom4JHelper.getNodeText("@name", attribute);
+        if(key == null) key = name;
+        
+        try {
+          result.put(key, userSession.getAttribute(name));
+        } catch (JSONException e) {
+          logger.error(e);
+        }
+      }
+      
+      return result;
+    }
+
+    private JSONObject processAutoIncludes(String dashboardPath, Document config) {
 
         JSONObject queries = new JSONObject();
         /* Bail out immediately if CDA isn' available */
@@ -106,7 +134,7 @@ public class DashboardContext {
             logger.warn("Couldn't find CDA. Skipping auto-includes");
             return queries;
         }
-        Document config = getConfigFile();
+//        Document config = getConfigFile();
         logger.info("[Timing] Getting solution repo for auto-includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         Document solution = getRepository();
         List<Node> includes, cdas;
