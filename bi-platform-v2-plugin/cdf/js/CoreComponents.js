@@ -1045,6 +1045,8 @@ var DateInputComponent = BaseComponent.extend({
       // Add JQuery DatePicker standard localization support only if the dashboard is localized
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
         $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+	// force the component to stick with the standard date format
+        $("#" + myself.htmlObject + " input").datepicker('option', 'dateFormat', 'yy-mm-dd'); 
       }
     });
   },
