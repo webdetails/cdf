@@ -3,6 +3,7 @@ package org.pentaho.test.cdf;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +17,17 @@ import org.junit.Test;
 import org.pentaho.cdf.XcdfRenderer;
 import org.pentaho.platform.api.engine.IPentahoDefinableObjectFactory;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
+import org.pentaho.platform.api.engine.IUserRoleListService;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.pentaho.platform.engine.core.system.StandaloneSession;
+import org.pentaho.platform.engine.security.userrole.ws.MockUserRoleListService;
 import org.pentaho.platform.repository2.ClientRepositoryPaths;
+import org.pentaho.platform.repository2.unified.fileio.RepositoryFileOutputStream;
 import org.pentaho.platform.repository2.unified.fileio.RepositoryFileWriter;
+import org.pentaho.platform.repository2.unified.fs.FileSystemBackedUnifiedRepository;
 import org.pentaho.test.platform.engine.core.MicroPlatform;
 
 
@@ -29,31 +35,28 @@ public class XcdfRendererTest {
 
 
   private static MicroPlatform mp = new MicroPlatform();
-
-  private static MicroPlatform.RepositoryModule repo;
   
   private String publicDir = ClientRepositoryPaths.getPublicFolderPath();
 
   @BeforeClass
   public static void beforeClass() throws Exception {
+    
     mp.define(IPluginResourceLoader.class, MockPluginResourceLoader.class, IPentahoDefinableObjectFactory.Scope.GLOBAL);
-    repo = mp.getRepositoryModule();
-    repo.up();
-  }
+    mp.define(IUnifiedRepository.class, FileSystemBackedUnifiedRepository.class);
+    mp.define(IUserRoleListService.class, MockUserRoleListService.class);
+}
 
   @AfterClass
   public static void afterClass() {
-    repo.down();
   }
 
   @Before
   public void beforeTest() {
-    repo.login("joe", "acme");
+    PentahoSessionHolder.setSession(new StandaloneSession());
   }
 
   @After
   public void afterTest() {
-    repo.logout();
   }
 
   @Test
@@ -70,7 +73,8 @@ public class XcdfRendererTest {
     resourceLoader.setRootDir(pluginFolder);
     
     String filePath = publicDir + "/test-file1.xcdf";
-    RepositoryFileWriter writer = new RepositoryFileWriter(filePath, "UTF-8");
+    //RepositoryFileWriter writer = new RepositoryFileWriter(filePath, "UTF-8");
+    OutputStreamWriter writer = new OutputStreamWriter(new RepositoryFileOutputStream(filePath, false, true, unifiedRepository));
     writer.write("<cdf><title>Start Here</title><author>Webdetails</author><description>Start Here</description><icon></icon><template>test-file2.html</template></cdf>");
     writer.close();
     RepositoryFile xcdfFile = unifiedRepository.getFile(filePath);
