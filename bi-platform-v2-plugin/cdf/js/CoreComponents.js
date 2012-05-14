@@ -231,7 +231,7 @@ var XactionComponent = BaseComponent.extend({
         " height=\"100%\"" +
         " width=\"100%\" />";        
         var iframe = $(xactionIFrameHTML);                
-        var url += webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
+        var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
 
         // Add args
         var p = new Array(this.parameters.length);
