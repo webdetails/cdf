@@ -227,10 +227,10 @@ var XactionComponent = BaseComponent.extend({
 
       } else {
         var xactionIFrameHTML = "<iframe id=\"iframe_"+ this.htmlObject + "\"" +
-        " frameborder=\"0\"" +
-        " height=\"100%\"" +
-        " width=\"100%\" />";        
-        var iframe = $(xactionIFrameHTML);                
+            " frameborder=\"0\"" +
+            " height=\"100%\"" +
+            " width=\"100%\" />";
+        var iframe = $(xactionIFrameHTML);
         var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
 
         // Add args
@@ -262,7 +262,7 @@ var XactionComponent = BaseComponent.extend({
         iframe[0].contentWindow.location = url;
       }
     } catch (e) {
-    // don't cause the rest of CDF to fail if xaction component fails for whatever reason
+      // don't cause the rest of CDF to fail if xaction component fails for whatever reason
     }
   }
 });
@@ -272,7 +272,7 @@ var SelectBaseComponent = BaseComponent.extend({
   update: function () {
     var ph = $("#" + this.htmlObject);
     var myArray = this.getValuesArray(),
-    isMultiple = false;
+        isMultiple = false;
 
     selectHTML = "<select";
 
@@ -294,8 +294,8 @@ var SelectBaseComponent = BaseComponent.extend({
     }
     selectHTML += ">";
     var firstVal,
-    currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
-    currentIsValid = false;
+        currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
+        currentIsValid = false;
 
     var hasCurrentVal = typeof currentVal != undefined;
     //var vid = this.valueAsId == false ? false : true;
@@ -348,11 +348,11 @@ var SelectBaseComponent = BaseComponent.extend({
     } else {
       $("select", ph).val(currentValArray);
     }
-    
-    if( this.externalPlugin == "chosen" ){ 
-      ph.find("select.chzn-select").chosen(); 
+
+    if( this.externalPlugin == "chosen" ){
+      ph.find("select.chzn-select").chosen();
     }
-    
+
     var myself = this;
     $("select", ph).change(function () {
       Dashboards.processChange(myself.name);
@@ -369,10 +369,10 @@ var SelectComponent = SelectBaseComponent.extend({
 
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
-  	var ph = $("#"+this.htmlObject + " select");
-	// caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
-	if(ph.hasClass("chzn-select") && ph.val() == null)
-		return [];
+    var ph = $("#"+this.htmlObject + " select");
+    // caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
+    if(ph.hasClass("chzn-select") && ph.val() == null)
+      return [];
     return ph.val();
   }
 });
@@ -388,7 +388,7 @@ var JFreeChartComponent = BaseComponent.extend({
     var cd = this.chartDefinition;
     // Merge the stuff with a chartOptions element
     if (cd == undefined){
-     Dashboards.log("Fatal - No chartDefinition passed","error");
+      Dashboards.log("Fatal - No chartDefinition passed","error");
       return;
     }
 
@@ -642,24 +642,24 @@ var DialComponent = JFreeChartComponent.extend({
 
     var cd = this.chartDefinition;
     if (cd == undefined){
-     Dashboards.log("Fatal - No chartDefinition passed","error");
+      Dashboards.log("Fatal - No chartDefinition passed","error");
       return;
     }
-    
+
     cd.chartType = 'DialChart';
 
     var intervals = cd.intervals;
 
     var colors = cd.colors;
     if(colors != undefined && intervals.length != colors.length){
-     Dashboards.log("Fatal - Number of intervals differs from number of colors","error");
+      Dashboards.log("Fatal - Number of intervals differs from number of colors","error");
       return;
     }
 
     this.callPentahoAction(cd.queryType == 'cda' ? "jfreechartdial-cda.xaction" : "jfreechartdial.xaction");
 
   }
-  
+
 });
 
 var OpenFlashChartComponent = JFreeChartComponent.extend({
@@ -701,7 +701,7 @@ var TrafficComponent = BaseComponent.extend({
   update : function() {
     var cd = this.trafficDefinition;
     if (cd == undefined){
-     Dashboards.log("Fatal - No trafficDefinition passed","error");
+      Dashboards.log("Fatal - No trafficDefinition passed","error");
       return;
     }
 
@@ -726,22 +726,22 @@ var TrafficComponent = BaseComponent.extend({
     // callback async mode
     var xactionPath = "/public/pentaho-solutions/cdf/components/traffic.xaction";
     Dashboards.callPentahoAction(myself, xactionPath, parameters,
-      function(result){
-        var value = $(result).find("VALUE").text();
-        var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
-        $('#'+myself.htmlObject).html(i);
+        function(result){
+          var value = $(result).find("VALUE").text();
+          var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
+          $('#'+myself.htmlObject).html(i);
 
-        if(cd.showValue != undefined && cd.showValue == true){
-          var tooltip = "Value: " + value + " <br /><img align='middle' src='" + Dashboards.TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + Dashboards.TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + Dashboards.TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:"");
-          $('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({
-            delay:0,
-            track: true,
-            fade: 250
-          });
-        }
+          if(cd.showValue != undefined && cd.showValue == true){
+            var tooltip = "Value: " + value + " <br /><img align='middle' src='" + Dashboards.TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + Dashboards.TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + Dashboards.TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:"");
+            $('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({
+              delay:0,
+              track: true,
+              fade: 250
+            });
+          }
 
-        Dashboards.decrementRunningCalls();
-      });
+          Dashboards.decrementRunningCalls();
+        });
   }
 });
 
@@ -767,7 +767,7 @@ var TimePlotComponent = BaseComponent.extend({
         var lastEventPlot = this.timeplot._plots[this.timeplot._plots.length -1];
         if(lastEventPlot._id == "eventPlot")
           lastEventPlot._addSelectEvent(Dashboards.getParameterValue(this.startDateParameter)+ " 00:00:00",Dashboards.getParameterValue(this.endDateParameter)+ " 23:59:59",
-            lastEventPlot._eventSource,"iso8601",this.geometry._earliestDate,this.geometry._latestDate);
+              lastEventPlot._eventSource,"iso8601",this.geometry._earliestDate,this.geometry._latestDate);
       }
 
       return;
@@ -785,10 +785,10 @@ var TimePlotComponent = BaseComponent.extend({
 
     if (typeof Timeplot != "undefined" && Dashboards.timePlotColors == undefined ){
       Dashboards.timePlotColors = [new Timeplot.Color('#820000'),
-      new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
-      new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
-      new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
-      new Timeplot.Color('#73F321')];
+        new Timeplot.Color('#13E512'), new Timeplot.Color('#1010E1'),
+        new Timeplot.Color('#E532D1'), new Timeplot.Color('#1D2DE1'),
+        new Timeplot.Color('#83FC24'), new Timeplot.Color('#A1D2FF'),
+        new Timeplot.Color('#73F321')];
     }
 
     var timePlotTimeGeometry = new Timeplot.DefaultTimeGeometry({
@@ -816,7 +816,7 @@ var TimePlotComponent = BaseComponent.extend({
 
     var obj = this;
     if (cd == undefined){
-     Dashboards.log("Fatal - No chart definition passed","error");
+      Dashboards.log("Fatal - No chart definition passed","error");
       return;
     }
 
@@ -828,7 +828,7 @@ var TimePlotComponent = BaseComponent.extend({
 
     var cols = typeof cd['columns']=='function'?cd['columns']():cd['columns'];
     if (cols == undefined || cols.length == 0){
-     Dashboards.log("Fatal - No 'columns' property passed in chartDefinition","error");
+      Dashboards.log("Fatal - No 'columns' property passed in chartDefinition","error");
       return;
     }
     // Write the title
@@ -934,7 +934,7 @@ var TimePlotComponent = BaseComponent.extend({
             var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
             if(lastEventPlot._id == "eventPlot")
               lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter) + " 00:00:00",Dashboards.getParameterValue(obj.endDateParameter)+ " 23:59:59",
-                eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+                  eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
           }
         })
       });
@@ -945,7 +945,7 @@ var TimePlotComponent = BaseComponent.extend({
           var lastEventPlot =  timeplot._plots[timeplot._plots.length -1];
           if(lastEventPlot._id == "eventPlot")
             lastEventPlot._addSelectEvent(Dashboards.getParameterValue(obj.startDateParameter) + " 00:00:00",Dashboards.getParameterValue(obj.endDateParameter)+ " 23:59:59",
-              eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
+                eventSource2,"iso8601",timePlotTimeGeometry._earliestDate,timePlotTimeGeometry._latestDate);
         }
       });
   },
@@ -992,20 +992,20 @@ var TextInputComponent = BaseComponent.extend({
   update: function(){
     selectHTML = "<input";
     selectHTML += " type=test id='" + this.name + "' name='" + this.name +
-    "' + value='" +
-    Dashboards.getParameterValue(this.parameter) +
-    (this.charWidth ? ("' + size='" + this.charWidth) : "") +
-    (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
-    "'>";
+        "' + value='" +
+        Dashboards.getParameterValue(this.parameter) +
+        (this.charWidth ? ("' + size='" + this.charWidth) : "") +
+        (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
+        "'>";
     $("#" + this.htmlObject).html(selectHTML);
     var myself = this;
     $("#" + this.name).change(function(){
       Dashboards.processChange(myself.name);
     }).keyup(function(event){
-      if (event.keyCode == 13) {
-        Dashboards.processChange(myself.name);
-      }
-    });
+          if (event.keyCode == 13) {
+            Dashboards.processChange(myself.name);
+          }
+        });
   },
   getValue : function() {
     return $("#"+this.name).val();
@@ -1057,96 +1057,96 @@ var DateInputComponent = BaseComponent.extend({
 
 
 var DateRangeInputComponent = BaseComponent.extend({
-  update : function() {
-    var dr;
-    if (this.singleInput == undefined || this.singleInput == true){
-      dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0]) + " > " + Dashboards.getParameterValue(this.parameter[1]) ).css("width","170px");
-      $("#"+this.htmlObject).html(dr);
-    } else {
-      dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0])).css("width","80px");
-      $("#"+this.htmlObject).html(dr);
-      dr.after($("<input/>").attr("id",this.name + "2").attr("value",Dashboards.getParameterValue(this.parameter[1])).css("width","80px"));
-      if(this.inputSeparator != undefined){
-        dr.after(this.inputSeparator);
-      }
-    }
-    var offset = dr.offset();
-    var myself = this;
-    var earliestDate = this.earliestDate != undefined  ?  Dashboards.getParameterValue(this.earliestDate) : Date.parse('-1years');
-    var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
-    var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
-    var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
-    
-    var changed, closed;
-    function triggerWhenDone() {
-      if(changed && closed) {
-        myself.fireInputChange(myself.startValue,myself.endValue);
-        changed = closed = false;
-      }
-    };
-    $(function(){
-      $("#" + myself.htmlObject + " input").daterangepicker({
-        posX: offset.left + leftOffset,
-        posY: offset.top + topOffset,
-        earliestDate: earliestDate,
-        latestDate: latestDate,
-        dateFormat: 'yy-mm-dd',
-        onOpen: function() {
-          changed = closed = false;
-          myself.startValue = null;
-          myself.endValue = null;
-        },
-        onDateSelect: function(rangeA, rangeB) {
-          changed = true;
-          myself.storeChanges(rangeA, rangeB);
-          triggerWhenDone();
-        },
-        onClose: function() {
-          closed = true;
-          triggerWhenDone();
+      update : function() {
+        var dr;
+        if (this.singleInput == undefined || this.singleInput == true){
+          dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0]) + " > " + Dashboards.getParameterValue(this.parameter[1]) ).css("width","170px");
+          $("#"+this.htmlObject).html(dr);
+        } else {
+          dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0])).css("width","80px");
+          $("#"+this.htmlObject).html(dr);
+          dr.after($("<input/>").attr("id",this.name + "2").attr("value",Dashboards.getParameterValue(this.parameter[1])).css("width","80px"));
+          if(this.inputSeparator != undefined){
+            dr.after(this.inputSeparator);
+          }
         }
-      });
-    });
-  },
-  
-  fireInputChange : function(start, end){
-    //TODO: review this!
-    if(this.preChange){
-      this.preChange(start, end);
-    }
-    
-    if(this.parameter)
-    {
-      if( this.parameter.length == 2) Dashboards.setParameter(this.parameter[1], end);
-      if( this.parameter.length > 0) Dashboards.fireChange(this.parameter[0], start);
-    }
-    
-    if(this.postChange){
-      this.postChange(start, end);
-    }
-  },
+        var offset = dr.offset();
+        var myself = this;
+        var earliestDate = this.earliestDate != undefined  ?  Dashboards.getParameterValue(this.earliestDate) : Date.parse('-1years');
+        var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
+        var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
+        var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
 
-  storeChanges : function(start,end){
-    this.startValue = start;
-    this.endValue = end;
-  }
-},
-{
-  fireDateRangeInputChange : function(name, rangeA, rangeB){
-    // WPG: can we just use the parameter directly?
-    var object = Dashboards.getComponentByName(name);
-    if(!(typeof(object.preChange)=='undefined')){
-      object.preChange(rangeA, rangeB);
+        var changed, closed;
+        function triggerWhenDone() {
+          if(changed && closed) {
+            myself.fireInputChange(myself.startValue,myself.endValue);
+            changed = closed = false;
+          }
+        };
+        $(function(){
+          $("#" + myself.htmlObject + " input").daterangepicker({
+            posX: offset.left + leftOffset,
+            posY: offset.top + topOffset,
+            earliestDate: earliestDate,
+            latestDate: latestDate,
+            dateFormat: 'yy-mm-dd',
+            onOpen: function() {
+              changed = closed = false;
+              myself.startValue = null;
+              myself.endValue = null;
+            },
+            onDateSelect: function(rangeA, rangeB) {
+              changed = true;
+              myself.storeChanges(rangeA, rangeB);
+              triggerWhenDone();
+            },
+            onClose: function() {
+              closed = true;
+              triggerWhenDone();
+            }
+          });
+        });
+      },
+
+      fireInputChange : function(start, end){
+        //TODO: review this!
+        if(this.preChange){
+          this.preChange(start, end);
+        }
+
+        if(this.parameter)
+        {
+          if( this.parameter.length == 2) Dashboards.setParameter(this.parameter[1], end);
+          if( this.parameter.length > 0) Dashboards.fireChange(this.parameter[0], start);
+        }
+
+        if(this.postChange){
+          this.postChange(start, end);
+        }
+      },
+
+      storeChanges : function(start,end){
+        this.startValue = start;
+        this.endValue = end;
+      }
+    },
+    {
+      fireDateRangeInputChange : function(name, rangeA, rangeB){
+        // WPG: can we just use the parameter directly?
+        var object = Dashboards.getComponentByName(name);
+        if(!(typeof(object.preChange)=='undefined')){
+          object.preChange(rangeA, rangeB);
+        }
+        var parameters = eval(name + ".parameter");
+        // set the second date and fireChange the first
+        Dashboards.setParameter(parameters[1], rangeB);
+        Dashboards.fireChange(parameters[0],rangeA);
+        if(!(typeof(object.postChange)=='undefined')){
+          object.postChange(rangeA, rangeB);
+        }
+      }
     }
-    var parameters = eval(name + ".parameter");
-    // set the second date and fireChange the first
-    Dashboards.setParameter(parameters[1], rangeB);
-    Dashboards.fireChange(parameters[0],rangeA);
-    if(!(typeof(object.postChange)=='undefined')){
-      object.postChange(rangeA, rangeB);
-    }
-  }
-}
 );
 
 var MonthPickerComponent = BaseComponent.extend({
@@ -1251,15 +1251,15 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
     // check to see if current selected values are in the current values array. If not check to see if we should default to the first
     var vid = this.valueAsId==false?0:1;
     var hasCurrentVal = false;
-      outer:
-      for(var i = 0; i < currentValArray.length; i++){
-        for(var y = 0; y < myArray.length; y++) {
-          if (currentValArray[i] == myArray[y][vid]) {
-            hasCurrentVal = true;
-            break outer;
+    outer:
+        for(var i = 0; i < currentValArray.length; i++){
+          for(var y = 0; y < myArray.length; y++) {
+            if (currentValArray[i] == myArray[y][vid]) {
+              hasCurrentVal = true;
+              break outer;
+            }
           }
         }
-      }
     // if there will be no selected value, but we're to default if empty, select the first
     if(!hasCurrentVal && this.defaultIfEmpty){
       currentValArray = [myArray[0][vid]];
@@ -1286,13 +1286,13 @@ var ToggleButtonBaseComponent = BaseComponent.extend({
 
       if (this.type == 'radio' || this.type == 'radioComponent'){
         if ((i == 0 && !hasCurrentVal) ||
-          (hasCurrentVal && (myArray[i][vid] == currentVal ))) {
+            (hasCurrentVal && (myArray[i][vid] == currentVal ))) {
           selectHTML += " CHECKED";
         }
         selectHTML += " type='radio'";
       }else{
         if ((i == 0 && !hasCurrentVal && this.defaultIfEmpty) ||
-          (hasCurrentVal && isSelected)) {
+            (hasCurrentVal && isSelected)) {
           selectHTML += " CHECKED";
         }
         selectHTML += " type='checkbox'";
@@ -1353,9 +1353,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     ph.appendTo($("#" + this.htmlObject).empty());
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx],
-        label = myArray[i][lblIdx],
-        classes = cssWrapperClass + this.getExtraCss(i,len,this.verticalOrientation),
-        selector;
+          label = myArray[i][lblIdx],
+          classes = cssWrapperClass + this.getExtraCss(i,len,this.verticalOrientation),
+          selector;
 
       value = (value == null ? null : value.replace('"','&quot;' ));
       label = (label == null ? null : label.replace('"','&quot;' ));
@@ -1377,7 +1377,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
     }
 
-    
+
     //default
     var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
@@ -1407,7 +1407,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
 
       if ( ( $.isArray(currentVal) && isSelected || isSelected)
-        || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
+          || (myArray[i][valIdx] == currentVal || myArray[i][lblIdx] == currentVal) ) {
 
         MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, i, this.isMultiple, this.verticalOrientation, true);
 
@@ -1556,38 +1556,38 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 });
 
 var AutocompleteBoxComponent = BaseComponent.extend({
-  
+
   searchedWord : '',
   result: [],
-  
+
   queryServer : function(searchString){
-    
+
     if(!this.parameters) this.parameters = [];
-    
+
     if(this.searchParam){
       this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
     }
     else if (this.parameters.length > 0){
       this.parameters[0][1] = this.getInnerParameterName();
     }
-    
+
     if(this.maxResults){
       this.queryDefinition.pageSize = this.maxResults;
     }
     Dashboards.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
     QueryComponent.makeQuery(this);
   },
-  
+
   getTextBoxValue: function(){
     return this.textbox.val();
   },
-  
+
   getInnerParameterName : function(){
     return this.parameter + '_textboxValue';
   },
-  
+
   update : function() {
-    
+
     // if reloadOnUpdate only update the list
     if(this.reloadOnUpdate&&this.autoBoxOpt!=undefined)
     {
@@ -1597,14 +1597,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     }
 
     $("#"+ this.htmlObject).empty();
-    
+
     var initialValue = null;
     if(this.parameter){
       initialValue = Dashboards.getParameterValue(this.parameter);
     }
 
     var myself = this;
-    
+
     //init parameter
     if(!Dashboards.getParameterValue(this.getInnerParameterName)){
       Dashboards.setParameter(this.getInnerParameterName(), '' );
@@ -1618,25 +1618,25 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var processElementChange = myself.processElementChange == true ? function(value){
       Dashboards.fireChange(myself.parameter,value);
     } : undefined;
-    
+
     //TODO:typo on minTextLength
     if(this.minTextLenght == undefined){
       this.minTextLenght = 0;
     }
-    
+
     var opt = {
       list: function(){
         var val = myself.textbox.val();
         if(val.length >= myself.minTextLenght &&
-           !(val == '' //nothing to search
-             ||
-             val == myself.searchedWord
-             ||
-            ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
-             myself.searchedWord != '' && 
-             ((myself.matchType == "fromStart")? 
-                val.indexOf(myself.searchedWord) == 0 :
-                val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
+            !(val == '' //nothing to search
+                ||
+                val == myself.searchedWord
+                ||
+                ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
+                    myself.searchedWord != '' &&
+                    ((myself.matchType == "fromStart")?
+                        val.indexOf(myself.searchedWord) == 0 :
+                        val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
         {
           myself.queryServer(val);
           myself.searchedWord = val;
@@ -1663,16 +1663,16 @@ var AutocompleteBoxComponent = BaseComponent.extend({
       tooltipMessage: myself.tooltipMessage == undefined ? "Click it to Apply" : myself.tooltipMessage,
       addTextElements: myself.addTextElements == undefined ? true : myself.addTextElements,
       externalApplyButtonId: myself.externalApplyButtonId,
-  //    selectedValues: initialValue,
+      //    selectedValues: initialValue,
       parent: myself
     };
 
 
     this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
-    
+
     //setInitialValue
     this.autoBoxOpt.setInitialValue(this.htmlObject, initialValue, this.name);
-    
+
     this.textbox = $('#' + this.htmlObject + ' input');
   },
   getValue : function() {
@@ -1687,10 +1687,10 @@ var JpivotComponent = BaseComponent.extend({
   update : function() {
     //to be backwards compatible set default value for iframeScolling
     // also added 20px 
-	if(this.iframeScrolling == undefined){
-		this.iframeScrolling="no";
-	}
-     // Build IFrame and set url
+    if(this.iframeScrolling == undefined){
+      this.iframeScrolling="no";
+    }
+    // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
     jpivotHTML += webAppPath + "/api/repos/" + this.path.replace(/\//g, ":") + "/generatedContent?";
 
@@ -1741,267 +1741,267 @@ if($.fn.dataTableExt != undefined){ // Ensure we load dataTables before this lin
 
     $('select', oSettings.oFeatures.l).val( iDisplay );
   };
-/* Example
-	 * $(document).ready(function() {
-	 *    var oTable = $('#example').dataTable();
-	 *    oTable.fnLengthChange( 100 );
-	 * } );
-	 */
+  /* Example
+   * $(document).ready(function() {
+   *    var oTable = $('#example').dataTable();
+   *    oTable.fnLengthChange( 100 );
+   * } );
+   */
 }
 
 var TableComponent = BaseComponent.extend({
-  
-  ph: undefined,
-  
-  update : function() {
-    var cd = this.chartDefinition;
-    if (cd == undefined){
-     Dashboards.log("Fatal - No chart definition passed","error");
-      return;
-    }
-    cd["tableId"] = this.htmlObject + "Table";
 
-    // Clear previous table
-    this.ph = $("#"+this.htmlObject);
-    this.ph.empty();
-    var myself = this;
-    // remove drawCallback from the parameters, or
-    // it'll be called before we have an actual table...
-    var croppedCd = $.extend({},cd);
-    croppedCd.drawCallback = undefined;
-    this.queryState = new Query(croppedCd);
-    this.query = this.queryState; // for analogy with ccc component's name
-    // make sure to clean sort options
-    var sortBy = this.chartDefinition.sortBy || [],
-      sortOptions = [];
-    for (var i = 0; i < sortBy.length; i++) {
-      var col = sortBy[i][0];
-      var dir = sortBy[i][1];
-      sortOptions.push( col + (dir == "asc" ? "A" : "D"));
-    }
-    this.queryState.setSortBy(sortOptions);
+      ph: undefined,
 
-    if(cd.paginateServerside) {
-      this.extraOptions = this.extraOptions || [];
-      this.extraOptions.push(["bServerSide",true]);
-      this.extraOptions.push(["bProcessing",true]);
-      this.queryState.setPageSize(parseInt(cd.displayLength || 10));
-      this.queryState.setCallback(function(values) {
-        changedValues = undefined;
-        if((typeof(myself.postFetch)=='function')){
-          changedValues = myself.postFetch(values);
-        }
-        if (changedValues != undefined) {
-          values = changedValues;
-        }
-        myself.processTableComponentResponse(values);
-      });
-      this.queryState.setParameters(this.parameters);
-      this.processTableComponentResponse();
-    } else {
-      this.queryState.fetchData(this.parameters, function(values) {
-        changedValues = undefined;
-        if((typeof(myself.postFetch)=='function')){
-          changedValues = myself.postFetch(values);
-        }
-        if (changedValues != undefined) {
-          values = changedValues;
-        }
-        myself.rawData = values;
-        myself.processTableComponentResponse(values);
-      });
-    }
-  },
-
-  pagingCallback: function(url, params,callback,dataTable) {
-    function p( sKey ) {
-      for ( var i=0, iLen=params.length ; i<iLen ; i++ ) {
-        if ( params[i].name == sKey ) {
-          return params[i].value;
-        }
-      }
-      return null;
-    }
-    var sortingCols = p("iSortingCols"),sort = [];
-    if (sortingCols > 0) {
-      for (var i = 0; i < sortingCols; i++) {
-        var col = p("iSortCol_" + i);
-        var dir = p("sSortDir_" + i);
-        sort.push( col + (dir == "asc" ? "A" : "D"));
-      }
-    }
-    var query = this.queryState,
-    myself = this;
-    query.setSortBy(sort.join(","));
-    query.setPageSize(parseInt(p("iDisplayLength")));
-    query.setPageStartingAt(p("iDisplayStart"));
-    query.fetchData(function(d) {
-      if (myself.postFetch){
-        var mod = myself.postFetch(d,dataTable);
-        if (typeof mod !== "undefined") {
-          d = mod;
-        }
-      }
-      var response = {
-        iTotalRecords: d.queryInfo.totalRows,
-        iTotalDisplayRecords: d.queryInfo.totalRows
-        };
-      response.aaData = d.resultset;
-      response.sEcho = p("sEcho");
-      myself.rawData = d;
-      callback(response);
-    });
-  },
-
-  processTableComponentResponse : function(json)
-  {
-    // General documentation here: http://datatables.net
-    var myself = this,
-      cd = this.chartDefinition,
-      extraOptions = {};
-   
-    myself.ph.trigger('cdfTableComponentProcessResponse');
-    
-   
-    // Set defaults for headers / types
-    if(typeof cd.colHeaders === "undefined" || cd.colHeaders.length == 0)
-      cd.colHeaders = json.metadata.map(function(i){return i.colName});
-
-    if(typeof cd.colTypes === "undefined" || cd.colTypes.length == 0)
-      cd.colTypes = json.metadata.map(function(i){return i.colType.toLowerCase()});
-
-    var dtData0 = TableComponent.getDataTableOptions(cd),
-    dtData;
-
-    // Build a default config from the standard options
-    $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){
-      extraOptions[e[0]] = e[1];
-    });
-    dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
-
-
-    // Sparklines still applied to drawcallback
-    var myself = this;
-    dtData.fnDrawCallback = function(dataTableSettings) {
-      var dataTable = this;
-      myself.ph.find("tbody tr").each(function(row,tr){
-          if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
-              return true;
-        $(tr).children("td").each(function(col,td){
-            var position = dataTable.fnGetPosition(td),
-                rowIdx = position[0],
-                colIdx = position[2];
-            var colType = cd.colTypes[colIdx];
-            var addIn = myself.getAddIn("colType",colType);
-            if (addIn) {
-              var state = {},
-                target = $(td),
-                results = myself.rawData;
-              if(!(target.parents('tbody').length)) {
-                return;
-              } else if (target.get(0).tagName != 'TD') {
-                target = target.closest('td');
-              }
-              state.rawData = results;
-              state.tableData = dataTable.fnGetData();
-              state.colIdx = colIdx;
-              state.rowIdx = rowIdx;
-              state.series = results.resultset[state.rowIdx][0];
-              state.category = results.metadata[state.colIdx].colName;
-              state.value =  results.resultset[state.rowIdx][state.colIdx];
-              if(cd.colFormats) {
-                state.colFormat = cd.colFormats[state.colIdx];
-              }
-              state.target = target;
-              addIn.call(td,state,myself.getAddInOptions("colType",addIn.getName()));
-            } else if(cd.colFormats) {
-              var format = cd.colFormats[position[1]],
-                value = myself.rawData.resultset[rowIdx][colIdx];
-              if (format && (typeof value != "undefined" && value !== null)) {
-                $(td).text(sprintf(format,value));
-              }
-            }
-        });
-      });
-
-	  // Old urlTemplate code. This needs to be here for backward compatibility
-	  if(cd.urlTemplate != undefined){
-		  var td =$("#" + myself.htmlObject + " td:nth-child(1)"); 
-		  td.addClass('cdfClickable');
-		  td.bind("click", function(e){
-				  var regex = new RegExp("{"+cd.parameterName+"}","g");
-				  var f = cd.urlTemplate.replace(regex,$(this).text());
-				  eval(f);
-				  });
-	  }
-
-      if(typeof cd.drawCallback == 'function'){
-        cd.drawCallback.apply(myself,arguments);
-      }
-
-    };
-
-
-    /* We need to make sure we're getting data from the right place,
-     * depending on whether we're using CDA
-     */
-    if (json) {
-      dtData.aaData = json.resultset;
-    } 
-    
-    ////else {
-    //  dtData.aaData = json;
-  //  }
-  
-  
-  
-    /* If we're doing server-side pagination, we need to set up the server callback
-     */
-    if (dtData.bServerSide) {
-      dtData.fnServerData = function(u,p,c) {
-        myself.pagingCallback(u,p,c,this);
-      };
-    }
-    myself.ph.html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
-    // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
-    this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
-  
-    // We'll create an Array to keep track of the open expandable rows.
-    this.dataTable.anOpen = [];
-
-
-    myself.ph.find ('table').bind('click',function(e) {
-      if (typeof cd.clickAction === 'function' || myself.expandOnClick) { 
-        var state = {},
-          target = $(e.target),
-          results = myself.queryState.lastResults();
-        if(!(target.parents('tbody').length)) {
+      update : function() {
+        var cd = this.chartDefinition;
+        if (cd == undefined){
+          Dashboards.log("Fatal - No chart definition passed","error");
           return;
-        } else if (target.get(0).tagName != 'TD') {
-          target = target.closest('td');
         }
-        var position = myself.dataTable.fnGetPosition(target.get(0));
-        state.rawData = myself.rawData;
-        state.tableData = myself.dataTable.fnGetData();
-        state.colIdx = position[1];
-        state.rowIdx = position[0];
-        state.series = results.resultset[state.rowIdx][0];
-        state.category = results.metadata[state.colIdx].colName;
-        state.value =  results.resultset[state.rowIdx][state.colIdx];
-        state.target = target;
-        state.colFormat = cd.colFormats[state.colIdx]; 
-        
-        if (myself.expandOnClick) {
-        	myself.handleExpandOnClick(state);
-        }
-        if (cd.clickAction)
-	        cd.clickAction.call(myself,state);
-      }
-    });
-    myself.ph.trigger('cdfTableComponentFinishRendering');
-  },
+        cd["tableId"] = this.htmlObject + "Table";
 
-   handleExpandOnClick:     function(event){     
+        // Clear previous table
+        this.ph = $("#"+this.htmlObject);
+        this.ph.empty();
+        var myself = this;
+        // remove drawCallback from the parameters, or
+        // it'll be called before we have an actual table...
+        var croppedCd = $.extend({},cd);
+        croppedCd.drawCallback = undefined;
+        this.queryState = new Query(croppedCd);
+        this.query = this.queryState; // for analogy with ccc component's name
+        // make sure to clean sort options
+        var sortBy = this.chartDefinition.sortBy || [],
+            sortOptions = [];
+        for (var i = 0; i < sortBy.length; i++) {
+          var col = sortBy[i][0];
+          var dir = sortBy[i][1];
+          sortOptions.push( col + (dir == "asc" ? "A" : "D"));
+        }
+        this.queryState.setSortBy(sortOptions);
+
+        if(cd.paginateServerside) {
+          this.extraOptions = this.extraOptions || [];
+          this.extraOptions.push(["bServerSide",true]);
+          this.extraOptions.push(["bProcessing",true]);
+          this.queryState.setPageSize(parseInt(cd.displayLength || 10));
+          this.queryState.setCallback(function(values) {
+            changedValues = undefined;
+            if((typeof(myself.postFetch)=='function')){
+              changedValues = myself.postFetch(values);
+            }
+            if (changedValues != undefined) {
+              values = changedValues;
+            }
+            myself.processTableComponentResponse(values);
+          });
+          this.queryState.setParameters(this.parameters);
+          this.processTableComponentResponse();
+        } else {
+          this.queryState.fetchData(this.parameters, function(values) {
+            changedValues = undefined;
+            if((typeof(myself.postFetch)=='function')){
+              changedValues = myself.postFetch(values);
+            }
+            if (changedValues != undefined) {
+              values = changedValues;
+            }
+            myself.rawData = values;
+            myself.processTableComponentResponse(values);
+          });
+        }
+      },
+
+      pagingCallback: function(url, params,callback,dataTable) {
+        function p( sKey ) {
+          for ( var i=0, iLen=params.length ; i<iLen ; i++ ) {
+            if ( params[i].name == sKey ) {
+              return params[i].value;
+            }
+          }
+          return null;
+        }
+        var sortingCols = p("iSortingCols"),sort = [];
+        if (sortingCols > 0) {
+          for (var i = 0; i < sortingCols; i++) {
+            var col = p("iSortCol_" + i);
+            var dir = p("sSortDir_" + i);
+            sort.push( col + (dir == "asc" ? "A" : "D"));
+          }
+        }
+        var query = this.queryState,
+            myself = this;
+        query.setSortBy(sort.join(","));
+        query.setPageSize(parseInt(p("iDisplayLength")));
+        query.setPageStartingAt(p("iDisplayStart"));
+        query.fetchData(function(d) {
+          if (myself.postFetch){
+            var mod = myself.postFetch(d,dataTable);
+            if (typeof mod !== "undefined") {
+              d = mod;
+            }
+          }
+          var response = {
+            iTotalRecords: d.queryInfo.totalRows,
+            iTotalDisplayRecords: d.queryInfo.totalRows
+          };
+          response.aaData = d.resultset;
+          response.sEcho = p("sEcho");
+          myself.rawData = d;
+          callback(response);
+        });
+      },
+
+      processTableComponentResponse : function(json)
+      {
+        // General documentation here: http://datatables.net
+        var myself = this,
+            cd = this.chartDefinition,
+            extraOptions = {};
+
+        myself.ph.trigger('cdfTableComponentProcessResponse');
+
+
+        // Set defaults for headers / types
+        if(typeof cd.colHeaders === "undefined" || cd.colHeaders.length == 0)
+          cd.colHeaders = json.metadata.map(function(i){return i.colName});
+
+        if(typeof cd.colTypes === "undefined" || cd.colTypes.length == 0)
+          cd.colTypes = json.metadata.map(function(i){return i.colType.toLowerCase()});
+
+        var dtData0 = TableComponent.getDataTableOptions(cd),
+            dtData;
+
+        // Build a default config from the standard options
+        $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){
+          extraOptions[e[0]] = e[1];
+        });
+        dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
+
+
+        // Sparklines still applied to drawcallback
+        var myself = this;
+        dtData.fnDrawCallback = function(dataTableSettings) {
+          var dataTable = this;
+          myself.ph.find("tbody tr").each(function(row,tr){
+            if (dataTable.fnGetPosition(tr) == null) //Tr not found in datatable, continue
+              return true;
+            $(tr).children("td").each(function(col,td){
+              var position = dataTable.fnGetPosition(td),
+                  rowIdx = position[0],
+                  colIdx = position[2];
+              var colType = cd.colTypes[colIdx];
+              var addIn = myself.getAddIn("colType",colType);
+              if (addIn) {
+                var state = {},
+                    target = $(td),
+                    results = myself.rawData;
+                if(!(target.parents('tbody').length)) {
+                  return;
+                } else if (target.get(0).tagName != 'TD') {
+                  target = target.closest('td');
+                }
+                state.rawData = results;
+                state.tableData = dataTable.fnGetData();
+                state.colIdx = colIdx;
+                state.rowIdx = rowIdx;
+                state.series = results.resultset[state.rowIdx][0];
+                state.category = results.metadata[state.colIdx].colName;
+                state.value =  results.resultset[state.rowIdx][state.colIdx];
+                if(cd.colFormats) {
+                  state.colFormat = cd.colFormats[state.colIdx];
+                }
+                state.target = target;
+                addIn.call(td,state,myself.getAddInOptions("colType",addIn.getName()));
+              } else if(cd.colFormats) {
+                var format = cd.colFormats[position[1]],
+                    value = myself.rawData.resultset[rowIdx][colIdx];
+                if (format && (typeof value != "undefined" && value !== null)) {
+                  $(td).text(sprintf(format,value));
+                }
+              }
+            });
+          });
+
+          // Old urlTemplate code. This needs to be here for backward compatibility
+          if(cd.urlTemplate != undefined){
+            var td =$("#" + myself.htmlObject + " td:nth-child(1)");
+            td.addClass('cdfClickable');
+            td.bind("click", function(e){
+              var regex = new RegExp("{"+cd.parameterName+"}","g");
+              var f = cd.urlTemplate.replace(regex,$(this).text());
+              eval(f);
+            });
+          }
+
+          if(typeof cd.drawCallback == 'function'){
+            cd.drawCallback.apply(myself,arguments);
+          }
+
+        };
+
+
+        /* We need to make sure we're getting data from the right place,
+         * depending on whether we're using CDA
+         */
+        if (json) {
+          dtData.aaData = json.resultset;
+        }
+
+        ////else {
+        //  dtData.aaData = json;
+        //  }
+
+
+
+        /* If we're doing server-side pagination, we need to set up the server callback
+         */
+        if (dtData.bServerSide) {
+          dtData.fnServerData = function(u,p,c) {
+            myself.pagingCallback(u,p,c,this);
+          };
+        }
+        myself.ph.html("<table id='" + this.htmlObject + "Table' class=\"tableComponent\" width=\"100%\"></table>");
+        // We'll first initialize a blank table so that we have a table handle to work with while the table is redrawing
+        this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
+
+        // We'll create an Array to keep track of the open expandable rows.
+        this.dataTable.anOpen = [];
+
+
+        myself.ph.find ('table').bind('click',function(e) {
+          if (typeof cd.clickAction === 'function' || myself.expandOnClick) {
+            var state = {},
+                target = $(e.target),
+                results = myself.queryState.lastResults();
+            if(!(target.parents('tbody').length)) {
+              return;
+            } else if (target.get(0).tagName != 'TD') {
+              target = target.closest('td');
+            }
+            var position = myself.dataTable.fnGetPosition(target.get(0));
+            state.rawData = myself.rawData;
+            state.tableData = myself.dataTable.fnGetData();
+            state.colIdx = position[1];
+            state.rowIdx = position[0];
+            state.series = results.resultset[state.rowIdx][0];
+            state.category = results.metadata[state.colIdx].colName;
+            state.value =  results.resultset[state.rowIdx][state.colIdx];
+            state.target = target;
+            state.colFormat = cd.colFormats[state.colIdx];
+
+            if (myself.expandOnClick) {
+              myself.handleExpandOnClick(state);
+            }
+            if (cd.clickAction)
+              cd.clickAction.call(myself,state);
+          }
+        });
+        myself.ph.trigger('cdfTableComponentFinishRendering');
+      },
+
+      handleExpandOnClick:     function(event){
         var myself = this,
             detailContainerObj = myself.expandContainerObject,
             activeclass = "expandingClass";
@@ -2009,271 +2009,271 @@ var TableComponent = BaseComponent.extend({
           activeclass = "activeRow";
         }
         var obj = event.target.closest("tr");
-            var a = event.target.closest("a");
-            if (a.hasClass ('info')){
-                    return;
-            }else{
-                    var row = obj.get(0);
-                   
-                    var value = event.series;
-                    var htmlContent = $("#" + detailContainerObj).html();
-                   
-                    var anOpen = myself.dataTable.anOpen;
-                    var i = $.inArray( row, anOpen );
-                   
-                    if( obj.hasClass(activeclass) ){
-                      obj.removeClass(activeclass);
-                      myself.dataTable.fnClose( row );
-                      anOpen.splice(i,1);
-                    }
-                    else{
-                            // Closes all open expandable rows .
-                            for ( var j=0; j < anOpen.length; j++ ){
-                                $(anOpen[j]).removeClass(activeclass);
-                                myself.dataTable.fnClose( anOpen[j] );
-                                anOpen.splice(j ,1);
-                            }
-                            
-                            //Closes previously opened expandable row.
-                           /* var prev = obj.siblings('.'+activeclass).each(function(i,d){
-                                    var curr = $(d);
-                                    curr.removeClass(activeclass);
-                                    myself.dataTable.fnClose( d );
-                            });*/
+        var a = event.target.closest("a");
+        if (a.hasClass ('info')){
+          return;
+        }else{
+          var row = obj.get(0);
 
-                            obj.addClass(activeclass);
-                            
-                            //Read parameters and fire changes
-                            var results = myself.queryState.lastResults();
-                            $(myself.expandParameters).each(function f(i, elt) {                            
-                            	Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);                            
-                            });
-                            myself.dataTable.fnOpen( row, htmlContent, activeclass );
-                            anOpen.push( row );
-                    };
-            };
-    }
-},
-{
-  getDataTableOptions : function(options) {
-    var dtData = {};
+          var value = event.series;
+          var htmlContent = $("#" + detailContainerObj).html();
 
-    if(options.tableStyle == "themeroller"){
-      dtData.bJQueryUI = true;
-    }
-    dtData.bInfo = options.info;
-    dtData.iDisplayLength = options.displayLength;
-    dtData.bLengthChange = options.lengthChange;
-    dtData.bPaginate = options.paginate;
-    dtData.bSort = options.sort;
-    dtData.bFilter = options.filter;
-    dtData.sPaginationType = options.paginationType;
-    dtData.sDom = options.sDom;
-    dtData.aaSorting = options.sortBy;
-    dtData.oLanguage = options.oLanguage;
+          var anOpen = myself.dataTable.anOpen;
+          var i = $.inArray( row, anOpen );
 
-    if(options.colHeaders != undefined){
-      dtData.aoColumns = new Array(options.colHeaders.length);
-      for(var i = 0; i< options.colHeaders.length; i++){
-        dtData.aoColumns[i]={}
-        dtData.aoColumns[i].sClass="column"+i;
-      };
-      $.each(options.colHeaders,function(i,val){
-        dtData.aoColumns[i].sTitle=val;
-        if(val == "") dtData.aoColumns[i].bVisible=false;
-      });  // colHeaders
-      if(options.colTypes!=undefined){
-        $.each(options.colTypes,function(i,val){
-          var col = dtData.aoColumns[i];
-          // Specific case: hidden cols
-          if(val == "hidden") col.bVisible=false;
-          col.sClass+=" "+val;
-          col.sType=val;
-
-        })
-      };  // colTypes
-      if(options.colFormats!=undefined){
-      // Changes are made directly to the json
-
-      };  // colFormats
-
-      var bAutoWidth = true;
-      if(options.colWidths!=undefined){
-        $.each(options.colWidths,function(i,val){
-          if (val!=null){
-            dtData.aoColumns[i].sWidth=val;
-            bAutoWidth = false;
+          if( obj.hasClass(activeclass) ){
+            obj.removeClass(activeclass);
+            myself.dataTable.fnClose( row );
+            anOpen.splice(i,1);
           }
-        })
-      }; //colWidths
-      dtData.bAutoWidth = bAutoWidth;
+          else{
+            // Closes all open expandable rows .
+            for ( var j=0; j < anOpen.length; j++ ){
+              $(anOpen[j]).removeClass(activeclass);
+              myself.dataTable.fnClose( anOpen[j] );
+              anOpen.splice(j ,1);
+            }
 
-      if(options.colSortable!=undefined){
-        $.each(options.colSortable,function(i,val){
-          if (val!=null && ( !val || val == "false" ) ){
-            dtData.aoColumns[i].bSortable=false
-          }
-        })
-      }; //colSortable
-      if(options.colSearchable!=undefined){
-        $.each(options.colSearchable,function(i,val){
-          if (val!=null && ( !val || val == "false" ) ){
-            dtData.aoColumns[i].bSearchable=false
-          }
-        })
-      }; //colSearchable
+            //Closes previously opened expandable row.
+            /* var prev = obj.siblings('.'+activeclass).each(function(i,d){
+             var curr = $(d);
+             curr.removeClass(activeclass);
+             myself.dataTable.fnClose( d );
+             });*/
+
+            obj.addClass(activeclass);
+
+            //Read parameters and fire changes
+            var results = myself.queryState.lastResults();
+            $(myself.expandParameters).each(function f(i, elt) {
+              Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+            });
+            myself.dataTable.fnOpen( row, htmlContent, activeclass );
+            anOpen.push( row );
+          };
+        };
+      }
+    },
+    {
+      getDataTableOptions : function(options) {
+        var dtData = {};
+
+        if(options.tableStyle == "themeroller"){
+          dtData.bJQueryUI = true;
+        }
+        dtData.bInfo = options.info;
+        dtData.iDisplayLength = options.displayLength;
+        dtData.bLengthChange = options.lengthChange;
+        dtData.bPaginate = options.paginate;
+        dtData.bSort = options.sort;
+        dtData.bFilter = options.filter;
+        dtData.sPaginationType = options.paginationType;
+        dtData.sDom = options.sDom;
+        dtData.aaSorting = options.sortBy;
+        dtData.oLanguage = options.oLanguage;
+
+        if(options.colHeaders != undefined){
+          dtData.aoColumns = new Array(options.colHeaders.length);
+          for(var i = 0; i< options.colHeaders.length; i++){
+            dtData.aoColumns[i]={}
+            dtData.aoColumns[i].sClass="column"+i;
+          };
+          $.each(options.colHeaders,function(i,val){
+            dtData.aoColumns[i].sTitle=val;
+            if(val == "") dtData.aoColumns[i].bVisible=false;
+          });  // colHeaders
+          if(options.colTypes!=undefined){
+            $.each(options.colTypes,function(i,val){
+              var col = dtData.aoColumns[i];
+              // Specific case: hidden cols
+              if(val == "hidden") col.bVisible=false;
+              col.sClass+=" "+val;
+              col.sType=val;
+
+            })
+          };  // colTypes
+          if(options.colFormats!=undefined){
+            // Changes are made directly to the json
+
+          };  // colFormats
+
+          var bAutoWidth = true;
+          if(options.colWidths!=undefined){
+            $.each(options.colWidths,function(i,val){
+              if (val!=null){
+                dtData.aoColumns[i].sWidth=val;
+                bAutoWidth = false;
+              }
+            })
+          }; //colWidths
+          dtData.bAutoWidth = bAutoWidth;
+
+          if(options.colSortable!=undefined){
+            $.each(options.colSortable,function(i,val){
+              if (val!=null && ( !val || val == "false" ) ){
+                dtData.aoColumns[i].bSortable=false
+              }
+            })
+          }; //colSortable
+          if(options.colSearchable!=undefined){
+            $.each(options.colSearchable,function(i,val){
+              if (val!=null && ( !val || val == "false" ) ){
+                dtData.aoColumns[i].bSearchable=false
+              }
+            })
+          }; //colSearchable
+
+        }
+
+        return dtData;
+      }
 
     }
-
-    return dtData;
-  }
-
-}
 );
 
 var CommentsComponent = BaseComponent.extend({
-  update : function() {
+      update : function() {
 
-    // Set page start and length - for pagination
-    if(typeof this.firstResult == 'undefined'){
-      this.firstResult = 0;
-    }
-    if(typeof this.maxResults == 'undefined'){
-      this.maxResults = 4;
-    }
+        // Set page start and length - for pagination
+        if(typeof this.firstResult == 'undefined'){
+          this.firstResult = 0;
+        }
+        if(typeof this.maxResults == 'undefined'){
+          this.maxResults = 4;
+        }
 
-    if (this.page == undefined){
-     Dashboards.log("Fatal - no page definition passed","error");
-      return;
-    }
+        if (this.page == undefined){
+          Dashboards.log("Fatal - no page definition passed","error");
+          return;
+        }
 
-    this.firePageUpdate();
+        this.firePageUpdate();
 
-  },
-  firePageUpdate: function(json){
-
-    // Clear previous table
-    var placeHolder = $("#"+this.htmlObject);
-    placeHolder.empty();
-    placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
-    var myself = this;
-    var args = {
-      action: "list",
-      page: this.page,
-      firstResult: this.firstResult,
-      maxResults: this.maxResults + 1 // Add 1 to maxResults for pagination look-ahead
-    };
-    $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
-      myself.processCommentsList(json);
-    });
-  },
-
-  processCommentsList : function(json)
-  {
-    // Add the possibility to add new comments
-    var myself = this;
-    var placeHolder = $("#"+this.htmlObject + " dl ");
-    myself.addCommentContainer = $('<dt class="ui-widget-header comment-body"><textarea/></dt>'+
-      '<dl class="ui-widget-header comment-footer">'+
-      '<a class="cdfAddComment">Add Comment</a>'+
-      ' <a class="cdfCancelComment">Cancel</a></dl>'
-      );
-    myself.addCommentContainer.find("a").addClass("ui-state-default");
-    myself.addCommentContainer.find("a").hover(
-      function(){
-        $(this).addClass("ui-state-hover");
       },
-      function(){
-        $(this).removeClass("ui-state-hover");
+      firePageUpdate: function(json){
+
+        // Clear previous table
+        var placeHolder = $("#"+this.htmlObject);
+        placeHolder.empty();
+        placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
+        var myself = this;
+        var args = {
+          action: "list",
+          page: this.page,
+          firstResult: this.firstResult,
+          maxResults: this.maxResults + 1 // Add 1 to maxResults for pagination look-ahead
+        };
+        $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
+          myself.processCommentsList(json);
+        });
+      },
+
+      processCommentsList : function(json)
+      {
+        // Add the possibility to add new comments
+        var myself = this;
+        var placeHolder = $("#"+this.htmlObject + " dl ");
+        myself.addCommentContainer = $('<dt class="ui-widget-header comment-body"><textarea/></dt>'+
+            '<dl class="ui-widget-header comment-footer">'+
+            '<a class="cdfAddComment">Add Comment</a>'+
+            ' <a class="cdfCancelComment">Cancel</a></dl>'
+        );
+        myself.addCommentContainer.find("a").addClass("ui-state-default");
+        myself.addCommentContainer.find("a").hover(
+            function(){
+              $(this).addClass("ui-state-hover");
+            },
+            function(){
+              $(this).removeClass("ui-state-hover");
+            }
+        )
+
+        // Cancel
+        $(".cdfCancelComment",myself.addCommentContainer).bind('click',function(e){
+          myself.addCommentContainer.hide("slow");
+          myself.addCommentContainer.find("textarea").val('');
+        });
+
+        // Add comment
+        $(".cdfAddComment",myself.addCommentContainer).bind('click',function(e){
+          var tarea = $("textarea",myself.addCommentContainer);
+          var code = tarea.val();
+          tarea.val('');
+          var args = {
+            action: "add",
+            page: myself.page,
+            comment: code
+          };
+          $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
+            myself.processCommentsAdd(json);
+          });
+          myself.addCommentContainer.hide("slow");
+        });
+
+        myself.addCommentContainer.hide();
+        myself.addCommentContainer.appendTo(placeHolder);
+
+        // Add comment option
+        var addCodeStr = '<div class="cdfAddComment"><a> Add comment</a></div>';
+
+        $(addCodeStr).insertBefore(placeHolder).bind('click',function(e){
+          myself.addCommentContainer.show("slow");
+          $("textarea",myself.addCommentContainer).focus();
+        });
+
+        if (typeof json.error != 'undefined' || typeof json.result == 'undefined') {
+          placeHolder.append('<span class="cdfNoComments">There was an error processing comments</span>' );
+          json.result = [];
+        } else
+        if (json.result.length == 0 ){
+          placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
+        }
+        $.each(json.result.slice(0,this.maxResults), // We drop the lookahead item, if any
+            function(i,comment){
+              var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
+              placeHolder.append('<dt class="'+ bodyClass +' comment-body"><p>'+comment.comment+'</p></dt>');
+              placeHolder.append('<dl class="ui-widget-header comment-footer ">'+comment.user+ ",  " + comment.createdOn +  '</dl>');
+
+            });
+
+
+        // Add pagination support;
+        var paginationContent = $('<div class="cdfCommentsPagination ui-helper-clearfix"><ul class="ui-widget"></ul></div>');
+        var ul = $("ul",paginationContent);
+        if(this.firstResult > 0){
+          ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
+          ul.find(".cdfCommentPagePrev").bind("click",function(){
+            myself.firstResult -= myself.maxResults;
+            myself.firePageUpdate();
+          });
+        }
+        // check if we got a lookahead hit
+        if(this.maxResults < json.result.length) {
+          ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
+          ul.find(".cdfCommentPageNext").bind("click",function(){
+            myself.firstResult += myself.maxResults;
+            myself.firePageUpdate();
+          });
+        }
+        paginationContent.insertAfter(placeHolder);
+
+
+      },
+      processCommentsAdd: function(json){
+        // json response
+        var result = json.result;
+        var placeHolder = $("#"+this.htmlObject + " dl ");
+
+        var container = $('<dt class="ui-widget-header comment-body">'+ result.comment +'</dt>'+
+            '<dl class="ui-widget-header comment-footer">'+ result.user +
+            ", " + result.createdOn + '</dl>'
+        );
+        container.hide();
+        container.insertAfter($("dl:eq(0)",placeHolder));
+        container.show("slow");
+        this.update();
       }
-      )
-
-    // Cancel
-    $(".cdfCancelComment",myself.addCommentContainer).bind('click',function(e){
-      myself.addCommentContainer.hide("slow");
-      myself.addCommentContainer.find("textarea").val('');
-    });
-
-    // Add comment
-    $(".cdfAddComment",myself.addCommentContainer).bind('click',function(e){
-      var tarea = $("textarea",myself.addCommentContainer);
-      var code = tarea.val();
-      tarea.val('');
-      var args = {
-        action: "add",
-        page: myself.page,
-        comment: code
-      };
-      $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
-        myself.processCommentsAdd(json);
-      });
-      myself.addCommentContainer.hide("slow");
-    });
-
-    myself.addCommentContainer.hide();
-    myself.addCommentContainer.appendTo(placeHolder);
-
-    // Add comment option
-    var addCodeStr = '<div class="cdfAddComment"><a> Add comment</a></div>';
-
-    $(addCodeStr).insertBefore(placeHolder).bind('click',function(e){
-      myself.addCommentContainer.show("slow");
-      $("textarea",myself.addCommentContainer).focus();
-    });
-
-    if (typeof json.error != 'undefined' || typeof json.result == 'undefined') {
-      placeHolder.append('<span class="cdfNoComments">There was an error processing comments</span>' );
-      json.result = [];
-    } else
-    if (json.result.length == 0 ){
-      placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
     }
-    $.each(json.result.slice(0,this.maxResults), // We drop the lookahead item, if any
-      function(i,comment){
-        var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
-        placeHolder.append('<dt class="'+ bodyClass +' comment-body"><p>'+comment.comment+'</p></dt>');
-        placeHolder.append('<dl class="ui-widget-header comment-footer ">'+comment.user+ ",  " + comment.createdOn +  '</dl>');
-
-      });
-
-
-    // Add pagination support;
-    var paginationContent = $('<div class="cdfCommentsPagination ui-helper-clearfix"><ul class="ui-widget"></ul></div>');
-    var ul = $("ul",paginationContent);
-    if(this.firstResult > 0){
-      ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
-      ul.find(".cdfCommentPagePrev").bind("click",function(){
-        myself.firstResult -= myself.maxResults;
-        myself.firePageUpdate();
-      });
-    }
-    // check if we got a lookahead hit
-    if(this.maxResults < json.result.length) {
-      ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
-      ul.find(".cdfCommentPageNext").bind("click",function(){
-        myself.firstResult += myself.maxResults;
-        myself.firePageUpdate();
-      });
-    }
-    paginationContent.insertAfter(placeHolder);
-
-
-  },
-  processCommentsAdd: function(json){
-    // json response
-    var result = json.result;
-    var placeHolder = $("#"+this.htmlObject + " dl ");
-
-    var container = $('<dt class="ui-widget-header comment-body">'+ result.comment +'</dt>'+
-      '<dl class="ui-widget-header comment-footer">'+ result.user +
-      ", " + result.createdOn + '</dl>'
-      );
-    container.hide();
-    container.insertAfter($("dl:eq(0)",placeHolder));
-    container.show("slow");
-    this.update();
-  }
-}
 );
 
 var PivotLinkComponent = BaseComponent.extend({
@@ -2317,57 +2317,58 @@ var PivotLinkComponent = BaseComponent.extend({
 });
 
 var QueryComponent = BaseComponent.extend({
-  visible: false,
-  update : function() {
-    QueryComponent.makeQuery(this);
-  },
-  warnOnce: function() {
-  Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
-    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" + 
-    " for more information");
-    delete(this.warnOnce);
-  }
-},
-{
-  makeQuery: function(object){
+      visible: false,
+      update : function() {
+        QueryComponent.makeQuery(this);
+      },
+      warnOnce: function() {
+        Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
+            "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" +
+            " for more information");
+        delete(this.warnOnce);
+      }
+    },
+    {
+      makeQuery: function(object){
 
-    if (this.warnOnce) {this.warnOnce();}
-    var cd = object.queryDefinition;
-    if (cd == undefined){
-     Dashboards.log("Fatal - No query definition passed","error");
-      return;
+        if (this.warnOnce) {this.warnOnce();}
+        var cd = object.queryDefinition;
+        if (cd == undefined){
+          Dashboards.log("Fatal - No query definition passed","error");
+          return;
+        }
+        var query = new Query(cd);
+        query.fetchData(object.parameters, function(values) {
+          // We need to make sure we're getting data from the right place,
+          // depending on whether we're using CDA
+
+          if (object.resultvar != undefined){
+            Dashboards.setParameter(object.resultvar, object.result);
+          }
+          changedValues = undefined;
+          object.metadata = values.metadata;
+          object.result = values.resultset != undefined ? values.resultset: values;
+          object.queryInfo = values.queryInfo;
+          if((typeof(object.postFetch)=='function')){
+            changedValues = object.postFetch(values);
+          }
+          if (changedValues != undefined){
+            values = changedValues;
+            // (Call this again after postFetch)
+
+            if (object.resultvar != undefined){
+              Dashboards.setParameter(object.resultvar, object.result);
+            }
+            object.result = values.resultset != undefined ? values.resultset: values;
+            if (typeof values.resultset != "undefined"){
+              object.metadata = values.metadata;
+              object.queryInfo = values.queryInfo;
+            }
+          }
+
+        });
+      }
     }
-    var query = new Query(cd);
-    query.fetchData(object.parameters, function(values) {
-      // We need to make sure we're getting data from the right place,
-      // depending on whether we're using CDA
-
-      if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
-      }
-      changedValues = undefined;
-      object.metadata = values.metadata;
-      object.result = values.resultset != undefined ? values.resultset: values;
-      object.queryInfo = values.queryInfo;
-      if((typeof(object.postFetch)=='function')){
-        changedValues = object.postFetch(values);
-      }
-      if (changedValues != undefined){
-        values = changedValues;
-        // (Call this again after postFetch)
-
-      if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
-      }
-      object.result = values.resultset != undefined ? values.resultset: values;
-      if (typeof values.resultset != "undefined"){
-        object.metadata = values.metadata;
-        object.queryInfo = values.queryInfo;
-      }
-    });
-
-  }
-}
 );
 
 var MdxQueryGroupComponent = BaseComponent.extend({
@@ -2436,7 +2437,7 @@ var ButtonComponent = BaseComponent.extend({
   update : function() {
     var myself = this;
     var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
-        return myself.expression.apply(myself,arguments);
+      return myself.expression.apply(myself,arguments);
     });
     if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
       b.button();
@@ -2468,7 +2469,7 @@ var PrptComponent = BaseComponent.extend({
       });
     }
     else{
-	var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
+      var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
       var encodeArray = function(k,v) {
         var arr = [];
         for (var i = 0; i < v.length;i++) {
@@ -2540,65 +2541,65 @@ var PrptComponent = BaseComponent.extend({
 
 
 var ExecutePrptComponent = PrptComponent.extend({
-  visible: false,
+      visible: false,
 
-  update : function() {
-    // 2 modes of working; if it's a div, create a button inside it
-    var myself = this;
-    var o = $("#"+ this.htmlObject);
-    if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
-      // create a button
-      o = $("<button/>").appendTo(o.empty());
-      if (o[0].tagName=="DIV") o.wrap("<span/>");
-      if (this.label != undefined) o.text(this.label);
-      o.button();
-    }
-    o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-    o.bind("click", function(){
-      var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
-      if(success) {
-        myself.executePrptComponent();
-      }
-      typeof(myself.postChange)=='undefined' ? true : myself.postChange();
-    });
-  },
+      update : function() {
+        // 2 modes of working; if it's a div, create a button inside it
+        var myself = this;
+        var o = $("#"+ this.htmlObject);
+        if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
+          // create a button
+          o = $("<button/>").appendTo(o.empty());
+          if (o[0].tagName=="DIV") o.wrap("<span/>");
+          if (this.label != undefined) o.text(this.label);
+          o.button();
+        }
+        o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+        o.bind("click", function(){
+          var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
+          if(success) {
+            myself.executePrptComponent();
+          }
+          typeof(myself.postChange)=='undefined' ? true : myself.postChange();
+        });
+      },
 
-  executePrptComponent: function(){
+      executePrptComponent: function(){
 
-    var options = this.getOptions();
-	var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
-    var a=[];
-    var encodeArray = function(k,v) {
-      var arr = [];
-      for (var i = 0; i < v.length;i++) {
-        arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-      }
-      return arr;
-    };
-    $.each(options,function(k,v){
+        var options = this.getOptions();
+        var url = webAppPath + '/api/repos/' + this.path.replace(/\//g, ":") + '/generatedContent';
+        var a=[];
+        var encodeArray = function(k,v) {
+          var arr = [];
+          for (var i = 0; i < v.length;i++) {
+            arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+          }
+          return arr;
+        };
+        $.each(options,function(k,v){
           if ((v != null) && (typeof v == 'object')) {
-        a.push.apply(a,encodeArray(k,v));
-      } else {
-        a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
-      }
-    });
-    $.fancybox({
-      type:"iframe",
-      href: url + "?"+ a.join('&') ,
-      width: $(window).width(),
-      height:$(window).height() - 50
-    });
+            a.push.apply(a,encodeArray(k,v));
+          } else {
+            a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+          }
+        });
+        $.fancybox({
+          type:"iframe",
+          href: url + "?"+ a.join('&') ,
+          width: $(window).width(),
+          height:$(window).height() - 50
+        });
 
-  }
-}
+      }
+    }
 );
 
 var AnalyzerComponent = BaseComponent.extend({
 
   update: function(){
-    
+
     this.clear();
-            
+
     var options = this.getOptions();
     var url = webAppPath + '/content/analyzer/';
     var myself=this;
@@ -2614,7 +2615,7 @@ var AnalyzerComponent = BaseComponent.extend({
   },
 
   getOptions: function() {
-                            
+
     var options = {
       solution : this.solution,
       path: this.path,
@@ -2628,22 +2629,22 @@ var AnalyzerComponent = BaseComponent.extend({
     $.map(this.parameters,function(k){
       options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
     });
-            
+
     return options;
   },
-  
-  generateIframe: function(htmlObject,url,parameters,height,width) {
-	  var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
-	  ' frameborder="0"' +
-	  ' height="' + height + '"' +
-	  ' width="' + width + '"' +
-	  ' src="' + url + "?";
 
-	  iFrameHTML += $.param(parameters, true);
-	  iFrameHTML += "\"></iframe>";
-	       
-	  return iFrameHTML;
-	}
+  generateIframe: function(htmlObject,url,parameters,height,width) {
+    var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
+        ' frameborder="0"' +
+        ' height="' + height + '"' +
+        ' width="' + width + '"' +
+        ' src="' + url + "?";
+
+    iFrameHTML += $.param(parameters, true);
+    iFrameHTML += "\"></iframe>";
+
+    return iFrameHTML;
+  }
 });
 
 var FreeformComponent = BaseComponent.extend({
