@@ -1,3 +1,16 @@
+12.05.15
+	* Added support on tables for urlTemplate, for backward compatibility
+	* DashboardContext: get roles via SecurityParameterProvider
+	* Can include session attributes in Dashboards.context according to xml
+	* [PATCH][FEAT] Experimental feature that allows to hide overcrowded category labels in a categorical axis. 
+	* [PATCH][FIX]  Bar valuesAnchor='top' now works.
+	* Handle cases where hash doesn't change so browsers won't jump to top of page
+	* Changed duplicate component separator to underscore.
+	* Add warning for when CDA isn't detected in auto-includes
+	* Added autoinclude documentation
+	* Solved [Redmine CCC574] - third bar is not removed from barline when having 2 series PATCH FIX Error occurring when hiding 
+	* Second axis series - now it does not try to hide at all, but does not throw also.
+
 12.04.09
 
 	* Added support for auto-including query results in dashboard context
