@@ -1044,12 +1044,23 @@ var DateInputComponent = BaseComponent.extend({
       });
       // Add JQuery DatePicker standard localization support only if the dashboard is localized
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+        var $input = $("#" + myself.htmlObject + " input");
+
+        $input.datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+        
+        
+        //Setup alt field and format to keep iso format
+        $input.parent().append($('<hidden>').attr("id", myself.name + "_hidden"));
+        $input.datepicker("option", "altField", "#" + myself.name + "_hidden" );
+        $input.datepicker("option", "altFormat", format );
       }
     });
   },
   getValue : function() {
-    return $("#"+this.name).val();
+    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) 
+        return $("#" + this.name + "_hidden").val();
+    else
+        return $("#"+this.name).val();
   }
 });
 
