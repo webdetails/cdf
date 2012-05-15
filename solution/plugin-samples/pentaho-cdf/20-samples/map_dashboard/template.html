@@ -89,7 +89,7 @@ territorySelector =
 {
   name: "territorySelector",
   type: "select",
-  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/GetTerritory.xaction",
+  path: "/public/pentaho-solutions/plugin-samples/cdf-samples/20-samples/map_dashboard/GetTerritory.xaction",
   parameters:[],
   parameter:"territory",
   htmlObject: "territory_selector",
@@ -104,7 +104,7 @@ firstChart =
 {
   name: "Chart",
   type: "xaction",
-  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/PieChart1.xaction",
+  path: "/public/pentaho-solutions/plugin-samples/cdf-samples/20-samples/map_dashboard/PieChart1.xaction",
   parameters: [["productLine","productLine"]],
   listeners:["productLine"],
   htmlObject: "first_chart",
@@ -117,7 +117,7 @@ secondChart =
 {
   name: "Chart",
   type: "xaction",
-  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/BarChart2.xaction",
+  path: "/public/pentaho-solutions/plugin-samples/cdf-samples/20-samples/map_dashboard/BarChart2.xaction",
   parameters:[["territory","territory"]],
   listeners:["territory"],
   htmlObject: "second_chart",
@@ -130,7 +130,7 @@ thirdChart =
 {
   name: "Chart",
   type: "xaction",
-  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/LineChart3.xaction",
+  path: "/public/pentaho-solutions/plugin-samples/cdf-samples/20-samples/map_dashboard/LineChart3.xaction",
   parameters:[["territory","territory"],["productLine","productLine"]],
   listeners:["territory","productLine"],
   htmlObject: "third_chart",
@@ -143,7 +143,7 @@ pivot =
 {
   name: "pivot",
   type: "jpivot",
-  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/Pivot.xaction",
+  path: "/public/pentaho-solutions/plugin-samples/cdf-samples/20-samples/map_dashboard/Pivot.xaction",
   parameters:[["territory","territory"],["productLine","productLine"]],
   listeners:["territory","productLine"],
   htmlObject: "pivot_object",
@@ -158,7 +158,7 @@ map =
 {
 name: "map",
 	  type: "map",
-	  path: "/public/pentaho-solutions/bi-developers/cdf-samples/20-samples/map_dashboard/GetPoints.xaction",
+	  path: "/public/pentaho-solutions/plugin-samples/cdf-samples/20-samples/map_dashboard/GetPoints.xaction",
 	  parameters:[["territory","territory"]],
 	  listeners:["territory"],
 	  messageElementId: "messages",

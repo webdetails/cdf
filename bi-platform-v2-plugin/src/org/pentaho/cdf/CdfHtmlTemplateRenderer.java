@@ -185,7 +185,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     
     final Properties resources = new Properties();
     File resourceFile = new File(getPluginRootDir(), "resources.txt");
-    resources.load(new FileInputStream(new File(getPluginRootDir(), "resources.txt")));
+    resources.load(new FileInputStream(resourceFile));
 
     ArrayList<String> scriptsList = new ArrayList<String>();
     ArrayList<String> stylesList = new ArrayList<String>();
