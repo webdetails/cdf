@@ -49,7 +49,7 @@ div.navi a {
 	height:8px;
 	float:left;
 	margin:3px;
-	background:url(GetCDFResource?resource=/public/pentaho-solutions/plugin-samples/cdf-samples/40-support/scrollable/navigator.png) 0 0 no-repeat;     
+	background:url(GetCDFResource?resource=/public/pentaho-solutions/plugin-samples/pentaho-cdf/40-support/scrollable/navigator.png) 0 0 no-repeat;     
 	cursor:pointer;	
 }
 
