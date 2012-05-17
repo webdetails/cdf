@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
@@ -63,14 +64,6 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
         
         OpenLayers.Renderer.Elements.prototype.initialize.apply(this, 
                                                                 arguments);
-    },
-
-    /**
-     * APIMethod: destroy
-     * Deconstruct the renderer.
-     */
-    destroy: function() {
-        OpenLayers.Renderer.Elements.prototype.destroy.apply(this, arguments);
     },
 
     /**
@@ -214,12 +207,12 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
     setStyle: function(node, style, options, geometry) {
         style = style  || node._style;
         options = options || node._options;
-        var widthFactor = 1;
         var fillColor = style.fillColor;
 
         if (node._geometryClass === "OpenLayers.Geometry.Point") {
             if (style.externalGraphic) {
-        		if (style.graphicTitle) {
+                options.isFilled = true;
+                if (style.graphicTitle) {
                     node.title=style.graphicTitle;
                 } 
                 var width = style.graphicWidth || style.graphicHeight;
@@ -295,7 +288,7 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
 
         // additional rendering for rotated graphics or symbols
         var rotation = style.rotation;
-        if (rotation !== node._rotation) {
+        if ((rotation !== undefined || node._rotation !== undefined)) {
             node._rotation = rotation;
             if (style.externalGraphic) {
                 this.graphicRotate(node, xOffset, yOffset, style);
@@ -310,26 +303,27 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
         }
 
         // stroke 
-        if (options.isStroked) { 
-            node.strokecolor = style.strokeColor; 
-            node.strokeweight = style.strokeWidth + "px"; 
-        } else { 
-            node.stroked = false; 
-        }
         var strokes = node.getElementsByTagName("stroke");
         var stroke = (strokes.length == 0) ? null : strokes[0];
         if (!options.isStroked) {
+            node.stroked = false;
             if (stroke) {
-                node.removeChild(stroke);
+                stroke.on = false;
             }
         } else {
             if (!stroke) {
                 stroke = this.createNode('olv:stroke', node.id + "_stroke");
                 node.appendChild(stroke);
             }
+            stroke.on = true;
+            stroke.color = style.strokeColor; 
+            stroke.weight = style.strokeWidth + "px"; 
             stroke.opacity = style.strokeOpacity;
-            stroke.endcap = !style.strokeLinecap || style.strokeLinecap == 'butt' ? 'flat' : style.strokeLinecap;
-            stroke.dashstyle = this.dashStyle(style);
+            stroke.endcap = style.strokeLinecap == 'butt' ? 'flat' :
+                (style.strokeLinecap || 'round');
+            if (style.strokeDashstyle) {
+                stroke.dashstyle = this.dashStyle(style);
+            }
         }
         
         if (style.cursor != "inherit" && style.cursor != null) {
@@ -360,7 +354,6 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
      */
     graphicRotate: function(node, xOffset, yOffset, style) {
         var style = style || node._style;
-        var options = node._options;
         var rotation = style.rotation || 0;
         
         var aspectRatio, size;
@@ -751,21 +744,43 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
         var resolution = this.getResolution();
     
         var path = [];
-        var linearRing, i, j, len, ilen, comp, x, y;
-        for (j = 0, len=geometry.components.length; j<len; j++) {
-            linearRing = geometry.components[j];
-
+        var j, jj, points, area, first, second, i, ii, comp, pathComp, x, y;
+        for (j=0, jj=geometry.components.length; j<jj; j++) {
             path.push("m");
-            for (i=0, ilen=linearRing.components.length; i<ilen; i++) {
-                comp = linearRing.components[i];
+            points = geometry.components[j].components;
+            // we only close paths of interior rings with area
+            area = (j === 0);
+            first = null;
+            second = null;
+            for (i=0, ii=points.length; i<ii; i++) {
+                comp = points[i];
                 x = (comp.x / resolution - this.offset.x) | 0;
                 y = (comp.y / resolution - this.offset.y) | 0;
-                path.push(" " + x + "," + y);
+                pathComp = " " + x + "," + y;
+                path.push(pathComp);
                 if (i==0) {
                     path.push(" l");
                 }
+                if (!area) {
+                    // IE improperly renders sub-paths that have no area.
+                    // Instead of checking the area of every ring, we confirm
+                    // the ring has at least three distinct points.  This does
+                    // not catch all non-zero area cases, but it greatly improves
+                    // interior ring digitizing and is a minor performance hit
+                    // when rendering rings with many points.
+                    if (!first) {
+                        first = pathComp;
+                    } else if (first != pathComp) {
+                        if (!second) {
+                            second = pathComp;
+                        } else if (second != pathComp) {
+                            // stop looking
+                            area = true;
+                        }
+                    }
+                }
             }
-            path.push(" x ");
+            path.push(area ? " x " : " ");
         }
         path.push("e");
         node.path = path.join("");
@@ -814,6 +829,9 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
 
         textbox.innerText = style.label;
 
+        if (style.cursor != "inherit" && style.cursor != null) {
+            textbox.style.cursor = style.cursor;
+        }
         if (style.fontColor) {
             textbox.style.color = style.fontColor;
         }
@@ -828,6 +846,9 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
         }
         if (style.fontWeight) {
             textbox.style.fontWeight = style.fontWeight;
+        }
+        if (style.fontStyle) {
+            textbox.style.fontStyle = style.fontStyle;
         }
         if(style.labelSelect === true) {
             label._featureId = featureId;
@@ -847,10 +868,13 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
         }
 
         var align = style.labelAlign || "cm";
+        if (align.length == 1) {
+            align += "m";
+        }
         var xshift = textbox.clientWidth *
-            (OpenLayers.Renderer.VML.LABEL_SHIFT[align[0] || "c"]);
+            (OpenLayers.Renderer.VML.LABEL_SHIFT[align.substr(0,1)]);
         var yshift = textbox.clientHeight *
-            (OpenLayers.Renderer.VML.LABEL_SHIFT[align[1] || "m"]);
+            (OpenLayers.Renderer.VML.LABEL_SHIFT[align.substr(1,1)]);
         label.style.left = parseInt(label.style.left)-xshift-1+"px";
         label.style.top = parseInt(label.style.top)+yshift+"px";
         
@@ -936,7 +960,6 @@ OpenLayers.Renderer.VML = OpenLayers.Class(OpenLayers.Renderer.Elements, {
         var symbol = OpenLayers.Renderer.symbol[graphicName];
         if (!symbol) {
             throw new Error(graphicName + ' is not a valid symbol name');
-            return;
         }
 
         var symbolExtent = new OpenLayers.Bounds(

@@ -1,3 +1,38 @@
+.pentaho-toggle-button-up button {
+    background: #eee;
+    border: 1px outset white;
+}
+
+.pentaho-toggle-button-down button {
+    background: silver;
+    border: 1px inset gray;
+}
+
+
+.boxshadow .pentaho-toggle-button-up button {
+    background: #eee;
+    border: 1px solid gray;
+    box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -webkit-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -moz-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -o-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+    -ms-box-shadow: inset 1px 1px 4px white,
+                inset -1px -1px 3px silver;
+}
+
+.boxshadow .pentaho-toggle-button-down button {
+    background: silver;
+    border: 1px solid black;
+    box-shadow: inset 1px 1px 1px gray;
+    -webkit-box-shadow: inset 1px 1px 1px gray;
+    -moz-box-shadow: inset 1px 1px 1px gray;
+    -o-box-shadow: inset 1px 1px 1px gray;
+    -ms-box-shadow: inset 1px 1px 1px gray;
+}
 
 .tableComponent{
 	margin-bottom:0em;

@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Harald Khan
  */
@@ -18,7 +14,7 @@
  */
 OpenLayers.Lang["nn"] = OpenLayers.Util.applyDefaults({
 
-    'scale': "Skala = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Skala = 1 : ${scaleDenom}",
 
     'layerAlreadyAdded': "Du freista å leggja til laget «${layerName}» på kartet, men det har alt vorte lagt til.",
 

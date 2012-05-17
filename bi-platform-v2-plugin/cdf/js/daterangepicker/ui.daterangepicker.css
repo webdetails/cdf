@@ -29,6 +29,8 @@
 .ui-daterangepicker button.btnDone {
 	margin: 0 5px 5px 0;
 	position: absolute;
+        top: auto;
+        left: auto;
 	bottom: 0;
 	right: 0;
 	clear: both;

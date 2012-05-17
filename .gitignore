@@ -1,0 +1,20 @@
+<<<<<<< HEAD
+bi-platform-v2-plugin/.classpath
+bi-platform-v2-plugin/bin
+bi-platform-v2-plugin/dist
+bi-platform-v2-plugin/lib
+bi-platform-v2-plugin/public
+bi-platform-v2-plugin/test-lib
+
+=======
+# OS-generated files
+.DS_Store*
+# Here be passwords!
+bi-platform-v2-plugin/override.properties
+# Build/Staging related stuff
+bi-platform-v2-plugin/bin/
+bi-platform-v2-plugin/dist/
+bi-platform-v2-plugin/lib/
+
+/nbproject/private/
+>>>>>>> master

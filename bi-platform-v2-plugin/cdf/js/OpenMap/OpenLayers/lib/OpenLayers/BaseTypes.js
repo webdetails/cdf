@@ -1,15 +1,10 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
- * @requires OpenLayers/BaseTypes/Class.js
- * @requires OpenLayers/BaseTypes/LonLat.js
- * @requires OpenLayers/BaseTypes/Size.js
- * @requires OpenLayers/BaseTypes/Pixel.js
- * @requires OpenLayers/BaseTypes/Bounds.js
- * @requires OpenLayers/BaseTypes/Element.js
- * @requires OpenLayers/Lang/en.js
+ * @requires OpenLayers/Lang.js
  * @requires OpenLayers/Console.js
  */
  
@@ -30,7 +25,7 @@ OpenLayers.String = {
      * 
      * Parameters:
      * str - {String} The string to test.
-     * sub - {Sring} The substring to look for.
+     * sub - {String} The substring to look for.
      *  
      * Returns:
      * {Boolean} The first string starts with the second.
@@ -158,20 +153,20 @@ OpenLayers.String = {
     },
 
     /**
-     * Property: OpenLayers.String.tokenRegEx
+     * Property: tokenRegEx
      * Used to find tokens in a string.
      * Examples: ${a}, ${a.b.c}, ${a-b}, ${5}
      */
     tokenRegEx:  /\$\{([\w.]+?)\}/g,
     
     /**
-     * Property: OpenLayers.String.numberRegEx
+     * Property: numberRegEx
      * Used to test strings as numbers.
      */
     numberRegEx: /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/,
     
     /**
-     * APIFunction: OpenLayers.String.isNumeric
+     * APIFunction: isNumeric
      * Determine whether a string contains only a numeric value.
      *
      * Examples:
@@ -209,7 +204,7 @@ if (!String.prototype.startsWith) {
      * *Deprecated*. Whether or not a string starts with another string. 
      * 
      * Parameters:
-     * sStart - {Sring} The string we're testing for.
+     * sStart - {String} The string we're testing for.
      *  
      * Returns:
      * {Boolean} Whether or not this string starts with the string passed in.
@@ -463,7 +458,17 @@ OpenLayers.Function = {
      */
     True : function() {
         return true;
-    }
+    },
+    
+    /**
+     * APIFunction: Void
+     * A reusable function that returns ``undefined``.
+     *
+     * Returns:
+     * {undefined}
+     */
+    Void: function() {}
+
 };
 
 if (!Function.prototype.bind) {
@@ -519,7 +524,7 @@ OpenLayers.Array = {
      *     Array.prototype.filter extension to the ECMA-262 standard.  Where
      *     available, Array.prototype.filter will be used.
      *
-     * Based on well known example from http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Objects:Array:filter
+     * Based on well known example from http://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/filter
      *
      * Parameters:
      * array - {Array} The array to be filtered.  This array is not mutated.

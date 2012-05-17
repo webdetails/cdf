@@ -75,7 +75,7 @@ function init_map(div, lon, lat, zoom, b_use_mercator, b_layer_control, b_custom
 	
 
 	
-	if( b_layer_control = 'true'){
+	if( b_layer_control == 'true'){
 		show_layers();
 	}
 }

@@ -1,10 +1,15 @@
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
+
 /**
  * @requires OpenLayers/Format/WFSCapabilities/v1.js
  */
 
 /**
  * Class: OpenLayers.Format.WFSCapabilities/v1_0_0
- * Read WMS Capabilities version 1.0.0.
+ * Read WFS Capabilities version 1.0.0.
  * 
  * Inherits from:
  *  - <OpenLayers.Format.WFSCapabilities>
@@ -145,6 +150,16 @@ OpenLayers.Format.WFSCapabilities.v1_0_0 = OpenLayers.Class(
      */
     read_cap_Post: function(obj, node) {
         obj.post = node.getAttribute("onlineResource");
+    },
+
+    /**
+     * Method: read_cap_SRS
+     */
+    read_cap_SRS: function(obj, node) {
+        var srs = this.getChildValue(node);
+        if (srs) {
+            obj.srs = srs;
+        }
     },
     
     CLASS_NAME: "OpenLayers.Format.WFSCapabilities.v1_0_0" 

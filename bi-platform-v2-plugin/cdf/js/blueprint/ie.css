@@ -21,7 +21,7 @@ sub {vertical-align:text-bottom;}
 html>body p code {*white-space:normal;}
 hr {margin:-8px auto 11px;}
 img {-ms-interpolation-mode:bicubic;}
-.clearfix, .container {display:inline-block;}
+.clearfix, .container {display:block;}
 * html .clearfix, * html .container {height:1%;}
 fieldset {padding-top:0;}
 legend {margin-top:-0.2em;margin-bottom:1em;margin-left:-0.5em;}

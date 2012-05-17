@@ -1,9 +1,11 @@
-/* Copyright (c) 2006 MetaCarta, Inc., published under a modified BSD license.
- * See http://svn.openlayers.org/trunk/openlayers/repository-license.txt 
- * for the full text of the license. */
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
 
 
 /**
+ * @requires OpenLayers/BaseTypes/Class.js
  * @requires OpenLayers/Util.js
  * @requires OpenLayers/Style.js
  */
@@ -16,7 +18,7 @@ OpenLayers.Filter = OpenLayers.Class({
     
     /** 
      * Constructor: OpenLayers.Filter
-     * This is an abstract class.  Create an instance of a filter subclass.
+     * This class represents a generic filter.
      *
      * Parameters:
      * options - {Object} Optional object whose properties will be set on the
@@ -38,11 +40,12 @@ OpenLayers.Filter = OpenLayers.Class({
 
     /**
      * APIMethod: evaluate
-     * Evaluates this filter in a specific context.  Should be implemented by
-     *     subclasses.
+     * Evaluates this filter in a specific context.  Instances or subclasses
+     * are supposed to override this method.
      * 
      * Parameters:
-     * context - {Object} Context to use in evaluating the filter.
+     * context - {Object} Context to use in evaluating the filter.  If a vector
+     *     feature is provided, the feature.attributes will be used as context.
      * 
      * Returns:
      * {Boolean} The filter applies.

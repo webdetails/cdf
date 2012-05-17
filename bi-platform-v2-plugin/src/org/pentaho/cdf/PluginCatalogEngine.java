@@ -58,7 +58,7 @@ public class PluginCatalogEngine {
     * Object = command to run the assigned file type
     */
 
-    pluginPool = new Hashtable();
+    pluginPool = new Hashtable<String, String>();
 
     /* xaction case is added manually because it doesnt need a plugin to be runnable */
     pluginPool.put("xaction", "ViewAction?solution={solution}&path={path}&action={name}");

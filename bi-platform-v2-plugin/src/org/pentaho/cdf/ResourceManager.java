@@ -20,7 +20,7 @@ public class ResourceManager {
   public static ResourceManager instance;
 
   public static final String PLUGIN_DIR = PentahoSystem.getApplicationContext().getSolutionPath("system/" + CdfContentGenerator.PLUGIN_NAME + "/");
-  private static final HashSet<String> CACHEABLE_EXTENSIONS = new HashSet();
+  private static final HashSet<String> CACHEABLE_EXTENSIONS = new HashSet<String>();
   private static final HashMap<String, String> cacheContainer = new HashMap<String, String>();
 
   private boolean isCacheEnabled = true;

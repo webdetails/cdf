@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -16,14 +12,11 @@ OpenLayers.Lang["zh-CN"] = {
 
     'unhandledRequest': "未处理的请求，返回值为 ${statusText}",
 
-    'permalink': "永久链接",
+    'Permalink': "永久链接",
 
-    'overlays': "叠加层",
+    'Overlays': "叠加层",
 
-    'baseLayer': "基础图层",
-
-    'sameProjection':
-        "鹰眼地图只有在和主地图使用相同的投影的时候才能正常共工作",
+    'Base Layer': "基础图层",
 
     'readNotImplemented': "读取功能没有实现。",
 
@@ -80,7 +73,7 @@ OpenLayers.Lang["zh-CN"] = {
         "<a href='http://trac.openlayers.org/wiki/${layerLib}' " +
         "target='_blank'>点击这里</a>",
 
-    'scale': "比例尺 = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "比例尺 = 1 : ${scaleDenom}",
 
     // console message
     'layerAlreadyAdded':
@@ -112,9 +105,5 @@ OpenLayers.Lang["zh-CN"] = {
     // console message
     'unsupportedGeometryType': "不支持的几何体类型： ${geomType}",
 
-    // console message
-    'pagePositionFailed':
-        "OpenLayers.Util.pagePosition 失败：id 为 ${elemId} 的元素可能被错置。",
-                    
     'end': ''
 };
