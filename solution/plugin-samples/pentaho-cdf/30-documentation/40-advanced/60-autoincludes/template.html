@@ -1,0 +1,123 @@
+<style>
+</style>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Auto Includes</h2>
+
+		<p>
+
+		CDF supports adding the results of CDA queries to the context. The
+		default configuration file will take any CDA file within the
+		solution:/cdf/include/ folder hierarchy and include all queries
+		therein, with their default parameters, in any dashboard whose path,
+		relative to the solution root, is within the same path as the CDA file,
+		relative to solution:/cdf/include/.
+
+		</p>
+		
+
+		<p>
+
+		As an example, if you have a CDA file in
+		solution:/cdf/include/aFolder/myQueries.cda, then the dashboard
+		solution:/aFolder/myDashboard.wcdf would include all queries from
+		myQueries.cda, as would a dashboard located at
+		solution:/aFolder/anotherFolder/myOtherDashboard.wcdf. A dashboard located at
+		solution:/someOtherFolder/myThirdDashboard.wcdf, however, wouldn't include
+		those queries. Partial matches will also work, without the full solution path
+
+		</p>
+
+		<p>
+
+		This is specially useful for dashboards that need constant data input, for instance an indication of when was the last time a specific etl worked.
+
+		
+		</p>
+
+
+		<h2>Rule Format</h2>
+
+		<p>
+		The auto-include rules follow the following template, where all the Patterns are understood as regular expressions:
+		</p>
+
+		<code><pre>
+			&lt;autoinclude&gt;
+			  &lt;cda&gt;cdaPattern&lt;/cda&gt;
+			  &lt;ids&gt;idPattern&lt;/ids&gt;
+			  &lt;dashboards&gt;
+				&lt;include&gt;includePattern&lt;/include&gt;
+				&lt;include&gt;includePattern_2&lt;/include&gt;
+				&lt;exclude&gt;excludePattern&lt;/include&gt;
+				...
+				&lt;include&gt;includePattern_n&lt;/include&gt;
+			  &lt;/dashboards&gt;
+			&lt;/autoinclude&gt;	
+		
+		</pre></code>
+
+
+		<p>
+		Such a block should be interpreted as follows:
+
+		<ul>
+		<li>
+		This auto-include rule pertains to any and all CDA files whose path matches cdaPattern.
+		</li>
+		<li>
+		The dashboards element may have any number of include and exclude elements, in order of importance (from least to most important). the includePattern_n/excludePattern_n patterns may contain backreferences to capture groups in the cdaPattern.
+		</li>
+		<li>
+		The path for the dashboard being executed will be tested against the include/exclude patterns, in order of importance. The dashboard will auto-include a CDA's queries if it matches at least one include rule, unless it matches a subsequent exclude rule (unless it matches a further include rule, etc).
+		</li>
+		<li>
+		If the dashboard qualifies for auto-insertion, all queries from the matched CDA whose dataAccessIds also match idPattern will be executed and included in the dashboard's context object.
+		</li>
+		</ul>
+
+		
+		</p>
+
+
+		<h2>Default Rule</h2>
+
+		<p>
+		The default rule for auto-inclusion serves as a good example of what can be achieved with the rule format. Be aware that this will only
+		work if CDA is also present in the system
+		</p>
+
+		
+		<code><pre>
+			&lt;autoinclude&gt;
+			  &lt;cda&gt;&lt;![CDATA[cdf/includes/(.*)/(.*?)\.cda]]&gt;&lt;/cda&gt;
+			  &lt;ids&gt;.*&lt;/ids&gt;
+			  &lt;dashboards&gt;
+				&lt;include&gt;&lt;![CDATA[/$1/.*\.wcdf]]&gt;&lt;/include&gt;
+				&lt;include&gt;&lt;![CDATA[/$1/.*\.xcdf]]&gt;&lt;/include&gt;
+				&lt;include&gt;&lt;![CDATA[/$1/.*\.cdfde]]&gt;&lt;/include&gt;
+			  &lt;/dashboards&gt;
+			&lt;/autoinclude&gt;	
+		</pre></code>
+
+
+		<p>
+		Note that most of the patterns are wrapped in &lt;![CDATA[ ]]&gt; blocks, obviating the need for escaping any reserved XML characters within the regexps.
+As you can see, the cda element defines that this rule will match any CDA file whose path looks like /solution/cdf/includes/(.*)/(.*?)\.cda — this will match all files within /solution/cdf/includes/ that have at least one more folder in the path, and end with the .cda extension. The two capture groups will capture the file path, and the (extension-less) filename.
+		</p>
+
+
+		<p>
+		The include patterns all specifiy paths starting with /$1/ (the path capture group), meaning, the path begins the same as the previously matched CDA file's, and ending with .*\.wcdf (or cdfde/xcdf), so matching all paths that start the same as the CDA file, but possibly having more folders in the path . The three rules differ only in the file extension they allow (covering CDF and CDE dashboards). The ids pattern specifies a loose pattern — any id matches, so once a match has been made between a dashboard and a CDA file, all queries in that CDA will be inserted into the dashboard's context.
+		</p>
+
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

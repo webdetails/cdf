@@ -3,4 +3,20 @@
 	<default-template>mantle</default-template>
 	<cache>false</cache>
 	<max-age>2628001</max-age>
+        <resources>
+            <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff</downloadable-formats>
+        </resources>
+
+
+    <!--
+        hibernate-available: flag indicating if the Hibernate database is available (not available in AGILE-BI and cause issues).
+        this flag allows agile-bi to override the default setting of true
+
+        valid values are: true | false
+     -->
+    <hibernate-available>true</hibernate-available>
+
+    <!-- Register the AMD namespace so RequireJS require/define can find the cdf modules -->
+    <amd-root-path>content/pentaho-cdf/js</amd-root-path>
+    <amd-root-namespace>cdf</amd-root-namespace>
 </settings>

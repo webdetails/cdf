@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Als-Holder
  */
@@ -20,13 +16,11 @@ OpenLayers.Lang["gsw"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Nit behandleti Aafrogsruckmäldig ${statusText}",
 
-    'permalink': "Permalink",
+    'Permalink': "Permalink",
 
-    'overlays': "Iberlagerige",
+    'Overlays': "Iberlagerige",
 
-    'baseLayer': "Grundcharte",
-
-    'sameProjection': "D Ibersichts-Charte funktioniert nume, wänn si di glych Projäktion brucht wie d Hauptcharte",
+    'Base Layer': "Grundcharte",
 
     'readNotImplemented': "Läse nit implementiert.",
 
@@ -52,7 +46,7 @@ OpenLayers.Lang["gsw"] = OpenLayers.Util.applyDefaults({
 
     'getLayerWarning': "Dr ${layerType}-Layer het nit korräkt chenne glade wäre.\x3cbr\x3e\x3cbr\x3eGo die Mäldig nimi z kriege, wehl e andere Hintergrundlayer us em LayerSwitcher im rächte obere Ecke.\x3cbr\x3e\x3cbr\x3eDää Fähler git s seli hyfig, wel s Skript vu dr \'${layerLib}\'-Bibliothek nit yybunde woren isch oder wel s kei giltige API-Schlissel fir Dyy URL din het.\x3cbr\x3e\x3cbr\x3eEntwickler: Fir Hilf zum korräkte Yybinde vu Layer \x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3edoo drucke\x3c/a\x3e",
 
-    'scale': "Maßstab = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Maßstab = 1 : ${scaleDenom}",
 
     'W': "W",
 
@@ -75,8 +69,6 @@ OpenLayers.Lang["gsw"] = OpenLayers.Util.applyDefaults({
     'pixelAddError': "Du muesch x- un y-Wärt aagee bi dr Zuefieg-Funktion.",
 
     'unsupportedGeometryType': "Nit unterstitze Geometrii-Typ: ${geomType}",
-
-    'pagePositionFailed': "OpenLayers.Util.pagePosition fählgschlaa: Elemänt mit ID ${elemId} isch villicht falsch gsetzt.",
 
     'filterEvaluateNotImplemented': "evaluiere isch nit implemäntiert in däm Filtertyp."
 

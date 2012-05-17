@@ -1,9 +1,11 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 
 /**
+ * @requires OpenLayers/BaseTypes/Class.js
  * @requires OpenLayers/Map.js
  * @requires OpenLayers/Projection.js
  */
@@ -79,10 +81,28 @@ OpenLayers.Layer = OpenLayers.Class({
      * moveend - Triggered when layer is done moving, object passed as
      *     argument has a zoomChanged boolean property which tells that the
      *     zoom has changed.
+     * added - Triggered after the layer is added to a map.  Listeners will
+     *     receive an object with a *map* property referencing the map and a
+     *     *layer* property referencing the layer.
+     * removed - Triggered after the layer is removed from the map.  Listeners
+     *     will receive an object with a *map* property referencing the map and
+     *     a *layer* property referencing the layer.
      */
     EVENT_TYPES: ["loadstart", "loadend", "loadcancel", "visibilitychanged",
-                  "move", "moveend"],
-        
+                  "move", "moveend", "added", "removed"],
+
+    /**
+     * Constant: RESOLUTION_PROPERTIES
+     * {Array} The properties that are used for calculating resolutions
+     *     information.
+     */
+    RESOLUTION_PROPERTIES: [
+        'scales', 'resolutions',
+        'maxScale', 'minScale',
+        'maxResolution', 'minResolution',
+        'numZoomLevels', 'maxZoomLevel'
+    ],
+
     /**
      * APIProperty: events
      * {<OpenLayers.Events>}
@@ -254,7 +274,7 @@ OpenLayers.Layer = OpenLayers.Class({
      * {Integer}
      */
     numZoomLevels: null,
-   
+    
     /**
      * APIProperty: minScale
      * {Float}
@@ -300,6 +320,13 @@ OpenLayers.Layer = OpenLayers.Class({
      *     transitionEffect values.
      */
     SUPPORTED_TRANSITIONS: ['resize'],
+
+    /**
+     * Property: metadata
+     * {Object} This object can be used to store additional information on a
+     *     layer object.
+     */
+    metadata: {},
     
     /**
      * Constructor: OpenLayers.Layer
@@ -435,20 +462,68 @@ OpenLayers.Layer = OpenLayers.Class({
     * 
     * Parameters:
     * newOptions - {Object}
+    * reinitialize - {Boolean} If set to true, and if resolution options of the
+    *     current baseLayer were changed, the map will be recentered to make
+    *     sure that it is displayed with a valid resolution, and a
+    *     changebaselayer event will be triggered.
     */
-    addOptions: function (newOptions) {
-        
+    addOptions: function (newOptions, reinitialize) {
+
         if (this.options == null) {
             this.options = {};
         }
-        
+
         // update our copy for clone
         OpenLayers.Util.extend(this.options, newOptions);
 
         // add new options to this
         OpenLayers.Util.extend(this, newOptions);
+
+        // make sure this.projection references a projection object
+        if(typeof this.projection == "string") {
+            this.projection = new OpenLayers.Projection(this.projection);
+        }
+
+        // get the units from the projection, if we have a projection
+        // and it it has units
+        if(this.projection && this.projection.getUnits()) {
+            this.units = this.projection.getUnits();
+        }
+
+        // re-initialize resolutions if necessary, i.e. if any of the
+        // properties of the "properties" array defined below is set
+        // in the new options
+        if(this.map) {
+            // store current resolution so we can try to restore it later
+            var resolution = this.map.getResolution();
+            var properties = this.RESOLUTION_PROPERTIES.concat(
+                ["projection", "units", "minExtent", "maxExtent"]
+            );
+            for(var o in newOptions) {
+                if(newOptions.hasOwnProperty(o) &&
+                   OpenLayers.Util.indexOf(properties, o) >= 0) {
+
+                    this.initResolutions();
+                    if (reinitialize && this.map.baseLayer === this) {
+                        // update map position, and restore previous resolution
+                        this.map.setCenter(this.map.getCenter(),
+                            this.map.getZoomForResolution(resolution),
+                            false, true
+                        );
+                        // trigger a changebaselayer event to make sure that
+                        // all controls (especially
+                        // OpenLayers.Control.PanZoomBar) get notified of the
+                        // new options
+                        this.map.events.triggerEvent("changebaselayer", {
+                            layer: this
+                        });
+                    }
+                    break;
+                }
+            }
+        }
     },
-    
+
     /**
      * APIMethod: onMapResize
      * This function can be implemented by subclasses
@@ -489,7 +564,7 @@ OpenLayers.Layer = OpenLayers.Class({
      * Method: moveTo
      * 
      * Parameters:
-     * bound - {<OpenLayers.Bounds>}
+     * bounds - {<OpenLayers.Bounds>}
      * zoomChanged - {Boolean} Tells when zoom has changed, as layers have to
      *     do some init work in that case.
      * dragging - {Boolean}
@@ -500,6 +575,17 @@ OpenLayers.Layer = OpenLayers.Class({
             display = display && this.inRange;
         }
         this.display(display);
+    },
+
+    /**
+     * Method: moveByPx
+     * Move the layer based on pixel vector. To be implemented by subclasses.
+     *
+     * Parameters:
+     * dx - {Number} The x coord of the displacement vector.
+     * dy - {Number} The y coord of the displacement vector.
+     */
+    moveByPx: function(dx, dy) {
     },
 
     /**
@@ -522,12 +608,13 @@ OpenLayers.Layer = OpenLayers.Class({
             // grab some essential layer data from the map if it hasn't already
             //  been set
             this.maxExtent = this.maxExtent || this.map.maxExtent;
+            this.minExtent = this.minExtent || this.map.minExtent;
+
             this.projection = this.projection || this.map.projection;
-            
-            if (this.projection && typeof this.projection == "string") {
+            if (typeof this.projection == "string") {
                 this.projection = new OpenLayers.Projection(this.projection);
             }
-            
+
             // Check the projection to see if we can get units -- if not, refer
             // to properties.
             this.units = this.projection.getUnits() ||
@@ -636,7 +723,7 @@ OpenLayers.Layer = OpenLayers.Class({
      *     subverted.
      * 
      * Parameters:
-     * visible - {Boolean} Whether or not to display the layer (if in range)
+     * visibility - {Boolean} Whether or not to display the layer (if in range)
      */
     setVisibility: function(visibility) {
         if (visibility != this.visibility) {
@@ -655,7 +742,9 @@ OpenLayers.Layer = OpenLayers.Class({
 
     /** 
      * APIMethod: display
-     * Hide or show the Layer
+     * Hide or show the Layer. This is designed to be used internally, and 
+     *     is not generally the way to enable or disable the layer. For that,
+     *     use the setVisibility function instead..
      * 
      * Parameters:
      * display - {Boolean}
@@ -727,184 +816,244 @@ OpenLayers.Layer = OpenLayers.Class({
      */
     initResolutions: function() {
 
-        // These are the relevant options which are used for calculating 
-        //  resolutions information.
+        // ok we want resolutions, here's our strategy:
         //
-        var props = new Array(
-          'projection', 'units',
-          'scales', 'resolutions',
-          'maxScale', 'minScale', 
-          'maxResolution', 'minResolution', 
-          'minExtent', 'maxExtent',
-          'numZoomLevels', 'maxZoomLevel'
-        );
+        // 1. if resolutions are defined in the layer config, use them
+        // 2. else, if scales are defined in the layer config then derive
+        //    resolutions from these scales
+        // 3. else, attempt to calculate resolutions from maxResolution,
+        //    minResolution, numZoomLevels, maxZoomLevel set in the
+        //    layer config
+        // 4. if we still don't have resolutions, and if resolutions
+        //    are defined in the same, use them
+        // 5. else, if scales are defined in the map then derive
+        //    resolutions from these scales
+        // 6. else, attempt to calculate resolutions from maxResolution,
+        //    minResolution, numZoomLevels, maxZoomLevel set in the
+        //    map
+        // 7. hope for the best!
 
-        //these are the properties which do *not* imply that user wishes 
-        // this layer to be scale-dependant
-        var notScaleProps = ['projection', 'units'];    
+        var i, len, p;
+        var props = {}, alwaysInRange = true;
 
-        //should the layer be scale-dependant? default is false -- this will 
-        // only be set true if we find that the user has specified a property
-        // from the 'props' array that is not in 'notScaleProps'
-        var useInRange = false;
-
-        // First we create a new object where we will store all of the 
-        //  resolution-related properties that we find in either the layer's
-        //  'options' array or from the map.
-        //
-        var confProps = {};        
-        for(var i=0, len=props.length; i<len; i++) {
-            var property = props[i];
-            
-            // If the layer had one of these properties set *and* it is 
-            // a scale property (is not a non-scale property), then we assume
-            // the user did intend to use scale-dependant display (useInRange).
-            if (this.options[property] && 
-                OpenLayers.Util.indexOf(notScaleProps, property) == -1) {
-                useInRange = true;
+        // get resolution data from layer config
+        // (we also set alwaysInRange in the layer as appropriate)
+        for(i=0, len=this.RESOLUTION_PROPERTIES.length; i<len; i++) {
+            p = this.RESOLUTION_PROPERTIES[i];
+            props[p] = this.options[p];
+            if(alwaysInRange && this.options[p]) {
+                alwaysInRange = false;
             }
-                   
-            confProps[property] = this.options[property] || this.map[property];
+        }
+        if(this.alwaysInRange == null) {
+            this.alwaysInRange = alwaysInRange;
         }
 
-        //only automatically set 'alwaysInRange' if the user hasn't already 
-        // set it (to true or false, since the default is null). If user did
-        // not intend to use scale-dependant display then we set they layer
-        // as alwaysInRange. This means calculateInRange() will always return 
-        // true and the layer will never be turned off due to scale changes.
-        //
-        if (this.alwaysInRange == null) {
-            this.alwaysInRange = !useInRange;
+        // if we don't have resolutions then attempt to derive them from scales
+        if(props.resolutions == null) {
+            props.resolutions = this.resolutionsFromScales(props.scales);
         }
 
-        // Do not use the scales array set at the map level if 
-        // either minScale or maxScale or both are set at the
-        // layer level
-        if ((this.options.minScale != null ||
-             this.options.maxScale != null) &&
-            this.options.scales == null) {
-
-            confProps.scales = null;
-        }
-        // Do not use the resolutions array set at the map level if 
-        // either minResolution or maxResolution or both are set at the
-        // layer level
-        if ((this.options.minResolution != null ||
-             this.options.maxResolution != null) &&
-            this.options.resolutions == null) {
-
-            confProps.resolutions = null;
+        // if we still don't have resolutions then attempt to calculate them
+        if(props.resolutions == null) {
+            props.resolutions = this.calculateResolutions(props);
         }
 
-        // If numZoomLevels hasn't been set and the maxZoomLevel *has*, 
-        //  then use maxZoomLevel to calculate numZoomLevels
-        //
-        if ( (!confProps.numZoomLevels) && (confProps.maxZoomLevel) ) {
-            confProps.numZoomLevels = confProps.maxZoomLevel + 1;
-        }
-
-        // First off, we take whatever hodge-podge of values we have and 
-        //  calculate/distill them down into a resolutions[] array
-        //
-        if ((confProps.scales != null) || (confProps.resolutions != null)) {
-          //preset levels
-            if (confProps.scales != null) {
-                confProps.resolutions = [];
-                for(var i=0, len=confProps.scales.length; i<len; i++) {
-                    var scale = confProps.scales[i];
-                    confProps.resolutions[i] = 
-                       OpenLayers.Util.getResolutionFromScale(scale, 
-                                                              confProps.units);
-                }
+        // if we couldn't calculate resolutions then we look at we have
+        // in the map
+        if(props.resolutions == null) {
+            for(i=0, len=this.RESOLUTION_PROPERTIES.length; i<len; i++) {
+                p = this.RESOLUTION_PROPERTIES[i];
+                props[p] = this.options[p] != null ?
+                    this.options[p] : this.map[p];
             }
-            confProps.numZoomLevels = confProps.resolutions.length;
+            if(props.resolutions == null) {
+                props.resolutions = this.resolutionsFromScales(props.scales);
+            }
+            if(props.resolutions == null) {
+                props.resolutions = this.calculateResolutions(props);
+            }
+        }
 
+        // ok, we new need to set properties in the instance
+
+        // get maxResolution from the config if it's defined there
+        var maxResolution;
+        if(this.options.maxResolution &&
+           this.options.maxResolution !== "auto") {
+            maxResolution = this.options.maxResolution;
+        }
+        if(this.options.minScale) {
+            maxResolution = OpenLayers.Util.getResolutionFromScale(
+                this.options.minScale, this.units);
+        }
+
+        // get minResolution from the config if it's defined there
+        var minResolution;
+        if(this.options.minResolution &&
+           this.options.minResolution !== "auto") {
+            minResolution = this.options.minResolution;
+        }
+        if(this.options.maxScale) {
+            minResolution = OpenLayers.Util.getResolutionFromScale(
+                this.options.maxScale, this.units);
+        }
+
+        if(props.resolutions) {
+
+            //sort resolutions array descendingly
+            props.resolutions.sort(function(a, b) {
+                return (b - a);
+            });
+
+            // if we still don't have a maxResolution get it from the
+            // resolutions array
+            if(!maxResolution) {
+                maxResolution = props.resolutions[0];
+            }
+
+            // if we still don't have a minResolution get it from the
+            // resolutions array
+            if(!minResolution) {
+                var lastIdx = props.resolutions.length - 1;
+                minResolution = props.resolutions[lastIdx];
+            }
+        }
+
+        this.resolutions = props.resolutions;
+        if(this.resolutions) {
+            len = this.resolutions.length;
+            this.scales = new Array(len);
+            for(i=0; i<len; i++) {
+                this.scales[i] = OpenLayers.Util.getScaleFromResolution(
+                    this.resolutions[i], this.units);
+            }
+            this.numZoomLevels = len;
+        }
+        this.minResolution = minResolution;
+        if(minResolution) {
+            this.maxScale = OpenLayers.Util.getScaleFromResolution(
+                minResolution, this.units);
+        }
+        this.maxResolution = maxResolution;
+        if(maxResolution) {
+            this.minScale = OpenLayers.Util.getScaleFromResolution(
+                maxResolution, this.units);
+        }
+    },
+
+    /**
+     * Method: resolutionsFromScales
+     * Derive resolutions from scales.
+     *
+     * Parameters:
+     * scales - {Array(Number)} Scales
+     *
+     * Returns
+     * {Array(Number)} Resolutions
+     */
+    resolutionsFromScales: function(scales) {
+        if(scales == null) {
+            return;
+        }
+        var resolutions, i, len;
+        len = scales.length;
+        resolutions = new Array(len);
+        for(i=0; i<len; i++) {
+            resolutions[i] = OpenLayers.Util.getResolutionFromScale(
+                scales[i], this.units);
+        }
+        return resolutions;
+    },
+
+    /**
+     * Method: calculateResolutions
+     * Calculate resolutions based on the provided properties.
+     *
+     * Parameters:
+     * props - {Object} Properties
+     *
+     * Return:
+     * {Array({Number})} Array of resolutions.
+     */
+    calculateResolutions: function(props) {
+
+        var viewSize, wRes, hRes;
+
+        // determine maxResolution
+        var maxResolution = props.maxResolution;
+        if(props.minScale != null) {
+            maxResolution =
+                OpenLayers.Util.getResolutionFromScale(props.minScale,
+                                                       this.units);
+        } else if(maxResolution == "auto" && this.maxExtent != null) {
+            viewSize = this.map.getSize();
+            wRes = this.maxExtent.getWidth() / viewSize.w;
+            hRes = this.maxExtent.getHeight() / viewSize.h;
+            maxResolution = Math.max(wRes, hRes);
+        }
+
+        // determine minResolution
+        var minResolution = props.minResolution;
+        if(props.maxScale != null) {
+            minResolution =
+                OpenLayers.Util.getResolutionFromScale(props.maxScale,
+                                                       this.units);
+        } else if(props.minResolution == "auto" && this.minExtent != null) {
+            viewSize = this.map.getSize();
+            wRes = this.minExtent.getWidth() / viewSize.w;
+            hRes = this.minExtent.getHeight()/ viewSize.h;
+            minResolution = Math.max(wRes, hRes);
+        }
+
+        // determine numZoomLevels
+        var maxZoomLevel = props.maxZoomLevel;
+        var numZoomLevels = props.numZoomLevels;
+        if(typeof minResolution === "number" &&
+           typeof maxResolution === "number" && numZoomLevels === undefined) {
+            var ratio = maxResolution / minResolution;
+            numZoomLevels = Math.floor(Math.log(ratio) / Math.log(2)) + 1;
+        } else if(numZoomLevels === undefined && maxZoomLevel != null) {
+            numZoomLevels = maxZoomLevel + 1;
+        }
+
+        // are we able to calculate resolutions?
+        if(typeof numZoomLevels !== "number" || numZoomLevels <= 0 ||
+           (typeof maxResolution !== "number" &&
+                typeof minResolution !== "number")) {
+            return;
+        }
+
+        // now we have numZoomLevels and at least one of maxResolution
+        // or minResolution, we can populate the resolutions array
+
+        var resolutions = new Array(numZoomLevels);
+        var base = 2;
+        if(typeof minResolution == "number" &&
+           typeof maxResolution == "number") {
+            // if maxResolution and minResolution are set, we calculate
+            // the base for exponential scaling that starts at
+            // maxResolution and ends at minResolution in numZoomLevels
+            // steps.
+            base = Math.pow(
+                    (maxResolution / minResolution),
+                (1 / (numZoomLevels - 1))
+            );
+        }
+
+        var i;
+        if(typeof maxResolution === "number") {
+            for(i=0; i<numZoomLevels; i++) {
+                resolutions[i] = maxResolution / Math.pow(base, i);
+            }
         } else {
-          //maxResolution and numZoomLevels based calculation
-
-            // determine maxResolution
-            if (confProps.minScale) {
-                confProps.maxResolution = 
-                    OpenLayers.Util.getResolutionFromScale(confProps.minScale, 
-                                                           confProps.units);
-            } else if (confProps.maxResolution == "auto") {
-                var viewSize = this.map.getSize();
-                var wRes = confProps.maxExtent.getWidth() / viewSize.w;
-                var hRes = confProps.maxExtent.getHeight()/ viewSize.h;
-                confProps.maxResolution = Math.max(wRes, hRes);
-            } 
-
-            // determine minResolution
-            if (confProps.maxScale != null) {           
-                confProps.minResolution = 
-                    OpenLayers.Util.getResolutionFromScale(confProps.maxScale, 
-                                                           confProps.units);
-            } else if ( (confProps.minResolution == "auto") && 
-                        (confProps.minExtent != null) ) {
-                var viewSize = this.map.getSize();
-                var wRes = confProps.minExtent.getWidth() / viewSize.w;
-                var hRes = confProps.minExtent.getHeight()/ viewSize.h;
-                confProps.minResolution = Math.max(wRes, hRes);
-            } 
-
-            // determine numZoomLevels if not already set on the layer
-            // this gives numZoomLevels assuming approximately base 2 scaling
-            if (confProps.minResolution != null &&
-                this.options.numZoomLevels == undefined) {
-                var ratio = confProps.maxResolution / confProps.minResolution;
-                confProps.numZoomLevels = 
-                    Math.floor(Math.log(ratio) / Math.log(2)) + 1;
-            }
-            
-            // now we have numZoomLevels and maxResolution, 
-            //  we can populate the resolutions array
-            confProps.resolutions = new Array(confProps.numZoomLevels);
-            var base = 2;
-            if(typeof confProps.minResolution == "number" &&
-               confProps.numZoomLevels > 1) {
-                /**
-                 * If maxResolution and minResolution are set (or related
-                 * scale properties), we calculate the base for exponential
-                 * scaling that starts at maxResolution and ends at
-                 * minResolution in numZoomLevels steps.
-                 */
-                base = Math.pow(
-                    (confProps.maxResolution / confProps.minResolution),
-                    (1 / (confProps.numZoomLevels - 1))
-                );
-            }
-            for (var i=0; i < confProps.numZoomLevels; i++) {
-                var res = confProps.maxResolution / Math.pow(base, i);
-                confProps.resolutions[i] = res;
+            for(i=0; i<numZoomLevels; i++) {
+                resolutions[numZoomLevels - 1 - i] =
+                    minResolution * Math.pow(base, i);
             }
         }
-        
-        //sort resolutions array ascendingly
-        //
-        confProps.resolutions.sort( function(a, b) { return(b-a); } );
 
-        // now set our newly calculated values back to the layer 
-        //  Note: We specifically do *not* set them to layer.options, which we 
-        //        will preserve as it was when we added this layer to the map. 
-        //        this way cloned layers reset themselves to new map div 
-        //        dimensions)
-        //
-
-        this.resolutions = confProps.resolutions;
-        this.maxResolution = confProps.resolutions[0];
-        var lastIndex = confProps.resolutions.length - 1;
-        this.minResolution = confProps.resolutions[lastIndex];
-        
-        this.scales = [];
-        for(var i=0, len=confProps.resolutions.length; i<len; i++) {
-            this.scales[i] = 
-               OpenLayers.Util.getScaleFromResolution(confProps.resolutions[i], 
-                                                      confProps.units);
-        }
-        this.minScale = this.scales[0];
-        this.maxScale = this.scales[this.scales.length - 1];
-        
-        this.numZoomLevels = confProps.numZoomLevels;
+        return resolutions;
     },
 
     /**
@@ -937,7 +1086,7 @@ OpenLayers.Layer = OpenLayers.Class({
      * APIMethod: getZoomForExtent
      * 
      * Parameters:
-     * bounds - {<OpenLayers.Bounds>}
+     * extent - {<OpenLayers.Bounds>}
      * closest - {Boolean} Find the zoom level that most closely fits the 
      *     specified bounds. Note that this may result in a zoom that does 
      *     not exactly contain the entire extent.
@@ -1012,14 +1161,14 @@ OpenLayers.Layer = OpenLayers.Class({
      *     value and the 'closest' specification.
      */
     getZoomForResolution: function(resolution, closest) {
-        var zoom;
+        var zoom, i, len;
         if(this.map.fractionalZoom) {
             var lowZoom = 0;
             var highZoom = this.resolutions.length - 1;
             var highRes = this.resolutions[lowZoom];
             var lowRes = this.resolutions[highZoom];
             var res;
-            for(var i=0, len=this.resolutions.length; i<len; ++i) {
+            for(i=0, len=this.resolutions.length; i<len; ++i) {
                 res = this.resolutions[i];
                 if(res >= resolution) {
                     highRes = res;
@@ -1040,7 +1189,7 @@ OpenLayers.Layer = OpenLayers.Class({
         } else {
             var diff;
             var minDiff = Number.POSITIVE_INFINITY;
-            for(var i=0, len=this.resolutions.length; i<len; i++) {            
+            for(i=0, len=this.resolutions.length; i<len; i++) {            
                 if (closest) {
                     diff = Math.abs(this.resolutions[i] - resolution);
                     if (diff > minDiff) {
@@ -1070,22 +1219,17 @@ OpenLayers.Layer = OpenLayers.Class({
      */
     getLonLatFromViewPortPx: function (viewPortPx) {
         var lonlat = null;
-        if (viewPortPx != null) {
-            var size = this.map.getSize();
-            var center = this.map.getCenter();
-            if (center) {
-                var res  = this.map.getResolution();
-        
-                var delta_x = viewPortPx.x - (size.w / 2);
-                var delta_y = viewPortPx.y - (size.h / 2);
-            
-                lonlat = new OpenLayers.LonLat(center.lon + delta_x * res ,
-                                             center.lat - delta_y * res); 
+        var map = this.map;
+        if (viewPortPx != null && map.minPx) {
+            var res = map.getResolution();
+            var maxExtent = map.getMaxExtent({restricted: true});
+            var lon = (viewPortPx.x - map.minPx.x) * res + maxExtent.left;
+            var lat = (map.minPx.y - viewPortPx.y) * res + maxExtent.top;
+            lonlat = new OpenLayers.LonLat(lon, lat);
 
-                if (this.wrapDateLine) {
-                    lonlat = lonlat.wrapDateLine(this.maxExtent);
-                }
-            } // else { DEBUG STATEMENT }
+            if (this.wrapDateLine) {
+                lonlat = lonlat.wrapDateLine(this.maxExtent);
+            }
         }
         return lonlat;
     },
@@ -1185,7 +1329,8 @@ OpenLayers.Layer = OpenLayers.Class({
         if (this.wrapDateLine) {
             // wrap around the date line, within the limits of rounding error
             var wrappingOptions = { 
-                'rightTolerance':this.getResolution()
+                'rightTolerance':this.getResolution(),
+                'leftTolerance':this.getResolution()
             };    
             bounds = bounds.wrapDateLine(this.maxExtent, wrappingOptions);
                               

@@ -6,7 +6,225 @@ $.ajaxSetup({
   contentType: "application/x-www-form-urlencoded;charset=UTF-8"
 });
 
-String.prototype.endsWith = function(str){return (this.match(str+"$")==str)}
+
+/* Some utility functions, backward compatibility with older browsers */
+
+if ( !String.prototype.endsWith ) {
+  String.prototype.endsWith = function(str){
+    return (this.match(str+"$")==str);
+  };
+} 
+
+if (!Object.keys) {
+  Object.keys = (function () {
+    var hasOwnProperty = Object.prototype.hasOwnProperty,
+        hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+        dontEnums = [
+          'toString',
+          'toLocaleString',
+          'valueOf',
+          'hasOwnProperty',
+          'isPrototypeOf',
+          'propertyIsEnumerable',
+          'constructor'
+        ],
+        dontEnumsLength = dontEnums.length
+
+    return function (obj) {
+      if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object')
+
+      var result = []
+
+      for (var prop in obj) {
+        if (hasOwnProperty.call(obj, prop)) result.push(prop)
+      }
+
+      if (hasDontEnumBug) {
+        for (var i=0; i < dontEnumsLength; i++) {
+          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i])
+        }
+      }
+      return result
+    }
+  })()
+};
+
+// Production steps of ECMA-262, Edition 5, 15.4.4.19  
+// Reference: http://es5.github.com/#x15.4.4.19  
+if (!Array.prototype.map) {  
+  Array.prototype.map = function(callback, thisArg) {  
+      
+    var T, A, k;  
+      
+    if (this == null) {  
+      throw new TypeError(" this is null or not defined");  
+    }  
+      
+    // 1. Let O be the result of calling ToObject passing the |this| value as the argument.  
+    var O = Object(this);  
+      
+    // 2. Let lenValue be the result of calling the Get internal method of O with the argument "length".  
+    // 3. Let len be ToUint32(lenValue).  
+    var len = O.length >>> 0;  
+      
+    // 4. If IsCallable(callback) is false, throw a TypeError exception.  
+    // See: http://es5.github.com/#x9.11  
+    if ({}.toString.call(callback) != "[object Function]") {  
+      throw new TypeError(callback + " is not a function");  
+    }  
+      
+    // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.  
+    if (thisArg) {  
+      T = thisArg;  
+    }  
+      
+    // 6. Let A be a new array created as if by the expression new Array(len) where Array is  
+    // the standard built-in constructor with that name and len is the value of len.  
+    A = new Array(len);  
+      
+    // 7. Let k be 0  
+    k = 0;  
+      
+    // 8. Repeat, while k < len  
+    while(k < len) {  
+      
+      var kValue, mappedValue;  
+      
+      // a. Let Pk be ToString(k).  
+      //   This is implicit for LHS operands of the in operator  
+      // b. Let kPresent be the result of calling the HasProperty internal method of O with argument Pk.  
+      //   This step can be combined with c  
+      // c. If kPresent is true, then  
+      if (k in O) {  
+      
+        // i. Let kValue be the result of calling the Get internal method of O with argument Pk.  
+        kValue = O[ k ];  
+      
+        // ii. Let mappedValue be the result of calling the Call internal method of callback  
+        // with T as the this value and argument list containing kValue, k, and O.  
+        mappedValue = callback.call(T, kValue, k, O);  
+      
+        // iii. Call the DefineOwnProperty internal method of A with arguments  
+        // Pk, Property Descriptor {Value: mappedValue, Writable: true, Enumerable: true, Configurable: true},  
+        // and false.  
+      
+        // In browsers that support Object.defineProperty, use the following:  
+        // Object.defineProperty(A, Pk, { value: mappedValue, writable: true, enumerable: true, configurable: true });  
+      
+        // For best browser support, use the following:  
+        A[ k ] = mappedValue;  
+      }  
+      // d. Increase k by 1.  
+      k++;  
+    }  
+      
+    // 9. return A  
+    return A;  
+  };        
+}  
+
+
+// Implementation of Array.indexOf (for IE <9)
+// Reference: https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 0) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
+}
+
+// Implementation of Array.lastIndexOf (for IE <9)
+// Reference: https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/lastIndexOf
+if (!Array.prototype.lastIndexOf)
+{
+  Array.prototype.lastIndexOf = function(searchElement /*, fromIndex*/)
+  {
+    "use strict";
+
+    if (this == null)
+      throw new TypeError();
+
+    var t = Object(this);
+    var len = t.length >>> 0;
+    if (len === 0)
+      return -1;
+
+    var n = len;
+    if (arguments.length > 1)
+    {
+      n = Number(arguments[1]);
+      if (n != n)
+        n = 0;
+      else if (n != 0 && n != (1 / 0) && n != -(1 / 0))
+        n = (n > 0 || -1) * Math.floor(Math.abs(n));
+    }
+
+    var k = n >= 0
+          ? Math.min(n, len - 1)
+          : len - Math.abs(n);
+
+    for (; k >= 0; k--)
+    {
+      if (k in t && t[k] === searchElement)
+        return k;
+    }
+    return -1;
+  };
+}
+
+
+if ( !Array.prototype.reduce ) {  
+  Array.prototype.reduce = function reduce(accumulator){  
+    var i, l = this.length, curr;  
+              
+    if(typeof accumulator !== "function") // ES5 : "If IsCallable(callbackfn) is false, throw a TypeError exception."  
+      throw new TypeError("First argument is not callable");  
+      
+    if((l == 0 || l === null) && (arguments.length <= 1))// == on purpose to test 0 and false.  
+      throw new TypeError("Array length is 0 and no second argument");  
+              
+    if(arguments.length <= 1){  
+      curr = this[0]; // Increase i to start searching the secondly defined element in the array  
+      i = 1; // start accumulating at the second element  
+    }  
+    else{  
+      curr = arguments[1];  
+    }  
+              
+    for(i = i || 0 ; i < l ; ++i){  
+      if(i in this)  
+        curr = accumulator.call(undefined, curr, this[i], i, this);  
+    }  
+              
+    return curr;  
+  };  
+}  
 
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
@@ -27,16 +245,18 @@ var CDF_SELF = 2;
 var ERROR_IMAGE = webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
-$.blockUI.defaults.fadeIn = 0;
-$.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/busy.gif" /><h3>Processing...</h3></div>';
-$.blockUI.defaults.css.left = '40%';
-$.blockUI.defaults.css.top = '30%';
-$.blockUI.defaults.css.marginLeft = '85px';
-$.blockUI.defaults.css.width = '170px';
-$.blockUI.defaults.css.opacity = '.8';
-$.blockUI.defaults.css['-webkit-border-radius'] = '10px'; 
-$.blockUI.defaults.css['-moz-border-radius'] = '10px';
 
+if($.blockUI){
+  $.blockUI.defaults.fadeIn = 0;
+  $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/processing_transparent.gif" />';
+  $.blockUI.defaults.css.left = '50%';
+  $.blockUI.defaults.css.top = '40%';
+  $.blockUI.defaults.css.marginLeft = '-16px';
+  $.blockUI.defaults.css.width = '32px';
+  $.blockUI.defaults.css.background = 'none';
+  $.blockUI.defaults.overlayCSS = { backgroundColor: "#FFFFFF", opacity: 0.8, cursor: "wait"};
+  $.blockUI.defaults.css.border = "none";
+}
 
 var ERROR_CODES = [];
 ERROR_CODES["UNKNOWN"] = ["ERROR: ","resources/style/images/error.jpg"];
@@ -50,27 +270,52 @@ if (typeof $.SetImpromptuDefaults == 'function')
     show: 'slideDown'
   });
 
-var Dashboards = 
-	{
-		TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_red.png",
-		TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_yellow.png",
-		TRAFFIC_GREEN: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_green.png",
-		globalContext: true, // globalContext determines if components and params are retrieved from the current window's object or from the Dashboards singleton
-		runningCalls: 0, // Used to control progress indicator for async mode
-		components: [],
-		parameters: [], // only used if globalContext = false
-		args: [],
-		monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        i18nCurrentLanguageCode : null,  // Reference to current language code . Used in every place where jquery plugins used in CDF hasm native internationalization support (ex: Datepicker)
-        i18nSupport : null  // Reference to i18n objects
-	}
+var Dashboards = {
+    TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_red.png",
+    TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_yellow.png",
+    TRAFFIC_GREEN: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_green.png",
+  /* globalContext determines if components and params are retrieved
+   * from the current window's object or from the Dashboards singleton
+   */
+  globalContext: true,
+  escapeParameterValues : true,
+  /* Used to control progress indicator for async mode */
+  runningCalls: 0,
+  components: [],
+  /* Holds the dashboard parameters if globalContext = false */
+  parameters: [],
+  
+  // Holder for context
+  context:{},
+  
+  /* measures, in miliseconds, the delay between firing blockUI and
+   * actually updating the dashboard. Necessary for IE/Chrome. Higher
+   * values have better chances of working, but are (obviously) slower
+   */
+  renderDelay: 300,
+  args: [],
+  monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  /* Reference to current language code . Used in every place where jquery
+   * plugins used in CDF hasm native internationalization support (ex: Datepicker)
+   */
+  i18nCurrentLanguageCode : null,
+  i18nSupport : null  // Reference to i18n objects
+};
 
 // Log
-Dashboards.log = function(m){
+Dashboards.log = function(m,type){
   if (typeof console != "undefined" ){
-    console.log("CDF: " + m);
+    if (type && console[type]) {
+      console[type]("CDF: " + m);
+    }else if (type === 'exception' &&
+      !console.exception) {
+      console.error(m.stack);
+    }
+    else {
+      console.log("CDF: " + m);
+    }
   }
-}
+};
 
 // REFRESH ENGINE begin
 
@@ -88,7 +333,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       nextRefresh : 0,
       component : null
     };
-  }
+  };
 
   //set global refresh and (re)start interval
   var startGlobalRefresh = function(refreshPeriod){
@@ -100,7 +345,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
     if(globalRefreshPeriod != NO_REFRESH){
       globalTimer = setInterval("Dashboards.refreshEngine.fireGlobalRefresh()",globalRefreshPeriod * 1000);//ToDo: cleaner way to call
     }
-  }
+  };
 
   var clearFromQueue = function(component){
     for (var i = 0; i < refreshQueue.length; i++) {
@@ -109,11 +354,11 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
         i--;
       }
     }
-  }
+  };
 
   var clearQueue = function(){
     if(refreshQueue.length > 0) refreshQueue.splice(0,refreshQueue.length);
-  }
+  };
 
   //binary search for elem's position in coll (nextRefresh asc order)
   var getSortedInsertPosition = function(coll, elem){
@@ -132,41 +377,41 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       }
     }
     return low;
-  }
+  };
   var sortedInsert = function(rtArray,rtInfo){
     var pos = getSortedInsertPosition(rtArray,rtInfo);
     rtArray.splice(pos,0,rtInfo);
-  }
+  };
 
   var stopTimer = function(){
     if (activeTimer != null) {
       clearTimeout(activeTimer);
       activeTimer = null;
     }
-  }
+  };
 
   var restartTimer = function(){
     stopTimer();
     Dashboards.refreshEngine.fireRefresh();
-  }
+  };
 
   var getCurrentTime = function (){
     var date = new Date();
     return date.getTime();
-  }
+  };
 
   var isFirstInQueue = function(component){
     return refreshQueue.length > 0 && refreshQueue[0].component == component;
-  }
+  };
 
   var refreshComponent = function(component){
     //if refresh period is too short, progress indicator will stay in user's face
-    //		let(Dashboards.runningCalls = 0){
+    //    let(Dashboards.runningCalls = 0){
     Dashboards.update(component);
-  //			Dashboards.runningCalls = 0;
-  //			Dashboards.hideProgressIndicator()
-  //		}
-  }
+  //      Dashboards.runningCalls = 0;
+  //      Dashboards.hideProgressIndicator()
+  //    }
+  };
 
   var insertInQueue = function(component){
     var time = getCurrentTime();
@@ -181,7 +426,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       info.component = component;
       sortedInsert(refreshQueue, info);
     }
-  }
+  };
   return {
 
     //set a component's refresh period and clears it from the queue if there;
@@ -257,7 +502,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       return refreshQueue;
     }
   };
-}
+};
 
 Dashboards.refreshEngine = new Dashboards.RefreshEngine();
 
@@ -265,24 +510,24 @@ Dashboards.refreshEngine = new Dashboards.RefreshEngine();
 
 Dashboards.setGlobalContext = function(globalContext) {
   Dashboards.globalContext = globalContext;
-}
+};
 
 Dashboards.showProgressIndicator = function() {
   Dashboards.blockUIwithDrag();
-}
+};
 
 Dashboards.hideProgressIndicator = function() {
   if(Dashboards.runningCalls <= 0){
     $.unblockUI();
     Dashboards.showErrorTooltip();
   }
-}
+};
 
 Dashboards.incrementRunningCalls = function() {
   Dashboards.runningCalls++ ;
   Dashboards.showProgressIndicator();
 //Dashboards.log("+Running calls incremented to: " + Dashboards.runningCalls);
-}
+};
 
 Dashboards.decrementRunningCalls = function() {
   Dashboards.runningCalls-- ;
@@ -291,7 +536,7 @@ Dashboards.decrementRunningCalls = function() {
     Dashboards.hideProgressIndicator();
     Dashboards.runningCalls = 0; // Just in case
   }
-}
+};
 
 Dashboards.bindControl = function(object) {
 
@@ -315,67 +560,126 @@ Dashboards.bindControl = function(object) {
   }
   
   if (typeof objectImpl == 'undefined'){
-    alert ("Object type " + object["type"] + " can't be mapped to a valid class");
+    Dashboards.log ("Object type " + object["type"] + " can't be mapped to a valid class","error");
   } else {
-	// this will add the methods from the inherited class. Overrides not allowed
-	$.extend(object,objectImpl);
+    // this will add the methods from the inherited class. Overrides not allowed
+    $.extend(object,objectImpl);
+  }
+};
+
+
+Dashboards.restoreDuplicates = function() {
+  /*
+   * We mark duplicates by appending a _nn tag to their names.
+   * This means that, when we read the parameters from bookmarks,
+   * we can look for the _nn suffixes, and infer from those suffixes
+   * what duplications were triggered, allowing us to reproduce that
+   * state as well.
+   */
+  var dupes = Dashboards.components.filter(function(c){return c.type == 'duplicate'}),
+      suffixes = {},
+      params = Dashboards.getBookmarkState().params || {};
+  /*
+   * First step is to go over the bookmarked parameters and find
+   * all of those that end with the _nn suffix (possibly several
+   * such suffixes piled up, like _1_2, as we can re-duplicate
+   * existing duplicates).
+   * 
+   * The suffixes object then maps those suffixes to a mapping of
+   * the root parameter names to their respective values.
+   * E.g. a parameter 'foo_1 = 1' yields '{_1: {foo: 1}}'
+   */
+  Object.keys(params).filter(function(e){
+      return /(_[0-9]+)+$/.test(e);
+  }).map(function(e){
+      var parts = e.match(/(.*?)((_[0-9]+)+)$/),
+          name = parts[1],
+          suffix = parts[2];
+      if(!suffixes[suffix]){
+          suffixes[suffix] = {}
+      }
+      suffixes[suffix][name] = params[e];
+      return e;
+  });
+
+
+  /*
+   * Once we have the suffix list, we'll check each suffix's 
+   * parameter list against each of the DuplicateComponents
+   * in the dashboard. We consider that a suffix matches a
+   * DuplicateComponent if the suffix contains all of the
+   * Component's Bookmarkable parameters. If we're satisfied
+   * that such a match was found, then we tell the Component
+   * to trigger a duplication with the provided values.
+   */
+  for (var s in suffixes) if (suffixes.hasOwnProperty(s)) {
+    var params = suffixes[s];
+    $.each(dupes,function(i,e){
+      var p;
+      for (p = 0; p < e.parameters.length;p++) {
+        if (!params.hasOwnProperty(e.parameters[p]) && Dashboards.isBookmarkable(e.parameters[p])) {
+          return;
+        }
+      }
+      e.duplicate(params);
+    });
   }
 }
-
 Dashboards.blockUIwithDrag = function() {
-    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        // If i18n support is enabled process the message accordingly
-        $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/busy.gif" /><h3>' + Dashboards.i18nSupport.prop('processing.message') + '</h3></div>';
-    }
+  if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+    // If i18n support is enabled process the message accordingly
+$.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/processing_transparent.gif" /></div>';
+  }
 
   $.blockUI();
-  var handle = $('<div id="blockUIDragHandle" style="cursor: pointer; width: 170px; -webkit-border-radius: 5px; -moz-border-radius: 5px; background-color: rgba(0,0,0,0.25);" align="right"><a style="padding-right: 5px; text-decoration: none; color: black; font-weight: bold; font-color: black; font-size: 8pt" href="javascript:$.unblockUI()" title="Click to unblock">X</a></div>')
+  var handle = $('<div id="blockUIDragHandle"></div>')
   $("div.blockUI.blockMsg").prepend(handle);
   $("div.blockUI.blockMsg").draggable({
     handle: "#blockUIDragHandle"
   });
-}
-
-//Dashboards.xactionCallback = function(object,str){
-//	$('#'+object.htmlObject).html(str);
-//	Dashboards.runningCalls--;
-//}
+};
 
 Dashboards.update = function(object) {
   try {
-  if(!(typeof(object.preExecution)=='undefined')){
+    
+    if( object.disabled ){
+      return;
+    }
+    
+    if(!(typeof(object.preExecution)=='undefined')){
       var ret = object.preExecution.apply(object);
-    if (typeof ret != "undefined" && !ret)
-      return; // if preExecution returns false, we'll skip the update
-  }
-  if (object.tooltip != undefined){
-    object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
-  }
-  // first see if there is an objectImpl
-  if ((object.update != undefined) &&
-    (typeof object['update'] == 'function')) {
-    object.update();
-		
-    // check if component has periodic refresh and schedule next update
-    this.refreshEngine.processComponent(object);
-		
-  } else {
-  // unsupported update call
-  }
-
-  if(!(typeof(object.postExecution)=='undefined')){
+      if (typeof ret != "undefined" && !ret)
+        return; // if preExecution returns false, we'll skip the update
+    }
+    if (object.tooltip != undefined){
+      object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
+    }
+    // first see if there is an objectImpl
+    if ((object.update != undefined) &&
+      (typeof object['update'] == 'function')) {
+      object.update();
+      
+      // check if component has periodic refresh and schedule next update
+      this.refreshEngine.processComponent(object);
+      
+    } else {
+    // unsupported update call
+    }
+  
+    if(!(typeof(object.postExecution)=='undefined')){
       object.postExecution.apply(object);
-  }
-  // if we have a tooltip component, how is the time.
-  if (object._tooltip != undefined){
-    $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
-      delay:0,
-      track: true,
-      fade: 250
-    });
-  }
+    }
+    // if we have a tooltip component, how is the time.
+    if (object._tooltip != undefined){
+      $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+        delay:0,
+        track: true,
+        fade: 250
+      });
+    }
   } catch (e) {
-    this.log("Error updating " + object.name +": "+ e);
+    this.log("Error updating " + object.name +":",'error');
+    this.log(e,'exception');
   }
 };
 
@@ -384,7 +688,7 @@ Dashboards.createAndCleanErrorDiv = function(){
     $("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
   }
   $("#"+CDF_ERROR_DIV).empty();
-}
+};
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
@@ -395,7 +699,7 @@ Dashboards.showErrorTooltip = function(){
       showBody: " -- "
     })
   });
-}
+};
 
 Dashboards.getComponent = function(name){
   for (i in this.components){
@@ -421,34 +725,35 @@ Dashboards.addComponents = function(components) {
 };
 
 Dashboards.registerEvent = function (ev, callback) {
-    if (typeof this.events == 'undefined') {
-        this.events = {};
-    }
-    this.events[ev] = callback;
+  if (typeof this.events == 'undefined') {
+    this.events = {};
+  }
+  this.events[ev] = callback;
 };
 
 Dashboards.addArgs = function(url){
   if(url != undefined)
     this.args = getURLParameters(url);
-}
+};
 
 Dashboards.setI18nSupport = function(lc, i18nRef) {
-    // Update global reference to i18n objects if needed
-    if (i18nRef !== "undefined" && lc !== "undefined") {
-        Dashboards.i18nCurrentLanguageCode = lc;
-        Dashboards.i18nSupport = i18nRef;
-    }
+  // Update global reference to i18n objects if needed
+  if (i18nRef !== "undefined" && lc !== "undefined") {
+    Dashboards.i18nCurrentLanguageCode = lc;
+    Dashboards.i18nSupport = i18nRef;
+  }
 
-}
+};
 
 Dashboards.init = function(components){
-    this.loadStorage();
-    if ($.isArray(components)) {
-        Dashboards.addComponents(components);
-    }
-    $(function() {
-        Dashboards.initEngine();
-    });
+  this.loadStorage();
+  this.restoreBookmarkables();
+  if ($.isArray(components)) {
+    Dashboards.addComponents(components);
+  }
+  $(function() {
+    Dashboards.initEngine();
+  });
 };
 
 
@@ -457,19 +762,26 @@ Dashboards.initEngine = function(){
   var compCount = components.length;
   Dashboards.incrementRunningCalls();
   Dashboards.createAndCleanErrorDiv();
+  // Fire all pre-initialization events
+  if(typeof this.preInit == 'function') {
+    this.preInit();
+  }
+  $(window).trigger('cdfAboutToLoad');
   var myself = this;
   setTimeout(
     function() {
-  for(var i= 0, len = components.length; i < len; i++){
-    if(components[i].executeAtStart){
+      for(var i= 0, len = components.length; i < len; i++){
+        if(components[i].executeAtStart){
           Dashboards.update(components[i]);
-    }
-  }
+        }
+      }
+      $(window).trigger('cdfLoaded');
       if(typeof myself.postInit == 'function') {
         myself.postInit();
       }
-
-  Dashboards.decrementRunningCalls();
+      Dashboards.restoreDuplicates();
+      Dashboards.finishedInit = true;
+      Dashboards.decrementRunningCalls();
     },
     Dashboards.renderDelay);
 };
@@ -497,12 +809,14 @@ Dashboards.processChange = function(object_name){
   }
   if (value == null) // We won't process changes on null values
     return;
-	
+  
   if(!(typeof(object.preChange)=='undefined')){
     var preChangeResult = object.preChange(value);
     value = preChangeResult != undefined ? preChangeResult : value;
   }
-  if(parameter) { this.fireChange(parameter,value); }
+  if(parameter) {
+    this.fireChange(parameter,value);
+  }
   if(!(typeof(object.postChange)=='undefined')){
     object.postChange(value);
   }
@@ -528,7 +842,7 @@ Dashboards.fireChange = function(parameter, value) {
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
       for(var j= 0 ; j < this.components[i].listeners.length; j++){
-        if(this.components[i].listeners[j] == parameter) {
+        if(this.components[i].listeners[j] == parameter && !this.components[i].disabled) {
           // We only show the 'working' message if we ever do anything useful.
           if (!workDone) {
             workDone = true;
@@ -544,19 +858,156 @@ Dashboards.fireChange = function(parameter, value) {
     for (var i = 0; i < toUpdate.length; i++) {
       Dashboards.update(toUpdate[i]);
     }
-  if (workDone) {
-    Dashboards.decrementRunningCalls();
-  }
+    if (workDone) {
+      Dashboards.decrementRunningCalls();
+    }
   }, Dashboards.renderDelay);
 };
 
+Dashboards.getHashValue = function(key) {
+  var hash = window.location.hash,
+      obj;
+  try {
+    obj = JSON.parse(hash.slice(1));
+  } catch (e) {
+    obj = {};
+  }
+  if (arguments.length === 0) {
+    return obj;
+  } else {
+    return obj[key];
+  }
+}
+
+Dashboards.setHashValue = function(key, value) {
+  var obj = Dashboards.getHashValue(),json;
+  if (arguments.length == 1) {
+    obj = key;
+  } else {
+    obj[key] = value;
+  }
+  json = JSON.stringify(obj);
+  /* We don't want to store empty objects */
+  if (json != "{}") {
+    window.location.hash = json;
+  } else {
+    if (window.location.hash) {
+      window.location.hash = '';
+    }
+  }
+}
+Dashboards.deleteHashValue = function(key) {
+  var obj = Dashboards.getHashValue();
+  if (arguments.length === 0) {
+    window.location.hash = "";
+  } else {
+    delete obj[key];
+    Dashboards.setHashValue(obj);
+  }
+}
+Dashboards.setBookmarkable = function(parameter, value) {
+    if(!this.bookmarkables) this.bookmarkables = {};
+    if (arguments.length === 1) value = true;
+    this.bookmarkables[parameter] = value;
+}
+
+Dashboards.isBookmarkable = function(parameter) {
+    if(!this.bookmarkables) {return false;}
+    return Boolean(this.bookmarkables[parameter]);
+}
+
+Dashboards.persistBookmarkables = function(param) {
+  var bookmarkables = this.bookmarkables,
+      params = {},
+      state;
+  /* We don't want to update the hash if we were passed a
+   * non-bookmarkable parameter (why bother?), nor is there
+   * much of a point in publishing changes when we're still
+   * initializing the dashboard. That's just the code for
+   * restoreBookmarkables doing the reverse of this!
+   */
+   if (!bookmarkables)
+    return;
+  if(!bookmarkables[param] || !Dashboards.finishedInit) {
+    return;
+  }
+  for (k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
+    if (bookmarkables[k]) {
+      params[k] = Dashboards.getParameterValue(k);
+    }
+  }
+  Dashboards.setBookmarkState({impl: 'client',params: params});
+}
+
+Dashboards.setBookmarkState = function(state) {
+  if(window.history && window.history.pushState) {
+    var method = window.location.pathname.split('/').pop(),
+        query = window.location.search.slice(1).split('&').map(function(e){
+          var entry = e.split('=');
+          entry[1] = decodeURIComponent(entry[1]);
+          return entry;
+        }),
+        url;
+    query = Dashboards.propertiesArrayToObject(query);
+    query.bookmarkState = JSON.stringify(state);
+    url = method + '?' + $.param(query);
+    window.history.pushState({},'',url);
+    this.deleteHashValue('bookmark')
+  } else {
+    this.setHashValue('bookmark',state);
+  }
+};
+
+Dashboards.getBookmarkState = function() {
+  /* 
+   * browsers that don't support history.pushState
+   * can't actually safely remove bookmarkState param,
+   * so we must first check whether there is a hash-based
+   * bookmark state.
+   */
+  if (window.location.hash.length > 1) {
+  try {
+      return this.getHashValue('bookmark') || {};
+    } catch (e) {
+      /*
+       * We'll land here if the hash isn't a valid json object,
+       * so we'll go on and try getting the state from the params
+       */
+    }
+  } 
+  var query = window.location.search.slice(1).split('&').map(function(e){
+          var pair = e.split('=');
+          pair[1] = decodeURIComponent(pair[1]);
+          return pair;
+      }),
+      params = Dashboards.propertiesArrayToObject(query),
+      bookmarkState;
+  if(params.bookmarkState) {
+    return JSON.parse(decodeURIComponent(params.bookmarkState.replace(/\+/g,' '))) || {};
+  } else  {
+    return {};
+  }
+};
+
+Dashboards.restoreBookmarkables = function() {
+  var state;
+  this.bookmarkables = this.bookmarkables || {};
+  try {
+    state = this.getBookmarkState().params;
+    for (k in state) if (state.hasOwnProperty(k)) {
+      Dashboards.setParameter(k,state[k]);
+    }
+  } catch (e) {
+    Dashboards.log(e,'error');
+  }
+}
 Dashboards.getParameterValue = function (parameterName) {
   if (Dashboards.globalContext) {
     return eval(parameterName);
   } else {
     return Dashboards.parameters[parameterName];
   }
-}
+};
 
 Dashboards.getQueryParameter = function ( parameterName ) {
   // Add "=" to the parameter name (i.e. parameterName=value)
@@ -575,7 +1026,7 @@ Dashboards.getQueryParameter = function ( parameterName ) {
         end = queryString.length
       }
       // Return the string
-      return unescape ( queryString.substring ( begin, end ) );
+      return decodeURIComponent ( queryString.substring ( begin, end ) );
     }
     // Return "" if no parameter has been found
     return "";
@@ -584,16 +1035,21 @@ Dashboards.getQueryParameter = function ( parameterName ) {
 
 Dashboards.setParameter = function(parameterName, parameterValue) {
   if(parameterName == undefined || parameterName == "undefined"){
-    Dashboards.log('Dashboards.setParameter: trying to set undefined!!');
+    Dashboards.log('Dashboards.setParameter: trying to set undefined!!','warn');
     return;  
   }
   if (Dashboards.globalContext) {
     //ToDo: this should really be sanitized!
     eval( parameterName + " = " + JSON.stringify(parameterValue) );
   } else {
-    Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
+    if(Dashboards.escapeParameterValues) {
+      Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
+    } else {
+      Dashboards.parameters[parameterName] = parameterValue;
+    }
   }
-}
+  Dashboards.persistBookmarkables(parameterName);
+};
 
 
 Dashboards.post = function(url,obj){
@@ -611,7 +1067,7 @@ Dashboards.post = function(url,obj){
   }
   form += '</form>';
   jQuery(form).appendTo('body').submit().remove();
-}
+};
 
 Dashboards.clone = function clone(obj) {
 
@@ -640,7 +1096,7 @@ Dashboards.clone = function clone(obj) {
   }
 
   return c;
-}
+};
 
 Dashboards.getArgValue  = function(key)
 {
@@ -651,7 +1107,7 @@ Dashboards.getArgValue  = function(key)
   }
 
   return undefined;
-}
+};
 
 Dashboards.ev = function(o){
   return typeof o == 'function'?o():o
@@ -670,11 +1126,11 @@ Dashboards.callPentahoAction = function(obj, path, parameters, callback ){
   else{
     return Dashboards.parseXActionResult(obj,Dashboards.pentahoAction( path, parameters, callback ));
   }
-}
+};
 
 Dashboards.urlAction = function ( url, params, func) {
   return Dashboards.executeAjax('xml', url, params, func);
-}
+};
 
 Dashboards.executeAjax = function( returnType, url, params, func ) {
   // execute a url
@@ -690,13 +1146,13 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
         func(XMLHttpRequest.responseXML);
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
-        alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
+        Dashboards.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
       }
 
     }
     );
   }
-	
+  
   // Sync
   var result = $.ajax({
     url: url,
@@ -705,7 +1161,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
     async: false,
     data: params,
     error: function (XMLHttpRequest, textStatus, errorThrown) {
-      alert("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown);
+      Dashboards.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
     }
 
   });
@@ -715,17 +1171,17 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
     return result.responseText;
   }
 
-} 
+}; 
 
 Dashboards.pentahoAction = function( path, params, func ) {
   return Dashboards.pentahoServiceAction('ServiceAction', 'xml', path, params, func);
-}
+};
 
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, params, func ) {
   // execute an Action Sequence on the server
 
   var url = webAppPath + "/api/repos/" + path.replace(/\//g, ":") + "/generatedContent";
-	
+  
   // Add the solution to the params
   var arr = {};
   arr.wrapper = false;
@@ -773,7 +1229,7 @@ Dashboards.parseXActionResult = function(obj,html){
 };
 
 Dashboards.setSettingsValue = function(name,object){
-			
+      
   var data = {
     method: "set",
     key: name,
@@ -787,24 +1243,26 @@ Dashboards.getSettingsValue = function(key,value){
   var callback = typeof value == 'function' ? value : function(json){
     value = json;
   };
-	
+  
   $.getJSON("Settings?method=get&key=" + key , callback);
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
-  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead');
+  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
   // Detect and handle CDA data sources
   if (cd != undefined && cd.dataAccessId != undefined) {
     for (param in params) {
       cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
     }
     $.post(webAppPath + "/content/cda/doQuery?", cd,
-      function(json) {callback(json);},'json');
+      function(json) {
+        callback(json);
+      },'json');
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
-	
-    $.post(webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:jtable.xaction/generatedContent?", cd,
+  
+    $.post(webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:cdf:components:jtable.xaction/generatedContent?", cd,
       function(result) {
         callback(result.values); 
       },'json');
@@ -813,17 +1271,17 @@ Dashboards.fetchData = function(cd, params, callback) {
   else {
     callback([]);
   }
-}
+};
 
 Dashboards.escapeHtml = function(input) {
   var escaped = input
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/'/g,"&#39;")
-    .replace(/"/g,"&#34;");
-return escaped;
-}
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/'/g,"&#39;")
+  .replace(/"/g,"&#34;");
+  return escaped;
+};
 // STORAGE ENGINE
 
 // Default object
@@ -832,39 +1290,74 @@ Dashboards.storage = {};
 // Operations
 Dashboards.loadStorage = function(){
 
-      var args = {
-        action: "read"
-      };
-	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  $.extend(Dashboards.storage,json);
-		  });
-}
+  // Don't do anything for anonymousUser.
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
+    return;
+  }
+
+  var args = {
+    action: "read",
+    _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+  };
+  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+    $.extend(Dashboards.storage,json);
+  });
+};
 
 Dashboards.saveStorage = function(){
 
-      var args = {
-        action: "store",
-		storageValue: JSON.stringify(Dashboards.storage)
-      };
-	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true && typeof console != "undefined"){
-				  Dashboards.log("Error saving storage")
-			  }
-		  });
-}
+  // Don't do anything for anonymousUser
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
+    return;
+  }
+
+  var args = {
+    action: "store",
+    storageValue: JSON.stringify(Dashboards.storage),
+    _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+  };
+  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+    if(json.result != true && typeof console != "undefined"){
+      Dashboards.log("Error saving storage",'error');
+    }
+  });
+};
 
 Dashboards.cleanStorage = function(){
 
-      var args = {
-        action: "delete"
-      };
-	  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-			  if(json.result != true && typeof console != "undefined"){
-				  Dashboards.log("Error deleting storage")
-			  }
-		  });
+  Dashboards.storage = {};
+
+  // Don't do noting for anonymousUser
+  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
+    return;
+  }
+  
+  var args = {
+    action: "delete"
+  };
+  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+    if(json.result != true && typeof console != "undefined"){
+      Dashboards.log("Error deleting storage", 'error');
+    }
+  });
+};
+
+Dashboards.propertiesArrayToObject = function(pArray) {
+  var obj = {};
+  for (p in pArray) if (pArray.hasOwnProperty(p)) {
+    var prop = pArray[p];
+    obj[prop[0]] = prop[1];
+  }
+  return obj;
 }
 
+Dashboards.objectToPropertiesArray = function(obj) {
+  var pArray = [];
+  for (key in obj) if (obj.hasOwnProperty(key)) {
+    pArray.push([key,obj[key]]);
+  }
+  return pArray;
+}
 
 /**
  *
@@ -886,7 +1379,7 @@ function encode_prepare_arr(value) {
   else{
     return encode_prepare(value);
   }
-}
+};
 
 function encode_prepare( s )
 {
@@ -897,7 +1390,7 @@ function encode_prepare( s )
     }
   }
   return s;
-}
+};
 
 var Utf8 = {
 
@@ -962,7 +1455,7 @@ var Utf8 = {
 }
 
 function getURLParameters(sURL) 
-{	
+{ 
   if (sURL.indexOf("?") > 0){
 
     var arrParams = sURL.split("?");
@@ -996,21 +1489,31 @@ function toFormatedString(value) {
 
 //quote csv values in a way compatible with CSVTokenizer
 function doCsvQuoting(value, separator, alwaysEscape){
-	var QUOTE_CHAR = '"';
-	if(separator == null) {return value;}
-	if(value == null) {return null;}
-	if(value.indexOf(QUOTE_CHAR) >= 0){
-		//double them
-		value = value.replace(QUOTE_CHAR, QUOTE_CHAR.concat(QUOTE_CHAR));
-	}
-	if(alwaysEscape || value.indexOf(separator) >= 0){
-		//quote value
-		value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
-	}
-	return value;
+  var QUOTE_CHAR = '"';
+  if(separator == null) {
+    return value;
+  }
+  if(value == null) {
+    return null;
+  }
+  if(value.indexOf(QUOTE_CHAR) >= 0){
+    //double them
+    value = value.replace(QUOTE_CHAR, QUOTE_CHAR.concat(QUOTE_CHAR));
+  }
+  if(alwaysEscape || value.indexOf(separator) >= 0){
+    //quote value
+    value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
+  }
+  return value;
 };
 
-
+/**
+*
+*  Javascript sprintf
+*  http://www.webtoolkit.info/
+*
+*
+**/
 sprintfWrapper = {
 
   init : function () {
@@ -1156,186 +1659,359 @@ sprintfWrapper = {
 
 sprintf = sprintfWrapper.init;
 
+//Normalization - Ensure component does not finish with component and capitalize first letter
+Dashboards.normalizeAddInKey = function(key) {
+    if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
+      key = key.substring(0, key.length - 'Component'.length);  
+  return key.charAt(0).toUpperCase() + key.substring(1);
+}
+
+Dashboards.registerAddIn = function(component,slot,addIn){
+  if (!this.addIns) {
+    this.addIns = {};
+  }
+  
+
+  var key = this.normalizeAddInKey(component);
+  
+  
+  if (!this.addIns[key]) {
+    this.addIns[key] = {};  
+  }
+  if (!this.addIns[key][slot]) {
+    this.addIns[key][slot] = {};  
+  }
+  this.addIns[key][slot][addIn.getName()] = addIn;  
+};
+
+Dashboards.hasAddIn = function(component,slot,addIn){
+  var key = this.normalizeAddInKey(component);
+  return Boolean(this.addIns && this.addIns[key] &&
+    this.addIns[key][slot] && this.addIns[key][slot][addIn]);
+};
+
+Dashboards.getAddIn = function(component,slot,addIn){
+  var key = this.normalizeAddInKey(component);
+  try {
+    return this.addIns[key][slot][addIn];
+  } catch (e) {
+    return null;
+  }
+};
+
+Dashboards.setAddInDefaults = function(component, slot, addInName, defaults) {
+var key = this.normalizeAddInKey(component);
+  var addIn = this.getAddIn(key,slot,addInName);
+  if(addIn) {
+    addIn.setDefaults(defaults);
+  }
+};
+Dashboards.listAddIns = function(component,slot) {
+var key = this.normalizeAddInKey(component);
+  var addInList = [];
+  try {
+    var slot = this.addIns[key][slot];
+    for (var addIn in slot) if (slot.hasOwnProperty(addIn)) { 
+      addInList.push([addIn, slot[addIn].getLabel()]);
+    }
+    return addInList;
+  } catch (e) {
+    return [];
+  }
+};
+
+Dashboards.safeClone = function(){
+  var options, name, src, copy, copyIsArray, clone,
+  target = arguments[0] || {},
+  i = 1,
+  length = arguments.length,
+  deep = false;
+
+  // Handle a deep copy situation
+  if ( typeof target === "boolean" ) {
+    deep = target;
+    target = arguments[1] || {};
+    // skip the boolean and the target
+    i = 2;
+  }
+
+  // Handle case when target is a string or something (possible in deep copy)
+  if ( typeof target !== "object" && !jQuery.isFunction(target) ) {
+    target = {};
+  }
+
+  for ( ; i < length; i++ ) {
+    // Only deal with non-null/undefined values
+    if ( (options = arguments[ i ]) != null ) {
+      // Extend the base object
+      for ( name in options ) if (options.hasOwnProperty(name)) {
+        src = target[ name ];
+        copy = options[ name ];
+
+        // Prevent never-ending loop
+        if ( target === copy ) {
+          continue;
+        }
+
+        // Recurse if we're merging plain objects or arrays
+        if ( deep && copy && ( jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)) ) ) {
+          if ( copyIsArray ) {
+            copyIsArray = false;
+            clone = src && jQuery.isArray(src) ? src : [];
+
+          } else {
+            clone = src && jQuery.isPlainObject(src) ? src : {};
+          }
+
+          // Never move original objects, clone them
+          target[ name ] = Dashboards.safeClone( deep, clone, copy );
+
+        // Don't bring in undefined values
+        } else if ( copy !== undefined ) {
+          target[ name ] = copy;
+        }
+      }
+    }
+  }
+
+  // Return the modified object
+  return target;
+}
+
 //Ctors:
 // Query(queryString) --> DEPRECATED
 // Query(queryDefinition{path, dataAccessId})
 // Query(path, dataAccessId)
 Query = function() {
 
-    // Constants, or what passes for them... Pretty please leave these alone.
-    var CDA_PATH = webAppPath + "/content/cda/doQuery?";
-    var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:pentaho-solutions:cdf:components:jtable.xaction/generatedContent";
+  // Constants, or what passes for them... Pretty please leave these alone.
+  var CDA_PATH = webAppPath + "/content/cda/doQuery?";
+  var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:cdf:components:jtable.xaction/generatedContent";
 
-    /*
+  /*
      * Private fields
      */
 
-    // Datasource type definition
-    var _mode = 'CDA';
-    // CDA uses file+id, Legacy uses a raw query
-    var _file = '';
-    var _id = '';
-    var _query = '';
-    // Callback for the data handler
-    var _callback = null;
-    // Result caching
-    var _lastResultSet = null;
-    // Paging and sorting
-    var _page = 0;
-    var _pageSize = 0;
-    var _sortBy = "";
+  // Datasource type definition
+  var _mode = 'CDA';
+  // CDA uses file+id, Legacy uses a raw query
+  var _file = '';
+  var _id = '';
+  var _query = '';
+  // Callback for the data handler
+  var _callback = null;
+  // Result caching
+  var _lastResultSet = null;
+  // Paging and sorting
+  var _page = 0;
+  var _pageSize = 0;
+  var _sortBy = "";
+  // Exporting support
+  var _exportIframe = null;
 
-    var _params = [];
-    /*
+  var _params = [];
+  /*
      * Initialization code
      */
 
-    //
-    (function(args){switch (args.length) {
-        case 1:
-            var cd = args[0];
-            if (typeof cd.query !== 'undefined') {
-                // got a valid legacy cd object
-                _mode = 'Legacy';
-                _query = args[0];
-            } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
-                // CDA-style cd object
-                _mode = 'CDA';
-                _file = cd.path;
-                _id = cd.dataAccessId;
-                if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-                  _sortBy = cd.sortBy;
-                }
-            } else {
-                throw 'InvalidQuery';
-            }
-            break;
-        case 2:
-            _mode = 'CDA';
-            var file = args[0];
-            var id = args[1];
-            if (typeof file != 'string' || typeof id != 'string') {
-                throw 'InvalidQuery';
-            } else {
-                // Seems like we have valid parameters
-                _id = id;
-                _file = file;
-            }
-            break;
-        default:
-            throw "InvalidQuery";
+  //
+  (function(args){
+    switch (args.length) {
+      case 1:
+        var cd = args[0];
+        if (typeof cd.query != 'undefined') {
+          // got a valid legacy cd object
+          _mode = 'Legacy';
+          _query = args[0];
+        } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
+          // CDA-style cd object
+          _mode = 'CDA';
+          _file = cd.path;
+          _id = cd.dataAccessId;
+          if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+            _sortBy = cd.sortBy;
+          }
+          if(cd.pageSize != null){
+            _pageSize = cd.pageSize;
+          }
+        } else {
+          throw 'InvalidQuery';
+        }
+        break;
+      case 2:
+        _mode = 'CDA';
+        var file = args[0];
+        var id = args[1];
+        if (typeof file != 'string' || typeof id != 'string') {
+          throw 'InvalidQuery';
+        } else {
+          // Seems like we have valid parameters
+          _id = id;
+          _file = file;
+        }
+        break;
+      default:
+        throw "InvalidQuery";
     } 
-    }(arguments));
-    /*
+  }(arguments));
+  /*
      * Private methods
      */
 
-    var doQuery = function(outsideCallback){
-        if (typeof _callback != 'function') {
-            throw 'QueryNotInitialized';
-        }
-        var url;
-        var queryDefinition = {};
-        var callback = (outsideCallback ? outsideCallback : _callback);
-        if (_mode == 'CDA') {
-            for (var param in _params) {
-                if(_params.hasOwnProperty(param)) {
-              var value = Dashboards.getParameterValue(_params[param][1]);
-              var name = _params[param][0];
-              if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-                //special case where single element will wrongly be treated as a parseable array by cda
-                value = doCsvQuoting(value[0],';');
-              }
-              //else will not be correctly handled for functions that return arrays
-              if (typeof value == 'function') value = value();
-              queryDefinition['param' + name] = value;
-                }
-            }
-            queryDefinition.path = _file;
-            queryDefinition.dataAccessId = _id;
-            queryDefinition.pageSize = _pageSize;
-            queryDefinition.pageStart = _page;
-            queryDefinition.sortBy = _sortBy;
-            url = CDA_PATH;
-            // Assemble parameters
-        } else if (_mode == 'Legacy') {
-            queryDefinition = _query;
-            url = LEGACY_QUERY_PATH;
-        }
-        $.post(url, queryDefinition, function(json) {
-				if(_mode == 'Legacy'){
-					json = eval("(" + json + ")");
-				}
-				_lastResultSet = json;
-				callback(_mode == 'CDA' ? json : json.values);
-			});
-    };
+  var doQuery = function(outsideCallback){
+    if (typeof _callback != 'function') {
+      throw 'QueryNotInitialized';
+    }
+    var url;
+    var queryDefinition; 
+    var callback = (outsideCallback ? outsideCallback : _callback);
+    if (_mode == 'CDA') {
+      url = CDA_PATH;
+      queryDefinition = buildQueryDefinition();
+    // Assemble parameters
+    } else if (_mode == 'Legacy') {
+      queryDefinition = _query;
+      url = LEGACY_QUERY_PATH;
+    }
+    $.post(url, queryDefinition, function(json) {
+      if(_mode == 'Legacy'){
+        json = eval("(" + json + ")");
+      }
+      _lastResultSet = json;
+      var clone = Dashboards.safeClone(true,{},_lastResultSet);
+      
+      if (_mode == 'Legacy') {
+        var newMetadata = [{"colIndex":0,"colType":"String","colName":"Name"}];
+        for (var i = 0 ; i < clone.metadata.length; i++) {
+          var x = i;
+      newMetadata.push({"colIndex":x+1,"colType":"String","colName":clone.metadata[x]});
+    }      
+    clone.resultset = clone.values;
+    clone.metadata = newMetadata;
+    clone.values = null;
+      }
+      
+      callback(clone);
+    });
+  };
 
-    /*
+  function buildQueryDefinition(overrides) {
+    overrides = overrides || {};
+    var queryDefinition = {};
+    
+    var p = Dashboards.objectToPropertiesArray( Dashboards.safeClone({},Dashboards.propertiesArrayToObject(_params), overrides) )
+
+    for (var param in p) {
+      if(p.hasOwnProperty(param)) {
+        var value; 
+        var name = p[param][0];
+        value = Dashboards.getParameterValue(p[param][1]);
+        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+          //special case where single element will wrongly be treated as a parseable array by cda
+          value = doCsvQuoting(value[0],';');
+        }
+        //else will not be correctly handled for functions that return arrays
+        if (typeof value == 'function') value = value();
+        queryDefinition['param' + name] = value;
+      }
+    }
+    queryDefinition.path = _file;
+    queryDefinition.dataAccessId = _id;
+    queryDefinition.pageSize = _pageSize;
+    queryDefinition.pageStart = _page;
+    queryDefinition.sortBy = _sortBy;
+    return queryDefinition;
+
+  };
+
+  /*
      * Public interface
      */
 
-    // Entry point
+  // Entry point
 
-    this.fetchData = function(params, callback) {
-      switch(arguments.length) {
-        case 0:
-          if(_params && _callback) {
-            return doQuery();
-          }
-          break;
-        case 1:
-          if (typeof arguments[0] == "function"){
+  this.exportData = function(outputType, overrides,options) {
+    if (_mode != 'CDA') {
+      throw "UnsupportedOperation";
+    }
+    if (!options) {
+      options = {};
+    }
+    var queryDefinition = buildQueryDefinition(overrides);
+    queryDefinition.outputType = outputType;
+    if (outputType == 'csv' && options.separator) {
+      queryDefinition.settingcsvSeparator = options.separator;
+    }
+    if (options.filename) {
+      queryDefinition.settingattachmentName= options.filename ;
+    }
+    _exportIframe = _exportIframe || $('<iframe style="display:none">');
+    _exportIframe.detach();
+    _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
+    _exportIframe.appendTo($('body'));
+  }
+
+  this.fetchData = function(params, callback) {
+    switch(arguments.length) {
+      case 0:
+        if(_params && _callback) {
+          return doQuery();
+        }
+        break;
+      case 1:
+        if (typeof arguments[0] == "function"){
           /* If we're receiving _only_ the callback, we're not
            * going to change the internal callback
            */
-            return doQuery(arguments[0]);
-          } else if( arguments[0] instanceof Array){
-            _params = arguments[0];
-            return doQuery();
-          }
-          break;
-        case 2:
-        default:
-        /* We're just going to discard anything over two params */
-            _params = params;
-            _callback = callback;
-            return doQuery();
+          return doQuery(arguments[0]);
+        } else if( arguments[0] instanceof Array){
+          _params = arguments[0];
+          return doQuery();
         }
-      /* If we haven't hit a return by this time,
+        break;
+      case 2:
+      default:
+        /* We're just going to discard anything over two params */
+        _params = params;
+        _callback = callback;
+        return doQuery();
+    }
+    /* If we haven't hit a return by this time,
        * the user gave us some wrong input
        */
-      throw "InvalidInput";
-    };
+    throw "InvalidInput";
+  };
 
-    // Result caching
-    this.lastResults = function(){
-        if (_lastResultSet !== null) {
-            return _lastResultSet;
-        } else {
-            throw "NoCachedResults";
-        }
-    };
+  // Result caching
+  this.lastResults = function(){
+    if (_lastResultSet !== null) {
+      return Dashboards.safeClone(true,{},_lastResultSet);
+    } else {
+      throw "NoCachedResults";
+    }
+  };
 
-    this.reprocessLastResults = function(outerCallback){
-        if (_lastResultSet !== null) {
-            var callback = outerCallback || _callback;
-            return callback(_lastResultSet);
-        } else{
-            throw "NoCachedResults";
-        }
-    };
+  this.reprocessLastResults = function(outerCallback){
+    if (_lastResultSet !== null) {
+      var clone = Dashboards.safeClone(true,{},_lastResultSet);
+      var callback = outerCallback || _callback;
+      return callback(clone);
+    } else {
+      throw "NoCachedResults";
+    }
+  };
 
-    this.reprocessResults = function(outerCallback) {
-      if (_lastResultSet !== null) {
-        var callback = (outsideCallback ? outsideCallback : _callback);
-        callback(_mode == 'CDA' ? json : json.values);
-      } else {
-        throw "NoCachedResults";
-      }
-    };
+  this.reprocessResults = function(outerCallback) {
+    if (_lastResultSet !== null) {
+      var clone = Dashboards.safeClone(true,{},_lastResultSet);
+      var callback = (outsideCallback ? outsideCallback : _callback);
+      callback(_mode == 'CDA' ? clone : clone.values);
+    } else {
+      throw "NoCachedResults";
+    }
+  };
 
-    /* Sorting
+  /* Sorting
      *
      * CDA expects an array of terms consisting of a number and a letter
      * that's either 'A' or 'D'. Each term denotes, in order, a column
@@ -1347,158 +2023,204 @@ Query = function() {
      * first by the first column (ascending), and then by the second
      * column (descending).
      */
-    this.setSortBy = function(sortBy) {
-      var newSort;
-      if (sortBy === null || sortBy === undefined || sortBy === '') {
-        newSort = '';
-      }
-      /* If we have a string as input, we need to split it into
+  this.setSortBy = function(sortBy) {
+    var newSort;
+    if (sortBy === null || sortBy === undefined || sortBy === '') {
+      newSort = '';
+    }
+    /* If we have a string as input, we need to split it into
        * an array of sort terms. Also, independently of the parameter
        * type, we need to convert everything to upper case, since want
        * to accept 'a' and 'd' even though CDA demands capitals.
        */
-      else if (typeof sortBy == "string") {
-        /* Valid sortBy Strings are column numbers, optionally
+    else if (typeof sortBy == "string") {
+      /* Valid sortBy Strings are column numbers, optionally
          *succeeded by A or D (ascending or descending), and separated by commas
          */
         if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-          throw "InvalidSortExpression";
-        }
-        /* Break the string into its constituent terms, filter out empty terms, if any */
-        newSort = sortBy.toUpperCase().split(',').filter(function(e){return e !== "";});
-      } else if (sortBy instanceof Array) {
-        newSort = sortBy.map(function(d){return d.toUpperCase();});
-        /* We also need to validate that each individual term is valid*/
-        var invalidEntries = newSort.filter(function(e){return !e.match("^[0-9]+[adAD]?,?$")});
-        if ( invalidEntries.length > 0) {
-            throw "InvalidSortExpression";
-        }
+        throw "InvalidSortExpression";
       }
+      /* Break the string into its constituent terms, filter out empty terms, if any */
+      newSort = sortBy.toUpperCase().split(',').filter(function(e){
+        return e !== "";
+      });
+    } else if (sortBy instanceof Array) {
+      newSort = sortBy.map(function(d){
+        return d.toUpperCase();
+      });
+      /* We also need to validate that each individual term is valid*/
+      var invalidEntries = newSort.filter(function(e){
+        return !e.match("^[0-9]+[adAD]?,?$")
+      });
+      if ( invalidEntries.length > 0) {
+        throw "InvalidSortExpression";
+      }
+    }
       
-      /* We check whether the parameter is the same as before,
+    /* We check whether the parameter is the same as before,
        * and notify the caller on whether it changed
        */
-      var same;
-      if (newSort instanceof Array) {
-        same = newSort.length != _sortBy.length;
-        $.each(newSort,function(i,d){
-          same = (same && d == _sortBy[i]);
-          if(!same) {return false;}
-        });
-      } else {
-        same = (newSort === _sortBy);
-      }
-      _sortBy = newSort;
-      return !same;
-    };
+    var same;
+    if (newSort instanceof Array) {
+      same = newSort.length != _sortBy.length;
+      $.each(newSort,function(i,d){
+        same = (same && d == _sortBy[i]);
+        if(!same) {
+          return false;
+        }
+      });
+    } else {
+      same = (newSort === _sortBy);
+    }
+    _sortBy = newSort;
+    return !same;
+  };
 
-    this.sortBy = function(sortBy,outsideCallback) {
-      /* If the parameter is not the same, and we have a valid state,
+  this.sortBy = function(sortBy,outsideCallback) {
+    /* If the parameter is not the same, and we have a valid state,
        * we can fire the query.
        */
-      var changed = this.setSortBy(sortBy);
-      if (!changed) {
-        return false;
-      } else if (_callback !== null) {
-        return doQuery(outsideCallback);
-      }
-    };
+    var changed = this.setSortBy(sortBy);
+    if (!changed) {
+      return false;
+    } else if (_callback !== null) {
+      return doQuery(outsideCallback);
+    }
+  };
 
-    this.setParameters = function (params) {
-      if((params instanceof Array)) {
-        _params = params;
-      } else {
-        throw "InvalidParameters";
-        }
-    };
+  this.setParameters = function (params) {
+    if((params instanceof Array)) {
+      _params = params;
+    } else {
+      throw "InvalidParameters";
+    }
+  };
 
-    this.setCallback = function(callback) {
-      if(typeof callback == "function") {
-        _callback = callback;
-      } else {
-        throw "InvalidCallback";
-      }
-    };
-    /* Pagination
+  this.setCallback = function(callback) {
+    if(typeof callback == "function") {
+      _callback = callback;
+    } else {
+      throw "InvalidCallback";
+    }
+  };
+  /* Pagination
      *
      * We paginate by having an initial position (_page) and page size (_pageSize)
      * Paginating consists of incrementing/decrementing the initial position by the page size
      * All paging operations change the paging cursor.
      */
 
-    // Gets the next _pageSize results
-    this.nextPage = function(outsideCallback) {
-        if (_pageSize > 0) {
-            _page += _pageSize;
-            return doQuery(outsideCallback);
-        } else {
-            throw "InvalidPageSize";
-        }
-    };
+  // Gets the next _pageSize results
+  this.nextPage = function(outsideCallback) {
+    if (_pageSize > 0) {
+      _page += _pageSize;
+      return doQuery(outsideCallback);
+    } else {
+      throw "InvalidPageSize";
+    }
+  };
 
-    // Gets the previous _pageSize results
-    this.prevPage = function(outsideCallback) {
-        if (_page > _pageSize) {
-            _page -= _pageSize;
-            return doQuery(outsideCallback);
-        } else if (_pageSize > 0) {
-            _page = 0;
-            return doQuery(outsideCallback);
-        } else {
-            throw "AtBeggining";
-        }
-    };
+  // Gets the previous _pageSize results
+  this.prevPage = function(outsideCallback) {
+    if (_page > _pageSize) {
+      _page -= _pageSize;
+      return doQuery(outsideCallback);
+    } else if (_pageSize > 0) {
+      _page = 0;
+      return doQuery(outsideCallback);
+    } else {
+      throw "AtBeggining";
+    }
+  };
 
-    // Gets the page-th set of _pageSize results (0-indexed)
-    this.getPage = function(page, outsideCallback) {
-      if (page * _pageSize == _page) {
-        return false;
-      } else if (typeof page == 'number' && page >= 0) {
-            _page = page * _pageSize;
-        return doQuery(outsideCallback);
-        } else {
-            throw "InvalidPage";
-        }
-    };
+  // Gets the page-th set of _pageSize results (0-indexed)
+  this.getPage = function(page, outsideCallback) {
+    if (page * _pageSize == _page) {
+      return false;
+    } else if (typeof page == 'number' && page >= 0) {
+      _page = page * _pageSize;
+      return doQuery(outsideCallback);
+    } else {
+      throw "InvalidPage";
+    }
+  };
 
-    // Gets _pageSize results starting at page
-    this.setPageStartingAt = function(page) {
-      if (page == _page) {
-        return false;
-      } else if (typeof page == 'number' && page >= 0) {
-            _page = page;
-        } else {
-            throw "InvalidPage";
-        }
-    };
+  // Gets _pageSize results starting at page
+  this.setPageStartingAt = function(page) {
+    if (page == _page) {
+      return false;
+    } else if (typeof page == 'number' && page >= 0) {
+      _page = page;
+    } else {
+      throw "InvalidPage";
+    }
+  };
 
-    this.pageStartingAt = function(page,outsideCallback) {
-      if(this.setPageStartingAt(page)) {
-        return doQuery(outsideCallback);
-      } else {
-        return false;
-      }
-    };
+  this.pageStartingAt = function(page,outsideCallback) {
+    if(this.setPageStartingAt(page)) {
+      return doQuery(outsideCallback);
+    } else {
+      return false;
+    }
+  };
 
-    // Sets the page size
-    this.setPageSize = function(pageSize) {
-        if (typeof pageSize == 'number' && pageSize > 0) {
-            _pageSize = pageSize;
-        } else {
-            throw "InvalidPageSize";
-        }
-    };
+  // Sets the page size
+  this.setPageSize = function(pageSize) {
+    if (typeof pageSize == 'number' && pageSize > 0) {
+      _pageSize = pageSize;
+    } else {
+      throw "InvalidPageSize";
+    }
+  };
 
-    // sets _pageSize to pageSize, and gets the first page of results
-    this.initPage = function(pageSize,outsideCallback) {
-      if (pageSize == _pageSize && _page == 0) {
-         return false;
-      } else if (typeof pageSize == 'number' && pageSize > 0) {
-            _page = 0;
-            _pageSize = pageSize;
-        return doQuery(outsideCallback);
-        } else {
-            throw "InvalidPageSize";
-        }
-    };
+  // sets _pageSize to pageSize, and gets the first page of results
+  this.initPage = function(pageSize,outsideCallback) {
+    if (pageSize == _pageSize && _page == 0) {
+      return false;
+    } else if (typeof pageSize == 'number' && pageSize > 0) {
+      _page = 0;
+      _pageSize = pageSize;
+      return doQuery(outsideCallback);
+    } else {
+      throw "InvalidPageSize";
+    }
+  };
 };
+
+/*
+ * UTILITY STUFF
+ *
+ * 
+ */
+
+(function() {
+  function accessorDescriptor(field, fun)
+  {
+    var desc = {
+      enumerable: true, 
+      configurable: true
+    };
+    desc[field] = fun;
+    return desc;
+  }
+  
+  this.defineGetter = function defineGetter(obj, prop, get)
+  {
+    if (Object.prototype.__defineGetter__)
+      return obj.__defineGetter__(prop, get);
+    if (Object.defineProperty)
+      return Object.defineProperty(obj, prop, accessorDescriptor("get", get));
+  
+    throw new Error("browser does not support getters");
+  }
+  
+  this.defineSetter = function defineSetter(obj, prop, set)
+  {
+    if (Object.prototype.__defineSetter__)
+      return obj.__defineSetter__(prop, set);
+    if (Object.defineProperty)
+      return Object.defineProperty(obj, prop, accessorDescriptor("set", set));
+  
+    throw new Error("browser does not support setters");
+  }
+})();

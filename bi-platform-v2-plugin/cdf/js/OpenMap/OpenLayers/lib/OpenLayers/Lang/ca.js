@@ -1,7 +1,3 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -16,14 +12,11 @@ OpenLayers.Lang.ca = {
 
     'unhandledRequest': "Resposta a petició no gestionada ${statusText}",
 
-    'permalink': "Enllaç permanent",
+    'Permalink': "Enllaç permanent",
 
-    'overlays': "Capes addicionals",
+    'Overlays': "Capes addicionals",
 
-    'baseLayer': "Capa Base",
-
-    'sameProjection':
-        "El mapa de referència només funciona si té la mateixa projecció que el mapa principal",
+    'Base Layer': "Capa Base",
 
     'readNotImplemented': "Lectura no implementada.",
 
@@ -31,23 +24,23 @@ OpenLayers.Lang.ca = {
 
     'noFID': "No es pot actualitzar un element per al que no existeix FID.",
 
-    'errorLoadingGML': "Error caregant el fitxer GML ${url}",
+    'errorLoadingGML': "Error carregant el fitxer GML ${url}",
 
     'browserNotSupported':
-        "El seu navegador no suporta renderització vectorial. Els renderitzadors suportats actualmente són:\n${renderers}",
+        "El seu navegador no suporta renderització vectorial. Els renderitzadors suportats actualment són:\n${renderers}",
 
     'componentShouldBe': "addFeatures : el component ha de ser de tipus ${geomType}",
 
     // console message
     'getFeatureError':
-        "getFeatureFromEvent ha estat cridat a una capa sense renderizador. Això normalment vol dir que " +
+        "getFeatureFromEvent ha estat cridat des d'una capa sense renderizador. Això normalment vol dir que " +
         "s'ha eliminat una capa, però no el handler associat a ella.",
 
     // console message
     'minZoomLevelError':
         "La propietat minZoomLevel s'ha d'utilitzar només " +
         "amb les capes que tenen FixedZoomLevels. El fet que " +
-        "una capa wfs comprovi minZoomLevel és una reliquia del " +
+        "una capa wfs comprovi minZoomLevel és una relíquia del " +
         "passat. No podem, però, eliminar-la sense trencar " +
         "les aplicacions d'OpenLayers que en puguin dependre. " +
         "Així doncs estem fent-la obsoleta -- la comprovació " +
@@ -61,7 +54,7 @@ OpenLayers.Lang.ca = {
 
     'googleWarning':
         "La capa Google no s'ha pogut carregar correctament.<br><br>" +
-        "Per evitar aquest missatge, sel·leccioneu una nova Capa Base " +
+        "Per evitar aquest missatge, seleccioneu una nova Capa Base " +
         "al gestor de capes de la cantonada superior dreta.<br><br>" +
         "Probablement això és degut a que l'script de la biblioteca de " +
     "Google Maps no ha estat inclòs a la vostra pàgina, o no " +
@@ -71,7 +64,7 @@ OpenLayers.Lang.ca = {
         "target='_blank'>féu clic aquí</a>",
 
     'getLayerWarning':
-        "Per evitar aquest missatge, sel·leccioneu una nova Capa Base " +
+        "Per evitar aquest missatge, seleccioneu una nova Capa Base " +
         "al gestor de capes de la cantonada superior dreta.<br><br>" +
         "Probablement això és degut a que l'script de la biblioteca " +
         "${layerLib} " +
@@ -80,24 +73,31 @@ OpenLayers.Lang.ca = {
         "<a href='http://trac.openlayers.org/wiki/${layerLib}' " +
         "target='_blank'>féu clic aquí</a>",
 
-    'scale': "Escala = 1 : ${scaleDenom}",
+    'Scale = 1 : ${scaleDenom}': "Escala = 1 : ${scaleDenom}",
 
+    //labels for the graticule control
+    'W': 'O',
+    'E': 'E',
+    'N': 'N',
+    'S': 'S',
+    'Graticule': 'Retícula',    
+        
     // console message
     'layerAlreadyAdded':
-        "Heu intentat afegir la capa: ${layerName} al mapa, pero ja ha estat afegida anteriorment",
+        "Heu intentat afegir la capa: ${layerName} al mapa, però ja ha estat afegida anteriorment",
 
     // console message
     'reprojectDeprecated':
         "Esteu fent servir l'opció 'reproject' a la capa " +
         "${layerName}. Aquesta opció és obsoleta: el seu ús fou concebut " +
         "per suportar la visualització de dades sobre mapes base comercials, " + 
-        "però aquesta funcionalitat s'hauria d'assolir ara mitjançant el suport " +
+        "però ara aquesta funcionalitat s'hauria d'assolir mitjançant el suport " +
         "de la projecció Spherical Mercator. Més informació disponible a " +
         "http://trac.openlayers.org/wiki/SphericalMercator.",
 
     // console message
     'methodDeprecated':
-        "Aquest mètode és obsolet i s'eliminará a la versió 3.0. " +
+        "Aquest mètode és obsolet i s'eliminarà a la versió 3.0. " +
         "Si us plau feu servir em mètode alternatiu ${newMethod}.",
 
     // console message
@@ -113,12 +113,9 @@ OpenLayers.Lang.ca = {
     'unsupportedGeometryType': "Tipus de geometria no suportada: ${geomType}",
 
     // console message
-    'pagePositionFailed':
-        "OpenLayers.Util.pagePosition ha fallat: l'element amb id ${elemId} pot estar fora de lloc.",
-                    
-    // console message
     'filterEvaluateNotImplemented': "evaluate no està implementat per aquest tipus de filtre.",
 
+    // **** end ****
     'end': ''
 
 };

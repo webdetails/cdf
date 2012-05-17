@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.pentaho.cdf;
 
 import java.io.IOException;
@@ -50,7 +46,7 @@ public class GetCDFResource extends ServletBase {
         }
         String resourcePath = null;
         resourcePath = resource;
-
+        
         InputStream in = ActionSequenceResource.getInputStream(resourcePath, LocaleHelper.getLocale());
         if (in == null) {
             error(Messages.getInstance().getErrorString("GetResource.ERROR_0003_RESOURCE_MISSING", resourcePath)); //$NON-NLS-1$
@@ -58,7 +54,6 @@ public class GetCDFResource extends ServletBase {
             return;
         }
         String mimeType = getServletContext().getMimeType(resourcePath);
-        //response.setHeader("content-disposition", "attachment;filename=" + resourceName); //$NON-NLS-1$ //$NON-NLS-2$
         if ((null == mimeType) || (mimeType.length() <= 0)) {
             // Hard coded to PNG because BIRT does not give us a mime type at
             // all...

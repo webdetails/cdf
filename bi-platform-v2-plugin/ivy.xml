@@ -8,18 +8,21 @@
     	<conf name="source"/>
     	<conf name="zip"/>
     	<conf name="test" visibility="private"/>
+        <conf name="js"/>
     </configurations>
-    
+
     <publications>
         <artifact name="pentaho-cdf" type="jar" conf="default"/>
         <artifact name="pentaho-cdf" m:classifier="sources" type="source" ext="jar" conf="source"/>
         <artifact name="pentaho-cdf" type="zip" conf="zip"/>
+        <artifact name="pentaho-cdf" m:classifier="js" type="js" ext="zip" conf="js" />
     </publications>
-    
+
     <dependencies defaultconf="default->default">
     
         <!--  third party dependencies -->
         <dependency org="commons-logging"     name="commons-logging"     rev="1.1"   transitive="false"/>
+        <dependency org="commons-io"     name="commons-io"     rev="1.3"   transitive="false"/>
         <dependency org="dom4j"               name="dom4j"               rev="1.6.1" transitive="false"/>
         <dependency org="commons-lang"        name="commons-lang"        rev="2.2" />
     	<dependency org="commons-io" name="commons-io" rev="1.4" />
@@ -27,7 +30,7 @@
         <dependency org="javax.servlet"       name="servlet-api"         rev="2.4" />
         <!--  pentaho dependencies -->
         <dependency org="pentaho" name="pentaho-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-platform-core" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>        
+        <dependency org="pentaho" name="pentaho-platform-core" rev="${dependency.bi-platform.revision}" transitive="true" changing="true" />       
         <dependency org="pentaho" name="pentaho-platform-extensions" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
         <dependency org="pentaho" name="pentaho-platform-repository" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
 		<dependency org="org.hibernate"       name="hibernate"           rev="3.2.6.ga">
@@ -46,7 +49,7 @@
         </dependency>
 
         <!--  testing dependencies -->   
-        <dependency org="pentaho" name="pentaho-platform-repository-test"      rev="${dependency.bi-platform.revision}" changing="true" conf="test->default"/>     
+        <dependency org="pentaho" name="pentaho-platform-repository-test"      rev="${dependency.bi-platform.revision}" changing="true" conf="test->default"/>
         <dependency org="commons-collections" name="commons-collections" conf="test->default" rev="3.2"/>
     	<dependency org="org.slf4j" name="slf4j-log4j12" rev="1.5.8" conf="test->default" />
     	<dependency org="pentaho" name="pentaho-platform-core-test" rev="${dependency.bi-platform.revision}" changing="true"

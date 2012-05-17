@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
@@ -243,6 +244,9 @@ OpenLayers.Format.XML = OpenLayers.Class(OpenLayers.Format, {
      */
     createTextNode: function(text) {
         var node;
+        if (typeof text !== "string") {
+            text = String(text);
+        }
         if(this.xmldom) {
             node = this.xmldom.createTextNode(text);
         } else {
@@ -568,9 +572,6 @@ OpenLayers.Format.XML = OpenLayers.Class(OpenLayers.Format, {
         }
         var value = options.value;
         if(value != null) {
-            if(typeof value == "boolean") {
-                value = String(value);
-            }
             node.appendChild(this.createTextNode(value));
         }
         return node;
@@ -847,6 +848,29 @@ OpenLayers.Format.XML = OpenLayers.Class(OpenLayers.Format, {
         return uri;
     },
     
+    /**
+     * Method: getXMLDoc
+     * Get an XML document for nodes that are not supported in HTML (e.g.
+     * createCDATASection). On IE, this will either return an existing or
+     * create a new <xmldom> on the instance. On other browsers, this will
+     * either return an existing or create a new shared document (see
+     * <OpenLayers.Format.XML.document>).
+     *
+     * Returns:
+     * {XMLDocument}
+     */
+    getXMLDoc: function() {
+        if (!OpenLayers.Format.XML.document && !this.xmldom) {
+            if (document.implementation && document.implementation.createDocument) {
+                OpenLayers.Format.XML.document =
+                    document.implementation.createDocument("", "", null);
+            } else if (!this.xmldom && window.ActiveXObject) {
+                this.xmldom = new ActiveXObject("Microsoft.XMLDOM");
+            }
+        }
+        return OpenLayers.Format.XML.document || this.xmldom;
+    },
+
     CLASS_NAME: "OpenLayers.Format.XML" 
 
 });     
@@ -878,3 +902,10 @@ OpenLayers.Format.XML.lookupNamespaceURI = OpenLayers.Function.bind(
     OpenLayers.Format.XML.prototype.lookupNamespaceURI,
     OpenLayers.Format.XML.prototype
 );
+
+/**
+ * Property: OpenLayers.Format.XML.document
+ * {XMLDocument} XML document to reuse for creating non-HTML compliant nodes,
+ * like document.createCDATASection.
+ */
+OpenLayers.Format.XML.document = null;

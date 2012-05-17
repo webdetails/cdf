@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2009 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
  
 /**
@@ -65,9 +66,6 @@ OpenLayers.Format.SOSGetFeatureOfInterest = OpenLayers.Class(
      * options - {Object} An optional object whose properties will be set on
      *     this instance.
      */
-    initialize: function(options) {
-        OpenLayers.Format.XML.prototype.initialize.apply(this, [options]);
-    },
 
     /**
      * APIMethod: read

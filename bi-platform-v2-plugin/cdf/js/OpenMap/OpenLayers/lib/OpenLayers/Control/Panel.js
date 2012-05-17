@@ -1,5 +1,6 @@
-/* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
- * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
  * full text of the license. */
 
 /**
@@ -32,13 +33,62 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      * APIProperty: defaultControl
      * {<OpenLayers.Control>} The control which is activated when the control is
      * activated (turned on), which also happens at instantiation.
+     * If <saveState> is true, <defaultControl> will be nullified after the
+     * first activation of the panel.
      */
-    defaultControl: null, 
+    defaultControl: null,
+    
+    /**
+     * APIProperty: saveState
+     * {Boolean} If set to true, the active state of this panel's controls will
+     * be stored on panel deactivation, and restored on reactivation. Default
+     * is false.
+     */
+    saveState: false,
+      
+    /**
+     * APIProperty: allowDepress
+     * {Boolean} If is true the <OpenLayers.Control.TYPE_TOOL> controls can 
+     *     be deactivated by clicking the icon that represents them.  Default 
+     *     is false.
+     */
+    allowDepress: false,
+    
+    /**
+     * Property: activeState
+     * {Object} stores the active state of this panel's controls.
+     */
+    activeState: null,
 
     /**
      * Constructor: OpenLayers.Control.Panel
      * Create a new control panel.
-     * 
+     *
+     * Each control in the panel is represented by an icon. When clicking 
+     *     on an icon, the <activateControl> method is called.
+     *
+     * Specific properties for controls on a panel:
+     * type - {Number} One of <OpenLayers.Control.TYPE_TOOL>,
+     *     <OpenLayers.Control.TYPE_TOGGLE>, <OpenLayers.Control.TYPE_BUTTON>.
+     *     If not provided, <OpenLayers.Control.TYPE_TOOL> is assumed.
+     * title - {string} Text displayed when mouse is over the icon that 
+     *     represents the control.     
+     *
+     * The <OpenLayers.Control.type> of a control determines the behavior when
+     * clicking its icon:
+     * <OpenLayers.Control.TYPE_TOOL> - The control is activated and other
+     *     controls of this type in the same panel are deactivated. This is
+     *     the default type.
+     * <OpenLayers.Control.TYPE_TOGGLE> - The active state of the control is
+     *     toggled.
+     * <OpenLayers.Control.TYPE_BUTTON> - The
+     *     <OpenLayers.Control.Button.trigger> method of the control is called,
+     *     but its active state is not changed.
+     *
+     * If a control is <OpenLayers.Control.active>, it will be drawn with the
+     * olControl[Name]ItemActive class, otherwise with the
+     * olControl[Name]ItemInactive class.
+     *
      * Parameters:
      * options - {Object} An optional object whose properties will be used
      *     to extend the control.
@@ -46,6 +96,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
     initialize: function(options) {
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
         this.controls = [];
+        this.activeState = {};
     },
 
     /**
@@ -53,17 +104,18 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      */
     destroy: function() {
         OpenLayers.Control.prototype.destroy.apply(this, arguments);
-        for(var i = this.controls.length - 1 ; i >= 0; i--) {
-            if(this.controls[i].events) {
-                this.controls[i].events.un({
-                    "activate": this.redraw,
-                    "deactivate": this.redraw,
-                    scope: this
+        for (var ctl, i = this.controls.length - 1; i >= 0; i--) {
+            ctl = this.controls[i];
+            if (ctl.events) {
+                ctl.events.un({
+                    activate: this.iconOn,
+                    deactivate: this.iconOff
                 });
             }
-            OpenLayers.Event.stopObservingElement(this.controls[i].panel_div);
-            this.controls[i].panel_div = null;
-        }    
+            OpenLayers.Event.stopObservingElement(ctl.panel_div);
+            ctl.panel_div = null;
+        }
+        this.activeState = null;
     },
 
     /**
@@ -71,11 +123,17 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      */
     activate: function() {
         if (OpenLayers.Control.prototype.activate.apply(this, arguments)) {
-            for(var i=0, len=this.controls.length; i<len; i++) {
-                if (this.controls[i] == this.defaultControl) {
-                    this.controls[i].activate();
+            var control;
+            for (var i=0, len=this.controls.length; i<len; i++) {
+                control = this.controls[i];
+                if (control === this.defaultControl ||
+                            (this.saveState && this.activeState[control.id])) {
+                    control.activate();
                 }
             }    
+            if (this.saveState === true) {
+                this.defaultControl = null;
+            }
             this.redraw();
             return true;
         } else {
@@ -88,9 +146,12 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      */
     deactivate: function() {
         if (OpenLayers.Control.prototype.deactivate.apply(this, arguments)) {
-            for(var i=0, len=this.controls.length; i<len; i++) {
-                this.controls[i].deactivate();
+            var control;
+            for (var i=0, len=this.controls.length; i<len; i++) {
+                control = this.controls[i];
+                this.activeState[control.id] = control.deactivate();
             }    
+            this.redraw();
             return true;
         } else {
             return false;
@@ -105,15 +166,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      */    
     draw: function() {
         OpenLayers.Control.prototype.draw.apply(this, arguments);
-        for (var i=0, len=this.controls.length; i<len; i++) {
-            this.map.addControl(this.controls[i]);
-            this.controls[i].deactivate();
-            this.controls[i].events.on({
-                "activate": this.redraw,
-                "deactivate": this.redraw,
-                scope: this
-            });
-        }
+        this.addControlsToMap(this.controls);
         return this.div;
     },
 
@@ -121,23 +174,22 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      * Method: redraw
      */
     redraw: function() {
+        for (var l=this.div.childNodes.length, i=l-1; i>=0; i--) {
+            this.div.removeChild(this.div.childNodes[i]);
+        }
         this.div.innerHTML = "";
         if (this.active) {
             for (var i=0, len=this.controls.length; i<len; i++) {
-                var element = this.controls[i].panel_div;
-                if (this.controls[i].active) {
-                    element.className = this.controls[i].displayClass + "ItemActive";
-                } else {    
-                    element.className = this.controls[i].displayClass + "ItemInactive";
-                }    
-                this.div.appendChild(element);
+                this.div.appendChild(this.controls[i].panel_div);
             }
         }
     },
 
     /**
      * APIMethod: activateControl
-     * 
+     * This method is called when the user click on the icon representing a 
+     *     control in the panel.
+     *
      * Parameters:
      * control - {<OpenLayers.Control>}
      */
@@ -145,7 +197,6 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
         if (!this.active) { return false; }
         if (control.type == OpenLayers.Control.TYPE_BUTTON) {
             control.trigger();
-            this.redraw();
             return;
         }
         if (control.type == OpenLayers.Control.TYPE_TOGGLE) {
@@ -154,17 +205,21 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
             } else {
                 control.activate();
             }
-            this.redraw();
             return;
         }
-        for (var i=0, len=this.controls.length; i<len; i++) {
-            if (this.controls[i] != control) {
-                if (this.controls[i].type != OpenLayers.Control.TYPE_TOGGLE) {
-                    this.controls[i].deactivate();
+        if (this.allowDepress && control.active) {
+            control.deactivate();
+        } else {
+            var c;
+            for (var i=0, len=this.controls.length; i<len; i++) {
+                c = this.controls[i];
+                if (c != control &&
+                   (c.type === OpenLayers.Control.TYPE_TOOL || c.type == null)) {
+                    c.deactivate();
                 }
             }
+            control.activate();
         }
-        control.activate();
     },
 
     /**
@@ -174,10 +229,10 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
      * Control Panel.
      *
      * Parameters:
-     * controls - {<OpenLayers.Control>} 
+     * controls - {<OpenLayers.Control>} Controls to add in the panel.
      */    
     addControls: function(controls) {
-        if (!(controls instanceof Array)) {
+        if (!(OpenLayers.Util.isArray(controls))) {
             controls = [controls];
         }
         this.controls = this.controls.concat(controls);
@@ -189,6 +244,7 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
         // since they need to pass through.
         for (var i=0, len=controls.length; i<len; i++) {
             var element = document.createElement("div");
+            element.className = controls[i].displayClass + "ItemInactive";
             controls[i].panel_div = element;
             if (controls[i].title != "") {
                 controls[i].panel_div.title = controls[i].title;
@@ -202,19 +258,55 @@ OpenLayers.Control.Panel = OpenLayers.Class(OpenLayers.Control, {
         }    
 
         if (this.map) { // map.addControl() has already been called on the panel
-            for (var i=0, len=controls.length; i<len; i++) {
-                this.map.addControl(controls[i]);
-                controls[i].deactivate();
-                controls[i].events.on({
-                    "activate": this.redraw,
-                    "deactivate": this.redraw,
-                    scope: this
-                });
-            }
+            this.addControlsToMap(controls);
             this.redraw();
         }
     },
    
+    /**
+     * Method: addControlsToMap
+     * Only for internal use in draw() and addControls() methods.
+     *
+     * Parameters:
+     * controls - {Array(<OpenLayers.Control>)} Controls to add into map.
+     */         
+    addControlsToMap: function (controls) {
+        var control;
+        for (var i=0, len=controls.length; i<len; i++) {
+            control = controls[i];
+            if (control.autoActivate === true) {
+                control.autoActivate = false;
+                this.map.addControl(control);
+                control.autoActivate = true;
+            } else {
+                this.map.addControl(control);
+                control.deactivate();
+            }
+            control.events.on({
+                activate: this.iconOn,
+                deactivate: this.iconOff
+            });
+        }  
+    },
+
+    /**
+     * Method: iconOn
+     * Internal use, for use only with "controls[i].events.on/un".
+     */
+     iconOn: function() {
+        var d = this.panel_div; // "this" refers to a control on panel!
+        d.className = d.className.replace(/ItemInactive$/, "ItemActive");
+    },
+
+    /**
+     * Method: iconOff
+     * Internal use, for use only with "controls[i].events.on/un".
+     */
+     iconOff: function() {
+        var d = this.panel_div; // "this" refers to a control on panel!
+        d.className = d.className.replace(/ItemActive$/, "ItemInactive");
+    },
+
     /**
      * Method: onClick
      */
