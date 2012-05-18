@@ -1955,7 +1955,7 @@ var TableComponent = BaseComponent.extend({
       if (typeof cd.clickAction === 'function' || myself.expandOnClick) { 
         var state = {},
           target = $(e.target),
-          results = myself.queryState.lastResults();
+          results = myself.rawData; //Get postfetch result instead of query lastResults()
         if(!(target.parents('tbody').length)) {
           return;
         } else if (target.get(0).tagName != 'TD') {
@@ -1967,10 +1967,14 @@ var TableComponent = BaseComponent.extend({
         state.colIdx = position[1];
         state.rowIdx = position[0];
         state.series = results.resultset[state.rowIdx][0];
+        
         state.category = results.metadata[state.colIdx].colName;
         state.value =  results.resultset[state.rowIdx][state.colIdx];
+        state.colFormat = cd.colFormats[state.colIdx];           
+
+          
         state.target = target;
-        state.colFormat = cd.colFormats[state.colIdx]; 
+
         
         if (myself.expandOnClick) {
         	myself.handleExpandOnClick(state);
