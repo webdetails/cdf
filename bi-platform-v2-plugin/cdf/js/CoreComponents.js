@@ -295,6 +295,10 @@ var SelectBaseComponent = BaseComponent.extend({
     if (this.externalPlugin == "chosen") {
       selectHTML += " class='chzn-select'";
     }
+    if (this.externalPlugin == "hynds") {
+      selectHTML += " class='hynds-select'";
+    }
+
     selectHTML += ">";
     var firstVal,
     currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
@@ -355,6 +359,12 @@ var SelectBaseComponent = BaseComponent.extend({
       ph.find("select.chzn-select").chosen(); 
     }
     
+    if( this.externalPlugin == "hynds" ){ 
+      	ph.find("select.hynds-select").multiselect({
+			multiple: (isMultiple)? true : false  
+		}); 
+    }
+    
     var myself = this;
     $("select", ph).change(function () {
       Dashboards.processChange(myself.name);
@@ -375,6 +385,10 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 	// caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
 	if(ph.hasClass("chzn-select") && ph.val() == null)
 		return [];
+	// marpontes: regarding to caveat's comment, doing the same to hynds multiSelect
+	if(ph.hasClass("hynds-select") && ph.val() == null)
+		return [];
+
     return ph.val();
   }
 });
