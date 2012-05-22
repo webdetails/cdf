@@ -1042,12 +1042,23 @@ var DateInputComponent = BaseComponent.extend({
       });
       // Add JQuery DatePicker standard localization support only if the dashboard is localized
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        $("#" + myself.htmlObject + " input").datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+        var $input = $("#" + myself.htmlObject + " input");
+
+        $input.datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+        
+        
+        //Setup alt field and format to keep iso format
+        $input.parent().append($('<hidden>').attr("id", myself.name + "_hidden"));
+        $input.datepicker("option", "altField", "#" + myself.name + "_hidden" );
+        $input.datepicker("option", "altFormat", format );
       }
     });
   },
   getValue : function() {
-    return $("#"+this.name).val();
+    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) 
+        return $("#" + this.name + "_hidden").val();
+    else
+        return $("#"+this.name).val();
   }
 });
 
@@ -1941,7 +1952,7 @@ var TableComponent = BaseComponent.extend({
       if (typeof cd.clickAction === 'function' || myself.expandOnClick) { 
         var state = {},
           target = $(e.target),
-          results = myself.queryState.lastResults();
+          results = myself.rawData; //Get postfetch result instead of query lastResults()
         if(!(target.parents('tbody').length)) {
           return;
         } else if (target.get(0).tagName != 'TD') {
@@ -1953,10 +1964,14 @@ var TableComponent = BaseComponent.extend({
         state.colIdx = position[1];
         state.rowIdx = position[0];
         state.series = results.resultset[state.rowIdx][0];
+        
         state.category = results.metadata[state.colIdx].colName;
         state.value =  results.resultset[state.rowIdx][state.colIdx];
+        state.colFormat = cd.colFormats[state.colIdx];           
+
+          
         state.target = target;
-        state.colFormat = cd.colFormats[state.colIdx]; 
+
         
         if (myself.expandOnClick) {
         	myself.handleExpandOnClick(state);

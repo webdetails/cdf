@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.core.system.UserSession;
 import org.pentaho.platform.engine.security.SecurityHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
+import org.pentaho.platform.engine.security.SecurityParameterProvider;
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
@@ -60,7 +62,12 @@ public class DashboardContext {
                     fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
             Calendar cal = Calendar.getInstance();
-            context.put("queryData", processAutoIncludes(fullPath));
+            
+            Document config = getConfigFile();
+            
+            context.put("queryData", processAutoIncludes(fullPath, config));
+            context.put("sessionAttributes", processSessionAttributes(config));
+            
             context.put("serverLocalDate", cal.getTimeInMillis());
             context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
             context.put("user", userSession.getName());
@@ -69,16 +76,9 @@ public class DashboardContext {
             context.put("path", path);
             context.put("file", file);
 
-            // The first method works in 3.6, for 3.5 it's a different method. We'll try both
-            IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
-            if (service == null) {
-                // TODO - Remove this block of code once we drop support for older versions than SUGAR
-                service = PentahoSystem.getUserDetailsRoleListService();
-            }
-            String userName = userSession.getName();
-            if (!userName.equals("anonymousUser")) {
-                context.put("roles", service.getRolesForUser(userName));
-            }
+            SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
+            context.put("roles", securityParams.getParameter("principalRoles") );
+            
             JSONObject params = new JSONObject();
 
             Iterator it = requestParams.getParameterNames();
@@ -104,7 +104,29 @@ public class DashboardContext {
         }
     }
 
-    private JSONObject processAutoIncludes(String dashboardPath) {
+    private JSONObject processSessionAttributes(Document config) {
+      
+      JSONObject result = new JSONObject();
+      
+      @SuppressWarnings("unchecked")
+      List<Node> attributes = config.selectNodes("//sessionattributes/attribute");      
+      for(Node attribute: attributes){
+        
+        String name = attribute.getText();
+        String key = XmlDom4JHelper.getNodeText("@name", attribute);
+        if(key == null) key = name;
+        
+        try {
+          result.put(key, userSession.getAttribute(name));
+        } catch (JSONException e) {
+          logger.error(e);
+        }
+      }
+      
+      return result;
+    }
+
+    private JSONObject processAutoIncludes(String dashboardPath, Document config) {
 
         JSONObject queries = new JSONObject();
         /* Bail out immediately if CDA isn' available */
@@ -112,7 +134,7 @@ public class DashboardContext {
             logger.warn("Couldn't find CDA. Skipping auto-includes");
             return queries;
         }
-        Document config = getConfigFile();
+//        Document config = getConfigFile();
         logger.info("[Timing] Getting solution repo for auto-includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         Document solution = getRepository();
         List<Node> includes, cdas;
