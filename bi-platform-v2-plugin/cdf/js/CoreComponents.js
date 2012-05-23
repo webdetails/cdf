@@ -1029,7 +1029,7 @@ var TextareaInputComponent = BaseComponent.extend({
   update: function(){
     selectHTML = "<textarea";
     selectHTML += " id='" + this.name + "' name='" + this.name +
-    (this.numColumns ? ("' rows='" + this.rows) : "") +
+    (this.numRows ? ("' rows='" + this.numRows) : "") +
     (this.numColumns ? ("' cols='" + this.numColumns) : "") +
     "'>" + Dashboards.getParameterValue(this.parameter) + 
     '</textarea>';
