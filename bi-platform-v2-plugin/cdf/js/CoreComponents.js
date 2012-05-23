@@ -1003,11 +1003,11 @@ var TextComponent = BaseComponent.extend({
 var TextInputComponent = BaseComponent.extend({
   update: function(){
     selectHTML = "<input";
-    selectHTML += " type=test id='" + this.name + "' name='" + this.name +
-    "' + value='" +
+    selectHTML += " type=text id='" + this.name + "' name='" + this.name +
+    "'  value='" +
     Dashboards.getParameterValue(this.parameter) +
-    (this.charWidth ? ("' + size='" + this.charWidth) : "") +
-    (this.maxChars ? ("' + maxlength='" + this.maxChars) : "") +
+    (this.size ? ("' size='" + this.size) : "") +
+    (this.maxLength ? ("' maxlength='" + this.maxLength) : "") +
     "'>";
     $("#" + this.htmlObject).html(selectHTML);
     var myself = this;
@@ -1023,6 +1023,31 @@ var TextInputComponent = BaseComponent.extend({
     return $("#"+this.name).val();
   }
 });
+
+
+var TextareaInputComponent = BaseComponent.extend({
+  update: function(){
+    selectHTML = "<textarea";
+    selectHTML += " id='" + this.name + "' name='" + this.name +
+    (this.numColumns ? ("' rows='" + this.rows) : "") +
+    (this.numColumns ? ("' cols='" + this.numColumns) : "") +
+    "'>" + Dashboards.getParameterValue(this.parameter) + 
+    '</textarea>';
+    $("#" + this.htmlObject).html(selectHTML);
+    var myself = this;
+    $("#" + this.name).change(function(){
+      Dashboards.processChange(myself.name);
+    }).keyup(function(event){
+      if (event.keyCode == 13) {
+        Dashboards.processChange(myself.name);
+      }
+    });
+  },
+  getValue : function() {
+    return $("#"+this.name).val();
+  }
+});
+
 
 
 // Start by setting a sane i18n default to datepicker
