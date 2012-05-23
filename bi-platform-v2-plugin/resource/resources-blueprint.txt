@@ -36,7 +36,8 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js
+@RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.js
 
 commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/tipsy.css,\
@@ -50,6 +51,7 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/blueprint/screen.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.css
 

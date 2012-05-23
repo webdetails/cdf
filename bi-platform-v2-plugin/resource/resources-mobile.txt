@@ -1,4 +1,3 @@
-
 commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
@@ -34,7 +33,8 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js
+@RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.js
 
 commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/tipsy.css,\
@@ -47,6 +47,7 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css
 
 mapScript=\
