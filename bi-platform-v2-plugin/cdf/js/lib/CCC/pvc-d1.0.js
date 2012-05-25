@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120508
+//VERSION TRUNK-20120215-patched-20120525
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -9188,6 +9188,11 @@ pvc.BulletChart = pvc.BaseChart.extend({
       tipsySettings: {
         gravity: "s",
         fade: true
+      },
+      
+      // PATCH - Backwards compatible default tooltip format
+      tooltipFormat: function(s, c, v) {
+        return this.chart.options.valueFormat(v);
       }
     }
 });
@@ -9324,6 +9329,25 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
 
     if(this.showTooltips){
+      // PATCH - bullets tooltip support
+      this.pvBulletMeasure
+            .localProperty('tooltip')
+            .tooltip(function(v, d){
+                var s = d.title;
+                var c = d.subtitle;
+                return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+            })
+            ;
+        
+      this.pvBulletMarker
+            .localProperty('tooltip')
+            .tooltip(function(v, d){
+                var s = d.title;
+                var c = d.subtitle;
+                return myself.chart.options.tooltipFormat.call(myself,s,c,v);
+            })
+            ;
+      
       // Extend default
       this.extend(this.tipsySettings,"tooltip_");
       this.pvBulletMeasure.event("mouseover", pv.Behavior.tipsy(this.tipsySettings));
