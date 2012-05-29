@@ -132,3 +132,11 @@ div.cdfCommentsPagination li{
 div.cdfCommentsPagination a{
 	display: inline-block
 }
+
+.container input[type="text"]{
+	   margin:0;
+}
+
+.container .dataTables_wrapper {
+	   min-height:0;
+}
