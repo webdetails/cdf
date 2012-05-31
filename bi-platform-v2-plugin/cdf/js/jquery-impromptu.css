@@ -19,16 +19,16 @@ div.jqi .jqiclose{
     float: right;
     margin: -35px -10px 0 0;
     cursor: pointer;
-    color: #c0cEa6;
+    color: #c0cece;
 }
 div.jqi .jqicontainer{
-	background-color: #e0eEc6;
+	background-color: #e0eeee;
 	padding: 5px; 
 	color: #ffffff;
 	font-weight: bold;
 }
 div.jqi .jqimessage{
-	background-color: #c0cEa6;
+	background-color: #c0cece;
 	padding: 10px;
 }
 div.jqi .jqibuttons{
@@ -106,14 +106,14 @@ div.colsJqi .colsJqiclose{
     color: #bbbbbb;
 }
 div.colsJqi .colsJqicontainer{
-	background-color: #e0eEc6;
+	background-color: #e0eeee;
 	padding: 5px; 
 	color: #ffffff;
 	font-weight: bold;
 	height: 260px;
 }
 div.colsJqi .colsJqimessage{
-	background-color: #c0cEa6;
+	background-color: #c0cece;
 	padding: 10px;
 	width: 380px;
 	height: 240px;

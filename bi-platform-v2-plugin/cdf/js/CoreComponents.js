@@ -304,14 +304,14 @@ var SelectBaseComponent = BaseComponent.extend({
     currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
     currentIsValid = false;
 
-    var hasCurrentVal = typeof currentVal != undefined;
+    var hasCurrentVal = currentVal != null; //typeof currentVal != undefined;
     //var vid = this.valueAsId == false ? false : true;
     var vid = !!this.valueAsId;
     var hasValueSelected = false;
     var isSelected = false;
 
     var currentValArray = [];
-    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
+    if(currentVal instanceof Array || (currentVal != null && typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else if(typeof(currentVal) == "string"){
       currentValArray = currentVal.split("|");
