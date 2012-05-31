@@ -317,6 +317,10 @@ Dashboards.log = function(m,type){
   }
 };
 
+Dashboards.error = function(m){
+  Dashboards.log(m, 'error');
+}
+
 // REFRESH ENGINE begin
 
 Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
@@ -1004,7 +1008,13 @@ Dashboards.restoreBookmarkables = function() {
 
 Dashboards.getParameterValue = function (parameterName) {
   if (Dashboards.globalContext) {
-    return eval(parameterName);
+    try{
+      return eval(parameterName);
+    }
+    catch (e){
+      Dashboards.error(e);
+      return undefined;
+    }
   } else {
     return Dashboards.parameters[parameterName];
   }
