@@ -301,7 +301,7 @@
       r.attr({
           fill: options.color,
           opacity: 1,
-          "stroke-width":0,
+          "stroke":"none",
           "title": options.title
       });
     }
