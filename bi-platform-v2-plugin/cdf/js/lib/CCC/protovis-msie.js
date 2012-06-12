@@ -10,7 +10,7 @@
  * Protovis is licensed under the BSD license.
  * 
  */
-
+pen.define("cdf/lib/protovis-msie", ["cdf/lib/CCC/protovis"],function(pv){
 // detect SVG support
 pv.have_SVG = !!( 
   document.createElementNS && 
@@ -959,12 +959,11 @@ pv.VmlScene.label = function(scenes) {
       var r = (~~rotation % 360) * vml.d2r,
           ct = Math.cos(r),
           st = Math.sin(r);
-      e.style.filter = ['progid:DXImageTransform.Microsoft.Chroma(color="white") progid:DXImageTransform.Microsoft.Matrix(',
+      e.style.filter = ['progid:DXImageTransform.Microsoft.Matrix(',
                     'M11=',  ct.toFixed( 8 ), ',',
                     'M12=', -st.toFixed( 8 ), ',',
                     'M21=',  st.toFixed( 8 ), ',',
                     'M22=',  ct.toFixed( 8 ), ',sizingMethod=\'auto expand\')";'].join('');
-     e.style.backgroundColor = "white";
     }
     else {
       e.style.filter = '';
@@ -1043,3 +1042,4 @@ pv.VmlScene.wedge = function(scenes) {
 
 // end VML override
 })();}
+});

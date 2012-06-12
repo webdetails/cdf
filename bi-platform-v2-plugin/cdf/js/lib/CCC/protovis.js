@@ -1,4 +1,4 @@
-// bb677cde2fae25b1bec496d53b551e7f66d41944
+// 27f7a95ef570506fafeeac3e61317c77eb7f2631
 /**
  * @class The built-in Array class.
  * @name Array
@@ -3931,7 +3931,11 @@ pv.Scale.ordinal = function() {
    * between points.
    *
    * <p>This method must be called <i>after</i> the domain is set.
-   *
+   * <p>
+   * The computed step width can be retrieved from the range as
+   * <tt>scale.range().step</tt>.
+   * </p>
+   * 
    * @function
    * @name pv.Scale.ordinal.prototype.split
    * @param {number} min minimum value of the output range.
@@ -3943,6 +3947,100 @@ pv.Scale.ordinal = function() {
   scale.split = function(min, max) {
     var step = (max - min) / this.domain().length;
     r = pv.range(min + step / 2, max, step);
+    r.step = step;
+    return this;
+  };
+
+  /**
+   * Sets the range from the given continuous interval.
+   * The interval [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
+   * where <i>n</i> is the number of (unique) values in the domain.
+   *
+   * The first and last band are offset from the edge of the range by
+   * half the distance between bands.
+   *
+   * The positions are centered in each band.
+   * <pre>
+   * m = M/2
+   *
+   *  |mBm|mBm| ... |mBm|
+   * min               max
+   *   r0 -> min + m + B/2
+   * </pre>
+   * <p>This method must be called <i>after</i> the domain is set.</p>
+   * <p>
+   * The computed absolute band width can be retrieved from the range as
+   * <tt>scale.range().band</tt>.
+   * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
+   * </p>
+   *
+   * @function
+   * @name pv.Scale.ordinal.prototype.splitBandedCenter
+   * @param {number} min minimum value of the output range.
+   * @param {number} max maximum value of the output range.
+   * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
+   * @returns {pv.Scale.ordinal} <tt>this</tt>.
+   * @see #split
+   */
+  scale.splitBandedCenter = function(min, max, band) {
+    scale.split(min, max);
+    if (band == null) {
+        band = 1;
+    }
+    r.band   = r.step * band;
+    r.margin = r.step - r.band;
+    return this;
+  };
+
+  /**
+   * Sets the range from the given continuous interval.
+   * The interval [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
+   * where <i>n</i> is the number of (unique) values in the domain.
+   *
+   * The first and last bands are aligned to the edges of the range.
+   * <pre>
+   *  |Bm|mBm| ...|mB|
+   *  or
+   *  |BM |BM |... |B|
+   * min           max
+   *   r0 -> min + B/2
+   * </pre>
+   * <p>
+   * The positions are centered in each band
+   * (the first position is at <tt>min + band / 2</tt>).
+   * </p>
+   * <p>This method must be called <i>after</i> the domain is set.</p>
+   * <p>
+   * The computed absolute band width can be retrieved from the range as
+   * <tt>scale.range().band</tt>.
+   * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
+   * </p>
+   *
+   * @function
+   * @name pv.Scale.ordinal.prototype.splitBandedFlushCenter
+   * @param {number} min minimum value of the output range.
+   * @param {number} max maximum value of the output range.
+   * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
+   * @returns {pv.Scale.ordinal} <tt>this</tt>.
+   * @see #split
+   */
+  scale.splitBandedFlushCenter = function(min, max, band) {
+    if (band == null) {
+        band = 1;
+    }
+
+    // Requires N > 0
+
+    var R = (max - min),
+        N = this.domain().length,
+        B = (R * band) / N,
+        M = N > 1 ? ((R - N * B) / (N - 1)) : 0,
+        S = M + B;
+    
+    r = pv.range(min + B / 2, max, S);
+    r.step   = S;
+    r.band   = B;
+    r.margin = M;
     return this;
   };
 
@@ -3981,6 +4079,16 @@ pv.Scale.ordinal = function() {
    * that the band width will be equal to the padding width. The computed
    * absolute band width can be retrieved from the range as
    * <tt>scale.range().band</tt>.
+   * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
+   * </p>
+   *
+   * <pre>
+   * m = M/2
+   *
+   *  |MBm|mBm| ... |mBM|
+   * min               max
+   *   r0 -> min + M
+   * </pre>
    *
    * <p>If the band width argument is negative, this method will allocate bands
    * of a <i>fixed</i> width <tt>-band</tt>, rather than a relative fraction of
@@ -4013,6 +4121,8 @@ pv.Scale.ordinal = function() {
       var step = (max - min) / (this.domain().length + (1 - band));
       r = pv.range(min + step * (1 - band), max, step);
       r.band = step * band;
+      r.step = step;
+      r.margin = step - r.band;
     }
     return this;
   };
@@ -5190,12 +5300,23 @@ pv.SvgScene.expect = function(e, type, attributes, style) {
   } else {
     e = this.create(type);
   }
-  for (var name in attributes) {
-    var value = attributes[name];
-    if (value == this.implicit.svg[name]) value = null;
-    if (value == null) e.removeAttribute(name);
-    else e.setAttribute(name, value);
-  }
+
+  if(attributes) this.setAttributes(e, attributes);
+  if(style)      this.setStyle(e, style);
+
+  return e;
+};
+
+pv.SvgScene.setAttributes = function(e, attributes){
+    for (var name in attributes) {
+        var value = attributes[name];
+        if (value == this.implicit.svg[name]) value = null;
+        if (value == null) e.removeAttribute(name);
+        else e.setAttribute(name, value);
+    }
+};
+
+pv.SvgScene.setStyle = function(e, style){
   for (var name in style) {
     var value = style[name];
     if (value == this.implicit.css[name]) value = null;
@@ -5210,7 +5331,6 @@ pv.SvgScene.expect = function(e, type, attributes, style) {
     else
       e.style[name] = value;
   }
-  return e;
 };
 
 /** TODO */
@@ -5650,7 +5770,7 @@ pv.SvgScene.monotoneTangents = function(points) {
 pv.SvgScene.curveMonotone = function(points) {
   if (points.length <= 2) return "";
   return this.curveHermite(points, this.monotoneTangents(points));
-}
+};
 
 /**
  * @private Interpolates the given points using Fritsch-Carlson Monotone cubic
@@ -5762,6 +5882,10 @@ pv.SvgScene.area = function(scenes) {
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
     });
+
+  if(s.svg) this.setAttributes(e, s.svg);
+  if(s.css) this.setStyle(e, s.css);
+
   return this.append(e, scenes, 0);
 };
 
@@ -5831,6 +5955,10 @@ pv.SvgScene.areaSegment = function(scenes) {
         "stroke-opacity": stroke.opacity || null,
         "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null
       });
+
+    if(s1.svg) this.setAttributes(e, s1.svg);
+    if(s1.css) this.setStyle(e, s1.css);
+
     e = this.append(e, scenes, i);
   }
   return e;
@@ -5859,6 +5987,10 @@ pv.SvgScene.bar = function(scenes) {
         "stroke-opacity": stroke.opacity || null,
         "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
       });
+
+    if(s.svg) this.setAttributes(e, s.svg);
+    if(s.css) this.setStyle(e, s.css);
+
     e = this.append(e, scenes, i);
   }
   return e;
@@ -5941,6 +6073,10 @@ pv.SvgScene.dot = function(scenes) {
       svg.r = radius;
       e = this.expect(e, "circle", svg);
     }
+
+    if(s.svg) this.setAttributes(e, s.svg);
+    if(s.css) this.setStyle(e, s.css);
+
     e = this.append(e, scenes, i);
   }
   return e;
@@ -5965,6 +6101,8 @@ pv.SvgScene.image = function(scenes) {
           "width": s.width,
           "height": s.height
         });
+      if(s.svg) this.setAttributes(e, s.svg);
+      if(s.css) this.setStyle(e, s.css);
       var c = e.firstChild || e.appendChild(document.createElementNS(this.xhtml, "canvas"));
       c.$scene = {scenes:scenes, index:i};
       c.style.width = s.width;
@@ -5981,6 +6119,10 @@ pv.SvgScene.image = function(scenes) {
           "width": s.width,
           "height": s.height
         });
+
+      if(s.svg) this.setAttributes(e, s.svg);
+      if(s.css) this.setStyle(e, s.css);
+
       e.setAttributeNS(this.xlink, "xlink:href", s.url);
     }
     e = this.append(e, scenes, i);
@@ -6041,6 +6183,10 @@ pv.SvgScene.label = function(scenes) {
         "text-shadow": s.textShadow,
         "text-decoration": s.textDecoration
       });
+
+    if(s.svg) this.setAttributes(e, s.svg);
+    if(s.css) this.setStyle(e, s.css);
+
     if (e.firstChild) e.firstChild.nodeValue = s.text;
     else {
         if (pv.renderer() == "svgweb") { // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
@@ -6095,6 +6241,10 @@ pv.SvgScene.line = function(scenes) {
       "stroke-linejoin": s.lineJoin,
       "stroke-dasharray": s.strokeDasharray || 'none'
     });
+
+  if(s.svg) this.setAttributes(e, s.svg);
+  if(s.css) this.setStyle(e, s.css);
+
   return this.append(e, scenes, 0);
 };
 
@@ -6141,6 +6291,10 @@ pv.SvgScene.lineSegment = function(scenes) {
         "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null,
         "stroke-linejoin": s1.lineJoin
       });
+    
+    if(s1.svg) this.setAttributes(e, s1.svg);
+    if(s1.css) this.setStyle(e, s1.css);
+
     e = this.append(e, scenes, i);
   }
   return e;
@@ -6169,50 +6323,195 @@ pv.SvgScene.pathSegment = function(s1, s2) {
 /** @private Line-line intersection, per Akenine-Moller 16.16.1. */
 pv.SvgScene.lineIntersect = function(o1, d1, o2, d2) {
   return o1.plus(d1.times(o2.minus(o1).dot(d2.perp()) / d1.dot(d2.perp())));
-}
+};
+
+/* 
+  MITER / BEVEL JOIN calculation
+
+  Normal line p1->p2 bounding box points  (a-b-c-d)
+
+                    ^ w12 
+  a-----------------|--------------b       ^
+  |                 |              |       |
+  p1           <----+p12           p2      | w1
+  |                                |       |
+  d--------------------------------c       v
+  
+  Points are added in the following order:
+  d -> a -> b -> c
+  
+  Depending on the position of p0 in relation to the segment p1-p2,
+  'a' may be the outer corner and 'd' the inner corner, 
+  or the opposite:
+  
+  Ex1:
+       outer side
+       
+         p1 ---- p2
+       /   
+     p0    inner side
+     
+     a is outer, d is inner
+     
+  Ex2:
+      
+     p0    inner side
+       \
+         p1 ---- p2
+         
+       outer side
+       
+     a is inner, d is outer
+     
+  =====================
+  
+    ^ v1
+     \
+      am
+       *--a------ ... ----b
+        \ |               |
+          p1              p2
+          |\              |
+          d-*---- ... ----c
+            dm\
+               \
+                v
+                v1
+
+
+  NOTE: 
+  As yy points down, and because of the way Vector.perp() is written,
+  perp() corresponds to rotating 90º clockwise.
+  
+  -----
+  
+  The miter (ratio) limit is
+  the limit on the ratio of the miter length to the line width.
+  
+  The miter length is the distance between the 
+  outer corner and the inner corner of the miter.
+*/
+pv.strokeMiterLimit = 4;
 
 /** @private Returns the miter join path for the specified points. */
 pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
   /*
-   * P1-P2 is the current line segment. V is a vector that is perpendicular to
-   * the line segment, and has length lineWidth / 2. ABCD forms the initial
-   * bounding box of the line segment (i.e., the line segment if we were to do
-   * no joins).
+   * P1-P2 is the current line segment. 
+   * V is a vector that is perpendicular to the line segment, and has length lineWidth / 2. 
+   * ABCD forms the initial bounding box of the line segment 
+   * (i.e., the line segment if we were to do no joins).
    */
-  var p1 = pv.vector(s1.left, s1.top),
-      p2 = pv.vector(s2.left, s2.top),
-      p = p2.minus(p1),
-      v = p.perp().norm(),
-      w = v.times(s1.lineWidth / (2 * this.scale)),
-      a = p1.plus(w),
-      b = p2.plus(w),
-      c = p2.minus(w),
-      d = p1.minus(w);
-
-  /*
-   * Start join. P0 is the previous line segment's start point. We define the
-   * cutting plane as the average of the vector perpendicular to P0-P1, and
-   * the vector perpendicular to P1-P2. This insures that the cross-section of
-   * the line on the cutting plane is equal if the line-width is unchanged.
-   * Note that we don't implement miter limits, so these can get wild.
-   */
-  if (s0 && s0.visible) {
-    var v1 = p1.minus(s0.left, s0.top).perp().norm().plus(v);
-    d = this.lineIntersect(p1, v1, d, p);
-    a = this.lineIntersect(p1, v1, a, p);
-  }
-
-  /* Similarly, for end join. */
-  if (s3 && s3.visible) {
-    var v2 = pv.vector(s3.left, s3.top).minus(p2).perp().norm().plus(v);
-    c = this.lineIntersect(p2, v2, c, p);
-    b = this.lineIntersect(p2, v2, b, p);
-  }
-
-  return "M" + a.x + "," + a.y
-       + "L" + b.x + "," + b.y
-       + " " + c.x + "," + c.y
-       + " " + d.x + "," + d.y;
+    var pts = [];
+    var miterLimit, miterRatio, miterLength;
+    
+    var w1 = s1.lineWidth / this.scale;
+    var p1 = pv.vector(s1.left, s1.top);
+    var p2 = pv.vector(s2.left, s2.top);
+    
+    var p21 = p2.minus(p1);
+    var v21 = p21.perp().norm();
+    var w21 = v21.times(w1 / 2);
+    
+    var a = p1.plus (w21);
+    var d = p1.minus(w21);
+    
+    var b = p2.plus (w21);
+    var c = p2.minus(w21);
+    
+    // --------------------
+    
+    if(!s0 || !s0.visible){
+        // Starting point
+        pts.push(d, a);
+    } else {
+        var p0  = pv.vector(s0.left, s0.top);
+        var p10 = p1.minus(p0);
+        var v10 = p10.perp().norm(); // may point inwards or outwards
+        
+        // v1 points from p1 to the inner or outer corner.
+        var v1 = v10.plus(v21).norm();
+        
+        // Miter Join
+        // One is the outer corner, the other is the inner corner
+        var am = this.lineIntersect(p1, v1, a, p21);
+        var dm = this.lineIntersect(p1, v1, d, p21);
+        
+        // Check Miter Limit
+        // The line width is taken as the average of the widths
+        // of the p0-p1 segment and that of the p1-p2 segment.
+        miterLength = am.minus(dm).length();
+        var w0 = s0.lineWidth / this.scale;
+        var w10avg = (w1 + w0) / 2;
+        miterRatio = miterLength / w10avg;
+        miterLimit = s1.strokeMiterLimit || pv.strokeMiterLimit;
+        if(miterRatio <= miterLimit){
+            // Accept the miter join
+            pts.push(dm, am);
+        } else {
+            // Choose the bevel join
+            // v1Outer is parallel to v1, but always points outwards
+            var p12 = p21.times(-1);
+            var v1Outer = p10.norm().plus(p12.norm()).norm();
+            
+            // The bevel intermediate point
+            // Place it along v1Outer, at a distance w10avg/2 from p1.
+            // If it were a circumference, it would have that radius.
+            // The inner corner is am or dm.
+            // The other corner is the original d or a.
+            var bevel10 = p1.plus(v1Outer.times(w10avg / 2));
+            if(v1Outer.dot(v21) >= 0){
+                // a is outer, d is inner
+                pts.push(dm, bevel10, a);
+            } else {
+                // d is outer, a is inner
+                pts.push(d, bevel10, am);
+            }
+        }
+    }
+    
+    // -------------------
+    
+    if(!s3 || !s3.visible){
+        // Starting point
+        pts.push(b, c);
+    } else {
+        var p3  = pv.vector(s3.left, s3.top);
+        var p32 = p3.minus(p2);
+        var v32 = p32.perp().norm();
+        var v2  = v32.plus(v21).norm();
+        
+        // Miter Join
+        var bm = this.lineIntersect(p2, v2, b, p21);
+        var cm = this.lineIntersect(p2, v2, c, p21);
+        
+        miterLength = bm.minus(cm).length();
+        var w3 = s3.lineWidth / this.scale;
+        var w31avg = (w3 + w1) / 2;
+        miterRatio = miterLength / w31avg;
+        miterLimit = s2.strokeMiterLimit || pv.strokeMiterLimit;
+        if(miterRatio <= miterLimit){
+            // Accept the miter join
+            pts.push(bm, cm);
+        } else {
+            // Choose a bevel join
+            var p23 = p32.times(-1);
+            var v2Outer = p21.norm().plus(p23.norm()).norm();
+            var bevel31 = p2.plus(v2Outer.times(w31avg / 2));
+            if(v2Outer.dot(v21) >= 0){
+                // b is outer, c is inner
+                pts.push(b, bevel31, cm);
+            } else {
+                // c is outer, b is inner
+                pts.push(bm, bevel31, c);
+            }
+        }
+    }
+    
+    // Render pts to svg path
+    var pt = pts.shift();
+    return "M" + pt.x + "," + pt.y + 
+           "L" + pts.map(function(pt2){ return pt2.x + "," + pt2.y; })
+                  .join(" ");
 };
 pv.SvgScene.panel = function(scenes) {
   var g = scenes.$g, e = g && g.firstChild;
@@ -6430,6 +6729,10 @@ pv.SvgScene.rule = function(scenes) {
         "stroke-opacity": stroke.opacity,
         "stroke-width": s.lineWidth / this.scale
       });
+    
+    if(s.svg) this.setAttributes(e, s.svg);
+    if(s.css) this.setStyle(e, s.css);
+
     e = this.append(e, scenes, i);
   }
   return e;
@@ -6496,6 +6799,10 @@ pv.SvgScene.wedge = function(scenes) {
         "stroke-opacity": stroke.opacity || null,
         "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
       });
+
+    if(s.svg) this.setAttributes(e, s.svg);
+    if(s.css) this.setStyle(e, s.css);
+
     e = this.append(e, scenes, i);
   }
   return e;
@@ -6710,6 +7017,10 @@ pv.Mark.prototype
     .property("visible", Boolean)
     // DATUM - an object counterpart for each value of data.
     .property("datum", Object)
+    // CSS attributes pass-through
+    .property("css", Object)
+    // SVG attributes pass-through
+    .property("svg", Object)
     .property("left", Number)
     .property("right", Number)
     .property("top", Number)
@@ -7671,10 +7982,10 @@ pv.Mark.prototype.mouse = function() {
  * interactive visualization, such as selection.
  *
  * <p>TODO In the current implementation, event handlers are not inherited from
- * prototype marks. They must be defined explicitly on each interactive mark. In
- * addition, only one event handler for a given event type can be defined; when
- * specifying multiple event handlers for the same type, only the last one will
- * be used.
+ * prototype marks. They must be defined explicitly on each interactive mark. 
+ * More than one event handler for a given event type <i>can</i> be defined.
+ * The return values of each handler, if any and are marks, 
+ * are rendered at the end of every handler having been called.
  *
  * @see <a href="http://www.w3.org/TR/SVGTiny12/interact.html#SVGEvents">SVG events</a>
  * @param {string} type the event type.
@@ -7682,7 +7993,18 @@ pv.Mark.prototype.mouse = function() {
  * @returns {pv.Mark} this.
  */
 pv.Mark.prototype.event = function(type, handler) {
-  this.$handlers[type] = pv.functor(handler);
+  handler = pv.functor(handler);
+  
+  var handlers = this.$handlers[type];
+  if(!handlers) {
+      handlers = handler; 
+  } else if(handlers instanceof Array) {
+      handlers.push(handler);
+  } else {
+      handlers = [handlers, handler];
+  }
+  
+  this.$handlers[type] = handlers;
   return this;
 };
 
@@ -7766,12 +8088,34 @@ pv.Mark.prototype.context = function(scene, index, f) {
 
 /** @private Execute the event listener, then re-render. */
 pv.Mark.dispatch = function(type, scene, index, event) {
-  var m = scene.mark, p = scene.parent, l = m.$handlers[type];
-  if (!l) return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
+  var m = scene.mark, 
+      p = scene.parent, 
+      l = m.$handlers[type];
+  
+  if (!l) {
+      return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
+  }
+  
   m.context(scene, index, function() {
-      m = l.apply(m, pv.Mark.stack.concat(event));
-      if (m && m.render) m.render();
-    });
+    var stack = pv.Mark.stack.concat(event);
+    if(l instanceof Array) {
+        var ms;
+        l.forEach(function(li){
+            var mi = li.apply(m, stack);
+            if(mi && mi.render) {
+                (ms || (ms = [])).push(mi);
+            }
+        });
+        
+        if(ms) { ms.forEach(function(mi){ mi.render(); }); }
+    } else {
+        m = l.apply(m, stack);
+        if (m && m.render) {
+            m.render();
+        }
+    }
+  });
+  
   return true;
 };
 
@@ -9802,18 +10146,28 @@ pv.Transition = function(mark) {
     var map = {};
     for (var i = 0; i < marks.length; i++) {
       var mark = marks[i];
-      if (mark.id) map[mark.id] = mark;
+      if (mark.id) {
+          map[mark.id] = mark;
+      }
     }
+    
     return map;
   }
 
   /** @private */
   function interpolateProperty(list, name, before, after) {
+    var f;
     if (name in interpolated) {
       var i = pv.Scale.interpolator(before[name], after[name]);
-      var f = function(t) {before[name] = i(t);}
+      f = function(t) {
+          before[name] = i(t); 
+      };
     } else {
-      var f = function(t) {if (t > .5) before[name] = after[name];}
+      f = function(t) {
+          if (t > .5) {
+              before[name] = after[name];
+          }
+      };
     }
     f.next = list.head;
     list.head = f;
@@ -9835,11 +10189,21 @@ pv.Transition = function(mark) {
 
   /** @private */
   function interpolate(list, before, after) {
-    var mark = before.mark, bi = ids(before), ai = ids(after);
+    var mark = before.mark, 
+        bi = ids(before), 
+        ai = ids(after);
+    
     for (var i = 0; i < before.length; i++) {
-      var b = before[i], a = b.id ? ai[b.id] : after[i];
+      var b = before[i], 
+          a = b.id ? ai[b.id] : after[i];
+      
       b.index = i;
-      if (!b.visible) continue;
+      
+      if (!b.visible) { 
+          continue;
+      }
+      
+      // No after or not after.visible
       if (!(a && a.visible)) {
         var o = override(before, i, mark.$exit, after);
 
@@ -9850,17 +10214,25 @@ pv.Transition = function(mark) {
          * them from the scenegraph; for instances that became invisible, we
          * need to mark them invisible. See the cleanup method for details.
          */
-        b.transition = a ? 2 : (after.push(o), 1);
+        b.transition = a ? 
+                2 : 
+                (after.push(o), 1);
         a = o;
       }
       interpolateInstance(list, b, a);
     }
+    
     for (var i = 0; i < after.length; i++) {
-      var a = after[i], b = a.id ? bi[a.id] : before[i];
+      var a = after[i], 
+          b = a.id ? bi[a.id] : before[i];
+      
       if (!(b && b.visible) && a.visible) {
         var o = override(after, i, mark.$enter, before);
-        if (!b) before.push(o);
-        else before[b.index] = o;
+        if (!b) 
+            before.push(o);
+        else 
+            before[b.index] = o;
+        
         interpolateInstance(list, o, a);
       }
     }
@@ -9883,10 +10255,14 @@ pv.Transition = function(mark) {
 
     /* Determine the set of properties to evaluate. */
     var seen = {};
-    for (var i = 0; i < p.length; i++) seen[p[i].name] = 1;
+    for (var i = 0; i < p.length; i++) {
+        seen[p[i].name] = 1;
+    }
+    
+    /* Add to p all optional properties in binds not in proto properties (p) */
     p = m.binds.optional
-        .filter(function(p) {return !(p.name in seen);})
-        .concat(p);
+         .filter(function(p) { return !(p.name in seen); })
+         .concat(p);
 
     /* Evaluate the properties and update any implied ones. */
     m.context(scene, index, function() {
@@ -9942,24 +10318,39 @@ pv.Transition = function(mark) {
     }
 
     // TODO allow parallel and sequenced transitions
-    if (mark.$transition) mark.$transition.stop();
+    if (mark.$transition) {
+        mark.$transition.stop();
+    }
     mark.$transition = that;
 
     // TODO clearing the scene like this forces total re-build
-    var i = pv.Mark.prototype.index, before = mark.scene, after;
+    var i = pv.Mark.prototype.index,
+        before = mark.scene,
+        after;
+    
     mark.scene = null;
     mark.bind();
     mark.build();
+    
     after = mark.scene;
     mark.scene = before;
+    
     pv.Mark.prototype.index = i;
 
-    var start = Date.now(), list = {};
+    var start = Date.now(), 
+        list = {};
+    
     interpolate(list, before, after);
+    
     timer = setInterval(function() {
       var t = Math.max(0, Math.min(1, (Date.now() - start) / duration)),
           e = ease(t);
-      for (var i = list.head; i; i = i.next) i(e);
+      
+      /* Advance every property of every mark */
+      for (var i = list.head ; i ; i = i.next) {
+          i(e);
+      }
+      
       if (t == 1) {
         cleanup(mark.scene);
         that.stop();
@@ -12217,6 +12608,576 @@ pv.Layout.Stack.prototype.values = function(f) {
  * @type string
  * @name pv.Layout.Stack.prototype.offset
  */
+/**
+ * Constructs a new, empty band layout. Layouts are not typically constructed
+ * directly; instead, they are added to an existing panel via
+ * {@link pv.Mark#add}.
+ *
+ * @class Implements a layout for banded visualizations; it is
+ * mainly used for grouped bar charts.
+ * 
+ * @extends pv.Layout
+ */
+pv.Layout.Band = function() {
+    
+    pv.Layout.call(this);
+
+    var that = this,
+        buildImplied = that.buildImplied,
+        itemProps,
+        values;
+
+    /**
+     * The prototype mark of the items mark.
+     */
+    var itemProto = new pv.Mark()
+        .data  (function(){return values[this.parent.index];})
+        .top   (proxy("t"))
+        .left  (proxy("l"))
+        .right (proxy("r"))
+        .bottom(proxy("b"))
+        .width (proxy("w"))
+        .height(proxy("h"));
+
+    /**
+     * Proxy the given property for an item of a band.
+     * @private
+     */
+    function proxy(name) {
+        return function() {
+            /* bandIndex, layerIndex */
+            return itemProps[name](this.index, this.parent.index);
+        };
+    }
+    
+    /**
+     * Compute the layout.
+     * @private
+     */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, s);
+
+        /* Update shared fields */
+        itemProps = Object.create(pv.Layout.Band.$baseItemProps);
+        values = [];
+
+        var data = s.layers,
+            L = data.length;
+        if(L > 0){
+            var orient = s.orient,
+                horizontal = /^(top|bottom)\b/.test(orient),
+                bh = this.parent[horizontal ? "height" : "width"](),
+                bands = this._readData(data, values, s),
+                B = bands.length;
+            
+            /* Band order */
+            if(s.bandOrder === "reverse") {
+                bands.reverse();
+            }
+            
+            /* Layer order */
+            if(s.order === "reverse") {
+                values.reverse();
+                
+                for (var b = 0; b < B; b++) {
+                    bands[b].items.reverse();
+                }
+            }
+
+            /* Layout kind */
+            switch(s.layout){
+                case "grouped": this._calcGrouped(bands, L, s);     break;
+                case "stacked": this._calcStacked(bands, L, bh, s); break;
+            }
+
+            this._bindItemProps(bands, itemProps, orient, horizontal);
+       }
+    };
+
+    var itemAccessor = this.item = {
+        end: this,
+
+        add: function(type) {
+            return that.add(pv.Panel)
+                    .data(function(){return that.layers();})
+                    .add(type)
+                    .extend(itemProto);
+        },
+
+        order: function(value){
+            that.order(value);
+            return this;
+        },
+
+        /**
+         * The item width pseudo-property;
+         * determines the width of an item.
+         */
+        w: function(f){
+            that.$iw = pv.functor(f);
+            return this;
+        },
+
+        /**
+         * The item height pseudo-property;
+         * determines the height of an item.
+         */
+        h: function(f){
+            that.$ih = pv.functor(f);
+            return this;
+        },
+
+        /**
+         * The percentage of total item width to band width
+         * in a grouped layout.
+         * <p>
+         * The empty space is equally distributed in
+         * separating items within a band.
+         * </p>
+         * <p>
+         * Evaluated once per band
+         * (on the corresponding band's item of the first series).
+         * </p>
+         * <pre>
+         * f: (item, series) -> percentage
+         * </pre>
+         */
+        horizontalRatio: function(f){
+            that.$ihorizRatio = pv.functor(f);
+            return this;
+        },
+
+        /**
+         * The vertical margin that separates stacked items,
+         * in a stacked layout.
+         * <p>
+         * Half the specified margin is discounted
+         * from each of the items own height.
+         * </p>
+         * 
+         * <p>
+         * Evaluated once per band
+         * (on the corresponding band's item of the first series).
+         * </p>
+         * <pre>
+         * f: (item, series) -> height
+         * </pre>
+         */
+        verticalMargin: function(f){
+            that.$ivertiMargin = pv.functor(f);
+            return this;
+        }
+    };
+
+    var bandAccessor = this.band = {
+        end: this,
+        
+        /**
+         * The band width pseudo-property;
+         * determines the width of a band
+         * when the item layout grouped.
+         * <p>
+         * Evaluated once per band
+         * (on the corresponding band's item of the first series).
+         * </p>
+         * <pre>
+         * f: (item, series) -> width
+         * </pre>
+         */
+        w: function(f){
+            that.$bw = pv.functor(f);
+            return this;
+        },
+
+        /**
+         * The band x pseudo-property;
+         * determines the x center position of a band
+         * in a layer panel.
+         * 
+         * <p>
+         * Evaluated once per band
+         * (on the corresponding band's item of the first series).
+         * </p>
+         * <pre>
+         * f: (item, series) -> x
+         * </pre>
+         */
+        x: function(f){
+            that.$bx = pv.functor(f);
+            return this;
+        },
+
+        order: function(value){
+            that.bandOrder(value);
+            return this;
+        },
+
+        /**
+         * Band differential control pseudo-property.
+         *  2 - Drawn starting at previous band offset. Multiply values by  1. Don't update offset.
+         *  1 - Drawn starting at previous band offset. Multiply values by  1. Update offset.
+         *  0 - Reset offset to 0. Drawn starting at 0. Default. Leave offset at 0.
+         * -1 - Drawn starting at previous band offset. Multiply values by -1. Update offset.
+         * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
+         * @private
+         */
+        differentialControl: function(f){
+            that.$bDiffControl = pv.functor(f);
+            return this;
+        }
+    };
+
+    this.band.item = itemAccessor;
+    this.item.band = bandAccessor;
+};
+
+pv.Layout.Band.$baseItemProps = (function(){
+    var none = function() {return null;};
+    return {t: none, l: none, r: none, b: none, w: none, h: none};
+}());
+
+pv.Layout.Band.prototype = pv.extend(pv.Layout)
+    .property("orient", String)     // x-y orientation
+    .property("layout", String)     // items layout within band: "grouped", "stacked"
+    .property("layers") // data
+    .property("yZero",     Number)  // The y zero base line
+    .property("verticalMode",   String) // The vertical mode: 'expand', null
+    .property("horizontalMode", String) // The horizontal mode: 'expand', null
+    .property("order",     String)  // layer order; "reverse" or null
+    .property("bandOrder", String)  // band order;  "reverse" or null
+    ;
+
+/**
+ * Default properties for stack layouts.
+ * The default orientation is "bottom-left",
+ * the default layout is "grouped",
+ * the default y zero base line is 0, and
+ * the default layers is <tt>[[]]</tt>.
+ *
+ * @type pv.Layout.Band
+ */
+pv.Layout.Band.prototype.defaults = new pv.Layout.Band()
+    .extend(pv.Layout.prototype.defaults)
+    .orient("bottom-left")
+    .layout("grouped")
+    .yZero(0)
+    .layers([[]]);
+
+/** @private */ pv.Layout.Band.prototype.$bx =
+/** @private */ pv.Layout.Band.prototype.$bw =
+/** @private */ pv.Layout.Band.prototype.$bDiffControl = 
+/** @private */ pv.Layout.Band.prototype.$iw =
+/** @private */ pv.Layout.Band.prototype.$ih =
+/** @private */ pv.Layout.Band.prototype.$ivertiMargin = pv.functor(0);
+
+/** @private */ pv.Layout.Band.prototype.$ihorizRatio = pv.functor(0.9);
+
+/** @private The default values function; identity. */
+pv.Layout.Band.prototype.$values = pv.identity;
+
+/**
+ * The values function; determines the values for a given band.
+ * The default value is the identity function,
+ * which assumes that the bands property is specified as
+ * a two-dimensional (i.e., nested) array.
+ *
+ * @param {function} f the values function.
+ * @returns {pv.Layout.Band} this.
+ */
+pv.Layout.Band.prototype.values = function(f) {
+  this.$values = pv.functor(f);
+  return this;
+};
+
+pv.Layout.prototype._readData = function(data, layersValues, scene){
+    var L = data.length,
+        bands = [
+            /*
+            {
+                x:   0, // x left position of each band
+                w:   0, // width of each band
+                iwr: 0, // item width ratio of each band
+                items: [ // indexed by series index
+                    {
+                        h: 0, // height of each item
+                        w: 0, // width of each item
+                        x: 0  // position of each item (within its band) (calculated)
+                    }
+                ]
+            }
+            */
+        ],
+        B;
+
+    /*
+     * Iterate over the data, evaluating the values, x and y functions.
+     * The context in which the x and y pseudo-properties are evaluated is a
+     * pseudo-mark that is a *grandchild* of this layout.
+     */
+    var stack = pv.Mark.stack,
+        o = {parent: {parent: this}};
+
+    stack.unshift(null);
+
+    for (var l = 0; l < L; l++) {
+        o.parent.index = l;
+        stack[0] = data[l];
+
+        /* Eval per-layer properties */
+
+        var layerValues = layersValues[l] = this.$values.apply(o.parent, stack);
+        if(!l){
+            B = layerValues.length;
+        }
+
+        /* Eval per-item properties */
+        stack.unshift(null);
+        for (var b = 0; b < B ; b++) {
+            stack[0] = layerValues[b];
+            o.index  = b;
+
+            /* First series evaluates band stuff, for each band */
+            var band = bands[b];
+            if(!band){
+                band = bands[b] = {
+                    horizRatio:  this.$ihorizRatio.apply(o, stack),
+                    vertiMargin: this.$ivertiMargin.apply(o, stack),
+                    w: this.$bw.apply(o, stack),
+                    x: this.$bx.apply(o, stack),
+                    diffControl: this.$bDiffControl ? this.$bDiffControl.apply(o, stack) : 0,
+                    items: []
+                };
+            }
+
+            var ih = this.$ih.apply(o, stack); // may be null
+            band.items[l] = {
+                y: (scene.yZero || 0),
+                x: 0,
+                w: this.$iw.apply(o, stack),
+                h: ih != null ? Math.abs(ih) : ih,
+                dir: ih < 0 ? -1 : 1 // null -> 1
+            };
+        }
+        stack.shift();
+    }
+    stack.shift();
+
+    return bands;
+};
+
+pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
+    /* Compute item x positions relative to parent panel */
+    for (var b = 0, B = bands.length; b < B ; b++) {
+        var band = bands[b],
+            items = band.items,
+            w = band.w,
+            horizRatio = band.horizRatio,
+            wItems = 0;
+
+        /* Total items width */
+        for (var l = 0 ; l < L ; l++) {
+            wItems += items[l].w;
+        }
+        
+        if(L === 1){
+            /*
+             * Horizontal ratio does not apply
+             * There's no space between...
+             */
+            horizRatio = 1;
+        } else if(!(horizRatio > 0 && horizRatio <= 1)) {
+            horizRatio = 1;
+        }
+        
+        if(w == null){
+            /* Expand band width to contain all items plus ratio */
+            w = band.w = wItems / horizRatio;
+            
+        } else if(scene.horizontalMode === 'expand'){
+            /* Scale items width to fit in band's width */
+
+            var wItems2 = horizRatio * w;
+            if (wItems) {
+                var wScale = wItems2 / wItems;
+                for (var l = 0 ; l < L ; l++) {
+                    items[l].w *= wScale;
+                }
+            } else {
+                var wiavg = wItems2 / L;
+                for (var l = 0 ; l < L; l++) {
+                    items[l].w = wiavg;
+                }
+            }
+
+            wItems = wItems2;
+        }
+
+        var wItemsWithMargin = wItems / horizRatio,
+            /* items start x position */
+            ix = band.x - (wItemsWithMargin / 2),
+            margin = L > 1 ? ((wItemsWithMargin - wItems) / (L - 1)) : 0;
+
+        for (var l = 0 ; l < L ; l++) {
+            var item = items[l];
+            item.x = ix;
+            ix += item.w + margin;
+
+            /* Negative direction turns into a lower iy */
+            if(item.dir < 0){
+                item.y -= item.h;
+            }
+        }
+    }
+};
+
+pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
+    var B = bands.length,
+        items;
+
+    if(scene.verticalMode === "expand") {
+        for (var b = 0; b < B; b++) {
+            items = bands[b].items;
+
+            /* Sum across layers for this band */
+            var hSum = null, nonNullCount = 0;
+            for (var l = 0; l < L; l++) {
+                /* We get rid of negative heights
+                 * because it is preferable to respect the layer's order
+                 * in this case, than to group negative and positive layers,
+                 * taking them out of order.
+                 */
+                var item = items[l];
+                item.dir = 1;
+                var h = item.h;
+                if(h != null){
+                    nonNullCount++;
+                    hSum += h; // null + 1 = 0 + 1
+                }
+            }
+
+            /* Scale hs */
+            if(nonNullCount){
+                if (hSum) {
+                    var hScale = bh / hSum;
+                    for (var l = 0; l < L; l++) {
+                        var h = items[l].h;
+                        if(h != null){
+                            items[l].h = h * hScale;
+                        }
+                    }
+                } else {
+                    var hAvg = bh / nonNullCount;
+                    for (var l = 0; l < L; l++) {
+                        var h = items[l].h;
+                        if(h != null){
+                            items[l].h = hAvg;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+     * Propagate y offset to other layers.
+     * Assign width.
+     * Calc x position.
+     * Discount vertiMargin
+     */
+    var yZero = scene.yZero,
+        yOffset = yZero;
+
+    for (var b = 0; b < B; b++) {
+        var band = bands[b],
+            bx = band.x, // centered on band
+            bDiffControl = band.diffControl,
+            invertDir    = (bDiffControl < 0), // -1 or -2
+            vertiMargin  = band.vertiMargin > 0 ? band.vertiMargin : 0;
+
+        items = band.items;
+        
+        // diffControl
+        var resultPos = this._layoutItemsOfDir(+1, invertDir, items, vertiMargin, bx, yOffset),
+            resultNeg;
+        if(resultPos.existsOtherDir){
+            resultNeg = this._layoutItemsOfDir(-1, invertDir, items, vertiMargin, bx, yOffset);
+        }
+
+        if(bDiffControl){
+            if(Math.abs(bDiffControl) === 1){
+                yOffset = resultPos.yOffset;
+                if(resultNeg){
+                    yOffset -= resultNeg.yOffset;
+                }
+            } // otherwise leave offset untouched
+        } else { // ensure zero
+            yOffset = yZero;
+        }
+    }
+};
+
+pv.Layout.Band.prototype._layoutItemsOfDir = function(dir, invertDir, items, vertiMargin, bx, yOffset){
+    var existsOtherDir = false,
+        vertiMargin2 = vertiMargin / 2,
+        efItemDir = (invertDir ? -dir : dir),
+        reverseLayers = invertDir;
+    
+    for (var l = 0, L = items.length ; l < L ; l+=1) {
+        var item = items[reverseLayers ? (L -l -1) : l];
+
+        if(item.dir === dir){
+            var h = item.h || 0; // null -> 0
+            if(efItemDir > 0){
+                item.y = yOffset + vertiMargin2;
+                yOffset += h;
+            } else {
+                item.y = yOffset - (h - vertiMargin2);
+                yOffset -= h;
+            }
+            
+            item.h -= vertiMargin; // may become < 0
+            item.x = bx - item.w / 2;
+        } else {
+            existsOtherDir = true;
+        }
+    }
+
+    return {
+        existsOtherDir: existsOtherDir,
+        yOffset: yOffset
+    };
+};
+
+pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, horizontal){
+    /*
+     * Find the property definitions for dynamic substitution.
+     *
+     * orient = xOrientation-yOrientation
+     */
+    var index = orient.indexOf("-"),
+        ph = horizontal ? "h" : "w",
+        pw = horizontal ? "w" : "h",
+        px = index < 0 ?
+            /* Default yOrientation
+            * horizontal -> left
+            * vertical   -> bottom
+            */
+            (horizontal ? "l" : "b") :
+            /*
+            * -l,r,t,b ...
+            */
+            orient.charAt(index + 1),
+
+        /*
+        * b,t,l,r
+        */
+        py  = orient.charAt(0);
+
+    itemProps[px] = function(b, l) {return bands[b].items[l].x;};
+    itemProps[py] = function(b, l) {return bands[b].items[l].y;};
+    itemProps[pw] = function(b, l) {return bands[b].items[l].w;};
+    itemProps[ph] = function(b, l) {return bands[b].items[l].h || 0;}; // null -> 0
+};
 /**
  * Constructs a new, empty treemap layout. Layouts are not typically
  * constructed directly; instead, they are added to an existing panel via
@@ -15055,17 +16016,18 @@ pv.Behavior.point = function(r) {
       collapse = null, // dimensions to collapse
       kx = 1, // x-dimension cost scale
       ky = 1, // y-dimension cost scale
+      pointingPanel = null, 
       r2 = arguments.length ? r * r : 900; // fuzzy radius
 
   /** @private Search for the mark closest to the mouse. */
   function search(scene, index) {
     var s = scene[index],
         point = {cost: Infinity};
-    for (var i = 0, n = s.visible && s.children.length; i < n; i++) {
+    for (var i = (s.visible ? s.children.length : 0) - 1 ; i >= 0; i--) {
       var child = s.children[i], mark = child.mark, p;
       if (mark.type == "panel") {
         mark.scene = child;
-        for (var j = 0, m = child.length; j < m; j++) {
+        for (var j = child.length - 1 ; j >= 0; j--) {
           mark.index = j;
           p = search(child, j);
           if (p.cost < point.cost) point = p;
@@ -15074,7 +16036,7 @@ pv.Behavior.point = function(r) {
         delete mark.index;
       } else if (mark.$handlers.point) {
         var v = mark.mouse();
-        for (var j = 0, m = child.length; j < m; j++) {
+        for (var j = child.length - 1 ; j >= 0; j--) {
           var c = child[j],
               dx = v.x - c.left - (c.width || 0) / 2,
               dy = v.y - c.top - (c.height || 0) / 2,
@@ -15109,8 +16071,16 @@ pv.Behavior.point = function(r) {
     if (unpoint = point) {
       pv.Mark.dispatch("point", point.scene, point.index, e);
 
-      /* Unpoint when the mouse leaves the root panel. */
-      pv.listen(this.root.canvas(), "mouseout", mouseout);
+      /* Unpoint when the mouse leaves the pointing panel. */
+      if(!pointingPanel && this.type === 'panel') {
+          pointingPanel = this;
+          pointingPanel.event('mouseout', function(){
+              var ev = arguments[arguments.length - 1];
+              mouseout.call(pointingPanel.scene.$g, ev);
+          });
+      } else {
+          pv.listen(this.root.canvas(), "mouseout", mouseout);
+      }
     }
   }
 
@@ -15150,8 +16120,7 @@ pv.Behavior.point = function(r) {
   };
 
   return mousemove;
-};
-/**
+};/**
  * Returns a new select behavior to be registered on mousedown events.
  *
  * @class Implements interactive selecting starting with mousedown events.
@@ -16045,3 +17014,7 @@ pv.Geo.scale = function(p) {
   if (arguments.length) scale.projection(p);
   return scale;
 };
+
+pen.define("cdf/lib/CCC/protovis", function(){
+  return pv;
+});
