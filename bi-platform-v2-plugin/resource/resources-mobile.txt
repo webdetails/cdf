@@ -1,6 +1,9 @@
 commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/backbone.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/mustache.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery-impromptu.3.1.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.ui.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.corner.js,\
