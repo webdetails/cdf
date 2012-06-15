@@ -547,12 +547,12 @@ Dashboards.bindControl = function(object) {
   // see if there is a class defined for this object
   var objectType = typeof object["type"]=='function'?object.type():object.type;
   var classNames = [
+  // try TypeComponent as class name
+  objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component',
   // try type as class name
   objectType,
   // try Type as class name with first letter uppercase
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1),
-  // try TypeComponent as class name
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
+  objectType.substring(0,1).toUpperCase() + objectType.substring(1)
   ];
   
   var objectImpl;
