@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120525
+//VERSION TRUNK-20120215-patched-20120615
 
 
 // ECMAScript 5 shim
@@ -4801,7 +4801,10 @@ pvc.CategoricalAbstractPanel = pvc.BasePanel.extend({
 
         // Overflow
         var options = this.chart.options;
-        if ((options.orthoFixedMin != null) || (options.orthoFixedMax != null)){
+        // PATCH 20120615 stacked bars with line: clipping would cut dots
+        if ((options.orthoFixedMin != null && 
+            (options.orthoFixedMin != 0 || !options.stacked)) || 
+            (options.orthoFixedMax != null)){
             this.pvPanel["overflow"]("hidden");
         }
         
