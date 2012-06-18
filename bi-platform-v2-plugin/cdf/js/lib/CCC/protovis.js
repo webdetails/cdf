@@ -1,4 +1,4 @@
-// 27f7a95ef570506fafeeac3e61317c77eb7f2631
+// 3d8244ee320ee2ba8f8eee421e38ee278fc43c51
 /**
  * @class The built-in Array class.
  * @name Array
@@ -246,7 +246,7 @@ try {
  * source code).
  * @returns {string} a conformant JavaScript 1.6 source code.
  */
-  pv.parse = function(js) { // hacky regex support
+ pv.parse = function(js) { // hacky regex support
     var re = new RegExp("function\\s*(\\b\\w+)?\\s*\\([^)]*\\)\\s*", "mg"), m, d, i = 0, s = "";
     while (m = re.exec(js)) {
       var j = m.index + m[0].length;
@@ -335,6 +335,8 @@ pv.listener = function(f) {
       try {
         pv.event = e;
         return f.call(this, e);
+      } catch (ex) {
+          pv.error(ex);
       } finally {
         delete pv.event;
       }
@@ -352,6 +354,22 @@ pv.ancestor = function(a, e) {
     e = e.parentNode;
   }
   return false;
+};
+
+/**
+ * @private Computes the accumulated scroll offset given an element.
+ */
+pv.scrollOffset = function(elem) {
+    var left = 0, 
+        top  = 0;
+    while(elem){
+        left += elem.scrollLeft || 0;
+        top  += elem.scrollTop  || 0;
+        
+        elem = elem.parentNode;
+    }
+    
+    return [left, top];
 };
 
 /**
@@ -379,7 +397,7 @@ pv.listenForPageLoad = function(listener) {
             window.attachEvent( "onload", listener );
         }
     }
-}
+};
 
 /**
  * @public Returns the name of the renderer we're using -
@@ -390,7 +408,7 @@ pv.listenForPageLoad = function(listener) {
 pv.renderer = function() {
     return (typeof document.svgImplementation !== "undefined") ? document.svgImplementation:
      (typeof window.svgweb === "undefined") ? "nativesvg" : "svgweb";
-}
+};
 
 /** @private Returns a locally-unique positive id. */
 pv.id = function() {
@@ -1138,6 +1156,25 @@ pv.repeat = function(array, n) {
 };
 
 /**
+ * Creates an array of the specified length,
+ * and, optionally, initializes it with the specified default value.
+ * 
+ * @param {number} [len] the length of the array; defaults to 0.
+ * @param {number} [dv] the default value with which to initialize each position; defaults to undefined.
+ * @returns {array} an array as specified.
+ */
+pv.array = function(len, dv){
+    var a = len >= 0 ? new Array(len) : [];
+    if(dv !== undefined){
+        for(var i = 0 ; i < len ; i++){
+            a[i] = dv;
+        }
+    }
+    
+    return a;
+};
+
+/**
  * Given two arrays <tt>a</tt> and <tt>b</tt>, <style
  * type="text/css">sub{line-height:0}</style> returns an array of all possible
  * pairs of elements [a<sub>i</sub>, b<sub>j</sub>]. The outer loop is on array
@@ -1507,7 +1544,7 @@ pv.max.index = function(array, f) {
     }
   }
   return maxi;
-}
+};
 
 /**
  * Returns the minimum value of the specified array of numbers. If the specified
@@ -1549,7 +1586,7 @@ pv.min.index = function(array, f) {
     }
   }
   return mini;
-}
+};
 
 /**
  * Returns the arithmetic mean, or average, of the specified array. If the
@@ -3945,8 +3982,16 @@ pv.Scale.ordinal = function() {
    * @see #splitBanded
    */
   scale.split = function(min, max) {
-    var step = (max - min) / this.domain().length;
-    r = pv.range(min + step / 2, max, step);
+    var R = max - min;
+    var N = this.domain().length;
+    var step = 0;
+    if(R === 0){
+        r = pv.array(N, min);
+    } else if(N){
+        step = (max - min) / N;
+        r = pv.range(min + step / 2, max, step);
+    }
+    
     r.step = step;
     return this;
   };
@@ -4029,18 +4074,25 @@ pv.Scale.ordinal = function() {
         band = 1;
     }
 
-    // Requires N > 0
-
     var R = (max - min),
         N = this.domain().length,
-        B = (R * band) / N,
-        M = N > 1 ? ((R - N * B) / (N - 1)) : 0,
+        S = 0,
+        B = 0,
+        M = 0;
+    if(R === 0){
+        r = pv.array(N, min);
+    } else if(N){
+        B = (R * band) / N;
+        M = N > 1 ? ((R - N * B) / (N - 1)) : 0;
         S = M + B;
+        
+        r = pv.range(min + B / 2, max, S);
+    }
     
-    r = pv.range(min + B / 2, max, S);
     r.step   = S;
     r.band   = B;
     r.margin = M;
+    
     return this;
   };
 
@@ -4060,7 +4112,9 @@ pv.Scale.ordinal = function() {
    * @see #split
    */
   scale.splitFlush = function(min, max) {
-    var n = this.domain().length, step = (max - min) / (n - 1);
+    var n = this.domain().length, 
+        step = (max - min) / (n - 1);
+    
     r = (n == 1) ? [(min + max) / 2]
         : pv.range(min, max + step / 2, step);
     return this;
@@ -5969,7 +6023,7 @@ pv.SvgScene.bar = function(scenes) {
     var s = scenes[i];
 
     /* visible */
-    if (!s.visible) continue;
+    if (!s.visible || Math.abs(s.width) <= 1E-10 || Math.abs(s.height) <= 1E-10) continue;
     var fill = s.fillStyle, stroke = s.strokeStyle;
     if (!fill.opacity && !stroke.opacity) continue;
 
@@ -7918,10 +7972,11 @@ pv.Mark.prototype.buildImplied = function(s) {
  * @returns {pv.Vector} the mouse location.
  */
 pv.Mark.prototype.mouse = function() {
-  var x = (pv.renderer() == 'svgweb' ? pv.event.clientX * 1 : pv.event.pageX) || 0,
-      y = (pv.renderer() == 'svgweb' ? pv.event.clientY * 1 : pv.event.pageY) || 0,
-      n = this.root.canvas();
-
+    var n = this.root.canvas(),
+        scrollOffset = pv.scrollOffset(n),
+        x = scrollOffset[0] + (pv.renderer() == 'svgweb' ? pv.event.clientX * 1 : pv.event.pageX) || 0,
+        y = scrollOffset[1] + (pv.renderer() == 'svgweb' ? pv.event.clientY * 1 : pv.event.pageY) || 0;
+    
       /* Compute xy-coordinates relative to the panel.
        * This is not necessary if we're using svgweb, as svgweb gives us
        * the necessary relative co-ordinates anyway (well, it seems to
@@ -8080,6 +8135,8 @@ pv.Mark.prototype.context = function(scene, index, f) {
   apply(scene, index);
   try {
     f.apply(this, stack);
+  } catch (ex) {
+      pv.error(ex);
   } finally {
     clear(scene, index);
     apply(oscene, oindex);
