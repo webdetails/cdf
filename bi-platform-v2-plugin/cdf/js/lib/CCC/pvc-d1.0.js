@@ -1,1874 +1,16 @@
-//VERSION TRUNK-20120616\n
-if(!Object.keys) {
-    /** @ignore */
-    Object.keys = function(o){
-        /* Object function not being used as a constructor */
-        /*jshint newcap:false */
-        if (o !== Object(o)){
-            throw new TypeError('Object.keys called on non-object');
-        }
+pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/lib/CCC/def", "cdf/lib/CCC/protovis"], function(def, pv){
 
-        var ret = [];
-        for(var p in o){
-            if(Object.prototype.hasOwnProperty.call(o,p)){
-                ret.push(p);
-            }
-        }
-
-        return ret;
-    };
-}
-
-if (!Array.prototype.filter){
-    /** @ignore */
-    Array.prototype.filter = function(fun, ctx){
-        var len = this.length >>> 0;
-        if (typeof fun !== 'function'){
-            throw new TypeError();
-        }
-
-        var res = [];
-        for (var i = 0; i < len; i++){
-            if (i in this){
-                var val = this[i]; // in case fun mutates this
-                if (fun.call(ctx, val, i, this)){
-                    res.push(val);
-                }
-            }
-        }
-
-        return res;
-    };
-}
-
-if(!Object.create){
-    /** @ignore */
-    Object.create = (function(){
-
-        var Klass = function(){},
-            proto = Klass.prototype;
-        
-        /** @private */
-        function create(baseProto){
-            Klass.prototype = baseProto || {};
-            var instance = new Klass();
-            Klass.prototype = proto;
-            
-            return instance;
-        }
-
-        return create;
-    }());
-}
-
-if (!Function.prototype.bind) {  
-    Function.prototype.bind = function (oThis) {  
-        if (typeof this !== "function") {  
-            // closest thing possible to the ECMAScript 5 internal IsCallable function  
-            throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");  
-        }  
-    
-        var aArgs = Array.prototype.slice.call(arguments, 1),   
-            fToBind = this,   
-            NOP = function () {},  
-            fBound = function () {  
-              return fToBind.apply(this instanceof NOP ? 
-                                   this : 
-                                   oThis || window,  
-                                   aArgs.concat(Array.prototype.slice.call(arguments)));  
-            };  
-    
-        NOP.prototype = this.prototype;  
-        fBound.prototype = new NOP();  
-    
-        return fBound;
-    };
-}
-
-// Basic JSON shim
-if(!this.JSON){
-    /** @ignore */
-    this.JSON = {};
-}
-if(!this.JSON.stringify){
-    /** @ignore */
-    this.JSON.stringify = function(t){
-        return '' + t;
-    };
-}
-
-// ------------------------
-
-// TODO: document all this
-
-this.def = (function(){
-    
-    // All or nothing.
-    // Mount in local object.
-
-    /** @private */
-    var objectHasOwn = Object.prototype.hasOwnProperty;
-    
-    /** @private */
-    var arraySlice = Array.prototype.slice;
-    
-    /**
-     * @name def
-     * @namespace The 'definition' library root namespace.
-     */
-    var def = /** @lends def */{
-        /**
-         * The JavaScript global object.
-         * @type {object}
-         */
-        global: this,
-        
-        /**
-         * Gets the value of an existing, own or inherited, and not "nully", property of an object,
-         * or if unsatisfied, a specified default value.
-         * 
-         * @param {object} [o] The object whose property value is desired.
-         * @param {string} p The desired property name.
-         * If the value is not a string, 
-         * it is converted to one, as if String(p) were used.
-         * @param [dv=undefined] The default value.
-         * 
-         * @returns {any} The satisfying property value or the specified default value.
-         * 
-         * @see def.getOwn
-         * @see def.nully
-         */
-        get: function(o, p, dv){
-            var v;
-            return o && (v = o[p]) != null ? v : dv;
-        },
-        
-        /** 
-         * Creates a property getter function,
-         * for a specified property name.
-         * 
-         * @param {string} name The name of the property.
-         * @param [dv=undefined] 
-         * The default value to return 
-         * if the property would be accessed on null or undefined.
-         * @type function
-         */
-        propGet: function(p, dv){
-            p = '' + p;
-            
-            /**
-             * Gets the value of a prespecified property 
-             * of a given thing.
-             * 
-             * @param [o] The <i>thing</i> whose prespecified property is to be read.
-             * <p>
-             * If {@link o} is not "nully", 
-             * but is not of type 'object', 
-             * the function behaves equivalently to:
-             * </p>
-             * <pre>
-             * return Object(o)[propName];
-             * </pre>
-             * 
-             * @returns {any}
-             * If the specified {@link o} is not "nully", 
-             * returns the value of the prespecified property on it; 
-             * otherwise, returns the prespecified default value.
-             * 
-             * @private
-             */
-            return function(o){ 
-                return o != null ? o[p] : dv;
-            };
-        },
-        
-        // TODO: propSet ?
-        
-        /**
-         * Gets the value of an existing, own, and not "nully", property of an object,
-         * or if unsatisfied, a specified default value.
-         * 
-         * @param {object} [o] The object whose property value is desired.
-         * @param {string} p The desired property name.
-         * If the value is not a string, 
-         * it is converted to one, as if String(p) were used.
-         * @param dv The default value.
-         * 
-         * @returns {any} The satisfying property value or the specified default value.
-         * 
-         * @see def.get
-         * @see def.hasOwn
-         * @see def.nully
-         */
-        getOwn: function(o, p, dv){
-            var v;
-            return o && objectHasOwn.call(o, p) && (v = o[p]) != null ? v : dv;
-        },
-        
-        hasOwn: function(o, p){
-            return !!o && objectHasOwn.call(o, p);
-        },
-        
-        set: function(o){
-            if(!o) {
-                o = {};
-            }
-            
-            var a = arguments;
-            for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-                o[a[i]] = a[i+1];
-            }
-            
-            return o;
-        },
-
-        setDefaults: function(o){
-            if(!o) {
-                o = {};
-            }
-
-            var a = arguments;
-            for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-                var p = a[i];
-                if(o[p] == null){
-                    o[p] = a[i+1];
-                }
-            }
-
-            return o;
-        },
-
-        setUDefaults: function(o){
-            if(!o) {
-                o = {};
-            }
-
-            var a = arguments;
-            for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-                var p = a[i];
-                if(o[p] === undefined){
-                    o[p] = a[i+1];
-                }
-            }
-
-            return o;
-        },
-        
-        /**
-         * Calls a function 
-         * for every <i>own</i> property of a specified object.
-         * 
-         * @param {object} [o] The object whose own properties are traversed.
-         * @param {function} [fun] The function to be called once per own property of <i>o</i>. 
-         * The signature of the function is:
-         * <pre>
-         * function(value, property : string, o : object) : any
-         * </pre>
-         * 
-         * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
-         * 
-         * @type undefined
-         */
-        eachOwn: function(o, fun, ctx){
-            if(o){
-                for(var p in o){
-                    if(objectHasOwn.call(o, p)){
-                        fun.call(ctx, o[p], p, o);
-                    }
-                }
-            }
-        },
-        
-        /**
-         * Calls a function 
-         * for every property of a specified object, own or inherited.
-         * 
-         * @param {object} [o] The object whose own properties are traversed.
-         * @param {function} [fun] The function to be called once per own property of <i>o</i>. 
-         * The signature of the function is:
-         * <pre>
-         * function(value, property : string, o : object) : any
-         * </pre>
-         * 
-         * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
-         * 
-         * @type undefined
-         */
-        each: function(o, fun, ctx){
-            if(o){
-                for(var p in o){
-                    fun.call(ctx, o[p], p, o);
-                }
-            }
-        },
-        
-        copyOwn: function(a, b){
-            var to, from;
-            if(arguments.length >= 2) {
-                to = a || {};
-                from = b;
-            } else {
-                to   = {};
-                from = a;
-            }
-            
-            if(from){
-                for(var p in from){
-                    if(objectHasOwn.call(from, p)){
-                        to[p] = from[p];
-                    }
-                }
-            }
-
-            return to;
-        },
-        
-        copy: function(a, b){
-            var to, from;
-            if(arguments.length >= 2) {
-                to = a || {};
-                from = b;
-            } else {
-                to   = {};
-                from = a;
-            }
-            
-            if(from) {
-                for(var p in from) { 
-                    to[p] = from[p];
-                }
-            }
-            
-            return to;
-        },
-        
-        ownKeys: Object.keys,
-        
-        keys: function(o){
-            var keys = [];
-            for(var p in o) {
-                keys.push(p);
-            }
-            
-            return keys;
-        },
-        
-        own: function(o){
-            return Object.keys(o)
-                         .map(function(key){ return o[key]; });
-        },
-        
-        scope: function(scopeFun, ctx){
-            return scopeFun.call(ctx);
-        },
-        
-        // Utility/Factory functions ----------------
-        
-        /**
-         * The natural order comparator function.
-         * @field
-         * @type function
-         */
-        compare: function(a, b){
-            /* Identity is favored because, otherwise,
-             * comparisons like: compare(NaN, 0) would return 0...
-             * This isn't perfect either, because:
-             * compare(NaN, 0) === compare(0, NaN) === -1
-             * so sorting may end in an end or the other...
-             */
-            return (a === b) ? 0 : ((a > b) ? 1 : -1);
-            //return (a < b) ? -1 : ((a > b) ? 1 : 0);
-        },
-        
-        constant: function(v){
-            return function(){ return v; };
-        },
-        
-        methodCaller: function(p, context){
-            if(context){
-                return function(){
-                    return context[p].apply(context, arguments); 
-                };
-            }
-            
-            /* floating method */
-            return function(){
-                return this[p].apply(this, arguments); 
-            };
-        },
-        
-        /**
-         * The identity function.
-         * @field
-         * @type function
-         */
-        identity: function(x){ return x; },
-        
-        /**
-         * The truthy function.
-         * @field
-         * @type function
-         */
-        truthy: function(x){ return !!x; },
-        
-        /**
-         * The falsy function.
-         * @field
-         * @type function
-         */
-        falsy: function(x){ return !x; },
-        
-        add: function(a, b){ return a + b; },
-        
-        /**
-         * The NO OPeration function.
-         * @field
-         * @type function
-         */
-        noop: function noop(){ /* NOOP */ },
-        
-        // negate?
-        
-        // Type coercion ----------------
-        
-        fun: function(v){
-            return def.isFun(v) ? v : def.constant(v);
-        },
-        
-        number: function(d, dv){
-            var v = parseFloat(d);
-            return isNaN(v) ? (dv || 0) : v;
-        },
-        
-        /**
-         * Converts something to an array if it is not one already,
-         * and if it is not nully.
-         * 
-         * @param thing A thing to convert to an array.
-         * @returns {Array} 
-         */
-        array: function(thing){
-            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
-        },
-        
-        // nully to 'dv'
-        nullyTo: function(v, dv){
-            return v != null ? v : dv;
-        },
-        
-        within: function(v, min, max){
-            return Math.max(min, Math.min(v, max));
-        },
-        
-        // Predicates ----------------
-        
-        // === null || === undefined
-        nully: function(v){
-            return v == null;
-        },
-        
-        empty: function(v){
-            return v == null || v === '';
-        },
-        
-        notEmpty: function(v){
-            return v != null && v !== '';
-        },
-        
-        // !== null && !== undefined
-        notNully: function(v){
-            return v != null;
-        },
-        
-        isArrayLike: function(v){
-            return v && (v.length != null) && (typeof v !== 'string');
-        },
-        
-        isArray: function(v){
-            return v && (v instanceof Array);
-        },
-        
-        isString: function(v){
-            return typeof v === 'string';
-        },
-        
-        isFun: function(v){
-            return typeof v === 'function';
-        },
-        
-        join: function(sep){
-            var args = [],
-                a = arguments;
-            for(var i = 1, L = a.length ; i < L ; i++){
-                var v = a[i];
-                if(v != null && v !== ""){
-                    args.push("" + v);
-                }
-            }
-        
-            return args.join(sep);
-        },
-        
-        // TODO: lousy implementation!
-        escapeHtml: function(str){
-            return str.replace(/&/gm, "&amp;")
-                      .replace(/</gm, "&lt;")
-                      .replace(/>/gm, "&gt;")
-                      .replace(/"/gm, "&quot;");    
-        },
-        
-        /* Ensures the first letter is upper case */
-        firstUpperCase: function(s){
-            if(s) {
-                var c  = s.charAt(0),
-                    cU = c.toUpperCase();
-                if(c !== cU) {
-                    s = cU + s.substr(1);
-                }
-            }
-            return s;
-        },
-        
-        /**
-         * Formats a string by replacing 
-         * place-holder markers, of the form "{foo}",
-         * with the value of corresponding properties
-         * of the specified scope argument.
-         * 
-         * @param {string} mask The string to format.
-         * @param {object} [scope] The scope object.
-         * 
-         * @example
-         * <pre>
-         * def.format("The name '{0}' is undefined.", ['foo']);
-         * // == "The name 'foo' is undefined."
-         * 
-         * def.format("The name '{foo}' is undefined, and so is '{what}'.", {foo: 'bar'});
-         * // == "The name 'bar' is undefined, and so is ''."
-         * 
-         * def.format("The name '{{foo}}' is undefined.", {foo: 'bar'});
-         * // == "The name '{{foo}}' is undefined."
-         * </pre>
-         * 
-         * @returns {string} The formatted string.
-         */
-        format: function(mask, scope){
-            if(mask == null || mask === '') {
-                return "";
-            }
-            return mask.replace(/(^|[^{])\{([^{}]+)\}/g, function($0, before, prop){
-                var value = scope ? scope[prop] : null;
-                return before + (value == null ? "" : value); 
-            });
-        },
-        
-        error: function(error){
-            return (error instanceof Error) ? error : new Error(error);
-        },
-        
-        fail: function(error){
-            throw def.error(error);
-        },
-        
-        assert: function(msg, scope){
-            throw def.error.assertionFailed(msg, scope);
-        },
-        
-        /**
-         * The not implemented function.
-         * @field
-         * @type function
-         */
-        notImplemented: function(){
-            throw def.error.notImplemented();
-        }
-    };
-
-    // Adapted from
-    // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
-    def.shared = function(){
-        var _channel = null;
-    
-        /** @private */
-        function create(value){
-    
-            /** @private */
-            function safe(){
-                _channel = value;
-            }
-    
-            return safe;
-        }
-    
-        /** @private */
-        function opener(safe){
-            if(_channel != null){ throw new Error("Access denied."); }
-    
-            safe();
-    
-            var value;
-            value = _channel;
-            _channel = null;
-            return value;
-        }
-        
-        opener.safe = create;
-    
-        return opener;
-    };
-    
-    var errors = {
-        operationInvalid: function(msg, scope){
-            return def.error(def.join(" ", "Invalid operation.", def.format(msg, scope)));
-        },
-    
-        notImplemented: function(){
-            return def.error("Not implemented.");
-        },
-    
-        argumentRequired: function(name){
-            return def.error(def.format("Required argument '{0}'.", [name]));
-        },
-    
-        argumentInvalid: function(name, msg, scope){
-            return def.error(
-                       def.join(" ",
-                           def.format("Invalid argument '{0}'.", [name]), 
-                           def.format(msg, scope)));
-        },
-    
-        assertionFailed: function(msg, scope){
-            return def.error(
-                       def.join(" ", 
-                           "Assertion failed.", 
-                           def.format(msg, scope)));
-        }
-    };
-    
-    def.copyOwn(def.error, errors);
-    
-    /* Create direct fail versions of errors */
-    def.eachOwn(errors, function(errorFun, name){
-        def.fail[name] = function(){
-            throw errorFun.apply(null, arguments);
-        };
-    });
-    
-    // -----------------------
-    
-    /** @private */
-    var currentNamespace = def, // at the end of the file it is set to def.global
-        namespaceStack = [];
-    
-    /** @private */
-    function getNamespace(name, base){
-        var current = base || currentNamespace;
-        if(name){
-            var parts = name.split('.');
-            for(var i = 0; i < parts.length ; i++){
-                var part = parts[i];
-                current = current[part] || (current[part] = {});
-            }
-        }
-    
-        return current;
-    }
-    
-    /** @private */
-    function createSpace(name, base, definition){
-        if(def.isFun(base)){
-            definition = base;
-            base = null;
-        }
-        
-        var namespace = getNamespace(name, base);
-        
-        if(definition){
-            namespaceStack.push(currentNamespace);
-            try{
-                definition(namespace);
-            } finally {
-                currentNamespace = namespaceStack.pop();
-            }
-        }
-    
-        return namespace;
-    }
-    
-    /** @private */
-    function defineName(namespace, name, value){
-        /*jshint expr:true */
-        !def.hasOwn(namespace, name) ||
-            def.fail.operationInvalid("Name '{0}' is already defined in namespace.", [name]);
-    
-        return namespace[name] = value;
-    }
-    
-    /**
-     * Defines a relative namespace with 
-     * name <i>name</i> on the current namespace.
-     * 
-     * <p>
-     * Namespace declarations may be nested.
-     * </p>
-     * <p>
-     * The current namespace can be obtained by 
-     * calling {@link def.space} with no arguments.
-     * The current namespace affects other nested declarations, such as {@link def.type}.
-     * </p>
-     * <p>
-     * A composite namespace name contains dots, ".", separating its elements.
-     * </p>
-     * @example
-     * <pre>
-     * def.space('foo.bar', function(space){
-     *     space.hello = 1;
-     * });
-     * </pre>
-     *
-     * @function
-     *
-     * @param {String} name The name of the namespace to obtain.
-     * If nully, the current namespace is implied.
-     * 
-     * @param {Function} definition
-     * A function that is called whith the desired namespace
-     * as first argument and while it is current.
-     * 
-     * @returns {object} The namespace.
-     */
-    def.space = createSpace;
-    
-    // -----------------------
-    
-    /** @private */
-    function asNativeObject(v){
-        return v && typeof(v) === 'object' && v.constructor === Object ?
-                v :
-                undefined;
-    }
-    
-    /** @private */
-    function asObject(v){
-        return v && typeof(v) === 'object' ? v : undefined;
-    }
-    
-    /** @private */
-    function mixinRecursive(instance, mixin){
-        for(var p in mixin){
-            var vMixin = mixin[p];
-            if(vMixin !== undefined){
-                var oMixin,
-                    oTo = asNativeObject(instance[p]);
-    
-                if(oTo){
-                    oMixin = asObject(vMixin);
-                    if(oMixin){
-                        mixinRecursive(oTo, oMixin);
-                    } else {
-                        // Overwrite oTo
-                        instance[p] = vMixin;
-                    }
-                } else {
-                    oMixin = asNativeObject(vMixin);
-                    if(oMixin){
-                        vMixin = Object.create(oMixin);
-                    }
-    
-                    instance[p] = vMixin;
-                }
-            }
-        }
-    }
-    
-    def.mixin = function(instance/*mixin1, mixin2, ...*/){
-        for(var i = 1, L = arguments.length ; i < L ; i++){
-            var mixin = arguments[i];
-            if(mixin){
-                mixin = asObject(mixin.prototype || mixin);
-                if(mixin){
-                    mixinRecursive(instance, mixin);
-                }
-            }
-        }
-    
-        return instance;
-    };
-    
-    // -----------------------
-    
-    /** @private */
-    function createRecursive(instance){
-        for(var p in instance){
-            var vObj = asNativeObject(instance[p]);
-            if(vObj){
-                createRecursive( (instance[p] = Object.create(vObj)) );
-            }
-        }
-    }
-        
-    // Creates an object whose prototype is the specified object.
-    def.create = function(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
-        var mixins = arraySlice.call(arguments),
-            deep = true,
-            baseProto = mixins.shift();
-    
-        if(typeof(baseProto) === 'boolean'){
-            deep = baseProto;
-            baseProto = mixins.shift();
-        }
-    
-        var instance = baseProto ? Object.create(baseProto) : {};
-        if(deep){
-            createRecursive(instance);
-        }
-    
-        // NOTE:
-        if(mixins.length > 0){
-            mixins.unshift(instance);
-            def.mixin.apply(def, mixins);
-        }
-    
-        return instance;
-    };
-    
-    // -----------------------
-    
-    def.scope(function(){
-        var shared = def.shared(),
-            rootProto = Object.prototype;
-    
-        /** @private */
-        function typeLocked(){
-            return def.error.operationInvalid("Type is locked.");
-        }
-    
-        /** @ignore */
-        var typeProto = /** lends def.type# */{
-            init: function(init){
-                var state = shared(this.safe);
-                
-                /*jshint expr:true */
-                !state.locked || def.fail(typeLocked());
-    
-                state.init = init;
-                state.initOrPost = !!(state.init || state.post);
-                return this;
-            },
-    
-            postInit: function(postInit){
-                var state = shared(this.safe);
-                
-                /*jshint expr:true */
-                !state.locked || def.fail(typeLocked());
-    
-                state.post = postInit;
-                state.initOrPost = !!(state.init || state.post);
-                return this;
-            },
-            
-            add: function(mixin){
-                var state = shared(this.safe);
-                
-                /*jshint expr:true */
-                !state.locked || def.fail(typeLocked());
-    
-                var proto = this.prototype,
-                    baseState = state.base;
-    
-                def.eachOwn(mixin.prototype || mixin, function(value, p){
-                    if(value !== undefined){
-                        var method = asMethod(value), 
-                            baseMethod;
-                        if(method) {
-                            state.methods[p] = method;
-                            
-                            if(baseState && 
-                               (baseMethod = baseState.methods[p]) &&
-                               // Exclude inherited stuff from Object.prototype
-                               (baseMethod instanceof Method)){
-                                value = baseMethod.override(method);
-                            }
-                        }
-                        
-                        proto[p] = value;
-                    }
-                });
-    
-                return this;
-            }
-        };
-    
-        // TODO: improve this code with indexOf
-        function TypeName(full){
-            var parts;
-            if(full){
-                if(full instanceof Array){
-                    parts = full;
-                    full  = parts.join('.');
-                } else {
-                    parts = full.split('.');
-                }
-            }
-            
-            if(parts && parts.length > 1){
-                this.name           = parts.pop();
-                this.namespace      = parts.join('.');
-                this.namespaceParts = parts;
-            } else {
-                this.name = full || null;
-                this.namespace = null;
-                this.namespaceParts = [];
-            }
-        }
-        
-        TypeName.prototype.toString = function(){
-            return this.namespace + '.' + this.name; 
-        };
-        
-        function Method(spec) {
-            this.fun = spec.as;
-            if(spec) {
-                if(spec.isAbstract) {
-                    this.isAbstract = true;
-                }
-            }
-        }
-        
-        def.copyOwn(Method.prototype, {
-            isAbstract: false,
-            override: function(method){
-                if(this.isAbstract) {
-                    return method.fun;
-                }
-                
-                var fun2 = override(method.fun, this.fun);
-                method.fun = fun2;
-                return fun2;
-            }
-        });
-        
-        /** @private */
-        function override(method, base){
-            
-            return function(){
-                var prevBase = this.base;
-                this.base = base;
-                try{
-                    return method.apply(this, arguments);
-                } finally {
-                    this.base = prevBase;
-                }
-            };
-        }
-        
-        /** @private */
-        function asMethod(fun) {
-            if(fun) {
-                if(def.isFun(fun)) {
-                    return new Method({as: fun});
-                }
-                
-                if(fun instanceof Method) {
-                    return fun;
-                }
-                
-                if(def.isFun(fun.as)) {
-                    return new Method(fun);
-                }
-                
-                if(fun.isAbstract) {
-                    return new Method({isAbstract: true, as: def.notImplemented });
-                }
-            }
-            
-            return null;
-        }
-        
-        /** @private */
-        function method(fun) {
-            return asMethod(fun) || def.fail.argumentInvalid('fun');
-        }
-        
-        /** @private */
-        function createConstructor(state) {
-            
-            function constructor(){
-                if(!state.initOrPost){
-                    return;
-                }
-                
-                var prevBase = this.base;
-                try{
-                    var method = state.init;
-                    if(method) {
-                        this.base = state.base.init;
-                        method.apply(this, arguments);
-                    }
-                    
-                    method = state.post;
-                    if(method) {
-                        this.base = state.base.post;
-                        method.apply(this, arguments);
-                    }
-                } finally {
-                    this.base = prevBase;
-                }
-            }
-            
-            return constructor;
-        }
-        
-        var rootState = {
-            methods: {}
-        };
-        
-        /**
-         * Constructs a type with the specified name in the current namespace.
-         * 
-         * @param {string} [name] The new type name, relative to the base argument.
-         * When unspecified, an anonymous type is created.
-         * The type is not published in any namespace.
-         *  
-         * @param {object} [baseType] The base type.
-         * @param {object} [baseSpace] The base namespace.
-         * The default namespace is the current namespace.
-         */
-        function type(name, baseType, baseSpace){
-            
-            var baseState = baseType && baseType.safe ? shared(baseType.safe) : rootState,
-                state = Object.create(baseState),
-                constructor = createConstructor(state),
-                typeName  = new TypeName(name);
-            
-            // ----
-            
-            state.locked      = false;
-            state.constructor = constructor;
-            state.base        = baseState;
-            state.methods     = Object.create(baseState.methods);
-            
-            // ----
-            
-            baseState.locked = true;
-            
-            // ----
-            constructor.name     = typeName.name;
-            constructor.typeName = typeName;
-            constructor.safe     = shared.safe(state);
-            def.copyOwn(constructor, typeProto);
-            
-            // ----
-            
-            var proto;
-            if(baseType) {
-                proto = constructor.prototype = Object.create(baseType.prototype);
-                proto.constructor = constructor;
-            } else {
-                proto = constructor.prototype;
-            }
-            
-            if(!('override' in proto)) {
-                proto.override = function(name2, method){
-                    this[name2] = override(method, this[name2]);
-                    return this;
-                };
-            }
-            
-            constructor.prototype.toString = function(){
-                return "[" + typeName + "]";
-            };
-            
-            // ----
-            
-            if(typeName.name){
-                defineName(def.space(typeName.namespace, baseSpace), 
-                           typeName.name, 
-                           constructor);
-            }
-            
-            return constructor;
-        }
-        
-        def.type   = type;
-        def.method = method;
-        def.override = override;
-    });
-    
-    // ----------------------
-    
-    def.copyOwn(def.array, /** @lends def.array */{
-        /**
-         * Creates an array of the specified length,
-         * and, optionally, initializes it with the specified default value.
-         */
-        create: function(len, dv){
-            var a = len >= 0 ? new Array(len) : [];
-            if(dv !== undefined){
-                for(var i = 0 ; i < len ; i++){
-                    a[i] = dv;
-                }
-            }
-            
-            return a;
-        },
-    
-        append: function(target, source, start){
-            if(start == null){
-                start = 0;
-            }
-    
-            for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
-                target[T + i] = source[start + i];
-            }
-    
-            return target;
-        },
-        
-        removeAt: function(array, index){
-            return array.splice(index, 1)[0];
-        },
-        
-        insertAt: function(array, index, elem){
-            array.splice(index, 0, elem);
-            return array;
-        },
-        
-        binarySearch: function(array, item, comparer, key){
-            if(!comparer) { comparer = def.compare; }
-            
-            var low  = 0, high = array.length - 1;
-            while(low <= high) {
-                var mid = (low + high) >> 1; // <=>  Math.floor((l+h) / 2)
-                
-                var result = comparer(item, key ? key(array[mid]) : array[mid]);
-                if (result < 0) {
-                    high = mid - 1;
-                } else if (result > 0) {
-                    low = mid + 1;
-                } else {
-                    return mid;
-                }
-            }
-            
-            /* Item was not found but would be inserted at ~low */
-            return ~low; // two's complement <=> -low - 1
-            
-            /*
-            case low == high (== mid)
-              if result > 0
-                   [low <- mid + 1]  => (low > high)
-                insert at (new) low
-              
-              if result < 0
-                   [high <- mid - 1] => (low > high)
-                insert at low
-           */
-        },
-    
-        /**
-         * Inserts an item in an array, 
-         * previously sorted with a specified comparer,
-         * if the item is not already contained in it.
-         *
-         * @param {Array} array A sorted array.
-         * @param item An item to insert in the array.
-         * @param {Function} [comparer] A comparer function.
-         * 
-         * @returns {Number}
-         * If the item is already contained in the array returns its index.
-         * If the item was not contained in the array returns the two's complement
-         * of the index where the item was inserted.
-         */
-        insert: function(array, item, comparer){
-            
-            var index = def.array.binarySearch(array, item, comparer);
-            if(index < 0){
-                // Insert at the two's complement of index
-                array.splice(~index, 0, item);
-            }
-            
-            return index;
-        },
-        
-        remove: function(array, item, comparer){
-            var index = def.array.binarySearch(array, item, comparer);
-            if(index >= 0) {
-                return array.splice(index, 1)[0];
-            }
-            // return undefined;
-        }
-    });
-    
-    // -----------------
-    
-    var nextGlobalId  = 1,
-        nextIdByScope = {};
-    def.nextId = function(scope){
-        if(scope) {
-            var nextId = def.getOwn(nextIdByScope, scope) || 1;
-            nextIdByScope[scope] = nextId + 1;
-            return nextId;
-        }
-        
-        return nextGlobalId++;
-    };
-    
-    // --------------------
-    
-    def.type('Map')
-    .init(function(source){
-        this.source = source || {};
-        this.count  = source ? def.ownKeys(source).length : 0;
-    })
-    .add({
-        has: function(p){
-            return objectHasOwn.call(this.source, p);
-        },
-        
-        get: function(p){
-            return objectHasOwn.call(this.source, p) ? 
-                   this.source[p] : 
-                   undefined;
-        },
-        
-        set: function(p, v){
-            var source = this.source;
-            if(!objectHasOwn.call(source, p)) {
-                this.count++;
-            }
-            
-            source[p] = v;
-            return this;
-        },
-        
-        rem: function(p){
-            if(objectHasOwn.call(this.source, p)) {
-                delete this.source[p];
-                this.count--;
-            }
-            
-            return this;
-        },
-        
-        clear: function(){
-            if(this.count) {
-                this.source = {}; 
-                this.count  = 0;
-            }
-            return this;
-        },
-        
-        values: function(){
-            return def.own(this.source);
-        },
-        
-        keys: function(){
-            return def.ownKeys(this.source);
-        }
-    });
-    
-    // --------------------
-    
-    def.type('Query')
-    .init(function(){
-        this.index = -1;
-        this.item = undefined;
-    })
-    .add({
-        next: function(){
-            // already was finished
-            if(this.index === -2){
-                return false;
-            }
-            
-            var nextIndex = this.index + 1;
-            if(!this._next(nextIndex)){
-                this.index = -2;
-                this.item = undefined;
-                return false;
-            }
-            
-            this.index = nextIndex;
-            return true;
-        },
-        
-        /**
-         * @name _next
-         * @function
-         * @param {number} nextIndex The index of the next item, if one exists.
-         * @member def.Query#
-         * @returns {boolean} truthy if there is a next item, falsy otherwise.
-         */
-        _next: def.method({isAbstract: true}),
-        
-        _finish: function(){
-            this.index = -2;
-            this.item  = undefined;
-        },
-        
-        // ------------
-        
-        each: function(fun, ctx){
-            while(this.next()){
-                if(fun.call(ctx, this.item, this.index) === false) {
-                    return true;
-                }
-            }
-            
-            return false;
-        },
-        
-        array: function(){
-            var array = [];
-            while(this.next()){
-                array.push(this.item);
-            }
-            return array;
-        },
-        
-        /**
-         * Consumes the query and fills an object
-         * with its items.
-         * <p>
-         * A property is created per item in the query.
-         * The default name of each property is the string value of the item.
-         * The default value of the property is the item itself.
-         * </p>
-         * <p>
-         * In the case where two items have the same key, 
-         * the last one overwrites the first. 
-         * </p>
-         * 
-         * @param {object}   [keyArgs] Keyword arguments.
-         * @param {function} [keyArgs.value] A function that computes the value of each property.
-         * @param {function} [keyArgs.name]  A function that computes the name of each property.
-         * @param {object}   [keyArgs.context] The context object on which <tt>keyArgs.name</tt> and <tt>keyArgs.value</tt>
-         * are called.
-         * @param {object}   [keyArgs.target] The object that is to receive the properties, 
-         * instead of a new one being creating.
-         * 
-         * @returns {object} A newly created object, or the specified <tt>keyArgs.target</tt> object,
-         * filled with properties. 
-         */
-        object: function(keyArgs){
-            var target   = def.get(keyArgs, 'target') || {},
-                nameFun  = def.get(keyArgs, 'name' ),    
-                valueFun = def.get(keyArgs, 'value'),
-                ctx      = def.get(keyArgs, 'context');
-            
-            while(this.next()){
-                var name = '' + (nameFun ? nameFun.call(ctx, this.item, this.index) : this.item);
-                target[name] = valueFun ? valueFun.call(ctx, this.item, this.index) : this.item;
-            }
-            
-            return target;
-        },
-        
-        reduce: function(accumulator/*, [initialValue]*/){
-            var i = 0, 
-                result;
-          
-            if(arguments.length < 2) {
-                if(!this.next()) {
-                    throw new TypeError("Length is 0 and no second argument");
-                }
-                
-                result = this.item;
-            } else {  
-                result = arguments[1];
-            }
-            
-            while(this.next()) {
-                result = accumulator(result, this.item, this.index);
-              
-                ++i;
-            }
-          
-            return result;
-        },
-        
-        /**
-         * Consumes the query and obtains the number of items.
-         * 
-         * @type number
-         */
-        count: function(){
-            var count = 0;
-            
-            while(this.next()){ count++; }
-            
-            return count;
-        },
-        
-        /**
-         * Returns the first item that satisfies a specified predicate.
-         * <p>
-         * If no predicate is specified, the first item is returned. 
-         * </p>
-         *  
-         * @param {function} [pred] A predicate to apply to every item.
-         * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-         * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
-         * 
-         * @type any
-         */
-        first: function(pred, ctx, dv){
-            while(this.next()){
-                if(!pred || pred.call(ctx, this.item, this.index)) {
-                    var item = this.item;
-                    this._finish();
-                    return item;
-                }
-            }
-            
-            return dv;
-        },
-        
-        /**
-         * Returns <tt>true</tt> if there is at least one item satisfying a specified predicate.
-         * <p>
-         * If no predicate is specified, returns <tt>true</tt> if there is at least one item. 
-         * </p>
-         *  
-         * @param {function} [pred] A predicate to apply to every item.
-         * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-         * 
-         * @type boolean
-         */
-        any: function(pred, ctx){
-            while(this.next()){
-                if(!pred || pred.call(ctx, this.item, this.index)) {
-                    this._finish();
-                    return true; 
-                }
-            }
-            
-            return false;
-        },
-        
-        /**
-         * Returns <tt>true</tt> if all the query items satisfy the specified predicate.
-         * @param {function} pred A predicate to apply to every item.
-         * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-         * 
-         * @type boolean
-         */
-        all: function(pred, ctx){
-            while(this.next()){
-                if(!pred.call(ctx, this.item, this.index)) {
-                    this._finish();
-                    return false; 
-                }
-            }
-            
-            return true;
-        },
-        
-        min: function(){
-            var min = null;
-            while(this.next()){
-                if(min === null || this.item < min) {
-                    min = this.item;
-                }
-            }
-            
-            return min;
-        },
-        
-        max: function(){
-            var max = null;
-            while(this.next()){
-                if(max === null || this.item > max) {
-                    max = this.item;
-                }
-            }
-            
-            return max;
-        },
-        
-        range: function(){
-            var min = null,
-                max = null;
-            
-            while(this.next()){
-                var item = this.item;
-                if(min === null) {
-                    min = max = item;
-                } else {
-                    if(item < min) {
-                        min = item;
-                    }
-                    if(item > max) {
-                        max = item;
-                    }
-                }
-            }
-            
-            return min != null ? {min: min, max: max} : null;
-        },
-        
-        index: function(keyFun, ctx){
-            var keyIndex = {};
-            
-            this.each(function(item){
-                var key = keyFun ? keyFun.call(ctx, item) : item;
-                if(key != null) {
-                    var sameKeyItems = def.getOwn(keyIndex, key) || (keyIndex[key] = []);
-                
-                    sameKeyItems.push(item);
-                }
-            });
-            
-            return keyIndex;
-        },
-        
-        uniqueIndex: function(keyFun, ctx){
-            var keyIndex = {};
-            
-            this.each(function(item){
-                var key = keyFun ? keyFun.call(ctx, item) : item;
-                if(key != null && !def.hasOwn(keyIndex, key)) {
-                    keyIndex[key] = item;
-                }
-            });
-            
-            return keyIndex;
-        },
-        
-        // ---------------
-        // Query -> Query
-        
-        // deferred map
-        select: function(fun, ctx){
-            return new def.SelectQuery(this, fun, ctx);
-        },
-    
-        selectMany: function(fun, ctx){
-            return new def.SelectManyQuery(this, fun, ctx);
-        },
-    
-        // deferred filter
-        where: function(fun, ctx){
-            return new def.WhereQuery(this, fun, ctx);
-        },
-    
-        distinct: function(fun, ctx){
-            return new def.DistinctQuery(this, fun, ctx);
-        },
-    
-        skip: function(n){
-            return new def.SkipQuery(this, n);
-        },
-        
-        take: function(n){
-            return new def.TakeQuery(this, n);
-        },
-        
-        wahyl: function(pred, ctx){
-            return new def.WhileQuery(this, pred, ctx);
-        },
-        
-        reverse: function(){
-            return new def.ReverseQuery(this);
-        }
-    });
-    
-    def.type('NullQuery', def.Query)
-    .add({
-        _next: function(nextIndex){}
-    });
-    
-    def.type('AdhocQuery', def.Query)
-    .init(function(next){
-        this.base();
-        this._next = next;
-    });
-    
-    def.type('ArrayLikeQuery', def.Query)
-    .init(function(list){
-        this.base();
-        this._list  = def.isArrayLike(list) ? list : [list];
-        this._count = this._list.length;
-    })
-    .add({
-        _next: function(nextIndex){
-            if(nextIndex < this._count){
-                this.item = this._list[nextIndex];
-                return 1;
-            }
-        },
-        
-        /**
-         * Obtains the number of items of a query.
-         * 
-         * This is a more efficient implementation for the array-like class.
-         * @type number
-         */
-        count: function(){
-            // Count counts remaining items
-            var remaining = this._count;
-            if(this.index >= 0){
-                remaining -= (this.index + 1);
-            }
-            
-            // Count consumes all remaining items
-            this._finish();
-            
-            return remaining;
-        }
-    });
-    
-    def.type('RangeQuery', def.Query)
-    .init(function(start, count, step){
-        this.base();
-        this._index = start;
-        this._count = count;
-        this._step  = step == null ? 1 : step;
-    })
-    .add({
-        _next: function(nextIndex){
-            if(nextIndex < this._count){
-                this.item = this._index;
-                this._index += this._step;
-                return 1;
-            }
-        },
-        
-        /**
-         * Obtains the number of items of a query.
-         * This is a more efficient implementation.
-         * @type number
-         */
-        count: function(){
-            // Count counts remaining items
-            var remaining = this._count;
-            if(this.index >= 0){
-                remaining -= (this.index + 1);
-            }
-            
-            // Count consumes all remaining items
-            this._finish();
-            
-            return remaining;
-        }
-    });
-    
-    def.type('WhereQuery', def.Query)
-    .init(function(source, where, ctx){
-        this.base();
-        this._where  = where;
-        this._ctx    = ctx;
-        this._source = source;
-    })
-    .add({
-        _next: function(nextIndex){
-            while(this._source.next()){
-                var nextItem = this._source.item;
-                if(this._where.call(this._ctx, nextItem, this._source.index)){
-                    this.item = nextItem;
-                    return 1;
-                }
-            }
-        }
-    });
-    
-    def.type('WhileQuery', def.Query)
-    .init(function(source, pred, ctx){
-        this.base();
-        this._pred  = pred;
-        this._ctx    = ctx;
-        this._source = source;
-    })
-    .add({
-        _next: function(nextIndex){
-            while(this._source.next()){
-                var nextItem = this._source.item;
-                if(this._pred.call(this._ctx, nextItem, this._source.index)){
-                    this.item = nextItem;
-                    return 1;
-                }
-                return 0;
-            }
-        }
-    });
-    
-    def.type('SelectQuery', def.Query)
-    .init(function(source, select, ctx){
-        this.base();
-        this._select = select;
-        this._ctx    = ctx;
-        this._source = source;
-    })
-    .add({
-        _next: function(nextIndex){
-            if(this._source.next()){
-                this.item = this._select.call(this._ctx, this._source.item, this._source.index);
-                return 1;
-            }
-        }
-    });
-    
-    def.type('SelectManyQuery', def.Query)
-    .init(function(source, selectMany, ctx){
-        this.base();
-        this._selectMany = selectMany;
-        this._ctx    = ctx;
-        this._source = source;
-        this._manySource = null;
-    })
-    .add({
-        _next: function(nextIndex){
-            while(true){
-                // Consume all of existing manySource
-                if(this._manySource){
-                    if(this._manySource.next()){
-                        this.item = this._manySource.item;
-                        return 1;
-                    }
-                    
-                    this._manySource = null;
-                }
-    
-                if(!query_nextMany.call(this)){
-                    break;
-                }
-            }
-        }
-    });
-    
-    function query_nextMany(){
-        while(this._source.next()){
-            var manySource = this._selectMany.call(this._ctx, this._source.item, this._source.index);
-            if(manySource != null){
-                this._manySource = def.query(manySource);
-                return 1;
-            }
-        }
-    }
-    
-    def.type('DistinctQuery', def.Query)
-    .init(function(source, key, ctx){
-        this.base();
-        this._key    = key;
-        this._ctx    = ctx;
-        this._source = source;
-        this._keys   = {};
-    })
-    .add({
-        _next: function(nextIndex){
-            while(this._source.next()){
-                var nextItem = this._source.item,
-                    keyValue = this._key ?
-                               this._key.call(this._ctx, nextItem, this._source.index) :
-                               nextItem;
-    
-                // items with null keys are ignored!
-                if(keyValue != null && !def.hasOwn(this._keys, keyValue)){
-                    this._keys[keyValue] = true;
-                    this.item = nextItem;
-                    return 1;
-                }
-            }
-        }
-    });
-    
-    def.type('SkipQuery', def.Query)
-    .init(function(source, skip){
-        this.base();
-        this._source = source;
-        this._skip = skip;
-    })
-    .add({
-        _next: function(nextIndex){
-            while(this._source.next()){
-                if(this._skip > 0){
-                    this._skip--;
-                } else {
-                    this.item = this._source.item;
-                    return 1;
-                }
-            }
-        }
-    });
-    
-    def.type('TakeQuery', def.Query)
-    .init(function(source, take){
-        this.base();
-        this._source = source;
-        this._take = take;
-    })
-    .add({
-        _next: function(nextIndex){
-            while(this._source.next()){
-                if(this._take > 0){
-                    this._take--;
-                    this.item = this._source.item;
-                    return 1;
-                }
-            }
-        }
-    });
-    
-    def.type('ReverseQuery', def.Query)
-    .init(function(source){
-        this.base();
-        this._source = source;
-    })
-    .add({
-        _next: function(nextIndex){
-            if(!nextIndex) {
-                if(this._source instanceof def.Query) {
-                    if(this._source instanceof def.ArrayLikeQuery){
-                        this._source = this._source._list;
-                    } else {
-                        this._source = this._source.array();
-                    }
-                } // else assume array-like
-                
-                this._count  = this._source.length;
-            }
-            
-            if(nextIndex < this._count){
-                this.item = this._source[this._count - nextIndex - 1];
-                return 1;
-            }
-        }
-    });
-    
-    
-    // -------------------
-    
-    def.query = function(q){
-        if(q === undefined) {
-            return new def.NullQuery();
-        }
-        
-        if(q instanceof def.Query){
-            return q;
-        }
-        
-        if(def.isFun(q)){
-            return new def.AdhocQuery(q);
-        }
-    
-        return new def.ArrayLikeQuery(q);
-    };
-    
-    def.range = function(start, count, step){
-        return new def.RangeQuery(start, count, step);
-    };
-    
-    // Reset namespace to global, instead of 'def'
-    currentNamespace = def.global;
-    
-    return def;
-}());
 /*global pvc:true */
-pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/lib/CCC/protovis"], function(pv){
-pvc = {
-    debug: 1
-};
+var pvc = def.globalSpace('pvc', {
+    // 0 - off
+    // 1 - errors 
+    // 2 - errors, warnings
+    // 3 - errors, warnings, info
+    // 4 - verbose
+    // 5 - trash
+    // ...
+    debug: 0
+});
 
 // Begin private scope
 (function(){
@@ -1876,6 +18,8 @@ pvc = {
 // goldenRatio proportion
 // ~61.8% ~ 38.2%
 pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
+
+pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
 
 var arraySlice = pvc.arraySlice = Array.prototype.slice;
 
@@ -2147,7 +291,7 @@ pvc.Sides.prototype.setSides = function(sides){
     }
     
     if(pvc.debug) {
-        pvc.log("Invalid 'margins' option value: " + JSON.stringify(sides));
+        pvc.log("Invalid 'sides' option value: " + JSON.stringify(sides));
     }
 };
 
@@ -2244,6 +388,11 @@ pv.Panel.prototype._hasZOrderChild = false;
 pv.Panel.prototype._needChildSort  = false;
 
 pv.Mark.prototype.zOrder = function(zOrder) {
+    var borderPanel = this.borderPanel;
+    if(borderPanel && borderPanel !== this){
+        return borderPanel.zOrder.apply(borderPanel, arguments);
+    }
+    
     if(!arguments.length){
         return this._zOrder;
     }
@@ -2639,7 +788,7 @@ pv.Mark.prototype.isLocked = function(prop){
 
 /**
  * Function used to propagate a datum received, as a singleton list.
- * Use this to prevent re-evaluation of inherited data property functions!
+ * Used to prevent re-evaluation of inherited data property functions.
  */
 pv.dataIdentity = function(datum){
     return [datum];
@@ -13444,7 +11593,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         var basePanelParent = this.parent && this.parent._multiChartPanel;
         
         this.basePanel = new pvc.BasePanel(this, basePanelParent, {
-            margins: options.margins
+            margins: options.margins,
+            paddings: options.paddings
         });
         
         this.basePanel.setSize(options.width, options.height);
@@ -13462,7 +11612,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 anchor:     options.titlePosition,
                 titleSize:  options.titleSize,
                 titleAlign: options.titleAlign,
-                margins:    options.titleMargins
+                margins:    options.titleMargins,
+                paddings:   options.titlePaddings
             });
         }
     },
@@ -13566,7 +11717,8 @@ pvc.BaseChart = pvc.Abstract.extend({
             markerSize: options.legendMarkerSize,
             drawLine:   options.legendDrawLine,
             drawMarker: options.legendDrawMarker,
-            margins:    options.legendMargins
+            margins:    options.legendMargins,
+            paddings:   options.legendPaddings
         });
     },
 
@@ -13707,6 +11859,10 @@ pvc.BaseChart = pvc.Abstract.extend({
             
             var points = this.options.extensionPoints;
             if(points){
+                if(mark.borderPanel){
+                    mark = mark.borderPanel;
+                }
+                
                 for (var p in points) {
                     // Starts with
                     if(p.indexOf(prefix) === 0){
@@ -13901,6 +12057,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         titleAlign:    "center", // left / right / center
         titleSize:     undefined,
         titleMargins:  undefined,
+        tittlePaddings:undefined,
         
         legend:           false,
         legendPosition:   "bottom",
@@ -13910,12 +12067,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendMinMarginX: undefined,
         legendMinMarginY: undefined,
         legendTextMargin: undefined,
-        legendPadding:    undefined,
+        legendPadding:    undefined, // ATTENTION: this is different from legendPaddings
         legendShape:      undefined,
         legendDrawLine:   undefined,
         legendDrawMarker: undefined,
         legendMarkerSize: undefined,
-        legendMargins: undefined,
+        legendMargins:    undefined,
+        legendPaddings:   undefined,
         
         colors: null,
 
@@ -13975,7 +12133,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         renderCallback: undefined,
 
-        margins: undefined,
+        margins:  undefined,
+        paddings: undefined,
         
         compatVersion: Infinity // numeric, 1 currently recognized
     }
@@ -13996,9 +12155,11 @@ pvc.BasePanel = pvc.Abstract.extend({
     height: null,
     width: null,
     anchor: "top",
-    pvPanel: null,
+    pvBorderPanel: null, // border box 
+    pvPanel: null, // padding box (within border box, separated by paddings)
     
     margins:   null,
+    paddings:  null,
     isRoot:    false,
     isTopRoot: false,
     root:      null, 
@@ -14068,7 +12229,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             */
         };
         
-        this.margins = new pvc.Sides(options && options.margins);
+        this.margins  = new pvc.Sides(options && options.margins);
+        this.paddings = new pvc.Sides(options && options.paddings);
         
         if(!parent) {
             this.parent    = null;
@@ -14148,10 +12310,14 @@ pvc.BasePanel = pvc.Abstract.extend({
                 referenceSize = new pvc.Size(availableSize);
             }
             
-            var margins = this.margins.resolve(referenceSize);
+            var margins  = this.margins.resolve(referenceSize);
+            var paddings = this.paddings.resolve(referenceSize);
+            var extraWidth  = margins.width + paddings.width;
+            var extraHeight = margins.height + paddings.height;
+            
             var clientSize = new pvc.Size(
-                Math.max(availableSize.width  - margins.width,  0),
-                Math.max(availableSize.height - margins.height, 0)
+                Math.max(availableSize.width  - extraWidth,  0),
+                Math.max(availableSize.height - extraHeight, 0)
             );
             
             var layoutInfo = {};
@@ -14160,13 +12326,14 @@ pvc.BasePanel = pvc.Abstract.extend({
                 this.setSize(availableSize); // request all available size
             } else {
                 this.setSize(new pvc.Size(
-                    reqClientSize.width  + margins.width,
-                    reqClientSize.height + margins.height
+                    reqClientSize.width  + extraWidth,
+                    reqClientSize.height + extraHeight
                 ));
             }
             
             this._layoutInfo = layoutInfo;
             this._resolvedMargins = margins;
+            this._resolvedPaddings = paddings;
         }
     },
     
@@ -14216,10 +12383,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         initLayout.call(this);
         
         // Lays out non-fill child panels and collects fill children
-        this._children.forEach(layoutChildI);
+        this._children.forEach(layoutChildI, this);
         
         // Lays out collected fill-child panels
-        fillChildren.forEach(layoutChildII);
+        fillChildren.forEach(layoutChildII, this);
         
         while(needRelayout){
             needRelayout = false;
@@ -14228,8 +12395,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             initLayout.call(this);
             
-            this._children.forEach(layoutChildI);
-            fillChildren.forEach(layoutChildII);
+            this._children.forEach(layoutChildI, this);
+            fillChildren.forEach(layoutChildII, this);
         }
         
         // Request required client size
@@ -14242,7 +12409,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             if(a === 'fill') {
                 // These are layed out on the second phase
                 fillChildren.push(child);
-            } else if(a) {
+            } else if(a) { // requires layout
                 /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
@@ -14250,9 +12417,11 @@ pvc.BasePanel = pvc.Abstract.extend({
                 
                 checkChildLayout.call(this, child);
                 
-                positionChild(a, child);
+                var align = this._parseAlign(a, child.align);
                 
-                updateSide(a, child);
+                positionChild.call(this, a, child, align);
+                
+                updateSide.call(this, a, child, align);
             }
         }
         
@@ -14261,7 +12430,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             checkChildLayout(child);
             
-            positionChild('left', child);
+            positionChild.call(this, 'fill', child);
         }
         
         function checkChildLayout(child){
@@ -14293,6 +12462,43 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
         }
         
+        function positionChild(side, child, align) {
+            var sidePos;
+            if(side === 'fill'){
+                side = 'left';
+                sidePos = margins.left + remSize.width / 2 - (child.width / 2);
+                align = 'middle';
+            } else {
+                sidePos = margins[side];
+            }
+            
+            var sideo, sideOPos;
+            switch(align){
+                case 'top':
+                case 'bottom':
+                case 'left':
+                case 'right':
+                    sideo = align;
+                    sideOPos = margins[sideo];
+                    break;
+                
+                case 'middle':
+                    sideo    = 'top';
+                    sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
+                    break;
+                    
+                case 'center':
+                    sideo    = 'left';
+                    sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                    break;
+            }
+            
+            child.setPosition(
+                    def.set({}, 
+                        side,  sidePos, 
+                        sideo, sideOPos));
+        }
+        
         // Decreases available size and increases margins
         function updateSide(side, child) {
             var sideol = aolMap[side];
@@ -14301,11 +12507,38 @@ pvc.BasePanel = pvc.Abstract.extend({
             margins[side]   += olen;
             remSize[sideol] -= olen;
         }
-        
-        function positionChild(side, child) {
-            var sideo = aoMap[side];
-            child.setPosition(def.set({}, side, margins[side], sideo, margins[sideo]));
+    },
+    
+    _parseAlign: function(side, align){
+        if(side === 'left' || side === 'right'){
+            switch(align){
+                case 'top':
+                case 'bottom':
+                case 'middle':
+                    break;
+                
+                default:
+                    if(align && pvc.debug >= 2){
+                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                    }
+                    align = 'top';
+            }
+        } else {
+            switch(align){
+                case 'left':
+                case 'right':
+                case 'center':
+                    break;
+                
+                default:
+                    if(align && pvc.debug >= 2){
+                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                    }
+                    align = 'left';
+            }
         }
+        
+        return align;
     },
     
     _invalidateLayout: function(){
@@ -14327,7 +12560,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             /* Layout */
             this.layout();
             
-            var margins = this._resolvedMargins;
+            var margins  = this._resolvedMargins;
+            var paddings = this._resolvedPaddings;
             
             /* Protovis Panel */
             if(this.isTopRoot) {
@@ -14351,9 +12585,11 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
             
             // Set panel size
+            var width  = this.width  - margins.width;
+            var height = this.height - margins.height;
             this.pvPanel
-                .width (this.width  - margins.width )
-                .height(this.height - margins.height);
+                .width (width)
+                .height(height);
             
             // Set panel positions
             var hasPositions = {};
@@ -14369,6 +12605,21 @@ pvc.BasePanel = pvc.Abstract.extend({
             if(!hasPositions.height && margins.top != null){
                 this.pvPanel.top(margins.top);
             }
+            
+            var pvBorderPanel = this.pvPanel;
+            
+            // Check padding
+            if(paddings.width >= 0 || paddings.height >= 0){
+                // We create separate border (outer) and inner (padding) panels
+                this.pvPanel = pvBorderPanel.add(pv.Panel)
+                                   .width(width - paddings.width)
+                                   .height(height - paddings.height)
+                                   .left(paddings.left)
+                                   .top(paddings.top);
+            }
+            
+            pvBorderPanel.paddingPanel = this.pvPanel;
+            this.pvPanel.borderPanel = pvBorderPanel;
             
             /* Protovis marks that are pvcPanel specific,
              * and/or #_creates child panels.
@@ -14437,7 +12688,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             options.renderCallback.call(chart);
         }
         
-        var pvPanel = this.pvPanel;
+        var pvPanel = this.pvRootPanel;
         
         this._isAnimating = options.animate && !def.get(keyArgs, 'bypassAnimation', false) ? 1 : 0;
         try {
@@ -14692,9 +12943,19 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
 
         if(!pvPanel){
-            pvPanel = this.parent.pvPanel.add(this.type)
-                            .extend(this.pvPanel);
-
+            var pvParentPanel = this.parent.pvPanel;
+            var pvBorderPanel = 
+                pvPanel = pvParentPanel.borderPanel.add(this.type)
+                              .extend(this.pvPanel.borderPanel);
+            
+            if(pvParentPanel !== pvParentPanel.borderPanel){
+                pvPanel = pvBorderPanel.add(pv.Panel)
+                                       .extend(this.pvPanel);
+            }
+            
+            pvBorderPanel.paddingPanel = pvPanel;
+            pvPanel.borderPanel = pvBorderPanel;
+            
             this.initLayerPanel(pvPanel, layer);
 
             this._layers[layer] = pvPanel;
@@ -15066,7 +13327,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         var isSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvPanel,
+        var rubberPvParentPanel = this.pvPanel, // .borderPanel
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
@@ -15077,14 +13338,14 @@ pvc.BasePanel = pvc.Abstract.extend({
             .height(function() {return this.parent.selectionRect.dy; })
             .fillStyle(options.rubberBandFill)
             .strokeStyle(options.rubberBandLine);
-
+        
         // Rubber band selection behavior definition
-        if(!options.extensionPoints ||
-           !options.extensionPoints.base_fillStyle){
-
-            var invisibleFill = 'rgba(127,127,127,0.00001)';
-            rubberPvParentPanel.fillStyle(invisibleFill);
-        }
+        
+        // NOTE that as the paddingPanel does not receive extension points
+        // The foloowing code is no longer necessary
+        //if(!options.extensionPoints.base_fillStyle){
+         rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        //}
         
         // NOTE: Rubber band coordinates are always transformed to screen coordinates (see 'select' and 'selectend' events)
         var selectionEndedDate;
@@ -15630,14 +13891,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     legend:     null,
     legendSize: null,
     
-    /** @deprecated */
-    minMarginX: 8,    // Minimum horizontal margin, in pixels. The space before the first and after the last items. Depending on 'align', may be split in half.
-    
-    /** @deprecated */
-    minMarginY: 20, 
-    
     textMargin: 6,   // The space between the marker and the text, in pixels.
-    padding:    5,   // The space between legend items, in pixels (in all directions).
+    padding:    5,   // The space around a legend item in pixels (in all directions, half for each side).
     
     shape:      null, // "square",
     markerSize: 15,   // *diameter* of marker *zone* (the marker(s) itself is a little smaller)
@@ -15729,23 +13984,24 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                 var a_left   = isHorizontal ? 'left' : 'top';
                 var a_right  = this.anchorOpposite(a_left);   // left or right
                 
-                // padding is added to clientWidth to account for the one extra padding.
-                // Note that padding should only be added between cells.
-                var maxCellsPerRow = ~~((clientSize[a_width] + this.padding) / paddedCellSize[a_width]); // ~~ <=> Math.floor
+                var maxCellsPerRow = ~~(clientSize[a_width] / paddedCellSize[a_width]); // ~~ <=> Math.floor
                 if(maxCellsPerRow > 0){
                     var cellsPerRow    = Math.min(leafCount, maxCellsPerRow);
                     var rowCount       = Math.ceil(leafCount / cellsPerRow);
-                    var rowWidth       = cellsPerRow * paddedCellSize[a_width] - this.padding;
+                    var rowWidth       = cellsPerRow * paddedCellSize[a_width];
                     
                     // If the legend is bigger than the available size, multi-line and left align
                     if(rowCount > 1){
                         this.align = a_left; // Why??
                     }
                     
-                    // Request all available width
-                    requiredSize[a_width] = clientSize[a_width];
+                    // NOTE: V1 behavior requires keeping alignment code here
+                    // even if it is also being performed in the layout...
                     
-                    var tableHeight = rowCount * paddedCellSize[a_height] - this.padding;
+                    // Request used width / all available width (V1)
+                    requiredSize[a_width] = !isV1Compat ? rowWidth : clientSize[a_width];
+                    
+                    var tableHeight = rowCount * paddedCellSize[a_height];
                     requiredSize[a_height] = Math.min(clientSize[a_height], tableHeight);
                     
                     // -----------------
@@ -19416,8 +17672,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
             showDots  = this.showDots,
             showAreas = this.showAreas,
             showLines = this.showLines,
-            anchor = this.isOrientationVertical() ? "bottom" : "left",
-            invisibleFill = 'rgba(127,127,127,0.00001)';
+            anchor = this.isOrientationVertical() ? "bottom" : "left";
 
         // ------------------
         // DATA
@@ -19591,7 +17846,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                                   (!showAloneDots && this.scene.isSingle) ||
                                   (showAloneDots && this.scene.isAlone);
                     if(!visible) {
-                        return invisibleFill;
+                        return pvc.invisibleFill;
                     }
                 }
                 
@@ -21245,8 +19500,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
          
         var myself = this,
             chart = this.chart,
-            options = chart.options,
-            invisibleFill = 'rgba(127,127,127,0.00001)';
+            options = chart.options;
 
         // ------------------
         // DATA
@@ -21320,7 +19574,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     var visible = this.scene.isActive ||
                                   this.scene.isSingle;
                     if(!visible) {
-                        return invisibleFill;
+                        return pvc.invisibleFill;
                     }
                 }
                 
@@ -24276,5 +22530,6 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         }
     }
 });
-
-return pvc; });
+    
+    return pvc;
+});

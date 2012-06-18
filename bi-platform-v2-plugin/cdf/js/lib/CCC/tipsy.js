@@ -1,4 +1,4 @@
-pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"],function(pv){
+pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
 (function(){
 var behaviorByGroup = {}; 
 

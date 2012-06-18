@@ -1,8 +1,9 @@
+pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
 // tipsy, facebook style tooltips for jquery
 // version 1.0.0a
 // (c) 2008-2010 jason frame [jason@onehackoranother.com]
 // releated under the MIT license
-pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
+
 (function($) {
     
     function fixTitle($ele) {
@@ -199,4 +200,5 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
     };
     
 })(jQuery);
+
 });
