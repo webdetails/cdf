@@ -14275,6 +14275,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           .left(layoutInfo.leftProp)
           .top(layoutInfo.topProp)
           .height(layoutInfo.cellSize.height)
+          .width(layoutInfo.cellSize.width)
           .cursor(function(scene){
               return scene.acts.legendItem.click ? "pointer" : null;
           })
