@@ -2363,7 +2363,8 @@ var QueryComponent = BaseComponent.extend({
       return;
     }
     var query = new Query(cd);
-    
+    object.queryState = query;
+
     query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
