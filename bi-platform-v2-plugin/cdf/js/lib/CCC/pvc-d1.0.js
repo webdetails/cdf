@@ -251,35 +251,35 @@ pvc.Sides.prototype.setSides = function(sides){
         switch(comps.length){
             case 1:
                 this.set('all', comps[0]);
-                return;
+                return this;
                 
             case 2:
                 this.set('top',    comps[0]);
                 this.set('left',   comps[1]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[0]);
-                return;
+                return this;
                 
             case 3:
                 this.set('top',    comps[0]);
                 this.set('left',   comps[1]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[2]);
-                return;
+                return this;
                 
             case 4:
                 this.set('top',    comps[0]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[2]);
                 this.set('left',   comps[3]);
-                return;
+                return this;
                 
             case 0:
-                return;
+                return this;
         }
     } else if(typeof sides === 'number') {
         this.set('all', sides);
-        return;
+        return this;
     } else if (typeof sides === 'object') {
         this.set('all', sides.all);
         for(var p in sides){
@@ -287,12 +287,14 @@ pvc.Sides.prototype.setSides = function(sides){
                 this.set(p, sides[p]);
             }
         }
-        return;
+        return this;
     }
     
     if(pvc.debug) {
-        pvc.log("Invalid 'sides' option value: " + JSON.stringify(sides));
+        pvc.log("Invalid 'sides' value: " + JSON.stringify(sides));
     }
+    
+    return this;
 };
 
 pvc.Sides.prototype.set = function(prop, value){
@@ -379,7 +381,7 @@ pvc.PercentValue.parse = function(value){
     }
 };
 
-/* Protovis Z-Order support */
+/* Protovis Z-Order support between sibling marks */
 
 // Default values
 pv.Mark.prototype._zOrder = 0;
@@ -999,15 +1001,74 @@ pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
 
 var Size = def.type('pvc.Size')
 .init(function(width, height){
-    if(width instanceof Object) {
-        this.width  = width.width  || 0;
-        this.height = width.height || 0;
+    if(arguments.length === 1){
+        if(width != null){
+            this.setSize(width);
+        }
     } else {
-        this.width  = width  || 0;
-        this.height = height || 0;
+        if(width != null){
+            this.width  = width;
+        }
+        
+        if(height != null){
+            this.height = height;
+        }
     }
 })
 .add({
+    setSize: function(size, keyArgs){
+        if(typeof size === 'string'){
+            var comps = size.split(/\s+/).map(function(comp){
+                return pvc.PercentValue.parse(comp);
+            });
+            
+            switch(comps.length){
+                case 1: 
+                    this.set(def.get(keyArgs, 'singleProp', 'all'), comps[0]);
+                    return this;
+                    
+                case 2:
+                    this.set('width',  comps[0]);
+                    this.set('height', comps[1]);
+                    return this;
+                    
+                case 0:
+                    return this;
+            }
+        } else if(typeof size === 'number') {
+            this.set(def.get(keyArgs, 'singleProp', 'all'), size);
+            return this;
+        } else if (typeof size === 'object') {
+            this.set('all', size.all);
+            for(var p in size){
+                if(p !== 'all'){
+                    this.set(p, size[p]);
+                }
+            }
+            return this;
+        }
+        
+        if(pvc.debug) {
+            pvc.log("Invalid 'size' value: " + JSON.stringify(size));
+        }
+        return this;
+    },
+    
+    set: function(prop, value){
+        value = pvc.PercentValue.parse(value);
+        if(value != null){
+            if(prop === 'all'){
+                // expand
+                pvc.Size.names.forEach(function(p){
+                    this[p] = value;
+                }, this);
+                
+            } else if(def.hasOwn(pvc.Size.namesSet, prop)){
+                this[prop] = value;
+            }
+        }
+    },
+    
     clone: function(){
         return new Size(this.width, this.height);
     },
@@ -1018,10 +1079,29 @@ var Size = def.type('pvc.Size')
                Math.min(this.height, size.height));
     },
     
-    setProp: function(prop, v){
-        this[prop] = v || 0;
+    resolve: function(refSize){
+        var size = {};
+        
+        pvc.Size.names.forEach(function(length){
+            var lengthValue = this[length];
+            if(lengthValue != null){
+                if(typeof(lengthValue) === 'number'){
+                    size[length] = lengthValue;
+                } else if(refSize){
+                    var refLength = refSize[length];
+                    if(refLength != null){
+                        size[length] = lengthValue.resolve(refLength);
+                    }
+                }
+            }
+        }, this);
+        
+        return size;
     }
 });
+
+pvc.Size.names = ['width', 'height'];
+pvc.Size.namesSet = pv.dict(pvc.Size.names, def.constant(true));
 
 // --------------------
 
@@ -11593,11 +11673,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         var basePanelParent = this.parent && this.parent._multiChartPanel;
         
         this.basePanel = new pvc.BasePanel(this, basePanelParent, {
-            margins: options.margins,
-            paddings: options.paddings
+            margins:  options.margins,
+            paddings: options.paddings,
+            size:     {width: options.width, height: options.height}
         });
-        
-        this.basePanel.setSize(options.width, options.height);
     },
 
     /**
@@ -11610,10 +11689,10 @@ pvc.BaseChart = pvc.Abstract.extend({
             this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
                 title:      options.title,
                 anchor:     options.titlePosition,
-                titleSize:  options.titleSize,
-                titleAlign: options.titleAlign,
                 margins:    options.titleMargins,
-                paddings:   options.titlePaddings
+                paddings:   options.titlePaddings,
+                titleSize:  options.titleSize,
+                titleAlign: options.titleAlign
             });
         }
     },
@@ -11707,6 +11786,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
             anchor:     options.legendPosition,
             legendSize: options.legendSize,
+            legendSizeMax: options.legendSizeMax,
             font:       options.legendFont,
             align:      options.legendAlign,
             minMarginX: options.legendMinMarginX,
@@ -12063,6 +12143,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendPosition:   "bottom",
         legendFont:       undefined,
         legendSize:       undefined,
+        legendSizeMax:    undefined,
         legendAlign:      undefined,
         legendMinMarginX: undefined,
         legendMinMarginY: undefined,
@@ -12152,14 +12233,30 @@ pvc.BasePanel = pvc.Abstract.extend({
     parent: null,
     _children: null,
     type: pv.Panel, // default one
+    
+    /**
+     * Total height of the panel.
+     * Includes vertical paddings and margins.
+     * Resolved.
+     * @type number  
+     */
     height: null,
+    
+    /**
+     * Total width of the panel.
+     * Includes horizontal paddings and margins.
+     * Resolved.
+     * @type number
+     */
     width: null,
+    
     anchor: "top",
-    pvBorderPanel: null, // border box 
-    pvPanel: null, // padding box (within border box, separated by paddings)
+    
+    pvPanel: null, // padding/client pv panel (within border box, separated by paddings)
     
     margins:   null,
     paddings:  null,
+    
     isRoot:    false,
     isTopRoot: false,
     root:      null, 
@@ -12229,8 +12326,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             */
         };
         
-        this.margins  = new pvc.Sides(options && options.margins);
+        this.margins  = new pvc.Sides(options && options.margins );
         this.paddings = new pvc.Sides(options && options.paddings);
+        this.size     = new pvc.Size (options && options.size    );
+        this.sizeMax  = new pvc.Size (options && options.sizeMax );
         
         if(!parent) {
             this.parent    = null;
@@ -12278,16 +12377,16 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     /** 
      * Calculates and sets its size,
-     * taking into account a specified available size.
+     * taking into account a specified total size.
      * 
-     * @param {pvc.Size} [availableSize] The size available for the panel.
+     * @param {pvc.Size} [availableSize] The total size available for the panel.
      * <p>
-     * On a root panel this argument is not specified,
-     * and the panel's current size should be used as default. 
+     * On root panels this argument is not specified,
+     * and the panels' current {@link #width} and {@link #height} are used as default. 
      * </p>
      * @param {pvc.Size} [referenceSize] The size that should be used for 
      * percentage size calculation. 
-     * This will typically be the client size of the parent.
+     * This will typically be the <i>client</i> size of the parent.
      * 
      * @param {object}  [keyArgs] Keyword arguments.
      * @param {boolean} [keyArgs.force=false] Indicates that the layout should be 
@@ -12298,64 +12397,120 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             this._layoutInfo = null;
             
+            if(!referenceSize && availableSize){
+                referenceSize = def.copyOwn(availableSize);
+            }
+            
+            // Does this panel have a **desired** fixed size specified?
+            
+            // * size may have no specified components 
+            // * referenceSize may be null
+            var desiredSize = this.size.resolve(referenceSize);
+            var sizeMax     = this.sizeMax.resolve(referenceSize);
+            
             if(!availableSize) {
-                /*jshint expr:true */
-                (this.width >= 0 && this.height >= 0) || 
-                    def.error.operationInvalid("Panel layout without width or height set.");
+                if(desiredSize.width == null || desiredSize.height == null){
+                    throw def.error.operationInvalid("Panel layout without width or height set.");
+                }
                 
-                availableSize = new pvc.Size(this.width, this.height);
+                availableSize = def.copyOwn(desiredSize);
             }
             
-            if(!referenceSize){
-                referenceSize = new pvc.Size(availableSize);
+            if(!referenceSize && availableSize){
+                referenceSize = def.copyOwn(availableSize);
             }
             
-            var margins  = this.margins.resolve(referenceSize);
+            // Apply max size to available size
+            if(sizeMax.width != null && availableSize.width > sizeMax.width){
+                availableSize.width = sizeMax.width;
+            }
+            
+            if(sizeMax.height != null && availableSize.height > sizeMax.height){
+                availableSize.height = sizeMax.height;
+            }
+            
+            var margins  = this.margins .resolve(referenceSize);
             var paddings = this.paddings.resolve(referenceSize);
-            var extraWidth  = margins.width + paddings.width;
-            var extraHeight = margins.height + paddings.height;
+            var spaceWidth  = margins.width  + paddings.width;
+            var spaceHeight = margins.height + paddings.height;
             
-            var clientSize = new pvc.Size(
-                Math.max(availableSize.width  - extraWidth,  0),
-                Math.max(availableSize.height - extraHeight, 0)
-            );
+            var availableClientSize = new pvc.Size(
+                        Math.max(availableSize.width  - spaceWidth,  0),
+                        Math.max(availableSize.height - spaceHeight, 0)
+                    );
             
-            var layoutInfo = {};
-            var reqClientSize = this._calcLayout(clientSize, layoutInfo, referenceSize);
-            if(!reqClientSize){
-                this.setSize(availableSize); // request all available size
-            } else {
-                this.setSize(new pvc.Size(
-                    reqClientSize.width  + extraWidth,
-                    reqClientSize.height + extraHeight
-                ));
+            var desiredClientSize = def.copyOwn(desiredSize);
+            if(desiredClientSize.width != null){
+                desiredClientSize.width = Math.max(desiredClientSize.width - spaceWidth, 0);
             }
             
+            if(desiredClientSize.height != null){
+                desiredClientSize.height = Math.max(desiredClientSize.height - spaceHeight, 0);
+            }
+            
+            var layoutInfo = {
+                referenceSize:       referenceSize,
+                margins:             margins,
+                paddings:            paddings,
+                desiredClientSize:   desiredClientSize,
+                clientSize:          availableClientSize
+            };
+            
+            var clientSize = this._calcLayout(layoutInfo);
+            
+            var size;
+            if(!clientSize){
+                size = availableSize; // use all available size
+            } else {
+                layoutInfo.clientSize = clientSize;
+                size = {
+                    width:  clientSize.width  + spaceWidth,
+                    height: clientSize.height + spaceHeight
+                };
+            }
+            
+            delete layoutInfo.desiredClientSize;
+            
+            this.width = size.width;
+            this.height = size.height;
             this._layoutInfo = layoutInfo;
-            this._resolvedMargins = margins;
-            this._resolvedPaddings = paddings;
         }
     },
     
     /**
-     * Override to calculate and set panel dimensions.
+     * Override to calculate panel client size.
      * <p>
      * The default implementation performs a dock layout {@link #layout} on child panels
-     * and uses all of the specified available size. 
+     * and uses all of the available size. 
      * </p>
      * 
-     * @param {pvc.Size} clientSize The available size, already without margins.
-     * @param {object} layoutInfo An object on which to export layout information.
+     * @param {object} layoutInfo An object that is supplied with layout information
+     * and on which to export custom layout information.
+     * <p>
      * This object is later supplied to the method {@link #_createCore},
      * and can thus be used to store any layout by-product
-     * relevant for the creation of the protovis marks.
-     * @param {pvc.Size} [referenceSize] The size that should be used for 
-     * percentage size calculation. 
-     * This will typically be the client size of the parent.
-     * 
+     * relevant for the creation of the protovis marks and
+     * that should be cleared whenever a layout becomes invalid.
+     * </p>
+     * <p>
+     * The object is supplied with the following properties:
+     * </p>
+     * <ul>
+     *    <li>referenceSize - size that should be used for percentage size calculation. 
+     *        This will typically be the <i>client</i> size of the parent.
+     *    </li>
+     *    <li>margins - the resolved margins object. All components are present, possibly with the value 0.</li>
+     *    <li>paddings - the resolved paddings object. All components are present, possibly with the value 0.</li>
+     *    <li>desiredClientSize - the desired fixed client size. Do ignore a null width or height property value.</li>
+     *    <li>clientSize - the available client size, already limited by a maximum size if specified.</li>
+     * </ul>
+     * <p>
+     * Do not modify the contents of the objects of 
+     * any of the supplied properties.
+     * </p>
      * @virtual
      */
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+    _calcLayout: function(layoutInfo){
         
         if(!this._children) {
             return;
@@ -12363,19 +12518,23 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         var margins, remSize, fillChildren;
         
+        // May be expanded, see checkChildLayout
+        var clientSize = def.copyOwn(layoutInfo.clientSize);
+        
         function initLayout(){
             
             fillChildren = [];
             
             // Objects we can mutate
             margins = new pvc.Sides(0);
-            remSize = def.copy(clientSize);
+            remSize = def.copyOwn(clientSize);
         }
         
         var aolMap = pvc.BasePanel.orthogonalLength,
             aoMap  = pvc.BasePanel.relativeAnchor;
         
         var childKeyArgs = {force: true};
+        var childReferenceSize = clientSize;
         var needRelayout = false;
         var relayoutCount = 0;
         var allowGrow = true;
@@ -12396,10 +12555,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             initLayout.call(this);
             
             this._children.forEach(layoutChildI, this);
+            
             fillChildren.forEach(layoutChildII, this);
         }
         
-        // Request required client size
         return clientSize;
         
         // --------------------
@@ -12413,7 +12572,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
-                child.layout(new pvc.Size(remSize), clientSize, childKeyArgs);
+                child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
                 
                 checkChildLayout.call(this, child);
                 
@@ -12426,7 +12585,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         function layoutChildII(child) {
-            child.layout(new pvc.Size(remSize), clientSize, childKeyArgs);
+            child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
             
             checkChildLayout(child);
             
@@ -12541,10 +12700,6 @@ pvc.BasePanel = pvc.Abstract.extend({
         return align;
     },
     
-    _invalidateLayout: function(){
-        this._layoutInfo = null;
-    },
-    
     /** 
      * CREATION PHASE
      * 
@@ -12560,8 +12715,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             /* Layout */
             this.layout();
             
-            var margins  = this._resolvedMargins;
-            var paddings = this._resolvedPaddings;
+            var margins  = this._layoutInfo.margins;
+            var paddings = this._layoutInfo.paddings;
             
             /* Protovis Panel */
             if(this.isTopRoot) {
@@ -12570,7 +12725,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 
                 if(margins.width > 0 || margins.height > 0){
                     this.pvPanel
-                        .width (this.width)
+                        .width (this.width )
                         .height(this.height);
                     
                     // As there is no parent panel,
@@ -12584,38 +12739,38 @@ pvc.BasePanel = pvc.Abstract.extend({
                 this.pvPanel = this.parent.pvPanel.add(this.type);
             }
             
+            var pvBorderPanel = this.pvPanel;
+            
             // Set panel size
             var width  = this.width  - margins.width;
             var height = this.height - margins.height;
-            this.pvPanel
+            pvBorderPanel
                 .width (width)
                 .height(height);
             
             // Set panel positions
             var hasPositions = {};
             def.eachOwn(this.position, function(v, side){
-                this.pvPanel[side](v + margins[side]);
+                pvBorderPanel[side](v + margins[side]);
                 hasPositions[this.anchorLength(side)] = true;
             }, this);
             
-            if(!hasPositions.width && margins.left != null){
-                this.pvPanel.left(margins.left);
+            if(!hasPositions.width && margins.left > 0){
+                pvBorderPanel.left(margins.left);
             }
             
-            if(!hasPositions.height && margins.top != null){
-                this.pvPanel.top(margins.top);
+            if(!hasPositions.height && margins.top > 0){
+                pvBorderPanel.top(margins.top);
             }
-            
-            var pvBorderPanel = this.pvPanel;
             
             // Check padding
-            if(paddings.width >= 0 || paddings.height >= 0){
+            if(paddings.width > 0 || paddings.height > 0){
                 // We create separate border (outer) and inner (padding) panels
                 this.pvPanel = pvBorderPanel.add(pv.Panel)
-                                   .width(width - paddings.width)
+                                   .width (width  - paddings.width )
                                    .height(height - paddings.height)
                                    .left(paddings.left)
-                                   .top(paddings.top);
+                                   .top (paddings.top );
             }
             
             pvBorderPanel.paddingPanel = this.pvPanel;
@@ -12847,73 +13002,12 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
         }
     },
-
-    /**
-     * Sets the size for the panel, 
-     * for when the parent panel is undefined
-     */
-    setSize: function(w, h) {
-        if(w instanceof pvc.Size) {
-            h = w.height;
-            w = w.width;
-        }
-        
-        if(h !== this.width || w !== this.height) {
-            this.width  = w;
-            this.height = h;
-            
-            this._invalidateLayout();
-        }
-    },
     
-    createAnchoredSize: function(anchorLength, availableSize){
+    createAnchoredSize: function(anchorLength, size){
         if (this.isAnchorTopOrBottom()) {
-            return new pvc.Size(availableSize.width, Math.min(availableSize.height, anchorLength));
+            return new pvc.Size(size.width, Math.min(size.height, anchorLength));
         } 
-        return new pvc.Size(Math.min(availableSize.width, anchorLength), availableSize.height);
-    },
-
-    /**
-     * Returns the width of the Panel
-     */
-    getWidth: function() {
-        return this.width;
-    },
-
-    /**
-     * Returns the height of the Panel
-     */
-    getHeight: function() {
-        return this.height;
-    },
-    
-    setWidth: function(w) {
-        if(w !== this.width) {
-            this.width = w;
-            this._invalidateLayout();
-        }
-    },
-    
-    setHeight: function(h) {
-        if(h !== this.height) {
-            this.height = h;
-            this._invalidateLayout();
-        }
-    },
-
-    /**
-     * Sets the margins of the panel.
-     */
-    setMargins: function(margins){
-        if(margins != null){
-            if(!(margins instanceof pvc.Sides)){
-                margins = new pvc.Sides(margins);
-            }
-            
-            this.margins = margins;
-            
-            this._invalidateLayout();
-        }
+        return new pvc.Size(Math.min(size.width, anchorLength), size.height);
     },
 
     /**
@@ -13653,8 +13747,8 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
      * 
      * @override
      */
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
-        
+    _calcLayout: function(layoutInfo){
+        var clientSize = def.copyOwn(layoutInfo.clientSize);
         var chart = this.chart;
         var data  = chart.visualRoles('multiChartColumn')
                          .flatten(chart.data, {visible: true});
@@ -13855,9 +13949,9 @@ pvc.TitlePanel = pvc.BasePanel.extend({
     /**
      * @override
      */
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+    _calcLayout: function(layoutInfo){
         // Size will depend on positioning and font size mainly
-        return this.createAnchoredSize(this.titleSize, clientSize);
+        return this.createAnchoredSize(this.titleSize, layoutInfo.clientSize);
     },
     
     /**
@@ -13943,6 +14037,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     pvLegendPanel: null,
     legend:     null,
     legendSize: null,
+    legendSizeMax: null,
     
     textMargin: 6,   // The space between the marker and the text, in pixels.
     padding:    5,   // The space around a legend item in pixels (in all directions, half for each side).
@@ -13960,11 +14055,35 @@ pvc.LegendPanel = pvc.BasePanel.extend({
             options = {};
         }
         
+        var anchor = options.anchor || this.anchor;
+        
         var isV1Compat = chart.options.compatVersion <= 1;
-        var isVertical = options.anchor !== "top" && options.anchor !== "bottom";
+        var isVertical = anchor !== 'top' && anchor !== 'bottom';
         
         if(isVertical && options.align === undefined){
             options.align = 'top';
+        }
+        
+        // legendSize
+        if(options.size == null){
+            var size = options.legendSize;
+            if(size != null){
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
+                options.size = new pvc.Size()
+                                 .setSize(size, {singleProp: this.anchorOrthoLength(anchor)});
+            }
+        }
+        
+        // legendSizeMax
+        if(options.sizeMax == null){
+            var sizeMax = options.legendSizeMax;
+            if(sizeMax != null){
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
+                options.sizeMax = new pvc.Size()
+                                    .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
+            }
         }
         
         if(isV1Compat){
@@ -13977,18 +14096,22 @@ pvc.LegendPanel = pvc.BasePanel.extend({
                 options.shape = 'square';
             }
             
-            var minMarginX = def.get(options, 'minMarginX',  8);
-            var minMarginY = def.get(options, 'minMarginY', 20);
-            options.margins = {
-                left: minMarginX,
-                // V1 only implemented minMarginY for vertical and  align = 'top'
-                top:  isVertical && (options.align !== 'middle' && options.align !== 'bottom') ? (minMarginY - 20) : null
-            };
+            // V1 minMarginX/Y were included in the size of the legend,
+            // so these correspond to padding
+            var minMarginX = Math.max(def.get(options, 'minMarginX', 8), 0);
+            
+            // V1 only implemented minMarginY for vertical and align = 'top'
+            var minMarginY;
+            if(isVertical && (options.align !== 'middle' && options.align !== 'bottom')){
+                minMarginY = Math.max(def.get(options, 'minMarginY', 20) - 20, 0);
+            } else {
+                minMarginY = 0;
+            }
+            
+            options.paddings = { left: minMarginX, top: minMarginY };
         } else {
             // Set default margins
             if(options.margins === undefined){
-                var anchor = options.anchor || this.anchor;
-                
                 options.margins = def.set({}, this.anchorOpposite(anchor), new pvc.PercentValue(0.03));
             }
         }
@@ -13999,102 +14122,137 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     /**
      * @override
      */
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+    _calcLayout: function(layoutInfo){
         var positionProps = {
             left: null, 
             top:  null
         };
+        var clientSize     = layoutInfo.clientSize;
         var requiredSize   = new pvc.Size(1,1);
         var paddedCellSize = new pvc.Size(1,1);
         var rootScene = this._buildScene();
         var leafCount = rootScene.childNodes.length;
-        if(leafCount){
-            if(clientSize.width > 0 && clientSize.height > 0){
-                var isV1Compat = (this.chart.options.compatVersion <= 1);
+        var overflowed = true;
+        var clipPartialContent = false;
+        
+        function finish(){
+            /** Other exports */
+            def.copy(layoutInfo, {
+                rootScene:  rootScene,
+                leftProp:   positionProps.left,
+                topProp:    positionProps.top,
+                cellSize:   paddedCellSize,
+                overflowed: overflowed
+            });
+            
+            return requiredSize;
+        }
+        
+        if(!leafCount){
+            overflowed = false;
+            return finish();
+        }
+        
+        if(!(clientSize.width > 0 && clientSize.height > 0)){
+            return finish();
+        }
+        
+        var isV1Compat = (this.chart.options.compatVersion <= 1);
+        
+        // The size of the biggest cell
+        var maxLabelLen = rootScene.acts.legendItem.maxLabelTextLen;
+        var cellWidth = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
+        var cellHeight;
+        if(isV1Compat){
+            // Previously, the cellHeight was the padding.
+            // As we now add the padding below, we put 0 here.
+            cellHeight = 0;
+        } else {
+            cellHeight = Math.max(pvc.text.getTextHeight("M", this.font), this.markerSize);
+        }
+        
+        paddedCellSize.width  = cellWidth  + this.padding;
+        paddedCellSize.height = cellHeight + this.padding;
+        
+        // Names are for horizontal layout (anchor = top or bottom)
+        var isHorizontal = this.anchor === 'top' || this.anchor === 'bottom';
+        var a_top    = isHorizontal ? 'top' : 'left';
+        var a_bottom = this.anchorOpposite(a_top);    // top or bottom
+        var a_width  = this.anchorLength(a_top);      // width or height
+        var a_height = this.anchorOrthoLength(a_top); // height or width
+        var a_center = isHorizontal ? 'center' : 'middle';
+        var a_left   = isHorizontal ? 'left' : 'top';
+        var a_right  = this.anchorOpposite(a_left);   // left or right
+        
+        var maxCellsPerRow = ~~(clientSize[a_width] / paddedCellSize[a_width]); // ~~ <=> Math.floor
+        if(!maxCellsPerRow){
+            if(clipPartialContent){
+                return finish();
+            }
+            maxCellsPerRow = 1;
+        }
+        
+        var cellsPerRow = Math.min(leafCount, maxCellsPerRow);
+        var rowWidth    = cellsPerRow * paddedCellSize[a_width];
+        var rowCount    = Math.ceil(leafCount / cellsPerRow);
+        var tableHeight = rowCount * paddedCellSize[a_height];
+        
+        if(tableHeight > clientSize[a_height]){
+            tableHeight = clientSize[a_height];
+            if(clipPartialContent){
+                // reduce row count
+                rowCount = ~~(tableHeight / paddedCellSize[a_height]);
                 
-                // The size of the biggest cell
-                var maxLabelLen = rootScene.acts.legendItem.maxLabelTextLen;
-                var cellWidth = this.markerSize + this.textMargin + maxLabelLen; // ignoring textAdjust
-                var cellHeight;
-                if(isV1Compat){
-                    // Previously, the cellHeight was the padding.
-                    // As we now add the padding below, we put 0 here.
-                    cellHeight = 0;
-                } else {
-                    cellHeight = Math.max(pvc.text.getTextHeight("M", this.font), this.markerSize);
+                if(!rowCount){
+                    // Nothing fits entirely
+                    return finish();
                 }
                 
-                paddedCellSize.width  = cellWidth  + this.padding;
-                paddedCellSize.height = cellHeight + this.padding;
-                
-                // Names are for horizontal layout (anchor = top or bottom)
-                var isHorizontal = this.anchor === 'top' || this.anchor === 'bottom';
-                var a_top    = isHorizontal ? 'top' : 'left';
-                var a_bottom = this.anchorOpposite(a_top);    // top or bottom
-                var a_width  = this.anchorLength(a_top);      // width or height
-                var a_height = this.anchorOrthoLength(a_top); // height or width
-                var a_center = isHorizontal ? 'center' : 'middle';
-                var a_left   = isHorizontal ? 'left' : 'top';
-                var a_right  = this.anchorOpposite(a_left);   // left or right
-                
-                var maxCellsPerRow = ~~(clientSize[a_width] / paddedCellSize[a_width]); // ~~ <=> Math.floor
-                if(maxCellsPerRow > 0){
-                    var cellsPerRow    = Math.min(leafCount, maxCellsPerRow);
-                    var rowCount       = Math.ceil(leafCount / cellsPerRow);
-                    var rowWidth       = cellsPerRow * paddedCellSize[a_width];
-                    
-                    // If the legend is bigger than the available size, multi-line and left align
-                    if(rowCount > 1){
-                        this.align = a_left; // Why??
-                    }
-                    
-                    // NOTE: V1 behavior requires keeping alignment code here
-                    // even if it is also being performed in the layout...
-                    
-                    // Request used width / all available width (V1)
-                    requiredSize[a_width] = !isV1Compat ? rowWidth : clientSize[a_width];
-                    
-                    var tableHeight = rowCount * paddedCellSize[a_height];
-                    requiredSize[a_height] = Math.min(clientSize[a_height], tableHeight);
-                    
-                    // -----------------
-                    
-                    var leftOffset = 0;
-                    switch(this.align){
-                        case a_right:
-                            leftOffset = requiredSize[a_width] - rowWidth;
-                            break;
-                            
-                        case a_center:
-                            leftOffset = (requiredSize[a_width] - rowWidth) / 2;
-                            break;
-                    }
-                    
-                    positionProps[a_left] = function(){
-                        var col = this.index % cellsPerRow;
-                        return leftOffset + col * paddedCellSize[a_width];
-                    };
-                    
-                    // -----------------
-                    
-                    var topOffset = 0;
-                    positionProps[a_top] = function(){
-                        var row = ~~(this.index / cellsPerRow);  // ~~ <=> Math.floor
-                        return topOffset + row * paddedCellSize[a_height];
-                    };
+                var maxLeafCount = cellsPerRow * rowCount;
+                while(leafCount > maxLeafCount){
+                    rootScene.removeAt(leafCount--);
                 }
             }
         }
         
-        /** Other exports */
-        def.copy(layoutInfo, {
-            rootScene: rootScene,
-            leftProp:  positionProps.left,
-            topProp:   positionProps.top,
-            cellSize:  paddedCellSize
-        });
+        // ----------------------
         
-        return requiredSize;
+        overflowed = false;
+        
+        // Request used width / all available width (V1)
+        requiredSize[a_width ] = !isV1Compat ? rowWidth : clientSize[a_width];
+        requiredSize[a_height] = tableHeight;
+        
+        // NOTE: V1 behavior requires keeping alignment code here
+        // even if it is also being performed in the layout...
+        
+        // -----------------
+        
+        var leftOffset = 0;
+        switch(this.align){
+            case a_right:
+                leftOffset = requiredSize[a_width] - rowWidth;
+                break;
+                
+            case a_center:
+                leftOffset = (requiredSize[a_width] - rowWidth) / 2;
+                break;
+        }
+        
+        positionProps[a_left] = function(){
+            var col = this.index % cellsPerRow;
+            return leftOffset + col * paddedCellSize[a_width];
+        };
+        
+        // -----------------
+        
+        var topOffset = 0;
+        positionProps[a_top] = function(){
+            var row = ~~(this.index / cellsPerRow);  // ~~ <=> Math.floor
+            return topOffset + row * paddedCellSize[a_height];
+        };
+        
+        return finish();
     },
     
     /**
@@ -14107,6 +14265,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               return scene.acts.legendItem.color;
           };
       
+      this.pvPanel.overflow("hidden");
+          
       this.pvLegendPanel = this.pvPanel.add(pv.Panel)
           .data(rootScene.childNodes)
           .localProperty('isOn', Boolean)
@@ -14297,8 +14457,8 @@ pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
     /**
      * @override
      */
-    _calcLayout: function(clientSize, layoutInfo){
-        return this.createAnchoredSize(this.allTimeseriesSize, clientSize);
+    _calcLayout: function(layoutInfo){
+        return this.createAnchoredSize(this.allTimeseriesSize, layoutInfo.clientSize);
     },
     
     /**
@@ -14308,7 +14468,7 @@ pvc.AllTimeseriesPanel = pvc.BasePanel.extend({
         this.base();
 
         // Extend panel
-        this.extend(this.pvPanel,"allTimeseries_");
+        this.extend(this.pvPanel, "allTimeseries_");
     }
 });
 /**
@@ -14908,7 +15068,7 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
      * 
      * @override
      */
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+    _calcLayout: function(layoutInfo){
         
         if(!this._children) {
             return;
@@ -14916,10 +15076,14 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         
         // Objects we can mutate
         var margins = new pvc.Sides(0);
-        var remSize = def.copy(clientSize);
+        var remSize = def.copyOwn(layoutInfo.clientSize);
         
         var aolMap = pvc.BasePanel.orthogonalLength,
-            aoMap  = pvc.BasePanel.relativeAnchor;
+            aoMap  = pvc.BasePanel.relativeAnchor,
+            alMap  = pvc.BasePanel.parallelLength;
+        
+        var childKeyArgs = {force: true};
+        var childReferenceSize = layoutInfo.clientSize;
         
         // Decreases available size and increases margins
         function updateSide(side, child) {
@@ -14939,15 +15103,13 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             child.setPosition(def.set({}, side, margins[side], sideo, margins[sideo]));
         }
         
-        var childKeyArgs = {force: true};
-        
         function layoutChildI(child) {
             var a = child.anchor;
             if(a && a !== 'fill') {
                 /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
-                child.layout(new pvc.Size(remSize), clientSize, childKeyArgs);
+                child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
                 
                 // Only set the *anchor* position
                 // The other orthogonal position is dependent on the size of the other non-fill children
@@ -14960,27 +15122,33 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         function layoutChildII(child) {
             var a = child.anchor;
             if(a === 'fill') {
-                child.layout(new pvc.Size(remSize), clientSize, childKeyArgs);
+                child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
                 
                 positionChild('left', child);
             } else if(a) {
+                var ao  = aoMap[a];
+                var al  = alMap[a];
+                var aol = aolMap[a];
+                var length      = child[al];
+                var olength     = remSize[aol];
+                var childSizeII = new pvc.Size(def.set({}, al, length, aol, olength));
                 
-                var ao = aoMap[a];
+                child.layout(childSizeII, childReferenceSize, childKeyArgs);
+                
                 positionChildI(ao, child);
-                
-                if(child.isAnchorTopOrBottom()) {
-                    child.setWidth(remSize.width);
-                } else {
-                    child.setHeight(remSize.height);
-                }
             }
         }
         
         this._children.forEach(layoutChildI );
         
+        // remSize now contains the center cell and is not changed in phase II
+        // fill children are layed out in that cell
+        // other non-fill children already layed out in phase I
+        // "relayout" once now that the other (orthogonal) length is now determined.
+        
         this._children.forEach(layoutChildII);
         
-        return clientSize;
+        // Consume all available client space, so no need to return anything
     }
 });
 
@@ -15565,7 +15733,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.isDiscrete = axis.role.grouping.isDiscrete();
     },
     
-    _calcLayout: function(clientSize, layoutInfo, referenceSize){
+    _calcLayout: function(layoutInfo){
         
         var titleSize = 0;
 
@@ -15598,7 +15766,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this.axisSize = this.titleSize + 50;
         }
         
-        return this.createAnchoredSize(this.axisSize, clientSize);
+        return this.createAnchoredSize(this.axisSize, layoutInfo.clientSize);
     },
     
     _createCore: function() {
@@ -19440,9 +19608,10 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
     /*
     * @override
     */
-   _calcLayout: function(clientSize, layoutInfo){
+   _calcLayout: function(layoutInfo){
        /* Adjust axis offset to avoid dots getting off the content area */
        
+       var clientSize = layoutInfo.clientSize;
        var chart = this.chart;
        
        if(chart._dotSizeDim){
