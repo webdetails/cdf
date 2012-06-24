@@ -14007,7 +14007,13 @@ pvc.TitlePanel = pvc.BasePanel.extend({
                 }
             }
         }
-
+    },
+    
+    /**
+     * @override
+     */
+    applyExtensions: function(){
+        
         // Extend title label
         this.extend(this.pvLabel, "titleLabel_");
     }
@@ -15130,8 +15136,8 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                 var ao  = aoMap[a];
                 var al  = alMap[a];
                 var aol = aolMap[a];
-                var length      = child[al];
-                var olength     = remSize[aol];
+                var length      = remSize[al];
+                var olength     = child[aol];
                 var childSizeII = new pvc.Size(def.set({}, al, length, aol, olength));
                 
                 child.layout(childSizeII, childReferenceSize, childKeyArgs);
@@ -16718,13 +16724,17 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             .visible(this.showValues)
             // .textAngle(0)
             .text(function(catGroup) {
-                var value;
+                // No text on 0-width slices... // TODO: ideally the whole slice would be visible=false; when scenes are added this is easily done
+                var value = myself.pvPie.value();
+                if(!value){
+                    return null;
+                }
+                
                 if(options.showValuePercentage) {
                     value = catGroup.dimensions(valueDimName).percentOverParent(visibleKeyArgs);
                     return options.valueFormat.call(null, Math.round(value * 1000) / 10) + "%";
                 }
                 
-                value = myself.pvPie.value();
                 return " " + valueDim.format(value);
              })
             .textMargin(10);
