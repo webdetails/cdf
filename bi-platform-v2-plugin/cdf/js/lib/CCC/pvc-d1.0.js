@@ -9326,25 +9326,22 @@ def.type('pvc.visual.Sign')
             var onEvent,
                 offEvent;
 
-//            switch(pvMark.type) {
+            switch(pvMark.type) {
 //                default:
 //                case 'dot':
 //                case 'line':
 //                case 'area':
 //                case 'rule':
-                    onEvent  = 'point';
-                    offEvent = 'unpoint';
-                    panel._requirePointEvent();
-//                    break;
-
-//                default:
 //                    onEvent  = 'point';
 //                    offEvent = 'unpoint';
 //                    panel._requirePointEvent();
-//                    onEvent = 'mouseover';
-//                    offEvent = 'mouseout';
 //                    break;
-//            }
+
+                default:
+                    onEvent = 'mouseover';
+                    offEvent = 'mouseout';
+                    break;
+            }
 
             pvMark
                 .event(onEvent, function(scene){
@@ -12203,11 +12200,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         hoverable:  false,
         selectable: false,
+        
         selectionChangedAction: null,
         
-        // Selection
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
+        clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
+        
         // Selection - Rubber band
         rubberBandFill: 'rgba(203, 239, 163, 0.6)', // 'rgba(255, 127, 0, 0.15)',
         rubberBandLine: '#86fe00', //'rgb(255,127,0)',
@@ -13130,14 +13129,14 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         if(!tipsyEvent) {
             switch(mark.type) {
-                case 'dot':
-                case 'line':
-                case 'area':
-                    this._requirePointEvent();
-                    tipsyEvent = 'point';
-                    tipsySettings.usesPoint = true;
-                    break;
-                    
+//                case 'dot':
+//                case 'line':
+//                case 'area':
+//                    this._requirePointEvent();
+//                    tipsyEvent = 'point';
+//                    tipsySettings.usesPoint = true;
+//                    break;
+                
                 default:
                     tipsyEvent = 'mouseover';
             }
@@ -13421,7 +13420,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         var isSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvPanel,
+        var rubberPvParentPanel = this.pvPanel.borderPanel,
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
@@ -13434,33 +13433,15 @@ pvc.BasePanel = pvc.Abstract.extend({
             .strokeStyle(options.rubberBandLine);
         
         // Rubber band selection behavior definition
-        
-        // NOTE that as the paddingPanel does not receive extension points
-        // The following code is no longer necessary
-        //if(!options.extensionPoints.base_fillStyle){
-         rubberPvParentPanel.fillStyle(pvc.invisibleFill);
-        //}
+        if(!this._getExtension('base', 'fillStyle')){
+            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        }
         
         // NOTE: Rubber band coordinates are always transformed to screen coordinates (see 'select' and 'selectend' events)
+         
         var selectionEndedDate;
         rubberPvParentPanel
             .event('mousedown', pv.Behavior.selector(false))
-            
-            .event("click", function() {
-                // It happens sometimes that the click is fired 
-                //  after mouse up, ending up clearing a just made selection.
-                if(selectionEndedDate){
-                    var timeSpan = new Date() - selectionEndedDate;
-                    if(timeSpan < 300){
-                        selectionEndedDate = null;
-                        return;
-                    }
-                }
-                
-                if(data.owner.clearSelected()) {
-                    myself._onSelectionChanged();
-                }
-            })
             .event('select', function(){
                 if(!isSelecting && !myself.isAnimating()){
                     var rb = this.selectionRect;
@@ -13500,6 +13481,25 @@ pvc.BasePanel = pvc.Abstract.extend({
                     myself.rubberBand = null;
                 }
             });
+        
+        if(options.clearSelectionMode === 'emptySpaceClick'){
+            rubberPvParentPanel
+                .event("click", function() {
+                    // It happens sometimes that the click is fired 
+                    //  after mouse up, ending up clearing a just made selection.
+                    if(selectionEndedDate){
+                        var timeSpan = new Date() - selectionEndedDate;
+                        if(timeSpan < 300){
+                            selectionEndedDate = null;
+                            return;
+                        }
+                    }
+                    
+                    if(data.owner.clearSelected()) {
+                        myself._onSelectionChanged();
+                    }
+                });
+        }
     },
     
     _dispatchRubberBandSelectionTop: function(ev){
@@ -18070,7 +18070,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                  * Despite !showDots,
                  * show a dot anyway when:
                  * 1) it is active, or
-                 * 2) it is single  (the only dot in the dataset) (and in areas+discreteCateg+stacked case)
+                 * 2) it is single  (the only dot in its series and there's only one category) (and in areas+discreteCateg+stacked case)
                  * 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                  */
                 if(!showDots){
@@ -18673,7 +18673,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 fromScene = toScene;
             }
             
-            if(notNullCount === 1 && firstAloneScene){
+            if(notNullCount === 1 && firstAloneScene && categCount === 1){
                 firstAloneScene.isSingle = true;
             }
             
