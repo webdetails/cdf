@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120615
+//VERSION TRUNK-20120215-patched-20120625
 
 
 // ECMAScript 5 shim
@@ -7016,8 +7016,9 @@ pvc.HeatGridChartPanel = pvc.CategoricalAbstractPanel.extend({
             [pvc.BasePanel.orthogonalLength[anchor]](h)
             .antialias(false)
             .strokeStyle(null)
-            .lineWidth(0)
-            .overflow('hidden'); //overflow important if showValues=true
+            .lineWidth(0);
+            // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode)
+            //.overflow('hidden'); //overflow important if showValues=true
         
         // tooltip text
         this.pvHeatGrid.text(function(d,f){
