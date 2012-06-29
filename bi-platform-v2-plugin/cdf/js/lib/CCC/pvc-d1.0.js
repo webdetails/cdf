@@ -163,26 +163,38 @@ pvc.createColorScheme = function(colors){
 };
 
 // Convert to Grayscale using YCbCr luminance conv.
-pvc.toGrayScale = function(color, alpha, maxGrayLevel){
+pvc.toGrayScale = function(color, alpha, maxGrayLevel, minGrayLevel){
     color = pv.color(color);
     
-    var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+    var avg = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
     // Don't let the color get near white, or it becomes unperceptible in most monitors
     if(maxGrayLevel === undefined) {
         maxGrayLevel = 200;
+    } else if(maxGrayLevel == null){
+        maxGrayLevel = 255; // no effect
     }
     
-    if(maxGrayLevel != null && avg > maxGrayLevel) {
+    if(minGrayLevel === undefined){
+        minGrayLevel = 30;
+    } else if(minGrayLevel == null){
+        minGrayLevel = 0; // no effect
+    }
+    
+    var delta = (maxGrayLevel - minGrayLevel);
+    if(delta <= 0){
         avg = maxGrayLevel;
+    } else {
+        // Compress
+        avg = minGrayLevel + (avg / 255) * delta;
     }
     
     if(alpha == null){
         alpha = color.opacity;
-        //alpha = 0.6;
     }
     
-    //var avg = Math.round( (color.r + color.g + color.b)/3);
-    return pv.rgb(avg, avg, avg, alpha != null ? alpha : 0.6);//.brighter();
+    avg = Math.round(avg);
+    
+    return pv.rgb(avg, avg, avg, alpha);
 };
 
 pvc.removeTipsyLegends = function(){
@@ -11984,7 +11996,38 @@ pvc.BaseChart = pvc.Abstract.extend({
     _initLegendGroups: function(){
         var partValues = this._partValues() || [null],
             me = this;
-
+        
+        var isOn, onClick;
+        
+        switch(this.options.legendClickMode){
+            case 'toggleSelected':
+                isOn = function(){
+                    return !this.group.owner.selectedCount() || 
+                           this.group.datums(null, {selected: true}).any();
+                };
+                
+                onClick = function(){
+                    pvc.data.Data.toggleSelected(this.group.datums());
+    
+                    me.updateSelections();
+                };
+                break;
+                
+            default: 
+           // 'toggleVisible'
+                isOn = function(){
+                    return this.group.datums(null, {visible: true}).any();
+                };
+                
+                onClick = function(){
+                    pvc.data.Data.toggleVisible(this.group.datums());
+    
+                    // Re-render chart
+                    me.render(true, true, false);
+                };
+                break;
+        }
+        
         partValues.forEach(function(partValue){
             var partData = this._legendData(partValue);
             if(partData){
@@ -12010,15 +12053,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                             color:    partColorScale(itemData.value),
                             useRule:  undefined,
                             shape:    partShape,
-                            isOn: function(){
-                                return this.group.datums(null, {visible: true}).any();
-                            },
-                            click: function(){
-                                pvc.data.Data.toggleVisible(this.group.datums());
-
-                                // Re-render chart
-                                me.render(true, true, false);
-                            }
+                            isOn:     isOn,
+                            click:    onClick
                         });
                     }, this);
 
@@ -12419,6 +12455,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         legendMarkerSize: undefined,
         legendMargins:    undefined,
         legendPaddings:   undefined,
+        
+        legendClickMode:  'toggleVisible', // toggleVisible || toggleSelected
         
         colors: null,
 
@@ -14757,8 +14795,18 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           })
           .font(this.font)
           .textMargin(this.textMargin)
-          .textDecoration(function(){ return this.parent.isOn() ? ""      : "line-through"; })
-          .textStyle     (function(){ return this.parent.isOn() ? "black" : "#ccc";         });
+          .textDecoration(function(){ return this.parent.isOn() ? "" : "line-through"; })
+          .intercept(
+                'textStyle',
+                labelTextStyleInterceptor,
+                this._getExtension('legendLabel', 'textStyle'));
+          
+      function labelTextStyleInterceptor(getTextStyle, args) {
+          var baseTextStyle = getTextStyle ? getTextStyle.apply(this, args) : "black";
+          return this.parent.isOn() ? 
+                      baseTextStyle : 
+                      pvc.toGrayScale(baseTextStyle, null, undefined, 150); 
+      }
     },
 
     applyExtensions: function(){

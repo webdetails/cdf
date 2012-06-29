@@ -3120,6 +3120,7 @@ pv.Scale.quantitative = function() {
       f = pv.identity, // default forward transform
       g = pv.identity, // default inverse transform
       tickFormat = String, // default tick formatting function
+      tickFormatter = null, // custom tick formatting function
       dateTickFormat, //custom date tick format
       dateTickPrecision; //custom date tick precision
 
@@ -3477,8 +3478,6 @@ pv.Scale.quantitative = function() {
     }
     return dateTickFormat;  };
 
-
-
   /**
    * Formats the specified tick with a defined precision for the date
    * @function
@@ -3493,7 +3492,23 @@ pv.Scale.quantitative = function() {
     return dateTickPrecision;  };
 
 
-
+    /**
+     * Gets or sets a custom tick formatter function.
+     * 
+     * @function
+     * @name pv.Scale.quantitative.prototype.tickFormatter
+     * @param {function} [f] 
+     * @returns {pv.Scale|function} a custom formatter function or this instance.
+     */
+    scale.tickFormatter = function (f) {
+      if (arguments.length) {
+        tickFormatter = f;
+        return this;
+      }
+      
+      return tickFormatter;
+   };
+    
   /**
    * Formats the specified tick value using the appropriate precision, based on
    * the step interval between tick marks. If {@link #ticks} has not been called,
@@ -3504,7 +3519,10 @@ pv.Scale.quantitative = function() {
    * @param {number} t a tick value.
    * @returns {string} a formatted tick value.
    */
-  scale.tickFormat = function (t) { return tickFormat(t); };
+  scale.tickFormat = function (t) {
+      var formatter = tickFormatter || tickFormat;
+      return formatter(t); 
+  };
 
   /**
    * "Nices" this scale, extending the bounds of the input domain to
