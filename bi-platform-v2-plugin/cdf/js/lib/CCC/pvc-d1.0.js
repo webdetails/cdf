@@ -221,6 +221,38 @@ pv.Format.createFormatter = function(pvFormat) {
     return format;
 };
 
+pvc.parseAlign = function(side, align){
+    if(side === 'left' || side === 'right'){
+        switch(align){
+            case 'top':
+            case 'bottom':
+            case 'middle':
+                break;
+            
+            default:
+                if(align && pvc.debug >= 2){
+                    pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                }
+                align = 'top';
+        }
+    } else {
+        switch(align){
+            case 'left':
+            case 'right':
+            case 'center':
+                break;
+            
+            default:
+                if(align && pvc.debug >= 2){
+                    pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
+                }
+                align = 'left';
+        }
+    }
+    
+    return align;
+};
+
 /**
  * Creates a margins/sides object.
  * @constructor
@@ -639,7 +671,7 @@ pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
             domaBeg = doma[0],
             domaEnd = doma[doma.length - 1],
             
-            // Is is an ascending or descending scale?
+            // Is it an ascending or descending scale?
             // Assuming the scale is monotonic...
             domaAsc = domaBeg < domaEnd,
             
@@ -988,6 +1020,8 @@ pv.Dot.prototype.getInstanceShape = function(instance){
     }
 
     // 'circle' included
+    
+    // Select dots only when the center is included
     return new Circle(cx, cy, radius);
 };
 
@@ -1055,16 +1089,18 @@ var Size = def.type('pvc.Size')
     },
     
     set: function(prop, value){
-        value = pvc.PercentValue.parse(value);
-        if(value != null){
-            if(prop === 'all'){
-                // expand
-                pvc.Size.names.forEach(function(p){
-                    this[p] = value;
-                }, this);
-                
-            } else if(def.hasOwn(pvc.Size.namesSet, prop)){
-                this[prop] = value;
+        if(value != null && def.hasOwn(pvc.Size.namesSet, prop)){
+            value = pvc.PercentValue.parse(value);
+            if(value != null){
+                if(prop === 'all'){
+                    // expand
+                    pvc.Size.names.forEach(function(p){
+                        this[p] = value;
+                    }, this);
+                    
+                } else {
+                    this[prop] = value;
+                }
             }
         }
     },
@@ -1423,7 +1459,7 @@ def.scope(function(){
                 // NOTE: the global function 'getTextLenCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextLenCGG:true */
-                return getTextLenCGG(text, font.fontFamily, font.fontSize);
+                return getTextLenCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
 
             //case 'svg':
         }
@@ -1442,7 +1478,7 @@ def.scope(function(){
                 // NOTE: the global function 'getTextHeightCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextHeightCGG:true */
-                return getTextHeightCGG(text, font.fontFamily, font.fontSize);
+                return getTextHeightCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
 
             //case 'svg':
         }
@@ -1476,7 +1512,13 @@ def.scope(function(){
         };
     }
 
-    function trimToWidth(len, text, font, trimTerminator){
+    function trimToWidthB(len, text, font, trimTerminator, before){
+        len += getTextLength(trimTerminator, font);
+        
+        return trimToWidth(len, text, font, trimTerminator, before);
+    }
+    
+    function trimToWidth(len, text, font, trimTerminator, before){
       if(text === '') {
           return text;
       }
@@ -1487,15 +1529,151 @@ def.scope(function(){
       }
 
       if(textLen > len * 1.5){ //cutoff for using other algorithm
-        return trimToWidthBin(len,text,font,trimTerminator);
+        return trimToWidthBin(len,text,font,trimTerminator, before);
       }
 
       while(textLen > len){
-        text = text.slice(0,text.length -1);
+        text = before ? text.slice(1) : text.slice(0,text.length -1);
         textLen = getTextLength(text, font);
       }
 
-      return text + trimTerminator;
+      return before ? (trimTerminator + text) : (text + trimTerminator);
+    }
+    
+    function justifyText(text, lineWidth, font){
+        var lines = [];
+        
+        if(lineWidth < getTextLength('a', font)){
+            // Not even one letter fits...
+            return lines;
+        } 
+        
+        var words = (text || '').split(/\s+/);
+        
+        var line = "";
+        while(words.length){
+            var word = words.shift();
+            if(word){
+                var nextLine = line ? (line + " " + word) : word;
+                if(pvc.text.getTextLength(nextLine, font) > lineWidth){
+                    // The word by itself may overflow the line width
+                    
+                    // Start new line
+                    if(line){
+                        lines.push(line);
+                    }
+                    
+                    line = word;
+                } else {
+                    line = nextLine; 
+                }
+            }
+        }
+        
+        if(line){
+            lines.push(line);
+        }
+        
+        return lines;
+    }
+    
+    function getLabelSize(textWidth, textHeight, align, baseline, angle, margin){
+        var width  = margin + Math.abs(textWidth * Math.cos(-angle));
+        var height = margin + Math.abs(textWidth * Math.sin(-angle));
+        return {
+            width:  width,
+            height: height
+        };
+    }
+    
+    /* Returns a label's BBox relative to its anchor point */
+    function getLabelBBox(textWidth, textHeight, align, baseline, angle, margin){
+        /* text-baseline, text-align */
+        
+        // From protovis' SvgLabel.js
+        
+        // In text line coordinates. y points downwards
+        var x, y;
+        
+        switch (baseline) {
+            case "middle":
+                y = textHeight / 2; // estimate middle (textHeight is not em, the height of capital M)
+                break;
+              
+            case "top":
+                y = margin + textHeight;
+                break;
+          
+            case "bottom":
+                y = -margin; 
+                break;
+        }
+        
+        switch (align) {
+            case "right": 
+                x = -margin -textWidth; 
+                break;
+          
+            case "center": 
+                x = -textWidth / 2;
+                break;
+          
+            case "left": 
+                x = margin;
+                break;
+        }
+        
+        var bottomLeft  = pv.vector(x, y);
+        var bottomRight = bottomLeft.plus(textWidth, 0);
+        var topRight    = bottomRight.plus(0, -textHeight);
+        var topLeft     = bottomLeft .plus(0, -textHeight);
+        
+        var min, max;
+        
+        var corners = [bottomLeft, bottomRight, topLeft, topRight];
+        
+        if(angle === 0){
+            min = topLeft;
+            max = bottomRight;
+        } else {
+            // Bounding box:
+            
+            corners.forEach(function(corner, index){
+                corner = corners[index] = corner.rotate(angle);
+                if(min == null){
+                    min = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x < min.x){
+                        min.x = corner.x;
+                    }
+                    
+                    if(corner.y < min.y){
+                        min.y = corner.y;
+                    }
+                }
+                
+                if(max == null){
+                    max = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x > max.x){
+                        max.x = corner.x;
+                    }
+                    
+                    if(corner.y > max.y){
+                        max.y = corner.y;
+                    }
+                }
+            });
+        }
+        
+        var bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        
+        bbox.sourceCorners   = corners;
+        bbox.sourceAngle     = angle;
+        bbox.sourceAlign     = align;
+        bbox.sourceTextWidth = textWidth;
+        
+        return bbox;
     }
     
     // --------------------------
@@ -1558,13 +1736,31 @@ def.scope(function(){
         sty.setProperty('font',font);
 
         var result = {};
-        result.fontFamily = sty.getProperty('font-family');
-        if(!result.fontFamily){
+        
+        // Below, the use of: 
+        //   '' + sty.getProperty(...)
+        //  converts the results to real strings
+        //  and not String objects (this later caused bugs in Java code)
+        
+        var fontFamily = result.fontFamily = '' + sty.getProperty('font-family');
+        if(!fontFamily){
             result.fontFamily = 'sans-serif';
+        } else if(fontFamily.length > 2){
+            // Did not work at the server
+            //var reQuoted = /^(["']?)(.*?)(\1)$/;
+            //fontFamily = fontFamily.replace(reQuoted, "$2");
+            var quote = fontFamily.charAt(0);
+            if(quote === '"' || quote === "'"){
+                fontFamily = fontFamily.substr(1, fontFamily.length - 2);
+            }
+            
+            result.fontFamily = fontFamily;
         }
-        result.fontSize = sty.getProperty('font-size');
-        result.fontStyle = sty.getProperty('font-style');
-
+        
+        result.fontSize   = '' + sty.getProperty('font-size');
+        result.fontStyle  = '' + sty.getProperty('font-style');
+        result.fontWeight = '' + sty.getProperty('font-weight');
+        
         return result;
     }
 
@@ -1588,9 +1784,10 @@ def.scope(function(){
         return pv.Vml.text_dims(text, font).height;
     }
 
-    function trimToWidthBin(len, text, font, trimTerminator){
+    function trimToWidthBin(len, text, font, trimTerminator, before){
 
-        var high = text.length-2,
+        var ilen = text.length,
+            high = ilen - 2,
             low = 0,
             mid,
             textLen;
@@ -1598,35 +1795,32 @@ def.scope(function(){
         while(low <= high && high > 0){
 
             mid = Math.ceil((low + high)/2);
-            textLen = getTextLength(text.slice(0, mid), font);
+            
+            var textMid = before ? text.slice(ilen - mid) : text.slice(0, mid);
+            textLen = getTextLength(textMid, font);
             if(textLen > len){
                 high = mid - 1;
-            } else if( getTextLength(text.slice(0, mid + 1), font) < len ){
+            } else if( getTextLength(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font) < len ){
                 low = mid + 1;
             } else {
-                return text.slice(0, mid) + trimTerminator;
+                return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
             }
         }
 
-        return text.slice(0,high) + trimTerminator;
+        return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
     }
-
-    /*
-    //TODO: use for IE if non-svg option kept
-    doesTextSizeFit: function(length, text, font){
-        var MARGIN = 4;//TODO: hcoded
-        var holder = this.getTextSizePlaceholder();
-        holder.text(text);
-        return holder.width() - MARGIN <= length;
-    }
-    */
-
+    
     pvc.text = {
         getTextLength: getTextLength,
         getFontSize:   getFontSize,
         getTextHeight: getTextHeight,
         getFitInfo:    getFitInfo,
-        trimToWidth:   trimToWidth
+        trimToWidth:   trimToWidth,
+        trimToWidthB:  trimToWidthB,
+        justify:       justifyText,
+        getLabelSize:  getLabelSize,
+        getLabelBBox:  getLabelBBox
+        
     };
 });
 // Colors utility
@@ -4952,10 +5146,10 @@ function(data, atoms, isNull){
                 this.isSelected = true;
             }
             
-            if(!this.isNull){
+            //if(!this.isNull){
                 /*global data_onDatumSelectedChanged:true */
                 data_onDatumSelectedChanged.call(this.owner, this, select);
-            }
+            //}
         }
 
         return changed;
@@ -4984,10 +5178,10 @@ function(data, atoms, isNull){
         var changed = this.isVisible !== visible;
         if(changed){
             this.isVisible = visible;
-            if(!this.isNull){
+            //if(!this.isNull){
                 /*global data_onDatumVisibleChanged:true */
                 data_onDatumVisibleChanged.call(this.owner, this, visible);
-            }
+            //}
         }
 
         return changed;
@@ -6918,6 +7112,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @internal
  */
 function data_onDatumSelectedChanged(datum, selected){
+    // <Debug>
+    /*jshint expr:true */
+    //!datum.isNull || def.assert("Null datums do not notify selected changes");
+    // </Debug>
+    
     if(selected){
         this._selectedDatums.set(datum.id, datum);
     } else {
@@ -6943,7 +7142,7 @@ function data_onDatumVisibleChanged(datum, visible){
         
         // <Debug>
         /*jshint expr:true */
-        !datum.isNull || def.assert("Null datums do not notify visible changes");
+        //!datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
         
         if(visible){
@@ -9326,7 +9525,7 @@ def.type('pvc.visual.Sign')
             var onEvent,
                 offEvent;
 
-            switch(pvMark.type) {
+//            switch(pvMark.type) {
 //                default:
 //                case 'dot':
 //                case 'line':
@@ -9334,14 +9533,14 @@ def.type('pvc.visual.Sign')
 //                case 'rule':
 //                    onEvent  = 'point';
 //                    offEvent = 'unpoint';
-//                    panel._requirePointEvent();
+//                   panel._requirePointEvent();
 //                    break;
 
-                default:
+//                default:
                     onEvent = 'mouseover';
                     offEvent = 'mouseout';
-                    break;
-            }
+//                    break;
+//            }
 
             pvMark
                 .event(onEvent, function(scene){
@@ -10464,6 +10663,7 @@ $VCA.createAllDefaultOptions = function(options){
         optionNames = [
             'Position',
             'Size',
+            'SizeMax',
             'FullGrid',
             'FullGridCrossesMargin',
             'RuleCrossesMargin',
@@ -10475,8 +10675,12 @@ $VCA.createAllDefaultOptions = function(options){
             'DoubleClickAction',
             'Title',
             'TitleSize',
-            'LabelFont',
+            'TitleSizeMax',
             'TitleFont',
+            'TitleMargins',
+            'TitlePaddings',
+            'TitleAlign',
+            'LabelFont',
             'OriginIsZero',
             'Offset',
             'FixedMin',
@@ -11685,11 +11889,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         if (!def.empty(options.title)) {
             this.titlePanel = new pvc.TitlePanel(this, this.basePanel, {
                 title:      options.title,
+                font:       options.titleFont,
                 anchor:     options.titlePosition,
+                align:      options.titleAlign,
                 margins:    options.titleMargins,
                 paddings:   options.titlePaddings,
                 titleSize:  options.titleSize,
-                titleAlign: options.titleAlign
+                titleSizeMax: options.titleSizeMax
             });
         }
     },
@@ -12133,8 +12339,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
         titleSize:     undefined,
+        titleSizeMax:  undefined,
         titleMargins:  undefined,
-        tittlePaddings:undefined,
+        titlePaddings: undefined,
+        titleFont:     undefined,
         
         legend:           false,
         legendPosition:   "bottom",
@@ -12575,7 +12783,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 
                 checkChildLayout.call(this, child);
                 
-                var align = this._parseAlign(a, child.align);
+                var align = pvc.parseAlign(a, child.align);
                 
                 positionChild.call(this, a, child, align);
                 
@@ -12640,14 +12848,15 @@ pvc.BasePanel = pvc.Abstract.extend({
                     sideOPos = margins[sideo];
                     break;
                 
-                case 'middle':
-                    sideo    = 'top';
-                    sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
-                    break;
-                    
                 case 'center':
-                    sideo    = 'left';
-                    sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                case 'middle':
+                    if(side === 'left' || side === 'right'){
+                        sideo    = 'top';
+                        sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
+                    } else {
+                        sideo    = 'left';
+                        sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                    }
                     break;
             }
             
@@ -12665,38 +12874,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             margins[side]   += olen;
             remSize[sideol] -= olen;
         }
-    },
-    
-    _parseAlign: function(side, align){
-        if(side === 'left' || side === 'right'){
-            switch(align){
-                case 'top':
-                case 'bottom':
-                case 'middle':
-                    break;
-                
-                default:
-                    if(align && pvc.debug >= 2){
-                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
-                    }
-                    align = 'top';
-            }
-        } else {
-            switch(align){
-                case 'left':
-                case 'right':
-                case 'center':
-                    break;
-                
-                default:
-                    if(align && pvc.debug >= 2){
-                        pvc.log(def.format("Invalid alignment value '{0}'.", [align]));
-                    }
-                    align = 'left';
-            }
-        }
-        
-        return align;
     },
     
     /** 
@@ -13703,6 +13880,38 @@ pvc.BasePanel = pvc.Abstract.extend({
         left: "bottom",
         right: "bottom"
     },
+    
+    leftBottomAnchor: {
+        top:    "bottom",
+        bottom: "bottom",
+        left:   "left",
+        right:  "left"
+    },
+    
+    leftTopAnchor: {
+        top:    "top",
+        bottom: "top",
+        left:   "left",
+        right:  "left"
+    },
+    
+    horizontalAlign: {
+        top:    "right",
+        bottom: "left",
+        middle: "center",
+        right:  "right",
+        left:   "left",
+        center: "center"
+    },
+    
+    verticalAlign: {
+        top:    "top",
+        bottom: "bottom",
+        middle: "middle",
+        right:  "top",
+        left:   "bottom",
+        center: "middle"
+    },
 
     relativeAnchorMirror: {
         top: "right",
@@ -13851,7 +14060,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                                   (isVertical ? options.baseAxisSize : options.orthoAxisSize) ||
                                   options.axisSize);
                 if(isNaN(size)){
-                    size = totalWidth * 0.1;
+                    size = totalWidth * 0.4;
                 }
                 
                 if(isVertical){
@@ -13866,7 +14075,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
                                   (isVertical ? options.orthoAxisSize : options.baseAxisSize) ||
                                   options.axisSize);
                 if(isNaN(size)){
-                    size = totalWidth * 0.1;
+                    size = totalWidth * 0.4;
                 }
                 
                 if(isVertical){
@@ -13878,7 +14087,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         }
         
         var contentWidth  = Math.max(totalWidth - chromeWidth, 10);
-        var contentHeight = contentWidth / pvc.goldenRatio;
+        var contentHeight = contentWidth;/// pvc.goldenRatio;
         
         return  chromeHeight + contentHeight;
     },
@@ -13926,41 +14135,144 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
     }
 });
 
-/*
- * Title panel. Generates the title. Specific options are: <i>title</i> - text.
- * Default: null <i>titlePosition</i> - top / bottom / left / right. Default:
- * top <i>titleSize</i> - The size of the title in pixels. Default: 25
- * 
- * Has the following protovis extension points:
- * 
- * <i>title_</i> - for the title Panel <i>titleLabel_</i> - for the title
- * Label
- */
-pvc.TitlePanel = pvc.BasePanel.extend({
+pvc.TitlePanelAbstract = pvc.BasePanel.extend({
 
     pvLabel: null,
-    anchor: "top",
-    titlePanel: null,
+    anchor: 'top',
+    align:  'center',
     title: null,
-    titleSize: 25,
-    titleAlign: "center",
-    font: "14px sans-serif",
+    titleSize: undefined,
+    font: "12px sans-serif",
     
-    /**
-     * @override
-     */
-    _calcLayout: function(layoutInfo){
-        // Size will depend on positioning and font size mainly
-        return this.createAnchoredSize(this.titleSize, layoutInfo.clientSize);
+    defaultPaddings: 2,
+    
+    constructor: function(chart, parent, options){
+        
+        if(!options){
+            options = {};
+        }
+        
+        var anchor = options.anchor || this.anchor;
+        var isVertical = anchor === 'top' || anchor === 'bottom';
+        
+        // Default value of align depends on anchor
+        if(options.align === undefined){
+            options.align = isVertical ? 'center' : 'middle';
+        }
+        
+        // titleSize
+        if(options.size == null){
+            var size = options.titleSize;
+            if(size != null){
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
+                options.size = new pvc.Size()
+                                      .setSize(size, {singleProp: this.anchorOrthoLength(anchor)});
+            }
+        }
+        
+        // titleSizeMax
+        if(options.sizeMax == null){
+            var sizeMax = options.titleSizeMax;
+            if(sizeMax != null){
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
+                options.sizeMax = new pvc.Size()
+                                    .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
+            }
+        }
+        
+        if(options.paddings == null){
+            options.paddings = this.defaultPaddings;
+        }
+        
+        this.base(chart, parent, options);
+        
+        if(options.font === undefined){
+            var extensionFont = this._getFontExtension();
+            if(typeof extensionFont === 'string'){
+                this.font = extensionFont;
+            }
+        }
+    },
+    
+    _getFontExtension: function(){
+        return this._getExtension('titleLabel', 'font');
     },
     
     /**
      * @override
      */
-    _createCore: function() {
-        // Extend title
-        this.extend(this.pvPanel, "title_");
-
+    _calcLayout: function(layoutInfo){
+        var requestSize = new pvc.Size();
+        
+        // TODO: take textAngle, textMargin and textBaseline into account
+        
+        // Naming is for anchor = top
+        var a = this.anchor;
+        var a_width  = this.anchorLength(a);
+        var a_height = this.anchorOrthoLength(a);
+        
+        var desiredWidth = layoutInfo.desiredClientSize[a_width];
+        if(desiredWidth == null){
+            desiredWidth = pvc.text.getTextLength(this.title, this.font) + 2; // Small factor to avoid cropping text on either side
+        }
+        
+        var lines;
+        var clientWidth = layoutInfo.clientSize[a_width];
+        if(desiredWidth > clientWidth){
+            desiredWidth = clientWidth;
+            lines = pvc.text.justify(this.title, desiredWidth, this.font);
+        } else {
+            lines = this.title ? [this.title] : [];
+        }
+        
+        // -------------
+        
+        var lineHeight = pvc.text.getTextHeight("m", this.font);
+        
+        var desiredHeight = layoutInfo.desiredClientSize[a_height];
+        if(desiredHeight == null){
+            desiredHeight = lines.length * lineHeight;
+        }
+        
+        var availableHeight = layoutInfo.clientSize[a_height];
+        if(desiredHeight > availableHeight){
+            // Don't show partial lines unless it is the only one left
+            var maxLineCount = Math.max(1, Math.floor(availableHeight / lineHeight));
+            if(lines.length > maxLineCount){
+                var firstCroppedLine = lines[maxLineCount];  
+                
+                lines.length = maxLineCount;
+                
+                desiredHeight = maxLineCount * lineHeight;
+                
+                var lastLine = lines[maxLineCount - 1] + " " + firstCroppedLine;
+                
+                lines[maxLineCount - 1] = pvc.text.trimToWidthB(desiredWidth, lastLine, this.font, "..");
+            }
+        }
+        
+        layoutInfo.lines = lines;
+        
+        layoutInfo.lineSize = {
+           width:  desiredWidth,
+           height: lineHeight
+        };
+        
+        layoutInfo.a_width   = a_width;
+        layoutInfo.a_height  = a_height;
+        
+        requestSize[a_width]  = desiredWidth;
+        requestSize[a_height] = desiredHeight;
+        
+        return requestSize;
+    },
+    
+    /**
+     * @override
+     */
+    _createCore: function(layoutInfo) {
         // Label
         var rotationByAnchor = {
             top: 0,
@@ -13968,27 +14280,36 @@ pvc.TitlePanel = pvc.BasePanel.extend({
             bottom: 0,
             left: -Math.PI / 2
         };
-
-        this.pvLabel = this.pvPanel.add(pv.Label)
-            .text(this.title)
+        
+        var linePanel = this.pvPanel.add(pv.Panel)
+            .data(layoutInfo.lines)
+            [pvc.BasePanel.leftTopAnchor[this.anchor]](function(){
+                return this.index * layoutInfo.lineSize.height;
+            })
+            [this.anchorOrtho(this.anchor)](0)
+            [layoutInfo.a_height](layoutInfo.lineSize.height)
+            [layoutInfo.a_width ](layoutInfo.lineSize.width );
+        
+        var textAlign = pvc.BasePanel.horizontalAlign[this.align];
+        
+        this.pvLabel = linePanel.add(pv.Label)
+            .text(function(line){ return line; })
             .font(this.font)
-            .textAlign("center")
-            .textBaseline("middle")
-            .left  (function(){ return this.parent.width() / 2; })
+            .textAlign(textAlign)
+            .textBaseline('middle')
+            .left  (function(){ return this.parent.width()  / 2; })
             .bottom(function(){ return this.parent.height() / 2; })
             .textAngle(rotationByAnchor[this.anchor]);
 
-        // Cases:
-        if (this.titleAlign !== "center") {
-            this.pvLabel.textAlign(this.titleAlign);
-
+        // Maintained for v1 compatibility
+        if (textAlign !== 'center') {
             if (this.isAnchorTopOrBottom()) {
                 this.pvLabel
                     .left(null) // reset
-                    [this.titleAlign](0);
+                    [textAlign](0);
 
             } else if (this.anchor == "right") {
-                if (this.titleAlign == "left") {
+                if (textAlign == "left") {
                     this.pvLabel
                         .bottom(null)
                         .top(0);
@@ -13997,7 +14318,7 @@ pvc.TitlePanel = pvc.BasePanel.extend({
                         .bottom(0);
                 }
             } else if (this.anchor == "left") {
-                if (this.titleAlign == "right") {
+                if (textAlign == "right") {
                     this.pvLabel
                         .bottom(null)
                         .top(0);
@@ -14013,12 +14334,33 @@ pvc.TitlePanel = pvc.BasePanel.extend({
      * @override
      */
     applyExtensions: function(){
-        
-        // Extend title label
-        this.extend(this.pvLabel, "titleLabel_");
+        this.extend(this.pvPanel, 'title_');
+        this.extend(this.pvLabel, 'titleLabel_');
     }
 });
+pvc.TitlePanel = pvc.TitlePanelAbstract.extend({
 
+    font: "14px sans-serif",
+    
+    defaultPaddings: 4,
+    
+    constructor: function(chart, parent, options){
+        
+        if(!options){
+            options = {};
+        }
+        
+        var isV1Compat = chart.options.compatVersion <= 1;
+        if(isV1Compat){
+            var size = options.titleSize;
+            if(size == null){
+                options.titleSize = 25;
+            }
+        }
+        
+        this.base(chart, parent, options);
+    }
+});
 /*
  * Legend panel. Generates the legend. Specific options are:
  * <i>legend</i> - text. Default: false
@@ -14118,7 +14460,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         } else {
             // Set default margins
             if(options.margins === undefined){
-                options.margins = def.set({}, this.anchorOpposite(anchor), new pvc.PercentValue(0.03));
+                options.margins = def.set({}, this.anchorOpposite(anchor), 10);
             }
         }
         
@@ -14553,17 +14895,24 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this._createAxisPanel(baseAxis );
         this._createAxisPanel(orthoAxis);
         
+        /* Create scales without range yet */
+        this._createAxisScale(baseAxis );
+        this._createAxisScale(orthoAxis);
+        if(ortho2Axis){
+            this._createAxisScale(ortho2Axis);
+        }
+        
         /* Create main content panel */
         this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel);
         
         /* Force layout */
         this.basePanel.layout();
         
-        /* Create scales, after layout */
-        this._createAxisScale(baseAxis );
-        this._createAxisScale(orthoAxis);
+        /* Set scale ranges, after layout */
+        this._setAxisScaleRange(baseAxis );
+        this._setAxisScaleRange(orthoAxis);
         if(ortho2Axis){
-            this._createAxisScale(ortho2Axis);
+            this._setAxisScaleRange(ortho2Axis);
         }
     },
     
@@ -14595,12 +14944,27 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      */
     _createAxisPanel: function(axis){
         if(axis.isVisible) {
+            var titlePanel;
+            var title = axis.option('Title');
+            if (!def.empty(title)) {
+                titlePanel = new pvc.AxisTitlePanel(this, this._gridDockPanel, {
+                    title:        title,
+                    font:         axis.option('TitleFont'),
+                    anchor:       axis.option('Position'),
+                    align:        axis.option('TitleAlign'),
+                    margins:      axis.option('TitleMargins'),
+                    paddings:     axis.option('TitlePaddings'),
+                    titleSize:    axis.option('TitleSize'),
+                    titleSizeMax: axis.option('TitleSizeMax')
+                });
+            }
+            
             var panel = pvc.AxisPanel.create(this, this._gridDockPanel, axis, {
                 useCompositeAxis:  axis.option('Composite'),
                 font:              axis.option('LabelFont'),
-                titleFont:         axis.option('TitleFont'),
                 anchor:            axis.option('Position'),
                 axisSize:          axis.option('Size'),
+                axisSizeMax:       axis.option('SizeMax'),
                 fullGrid:          axis.option('FullGrid'),
                 fullGridCrossesMargin: axis.option('FullGridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
@@ -14608,11 +14972,14 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 domainRoundMode:   axis.option('DomainRoundMode'),
                 desiredTickCount:  axis.option('DesiredTickCount'),
                 minorTicks:        axis.option('MinorTicks'),
-                title:             axis.option('Title'),
-                titleSize:         axis.option('TitleSize'),
                 clickAction:       axis.option('ClickAction'),
                 doubleClickAction: axis.option('DoubleClickAction')
             });
+            
+            if(titlePanel){
+                titlePanel.panelName = panel.panelName;
+                panel.titlePanel = titlePanel;
+            }
             
             this.axesPanels[axis.id] = panel;
             this.axesPanels[axis.orientedId] = panel;
@@ -14673,7 +15040,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         return createScaleMethod.call(this, axis, dataPartValues);
     },
-
+    
     _getAxisDataParts: function(axis){
         return null;
     },
@@ -14703,15 +15070,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             scale  = new pv.Scale.ordinal(values);
         
         scale.type = 'Discrete';
-        
-        /* RANGE */
-        this._setAxisScaleRange(scale, axis);
 
-        if(values.length > 0){ // Has domain? At least one point is required to split.
-            var bandRatio = this.options.panelSizeRatio || 0.8;
-            scale.splitBandedCenter(scale.min, scale.max, bandRatio);
-        }
-        
         return scale;
     },
     
@@ -14754,11 +15113,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Domain rounding
         // TODO: pvc.scaleTicks(scale) does not like Dates...
         //pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-        
-        /* RANGE */
-        this._setAxisScaleRange(scale, axis);
-        
-        scale.range(scale.min, scale.max);
         
         return scale;
     },
@@ -14831,22 +15185,16 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Then, the scale range is updated but the ticks cache is not.
         // The result is we end up showing two zones, on each end, with no ticks.
         pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-        
-        // ----------------------------
-        
-        /* RANGE */
-        this._setAxisScaleRange(scale, axis);
 
-        scale.range(scale.min, scale.max);
-        
         return scale;
     },
     
-    _setAxisScaleRange: function(scale, axis){
+    _setAxisScaleRange: function(axis){
         var size = (axis.orientation === 'x') ?
                         this._mainContentPanel.width :
                         this._mainContentPanel.height;
         
+        var scale = axis.scale;
         scale.min  = 0;
         scale.max  = size; 
         scale.size = size; // original size
@@ -14862,7 +15210,16 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             scale.offset = 0;
             scale.offsetSize = scale.size;
         }
-
+        
+        if(scale.type === 'Discrete'){ 
+            if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
+                var bandRatio = this.options.panelSizeRatio || 0.8;
+                scale.splitBandedCenter(scale.min, scale.max, bandRatio);
+            }
+        } else {
+            scale.range(scale.min, scale.max);
+        }
+        
         return scale;
     },
 
@@ -15102,12 +15459,45 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         }
         
         function positionChildI(side, child) {
-            child.setPosition(def.set({}, side, margins[side]));
+            var sidePos;
+            if(side === 'fill'){
+                side = 'left';
+                sidePos = margins.left + remSize.width / 2 - (child.width / 2);
+            } else {
+                sidePos = margins[side];
+            }
+            
+            child.setPosition(def.set({}, side, sidePos));
         }
         
-        function positionChild(side, child) {
-            var sideo = aoMap[side];
-            child.setPosition(def.set({}, side, margins[side], sideo, margins[sideo]));
+        function positionChildII(child, align) {
+            var sideo;
+            if(align === 'fill'){
+                align = 'middle';
+            }
+            
+            var sideOPos;
+            switch(align){
+                case 'top':
+                case 'bottom':
+                case 'left':
+                case 'right':
+                    sideo = align;
+                    sideOPos = margins[sideo];
+                    break;
+                
+                case 'middle':
+                    sideo    = 'bottom';
+                    sideOPos = margins.bottom + (remSize.height / 2) - (child.height / 2);
+                    break;
+                    
+                case 'center':
+                    sideo    = 'left';
+                    sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
+                    break;
+            }
+            
+            child.setPosition(def.set({}, sideo, sideOPos));
         }
         
         function layoutChildI(child) {
@@ -15131,9 +15521,9 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             if(a === 'fill') {
                 child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
                 
-                positionChild('left', child);
+                positionChildI (a, child);
+                positionChildII(child, a);
             } else if(a) {
-                var ao  = aoMap[a];
                 var al  = alMap[a];
                 var aol = aolMap[a];
                 var length      = remSize[al];
@@ -15142,7 +15532,9 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
                 
                 child.layout(childSizeII, childReferenceSize, childKeyArgs);
                 
-                positionChildI(ao, child);
+                var align = pvc.parseAlign(a, child.align);
+                
+                positionChildII(child, align);
             }
         }
         
@@ -15185,22 +15577,25 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
             contentPanel = chart._mainContentPanel;
         if(contentPanel) {
             var axes = chart.axes;
-            if(axes.x.option('EndLine')) {
+            var xAxis = axes.x;
+            var yAxis = axes.y;
+            
+            if(xAxis.option('EndLine')) {
                 // Frame lines parallel to x axis
-                this.xFrameRule = this._createFrameRule(axes.x);
+                this.xFrameRule = this._createFrameRule(xAxis);
             }
 
-            if(axes.y.option('EndLine')) {
+            if(yAxis.option('EndLine')) {
                 // Frame lines parallel to y axis
-                this.yFrameRule = this._createFrameRule(axes.y);
+                this.yFrameRule = this._createFrameRule(yAxis);
             }
 
-            if(axes.x.option('ZeroLine')) {
-                this.xZeroLine = this._createZeroLine(axes.x);
+            if(xAxis.scaleType === 'Continuous' && xAxis.option('ZeroLine')) {
+                this.xZeroLine = this._createZeroLine(xAxis);
             }
 
-            if(axes.y.option('ZeroLine')) {
-                this.yZeroLine = this._createZeroLine(axes.y);
+            if(yAxis.scaleType === 'Continuous' && yAxis.option('ZeroLine')) {
+                this.yZeroLine = this._createZeroLine(yAxis);
             }
         }
     },
@@ -15211,8 +15606,10 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
 
         // Domain crosses zero?
         if(domain[0] * domain[1] <= 0){
-            var a = axis.orientation === 'x' ? 'bottom' : 'left',
-                ao = this.anchorOrtho(a),
+            var a   = axis.orientation === 'x' ? 'bottom' : 'left',
+                al  = this.anchorLength(a),
+                ao  = this.anchorOrtho(a),
+                aol = this.anchorOrthoLength(a),
                 orthoAxis = this._getOrthoAxis(axis.type),
                 orthoScale = orthoAxis.scale,
                 orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
@@ -15223,7 +15620,7 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                                 0 :
                                 orthoScale.offset),
 
-                length   = orthoFullGridCrossesMargin ?
+                olength   = orthoFullGridCrossesMargin ?
                                     orthoScale.size :
                                     orthoScale.offsetSize;
             
@@ -15244,8 +15641,8 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
                 .zOrder(-9)
                 .strokeStyle("#808285")
                 [a](position)
-                [this.anchorOrthoLength(a)](length)
-                [this.anchorLength(a)](null)
+                [aol](olength)
+                [al](null)
                 [ao](zeroPosition)
                 //.svg(null)
                 ;
@@ -15718,20 +16115,32 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     ruleCrossesMargin: true,
     zeroLine: false, // continuous axis
     font: '9px sans-serif', // label font
-    titleFont: '12px sans-serif',
-    title: undefined,
-    titleSize: 0,
 
     // To be used in linear scales
     domainRoundMode: 'none',
     desiredTickCount: null,
     minorTicks:       true,
     
+    _isScaleSetup: false,
+    
     constructor: function(chart, parent, axis, options) {
         
         options = def.create(options, {
             anchor: axis.option('Position')
         });
+        
+        // sizeMax
+        if(options.sizeMax == null){
+            var sizeMax = options.axisSizeMax;
+            if(sizeMax != null){
+                // Single size (a number or a string with only one number)
+                // should be interpreted as meaning the orthogonal length.
+                var anchor = options.anchor || this.anchor;
+                
+                options.sizeMax = new pvc.Size()
+                                    .setSize(sizeMax, {singleProp: this.anchorOrthoLength(anchor)});
+            }
+        }
         
         this.base(chart, parent, options);
         
@@ -15742,49 +16151,211 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     _calcLayout: function(layoutInfo){
         
-        var titleSize = 0;
-
-        if(this.title){
-            titleSize = Math.ceil(
-                            pvc.text.getTextHeight(this.title, this.titleFont) *
-                            pvc.goldenRatio);
-
-            if(this.titleSize > titleSize){
-                titleSize = this.titleSize;
+        var scale = this.axis.scale;
+        
+        if(!this._isScaleSetup){
+            this.pvScale = scale;
+            this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
+            
+            this.extend(scale, this.panelName + "Scale_");
+            
+            this._isScaleSetup = true;
+        }
+        
+        var labelBBox;
+        
+        function labelLayout(){
+            var labelExtId = this.panelName + 'Label';
+            
+            var font = this.font;
+                
+            var align = this._getExtension(labelExtId, 'textAlign');
+            if(typeof align !== 'string'){
+                align = this.isAnchorTopOrBottom() ? 
+                        "center" : 
+                        (this.anchor == "left") ? "right" : "left";
             }
-
-            if(this.axisSize  != null &&
-               this.titleSize != null &&
-               titleSize > this.axisSize){
-               
-                if(pvc.debug >= 2) {
-                    pvc.log("WARNING: Inconsistent options '" +
-                                this.panelName + "TitleSize: " +  JSON.stringify(this.titleSize) +
-                                this.panelName + "Size: " +  JSON.stringify(this.axisSize));
-               }
-               
-               titleSize = this.axisSize;
+            
+            var baseline = this._getExtension(labelExtId, 'textBaseline');
+            if(typeof baseline !== 'string'){
+                switch (this.anchor) {
+                    case "right":
+                    case "left":
+                    case "center": 
+                        baseline = "middle";
+                        break;
+                        
+                    case "bottom": 
+                        baseline = "top";
+                        break;
+                      
+                    default:
+                    //case "top": 
+                        baseline = "bottom";
+                        //break;
+                }
+            } 
+            
+            var angle  = def.number(this._getExtension(labelExtId, 'textAngle'),  0);
+            var margin = def.number(this._getExtension(labelExtId, 'textMargin'), 3);
+            
+            var textHeight = pvc.text.getTextHeight("m", font);
+            
+            var textItems;
+            if(this.isDiscrete){
+                var data = this.chart.visualRoles(this.roleName)
+                               .flatten(this.chart.data, {visible: true});
+                
+                textItems = def.query(data._children)
+                               .select(function(child){ return child.absLabel; });
+            } else {
+                var ticks = pvc.scaleTicks(
+                                scale,
+                                this.domainRoundMode === 'tick',
+                                this.desiredTickCount);
+                
+                textItems = def.query(ticks)
+                                .select(function(tick){ return scale.tickFormat(tick); });
+            }
+            
+            var textWidth = textItems
+                                .select(function(text){ return 1.0 * pvc.text.getTextLength(text, font); })
+                                .max();
+            
+            labelBBox = pvc.text.getLabelBBox(textWidth, textHeight, align, baseline, angle, margin);
+            
+            // The length not over the plot area
+            var length;
+            switch(this.anchor){
+                case 'left':
+                    length = -labelBBox.x;
+                    break;
+                
+                case 'right':
+                    length = labelBBox.x2;
+                    break;
+                    
+                case 'top':
+                    length = -labelBBox.y;
+                    break;
+                
+                case 'bottom':
+                    length = labelBBox.y2;
+                    break;
+            }
+            
+            length = Math.max(length, 0);
+            
+            // --------------
+            
+            this.axisSize = this.tickLength + length; 
+            
+            // Add equal margin on both sides?
+            if(!(angle === 0 && this.isAnchorTopOrBottom())){
+                // Text height already has some free space in that case
+                // so no need to add more.
+                this.axisSize += this.tickLength;
             }
         }
-
-        this.titleSize = titleSize;
-
-        if(this.axisSize == null){
-            this.axisSize = this.titleSize + 50;
+        
+        layoutInfo.maxTextWidth = Infinity;
+        
+        if (this.isDiscrete && this.useCompositeAxis){
+            if(this.axisSize == null){
+                this.axisSize = 50;
+            }
+        } else {
+            if(this.axisSize == null){
+                labelLayout.call(this);
+            }
+            
+            var maxClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
+            if(this.axisSize > maxClientLength){
+                // Text may not fit. Calculate maxTextWidth.
+                if(!labelBBox){
+                    labelLayout.call(this);
+                }
+                
+                // Now move backwards, to the max text width...
+                var maxOrthoLength = maxClientLength - 2 * this.tickLength;
+                
+                // A point at the maximum orthogonal distance from the anchor
+                var mostOrthoDistantPoint;
+                var parallelDirection;
+                switch(this.anchor){
+                    case 'left':
+                        parallelDirection = pv.vector(0, 1);
+                        mostOrthoDistantPoint = pv.vector(-maxOrthoLength, 0);
+                        break;
+                    
+                    case 'right':
+                        parallelDirection = pv.vector(0, 1);
+                        mostOrthoDistantPoint = pv.vector(maxOrthoLength, 0);
+                        break;
+                        
+                    case 'top':
+                        parallelDirection = pv.vector(1, 0);
+                        mostOrthoDistantPoint = pv.vector(0, -maxOrthoLength);
+                        break;
+                    
+                    case 'bottom':
+                        parallelDirection = pv.vector(1, 0);
+                        mostOrthoDistantPoint = pv.vector(0, maxOrthoLength);
+                        break;
+                }
+                
+                // Intersect the line that passes through mostOrthoDistantPoint,
+                // and has the direction parallelDirection with 
+                // the top side and with the bottom side of the *original* label box.
+                var corners = labelBBox.sourceCorners;
+                var botL = corners[0];
+                var botR = corners[1];
+                var topL = corners[2];
+                var topR = corners[3];
+                
+                var topRLSideDir = topR.minus(topL);
+                var botRLSideDir = botR.minus(botL);
+                var intersect = pv.SvgScene.lineIntersect;
+                var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botRLSideDir);
+                var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topRLSideDir);
+                
+                // Two cases
+                // A) If the angle is between -90 and 90, the text does not get upside down
+                // In that case, we're always interested in topI -> topR and botI -> botR
+                // B) Otherwise the relevant new segments are topI -> topL and botI -> botL
+                
+                var maxTextWidth;
+                if(Math.cos(labelBBox.sourceAngle) >= 0){
+                    // A) [-90, 90]
+                    maxTextWidth = Math.min(
+                                        topR.minus(topI).length(), 
+                                        botR.minus(botI).length());
+                } else {
+                    maxTextWidth = Math.min(
+                            topL.minus(topI).length(), 
+                            botL.minus(botI).length());
+                }
+                
+                // One other detail.
+                // When align (anchor) is center,
+                // just cutting on one side of the label original box
+                // won't do, because when text is centered, the cut we make in length
+                // ends up distributed by both sides...
+                if(labelBBox.sourceAlign === 'center'){
+                    var cutWidth = labelBBox.sourceTextWidth - maxTextWidth;
+                    
+                    // Cut same width on the opposite side. 
+                    maxTextWidth -= cutWidth;
+                }
+                
+                layoutInfo.maxTextWidth = maxTextWidth; 
+            }
         }
         
         return this.createAnchoredSize(this.axisSize, layoutInfo.clientSize);
     },
     
     _createCore: function() {
-        // Update the scale from the cartesian axis
-        var scale = this.axis.scale; 
-        this.pvScale = scale;
-        this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
-        
-        // TODO: danger?
-        this.extend(this.pvScale, this.panelName + "Scale_");
-        
         this.renderAxis();
     },
 
@@ -15800,7 +16371,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvTicks,      this.panelName + "Ticks_");
         this.extend(this.pvLabel,      this.panelName + "Label_");
         this.extend(this.pvRuleGrid,   this.panelName + "Grid_" );
-        this.extend(this.pvTitle,      this.panelName + "TitleLabel_");
         this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
         this.extend(this.pvZeroLine,   this.panelName + "ZeroLine_");
     },
@@ -15833,33 +16403,33 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         this._rSize = rSize;
         
-        if(this.title){
-           this.pvTitlePanel = this.pvPanel.add(pv.Panel)
-                [this.anchor             ](0)     // bottom (of the axis panel)
-                [this.anchorOrthoLength()](this.titleSize) // height
-                [this.anchorOrtho()      ](rMin)  // left
-                [this.anchorLength()     ](rSize) // width
-                ;
-
-            this.pvTitle = this.pvTitlePanel.anchor('center').add(pv.Label)
-                .lock('text', this.title)
-                .lock('font', this.titleFont)
-
-                // Rotate text over center point
-                .lock('textAngle',
-                    this.anchor === 'left'  ? -Math.PI/2 :
-                    this.anchor === 'right' ?  Math.PI/2 :
-                    null)
-                ;
-
-            // Create a container panel to draw the remaining axis components
-            ruleParentPanel = this.pvPanel.add(pv.Panel)
-                [this.anchorOpposite()   ](0) // top (of the axis panel)
-                [this.anchorOrthoLength()](this.axisSize - this.titleSize) // height
-                [this.anchorOrtho()      ](0)     // left
-                [this.anchorLength()     ](rSize) // width
-                ;
-        }
+//        if(this.title){
+//           this.pvTitlePanel = this.pvPanel.add(pv.Panel)
+//                [this.anchor             ](0)     // bottom (of the axis panel)
+//                [this.anchorOrthoLength()](this.titleSize) // height
+//                [this.anchorOrtho()      ](rMin)  // left
+//                [this.anchorLength()     ](rSize) // width
+//                ;
+//
+//            this.pvTitle = this.pvTitlePanel.anchor('center').add(pv.Label)
+//                .lock('text', this.title)
+//                .lock('font', this.titleFont)
+//
+//                // Rotate text over center point
+//                .lock('textAngle',
+//                    this.anchor === 'left'  ? -Math.PI/2 :
+//                    this.anchor === 'right' ?  Math.PI/2 :
+//                    null)
+//                ;
+//
+//            // Create a container panel to draw the remaining axis components
+//            ruleParentPanel = this.pvPanel.add(pv.Panel)
+//                [this.anchorOpposite()   ](0) // top (of the axis panel)
+//                [this.anchorOrthoLength()](this.axisSize - this.titleSize) // height
+//                [this.anchorOrtho()      ](0)     // left
+//                [this.anchorLength()     ](rSize) // width
+//                ;
+//        }
 
         this.pvRule = ruleParentPanel.add(pv.Rule)
             .zOrder(30) // see pvc.js
@@ -15939,6 +16509,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     "center" : 
                     (this.anchor == "left") ? "right" : "left";
         
+        var font = this.font;
+        
+        var maxTextWidth = this._layoutInfo.maxTextWidth;
+        if(!isFinite(maxTextWidth)){
+            maxTextWidth = 0;
+        }
+        
         // All ordinal labels are relevant and must be visible
         this.pvLabel = this.pvTicks.anchor(this.anchor).add(pv.Label)
             .intercept(
@@ -15947,8 +16524,14 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 this._getExtension(this.panelName + "Label", 'visible'))
             .zOrder(40) // see pvc.js
             .textAlign(align)
-            .text(function(child){return child.absLabel;})
-            .font(this.font)
+            .text(function(child){
+                var text = child.absLabel;
+                if(maxTextWidth){
+                    text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
+                }
+                return text; 
+             })
+            .font(font)
             .localProperty('group')
             .group(function(child){ return child; })
             ;
@@ -16119,9 +16702,23 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var labelAnchor = this.pvTicks.anchor(this.anchor)
                                 .addMargin(this.anchorOpposite(), 2);
         
+        var scale = this.scale;
+        var font = this.font;
+        
+        var maxTextWidth = this._layoutInfo.maxTextWidth;
+        if(!isFinite(maxTextWidth)){
+            maxTextWidth = 0;
+        }
+        
         var label = this.pvLabel = labelAnchor.add(pv.Label)
             .zOrder(40)
-            .text(this.pvScale.tickFormat)
+            .text(function(d){
+                var text = scale.tickFormat(d);
+                if(maxTextWidth){
+                    text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
+                }
+                return text;
+             })
             .font(this.font)
             .textMargin(0.5) // Just enough for some labels not to be cut (vertical)
             .visible(true);
@@ -16468,7 +17065,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             maxDepth  = data.treeHeight,
             elements  = data.nodes(),
             
-            depthLength = this.axisSize - this.titleSize;
+            depthLength = this.axisSize;
         
         this._rootElement = elements[0]; // lasso
             
@@ -16493,7 +17090,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
         var panel = this.pvRule
             .add(pv.Panel)
-                [orthoLength](depthLength)//.overflow('hidden')
+                [orthoLength](depthLength)
                 .strokeStyle(null)
                 .lineWidth(0) //cropping panel
             .add(pv.Panel)
@@ -16547,6 +17144,23 @@ pvc.YAxisPanel = pvc.AxisPanel.extend({
 
 pvc.SecondYAxisPanel = pvc.YAxisPanel.extend({
     panelName: "secondYAxis"
+});
+
+pvc.AxisTitlePanel = pvc.TitlePanelAbstract.extend({
+    
+    panelName: 'axis',
+    
+    _getFontExtension: function(){
+        return this._getExtension(this.panelName + 'TitleLabel', 'font');
+    },
+    
+    /**
+     * @override
+     */
+    applyExtensions: function(){
+        this.extend(this.pvPanel, this.panelName + 'Title_');
+        this.extend(this.pvLabel, this.panelName + 'TitleLabel_');
+    }
 });
 
 /**

@@ -1067,6 +1067,7 @@ def.scope(function(){
     }
     
     var rootProto = rootType.prototype;
+    // Unfortunately, creates an enumerable property in every instance
     rootProto.base = undefined;
     
     var rootState = {
@@ -1107,6 +1108,7 @@ def.scope(function(){
     function inherits(type, base){
      // Inherit
         var proto = type.prototype = Object.create(base.prototype);
+        // Unfortunately, creates an enumerable property in every instance
         proto.constructor = type;
         
         return proto;
