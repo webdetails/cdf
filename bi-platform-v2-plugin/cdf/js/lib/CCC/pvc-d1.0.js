@@ -12317,6 +12317,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 return;
             }
             
+            pvc.removeTipsyLegends();
+            
             // Reentry control
             this._inUpdateSelections = true;
             try {
@@ -12437,7 +12439,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         tipsySettings: {
             gravity: "s",
-            delayIn:  400,
+            delayIn:  200,
             offset:   2,
             opacity:  0.7,
             html:     true,
