@@ -5204,6 +5204,9 @@ function(data, atoms, isNull){
      * @returns {boolean} true if the selected state changed, false otherwise.
      */
     setSelected: function(select){
+        // Null datums are always not selected
+        if(this.isNull){ return false; }
+        
         // Normalize 'select'
         select = (select == null) || !!select;
 
@@ -5215,10 +5218,9 @@ function(data, atoms, isNull){
                 this.isSelected = true;
             }
             
-            //if(!this.isNull){
-                /*global data_onDatumSelectedChanged:true */
-                data_onDatumSelectedChanged.call(this.owner, this, select);
-            //}
+            
+            /*global data_onDatumSelectedChanged:true */
+            data_onDatumSelectedChanged.call(this.owner, this, select);
         }
 
         return changed;
@@ -5230,7 +5232,7 @@ function(data, atoms, isNull){
      * @type {undefined}
      */
     toggleSelected: function(){
-        this.setSelected(!this.isSelected);
+        return this.setSelected(!this.isSelected);
     },
     
     /**
@@ -5241,6 +5243,9 @@ function(data, atoms, isNull){
      * @returns {boolean} true if the visible state changed, false otherwise.
      */
     setVisible: function(visible){
+        // Null datums are always visible
+        if(this.isNull){ return false; }
+        
         // Normalize 'visible'
         visible = (visible == null) || !!visible;
 
@@ -5262,7 +5267,7 @@ function(data, atoms, isNull){
      * @type {undefined}
      */
     toggleVisible: function(){
-        this.setVisible(!this.isVisible);
+        return this.setVisible(!this.isVisible);
     }
 });
 
@@ -7183,7 +7188,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 function data_onDatumSelectedChanged(datum, selected){
     // <Debug>
     /*jshint expr:true */
-    //!datum.isNull || def.assert("Null datums do not notify selected changes");
+    !datum.isNull || def.assert("Null datums do not notify selected changes");
     // </Debug>
     
     if(selected){
@@ -7211,7 +7216,7 @@ function data_onDatumVisibleChanged(datum, visible){
         
         // <Debug>
         /*jshint expr:true */
-        //!datum.isNull || def.assert("Null datums do not notify visible changes");
+        !datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
         
         if(visible){
@@ -7298,13 +7303,15 @@ function data_addDatum(datum){
 function data_onReceiveDatum(datum){
     var id = datum.id;
     this._datumsById[id] = datum;
-
-    if(this._selectedDatums && datum.isSelected) {
-        this._selectedDatums.set(id, datum);
-    }
-
-    if(datum.isVisible) {
-        this._visibleDatums.set(id, datum);
+    
+    if(!datum.isNull){
+        if(this._selectedDatums && datum.isSelected) {
+            this._selectedDatums.set(id, datum);
+        }
+    
+        if(datum.isVisible) {
+            this._visibleDatums.set(id, datum);
+        }
     }
 }
 
@@ -7340,15 +7347,17 @@ pvc.data.Data.setSelected = function(datums, selected){
  * 
  * @param {def.Query} datums An enumerable of {@link pvc.data.Datum} to toggle.
  * 
+ * @returns {boolean} true if at least one datum changed its selected state.
  * @static
  */
 pvc.data.Data.toggleSelected = function(datums){
     if(!def.isArrayLike(datums)){
         datums = def.query(datums).array();
     }
-     
-    var allSelected = def.query(datums).all(function(datum){ return datum.isSelected; });
-    this.setSelected(datums, !allSelected);
+    
+    // Ensure null datums don't affect the result
+    var allSelected = def.query(datums).all(function(datum){ return datum.isNull || datum.isSelected; });
+    return this.setSelected(datums, !allSelected);
 };
 
 /**
@@ -7383,12 +7392,17 @@ pvc.data.Data.setVisible = function(datums, visible){
  * 
  * @param {def.Query} datums An enumerable of {@link pvc.data.Datum} to toggle.
  * 
+ * @returns {boolean} true if at least one datum changed its visible state.
  * @static
  */
 pvc.data.Data.toggleVisible = function(datums){
-    datums = def.query(datums).array(); 
+    if(!def.isArrayLike(datums)){
+        datums = def.query(datums).array();
+    }
+    
+    // Ensure null datums don't affect the result (null datums are always visible)
     var allVisible = def.query(datums).all(function(datum){ return datum.isVisible; });
-    pvc.data.Data.setVisible(datums, !allVisible);
+    return pvc.data.Data.setVisible(datums, !allVisible);
 };
 
 /**
@@ -7913,7 +7927,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     this._selected   = def.get(keyArgs, 'selected', null);
 
     /* 'Where' predicate and its key */
-    var hasKey = true,
+    var hasKey = this._selected == null, // Selected state changes does not yet invalidate cache...
         whereKey = '';
     if(this._where){
         whereKey = def.get(keyArgs, 'whereKey');
@@ -7949,7 +7963,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     if(hasKey){
         this.key = ids.join('!!') +
                    "||visible:"  + this._visible +
-                   "||selected:" + this._selected +
+                   //"||selected:" + this._selected +
                    "||where:"    + whereKey;
     }
 }).
@@ -7962,24 +7976,15 @@ add(/** @lends pvc.data.GroupingOper */{
      */
     execute: function(){
         /* Setup a priori datum filters */
-        var datumsQuery = def.query(this._linkParent._datums),
-            visible = this._visible,
-            selected = this._selected,
-            where = this._where;
-
-        if(visible != null){
-            datumsQuery = datumsQuery.where(function(datum){return datum.isVisible === visible;});
-        }
-
-        if(selected != null){
-            datumsQuery = datumsQuery.where(function(datum){return datum.isSelected === selected;});
-        }
-
-        if(where){
-            datumsQuery = datumsQuery.where(where);
-        }
-
-        /* Group datums */
+        
+        /*global data_whereState: true */
+        var datumsQuery = data_whereState(def.query(this._linkParent._datums), {
+            visible:  this._visible,
+            selected: this._selected,
+            where:    this._where
+        });
+        
+                /* Group datums */
         var rootNode = this._group(datumsQuery);
 
         /* Render node into a data */
@@ -8409,25 +8414,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      */
     datums: function(whereSpec, keyArgs){
         if(!whereSpec){
-            var q        = def.query(this._datums),
-                selected = def.get(keyArgs, 'selected'),
-                visible  = def.get(keyArgs, 'visible'),
-                where    = def.get(keyArgs, 'where')
-                ;
-            
-            if(visible != null){
-                q = q.where(function(datum){ return datum.isVisible === visible;  });
-            }
-            
-            if(selected != null){
-                q = q.where(function(datum){ return datum.isSelected === selected; });
-            }
-
-            if(where){
-                q = q.where(where);
-            }
-            
-            return q;
+            return data_whereState(def.query(this._datums), keyArgs);
         }
         
         whereSpec = data_processWhereSpec.call(this, whereSpec, keyArgs);
@@ -8544,13 +8531,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * 
  * @param {object} whereSpec A "where" specification to be normalized.
  * A structure with the following form:
- *  
- * @param {Object} [keyArgs] Keyword arguments object.
- * 
- * @param {boolean} [keyArgs.visible=null] 
- *      Only considers datums whose atoms of the <i>filtered</i> dimensions  
- *      have the specified visible state.
- * 
+ *
  * @return Array A <i>processed</i> "where" of the specification.
  * A structure with the following form:
  * <pre>
@@ -8568,9 +8549,8 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * 
  * @private
  */
-function data_processWhereSpec(whereSpec, keyArgs){
-    var whereProcSpec = [],
-        visible = def.get(keyArgs, 'visible');
+function data_processWhereSpec(whereSpec){
+    var whereProcSpec = [];
     
     whereSpec = def.array(whereSpec);
     if(whereSpec){
@@ -8606,14 +8586,48 @@ function data_processWhereSpec(whereSpec, keyArgs){
         var dimension = this.dimensions(dimName),
             atoms = def.query(values)
                        .select(function(value){ return dimension.atom(value); }) // null if it doesn't exist
-                       .where(visible == null ? 
-                              def.notNully : 
-                              function(atom){ return atom && dimension.isVisible(atom) === visible; })
+                       .where(def.notNully)
                        .distinct(function(atom){ return atom.key; })
                        .array();
         
         return atoms.length ? atoms : null;
     }
+}
+
+/**
+ * Filters a datum query according to a specified predicate, 
+ * datum selected and visible state.
+ * 
+ * @name pvc.data.Data#_whereState
+ * @function
+ * 
+ * @param {def.query} q A datum query.
+ * @param {object} [keyArgs] Keyword arguments object.
+ * See {@link #groupBy} for additional available keyword arguments.
+ * 
+ * @returns {def.Query} A query object that enumerates the desired {@link pvc.data.Datum}.
+ * @private
+ * @static
+ */
+function data_whereState(q, keyArgs){
+    var selected = def.get(keyArgs, 'selected'),
+        visible  = def.get(keyArgs, 'visible'),
+        where    = def.get(keyArgs, 'where')
+        ;
+
+    if(visible != null){
+        q = q.where(function(datum){ return datum.isVisible === visible; });
+    }
+    
+    if(selected != null){
+        q = q.where(function(datum){ return datum.isSelected === selected; });
+    }
+    
+    if(where){
+        q = q.where(where);
+    }
+    
+    return q;
 }
 
 // All the "Filter" and "Spec" words below should be read as if they were prepended by "Proc"
@@ -12001,16 +12015,21 @@ pvc.BaseChart = pvc.Abstract.extend({
         
         switch(this.options.legendClickMode){
             case 'toggleSelected':
-                isOn = function(){
-                    return !this.group.owner.selectedCount() || 
-                           this.group.datums(null, {selected: true}).any();
-                };
-                
-                onClick = function(){
-                    pvc.data.Data.toggleSelected(this.group.datums());
-    
-                    me.updateSelections();
-                };
+                if(!this.options.selectable){
+                    isOn = def.constant(true);
+                } else {
+                    isOn = function(){
+                        return !this.group.owner.selectedCount() || 
+                               this.group.datums(null, {selected: true}).any();
+                    };
+                    
+                    onClick = function(){
+                        var on = this.group.datums(null, {selected: true}).any();
+                        if(pvc.data.Data.setSelected(this.group.datums(), !on)){
+                            me.updateSelections();
+                        }
+                    };
+                }
                 break;
                 
             default: 
@@ -12020,10 +12039,10 @@ pvc.BaseChart = pvc.Abstract.extend({
                 };
                 
                 onClick = function(){
-                    pvc.data.Data.toggleVisible(this.group.datums());
-    
-                    // Re-render chart
-                    me.render(true, true, false);
+                    if(pvc.data.Data.toggleVisible(this.group.datums())){
+                        // Re-render chart
+                        me.render(true, true, false);
+                    }
                 };
                 break;
         }
@@ -12376,6 +12395,24 @@ pvc.BaseChart = pvc.Abstract.extend({
         }
     },
     
+    _onUserSelection: function(datums){
+        if(!datums || !datums.length){
+            return datums;
+        }
+        
+        if(this === this.root) {
+            // Fire action
+            var action = this.options.userSelectionAction;
+            if(action){
+                return action.call(null, datums) || datums;
+            }
+            
+            return datums;
+        }
+        
+        return this.root._onUserSelection(datums);
+    },
+    
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === "vertical";
     },
@@ -12507,7 +12544,8 @@ pvc.BaseChart = pvc.Abstract.extend({
         selectable: false,
         
         selectionChangedAction: null,
-        
+        userSelectionAction: null, 
+            
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
         clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
@@ -13660,8 +13698,11 @@ pvc.BasePanel = pvc.Abstract.extend({
     
     /* SELECTION & RUBBER-BAND */
     _onSelect: function(context){
-        var datums = context.scene.datums(),
+        var datums = context.scene.datums().array(),
             chart  = this.chart;
+        
+        datums = this._onUserSelection(datums);
+        
         if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
             chart.data.owner.clearSelected();
             
@@ -13669,8 +13710,12 @@ pvc.BasePanel = pvc.Abstract.extend({
         } else {
             pvc.data.Data.toggleSelected(datums);
         }
-
+        
         this._onSelectionChanged();
+    },
+    
+    _onUserSelection: function(datums){
+        return this.chart._onUserSelection(datums);
     },
     
     _onSelectionChanged: function(){
@@ -13804,6 +13849,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             keyArgs = {toggle: false};
         if(this._detectDatumsUnderRubberBand(datumsByKey, this.rubberBand, keyArgs)) {
             var selectedDatums = def.own(datumsByKey); 
+            
+            selectedDatums = this._onUserSelection(selectedDatums);
             
             var changed;
             if(keyArgs.toggle){
@@ -14805,7 +14852,7 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           var baseTextStyle = getTextStyle ? getTextStyle.apply(this, args) : "black";
           return this.parent.isOn() ? 
                       baseTextStyle : 
-                      pvc.toGrayScale(baseTextStyle, null, undefined, 150); 
+                      pvc.toGrayScale(baseTextStyle, null, undefined, 150);
       }
     },
 
@@ -16937,13 +16984,17 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
 
     _selectOrdinalElement: function(data, toggle){
+        var selectedDatums = data.datums().array();
+        
+        selectedDatums = this._onUserSelection(selectedDatums);
+        
         if(toggle){
             this.chart.data.owner.clearSelected();
         }
 
-        pvc.data.Data.toggleSelected(data.datums().array());
+        pvc.data.Data.toggleSelected(selectedDatums);
         
-        this.chart.updateSelections();
+        this._onSelectionChanged();
     },
     
     /**
