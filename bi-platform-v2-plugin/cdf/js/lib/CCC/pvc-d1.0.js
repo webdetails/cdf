@@ -9070,7 +9070,7 @@ def.type('pvc.visual.Role')
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
     }
-
+    
     if(def.get(keyArgs, 'autoCreateDimension', false)) {
         this.autoCreateDimension = true;
     }
@@ -9135,6 +9135,7 @@ def.type('pvc.visual.Role')
     flatteningMode: 'singleLevel',
     flattenRootLabel: '',
     autoCreateDimension: false,
+    isReversed: false,
     label: null,
 
     /** 
@@ -9152,7 +9153,15 @@ def.type('pvc.visual.Role')
     firstDimension: function(){
         return this.grouping && this.grouping.firstDimension.type;
     },
-
+    
+    setIsReversed: function(isReversed){
+        if(!isReversed){ // default value
+            delete this.isReversed;
+        } else {
+            this.isReversed = true;
+        }
+    },
+    
     setFlatteningMode: function(flatteningMode){
         if(!flatteningMode || flatteningMode === 'singleLevel'){ // default value
             delete this.flatteningMode;
@@ -9299,6 +9308,11 @@ def.type('pvc.visual.Role')
         this.grouping = groupingSpec;
         
         if(this.grouping) {
+            
+            if(this.isReversed){
+                this.grouping = this.grouping.reversed();
+            }
+            
             // register in current dimension types
             this.grouping.dimensions().each(function(dimSpec){
                 /*global dimType_addVisualRole:true */
@@ -10525,12 +10539,12 @@ def.type('pvc.visual.CartesianAxis')
             }
         } else {
             if(!grouping.firstDimension.type.isComparable){
-                throw def.error.operationInvalid("Continuous roles on the same axis must have comparable groupings.");
+                throw def.error.operationInvalid("Continuous roles on the same axis must have 'comparable' groupings.");
             }
 
             for(i = 1; i < L ; i++){
                 if(this.scaleType !== groupingScaleType(this.roles[i].grouping)){
-                    throw def.error.operationInvalid("Continuous roles on the same axis must have equal scales of the same type.");
+                    throw def.error.operationInvalid("Continuous roles on the same axis must have scales of the same type.");
                 }
             }
         }
@@ -10751,6 +10765,7 @@ $VCA.createAllDefaultOptions = function(options){
             'FullGridCrossesMargin',
             'RuleCrossesMargin',
             'EndLine',
+            //'Reversed',
             'DomainRoundMode',
             'DesiredTickCount',
             'MinorTicks',
@@ -10776,6 +10791,7 @@ $VCA.createAllDefaultOptions = function(options){
        globalDefaults = {
            'OriginIsZero':      true,
            'Offset':            0,
+           //'Reversed':          false,
            'Composite':         false,
            'OverlappedLabelsHide': false,
            'OverlappedLabelsMaxPct': 0.2,
@@ -11654,16 +11670,32 @@ pvc.BaseChart = pvc.Abstract.extend({
      * dimensions bound to roles, by taking them from the roles requirements.
      */
     _bindVisualRolesPre: function(){
+        
+        def.eachOwn(this._visualRoles, function(visualRole){
+            visualRole.setIsReversed(false);
+        });
+        
         /* Process user specified bindings */
         var boundDimNames = {};
         def.each(this.options.visualRoles, function(roleSpec, name){
             var visualRole = this._visualRoles[name] ||
                 def.fail.operationInvalid("Role '{0}' is not supported by the chart type.", [name]);
-
-            // !roleSpec results in a null grouping being preBound
+            
+            var groupingSpec;
+            if(roleSpec && typeof roleSpec === 'object'){
+                if(def.get(roleSpec, 'isReversed', false)){
+                    visualRole.setIsReversed(true);
+                }
+                
+                groupingSpec = roleSpec.dimensions;
+            } else {
+                groupingSpec = roleSpec;
+            }
+            
+            // !groupingSpec results in a null grouping being preBound
             // A pre bound null grouping is later discarded in the post bind
-            if(roleSpec !== undefined){
-                var grouping = pvc.data.GroupingSpec.parse(roleSpec);
+            if(groupingSpec !== undefined){
+                var grouping = pvc.data.GroupingSpec.parse(groupingSpec);
 
                 visualRole.preBind(grouping);
 
@@ -15169,7 +15201,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var scale;
 
         if(isSecondOrtho && !this.options.secondAxisIndependentScale){
-            scale = this.axes.ortho.scale; // better already exist...
+            scale = this.axes.ortho.scale || 
+                    def.fail.operationInvalid("First ortho scale must be created first.");
         } else {
             scale = this._createScaleByAxis(axis);
         }
@@ -15224,16 +15257,19 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                                 visible: true,
                                 flatteningMode: flatteningMode
                             }),
-            values = data.children().select(function(child){ return child.value; }).array(),
-            scale  = new pv.Scale.ordinal(values);
+            values = data.children().select(function(child){ return child.value; }).array();
         
+//        if(axis.option('Reversed')){
+//            values.reverse();
+//        }
+        
+        var scale  = new pv.Scale.ordinal(values);
         scale.type = 'Discrete';
-
         return scale;
     },
     
     /**
-     * Creates a continuous timeseries scale for a given axis.
+     * Creates a continuous time-series scale for a given axis.
      * 
      * <p>
      * Uses the axis' option <tt>Offset</tt> to calculate excess domain margins at each end of the scale.
@@ -15265,6 +15301,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         if((dMax - dMin) === 0) {
             dMax = new Date(dMax.getTime() + 3600000); // 1 h
         }
+        
+//        if(axis.type === 'base' && axis.option('Reversed')){
+//            var dTemp = dMax;
+//            dMax = dMin;
+//            dMin = dTemp;
+//        }
         
         var scale = new pv.Scale.linear(dMin, dMax);
 
@@ -15369,7 +15411,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             scale.offsetSize = scale.size;
         }
         
-        if(scale.type === 'Discrete'){ 
+        if(scale.type === 'Discrete'){
             if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
                 var bandRatio = this.options.panelSizeRatio || 0.8;
                 scale.splitBandedCenter(scale.min, scale.max, bandRatio);
@@ -23128,28 +23170,25 @@ pvc.BoxplotChart = pvc.CategoricalAbstract.extend({
 
         this.base();
 
-        var rolesSpec = def.scope(function(){
+        var roleSpecBase = {
+                isMeasure: true,
+                requireSingleDimension: true,
+                requireIsDiscrete: false,
+                valueType: Number
+            };
 
-            var roleSpecBase = {
-                    isMeasure: true,
-                    requireSingleDimension: true,
-                    requireIsDiscrete: false,
-                    valueType: Number
-                };
-
-            return def.query([
-                    {name: 'median',      label: 'Median',        defaultDimensionName: 'median', isRequired: true},
-                    {name: 'percentil25', label: '25% Percentil', defaultDimensionName: 'percentil25'},
-                    {name: 'percentil75', label: '75% Percentil', defaultDimensionName: 'percentil75'},
-                    {name: 'percentil5',  label: '5% Percentil',  defaultDimensionName: 'percentil5' },
-                    {name: 'percentil95', label: '95% Percentil', defaultDimensionName: 'percentil95'}
-                ])
-                .object({
-                    name:  function(info){ return info.name; },
-                    value: function(info){ return def.create(roleSpecBase, info); }
-                });
-        });
-
+        var rolesSpec = def.query([
+                {name: 'median',      label: 'Median',        defaultDimensionName: 'median', isRequired: true},
+                {name: 'percentil25', label: '25% Percentil', defaultDimensionName: 'percentil25'},
+                {name: 'percentil75', label: '75% Percentil', defaultDimensionName: 'percentil75'},
+                {name: 'percentil5',  label: '5% Percentil',  defaultDimensionName: 'percentil5' },
+                {name: 'percentil95', label: '95% Percentil', defaultDimensionName: 'percentil95'}
+            ])
+            .object({
+                name:  function(info){ return info.name; },
+                value: function(info){ return def.create(roleSpecBase, info); }
+            });
+        
         this._addVisualRoles(rolesSpec);
     },
     
