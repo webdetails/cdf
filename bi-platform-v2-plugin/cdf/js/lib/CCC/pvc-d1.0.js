@@ -1493,10 +1493,17 @@ pv.Behavior.selector = function(autoRefresh, mark) {
 
   /** @private */
   function mouseup(e) {
-    if (!scene) { return; }
-    pv.Mark.dispatch("selectend", scene, index, e);
-    scene.mark.selectionRect = null;
-    scene = null;
+    var lscene = scene;
+    if(lscene){
+        var lmark = lscene.mark;
+        if(lmark){
+            pv.Mark.dispatch("selectend", lscene, index, e);
+        
+            lmark.selectionRect = null;
+        }
+        
+        scene = null;
+    }
   }
 
   pv.listen(window, "mousemove", mousemove);
