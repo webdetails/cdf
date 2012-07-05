@@ -10769,7 +10769,6 @@ $VCA.createAllDefaultOptions = function(options){
             'FullGridCrossesMargin',
             'RuleCrossesMargin',
             'EndLine',
-            //'Reversed',
             'DomainRoundMode',
             'DesiredTickCount',
             'MinorTicks',
@@ -10795,7 +10794,6 @@ $VCA.createAllDefaultOptions = function(options){
        globalDefaults = {
            'OriginIsZero':      true,
            'Offset':            0,
-           //'Reversed':          false,
            'Composite':         false,
            'OverlappedLabelsHide': false,
            'OverlappedLabelsMaxPct': 0.2,
@@ -12551,10 +12549,12 @@ pvc.BaseChart = pvc.Abstract.extend({
         tipsySettings: {
             gravity: "s",
             delayIn:  200,
+            delayOut: 50,
             offset:   2,
-            opacity:  0.7,
+            opacity:  0.8,
             html:     true,
-            fade:     true
+            fade:     true,
+            followMouse: false
         },
         
         valueFormat: function(d) {
@@ -12667,6 +12667,8 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @type number
      */
     _isAnimating: 0,
+    
+    _isRubberBandSelecting: false,
     
     /**
      * Shared state between {@link _handleClick} and {@link #_handleDoubleClick}.
@@ -13467,6 +13469,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         return this._context;
     },
     
+    _isTooltipEnabled: function(){
+        return !this.isRubberBandSelecting() && !this.isAnimating();
+    },
+    
     /* TOOLTIP */ 
     _addPropTooltip: function(mark, keyArgs){
         var myself = this,
@@ -13475,8 +13481,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             tipsySettings = Object.create(options.tipsySettings),  
             buildTooltip;
         
+        tipsySettings.isEnabled = this._isTooltipEnabled.bind(this);
+        
         if(!tipsyEvent) {
-            switch(mark.type) {
+//          switch(mark.type) {
 //                case 'dot':
 //                case 'line':
 //                case 'area':
@@ -13485,9 +13493,9 @@ pvc.BasePanel = pvc.Abstract.extend({
 //                    tipsySettings.usesPoint = true;
 //                    break;
                 
-                default:
+//                default:
                     tipsyEvent = 'mouseover';
-            }
+//            }
         }
         
         var tooltipFormat = options.tooltipFormat;
@@ -13758,6 +13766,10 @@ pvc.BasePanel = pvc.Abstract.extend({
         this.chart.updateSelections();
     },
     
+    isRubberBandSelecting: function(){
+        return this.topRoot._isRubberBandSelecting;
+    },
+    
     /**
      * Add rubber-band functionality to panel.
      * Override to prevent rubber band selection.
@@ -13772,14 +13784,14 @@ pvc.BasePanel = pvc.Abstract.extend({
 
         var dMin = 10; // Minimum dx or dy for a rubber band selection to be relevant
 
-        var isSelecting = false;
+        this._isRubberBandSelecting = false;
 
         // Rubber band
         var rubberPvParentPanel = this.pvPanel.borderPanel,
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
-            .visible(function() { return isSelecting;} )
+            .visible(function() { return myself._isRubberBandSelecting; } )
             .left(function() { return this.parent.selectionRect.x; })
             .top(function() { return this.parent.selectionRect.y; })
             .width(function() { return this.parent.selectionRect.dx; })
@@ -13798,13 +13810,13 @@ pvc.BasePanel = pvc.Abstract.extend({
         rubberPvParentPanel
             .event('mousedown', pv.Behavior.selector(false))
             .event('select', function(){
-                if(!isSelecting && !myself.isAnimating()){
+                if(!myself._isRubberBandSelecting && !myself.isAnimating()){
                     var rb = this.selectionRect;
                     if(Math.sqrt(rb.dx * rb.dx + rb.dy * rb.dy) <= dMin){
                         return;
                     }
 
-                    isSelecting = true;
+                    myself._isRubberBandSelecting = true;
                     
                     if(!toScreen){
                         toScreen = rubberPvParentPanel.toScreenTransform();
@@ -13816,7 +13828,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 selectBar.render();
             })
             .event('selectend', function(){
-                if(isSelecting){
+                if(myself._isRubberBandSelecting){
                     var ev = arguments[arguments.length - 1];
                     
                     if(!toScreen){
@@ -13825,7 +13837,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     
                     myself.rubberBand = this.selectionRect.clone().apply(toScreen);
                     
-                    isSelecting = false;
+                    myself._isRubberBandSelecting = false;
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
@@ -15261,14 +15273,11 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                                 visible: true,
                                 flatteningMode: flatteningMode
                             }),
-            values = data.children().select(function(child){ return child.value; }).array();
-        
-//        if(axis.option('Reversed')){
-//            values.reverse();
-//        }
-        
-        var scale  = new pv.Scale.ordinal(values);
+            values = data.children().select(function(child){ return child.value; }).array(),
+            scale  = new pv.Scale.ordinal(values);
+
         scale.type = 'Discrete';
+
         return scale;
     },
     
@@ -15305,12 +15314,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         if((dMax - dMin) === 0) {
             dMax = new Date(dMax.getTime() + 3600000); // 1 h
         }
-        
-//        if(axis.type === 'base' && axis.option('Reversed')){
-//            var dTemp = dMax;
-//            dMax = dMin;
-//            dMin = dTemp;
-//        }
         
         var scale = new pv.Scale.linear(dMin, dMax);
 
