@@ -15369,10 +15369,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             dMin = extent.min,
             dMax = extent.max;
 
-         if(pvc.debug >= 3){
-             pvc.log("Continuous scale extent: " + JSON.stringify(extent));
-         }
-
         /*
          * If both negative or both positive
          * the scale does not contain the number 0.
@@ -15415,7 +15411,13 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         // Then, the scale range is updated but the ticks cache is not.
         // The result is we end up showing two zones, on each end, with no ticks.
         pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-
+        
+        if(pvc.debug >= 3){
+            pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
+                    " create:"  + JSON.stringify({min: dMin, max: dMax}) + 
+                    " rounded:" + JSON.stringify(scale.domain()));
+        }
+        
         return scale;
     },
     
@@ -15448,6 +15450,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         } else {
             scale.range(scale.min, scale.max);
+        }
+        
+        if(pvc.debug >= 4){
+            pvc.log("Scale: " + JSON.stringify(def.copyOwn(scale)));
         }
         
         return scale;
@@ -19827,11 +19833,7 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
         options = def.set(options, 
                 'orthoAxisOrdinal', true,
                 'legend', false);
-        
-//        if(options.useCompositeAxis){
-//            options.isMultiValued = true;
-//        }
-//
+  
         if(options.scalingType && !options.colorScaleType){
             options.colorScaleType = options.scalingType;
         }
@@ -19981,9 +19983,12 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
     /**
      * @override
      */
-     _createCore: function(){
-         this.base();
-
+    _createCore: function(){
+        
+        this.base();
+        
+        // TODO: this options treatment is highly "non-standard". Refactor to chart + panel-constructor
+        
         var chart = this.chart,
             options = chart.options;
 
@@ -19998,6 +20003,10 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         
         if(options.shape != null) {
             this.shape = options.shape;
+        }
+        
+        if(options.nullShape !== undefined) { // can clear the null shape!
+            this.nullShape = options.nullShape;
         }
         
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
@@ -20100,11 +20109,11 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
             .group(function(rowData1){
                 return this.parent.group()._childrenByKey[rowData1.absKey];
             })
-            .localProperty('colorValue', Number)
+            .localProperty('colorValue')
             .colorValue(function(){
                 return colorDimName && this.datum().atoms[colorDimName].value;
             })
-            .localProperty('sizeValue',  Number)
+            .localProperty('sizeValue')
             .sizeValue(function(){
                 return sizeDimName && this.datum().atoms[sizeDimName].value;
             })
@@ -20181,7 +20190,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
             data = this.chart.data,
             sizeDimName  = this.sizeDimName,
             colorDimName = this.colorDimName,
-            nullShapeType = options.nullShape,
+            nullShapeType = this.nullShape,
             shapeType = this.shape;
         
         /* SIZE RANGE */
@@ -20209,7 +20218,9 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
             minArea = 1;
             areaSpan = maxArea - minArea;
             
-            pvc.log("Using rescue mode dot area calculation due to insufficient space.");
+            if(pvc.debug >= 2){
+                pvc.log("Using rescue mode dot area calculation due to insufficient space.");
+            }
         }
         
         var sizeValueToArea;
@@ -20218,11 +20229,11 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
             def.scope(function(){
                 var sizeValExtent = data.dimensions(sizeDimName).extent({visible: true});
                 if(sizeValExtent){
-                    var sizeValMin   = sizeValExtent.min.value,
-                        sizeValMax   = sizeValExtent.max.value,
-                        sizeValSpan  = Math.abs(sizeValMax - sizeValMin); // may be zero
+                    var sizeValMin  = sizeValExtent.min.value,
+                        sizeValMax  = sizeValExtent.max.value,
+                        sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
                     
-                    if(isFinite(sizeValSpan) && sizeValSpan > 0.001) {
+                    if(isFinite(sizeValSpan) && sizeValSpan > 0.00001) {
                         // Linear mapping
                         // TODO: a linear scale object??
                         var sizeSlope = areaSpan / sizeValSpan;
@@ -20290,7 +20301,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         } else {
             getShapeSize = function(){
                 var sizeValue = this.parent.sizeValue();
-                return (!sizeValue && !nullShapeType) ? 0 : sizeValueToArea(sizeValue);
+                return (sizeValue == null && !nullShapeType) ? 0 : sizeValueToArea(sizeValue);
             };
         }
         
