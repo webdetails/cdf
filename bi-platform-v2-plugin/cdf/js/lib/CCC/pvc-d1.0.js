@@ -70,8 +70,32 @@ pvc.cloneMatrix = function(m){
 
 pvc.mergeDefaults = function(to, defaults, from){
     def.eachOwn(defaults, function(dv, p){
-        var v;
-        to[p] = (from && (v = from[p]) !== undefined) ? v : dv;
+        var v, dvo;
+        
+        if(from){ 
+            v = from[p];
+        }
+        
+        if(v !== undefined){
+            var vo = def.object.asNative(v);
+            if(vo){
+                dvo = def.object.asNative(dv);
+                if(dvo){
+                    v = def.create(dvo, vo);
+                } // else, ignore dv
+            } // else, simple value (null included) ignores dv
+        }
+        
+        if(v === undefined){
+            // Inherit default native objects
+            dvo = def.object.asNative(dv);
+            if(dvo){
+                dv = Object.create(dvo);
+            }
+            v = dv;
+        }
+        
+        to[p] = v;
     });
     
     return to;
@@ -153,7 +177,7 @@ pvc.createColorScheme = function(colors){
         return pv.Colors.category10;
     }
 	
-    colors = def.array(colors);
+    colors = def.array.as(colors);
 	
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
@@ -284,7 +308,7 @@ pvc.Sides = function(sides){
 };
 
 pvc.Sides.names = 'left right top bottom'.split(' ');
-pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.constant(true));
+pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.retTrue);
 
 pvc.Sides.prototype.setSides = function(sides){
     if(typeof sides === 'string'){
@@ -1175,7 +1199,7 @@ var Size = def.type('pvc.Size')
 });
 
 pvc.Size.names = ['width', 'height'];
-pvc.Size.namesSet = pv.dict(pvc.Size.names, def.constant(true));
+pvc.Size.namesSet = pv.dict(pvc.Size.names, def.retTrue);
 
 // --------------------
 
@@ -2052,7 +2076,7 @@ def.scope(function(){
                    var domain = this._getDomain(),
                        scale  = this._createScale(domain);
                    
-                   createCategoryScale = def.constant(scale);
+                   createCategoryScale = def.fun.constant(scale);
                }
                
                return this._createCategoryScalesMap(createCategoryScale); 
@@ -3417,7 +3441,7 @@ def.type('pvc.data.TranslationOper')
         if(typeof dimNames === 'string'){
             dimNames = dimNames.split(/\s*\,\s*/);
         } else {
-            dimNames =  def.array(dimNames);
+            dimNames =  def.array.as(dimNames);
         }
         
         var hasDims = !!(dimNames && dimNames.length);
@@ -3435,7 +3459,7 @@ def.type('pvc.data.TranslationOper')
         }
         
         // Consumed/Reserved virtual item indexes
-        var indexes = def.array(dimReaderSpec.indexes);
+        var indexes = def.array.as(dimReaderSpec.indexes);
         if(indexes) {
             indexes.forEach(this._userUseIndex, this);
         }
@@ -3585,9 +3609,9 @@ def.type('pvc.data.TranslationOper')
 
     _userRead: function(reader, dimNames){
         /*jshint expr:true */
-        def.isFun(reader) || def.fail.argumentInvalid('reader', "Reader must be a function.");
+        def.fun.is(reader) || def.fail.argumentInvalid('reader', "Reader must be a function.");
         
-        if(def.isArray(dimNames)){
+        if(def.array.is(dimNames)){
             dimNames.forEach(function(name){
                 this._userDimsReadersByDim[name] = reader;
             }, this);
@@ -4658,7 +4682,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         if(this._axis2SeriesKeySet){
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
-                var calcAxis2SeriesKeySet = def.constant(this._axis2SeriesKeySet);
+                var calcAxis2SeriesKeySet = def.fun.constant(this._axis2SeriesKeySet);
 
                 /* Create a reader that surely only returns 'series' atoms */
                 seriesReader = this._filterDimensionReader(seriesReader, 'series');
@@ -6463,11 +6487,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
         
         if(parent.absLabel){
             /*global complex_labelSep:true */
-            this.absLabel = def.join(complex_labelSep, parent.absLabel, this.label);
+            this.absLabel = def.string.join(complex_labelSep, parent.absLabel, this.label);
         }
         
         if(parent.absKey){
-            this.absKey = def.join(",", parent.absKey, this.key);
+            this.absKey = def.string.join(",", parent.absKey, this.key);
         }
     }
 })
@@ -7355,7 +7379,7 @@ pvc.data.Data.setSelected = function(datums, selected){
  * @static
  */
 pvc.data.Data.toggleSelected = function(datums){
-    if(!def.isArrayLike(datums)){
+    if(!def.array.isLike(datums)){
         datums = def.query(datums).array();
     }
     
@@ -7400,7 +7424,7 @@ pvc.data.Data.setVisible = function(datums, visible){
  * @static
  */
 pvc.data.Data.toggleVisible = function(datums){
-    if(!def.isArrayLike(datums)){
+    if(!def.array.isLike(datums)){
         datums = def.query(datums).array();
     }
     
@@ -7769,9 +7793,9 @@ pvc.data.GroupingSpec.parse = function(specText, type){
     }
     
     var levels;
-    if(def.isArray(specText)) {
+    if(def.array.is(specText)) {
         levels = specText;
-    } else if(def.isString(specText)) {
+    } else if(def.string.is(specText)) {
         levels = specText.split(/\s*,\s*/); 
     }
 
@@ -7835,7 +7859,7 @@ var groupSpec_matchDimSpec = /^\s*(.+?)(?:\s+(asc|desc))?\s*$/i;
  */
 function groupSpec_parseGroupingLevel(groupLevelText, type) {
     /*jshint expr:true */
-    def.isString(groupLevelText) || def.fail.argumentInvalid('groupLevelText', "Invalid grouping specification.");
+    def.string.is(groupLevelText) || def.fail.argumentInvalid('groupLevelText', "Invalid grouping specification.");
     
     return def.query(groupLevelText.split(/\s*\|\s*/))
        .where(def.truthy)
@@ -7948,7 +7972,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
 
     // grouping spec ids is semantic keys, although the name is not 'key'
     var ids = [];
-    this._groupSpecs = def.array(groupingSpecs).map(function(groupSpec){
+    this._groupSpecs = def.array.as(groupingSpecs).map(function(groupSpec){
         if(groupSpec instanceof pvc.data.GroupingSpec) {
             if(groupSpec.type !== linkParent.type) {
                 throw def.error.argumentInvalid('groupingSpecText', "Invalid associated complex type.");
@@ -8556,7 +8580,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
 function data_processWhereSpec(whereSpec){
     var whereProcSpec = [];
     
-    whereSpec = def.array(whereSpec);
+    whereSpec = def.array.as(whereSpec);
     if(whereSpec){
         whereSpec.forEach(processDatumFilter, this);
     }
@@ -8656,7 +8680,7 @@ function data_whereState(q, keyArgs){
  */
 function data_where(whereSpec, keyArgs) {
     
-    var orderBys = def.array(def.get(keyArgs, 'orderBy')),
+    var orderBys = def.array.as(def.get(keyArgs, 'orderBy')),
         datumKeyArgs = def.create(keyArgs || {}, {
             orderBy: null
         });
@@ -9602,7 +9626,7 @@ def.type('pvc.visual.Sign')
             return this.scene.datum; 
         });
         
-    pvMark.sign = def.constant(this);
+    pvMark.sign = def.fun.constant(this);
     
     /* Intercept the protovis mark's buildInstance */
     pvMark.buildInstance = this._buildInstance.bind(this, pvMark.buildInstance);
@@ -10526,7 +10550,7 @@ def.type('pvc.visual.CartesianAxis')
     this.type  = type;
     this.index = index == null ? 0 : index;
 
-    this.roles = def.array(roles);
+    this.roles = def.array.as(roles);
     this.role  = this.roles[0];
     this.scaleType = groupingScaleType(this.role.grouping);
 
@@ -11303,9 +11327,10 @@ pvc.BaseChart = pvc.Abstract.extend({
     constructor: function(options) {
         var parent = this.parent = def.get(options, 'parent') || null;
         if(parent) {
+            // options != null
             this.root = parent.root;
             this.dataEngine =
-            this.data = def.get(options, 'data') ||
+            this.data = options.data ||
                         def.fail.argumentRequired('options.data');
             
             this.left = options.left;
@@ -11327,7 +11352,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             this._visualRoles = {};
             this._measureVisualRoles = [];
         }
-
+        
         this.options = pvc.mergeDefaults({}, pvc.BaseChart.defaultOptions, options);
     },
     
@@ -11374,11 +11399,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(options.showTooltips){
             var ts = options.tipsySettings;
             if(ts){
-                ts = options.tipsySettings = def.create(ts);
                 this.extend(ts, "tooltip_");
-                if(ts.exclusionGroup === undefined) {
-                    ts.exclusionGroup = 'chart';
-                }
             }
         }
     },
@@ -11755,7 +11776,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 
         function bind(role, dimNames){
             role.bind(pvc.data.GroupingSpec.parse(dimNames, type));
-            def.array(dimNames).forEach(function(dimName){
+            def.array.as(dimNames).forEach(function(dimName){
                 boundDimTypes[dimName] = true;
             });
         }
@@ -12050,7 +12071,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         switch(this.options.legendClickMode){
             case 'toggleSelected':
                 if(!this.options.selectable){
-                    isOn = def.constant(true);
+                    isOn = def.retTrue;
                 } else {
                     isOn = function(){
                         return !this.group.owner.selectedCount() || 
@@ -12547,6 +12568,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         },
         
         tipsySettings: {
+            exclusionGroup: 'chart',
             gravity: "s",
             delayIn:  200,
             delayOut: 50,
@@ -12554,6 +12576,7 @@ pvc.BaseChart = pvc.Abstract.extend({
             opacity:  0.8,
             html:     true,
             fade:     true,
+            corners:  false,
             followMouse: false
         },
         
@@ -13579,7 +13602,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         
         function addDim(escapedDimLabel, label){
-            tooltip.push('<b>' + escapedDimLabel + "</b>: " + (def.escapeHtml(label) || " - ") + '<br/>');
+            tooltip.push('<b>' + escapedDimLabel + "</b>: " + (def.html.escape(label) || " - ") + '<br/>');
         }
         
         function calcPercent(atom, dimName) {
@@ -13602,7 +13625,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                         valueLabel += " (" + calcPercent(atom, dimName) + ")";
                     }
                     
-                    addDim(def.escapeHtml(atom.dimension.type.label), valueLabel);
+                    addDim(def.html.escape(atom.dimension.type.label), valueLabel);
                 }
             }
         });
@@ -13614,7 +13637,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             group.freeDimensionNames().forEach(function(dimName){
                 var dim = group.dimensions(dimName);
                 if(!dim.type.isHidden){
-                    var dimLabel = def.escapeHtml(dim.type.label),
+                    var dimLabel = def.html.escape(dim.type.label),
                         valueLabel;
                     
                     if(dim.type.valueType === Number) {
@@ -13967,7 +13990,7 @@ pvc.BasePanel = pvc.Abstract.extend({
             // pvc.log(datum.key + ": " + JSON.stringify(shape) + " intersects? " + shape.intersectsRect(this.rubberBand));
             if (shape.intersectsRect(rb)){
                 var group = instance.group;
-                var datums = group ? group._datums : def.array(instance.datum);
+                var datums = group ? group._datums : def.array.as(instance.datum);
                 if(datums) {
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
@@ -15131,7 +15154,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @type pvc.visual.CartesianAxis
      */
     _createAxis: function(axisType, axisIndex){
-        var roles = def.array(this._axisRoleNameMap[axisType])
+        var roles = def.array.as(this._axisRoleNameMap[axisType])
                         .map(function(roleName){
                             return this.visualRoles(roleName);
                         }, this);
@@ -16403,8 +16426,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 }
             } 
             
-            var angle  = def.number(this._getExtension(labelExtId, 'textAngle'),  0);
-            var margin = def.number(this._getExtension(labelExtId, 'textMargin'), 3);
+            var angle  = def.number.as(this._getExtension(labelExtId, 'textAngle'),  0);
+            var margin = def.number.as(this._getExtension(labelExtId, 'textMargin'), 3);
             
             var textHeight = pvc.text.getTextHeight("m", font);
             
@@ -18547,7 +18570,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
         this.base();
 
         var strokeStyle = this._getExtension("barWaterfallLine", "strokeStyle");
-        if(strokeStyle && !def.isFun(strokeStyle)){
+        if(strokeStyle && !def.fun.is(strokeStyle)){
             this._waterColor = pv.color(strokeStyle);
         }
 
@@ -18559,7 +18582,7 @@ pvc.WaterfallChart = pvc.BarAbstract.extend({
                 label: this.options.accumulatedLineLabel,
                 color: this._waterColor,
                 shape: 'bar',
-                isOn:  def.constant(true),
+                isOn:  def.retTrue,
                 click: null
             }]
         });
@@ -18764,7 +18787,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 segmented:   !isDense
             })
             
-            .lock('visible', def.constant(true))
+            .lock('visible', def.retTrue)
             
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
@@ -18848,7 +18871,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
              */
             .lock('visible',
                     showDotsOnly ? 
-                    def.constant(false) : 
+                    def.retFalse : 
                     (isBaseDiscrete && isStacked ? 
                     function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
                     function(){ return !this.scene.isNull; })
@@ -20251,7 +20274,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
         /* SHAPE TYPE & SIZE */
         var getShapeType;
         if(!sizeDimName) {
-            getShapeType = def.constant(shapeType);
+            getShapeType = def.fun.constant(shapeType);
         } else {
             getShapeType = function(){
                 return this.parent.sizeValue() != null ? shapeType : nullShapeType;
@@ -20737,7 +20760,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 // ------
                 .bottom(0)
                 .text(function(scene){ 
-                    return def.join(",", scene.acts.x.label, scene.acts.y.label);
+                    return def.string.join(",", scene.acts.x.label, scene.acts.y.label);
                 })
                 ;
         }
@@ -23368,7 +23391,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                     case 'stroke': return strokeColor;
                 }
             })
-            .override('defaultStrokeWidth', def.constant(1))
+            .override('defaultStrokeWidth', def.fun.constant(1))
             .pvMark
             ;
 
@@ -23416,7 +23439,7 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
                 return this.scene.acts.median.value != null && this.delegate(true);
             })
             .lock(a_bottom,  function(){ return this.scene.acts.median.position; }) // bottom
-            .override('defaultStrokeWidth', def.constant(2))
+            .override('defaultStrokeWidth', def.fun.constant(2))
             .pvMark
             ;
     },

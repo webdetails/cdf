@@ -179,7 +179,6 @@ pv.Behavior.tipsy = function(opts) {
         // backwards compatibility for special gravity, 'c', 
         // added to jquery.tipsy to avoid the style applying to the arrow, 
         // causing it to not show.
-        // If you want to hide the arrow, change the style (not per tooltip, though).
         if(gravity === 'c'){
             gravity = 'w';
         }
@@ -281,11 +280,6 @@ pv.Behavior.tipsy = function(opts) {
             width:  bounds.width,
             height: bounds.height
         });
-        
-//        $fakeTipTarget[0].style.left = bounds.left + 'px';
-//        $fakeTipTarget[0].style.top = bounds.top + 'px';
-//        $fakeTipTarget[0].style.width = bounds.width  != null ? (bounds.width  + "px") : '';
-//        $fakeTipTarget[0].style.height = bounds.height != null ? (bounds.height + "px") : '';
     }
     
     function createTipsy(mark) {
@@ -333,11 +327,12 @@ pv.Behavior.tipsy = function(opts) {
     function getMouseBounds(ev){
         if(!ev){ ev = pv.event; }
         
+        var delta = 5;
         var offset = $canvas.offset();
         return {
-            left:   ev.pageX - offset.left,
-            top:    ev.pageY - offset.top,
-            width:  10,
+            left:   ev.pageX - offset.left - delta,
+            top:    ev.pageY - offset.top  - delta,
+            width:  10 + 2*delta,
             height: 20
         };
     }
