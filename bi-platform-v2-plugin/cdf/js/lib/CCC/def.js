@@ -41,13 +41,13 @@ if (!Array.prototype.filter){
     };
 }
 
-if (!Array.prototype.forEach){
-    Array.prototype.forEach = function(fun, ctx){
-        for(var i = 0, len = this.length; i < len; ++i) {  
-            fun.call(ctx, this[i], i, this);
-        }
-    };
-}
+//if (!Array.prototype.forEach){ // protovis has it
+//    Array.prototype.forEach = function(fun, ctx){
+//        for(var i = 0, len = this.length; i < len; ++i) {  
+//            fun.call(ctx, this[i], i, this);
+//        }
+//    };
+//}
 
 if(!Object.create){
     /** @ignore */
