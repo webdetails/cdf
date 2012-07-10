@@ -1812,6 +1812,7 @@ Query = function() {
   // CDA uses file+id, Legacy uses a raw query
   var _file = '';
   var _id = '';
+  var _outputIdx = '1';
   var _query = '';
   // Callback for the data handler
   var _callback = null;
@@ -1849,6 +1850,9 @@ Query = function() {
           if(cd.pageSize != null){
             _pageSize = cd.pageSize;
           }
+          if(cd.outputIndexId != null){
+            _outputIdx = cd.outputIndexId;
+          }		  
         } else {
           throw 'InvalidQuery';
         }
@@ -1857,7 +1861,7 @@ Query = function() {
         _mode = 'CDA';
         var file = args[0];
         var id = args[1];
-        if (typeof file != 'string' || typeof id != 'string') {
+		if (typeof file != 'string' || typeof id != 'string') {
           throw 'InvalidQuery';
         } else {
           // Seems like we have valid parameters
@@ -1932,6 +1936,7 @@ Query = function() {
     }
     queryDefinition.path = _file;
     queryDefinition.dataAccessId = _id;
+	queryDefinition.outputIndexId = _outputIdx;
     queryDefinition.pageSize = _pageSize;
     queryDefinition.pageStart = _page;
     queryDefinition.sortBy = _sortBy;
@@ -1940,6 +1945,7 @@ Query = function() {
 
   /*
      * Public interface
+
      */
 
   // Entry point
