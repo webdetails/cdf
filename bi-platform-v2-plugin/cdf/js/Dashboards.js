@@ -843,15 +843,19 @@ Dashboards.fireChange = function(parameter, value) {
   Dashboards.setParameter(parameter, value);
   var toUpdate = [];
   var workDone = false;
+  var silent = true;
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
       for(var j= 0 ; j < this.components[i].listeners.length; j++){
         if(this.components[i].listeners[j] == parameter && !this.components[i].disabled) {
-          // We only show the 'working' message if we ever do anything useful.
-          if (!workDone) {
-            workDone = true;
-            Dashboards.incrementRunningCalls();
+          if( !this.components[i].lifecycle || !this.components[i].lifecycle.silent) {
+            silent = false;
           }
+          // We only show the 'working' message if we ever do anything useful.
+          if (workDone && !silent) {
+            wordDone = true;
+            Dashboards.incrementRunningCalls();
+          }          
           toUpdate.push(this.components[i]);
           break;
         }
