@@ -6032,8 +6032,8 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
       var className = '__pv_gradient' + fill.id;
       
       // TODO: check this check exists method. It looks wrong...
-      
-      results = defs.querySelector('.' + className);
+      //1107[PVALE] - No ideia what this was supposed to do, but the method does not seem to exist            
+      results = undefined; //defs.querySelector('.' + className);
       if (!results) {
         var instId = '__pv_gradient' + fill.id + '_inst_' + (++gradient_definition_id);
         
@@ -7080,7 +7080,7 @@ pv.SvgScene.lineIntersect = function(o1, d1, o2, d2) {
 
   NOTE: 
   As yy points down, and because of the way Vector.perp() is written,
-  perp() corresponds to rotating 90º clockwise.
+  perp() corresponds to rotating 90ï¿½ clockwise.
   
   -----
   
