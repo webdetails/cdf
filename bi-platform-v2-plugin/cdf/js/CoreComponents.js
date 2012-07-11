@@ -1051,7 +1051,10 @@ var TextareaInputComponent = BaseComponent.extend({
 
 
 // Start by setting a sane i18n default to datepicker
-$(function(){$.datepicker.setDefaults($.datepicker.regional[''])});
+//TODO: move this to where we know for sure datepicker is loaded..
+if($.datepicker != null){
+  $(function(){$.datepicker.setDefaults($.datepicker.regional[''])});
+}
 
 var DateInputComponent = BaseComponent.extend({
   update: function(){

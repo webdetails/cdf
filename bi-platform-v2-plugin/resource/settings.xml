@@ -3,7 +3,7 @@
 	<cache>false</cache>
 	<max-age>2628001</max-age>
         <resources>
-            <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff,ico</downloadable-formats>
+            <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff,ico,zip,xml</downloadable-formats>
         </resources>
 
 
