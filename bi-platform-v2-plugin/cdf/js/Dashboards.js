@@ -853,7 +853,7 @@ Dashboards.fireChange = function(parameter, value) {
           }
           // We only show the 'working' message if we ever do anything useful.
           if (!workDone && !silent) {
-            wordDone = true;
+            workDone = true;
             Dashboards.incrementRunningCalls();
           }          
           toUpdate.push(this.components[i]);
