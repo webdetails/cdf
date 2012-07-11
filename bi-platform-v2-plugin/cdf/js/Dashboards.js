@@ -852,7 +852,7 @@ Dashboards.fireChange = function(parameter, value) {
             silent = false;
           }
           // We only show the 'working' message if we ever do anything useful.
-          if (workDone && !silent) {
+          if (!workDone && !silent) {
             wordDone = true;
             Dashboards.incrementRunningCalls();
           }          
