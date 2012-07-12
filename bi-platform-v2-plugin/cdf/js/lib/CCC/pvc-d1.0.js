@@ -18950,6 +18950,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 extensionId: 'area',
                 antialias:   showAreas && !showLines,
                 segmented:   !isDense,
+                noTooltips:  false,
                 noHoverable: false // While the area itself does not change appearance, the pvLine does due to activeSeries... 
             })
             
