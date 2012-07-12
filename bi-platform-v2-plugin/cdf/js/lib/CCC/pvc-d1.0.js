@@ -646,154 +646,6 @@ pv.Mark.prototype.localProperty = function(name, cast) {
   return this;
 };
 
-/* TICKS */
-/**
- * An alternative implementation of QuantitativeScale#ticks
- * that ensures that:
- * (i) the returned ticks include the min. and max. domain values, 
- * (ii) the scale's domain is extended, 
- *      when the calculated ticks so demand and
- * (iii) the resulting ticks are cached.
- * <br/>
- * Only scales with numeric domains are treated specially.
- * The 'syncScale', when not nully and is falsy, 
- * makes every case be treated solely by the protovis implementation.
- * <br /> 
- * In any case, the default of desiredTickCount is 5
- * (which is different from that of the protovis implementation).
- */
-pvc.scaleTicks = function(scale, syncScale, desiredTickCount, forceCalc){
-    /* This implementation uses PROTOVIS's 
-     * implementation of QuantitativeScale#ticks
-     * as a way to not to deal with date scales
-     * and to ensure that its internal field 'tickFormat'
-     * is updated.
-     * 
-     * For the cases when the ticks do not fully enclose the domain,
-     * this implementation copies & adapts PROTOVIS's
-     * implementation, and, unfortunately, 
-     * ends up doing the same work twice.
-     * 
-     * In either case, if the ticks domain is !=
-     * from the scale's domain the later is updated to the former.
-     */
-    if(!desiredTickCount){
-        desiredTickCount = 5;
-    }
-    
-    var ticks,
-        ticksCacheKey = syncScale + "|" + desiredTickCount;
-    if(!forceCalc && 
-       scale._ticksCache && 
-       (ticks = scale._ticksCache[ticksCacheKey])){
-        return ticks;
-    }
-    
-    // Call PROTOVIS implementation
-    ticks = scale.ticks(desiredTickCount);
-    
-    if(syncScale != null && !syncScale){
-        return ticks;
-    }
-    
-    var T = ticks.length;
-    
-    // Treat only well-formed, finite, numeric domains
-    if(T >= 2 && !(ticks[0] instanceof Date)){
-        // Assume numeric domain
-        
-        // Check if scale's domain is "included" in the ticks domain
-        var doma = scale.domain(),  // "doma/in"
-            domaBeg = doma[0],
-            domaEnd = doma[doma.length - 1],
-            
-            // Is it an ascending or descending scale?
-            // Assuming the scale is monotonic...
-            domaAsc = domaBeg < domaEnd,
-            
-            domaMin = domaAsc ? domaBeg : domaEnd,
-            domaMax = domaAsc ? domaEnd : domaBeg,
-            
-            tickMin = domaAsc ? ticks[0]     : ticks[T - 1],
-            tickMax = domaAsc ? ticks[T - 1] : ticks[0];
-        
-        if((tickMin > domaMin) || (domaMax > tickMax)){
-            // Copied & Adapted PROTOVIS algorithm
-            // To recalculate ticks that include the scale's domain
-            // at both ends.
-            
-            var domaSize  = domaMax - domaMin,
-                // 1, 10, 100, 1000, ...
-                tickStep  = pv.logFloor(domaSize / desiredTickCount, 10),
-                tickCount = (domaSize / tickStep),
-                err = desiredTickCount / tickCount;
-            
-            if      (err <= 0.15) { tickStep *= 10; }
-            else if (err <= 0.35) { tickStep *= 5;  }
-            else if (err <= 0.75) { tickStep *= 2;  }
-            
-            // NOTE: this is the "BIG" change to
-            //  PROTOVIS's implementation:
-            // ceil  -> floor
-            // floor -> ceil
-            tickMin = Math.floor(domaMin / tickStep) * tickStep;
-            tickMax = Math.ceil (domaMax / tickStep) * tickStep;
-            
-            // Overwrite PROTOVIS ticks
-            ticks = pv.range(tickMin, tickMax + tickStep, tickStep);
-            if(!domaAsc){
-                ticks = ticks.reverse();
-            }
-        }
-        
-        if(tickMin < domaMin || domaMax < tickMax){
-            /* Update the scale to reflect the new domain */
-            if(doma.length !== 2){
-                if(pvc.debug >= 2) {
-                    pvc.log("Ticks forced extending a linear scale's domain, " +
-                            "but it is not possible to update the domain because " + 
-                            "it has '" +  doma.length + "' element(s).");
-                }
-            } else {
-                if(pvc.debug >= 3) {
-                    pvc.log("Ticks forced extending a linear scale's domain from [" +
-                            [domaMin, domaMax] + "] to [" +
-                            [tickMin, tickMax] + "]");
-                }
-                
-                scale.domain(tickMin, tickMax);
-            }
-        } // else === && ===
-    }
-    
-    // Cache ticks
-    (scale._ticksCache || (scale._ticksCache = {}))[ticksCacheKey] = ticks;
-    
-    return ticks;
-};
-
-pvc.roundScaleDomain = function(scale, roundMode, desiredTickCount){
-    // Domain rounding
-    if(roundMode){
-        switch(roundMode){
-            case 'none':
-                break;
-                
-            case 'nice':
-                scale.nice();
-                break;
-            
-            case 'tick':
-                scale.nice();
-                pvc.scaleTicks(scale, true, desiredTickCount);
-                break;
-                
-            default:
-                pvc.log("Invalid 'roundMode' argument: '" + roundMode + "'.");
-        }
-    }
-};
-
 /* PROPERTIES */
 /**
  * Returns the value of a property as specified upon definition,
@@ -10128,8 +9980,8 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
      * @override
      */
     interactiveColor: function(type, color){
-        if(this.scene.anySelected() && !this.scene.isSelected()) {
-            if(type === 'fill'){
+        if(type === 'fill'){
+            if(this.scene.anySelected() && !this.scene.isSelected()) {
                 return this.dimColor(type, color);
             }
         }
@@ -10722,6 +10574,8 @@ $VCA.createAllDefaultOptions = function(options){
             'EndLine',
             'DomainRoundMode',
             'DesiredTickCount',
+            'TickExponentMin',
+            'TickExponentMax',
             'MinorTicks',
             'ClickAction',
             'DoubleClickAction',
@@ -10740,7 +10594,8 @@ $VCA.createAllDefaultOptions = function(options){
             'OverlappedLabelsHide',
             'OverlappedLabelsMaxPct',
             'Composite',
-            'ZeroLine'
+            'ZeroLine',
+            'LabelSpacingMin'
        ],
        globalDefaults = {
            'OriginIsZero':      true,
@@ -10756,7 +10611,8 @@ $VCA.createAllDefaultOptions = function(options){
            'RuleCrossesMargin': true,
            'EndLine':           false,
            'DomainRoundMode':   'none',
-           'ZeroLine':          true
+           'ZeroLine':          true,
+           'LabelSpacingMin':      1
        };
 
     function addOption(optionId, value){
@@ -10896,7 +10752,10 @@ var axisOptionHandlers = {
     TitleSize: {cast: Number2 },
     FullGridCrossesMargin: {cast: Boolean },
     RuleCrossesMargin: {cast: Boolean },
-    ZeroLine: {cast: Boolean }
+    ZeroLine: {cast: Boolean },
+    LabelSpacingMin: {cast: Number2 },
+    TickExponentMin: {cast: Number2 },
+    TickExponentMax: {cast: Number2 }
 };
 
 /**
@@ -12725,8 +12584,6 @@ pvc.BasePanel = pvc.Abstract.extend({
     layout: function(availableSize, referenceSize, keyArgs){
         if(!this._layoutInfo || def.get(keyArgs, 'force', false)) {
             
-            this._layoutInfo = null;
-            
             if(!referenceSize && availableSize){
                 referenceSize = def.copyOwn(availableSize);
             }
@@ -12778,7 +12635,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 desiredClientSize.height = Math.max(desiredClientSize.height - spaceHeight, 0);
             }
             
-            var layoutInfo = {
+            var layoutInfo = 
+                this._layoutInfo = {
                 referenceSize:       referenceSize,
                 margins:             margins,
                 paddings:            paddings,
@@ -12803,7 +12661,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             this.width = size.width;
             this.height = size.height;
-            this._layoutInfo = layoutInfo;
         }
     },
     
@@ -15121,6 +14978,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 anchor:            axis.option('Position'),
                 axisSize:          axis.option('Size'),
                 axisSizeMax:       axis.option('SizeMax'),
+                labelSpacingMin:   axis.option('LabelSpacingMin'),
+                tickExponentMin:   axis.option('TickExponentMin'),
+                tickExponentMax:   axis.option('TickExponentMax'),
                 fullGrid:          axis.option('FullGrid'),
                 fullGridCrossesMargin: axis.option('FullGridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
@@ -15217,17 +15077,30 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         /* DOMAIN */
 
         // With composite axis, only 'singleLevel' flattening works well
-        var flatteningMode = null, //axis.option('Composite') ? 'singleLevel' : null,
-            baseData = this._getVisibleData(dataPartValues),
-            data = axis.role.flatten(baseData, {
+        var flatteningMode = null; //axis.option('Composite') ? 'singleLevel' : null,
+        var baseData = this._getVisibleData(dataPartValues);
+        var data = axis.role.flatten(baseData, {
                                 visible: true,
                                 flatteningMode: flatteningMode
-                            }),
-            values = data.children().select(function(child){ return child.value; }).array(),
-            scale  = new pv.Scale.ordinal(values);
-
+                            });
+        
+        var scale  = new pv.Scale.ordinal();
         scale.type = 'Discrete';
-
+        
+        if(!data.count()){
+            scale.isNull = true;
+            
+            if(pvc.debug >= 3){
+                pvc.log("Discrete scale - no data");
+            }
+        } else {
+            var values = data.children()
+                             .select(function(child){ return child.value; })
+                             .array();
+            
+            scale.domain(values);
+        }
+        
         return scale;
     },
     
@@ -15250,26 +15123,29 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      */
     _createTimeseriesScaleByAxis: function(axis, dataPartValues){
         /* DOMAIN */
-        var dExtent = this._getVisibleValueExtent(axis, dataPartValues), // null when no data...
-            dMin,
-            dMax;
+        var extent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data...
         
-        if(dExtent) {
-            dMin = dExtent.min;
-            dMax = dExtent.max;
+        var scale = new pv.Scale.linear();
+        scale.type = 'Timeseries';
+        
+        if(!extent){
+            scale.isNull = true;
+            
+            if(pvc.debug >= 3){
+                pvc.log("Timeseries scale - no data");
+            }
         } else {
-            dMin = dMax = new Date();
-        }
-        
-        if((dMax - dMin) === 0) {
-            dMax = new Date(dMax.getTime() + 3600000); // 1 h
-        }
-        
-        var scale = new pv.Scale.linear(dMin, dMax);
+            var dMin = extent.min;
+            var dMax = extent.max;
 
-        // Domain rounding
-        // TODO: pvc.scaleTicks(scale) does not like Dates...
-        //pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
+            if((dMax - dMin) === 0) {
+                dMax = new Date(dMax.getTime() + 3600000); // 1 h
+            }
+        
+            scale.domain(dMin, dMax);
+            
+            // TODO: Domain rounding
+        }
         
         return scale;
     },
@@ -15292,57 +15168,73 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      */
     _createContinuousScaleByAxis: function(axis, dataPartValues){
         /* DOMAIN */
-        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues),
-            dMin = extent.min,
-            dMax = extent.max;
-
-        /*
-         * If both negative or both positive
-         * the scale does not contain the number 0.
-         *
-         * Currently this option ignores locks. Is this all right?
-         */
-        var originIsZero = axis.option('OriginIsZero');
-        if(originIsZero && (dMin * dMax > 0)){
-            if(dMin > 0){
-                dMin = 0;
-                extent.minLocked = true;
-            } else {
-                dMax = 0;
-                extent.maxLocked = true;
+        var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues);
+        
+        var scale = new pv.Scale.linear();
+        scale.type = 'Continuous';
+        
+        if(!extent){
+            scale.isNull = true;
+            
+            if(pvc.debug >= 3){
+                pvc.log("Continuous scale - no data");
             }
-        }
-
-        /*
-         * If the bounds (still) are the same, things break,
-         * so we add a wee bit of variation.
-         *
-         * This one must ignore locks.
-         */
-        if (dMin === dMax) {
-            dMin = dMin !== 0 ? dMin * 0.99 : originIsZero ? 0 : -0.1;
-            dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
-        } else if(dMin > dMax){
-            // What the heck...
-            // Is this ok or should throw?
-            var bound = dMin;
-            dMin = dMax;
-            dMax = bound;
-        }
-        
-        var scale = new pv.Scale.linear(dMin, dMax);
-        
-        // Domain rounding
-        // Must be done before applying offset
-        // because otherwise the offset gets amplified by the rounding
-        // Then, the scale range is updated but the ticks cache is not.
-        // The result is we end up showing two zones, on each end, with no ticks.
-        pvc.roundScaleDomain(scale, axis.option('DomainRoundMode'), axis.option('DesiredTickCount'));
-        
-        if(pvc.debug >= 3){
-            pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
-                    " create:"  + JSON.stringify({min: dMin, max: dMax}) + 
-                    " rounded:" + JSON.stringify(scale.domain()));
+        } else {
+            var dMin = extent.min;
+            var dMax = extent.max;
+    
+            /*
+             * If both negative or both positive
+             * the scale does not contain the number 0.
+             *
+             * Currently this option ignores locks. Is this all right?
+             */
+            var originIsZero = axis.option('OriginIsZero');
+            if(originIsZero && (dMin * dMax > 0)){
+                if(dMin > 0){
+                    dMin = 0;
+                    extent.minLocked = true;
+                } else {
+                    dMax = 0;
+                    extent.maxLocked = true;
+                }
+            }
+    
+            /*
+             * If the bounds (still) are the same, things break,
+             * so we add a wee bit of variation.
+             *
+             * This one must ignore locks.
+             */
+            if (dMin === dMax) {
+                dMin = dMin !== 0 ? dMin * 0.99 : originIsZero ? 0 : -0.1;
+                dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
+            } else if(dMin > dMax){
+                // What the heck...
+                // Is this ok or should throw?
+                var bound = dMin;
+                dMin = dMax;
+                dMax = bound;
+            }
+            
+            scale.domain(dMin, dMax);
+            
+            // Domain rounding
+            // Must be done before applying offset
+            // because otherwise the offset gets amplified by the rounding
+            // Then, the scale range is updated but the ticks cache is not.
+            // The result is we end up showing two zones, on each end, with no ticks.
+            var roundMode = axis.option('DomainRoundMode');
+            if(roundMode === 'nice'){
+                scale.nice();
+                // Ticks domain rounding is performed during AxisPanel layout
+            }
+            
+            if(pvc.debug >= 3){
+                pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
+                        " create:" + JSON.stringify({min: dMin, max: dMax}) + 
+                        " niced:"  + JSON.stringify(scale.domain()));
+            }
         }
         
         return scale;
@@ -15376,6 +15268,19 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 scale.splitBandedCenter(scale.min, scale.max, bandRatio);
             }
         } else {
+            if(scale.type === 'Continuous' && axis.option('DomainRoundMode') === 'tick'){
+                var axisPanel = this.axesPanels[axis.id];
+                if(axisPanel){
+                    // Domain rounding
+                    // Commit the scale's domain to the axis calculated ticks domain
+                    var ticks = axisPanel.getTicks();
+                    var tickCount = ticks && ticks.length;
+                    if(tickCount){
+                        scale.domain(ticks[0], ticks[tickCount - 1]);
+                    }
+                }
+            }
+            
             scale.range(scale.min, scale.max);
         }
         
@@ -15534,16 +15439,18 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         }
         
-        var baseExtent;
         if(min == null || max == null) {
-            baseExtent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data
+            var baseExtent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data
+            if(!baseExtent){
+                return null;
+            }
             
             if(min == null){
-                min = baseExtent ? baseExtent.min : 0;
+                min = baseExtent.min;
             }
             
             if(max == null){
-                max = baseExtent ? baseExtent.max : 0;
+                max = baseExtent.max;
             }
         }
         
@@ -15764,64 +15671,83 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
     },
 
     _createZeroLine: function(axis){
-        var scale  = axis.scale,
-            domain = scale.domain();
-
-        // Domain crosses zero?
-        if(domain[0] * domain[1] <= 0){
-            var a   = axis.orientation === 'x' ? 'bottom' : 'left',
-                al  = this.anchorLength(a),
-                ao  = this.anchorOrtho(a),
-                aol = this.anchorOrthoLength(a),
-                orthoAxis = this._getOrthoAxis(axis.type),
-                orthoScale = orthoAxis.scale,
-                orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
-                contentPanel = this.chart._mainContentPanel,
-                zeroPosition = contentPanel.position[ao] + scale(0),
-                position = contentPanel.position[a] + 
-                            (orthoFullGridCrossesMargin ?
-                                0 :
-                                orthoScale.offset),
-
-                olength   = orthoFullGridCrossesMargin ?
-                                    orthoScale.size :
-                                    orthoScale.offsetSize;
-            
-            this.pvZeroLine = this.pvPanel.add(pv.Rule)
-                /* zOrder
-                 *
-                 * TOP
-                 * -------------------
-                 * Axis Rules:     0
-                 * Frame/EndLine: -5
-                 * Line/Dot/Area Content: -7
-                 * ZeroLine:      -9   <<------
-                 * Content:       -10 (default)
-                 * FullGrid:      -12
-                 * -------------------
-                 * BOT
-                 */
-                .zOrder(-9)
-                .strokeStyle("#808285")
-                [a](position)
-                [aol](olength)
-                [al](null)
-                [ao](zeroPosition)
-                //.svg(null)
-                ;
+        var scale = axis.scale;
+        if(!scale.isNull){
+            var domain = scale.domain();
+    
+            // Domain crosses zero?
+            if(domain[0] * domain[1] <= 0){
+                var a   = axis.orientation === 'x' ? 'bottom' : 'left',
+                    al  = this.anchorLength(a),
+                    ao  = this.anchorOrtho(a),
+                    aol = this.anchorOrthoLength(a),
+                    orthoAxis = this._getOrthoAxis(axis.type),
+                    orthoScale = orthoAxis.scale,
+                    orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
+                    contentPanel = this.chart._mainContentPanel,
+                    zeroPosition = contentPanel.position[ao] + scale(0),
+                    position = contentPanel.position[a] + 
+                                (orthoFullGridCrossesMargin ?
+                                    0 :
+                                    orthoScale.offset),
+    
+                    olength   = orthoFullGridCrossesMargin ?
+                                        orthoScale.size :
+                                        orthoScale.offsetSize;
+                
+                this.pvZeroLine = this.pvPanel.add(pv.Rule)
+                    /* zOrder
+                     *
+                     * TOP
+                     * -------------------
+                     * Axis Rules:     0
+                     * Frame/EndLine: -5
+                     * Line/Dot/Area Content: -7
+                     * ZeroLine:      -9   <<------
+                     * Content:       -10 (default)
+                     * FullGrid:      -12
+                     * -------------------
+                     * BOT
+                     */
+                    .zOrder(-9)
+                    .strokeStyle("#808285")
+                    [a](position)
+                    [aol](olength)
+                    [al](null)
+                    [ao](zeroPosition)
+                    //.svg(null)
+                    ;
+            }
         }
     },
 
     _createFrameRule: function(axis){
-        var a = axis.option('Position'),
-            scale = axis.scale,
-            orthoAxis = this._getOrthoAxis(axis.type),
-            orthoScale = orthoAxis.scale,
-            fullGridCrossesMargin = axis.option('FullGridCrossesMargin'),
-            orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin')
-            ;
+        var orthoAxis = this._getOrthoAxis(axis.type);
+        var orthoScale = orthoAxis.scale;
+        if(orthoScale.isNull){
+            // Can only hide if the second axis is null as well 
+            var orthoAxis2 = this.chart.axes[pvc.visual.CartesianAxis.getId(orthoAxis.type, 1)];
+            if(!orthoAxis2 || orthoAxis2.scale.isNull){
+                return;
+            }
+            
+            orthoScale = orthoAxis2;
+        }
         
+        var a = axis.option('Position');
+        var scale = axis.scale;
+        if(scale.isNull){
+            // Can only hide if the second axis is null as well 
+            var axis2 = this.chart.axes[pvc.visual.CartesianAxis.getId(axis.type, 1)];
+            if(!axis2 || axis2.scale.isNull){
+                return;
+            }
+        }
+        
+        var fullGridCrossesMargin = axis.option('FullGridCrossesMargin');
+        var orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin');
         var contentPanel = this.chart._mainContentPanel;
+        
         switch(a) {
             case 'right':
                 a = 'left';
@@ -15861,7 +15787,7 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
             [aol](null)
             .svg({ 'stroke-linecap': 'square' })
             ;
-
+    
         return frameRule;
     },
 
@@ -16278,10 +16204,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     ruleCrossesMargin: true,
     zeroLine: false, // continuous axis
     font: '9px sans-serif', // label font
-
+    labelSpacingMin: 1,
     // To be used in linear scales
     domainRoundMode: 'none',
     desiredTickCount: null,
+    tickExponentMin:  null,
+    tickExponentMax:  null,
     minorTicks:       true,
     
     _isScaleSetup: false,
@@ -16312,6 +16240,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.isDiscrete = axis.role.grouping.isDiscrete();
     },
     
+    getTicks: function(){
+        return this._layoutInfo && this._layoutInfo.ticks;
+    },
+    
     _calcLayout: function(layoutInfo){
         
         var scale = this.axis.scale;
@@ -16325,203 +16257,470 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this._isScaleSetup = true;
         }
         
-        var labelBBox;
+        if(scale.isNull){
+            layoutInfo.axisSize = 0;
+        } else {
+            this._calcLayoutCore(layoutInfo);
+        }
         
-        function labelLayout(){
-            var labelExtId = this.panelName + 'Label';
+        return this.createAnchoredSize(layoutInfo.axisSize, layoutInfo.clientSize);
+    },
+    
+    _calcLayoutCore: function(layoutInfo){
+        //var layoutInfo = this._layoutInfo;
+        
+        // Fixed axis size?
+        layoutInfo.axisSize = this.axisSize;
+        
+        if (this.isDiscrete && this.useCompositeAxis){
+            if(layoutInfo.axisSize == null){
+                layoutInfo.axisSize = 50;
+            }
+        } else {
             
-            var font = this.font;
-                
-            var align = this._getExtension(labelExtId, 'textAlign');
-            if(typeof align !== 'string'){
-                align = this.isAnchorTopOrBottom() ? 
-                        "center" : 
-                        (this.anchor == "left") ? "right" : "left";
+            /* I  - Calculate ticks
+             * --> layoutInfo.{ ticks, ticksText, maxTextWidth } 
+             */
+            this._calcTicks();
+            
+            /* II - Calculate REQUIRED axisSize so that all labels fit */
+            if(layoutInfo.axisSize == null){
+                this._calcAxisSizeFromLabel(); // -> layoutInfo.axisSize and layoutInfo.labelBBox
             }
             
-            var baseline = this._getExtension(labelExtId, 'textBaseline');
-            if(typeof baseline !== 'string'){
-                switch (this.anchor) {
-                    case "right":
-                    case "left":
-                    case "center": 
-                        baseline = "middle";
-                        break;
-                        
-                    case "bottom": 
-                        baseline = "top";
-                        break;
-                      
-                    default:
-                    //case "top": 
-                        baseline = "bottom";
-                        //break;
-                }
-            } 
+            /* III - Calculate Trimming Length if FIXED/REQUIRED > AVAILABLE */
+            this._calcMaxTextLengthThatFits();
             
-            var angle  = def.number.as(this._getExtension(labelExtId, 'textAngle'),  0);
-            var margin = def.number.as(this._getExtension(labelExtId, 'textMargin'), 3);
+            // Release memory.
+            layoutInfo.labelBBox = null;
+        }
+    },
+    
+    _calcAxisSizeFromLabel: function(){
+        this._calcLabelBBox();
+        this._calcAxisSizeFromLabelBBox();
+    },
+
+    // --> layoutInfo.labelBBox
+    _calcLabelBBox: function(){
+        var layoutInfo = this._layoutInfo;
+        
+        var labelExtId = this.panelName + 'Label';
+        
+        var align = this._getExtension(labelExtId, 'textAlign');
+        if(typeof align !== 'string'){
+            align = this.isAnchorTopOrBottom() ? 
+                    "center" : 
+                    (this.anchor == "left") ? "right" : "left";
+        }
+        
+        var baseline = this._getExtension(labelExtId, 'textBaseline');
+        if(typeof baseline !== 'string'){
+            switch (this.anchor) {
+                case "right":
+                case "left":
+                case "center": 
+                    baseline = "middle";
+                    break;
+                    
+                case "bottom": 
+                    baseline = "top";
+                    break;
+                  
+                default:
+                //case "top": 
+                    baseline = "bottom";
+                    //break;
+            }
+        } 
+        
+        var angle  = def.number.as(this._getExtension(labelExtId, 'textAngle'),  0);
+        var margin = def.number.as(this._getExtension(labelExtId, 'textMargin'), 3);
+        
+        layoutInfo.labelBBox = pvc.text.getLabelBBox(
+                        layoutInfo.maxTextWidth, 
+                        layoutInfo.textHeight, 
+                        align, 
+                        baseline, 
+                        angle, 
+                        margin);
+    },
+    
+    _calcAxisSizeFromLabelBBox: function(){
+        var layoutInfo = this._layoutInfo;
+        var labelBBox = layoutInfo.labelBBox;
+        
+        // The length not over the plot area
+        var length;
+        switch(this.anchor){
+            case 'left':   length = -labelBBox.x; break;
+            case 'right':  length = labelBBox.x2; break;
+            case 'top':    length = -labelBBox.y; break;
+            case 'bottom': length = labelBBox.y2; break;
+        }
+        
+        length = Math.max(length, 0);
+        
+        // --------------
+        
+        layoutInfo.axisSize = this.tickLength + length; 
+        
+        // Add equal margin on both sides?
+        var angle = labelBBox.sourceAngle;
+        if(!(angle === 0 && this.isAnchorTopOrBottom())){
+            // Text height already has some free space in that case
+            // so no need to add more.
+            layoutInfo.axisSize += this.tickLength;
+        }
+    },
+    
+    _calcMaxTextLengthThatFits: function(){
+        var layoutInfo = this._layoutInfo;
+        var maxClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
+        if(layoutInfo.axisSize <= maxClientLength){
+            // Labels fit
+            // Clear to avoid unnecessary trimming
+            layoutInfo.maxTextWidth = null;
+        } else {
+            // Text may not fit. 
+            // Calculate maxTextWidth where text is to be trimmed.
             
-            var textHeight = pvc.text.getTextHeight("m", font);
-            
-            var textItems;
-            if(this.isDiscrete){
-                var data = this.chart.visualRoles(this.roleName)
-                               .flatten(this.chart.data, {visible: true});
-                
-                textItems = def.query(data._children)
-                               .select(function(child){ return child.absLabel; });
-            } else {
-                var ticks = pvc.scaleTicks(
-                                scale,
-                                this.domainRoundMode === 'tick',
-                                this.desiredTickCount);
-                
-                textItems = def.query(ticks)
-                                .select(function(tick){ return scale.tickFormat(tick); });
+            var labelBBox = layoutInfo.labelBBox;
+            if(!labelBBox){
+                // NOTE: requires previously calculated layoutInfo.maxTextWidth...
+                this._calcAxisSizeFromLabel();
             }
             
-            var textWidth = textItems
-                                .select(function(text){ return 1.0 * pvc.text.getTextLength(text, font); })
-                                .max();
+            // Now move backwards, to the max text width...
+            var maxOrthoLength = maxClientLength - 2 * this.tickLength;
             
-            labelBBox = pvc.text.getLabelBBox(textWidth, textHeight, align, baseline, angle, margin);
-            
-            // The length not over the plot area
-            var length;
+            // A point at the maximum orthogonal distance from the anchor
+            var mostOrthoDistantPoint;
+            var parallelDirection;
             switch(this.anchor){
                 case 'left':
-                    length = -labelBBox.x;
+                    parallelDirection = pv.vector(0, 1);
+                    mostOrthoDistantPoint = pv.vector(-maxOrthoLength, 0);
                     break;
                 
                 case 'right':
-                    length = labelBBox.x2;
+                    parallelDirection = pv.vector(0, 1);
+                    mostOrthoDistantPoint = pv.vector(maxOrthoLength, 0);
                     break;
                     
                 case 'top':
-                    length = -labelBBox.y;
+                    parallelDirection = pv.vector(1, 0);
+                    mostOrthoDistantPoint = pv.vector(0, -maxOrthoLength);
                     break;
                 
                 case 'bottom':
-                    length = labelBBox.y2;
+                    parallelDirection = pv.vector(1, 0);
+                    mostOrthoDistantPoint = pv.vector(0, maxOrthoLength);
                     break;
             }
             
-            length = Math.max(length, 0);
+            // Intersect the line that passes through mostOrthoDistantPoint,
+            // and has the direction parallelDirection with 
+            // the top side and with the bottom side of the *original* label box.
+            var corners = labelBBox.sourceCorners;
+            var botL = corners[0];
+            var botR = corners[1];
+            var topL = corners[2];
+            var topR = corners[3];
             
-            // --------------
+            var topRLSideDir = topR.minus(topL);
+            var botRLSideDir = botR.minus(botL);
+            var intersect = pv.SvgScene.lineIntersect;
+            var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botRLSideDir);
+            var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topRLSideDir);
             
-            this.axisSize = this.tickLength + length; 
+            // Two cases
+            // A) If the angle is between -90 and 90, the text does not get upside down
+            // In that case, we're always interested in topI -> topR and botI -> botR
+            // B) Otherwise the relevant new segments are topI -> topL and botI -> botL
             
-            // Add equal margin on both sides?
-            if(!(angle === 0 && this.isAnchorTopOrBottom())){
-                // Text height already has some free space in that case
-                // so no need to add more.
-                this.axisSize += this.tickLength;
+            var maxTextWidth;
+            if(Math.cos(labelBBox.sourceAngle) >= 0){
+                // A) [-90, 90]
+                maxTextWidth = Math.min(
+                                    topR.minus(topI).length(), 
+                                    botR.minus(botI).length());
+            } else {
+                maxTextWidth = Math.min(
+                        topL.minus(topI).length(), 
+                        botL.minus(botI).length());
             }
+            
+            // One other detail.
+            // When align (anchor) is center,
+            // just cutting on one side of the label original box
+            // won't do, because when text is centered, the cut we make in length
+            // ends up distributed by both sides...
+            if(labelBBox.sourceAlign === 'center'){
+                var cutWidth = labelBBox.sourceTextWidth - maxTextWidth;
+                
+                // Cut same width on the opposite side. 
+                maxTextWidth -= cutWidth;
+            }
+            
+            layoutInfo.maxTextWidth = maxTextWidth; 
+        }
+    },
+    
+    // ----------------
+    
+    _calcTicks: function(){
+        var layoutInfo = this._layoutInfo;
+        
+        layoutInfo.textHeight = pvc.text.getTextHeight("m", this.font);
+        layoutInfo.maxTextWidth = null;
+        
+        // update maxTextWidth, ticks and ticksText
+        switch(this.scale.type){
+            case 'Discrete'  : this._calcDiscreteTicks(); break;
+            case 'Timeseries': this._calcTimeseriesTicks(); break;
+            case 'Continuous': this._calcNumberTicks(); break;
+            default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
         
-        layoutInfo.maxTextWidth = Infinity;
-        
-        if (this.isDiscrete && this.useCompositeAxis){
-            if(this.axisSize == null){
-                this.axisSize = 50;
-            }
-        } else {
-            if(this.axisSize == null){
-                labelLayout.call(this);
+        if(layoutInfo.maxTextWidth == null){
+            layoutInfo.maxTextWidth = 
+                def.query(layoutInfo.ticksText)
+                    .select(function(text){ return pvc.text.getTextLength(text, this.font); }, this)
+                    .max();
+        }
+    },
+    
+    _calcDiscreteTicks: function(){
+        var layoutInfo = this._layoutInfo;
+        var data = this.chart.visualRoles(this.roleName)
+                        .flatten(this.chart.data, {visible: true});
+         
+        layoutInfo.data  = data;
+        layoutInfo.ticks = data._children;
+         
+        layoutInfo.ticksText = def.query(data._children)
+                            .select(function(child){ return child.absLabel; })
+                            .array();
+    },
+    
+    _calcTimeseriesTicks: function(){
+        this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
+    },
+    
+    _calcNumberTicks: function(){
+        var desiredTickCount = this.desiredTickCount;
+        if(desiredTickCount == null){
+            if(this.isAnchorTopOrBottom()){
+                this._calcNumberHTicks();
+                return;
             }
             
-            var maxClientLength = layoutInfo.clientSize[this.anchorOrthoLength()];
-            if(this.axisSize > maxClientLength){
-                // Text may not fit. Calculate maxTextWidth.
-                if(!labelBBox){
-                    labelLayout.call(this);
+            desiredTickCount = this._calcNumberVDesiredTickCount();
+        }
+        
+        this._calcContinuousTicks(this._layoutInfo, desiredTickCount);
+    },
+    
+    // --------------
+    
+    _calcContinuousTicks: function(ticksInfo, desiredTickCount){
+        this._calcContinuousTicksValue(ticksInfo, desiredTickCount);
+        this._calcContinuousTicksText(ticksInfo);
+    },
+    
+    _calcContinuousTicksValue: function(ticksInfo, desiredTickCount){
+        ticksInfo.ticks = this.scale.ticks(
+                                desiredTickCount, {
+                                    roundInside:       this.domainRoundMode !== 'tick',
+                                    numberExponentMin: this.tickExponentMin,
+                                    numberExponentMax: this.tickExponentMax
+                                });
+    },
+    
+    _calcContinuousTicksText: function(ticksInfo){
+        
+        ticksInfo.ticksText = def.query(ticksInfo.ticks)
+                               .select(function(tick){ return this.scale.tickFormat(tick); }, this)
+                               .array();
+    },
+    
+    // --------------
+    
+    _calcNumberVDesiredTickCount: function(){
+        var layoutInfo = this._layoutInfo;
+        
+        var lineHeight   = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
+        
+        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        
+        return Math.max(1, ~~(clientLength / lineHeight));
+    },
+    
+    _calcNumberHTicks: function(){
+        var layoutInfo = this._layoutInfo;
+        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        var spacing = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin/*em*/));
+        var desiredTickCount = this._calcNumberHDesiredTickCount(this, spacing);
+        
+        var doLog = (pvc.debug >= 5);
+        var dir, prevResultTickCount;
+        var ticksInfo, lastBelow, lastAbove;
+        do {
+            if(doLog){ pvc.log("calculateNumberHTicks TickCount IN desired = " + desiredTickCount); }
+            
+            ticksInfo = {};
+            
+            this._calcContinuousTicksValue(ticksInfo, desiredTickCount);
+            
+            var ticks = ticksInfo.ticks;
+            
+            var resultTickCount = ticks.length;
+            
+            if(ticks.exponentOverflow){
+                // TODO: Check if this part of the algorithm is working ok
+                
+                // Cannot go anymore in the current direction, if any
+                if(dir == null){
+                    if(ticks.exponent === this.exponentMin){
+                        lastBelow = ticksInfo;
+                        dir =  1;
+                    } else {
+                        lastAbove = ticksInfo;
+                        dir = -1;
+                    }
+                } else if(dir === 1){
+                    if(lastBelow){
+                        ticksInfo = lastBelow;
+                    }
+                    break;
+                } else { // dir === -1
+                    if(lastAbove){
+                        ticksInfo = lastAbove;
+                    }
+                    break;
                 }
                 
-                // Now move backwards, to the max text width...
-                var maxOrthoLength = maxClientLength - 2 * this.tickLength;
+            } else if(prevResultTickCount == null || resultTickCount !== prevResultTickCount){
                 
-                // A point at the maximum orthogonal distance from the anchor
-                var mostOrthoDistantPoint;
-                var parallelDirection;
-                switch(this.anchor){
-                    case 'left':
-                        parallelDirection = pv.vector(0, 1);
-                        mostOrthoDistantPoint = pv.vector(-maxOrthoLength, 0);
-                        break;
-                    
-                    case 'right':
-                        parallelDirection = pv.vector(0, 1);
-                        mostOrthoDistantPoint = pv.vector(maxOrthoLength, 0);
-                        break;
-                        
-                    case 'top':
-                        parallelDirection = pv.vector(1, 0);
-                        mostOrthoDistantPoint = pv.vector(0, -maxOrthoLength);
-                        break;
-                    
-                    case 'bottom':
-                        parallelDirection = pv.vector(1, 0);
-                        mostOrthoDistantPoint = pv.vector(0, maxOrthoLength);
-                        break;
+                if(doLog){ 
+                    pvc.log("calculateNumberHTicks TickCount desired/resulting = " + desiredTickCount + " -> " + resultTickCount); 
                 }
                 
-                // Intersect the line that passes through mostOrthoDistantPoint,
-                // and has the direction parallelDirection with 
-                // the top side and with the bottom side of the *original* label box.
-                var corners = labelBBox.sourceCorners;
-                var botL = corners[0];
-                var botR = corners[1];
-                var topL = corners[2];
-                var topR = corners[3];
+                prevResultTickCount = resultTickCount;
                 
-                var topRLSideDir = topR.minus(topL);
-                var botRLSideDir = botR.minus(botL);
-                var intersect = pv.SvgScene.lineIntersect;
-                var botI = intersect(mostOrthoDistantPoint, parallelDirection, botL, botRLSideDir);
-                var topI = intersect(mostOrthoDistantPoint, parallelDirection, topL, topRLSideDir);
+                this._calcContinuousTicksText(ticksInfo);
                 
-                // Two cases
-                // A) If the angle is between -90 and 90, the text does not get upside down
-                // In that case, we're always interested in topI -> topR and botI -> botR
-                // B) Otherwise the relevant new segments are topI -> topL and botI -> botL
+                var length = this._calcNumberHLength(ticksInfo, spacing);
+                var excessLength  = length - clientLength;
+                var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
                 
-                var maxTextWidth;
-                if(Math.cos(labelBBox.sourceAngle) >= 0){
-                    // A) [-90, 90]
-                    maxTextWidth = Math.min(
-                                        topR.minus(topI).length(), 
-                                        botR.minus(botI).length());
+                if(doLog){ 
+                    pvc.log("calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
+                }
+                
+                if(excessLength > 0){
+                    // More ticks than can fit
+                    if(desiredTickCount === 1){
+                        break;
+                    }
+                    
+                    if(lastBelow){
+                        // We were below max length and then overshot...
+                        // Choose the best conforming one
+                        if(pctError > 0.05 || pctError > lastBelow.error){
+                            ticksInfo = lastBelow;
+                        }
+                        break;
+                    }
+                    
+                    // Backup last *above* calculation
+                    lastAbove = ticksInfo;
+                    
+                    dir = -1;
                 } else {
-                    maxTextWidth = Math.min(
-                            topL.minus(topI).length(), 
-                            botL.minus(botI).length());
-                }
-                
-                // One other detail.
-                // When align (anchor) is center,
-                // just cutting on one side of the label original box
-                // won't do, because when text is centered, the cut we make in length
-                // ends up distributed by both sides...
-                if(labelBBox.sourceAlign === 'center'){
-                    var cutWidth = labelBBox.sourceTextWidth - maxTextWidth;
+                    // Less ticks than could fit
                     
-                    // Cut same width on the opposite side. 
-                    maxTextWidth -= cutWidth;
+                    if(pctError <= 0.05 || dir === -1){
+                        // Acceptable
+                        // or
+                        // Already had exceeded the length and had decided to go down
+                        
+                        if(lastAbove && pctError > lastAbove.error){
+                            ticksInfo = lastAbove;
+                        }
+                        break;
+                    }
+                    
+                    // Backup last *below* calculation
+                    lastBelow = ticksInfo;
+                                            
+                    dir = +1;
                 }
-                
-                layoutInfo.maxTextWidth = maxTextWidth; 
+            }
+            
+            desiredTickCount += dir;
+        } while(true);
+        
+        if(ticksInfo){
+            layoutInfo.ticks = ticksInfo.ticks;
+            layoutInfo.ticksText = ticksInfo.ticksText;
+            layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
+        }
+        
+        if(doLog){ pvc.log("calculateNumberHTicks END"); }
+    },
+    
+    _calcNumberHDesiredTickCount: function(spacing){
+        // The initial tick count is determined 
+        // from the formatted min and max values of the domain.
+        var layoutInfo = this._layoutInfo;
+        var domainTextLength = this.scale.domain().map(function(tick){
+                var text = this.scale.tickFormat(tick);
+                return pvc.text.getTextLength(text, this.font); 
+            }, this);
+        
+        var avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight);
+        
+        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        
+        return Math.max(1, ~~(clientLength / (avgTextLength + spacing)));
+    },
+    
+    _calcNumberHLength: function(ticksInfo, spacing){
+        // Measure full width, with spacing
+        var ticksText = ticksInfo.ticksText;
+        var tickCount = ticksText.length;
+        var length = 0;
+        var maxLength = -Infinity;
+        for(var t = 0 ; t < tickCount ; t++){
+            var textLength = pvc.text.getTextLength(ticksText[t], this.font);
+            if(textLength > maxLength){
+                maxLength = textLength;
+            }
+            
+            if(t){
+                length += spacing;
+            }
+            
+            if(!t ||  t === tickCount - 1) {
+                // Include half the text size only, as centered labels are the most common scenario
+                length += textLength / 2;
+            } else {
+                // Middle tick
+                length += textLength;
             }
         }
         
-        return this.createAnchoredSize(this.axisSize, layoutInfo.clientSize);
+        ticksInfo.maxTextWidth = maxLength;
+        
+        return length;
     },
     
     _createCore: function() {
         this.renderAxis();
     },
-
+    
     /**
      * @override
      */
@@ -16549,6 +16748,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     },
 
     renderAxis: function(){
+        if(this.scale.isNull){
+            return;
+        }
+        
         // Z-Order
         // ==============
         // -10 - grid lines   (on 'gridLines' background panel)
@@ -16559,40 +16762,12 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         //  40 - labels       (on main foreground panel)
         
         // Range
-        var rMin  = this.ruleCrossesMargin ?  0 : this.pvScale.min,
-            rMax  = this.ruleCrossesMargin ?  this.pvScale.size : this.pvScale.max,
+        var rMin  = this.ruleCrossesMargin ?  0 : this.scale.min,
+            rMax  = this.ruleCrossesMargin ?  this.scale.size : this.scale.max,
             rSize = rMax - rMin,
             ruleParentPanel = this.pvPanel;
 
         this._rSize = rSize;
-        
-//        if(this.title){
-//           this.pvTitlePanel = this.pvPanel.add(pv.Panel)
-//                [this.anchor             ](0)     // bottom (of the axis panel)
-//                [this.anchorOrthoLength()](this.titleSize) // height
-//                [this.anchorOrtho()      ](rMin)  // left
-//                [this.anchorLength()     ](rSize) // width
-//                ;
-//
-//            this.pvTitle = this.pvTitlePanel.anchor('center').add(pv.Label)
-//                .lock('text', this.title)
-//                .lock('font', this.titleFont)
-//
-//                // Rotate text over center point
-//                .lock('textAngle',
-//                    this.anchor === 'left'  ? -Math.PI/2 :
-//                    this.anchor === 'right' ?  Math.PI/2 :
-//                    null)
-//                ;
-//
-//            // Create a container panel to draw the remaining axis components
-//            ruleParentPanel = this.pvPanel.add(pv.Panel)
-//                [this.anchorOpposite()   ](0) // top (of the axis panel)
-//                [this.anchorOrthoLength()](this.axisSize - this.titleSize) // height
-//                [this.anchorOrtho()      ](0)     // left
-//                [this.anchorLength()     ](rSize) // width
-//                ;
-//        }
 
         this.pvRule = ruleParentPanel.add(pv.Rule)
             .zOrder(30) // see pvc.js
@@ -16627,14 +16802,13 @@ pvc.AxisPanel = pvc.BasePanel.extend({
 
     renderOrdinalAxis: function(){
         var myself = this,
-            scale = this.pvScale,
+            scale = this.scale,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            data              = this.chart.visualRoles(this.roleName)
-                                    .flatten(this.chart.data, {visible: true}),
-            itemCount         = data._children.length,
+            data              = this._layoutInfo.data,
+            itemCount         = this._layoutInfo.ticks.length,
             includeModulo;
         
         if(this.axis.option('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
@@ -16657,7 +16831,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // Ticks are drawn at the center of each band.
         this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20) // see pvc.js
-            .data(data._children)
+            .data(this._layoutInfo.ticks)
             .localProperty('group')
             .group(function(child){ return child; })
             //[anchorOpposite   ](0)
@@ -16783,13 +16957,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         // NOTE: Includes time series, 
         // so "d" may be a number or a Date object...
         
-        var scale  = this.pvScale,
+        var scale  = this.scale,
             orthoAxis  = this._getOrthoAxis(),
             orthoScale = orthoAxis.scale,
-            ticks  = pvc.scaleTicks(
-                        scale, 
-                        this.domainRoundMode === 'tick',
-                        this.desiredTickCount),
+            ticks      = this._layoutInfo.ticks,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
@@ -16833,7 +17004,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return visible && (getVisible ? getVisible.apply(this, args) : true);
         }
 
-        this.renderLinearAxisLabel(ticks);
+        this.renderLinearAxisLabel(ticks, this._layoutInfo.ticksText);
 
         // Now do the full grid lines
         if(this.fullGrid) {
@@ -16853,7 +17024,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
     },
     
-    renderLinearAxisLabel: function(ticks){
+    renderLinearAxisLabel: function(ticks, ticksText){
         // Labels are visible (only) on MAJOR ticks,
         // On first and last tick care is taken
         //  with their H/V alignment so that
@@ -16876,7 +17047,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var label = this.pvLabel = labelAnchor.add(pv.Label)
             .zOrder(40)
             .text(function(d){
-                var text = scale.tickFormat(d);
+                var text = ticksText[this.index]; // scale.tickFormat(d);
                 if(maxTextWidth){
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', true);
                 }
@@ -17232,7 +17403,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             maxDepth  = data.treeHeight,
             elements  = data.nodes(),
             
-            depthLength = this.axisSize;
+            depthLength = this._layoutInfo.axisSize;
         
         this._rootElement = elements[0]; // lasso
             
@@ -18168,10 +18339,11 @@ pvc.NormalizedBarChart = pvc.BarAbstract.extend({
         if(axis.type === 'ortho') {
             /* 
              * Forces showing 0-100 in the axis.
-             * Note that the bars are streched automatically by the band layout,
+             * Note that the bars are stretched automatically by the band layout,
              * so this scale ends up being ignored by the bars.
              * Note also that each category would have a different scale,
-             * so it isn't possible to provide a single correct scale.
+             * so it isn't possible to provide a single correct scale,
+             * that would satisfy all the bars...
              */
             min = 0;
             max = 100;
@@ -18777,7 +18949,8 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
                 antialias:   showAreas && !showLines,
-                segmented:   !isDense
+                segmented:   !isDense,
+                noHoverable: false // While the area itself does not change appearance, the pvLine does due to activeSeries... 
             })
             
             .lock('visible', def.retTrue)
