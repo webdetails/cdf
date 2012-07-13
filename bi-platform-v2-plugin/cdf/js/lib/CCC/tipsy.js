@@ -437,7 +437,6 @@ pv.Behavior.tipsy = function(opts) {
         //console.log("[TIPSY] Updating opId=" + opId);
         
         if($fakeTipTarget) {
-            
             /* Don't know why: 
              * the mouseover event is triggered at a fixed interval
              * as long as the mouse is over the element, 
@@ -455,6 +454,15 @@ pv.Behavior.tipsy = function(opts) {
             prevMouseY = ev.clientY;
             
             // -------------
+            
+            if(!$fakeTipTarget.tipsy('visible')){
+                // Text may have changed
+                var mark;
+                var scene = this.$scene;
+                if(scene && (mark = scene.scenes.mark)){
+                    $fakeTipTarget.attr('title', getTooltipText(mark));
+                }
+            }
             
             setFakeTipTargetBounds(getMouseBounds(ev));
             

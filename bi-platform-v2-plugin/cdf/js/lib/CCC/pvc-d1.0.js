@@ -13745,7 +13745,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         this._isRubberBandSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvPanel.paddingPanel,
+        var rubberPvParentPanel = this.pvRootPanel || this.pvPanel.paddingPanel,
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
