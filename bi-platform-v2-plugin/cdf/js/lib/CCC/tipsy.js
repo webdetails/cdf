@@ -53,18 +53,25 @@ pv.Behavior.tipsy = function(opts) {
         nextOperationId = 0,
         prevMouseX,
         prevMouseY,
+        delayOut = opts.delayOut,
         id = "tipsyPvBehavior" + (opts.id || new Date().getTime()),
         group     = opts.exclusionGroup,
         usesPoint = opts.usesPoint,
         $canvas,
         isEnabled = opts.isEnabled;
-
-    function getTooltipText(mark) {
-        var instance = mark.instance();
+    
+    opts.delayOut = 0; 
+        
+    function getTooltipText(mark, instance) {
+        if(!instance){
+            instance = mark.instance();
+        }
+        
         var title = (instance && instance.tooltip) ||
-                    (typeof mark.tooltip == 'function' && mark.tooltip()) ||
-                    mark.title() ||
-                    mark.text();
+                    // A mark method that is not a property?
+                    (!mark.properties.tooltip && typeof mark.tooltip == 'function' && mark.tooltip()) ||
+                    instance.title ||
+                    instance.text;
          
         // Allow deferred tooltip creation! 
         if(typeof title === 'function') {
@@ -386,31 +393,40 @@ pv.Behavior.tipsy = function(opts) {
         return opId === nextOperationId - 1;
     }
     
-    function hideTipsy() {
+    function hideTipsy(ev) {
         var opId = getNewOperationId();
         
-        //console.log("[TIPSY] Delayed Hide Begin opId=" + opId);
+//        console.log("[TIPSY] Delayed Hide Begin opId=" + opId);
         
-        setTimeout(function(){
-            if(checkCanOperate(opId)){
-                hideTipsyCore();
-            } 
-//            else
-//            {
-//                console.log("[TIPSY] Delayed Hide Cancelled opId=" + opId);
-//            }
-        }, 100);
+        if(delayOut > 0){
+            setTimeout(function(){
+                if(checkCanOperate(opId)){
+                    hideTipsyCore(opId);
+                } 
+//              else
+//              {
+//                  console.log("[TIPSY] Delayed Hide Cancelled opId=" + opId);
+//              }
+                
+            }, delayOut);
+            
+            return;
+        }
+        
+//        console.log("[TIPSY] Hiding Immediately opId=" + opId);
+        
+        hideTipsyCore(opId);
     }
     
     function hideTipsyCore(opId) {
-        //console.log("[TIPSY] Hiding opId=" + opId);
+//        console.log("[TIPSY] Hiding opId=" + opId);
       
-      // Release real target
-      setTarget(null);
+        // Release real target
+        setTarget(null);
       
-      if ($fakeTipTarget) {
-          $fakeTipTarget.tipsy("leave");
-      }
+        if ($fakeTipTarget) {
+            $fakeTipTarget.tipsy("leave");
+        }
     }
   
     

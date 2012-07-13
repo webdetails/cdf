@@ -12504,13 +12504,13 @@ pvc.BaseChart = pvc.Abstract.extend({
         tipsySettings: {
             exclusionGroup: 'chart',
             gravity: "s",
-            delayIn:  200,
-            delayOut: 50,
-            offset:   2,
-            opacity:  0.8,
-            html:     true,
-            fade:     true,
-            corners:  false,
+            delayIn:     200,
+            delayOut:    80, // smoother moving between marks with tooltips, possibly slightly separated
+            offset:      2,
+            opacity:     0.8,
+            html:        true,
+            fade:        false, // fade out
+            corners:     false,
             followMouse: false
         },
         
