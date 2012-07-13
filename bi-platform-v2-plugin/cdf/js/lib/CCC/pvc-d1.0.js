@@ -34,13 +34,20 @@ pvc.log = function(m){
     }
 };
 
-pvc.logError = function(m){
+pvc.logError = function(e){
+    if(e && typeof e === 'object' && e.message){
+        e = e.message;
+    }
+    
     if (typeof console != "undefined"){
-        console.log("[pvChart ERROR]: " + m);
+        console.log("[pvChart ERROR]: " + e);
     } else {
-        throw new Error("[pvChart ERROR]: " + m);
+        throw new Error("[pvChart ERROR]: " + e);
     }
 };
+
+// Redirect protovis error handler
+pv.error = pvc.logError;
 
 /**
  * Evaluates x if it's a function or returns the value otherwise
@@ -871,18 +878,23 @@ pv.Mark.prototype.getInstanceShape = function(instance){
 };
 
 pv.Mark.prototype.getInstanceCenterPoint = function(instance){
-    return new Point(
+    return pv.vector(
                 instance.left + (instance.width  || 0) / 2,
                 instance.top +  (instance.height || 0) / 2);
 };
 
 pv.Label.prototype.getInstanceShape = function(instance){
-    // TODO
-    return new Rect(
-            instance.left,
-            instance.top,
-            10,
-            10);
+    var t = pvc.text;
+    var size = t.getTextSize(instance.text, instance.font);
+    
+    return t.getLabelPolygon(
+                size.width,
+                size.height,
+                instance.textAlign,
+                instance.textBaseline,
+                instance.textAngle,
+                instance.textMargin)
+            .apply(pv.Transform.identity.translate(instance.left, instance.top));
 };
 
 pv.Wedge.prototype.getInstanceCenterPoint = function(instance){
@@ -891,7 +903,7 @@ pv.Wedge.prototype.getInstanceCenterPoint = function(instance){
     var dotLeft   = instance.left + midRadius * Math.cos(midAngle);
     var dotTop    = instance.top  + midRadius * Math.sin(midAngle);
     
-    return new Point(dotLeft, dotTop);
+    return pv.vector(dotLeft, dotTop);
 };
 
 pv.Wedge.prototype.getInstanceShape = function(instance){
@@ -929,7 +941,7 @@ pv.Dot.prototype.getInstanceShape = function(instance){
 };
 
 pv.Dot.prototype.getInstanceCenterPoint = function(instance){
-    return new Point(instance.left, instance.top);
+    return pv.vector(instance.left, instance.top);
 };
 
 pv.Area.prototype.getInstanceShape =
@@ -939,11 +951,10 @@ pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
 
 pv.Area.prototype.getInstanceCenterPoint =
 pv.Line.prototype.getInstanceCenterPoint = function(instance, nextInstance){
-    return new Point(
+    return pv.vector(
             (instance.left + nextInstance.left) / 2, 
             (instance.top  + nextInstance.top ) / 2);
 };
-
 
 // --------------------
 
@@ -1067,20 +1078,16 @@ var Shape = def.type('pvc.Shape')
 
 // --------------------
 
-var Point = def.type('pvc.Point', Shape)
-.init(function(x, y){
-    this.set(x, y);
-})
-.add({
+def.mixin(pv.Vector.prototype, Shape.prototype, {
     set: function(x, y){
         this.x  = x  || 0;
         this.y  = y  || 0;
     },
-
+    
     clone: function(){
-        return new Point(this.x, this.y);
+        return new pv.Vector(this.x, this.y);
     },
-
+    
     apply: function(t){
         this.x  = t.transformHPosition(this.x);
         this.y  = t.transformVPosition(this.y);
@@ -1089,13 +1096,8 @@ var Point = def.type('pvc.Point', Shape)
 
     intersectsRect: function(rect){
         // Does rect contain the point
-        var minX = Math.min(rect.x, rect.x2),
-            maxX = Math.max(rect.x, rect.x2),
-            minY = Math.min(rect.y, rect.y2),
-            maxY = Math.max(rect.y, rect.y2);
-
-        return (this.x >= minX) && (this.x <= maxX) &&
-               (this.y >= minY) && (this.y <= maxY);
+        return (this.x >= rect.x) && (this.x <= rect.x2) &&
+               (this.y >= rect.y) && (this.y <= rect.y2);
     }
 });
 
@@ -1107,16 +1109,30 @@ var Rect = def.type('pvc.Rect', Shape)
 })
 .add({
     set: function(x, y, dx, dy){
-        this.x  = x  || 0;
-        this.y  = y  || 0;
+        this.x  =  x || 0;
+        this.y  =  y || 0;
         this.dx = dx || 0;
         this.dy = dy || 0;
+        
         this.calc();
     },
-
+    
     calc: function(){
+        // Ensure normalized
+        if(this.dx < 0){
+            this.dx = -this.dx;
+            this.x  = this.x - this.dx;
+        }
+        
+        if(this.dy < 0){
+            this.dy = -this.dy;
+            this.y = this.y - this.dy;
+        }
+        
         this.x2  = this.x + this.dx;
         this.y2  = this.y + this.dy;
+        
+        this._sides = null;
     },
 
     clone: function(){
@@ -1141,34 +1157,30 @@ var Rect = def.type('pvc.Rect', Shape)
 //        pvc.log("[" + [this.x, this.x2, this.y, this.y2] + "]~" +
 //                "[" + [rect.x, rect.x2, rect.y, rect.y2] + "]");
 
-        // rect is not trusted to be normalized...(line...)
-        var minX = Math.min(rect.x, rect.x2),
-            maxX = Math.max(rect.x, rect.x2),
-            minY = Math.min(rect.y, rect.y2),
-            maxY = Math.max(rect.y, rect.y2);
+        // rect is trusted to be normalized...
 
-        return (this.x2 > minX ) &&  // Some intersection on X
-               (this.x  < maxX ) &&
-               (this.y2 > minY ) &&  // Some intersection on Y
-               (this.y  < maxY);
+        return (this.x2 > rect.x ) &&  // Some intersection on X
+               (this.x  < rect.x2) &&
+               (this.y2 > rect.y ) &&  // Some intersection on Y
+               (this.y  < rect.y2);
     },
 
-    getSides: function(){
-        var x  = Math.min(this.x, this.x2),
-            y  = Math.min(this.y, this.y2),
-            x2 = Math.max(this.x, this.x2),
-            y2 = Math.max(this.y, this.y2);
-
-        /*
-         *    x,y    A
-         *     * ------- *
-         *  D  |         |  B
-         *     |         |
-         *     * --------*
-         *              x2,y2
-         *          C
-         */
+    sides: function(){
         if(!this._sides){
+            var x  = this.x,
+                y  = this.y,
+                x2 = this.x2,
+                y2 = this.y2;
+    
+            /*
+             *    x,y    A
+             *     * ------- *
+             *  D  |         |  B
+             *     |         |
+             *     * --------*
+             *              x2,y2
+             *          C
+             */
             this._sides = [
                 //x, y, x2, y2
                 new Line(x,  y,  x2, y),
@@ -1220,7 +1232,7 @@ var Circle = def.type('pvc.Circle', Shape)
         }
 
         var sqCornerDistance = Math.pow(circleDistX - dx2, 2) +
-                            Math.pow(circleDistY - dy2, 2);
+                               Math.pow(circleDistY - dy2, 2);
 
         return sqCornerDistance <= (this.radius * this.radius);
     }
@@ -1252,7 +1264,7 @@ var Line = def.type('pvc.Line', Shape)
         if(!rect) {
             return false;
         }
-        var sides = rect.getSides();
+        var sides = rect.sides();
         for(var i = 0 ; i < 4 ; i++){
             if(this.intersectsLine(sides[i])){
                 return true;
@@ -1303,6 +1315,117 @@ var Line = def.type('pvc.Line', Shape)
         }
 
         return true;
+    }
+});
+
+// ----------------
+
+var Polygon = def.type('pvc.Polygon', Shape)
+.init(function(corners){
+    this._corners = corners || [];
+})
+.add({
+    _sides: null,
+    _bbox:  null,
+    
+    corners: function(){
+        return this._corners;
+    },
+    
+    clone: function(){
+        return new Polygon(this.corners().slice());
+    },
+
+    apply: function(t){
+        delete this._sides;
+        delete this._bbox;
+        
+        var corners = this.corners();
+        for(var i = 0, L = corners.length; i < L ; i++){
+            corners[i].apply(t);
+        }
+        
+        return this;
+    },
+    
+    intersectsRect: function(rect){
+        // I - Any corner is inside the rect?
+        var i, L;
+        var corners = this.corners();
+        
+        L = corners.length;
+        for(i = 0 ; i < L ; i++){
+            if(corners[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        // II - Any side intersects the rect?
+        var sides = this.sides();
+        L = sides.length;
+        for(i = 0 ; i < L ; i++){
+            if(sides[i].intersectsRect(rect)){
+                return true;
+            }
+        }
+        
+        return false;
+    },
+
+    sides: function(){
+        var sides = this._sides;
+        if(!sides){
+            sides = this._sides = [];
+            
+            var corners = this.corners();
+            var L = corners.length;
+            if(L){
+                var prevCorner = corners[0];
+                for(var i = 1 ; i < L ; i++){
+                    var corner = corners[i];
+                    sides.push(
+                        new Line(prevCorner.x, prevCorner.y,  corner.x, corner.y));
+                }
+            }
+        }
+
+        return sides;
+    },
+    
+    bbox: function(){
+        var bbox = this._bbox;
+        if(!bbox){
+            var min, max;
+            this.corners().forEach(function(corner, index){
+                if(min == null){
+                    min = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x < min.x){
+                        min.x = corner.x;
+                    }
+                    
+                    if(corner.y < min.y){
+                        min.y = corner.y;
+                    }
+                }
+                
+                if(max == null){
+                    max = pv.vector(corner.x, corner.y);
+                } else {
+                    if(corner.x > max.x){
+                        max.x = corner.x;
+                    }
+                    
+                    if(corner.y > max.y){
+                        max.y = corner.y;
+                    }
+                }
+            });
+            
+            bbox = this._bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        }
+        
+        return this._bbox;
     }
 });
 
@@ -1400,18 +1523,27 @@ def.scope(function(){
     
     // --------------------------
     // exported
+    function getTextSize(text, font){
+        switch(pv.renderer()){
+            case 'vml':   return getTextSizeVML(text, font);
+            case 'batik': return getTextSizeCGG(text, font);
+        }
+
+        return getTextSizeSVG(text, font);
+    }
+    
     function getTextLength(text, font){
         switch(pv.renderer()){
             case 'vml':
                 return getTextLenVML(text, font);
 
             case 'batik':
-                font = splitFontCGG(font);
+                var fontInfo = getFontInfoCGG(font);
 
                 // NOTE: the global function 'getTextLenCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextLenCGG:true */
-                return getTextLenCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
+                return getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
 
             //case 'svg':
         }
@@ -1425,22 +1557,24 @@ def.scope(function(){
                 return getTextHeightVML(text, font);
 
             case 'batik':
-                font = splitFontCGG(font);
+                var fontInfo = getFontInfoCGG(font);
 
                 // NOTE: the global function 'getTextHeightCGG' must be
                 // defined by the CGG loading environment
                 /*global getTextHeightCGG:true */
-                return getTextHeightCGG(text, font.fontFamily, font.fontSize, font.fontStyle, font.fontWeight);
+                return getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
 
             //case 'svg':
         }
 
         return getTextHeightSVG(text, font);
     }
-
-    //TODO: if not in px?..
+    
+    // -------------
+    
+    // TODO: if not in px?..
     function getFontSize(font){
-        if(pv.renderer() == 'batik'){
+        if(pv.renderer() === 'batik'){
             var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
             sty.setProperty('font',font);
             return parseInt(sty.getProperty('font-size'), 10);
@@ -1471,25 +1605,25 @@ def.scope(function(){
     }
     
     function trimToWidth(len, text, font, trimTerminator, before){
-      if(text === '') {
-          return text;
-      }
-      
-      var textLen = getTextLength(text, font);
-      if(textLen <= len){
-        return text;
-      }
-
-      if(textLen > len * 1.5){ //cutoff for using other algorithm
-        return trimToWidthBin(len,text,font,trimTerminator, before);
-      }
-
-      while(textLen > len){
-        text = before ? text.slice(1) : text.slice(0,text.length -1);
-        textLen = getTextLength(text, font);
-      }
-
-      return before ? (trimTerminator + text) : (text + trimTerminator);
+        if(text === '') {
+            return text;
+        }
+  
+        var textLen = getTextLength(text, font);
+        if(textLen <= len){
+            return text;
+        }
+    
+        if(textLen > len * 1.5){ //cutoff for using other algorithm
+            return trimToWidthBin(len,text,font,trimTerminator, before);
+        }
+    
+        while(textLen > len){
+            text = before ? text.slice(1) : text.slice(0,text.length -1);
+            textLen = getTextLength(text, font);
+        }
+    
+        return before ? (trimTerminator + text) : (text + trimTerminator);
     }
     
     function justifyText(text, lineWidth, font){
@@ -1529,19 +1663,7 @@ def.scope(function(){
         return lines;
     }
     
-    function getLabelSize(textWidth, textHeight, align, baseline, angle, margin){
-        var width  = margin + Math.abs(textWidth * Math.cos(-angle));
-        var height = margin + Math.abs(textWidth * Math.sin(-angle));
-        return {
-            width:  width,
-            height: height
-        };
-    }
-    
-    /* Returns a label's BBox relative to its anchor point */
-    function getLabelBBox(textWidth, textHeight, align, baseline, angle, margin){
-        /* text-baseline, text-align */
-        
+    function getLabelPolygon(textWidth, textHeight, align, baseline, angle, margin){
         // From protovis' SvgLabel.js
         
         // In text line coordinates. y points downwards
@@ -1575,50 +1697,37 @@ def.scope(function(){
                 break;
         }
         
-        var bottomLeft  = pv.vector(x, y);
-        var bottomRight = bottomLeft.plus(textWidth, 0);
-        var topRight    = bottomRight.plus(0, -textHeight);
-        var topLeft     = bottomLeft .plus(0, -textHeight);
+        var bl = pv.vector(x, y);
+        var br = bl.plus(textWidth, 0);
+        var tr = br.plus(0, -textHeight);
+        var tl = bl.plus(0, -textHeight);
         
-        var min, max;
+        // Rotate
         
-        var corners = [bottomLeft, bottomRight, topLeft, topRight];
-        
-        if(angle === 0){
-            min = topLeft;
-            max = bottomRight;
-        } else {
-            // Bounding box:
-            
-            corners.forEach(function(corner, index){
-                corner = corners[index] = corner.rotate(angle);
-                if(min == null){
-                    min = pv.vector(corner.x, corner.y);
-                } else {
-                    if(corner.x < min.x){
-                        min.x = corner.x;
-                    }
-                    
-                    if(corner.y < min.y){
-                        min.y = corner.y;
-                    }
-                }
-                
-                if(max == null){
-                    max = pv.vector(corner.x, corner.y);
-                } else {
-                    if(corner.x > max.x){
-                        max.x = corner.x;
-                    }
-                    
-                    if(corner.y > max.y){
-                        max.y = corner.y;
-                    }
-                }
-            });
+        if(angle !== 0){
+            bl = bl.rotate(angle);
+            br = br.rotate(angle);
+            tl = tl.rotate(angle);
+            tr = tr.rotate(angle);
         }
         
-        var bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        return new pvc.Polygon([bl, br, tl, tr]);
+    }
+    
+    /* Returns a label's BBox relative to its anchor point */
+    function getLabelBBox(textWidth, textHeight, align, baseline, angle, margin){
+        
+        var polygon = getLabelPolygon(textWidth, textHeight, align, baseline, angle, margin);
+        var corners = polygon.corners();
+        var bbox;
+        if(angle === 0){
+            var min = corners[2]; // topLeft
+            var max = corners[1]; // bottomRight
+            
+            bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+        } else {
+            bbox = polygon.bbox();
+        }
         
         bbox.sourceCorners   = corners;
         bbox.sourceAngle     = angle;
@@ -1682,40 +1791,70 @@ def.scope(function(){
         return $textSizePvLabel[0];
     }
 
-    function splitFontCGG(font){
-        var el = document.createElementNS('http://www.w3.org/2000/svg','text');
-        var sty = el.style;
-        sty.setProperty('font',font);
-
-        var result = {};
-        
-        // Below, the use of: 
-        //   '' + sty.getProperty(...)
-        //  converts the results to real strings
-        //  and not String objects (this later caused bugs in Java code)
-        
-        var fontFamily = result.fontFamily = '' + sty.getProperty('font-family');
-        if(!fontFamily){
-            result.fontFamily = 'sans-serif';
-        } else if(fontFamily.length > 2){
-            // Did not work at the server
-            //var reQuoted = /^(["']?)(.*?)(\1)$/;
-            //fontFamily = fontFamily.replace(reQuoted, "$2");
-            var quote = fontFamily.charAt(0);
-            if(quote === '"' || quote === "'"){
-                fontFamily = fontFamily.substr(1, fontFamily.length - 2);
+    var _cggFontCache;
+    var _cggFontTextElem;
+    
+    function getFontInfoCGG(font){
+        var fontInfo = _cggFontCache && _cggFontCache[font];
+        if(!fontInfo){
+            if(!_cggFontTextElem){
+                _cggFontTextElem = document.createElementNS('http://www.w3.org/2000/svg','text');
             }
             
-            result.fontFamily = fontFamily;
+            var sty = _cggFontTextElem.style;
+            sty.setProperty('font', font);
+
+            // Below, the use of: 
+            //   '' + sty.getProperty(...)
+            //  converts the results to real strings
+            //  and not String objects (this later caused bugs in Java code)
+        
+            var family = '' + sty.getProperty('font-family');
+            if(!family){
+                family = 'sans-serif';
+            } else if(family.length > 2){
+                // Did not work at the server
+                //var reQuoted = /^(["']?)(.*?)(\1)$/;
+                //family = family.replace(reQuoted, "$2");
+                var quote = family.charAt(0);
+                if(quote === '"' || quote === "'"){
+                    family = family.substr(1, family.length - 2);
+                }
+            }
+            
+            fontInfo = {
+                family: family,
+                size:   '' + sty.getProperty('font-size'),
+                style:  '' + sty.getProperty('font-style'),
+                weight: '' + sty.getProperty('font-weight')
+            };
         }
         
-        result.fontSize   = '' + sty.getProperty('font-size');
-        result.fontStyle  = '' + sty.getProperty('font-style');
-        result.fontWeight = '' + sty.getProperty('font-weight');
-        
-        return result;
+        return fontInfo;
     }
-
+    
+    // -------------
+    
+    function getTextSizeCGG(text, font){
+        var fontInfo = getFontInfoCGG(font);
+        
+        // TODO: Add cgg size method
+        return {
+            /*global getTextLenCGG:true */
+            width:  getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight),
+            /*global getTextHeightCGG:true */
+            height: getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight)
+        };
+    }
+    
+    // -------------
+    
+    function getTextSizeSVG(text, font){
+        var lbl = getTextSizePvLabel(text, font);
+        var box = lbl.getBBox();
+        return {width: box.width, height: box.height};
+    }
+    
     function getTextLenSVG(text, font){
         var lbl = getTextSizePvLabel(text, font);
         var box = lbl.getBBox();
@@ -1727,7 +1866,14 @@ def.scope(function(){
         var box = lbl.getBBox();
         return box.height;
     }
-
+    
+    // -------------
+    
+    function getTextSizeVML(text, font){
+        var box = pv.Vml.text_dims(text, font);
+        return {width: box.width, height: box.height};
+    }
+    
     function getTextLenVML(text, font){
         return pv.Vml.text_dims(text, font).width;
     }
@@ -1735,7 +1881,9 @@ def.scope(function(){
     function getTextHeightVML(text, font){
         return pv.Vml.text_dims(text, font).height;
     }
-
+    
+    // -------------
+    
     function trimToWidthBin(len, text, font, trimTerminator, before){
 
         var ilen = text.length,
@@ -1763,16 +1911,16 @@ def.scope(function(){
     }
     
     pvc.text = {
-        getTextLength: getTextLength,
-        getFontSize:   getFontSize,
-        getTextHeight: getTextHeight,
-        getFitInfo:    getFitInfo,
-        trimToWidth:   trimToWidth,
-        trimToWidthB:  trimToWidthB,
-        justify:       justifyText,
-        getLabelSize:  getLabelSize,
-        getLabelBBox:  getLabelBBox
-        
+        getTextSize:     getTextSize,
+        getTextLength:   getTextLength,
+        getFontSize:     getFontSize,
+        getTextHeight:   getTextHeight,
+        getFitInfo:      getFitInfo,
+        trimToWidth:     trimToWidth,
+        trimToWidthB:    trimToWidthB,
+        justify:         justifyText,
+        getLabelBBox:    getLabelBBox,
+        getLabelPolygon: getLabelPolygon
     };
 });
 // Colors utility
@@ -12929,8 +13077,11 @@ pvc.BasePanel = pvc.Abstract.extend({
                                    .top (paddings.top );
             }
             
+            pvBorderPanel.borderPanel  = pvBorderPanel;
             pvBorderPanel.paddingPanel = this.pvPanel;
-            this.pvPanel.borderPanel = pvBorderPanel;
+            
+            this.pvPanel.paddingPanel  = this.pvPanel;
+            this.pvPanel.borderPanel   = pvBorderPanel;
             
             /* Protovis marks that are pvcPanel specific,
              * and/or #_creates child panels.
@@ -13594,7 +13745,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         this._isRubberBandSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvPanel.borderPanel,
+        var rubberPvParentPanel = this.pvPanel.paddingPanel,
             toScreen;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
@@ -13611,7 +13762,8 @@ pvc.BasePanel = pvc.Abstract.extend({
             rubberPvParentPanel.fillStyle(pvc.invisibleFill);
         }
         
-        // NOTE: Rubber band coordinates are always transformed to screen coordinates (see 'select' and 'selectend' events)
+        // NOTE: Rubber band coordinates are always transformed to canvas/client 
+        // coordinates (see 'select' and 'selectend' events)
          
         var selectionEndedDate;
         rubberPvParentPanel
@@ -14620,6 +14772,8 @@ pvc.LegendPanel = pvc.BasePanel.extend({
           
       this.pvLegendPanel = this.pvPanel.add(pv.Panel)
           .data(rootScene.childNodes)
+          .localProperty('group', Object)
+          .group(function(scene){ return scene.group; }) // for rubber band selection support
           .localProperty('isOn', Boolean)
           .isOn(function(scene){ return scene.acts.legendItem.isOn(); })
           .def("hidden", "false")
@@ -14717,6 +14871,12 @@ pvc.LegendPanel = pvc.BasePanel.extend({
         this.extend(this.pvRule,       "legendRule_");
         this.extend(this.pvDot,        "legendDot_");
         this.extend(this.pvLabel,      "legendLabel_");
+    },
+    
+    _getSignums: function(){
+        // Catches both the dot, the ruler and label...
+        // Also, if selection changes, render interactive refreshes all of these.
+        return [this.pvLegendPanel];
     },
     
     _buildScene: function(){
@@ -17177,7 +17337,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
      * Prevents the axis panel from reacting directly to rubber band selections.
      * 
      * The panel participates in rubber band selection through 
-     * the mediator {@link pvc.CartesianAbstractPanel}.
+     * the mediator {@link pvc.CartesianAbstractPanel}, which calls
+     * each axes' {@link #_detectDatumsUnderRubberBand} directly.
      *   
      * @override
      */
