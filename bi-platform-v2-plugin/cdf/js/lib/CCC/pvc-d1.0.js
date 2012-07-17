@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120625
+//VERSION TRUNK-20120215-patched-20120717
 
 
 // ECMAScript 5 shim
@@ -315,21 +315,39 @@ pvc.toArray = function(thing){
  * The default color scheme is "pv.Colors.category10", 
  * and is returned when null or an empty array is specified.
  */
+ 
+// variable to represent a default color scheme
+//   (Added by CvK  febr. 2012)
+pvc._defaultColorScheme = null;
+
 pvc.createColorScheme = function(colors){
-    if (colors == null || colors.length == 0){
-        return pv.Colors.category10;
+    if (colors == null || !colors.length){
+        return pvc._defaultColorScheme || pv.Colors.category10;
     }
 	
     colors = pvc.toArray(colors);
 	
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
-	scale.domain.apply(scale, arguments); // defines the domain of the color scale
-	return scale;
+        scale.domain.apply(scale, arguments); // defines the domain of the color scale
+        return scale;
     };
 };
 
-//convert to greyscale using YCbCr luminance conv
+/**
+ * Install a default colorscheme. The parameter should be an array containing
+ * approximately 10 colors.
+ * If you pass colors==null  it will remove the default-color scheme and
+ * use original default-colors.
+ *    (Added by CvK  febr. 2012)
+ */
+pvc.setDefaultColorScheme = function(colors){
+   pvc._defaultColorScheme = (colors == null) ? 
+            null : 
+            pvc.createColorScheme(colors);
+};
+
+//convert to grayscale using YCbCr luminance conv
 pvc.toGrayScale = function(color){
     var avg = Math.round( 0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
     //var avg = Math.round( (color.r + color.g + color.b)/3);
