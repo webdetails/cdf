@@ -103,11 +103,11 @@ pv.Behavior.tipsy = function(opts) {
             var radius;
             if(mark.properties.outerRadius){
                 // Wedge
-                var angle  = instance.endAngle    - instance.angle / 2;
-                radius = instance.outerRadius - (instance.outerRadius - instance.innerRadius) * 0.3;
+                var midAngle = instance.startAngle + instance.angle / 2;
+                radius = instance.outerRadius;// - (instance.outerRadius - instance.innerRadius) * 0.05;
                 
-                left = instance.left + Math.cos(angle) * radius + t.x;
-                top  = instance.top  + Math.sin(angle) * radius + t.y;
+                left = t.x + instance.left + radius * Math.cos(midAngle);
+                top  = t.y + instance.top  + radius * Math.sin(midAngle);
                 
             } else if(mark.properties.shapeRadius){
                 radius = Math.max(2, instance.shapeRadius);
