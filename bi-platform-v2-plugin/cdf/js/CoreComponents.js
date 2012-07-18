@@ -2096,7 +2096,11 @@ var TableComponent = BaseComponent.extend({
     dtData.sPaginationType = options.paginationType;
     dtData.sDom = options.sDom;
     dtData.aaSorting = options.sortBy;
-    dtData.oLanguage = eval("(" + options.oLanguage + ")");
+    
+    if (typeof options.oLanguage == "string")
+        dtData.oLanguage = eval("(" + options.oLanguage + ")");
+    else
+        dtData.oLanguage = options.oLanguage;
 
     if(options.colHeaders != undefined){
       dtData.aoColumns = new Array(options.colHeaders.length);
