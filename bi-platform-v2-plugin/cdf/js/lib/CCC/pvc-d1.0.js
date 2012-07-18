@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120717
+//VERSION TRUNK-20120215-patched-20120718
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -317,11 +317,11 @@ pvc.toArray = function(thing){
  
 // variable to represent a default color scheme
 //   (Added by CvK  febr. 2012)
-pvc._defaultColorScheme = null;
+pvc.defaultColorScheme = null;
 
 pvc.createColorScheme = function(colors){
     if (colors == null || !colors.length){
-        return pvc._defaultColorScheme || pv.Colors.category10;
+        return pvc.defaultColorScheme || pv.Colors.category10;
     }
 	
     colors = pvc.toArray(colors);
@@ -341,7 +341,7 @@ pvc.createColorScheme = function(colors){
  *    (Added by CvK  febr. 2012)
  */
 pvc.setDefaultColorScheme = function(colors){
-   pvc._defaultColorScheme = (colors == null) ? 
+   pvc.defaultColorScheme = (colors == null) ? 
             null : 
             pvc.createColorScheme(colors);
 };
