@@ -27,7 +27,6 @@ pv.Behavior.tipsy = function(opts) {
     function followMouseMoveAbs(ev){
         // TODO: with Dots, only works well if gravity is set to "c"...
         if(tip) {
-
             var tipLbl = $(tip).tipsy("tip"),
                 extra = 8,//px
                 x,
@@ -49,7 +48,6 @@ pv.Behavior.tipsy = function(opts) {
             tipLbl.css('left', x + "px");
             tipLbl.css('top',  y + "px");
         }
-
     }
 
     function toParentTransform(parentPanel){

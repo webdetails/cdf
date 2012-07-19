@@ -1029,7 +1029,7 @@ var TextareaInputComponent = BaseComponent.extend({
   update: function(){
     selectHTML = "<textarea";
     selectHTML += " id='" + this.name + "' name='" + this.name +
-    (this.numColumns ? ("' rows='" + this.rows) : "") +
+    (this.numRows ? ("' rows='" + this.numRows) : "") +
     (this.numColumns ? ("' cols='" + this.numColumns) : "") +
     "'>" + Dashboards.getParameterValue(this.parameter) + 
     '</textarea>';
@@ -1086,7 +1086,6 @@ var DateInputComponent = BaseComponent.extend({
       });
       // Add JQuery DatePicker standard localization support only if the dashboard is localized
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-
         var $input = $("#" + myself.htmlObject + " input");
 
         $input.datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
@@ -1401,7 +1400,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     if (this.isMultiple == undefined) this.isMultiple = false;
 
     var ph = $("<div>");
-
+    ph.appendTo($("#" + this.htmlObject).empty());
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx],
         label = myArray[i][lblIdx],
@@ -1428,7 +1427,6 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
     }
 
-    ph.appendTo($("#" + this.htmlObject).empty());
     
     //default
     var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
@@ -2098,7 +2096,11 @@ var TableComponent = BaseComponent.extend({
     dtData.sPaginationType = options.paginationType;
     dtData.sDom = options.sDom;
     dtData.aaSorting = options.sortBy;
-    dtData.oLanguage = eval("(" + options.oLanguage + ")");
+    
+    if (typeof options.oLanguage == "string")
+        dtData.oLanguage = eval("(" + options.oLanguage + ")");
+    else
+        dtData.oLanguage = options.oLanguage;
 
     if(options.colHeaders != undefined){
       dtData.aoColumns = new Array(options.colHeaders.length);

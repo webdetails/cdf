@@ -1,3 +1,31 @@
+12.07.19
+    * [Redmine-207] - tableComponent oLanguage fix
+    * Turned pvc.defaultColorScheme public (for readonly access)
+    * [FEAT] Added a hook for plugging in a default chart colorscheme (CvK Feb. 2012)
+    * Add clippedText AddIn
+    * add column headers support to group headers addIn
+    * Added support in fireChange for components to be able to update without triggering increment/decrementRunningCalls.
+    * Changed the behaviour of the clickable "span" for removal. Before, we needed to click on the "x" (<a> tag) to get the selection out, 
+        now you just need to click on the span of that selection
+    * output-index for external cda's
+    * jqueryui: use ctrlKey instead of metaKey for multiple selection
+    * set datepicker defaults only if it exists
+    * CDF tutorial needs that both zip and xml files be downloadable by CDF
+    * Patch to fix HeatGrid performance problem.
+    * Added queryState to query component.
+    * MapComponent fix for FF13 - FooComponent as first object in classNames[]
+    * [PATCH] Stacked bars with line: plot panel clipping was activated due to forcing orthoFixedMin to 0 and resulted in cut dots
+    * Added underscore, backbone and mustache
+    * circle addin border width was not working on Chrome
+    * [REDMINE 721, REDMINE 771] selectMultiComponent null-related issues; impromptu css less green
+    * Added override to input[type=text] margin and dataTables min-height
+    * [PATCH] BulletChart support for the tooltipFormat option.
+    * Added TextareaInputComponent
+    * Added erichynds Multiselect JQuery Plugin Files
+    * Fix the Clean template, which wasn't actually as clean as all that.
+    * changed table click handler to use rawData instead of query.lastResult so we can access postFetch changes
+    * [REDMINE 206] - Dates are always used in iso format on parameters regardless of display date format
+
 12.05.15
 	* Added support on tables for urlTemplate, for backward compatibility
 	* DashboardContext: get roles via SecurityParameterProvider

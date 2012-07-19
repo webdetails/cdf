@@ -6,6 +6,7 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
 
     update: function() {
       var myself = this;
+      if(this.ph == undefined) {
       this.ph = $("#" + this.htmlObject).empty();
       this.input = $("<input type='text'>").appendTo(this.ph);
       this.query = new Query(this.queryDefinition);
@@ -20,6 +21,7 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
           Dashboards.processChange(myself.name);
         }
       });
+}
     },
 
     handleQuery: function(callback) {
