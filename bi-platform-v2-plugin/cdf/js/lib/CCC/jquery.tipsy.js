@@ -28,7 +28,7 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             if (options.delayIn == 0) {
                 tipsy.show();
             } else {
-                setTimeout(function() { if (tipsy.hoverState == 'in') tipsy.show(); }, options.delayIn);
+                setTimeout(function() { if (tipsy.hoverState === 'in') tipsy.show(); }, options.delayIn);
             }
         },
         
@@ -40,12 +40,14 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             if (options.delayOut == 0) {
                 tipsy.hide();
             } else {
-                setTimeout(function() { if (tipsy.hoverState == 'out') tipsy.hide(); }, options.delayOut);
+                setTimeout(function() { if (tipsy.hoverState === 'out') tipsy.hide(); }, options.delayOut);
             }
         },
         
         visible: function(){
-            return !!(this.$tip && this.$tip[0].parentNode);
+            return this.hoverState === 'in' || // almost visible
+                   (this.hoverState !== 'out' &&  
+                   !!(this.$tip && this.$tip[0].parentNode));
         },
         
         update: function(){
@@ -60,12 +62,16 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             var title = this.getTitle();
             if (title && this.enabled) {
                 var $tip = this.tip();
-                
                 $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
                 $tip[0].className = 'tipsy'; // reset classname in case of dynamic gravity
                 
                 if(!isUpdate){
-                    $tip.remove().css({top: 0, left: 0, visibility: 'hidden', display: 'block'}).appendTo(document.body);
+                    $tip.remove();
+                }
+                
+                if(!$tip[0].parentNode){
+                    $tip.css({top: 0, left: 0, visibility: 'hidden', display: 'block'})
+                        .appendTo(document.body);
                 }
                 
                 var pos = $.extend({}, this.$element.offset());
@@ -131,7 +137,8 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
                 var tp = calcPosition(gravity);
                 
                 // Add a duplicate w/e char at the end when using corners
-                $tip.css(tp).addClass('tipsy-' + gravity + (useCorners && gravity.length > 1 ? gravity.charAt(1) : ''));
+                $tip.css(tp)
+                    .addClass('tipsy-' + gravity + (useCorners && gravity.length > 1 ? gravity.charAt(1) : ''));
                 
                 if(showArrow){
                     var hideArrow = useCorners && gravity.length === 2;
@@ -139,14 +146,19 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
                     $tip.find('.tipsy-arrow')[hideArrow ? 'hide' : 'show']();
                 }
                 
-                if (this.options.fade && (!isUpdate || !this._prevGravity || (this._prevGravity !== gravity))) {
-                    $tip.stop().css({opacity: 0, display: 'block', visibility: 'visible'}).animate({opacity: this.options.opacity});
+                var doFadeIn = this.options.fade && (!isUpdate || !this._prevGravity || (this._prevGravity !== gravity));
+                if (doFadeIn) {
+                    $tip.stop()
+                        .css({opacity: 0, display: 'block', visibility: 'visible'})
+                        .animate({opacity: this.options.opacity});
                 } else {
                     $tip.css({visibility: 'visible', opacity: this.options.opacity});
                 }
                 
                 this._prevGravity = gravity;
             }
+            
+            this.hoverState = null;
         },
         
         hide: function() {
@@ -155,6 +167,8 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             } else if(this.$tip){
                 this.tip().remove();
             }
+            
+            this.hoverState = null;
         },
         
         getTitle: function() {
@@ -178,6 +192,10 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
                 } else {
                     this.$tip.html('<div class="tipsy-inner"/></div>');
                 }
+                
+                // Remove it from document fragment parent
+                // So that visible tests do not fail
+                this.$tip.remove();
             }
             return this.$tip;
         },

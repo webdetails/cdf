@@ -23,12 +23,20 @@ pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
 
 var arraySlice = pvc.arraySlice = Array.prototype.slice;
 
+pvc.setDebug = function(level){
+    level = +level;
+    pvc.debug = isNaN(level) ? 0 : level;
+    
+    syncTipsyLog();
+    
+    return pvc.debug;
+};
+
 /**
  *  Utility function for logging messages to the console
  */
 pvc.log = function(m){
-
-    if (pvc.debug && typeof console != "undefined"){
+    if (pvc.debug && typeof console !== "undefined"){
         console.log("[pvChart]: " + 
           (typeof m === 'string' ? m : JSON.stringify(m)));
     }
@@ -48,6 +56,14 @@ pvc.logError = function(e){
 
 // Redirect protovis error handler
 pv.error = pvc.logError;
+
+function syncTipsyLog(){
+    var tip = pv.Behavior.tipsy;
+    if(tip){
+        tip.debug = pvc.debug;
+        tip.log   = pvc.log;
+    }
+}
 
 /**
  * Evaluates x if it's a function or returns the value otherwise
@@ -175,22 +191,104 @@ pvc.arrayEquals = function(array1, array2, func){
 };
 
 /**
- * Creates a color scheme based on the specified colors.
- * The default color scheme is "pv.Colors.category10", 
- * and is returned when null or an empty array is specified.
+ * The default color scheme used by charts.
+ * <p>
+ * Charts use the color scheme specified in the chart options 
+ * {@link pvc.BaseChart#options.colors}
+ * and 
+ * {@link pvc.BaseChart#options.secondAxisColors}, 
+ * for the main and second axis series, respectively, 
+ * or, when any is unspecified, 
+ * the default color scheme.
+ * </p>
+ * <p>
+ * When null, the color scheme {@link pv.Colors.category10} is implied. 
+ * To obtain the default color scheme call {@link pvc.createColorScheme}
+ * with no arguments. 
+ * </p>
+ * <p>
+ * To be generically useful, 
+ * a color scheme should contain at least 10 colors.
+ * </p>
+ * <p>
+ * A color scheme is a function that creates a {@link pv.Scale} color scale function
+ * each time it is called. 
+ * It sets as its domain the specified arguments and as range 
+ * the pre-spcecified colors of the color scheme.
+ * </p>
+ * 
+ * @readonly
+ * @type function
  */
-pvc.createColorScheme = function(colors){
-    if (colors == null || !colors.length){
-        return pv.Colors.category10;
+pvc.defaultColorScheme = null;
+
+/**
+ * Sets the colors of the default color scheme used by charts 
+ * to a specified color array.
+ * <p>
+ * If null is specified, the default color scheme is reset to its original value.
+ * </p>
+ * 
+ * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] Something convertible to a color scheme by {@link pvc.colorScheme}.
+ * @return {null|pv.Scale} A color scale function or null.
+ */
+pvc.setDefaultColorScheme = function(colors){
+    return pvc.defaultColorScheme = pvc.colorScheme(colors);
+};
+
+/**
+ * Creates a color scheme if the specified argument is not one already.
+ * 
+ * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] A value convertible to a color scheme: 
+ * a color string, 
+ * a color object, 
+ * an array of color strings or objects, 
+ * a color scale function, 
+ * or null.
+ * 
+ * @returns {null|function} A color scheme function or null.
+ */
+pvc.colorScheme = function(colors){
+    if(colors == null){
+        return null;
     }
-	
-    colors = def.array.as(colors);
-	
+    
+    if(typeof colors === 'function') {
+        if(!colors.hasOwnProperty('range')){
+            // Assume already a color scheme (a color scale factory)
+            return colors;
+        }
+        
+        // A protovis color scale
+        // Obtain its range colors array and discard the scale function.
+        colors = colors.range();
+    } else {
+        colors = def.array.as(colors);
+    }
+    
+    if(!colors.length){
+        return null;
+    }
+    
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
         scale.domain.apply(scale, arguments); // defines the domain of the color scale
         return scale;
     };
+},
+
+/**
+ * Creates a color scheme based on the specified colors.
+ * When no colors are specified, the default color scheme is returned.
+ * 
+ * @see pvc.defaultColorScheme 
+ * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] Something convertible to a color scheme by {@link pvc.colorScheme}.
+ * @type function
+ */
+pvc.createColorScheme = function(colors){
+    return pvc.colorScheme(colors) ||
+           pvc.defaultColorScheme  ||
+           pv.Colors.category10;
 };
 
 // Convert to Grayscale using YCbCr luminance conv.
@@ -5316,7 +5414,7 @@ function(data, atoms, isNull){
  * @see pvc.data.Data#clearSelected
  */
 function datum_deselect(){
-    this.isSelected = false;
+    delete this.isSelected;
 }
 /**
  * Initializes a dimension instance.
@@ -7108,23 +7206,40 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * <p>
      * Can only be called on an owner data.
      * </p>
-     * 
+     * @param {pvc.data.Datum} [funFilter] Allows excluding atoms from the clear operation.
      * @returns {boolean} Returns <tt>true</tt> if any datum was selected and <tt>false</tt> otherwise. 
      */
-    clearSelected: function(){
+    clearSelected: function(funFilter){
         /*global data_assertIsOwner:true */
+        /*global datum_deselect:true */
+        
         data_assertIsOwner.call(this);
         if(!this._selectedDatums.count) {
             return false;
         }
         
-        this._selectedDatums.values().forEach(function(datum){
-            /*global datum_deselect:true */
-            datum_deselect.call(datum);
-        });
-
-        this._selectedDatums.clear();
-        return true;
+        var changed;
+        if(funFilter){
+            changed = false;
+            this._selectedDatums
+                .values()
+                .filter(funFilter)
+                .forEach(function(datum){
+                    changed = true;
+                    datum_deselect.call(datum);
+                    this._selectedDatums.rem(datum.id);
+                }, this);
+        } else {
+            changed = true;
+            this._selectedDatums.values().forEach(function(datum){
+                /*global datum_deselect:true */
+                datum_deselect.call(datum);
+            });
+    
+            this._selectedDatums.clear();
+        }
+        
+        return changed;
     }
 });
 
@@ -9538,7 +9653,7 @@ def.type('pvc.visual.Scene')
  */
 function scene_renderId(renderId){
     if(this._renderId !== renderId){
-        if(pvc.debug >= 5){
+        if(pvc.debug >= 7){
             pvc.log({sceneId: this.id, oldRenderId: this._renderId, newRenderId: renderId});
         }
         
@@ -12230,9 +12345,14 @@ pvc.BaseChart = pvc.Abstract.extend({
                     };
                     
                     onClick = function(){
-                        var on = this.group.datums(null, {selected: true}).any();
-                        if(pvc.data.Data.setSelected(this.group.datums(), !on)){
-                            me.updateSelections();
+                        var datums = this.group.datums().array();
+                        
+                        datums = me._onUserSelection(datums);
+                        if(datums){
+                            var on = def.query(datums).any(function(datum){ return datum.isSelected; });
+                            if(pvc.data.Data.setSelected(datums, !on)){
+                                me.updateSelections();
+                            }
                         }
                     };
                 }
@@ -12719,7 +12839,6 @@ pvc.BaseChart = pvc.Abstract.extend({
         },
         
         tipsySettings: {
-            exclusionGroup: 'chart',
             gravity: "s",
             delayIn:     200,
             delayOut:    80, // smoother moving between marks with tooltips, possibly slightly separated
@@ -13982,16 +14101,28 @@ pvc.BasePanel = pvc.Abstract.extend({
             chart  = this.chart;
         
         datums = this._onUserSelection(datums);
-        
-        if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-            chart.data.owner.clearSelected();
+        if(datums && datums.length){
+            var changed;
+            if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
+                // Clear all but the ones we'll be selecting.
+                // This way we can have a correct changed flag.
+                var alreadySelectedById = def.query(datums)
+                                        .where(function(datum){ return datum.isSelected; })
+                                        .object({ name: function(datum){ return datum.id; } });
+                
+                changed = chart.data.owner.clearSelected(function(datum){
+                    return !def.hasOwn(alreadySelectedById, datum.id); 
+                });
+                
+                changed |= pvc.data.Data.setSelected(datums, true);
+            } else {
+                changed = pvc.data.Data.toggleSelected(datums);
+            }
             
-            pvc.data.Data.setSelected(datums, true);
-        } else {
-            pvc.data.Data.toggleSelected(datums);
+            if(changed){
+                this._onSelectionChanged();
+            }
         }
-        
-        this._onSelectionChanged();
     },
     
     _onUserSelection: function(datums){
@@ -17833,7 +17964,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 return '';
             })
             .event("mouseover", pv.Behavior.tipsy({
-                exclusionGroup: 'chart',
                 gravity: tipsyGravity,
                 fade: true,
                 offset: diagMargin * 2,
@@ -18023,7 +18153,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
      *      
      */
     
-    labelFont: 'default',
+    labelFont: '10px sans-serif',
     
     linkedLabel: {
         /**
@@ -18079,7 +18209,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
             }
         }
         
-        // innerGap
+        // innerGap translation to paddings
         if(options.paddings == null){
             var innerGap = options.innerGap || 0.95;
             delete options.innerGap;
@@ -18099,7 +18229,7 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         
         var labelStyle = options.labelStyle || this.labelStyle;
         var isLinked = labelStyle === 'linked';
-        var valuesMask = options.valueMask;
+        var valuesMask = options.valuesMask;
         if(valuesMask == null){
             options.valuesMask = isLinked ? "{value} ({value.percent})" : "{value}";
         }
