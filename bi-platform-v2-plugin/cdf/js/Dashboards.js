@@ -2181,7 +2181,7 @@ Query = function() {
   };
 
   this.pageStartingAt = function(page,outsideCallback) {
-    if(this.setPageStartingAt(page)) {
+    if(this.setPageStartingAt(page) !== false) {
       return doQuery(outsideCallback);
     } else {
       return false;
