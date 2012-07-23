@@ -13580,17 +13580,19 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @virtual
      */
     _renderInteractive: function(){
-        var marks = this._getSignums();
-        if(marks && marks.length){
-            marks.forEach(function(mark){ mark.render(); });
-        } else if(!this._children) {
-            this.pvPanel.render();
-        }
-        
-        if(this._children){
-            this._children.forEach(function(child){
-                child._renderInteractive();
-            });
+        if(this.isVisible){
+            var marks = this._getSignums();
+            if(marks && marks.length){
+                marks.forEach(function(mark){ mark.render(); });
+            } else if(!this._children) {
+                this.pvPanel.render();
+            }
+            
+            if(this._children){
+                this._children.forEach(function(child){
+                    child._renderInteractive();
+                });
+            }
         }
     },
 
@@ -14313,16 +14315,18 @@ pvc.BasePanel = pvc.Abstract.extend({
      * @virtual
      */
     _detectDatumsUnderRubberBand: function(datumsByKey, rb, keyArgs){
-        var any = false,
-            selectableMarks = this._getSignums();
-        
-        if(selectableMarks){
-            selectableMarks.forEach(function(mark){
-                this._forEachMarkDatumUnderRubberBand(mark, function(datum){
-                    datumsByKey[datum.key] = datum;
-                    any = true;
-                }, this, rb);
-            }, this);
+        var any = false;
+        if(this.isVisible){
+            var selectableMarks = this._getSignums();
+            
+            if(selectableMarks){
+                selectableMarks.forEach(function(mark){
+                    this._forEachMarkDatumUnderRubberBand(mark, function(datum){
+                        datumsByKey[datum.key] = datum;
+                        any = true;
+                    }, this, rb);
+                }, this);
+            }
         }
         
         return any;
