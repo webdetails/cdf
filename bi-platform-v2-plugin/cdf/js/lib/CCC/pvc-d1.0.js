@@ -403,6 +403,8 @@ pvc.Sides = function(sides){
     }
 };
 
+pvc.Sides.hnames = 'left right'.split(' ');
+pvc.Sides.vnames = 'top bottom'.split(' ');
 pvc.Sides.names = 'left right top bottom'.split(' ');
 pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.retTrue);
 
@@ -447,7 +449,7 @@ pvc.Sides.prototype.setSides = function(sides){
     } else if (typeof sides === 'object') {
         this.set('all', sides.all);
         for(var p in sides){
-            if(p !== 'all'){
+            if(p !== 'all' && sides.hasOwnProperty(p)){
                 this.set(p, sides[p]);
             }
         }
@@ -503,6 +505,38 @@ pvc.Sides.prototype.resolve = function(width, height){
     
     return sides;
 };
+
+pvc.Sides.resolvedMax = function(a, b){
+    var sides = {};
+    
+    pvc.Sides.names.forEach(function(side){
+        sides[side] = Math.max(a[side] || 0, b[side] || 0);
+    });
+    
+    return sides;
+};
+
+pvc.Sides.resolvedPlus = function(a, b){
+    var sides = {};
+    
+    pvc.Sides.names.forEach(function(side){
+        sides[side] = (a[side] || 0) + (b[side] || 0);
+    });
+    
+    return sides;
+};
+
+pvc.Sides.resolvedMinus = function(a, b){
+    var sides = {};
+    
+    pvc.Sides.names.forEach(function(side){
+        sides[side] = (a[side] || 0) - (b[side] || 0);
+    });
+    
+    return sides;
+};
+
+// -------------
 
 pvc.PercentValue = function(pct){
     this.percent = pct;
@@ -10781,7 +10815,7 @@ function visualContext_update(mark, event){
  * @property {string} orientatedId The id of the axis with respect to the orientation and the index of the axis ("").
  * @property {pvc.visual.Role} role The associated visual role.
  * @property {pv.Scale} scale The associated scale.
- *  
+ * 
  * @constructor
  * @param {pvc.CartesianAbstract} chart The associated cartesian chart.
  * @param {string} type The type of the axis. One of the values: 'base' or 'ortho'.
@@ -10851,7 +10885,31 @@ def.type('pvc.visual.CartesianAxis')
 .add(/** @lends pvc.visual.CartesianAxis# */{
     
     setScale: function(scale){
+        
+        if(this.scale){
+            // If any
+            delete this.domain;
+            delete this.ticks;
+            delete this._roundingPaddings;
+        }
+        
         this.scale = scale;
+        
+        if(scale){
+            scale.type = this.scaleType;
+            
+            if(!scale.isNull && this.scaleType !== 'Discrete'){
+                // Original data domain, before nice or tick rounding
+                this.domain = scale.domain();
+                
+                if(this.scaleType === 'Continuous'){
+                    var roundMode = this.option('DomainRoundMode');
+                    if(roundMode === 'nice'){
+                        scale.nice();
+                    }
+                }
+            }
+        }
     },
     
     /**
@@ -10921,6 +10979,65 @@ def.type('pvc.visual.CartesianAxis')
         }
         
         return value;
+    },
+ 
+    setTicks: function(ticks){
+        var scale = this.scale;
+        
+        /*jshint expr:true */
+        (scale && !scale.isNull) || def.fail.operationInvalid("Scale must be set and non-null.");
+        
+        this.ticks = ticks;
+        
+        if(scale.type === 'Continuous' && this.option('DomainRoundMode') === 'tick'){
+            
+            delete this._roundingPaddings;
+            
+            // Commit calculated ticks to scale's domain
+            var tickCount = ticks && ticks.length;
+            if(tickCount){
+                this.scale.domain(ticks[0], ticks[tickCount - 1]);
+            } else {
+                // Reset scale domain
+                this.scale.domain(this.domain[0], this.domain[1]);
+            }
+        }
+    },
+    
+    getScaleRoundingPaddings: function(){
+        var roundingPaddings = this._roundingPaddings;
+        if(!roundingPaddings){
+            roundingPaddings = {begin: 0, end: 0};
+            
+            var scale = this.scale;
+            var roundMode;
+            
+            while(scale && !scale.isNull && scale.type === 'Continuous' && 
+                  (roundMode = this.option('DomainRoundMode')) !== 'none'){
+                
+                var currDomain = scale.domain();
+                var origDomain = this.domain || def.assert("Must be set");
+                
+                var currLength = currDomain[1] - currDomain[0];
+                if(currLength){
+                    var dif = origDomain[0] - currDomain[0];
+                    if(dif > 0){
+                        roundingPaddings.begin = dif / currLength;
+                    }
+
+                    dif = currDomain[1] - origDomain[1];
+                    if(dif > 0){
+                        roundingPaddings.end = dif / currLength;
+                    }
+                }
+                
+                break;
+            }
+            
+            this._roundingPaddings = roundingPaddings;
+        }
+        
+        return roundingPaddings;
     }
 });
 
@@ -11081,7 +11198,6 @@ $VCA.createAllDefaultOptions = function(options){
            'FullGrid':          false,
            'FullGridCrossesMargin': true,
            'RuleCrossesMargin': true,
-           'EndLine':           false,
            'DomainRoundMode':   'none',
            'ZeroLine':          true,
            'LabelSpacingMin':      1
@@ -11584,6 +11700,16 @@ pvc.BaseChart = pvc.Abstract.extend({
 
     constructor: function(options) {
         var parent = this.parent = def.get(options, 'parent') || null;
+        
+        /* DEBUG options */
+        if(pvc.debug >= 3 && !parent && options){
+            try {
+                pvc.log("INITIAL OPTIONS:\n" + JSON.stringify(options));
+            } catch(ex) {
+                /* SWALLOW usually a circular JSON structure */
+            }
+        }
+        
         if(parent) {
             // options != null
             this.root = parent.root;
@@ -11627,9 +11753,9 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._processOptionsCore(options);
         
         /* DEBUG options */
-        if(pvc.debug >= 3 && options){
+        if(pvc.debug >= 3 && options && !this.parent){
             try {
-                pvc.log("OPTIONS:\n" + JSON.stringify(options));
+                pvc.log("CURRENT OPTIONS:\n" + JSON.stringify(options));
             }catch(ex) {
                 /* SWALLOW usually a circular JSON structure */
             }
@@ -13020,8 +13146,6 @@ pvc.BasePanel = pvc.Abstract.extend({
         this.paddings = new pvc.Sides(options && options.paddings);
         this.size     = new pvc.Size (options && options.size    );
         this.sizeMax  = new pvc.Size (options && options.sizeMax );
-        this.align    = pvc.parseAlign(this.anchor, this.align);
-        
         
         if(!parent) {
             this.parent    = null;
@@ -13050,6 +13174,9 @@ pvc.BasePanel = pvc.Abstract.extend({
         /* Root panels do not need layout */
         if(this.isRoot) {
             this.anchor = null;
+            this.align  = null;
+        } else {
+            this.align = pvc.parseAlign(this.anchor, this.align);
         }
     },
     
@@ -13076,17 +13203,22 @@ pvc.BasePanel = pvc.Abstract.extend({
      * On root panels this argument is not specified,
      * and the panels' current {@link #width} and {@link #height} are used as default. 
      * </p>
-     * @param {pvc.Size} [referenceSize] The size that should be used for 
+     * @param {object}  [keyArgs] Keyword arguments.
+     * @param {boolean} [keyArgs.force=false] Indicates that the layout should be
+     * performed even if it has already been done.
+     * @param {pvc.Size} [keyArgs.referenceSize] The size that should be used for 
      * percentage size calculation. 
      * This will typically be the <i>client</i> size of the parent.
-     * 
-     * @param {object}  [keyArgs] Keyword arguments.
-     * @param {boolean} [keyArgs.force=false] Indicates that the layout should be 
-     * performed even if it has already been done. 
+     * @param {pvc.Sides} [keyArgs.paddings] The paddings that should be used for 
+     * the layout. Default to the panel's paddings {@link #paddings}.
+     * @param {pvc.Sides} [keyArgs.margins] The margins that should be used for 
+     * the layout. Default to the panel's margins {@link #margins}.
+     * @param {boolean} [keyArgs.canChange=true] Whether this is a last time layout. 
      */
-    layout: function(availableSize, referenceSize, keyArgs){
+    layout: function(availableSize, keyArgs){
         if(!this._layoutInfo || def.get(keyArgs, 'force', false)) {
             
+            var referenceSize = def.get(keyArgs, 'referenceSize');
             if(!referenceSize && availableSize){
                 referenceSize = def.copyOwn(availableSize);
             }
@@ -13119,15 +13251,16 @@ pvc.BasePanel = pvc.Abstract.extend({
                 availableSize.height = sizeMax.height;
             }
             
-            var margins  = this.margins .resolve(referenceSize);
-            var paddings = this.paddings.resolve(referenceSize);
+            var margins  = (def.get(keyArgs, 'margins' ) || this.margins ).resolve(referenceSize);
+            var paddings = (def.get(keyArgs, 'paddings') || this.paddings).resolve(referenceSize);
+            
             var spaceWidth  = margins.width  + paddings.width;
             var spaceHeight = margins.height + paddings.height;
             
             var availableClientSize = new pvc.Size(
-                        Math.max(availableSize.width  - spaceWidth,  0),
-                        Math.max(availableSize.height - spaceHeight, 0)
-                    );
+                    Math.max(availableSize.width  - spaceWidth,  0),
+                    Math.max(availableSize.height - spaceHeight, 0)
+                );
             
             var desiredClientSize = def.copyOwn(desiredSize);
             if(desiredClientSize.width != null){
@@ -13138,14 +13271,24 @@ pvc.BasePanel = pvc.Abstract.extend({
                 desiredClientSize.height = Math.max(desiredClientSize.height - spaceHeight, 0);
             }
             
+            var prevLayoutInfo = this._layoutInfo || null;
+            if(prevLayoutInfo){
+                // Free old memory
+                delete prevLayoutInfo.previous;
+            }
+            
+            var canChange = def.get(keyArgs, 'canChange', true);
+            
             var layoutInfo = 
                 this._layoutInfo = {
-                referenceSize:       referenceSize,
-                margins:             margins,
-                paddings:            paddings,
-                desiredClientSize:   desiredClientSize,
-                clientSize:          availableClientSize
-            };
+                    canChange:         canChange,
+                    referenceSize:     referenceSize,
+                    margins:           margins,
+                    paddings:          paddings,
+                    desiredClientSize: desiredClientSize,
+                    clientSize:        availableClientSize,
+                    previous:          prevLayoutInfo
+                };
             
             var clientSize = this._calcLayout(layoutInfo);
             
@@ -13167,6 +13310,10 @@ pvc.BasePanel = pvc.Abstract.extend({
             
             this.width  = size.width;
             this.height = size.height;
+            
+            if(!canChange && prevLayoutInfo){
+                delete layoutInfo.previous;
+            }
         }
     },
     
@@ -13226,8 +13373,11 @@ pvc.BasePanel = pvc.Abstract.extend({
         var aolMap = pvc.BasePanel.orthogonalLength,
             aoMap  = pvc.BasePanel.relativeAnchor;
         
-        var childKeyArgs = {force: true};
-        var childReferenceSize = clientSize;
+        var childKeyArgs = {
+                force: true,
+                referenceSize: clientSize
+            };
+        
         var needRelayout = false;
         var relayoutCount = 0;
         var allowGrow = true;
@@ -13265,7 +13415,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 /*jshint expr:true */
                 def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
                 
-                child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
+                child.layout(new pvc.Size(remSize), childKeyArgs);
                 
                 if(child.isVisible){
                     checkChildLayout.call(this, child);
@@ -13282,7 +13432,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
         
         function layoutChildII(child) {
-            child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
+            child.layout(new pvc.Size(remSize), childKeyArgs);
             if(child.isVisible){
                 checkChildLayout(child);
                 if(!needRelayout){
@@ -13724,15 +13874,16 @@ pvc.BasePanel = pvc.Abstract.extend({
      * the protovis panel for the specified layer name.
      */
     getPvPanel: function(layer) {
+        var mainPvPanel = this.pvPanel;
         if(!layer){
-            return this.pvPanel;
+            return mainPvPanel;
         }
 
         if(!this.parent){
             throw def.error.operationInvalid("Layers are not possible in a root panel.");
         }
 
-        if(!this.pvPanel){
+        if(!mainPvPanel){
             throw def.error.operationInvalid(
                "Cannot access layer panels without having created the main panel.");
         }
@@ -13748,15 +13899,18 @@ pvc.BasePanel = pvc.Abstract.extend({
             var pvParentPanel = this.parent.pvPanel;
             var pvBorderPanel = 
                 pvPanel = pvParentPanel.borderPanel.add(this.type)
-                              .extend(this.pvPanel.borderPanel);
+                              .extend(mainPvPanel.borderPanel);
             
-            if(pvParentPanel !== pvParentPanel.borderPanel){
+            if(mainPvPanel !== mainPvPanel.borderPanel){
                 pvPanel = pvBorderPanel.add(pv.Panel)
-                                       .extend(this.pvPanel);
+                                       .extend(mainPvPanel);
             }
             
+            pvBorderPanel.borderPanel  = pvBorderPanel;
             pvBorderPanel.paddingPanel = pvPanel;
-            pvPanel.borderPanel = pvBorderPanel;
+            
+            pvPanel.paddingPanel  = pvPanel;
+            pvPanel.borderPanel   = pvBorderPanel;
             
             this.initLayerPanel(pvPanel, layer);
 
@@ -14318,7 +14472,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         var any = false;
         if(this.isVisible){
             var selectableMarks = this._getSignums();
-            
+        
             if(selectableMarks){
                 selectableMarks.forEach(function(mark){
                     this._forEachMarkDatumUnderRubberBand(mark, function(datum){
@@ -14613,8 +14767,9 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         var chart = this.chart;
         
         if(chart instanceof pvc.PieChart){
-            // These are square bounded
-            return totalWidth;
+            // These are ~ square bounded
+            // 5 - width / 4 - height
+            return (7/10) * totalWidth;
         }
         
         var options = chart.options;
@@ -15443,7 +15598,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this.axesPanels = {};
         
         this.base(options);
-
+        
         pvc.mergeDefaults(this.options, pvc.CartesianAbstract.defaultOptions, options);
     },
     
@@ -15483,7 +15638,9 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         this._createAxisPanel(baseAxis );
         this._createAxisPanel(orthoAxis);
         
-        /* Create scales without range yet */
+        /* Create scales, with domain applied, but no range yet,
+         * and give them to corresponding axes.
+         */
         this._createAxisScale(baseAxis );
         this._createAxisScale(orthoAxis);
         if(ortho2Axis){
@@ -15606,7 +15763,12 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                     def.fail.operationInvalid("First ortho scale must be created first.");
         } else {
             scale = this._createScaleByAxis(axis);
+            
+            if(scale.isNull && pvc.debug >= 3){
+                pvc.log(def.format("{0} scale for axis '{1}'- no data", [axis.scaleType, axis.id]));
+            }
         }
+        
         axis.setScale(scale);
         
         /* V1 fields xScale, yScale, secondScale */
@@ -15660,14 +15822,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                             });
         
         var scale  = new pv.Scale.ordinal();
-        scale.type = 'Discrete';
-        
         if(!data.count()){
             scale.isNull = true;
-            
-            if(pvc.debug >= 3){
-                pvc.log("Discrete scale - no data");
-            }
         } else {
             var values = data.children()
                              .select(function(child){ return child.value; })
@@ -15701,14 +15857,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var extent = this._getVisibleValueExtent(axis, dataPartValues); // null when no data...
         
         var scale = new pv.Scale.linear();
-        scale.type = 'Timeseries';
-        
         if(!extent){
             scale.isNull = true;
-            
-            if(pvc.debug >= 3){
-                pvc.log("Timeseries scale - no data");
-            }
         } else {
             var dMin = extent.min;
             var dMax = extent.max;
@@ -15718,8 +15868,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
         
             scale.domain(dMin, dMax);
-            
-            // TODO: Domain rounding
         }
         
         return scale;
@@ -15746,14 +15894,8 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var extent = this._getVisibleValueExtentConstrained(axis, dataPartValues);
         
         var scale = new pv.Scale.linear();
-        scale.type = 'Continuous';
-        
         if(!extent){
             scale.isNull = true;
-            
-            if(pvc.debug >= 3){
-                pvc.log("Continuous scale - no data");
-            }
         } else {
             var dMin = extent.min;
             var dMax = extent.max;
@@ -15793,49 +15935,23 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
             }
             
             scale.domain(dMin, dMax);
-            
-            // Domain rounding
-            // Must be done before applying offset
-            // because otherwise the offset gets amplified by the rounding
-            // Then, the scale range is updated but the ticks cache is not.
-            // The result is we end up showing two zones, on each end, with no ticks.
-            var roundMode = axis.option('DomainRoundMode');
-            if(roundMode === 'nice'){
-                scale.nice();
-                // Ticks domain rounding is performed during AxisPanel layout
-            }
-            
-            if(pvc.debug >= 3){
-                pvc.log("Continuous scale extent: " + JSON.stringify(extent) + 
-                        " create:" + JSON.stringify({min: dMin, max: dMax}) + 
-                        " niced:"  + JSON.stringify(scale.domain()));
-            }
         }
         
         return scale;
     },
     
     _setAxisScaleRange: function(axis){
+        var info = this._mainContentPanel._layoutInfo;
         var size = (axis.orientation === 'x') ?
-                        this._mainContentPanel.width :
-                        this._mainContentPanel.height;
+                   info.clientSize.width :
+                   info.clientSize.height;
         
         var scale = axis.scale;
         scale.min  = 0;
-        scale.max  = size; 
+        scale.max  = size;
         scale.size = size; // original size
         
-        var axisOffset = axis.option('Offset');
-        if(axisOffset > 0){
-            var rOffset = size * axisOffset;
-            scale.min += rOffset;
-            scale.max -= rOffset;
-            scale.offset = rOffset;
-            scale.offsetSize = scale.max - scale.min;
-        } else {
-            scale.offset = 0;
-            scale.offsetSize = scale.size;
-        }
+        // -------------
         
         if(scale.type === 'Discrete'){
             if(scale.domain().length > 0){ // Has domain? At least one point is required to split.
@@ -15843,19 +15959,6 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
                 scale.splitBandedCenter(scale.min, scale.max, bandRatio);
             }
         } else {
-            if(scale.type === 'Continuous' && axis.option('DomainRoundMode') === 'tick'){
-                var axisPanel = this.axesPanels[axis.id];
-                if(axisPanel){
-                    // Domain rounding
-                    // Commit the scale's domain to the axis calculated ticks domain
-                    var ticks = axisPanel.getTicks();
-                    var tickCount = ticks && ticks.length;
-                    if(tickCount){
-                        scale.domain(ticks[0], ticks[tickCount - 1]);
-                    }
-                }
-            }
-            
             scale.range(scale.min, scale.max);
         }
         
@@ -15865,7 +15968,42 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         
         return scale;
     },
-
+    
+    _getAxesRoundingPaddings: function(){
+        var axesPaddings = {};
+        
+        var axes  = this.axes;
+        processAxis(axes.x);
+        processAxis(axes.secondX);
+        processAxis(axes.y);
+        processAxis(axes.secondY);
+        
+        return axesPaddings;
+        
+        function setSide(side, pct){
+            var value = axesPaddings[side];
+            if(value == null || pct > value){
+                axesPaddings[side] = pct;
+            }
+        }
+        
+        function processAxis(axis){
+            if(axis){
+                // {begin: , end: }
+                var roundingPaddings = axis.getScaleRoundingPaddings();
+                if(roundingPaddings){
+                    if(axis.orientation === 'x'){
+                        setSide('left',  roundingPaddings.begin);
+                        setSide('right', roundingPaddings.end);
+                    } else {
+                        setSide('bottom', roundingPaddings.begin);
+                        setSide('top',    roundingPaddings.end);
+                    }
+                }
+            }
+        }
+    },
+    
     /*
      * Obtains the chart's visible data
      * grouped according to the charts "main grouping".
@@ -16051,7 +16189,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         orthoFixedMax: undefined,
 
         useCompositeAxis: false,
-
+        
+        // Show a frame around the plot area
+        showPlotFrame: undefined,
+        
         /* Non-standard axes options and defaults */
         showXScale: true,
         showYScale: true,
@@ -16074,6 +16215,11 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
      * These are mapped to a 3x3 grid. The corner cells always remain empty.
      * In the center cell, panels are superimposed.
      * </p>
+     * <p>
+     * Additionally, panels' paddings are shared:
+     * Left and right paddings are shared by the top, center and bottom panels.
+     * Top and bottom paddings are shared by the left, center and right panels.
+     * </p>
      * 
      * @override
      */
@@ -16084,26 +16230,242 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
         }
         
         // Objects we can mutate
-        var margins = new pvc.Sides(0);
+        var margins  = new pvc.Sides(0);
+        var paddings = new pvc.Sides(0);
         var remSize = def.copyOwn(layoutInfo.clientSize);
         
-        var aolMap = pvc.BasePanel.orthogonalLength,
-            aoMap  = pvc.BasePanel.relativeAnchor,
-            alMap  = pvc.BasePanel.parallelLength;
+        var aolMap = pvc.BasePanel.orthogonalLength;
+        var aoMap  = pvc.BasePanel.relativeAnchor;
+        var alMap  = pvc.BasePanel.parallelLength;
         
-        var childKeyArgs = {force: true};
-        var childReferenceSize = layoutInfo.clientSize;
+        var childKeyArgs = {
+                force: true,
+                referenceSize: layoutInfo.clientSize
+            };
         
-        // Decreases available size and increases margins
-        function updateSide(side, child) {
-            var sideol = aolMap[side],
-                olen   = child[sideol];
+        var fillChildren = [];
+        var sideChildren = [];
+        
+        // loop detection
+        var paddingHistory = {}; 
+        var loopSignal = {};
+        var isDisasterRecovery = false;
+        
+        
+        // PHASE 0 - Initialization
+        //
+        // Splits children in two groups: FILL and SIDE, according to its anchor.
+        // Children explicitly not requiring layout are excluded (!child.anchor).
+        //
+        // For FILL children, finds the maximum of the resolved paddings.
+        // These paddings will be the minimum that will result from this layout.
+        this._children.forEach(initChild);
+        
+        // PHASE 1 - MARGINS are imposed by SIDE children
+        //
+        // Lays out non-fill children receiving each, the remaining space as clientSize.
+        //
+        // Each adds its orthogonal length to the margin side where it is anchored.
+        // The normal length is only correctly known after all non-fill
+        // children have been layed out once.
+        // 
+        // As such the child is only positioned on the anchor coordinate.
+        // The orthogonal anchor coordinate is only set on the second phase.
+        // 
+        // SIDE children may change paddings as well.
+        sideChildren.forEach(layoutChild1Side);
+        
+        // -> remSize now contains the size of the CENTER cell and is not changed any more
+        
+        // PHASE 2 - Relayout each SIDE child with its final orthogonal length
+        // PHASE 3 - Layout FILL children
+        // 
+        // Repeat 2 and 3 while paddings changed
+        
+        doMaxTimes(9, layoutCycle);
+        
+        layoutInfo.gridMargins  = new pvc.Sides(margins );
+        layoutInfo.gridPaddings = new pvc.Sides(paddings);
+        layoutInfo.gridSize     = new pvc.Size(remSize  );
+        
+        // All available client space is consumed.
+        // As such, there's no need to return anything.
+        // return;
+        
+        // --------
+        
+        function layoutCycle(remTimes, iteration){
+            if(pvc.debug >= 5){
+                pvc.log("\n[GridDockingPanel] ==== LayoutCycle " + (isDisasterRecovery ? "Disaster MODE" : ("#" + (iteration + 1))));
+            }
             
-            margins[side]   += olen;
-            remSize[sideol] -= olen;
+            var index, count;
+            var canChange = !isDisasterRecovery && (remTimes > 0);
+            var paddingsChanged;
+            
+            index = 0;
+            count = sideChildren.length;
+            while(index < count){
+                if(pvc.debug >= 5){
+                    pvc.log("[GridDockingPanel] SIDE Child " + index);
+                }
+                
+                paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
+                if(!isDisasterRecovery && paddingsChanged){
+                    if(paddingsChanged === loopSignal){
+                        // Oh no...
+                        isDisasterRecovery = true;
+                        layoutCycle(0);
+                        return false; // stop;
+                    }
+                    
+                    if(remTimes > 0){
+                        if(pvc.debug >= 5){
+                            pvc.log("[GridDockingPanel] SIDE Child " + index + " increased paddings (remTimes=" + remTimes + ")");
+                        }
+                        return true; // repeat
+                    } else if(pvc.debug >= 2){
+                        pvc.log("[Warning] [GridDockingPanel] SIDE Child " + index + " increased paddings but no more iterations possible.");
+                    }
+                }
+                index++;
+            }
+            
+            index = 0;
+            count = fillChildren.length;
+            while(index < count){
+                if(pvc.debug >= 5){
+                    pvc.log("[GridDockingPanel] FILL Child " + index);
+                }
+                
+                paddingsChanged = layoutChildFill(fillChildren[index], canChange);
+                if(!isDisasterRecovery && paddingsChanged){
+                    if(paddingsChanged === loopSignal){
+                        // Oh no...
+                        isDisasterRecovery = true;
+                        layoutCycle(0);
+                        return false; // stop;
+                    }
+                    
+                    if(remTimes > 0){
+                        if(pvc.debug >= 5){
+                            pvc.log("[GridDockingPanel] FILL Child " + index + " increased paddings (remTimes=" + remTimes + ")");
+                        }
+                        return true; // repeat
+                    } else if(pvc.debug >= 2){
+                        pvc.log("[Warning] [GridDockingPanel] FILL Child " + index + " increased paddings but no more iterations possible.");
+                    }
+                }
+                index++;
+            }
+            
+            return false; // stop
         }
         
-        function positionChildI(side, child) {
+        function doMaxTimes(maxTimes, fun){
+            var index = 0;
+            while(maxTimes--){
+                // remTimes = maxTimes
+                if(fun(maxTimes, index) === false){
+                    return true;
+                }
+                index++;
+            }
+            
+            return false;
+        }
+        
+        function initChild(child) {
+            var a = child.anchor;
+            if(a){
+                if(a === 'fill') {
+                    fillChildren.push(child);
+                    
+                    var childPaddings = child.paddings.resolve(childKeyArgs.referenceSize);
+                    
+                    // After the op. it's not a pvc.Side anymore, just an object with same named properties.
+                    paddings = pvc.Sides.resolvedMax(paddings, childPaddings);
+                } else {
+                    /*jshint expr:true */
+                    def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
+                    
+                    sideChildren.push(child);
+                }
+            }
+        }
+        
+        function layoutChild1Side(child) {
+            var paddingsChanged = false;
+            
+            var a = child.anchor;
+            
+            childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
+            
+            child.layout(new pvc.Size(remSize), childKeyArgs);
+            
+            if(child.isVisible){
+                
+                paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child);
+
+                // Only set the *anchor* position
+                // The other orthogonal position is dependent on the size of the other non-fill children
+                positionChildNormal(a, child);
+                
+                updateSide(a, child);
+            }
+            
+            return paddingsChanged;
+        }
+        
+        function layoutChildFill(child, canChange) {
+            var paddingsChanged = false;
+            
+            var a = child.anchor; // 'fill'
+            
+            childKeyArgs.paddings  = filterAnchorPaddings(a, paddings);
+            childKeyArgs.canChange = canChange;
+            
+            child.layout(new pvc.Size(remSize), childKeyArgs);
+            
+            if(child.isVisible){
+                paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange);
+                
+                positionChildNormal(a, child);
+                positionChildOrtho (child, a);
+            }
+            
+            return paddingsChanged;
+        }
+        
+        function layoutChild2Side(child, canChange) {
+            var paddingsChanged = false;
+            if(child.isVisible){
+                var a = child.anchor;
+                var al  = alMap[a];
+                var aol = aolMap[a];
+                var length  = remSize[al];
+                var olength = child[aol];
+                
+                var childSize2 = new pvc.Size(def.set({}, al, length, aol, olength));
+                
+                childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
+                childKeyArgs.canChange = canChange;
+                
+                child.layout(childSize2, childKeyArgs);
+                
+                if(child.isVisible){
+                    paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange);
+                    
+                    var align = pvc.parseAlign(a, child.align);
+                    
+                    positionChildOrtho(child, align);
+                }
+            }
+            
+            return paddingsChanged;
+        }
+        
+        function positionChildNormal(side, child) {
             var sidePos;
             if(side === 'fill'){
                 side = 'left';
@@ -16115,7 +16477,16 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             child.setPosition(def.set({}, side, sidePos));
         }
         
-        function positionChildII(child, align) {
+        // Decreases available size and increases margins
+        function updateSide(side, child) {
+            var sideol = aolMap[side],
+                olen   = child[sideol];
+            
+            margins[side]   += olen;
+            remSize[sideol] -= olen;
+        }
+        
+        function positionChildOrtho(child, align) {
             var sideo;
             if(align === 'fill'){
                 align = 'middle';
@@ -16145,59 +16516,84 @@ pvc.GridDockingPanel = pvc.BasePanel.extend({
             child.setPosition(def.set({}, sideo, sideOPos));
         }
         
-        function layoutChildI(child) {
-            var a = child.anchor;
-            if(a && a !== 'fill') {
-                /*jshint expr:true */
-                def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
+        function filterAnchorPaddings(a, paddings){
+            var filtered = new pvc.Sides();
+            
+            getAnchorPaddingsNames(a).forEach(function(side){
+                filtered.set(side, paddings[side]);
+            });
+            
+            return filtered;
+        }
+        
+        function checkAnchorPaddingsChanged(a, paddings, child, canChange){
+            var newPaddings = child._layoutInfo.requestPaddings;
+            
+            var changed = false;
+            if(newPaddings){
+                if(pvc.debug >= 5){
+                    pvc.log("[GridDockingPanel] => clientSize=" + JSON.stringify(child._layoutInfo.clientSize));
+                    pvc.log("[GridDockingPanel] <= requestPaddings=" + JSON.stringify(newPaddings));
+                }
                 
-                child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
-                if(child.isVisible){
-                    // Only set the *anchor* position
-                    // The other orthogonal position is dependent on the size of the other non-fill children
-                    positionChildI(a, child);
-                    
-                    updateSide(a, child);
-                }
-            }
-        }
-        
-        function layoutChildII(child) {
-            var a = child.anchor;
-            if(a === 'fill') {
-                child.layout(new pvc.Size(remSize), childReferenceSize, childKeyArgs);
-                if(child.isVisible){
-                    positionChildI (a, child);
-                    positionChildII(child, a);
-                }
-            } else if(a) {
-                if(child.isVisible){
-                    var al  = alMap[a];
-                    var aol = aolMap[a];
-                    var length      = remSize[al];
-                    var olength     = child[aol];
-                    var childSizeII = new pvc.Size(def.set({}, al, length, aol, olength));
-                    
-                    child.layout(childSizeII, childReferenceSize, childKeyArgs);
-                    if(child.isVisible){
-                        var align = pvc.parseAlign(a, child.align);
+                getAnchorPaddingsNames(a).forEach(function(side){
+                    if(newPaddings.hasOwnProperty(side)){
+                        var value    = paddings    [side] || 0;
+                        var newValue = Math.floor(10000 * (newPaddings[side] || 0)) / 10000;
+                        var increase = newValue - value;
                         
-                        positionChildII(child, align);
+                        // STABILITY requirement
+                        if(increase !== 0 && Math.abs(increase) >= Math.abs(0.01 * value)){
+                            if(!canChange){
+                                if(pvc.debug >= 2){
+                                    pvc.log("[Warning] [GridDockingPanel] CANNOT change but child wanted to: " + side + "=" + newValue);
+                                }
+                            } else {
+                                changed = true;
+                                paddings[side] = newValue;
+                                
+                                if(pvc.debug >= 5){
+                                    pvc.log("[Warning] [GridDockingPanel] changed padding " + side + " <- " + newValue);
+                                }
+                            }
+                        }
                     }
+                });
+                
+                if(changed){
+                    var paddingKey = pvc.Sides
+                                        .names
+                                        .map(function(side){ return (paddings[side] || 0).toFixed(3); })
+                                        .join('|');
+                    
+                    if(def.hasOwn(paddingHistory, paddingKey)){
+                        // LOOP detected
+                        if(pvc.debug >= 2){
+                            pvc.log("[GridDockingPanel] LOOP detected");
+                        }
+                        changed = loopSignal;
+                    } else {
+                        paddingHistory[paddingKey] = true;
+                    }
+                    
+                    paddings.width  = paddings.left + paddings.right ;
+                    paddings.height = paddings.top  + paddings.bottom;
                 }
             }
+            
+            return changed;
         }
         
-        this._children.forEach(layoutChildI );
-        
-        // remSize now contains the center cell and is not changed in phase II
-        // fill children are layed out in that cell
-        // other non-fill children already layed out in phase I
-        // "relayout" once now that the other (orthogonal) length is now determined.
-        
-        this._children.forEach(layoutChildII);
-        
-        // Consume all available client space, so no need to return anything
+        function getAnchorPaddingsNames(a){
+            switch(a){
+                case 'left':
+                case 'right':  return pvc.Sides.vnames;
+                case 'top':
+                case 'bottom': return pvc.Sides.hnames;
+                case 'fill':   return pvc.Sides.names;
+            }
+        }
+
     }
 });
 
@@ -16210,8 +16606,9 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
 
         // Extend body
         this.extend(this.pvPanel,    "content_");
-        this.extend(this.xFrameRule, "xAxisEndLine_");
-        this.extend(this.yFrameRule, "yAxisEndLine_");
+        this.extend(this.xGridRule,  "xAxisGrid_");
+        this.extend(this.yGridRule,  "yAxisGrid_");
+        this.extend(this.pvFrameBar, "plotFrame_");
         this.extend(this.xZeroLine,  "xAxisZeroLine_");
         this.extend(this.yZeroLine,  "yAxisZeroLine_");
     },
@@ -16220,167 +16617,300 @@ pvc.CartesianGridDockingPanel = pvc.GridDockingPanel.extend({
      * @override
      */
     _createCore: function(layoutInfo){
-
+        var chart = this.chart;
+        var axes  = chart.axes;
+        var xAxis = axes.x;
+        var yAxis = axes.y;
+        
+        // Full grid lines
+        if(xAxis.isVisible && xAxis.option('FullGrid')) {
+            this.xGridRule = this._createGridRule(xAxis);
+        }
+        
+        if(yAxis.isVisible && yAxis.option('FullGrid')) {
+            this.yGridRule = this._createGridRule(yAxis);
+        }
+        
         this.base(layoutInfo);
 
-        var chart = this.chart,
-            contentPanel = chart._mainContentPanel;
+        var contentPanel = chart._mainContentPanel;
         if(contentPanel) {
-            var axes = chart.axes;
-            var xAxis = axes.x;
-            var yAxis = axes.y;
+            var showPlotFrame = chart.options.showPlotFrame;
+            if(showPlotFrame == null){
+                if(chart.options.compatVersion <= 1){
+                    showPlotFrame = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
+                } else {
+                    showPlotFrame = true;
+                }
+            }
             
-            if(xAxis.option('EndLine')) {
-                // Frame lines parallel to x axis
-                this.xFrameRule = this._createFrameRule(xAxis);
+            if(showPlotFrame) {
+                this.pvFrameBar = this._createFrame(layoutInfo, axes);
             }
-
-            if(yAxis.option('EndLine')) {
-                // Frame lines parallel to y axis
-                this.yFrameRule = this._createFrameRule(yAxis);
-            }
-
+            
             if(xAxis.scaleType === 'Continuous' && xAxis.option('ZeroLine')) {
-                this.xZeroLine = this._createZeroLine(xAxis);
+                this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
             }
 
             if(yAxis.scaleType === 'Continuous' && yAxis.option('ZeroLine')) {
-                this.yZeroLine = this._createZeroLine(yAxis);
+                this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
             }
         }
     },
-
-    _createZeroLine: function(axis){
+    
+    _createGridRule: function(axis){
+        var scale = axis.scale;
+        var ticks;
+        
+        // Composite axis don't fill ticks
+        if(!scale.isNull && (ticks = axis.ticks)){
+            var margins  = this._layoutInfo.gridMargins;
+            var paddings = this._layoutInfo.gridPaddings;
+            
+            var tick_a = axis.orientation === 'x' ? 'left' : 'bottom';
+            var len_a  = this.anchorLength(tick_a);
+            var obeg_a = this.anchorOrtho(tick_a);
+            var oend_a = this.anchorOpposite(obeg_a);
+            
+            var tick_offset = margins[tick_a] + paddings[tick_a];
+            
+            var obeg = margins[obeg_a];
+            var oend = margins[oend_a];
+            
+    //      TODO: Implement FullGridCrossesMargin ...
+    //        var orthoAxis = this._getOrthoAxis(axis.type);
+    //        if(!orthoAxis.option('FullGridCrossesMargin')){
+    //            obeg += paddings[obeg_a];
+    //            oend += paddings[oend_a];
+    //        }
+            
+            // Grid rules are generated for MAJOR ticks only.
+            // For discrete axes, each category
+            // has a grid line at the beginning of the band,
+            // and an extra end line in the last band
+            var isDiscrete = axis.scaleType === 'Discrete';
+            if(isDiscrete){
+                ticks = ticks.concat(ticks[ticks.length - 1]);
+            }
+            
+            var pvGridRule = this.pvPanel.add(pv.Rule)
+                            .data(ticks)
+                            .zOrder(-12)
+                            .strokeStyle("#f0f0f0")
+                            [obeg_a](obeg)
+                            [oend_a](oend)
+                            [len_a](null)
+                            ;
+            
+            if(!isDiscrete){
+                pvGridRule
+                    [tick_a](function(tick){
+                        return tick_offset + scale(tick);
+                    });
+            } else {
+                var halfStep = scale.range().step / 2;
+                var lastTick = ticks.length - 1;
+                
+                pvGridRule
+                    [tick_a](function(childData){
+                        var position = tick_offset + scale(childData.value);
+                        return position + (this.index < lastTick ? -halfStep : halfStep);
+                    });
+            }
+            
+            return pvGridRule;
+        }
+    },
+    
+    /* zOrder
+     *
+     * TOP
+     * -------------------
+     * Axis Rules:     0
+     * Frame/EndLine: -5
+     * Line/Dot/Area Content: -7
+     * ZeroLine:      -9   <<------
+     * Content:       -10 (default)
+     * FullGrid:      -12
+     * -------------------
+     * BOT
+     */
+    
+    _createFrame: function(layoutInfo, axes){
+        if(axes.base.scale.isNull || 
+           (axes.ortho.scale.isNull && (!axes.ortho2 || axes.ortho2.scale.isNull))){
+            return;
+        }
+                
+        var margins = layoutInfo.gridMargins;
+        var left   = margins.left;
+        var right  = margins.right;
+        var top    = margins.top;
+        var bottom = margins.bottom;
+        
+        // TODO: Implement FullGridCrossesMargin ...
+        // Need to use to find the correct bounding box.
+        // xScale(xScale.domain()[0]) -> xScale(xScale.domain()[1])
+        // and
+        // yScale(yScale.domain()[0]) -> yScale(yScale.domain()[1])
+        var pvFrame = this.pvPanel.add(pv.Bar)
+                        .zOrder(-5)
+                        .left(left)
+                        .right(right)
+                        .top (top)
+                        .bottom(bottom)
+                        .strokeStyle("#808285")
+                        .lineWidth(0.5)
+                        .lock('fillStyle', null);
+        return pvFrame;
+    },
+    
+    _createZeroLine: function(axis, layoutInfo){
         var scale = axis.scale;
         if(!scale.isNull){
             var domain = scale.domain();
     
             // Domain crosses zero?
             if(domain[0] * domain[1] <= 0){
-                var a   = axis.orientation === 'x' ? 'bottom' : 'left',
-                    al  = this.anchorLength(a),
-                    ao  = this.anchorOrtho(a),
-                    aol = this.anchorOrthoLength(a),
-                    orthoAxis = this._getOrthoAxis(axis.type),
-                    orthoScale = orthoAxis.scale,
-                    orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
-                    contentPanel = this.chart._mainContentPanel,
-                    zeroPosition = contentPanel.position[ao] + scale(0),
-                    position = contentPanel.position[a] + 
-                                (orthoFullGridCrossesMargin ?
-                                    0 :
-                                    orthoScale.offset),
-    
-                    olength   = orthoFullGridCrossesMargin ?
-                                        orthoScale.size :
-                                        orthoScale.offsetSize;
+                // TODO: Implement FullGridCrossesMargin ...
+                
+                var a = axis.orientation === 'x' ? 'left' : 'bottom';
+                var len_a  = this.anchorLength(a);
+                var obeg_a = this.anchorOrtho(a);
+                var oend_a = this.anchorOpposite(obeg_a);
+                
+                var margins = layoutInfo.gridMargins;
+                var paddings = layoutInfo.gridPaddings;
+                
+                var zeroPosition = margins[a] + paddings[a] + scale(0);
+                
+                var obeg = margins[obeg_a];
+                var oend = margins[oend_a];
                 
                 this.pvZeroLine = this.pvPanel.add(pv.Rule)
-                    /* zOrder
-                     *
-                     * TOP
-                     * -------------------
-                     * Axis Rules:     0
-                     * Frame/EndLine: -5
-                     * Line/Dot/Area Content: -7
-                     * ZeroLine:      -9   <<------
-                     * Content:       -10 (default)
-                     * FullGrid:      -12
-                     * -------------------
-                     * BOT
-                     */
                     .zOrder(-9)
                     .strokeStyle("#808285")
-                    [a](position)
-                    [aol](olength)
-                    [al](null)
-                    [ao](zeroPosition)
-                    //.svg(null)
+                    [obeg_a](obeg)
+                    [oend_a](oend)
+                    [a](zeroPosition)
+                    [len_a](null)
                     ;
             }
         }
-    },
-
-    _createFrameRule: function(axis){
-        var orthoAxis = this._getOrthoAxis(axis.type);
-        var orthoScale = orthoAxis.scale;
-        if(orthoScale.isNull){
-            // Can only hide if the second axis is null as well 
-            var orthoAxis2 = this.chart.axes[pvc.visual.CartesianAxis.getId(orthoAxis.type, 1)];
-            if(!orthoAxis2 || orthoAxis2.scale.isNull){
-                return;
-            }
-            
-            orthoScale = orthoAxis2;
-        }
-        
-        var a = axis.option('Position');
-        var scale = axis.scale;
-        if(scale.isNull){
-            // Can only hide if the second axis is null as well 
-            var axis2 = this.chart.axes[pvc.visual.CartesianAxis.getId(axis.type, 1)];
-            if(!axis2 || axis2.scale.isNull){
-                return;
-            }
-        }
-        
-        var fullGridCrossesMargin = axis.option('FullGridCrossesMargin');
-        var orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin');
-        var contentPanel = this.chart._mainContentPanel;
-        
-        switch(a) {
-            case 'right':
-                a = 'left';
-                break;
-
-            case 'top':
-                a = 'bottom';
-                break;
-        }
-
-        // Frame lines *parallel* to axis rule
-        // Example: a = bottom
-        var ao  = this.anchorOrtho(a), // left
-            aol = this.anchorOrthoLength(a), // height
-            al  = this.anchorLength(a), // width
-
-            rulePos1 = contentPanel.position[a] +
-                         (orthoFullGridCrossesMargin ? 0 : orthoScale.min),
-
-            rulePos2 = contentPanel.position[a] +
-                         (orthoFullGridCrossesMargin ?
-                            contentPanel[aol] :
-                            orthoScale.max),
-
-            rulePosOrtho = contentPanel.position[ao] + 
-                                (fullGridCrossesMargin ? 0 : scale.min),
-
-            ruleLength   = (fullGridCrossesMargin ? contentPanel[al] : (scale.max - scale.min));
-
-        var frameRule = this.pvPanel.add(pv.Rule)
-            .data([rulePos1, rulePos2])
-            .zOrder(-5)
-            .strokeStyle("#808285")
-            [a ](function(pos){ return pos; })
-            [ao](rulePosOrtho)
-            [al](ruleLength)
-            [aol](null)
-            .svg({ 'stroke-linecap': 'square' })
-            ;
-    
-        return frameRule;
     },
 
     _getOrthoAxis: function(type){
         var orthoType = type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType];
     }
+    
+//    _buildDiscreteFullGridScene: function(data){
+//        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
+//        
+//        data.children()
+//            .each(function(childData){
+//                var childScene = new pvc.visual.Scene(rootScene, {group: childData});
+//                var valueVar = 
+//                    childScene.vars.tick = 
+//                        new pvc.visual.ValueLabelVar(
+//                                    childData.value,
+//                                    childData.label);
+//                
+//                valueVar.absLabel = childData.absLabel;
+//        });
+//
+//        /* Add a last scene, with the same data group */
+//        var lastScene  = rootScene.lastChild;
+//        if(lastScene){
+//            var endScene = new pvc.visual.Scene(rootScene, {group: lastScene.group});
+//            endScene.vars.tick = lastScene.vars.tick;
+//        }
+//
+//        return rootScene;
+//    }
 });
 
 pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
     anchor: 'fill',
     orientation: "vertical",
     stacked: false,
+    offsetPaddings: null,
+    
+    constructor: function(chart, parent, options) {
+        
+        this.base(chart, parent, options);
+        
+        // Initialize paddings from axes offsets
+        var axes = chart.axes;
+        var paddings = {};
+        var hasAny = false;
+        
+        function setSide(side, pct){
+            var value = paddings[side];
+            if(value == null || pct > value){
+                hasAny = true;
+                paddings[side] = pct;
+            }
+        }
+        
+        function processAxis(axis){
+            var offset = axis && axis.option('Offset');
+            if(offset > 0) {
+                if(axis.orientation === 'x'){
+                    setSide('left',  offset);
+                    setSide('right', offset);
+                } else {
+                    setSide('top',    offset);
+                    setSide('bottom', offset);
+                }
+            }
+        }
+        
+        processAxis(axes.x);
+        processAxis(axes.secondX);
+        processAxis(axes.y);
+        processAxis(axes.secondY);
+        
+        if(hasAny){
+            this.offsetPaddings = paddings;
+        }
+    },
+    
+    _calcLayout: function(layoutInfo){
+        layoutInfo.requestPaddings = this._calcRequestPaddings(layoutInfo);
+    },
+    
+    _calcRequestPaddings: function(layoutInfo){
+        var op = this.offsetPaddings;
+        if(!op){
+            return;
+        }
+
+        var rp = this.chart._getAxesRoundingPaddings();
+        var clientSize = layoutInfo.clientSize;
+        var paddings   = layoutInfo.paddings;
+        
+        var reqPad = {};
+        pvc.Sides.names.forEach(function(side){
+//            var len_a = pvc.BasePanel.orthogonalLength[side];
+//            var len   = clientSize[len_a] + paddings[len_a];
+//            reqPad[side] = len * Math.max((op[side] || 0) - (rp[side] || 0), 0);
+            
+            var len_a = pvc.BasePanel.orthogonalLength[side];
+            
+            var clientLen = clientSize[len_a];
+            var paddingLen = paddings[len_a];
+            
+            var len = clientLen + paddingLen;
+            
+            var offset   = len * (op[side] || 0);
+            var rounding = clientLen * (rp[side] || 0);
+        
+            reqPad[side] = Math.max(offset - rounding, 0);
+        }, this);
+        
+        return reqPad;  
+    },
     
     /**
      * @override
@@ -16857,7 +17387,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 layoutInfo.axisSize = 50;
             }
         } else {
-            
             /* I  - Calculate ticks
              * --> layoutInfo.{ ticks, ticksText, maxTextWidth } 
              */
@@ -17055,13 +17584,18 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         layoutInfo.textHeight = pvc.text.getTextHeight("m", this.font);
         layoutInfo.maxTextWidth = null;
         
+        // Reset scale to original unrounded domain
+        this.axis.setTicks(null);
+        
         // update maxTextWidth, ticks and ticksText
         switch(this.scale.type){
-            case 'Discrete'  : this._calcDiscreteTicks(); break;
+            case 'Discrete'  : this._calcDiscreteTicks();   break;
             case 'Timeseries': this._calcTimeseriesTicks(); break;
-            case 'Continuous': this._calcNumberTicks(); break;
+            case 'Continuous': this._calcNumberTicks(layoutInfo); break;
             default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
+        
+        this.axis.setTicks(layoutInfo.ticks);
         
         if(layoutInfo.maxTextWidth == null){
             layoutInfo.maxTextWidth = 
@@ -17088,8 +17622,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
     },
     
-    _calcNumberTicks: function(){
-        var desiredTickCount = this.desiredTickCount;
+    _calcNumberTicks: function(layoutInfo){
+        var desiredTickCount;
+        
+        var previousLayout;
+        if(!layoutInfo.canChange && (previousLayout = layoutInfo.previous)){
+            desiredTickCount = previousLayout.ticks.length;
+        } else {
+            desiredTickCount = this.desiredTickCount;
+        }
+         
         if(desiredTickCount == null){
             if(this.isAnchorTopOrBottom()){
                 this._calcNumberHTicks();
@@ -17129,9 +17671,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     
     _calcNumberVDesiredTickCount: function(){
         var layoutInfo = this._layoutInfo;
-        
-        var lineHeight   = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
-        
+        var lineHeight = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
         var clientLength = layoutInfo.clientSize[this.anchorLength()];
         
         return Math.max(1, ~~(clientLength / lineHeight));
@@ -17143,7 +17683,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var spacing = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin/*em*/));
         var desiredTickCount = this._calcNumberHDesiredTickCount(this, spacing);
         
-        var doLog = (pvc.debug >= 5);
+        var doLog = (pvc.debug >= 7);
         var dir, prevResultTickCount;
         var ticksInfo, lastBelow, lastAbove;
         do {
@@ -17195,7 +17735,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                 var excessLength  = length - clientLength;
                 var pctError = ticksInfo.error = Math.abs(excessLength / clientLength);
                 
-                if(doLog){ 
+                if(doLog){
+                    pvc.log("calculateNumberHTicks error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + resultTickCount + " step=" + ticks.step);
                     pvc.log("calculateNumberHTicks Length client/resulting = " + clientLength + " / " + length + " spacing = " + spacing);
                 }
                 
@@ -17208,7 +17749,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     if(lastBelow){
                         // We were below max length and then overshot...
                         // Choose the best conforming one
-                        if(pctError > 0.05 || pctError > lastBelow.error){
+                        if(/*pctError > 0.05 || */pctError > lastBelow.error){
                             ticksInfo = lastBelow;
                         }
                         break;
@@ -17246,6 +17787,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             layoutInfo.ticks = ticksInfo.ticks;
             layoutInfo.ticksText = ticksInfo.ticksText;
             layoutInfo.maxTextWidth = ticksInfo.maxTextWidth;
+            
+            if(pvc.debug >= 5){
+                pvc.log("calculateNumberHTicks RESULT error=" + (ticksInfo.error * 100).toFixed(0) + "% count=" + ticksInfo.ticks.length + " step=" + ticksInfo.ticks.step);
+            }
         }
         
         if(doLog){ pvc.log("calculateNumberHTicks END"); }
@@ -17312,19 +17857,8 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvRule,       this.panelName + "Rule_" );
         this.extend(this.pvTicks,      this.panelName + "Ticks_");
         this.extend(this.pvLabel,      this.panelName + "Label_");
-        this.extend(this.pvRuleGrid,   this.panelName + "Grid_" );
         this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
         this.extend(this.pvZeroLine,   this.panelName + "ZeroLine_");
-    },
-
-    /**
-     * Initializes a new layer panel.
-     * @override
-     */
-    initLayerPanel: function(pvPanel, layer){
-        if(layer === 'gridLines'){
-            pvPanel.zOrder(-12);
-        }
     },
 
     renderAxis: function(){
@@ -17332,31 +17866,32 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return;
         }
         
-        // Z-Order
-        // ==============
-        // -10 - grid lines   (on 'gridLines' background panel)
-        //   0 - content (specific chart types should render content on this zOrder)
-        //  10 - end line     (on main foreground panel)
-        //  20 - ticks        (on main foreground panel)
-        //  30 - ruler (begin line) (on main foreground panel)
-        //  40 - labels       (on main foreground panel)
+        //this.pvPanel.strokeStyle('orange');
         
         // Range
-        var rMin  = this.ruleCrossesMargin ?  0 : this.scale.min,
-            rMax  = this.ruleCrossesMargin ?  this.scale.size : this.scale.max,
-            rSize = rMax - rMin,
-            ruleParentPanel = this.pvPanel;
+        var clientSize = this._layoutInfo.clientSize;
+        var paddings   = this._layoutInfo.paddings;
+        
+        var begin_a = this.anchorOrtho();
+        var end_a   = this.anchorOpposite(begin_a);
+        var size_a  = this.anchorOrthoLength(begin_a);
+        
+        var rMin = this.ruleCrossesMargin ? -paddings[begin_a] : 0;
+        var rMax = clientSize[size_a] + (this.ruleCrossesMargin ? paddings[end_a] : 0);
+        var rSize = rMax - rMin;
+        
+        var ruleParentPanel = this.pvPanel;
 
         this._rSize = rSize;
 
         this.pvRule = ruleParentPanel.add(pv.Rule)
-            .zOrder(30) // see pvc.js
+            .zOrder(30)
             .strokeStyle('black')
             // ex: anchor = bottom
-            [this.anchorOpposite()](0)     // top    (of the axis panel)
-            [this.anchorLength()  ](rSize) // width  
-            [this.anchorOrtho()   ](rMin)  // left
-            .svg({ 'stroke-linecap': 'square' })
+            [this.anchorOpposite()](0) // top (of the axis panel)
+            [size_a ](rSize) // width
+            [begin_a](rMin)  // left
+            .svg({ 'stroke-linecap': 'square' }) // So that begin/end ticks better join with the rule 
             ;
 
         if (this.isDiscrete){
@@ -17477,62 +18012,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
                     myself._handleDoubleClick(child, ev);
                 });
         }
-        
-        if(this.fullGrid){
-            var fullGridRootScene = this._buildDiscreteFullGridScene(data),
-                orthoAxis  = this._getOrthoAxis(),
-                orthoScale = orthoAxis.scale,
-                orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
-                ruleLength = orthoFullGridCrossesMargin ?
-                                    orthoScale.size :
-                                    (orthoScale.max - orthoScale.min),
-                             // this.parent[anchorOrthoLength] - this[anchorOrthoLength],
-                halfStep = scale.range().step / 2,
-                count = fullGridRootScene.childNodes.length;
-            
-            this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
-                .extend(this.pvRule)
-                .data(fullGridRootScene.childNodes)
-                .strokeStyle("#f0f0f0")
-                [anchorOpposite   ](orthoFullGridCrossesMargin ? -ruleLength : -orthoScale.max)
-                [anchorOrthoLength](ruleLength)
-                [anchorLength     ](null)
-                [anchorOrtho      ](function(scene){
-                    var value = scale(scene.vars.tick.value);
-                    if(this.index +  1 < count){
-                        return value - halfStep;
-                    }
-
-                    // end line
-                    return value + halfStep;
-                })
-                ;
-        }
-    },
-
-    _buildDiscreteFullGridScene: function(data){
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
-        
-        data.children()
-            .each(function(childData){
-                var childScene = new pvc.visual.Scene(rootScene, {group: childData});
-                var valueVar = 
-                    childScene.vars.tick = 
-                        new pvc.visual.ValueLabelVar(
-                                    childData.value,
-                                    childData.label);
-                
-                valueVar.absLabel = childData.absLabel;
-        });
-
-        /* Add a last scene, with the same data group */
-        var lastScene  = rootScene.lastChild;
-        if(lastScene){
-            var endScene = new pvc.visual.Scene(rootScene, {group: lastScene.group});
-            endScene.vars.tick = lastScene.vars.tick;
-        }
-
-        return rootScene;
     },
 
     renderLinearAxis: function(){
@@ -17542,14 +18021,15 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         var scale  = this.scale,
             orthoAxis  = this._getOrthoAxis(),
             orthoScale = orthoAxis.scale,
-            ticks      = this._layoutInfo.ticks,
+            layoutInfo = this._layoutInfo,
+            ticks      = layoutInfo.ticks,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
             
             tickStep = Math.abs(ticks[1] - ticks[0]); // ticks.length >= 2
-                
+        
         // (MAJOR) ticks
         var pvTicks = this.pvTicks = this.pvRule.add(pv.Rule)
             .zOrder(20)
@@ -17586,24 +18066,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             return visible && (getVisible ? getVisible.apply(this, args) : true);
         }
 
-        this.renderLinearAxisLabel(ticks, this._layoutInfo.ticksText);
-
-        // Now do the full grid lines
-        if(this.fullGrid) {
-            var orthoFullGridCrossesMargin = orthoAxis.option('FullGridCrossesMargin'),
-                ruleLength = orthoFullGridCrossesMargin ? orthoScale.size : orthoScale.offsetSize;
-
-            // Grid rules are visible (only) on MAJOR ticks.
-            this.pvRuleGrid = this.getPvPanel('gridLines').add(pv.Rule)
-                    .extend(this.pvRule)
-                    .data(ticks)
-                    .strokeStyle("#f0f0f0")
-                    [anchorOpposite   ](orthoFullGridCrossesMargin ? -ruleLength : -orthoScale.max)
-                    [anchorOrthoLength](ruleLength)
-                    [anchorLength     ](null)
-                    [anchorOrtho      ](scale)
-                    ;
-        }
+        this.renderLinearAxisLabel(ticks, layoutInfo.ticksText);
     },
     
     renderLinearAxisLabel: function(ticks, ticksText){
@@ -17709,8 +18172,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             this._handleClickCore(data, ev);
         } else {
             // Delay click evaluation so that
-            // it may be canceled if double click meanwhile
-            // fires.
+            // it may be canceled if double click meanwhile fires.
             var myself  = this,
                 options = this.chart.options;
             window.setTimeout(
@@ -19164,55 +19626,55 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
          * and as such markers will be children of bar's parent,
          * yet have bar's anchor as a prototype.
          */
-
-        var myself = this,
-            isVertical = this.isOrientationVertical(),
-            orthoProp = isVertical ? "bottom" : "left",
-            lengthProp = myself.anchorOrthoLength(orthoProp),
-            orthoLengthProp = myself.anchorLength(orthoProp),
-            rOrthoBound = isMin ?
-                        (orthoScale.min - orthoScale.offset) :
-                        (orthoScale.max + orthoScale.offset),
-        
-            angle;
-
-        if(!isMin){
-            angle = isVertical ? Math.PI: -Math.PI/2;
-        } else {
-            angle = isVertical ? 0: Math.PI/2;
-        }
-        
-        return this.pvBar.anchor('center').add(pv.Dot)
-            .visible(function(scene){
-                var value = scene.vars.value.value;
-                if(value == null){
-                    return false;
-                }
-
-                var targetInstance = this.scene.target[this.index];
-                // Where is the position of the max of the bar??
-                var orthoMaxPos = targetInstance[orthoProp] +
-                                  (value > 0 ? targetInstance[lengthProp] : 0);
-                return isMin ?
-                        (orthoMaxPos < rOrthoBound) :
-                        (orthoMaxPos > rOrthoBound);
-            })
-            .shape("triangle")
-            .lock('shapeSize')
-            .shapeRadius(function(){
-                return Math.min(
-                        Math.sqrt(10),
-                        this.scene.target[this.index][orthoLengthProp] / 2);
-            })
-            .shapeAngle(angle)
-            .lineWidth(1.5)
-            .strokeStyle("red")
-            .fillStyle("white")
-            [orthoProp](function(){
-                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
-            })
-            [this.anchorOpposite(orthoProp)](null)
-            ;
+        // TODO - restore overflow markers
+//        var myself = this,
+//            isVertical = this.isOrientationVertical(),
+//            orthoProp = isVertical ? "bottom" : "left",
+//            lengthProp = myself.anchorOrthoLength(orthoProp),
+//            orthoLengthProp = myself.anchorLength(orthoProp),
+//            rOrthoBound = isMin ?
+//                        (orthoScale.min - orthoScale.offsetMin) :
+//                        (orthoScale.max + orthoScale.offsetMax),
+//        
+//            angle;
+//
+//        if(!isMin){
+//            angle = isVertical ? Math.PI: -Math.PI/2;
+//        } else {
+//            angle = isVertical ? 0: Math.PI/2;
+//        }
+//        
+//        return this.pvBar.anchor('center').add(pv.Dot)
+//            .visible(function(scene){
+//                var value = scene.vars.value.value;
+//                if(value == null){
+//                    return false;
+//                }
+//
+//                var targetInstance = this.scene.target[this.index];
+//                // Where is the position of the max of the bar??
+//                var orthoMaxPos = targetInstance[orthoProp] +
+//                                  (value > 0 ? targetInstance[lengthProp] : 0);
+//                return isMin ?
+//                        (orthoMaxPos < rOrthoBound) :
+//                        (orthoMaxPos > rOrthoBound);
+//            })
+//            .shape("triangle")
+//            .lock('shapeSize')
+//            .shapeRadius(function(){
+//                return Math.min(
+//                        Math.sqrt(10),
+//                        this.scene.target[this.index][orthoLengthProp] / 2);
+//            })
+//            .shapeAngle(angle)
+//            .lineWidth(1.5)
+//            .strokeStyle("red")
+//            .fillStyle("white")
+//            [orthoProp](function(){
+//                return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
+//            })
+//            [this.anchorOpposite(orthoProp)](null)
+//            ;
     },
 
     /**
@@ -21192,6 +21654,8 @@ pvc.HeatGridChart = pvc.CategoricalAbstract.extend({
             showValues: true,
             axisOffset: 0,
             
+            showPlotFrame: false,
+            
             orientation: "vertical",
             
             colorScaleType: "linear",  // "discrete", "normal" (distribution) or "linear"
@@ -21576,7 +22040,7 @@ pvc.HeatGridChartPanel = pvc.CartesianAbstractPanel.extend({
                         sizeValMax  = sizeValExtent.max.value,
                         sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
                     
-                    if(isFinite(sizeValSpan) && sizeValSpan > 0.00001) {
+                    if(isFinite(sizeValSpan) && sizeValSpan > 1e-12) {
                         // Linear mapping
                         // TODO: a linear scale object??
                         var sizeSlope = areaSpan / sizeValSpan;
@@ -21710,11 +22174,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
             }
         }
 
-        if(options && options.axisOffset != null){
-            // See pvc.MetricLineDotPanel#_calcLayout
-            this._explicitAxisOffset = true;
-        }
-
         this.base(options);
 
         // Apply options
@@ -21774,7 +22233,6 @@ pvc.MetricXYAbstract = pvc.CartesianAbstract.extend({
     }
 }, {
     defaultOptions: {
-        axisOffset: 0.04,
         valuesAnchor: "right",
         panelSizeRatio: 1
     }
@@ -21812,125 +22270,274 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
     
     dotShape: "circle",
     
+    // Ratio of the biggest bubble diameter to 
+    // the length of plot area dimension according to option 'dotSizeRatioTo'
+    dotSizeRatio: 1/5,
+    
+    dotSizeRatioTo: 'minWidthHeight', // 'height', 'width', 
+    
+    autoDotSizePadding: true,
+    
     _v1DimRoleName: {
         'series':   'series',
         'category': 'x',
         'value':    'y'
     },
     
+    constructor: function(chart, parent, options) {
+        
+        this.base(chart, parent, options);
+        
+        if(!this.offsetPaddings){
+            this.offsetPaddings = new pvc.Sides(0.01);
+        }
+    },
+    
+    _getRootScene: function(){
+        var rootScene = this._rootScene;
+        if(!rootScene){
+            // First time stuff
+            var chart = this.chart;
+            // Shared "series" grouped data
+            var data = this._getVisibleData();
+            var hasColorRole = !!chart._colorRole.grouping;
+            var hasDotSizeRole = this.showDots && !!chart._dotSizeDim;
+            
+            var sizeValRange;
+            if(hasDotSizeRole){
+                var sizeValExtent = chart._dotSizeDim.extent({visible: true});
+                if(sizeValExtent){
+                    var sizeValMin  = sizeValExtent.min.value,
+                        sizeValMax  = sizeValExtent.max.value,
+                        sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
+                    
+                    hasDotSizeRole = isFinite(sizeValSpan) && sizeValSpan > 1e-12;
+                    if(hasDotSizeRole){
+                        sizeValRange = {min: sizeValMin, max: sizeValMax};
+                    }
+                }
+            }
+            
+            rootScene = this._buildScene(data, hasColorRole, hasDotSizeRole);
+            
+            rootScene.sizeValRange = sizeValRange; // TODO: not pretty?
+            
+            this._rootScene = rootScene;
+        }
+        
+        return rootScene;
+    },
+    
     /*
     * @override
     */
-   _calcLayout: function(layoutInfo){
-       /* Adjust axis offset to avoid dots getting off the content area */
-       
-       var clientSize = layoutInfo.clientSize;
-       var chart = this.chart;
-       
-       if(chart._dotSizeDim){
-           /* Determine Max/Min Dot Size */
-           var length = Math.max((clientSize.width + clientSize.height) / 2, 2);
-           var maxRadius = length / 8;
-           if(this.dotShape === 'diamond'){
-               // Protovis draws diamonds inscribed on
-               // a square with half-side radius*Math.SQRT2
-               // (so that diamonds just look like a rotated square)
-               // For the height of the dimanod not to exceed the cell size
-               // we compensate that factor here.
-               maxRadius /= Math.SQRT2;
-           }
+    _calcLayout: function(layoutInfo){
+        var chart = this.chart;
+        var rootScene = this._getRootScene();
+        var clientSize = layoutInfo.clientSize;
+        
+        /* Adjust axis offset to avoid dots getting off the content area */
+        
+        if(rootScene.hasDotSizeRole){
+            /* Determine Max/Min Dot Size */
+            
+            var radiusRange = this._calcDotRadiusRange(layoutInfo);
+            
+            // Diamond Adjustment
+            if(this.dotShape === 'diamond'){
+                // Protovis draws diamonds inscribed on
+                // a square with half-side radius*Math.SQRT2
+                // (so that diamonds just look like a rotated square)
+                // For the height/width of the dimanod not to exceed the cell size
+                // we compensate that factor here.
+                radiusRange.max /= Math.SQRT2;
+                radiusRange.min /= Math.SQRT2;
+            }
            
-           // Small margin
-           maxRadius -= 2;
+            var maxArea   = radiusRange.max * radiusRange.max,
+                minArea   = radiusRange.min * radiusRange.min,
+                areaSpan = maxArea - minArea;
            
-           var maxArea  = maxRadius * maxRadius,
-               minArea  = 12,
-               areaSpan = maxArea - minArea;
-           
-           if(areaSpan <= 1){
-               // Very little space
-               // Rescue Mode - show *something*
-               maxArea = Math.max(maxArea, 2);
-               minArea = 1;
-               areaSpan = maxArea - minArea;
-               maxRadius = Math.sqrt(maxArea);
+            if(areaSpan <= 1){
+                // Very little space
+                // Rescue Mode - show *something*
+                maxArea  = Math.max(maxArea, 2);
+                minArea  = 1;
+                areaSpan = maxArea - minArea;
                
-               if(pvc.debug >= 3){
-                   pvc.log("Using rescue mode dot area calculation due to insufficient space.");
-               }
-           }
-           
-           this.maxDotRadius = maxRadius;
-           this.maxDotArea   = maxArea;
-           this.minDotArea   = minArea;
-           this.dotAreaSpan  = areaSpan;
-           
-           if(!chart.root._explicitAxisOffset){
-               /* Half a circle must fit at any edge of the main content area */
-               // TODO: Something should be wrong with the calculations?
-               // Dots still come out a little bit, and this compensates for it.
-               var offsetRadius  = maxRadius + 6,
-                   minAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
-                   axisOffset = offsetRadius / Math.max(clientSize.width, 2);
-
-               if(axisOffset > minAxisOffset){
-                   if(pvc.debug >= 3){
-                       pvc.log(def.format("Using X axis offset of '{0}' to compensate for dot size.", [axisOffset]));
-                   }
-                   
-                   chart.options.xAxisOffset = axisOffset;
-               }
-
-               axisOffset = offsetRadius / Math.max(clientSize.height, 2);
-               if(axisOffset > minAxisOffset){
-                   if(pvc.debug >= 3){
-                       pvc.log(def.format("Using Y axis offset of '{0}' to compensate for dot size.", [axisOffset]));
-                   }
-
-                   chart.options.yAxisOffset = axisOffset;
-               }
-           }
-        } else {
-            /* Make X and Y axis offsets take the same abs width */
-            /* TODO: should be able to test if any offset, X, or Y is the default value... */
-            var defaultAxisOffset = pvc.MetricXYAbstract.defaultOptions.axisOffset,
-                xAxisOffset = chart.axes.x.option('Offset'),
-                yAxisOffset = chart.axes.y.option('Offset'),
-                adjustX = (xAxisOffset === defaultAxisOffset),
-                adjustY = (yAxisOffset === defaultAxisOffset);
-
-            if(adjustX || adjustY){
-                var offsetLength;
-
-                if(adjustX && adjustY){
-                    offsetLength = Math.max(clientSize.width, clientSize.height) * xAxisOffset;
-                } else if(adjustX){
-                    offsetLength = clientSize.height * yAxisOffset;
-                } else /*if(adjustY) */{
-                    offsetLength = clientSize.width * xAxisOffset;
-                }
-
-                if(adjustX){
-                    this.chart.options.xAxisOffset = xAxisOffset = offsetLength / Math.max(clientSize.width, 2);
-                    if(pvc.debug >= 3){
-                       pvc.log(def.format("Using X axis offset of '{0}' to balance with that of Y axis.", [xAxisOffset]));
-                   }
-                }
-
-                if(adjustY){
-                    this.chart.options.yAxisOffset = yAxisOffset = offsetLength / Math.max(clientSize.height, 2);
-                    if(pvc.debug >= 3){
-                       pvc.log(def.format("Using Y axis offset of '{0}' to balance with that of X axis.", [yAxisOffset]));
-                   }
+                radiusRange = {
+                    min: Math.sqrt(minArea),
+                    max: Math.sqrt(maxArea)
+                };
+               
+                if(pvc.debug >= 3){
+                    pvc.log("Using rescue mode dot area calculation due to insufficient space.");
                 }
             }
+           
+            this.maxDotRadius = radiusRange.max;
+           
+            this.maxDotArea  = maxArea;
+            this.minDotArea  = minArea;
+            this.dotAreaSpan = areaSpan;
+           
+            this.dotSizeScale = this._getDotSizeRoleScale(rootScene.sizeValRange);
         }
+        
+        this._calcAxesPadding(layoutInfo, rootScene);
+    },
+  
+   _getDotDiameterRefLength: function(layoutInfo){
+       // Use the border box to always have the same size for != axis offsets (paddings)
+       
+       var clientSize = layoutInfo.clientSize;
+       var paddings   = layoutInfo.paddings;
+       
+       switch(this.dotSizeRatioTo){
+           case 'minWidthHeight': 
+               return Math.min(
+                       clientSize.width  + paddings.width, 
+                       clientSize.height + paddings.height);
+           
+           case 'width':  return clientSize.width  + paddings.width ;
+           case 'height': return clientSize.height + paddings.height;
+       }
+       
+       if(pvc.debug >= 2){
+           pvc.log(
+              def.format(
+                  "Invalid option 'dotSizeRatioTo' value. Assuming 'minWidthHeight'.", 
+                  [this.dotSizeRatioTo]));
+       }
+       
+       this.dotSizeRatioTo = 'minWidthHeight';
+       
+       return this._getDotDiameterRefLength(layoutInfo);
    },
-    
+   
+   _calcDotRadiusRange: function(layoutInfo){
+       var refLength = this._getDotDiameterRefLength(layoutInfo);
+       
+       // Diameter is 1/5 of ref length
+       var max = (this.dotSizeRatio / 2) * refLength;
+       
+       // Minimum SIZE (not radius) is 12
+       var min = Math.sqrt(12); 
+       
+       return {min: min, max: max};
+   },
+   
+   _calcAxesPadding: function(layoutInfo, rootScene){
+       
+       // If we were not to take axes rounding padding effect
+       // into account, it could be as simple as:
+       // var offsetRadius = radiusRange.max + 6;
+       // requestPaddings = new pvc.Sides(offsetRadius);
+       
+       var requestPaddings;
+       
+       if(!this.autoDotSizePadding){
+           requestPaddings = this._calcRequestPaddings(layoutInfo);
+       } else {
+           var chart = this.chart;
+           var axes  = chart.axes;
+           var clientSize = layoutInfo.clientSize;
+           var paddings   = layoutInfo.paddings;
+           
+           requestPaddings = {};
+           
+           /* The Worst case implementation would be like:
+            *   Use more padding than is required in many cases,
+            *   but ensures that no dot ever leaves the "stage".
+            * 
+            *   Half a circle must fit in the client area
+            *   at any edge of the effective plot area 
+            *   (the client area minus axis offsets).
+            */
+           
+           // X and Y axis orientations
+           axes.x.scale.range(0, clientSize.width );
+           axes.y.scale.range(0, clientSize.height);
+           
+           // X and Y visual roles
+           var sceneXScale = chart.axes.base.sceneScale({sceneVarName:  'x'});
+           var sceneYScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'});
+           
+           var hasDotSizeRole = rootScene.hasDotSizeRole;
+           var sizeScale = this.dotSizeScale;
+           if(!hasDotSizeRole){
+               // Use the dot default size
+               var defaultSize = def.number.as(this._getExtension('dot', 'shapeRadius'), 0);
+               if(!(defaultSize > 0)){
+                   defaultSize = def.number.as(this._getExtension('dot', 'shapeSize'), 0);
+                   if(!(defaultSize) > 0){
+                       defaultSize = 12;
+                   }
+               } else {
+                   // Radius -> Size
+                   defaultSize = defaultSize * defaultSize;
+               }
+               
+               sizeScale = def.fun.constant(defaultSize);
+           }
+           
+           // TODO: these padding requests do not take the resulting new scale into account
+           // and as such do not work exactly...
+           //var xMinPct = xScale(xDomain.min) /  clientSize.width;
+           //var overflowLeft = (offsetRadius - xMinPct * (paddings.left + clientSize.width)) / (1 - xMinPct);
+           
+           requestPaddings = {};
+           
+           // Resolve (not of PercentValue so cannot use pvc.Sides#resolve)
+           var op;
+           if(this.offsetPaddings){
+               op = {};
+               pvc.Sides.names.forEach(function(side){
+                   var len_a = pvc.BasePanel.orthogonalLength[side];
+                   op[side] = (this.offsetPaddings[side] || 0) * (clientSize[len_a] + paddings[len_a]);
+               }, this);
+           }
+           
+           var setSide = function(side, padding){
+               if(op){
+                   padding += (op[side] || 0);
+               }
+               
+               if(padding < 0){
+                   padding = 0;
+               }
+               
+               var value = requestPaddings[side];
+               if(value == null || padding > value){
+                   requestPaddings[side] = padding;
+               }
+           };
+           
+           var processScene = function(scene){
+               var x = sceneXScale(scene);
+               var y = sceneYScale(scene);
+               var r = Math.sqrt(sizeScale(hasDotSizeRole ? scene.vars.dotSize.value : 0));
+               
+               // How much overflow on each side?
+               setSide('left',   r - x);
+               setSide('bottom', r - y);
+               setSide('right',  x + r - clientSize.width );
+               setSide('top',    y + r - clientSize.height);
+           };
+           
+           rootScene
+               .children()
+               .selectMany(function(seriesScene){ return seriesScene.childNodes; })
+               .each(processScene);
+       }
+       
+       layoutInfo.requestPaddings = requestPaddings;
+   },
+   
     /**
      * @override
      */
-    _createCore: function(){
+    _createCore: function(layoutInfo){
         this.base();
          
         var myself = this,
@@ -21939,20 +22546,12 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
 
         // ------------------
         // DATA
-        var data            = this._getVisibleData(), // shared "series" grouped data
-            isDense         = !(this.width > 0) || (data._leafs.length / this.width > 0.5), //  > 100 pts / 200 pxs
-            hasColorRole    = !!chart._colorRole.grouping,
-            hasDotSizeRole  = this.showDots && !!chart._dotSizeDim,
-            sizeValueToArea; 
+        var rootScene = this._getRootScene(),
+            data      = rootScene.group,
+            // data._leafs.length is currently an approximation of datum count due to datum filtering in the scenes only...
+            isDense   = !(this.width > 0) || (data._leafs.length / this.width > 0.5); //  > 100 pts / 200 pxs 
         
-        if(hasDotSizeRole){
-            sizeValueToArea = this._getDotSizeRoleScale();
-            if(!sizeValueToArea){
-                hasDotSizeRole = false;
-            }
-        }
-                    
-        var rootScene = this._buildScene(data, hasColorRole, hasDotSizeRole);
+        this._finalizeScene(rootScene);
 
         // Disable selection?
         if(isDense && (options.selectable || options.hoverable)) {
@@ -21965,6 +22564,9 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
        
         // ---------------
         // BUILD
+        
+        // this.pvPanel.strokeStyle('red');
+        
         this.pvScatterPanel = this.pvPanel.add(pv.Panel)
             .lock('data', rootScene.childNodes)
             ;
@@ -22026,11 +22628,11 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         // When no lines are shown, dots are shown with transparency,
         // which helps in distinguishing overlapped dots.
         // With lines shown, it would look strange.
-        if(!hasColorRole){
+        if(!rootScene.hasColorRole){
             if(!myself.showLines){
                 dot.override('baseColor', function(type){
                     var color = this.base(type);
-                    color.opacity = 0.8;
+                    color.opacity = 0.85;
                     return color;
                 });
             }
@@ -22063,7 +22665,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     }
                     
                     if(!myself.showLines){
-                        color.opacity = 0.8;
+                        color = color.alpha(color.opacity * 0.85);
                     }
                 }
                 
@@ -22081,7 +22683,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         }
         
         // -- DOT SIZE --
-        if(!hasDotSizeRole){
+        if(!rootScene.hasDotSizeRole){
             dot.override('baseSize', function(){
                 /* When not showing dots, 
                  * but a datum is alone and 
@@ -22100,10 +22702,27 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 return this.base();
             });
         } else {
+            var sizeValueToArea = this._getDotSizeRoleScale(rootScene.sizeValRange);
+
             /* Ignore any extension */
-            dot.override('baseSize', function(){
-                return sizeValueToArea(this.scene.vars.dotSize.value);
-            });
+            dot .override('baseSize', function(){
+                    return sizeValueToArea(this.scene.vars.dotSize.value);
+                })
+                .override('interactiveSize', function(size){
+                    if(this.scene.isActive){
+                        var radius = Math.sqrt(size) * 1.1;
+                        return radius * radius;
+                    }
+                    
+                    return size;
+                })
+                ;
+            
+            // Default is to hide overflow dots, 
+            // for a case where the provided offset, or calculated one is not enough 
+            // (dotSizeRatioTo='width' or 'height' don't guarantee no overflow)
+            // Padding area is used by the bubbles.
+            this.pvPanel.borderPanel.overflow("hidden");
         }
         
         // -- LABEL --
@@ -22181,38 +22800,22 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             }));
     },
     
-    _getDotSizeRoleScale: function(){
+    _getDotSizeRoleScale: function(sizeValRange){
         /* Per small chart scale */
         // TODO ~ copy paste from HeatGrid        
 
-        var sizeValExtent = this.chart._dotSizeDim.extent({visible: true});
-        if(sizeValExtent){
-            var sizeValMin    = sizeValExtent.min.value,
-                sizeValMax    = sizeValExtent.max.value,
-                sizeValSpan   = Math.abs(sizeValMax - sizeValMin); // may be zero
-            
-            if(isFinite(sizeValSpan) && sizeValSpan > 0.001) {
-                // Linear mapping
-                // TODO: a linear scale object ??
-                var sizeSlope = this.dotAreaSpan / sizeValSpan,
-                    minArea   = this.minDotArea;
-                
-                if(pvc.debug >= 3){
-                    pvc.log("Dot Size Scale info: " + JSON.stringify({
-                        sizeValMin:  sizeValMin,
-                        sizeValMax:  sizeValMax,
-                        sizeValSpan: sizeValSpan,
-                        sizeSlope:   sizeSlope,
-                        minArea:     minArea,
-                        dotAreaSpan: this.dotAreaSpan
-                    }));
-                }
-                
-                return function(sizeVal){
-                    return minArea + sizeSlope * (sizeVal == null ? 0 : (sizeVal - sizeValMin));
-                };
-            }
-        }
+        var sizeValMin  = sizeValRange.min,
+            sizeValMax  = sizeValRange.max,
+            sizeValSpan = sizeValMax - sizeValMin; // > 0
+        
+        // Linear mapping
+        // TODO: a linear scale object ??
+        var sizeSlope = this.dotAreaSpan / sizeValSpan,
+            minArea   = this.minDotArea;
+        
+        return function(sizeVal){
+            return minArea + sizeSlope * (sizeVal == null ? 0 : (sizeVal - sizeValMin));
+        };
     },
     
     /**
@@ -22253,15 +22856,31 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         return marks;
     },
     
-    _buildScene: function(data, hasColorRole){
-        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
-        
+    _finalizeScene: function(rootScene){
         var chart = this.chart,
             sceneBaseScale  = chart.axes.base.sceneScale({sceneVarName: 'x'}),
-            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'}),
+            sceneOrthoScale = chart.axes.ortho.sceneScale({sceneVarName: 'y'});
+        
+        rootScene
+            .children()
+            .selectMany(function(seriesScene){ return seriesScene.childNodes; })
+            .each(function(leafScene){
+                leafScene.basePosition  = sceneBaseScale(leafScene);
+                leafScene.orthoPosition = sceneOrthoScale(leafScene);
+            }, this);
+    
+        return rootScene;
+    },
+    
+    _buildScene: function(data, hasColorRole, hasDotSizeRole){
+        var rootScene = new pvc.visual.Scene(null, {panel: this, group: data});
+        rootScene.hasColorRole = hasColorRole;
+        rootScene.hasDotSizeRole = hasDotSizeRole;
+        
+        var chart = this.chart,
             getColorRoleValue,
             getDotSizeRoleValue;
-            
+        
         if(hasColorRole){
              var colorGrouping = chart._colorRole.grouping;//.singleLevelGrouping();
              if(colorGrouping.isSingleDimension){ // TODO
@@ -22303,11 +22922,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         
         return rootScene;
         
-        function applyScales(scene){
-            scene.basePosition  = sceneBaseScale(scene);
-            scene.orthoPosition = sceneOrthoScale(scene);
-        }
-        
         function createSeriesScene(seriesGroup){
             /* Create series scene */
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesGroup});
@@ -22317,14 +22931,21 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                                 seriesGroup.label);
             
             seriesGroup.datums().each(function(datum){
+                var xAtom = datum.atoms[chart._xDim.name];
+                if(xAtom.value == null){
+                    return;
+                }
+                
+                var yAtom = datum.atoms[chart._yDim.name];
+                if(yAtom.value == null){
+                    return;
+                }
+                
                 /* Create leaf scene */
                 var scene = new pvc.visual.Scene(seriesScene, {datum: datum});
                 
-                var atom = datum.atoms[chart._xDim.name];
-                scene.vars.x = new pvc.visual.ValueLabelVar(atom.value, atom.label);
-                
-                atom = datum.atoms[chart._yDim.name];
-                scene.vars.y = new pvc.visual.ValueLabelVar(atom.value, atom.label);
+                scene.vars.x = new pvc.visual.ValueLabelVar(xAtom.value, xAtom.label);
+                scene.vars.y = new pvc.visual.ValueLabelVar(yAtom.value, yAtom.label);
                 
                 if(getColorRoleValue){
                     scene.vars.color = new pvc.visual.ValueLabelVar(
@@ -22340,8 +22961,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 }
                 
                 scene.isIntermediate = false;
-                
-                applyScales(scene);
             });
         }
         
@@ -22421,8 +23040,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
             
             interScene.isIntermediate = true;
             interScene.isSingle = false;
-            
-            applyScales(interScene);
             
             return interScene;
         }
@@ -22527,11 +23144,14 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         var options = this.options;
         
         return new pvc.MetricLineDotPanel(this, parentPanel, {
-            showValues:   options.showValues,
-            valuesAnchor: options.valuesAnchor,
-            showLines:    options.showLines,
-            showDots:     options.showDots,
-            orientation:  options.orientation
+            showValues:    options.showValues,
+            valuesAnchor:   options.valuesAnchor,
+            showLines:      options.showLines,
+            showDots:       options.showDots,
+            orientation:    options.orientation,
+            dotSizeRatio:   options.dotSizeRatio,
+            dotSizeRatioTo: options.dotSizeRatioTo,
+            autoDotSizePadding: options.autoDotSizePadding
         });
     }
 }, {
@@ -22548,7 +23168,12 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         colorRangeInterval:  undefined,
         minColor:  undefined, //"white",
         maxColor:  undefined, //"darkgreen",
-        nullColor: "#efc5ad"  // white with a shade of orange
+        nullColor: "#efc5ad",  // white with a shade of orange
+        
+        /* Dot Size Role */
+        dotSizeRatio:   undefined,
+        dotSizeRatioTo: undefined,
+        autoDotSizePadding: undefined
     }
 });
 
