@@ -220,7 +220,7 @@ class FileSet
     return update(false);
   }
 
-  public String update(boolean force) throws IOException, NoSuchAlgorithmException
+  public synchronized String update(boolean force) throws IOException, NoSuchAlgorithmException
   {
     // If we're not otherwise sure we must update, we actively check if the
     //minified file is older than any file in the set.
