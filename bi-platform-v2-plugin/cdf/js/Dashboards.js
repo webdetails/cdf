@@ -924,6 +924,18 @@ Dashboards.isBookmarkable = function(parameter) {
     return Boolean(this.bookmarkables[parameter]);
 }
 
+
+Dashboards.generateBookmarkState = function() {
+  var params = {}
+      bookmarkables = this.bookmarkables;
+  for (k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
+    if (bookmarkables[k]) {
+      params[k] = Dashboards.getParameterValue(k);
+    }
+  }
+  return params;
+};
+
 Dashboards.persistBookmarkables = function(param) {
   var bookmarkables = this.bookmarkables,
       params = {},
@@ -934,21 +946,18 @@ Dashboards.persistBookmarkables = function(param) {
    * initializing the dashboard. That's just the code for
    * restoreBookmarkables doing the reverse of this!
    */
-   if (!bookmarkables)
-   	return;
+  if (!bookmarkables) {
+    return;
+  }
   if(!bookmarkables[param] || !Dashboards.finishedInit) {
     return;
   }
-  for (k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
-    if (bookmarkables[k]) {
-      params[k] = Dashboards.getParameterValue(k);
-    }
-  }
+  params = Dashboards.generateBookmarkState();
   Dashboards.setBookmarkState({impl: 'client',params: params});
 }
 
 Dashboards.setBookmarkState = function(state) {
-  if(window.history && window.history.pushState) {
+  if(window.history && window.history.replaceState) {
     var method = window.location.pathname.split('/').pop(),
         query = window.location.search.slice(1).split('&').map(function(e){
           var entry = e.split('=');
@@ -959,7 +968,7 @@ Dashboards.setBookmarkState = function(state) {
     query = Dashboards.propertiesArrayToObject(query);
     query.bookmarkState = JSON.stringify(state);
     url = method + '?' + $.param(query);
-    window.history.pushState({},'',url);
+    window.history.replaceState({},'',url);
     this.deleteHashValue('bookmark')
   } else {
     this.setHashValue('bookmark',state);
