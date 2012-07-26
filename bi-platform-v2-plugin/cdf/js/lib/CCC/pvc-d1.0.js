@@ -5248,13 +5248,14 @@ def
 
     buildLabel: function(atoms){
     
-        if (atoms) 
+        if(atoms){
             return  atoms
                     .map(function(atom){ return atom.label; })
                     .filter(def.notEmpty)
                     .join(complex_labelSep);
-        else
-            return "";
+        }
+        
+        return "";
     },
 
     view: function(dimNames){
@@ -7997,6 +7998,9 @@ add(/** @lends pvc.data.DataOper */{
  * 
  * @param {object} [keyArgs] Keyword arguments.
  * See {@link pvc.data.DataOper} for any additional arguments.
+ * 
+ * @param {boolean} [keyArgs.isNull=null]
+ *      Only considers datums with the specified isNull attribute.
  * @param {boolean} [keyArgs.visible=null]
  *      Only considers datums that have the specified visible state.
  * @param {boolean} [keyArgs.selected=null]
@@ -8028,7 +8032,8 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     this._where      = def.get(keyArgs, 'where');
     this._visible    = def.get(keyArgs, 'visible',  null);
     this._selected   = def.get(keyArgs, 'selected', null);
-
+    this._isNull     = def.get(keyArgs, 'isNull',   null);
+        
     /* 'Where' predicate and its key */
     var hasKey = this._selected == null, // Selected state changes does not yet invalidate cache...
         whereKey = '';
@@ -8066,6 +8071,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     if(hasKey){
         this.key = ids.join('!!') +
                    "||visible:"  + this._visible +
+                   "||isNull:"   + this._isNull  +
                    //"||selected:" + this._selected +
                    "||where:"    + whereKey;
     }
@@ -8084,6 +8090,7 @@ add(/** @lends pvc.data.GroupingOper */{
         var datumsQuery = data_whereState(def.query(this._linkParent._datums), {
             visible:  this._visible,
             selected: this._selected,
+            isNull:   this._isNull,
             where:    this._where
         });
         
@@ -8390,10 +8397,6 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      * @param {Object} [keyArgs] Keyword arguments object.
      * See additional keyword arguments in {@link pvc.data.GroupingOper}
      * 
-     * @param {boolean} [keyArgs.visible=null]
-     *      Only considers datums whose atoms of the grouping dimensions 
-     *      have the specified visible state.
-     *
      * @see #where
      * @see pvc.data.GroupingLevelSpec
      *
@@ -8484,12 +8487,15 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
      *  
      * @param {object} [keyArgs] Keyword arguments object.
      * 
+     * @param {boolean} [keyArgs.isNull=null]
+     *      Only considers datums with the specified isNull attribute.
+     * 
      * @param {boolean} [keyArgs.visible=null]
      *      Only considers datums that have the specified visible state.
      * 
      * @param {boolean} [keyArgs.selected=null]
      *      Only considers datums that have the specified selected state.
-     *
+     * 
      * @param {function} [keyArgs.where] A arbitrary datum predicate.
      *
      * @param {string[]} [keyArgs.orderBySpec] An array of "order by" strings to be applied to each 
@@ -8723,11 +8729,16 @@ function data_processWhereSpec(whereSpec){
 function data_whereState(q, keyArgs){
     var selected = def.get(keyArgs, 'selected'),
         visible  = def.get(keyArgs, 'visible'),
-        where    = def.get(keyArgs, 'where')
+        where    = def.get(keyArgs, 'where'),
+        isNull   = def.get(keyArgs, 'isNull')
         ;
 
     if(visible != null){
         q = q.where(function(datum){ return datum.isVisible === visible; });
+    }
+    
+    if(isNull != null){
+        q = q.where(function(datum){ return datum.isNull === isNull; });
     }
     
     if(selected != null){
@@ -15987,7 +15998,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
 
         // With composite axis, only 'singleLevel' flattening works well
         var flatteningMode = null; //axis.option('Composite') ? 'singleLevel' : null,
-        var baseData = this._getVisibleData(dataPartValues);
+        var baseData = this._getVisibleData(dataPartValues, {ignoreNulls: false});
         var data = axis.role.flatten(baseData, {
                                 visible: true,
                                 flatteningMode: flatteningMode
@@ -16121,7 +16132,7 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
         var scale = axis.scale;
         scale.min  = 0;
         scale.max  = size;
-        scale.size = size; // original size
+        scale.size = size; // original size // TODO: remove this...
         
         // -------------
         
@@ -16181,14 +16192,22 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * grouped according to the charts "main grouping".
      * 
      * @param {string|string[]} [dataPartValues=null] The desired data part value or values.
+     * @param {object} [keyArgs=null] Optional keyword arguments object.
+     * @param {boolean} [keyArgs.ignoreNulls=true] Indicates that null datums should be ignored.
      * 
      * @type pvc.data.Data
      */
-    _getVisibleData: function(dataPartValues){
-        var key = '' + (dataPartValues || ''), // relying on Array.toString
+    _getVisibleData: function(dataPartValues, keyArgs){
+        var ignoreNulls = def.get(keyArgs, 'ignoreNulls', true);
+        if(ignoreNulls){
+            // If already globally ignoring nulls, there's no need to do it explicitly anywhere
+            ignoreNulls = !this.options.ignoreNulls;
+        }
+        
+        var key = ignoreNulls + '|' + (dataPartValues || ''), // relying on Array.toString
             data = def.getOwn(this._visibleDataCache, key);
         if(!data) {
-            data = this._createVisibleData(dataPartValues);
+            data = this._createVisibleData(dataPartValues, ignoreNulls);
             
             (this._visibleDataCache || (this._visibleDataCache = {}))
                 [key] = data;
@@ -16211,10 +16230,10 @@ pvc.CartesianAbstract = pvc.TimeseriesAbstract.extend({
      * @protected
      * @virtual
      */
-    _createVisibleData: function(dataPartValues){
+    _createVisibleData: function(dataPartValues, ignoreNulls){
         var partData = this._partData(dataPartValues);
         return this._serRole && this._serRole.grouping ?
-                   this._serRole.flatten(partData, {visible: true}) :
+                   this._serRole.flatten(partData, {visible: true, isNull: ignoreNulls ? false : null}) :
                    partData;
     },
     
@@ -17102,8 +17121,8 @@ pvc.CartesianAbstractPanel = pvc.BasePanel.extend({
         }
     },
 
-    _getVisibleData: function(dataPartValues){
-        return this.chart._getVisibleData(dataPartValues || this.dataPartValue);
+    _getVisibleData: function(dataPartValues, keyArgs){
+        return this.chart._getVisibleData(dataPartValues || this.dataPartValue, keyArgs);
     },
 
     /**
@@ -17223,15 +17242,36 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
     /**
      * @override
      */
-    _createVisibleData: function(dataPartValues){
+    _createVisibleData: function(dataPartValues, ignoreNulls){
         var serGrouping = this._serRole && this._serRole.flattenedGrouping(),
             catGrouping = this._catRole.flattenedGrouping(),
-            partData    = this._partData(dataPartValues);
-
+            partData    = this._partData(dataPartValues),
+            
+            // Allow for more caching when isNull is null
+            keyArgs = { visible: true, isNull: ignoreNulls ? false : null};
+        
+        // Determine the series that have at least one non-null datum
+//        if(serGrouping && !this.options.ignoreNulls){
+//            var seriesWithNonNullDatumsData = partData.groupBy(serGrouping, {
+//                visible:  true,
+//                where:    function(datum){ return !datum.isNull; },
+//                whereKey: "datum_not_null"
+//            });
+//            
+//            // Exclude null datums whose series value is not in 
+//            // seriesWithNonNullDatumsData
+//            keyArgs.where = function(datum){
+//                if(!datum.isNull) {
+//                    return true;
+//                }
+//                
+//            };
+//        }
+        
         return serGrouping ?
                 // <=> One multi-dimensional, two-levels data grouping
-                partData.groupBy([catGrouping, serGrouping], { visible: true }) :
-                partData.groupBy(catGrouping, { visible: true });
+                partData.groupBy([catGrouping, serGrouping], keyArgs) :
+                partData.groupBy(catGrouping, keyArgs);
     },
     
     /**
@@ -19652,7 +19692,7 @@ pvc.BarAbstractPanel = pvc.CartesianAbstractPanel.extend({
             options = chart.options,
             isStacked = !!this.stacked,
             isVertical = this.isOrientationVertical();
-
+        
         var data = this._getVisibleData(), // shared "categ then series" grouped data
             seriesData = chart._serRole.flatten(data),
             rootScene = this._buildScene(data, seriesData)
