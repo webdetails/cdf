@@ -1,6 +1,6 @@
 pen.define("cdf/lib/CCC/protovis", function(){
 
-// c84a76b5fc52ee0fdbd02ca5e82660a0fdab5da8
+// 09485740f1bee7036d42d3ebc02acdc5ec129c32
 /**
  * @class The built-in Array class.
  * @name Array
@@ -338,6 +338,7 @@ pv.listener = function(f) {
         pv.event = e;
         return f.call(this, e);
       } catch (ex) {
+          // swallow top level error
           pv.error(ex);
       } finally {
         delete pv.event;
@@ -8346,14 +8347,30 @@ pv.Mark.prototype.cousin = function() {
  * will be rendered.
  */
 pv.Mark.prototype.render = function() {
+    /* For the first render, take it from the top. */
+    if (this.parent && !this.root.scene) {
+      this.root.render();
+      return;
+    }
+    
+    try {
+        this.renderCore();
+    } catch(ex){
+        // swallow top level error
+        pv.error(ex);
+    } finally {
+        // Check corrupted stack
+        var stack = pv.Mark.stack;
+        if(stack && stack.length){
+            pv.error("Fixing corrupted stack.");
+            stack.length = 0;
+        }
+    }
+};
+
+pv.Mark.prototype.renderCore = function() {
   var parent = this.parent,
       stack = pv.Mark.stack;
-
-  /* For the first render, take it from the top. */
-  if (parent && !this.root.scene) {
-    this.root.render();
-    return;
-  }
 
   /* Record the path to this mark. */
   var indexes = [];
@@ -8992,6 +9009,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
     f.apply(this, stack);
   } catch (ex) {
       pv.error(ex);
+      throw ex;
   } finally {
     clear(scene, index);
     apply(oscene, oindex);
@@ -9014,16 +9032,16 @@ pv.Mark.dispatch = function(type, scene, index, event) {
         var ms;
         l.forEach(function(li){
             var mi = li.apply(m, stack);
-            if(mi && mi.render) {
+            if(mi && mi.renderCore) {
                 (ms || (ms = [])).push(mi);
             }
         });
         
-        if(ms) { ms.forEach(function(mi){ mi.render(); }); }
+        if(ms) { ms.forEach(function(mi){ mi.renderCore(); }); }
     } else {
         m = l.apply(m, stack);
-        if (m && m.render) {
-            m.render();
+        if (m && m.renderCore) {
+            m.renderCore();
         }
     }
   });
@@ -15426,7 +15444,7 @@ pv.Layout.Force.prototype.buildImplied = function(s) {
           render = true;
         }
       }
-      if (render) that.render();
+      if (render) that.renderCore();
     }, 42);
   } else for (var i = 0; i < k; i++) {
     sim.step();
@@ -16836,7 +16854,7 @@ pv.Behavior.drag = function() {
       x: this.parent.width() - (d.dx || 0),
       y: this.parent.height() - (d.dy || 0)
     };
-    scene.mark.context(scene, index, function() { this.render(); });
+    scene.mark.context(scene, index, function() { this.renderCore(); });
     pv.Mark.dispatch("dragstart", scene, index, e);
   }
 
@@ -16847,7 +16865,7 @@ pv.Behavior.drag = function() {
         var m = this.mouse();
         p.x = p.fix.x = Math.max(0, Math.min(v1.x + m.x, max.x));
         p.y = p.fix.y = Math.max(0, Math.min(v1.y + m.y, max.y));
-        this.render();
+        this.renderCore();
       });
     pv.Mark.dispatch("drag", scene, index, e);
   }
@@ -16856,7 +16874,7 @@ pv.Behavior.drag = function() {
   function mouseup(e) {
     if (!scene) return;
     p.fix = null;
-    scene.mark.context(scene, index, function() { this.render(); });
+    scene.mark.context(scene, index, function() { this.renderCore(); });
     pv.Mark.dispatch("dragend", scene, index, e);
     scene = null;
   }
@@ -17114,7 +17132,7 @@ pv.Behavior.select = function() {
         r.y = Math.max(0, Math.min(m1.y, m2.y));
         r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
         r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
-        this.render();
+        this.renderCore();
       });
     pv.Mark.dispatch("select", scene, index, e);
   }
@@ -17218,7 +17236,7 @@ pv.Behavior.resize = function(side) {
         r.y = Math.max(0, Math.min(m1.y, m2.y));
         r.dx = Math.min(this.parent.width(), Math.max(m2.x, m1.x)) - r.x;
         r.dy = Math.min(this.parent.height(), Math.max(m2.y, m1.y)) - r.y;
-        this.render();
+        this.renderCore();
       });
     pv.Mark.dispatch("resize", scene, index, e);
   }
@@ -17307,7 +17325,7 @@ pv.Behavior.pan = function() {
           m.x = Math.max(bound.x, Math.min(0, m.x));
           m.y = Math.max(bound.y, Math.min(0, m.y));
         }
-        this.transform(m).render();
+        this.transform(m).renderCore();
       });
     pv.Mark.dispatch("pan", scene, index, e);
   }
@@ -17400,7 +17418,7 @@ pv.Behavior.zoom = function(speed) {
       m.x = Math.max((1 - m.k) * this.width(), Math.min(0, m.x));
       m.y = Math.max((1 - m.k) * this.height(), Math.min(0, m.y));
     }
-    this.transform(m).render();
+    this.transform(m).renderCore();
     pv.Mark.dispatch("zoom", this.scene, this.index, e);
   }
 
