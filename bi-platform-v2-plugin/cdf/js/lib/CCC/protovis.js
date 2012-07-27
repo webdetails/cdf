@@ -8333,6 +8333,8 @@ pv.Mark.prototype.cousin = function() {
   return (s && s.children) ? s.children[this.childIndex][this.index] : null;
 };
 
+//pv.Mark.renderLevel = 0;
+
 /**
  * Renders this mark, including recursively rendering all child marks if this is
  * a panel. This method finds all instances of this mark and renders them. This
@@ -8353,19 +8355,27 @@ pv.Mark.prototype.render = function() {
       return;
     }
     
-    try {
+    //pv.Mark.renderLevel++;
+    //try {
         this.renderCore();
-    } catch(ex){
-        // swallow top level error
-        pv.error(ex);
-    } finally {
-        // Check corrupted stack
-        var stack = pv.Mark.stack;
-        if(stack && stack.length){
-            pv.error("Fixing corrupted stack.");
-            stack.length = 0;
-        }
-    }
+    //} catch(ex){
+    //    // swallow top level error
+    //    pv.error(ex);
+//    } finally {
+//        if(pv.Mark.renderLevel > 0){
+//            pv.Mark.renderLevel--;
+//        }
+//        
+//        if(!pv.Mark.renderLevel){
+//            // TOP level render
+//            // Check corrupted stack
+//            var stack = pv.Mark.stack;
+//            if(stack && stack.length){
+//                pv.error("Fixing corrupted stack.");
+//                stack.length = 0;
+//            }
+//        }
+//    }
 };
 
 pv.Mark.prototype.renderCore = function() {
@@ -9032,16 +9042,16 @@ pv.Mark.dispatch = function(type, scene, index, event) {
         var ms;
         l.forEach(function(li){
             var mi = li.apply(m, stack);
-            if(mi && mi.renderCore) {
+            if(mi && mi.render) {
                 (ms || (ms = [])).push(mi);
             }
         });
         
-        if(ms) { ms.forEach(function(mi){ mi.renderCore(); }); }
+        if(ms) { ms.forEach(function(mi){ mi.render(); }); }
     } else {
         m = l.apply(m, stack);
-        if (m && m.renderCore) {
-            m.renderCore();
+        if (m && m.render) {
+            m.render();
         }
     }
   });
@@ -15444,7 +15454,7 @@ pv.Layout.Force.prototype.buildImplied = function(s) {
           render = true;
         }
       }
-      if (render) that.renderCore();
+      if (render) that.render();
     }, 42);
   } else for (var i = 0; i < k; i++) {
     sim.step();
@@ -16854,7 +16864,7 @@ pv.Behavior.drag = function() {
       x: this.parent.width() - (d.dx || 0),
       y: this.parent.height() - (d.dy || 0)
     };
-    scene.mark.context(scene, index, function() { this.renderCore(); });
+    scene.mark.context(scene, index, function() { this.render(); });
     pv.Mark.dispatch("dragstart", scene, index, e);
   }
 
@@ -16865,7 +16875,7 @@ pv.Behavior.drag = function() {
         var m = this.mouse();
         p.x = p.fix.x = Math.max(0, Math.min(v1.x + m.x, max.x));
         p.y = p.fix.y = Math.max(0, Math.min(v1.y + m.y, max.y));
-        this.renderCore();
+        this.render();
       });
     pv.Mark.dispatch("drag", scene, index, e);
   }
@@ -16874,7 +16884,7 @@ pv.Behavior.drag = function() {
   function mouseup(e) {
     if (!scene) return;
     p.fix = null;
-    scene.mark.context(scene, index, function() { this.renderCore(); });
+    scene.mark.context(scene, index, function() { this.render(); });
     pv.Mark.dispatch("dragend", scene, index, e);
     scene = null;
   }
@@ -17132,7 +17142,7 @@ pv.Behavior.select = function() {
         r.y = Math.max(0, Math.min(m1.y, m2.y));
         r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
         r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
-        this.renderCore();
+        this.render();
       });
     pv.Mark.dispatch("select", scene, index, e);
   }
@@ -17236,7 +17246,7 @@ pv.Behavior.resize = function(side) {
         r.y = Math.max(0, Math.min(m1.y, m2.y));
         r.dx = Math.min(this.parent.width(), Math.max(m2.x, m1.x)) - r.x;
         r.dy = Math.min(this.parent.height(), Math.max(m2.y, m1.y)) - r.y;
-        this.renderCore();
+        this.render();
       });
     pv.Mark.dispatch("resize", scene, index, e);
   }
@@ -17325,7 +17335,7 @@ pv.Behavior.pan = function() {
           m.x = Math.max(bound.x, Math.min(0, m.x));
           m.y = Math.max(bound.y, Math.min(0, m.y));
         }
-        this.transform(m).renderCore();
+        this.transform(m).render();
       });
     pv.Mark.dispatch("pan", scene, index, e);
   }
@@ -17418,7 +17428,7 @@ pv.Behavior.zoom = function(speed) {
       m.x = Math.max((1 - m.k) * this.width(), Math.min(0, m.x));
       m.y = Math.max((1 - m.k) * this.height(), Math.min(0, m.y));
     }
-    this.transform(m).renderCore();
+    this.transform(m).render();
     pv.Mark.dispatch("zoom", this.scene, this.index, e);
   }
 
