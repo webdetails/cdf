@@ -408,9 +408,15 @@ pv.listenForPageLoad = function(listener) {
  * 'nativesvg' is the default - the native svg of the browser.
  * 'svgweb' is if we identify svgweb is there.
  */
-pv.renderer = function() {
-    return (typeof document.svgImplementation !== "undefined") ? document.svgImplementation:
-     (typeof window.svgweb === "undefined") ? "nativesvg" : "svgweb";
+
+pv.renderer = function(){
+    var renderer = (typeof document.svgImplementation !== "undefined") ? 
+                   document.svgImplementation :
+                   (typeof window.svgweb === "undefined") ? "nativesvg" : "svgweb";
+    
+    pv.renderer = function(){ return renderer; };
+    
+    return renderer;
 };
 
 /** @private Returns a locally-unique positive id. */
@@ -5915,9 +5921,10 @@ pv.SvgScene.create = function(type) {
  */
 pv.SvgScene.expect = function(e, type, scenes, i, attributes, style) {
   if (e) {
-    if (e.tagName === "defs") e = e.nextSibling;
-    if (e.tagName === "a") e = e.firstChild;
-    if (e.tagName !== type) {
+    var tagName = e.tagName;
+    if (tagName === "defs") e = e.nextSibling;
+    if (tagName === "a")    e = e.firstChild;
+    if (tagName !== type) {
       var n = this.create(type);
       e.parentNode.replaceChild(n, e);
       e = n;
@@ -5933,28 +5940,51 @@ pv.SvgScene.expect = function(e, type, scenes, i, attributes, style) {
 };
 
 pv.SvgScene.setAttributes = function(e, attributes){
+    var implicitSvg = this.implicit.svg;
     for (var name in attributes) {
         var value = attributes[name];
-        if (value == this.implicit.svg[name]) value = null;
-        if (value == null) e.removeAttribute(name);
-        else e.setAttribute(name, value);
+        if (value == null || value == implicitSvg[name]){
+            e.removeAttribute(name);
+        }  else {
+            e.setAttribute(name, value);
+        }
     }
 };
 
 pv.SvgScene.setStyle = function(e, style){
-  for (var name in style) {
-    var value = style[name];
-    if (value == this.implicit.css[name]) value = null;
-    if (value == null) {
-      if (pv.renderer() === "batik") {
-        e.removeAttribute(name);
-      } else if (pv.renderer() != 'svgweb') // svgweb doesn't support removeproperty TODO SVGWEB
-        e.style.removeProperty(name);
-    }
-    else if (pv.renderer() == "batik")
-      e.style.setProperty(name,value);
-    else
-      e.style[name] = value;
+  var implicitCss = this.implicit.css;
+  switch(pv.renderer()){
+      case 'batik':
+          for (var name in style) {
+              var value = style[name];
+              if (value == null || value == implicitCss[name]) {
+                e.removeAttribute(name);
+              } else {
+                e.style.setProperty(name,value);
+              }
+          }
+          break;
+          
+      case 'svgweb':
+          for (var name in style) {
+              // svgweb doesn't support removeproperty TODO SVGWEB
+              var value = style[name];
+              if (value == null || value == implicitCss[name]) {
+                  continue;
+              }
+              e.style[name] = value;
+          }
+          break;
+          
+     default:
+         for (var name in style) {
+             var value = style[name];
+             if (value == null || value == implicitCss[name]){
+               e.style.removeProperty(name);
+             } else {
+                 e.style[name] = value;
+             }
+         }
   }
 };
 
@@ -7294,14 +7324,14 @@ pv.SvgScene.panel = function(scenes) {
         e = g && g.firstChild;
       }
       if (!g) {
-        g = this.create(pv.renderer() !== "batik"? "svg":"g");
+        g = this.create(pv.renderer() !== "batik" ? "svg":"g");
         g.setAttribute("font-size", "10px");
         g.setAttribute("font-family", "sans-serif");
         g.setAttribute("fill", "none");
         g.setAttribute("stroke", "none");
         g.setAttribute("stroke-width", 1.5);
 
-        if (pv.renderer() == "svgweb") { // SVGWeb requires a separate mechanism for setting event listeners.
+        if (pv.renderer() === "svgweb") { // SVGWeb requires a separate mechanism for setting event listeners.
             // width/height can't be set on the fragment
             g.setAttribute("width", s.width + s.left + s.right);
             g.setAttribute("height", s.height + s.top + s.bottom);
@@ -8072,8 +8102,9 @@ pv.Mark.prototype.defaults = new pv.Mark()
     .data(function(d) { return [d]; })
     // DATUM - an object counterpart for each value of data.
     .datum(function() {
-        return this.parent ?
-                this.parent.scene[this.parent.index].datum : null; })
+        var parent = this.parent;
+        return parent ? parent.scene[parent.index].datum : null; 
+     })
     .visible(true)
     .antialias(true)
     .events("painted");
@@ -8716,19 +8747,27 @@ pv.Mark.prototype.build = function() {
   data = data.type & 1 ? data.value.apply(this, stack) : data.value;
 
   /* Create, update and delete scene nodes. */
+  var markProto = pv.Mark.prototype;
   stack.unshift(null);
-  scene.length = data.length;
-  for (var i = 0; i < data.length; i++) {
-    pv.Mark.prototype.index = this.index = i;
-    var s = scene[i];
-    if (!s) scene[i] = s = {};
-    s.data = stack[0] = data[i];
-    this.buildInstance(s);
+  try {
+      /* Adjust scene length to data length. */
+      var L = scene.length = data.length;
+      for (var i = 0 ; i < L ; i++) {
+        markProto.index = this.index = i;
+        
+        var s = scene[i] || (scene[i] = {});
+        
+        /* Fill special data property and update the stack. */
+        s.data = stack[0] = data[i];
+        
+        this.buildInstance(s);
+      }
+  } finally {
+      markProto.index = -1;
+      delete this.index;
+      stack.shift();
   }
-  pv.Mark.prototype.index = -1;
-  delete this.index;
-  stack.shift();
-
+  
   return this;
 };
 
@@ -8740,6 +8779,7 @@ pv.Mark.prototype.build = function() {
  * @param properties an array of properties.
  */
 pv.Mark.prototype.buildProperties = function(s, properties) {
+  var stack = pv.Mark.stack;
   for (var i = 0, n = properties.length; i < n; i++) {
     var p = properties[i];
     var v = p.value; // assume case 2 (constant)
@@ -8752,7 +8792,7 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
         break;
           
       case 3: 
-        v = v.apply(this, pv.Mark.stack); 
+        v = v.apply(this, stack); 
         break;
     }
     
@@ -8856,27 +8896,37 @@ pv.Mark.prototype.buildImplied = function(s) {
 pv.Mark.prototype.mouse = function() {
     var n = this.root.canvas(),
         scrollOffset = pv.scrollOffset(n),
-        x = scrollOffset[0] + pv.event.clientX * 1,
-        y = scrollOffset[1] + pv.event.clientY * 1;
+        ev = pv.event,
+        x = scrollOffset[0] + ev.clientX * 1,
+        y = scrollOffset[1] + ev.clientY * 1;
     
       /* Compute xy-coordinates relative to the panel.
        * This is not necessary if we're using svgweb, as svgweb gives us
        * the necessary relative co-ordinates anyway (well, it seems to
        * in my code.
        */
-      if (pv.renderer() != 'svgweb') {
+      if (pv.renderer() !== 'svgweb') {
           do {
             x -= n.offsetLeft;
             y -= n.offsetTop;
-          } while (n = n.offsetParent);
+          } while ((n = n.offsetParent));
       }
 
       /* Compute the inverse transform of all enclosing panels. */
       var t = pv.Transform.identity,
           p = this.properties.transform ? this : this.parent,
           pz = [];
-      do { pz.push(p); } while (p = p.parent);
-      while (p = pz.pop()) t = t.translate(p.left(), p.top()).times(p.transform());
+      
+      do { 
+          pz.push(p); 
+      } while ((p = p.parent));
+      
+      while ((p = pz.pop())) {
+          var pinst = p.instance();
+          t = t.translate(pinst.left, pinst.top)
+               .times(pinst.transform);
+      }
+      
       t = t.invert();
       return pv.vector(x * t.k + t.x, y * t.k + t.y);
 };
@@ -8956,8 +9006,10 @@ pv.Mark.prototype.context = function(scene, index, f) {
   function apply(scene, index) {
     pv.Mark.scene = scene;
     proto.index = index;
-    if (!scene) return;
-
+    if (!scene) {
+        return;
+    }
+    
     var that = scene.mark,
         mark = that,
         ancestors = [];
@@ -8966,8 +9018,10 @@ pv.Mark.prototype.context = function(scene, index, f) {
     do {
       ancestors.push(mark);
       stack.push(scene[index].data);
+      
       mark.index = index;
       mark.scene = scene;
+      
       index = scene.parentIndex;
       scene = scene.parent;
     } while (mark = mark.parent);
@@ -8978,12 +9032,16 @@ pv.Mark.prototype.context = function(scene, index, f) {
       mark.scale = k;
       k *= mark.scene[mark.index].transform.k;
     }
-
-    /* Set children's scene and scale. */
-    if (that.children) for (var i = 0, n = that.children.length; i < n; i++) {
-      mark = that.children[i];
-      mark.scene = that.scene[that.index].children[i];
-      mark.scale = k;
+    
+    /* Set direct children of "that"'s scene and scale. */
+    var children = that.children;
+    if (children){
+      var thatInstance = that.scene[that.index];
+      for (var i = 0, n = children.length ; i < n; i++) {
+        mark = children[i];
+        mark.scene = thatInstance.children[i];
+        mark.scale = k;
+      }
     }
   }
 
@@ -8994,12 +9052,15 @@ pv.Mark.prototype.context = function(scene, index, f) {
         mark;
 
     /* Reset children. */
-    if (that.children) for (var i = 0, n = that.children.length; i < n; i++) {
-      mark = that.children[i];
-      delete mark.scene;
-      delete mark.scale;
+    var children = that.children;
+    if (children){
+      for (var i = 0, n = children.length ; i < n; i++) {
+        mark = children[i];
+        delete mark.scene;
+        delete mark.scale;
+      }
     }
-
+    
     /* Reset ancestors. */
     mark = that;
     do {
@@ -9013,16 +9074,30 @@ pv.Mark.prototype.context = function(scene, index, f) {
   }
 
   /* Context switch, invoke the function, then switch back. */
-  clear(oscene, oindex);
-  apply(scene, index);
-  try {
-    f.apply(this, stack);
-  } catch (ex) {
-      pv.error(ex);
-      throw ex;
-  } finally {
-    clear(scene, index);
-    apply(oscene, oindex);
+  if(scene && scene === oscene && index === oindex){
+      // already there
+      try{
+          f.apply(this, stack);
+      } catch (ex) {
+          pv.error(ex);
+          throw ex;
+      } finally {
+          // Some guys like setting index to -1...
+          pv.Mark.scene = oscene;
+          proto.index = oindex;
+      }
+    } else {
+      clear(oscene, oindex);
+      apply(scene, index);
+      try {
+        f.apply(this, stack);
+      } catch (ex) {
+          pv.error(ex);
+          throw ex;
+      } finally {
+        clear(scene, index);
+        apply(oscene, oindex);
+      }
   }
 };
 
@@ -10369,8 +10444,10 @@ pv.Panel.prototype.add = function(type) {
 /** @private Bind this panel, then any child marks recursively. */
 pv.Panel.prototype.bind = function() {
   pv.Mark.prototype.bind.call(this);
-  for (var i = 0; i < this.children.length; i++) {
-    this.children[i].bind();
+  
+  var children = this.children;
+  for (var i = 0, n = children.length ; i < n ; i++) {
+    children[i].bind();
   }
 };
 
@@ -10384,15 +10461,15 @@ pv.Panel.prototype.bind = function() {
  */
 pv.Panel.prototype.buildInstance = function(s) {
   pv.Bar.prototype.buildInstance.call(this, s);
+  
   if (!s.visible) return;
-  if (!s.children) s.children = [];
-
+  
   /*
    * Multiply the current scale factor by this panel's transform. Also clear the
    * default index as we recurse into child marks; it will be reset to the
    * current index when the next panel instance is built.
    */
-  var scale = this.scale * s.transform.k, child, n = this.children.length;
+  var scale = this.scale * s.transform.k;
   pv.Mark.prototype.index = -1;
 
   /*
@@ -10401,9 +10478,12 @@ pv.Panel.prototype.buildInstance = function(s) {
    * existing scene graph, such that properties from the previous build can be
    * reused; this is largely to facilitate the recycling of SVG elements.
    */
-  for (var i = 0; i < n; i++) {
-    child = this.children[i];
-    child.scene = s.children[i]; // possibly undefined
+  var child;
+  var children = this.children;
+  var childScenes = s.children || (s.children = []);
+  for (var i = 0, n = children.length; i < n; i++) {
+    child = children[i];
+    child.scene = childScenes[i]; // possibly undefined
     child.scale = scale;
     child.build();
   }
@@ -10415,14 +10495,14 @@ pv.Panel.prototype.buildInstance = function(s) {
    * instantiated multiple times!
    */
   for (var i = 0; i < n; i++) {
-    child = this.children[i];
-    s.children[i] = child.scene;
+    child = children[i];
+    childScenes[i] = child.scene;
     delete child.scene;
     delete child.scale;
   }
 
   /* Delete any expired child scenes. */
-  s.children.length = n;
+  childScenes.length = n;
 };
 
 /**

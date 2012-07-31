@@ -15,6 +15,17 @@ var pvc = def.globalSpace('pvc', {
 // Begin private scope
 (function(){
 
+// Check URL debug and debugLevel
+(function(){
+    if((typeof window.location) !== 'undefined'){
+        var url = window.location.href;
+        if(url && (/\bdebug=true\b/).test(url)){
+            var m = /\bdebugLevel=(\d+)/.exec(url);
+            pvc.debug = m ? (+m[1]) : 1;
+        }
+    }
+}());
+
 // goldenRatio proportion
 // ~61.8% ~ 38.2%
 pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
@@ -64,6 +75,8 @@ function syncTipsyLog(){
         tip.log = pvc.log;
     }
 }
+
+syncTipsyLog();
 
 /**
  * Evaluates x if it's a function or returns the value otherwise
@@ -622,22 +635,18 @@ pv.Mark.prototype.renderCore = function(){
     sortChildren.call(this);
     
     /* Assign a new render id to the root mark */
-    var rootId = this.root._rootId;
-    if(rootId == null){
-        rootId = this.root._rootId = def.nextId('rootMarks');
-    }
-    
-    this.root._renderId = def.nextId("render" + rootId);
+    var root = this.root;
+    root._renderId = (root._renderId || 0) + 1;
     
     if(pvc.debug >= 10){
-        pvc.log("BEGIN RENDER " + this.root._renderId);
+        pvc.log("BEGIN RENDER " + root._renderId);
     }
     
     /* Render */
     markRenderCore.apply(this, arguments);
     
     if(pvc.debug >= 10){
-        pvc.log("END RENDER " + this.root._renderId);
+        pvc.log("END RENDER " + root._renderId);
     }
 };
 
@@ -1553,6 +1562,8 @@ var Polygon = def.type('pvc.Polygon', Shape)
 pv.Behavior.selector = function(autoRefresh, mark) {
   var scene, // scene context
       index, // scene context
+      mprev,
+      inited,
       m1, // initial mouse position
       redrawThis = (arguments.length > 0)?
                     autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
@@ -1567,56 +1578,79 @@ pv.Behavior.selector = function(autoRefresh, mark) {
         scene = mark.scene;
     }
     
+    if(!inited){
+        inited = true;
+        
+        // Staying close to canvas allows cancelling bubbling of the event in time 
+        // for other ascendant handlers
+        var root = this.root.scene.$g;
+        pv.listen(root, "mousemove", mousemove);
+        pv.listen(root, "mouseup",   mouseup  );
+        
+        // But when the mouse leaves the canvas we still need to
+        // receive events...
+        pv.listen(document, "mousemove", mousemove);
+        pv.listen(document, "mouseup",   mouseup  );
+    }
+    
     m1 = this.mouse();
-
-    scene.mark.selectionRect = new pvc.Rect(m1.x, m1.y);
+    mprev = m1;
+    this.selectionRect = new pvc.Rect(m1.x, m1.y);
     
     pv.Mark.dispatch("selectstart", scene, index, e);
   }
-
+  
   /** @private */
   function mousemove(e) {
     if (!scene) {
         return;
     }
     
+    e.stopPropagation();
+    
     scene.mark.context(scene, index, function() {
         // this === scene.mark
-        var m2 = this.mouse(),
-            x = Math.max(0, Math.min(m1.x, m2.x)),
-            y = Math.max(0, Math.min(m1.y, m2.y));
+        var m2 = this.mouse();
+        if(mprev){
+            var dx = m2.x - mprev.x;
+            var dy = m2.y - mprev.y;
+            var len = dx*dx + dy*dy;
+            if(len <= 2){
+                return;
+            }
+            mprev = m2;
+        }
             
-        scene.mark.selectionRect.set(
-            x,
-            y,
-            Math.min(this.width(),  Math.max(m2.x, m1.x)) - x,
-            Math.min(this.height(), Math.max(m2.y, m1.y)) - y);
-
+        var x = m1.x;
+        var y = m1.y;
+            
+        this.selectionRect.set(x, y, m2.x - x, m2.y - y);
+        
         if(redrawThis){
             this.render();
         }
-      });
-
-    pv.Mark.dispatch("select", scene, index, e);
+        
+        pv.Mark.dispatch("select", scene, index, e);
+    });
   }
 
   /** @private */
   function mouseup(e) {
     var lscene = scene;
     if(lscene){
+        
+        e.stopPropagation();
+        
         var lmark = lscene.mark;
         if(lmark){
             pv.Mark.dispatch("selectend", lscene, index, e);
         
             lmark.selectionRect = null;
         }
-        
+        mprev = null;
         scene = null;
     }
   }
-
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup", mouseup);
 
   return mousedown;
 };
@@ -1630,57 +1664,41 @@ pv.Behavior.selector = function(autoRefresh, mark) {
 }(jQuery));
 // Text measurement utility
 def.scope(function(){
+    var _currentFontSizeCache;
     
-    // --------------------------
-    // exported
-    function getTextSize(text, font){
-        switch(pv.renderer()){
-            case 'vml':   return getTextSizeVML(text, font);
-            case 'batik': return getTextSizeCGG(text, font);
+    function createCache(){
+        return new pvc.text.FontSizeCache();
+    }
+    
+    function useCache(cache, fun, ctx){
+        (cache instanceof pvc.text.FontSizeCache) || def.fail.operationInvalid("Not a valid text cache.");
+        
+        var prevCache = _currentFontSizeCache;
+        _currentFontSizeCache = cache;
+        try{
+            return fun.call(ctx);
+        } finally {
+            _currentFontSizeCache = prevCache;
         }
-
-        return getTextSizeSVG(text, font);
+    }
+    
+    function getTextSize(text, font){
+        var bbox = _currentFontSizeCache && _currentFontSizeCache.get(font, text);
+        if(!bbox){
+            bbox = getTextSizeCore(text, font);
+            _currentFontSizeCache && _currentFontSizeCache.put(font, text, bbox);
+        }
+        
+        return bbox;
     }
     
     function getTextLength(text, font){
-        switch(pv.renderer()){
-            case 'vml':
-                return getTextLenVML(text, font);
-
-            case 'batik':
-                var fontInfo = getFontInfoCGG(font);
-
-                // NOTE: the global function 'getTextLenCGG' must be
-                // defined by the CGG loading environment
-                /*global getTextLenCGG:true */
-                return getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
-
-            //case 'svg':
-        }
-
-        return getTextLenSVG(text, font);
+        return getTextSize(text, font).width;
     }
 
     function getTextHeight(text, font){
-        switch(pv.renderer()){
-            case 'vml':
-                return getTextHeightVML(text, font);
-
-            case 'batik':
-                var fontInfo = getFontInfoCGG(font);
-
-                // NOTE: the global function 'getTextHeightCGG' must be
-                // defined by the CGG loading environment
-                /*global getTextHeightCGG:true */
-                return getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight);
-
-            //case 'svg':
-        }
-
-        return getTextHeightSVG(text, font);
+        return getTextSize(text, font).height;
     }
-    
-    // -------------
     
     // TODO: if not in px?..
     function getFontSize(font){
@@ -1852,10 +1870,60 @@ def.scope(function(){
     // --------------------------
     // private
     var $textSizePlaceholder = null,
-        $textSizePvLabel = null,
-        textSizePvLabelFont = null,
+        _svgText = null,
+        _svgTextFont = null,
         textSizePlaceholderId = 'cccTextSizeTest_' + new Date().getTime();
+    
+    function getTextSizeCore(text, font){
+        switch(pv.renderer()){
+            case 'vml':   return getTextSizeVML(text, font);
+            case 'batik': return getTextSizeCGG(text, font);
+        }
 
+        return getTextSizeSVG(text, font);
+    }
+    
+    function getTextSizeSVG(text, font){
+        if(text === "") {
+            return {width: 0, height: 0}; 
+        }
+        
+        if(!_svgText){
+            var holder  = getTextSizePlaceholder();
+            var svgElem = pv.SvgScene.create('svg');
+            svgElem.setAttribute('font-size', '10px');
+            svgElem.setAttribute('font-family', 'sans-serif');
+            
+            _svgText = pv.SvgScene.create('text');
+            svgElem.appendChild(_svgText);
+            holder[0].appendChild(svgElem);
+        }
+        
+        if(!font){
+            font = null;
+        }
+        
+        if(_svgTextFont !== font){
+            _svgTextFont = font;
+            pv.SvgScene.setStyle(_svgText, { 'font': font });
+        }
+        
+        var textNode = _svgText.firstChild;
+        if(textNode) {
+            textNode.nodeValue = ''+text;
+        } else {
+            if (pv.renderer() === "svgweb") { 
+                // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
+                _svgText.appendChild(document.createTextNode(''+text, true));
+            } else {
+                _svgText.appendChild(document.createTextNode(''+text));
+            }
+        }
+
+        var box = _svgText.getBBox();
+        return {width: box.width, height: box.height};
+    }
+    
     function getTextSizePlaceholder(){
         if(!$textSizePlaceholder || !$textSizePlaceholder.parent().length){
             
@@ -1866,7 +1934,7 @@ def.scope(function(){
                     .attr('id', textSizePlaceholderId)
                     .css('position', 'absolute')
                     .css('visibility', 'hidden')
-                    .css('width', 'auto')
+                    .css('width',  'auto')
                     .css('height', 'auto');
 
                 $('body').append($textSizePlaceholder);
@@ -1875,36 +1943,24 @@ def.scope(function(){
 
         return $textSizePlaceholder;
     }
+    
+    // ---------------
+    
+    function getTextSizeCGG(text, font){
+        var fontInfo = getFontInfoCGG(font);
 
-    // TODO: the following method fails on empty text...
-    function getTextSizePvLabel(text, font){
-        if(text === ""){
-            text = "m";
-        }
-
-        if(!$textSizePvLabel || textSizePvLabelFont != font){
-            var holder   = getTextSizePlaceholder();
-            var holderId = holder.attr('id');
-
-            var panel = new pv.Panel();
-            panel.canvas(holderId);
-            var lbl = panel.add(pv.Label).text(text);
-            if(font){
-                lbl.font(font);
-            }
-            panel.render();
-
-            $textSizePvLabel   = $('#' + holderId + ' text');
-            textSizePvLabelFont = font;
-        } else {
-            $textSizePvLabel.text(text);
-        }
-
-        return $textSizePvLabel[0];
+        // TODO: Add cgg size method
+        // NOTE: the global functions 'getTextLenCGG' and 'getTextHeightCGG' must be
+        // defined by the CGG loading environment
+        return {
+            /*global getTextLenCGG:true */
+            width:  getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight),
+            /*global getTextHeightCGG:true */
+            height: getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight)
+        };
     }
-
-    var _cggFontCache;
-    var _cggFontTextElem;
+    
+    var _cggFontCache, _cggFontTextElem;
     
     function getFontInfoCGG(font){
         var fontInfo = _cggFontCache && _cggFontCache[font];
@@ -1947,57 +2003,9 @@ def.scope(function(){
     
     // -------------
     
-    function getTextSizeCGG(text, font){
-        var fontInfo = getFontInfoCGG(font);
-        
-        // TODO: Add cgg size method
-        return {
-            /*global getTextLenCGG:true */
-            width:  getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight),
-            /*global getTextHeightCGG:true */
-            height: getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight)
-        };
-    }
-    
-    // -------------
-    
-    function getTextSizeSVG(text, font){
-        if(!text) { return {width: 0, height: 0}; }
-        
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return {width: box.width, height: box.height};
-    }
-    
-    function getTextLenSVG(text, font){
-        if(!text) { return {width: 0, height: 0}; }
-        
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return box.width;
-    }
-
-    function getTextHeightSVG(text, font){
-        if(!text) { return {width: 0, height: 0}; }
-        
-        var lbl = getTextSizePvLabel(text, font);
-        var box = lbl.getBBox();
-        return box.height;
-    }
-    
-    // -------------
-    
     function getTextSizeVML(text, font){
         var box = pv.Vml.text_dims(text, font);
         return {width: box.width, height: box.height};
-    }
-    
-    function getTextLenVML(text, font){
-        return pv.Vml.text_dims(text, font).width;
-    }
-
-    function getTextHeightVML(text, font){
-        return pv.Vml.text_dims(text, font).height;
     }
     
     // -------------
@@ -2027,8 +2035,33 @@ def.scope(function(){
 
         return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
     }
+
+    // ----------------
     
-    pvc.text = {
+    def
+    .type('pvc.text.FontSizeCache')
+    .init(function(){
+        this._fontsCache = {};
+    })
+    .add({
+        _getFont: function(font){
+            return def.getOwn(this._fontsCache, font||'') || (this._fontsCache[font||''] = {});
+        },
+        
+        get: function(font, text){
+            return def.getOwn(this._getFont(font), text||'');
+        },
+        
+        put: function(font, text, size){
+            return this._getFont(font)[text||''] = size;
+        }
+    });
+    
+    // ----------------
+    
+    def.copyOwn(pvc.text, {
+        createCache:     createCache,
+        useCache:        useCache,
         getTextSize:     getTextSize,
         getTextLength:   getTextLength,
         getFontSize:     getFontSize,
@@ -2039,7 +2072,7 @@ def.scope(function(){
         justify:         justifyText,
         getLabelBBox:    getLabelBBox,
         getLabelPolygon: getLabelPolygon
-    };
+    });
 });
 // Colors utility
 def.scope(function(){
@@ -2988,25 +3021,45 @@ function(complexType, name, keyArgs){
      * @type function
      */
     atomComparer: function(reverse){
-        var me = this;
-        if(this.isComparable) {
-            if(reverse){
-                return this._reverseAtomComparer || 
-                       (this._reverseAtomComparer = function(a, b){
-                           if(a === b) { return 0; } // Same atom
-                           return me.compare(b.value, a.value); 
-                       }); 
-            }
-            
-            return this._directAtomComparer || 
-                    (this._directAtomComparer = function(a, b){
-                        if(a === b) { return 0; } // Same atom
-                        return me.compare(a.value, b.value); 
-                     }); 
+        if(reverse){
+            return this._reverseAtomComparer || 
+                   (this._reverseAtomComparer = this._createReverseAtomComparer()); 
         }
         
-        /*global atom_idComparer:true, atom_idComparerReverse:true */
-        return reverse ? atom_idComparerReverse : atom_idComparer;
+        return this._directAtomComparer ||
+                (this._directAtomComparer = this._createDirectAtomComparer());
+    },
+    
+    _createReverseAtomComparer: function(){
+        if(!this.isComparable){
+            /*global atom_idComparerReverse:true */
+            return atom_idComparerReverse;
+        }
+        
+        var me = this;
+        
+        function reverseAtomComparer(a, b){
+            if(a === b) { return 0; } // Same atom
+            return me.compare(b.value, a.value); 
+        }
+        
+        return reverseAtomComparer;
+    },
+    
+    _createDirectAtomComparer: function(){
+        if(!this.isComparable){
+            /*global atom_idComparer:true */
+            return atom_idComparer;
+        }
+        
+        var me = this;
+        
+        function directAtomComparer(a, b){
+            if(a === b) { return 0; } // Same atom
+            return me.compare(a.value, b.value);
+        }
+        
+        return directAtomComparer;
     },
     
     /**
@@ -5067,6 +5120,7 @@ function relTransl_dataPartGet(secondAxisSeriesIndexes, seriesReader) {
  *           <p>
  *           Only the null atom has a key equal to "".
  *           </p>
+ * @property {string} globalKey A semantic key that is unique across atoms of every dimensions.
  * 
  * @constructor
  * @private
@@ -5085,6 +5139,7 @@ function(dimension, value, label, rawValue, key) {
     this.label = label;
     this.rawValue = rawValue;
     this.key = key;
+    this.globalKey = dimension.name + ":" + key;
 })
 .add( /** @lends pvc.data.Atom */{
     /**
@@ -5092,13 +5147,6 @@ function(dimension, value, label, rawValue, key) {
      */
     toString: function(){
         return this.label;
-    },
-
-    /**
-     * A semantic key that is unique across atoms of every dimensions.
-     */
-    globalKey: function(){
-        return this.dimension.name + ":" + this.key;
     }
 });
 
@@ -5119,6 +5167,7 @@ function atom_idComparerReverse(a, b) {
  * The separator used between labels of dimensions of a complex.
  */
 var complex_labelSep = " ~ ";
+var complex_nextId = 1;
 
 /**
  * Initializes a complex instance.
@@ -5162,64 +5211,82 @@ var complex_labelSep = " ~ ";
 def
 .type('pvc.data.Complex')
 .init(function(owner, atoms, atomsBase) {
-    // <Debug>
     /*jshint expr:true */
-    (owner && owner.isOwner()) || def.fail.argumentInvalid('owner', "Must be an owner data.");
+    
+    /* NOTE: this function is a hot spot and as such is performance critical */
+    
+    // <Debug>
+    var asserts = pvc.debug >= 6;
+    if(asserts){
+        (owner && owner.isOwner()) || def.fail.argumentInvalid('owner', "Must be an owner data.");
+    }
     // </Debug>
     
-    this.id    = def.nextId();
+    this.id    = complex_nextId++;
     this.owner = owner;
-    
     this.atoms = atomsBase ? Object.create(atomsBase) : {};
 	
     if (!atoms) {
         this.value = null;
         this.key   = '';
     } else {
-        var atomsMap = this.atoms,
-            count    = 0,
-            singleValue;
-        
-        atoms.forEach(function(atom) {
-            atom || def.fail.argumentRequired('atom');
-            
+        var atomsMap = this.atoms;
+        var count = 0;
+        var singleAtom;
+        var i;
+        var L = atoms.length;
+        for(i = 0 ; i < L ; i++){
+            var atom  = atoms[i] || def.fail.argumentRequired('atom');
             var value = atom.value; 
-            if(value != null){ // already in proto object
-                var atomDim  = atom.dimension, 
-                    name     = atomDim.name,
+            if(value != null){ // nulls are already in base proto object
+                var name     = atom.dimension.name,
                     atomBase = atomsBase && atomsBase[name];
 
-                if(!atomBase || atom !== atomBase) { 
+                if(!atomBase || atom !== atomBase) { // don't add atoms already in base proto object
                     // <Debug>
-                    if(atomDim !== owner.dimensions(name)){
-                        throw def.error.operationInvalid("Invalid atom dimension '{0}'.", [name]);
-                    }
-
-                    if(def.hasOwn(atomsMap, name)) {
-                        throw def.error.operationInvalid("An atom of the same dimension has already been added '{0}'.", [name]);
+                    if(asserts){
+                        if(atom.dimension !== owner.dimensions(name)){
+                            throw def.error.operationInvalid("Invalid atom dimension '{0}'.", [name]);
+                        }
+    
+                        if(def.hasOwnProp.call(atomsMap, name)) {
+                            throw def.error.operationInvalid("An atom of the same dimension has already been added '{0}'.", [name]);
+                        }
                     }
                     // </Debug>
                     
                     count++;
                     atomsMap[name] = atom;
                     if(count === 1){
-                        singleValue = atom.value;
+                        singleAtom = atom;
                     }
                 }
             }
-        }, this);
-		
-        var keys = [];
-        owner.type
-            .dimensionsNames()
-            .forEach(function(dimName){
-                if(def.hasOwn(atomsMap, dimName)) {
-                    keys.push(atomsMap[dimName].globalKey());
+        }
+        
+        if(count === 1){
+            this.value = singleAtom.value;     // typed
+            this.key   = singleAtom.globalKey; // string
+        } else {
+            // For small number of strings, it's actually faster to 
+            // just concatenate strings comparing to the array.join method 
+            var dimNames = owner.type._dimsNames;
+            var key;
+            L = dimNames.length;
+            for(i = 0 ; i < L ; i++){
+                var dimName = dimNames[i];
+                if(def.hasOwnProp.call(atomsMap, dimName)){
+                    var akey = atomsMap[dimName].globalKey;
+                    if(i === 0){
+                        key = akey;
+                    } else {
+                        key += ',' + akey;
+                    }
                 }
-            });
-
-        this.key   = keys.join(',');
-        this.value = count === 1 ? singleValue : this.key;
+            }
+        
+            this.value = this.key = key;
+        }
 	}
 })
 .add(/** @lends pvc.data.Complex# */{
@@ -5227,7 +5294,7 @@ def
     buildLabel: function(atoms){
     
         if(atoms){
-            return  atoms
+            return atoms
                     .map(function(atom){ return atom.label; })
                     .filter(def.notEmpty)
                     .join(complex_labelSep);
@@ -5463,11 +5530,15 @@ function datum_deselect(){
 
 def.type('pvc.data.Dimension')
 .init(function(data, type){
+    /* NOTE: this function is a hot spot and as such is performance critical */
     this.data  = data;
     this.type  = type;
     this.root  = this;
     this.owner = this;
-    this.name  = type.name;
+    
+    var name = type.name;
+    
+    this.name = name;
     
     // Cache
     // -------
@@ -5486,41 +5557,46 @@ def.type('pvc.data.Dimension')
         
     } else {
         // Not an owner
+        var parentData = data.parent;
         
         var source; // Effective parent / atoms source
-        if(data.parent){
+        if(parentData){
             // Not a root
-            source = data.parent.dimensions(this.name);
+            source = parentData._dimensions[name];
             dim_addChild.call(source, this);
             
             this.root = data.parent.root;
         } else {
+            parentData = data.linkParent;
             // A root that is not topmost
             /*jshint expr:true */
-            data.linkParent || def.assert("Data must have a linkParent");
+            parentData || def.assert("Data must have a linkParent");
             
-            source = data.linkParent.dimensions(this.name);
+            source = parentData._dimensions[name];
             dim_addLinkChild.call(source, this);
         }
         
         // Not in _atomsKey
         this._nullAtom = this.owner._nullAtom; // may be null
         
-        this._lazyInit = function(){ /* captures 'source' variable */
+        this._lazyInit = function(){ /* captures 'source' and 'name' variable */
             this._lazyInit = null;
             
             // Collect distinct atoms in data._datums
-            this.data._datums.forEach(function(datum){
+            var datums = this.data._datums;
+            var L = datums.length;
+            var atomsByKey = this._atomsByKey;
+            for(var i = 0 ; i < L ; i++){
                 // NOTE: Not checking if atom is already added,
                 // but it has no adverse side-effect.
-                var atom = datum.atoms[this.name];
-                this._atomsByKey[atom.key] = atom;
-            }, this);
+                var atom = datums[i].atoms[name];
+                atomsByKey[atom.key] = atom;
+            }
             
             // Filter parentEf dimension's atoms; keeps order.
             this._atoms = source.atoms().filter(function(atom){
-                return def.hasOwn(this._atomsByKey, atom.key);
-            }, this);
+                return def.hasOwnProp.call(atomsByKey, atom.key);
+            });
         };
     }
 })
@@ -6515,36 +6591,41 @@ function dim_calcVisibleAtoms(visible){
  */
 def.type('pvc.data.Data', pvc.data.Complex)
 .init(function(keyArgs){
+    /* NOTE: this function is a hot spot and as such is performance critical */
+    
+    /*jshint expr:true*/
+    keyArgs || def.fail.argumentRequired('keyArgs');
+    
     this._dimensions = {};
     this._visibleDatums = new def.Map();
     
     var owner,
         atoms,
         atomsBase,
-        parent = this.parent = def.get(keyArgs, 'parent') || null;
+        parent = this.parent = keyArgs.parent || null;
     if(parent){
         // Not a root
         this.root    = parent.root;
         this.depth   = parent.depth + 1;
         this.type    = parent.type;
-        this._datums = def.get(keyArgs, 'datums') || def.fail.argumentRequired('datums');
+        this._datums = keyArgs.datums || def.fail.argumentRequired('datums');
         
         owner = parent.owner;
-        atoms = def.get(keyArgs, 'atoms') || def.fail.argumentRequired('atoms');
+        atoms = keyArgs.atoms || def.fail.argumentRequired('atoms');
         atomsBase = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;
         // depth = 0
         
-        var linkParent = def.get(keyArgs, 'linkParent') || null;
+        var linkParent = keyArgs.linkParent || null;
         if(linkParent){
             // A root that is not topmost - owned, linked
             owner = linkParent.owner;
             //atoms = pv.values(linkParent.atoms); // is atomsBase, below
             
             this.type    = owner.type;
-            this._datums = def.get(keyArgs, 'datums') || linkParent._datums.slice();
+            this._datums = keyArgs.datums || linkParent._datums.slice();
             this._leafs  = [];
             
             /* 
@@ -6561,7 +6642,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
             //atoms = null
             atomsBase = {};
 
-            this.type = def.get(keyArgs, 'type') || def.fail.argumentRequired('type');
+            this.type = keyArgs.type || def.fail.argumentRequired('type');
             
             // Only owner datas cache selected datums
             this._selectedDatums = new def.Map();
@@ -6578,12 +6659,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /* Need this because of null interning/uninterning and atoms chaining */
     this._atomsBase = atomsBase;
     
-    this.type.dimensionsList().forEach(function(dimType){
-        var name = dimType.name,
-            dimension = new pvc.data.Dimension(this, dimType);
-        
-        this._dimensions[name] = dimension;
-    }, this);
+    this.type.dimensionsList().forEach(this._initDimension, this);
     
     // Call base constructors
     this.base(owner, atoms, atomsBase);
@@ -6734,7 +6810,12 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type boolean
      */
     _isFlattenGroup: false,
-
+    
+    _initDimension: function(dimType){
+        this._dimensions[dimType.name] = 
+                new pvc.data.Dimension(this, dimType);
+    },
+    
     /**
      * Obtains a dimension given its name.
      * 
@@ -6991,7 +7072,9 @@ function data_loadDatums(atomz, whereFun, isNullFun) {
         }
         
         // Mark Really Used Atoms (includes null atoms)
-        def.each(datum.atoms, function(atom){
+        var datoms = datum.atoms;
+        for(var dimName in datoms){
+            var atom = datoms[dimName];
             if(atom){
                 var dim = atom.dimension;
                 if(dim._virtualNullAtom === atom){
@@ -7005,9 +7088,9 @@ function data_loadDatums(atomz, whereFun, isNullFun) {
                     dim.intern(null);
                 }
                 
-                visitedAtomsKeySetByDimension[atom.dimension.name][atom.key] = true;
+                visitedAtomsKeySetByDimension[dimName][atom.key] = true;
             }
-        });
+        }
         
         return datum;
     }
@@ -7387,8 +7470,9 @@ function data_onReceiveDatum(datum){
     this._datumsById[id] = datum;
     
     if(!datum.isNull){
-        if(this._selectedDatums && datum.isSelected) {
-            this._selectedDatums.set(id, datum);
+        var selectedDatums;
+        if(datum.isSelected && (selectedDatums = this._selectedDatums)) {
+            selectedDatums.set(id, datum);
         }
     
         if(datum.isVisible) {
@@ -7750,14 +7834,15 @@ def.type('pvc.data.GroupingLevelSpec')
     },
     
     key: function(datum){
-        var keys  = [],
-            atoms = [];
+        var keys  = [];
+        var atoms = [];
+        var datoms = datum.atoms;
+        var dims  = this.dimensions;
         
         for(var i = 0, D = this.depth  ; i < D ; i++) {
-            var dimName = this.dimensions[i].name,
-                atom = datum.atoms[dimName];
+            var atom = datoms[dims[i].name];
             atoms.push(atom);
-            keys.push(atom.globalKey());
+            keys.push(atom.globalKey);
         }
         
         return {
@@ -8227,7 +8312,7 @@ add(/** @lends pvc.data.GroupingOper */{
                     /* A key that does not include null atoms */
                     key = def.query(child.atoms)
                              .where (function(atom){ return atom.value != null; })
-                             .select(function(atom){ return atom.globalKey();   })
+                             .select(function(atom){ return atom.globalKey;   })
                              .array()
                              .join(',')
                              ;
@@ -8394,11 +8479,17 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         }
 
         if(!data) {
+            if(pvc.debug >= 7){
+                pvc.log("[GroupBy] " + (cacheKey ? ("Cache key not found: '" + cacheKey + "'") : "No Cache key"));
+            }
+            
             data = groupOper.execute();
 
             if(cacheKey){
                 (groupByCache || (this._groupByCache = {}))[cacheKey] = data;
             }
+        } else if(pvc.debug >= 7){
+            pvc.log("[GroupBy] Cache key hit '" + cacheKey + "'");
         }
         
         return data;
@@ -8901,7 +8992,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              while(this._dimAtomsOrQuery.next()) {
                  
                  var dimAtomOr = this._dimAtomsOrQuery.item,
-                     childData = this._data._childrenByKey[dimAtomOr.globalKey()];
+                     childData = this._data._childrenByKey[dimAtomOr.globalKey];
                  
                  // Also, advance the test of a leaf child data with no datums, to avoid backtracking
                  if(childData && (depth < H - 1 || childData._datums.length)) {
@@ -9757,11 +9848,14 @@ def.type('pvc.visual.Sign')
         .lock('datum', function(){ 
             return this.scene.datum; 
         });
-        
-    pvMark.sign = def.fun.constant(this);
+    
+    pvMark.sign = this;
     
     /* Intercept the protovis mark's buildInstance */
-    pvMark.buildInstance = this._buildInstance.bind(this, pvMark.buildInstance);
+    
+    // Avoid doing a function bind, cause buildInstance is a very hot path
+    pvMark._buildInstance = pvMark.buildInstance;
+    pvMark.buildInstance  = this._dispatchBuildInstance;
 })
 .postInit(function(panel, pvMark, keyArgs){
     this._addInteractive(keyArgs);
@@ -9827,10 +9921,17 @@ def.type('pvc.visual.Sign')
     },
     
     /* SCENE MAINTENANCE */
-    _buildInstance: function(baseBuildInstance, instance){
+    _dispatchBuildInstance: function(instance){
+        // this: the mark
+        this.sign._buildInstance(this, instance);
+    },
+    
+    _buildInstance: function(mark, instance){
         /* Reset scene/instance state */
         this.pvInstance = instance; // pv Scene
-        this.scene = instance.data;
+        
+        var scene  = instance.data;
+        this.scene = scene;
         
         /* 
          * Update the scene's render id, 
@@ -9838,18 +9939,12 @@ def.type('pvc.visual.Sign')
          * cached data.
          */
         /*global scene_renderId:true */
-        scene_renderId.call(this.scene, this.pvMark.renderId());
+        scene_renderId.call(scene, mark.renderId());
 
         /* state per: sign & scene & render */
         this.state = {};
 
-        this._initScene();
-        
-        baseBuildInstance.call(this.pvMark, instance);
-    },
-    
-    _initScene: function(){
-        /* NOOP */
+        mark._buildInstance.call(mark, instance);
     },
     
     /* Extensibility */
@@ -10744,7 +10839,7 @@ def.type('pvc.visual.Context')
  */
 function visualContext_update(mark, event){
 
-    this.sign   = mark.sign ? mark.sign() : null;
+    this.sign   = mark.sign || null;
     this.event  = event || null;
     this.index  = mark.index; // !scene => index = null
     this.pvMark = mark;
@@ -12602,41 +12697,50 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._multiChartPanel = new pvc.MultiChartPanel(this, this.basePanel);
     },
     
+    useTextMeasureCache: function(fun, ctx){
+        var root = this.root;
+        var textMeasureCache = root._textMeasureCache || (root._textMeasureCache = pvc.text.createCache());
+        
+        return pvc.text.useCache(textMeasureCache, fun, ctx || this);
+    },
+    
     /**
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
-    render: function(bypassAnimation, recreate, reloadData) {
-        try{
-            if (!this.isPreRendered || recreate) {
-                this._preRender({reloadData: reloadData});
-            } else if(!this.parent && this.isPreRendered) {
-                pvc.removeTipsyLegends();
-            }
-
-            this.basePanel.render({
-                bypassAnimation: bypassAnimation, 
-                recreate: recreate
-             });
-            
-        } catch (e) {
-            var isNoData = (e instanceof NoDataException);
-            if (isNoData) {
-                if(pvc.debug > 1){
-                    pvc.log("No data found.");
+    render: function(bypassAnimation, recreate, reloadData){
+        this.useTextMeasureCache(function(){
+            try{
+                if (!this.isPreRendered || recreate) {
+                    this._preRender({reloadData: reloadData});
+                } else if(!this.parent && this.isPreRendered) {
+                    pvc.removeTipsyLegends();
                 }
-
-                this._addErrorPanelMessage("No data found", true);
-            } else {
-                // We don't know how to handle this
-                pvc.logError(e.message);
+    
+                this.basePanel.render({
+                    bypassAnimation: bypassAnimation, 
+                    recreate: recreate
+                 });
                 
-                if(pvc.debug > 0){
-                    this._addErrorPanelMessage("Error: " + e.message, false);
+            } catch (e) {
+                var isNoData = (e instanceof NoDataException);
+                if (isNoData) {
+                    if(pvc.debug > 1){
+                        pvc.log("No data found.");
+                    }
+    
+                    this._addErrorPanelMessage("No data found", true);
+                } else {
+                    // We don't know how to handle this
+                    pvc.logError(e.message);
+                    
+                    if(pvc.debug > 0){
+                        this._addErrorPanelMessage("Error: " + e.message, false);
+                    }
+                    //throw e;
                 }
-                //throw e;
             }
-        }
+        });
     },
 
     _addErrorPanelMessage: function(text, isNoData){
@@ -12774,8 +12878,8 @@ pvc.BaseChart = pvc.Abstract.extend({
                 if(logOut){
                     if(logOut.length){
                         pvc.log("Applying Extension Points for: '" + prefix + "'\n\t* " + logOut.join("\n\t* "));
-                    } else if(pvc.debug >= 4) {
-                        pvc.log("Applying Extension Points for: '" + prefix + "' (none)");
+                    } else if(pvc.debug >= 5) {
+                        pvc.log("No Extension Points for: '" + prefix + "'");
                     }
                 }
             }
@@ -14417,20 +14521,21 @@ pvc.BasePanel = pvc.Abstract.extend({
             options  = chart.options,
             data = chart.data;
 
-        var dMin = 10; // Minimum dx or dy for a rubber band selection to be relevant
+        var dMin = 2; // Minimum dx or dy for a drag to be considered a rubber band selection
 
         this._isRubberBandSelecting = false;
 
         // Rubber band
         var rubberPvParentPanel = this.pvRootPanel || this.pvPanel.paddingPanel,
-            toScreen;
+            toScreen,
+            rb;
         
         var selectBar = this.selectBar = rubberPvParentPanel.add(pv.Bar)
-            .visible(function() { return myself._isRubberBandSelecting; } )
-            .left(function() { return this.parent.selectionRect.x; })
-            .top(function() { return this.parent.selectionRect.y; })
-            .width(function() { return this.parent.selectionRect.dx; })
-            .height(function() { return this.parent.selectionRect.dy; })
+            .visible(function() { return !!rb; } )
+            .left(function() { return rb.x; })
+            .top(function() { return rb.y; })
+            .width(function() { return rb.dx; })
+            .height(function() { return rb.dy; })
             .fillStyle(options.rubberBandFill)
             .strokeStyle(options.rubberBandLine);
         
@@ -14446,12 +14551,17 @@ pvc.BasePanel = pvc.Abstract.extend({
         rubberPvParentPanel
             .event('mousedown', pv.Behavior.selector(false))
             .event('select', function(){
-                if(!myself._isRubberBandSelecting && !myself.isAnimating()){
-                    var rb = this.selectionRect;
-                    if(Math.sqrt(rb.dx * rb.dx + rb.dy * rb.dy) <= dMin){
+                if(!rb){
+                    if(myself.isAnimating()){
                         return;
                     }
-
+                    
+                    var rb1 = this.selectionRect;
+                    if(Math.sqrt(rb1.dx * rb1.dx + rb1.dy * rb1.dy) <= dMin){
+                        return;
+                    }
+                    
+                    rb = rb1;
                     myself._isRubberBandSelecting = true;
                     
                     if(!toScreen){
@@ -14459,20 +14569,23 @@ pvc.BasePanel = pvc.Abstract.extend({
                     }
                     
                     myself.rubberBand = rb.clone().apply(toScreen);
+                } else {
+                    rb = this.selectionRect;
                 }
-
+                
                 selectBar.render();
             })
             .event('selectend', function(){
-                if(myself._isRubberBandSelecting){
+                if(rb){
                     var ev = arguments[arguments.length - 1];
                     
                     if(!toScreen){
                         toScreen = rubberPvParentPanel.toScreenTransform();
                     }
                     
-                    myself.rubberBand = this.selectionRect.clone().apply(toScreen);
+                    myself.rubberBand = rb = this.selectionRect.clone().apply(toScreen);
                     
+                    rb = null;
                     myself._isRubberBandSelecting = false;
                     selectBar.render(); // hide rubber band
                     
@@ -14481,7 +14594,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                     
                     selectionEndedDate = new Date();
                     
-                    myself.rubberBand = null;
+                    myself.rubberBand = rb = null;
                 }
             });
         
@@ -14519,7 +14632,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 chart.data.owner.clearSelected();
             }
             
-            this._dispatchRubberBandSelection();
+            chart.useTextMeasureCache(this._dispatchRubberBandSelection, this);
             
         } finally {
             chart._resumeSelectionUpdate();
@@ -14609,8 +14722,8 @@ pvc.BasePanel = pvc.Abstract.extend({
                 if(datums) {
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
-                            if(pvc.debug >= 4) {
-                                pvc.log(datum.key + ": " + JSON.stringify(shape) + " intersects? true " + mark.type.toUpperCase());
+                            if(pvc.debug >= 10) {
+                                pvc.log(datum.key + ": " + JSON.stringify(shape) + " mark type: " + mark.type);
                             }
                     
                             fun.call(ctx, datum);
@@ -20554,7 +20667,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         }
         
         this.pvBar
-            .sign()
+            .sign
             .override('baseColor', function(type){
                 var color = this.base(type);
                 if(type === 'fill'){
