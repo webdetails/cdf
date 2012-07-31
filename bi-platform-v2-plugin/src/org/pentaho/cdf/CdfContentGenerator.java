@@ -798,10 +798,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
 
         final String dashboardType = requestParams.getStringParameter("dashboardType", "blueprint");
-        final String scheme = requestParams.getStringParameter("scheme", "http");
+        final String scheme =  requestParams.hasParameter("scheme") ? requestParams.getStringParameter("scheme", "") : "http";
         final String suffix;
         final File file;
-
+        
         /*
          * depending on the dashboard type, the minification engine and its file
          * set will vary.
@@ -834,7 +834,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         styles.addAll(Arrays.asList(resources.getProperty("style", "").split(",")));
         StringBuilder scriptsBuilders = new StringBuilder();
         StringBuilder stylesBuilders = new StringBuilder();
-        final String absRoot = requestParams.hasParameter("root") ? scheme + "://" + requestParams.getParameter("root").toString() : "";
+        final String absRoot = requestParams.hasParameter("root") ? (scheme.equals("") ? "" : (scheme + "://")) + requestParams.getParameter("root").toString() : "";
 
         // Add common libraries
         if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true")) {
