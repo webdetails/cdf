@@ -184,7 +184,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     Packager packager = Packager.getInstance();
     
     final Properties resources = new Properties();
-    File resourceFile = new File(getPluginRootDir(), "resources.txt");
+    File resourceFile = new File(getPluginRootDir(), "resources-blueprint.txt");
     resources.load(new FileInputStream(resourceFile));
 
     ArrayList<String> scriptsList = new ArrayList<String>();
@@ -290,7 +290,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   private void getHeaders(final String dashboardContent, final OutputStream out) throws Exception
   {
 
-    final File file = new File(getPluginRootDir(), "resources.txt");
+    final File file = new File(getPluginRootDir(), "resources-blueprint.txt");
     HashMap<String, String> includes = new HashMap<String, String>();
     final Properties resources = new Properties();
     resources.load(new FileInputStream(file));
