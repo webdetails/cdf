@@ -85,7 +85,7 @@ public class DashboardContext {
             IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
             String userName = userSession.getName();
             if (!userName.equals("anonymousUser")) {
-                context.put("roles", service.getRolesForUser(userName));
+                context.put("roles", service.getRolesForUser(null, userName));
             }
             JSONObject params = new JSONObject();
 
