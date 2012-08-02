@@ -252,7 +252,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   
   protected List<String> getUserRoles() {
     IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
-    return service.getRolesForUser(userSession.getName());
+    return service.getRolesForUser(null, userSession.getName());
   }
   
   private void generateContext(OutputStream out) throws Exception
