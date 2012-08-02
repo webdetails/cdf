@@ -1,6 +1,6 @@
 pen.define("cdf/lib/CCC/protovis", function(){
 
-// 09485740f1bee7036d42d3ebc02acdc5ec129c32
+// ed2eef592fff07cd727ce0473b8a4bc98e1a52b2
 /**
  * @class The built-in Array class.
  * @name Array
@@ -318,9 +318,29 @@ pv.listen = function(target, type, listener) {
       return pv.listenForPageLoad (pv.listener(listener));
 
   listener = pv.listener(listener);
-  return target.addEventListener
+  target.addEventListener
       ? target.addEventListener(type, listener, false)
       : target.attachEvent("on" + type, listener);
+  
+   return listener;
+};
+
+/**
+ * @private Unregisters the specified listener for events of the specified type on
+ * the specified target.
+ * 
+ * @param target a DOM element.
+ * @param {string} type the type of event, such as "click".
+ * @param {function} the event handler callback or the result of {@link pv.listen}.
+ */
+pv.unlisten = function(target, type, listener){
+    if(listener.$listener){
+        listener = listener.$listener;
+    }
+    
+    target.removeEventListener
+        ? target.removeEventListener(type, listener, false)
+        : target.detachEvent("on" + type, listener);
 };
 
 /**
@@ -5252,6 +5272,7 @@ pv.Color.names = {
 /* Initialized named colors. */
 (function() {
   var names = pv.Color.names;
+  names.none = names.transparent;
   for (var name in names) names[name] = pv.color(names[name]);
 })();
 /**
@@ -5703,7 +5724,11 @@ pv.Colors.category19 = function() {
     FillStyle.prototype = new pv.Color('none', 1);
     
     FillStyle.prototype.rgb = function(){
-        return pv.color(this.color).alpha(this.opacity);
+        var color = pv.color(this.color);
+        if(this.opacity !== color.opacity){
+            color = color.alpha(this.opacity);
+        }
+        return color;
     };
     
     /**
@@ -8364,8 +8389,6 @@ pv.Mark.prototype.cousin = function() {
   return (s && s.children) ? s.children[this.childIndex][this.index] : null;
 };
 
-//pv.Mark.renderLevel = 0;
-
 /**
  * Renders this mark, including recursively rendering all child marks if this is
  * a panel. This method finds all instances of this mark and renders them. This
@@ -8386,27 +8409,7 @@ pv.Mark.prototype.render = function() {
       return;
     }
     
-    //pv.Mark.renderLevel++;
-    //try {
-        this.renderCore();
-    //} catch(ex){
-    //    // swallow top level error
-    //    pv.error(ex);
-//    } finally {
-//        if(pv.Mark.renderLevel > 0){
-//            pv.Mark.renderLevel--;
-//        }
-//        
-//        if(!pv.Mark.renderLevel){
-//            // TOP level render
-//            // Check corrupted stack
-//            var stack = pv.Mark.stack;
-//            if(stack && stack.length){
-//                pv.error("Fixing corrupted stack.");
-//                stack.length = 0;
-//            }
-//        }
-//    }
+    this.renderCore();
 };
 
 pv.Mark.prototype.renderCore = function() {
@@ -16970,7 +16973,7 @@ pv.Behavior.drag = function() {
   }
 
   pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup", mouseup);
+  pv.listen(window, "mouseup",   mouseup);
   return mousedown;
 };
 /**
