@@ -12085,12 +12085,12 @@ pvc.BaseChart = pvc.Abstract.extend({
     isPreRendered: false,
 
     /**
-     * The version value of the current/last pre-render phase.
+     * The version value of the current/last creation.
      * 
      * <p>
      * This value is changed on each pre-render of the chart.
      * It can be useful to invalidate cached information that 
-     * is only valid for each pre-render.
+     * is only valid for each creation.
      * </p>
      * <p>
      * Version values can be compared using the identity operator <tt>===</tt>.
@@ -12098,7 +12098,7 @@ pvc.BaseChart = pvc.Abstract.extend({
      * 
      * @type any
      */
-    _preRenderVersion: 0,
+    _createVersion: 0,
     
     /**
      * A callback function that is called 
@@ -12375,7 +12375,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         var options = this.options;
         
         /* Increment pre-render version to allow for cache invalidation  */
-        this._preRenderVersion++;
+        this._createVersion++;
         
         this.isPreRendered = false;
 
@@ -12401,7 +12401,7 @@ pvc.BaseChart = pvc.Abstract.extend({
         this._processOptions();
         
         /* Initialize root chart roles */
-        if(!this.parent && this._preRenderVersion === 1) {
+        if(!this.parent && this._createVersion === 1) {
             this._initVisualRoles();
             this._bindVisualRolesPre();
         }
@@ -19353,17 +19353,16 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         }
 
         // tooltip
+        var tipSySettings = def.set(Object.create(this.chart.options.tipsySettings),
+                'gravity', tipsyGravity,
+                'offset',  diagMargin * 2);
+        
         this.pvLabel
             .title(function(d){
                 this.instance().tooltip = d.label;
                 return '';
             })
-            .event("mouseover", pv.Behavior.tipsy({
-                gravity: tipsyGravity,
-                fade: true,
-                offset: diagMargin * 2,
-                opacity:1
-            }));
+            .event("mouseover", pv.Behavior.tipsy(tipSySettings));
     },
     
     getLayoutSingleCluster: function(){
