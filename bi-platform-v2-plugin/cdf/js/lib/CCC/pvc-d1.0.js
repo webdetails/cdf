@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120718
+//VERSION TRUNK-20120215-patched-20120803
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -9449,19 +9449,21 @@ pvc.BulletChartPanel = pvc.BasePanel.extend({
 
     pvc.log("In buildData: " + this.chart.dataEngine.getInfo() );
 
-    var defaultData = {
-      title:     this.chart.options.bulletTitle,
-      subtitle:  this.chart.options.bulletSubtitle,
-      ranges:    this.chart.options.bulletRanges   || [],
-      measures:  this.chart.options.bulletMeasures || [],
-      markers:   this.chart.options.bulletMarkers  || []
-    };
-    
     var data = [],
         options = this.chart.options,
-        getSeriesLabel   = options.getSeriesLabel || pv.identity,
+        getSeriesLabel   = options.getSeriesLabel   || pv.identity,
         getCategoryLabel = options.getCategoryLabel || pv.identity;
-
+        
+    var defaultData = {
+      title:     options.bulletTitle,
+      subtitle:  options.bulletSubtitle,
+      formattedTitle: getCategoryLabel(options.bulletTitle),
+      formattedSubtitle: getSeriesLabel(options.bulletSubtitle),
+      ranges:    options.bulletRanges   || [],
+      measures:  options.bulletMeasures || [],
+      markers:   options.bulletMarkers  || []
+    };
+    
     if(this.chart.dataEngine.getSeriesSize() == 0 ) {
       // No data
       data.push($.extend({}, defaultData));
