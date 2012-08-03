@@ -144,7 +144,7 @@ timePlotDefinition: {
 	title: "Total order income",
 	queryType: 'mdx',
 	jndi: "SampleData",
-	catalog: "solution:/public/pentaho-solutions/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
+	catalog: "mondrian:/SteelWheels",
 	query: function(){
 
 		var query = "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
