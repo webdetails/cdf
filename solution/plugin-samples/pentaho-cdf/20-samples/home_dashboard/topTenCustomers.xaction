@@ -33,13 +33,13 @@
   <resources> 
     <catalog> 
       <url> 
-        <location>/public/pentaho-solutions/steel-wheels/analysis/steelwheels.mondrian.xml</location>  
+        <location>mondrian:/SteelWheels</location>  
         <mime-type>text/plain</mime-type> 
       </url> 
     </catalog>  
     <catalog1> 
       <solution-file> 
-        <location>/public/pentaho-solutions/steel-wheels/analysis/steelwheels.mondrian.xml</location>  
+        <location>mondrian:/SteelWheels</location>  
         <mime-type>text/plain</mime-type> 
       </solution-file> 
     </catalog1> 
