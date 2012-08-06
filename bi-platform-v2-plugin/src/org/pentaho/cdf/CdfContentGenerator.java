@@ -1,30 +1,45 @@
 package org.pentaho.cdf;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.pentaho.cdf.comments.CommentsEngine;
 import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
@@ -48,7 +63,6 @@ import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.util.web.MimeHelper;
 
-import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.packager.Packager;
 
 /**
@@ -170,6 +184,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
       findMethod(method, contentItem, out, payload);
 
     } catch (Exception e) {
+      e.printStackTrace();
       logger.error("Error creating cdf content: " + e.getMessage()); //$NON-NLS-1$
     }
   }
@@ -409,12 +424,13 @@ public class CdfContentGenerator extends BaseContentGenerator {
         out.write("Can not open file".getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
       }
       long end = System.currentTimeMillis();
-      CdfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this,
+      CdfAuditHelper.endAudit(xcdfFilePath, getObjectName(), this.userSession, this,
           start, uuid, end);
 
     } catch (Exception e) {
+      e.printStackTrace();
       long end = System.currentTimeMillis();
-      CdfAuditHelper.endAudit(requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this,
+      CdfAuditHelper.endAudit(xcdfFilePath, getObjectName(), this.userSession, this,
           start, uuid, end);
       throw e;
     }

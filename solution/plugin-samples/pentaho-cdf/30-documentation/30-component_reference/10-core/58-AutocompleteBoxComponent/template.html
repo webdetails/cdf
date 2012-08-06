@@ -48,55 +48,55 @@
 
 			<dt>postChange</dt>
 			<dd><i>Function(value) - </i> Function to be called after the component is changed</dd>
-			
+
 			<dt>queryDefinition</dt>
 			<dd>MetaLayer object with the definition of the query (see MetaLayer options)</dd>
-			
+
 			<dt>selectMulti</dt>
 			<dd>Allow multiple selection. Default: false</dd>
-			
+
 			<dt>minTextLenght</dt>
 			<dd>The minimal word length to check if there is a match</dd>
-			
+
 			<dt>matchType</dt>
 			<dd>The type of the word match (fromStart/all). Default: fromStart </dd>
-			
+
 			<dt>scrollHeight</dt>
 			<dd>The size of the scrollbar. Default: Not defined (without scrollbar) </dd>
-			
+
 			<dt>showApplyButton</dt>
 			<dd>Show apply Button in multi selection mode. Default: true </dd>
 
 			<dt>tooltip</dt>
 			<dd>Tooltip to be displayed when mouse hovers</dd>
-			
+
 			<dt>autoUpdateFunction</dt>
 			<dd>Function to be called every X second according to the autoUpdateTimeout setting</dd>
-			
+
 			<dt>autoUpdateTimeout</dt>
 			<dd>timeout in milliseconds to call the function defined by autoUpdateFunction. Default 3 secs </dd>
-			
+
 			<dt>reloadOnUpdate</dt>
-			<dd>on update event the component should be reloaded or only update the list of values</dd>				
-			
-		</dl>	
-		
+			<dd>on update event the component should be reloaded or only update the list of values</dd>
+
+		</dl>
+
 		<h3>MetaLayer options</h3>
 
 		<dl class="documentation">
 			<dt>queryType</dt>
 			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
 
-			<dt>jndi</dt> 
+			<dt>jndi</dt>
 			<dd>Connection to use for the query</dd>
 
-			<dt>query</dt> 
+			<dt>query</dt>
 			<dd>sql or mdx Query to execute</dd>
 
-			<dt>cube</dt> 
+			<dt>cube</dt>
 			<dd>Cube name to use when queryType is mdx</dd>
 
-			<dt>catalog</dt> 
+			<dt>catalog</dt>
 			<dd>Mondrian schema to use when queryType is mdx</dd>
 		</dl>
 
@@ -114,16 +114,16 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-				
-var clients = "";				
+
+var clients = "";
 MetaLayerHome2 = {
 clientSelectorDefinition: {
 	queryType: 'mdx',
 	jndi: "SampleData",
-	catalog: "solution:/public/pentaho-solutions/steel-wheels/analysis/steelwheels.mondrian.xml",
+	catalog: "mondrian:/SteelWheels",
 	query: function(){
-		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," + 
-		"NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"+ 
+		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+		"NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"+
 		"(Left([Customers].CurrentMember.Name, Len(\""+clients+"\")) = \""+clients+"\")),100.0,[Measures].[Sales]) ON ROWS "+
 		"from [SteelWheelsSales]";
 		}
@@ -131,7 +131,7 @@ clientSelectorDefinition: {
 }
 
 
-clientSelector = 
+clientSelector =
 {
   name: "clientSelector",
   type: "autocompleteBox",
@@ -173,7 +173,7 @@ Dashboards.init([clientSelector]);
 	</div>
 
 	<script language="javascript" type="text/javascript">
-		
+
 		var tabs = $("#example").tabs();
 		evaluateCode(false);
 	</script>

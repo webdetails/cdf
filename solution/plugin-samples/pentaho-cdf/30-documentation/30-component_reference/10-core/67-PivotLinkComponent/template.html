@@ -10,11 +10,11 @@
 		<p>
 			Creates a pivot action link. Usually it's used together with chart components which allows the user to
 			analyze, with more detail, the chart results.
-			
+
 		</p>
 
 		<h3>Options</h3>
-		
+
 
 		<dl class="documentation">
 			<dt>name</dt>
@@ -22,7 +22,7 @@
 
 			<dt>type</dt>
 			<dd><code>pivotLink</code></dd>
-			
+
 			<dt>htmlObject</dt>
 			<dd>Id of the component (usually a div or a span tag)</dd>
 
@@ -33,17 +33,17 @@
 
 			<dt>executeAtStart</dt>
 			<dd>True to execute the component at start, false otherwise</dd>
-			
+
 			<dt>tooltip</dt>
-			<dd>Tooltip to be displayed when mouse hovers</dd>	
-			
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
 			<dt>content</dt>
 			<dd>The value of the pivot action link</dd>
-			
+
 			<dt>pivotDefinition</dt>
 			<dd>MetaLayer object with the definition of pivot (see MetaLayer options)</dd>
-		</dl>	
-		
+		</dl>
+
 		<h3>MetaLayer options</h3>
 
 		The options related to pivot action described in pentaho wiki.
@@ -52,16 +52,16 @@
 			<dt>queryType</dt>
 			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
 
-			<dt>jndi</dt> 
+			<dt>jndi</dt>
 			<dd>Connection to use for the query</dd>
 
-			<dt>query</dt> 
+			<dt>query</dt>
 			<dd>sql or mdx Query to execute</dd>
 
-			<dt>cube</dt> 
+			<dt>cube</dt>
 			<dd>Cube name to use when queryType is mdx</dd>
 
-			<dt>catalog</dt> 
+			<dt>catalog</dt>
 			<dd>Mondrian schema to use when queryType is mdx</dd>
 		</dl>
 
@@ -80,21 +80,21 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-					
+
 MetaLayerHome2 = {
 topTenCustomersPivotDefinition: {
 	queryType: 'mdx',
 	jndi: "SampleData",
-	catalog: "solution:/public/pentaho-solutions/steel-wheels/analysis/steelwheels.mondrian.xml",
+	catalog: "mondrian:/SteelWheels",
 	query: function(){
-		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," + 
-		"NON EMPTY TopCount([Customers].[All Customers].Children," + 
+		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+		"NON EMPTY TopCount([Customers].[All Customers].Children," +
 		"10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
 		}
 	}
 }
 
-topTenCustomersPivot = 
+topTenCustomersPivot =
 {
 name: "topTenCustomersPivot",
 type: "pivotLink",
@@ -116,8 +116,8 @@ Dashboards.init([topTenCustomersPivot]);
 
 	<script language="javascript" type="text/javascript">
 
-	
+
 		var tabs = $("#example").tabs();
 		evaluateCode(false);
-		
+
 	</script>
