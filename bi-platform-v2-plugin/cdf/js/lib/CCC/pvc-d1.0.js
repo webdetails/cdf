@@ -1687,12 +1687,12 @@ pv.Behavior.selector = function(autoRefresh, mark) {
         
         events = [
             [root,     "mousemove", pv.listen(root, "mousemove", mousemove)],
-            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )],
+            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )]//,
             
             // But when the mouse leaves the canvas we still need to
             // receive events...
-            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
-            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
+//            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
+ //           [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
         ];
     }
     
@@ -24144,9 +24144,26 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 var sizeValExtent = chart._dotSizeDim.extent({visible: true});
                 hasDotSizeRole = !!sizeValExtent;
                 if(hasDotSizeRole){
+                
                     var sizeValMin  = sizeValExtent.min.value,
-                        sizeValMax  = sizeValExtent.max.value,
-                        sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
+                        sizeValMax  = sizeValExtent.max.value;
+
+                    //Need to calculate manually the abs - probably there's a better way to do this
+                    if (this.dotSizeAbs) {
+                        var atoms = chart._dotSizeDim.atoms({visible:true});
+                        
+                        for (var i=0; i < atoms.length; i++) {
+                            if (i == 0)
+                                sizeValMin = sizeValMax = Math.abs(atoms[0].value);
+                            else {
+                                var newValue = Math.abs(atoms[i].value);
+                                if (newValue > sizeValMax) sizeValMax = newValue;
+                                if (newValue < sizeValMin) sizeValMin = newValue;
+                            }                            
+                        }                    
+                    }
+                                
+                    var sizeValSpan = Math.abs(sizeValMax - sizeValMin); // may be zero
                     
                     hasDotSizeRole = isFinite(sizeValSpan) && sizeValSpan > 1e-12;
                     if(hasDotSizeRole){
@@ -24527,7 +24544,7 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         }
         
         // -- DOT SIZE --
-        if(!rootScene.hasDotSizeRole){
+        if(!rootScene.hasDotSizeRole){        
             dot.override('baseSize', function(){
                 /* When not showing dots, 
                  * but a datum is alone and 
@@ -24548,9 +24565,20 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         } else {
             var sizeValueToArea = this._getDotSizeRoleScale(rootScene.sizeValRange);
 
+            var dotSizeAbs = this.dotSizeAbs;
+            if (this.dotSizeAbs) {
+                dot.override('strokeColor', function () {
+                    return this.scene.vars.dotSize.value < 0 ? "#000000" : null;
+                });
+            }
+
+
             /* Ignore any extension */
             dot .override('baseSize', function(){
-                    return sizeValueToArea(this.scene.vars.dotSize.value);
+                    var value = this.scene.vars.dotSize.value;
+                    if (dotSizeAbs)
+                        value = Math.abs(value);
+                    return sizeValueToArea(value);
                 })
                 .override('interactiveSize', function(size){
                     if(this.scene.isActive){
@@ -24987,20 +25015,21 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
         
         return new pvc.MetricLineDotPanel(this, parentPanel, {
             showValues:    options.showValues,
-            valuesAnchor:   options.valuesAnchor,
+            valuesAnchor:   options.valuesAnchor,            
             showLines:      options.showLines,
             showDots:       options.showDots,
             orientation:    options.orientation,
             dotSizeRatio:   options.dotSizeRatio,
             dotSizeRatioTo: options.dotSizeRatioTo,
-            autoDotSizePadding: options.autoDotSizePadding
+            autoDotSizePadding: options.autoDotSizePadding,
+            dotSizeAbs: options.dotSizeAbs
         });
     },
     
     defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {
         showDots:   false,
         showLines:  false,
-        showValues: false,
+        showValues: false,        
         originIsZero: false,
         
         tipsySettings: { offset: 15 },
@@ -25011,9 +25040,10 @@ pvc.MetricLineDotAbstract = pvc.MetricXYAbstract.extend({
 //        colorRangeInterval:  undefined,
 //        minColor:  undefined, //"white",
 //        maxColor:  undefined, //"darkgreen",
-        nullColor: "#efc5ad"  // white with a shade of orange
+        nullColor: "#efc5ad",  // white with a shade of orange
         
         /* Dot Size Role */
+        dotSizeAbs: false
 //        dotSizeRatio:   undefined,
 //        dotSizeRatioTo: undefined,
 //        autoDotSizePadding: undefined
