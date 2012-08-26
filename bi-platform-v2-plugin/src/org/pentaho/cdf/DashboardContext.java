@@ -58,7 +58,7 @@ public class DashboardContext {
         try {
             String solution = requestParams.getStringParameter("solution", ""),
                     path = requestParams.getStringParameter("path", ""),
-                    file = requestParams.getStringParameter("file", ""),
+                    file = requestParams.getStringParameter("action", ""), // Fix #29. Because there is no file parameter, but action parameter
                     fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
             Calendar cal = Calendar.getInstance();
@@ -75,6 +75,7 @@ public class DashboardContext {
             context.put("solution", solution);
             context.put("path", path);
             context.put("file", file);
+            context.put("fullPath", fullPath);
 
             SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
             context.put("roles", securityParams.getParameter("principalRoles") );
