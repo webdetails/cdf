@@ -17036,7 +17036,9 @@ pvc.LegendPanel = pvc.BasePanel.extend({
               return itemScene.isClickable() ? "pointer" : null;
           })
           .event("click", function(itemScene){
-              return itemScene.click();
+              if(itemScene.isClickable()){
+                  return itemScene.click();
+              }
           })
           ;
       
