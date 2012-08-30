@@ -9183,7 +9183,7 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
  * @function
  * 
  * @param {object} whereSpec A "where" specification to be normalized.
- * A structure with the following form:
+ * TODO: A structure with the following form: ... 
  *
  * @return Array A <i>processed</i> "where" of the specification.
  * A structure with the following form:
@@ -24586,11 +24586,16 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
 
             var dotSizeAbs = this.dotSizeAbs;
             if (this.dotSizeAbs) {
-                dot.override('strokeColor', function () {
-                    return this.scene.vars.dotSize.value < 0 ? "#000000" : null;
+                dot.override('strokeColor', function (scene) {
+                    return scene.vars.dotSize.value < 0 ? "#000000" : this.base();
+                });
+                dot.optional('strokeDasharray', function (scene){
+                    return scene.vars.dotSize.value < 0 ? '4 4' : null; // --  --  --
+                });
+                dot.optional('lineWidth', function (scene){
+                    return scene.vars.dotSize.value < 0 ? 1 : 1.5;
                 });
             }
-
 
             /* Ignore any extension */
             dot .override('baseSize', function(){
