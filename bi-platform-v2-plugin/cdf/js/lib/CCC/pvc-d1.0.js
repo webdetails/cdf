@@ -24590,11 +24590,11 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     return scene.vars.dotSize.value < 0 ? "#000000" : this.base();
                 });
                 dot.optional('strokeDasharray', function (scene){
-                    return scene.vars.dotSize.value < 0 ? '4 4' : null; // --  --  --
+                    return scene.vars.dotSize.value < 0 ? '1.5 3' : null; // .  .  .
                 });
-                dot.optional('lineWidth', function (scene){
-                    return scene.vars.dotSize.value < 0 ? 1 : 1.5;
-                });
+//                dot.optional('lineWidth', function (scene){
+//                    return scene.vars.dotSize.value < 0 ? 1 : 1.5;
+//                });
             }
 
             /* Ignore any extension */
