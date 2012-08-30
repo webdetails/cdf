@@ -1286,6 +1286,115 @@ pvc.Size.as = function(v){
 
 // --------------------
 
+var Offset = def.type('pvc.Offset')
+.init(function(x, y){
+    if(arguments.length === 1){
+        if(x != null){
+            this.setOffset(x);
+        }
+    } else {
+        if(x != null){
+            this.x = x;
+        }
+        
+        if(y != null){
+            this.y = y;
+        }
+    }
+})
+.add({
+    setOffset: function(offset, keyArgs){
+        if(typeof offset === 'string'){
+            var comps = offset.split(/\s+/).map(function(comp){
+                return pvc.PercentValue.parse(comp);
+            });
+            
+            switch(comps.length){
+                case 1: 
+                    this.set(def.get(keyArgs, 'singleProp', 'all'), comps[0]);
+                    return this;
+                    
+                case 2:
+                    this.set('x', comps[0]);
+                    this.set('y', comps[1]);
+                    return this;
+                    
+                case 0:
+                    return this;
+            }
+        } else if(typeof offset === 'number') {
+            this.set(def.get(keyArgs, 'singleProp', 'all'), offset);
+            return this;
+        } else if (typeof offset === 'object') {
+            this.set('all', offset.all);
+            for(var p in offset){
+                if(p !== 'all'){
+                    this.set(p, offset[p]);
+                }
+            }
+            return this;
+        }
+        
+        if(pvc.debug) {
+            pvc.log("Invalid 'offset' value: " + JSON.stringify(offset));
+        }
+        return this;
+    },
+    
+    set: function(prop, value){
+        if(value != null && def.hasOwn(pvc.Offset.namesSet, prop)){
+            value = pvc.PercentValue.parse(value);
+            if(value != null){
+                if(prop === 'all'){
+                    // expand
+                    pvc.Offset.names.forEach(function(p){
+                        this[p] = value;
+                    }, this);
+                    
+                } else {
+                    this[prop] = value;
+                }
+            }
+        }
+    },
+    
+    resolve: function(refSize){
+        var offset = {};
+        
+        pvc.Size.names.forEach(function(length){
+            var offsetProp  = pvc.Offset.namesSizeToOffset[length];
+            var offsetValue = this[offsetProp];
+            if(offsetValue != null){
+                if(typeof(offsetValue) === 'number'){
+                    offset[offsetProp] = offsetValue;
+                } else if(refSize){
+                    var refLength = refSize[length];
+                    if(refLength != null){
+                        offset[offsetProp] = offsetValue.resolve(refLength);
+                    }
+                }
+            }
+        }, this);
+        
+        return offset;
+    }
+});
+
+pvc.Offset.names = ['x', 'y'];
+pvc.Offset.namesSet = pv.dict(pvc.Offset.names, def.retTrue);
+pvc.Offset.namesSizeToOffset = {width: 'x', height: 'y'};
+pvc.Offset.namesSidesToOffset = {left: 'x', right: 'x', top: 'y', bottom: 'y'};
+
+pvc.Offset.as = function(v){
+    if(v != null && !(v instanceof Offset)){
+        v = new Offset().setOffset(v);
+    }
+    
+    return v;
+};
+
+// --------------------
+
 var Shape = def.type('pvc.Shape')
 .add({
     transform: function(t){
@@ -13951,6 +14060,9 @@ pvc.BaseChart = pvc.Abstract.extend({
                 font:       options.titleFont,
                 anchor:     options.titlePosition,
                 align:      options.titleAlign,
+                alignTo:    options.titleAlignTo,
+                offset:     options.titleOffset,
+                inBounds:   options.titleInBounds,
                 margins:    options.titleMargins,
                 paddings:   options.titlePaddings,
                 titleSize:  options.titleSize,
@@ -13973,6 +14085,9 @@ pvc.BaseChart = pvc.Abstract.extend({
             this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
                 anchor:     colorAxis.option('Position'),
                 align:      colorAxis.option('Align'),
+                alignTo:    options.legendAlignTo,
+                offset:     options.legendOffset,
+                inBounds:   options.legendInBounds,
                 size:       colorAxis.option('Size'),
                 sizeMax:    colorAxis.option('SizeMax'),
                 margins:    colorAxis.option('Margins'),
@@ -13981,8 +14096,6 @@ pvc.BaseChart = pvc.Abstract.extend({
                 scenes:     def.getPath(options, 'legend.scenes'),
                 
                 // Bullet legend
-                clickMode:  colorAxis.option('ClickMode'),
-                
                 minMarginX: options.legendMinMarginX, // V1 -> paddings
                 minMarginY: options.legendMinMarginY, // V1 -> paddings
                 textMargin: options.legendTextMargin,
@@ -14435,6 +14548,9 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        title:         null,
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
+//        titleAlignTo:  undefined,
+//        titleOffset:   undefined,
+//        titleInBounds: undefined,
 //        titleSize:     undefined,
 //        titleSizeMax:  undefined,
 //        titleMargins:  undefined,
@@ -14447,6 +14563,9 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        legendSize:       undefined,
 //        legendSizeMax:    undefined,
 //        legendAlign:      undefined,
+//        legendAlignTo:    undefined,
+//        legendOffset:     undefined,
+//        legendInBounds:   undefined,
 //        legendMinMarginX: undefined,
 //        legendMinMarginY: undefined,
 //        legendTextMargin: undefined,
@@ -14695,10 +14814,33 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         /* Root panels do not need layout */
         if(this.isRoot) {
-            this.anchor = null;
-            this.align  = null;
+            this.anchor  = null;
+            this.align   = null;
+            this.alignTo = null;
+            this.offset  = null;
         } else {
             this.align = pvc.parseAlign(this.anchor, this.align);
+            
+            // * a string with a named alignTo value
+            // * a number
+            // * a PercentValue object
+            var alignTo = this.alignTo;
+            var side = this.anchor;
+            if(alignTo != null && alignTo !== '' && (side === 'left' || side === 'right')){
+                if(alignTo !== 'page-middle'){
+                    if(!isNaN(+alignTo.charAt(0))){
+                        alignTo = pvc.PercentValue.parse(alignTo); // percent or number
+                    } else {
+                        alignTo = pvc.parseAlign(side, alignTo);
+                    }
+                }
+            } else {
+                alignTo = this.align;
+            }
+            
+            this.alignTo = alignTo;
+            
+            this.offset = new pvc.Offset(this.offset);
         }
     },
     
@@ -14811,11 +14953,6 @@ pvc.BasePanel = pvc.Abstract.extend({
             }
             
             var prevLayoutInfo = this._layoutInfo || null;
-            if(prevLayoutInfo){
-                // Free old memory
-                delete prevLayoutInfo.previous;
-            }
-            
             var canChange = def.get(keyArgs, 'canChange', true);
             
             var layoutInfo = 
@@ -14826,8 +14963,15 @@ pvc.BasePanel = pvc.Abstract.extend({
                     paddings:          paddings,
                     desiredClientSize: desiredClientSize,
                     clientSize:        availableClientSize,
+                    pageClientSize:    prevLayoutInfo ? prevLayoutInfo.pageClientSize : availableClientSize.clone(),
                     previous:          prevLayoutInfo
                 };
+            
+            if(prevLayoutInfo){
+                // Free old memory
+                delete prevLayoutInfo.previous;
+                delete prevLayoutInfo.pageClientSize;
+            }
             
             var clientSize = this._calcLayout(layoutInfo);
             
@@ -14898,6 +15042,8 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;
+        var altMap = pvc.BasePanel.leftTopAnchor;
+        var aofMap = pvc.Offset.namesSidesToOffset;
         
         // Classify children
         
@@ -15091,40 +15237,87 @@ pvc.BasePanel = pvc.Abstract.extend({
         function positionChild(child) {
             var side  = child.anchor;
             var align = child.align;
+            var alignTo = child.alignTo;
             var sidePos;
             if(side === 'fill'){
                 side = 'left';
                 sidePos = margins.left + remSize.width / 2 - (child.width / 2);
-                align = 'middle';
+                align = alignTo = 'middle';
             } else {
                 sidePos = margins[side];
             }
             
-            var sideo, sideOPos;
+            var sideo, sideOPosChildOffset;
             switch(align){
                 case 'top':
                 case 'bottom':
                 case 'left':
                 case 'right':
                     sideo = align;
-                    sideOPos = margins[sideo];
+                    sideOPosChildOffset = 0;
                     break;
                 
                 case 'center':
                 case 'middle':
-                    if(side === 'left' || side === 'right'){
-                        sideo    = 'top';
-                        sideOPos = margins.top + (remSize.height / 2) - (child.height / 2);
-                    } else {
-                        sideo    = 'left';
-                        sideOPos = margins.left + remSize.width / 2 - (child.width / 2);
-                    }
+                    // 'left', 'right' -> 'top'
+                    // else -> 'left'
+                    sideo = altMap[aoMap[side]];
+                    
+                    // left -> width; top -> height
+                    sideOPosChildOffset = - child[aolMap[sideo]] / 2;
                     break;
+            }
+            
+            
+            var sideOPosParentOffset;
+            var sideOTo;
+            switch(alignTo){
+                case 'top':
+                case 'bottom':
+                case 'left':
+                case 'right':
+                    sideOTo = alignTo;
+                    sideOPosParentOffset = (sideOTo !== sideo) ? remSize[aolMap[sideo]] : 0;
+                    break;
+
+                case 'center':
+                case 'middle':
+                    sideOTo = altMap[aoMap[side]];
+                    
+                    sideOPosParentOffset = remSize[aolMap[sideo]] / 2;
+                    break;
+                        
+                case 'page-center':
+                case 'page-middle':
+                    sideOTo = altMap[aoMap[side]];
+                    
+                    var lenProp = aolMap[sideo];
+                    var pageLen = Math.min(remSize[lenProp], layoutInfo.pageClientSize[lenProp]);
+                    sideOPosParentOffset = pageLen / 2;
+                    break;
+            }
+            
+            var sideOPos = margins[sideOTo] + sideOPosParentOffset + sideOPosChildOffset;
+            
+            var resolvedOffset = child.offset.resolve(remSize);
+            if(resolvedOffset){
+                sidePos  += resolvedOffset[aofMap[side ]] || 0;
+                sideOPos += resolvedOffset[aofMap[sideo]] || 0;
+            }
+            
+            if(child.inBounds){
+                if(sidePos < 0){
+                    sidePos = 0;
+                }
+                
+                if(sideOPos < 0){
+                    sideOPos = 0;
+                }
             }
             
             child.setPosition(
                     def.set({}, 
-                        side,  sidePos, 
+                        side,  sidePos,
                         sideo, sideOPos));
         }
         
@@ -16894,7 +17087,6 @@ pvc.LegendPanel = pvc.BasePanel.extend({
     textMargin: 6,    // The space *between* the marker and the text, in pixels.
     padding:    2.5,  // Half the space *between* legend items, in pixels.
     markerSize: 15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
-    clickMode:  'toggleVisible', // toggleVisible || toggleSelected
     font:  '10px sans-serif',
     
     constructor: function(chart, parent, options){
