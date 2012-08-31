@@ -1978,6 +1978,12 @@ Query = function() {
     if (options.filename) {
       queryDefinition.settingattachmentName= options.filename ;
     }
+    if (outputType = 'xls' && options.template) {
+      queryDefinition.settingtemplateName= options.template ;
+    }
+    if( options.columnHeaders ){
+      queryDefinition.settingcolumnHeaders = options.columnHeaders;
+    }
     _exportIframe = _exportIframe || $('<iframe style="display:none">');
     _exportIframe.detach();
     _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
