@@ -46,8 +46,7 @@ if ( typeof Date.now !== 'function' ) {
 
 var vml = {
 
-  round: function(n){ return Math.round( n * 21.6 ); },
-
+  round: function(n){ return Math.round( (n || 0) * 21.6 ); },
   styles: null,
 
   pre: '<pvml:',
@@ -111,10 +110,10 @@ var vml = {
     o.x = parseFloat( attr.x||0 );
     o.y = parseFloat( attr.y||0 );
     if ( 'width' in attr ) {
-      o.width = parseInt( attr.width, 10 );
+      o.width = parseFloat( attr.width);
     }
     if ( 'height' in attr ) { 
-      o.height = parseInt( attr.height, 10 );
+      o.height = parseFloat( attr.height);
     }
     return o;
   },
@@ -159,10 +158,10 @@ var vml = {
             y = r(d.translate_y + d.y),
             w = r(d.width),
             h = r(d.height);
-        p.v = 'M ' + x + ' ' + y + 
-             ' L ' + (x + w) + ' ' + y + 
+        p.v = 'M ' + x       + ' ' + y       + 
+             ' L ' + (x + w) + ' ' + y       + 
              ' L ' + (x + w) + ' ' + (y + h) + 
-             ' L ' + x + ' ' + (y + h) + 
+             ' L ' + x       + ' ' + (y + h) + 
              ' x';
         vml.stroke( elm, attr, scenes, i );
         vml.fill( elm, attr, scenes, i );
@@ -333,11 +332,29 @@ var vml = {
       stroke.weight = '0';
     }
     else {
-      stroke.on = 'true';
-      stroke.weight = parseFloat( attr['stroke-width'] || '1' ) / 1.25;
-      stroke.color = vml.color( attr.stroke ) || 'black';
-      stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
-      stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+        var strokeWidth = attr['stroke-width'];
+        if(strokeWidth == null || strokeWidth === ''){
+            strokeWidth = 1;
+        } else {
+            strokeWidth = +strokeWidth;
+        }
+        
+        if(strokeWidth < 1e-10){
+            strokeWidth = 0;
+        } else if (strokeWidth < 1){
+            strokeWidth = 1;
+        }
+        
+        if(!strokeWidth){
+            stroke.on = 'false';
+            stroke.weight = '0';
+        } else {
+            stroke.on = 'true';
+            stroke.weight = strokeWidth;
+            stroke.color = vml.color( attr.stroke ) || 'black';
+            stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
+            stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+        }
     }
   },
 
@@ -583,6 +600,15 @@ pv.VmlScene = {
 pv.VmlScene.copy_functions( pv.SvgScene );
 pv.Scene = pv.VmlScene;
 pv.renderer = function() { return 'vml'; };//changed renderer
+
+(function(is64bit){
+    // experimental minimum visible, with perceptible color, values
+    
+    pv.VmlScene.minRuleLineWidth = is64bit ? 1.2 : 1.1;
+    pv.VmlScene.minBarWidth      = is64bit ? 2.2 : 1.8;
+    pv.VmlScene.minBarHeight     = is64bit ? 2.2 : 1.8;
+    pv.VmlScene.minBarLineWidth  = is64bit ? 1.2 : 1.0;
+}(window.navigator.cpuClass === 'x64'));
 
 pv.VmlScene.expect = function (e, type, scenes, i, attr, style) {
   style = style || {};
@@ -1133,5 +1159,4 @@ pv.VmlScene.wedge = function(scenes) {
 
 // end VML override
 })();}
-
 });
