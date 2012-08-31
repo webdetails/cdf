@@ -5686,11 +5686,7 @@ function atom_idComparer(a, b) {
  */
 function atom_idComparerReverse(a, b) {
     return b.id - a.id; // works for numbers...
-}/**
- * The separator used between labels of dimensions of a complex.
- */
-var complex_labelSep = " ~ ";
-var complex_nextId = 1;
+}var complex_nextId = 1;
 
 /**
  * Initializes a complex instance.
@@ -5813,6 +5809,8 @@ def
             // just concatenate strings comparing to the array.join method 
             var dimNames = owner.type._dimsNames;
             var key, label, aLabel;
+            var labelSep = owner.labelSep;
+            
             L = dimNames.length;
             for(i = 0 ; i < L ; i++){
                 var dimName = dimNames[i];
@@ -5828,7 +5826,7 @@ def
                         // Assuming labels are non-empty
                         // Non-null atoms => non-empty labels
                         if(label){
-                            label += complex_labelSep + atom.label;
+                            label += labelSep + atom.label;
                         } else {
                             label = atom.label;
                         }
@@ -5845,17 +5843,24 @@ def
 })
 .add(/** @lends pvc.data.Complex# */{
     
+    /**
+     * The separator used between labels of dimensions of a complex.
+     * Generally, it is the owner's labelSep that is used.
+     */
+    labelSep: " ~ ",
+    
     label: null,
     
     ensureLabel: function(){
         var label = this.label;
         if(label != null){
             label = "";
+            var labelSep = this.owner.labelSep;
             def.eachOwn(this.atoms, function(atom){
                 var alabel = atom.label;
                 if(alabel){
                     if(label){
-                        label += complex_labelSep + alabel;
+                        label += labelSep + alabel;
                     } else {
                         label = alabel;
                     }
@@ -7203,7 +7208,11 @@ def.type('pvc.data.Data', pvc.data.Complex)
             owner = this;
             //atoms = null
             atomsBase = {};
-
+            
+            if(keyArgs.labelSep){
+                this.labelSep = keyArgs.labelSep;
+            }
+            
             this.type = keyArgs.type || def.fail.argumentRequired('type');
             
             // Only owner datas cache selected datums
@@ -7239,8 +7248,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
         data_addChild.call(parent, this);
         
         if(parent.absLabel){
-            /*global complex_labelSep:true */
-            this.absLabel = def.string.join(complex_labelSep, parent.absLabel, this.label);
+            this.absLabel = def.string.join(owner.labelSep, parent.absLabel, this.label);
         } else {
             this.absLabel = this.label;
         }
@@ -13631,7 +13639,10 @@ pvc.BaseChart = pvc.Abstract.extend({
         if(!data) {
             data =
                 this.dataEngine =
-                this.data = new pvc.data.Data({type: complexType});
+                this.data = new pvc.data.Data({
+                    type:     complexType,
+                    labelSep: this.options.groupedLabelSep
+                });
         } // else TODO: assert complexType has not changed...
         
         // ----------
@@ -14537,6 +14548,7 @@ pvc.BaseChart = pvc.Abstract.extend({
 //        multiChartIndexes: undefined,
         isMultiValued:     false,
         seriesInRows:      false,
+        groupedLabelSep:   undefined,
 //        measuresIndexes:   undefined,
 //        dataOptions:       undefined,
 //        
