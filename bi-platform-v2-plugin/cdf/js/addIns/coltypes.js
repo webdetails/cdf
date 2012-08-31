@@ -209,7 +209,7 @@
          * or a string that is a fixed point for conversion
          * to number and back to string.
          */
-        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() == st.value),
+        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() != 'NaN' ),
         trendClass = !isNumeric ? "invalid": (st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up");
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
@@ -525,6 +525,9 @@
     }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(clippedText));
+
+
+
 
 })();
 
