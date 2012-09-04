@@ -1808,7 +1808,7 @@ Dashboards.safeClone = function(){
 
 //Ctors:
 // Query(queryString) --> DEPRECATED
-// Query(queryDefinition{path, dataAccessId})
+// Query(queryDefinition{path, dataAccessId, ...})
 // Query(path, dataAccessId)
 Query = function() {
 
@@ -1817,8 +1817,8 @@ Query = function() {
   var LEGACY_QUERY_PATH = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction";
 
   /*
-     * Private fields
-     */
+   * Private fields
+   */
 
   // Datasource type definition
   var _mode = 'CDA';
@@ -1840,8 +1840,8 @@ Query = function() {
 
   var _params = [];
   /*
-     * Initialization code
-     */
+   * Initialization code
+   */
 
   //
   (function(args){
@@ -1886,9 +1886,11 @@ Query = function() {
         throw "InvalidQuery";
     } 
   }(arguments));
+  
+  
   /*
-     * Private methods
-     */
+   * Private methods
+   */
 
   var doQuery = function(outsideCallback){
     if (typeof _callback != 'function') {
@@ -1957,13 +1959,12 @@ Query = function() {
   };
 
   /*
-     * Public interface
-
-     */
+   * Public interface
+   */
 
   // Entry point
 
-  this.exportData = function(outputType, overrides,options) {
+  this.exportData = function(outputType, overrides, options) {
     if (_mode != 'CDA') {
       throw "UnsupportedOperation";
     }
@@ -1975,6 +1976,7 @@ Query = function() {
     if (outputType == 'csv' && options.separator) {
       queryDefinition.settingcsvSeparator = options.separator;
     }
+    
     if (options.filename) {
       queryDefinition.settingattachmentName= options.filename ;
     }
@@ -1984,6 +1986,14 @@ Query = function() {
     if( options.columnHeaders ){
       queryDefinition.settingcolumnHeaders = options.columnHeaders;
     }
+    
+    if(options.dtFilter != null){
+	  queryDefinition.settingdtFilter = options.dtFilter;
+	  if(options.dtSearchableColumns != null){
+	    queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
+	  }
+	}
+    
     _exportIframe = _exportIframe || $('<iframe style="display:none">');
     _exportIframe.detach();
     _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
