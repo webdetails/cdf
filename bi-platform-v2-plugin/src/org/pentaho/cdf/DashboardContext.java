@@ -58,8 +58,10 @@ public class DashboardContext {
         try {
             String solution = requestParams.getStringParameter("solution", ""),
                     path = requestParams.getStringParameter("path", ""),
-                    file = requestParams.getStringParameter("action", ""), // Fix #29. Because there is no file parameter, but action parameter
-                    fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
+                    // Fix #29. Because there is no file parameter in CDF, but action parameter
+                    //file parameter is used in CDE
+                    file = requestParams.getStringParameter("file", requestParams.getStringParameter("action", "")),
+                    fullPath = ("/" + solution  + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
             Calendar cal = Calendar.getInstance();
             
