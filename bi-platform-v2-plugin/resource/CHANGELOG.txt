@@ -1,3 +1,14 @@
+12.09.05
+    * Fixed [REDMINE 942] - Ensure only one instance of the minification routine is running at any given time
+    * send cda dataTables filtering settings on export
+    * Change isNumeric predicate in trendArrow addIn.
+    * Added support for excel template option in exportData.
+    * Fix to dashboardContext and CdfContentGenerator (templating)
+    * [PATCH][FIX] Bullet chart bulletTitle and bulletSubtitle options were not showing in the "fixed data" mode
+    * Add option to disable url scheme detection in dashboard headers
+    * Make bookmark state not generate multiple history entries
+    * Make pageStartingAt behave correctly
+
 12.07.19
     * [Redmine-207] - tableComponent oLanguage fix
     * Turned pvc.defaultColorScheme public (for readonly access)
