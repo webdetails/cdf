@@ -519,7 +519,7 @@ pv.Behavior.tipsy = function(opts) {
                 
                 if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Update text. Was hidden. Text: " + text); }
                 
-                $fakeTipTarget.attr('title', text);
+                $fakeTipTarget.tipsy('setTitle', text);
                 
                 bounds = opts.followMouse ? getMouseBounds(ev) : getInstanceBounds(mark);
             });
@@ -568,16 +568,20 @@ pv.Behavior.tipsy = function(opts) {
         
         setTarget(pv.event.target);
         
-        $fakeTipTarget.attr('title', getTooltipText(mark));
+        var text = getTooltipText(mark);
+        
+        if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Text: " + text); }
+        
+        $fakeTipTarget.tipsy('setTitle', text);
         
         setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds(mark));
         
         hideOtherTipsies();
         
         if(isHidden){
-            $fakeTipTarget.tipsy("enter");
+            $fakeTipTarget.tipsy('enter');
         } else {
-            $fakeTipTarget.tipsy("update");
+            $fakeTipTarget.tipsy('update');
         }
         
         if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Show OUT"); }
@@ -647,12 +651,12 @@ function getVisibleScreenBounds(mark){
             top = 0;
         }
 
-        right  = mark.right();
+        right  = instance.right;
         if(right < 0){
             width += right;
         }
 
-        bottom = mark.bottom();
+        bottom = instance.bottom;
         if(bottom < 0){
             height += bottom;
         }
@@ -667,6 +671,7 @@ function getVisibleScreenBounds(mark){
         height = s * height;
 
         mark = parent;
+        instance = mark.instance();
     }
 
     return {

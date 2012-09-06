@@ -7,8 +7,10 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
 (function($) {
     
     function fixTitle($ele) {
-        if ($ele.attr('title') || typeof($ele.attr('original-title')) != 'string') {
-            $ele.attr('original-title', $ele.attr('title') || '').removeAttr('title');
+        var title = $ele.attr('title');
+        if (title || typeof($ele.attr('original-title')) !== 'string') {
+            $ele.attr('original-title', title || '')
+                .removeAttr('title');
         }
     }
     
@@ -73,7 +75,12 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             }
             
             var title = this.getTitle();
-            if (title && this.enabled) {
+            if (!this.enabled || !title) {
+                this.hoverState = null;
+                this.hide();
+                return;
+            } 
+            
                 var $tip = this.tip();
                 $tip.find('.tipsy-inner')[this.options.html ? 'html' : 'text'](title);
                 $tip[0].className = 'tipsy'; // reset classname in case of dynamic gravity
@@ -170,7 +177,6 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
                 }
                 
                 this._prevGravity = gravity;
-            }
             
             this.hoverState = null;
         },
@@ -185,13 +191,19 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             this.hoverState = null;
         },
         
+        setTitle: function(title) {
+            title = (title == null) ? "" : ("" + title);
+            this.$element
+                .attr('original-title', title)
+                .removeAttr('title');
+        },
+        
         getTitle: function() {
             var title, $e = this.$element, o = this.options;
             fixTitle($e);
-            var title, o = this.options;
-            if (typeof o.title == 'string') {
+            if (typeof o.title === 'string') {
                 title = $e.attr(o.title == 'title' ? 'original-title' : o.title);
-            } else if (typeof o.title == 'function') {
+            } else if (typeof o.title === 'function') {
                 title = o.title.call($e[0]);
             }
             title = ('' + title).replace(/(^\s*|\s*$)/, "");
@@ -229,12 +241,12 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
         toggleEnabled: function() { this.enabled = !this.enabled; }
     };
     
-    $.fn.tipsy = function(options) {
+    $.fn.tipsy = function(options, arg) {
         
         if (options === true) {
             return this.data('tipsy');
-        } else if (typeof options == 'string') {
-            return this.data('tipsy')[options]();
+        } else if (typeof options === 'string') {
+            return this.data('tipsy')[options](arg);
         }
         
         options = $.extend({}, $.fn.tipsy.defaults, options);

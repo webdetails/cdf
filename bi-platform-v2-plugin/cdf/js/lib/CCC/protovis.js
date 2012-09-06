@@ -991,6 +991,13 @@ pv.Format.number = function() {
 
     /* Pad the fractional part. */
     var f = s[1] || "";
+    if (f.length > maxf){
+        // In IE9 64 bit strange things happen with floating points
+        // and the above division by maxk seems to sometimes result in 
+        // floating point precision problems...
+        f = s[1] = f.substr(0, maxf);
+    }
+
     if (f.length < minf) s[1] = f + new Array(minf - f.length + 1).join(padf);
 
     return s.join(decimal);
@@ -7482,16 +7489,17 @@ pv.SvgScene.panel = function(scenes) {
     this.scale *= t.k;
 
     /* children */
-    for (var j = 0; j < s.children.length; j++) {
-      s.children[j].$g = e = this.expect(e, "g", scenes, i, {
-          "transform": "translate(" + x + "," + y + ")"
-              + (t.k != 1 ? " scale(" + t.k + ")" : "")
+    this.eachChild(scenes, i, function(childScenes){
+        childScenes.$g = e = this.expect(e, "g", scenes, i, {
+            "transform": "translate(" + x + "," + y + ")" + 
+                         (t.k != 1 ? " scale(" + t.k + ")" : "")
         });
-      this.updateAll(s.children[j]);
-      if (!e.parentNode) g.appendChild(e);
-      e = e.nextSibling;
-    }
-
+        
+        this.updateAll(childScenes);
+        if (!e.parentNode) g.appendChild(e);
+        e = e.nextSibling;
+    });
+    
     /* transform (pop) */
     this.scale = k;
 
@@ -7506,6 +7514,18 @@ pv.SvgScene.panel = function(scenes) {
   }
   complete = true;
   return e;
+};
+
+pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
+    if(scenes.mark.zOrderChildCount){
+        var sorted = scenes[i].children.slice(0);
+        sorted.sort(function(scenes1, scenes2){ // sort ascending
+            return scenes1.mark._zOrder - scenes2.mark._zOrder;
+        });
+        sorted.forEach(fun, ctx || this);
+    } else {
+        scenes[i].children.forEach(fun, ctx || this);
+    }
 };
 
 pv.SvgScene.fill = function(e, scenes, i) {
@@ -8048,6 +8068,16 @@ pv.Mark.prototype.index = -1;
 pv.Mark.prototype.scale = 1;
 
 /**
+ * Affects the drawing order amongst sibling marks.
+ * Evaluation order is not affected.
+ * A higher Z order value is drawn on top of a lower Z order value.
+ * 
+ * @type number
+ * @private
+ */
+pv.Mark.prototype._zOrder = 0;
+
+/**
  * @private The scene graph. The scene graph is an array of objects; each object
  * (or "node") corresponds to an instance of this mark and an element in the
  * data array. The scene graph can be traversed to lookup previously-evaluated
@@ -8259,6 +8289,37 @@ pv.Mark.prototype.add = function(type) {
 pv.Mark.prototype.def = function(name, v) {
   this.propertyMethod(name, true);
   return this[name](arguments.length > 1 ? v : null);
+};
+
+/**
+ * Affects the drawing order amongst sibling marks.
+ * Evaluation order is not affected.
+ * A higher Z order value is drawn on top of a lower Z order value. 
+ * 
+ * @param {number} zOrder the Z order of the mark. 
+ * @type number
+ */
+pv.Mark.prototype.zOrder = function(zOrder){
+    if(!arguments.length){
+        return this._zOrder;
+    }
+    
+    zOrder = (+zOrder) || 0; // NaN -> 0
+    
+    if(this._zOrder !== zOrder){
+        
+        if(this._zOrder !== 0 && this.parent){
+            this.parent.zOrderChildCount--;
+        }
+        
+        this._zOrder = zOrder;
+        
+        if(this._zOrder !== 0 && this.parent){
+            this.parent.zOrderChildCount++;
+        }
+    }
+    
+    return this;
 };
 
 /**
@@ -8912,17 +8973,20 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
 pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
     // Current bindings
     var net = this.binds.net;
-    var netIndex, newNetIndex, netDirtyProps, prevNetDirtyProps;
+    var netIndex, newNetIndex, netDirtyProps, prevNetDirtyProps, 
+        propertyIndexes, evaluatedProps;
     var stack = pv.Mark.stack;
     
     var n = properties.length;
     try{
         while(true){
             netDirtyProps = null;
-            
+            evaluatedProps = {};
             for (var i = 0 ; i < n; i++) {
                 var p = properties[i];
                 var name = p.name;
+                evaluatedProps[name] = true;
+                
                 // Only re-evaluate properties marked dirty on the previous iteration
                 if(!prevNetDirtyProps || prevNetDirtyProps[name]){
                     var v = p.value; // assume case 2 (constant)
@@ -8943,16 +9007,18 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                             
                             newNetIndex = pv.propertyEvalNetIndex;
                             if(newNetIndex > netIndex){
-                                if(!netDirtyProps){
-                                    netDirtyProps = pv.propertyEvalDependencies;
-                                } else {
                                     var evalDeps = pv.propertyEvalDependencies;
                                     for(var depName in evalDeps){
-                                        if(evalDeps.hasOwnProperty(depName)){
+                                    // If dependent property has not yet been evaluated
+                                    // set it as dirty
+                                    if(evalDeps.hasOwnProperty(depName) &&
+                                       !evaluatedProps.hasOwnProperty(name)){
+                                        if(!netDirtyProps){
+                                            netDirtyProps = {};
+                                        }
                                             netDirtyProps[depName] = true;
                                         }
                                     }
-                                }
                                 
                                 this.updateNet(p, newNetIndex);
                             }
@@ -8970,9 +9036,19 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
             prevNetDirtyProps = netDirtyProps;
             
             // Sort properties on net index and repeat...
+            
+            propertyIndexes = pv.numerate(properties, function(p){ return p.name; });
+            
             properties.sort(function(pa, pb){
-                return pv.naturalOrder(net[pa.name] || 0, net[pb.name] || 0);
+                var comp = pv.naturalOrder(net[pa.name] || 0, net[pb.name] || 0);
+                if(!comp){
+                    // Force mantaining original order
+                    comp = pv.naturalOrder(propertyIndexes[pa.name], propertyIndexes[pb.name]);
+                }
+                return comp;
             });
+            
+            propertyIndexes = null;
         }
     } finally {
         pv.propertyEval = null;
@@ -10583,6 +10659,13 @@ pv.Panel.prototype.type = "panel";
  * @name pv.Panel.prototype.transform
  * @see pv.Mark#scale
  */
+
+/**
+ * The number of children that have a non-zero {@link pv.Mark#_zOrder}.
+ * 
+ *  @type number
+ */
+pv.Panel.prototype.zOrderChildCount = 0;
 
 /**
  * Default properties for panels. By default, the margins are zero, the fill

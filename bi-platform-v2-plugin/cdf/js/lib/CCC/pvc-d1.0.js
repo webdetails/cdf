@@ -676,57 +676,24 @@ pvc.PercentValue.resolve = function(value, total){
     return (value instanceof pvc.PercentValue) ? value.resolve(total) : value;
 };
 
-/* Protovis Z-Order support between sibling marks */
+/* Z-Order */
 
-// Default values
-pv.Mark.prototype._zOrder = 0;
-
-pv.Panel.prototype._hasZOrderChild = false;
-pv.Panel.prototype._needChildSort  = false;
+//Copy original methods
+var markRenderCore = pv.Mark.prototype.renderCore,
+    panelAdd   = pv.Panel.prototype.add,
+    markZOrder = pv.Mark.prototype.zOrder;
 
 pv.Mark.prototype.zOrder = function(zOrder) {
     var borderPanel = this.borderPanel;
     if(borderPanel && borderPanel !== this){
-        return borderPanel.zOrder.apply(borderPanel, arguments);
+        return markZOrder.apply(borderPanel, arguments);
     }
     
-    if(!arguments.length){
-        return this._zOrder;
-    }
-    
-    if(this._zOrder !== zOrder){
-        this._zOrder = zOrder;
-        
-        if(this.parent){
-            this.parent._hasZOrderChild = 
-            this.parent._needChildSort  = true;
-        }
-    }
-    
-    return this;
+    return markZOrder.apply(this, arguments);
 };
 
-// Copy original methods
-var markRenderCore = pv.Mark.prototype.renderCore,
-    panelAdd   = pv.Panel.prototype.add;
-
-// @replace
-pv.Panel.prototype.add = function(){
-    var mark = panelAdd.apply(this, arraySlice.call(arguments));
-
-    // Detect new child with non-zero ZOrder
-    if(!this._hasZOrderChild && mark._zOrder !== 0){
-        this._hasZOrderChild = this._needChildSort  = true;
-    }
-
-    return mark;
-};
-
-// @replace
+/* Render id */
 pv.Mark.prototype.renderCore = function(){
-    /* Ensure zOrder is up to date */
-    sortChildren.call(this);
-    
     /* Assign a new render id to the root mark */
     var root = this.root;
     root._renderId = (root._renderId || 0) + 1;
@@ -746,33 +713,6 @@ pv.Mark.prototype.renderCore = function(){
 pv.Mark.prototype.renderId = function(){
     return this.root._renderId;
 };
-
-function sortChildren(){
-    // Sort children by their Z-Order
-    var children = this.children, L;
-    if(children && (L = children.length)){
-        var needChildSort = this._needChildSort;
-        if(needChildSort){
-            children.sort(function(m1, m2){
-                return def.compare(m1._zOrder, m2._zOrder);
-            });
-            
-            this._needChildSort = false;
-        }
-        
-        // Fix childIndex and apply recursively
-        for(var i = 0 ; i < L ; i++){
-            var child = children[i]; 
-            if(needChildSort) { 
-                child.childIndex = i; 
-            }
-            
-            if(child instanceof pv.Panel){
-                sortChildren.call(child);
-            }
-        }
-    }
-}
 
 /* DOM */
 /**
@@ -1796,12 +1736,11 @@ pv.Behavior.selector = function(autoRefresh, mark) {
         
         events = [
             [root,     "mousemove", pv.listen(root, "mousemove", mousemove)],
-            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )]//,
+            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )],
             
-            // But when the mouse leaves the canvas we still need to
-            // receive events...
-//            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
-//            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
+            // But when the mouse leaves the canvas we still need to receive events...
+            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
+            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
         ];
     }
     
@@ -24707,19 +24646,37 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
         this.pvDot.rubberBandSelectionMode = 'center';
         
         // -- COLOR --
+        dot.override('baseColor', function(type){
+            var color = this.delegate();
+            if(color === undefined){
+                var color;
+                if(!rootScene.hasColorRole){
+                    color = this.defaultColor(type);
+                } else {
+                    var colorValue = this.scene.vars.color.value;
+                    
+                    color = colorValue == null ?
+                                options.nullColor :
+                                colorScale(colorValue);
+                }
+                
+                if(type === 'stroke'){
+                    color = color.darker();
+                }
+                
         // When no lines are shown, dots are shown with transparency,
         // which helps in distinguishing overlapped dots.
         // With lines shown, it would look strange.
-        if(!rootScene.hasColorRole){
             // ANALYZER requirements, so until there's no way to configure it...
 //            if(!myself.showLines){
-//                dot.override('baseColor', function(type){
-//                    var color = this.base(type);
-//                    color.opacity = 0.85;
-//                    return color;
-//                });
+//                    color = color.alpha(color.opacity * 0.85);
 //            }
-        } else {
+                }
+                
+                return color;
+            });
+            
+        if(rootScene.hasColorRole){
             var colorScale = this._getColorRoleScale(data);
             
             line.override('baseColor', function(type){
@@ -24729,28 +24686,6 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                     color = colorValue == null ?
                                 options.nullColor :
                                 colorScale(colorValue);
-                }
-                
-                return color;
-            });
-            
-            dot.override('baseColor', function(type){
-                var color = this.delegate();
-                if(color === undefined){
-                    var colorValue = this.scene.vars.color.value;
-                    
-                    color = colorValue == null ?
-                                options.nullColor :
-                                colorScale(colorValue);
-                    
-                    if(type === 'stroke'){
-                        color = color.darker();
-                    }
-                    
-                 // ANALYZER requirements, so until there's no way to configure it...
-//                    if(!myself.showLines){
-//                        color = color.alpha(color.opacity * 0.85);
-//                    }
                 }
                 
                 return color;
