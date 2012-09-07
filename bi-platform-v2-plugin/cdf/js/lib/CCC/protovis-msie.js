@@ -56,8 +56,9 @@ var vml = {
   block: { 'group':1, 'shape':1, 'shapetype':1, 'line':1,
            'polyline':1, 'curve':1, 'rect':1, 'roundrect':1,
            'oval':1, 'arc':1, 'image':1 },
-  ends: { 'butt':'flat','round':'round','square':'square','flat':'flat'},
+  caps:  { 'butt':  'flat',  'round': 'round', 'square': 'square' },
   joins: { 'bevel':'bevel','round':'round','miter':'miter'},
+  
   cursorstyles: {
     'hand': 'pointer',
     'crosshair': 1, 'pointer': 1, 'move': 1, 'text': 1,
@@ -450,7 +451,7 @@ var vml = {
     }
     if ( !attr.stroke || attr.stroke === 'none' ) {
       stroke.on = 'false';
-      stroke.weight = '0';
+      stroke.weight = 0;
     } else {
         var strokeWidth = attr['stroke-width'];
         if(strokeWidth == null || strokeWidth === ''){
@@ -467,13 +468,21 @@ var vml = {
         
         if(!strokeWidth){
             stroke.on = 'false';
-            stroke.weight = '0';
+            stroke.weight = 0;
         } else {
             stroke.on = 'true';
             stroke.weight = strokeWidth;
             stroke.color = vml.color( attr.stroke ) || 'black';
             stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
             stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+            stroke.miterlimit = attr['stroke-miterlimit'] || 8;
+            stroke.endcap     = vml.caps [attr['stroke-linecap' ]] || 'flat';
+            
+            var dashArray = attr["stroke-dasharray"];
+            if(!dashArray || dashArray === 'none'){
+                dashArray = 'Solid';
+            }
+            stroke.dashstyle  = dashArray;
         }
     }
   },
@@ -917,6 +926,37 @@ pv.VmlScene.panel = function(scenes) {
   return e;
 };
 
+pv.VmlScene.parseDasharray = function(s){
+    var dashArray = s.strokeDasharray;
+    
+    if(dashArray && dashArray !== 'none'){
+        var standardDashArray = this.translateDashStyleAlias(dashArray);
+        if(this.isStandardDashStyle(standardDashArray)){
+            dashArray = standardDashArray;
+        } else {
+            // Dashes with numbers work very badly on IE,
+            //  many times disrespecting the user request.
+            // My guess is that it is trying to approximate
+            //  the requested pattern to one of the standard patterns...
+            
+            // IE already receives line width relative measures
+            dashArray = 
+                dashArray
+                    .split(/[\s,]+/)
+                    .map(function(num){ return (+num) / this.scale; }, this);
+            
+            if(dashArray.length % 2){
+                dashArray = dashArray.concat(dashArray);
+            }
+            dashArray = dashArray.join(' ');
+        }
+    } else {
+        dashArray = null;
+    }
+    
+    return dashArray;
+};
+
 // Much of the event rewriting code is copyed and watered down
 // from the jQuery library's event hander. We have the luxury
 // of knowing that we're on MSIE<9 so we can despense with some
@@ -1286,7 +1326,11 @@ pv.VmlScene.wedge = function(scenes) {
       "fill-opacity": fill.opacity || null,
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
+      "stroke-width":   stroke.opacity ? s.lineWidth / this.scale : null,
+      "stroke-linecap":    s.lineCap,
+      "stroke-linejoin":   s.lineJoin,
+      "stroke-miterlimit": s.strokeMiterLimit,
+      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
     });
     
     // add path

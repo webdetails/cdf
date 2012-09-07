@@ -84,7 +84,7 @@ pv.Behavior.tipsy = function(opts) {
             
         } else {
             /* Compute the transform to offset the tooltip position. */
-            var t = toScreenTransform(mark.parent);
+            var t = mark.toScreenTransform();
             var instance = mark.instance();
             var radius;
             if(mark.properties.outerRadius){
@@ -615,16 +615,6 @@ function toParentTransform(parentPanel){
     return pv.Transform.identity.
                 translate(parentPanel.left(), parentPanel.top()).
                 times(parentPanel.transform());
-}
-
-function toScreenTransform(parent){
-    var t = pv.Transform.identity;
-    do {
-        t = t.translate(parent.left(), parent.top())
-             .times(parent.transform());
-    } while ((parent = parent.parent));
-
-    return t;
 }
 
 function getVisibleScreenBounds(mark){

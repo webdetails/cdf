@@ -28,7 +28,7 @@ var pvc = def.globalSpace('pvc', {
 
 // goldenRatio proportion
 // ~61.8% ~ 38.2%
-pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
+//pvc.goldenRatio = (1 + Math.sqrt(5)) / 2;
 
 pvc.invisibleFill = 'rgba(127,127,127,0.00001)';
 
@@ -77,26 +77,6 @@ function syncTipsyLog(){
 }
 
 syncTipsyLog();
-
-/**
- * Evaluates x if it's a function or returns the value otherwise
- */
-pvc.ev = function(x){
-    return typeof x == "function" ? x(): x;
-};
-
-/**
- * Sums two numbers.
- * 
- * If v1 is null or undefined, v2 is returned.
- * If v2 is null or undefined, v1 is returned.
- * Else the sum of the two is returned.
- */
-pvc.sum = function(v1, v2){
-    return v1 == null ? 
-            v2 :
-            (v1 == null ? v1 : (v1 + v2));
-};
 
 pvc.cloneMatrix = function(m){
     return m.map(function(d){
@@ -150,6 +130,7 @@ pvc.extendType = function(type, exts, names){
     }
 };
 
+// TODO: adapt to use def.Query.range
 // Adapted from pv.range
 pvc.Range = function(start, stop, step){
     if (arguments.length == 1) {
@@ -191,29 +172,6 @@ pvc.Range.prototype.map = function(fun, ctx){
     });
     
     return result;
-};
-
-/**
- * Equals for two arrays
- * func - needed if not flat array of comparables
- **/
-pvc.arrayEquals = function(array1, array2, func){
-  if(array1 == null){return array2 == null;}
-  
-  var useFunc = typeof(func) == 'function';
-  
-  for(var i=0;i<array1.length;i++)
-  {
-    if(useFunc){
-        if(!func(array1[i],array2[i])){
-            return false;
-        }
-    }
-    else if(array1[i]!=array2[i]){
-        return false;   
-    }
-  }
-  return true;
 };
 
 /**
@@ -678,24 +636,24 @@ pvc.PercentValue.resolve = function(value, total){
 
 /* Z-Order */
 
-//Copy original methods
+// Backup original methods
 var markRenderCore = pv.Mark.prototype.renderCore,
-    panelAdd   = pv.Panel.prototype.add,
     markZOrder = pv.Mark.prototype.zOrder;
 
 pv.Mark.prototype.zOrder = function(zOrder) {
     var borderPanel = this.borderPanel;
     if(borderPanel && borderPanel !== this){
-        return markZOrder.apply(borderPanel, arguments);
+        return markZOrder.call(borderPanel, zOrder);
     }
     
-    return markZOrder.apply(this, arguments);
+    return markZOrder.call(this, zOrder);
 };
 
 /* Render id */
 pv.Mark.prototype.renderCore = function(){
     /* Assign a new render id to the root mark */
     var root = this.root;
+    
     root._renderId = (root._renderId || 0) + 1;
     
     if(pvc.debug >= 10){
@@ -714,120 +672,16 @@ pv.Mark.prototype.renderId = function(){
     return this.root._renderId;
 };
 
-/* DOM */
-/**
- * Inserts the specified child <i>n</i> at the given index. 
- * Any child from the given index onwards will be moved one position to the end. 
- * If <i>index</i> is null, this method is equivalent to
- * {@link #appendChild}. 
- * If <i>n</i> is already part of the DOM, it is first
- * removed before being inserted.
- *
- * @throws Error if <i>index</i> is non-null and greater than the current number of children.
- * @returns {pv.Dom.Node} the inserted child.
- */
-pv.Dom.Node.prototype.insertAt = function(n, index) {
-    var L;
-    if (index == null || index === (L = this.childNodes.length)){     
-        return this.appendChild(n);
-    }
-    
-    if(index > L){
-        throw new Error("Index out of range.");
-    }
-    
-    if (n.parentNode) {
-        n.parentNode.removeChild(n);
-    }
-    
-    var r = this.childNodes[index];
-    n.parentNode = this;
-    n.nextSibling = r;
-    n.previousSibling = r.previousSibling;
-    if (r.previousSibling) {
-        r.previousSibling.nextSibling = n;
-    } else {
-        if (r == this.lastChild) {
-            this.lastChild = n;
-        }
-        this.firstChild = n;
-    }
-    this.childNodes.splice(index, 0, n);
-    return n;
-};
-
-/**
- * Removes the child node at the specified index from this node.
- */
-pv.Dom.Node.prototype.removeAt = function(i) {
-  var n = this.childNodes[i];
-  if(n){
-      this.childNodes.splice(i, 1);
-      if (n.previousSibling) { 
-          n.previousSibling.nextSibling = n.nextSibling; 
-      } else { 
-          this.firstChild = n.nextSibling; 
-      }
-      
-      if (n.nextSibling) {
-          n.nextSibling.previousSibling = n.previousSibling;
-      } else {
-          this.lastChild = n.previousSibling;
-      }
-      
-      delete n.nextSibling;
-      delete n.previousSibling;
-      delete n.parentNode;
-  }
-  return n;
-};
-
-
-/* Local Properties */
-/**
- * Adapted from pv.Layout#property.
- * Defines a local property with the specified name and cast.
- * Note that although the property method is only defined locally,
- * the cast function is global,
- * which is necessary since properties are inherited!
- *
- * @param {string} name the property name.
- * @param {function} [cast] the cast function for this property.
- */
-pv.Mark.prototype.localProperty = function(name, cast) {
-  if (!this.hasOwnProperty("properties")) {
-    this.properties = pv.extend(this.properties);
-  }
-  this.properties[name] = true;
-  this.propertyMethod(name, false, pv.Mark.cast[name] = cast);
-  return this;
-};
-
 /* PROPERTIES */
-/**
- * Returns the value of a property as specified upon definition,
- * and, thus, without evaluation.
- */
-pv.Mark.prototype.getStaticPropertyValue = function(name) {
-    var properties = this.$properties;
-    for (var i = 0, L = properties.length; i < L; i++) {
-        var property = properties[i];
-        if (property.name == name) {
-            return property.value;
-        }
-    }
-    //return undefined;
-};
-
 pv.Mark.prototype.intercept = function(prop, interceptor, extValue, noCast){
     if(extValue !== undefined){
         if(!noCast){
             this[prop](extValue);
         
-            extValue = this.getStaticPropertyValue(prop);
+            extValue = this.propertyValue(prop);
         }
     } else if(!this._intercepted || !this._intercepted[prop]) { // Don't intercept any previous interceptor...
-        extValue = this.getStaticPropertyValue(prop);
+        extValue = this.propertyValue(prop);
     }
         
     // Let undefined pass through as a sign of not-intercepted
@@ -867,21 +721,13 @@ pv.Mark.prototype.isLocked = function(prop){
     return this._locked && this._locked[prop];
 };
 
-/**
- * Function used to propagate a datum received, as a singleton list.
- * Used to prevent re-evaluation of inherited data property functions.
- */
-pv.dataIdentity = function(datum){
-    return [datum];
-};
-
 /* ANCHORS */
 /**
  * name = left | right | top | bottom
  */
 pv.Mark.prototype.addMargin = function(name, margin) {
     if(margin !== 0){
-        var staticValue = def.nullyTo(this.getStaticPropertyValue(name), 0),
+        var staticValue = def.nullyTo(this.propertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
         this[name](function(){
@@ -913,73 +759,8 @@ pv.Mark.prototype.addMargins = function(margins) {
 };
 
 /* SCENE */
-/**
- * Iterates through all instances that
- * this mark has rendered.
- */
-pv.Mark.prototype.forEachInstance = function(fun, ctx){
-    var mark = this,
-        indexes = [],
-        breakInstance = {
-            isBreak: true,
-            visible: false,
-            datum: {}
-        };
-
-    /* Go up to the root and register our way back.
-     * The root mark never "looses" its scene.
-     */
-    while(mark.parent){
-        indexes.unshift(mark.childIndex);
-        mark = mark.parent;
-    }
-
-    // mark != null
-
-    // root scene exists if rendered at least once
-    var rootScene = mark.scene;
-    if(!rootScene){
-        return;
-    }
-    
-    var L = indexes.length;
-
-    function collectRecursive(scene, level, toScreen){
-        var isLastLevel = level === L, 
-            childIndex;
-        
-        if(!isLastLevel) {
-            childIndex = indexes[level];
-        }
-        
-        for(var index = 0, D = scene.length; index < D ; index++){
-            var instance = scene[index];
-            if(level === L){
-                fun.call(ctx, scene[index], toScreen);
-            } else if(instance.visible) {
-                var childScene = instance.children[childIndex];
-                
-                // Some nodes might have not been rendered?
-                if(childScene){
-                    var childToScreen = toScreen
-                                            .times(instance.transform)
-                                            .translate(instance.left, instance.top);
-                    
-                    collectRecursive(childScene, level + 1, childToScreen);
-                }
-            }
-        }
-        
-        if(D > 0) {
-            fun.call(ctx, breakInstance, null);
-        }
-    }
-
-    collectRecursive(rootScene, 0, pv.Transform.identity);
-};
-
-pv.Mark.prototype.forEachSignumInstance = function(fun, ctx){
-    this.forEachInstance(function(instance, t){
+pv.Mark.prototype.eachSignumInstance = function(fun, ctx){
+    this.eachInstance(function(instance, t){
         if(instance.datum || instance.group){
             fun.call(ctx, instance, t);
         }
@@ -987,25 +768,6 @@ pv.Mark.prototype.forEachSignumInstance = function(fun, ctx){
 };
 
 /* BOUNDS */
-pv.Mark.prototype.toScreenTransform = function(){
-    var t = pv.Transform.identity;
-    
-    if(this instanceof pv.Panel) {
-        t = t.translate(this.left(), this.top())
-             .times(this.transform());
-    }
-
-    var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
-    if(parent){
-        do {
-            t = t.translate(parent.left(), parent.top())
-                 .times(parent.transform());
-        } while ((parent = parent.parent));
-    }
-    
-    return t;
-};
-
 pv.Transform.prototype.transformHPosition = function(left){
     return this.x + (this.k * left);
 };
@@ -10368,23 +10130,18 @@ def.type('pvc.visual.Sign')
         .localProperty('_scene', Object)
         .localProperty('group',  Object);
     
-    this.lock('_scene', function(){ 
-            return this.scene; 
-        })
+    this.lockValue('_scene', function(scene){ return scene; })
         /* TODO: remove these when possible and favor access through scene */
-        .lock('group', function(){ 
-            return this.scene.group; 
-        })
-        .lock('datum', function(){ 
-            return this.scene.datum; 
-        });
+        .lockValue('group',  function(scene){ return scene.group; })
+        .lockValue('datum',  function(scene){ return scene.datum; })
+        ;
     
     pvMark.sign = this;
     
     /* Intercept the protovis mark's buildInstance */
     
     // Avoid doing a function bind, cause buildInstance is a very hot path
-    pvMark._buildInstance = pvMark.buildInstance;
+    pvMark.__buildInstance = pvMark.buildInstance;
     pvMark.buildInstance  = this._dispatchBuildInstance;
 })
 .postInit(function(panel, pvMark, keyArgs){
@@ -10400,7 +10157,14 @@ def.type('pvc.visual.Sign')
             this.panel._addPropTooltip(pvMark);
         }
 
-        if(!def.get(keyArgs, 'noHoverable', false) && options.hoverable) {
+        this.selectable = !def.get(keyArgs, 'noSelect', false) && options.selectable;
+        this.hoverable  = !def.get(keyArgs, 'noHover' , false) && options.hoverable ;
+        this.clickable  = !def.get(keyArgs, 'noClick', false) && panel._shouldHandleClick();
+        this.doubleClickable = !def.get(keyArgs, 'noDoubleClick', false) && options.doubleClickAction;
+        
+        this.interactive = this.selectable || this.hoverable;
+        
+        if(this.hoverable) {
             // Add hover-active behavior
             // May still require the point behavior on some ascendant panel
             var onEvent,
@@ -10441,11 +10205,11 @@ def.type('pvc.visual.Sign')
                 });
         }
 
-        if(!def.get(keyArgs, 'noClick', false) && panel._shouldHandleClick()){
+        if(this.clickable){
             panel._addPropClick(pvMark);
         }
 
-        if(!def.get(keyArgs, 'noDoubleClick', false) && options.doubleClickAction) {
+        if(this.doubleClickable) {
             panel._addPropDoubleClick(pvMark);
         }
     },
@@ -10474,7 +10238,7 @@ def.type('pvc.visual.Sign')
         /* state per: sign & scene & render */
         this.state = {};
 
-        mark._buildInstance.call(mark, instance);
+        mark.__buildInstance.call(mark, instance);
     },
     
     /* Extensibility */
@@ -10582,7 +10346,7 @@ def.type('pvc.visual.Sign')
             return null;
         }
 
-        if(this.scene.anyInteraction()) {
+        if(this.interactive && this.scene.anyInteraction()) {
             color = this.interactiveColor(type, color);
         } else {
             color = this.normalColor(type, color);
@@ -10690,7 +10454,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     /* SIZE */
     size: function(){
         var size = this.baseSize();
-        if(this.scene.anyInteraction()) {
+        if(this.interactive && this.scene.anyInteraction()) {
             size = this.interactiveSize(size);
         } else {
             size = this.normalSize(size);
@@ -10785,12 +10549,12 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
         ;
 
     // Segmented lines use fill color instead of stroke...so this doesn't work.
-    //this.pvMark.svg({ 'stroke-linecap': 'square' });
+    //this.pvMark.lineCap('square');
 })
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs, 
-                        'noHoverable', true,
+                        'noHover', true,
                         'noTooltips',  true);
         
         this.base(keyArgs);
@@ -10815,7 +10579,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();
-        if(this.scene.anyInteraction()) {
+        if(this.interactive && this.scene.anyInteraction()) {
             strokeWidth = this.interactiveStrokeWidth(strokeWidth);
         } else {
             strokeWidth = this.normalStrokeWidth(strokeWidth);
@@ -10929,7 +10693,7 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs, 
-                        'noHoverable', true,
+                        'noHover', true,
                         'noTooltips',  true);
 
         this.base(keyArgs);
@@ -11064,7 +10828,7 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();
-        if(this.scene.anyInteraction()) {
+        if(this.interactive && this.scene.anyInteraction()) {
             strokeWidth = this.interactiveStrokeWidth(strokeWidth);
         } else {
             strokeWidth = this.normalStrokeWidth(strokeWidth);
@@ -11209,7 +10973,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     /* Offset */
     offsetRadius: function(){
         var offsetRadius = this.baseOffsetRadius();
-        if(this.scene.anyInteraction()) {
+        if(this.interactive && this.scene.anyInteraction()) {
             offsetRadius = this.interactiveOffsetRadius(offsetRadius);
         } else {
             offsetRadius = this.normalOffsetRadius(offsetRadius);
@@ -11250,8 +11014,11 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
 .add({
     _addInteractive: function(keyArgs){
         keyArgs = def.setDefaults(keyArgs,
-                        'noHoverable', true,
-                        'noTooltips',  true);
+                        'noHover', true,
+                        'noSelect',  true,
+                        'noTooltips',    true,
+                        'noClick',       true,
+                        'noDoubleClick', true);
 
         this.base(keyArgs);
     },
@@ -11259,7 +11026,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     /* STROKE WIDTH */
     strokeWidth: function(){
         var strokeWidth = this.baseStrokeWidth();
-        if(this.scene.anyInteraction()) {
+        if(this.interactive && this.scene.anyInteraction()) {
             strokeWidth = this.interactiveStrokeWidth(strokeWidth);
         } else {
             strokeWidth = this.normalStrokeWidth(strokeWidth);
@@ -11344,6 +11111,12 @@ def.type('pvc.visual.Context')
     visualContext_update.call(this, mark, event);
 })
 .add(/** @lends pvc.visual.Context */{
+    isPinned: false,
+    
+    pin: function(){
+        this.isPinned = true;
+        return this;
+    },
     
     /* V1 DIMENSION ACCESSORS */
     getV1Series: function(){
@@ -11382,7 +11155,7 @@ function visualContext_update(mark, event){
     this.pvMark = mark;
 
     var instance = mark.instance(),
-        scene = instance.scene;
+        scene = instance._scene;
     
     if(!scene){
         var group = instance.group,
@@ -11500,7 +11273,7 @@ def.type('pvc.visual.Axis')
             return by;
         }
 
-        return this.scale.by(function(scene){
+        return this.scale.by1(function(scene){
             return scene.vars[varName].value;
         });
     },
@@ -14299,7 +14072,7 @@ pvc.BaseChart = pvc.Abstract.extend({
                                 var type = typeof v;
                                 if(type === 'object'){
                                     if(m === 'svg' || m === 'css'){
-                                        var v2 = mark.getStaticPropertyValue(m);
+                                        var v2 = mark.propertyValue(m);
                                         if(v2){
                                             v = def.copy(v2, v);
                                         }
@@ -16290,7 +16063,7 @@ pvc.BasePanel = pvc.Abstract.extend({
         if(mark.type === 'area' || mark.type === 'line'){
             var instancePrev;
             
-            mark.forEachSignumInstance(function(instance, toScreen){
+            mark.eachSignumInstance(function(instance, toScreen){
                 if(!instance.visible || instance.isBreak || (instance.datum && instance.datum.isNull)) {
                     // Break the line
                     instancePrev = null;
@@ -16304,7 +16077,7 @@ pvc.BasePanel = pvc.Abstract.extend({
                 }
             }, this);
         } else {
-            mark.forEachSignumInstance(function(instance, toScreen){
+            mark.eachSignumInstance(function(instance, toScreen){
                 if(!instance.isBreak && instance.visible) {
                     var shape = mark[shapeMethod](instance).apply(toScreen);
                     processShape(shape, instance);
@@ -19138,13 +18911,10 @@ pvc.AxisPanel = pvc.BasePanel.extend({
     anchor: "bottom",
     axisSize: undefined,
     tickLength: 6,
-    tickColor: "#aaa",
+    
     panelName: "axis", // override
     scale: null,
-    fullGrid: false,
-    fullGridCrossesMargin: true,
     ruleCrossesMargin: true,
-    zeroLine: false, // continuous axis
     font: '9px sans-serif', // label font
     labelSpacingMin: 1,
     // To be used in linear scales
@@ -19785,7 +19555,6 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         this.extend(this.pvTicks,      this.panelName + "Ticks_");
         this.extend(this.pvLabel,      this.panelName + "Label_");
         this.extend(this.pvMinorTicks, this.panelName + "MinorTicks_");
-        this.extend(this.pvZeroLine,   this.panelName + "ZeroLine_");
     },
 
     renderAxis: function(){
@@ -19818,7 +19587,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             [this.anchorOpposite()](0) // top (of the axis panel)
             [size_a ](rSize) // width
             [begin_a](rMin)  // left
-            .svg({ 'stroke-linecap': 'square' }) // So that begin/end ticks better join with the rule 
+            .lineCap('square') // So that begin/end ticks better join with the rule 
             ;
 
         if (this.isDiscrete){
@@ -19854,7 +19623,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
             includeModulo;
         
         if(this.axis.option('OverlappedLabelsHide') && itemCount > 0 && this._rSize > 0) {
-            var overlapFactor = def.within(this.axis.option('OverlappedLabelsMaxPct'), 0, 0.9);
+            var overlapFactor = def.between(this.axis.option('OverlappedLabelsMaxPct'), 0, 0.9);
             var textHeight    = pvc.text.getTextHeight("m", this.font) * (1 - overlapFactor);
             includeModulo = Math.max(1, Math.ceil((itemCount * textHeight) / this._rSize));
 
@@ -20177,7 +19946,7 @@ pvc.AxisPanel = pvc.BasePanel.extend({
         if(!this.useCompositeAxis){
             var mark = this.pvLabel;
             
-            mark.forEachInstance(function(instance, t){
+            mark.eachInstance(function(instance, t){
                 if(!instance.isBreak) { 
                     var data = instance.group;
                     if(data) {
@@ -20672,11 +20441,11 @@ pvc.PieChartPanel = pvc.BasePanel.extend({
         var center = pv.vector(clientSize.width / 2, clientSize.height / 2);
         
         function resolvePercentRadius(radius){
-            return def.within(pvc.PercentValue.resolve(radius, clientRadius), 0, clientRadius);
+            return def.between(pvc.PercentValue.resolve(radius, clientRadius), 0, clientRadius);
         }
         
         function resolvePercentWidth(width){
-            return def.within(pvc.PercentValue.resolve(width, clientWidth), 0, clientWidth);
+            return def.between(pvc.PercentValue.resolve(width, clientWidth), 0, clientWidth);
         }
         
         // ---------------------
@@ -21012,7 +20781,7 @@ def
     this.angleScale = pv.Scale
                         .linear(0, sumAbs)
                         .range(0, 2 * Math.PI)
-                        .by(Math.abs);
+                        .by1(Math.abs);
     
     this.vars.sumAbs = new pvc.visual.ValueLabelVar(sumAbs, formatValue(sumAbs));
     
@@ -22073,7 +21842,10 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
         this.pvWaterfallLine = new pvc.visual.Rule(this, this.pvPanel, {
                 extensionId: 'barWaterfallLine',
                 noTooltips:  false,
-                noHoverable: false
+                noHover:   false,
+                noSelect:  false,
+                noClick:       false,
+                noDoubleClick: false
             })
             .lockValue('data', ruleRootScene.childNodes)
             .optional('visible', function(){
@@ -22090,7 +21862,7 @@ pvc.WaterfallPanel = pvc.BarAbstractPanel.extend({
                     function(){ return sceneBaseScale(this.scene) - barWidth2; })
             .override('baseColor', function(){ return this.delegate(waterColor); })
             .pvMark
-            .svg({ 'stroke-linecap': 'round' })
+            .lineCap('round')
             ;
 
         if(chart.options.showWaterValues){
@@ -22575,7 +22347,7 @@ pvc.LineDotAreaPanel = pvc.CartesianAbstractPanel.extend({
                 antialias:   showAreas && !showLines,
                 segmented:   !isDense,
                 noTooltips:  false,
-                noHoverable: false // While the area itself does not change appearance, the pvLine does due to activeSeries... 
+                noHover: false // While the area itself does not change appearance, the pvLine does due to activeSeries... 
             })
             
             .lock('visible', def.retTrue)
@@ -24728,12 +24500,13 @@ pvc.MetricLineDotPanel = pvc.CartesianAbstractPanel.extend({
                 dot.override('strokeColor', function (scene) {
                     return scene.vars.dotSize.value < 0 ? "#000000" : this.base();
                 });
+                dot.optionalValue('lineCap', 'round'); // only used by strokeDashArray
                 dot.optional('strokeDasharray', function (scene){
-                    return scene.vars.dotSize.value < 0 ? '1.5 3' : null; // .  .  .
+                    return scene.vars.dotSize.value < 0 ? 'dot' : null; // .  .  .
                 });
-//                dot.optional('lineWidth', function (scene){
-//                    return scene.vars.dotSize.value < 0 ? 1 : 1.5;
-//                });
+                dot.optional('lineWidth', function (scene){
+                    return scene.vars.dotSize.value < 0 ? 1.8 : 1.5;
+                });
             }
 
             /* Ignore any extension */
@@ -27337,7 +27110,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         this.pvVRuleTop = setupVRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
                 extensionId:  'boxVRule',
                 freePosition: true,
-                noHoverable:  false
+                noHover:   false,
+                noSelect:  false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(scene){
                 return scene.vars.category.showVRuleAbove && this.delegate(true);
@@ -27350,7 +27126,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         this.pvVRuleBot = setupVRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
                 extensionId:  'boxVRule',
                 freePosition: true,
-                noHoverable:  false
+                noHover:   false,
+                noSelect:  false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(scene){
                 return scene.vars.category.showVRuleBelow && this.delegate(true);
@@ -27403,7 +27182,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         this.pvHRule5 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
                 extensionId:  'boxHRule5',
                 freePosition: true,
-                noHoverable:  false
+                noHover:   false,
+                noSelect:  false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(){
                 return this.scene.vars.percentil5.value != null && this.delegate(true);
@@ -27415,7 +27197,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         this.pvHRule95 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
                 extensionId:  'boxHRule95',
                 freePosition: true,
-                noHoverable:  false
+                noHover:   false,
+                noSelect:  false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(){
                 return this.scene.vars.percentil95.value != null && this.delegate(true);
@@ -27427,7 +27212,10 @@ pvc.BoxplotChartPanel = pvc.CartesianAbstractPanel.extend({
         this.pvHRule50 = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
                 extensionId:  'boxHRule50',
                 freePosition: true,
-                noHoverable:  false
+                noHover:   false,
+                noSelect:  false,
+                noClick:       false,
+                noDoubleClick: false
             }))
             .intercept('visible', function(){
                 return this.scene.vars.median.value != null && this.delegate(true);

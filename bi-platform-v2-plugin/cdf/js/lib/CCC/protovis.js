@@ -2096,6 +2096,73 @@ pv.Dom.Node.prototype.insertBefore = function(n, r) {
 };
 
 /**
+ * Inserts the specified child <i>n</i> at the given index. 
+ * Any child from the given index onwards will be moved one position to the end. 
+ * If <i>index</i> is null, this method is equivalent to
+ * {@link #appendChild}. 
+ * If <i>n</i> is already part of the DOM, it is first
+ * removed before being inserted.
+ *
+ * @throws Error if <i>index</i> is non-null and greater than the current number of children.
+ * @returns {pv.Dom.Node} the inserted child.
+ */
+pv.Dom.Node.prototype.insertAt = function(n, index) {
+    var L;
+    if (index == null || index === (L = this.childNodes.length)){     
+        return this.appendChild(n);
+    }
+    
+    if(index > L){
+        throw new Error("Index out of range.");
+    }
+    
+    if (n.parentNode) {
+        n.parentNode.removeChild(n);
+    }
+    
+    var r = this.childNodes[index];
+    n.parentNode = this;
+    n.nextSibling = r;
+    n.previousSibling = r.previousSibling;
+    if (r.previousSibling) {
+        r.previousSibling.nextSibling = n;
+    } else {
+        if (r == this.lastChild) {
+            this.lastChild = n;
+        }
+        this.firstChild = n;
+    }
+    this.childNodes.splice(index, 0, n);
+    return n;
+};
+
+/**
+ * Removes the child node at the specified index from this node.
+ */
+pv.Dom.Node.prototype.removeAt = function(i) {
+  var n = this.childNodes[i];
+  if(n){
+      this.childNodes.splice(i, 1);
+      if (n.previousSibling) { 
+          n.previousSibling.nextSibling = n.nextSibling; 
+      } else { 
+          this.firstChild = n.nextSibling; 
+      }
+      
+      if (n.nextSibling) {
+          n.nextSibling.previousSibling = n.previousSibling;
+      } else {
+          this.lastChild = n.previousSibling;
+      }
+      
+      delete n.nextSibling;
+      delete n.previousSibling;
+      delete n.parentNode;
+  }
+  return n;
+};
+
+/**
  * Replaces the specified child <i>r</i> of this node with the node <i>n</i>. If
  * <i>n</i> is already part of the DOM, it is first removed before being added.
  *
@@ -3682,6 +3749,12 @@ pv.Scale.quantitative = function() {
     return by;
   };
 
+  scale.by1 = function(f) {
+    function by1(x) { return scale(f.call(this, x)); }
+    for (var method in scale) by1[method] = scale[method];
+    return by1;
+  };
+
   scale.domain.apply(scale, arguments);
   return scale;
 };
@@ -4327,6 +4400,12 @@ pv.Scale.ordinal = function() {
     return by;
   };
 
+  scale.by1 = function(f) {
+    function by1(x) { return scale(f.call(this, x)); }
+    for (var method in scale) by1[method] = scale[method];
+    return by1;
+  };
+    
   scale.domain.apply(scale, arguments);
   return scale;
 };
@@ -4507,6 +4586,12 @@ pv.Scale.quantile = function() {
     return by;
   };
 
+  scale.by1 = function(f) {
+    function by1(x) { return scale(f.call(this, x)); }
+    for (var method in scale) by1[method] = scale[method];
+    return by1;
+  };
+  
   scale.domain.apply(scale, arguments);
   return scale;
 };
@@ -5903,7 +5988,10 @@ pv.Scene = pv.SvgScene = {
       "stroke": "none",
       "stroke-opacity": 1,
       "stroke-width": 1.5,
-      "stroke-linejoin": "miter"
+      "stroke-linejoin":   "miter",
+      "stroke-linecap":    "butt",
+      "stroke-miterlimit": 8,
+      "stroke-dasharray":  "none"
     },
     css: {
       "font": "10px sans-serif"
@@ -6135,6 +6223,97 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
   }
 };
 
+
+(function() {
+    var dashAliasMap = {
+        '-':    'shortdash',
+        '.':    'shortdot',
+        '-.':   'shortdashdot',
+        '-..':  'shortdashdotdot',
+        '. ':   'dot',
+        '- ':   'dash',
+        '--':   'longdash',
+        '- .':  'dashdot',
+        '--.':  'longdashdot',
+        '--..': 'longdashdotdot'
+    };
+    
+    var dashMap = { // SVG specific - values for cap=butt
+        'shortdash':       [3, 1],
+        'shortdot':        [1, 1],
+        'shortdashdot':    [3, 1, 1, 1],
+        'shortdashdotdot': [3, 1, 1, 1, 1, 1],
+        'dot':             [1, 3],
+        'dash':            [4, 3],
+        'longdash':        [8, 3],
+        'dashdot':         [4, 3, 1, 3],
+        'longdashdot':     [8, 3, 1, 3],
+        'longdashdotdot':  [8, 3, 1, 3, 1, 3]
+    };
+    
+    pv.SvgScene.isStandardDashStyle = function(dashArray){
+        return dashMap.hasOwnProperty(dashArray);
+    };
+    
+    pv.SvgScene.translateDashStyleAlias = function(dashArray){
+        return dashAliasMap.hasOwnProperty(dashArray) ?
+                    dashAliasMap[dashArray] :
+                    dashArray;
+    };
+    
+    pv.SvgScene.parseDasharray = function(s){
+        // This implementation tries to mimic the VML dashStyle,
+        // cause the later is more limited...
+        //
+        // cap = square and butt result in the same dash pattern
+        
+        var dashArray = s.strokeDasharray; 
+        if(dashArray && dashArray !== 'none'){
+            dashArray = this.translateDashStyleAlias(dashArray);
+            
+            var standardDashArray = dashMap[dashArray];
+            if(standardDashArray){
+                dashArray = standardDashArray;
+            } else {
+                // Make measures relative to line width
+                dashArray = 
+                    dashArray.split(/[\s,]+/);
+            }
+            
+            var lineWidth = s.lineWidth;
+            var lineCap   = s.lineCap || 'butt';
+            var isButtCap = lineCap === 'butt';
+            
+            dashArray = 
+                dashArray
+                    .map(function(num, index){
+                        num = +num;
+                        if(!isButtCap){
+                            // Steal one unit to dash and give it to the gap
+                            // to compensate for the round/square cap
+                            if(index % 2){
+                                // gap
+                                num += 1;
+                            } else {
+                                // dash/dot
+                                num -= 1;
+                            }
+                        }
+                        
+                        if(num <= 0){
+                            num = .001; // SVG does not support 0-width; with cap=square/round is useful.
+                        }
+                        
+                        return num * lineWidth / this.scale; 
+                     }, this)
+                    .join(' ');
+        } else {
+            dashArray = null;
+        }
+        
+        return dashArray;
+    };
+})();
 
 (function() {
 
@@ -6675,7 +6854,11 @@ pv.SvgScene.area = function(scenes) {
       "fill-opacity": fill.opacity || null,
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
-      "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
+      "stroke-width":      stroke.opacity ? s.lineWidth / this.scale : null,
+      "stroke-linecap":    s.lineCap,
+      "stroke-linejoin":   s.lineJoin,
+      "stroke-miterlimit": s.strokeMiterLimit,
+      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
     });
 
   if(s.svg) this.setAttributes(e, s.svg);
@@ -6815,7 +6998,9 @@ pv.SvgScene.bar = function(scenes) {
         "fill-opacity": fill.opacity || null,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity || null,
-        "stroke-width": lineWidth
+        "stroke-width": lineWidth,
+        "stroke-linecap":    s.lineCap,
+        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
       });
 
     if(s.svg) this.setAttributes(e, s.svg);
@@ -6901,7 +7086,8 @@ pv.SvgScene.dot = function(scenes) {
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-      "stroke-dasharray": s.strokeDasharray || 'none'
+      "stroke-linecap": s.lineCap,
+      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
     };
     if (path) {
       svg.transform = "translate(" + s.left + "," + s.top + ")";
@@ -7086,8 +7272,10 @@ pv.SvgScene.line = function(scenes) {
       "stroke": stroke.color,
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
+      "stroke-linecap":    s.lineCap,
       "stroke-linejoin": s.lineJoin,
-      "stroke-dasharray": s.strokeDasharray || 'none'
+      "stroke-miterlimit": s.strokeMiterLimit,
+      "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
     });
 
   if(s.svg) this.setAttributes(e, s.svg);
@@ -7569,7 +7757,9 @@ pv.SvgScene.stroke = function(e, scenes, i) {
         "fill": null,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity,
-        "stroke-width": s.lineWidth / this.scale
+        "stroke-width": s.lineWidth / this.scale,
+        "stroke-linecap":    s.lineCap,
+        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
       });
     e = this.append(e, scenes, i);
   }
@@ -7605,7 +7795,8 @@ pv.SvgScene.rule = function(scenes) {
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity,
         "stroke-width": lineWidth,
-        "stroke-dasharray": s.strokeDasharray || 'none'
+        "stroke-linecap":    s.lineCap,
+        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
       });
     
     if(s.svg) this.setAttributes(e, s.svg);
@@ -7686,7 +7877,11 @@ pv.SvgScene.wedge = function(scenes) {
         "fill-opacity": fill.opacity || null,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity || null,
-        "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null
+        "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
+        "stroke-linejoin":   s.lineJoin,
+        "stroke-miterlimit": s.strokeMiterLimit,
+        "stroke-linecap":    s.lineCap,
+        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
       });
 
     if(s.svg) this.setAttributes(e, s.svg);
@@ -7845,11 +8040,30 @@ pv.Mark.prototype.property = function(name, cast) {
   return this;
 };
 
+// Adapted from pv.Layout#property
 /**
- * @type object
+ * Defines a local property with the specified name and cast.
+ * Note that although the property method is only defined locally,
+ * the cast function is global,
+ * which is necessary since properties are inherited!
+ *
+ * @param {string} name the property name.
+ * @param {function} [cast] the cast function for this property.
  */
-pv.propertiesDepsOf = null;
-pv.propertyEval   = null;
+pv.Mark.prototype.localProperty = function(name, cast) {
+  if (!this.hasOwnProperty("properties")) {
+    this.properties = pv.extend(this.properties);
+  }
+  this.properties[name] = true;
+  
+  var currCast = pv.Mark.cast[name];
+  if(cast){
+      pv.Mark.cast[name] = currCast = cast;
+  }
+  
+  this.propertyMethod(name, false, currCast);
+  return this;
+};
 
 /**
  * @private Defines a setter-getter for the specified property.
@@ -7897,22 +8111,22 @@ pv.Mark.prototype.propertyMethod = function(name, def, cast) {
          * 11 - 3 - prop - function
          * 
          * x << 1 <=> floor(x) * 2
+         * 
+         * true  << 1 -> 2 - 10
+         * false << 1 -> 0 - 00
          */
         var type = !def << 1 | (typeof v === "function");
         var vf;
         // A function and cast?
         if(type & 1 && cast){
-            vf = function(){
-                var x = v.apply(this, arguments);
-                return (x != null) ? cast(x) : null;
-            };
+            vf = pv.Mark.funPropertyCaller(v, cast);
         } else if(v != null && cast){
             vf = cast(v);
         } else {
             vf = v;
         }
         
-        this.propertyValue(name, vf, type);
+        this.setPropertyValue(name, vf, type);
         
         return this;
       }
@@ -7946,8 +8160,19 @@ pv.Mark.prototype.propertyMethod = function(name, def, cast) {
     };
 };
 
+/** @private Creates and returns a wrapper function to call a property function and a property cast. */
+pv.Mark.funPropertyCaller = function(fun, cast){
+    // Avoiding the use of arguments object to try to speed things up
+    var stack = pv.Mark.stack;
+    
+    return function(){
+        var value = fun.apply(this, stack);
+        return value != null ? cast(value) : null;
+    };
+};
+
 /** @private Sets the value of the property <i>name</i> to <i>v</i>. */
-pv.Mark.prototype.propertyValue = function(name, v, type) {
+pv.Mark.prototype.setPropertyValue = function(name, v, type) {
     var propertiesMap = this.$propertiesMap;
     var properties = this.$properties;
     
@@ -7975,6 +8200,23 @@ pv.Mark.prototype.propertyValue = function(name, v, type) {
   properties.push(p);
   return p;
 };
+
+/**
+ * Gets the static value of a property, without evaluation.
+ * @param {string} name the property name.
+ * @type any
+ */
+pv.Mark.prototype.propertyValue = function(name) {
+    var p = this.$propertiesMap[name];
+    if(p){
+        return p.value;
+    }
+    //return undefined;
+};
+
+/** @private Stores the current data stack. */
+//must be declared before defaults, below
+pv.Mark.stack = [];
 
 /* Define all global properties. */
 pv.Mark.prototype
@@ -8650,10 +8892,6 @@ pv.Mark.prototype.renderCore = function() {
       function() { render(this.root, 0, 1); });
 };
 
-/** @private Stores the current data stack. */
-pv.Mark.stack = [];
-
-
 /** @private */ 
 pv.Mark._requiredPropsPosition = {id: 0, datum: 1, visible: 3};
 
@@ -8955,14 +9193,17 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
     var v = p.value; // assume case 2 (constant)
     
     switch (p.type) {
+      /* 2 most common first */
+      case 3: 
+        v = v.apply(this, stack); 
+        break;
+      case 2:
+        break;
+        
       // copy already evaluated def value to each instance's scene
       case 0:
       case 1: 
         v = this.scene.defs[p.name].value; 
-        break;
-          
-      case 3: 
-        v = v.apply(this, stack); 
         break;
     }
     
@@ -9106,7 +9347,13 @@ pv.Mark.prototype.buildImplied = function(s) {
   var h = p.height ? s.height : 0;
 
   /* Compute implied width, right and left. */
-  var width = this.parent ? this.parent.width() : (w + l + r);
+  var instance;
+  var checked;
+  
+  if(w == null || r == null || l == null){
+      instance = this.parent ? this.parent.instance() : null;
+      checked = true;
+      var width = instance ? instance.width : (w + l + r);
   if (w == null) {
     w = width - (r = r || 0) - (l = l || 0);
   } else if (r == null) {
@@ -9115,12 +9362,18 @@ pv.Mark.prototype.buildImplied = function(s) {
     } else {
       r = width - w - l;
     }
-  } else if (l == null) {
+      } else {
     l = width - w - r;
+  }
   }
 
   /* Compute implied height, bottom and top. */
-  var height = this.parent ? this.parent.height() : (h + t + b);
+  if (h == null || b == null || t == null) {
+      if(!checked){
+          instance = this.parent ? this.parent.instance() : null;
+      }
+      
+      var height = instance ? instance.height : (h + t + b);
   if (h == null) {
     h = height - (t = t || 0) - (b = b || 0);
   } else if (b == null) {
@@ -9129,8 +9382,9 @@ pv.Mark.prototype.buildImplied = function(s) {
     } else {
       b = height - h - t;
     }
-  } else if (t == null) {
+      } else {
     t = height - h - b;
+  }
   }
 
   s.left = l;
@@ -9396,6 +9650,91 @@ pv.Mark.dispatch = function(type, scene, index, event) {
   return true;
 };
 
+/**
+ * Iterates through all instances that
+ * this mark has rendered.
+ */
+pv.Mark.prototype.eachInstance = function(fun, ctx){
+    var mark = this,
+        indexes = [],
+        breakInstance = {
+            isBreak: true,
+            visible: false,
+            datum: {}
+        };
+
+    /* Go up to the root and register our way back.
+     * The root mark never "looses" its scene.
+     */
+    while(mark.parent){
+        indexes.unshift(mark.childIndex);
+        mark = mark.parent;
+    }
+
+    // mark != null
+
+    // root scene exists if rendered at least once
+    var rootScene = mark.scene;
+    if(!rootScene){
+        return;
+    }
+    
+    var L = indexes.length;
+
+    function collectRecursive(scene, level, toScreen){
+        var isLastLevel = level === L, 
+            childIndex;
+        
+        if(!isLastLevel) {
+            childIndex = indexes[level];
+        }
+        
+        var D = scene.length;
+        if(D > 0){
+            for(var index = 0 ; index < D ; index++){
+                var instance = scene[index];
+                if(level === L){
+                    fun.call(ctx, scene[index], toScreen);
+                } else if(instance.visible) {
+                    var childScene = instance.children[childIndex];
+                    
+                    // Some nodes might have not been rendered?
+                    if(childScene){
+                        var childToScreen = toScreen
+                                                .times(instance.transform)
+                                                .translate(instance.left, instance.top);
+                        
+                        collectRecursive(childScene, level + 1, childToScreen);
+                    }
+                }
+            }
+        
+            fun.call(ctx, breakInstance, null);
+        }
+    }
+
+    collectRecursive(rootScene, 0, pv.Transform.identity);
+};
+
+pv.Mark.prototype.toScreenTransform = function(){
+    var t = pv.Transform.identity;
+    
+    if(this instanceof pv.Panel) {
+        t = t.translate(this.left(), this.top())
+             .times(this.transform());
+    }
+
+    var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
+    if(parent){
+        do {
+            t = t.translate(parent.left(), parent.top())
+                 .times(parent.transform());
+        } while ((parent = parent.parent));
+    }
+    
+    return t;
+};
+
 pv.Mark.prototype.transition = function() {
   return new pv.Transition(this);
 };
@@ -9513,6 +9852,10 @@ pv.Area.prototype = pv.extend(pv.Mark)
     .property("width", Number)
     .property("height", Number)
     .property("lineWidth", Number)
+    .property("lineJoin",   String)
+    .property("strokeMiterLimit", Number)
+    .property("lineCap",   String)
+    .property("strokeDasharray", String)
     .property("strokeStyle", pv.fillStyle)
     .property("fillStyle", pv.fillStyle)
     .property("segmented", Boolean)
@@ -9631,7 +9974,11 @@ pv.Area.prototype.defaults = new pv.Area()
     .lineWidth(1.5)
     .fillStyle(pv.Colors.category20().by(pv.parent))
     .interpolate("linear")
-    .tension(.7);
+    .tension(.7)
+    .lineJoin("miter")
+    .strokeMiterLimit(8)
+    .lineCap("butt")
+    .strokeDasharray("none");
 
 /** @private Sets width and height to zero if null. */
 pv.Area.prototype.buildImplied = function(s) {
@@ -9644,7 +9991,10 @@ pv.Area.prototype.buildImplied = function(s) {
 pv.Area.fixed = {
   lineWidth: 1,
   lineJoin: 1,
+  strokeMiterLimit: 1,
+  lineCap: 1,
   strokeStyle: 1,
+  strokeDasharray: 1,
   fillStyle: 1,
   segmented: 1,
   interpolate: 1,
@@ -9694,15 +10044,21 @@ pv.Area.prototype.buildInstance = function(s) {
     /* Determine which properties are fixed. */
     if (!fixed) {
       fixed = binds.fixed = [];
+      
       function f(p) { return !p.fixed || (fixed.push(p), false); }
+      
       binds.required = binds.required.filter(f);
       if (!this.scene[0].segmented) binds.optional = binds.optional.filter(f);
     }
 
     /* Copy fixed property values from the first instance. */
-    for (var i = 0, n = fixed.length; i < n; i++) {
+    var n = fixed.length;
+    if(n){
+      var firstScene = this.scene[0];
+      for (var i = 0 ; i < n ; i++) {
       var p = fixed[i].name;
-      s[p] = this.scene[0][p];
+        s[p] = firstScene[p];
+      }
     }
   }
 
@@ -9786,7 +10142,9 @@ pv.Bar.prototype = pv.extend(pv.Mark)
     .property("height", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
-    .property("fillStyle", pv.fillStyle);
+    .property("fillStyle", pv.fillStyle)
+    .property("lineCap",   String)
+    .property("strokeDasharray", String);
 
 pv.Bar.prototype.type = "bar";
 
@@ -9844,7 +10202,9 @@ pv.Bar.prototype.type = "bar";
 pv.Bar.prototype.defaults = new pv.Bar()
     .extend(pv.Mark.prototype.defaults)
     .lineWidth(1.5)
-    .fillStyle(pv.Colors.category20().by(pv.parent));
+    .fillStyle(pv.Colors.category20().by(pv.parent))
+    .lineCap("butt")
+    .strokeDasharray("none");
 /**
  * Constructs a new dot mark with default properties. Dots are not typically
  * constructed directly, but by adding to a panel or an existing mark via
@@ -9872,6 +10232,7 @@ pv.Dot.prototype = pv.extend(pv.Mark)
     .property("shapeSize", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
+    .property("lineCap",   String)
     .property("strokeDasharray", String)
     .property("fillStyle", pv.fillStyle);
 
@@ -9969,7 +10330,8 @@ pv.Dot.prototype.defaults = new pv.Dot()
     .shape("circle")
     .lineWidth(1.5)
     .strokeStyle(pv.Colors.category10().by(pv.parent))
-    .strokeDasharray("");
+    .lineCap("butt")
+    .strokeDasharray("none");
 
 /**
  * Constructs a new dot anchor with default properties. Dots support five
@@ -10241,6 +10603,8 @@ pv.Line = function() {
 pv.Line.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
     .property("lineJoin", String)
+    .property("strokeMiterLimit", Number)
+    .property("lineCap",   String)
     .property("strokeStyle", pv.fillStyle)
     .property("strokeDasharray", String)
     .property("fillStyle", pv.fillStyle)
@@ -10355,13 +10719,15 @@ pv.Line.prototype.type = "line";
  */
 pv.Line.prototype.defaults = new pv.Line()
     .extend(pv.Mark.prototype.defaults)
-    .lineJoin("miter")
     .lineWidth(1.5)
     .strokeStyle(pv.Colors.category10().by(pv.parent))
-    .strokeDasharray("")
     .interpolate("linear")
     .eccentricity(0)
-    .tension(.7);
+    .tension(.7)
+    .lineJoin("miter")
+    .strokeMiterLimit(8)
+    .lineCap("butt")
+    .strokeDasharray("none");
 
 /** @private Reuse Area's implementation for segmented bind & build. */
 pv.Line.prototype.bind = pv.Area.prototype.bind;
@@ -10464,6 +10830,7 @@ pv.Rule.prototype = pv.extend(pv.Mark)
     .property("height", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
+    .property("lineCap",   String)
     .property("strokeDasharray", String);
 
 pv.Rule.prototype.type = "rule";
@@ -10514,7 +10881,8 @@ pv.Rule.prototype.defaults = new pv.Rule()
     .lineWidth(1)
     .strokeStyle("black")
     .antialias(false)
-    .strokeDasharray("");
+    .lineCap("butt")
+    .strokeDasharray("none");
 
 /**
  * Constructs a new rule anchor with default properties. Rules support five
@@ -11042,6 +11410,10 @@ pv.Wedge.prototype = pv.extend(pv.Mark)
     .property("outerRadius", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
+    .property("lineJoin",  String)
+    .property("strokeMiterLimit", Number)
+    .property("lineCap",   String)
+    .property("strokeDasharray", String)
     .property("fillStyle", pv.fillStyle);
 
 pv.Wedge.prototype.type = "wedge";
@@ -11134,7 +11506,11 @@ pv.Wedge.prototype.defaults = new pv.Wedge()
     .innerRadius(0)
     .lineWidth(1.5)
     .strokeStyle(null)
-    .fillStyle(pv.Colors.category20().by(pv.index));
+    .fillStyle(pv.Colors.category20().by(pv.index))
+    .lineJoin("miter")
+    .strokeMiterLimit(8)
+    .lineCap("butt")
+    .strokeDasharray("none");
 
 /**
  * Returns the mid-radius of the wedge, which is defined as half-way between the
@@ -12834,14 +13210,7 @@ pv.Layout.prototype = pv.extend(pv.Panel);
  * @param {string} name the property name.
  * @param {function} [cast] the cast function for this property.
  */
-pv.Layout.prototype.property = function(name, cast) {
-  if (!this.hasOwnProperty("properties")) {
-    this.properties = pv.extend(this.properties);
-  }
-  this.properties[name] = true;
-  this.propertyMethod(name, false, pv.Mark.cast[name] = cast);
-  return this;
-};
+pv.Layout.prototype.property = pv.Mark.prototype.localProperty;
 /**
  * Constructs a new, empty network layout. Layouts are not typically constructed
  * directly; instead, they are added to an existing panel via
