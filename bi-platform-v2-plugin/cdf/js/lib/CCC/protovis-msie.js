@@ -838,6 +838,7 @@ pv.VmlScene.title = function(e, s) {
 // mostly the same code as pv.SvgScene.panel, but with less MSIE crashing...
 pv.VmlScene.panel = function(scenes) {
   var g = scenes.$g, e = g && g.firstChild;
+  var inited = false;
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
 
@@ -856,6 +857,7 @@ pv.VmlScene.panel = function(scenes) {
       }
       
       if(!g) {
+        inited = true;
         vml.init(); // turn VML on if it isn't already
         
         g = canvas.appendChild( vml.createElement( "svg" ) );
@@ -922,6 +924,11 @@ pv.VmlScene.panel = function(scenes) {
     /* stroke */
     e = this.stroke( e, scenes, i );
 
+  }
+  
+  if(inited){
+    this.removeSiblings(e);
+    e = g.appendChild( vml.createElement( "oval" ) );
   }
   return e;
 };
