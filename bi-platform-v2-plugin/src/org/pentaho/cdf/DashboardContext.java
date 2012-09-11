@@ -61,7 +61,7 @@ public class DashboardContext {
                     // Fix #29. Because there is no file parameter in CDF, but action parameter
                     //file parameter is used in CDE
                     file = requestParams.getStringParameter("file", requestParams.getStringParameter("action", "")),
-                    fullPath = ("/" + solution  + "/" + file).replaceAll("/+", "/");
+                    fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
             Calendar cal = Calendar.getInstance();
             
