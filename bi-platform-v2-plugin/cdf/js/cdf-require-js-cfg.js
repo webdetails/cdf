@@ -1,0 +1,1 @@
+requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
