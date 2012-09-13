@@ -928,6 +928,10 @@ pv.VmlScene.panel = function(scenes) {
   
   if(inited){
     this.removeSiblings(e);
+    
+    // IE doesn't immediately render the last VML element???
+    // Only a re-render forces it to show (like when dragging with the rubber band) 
+    // Adding a dummy last element in the VML DOM solves the issue.
     e = g.appendChild( vml.createElement( "oval" ) );
   }
   return e;
