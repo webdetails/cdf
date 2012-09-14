@@ -12359,7 +12359,7 @@ def
                     keyArgs = {
                         drawRule:    colorAxis.option('DrawLine'  ),
                         drawMarker:  colorAxis.option('DrawMarker'),
-                        markerShape: colorAxis.option('Shape'),
+                        markerShape: colorAxis.option('Shape')
                     };
                 }
                 
