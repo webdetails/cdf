@@ -1,0 +1,25 @@
+/*
+ * This module definition is used by other projects to build CDF scripts in with their own. This is not used by CDF itself
+ */
+pen.define(
+['cdf/Base',
+	'cdf/Dashboards',
+	'cdf/jquery',
+	'cdf/jquery-impromptu.3.1',
+	'cdf/jquery-ui-datepicker-i18n',
+	'cdf/jquery.bgiframe',
+	'cdf/jquery.blockUI',
+	'cdf/jquery.corner',
+	'cdf/jquery.eventstack',
+	'cdf/jquery.i18n.properties',
+	'cdf/jquery.jdMenu',
+	'cdf/jquery',
+	'cdf/jquery.positionBy',
+	'cdf/jquery.sparkline',
+	'cdf/jquery.tooltip',
+	'cdf/jquery.ui',
+	'cdf/json',
+	'cdf/simile/ajax/simile-ajax-api',
+	'cdf/simile/ajax/scripts/json',
+	'cdf/CoreComponents'],
+	function(){});
