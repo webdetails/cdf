@@ -1313,7 +1313,7 @@ function doCsvQuoting(value, separator, alwaysEscape){
   return value;
 };
 
-/**
+/*!
 *
 *  Javascript sprintf
 *  http://www.webtoolkit.info/
