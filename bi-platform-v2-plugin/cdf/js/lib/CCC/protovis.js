@@ -980,7 +980,7 @@ pv.Format.number = function() {
     /* Round the fractional part, and split on decimal separator. */
     if (Infinity > maxf) x = Math.round(x * maxk) / maxk;
     var s = String(Math.abs(x)).split(".");
-
+        
     /* Pad, truncate and group the integral part. */
     var i = s[0];
     if (i.length > maxi) i = i.substring(i.length - maxi);
@@ -1967,7 +1967,10 @@ pv.Dom.prototype.nodes = function() {
  * @class Represents a <tt>Node</tt> in the W3C Document Object Model.
  */
 pv.Dom.Node = function(value) {
-  this.nodeValue = value;
+  if(value !== undefined){
+    this.nodeValue = value;
+  }
+  
   this.childNodes = [];
 };
 
@@ -1986,6 +1989,7 @@ pv.Dom.Node = function(value) {
  *
  * @field pv.Dom.Node.prototype.nodeValue
  */
+pv.Dom.Node.prototype.nodeValue = undefined;
 
 /**
  * The array of child nodes. This array is empty for leaf nodes. An easy way to
@@ -2031,6 +2035,15 @@ pv.Dom.Node.prototype.previousSibling = null;
 pv.Dom.Node.prototype.nextSibling = null;
 
 /**
+ * The index of the first child 
+ * whose {@link #_childIndex} is dirty.
+ * 
+ * @private
+ * @type number | null
+ */
+pv.Dom.Node.prototype._firstDirtyChildIndex = Infinity;
+
+/**
  * Removes the specified child node from this node.
  *
  * @throws Error if the specified child is not a child of this node.
@@ -2038,16 +2051,9 @@ pv.Dom.Node.prototype.nextSibling = null;
  */
 pv.Dom.Node.prototype.removeChild = function(n) {
   var i = this.childNodes.indexOf(n);
-  if (i == -1) throw new Error("child not found");
-  this.childNodes.splice(i, 1);
-  if (n.previousSibling) n.previousSibling.nextSibling = n.nextSibling;
-  else this.firstChild = n.nextSibling;
-  if (n.nextSibling) n.nextSibling.previousSibling = n.previousSibling;
-  else this.lastChild = n.previousSibling;
-  delete n.nextSibling;
-  delete n.previousSibling;
-  delete n.parentNode;
-  return n;
+  if (i === -1) throw new Error("child not found");
+  
+  return this.removeAt(i);
 };
 
 /**
@@ -2057,17 +2063,27 @@ pv.Dom.Node.prototype.removeChild = function(n) {
  *
  * @returns {pv.Dom.Node} the appended child.
  */
-pv.Dom.Node.prototype.appendChild = function(n) {
-  if (n.parentNode) n.parentNode.removeChild(n);
+pv.Dom.Node.prototype.appendChild = function(n){
+  var pn = n.parentNode;
+  if (pn) pn.removeChild(n);
+  
+  var lc = this.lastChild;
   n.parentNode = this;
-  n.previousSibling = this.lastChild;
-  if (this.lastChild) this.lastChild.nextSibling = n;
-  else this.firstChild = n;
+  n.previousSibling = lc;
+  if (lc) {
+      lc.nextSibling = n;
+      n._childIndex  = lc._childIndex + 1;
+  } else {
+      this.firstChild = n;
+      n._childIndex   = 0;
+  }
+  
   this.lastChild = n;
   this.childNodes.push(n);
+  
   return n;
 };
-
+  
 /**
  * Inserts the specified child <i>n</i> before the given reference child
  * <i>r</i> of this node. If <i>r</i> is null, this method is equivalent to
@@ -2077,62 +2093,69 @@ pv.Dom.Node.prototype.appendChild = function(n) {
  * @throws Error if <i>r</i> is non-null and not a child of this node.
  * @returns {pv.Dom.Node} the inserted child.
  */
-pv.Dom.Node.prototype.insertBefore = function(n, r) {
+pv.Dom.Node.prototype.insertBefore = function(n, r){
   if (!r) return this.appendChild(n);
-  var i = this.childNodes.indexOf(r);
-  if (i == -1) throw new Error("child not found");
-  if (n.parentNode) n.parentNode.removeChild(n);
-  n.parentNode = this;
-  n.nextSibling = r;
-  n.previousSibling = r.previousSibling;
-  if (r.previousSibling) {
-    r.previousSibling.nextSibling = n;
-  } else {
-    if (r == this.lastChild) this.lastChild = n;
-    this.firstChild = n;
-  }
-  this.childNodes.splice(i, 0, n);
-  return n;
+  
+  var ns = this.childNodes;
+  var i = ns.indexOf(r);
+  if (i === -1) throw new Error("child not found");
+  
+  return this.insertAt(n, i);
 };
 
 /**
  * Inserts the specified child <i>n</i> at the given index. 
  * Any child from the given index onwards will be moved one position to the end. 
- * If <i>index</i> is null, this method is equivalent to
+ * If <i>i</i> is null, this method is equivalent to
  * {@link #appendChild}. 
  * If <i>n</i> is already part of the DOM, it is first
  * removed before being inserted.
  *
- * @throws Error if <i>index</i> is non-null and greater than the current number of children.
+ * @throws Error if <i>i</i> is non-null and greater than the current number of children.
  * @returns {pv.Dom.Node} the inserted child.
  */
-pv.Dom.Node.prototype.insertAt = function(n, index) {
-    var L;
-    if (index == null || index === (L = this.childNodes.length)){     
+pv.Dom.Node.prototype.insertAt = function(n, i) {
+    if (i == null){     
         return this.appendChild(n);
     }
     
-    if(index > L){
+    var ns = this.childNodes;
+    var L  = ns.length;
+    if (i === L){
+        return this.appendChild(n);
+    }
+    
+    if(i > L){
         throw new Error("Index out of range.");
     }
     
-    if (n.parentNode) {
-        n.parentNode.removeChild(n);
+    var ni = i + 1;
+    var firstDirtyIndex = this._firstDirtyChildIndex;
+    if(ni < firstDirtyIndex){
+        this._firstDirtyChildIndex = ni;
     }
     
-    var r = this.childNodes[index];
-    n.parentNode = this;
+    var pn = n.parentNode;
+    if (pn) {
+        pn.removeChild(n);
+    }
+    
+    var r = ns[i];
+    n.parentNode  = this;
     n.nextSibling = r;
-    n.previousSibling = r.previousSibling;
-    if (r.previousSibling) {
-        r.previousSibling.nextSibling = n;
+    n._childIndex = i;
+    
+    var psib = n.previousSibling = r.previousSibling;
+    if (psib) {
+        psib.nextSibling = n;
     } else {
-        if (r == this.lastChild) {
+        if (r === this.lastChild) {
             this.lastChild = n;
         }
         this.firstChild = n;
     }
-    this.childNodes.splice(index, 0, n);
+    
+    this.childNodes.splice(i, 0, n);
     return n;
 };
 
@@ -2140,17 +2163,28 @@ pv.Dom.Node.prototype.insertAt = function(n, index) {
  * Removes the child node at the specified index from this node.
  */
 pv.Dom.Node.prototype.removeAt = function(i) {
-  var n = this.childNodes[i];
+  var ns = this.childNodes;
+  var n = ns[i];
   if(n){
-      this.childNodes.splice(i, 1);
-      if (n.previousSibling) { 
-          n.previousSibling.nextSibling = n.nextSibling; 
+      ns.splice(i, 1);
+      
+      if(i < ns.length){
+          var firstDirtyIndex = this._firstDirtyChildIndex;
+          if(i < firstDirtyIndex){
+              this._firstDirtyChildIndex = i;
+          }
+      }
+      
+      var psib = n.previousSibling;
+      if (psib) { 
+          psib.nextSibling = n.nextSibling; 
       } else { 
           this.firstChild = n.nextSibling; 
       }
       
-      if (n.nextSibling) {
-          n.nextSibling.previousSibling = n.previousSibling;
+      var nsib = n.nextSibling;
+      if (nsib) {
+          nsib.previousSibling = n.previousSibling;
       } else {
           this.lastChild = n.previousSibling;
       }
@@ -2159,6 +2193,7 @@ pv.Dom.Node.prototype.removeAt = function(i) {
       delete n.previousSibling;
       delete n.parentNode;
   }
+  
   return n;
 };
 
@@ -2169,18 +2204,56 @@ pv.Dom.Node.prototype.removeAt = function(i) {
  * @throws Error if <i>r</i> is not a child of this node.
  */
 pv.Dom.Node.prototype.replaceChild = function(n, r) {
-  var i = this.childNodes.indexOf(r);
-  if (i == -1) throw new Error("child not found");
-  if (n.parentNode) n.parentNode.removeChild(n);
-  n.parentNode = this;
+  var ns = this.childNodes;
+  var i = ns.indexOf(r);
+  if (i === -1) throw new Error("child not found");
+  
+  var pn = n.parentNode;
+  if (pn) pn.removeChild(n);
+  
+  n.parentNode  = this;
   n.nextSibling = r.nextSibling;
-  n.previousSibling = r.previousSibling;
-  if (r.previousSibling) r.previousSibling.nextSibling = n;
+  n._childIndex = r._childIndex;
+  
+  var psib = n.previousSibling = r.previousSibling;
+  if (psib) psib.nextSibling = n;
   else this.firstChild = n;
-  if (r.nextSibling) r.nextSibling.previousSibling = n;
+  
+  var nsib = r.nextSibling;
+  if (nsib) nsib.previousSibling = n;
   else this.lastChild = n;
-  this.childNodes[i] = n;
+  
+  ns[i] = n;
+  
   return r;
+};
+
+
+/**
+ * Obtains the child index of this node.
+ * Returns -1, if the node has no parent.
+ * 
+ * @type number
+ */
+pv.Dom.Node.prototype.childIndex = function(){
+  var p = this.parentNode;
+  if(p){
+      var i = p._firstDirtyChildIndex;
+      if(i < Infinity){
+          var ns = p.childNodes;
+          if(i < ns.length){
+              for(var c = ns[i] ; c ; c = c.nextSibling){
+                  c._childIndex = i++;
+              }
+          }
+          
+          delete p._firstDirtyChildIndex;
+      }
+      
+      return this._childIndex;
+  }
+  
+  return -1;
 };
 
 /**
@@ -2236,19 +2309,28 @@ pv.Dom.Node.prototype.visitAfter = function(f) {
  */
 pv.Dom.Node.prototype.sort = function(f) {
   if (this.firstChild) {
+    delete p._firstDirtyChildIndex;
+    
     this.childNodes.sort(f);
+    
     var p = this.firstChild = this.childNodes[0], c;
     delete p.previousSibling;
+    p._childIndex = 0;
+    
     for (var i = 1; i < this.childNodes.length; i++) {
       p.sort(f);
       c = this.childNodes[i];
+      c._childIndex = i;
       c.previousSibling = p;
       p = p.nextSibling = c;
     }
+    
     this.lastChild = p;
     delete p.nextSibling;
+    
     p.sort(f);
   }
+  
   return this;
 };
 
@@ -3748,7 +3830,7 @@ pv.Scale.quantitative = function() {
     for (var method in scale) by[method] = scale[method];
     return by;
   };
-
+  
   scale.by1 = function(f) {
     function by1(x) { return scale(f.call(this, x)); }
     for (var method in scale) by1[method] = scale[method];
@@ -4399,7 +4481,7 @@ pv.Scale.ordinal = function() {
     for (var method in scale) by[method] = scale[method];
     return by;
   };
-
+  
   scale.by1 = function(f) {
     function by1(x) { return scale(f.call(this, x)); }
     for (var method in scale) by1[method] = scale[method];
@@ -6289,11 +6371,11 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
                     .map(function(num, index){
                         num = +num;
                         if(!isButtCap){
-                            // Steal one unit to dash and give it to the gap
+                            // Steal one unit to dash and give it to the gap,
                             // to compensate for the round/square cap
                             if(index % 2){
                                 // gap
-                                num += 1;
+                                num++;
                             } else {
                                 // dash/dot
                                 num -= 1;
@@ -6390,7 +6472,7 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
       }
     }
   };
-
+ 
 })();
 /**
  * @private Converts the specified b-spline curve segment to a bezier curve
@@ -6852,8 +6934,8 @@ pv.SvgScene.area = function(scenes) {
       "d": "M" + d.join("ZM") + "Z",
       "fill": fill.color,
       "fill-opacity": fill.opacity || null,
-      "stroke": stroke.color,
-      "stroke-opacity": stroke.opacity || null,
+      "stroke":            stroke.color,
+      "stroke-opacity":    stroke.opacity || null,
       "stroke-width":      stroke.opacity ? s.lineWidth / this.scale : null,
       "stroke-linecap":    s.lineCap,
       "stroke-linejoin":   s.lineJoin,
@@ -7273,7 +7355,7 @@ pv.SvgScene.line = function(scenes) {
       "stroke-opacity": stroke.opacity || null,
       "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
       "stroke-linecap":    s.lineCap,
-      "stroke-linejoin": s.lineJoin,
+      "stroke-linejoin":   s.lineJoin,
       "stroke-miterlimit": s.strokeMiterLimit,
       "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
     });
@@ -7574,7 +7656,18 @@ pv.SvgScene.panel = function(scenes) {
         g.setAttribute("fill", "none");
         g.setAttribute("stroke", "none");
         g.setAttribute("stroke-width", 1.5);
-
+        
+        // Prevent selecting VML elements when dragging
+        
+        // Supported by IE10 SVG
+        g.setAttribute("style", "-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;");
+        
+        if (typeof g.onselectstart !== 'undefined') {
+            // IE9 SVG
+            g.setAttribute('unselectable', 'on');
+            g.onselectstart = function(){ return false; };
+        }
+        
         if (pv.renderer() === "svgweb") { // SVGWeb requires a separate mechanism for setting event listeners.
             // width/height can't be set on the fragment
             g.setAttribute("width", s.width + s.left + s.right);
@@ -7732,7 +7825,7 @@ pv.SvgScene.fill = function(e, scenes, i) {
         "cursor": s.cursor,
         "x": s.left,
         "y": s.top,
-        "width": s.width,
+        "width":  s.width,
         "height": s.height,
         "fill": fill.color,
         "fill-opacity": fill.opacity,
@@ -8080,7 +8173,7 @@ pv.Mark.prototype.localProperty = function(name, cast) {
 pv.Mark.prototype.propertyMethod = function(name, def, cast) {
   if (!cast) cast = pv.Mark.cast[name];
   
-  this[name] = function(v) {
+  this[name] = function(v, tag) {
       /* When arguments are specified, set the property/def value. */
       
       /* DEF */
@@ -8100,34 +8193,8 @@ pv.Mark.prototype.propertyMethod = function(name, def, cast) {
       }
       
       /* PROP */
-      
       if (arguments.length) {
-        /* bit 0: 0 = value, 1 = function
-         * bit 1: 0 = def,   1 = prop
-         * ------------------------------
-         * 00 - 0 - def  - value
-         * 01 - 1 - def  - function
-         * 10 - 2 - prop - value
-         * 11 - 3 - prop - function
-         * 
-         * x << 1 <=> floor(x) * 2
-         * 
-         * true  << 1 -> 2 - 10
-         * false << 1 -> 0 - 00
-         */
-        var type = !def << 1 | (typeof v === "function");
-        var vf;
-        // A function and cast?
-        if(type & 1 && cast){
-            vf = pv.Mark.funPropertyCaller(v, cast);
-        } else if(v != null && cast){
-            vf = cast(v);
-        } else {
-            vf = v;
-        }
-        
-        this.setPropertyValue(name, vf, type);
-        
+        this.setPropertyValue(name, v, def, cast, /* chain */false, tag);
         return this;
       }
       
@@ -8172,33 +8239,75 @@ pv.Mark.funPropertyCaller = function(fun, cast){
 };
 
 /** @private Sets the value of the property <i>name</i> to <i>v</i>. */
-pv.Mark.prototype.setPropertyValue = function(name, v, type) {
+pv.Mark.prototype.setPropertyValue = function(name, v, def, cast, chain, tag){
+    /* bit 0: 0 = value, 1 = function
+     * bit 1: 0 = def,   1 = prop
+     * ------------------------------
+     * 00 - 0 - def  - value
+     * 01 - 1 - def  - function
+     * 10 - 2 - prop - value
+     * 11 - 3 - prop - function
+     * 
+     * x << 1 <=> floor(x) * 2
+     * 
+     * true  << 1 -> 2 - 10
+     * false << 1 -> 0 - 00
+     */
+    var type = !def << 1 | (typeof v === "function");
+    // A function and cast?
+    if(type & 1 && cast){
+        v = pv.Mark.funPropertyCaller(v, cast);
+    } else if(v != null && cast){
+        v = cast(v);
+    }
+    
+    // ------
+    
     var propertiesMap = this.$propertiesMap;
     var properties = this.$properties;
     
     var p = {
-      name:     name, 
-      id:       pv.id(), 
-      value:    v,
-      type:     type
-  };
+        name:  name,
+        id:    pv.id(), 
+        value: v,
+        type:  type,
+        tag:   tag
+    };
   
-  var specified = propertiesMap[name];
+    var specified = propertiesMap[name];
   
-  propertiesMap[name] = p;
+    propertiesMap[name] = p;
   
-  if(specified){
-      // Find it and remove it
-      for (var i = 0; i < properties.length; i++) {
-        if (properties[i] === specified) {
-          properties.splice(i, 1);
-          break;
+    if(specified){
+        // Find it and remove it
+        for (var i = 0; i < properties.length; i++) {
+            if (properties[i] === specified) {
+                properties.splice(i, 1);
+                break;
+            }
         }
-      }
-  }
-  
-  properties.push(p);
-  return p;
+    }
+    
+    properties.push(p);
+    
+    if(chain && specified && type === 3){ // is a prop fun
+        p.proto = specified;
+        p.root  = specified.root || specified;
+    }
+    
+    return p;
+};
+
+pv.Mark.prototype.intercept = function(name, v, keyArgs){
+    this.setPropertyValue(
+            name, 
+            v, 
+            /* def */ false,
+            pv.get(keyArgs, 'noCast') ? null : pv.Mark.cast[name],
+            /* chain*/ true,
+            pv.get(keyArgs, 'tag'));
+    
+    return this;
 };
 
 /**
@@ -8206,10 +8315,36 @@ pv.Mark.prototype.setPropertyValue = function(name, v, type) {
  * @param {string} name the property name.
  * @type any
  */
-pv.Mark.prototype.propertyValue = function(name) {
+pv.Mark.prototype.propertyValue = function(name, inherit) {
     var p = this.$propertiesMap[name];
     if(p){
         return p.value;
+    }
+    
+    // This mimics the way #bind works
+    if(inherit){
+        if(this.proto){
+            var value = this.proto.propertyValueRecursive(name);
+            if(value !== undefined){
+                return value;
+            }
+        }
+        
+        return this.defaults.propertyValueRecursive(name);
+    }
+    
+    //return undefined;
+};
+
+/** @private */
+pv.Mark.prototype.propertyValueRecursive = function(name) {
+    var p = this.$propertiesMap[name];
+    if(p){
+        return p.value;
+    }
+    
+    if(this.proto){
+        return this.proto.propertyValueRecursive(name);
     }
     //return undefined;
 };
@@ -8476,7 +8611,7 @@ pv.Mark.prototype.defaults = new pv.Mark()
     .datum(function() {
         var parent = this.parent;
         return parent ? parent.scene[parent.index].datum : null; 
-     })
+    })
     .visible(true)
     .antialias(true)
     .events("painted");
@@ -8520,7 +8655,7 @@ pv.Mark.prototype.add = function(type) {
  *
  * <p>WARNING We plan on changing this feature in a future release to define
  * standard properties, as opposed to <i>fixed</i> properties that behave
- * idiosyncratically within event handlers. Furthermore, we recommend storing
+ * idiosincratically within event handlers. Furthermore, we recommend storing
  * state in an external data structure, rather than tying it to the
  * visualization specification as with defs.
  *
@@ -8805,16 +8940,19 @@ pv.Mark.prototype.renderCore = function() {
     mark.scale = scale;
     if (depth < indexes.length) {
       stack.unshift(null);
-      if (mark.hasOwnProperty("index")) {
-        renderInstance(mark, depth, scale);
-      } else {
-        for (var i = 0, n = mark.scene.length; i < n; i++) {
-          mark.index = i;
-          renderInstance(mark, depth, scale);
-        }
-        delete mark.index;
+      try{
+          if (mark.hasOwnProperty("index")) {
+            renderInstance(mark, depth, scale);
+          } else {
+            for (var i = 0, n = mark.scene.length; i < n; i++) {
+              mark.index = i;
+              renderInstance(mark, depth, scale);
+            }
+            delete mark.index;
+          }
+      } finally {
+          stack.shift();
       }
-      stack.shift();
     } else {
       mark.build();
 
@@ -8985,12 +9123,13 @@ pv.Mark.prototype.bind = function() {
       
       for (var i = properties.length - 1; i >= 0 ; i--) {
         var p = properties[i];
-        if (!(p.name in seen)) {
+        var pLeaf = seen[p.name];
+        if (!pLeaf) {
           seen[p.name] = p;
           
           switch (p.name) {
             case "data": 
-              data = p; 
+              data = p;
               break;
 
             // DATUM - an object counterpart for each value of data.
@@ -9004,6 +9143,19 @@ pv.Mark.prototype.bind = function() {
               types[p.type].push(p); 
               break;
           }
+        } else if(pLeaf.type === 3){ // prop/fun
+            // Chain properties
+            //
+            // seen[name]-> (leaf).proto-> (B).proto-> (C).proto-> (root)
+            //                    .root-------------------------------^
+            var pRoot = pLeaf.root;
+            if(!pRoot){
+                pLeaf.proto = 
+                pLeaf.root  = p;
+            } else if(!pRoot.proto){
+                pRoot.proto = p;
+                pLeaf.root  = p;
+            }
         }
       }
     } while (mark = mark.proto);
@@ -9190,25 +9342,71 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
   var stack = pv.Mark.stack;
   for (var i = 0, n = properties.length; i < n; i++) {
     var p = properties[i];
-    var v = p.value; // assume case 2 (constant)
     
-    switch (p.type) {
-      /* 2 most common first */
-      case 3: 
-        v = v.apply(this, stack); 
-        break;
-      case 2:
-        break;
-        
-      // copy already evaluated def value to each instance's scene
-      case 0:
-      case 1: 
-        v = this.scene.defs[p.name].value; 
-        break;
+    // repeated here, for performance
+    var v;
+    switch(p.type){
+        /* 2 most common first */
+        case 3:
+            var oldProtoProp = pv.propertyProto;
+            try{
+                pv.propertyProto = p.proto;
+                v = p.value.apply(this, stack);
+            } finally {
+                pv.propertyProto = oldProtoProp;
+            }
+            break;
+            
+        case 2: 
+            v = p.value;
+            break;
+      
+        // copy already evaluated def value to each instance's scene
+        case 0:
+        case 1:
+            v = this.scene.defs[p.name].value;
+            break;
     }
     
     s[p.name] = v;
   }
+};
+
+pv.Mark.prototype.delegate = function(dv, tag){
+    var protoProp = pv.propertyProto;
+    if(protoProp && (!tag || protoProp.tag === tag)){ 
+        var value = this.evalProperty(protoProp);
+        if(value !== undefined){
+            return value;
+        }
+    }
+    
+    return dv;
+};
+
+pv.Mark.prototype.hasDelegate = function(tag){
+    var protoProp = pv.propertyProto;
+    return !!protoProp && (!tag || protoProp.tag === tag);
+};
+
+pv.Mark.prototype.evalProperty = function(p){
+    switch(p.type){
+        /* 2 most common first */
+        case 3:
+            var oldProtoProp = pv.propertyProto;
+            try{
+                pv.propertyProto = p.proto;
+                return p.value.apply(this,  pv.Mark.stack);
+            } finally {
+                pv.propertyProto = oldProtoProp;
+            }
+        
+        case 2: return p.value;
+      
+        // copy already evaluated def value to each instance's scene
+        case 0:
+        case 1: return this.scene.defs[p.name].value; 
+    }
 };
 
 pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
@@ -9230,26 +9428,26 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                 
                 // Only re-evaluate properties marked dirty on the previous iteration
                 if(!prevNetDirtyProps || prevNetDirtyProps[name]){
-                    var v = p.value; // assume case 2 (constant)
-                    
+                    var v;
                     switch (p.type) {
-                        // copy already evaluated def value to each instance's scene
-                        case 0:
-                        case 1:
-                            v = this.scene.defs[name].value;
-                            break;
-                            
                         case 3:
                             pv.propertyEval = p;
                             pv.propertyEvalNetIndex = netIndex = (net[name] || 0);
                             pv.propertyEvalDependencies = null;
                             
-                            v = v.apply(this, stack);
+                            // repeated here, for performance
+                            var oldProtoProp = pv.propertyProto;
+                            try{
+                                pv.propertyProto = p.proto;
+                                v = p.value.apply(this,  stack);
+                            } finally {
+                                pv.propertyProto = oldProtoProp;
+                            }
                             
                             newNetIndex = pv.propertyEvalNetIndex;
                             if(newNetIndex > netIndex){
-                                    var evalDeps = pv.propertyEvalDependencies;
-                                    for(var depName in evalDeps){
+                                var evalDeps = pv.propertyEvalDependencies;
+                                for(var depName in evalDeps){
                                     // If dependent property has not yet been evaluated
                                     // set it as dirty
                                     if(evalDeps.hasOwnProperty(depName) &&
@@ -9257,12 +9455,22 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                                         if(!netDirtyProps){
                                             netDirtyProps = {};
                                         }
-                                            netDirtyProps[depName] = true;
-                                        }
+                                        netDirtyProps[depName] = true;
                                     }
+                                }
                                 
                                 this.updateNet(p, newNetIndex);
                             }
+                            break;
+                        
+                        case 2:
+                            v = p.value;
+                            break;
+                            
+                        // copy already evaluated def value to each instance's scene
+                        case 0:
+                        case 1:
+                            v = this.scene.defs[name].value;
                             break;
                     }
                      
@@ -9354,19 +9562,19 @@ pv.Mark.prototype.buildImplied = function(s) {
       instance = this.parent ? this.parent.instance() : null;
       checked = true;
       var width = instance ? instance.width : (w + l + r);
-  if (w == null) {
-    w = width - (r = r || 0) - (l = l || 0);
-  } else if (r == null) {
-    if (l == null) {
-      l = r = (width - w) / 2;
-    } else {
-      r = width - w - l;
-    }
+      if (w == null) {
+        w = width - (r = r || 0) - (l = l || 0);
+      } else if (r == null) {
+        if (l == null) {
+          l = r = (width - w) / 2;
+        } else {
+          r = width - w - l;
+        }
       } else {
-    l = width - w - r;
+        l = width - w - r;
+      }
   }
-  }
-
+  
   /* Compute implied height, bottom and top. */
   if (h == null || b == null || t == null) {
       if(!checked){
@@ -9374,31 +9582,31 @@ pv.Mark.prototype.buildImplied = function(s) {
       }
       
       var height = instance ? instance.height : (h + t + b);
-  if (h == null) {
-    h = height - (t = t || 0) - (b = b || 0);
-  } else if (b == null) {
-    if (t == null) {
-      b = t = (height - h) / 2;
-    } else {
-      b = height - h - t;
-    }
+      if (h == null) {
+        h = height - (t = t || 0) - (b = b || 0);
+      } else if (b == null) {
+        if (t == null) {
+          b = t = (height - h) / 2;
+        } else {
+          b = height - h - t;
+        }
       } else {
-    t = height - h - b;
+        t = height - h - b;
+      }
   }
-  }
-
+  
   s.left = l;
   s.right = r;
   s.top = t;
   s.bottom = b;
 
   /* Only set width and height if they are supported by this mark type. */
-  if (p.width) s.width = w;
+  if (p.width ) s.width  = w;
   if (p.height) s.height = h;
 
   /* Set any null colors to pv.FillStyle.transparent. */
-  if (p.textStyle && !s.textStyle) s.textStyle = pv.FillStyle.transparent;
-  if (p.fillStyle && !s.fillStyle) s.fillStyle = pv.FillStyle.transparent;
+  if (p.textStyle   && !s.textStyle  ) s.textStyle   = pv.FillStyle.transparent;
+  if (p.fillStyle   && !s.fillStyle  ) s.fillStyle   = pv.FillStyle.transparent;
   if (p.strokeStyle && !s.strokeStyle) s.strokeStyle = pv.FillStyle.transparent;
 };
 
@@ -9622,6 +9830,10 @@ pv.Mark.dispatch = function(type, scene, index, event) {
   var m = scene.mark, 
       p = scene.parent, 
       l = m.$handlers[type];
+  
+  if(m.root.animatingCount){
+      return true;
+  }
   
   if (!l) {
       return p && pv.Mark.dispatch(type, p, scene.parentIndex, event);
@@ -10056,7 +10268,7 @@ pv.Area.prototype.buildInstance = function(s) {
     if(n){
       var firstScene = this.scene[0];
       for (var i = 0 ; i < n ; i++) {
-      var p = fixed[i].name;
+        var p = fixed[i].name;
         s[p] = firstScene[p];
       }
     }
@@ -10602,7 +10814,7 @@ pv.Line = function() {
 
 pv.Line.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
-    .property("lineJoin", String)
+    .property("lineJoin",  String)
     .property("strokeMiterLimit", Number)
     .property("lineCap",   String)
     .property("strokeStyle", pv.fillStyle)
@@ -11027,6 +11239,15 @@ pv.Panel.prototype.type = "panel";
  * @name pv.Panel.prototype.transform
  * @see pv.Mark#scale
  */
+
+/**
+ * The number of descendant marks that are animating.
+ * Only the root panel has this property set.
+ * 
+ * @type number
+ */
+pv.Panel.prototype.animatingCount = 0;
+
 
 /**
  * The number of children that have a non-zero {@link pv.Mark#_zOrder}.
@@ -11972,6 +12193,8 @@ pv.Transition = function(mark) {
   };
 
   function doEnd(){
+      mark.root.animatingCount--;
+      
       if(onEndCallback){
           var cb = onEndCallback;
           onEndCallback = null;
@@ -11981,37 +12204,44 @@ pv.Transition = function(mark) {
 
   that.start = function(onEnd) {
     onEndCallback = onEnd;
-
+    
+    mark.root.animatingCount++;
+    
     // TODO allow partial rendering
     if (mark.parent) {
         doEnd();
-        fail();
+        throw new Error("Animated partial rendering is not supported.");
     }
-
-    // TODO allow parallel and sequenced transitions
-    if (mark.$transition) {
-        mark.$transition.stop();
+    
+    try{
+        // TODO allow parallel and sequenced transitions
+        if (mark.$transition) {
+            mark.$transition.stop();
+        }
+        mark.$transition = that;
+    
+        // TODO clearing the scene like this forces total re-build
+        var i = pv.Mark.prototype.index,
+            before = mark.scene,
+            after;
+        
+        mark.scene = null;
+        mark.bind();
+        mark.build();
+        
+        after = mark.scene;
+        mark.scene = before;
+        
+        pv.Mark.prototype.index = i;
+    
+        var start = Date.now(), 
+            list = {};
+        
+        interpolate(list, before, after);
+    } catch(ex) {
+        doEnd();
+        throw ex;
     }
-    mark.$transition = that;
-
-    // TODO clearing the scene like this forces total re-build
-    var i = pv.Mark.prototype.index,
-        before = mark.scene,
-        after;
-    
-    mark.scene = null;
-    mark.bind();
-    mark.build();
-    
-    after = mark.scene;
-    mark.scene = before;
-    
-    pv.Mark.prototype.index = i;
-
-    var start = Date.now(), 
-        list = {};
-    
-    interpolate(list, before, after);
     
     timer = setInterval(function() {
       var t = Math.max(0, Math.min(1, (Date.now() - start) / duration)),

@@ -150,10 +150,25 @@ var def = /** @lends def */{
                     var value = o[part];
                     if(value == null){
                         if(!create){ return dv; }
-                        
-                        value = o[part] = {};
+                        value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
                     }
+                    
                     o = value;
+                }
+            }
+        }
+        
+        return o;
+    },
+    
+    setPath: function(o, path, v){
+        if(o && path != null){
+            var parts = def.array.is(path) ? path : path.split('.');
+            if(parts.length){
+                var pLast = parts.pop();
+                var o = def.getPath(o, parts, true, pLast);
+                if(o != null){
+                    o[pLast] = v;
                 }
             }
         }
@@ -384,8 +399,6 @@ var def = /** @lends def */{
         return to;
     },
     
-    ownKeys: Object.keys,
-    
     keys: function(o){
         var keys = [];
         for(var p in o) {
@@ -394,6 +407,17 @@ var def = /** @lends def */{
         
         return keys;
     },
+    
+    values: function(o){
+        var values = [];
+        for(var p in o) {
+            values.push(o[p]);
+        }
+        
+        return values;
+    },
+    
+    ownKeys: Object.keys,
     
     own: function(o){
         return Object.keys(o)
@@ -420,6 +444,10 @@ var def = /** @lends def */{
          */
         return (a === b) ? 0 : ((a > b) ? 1 : -1);
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
+    },
+    
+    compareReverse: function(a, b){
+        return (a === b) ? 0 : ((a > b) ? -1 : 1);
     },
     
     methodCaller: function(p, context){
@@ -486,6 +514,7 @@ var def = /** @lends def */{
             return v && (v.length != null) && (typeof v !== 'string');
         },
         
+        // TODO: this should work as other 'as' methods...
         /**
          * Converts something to an array if it is not one already,
          * and if it is not nully.
@@ -494,6 +523,10 @@ var def = /** @lends def */{
          * @returns {Array} 
          */
         as: function(thing){
+            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+        },
+        
+        to: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
         }
     },
@@ -1636,6 +1669,85 @@ def.type('Map')
     
     keys: function(){
         return def.ownKeys(this.source);
+    }
+});
+
+// --------------------
+
+//---------------
+
+def.type('OrderedMap')
+.init(function(){
+    this._list = [];
+    this._map  = {};
+})
+.add({
+    has: function(key){
+        return objectHasOwn.call(this._map, key);
+    },
+    
+    count: function(){
+        return this._list.length;
+    },
+    
+    get: function(key){
+        var bucket = def.getOwn(this._map, key);
+        if(bucket) { 
+            return bucket.value;
+        }
+    },
+    
+    at: function(index){
+        var bucket = this._list[index];
+        if(bucket){
+            return bucket.value;
+        }
+    },
+    
+    add: function(key, v){
+        var map = this._map;
+        var bucket = def.getOwn(map, key);
+        if(!bucket){
+            this._list.push((map[key] = {
+               key:   key,
+               value: v
+            }));
+        } else if(bucket.value !== v){
+            bucket.value = v;
+        }
+        
+        return this;
+    },
+    
+    rem: function(key){
+        var bucket = def.getOwn(this._map, key);
+        if(bucket){
+            // Find it
+            var index = this._list.indexOf(bucket);
+            this._list.splice(index, 1);
+            delete this._map[key];
+        }
+        
+        return this;
+    },
+    
+    clear: function(){
+        if(this._list.length) {
+            this._map = {}; 
+            this._list.length = 0;
+        }
+        
+        return this;
+    },
+    
+    keys: function(){
+        return def.ownKeys(this._map);
+    },
+    
+    forEach: function(fun, ctx){
+        return this._list.forEach(function(bucket){
+            fun.call(ctx, bucket.value, bucket.key);
+        });
     }
 });
 
