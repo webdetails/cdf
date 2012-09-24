@@ -26,5 +26,9 @@
 	</content-types>
 
     <content-generator id="pentaho-cdf" type="xcdf" title="CDF Display Handler" class="org.pentaho.cdf.CdfContentGenerator"/>
-    
+
+  <external-resources>
+    <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
+  </external-resources>
+
 </plugin>

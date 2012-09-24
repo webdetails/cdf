@@ -591,7 +591,7 @@ var def = /** @lends def */{
         return v != null ? v : dv;
     },
     
-    within: function(v, min, max){
+    between: function(v, min, max){
         return Math.max(min, Math.min(v, max));
     },
     
