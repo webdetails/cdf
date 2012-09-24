@@ -11,11 +11,6 @@
  * This also requires the jQuery dimensions >= 1.2 plugin
  */
 
-// This initializes the menu
-$(function() {
-	$('ul.jd_menu').jdMenu();
-});
-
 (function($){
 	function addEvents(ul) {
 		var settings = $.data( $(ul).parents().andSelf().filter('ul.jd_menu')[0], 'jdMenuSettings' );
@@ -169,3 +164,9 @@ $(function() {
 			$('ul.jd_menu ul:visible').jdMenuHide();
 		});
 })(jQuery);
+
+
+// This initializes the menu
+$(function() {
+  $('ul.jd_menu').jdMenu();
+});
