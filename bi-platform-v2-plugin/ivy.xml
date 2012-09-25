@@ -1,45 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
-
-    <info organisation="pentaho" module="pentaho-cdf" revision="${project.revision}" />
-    
-    <configurations>
-    	<conf name="default"/>
-    	<conf name="source"/>
-    	<conf name="zip"/>
-    	<conf name="test" visibility="private"/>
-      <conf name="js"/>
-    </configurations>
-
-    <publications>
-        <artifact name="pentaho-cdf" type="jar" conf="default"/>
-        <artifact name="pentaho-cdf" m:classifier="sources" type="source" ext="jar" conf="source"/>
-        <artifact name="pentaho-cdf" type="zip" conf="zip"/>
-        <artifact name="pentaho-cdf" m:classifier="js" type="js" ext="zip" conf="js" />
-    </publications>
-
-    <dependencies defaultconf="default->default">
-    
-        <!--  third party dependencies -->
-        <dependency org="commons-logging"     name="commons-logging"     rev="1.1"   transitive="false"/>
-        <dependency org="commons-io"     name="commons-io"     rev="1.3"   transitive="false"/>
-        <dependency org="dom4j"               name="dom4j"               rev="1.6.1" transitive="false"/>
-        <dependency org="commons-lang"        name="commons-lang"        rev="2.2" />
-        <dependency org="org.json"            name="json"                rev="${dependency.json.revision}" transitive="false"/>        
-        <dependency org="javax.servlet"       name="servlet-api"         rev="2.4" />
-        <!--  pentaho dependencies -->
-		<dependency org="pentaho-reporting-engine" name="pentaho-reporting-engine-classic-core-platform-plugin"
-			rev="${dependency.pentaho-reporting-engine-classic-core-platform-plugin.revision}" changing="true">
-		</dependency>        <dependency org="pentaho" name="pentaho-bi-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-util" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>        
-        <dependency org="pentaho" name="pentaho-bi-platform-engine-core" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-engine-services" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-repository" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-plugin-services" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
-		<dependency org="pentaho" name="pentaho-bi-platform-web" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-web-servlet" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
-		<dependency org="org.hibernate"       name="hibernate"           rev="3.2.6.ga">
-			<!--
+<ivy-module xmlns:m="http://ant.apache.org/ivy/maven" version="2.0">
+  <info organisation="pentaho" module="pentaho-cdf" revision="${project.revision}"/>
+  <configurations>
+    <conf name="default"/>
+    <conf name="runtime"/>
+    <conf name="source"/>
+    <conf name="zip"/>
+    <conf name="test" visibility="private"/>
+    <conf name="js"/>
+  </configurations>
+  <publications>
+    <artifact name="pentaho-cdf" type="jar" conf="default"/>
+    <artifact name="pentaho-cdf" m:classifier="sources" type="source" ext="jar" conf="source"/>
+    <artifact name="pentaho-cdf" type="zip" conf="zip"/>
+    <artifact name="pentaho-cdf" m:classifier="js" type="js" ext="zip" conf="js"/>
+  </publications>
+  <dependencies defaultconf="default->default">
+    <!--  third party dependencies -->
+    <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false"/>
+    <dependency org="commons-io" name="commons-io" rev="1.3" transitive="false"/>
+    <dependency org="dom4j" name="dom4j" rev="1.6.1" transitive="false"/>
+    <dependency org="commons-lang" name="commons-lang" rev="2.2"/>
+    <dependency org="org.json" name="json" rev="${dependency.json.revision}" transitive="false"/>
+    <dependency org="javax.servlet" name="servlet-api" rev="2.4"/>
+    <!--  pentaho dependencies -->
+    <dependency org="pentaho-reporting-engine" name="pentaho-reporting-engine-classic-core-platform-plugin" rev="${dependency.pentaho-reporting-engine-classic-core-platform-plugin.revision}" changing="true">
+		</dependency>
+    <dependency org="pentaho" name="pentaho-bi-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="pentaho" name="pentaho-bi-platform-util" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="pentaho" name="pentaho-bi-platform-engine-core" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="pentaho" name="pentaho-bi-platform-engine-services" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="pentaho" name="pentaho-bi-platform-repository" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="pentaho" name="pentaho-bi-platform-plugin-services" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="pentaho" name="pentaho-bi-platform-web" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="pentaho" name="pentaho-bi-platform-web-servlet" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    <dependency org="org.hibernate" name="hibernate" rev="3.2.6.ga">
+      <!--
 			 
 			 include these jars, needed for unit tests.  child projects may choose
 			 to exclude these, if deploying to an app server, etc.
@@ -48,11 +44,19 @@
         	<exclude org="asm" name="asm" />
         	<exclude org="asm" name="asm-attrs" />
          	 -->
-        	<exclude org="commons-logging" name="commons-logging" />
-        	<exclude org="commons-collections"/>
-        	<exclude org="dom4j" name="dom4j" />
-        </dependency>
+      <exclude org="commons-logging" name="commons-logging"/>
+      <exclude org="commons-collections"/>
+      <exclude org="dom4j" name="dom4j"/>
+    </dependency>
+    <dependency org="pentaho" name="cpf" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf="runtime->default"/>
 
-    </dependencies>
-    
+    <!-- orient db (persistence) -->
+    <dependency org="com.orientechnologies" name="orient-commons" rev="${dependency.orientdb.revision}" transitive="false" conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies" name="orientdb-core" rev="${dependency.orientdb.revision}" transitive="false" conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies" name="orientdb-server" rev="${dependency.orientdb.revision}" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orientdb-client" rev="${dependency.orientdb.revision}" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orientdb-enterprise" rev="${dependency.orientdb.revision}" transitive="false" conf="runtime,default->default" />
+
+
+  </dependencies>
 </ivy-module>

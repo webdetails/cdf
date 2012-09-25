@@ -271,9 +271,23 @@ if (typeof $.SetImpromptuDefaults == 'function')
   });
 
 var Dashboards = {
+
+  parameterModel: new Backbone.Model(),
+
   TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
   TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
   TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
+
+  viewFlags: {
+
+    UNUSED: "unused",
+
+    UNBOUND: "unbound",
+
+    VIEW: "view"
+
+  },
+
   /* globalContext determines if components and params are retrieved
    * from the current window's object or from the Dashboards singleton
    */
@@ -752,6 +766,9 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 Dashboards.init = function(components){
   this.loadStorage();
   this.restoreBookmarkables();
+
+  this.restoreView();
+
   if ($.isArray(components)) {
     Dashboards.addComponents(components);
   }
@@ -841,6 +858,9 @@ Dashboards.fireChange = function(parameter, value) {
   Dashboards.createAndCleanErrorDiv();
 
   Dashboards.setParameter(parameter, value);
+
+  Dashboards.parameterModel.change();
+
   var toUpdate = [];
   var workDone = false;
   var silent = true;
@@ -871,6 +891,26 @@ Dashboards.fireChange = function(parameter, value) {
     }
   }, Dashboards.renderDelay);
 };
+
+
+
+Dashboards.restoreView = function() {
+
+  var p, params;
+
+  if(!Dashboards.view) return;
+
+  params = Dashboards.view.params;
+
+  for(p in params) if (params.hasOwnProperty(p)) {
+
+    Dashboards.setParameter(p,params[p]);
+
+  }
+
+};
+
+
 
 Dashboards.getHashValue = function(key) {
   var hash = window.location.hash,
@@ -917,12 +957,21 @@ Dashboards.setBookmarkable = function(parameter, value) {
     if(!this.bookmarkables) this.bookmarkables = {};
     if (arguments.length === 1) value = true;
     this.bookmarkables[parameter] = value;
-}
+
+};
+
+
 
 Dashboards.isBookmarkable = function(parameter) {
     if(!this.bookmarkables) {return false;}
     return Boolean(this.bookmarkables[parameter]);
-}
+
+};
+
+
+
+
+
 
 
 Dashboards.generateBookmarkState = function() {
@@ -1019,6 +1068,94 @@ Dashboards.restoreBookmarkables = function() {
   }
 }
 
+
+
+Dashboards.setParameterViewMode = function(parameter, value) {
+
+    if(!this.viewParameters) this.viewParameters = {};
+
+    if (arguments.length === 1) value = Dashboards.viewFlags.VIEW;
+
+    //if(!Dashboards.viewFlags.hasOwnProperty(value)) throw 
+
+    this.viewParameters[parameter] = value;
+
+};
+
+
+
+Dashboards.isViewParameter = function(parameter) {
+
+    if(!this.viewParameters) {return false;}
+
+    return this.viewParameters[parameter];
+
+};
+
+
+
+/*
+
+ * List the values for all dashboard parameters flagged as being View parameters
+
+ */
+
+Dashboards.getViewParameters = function(){
+
+  if(!this.viewParameters) return {};
+
+  var params = this.viewParameters,
+
+      ret = {};
+
+  for(p in params) if (params.hasOwnProperty(p)) {
+
+    if (params[p] == Dashboards.viewFlags.VIEW|| params[p] == Dashboards.viewFlags.UNBOUND) {
+
+      ret[p] = Dashboards.getParameterValue(p);
+
+    }
+
+    return ret;
+
+  }
+
+};
+
+
+
+/*
+
+ * List all dashboard parameters flagged as being Unbound View parameters
+
+ */
+
+
+
+Dashboards.getUnboundParameters = function(){
+
+  if(!this.viewParameters) return {};
+
+  var params = this.viewParameters,
+
+      ret = []
+
+  for(p in params) if (params.hasOwnProperty(p)) {
+
+    if (params[p] == Dashboards.viewFlags.UNBOUND) {
+
+      ret.push(p);
+
+    }
+
+    return ret;
+
+  }
+
+};
+
+
+
 Dashboards.getParameterValue = function (parameterName) {
   if (Dashboards.globalContext) {
     try{
@@ -1072,6 +1209,9 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
       Dashboards.parameters[parameterName] = parameterValue;
     }
   }
+
+  Dashboards.parameterModel.set(parameterName,parameterValue,{silent:true});
+
   Dashboards.persistBookmarkables(parameterName);
 };
 
