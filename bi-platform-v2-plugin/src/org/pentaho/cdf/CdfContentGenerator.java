@@ -32,6 +32,7 @@ import org.pentaho.cdf.export.ExportCSV;
 import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
+import org.pentaho.cdf.views.ViewManager;
 import org.pentaho.platform.api.engine.IActionSequenceResource;
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
@@ -54,14 +55,11 @@ import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.packager.Packager;
 
 /**
- * This is the main class of the CDF plugin.  It handles all requests to
- * /pentaho/content/pentaho-cdf.  These requests include:
+ * This is the main class of the CDF plugin. It handles all requests to
+ * /pentaho/content/pentaho-cdf. These requests include:
  * <p/>
- * - JSONSolution
- * - GetCDFResource
- * - .xcdf requests
- * - js files
- * - files within resources
+ * - JSONSolution - GetCDFResource - .xcdf requests - js files - files within
+ * resources
  *
  * @author Will Gorman (wgorman@pentaho.com)
  */
@@ -74,6 +72,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     public static final String SOLUTION_DIR = "cdf";
     // Possible actions
     private static final String RENDER_HTML = "/RenderHTML";
+    private static final String VIEWS = "/Views";
     private static final String RENDER_XCDF = "/RenderXCDF";
     private static final String JSON_SOLUTION = "/JSONSolution"; //$NON-NLS-1$
     private static final String GET_CDF_RESOURCE = "/GetCDFResource"; //$NON-NLS-1$
@@ -179,7 +178,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
         // Each block will call a different method. If in the future this extends a lot we can think
         // about using reflection for class loading, but I don't expect that to happen.
 
-        final IParameterProvider requestParams = parameterProviders.get(IParameterProvider.SCOPE_REQUEST);
+        final IParameterProvider requestParams = parameterProviders.get(IParameterProvider.SCOPE_REQUEST),
+                pathParams = parameterProviders.get("pathparams");
+        ;
 
         if (urlPath.equals(RENDER_XCDF)) {
 
@@ -208,6 +209,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
             generateContext(requestParams, out);
         } else if (urlPath.equals(CLEAR_CACHE)) {
             clearCache(requestParams, out);
+        } else if (urlPath.equals(VIEWS)) {
+            views(requestParams, pathParams, out);
         } else if (urlPath.equals(GETHEADERS)) {
             if (!payload.equals("")) {
                 getHeaders(payload, requestParams, out);
@@ -216,7 +219,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
             }
         } else {
             // we'll be providing the actual content with cache
-          logger.warn("Getting resources through content generator is deprecated, please use static resources: " + urlPath);
+            logger.warn("Getting resources through content generator is deprecated, please use static resources: " + urlPath);
             returnResource(urlPath, contentItem, out);
 
         }
@@ -249,18 +252,18 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
         final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
         final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
-        
-                
-        UUID uuid = CpfAuditHelper.startAudit(PLUGIN_NAME, requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, requestParams);                        
-        
+
+
+        UUID uuid = CpfAuditHelper.startAudit(PLUGIN_NAME, requestParams.getParameter("action").toString(), getObjectName(), this.userSession, this, requestParams);
+
         try {
             final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
             if (mimeTypeListener != null) {
                 mimeTypeListener.setMimeType(MIMETYPE);
             }
 
-                                              
-            
+
+
             renderXCDFDashboard(requestParams, out, solution, path, action, template);
 
             long end = System.currentTimeMillis();
@@ -356,8 +359,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
             String template) throws Exception {
 
 
-        
-        
+
+
         final String fullPath = ActionInfo.buildSolutionPath(solution, path, action);
 
         // Check for access permissions
@@ -389,7 +392,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         renderHtmlDashboard(requestParams, out, solution, path, templateName, template, messagesBaseFilename);
-               
+
     }
 
     public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
@@ -501,9 +504,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
         intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET_PATH\\}", messageSetPath);
         intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET\\}", buildMessageSetCode(i18nTagsList));
 
-        /************************************************/
+        /**
+         * *********************************************
+         */
         /*      Add cdf libraries
-        /************************************************/
+         /************************************************/
 //        final Date startDate = new Date();
         final int headIndex = intro.indexOf("<head>");
         final int length = intro.length();
@@ -798,10 +803,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
 
         final String dashboardType = requestParams.getStringParameter("dashboardType", "blueprint");
-        final String scheme =  requestParams.hasParameter("scheme") ? requestParams.getStringParameter("scheme", "") : "http";
+        final String scheme = requestParams.hasParameter("scheme") ? requestParams.getStringParameter("scheme", "") : "http";
         final String suffix;
         final File file;
-        
+
         /*
          * depending on the dashboard type, the minification engine and its file
          * set will vary.
@@ -843,7 +848,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
                 scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"></script>\n");
             }
             for (String header : ministyles) {
-                stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append( "\"/>\n");
+                stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"/>\n");
             }
 
         } else {
@@ -851,8 +856,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
             logger.info("[Timing] starting minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
             String stylesHash = packager.minifyPackage("styles" + suffix);
             String scriptsHash = packager.minifyPackage("scripts" + suffix);
-            stylesBuilders.append("<link href=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/styles").append(suffix).append(".css?version=").append(stylesHash).append( "\" rel=\"stylesheet\" type=\"text/css\" />");
-            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(absRoot).append( RELATIVE_URL).append("/content/pentaho-cdf/js/scripts" ).append(suffix).append(".js?version=").append(scriptsHash).append("\"></script>");
+            stylesBuilders.append("<link href=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/styles").append(suffix).append(".css?version=").append(stylesHash).append("\" rel=\"stylesheet\" type=\"text/css\" />");
+            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/scripts").append(suffix).append(".js?version=").append(scriptsHash).append("\"></script>");
             logger.info("[Timing] finished minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         }
         // Add extra components libraries
@@ -865,7 +870,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         // Add ie8 blueprint condition
-        stylesBuilders.append("<!--[if lte IE 8]><link rel=\"stylesheet\" href=\"").append( absRoot).append(RELATIVE_URL)
+        stylesBuilders.append("<!--[if lte IE 8]><link rel=\"stylesheet\" href=\"").append(absRoot).append(RELATIVE_URL)
                 .append("/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
 
         StringBuilder stuff = new StringBuilder();
@@ -1034,6 +1039,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         return baseUrl;
 
+    }
+
+    public void views(final IParameterProvider requestParams, final IParameterProvider pathParams, final OutputStream out) {
+        ViewManager man = ViewManager.getInstance();
+        man.process(requestParams, pathParams, out);
     }
 
     public void clearCache(final IParameterProvider requestParams, final OutputStream out) {

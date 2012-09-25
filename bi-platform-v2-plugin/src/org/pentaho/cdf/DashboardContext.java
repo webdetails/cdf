@@ -25,6 +25,8 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pentaho.cdf.views.View;
+import org.pentaho.cdf.views.ViewManager;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IUserDetailsRoleListService;
@@ -37,7 +39,7 @@ import org.pentaho.platform.engine.security.SecurityParameterProvider;
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
-import pt.webdetails.cpf.InterPluginComms;
+import pt.webdetails.cpf.InterPluginCall;
 
 /**
  *
@@ -59,15 +61,16 @@ public class DashboardContext {
             String solution = requestParams.getStringParameter("solution", ""),
                     path = requestParams.getStringParameter("path", ""),
                     file = requestParams.getStringParameter("file", ""),
+                    viewId = requestParams.getStringParameter("view", ""),
                     fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
             Calendar cal = Calendar.getInstance();
-            
+
             Document config = getConfigFile();
-            
+
             context.put("queryData", processAutoIncludes(fullPath, config));
             context.put("sessionAttributes", processSessionAttributes(config));
-            
+
             context.put("serverLocalDate", cal.getTimeInMillis());
             context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
             context.put("user", userSession.getName());
@@ -77,8 +80,8 @@ public class DashboardContext {
             context.put("file", file);
 
             SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
-            context.put("roles", securityParams.getParameter("principalRoles") );
-            
+            context.put("roles", securityParams.getParameter("principalRoles"));
+
             JSONObject params = new JSONObject();
 
             Iterator it = requestParams.getParameterNames();
@@ -94,6 +97,12 @@ public class DashboardContext {
             s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
             s.append("  Dashboards.context = ");
             s.append(context.toString(2) + "\n");
+
+            View view = ViewManager.getInstance().getView(viewId);
+            if (view != null) {
+                s.append("Dashboards.view = ");
+                s.append(view.toJSON().toString(2) + "\n");
+            }
             s.append("</script>\n");
             // setResponseHeaders(MIME_PLAIN,0,null);
             logger.info("[Timing] Finished building context: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
@@ -105,32 +114,34 @@ public class DashboardContext {
     }
 
     private JSONObject processSessionAttributes(Document config) {
-      
-      JSONObject result = new JSONObject();
-      
-      @SuppressWarnings("unchecked")
-      List<Node> attributes = config.selectNodes("//sessionattributes/attribute");      
-      for(Node attribute: attributes){
-        
-        String name = attribute.getText();
-        String key = XmlDom4JHelper.getNodeText("@name", attribute);
-        if(key == null) key = name;
-        
-        try {
-          result.put(key, userSession.getAttribute(name));
-        } catch (JSONException e) {
-          logger.error(e);
+
+        JSONObject result = new JSONObject();
+
+        @SuppressWarnings("unchecked")
+        List<Node> attributes = config.selectNodes("//sessionattributes/attribute");
+        for (Node attribute : attributes) {
+
+            String name = attribute.getText();
+            String key = XmlDom4JHelper.getNodeText("@name", attribute);
+            if (key == null) {
+                key = name;
+            }
+
+            try {
+                result.put(key, userSession.getAttribute(name));
+            } catch (JSONException e) {
+                logger.error(e);
+            }
         }
-      }
-      
-      return result;
+
+        return result;
     }
 
     private JSONObject processAutoIncludes(String dashboardPath, Document config) {
 
         JSONObject queries = new JSONObject();
         /* Bail out immediately if CDA isn' available */
-        if (!InterPluginComms.isPluginAvailable("cda")) {
+        if (!(new InterPluginCall(InterPluginCall.CDA, "")).pluginExists()) {
             logger.warn("Couldn't find CDA. Skipping auto-includes");
             return queries;
         }
@@ -145,13 +156,13 @@ public class DashboardContext {
             String re = XmlDom4JHelper.getNodeText("cda", include, "");
             for (Node cda : cdas) {
                 String path = (String) cda.selectObject("string(path)");
-                
+
                 /* There's a stupid bug in the filebased rep that makes this not work (see BISERVER-3538)
                  * Path comes out as pentaho-solutions/<solution>/..., and filebase rep doesn't handle that well
                  * We'll remote the initial part and that apparently works ok
                  */
-                path = path.substring(path.indexOf('/', 1)+1);
-                
+                path = path.substring(path.indexOf('/', 1) + 1);
+
                 if (!path.matches(re)) {
                     continue;
                 }
@@ -166,7 +177,8 @@ public class DashboardContext {
                         params.put("dataAccessId", id);
                         params.put("path", path);
                         logger.info("[Timing] Executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-                        String reply = InterPluginComms.callPlugin(InterPluginComms.Plugin.CDA, "doQuery", params, true);
+                        InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "doQuery", params);
+                        String reply = ipc.callInPluginClassLoader();
                         logger.info("[Timing] Done executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
                         try {
                             queries.put(id, new JSONObject(reply));
@@ -218,7 +230,8 @@ public class DashboardContext {
 
             params.put("path", cda);
             params.put("outputType", "xml");
-            String reply = InterPluginComms.callPlugin(InterPluginComms.Plugin.CDA, "listQueries", params);
+            InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "listQueries", params);
+            String reply = ipc.call();
             Document queryList = reader.read(new StringReader(reply));
             List<Node> queries = queryList.selectNodes("//ResultSet/Row/Col[1]");
             for (Node query : queries) {
