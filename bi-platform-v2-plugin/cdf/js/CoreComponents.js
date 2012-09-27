@@ -1892,14 +1892,13 @@ var TableComponent = BaseComponent.extend({
     if(typeof cd.colTypes === "undefined" || cd.colTypes.length == 0)
       cd.colTypes = json.metadata.map(function(i){return i.colType.toLowerCase()});
 
-    var dtData0 = TableComponent.getDataTableOptions(cd),
-    dtData;
+    var dtData0 = TableComponent.getDataTableOptions(cd);
 
     // Build a default config from the standard options
     $.each(this.extraOptions ? this.extraOptions : {}, function(i,e){
       extraOptions[e[0]] = e[1];
     });
-    dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
+    var dtData = $.extend(cd.dataTableOptions,dtData0,extraOptions);
 
 
     // Sparklines still applied to drawcallback
@@ -2097,10 +2096,12 @@ var TableComponent = BaseComponent.extend({
     dtData.sDom = options.sDom;
     dtData.aaSorting = options.sortBy;
     
-    if (typeof options.oLanguage == "string")
-        dtData.oLanguage = eval("(" + options.oLanguage + ")");
-    else
-        dtData.oLanguage = options.oLanguage;
+    if (typeof options.oLanguage == "string"){
+      dtData.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
+	}
+    else {
+      dtData.oLanguage = options.oLanguage;
+	}
 
     if(options.colHeaders != undefined){
       dtData.aoColumns = new Array(options.colHeaders.length);
