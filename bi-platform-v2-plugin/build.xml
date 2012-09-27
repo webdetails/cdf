@@ -58,7 +58,7 @@
     <fileset dir="${lib.dir}">
       <include name="**/*.jar" />
     </fileset>
-    <fileset dir="runtime-lib">
+    <fileset dir="${runtimelib.dir}">
       <include name="**/*.jar" />
     </fileset>
   </path>
