@@ -99,8 +99,7 @@
 
 	  <property name="plugin.local.install.solutions.dir" value="../solution" /> 
 
-	  <!--<target name="dist" depends="clean-dist,resolve,jar,dist-plugin,dist-solution,dist-samples,subfloor-js.dist-js"/>-->
-	  <target name="dist" depends="clean-dist,jar,dist-plugin,dist-solution,dist-samples,subfloor-js.dist-js"/>
+	  <target name="dist" depends="clean-dist,resolve,jar,dist-plugin,dist-solution,dist-samples,subfloor-js.dist-js"/>
 	  <target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
 
 	  <property name="plugin.artifact.id" value="${plugin.name}"/>
