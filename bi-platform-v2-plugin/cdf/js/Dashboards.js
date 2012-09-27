@@ -1060,8 +1060,8 @@ Dashboards.getViewParameters = function(){
     if (params[p] == Dashboards.viewFlags.VIEW|| params[p] == Dashboards.viewFlags.UNBOUND) {
       ret[p] = Dashboards.getParameterValue(p);
     }
-    return ret;
   }
+  return ret;
 };
 
 /*
@@ -1069,7 +1069,7 @@ Dashboards.getViewParameters = function(){
  */
 
 Dashboards.getUnboundParameters = function(){
-  if(!this.viewParameters) return {};
+  if(!this.viewParameters) return [];
   var params = this.viewParameters,
       ret = []
   for(p in params) if (params.hasOwnProperty(p)) {
