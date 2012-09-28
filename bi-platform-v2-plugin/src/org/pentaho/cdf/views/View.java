@@ -20,7 +20,7 @@ import pt.webdetails.cpf.persistence.Persistable;
  */
 public class View implements Persistable {
 
-    private Map<String, String> parameters;
+    private Map<String, Object> parameters;
     private List<String> unboundParams;
     private String name, id, user, description, key;
     private String solution, path, file;
@@ -50,11 +50,11 @@ public class View implements Persistable {
         this.file = file;
     }
 
-    public void setParameter(String name, String value) {
+    public void setParameter(String name, Object value) {
         parameters.put(name, value);
     }
 
-    public String getParameter(String name) {
+    public Object getParameter(String name) {
         return parameters.get(name);
     }
 
@@ -139,11 +139,11 @@ public class View implements Persistable {
             _file = json.getString("file");
             JSONObject jsonParams = json.getJSONObject("params");
             JSONArray jsonUnbound = json.getJSONArray("unbound");
-            Map<String, String> _params = new HashMap<String, String>();
+            Map<String, Object> _params = new HashMap<String, Object>();
             String[] keys = JSONObject.getNames(jsonParams);
             if (keys != null) {
                 for (String k : keys) {
-                    _params.put(k, jsonParams.getString(k));
+                    _params.put(k, jsonParams.get(k));
                 }
             }
             List<String> _unbound = new ArrayList<String>();
