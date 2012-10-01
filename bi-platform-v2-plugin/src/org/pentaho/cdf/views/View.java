@@ -114,6 +114,7 @@ public class View implements Persistable {
             json.put("description", description);
             json.put("name", name);
             json.put("id", id);
+            json.put("key", key);
             json.put("timestamp", timestamp == null ? 0 : timestamp.getTime());
             json.put("user", user);
             json.put("unbound", new JSONArray(unboundParams));
@@ -129,13 +130,14 @@ public class View implements Persistable {
 
     public void fromJSON(JSONObject json) {
         try {
-            String _description, _name, _id, _user, _solution, _path, _file;
+            String _description, _name, _id, _key, _user, _solution, _path, _file;
             Date _timestamp;
             _description = json.optString("description");
             _name = json.getString("name");
             _id = json.getString("id");
             _timestamp = new Date(json.optLong("timestamp",0));
             _user = json.getString("user");
+            _key = json.optString("key");
             _solution = json.getString("solution");
             _path = json.getString("path");
             _file = json.getString("file");
@@ -157,6 +159,7 @@ public class View implements Persistable {
             user = _user;
             description = _description;
             id = _id;
+            key = _key;
             timestamp = _timestamp;
             parameters = _params;
             unboundParams = _unbound;
