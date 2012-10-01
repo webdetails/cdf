@@ -137,7 +137,7 @@ public class View implements Persistable {
             _id = json.getString("id");
             _timestamp = new Date(json.optLong("timestamp",0));
             _user = json.getString("user");
-            _key = json.optString("key");
+            _key = json.isNull("key") ? null : json.optString("key");
             _solution = json.getString("solution");
             _path = json.getString("path");
             _file = json.getString("file");
