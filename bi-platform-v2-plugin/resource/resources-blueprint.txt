@@ -7,6 +7,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/backbone.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/mustache.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/base64.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/jquery.tipsy.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/protovis.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/protovis-msie.js,\

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -108,6 +109,7 @@ public class View implements Persistable {
 
     public JSONObject toJSON() {
         try {
+            String p = new String(Base64.encodeBase64(new JSONObject(parameters).toString(2).getBytes()));
             JSONObject json = new JSONObject();
             json.put("description", description);
             json.put("name", name);
@@ -115,7 +117,7 @@ public class View implements Persistable {
             json.put("timestamp", timestamp == null ? 0 : timestamp.getTime());
             json.put("user", user);
             json.put("unbound", new JSONArray(unboundParams));
-            json.put("params", new JSONObject(parameters));
+            json.put("params", p);
             json.put("solution", solution);
             json.put("path", path);
             json.put("file", file);
@@ -137,7 +139,8 @@ public class View implements Persistable {
             _solution = json.getString("solution");
             _path = json.getString("path");
             _file = json.getString("file");
-            JSONObject jsonParams = json.getJSONObject("params");
+            String p =json.getString("params");
+            JSONObject jsonParams = new JSONObject(new String(Base64.decodeBase64(p.getBytes())));
             JSONArray jsonUnbound = json.getJSONArray("unbound");
             Map<String, Object> _params = new HashMap<String, Object>();
             String[] keys = JSONObject.getNames(jsonParams);

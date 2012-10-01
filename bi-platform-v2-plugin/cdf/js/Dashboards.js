@@ -1767,8 +1767,7 @@ Dashboards.restoreView = function() {
   var p, params;
 
   if(!Dashboards.view) return;
-
-  params = Dashboards.view.params;
+  params = JSON.parse(Base64.decode(Dashboards.view.params));
 
   for(p in params) if (params.hasOwnProperty(p)) {
 
