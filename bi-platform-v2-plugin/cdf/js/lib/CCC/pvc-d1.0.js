@@ -1,4 +1,4 @@
-pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/Base", "cdf/lib/CCC/def", "cdf/lib/CCC/protovis"], function(_Base, def, pv){
+pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/Base", "cdf/lib/CCC/def", "cdf/lib/CCC/protovis-msie", "cdf/lib/CCC/protovis"], function(_Base, def, pvie, pv){
 
 /*global pvc:true */
 var pvc = def.globalSpace('pvc', {
