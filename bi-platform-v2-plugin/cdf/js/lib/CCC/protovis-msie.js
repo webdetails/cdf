@@ -38,15 +38,15 @@ if ( !Array.prototype.indexOf ) {
 }
 
 // only run if we need to
-if ( !pv.have_SVG && pv.have_VML ){(function(){
+if (!pv.have_SVG && pv.have_VML){(function(){
 
-if ( typeof Date.now !== 'function' ) {
+if (typeof Date.now !== 'function') {
   Date.now = function () { return new Date() * 1; };
 }
 
 var vml = {
   is64Bit: window.navigator.cpuClass === 'x64',
-
+  
   round: function(n){ return Math.round( (n || 0) * 21.6 ); },
   styles: null,
 
@@ -57,7 +57,7 @@ var vml = {
            'polyline':1, 'curve':1, 'rect':1, 'roundrect':1,
            'oval':1, 'arc':1, 'image':1 },
   caps:  { 'butt':  'flat',  'round': 'round', 'square': 'square' },
-  joins: { 'bevel':'bevel','round':'round','miter':'miter'},
+  joins: { 'bevel': 'bevel', 'round': 'round', 'miter':  'miter'  },
   
   cursorstyles: {
     'hand': 'pointer',
@@ -69,7 +69,7 @@ var vml = {
 
   text_shim: null,
   _textcache: {},
-  text_dims: function ( text, font ) {
+  text_dims: function (text, font) {
     
     var shim = vml.text_shim || (vml.init(), vml.text_shim);
     
@@ -78,13 +78,13 @@ var vml = {
     var fontTextCache = vml._textcache[font] || (vml._textcache[font] = {});
     var info = fontTextCache[text];
     if (!info) {
-    shim.style.font = font;
+        shim.style.font = font;
    
-    shim.innerText = text;
+        shim.innerText = text;
         fontTextCache[text] = info = {
-      fontsize: parseInt( shim.style.fontSize, 10 ),
-      height: shim.offsetHeight,
-      width: shim.offsetWidth
+            fontsize: parseInt(shim.style.fontSize, 10),
+            height:   shim.offsetHeight,
+            width:    shim.offsetWidth
         };
     }
     
@@ -171,7 +171,7 @@ var vml = {
     }
     return o;
   },
-
+  
   // constant
   solidFillStyle: {type: 'solid'},
   
@@ -333,7 +333,7 @@ var vml = {
         
         var s = scenes[i];
         s.fillStyle = vml.solidFillStyle;
-        vml.fill( elm, attr, scenes, i );
+        vml.fill(elm, attr, scenes, i);
         s.fillStyle = null;
       },
       css: "position:absolute;top:0px;left:0px;width:1px;height:1px;"
@@ -345,11 +345,11 @@ var vml = {
     },
 
     // this allows reuse of the createElement function for actual VML
-    "vml:path": { rewrite: 'path' },
-    "vml:stroke": { rewrite: 'stroke' },
-    "vml:fill": { rewrite: 'fill' },
+    "vml:path":     { rewrite: 'path'     },
+    "vml:stroke":   { rewrite: 'stroke'   },
+    "vml:fill":     { rewrite: 'fill'     },
     "vml:textpath": { rewrite: 'textpath' },
-    "vml:skew": { rewrite: 'skew' }
+    "vml:skew":     { rewrite: 'skew'     }
 
   },
 
@@ -430,7 +430,7 @@ var vml = {
               // Clockwise, Top = 0, Degrees
               fill.type = 'gradient';
               var angle = (-pv.degrees(fillStyle.angle)) % 360;
-              fill.angle = angle < 0 ? (angle + 360) : angle; 
+              fill.angle = angle < 0 ? (angle + 360) : angle;
           } else {
               fill.type  = 'gradientTitle';
               fill.focus = '100%';
@@ -470,11 +470,11 @@ var vml = {
             stroke.on = 'false';
             stroke.weight = 0;
         } else {
-            stroke.on = 'true';
-            stroke.weight = strokeWidth;
-            stroke.color = vml.color( attr.stroke ) || 'black';
-            stroke.opacity = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
-            stroke.joinstyle = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
+            stroke.on         = 'true';
+            stroke.weight     = strokeWidth;
+            stroke.color      = vml.color( attr.stroke ) || 'black';
+            stroke.opacity    = Math.min(parseFloat( attr['stroke-opacity'] || '1' ),1) || '1';
+            stroke.joinstyle  = vml.joins[ attr['stroke-linejoin'] ] || 'miter';
             stroke.miterlimit = attr['stroke-miterlimit'] || 8;
             stroke.endcap     = vml.caps [attr['stroke-linecap' ]] || 'flat';
             
@@ -503,7 +503,7 @@ var vml = {
     var sk = elm.getElementsByTagName('skew')[0];
     if (!sk) 
         sk = elm.appendChild(vml.createElement('vml:skew'));
-    sk.on = "false";  
+    sk.on = "false";
     return sk;  
   },
   
@@ -513,8 +513,8 @@ var vml = {
         tp = elm.appendChild(vml.createElement('vml:textpath'));
     }
     
-    tp.style['v-text-align']='center';
-    tp.style['v-text-kern']='true';
+    tp.style['v-text-align'] = 'center';
+    tp.style['v-text-kern' ] = 'true';
     tp.on = "true";
     return tp;
   },
@@ -862,7 +862,7 @@ pv.VmlScene.panel = function(scenes) {
         
         g = canvas.appendChild( vml.createElement( "svg" ) );
         
-        // [DCL] Prevent selecting VML elements when dragging 
+        // Prevent selecting VML elements when dragging
         g.unselectable = 'on';
         g.onselectstart = function(){ return false; };
         
@@ -1205,37 +1205,60 @@ pv.VmlScene.label = function(scenes) {
     if (!fill.opacity || !s.text) continue;
 
     // measure text
-    var txt = s.text.replace( /\s+/g, '\xA0' );
+    var txt   = s.text.replace(/\s+/g, '\xA0');
     var font  = vml.processFont(s.font);
     var label = vml.text_dims(txt, font);
 
-    var dx = 0, dy = 0;
-    if ( s.textBaseline === 'middle' ) {
-      if(s.textAngle != 0){
-        dy += Math.sin(s.textAngle) * label.width /2;
-      } else {
-        dy -= label.fontsize / 2;
-      }
-    } else if (s.textBaseline === 'top') {
-      dy += s.textMargin;
-    } else if (s.textBaseline === 'bottom') {
-      dy -= s.textMargin + label.fontsize;
+    // dx, dy are the coordinates of the middle-left point
+    // of the label's bounding-box.
+    //
+    // +--> xx
+    // |
+    // v yy
+    
+    var dx = 0;
+    var dy = 0;
+    switch(s.textBaseline){
+        case 'middle':
+            dy  = (.1 * label.fontsize); // slight middle baseline correction
+            break;
+            
+        case 'top':
+            dy  = s.textMargin + .5 * label.fontsize;
+            break;
+            
+        case 'bottom':
+            dy  = -(s.textMargin + .5 * label.fontsize);
+            break;
     }
 
-    if ( s.textAlign === 'center' ) {
-     if(s.textAngle != 0){
-        dx -= Math.cos(s.textAngle) * label.width / 2 ;
-      } else {
-      dx -= label.width / 2; 
-     }
-    } else if (s.textAlign === 'right') {
-      dx -= label.width + s.textMargin; 
-    } else if (s.textAlign === 'left') {
-      dx += s.textMargin; 
+    // Text alignment is already handled by VML's textPath "v-text-align" style attribute
+    // So, only the text margin must be explicitly handled.
+    switch(s.textAlign){
+        case 'left':
+            dx  = s.textMargin;
+            break;
+            
+        case 'right':
+            dx  = -s.textMargin;
+            break;
+    }
+ 
+    // VML already handles rotation relative to the elements position.
+    // Only need to rotate the position.
+    var a = s.textAngle;
+    if(a){
+        var ct = Math.cos(a);
+        var st = Math.sin(a);
+
+        var dx2 = dx*ct - dy*st;
+        var dy2 = dx*st + dy*ct;
+        dx = dx2;
+        dy = dy2;
     }
 
-    var left = s.left; // + dx;
-    var top  = s.top;// Math.round(s.top + dy);
+    var left = s.left + dx;
+    var top  = s.top  + dy;
     
     // ---------------
     
@@ -1243,14 +1266,14 @@ pv.VmlScene.label = function(scenes) {
     if(s.cursor) { 
         attr.cursor = s.cursor; 
     }
-
+    
     attr.fill = vml.color(fill.color) || "black";
     
     if(vml.is64Bit){
         // The text is overly black/bold
-    attr['fill-opacity'] = 0.7;
+        attr['fill-opacity'] = 0.7;
     }
-        
+    
     attr.x = left;
     attr.y = top;
     attr.rotation = s.textAngle;
@@ -1260,17 +1283,17 @@ pv.VmlScene.label = function(scenes) {
     attr.textDecoration = s.textDecoration;
     
     e = this.expect(e, "text", scenes, i, attr, {    
-      'display': 'block',
+      'display':    'block',
       'lineHeight': 1,
       'whiteSpace': 'nowrap',
-      'zoom': 1,
-      'position': 'absolute',
+      'zoom':       1,
+      'position':   'absolute',
       'cursor':     'default',
       'top':        top  + 'px',
       'left':       left + 'px'
     });
-    
-/*
+
+    /*
     e = this.expect(e, "text", scenes, i, attr, {
       "font": s.font,
       // "text-shadow": s.textShadow,
@@ -1286,7 +1309,7 @@ pv.VmlScene.label = function(scenes) {
       'color': vml.color( fill.color ) || 'black'
     });
     e.innerText = txt;
-*/
+    */
 
 
 /*
