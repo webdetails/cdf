@@ -5651,10 +5651,10 @@ pv.Colors.category19 = function() {
      * <angle-number> := <number>[deg] 
      * 
      * examples: 
-     * "bottom, white to top, black"
+     * "bottom~white to top~black"
      *    linear-gradient(to top, white, black) 
      *   
-     * "bottom-right, white to top-left, black" 
+     * "bottom-right~white to top-left~black" 
      *    linear-gradient(to top left, white, black)
      */
     function parseLinearGradient(text) {
@@ -5937,7 +5937,7 @@ pv.Colors.category19 = function() {
     };
 
     Solid.prototype.darker = function(k){
-        return new Solid(this.color.darker(k));
+        return new Solid(this.rgb().darker(k));
     };
     
     pv.FillStyle.transparent = new Solid(pv.Color.transparent);
@@ -6401,6 +6401,10 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
 
   var gradient_definition_id = 0;
 
+  function zeroRounding(x){
+      return Math.abs(x) <= 1e-12 ? 0 : x;
+  }
+  
   pv.SvgScene.addFillStyleDefinition = function(scenes, fill) {
     var isLinear = fill.type === 'lineargradient';
     if (isLinear || fill.type === 'radialgradient') {
@@ -6426,6 +6430,11 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
         elem = defs.appendChild(this.create(isLinear ? "linearGradient" : "radialGradient"));
         elem.setAttribute("id",    instId);
         elem.setAttribute("class", className);
+        // Use the default: objectBoundingBox units
+        // Coordinates are %s of the width and height of the BBox
+        // 0,0 = top, left
+        // 1,1 = bottom, right
+        
 //       elem.setAttribute("gradientUnits","userSpaceOnUse");
         
         if(isLinear){
@@ -6442,17 +6451,18 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
           var dirx = radius * Math.cos(svgAngle);
           var diry = radius * Math.sin(svgAngle);
           
-          var x1 = 0.5 - dirx;
-          var y1 = 0.5 - diry;
-          var x2 = 0.5 + dirx;
-          var y2 = 0.5 + diry;
+          var x1 = zeroRounding(0.5 - dirx);
+          var y1 = zeroRounding(0.5 - diry);
+          var x2 = zeroRounding(0.5 + dirx);
+          var y2 = zeroRounding(0.5 + diry);
           
           elem.setAttribute("x1", x1);
           elem.setAttribute("y1", y1);
           elem.setAttribute("x2", x2);
           elem.setAttribute("y2", y2);
         } else {
-          // Currently using defaults
+          // Currently using defaults cx = cy = r = 0.5
+            
 //          elem.setAttribute("cx", fill.cx);
 //          elem.setAttribute("cy", fill.cy);
 //          elem.setAttribute("r",  fill.r );
@@ -7025,7 +7035,7 @@ pv.SvgScene.areaSegment = function(scenes) {
 };
 pv.SvgScene.minBarWidth = 1;
 pv.SvgScene.minBarHeight = 1;
-pv.SvgScene.minBarLineWidth = 1;
+pv.SvgScene.minBarLineWidth = 0.2;
 
 pv.SvgScene.bar = function(scenes) {
   var e = scenes.$g.firstChild;
@@ -14755,7 +14765,8 @@ pv.Layout.Band.prototype.defaults = new pv.Layout.Band()
     .orient("bottom-left")
     .layout("grouped")
     .yZero(0)
-    .layers([[]]);
+    .layers([[]])
+    ;
 
 /** @private */ pv.Layout.Band.prototype.$bx =
 /** @private */ pv.Layout.Band.prototype.$bw =
@@ -14999,9 +15010,10 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
 
         if(bDiffControl){
             if(Math.abs(bDiffControl) === 1){
+                var yOffset0 = yOffset;
                 yOffset = resultPos.yOffset;
                 if(resultNeg){
-                    yOffset -= resultNeg.yOffset;
+                    yOffset -= (yOffset0 - resultNeg.yOffset);
                 }
             } // otherwise leave offset untouched
         } else { // ensure zero
@@ -15010,18 +15022,18 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
     }
 };
 
-pv.Layout.Band.prototype._layoutItemsOfDir = function(dir, invertDir, items, vertiMargin, bx, yOffset){
+pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, invertDir, items, vertiMargin, bx, yOffset){
     var existsOtherDir = false,
         vertiMargin2 = vertiMargin / 2,
-        efItemDir = (invertDir ? -dir : dir),
+        efDir = (invertDir ? -stackDir : stackDir),
         reverseLayers = invertDir;
     
     for (var l = 0, L = items.length ; l < L ; l+=1) {
         var item = items[reverseLayers ? (L -l -1) : l];
-
-        if(item.dir === dir){
+        if(item.dir === stackDir){
             var h = item.h || 0; // null -> 0
-            if(efItemDir > 0){
+            
+            if(efDir > 0){
                 item.y = yOffset + vertiMargin2;
                 yOffset += h;
             } else {
@@ -15029,7 +15041,8 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(dir, invertDir, items, ver
                 yOffset -= h;
             }
             
-            item.h -= vertiMargin; // may become < 0
+            var h2 = item.h - vertiMargin;
+            item.h = h2 > 0 ? h2 : 0;
             item.x = bx - item.w / 2;
         } else {
             existsOtherDir = true;

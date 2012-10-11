@@ -101,8 +101,6 @@ if(!this.JSON.stringify){
 
 /** @private */
 var objectHasOwn = Object.prototype.hasOwnProperty;
-/** @private */
-var arraySlice = Array.prototype.slice;
 
 /**
  * @name def
@@ -139,8 +137,12 @@ var def = /** @lends def */{
         return props.map(function(p){ return o[p]; });
     },
     
-    getPath: function(o, path, create, dv){
-        if(o && path != null){
+    getPath: function(o, path, dv, create){
+        if(!o) { 
+            return dv;
+        }
+        
+        if(path != null){
             var parts = def.array.is(path) ? path : path.split('.');
             var L = parts.length;
             if(L){
@@ -149,7 +151,9 @@ var def = /** @lends def */{
                     var part = parts[i++];
                     var value = o[part];
                     if(value == null){
-                        if(!create){ return dv; }
+                        if(!create){ 
+                            return dv; 
+                        }
                         value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
                     }
                     
@@ -166,7 +170,7 @@ var def = /** @lends def */{
             var parts = def.array.is(path) ? path : path.split('.');
             if(parts.length){
                 var pLast = parts.pop();
-                var o = def.getPath(o, parts, true, pLast);
+                o = def.getPath(o, parts, pLast, true);
                 if(o != null){
                     o[pLast] = v;
                 }
@@ -558,6 +562,10 @@ var def = /** @lends def */{
             return typeof v === 'string';
         },
         
+        to: function(v, ds){
+            return v != null ? ('' + v) : (ds || '');
+        },
+        
         join: function(sep){
             var a = arguments;
             var L = a.length;
@@ -605,9 +613,8 @@ var def = /** @lends def */{
             return typeof v === 'function';
         },
         
-        // TODO: this is not an as...
         as: function(v){
-            return typeof v === 'function' ? v : def.fun.constant(v);
+            return typeof v === 'function' ? v : null;
         },
         
         to: function(v){
@@ -638,6 +645,11 @@ var def = /** @lends def */{
     // !== null && !== undefined
     notNully: function(v){
         return v != null;
+    },
+    
+    // !== undefined
+    notUndef: function(v){
+        return v !== undefined;
     },
     
     empty: function(v){
@@ -1143,14 +1155,24 @@ def.scope(function(){
                     // Try to convert to method
                     var method = asMethod(value);
                     if(method) {
-                        state.methods[p] = method;
+                        var baseMethod;
                         
                         // Check if it is an override
-                        var baseMethod;
-                        if(baseState && (baseMethod = baseState.methods[p]) &&
-                           // Exclude inherited stuff from Object.prototype
-                           (baseMethod instanceof Method)){
-                            
+                        
+                        // Exclude inherited stuff from Object.prototype
+                        var bm = state.methods[p];
+                        if(bm && (bm instanceof Method)){
+                            baseMethod = bm;
+                        } else if(baseState) {
+                            bm = baseState.methods[p];
+                            if(bm && (bm instanceof Method)){
+                                baseMethod = bm;
+                            }
+                        }
+                        
+                        state.methods[p] = method;
+                        
+                        if(baseMethod){
                             // Replace value with an override function 
                             // that intercepts the call and sets the correct
                             // 'base' property before calling the original value function
@@ -1369,7 +1391,7 @@ def.scope(function(){
         function constructor(){
             if(S){
                 var i = 0;
-                while(steps[i].apply(this, arguments) !== false && ++i < S);
+                while(steps[i].apply(this, arguments) !== false && ++i < S){}
             }
         }
         
@@ -1480,6 +1502,18 @@ def.copyOwn(def.array, /** @lends def.array */{
 
         for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
             target[T + i] = source[start + i];
+        }
+
+        return target;
+    },
+    
+    prepend: function(target, source, start){
+        if(start == null){
+            start = 0;
+        }
+
+        for(var i = 0, L = source.length ; i < L ; i++){
+            target.unshift(source[start + i]);
         }
 
         return target;
@@ -1756,10 +1790,12 @@ def.type('OrderedMap')
 def.html = {
     // TODO: lousy multipass implementation!
     escape: function(str){
-        return str.replace(/&/gm, "&amp;")
-                  .replace(/</gm, "&lt;")
-                  .replace(/>/gm, "&gt;")
-                  .replace(/"/gm, "&quot;");    
+        return def
+            .string.to(str)
+            .replace(/&/gm, "&amp;")
+            .replace(/</gm, "&lt;")
+            .replace(/>/gm, "&gt;")
+            .replace(/"/gm, "&quot;");    
     }
 };
 
@@ -2004,7 +2040,7 @@ def.type('Query')
         return min != null ? {min: min, max: max} : null;
     },
     
-    index: function(keyFun, ctx){
+    multipleIndex: function(keyFun, ctx){
         var keyIndex = {};
         
         this.each(function(item){
@@ -2124,7 +2160,7 @@ def.type('RangeQuery', def.Query)
 .init(function(start, count, step){
     this.base();
     this._index = start;
-    this._count = count;
+    this._count = count; // may be infinte
     this._step  = step == null ? 1 : step;
 })
 .add({
@@ -2304,12 +2340,10 @@ def.type('TakeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        while(this._source.next()){
-            if(this._take > 0){
-                this._take--;
-                this.item = this._source.item;
-                return 1;
-            }
+        if(this._take > 0 && this._source.next()){
+            this._take--;
+            this.item = this._source.item;
+            return 1;
         }
     }
 });
