@@ -6428,7 +6428,8 @@ pv.SvgScene.rule = function(scenes) {
         "y2": s.top + s.height,
         "stroke": stroke.color,
         "stroke-opacity": stroke.opacity,
-        "stroke-width": s.lineWidth / this.scale
+        "stroke-width": s.lineWidth / this.scale,
+        "stroke-dasharray": s.strokeDasharray || 'none'
       });
     e = this.append(e, scenes, i);
   }
@@ -8845,7 +8846,8 @@ pv.Rule.prototype = pv.extend(pv.Mark)
     .property("width", Number)
     .property("height", Number)
     .property("lineWidth", Number)
-    .property("strokeStyle", pv.color);
+    .property("strokeStyle", pv.color)
+    .property("strokeDasharray", String);
 
 pv.Rule.prototype.type = "rule";
 
@@ -8894,7 +8896,8 @@ pv.Rule.prototype.defaults = new pv.Rule()
     .extend(pv.Mark.prototype.defaults)
     .lineWidth(1)
     .strokeStyle("black")
-    .antialias(false);
+    .antialias(false)
+    .strokeDasharray("none");
 
 /**
  * Constructs a new rule anchor with default properties. Rules support five
