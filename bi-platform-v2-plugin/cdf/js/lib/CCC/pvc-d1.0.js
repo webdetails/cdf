@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20120803
+//VERSION TRUNK-20120215-patched-20121015
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -4590,7 +4590,12 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
                 dMax = 0;
             }
         }
-
+        
+        if (dMin === dMax) {
+            dMin = dMin !== 0 ? dMin * 0.99 : options.secondAxisOriginIsZero ? 0 : -0.1;
+            dMax = dMax !== 0 ? dMax * 1.01 : 0.1;
+        }
+        
         // Adding a small offset to the scale's domain:
         var dOffset = (dMax - dMin) * options.secondAxisOffset,
             scale = new pv.Scale.linear(
