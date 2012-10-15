@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20121015
+//VERSION TRUNK-20120215-patched-20121015-b
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -4582,7 +4582,15 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
             dMax = this.dataEngine.getSecondAxisMax(),
             dMin = this.dataEngine.getSecondAxisMin();
-
+        
+        if(!isFinite(dMin)){
+            dMin = 0;
+        }
+        
+        if(!isFinite(dMax)){
+            dMax = 0;
+        }
+        
         if(dMin * dMax > 0 && options.secondAxisOriginIsZero){
             if(dMin > 0){
                 dMin = 0;
