@@ -1,3 +1,10 @@
+12.10.17
+    * [FIX] Fixed linear scale calculation for second axis when all values are null.
+    * General image Update
+    * Added pv.Rule#strokeDasharray (with support for SVG only, not IE)
+    * [FIX] Fixed linear scale calculation for second axis when all values are equal.
+    * AMD compatibility with current Pentaho release
+
 12.09.05
     * Fixed [REDMINE 942] - Ensure only one instance of the minification routine is running at any given time
     * send cda dataTables filtering settings on export
