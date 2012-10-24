@@ -21089,7 +21089,7 @@ pvc.CategoricalAbstract = pvc.CartesianAbstract.extend({
                      this._catRole,
                      this._serRole,
                      dataCell.role,
-                     dataCell.isStacked)
+                     true)
                 .interpolate();
             }
         }
