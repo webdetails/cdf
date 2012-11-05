@@ -2053,7 +2053,7 @@ Query = function() {
     }
   }
     
-  var theDoQuery = CDA_PATH + $.param(queryDefinition);
+  var theDoQuery = CDA_PATH + $.param(queryDefinition) + '&wrapItUp=wrapit';
   $.post(theDoQuery, function(uuid) {
     _exportIframe = _exportIframe || $('<iframe style="display:none">');
     _exportIframe.detach();
