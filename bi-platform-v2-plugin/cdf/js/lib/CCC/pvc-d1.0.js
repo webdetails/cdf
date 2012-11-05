@@ -3700,17 +3700,14 @@ function(complexType, name, keyArgs){
     
     /** @private */
     this._comparer = def.get(keyArgs, 'comparer');
-    if(this._comparer === undefined && !this.isDiscrete){
+    if(this._comparer === undefined){ // It is possible to prevent the default specifying null
         switch(this.valueType){
             case Number:
-                this._comparer = def.compare;
-                break;
-                
             case Date:
                 this._comparer = def.compare;
                 break;
                 
-             default:
+            default:
                  this._comparer = null;
         }
     }
@@ -4864,10 +4861,6 @@ def.type('pvc.data.TranslationOper')
 
             for(var i = L ; i < I ; i++, level++) {
                 dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
-//                if(i > L){ // first name was already registered
-//                    this.complexTypeProj.readDim(dimName);
-//                }
-
                 this._userRead(this._propGet(dimName, indexes[i]), dimName);
             }
         }
@@ -13282,13 +13275,16 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             
             if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                 //return color.darker(1.5);
-                return pv.Color.names.darkgray.darker().darker();
-            }
-            
-            switch(type) {
-                case 'fill':
-                case 'stroke':
-                    return this.dimColor(color, type);
+                return color.alpha(0.8);
+//                switch(type){
+//                  case 'fill':   return pv.Color.names.darkgray.darker().darker();
+//                  case 'stroke': return color;
+//                }
+            } else {
+                switch(type) {
+                    case 'fill':   return this.dimColor(color, type);
+                    case 'stroke': return color.alpha(0.45);
+                }
             }
         }
 
@@ -13303,7 +13299,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    this.lock('segmented', true) // fixed
+    this.lock('segmented', 'smart') // fixed
         .lock('antialias', true)
         ;
 
@@ -13400,11 +13396,10 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     
     this.base(panel, pvMark, keyArgs);
     
-    var antialias = def.get(keyArgs, 'antialias', true),
-        segmented = def.get(keyArgs, 'segmented', true);
+    var antialias = def.get(keyArgs, 'antialias', true);
     
     this
-        .lock('segmented', segmented) // fixed, not inherited
+        .lock('segmented', 'smart') // fixed, not inherited
         .lock('antialias', antialias)
         ;
 
@@ -13422,32 +13417,13 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     }
     
     /* Colors */
-    // NOTE: must be registered before fixAntialiasStrokeColor
     this._bindProperty('fillStyle', 'fillColor', 'color');
     
-    /* Using antialias causes the vertical separation
-     * of *segmented* areas to be noticed.
-     * When lines are also shown, not using antialias
-     * is ok because the ladder border that it causes is hidden by the line.
-     * 
-     * So, we only use antialias if there isn't a line 
-     * to cover the side effect of not using it.
-     */
-    if(segmented && antialias) {
-        // Try to hide the vertical lines noticeable between areas,
-        // due to antialias
-        this
-            ._lockDynamic('strokeStyle', 'fixAntialiasStrokeColor')
-            // NOTE: must be registered after fixAntialiasStrokeColor
-            ._lockDynamic('lineWidth', 'fixAntialiasStrokeWidth')
-            ;
-    } else {
-        // These really have no real meaning in the area and should not be used.
-        // If lines are desired, they should be created with showLines of LineChart
-        this.lock('strokeStyle', null)
-            .lock('lineWidth',   0)
-            ;
-    }
+    // These really have no real meaning in the area and should not be used.
+    // If lines are desired, they should be created with showLines of LineChart
+    this.lock('strokeStyle', null)
+        .lock('lineWidth',   0)
+        ;
 })
 .add({
     _addInteractive: function(keyArgs){
@@ -13475,11 +13451,6 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     dy: function(){ return 0; },
     
     /* COLOR */
-    fixAntialiasStrokeColor: function(){ 
-        /* Copy fill color */
-        return this.pvMark.fillStyle();
-    },
-    
     /**
      * @override
      */
@@ -13491,16 +13462,6 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
         }
 
         return this.base(color, type);
-    },
-    
-    /* STROKE */
-    fixAntialiasStrokeWidth: function(){
-        // Hide the line when using alpha
-        // Otherwise, show it to bridge the gaps of segmented areas.
-        // If the line is too thick, 
-        // the junctions become horrible on very small angles.
-        var color = this.pvMark.strokeStyle();
-        return (!color || color.a < 1) ? 0.00001 : 1;
     }
 });
 
@@ -14402,10 +14363,6 @@ def.scope(function(){
                 scale.range(scale.min, scale.max);
             }
             
-//            if(pvc.debug >= 4){
-//                this.chart._log("Scale: " + pvc.stringify(def.copyOwn(scale)));
-//            }
-//            
             return scale;
         },
         
@@ -18090,166 +18047,7 @@ pvc.BaseChart
             role.postBind(complexType);
         }
     },
-    
-    /*
-    _bindVisualRolesPost2: function(){
-        
-        var complexTypeProj = this._complexTypeProj;
-        
-        // Bound dimension names (which have at least one role bound to them)
-        var boundDimTypes = {};
-        
-        
-        def
-        .query(this._visualRoleList)
-        .where(function(role) { return role.isPreBound(); })
-        .each (commitRolePreBinding, this);
-        
-        
-        def
-        .query(this._visualRoleList)
-        .where(function(role) { return !role.isBound(); })
-        .each (autoBindUnboundRole, this);
 
-        // ----------------
-        
-        function markDimBoundTo(dimName){
-            boundDimTypes[dimName] = true;
-        }
-        
-        function dimIsNotBoundTo(dimName){
-            return !def.hasOwn(boundDimTypes, dimName); 
-        }
-        
-        function dimIsDefined(dimName){
-            return complexTypeProj.hasDim(dimName);
-        }
-        
-        function bindRoleTo(role, dimNames){
-            if(def.array.is(dimNames)){
-                if(!dimNames.length){
-                    return;
-                }
-                
-                dimNames.forEach(markDimBoundTo);
-            } else {
-                markDimBoundTo(dimNames);
-            }
-            
-            role.bind(pvc.data.GroupingSpec.parse(dimNames, complexType));
-        }
-        
-        function bindRoleToGroupFreeDims(role, groupDimNames){
-            var freeGroupDimNames = 
-                def
-                .query(groupDimNames)
-                .where(dimIsNotBoundTo);
-
-            if(role.requireSingleDimension){
-                var firstFreeDimName = freeGroupDimNames.first();
-                if(firstFreeDimName){
-                    bindRoleTo(role, firstFreeDimName);
-                }
-            } else {
-                // May have no elements
-                bindRoleTo(role, freeGroupDimNames.array());
-            }
-        }
-        
-        function bindRoleToNewDim(role, dimName){
-            complexTypeProj.setDim(dimName, {isHidden: true});
-            
-            bindRoleTo(role, dimName);
-        }
-        
-        function roleIsUnbound(role){
-            if(role.isRequired) {
-                throw def.error.operationInvalid("Chart type requires unassigned role '{0}'.", [role.name]);
-            }
-            
-            // Unbind role from any previous binding
-            role.bind(null);
-        }
-        
-        function commitRolePreBinding(role){
-            // Commits and validates the grouping specification.
-            // Null groupings are discarded.
-            // Sourced roles that were also pre-bound are here normally bound.
-            role.postBind(complexType);
-            
-            // Still bound? Wasn't a null grouping?
-            if(role.isBound()){
-                // Mark used dimensions
-                role.grouping
-                    .dimensionNames()
-                    .forEach(markDimBoundTo);
-            }
-        }
-        
-        function autoBindUnboundRole(role){
-            var name = role.name;
-            
-            if(role.sourceRole && role.isPreBound()){
-                tryBindSourcedRole(role);
-                return;
-            }
-            
-            var dimName = role.defaultDimensionName;
-            if(!dimName) {
-                if(role.sourceRole){
-                    tryBindSourcedRole(role);
-                } else {
-                    roleIsUnbound(role);
-                }
-                return;
-            }
-                
-            var match = dimName.match(/^(.*?)(\*)?$/) ||
-                        def.fail.argumentInvalid('defaultDimensionName');
-            
-            var defaultName =  match[1];
-            var greedy = match[2];
-            if(greedy) {
-                // TODO: does not respect any index explicitly specified
-                // before the *. Could mean >=...
-                var groupDimNames = complexType.groupDimensionsNames(defaultName, {assertExists: false});
-                if(groupDimNames){
-                    // Default dimension(s) is defined
-                    bindRoleToGroupFreeDims(role, groupDimNames);
-                    return;
-                }
-                // Follow to auto create dimension
-                
-            } else if(dimIsDefined(defaultName)){ // defaultName === dimName
-                if(dimIsNotBoundTo(defaultName)){
-                    bindRoleTo(role, defaultName);
-                }
-                return;
-            }
-
-            if(role.autoCreateDimension){
-                bindRoleToNewDim(role, defaultName);
-                return;
-            }
-            
-            if(role.sourceRole){
-                tryBindSourcedRole(role);
-            } else {
-                roleIsUnbound(role);
-            }
-        }
-    
-        function tryBindSourcedRole(role){
-            var sourceRole = role.sourceRole;
-            if(sourceRole.isBound()){
-                role.bind(sourceRole.grouping);
-            } else {
-                roleIsUnbound(role);
-            }
-        }
-    },
-*/
-    
     _logVisualRoles: function(){
         var out = ["VISUAL ROLES SUMMARY", pvc.logSeparator];
         
@@ -18441,8 +18239,6 @@ pvc.BaseChart
         // is done on every create version
         this._bindVisualRolesPostI();
         
-        this._finishComplexTypeProject();
-        
         // Setup the complex type from complexTypeProj;
         var complexType;
         if(!data){
@@ -18513,10 +18309,6 @@ pvc.BaseChart
         }
         
         return complexTypeProj;
-    },
-    
-    _finishComplexTypeProject: function(){
-        
     },
     
     _getLoadFilter: function(){
@@ -25582,20 +25374,6 @@ def
     },
     
     _calcNumberTicks: function(layoutInfo){
-        var previousLayout;
-//        if(!layoutInfo.canChange && (previousLayout = layoutInfo.previous)){
-//            
-//            layoutInfo.ticks = previousLayout.ticks;
-//            layoutInfo.ticksText = previousLayout.ticksText;
-//            layoutInfo.maxTextWidth = previousLayout.maxTextWidth;
-//            
-//            if(pvc.debug >= 2){
-//                var previousTicks = previousLayout.ticks;
-//                this._log("[WARNING] Layout cannot change. Keeping previous layout's ticks: [" + previousTicks.slice(0, 10).join(", ") + (previousTicks.length > 10 ? "..." : "") + "]");
-//            }
-//            return;
-//        }
-        
         var desiredTickCount = this.desiredTickCount;
         if(desiredTickCount == null){
             if(this.isAnchorTopOrBottom()){
@@ -28895,18 +28673,8 @@ def
         // ------------------
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
-        var data      = this._getVisibleData(); // shared "categ then series" grouped data
-        var isDense   = (this.width <= 0) || (data._children.length / this.width > 0.5); //  > 100 categs / 200 pxs
+        var data = this._getVisibleData(); // shared "categ then series" grouped data
         var rootScene = this._buildScene(data, isBaseDiscrete);
-
-        // Disable selection?
-        if(isDense && (options.selectable || options.hoverable)) {
-            options.selectable = false;
-            options.hoverable  = false;
-            if(pvc.debug >= 3) {
-                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
-            }
-        }
        
         // ---------------
         // BUILD
@@ -28952,13 +28720,11 @@ def
         
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
-                antialias:   showAreas && !showLines,
-                segmented:   !isDense,
-                noTooltip:  false,
+                noTooltip:   false,
                 wrapper:     wrapper
             })
             
-            .lock('visible', def.retTrue)
+            .lock('visible', function(){ return !this.scene.isNull; })
             
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
@@ -28980,15 +28746,12 @@ def
                 
                 return color;
             })
-            .override('fixAntialiasStrokeWidth', function(){
-                // Hide a vertical line from 0 to the alone dot
-                // Hide horizontal lines of nulls near zero
-                if(this.scene.isNull || this.scene.isAlone) {
-                     return 0;
-                }
-
-                return this.base();
+            .override('dimColor', function(color, type){
+                return isStacked ? 
+                    pvc.toGrayScale(color, 1, null, null).brighter() :
+                    this.base(color, type);
             })
+            .lock('events', showAreas ? 'painted' : 'none')
             .pvMark
             ;
         
@@ -29022,7 +28785,7 @@ def
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
             {
-                extensionId: extensionIds,
+                extensionId:  extensionIds,
                 freePosition: true,
                 wrapper:      wrapper,
                 noTooltip:    false
@@ -29042,19 +28805,11 @@ def
                     showDotsOnly ? 
                     def.retFalse : 
                     (isBaseDiscrete && isStacked ? 
-                    function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
-                    function(){ return !this.scene.isNull; })
+                     function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
+                     function(){ return !this.scene.isNull; })
             )
             
             /* Color & Line */
-            .override('color', function(type){
-                if(lineCopiesAreaColor && !this.scene.isActiveSeries()) {
-                    // This obtains the color of the same index area
-                    return myself.pvArea.fillStyle();
-                }
-                
-                return this.base(type);
-            })
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
@@ -29063,6 +28818,9 @@ def
                 }
                 return color;
             })
+            .override('normalColor', function(color, type){
+                return showLines ? color : null;
+            })
             .override('baseStrokeWidth', function(){
                 var strokeWidth;
                 if(showLines){
@@ -29070,6 +28828,14 @@ def
                 }
                 
                 return strokeWidth == null ? 1.5 : strokeWidth; 
+            })
+            .intercept('strokeDasharray', function(){
+                var dashArray = this.delegateExtension();
+                if(dashArray === undefined){
+                    dashArray = this.scene.isInterpolated ? '. ' : null; 
+                }
+                
+                return dashArray;
             })
             .pvMark
             ;
@@ -29115,22 +28881,27 @@ def
                 // TODO: review interpolated style/visibility
                 if(this.scene.isInterpolated && type === 'fill'){
                     var color = this.base(type);
-                    return color && pv.color(this.base(type)).alpha(0.5);
+                    return color && pv.color(color).brighter(0.5);
                 }
                 
                 // Follow normal logic
                 return this.base(type);
             })
+//            .override('interactiveColor', function(color, type){
+//              return this.scene.isInterpolated && type === 'stroke' ? 
+//                     color :
+//                     this.base(color, type);
+//            })
             .optionalMark('lineCap', 'round')
-            .intercept('strokeDasharray', function(){
-                var dashArray = this.delegateExtension();
-                if(dashArray === undefined){
-                    // TODO: review interpolated style/visibility
-                    dashArray = this.scene.isInterpolated ? '.' : null; 
-                }
-                
-                return dashArray;
-            })
+//            .intercept('strokeDasharray', function(){
+//                var dashArray = this.delegateExtension();
+//                if(dashArray === undefined){
+//                    // TODO: review interpolated style/visibility
+//                    dashArray = this.scene.isInterpolated ? '.' : null; 
+//                }
+//                
+//                return dashArray;
+//            })
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
@@ -29585,6 +29356,7 @@ def
             
             interScene.vars.value = interValueVar;
             interScene.ownerScene     = toScene;
+            interScene.isInterpolated = toScene.isInterpolated;
             interScene.isIntermediate = true;
             interScene.isSingle       = false;
             interScene.isNull         = interIsNull;
@@ -29809,8 +29581,7 @@ def
 .add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
-            fixed:    {AreasVisible: true},
-            defaults: {LinesVisible: true}
+            fixed: {AreasVisible: true}
         });
     }
 });
@@ -29824,7 +29595,7 @@ def
 .add({
     _createPointPlot: function(){
         return new pvc.visual.PointPlot(this, {
-            fixed:    {LinesVisible: true, Stacked: true}
+            fixed: {LinesVisible: true, Stacked: true}
         });
     }
 });
