@@ -4092,15 +4092,19 @@ Query = function() {
       queryDefinition.settingcolumnHeaders = options.columnHeaders;
 
     }
+  }
+    
+  var theDoQuery = CDA_PATH + $.param(queryDefinition);
+  $.post(theDoQuery, function(uuid) {
 
     _exportIframe = _exportIframe || $('<iframe style="display:none">');
 
     _exportIframe.detach();
-
-    _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
-
+    _exportIframe[0].src = webAppPath + '/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
     _exportIframe.appendTo($('body'));
-
+  });    
+    
+    
   }
 
 
