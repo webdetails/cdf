@@ -674,10 +674,12 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseTrendType = function(value) {
         if(value){
-            switch(value){
-                case 'none':
-                case 'linear':
-                    return value;
+            if(value === 'none'){
+                return value;
+            }
+            
+            if(pvc.trends.has(value)){
+                return value;
             }
             
             if(pvc.debug >= 2){
@@ -2900,12 +2902,20 @@ def.scope(function(){
         
         'has', function(type){
             return def.hasOwn(_trends, type);
+        },
+        
+        'types', function(){
+            return def.ownKeys(_trends);
         });
     
     
     trends.define('linear', {
         label: 'Linear trend',
-        model: function(rowsQuery, funX, funY){
+        model: function(options){
+            var rows = def.get(options, 'rows'); 
+            var funX = def.get(options, 'x');
+            var funY = def.get(options, 'y');
+            
             var i = 0;
             var N = 0;
             var sumX  = 0;
@@ -2916,8 +2926,8 @@ def.scope(function(){
                 return value != null ? (+value) : NaN;  // to Number works for dates as well
             };
             
-            while(rowsQuery.next()){
-                var row = rowsQuery.item;
+            while(rows.next()){
+                var row = rows.item;
                 
                 // Ignore null && NaN values
                 
@@ -2962,7 +2972,7 @@ def.scope(function(){
                     reset: def.noop,
                     
                     // y = alpha + beta * x
-                    sample: function(x){
+                    sample: function(x/*, y, i*/){
                         return alpha + beta * (+x);
                     }
                 };
@@ -2970,7 +2980,97 @@ def.scope(function(){
         }
     });
     
+    // Source: http://en.wikipedia.org/wiki/Moving_average
+    trends.define('moving-average', {
+        label: 'Moving average',
+        model: function(options){
+            var W = Math.max(+(def.get(options, 'periods') || 3), 2);
+              
+            var sum = 0; // Current sum of values in avgValues
+            var avgValues = []; // Values in the average window
+            
+            return {
+                reset: function(){
+                    sum = 0;
+                    avgValues.length = 0;
+                },
+                
+                sample: function(x, y, i){
+                    // Only y is relevant for this trend type
+                    var L = W;
+                    if(y != null){
+                        avgValues.unshift(y);
+                        sum += y;
+                        
+                        L = avgValues.length;
+                        if(L > W){
+                            sum -= avgValues.pop();
+                            L = W;
+                        }
+                    }
+                    
+                    return sum / L;
+                }
+            };
+        }
+    });
     
+    // Source: http://en.wikipedia.org/wiki/Moving_average
+    trends.define('weighted-moving-average', {
+        label: 'Weighted Moving average',
+        model: function(options){
+            var W = Math.max(+(def.get(options, 'periods') || 3), 2);
+            
+            // Current sum of values in the window
+            var sum = 0; // Current sum of values in avgValues
+            
+            // Current numerator
+            var numer = 0;
+            
+            var avgValues = []; // Values in the average window
+            var L = 0;
+            
+            // Constant Denominator (from L = W onward it is constant)
+            // W +  (W - 1) + ... + 2 + 1
+            // = W * (W + 1) / 2;
+            var denom = 0;
+            
+            return {
+                reset: function(){
+                    sum = numer = denom = L = 0;
+                    avgValues.length = 0;
+                },
+                
+                sample: function(x, y/*, i*/){
+                    // Only y is relevant for this trend type
+                    if(y != null){
+                        
+                        if(L < W){
+                            // Still filling the avgValues array
+                            
+                            avgValues.push(y);
+                            L++;
+                            denom += L;
+                            numer += L * y;
+                            sum   += y;
+                        } else {
+                            // denom is now equal to: W * (W + 1) / 2; 
+                            numer += (L * y) - sum;
+                            sum   += y - avgValues[0]; // newest - oldest
+                            
+                            // Shift avgValues left
+                            for(var j = 1 ; j < W ; j++){
+                                avgValues[j - 1] = avgValues[j];
+                            }
+                            avgValues[W - 1] = y;
+                        }
+                    }
+                    
+                    return numer / denom;
+                }
+            };
+        }
+    });
 });
 // Options management utility
 def.scope(function(){
@@ -16128,6 +16228,32 @@ def.scope(function(){
         }
     });
     
+    function castTrend(trend){
+        var type = this.option('TrendType');
+        if(!type && trend){
+            type = trend.type;
+        }
+        
+        if(!type || type === 'none'){
+            return null;
+        }
+        
+        if(!trend){
+            trend = {};
+        } else {
+            trend = Object.create(trend);
+        }
+        
+        trend.type = type;
+       
+        var label = this.option('TrendLabel');
+        if(label !== undefined){
+            trend.label = label;
+        }
+        
+        return trend;
+    }
+    
     pvc.visual.CartesianPlot.optionsDef = def.create(
         pvc.visual.Plot.optionsDef, {
             BaseAxis: {
@@ -16159,7 +16285,7 @@ def.scope(function(){
                     '_resolveNormal',
                     '_resolveDefault'
                 ]),
-                cast:  function(value){
+                cast: function(value){
                     value = pvc.castNumber(value);
                     if(value != null){
                         value = def.between(value, 1, 10);
@@ -16177,17 +16303,35 @@ def.scope(function(){
                 // String or string array
             },
             
+            Trend: {
+                resolve: pvc.options.resolvers([
+                    '_resolveFixed',
+                    '_resolveNormal',
+                    function(optionInfo){
+                        var type = this.option('TrendType');
+                        if(type){
+                            // Cast handles the rest
+                            optionInfo.defaultValue({
+                                type: type
+                            });
+                            return true;
+                        }
+                    }
+                ]),
+                cast:    castTrend
+            },
+            
             TrendType: {
                 resolve: '_resolveFull',
-                cast:    pvc.parseTrendType,
-                value:   'none'
+                cast:    pvc.parseTrendType
+                //value:   'none'
             },
             
             TrendLabel: {
                 resolve: '_resolveFull',
                 cast:    String
             },
-                        
+            
             NullInterpolationMode: {
                 resolve: '_resolveFull',
                 cast:    pvc.parseNullInterpolationMode,
@@ -16937,6 +17081,10 @@ pvc.visual.BulletPlot.optionsDef = def.create(
     pvc.visual.Plot.optionsDef, {
         ShowValues: { // override
             value: true
+        },
+        
+        ColorRole: {
+            value: null
         }
     });def
 .type('pvc.Abstract')
@@ -18510,10 +18658,7 @@ pvc.BaseChart
             def
             .query(def.own(this.axes))
             .selectMany(function(axis){ return axis.dataCells; })
-            .where(function(dataCell){
-                var trendType = dataCell.trendType;
-                return !!trendType && trendType !== 'none'; 
-             })
+            .where(function(dataCell){ return !!dataCell.trend; })
              .distinct(function(dataCell){
                  return dataCell.role.name  + '|' +
                        (dataCell.dataPartValue || '');
@@ -18803,16 +18948,13 @@ pvc.BaseChart
                     return dataCellsByAxisTypeThenIndex[axisType];
                 })
                 .selectMany()
-                .first (function(dataCell){
-                    var trendType = dataCell.trendType;
-                    return trendType && trendType !== 'none'; 
-                })
+                .first (function(dataCell){ return !!dataCell.trend; })
                 ;
             
             if(firstDataCell){
-                var trendInfo = pvc.trends.get(firstDataCell.trendType);
+                var trendInfo = pvc.trends.get(firstDataCell.trend.type);
                 var dataPartAtom = trendInfo.dataPartAtom;
-                var trendLabel = firstDataCell.trendLabel;
+                var trendLabel = firstDataCell.trend.label;
                 if(trendLabel === undefined){
                     trendLabel = dataPartAtom.f;
                 }
@@ -22821,11 +22963,7 @@ def
         /* Configure Ortho Axis Data Cell */
         if(plot.option.isDefined('OrthoAxis')){
             
-            var trendType = plot.option('TrendType'); // != null
-            if(trendType === 'none'){ 
-                trendType = null; 
-            }
-            
+            var trend = plot.option('Trend');
             var isStacked = plot.option.isDefined('Stacked') ?
                             plot.option('Stacked') :
                             undefined;
@@ -22840,8 +22978,7 @@ def
             var dataCellBase = {
                 dataPartValue: plot.option('DataPart' ),
                 isStacked:     isStacked,
-                trendType:     trendType,
-                trendLabel:    trendType && plot.option('TrendLabel'),
+                trend:         trend,
                 nullInterpolationMode: plot.option('NullInterpolationMode')
             };
             
@@ -22874,9 +23011,9 @@ def
         
     _generateTrendsDataCell: function(dataCell){
         /*jshint onecase:true */
-        var trendType =  dataCell.trendType;
-        if(trendType){
-            var trendInfo = pvc.trends.get(trendType);
+        var trend =  dataCell.trend;
+        if(trend){
+            var trendInfo = pvc.trends.get(trend.type);
             
             var newDatums = [];
             
@@ -24373,6 +24510,7 @@ def
         var serRole = this._serRole;
         var xRole   = this._catRole;
         var yRole   = dataCell.role;
+        var trendOptions = dataCell.trend;
         
         this._warnSingleContinuousValueRole(yRole);
         
@@ -24414,7 +24552,7 @@ def
                        function(allCatData){
                            return allCatData.atoms[xDimName].value;
                        };
-                       
+
             var funY = function(allCatData){
                 var group = data._childrenByKey[allCatData.key];
                 if(group && serData1){
@@ -24425,7 +24563,13 @@ def
                 return group ? group.dimensions(yDimName).sum(sumKeyArgs) : null;
             };
             
-            var trendModel = trendInfo.model(def.query(allCatDatas), funX, funY);
+            var options = def.create(trendOptions, {
+                rows: def.query(allCatDatas),
+                x: funX,
+                y: funY
+            });
+            
+            var trendModel = trendInfo.model(options);
             if(trendModel){
                 // At least one point...
                 // Sample the line on each x and create a datum for it
@@ -24435,40 +24579,41 @@ def
                                  index :
                                  allCatData.atoms[xDimName].value;
                     
-                    var trendY = trendModel.sample(trendX);
-                    
-                    var catData   = data._childrenByKey[allCatData.key];
-                    var efCatData = catData || allCatData;
-                    
-                    var atoms;
-                    var proto = catData;
-                    if(serData1){
-                        var catSerData = catData && 
-                                         catData._childrenByKey[serData1.key];
+                    var trendY = trendModel.sample(trendX, funY(allCatData), index);
+                    if(trendY != null){
+                        var catData   = data._childrenByKey[allCatData.key];
+                        var efCatData = catData || allCatData;
                         
-                        if(catSerData){
-                            atoms = Object.create(catSerData._datums[0].atoms);
-                        } else {
-                            // Missing data point
-                            atoms = Object.create(efCatData._datums[0].atoms);
+                        var atoms;
+                        var proto = catData;
+                        if(serData1){
+                            var catSerData = catData && 
+                                             catData._childrenByKey[serData1.key];
                             
-                            // Now copy series atoms
-                            def.copyOwn(atoms, serData1.atoms);
+                            if(catSerData){
+                                atoms = Object.create(catSerData._datums[0].atoms);
+                            } else {
+                                // Missing data point
+                                atoms = Object.create(efCatData._datums[0].atoms);
+                                
+                                // Now copy series atoms
+                                def.copyOwn(atoms, serData1.atoms);
+                            }
+                        } else {
+                            // Series is unbound
+                            atoms = Object.create(efCatData._datums[0].atoms);
                         }
-                    } else {
-                        // Series is unbound
-                        atoms = Object.create(efCatData._datums[0].atoms);
+                        
+                        atoms[yDimName] = trendY;
+                        atoms[dataPartDimName] = trendInfo.dataPartAtom;
+                        
+                        var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
+                        newDatum.isVirtual = true;
+                        newDatum.isTrend   = true;
+                        newDatum.trendType = trendInfo.type;
+                        
+                        newDatums.push(newDatum);
                     }
-                    
-                    atoms[yDimName] = trendY;
-                    atoms[dataPartDimName] = trendInfo.dataPartAtom;
-                    
-                    var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
-                    newDatum.isVirtual = true;
-                    newDatum.isTrend   = true;
-                    newDatum.trendType = trendInfo.type;
-                    
-                    newDatums.push(newDatum);
                 }, this);
             }
         }
@@ -27841,8 +27986,8 @@ def
                 }});
         }
         
-        var trend = barPlot.option('TrendType');
-        if(trend && trend !== 'none'){
+        var trend = barPlot.option('Trend');
+        if(trend){
             // Trend Plot
             new pvc.visual.PointPlot(this, {
                 name: 'trend',
@@ -28832,7 +28977,18 @@ def
             .intercept('strokeDasharray', function(){
                 var dashArray = this.delegateExtension();
                 if(dashArray === undefined){
-                    dashArray = this.scene.isInterpolated ? '. ' : null; 
+                    var scene = this.scene;
+                    var useDash = scene.isInterpolated;
+                    if(!useDash){
+                        var next = scene.nextSibling;
+                        useDash = next && next.isIntermediate && next.isInterpolated;
+                        if(!useDash){
+                            var previous = scene.previousSibling;
+                            useDash = previous  && scene.isIntermediate && previous.isInterpolated;
+                        }
+                    }
+                    
+                    dashArray = useDash ? '. ' : null;
                 }
                 
                 return dashArray;
@@ -29473,8 +29629,8 @@ def
                 }});
         }
         
-        var trend = pointPlot.option('TrendType');
-        if(trend && trend !== 'none'){
+        var trend = pointPlot.option('Trend');
+        if(trend){
             // Trend Plot
             new pvc.visual.PointPlot(this, {
                 name: 'trend',
@@ -30459,6 +30615,7 @@ def
         var serRole = this._serRole;
         var xRole   = this._xRole;
         var yRole   = dataCell.role;
+        var trendOptions = dataCell.trend;
         
         this._warnSingleContinuousValueRole(yRole);
         
@@ -30489,32 +30646,38 @@ def
                     return datum.atoms[yDimName].value;
                 };
             
-            var trendModel = trendInfo.model(serData.datums(), funX, funY);
+
+            var options = def.create(trendOptions, {
+                    rows: serData.datums(),
+                    x: funX,
+                    y: funY
+                });
+
+            var trendModel = trendInfo.model(options);
             if(trendModel){
-                // Works well for linear, but for other interpolation types
-                // what is the correct sampling spacing?
-                var firstDatum = serData.firstDatum();
-                var xExtent = serData.dimensions(xDimName).extent();
-                if(xExtent.min !== xExtent.max){
-                    var xPoints = [xExtent.min.value, xExtent.max.value];
-                    // At least one point...
-                    // Sample the line on each x and create a datum for it
-                    // on the 'trend' data part
-                    xPoints.forEach(function(trendX, index){
-                        var trendY = trendModel.sample(trendX);
-                        var atoms = Object.create(serData.atoms); // just common atoms
-                        atoms[xDimName] = trendX;
-                        atoms[yDimName] = trendY;
-                        atoms[dataPartDimName] = trendInfo.dataPartAtom;
-                        
-                        var newDatum = new pvc.data.Datum(data.owner, atoms);
-                        newDatum.isVirtual = true;
-                        newDatum.isTrend   = true;
-                        newDatum.trendType = trendInfo.type;
-                        
-                        newDatums.push(newDatum);
-                    }, this);
-                }
+                serData
+                .datums()
+                .each(function(datum, index){
+                    var trendX = funX(datum);
+                    if(trendX){
+                        var trendY = trendModel.sample(trendX, funY(datum), index);
+                        if(trendY != null){
+                            var atoms = 
+                                def.set(
+                                    Object.create(serData.atoms), // just common atoms
+                                    xDimName, trendX,
+                                    yDimName, trendY,
+                                    dataPartDimName, trendInfo.dataPartAtom);
+                            
+                            newDatums.push( 
+                                def.set(
+                                    new pvc.data.Datum(data.owner, atoms),
+                                    'isVirtual', true,
+                                    'isTrend',   true,
+                                    'trendType', trendInfo.type));
+                        }
+                    }
+                });
             }
         }
     },
@@ -31376,8 +31539,8 @@ def
         
         var pointPlot = this._createPointPlot();
         
-        var trend = pointPlot.option('TrendType');
-        if(trend && trend !== 'none'){
+        var trend = pointPlot.option('Trend');
+        if(trend){
             // Trend Plot
             new pvc.visual.MetricPointPlot(this, {
                 name: 'trend',
@@ -32116,10 +32279,6 @@ def
 .add({
 
     parCoordPanel : null,
-    
-    _getColorRoleSpec: function(){
-        return { isRequired: true, defaultSourceRole: 'category', requireIsDiscrete: true };
-    },
     
     _preRenderContent: function(contentOptions){
         this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, def.create(contentOptions, {
