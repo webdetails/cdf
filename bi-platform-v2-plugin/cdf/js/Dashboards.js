@@ -4096,8 +4096,7 @@ Query = function() {
     
   var theDoQuery = CDA_PATH + $.param(queryDefinition) + '&wrapItUp=wrapit';
   $.post(theDoQuery, function(uuid) {
-
-    _exportIframe = _exportIframe || $('<iframe style="display:none">');
+    var _exportIframe = $('<iframe style="display:none">');
 
     _exportIframe.detach();
     _exportIframe[0].src = webAppPath + '/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
