@@ -4094,8 +4094,8 @@ Query = function() {
     }
   }
     
-  var theDoQuery = CDA_PATH + $.param(queryDefinition) + '&wrapItUp=wrapit';
-  $.post(theDoQuery, function(uuid) {
+  var theDoQuery = CDA_PATH + 'wrapItUp=wrapit';
+  $.post(theDoQuery, queryDefinition, function(uuid) {
     var _exportIframe = $('<iframe style="display:none">');
 
     _exportIframe.detach();
