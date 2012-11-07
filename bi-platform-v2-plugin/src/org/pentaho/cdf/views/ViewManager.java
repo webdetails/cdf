@@ -1,7 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.pentaho.cdf.views;
 
 import java.io.OutputStream;
@@ -68,7 +68,7 @@ public class ViewManager {
         filter.where("name").equalTo(id).and().where("user").equalTo(userSession.getName());
         List<View> views = sp.load(View.class, filter);
 
-        return views.size() > 0 ? views.get(0) : null;
+        return (views != null && views.size() > 0) ? views.get(0) : null;
     }
 
     public JSONObject listViews() {
@@ -108,9 +108,7 @@ public class ViewManager {
     }
 
     public String deleteView(IParameterProvider requestParams, IParameterProvider pathParams) {
-        View view = new View();
         IPentahoSession userSession = PentahoSessionHolder.getSession();
-
         try {
             String name = requestParams.getStringParameter("name", "");
             Filter filter = new Filter();
