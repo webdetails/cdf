@@ -1,7 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.pentaho.cdf;
 
 import java.io.IOException;
@@ -174,7 +174,7 @@ public class DashboardContext {
                 if (canInclude(dashboardPath, include.selectNodes("dashboards/*"), pat.matcher(path))) {
                     logger.debug("Accepted dashboard " + dashboardPath);
                     List<String> ids = listQueries(path);
-                    String idPattern = (String) cda.selectObject("string(ids)");
+                    //String idPattern = (String) cda.selectObject("string(ids)");
                     for (String id : ids) {
                         Map<String, Object> params = new HashMap<String, Object>();
                         params.put("dataAccessId", id);
@@ -193,7 +193,6 @@ public class DashboardContext {
             }
         }
         logger.info("[Timing] Finished testing includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-
 
         return queries;
     }
