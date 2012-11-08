@@ -1908,10 +1908,16 @@ Query = function() {
       queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
     }
   }
-    _exportIframe = _exportIframe || $('<iframe style="display:none">');
+    
+  var theDoQuery = CDA_PATH + 'wrapItUp=wrapit';
+  $.post(theDoQuery, queryDefinition, function(uuid) {
+    var _exportIframe = $('<iframe style="display:none">');
     _exportIframe.detach();
-    _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
+    _exportIframe[0].src = webAppPath + '/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
     _exportIframe.appendTo($('body'));
+  });    
+    
+    
   }
 
   this.fetchData = function(params, callback) {

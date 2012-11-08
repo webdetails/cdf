@@ -111,7 +111,7 @@ var BaseCccComponent = BaseComponent.extend({
             }
             
             var scriptName =  myself.name.replace(/render_/,"");
-            chartDefinition.script = ("/"+ Dashboards.context.solution + "/" + Dashboards.context.path + "/" + scriptName +".js").replace(/\/+/g,'/') ;
+            chartDefinition.script = ("/"+ Dashboards.context.solution + "/" + Dashboards.context.path + "/" + Dashboards.context.file.split('.')[0] + "_" + scriptName +".js").replace(/\/+/g,'/') ;
             chartDefinition.attachmentName = scriptName;
             return chartDefinition;
         };

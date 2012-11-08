@@ -256,13 +256,16 @@ var DateRangeInputComponent = BaseComponent.extend({
         changed = closed = false;
       }
     };
+
+    var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
+
     $(function(){
       $("#" + myself.htmlObject + " input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
         latestDate: latestDate,
-        dateFormat: 'yy-mm-dd',
+        dateFormat: format,
         onOpen: function() {
           changed = closed = false;
           myself.startValue = null;
