@@ -1,4 +1,5 @@
 commonLibrariesScript=\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/shims.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
