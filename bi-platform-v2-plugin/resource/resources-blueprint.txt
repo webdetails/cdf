@@ -2,6 +2,7 @@ style=\
 @RELATIVE_URL@/content/pentaho-cdf/js/theme/cupertino/jquery-ui-1.8.custom.css
 
 commonLibrariesScript=\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/shims.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
