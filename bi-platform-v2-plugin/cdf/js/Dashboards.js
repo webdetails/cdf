@@ -1,4 +1,4 @@
-$.ajaxSetup({
+ $.ajaxSetup({
   type: "POST",
   async: false,
   traditional: true,
@@ -7,224 +7,6 @@ $.ajaxSetup({
 });
 
 
-/* Some utility functions, backward compatibility with older browsers */
-
-if ( !String.prototype.endsWith ) {
-  String.prototype.endsWith = function(str){
-    return (this.match(str+"$")==str);
-  };
-} 
-
-if (!Object.keys) {
-  Object.keys = (function () {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length
-
-    return function (obj) {
-      if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object')
-
-      var result = []
-
-      for (var prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) result.push(prop)
-      }
-
-      if (hasDontEnumBug) {
-        for (var i=0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i])
-        }
-      }
-      return result
-    }
-  })()
-};
-
-// Production steps of ECMA-262, Edition 5, 15.4.4.19  
-// Reference: http://es5.github.com/#x15.4.4.19  
-if (!Array.prototype.map) {  
-  Array.prototype.map = function(callback, thisArg) {  
-      
-    var T, A, k;  
-      
-    if (this == null) {  
-      throw new TypeError(" this is null or not defined");  
-    }  
-      
-    // 1. Let O be the result of calling ToObject passing the |this| value as the argument.  
-    var O = Object(this);  
-      
-    // 2. Let lenValue be the result of calling the Get internal method of O with the argument "length".  
-    // 3. Let len be ToUint32(lenValue).  
-    var len = O.length >>> 0;  
-      
-    // 4. If IsCallable(callback) is false, throw a TypeError exception.  
-    // See: http://es5.github.com/#x9.11  
-    if ({}.toString.call(callback) != "[object Function]") {  
-      throw new TypeError(callback + " is not a function");  
-    }  
-      
-    // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.  
-    if (thisArg) {  
-      T = thisArg;  
-    }  
-      
-    // 6. Let A be a new array created as if by the expression new Array(len) where Array is  
-    // the standard built-in constructor with that name and len is the value of len.  
-    A = new Array(len);  
-      
-    // 7. Let k be 0  
-    k = 0;  
-      
-    // 8. Repeat, while k < len  
-    while(k < len) {  
-      
-      var kValue, mappedValue;  
-      
-      // a. Let Pk be ToString(k).  
-      //   This is implicit for LHS operands of the in operator  
-      // b. Let kPresent be the result of calling the HasProperty internal method of O with argument Pk.  
-      //   This step can be combined with c  
-      // c. If kPresent is true, then  
-      if (k in O) {  
-      
-        // i. Let kValue be the result of calling the Get internal method of O with argument Pk.  
-        kValue = O[ k ];  
-      
-        // ii. Let mappedValue be the result of calling the Call internal method of callback  
-        // with T as the this value and argument list containing kValue, k, and O.  
-        mappedValue = callback.call(T, kValue, k, O);  
-      
-        // iii. Call the DefineOwnProperty internal method of A with arguments  
-        // Pk, Property Descriptor {Value: mappedValue, Writable: true, Enumerable: true, Configurable: true},  
-        // and false.  
-      
-        // In browsers that support Object.defineProperty, use the following:  
-        // Object.defineProperty(A, Pk, { value: mappedValue, writable: true, enumerable: true, configurable: true });  
-      
-        // For best browser support, use the following:  
-        A[ k ] = mappedValue;  
-      }  
-      // d. Increase k by 1.  
-      k++;  
-    }  
-      
-    // 9. return A  
-    return A;  
-  };        
-}  
-
-
-// Implementation of Array.indexOf (for IE <9)
-// Reference: https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-        "use strict";
-        if (this == null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
-            }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    }
-}
-
-// Implementation of Array.lastIndexOf (for IE <9)
-// Reference: https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/lastIndexOf
-if (!Array.prototype.lastIndexOf)
-{
-  Array.prototype.lastIndexOf = function(searchElement /*, fromIndex*/)
-  {
-    "use strict";
-
-    if (this == null)
-      throw new TypeError();
-
-    var t = Object(this);
-    var len = t.length >>> 0;
-    if (len === 0)
-      return -1;
-
-    var n = len;
-    if (arguments.length > 1)
-    {
-      n = Number(arguments[1]);
-      if (n != n)
-        n = 0;
-      else if (n != 0 && n != (1 / 0) && n != -(1 / 0))
-        n = (n > 0 || -1) * Math.floor(Math.abs(n));
-    }
-
-    var k = n >= 0
-          ? Math.min(n, len - 1)
-          : len - Math.abs(n);
-
-    for (; k >= 0; k--)
-    {
-      if (k in t && t[k] === searchElement)
-        return k;
-    }
-    return -1;
-  };
-}
-
-
-if ( !Array.prototype.reduce ) {  
-  Array.prototype.reduce = function reduce(accumulator){  
-    var i, l = this.length, curr;  
-              
-    if(typeof accumulator !== "function") // ES5 : "If IsCallable(callbackfn) is false, throw a TypeError exception."  
-      throw new TypeError("First argument is not callable");  
-      
-    if((l == 0 || l === null) && (arguments.length <= 1))// == on purpose to test 0 and false.  
-      throw new TypeError("Array length is 0 and no second argument");  
-              
-    if(arguments.length <= 1){  
-      curr = this[0]; // Increase i to start searching the secondly defined element in the array  
-      i = 1; // start accumulating at the second element  
-    }  
-    else{  
-      curr = arguments[1];  
-    }  
-              
-    for(i = i || 0 ; i < l ; ++i){  
-      if(i in this)  
-        curr = accumulator.call(undefined, curr, this[i], i, this);  
-    }  
-              
-    return curr;  
-  };  
-}  
 
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
@@ -756,9 +538,14 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 };
 
 Dashboards.init = function(components){
-  this.loadStorage();
+  if(this.initialStorage) {
+    this.storage = this.initialStorage;
+  } else {
+    this.loadStorage();
+  }
   this.restoreBookmarkables();
   this.restoreView();
+  this.syncParametersInit();
   if ($.isArray(components)) {
     Dashboards.addComponents(components);
   }
@@ -766,6 +553,70 @@ Dashboards.init = function(components){
     Dashboards.initEngine();
   });
 };
+
+
+/* Keep parameters master and slave in sync. The master parameter's
+ * initial value takes precedence over the slave parameter's when
+ * initializing the dashboard.
+ */
+ Dashboards.syncParameters = function(master, slave) {
+  this.setParameter(slave, this.getParameterValue(master));
+  this.parameterModel.change();
+  this.parameterModel.on("change:" + master,function(m,v){this.fireChange(slave,v)},this);
+  this.parameterModel.on("change:" + slave,function(m,v){this.fireChange(master,v)},this);
+ }
+
+Dashboards.chains = [];
+Dashboards.syncedParameters = {};
+Dashboards.syncParametersOnInit = function (master, slave){
+  var parameters = this.syncedParameters,
+      currChain,
+      masterChain,
+      slaveChain, slaveChainIdx, i;
+  if(!parameters[master]) parameters[master] = [];
+  parameters[master].push(slave);
+  
+  for (i = 0; i < this.chains.length;i++) {
+    currChain = this.chains[i];
+    if (currChain.indexOf(master) > -1) {
+      masterChain = currChain;
+    }
+    if (currChain.indexOf(slave) > -1) {
+      slaveChain = currChain;
+      slaveChainIdx = i;
+    }    
+  }
+  if(slaveChain && masterChain) {
+    if (masterChain != slaveChain) {
+      args = slaveChain.slice();
+      args.unshift(0);
+      args.unshift(masterChain.length);
+      [].splice.apply(masterChain,args);
+      this.chains.splice(slaveChainIdx,1);
+    }
+  } else if (slaveChain) {
+      slaveChain.unshift(master);
+  } else if(masterChain) {
+      masterChain.push(slave)
+  } else {
+    this.chains.push([master, slave]);
+  }
+}
+
+Dashboards.syncParametersInit = function() {
+  var parameters = this.syncedParameters,
+      i,j,k,master, slave;
+  for(i = 0; i < this.chains.length;i++) {
+    for(j = 0; j < this.chains[i].length;j++) {
+      var master = this.chains[i][j];
+      if(!parameters[master]) continue;
+      for(k = 0; k < parameters[master].length; k++) {
+        slave = parameters[master][k];
+        this.syncParameters(master,slave);
+      }
+    }
+  }
+}
 
 
 Dashboards.initEngine = function(){
@@ -883,6 +734,11 @@ Dashboards.fireChange = function(parameter, value) {
 Dashboards.restoreView = function() {
   var p, params;
   if(!Dashboards.view) return;
+  /* Because we're storing the parameters in OrientDB, and as OrientDB has some
+   * serious issues when storing nested objects, we're stuck marshalling the
+   * parameters into a JSON object and converting that JSON into a Base64 blob
+   * before storage. So now we have to decode that mess.
+   */
   params = JSON.parse(Base64.decode(Dashboards.view.params));
   for(p in params) if (params.hasOwnProperty(p)) {
     Dashboards.setParameter(p,params[p]);
@@ -2119,31 +1975,31 @@ Query = function() {
   };
 
   /* Sorting
-     *
-     * CDA expects an array of terms consisting of a number and a letter
-     * that's either 'A' or 'D'. Each term denotes, in order, a column
-     * number and sort direction: 0A would then be sorting the first column
-     * ascending, and 1D would sort the second column in descending order.
-     * This function accepts either an array with the search terms, or
-     * a comma-separated string with the terms:  "0A,1D" would then mean
-     * the same as the array ["0A","1D"], which would sort the results
-     * first by the first column (ascending), and then by the second
-     * column (descending).
-     */
+   *
+   * CDA expects an array of terms consisting of a number and a letter
+   * that's either 'A' or 'D'. Each term denotes, in order, a column
+   * number and sort direction: 0A would then be sorting the first column
+   * ascending, and 1D would sort the second column in descending order.
+   * This function accepts either an array with the search terms, or
+   * a comma-separated string with the terms:  "0A,1D" would then mean
+   * the same as the array ["0A","1D"], which would sort the results
+   * first by the first column (ascending), and then by the second
+   * column (descending).
+   */
   this.setSortBy = function(sortBy) {
     var newSort;
     if (sortBy === null || sortBy === undefined || sortBy === '') {
       newSort = '';
     }
     /* If we have a string as input, we need to split it into
-       * an array of sort terms. Also, independently of the parameter
-       * type, we need to convert everything to upper case, since want
-       * to accept 'a' and 'd' even though CDA demands capitals.
-       */
+     * an array of sort terms. Also, independently of the parameter
+     * type, we need to convert everything to upper case, since want
+     * to accept 'a' and 'd' even though CDA demands capitals.
+     */
     else if (typeof sortBy == "string") {
       /* Valid sortBy Strings are column numbers, optionally
-         *succeeded by A or D (ascending or descending), and separated by commas
-         */
+       *succeeded by A or D (ascending or descending), and separated by commas
+       */
       if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
         throw "InvalidSortExpression";
       }
@@ -2155,7 +2011,7 @@ Query = function() {
       newSort = sortBy.map(function(d){
         return d.toUpperCase();
       });
-      /* We also need to validate that each individual term is valid*/
+      /* We also need to validate that each individual term is valid */
       var invalidEntries = newSort.filter(function(e){
         return !e.match("^[0-9]+[adAD]?,?$")
       });
@@ -2211,11 +2067,11 @@ Query = function() {
     }
   };
   /* Pagination
-     *
-     * We paginate by having an initial position (_page) and page size (_pageSize)
-     * Paginating consists of incrementing/decrementing the initial position by the page size
-     * All paging operations change the paging cursor.
-     */
+   *
+   * We paginate by having an initial position (_page) and page size (_pageSize)
+   * Paginating consists of incrementing/decrementing the initial position by the page size
+   * All paging operations change the paging cursor.
+   */
 
   // Gets the next _pageSize results
   this.nextPage = function(outsideCallback) {
