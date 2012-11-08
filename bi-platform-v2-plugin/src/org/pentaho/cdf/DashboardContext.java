@@ -25,6 +25,7 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.views.View;
 import org.pentaho.cdf.views.ViewManager;
 import org.pentaho.platform.api.engine.IParameterProvider;
@@ -56,6 +57,15 @@ public class DashboardContext {
         this.userSession = userSession;
     }
 
+    private String getStorage() {
+        try {
+            return StorageEngine.getInstance().read(userSession.getName());
+        } catch (Exception e) {
+            logger.error(e);
+            return "";
+        }
+    }
+
     public String getContext(IParameterProvider requestParams) {
         try {
             String solution = requestParams.getStringParameter("solution", ""),
@@ -64,15 +74,16 @@ public class DashboardContext {
                     viewId = requestParams.getStringParameter("view", requestParams.getStringParameter("action", "")),
                     fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
-            Calendar cal = Calendar.getInstance();
 
             Document config = getConfigFile();
 
             context.put("queryData", processAutoIncludes(fullPath, config));
             context.put("sessionAttributes", processSessionAttributes(config));
+            Calendar cal = Calendar.getInstance();
 
-            context.put("serverLocalDate", cal.getTimeInMillis());
-            context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
+            long utcTime = cal.getTimeInMillis();
+            context.put("serverLocalDate", utcTime + cal.getTimeZone().getOffset(utcTime));
+            context.put("serverUTCDate", utcTime);
             context.put("user", userSession.getName());
             context.put("locale", userSession.getLocale());
             context.put("solution", solution);
@@ -103,6 +114,12 @@ public class DashboardContext {
             if (view != null) {
                 s.append("Dashboards.view = ");
                 s.append(view.toJSON().toString(2) + "\n");
+            }
+            String storage = getStorage();
+            if (!"".equals(storage)) {
+                s.append("Dashboards.initialStorage = ");
+                s.append(storage);
+                s.append("\n");
             }
             s.append("</script>\n");
             // setResponseHeaders(MIME_PLAIN,0,null);
