@@ -1,3 +1,6 @@
+12.11.09
+    * 4.8 ee compatibility issues
+
 12.10.17
     * [FIX] Fixed linear scale calculation for second axis when all values are null.
     * General image Update
