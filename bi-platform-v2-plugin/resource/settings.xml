@@ -16,8 +16,5 @@
     <hibernate-available>true</hibernate-available>
     
     
-   <!-- Register the AMD namespace so RequireJS require/define can find the cdf modules -->
-    <amd-root-path>content/pentaho-cdf/js</amd-root-path>
-    <amd-root-namespace>cdf</amd-root-namespace>    
     
 </settings>
