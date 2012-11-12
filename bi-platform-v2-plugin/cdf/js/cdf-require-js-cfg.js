@@ -15,10 +15,56 @@ requireCfg['shim']['cdf/cdf-module'] = ['cdf/Dashboards',
 	'cdf/simile/ajax/simile-ajax-api',
 	'cdf/simile/ajax/scripts/json',
 	'cdf/json',
-	'cdf/CoreComponents'];
+    'cdf/lib/shims',
+	'cdf/backbone',
+	'cdf/underscore',
+	'cdf/mustache',
+	'cdf/components/ccc',
+	'cdf/components/core',
+    'cdf/components/input'	,
+    'cdf/components/jfreechart',    
+    'cdf/components/maps',
+    'cdf/components/navigation',
+    'cdf/components/pentaho',
+    'cdf/components/simpleautocomplete',
+	'cdf/components/table'];
 
-requireCfg['shim']['cdf/Dashboards'] = ['cdf/Base'];
-requireCfg['shim']['cdf/CoreComponents'] = ['cdf/Dashboards'];
+
+requireCfg['shim']['cdf/CoreComponents'] = [
+	'cdf/components/core',
+	'cdf/components/ccc',
+    'cdf/components/input'	,
+    'cdf/components/jfreechart',    
+    'cdf/components/maps',
+    'cdf/components/navigation',
+    'cdf/components/pentaho',
+    'cdf/components/simpleautocomplete',
+	'cdf/components/table'
+];
+
+
+
+requireCfg['shim']['cdf/Dashboards'] = [
+    'cdf/Base',
+    'cdf/underscore',
+    'cdf/backbone',
+    'cdf/mustache', 
+    'cdf/lib/shims'    
+];
+
+
+requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
+
+requireCfg['shim']['cdf/components/core'] = ['cdf/Dashboards'];
+requireCfg['shim']['cdf/components/ccc'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/input'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/maps'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/navigation'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/pentaho'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/table'] = ['cdf/components/core'];
+
 requireCfg['shim']['cdf/jquery.ui'] = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-impromptu.3.1'] = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-ui-datepicker-i18n'] = ['cdf/jquery.ui'];
