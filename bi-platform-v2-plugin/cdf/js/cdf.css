@@ -140,3 +140,7 @@ div.cdfCommentsPagination a{
 .container .dataTables_wrapper {
 	   min-height:0;
 }
+
+.container .container {
+  width: auto;
+}
