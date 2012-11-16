@@ -109,8 +109,8 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             }
             
             var tipOffset = this.options.offset,
-                useCorners = this.options.corners,
-                showArrow  = this.options.arrow,
+                useCorners = this.options.useCorners,
+                showArrow  = this.options.arrowVisible,
                 actualWidth  = $tip[0].offsetWidth, 
                 actualHeight = $tip[0].offsetHeight;
             
@@ -213,7 +213,7 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
         tip: function() {
             if (!this.$tip) {
                 this.$tip = $('<div class="tipsy"></div>');
-                if(this.options.arrow){
+                if(this.options.arrowVisible){
                     this.$tip.html('<div class="tipsy-arrow"></div><div class="tipsy-inner"/></div>');
                 } else {
                     this.$tip.html('<div class="tipsy-inner"/></div>');
@@ -250,8 +250,8 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
         }
         
         options = $.extend({}, $.fn.tipsy.defaults, options);
-        if(options.arrow == null){
-            options.arrow = !options.corners;
+        if(options.arrowVisible == null){
+            options.arrowVisible = !options.useCorners;
         }
         
         function get(ele) {
@@ -297,8 +297,8 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
         opacity: 0.8,
         title: 'title',
         trigger: 'hover',
-        corners: false, // use corners in nw, ne and sw, se gravities
-        arrow:   null   // show or hide the arrow (default is !corners)
+        useCorners: false, // use corners in nw, ne and sw, se gravities
+        arrowVisible: null   // show or hide the arrow (default is !useCorners)
     };
     
     // Overwrite this method to provide options on a per-element basis.

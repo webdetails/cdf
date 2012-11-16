@@ -304,7 +304,7 @@ pv.css = function(e, p) {
  * @param e the exception that triggered the error.
  */
 pv.error = function(e) {
-  (typeof console == "undefined") ? alert(e) : console.error(e);
+  (typeof console === "undefined" || !console.error) ? alert(e) : console.error(e);
 };
 
 /**
@@ -3374,7 +3374,9 @@ pv.Scale.quantitative = function() {
       tickFormat = String, // default tick formatting function
       tickFormatter = null, // custom tick formatting function
       dateTickFormat, //custom date tick format
-      dateTickPrecision; //custom date tick precision
+      dateTickPrecision, //custom date tick precision
+      usedDateTickPrecision,
+      usedNumberExponent;
 
   /** @private */
   function newDate(x) {
@@ -3536,7 +3538,7 @@ pv.Scale.quantitative = function() {
    *
    * @function
    * @name pv.Scale.quantitative.prototype.ticks
-   * @param {number} [m] optional number of desired ticks.
+   * @param {number} [m] optional number of desired numeric ticks.
    * @param {object} [options] optional keyword arguments object.
    * @param {boolean} [options.roundInside=true] should the ticks be ensured to be strictly inside the scale domain, or to strictly outside the scale domain.
    * @param {boolean} [options.numberExponentMin=-Inifinity] minimum value for the step exponent.
@@ -3609,9 +3611,11 @@ pv.Scale.quantitative = function() {
         /** @ignore */ increment = function(d) { d.setTime(d.getTime() + step); };
       }
 
-      precision = dateTickPrecision?dateTickPrecision:precision;
-      format = dateTickFormat?dateTickFormat:format;
-
+      precision = dateTickPrecision ? dateTickPrecision : precision;
+      format = dateTickFormat ? dateTickFormat : format;
+      
+      usedDateTickPrecision = precision;
+      
       tickFormat = pv.Format.date(format);
 
       var date = new Date(min), dates = [];
@@ -3679,7 +3683,7 @@ pv.Scale.quantitative = function() {
             break;
           }
 
-          // 31536e6 - 1 ano
+          // 31536e6 - 1 year
           default: {
             step = pv.logCeil(n / 15, 10);
             if (n / step < 2) step /= 5;
@@ -3695,7 +3699,7 @@ pv.Scale.quantitative = function() {
         step = 1;
         increment = function(d) { d.setSeconds(d.getSeconds() + step*dateTickPrecision/1000);};
       }
-
+      
 
       while (true) {
         increment(date);
@@ -3732,7 +3736,7 @@ pv.Scale.quantitative = function() {
     if (err <= .15 && exponent < exponentMax - 1) { 
         step *= 10;
     } else if (err <= .35) {
-        step *= 5; 
+        step *= 5;
     } else if (err <= .75) {
         step *= 2;
     }
@@ -3743,7 +3747,9 @@ pv.Scale.quantitative = function() {
     var start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
     var end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
     
-    tickFormat = pv.Format.number().fractionDigits(Math.max(0, -exponent));
+    usedNumberExponent = Math.max(0, -exponent);
+    
+    tickFormat = pv.Format.number().fractionDigits(usedNumberExponent);
     
     var ticks = pv.range(start, end + step, step);
     if(reverse){
@@ -3775,17 +3781,19 @@ pv.Scale.quantitative = function() {
     return dateTickFormat;  };
 
   /**
-   * Formats the specified tick with a defined precision for the date
+   * Generates date ticks with a specified precision.
    * @function
    * @name pv.Scale.quantitative.prototype.dateTickPrecision
-   * @returns {string} a string with the desired tick format.
+   * @param {number} [precision] The number of milliseconds that separate ticks.
+   * @returns {number} the current date tick precision.
    */
   scale.dateTickPrecision = function () {
     if (arguments.length) {
       dateTickPrecision = arguments[0];
       return this;
     }
-    return dateTickPrecision;  };
+    return dateTickPrecision;  
+  };
 
 
     /**
@@ -3793,7 +3801,10 @@ pv.Scale.quantitative = function() {
      * 
      * @function
      * @name pv.Scale.quantitative.prototype.tickFormatter
-     * @param {function} [f] 
+     * @param {function} [f] The function that formats number or date ticks.
+     * When ticks are dates, the second argument of the function is the 
+     * desired tick precision.
+     * 
      * @returns {pv.Scale|function} a custom formatter function or this instance.
      */
     scale.tickFormatter = function (f) {
@@ -3816,8 +3827,12 @@ pv.Scale.quantitative = function() {
    * @returns {string} a formatted tick value.
    */
   scale.tickFormat = function (t) {
+      if(tickFormatter){
+          return tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
+      }
+      
       var formatter = tickFormatter || tickFormat;
-      return formatter(t); 
+      return formatter(t);
   };
 
   /**
