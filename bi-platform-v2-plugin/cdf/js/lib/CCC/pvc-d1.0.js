@@ -15237,7 +15237,7 @@ def
         
         // Naked
         if(!this.index && 
-           this._specifyChartOption(def.firstLowerCase(optionInfo.name))){
+           this._specifyChartOption(optionInfo, def.firstLowerCase(optionInfo.name))){
             return true;
         }
     }
