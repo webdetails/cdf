@@ -1,6 +1,7 @@
 BaseComponent = Base.extend({
   //type : "unknown",
   visible: true,
+  isManaged: true,
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
@@ -197,11 +198,6 @@ BaseComponent = Base.extend({
     return opts || {};
   }
 });
-
-
-
-
-
 
 var TextComponent = BaseComponent.extend({
   update : function() {
@@ -419,9 +415,214 @@ var MdxQueryGroupComponent = BaseComponent.extend({
   }
 });
 
-
-var FreeformComponent = BaseComponent.extend({
+var ManagedFreeformComponent = BaseComponent.extend({
   update : function() {
     this.customfunction(this.parameters || []);
   }
 });
+
+
+/*
+ * UnmanagedComponent is an advanced version of the BaseComponent that allows
+ * control over the core CDF lifecycle for implementing components. It should
+ * be used as the base class for all components that desire to implement an
+ * asynchronous lifecycle, as CDF cannot otherwise ensure that the postExecution
+ * callback is correctly handled.
+ */
+var UnmanagedComponent = BaseComponent.extend({
+  isManaged: false,
+
+  /*
+   * Handle calling preExecution when it exists. All components extending
+   * UnmanagedComponent should either use one of the three lifecycles declared
+   * in this class (synchronous, triggerQuery, triggerAjax), or call this method
+   * explicitly at the very earliest opportunity. If preExec returns a falsy
+   * value, component execution should be cancelled as close to immediately as
+   * possible.
+   */
+  preExec: function() {
+    /*
+     * runCounter gets incremented every time we run a query, allowing us to
+     * determine whether the query has been called again after us.
+     */
+    if(typeof this.runCounter == "undefined") {
+      this.runCounter = 0;
+    }
+    this.trigger('component component:preExecution', this);
+    if (typeof this.preExecution == "function") {
+      var ret = this.preExecution();
+      return (typeof ret == "undefined" || ret);
+    } else {
+      return true;
+    }
+  },
+  /*
+   * Handle calling postExecution when it exists. All components extending
+   * UnmanagedComponent should either use one of the three lifecycles declared
+   * in this class (synchronous, triggerQuery, triggerAjax), or call this method
+   * explicitly immediately before yielding control back to CDF.
+   */
+  postExec: function() {
+    this.trigger('component component:postExecution', this);
+    if(typeof this.postExecution == "function") {
+      this.postExecution();
+    }
+  },
+
+  drawTooltip: function() {
+    if (this.tooltip) {
+      this._tooltip = typeof this.tooltip == "function" ?
+          this.tooltip():
+          this.tooltip;
+    }
+  },
+  showTooltip: function() {
+    if(typeof this._tooltip != "undefined") {
+      $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+        delay:0,
+        track: true,
+        fade: 250
+      });
+    }
+  },
+
+  /*
+   * The synchronous lifecycle handler closely resembles the core CDF lifecycle,
+   * and is provided as an alternative for components that desire the option to
+   * alternate between a synchronous and asynchronous style lifecycles depending
+   * on external configuration (e.g. if it can take values from either a static
+   * array or a query). It take the component drawing method as a callback.
+   */
+  synchronous: function(callback) {
+    if (!this.preExec()) {
+      return;
+    }
+    this.block();
+    setTimeout(_.bind(function(){
+      try{
+        callback();
+        this.drawTooltip();
+        this.postExec();
+        this.showTooltip();
+      } finally {
+        this.unblock();
+      }
+    },this), 10);
+  },
+
+  /*
+   * The triggerQuery method implements a lifecycle around Query objects.
+   *
+   * It takes a query definition object that is passed directly into the Query
+   * constructor, and the component rendering callback, and implements the full 
+   * preExecution->block->render->postExecution->unblock lifecycle. This method
+   * detects concurrent updates to the component and ensures that only one
+   * redraw is performed.
+   */
+  triggerQuery: function(queryDef, callback) {
+    if(!this.preExec()) {
+      return;
+    }
+    /*
+     * We increment runCounter before actually running the query. This way, as
+     * the query handler keeps track of the runCounter state when it was called,
+     * it can detect whether the query was called again after the call that led
+     * to the handler's invocation. In such a case, we know there's another
+     * update incoming,  and we shouldn't call the client callback.
+     */
+    this.block();
+    var counter = ++this.runCounter;
+    var handler = _.bind(function(data){
+      if(counter >= this.runCounter) {
+        if(typeof this.postFetch == "function") {
+          data = this.postFetch(data);
+        }
+        callback(data);
+        this.postExec();
+      }
+      this.unblock();
+    },this);
+    var query = this.queryState = new Query(queryDef);
+    query.fetchData(this.parameters,handler);
+  },
+
+  /* 
+   * The triggerAjax method implements a lifecycle around 
+   * triggerAjax can be used with either of the following call conventions:
+   * - this.triggerAjax(url,params,callback);
+   * - this.triggerAjax({url: url, data: params, ...},callback);
+   * In the second case, you can add any other jQuery.Ajax parameters you desire
+   * to the object, but triggerAjax will take control over the success and error
+   * callbacks.
+   */
+  triggerAjax: function(url,params,callback) {
+    if(!this.preExec()) {
+      return;
+    }
+    this.block();
+    var ajaxParameters = {
+      async: true
+    };
+    if (typeof callback != "function") {
+      callback = params;
+      _.extend(ajaxParameters,url);
+    } else {
+      _.extend(ajaxParameters,{
+        url: url,
+        data: params
+      });
+    }
+    var counter = ++this.runCounter;
+    ajaxParameters.success = _.bind(function(data) {
+        if(counter >= this.runCounter) {
+          this.trigger('component component:postFetch',this,data);
+          if(typeof this.postFetch == "function") {
+            data = this.postFetch(data);
+          }
+          callback(data);
+          this.postExec();
+        }
+        this.unblock();
+      },this);
+    ajaxParameters.error = _.bind(this.unblock,this);
+    jQuery.ajax(ajaxParameters);
+  },
+
+  /*
+   * Trigger UI blocking while the component is updating. Default implementation
+   * uses the global CDF blockUI, but implementers are encouraged to override
+   * with per-component blocking where appropriate (or no blocking at all in
+   * components that support it!)
+   */
+  block: function() {
+    Dashboards.incrementRunningCalls();
+  },
+
+  /*
+   * Trigger UI unblock when the component finishes updating. Functionality is
+   * defined as undoing whatever was done in the block method. Should also be
+   * overridden in components that override UnmanagedComponent#block. 
+   */
+  unblock: function() {
+    Dashboards.decrementRunningCalls();
+  }
+});
+
+var FreeformComponent = UnmanagedComponent.extend({
+  manageCallee: true,
+
+  update: function() {
+    var render = _.bind(this.render,this);
+    if(this.manageCallee) {
+      this.synchronous(render);
+    } else {
+      render();
+    }
+  },
+
+  render : function() {
+    var parameters =this.parameters || [];
+    this.customfunction(parameters);
+  }
+});
+
