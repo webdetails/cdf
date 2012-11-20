@@ -539,7 +539,7 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 
 Dashboards.init = function(components){
   if(this.initialStorage) {
-    this.storage = this.initialStorage;
+    _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
   }
