@@ -28,7 +28,6 @@ var BaseCccComponent = UnmanagedComponent.extend({
     
     query: null,
     chart: null,
-    
       
     exportChart: function(outputType, overrides) {
         
@@ -60,7 +59,7 @@ var BaseCccComponent = UnmanagedComponent.extend({
             }
             
             var scriptName =  myself.name.replace(/render_/,"");
-            chartDefinition.script = ("/"+ Dashboards.context.solution + "/" + Dashboards.context.path + "/" + /* Dashboards.context.file.split('.')[0] + "_" +*/ scriptName +".js").replace(/\/+/g,'/') ;
+            chartDefinition.script = ("/"+ Dashboards.context.solution + "/" + Dashboards.context.path + "/" + scriptName +".js").replace(/\/+/g,'/') ;
             chartDefinition.attachmentName = scriptName;
             return chartDefinition;
         };
@@ -72,9 +71,78 @@ var BaseCccComponent = UnmanagedComponent.extend({
         _exportIframe.detach();
         _exportIframe[0].src = "../cgg/draw?" + $.param(chartDefinition);
         _exportIframe.appendTo($('body'));
-    }
+    },
     
-})
+    _preProcessChartDefinition: function(){
+        var chartDef = this.chartDefinition;
+        if(chartDef){
+            var isV1Compat = typeof pvc.defaultCompatVersion !== 'function' || 
+                             pvc.defaultCompatVersion() <= 1; 
+            if(isV1Compat){
+                var renamed = this._renamedV2Props;
+                var hop = Object.prototype.hasOwnProperty;
+                
+                // Don't presume chartDef props must be own
+                for(var p in chartDef){
+                    
+                    // Is property a new and renamed V2 property?
+                    if(hop.call(renamed, p)){
+                        // delete the v2 property, 
+                        // so that the v1 value is not ignored
+                        delete chartDef[p];
+                    }
+                } 
+            }
+        }
+    },
+    
+    _renamedV2Props: (function(){
+        var o = {
+            valuesVisible:      1, // showValues
+            areasVisible:       1, // showAreas
+            dotsVisible:        1, // showDots
+            linesVisible:       1, // showLines
+            tooltipEnabled:     1, // showTooltips
+            tooltip:            1, // tipsySettings
+            
+            contentPaddings:    1, // innerGap
+            
+            plotFrameVisible:   1, // x,y AxisEndLine
+            
+            barSizeMax:         1, // maxBarSize
+            boxSizeMax:         1, // maxBoxSize
+            
+            plot2:              1, // secondAxis 
+            ortho2AxisColors:   1, // secondAxisColor
+            plot2Series:        1, // secondAxisIdx
+            plot2OrthoAxis:     1  // secondAxisIndependentScale
+        };
+        
+        // To address the following:
+        //  x,y AxisFullGrid
+        //  x,y,second AxisDesiredTickCount
+        //  x,y,second AxisMinorTicks
+        //  x,y,second AxisSize, 
+        //  x,y,second AxisPosition
+        //  axisOffset
+        //  originIsZero, secondAxisOriginIsZero
+        //  orthoFixedMin, orthoFixedMax
+        //  showXScale, showYScale, showSecondScale
+        var axisIds   = ['baseAxis', 'orthoAxis', 'ortho2Axis'];
+        var axisProps = ['Grid', 'Visible', 'DomainRoundMode', 
+                         'DesiredTickCount', 'MinorTicks', 'Size', 
+                         'Position', 'Offset', 'OriginIsZero',
+                         'FixedMin', 'FixedMax', 'Composite'];
+        
+        axisProps.forEach(function(p){
+            axisIds.forEach(function(axisId){
+                o[axisId + p] = 1;
+            });
+        });
+        
+        return o;
+    }())
+});
 
 var CccComponent = BaseCccComponent.extend({
 
@@ -123,7 +191,9 @@ var CccComponent = BaseCccComponent.extend({
     render: function(values) {
 
         $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
-
+        
+        this._preProcessChartDefinition();
+        
         var o = $.extend({},this.chartDefinition);
         o.canvas = this.htmlObject+'protovis';
         // Extension points
@@ -134,6 +204,7 @@ var CccComponent = BaseCccComponent.extend({
             });
             o.extensionPoints=ep;
         }
+        
         this.chart =  new this.cccType(o);
         if(arguments.length > 0){
             this.chart.setData(values,{
@@ -229,6 +300,8 @@ var CccComponent2 = BaseCccComponent.extend({
 
         $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
 
+        this._preProcessChartDefinition();
+        
         var o = $.extend({},this.chartDefinition);
         o.canvas = this.htmlObject+'protovis';
         // Extension points
