@@ -1,4 +1,6 @@
-pen.define("cdf/lib/CCC/def", function(){
+//VERSION TRUNK-20121122\n
+
+var def = (function(){
 /** @private */
 var arraySlice = Array.prototype.slice;
 
@@ -1711,6 +1713,23 @@ def.type('Query')
         return array;
     },
     
+    sort: function(compare, by){
+        if(!compare){
+            compare = def.compare;
+        }
+        
+        if(by){
+            var keyCompare = compare;
+            compare = function(a, b){
+                return keyCompare(by(a), by(b));
+            };
+        }
+        
+        var sorted = this.array().sort(compare);
+        
+        return new def.ArrayLikeQuery(sorted);
+    },
+    
     /**
      * Consumes the query and fills an object
      * with its items.
@@ -1982,8 +2001,19 @@ def.type('ArrayLikeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        if(nextIndex < this._count){
-            this.item = this._list[nextIndex];
+        var count = this._count;
+        if(nextIndex < count){
+            var list = this._list;
+            
+            while(!objectHasOwn.call(list, nextIndex)){
+                nextIndex++;
+                if(nextIndex >= count){
+                    return 0;
+                }
+                this._count--;
+            }
+            
+            this.item = list[nextIndex];
             return 1;
         }
     },
@@ -2221,8 +2251,19 @@ def.type('ReverseQuery', def.Query)
             this._count  = this._source.length;
         }
         
-        if(nextIndex < this._count){
-            this.item = this._source[this._count - nextIndex - 1];
+        var count = this._count;
+        if(nextIndex < count){
+            var index = count - nextIndex - 1;
+            var source = this._source;
+            
+            while(!objectHasOwn.call(source, index)){
+                if(--index < 0){
+                    return 0;
+                }
+                this._count--;
+            }
+            
+            this.item = source[index];
             return 1;
         }
     }
@@ -2254,4 +2295,4 @@ def.range = function(start, count, step){
 // Reset namespace to global, instead of 'def'
 currentNamespace = def.global;    
     return def;
-});
+}());
