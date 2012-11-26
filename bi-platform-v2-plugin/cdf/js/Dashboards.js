@@ -1,6 +1,6 @@
  $.ajaxSetup({
   type: "POST",
-  async: true,
+  async: false,
   traditional: true,
   scriptCharset: "utf-8",
   contentType: "application/x-www-form-urlencoded;charset=UTF-8"
@@ -356,9 +356,9 @@ Dashboards.bindControl = function(object) {
   }
   
   if (typeof objectImpl == 'undefined'){
-    objectImpl.dashboard = this;
     this.log ("Object type " + object["type"] + " can't be mapped to a valid class","error");
   } else {
+    objectImpl.dashboard = this;
     /*
      * extend the input object with all the component methods,
      * and endow it with the Backbone event system.
@@ -450,7 +450,7 @@ Dashboards.updateLifecycle = function(object) {
     }
     var handler = _.bind(function() {
       try {
-        object.trigger('component component:preExecution', object);
+        object.trigger('cdf cdf:preExecution', object);
         if(!(typeof(object.preExecution)=='undefined')){
           var ret = object.preExecution.apply(object);
           if (typeof ret != "undefined" && !ret)
@@ -471,7 +471,7 @@ Dashboards.updateLifecycle = function(object) {
         // unsupported update call
         }
       
-        object.trigger('component component:postExecution', object);
+        object.trigger('cdf cdf:postExecution', object);
         if(!(typeof(object.postExecution)=='undefined')){
           object.postExecution.apply(object);
         }
@@ -711,9 +711,9 @@ Dashboards.initEngine = function(){
         var callback = function(comp) {
           this.waitingForInit = _(this.waitingForInit).without(comp);
           this.handlePostInit();
-          comp.off('component:postExecution',callback);
+          comp.off('cdf:postExecution',callback);
         } 
-        component.on('component:postExecution',callback,myself);
+        component.on('cdf:postExecution',callback,myself);
         myself.update(component);
       }
       myself.restoreDuplicates();
@@ -1204,7 +1204,7 @@ Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution,
   // execute an Action Sequence on the server
 
   var url = webAppPath + "/" + serviceMethod;
-	
+
   // Add the solution to the params
   var arr = {};
   arr.wrapper = false;
@@ -1215,7 +1215,7 @@ Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution,
     arr[val[0]]=val[1];
   });
   return this.executeAjax(returntype, url, arr, func);
-}    
+};
 
 Dashboards.parseXActionResult = function(obj,html){
 
@@ -1254,7 +1254,7 @@ Dashboards.parseXActionResult = function(obj,html){
 };
 
 Dashboards.setSettingsValue = function(name,object){
-			
+
   var data = {
     method: "set",
     key: name,
@@ -1818,7 +1818,11 @@ Query = function() {
   /*
    * Private fields
    */
-
+  /* AJAX Options for the query */
+  var _ajaxOptions = {
+    type: "POST",
+    async: false,
+  };
   // Datasource type definition
   var _mode = 'CDA';
   // CDA uses file+id, Legacy uses a raw query
@@ -1836,7 +1840,6 @@ Query = function() {
   var _sortBy = "";
   // Exporting support
   var _exportIframe = null;
-
   var _params = [];
   /*
    * Initialization code
@@ -1889,7 +1892,7 @@ Query = function() {
    * Private methods
    */
 
-  var doQuery = function(outsideCallback){
+  function doQuery(outsideCallback){
     if (typeof _callback != 'function') {
       throw 'QueryNotInitialized';
     }
@@ -1904,7 +1907,7 @@ Query = function() {
       queryDefinition = _query;
       url = LEGACY_QUERY_PATH;
     }
-    $.post(url, queryDefinition, function(json) {
+    var successHandler = function(json) {
       if(_mode == 'Legacy'){
         json = eval("(" + json + ")");
       }
@@ -1912,18 +1915,35 @@ Query = function() {
       var clone = Dashboards.safeClone(true,{},_lastResultSet);
       
       if (_mode == 'Legacy') {
-      	var newMetadata = [{"colIndex":0,"colType":"String","colName":"Name"}];
-      	for (var i = 0 ; i < clone.metadata.length; i++) {
-      		var x = i;
-			newMetadata.push({"colIndex":x+1,"colType":"String","colName":clone.metadata[x]});
-		}      
-		clone.resultset = clone.values;
-		clone.metadata = newMetadata;
-		clone.values = null;
+        var newMetadata = [{
+          "colIndex":0,
+          "colType":"String",
+          "colName":"Name"
+        }];
+        for (var i = 0 ; i < clone.metadata.length; i++) {
+          var x = i;
+          newMetadata.push({
+            "colIndex":x+1,
+            "colType":"String",
+            "colName":clone.metadata[x]
+          });
+        }      
+        clone.resultset = clone.values;
+        clone.metadata = newMetadata;
+        clone.values = null;
       }
       
       callback(clone);
+    };
+
+    var settings = _.extend({},_ajaxOptions, {
+      success: function() {},
+      data: queryDefinition,
+      url: url,
+      success: successHandler
     });
+    
+    $.ajax(settings);
   };
 
   function buildQueryDefinition(overrides) {
@@ -1948,7 +1968,7 @@ Query = function() {
     }
     queryDefinition.path = _file;
     queryDefinition.dataAccessId = _id;
-	queryDefinition.outputIndexId = _outputIdx;
+    queryDefinition.outputIndexId = _outputIdx;
     queryDefinition.pageSize = _pageSize;
     queryDefinition.pageStart = _page;
     queryDefinition.sortBy = _sortBy;
@@ -2001,6 +2021,12 @@ Query = function() {
     
     
   }
+
+  this.setAjaxOptions = function(newOptions) {
+    if(typeof newOptions == "object") {
+      _.extend(_ajaxOptions,newOptions);
+    }
+  };
 
   this.fetchData = function(params, callback) {
     switch(arguments.length) {
