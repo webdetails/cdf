@@ -192,7 +192,7 @@ var CccComponent = BaseCccComponent.extend({
 
         $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
         
-        this._preProcessChartDefinition();
+        //this._preProcessChartDefinition();
         
         var o = $.extend({},this.chartDefinition);
         o.canvas = this.htmlObject+'protovis';
@@ -300,7 +300,7 @@ var CccComponent2 = BaseCccComponent.extend({
 
         $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
 
-        this._preProcessChartDefinition();
+        //this._preProcessChartDefinition();
         
         var o = $.extend({},this.chartDefinition);
         o.canvas = this.htmlObject+'protovis';
