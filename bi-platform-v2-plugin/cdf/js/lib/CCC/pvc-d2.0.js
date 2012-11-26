@@ -1,4 +1,4 @@
-//VERSION TRUNK-20121122\n
+//VERSION TRUNK-20121126\n
 
 
 /*global pvc:true */
@@ -233,32 +233,6 @@ var pvc = def.globalSpace('pvc', {
             }
         }
     };
-    //
-    //pv.Mark.prototype.duckExtension = function(ext, tag){
-    //    // Copy properties of ext, local or inherited
-    //    // that are different from the current ones.
-    //    // Mark copied properties with tag, when specified (!==undefined),
-    //    //  or inherit the copied tag, when unspecified.
-    //    var fixedTag = (tag !== undefined);
-    //    var copied = {};
-    //    while(ext && ext !== this){
-    //        for(var extName in ext.$propertiesMap){
-    //            if(!def.hasOwn(copied, extName) && extName in this.properties){
-    //                copied[extName] = 1;
-    //                
-    //                // Defined in both marks
-    //                var extP = ext.$propertiesMap[extName];
-    //                var p = this.$propertiesMap[extName];
-    //                // tag differences do not cause copying
-    //                if(!p || (p.value !== extP.value) || (p.type !== extP.type)){
-    //                    this[extName](extP.value, fixedTag ? tag : extP.tag);
-    //                }
-    //            }
-    //        }
-    //        
-    //        ext = ext.proto;
-    //    }
-    //};
     
     pv.Mark.prototype.hasDelegateValue = function(name, tag) {
         var p = this.$propertiesMap[name];
@@ -3432,6 +3406,11 @@ def.scope(function(){
         this.resolveCore = def.get(spec, 'resolve');
         if(!this.resolveCore){
             this.isResolved = true;
+        }
+        
+        var data = def.get(spec, 'data');
+        if(data != null){
+            this.data = data;
         }
         
         // --------
@@ -6700,7 +6679,6 @@ function(dimension, value, label, rawValue, key) {
         this.rawValue = rawValue;
     }
     this.key = key;
-    this.globalKey = dimension.name + ":" + key;
 })
 .add( /** @lends pvc.data.Atom */{
     isVirtual: false,
@@ -6750,10 +6728,6 @@ function atom_idComparerReverse(a, b) {
  * 
  * @property {number} key
  *           A semantic identifier.
- *           <p>
- *           Only contains information related to locally set atoms.
- *           Atoms that are present in a base atoms object are not included.
- *           </p>
  *           
  * @property {pvc.data.Data} owner
  *           The owner data instance.
@@ -6767,7 +6741,14 @@ function atom_idComparerReverse(a, b) {
  * 
  * @param {map(string any)} [atomsByName] 
  *        A map of atoms or raw values by dimension name.
- *        
+ * 
+ * @param {string[]} [dimNames] The dimension names of atoms in {@link atomsByName}.
+ * The dimension names in this list will be used to build 
+ * the key and label of the complex.
+ * When unspecified, all the dimensions of the associated complex type
+ * will be used to create the key and label.
+ * Null atoms are not included in the label.
+ * 
  * @param {object} [atomsBase] 
  *        An object to serve as prototype to the {@link #atoms} object.
  *        <p>
@@ -6782,7 +6763,7 @@ function atom_idComparerReverse(a, b) {
  */
 def
 .type('pvc.data.Complex')
-.init(function(source, atomsByName, atomsBase, wantLabel, calculate) {
+.init(function(source, atomsByName, dimNames, atomsBase, wantLabel, calculate) {
     /*jshint expr:true */
     
     /* NOTE: this function is a hot spot and as such is performance critical */
@@ -6800,113 +6781,98 @@ def
     this.owner = owner || this;
     this.atoms = atomsBase ? Object.create(atomsBase) : {};
 	
-    if (!atomsByName) {
+    var hadDimNames = !!dimNames;
+    if(!dimNames){
+        dimNames = owner.type._dimsNames;
+    }
+    
+    var atomsMap = this.atoms;
+    var D = dimNames.length;
+    var i, dimName;
+    
+    if(atomsByName){
+        /* Fill the atoms map */
+        var ownerDims = owner._dimensions;
+        
+        var addAtom = function(dimName, value){
+            if(value != null){ // nulls are already in base proto object
+                var dimension = def.getOwn(ownerDims, dimName);
+                var atom = dimension.intern(value);
+                if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
+                    atomsMap[dimName] = atom;
+                }
+            }
+        };
+    
+        if(!hadDimNames){
+            for(dimName in atomsByName){
+                addAtom(dimName, atomsByName[dimName]);
+            }
+        } else {
+            for(i = 0 ; i < D ; i++){
+                dimName = dimNames[i];
+                addAtom(dimName, atomsByName[dimName]);
+            }
+        }
+        
+        if(calculate){
+            var newAtomsByName = owner.type._calculate(this); // may be null
+            for(dimName in newAtomsByName){
+                if(!def.hasOwnProp.call(atomsMap, dimName)){ // not yet added
+                    addAtom(dimName, newAtomsByName[dimName]);
+                }
+            }
+        }
+    }
+    
+    /* Build Key and Label */
+    if(!D){
         this.value = null;
         this.key   = '';
         if(wantLabel){
             this.label = "";
         }
+    } else if(D === 1){
+        var singleAtom = atomsMap[dimNames[0]];
+        var isDiscrete = singleAtom.dimension.type.isDiscrete;
+        this.value     = isDiscrete ? singleAtom.key : singleAtom.value; // typed only when continuous
+        this.rawValue  = singleAtom.rawValue; // original
+        this.key       = singleAtom.key;      // string
+        if(wantLabel){
+            this.label = singleAtom.label;
+        }
     } else {
-        // <Debug>
-        var asserts = pvc.debug >= 6;
-        // </Debug>
+        var key, label;
+        var labelSep = owner.labelSep;
+        var keySep   = owner.keySep;
         
-        /* Fill the atoms map */
-        var atomsMap = this.atoms;
-        var atom, dimName, dimension, singleAtom, value;
-        var count = 0;
-        var ownerDims = owner._dimensions;
-        
-        for(dimName in atomsByName){
-            value = atomsByName[dimName];
-            if(value != null){ // nulls are already in base proto object
-                dimension = def.getOwn(ownerDims, dimName);
-                atom = dimension.intern(value);
-                
-                if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
-                    if(!count){
-                        singleAtom = atom;
-                    }
-                    count++;
-                    atomsMap[dimName] = atom;
-                }
+        for(i = 0 ; i < D ; i++){
+            dimName = dimNames[i];
+            var atom = atomsMap[dimName];
+            
+            // Add to key, null or not
+            if(!i){
+                key = atom.key;
+            } else {
+                key += keySep + atom.key;
             }
-        }
-        
-        if(calculate){
-            var newAtomsByName = owner.type._calculate(this);
-            if(newAtomsByName){
-                for(dimName in newAtomsByName){
-                    if(!def.hasOwnProp.call(atomsMap, dimName)){
-                        
-                        value = newAtomsByName[dimName];
-                        if(value != null){ // nulls are already in base proto object
-                            dimension = def.getOwn(ownerDims, dimName);
-                            atom = dimension.intern(value);
-                            if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
-                                if(!count){
-                                    singleAtom = atom;
-                                }
-                                count++;
-                                atomsMap[dimName] = atom;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        /* Build Key and Label in the order of type.dimensions */
-        if(count === 0){
-            this.value = null;
-            this.key   = '';
+            
+            // Add to label, when non-empty
             if(wantLabel){
-                this.label = "";
-            }
-        } else if(count === 1){
-            var isDiscrete = singleAtom.dimension.type.isDiscrete;
-            
-            this.value    = isDiscrete ? singleAtom.globalKey : singleAtom.value; // typed when continuous
-            this.rawValue = singleAtom.rawValue;  // original
-            this.key      = singleAtom.globalKey; // string
-            
-            if(wantLabel){
-                this.label = singleAtom.label;
-            }
-        } else {
-            // For a small number, of small strings, it's actually faster to 
-            // just concatenate strings comparing to the array.join method 
-            var dimNames = owner.type._dimsNames;
-            var key = '', label = '';
-            var labelSep = owner.labelSep;
-            
-            var L = dimNames.length;
-            for(var i = 0 ; i < L ; i++){
-                dimName = dimNames[i];
-                if(def.hasOwnProp.call(atomsMap, dimName)){
-                    atom = atomsMap[dimName];
-                    if(key){
-                        key += ',' + atom.globalKey;
+                var atomLabel = atom.label;
+                if(atomLabel){
+                    if(!label){
+                        label = atomLabel;
                     } else {
-                        key = atom.globalKey;
-                    }
-                    
-                    if(wantLabel){
-                        // Assuming labels are non-empty
-                        // Non-null atoms => non-empty labels
-                        if(label){
-                            label += labelSep + atom.label;
-                        } else {
-                            label = atom.label;
-                        }
+                        label += labelSep + atomLabel;
                     }
                 }
             }
+        }
         
-            this.value = this.rawValue = this.key = key;
-            if(wantLabel){
-                this.label = label;
-            }
+        this.value = this.rawValue = this.key = key;
+        if(wantLabel){
+            this.label = label;
         }
     }
 })
@@ -6918,11 +6884,15 @@ def
      */
     labelSep: " ~ ",
     
+    keySep: ',',
+    
     label: null,
+    
+    rawValue: undefined,
     
     ensureLabel: function(){
         var label = this.label;
-        if(label != null){
+        if(label != null){ // TODO: don't think this is being used...
             label = "";
             var labelSep = this.owner.labelSep;
             def.eachOwn(this.atoms, function(atom){
@@ -7005,7 +6975,7 @@ def.type('pvc.data.ComplexView', pvc.data.Complex)
     });
 
     // Call base constructor
-    this.base(source, ownSourceAtoms, source.owner.atoms, /* wantLabel */ true);
+    this.base(source, ownSourceAtoms, viewDimNames, source.owner.atoms, /* wantLabel */ true);
 })
 .add({
     values: function(){
@@ -7046,7 +7016,7 @@ def.type('pvc.data.Datum', pvc.data.Complex)
 .init(
 function(data, atomsByName, isNull){
     
-    this.base(data, atomsByName, /*atomsBase*/ null, /*wantLabel*/ false, /*calculate*/!isNull);
+    this.base(data, atomsByName, /* dimNames */ null, /*atomsBase*/ null, /*wantLabel*/ false, /*calculate*/!isNull);
     
     if(isNull) {
         this.isNull = true;
@@ -8501,6 +8471,8 @@ function dim_calcVisibleAtoms(visible){
  * @param {pvc.data.Data}   [keyArgs.parent]      The parent data.
  * @param {pvc.data.Data}   [keyArgs.linkParent]  The link parent data.
  * @param {map(string union(any pvc.data.Atom))} [keyArgs.atoms] The atoms shared by contained datums.
+ * @param {string[]} [keyArgs.dimNames] The dimension names of atoms in {@link keyArgs.atoms}.
+ * This argument must be specified whenever {@link keyArgs.atoms} is.
  * @param {pvc.data.Datum[]|def.Query} [keyArgs.datums] The contained datums array or enumerable.
  * @param {pvc.data.Data}    [keyArgs.owner] The owner data.
  * The topmost root data is its own owner.
@@ -8523,6 +8495,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
     var owner,
         atoms,
         atomsBase,
+        dimNames,
         datums,
         index,
         parent = this.parent = keyArgs.parent || null;
@@ -8534,12 +8507,15 @@ def.type('pvc.data.Data', pvc.data.Complex)
         datums     = keyArgs.datums || def.fail.argumentRequired('datums');
         
         owner = parent.owner;
-        atoms = keyArgs.atoms || def.fail.argumentRequired('atoms');
+        atoms     = keyArgs.atoms   || def.fail.argumentRequired('atoms');
+        dimNames  = keyArgs.dimNames|| def.fail.argumentRequired('dimNames');
         atomsBase = parent.atoms;
     } else {
         // Root (topmost or not)
         this.root = this;
         // depth = 0
+        
+        dimNames = [];
         
         var linkParent = keyArgs.linkParent || null;
         if(linkParent){
@@ -8586,16 +8562,16 @@ def.type('pvc.data.Data', pvc.data.Complex)
     // because otherwise new Dimension( ... ) fails.
     this.owner = owner;
     
-    /* Need this because of null interning/uninterning and atoms chaining */
+    /* Need this because of null interning/un-interning and atoms chaining */
     this._atomsBase = atomsBase;
     
     this._dimensions = {};
     this.type.dimensionsList().forEach(this._initDimension, this);
     
     // Call base constructors
-    this.base(owner, atoms, atomsBase, /* wantLabel */ true);
+    this.base(owner, atoms, dimNames, atomsBase, /* wantLabel */ true);
     
-    pv.Dom.Node.call(this, /* nodeValue */null); // TODO: remove this when possible
+    pv.Dom.Node.call(this, /* nodeValue */null);
     delete this.nodeValue;
     this._children = this.childNodes; // pv.Dom.Node#childNodes
     
@@ -8761,6 +8737,7 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type boolean
      */
     _isFlattenGroup: false,
+    _isDegenerateFlattenGroup: false,
     
     _initDimension: function(dimType){
         this._dimensions[dimType.name] = 
@@ -9333,19 +9310,27 @@ def.type('pvc.data.GroupingSpec')
     
     this.hasCompositeLevels = false;
     
+    var dimNames = []; // accumulated dimension names
+    
     this.levels = def.query(levelSpecs || undefined) // -> null query
         .where(function(levelSpec){ return levelSpec.dimensions.length > 0; })
         .select(function(levelSpec){
             ids.push(levelSpec.id);
             
+            def.array.append(dimNames, levelSpec.dimensionNames());
+            
             if(!this.hasCompositeLevels && levelSpec.dimensions.length > 1) {
                 this.hasCompositeLevels = true;
             }
             
+            levelSpec._setAccDimNames(dimNames.slice(0));
+            
             return levelSpec;
         }, this)
         .array();
-
+    
+    this._dimNames = dimNames;
+    
     // The null grouping has zero levels
     this.depth             = this.levels.length;
     this.isSingleLevel     = this.depth === 1;
@@ -9381,12 +9366,6 @@ def.type('pvc.data.GroupingSpec')
     },
 
     dimensionNames: function(){
-        if(!this._dimNames){
-            this._dimNames = this.dimensions()
-                                 .select(function(dimSpec){ return dimSpec.name; })
-                                 .array();
-        }
-        
         return this._dimNames;
     },
     
@@ -9554,13 +9533,17 @@ def.type('pvc.data.GroupingSpec')
 def.type('pvc.data.GroupingLevelSpec')
 .init(function(dimSpecs, type){
     var ids = [];
+    var dimNames = [];
     
     this.dimensions = def.query(dimSpecs)
        .select(function(dimSpec){
            ids.push(dimSpec.id);
+           dimNames.push(dimSpec.name);
            return dimSpec;
        })
        .array();
+    
+    this._dimNames = dimNames;
     
     this.dimensionsInDefOrder = this.dimensions.slice(0);
     if(type){
@@ -9578,6 +9561,18 @@ def.type('pvc.data.GroupingLevelSpec')
         type.sortDimensionNames(
             this.dimensionsInDefOrder,
             function(d){ return d.name; });
+    },
+    
+    _setAccDimNames: function(accDimNames){
+        this._accDimNames = accDimNames;
+    },
+    
+    accDimensionNames: function(){
+        return this._accDimNames;
+    },
+    
+    dimensionNames: function(){
+        return this._dimNames;
     },
     
     bind: function(type){
@@ -9598,27 +9593,25 @@ def.type('pvc.data.GroupingLevelSpec')
     },
     
     key: function(datum){
-        var keys   = [];
-        var atoms  = {};
-        var datoms = datum.atoms;
-        var dims   = this.dimensionsInDefOrder;
+        var key      = '';
+        var atoms    = {};
+        var datoms   = datum.atoms;
+        var dimNames = this._dimNames;
+        var keySep   = datum.owner.keySep;
         
         // This builds a key compatible with that of pvc.data.Complex#key
-        //  as long as only the atoms of the dimensions here used become
-        //  the only own atoms of the complex.
         for(var i = 0, D = this.depth ; i < D ; i++) {
-            var dimName = dims[i].name;
+            var dimName = dimNames[i];
             var atom = datoms[dimName];
             atoms[dimName] = atom;
-            if(atom.value != null){
-                keys.push(atom.globalKey);
+            if(!i){
+                key = atom.key;
+            } else {
+                key += keySep + atom.key;
             }
         }
         
-        return {
-            key:   keys.join(','),
-            atoms: atoms
-        };
+        return {key: key, atoms: atoms, dimNames: dimNames};
     },
 
     toString: function(){
@@ -9717,49 +9710,6 @@ pvc.data.GroupingSpec.parse = function(specText, type){
     return new pvc.data.GroupingSpec(levelSpecs, type);
 };
 
-/**
- * Creates a combined grouping specification.
- *
- * <p>
- * TODO:
- * If all the specified grouping specifications have the same flattening mode
- * then each of the specified is destructured into a single grouping level.
- *
- * Otherwise, a composite grouping specification is returned.
- * </p>
- * 
- * @param {pvc.data.GroupingSpec[]} groupings An enumerable of grouping specifications.
- * @param {object} [keyArgs] Keyword arguments
- * @param {boolean} [keyArgs.reverse=false] Indicates that each dimension's order should be reversed.
- * 
- * @type pvc.data.GroupingSpec
- 
-pvc.data.GroupingSpec.multiple = function(groupings, keyArgs){
-    var reverse = !!def.get(keyArgs, 'reverse', false);
-    var type = null;
-    
-    // One level per specified grouping
-    var levelSpecs = def.query(groupings)
-           .select(function(grouping){
-               var dimSpecs = grouping.dimensions().select(function(dimSpec){
-                       var asc = (dimSpec.reverse === reverse);
-                       if(!type) {
-                           type = dimSpec.type.complexType;
-                       } else if(type !== dimSpec.type.complexType) {
-                           throw def.error.operationInvalid("Multiple groupings must have the same complex type.");
-                       }
-                       
-                       return new pvc.data.GroupingDimensionSpec(dimSpec.name, !asc, dimSpec.type.complexType);
-                   });
-               
-               return new pvc.data.GroupingLevelSpec(dimSpecs, type);
-           })
-           .array();
-    
-    return type ? new pvc.data.GroupingSpec(levelSpecs, type) : null;
-};
-*/
-
 var groupSpec_matchDimSpec = /^\s*(.+?)(?:\s+(asc|desc))?\s*$/i;
 
 /**
@@ -9779,8 +9729,7 @@ function groupSpec_parseGroupingLevel(groupLevelText, type) {
                 order   = (match[2] || '').toLowerCase(),
                 reverse = order === 'desc';
                
-            var dimSpec = new pvc.data.GroupingDimensionSpec(name, reverse, type);
-            return dimSpec;
+            return new pvc.data.GroupingDimensionSpec(name, reverse, type);
         });
 }
 /**
@@ -9869,7 +9818,7 @@ def.type('pvc.data.GroupingOper', pvc.data.DataOper)
     this._visible    = def.get(keyArgs, 'visible',  null);
     this._selected   = def.get(keyArgs, 'selected', null);
     this._isNull     = def.get(keyArgs, 'isNull',   null);
-        
+    
     /* 'Where' predicate and its key */
     var hasKey = this._selected == null, // TODO: Selected state changes do not yet invalidate cache...
         whereKey = '';
@@ -9959,8 +9908,8 @@ add(/** @lends pvc.data.GroupingOper */{
     _group: function(datumsQuery){
 
         // Create the root node
-        var root = {
-            isRoot:     true,
+        var rootNode = {
+            isRoot: true,
             treeHeight: def
                 .query(this._groupSpecs)
                 .select(function(spec){
@@ -9972,213 +9921,249 @@ add(/** @lends pvc.data.GroupingOper */{
                 })
                 .reduce(def.add, 0),
                 
-            datums:   []
+            datums: []
             // children
-            // atoms       // not on root
-            // childrenKeyDimName // not on leafs
+            // atoms       // not on rootNode
             // isFlattenGroup // on parents of a flattened group spec
         };
 
-        if(root.treeHeight > 0){
-            this._groupSpecRecursive(root, datumsQuery, 0);
+        if(rootNode.treeHeight > 0){
+            this._groupSpecRecursive(rootNode, datumsQuery, 0);
         }
         
-        return root;
+        return rootNode;
     },
-
-    _groupSpecRecursive: function(specParent, specDatums, specIndex){
-        var groupSpec  = this._groupSpecs[specIndex],
-            levelSpecs = groupSpec.levels,
-            D = levelSpecs.length,
-            nextSpecIndex = specIndex + 1,
-            isLastSpec  = (nextSpecIndex >= this._groupSpecs.length),
-            doFlatten   = !!groupSpec.flatteningMode,
-            isPostOrder = doFlatten && (groupSpec.flatteningMode === 'tree-post'),
-            specGroupParent;
-
-        // <Debug>
-        /*jshint expr:true */
-        D || def.fail.operationInvalid("Must have levels");
-        // </Debug>
+    
+    _groupSpecRecursive: function(specParentNode, specDatumsQuery, specIndex){
+        var groupSpec     = this._groupSpecs[specIndex];
+        var levelSpecs    = groupSpec.levels;
+        var L             = levelSpecs.length;
+        var doFlatten     = !!groupSpec.flatteningMode;
+        var nextSpecIndex = specIndex + 1;
+        var isLastSpec    = (nextSpecIndex >= this._groupSpecs.length);
+        var isPostOrder   = doFlatten && (groupSpec.flatteningMode === 'tree-post');
+        var specGroupParent;
         
         if(doFlatten){
-            specParent.children = [];
-            specParent.childrenByKey = {}; // Don't create children with equal keys
+            specParentNode.children = [];
+            specParentNode.childrenByKey = {}; // Don't create children with equal keys
             
-            // Must create a root for the grouping operation
-            // Cannot be specParent
+            // Must create a rootNode for the grouping operation
+            // Cannot be specParentNode (TODO: Why?)
             specGroupParent = {
-                key:    '',
-                atoms:  {},
-                datums: [],
-                label:  groupSpec.flattenRootLabel
+                key:      '', // Key is local to groupSpec (when not flattened, it is local to level)
+                absKey:   '', 
+                atoms:    {},
+                datums:   [],
+                label:    groupSpec.flattenRootLabel,
+                dimNames: []
             };
 
             if(!isPostOrder){
-                specParent.children.push(specGroupParent);
-                specParent.childrenByKey[''] = specGroupParent;
+                specParentNode.children.push(specGroupParent);
+                specParentNode.childrenByKey[''] = specGroupParent;
             }
         } else {
-            specGroupParent = specParent;
+            specGroupParent = specParentNode;
         }
 
         /* Group datums */
-        groupLevelRecursive.call(this, specGroupParent, specDatums, 0);
+        groupLevelRecursive.call(this, specGroupParent, specDatumsQuery, 0);
 
         if(doFlatten){
 
             if(isPostOrder){
-                specParent.children.push(specGroupParent);
+                specParentNode.children.push(specGroupParent);
             }
 
-            // Add datums of specGroupParent to specParent.
-            specParent.datums = specGroupParent.datums;
+            // Add datums of specGroupParent to specParentNode.
+            specParentNode.datums = specGroupParent.datums;
         }
+        
+        function groupLevelRecursive(levelParentNode, levelDatums, levelIndex){
             
-        function groupLevelRecursive(groupParent, datums, specDepth){
-            var levelSpec = levelSpecs[specDepth],
-
-                groupChildren = [],
-                
-                // The first datum of each group is inserted here in order,
-                // according to level's comparer
-                firstDatums = [],
-
-                // The first group info is inserted here at the same index
-                // as the first datum.
-                // At the end, one child data is created per groupInfo,
-                // in the same order.
-                groupInfos  = [],
-
-                // group key -> datums, in given datums argument order
-                datumsByKey = {};
-
+            var levelSpec = levelSpecs[levelIndex];
+            
             if(!doFlatten){
-                groupParent.children = [];
-
-                groupParent.groupSpec = groupSpec;
-                groupParent.groupLevelSpec = levelSpec;
-                
-                // TODO: Really ugly....
-                // This is to support single-dimension grouping specifications used
-                // internally by the "where" operation. See #data_whereDatumFilter
-                groupParent.childrenKeyDimName = levelSpec.dimensions[0].name;
+                levelParentNode.children = [];
+                levelParentNode.groupSpec = groupSpec;
+                levelParentNode.groupLevelSpec = levelSpec;
             }
             
-            // Group, and possibly filter, received datums on level's key
-            def.query(datums).each(function(datum){
-                /* Datum passes to children, but may still be filtered downstream */
-                
-                var groupInfo = levelSpec.key(datum);
-                var key = groupInfo.key;
-                var keyDatums = datumsByKey[key];
-                if(keyDatums){
-                    keyDatums.push(datum);
-                } else {
-                    // First datum with key -> new group
-                    keyDatums = datumsByKey[key] = [datum];
-
-                    groupInfo.datums = keyDatums;
-                    
-                    var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
-                    def.array.insertAt(groupInfos, ~datumIndex, groupInfo);
-                }
-            });
+            var childNodes = this._groupDatums(levelSpec, levelParentNode, levelDatums, doFlatten);
+            var isLastSpecLevel = levelIndex === L - 1;
+            var willRecurseParent = doFlatten && !isLastSpec;
             
-            // Auxiliar to correctly sort groupInfos
-            firstDatums = null;
+            // Add children's datums to levelParentNode, in post order.
+            // This way, datums are reordered to follow the grouping "pattern". 
+            // 
+            // NOTE: levelParentNode.datums is initially empty
+            var levelParentDatums = willRecurseParent ? 
+                    [] : 
+                    levelParentNode.datums;
             
-            // Create 1 child node per created groupInfo, in same order as these.
-            // Further group each child node, on next grouping level, recursively.
-            var isLastSpecLevel = specDepth === D - 1;
-                
-            groupInfos.forEach(function(groupInfo){
-                var child = Object.create(groupInfo);
-                /*
-                 * On all but the last level,
-                 * datums are only added to *child* at the end of the
-                 * following recursive call,
-                 * to the "union" of the datums of its own children.
+            childNodes
+            .forEach(function(child){
+                /* On all but the last level,
+                 * the datums of *child* are set to the 
+                 * union of datums of its own children.
+                 * The datums will have been added, 
+                 * by the end of the following recursive call.
                  */
-                child.datums = isLastSpec && isLastSpecLevel ? groupInfo.datums : [];
-
-                var key;
+                var childDatums = child.datums; // backup original datums
+                if(!(isLastSpec && isLastSpecLevel)){
+                    child.datums = [];
+                }
+                
+                var specParentChildIndex;
                 if(!doFlatten){
-                    groupParent.children.push(child);
+                    levelParentNode.children.push(child);
                 } else {
-                    var childAtoms = child.atoms;
+                    // Add children at a "hidden" property
+                    // so that the test "if(!child._children.length)"
+                    // below, can be done.
+                    def.array.lazy(levelParentNode, '_children').push(child);
                     
-                    // Atoms must contain those of the groupParent
-                    def.copy(childAtoms, groupParent.atoms);
-
-                    /* A key that does not include null atoms */
-                    key = '';
-                    for(var dimName in childAtoms){
-                        var atom = childAtoms[dimName];
-                        if(atom.value != null){
-                            if(key){
-                                key += ',' + atom.globalKey;
-                            } else {
-                                key = atom.globalKey;
-                            }
-                        }
-                    }
-                    
-                    if(def.hasOwn(specParent.childrenByKey, key)){
-                        // Duplicate key
-                        // We need datums added to parent anyway
-                        groupChildren.push({datums: groupInfo.datums});
+                    if(def.hasOwn(specParentNode.childrenByKey, child.key)){
+                        // Duplicate key.
+                        // Don't add as child of specParentNode.
+                        // 
+                        // We need to add its datums to group parent, anyway.
+                        def.array.append(levelParentDatums, childDatums);
                         return;
                     }
-
+                    
+                    specParentChildIndex = specParentNode.children.length;
                     if(!isPostOrder){
-                        specParent.children.push(child);
-                        specParent.childrenByKey[key] = child;
+                        specParentNode.children.push(child);
+                        specParentNode.childrenByKey[child.key] = child;
 
-                        groupParent.isFlattenGroup = true;
+                        levelParentNode.isFlattenGroup = true;
                     }
                 }
                 
                 if(!isLastSpecLevel){
-                    groupLevelRecursive.call(this, child, groupInfo.datums, specDepth + 1);
+                    groupLevelRecursive.call(this, child, childDatums, levelIndex + 1);
                 } else if(!isLastSpec) {
-                    this._groupSpecRecursive(child, groupInfo.datums, nextSpecIndex);
+                    this._groupSpecRecursive(child, childDatums, nextSpecIndex);
                 }
 
                 // Datums already added to 'child'.
-
-                groupChildren.push(child);
+                def.array.append(levelParentDatums, child.datums);
 
                 if(doFlatten && isPostOrder){
-                    specParent.children.push(child);
-                    specParent.childrenByKey[key] = child;
-
-                    groupParent.isFlattenGroup = true;
+                    if(def.hasOwn(specParentNode.childrenByKey, child.key)){
+                        /*jshint expr:true*/
+                        child.isFlattenGroup || def.assert("Must be a parent for duplicate keys to exist.");
+                        
+                        // A child of child
+                        // was registered with the same key,
+                        // because it is all-nulls (in descending level's keys).
+                        // But it is better to show the parent instead of the child,
+                        // so we remove the child and add the parent.
+                        // Yet, we cannot show only the parent
+                        // if *child* has more than one child,
+                        // cause then, the datums of the null child.child
+                        // would only be in *child*, but
+                        // the datums of the non-null child.child
+                        // would be both in *child* and in child.child.
+                        // This would mess up the scales and waterfall control code,
+                        // not knowing whether to ignore the flatten group or not.
+                        if(child._children.length === 1){
+                            specParentNode.children.splice(
+                                    specParentChildIndex, 
+                                    specParentNode.children.length - specParentChildIndex);
+                            
+                            // A total group that must be accounted for
+                            // because it has own datums.
+                            child.isDegenerateFlattenGroup = true;
+                        }
+                        // else, both are added to specParentNode,
+                        // and their datas will be given separate keys
+                        // they will both be shown.
+                        // Below, we overwrite anyway, with no harmful effect
+                    }
+                    
+                    specParentNode.children.push(child);
+                    specParentNode.childrenByKey[child.key] = child;
+                    
+                    levelParentNode.isFlattenGroup = true;
                 }
             }, this);
 
-            var willRecurseParent = doFlatten && !isLastSpec;
-
-            datums = willRecurseParent ? [] : groupParent.datums;
-
-            // Add datums of children to groupParent.
-            // This accounts for possibly excluded datums,
-            // in any of the below levels (due to null atoms).
-            // TODO: This method changes the order of preserved datums to
-            //       follow the grouping "pattern". Is this OK?
-            groupChildren.forEach(function(child){
-                def.array.append(datums, child.datums);
-            });
-            
             if(willRecurseParent) {
-                /* datums can no longer change */
-                this._groupSpecRecursive(groupParent, datums, nextSpecIndex);
+                // datums can no longer change
+                this._groupSpecRecursive(levelParentNode, levelParentDatums, nextSpecIndex);
             }
-            
-            return groupChildren;
         }
     },
-
+    
+    _groupDatums: function(levelSpec, levelParentNode, levelDatums, doFlatten){
+        // The first datum of each group is inserted here in order,
+        // according to the level's comparer.
+        var firstDatums = [];
+        
+        // The first child is inserted here 
+        // at the same index as that of 
+        // the first datum in firstDatums.
+        var childNodes = new def.OrderedMap();
+        
+        // Group levelDatums By the levelSpec#key(.)
+        def
+        .query(levelDatums)
+        .each(function(datum){
+            /*  newChild = { key: '', atoms: {}, dimNames: [] } */
+            var newChild = levelSpec.key(datum);
+            var key      = newChild.key;
+            var child    = childNodes.get(key);
+            if(child){
+                child.datums.push(datum);
+            } else {
+                // First datum with key -> new child
+                child = newChild;
+                child.datums   = [datum];
+                
+                if(doFlatten){
+                    // child.atoms must contain (locally) those of the levelParentNode,
+                    // so that when flattened, they have a unique key 
+                    def.copy(child.atoms, levelParentNode.atoms);
+                    
+                    // The key is the absKey, trimmed of keySep at the end
+                    if(levelParentNode.dimNames.length){
+//                        child.key = levelParentNode.key + 
+//                                    datum.owner.keySep + 
+//                                    key;
+                        
+                        var keySep = datum.owner.keySep;
+                        
+                        child.absKey = 
+                            levelParentNode.absKey + 
+                            keySep + 
+                            key;
+                        
+                        var K = keySep.length;
+                        var trimKey = child.absKey;
+                        while(trimKey.lastIndexOf(keySep) === trimKey.length - K){
+                            trimKey = trimKey.substr(0, trimKey.length - K);
+                        }
+                        
+                        child.key = trimKey;
+                    } else {
+                        child.absKey = key;
+                    }
+                    
+                    // don't change local key variable
+                    child.dimNames = levelSpec.accDimensionNames();
+                }
+                
+                var datumIndex = def.array.insert(firstDatums, datum, levelSpec.comparer);
+                childNodes.add(key, child, ~datumIndex);
+            }
+        });
+        
+        return childNodes;
+    },
+    
     _generateData: function(node, parentNode, parentData, rootData){
         var data, isNew;
         if(node.isRoot){
@@ -10190,7 +10175,7 @@ add(/** @lends pvc.data.GroupingOper */{
             } else {
                 isNew = true;
                 
-                // Create a *linked* root data
+                // Create a *linked* rootNode data
                 data = new pvc.data.Data({
                     linkParent: parentData,
                     datums:     node.datums
@@ -10219,8 +10204,9 @@ add(/** @lends pvc.data.GroupingOper */{
                 }
                 
                 data = new pvc.data.Data({
-                    parent: parentData,
-                    atoms:  node.atoms,
+                    parent:   parentData,
+                    atoms:    node.atoms,
+                    dimNames: node.dimNames,
                     datums: node.datums,
                     index:  index
                 });
@@ -10229,6 +10215,8 @@ add(/** @lends pvc.data.GroupingOper */{
 
         if(isNew && node.isFlattenGroup){
             data._isFlattenGroup = true;
+            data._isDegenerateFlattenGroup = !!node.isDegenerateFlattenGroup;
+            
             var label = node.label;
             if(label){
                 data.label    += label;
@@ -10587,7 +10575,7 @@ def
         var valueAtom = interpolation._valDim.intern(value, /* isVirtual */ true);
         atoms[valueAtom.dimension.name] = valueAtom;
         
-        // Create datum with an array of the collected atoms
+        // Create datum with collected atoms
         var newDatum = new pvc.data.Datum(group.owner, atoms);
         
         newDatum.isVirtual = true;
@@ -10811,7 +10799,7 @@ def
         
         atoms[zeroAtom.dimension.name] = zeroAtom;
         
-        // Create datum with an array of the collected atoms
+        // Create datum with collected atoms
         var newDatum = new pvc.data.Datum(group.owner, atoms);
         newDatum.isVirtual = true;
         newDatum.isInterpolated = true;
@@ -11218,8 +11206,8 @@ def
 
         if(sum == null) {
             sum = this.children()
-                    /* flattened parent groups would account for the same values more than once */
-                    .where(function(childData){ return !childData._isFlattenGroup; })
+                    /* non-degenerate flattened parent groups would account for the same values more than once */
+                    .where(function(childData){ return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup; })
                     .select(function(childData){
                         return Math.abs(childData.dimensions(dimName).sum(keyArgs));
                     }, this)
@@ -11833,7 +11821,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
              while(this._dimAtomsOrQuery.next()) {
                  
                  var dimAtomOr = this._dimAtomsOrQuery.item,
-                     childData = this._data._childrenByKey[dimAtomOr.globalKey];
+                     childData = this._data._childrenByKey[dimAtomOr.key];
                  
                  // Also, advance the test of a leaf child data with no datums, to avoid backtracking
                  if(childData && (depth < H - 1 || childData._datums.length)) {
@@ -14080,15 +14068,9 @@ def
     this.id    = this._buildId();
     this.optionId = this._buildOptionId();
     
-    var fixed = def.get(keyArgs, 'fixed');
-    if(fixed){
-        this._fixed = fixed;
-    }
+    var rs = this._resolvers = [];
     
-    var defaults = def.get(keyArgs, 'defaults');
-    if(defaults){
-        this._defaults = defaults;
-    }
+    this._registerResolversFull(rs, keyArgs);
     
     this.option = pvc.options(this._getOptionsDefinition(), this);
 })
@@ -14108,18 +14090,61 @@ def
         return this.chart.options[name];
     },
     
-    _resolveFull: function(optionInfo){
-        return this._resolveFixed  (optionInfo) || 
-               this._resolveNormal (optionInfo) ||
-               this._resolveDefault(optionInfo)
-               ;
+    _registerResolversFull: function(rs, keyArgs){
+        // I - By Fixed values
+        var fixed = def.get(keyArgs, 'fixed');
+        if(fixed){
+            this._fixed = fixed;
+            rs.push(
+                pvc.options.specify(function(optionInfo){
+                    return fixed[optionInfo.name];
+                }));
+        }
+        
+        this._registerResolversNormal(rs, keyArgs);
+        
+        // VI - By Default Values
+        var defaults = def.get(keyArgs, 'defaults');
+        if(defaults){
+            this._defaults = defaults;
+        }
+        
+        rs.push(this._resolveDefault);
     },
     
-    _resolveNormal: function(optionInfo){
-        return this._resolveByName    (optionInfo) ||
-               this._resolveByOptionId(optionInfo) ||
-               this._resolveByNaked   (optionInfo)
-               ;
+    _registerResolversNormal: function(rs, keyArgs){
+        // II - By V1 Only Logic
+        if(this.chart.compatVersion() <= 1){
+            rs.push(this._resolveByV1OnlyLogic);
+        }
+        
+        // III - By Name (ex: plot2, trend)
+        if(this.name){
+            rs.push(
+                pvc.options.specify(function(optionInfo){
+                      return this._chartOption(this.name + def.firstUpperCase(optionInfo.name));
+                }));
+        }
+        
+        // IV - By OptionId
+        rs.push(this._resolveByOptionId);
+        
+        // V - By Naked Id
+        if(def.get(keyArgs, 'byNaked', !this.index)){
+            rs.push(this._resolveByNaked);
+        }
+    },
+    
+    // -------------
+    
+    _resolveFull: function(optionInfo){
+        var rs = this._resolvers;
+        for(var i = 0, L = rs.length ; i < L ; i++){
+            if(rs[i].call(this, optionInfo)){
+                return true;
+            }
+        }
+        return false;
     },
     
     _resolveFixed: pvc.options.specify(function(optionInfo){
@@ -14128,14 +14153,22 @@ def
         }
     }),
     
-    _resolveByOptionId: pvc.options.specify(function(optionInfo){
-        return this._chartOption(this.optionId + def.firstUpperCase(optionInfo.name));
-    }),
+    _resolveByV1OnlyLogic: function(optionInfo){
+        var data = optionInfo.data;
+        var resolverV1;
+        if(data && (resolverV1 = data.resolveV1)){
+            return resolverV1.call(this, optionInfo);
+        }
+    },
     
     _resolveByName: pvc.options.specify(function(optionInfo){
         if(this.name){ 
             return this._chartOption(this.name + def.firstUpperCase(optionInfo.name));
         }
+    }),
+    
+    _resolveByOptionId: pvc.options.specify(function(optionInfo){
+        return this._chartOption(this.optionId + def.firstUpperCase(optionInfo.name));
     }),
     
     _resolveByNaked: pvc.options.specify(function(optionInfo){
@@ -14145,11 +14178,24 @@ def
         }
     }),
     
-    _resolveDefault: pvc.options.defaultValue(function(optionInfo){
-        if(this._defaults){
-            return this._defaults[optionInfo.name];
+    _resolveDefault: function(optionInfo){
+        // Dynamic default value?
+        var data = optionInfo.data;
+        var resolverDefault;
+        if(data && (resolverDefault = data.resolveDefault)){
+            if(resolverDefault.call(this, optionInfo)){
+                return true;
+            }
         }
-    }),
+        
+        if(this._defaults){
+            var value = this._defaults[optionInfo.name];
+            if(value !== undefined){
+                optionInfo.defaultValue(value);
+                return true;
+            }
+        }
+    },
     
     _specifyChartOption: function(optionInfo, asName){
         var value = this._chartOption(asName);
@@ -14615,10 +14661,68 @@ def.scope(function(){
         
         _getOptionsDefinition: function(){
             return cartAxis_optionsDef;
-        }
+        },
+        
+        _buildOptionId: function(){
+            return this.id + "Axis";
+        },
+        
+        _registerResolversNormal: function(rs, keyArgs){
+            // II - By V1 Only Logic
+            if(this.chart.compatVersion() <= 1){
+                rs.push(this._resolveByV1OnlyLogic);
+            }
+            
+            // IV - By OptionId
+            rs.push(
+               this._resolveByOptionId,
+               this._resolveByOrientedId);
+            
+            if(this.index === 1){
+                rs.push(this._resolveByV1OptionId);
+            }
+            
+            rs.push(
+               this._resolveByScaleType,
+               this._resolveByCommonId);
+            
+        },
+        
+        // xAxisOffset, yAxisOffset, x2AxisOffset
+        _resolveByOrientedId: pvc.options.specify(function(optionInfo){
+            return this._chartOption(this.orientedId + "Axis" + optionInfo.name);
+        }),
+        
+        // secondAxisOffset
+        _resolveByV1OptionId: pvc.options.specify(function(optionInfo){
+            //if(this.index === 1){
+            return this._chartOption('secondAxis' + optionInfo.name);
+            //}
+        }),
+        
+        // numericAxisLabelSpacingMin
+        _resolveByScaleType: pvc.options.specify(function(optionInfo){
+            // this.scaleType
+            // * discrete
+            // * numeric    | continuous
+            // * timeSeries | continuous
+            var st = this.scaleType;
+            if(st){
+                var name  = optionInfo.name;
+                var value = this._chartOption(st + 'Axis' + name);
+                if(value === undefined && st !== 'discrete'){
+                    value = this._chartOption('continuousAxis' + name);
+                }
+                
+                return value;
+            }
+        }),
+        
+        // axisOffset
+        _resolveByCommonId: pvc.options.specify(function(optionInfo){
+            return this._chartOption('axis' + optionInfo.name);
+        })
     });
-    
-    // TODO: refactor all this, unify with base Axis code
     
     var $VCA = pvc.visual.CartesianAxis;
 
@@ -14649,102 +14753,18 @@ def.scope(function(){
     };
     
     /* PRIVATE STUFF */
-    
-    /**
-     * Obtains the value of an option using a specified final name.
-     * 
-     * @name pvc.visual.CartesianAxis#_chartOption
-     * @function
-     * @param {string} name The chart option name.
-     * @private
-     * @type string
-     */
-    function chartOption(name) {
-        return this.chart.options[name];
-    }
-    
-    function axisSpecify(getAxisPropValue){
-        return axisResolve(getAxisPropValue, 'specify');
-    }
-    
-    function axisDefault(getAxisPropValue){
-        return axisResolve(getAxisPropValue, 'defaultValue');
-    }
-    
-    function axisResolve(getAxisPropValue, operation){
-        return function(optionInfo){ 
-            var value = getAxisPropValue.call(this, optionInfo.name, optionInfo);
-            if(value !== undefined){
-                optionInfo[operation || 'specify'](value);
-                return true;
-            }
-        };
-    }
-    
-    // baseAxisOffset, orthoAxisOffset, 
-    axisSpecify.byId = axisSpecify(function(name){
-        return chartOption.call(this, this.id + "Axis" + name);
-    });
-    
-    // xAxisOffset, yAxisOffset, x2AxisOffset
-    axisSpecify.byOrientedId = axisSpecify(function(name){
-        return chartOption.call(this, this.orientedId + "Axis" + name);
-    });
-    
-    // secondAxisOffset
-    axisSpecify.byV1OptionId = axisSpecify(function(name){
-        if(this.index === 1){
-            return chartOption.call(this, 'secondAxis' + name);
-        }
-    });
-    
-    // numericAxisLabelSpacingMin
-    axisSpecify.byScaleType = axisSpecify(function(name){
-        // this.scaleType
-        // * discrete
-        // * numeric    | continuous
-        // * timeSeries | continuous
-        var st = this.scaleType;
-        if(st){
-            var value = chartOption.call(this, st + 'Axis' + name);
-            if(value === undefined && st !== 'discrete'){
-                value = chartOption.call(this, 'continuousAxis' + name);
-            }
-            
-            return value;
-        }
-    });
-    
-    // axisOffset
-    axisSpecify.byCommonId = axisSpecify(function(name){
-        return chartOption.call(this, 'axis' + name);
-    });
-    
-    var resolveNormal = pvc.options.resolvers([
-       axisSpecify.byId,
-       axisSpecify.byOrientedId,
-       axisSpecify.byV1OptionId,
-       axisSpecify.byScaleType,
-       axisSpecify.byCommonId
-    ]);
-    
-    var specNormal = { resolve: resolveNormal };
-    
-    /* orthoFixedMin, orthoFixedMax */
     var fixedMinMaxSpec = {
-        resolve: pvc.options.resolvers([
-            axisSpecify.byId,
-            axisSpecify.byOrientedId,
-            axisSpecify.byV1OptionId,
-            axisSpecify(function(name){
+        resolve: '_resolveFull',
+        data: {
+            /* orthoFixedMin, orthoFixedMax */
+            resolveV1: function(optionInfo){
                 if(!this.index && this.type === 'ortho'){
                     // Bare Id (no "Axis")
-                    return chartOption.call(this, this.id + name);
+                    this._specifyChartOption(optionInfo, this.id + optionInfo.name);
                 }
-            }),
-            axisSpecify.byScaleType,
-            axisSpecify.byCommonId
-        ]),
+                return true;
+            }
+        },
         cast: pvc.castNumber
     };
     
@@ -14768,25 +14788,52 @@ def.scope(function(){
         return this.orientation === 'x' ? 'bottom' : 'left';
     }
     
+    var normalV1Data = {
+        resolveV1: function(optionInfo){
+            if(!this.index){
+                if(this._resolveByOrientedId(optionInfo)){
+                    return true;
+                }
+            } else if(this._resolveByV1OptionId()) { // secondAxis...
+                return true;
+            }
+            
+            this._resolveDefault(optionInfo);
+            
+            return true;
+        }
+    };
+    
+    var defaultPosition = pvc.options.defaultValue(function(optionInfo){
+        if(!this.typeIndex){
+            return this.orientation === 'x' ? 'bottom' : 'left';
+        }
+        
+        // Use the position opposite to that of the first axis 
+        // of same orientation (the same as type)
+        var firstAxis = this.chart.axesByType[this.type].first;
+        var position  = firstAxis.option('Position');
+        
+        return pvc.BasePanel.oppositeAnchor[position];
+    });
+    
     /*global axis_optionsDef:true*/
     var cartAxis_optionsDef = def.create(axis_optionsDef, {
         Visible: {
-            resolve: pvc.options.resolvers([
-                axisSpecify.byId,
-                axisSpecify.byOrientedId,
-                axisSpecify.byV1OptionId,
-                axisSpecify(function(name){ // V1 - showXScale, showYScale, showSecondScale
+            resolve: '_resolveFull',
+            data: {
+                /* showXScale, showYScale, showSecondScale */
+                resolveV1: function(optionInfo){
                     if(this.index <= 1){
                         var v1OptionId = this.index === 0 ? 
                             def.firstUpperCase(this.orientation) :
                             'Second';
                         
-                        return chartOption.call(this, 'show' + v1OptionId + 'Scale');
+                        this._specifyChartOption(optionInfo, 'show' + v1OptionId + 'Scale');
                     }
-                }),
-                axisSpecify.byScaleType,
-                axisSpecify.byCommonId
-            ]),
+                    return true;
+                }
+            },
             cast:    Boolean,
             value:   true
         },
@@ -14796,18 +14843,21 @@ def.scope(function(){
          * >= 2  <- false
          */
         Composite: {
-            resolve: pvc.options.resolvers([
-                axisSpecify(function(name){
-                    // Only first axis can be composite?
-                    if(this.index > 0) {
-                        return false;
-                    }
-                }),
-                resolveNormal,
-                axisSpecify(function(name){
-                    return chartOption.call(this, 'useCompositeAxis');
-                })
-            ]),
+            resolve: function(optionInfo){
+                // Only first axis can be composite?
+                if(this.index > 0) {
+                    optionInfo.specify(false);
+                    return true;
+                }
+                
+                return this._resolveFull(optionInfo);
+            },
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyChartOption(optionInfo, 'useCompositeAxis');
+                    return true;
+                }
+            },
             cast:  Boolean,
             value: false
         },
@@ -14816,12 +14866,13 @@ def.scope(function(){
          * secondAxisSize || xAxisSize 
          */
         Size: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data:    normalV1Data,
             cast:    pvc.Size.to
         },
         
         SizeMax: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Size.to 
         },
         
@@ -14829,192 +14880,194 @@ def.scope(function(){
          * secondAxisPosition <- opposite(xAxisPosition) 
          */
         Position: {
-            resolve: pvc.options.resolvers([
-                resolveNormal,
-                
-                // Dynamic default value
-                axisDefault(function(name){
-                    if(!this.typeIndex){
-                        return this.orientation === 'x' ? 'bottom' : 'left';
-                    }
-                    
-                    // Use the position opposite to that of the first axis 
-                    // of same orientation (the same as type)
-                    var firstAxis = this.chart.axesByType[this.type].first;
-                    var position  = firstAxis.option('Position');
-                    
-                    return pvc.BasePanel.oppositeAnchor[position];
-                })
-            ]),
-            
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: normalV1Data.resolveV1,
+                resolveDefault: defaultPosition
+            },
             cast: castAxisPosition
         },
         
-        /* orthoFixedMin, orthoFixedMax */
         FixedMin: fixedMinMaxSpec,
         FixedMax: fixedMinMaxSpec,
         
-        /* 1 <- originIsZero
+        /* 1 <- originIsZero (v1)
          * 2 <- secondAxisOriginIsZero (v1 && bar)
          */
         OriginIsZero: {
-            resolve: pvc.options.resolvers([
-                resolveNormal,
-                axisSpecify(function(name){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
                     switch(this.index){
-                        case 0: return chartOption.call(this, 'originIsZero');
+                        case 0: 
+                            this._specifyChartOption(optionInfo, 'originIsZero');
+                            break;
                         case 1:
                             if(this.chart._allowV1SecondAxis){
-                                return chartOption.call(this, 'secondAxisOriginIsZero');
+                                this._specifyChartOption(optionInfo, 'secondAxisOriginIsZero');
                             }
                             break;
                     }
-                })
-            ]),
+                    
+                    return true;
+                } 
+            },
             cast:  Boolean,
             value: true 
         }, 
         
         DomainScope: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    castDomainScope,
-            value:  'global'
+            value:   'global'
         },
         
         /* 1 <- axisOffset, 
          * 2 <- secondAxisOffset (V1 && bar)
          */
         Offset: {
-            resolve: pvc.options.resolvers([
-                axisSpecify.byId,
-                axisSpecify.byOrientedId,
-                axisSpecify.byV1OptionId,
-                axisSpecify.byScaleType,
-                // axisOffset only applies to index 0!
-                axisSpecify(function(name){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
                     switch(this.index) {
-                        case 0: return chartOption.call(this, 'axisOffset');
+                        case 0: 
+                            this._specifyChartOption(optionInfo, 'axisOffset');
+                            break;
+                            
                         case 1:
                             if(this.chart._allowV1SecondAxis){
-                                return chartOption.call(this, 'secondAxisOffset');
+                                this._specifyChartOption(optionInfo, 'secondAxisOffset');
+                                break;
                             }
                             break;
                     }
-                })
-            ]),
+                    
+                    return true;
+                }
+            },
             cast: pvc.castNumber
         },
         
         // em
         LabelSpacingMin: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.castNumber
         },
         
         OverlappedLabelsMode: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.parseOverlappedLabelsMode,
             value:   'hide'
         },
         
         /* RULES */
-        FullGrid: { // deprecated
-            resolve: resolveNormal,
-            cast:    Boolean,
-            value:   false
-        },
-        
         Grid: {
-            resolve: pvc.options.resolvers([
-                         resolveNormal,
-                         axisSpecify(function(){
-                             return this.option('FullGrid');
-                         })
-                     ]),
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    if(!this.index){
+                        this._specifyChartOption(optionInfo, this.orientation + 'AxisFullGrid');
+                    }
+                    return true;
+                }
+            },
             cast:    Boolean,
             value:   false
         },
         
         GridCrossesMargin: { // experimental
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   true
         },
         
         EndLine:  { // deprecated
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean
         },
+        
         ZeroLine: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   true 
         },
         RuleCrossesMargin: { // experimental
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean,
             value:   true
         },
         
         /* TICKS */
         Ticks: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    Boolean
         },
         DesiredTickCount: { // secondAxisDesiredTickCount (v1 && bar)
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data: normalV1Data,
             cast: pvc.castNumber
         },
         MinorTicks: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data:    normalV1Data,
             cast:    Boolean,
             value:   true 
         },
         TickFormatter: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    def.fun.as
         },
         DomainRoundMode: { // secondAxisRoundDomain (bug && v1 && bar), secondAxisDomainRoundMode (v1 && bar)
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: normalV1Data.resolveV1,
+                resolveDefault: function(optionInfo){
+                    if(this.chart.compatVersion() <= 1){
+                        optionInfo.defaultValue('none');
+                        return true;
+                    }
+                }
+            },
+            
             cast:    pvc.parseDomainRoundingMode,
             value:   'tick'
         },
         TickExponentMin: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.castNumber  
         },
         TickExponentMax: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.castNumber 
         },
         
         /* TITLE */
         Title: {
-            resolve: resolveNormal,
-            cast:    String  
+            resolve: '_resolveFull',
+            cast:    String
         },
         TitleSize: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Size.to
         },
         TitleSizeMax: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Size.to
         }, 
         TitleFont: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    String 
         },
         TitleMargins:  {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Sides.as 
         },
         TitlePaddings: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    pvc.Sides.as 
         },
         TitleAlign: {
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast: function castAlign(align){
                 var position = this.option('Position');
                 return pvc.parseAlign(position, align);
@@ -15022,12 +15075,18 @@ def.scope(function(){
         },
         
         Font: { // axisLabelFont (v1 && index == 0 && HeatGrid)
-            resolve: resolveNormal,
+            resolve: '_resolveFull',
             cast:    String
         },
         
-        ClickAction: specNormal,      // (v1 && index === 0) 
-        DoubleClickAction: specNormal // idem
+        ClickAction: { 
+            resolve: '_resolveFull',
+            data: normalV1Data
+        }, // (v1 && index === 0) 
+        DoubleClickAction: { 
+            resolve: '_resolveFull',
+            data: normalV1Data
+        } // idem
     });
 });
 /**
@@ -15258,17 +15317,39 @@ def
         return pvc.parseAlign(position, align);
     }
     
-    function legendResolve(optionInfo){
-        if(this._resolveNormal(optionInfo)){
-            return true;
+    var legendData = {
+        resolveDefault: function(optionInfo){
+            // Naked
+            if(!this.index && 
+               this._specifyChartOption(optionInfo, def.firstLowerCase(optionInfo.name))){
+                return true;
+            }
+        }
+    };
+    
+    function getDefaultColor(optionInfo){
+        var colors;
+        if(this.scaleType === 'discrete'){
+            if(this.index === 0){
+                // Assumes default pvc scale
+                colors = pvc.createColorScheme();
+            } else { 
+                // Use colors of axes with own colors.
+                // Use a color scheme that always returns 
+                // the global color scale of the role
+                var me = this;
+                colors = function(){ // ignore domain values
+                    return me.chart._getRoleColorScale(me.role.name);
+                };
+            }
+        } else {
+            colors = ['red', 'yellow','green']
+                     .map(function(name){ return pv.Color.names[name]; });
         }
         
-        // Naked
-        if(!this.index && 
-           this._specifyChartOption(optionInfo, def.firstLowerCase(optionInfo.name))){
-            return true;
-        }
+        return colors;
     }
+    
     
     /*global axis_optionsDef:true*/
     var colorAxis_optionsDef = def.create(axis_optionsDef, {
@@ -15282,48 +15363,36 @@ def
          * secondAxisColor (V1 compatibility)
          */
         Colors: {
-            resolve: pvc.options.resolvers([
-                '_resolveFixed',
-                '_resolveNormal',
-                function(optionInfo){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    if(this.index === 0 && 
+                       this._specifyChartOption(optionInfo, 'colors')){
+                        return true;
+                    }
+                     
+                    if(this.index === 1 &&
+                        this.chart._allowV1SecondAxis &&
+                        this._specifyChartOption(optionInfo, 'secondAxisColor')){
+                         return true;
+                    }
+                    
+                    // Compute default value
+                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
+                    return true;
+                },
+                resolveDefault: function(optionInfo){
                     // Handle naming exceptions
                     if(this.index === 0 && 
                        this._specifyChartOption(optionInfo, 'colors')){
                         return true;
                     }
                     
-                    if(this.index === 1 &&
-                       this.chart._allowV1SecondAxis &&
-                       this._specifyChartOption(optionInfo, 'secondAxisColor')){
-                        return true;
-                    }
-                    
                     // Compute default value
-                    
-                    var colors;
-                    if(this.scaleType === 'discrete'){
-                        if(this.index === 0){
-                            // Assumes default pvc scale
-                            colors = pvc.createColorScheme();
-                        } else { 
-                            // Use colors of axes with own colors.
-                            // Use a color scheme that always returns 
-                            // the global color scale of the role
-                            var me = this;
-                            colors = function(){ // ignore domain values
-                                return me.chart._getRoleColorScale(me.role.name);
-                            };
-                        }
-                    } else {
-                        colors = ['red', 'yellow','green']
-                                 .map(function(name){ return pv.Color.names[name]; });
-                    }
-                    
-                    optionInfo.defaultValue(colors);
+                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
                     return true;
-                },
-                '_resoveDefault'
-            ]),
+                }
+            },
             cast: pvc.colorScheme
         },
         
@@ -15333,20 +15402,18 @@ def
          * pv.Color -> pv.Color
          */
         Transform: {
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
-                    return true;
-                }
-                
-                if(this._plotList.length === 1){
-                    var name = this._plotList[0].name;
-                    if(name === 'plot2' || name === 'trend'){
-                        optionInfo.defaultValue(pvc.brighterColorTransform);
-                        return true;
+            resolve: '_resolveFull',
+            data: {
+                resolveDefault: function(optionInfo){
+                    if(this._plotList.length === 1){
+                        var name = this._plotList[0].name;
+                        if(name === 'plot2' || name === 'trend'){
+                            optionInfo.defaultValue(pvc.brighterColorTransform);
+                            return true;
+                        }
                     }
                 }
             },
-            
             cast: def.fun.to
         },
         
@@ -15357,11 +15424,11 @@ def
                     return true;
                 }
                 
-                if(this._specifyV1ChartOption(optionInfo, 'normPerBaseCategory')){
-                    return true;
-                }
-                
-                if(this._resolveNormal(optionInfo)){
+                return this._resolveFull(optionInfo);
+            },
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'normPerBaseCategory');
                     return true;
                 }
             },
@@ -15372,12 +15439,10 @@ def
         // ------------
         // Continuous color scale
         ScaleType: {
-            resolve: function(optionInfo){
-                if(this._resolveFull(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'scalingType')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'scalingType');
                     return true;
                 }
             },
@@ -15399,25 +15464,21 @@ def
         },
         
         Domain: {
-            resolve: function(optionInfo){
-                if(this._resolveFull(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'colorRangeInterval')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'colorRangeInterval');
                     return true;
                 }
             },
-            cast:    def.array.to
+            cast: def.array.to
         },
         
         Min: {
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'minColor')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'minColor');
                     return true;
                 }
             },
@@ -15425,12 +15486,10 @@ def
         },
         
         Max: {
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
-                    return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'maxColor')){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'maxColor');
                     return true;
                 }
             },
@@ -15438,13 +15497,11 @@ def
         },
         
         Missing: { // Null, in lower case is reserved in JS...
-            resolve: function(optionInfo){
-                if(this._resolveNormal(optionInfo)){
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    this._specifyV1ChartOption(optionInfo, 'nullColor');
                     return true;
-                }
-                
-                if(this._specifyV1ChartOption(optionInfo, 'nullColor')){
-                   return true;
                 }
             },
             cast: pv.color,
@@ -15457,31 +15514,36 @@ def
          * LegendVisible 
          */
         LegendVisible: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    Boolean,
             value:   true
         },
         
         LegendClickMode: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    pvc.parseLegendClickMode,
             value:   'toggleVisible'
         },
         
         LegendDrawLine: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    Boolean,
             value:   false
         },
         
         LegendDrawMarker: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    Boolean,
             value:   true
         },
         
         LegendShape: {
-            resolve: legendResolve,
+            resolve: '_resolveFull',
+            data:    legendData,
             cast:    pvc.parseShape
         }
     });
@@ -15501,10 +15563,10 @@ def.scope(function(){
     .type('pvc.visual.SizeAxis', pvc.visual.Axis)
     .init(function(chart, type, index, keyArgs){
         
-        this.base(chart, type, index, keyArgs);
+        // prevent naked resolution of size axis
+        keyArgs = def.set(keyArgs, 'byNaked', false);
         
-        /* this.scaleType === 'discrete' && */
-    
+        this.base(chart, type, index, keyArgs);
     })
     .add(/** @lends pvc.visual.SizeAxis# */{
         
@@ -15529,10 +15591,6 @@ def.scope(function(){
             }
             
             return this;
-        },
-        
-        _resolveByNaked: function(){
-            // prevent naked resolution of size axes
         },
         
         _getOptionsDefinition: function(){
@@ -15581,13 +15639,15 @@ def.scope(function(){
      */
     def
     .type('pvc.visual.Legend', pvc.visual.OptionsBase)
+    .init(function(chart, type, index, keyArgs){
+        // prevent naked resolution of legend
+        keyArgs = def.set(keyArgs, 'byNaked', false);
+        
+        this.base(chart, type, index, keyArgs);
+    })
     .add(/** @lends Legend# */{
         _getOptionsDefinition: function(){
             return legend_optionsDef;
-        },
-        
-        _resolveByNaked: function(){
-            // prevent naked resolution of legend
         }
     });
     
@@ -15635,8 +15695,9 @@ def.scope(function(){
         },
         
         Align: {
-            resolve: function(optionInfo){
-                if(!this._resolveNormal(optionInfo)){
+            resolve: '_resolveFull',
+            data: {
+                resolveDefault: function(optionInfo){
                     // Default value of align depends on position
                     var position = this.option('Position');
                     var align;
@@ -15647,15 +15708,17 @@ def.scope(function(){
                     }
                     
                     optionInfo.defaultValue(align);
+                    return true;
                 }
             },
             cast: castAlign
         },
         
         Margins:  {
-            resolve: function(optionInfo){
-                if(!this._resolveNormal(optionInfo)){
-                    
+            resolve: '_resolveFull',
+            data: {
+                resolveDefault: function(optionInfo){
+                    // Default value of align depends on position
                     // Default value of margins depends on position
                     if(this.chart.compatVersion() > 1){
                         var position = this.option('Position');
@@ -15665,6 +15728,8 @@ def.scope(function(){
                         
                         optionInfo.defaultValue(margins);
                     }
+                    
+                    return true;
                 }
             },
             cast: pvc.Sides.as
@@ -16315,24 +16380,16 @@ def.scope(function(){
         var typePlots = def.getPath(chart, ['plotsByType', this.type]);
         var index = typePlots ? typePlots.length : 0;
         
+        // Elements of the first plot (of any type)
+        // can be accessed without prefix.
+        // Peek chart's plotList (globalIndex is only set afterwards in addPlot)
+        var globalIndex = chart.plotList.length;
+        keyArgs = def.set(keyArgs, 'byNaked', !globalIndex);
+        
         this.base(chart, this.type, index, keyArgs);
         
         // fills globalIndex
         chart._addPlot(this);
-        
-        // -------------
-        
-        this.option = pvc.options(this._getOptionsDefinition(), this);
-        
-        var fixed = def.get(keyArgs, 'fixed');
-        if(fixed){
-            this._fixed = fixed;
-        }
-        
-        var defaults = def.get(keyArgs, 'defaults');
-        if(defaults){
-            this._defaults = defaults;
-        }
         
         // -------------
         
@@ -16341,7 +16398,7 @@ def.scope(function(){
         // The plot id is always a valid prefix (type+index)
         var prefixes = this.extensionPrefixes = [this.id];
         
-        if(this.globalIndex === 0){
+        if(!this.globalIndex){
             // Elements of the first plot (of any type)
             // can be accessed without prefix
             prefixes.push('');
@@ -16378,29 +16435,21 @@ def.scope(function(){
         },
         
         ValuesVisible: {
-            resolve: pvc.options.resolvers([
-                 '_resolveFixed',
-                 '_resolveNormal',
-                 function(optionInfo){
-                     // V1 ?
-                     var show = this.option('ShowValues');
-                     if(show !== undefined){
-                         optionInfo.specify(show);
-                     } else {
-                         show = this.chart.compatVersion <= 1 && (this.type !== 'point');
-                         optionInfo.defaultValue(show);
-                     }
-                     
-                     return true;
-                 }
-              ]),
-            cast: Boolean
-        },
-        
-        // Deprecated
-        ShowValues: {
             resolve: '_resolveFull',
-            cast:    Boolean
+            data: {
+                resolveV1: function(optionInfo){
+                    var show = this._chartOption('showValues');
+                    if(show !== undefined){
+                        optionInfo.specify(show);
+                    } else {
+                        show = this.type !== 'point';
+                        optionInfo.defaultValue(show);
+                    }
+                    return true;
+                }
+            },
+            cast:  Boolean,
+            value: false
         },
         
         ValuesAnchor: {
@@ -16446,9 +16495,11 @@ def.scope(function(){
                         return true;
                     }
                 },
-                '_resolveFixed',
-                '_resolveNormal',
-                function(optionInfo){
+                '_resolveFull'
+            ]),
+            data: {
+                // Dynamic default
+                resolveDefault: function(optionInfo){
                     // Trends must have its own color scale
                     // cause otherwise each trend series
                     // would have exactly the same color as the corresponding
@@ -16461,9 +16512,8 @@ def.scope(function(){
                         optionInfo.defaultValue(3);
                         return true;
                     }
-                },
-                '_resolveDefault'
-            ]),
+                }
+            },
             cast:  function(value){
                 value = pvc.castNumber(value);
                 if(value != null){
@@ -16537,27 +16587,26 @@ def.scope(function(){
             },
             
             OrthoAxis: {
-                resolve: pvc.options.resolvers([
-                    function(optionInfo){
-                        if(this.globalIndex === 0){
-                            // plot0 must use ortho axis 0!
-                            // This also ensures that the ortho axis 0 is created...
-                            optionInfo.specify(1);
-                            return true;
-                        }
-                        
-                        // V1 compatibility
+                resolve: function(optionInfo){
+                    if(this.globalIndex === 0){
+                        // plot0 must use ortho axis 0!
+                        // This also ensures that the ortho axis 0 is created...
+                        optionInfo.specify(1);
+                        return true;
+                    }
+                    
+                    return this._resolveFull(optionInfo);
+                },
+                data: {
+                    resolveV1: function(optionInfo){
                         if(this.name === 'plot2' &&
-                           this.chart._allowV1SecondAxis &&
-                           this._chartOption('secondAxisIndependentScale')){
-                            optionInfo.specify(2);
-                            return true;
+                            this.chart._allowV1SecondAxis &&
+                            this._chartOption('secondAxisIndependentScale')){
+                             optionInfo.specify(2);
                         }
-                    },
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    '_resolveDefault'
-                ]),
+                        return true;
+                    }
+                },
                 cast: function(value){
                     value = pvc.castNumber(value);
                     if(value != null){
@@ -16580,10 +16629,9 @@ def.scope(function(){
             },
             
             Trend: {
-                resolve: pvc.options.resolvers([
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    function(optionInfo){
+                resolve: '_resolveFull',
+                data: {
+                    resolveDefault: function(optionInfo){
                         var type = this.option('TrendType');
                         if(type){
                             // Cast handles the rest
@@ -16593,8 +16641,8 @@ def.scope(function(){
                             return true;
                         }
                     }
-                ]),
-                cast:    castTrend
+                },
+                cast: castTrend
             },
             
             TrendType: {
@@ -16686,19 +16734,14 @@ def.scope(function(){
         },
         
         BarSizeMax: {
-            resolve: pvc.options.resolvers([
-                         '_resolveFixed',
-                         '_resolveNormal',
-                         function(optionInfo){
-                             // default to v1 option
-                             var barSizeMax = this.option('MaxBarSize');
-                             if(barSizeMax !== undefined){
-                                 optionInfo.specify(barSizeMax);
-                                 return true;
-                             }
-                         },
-                         '_resolveDefault'
-                     ]),
+            resolve: '_resolveFull',
+            data: {
+                resolveV1: function(optionInfo){
+                    // default to v1 option
+                    this._specifyChartOption(optionInfo, 'maxBarSize');
+                    return true;
+                }
+            },
             cast: function(value){
                 value = pvc.castNumber(value);
                 if(value == null){
@@ -16723,12 +16766,6 @@ def.scope(function(){
                 return value;
             },
             value:   0
-        },
-        
-        // Deprecated
-        MaxBarSize: {
-            resolve: '_resolveFull',
-            cast:    pvc.castNumber
         },
         
         OverflowMarkersVisible: {
@@ -16811,38 +16848,38 @@ def
                 value:   true
             },
             
-            WaterLineLabel: {
-                resolve: '_resolveNormal',
+            TotalLineLabel: {
+                resolve: '_resolveFull',
                 cast:    String,
                 value:   "Accumulated"
             },
             
-            WaterValuesVisible: {
-                // Values Visible?
-                resolve: pvc.options.resolvers([
-                             '_resolveNormal',
-                             function(optionInfo){
-                                 optionInfo.specify(this.option('ValuesVisible'));
-                                 return true;
-                             }
-                         ]),
+            TotalValuesVisible: { 
+                resolve: '_resolveFull',
+                data: {
+                    // Dynamic default
+                    resolveDefault: function(optionInfo){
+                        optionInfo.defaultValue(this.option('ValuesVisible'));
+                        return true;
+                    }
+                },
                 cast:    Boolean
             },
             
             Direction: { // up/down
-                resolve: '_resolveNormal',
+                resolve: '_resolveFull',
                 cast:    pvc.parseWaterDirection,
                 value:   'down'
             },
             
             AreasVisible: {
-                resolve: '_resolveNormal',
+                resolve: '_resolveFull',
                 cast:    Boolean,
                 value:   true
             },
             
             AllCategoryLabel: {
-                resolve: '_resolveNormal',
+                resolve: '_resolveFull',
                 cast:    String,
                 value:   "All"
             }
@@ -16864,53 +16901,37 @@ def
         }
     });
     
-    var specNormalBool = {
-            resolve: '_resolveNormal',
-            cast:    Boolean
+    function visibleData(type){
+        return {
+            resolveV1: function(optionInfo){
+                this._specifyChartOption(optionInfo, 'show' + type);
+                return true;
+            }
         };
-    
-    function visibleResolver(type){
-        return pvc.options.resolvers([
-               '_resolveFixed',
-               '_resolveNormal',
-               
-               // V1 compatibility
-               pvc.options.specify(function(){
-                   return this.option('Show' + type);
-               }),
-               
-               '_resolveDefault'
-           ]);
     }
     
     pvc.visual.PointPlot.optionsDef = def.create(
         pvc.visual.CategoricalPlot.optionsDef, {
             DotsVisible: {
-                resolve: visibleResolver('Dots'),
+                resolve: '_resolveFull',
+                data:    visibleData('Dots'),
                 cast:    Boolean,
                 value:   false
             },
             
             LinesVisible: {
-                resolve: visibleResolver('Lines'),
+                resolve: '_resolveFull',
+                data:    visibleData('Lines'),
                 cast:    Boolean,
                 value:   false
             },
             
             AreasVisible: {
-                resolve: visibleResolver('Areas'),
+                resolve: '_resolveFull',
+                data:    visibleData('Areas'),
                 cast:    Boolean,
                 value:   false
             },
-            
-            // Deprecated
-            ShowDots:  specNormalBool,
-            
-            // Deprecated
-            ShowLines: specNormalBool,
-            
-            // Deprecated
-            ShowAreas: specNormalBool,
             
             ValuesAnchor: { // override
                 value: 'right'
@@ -16965,23 +16986,13 @@ def
         }
     });
     
-    var specNormalBool = {
-            resolve: '_resolveNormal',
-            cast:    Boolean
+    function visibleData(type){
+        return {
+            resolveV1: function(optionInfo){
+                this._specifyChartOption(optionInfo, 'show' + type);
+                return true;
+            }
         };
-    
-    function visibleResolver(type){
-        return pvc.options.resolvers([
-               '_resolveFixed',
-               '_resolveNormal',
-               
-               // V1 compatibility
-               pvc.options.specify(function(){
-                   return this.option('Show' + type);
-               }),
-               
-               '_resolveDefault'
-           ]);
     }
     
     pvc.visual.MetricPointPlot.optionsDef = def.create(
@@ -17003,22 +17014,18 @@ def
             },
             
             DotsVisible: {
-                resolve: visibleResolver('Dots'),
+                resolve: '_resolveFull',
+                data:    visibleData('Dots'),
                 cast:    Boolean,
                 value:   false
             },
             
             LinesVisible: {
-                resolve: visibleResolver('Lines'),
+                resolve: '_resolveFull',
+                data:    visibleData('Lines'),
                 cast:    Boolean,
                 value:   false
             },
-            
-            // Deprecated
-            ShowDots:  specNormalBool,
-            
-            // Deprecated
-            ShowLines: specNormalBool,
             
             ValuesAnchor: { // override
                 value: 'right'
@@ -17068,21 +17075,19 @@ def
                 value: 'outer'
             },
             
-            ShowValues: { // override
+            ValuesVisible: { // override
                 value: true
             },
             
             ValuesLabelStyle: {
-                resolve: pvc.options.resolvers([
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    '_resolveDefault',
-                    function(optionInfo){
+                resolve: '_resolveFull',
+                data: {
+                    resolveDefault: function(optionInfo){
                         var isV1Compat = this.chart.compatVersion() <= 1;
                         optionInfo.defaultValue(isV1Compat ? 'inside' : 'linked');
                         return true;
                     }
-                ]),
+                },
                 cast: function(value) {
                     switch(value){
                         case 'inside':
@@ -17104,16 +17109,16 @@ def
             // "{value} ({value.percent})"
             // "{#productId}" // Atom name
             ValuesMask: { // OVERRIDE
-                resolve: pvc.options.resolvers([
-                    '_resolveFull',
-                    function(optionInfo){
+                resolve: '_resolveFull',
+                data: {
+                    resolveDefault: function(optionInfo){
                         optionInfo.defaultValue(
-                            this.option('ValuesLabelStyle') === 'linked' ? 
-                            "{value} ({value.percent})" : 
-                            "{value}");
+                                this.option('ValuesLabelStyle') === 'linked' ? 
+                                "{value} ({value.percent})" : 
+                                "{value}");
                         return true;
                     }
-                ])
+                }
             },
             
             /* Linked Label Style
@@ -17240,7 +17245,7 @@ def
                 value:   'cross'
             },
             
-            ShowValues: { // override
+            ValuesVisible: { // override
                 value: true
             },
             
@@ -17315,18 +17320,14 @@ def
             },
             
             BoxSizeMax: {
-                resolve: pvc.options.resolvers([
-                    '_resolveFixed',
-                    '_resolveNormal',
-                    function(optionInfo){
-                        var value = this.option('MaxBoxSize');
-                        if(value !== undefined){
-                            optionInfo.specify(value);
-                            return true;
-                        }
-                    },
-                    '_resolveDefault'
-                ]),
+                resolve: '_resolveFull',
+                data: {
+                    resolveV1: function(optionInfo){
+                        // default to v1 option
+                        this._specifyChartOption(optionInfo, 'maxBoxSize');
+                        return true;
+                    }
+                },
                 cast: function(value){
                     value = pvc.castNumber(value);
                     if(value == null){
@@ -17338,12 +17339,6 @@ def
                     return value;
                 },
                 value: Infinity
-            },
-            
-            // Deprecated
-            MaxBoxSize: {
-                resolve: '_resolveFull',
-                cast:    pvc.castNumber
             }
         });
 });/**
@@ -17365,7 +17360,7 @@ def
 
 pvc.visual.BulletPlot.optionsDef = def.create(
     pvc.visual.Plot.optionsDef, {
-        ShowValues: { // override
+        ValuesVisible: { // override
             value: true
         },
         
@@ -17739,10 +17734,8 @@ def
             this.paddings = options.paddings;
         }
         
-        if(this._allowV1SecondAxis){
-            if(this.plot2 === undefined){
-                this.plot2 = !!options.secondAxis;
-            }
+        if(this.compatVersion() <= 1){
+            options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
         }
         
         this._processOptionsCore(options);
@@ -18048,8 +18041,6 @@ def
         
 //        colors: null,
 
-        plot2: false,
-        
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
@@ -18891,11 +18882,9 @@ pvc.BaseChart
 
         return {
             compatVersion:     this.compatVersion(),
-            plot2SeriesIndexes: (!this._allowV1SecondAxis || 
-                                !plot2 || 
-                                options.plot2Series) ? 
-                                null : 
-                                options.secondAxisIdx,
+            plot2SeriesIndexes: (plot2 && this._allowV1SecondAxis && (this.compatVersion() <= 1)) ?  
+                                 options.secondAxisIdx : 
+                                 null,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -18924,10 +18913,14 @@ pvc.BaseChart
     },
     
     _addPlot2SeriesDataPartCalculation: function(complexTypeProj, dataPartDimName){
+        if(this.compatVersion() <= 1){
+            return;
+        }
+        
         var options = this.options;
         var serRole = this._serRole;
         
-        var plot2Series = (this._serRole != null) && options.plot2 && options.plot2Series;
+        var plot2Series = (serRole != null) && options.plot2 && options.plot2Series;
         if(!plot2Series){
             return;
         }
@@ -19006,7 +18999,7 @@ pvc.BaseChart
         }
         
         // TODO: should, at least, call some static method of Atom to build a global key
-        var child = this._partData._childrenByKey[dataPartDimName + ':' + dataPartValues];
+        var child = this._partData._childrenByKey[/*dataPartDimName + ':' +*/ dataPartValues + ''];
         if(!child){
             // NOTE: 
             // This helps, at least, the ColorAxis.dataCells setting
@@ -19016,9 +19009,10 @@ pvc.BaseChart
             // so that when the trend datums are added they end up here,
             // and not in another new Data...
             child = new pvc.data.Data({
-                parent: this._partData,
-                atoms:  def.set({}, dataPartDimName, dataPartValues), 
-                datums: []
+                parent:   this._partData,
+                atoms:    def.set({}, dataPartDimName, dataPartValues), 
+                dimNames: [dataPartDimName],
+                datums:   []
                 // TODO: index
             });
         }
@@ -23535,8 +23529,8 @@ def
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
                 tickExponentMin:   axis.option('TickExponentMin'),
                 tickExponentMax:   axis.option('TickExponentMax'),
-                Grid:              axis.option('Grid'),
-                GridCrossesMargin: axis.option('GridCrossesMargin'),
+                grid:              axis.option('Grid'),
+                gridCrossesMargin: axis.option('GridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
                 zeroLine:          axis.option('ZeroLine'),
                 domainRoundMode:   axis.option('DomainRoundMode'),
@@ -26000,7 +25994,7 @@ def
     
     _calcDiscreteTicksHiddenCore: function(){
         var mode = this.axis.option('OverlappedLabelsMode');
-        if(mode !== 'hide'){
+        if(mode !== 'hide' || this.compatVersion() <= 1){
             return 1;
         }
         
@@ -27906,21 +27900,13 @@ def
 
         this.base();
         
-        if(contentOptions.paddings == null){
-            var paddings;
-            if(this.compatVersion() <= 1){
-                var innerGap = pvc.castNumber(this.options.innerGap);
-                if(innerGap != null){
-                    innerGap = def.between(innerGap, 0.1, 1);
-                    paddings = ((1 - innerGap) * 100 / 2).toFixed(2) + "%";
-                }
-            }
-            
-            if(paddings == null){
-                paddings = new pvc.PercentValue(0.025);
-            }
-            
-            contentOptions.paddings = paddings;
+        var isV1Compat = this.compatVersion() <= 1;
+        if(isV1Compat){
+            var innerGap = pvc.castNumber(this.options.innerGap) || 0.95;
+            innerGap = def.between(innerGap, 0.1, 1);
+            contentOptions.paddings = ((1 - innerGap) * 100 / 2).toFixed(2) + "%";
+        } else if(contentOptions.paddings == null) {
+            contentOptions.paddings = new pvc.PercentValue(0.025);
         }
         
         var piePlot = this.plots.pie;
@@ -28413,10 +28399,6 @@ def
 def
 .type('pvc.BarChart', pvc.BarAbstract)
 .add({
-// Options
-//  secondAxis: false, // deprecated
-//  secondAxisIdx: -1, // deprecated
-//  secondAxisColor    // deprecated
 
     _allowV1SecondAxis: true, 
     
@@ -28426,7 +28408,6 @@ def
         var barPlot = new pvc.visual.BarPlot(this);
         var trend   = barPlot.option('Trend');
         
-        // secondAxis V1 compatibility
         if(options.plot2){
             // Line Plot
             var plot2Plot = new pvc.visual.PointPlot(this, {
@@ -28697,7 +28678,8 @@ def
                 return 1;
             }
 
-            if(scene.vars.category.group._isFlattenGroup){
+            var group = scene.vars.category.group;
+            if(group._isFlattenGroup && !group._isDegenerateFlattenGroup){
                 // Groups don't update the total
                 // Groups, always go down, except the first falling...
                 return -2;
@@ -28832,7 +28814,7 @@ def
             .lineCap('butt')
             ;
 
-        if(this.plot.option('WaterValuesVisible')){
+        if(this.plot.option('TotalValuesVisible')){
             this.pvWaterfallLabel = new pvc.visual.Label(
                 this, 
                 this.pvWaterfallLine, 
@@ -29036,13 +29018,13 @@ def
         // Might still affect scale calculation
         options.stacked = true;
         
-        // Not supported
-        options.plot2 = false;
-        
         // Doesn't work (yet?);
         options.baseAxisComposite = false;
         
         this.base(options);
+        
+        // Not supported
+        options.plot2 = false;
     },
   
     _initPlotsCore: function(){
@@ -29070,7 +29052,7 @@ def
         
         new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
             extensionPrefix: pvc.buildIndexedId('legend', 1), // legend2_ TODO
-            label: waterPlot.option('WaterLineLabel'),
+            label: waterPlot.option('TotalLineLabel'),
             color: this._waterColor
         });
         
@@ -29134,7 +29116,7 @@ def
             });
         }
 
-        if(!catGroup._isFlattenGroup){
+        if(!catGroup._isFlattenGroup || catGroup._isDegenerateFlattenGroup){
             var dir = this._isFalling ? -1 : 1;
 
             offset = result.offset = offset + dir * (catRange.min + catRange.max);
