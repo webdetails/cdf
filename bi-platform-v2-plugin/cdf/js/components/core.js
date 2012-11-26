@@ -632,10 +632,12 @@ var UnmanagedComponent = BaseComponent.extend({
       counter = this.callCounter();
     }
     return _.bind(function(data) {
+      var newData;
       if(counter >= this.runCounter) {
         this.trigger('cdf cdf:postFetch',this,data);
         if(typeof this.postFetch == "function") {
-          data = this.postFetch(data);
+          newData = this.postFetch(data);
+          data = typeof newData == "undefined" ? data : newData;
         }
         success(data);
       }
