@@ -1,8 +1,37 @@
-var SelectBaseComponent = BaseComponent.extend({
+var InputBaseComponent = UnmanagedComponent.extend({
+  update: function(){
+    var qd = this.queryDefinition;
+    if(this.valuesArray && this.valuesArray.length > 0) {
+      var handler = _.bind(function() {
+        this.draw(this.valuesArray);
+      },this);
+      this.synchronous(handler);
+    } else if(qd && (qd.dataAccessId || qd.query)){
+      var handler = _.bind(function(data){
+        this.draw(data.resultset);
+      },this);
+      this.triggerQuery(qd,handler);
+    } else {
+      /* Legacy XAction-based components are a wasps' nest, so
+       * we'll steer clearfrom updating those for the time being
+       */
+      var handler = _.bind(function() {
+        var data = this.getValuesArray();
+        this.draw(data);
+      },this);
+      this.synchronous(handler);
+
+    }
+  }
+});
+
+
+
+var SelectBaseComponent = InputBaseComponent.extend({
   visible: false,
-  update: function () {
+
+  draw: function (myArray) {
     var ph = $("#" + this.htmlObject);
-    var myArray = this.getValuesArray(),
     isMultiple = false;
 
     selectHTML = "<select";
@@ -401,9 +430,8 @@ var MonthPickerComponent = BaseComponent.extend({
   }
 });
 
-var ToggleButtonBaseComponent = BaseComponent.extend({
-  update: function(){
-    var myArray = this.getValuesArray();
+var ToggleButtonBaseComponent = InputBaseComponent.extend({
+  draw: function(myArray){
 
     selectHTML = "";
 
@@ -508,8 +536,7 @@ var CheckComponent = ToggleButtonBaseComponent.extend({
 
 var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
-  update: function(){
-    var myArray = this.getValuesArray();
+  draw: function(myArray){
     this.cachedArray = myArray;
     var cssWrapperClass= "pentaho-toggle-button pentaho-toggle-button-up "+ ((this.verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
     selectHTML = "";
@@ -555,7 +582,9 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     var isSelected = false;
 
     var currentValArray;
-    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
+    if(typeof currentVal == "undefined") {
+      currentValArray = [];
+    } else if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
     } else {
       currentValArray = currentVal.toString().split("|");
