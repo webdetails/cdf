@@ -889,7 +889,7 @@ OlapUtils.EvolutionQuery = OlapUtils.GenericMdxQuery.extend({
 				},
 				members: {
 					todaysMonth: function(){return "[Date].[TodaysMonth] as Aggregate( now )"},
-					notNullMeasure: function(){return ""+options.measuresDim+nonEmptyMeasure + " as Iif(isEmpty(" + options.measuresDim+"."+options.measure + "), 0 ," + options.measure + ") "},
+					notNullMeasure: function(){return ""+options.measuresDim+nonEmptyMeasure + " as Iif(isEmpty(" + options.measuresDim+"."+options.measure + "), 0 , "+options.measuresDim+"."+options.measure+") "},
 					thisPeriodMeasure: function(){return ""+options.measuresDim+".[This Period] as Aggregate(now*"+options.measuresDim+nonEmptyMeasure+") "},
 					previousPeriodMeasure:function(){return ""+options.measuresDim+".[Previous Period] as Aggregate(oneMonthAgo*"+options.measuresDim+nonEmptyMeasure+") "},
 					lastYearPeriodMeasure:function(){return ""+options.measuresDim+".[Last Year Period] as Aggregate(oneYearAgo*"+options.measuresDim+nonEmptyMeasure+") "},
