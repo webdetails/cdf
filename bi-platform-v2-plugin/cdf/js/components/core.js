@@ -529,7 +529,7 @@ var UnmanagedComponent = BaseComponent.extend({
       return;
     }
     this.block();
-
+    userQueryOptions = userQueryOptions || {};
     /* 
      * The query response handler should trigger the component-provided callback
      * and the postExec stage if the call wasn't skipped, and should always
