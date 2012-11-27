@@ -1,81 +1,30 @@
 var ProtovisComponent = BaseComponent.extend({
 
-    update : function() {
-      if (this.parameters == undefined) {
+  update : function() {
+    if (this.parameters == undefined) {
+      this.parameters = [];
+    };
+    // clear previous table
 
-        this.parameters = [];
+    this.triggerQuery(this.chartDefinition,_.bind(this.render,this));
+  },
 
-      };
+  render: function(values) {
+    $("#" + this.htmlObject).html('<div id="'+ this.htmlObject +'protovis"></div>');
+    var vis = new pv.Panel()
+      .canvas(this.htmlObject + "protovis")
+      .width(this.width)
+      .height(this.height);
+    this.customfunction(vis,values);
+    vis.root.render();
+  },
 
-
-
-      // clear previous table
-
-      $("#"+this.htmlObject).empty();
-
-      var myself = this;
-
-      Dashboards.fetchData(this.chartDefinition, this.parameters,
-
-                            function(values) {
-
-                                changedData = undefined;
-
-                                if((typeof(myself.postFetch)=='function')){
-
-                                    changedData = myself.postFetch(values);
-
-                                };
-
-                                if (changedData != undefined) {
-
-                                  values = changedData;
-
-                                };
-
-                                myself.render(values);
-
-                            });
-
-    },
-
-
-
-    render: function(values) {
-
-      $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
-
-      var vis = new pv.Panel()
-
-        .canvas(this.htmlObject + "protovis")
-
-        .width(this.width)
-
-        .height(this.height);
-
-      this.customfunction(vis,values);
-
-      vis.root.render();
-
-      //vis.canvas(this.htmlObject + "image");
-
-      //if (this.caption != undefined)
-
-            //this.buildCaptionWrapper($("#" + this.htmlObject + "protovis"),"");
-
-    },
-
-
-
-    processdata: function(values) {
-
-      this.render(values);
-
-    }
-
+  processdata: function(values) {
+    this.render(values);
+  }
 });
 
-var BaseCccComponent = BaseComponent.extend({
+var BaseCccComponent = UnmanagedComponent.extend({
     
     query: null,
     chart: null,
@@ -226,31 +175,17 @@ var CccComponent = BaseCccComponent.extend({
     },
 
     renderChart: function() {
-        var myself = this;
-        if(this.chartDefinition.dataAccessId || myself.chartDefinition.query){
-      
-            this.query = new Query(this.chartDefinition);
-
-            this.query.fetchData(this.parameters, function(values) {
-                var changedValues = undefined;
-                if((typeof(myself.postFetch)=='function')){
-                    changedValues = myself.postFetch(values);
-                    $("#" + this.htmlObject).append('<div id="'+ myself.htmlObject  +'protovis"></div>');
-                }
-                if (changedValues != undefined) {
-                    values = changedValues;
-                }
-                myself.render(values);
-            });
-
-        }
-        else if(this.valuesArray != undefined){
-            this.render(this.valuesArray);
-        }
-        else{
-            // initialize the component only
-            this.render();
-        }
+      var myself = this;
+      if(this.chartDefinition.dataAccessId || myself.chartDefinition.query){
+        this.triggerQuery(this.chartDefinition,_.bind(this.render,this));
+      }
+      else if(this.valuesArray != undefined){
+        this.synchronous(_.bind(function(){this.render(this.valuesArray)},this));
+      }
+      else{
+        // initialize the component only
+        this.synchronous(_.bind(this.render,this));
+      }
     },
   
     render: function(values) {
