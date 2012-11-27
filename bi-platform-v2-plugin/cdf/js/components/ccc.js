@@ -325,6 +325,17 @@ var CccComponent2 = BaseCccComponent.extend({
 });
 
 
+var CccAreaChartComponent = CccComponent.extend({
+
+    cccType: pvc.AreaChart
+
+});
+
+var CccStackedDotChart = CccComponent.extend({
+
+    cccType: pvc.StackedDotChart
+});
+
 var CccDotChartComponent = CccComponent.extend({
 
     cccType: pvc.DotChart
