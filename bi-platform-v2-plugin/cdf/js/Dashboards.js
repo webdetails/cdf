@@ -412,12 +412,13 @@ Dashboards.restoreDuplicates = function() {
    * that such a match was found, then we tell the Component
    * to trigger a duplication with the provided values.
    */
+  var myself = this;
   for (var s in suffixes) if (suffixes.hasOwnProperty(s)) {
     var params = suffixes[s];
     $.each(dupes,function(i,e){
       var p;
       for (p = 0; p < e.parameters.length;p++) {
-        if (!params.hasOwnProperty(e.parameters[p]) && this.isBookmarkable(e.parameters[p])) {
+        if (!params.hasOwnProperty(e.parameters[p]) && myself.isBookmarkable(e.parameters[p])) {
           return;
         }
       }
@@ -441,7 +442,7 @@ Dashboards.blockUIwithDrag = function() {
 
 Dashboards.updateLifecycle = function(object) {
   var silent = object.lifecycle ? !!object.lifecycle.silent : false;
-    
+
     if( object.disabled ){
       return;
     }
@@ -463,14 +464,14 @@ Dashboards.updateLifecycle = function(object) {
         if ((object.update != undefined) &&
           (typeof object['update'] == 'function')) {
           object.update();
-          
+
           // check if component has periodic refresh and schedule next update
           this.refreshEngine.processComponent(object);
-          
+
         } else {
         // unsupported update call
         }
-      
+
         object.trigger('cdf cdf:postExecution', object);
         if(!(typeof(object.postExecution)=='undefined')){
           object.postExecution.apply(object);
