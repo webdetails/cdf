@@ -1,4 +1,4 @@
-//VERSION TRUNK-20121126\n
+//VERSION TRUNK-20121127\n
 
 
 /*global pvc:true */
@@ -3394,7 +3394,7 @@ def.scope(function(){
         this._context = context;
         this.option = option;
         
-        this.cast = def.get(spec, 'cast');
+        this._cast = def.get(spec, 'cast');
         
         // Assumed already cast
         // May be undefined
@@ -3406,6 +3406,11 @@ def.scope(function(){
         this.resolveCore = def.get(spec, 'resolve');
         if(!this.resolveCore){
             this.isResolved = true;
+        }
+        
+        var getDefault = def.get(spec, 'getDefault');
+        if(getDefault){
+            this._getDefault = getDefault;
         }
         
         var data = def.get(spec, 'data');
@@ -3434,14 +3439,22 @@ def.scope(function(){
                 // In case of re-entry, the initial default value is obtained.
                 this.isResolved = true;
                 
-                var resolve = this.resolveCore;
-                var context = this._context;
-                if(context && def.string.is(resolve)){
-                    resolve = context[resolve];
-                }
+                var resolve = this._getFunProp('resolveCore');
                 
                 // Must call set, specify or defaultValue
-                resolve.call(context, this);
+                // Or the current default value becomes the value.
+                resolve.call(this._context, this);
+                
+                if(this.value == null){
+                    var getDefault = this._getFunProp('_getDefault');
+                    if(getDefault){
+                        var value = this.cast(getDefault.call(this._context, this));
+                        if(value != null){
+                            delete this.isSpecified;
+                            this.value = this._defaultValue = value;
+                        }
+                    }
+                }
             }
             
             return this;
@@ -3470,6 +3483,23 @@ def.scope(function(){
             return this._defaultValue;
         },
         
+        cast: function(value){
+            if(value != null){
+                var cast = this._getFunProp('_cast');
+                if(cast){
+                    value = cast.call(this._context, value, this);
+                }
+            }
+            return value;
+        },
+        
+        dynDefault: function(){
+            var dynDefault = this._getFunProp('_dynDefault');
+            if(dynDefault){
+                return this.cast(dynDefault.call(this._context, this));
+            }
+        },
+        
         /**
          * Sets the option's value or default value.
          * 
@@ -3480,14 +3510,13 @@ def.scope(function(){
          */
         set: function(value, isDefault){
             if(value != null){
-                var cast = this.cast;
-                if(cast){
-                    var context = this._context;
-                    if(context && def.string.is(cast)){
-                        cast = context[cast];
-                    }
-                    
-                    value = cast.call(context, value, this);
+                value = this.cast(value);
+            }
+            
+            if(value == null){
+                value = this.dynDefault();
+                if(value != null){
+                    isDefault = true;
                 }
             }
             
@@ -3505,6 +3534,17 @@ def.scope(function(){
             }
             
             return this;
+        },
+
+        _getFunProp: function(name){
+            var fun = this[name];
+            if(fun){
+                var context = this._context;
+                if(context && def.string.is(fun)){
+                    fun = context[fun];
+                }
+            }
+            return fun;
         }
     });
 });/**
@@ -5392,7 +5432,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         var out = [
             "DATA SOURCE SUMMARY",
             pvc.logSeparator,
-            "ROWS (10/" + this.I + ")"
+            "ROWS (" + Math.min(10, this.I) + "/" + this.I + ")"
         ];
         
         def
@@ -11868,7 +11908,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
      */
     getInfo: function(){
 
-        var out = ["DATASET SUMMARY", pvc.logSeparator];
+        var out = ["DATA TYPE SUMMARY", pvc.logSeparator];
         
         def.eachOwn(this.dimensions(), function(dimension, name){
             var count = dimension.count(),
@@ -15363,34 +15403,27 @@ def
          * secondAxisColor (V1 compatibility)
          */
         Colors: {
-            resolve: '_resolveFull',
+            resolve:    '_resolveFull',
+            getDefault: getDefaultColor,
             data: {
                 resolveV1: function(optionInfo){
-                    if(this.index === 0 && 
-                       this._specifyChartOption(optionInfo, 'colors')){
-                        return true;
-                    }
-                     
-                    if(this.index === 1 &&
-                        this.chart._allowV1SecondAxis &&
-                        this._specifyChartOption(optionInfo, 'secondAxisColor')){
-                         return true;
+                    if(this.scaleType === 'discrete'){
+                        if(this.index === 0){ 
+                            this._specifyChartOption(optionInfo, 'colors');
+                        } else if(this.index === 1 && this.chart._allowV1SecondAxis) {
+                            this._specifyChartOption(optionInfo, 'secondAxisColor');
+                        }
+                    } else {
+                        this._specifyChartOption(optionInfo, 'colorRange');
                     }
                     
-                    // Compute default value
-                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
                     return true;
                 },
-                resolveDefault: function(optionInfo){
+                resolveDefault: function(optionInfo){ // after normal resolution
                     // Handle naming exceptions
-                    if(this.index === 0 && 
-                       this._specifyChartOption(optionInfo, 'colors')){
-                        return true;
+                    if(this.index === 0){ 
+                       this._specifyChartOption(optionInfo, 'colors');
                     }
-                    
-                    // Compute default value
-                    optionInfo.defaultValue(getDefaultColor.call(this, optionInfo));
-                    return true;
                 }
             },
             cast: pvc.colorScheme
@@ -15454,13 +15487,6 @@ def
             resolve: '_resolveFull',
             cast:    Boolean,
             value:   false
-        },
-        
-        Range: {
-            resolve: '_resolveFull',
-            cast:    def.array.to,
-            value:   ['red', 'yellow','green']
-                     .map(function(name){ return pv.Color.names[name]; })
         },
         
         Domain: {
