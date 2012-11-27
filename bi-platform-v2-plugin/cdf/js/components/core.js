@@ -456,6 +456,7 @@ var UnmanagedComponent = BaseComponent.extend({
       return true;
     }
   },
+
   /*
    * Handle calling postExecution when it exists. All components extending
    * UnmanagedComponent should either use one of the three lifecycles declared
@@ -542,7 +543,7 @@ var UnmanagedComponent = BaseComponent.extend({
     var always = _.bind(this.unblock, this);
     var handler = this.getSuccessHandler(success, always);
 
-    var query = this.queryState = new Query(queryDef);
+    var query = this.queryState = this.query = new Query(queryDef);
     var ajaxOptions = {
       async: true
     }
@@ -601,11 +602,11 @@ var UnmanagedComponent = BaseComponent.extend({
    * Increment the call counter, so we can keep track of the order in which
    * requests were made.
    */
+  callCounter: function() {
+    return ++this.runCounter;
+  },
 
-    callCounter: function() {
-      return ++this.runCounter;
-    },
-  /* 
+  /*
    * Build a generic response handler that runs the success callback when being
    * called in response to the most recent AJAX request that was triggered for
    * this component (as determined by comparing counter and this.runCounter),
