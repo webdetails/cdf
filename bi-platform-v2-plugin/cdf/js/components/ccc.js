@@ -1,4 +1,4 @@
-var ProtovisComponent = BaseComponent.extend({
+var ProtovisComponent =  UnmanagedComponent.extend({
 
   update : function() {
     if (this.parameters == undefined) {
