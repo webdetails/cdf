@@ -697,7 +697,6 @@ Dashboards.bindControl = function(object) {
      * and endow it with the Backbone event system.
      */
     _.extend(object,objectImpl,Backbone.Events);
-
   }
 
 };
