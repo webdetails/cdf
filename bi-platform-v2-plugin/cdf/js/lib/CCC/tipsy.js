@@ -176,7 +176,9 @@ pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
             (this === $fakeTipTarget[0]) || def.assert();
             // </Debug>
             
-            var scrollOffset = pv.scrollOffset(this);
+            var $win = $(window);
+            var scrollOffset = {width: $win.scrollLeft(), height: $win.scrollTop()};
+            var pageSize     = {width: $win.width(),      height: $win.height()   };
             
             // Desired gravity (assumes updateUserGravity was called previously)
             var gravity = _userGravity;
@@ -235,12 +237,11 @@ pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
             
             function calcPosScore(absPos, a_len){
                 /*global window:true*/
-                var maxLen = $(window)[a_len]();
-                var len  = tipSize[a_len];
+                var maxLen = pageSize[a_len];
+                var len    = tipSize[a_len];
                 
-                var pos  = absPos - scrollOffset[a_len === 'width' ? 0 : 1];
+                var pos  = absPos - scrollOffset[a_len];
                 var opos = maxLen - (pos + len);
-                
                 var fits = pos >= 0 && opos >= 0;
                 
                 // Negative positions (off-screen) are amplified 4 times
