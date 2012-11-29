@@ -1,4 +1,4 @@
-//VERSION TRUNK-20121127\n
+//VERSION TRUNK-20121129\n
 
 
 /*global pvc:true */
@@ -1356,16 +1356,27 @@ var pvc = def.globalSpace('pvc', {
     pvc.Size.names = ['width', 'height'];
     pvc.Size.namesSet = pv.dict(pvc.Size.names, def.retTrue);
     
-    pvc.Size.as = function(v){
-        if(v != null && !(v instanceof Size)){
-            v = new Size().setSize(v);
+    pvc.Size.toOrtho = function(value, anchor){
+        if(value != null){
+            // Single size (a number or a string with only one number)
+            // should be interpreted as meaning the orthogonal length.
+            var a_ol;
+            if(anchor){
+                a_ol = pvc.BasePanel.orthogonalLength[anchor];
+            }
+            
+            value = pvc.Size.to(value, {singleProp: a_ol});
+            
+            if(anchor){
+                delete value[pvc.BasePanel.oppositeLength[a_ol]];
+            }
         }
         
-        return v;
+        return value;
     };
     
     pvc.Size.to = function(v, keyArgs){
-        if(v != null){
+        if(v != null && !(v instanceof Size)){
             v = new Size().setSize(v, keyArgs);
         }
         
@@ -14857,6 +14868,17 @@ def.scope(function(){
         return pvc.BasePanel.oppositeAnchor[position];
     });
     
+    function castSize(value){
+        var position = this.option('Position');
+        return pvc.Size.toOrtho(value, position);
+    }
+    
+    function castTitleSize(value){
+        var position = this.option('Position');
+        
+        return pvc.Size.to(value, {singleProp: pvc.BasePanel.orthogonalLength[position]});
+    }
+    
     /*global axis_optionsDef:true*/
     var cartAxis_optionsDef = def.create(axis_optionsDef, {
         Visible: {
@@ -14908,12 +14930,12 @@ def.scope(function(){
         Size: {
             resolve: '_resolveFull',
             data:    normalV1Data,
-            cast:    pvc.Size.to
+            cast:    castSize
         },
         
         SizeMax: {
             resolve: '_resolveFull',
-            cast:    pvc.Size.to 
+            cast:    castSize
         },
         
         /* xAxisPosition,
@@ -15088,11 +15110,11 @@ def.scope(function(){
         },
         TitleSize: {
             resolve: '_resolveFull',
-            cast:    pvc.Size.to
+            cast:    castTitleSize
         },
         TitleSizeMax: {
             resolve: '_resolveFull',
-            cast:    pvc.Size.to
+            cast:    castTitleSize
         }, 
         TitleFont: {
             resolve: '_resolveFull',
@@ -19034,9 +19056,21 @@ pvc.BaseChart
             // So we create a dummy empty place-holder child here,
             // so that when the trend datums are added they end up here,
             // and not in another new Data...
+            var dataPartCell = {
+                v: dataPartValues
+            };
+            
+            // TODO: HACK: To make trend label fixing work in multi-chart scenarios... 
+            if(dataPartValues === 'trend'){
+                var firstTrendAtom = this._firstTrendAtomProto;
+                if(firstTrendAtom){
+                    dataPartCell.f = firstTrendAtom.f;
+                }
+            }
+            
             child = new pvc.data.Data({
                 parent:   this._partData,
-                atoms:    def.set({}, dataPartDimName, dataPartValues), 
+                atoms:    def.set({}, dataPartDimName, dataPartCell), 
                 dimNames: [dataPartDimName],
                 datums:   []
                 // TODO: index
@@ -19049,6 +19083,7 @@ pvc.BaseChart
     
     _generateTrends: function(){
         if(this._dataPartRole){
+            
             def
             .query(def.own(this.axes))
             .selectMany(function(axis){ return axis.dataCells; })
@@ -19352,12 +19387,12 @@ pvc.BaseChart
                     trendLabel = dataPartAtom.f;
                 }
                 
-                this.data.owner
-                .dimensions(dataPartDimName)
-                .intern({
+                this._firstTrendAtomProto = {
                     v: dataPartAtom.v,
                     f: trendLabel
-                });
+                };
+            } else {
+                delete this._firstTrendAtomProto;
             }
         }
     },
@@ -22064,8 +22099,8 @@ def
                 if(datums) {
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
-                            if(pvc.debug >= 10) {
-                                this._log(datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
+                            if(pvc.debug >= 20) {
+                                this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
                             }
                     
                             fun.call(ctx, datum);
@@ -23545,11 +23580,10 @@ def
             
             var panel = new pvc.AxisPanel(this, this._gridDockPanel, axis, {
                 anchor:            axis.option('Position'),
-                axisSize:          axis.option('Size'),
-                axisSizeMax:       axis.option('SizeMax'),
+                size:              axis.option('Size'),
+                sizeMax:           axis.option('SizeMax'),
                 clickAction:       axis.option('ClickAction'),
                 doubleClickAction: axis.option('DoubleClickAction'),
-                
                 useCompositeAxis:  axis.option('Composite'),
                 font:              axis.option('Font'),
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
@@ -23979,7 +24013,7 @@ def
         }
     },
     
-    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+    defaults: {
         /* Percentage of occupied space over total space in a discrete axis band */
         panelSizeRatio: 0.9,
 
@@ -23989,7 +24023,7 @@ def
         
         // Show a frame around the plot area
         // plotFrameVisible: undefined
-    })
+    }
 });
 
 def
@@ -25020,6 +25054,12 @@ def
             });
             
             var trendModel = trendInfo.model(options);
+            
+            // If a label has already been registered, it is preserved... (See BaseChart#_fixTrendsLabel)
+            var dataPartAtom = data.owner
+                                .dimensions(dataPartDimName)
+                                .intern(this.root._firstTrendAtomProto);
+            
             if(trendModel){
                 // At least one point...
                 // Sample the line on each x and create a datum for it
@@ -25055,7 +25095,7 @@ def
                         }
                         
                         atoms[yDimName] = trendY;
-                        atoms[dataPartDimName] = trendInfo.dataPartAtom;
+                        atoms[dataPartDimName] = dataPartAtom;
                         
                         var newDatum = new pvc.data.Datum(efCatData.owner, atoms);
                         newDatum.isVirtual = true;
@@ -25430,11 +25470,11 @@ def
         return this;
     },
     
-    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {
+    defaults: {
      // Ortho <- value role
         // TODO: this should go somewhere else
         orthoAxisOrdinal: false // when true => ortho axis gets the series role (instead of the value role)
-    })
+    }
 });
 
 def
@@ -25457,28 +25497,6 @@ def
     });
     
     var anchor = options.anchor || this.anchor;
-    
-    function readSize(prop){
-        var value = options[prop];
-        if(value == null){
-            value = options['axis' + def.firstUpperCase(prop)];
-        }
-        
-        if(value != null){
-            // Single size (a number or a string with only one number)
-            // should be interpreted as meaning the orthogonal length.
-            var aol = this.anchorOrthoLength(anchor);
-            value = pvc.Size.to(value, {singleProp: aol});
-            
-            delete value[this.anchorLength(anchor)];
-        }
-        
-        return value;
-    }
-    
-    // size && sizeMax
-    options.size    = readSize.call(this, 'size');
-    options.sizeMax = readSize.call(this, 'sizeMax');
     
     // Prevent the border from affecting the box model,
     // providing a static 0 value, independently of the actual drawn value...
@@ -25526,7 +25544,6 @@ def
     roleName: null,
     axis: null,
     anchor: "bottom",
-    axisSize: undefined,
     tickLength: 6,
     
     scale: null,
@@ -28410,8 +28427,6 @@ def
         // Cached
         this._valueDim = data.dimensions(this._valueRole.firstDimensionName());
     }
-    
-    //defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {})
 });/**
  * Bar Panel.
  */
@@ -30189,9 +30204,9 @@ def
         return pointPanel;
     },
     
-    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+    defaults: {
         tooltipOffset: 15
-    })
+    }
 });
 
 /**
@@ -30362,36 +30377,6 @@ def
         var colorAxis = this.axes.color;
         var colorNull = colorAxis.option('Missing');
         if(colorDimName){
-            /*
-             * type
-             * colorDimension
-             * data
-             * normPerBaseCategory
-             * colorDomain
-             * colors
-             * colorNull
-             * colorMax
-             * colorMin
-             */
-//            var fillColorScaleByColKey = pvc.color.scales(def.create(false, options, {
-//                /* Override/create these options, inherit the rest */
-//                type: this.colorScaleType, 
-//                data: colRootData,
-//                colorDimension: colorDimName
-//            }));
-//            
-//            getFillColor = function(leafScene){
-//                var color;
-//                var colorValue = leafScene.vars.color.value;
-//                if(colorValue != null) {
-//                    var colAbsKey = leafScene.group.parent.absKey;
-//                    color = fillColorScaleByColKey[colAbsKey](colorValue);
-//                } else {
-//                    color = me.colorNull;
-//                }
-//                
-//                return color;
-//            };
             var fillColorScaleByColKey = colorAxis.scalesByCateg;
             if(fillColorScaleByColKey){
                 getFillColor = function(leafScene){
@@ -31055,7 +31040,7 @@ def
                         Object.create(baseOptions)));
     },
     
-    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+    defaults: {
         colorValIdx: 0,
         sizeValIdx:  1,
         measuresIndexes: [2], // TODO: ???
@@ -31089,7 +31074,7 @@ def
 //      colorMin: undefined, //"white",
 //      colorMax: undefined, //"darkgreen",
 //      colorNull:  "#efc5ad"  // white with a shade of orange
-    })
+    }
 });
 
 /**
@@ -31207,6 +31192,12 @@ def
 
             var trendModel = trendInfo.model(options);
             if(trendModel){
+                
+                // If a label has already been registered, it is preserved... (See BaseChart#_fixTrendsLabel)
+                var dataPartAtom = data.owner
+                                .dimensions(dataPartDimName)
+                                .intern(this.root._firstTrendAtomProto);
+                
                 datums.forEach(function(datum, index){
                     var trendX = funX(datum);
                     if(trendX){
@@ -31217,7 +31208,7 @@ def
                                     Object.create(serData.atoms), // just common atoms
                                     xDimName, trendX,
                                     yDimName, trendY,
-                                    dataPartDimName, trendInfo.dataPartAtom);
+                                    dataPartDimName, dataPartAtom);
                             
                             newDatums.push(
                                 def.set(
@@ -31230,9 +31221,7 @@ def
                 });
             }
         }
-    },
-
-    defaults: def.create(pvc.CartesianAbstract.prototype.defaults, {})
+    }
 });
 
 /**
@@ -31378,8 +31367,9 @@ def
     
     autoPaddingByDotSize: true,
     
+    // Override default mappings
     _v1DimRoleName: {
-        'series':   'series',
+        //'series':   'series',
         'category': 'x',
         'value':    'y'
     },
@@ -32248,8 +32238,8 @@ def
         return scatterChartPanel;
     },
     
-    defaults: def.create(pvc.MetricXYAbstract.prototype.defaults, {
-        originIsZero: false,
+    defaults: {
+        axisOriginIsZero: false,
         
         tooltipOffset: 15
         
@@ -32271,7 +32261,7 @@ def
 //      sizeAxisRatio:    undefined,
 //      sizeAxisRatioTo:  undefined,
 //      autoPaddingByDotSize: undefined
-    })
+    }
 });
 
 /**
@@ -32431,7 +32421,7 @@ def
             }));
     },
   
-    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+    defaults: {
         compatVersion: 1,
       
         orientation: 'horizontal',
@@ -32455,7 +32445,7 @@ def
         
         crosstabMode: false,
         seriesInRows: false
-    })
+    }
 });
 
 /*
@@ -33502,7 +33492,7 @@ def
         }));
     },
     
-    defaults: def.create(pvc.BaseChart.prototype.defaults, {
+    defaults: {
         compatVersion: 1,
         
      // margins around the full tree
@@ -33527,7 +33517,7 @@ def
         minAspectRatio: 2.0
 
         //selectParam: undefined
-    })
+    }
 });
 
 /*
@@ -34190,9 +34180,10 @@ def
     
     anchor: 'fill',
     
+    // Override default mappings
     _v1DimRoleName: {
-        'series':   'series',
-        'category': 'category',
+        //'series':   'series',
+        //'category': 'category',
         'value':    'median'
     },
     
@@ -34632,12 +34623,12 @@ def
         return boxPanel;
     },
     
-    defaults: def.create(pvc.CategoricalAbstract.prototype.defaults, {
+    defaults: {
         // plot2: false
         // legend: false,
         crosstabMode: false
         // panelSizeRatio
-    })
+    }
 })
 .addStatic({
     measureRolesNames: ['median', 'lowerQuartil', 'upperQuartil', 'minimum', 'maximum']
