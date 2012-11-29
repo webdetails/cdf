@@ -382,6 +382,14 @@ pv.ancestor = function(a, e) {
   return false;
 };
 
+pv.getWindow = function(elem) {
+    return (elem != null && elem == elem.window) ?
+        elem :
+        elem.nodeType === 9 ?
+            elem.defaultView || elem.parentWindow :
+            false;
+};
+
 /**
  * @private Computes the accumulated scroll offset given an element.
  */
@@ -396,6 +404,40 @@ pv.scrollOffset = function(elem) {
     }
     
     return [left, top];
+};
+
+/* Adapted from jQuery.offset()
+ */
+pv.elementOffset = function(elem) {
+    var docElem, body, win, clientTop, clientLeft, scrollTop, scrollLeft,
+        box = { top: 0, left: 0 },
+        doc = elem && elem.ownerDocument;
+
+    if (!doc) {
+        return;
+    }
+
+    body = doc.body;
+    if(body === elem)  {
+        return; // not supported
+    }
+    
+    docElem = doc.documentElement;
+
+    if ( typeof elem.getBoundingClientRect !== "undefined" ) {
+        box = elem.getBoundingClientRect();
+    }
+    
+    win = pv.getWindow(doc);
+    
+    clientTop  = docElem.clientTop  || body.clientTop  || 0;
+    clientLeft = docElem.clientLeft || body.clientLeft || 0;
+    scrollTop  = win.pageYOffset || docElem.scrollTop;
+    scrollLeft = win.pageXOffset || docElem.scrollLeft;
+    return {
+        top:  box.top  + scrollTop  - clientTop,
+        left: box.left + scrollLeft - clientLeft
+    };
 };
 
 /**
@@ -6925,17 +6967,18 @@ pv.SvgScene.monotoneTangents = function(points, from, to) {
   /* Compute the slopes of the secant lines between successive points. */
   for (k = 0 ; k < L - 1 ; k++) {
     j = from + k;
-    d[k] = (points[j+1].top - points[j].top)/(points[j+1].left - points[j].left);
+    var den = points[j+1].left - points[j].left;
+    d[k] = Math.abs(den) <= 1e-12 ? 0 : (points[j+1].top - points[j].top)/den;
   }
 
   /* Initialize the tangents at every point as the average of the secants. */
   m[0] = d[0];
   dx[0] = points[from + 1].left - points[from].left;
   for (k = 1, j = from + k ; k < L - 1 ; k++, j++) {
-    m[k] = (d[k-1]+d[k])/2;
+    m[k]  = (d[k-1]+d[k])/2;
     dx[k] = (points[j+1].left - points[j-1].left)/2;
   }
-  m[k] = d[k-1];
+  m[k]  = d[k-1];
   dx[k] = (points[j].left - points[j-1].left);
 
   /* Step 3. Very important, step 3. Yep. Wouldn't miss it. */
@@ -7226,7 +7269,7 @@ pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
           var attrs = Object.create(attrsBase);
           attrs['pointer-events'] = events;
           attrs.cursor = s.cursor;
-          attrs.d = pathT + "L" + pathB[0].substr(1) + pathB[1] + "Z";
+          attrs.d = pathT.join("") + "L" + pathB[0].substr(1) + pathB[1] + "Z";
           
           elm = this.expect(elm, 'path', scenes, i, attrs);
           
@@ -7993,7 +8036,7 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
           var attrs = Object.create(attrsBase);
           attrs['pointer-events'] = events;
           attrs.cursor = s.cursor;
-          attrs.d = path;
+          attrs.d = path.join("");
           
           elm = this.expect(elm, 'path', scenes, i, attrs);
           
@@ -8309,6 +8352,8 @@ pv.SvgScene.lineJoinPaths = function(paths, from, to) {
  * when neighbour scenes are invisible. 
  */
 pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
+  return elm;
+  /*
   var s = scenes[i];
   var s2;
   if(i > 0){
@@ -8332,7 +8377,7 @@ pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
   if(!style || !style.opacity){
     style = s.fillStyle;
   }
-  var radius = (s.lineWidth / this.scale) / 2;
+  var radius = Math.max(s.lineWidth  / 2, 1.5) / this.scale;
   
   var attrs = {
     'shape-rendering': s.antialias ? null : 'crispEdges',
@@ -8351,6 +8396,7 @@ pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
   if(s.svg) this.setAttributes(elm, s.svg);
   
   return this.append(elm, scenes, i);
+  */
 };
 
 pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment) {
@@ -8361,12 +8407,10 @@ pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment
   }
   
   // Besides breaking paths on visible, 
-  // should they break on properties as well? 
+  // should they break on properties as well?
   var breakOnKeyChange = pv.get(keyArgs, 'breakOnKeyChange', false);
   var from = pv.get(keyArgs, 'from') || 0;
   var to   = pv.get(keyArgs, 'to', scenes.length - 1);
-  
-  var count = from - to + 1;
   
   var ki, kf;
   if(breakOnKeyChange){
@@ -8404,7 +8448,7 @@ pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment
       }
       
       var sf = scenes[f2];
-      if(!this.isSceneVisible(sf)){
+      if(!this.isSceneVisible(sf)){  
         // f + 1 exists but is NOT strictly visible
         // Connect i to f (possibly, i === f)
         // Continue with f + 2
@@ -8427,7 +8471,7 @@ pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment
         }
       }
     }
-    
+  
     elm = lineAreaSegment.call(this, elm, scenes, i, f, keyArgs);
     
     // next part
@@ -10463,13 +10507,12 @@ pv.Mark.prototype.mouse = function() {
        * the necessary relative co-ordinates anyway (well, it seems to
        * in my code.
        */
-      if (pv.renderer() !== 'svgweb') {
-          do {
-            x -= n.offsetLeft;
-            y -= n.offsetTop;
-          } while ((n = n.offsetParent));
+      var offset = pv.elementOffset(n);
+      if(offset){
+          x -= offset.left;
+          y -= offset.top;
       }
-
+      
       /* Compute the inverse transform of all enclosing panels. */
       var t = pv.Transform.identity,
           p = this.properties.transform ? this : this.parent,
