@@ -893,7 +893,7 @@ Dashboards.updateLifecycle = function(object) {
         }
       }
   },this);
-  setTimeout(handler,10);
+  setTimeout(handler,1);
 };
 
 Dashboards.update = function(object) {
@@ -1168,23 +1168,22 @@ Dashboards.initEngine = function(){
     }
   }
   this.waitingForInit = updating.slice();
+
+  var callback = function(comp) {
+    this.waitingForInit = _(this.waitingForInit).without(comp);
+    comp.off('cdf:postExecution',callback);
+    this.handlePostInit();
+  }
+
   setTimeout(
 
     function() {
 
       for(var i= 0, len = updating.length; i < len; i++){
         var component = updating[i];
-        var callback = function(comp) {
-          this.waitingForInit = _(this.waitingForInit).without(comp);
-          this.handlePostInit();
-          comp.off('cdf:postExecution',callback);
-        } 
         component.on('cdf:postExecution',callback,myself);
         myself.update(component);
       }
-      myself.restoreDuplicates();
-      myself.finishedInit = true;
-      myself.decrementRunningCalls();
       if(components.length > 0) {
         myself.handlePostInit();
       }
@@ -1198,9 +1197,13 @@ Dashboards.handlePostInit = function() {
     this.trigger("cdf cdf:postInit",this);
     /* Legacy Event -- don't rely on this! */
     $(window).trigger('cdfLoaded');
+
     if(typeof this.postInit == "function") {
       this.postInit();
     }
+    this.restoreDuplicates();
+    this.finishedInit = true;
+    this.decrementRunningCalls();
   }
 };
 
@@ -1306,15 +1309,12 @@ Dashboards.fireChange = function(parameter, value) {
   var toUpdate = [];
 
   var workDone = false;
-  for(var i= 0, len = this.components.length; i < len; i++){
-
-    if($.isArray(this.components[i].listeners)){
-
-      for(var j= 0 ; j < this.components[i].listeners.length; j++){
-
-        if(this.components[i].listeners[j] == parameter && !this.components[i].disabled) {
-          toUpdate.push(this.components[i]);
-
+  for (var i= 0, len = this.components.length; i < len; i++){
+    if ($.isArray(this.components[i].listeners)){
+      for (var j= 0 ; j < this.components[i].listeners.length; j++){
+        var comp = this.components[i];
+        if (comp.listeners[j] == parameter && !comp.disabled) {
+          toUpdate.push(comp);
           break;
 
         }
