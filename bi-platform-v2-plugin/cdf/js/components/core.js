@@ -5,9 +5,35 @@ BaseComponent = Base.extend({
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
+
+  copyEvents: function(target,events) {
+    _.each(events,function(evt, evtName){
+      var e = evt,
+          tail = evt.tail;
+      while((e = e.next) !== tail) {
+        target.on(evtName,e.callback,e.context);
+      }
+    })
+  },
+
   clone: function(parameterRemap,componentRemap,htmlRemap) {
-    var that;
+    var that, dashboard, callbacks;
+    /*
+     * dashboard points back to this component, so we need to remove it from
+     * the original component before cloning, lest we enter an infinite loop.
+     * _callbacks contains the event bindings for the Backbone Event mixin
+     * and may also point back to the dashboard. We want to clone that as well,
+     * but have to be careful about it.
+     */
+    dashboard = this.dashboard;
+    callbacks = this._callbacks;
+    delete this.dashboard;
+    delete this._callbacks;
     that = $.extend(true,{},this);
+    that.dashboard = this.dashboard = dashboard;
+    this._callbacks = callbacks;
+    this.copyEvents(that,callbacks);
+
     if (that.parameters) {
       that.parameters = that.parameters.map(function(param){
         if (param[1] in parameterRemap) {
@@ -669,11 +695,10 @@ var UnmanagedComponent = BaseComponent.extend({
 });
 
 var FreeformComponent = UnmanagedComponent.extend({
-  manageCallee: true,
 
   update: function() {
     var render = _.bind(this.render,this);
-    if(this.manageCallee) {
+    if(typeof this.manageCallee == "undefined" || this.maangeCallee) {
       this.synchronous(render);
     } else {
       render();

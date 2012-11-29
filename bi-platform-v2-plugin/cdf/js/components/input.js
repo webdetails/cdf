@@ -8,7 +8,15 @@ var InputBaseComponent = UnmanagedComponent.extend({
       this.synchronous(handler);
     } else if(qd && (qd.dataAccessId || qd.query)){
       var handler = _.bind(function(data){
-        this.draw(data.resultset);
+        var filtered;
+        if(this.valueAsId) {
+          filtered = data.resultset.map(function(e){
+            return [e[0],e[0]];
+          });
+        } else {
+          filtered = data.resultset;
+        }
+        this.draw(filtered);
       },this);
       this.triggerQuery(qd,handler);
     } else {
