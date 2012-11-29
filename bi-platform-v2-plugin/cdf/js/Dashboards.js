@@ -1,4 +1,4 @@
-$.ajaxSetup({
+ $.ajaxSetup({
   type: "POST",
   async: false,
   traditional: true,
@@ -7,224 +7,6 @@ $.ajaxSetup({
 });
 
 
-/* Some utility functions, backward compatibility with older browsers */
-
-if ( !String.prototype.endsWith ) {
-  String.prototype.endsWith = function(str){
-    return (this.match(str+"$")==str);
-  };
-} 
-
-if (!Object.keys) {
-  Object.keys = (function () {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length
-
-    return function (obj) {
-      if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object')
-
-      var result = []
-
-      for (var prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) result.push(prop)
-      }
-
-      if (hasDontEnumBug) {
-        for (var i=0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i])
-        }
-      }
-      return result
-    }
-  })()
-};
-
-// Production steps of ECMA-262, Edition 5, 15.4.4.19  
-// Reference: http://es5.github.com/#x15.4.4.19  
-if (!Array.prototype.map) {  
-  Array.prototype.map = function(callback, thisArg) {  
-      
-    var T, A, k;  
-      
-    if (this == null) {  
-      throw new TypeError(" this is null or not defined");  
-    }  
-      
-    // 1. Let O be the result of calling ToObject passing the |this| value as the argument.  
-    var O = Object(this);  
-      
-    // 2. Let lenValue be the result of calling the Get internal method of O with the argument "length".  
-    // 3. Let len be ToUint32(lenValue).  
-    var len = O.length >>> 0;  
-      
-    // 4. If IsCallable(callback) is false, throw a TypeError exception.  
-    // See: http://es5.github.com/#x9.11  
-    if ({}.toString.call(callback) != "[object Function]") {  
-      throw new TypeError(callback + " is not a function");  
-    }  
-      
-    // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.  
-    if (thisArg) {  
-      T = thisArg;  
-    }  
-      
-    // 6. Let A be a new array created as if by the expression new Array(len) where Array is  
-    // the standard built-in constructor with that name and len is the value of len.  
-    A = new Array(len);  
-      
-    // 7. Let k be 0  
-    k = 0;  
-      
-    // 8. Repeat, while k < len  
-    while(k < len) {  
-      
-      var kValue, mappedValue;  
-      
-      // a. Let Pk be ToString(k).  
-      //   This is implicit for LHS operands of the in operator  
-      // b. Let kPresent be the result of calling the HasProperty internal method of O with argument Pk.  
-      //   This step can be combined with c  
-      // c. If kPresent is true, then  
-      if (k in O) {  
-      
-        // i. Let kValue be the result of calling the Get internal method of O with argument Pk.  
-        kValue = O[ k ];  
-      
-        // ii. Let mappedValue be the result of calling the Call internal method of callback  
-        // with T as the this value and argument list containing kValue, k, and O.  
-        mappedValue = callback.call(T, kValue, k, O);  
-      
-        // iii. Call the DefineOwnProperty internal method of A with arguments  
-        // Pk, Property Descriptor {Value: mappedValue, Writable: true, Enumerable: true, Configurable: true},  
-        // and false.  
-      
-        // In browsers that support Object.defineProperty, use the following:  
-        // Object.defineProperty(A, Pk, { value: mappedValue, writable: true, enumerable: true, configurable: true });  
-      
-        // For best browser support, use the following:  
-        A[ k ] = mappedValue;  
-      }  
-      // d. Increase k by 1.  
-      k++;  
-    }  
-      
-    // 9. return A  
-    return A;  
-  };        
-}  
-
-
-// Implementation of Array.indexOf (for IE <9)
-// Reference: https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-        "use strict";
-        if (this == null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
-            }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    }
-}
-
-// Implementation of Array.lastIndexOf (for IE <9)
-// Reference: https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/lastIndexOf
-if (!Array.prototype.lastIndexOf)
-{
-  Array.prototype.lastIndexOf = function(searchElement /*, fromIndex*/)
-  {
-    "use strict";
-
-    if (this == null)
-      throw new TypeError();
-
-    var t = Object(this);
-    var len = t.length >>> 0;
-    if (len === 0)
-      return -1;
-
-    var n = len;
-    if (arguments.length > 1)
-    {
-      n = Number(arguments[1]);
-      if (n != n)
-        n = 0;
-      else if (n != 0 && n != (1 / 0) && n != -(1 / 0))
-        n = (n > 0 || -1) * Math.floor(Math.abs(n));
-    }
-
-    var k = n >= 0
-          ? Math.min(n, len - 1)
-          : len - Math.abs(n);
-
-    for (; k >= 0; k--)
-    {
-      if (k in t && t[k] === searchElement)
-        return k;
-    }
-    return -1;
-  };
-}
-
-
-if ( !Array.prototype.reduce ) {  
-  Array.prototype.reduce = function reduce(accumulator){  
-    var i, l = this.length, curr;  
-              
-    if(typeof accumulator !== "function") // ES5 : "If IsCallable(callbackfn) is false, throw a TypeError exception."  
-      throw new TypeError("First argument is not callable");  
-      
-    if((l == 0 || l === null) && (arguments.length <= 1))// == on purpose to test 0 and false.  
-      throw new TypeError("Array length is 0 and no second argument");  
-              
-    if(arguments.length <= 1){  
-      curr = this[0]; // Increase i to start searching the secondly defined element in the array  
-      i = 1; // start accumulating at the second element  
-    }  
-    else{  
-      curr = arguments[1];  
-    }  
-              
-    for(i = i || 0 ; i < l ; ++i){  
-      if(i in this)  
-        curr = accumulator.call(undefined, curr, this[i], i, this);  
-    }  
-              
-    return curr;  
-  };  
-}  
 
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
@@ -242,13 +24,13 @@ if(webAppPath.endsWith("/")) {
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
-var ERROR_IMAGE = webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/error.png";
+var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
 
 if($.blockUI){
   $.blockUI.defaults.fadeIn = 0;
-  $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/processing_transparent.gif" />';
+  $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" />';
   $.blockUI.defaults.css.left = '50%';
   $.blockUI.defaults.css.top = '40%';
   $.blockUI.defaults.css.marginLeft = '-16px';
@@ -271,9 +53,15 @@ if (typeof $.SetImpromptuDefaults == 'function')
   });
 
 var Dashboards = {
-    TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_red.png",
-    TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_yellow.png",
-    TRAFFIC_GREEN: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_green.png",
+  parameterModel: new Backbone.Model(),
+  TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
+  TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
+  TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
+  viewFlags: {
+    UNUSED: "unused",
+    UNBOUND: "unbound",
+    VIEW: "view"
+  },
   /* globalContext determines if components and params are retrieved
    * from the current window's object or from the Dashboards singleton
    */
@@ -302,6 +90,8 @@ var Dashboards = {
   i18nSupport : null  // Reference to i18n objects
 };
 
+_.extend(Dashboards, Backbone.Events);
+
 // Log
 Dashboards.log = function(m,type){
   if (typeof console != "undefined" ){
@@ -316,6 +106,10 @@ Dashboards.log = function(m,type){
     }
   }
 };
+
+Dashboards.error = function(m){
+  this.log(m, 'error');
+}
 
 // REFRESH ENGINE begin
 
@@ -406,11 +200,11 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 
   var refreshComponent = function(component){
     //if refresh period is too short, progress indicator will stay in user's face
-    //    let(Dashboards.runningCalls = 0){
+    //		let(Dashboards.runningCalls = 0){
     Dashboards.update(component);
-  //      Dashboards.runningCalls = 0;
-  //      Dashboards.hideProgressIndicator()
-  //    }
+  //			Dashboards.runningCalls = 0;
+  //			Dashboards.hideProgressIndicator()
+  //		}
   };
 
   var insertInQueue = function(component){
@@ -509,33 +303,35 @@ Dashboards.refreshEngine = new Dashboards.RefreshEngine();
 //REFRESH ENGINE end
 
 Dashboards.setGlobalContext = function(globalContext) {
-  Dashboards.globalContext = globalContext;
+  this.globalContext = globalContext;
 };
 
 Dashboards.showProgressIndicator = function() {
-  Dashboards.blockUIwithDrag();
+  this.blockUIwithDrag();
 };
 
 Dashboards.hideProgressIndicator = function() {
-  if(Dashboards.runningCalls <= 0){
+  if(this.runningCalls <= 0){
     $.unblockUI();
-    Dashboards.showErrorTooltip();
+    this.showErrorTooltip();
   }
 };
 
 Dashboards.incrementRunningCalls = function() {
-  Dashboards.runningCalls++ ;
-  Dashboards.showProgressIndicator();
+  this.runningCalls++ ;
+  this.showProgressIndicator();
 //Dashboards.log("+Running calls incremented to: " + Dashboards.runningCalls);
 };
 
 Dashboards.decrementRunningCalls = function() {
-  Dashboards.runningCalls-- ;
+  this.runningCalls-- ;
   //Dashboards.log("-Running calls decremented to: " + Dashboards.runningCalls);
-  if(Dashboards.runningCalls<=0){
-    Dashboards.hideProgressIndicator();
-    Dashboards.runningCalls = 0; // Just in case
-  }
+  setTimeout(_.bind(function(){
+    if(this.runningCalls<=0){
+      this.hideProgressIndicator();
+      this.runningCalls = 0; // Just in case
+    }
+  },this),10);
 };
 
 Dashboards.bindControl = function(object) {
@@ -543,12 +339,12 @@ Dashboards.bindControl = function(object) {
   // see if there is a class defined for this object
   var objectType = typeof object["type"]=='function'?object.type():object.type;
   var classNames = [
+  // try TypeComponent as class name
+  objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component',
   // try type as class name
   objectType,
   // try Type as class name with first letter uppercase
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1),
-  // try TypeComponent as class name
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
+  objectType.substring(0,1).toUpperCase() + objectType.substring(1)
   ];
   
   var objectImpl;
@@ -560,25 +356,29 @@ Dashboards.bindControl = function(object) {
   }
   
   if (typeof objectImpl == 'undefined'){
-    Dashboards.log ("Object type " + object["type"] + " can't be mapped to a valid class","error");
+    this.log ("Object type " + object["type"] + " can't be mapped to a valid class","error");
   } else {
-    // this will add the methods from the inherited class. Overrides not allowed
-    $.extend(object,objectImpl);
+    objectImpl.dashboard = this;
+    /*
+     * extend the input object with all the component methods,
+     * and endow it with the Backbone event system.
+     */
+    _.extend(object,objectImpl,_.clone(object),Backbone.Events);
   }
 };
 
 
 Dashboards.restoreDuplicates = function() {
   /*
-   * We mark duplicates by appending a _nn tag to their names.
+   * We mark duplicates by appending an _nn suffix to their names.
    * This means that, when we read the parameters from bookmarks,
    * we can look for the _nn suffixes, and infer from those suffixes
    * what duplications were triggered, allowing us to reproduce that
    * state as well.
    */
-  var dupes = Dashboards.components.filter(function(c){return c.type == 'duplicate'}),
+  var dupes = this.components.filter(function(c){return c.type == 'duplicate'}),
       suffixes = {},
-      params = Dashboards.getBookmarkState().params || {};
+      params = this.getBookmarkState().params || {};
   /*
    * First step is to go over the bookmarked parameters and find
    * all of those that end with the _nn suffix (possibly several
@@ -617,7 +417,7 @@ Dashboards.restoreDuplicates = function() {
     $.each(dupes,function(i,e){
       var p;
       for (p = 0; p < e.parameters.length;p++) {
-        if (!params.hasOwnProperty(e.parameters[p]) && Dashboards.isBookmarkable(e.parameters[p])) {
+        if (!params.hasOwnProperty(e.parameters[p]) && this.isBookmarkable(e.parameters[p])) {
           return;
         }
       }
@@ -626,9 +426,9 @@ Dashboards.restoreDuplicates = function() {
   }
 }
 Dashboards.blockUIwithDrag = function() {
-  if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+  if (typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
-$.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/processing_transparent.gif" /></div>';
+    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
   }
 
   $.blockUI();
@@ -639,50 +439,69 @@ $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPat
   });
 };
 
-Dashboards.update = function(object) {
-  try {
+Dashboards.updateLifecycle = function(object) {
+  var silent = object.lifecycle ? !!object.lifecycle.silent : false;
     
     if( object.disabled ){
       return;
     }
-    
-    if(!(typeof(object.preExecution)=='undefined')){
-      var ret = object.preExecution.apply(object);
-      if (typeof ret != "undefined" && !ret)
-        return; // if preExecution returns false, we'll skip the update
+    if(!silent) {
+      this.incrementRunningCalls();
     }
-    if (object.tooltip != undefined){
-      object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
-    }
-    // first see if there is an objectImpl
-    if ((object.update != undefined) &&
-      (typeof object['update'] == 'function')) {
-      object.update();
+    var handler = _.bind(function() {
+      try {
+        object.trigger('cdf cdf:preExecution', object);
+        if(!(typeof(object.preExecution)=='undefined')){
+          var ret = object.preExecution.apply(object);
+          if (typeof ret != "undefined" && !ret)
+            return; // if preExecution returns false, we'll skip the update
+        }
+        if (object.tooltip != undefined){
+          object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
+        }
+        // first see if there is an objectImpl
+        if ((object.update != undefined) &&
+          (typeof object['update'] == 'function')) {
+          object.update();
+          
+          // check if component has periodic refresh and schedule next update
+          this.refreshEngine.processComponent(object);
+          
+        } else {
+        // unsupported update call
+        }
       
-      // check if component has periodic refresh and schedule next update
-      this.refreshEngine.processComponent(object);
-      
-    } else {
-    // unsupported update call
-    }
-  
-    if(!(typeof(object.postExecution)=='undefined')){
-      object.postExecution.apply(object);
-    }
-    // if we have a tooltip component, how is the time.
-    if (object._tooltip != undefined){
-      $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
-        delay:0,
-        track: true,
-        fade: 250
-      });
-    }
-  } catch (e) {
-    this.log("Error updating " + object.name +":",'error');
-    this.log(e,'exception');
-  }
+        object.trigger('cdf cdf:postExecution', object);
+        if(!(typeof(object.postExecution)=='undefined')){
+          object.postExecution.apply(object);
+        }
+        // if we have a tooltip component, how is the time.
+        if (object._tooltip != undefined){
+          $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+            delay:0,
+            track: true,
+            fade: 250
+          });
+        }
+      } catch (e) {
+        this.log("Error updating " + object.name +":",'error');
+        this.log(e,'exception');
+      } finally {
+        if(!silent) {
+          this.decrementRunningCalls();
+        }
+      }
+  },this);
+  setTimeout(handler,10);
 };
 
+Dashboards.update = function(object) {
+  if(object.isManaged === false && object.update) {
+    object.update();
+  } else {
+    this.updateLifecycle(object);
+  }
+}
 Dashboards.createAndCleanErrorDiv = function(){
   if ($("#"+CDF_ERROR_DIV).length == 0){
     $("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
@@ -709,17 +528,17 @@ Dashboards.getComponent = function(name){
 };
 
 Dashboards.getComponentByName = function(name) {
-  if (Dashboards.globalContext) {
+  if (this.globalContext) {
     return eval(name);
   } else {
-    return Dashboards.getComponent(name);
+    return this.getComponent(name);
   }
 };
 
 Dashboards.addComponents = function(components) {
   // attempt to convert over to component implementation
   for (var i =0; i < components.length; i++) {
-    Dashboards.bindControl(components[i]);
+    this.bindControl(components[i]);
   }
   this.components = this.components.concat(components);
 };
@@ -739,55 +558,188 @@ Dashboards.addArgs = function(url){
 Dashboards.setI18nSupport = function(lc, i18nRef) {
   // Update global reference to i18n objects if needed
   if (i18nRef !== "undefined" && lc !== "undefined") {
-    Dashboards.i18nCurrentLanguageCode = lc;
-    Dashboards.i18nSupport = i18nRef;
+    this.i18nCurrentLanguageCode = lc;
+    this.i18nSupport = i18nRef;
   }
 
 };
 
 Dashboards.init = function(components){
-  this.loadStorage();
+  var myself =this;
+  if(this.initialStorage) {
+    _.extend(this.storage, this.initialStorage);
+  } else {
+    this.loadStorage();
+  }
   this.restoreBookmarkables();
+  this.restoreView();
+  this.syncParametersInit();
   if ($.isArray(components)) {
-    Dashboards.addComponents(components);
+    this.addComponents(components);
   }
   $(function() {
-    Dashboards.initEngine();
+    myself.initEngine();
   });
 };
 
 
+/* Keep parameters master and slave in sync. The master parameter's
+ * initial value takes precedence over the slave parameter's when
+ * initializing the dashboard.
+ */
+Dashboards.syncParameters = function(master, slave) {
+  this.setParameter(slave, this.getParameterValue(master));
+  this.parameterModel.change();
+  this.parameterModel.on("change:" + master,function(m,v){this.fireChange(slave,v)},this);
+  this.parameterModel.on("change:" + slave,function(m,v){this.fireChange(master,v)},this);
+}
+
+Dashboards.chains = [];
+Dashboards.syncedParameters = {};
+/* Register parameter pairs that will be synced on dashboard init. We'll store
+ * the dependency pairings in Dashboards.syncedParameters,as an object mapping
+ * master parameters to an array of all its slaves (so {a: [b,c]} means that
+ * both *b* and *c* are subordinate to *a*), and in Dashboards.chains wel'll
+ * store an array of arrays representing a list of separate dependency trees.
+ * An entry of the form [a, b, c] means that *a* doesn't depend on either *b*
+ * or *c*, and that *b* doesn't depend on *c*. Inversely, *b* depends on *a*,
+ * and *c* depends on either *a* or *b*. You can have multiple such entries,
+ * each representing a completely isolated set of dependencies.
+ *
+ * Note that we make no effort to detect circular dependencies. Behaviour is
+ * undetermined should you provide such a case.
+ */
+Dashboards.syncParametersOnInit = function (master, slave){
+  var parameters = this.syncedParameters,
+      currChain,
+      masterChain,
+      slaveChain, slaveChainIdx, i;
+  if(!parameters[master]) parameters[master] = [];
+  parameters[master].push(slave);
+  
+  /* When inserting an entry into Dashboards.chains, we need to check whether
+   * any of the master or the slave are already in one of the chains.
+   */
+  for (i = 0; i < this.chains.length;i++) {
+    currChain = this.chains[i];
+    if (currChain.indexOf(master) > -1) {
+      masterChain = currChain;
+    }
+    if (currChain.indexOf(slave) > -1) {
+      slaveChain = currChain;
+      slaveChainIdx = i;
+    }    
+  }
+  /* If both slave and master are present in different chains, we merge the
+   * chains.
+   *
+   * If only one of the two is present, we insert the slave at the end
+   * of the master's chain, or the master at the head of the slave's chain.
+   * 
+   * Note that, since a parameter can be both a master and a slave, and because
+   * no slave can have two masters, it is guaranteed that we can only add the
+   * master to the head of the chain if the slave was the head before, and, when
+   * adding the slave at the end of the master's chain, none of the parameters
+   * between master and slave can depend on the slave. This means there is no
+   * scenario where a chain can become inconsistent from prepending masters or
+   * appending slaves.
+   *
+   * If neither master nor slave is present in the existing chains, we create a
+   * new chain with [master, slave].
+   */
+  if(slaveChain && masterChain) {
+    if (masterChain != slaveChain) {
+      args = slaveChain.slice();
+      args.unshift(0);
+      args.unshift(masterChain.length);
+      [].splice.apply(masterChain,args);
+      this.chains.splice(slaveChainIdx,1);
+    }
+  } else if (slaveChain) {
+      slaveChain.unshift(master);
+  } else if(masterChain) {
+      masterChain.push(slave)
+  } else {
+    this.chains.push([master, slave]);
+  }
+}
+
+/*
+ * Iterate over the registered parameter syncing chains,
+ * and configure syncing for each parameter pair.
+ */
+Dashboards.syncParametersInit = function() {
+  var parameters = this.syncedParameters,
+      i,j,k,master, slave;
+  for(i = 0; i < this.chains.length;i++) {
+    for(j = 0; j < this.chains[i].length;j++) {
+      var master = this.chains[i][j];
+      if(!parameters[master]) continue;
+      for(k = 0; k < parameters[master].length; k++) {
+        slave = parameters[master][k];
+        this.syncParameters(master,slave);
+      }
+    }
+  }
+}
+
+
 Dashboards.initEngine = function(){
+  var myself = this;
   var components = this.components;
-  var compCount = components.length;
-  Dashboards.incrementRunningCalls();
-  Dashboards.createAndCleanErrorDiv();
+  this.incrementRunningCalls();
+  this.createAndCleanErrorDiv();
   // Fire all pre-initialization events
   if(typeof this.preInit == 'function') {
     this.preInit();
   }
+  this.trigger("cdf cdf:preInit",this);
+  /* Legacy Event -- don't rely on this! */
   $(window).trigger('cdfAboutToLoad');
   var myself = this;
+  var updating = [],i;
+  for(i = 0; i < components.length;i++) {
+    if(components[i].executeAtStart) {
+      updating.push(components[i]);
+    }
+  }
+  this.waitingForInit = updating.slice();
   setTimeout(
     function() {
-      for(var i= 0, len = components.length; i < len; i++){
-        if(components[i].executeAtStart){
-          Dashboards.update(components[i]);
-        }
+      for(var i= 0, len = updating.length; i < len; i++){
+        var component = updating[i];
+        var callback = function(comp) {
+          this.waitingForInit = _(this.waitingForInit).without(comp);
+          this.handlePostInit();
+          comp.off('cdf:postExecution',callback);
+        } 
+        component.on('cdf:postExecution',callback,myself);
+        myself.update(component);
       }
-      $(window).trigger('cdfLoaded');
-      if(typeof myself.postInit == 'function') {
-        myself.postInit();
+      myself.restoreDuplicates();
+      myself.finishedInit = true;
+      myself.decrementRunningCalls();
+      if(components.length > 0) {
+        myself.handlePostInit();
       }
-      Dashboards.restoreDuplicates();
-      Dashboards.finishedInit = true;
-      Dashboards.decrementRunningCalls();
     },
-    Dashboards.renderDelay);
+    this.renderDelay
+  );
+};
+
+Dashboards.handlePostInit = function() {
+  if(this.waitingForInit && this.waitingForInit.length === 0) {
+    this.trigger("cdf cdf:postInit",this);
+    /* Legacy Event -- don't rely on this! */
+    $(window).trigger('cdfLoaded');
+    if(typeof this.postInit == "function") {
+      this.postInit();
+    }
+  }
 };
 
 Dashboards.resetAll = function(){
-  Dashboards.createAndCleanErrorDiv();
+  this.createAndCleanErrorDiv();
   var compCount = this.components.length;
   for(var i= 0, len = this.components.length; i < len; i++){
     this.components[i].clear();
@@ -801,7 +753,7 @@ Dashboards.resetAll = function(){
 };
 
 Dashboards.processChange = function(object_name){
-  var object = Dashboards.getComponentByName(object_name);
+  var object = this.getComponentByName(object_name);
   var parameter = object.parameter;
   var value;
   if (typeof object['getValue'] == 'function') {
@@ -809,7 +761,7 @@ Dashboards.processChange = function(object_name){
   }
   if (value == null) // We won't process changes on null values
     return;
-  
+
   if(!(typeof(object.preChange)=='undefined')){
     var preChangeResult = object.preChange(value);
     value = preChangeResult != undefined ? preChangeResult : value;
@@ -834,20 +786,17 @@ Dashboards.processChange = function(object_name){
  * script has the opportunity to finish.
  */
 Dashboards.fireChange = function(parameter, value) {
-  Dashboards.createAndCleanErrorDiv();
+  var myself = this;
+  this.createAndCleanErrorDiv();
 
-  Dashboards.setParameter(parameter, value);
+  this.setParameter(parameter, value);
+  this.parameterModel.change();
   var toUpdate = [];
   var workDone = false;
   for(var i= 0, len = this.components.length; i < len; i++){
     if($.isArray(this.components[i].listeners)){
       for(var j= 0 ; j < this.components[i].listeners.length; j++){
         if(this.components[i].listeners[j] == parameter && !this.components[i].disabled) {
-          // We only show the 'working' message if we ever do anything useful.
-          if (!workDone) {
-            workDone = true;
-            Dashboards.incrementRunningCalls();
-          }
           toUpdate.push(this.components[i]);
           break;
         }
@@ -856,12 +805,23 @@ Dashboards.fireChange = function(parameter, value) {
   }
   setTimeout(function() {
     for (var i = 0; i < toUpdate.length; i++) {
-      Dashboards.update(toUpdate[i]);
+      myself.update(toUpdate[i]);
     }
-    if (workDone) {
-      Dashboards.decrementRunningCalls();
-    }
-  }, Dashboards.renderDelay);
+  }, this.renderDelay);
+};
+
+Dashboards.restoreView = function() {
+  var p, params;
+  if(!this.view) return;
+  /* Because we're storing the parameters in OrientDB, and as OrientDB has some
+   * serious issues when storing nested objects, we're stuck marshalling the
+   * parameters into a JSON object and converting that JSON into a Base64 blob
+   * before storage. So now we have to decode that mess.
+   */
+  params = JSON.parse(Base64.decode(this.view.params));
+  for(p in params) if (params.hasOwnProperty(p)) {
+    this.setParameter(p,params[p]);
+  }
 };
 
 Dashboards.getHashValue = function(key) {
@@ -880,7 +840,7 @@ Dashboards.getHashValue = function(key) {
 }
 
 Dashboards.setHashValue = function(key, value) {
-  var obj = Dashboards.getHashValue(),json;
+  var obj = this.getHashValue(),json;
   if (arguments.length == 1) {
     obj = key;
   } else {
@@ -897,24 +857,37 @@ Dashboards.setHashValue = function(key, value) {
   }
 }
 Dashboards.deleteHashValue = function(key) {
-  var obj = Dashboards.getHashValue();
+  var obj = this.getHashValue();
   if (arguments.length === 0) {
     window.location.hash = "";
   } else {
     delete obj[key];
-    Dashboards.setHashValue(obj);
+    this.setHashValue(obj);
   }
 }
 Dashboards.setBookmarkable = function(parameter, value) {
     if(!this.bookmarkables) this.bookmarkables = {};
     if (arguments.length === 1) value = true;
     this.bookmarkables[parameter] = value;
-}
+};
 
 Dashboards.isBookmarkable = function(parameter) {
     if(!this.bookmarkables) {return false;}
     return Boolean(this.bookmarkables[parameter]);
-}
+};
+
+
+
+Dashboards.generateBookmarkState = function() {
+  var params = {}
+      bookmarkables = this.bookmarkables;
+  for (k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
+    if (bookmarkables[k]) {
+      params[k] = this.getParameterValue(k);
+    }
+  }
+  return params;
+};
 
 Dashboards.persistBookmarkables = function(param) {
   var bookmarkables = this.bookmarkables,
@@ -926,21 +899,18 @@ Dashboards.persistBookmarkables = function(param) {
    * initializing the dashboard. That's just the code for
    * restoreBookmarkables doing the reverse of this!
    */
-   if (!bookmarkables)
-    return;
-  if(!bookmarkables[param] || !Dashboards.finishedInit) {
+  if (!bookmarkables || !bookmarkables[param]) {
     return;
   }
-  for (k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
-    if (bookmarkables[k]) {
-      params[k] = Dashboards.getParameterValue(k);
-    }
+  if(!this.finishedInit) {
+    return;
   }
-  Dashboards.setBookmarkState({impl: 'client',params: params});
+  params = this.generateBookmarkState();
+  this.setBookmarkState({impl: 'client',params: params});
 }
 
 Dashboards.setBookmarkState = function(state) {
-  if(window.history && window.history.pushState) {
+  if(window.history && window.history.replaceState) {
     var method = window.location.pathname.split('/').pop(),
         query = window.location.search.slice(1).split('&').map(function(e){
           var entry = e.split('=');
@@ -948,10 +918,10 @@ Dashboards.setBookmarkState = function(state) {
           return entry;
         }),
         url;
-    query = Dashboards.propertiesArrayToObject(query);
+    query = this.propertiesArrayToObject(query);
     query.bookmarkState = JSON.stringify(state);
     url = method + '?' + $.param(query);
-    window.history.pushState({},'',url);
+    window.history.replaceState({},'',url);
     this.deleteHashValue('bookmark')
   } else {
     this.setHashValue('bookmark',state);
@@ -980,7 +950,7 @@ Dashboards.getBookmarkState = function() {
           pair[1] = decodeURIComponent(pair[1]);
           return pair;
       }),
-      params = Dashboards.propertiesArrayToObject(query),
+      params = this.propertiesArrayToObject(query),
       bookmarkState;
   if(params.bookmarkState) {
     return JSON.parse(decodeURIComponent(params.bookmarkState.replace(/\+/g,' '))) || {};
@@ -995,17 +965,67 @@ Dashboards.restoreBookmarkables = function() {
   try {
     state = this.getBookmarkState().params;
     for (k in state) if (state.hasOwnProperty(k)) {
-      Dashboards.setParameter(k,state[k]);
+      this.setParameter(k,state[k]);
     }
   } catch (e) {
-    Dashboards.log(e,'error');
+    this.log(e,'error');
   }
 }
+
+Dashboards.setParameterViewMode = function(parameter, value) {
+    if(!this.viewParameters) this.viewParameters = {};
+    if (arguments.length === 1) value = this.viewFlags.VIEW;
+    //if(!Dashboards.viewFlags.hasOwnProperty(value)) throw 
+    this.viewParameters[parameter] = value;
+};
+
+Dashboards.isViewParameter = function(parameter) {
+    if(!this.viewParameters) {return false;}
+    return this.viewParameters[parameter];
+};
+
+/*
+ * List the values for all dashboard parameters flagged as being View parameters
+ */
+Dashboards.getViewParameters = function(){
+  if(!this.viewParameters) return {};
+  var params = this.viewParameters,
+      ret = {};
+  for(p in params) if (params.hasOwnProperty(p)) {
+    if (params[p] == this.viewFlags.VIEW|| params[p] == this.viewFlags.UNBOUND) {
+      ret[p] = this.getParameterValue(p);
+    }
+  }
+  return ret;
+};
+
+/*
+ * List all dashboard parameters flagged as being Unbound View parameters
+ */
+
+Dashboards.getUnboundParameters = function(){
+  if(!this.viewParameters) return [];
+  var params = this.viewParameters,
+      ret = []
+  for(p in params) if (params.hasOwnProperty(p)) {
+    if (params[p] == this.viewFlags.UNBOUND) {
+      ret.push(p);
+    }
+    return ret;
+  }
+};
+
 Dashboards.getParameterValue = function (parameterName) {
-  if (Dashboards.globalContext) {
-    return eval(parameterName);
+  if (this.globalContext) {
+    try{
+      return eval(parameterName);
+    }
+    catch (e){
+      this.error(e);
+      return undefined;
+    }
   } else {
-    return Dashboards.parameters[parameterName];
+    return this.parameters[parameterName];
   }
 };
 
@@ -1035,20 +1055,21 @@ Dashboards.getQueryParameter = function ( parameterName ) {
 
 Dashboards.setParameter = function(parameterName, parameterValue) {
   if(parameterName == undefined || parameterName == "undefined"){
-    Dashboards.log('Dashboards.setParameter: trying to set undefined!!','warn');
+    this.log('Dashboards.setParameter: trying to set undefined!!','warn');
     return;  
   }
-  if (Dashboards.globalContext) {
+  if (this.globalContext) {
     //ToDo: this should really be sanitized!
     eval( parameterName + " = " + JSON.stringify(parameterValue) );
   } else {
-    if(Dashboards.escapeParameterValues) {
-      Dashboards.parameters[parameterName] = encode_prepare_arr(parameterValue);
+    if(this.escapeParameterValues) {
+      this.parameters[parameterName] = encode_prepare_arr(parameterValue);
     } else {
-      Dashboards.parameters[parameterName] = parameterValue;
+      this.parameters[parameterName] = parameterValue;
     }
   }
-  Dashboards.persistBookmarkables(parameterName);
+  this.parameterModel.set(parameterName,parameterValue,{silent:true});
+  this.persistBookmarkables(parameterName);
 };
 
 
@@ -1084,11 +1105,11 @@ Dashboards.clone = function clone(obj) {
           if (typeof prop[j] != 'object') {
             c[i].push(prop[j]);
           } else {
-            c[i].push(Dashboards.clone(prop[j]));
+            c[i].push(this.clone(prop[j]));
           }
         }
       } else {
-        c[i] = Dashboards.clone(prop);
+        c[i] = this.clone(prop);
       }
     } else {
       c[i] = prop;
@@ -1113,26 +1134,28 @@ Dashboards.ev = function(o){
   return typeof o == 'function'?o():o
 };
 
-Dashboards.callPentahoAction = function(obj, path, parameters, callback ){
+Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
+  myself = this;
   // Encapsulate pentahoAction call
   // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
   if(typeof callback == 'function'){
-    return Dashboards.pentahoAction( path, parameters,
+    return this.pentahoAction( solution, path, action, parameters,
       function(json){
-        callback(Dashboards.parseXActionResult(obj,json));
+        callback(myself.parseXActionResult(obj,json));
       }
       );
   }
   else{
-    return Dashboards.parseXActionResult(obj,Dashboards.pentahoAction( path, parameters, callback ));
+    return this.parseXActionResult(obj,this.pentahoAction( solution, path, action, parameters, callback ));
   }
 };
 
 Dashboards.urlAction = function ( url, params, func) {
-  return Dashboards.executeAjax('xml', url, params, func);
+  return this.executeAjax('xml', url, params, func);
 };
 
 Dashboards.executeAjax = function( returnType, url, params, func ) {
+  var myself = this;
   // execute a url
   if (typeof func == "function"){
     // async
@@ -1146,13 +1169,13 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
         func(XMLHttpRequest.responseXML);
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
-        Dashboards.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
+        this.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
       }
 
     }
     );
   }
-  
+	
   // Sync
   var result = $.ajax({
     url: url,
@@ -1161,7 +1184,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
     async: false,
     data: params,
     error: function (XMLHttpRequest, textStatus, errorThrown) {
-      Dashboards.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
+      myself.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
     }
 
   });
@@ -1173,24 +1196,26 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
 
 }; 
 
-Dashboards.pentahoAction = function( path, params, func ) {
-  return Dashboards.pentahoServiceAction('ServiceAction', 'xml', path, params, func);
+Dashboards.pentahoAction = function( solution, path, action, params, func ) {
+  return this.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
 };
 
-Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, params, func ) {
+Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = webAppPath + "/api/repos/" + path.replace(/\//g, ":") + "/generatedContent";
-  
+  var url = webAppPath + "/" + serviceMethod;
+
   // Add the solution to the params
   var arr = {};
   arr.wrapper = false;
+  arr.solution = solution;
   arr.path = path;
+  arr.action = action;
   $.each(params,function(i,val){
     arr[val[0]]=val[1];
   });
-  return Dashboards.executeAjax(returntype, url, arr, func);
-}    
+  return this.executeAjax(returntype, url, arr, func);
+};
 
 Dashboards.parseXActionResult = function(obj,html){
 
@@ -1229,7 +1254,7 @@ Dashboards.parseXActionResult = function(obj,html){
 };
 
 Dashboards.setSettingsValue = function(name,object){
-      
+
   var data = {
     method: "set",
     key: name,
@@ -1243,16 +1268,16 @@ Dashboards.getSettingsValue = function(key,value){
   var callback = typeof value == 'function' ? value : function(json){
     value = json;
   };
-  
+	
   $.getJSON("Settings?method=get&key=" + key , callback);
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
-  Dashboards.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
+  this.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
   // Detect and handle CDA data sources
   if (cd != undefined && cd.dataAccessId != undefined) {
     for (param in params) {
-      cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
+      cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
     $.post(webAppPath + "/content/cda/doQuery?", cd,
       function(json) {
@@ -1261,8 +1286,10 @@ Dashboards.fetchData = function(cd, params, callback) {
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
+	
+    var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
   
-    $.post(webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:cdf:components:jtable.xaction/generatedContent?", cd,
+    $.post(webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=" + xactionFile, cd,
       function(result) {
         callback(result.values); 
       },'json');
@@ -1289,9 +1316,9 @@ Dashboards.storage = {};
 
 // Operations
 Dashboards.loadStorage = function(){
-
+  var myself = this;
   // Don't do anything for anonymousUser.
-  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
+  if( this.context && this.context.user === "anonymousUser") {
     return;
   }
 
@@ -1300,35 +1327,35 @@ Dashboards.loadStorage = function(){
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
   $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-    $.extend(Dashboards.storage,json);
+    $.extend(myself.storage,json);
   });
 };
 
 Dashboards.saveStorage = function(){
-
+  var myself = this;
   // Don't do anything for anonymousUser
-  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
+  if( this.context && this.context.user === "anonymousUser") {
     return;
   }
 
   var args = {
     action: "store",
-    storageValue: JSON.stringify(Dashboards.storage),
+    storageValue: JSON.stringify(this.storage),
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
   $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-    if(json.result != true && typeof console != "undefined"){
-      Dashboards.log("Error saving storage",'error');
+    if(json.result != true){
+      myself.log("Error saving storage",'error');
     }
   });
 };
 
 Dashboards.cleanStorage = function(){
-
-  Dashboards.storage = {};
+  var myself = this;
+  this.storage = {};
 
   // Don't do noting for anonymousUser
-  if( Dashboards.context && Dashboards.context.user === "anonymousUser") {
+  if( this.context && this.context.user === "anonymousUser") {
     return;
   }
   
@@ -1336,8 +1363,8 @@ Dashboards.cleanStorage = function(){
     action: "delete"
   };
   $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-    if(json.result != true && typeof console != "undefined"){
-      Dashboards.log("Error deleting storage", 'error');
+    if(json.result != true){
+      myself.log("Error deleting storage", 'error');
     }
   });
 };
@@ -1455,7 +1482,7 @@ var Utf8 = {
 }
 
 function getURLParameters(sURL) 
-{ 
+{
   if (sURL.indexOf("?") > 0){
 
     var arrParams = sURL.split("?");
@@ -1661,9 +1688,9 @@ sprintf = sprintfWrapper.init;
 
 //Normalization - Ensure component does not finish with component and capitalize first letter
 Dashboards.normalizeAddInKey = function(key) {
-    if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
-      key = key.substring(0, key.length - 'Component'.length);  
-  return key.charAt(0).toUpperCase() + key.substring(1);
+  	if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
+  		key = key.substring(0, key.length - 'Component'.length);	
+	return key.charAt(0).toUpperCase() + key.substring(1);
 }
 
 Dashboards.registerAddIn = function(component,slot,addIn){
@@ -1685,13 +1712,13 @@ Dashboards.registerAddIn = function(component,slot,addIn){
 };
 
 Dashboards.hasAddIn = function(component,slot,addIn){
-  var key = this.normalizeAddInKey(component);
+	var key = this.normalizeAddInKey(component);
   return Boolean(this.addIns && this.addIns[key] &&
     this.addIns[key][slot] && this.addIns[key][slot][addIn]);
 };
 
 Dashboards.getAddIn = function(component,slot,addIn){
-  var key = this.normalizeAddInKey(component);
+	var key = this.normalizeAddInKey(component);
   try {
     return this.addIns[key][slot][addIn];
   } catch (e) {
@@ -1764,7 +1791,7 @@ Dashboards.safeClone = function(){
           }
 
           // Never move original objects, clone them
-          target[ name ] = Dashboards.safeClone( deep, clone, copy );
+          target[ name ] = this.safeClone( deep, clone, copy );
 
         // Don't bring in undefined values
         } else if ( copy !== undefined ) {
@@ -1786,17 +1813,22 @@ Query = function() {
 
   // Constants, or what passes for them... Pretty please leave these alone.
   var CDA_PATH = webAppPath + "/content/cda/doQuery?";
-  var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:cdf:components:jtable.xaction/generatedContent";
+  var LEGACY_QUERY_PATH = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction";
 
   /*
-     * Private fields
-     */
-
+   * Private fields
+   */
+  /* AJAX Options for the query */
+  var _ajaxOptions = {
+    type: "POST",
+    async: false,
+  };
   // Datasource type definition
   var _mode = 'CDA';
   // CDA uses file+id, Legacy uses a raw query
   var _file = '';
   var _id = '';
+  var _outputIdx = '1';
   var _query = '';
   // Callback for the data handler
   var _callback = null;
@@ -1808,11 +1840,10 @@ Query = function() {
   var _sortBy = "";
   // Exporting support
   var _exportIframe = null;
-
   var _params = [];
   /*
-     * Initialization code
-     */
+   * Initialization code
+   */
 
   //
   (function(args){
@@ -1834,6 +1865,9 @@ Query = function() {
           if(cd.pageSize != null){
             _pageSize = cd.pageSize;
           }
+          if(cd.outputIndexId != null){
+            _outputIdx = cd.outputIndexId;
+          }		  
         } else {
           throw 'InvalidQuery';
         }
@@ -1842,7 +1876,7 @@ Query = function() {
         _mode = 'CDA';
         var file = args[0];
         var id = args[1];
-        if (typeof file != 'string' || typeof id != 'string') {
+		if (typeof file != 'string' || typeof id != 'string') {
           throw 'InvalidQuery';
         } else {
           // Seems like we have valid parameters
@@ -1855,10 +1889,10 @@ Query = function() {
     } 
   }(arguments));
   /*
-     * Private methods
-     */
+   * Private methods
+   */
 
-  var doQuery = function(outsideCallback){
+  function doQuery(outsideCallback){
     if (typeof _callback != 'function') {
       throw 'QueryNotInitialized';
     }
@@ -1873,7 +1907,7 @@ Query = function() {
       queryDefinition = _query;
       url = LEGACY_QUERY_PATH;
     }
-    $.post(url, queryDefinition, function(json) {
+    var successHandler = function(json) {
       if(_mode == 'Legacy'){
         json = eval("(" + json + ")");
       }
@@ -1881,18 +1915,35 @@ Query = function() {
       var clone = Dashboards.safeClone(true,{},_lastResultSet);
       
       if (_mode == 'Legacy') {
-        var newMetadata = [{"colIndex":0,"colType":"String","colName":"Name"}];
+        var newMetadata = [{
+          "colIndex":0,
+          "colType":"String",
+          "colName":"Name"
+        }];
         for (var i = 0 ; i < clone.metadata.length; i++) {
           var x = i;
-      newMetadata.push({"colIndex":x+1,"colType":"String","colName":clone.metadata[x]});
-    }      
-    clone.resultset = clone.values;
-    clone.metadata = newMetadata;
-    clone.values = null;
+          newMetadata.push({
+            "colIndex":x+1,
+            "colType":"String",
+            "colName":clone.metadata[x]
+          });
+        }      
+        clone.resultset = clone.values;
+        clone.metadata = newMetadata;
+        clone.values = null;
       }
       
       callback(clone);
+    };
+
+    var settings = _.extend({},_ajaxOptions, {
+      success: function() {},
+      data: queryDefinition,
+      url: url,
+      success: successHandler
     });
+    
+    $.ajax(settings);
   };
 
   function buildQueryDefinition(overrides) {
@@ -1917,20 +1968,18 @@ Query = function() {
     }
     queryDefinition.path = _file;
     queryDefinition.dataAccessId = _id;
+    queryDefinition.outputIndexId = _outputIdx;
     queryDefinition.pageSize = _pageSize;
     queryDefinition.pageStart = _page;
     queryDefinition.sortBy = _sortBy;
     return queryDefinition;
-
   };
 
   /*
-     * Public interface
-     */
+   * Public interface
+   */
 
-  // Entry point
-
-  this.exportData = function(outputType, overrides,options) {
+  this.exportData = function(outputType, overrides, options) {
     if (_mode != 'CDA') {
       throw "UnsupportedOperation";
     }
@@ -1945,11 +1994,39 @@ Query = function() {
     if (options.filename) {
       queryDefinition.settingattachmentName= options.filename ;
     }
-    _exportIframe = _exportIframe || $('<iframe style="display:none">');
-    _exportIframe.detach();
-    _exportIframe[0].src = CDA_PATH + $.param(queryDefinition);
-    _exportIframe.appendTo($('body'));
+    if (outputType = 'xls' && options.template) {
+      queryDefinition.settingtemplateName= options.template ;
+    }
+    if( options.columnHeaders ){
+      queryDefinition.settingcolumnHeaders = options.columnHeaders;
+    }
+
+    if(options.dtFilter != null){
+      queryDefinition.settingdtFilter = options.dtFilter;
+      if(options.dtSearchableColumns != null){
+        queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
+      }
+    }
+    
+    var theDoQuery = CDA_PATH + 'wrapItUp=wrapit';
+    var x = $.ajaxSettings.async;
+    $.ajaxSetup({ async: false });
+    $.post(theDoQuery, queryDefinition, function(uuid) {
+      var _exportIframe = $('<iframe style="display:none">');
+      _exportIframe.detach();
+      _exportIframe[0].src = webAppPath + '/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
+      _exportIframe.appendTo($('body'));
+    });    
+    $.ajaxSetup({ async: x});
+    
+    
   }
+
+  this.setAjaxOptions = function(newOptions) {
+    if(typeof newOptions == "object") {
+      _.extend(_ajaxOptions,newOptions);
+    }
+  };
 
   this.fetchData = function(params, callback) {
     switch(arguments.length) {
@@ -1977,8 +2054,8 @@ Query = function() {
         return doQuery();
     }
     /* If we haven't hit a return by this time,
-       * the user gave us some wrong input
-       */
+     * the user gave us some wrong input
+     */
     throw "InvalidInput";
   };
 
@@ -2012,32 +2089,32 @@ Query = function() {
   };
 
   /* Sorting
-     *
-     * CDA expects an array of terms consisting of a number and a letter
-     * that's either 'A' or 'D'. Each term denotes, in order, a column
-     * number and sort direction: 0A would then be sorting the first column
-     * ascending, and 1D would sort the second column in descending order.
-     * This function accepts either an array with the search terms, or
-     * a comma-separated string with the terms:  "0A,1D" would then mean
-     * the same as the array ["0A","1D"], which would sort the results
-     * first by the first column (ascending), and then by the second
-     * column (descending).
-     */
+   *
+   * CDA expects an array of terms consisting of a number and a letter
+   * that's either 'A' or 'D'. Each term denotes, in order, a column
+   * number and sort direction: 0A would then be sorting the first column
+   * ascending, and 1D would sort the second column in descending order.
+   * This function accepts either an array with the search terms, or
+   * a comma-separated string with the terms:  "0A,1D" would then mean
+   * the same as the array ["0A","1D"], which would sort the results
+   * first by the first column (ascending), and then by the second
+   * column (descending).
+   */
   this.setSortBy = function(sortBy) {
     var newSort;
     if (sortBy === null || sortBy === undefined || sortBy === '') {
       newSort = '';
     }
     /* If we have a string as input, we need to split it into
-       * an array of sort terms. Also, independently of the parameter
-       * type, we need to convert everything to upper case, since want
-       * to accept 'a' and 'd' even though CDA demands capitals.
-       */
+     * an array of sort terms. Also, independently of the parameter
+     * type, we need to convert everything to upper case, since want
+     * to accept 'a' and 'd' even though CDA demands capitals.
+     */
     else if (typeof sortBy == "string") {
       /* Valid sortBy Strings are column numbers, optionally
-         *succeeded by A or D (ascending or descending), and separated by commas
-         */
-        if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
+       * succeeded by A or D (ascending or descending), and separated by commas
+       */
+      if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
         throw "InvalidSortExpression";
       }
       /* Break the string into its constituent terms, filter out empty terms, if any */
@@ -2048,7 +2125,7 @@ Query = function() {
       newSort = sortBy.map(function(d){
         return d.toUpperCase();
       });
-      /* We also need to validate that each individual term is valid*/
+      /* We also need to validate that each individual term is valid */
       var invalidEntries = newSort.filter(function(e){
         return !e.match("^[0-9]+[adAD]?,?$")
       });
@@ -2058,8 +2135,8 @@ Query = function() {
     }
       
     /* We check whether the parameter is the same as before,
-       * and notify the caller on whether it changed
-       */
+     * and notify the caller on whether it changed
+     */
     var same;
     if (newSort instanceof Array) {
       same = newSort.length != _sortBy.length;
@@ -2078,8 +2155,8 @@ Query = function() {
 
   this.sortBy = function(sortBy,outsideCallback) {
     /* If the parameter is not the same, and we have a valid state,
-       * we can fire the query.
-       */
+     * we can fire the query.
+     */
     var changed = this.setSortBy(sortBy);
     if (!changed) {
       return false;
@@ -2104,11 +2181,11 @@ Query = function() {
     }
   };
   /* Pagination
-     *
-     * We paginate by having an initial position (_page) and page size (_pageSize)
-     * Paginating consists of incrementing/decrementing the initial position by the page size
-     * All paging operations change the paging cursor.
-     */
+   *
+   * We paginate by having an initial position (_page) and page size (_pageSize)
+   * Paginating consists of incrementing/decrementing the initial position by
+   * the page size. All paging operations change the paging cursor.
+   */
 
   // Gets the next _pageSize results
   this.nextPage = function(outsideCallback) {
@@ -2157,7 +2234,7 @@ Query = function() {
   };
 
   this.pageStartingAt = function(page,outsideCallback) {
-    if(this.setPageStartingAt(page)) {
+    if(this.setPageStartingAt(page) !== false) {
       return doQuery(outsideCallback);
     } else {
       return false;

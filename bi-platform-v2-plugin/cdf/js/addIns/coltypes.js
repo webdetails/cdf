@@ -209,7 +209,7 @@
          * or a string that is a fixed point for conversion
          * to number and back to string.
          */
-        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() == st.value),
+        isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() != 'NaN' ),
         trendClass = !isNumeric ? "invalid": (st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up");
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
@@ -301,7 +301,7 @@
       r.attr({
           fill: options.color,
           opacity: 1,
-          "stroke-width":0,
+          "stroke":"none",
           "title": options.title
       });
     }
@@ -423,7 +423,9 @@
     name: "groupHeaders",
     label: "Group Headers",
     defaults: {
-      hide:true
+      hide:true,
+      columnHeadersInGroups: false,
+      replaceFirstHeader: true
     },
 
     init: function(){
@@ -435,8 +437,15 @@
       var dt = $(tgt).parents('table').eq(0).dataTable(),
           visColIdx = $(tgt).index();
 
+      /* Decide whether to hide the original column we're drawing the group headers from */
       if (opt.hide){
          dt.find('.groupHeaders:nth-child(' + (visColIdx + 1) + ')').addClass('hiddenCol');
+      }
+
+      
+      if(opt.columnHeadersInGroups) {
+        var header = dt.find("thead").eq(0);
+        header.find("tr").clone
       }
 
       var $row = $(dt.fnGetNodes( st.rowIdx )),
@@ -444,17 +453,80 @@
           count = $row.children().length,
           $group;
 
+      /* We create and insert a group header under any of the following circumstances:
+       *   - On the very first row
+       *   - Immediately after a higher-level group header
+       *     when using group headers for more than one column
+       *   - when the value for the current cell is
+       *     different from the one immediately before it
+       */
       if ( visRowIdx === 0 || $row.prev().hasClass('groupHeader') || ( st.value != dt.fnGetData( $row.prev().get(0) )[st.colIdx]  )) {
-          $group = $('<td/>').append( st.value );
-          $group.attr({colSpan:count});
-          $group = $('<tr/>').addClass('groupHeader group' + visColIdx).append($group);
+          $group = this.buildHeader(tgt,st, opt);
           $group.insertBefore($row);
       }
  
-    }
+    },
 
+    buildHeader: function(tgt, st, opt) {
+      var $header,
+          $dt = $(tgt).parents('table').eq(0).dataTable(),
+          $theader;
+
+      if(opt.columnHeadersInGroups) {
+        $theader = $dt.find("thead").eq(0);
+        $theader.hide();
+        $header = $("<tr>");
+        $theader.find("tr th").each(function(i,e){
+          var $e = $(e),
+              newCell = $("<td>").text($e.text()).width(e.style.width);
+          newCell.addClass($(e).hasClass("hiddenCol")? "hiddenCol" : "");
+          $header.append(newCell);
+        });
+        $header.find("td").eq($(tgt).index() + 1).text(st.value).addClass("groupName");
+      } else {
+        $header = $("<tr/>");
+        $("<td/>").addClass("groupName").text(st.value).attr("colspan",  $(tgt).siblings().length + 1).appendTo($header);
+      }
+      $header.addClass("groupHeader group" + $(tgt).index());
+      var $preSpace = $("<td>").attr("colspan",$(tgt).siblings().length + 1).wrap("<tr>").parent().addClass("groupHeader preSpace");
+      var $postSpace = $("<td>").attr("colspan",$(tgt).siblings().length + 1).wrap("<tr>").parent().addClass("groupHeader postSpace");
+      var $response = $preSpace.add($header).add($postSpace);
+      return $response;
+    }
   };
   Dashboards.registerAddIn("Table", "colType", new AddIn(groupHeaders));
+
+  var clippedText = {
+    name: "clippedText",
+    label: "Clipped Text",
+    defaults: {
+      showTooltip: true,
+      useTipsy: false,
+      style: {}
+    },
+
+    init: function(){
+      $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['string-asc'];
+      $.fn.dataTableExt.oSort[this.name+'-desc'] = $.fn.dataTableExt.oSort['string-desc'];
+    },
+    
+    implementation: function(tgt, st, opt){
+      var $tgt = $(tgt),
+          $container = $("<div>");
+      $tgt.empty().append($container);
+      $container.text(st.value).addClass("clippedText").attr("title",opt.showTooltip ? st.value : "");
+      $container.css(opt.style);
+      if(opt.useTipsy) {
+        $container.tipsy({
+            gravity: 's', 
+            html:false
+        });
+      }
+    }
+  };
+  Dashboards.registerAddIn("Table", "colType", new AddIn(clippedText));
+
+
 
 
 })();

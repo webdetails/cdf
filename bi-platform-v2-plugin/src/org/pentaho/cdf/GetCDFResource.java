@@ -1,5 +1,6 @@
 package org.pentaho.cdf;
 
+import com.sun.org.apache.bcel.internal.Repository;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
@@ -8,14 +9,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.pentaho.platform.api.repository.ISolutionRepository;
+//import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.pentaho.platform.engine.core.messages.Messages;
 import org.pentaho.platform.engine.services.actionsequence.ActionSequenceResource;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.web.servlet.ServletBase;
 import org.pentaho.platform.util.StringUtil;
+import org.pentaho.platform.engine.core.messages.Messages;
+
+import pt.webdetails.cpf.repository.RepositoryAccess;
 
 /**
  *
@@ -47,7 +50,8 @@ public class GetCDFResource extends ServletBase {
         String resourcePath = null;
         resourcePath = resource;
         
-        InputStream in = ActionSequenceResource.getInputStream(resourcePath, LocaleHelper.getLocale());
+        InputStream in = RepositoryAccess.getRepository().getResourceInputStream(resourcePath, RepositoryAccess.FileAccess.READ);
+        
         if (in == null) {
             error(Messages.getInstance().getErrorString("GetResource.ERROR_0003_RESOURCE_MISSING", resourcePath)); //$NON-NLS-1$
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);

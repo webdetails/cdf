@@ -378,7 +378,8 @@
     };
     Chosen.prototype.choices_click = function(evt) {
       evt.preventDefault();
-      if (this.active_field && !($(evt.target).hasClass("search-choice" || $(evt.target).parents('.search-choice').first)) && !this.results_showing) {
+      var tgt = $(evt.target);
+      if (this.active_field && !(tgt.hasClass("search-choice" || tgt.parents('.search-choice').first)) && !this.results_showing && !(tgt.siblings("a").first().hasClass("search-choice-close")) ) {
         return this.results_show();
       }
     };
@@ -387,7 +388,7 @@
       choice_id = this.container_id + "_c_" + item.array_index;
       this.choices += 1;
       this.search_container.before('<li class="search-choice" id="' + choice_id + '"><span>' + item.html + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"></a></li>');
-      link = $('#' + choice_id).find("a").first();
+      link = $('#' + choice_id);
       return link.click(__bind(function(evt) {
         return this.choice_destroy_link_click(evt);
       }, this));
@@ -402,6 +403,10 @@
       this.show_search_field_default();
       if (this.is_multiple && this.choices > 0 && this.search_field.val().length < 1) {
         this.results_hide();
+      }
+      var tmp = link.attr("rel");
+      if(typeof tmp === "undefined"){
+	link = link.siblings("a").first();
       }
       this.result_deselect(link.attr("rel"));
       return link.parents('li').first().remove();

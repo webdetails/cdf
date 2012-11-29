@@ -33,8 +33,11 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
+import org.pentaho.platform.plugin.services.security.userrole.ldap.transform.GrantedAuthorityToString;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.web.http.api.resources.IFileResourceRenderer;
+
+import org.springframework.security.GrantedAuthority;
 
 import pt.webdetails.packager.Packager;
 
@@ -252,7 +255,9 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   
   protected List<String> getUserRoles() {
     IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
-    return service.getRolesForUser(null, userSession.getName());
+    List<String> auths = service.getRolesForUser(null, userSession.getName());//.getAuthoritiesForUser(userSession.getName());
+    
+    return auths;
   }
   
   private void generateContext(OutputStream out) throws Exception

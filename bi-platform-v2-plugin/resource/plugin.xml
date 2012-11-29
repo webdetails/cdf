@@ -14,19 +14,7 @@
         	<description>Community Dashboard File</description>
 	        <icon-url>content/pentaho-cdf/resources/cdfFileType.png</icon-url>
 	        <meta-provider>org.pentaho.cdf.CdfFileInfoGenerator</meta-provider>
-	        <operations>
-    	    	<operation>
-        			<id>RUN</id>
-        			<command>content/pentaho-cdf/RenderXCDF?id={id}&amp;template=mantle</command>
-        		</operation>
-    	    	<operation>
-        			<id>NEWWINDOW</id>
-        			<command>content/pentaho-cdf/RenderXCDF?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
-        		</operation>        		
-	        </operations>
     	</content-type>
 	</content-types>
 
-    <content-generator id="pentaho-cdf" type="xcdf" title="CDF Display Handler" class="org.pentaho.cdf.CdfContentGenerator"/>
-    
 </plugin>

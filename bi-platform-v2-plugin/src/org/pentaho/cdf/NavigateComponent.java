@@ -1,7 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.pentaho.cdf;
 
 import java.util.Hashtable;
@@ -19,7 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.platform.api.engine.ICacheManager;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.repository.ISolutionRepository;
+//import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.engine.core.system.PentahoBase;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
@@ -34,11 +34,11 @@ public class NavigateComponent extends PentahoBase
   private static final String CONTENTLIST = "contentList";
   private static final String SOLUTIONTREE = "solutionTree";
   private static final String TYPE_DIR = "FOLDER";
-  private static final String TYPE_XACTION = "XACTION";
+//  private static final String TYPE_XACTION = "XACTION";
   private static final String TYPE_URL = "URL";
-  private static final String TYPE_XCDF = "XCDF";
-  private static final String TYPE_WCDF = "WCDF";
-  private static final String TYPE_PRPT = "PRPT";
+//  private static final String TYPE_XCDF = "XCDF";
+//  private static final String TYPE_WCDF = "WCDF";
+//  private static final String TYPE_PRPT = "PRPT";
   private static final String CACHE_NAVIGATOR = "CDF_NAVIGATOR_JSON";
   private static final String CACHE_SOLUTIONTREE = "CDF_SOLUTIONTREE_JSON";
   private static final String CACHE_REPOSITORY_DOCUMENT = "CDF_REPOSITORY_DOCUMENT";

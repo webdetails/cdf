@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
-	<default-template>mantle</default-template>
 	<cache>false</cache>
 	<max-age>2628001</max-age>
         <resources>
-            <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff</downloadable-formats>
+            <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff,ico,zip,xml</downloadable-formats>
         </resources>
 
 
@@ -15,8 +14,7 @@
         valid values are: true | false
      -->
     <hibernate-available>true</hibernate-available>
-
-    <!-- Register the AMD namespace so RequireJS require/define can find the cdf modules -->
-    <amd-root-path>content/pentaho-cdf/js</amd-root-path>
-    <amd-root-namespace>cdf</amd-root-namespace>
+    
+    
+    
 </settings>

@@ -1,13 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.pentaho.cdf;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
@@ -24,19 +25,31 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pentaho.cdf.storage.StorageEngine;
+import org.pentaho.cdf.views.View;
+import org.pentaho.cdf.views.ViewManager;
 import org.pentaho.platform.api.engine.IParameterProvider;
+import org.pentaho.platform.api.engine.IPentahoAclEntry;
 import org.pentaho.platform.api.engine.IPentahoSession;
+//import org.pentaho.platform.api.engine.IUserDetailsRoleListService;
 import org.pentaho.platform.api.engine.IUserRoleListService;
-import org.pentaho.platform.api.repository.ISolutionRepository;
+//import org.pentaho.platform.api.repository.ISolutionRepository;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.core.system.UserSession;
+import org.pentaho.platform.engine.security.SecurityHelper;
+import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
+import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
+import org.pentaho.platform.engine.security.SecurityParameterProvider;
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
+import org.springframework.security.GrantedAuthorityImpl;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
-import org.springframework.security.userdetails.UserDetailsService;
+import pt.webdetails.cpf.InterPluginCall;
 
-import pt.webdetails.cpf.InterPluginComms;
+import pt.webdetails.cpf.repository.RepositoryAccess;
+
+import org.pentaho.platform.plugin.services.security.userrole.ldap.transform.GrantedAuthorityToString;
 
 /**
  *
@@ -44,16 +57,26 @@ import pt.webdetails.cpf.InterPluginComms;
  */
 public class DashboardContext {
 
-    // copied from the old org.pentaho.platform.engine.security.SecurityHelper
-    public static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL"; //$NON-NLS-1$
-  
     protected IPentahoSession userSession;
     private static final Log logger = LogFactory.getLog(DashboardContext.class);
-    private static Document repositoryCache;
+    private static RepositoryFileTree repositoryCache;
+    
+    static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
+    
+    public static final int ACTION_ADMIN = IPentahoAclEntry.PERM_ADMINISTRATION; //Document being requested for administration
 
     public DashboardContext(IPentahoSession userSession) {
         logger.debug("Creating Context for user " + userSession.getName());
         this.userSession = userSession;
+    }
+
+    private String getStorage() {
+        try {
+            return StorageEngine.getInstance().read(userSession.getName());
+        } catch (Exception e) {
+            logger.error(e);
+            return "";
+        }
     }
 
     public String getContext(IParameterProvider requestParams) {
@@ -61,32 +84,29 @@ public class DashboardContext {
             String solution = requestParams.getStringParameter("solution", ""),
                     path = requestParams.getStringParameter("path", ""),
                     file = requestParams.getStringParameter("file", ""),
+                    viewId = requestParams.getStringParameter("view", requestParams.getStringParameter("action", "")),
                     fullPath = ("/" + solution + "/" + path + "/" + file).replaceAll("/+", "/");
             final JSONObject context = new JSONObject();
+
+            Document config = getConfigFile();
+
+            context.put("queryData", processAutoIncludes(fullPath, config));
+            context.put("sessionAttributes", processSessionAttributes(config));
             Calendar cal = Calendar.getInstance();
-            context.put("queryData", processAutoIncludes(fullPath));
-            context.put("serverLocalDate", cal.getTimeInMillis());
-            context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset());
+
+            long utcTime = cal.getTimeInMillis();
+            context.put("serverLocalDate", utcTime + cal.getTimeZone().getOffset(utcTime));
+            context.put("serverUTCDate", utcTime);
             context.put("user", userSession.getName());
             context.put("locale", userSession.getLocale());
             context.put("solution", solution);
             context.put("path", path);
             context.put("file", file);
+            context.put("fullPath", fullPath);
 
-            /*
-            // The first method works in 3.6, for 3.5 it's a different method. We'll try both
-            IUserDetailsRoleListService service = PentahoSystem.get(IUserDetailsRoleListService.class);
-            if (service == null) {
-                // TODO - Remove this block of code once we drop support for older versions than SUGAR
-                service = PentahoSystem.getUserDetailsRoleListService();
-            }
-            */
-            
-            IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
-            String userName = userSession.getName();
-            if (!userName.equals("anonymousUser")) {
-                context.put("roles", service.getRolesForUser(null, userName));
-            }
+            SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
+            context.put("roles", securityParams.getParameter("principalRoles"));
+
             JSONObject params = new JSONObject();
 
             Iterator it = requestParams.getParameterNames();
@@ -102,6 +122,18 @@ public class DashboardContext {
             s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
             s.append("  Dashboards.context = ");
             s.append(context.toString(2) + "\n");
+
+            View view = ViewManager.getInstance().getView(viewId);
+            if (view != null) {
+                s.append("Dashboards.view = ");
+                s.append(view.toJSON().toString(2) + "\n");
+            }
+            String storage = getStorage();
+            if (!"".equals(storage)) {
+                s.append("Dashboards.initialStorage = ");
+                s.append(storage);
+                s.append("\n");
+            }
             s.append("</script>\n");
             // setResponseHeaders(MIME_PLAIN,0,null);
             logger.info("[Timing] Finished building context: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
@@ -112,17 +144,42 @@ public class DashboardContext {
         }
     }
 
-    private JSONObject processAutoIncludes(String dashboardPath) {
+    private JSONObject processSessionAttributes(Document config) {
+
+        JSONObject result = new JSONObject();
+
+        @SuppressWarnings("unchecked")
+        List<Node> attributes = config.selectNodes("//sessionattributes/attribute");
+        for (Node attribute : attributes) {
+
+            String name = attribute.getText();
+            String key = XmlDom4JHelper.getNodeText("@name", attribute);
+            if (key == null) {
+                key = name;
+            }
+
+            try {
+                result.put(key, userSession.getAttribute(name));
+            } catch (JSONException e) {
+                logger.error(e);
+            }
+        }
+
+        return result;
+    }
+
+    private JSONObject processAutoIncludes(String dashboardPath, Document config) {
 
         JSONObject queries = new JSONObject();
         /* Bail out immediately if CDA isn' available */
-        if (!InterPluginComms.isPluginAvailable("cda")) {
+        if (!(new InterPluginCall(InterPluginCall.CDA, "")).pluginExists()) {
             logger.warn("Couldn't find CDA. Skipping auto-includes");
             return queries;
         }
-        Document config = getConfigFile();
+//        Document config = getConfigFile();
         logger.info("[Timing] Getting solution repo for auto-includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-        Document solution = getRepository();
+        //RepositoryFileTree solution = getRepository();
+        Document solution = null;
         List<Node> includes, cdas;
         includes = config.selectNodes("//autoincludes/autoinclude");
         cdas = solution.selectNodes("//leaf[ends-with(leafText,'cda')]");
@@ -131,13 +188,13 @@ public class DashboardContext {
             String re = XmlDom4JHelper.getNodeText("cda", include, "");
             for (Node cda : cdas) {
                 String path = (String) cda.selectObject("string(path)");
-                
+
                 /* There's a stupid bug in the filebased rep that makes this not work (see BISERVER-3538)
                  * Path comes out as pentaho-solutions/<solution>/..., and filebase rep doesn't handle that well
                  * We'll remote the initial part and that apparently works ok
                  */
-                path = path.substring(path.indexOf('/', 1)+1);
-                
+                path = path.substring(path.indexOf('/', 1) + 1);
+
                 if (!path.matches(re)) {
                     continue;
                 }
@@ -146,13 +203,14 @@ public class DashboardContext {
                 if (canInclude(dashboardPath, include.selectNodes("dashboards/*"), pat.matcher(path))) {
                     logger.debug("Accepted dashboard " + dashboardPath);
                     List<String> ids = listQueries(path);
-                    String idPattern = (String) cda.selectObject("string(ids)");
+                    //String idPattern = (String) cda.selectObject("string(ids)");
                     for (String id : ids) {
                         Map<String, Object> params = new HashMap<String, Object>();
                         params.put("dataAccessId", id);
                         params.put("path", path);
                         logger.info("[Timing] Executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-                        String reply = InterPluginComms.callPlugin(InterPluginComms.Plugin.CDA, "doQuery", params, true);
+                        InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "doQuery", params);
+                        String reply = ipc.callInPluginClassLoader();
                         logger.info("[Timing] Done executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
                         try {
                             queries.put(id, new JSONObject(reply));
@@ -164,7 +222,6 @@ public class DashboardContext {
             }
         }
         logger.info("[Timing] Finished testing includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-
 
         return queries;
     }
@@ -204,7 +261,8 @@ public class DashboardContext {
 
             params.put("path", cda);
             params.put("outputType", "xml");
-            String reply = InterPluginComms.callPlugin(InterPluginComms.Plugin.CDA, "listQueries", params);
+            InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "listQueries", params);
+            String reply = ipc.call();
             Document queryList = reader.read(new StringReader(reply));
             List<Node> queries = queryList.selectNodes("//ResultSet/Row/Col[1]");
             for (Node query : queries) {
@@ -221,22 +279,20 @@ public class DashboardContext {
     }
 
     private Document getConfigFile() {
-        ISolutionRepository solutionRepository = PentahoSystem.get(ISolutionRepository.class, userSession);
-        
+        RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(userSession);
         Document doc;
 
-
-
         try {
-            doc = solutionRepository.getSolutions("", "/cdf/dashboardContext.xml", 0, false);
-        } catch (Exception e) {
+            doc = repositoryAccess.getResourceAsDocument("/cdf/dashboardContext.xml", RepositoryAccess.FileAccess.READ);
+        } catch (IOException e) {
             doc = null;
         }
 
-        if (doc == null) {
+        if (doc
+                == null) {
             try {
-                doc = solutionRepository.getSolutions("", "/system/pentaho-cdf/dashboardContext.xml", 0, false);
-            } catch (Exception e) {
+                doc = repositoryAccess.getResourceAsDocument("/system/pentaho-cdf/dashboardContext.xml", RepositoryAccess.FileAccess.READ);
+            } catch (IOException e) {
                 logger.error("Couldn't get context configuration file! Cause:\n" + e.toString());
                 return null;
             }
@@ -249,20 +305,29 @@ public class DashboardContext {
         repositoryCache = null;
     }
 
-    private static Document getRepository() {
+    private static RepositoryFileTree getRepository() {
         if (repositoryCache == null) {
             IPentahoSession adminsession = getAdminSession();
-            ISolutionRepository solutionRepository = PentahoSystem.get(ISolutionRepository.class, adminsession);
-            repositoryCache = solutionRepository.getSolutionTree(ISolutionRepository.ACTION_ADMIN);
+            RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(adminsession);
+            
+            repositoryCache = repositoryAccess.getFullSolutionTree(RepositoryAccess.FileAccess.READ, null, true);
         }
         return repositoryCache;
     }
 
     private static IPentahoSession getAdminSession() {
-        UserDetailsService service = PentahoSystem.get(UserDetailsService.class);
         UserSession session = new UserSession("admin", null, false, null);
-        GrantedAuthority[] auths = service.loadUserByUsername(session.getName()).getAuthorities();
-        Authentication auth = new AnonymousAuthenticationToken("admin", SESSION_PRINCIPAL, auths);
+        IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
+        List<String> authorities = service.getAllRoles();
+       
+        GrantedAuthority[] grantedAuthorities = new GrantedAuthority[authorities.size()];
+        if (!authorities.isEmpty()) {
+            for (int i = 0; i < authorities.size(); i++) {
+                grantedAuthorities[i] = new GrantedAuthorityImpl(authorities.get(i));
+            }
+        }
+        
+        Authentication auth = new AnonymousAuthenticationToken("admin", SESSION_PRINCIPAL, grantedAuthorities);
         session.setAttribute(SESSION_PRINCIPAL, auth);
         session.doStartupActions(null);
         return session;
