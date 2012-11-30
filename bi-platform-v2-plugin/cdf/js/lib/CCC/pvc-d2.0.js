@@ -18309,7 +18309,7 @@ pvc.BaseChart
                     }
                     
                     sourceRoleName = roleSpec.from;
-                    if(sourceRoleName){
+                    if(sourceRoleName && (sourceRoleName !== name)){
                         var sourceRole = this._visualRoles[sourceRoleName] ||
                             def.fail.operationInvalid("Source role '{0}' is not supported by the chart type.", [sourceRoleName]);
                         
@@ -19697,7 +19697,8 @@ pvc.BaseChart
      */
     _initLegendPanel: function(){
         var options = this.options;
-        if (options.legend) { // global legend(s) switch
+        // global legend(s) switch
+        if ((this.compatVersion() > 1) ? options.legend : options.showLegend) {
 
             var legend = new pvc.visual.Legend(this, 'legend', 0);
             
