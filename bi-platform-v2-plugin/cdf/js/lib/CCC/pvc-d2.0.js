@@ -1,4 +1,4 @@
-//VERSION TRUNK-20121129\n
+//VERSION TRUNK-20121130\n
 
 
 /*global pvc:true */
@@ -15460,9 +15460,17 @@ def
             resolve: '_resolveFull',
             data: {
                 resolveDefault: function(optionInfo){
-                    if(this._plotList.length === 1){
-                        var name = this._plotList[0].name;
-                        if(name === 'plot2' || name === 'trend'){
+                    var plotList = this._plotList;
+                    if(plotList <= 2){
+                        var onlyTrendAndPlot2 = 
+                            def
+                            .query(plotList)
+                            .all(function(plot){
+                                var name = plot.name;
+                                return (name === 'plot2' || name === 'trend');
+                            });
+                        
+                        if(onlyTrendAndPlot2){
                             optionInfo.defaultValue(pvc.brighterColorTransform);
                             return true;
                         }
@@ -16545,23 +16553,6 @@ def.scope(function(){
                 },
                 '_resolveFull'
             ]),
-            data: {
-                // Dynamic default
-                resolveDefault: function(optionInfo){
-                    // Trends must have its own color scale
-                    // cause otherwise each trend series
-                    // would have exactly the same color as the corresponding
-                    // non-trended series; the only distinction between
-                    // the two sets of points is its data part (and the values...).
-                    // Specifically the currently user color scale key 
-                    // (the value of the series or the category role)
-                    // is the same. Same value => same color.
-                    if(this.name === 'trend'){
-                        optionInfo.defaultValue(3);
-                        return true;
-                    }
-                }
-            },
             cast:  function(value){
                 value = pvc.castNumber(value);
                 if(value != null){
@@ -17820,7 +17811,7 @@ def
         offset:       2,
         opacity:      0.9,
         html:         true,
-        fade:         false,
+        fade:         true,
         useCorners:   false,
         arrowVisible: true,
         followMouse:  false,
@@ -28478,6 +28469,7 @@ def
                     NullInterpolatioMode: 'none'
                 },
                 defaults: {
+                    ColorAxis:    2,
                     LinesVisible: true,
                     DotsVisible:  false
                 }
@@ -30128,6 +30120,7 @@ def
                     NullInterpolatioMode: 'none'
                 },
                 defaults: {
+                    ColorAxis:    2,
                     LinesVisible: true,
                     DotsVisible:  false
                 }
@@ -32097,9 +32090,11 @@ def
                     NullInterpolatioMode: 'none',
                     ColorRole: 'series', // one trend per series
                     SizeRole:  null,
-                    SizeAxis:  null
+                    SizeAxis:  null,
+                    OrthoAxis:    1
                 },
                 defaults: {
+                    ColorAxis:    2,
                     LinesVisible: true,
                     DotsVisible:  false
                 }
@@ -34563,10 +34558,11 @@ def
                 defaults: {
                     LinesVisible: true,
                     DotsVisible:  true,
-                    OrthoRole: 'median'
+                    OrthoRole:    'median',
+                    ColorAxis:    2
                 },
                 fixed: {
-                    ColorAxis: 2
+                    OrthoAxis: 1
                 }});
         }
     },
