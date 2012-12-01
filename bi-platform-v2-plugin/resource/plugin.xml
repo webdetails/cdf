@@ -17,4 +17,8 @@
     	</content-type>
 	</content-types>
 
+  <external-resources>
+    <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
+  </external-resources>
+
 </plugin>
