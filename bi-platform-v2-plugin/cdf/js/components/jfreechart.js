@@ -65,7 +65,8 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", action, this.getParameters(),function(jXML){
+    var actionPath = "/api/plugins/pentaho-cdf/files/resources/actions/" + action;
+    Dashboards.callPentahoAction(myself,actionPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
         if(myself.chartDefinition.caption != undefined){
@@ -160,9 +161,10 @@ var JFreeChartComponent = BaseComponent.extend({
           myself.zoomCallBack = function(value){
             eval(urlTemplate.replace("{" + parameterName + "}",value));
           };
-          Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
+          var componentPath = "/api/plugins/pentaho-cdf/files/resources/actions/" + cdfComponent;
+          Dashboards.callPentahoAction(myself, componentPath, parameters,function(jXML){
             if(jXML != null){
-              var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
+              var openWindow = window.open(webAppPath + "/api/plugins/pentaho-cdf/files/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
               var loadChart = function(){
                 if(openWindow.loadChart != undefined)openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())
