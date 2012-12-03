@@ -17119,13 +17119,14 @@ def
             },
             
             ValuesLabelStyle: {
-                resolve: '_resolveFull',
-                data: {
-                    resolveDefault: function(optionInfo){
-                        var isV1Compat = this.chart.compatVersion() <= 1;
-                        optionInfo.defaultValue(isV1Compat ? 'inside' : 'linked');
+                resolve: function(optionInfo){
+                    var isV1Compat = this.chart.compatVersion() <= 1;
+                    if(isV1Compat){
+                        optionInfo.specify('inside');
                         return true;
                     }
+                    
+                    return this._resolveFull(optionInfo);
                 },
                 cast: function(value) {
                     switch(value){
@@ -17138,7 +17139,8 @@ def
                     }
                     
                     return 'linked';
-                }
+                },
+                value: 'linked'
             },
             
             // Depends on being linked or not
