@@ -21,13 +21,13 @@ var XactionComponent = BaseComponent.extend({
         }
 
         if (typeof(this.serviceMethod) == 'undefined' || this.serviceMethod == 'ServiceAction') {
-          var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
+          var jXML = Dashboards.callPentahoAction(myself,this.path, p,null);
 
           if(jXML != null){
             $('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
           }
         } else {
-          var html = Dashboards.pentahoServiceAction(this.serviceMethod, 'html', this.solution, this.path, this.action, p, null);
+          var html = Dashboards.pentahoServiceAction(this.serviceMethod, 'html', this.path, p, null);
           $('#'+myself.htmlObject).html(html);
         }
 

@@ -65,7 +65,7 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    var actionPath = "/api/plugins/pentaho-cdf/files/resources/actions/" + action;
+    var actionPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/" + action;
     Dashboards.callPentahoAction(myself,actionPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
@@ -161,7 +161,7 @@ var JFreeChartComponent = BaseComponent.extend({
           myself.zoomCallBack = function(value){
             eval(urlTemplate.replace("{" + parameterName + "}",value));
           };
-          var componentPath = "/api/plugins/pentaho-cdf/files/resources/actions/" + cdfComponent;
+          var componentPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/" + cdfComponent;
           Dashboards.callPentahoAction(myself, componentPath, parameters,function(jXML){
             if(jXML != null){
               var openWindow = window.open(webAppPath + "/api/plugins/pentaho-cdf/files/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));

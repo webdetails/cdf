@@ -428,7 +428,7 @@ Dashboards.restoreDuplicates = function() {
 Dashboards.blockUIwithDrag = function() {
   if (typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
-    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
+    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/processing_transparent.gif" /></div>';
   }
 
   $.blockUI();
@@ -1204,7 +1204,7 @@ Dashboards.pentahoAction = function( path, params, func ) {
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = webAppPath + path;
+  var url = webAppPath + "/api/repos/" + path.replace(/\//g, ":") + "/generatedContent";
   
   // Add the solution to the params
   var arr = {};

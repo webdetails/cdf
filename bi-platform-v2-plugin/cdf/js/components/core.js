@@ -100,7 +100,7 @@ BaseComponent = Base.extend({
           });
           jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
         } else {
-          jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
+          jXML = Dashboards.callPentahoAction(myself, this.path, p,null);
         }
         //transform the result int a javascript array
         var myArray = this.parseArray(jXML, false);
