@@ -1,4 +1,4 @@
-//VERSION TRUNK-20121203\n
+//VERSION TRUNK-20121204\n
 
 
 /*global pvc:true */
@@ -5846,15 +5846,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         var colNames;
         if(this.options.seriesInRows){
             colNames = this.metadata.map(function(d){ return d.colName; });
-            
-            // TODO: do this only later on the VITEM
-//            lines.unshift(colNames);
-//            pv.transpose(lines); // Transposes, in-place
-//            colNames = lines.shift();
-//            colNames.forEach(function(value, i){
-//                colNames[i] = {v: value}; // may be null ....
-//            });
-            
         } else if(this.options.compatVersion <= 1){
             colNames = this.metadata.map(function(d){ return {v: d.colName}; });
         } else {
@@ -6413,9 +6404,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 M = valuesColIndexes.length;
                 if(!M){
                     M = valuesColIndexes = null;
-                } 
-                else 
-                {
+                } else {
                     /*jshint expr:true */ 
                     (M <= J) || def.assert("M must be smaller than J");
                 }
@@ -6424,7 +6413,18 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         
         var D; // discrete count = D = S + C
         if(M == null){
-            if(C != null &&  C >= J){
+            if(J > 0 && J <= 3 && (C == null || C === 1) && S == null){
+                // V1 Stability requirement
+                // Measure columns with all values = null,
+                // would be detected as type string,
+                // and not be chosen as measures.
+                M = 1;
+                valuesColIndexes = [J - 1];
+                C = J >= 2 ? 1 : 0;
+                S = J >= 3 ? 1 : 0;
+                D = C + S;
+                
+            } else if(C != null &&  C >= J){
                 D = J;
                 C = J;
                 S = 0;
@@ -26436,7 +26436,7 @@ def
         var orthoType = this.axis.type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType]; // index 0
     },
-
+    
     renderOrdinalAxis: function(){
         var myself = this,
             scale = this.scale,
@@ -26459,6 +26459,19 @@ def
         var wrapper;
         if(this.compatVersion() <= 1){
             // For use in child marks of pvTicksPanel
+            var DataElement = function(tickVar){
+                this.value = 
+                this.absValue = tickVar.rawValue;
+                this.nodeName = '' + (this.value || '');
+                this.path = this.nodeName ? [this.nodeName] : [];
+                this.label = 
+                this.absLabel = tickVar.label;    
+            };
+            
+            DataElement.prototype.toString = function(){
+                return ''+this.value;
+            };
+            
             wrapper = function(v1f){
                 return function(tickScene){
                     // Fix index due to the introduction of 
@@ -26466,7 +26479,7 @@ def
                     var markWrapped = Object.create(this);
                     markWrapped.index = this.parent.index;
                     
-                    return v1f.call(markWrapped, tickScene.vars.tick.rawValue);
+                    return v1f.call(markWrapped, new DataElement(tickScene.vars.tick));
                 };
             };
         }
