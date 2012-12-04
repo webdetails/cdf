@@ -16,6 +16,11 @@ requireCfg['shim']['cdf/cdf-module'] = ['cdf/Dashboards',
 	'cdf/simile/ajax/scripts/json',
 	'cdf/json',
     'cdf/lib/shims',
+    'cdf/lib/CCC/pvc-d1.0',
+    'cdf/lib/CCC/protovis', 
+    'cdf/lib/CCC/tipsy', 
+    'cdf/lib/CCC/jquery.tipsy', 
+    'cdf/lib/CCC/def',    
 	'cdf/backbone',
 	'cdf/underscore',
 	'cdf/mustache',
@@ -54,9 +59,10 @@ requireCfg['shim']['cdf/Dashboards'] = [
 
 
 requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
+requireCfg['shim']['cdf/lib/CCC/pvc-d1.0'] = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/tipsy', 'cdf/lib/CCC/jquery.tipsy', 'cdf/lib/CCC/def'];
 
 requireCfg['shim']['cdf/components/core'] = ['cdf/Dashboards'];
-requireCfg['shim']['cdf/components/ccc'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/ccc'] = ['cdf/components/core', 'cdf/lib/CCC/pvc-d1.0'];
 requireCfg['shim']['cdf/components/input'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/maps'] = ['cdf/components/core'];

@@ -290,8 +290,11 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
     Dashboards.incrementRunningCalls();
 
     var myself = this;
-
-    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML){
+    
+    
+    var componentPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/openflashchart.xaction";
+    
+    Dashboards.callPentahoAction(myself,componentPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
         var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
@@ -344,7 +347,9 @@ var TrafficComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "traffic.xaction", parameters,
+    var componentPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/traffic.xaction";
+    
+    Dashboards.callPentahoAction(myself,componentPath, parameters,
       function(result){
         var value = $(result).find("VALUE").text();
         var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));

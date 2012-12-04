@@ -54,9 +54,9 @@ if (typeof $.SetImpromptuDefaults == 'function')
 
 var Dashboards = {
   parameterModel: new Backbone.Model(),
-  TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/resources/style/images/traffic_red.png",
-  TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/resources/style/images/traffic_yellow.png",
-  TRAFFIC_GREEN: webAppPath + "/api/plugins/pentaho-cdf/resources/style/images/traffic_green.png",
+  TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_red.png",
+  TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_yellow.png",
+  TRAFFIC_GREEN: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_green.png",
   viewFlags: {
     UNUSED: "unused",
     UNBOUND: "unbound",
@@ -1319,12 +1319,11 @@ Dashboards.loadStorage = function(){
   if( this.context && this.context.user === "anonymousUser") {
     return;
   }
-
+  
   var args = {
-    action: "read",
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/read", args, function(json) {
     $.extend(myself.storage,json);
   });
 };
@@ -1337,11 +1336,10 @@ Dashboards.saveStorage = function(){
   }
 
   var args = {
-    action: "store",
     storageValue: JSON.stringify(this.storage),
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/store", args, function(json) {
     if(json.result != true){
       myself.log("Error saving storage",'error');
     }
@@ -1358,9 +1356,8 @@ Dashboards.cleanStorage = function(){
   }
   
   var args = {
-    action: "delete"
   };
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/delete", args, function(json) {
     if(json.result != true){
       myself.log("Error deleting storage", 'error');
     }

@@ -1,4 +1,4 @@
-define(['cdf/Base',
+pen.define(['cdf/Base',
   'cdf/Dashboards',
   'cdf/jquery',
   'cdf/jquery.ui',
