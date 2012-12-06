@@ -1,4 +1,4 @@
-//VERSION TRUNK-20120215-patched-20121015-b
+//VERSION TRUNK-20120215-patched-20121203
 
 // ECMAScript 5 shim
 if(!Object.keys) {
@@ -4580,8 +4580,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         
         // DOMAIN
         var bypassAxisSize   = pvc.get(keyArgs, 'bypassAxisSize',   false),
-            dMax = this.dataEngine.getSecondAxisMax(),
-            dMin = this.dataEngine.getSecondAxisMin();
+            dMax = options.secondAxisOrthoFixedMax != null ? options.secondAxisOrthoFixedMax : this.dataEngine.getSecondAxisMax(),
+            dMin = options.secondAxisOrthoFixedMin != null ? options.secondAxisOrthoFixedMin : this.dataEngine.getSecondAxisMin();
         
         if(!isFinite(dMin)){
             dMin = 0;
@@ -4771,6 +4771,8 @@ pvc.CategoricalAbstract = pvc.TimeseriesAbstract.extend({
         secondAxisDomainRoundMode: 'none',  // only with independent second scale
         secondAxisDesiredTickCount: null,   // idem
         secondAxisMinorTicks: true,
+        secondAxisOrthoFixedMin: null,
+        secondAxisOrthoFixedMax: null,
         
         panelSizeRatio: 0.9,
         
