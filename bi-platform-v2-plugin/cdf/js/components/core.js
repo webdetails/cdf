@@ -19,9 +19,9 @@ BaseComponent = Base.extend({
   clone: function(parameterRemap,componentRemap,htmlRemap) {
     var that, dashboard, callbacks;
     /*
-     * dashboard points back to this component, so we need to remove it from
+     * `dashboard` points back to this component, so we need to remove it from
      * the original component before cloning, lest we enter an infinite loop.
-     * _callbacks contains the event bindings for the Backbone Event mixin
+     * `_callbacks` contains the event bindings for the Backbone Event mixin
      * and may also point back to the dashboard. We want to clone that as well,
      * but have to be careful about it.
      */
@@ -474,13 +474,15 @@ var UnmanagedComponent = BaseComponent.extend({
     if(typeof this.runCounter == "undefined") {
       this.runCounter = 0;
     }
-    this.trigger('cdf cdf:preExecution', this);
+    var ret;
     if (typeof this.preExecution == "function") {
-      var ret = this.preExecution();
-      return (typeof ret == "undefined" || ret);
+      ret = this.preExecution();
+      ret = typeof ret == "undefined" || ret;
     } else {
-      return true;
+      ret = true;
     }
+    this.trigger('cdf cdf:preExecution', this, ret);
+    return ret;
   },
 
   /*
@@ -563,8 +565,13 @@ var UnmanagedComponent = BaseComponent.extend({
      * unblock the UI
      */
     var success = _.bind(function(data) {
-      callback(data);
-      this.postExec();
+      try{
+        callback(data);
+      } catch (e) {
+        this.dashboard.log(e,'error');
+      } finally {
+        this.postExec();
+      }
     },this);
     var always = _.bind(this.unblock, this);
     var handler = this.getSuccessHandler(success, always);
@@ -614,8 +621,13 @@ var UnmanagedComponent = BaseComponent.extend({
       });
     }
     var success = _.bind(function(data){
+      try{
         callback(data);
+      } catch (e) {
+        this.dashboard.log(e,'error');
+      } finally {
         this.postExec();
+      }
     },this);
     var always = _.bind(this.unblock,this);
     ajaxParameters.success = this.getSuccessHandler(success,always);
@@ -698,7 +710,7 @@ var FreeformComponent = UnmanagedComponent.extend({
 
   update: function() {
     var render = _.bind(this.render,this);
-    if(typeof this.manageCallee == "undefined" || this.maangeCallee) {
+    if(typeof this.manageCallee == "undefined" || this.manageCallee) {
       this.synchronous(render);
     } else {
       render();
