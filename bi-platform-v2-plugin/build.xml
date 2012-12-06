@@ -164,7 +164,7 @@
 		   <mkdir dir="${stage.dir}/${plugin.name}/lib" />
 
 <mkdir dir="${stage.dir}/${plugin.name}/resources/actions" />
-	
+
 		   <!-- copy the plugin jar to the plugin dist lib folder -->
 		   <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
 			   <fileset dir="${dist.dir}">
@@ -202,10 +202,10 @@
 		   </copy>
 
 		   <!-- create the version file -->
-		   <tstamp/>			
+		   <tstamp/>
 			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
 
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>
 
 
 		   <!-- Copy js folder into dist -->
@@ -214,6 +214,10 @@
 				   <include name="**/*" />
 			   </fileset>
 		   </copy>
+
+
+       <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
+       <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>
 
 		   <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.revision}"/> 
     <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.revision}"/> 
