@@ -451,11 +451,20 @@ Dashboards.updateLifecycle = function(object) {
     }
     var handler = _.bind(function() {
       try {
-        object.trigger('cdf cdf:preExecution', object);
+        var shouldExecute;
         if(!(typeof(object.preExecution)=='undefined')){
-          var ret = object.preExecution.apply(object);
-          if (typeof ret != "undefined" && !ret)
-            return; // if preExecution returns false, we'll skip the update
+          var shouldExecute = object.preExecution.apply(object);
+        }
+        /*
+         * If `preExecution` returns anything, we should use its truth value to
+         * determine whether the component should execute. If it doesn't return
+         * anything (or returns `undefined`), then by default the component
+         * should update.
+         */
+        shouldExecute = typeof shouldExecute != "undefined"? !!shouldExecute : true;
+        object.trigger('cdf cdf:preExecution', object, shouldExecute);
+        if (!shouldExecute) {
+          return; // if preExecution returns false, we'll skip the update
         }
         if (object.tooltip != undefined){
           object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
@@ -496,13 +505,18 @@ Dashboards.updateLifecycle = function(object) {
   setTimeout(handler,1);
 };
 
-Dashboards.update = function(object) {
+Dashboards.update = function(component) {
+  this.updateAll([component]);
+};
+
+Dashboards.updateComponent = function(object) {
   if(object.isManaged === false && object.update) {
     object.update();
   } else {
     this.updateLifecycle(object);
   }
-}
+};
+
 Dashboards.createAndCleanErrorDiv = function(){
   if ($("#"+CDF_ERROR_DIV).length == 0){
     $("body").append("<div id='" +  CDF_ERROR_DIV + "'></div>");
@@ -704,11 +718,27 @@ Dashboards.initEngine = function(){
       updating.push(components[i]);
     }
   }
+
+  if (!updating.length) {
+    this.handlePostInit();
+    return;
+  }
   this.waitingForInit = updating.slice();
 
-  var callback = function(comp) {
+  var callback = function(comp,isExecuting) {
+    /*
+     * The `preExecution` event will pass two arguments (the component proper
+     * and a flag telling us whether the preExecution test passed), so we can
+     * test for that, and check whether the component is executing or not.
+     * If it's not going to execute, we should check for postInit right now.
+     * If it is, we shouldn't do anything.right now.
+     */
+    if(arguments.length == 2 && isExecuting) {
+      return;
+    }
     this.waitingForInit = _(this.waitingForInit).without(comp);
     comp.off('cdf:postExecution',callback);
+    comp.off('cdf:preExecution',callback);
     this.handlePostInit();
   }
 
@@ -716,9 +746,9 @@ Dashboards.initEngine = function(){
     function() {
       for(var i= 0, len = updating.length; i < len; i++){
         var component = updating[i];
-        component.on('cdf:postExecution',callback,myself);
-        myself.update(component);
+        component.on('cdf:postExecution cdf:preExecution',callback,myself);
       }
+      Dashboards.updateAll(updating);
       if(components.length > 0) {
         myself.handlePostInit();
       }
@@ -728,7 +758,7 @@ Dashboards.initEngine = function(){
 };
 
 Dashboards.handlePostInit = function() {
-  if(this.waitingForInit && this.waitingForInit.length === 0) {
+  if(!this.waitingForInit || this.waitingForInit.length === 0) {
     this.trigger("cdf cdf:postInit",this);
     /* Legacy Event -- don't rely on this! */
     $(window).trigger('cdfLoaded');
@@ -815,6 +845,113 @@ Dashboards.fireChange = function(parameter, value) {
   }, this.renderDelay);
 };
 
+
+/* Update components by priority. Expects as parameter an object where the keys
+ * are the priorities, and the values are arrays of components that should be
+ * updated at that priority level:
+ *
+ *  {
+ *    0: [c1,c2],
+ *    2: [c3],
+ *    10: [c4]
+ *  }
+ *
+ *  Note that even though it expects numerical keys, 
+ */
+Dashboards.updateAll = function(components) {
+  if(!this.updating) {
+    this.updating = {
+      tiers: {},
+      current: null
+    };
+  }
+  if(components && _.isArray(components) && !_.isArray(components[0])) {
+    var comps = [];
+    _.each(components,function(c) {
+      var prio = c.priority || 0;
+      if(!comps[prio]) {
+        comps[prio] = [];
+      }
+      comps[prio].push(c);
+    });
+    components = comps;
+  }
+  this.mergePriorityLists(this.updating.tiers,components);
+
+  var updating = this.updating.current;
+  if(updating === null || updating.components.length == 0) {
+    var toUpdate = this.getFirstTier(this.updating.tiers);
+    if(!toUpdate) return;
+    this.updating.current = toUpdate;
+
+    var postExec = function(component,isExecuting) {
+      /*
+       * The `preExecution` event will pass two arguments (the component proper
+       * and a flag telling us whether the preExecution test passed), so we can
+       * test for that, and check whether the component is executing or not.
+       * If it's not going to execute, we should queue up the next component
+       * right now. If it is, we shouldn't do anything.right now.
+       */
+      if(arguments.length == 2 && isExecuting) {
+        return;
+      }
+      component.off("cdf:postExecution",postExec);
+      component.off("cdf:preExecution",postExec);
+      var current = this.updating.current;
+      current.components = _.without(current.components, component);
+      var tiers = this.updating.tiers;
+      tiers[current.priority] = _.without(tiers[current.priority], component);
+      this.updateAll();
+    }
+    /*
+     * We need a copy of `this.updating.current.components` here so that we can
+     * update them all without having items removed from the list by calls to
+     * `postExec` made by synchronous components.
+     */
+    var comps = this.updating.current.components.slice();
+    for(var i = 0; i < comps.length;i++) {
+      component = comps[i];
+      component.on("cdf:postExecution cdf:preExecution",postExec,this);
+      this.updateComponent(component);
+    }
+  }
+}
+
+/*
+ * Given a list of component priority tiers, returns the highest priority
+ * non-empty tier of components awaiting update, or null if no such tier exists.
+ */
+Dashboards.getFirstTier = function(tiers) {
+      var keys = _.keys(tiers).sort(function(a,b){
+        return parseInt(a,10) - parseInt(b,10);
+      }),
+      i, tier;
+
+  for(i = 0;i < keys.length;i++) {
+    tier = tiers[keys[i]];
+    if(tier.length > 0) {
+      return {priority: keys[i], components: tier.slice()};
+    }
+  }
+  return null;
+}
+
+/*
+ * Add all components in priority list 'source' into priority list 'target'
+ */
+Dashboards.mergePriorityLists = function(target,source) {
+  if(!source) {
+    return;
+  }
+  for(key in source) if (source.hasOwnProperty(key)) {
+    if(_.isArray(target[key])) {
+      target[key] = _.union(target[key],source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+}
+
 Dashboards.restoreView = function() {
   var p, params;
   if(!this.view) return;
@@ -898,7 +1035,8 @@ Dashboards.persistBookmarkables = function(param) {
   var bookmarkables = this.bookmarkables,
       params = {},
       state;
-  /* We don't want to update the hash if we were passed a
+  /*
+   * We don't want to update the hash if we were passed a
    * non-bookmarkable parameter (why bother?), nor is there
    * much of a point in publishing changes when we're still
    * initializing the dashboard. That's just the code for
@@ -934,7 +1072,7 @@ Dashboards.setBookmarkState = function(state) {
 };
 
 Dashboards.getBookmarkState = function() {
-  /* 
+  /*
    * browsers that don't support history.pushState
    * can't actually safely remove bookmarkState param,
    * so we must first check whether there is a hash-based
@@ -949,7 +1087,7 @@ Dashboards.getBookmarkState = function() {
        * so we'll go on and try getting the state from the params
        */
     }
-  } 
+  }
   var query = window.location.search.slice(1).split('&').map(function(e){
           var pair = e.split('=');
           pair[1] = decodeURIComponent(pair[1]);
@@ -1826,7 +1964,7 @@ Query = function() {
   /* AJAX Options for the query */
   var _ajaxOptions = {
     type: "POST",
-    async: false,
+    async: false
   };
   // Datasource type definition
   var _mode = 'CDA';
