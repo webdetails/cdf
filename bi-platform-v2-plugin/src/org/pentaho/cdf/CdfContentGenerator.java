@@ -203,7 +203,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         } else if (urlPath.equals(JSON_SOLUTION)) {
 
             jsonSolution(out, requestParams);
-        } else if (urlPath.equals(GET_CDF_RESOURCE)) {
+        } else if (urlPath.startsWith(GET_CDF_RESOURCE)) {
 
             getCDFResource(urlPath, contentItem, out, requestParams);
         } else if (urlPath.equals(RENDER_HTML)) {
@@ -217,7 +217,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
             callAction(requestParams, out);
         } else if (urlPath.equals(COMMENTS)) {
             processComments(requestParams, out);
-        } else if (urlPath.equals(STORAGE)) {
+        } else if (urlPath.startsWith(STORAGE)) {
             processStorage(requestParams, out);
         } else if (urlPath.equals(CONTEXT)) {
             generateContext(requestParams, out);

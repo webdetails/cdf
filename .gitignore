@@ -9,3 +9,4 @@ bi-platform-v2-plugin/lib/
 bi-platform-v2-plugin/runtime-lib/
 solution/system/
 /nbproject/private/
+/build/

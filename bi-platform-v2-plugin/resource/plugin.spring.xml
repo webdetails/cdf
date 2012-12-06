@@ -9,4 +9,8 @@
 
   <context:annotation-config />
   <bean id="xcdf" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
+  <!-- JAX-RS beans -->
+  <bean id="api" class="org.pentaho.platform.web.servlet.JAXRSPluginServlet"/>
+  <bean class="org.pentaho.cdf.resource.StorageResource"/>
+  
 </beans>

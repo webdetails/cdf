@@ -26,9 +26,9 @@ import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 /**
- *
- * @author pedro
- */
+*
+* @author pedro
+*/
 public class StorageEngine {
 
     private static final Log logger = LogFactory.getLog(StorageEngine.class);
@@ -77,7 +77,47 @@ public class StorageEngine {
 
     }
 
-    public String store(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+    public Boolean store(String user, String storageValue) throws InvalidCdfOperationException  {
+      try {
+        if (storageValue == null) {
+  
+          logger.error("Parameter 'storageValue' Can't be null");
+          throw new InvalidCdfOperationException("Parameter 'storageValue' Can't be null");
+    
+        }
+    
+        logger.debug("Storing user entry");
+    
+        // if we have one, get it. Otherwise, create a new one
+    
+        Session session = getSession();
+        session.beginTransaction();
+    
+        Query query = session.getNamedQuery("org.pentaho.cdf.storage.StorageEntry.getStorageForUser").setString("user", user);
+        StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
+    
+        if (storageEntry == null) {
+            storageEntry = new StorageEntry();
+            storageEntry.setUser(user);
+        }
+    
+        storageEntry.setStorageValue(storageValue);
+        storageEntry.setLastUpdatedDate(Calendar.getInstance().getTime());
+    
+    
+        session.save(storageEntry);
+        session.flush();
+        session.getTransaction().commit();
+        session.close();
+        
+        return true;
+      } catch(PluginHibernateException phe) {
+        phe.printStackTrace();
+        return false;
+      }
+    }
+    
+    public String store(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException{
 
 
         String user = userSession.getName();
@@ -91,43 +131,23 @@ public class StorageEngine {
         }
 
         String storageValue = requestParams.getStringParameter("storageValue", "");
+        Boolean success = store(user, storageValue);
 
-        if (storageValue == null) {
-
-            logger.error("Parameter 'storageValue' Can't be null");
-            throw new InvalidCdfOperationException("Parameter 'storageValue' Can't be null");
-
+        if(success) {
+          // Return success
+          JSONObject json = new JSONObject();
+          json.put("result", Boolean.TRUE);
+      
+          return json.toString(2);
+        } else {
+          // Return success
+          JSONObject json = new JSONObject();
+          json.put("result", Boolean.FALSE);
+      
+          return json.toString(2);
+          
         }
 
-        logger.debug("Storing user entry");
-
-        // if we have one, get it. Otherwise, create a new one
-
-        Session session = getSession();
-        session.beginTransaction();
-
-        Query query = session.getNamedQuery("org.pentaho.cdf.storage.StorageEntry.getStorageForUser").setString("user", user);
-        StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
-
-        if (storageEntry == null) {
-            storageEntry = new StorageEntry();
-            storageEntry.setUser(user);
-        }
-
-        storageEntry.setStorageValue(storageValue);
-        storageEntry.setLastUpdatedDate(Calendar.getInstance().getTime());
-
-
-        session.save(storageEntry);
-        session.flush();
-        session.getTransaction().commit();
-        session.close();
-
-        // Return success
-        JSONObject json = new JSONObject();
-        json.put("result", Boolean.TRUE);
-
-        return json.toString(2);
 
     }
 
@@ -169,21 +189,7 @@ public class StorageEngine {
             return json.toString(2);
         }
 
-        logger.debug("Deleting storage for user " + user);
-
-        Session session = getSession();
-        session.beginTransaction();
-
-        Query query = session.getNamedQuery("org.pentaho.cdf.storage.StorageEntry.getStorageForUser").setString("user", user);
-        StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
-
-        if (storageEntry != null) {
-            session.delete(storageEntry);
-
-        }
-        session.flush();
-        session.getTransaction().commit();
-        session.close();
+        delete(user);
 
         // Return success
         JSONObject json = new JSONObject();
@@ -192,6 +198,30 @@ public class StorageEngine {
 
     }
 
+    public Boolean delete(String user) {
+      try {
+        logger.debug("Deleting storage for user " + user);
+  
+        Session session = getSession();
+        session.beginTransaction();
+  
+        Query query = session.getNamedQuery("org.pentaho.cdf.storage.StorageEntry.getStorageForUser").setString("user", user);
+        StorageEntry storageEntry = (StorageEntry) query.uniqueResult();
+  
+        if (storageEntry != null) {
+            session.delete(storageEntry);
+  
+        }
+        session.flush();
+        session.getTransaction().commit();
+        session.close();
+        
+        return true;
+      } catch(PluginHibernateException phe) {
+        phe.printStackTrace();
+        return false;
+      }
+    }
     private synchronized Session getSession() throws PluginHibernateException {
 
         return PluginHibernateUtil.getSession();

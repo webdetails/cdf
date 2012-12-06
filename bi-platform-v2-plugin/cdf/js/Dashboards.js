@@ -1319,7 +1319,7 @@ Dashboards.loadStorage = function(){
   if( this.context && this.context.user === "anonymousUser") {
     return;
   }
-  
+
   var args = {
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
@@ -1339,8 +1339,8 @@ Dashboards.saveStorage = function(){
     storageValue: JSON.stringify(this.storage),
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
-  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/store", args, function(json) {
-    if(json.result != true){
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/store", args, function(ok) {
+    if(ok != null){
       myself.log("Error saving storage",'error');
     }
   });
@@ -1357,8 +1357,8 @@ Dashboards.cleanStorage = function(){
   
   var args = {
   };
-  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/delete", args, function(json) {
-    if(json.result != true){
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/delete", args, function(ok) {
+    if(ok != null){
       myself.log("Error deleting storage", 'error');
     }
   });
@@ -1816,7 +1816,7 @@ Query = function() {
   /* AJAX Options for the query */
   var _ajaxOptions = {
     type: "POST",
-    async: false,
+    async: false
   };
   // Datasource type definition
   var _mode = 'CDA';
