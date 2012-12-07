@@ -682,7 +682,11 @@ var UnmanagedComponent = BaseComponent.extend({
               this.dashboard.log(e,"error");
             }
           }
-          success(data);
+          try {
+            success(data);
+          } catch (e) {
+            this.dashboard.log(e,"error");
+          }
         }
         if(typeof always == "function") {
           always();
