@@ -671,18 +671,22 @@ var UnmanagedComponent = BaseComponent.extend({
       counter = this.callCounter();
     }
     return _.bind(function(data) {
-      var newData;
-      if(counter >= this.runCounter) {
-        this.trigger('cdf cdf:postFetch',this,data);
-        if(typeof this.postFetch == "function") {
-          newData = this.postFetch(data);
-          data = typeof newData == "undefined" ? data : newData;
+        var newData;
+        if(counter >= this.runCounter) {
+          this.trigger('cdf cdf:postFetch',this,data);
+          if(typeof this.postFetch == "function") {
+            try {
+              newData = this.postFetch(data);
+              data = typeof newData == "undefined" ? data : newData;
+            } catch(e) {
+              this.dashboard.log(e,"error");
+            }
+          }
+          success(data);
         }
-        success(data);
-      }
-      if(typeof always == "function") {
-        always();
-      }
+        if(typeof always == "function") {
+          always();
+        }
     },
     this);
   },
