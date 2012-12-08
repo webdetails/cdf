@@ -101,6 +101,8 @@ if(!this.JSON.stringify){
 
 /** @private */
 var objectHasOwn = Object.prototype.hasOwnProperty;
+/** @private */
+var arraySlice = Array.prototype.slice;
 
 /**
  * @name def
@@ -137,12 +139,8 @@ var def = /** @lends def */{
         return props.map(function(p){ return o[p]; });
     },
     
-    getPath: function(o, path, dv, create){
-        if(!o) { 
-            return dv;
-        }
-        
-        if(path != null){
+    getPath: function(o, path, create, dv){
+        if(o && path != null){
             var parts = def.array.is(path) ? path : path.split('.');
             var L = parts.length;
             if(L){
@@ -151,28 +149,11 @@ var def = /** @lends def */{
                     var part = parts[i++];
                     var value = o[part];
                     if(value == null){
-                        if(!create){ 
-                            return dv; 
-                        }
-                        value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
+                        if(!create){ return dv; }
+                        
+                        value = o[part] = {};
                     }
-                    
                     o = value;
-                }
-            }
-        }
-        
-        return o;
-    },
-    
-    setPath: function(o, path, v){
-        if(o && path != null){
-            var parts = def.array.is(path) ? path : path.split('.');
-            if(parts.length){
-                var pLast = parts.pop();
-                o = def.getPath(o, parts, pLast, true);
-                if(o != null){
-                    o[pLast] = v;
                 }
             }
         }
@@ -261,57 +242,35 @@ var def = /** @lends def */{
         return o;
     },
 
-    setDefaults: function(o, o2){
+    setDefaults: function(o){
         if(!o) {
             o = {};
         }
 
         var a = arguments;
-        var A = a.length;
-        var p;
-        if(A === 2 && def.object.is(o2)){
-            for(p in o2){
-                if(o[p] == null){
-                    o[p] = o2[p];
-                }
-            }
-        } else {
-            A--;
-            for(var i = 1 ; i < A ; i += 2) {
-                p = a[i];
-                if(o[p] == null){
-                    o[p] = a[i+1];
-                }
+        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
+            var p = a[i];
+            if(o[p] == null){
+                o[p] = a[i+1];
             }
         }
-        
+
         return o;
     },
 
-    setUDefaults: function(o, o2){
+    setUDefaults: function(o){
         if(!o) {
             o = {};
         }
 
         var a = arguments;
-        var A = a.length;
-        var p;
-        if(A === 2 && def.object.is(o2)){
-            for(p in o2){
-                if(o[p] === undefined){
-                    o[p] = o2[p];
-                }
-            }
-        } else {
-            A--;
-            for(var i = 1 ; i < A ; i += 2) {
-                p = a[i];
-                if(o[p] === undefined){
-                    o[p] = a[i+1];
-                }
+        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
+            var p = a[i];
+            if(o[p] === undefined){
+                o[p] = a[i+1];
             }
         }
-        
+
         return o;
     },
     
@@ -425,6 +384,8 @@ var def = /** @lends def */{
         return to;
     },
     
+    ownKeys: Object.keys,
+    
     keys: function(o){
         var keys = [];
         for(var p in o) {
@@ -433,17 +394,6 @@ var def = /** @lends def */{
         
         return keys;
     },
-    
-    values: function(o){
-        var values = [];
-        for(var p in o) {
-            values.push(o[p]);
-        }
-        
-        return values;
-    },
-    
-    ownKeys: Object.keys,
     
     own: function(o){
         return Object.keys(o)
@@ -472,10 +422,6 @@ var def = /** @lends def */{
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
     },
     
-    compareReverse: function(a, b){
-        return (a === b) ? 0 : ((a > b) ? -1 : 1);
-    },
-    
     methodCaller: function(p, context){
         if(context){
             return function(){
@@ -499,11 +445,6 @@ var def = /** @lends def */{
     add: function(a, b){ return a + b; },
 
     // negate?
-    negate: function(f){
-        return function(){
-            return !f.apply(this, arguments);
-        };
-    },
     
     // Constant functions ----------------
     
@@ -545,7 +486,6 @@ var def = /** @lends def */{
             return v && (v.length != null) && (typeof v !== 'string');
         },
         
-        // TODO: this should work as other 'as' methods...
         /**
          * Converts something to an array if it is not one already,
          * and if it is not nully.
@@ -555,14 +495,6 @@ var def = /** @lends def */{
          */
         as: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
-        },
-        
-        to: function(thing){
-            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
-        },
-        
-        lazy: function(scope, p, f){
-            return scope[p] || (scope[p] = (f ? f(p, scope) : []));
         }
     },
     
@@ -585,21 +517,12 @@ var def = /** @lends def */{
             return v && /*typeof(v) === 'object' &&*/ v.constructor === Object ?
                     v :
                     null;
-        },
-        
-        lazy: function(scope, p, f, ctx){
-            return scope[p] || 
-                  (scope[p] = (f ? f.call(ctx, p) : {}));
         }
     },
     
     string: {
         is: function(v){
             return typeof v === 'string';
-        },
-        
-        to: function(v, ds){
-            return v != null ? ('' + v) : (ds || '');
         },
         
         join: function(sep){
@@ -649,8 +572,9 @@ var def = /** @lends def */{
             return typeof v === 'function';
         },
         
+        // TODO: this is not an as...
         as: function(v){
-            return typeof v === 'function' ? v : null;
+            return typeof v === 'function' ? v : def.fun.constant(v);
         },
         
         to: function(v){
@@ -681,11 +605,6 @@ var def = /** @lends def */{
     // !== null && !== undefined
     notNully: function(v){
         return v != null;
-    },
-    
-    // !== undefined
-    notUndef: function(v){
-        return v !== undefined;
     },
     
     empty: function(v){
@@ -719,17 +638,6 @@ var def = /** @lends def */{
                 cU = c.toUpperCase();
             if(c !== cU) {
                 s = cU + s.substr(1);
-            }
-        }
-        return s;
-    },
-    
-    firstLowerCase: function(s){
-        if(s) {
-            var c  = s.charAt(0),
-                cL = c.toLowerCase();
-            if(c !== cL) {
-                s = cL + s.substr(1);
             }
         }
         return s;
@@ -837,8 +745,6 @@ var def = /** @lends def */{
         throw def.error.assertionFailed(msg, scope);
     }
 };
-
-def.lazy = def.object.lazy;
 
 // Adapted from
 // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
@@ -1204,24 +1110,14 @@ def.scope(function(){
                     // Try to convert to method
                     var method = asMethod(value);
                     if(method) {
-                        var baseMethod;
-                        
-                        // Check if it is an override
-                        
-                        // Exclude inherited stuff from Object.prototype
-                        var bm = state.methods[p];
-                        if(bm && (bm instanceof Method)){
-                            baseMethod = bm;
-                        } else if(baseState) {
-                            bm = baseState.methods[p];
-                            if(bm && (bm instanceof Method)){
-                                baseMethod = bm;
-                            }
-                        }
-                        
                         state.methods[p] = method;
                         
-                        if(baseMethod){
+                        // Check if it is an override
+                        var baseMethod;
+                        if(baseState && (baseMethod = baseState.methods[p]) &&
+                           // Exclude inherited stuff from Object.prototype
+                           (baseMethod instanceof Method)){
+                            
                             // Replace value with an override function 
                             // that intercepts the call and sets the correct
                             // 'base' property before calling the original value function
@@ -1233,11 +1129,6 @@ def.scope(function(){
                 proto[p] = value;
             });
 
-            return this;
-        },
-        
-        addStatic: function(mixin){
-            def.copy(this, mixin);
             return this;
         }
     };
@@ -1445,7 +1336,7 @@ def.scope(function(){
         function constructor(){
             if(S){
                 var i = 0;
-                while(steps[i].apply(this, arguments) !== false && ++i < S){}
+                while(steps[i].apply(this, arguments) !== false && ++i < S);
             }
         }
         
@@ -1561,18 +1452,6 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
     
-    prepend: function(target, source, start){
-        if(start == null){
-            start = 0;
-        }
-
-        for(var i = 0, L = source.length ; i < L ; i++){
-            target.unshift(source[start + i]);
-        }
-
-        return target;
-    },
-    
     removeAt: function(array, index){
         return array.splice(index, 1)[0];
     },
@@ -1601,6 +1480,17 @@ def.copyOwn(def.array, /** @lends def.array */{
         
         /* Item was not found but would be inserted at ~low */
         return ~low; // two's complement <=> -low - 1
+        
+        /*
+        case low == high (== mid)
+          if result > 0
+               [low <- mid + 1]  => (low > high)
+            insert at (new) low
+          
+          if result < 0
+               [high <- mid - 1] => (low > high)
+            insert at low
+       */
     },
 
     /**
@@ -1751,94 +1641,13 @@ def.type('Map')
 
 // --------------------
 
-//---------------
-
-def.type('OrderedMap')
-.init(function(){
-    this._list = [];
-    this._map  = {};
-})
-.add({
-    has: function(key){
-        return objectHasOwn.call(this._map, key);
-    },
-    
-    count: function(){
-        return this._list.length;
-    },
-    
-    get: function(key){
-        var bucket = def.getOwn(this._map, key);
-        if(bucket) { 
-            return bucket.value;
-        }
-    },
-    
-    at: function(index){
-        var bucket = this._list[index];
-        if(bucket){
-            return bucket.value;
-        }
-    },
-    
-    add: function(key, v){
-        var map = this._map;
-        var bucket = def.getOwn(map, key);
-        if(!bucket){
-            this._list.push((map[key] = {
-               key:   key,
-               value: v
-            }));
-        } else if(bucket.value !== v){
-            bucket.value = v;
-        }
-        
-        return this;
-    },
-    
-    rem: function(key){
-        var bucket = def.getOwn(this._map, key);
-        if(bucket){
-            // Find it
-            var index = this._list.indexOf(bucket);
-            this._list.splice(index, 1);
-            delete this._map[key];
-        }
-        
-        return this;
-    },
-    
-    clear: function(){
-        if(this._list.length) {
-            this._map = {}; 
-            this._list.length = 0;
-        }
-        
-        return this;
-    },
-    
-    keys: function(){
-        return def.ownKeys(this._map);
-    },
-    
-    forEach: function(fun, ctx){
-        return this._list.forEach(function(bucket){
-            fun.call(ctx, bucket.value, bucket.key);
-        });
-    }
-});
-
-// --------------------
-
 def.html = {
     // TODO: lousy multipass implementation!
     escape: function(str){
-        return def
-            .string.to(str)
-            .replace(/&/gm, "&amp;")
-            .replace(/</gm, "&lt;")
-            .replace(/>/gm, "&gt;")
-            .replace(/"/gm, "&quot;");    
+        return str.replace(/&/gm, "&amp;")
+                  .replace(/</gm, "&lt;")
+                  .replace(/>/gm, "&gt;")
+                  .replace(/"/gm, "&quot;");    
     }
 };
 
@@ -2001,29 +1810,6 @@ def.type('Query')
     },
     
     /**
-     * Returns the last item that satisfies a specified predicate.
-     * <p>
-     * If no predicate is specified, the last item is returned. 
-     * </p>
-     *  
-     * @param {function} [pred] A predicate to apply to every item.
-     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-     * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
-     * 
-     * @type any
-     */
-    last: function(pred, ctx, dv){
-        var theItem = dv;
-        while(this.next()){
-            if(!pred || pred.call(ctx, this.item, this.index)) {
-                theItem = this.item;
-            }
-        }
-        
-        return theItem;
-    },
-    
-    /**
      * Returns <tt>true</tt> if there is at least one item satisfying a specified predicate.
      * <p>
      * If no predicate is specified, returns <tt>true</tt> if there is at least one item. 
@@ -2106,7 +1892,7 @@ def.type('Query')
         return min != null ? {min: min, max: max} : null;
     },
     
-    multipleIndex: function(keyFun, ctx){
+    index: function(keyFun, ctx){
         var keyIndex = {};
         
         this.each(function(item){
@@ -2165,18 +1951,10 @@ def.type('Query')
     },
     
     take: function(n){
-        if(n <= 0){
-            return new def.NullQuery();
-        }
-        
-        if(!isFinite(n)){
-            return this; // all
-        }
-        
         return new def.TakeQuery(this, n);
     },
     
-    whayl: function(pred, ctx){
+    wahyl: function(pred, ctx){
         return new def.WhileQuery(this, pred, ctx);
     },
     
@@ -2234,7 +2012,7 @@ def.type('RangeQuery', def.Query)
 .init(function(start, count, step){
     this.base();
     this._index = start;
-    this._count = count; // may be infinte
+    this._count = count;
     this._step  = step == null ? 1 : step;
 })
 .add({
@@ -2414,10 +2192,12 @@ def.type('TakeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        if(this._take > 0 && this._source.next()){
-            this._take--;
-            this.item = this._source.item;
-            return 1;
+        while(this._source.next()){
+            if(this._take > 0){
+                this._take--;
+                this.item = this._source.item;
+                return 1;
+            }
         }
     }
 });
