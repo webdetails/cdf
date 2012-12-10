@@ -1,3 +1,8 @@
+12.12.10
+    * Fixes to avioid exportData to break due to url length
+    * Changed Orient Dependency to 1.3.0
+    * Added dashboard Views
+
 12.11.09
     * 4.8 ee compatibility issues
 
