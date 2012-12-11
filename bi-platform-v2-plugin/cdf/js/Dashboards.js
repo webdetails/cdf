@@ -4092,7 +4092,7 @@ Query = function() {
       queryDefinition.settingcolumnHeaders = options.columnHeaders;
 
     }
-  }
+  
     
   var theDoQuery = CDA_PATH + 'wrapItUp=wrapit';
   var x = $.ajaxSettings.async;
@@ -4579,7 +4579,7 @@ Query = function() {
 
   };
 
-
+};
 
 
 
