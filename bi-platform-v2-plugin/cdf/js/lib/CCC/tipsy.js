@@ -30,7 +30,12 @@ pv.Behavior.tipsy = function(opts) {
     /**
      * Gravity is intercepted to allow for off screen bounds reaction. 
      */
-    opts.userGravity = opts.gravity || $.fn.tipsy.defaults.gravity;
+        var _userGravity = opts.gravity || $.fn.tipsy.defaults.gravity;
+        var _userGravityFun;
+        if(typeof _userGravity === 'function'){
+            _userGravityFun = _userGravity;
+            _userGravity = null;
+        }
     
     opts.gravity = calculateGravity;
     
@@ -39,6 +44,8 @@ pv.Behavior.tipsy = function(opts) {
         nextOperationId = 0,
         prevMouseX,
         prevMouseY,
+        _renderId,
+        _mark,
         delayOut = opts.delayOut,
         id,
         usesPoint = opts.usesPoint,
@@ -48,14 +55,11 @@ pv.Behavior.tipsy = function(opts) {
     
     opts.delayOut = 0; 
         
-    function getTooltipText(mark, instance) {
-        if(!instance){
-            instance = mark.instance();
-        }
-        
+        function getTooltipText() {
+            var instance = _mark.instance();
         var title = (instance && instance.tooltip) ||
                     // A mark method that is not a property?
-                    (!mark.properties.tooltip && typeof mark.tooltip == 'function' && mark.tooltip()) ||
+                        (!_mark.properties.tooltip && typeof _mark.tooltip == 'function' && _mark.tooltip()) ||
                     instance.title ||
                     instance.text;
          
@@ -67,15 +71,17 @@ pv.Behavior.tipsy = function(opts) {
         return title || ""; // Prevent "undefined" from showing up
     }
     
-    function getInstanceBounds(mark) {
+        function getInstanceBounds() {
+            var instance = _mark.instance();
+            
         /*
          * Compute bounding box. 
          * TODO: support area, lines. 
          */
         var left, top, width, height;
-        if (mark.properties.width) {
+            if (_mark.properties.width) {
             // Bar, panel
-            var bounds = getVisibleScreenBounds(mark);
+                var bounds = getVisibleScreenBounds(_mark);
             
             left = bounds.left;
             top  = bounds.top;
@@ -84,10 +90,9 @@ pv.Behavior.tipsy = function(opts) {
             
         } else {
             /* Compute the transform to offset the tooltip position. */
-            var t = mark.toScreenTransform();
-            var instance = mark.instance();
+                var t = _mark.toScreenTransform();
             var radius;
-            if(mark.properties.outerRadius){
+                if(_mark.properties.outerRadius){
                 // Wedge
                 var midAngle = instance.startAngle + instance.angle / 2;
                 radius = instance.outerRadius;// - (instance.outerRadius - instance.innerRadius) * 0.05;
@@ -95,7 +100,7 @@ pv.Behavior.tipsy = function(opts) {
                 left = t.x + instance.left + radius * Math.cos(midAngle);
                 top  = t.y + instance.top  + radius * Math.sin(midAngle);
                 
-            } else if(mark.properties.shapeRadius){
+                } else if(_mark.properties.shapeRadius){
                 radius = Math.max(2, instance.shapeRadius);
                 var cx = instance.left;
                 var cy = instance.top;
@@ -155,6 +160,14 @@ pv.Behavior.tipsy = function(opts) {
     
     var _gravities = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
     
+        function updateUserGravity(){
+            if(_userGravityFun){
+                _userGravity = _userGravityFun.call(_mark) || $.fn.tipsy.defaults.gravity;
+            }
+            
+            return _userGravity;
+        }
+        
     function calculateGravity(tipSize, calcPosition){
         /*jshint expr:true */
         
@@ -163,13 +176,12 @@ pv.Behavior.tipsy = function(opts) {
         (this === $fakeTipTarget[0]) || def.assert();
         // </Debug>
         
-        var scrollOffset = pv.scrollOffset(this);
+            var $win = $(window);
+            var scrollOffset = {width: $win.scrollLeft(), height: $win.scrollTop()};
+            var pageSize     = {width: $win.width(),      height: $win.height()   };
         
-        // Obtain desired user gravity
-        var gravity = opts.userGravity;
-        if(typeof gravity === 'function'){
-            gravity = gravity.call(this) || $.fn.tipsy.defaults.gravity;
-        }
+            // Desired gravity (assumes updateUserGravity was called previously)
+            var gravity = _userGravity;
         
         // backwards compatibility for special gravity, 'c', 
         // added to jquery.tipsy to avoid the style applying to the arrow, 
@@ -224,12 +236,12 @@ pv.Behavior.tipsy = function(opts) {
         }
         
         function calcPosScore(absPos, a_len){
-            var maxLen = $(window)[a_len]();
+                /*global window:true*/
+                var maxLen = pageSize[a_len];
             var len  = tipSize[a_len];
             
-            var pos  = absPos - scrollOffset[a_len === 'width' ? 0 : 1];
+                var pos  = absPos - scrollOffset[a_len];
             var opos = maxLen - (pos + len);
-            
             var fits = pos >= 0 && opos >= 0;
             
             // Negative positions (off-screen) are amplified 4 times
@@ -298,6 +310,7 @@ pv.Behavior.tipsy = function(opts) {
             id = "tipsyPvBehavior_" + new Date().getTime();
         }
         
+            /*global document:true*/
         var fakeTipTarget = document.getElementById(id);
         if(!fakeTipTarget) {
             fakeTipTarget = document.createElement("div");
@@ -351,7 +364,7 @@ pv.Behavior.tipsy = function(opts) {
     
     function updateTipDebug(){
         if($fakeTipTarget){
-            if(_tip.debug >= 5){
+                if(_tip.debug >= 16){
                 $fakeTipTarget.css({
                     borderColor: 'red',
                     borderWidth: '1px',
@@ -378,7 +391,7 @@ pv.Behavior.tipsy = function(opts) {
         };
     }
     
-    function setTarget(targetElem){
+        function setTarget(targetElem, mark){
         
         if((!$targetElem && targetElem) || 
            ( $targetElem && $targetElem[0] !== targetElem)){
@@ -395,8 +408,9 @@ pv.Behavior.tipsy = function(opts) {
             // ---------
             
             $targetElem = targetElem ? $(targetElem) : null;
+                _mark = targetElem  ? mark : null;
             
-            prevMouseX = prevMouseY = null;
+                prevMouseX = prevMouseY = _renderId = null;
             
             // ---------
             
@@ -424,7 +438,7 @@ pv.Behavior.tipsy = function(opts) {
         if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Delayed Hide Begin opId=" + opId); }
         
         if(delayOut > 0){
-            setTimeout(function(){
+                window.setTimeout(function(){
                 if(checkCanOperate(opId)){
                     if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Hiding opId=" + opId + " nextOperationId=" + nextOperationId); }
                     hideTipsyCore(opId);
@@ -448,7 +462,7 @@ pv.Behavior.tipsy = function(opts) {
     
     function hideTipsyCore(opId) {
         // Release real target
-        setTarget(null);
+            setTarget(null, null);
       
         if ($fakeTipTarget) {
             $fakeTipTarget.tipsy("leave");
@@ -477,14 +491,29 @@ pv.Behavior.tipsy = function(opts) {
          * even if the mouse position does not change... 
          */
         if(prevMouseX != null && 
-           prevMouseX === ev.clientX && 
-           prevMouseY === ev.clientY){ 
+               Math.abs(ev.clientX - prevMouseX) < 3  && 
+               Math.abs(ev.clientY - prevMouseY) < 3){ 
+                 return;
+            }
+            
+            var tag = this.$scene;
+            // tag = {scenes: scenes, index: index}
+            // instance = scenes[index];
+            // mark     = scenes.mark;
+            
+            var scenes;
+            if(!tag || !(scenes = tag.scenes) || !scenes.mark){
              return;
         }
         
-        var t = this.$scene;
-        var mark, scene;
-        if(!t || !(scene = t.scenes) || !(mark = scene.mark)){
+            /*jshint expr:true */
+            (scenes.mark === _mark) || def.assert("Should be the current target's mark.");
+            
+            var renderId = _mark.renderId();
+            var renderIdChanged = (renderId !== _renderId);
+            var followMouse = opts.followMouse;
+            
+            if(!followMouse && !renderIdChanged){
             return;
         }
         
@@ -498,30 +527,35 @@ pv.Behavior.tipsy = function(opts) {
         // -------------
         
         var bounds;
-        if($fakeTipTarget.tipsy('visible')){
-            if(!opts.followMouse){
-                // No need to update text.
-                // Position is updated because, 
-                // otherwise, animations that re-render
-                // the hovering mark and slightly move it,
-                // in a way that the mouse is still kept inside it,
-                // we have to update the position of the tooltip as well.
-                mark.context(scene, t.index, function(){
-                    bounds = getInstanceBounds(mark);
-                });
-            } else {
+            if(followMouse){
                 bounds = getMouseBounds(ev);
             }
-        } else {
-            // Text may have changed
-            mark.context(scene, t.index, function(){
-                var text = getTooltipText(mark);
+            
+            if(renderIdChanged){
+                // => update bounds, text and gravity
+                
+                _renderId = renderId;
+                
+                // Position is updated because, 
+                // otherwise, animations that re-render
+                // the hovering mark causing it to move,
+                // in a way that the mouse is still kept inside it,
+                // we have to update the position of the tooltip as well.
+                
+                
+                _mark.context(scenes, tag.index, function(){
+                    
+                    if(!followMouse){
+                        bounds = getInstanceBounds();
+            }
+                    
+                    var text = getTooltipText();
                 
                 if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Update text. Was hidden. Text: " + text); }
                 
-                $fakeTipTarget.tipsy('setTitle', text);
+                    $fakeTipTarget.tipsy('setTitle', text); // does not update the tooltip UI
                 
-                bounds = opts.followMouse ? getMouseBounds(ev) : getInstanceBounds(mark);
+                    updateUserGravity();
             });
         }
         
@@ -566,15 +600,17 @@ pv.Behavior.tipsy = function(opts) {
         
         var isHidden = !$targetElem;
         
-        setTarget(pv.event.target);
+            setTarget(pv.event.target, mark);
         
-        var text = getTooltipText(mark);
+            var text = getTooltipText();
         
         if(_tip.debug >= 4){ _tip.log("[TIPSY] #" + _tipsyId + " Text: " + text); }
         
         $fakeTipTarget.tipsy('setTitle', text);
         
-        setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds(mark));
+            setFakeTipTargetBounds(opts.followMouse ? getMouseBounds() : getInstanceBounds());
+            
+            updateUserGravity();
         
         hideOtherTipsies();
         
@@ -606,6 +642,7 @@ _tip.setDebug = function(level){
 };
 
 _tip.log = function(m){
+        /*global console:true*/
     if(typeof console !== "undefined"){
         console.log('' + m);
     }
