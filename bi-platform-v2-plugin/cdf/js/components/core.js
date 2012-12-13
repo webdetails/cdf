@@ -526,7 +526,10 @@ var UnmanagedComponent = BaseComponent.extend({
     if (!this.preExec()) {
       return;
     }
-    this.block();
+    var silent = this.lifecycle ? !!this.lifecycle.silent : false;
+    if(!silent) {
+      this.block();
+    }
     setTimeout(_.bind(function(){
       try{
         /* The caller should specify what 'this' points at within the callback
@@ -539,7 +542,9 @@ var UnmanagedComponent = BaseComponent.extend({
         this.postExec();
         this.showTooltip();
       } finally {
-        this.unblock();
+        if(!silent) {
+          this.unblock();
+        }
       }
     },this), 10);
   },
