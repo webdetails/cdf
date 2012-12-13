@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 package org.pentaho.cdf.views;
 
 import java.io.OutputStream;
@@ -14,6 +13,7 @@ import org.json.JSONObject;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
+import org.pentaho.platform.engine.security.SecurityHelper;
 import pt.webdetails.cpf.persistence.*;
 
 /**
@@ -44,6 +44,12 @@ public class ViewManager {
             } catch (Exception e) {
                 logger.error("Error listing views: " + e);
             }
+        } else if ("listAllViews".equals(method)) {
+            try {
+                out.write(listAllViews().toString(2).getBytes("utf-8"));
+            } catch (Exception e) {
+                logger.error("Error listing views: " + e);
+            }
         } else if ("saveView".equals(method)) {
             try {
                 out.write(saveView(requestParams, pathParams).getBytes("utf-8"));
@@ -56,7 +62,7 @@ public class ViewManager {
             } catch (Exception e) {
                 logger.error("Error saving view: " + e);
             }
-        }else {
+        } else {
             logger.error("Unsupported method");
         }
     }
@@ -88,6 +94,33 @@ public class ViewManager {
         } catch (JSONException e) {
         }
         return obj;
+    }
+
+    public JSONObject listAllViews() {
+        JSONObject response = new JSONObject();
+        IPentahoSession userSession = PentahoSessionHolder.getSession();
+        if (!SecurityHelper.isPentahoAdministrator(userSession)) {
+            try {
+                response.put("status", "error");
+                response.put("message", "You need to be an administrator to poll all views");
+            } catch (JSONException e) {
+            }
+            return response;
+        }
+        SimplePersistence sp = SimplePersistence.getInstance();
+        Filter filter = new Filter();
+        filter.where("user").equalTo(userSession.getName());
+        List<View> views = sp.loadAll(View.class);
+        JSONArray arr = new JSONArray();
+        for (View v : views) {
+            arr.put(v.toJSON());
+        }
+        try {
+            response.put("views", arr);
+            response.put("status", "ok");
+        } catch (JSONException e) {
+        }
+        return response;
     }
 
     public String saveView(IParameterProvider requestParams, IParameterProvider pathParams) {
