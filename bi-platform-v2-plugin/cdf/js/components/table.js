@@ -63,6 +63,7 @@ var TableComponent = UnmanagedComponent.extend({
         },this);
         var handler = this.getSuccessHandler(success);
 
+        this.queryState.setAjaxOptions({async:true});
         this.queryState.fetchData(this.parameters, handler);
       }
     } catch (e) {
@@ -91,6 +92,7 @@ var TableComponent = UnmanagedComponent.extend({
       this.processTableComponentResponse(values);
     },this));
     this.queryState.setParameters(this.parameters);
+    this.queryState.setAjaxOptions({async:true});
     this.processTableComponentResponse();
    },
 
