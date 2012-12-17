@@ -506,7 +506,29 @@ Dashboards.updateLifecycle = function(object) {
 };
 
 Dashboards.update = function(component) {
-  this.updateAll([component]);
+  /*
+   * It's not unusual to have several consecutive calls to `update` -- it can
+   * happen, e.g, as a result of using `DuplicateComponent` to clone a number
+   * of components. If we pass each update individually to `updateAll`, the
+   * first call will pass through directly, while the remaining calls will
+   * result in the components being queued up for update only after the first
+   * finished. To prevent this, we build a list of components waiting to be
+   * updated, and only pass those forward to `updateAll` if we haven't had any
+   * more calls within 5 miliseconds of the last.
+   */
+  if(!this.updateQueue){
+    this.updateQueue = [];
+  }
+  this.updateQueue.push(component);
+  if(this.updateTimeout) {
+    clearTimeout(this.updateTimeout);
+  }
+
+  var handler = _.bind(function(){
+    this.updateAll(this.updateQueue);
+    delete this.updateQueue;
+  },this);
+  this.updateTimeout = setTimeout(handler,5);
 };
 
 Dashboards.updateComponent = function(object) {
@@ -904,9 +926,9 @@ Dashboards.updateAll = function(components) {
       this.updateAll();
     }
     /*
-     * We need a copy of `this.updating.current.components` here so that we can
-     * update them all without having items removed from the list by calls to
-     * `postExec` made by synchronous components.
+     * Any synchronous components we update will edit the `current.components`
+     * list midway through this loop, so we need a separate copy of that list
+     * so as to avoid messing up the indices.
      */
     var comps = this.updating.current.components.slice();
     for(var i = 0; i < comps.length;i++) {
