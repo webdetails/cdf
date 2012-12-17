@@ -537,10 +537,12 @@ var UnmanagedComponent = BaseComponent.extend({
          * to call, the component itself is the only sane value to pass as the
          * callback's 'this' as an alternative to using bind.
          */
-        callback.apply(this, args);
+        callback.apply(this, args || []);
         this.drawTooltip();
         this.postExec();
         this.showTooltip();
+      } catch(err){
+        // Avoid IE8 error when there's no catch statement.
       } finally {
         if(!silent) {
           this.unblock();
