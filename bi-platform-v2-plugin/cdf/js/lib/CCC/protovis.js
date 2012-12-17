@@ -436,22 +436,6 @@ pv.elementOffset = function(elem) {
 };
 
 /**
- * @private Computes the accumulated scroll offset given an element.
- */
-pv.scrollOffset = function(elem) {
-    var left = 0, 
-        top  = 0;
-    while(elem){
-        left += elem.scrollLeft || 0;
-        top  += elem.scrollTop  || 0;
-        
-        elem = elem.parentNode;
-    }
-    
-    return [left, top];
-};
-
-/**
  * Binds to the page ready event in a browser-agnostic
  * fashion (i.e. that works under IE!)
  */
@@ -2276,73 +2260,6 @@ pv.Dom.Node.prototype.removeAt = function(i) {
 };
 
 /**
- * Inserts the specified child <i>n</i> at the given index. 
- * Any child from the given index onwards will be moved one position to the end. 
- * If <i>index</i> is null, this method is equivalent to
- * {@link #appendChild}. 
- * If <i>n</i> is already part of the DOM, it is first
- * removed before being inserted.
- *
- * @throws Error if <i>index</i> is non-null and greater than the current number of children.
- * @returns {pv.Dom.Node} the inserted child.
- */
-pv.Dom.Node.prototype.insertAt = function(n, index) {
-    var L;
-    if (index == null || index === (L = this.childNodes.length)){     
-        return this.appendChild(n);
-    }
-    
-    if(index > L){
-        throw new Error("Index out of range.");
-    }
-    
-    if (n.parentNode) {
-        n.parentNode.removeChild(n);
-    }
-    
-    var r = this.childNodes[index];
-    n.parentNode = this;
-    n.nextSibling = r;
-    n.previousSibling = r.previousSibling;
-    if (r.previousSibling) {
-        r.previousSibling.nextSibling = n;
-    } else {
-        if (r == this.lastChild) {
-            this.lastChild = n;
-        }
-        this.firstChild = n;
-    }
-    this.childNodes.splice(index, 0, n);
-    return n;
-};
-
-/**
- * Removes the child node at the specified index from this node.
- */
-pv.Dom.Node.prototype.removeAt = function(i) {
-  var n = this.childNodes[i];
-  if(n){
-      this.childNodes.splice(i, 1);
-      if (n.previousSibling) { 
-          n.previousSibling.nextSibling = n.nextSibling; 
-      } else { 
-          this.firstChild = n.nextSibling; 
-      }
-      
-      if (n.nextSibling) {
-          n.nextSibling.previousSibling = n.previousSibling;
-      } else {
-          this.lastChild = n.previousSibling;
-      }
-      
-      delete n.nextSibling;
-      delete n.previousSibling;
-      delete n.parentNode;
-  }
-  return n;
-};
-
-/**
  * Replaces the specified child <i>r</i> of this node with the node <i>n</i>. If
  * <i>n</i> is already part of the DOM, it is first removed before being added.
  *
@@ -3856,7 +3773,7 @@ pv.Scale.quantitative = function() {
     if (err <= .15 && exponent < exponentMax - 1) { 
         step *= 10;
     } else if (err <= .35) {
-        step *= 5; 
+        step *= 5;
     } else if (err <= .75) {
         step *= 2;
     }
@@ -3952,7 +3869,7 @@ pv.Scale.quantitative = function() {
       }
       
       var formatter = tickFormatter || tickFormat;
-      return formatter(t); 
+      return formatter(t);
   };
 
   /**
@@ -4014,12 +3931,6 @@ pv.Scale.quantitative = function() {
    */
   
   pv.copyOwn(scale, pv.Scale.common);
-
-  scale.by1 = function(f) {
-    function by1(x) { return scale(f.call(this, x)); }
-    for (var method in scale) by1[method] = scale[method];
-    return by1;
-  };
 
   scale.domain.apply(scale, arguments);
   return scale;
@@ -4660,7 +4571,7 @@ pv.Scale.ordinal = function() {
    * @returns {pv.Scale.ordinal} a view of this scale by the specified accessor
    * function.
    */
-
+  
   pv.copyOwn(scale, pv.Scale.common);
     
   scale.domain.apply(scale, arguments);
@@ -4837,7 +4748,7 @@ pv.Scale.quantile = function() {
    * @returns {pv.Scale.quantile} a view of this scale by the specified
    * accessor function.
    */
-
+  
   pv.copyOwn(scale, pv.Scale.common);
   
   scale.domain.apply(scale, arguments);
@@ -5083,15 +4994,6 @@ pv.Color = function(color, opacity) {
   this.opacity = opacity;
   
   this.key = "solid " + color + " alpha(" + opacity + ")";
-};
-
-/**
- * Returns an equivalent color in the HSL color space.
- * 
- * @returns {pv.Color.Hsl} an HSL color.
- */
-pv.Color.prototype.hsl = function() { 
-    return this.rgb().hsl(); 
 };
 
 /**
@@ -6678,7 +6580,7 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
       }
     }
   };
-
+ 
 })();
 /**
  * @private Converts the specified b-spline curve segment to a bezier curve
@@ -7248,13 +7150,13 @@ pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
 
   var sop = stroke.opacity;
   elm = this.expect(elm, "path", scenes, from, {
-      "shape-rendering": s.antialias ? null : "crispEdges",
+      "shape-rendering":   s.antialias ? null : "crispEdges",
       "pointer-events":    addEvents ? s.events : 'none',
-      "cursor": s.cursor,
-      "d": "M" + d.join("ZM") + "Z",
-      "fill": fill.color,
-      "fill-opacity": fill.opacity || null,
-      "stroke": stroke.color,
+      "cursor":            s.cursor,
+      "d":                 "M" + d.join("ZM") + "Z",
+      "fill":              fill.color,
+      "fill-opacity":      fill.opacity || null,
+      "stroke":            stroke.color,
       "stroke-opacity":    sop || null,
       "stroke-width":      sop ? (s.lineWidth / this.scale) : null,
       "stroke-linecap":    s.lineCap,
@@ -7561,14 +7463,14 @@ pv.SvgScene.areaSegmentedFull = function(e, scenes) {
 
     var attrs = {
         "shape-rendering": s1.antialias ? null : "crispEdges",
-        "pointer-events": s1.events,
-        "cursor": s1.cursor,
-        "d": d,
-        "fill": fill.color,
-        "fill-opacity": fill.opacity || null,
-        "stroke": stroke.color,
-        "stroke-opacity": stroke.opacity || null,
-        "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null
+        "pointer-events":  s1.events,
+        "cursor":          s1.cursor,
+        "d":               d,
+        "fill":            fill.color,
+        "fill-opacity":    fill.opacity || null,
+        "stroke":          stroke.color,
+        "stroke-opacity":  stroke.opacity || null,
+        "stroke-width":    stroke.opacity ? s1.lineWidth / this.scale : null
       };
     
     e = this.expect(e, "path", scenes, i, attrs);
@@ -7990,7 +7892,7 @@ pv.SvgScene.lineFixed = function(elm, scenes) {
   if (!fill.opacity && !stroke.opacity) {
     return elm;
   }
-
+  
   this.addFillStyleDefinition(scenes, fill);
   this.addFillStyleDefinition(scenes, stroke);
   
@@ -8103,8 +8005,8 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
 
       return this.append(elm, scenes, from);
     });
-    });
-
+  });
+  
   /* Events */
   if(eventsSegments){
     eventsSegments.forEach(function(segment){
@@ -8138,7 +8040,7 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
       }, this); 
     }, this);
   }
-
+  
   return elm;
 };
 
@@ -8621,7 +8523,7 @@ pv.SvgScene.panel = function(scenes) {
         g.setAttribute("fill", "none");
         g.setAttribute("stroke", "none");
         g.setAttribute("stroke-width", 1.5);
-
+        
         // Prevent selecting VML elements when dragging
         
         // Supported by IE10 SVG
@@ -9238,35 +9140,35 @@ pv.Mark.prototype.setPropertyValue = function(name, v, def, cast, chain, tag){
     var properties = this.$properties;
     
     var p = {
-      name:     name, 
-      id:       pv.id(), 
-      value:    v,
+        name:  name,
+        id:    pv.id(), 
+        value: v,
         type:  type,
         tag:   tag
-  };
+    };
   
-  var specified = propertiesMap[name];
+    var specified = propertiesMap[name];
   
-  propertiesMap[name] = p;
+    propertiesMap[name] = p;
   
-  if(specified){
-      // Find it and remove it
-      for (var i = 0; i < properties.length; i++) {
-        if (properties[i] === specified) {
-          properties.splice(i, 1);
-          break;
+    if(specified){
+        // Find it and remove it
+        for (var i = 0; i < properties.length; i++) {
+            if (properties[i] === specified) {
+                properties.splice(i, 1);
+                break;
+            }
         }
-      }
-  }
-  
-  properties.push(p);
+    }
+    
+    properties.push(p);
     
     if(chain && specified && type === 3){ // is a prop fun
         p.proto = specified;
         p.root  = specified.root || specified;
     }
     
-  return p;
+    return p;
 };
 
 pv.Mark.prototype.intercept = function(name, v, keyArgs){
@@ -9582,7 +9484,7 @@ pv.Mark.prototype.defaults = new pv.Mark()
     .datum(function() {
         var parent = this.parent;
         return parent ? parent.scene[parent.index].datum : null; 
-     })
+    })
     .visible(true)
     .antialias(true)
     .events("painted");
@@ -10100,7 +10002,7 @@ pv.Mark.prototype.bind = function() {
           
           switch (p.name) {
             case "data": 
-              data = p; 
+              data = p;
               break;
 
             // DATUM - an object counterpart for each value of data.
@@ -10317,8 +10219,8 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
     // repeated here, for performance
     var v;
     switch(p.type){
-      /* 2 most common first */
-      case 3: 
+        /* 2 most common first */
+        case 3:
             var oldProtoProp = pv.propertyProto;
             try{
                 pv.propertyProto = p.proto;
@@ -10326,17 +10228,17 @@ pv.Mark.prototype.buildProperties = function(s, properties) {
             } finally {
                 pv.propertyProto = oldProtoProp;
             }
-        break;
+            break;
             
-      case 2:
+        case 2: 
             v = p.value;
-        break;
-        
-      // copy already evaluated def value to each instance's scene
-      case 0:
-      case 1: 
-        v = this.scene.defs[p.name].value; 
-        break;
+            break;
+      
+        // copy already evaluated def value to each instance's scene
+        case 0:
+        case 1:
+            v = this.scene.defs[p.name].value;
+            break;
     }
     
     s[p.name] = v;
@@ -10417,8 +10319,8 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                             
                             newNetIndex = pv.propertyEvalNetIndex;
                             if(newNetIndex > netIndex){
-                                    var evalDeps = pv.propertyEvalDependencies;
-                                    for(var depName in evalDeps){
+                                var evalDeps = pv.propertyEvalDependencies;
+                                for(var depName in evalDeps){
                                     // If dependent property has not yet been evaluated
                                     // set it as dirty
                                     if(evalDeps.hasOwnProperty(depName) &&
@@ -10426,9 +10328,9 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                                         if(!netDirtyProps){
                                             netDirtyProps = {};
                                         }
-                                            netDirtyProps[depName] = true;
-                                        }
+                                        netDirtyProps[depName] = true;
                                     }
+                                }
                                 
                                 this.updateNet(p, newNetIndex);
                             }
@@ -10533,19 +10435,19 @@ pv.Mark.prototype.buildImplied = function(s) {
       instance = this.parent ? this.parent.instance() : null;
       checked = true;
       var width = instance ? instance.width : (w + l + r);
-  if (w == null) {
-    w = width - (r = r || 0) - (l = l || 0);
-  } else if (r == null) {
-    if (l == null) {
-      l = r = (width - w) / 2;
-    } else {
-      r = width - w - l;
-    }
+      if (w == null) {
+        w = width - (r = r || 0) - (l = l || 0);
+      } else if (r == null) {
+        if (l == null) {
+          l = r = (width - w) / 2;
+        } else {
+          r = width - w - l;
+        }
       } else {
-    l = width - w - r;
+        l = width - w - r;
+      }
   }
-  }
-
+  
   /* Compute implied height, bottom and top. */
   if (h == null || b == null || t == null) {
       if(!checked){
@@ -10553,19 +10455,19 @@ pv.Mark.prototype.buildImplied = function(s) {
       }
       
       var height = instance ? instance.height : (h + t + b);
-  if (h == null) {
-    h = height - (t = t || 0) - (b = b || 0);
-  } else if (b == null) {
-    if (t == null) {
-      b = t = (height - h) / 2;
-    } else {
-      b = height - h - t;
-    }
+      if (h == null) {
+        h = height - (t = t || 0) - (b = b || 0);
+      } else if (b == null) {
+        if (t == null) {
+          b = t = (height - h) / 2;
+        } else {
+          b = height - h - t;
+        }
       } else {
-    t = height - h - b;
+        t = height - h - b;
+      }
   }
-  }
-
+  
   s.left = l;
   s.right = r;
   s.top = t;
@@ -11251,7 +11153,7 @@ pv.Area.prototype.buildInstance = function(s) {
     if(n){
       var firstScene = this.scene[0];
       for (var i = 0 ; i < n ; i++) {
-      var p = fixed[i].name;
+        var p = fixed[i].name;
         s[p] = firstScene[p];
       }
     }
@@ -11797,7 +11699,7 @@ pv.Line = function() {
 
 pv.Line.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
-    .property("lineJoin", String)
+    .property("lineJoin",  String)
     .property("strokeMiterLimit", Number)
     .property("lineCap",   String)
     .property("strokeStyle", pv.fillStyle)
@@ -13187,7 +13089,7 @@ pv.Transition = function(mark) {
 
   that.start = function(onEnd) {
     onEndCallback = onEnd;
-
+    
     mark.root.animatingCount++;
     
     // TODO allow partial rendering
@@ -13195,32 +13097,32 @@ pv.Transition = function(mark) {
         doEnd();
         throw new Error("Animated partial rendering is not supported.");
     }
-
+    
     try{
-    // TODO allow parallel and sequenced transitions
-    if (mark.$transition) {
-        mark.$transition.stop();
-    }
-    mark.$transition = that;
-
-    // TODO clearing the scene like this forces total re-build
-    var i = pv.Mark.prototype.index,
-        before = mark.scene,
-        after;
+        // TODO allow parallel and sequenced transitions
+        if (mark.$transition) {
+            mark.$transition.stop();
+        }
+        mark.$transition = that;
     
-    mark.scene = null;
-    mark.bind();
-    mark.build();
+        // TODO clearing the scene like this forces total re-build
+        var i = pv.Mark.prototype.index,
+            before = mark.scene,
+            after;
+        
+        mark.scene = null;
+        mark.bind();
+        mark.build();
+        
+        after = mark.scene;
+        mark.scene = before;
+        
+        pv.Mark.prototype.index = i;
     
-    after = mark.scene;
-    mark.scene = before;
-    
-    pv.Mark.prototype.index = i;
-
-    var start = Date.now(), 
-        list = {};
-    
-    interpolate(list, before, after);
+        var start = Date.now(), 
+            list = {};
+        
+        interpolate(list, before, after);
     } catch(ex) {
         doEnd();
         throw ex;
@@ -16005,7 +15907,7 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, invertDir, items
         var item = items[reverseLayers ? (L -l -1) : l];
         if(item.dir === stackDir){
             var h = item.h || 0; // null -> 0
-
+            
             if(efDir > 0){
                 item.y = yOffset + vertiMargin2;
                 yOffset += h;

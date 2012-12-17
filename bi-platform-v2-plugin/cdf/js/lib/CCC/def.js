@@ -1,4 +1,4 @@
-pen.define("cdf/lib/CCC/def", function(){
+pen.define("cdf/lib/CCC/def", function(){ 
 /** @private */
 var arraySlice = Array.prototype.slice;
 
@@ -156,10 +156,10 @@ var def = /** @lends def */{
                         }
                         value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
                     }
-                        
+                    
                     o = value;
                 }
-                    }
+            }
         }
         
         return o;
@@ -279,12 +279,12 @@ var def = /** @lends def */{
             A--;
             for(var i = 1 ; i < A ; i += 2) {
                 p = a[i];
-            if(o[p] == null){
-                o[p] = a[i+1];
+                if(o[p] == null){
+                    o[p] = a[i+1];
+                }
             }
         }
-        }
-
+        
         return o;
     },
 
@@ -306,12 +306,12 @@ var def = /** @lends def */{
             A--;
             for(var i = 1 ; i < A ; i += 2) {
                 p = a[i];
-            if(o[p] === undefined){
-                o[p] = a[i+1];
+                if(o[p] === undefined){
+                    o[p] = a[i+1];
+                }
             }
         }
-        }
-
+        
         return o;
     },
     
@@ -1044,33 +1044,33 @@ function mixinRecursive(instance, mixin){
 }
 
 function mixinProp(instance, p, vMixin, noProtectValue){
-        if(vMixin !== undefined){
-            var oMixin,
-                oTo = def.object.asNative(instance[p]);
+    if(vMixin !== undefined){
+        var oMixin,
+            oTo = def.object.asNative(instance[p]);
 
-            if(oTo){
-                oMixin = def.object.as(vMixin);
-                if(oMixin){
+        if(oTo){
+            oMixin = def.object.as(vMixin);
+            if(oMixin){
                 if(!objectHasOwn.call(instance, p)){
                     instance[p] = oTo = Object.create(oTo);
                 }
             
-                    mixinRecursive(oTo, oMixin);
-                } else {
-                    // Overwrite oTo
-                    instance[p] = vMixin;
-                }
+                mixinRecursive(oTo, oMixin);
             } else {
+                // Overwrite oTo
+                instance[p] = vMixin;
+            }
+        } else {
             if(!noProtectValue){
                 oMixin = def.object.asNative(vMixin);
                 if(oMixin){
                     vMixin = Object.create(oMixin);
                 }
             }
-
-                instance[p] = vMixin;
-            }
+            
+            instance[p] = vMixin;
         }
+    }
 }
 
 def.mixin = function(instance/*mixin1, mixin2, ...*/){
@@ -1217,7 +1217,7 @@ def.scope(function(){
                         
                         // Check if it is an override
                         
-                           // Exclude inherited stuff from Object.prototype
+                        // Exclude inherited stuff from Object.prototype
                         var bm = state.methods[p];
                         if(bm && (bm instanceof Method)){
                             baseMethod = bm;
@@ -1229,7 +1229,7 @@ def.scope(function(){
                         }
                         
                         state.methods[p] = method;
-                            
+                        
                         if(baseMethod){
                             // Replace value with an override function 
                             // that intercepts the call and sets the correct
@@ -1288,7 +1288,7 @@ def.scope(function(){
             return this;
         }
     };
-
+    
     function getStatic(state, p){
         if(state){
             do{
@@ -1920,9 +1920,9 @@ def.html = {
         return def
             .string.to(str)
             .replace(/&/gm, "&amp;")
-                  .replace(/</gm, "&lt;")
-                  .replace(/>/gm, "&gt;")
-                  .replace(/"/gm, "&quot;");    
+            .replace(/</gm, "&lt;")
+            .replace(/>/gm, "&gt;")
+            .replace(/"/gm, "&quot;");    
     }
 };
 
@@ -2527,11 +2527,11 @@ def.type('TakeQuery', def.Query)
 .add({
     _next: function(nextIndex){
         if(this._take > 0 && this._source.next()){
-                this._take--;
-                this.item = this._source.item;
-                return 1;
-            }
+            this._take--;
+            this.item = this._source.item;
+            return 1;
         }
+    }
 });
 
 def.type('ReverseQuery', def.Query)
