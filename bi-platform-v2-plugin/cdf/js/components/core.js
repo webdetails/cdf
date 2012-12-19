@@ -2,6 +2,12 @@ BaseComponent = Base.extend({
   //type : "unknown",
   visible: true,
   isManaged: true,
+  timerStart: 0,
+  timerSplit: 0,
+  elapsedSinceSplit: 0,
+  elapsedSinceStart: 0,
+  logColor: undefined,
+  
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
@@ -222,7 +228,83 @@ BaseComponent = Base.extend({
     }
     /* opts is falsy if null or undefined */
     return opts || {};
+  },
+  
+  startTimer: function(){
+    
+    this.timerStart = new Date();
+    this.timerSplit = this.timerStart;
+    
+  },
+  
+  splitTimer: function(){
+    
+    var now = new Date();
+    
+    this.elapsedSinceStart = now.getTime() - this.timerStart.getTime();
+    this.elapsedSinceSplit = now.getTime() - this.timerSplit.getTime();
+    
+    this.timerSplit = now;
+    return this.getTimerInfo();
+  },
+  
+  formatTimeDisplay: function(t){
+    return Math.log(t)/Math.log(10)>=3?Math.round(t/100)/10+"s":t+"ms";
+  },
+  
+  getTimerInfo: function(){
+    
+      return {
+        timerStart: this.timerStart,
+        timerSplit: this.timerSplit,
+        elapsedSinceStart: this.elapsedSinceStart,
+        elapsedSinceStartDesc: this.formatTimeDisplay(this.elapsedSinceStart),
+        elapsedSinceSplit: this.elapsedSinceSplit,
+        elapsedSinceSplitDesc: this.formatTimeDisplay(this.elapsedSinceSplit)
+      }
+    
+  },
+  
+  /*
+   * This method assigns and returns a unique and somewhat randomish color for 
+   * this log. The goal is to be able to track cdf lifecycle more easily in 
+   * the console logs. We're returning a Hue value between 0 and 360, a range between 0
+   * and 75 for saturation and between 45 and 80 for value
+   *
+   */
+  
+  getLogColor: function(){
+    
+    if (this.logColor){
+      return this.logColor;
+    }
+    else{
+      // generate a unique, 
+      
+      var hashCode = function(str){
+        var hash = 0;
+        if (str.length == 0) return hash;
+        for (i = 0; i < str.length; i++) {
+          var chr = str.charCodeAt(i);
+          hash = ((hash<<5)-hash)+chr;
+          hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash;
+      }
+      
+      var hash = hashCode(this.name).toString();
+      var hueSeed = hash.substr(hash.length-6,2) || 0;
+      var saturationSeed = hash.substr(hash.length-2,2) || 0;
+      var valueSeed = hash.substr(hash.length-4,2) || 0;
+
+      this.logColor = Dashboards.hsvToRgb(360/100*hueSeed, 75/100*saturationSeed, 45 + (80-45)/100*valueSeed);
+      return this.logColor;
+      
+    }
+    
+    
   }
+  
 });
 
 var TextComponent = BaseComponent.extend({
@@ -457,6 +539,7 @@ var ManagedFreeformComponent = BaseComponent.extend({
  */
 var UnmanagedComponent = BaseComponent.extend({
   isManaged: false,
+  isRunning: false,
 
   /*
    * Handle calling preExecution when it exists. All components extending
@@ -654,8 +737,10 @@ var UnmanagedComponent = BaseComponent.extend({
 
   /* Trigger an error event on the component. Takes as arguments the error
    * message and, optionally, a `cause` object.
+   * Also 
    */
   error: function(msg, cause) {
+    this.unblock();
     this.trigger("cdf cdf:error", this, msg, cause || null);
   },
   /*
@@ -715,7 +800,11 @@ var UnmanagedComponent = BaseComponent.extend({
    * components that support it!)
    */
   block: function() {
-    Dashboards.incrementRunningCalls();
+    if(!this.isRunning){
+      this.dashboard.incrementRunningCalls();
+      this.isRunning = true;
+    }
+    
   },
 
   /*
@@ -724,7 +813,11 @@ var UnmanagedComponent = BaseComponent.extend({
    * overridden in components that override UnmanagedComponent#block. 
    */
   unblock: function() {
-    Dashboards.decrementRunningCalls();
+  
+    if(this.isRunning){
+      this.dashboard.decrementRunningCalls();
+      this.isRunning = false;
+    }
   }
 });
 
