@@ -1,0 +1,45 @@
+body {
+  color: #333;
+  width: 850px;
+  margin: 0px auto;
+  counter-reset: chapter, section, subsection;
+}
+
+h1, h2, h3 {
+  color: #113;
+}
+
+h2:before {
+  content: counter(chapter) " ";
+  counter-increment: chapter;
+}
+
+h2 {
+  counter-reset: section, subsection;
+}
+h3:before {
+  counter-increment: section;
+  content: counter(chapter) "." counter(section) " ";
+}
+
+h3 {
+  counter-reset: subsection;
+}
+h4:before {
+  content: counter(chapter) "." counter(section) "." counter(subsection) " ";
+  counter-increment: subsection;
+}
+
+pre {
+  margin: 10px auto;
+  padding: 10px;
+  color: #113;
+  border: 1px solid #113;
+  background: #d0dad8;
+  border-radius: 3px;
+  -o-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webki-border-radius: 3px;
+  -ms-border-radius: 3px;
+  width: 650px;
+}
