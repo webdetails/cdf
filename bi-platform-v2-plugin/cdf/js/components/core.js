@@ -651,6 +651,12 @@ var UnmanagedComponent = BaseComponent.extend({
     return ++this.runCounter;
   },
 
+  /* Trigger an error event on the component. Takes as arguments the error
+   * message and, optionally, a `cause` object.
+   */
+  error: function(msg, cause) {
+    this.trigger("cdf cdf:error", this, msg, cause || null);
+  },
   /*
    * Build a generic response handler that runs the success callback when being
    * called in response to the most recent AJAX request that was triggered for

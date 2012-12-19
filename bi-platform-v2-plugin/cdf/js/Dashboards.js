@@ -1401,13 +1401,20 @@ Dashboards.fireChange = function(parameter, value) {
  * are the priorities, and the values are arrays of components that should be
  * updated at that priority level:
  *
- *  {
- *    0: [c1,c2],
- *    2: [c3],
- *    10: [c4]
- *  }
+ *    {
+ *      0: [c1,c2],
+ *      2: [c3],
+ *      10: [c4]
+ *    }
  *
- *  Note that even though it expects numerical keys, 
+ * Alternatively, you can pass an array of components, `[c1, c2, c3]`, in which
+ * case the priority-keyed object will be created internally from the priority
+ * values the components declare for themselves.
+ *
+ * Note that even though `updateAll` expects `components` to have numerical
+ * keys, and that it does work if you pass it an array, `components` should be
+ * an object, rather than an array, so as to allow negative keys (and so that
+ * we can use it as a sparse array of sorts)
  */
 Dashboards.updateAll = function(components) {
   if(!this.updating) {
@@ -1437,17 +1444,22 @@ Dashboards.updateAll = function(components) {
 
     var postExec = function(component,isExecuting) {
       /*
-       * The `preExecution` event will pass two arguments (the component proper
-       * and a flag telling us whether the preExecution test passed), so we can
-       * test for that, and check whether the component is executing or not.
-       * If it's not going to execute, we should queue up the next component
-       * right now. If it is, we shouldn't do anything.right now.
+       * We first need to figure out what event we're handling. `error` will
+       * pass the component, error message and caught exception (if any) to
+       * its event handler, while the `preExecution` event will pass two
+       * arguments (the component proper and a flag telling us whether the
+       * preExecution test passed).
+       *
+       * If we're not going to finish updating the component, either because
+       * `preExecution` cancelled the update, or because we're in an `error`
+       * event handler, we should queue up the next component right now.
        */
-      if(arguments.length == 2 && isExecuting) {
+      if(arguments.length == 2 && typeof isExecuting == "boolean" && isExecuting) {
         return;
       }
       component.off("cdf:postExecution",postExec);
       component.off("cdf:preExecution",postExec);
+      component.off("cdf:error",postExec);
       var current = this.updating.current;
       current.components = _.without(current.components, component);
       var tiers = this.updating.tiers;
@@ -1462,7 +1474,7 @@ Dashboards.updateAll = function(components) {
     var comps = this.updating.current.components.slice();
     for(var i = 0; i < comps.length;i++) {
       component = comps[i];
-      component.on("cdf:postExecution cdf:preExecution",postExec,this);
+      component.on("cdf:postExecution cdf:preExecution cdf:error",postExec,this);
       this.updateComponent(component);
     }
   }

@@ -48,6 +48,9 @@ var TableComponent = UnmanagedComponent.extend({
     if(!this.preExec()){
       return;
     }
+    if(!this.htmlObject) {
+      return this.error("TableComponent requires an htmlObject");
+    }
     try{
       this.block();
       this.setup();
