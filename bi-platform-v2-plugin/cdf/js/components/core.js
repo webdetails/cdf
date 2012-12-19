@@ -541,8 +541,9 @@ var UnmanagedComponent = BaseComponent.extend({
         this.drawTooltip();
         this.postExec();
         this.showTooltip();
-      } catch(err){
+      } catch(e){
         // Avoid IE8 error when there's no catch statement.
+        this.dashboard.log(e,'error');
       } finally {
         if(!silent) {
           this.unblock();
