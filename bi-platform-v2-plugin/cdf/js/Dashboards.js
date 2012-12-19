@@ -161,6 +161,13 @@ var Dashboards = {
    */
 
   renderDelay: 300,
+  /* 
+   * Legacy dashboards don't have priority, so we'll assign a very low priority
+   * to them.
+   * */
+  
+  legacyPriority: -1000,
+  
 
   args: [],
 
@@ -1002,11 +1009,16 @@ Dashboards.getComponentByName = function(name) {
 
 
 Dashboards.addComponents = function(components) {
-
   // attempt to convert over to component implementation
 
   for (var i =0; i < components.length; i++) {
     this.bindControl(components[i]);
+    
+    // For legacy dashboards, we'll automatically assign some priority for 
+    // component execution
+    if(components[i].priority === ""){
+      components[i].priority = this.legacyPriority++;
+    }
   }
 
   this.components = this.components.concat(components);
@@ -1405,7 +1417,7 @@ Dashboards.updateAll = function(components) {
     };
   }
   if(components && _.isArray(components) && !_.isArray(components[0])) {
-    var comps = [];
+    var comps = {};
     _.each(components,function(c) {
       var prio = c.priority || 0;
       if(!comps[prio]) {
