@@ -89,6 +89,9 @@ var Dashboards = {
   
   legacyPriority: -1000,
   
+  /* Log lifecycle events? */
+  logLifecycle: true,
+  
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   /* Reference to current language code . Used in every place where jquery
@@ -372,6 +375,31 @@ Dashboards.bindControl = function(object) {
      * and endow it with the Backbone event system.
      */
     _.extend(object,objectImpl,Backbone.Events);
+    
+    // Add logging lifeCycle
+    
+      
+    var myself = this;
+    object.on("all",function(e){
+      
+      if( myself.logLifecycle &&  e !== "cdf" && typeof console != "undefined" ){
+        
+        var eventName = e.substr(4);
+        var eventStr = "      ";
+        if (eventName==="preExecution")
+          eventStr = ">Start";
+        else if(eventName==="postExecution")
+          eventStr = "<End  ";
+        else if(eventName === "error")
+          eventStr = "!Error";
+        
+        
+        
+        var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event",this.splitTimer());
+        console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
+          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+      }
+    })
   }
 };
 
@@ -776,6 +804,7 @@ Dashboards.initEngine = function(){
     this.waitingForInit = _(this.waitingForInit).without(comp);
     comp.off('cdf:postExecution',callback);
     comp.off('cdf:preExecution',callback);
+    comp.off('cdf:error',callback);
     this.handlePostInit();
   }
 
@@ -783,7 +812,7 @@ Dashboards.initEngine = function(){
     function() {
       for(var i= 0, len = updating.length; i < len; i++){
         var component = updating[i];
-        component.on('cdf:postExecution cdf:preExecution',callback,myself);
+        component.on('cdf:postExecution cdf:preExecution cdf:error',callback,myself);
       }
       Dashboards.updateAll(updating);
       if(components.length > 0) {
@@ -960,6 +989,8 @@ Dashboards.updateAll = function(components) {
     var comps = this.updating.current.components.slice();
     for(var i = 0; i < comps.length;i++) {
       component = comps[i];
+      // Start timer
+      component.startTimer();
       component.on("cdf:postExecution cdf:preExecution cdf:error",postExec,this);
       this.updateComponent(component);
     }
@@ -1577,6 +1608,44 @@ Dashboards.objectToPropertiesArray = function(obj) {
   }
   return pArray;
 }
+
+/** 
+* Converts HSV to RGB value. 
+* 
+* @param {Integer} h Hue as a value between 0 - 360 degrees 
+* @param {Integer} s Saturation as a value between 0 - 100 % 
+* @param {Integer} v Value as a value between 0 - 100 % 
+* @returns {Array} The RGB values  EG: [r,g,b], [255,255,255] 
+*/  
+Dashboards.hsvToRgb = function (h,s,v) {  
+  
+    var s = s / 100,  
+         v = v / 100;  
+  
+    var hi = Math.floor((h/60) % 6);  
+    var f = (h / 60) - hi;  
+    var p = v * (1 - s);  
+    var q = v * (1 - f * s);  
+    var t = v * (1 - (1 - f) * s);  
+  
+    var rgb = [];  
+  
+    switch (hi) {  
+        case 0: rgb = [v,t,p];break;  
+        case 1: rgb = [q,v,p];break;  
+        case 2: rgb = [p,v,t];break;  
+        case 3: rgb = [p,q,v];break;  
+        case 4: rgb = [t,p,v];break;  
+        case 5: rgb = [v,p,q];break;  
+    }  
+  
+    var r = Math.min(255, Math.round(rgb[0]*256)),  
+        g = Math.min(255, Math.round(rgb[1]*256)),  
+        b = Math.min(255, Math.round(rgb[2]*256));  
+  
+    return "rgb("+ [r,g,b].join(",")+")";  
+  
+}     
 
 /**
  *
