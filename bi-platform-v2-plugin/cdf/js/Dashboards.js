@@ -151,16 +151,6 @@ var Dashboards = {
   context:{},
 
   
-
-  /* measures, in miliseconds, the delay between firing blockUI and
-
-   * actually updating the dashboard. Necessary for IE/Chrome. Higher
-
-   * values have better chances of working, but are (obviously) slower
-
-   */
-
-  renderDelay: 300,
   /* 
    * Legacy dashboards don't have priority, so we'll assign a very low priority
    * to them.
@@ -1267,21 +1257,14 @@ Dashboards.initEngine = function(){
     this.handlePostInit();
   }
 
-  setTimeout(
-
-    function() {
-
-      for(var i= 0, len = updating.length; i < len; i++){
-        var component = updating[i];
-        component.on('cdf:postExecution cdf:preExecution cdf:error',callback,myself);
-      }
-      Dashboards.updateAll(updating);
-      if(components.length > 0) {
-        myself.handlePostInit();
-      }
-    },
-    this.renderDelay
-  );
+  for(var i= 0, len = updating.length; i < len; i++){
+    var component = updating[i];
+    component.on('cdf:postExecution cdf:preExecution cdf:error',callback,myself);
+  }
+  Dashboards.updateAll(updating);
+  if(components.length > 0) {
+    myself.handlePostInit();
+  }
 };
 
 Dashboards.handlePostInit = function() {
@@ -1329,6 +1312,9 @@ Dashboards.resetAll = function(){
 
 
 Dashboards.processChange = function(object_name){
+  
+  //Dashboards.log("Processing change on " + object_name);
+  
   var object = this.getComponentByName(object_name);
 
   var parameter = object.parameter;
@@ -1416,10 +1402,7 @@ Dashboards.fireChange = function(parameter, value) {
     }
 
   }
-
-  setTimeout(function() {
-      myself.updateAll(toUpdate);
-  }, this.renderDelay);
+  myself.updateAll(toUpdate);
 };
 
 
@@ -1503,6 +1486,10 @@ Dashboards.updateAll = function(components) {
       // Start timer
       component.startTimer();
       component.on("cdf:postExecution cdf:preExecution cdf:error",postExec,this);
+      
+      // Logging this.updating. Uncomment if needed to trace issues with lifecycle
+      // Dashboards.log("Processing "+ component.name +" (priority " + this.updating.current.priority +"); Next in queue: " +
+      //  _(this.updating.tiers).map(function(v,k){return k + ": [" + _(v).pluck("name").join(",") + "]"}).join(", "));
       this.updateComponent(component);
     }
   }
