@@ -905,9 +905,7 @@ Dashboards.fireChange = function(parameter, value) {
     }
   }
   setTimeout(function() {
-    for (var i = 0; i < toUpdate.length; i++) {
-      myself.update(toUpdate[i]);
-    }
+      myself.updateAll(toUpdate);
   }, this.renderDelay);
 };
 
