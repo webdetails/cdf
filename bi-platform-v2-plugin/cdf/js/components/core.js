@@ -241,6 +241,12 @@ BaseComponent = Base.extend({
     
     var now = new Date();
     
+    // Sanity check, in case this component doesn't follow the correct workflow
+    if(this.elapsedSinceStart === 0 || this.elapsedSinceSplit === 0){
+      this.startTimer();
+    }
+    
+    
     this.elapsedSinceStart = now.getTime() - this.timerStart.getTime();
     this.elapsedSinceSplit = now.getTime() - this.timerSplit.getTime();
     
