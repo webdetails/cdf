@@ -281,8 +281,8 @@ var DateRangeInputComponent = BaseComponent.extend({
     }
     var offset = dr.offset();
     var myself = this;
-    var earliestDate = this.earliestDate != undefined  ?  Dashboards.getParameterValue(this.earliestDate) : Date.parse('-1years');
-    var latestDate = this.latestDate != undefined  ?  Dashboards.getParameterValue(this.latestDate) : Date.parse('+1years');
+    var earliestDate = this.earliestDate != undefined  ?  this.earliestDate : Date.parse('-1years');
+    var latestDate = this.latestDate != undefined  ?  this.latestDate : Date.parse('+1years');
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
     
