@@ -1,4 +1,4 @@
-//VERSION TRUNK-20121204\n
+//VERSION TRUNK-20130103\n
 
 
 /*global pvc:true */
@@ -26451,13 +26451,14 @@ def
             data              = layoutInfo.data,
             itemCount         = layoutInfo.ticks.length,
             rootScene         = this._getRootScene(),
-            includeModulo     = this._tickIncludeModulo;
-
+            includeModulo     = this._tickIncludeModulo,
+            isV1Compat        = this.compatVersion() <= 1;
+        
         rootScene.vars.tickIncludeModulo = includeModulo;
         rootScene.vars.hiddenLabelText   = hiddenLabelText;
         
         var wrapper;
-        if(this.compatVersion() <= 1){
+        if(isV1Compat){
             // For use in child marks of pvTicksPanel
             var DataElement = function(tickVar){
                 this.value = 
@@ -26510,7 +26511,7 @@ def
             .zOrder(20) // below axis rule
             ;
         
-        if(this.showTicks){
+        if(isV1Compat || this.showTicks){
             var pvTicks = this.pvTicks = new pvc.visual.Rule(this, pvTicksPanel, {
                     extensionId: 'ticks',
                     wrapper:  wrapper
@@ -26530,7 +26531,11 @@ def
                 .lock(anchorLength,    null)
                 .optional(anchorOrthoLength, this.tickLength * 2/3) // slightly smaller than continuous ticks
                 .override('defaultColor', function(type){
-                    // Inherit ticks color
+                    if(isV1Compat) {
+                        return pv.Color.names.transparent;
+                    }
+                    
+                    // Inherit ticks color from rule
                     // Control visibility through .visible or lineWidth
                     return pvRule.scene ? 
                            pvRule.scene[0].strokeStyle : 
@@ -27471,12 +27476,17 @@ def
                         
                         return scene.childNodes;
                     })
+                    .override('defaultColor', function(type){
+                        if(type === 'stroke'){
+                            return 'black';
+                        }
+                        return this.base(type);
+                    })
+                    .override('defaultStrokeWidth', def.fun.constant(0.5))
                     .pvMark
                     .lock('visible')
                     .lock('top',  function(dot){ return dot.y; })
                     .lock('left', function(dot){ return dot.x; })
-                    .strokeStyle('black')
-                    .lineWidth(0.5)
                     ;
                 
                 this.pvPieLabel = new pvc.visual.Label(
