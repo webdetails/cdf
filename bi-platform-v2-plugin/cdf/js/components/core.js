@@ -626,7 +626,7 @@ var UnmanagedComponent = BaseComponent.extend({
          * to call, the component itself is the only sane value to pass as the
          * callback's 'this' as an alternative to using bind.
          */
-        callback.apply(this, args || []);
+        callback.call(this, args || []);
         this.drawTooltip();
         this.postExec();
         this.showTooltip();

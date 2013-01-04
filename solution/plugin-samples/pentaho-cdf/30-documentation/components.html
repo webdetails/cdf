@@ -24,7 +24,7 @@
 			control their life cycle and  behavior. Before the enumeration of this "properties", let's clarify
 			what is the life cycle of the component: 
 		</p>
-		<img  style="border: 1px solid #000;"  src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/20-components/diagram.png">
+		<img  style="border: 1px solid #000;"  src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/diagram.png">
 		<br><br>
 
 		<h2>Generic Properties</h2>
@@ -55,6 +55,13 @@
 			
 			<dt>htmlObject</dt>
 			<dd>This is the id of the html object that will be replaced by the component's content result.</dd>
+			
+			<dt>priority</dt>
+			<dd>Priority of component execution, defaulting to 5. The lower the
+			number, the higher priority the component has. Components with same
+			priority with be executed simultaneously. Useful in places where we 
+			need to give higher priority to filters or other components that
+			need to be executed before other components </dd>
 			
 			<dt>executeAtStart</dt>
 			<dd>If set to false, the component will not execute at start. It will be updated as soon as one of his listeners have changed </dd>

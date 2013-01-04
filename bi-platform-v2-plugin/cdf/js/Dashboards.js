@@ -1037,7 +1037,7 @@ Dashboards.addComponents = function(components) {
     
     // For legacy dashboards, we'll automatically assign some priority for 
     // component execution
-    if(components[i].priority === ""){
+    if(typeof components[i].priority === "undefined" || components[i].priority === ""){
       components[i].priority = this.legacyPriority++;
     }
   }
