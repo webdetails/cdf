@@ -4,5 +4,5 @@
 	<author>Webdetails</author>
 	<description>MetaLayer Usage Description</description>
 	<icon></icon>
-	<template>template.html</template>
+	<template>metaLayer_usage.html</template>
 </cdf>
