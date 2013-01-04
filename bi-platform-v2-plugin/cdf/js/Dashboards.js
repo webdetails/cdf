@@ -377,7 +377,7 @@ Dashboards.bindControl = function(object) {
     var myself = this;
     object.on("all",function(e){
       
-      if( myself.logLifecycle &&  e !== "cdf" && typeof console != "undefined" ){
+      if( myself.logLifecycle &&  e !== "cdf" && this.name !=="PostInitMarker" && typeof console != "undefined" ){
         
         var eventName = e.substr(4);
         var eventStr = "      ";
@@ -484,7 +484,7 @@ Dashboards.updateLifecycle = function(object) {
       try {
         var shouldExecute;
         if(!(typeof(object.preExecution)=='undefined')){
-          var shouldExecute = object.preExecution.apply(object);
+          shouldExecute = object.preExecution.apply(object);
         }
         /*
          * If `preExecution` returns anything, we should use its truth value to
@@ -512,7 +512,6 @@ Dashboards.updateLifecycle = function(object) {
         // unsupported update call
         }
 
-        object.trigger('cdf cdf:postExecution', object);
         if(!(typeof(object.postExecution)=='undefined')){
           object.postExecution.apply(object);
         }
@@ -532,7 +531,11 @@ Dashboards.updateLifecycle = function(object) {
           this.decrementRunningCalls();
         }
       }
-  },this);
+
+      // Triggering the event for the rest of the process
+      object.trigger('cdf cdf:postExecution', object);
+
+  },this);  
   setTimeout(handler,1);
 };
 
@@ -762,7 +765,12 @@ Dashboards.syncParametersInit = function() {
 Dashboards.initEngine = function(){
   var myself = this;
   var components = this.components;
+
   this.incrementRunningCalls();
+  if( this.logLifecycle && typeof console != "undefined" ){
+    console.log("%c          [Lifecycle >Start] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+  }
+
   this.createAndCleanErrorDiv();
   // Fire all pre-initialization events
   if(typeof this.preInit == 'function') {
@@ -783,6 +791,23 @@ Dashboards.initEngine = function(){
     this.handlePostInit();
     return;
   }
+  
+  // Since we can get into racing conditions between last component's 
+  // preExecution and dashboard.postInit, we'll add a last component with very 
+  // low priority who's funcion is only to act as a marker.
+  var postInitComponent = {
+    name: "PostInitMarker",
+    type: "unmanaged",
+    lifecycle: {
+      silent: true
+    },
+    executeAtStart: true,
+    priority:999999999
+  };
+  this.bindControl(postInitComponent)
+  updating.push(postInitComponent);
+  
+  
   this.waitingForInit = updating.slice();
 
   var callback = function(comp,isExecuting) {
@@ -825,7 +850,12 @@ Dashboards.handlePostInit = function() {
     }
     this.restoreDuplicates();
     this.finishedInit = true;
+    
     this.decrementRunningCalls();
+    if( this.logLifecycle && typeof console != "undefined" ){
+      console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+    }
+    
   }
 };
 
