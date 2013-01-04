@@ -42,9 +42,36 @@ Our objective here was to retool the base component so as to deal with both
 of these issues, thus allowing queries to be performed asynchronously while 
 reducing the developer effort involved in creating a component.
 
-## Basic Concepts
 
-The basic lifecycle 
+## Component execution order and Priority
+
+There are no major changes in the way components behave. There is, however an
+important caveat - since all components (that have been converted) will be
+executed simultaneously, we can no longer rely on the order of execution. 
+
+There's now an additional property named *priority*. The priority of component
+execution, defaulting to 5. The lower the number, the higher priority the
+component has. Components with same priority with be executed simultaneously.
+Useful in places where we need to give higher priority to filters or other
+components that need to be executed before other components.
+
+This way there's no longer the need to use dummy parameters and postChange
+tricks to do, for instance, cascade prompts.
+
+
+## Backward compatibility and changes
+
+We did a big effort in order to maintain backward compatibility, but some care
+has to be taken. What we do is assume that if components have no priority, we
+give them a sequential value, trying to emulate the old behavior. It's
+recommended that proper priorities are set in order to take advantage of the new
+improvements.
+
+If using *CDE*, please note that if you edit a dashboard and save it, **all
+components will have a default priority of 5**. This may break the old behavior.
+If you need to change a dashboard, make sure you tweak the priorities, if
+needed.
+
 
 ## Developing Components
 
@@ -144,7 +171,6 @@ guidelines:
     specific UI blocking. If you override either, you *must* override the other
     as well.
 
-## Converting Components
 
 ## New and Changed Features
 
