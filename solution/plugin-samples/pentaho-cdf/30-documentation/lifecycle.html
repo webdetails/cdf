@@ -146,7 +146,7 @@ update: function() {
     <pre><code>
 update: function() {
 	var redraw = _.bind(this.redraw,this);
-	this.synchronous(this.queryDefinition, redraw);
+	this.triggerQuery(this.queryDefinition, redraw);
 }
 </code></pre>
 
@@ -182,8 +182,8 @@ update: function() {
         amount of work is done.</li>
       <li>If you called <code>this.block()</code>, make sure to always call <code>this.unblock()</code> as
         well once all relevant work is done.</li>
-      <li>If you want to use any sort of AJAX, consider using </li>
-      <li>Call <code>this.postExec()</code> once all </li>
+      <li>If you want to use any sort of AJAX, consider using <code>triggerAjax</code></li>
+      <li>Call <code>this.postExec()</code> once all processing is done</li>
       <li>You can override <code>this.block</code> and <code>this.unblock</code> to implement component
         specific UI blocking. If you override either, you <em>must</em> override the other
         as well.</li>
@@ -217,7 +217,7 @@ update: function() {
 
     <p>Each component should have a member property with isManaged, indicating whether
       CDF should managed the component's lifecycle. Components where <code>isManaged</code> is 
-      false need to implement</p>
+      false need to implement it's own calls to the lifecycle</p>
 
 
 
@@ -258,7 +258,6 @@ ExampleComponent = UnmanagedComponent.extend({
   redraw: function(data){
 
     /* Specific code goes here */
-    debugger;
     if(!this.isInitialized){
       this.compiledStr = Mustache.compile("<p> Got a result set with  {{nrRows}} rows and {{nrCols}} columns </p>");
       this.isInitialized = true;
