@@ -392,14 +392,16 @@ var TableComponent = UnmanagedComponent.extend({
           anOpen.splice(j ,1);
         }
         obj.addClass(activeclass);
-        
+
+        anOpen.push( row );
+        // Since the switch to async, we need to open it first
+        myself.dataTable.fnOpen( row, htmlContent, activeclass );
+
         //Read parameters and fire changes
         var results = myself.queryState.lastResults();
         $(myself.expandParameters).each(function f(i, elt) {
           Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);              
         });
-        myself.dataTable.fnOpen( row, htmlContent, activeclass );
-        anOpen.push( row );
       };
     };
   }
