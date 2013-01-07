@@ -581,10 +581,10 @@ var UnmanagedComponent = BaseComponent.extend({
    * explicitly immediately before yielding control back to CDF.
    */
   postExec: function() {
-    this.trigger('cdf cdf:postExecution', this);
     if(typeof this.postExecution == "function") {
       this.postExecution();
     }
+    this.trigger('cdf cdf:postExecution', this);
   },
 
   drawTooltip: function() {
