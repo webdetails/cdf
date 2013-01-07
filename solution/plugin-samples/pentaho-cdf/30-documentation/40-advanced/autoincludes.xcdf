@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-	<title>Documenting</title>
+	<title>AutoIncludes</title>
 	<author>Webdetails</author>
 	<description>Documenting with CDF</description>
 	<icon></icon>
-	<template>template.html</template>
+	<template>autoincludes.html</template>
 </cdf>

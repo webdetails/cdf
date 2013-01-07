@@ -75,12 +75,18 @@ var Dashboards = {
   
   // Holder for context
   context:{},
+
   
-  /* measures, in miliseconds, the delay between firing blockUI and
-   * actually updating the dashboard. Necessary for IE/Chrome. Higher
-   * values have better chances of working, but are (obviously) slower
-   */
-  renderDelay: 300,
+  /* 
+   * Legacy dashboards don't have priority, so we'll assign a very low priority
+   * to them.
+   * */
+  
+  legacyPriority: -1000,
+  
+  /* Log lifecycle events? */
+  logLifecycle: true,
+  
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   /* Reference to current language code . Used in every place where jquery
@@ -364,6 +370,31 @@ Dashboards.bindControl = function(object) {
      * and endow it with the Backbone event system.
      */
     _.extend(object,objectImpl,Backbone.Events);
+    
+    // Add logging lifeCycle
+    
+      
+    var myself = this;
+    object.on("all",function(e){
+      
+      if( myself.logLifecycle &&  e !== "cdf" && this.name !=="PostInitMarker" && typeof console != "undefined" ){
+        
+        var eventName = e.substr(4);
+        var eventStr = "      ";
+        if (eventName==="preExecution")
+          eventStr = ">Start";
+        else if(eventName==="postExecution")
+          eventStr = "<End  ";
+        else if(eventName === "error")
+          eventStr = "!Error";
+        
+        
+        
+        var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event",this.splitTimer());
+        console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
+          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+      }
+    })
   }
 };
 
@@ -453,7 +484,7 @@ Dashboards.updateLifecycle = function(object) {
       try {
         var shouldExecute;
         if(!(typeof(object.preExecution)=='undefined')){
-          var shouldExecute = object.preExecution.apply(object);
+          shouldExecute = object.preExecution.apply(object);
         }
         /*
          * If `preExecution` returns anything, we should use its truth value to
@@ -481,7 +512,6 @@ Dashboards.updateLifecycle = function(object) {
         // unsupported update call
         }
 
-        object.trigger('cdf cdf:postExecution', object);
         if(!(typeof(object.postExecution)=='undefined')){
           object.postExecution.apply(object);
         }
@@ -501,7 +531,11 @@ Dashboards.updateLifecycle = function(object) {
           this.decrementRunningCalls();
         }
       }
-  },this);
+
+      // Triggering the event for the rest of the process
+      object.trigger('cdf cdf:postExecution', object);
+
+  },this);  
   setTimeout(handler,1);
 };
 
@@ -573,9 +607,16 @@ Dashboards.getComponentByName = function(name) {
 };
 
 Dashboards.addComponents = function(components) {
+  
   // attempt to convert over to component implementation
   for (var i =0; i < components.length; i++) {
     this.bindControl(components[i]);
+    
+    // For legacy dashboards, we'll automatically assign some priority for 
+    // component execution
+    if(typeof components[i].priority === "undefined" || components[i].priority === ""){
+      components[i].priority = this.legacyPriority++;
+    }
   }
   this.components = this.components.concat(components);
 };
@@ -724,7 +765,12 @@ Dashboards.syncParametersInit = function() {
 Dashboards.initEngine = function(){
   var myself = this;
   var components = this.components;
+
   this.incrementRunningCalls();
+  if( this.logLifecycle && typeof console != "undefined" ){
+    console.log("%c          [Lifecycle >Start] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+  }
+
   this.createAndCleanErrorDiv();
   // Fire all pre-initialization events
   if(typeof this.preInit == 'function') {
@@ -745,6 +791,23 @@ Dashboards.initEngine = function(){
     this.handlePostInit();
     return;
   }
+  
+  // Since we can get into racing conditions between last component's 
+  // preExecution and dashboard.postInit, we'll add a last component with very 
+  // low priority who's funcion is only to act as a marker.
+  var postInitComponent = {
+    name: "PostInitMarker",
+    type: "unmanaged",
+    lifecycle: {
+      silent: true
+    },
+    executeAtStart: true,
+    priority:999999999
+  };
+  this.bindControl(postInitComponent)
+  updating.push(postInitComponent);
+  
+  
   this.waitingForInit = updating.slice();
 
   var callback = function(comp,isExecuting) {
@@ -761,22 +824,19 @@ Dashboards.initEngine = function(){
     this.waitingForInit = _(this.waitingForInit).without(comp);
     comp.off('cdf:postExecution',callback);
     comp.off('cdf:preExecution',callback);
+    comp.off('cdf:error',callback);
     this.handlePostInit();
   }
 
-  setTimeout(
-    function() {
-      for(var i= 0, len = updating.length; i < len; i++){
-        var component = updating[i];
-        component.on('cdf:postExecution cdf:preExecution',callback,myself);
-      }
-      Dashboards.updateAll(updating);
-      if(components.length > 0) {
-        myself.handlePostInit();
-      }
-    },
-    this.renderDelay
-  );
+  for(var i= 0, len = updating.length; i < len; i++){
+    var component = updating[i];
+    component.on('cdf:postExecution cdf:preExecution cdf:error',callback,myself);
+  }
+  Dashboards.updateAll(updating);
+  if(components.length > 0) {
+    myself.handlePostInit();
+  }
+
 };
 
 Dashboards.handlePostInit = function() {
@@ -790,7 +850,12 @@ Dashboards.handlePostInit = function() {
     }
     this.restoreDuplicates();
     this.finishedInit = true;
+    
     this.decrementRunningCalls();
+    if( this.logLifecycle && typeof console != "undefined" ){
+      console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+    }
+    
   }
 };
 
@@ -809,6 +874,9 @@ Dashboards.resetAll = function(){
 };
 
 Dashboards.processChange = function(object_name){
+  
+  //Dashboards.log("Processing change on " + object_name);
+  
   var object = this.getComponentByName(object_name);
   var parameter = object.parameter;
   var value;
@@ -860,11 +928,8 @@ Dashboards.fireChange = function(parameter, value) {
       }
     }
   }
-  setTimeout(function() {
-    for (var i = 0; i < toUpdate.length; i++) {
-      myself.update(toUpdate[i]);
-    }
-  }, this.renderDelay);
+  myself.updateAll(toUpdate);
+
 };
 
 
@@ -872,13 +937,20 @@ Dashboards.fireChange = function(parameter, value) {
  * are the priorities, and the values are arrays of components that should be
  * updated at that priority level:
  *
- *  {
- *    0: [c1,c2],
- *    2: [c3],
- *    10: [c4]
- *  }
+ *    {
+ *      0: [c1,c2],
+ *      2: [c3],
+ *      10: [c4]
+ *    }
  *
- *  Note that even though it expects numerical keys, 
+ * Alternatively, you can pass an array of components, `[c1, c2, c3]`, in which
+ * case the priority-keyed object will be created internally from the priority
+ * values the components declare for themselves.
+ *
+ * Note that even though `updateAll` expects `components` to have numerical
+ * keys, and that it does work if you pass it an array, `components` should be
+ * an object, rather than an array, so as to allow negative keys (and so that
+ * we can use it as a sparse array of sorts)
  */
 Dashboards.updateAll = function(components) {
   if(!this.updating) {
@@ -888,7 +960,7 @@ Dashboards.updateAll = function(components) {
     };
   }
   if(components && _.isArray(components) && !_.isArray(components[0])) {
-    var comps = [];
+    var comps = {};
     _.each(components,function(c) {
       var prio = c.priority || 0;
       if(!comps[prio]) {
@@ -908,17 +980,22 @@ Dashboards.updateAll = function(components) {
 
     var postExec = function(component,isExecuting) {
       /*
-       * The `preExecution` event will pass two arguments (the component proper
-       * and a flag telling us whether the preExecution test passed), so we can
-       * test for that, and check whether the component is executing or not.
-       * If it's not going to execute, we should queue up the next component
-       * right now. If it is, we shouldn't do anything.right now.
+       * We first need to figure out what event we're handling. `error` will
+       * pass the component, error message and caught exception (if any) to
+       * its event handler, while the `preExecution` event will pass two
+       * arguments (the component proper and a flag telling us whether the
+       * preExecution test passed).
+       *
+       * If we're not going to finish updating the component, either because
+       * `preExecution` cancelled the update, or because we're in an `error`
+       * event handler, we should queue up the next component right now.
        */
-      if(arguments.length == 2 && isExecuting) {
+      if(arguments.length == 2 && typeof isExecuting == "boolean" && isExecuting) {
         return;
       }
       component.off("cdf:postExecution",postExec);
       component.off("cdf:preExecution",postExec);
+      component.off("cdf:error",postExec);
       var current = this.updating.current;
       current.components = _.without(current.components, component);
       var tiers = this.updating.tiers;
@@ -933,7 +1010,13 @@ Dashboards.updateAll = function(components) {
     var comps = this.updating.current.components.slice();
     for(var i = 0; i < comps.length;i++) {
       component = comps[i];
-      component.on("cdf:postExecution cdf:preExecution",postExec,this);
+      // Start timer
+      component.startTimer();
+      component.on("cdf:postExecution cdf:preExecution cdf:error",postExec,this);
+      
+      // Logging this.updating. Uncomment if needed to trace issues with lifecycle
+      // Dashboards.log("Processing "+ component.name +" (priority " + this.updating.current.priority +"); Next in queue: " +
+      //  _(this.updating.tiers).map(function(v,k){return k + ": [" + _(v).pluck("name").join(",") + "]"}).join(", "));
       this.updateComponent(component);
     }
   }
@@ -1550,6 +1633,44 @@ Dashboards.objectToPropertiesArray = function(obj) {
   }
   return pArray;
 }
+
+/** 
+* Converts HSV to RGB value. 
+* 
+* @param {Integer} h Hue as a value between 0 - 360 degrees 
+* @param {Integer} s Saturation as a value between 0 - 100 % 
+* @param {Integer} v Value as a value between 0 - 100 % 
+* @returns {Array} The RGB values  EG: [r,g,b], [255,255,255] 
+*/  
+Dashboards.hsvToRgb = function (h,s,v) {  
+  
+    var s = s / 100,  
+         v = v / 100;  
+  
+    var hi = Math.floor((h/60) % 6);  
+    var f = (h / 60) - hi;  
+    var p = v * (1 - s);  
+    var q = v * (1 - f * s);  
+    var t = v * (1 - (1 - f) * s);  
+  
+    var rgb = [];  
+  
+    switch (hi) {  
+        case 0: rgb = [v,t,p];break;  
+        case 1: rgb = [q,v,p];break;  
+        case 2: rgb = [p,v,t];break;  
+        case 3: rgb = [p,q,v];break;  
+        case 4: rgb = [t,p,v];break;  
+        case 5: rgb = [v,p,q];break;  
+    }  
+  
+    var r = Math.min(255, Math.round(rgb[0]*256)),  
+        g = Math.min(255, Math.round(rgb[1]*256)),  
+        b = Math.min(255, Math.round(rgb[2]*256));  
+  
+    return "rgb("+ [r,g,b].join(",")+")";  
+  
+}     
 
 /**
  *

@@ -4,5 +4,5 @@
 	<author>Webdetails</author>
 	<description>CDF Architecture</description>
 	<icon></icon>
-	<template>template.html</template>
+	<template>architecture.html</template>
 </cdf>

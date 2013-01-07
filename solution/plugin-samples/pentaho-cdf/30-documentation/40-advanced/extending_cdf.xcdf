@@ -4,5 +4,5 @@
 	<author>Webdetails</author>
 	<description>Extending CDF components</description>
 	<icon></icon>
-	<template>template.html</template>
+	<template>extending_cdf.html</template>
 </cdf>
