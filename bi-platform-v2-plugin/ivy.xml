@@ -51,11 +51,11 @@
     <dependency org="pentaho" name="cpf" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf="runtime->default"/>
 
     <!-- orient db (persistence) -->
-    <dependency org="com.orientechnologies" name="orient-commons" rev="1.3.0-SNAPSHOT" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-core" rev="1.3.0-SNAPSHOT" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-server" rev="1.3.0-SNAPSHOT" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-client" rev="1.3.0-SNAPSHOT" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-enterprise" rev="1.3.0-SNAPSHOT" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orient-commons" rev="1.3.0" transitive="false" conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies" name="orientdb-core" rev="1.3.0" transitive="false" conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies" name="orientdb-server" rev="1.3.0" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orientdb-client" rev="1.3.0" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orientdb-enterprise" rev="1.3.0" transitive="false" conf="runtime,default->default" />
 
 
   </dependencies>
