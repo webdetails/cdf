@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130103\n
+//VERSION TRUNK-20130107
 
 
 /*global pvc:true */
@@ -110,14 +110,13 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.stringify = function(t, keyArgs){
         var maxLevel = def.get(keyArgs, 'maxLevel') || 5;
-        var ownOnly  = def.get(keyArgs, 'ownOnly', true);
-        var funs     = def.get(keyArgs, 'funs',    false);
+        
         var out = [];
-        stringifyRecursive(out, t, maxLevel, ownOnly, funs);
+        pvc.stringifyRecursive(out, t, maxLevel, keyArgs);
         return out.join('');
     };
     
-    function stringifyRecursive(out, t, remLevels, ownOnly, funs){
+    pvc.stringifyRecursive = function(out, t, remLevels, keyArgs){
         if(remLevels > 0){
             remLevels--;
             switch(typeof t){
@@ -128,11 +127,15 @@ var pvc = def.globalSpace('pvc', {
                         return true;
                     }
                     
+                    if(def.fun.is(t.stringify)){
+                        return t.stringify(out, remLevels, keyArgs);
+                    }
+                    
                     if(t instanceof Array){
                         out.push('[');
                         t.forEach(function(item, index){
                             if(index){ out.push(', '); }
-                            if(!stringifyRecursive(out, item, remLevels, ownOnly, funs)){
+                            if(!pvc.stringifyRecursive(out, item, remLevels, keyArgs)){
                                 out.pop();
                             }
                         });
@@ -140,11 +143,12 @@ var pvc = def.globalSpace('pvc', {
                     } else if(t.constructor === Object){
                         out.push('{');
                         var first = true;
+                        var ownOnly  = def.get(keyArgs, 'ownOnly', true);
                         for(var p in t){
                             if(!ownOnly || def.hasOwnProp.call(t, p)){
                                 if(!first){ out.push(', '); }
                                 out.push(p + ': ');
-                                if(!stringifyRecursive(out, t[p], remLevels, ownOnly, funs)){
+                                if(!pvc.stringifyRecursive(out, t[p], remLevels, keyArgs)){
                                     out.pop();
                                     if(!first){ out.pop(); }
                                 } else if(first){
@@ -168,7 +172,7 @@ var pvc = def.globalSpace('pvc', {
                     return true;
                     
                 case 'function':
-                    if(funs){
+                    if(def.get(keyArgs, 'funs', false)){
                         out.push(JSON.stringify(t.toString().substr(0, 13) + '...'));
                         return true;
                     }
@@ -179,7 +183,7 @@ var pvc = def.globalSpace('pvc', {
             out.push("'new ???'");
             return true;
         }
-    } 
+    };
     
     pvc.orientation = {
         vertical:   'vertical',
@@ -244,53 +248,8 @@ var pvc = def.globalSpace('pvc', {
         if(this.proto){
             return this.proto.hasDelegateValue(name, tag);
         }
+        
         return false;
-        // No delegates in the defaults...
-        //return this.defaults.hasDelegateValue(name, tag);
-    };
-    
-    // TODO: adapt to use def.Query.range
-    // Adapted from pv.range
-    pvc.Range = function(start, stop, step){
-        if (arguments.length == 1) {
-            stop  = start;
-            start = 0;
-        }
-      
-        if (step == null) {
-            step = 1;
-        }
-        
-        if ((stop - start) / step == Infinity) {
-            throw new Error("range must be finite");
-        }
-      
-        this.stop  = stop;//-= (stop - start) * 1e-10; // floating point precision!
-        this.start = start;
-        this.step  = step;
-    };
-    
-    pvc.Range.prototype.forEach = function(fun, ctx){
-        var i = 0, j;
-        if (this.step < 0) {
-            while((j = this.start + this.step * i++) > this.stop) {
-                fun.call(ctx, j);
-            }
-        } else {
-            while((j = this.start + this.step * i++) < this.stop) {
-                fun.call(ctx, j);
-            }
-        }
-    };
-    
-    pvc.Range.prototype.map = function(fun, ctx){
-        var result = [];
-        
-        this.forEach(function(j){
-            result.push(fun.call(ctx, j));
-        });
-        
-        return result;
     };
     
     /**
@@ -437,6 +396,7 @@ var pvc = def.globalSpace('pvc', {
         return pv.rgb(avg, avg, avg, alpha);
     };
     
+    // TODO: change the name of this
     pvc.removeTipsyLegends = function(){
         try {
             $('.tipsy').remove();
@@ -473,12 +433,40 @@ var pvc = def.globalSpace('pvc', {
         return format;
     };
     
+    pvc.buildTitleFromName = function(name){
+        // TODO: i18n
+        return def.firstUpperCase(name).replace(/([a-z\d])([A-Z])/, "$1 $2");
+    };
+    
     pvc.buildIndexedId = function(prefix, index){
-        if(index === 0) {
-            return prefix; // base, ortho, legend
+        if(index > 0) {
+            return prefix + "" + (index + 1); // base2, ortho3,..., legend2
         }
         
-        return prefix + "" + (index + 1); // base2, ortho3,..., legend2
+        return prefix; // base, ortho, legend
+    };
+    
+    /**
+     * Splits an indexed id into its prefix and index.
+     * 
+     * @param {string} indexedId The indexed id.
+     * 
+     * @type Array
+     */
+    pvc.splitIndexedId = function(indexedId){
+        var match = /^(.*?)(\d*)$/.exec(indexedId);
+        var index = null;
+        
+        if(match[2]) {
+            index = Number(match[2]);
+            if(index <= 1) {
+                index = 1;
+            } else {
+                index--;
+            }
+        }
+        
+        return [match[1], index];
     };
     
     function unwrapExtensionOne(id, prefix){
@@ -842,6 +830,10 @@ var pvc = def.globalSpace('pvc', {
         return v;
     };
     
+    pvc.Sides.prototype.stringify = function(out, remLevels, keyArgs){
+        return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
+    };
+    
     pvc.Sides.prototype.setSides = function(sides){
         if(typeof sides === 'string'){
             var comps = sides.split(/\s+/).map(function(comp){
@@ -1128,9 +1120,10 @@ var pvc = def.globalSpace('pvc', {
     
     /* SCENE */
     pv.Mark.prototype.eachInstanceWithData = function(fun, ctx){
-        this.eachInstance(function(instance, t){
+        this.eachInstance(function(scenes, index, t){
+            var instance = scenes[index];
             if(instance.datum || instance.group){
-                fun.call(ctx, instance, t);
+                fun.call(ctx, scenes, index, t);
             }
         });
     };
@@ -1147,97 +1140,6 @@ var pvc = def.globalSpace('pvc', {
     // width / height
     pv.Transform.prototype.transformLength = function(length){
         return this.k * length;
-    };
-    
-    // -----------
-    
-    pv.Mark.prototype.getInstanceShape = function(instance){
-        return new Rect(
-                instance.left,
-                instance.top,
-                instance.width,
-                instance.height);
-    };
-    
-    pv.Mark.prototype.getInstanceCenterPoint = function(instance){
-        return pv.vector(
-                    instance.left + (instance.width  || 0) / 2,
-                    instance.top +  (instance.height || 0) / 2);
-    };
-    
-    pv.Label.prototype.getInstanceShape = function(instance){
-        var t = pvc.text;
-        var size = t.getTextSize(instance.text, instance.font);
-        
-        return t.getLabelPolygon(
-                    size.width,
-                    size.height,
-                    instance.textAlign,
-                    instance.textBaseline,
-                    instance.textAngle,
-                    instance.textMargin)
-                .apply(pv.Transform.identity.translate(instance.left, instance.top));
-    };
-    
-    pv.Wedge.prototype.getInstanceCenterPoint = function(instance){
-        var midAngle  = instance.startAngle + (instance.angle / 2);
-        var midRadius = (instance.outerRadius + instance.innerRadius) / 2;
-        var dotLeft   = instance.left + midRadius * Math.cos(midAngle);
-        var dotTop    = instance.top  + midRadius * Math.sin(midAngle);
-        
-        return pv.vector(dotLeft, dotTop);
-    };
-    
-    pv.Wedge.prototype.getInstanceShape = function(instance){
-        var center = this.getInstanceCenterPoint(instance);
-    
-        // TODO: at a minimum, improve calculation of circle radius
-        // to match the biggest circle within the wedge at that point
-        
-        return new Circle(center.x, center.y, 10);
-    };
-    
-    pv.Dot.prototype.getInstanceShape = function(instance){
-        var radius = instance.shapeRadius,
-            cx = instance.left,
-            cy = instance.top;
-    
-        // TODO: square and diamond break when angle is used
-        
-        switch(instance.shape){
-            case 'diamond':
-                radius *= Math.SQRT2;
-                // the following comment is for jshint
-                /* falls through */
-            case 'square':
-            case 'cross':
-                return new Rect(
-                    cx - radius,
-                    cy - radius,
-                    2*radius,
-                    2*radius);
-        }
-    
-        // 'circle' included
-        
-        // Select dots only when the center is included
-        return new Circle(cx, cy, radius);
-    };
-    
-    pv.Dot.prototype.getInstanceCenterPoint = function(instance){
-        return pv.vector(instance.left, instance.top);
-    };
-    
-    pv.Area.prototype.getInstanceShape =
-    pv.Line.prototype.getInstanceShape = function(instance, nextInstance){
-        return new Line(instance.left, instance.top, nextInstance.left, nextInstance.top);
-    };
-    
-    pv.Area.prototype.getInstanceCenterPoint =
-    pv.Line.prototype.getInstanceCenterPoint = function(instance, nextInstance){
-        return pv.vector(
-                (instance.left + nextInstance.left) / 2, 
-                (instance.top  + nextInstance.top ) / 2);
     };
     
     // --------------------
@@ -1259,6 +1161,10 @@ var pvc = def.globalSpace('pvc', {
         }
     })
     .add({
+        stringify: function(out, remLevels, keyArgs){
+            return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
+        },
+        
         setSize: function(size, keyArgs){
             if(typeof size === 'string'){
                 var comps = size.split(/\s+/).map(function(comp){
@@ -1402,6 +1308,10 @@ var pvc = def.globalSpace('pvc', {
         }
     })
     .add({
+        stringify: function(out, remLevels, keyArgs){
+            return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
+        },
+        
         setOffset: function(offset, keyArgs){
             if(typeof offset === 'string'){
                 var comps = offset.split(/\s+/).map(function(comp){
@@ -1492,484 +1402,7 @@ var pvc = def.globalSpace('pvc', {
         return v;
     };
     
-    // --------------------
-    
-    var Shape = def.type('pvc.Shape')
-    .add({
-        transform: function(t){
-            return this.clone().apply(t);
-        }
-    
-        // clone
-        // intersectsRect
-    });
-    
-    // --------------------
-    
-    def.mixin(pv.Vector.prototype, Shape.prototype, {
-        set: function(x, y){
-            this.x  = x  || 0;
-            this.y  = y  || 0;
-        },
-        
-        clone: function(){
-            return new pv.Vector(this.x, this.y);
-        },
-        
-        apply: function(t){
-            this.x  = t.transformHPosition(this.x);
-            this.y  = t.transformVPosition(this.y);
-            return this;
-        },
-    
-        intersectsRect: function(rect){
-            // Does rect contain the point
-            return (this.x >= rect.x) && (this.x <= rect.x2) &&
-                   (this.y >= rect.y) && (this.y <= rect.y2);
-        }
-    });
-    
-    // --------------------
-    
-    var Rect = def.type('pvc.Rect', Shape)
-    .init(function(x, y, dx, dy){
-        this.set(x, y, dx, dy);
-    })
-    .add({
-        set: function(x, y, dx, dy){
-            this.x  =  x || 0;
-            this.y  =  y || 0;
-            this.dx = dx || 0;
-            this.dy = dy || 0;
-            
-            this.calc();
-        },
-        
-        calc: function(){
-            // Ensure normalized
-            if(this.dx < 0){
-                this.dx = -this.dx;
-                this.x  = this.x - this.dx;
-            }
-            
-            if(this.dy < 0){
-                this.dy = -this.dy;
-                this.y = this.y - this.dy;
-            }
-            
-            this.x2  = this.x + this.dx;
-            this.y2  = this.y + this.dy;
-            
-            this._sides = null;
-        },
-    
-        clone: function(){
-            return new Rect(this.x, this.y, this.dx, this.dy);
-        },
-    
-        apply: function(t){
-            this.x  = t.transformHPosition(this.x);
-            this.y  = t.transformVPosition(this.y);
-            this.dx = t.transformLength(this.dx);
-            this.dy = t.transformLength(this.dy);
-            this.calc();
-            return this;
-        },
-        
-        containsPoint: function(x, y){
-            return this.x < x && x < this.x2 && 
-                   this.y < y && y < this.y2;
-        },
-        
-        intersectsRect: function(rect){
-    //        pvc.log("[" + [this.x, this.x2, this.y, this.y2] + "]~" +
-    //                "[" + [rect.x, rect.x2, rect.y, rect.y2] + "]");
-    
-            // rect is trusted to be normalized...
-    
-            return (this.x2 > rect.x ) &&  // Some intersection on X
-                   (this.x  < rect.x2) &&
-                   (this.y2 > rect.y ) &&  // Some intersection on Y
-                   (this.y  < rect.y2);
-        },
-    
-        sides: function(){
-            if(!this._sides){
-                var x  = this.x,
-                    y  = this.y,
-                    x2 = this.x2,
-                    y2 = this.y2;
-        
-                /*
-                 *    x,y    A
-                 *     * ------- *
-                 *  D  |         |  B
-                 *     |         |
-                 *     * --------*
-                 *              x2,y2
-                 *          C
-                 */
-                this._sides = [
-                    //x, y, x2, y2
-                    new Line(x,  y,  x2, y),
-                    new Line(x2, y,  x2, y2),
-                    new Line(x,  y2, x2, y2),
-                    new Line(x,  y,  x,  y2)
-                ];
-            }
-    
-            return this._sides;
-        }
-    });
-    
-    // ------
-    
-    var Circle = def.type('pvc.Circle', Shape)
-    .init(function(x, y, radius){
-        this.x = x || 0;
-        this.y = y || 0;
-        this.radius = radius || 0;
-    })
-    .add({
-        clone: function(){
-            return new Circle(this.x, this.y, this.radius);
-        },
-    
-        apply: function(t){
-            this.x = t.transformHPosition(this.x);
-            this.y = t.transformVPosition(this.y);
-            this.radius = t.transformLength(this.radius);
-            return this;
-        },
-    
-        intersectsRect: function(rect){
-            // Taken from http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
-            var dx2 = rect.dx / 2,
-                dy2 = rect.dy / 2;
-    
-            var circleDistX = Math.abs(this.x - rect.x - dx2),
-                circleDistY = Math.abs(this.y - rect.y - dy2);
-    
-            if ((circleDistX > dx2 + this.radius) ||
-                (circleDistY > dy2 + this.radius)) {
-                return false;
-            }
-    
-            if (circleDistX <= dx2 || circleDistY <= dy2) {
-                return true;
-            }
-    
-            var sqCornerDistance = Math.pow(circleDistX - dx2, 2) +
-                                   Math.pow(circleDistY - dy2, 2);
-    
-            return sqCornerDistance <= (this.radius * this.radius);
-        }
-    });
-    
-    // -----
-    
-    var Line = def.type('pvc.Line', Shape)
-    .init(function(x, y, x2, y2){
-        this.x  = x  || 0;
-        this.y  = y  || 0;
-        this.x2 = x2 || 0;
-        this.y2 = y2 || 0;
-    })
-    .add({
-        clone: function(){
-            return new pvc.Line(this.x, this.y, this.x2, this.x2);
-        },
-    
-        apply: function(t){
-            this.x  = t.transformHPosition(this.x );
-            this.y  = t.transformVPosition(this.y );
-            this.x2 = t.transformHPosition(this.x2);
-            this.y2 = t.transformVPosition(this.y2);
-            return this;
-        },
-    
-        intersectsRect: function(rect){
-            if(!rect) {
-                return false;
-            }
-            var sides = rect.sides();
-            for(var i = 0 ; i < 4 ; i++){
-                if(this.intersectsLine(sides[i])){
-                    return true;
-                }
-            }
-    
-            return false;
-        },
-    
-        intersectsLine: function(b){
-            // See: http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
-            var a = this,
-    
-                x21 = a.x2 - a.x,
-                y21 = a.y2 - a.y,
-    
-                x43 = b.x2 - b.x,
-                y43 = b.y2 - b.y,
-    
-                denom = y43 * x21 - x43 * y21;
-    
-            if(denom === 0){
-                // Parallel lines: no intersection
-                return false;
-            }
-    
-            var y13 = a.y - b.y,
-                x13 = a.x - b.x,
-                numa = (x43 * y13 - y43 * x13),
-                numb = (x21 * y13 - y21 * x13);
-    
-            if(denom === 0){
-                // Both 0  => coincident
-                // Only denom 0 => parallel, but not coincident
-                return (numa === 0) && (numb === 0);
-            }
-    
-            var ua = numa / denom;
-            if(ua < 0 || ua > 1){
-                // Intersection not within segment a
-                return false;
-            }
-    
-            var ub = numb / denom;
-            if(ub < 0 || ub > 1){
-                // Intersection not within segment b
-                return false;
-            }
-    
-            return true;
-        }
-    });
-    
-    // ----------------
-    
-    var Polygon = def.type('pvc.Polygon', Shape)
-    .init(function(corners){
-        this._corners = corners || [];
-    })
-    .add({
-        _sides: null,
-        _bbox:  null,
-        
-        corners: function(){
-            return this._corners;
-        },
-        
-        clone: function(){
-            return new Polygon(this.corners().slice());
-        },
-    
-        apply: function(t){
-            delete this._sides;
-            delete this._bbox;
-            
-            var corners = this.corners();
-            for(var i = 0, L = corners.length; i < L ; i++){
-                corners[i].apply(t);
-            }
-            
-            return this;
-        },
-        
-        intersectsRect: function(rect){
-            // I - Any corner is inside the rect?
-            var i, L;
-            var corners = this.corners();
-            
-            L = corners.length;
-            for(i = 0 ; i < L ; i++){
-                if(corners[i].intersectsRect(rect)){
-                    return true;
-                }
-            }
-            
-            // II - Any side intersects the rect?
-            var sides = this.sides();
-            L = sides.length;
-            for(i = 0 ; i < L ; i++){
-                if(sides[i].intersectsRect(rect)){
-                    return true;
-                }
-            }
-            
-            return false;
-        },
-    
-        sides: function(){
-            var sides = this._sides;
-            if(!sides){
-                sides = this._sides = [];
-                
-                var corners = this.corners();
-                var L = corners.length;
-                if(L){
-                    var prevCorner = corners[0];
-                    for(var i = 1 ; i < L ; i++){
-                        var corner = corners[i];
-                        sides.push(
-                            new Line(prevCorner.x, prevCorner.y,  corner.x, corner.y));
-                    }
-                }
-            }
-    
-            return sides;
-        },
-        
-        bbox: function(){
-            var bbox = this._bbox;
-            if(!bbox){
-                var min, max;
-                this.corners().forEach(function(corner, index){
-                    if(min == null){
-                        min = pv.vector(corner.x, corner.y);
-                    } else {
-                        if(corner.x < min.x){
-                            min.x = corner.x;
-                        }
-                        
-                        if(corner.y < min.y){
-                            min.y = corner.y;
-                        }
-                    }
-                    
-                    if(max == null){
-                        max = pv.vector(corner.x, corner.y);
-                    } else {
-                        if(corner.x > max.x){
-                            max.x = corner.x;
-                        }
-                        
-                        if(corner.y > max.y){
-                            max.y = corner.y;
-                        }
-                    }
-                });
-                
-                bbox = this._bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
-            }
-            
-            return this._bbox;
-        }
-    });
-
 }()); // End private scope
-
-
-/**
- * Equal to pv.Behavior.select but doesn't necessarily
- * force redraw of component it's in on mousemove, and sends event info
- * (default behavior matches pv.Behavior.select())
- * @param {boolean} autoRefresh refresh parent mark automatically
- * @param {pv.Mark} mark
- * @return {function} mousedown
- **/
-pv.Behavior.selector = function(autoRefresh, mark) {
-  var scene, // scene context
-      index, // scene context
-      mprev,
-      inited,
-      events,
-      m1, // initial mouse position
-      redrawThis = (arguments.length > 0)?
-                    autoRefresh : true; //redraw mark - default: same as pv.Behavior.select
-    
-  /** @private */
-  function mousedown(d, e) {
-    if(mark == null){
-        index = this.index;
-        scene = this.scene;
-    } else {
-        index = mark.index;
-        scene = mark.scene;
-    }
-    
-    if(!events){
-        // Staying close to canvas allows cancelling bubbling of the event in time 
-        // for other ascendant handlers
-        var root = this.root.scene.$g;
-        
-        events = [
-            [root,     "mousemove", pv.listen(root, "mousemove", mousemove)],
-            [root,     "mouseup",   pv.listen(root, "mouseup",   mouseup  )],
-            
-            // But when the mouse leaves the canvas we still need to receive events...
-            [document, "mousemove", pv.listen(document, "mousemove", mousemove)],
-            [document, "mouseup",   pv.listen(document, "mouseup",   mouseup  )]
-        ];
-    }
-    
-    m1 = this.mouse();
-    mprev = m1;
-    this.selectionRect = new pvc.Rect(m1.x, m1.y);
-    
-    pv.Mark.dispatch("selectstart", scene, index, e);
-  }
-  
-  /** @private */
-  function mousemove(e) {
-    if (!scene) {
-        return;
-    }
-    
-    e.stopPropagation();
-    
-    scene.mark.context(scene, index, function() {
-        // this === scene.mark
-        var m2 = this.mouse();
-        if(mprev){
-            var dx = m2.x - mprev.x;
-            var dy = m2.y - mprev.y;
-            var len = dx*dx + dy*dy;
-            if(len <= 2){
-                return;
-            }
-            mprev = m2;
-        }
-            
-        var x = m1.x;
-        var y = m1.y;
-            
-        this.selectionRect.set(x, y, m2.x - x, m2.y - y);
-        
-        if(redrawThis){
-            this.render();
-        }
-        
-        pv.Mark.dispatch("select", scene, index, e);
-    });
-  }
-
-  /** @private */
-  function mouseup(e) {
-    var lscene = scene;
-    if(lscene){
-        if(events){
-            events.forEach(function(registration){
-                pv.unlisten.apply(pv, registration);
-            });
-            events = null;
-        }
-        
-        e.stopPropagation();
-        
-        var lmark = lscene.mark;
-        if(lmark){
-            pv.Mark.dispatch("selectend", lscene, index, e);
-        
-            lmark.selectionRect = null;
-        }
-        mprev = null;
-        scene = null;
-    }
-  }
-
-  return mousedown;
-};
 
 /**
  * Implements support for svg detection
@@ -1979,113 +1412,78 @@ pv.Behavior.selector = function(autoRefresh, mark) {
     $.support.svg = $.support.svg || 
         document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
 }(/*global jQuery:true */jQuery));
-// Text measurement utility
-def.scope(function(){
-    /*global document:true */
-    
-    var _currentFontSizeCache;
-    
-    function createCache(){
-        return new pvc.text.FontSizeCache();
-    }
-    
-    function useCache(cache, fun, ctx){
-        /*jshint expr:true */
-        (cache instanceof pvc.text.FontSizeCache) || def.fail.operationInvalid("Not a valid text cache.");
-        
-        var prevCache = _currentFontSizeCache;
-        _currentFontSizeCache = cache;
-        try{
-            return fun.call(ctx);
-        } finally {
-            _currentFontSizeCache = prevCache;
-        }
-    }
-    
-    function getTextSize(text, font){
-        if(text == null){
-            text = "";
-        } else {
-            text = "" + text;
-        }
-        
-        var bbox = _currentFontSizeCache && _currentFontSizeCache.get(font, text);
-        if(!bbox){
-            bbox = getTextSizeCore(text, font);
-            if(_currentFontSizeCache){
-                _currentFontSizeCache.put(font, text, bbox);
-            }
-        }
-        
-        return bbox;
-    }
-    
-    function getTextLength(text, font){
-        return getTextSize(text, font).width;
-    }
-
-    function getTextHeight(text, font){
-        return getTextSize(text, font).height;
-    }
-    
-    // TODO: if not in px?..
-    function getFontSize(font){
-        if(pv.renderer() === 'batik'){
-            var sty = document.createElementNS('http://www.w3.org/2000/svg','text').style;
-            sty.setProperty('font',font);
-            return parseInt(sty.getProperty('font-size'), 10);
-        }
-
-        var holder = getTextSizePlaceholder();
-        holder.css('font', font);
-        return parseInt(holder.css('font-size'), 10);
-    }
-
-    function getFitInfo(w, h, text, font, diagMargin){
+pvc.text = {
+    getFitInfo: function(w, h, text, font, diagMargin){
         if(text === '') {
             return {h: true, v: true, d: true};
         }
         
-        var len = getTextLength(text, font);
+        var len = pv.Text.measure(text, font).width;
         return {
             h: len <= w,
             v: len <= h,
             d: len <= Math.sqrt(w*w + h*h) - diagMargin
         };
-    }
+    },
 
-    function trimToWidthB(len, text, font, trimTerminator, before){
-        len -= getTextLength(trimTerminator, font);
+    trimToWidthB: function(len, text, font, trimTerminator, before){
+        len -= pv.Text.measure(trimTerminator, font).width;
         
-        return trimToWidth(len, text, font, trimTerminator, before);
-    }
+        return pvc.text.trimToWidth(len, text, font, trimTerminator, before);
+    },
     
-    function trimToWidth(len, text, font, trimTerminator, before){
+    trimToWidth: function(len, text, font, trimTerminator, before){
         if(text === '') {
             return text;
         }
   
-        var textLen = getTextLength(text, font);
+        var textLen = pv.Text.measure(text, font).width;
         if(textLen <= len){
             return text;
         }
     
         if(textLen > len * 1.5){ //cutoff for using other algorithm
-            return trimToWidthBin(len,text,font,trimTerminator, before);
+            return pvc.text.trimToWidthBin(len, text, font, trimTerminator, before);
         }
     
         while(textLen > len){
-            text = before ? text.slice(1) : text.slice(0,text.length -1);
-            textLen = getTextLength(text, font);
+            text = before ? text.slice(1) : text.slice(0, text.length -1);
+            textLen = pv.Text.measure(text, font).width;
         }
     
         return before ? (trimTerminator + text) : (text + trimTerminator);
+    },
+    
+    trimToWidthBin: function(len, text, font, trimTerminator, before){
+
+        var ilen = text.length,
+            high = ilen - 2,
+            low = 0,
+            mid,
+            textLen;
+
+        while(low <= high && high > 0){
+
+            mid = Math.ceil((low + high)/2);
+            
+            var textMid = before ? text.slice(ilen - mid) : text.slice(0, mid);
+            textLen = pv.Text.measure(textMid, font).width;
+            if(textLen > len){
+                high = mid - 1;
+            } else if(pv.Text.measure(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font).width < len){
+                low = mid + 1;
+            } else {
+                return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
+            }
     }
     
-    function justifyText(text, lineWidth, font){
+        return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
+    },
+    
+    justify: function(text, lineWidth, font){
         var lines = [];
         
-        if(lineWidth < getTextLength('a', font)){
+        if(lineWidth < pv.Text.measure('a', font).width){
             // Not even one letter fits...
             return lines;
         } 
@@ -2097,7 +1495,7 @@ def.scope(function(){
             var word = words.shift();
             if(word){
                 var nextLine = line ? (line + " " + word) : word;
-                if(pvc.text.getTextLength(nextLine, font) > lineWidth){
+                if(pv.Text.measure(nextLine, font).width > lineWidth){
                     // The word by itself may overflow the line width
                     
                     // Start new line
@@ -2117,292 +1515,23 @@ def.scope(function(){
         }
         
         return lines;
-    }
-    
-    function getLabelPolygon(textWidth, textHeight, align, baseline, angle, margin){
-        // From protovis' SvgLabel.js
-        
-        // x, y are the position of the left-bottom corner
-        // of the text relative to its anchor point (at x=0,y=0)
-        // x points right, y points down
-        var x, y;
-        
-        switch (baseline) {
-            case "middle":
-                y = textHeight / 2; // estimate middle (textHeight is not em, the height of capital M)
-                break;
-              
-            case "top":
-                y = margin + textHeight;
-                break;
-          
-            case "bottom":
-                y = -margin; 
-                break;
-        }
-        
-        switch (align) {
-            case "right": 
-                x = -margin -textWidth; 
-                break;
-          
-            case "center": 
-                x = -textWidth / 2;
-                break;
-          
-            case "left": 
-                x = margin;
-                break;
-        }
-        
-        var bl = pv.vector(x, y);
-        var br = bl.plus(textWidth, 0);
-        var tr = br.plus(0, -textHeight);
-        var tl = bl.plus(0, -textHeight);
-        
-        // Rotate
-        
-        if(angle !== 0){
-            bl = bl.rotate(angle);
-            br = br.rotate(angle);
-            tl = tl.rotate(angle);
-            tr = tr.rotate(angle);
-        }
-        
-        return new pvc.Polygon([bl, br, tr, tl]);
-    }
+    },
     
     /* Returns a label's BBox relative to its anchor point */
-    function getLabelBBox(textWidth, textHeight, align, baseline, angle, margin){
-        
-        var polygon = getLabelPolygon(textWidth, textHeight, align, baseline, angle, margin);
-        var corners = polygon.corners();
-        var bbox;
-        if(angle === 0){
-            var min = corners[3]; // topLeft
-            var max = corners[1]; // bottomRight
+    getLabelBBox: function(textWidth, textHeight, align, baseline, angle, margin){
             
-            bbox = new pvc.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
-        } else {
-            bbox = polygon.bbox();
-        }
+        var polygon = pv.Label.getPolygon(textWidth, textHeight, align, baseline, angle, margin);
         
-        bbox.sourcePolygon   = polygon;
-        bbox.sourceCorners   = corners;
+        var bbox             = polygon.bbox();
+        bbox.source          = polygon;
         bbox.sourceAngle     = angle;
         bbox.sourceAlign     = align;
         bbox.sourceTextWidth = textWidth;
         
         return bbox;
     }
-    
-    // --------------------------
-    // private
-    var $textSizePlaceholder = null,
-        _svgText = null,
-        _svgTextFont = null,
-        textSizePlaceholderId = 'cccTextSizeTest_' + new Date().getTime();
-    
-    function getTextSizeCore(text, font){
-        if(!text){
-            return {width: 0, height: 0};
-        }
-        
-        switch(pv.renderer()){
-            case 'vml':   return getTextSizeVML(text, font);
-            case 'batik': return getTextSizeCGG(text, font);
-        }
+};
 
-        return getTextSizeSVG(text, font);
-    }
-    
-    function getTextSizeSVG(text, font){
-        if(!_svgText){
-            var holder  = getTextSizePlaceholder();
-            var svgElem = pv.SvgScene.create('svg');
-            svgElem.setAttribute('font-size', '10px');
-            svgElem.setAttribute('font-family', 'sans-serif');
-            
-            _svgText = pv.SvgScene.create('text');
-            svgElem.appendChild(_svgText);
-            holder[0].appendChild(svgElem);
-        }
-        
-        if(!font){
-            font = null;
-        }
-        
-        if(_svgTextFont !== font){
-            _svgTextFont = font;
-            pv.SvgScene.setStyle(_svgText, { 'font': font });
-        }
-        
-        var textNode = _svgText.firstChild;
-        if(textNode) {
-            textNode.nodeValue = ''+text;
-        } else {
-            if (pv.renderer() === "svgweb") { 
-                // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
-                _svgText.appendChild(document.createTextNode(''+text, true));
-            } else {
-                _svgText.appendChild(document.createTextNode(''+text));
-            }
-        }
-
-        var box = _svgText.getBBox();
-        return {width: box.width, height: box.height};
-    }
-    
-    function getTextSizePlaceholder(){
-        if(!$textSizePlaceholder || !$textSizePlaceholder.parent().length){
-            
-            $textSizePlaceholder = $(textSizePlaceholderId);
-
-            if(!$textSizePlaceholder.length){
-                $textSizePlaceholder = $('<div>')
-                    .attr('id', textSizePlaceholderId)
-                    .css('position', 'absolute')
-                    .css('visibility', 'hidden')
-                    .css('width',  'auto')
-                    .css('height', 'auto');
-
-                $('body').append($textSizePlaceholder);
-            }
-        }
-
-        return $textSizePlaceholder;
-    }
-    
-    // ---------------
-    
-    function getTextSizeCGG(text, font){
-        var fontInfo = getFontInfoCGG(font);
-
-        // TODO: Add cgg size method
-        // NOTE: the global functions 'getTextLenCGG' and 'getTextHeightCGG' must be
-        // defined by the CGG loading environment
-        return {
-            /*global getTextLenCGG:true */
-            width:  getTextLenCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight),
-            /*global getTextHeightCGG:true */
-            height: getTextHeightCGG(text, fontInfo.family, fontInfo.size, fontInfo.style, fontInfo.weight)
-        };
-    }
-    
-    var _cggFontCache, _cggFontTextElem;
-    
-    function getFontInfoCGG(font){
-        var fontInfo = _cggFontCache && _cggFontCache[font];
-        if(!fontInfo){
-            if(!_cggFontTextElem){
-                _cggFontTextElem = document.createElementNS('http://www.w3.org/2000/svg','text');
-            }
-            
-            var sty = _cggFontTextElem.style;
-            sty.setProperty('font', font);
-
-            // Below, the use of: 
-            //   '' + sty.getProperty(...)
-            //  converts the results to real strings
-            //  and not String objects (this later caused bugs in Java code)
-        
-            var family = '' + sty.getProperty('font-family');
-            if(!family){
-                family = 'sans-serif';
-            } else if(family.length > 2){
-                // Did not work at the server
-                //var reQuoted = /^(["']?)(.*?)(\1)$/;
-                //family = family.replace(reQuoted, "$2");
-                var quote = family.charAt(0);
-                if(quote === '"' || quote === "'"){
-                    family = family.substr(1, family.length - 2);
-                }
-            }
-            
-            fontInfo = {
-                family: family,
-                size:   '' + sty.getProperty('font-size'),
-                style:  '' + sty.getProperty('font-style'),
-                weight: '' + sty.getProperty('font-weight')
-            };
-        }
-        
-        return fontInfo;
-    }
-    
-    // -------------
-    
-    function getTextSizeVML(text, font){
-        var box = pv.Vml.text_dims(text, font);
-        return {width: box.width, height: box.height};
-    }
-    
-    // -------------
-    
-    function trimToWidthBin(len, text, font, trimTerminator, before){
-
-        var ilen = text.length,
-            high = ilen - 2,
-            low = 0,
-            mid,
-            textLen;
-
-        while(low <= high && high > 0){
-
-            mid = Math.ceil((low + high)/2);
-            
-            var textMid = before ? text.slice(ilen - mid) : text.slice(0, mid);
-            textLen = getTextLength(textMid, font);
-            if(textLen > len){
-                high = mid - 1;
-            } else if( getTextLength(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font) < len ){
-                low = mid + 1;
-            } else {
-                return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
-            }
-        }
-
-        return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
-    }
-
-    // ----------------
-    
-    def
-    .type('pvc.text.FontSizeCache')
-    .init(function(){
-        this._fontsCache = {};
-    })
-    .add({
-        _getFont: function(font){
-            return def.getOwn(this._fontsCache, font||'') || (this._fontsCache[font||''] = {});
-        },
-        
-        get: function(font, text){
-            return def.getOwn(this._getFont(font), text||'');
-        },
-        
-        put: function(font, text, size){
-            return this._getFont(font)[text||''] = size;
-        }
-    });
-    
-    // ----------------
-    
-    def.copyOwn(pvc.text, {
-        createCache:     createCache,
-        useCache:        useCache,
-        getTextSize:     getTextSize,
-        getTextLength:   getTextLength,
-        getFontSize:     getFontSize,
-        getTextHeight:   getTextHeight,
-        getFitInfo:      getFitInfo,
-        trimToWidth:     trimToWidth,
-        trimToWidthB:    trimToWidthB,
-        justify:         justifyText,
-        getLabelBBox:    getLabelBBox,
-        getLabelPolygon: getLabelPolygon
-    });
-});
 // Colors utility
 def.scope(function(){
     
@@ -3835,9 +2964,9 @@ def.type('pvc.data.DimensionType')
 function(complexType, name, keyArgs){
     this.complexType = complexType;
     this.name  = name;
-    this.label = def.get(keyArgs, 'label') || def.firstUpperCase(name);
+    this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
 
-    var groupAndLevel = pvc.data.DimensionType.splitDimensionGroupName(name);
+    var groupAndLevel = pvc.splitIndexedId(name);
     this.group = groupAndLevel[0];
     this.groupLevel = def.nullyTo(groupAndLevel[1], 0);
 
@@ -4121,29 +3250,6 @@ pvc.data.DimensionType.dimensionGroupName = function(dimName){
     return dimName.replace(/^(.*?)(\d*)$/, "$1");
 };
 
-/**
- * Splits a dimension name to its default group name and a group index.
- * 
- * @param {string} dimName The dimension name.
- * 
- * @type Array
- */
-pvc.data.DimensionType.splitDimensionGroupName = function(dimName){
-    var match = /^(.*?)(\d*)$/.exec(dimName);
-    var index = null;
-    
-    if(match[2]) {
-        index = Number(match[2]);
-        if(index <= 1) {
-            index = 1;
-        } else {
-            index--;
-        }
-    }
-    
-    return [match[1], index];
-};
-
 // TODO: Docs
 pvc.data.DimensionType.valueTypeName = function(valueType){
     if(valueType == null){
@@ -4158,24 +3264,6 @@ pvc.data.DimensionType.valueTypeName = function(valueType){
         case Date:    return 'Date';
         default: throw def.error.argumentInvalid('valueType', "Invalid valueType function: '{0}'.", [valueType]);
     }
-};
-
-/**
- * Computes the name of the nth level dimension 
- * of a dimension group (protected).
- * <p>
- * Generated dimension names follow the naming pattern:
- * 'value', 'value2', 'value3', 'value4', etc.,
- * where the dimension group name is 'value'.
- * </p>
- * 
- * @param {string} dimGroupName The name of the dimension group.
- * @param {number} level The 0-based level of the dimension.
- * 
- * @type string
- */
-pvc.data.DimensionType.dimensionGroupLevelName = function(baseDimName, level){
-    return baseDimName + (level >= 1 ? (level + 1) : '');
 };
 
 /**
@@ -4929,7 +4017,13 @@ def.type('pvc.data.TranslationOper')
         /*jshint expr:true */
         dimReaderSpec || def.fail.argumentRequired('readerSpec');
 
-        var dimNames =  dimReaderSpec.names;
+        var dimNames;
+        if(typeof dimReaderSpec === 'string'){
+            dimNames = dimReaderSpec;
+        } else {
+            dimNames =  dimReaderSpec.names;
+        }
+        
         if(typeof dimNames === 'string'){
             dimNames = dimNames.split(/\s*\,\s*/);
         } else {
@@ -4946,13 +4040,15 @@ def.type('pvc.data.TranslationOper')
         var reader = dimReaderSpec.reader;
         if(!reader) {
             if(hasDims){
-                this._userCreateReaders(dimNames, indexes);
+                return  this._userCreateReaders(dimNames, indexes); // -> indexes, possibly expanded
             } // else a reader that only serves to exclude indexes
         } else {
             hasDims || def.fail.argumentRequired('reader.names', "Required argument when a reader function is specified.");
             
             this._userRead(reader, dimNames);
         }
+        
+        return indexes;
     },
 
     /**
@@ -4994,7 +4090,8 @@ def.type('pvc.data.TranslationOper')
 
         var multiChartIndexes = this.options.multiChartIndexes;
         if(multiChartIndexes != null) {
-            this.defReader({names: 'multiChart', indexes: multiChartIndexes });
+            this._multiChartIndexes = 
+                this.defReader({names: 'multiChart', indexes: multiChartIndexes });
         }
     },
 
@@ -5010,6 +4107,8 @@ def.type('pvc.data.TranslationOper')
         this._userUsedIndexes[index] = true;
         this._userUsedIndexesCount++;
         this._userItem[index] = true;
+        
+        return index;
     },
 
     _userCreateReaders: function(dimNames, indexes){
@@ -5055,15 +4154,17 @@ def.type('pvc.data.TranslationOper')
         if(L < N) {
             // TODO: make a single reader that reads all atoms??
             // Last is a *group* START name
-            var splitGroupName = pvc.data.DimensionType.splitDimensionGroupName(dimNames[N - 1]),
+            var splitGroupName = pvc.splitIndexedId(dimNames[N - 1]),
                 groupName = splitGroupName[0],
                 level     = def.nullyTo(splitGroupName[1], 0);
 
             for(var i = L ; i < I ; i++, level++) {
-                dimName = pvc.data.DimensionType.dimensionGroupLevelName(groupName, level);
+                dimName = pvc.buildIndexedId(groupName, level);
                 this._userRead(this._propGet(dimName, indexes[i]), dimName);
             }
         }
+        
+        return indexes;
     },
 
     _userRead: function(reader, dimNames){
@@ -5306,7 +4407,7 @@ def.type('pvc.data.TranslationOper')
                 
                 // Already bound dimensions count
                 while(count--){
-                    var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level++);
+                    var dimName = pvc.buildIndexedId(dimGroupName, level++);
                     if(!this.complexTypeProj.isReadOrCalc(dimName)){
                         dims.push(dimName);
                     }
@@ -5474,10 +4575,6 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         
         out.push(pvc.logSeparator);
         pvc.log(out.join('\n'));
-    },
-    
-    _getCategoriesCount: function(){
-        return Math.max(0, def.get(this.options, 'categoriesCount', 1));
     },
     
     /**
@@ -6040,6 +5137,29 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
     },
 
+    _getCategoriesCount: function(){
+        var R = this.options.categoriesCount;
+        if(R != null && (!isFinite(R) || R < 0)){
+            R = null;
+        }
+        
+        if(R == null){
+            // Number of consecutive discrete columns, from left
+            R = def
+                .query(this._columnTypes)
+                .whayl(function(type){ return type === 0; }) // 0 = discrete
+                .count();
+            if(!R){
+                // Having no R causes problems 
+                // when categories are continuous
+                // (in MetricDots for example).
+                R = 1;
+            }
+        }
+        
+        return R;
+    },
+    
     _splitEncodedColGroupCell: function(colGroup){
         var values = colGroup.v;
         var labels;
@@ -6238,7 +5358,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         function add(dimGroupName, level, count) {
             var crossEndIndex = itemLogicalGroupIndex[dimGroupName] + count; // exclusive
             while(count > 0) {
-                var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level);
+                var dimName = pvc.buildIndexedId(dimGroupName, level);
                 if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
                     
                     // use first available slot for auto dims readers as long as within crossIndex and crossIndex + count
@@ -6363,12 +5483,6 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
     C: 0, // number of categories
     S: 0, // number of series
     
-    /** @static */
-    _isDiscreteColDef: function(colDef){
-        var colType = colDef && colDef.colType;
-        return !colType || (colType.toLowerCase() === 'string');
-    },
-    
     _processMetadata: function(){
         
         this.base();
@@ -6382,7 +5496,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         if(C != null && (!isFinite(C) || C < 0)){
             C = 0;
         }
-                
+
         var S;
         
         // Assuming duplicate valuesColIndexes is not valid
@@ -6436,7 +5550,9 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 // colIndex has already been fixed on _processMetadata
                 valuesColIndexes = def
                     .query(metadata)
-                    .where(def.negate(this._isDiscreteColDef), this)
+                    .where(function(colDef, index){
+                        return this._columnTypes[index] !== 0; // 0 = discrete
+                    }, this)
                     .select(function(colDef){ return colDef.colIndex; })
                     .take(Mmax)
                     .array()
@@ -6568,7 +5684,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         function add(dimGroupName, colGroupName, level, count) {
             var groupEndIndex = me._itemCrossGroupIndex[colGroupName] + count; // exclusive
             while(count > 0) {
-                var dimName = pvc.data.DimensionType.dimensionGroupLevelName(dimGroupName, level);
+                var dimName = pvc.buildIndexedId(dimGroupName, level);
                 if(!me.complexTypeProj.isReadOrCalc(dimName)) { // Skip name if occupied and continue with next name
                     
                     // use first available slot for auto dims readers as long as within the group slots
@@ -9076,6 +8192,26 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
         }
         
         return this._selectedDatums.values();
+    },
+    
+    /**
+     * Obtains a map containing the selected datums, indexed by id.
+     * 
+     * @type def.Map(pvc.data.Datum)
+     */
+    selectedDatumMap: function(){
+        if(!this.isOwner()){
+            
+            var datums = this
+                .datums(null, {selected: true})
+                .object({
+                    name: function(datum){ return datum.id; }
+                });
+            
+            return new def.Set(datums);
+        }
+        
+        return this._selectedDatums.clone();
     },
     
     /**
@@ -11926,7 +11062,9 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
                 type = dimension.type,
                 features = [];
             
+            features.push('"' + type.label + '"');
             features.push(type.valueTypeName);
+            
             if(type.isComparable){ features.push("comparable"); }
             if(!type.isDiscrete){ features.push("continuous"); }
             if(type.isHidden){ features.push("hidden"); }
@@ -12134,12 +11272,11 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
  */
 def.type('pvc.visual.Role')
 .init(function(name, keyArgs){
-    this.name = name;
-    this.label = def.get(keyArgs, 'label') || name;
+    this.name  = name;
+    this.label = def.get(keyArgs, 'label') || pvc.buildTitleFromName(name);
     this.index = def.get(keyArgs, 'index') || 0;
     
     this.dimensionDefaults = def.get(keyArgs, 'dimensionDefaults') || {};
-    this.dimensionDefaults.label = this.label;
     
     if(def.get(keyArgs, 'isRequired', false)) {
         this.isRequired = true;
@@ -16173,7 +15310,7 @@ def
      */
     labelTextSize: function(){
         var valueVar = this.vars.value;
-        return valueVar && pvc.text.getTextSize(valueVar.label, this.vars.font);
+        return valueVar && pv.Text.measure(valueVar.label, this.vars.font);
     }
 });
 /**
@@ -16212,20 +15349,19 @@ def
     
     /**
      * Toggles the selected state of the datums present in this scene
-     * and forces an interactive render of the chart by calling
-     * {@link pvc.BaseChart#updateSelections}.
+     * and updates the chart if necessary.
      */
     click: function(){
         var datums = this.datums().array();
-        
-        // Allow chart action to change the selection
-        var chart = this.chart();
-        datums = chart._onUserSelection(datums);
-        if(datums){
-            var on = def.query(datums).any(function(datum){ return datum.isSelected; });
-            if(pvc.data.Data.setSelected(datums, !on)){
-                chart.updateSelections();
-            }
+        if(datums.length){
+            var chart = this.chart();
+            chart._updatingSelections(function(){
+                datums = chart._onUserSelection(datums);
+                if(datums){
+                    var on = def.query(datums).any(function(datum){ return datum.isSelected; });
+                    pvc.data.Data.setSelected(datums, !on);
+                }
+            });
         }
     }
 });
@@ -17671,7 +16807,7 @@ def
          * (must be done AFTER processing options
          *  because of width, height properties and noData extension point...) 
          */
-        this._checkNoData();
+        this._checkNoDataI();
         
         /* Initialize root visual roles */
         if(!this.parent && this._createVersion === 1) {
@@ -17687,6 +16823,8 @@ def
         /* Initialize the data (and _bindVisualRolesPost) */
         this._initData(keyArgs);
 
+        /* When data is excluded, there may be no data after all */
+        this._checkNoDataII();
         
         var hasMultiRole = this._isRoleAssigned('multiChart');
         
@@ -17946,9 +17084,9 @@ def
     useTextMeasureCache: function(fun, ctx){
         var root = this.root;
         var textMeasureCache = root._textMeasureCache || 
-                               (root._textMeasureCache = pvc.text.createCache());
+                               (root._textMeasureCache = pv.Text.createCache());
         
-        return pvc.text.useCache(textMeasureCache, fun, ctx || this);
+        return pv.Text.usingCache(textMeasureCache, fun, ctx || this);
     },
     
     /**
@@ -18046,7 +17184,10 @@ def
         groupedLabelSep:   undefined,
 //        measuresIndexes:   undefined,
 //        dataOptions:       undefined,
-//        
+//        dataSeparator
+//        dataMeasuresInColumns
+//        dataCategoriesCount
+        
 //        timeSeries:        undefined,
 //        timeSeriesFormat:  undefined,
 
@@ -18399,7 +17540,14 @@ pvc.BaseChart
     },
     
     _setRoleBoundDimensionDefaults: function(role, dimName){
-        this._complexTypeProj.setDimDefaults(dimName, role.dimensionDefaults);
+        //var splitId = pvc.splitIndexedId(dimName);
+        
+        this._complexTypeProj
+            .setDimDefaults(dimName, role.dimensionDefaults)
+            ;
+//            .setDimDefaults(dimName, {
+//                label: pvc.buildIndexedId(role.label, splitId[1])
+//            });
     },
     
     _bindVisualRolesPostI: function(){
@@ -18451,10 +17599,6 @@ pvc.BaseChart
             def.array.lazy(boundDimTypes, dimName).push(role);
         }
         
-        function dimIsNotBoundTo(dimName){
-            return !def.hasOwn(boundDimTypes, dimName); 
-        }
-        
         function dimIsDefined(dimName){
             return complexTypeProj.hasDim(dimName);
         }
@@ -18472,20 +17616,13 @@ pvc.BaseChart
             role.preBind(pvc.data.GroupingSpec.parse(dimNames));
         }
         
-        function preBindRoleToGroupFreeDims(role, groupDimNames){
-            var freeGroupDimNames = 
-                def
-                .query(groupDimNames)
-                .where(dimIsNotBoundTo);
-
-            if(role.requireSingleDimension){
-                var firstFreeDimName = freeGroupDimNames.first();
-                if(firstFreeDimName){
-                    preBindRoleTo(role, firstFreeDimName);
+        function preBindRoleToGroupDims(role, groupDimNames){
+            if(groupDimNames.length){
+                if(role.requireSingleDimension){
+                    preBindRoleTo(role, groupDimNames[0]);
+                } else {
+                    preBindRoleTo(role, groupDimNames);
                 }
-            } else {
-                // May have no elements
-                preBindRoleTo(role, freeGroupDimNames.array());
             }
         }
         
@@ -18515,10 +17652,7 @@ pvc.BaseChart
         function autoBindUnboundRole(role){
             var name = role.name;
             
-            if(role.sourceRole && role.isPreBound()){
-                unboundSourcedRoles.push(role);
-                return;
-            }
+            // !role.isPreBound()
             
             /* Try to bind automatically, to defaultDimensionName */
             var dimName = role.defaultDimensionName;
@@ -18550,16 +17684,13 @@ pvc.BaseChart
                 var groupDimNames = complexTypeProj.groupDimensionsNames(defaultName);
                 if(groupDimNames){
                     // Default dimension(s) is defined
-                    preBindRoleToGroupFreeDims(role, groupDimNames);
+                    preBindRoleToGroupDims(role, groupDimNames);
                     return;
                 }
                 // Follow to auto create dimension
                 
             } else if(dimIsDefined(defaultName)){ // defaultName === dimName
-                if(dimIsNotBoundTo(defaultName)){
-                    preBindRoleTo(role, defaultName);
-      
-                }
+                preBindRoleTo(role, defaultName);
                 return;
             }
 
@@ -18724,13 +17855,26 @@ pvc.BaseChart
         }
     },
     
-    _checkNoData: function(){
+    _checkNoDataI: function(){
         // Child charts are created to consume *existing* data
         if (!this.parent) {
             
             // If we don't have data, we just need to set a "no data" message
             // and go on with life.
             if(!this.allowNoData && this.resultset.length === 0) {
+                /*global NoDataException:true */
+                throw new NoDataException();
+            }
+        }
+    },
+    
+    _checkNoDataII: function(){
+        // Child charts are created to consume *existing* data
+        if (!this.parent) {
+            
+            // If we don't have data, we just need to set a "no data" message
+            // and go on with life.
+            if(!this.allowNoData && (!this.data || !this.data.count())) {
                 /*global NoDataException:true */
                 throw new NoDataException();
             }
@@ -18910,7 +18054,24 @@ pvc.BaseChart
     
     _createTranslationOptions: function(dataPartDimName){
         var options = this.options;
+        
         var dataOptions = options.dataOptions || {};
+        
+        var dataSeparator = options.dataSeparator;
+        if(dataSeparator === undefined){
+            dataSeparator = dataOptions.separator;
+        }
+        
+        var dataMeasuresInColumns = options.dataMeasuresInColumns;
+        if(dataMeasuresInColumns === undefined){
+            dataMeasuresInColumns = dataOptions.measuresInColumns;
+        }
+        
+        var dataCategoriesCount = options.dataCategoriesCount;
+        if(dataCategoriesCount === undefined){
+            dataCategoriesCount = dataOptions.categoriesCount;
+        }
+        
         var plot2 = options.plot2;
         
         var valueFormat = options.valueFormat,
@@ -18939,11 +18100,13 @@ pvc.BaseChart
             multiChartIndexes: options.multiChartIndexes,
 
             // crosstab
-            separator:         dataOptions.separator,
-            measuresInColumns: dataOptions.measuresInColumns,
+            separator:         dataSeparator,
+            measuresInColumns: dataMeasuresInColumns,
+            categoriesCount:   dataCategoriesCount,
+            
+            // TODO: currently measuresInRows is not implemented...
             measuresIndex:     dataOptions.measuresIndex || dataOptions.measuresIdx, // measuresInRows
             measuresCount:     dataOptions.measuresCount || dataOptions.numMeasures, // measuresInRows
-            categoriesCount:   dataOptions.categoriesCount,
 
             // Timeseries *parse* format
             isCategoryTimeSeries: options.timeSeries,
@@ -19234,6 +18397,17 @@ pvc.BaseChart
                 });
             }
         }
+    },
+    
+    // Called by the pvc.PlotPnel class
+    _addPlotPanel: function(plotPanel){
+        def.lazy(this, 'plotPanels')[plotPanel.plot.id] = plotPanel;
+        def.array.lazy(this, 'plotPanelList').push(plotPanel);
+    },
+    
+    /* @abstract */
+    _createPlotPanels: function(parentPanel, baseOptions){
+        throw def.error.notImplemented();
     }
 });
 
@@ -19834,7 +19008,7 @@ pvc.BaseChart
 pvc.BaseChart
 .add({
     _updateSelectionSuspendCount: 0,
-    _selectionNeedsUpdate: false,
+    _lastSelectedDatums: null,
     
     /** 
      * Clears any selections and, if necessary,
@@ -19851,6 +19025,20 @@ pvc.BaseChart
         return this;
     },
     
+    _updatingSelections: function(method, context){
+        this._suspendSelectionUpdate();
+        
+        var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
+        //this._log("Previous Datum count=" + datums.length + 
+        //        " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
+        
+        try {
+            method.call(context || this);
+        } finally {
+            this._resumeSelectionUpdate();
+        }
+    },
+    
     _suspendSelectionUpdate: function(){
         if(this === this.root) {
             this._updateSelectionSuspendCount++;
@@ -19863,18 +19051,16 @@ pvc.BaseChart
         if(this === this.root) {
             if(this._updateSelectionSuspendCount > 0) {
                 if(!(--this._updateSelectionSuspendCount)) {
-                    if(this._selectionNeedsUpdate) {
                         this.updateSelections();
                     }
                 }
-            }
         } else {
-            this._resumeSelectionUpdate();
+            this.root._resumeSelectionUpdate();
         }
     },
     
     /** 
-     * Re-renders the parts of the chart that show selected marks.
+     * Re-renders the parts of the chart that show marks.
      * 
      * @type undefined
      * @virtual 
@@ -19886,8 +19072,12 @@ pvc.BaseChart
             }
             
             if(this._updateSelectionSuspendCount) {
-                this._selectionNeedsUpdate = true;
                 return this;
+            }
+            
+            var selectedChangedDatumMap = this._calcSelectedChangedDatums();
+            if(!selectedChangedDatumMap){
+                return;
             }
             
             pvc.removeTipsyLegends();
@@ -19898,21 +19088,54 @@ pvc.BaseChart
                 // Fire action
                 var action = this.options.selectionChangedAction;
                 if(action){
-                    var selections = this.data.selectedDatums();
-                    action.call(this.basePanel._getContext(), selections);
+                    var selectedDatums = this.data.selectedDatums();
+                    var selectedChangedDatums = selectedChangedDatumMap.values();
+                    action.call(
+                        this.basePanel._getContext(), 
+                        selectedDatums, 
+                        selectedChangedDatums);
                 }
                 
-                /** Rendering afterwards allows the action to change the selection in between */
-                this.basePanel.renderInteractive();
+                // Rendering afterwards allows the action to change the selection in between
+                this.useTextMeasureCache(function(){
+                    this.basePanel.renderInteractive();
+                }, this);
             } finally {
-                this._inUpdateSelections   = false;
-                this._selectionNeedsUpdate = false;
+                this._inUpdateSelections = false;
             }
         } else {
             this.root.updateSelections();
         }
         
         return this;
+    },
+    
+    _calcSelectedChangedDatums: function(){
+        // Capture currently selected datums
+        // Calculate the ones that changed.
+        var selectedChangedDatums;
+        var nowSelectedDatums  = this.data.selectedDatumMap();
+        var lastSelectedDatums = this._lastSelectedDatums;
+        if(!lastSelectedDatums){
+            if(!nowSelectedDatums.count){
+                return;
+            }
+            
+            selectedChangedDatums = nowSelectedDatums.clone();
+        } else {
+            selectedChangedDatums = lastSelectedDatums.symmetricDifference(nowSelectedDatums);
+            if(!selectedChangedDatums.count){
+                return;
+            }
+        }
+        
+        this._lastSelectedDatums = nowSelectedDatums;
+        
+        var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
+//        this._log("Now Datum count=" + datums.length + 
+//                " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
+        
+        return selectedChangedDatums;
     },
     
     _onUserSelection: function(datums){
@@ -19938,23 +19161,28 @@ pvc.BaseChart
 .add({
     
     _processExtensionPoints: function(){
-        var points = this.options.extensionPoints;
-        var components = {};
-        if(points){
-            for(var p in points) {
-                var id, prop;
-                var splitIndex = p.indexOf("_");
-                if(splitIndex > 0){
-                    id   = p.substring(0, splitIndex);
-                    prop = p.substr(splitIndex + 1);
-                    if(id && prop){
-                        var component = def.getOwn(components, id) ||
-                                        (components[id] = new def.OrderedMap());
-                        
-                        component.add(prop, points[p]);
+        var components;
+        if(!this.parent){
+            var points = this.options.extensionPoints;
+            components = {};
+            if(points){
+                for(var p in points) {
+                    var id, prop;
+                    var splitIndex = p.indexOf("_");
+                    if(splitIndex > 0){
+                        id   = p.substring(0, splitIndex);
+                        prop = p.substr(splitIndex + 1);
+                        if(id && prop){
+                            var component = def.getOwn(components, id) ||
+                                            (components[id] = new def.OrderedMap());
+                            
+                            component.add(prop, points[p]);
+                        }
                     }
                 }
             }
+        } else {
+            components = this.parent._components;
         }
         
         this._components = components;
@@ -21122,6 +20350,7 @@ def
                 pvMarks.forEach(function(pvMark){ pvMark.render(); });
             } else if(!this._children) {
                 this.pvPanel.render();
+                return;
             }
             
             if(this._children){
@@ -21822,30 +21051,20 @@ def
     _onSelect: function(context){
         var datums = context.scene.datums().array();
         if(datums.length){
-            datums = this._onUserSelection(datums);
-            if(datums && datums.length){
-                var chart = this.chart;
+            var chart = this.chart;
                 
-                var changed;
-                if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
-                    changed = chart.data.replaceSelected(datums);
-                } else {
-                    changed = pvc.data.Data.toggleSelected(datums);
-                }
+            chart._updatingSelections(function(){
                 
-                if(changed){
-                    this._onSelectionChanged();
+                datums = chart._onUserSelection(datums);
+                if(datums && datums.length){
+                    if(chart.options.ctrlSelectMode && !context.event.ctrlKey){
+                        chart.data.replaceSelected(datums);
+                    } else {
+                        pvc.data.Data.toggleSelected(datums);
+                    }
                 }
-            }
+            }, this);
         }
-    },
-    
-    _onUserSelection: function(datums){
-        return this.chart._onUserSelection(datums);
-    },
-    
-    _onSelectionChanged: function(){
-        this.chart.updateSelections();
     },
     
     isRubberBandSelecting: function(){
@@ -21898,13 +21117,13 @@ def
             })
             .pvMark
             .lock('data', [new pvc.visual.Scene(null, {panel: this})])
-            .lock('visible', function() { return !!rb;  })
-            .lock('left',    function() { return rb.x;  })
+            .lock('visible', function(){ return !!rb;  })
+            .lock('left',    function(){ return rb.x;  })
             .lock('right')
-            .lock('top',     function() { return rb.y;  })
+            .lock('top',     function(){ return rb.y;  })
             .lock('bottom')
-            .lock('width',   function() { return rb.dx; })
-            .lock('height',  function() { return rb.dy; })
+            .lock('width',   function(){ return rb.dx; })
+            .lock('height',  function(){ return rb.dy; })
             .lock('cursor')
             .lock('events', 'none')
             ;
@@ -21922,7 +21141,7 @@ def
          
         var selectionEndedDate;
         rubberPvParentPanel
-            .event('mousedown', pv.Behavior.selector(false))
+            .event('mousedown', pv.Behavior.select({autoRefresh: false, datumIsRect: false}))
             .event('select', function(){
                 if(!rb){
                     if(myself.isAnimating()){
@@ -21956,14 +21175,14 @@ def
                         toScreen = rubberPvParentPanel.toScreenTransform();
                     }
                     
-                    myself.rubberBand = rb = this.selectionRect.clone().apply(toScreen);
+                    myself.rubberBand = rb = this.selectionRect.apply(toScreen);
                     
                     rb = null;
                     myself._isRubberBandSelecting = false;
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
-                    myself._dispatchRubberBandSelectionTop(ev);
+                    myself._onRubberBandSelectionEnd(ev);
                     
                     selectionEndedDate = new Date();
                     
@@ -21985,95 +21204,82 @@ def
                     }
                     
                     if(data.owner.clearSelected()) {
-                        myself._onSelectionChanged();
+                        myself.chart.updateSelections();
                     }
                 });
         }
     },
     
-    _dispatchRubberBandSelectionTop: function(ev){
-        /* Only update selection, which is a global op, after all selection changes */
-        
+    _onRubberBandSelectionEnd: function(ev){
         if(pvc.debug >= 3) {
             this._log('rubberBand ' + pvc.stringify(this.rubberBand));
         }
         
+        var keyArgs = {toggle: false}; // output argument
+        var datums = this._getDatumsOnRubberBand(ev, keyArgs);
+        if(datums){
         var chart = this.chart;
-        chart._suspendSelectionUpdate();
-        try {
-            if(!ev.ctrlKey && chart.options.ctrlSelectMode){
+            
+            //this._log("Selecting Datum count=" + datums.length + 
+            //          " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
+            
+            // Make sure selection changed action is called only once
+            // Checks if any datum's selected changed, at the end
+            chart._updatingSelections(function(){
+                var clearBefore = !ev.ctrlKey && chart.options.ctrlSelectMode;
+                if(clearBefore){
                 chart.data.owner.clearSelected();
+                    pvc.data.Data.setSelected(datums, true);
+                } else if(keyArgs.toggle){
+                    pvc.data.Data.toggleSelected(datums);
+                } else {
+                    pvc.data.Data.setSelected(datums, true);
             }
+            });
             
-            chart.useTextMeasureCache(this._dispatchRubberBandSelection, this);
-            
-        } finally {
-            chart._resumeSelectionUpdate();
+            //this._log("End rubber band selection");
         }
     },
     
-    // Callback to handle end of rubber band selection
-    _dispatchRubberBandSelection: function(ev){
-        // Ask the panel for selectable marks
-        var datumsByKey = {},
-            keyArgs = {toggle: false};
-        if(this._detectDatumsUnderRubberBand(datumsByKey, this.rubberBand, keyArgs)) {
-            var selectedDatums = def.own(datumsByKey); 
+    _getDatumsOnRubberBand: function(ev, keyArgs){
+        var datumMap = new def.Map();
+        
+        this._getDatumsOnRect(datumMap, this.rubberBand, keyArgs);
             
-            selectedDatums = this._onUserSelection(selectedDatums);
-            
-            var changed;
-            if(keyArgs.toggle){
-                pvc.data.Data.toggleSelected(selectedDatums);
-                changed = true;
-            } else {
-                changed = pvc.data.Data.setSelected(selectedDatums, true);
-            }
-            
-            if(changed) {
-                this._onSelectionChanged();
+        var datums = datumMap.values();
+        if(datums.length){
+            datums = this.chart._onUserSelection(datums);
+            if(datums && !datums.length){
+                datums = null;
             }
         }
         
-        // --------------
+        return datums;
+    },
+    
+    // Callback to handle end of rubber band selection
+    _getDatumsOnRect: function(datumMap, rect, keyArgs){
+        this._getOwnDatumsOnRect(datumMap, rect, keyArgs);
         
         if(this._children) {
             this._children.forEach(function(child){
-                child.rubberBand = this.rubberBand;
-                child._dispatchRubberBandSelection(child);
+                child._getDatumsOnRect(datumMap, rect, keyArgs);
             }, this);
         }
     },
     
-    /**
-     * The default implementation obtains
-     * datums associated with the instances of 
-     * marks returned by #_getSelectableMarks.
-     * 
-     * <p>
-     * Override to provide a specific
-     * selection detection implementation.
-     * </p>
-     * 
-     * @param {object} datumsByKey The map that receives the found datums, indexed by their key. 
-     * @param {pvc.Rect} rb The rubber band to use. The default value is the panel's current rubber band.
-     * @param {object} keyArgs Keyword arguments.
-     * @param {boolean} [keyArgs.toggle=false] Returns a value that indicates to the caller that the selection should be toggled.
-     * 
-     * @returns {boolean} <tt>true</tt> if any datum was found under the rubber band.
-     * 
-     * @virtual
-     */
-    _detectDatumsUnderRubberBand: function(datumsByKey, rb, keyArgs){
+    _getOwnDatumsOnRect: function(datumMap, rect, keyArgs){
         var any = false;
+        
         if(this.isVisible){
             var pvMarks = this._getSelectableMarks();
             if(pvMarks && pvMarks.length){
                 pvMarks.forEach(function(pvMark){
-                    this._forEachMarkDatumUnderRubberBand(pvMark, function(datum){
-                        datumsByKey[datum.key] = datum;
+                    this._eachMarkDatumOnRect(pvMark, rect, function(datum){
+                        datumMap.set(datum.id, datum);
                         any = true;
-                    }, this, rb);
+                    }, this);
+                    
                 }, this);
             }
         }
@@ -22081,20 +21287,31 @@ def
         return any;
     },
     
-    _forEachMarkDatumUnderRubberBand: function(pvMark, fun, ctx, rb){
-        if(!rb) {
-            rb = this.rubberBand;
-        }
+    _eachMarkDatumOnRect: function(pvMark, rect, fun, ctx){
         
-        function processShape(shape, instance) {
-            if (shape.intersectsRect(rb)){
+        // center, partial and total (not implemented)
+        var selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
+        var useCenter = (selectionMode === 'center');
+        
+        pvMark.eachInstanceWithData(function(scenes, index, toScreen){
+            
+            var shape = pvMark.getShape(scenes, index);
+            
+            shape = (useCenter ? shape.center() : shape).apply(toScreen);
+            
+            processShape.call(this, shape, scenes[index], index);
+        }, this);
+        
+        function processShape(shape, instance, index) {
+        
+            if (shape.intersectsRect(rect)){
                 var group = instance.group;
                 var datums = group ? group._datums : def.array.as(instance.datum);
                 if(datums) {
                     datums.forEach(function(datum){
                         if(!datum.isNull) {
                             if(pvc.debug >= 20) {
-                                this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type);
+                                this._log("Rubbered Datum.key=" + datum.key + ": " + pvc.stringify(shape) + " mark type: " + pvMark.type + " index=" + index);
                             }
                     
                             fun.call(ctx, datum);
@@ -22102,35 +21319,6 @@ def
                     }, this);
                 }
             }
-        }
-        
-        // center, partial and total (not implemented)
-        var selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
-        var shapeMethod = (selectionMode === 'center') ? 'getInstanceCenterPoint' : 'getInstanceShape';
-        
-        if(pvMark.type === 'area' || pvMark.type === 'line'){
-            var instancePrev;
-            
-            pvMark.eachInstanceWithData(function(instance, toScreen){
-                if(!instance.visible || instance.isBreak || (instance.datum && instance.datum.isNull)) {
-                    // Break the line
-                    instancePrev = null;
-                } else {
-                    if(instancePrev){
-                        var shape = pvMark[shapeMethod](instancePrev, instance).apply(toScreen);
-                        processShape.call(this, shape, instancePrev);
-                    }
-    
-                    instancePrev = instance;
-                }
-            }, this);
-        } else {
-            pvMark.eachInstanceWithData(function(instance, toScreen){
-                if(!instance.isBreak && instance.visible) {
-                    var shape = pvMark[shapeMethod](instance).apply(toScreen);
-                    processShape.call(this, shape, instance);
-                }
-            }, this);
         }
     },
     
@@ -22293,6 +21481,8 @@ def
     this.valuesAnchor  = plot.option('ValuesAnchor' );
     this.valuesMask    = plot.option('ValuesMask'   );
     this.valuesFont    = plot.option('ValuesFont'   );
+    
+    this.chart._addPlotPanel(this);
 })
 .add({
     anchor:  'fill',
@@ -22928,7 +22118,7 @@ def
         var a_height = this.anchorOrthoLength(a);
         
         // 2 - Small factor to avoid cropping text on either side
-        var textWidth    = pvc.text.getTextLength(this.title, this.font) + 2;
+        var textWidth    = pv.Text.measure(this.title, this.font).width + 2;
         var clientWidth  = layoutInfo.clientSize[a_width];
         var desiredWidth = layoutInfo.desiredClientSize[a_width];
         
@@ -22947,7 +22137,7 @@ def
 
         // -------------
 
-        var lineHeight = pvc.text.getTextHeight("m", this.font);
+        var lineHeight = pv.Text.fontHeight(this.font);
         var realHeight = lines.length * lineHeight;
         var availableHeight = layoutInfo.clientSize[a_height];
         
@@ -23081,9 +22271,10 @@ def
         }
     }
     
-    this.base(chart, parent, options);
-    
+    // Must be done before calling base, cause it uses _getExtension
     this._extensionPrefix = !chart.parent ? "title" : "smallTitle";
+    
+    this.base(chart, parent, options);
 })
 .add({
 
@@ -23332,7 +22523,6 @@ def
 })
 .add({
     _gridDockPanel: null,
-    _mainContentPanel: null,
     
     axesPanels: null, 
     
@@ -23544,7 +22734,7 @@ def
         
         /* Create main content panel 
          * (something derived from pvc.CartesianAbstractPanel) */
-        this._mainContentPanel = this._createMainContentPanel(this._gridDockPanel, {
+        this._createPlotPanels(this._gridDockPanel, {
             clickAction:        contentOptions.clickAction,
             doubleClickAction:  contentOptions.doubleClickAction
         });
@@ -23609,11 +22799,6 @@ def
         }
     },
 
-    /* @abstract */
-    _createMainContentPanel: function(parentPanel, baseOptions){
-        throw def.error.notImplemented();
-    },
-    
     /**
      * Creates a discrete scale for a given axis.
      * <p>
@@ -23776,7 +22961,7 @@ def
     },
     
     _onLaidOut: function(){
-        if(this._mainContentPanel){ // not the root of a multi chart
+        if(this.plotPanelList && this.plotPanelList[0]){ // not the root of a multi chart
             /* Set scale ranges, after layout */
             ['base', 'ortho'].forEach(function(type){
                 var axes = this.axesByType[type];
@@ -23788,7 +22973,7 @@ def
     },
     
     _setCartAxisScaleRange: function(axis){
-        var info = this._mainContentPanel._layoutInfo;
+        var info = this.plotPanelList[0]._layoutInfo;
         var size = (axis.orientation === 'x') ?
            info.clientSize.width :
            info.clientSize.height;
@@ -24534,28 +23719,23 @@ def
         
         this.base(layoutInfo);
 
-        var contentPanel = chart._mainContentPanel;
-        if(contentPanel) {
-            var plotFrameVisible = chart.options.plotFrameVisible;
-            if(plotFrameVisible == null){
-                if(chart.compatVersion <= 1){
-                    plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
-                } else {
-                    plotFrameVisible = true;
-                }
-            }
+        var plotFrameVisible;
+        if(chart.compatVersion <= 1){
+            plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
+        } else {
+            plotFrameVisible = def.get(chart.options, 'plotFrameVisible', true);
+        }
             
-            if(plotFrameVisible) {
-                this.pvFrameBar = this._createFrame(layoutInfo, axes);
-            }
+        if(plotFrameVisible) {
+            this.pvFrameBar = this._createFrame(layoutInfo, axes);
+        }
             
-            if(xAxis.scaleType !== 'discrete' && xAxis.option('ZeroLine')) {
-                this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
-            }
+        if(xAxis.scaleType !== 'discrete' && xAxis.option('ZeroLine')) {
+            this.xZeroLine = this._createZeroLine(xAxis, layoutInfo);
+        }
 
-            if(yAxis.scaleType !== 'discrete' && yAxis.option('ZeroLine')) {
-                this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
-            }
+        if(yAxis.scaleType !== 'discrete' && yAxis.option('ZeroLine')) {
+            this.yZeroLine = this._createZeroLine(yAxis, layoutInfo);
         }
     },
     
@@ -24755,6 +23935,55 @@ def
     _getOrthoAxis: function(type){
         var orthoType = type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType];
+    },
+    
+    /*
+     * @override
+     */
+    _getDatumsOnRect: function(datumMap, rect, keyArgs){
+        // TODO: this is done for x and y axis only, which is ok for now,
+        // as only discrete axes use selection and
+        // multiple axis are only continuous...
+        var chart = this.chart,
+            xAxisPanel = chart.axesPanels.x,
+            yAxisPanel = chart.axesPanels.y,
+            xDatumMap,
+            yDatumMap;
+
+        //1) x axis
+        if(xAxisPanel){
+            xDatumMap = new def.Map();
+            xAxisPanel._getDatumsOnRect(xDatumMap, rect, keyArgs);
+            if(!xDatumMap.count) {
+                xDatumMap = null;
+            }
+        }
+
+        //2) y axis
+        if(yAxisPanel){
+            yDatumMap = new def.Map();
+            yAxisPanel._getOwnDatumsOnRect(yDatumMap, rect, keyArgs);
+            if(!yDatumMap.count) {
+                yDatumMap = null;
+            }
+        }
+
+        // Rubber band selects on both axes?
+        if(xDatumMap && yDatumMap) {
+            xDatumMap.intersect(yDatumMap, /* into */ datumMap);
+            
+            keyArgs.toggle = true;
+
+            // Rubber band selects over any of the axes?
+        } else if(xDatumMap) {
+            datumMap.copy(xDatumMap);
+        } else if(yDatumMap) {
+            datumMap.copy(yDatumMap);
+        } else {
+            chart.plotPanelList.forEach(function(plotPanel){
+                plotPanel._getDatumsOnRect(datumMap, rect, keyArgs);
+            }, this);
+        }
     }
 });
 
@@ -24890,64 +24119,6 @@ def
     
     _getVisibleData: function(){
         return this.chart._getVisibleData(this.dataPartValue);
-    },
-
-    /*
-     * @override
-     */
-    _detectDatumsUnderRubberBand: function(datumsByKey, rb, keyArgs){
-        // TODO: this is done for x and y axis only, which is ok for now,
-        // as only discrete axes use selection and
-        // multiple axis are only continuous...
-        var any = false,
-            chart = this.chart,
-            xAxisPanel = chart.axesPanels.x,
-            yAxisPanel = chart.axesPanels.y,
-            xDatumsByKey,
-            yDatumsByKey;
-
-        //1) x axis
-        if(xAxisPanel){
-            xDatumsByKey = {};
-            if(!xAxisPanel._detectDatumsUnderRubberBand(xDatumsByKey, rb, keyArgs)) {
-                xDatumsByKey = null;
-            }
-        }
-
-        //2) y axis
-        if(yAxisPanel){
-            yDatumsByKey = {};
-            if(!yAxisPanel._detectDatumsUnderRubberBand(yDatumsByKey, rb, keyArgs)) {
-                yDatumsByKey = null;
-            }
-        }
-
-        // Rubber band selects on both axes?
-        if(xDatumsByKey && yDatumsByKey) {
-            // Intersect datums
-
-            def.eachOwn(yDatumsByKey, function(datum, key){
-                if(def.hasOwn(xDatumsByKey, key)) {
-                    datumsByKey[datum.key] = datum;
-                    any = true;
-                }
-            });
-
-            keyArgs.toggle = true;
-
-            // Rubber band selects over any of the axes?
-        } else if(xDatumsByKey) {
-            def.copy(datumsByKey, xDatumsByKey);
-            any = true;
-        } else if(yDatumsByKey) {
-            def.copy(datumsByKey, yDatumsByKey);
-            any = true;
-        } else {
-            // Ask the base implementation for datums
-            any = this.base(datumsByKey, rb, keyArgs);
-        }
-
-        return any;
     }
 });
 /**
@@ -25428,7 +24599,7 @@ def
 
         // Add the line
 
-        var panel = this._mainContentPanel.pvPanel;
+        var panel = this.plotPanelList[0].pvPanel;
         var h = this.yScale.range()[1];
 
         // Detect where to place the horizontalAnchor
@@ -25625,11 +24796,6 @@ def
             
             /* IV - Calculate overflow paddings */
             this._calcOverflowPaddings();
-            
-            // Release memory.
-            if(pvc.debug > 16){
-                layoutInfo.labelBBox = null;
-            } // else keep this to draw the debug paths around the labels
         }
     },
     
@@ -25669,13 +24835,13 @@ def
             }
         } 
         
-        layoutInfo.labelBBox = pvc.text.getLabelBBox(
-                        layoutInfo.maxTextWidth, 
+        return (layoutInfo.labelBBox = pvc.text.getLabelBBox(
+                        layoutInfo.maxTextWidth != null ? layoutInfo.maxTextWidth : layoutInfo._maxTextWidth, 
                         layoutInfo.textHeight, 
                         align, 
                         baseline, 
                         layoutInfo.textAngle, 
-                        layoutInfo.textMargin);
+                        layoutInfo.textMargin));
     },
     
     _calcAxisSizeFromLabelBBox: function(){
@@ -25866,7 +25032,7 @@ def
             // Intersect the line that passes through mostOrthoDistantPoint,
             // and has the direction parallelDirection with 
             // the top side and with the bottom side of the *original* label box.
-            var corners = labelBBox.sourceCorners;
+            var corners = labelBBox.source.points();
             var botL = corners[0];
             var botR = corners[1];
             var topR = corners[2];
@@ -25942,7 +25108,7 @@ def
     _calcTicks: function(){
         var layoutInfo = this._layoutInfo;
         
-        layoutInfo.textHeight = pvc.text.getTextHeight("m", this.font);
+        layoutInfo.textHeight = pv.Text.fontHeight(this.font);
         layoutInfo.maxTextWidth = null;
         
         // Reset scale to original unrounded domain
@@ -25964,9 +25130,13 @@ def
         if(layoutInfo.maxTextWidth == null){
             layoutInfo.maxTextWidth = 
                 def.query(layoutInfo.ticksText)
-                    .select(function(text){ return pvc.text.getTextLength(text, this.font); }, this)
+                    .select(function(text){ return pv.Text.measure(text, this.font).width; }, this)
                     .max();
         }
+        
+        // Backup value, cause the first one is cleared to prevent label trimming
+        // but the max text width is important for other uses
+        layoutInfo._maxTextWidth = layoutInfo.maxTextWidth;
     },
     
     _calcDiscreteTicks: function(){
@@ -26256,7 +25426,7 @@ def
         var domainTextLength = this.scale.domain().map(function(tick){
                 tick = +tick.toFixed(2); // crop some decimal places...
                 var text = this.scale.tickFormat(tick);
-                return pvc.text.getTextLength(text, this.font);
+                return pv.Text.measure(text, this.font).width;
             }, this);
         
         var avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight);
@@ -26272,7 +25442,7 @@ def
         var maxTextWidth = 
             def.query(ticksText)
                 .select(function(text){ 
-                    return pvc.text.getTextLength(text, this.font); 
+                    return pv.Text.measure(text, this.font).width; 
                 }, this)
                 .max();
         
@@ -26632,7 +25802,8 @@ def
     
     _debugTicksPanel: function(pvTicksPanel){
         if(pvc.debug >= 16){ // one more than general debug box model
-            var corners = this._layoutInfo.labelBBox.sourceCorners;
+            var corners = this._layoutInfo.labelBBox.source.points();
+            
             // Close the path
             if(corners.length > 1){
                 // not changing corners on purpose
@@ -26876,19 +26047,6 @@ def
         }
     },
     
-    /**
-     * Prevents the axis panel from reacting directly to rubber band selections.
-     * 
-     * The panel participates in rubber band selection through 
-     * the mediator {@link pvc.CartesianAbstractPanel}, which calls
-     * each axes' {@link #_detectDatumsUnderRubberBand} directly.
-     *   
-     * @override
-     */
-    _dispatchRubberBandSelection: function(ev){
-        /* NOOP */
-    },
-    
     /** @override */
     _getSelectableMarks: function(){
         if(this.isDiscrete && this.isVisible && this.pvLabel){
@@ -26906,7 +26064,7 @@ def
             vertDepthCutoff = 2,
             font = this.font;
         
-        var diagMargin = pvc.text.getFontSize(font) / 2;
+        var diagMargin = pv.Text.fontHeight(font) / 2;
         
         var layout = this._pvLayout = this.getLayoutSingleCluster();
 
@@ -27260,7 +26418,7 @@ def
             var linkLabelSize    = resolvePercentWidth (this.linkLabelSize   );
             
             var textMargin = def.number.to(this._getConstantExtension('label', 'textMargin'), 3);
-            var textHeight = pvc.text.getTextHeight('m', labelFont);
+            var textHeight = pv.Text.fontHeight(labelFont);
             
             var linkHandleWidth = this.linkHandleWidth * textHeight; // em
             linkMargin += linkHandleWidth;
@@ -28537,7 +27695,7 @@ def
     /**
      * @override 
      */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var options = this.options;
         var plots = this.plots;
         
@@ -28582,8 +27740,6 @@ def
                     trendPlot,
                     Object.create(baseOptions));
         }
-        
-        return barPanel;
     }
 });
 
@@ -28640,18 +27796,15 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var barPlot = this.plots.bar;
         
-        var barPanel = 
         this.barChartPanel = 
             new pvc.NormalizedBarPanel(
                 this, 
                 parentPanel, 
                 barPlot, 
                 Object.create(baseOptions));
-        
-        return barPanel;
     }
 });
 /**
@@ -29228,10 +28381,15 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
-        return (this.wfChartPanel = new pvc.WaterfallPanel(this, parentPanel, this.plots.water, def.create(baseOptions, {
-            waterfall:  this.options.waterfall
-        })));
+    _createPlotPanels: function(parentPanel, baseOptions){
+        this.wfChartPanel = 
+            new pvc.WaterfallPanel(
+                    this, 
+                    parentPanel, 
+                    this.plots.water, 
+                    def.create(baseOptions, {
+                        waterfall:  this.options.waterfall
+                    }));
     }
 });
 /*
@@ -30207,13 +29365,12 @@ def
     //_createPointPlot: function(){},
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var options = this.options;
         var axes    = this.axes;
         var plots   = this.plots;
         
         var pointPlot = plots.point;
-        var pointPanel = 
             this.scatterChartPanel = 
             new pvc.PointPanel(
                 this, 
@@ -30246,8 +29403,6 @@ def
                     trendPlot,
                     Object.create(baseOptions));
         }
-        
-        return pointPanel;
     },
     
     defaults: {
@@ -31075,15 +30230,15 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var heatGridPlot = this.plots.heatGrid;
         
-        return (this.heatGridChartPanel = 
+        this.heatGridChartPanel = 
                 new pvc.HeatGridPanel(
                         this, 
                         parentPanel, 
                         heatGridPlot, 
-                        Object.create(baseOptions)));
+                        Object.create(baseOptions));
     },
     
     defaults: {
@@ -32260,7 +31415,7 @@ def
      /**
       * @override 
       */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         // TODO: integrate these options in the MetricPointPlot or in the SizeAxis?
         var options = this.options;
         var panelOptions = def.set(
@@ -32270,7 +31425,6 @@ def
             'autoPaddingByDotSize', options.autoPaddingByDotSize);
         
         var scatterPlot = this.plots.scatter;
-        var scatterChartPanel = 
             this.scatterChartPanel = // V1 property 
             new pvc.MetricPointPanel(this, parentPanel, scatterPlot, panelOptions);
 
@@ -32282,8 +31436,6 @@ def
                 trendPlot, 
                 Object.create(panelOptions));
         }
-        
-        return scatterChartPanel;
     },
     
     defaults: {
@@ -32482,7 +31634,7 @@ def
 //      bulletMarkers:  null,     // Array of markers to appear
 //      bulletMeasures: null,     // Array of measures
 //      bulletRanges:   null,     // Ranges
-        bulletTitle:    "Bullet", // Title
+        bulletTitle:    "Title",  // Title
         bulletSubtitle: "",       // Subtitle
         bulletTitlePosition: "left", // Position of bullet title relative to bullet
 
@@ -34634,7 +33786,7 @@ def
     },
     
     /* @override */
-    _createMainContentPanel: function(parentPanel, baseOptions){
+    _createPlotPanels: function(parentPanel, baseOptions){
         var options = this.options;
         var plots   = this.plots;
             
@@ -34668,8 +33820,6 @@ def
             boxPanel.pvSecondLine = pointPanel.pvLine;
             boxPanel.pvSecondDot  = pointPanel.pvDot;
         }
-             
-        return boxPanel;
     },
     
     defaults: {
