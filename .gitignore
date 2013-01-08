@@ -1,11 +1,14 @@
 # OS-generated files
 .DS_Store*
 # Here be passwords!
-bi-platform-v2-plugin/override.properties
+/bi-platform-v2-plugin/override.properties
 # Build/Staging related stuff
-bi-platform-v2-plugin/bin/
-bi-platform-v2-plugin/dist/
-bi-platform-v2-plugin/lib/
-bi-platform-v2-plugin/runtime-lib/
-solution/system/
+/bi-platform-v2-plugin/bin/
+/bi-platform-v2-plugin/dist/
+/bi-platform-v2-plugin/lib/
+/bi-platform-v2-plugin/runtime-lib/
+/solution/system/
 /nbproject/private/
+/build
+/dist
+/manifest.mf
