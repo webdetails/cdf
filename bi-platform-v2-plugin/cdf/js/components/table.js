@@ -48,6 +48,9 @@ var TableComponent = UnmanagedComponent.extend({
     if(!this.preExec()){
       return;
     }
+    if(!this.htmlObject) {
+      return this.error("TableComponent requires an htmlObject");
+    }
     try{
       this.block();
       this.setup();
@@ -63,6 +66,7 @@ var TableComponent = UnmanagedComponent.extend({
         },this);
         var handler = this.getSuccessHandler(success);
 
+        this.queryState.setAjaxOptions({async:true});
         this.queryState.fetchData(this.parameters, handler);
       }
     } catch (e) {
@@ -91,6 +95,7 @@ var TableComponent = UnmanagedComponent.extend({
       this.processTableComponentResponse(values);
     },this));
     this.queryState.setParameters(this.parameters);
+    this.queryState.setAjaxOptions({async:true});
     this.processTableComponentResponse();
    },
 
@@ -387,14 +392,16 @@ var TableComponent = UnmanagedComponent.extend({
           anOpen.splice(j ,1);
         }
         obj.addClass(activeclass);
-        
+
+        anOpen.push( row );
+        // Since the switch to async, we need to open it first
+        myself.dataTable.fnOpen( row, htmlContent, activeclass );
+
         //Read parameters and fire changes
         var results = myself.queryState.lastResults();
         $(myself.expandParameters).each(function f(i, elt) {
           Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);              
         });
-        myself.dataTable.fnOpen( row, htmlContent, activeclass );
-        anOpen.push( row );
       };
     };
   }

@@ -1,6 +1,6 @@
 pen.require(["cdf/lib/CCC/pvc-d1.0"], function(pvc){
     
-var ProtovisComponent = BaseComponent.extend({
+var ProtovisComponent = UnmanagedComponent.extend({
 
   update : function() {
     if (this.parameters == undefined) {
