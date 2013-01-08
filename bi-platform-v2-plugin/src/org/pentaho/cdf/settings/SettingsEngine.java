@@ -1,14 +1,15 @@
-package org.pentaho.cdf;
+package org.pentaho.cdf.settings;
 
+import org.pentaho.cdf.CdfSessionCache;
 import org.pentaho.platform.api.engine.IPentahoSession;
 
-public class CdfSettings  {
+public class SettingsEngine  {
 	
 	
-	private static CdfSettings cdfSettings = null;
+	private static SettingsEngine cdfSettings = null;
 	
-	static CdfSettings getInstance() {
-		if(cdfSettings == null) cdfSettings = new CdfSettings();
+	static SettingsEngine getInstance() {
+		if(cdfSettings == null) cdfSettings = new SettingsEngine();
 		return cdfSettings;
 	}
 	

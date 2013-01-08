@@ -11,6 +11,10 @@
   <bean id="xcdf" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
   <!-- JAX-RS beans -->
   <bean id="api" class="org.pentaho.platform.web.servlet.JAXRSPluginServlet"/>
-  <bean class="org.pentaho.cdf.resource.StorageResource"/>
+  <bean id="storage" class="org.pentaho.cdf.storage.StorageApi"/>
+  <bean id="comments" class="org.pentaho.cdf.comments.CommentsApi"/>
+  <bean id="settings" class="org.pentaho.cdf.settings.SettingsApi"/>
+  <bean id="context" class="org.pentaho.cdf.context.DashboardContextApi"/>
+  <bean id="views" class="org.pentaho.cdf.views.ViewsApi"/>
   
 </beans>

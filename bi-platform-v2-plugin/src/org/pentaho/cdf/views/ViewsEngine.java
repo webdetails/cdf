@@ -20,53 +20,27 @@ import pt.webdetails.cpf.persistence.*;
  *
  * @author pdpi
  */
-public class ViewManager {
+public class ViewsEngine {
 
-    private static ViewManager instance;
-    private static final Log logger = LogFactory.getLog(ViewManager.class);
+    private static ViewsEngine instance;
+    private static final Log logger = LogFactory.getLog(ViewsEngine.class);
 
-    private ViewManager() {
+    private ViewsEngine() {
     }
 
-    public synchronized static ViewManager getInstance() {
+    public synchronized static ViewsEngine getInstance() {
         if (instance == null) {
-            instance = new ViewManager();
+            instance = new ViewsEngine();
         }
         return instance;
     }
 
-    public void process(IParameterProvider requestParams, IParameterProvider pathParams, OutputStream out) {
-
-        String method = requestParams.getStringParameter("method", "");
-        if ("listViews".equals(method)) {
-            try {
-                out.write(listViews().toString(2).getBytes("utf-8"));
-            } catch (Exception e) {
-                logger.error("Error listing views: " + e);
-            }
-        } else if ("saveView".equals(method)) {
-            try {
-                out.write(saveView(requestParams, pathParams).getBytes("utf-8"));
-            } catch (Exception e) {
-                logger.error("Error saving view: " + e);
-            }
-        } else if ("deleteView".equals(method)) {
-            try {
-                out.write(deleteView(requestParams, pathParams).getBytes("utf-8"));
-            } catch (Exception e) {
-                logger.error("Error saving view: " + e);
-            }
-        }else {
-            logger.error("Unsupported method");
-        }
-    }
-
-    public View getView(String id) {
+    public ViewEntry getView(String id) {
         IPentahoSession userSession = PentahoSessionHolder.getSession();
         SimplePersistence sp = SimplePersistence.getInstance();
         Filter filter = new Filter();
         filter.where("name").equalTo(id).and().where("user").equalTo(userSession.getName());
-        List<View> views = sp.load(View.class, filter);
+        List<ViewEntry> views = sp.load(ViewEntry.class, filter);
 
         return (views != null && views.size() > 0) ? views.get(0) : null;
     }
@@ -76,10 +50,10 @@ public class ViewManager {
         SimplePersistence sp = SimplePersistence.getInstance();
         Filter filter = new Filter();
         filter.where("user").equalTo(userSession.getName());
-        List<View> views = sp.load(View.class, filter);
+        List<ViewEntry> views = sp.load(ViewEntry.class, filter);
         JSONObject obj = new JSONObject();
         JSONArray arr = new JSONArray();
-        for (View v : views) {
+        for (ViewEntry v : views) {
             arr.put(v.toJSON());
         }
         try {
@@ -90,34 +64,50 @@ public class ViewManager {
         return obj;
     }
 
-    public String saveView(IParameterProvider requestParams, IParameterProvider pathParams) {
-        View view = new View();
+    public JSONObject saveView(String viewContent) {
+        ViewEntry view = new ViewEntry();
         IPentahoSession userSession = PentahoSessionHolder.getSession();
-
+        JSONObject obj = new JSONObject(); 
+        
         try {
-            JSONObject json = new JSONObject(requestParams.getStringParameter("view", ""));
+            JSONObject json = new JSONObject(viewContent);
             view.fromJSON(json);
             view.setUser(userSession.getName());
             PersistenceEngine pe = PersistenceEngine.getInstance();
             pe.store(view);
         } catch (JSONException e) {
             logger.error(e);
-            return "error";
+            try {
+                obj.put("status", "error");
+            } catch (JSONException ex) {}  
         }
-        return "ok";
+        
+        try {
+            obj.put("status", "ok");
+        } catch (JSONException e) {}
+        
+        return obj;
     }
 
-    public String deleteView(IParameterProvider requestParams, IParameterProvider pathParams) {
+    public JSONObject deleteView(String name) {
         IPentahoSession userSession = PentahoSessionHolder.getSession();
+        JSONObject obj = new JSONObject(); 
+        
         try {
-            String name = requestParams.getStringParameter("name", "");
             Filter filter = new Filter();
             filter.where("user").equalTo(userSession.getName()).and().where("name").equalTo(name);
-            SimplePersistence.getInstance().delete(View.class, filter);
-            return "ok";
+            SimplePersistence.getInstance().delete(ViewEntry.class, filter);
+            try {
+                obj.put("status", "ok");
+            } catch (JSONException e) {}
         } catch (Exception e) {
-            return "error";
+            logger.error(e);
+            try {
+                obj.put("status", "error");
+            } catch (JSONException ex) {}  
         }
+        
+        return obj;
     }
 
     public void listReports() {

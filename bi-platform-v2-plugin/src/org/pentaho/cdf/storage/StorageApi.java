@@ -1,4 +1,4 @@
-package org.pentaho.cdf.resource;
+package org.pentaho.cdf.storage;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
@@ -26,8 +26,8 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
  * @author rmansoor
  */
 @Path("/pentaho-cdf/api/storage")
-public class StorageResource {
-    public StorageResource() {
+public class StorageApi {
+    public StorageApi() {
       
     }
 

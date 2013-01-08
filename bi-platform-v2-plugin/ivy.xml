@@ -23,6 +23,8 @@
     <dependency org="commons-lang" name="commons-lang" rev="2.2"/>
     <dependency org="org.json" name="json" rev="${dependency.json.revision}" transitive="false"/>
     <dependency org="javax.servlet" name="servlet-api" rev="2.4"/>
+    <dependency org="javax.ws.rs"            name="jsr311-api"         rev="0.11"/>
+    <dependency org="javax.xml" name="jaxrpc-api" rev="1.1" />
     <!--  pentaho dependencies -->
     <dependency org="pentaho-reporting-engine" name="pentaho-reporting-engine-classic-core-platform-plugin" rev="${dependency.pentaho-reporting-engine-classic-core-platform-plugin.revision}" changing="true">
         

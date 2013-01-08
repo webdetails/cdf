@@ -59,50 +59,9 @@ public class CommentsEngine
     }
   }
 
-  public String process(IParameterProvider requestParams, IPentahoSession userSession) throws InvalidCdfOperationException
+
+  public JSONObject add(String page, String comment, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
-
-    String actionParam = requestParams.getStringParameter("action", "");
-
-    Class[] params =
-    {
-      IParameterProvider.class, IPentahoSession.class
-    };
-    try
-    {
-
-      Method mthd = this.getClass().getMethod(actionParam, params);
-      JSONObject json;
-
-      json = (JSONObject) mthd.invoke(this, requestParams, userSession);
-
-      return json.toString(2);
-
-    }
-    catch (JSONException ex)
-    {
-      logger.error("JSONException while building return information: " + getExceptionDescription(ex));
-      throw new InvalidCdfOperationException(ex);
-    }
-    catch (NoSuchMethodException ex)
-    {
-      logger.error("NoSuchMethodException : " + actionParam + " - " + getExceptionDescription(ex));
-      throw new InvalidCdfOperationException(ex);
-    }
-    catch (Exception ex)
-    {
-      logger.error(Messages.getErrorString("DashboardDesignerContentGenerator.ERROR_001_INVALID_METHOD_EXCEPTION") + " : " + actionParam);
-      throw new InvalidCdfOperationException(ex);
-    }
-
-  }
-
-  public JSONObject add(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
-  {
-
-
-    String page = requestParams.getStringParameter("page", "");
-    String comment = requestParams.getStringParameter("comment", "");
     String user = userSession.getName();
 
     if (page == null || page.equals("") || comment == null || comment.equals(""))
@@ -133,15 +92,11 @@ public class CommentsEngine
 
   }
 
-  public JSONObject list(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject list(String page, int firstResult, int maxResults, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
 
     logger.debug("Listing messages");
-
-    String page = requestParams.getStringParameter("page", "");
     String user = userSession.getName();
-    int firstResult = Integer.parseInt(requestParams.getStringParameter("firstResult", "0"));
-    int maxResults = Integer.parseInt(requestParams.getStringParameter("maxResults", "20"));
 
     if (page == null || page.equals(""))
     {
@@ -178,19 +133,15 @@ public class CommentsEngine
 
   }
 
-  public JSONObject delete(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject delete(int commentId, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
-
-    int commentId = Integer.parseInt(requestParams.getStringParameter("commentId", ""));
     logger.debug("Deleting comment " + commentId);
     return changeCommentStatus(DELETE_OPERATION, commentId, userSession);
 
   }
 
-  public JSONObject archive(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject archive(int commentId, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
-
-    int commentId = Integer.parseInt(requestParams.getStringParameter("commentId", ""));
     logger.debug("Archiving comment " + commentId);
     return changeCommentStatus(ARCHIVE_OPERATION, commentId, userSession);
 
@@ -249,14 +200,27 @@ public class CommentsEngine
   {
 
 
-    // Get hbm file
-    IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
-    InputStream in = resLoader.getResourceAsStream(CommentsEngine.class, "resources/hibernate/Comments.hbm.xml");
+      
+    ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+    try {
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      
+        IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
+        InputStream in = resLoader.getResourceAsStream(CommentsEngine.class, "resources/hibernate/Comments.hbm.xml");
 
-    // Close session and rebuild
-    PluginHibernateUtil.closeSession();
-    PluginHibernateUtil.getConfiguration().addInputStream(in);
-    PluginHibernateUtil.rebuildSessionFactory();
+        // Close session and rebuild
+        PluginHibernateUtil.closeSession();
+        PluginHibernateUtil.getConfiguration().addInputStream(in);
+        PluginHibernateUtil.rebuildSessionFactory();
+      
+      
+    }
+    catch (Exception e){}
+    finally {
+        Thread.currentThread().setContextClassLoader(contextCL);
+    }      
+      
+    // Get hbm file
 
   }
 

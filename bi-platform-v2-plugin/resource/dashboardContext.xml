@@ -2,7 +2,7 @@
   <!-- Query auto-includes -->
   <autoincludes>
     <autoinclude>
-      <cda><![CDATA[cdf/includes/(.*)/(.*?)\.cda]]></cda>
+      <cda><![CDATA[/public/pentaho-solutions/cdf/includes/(.*)/(.*?)\.cda]]></cda>
       <ids>.*</ids>
       <dashboards>
         <include><![CDATA[.*/$1/.*\.wcdf]]></include>

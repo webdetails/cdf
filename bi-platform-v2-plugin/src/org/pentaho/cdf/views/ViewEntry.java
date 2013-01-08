@@ -19,7 +19,7 @@ import pt.webdetails.cpf.persistence.Persistable;
  *
  * @author pdpi
  */
-public class View implements Persistable {
+public class ViewEntry implements Persistable {
 
     private Map<String, Object> parameters;
     private List<String> unboundParams;
