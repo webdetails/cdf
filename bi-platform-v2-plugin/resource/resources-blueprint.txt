@@ -8,6 +8,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/backbone.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/mustache.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/def.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/base64.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/jquery.tipsy.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/protovis.js,\
@@ -35,7 +36,8 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/json.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d2.0.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/compatVersion.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/core.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/table.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/maps.js,\

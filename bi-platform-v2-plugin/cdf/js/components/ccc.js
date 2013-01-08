@@ -28,7 +28,6 @@ var BaseCccComponent = UnmanagedComponent.extend({
     
     query: null,
     chart: null,
-    
       
     exportChart: function(outputType, overrides) {
         
@@ -73,8 +72,7 @@ var BaseCccComponent = UnmanagedComponent.extend({
         _exportIframe[0].src = "../cgg/draw?" + $.param(chartDefinition);
         _exportIframe.appendTo($('body'));
     }
-    
-})
+});
 
 var CccComponent = BaseCccComponent.extend({
 
@@ -123,7 +121,7 @@ var CccComponent = BaseCccComponent.extend({
     render: function(values) {
 
         $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
-
+        
         var o = $.extend({},this.chartDefinition);
         o.canvas = this.htmlObject+'protovis';
         // Extension points
@@ -134,6 +132,7 @@ var CccComponent = BaseCccComponent.extend({
             });
             o.extensionPoints=ep;
         }
+        
         this.chart =  new this.cccType(o);
         if(arguments.length > 0){
             this.chart.setData(values,{
@@ -251,6 +250,17 @@ var CccComponent2 = BaseCccComponent.extend({
 
 });
 
+
+var CccAreaChartComponent = CccComponent.extend({
+
+    cccType: pvc.AreaChart
+
+});
+
+var CccStackedDotChart = CccComponent.extend({
+
+    cccType: pvc.StackedDotChart
+});
 
 var CccDotChartComponent = CccComponent.extend({
 

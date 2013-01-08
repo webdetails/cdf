@@ -1,4 +1,6 @@
-pen.define("cdf/lib/CCC/def", function(){
+//VERSION TRUNK-20130107
+
+var def = (function(){
 /** @private */
 var arraySlice = Array.prototype.slice;
 
@@ -1039,27 +1041,36 @@ def.globalSpace = globalSpace;
 /** @private */
 function mixinRecursive(instance, mixin){
     for(var p in mixin){
-        var vMixin = mixin[p];
-        if(vMixin !== undefined){
-            var oMixin,
-                oTo = def.object.asNative(instance[p]);
+        mixinProp(instance, p, mixin[p]);
+    }
+}
 
-            if(oTo){
-                oMixin = def.object.as(vMixin);
-                if(oMixin){
-                    mixinRecursive(oTo, oMixin);
-                } else {
-                    // Overwrite oTo
-                    instance[p] = vMixin;
+function mixinProp(instance, p, vMixin, noProtectValue){
+    if(vMixin !== undefined){
+        var oMixin,
+            oTo = def.object.asNative(instance[p]);
+
+        if(oTo){
+            oMixin = def.object.as(vMixin);
+            if(oMixin){
+                if(!objectHasOwn.call(instance, p)){
+                    instance[p] = oTo = Object.create(oTo);
                 }
+            
+                mixinRecursive(oTo, oMixin);
             } else {
+                // Overwrite oTo
+                instance[p] = vMixin;
+            }
+        } else {
+            if(!noProtectValue){
                 oMixin = def.object.asNative(vMixin);
                 if(oMixin){
                     vMixin = Object.create(oMixin);
                 }
-
-                instance[p] = vMixin;
             }
+            
+            instance[p] = vMixin;
         }
     }
 }
@@ -1227,21 +1238,70 @@ def.scope(function(){
                             // 'base' property before calling the original value function
                             value = baseMethod.override(method);
                         }
+                        
+                        proto[p] = value;
+                        return;
                     }
                 }
                 
-                proto[p] = value;
+                mixinProp(proto, p, value, /*noProtectValue*/true); // Can use value directly without inheriting from it
             });
 
             return this;
         },
         
+        getStatic: function(p){
+            return getStatic(shared(this.safe), p);
+        },
+        
         addStatic: function(mixin){
-            def.copy(this, mixin);
+            var state = shared(this.safe);
+            
+            /*jshint expr:true */
+            !state.locked || def.fail(typeLocked());
+            
+            for(var p in mixin){
+                if(p !== 'prototype'){
+                    var v1 = def.getOwn(this, p);
+                    
+                    var v2 = mixin[p];
+                    var o2 = def.object.as(v2);
+                    if(o2){
+                        var v1Local = (v1 !== undefined);
+                        if(!v1Local){
+                            v1 = getStatic(state.base, p);
+                        }
+                        
+                        var o1 = def.object.asNative(v1);
+                        if(o1){
+                            if(v1Local){
+                                def.mixin(v1, v2);
+                                continue;
+                            }
+                            
+                            v2 = def.create(v1, v2); // Extend from v1 and mixin v2
+                        }
+                    } // else v2 smashes anything in this[p]
+    
+                    this[p] = v2;
+                }
+            }
+            
             return this;
         }
     };
-
+    
+    function getStatic(state, p){
+        if(state){
+            do{
+                var v = def.getOwn(state.constructor, p);
+                if(v !== undefined){
+                    return v;
+                }
+            } while((state = state.base));
+        }
+    }
+    
     // TODO: improve this code with indexOf
     function TypeName(full){
         var parts;
@@ -1561,6 +1621,26 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
     
+    appendMany: function(target){
+        var a = arguments;
+        var S = a.length;
+        if(S > 1){
+            var t = target.length;
+            for(var s = 1 ; s < S ; s++){
+                var source = a[s];
+                if(source){
+                    var i = 0;
+                    var L = source.length;
+                    while(i < L){
+                        target[t++] = source[i++];
+                    }
+                }
+            }
+        }
+        
+        return target;
+    },
+    
     prepend: function(target, source, start){
         if(start == null){
             start = 0;
@@ -1654,9 +1734,9 @@ def.nextId = function(scope){
 // --------------------
 
 def.type('Set')
-.init(function(source){
+.init(function(source, count){
     this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
+    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
 .add({
     has: function(p){
@@ -1698,9 +1778,9 @@ def.type('Set')
 // ---------------
 
 def.type('Map')
-.init(function(source){
+.init(function(source, count){
     this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
+    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
 .add({
     has: function(p){
@@ -1740,12 +1820,77 @@ def.type('Map')
         return this;
     },
     
+    copy: function(other){
+        // Add other to this one
+        def.eachOwn(other.source, function(value, p){
+            this.set(p, value);
+        }, this);
+    },
+    
     values: function(){
         return def.own(this.source);
     },
     
     keys: function(){
         return def.ownKeys(this.source);
+    },
+    
+    clone: function(){
+        return new def.Map(def.copy(this.source), this.count);
+    },
+    
+    /**
+     * The union of the current map with the specified
+     * map minus their intersection.
+     * 
+     * (A U B) \ (A /\ B)
+     * (A \ B) U (B \ A)
+     * @param {def.Map} other The map with which to perform the operation.
+     * @type {def.Map}
+     */
+    symmetricDifference: function(other){
+        if(!this.count){
+            return other.clone();
+        }
+        if(!other.count){
+            return this.clone();
+        }
+        
+        var result = {};
+        var count  = 0;
+        
+        var as = this.source;
+        var bs = other.source;
+        
+        def.eachOwn(as, function(a, p){
+            if(!objectHasOwn.call(bs, p)){
+                result[p] = a;
+                count++;
+            }
+        });
+        
+        def.eachOwn(bs, function(b, p){
+            if(!objectHasOwn.call(as, p)){
+                result[p] = b;
+                count++;
+            }
+        });
+        
+        return new def.Map(result, count);
+    },
+    
+    intersect: function(other, result){
+        if(!result){
+            result = new def.Map();
+        }
+        
+        def.eachOwn(this.source, function(value, p){
+            if(other.has(p)) {
+                result.set(p, value);
+            }
+        });
+        
+        return result;
     }
 });
 
@@ -1781,14 +1926,20 @@ def.type('OrderedMap')
         }
     },
     
-    add: function(key, v){
+    add: function(key, v, index){
         var map = this._map;
         var bucket = def.getOwn(map, key);
         if(!bucket){
-            this._list.push((map[key] = {
-               key:   key,
-               value: v
-            }));
+            bucket = map[key] = {
+                key:   key,
+                value: v
+            };
+            
+            if(index == null){
+                this._list.push(bucket);
+            } else {
+                def.array.insertAt(this._list, index, bucket);
+            }
         } else if(bucket.value !== v){
             bucket.value = v;
         }
@@ -1900,6 +2051,23 @@ def.type('Query')
             array.push(this.item);
         }
         return array;
+    },
+    
+    sort: function(compare, by){
+        if(!compare){
+            compare = def.compare;
+        }
+        
+        if(by){
+            var keyCompare = compare;
+            compare = function(a, b){
+                return keyCompare(by(a), by(b));
+            };
+        }
+        
+        var sorted = this.array().sort(compare);
+        
+        return new def.ArrayLikeQuery(sorted);
     },
     
     /**
@@ -2204,8 +2372,19 @@ def.type('ArrayLikeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        if(nextIndex < this._count){
-            this.item = this._list[nextIndex];
+        var count = this._count;
+        if(nextIndex < count){
+            var list = this._list;
+            
+            while(!objectHasOwn.call(list, nextIndex)){
+                nextIndex++;
+                if(nextIndex >= count){
+                    return 0;
+                }
+                this._count--;
+            }
+            
+            this.item = list[nextIndex];
             return 1;
         }
     },
@@ -2441,8 +2620,19 @@ def.type('ReverseQuery', def.Query)
             this._count  = this._source.length;
         }
         
-        if(nextIndex < this._count){
-            this.item = this._source[this._count - nextIndex - 1];
+        var count = this._count;
+        if(nextIndex < count){
+            var index = count - nextIndex - 1;
+            var source = this._source;
+            
+            while(!objectHasOwn.call(source, index)){
+                if(--index < 0){
+                    return 0;
+                }
+                this._count--;
+            }
+            
+            this.item = source[index];
             return 1;
         }
     }
@@ -2474,4 +2664,4 @@ def.range = function(start, count, step){
 // Reset namespace to global, instead of 'def'
 currentNamespace = def.global;    
     return def;
-});
+}());
