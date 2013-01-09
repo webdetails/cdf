@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130108
+//VERSION TRUNK-20130109
 
 
 /*global pvc:true */
@@ -23890,7 +23890,7 @@ def
             .lock('top',    top)
             .lock('bottom', bottom)
             .lock('fillStyle', null)
-            .strokeStyle("#808285")
+            .strokeStyle("#666666")
             .lineWidth(1)
             .antialias(false)
             .zOrder(-8)
@@ -23932,7 +23932,7 @@ def
                     .lock(oend_a, oend)
                     .lock(a,      zeroPosition)
                     .override('defaultColor', function(){
-                        return pv.color("#808285");
+                        return pv.color("#666666");
                     })
                     .pvMark
                     .lineWidth(1)
@@ -25493,7 +25493,7 @@ def
                 extensionId: 'rule'
             })
             .lock('data', [rootScene])
-            .override('defaultColor', def.fun.constant(pv.Color.names.black))
+            .override('defaultColor', def.fun.constant("#666666"))
             // ex: anchor = bottom
             .lock(this.anchorOpposite(), 0) // top (of the axis panel)
             .lock(begin_a, rMin )  // left
@@ -25719,7 +25719,7 @@ def
                     // Control visibility through .visible or lineWidth
                     return pvRule.scene ? 
                            pvRule.scene[0].strokeStyle : 
-                           pv.Color.names.black;
+                           "#666666";
                 })
                 .pvMark
                 ;
@@ -25788,7 +25788,7 @@ def
             .lock(anchorOrtho,    0)
             
             .font(font)
-            
+            .textStyle("#666666")
             .textAlign(align)
             .textBaseline(baseline)
             
@@ -25901,7 +25901,7 @@ def
                     // NOTE: the rule only has one scene/instance
                     return pvRule.scene ? 
                            pvRule.scene[0].strokeStyle :
-                           pv.Color.names.black;
+                           "#666666";
                 })
                 .lock(anchorOpposite, 0) // top
                 .lock(anchorOrtho,    0) // left
@@ -25938,7 +25938,7 @@ def
                         // Control visibility through color or through .visible
                         return pvTicks.scene ? 
                                pvTicks.scene[0].strokeStyle : 
-                               pv.Color.names.black;
+                               pv.Color.names.d;
                     })
                     .lock(anchorOpposite, 0) // top
                     .lock(anchorLength,   null)
@@ -25997,6 +25997,7 @@ def
                 return text;
              })
             .font(this.font)
+            .textStyle("#666666")
             //.textMargin(0.5) // Just enough for some labels not to be cut (vertical)
             ;
         
@@ -26193,6 +26194,7 @@ def
                      ((align == 'right')? tickScene.x + tickScene.dx : tickScene.x);
             })
             .font(font)
+            .textStyle("#666666")
             .text(function(tickScene){
                 var fitInfo = this.fitInfo();
                 var label = tickScene.vars.tick.label;
