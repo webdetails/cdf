@@ -96,7 +96,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
         if (i == 0) {
           firstVal = value;
         }
-        if (jQuery.inArray( value, currentValArray) > -1) {
+        if (jQuery.inArray(""+ value, currentValArray.map(function (v) {return "" + v;})) > -1) {
           currentIsValid = true;
         }
         selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";

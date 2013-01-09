@@ -1,5 +1,4 @@
-define(['cdf/Base',
-  'cdf/Dashboards',
+define([
   'cdf/jquery',
   'cdf/jquery.ui',
   'cdf/jquery-impromptu.3.1',
@@ -15,6 +14,8 @@ define(['cdf/Base',
   'cdf/json',
   'cdf/simile/ajax/simile-ajax-api',
   'cdf/simile/ajax/scripts/json',
-  'cdf/CoreComponents'], function(){
-	
+  'cdf/Base',
+  'cdf/Dashboards',
+  'cdf/CoreComponents'
+], function(){
 });
