@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130107
+//VERSION TRUNK-20130108
 
 
 /*global pvc:true */
@@ -1412,6 +1412,7 @@ var pvc = def.globalSpace('pvc', {
     $.support.svg = $.support.svg || 
         document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
 }(/*global jQuery:true */jQuery));
+
 pvc.text = {
     getFitInfo: function(w, h, text, font, diagMargin){
         if(text === '') {
@@ -20755,6 +20756,11 @@ def
             return function(){
                 // Capture current context
                 var context = myself._getContext(pvMark, null);
+                
+                // discard intermidiate points
+                if (context.scene.isIntermediate)
+                   return null;
+            
                 return buildTooltip.call(myself, context);
             };
         }
@@ -20762,6 +20768,11 @@ def
         return function(){
             // Capture current context
             var context = myself._getContext(pvMark, null);
+            
+            // discard intermidiate points
+            if (context.scene.isIntermediate)
+                return null;
+            
             context.pin();
             
             var tooltip;
@@ -24120,8 +24131,7 @@ def
     _getVisibleData: function(){
         return this.chart._getVisibleData(this.dataPartValue);
     }
-});
-/**
+});/**
  * CategoricalAbstract is the base class for all categorical or timeseries
  */
 def
@@ -29406,7 +29416,7 @@ def
     },
     
     defaults: {
-        tooltipOffset: 15
+        tooltipOffset: 10
     }
 });
 
@@ -31441,7 +31451,7 @@ def
     defaults: {
         axisOriginIsZero: false,
         
-        tooltipOffset: 15
+        tooltipOffset: 10
         
         /* Continuous Color Role */
         // TODO:
