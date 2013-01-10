@@ -14978,16 +14978,22 @@ def
             return new pvc.Size(0,0);
         }
         
+        var desiredClientSize = layoutInfo.desiredClientSize;
+        
         // The size of the biggest cell
-        var markerDiam = this.vars.markerSize;
-        var textLeft   = markerDiam + this.vars.textMargin;
-        var itemPadding    = this.vars.itemPadding;
+        var markerDiam  = this.vars.markerSize;
+        var textLeft    = markerDiam + this.vars.textMargin;
+        var itemPadding = this.vars.itemPadding;
         
         // Names are for legend items when laid out in rows
         var a_width  = this.vars.horizontal ? 'width' : 'height';
         var a_height = pvc.BasePanel.oppositeLength[a_width]; // height or width
         
-        var maxRowWidth = clientSize[a_width]; // row or col
+        var maxRowWidth = desiredClientSize[a_width];
+        if(!maxRowWidth || maxRowWidth < 0){
+            maxRowWidth = clientSize[a_width]; // row or col
+        }
+        
         var row;
         var rows = [];
         var contentSize = {width: 0, height: 0};
@@ -15011,12 +15017,18 @@ def
             'size',     contentSize);
         
         var isV1Compat = this.compatVersion() <= 1;
-        var requestSize = def.set({},
-                // Request used width / all available width (V1)
-                a_width,  isV1Compat ? clientSize[a_width] : contentSize.width,
-                a_height, Math.min(contentSize.height, clientSize[a_height]));
         
-        return requestSize;
+        // Request used width / all available width (V1)
+        var w = isV1Compat ? maxRowWidth : contentSize.width;
+        var h = desiredClientSize[a_height];
+        if(!h || h < 0){
+            h = contentSize.height;
+        }
+        
+        // requestSize
+        return def.set({},
+            a_width,  Math.min(w, clientSize[a_width]),
+            a_height, Math.min(h, clientSize[a_height]));
         
         function layoutItem(itemScene){
             // The names of props  of textSize and itemClientSize 
