@@ -20757,10 +20757,11 @@ def
                 // Capture current context
                 var context = myself._getContext(pvMark, null);
                 
-                // discard intermidiate points
-                if (context.scene.isIntermediate)
+                // discard intermediate points
+                if (context.scene.isIntermediate){
                    return null;
-            
+                }
+                
                 return buildTooltip.call(myself, context);
             };
         }
@@ -20769,9 +20770,10 @@ def
             // Capture current context
             var context = myself._getContext(pvMark, null);
             
-            // discard intermidiate points
-            if (context.scene.isIntermediate)
+            // discard intermediate points
+            if (context.scene.isIntermediate){
                 return null;
+            }
             
             context.pin();
             
@@ -23890,7 +23892,7 @@ def
             .lock('top',    top)
             .lock('bottom', bottom)
             .lock('fillStyle', null)
-            .strokeStyle("#666666")
+            .strokeStyle("#808285")
             .lineWidth(1)
             .antialias(false)
             .zOrder(-8)
@@ -23932,7 +23934,7 @@ def
                     .lock(oend_a, oend)
                     .lock(a,      zeroPosition)
                     .override('defaultColor', function(){
-                        return pv.color("#666666");
+                        return pv.color("#808285");
                     })
                     .pvMark
                     .lineWidth(1)
@@ -25493,7 +25495,7 @@ def
                 extensionId: 'rule'
             })
             .lock('data', [rootScene])
-            .override('defaultColor', def.fun.constant("#666666"))
+            .override('defaultColor', def.fun.constant(pv.Color.names.black))
             // ex: anchor = bottom
             .lock(this.anchorOpposite(), 0) // top (of the axis panel)
             .lock(begin_a, rMin )  // left
@@ -25719,7 +25721,7 @@ def
                     // Control visibility through .visible or lineWidth
                     return pvRule.scene ? 
                            pvRule.scene[0].strokeStyle : 
-                           "#666666";
+                           pv.Color.names.black;
                 })
                 .pvMark
                 ;
@@ -25788,7 +25790,7 @@ def
             .lock(anchorOrtho,    0)
             
             .font(font)
-            .textStyle("#666666")
+            
             .textAlign(align)
             .textBaseline(baseline)
             
@@ -25901,7 +25903,7 @@ def
                     // NOTE: the rule only has one scene/instance
                     return pvRule.scene ? 
                            pvRule.scene[0].strokeStyle :
-                           "#666666";
+                           pv.Color.names.black;
                 })
                 .lock(anchorOpposite, 0) // top
                 .lock(anchorOrtho,    0) // left
@@ -25938,7 +25940,7 @@ def
                         // Control visibility through color or through .visible
                         return pvTicks.scene ? 
                                pvTicks.scene[0].strokeStyle : 
-                               pv.Color.names.d;
+                               pv.Color.names.black;
                     })
                     .lock(anchorOpposite, 0) // top
                     .lock(anchorLength,   null)
@@ -25997,7 +25999,6 @@ def
                 return text;
              })
             .font(this.font)
-            .textStyle("#666666")
             //.textMargin(0.5) // Just enough for some labels not to be cut (vertical)
             ;
         
@@ -26194,7 +26195,6 @@ def
                      ((align == 'right')? tickScene.x + tickScene.dx : tickScene.x);
             })
             .font(font)
-            .textStyle("#666666")
             .text(function(tickScene){
                 var fitInfo = this.fitInfo();
                 var label = tickScene.vars.tick.label;
