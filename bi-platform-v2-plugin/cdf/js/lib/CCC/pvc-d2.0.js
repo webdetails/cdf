@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130109
+//VERSION TRUNK-20130110
 
 
 /*global pvc:true */
@@ -11148,7 +11148,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
     },
 
     /**
-     * Returns an array with the visible categories.
+     * Returns an array with the visible series.
      * @deprecated
      */
     getVisibleSeries: function(){
@@ -20757,10 +20757,11 @@ def
                 // Capture current context
                 var context = myself._getContext(pvMark, null);
                 
-                // discard intermidiate points
-                if (context.scene.isIntermediate)
+                // discard intermediate points
+                if (context.scene.isIntermediate){
                    return null;
-            
+                }
+                
                 return buildTooltip.call(myself, context);
             };
         }
@@ -20769,9 +20770,10 @@ def
             // Capture current context
             var context = myself._getContext(pvMark, null);
             
-            // discard intermidiate points
-            if (context.scene.isIntermediate)
+            // discard intermediate points
+            if (context.scene.isIntermediate){
                 return null;
+            }
             
             context.pin();
             
@@ -23731,7 +23733,7 @@ def
         this.base(layoutInfo);
 
         var plotFrameVisible;
-        if(chart.compatVersion <= 1){
+        if(chart.compatVersion() <= 1){
             plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
         } else {
             plotFrameVisible = def.get(chart.options, 'plotFrameVisible', true);
