@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130109
+//VERSION TRUNK-20130110
 
 
 /*global pvc:true */
@@ -11148,7 +11148,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
     },
 
     /**
-     * Returns an array with the visible categories.
+     * Returns an array with the visible series.
      * @deprecated
      */
     getVisibleSeries: function(){
@@ -23733,7 +23733,7 @@ def
         this.base(layoutInfo);
 
         var plotFrameVisible;
-        if(chart.compatVersion <= 1){
+        if(chart.compatVersion() <= 1){
             plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
         } else {
             plotFrameVisible = def.get(chart.options, 'plotFrameVisible', true);

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // 83a4881ffe4b5c2de0f37b423ec08e858006b5cc
+=======
+// d2e723b64c27e95b70990fcd1b6e07100db6d771
+>>>>>>> 2274728... - Upgraded CCC
 /**
  * @class The built-in Array class.
  * @name Array
@@ -7704,14 +7708,10 @@ pv.SvgScene.removeFillStyleDefinitions = function(scenes) {
       var results = g.getElementsByTagName('defs');
       var defs;
       if(results.length) {
-<<<<<<< HEAD
-        defs = results[0];
-=======
         if (pv.renderer() !== "batik")
           defs = results.item(0);
         else
           defs = new cgg.element(results.item(0));
->>>>>>> 7a4d7e6... [FIX](ccc IE8 gradients) Bug on re-render of gradients
       } else {
           defs = g.appendChild(this.create("defs"));
       }
@@ -10056,7 +10056,12 @@ pv.SvgScene.wedge = function(scenes) {
     e = this.append(e, scenes, i);
   }
   
+<<<<<<< HEAD
   //DEBUG BEG
+=======
+  /*
+  // DEBUG BEG
+>>>>>>> 2274728... - Upgraded CCC
   var mark  = scenes.mark;
   for (var i = 0; i < scenes.length; i+=2) {
       var shape = mark.getShape(scenes, i);
@@ -10107,6 +10112,10 @@ pv.SvgScene.wedge = function(scenes) {
       }, this);
   }
   // DEBUG END
+<<<<<<< HEAD
+=======
+  */
+>>>>>>> 2274728... - Upgraded CCC
   return e;
 };
 /**
