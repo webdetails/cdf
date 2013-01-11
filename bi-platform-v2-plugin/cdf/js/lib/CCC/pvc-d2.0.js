@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130110
+//VERSION TRUNK-20130111
 
 
 /*global pvc:true */
@@ -2834,7 +2834,13 @@ function data_removeColChild(parent, childrenProp, child, parentProp) {
  * @property {string} valueTypeName A description of the value type.
  * 
  * @property {boolean} isDiscrete
- * Indicates if the values of this dimension are discrete,
+ * Indicates if the values of this dimension are 
+ * to be considered discrete,
+ * as opposed to continuous,
+ * even if the value type is continuous.
+ *
+ * @property {boolean} isDiscreteValueType
+ * Indicates if the value type of the values of this dimension are discrete,
  * as opposed to continuous.
  *
  * @property {boolean} isComparable
@@ -2986,14 +2992,14 @@ function(complexType, name, keyArgs){
     this.valueTypeName = valueTypeName;
     this.cast = cast;
     
+    this.isDiscreteValueType = (this.valueType !== Number && this.valueType !== Date);
     this.isDiscrete = def.get(keyArgs, 'isDiscrete');
     if(this.isDiscrete == null){
-        this.isDiscrete = (this.valueType !== Number && 
-                           this.valueType !== Date);
+        this.isDiscrete = this.isDiscreteValueType;
     } else {
         // Normalize the value
         this.isDiscrete = !!this.isDiscrete;
-        if(!this.isDiscrete && (this.valueType !== Number && this.valueType !== Date)) {
+        if(!this.isDiscrete && this.isDiscreteValueType) {
             throw def.error.argumentInvalid('isDiscrete', "The only supported continuous value types are Number and Date.");
         }
     }
@@ -6002,8 +6008,7 @@ def
         }
     } else if(D === 1){
         var singleAtom = atomsMap[dimNames[0]];
-        var isDiscrete = singleAtom.dimension.type.isDiscrete;
-        this.value     = isDiscrete ? singleAtom.key : singleAtom.value; // typed only when continuous
+        this.value     = singleAtom.value;    // always typed when only one
         this.rawValue  = singleAtom.rawValue; // original
         this.key       = singleAtom.key;      // string
         if(wantLabel){
@@ -24700,7 +24705,7 @@ def
     
     if(this.labelSpacingMin == null){
         // The user tolerance for "missing" stuff is much smaller with discrete stuff
-        this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
+        this.labelSpacingMin = this.isDiscrete ? 0.3 : 1.5; // em
     }
     
     if(this.showTicks == null){
@@ -25165,17 +25170,45 @@ def
     
     _calcDiscreteTicks: function(){
         var layoutInfo = this._layoutInfo;
-        var data = this.chart.visualRoles(this.roleName)
-                        .flatten(this.chart.data, {visible: true});
-         
+        var role = this.chart.visualRoles(this.roleName);
+        var data = role.flatten(this.chart.data, {visible: true});
+        
         layoutInfo.data  = data;
         layoutInfo.ticks = data._children;
-         
-        layoutInfo.ticksText = def.query(data._children)
-                            .select(function(child){ return child.absLabel; })
-                            .array();
+        
+        // If the discrete data is of a single Date value type,
+        // we want to format the category values with an appropriate precision,
+        // instead of showing the default label.
+        var format, dimType;
+        var grouping = role.grouping;
+        if(grouping.isSingleDimension && 
+           (dimType = grouping.firstDimensionType()) &&
+           (dimType.valueType === Date)){
+            // Calculate precision from data dimension's extent 
+            var extent = data.dimensions(dimType.name).extent();
+            // At least two atoms are required
+            if(extent && extent.min !== extent.max){
+                var scale = new pv.Scale.linear(extent.min.value, extent.max.value);
+                // Force "best" tick and tick format determination 
+                scale.ticks();
+                var tickFormatter = this.axis.option('TickFormatter');
+                if(tickFormatter){
+                    scale.tickFormatter(tickFormatter);
+                }
+                
+                format = function(child){ return scale.tickFormat(child.value); };
+            }
+        }
+        
+        if(!format){
+            format = function(child){ return child.absLabel; };
+        }
+        
+        layoutInfo.ticksText = data._children.map(format);
     },
     
+    
+
     _calcTimeSeriesTicks: function(){
         this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
     },
@@ -25543,21 +25576,21 @@ def
                 });
             
             var layoutInfo = this._layoutInfo;
+            var ticksText = layoutInfo.ticksText;
             if (this.isDiscrete){
                 if(this.useCompositeAxis){
                     this._buildCompositeScene(rootScene);
                 } else {
-                    layoutInfo.ticks.forEach(function(tickData){
+                    layoutInfo.ticks.forEach(function(tickData, index){
                         new pvc.visual.CartesianAxisTickScene(rootScene, {
                             group:     tickData,
                             tick:      tickData.value,
                             tickRaw:   tickData.rawValue,
-                            tickLabel: tickData.absLabel
+                            tickLabel: ticksText[index]
                         });
                     });
                 }
             } else {
-                var ticksText = layoutInfo.ticksText;
                 layoutInfo.ticks.forEach(function(majorTick, index){
                     new pvc.visual.CartesianAxisTickScene(rootScene, {
                         tick:      majorTick,
@@ -30505,6 +30538,7 @@ def.type('pvc.data.MetricPointChartTranslationOper')
             }
         }, this);
         
+        // Distribute free measure columns by unbound measure roles 
         var N;
         var autoDimNames = [];
         var F = freeMeaIndexes.length;
@@ -30514,7 +30548,10 @@ def.type('pvc.data.MetricPointChartTranslationOper')
             var R = this._meaLayoutRoles.length;
             var i = 0;
             while(i < R && autoDimNames.length < F){
-                // Each unbound role gets one of the free dimensions
+                // If the measure role is unbound and has a default dimension,
+                //  the next unused dimension of the default dimension group name
+                //  is placed in autoDimNames.
+                // If any, this dimension will be fed with the next freeMeaIndexes
                 this._getUnboundRoleDefaultDimNames(this._meaLayoutRoles[i], 1, autoDimNames);
                 i++;
             }
@@ -30526,7 +30563,7 @@ def.type('pvc.data.MetricPointChartTranslationOper')
             }
         }
         
-        // All discrete measures go to series dimensions
+        // All discrete columns go to series dimensions
         F = freeDisIndexes.length;
         if(F > 0){
             autoDimNames.length = 0;

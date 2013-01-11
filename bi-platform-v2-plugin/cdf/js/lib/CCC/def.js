@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130110
+//VERSION TRUNK-20130111
 
 var def = (function(){
 /** @private */
