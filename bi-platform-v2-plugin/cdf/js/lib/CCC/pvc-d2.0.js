@@ -14209,7 +14209,15 @@ def.scope(function(){
         },
         DesiredTickCount: { // secondAxisDesiredTickCount (v1 && bar)
             resolve: '_resolveFull',
-            data: normalV1Data,
+            data: {
+                resolveV1: normalV1Data.resolveV1,
+                resolveDefault: function(optionInfo){
+                    if(this.chart.compatVersion() <= 1){
+                        optionInfo.defaultValue(5);
+                        return true;
+                    }
+                }
+            },
             cast: pvc.castNumber
         },
         MinorTicks: {
