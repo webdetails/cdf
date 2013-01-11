@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 // 83a4881ffe4b5c2de0f37b423ec08e858006b5cc
 =======
 // d2e723b64c27e95b70990fcd1b6e07100db6d771
 >>>>>>> 2274728... - Upgraded CCC
+=======
+// 9ef98c36170614dde646cf2015c247dbe8d5b514
+>>>>>>> bfd0582... [FIX](Protovis Text Div) Its position was fixated to 0,0 and its height and width to 0 as well. Otherwise, it would affect the dimensions of the body.
 /**
  * @class The built-in Array class.
  * @name Array
@@ -1292,9 +1296,11 @@ pv.Format.number = function() {
             var style = div.style;
             style.position   = 'absolute';
             style.visibility = 'hidden';
-            style.width      = 'auto';
-            style.height     = 'auto';
-                
+            style.width = 0;
+            style.height = 0;
+            style.left = 0;
+            style.top = 0;
+            
             document.body.appendChild(div);
             
             return div;
@@ -10056,12 +10062,9 @@ pv.SvgScene.wedge = function(scenes) {
     e = this.append(e, scenes, i);
   }
   
-<<<<<<< HEAD
-  //DEBUG BEG
-=======
+
   /*
   // DEBUG BEG
->>>>>>> 2274728... - Upgraded CCC
   var mark  = scenes.mark;
   for (var i = 0; i < scenes.length; i+=2) {
       var shape = mark.getShape(scenes, i);
@@ -10112,10 +10115,7 @@ pv.SvgScene.wedge = function(scenes) {
       }, this);
   }
   // DEBUG END
-<<<<<<< HEAD
-=======
   */
->>>>>>> 2274728... - Upgraded CCC
   return e;
 };
 /**
