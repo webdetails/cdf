@@ -28605,7 +28605,10 @@ def
                                 value:    dotScene.vars.value.rawValue
                             };
                         
-                        return v1f.call(this, d);
+                        // Compensate for the effect of intermediate scenes on mark's index
+                        var pseudo = Object.create(this);
+                        pseudo.index = dotScene.dataIndex;
+                        return v1f.call(pseudo, d);
                     };
                 };
             }
@@ -29023,6 +29026,7 @@ def
                 var serCatScene = new pvc.visual.Scene(seriesScene, {group: group, datum: datum});
                 
                 // -------------
+                serCatScene.dataIndex = categIndex;
                 
                 serCatScene.vars.category = 
                     new pvc.visual.ValueLabelVar(categData.value, categData.label, categData.rawValue);
@@ -29253,6 +29257,7 @@ def
                     datum: toScene.group ? null : toScene.datum
                 });
             
+            interScene.dataIndex = toScene.dataIndex;
             interScene.vars.category = toScene.vars.category;
             
             var interValueVar = new pvc.visual.ValueLabelVar(
@@ -30957,7 +30962,10 @@ def
                             value:    dotScene.vars.y.rawValue
                         };
                     
-                    return v1f.call(this, d);
+                    // Compensate for the effect of intermediate scenes on mark's index
+                    var pseudo = Object.create(this);
+                    pseudo.index = dotScene.dataIndex;
+                    return v1f.call(pseudo, d);
                 };
             };
         }
@@ -30965,8 +30973,9 @@ def
         // -- LINE --
         var line = new pvc.visual.Line(this, this.pvScatterPanel, {
                 extensionId: 'line',
-                noTooltip:    false,
-                noHover:      true // TODO: SIGN check if not broken
+                wrapper:     wrapper,
+                noTooltip:   false,
+                noHover:     true // TODO: SIGN check if not broken
             })
             /* Data */
             .lock('data', function(seriesScene){ return seriesScene.childNodes; }) // TODO    
@@ -30983,6 +30992,7 @@ def
         // -- DOT --
         var dot = new pvc.visual.Dot(this, this.pvLine, {
                 extensionId: 'dot',
+                wrapper:     wrapper,
                 activeSeriesAware: this.linesVisible
             })
             .intercept('visible', function(){
@@ -31217,7 +31227,7 @@ def
             
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
-            seriesGroup.datums().each(function(datum){
+            seriesGroup.datums().each(function(datum, dataIndex){
                 var xAtom = datum.atoms[chart._xDim.name];
                 if(xAtom.value == null){
                     return;
@@ -31230,7 +31240,7 @@ def
                 
                 /* Create leaf scene */
                 var scene = new pvc.visual.Scene(seriesScene, {datum: datum});
-                
+                scene.dataIndex = dataIndex;
                 scene.vars.x = Object.create(xAtom);
                 scene.vars.y = Object.create(yAtom);
                 
@@ -31308,6 +31318,8 @@ def
                     index: toChildIndex,
                     datum: toScene.datum
                 });
+            
+            interScene.dataIndex = toScene.dataIndex;
             
             interScene.vars.x = new pvc.visual.ValueLabelVar(
                                     interXValue,
