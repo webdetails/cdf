@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130111
+//VERSION TRUNK-20130114
 
 
 /*global pvc:true */
@@ -500,6 +500,26 @@ var pvc = def.globalSpace('pvc', {
            .where(def.truthy)
            .array()
            ;
+    };
+    
+    pvc.parseDistinctIndexArray = function(value, max){
+        value = def.array.as(value);
+        if(value == null){
+            return null;
+        }
+        
+        if(max == null){
+            max = Infinity;
+        }
+        
+        var a = def
+            .query(value)
+            .select(function(index){ return +index; }) // to number
+            .where(function(index){ return !isNaN(index) && index >= 0 && index <= max; })
+            .distinct()
+            .array();
+        
+        return a.length ? a : null;
     };
     
     pvc.parseLegendClickMode = function(clickMode){
@@ -4095,10 +4115,9 @@ def.type('pvc.data.TranslationOper')
             userDimReaders.forEach(this.defReader, this);
         }
 
-        var multiChartIndexes = this.options.multiChartIndexes;
-        if(multiChartIndexes != null) {
-            this._multiChartIndexes = 
-                this.defReader({names: 'multiChart', indexes: multiChartIndexes });
+        var multiChartIndexes = pvc.parseDistinctIndexArray(this.options.multiChartIndexes);
+        if(multiChartIndexes) {
+            this._multiChartIndexes = this.defReader({names: 'multiChart', indexes: multiChartIndexes });
         }
     },
 
@@ -5510,26 +5529,8 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         // (v1 did not make this assumption)
         var valuesColIndexes, M;
         if(this.options.isMultiValued){
-            valuesColIndexes = this.options.measuresIndexes;
-            // The null test is required because measuresIndexes can be a number, a string...
-            if(valuesColIndexes != null){
-                // Normalize, filter indexes
-                valuesColIndexes = 
-                    def
-                    .query(valuesColIndexes)
-                    .select(function(index){ return +index; }) // to number
-                    .where(function(index){ return !isNaN(index) && index >= 0 && index < J; })
-                    .distinct()
-                    .array();
-                
-                M = valuesColIndexes.length;
-                if(!M){
-                    M = valuesColIndexes = null;
-                } else {
-                    /*jshint expr:true */ 
-                    (M <= J) || def.assert("M must be smaller than J");
-                }
-            }
+            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, J - 1);
+            M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
         
         var D; // discrete count = D = S + C
@@ -18150,8 +18151,11 @@ pvc.BaseChart
         var options = this.options;
         var serRole = this._serRole;
         
-        var plot2Series = (serRole != null) && options.plot2 && options.plot2Series;
-        if(!plot2Series){
+        var plot2Series = (serRole != null) && 
+                          options.plot2 && 
+                          options.plot2Series && 
+                          def.array.as(options.plot2Series);
+        if(!plot2Series || !plot2Series.length){
             return;
         }
         
@@ -19282,10 +19286,10 @@ pvc.BaseChart
                         
                         // Distinguish between mark methods and properties
                         if (typeof mark[m] === "function") {
-                            if(mark.intercept){
+                            if(m != 'add' && mark.intercept){
                                 mark.intercept(m, v, keyArgs2);
                             } else {
-                                // Not really a mark
+                                // Not really a mark or not a real protovis property 
                                 mark[m](v);
                             }
                         } else {
