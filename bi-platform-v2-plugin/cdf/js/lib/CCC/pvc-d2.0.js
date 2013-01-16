@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130115
+//VERSION TRUNK-20130116
 
 
 /*global pvc:true */
@@ -18967,7 +18967,7 @@ pvc.BaseChart
     _initLegendPanel: function(){
         var options = this.options;
         // global legend(s) switch
-        if ((this.compatVersion() > 1) ? options.legend : options.showLegend) {
+        if (options.legend) {
 
             var legend = new pvc.visual.Legend(this, 'legend', 0);
             
@@ -30950,6 +30950,7 @@ def
                 }, this);
             }
             
+            // TODO: this seams to not be working on negative x, y values
             var setSide = function(side, padding){
                 if(op){
                     padding += (op[side] || 0);
