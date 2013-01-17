@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130116
+//VERSION TRUNK-20130117
 
 
 /*global pvc:true */
@@ -15717,14 +15717,17 @@ def.scope(function(){
             resolve: '_resolveFull',
             data: {
                 resolveV1: function(optionInfo){
-                    var show = this._chartOption('showValues');
-                    if(show !== undefined){
-                        optionInfo.specify(show);
-                    } else {
-                        show = this.type !== 'point';
-                        optionInfo.defaultValue(show);
+                    if(this.globalIndex === 0){
+                        var show = this._chartOption('showValues');
+                        if(show !== undefined){
+                            optionInfo.specify(show);
+                        } else {
+                            show = this.type !== 'point';
+                            optionInfo.defaultValue(show);
+                        }
+                        
+                        return true;
                     }
-                    return true;
                 }
             },
             cast:  Boolean,
@@ -16166,10 +16169,12 @@ def
     function visibleData(type, dv){
         return {
             resolveV1: function(optionInfo){
-                if(!this._specifyChartOption(optionInfo, 'show' + type)){
-                    optionInfo.defaultValue(dv);
+                if(this.globalIndex === 0){
+                    if(!this._specifyChartOption(optionInfo, 'show' + type)){
+                        optionInfo.defaultValue(dv);
+                    }
+                    return true;
                 }
-                return true;
             }
         };
     }
@@ -28924,16 +28929,11 @@ def
         
         // -- LABEL --
         if(this.valuesVisible){
-            extensionIds = ['label'];
-            if(this.compatVersion() <= 1){
-                extensionIds.push('lineLabel');
-            }
-            
             this.pvLabel = new pvc.visual.Label(
                 this, 
                 this.pvDot.anchor(this.valuesAnchor), 
                 {
-                    extensionId: extensionIds,
+                    extensionId: 'label',
                     wrapper:     wrapper
                 })
                 .pvMark
