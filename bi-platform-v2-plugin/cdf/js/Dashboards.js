@@ -1700,7 +1700,6 @@ Dashboards.persistBookmarkables = function(param) {
 
   var bookmarkables = this.bookmarkables,
       params = {};
-
   /*
    * We don't want to update the hash if we were passed a
    * non-bookmarkable parameter (why bother?), nor is there
@@ -1828,7 +1827,6 @@ Dashboards.restoreBookmarkables = function() {
 
     state = this.getBookmarkState().params;
     for (var k in state) if (state.hasOwnProperty(k)) {
-
       this.setParameter(k,state[k]);
     }
 
@@ -2017,9 +2015,6 @@ Dashboards.post = function(url,obj){
   var form = '<form action="' + url + '" method="post">';
   for(var o in obj){
 
-
-
-
     var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
 
 
@@ -2189,7 +2184,6 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
         myself.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
       }
     });
-
   }
 
 	
@@ -2745,9 +2739,6 @@ var Utf8 = {
     var i = 0;
     var c = 0, c2 = 0, c3 = 0;
 
-
-
-
     while ( i < utftext.length ) {
 
 
@@ -2838,9 +2829,6 @@ function getURLParameters(sURL)
   return arrParam;
 }
 
-
-
-
 function toFormatedString(value) {
 
   value += '';
@@ -2855,9 +2843,6 @@ function toFormatedString(value) {
 
   return x1 + x2;
 }
-
-
-
 
 //quote csv values in a way compatible with CSVTokenizer
 
@@ -2895,9 +2880,6 @@ function doCsvQuoting(value, separator, alwaysEscape){
 
   return value;
 }
-
-
-
 
 /**
 
@@ -3032,7 +3014,6 @@ sprintfWrapper = {
     }
 
     match = null;
-
     var i = null;
 
 
@@ -3041,7 +3022,6 @@ sprintfWrapper = {
 
       var m =matches[i];
       var substitution;
-
       if (m.code == '%') {
 
         substitution = '%'
@@ -3121,9 +3101,9 @@ sprintfWrapper = {
 
 
       newString += strings[i];
-
       newString += substitution;
     }
+    
     newString += strings[i];
 
 
@@ -3290,7 +3270,6 @@ var key = this.normalizeAddInKey(component);
 
   try {
     slot = this.addIns[key][slot];
-
     for (var addIn in slot) if (slot.hasOwnProperty(addIn)) { 
 
       addInList.push([addIn, slot[addIn].getLabel()]);
@@ -3663,8 +3642,6 @@ Query = function() {
     $.ajax(settings);
   }
 
-
-
   function buildQueryDefinition(overrides) {
 
     overrides = overrides || {};
@@ -3717,18 +3694,6 @@ Query = function() {
 
     return queryDefinition;
   }
-
-
-
-
-  /*
-
-     * Public interface
-
-
-
-     */
-
 
 
   this.exportData = function(outputType, overrides, options) {
