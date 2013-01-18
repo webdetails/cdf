@@ -4,6 +4,7 @@ style=\
 commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pen.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/jquery.tipsy.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/protovis.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/protovis-msie.js,\
@@ -33,6 +34,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/json.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/def.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
