@@ -369,7 +369,7 @@ Dashboards.bindControl = function(object) {
      * extend the input object with all the component methods,
      * and endow it with the Backbone event system.
      */
-    _.extend(object,objectImpl,Backbone.Events);
+    $.extend(object,objectImpl,Backbone.Events);
     
     // Add logging lifeCycle
     
