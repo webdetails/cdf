@@ -1551,7 +1551,7 @@ Dashboards.mergePriorityLists = function(target,source) {
   if(!source) {
     return;
   }
-  for(key in source) if (source.hasOwnProperty(key)) {
+  for(var key in source) if (source.hasOwnProperty(key)) {
     if(_.isArray(target[key])) {
       target[key] = _.union(target[key],source[key]);
     } else {
@@ -1681,13 +1681,9 @@ Dashboards.isBookmarkable = function(parameter) {
 
 
 Dashboards.generateBookmarkState = function() {
-
-  var params = {}
-
+  var params = {},
       bookmarkables = this.bookmarkables;
-
-  for (k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
-
+  for (var k in bookmarkables) if (bookmarkables.hasOwnProperty(k)) {
     if (bookmarkables[k]) {
       params[k] = this.getParameterValue(k);
     }
@@ -1703,10 +1699,8 @@ Dashboards.generateBookmarkState = function() {
 Dashboards.persistBookmarkables = function(param) {
 
   var bookmarkables = this.bookmarkables,
+      params = {};
 
-      params = {},
-
-      state;
   /*
    * We don't want to update the hash if we were passed a
    * non-bookmarkable parameter (why bother?), nor is there
@@ -1756,9 +1750,7 @@ Dashboards.setBookmarkState = function(state) {
     url = method + '?' + $.param(query);
 
     window.history.replaceState({},'',url);
-
-    this.deleteHashValue('bookmark')
-
+    this.deleteHashValue('bookmark');
   } else {
 
     this.setHashValue('bookmark',state);
@@ -1810,8 +1802,7 @@ Dashboards.getBookmarkState = function() {
           return pair;
 
       }),
-      params = this.propertiesArrayToObject(query),
-      bookmarkState;
+      params = this.propertiesArrayToObject(query);
 
   if(params.bookmarkState) {
 
@@ -1836,8 +1827,8 @@ Dashboards.restoreBookmarkables = function() {
   try {
 
     state = this.getBookmarkState().params;
+    for (var k in state) if (state.hasOwnProperty(k)) {
 
-    for (k in state) if (state.hasOwnProperty(k)) {
       this.setParameter(k,state[k]);
     }
 
@@ -1884,8 +1875,7 @@ Dashboards.getViewParameters = function(){
   var params = this.viewParameters,
 
       ret = {};
-
-  for(p in params) if (params.hasOwnProperty(p)) {
+  for(var p in params) if (params.hasOwnProperty(p)) {
     if (params[p] == this.viewFlags.VIEW|| params[p] == this.viewFlags.UNBOUND) {
       ret[p] = this.getParameterValue(p);
     }
@@ -1913,8 +1903,7 @@ Dashboards.getUnboundParameters = function(){
   var params = this.viewParameters,
 
       ret = []
-
-  for(p in params) if (params.hasOwnProperty(p)) {
+  for(var p in params) if (params.hasOwnProperty(p)) {
     if (params[p] == this.viewFlags.UNBOUND) {
       ret.push(p);
 
@@ -1938,8 +1927,7 @@ Dashboards.getParameterValue = function (parameterName) {
 
     catch (e){
       this.error(e);
-      return undefined;
-
+      //return undefined;
     }
 
   } else {
@@ -1961,9 +1949,7 @@ Dashboards.getQueryParameter = function ( parameterName ) {
   if ( queryString.length > 0 ) {
 
     // Find the beginning of the string
-
-    begin = queryString.indexOf ( parameterName );
-
+    var begin = queryString.indexOf ( parameterName );
     // If the parameter name is not found, skip it, otherwise return the value
 
     if ( begin != -1 ) {
@@ -1973,9 +1959,7 @@ Dashboards.getQueryParameter = function ( parameterName ) {
       begin += parameterName.length;
 
       // Multiple parameters are separated by the "&" sign
-
-      end = queryString.indexOf ( "&" , begin );
-
+      var end = queryString.indexOf ( "&" , begin );
       if ( end == -1 ) {
 
         end = queryString.length
@@ -2031,8 +2015,8 @@ Dashboards.post = function(url,obj){
 
 
   var form = '<form action="' + url + '" method="post">';
+  for(var o in obj){
 
-  for(o in obj){
 
 
 
@@ -2145,7 +2129,8 @@ Dashboards.ev = function(o){
 
 
 Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
-  myself = this;
+  var myself = this;
+  
   // Encapsulate pentahoAction call
 
   // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
@@ -2201,14 +2186,9 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
       },
 
       error: function (XMLHttpRequest, textStatus, errorThrown) {
-        this.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
+        myself.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
       }
-
-
-
-    }
-
-    );
+    });
 
   }
 
@@ -2402,8 +2382,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   // Detect and handle CDA data sources
 
   if (cd != undefined && cd.dataAccessId != undefined) {
-
-    for (param in params) {
+    for (var param in params) {
       cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
 
@@ -2570,9 +2549,7 @@ Dashboards.cleanStorage = function(){
 Dashboards.propertiesArrayToObject = function(pArray) {
 
   var obj = {};
-
-  for (p in pArray) if (pArray.hasOwnProperty(p)) {
-
+  for (var p in pArray) if (pArray.hasOwnProperty(p)) {
     var prop = pArray[p];
 
     obj[prop[0]] = prop[1];
@@ -2588,9 +2565,7 @@ Dashboards.propertiesArrayToObject = function(pArray) {
 Dashboards.objectToPropertiesArray = function(obj) {
 
   var pArray = [];
-
-  for (key in obj) if (obj.hasOwnProperty(key)) {
-
+  for (var key in obj) if (obj.hasOwnProperty(key)) {
     pArray.push([key,obj[key]]);
 
   }
@@ -2609,8 +2584,8 @@ Dashboards.objectToPropertiesArray = function(obj) {
 */  
 Dashboards.hsvToRgb = function (h,s,v) {  
   
-    var s = s / 100,  
-         v = v / 100;  
+    s = s / 100;
+    v = v / 100;
   
     var hi = Math.floor((h/60) % 6);  
     var f = (h / 60) - hi;  
@@ -2768,8 +2743,8 @@ var Utf8 = {
     var string = "";
 
     var i = 0;
+    var c = 0, c2 = 0, c3 = 0;
 
-    var c = c1 = c2 = 0;
 
 
 
@@ -2839,10 +2814,7 @@ function getURLParameters(sURL)
 
     var arrParam = [];
 
-
-
-    for (i=0;i<arrURLParams.length;i++){
-
+    for (var i=0;i<arrURLParams.length;i++){
       var sParam =  arrURLParams[i].split("=");
 
 
@@ -2864,21 +2836,17 @@ function getURLParameters(sURL)
 
 
   return arrParam;
+}
 
-};
 
 
 
 function toFormatedString(value) {
 
   value += '';
-
-  x = value.split('.');
-
-  x1 = x[0];
-
-  x2 = x.length > 1 ? '.' + x[1] : '';
-
+  var x = value.split('.');
+  var x1 = x[0];
+  var x2 = x.length > 1 ? '.' + x[1] : '';
   var rgx = /(\d+)(\d{3})/;
 
   while (rgx.test(x1))
@@ -2886,8 +2854,8 @@ function toFormatedString(value) {
     x1 = x1.replace(rgx, '$1' + ',' + '$2');
 
   return x1 + x2;
+}
 
-};
 
 
 
@@ -2926,8 +2894,8 @@ function doCsvQuoting(value, separator, alwaysEscape){
   }
 
   return value;
+}
 
-};
 
 
 
@@ -2999,10 +2967,7 @@ sprintfWrapper = {
 
     var match = null;
 
-
-
-    while (match = exp.exec(string)) {
-
+    while ((match = exp.exec(string))) {
       if (match[9]) {
 
         convCount += 1;
@@ -3022,11 +2987,8 @@ sprintfWrapper = {
       matchPosEnd = exp.lastIndex;
 
       
-
-      var negative = parseInt(arguments[convCount]) < 0 ? true : false;
-
-      if(negative == 0) negative = parseFloat(arguments[convCount]) < 0 ? true : false;
-
+      var negative = parseInt(arguments[convCount]) < 0;
+      if(!negative) negative = parseFloat(arguments[convCount]) < 0;
       
 
       matches[matches.length] = {
@@ -3069,11 +3031,7 @@ sprintfWrapper = {
 
     }
 
-
-
-    var code = null;
-
-    var match = null;
+    match = null;
 
     var i = null;
 
@@ -3082,8 +3040,7 @@ sprintfWrapper = {
     for (i=0; i<matches.length; i++) {
 
       var m =matches[i];
-
-
+      var substitution;
 
       if (m.code == '%') {
 
@@ -3166,11 +3123,7 @@ sprintfWrapper = {
       newString += strings[i];
 
       newString += substitution;
-
-
-
     }
-
     newString += strings[i];
 
 
@@ -3336,8 +3289,7 @@ var key = this.normalizeAddInKey(component);
   var addInList = [];
 
   try {
-
-    var slot = this.addIns[key][slot];
+    slot = this.addIns[key][slot];
 
     for (var addIn in slot) if (slot.hasOwnProperty(addIn)) { 
 
@@ -3703,14 +3655,13 @@ Query = function() {
     };
 
     var settings = _.extend({},_ajaxOptions, {
-      success: function() {},
       data: queryDefinition,
       url: url,
       success: successHandler
     });
     
     $.ajax(settings);
-  };
+  }
 
 
 
@@ -3765,8 +3716,8 @@ Query = function() {
     queryDefinition.sortBy = _sortBy;
 
     return queryDefinition;
+  }
 
-  };
 
 
 
@@ -3808,9 +3759,7 @@ Query = function() {
       queryDefinition.settingattachmentName= options.filename ;
 
     }
-
-    if (outputType = 'xls' && options.template) {
-
+    if (outputType == 'xls' && options.template) {
       queryDefinition.settingtemplateName= options.template ;
 
     }
@@ -3941,10 +3890,7 @@ Query = function() {
 
   };
 
-
-
-  this.reprocessResults = function(outerCallback) {
-
+  this.reprocessResults = function(outsideCallback) {
     if (_lastResultSet !== null) {
 
       var clone = Dashboards.safeClone(true,{},_lastResultSet);
