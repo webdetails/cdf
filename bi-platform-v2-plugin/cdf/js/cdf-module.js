@@ -1,4 +1,4 @@
-define([
+pen.define([
   'cdf/jquery',
   'cdf/jquery.ui',
   'cdf/jquery-impromptu.3.1',
