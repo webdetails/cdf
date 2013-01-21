@@ -1,19 +1,18 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.pentaho.cdf.storage;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.pentaho.cdf.PluginHibernateException;
-import org.pentaho.cdf.comments.*;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.InvalidCdfOperationException;
@@ -33,7 +32,6 @@ public class StorageEngine {
 
     private static final Log logger = LogFactory.getLog(StorageEngine.class);
     private static StorageEngine _instance;
-    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     public static synchronized StorageEngine getInstance() {
         if (_instance == null) {
@@ -53,17 +51,17 @@ public class StorageEngine {
 
     }
 
-    public String process(IParameterProvider requestParams, IPentahoSession userSession) throws InvalidCdfOperationException {
+    public String processRequest(IParameterProvider requestParams, IPentahoSession userSession) throws InvalidCdfOperationException {
 
         String actionParam = requestParams.getStringParameter("action", "");
 
-        Class[] params = {
+        Class<?>[] params = {
             IParameterProvider.class, IPentahoSession.class
         };
+
         try {
 
             Method mthd = this.getClass().getMethod(actionParam, params);
-
             return (String) mthd.invoke(this, requestParams, userSession);
 
 
