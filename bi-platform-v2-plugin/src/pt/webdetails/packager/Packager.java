@@ -1,10 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package pt.webdetails.packager;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.File;
@@ -14,14 +13,17 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.Reader;
 
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -162,11 +164,12 @@ class FileSet
 
   private String minify() throws IOException, NoSuchAlgorithmException
   {
+    InputStream concatenatedStream = null;
+    Reader freader = null;
+    FileInputStream script = null;
+    DigestInputStream digestStream = null;
     try
     {
-      InputStream concatenatedStream;
-      Reader freader;
-      FileWriter output = new FileWriter(location);
       switch (this.filetype)
       {
         case JS:
@@ -178,29 +181,30 @@ class FileSet
           break;
         case CSS:
           concatenatedStream = Concatenate.concat(this.files.toArray(new File[this.files.size()]), rootdir);
-          freader = new InputStreamReader(concatenatedStream, "UTF8");
-
-          int input;
           FileWriter wout = new FileWriter(location);
-          while ((input = freader.read()) != -1)
-          {
-            wout.write(input);
-          }
-          //CSSMin.formatFile(freader, new FileOutputStream(location));
+          IOUtils.copy(concatenatedStream, wout, "UTF8");
           wout.close();
           break;
       }
-      FileInputStream script = new FileInputStream(location);
-      byte[] fileContent = new byte[(int) location.length()];
-      script.read(fileContent);
+
+      script = new FileInputStream(location);
+      MessageDigest digest = MessageDigest.getInstance("MD5");
+      digestStream = new DigestInputStream(script, digest);
+      IOUtils.copy(digestStream, NullOutputStream.NULL_OUTPUT_STREAM);
+      this.latestVersion = byteToHex(digest.digest());
       this.dirty = false;
-      this.latestVersion = byteToHex(MessageDigest.getInstance("MD5").digest(fileContent));
       return latestVersion;
     }
     catch (Exception ex)
     {
       Logger.getLogger(FileSet.class.getName()).log(Level.SEVERE, null, ex);
       return null;
+    }
+    finally {
+      IOUtils.closeQuietly(concatenatedStream);
+      IOUtils.closeQuietly(freader);
+      IOUtils.closeQuietly(digestStream);
+      IOUtils.closeQuietly(script);
     }
   }
 
