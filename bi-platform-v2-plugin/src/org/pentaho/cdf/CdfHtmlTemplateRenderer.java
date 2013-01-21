@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -21,24 +20,24 @@ import java.util.Properties;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
+
+import org.pentaho.cdf.context.DashboardContextApi;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
-import org.pentaho.cdf.storage.StorageEngine;
+
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
 import org.pentaho.platform.api.engine.IUserRoleListService;
-import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
+import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
-import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
+
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
 import org.pentaho.platform.plugin.services.security.userrole.ldap.transform.GrantedAuthorityToString;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.web.http.api.resources.IFileResourceRenderer;
 
-import org.springframework.security.GrantedAuthority;
-
+import pt.webdetails.cpf.repository.RepositoryAccess;
 import pt.webdetails.packager.Packager;
 
 public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
@@ -58,6 +57,12 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   String msgsFileBaseName;
   File pluginRootDir;
   File templateName;
+  String filePath;
+  IParameterProvider requestParams;
+  
+  public void setFilePath(String arg0) {
+    filePath = arg0;
+  }
   
   public String getMsgsFileBaseName() {
     return msgsFileBaseName;
@@ -73,6 +78,15 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   
   protected OutputStream getOutputStream() {
     return outputStream;
+  }
+  
+  
+  public void setRequestParams(IParameterProvider params){
+      requestParams = params;
+  }
+  
+  public IParameterProvider getRequestParams(){
+      return requestParams;
   }
 
   public void setRepositoryFile(RepositoryFile arg0) {
@@ -143,7 +157,9 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     if (packager == null) {
       packager = createPackager();
     }
-    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
+    RepositoryAccess repositoryAccess = RepositoryAccess.getRepository();
+    
+    //IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
 
    File templateFile = getTemplateFile();
 
@@ -164,8 +180,8 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
         parentDir = "/";
       }
       parentDir = FilenameUtils.separatorsToUnix(parentDir);
-      mbh = new MessageBundlesHelper(unifiedRepository.getFile(parentDir), msgsFileBaseName);
-      fileInputStream = unifiedRepository.getDataForRead(jcrSourceFile.getId(), SimpleRepositoryFileData.class).getStream();
+      mbh = new MessageBundlesHelper(repositoryAccess.getRepositoryFile(parentDir, RepositoryAccess.FileAccess.READ), msgsFileBaseName);
+      fileInputStream = repositoryAccess.getResourceInputStream(jcrSourceFile.getPath()); 
     }
     
     mbh.setPluginRootDir(getPluginRootDir());
@@ -224,15 +240,13 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     final int headIndex = intro.indexOf("<head>"); //$NON-NLS-1$
     final int length = intro.length();
 
-    outputStream.write(intro.substring(0, headIndex + 6).getBytes("UTF-8")); //$NON-NLS-1$
+    outputStream.write(intro.substring(0, headIndex + 6).getBytes("UTF-8")); //$NON-NLS-1$   
     //Concat libraries to html head content
-    getHeaders(dashboardContent, outputStream);
+    getHeaders(dashboardContent, getOutputStream());
     outputStream.write(intro.substring(headIndex + 7, length - 1).getBytes("UTF-8")); //$NON-NLS-1$
-    // Add context
-    generateContext(outputStream);
-    // Add storage
-    generateStorage(outputStream);
 
+    DashboardContextApi contextApi = new DashboardContextApi();
+    contextApi.getContext(filePath, getRequestParams(), getOutputStream());
     outputStream.write("<div id=\"dashboardContent\">".getBytes("UTF-8")); //$NON-NLS-1$
 
     outputStream.write(dashboardContent.getBytes("UTF-8")); //$NON-NLS-1$
@@ -240,19 +254,6 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     outputStream.write(footer.getBytes("UTF-8")); //$NON-NLS-1$
   }
 
-  protected void generateStorage(final OutputStream out) throws Exception
-  {
-
-    final StringBuilder s = new StringBuilder();
-    s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
-    s.append("  Dashboards.storage = ");
-    s.append( StorageEngine.getInstance().read(null, userSession) + "\n");
-    s.append("</script>\n");
-    // setResponseHeaders(MIME_PLAIN,0,null);
-    out.write(s.toString().getBytes("UTF-8"));
-
-  }
-  
   protected List<String> getUserRoles() {
     IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
     List<String> auths = service.getRolesForUser(null, userSession.getName());//.getAuthoritiesForUser(userSession.getName());
@@ -260,39 +261,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     return auths;
   }
   
-  private void generateContext(OutputStream out) throws Exception
-  {
-
-    final JSONObject context = new JSONObject();
-    Calendar cal = Calendar.getInstance();
-    context.put("serverLocalDate", cal.getTimeInMillis()); //$NON-NLS-1$
-    context.put("serverUTCDate", cal.getTimeInMillis() + cal.getTimeZone().getRawOffset()); //$NON-NLS-1$
-    context.put("user", userSession.getName()); //$NON-NLS-1$
-
-    // The first method works in 3.6, for 3.5 it's a different method. We'll try both
-
-    context.put("roles", getUserRoles()); //$NON-NLS-1$
-
-    JSONObject params = new JSONObject();
-    for (Map.Entry<String, Object> paramEntry : varArgs.entrySet()) {
-      if (paramEntry.getKey().indexOf("parameters") == 0)
-      {
-        params.put(paramEntry.getKey().substring(5), paramEntry.getValue());
-      }
-    }
-    context.put("params", params);
-
-    final StringBuilder s = new StringBuilder();
-    s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n"); //$NON-NLS-1$
-    s.append("  Dashboards.context = ");
-    s.append(context.toString(2) + "\n");
-    s.append("</script>\n");
-    // setResponseHeaders(MIME_PLAIN,0,null);
-    out.write(s.toString().getBytes("UTF-8"));
-
-  }
-  
-  private void getHeaders(final String dashboardContent, final OutputStream out) throws Exception
+  public void getHeaders(final String dashboardContent, final OutputStream out) throws Exception
   {
 
     final File file = new File(getPluginRootDir(), "resources-blueprint.txt");

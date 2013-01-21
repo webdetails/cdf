@@ -11,7 +11,17 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.core.Context;
 import javax.xml.parsers.ParserConfigurationException;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -28,12 +38,13 @@ import org.json.JSONObject;
 
 
 import org.pentaho.cdf.comments.CommentsEngine;
+import org.pentaho.cdf.context.DashboardContextApi;
 import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
 import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
-import org.pentaho.cdf.views.ViewManager;
+import org.pentaho.cdf.views.ViewsEngine;
 import org.pentaho.platform.api.engine.IActionSequenceResource;
 import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.api.engine.IMimeTypeListener;
@@ -41,7 +52,6 @@ import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
-import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository.IContentItem;
 import org.pentaho.platform.repository2.unified.fileio.RepositoryFileContentItem;
@@ -58,6 +68,8 @@ import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 
 import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.cpf.repository.RepositoryAccess;
+import pt.webdetails.cpf.web.CpfHttpServletResponse;
+import pt.webdetails.cpf.SimpleContentGenerator;
 import pt.webdetails.packager.Packager;
 
 
@@ -71,7 +83,9 @@ import pt.webdetails.packager.Packager;
  *
  * @author Will Gorman (wgorman@pentaho.com)
  */
-public class CdfContentGenerator extends BaseContentGenerator {
+
+@Path("/cdf")
+public class CdfContentGenerator extends SimpleContentGenerator {
 
     private static final long serialVersionUID = 5608691656289862706L;
     private static final Log logger = LogFactory.getLog(CdfContentGenerator.class);
@@ -118,19 +132,28 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     @Override
     public void createContent() throws Exception {
-        final OutputStream out;
+        OutputStream out;
         final IContentItem contentItem;
-        final IParameterProvider pathParams;
-        final String method;
-        final String payload;
+        IParameterProvider pathParams;
+        IParameterProvider requestParams = null;
+        String filePath = "";
+        String payload = "";
+        String template = "";
         //outputHandler = new RepositoryFileOutputHandler(null);
         
         logger.info("[Timing] CDF content generator took over: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         try {
-            if (parameterProviders.get("path") != null
-                    && parameterProviders.get("path").getParameter("httprequest") != null
-                    && ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest")).getContextPath() != null) {
-                RELATIVE_URL = ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest")).getContextPath();
+            if(parameterProviders.get("path") != null){
+                pathParams = parameterProviders.get("path");
+                requestParams = parameterProviders.get(IParameterProvider.SCOPE_REQUEST);
+                filePath = pathParams.getStringParameter("path", null);
+                template = requestParams.getStringParameter("template", null);
+                
+                Object parameter = pathParams.getParameter("httprequest");
+                
+                if(parameter != null && ((HttpServletRequest) parameter).getContextPath() != null){
+                    RELATIVE_URL = ((HttpServletRequest) parameter).getContextPath();
+                }
             } else {
                 RELATIVE_URL = getBaseUrl();
                 /* If we detect an empty string, things will break.
@@ -150,23 +173,18 @@ public class CdfContentGenerator extends BaseContentGenerator {
             if (RELATIVE_URL.endsWith("/")) {
                 RELATIVE_URL = RELATIVE_URL.substring(0, RELATIVE_URL.length() - 1);
             }
+            
+            contentItem = outputHandler.getOutputContentItem("response", "content", instanceId, MIME_HTML);
+            out = contentItem.getOutputStream(null);
 
             // If callbacks is properly setup, we assume we're being called from another plugin
             if (this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance(callbacks.get(0))) {
                 HashMap<String, Object> iface = (HashMap<String, Object>) callbacks.get(0);
-                pathParams = parameterProviders.get("path");
-                contentItem = outputHandler.getOutputContentItem("response", "content", instanceId, MIME_HTML);
                 out = (OutputStream) iface.get("output");
-                method = "/" + (String) iface.get("method");
+                filePath = "/" + (String) iface.get("method");
                 payload = (String) iface.get("payload");
                 this.userSession = this.userSession != null ? this.userSession : (IPentahoSession) iface.get("usersession");
-            } else { // if not, we handle the request normally
-                pathParams = parameterProviders.get("path");
-                contentItem = outputHandler.getOutputContentItem("response", "content", instanceId, MIME_HTML);
-                out = contentItem.getOutputStream(null);
-                method = pathParams.getStringParameter("path", null);
-                payload = "";
-            }
+            } 
 
             // make sure we have a workable state
             if (outputHandler == null) {
@@ -179,8 +197,16 @@ public class CdfContentGenerator extends BaseContentGenerator {
                 error(Messages.getErrorString("CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM")); //$NON-NLS-1$
                 throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM")); //$NON-NLS-1$
             }
-
-            findMethod(method, contentItem, out, payload);
+            
+            if(filePath.isEmpty()){
+                logger.error("Calling cdf with an empty method");
+            }
+            
+            if(requestParams != null){
+                renderXcdf(out, requestParams, filePath, template);
+            }
+            
+            //findMethod(method, contentItem, out, payload);
 
         } catch (Exception e) {
             logger.error("Error creating cdf content: ", e);
@@ -196,41 +222,17 @@ public class CdfContentGenerator extends BaseContentGenerator {
         final IParameterProvider pathParams = parameterProviders.get("pathparams");
 
 
-        if (urlPath.equals(RENDER_XCDF)) {
+        if (urlPath.equals(RENDER_XCDF)) { //JA ESTA
 
             //renderXcdf(out, requestParams);
 
-        } else if (urlPath.equals(JSON_SOLUTION)) {
+        } else if (urlPath.equals(JSON_SOLUTION)) { //DEIXAR PARA O FIM
 
             jsonSolution(out, requestParams);
-        } else if (urlPath.startsWith(GET_CDF_RESOURCE)) {
-
-            getCDFResource(urlPath, contentItem, out, requestParams);
-        } else if (urlPath.equals(RENDER_HTML)) {
-
-            renderHtml(out, requestParams);
-        } else if (urlPath.equals(EXPORT)) {
+        } else if (urlPath.equals(EXPORT)) { //Chama uma XACTion - não funciona
             exportFile(requestParams, out);
-        } else if (urlPath.equals(SETTINGS)) {
-            cdfSettings(requestParams, out);
-        } else if (urlPath.equals(CALLACTION)) {
+        } else if (urlPath.equals(CALLACTION)) { //Chama uma XAction - nao funciona
             callAction(requestParams, out);
-        } else if (urlPath.equals(COMMENTS)) {
-            processComments(requestParams, out);
-        } else if (urlPath.startsWith(STORAGE)) {
-            processStorage(requestParams, out);
-        } else if (urlPath.equals(CONTEXT)) {
-            generateContext(requestParams, out);
-        } else if (urlPath.equals(CLEAR_CACHE)) {
-            clearCache(requestParams, out);
-        } else if (urlPath.equals(VIEWS)) {
-            views(requestParams, pathParams, out);
-        } else if (urlPath.equals(GETHEADERS)) {
-            if (!payload.equals("")) {
-                getHeaders(payload, requestParams, out);
-            } else {
-                getHeaders(requestParams, out);
-            }
         } else if (urlPath.endsWith(FILE_EXTENSION)) {
             renderXcdf(out, requestParams, urlPath, requestParams.getStringParameter("template", null));
             //renderXCDFDashboard(requestParams, out, ); //$NON-NLS-1$
@@ -241,24 +243,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
     }
 
-    private void generateContext(final IParameterProvider requestParams, final OutputStream out) throws Exception {
-
-        DashboardContext context = new DashboardContext(userSession);
-        out.write(context.getContext(requestParams).getBytes(ENCODING));
-
-    }
-
-    private void generateStorage(final IParameterProvider requestParams, final OutputStream out) throws Exception {
-
-        final StringBuilder s = new StringBuilder();
-        s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
-        s.append("  Dashboards.storage = ");
-        s.append(StorageEngine.getInstance().read(requestParams, userSession)).append("\n");
-        s.append("</script>\n");
-        // setResponseHeaders(MIME_PLAIN,0,null);
-        out.write(s.toString().getBytes(ENCODING));
-
-    }
 
     private void renderXcdf(final OutputStream out, final IParameterProvider requestParams, final String xcdfFilePath, String template) throws Exception {
         long start = System.currentTimeMillis();
@@ -296,12 +280,15 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
             XcdfRenderer xcdfRenderer = new XcdfRenderer();
 
-            IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-            RepositoryFile xcdfFile = unifiedRepository.getFile(xcdfFilePath);
+            RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(userSession);
+            RepositoryFile xcdfFile = repositoryAccess.getRepositoryFile(xcdfFilePath, RepositoryAccess.FileAccess.READ);
+            
             if (xcdfFile != null) {
+                xcdfRenderer.setRequestParams(requestParams);
                 xcdfRenderer.setOutputStream(out);
                 xcdfRenderer.setRepositoryFile(xcdfFile);
                 xcdfRenderer.setTemplate(template);
+                xcdfRenderer.setFilePath(xcdfFilePath);
                 xcdfRenderer.setDebug(requestParams.hasParameter("debug")
                     && requestParams.getParameter("debug").toString().equals("true"));
                 xcdfRenderer.setBaseUrl((requestParams.hasParameter("root") ? "http://"
@@ -336,7 +323,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   }
     
-
+//esquece
     private void jsonSolution(final OutputStream out, final IParameterProvider requestParams) throws JSONException, ParserConfigurationException {
         if (requestParams == null) {
             error(Messages.getErrorString("CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS")); //$NON-NLS-1$
@@ -364,40 +351,25 @@ public class CdfContentGenerator extends BaseContentGenerator {
         pw.flush();
     }
 
-    private void getCDFResource(final String urlPath, final IContentItem contentItem, final OutputStream out, final IParameterProvider requestParams) throws Exception {
-        if (requestParams == null) {
-            error(Messages.getErrorString("CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS")); //$NON-NLS-1$
-            throw new InvalidParameterException(Messages.getString("CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS")); //$NON-NLS-1$
-        }
+    //compatibilidade
+    @GET
+    @Path("/getCDFResource")
+    @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
+    public void getCDFResource(
+            @QueryParam("resource") String resource, 
+            @QueryParam("path") String path, 
 
-        final String resource = requestParams.getStringParameter("resource", null); //$NON-NLS-1$
-        contentItem.setMimeType(MimeHelper.getMimeTypeFromFileName(resource));
-        //TODO: unused
-//        String[] allowedRoots = new String[2];
-//        allowedRoots[0] = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
-//        allowedRoots[1] = PentahoSystem.getApplicationContext().getSolutionPath(SOLUTION_DIR);
-        final HttpServletResponse response = (HttpServletResponse) parameterProviders.get("path").getParameter("httpresponse");
+            @Context HttpServletResponse servletResponse, 
+            @Context HttpServletRequest servletRequest) throws Exception {
+        
+        getResponse().setHeader("Content-Type", MimeHelper.getMimeTypeFromFileName(resource));
         try {
-            getSolutionFile(resource, out, this);
+            getSolutionFile(resource, servletResponse.getOutputStream(), this);
         } catch (SecurityException e) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            getResponse().sendError(HttpServletResponse.SC_FORBIDDEN);
         }
     }
 
-    private void renderHtml(final OutputStream out, final IParameterProvider requestParams) throws Exception {
-        final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-        if (mimeTypeListener != null) {
-            mimeTypeListener.setMimeType(MIMETYPE);
-        }
-
-        final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
-        final String template = requestParams.getStringParameter("template", null); //$NON-NLS-1$
-        final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
-        final String templateName = requestParams.getStringParameter("dashboard", null);
-        // Get messages base filename from url if given otherwise defaults to Messages
-        String messageBaseFilename = requestParams.getStringParameter("messages", null);
-        //renderHtmlDashboard(requestParams, out, solution, path, templateName == null ? "template.html" : templateName, template, messageBaseFilename);
-    }
 
     private void returnResource(final String urlPath, final IContentItem contentItem, final OutputStream out) throws Exception {
         final IParameterProvider pathParams = parameterProviders.get("path"); //$NON-NLS-1$
@@ -411,233 +383,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
 
         getContent(urlPath, out, this);
-    }
-
-    /*public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out, final String xcdfFilePath, String template) throws Exception {
-        //final String fullPath = ActionInfo.buildSolutionPath(solution, path, action);
-
-        RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(userSession);
-        // Check for access permissions
-        if (!repositoryAccess.hasAccess(xcdfFilePath, RepositoryAccess.FileAccess.EXECUTE)) {
-            out.write("Access Denied".getBytes(ENCODING));
-            return;
-        }
-
-        String templateName = null;
-        String messagesBaseFilename = null;
-
-        if (repositoryAccess.resourceExists(xcdfFilePath)) {
-            final String dashboardMetadata = repositoryAccess.getResourceAsString(xcdfFilePath,  RepositoryAccess.FileAccess.EXECUTE);
-            final Document doc = DocumentHelper.parseText(dashboardMetadata);
-            templateName = XmlDom4JHelper.getNodeText("/cdf/template", doc, "");
-
-            // Get message file base name if any
-            if (doc.selectSingleNode("/cdf/messages") != null) {
-                messagesBaseFilename = XmlDom4JHelper.getNodeText("/cdf/messages", doc);
-            }
-
-            // If a "style" tag exists, use that one
-            if (doc.selectSingleNode("/cdf/style") != null) {
-                template = XmlDom4JHelper.getNodeText("/cdf/style", doc);
-            }
-        }
-
-        renderHtmlDashboard(requestParams, out, xcdfFilePath, templateName, template, messagesBaseFilename);
-
-    }*/
-
-    public void renderHtmlDashboard(final IParameterProvider requestParams, final OutputStream out,
-            final String xcdfFilePath,
-            final String templateName,
-            String template,
-            String dashboardsMessagesBaseFilename) throws Exception {
-
-        if (template == null || template.equals("")) {
-            template = "";
-        } else {
-            template = "-" + template;
-        }
-        RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(userSession);
-        
-        IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
-        File dashboardFile = null;
-        RepositoryFile dashboardRepositoryFile = null;
-        
-        File pluginDir = ((PluginClassLoader) this.getClass().getClassLoader()).getPluginDir();
-
-        //final ISolutionRepository repository = PentahoSystem.get(ISolutionRepository.class, userSession);
-        //final ActionResource resource;
-
-        String fullTemplatePath = null;
-
-        if (templateName != null) {
-            if (templateName.startsWith("/") || templateName.startsWith("\\")) { //$NON-NLS-1$ //$NON-NLS-2$
-                fullTemplatePath = templateName;
-            } else {
-                fullTemplatePath = template;
-            }
-        }
-
-        if (fullTemplatePath != null && repositoryAccess.resourceExists(fullTemplatePath)) {
-            dashboardFile = new File(fullTemplatePath);
-        } else {
-            dashboardFile = new File(pluginDir, "default-dashboard-template.html"); //$NON-NLS-1$ //$NON-NLS-2$
-        }
-
-        // Check for access permissions
-        if (repositoryAccess.hasAccess(fullTemplatePath, RepositoryAccess.FileAccess.EXECUTE)) {
-            out.write("Access Denied".getBytes(ENCODING));
-            return;
-        }
-
-        String intro = ""; //$NON-NLS-1$
-        String footer = ""; //$NON-NLS-1$
-
-        final String dashboardTemplate = "template-dashboard" + template + ".html"; //$NON-NLS-1$
-
-        final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
-        ArrayList<String> i18nTagsList = new ArrayList<String>();
-        if (templater != null) {
-
-            String solutionPath = SOLUTION_DIR + "/templates/" + dashboardTemplate;
-            if (!repositoryAccess.resourceExists(solutionPath)) {//then try in system
-                solutionPath = "system/" + PLUGIN_NAME + "/" + dashboardTemplate;
-            }
-
-            //final ActionResource templateResource = new ActionResource("", IActionSequenceResource.SOLUTION_FILE_RESOURCE, "text/xml", solutionPath); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            String templateContent = repositoryAccess.getResourceAsString(solutionPath, RepositoryAccess.FileAccess.EXECUTE);
-            // Process i18n on dashboard outer template
-            templateContent = updateUserLanguageKey(templateContent);
-            templateContent = processi18nTags(templateContent, i18nTagsList);
-            // Process i18n on dashboard outer template - end
-            final String[] sections = templater.breakTemplateString(templateContent, "", userSession); //$NON-NLS-1$
-            if (sections != null && sections.length > 0) {
-                intro = sections[0];
-            }
-            if (sections != null && sections.length > 1) {
-                footer = sections[1];
-            }
-        } else {
-            intro = Messages.getErrorString("CdfContentGenerator.ERROR_0005_BAD_TEMPLATE_OBJECT");
-        }
-
-        final String dashboardContent;
-
-        // TESTING to localize the template
-        //dashboardContent = repository.getResourceAsString(resource);
-        InputStream is = repositoryAccess.getResourceInputStream(fullTemplatePath, RepositoryAccess.FileAccess.EXECUTE);
-
-        // Fixed ISSUE #CDF-113
-        //BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is, Charset.forName(LocaleHelper.getSystemEncoding())));
-
-        StringBuilder sb = new StringBuilder();
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            // Process i18n for each line of the dashboard output
-            line = processi18nTags(line, i18nTagsList);
-            // Process i18n - end
-            sb.append(line).append("\n");
-        }
-        is.close();
-        dashboardContent = sb.toString();
-
-        String messageSetPath = null;
-        // Merge dashboard related message file with global message file and save it in the dashboard cache
-        MessageBundlesHelper mbh = new MessageBundlesHelper(dashboardFile, dashboardsMessagesBaseFilename);
-        mbh.saveI18NMessageFilesToCache();
-        messageSetPath = mbh.getMessageFilesCacheUrl() + "/";
-
-        // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
-        if (dashboardsMessagesBaseFilename == null) {
-            dashboardsMessagesBaseFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
-        }
-
-        intro = intro.replaceAll("\\{load\\}", "onload=\"load()\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        intro = intro.replaceAll("\\{body-tag-unload\\}", "");
-        intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET_NAME\\}", dashboardsMessagesBaseFilename);
-        intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET_PATH\\}", messageSetPath);
-        intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET\\}", buildMessageSetCode(i18nTagsList));
-
-        /**
-         * *********************************************
-         */
-        /*      Add cdf libraries
-         /************************************************/
-//        final Date startDate = new Date();
-        final int headIndex = intro.indexOf("<head>");
-        final int length = intro.length();
-//        final Hashtable addedFiles = new Hashtable();
-
-        out.write(intro.substring(0, headIndex + 6).getBytes(ENCODING));
-        // Concat libraries to html head content
-        getHeaders(dashboardContent, requestParams, out);
-        out.write(intro.substring(headIndex + 6, length).getBytes(ENCODING));
-        // Add context
-        generateContext(requestParams, out);
-        // Add storage
-        generateStorage(requestParams, out);
-
-        out.write("<div id=\"dashboardContent\">".getBytes(ENCODING));
-
-        out.write(dashboardContent.getBytes(ENCODING));
-        out.write("</div>".getBytes(ENCODING));
-        out.write(footer.getBytes(ENCODING));
-
-        setResponseHeaders(MIME_HTML, 0, null);
-    }
-
-    private String buildMessageSetCode(ArrayList<String> tagsList) {
-        StringBuilder messageCodeSet = new StringBuilder();
-        for (String tag : tagsList) {
-            messageCodeSet.append("\\$('#").append(updateSelectorName(tag)).append("').html(jQuery.i18n.prop('").append(tag).append("'));\n");
-        }
-        return messageCodeSet.toString();
-    }
-
-    private String processi18nTags(String content, ArrayList<String> tagsList) {
-        String tagPattern = "CDF.i18n\\(\"";
-        String[] test = content.split(tagPattern);
-        if (test.length == 1) {
-            return content;
-        }
-        StringBuilder resBuffer = new StringBuilder();
-        int i;
-        String tagValue;
-        resBuffer.append(test[0]);
-        for (i = 1; i < test.length; i++) {
-
-            // First tag is processed differently that other because is the only case where I don't
-            // have key in first position
-            resBuffer.append("<span id=\"");
-            if (i != 0) {
-                // Right part of the string with the value of the tag herein
-                tagValue = test[i].substring(0, test[i].indexOf("\")"));
-                tagsList.add(tagValue);
-                resBuffer.append(updateSelectorName(tagValue));
-                resBuffer.append("\"></span>");
-                resBuffer.append(test[i].substring(test[i].indexOf("\")") + 2, test[i].length()));
-            }
-        }
-        return resBuffer.toString();
-    }
-
-    private String updateSelectorName(String name) {
-        // If we've the character . in the message key substitute it conventionally to _
-        // when dynamically generating the selector name. The "." character is not permitted in the
-        // selector id name
-        return name.replace(".", "_");
-    }
-
-    private String updateUserLanguageKey(String intro) {
-
-        // Fill the template with the correct user locale
-        Locale locale = LocaleHelper.getLocale();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Current Pentaho user locale: " + locale.getLanguage());
-        }
-        intro = intro.replaceAll("#\\{LANGUAGE_CODE\\}", locale.getLanguage());
-        return intro;
     }
 
     private void exportFile(final IParameterProvider requestParams, final OutputStream output) {
@@ -672,75 +417,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     }
 
-    private void cdfSettings(final IParameterProvider requestParams, final OutputStream out) {
 
-        final String method = requestParams.getStringParameter("method", null);
-        final String key = requestParams.getStringParameter("key", null);
-
-        if (method.equals("set")) {
-            CdfSettings.getInstance().setValue(key, requestParams.getParameter("value"), userSession);
-        } else {
-            final Object value = CdfSettings.getInstance().getValue(key, userSession);
-            final PrintWriter pw = new PrintWriter(out);
-            pw.println(value != null ? value.toString() : "");
-            pw.flush();
-        }
-    }
 
     private void callAction(final IParameterProvider requestParams, final OutputStream out) {
 
         final ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
         serviceCallAction.execute(requestParams, userSession, out);
-    }
-
-    private void processComments(final IParameterProvider requestParams, final OutputStream out) throws JSONException {
-
-        String result;
-
-        try {
-
-            final CommentsEngine commentsEngine = CommentsEngine.getInstance();
-            result = commentsEngine.process(requestParams, userSession);
-
-        } catch (InvalidCdfOperationException ex) {
-
-            final String errMessage = ex.getCause().getClass().getName() + " - " + ex.getMessage();
-            logger.error("Error processing comment: " + errMessage);
-            final JSONObject json = new JSONObject();
-            json.put("error", errMessage);
-            result = json.toString(2);
-
-        }
-
-        final PrintWriter pw = new PrintWriter(out);
-        pw.println(result);
-        pw.flush();
-
-    }
-
-    private void processStorage(final IParameterProvider requestParams, final OutputStream out) throws JSONException {
-
-        String result;
-
-        try {
-
-            final StorageEngine storagesEngine = StorageEngine.getInstance();
-            result = storagesEngine.process(requestParams, userSession);
-
-        } catch (InvalidCdfOperationException ex) {
-
-            final String errMessage = ex.getCause().getClass().getName() + " - " + ex.getMessage();
-            logger.error("Error processing storage: " + errMessage);
-            final JSONObject json = new JSONObject();
-            json.put("error", errMessage);
-            result = json.toString(2);
-
-        }
-
-        final PrintWriter pw = new PrintWriter(out);
-        pw.println(result);
-        pw.flush();
-
     }
 
     @Override
@@ -833,191 +515,21 @@ public class CdfContentGenerator extends BaseContentGenerator {
         }
     }
 
-    private void setResponseHeaders(final String mimeType, final int cacheDuration, final String attachmentName) {
-        // Make sure we have the correct mime type
-        final HttpServletResponse response = (HttpServletResponse) parameterProviders.get("path").getParameter("httpresponse");
-        response.setHeader("Content-Type", mimeType);
-
-        if (attachmentName != null) {
-            response.setHeader("content-disposition", "attachment; filename=" + attachmentName);
-        }
-
-        // Cache?
-        if (cacheDuration > 0) {
-            response.setHeader("Cache-Control", "max-age=" + cacheDuration);
-        } else {
-            response.setHeader("Cache-Control", "max-age=0, no-store");
-        }
+    @GET
+    @Path("/getHeaders")
+    @Produces("text/html")
+    public void getHeaders(@QueryParam("dashboardContent") String dashboardContent,
+                            
+                           @Context HttpServletResponse servletResponse, 
+                           @Context HttpServletRequest servletRequest) throws Exception{       
+        try {
+            CdfHtmlTemplateRenderer renderer = new CdfHtmlTemplateRenderer();
+            renderer.getHeaders(dashboardContent, servletResponse.getOutputStream());
+        } catch (IOException ex){
+            
+        }        
     }
-
-    private void getHeaders(final IParameterProvider requestParams, final OutputStream out) throws Exception {
-
-        String dashboard = requestParams.getStringParameter("dashboardContent", "");
-        getHeaders(dashboard, requestParams, out);
-    }
-
-    private void getHeaders(final String dashboardContent, final IParameterProvider requestParams, final OutputStream out) throws Exception {
-
-
-        final String dashboardType = requestParams.getStringParameter("dashboardType", "blueprint");
-        final String scheme = requestParams.hasParameter("scheme") ? requestParams.getStringParameter("scheme", "") : "http";
-        final String suffix;
-        final File file;
-
-        /*
-         * depending on the dashboard type, the minification engine and its file
-         * set will vary.
-         */
-        logger.info("[Timing] opening resources file: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-        if (dashboardType.equals("mobile")) {
-            suffix = "-mobile";
-            file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-mobile.txt"));
-        } else if (dashboardType.equals("blueprint")) {
-            suffix = "";
-            file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-blueprint.txt"));
-        } else {
-            suffix = "";
-            file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-blueprint.txt"));
-        }
-        HashMap<String, String> includes = new HashMap<String, String>();
-        final Properties resources = new Properties();
-        resources.load(new FileInputStream(file));
-
-        final ArrayList<String> miniscripts = new ArrayList<String>();
-        final ArrayList<String> ministyles = new ArrayList<String>();
-
-        final ArrayList<String> scripts = new ArrayList<String>();
-        final ArrayList<String> styles = new ArrayList<String>();
-
-        miniscripts.addAll(Arrays.asList(resources.getProperty("commonLibrariesScript", "").split(",")));
-        ministyles.addAll(Arrays.asList(resources.getProperty("commonLibrariesLink", "").split(",")));
-        scripts.addAll(getExtraScripts(dashboardContent, resources));
-        styles.addAll(getExtraStyles(dashboardContent, resources));
-        styles.addAll(Arrays.asList(resources.getProperty("style", "").split(",")));
-        StringBuilder scriptsBuilders = new StringBuilder();
-        StringBuilder stylesBuilders = new StringBuilder();
-        final String absRoot = requestParams.hasParameter("root") ? (scheme.equals("") ? "" : (scheme + "://")) + requestParams.getParameter("root").toString() : "";
-
-        // Add common libraries
-        if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true")) {
-            // DEBUG MODE
-            for (String header : miniscripts) {
-                scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"></script>\n");
-            }
-            for (String header : ministyles) {
-                stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"/>\n");
-            }
-
-        } else {
-            // NORMAL MODE
-            logger.info("[Timing] starting minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-            String stylesHash = packager.minifyPackage("styles" + suffix);
-            String scriptsHash = packager.minifyPackage("scripts" + suffix);
-            stylesBuilders.append("<link href=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/styles").append(suffix).append(".css?version=").append(stylesHash).append("\" rel=\"stylesheet\" type=\"text/css\" />");
-            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/scripts").append(suffix).append(".js?version=").append(scriptsHash).append("\"></script>");
-            logger.info("[Timing] finished minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-        }
-        // Add extra components libraries
-
-        for (String header : scripts) {
-            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"></script>\n");
-        }
-        for (String header : styles) {
-            stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"/>\n");
-        }
-
-        // Add ie8 blueprint condition
-        stylesBuilders.append("<!--[if lte IE 8]><link rel=\"stylesheet\" href=\"").append(absRoot).append(RELATIVE_URL)
-                .append("/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
-
-        StringBuilder stuff = new StringBuilder();
-        includes.put("scripts", scriptsBuilders.toString());
-        includes.put("styles", stylesBuilders.toString());
-        for (String key : includes.keySet()) {
-            stuff.append(includes.get(key));
-        }
-        out.write(stuff.toString().getBytes("UTF8"));
-    }
-
-    private ArrayList<String> getExtraScripts(String dashboardContentOrig, Properties resources) {
-
-        // Compare this ignoring case
-        final String dashboardContent = dashboardContentOrig.toLowerCase();
-
-        ArrayList<String> scripts = new ArrayList<String>();
-        boolean all;
-        if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
-            all = true;
-        } else {
-            all = false;
-        }
-
-        final Enumeration<?> resourceKeys = resources.propertyNames();
-        while (resourceKeys.hasMoreElements()) {
-
-            final String scriptkey = (String) resourceKeys.nextElement();
-
-            final String key;
-
-            if (scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
-                key = scriptkey.replaceAll("Script$", "");
-            } else {
-                continue;
-            }
-
-            final int keyIndex = all ? 0 : dashboardContent.indexOf(key.toLowerCase());
-            if (keyIndex != -1) {
-                if (all || matchComponent(keyIndex, key.toLowerCase(), dashboardContent)) {
-                    // ugly hack -- if we don't know for sure we need OpenStreetMaps,
-                    // don't load it!
-                    if (all && scriptkey.indexOf("mapScript") != -1) {
-                        continue;
-                    }
-                    scripts.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
-                }
-            }
-        }
-
-        return scripts;
-    }
-
-    private ArrayList<String> getExtraStyles(String dashboardContentOrig, Properties resources) {
-        // Compare this ignoring case
-        final String dashboardContent = dashboardContentOrig.toLowerCase();
-
-        ArrayList<String> styles = new ArrayList<String>();
-        boolean all;
-        if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
-            all = true;
-        } else {
-            all = false;
-        }
-
-        if (dashboardContent != null && !StringUtils.isEmpty(dashboardContent)) {
-            final Enumeration<?> resourceKeys = resources.propertyNames();
-            while (resourceKeys.hasMoreElements()) {
-
-                final String scriptkey = (String) resourceKeys.nextElement();
-
-                final String key;
-
-                if (scriptkey.indexOf("Link") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
-                    key = scriptkey.replaceAll("Link$", "");
-                } else {
-                    continue;
-                }
-
-                final int keyIndex = all ? 0 : dashboardContent.indexOf(key.toLowerCase());
-                if (keyIndex != -1) {
-                    if (matchComponent(keyIndex, key.toLowerCase(), dashboardContent)) {
-                        styles.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
-                    }
-                }
-            }
-        }
-        return styles;
-    }
-
+    
     private void init() throws Exception {
         String rootdir = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
         final File blueprintFile = new File(rootdir + "/resources-blueprint.txt");
@@ -1097,18 +609,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
         return baseUrl;
 
     }
-
-    public void views(final IParameterProvider requestParams, final IParameterProvider pathParams, final OutputStream out) {
-        ViewManager man = ViewManager.getInstance();
-        man.process(requestParams, pathParams, out);
-    }
-
-    public void clearCache(final IParameterProvider requestParams, final OutputStream out) {
-        try {
-            DashboardContext.clearCache();
-            out.write("Cache cleared".getBytes("utf-8"));
-        } catch (IOException e) {
-            logger.error("failed to clear CDFcache");
-        }
+    
+    public String getPluginName(){
+        return PLUGIN_NAME;
     }
 }

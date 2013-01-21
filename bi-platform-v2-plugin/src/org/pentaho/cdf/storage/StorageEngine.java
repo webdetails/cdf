@@ -232,9 +232,13 @@ public class StorageEngine {
 
     private void initialize() throws PluginHibernateException {
 
-
-        // Get hbm file
-        IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
+  ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+    try
+    {
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+         
+      // Get hbm file
+      IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
         InputStream in = resLoader.getResourceAsStream(StorageEngine.class, "resources/hibernate/Storage.hbm.xml");
 
         // Close session and rebuild
@@ -243,7 +247,17 @@ public class StorageEngine {
         PluginHibernateUtil.getConfiguration()
                 .addInputStream(in);
         PluginHibernateUtil.rebuildSessionFactory();
+    
     }
+    catch (Exception e)
+    {
+    }
+    finally
+    {
+      Thread.currentThread().setContextClassLoader(contextCL);
+    }
+    }    
+   
 
     private String getExceptionDescription(Exception ex) {
         return ex.getCause().getClass().getName() + " - " + ex.getMessage();

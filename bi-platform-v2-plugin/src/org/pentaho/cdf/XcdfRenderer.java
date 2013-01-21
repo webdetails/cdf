@@ -11,13 +11,13 @@ import org.apache.commons.io.FilenameUtils;
 import org.dom4j.Document;
 import org.pentaho.platform.api.action.IVarArgsAction;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 import org.pentaho.platform.web.http.api.resources.IFileResourceRenderer;
+import pt.webdetails.cpf.repository.RepositoryAccess;
 
 public class XcdfRenderer extends CdfHtmlTemplateRenderer implements IFileResourceRenderer, IVarArgsAction {
 
@@ -33,6 +33,8 @@ public class XcdfRenderer extends CdfHtmlTemplateRenderer implements IFileResour
     }
   }
   
+
+  
   public void setFile(File xcdfFile) {
     this.xcdfFile = xcdfFile;
     if (this.xcdfFile != null) {
@@ -43,16 +45,18 @@ public class XcdfRenderer extends CdfHtmlTemplateRenderer implements IFileResour
 
   protected InputStream getSourceInputStream() throws IOException {
     InputStream inputStream = null;
+    RepositoryAccess repositoryAccess = RepositoryAccess.getRepository();
+    
     if (jcrXcdfFile != null) {
-      inputStream = PentahoSystem.get(IUnifiedRepository.class, null).getDataForRead(jcrXcdfFile.getId(), SimpleRepositoryFileData.class).getStream();
+        inputStream = repositoryAccess.getResourceInputStream(jcrXcdfFile.getPath());//.getId());
     } else {
-      inputStream = new FileInputStream(xcdfFile);
+        inputStream = new FileInputStream(xcdfFile);
     }
     return inputStream;
   }
   
   public void execute() throws Exception {
-    IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
+    RepositoryAccess repositoryAccess = RepositoryAccess.getRepository();
     if (jcrXcdfFile != null) {
       final Document doc = XmlDom4JHelper.getDocFromStream(getSourceInputStream());
 
@@ -77,7 +81,7 @@ public class XcdfRenderer extends CdfHtmlTemplateRenderer implements IFileResour
       } else {
         String parentDir = FilenameUtils.getFullPathNoEndSeparator(jcrXcdfFile.getPath());
         dashboardFileName = FilenameUtils.separatorsToUnix(FilenameUtils.concat(parentDir, dashboardFileName));
-        super.setRepositoryFile(unifiedRepository.getFile(dashboardFileName));
+        super.setRepositoryFile(repositoryAccess.getRepositoryFile(dashboardFileName, RepositoryAccess.FileAccess.READ));
       }
       
       super.execute();
