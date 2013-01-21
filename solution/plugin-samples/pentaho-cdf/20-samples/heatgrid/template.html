@@ -77,6 +77,7 @@ var render_grid = {
 		height: 400,
 //		dataAccessId: "mdxQuery",
 //path: "/bi-developers/pentaho-cdf/20-samples/heatgrid/cde_sample1.cda",
+        dataOptions: {measuresInColumns: false},
 		crosstabMode: true,
 		seriesInRows: false,
 		animate: false,
@@ -123,6 +124,7 @@ function initDummyData() {
 	render_grid.chart.setData(testHeatGrid,
                                  {crosstabMode: true,
                                   seriesInRows: false });
+    render_grid.chart._createVersion = 0;                                  
 	render_grid.chart.render();	
 }
 
