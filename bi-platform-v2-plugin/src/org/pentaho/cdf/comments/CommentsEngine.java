@@ -1,11 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.pentaho.cdf.comments;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
@@ -64,7 +66,7 @@ public class CommentsEngine
 
     String actionParam = requestParams.getStringParameter("action", "");
 
-    Class[] params =
+    Class<?>[] params =
     {
       IParameterProvider.class, IPentahoSession.class
     };
@@ -139,7 +141,6 @@ public class CommentsEngine
     logger.debug("Listing messages");
 
     String page = requestParams.getStringParameter("page", "");
-    String user = userSession.getName();
     int firstResult = Integer.parseInt(requestParams.getStringParameter("firstResult", "0"));
     int maxResults = Integer.parseInt(requestParams.getStringParameter("maxResults", "20"));
 
@@ -160,6 +161,7 @@ public class CommentsEngine
     query.setFirstResult(firstResult);
     query.setMaxResults(maxResults);
 
+    @SuppressWarnings("unchecked")
     List<CommentEntry> comments = query.list();
 
     JSONArray jsonArray = new JSONArray();

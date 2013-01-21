@@ -670,7 +670,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         try {
 
             final StorageEngine storagesEngine = StorageEngine.getInstance();
-            result = storagesEngine.process(requestParams, userSession);
+            result = storagesEngine.processRequest(requestParams, userSession);
 
         } catch (InvalidCdfOperationException ex) {
 
