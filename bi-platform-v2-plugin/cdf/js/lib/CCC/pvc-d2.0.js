@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130117
+//VERSION TRUNK-20130122
 
 
 /*global pvc:true */
@@ -307,11 +307,19 @@ var pvc = def.globalSpace('pvc', {
     /**
      * Creates a color scheme if the specified argument is not one already.
      * 
+     * <p>
+     * A color scheme function is a factory of protovis color scales.
+     * Given the domain values, returns a protovis color scale.
+     * The arguments of the function are suitable for passing
+     * to a protovis scale's <tt>domain</tt> method.
+     * </p>
+     * 
      * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] A value convertible to a color scheme: 
      * a color string, 
      * a color object, 
      * an array of color strings or objects, 
-     * a color scale function, 
+     * a protovis color scale function,
+     * a color scale factory function (i.e. a color scheme), 
      * or null.
      * 
      * @returns {null|function} A color scheme function or null.
@@ -13546,11 +13554,11 @@ def.scope(function(){
             return !!this.role;
         },
         
-        setScale: function(scale){
+        setScale: function(scale, noWrap){
             /*jshint expr:true */
             this.role || def.fail.operationInvalid('Axis is unbound.');
             
-            this.scale = scale ? this._wrapScale(scale) : null;
+            this.scale = scale ? (noWrap ? scale : this._wrapScale(scale)) : null;
     
             return this;
         },
@@ -14441,7 +14449,7 @@ def
         
         calculateScale: function(){
             /*jshint expr:true */
-            var scale;
+            var scale, noWrap;
             var dataCells = this.dataCells;
             if(dataCells){
                 var chart = this.chart;
@@ -14470,7 +14478,10 @@ def
                     
                     // Call the transformed color scheme with the domain values
                     //  to obtain a final scale object
-                    scale = this.option('Colors').call(null, domainValues);
+                    scale = this.scheme()(domainValues);
+                    
+                    // scale is already wrapped by this axis' _wrapScale
+                    noWrap = true;
                 } else {
                     if(dataCells.length === 1){
                         // Local scope: 
@@ -14511,11 +14522,12 @@ def
                 }
             }
             
-            this.setScale(scale);
+            this.setScale(scale, noWrap);
             
             return this;
         },
         
+        // Called from within setScale
         _wrapScale: function(scale){
             // Check if there is a color transform set
             // and if so, transform the color scheme
@@ -14523,7 +14535,9 @@ def
             // do not apply default color transforms...
             var applyTransf;
             if(this.scaleType === 'discrete'){
-                applyTransf = this.option.isSpecified('Transform') || !this.option.isSpecified('Colors');
+                applyTransf = this.option.isSpecified('Transform') || 
+                              (!this.option.isSpecified('Colors') && 
+                               !this.option.isSpecified('Map'   ));
             } else {
                 applyTransf = true;
             }
@@ -14536,6 +14550,108 @@ def
             }
             
             return this.base(scale);
+        },
+        
+        scheme: function(){
+            return def.lazy(this, '_scheme', this._createScheme, this);
+        },
+        
+        _createColorMapFilter: function(colorMap){
+            // Fixed Color Values (map of color.key -> first domain value of that color)
+            var fixedColors = def.uniqueIndex(colorMap, function(c){ return c.key; });
+            
+            return {
+                domain: function(k){
+                    return !def.hasOwn(colorMap, k); 
+                },
+                
+                color: function(c){
+                    return !def.hasOwn(fixedColors, c.key);
+                }
+            };
+        },
+        
+        _createScheme: function(){
+            var me = this;
+            var baseScheme = me.option('Colors');
+            
+            if(me.scaleType !== 'discrete'){
+                // TODO: this implementation doesn't support NormByCategory...
+                return function(d/*domainAsArrayOrArgs*/){
+                    // Create a fresh baseScale, from the baseColorScheme
+                    // Use baseScale directly
+                    var scale = baseScheme.apply(null, arguments);
+                    
+                    // Apply Transforms, nulls, etc, according to the axis' rules
+                    return me._wrapScale(scale);
+                };
+            }
+            
+            var colorMap = me.option('Map'); // map domain key -> pv.Color
+            if(!colorMap){
+                return function(d/*domainAsArrayOrArgs*/){
+                    // Create a fresh baseScale, from the baseColorScheme
+                    // Use baseScale directly
+                    var scale = baseScheme.apply(null, arguments);
+                    
+                    // Apply Transforms, nulls, etc, according to the axis' rules
+                    return me._wrapScale(scale);
+                };
+            } 
+
+            var filter = this._createColorMapFilter(colorMap);
+                
+            return function(d/*domainAsArrayOrArgs*/){
+                
+                // Create a fresh baseScale, from the baseColorScheme
+                var scale;
+                if(!(d instanceof Array)){
+                    d = def.array.copy(arguments);
+                }
+                
+                // Filter the domain before creating the scale
+                d = d.filter(filter.domain);
+                
+                var baseScale = baseScheme(d);
+                
+                // Removed fixed colors from the baseScale
+                var r = baseScale.range().filter(filter.color);
+                
+                baseScale.range(r);
+                
+                // Intercept so that the fixed color is tested first
+                scale = function(k){
+                    var c = def.getOwn(colorMap, k);
+                    return c || baseScale(k);
+                };
+                
+                def.copy(scale, baseScale);
+                
+                // override domain and range methods
+                var dx, rx;
+                scale.domain = function(){
+                    if (arguments.length) {
+                        throw def.operationInvalid("The scale cannot be modified.");
+                    }
+                    if(!dx){
+                        dx = def.array.append(def.ownKeys(colorMap), d);
+                    }
+                    return dx;
+                };
+                
+                scale.range = function(){
+                    if (arguments.length) {
+                        throw def.operationInvalid("The scale cannot be modified.");
+                    }
+                    if(!rx){
+                        rx = def.array.append(def.own(colorMap), d);
+                    }
+                    return rx;
+                };
+                
+                // At last, apply Transforms, nulls, etc, according to the axis' rules
+                return me._wrapScale(scale);
+            };
         },
         
         sceneScale: function(keyArgs){
@@ -14589,6 +14705,23 @@ def
     function castAlign(align){
         var position = this.option('Position');
         return pvc.parseAlign(position, align);
+    }
+    
+    function castColorMap(colorMap){
+        var resultMap;
+        if(colorMap){
+            var any;
+            def.eachOwn(colorMap, function(v, k){
+                any = true;
+                colorMap[k] = pv.color(v);
+            });
+            
+            if(any){
+                resultMap = colorMap;
+            }
+        }
+        
+        return resultMap;
     }
     
     var legendData = {
@@ -14661,6 +14794,22 @@ def
                 }
             },
             cast: pvc.colorScheme
+        },
+        
+        /**
+         * For ordinal color scales, a map of keys and their fixed colors.
+         * 
+         * @example
+         * <pre>
+         *  {
+         *      'Lisbon': 'red',
+         *      'London': 'blue'
+         *  }
+         * </pre>
+         */
+        Map: {
+            resolve: '_resolveFull',
+            cast:    castColorMap
         },
         
         /*
@@ -16710,7 +16859,7 @@ def
     this._constructData(options);
     this._constructVisualRoles(options);
     
-    this.options = def.mixin({}, this.defaults, options);
+    this.options = def.mixin.copy({}, this.defaults, options);
 })
 .add({
     /**
@@ -18748,12 +18897,12 @@ pvc.BaseChart
     _onColorAxisScaleSet: function(axis){
         switch(axis.index){
             case 0:
-                this.colors = axis.option('Colors');
+                this.colors = axis.scheme();
                 break;
             
             case 1:
                 if(this._allowV1SecondAxis){
-                    this.secondAxisColor = axis.option('Colors');
+                    this.secondAxisColor = axis.scheme();
                 }
                 break;
         }
@@ -18787,7 +18936,12 @@ pvc.BaseChart
                 (axisRole.name === roleName) ||
                 (axisRole.sourceRole && axisRole.sourceRole.name === roleName);
             
-            if(isRoleCompatible && (axis.index === 0 || axis.option.isSpecified('Colors'))){
+            if(isRoleCompatible &&
+               axis.scale &&
+               (axis.index === 0 || 
+               axis.option.isSpecified('Colors') || 
+               axis.option.isSpecified('Map'))){
+                
                 scale = axis.scale;
                 if(!firstScale){ firstScale = scale; }
                 
@@ -25831,14 +25985,10 @@ def
                     extensionId: 'ticks',
                     wrapper:  wrapper
                 })
-                .lock('data')            // Inherited    
-                // By default is visible unless the includeModulo hides it
+                .lock('data') // Inherited
                 .intercept('visible', function(){
-                    var visible = this.delegateExtension();
-                    if(visible === undefined){
-                        visible = !this.pvMark.parent.hidden();
-                    }
-                    return visible;
+                    return !this.pvMark.parent.hidden() &&
+                            this.delegateExtension(true);
                 })
                 .optional('lineWidth', 1)
                 .lock(anchorOpposite,  0) // top
@@ -25916,6 +26066,28 @@ def
                     }
                 }
             })
+            .intercept('visible', function(tickScene){
+                return this.pvMark.parent.hidden()  ?
+                       this.delegateExtension(true) :
+                       !!tickScene.vars.hiddenLabelText;
+            })
+            .intercept('text', function(tickScene){
+                var text;
+                if(this.pvMark.parent.hidden()){
+                    text = tickScene.vars.hiddenLabelText;
+                } else {
+                    // Allow late overriding (does not affect layout..)
+                    text = this.delegateExtension();
+                    if(text === undefined){
+                        text = tickScene.vars.tick.label;
+                    }
+                    if(maxTextWidth){
+                        text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
+                    }
+                }
+                
+                return text;
+             })
             .pvMark
             .zOrder(40) // above axis rule
             
@@ -25926,20 +26098,6 @@ def
             .textStyle("#666666")
             .textAlign(align)
             .textBaseline(baseline)
-            
-            .text(function(tickScene){
-                var text;
-                if(this.parent.hidden()){
-                    text = tickScene.vars.hiddenLabelText;
-                } else {
-                    text = tickScene.vars.tick.label;
-                    if(maxTextWidth){
-                        text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
-                    }
-                }
-                
-                return text;
-             })
             ;
         
         this._debugTicksPanel(pvTicksPanel);
