@@ -7,7 +7,6 @@ package org.pentaho.cdf.storage;
 import org.pentaho.cdf.PluginHibernateException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

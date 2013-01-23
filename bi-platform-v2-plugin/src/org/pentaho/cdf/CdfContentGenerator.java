@@ -84,6 +84,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final String STORAGE = "/Storage"; //$NON-NLS-1$
     private static final String GETHEADERS = "/GetHeaders"; //$NON-NLS-1$
     private static final String CONTEXT = "/Context"; //$NON-NLS-1$
+    private static final String PING = "/ping"; //$NON-NLS-1$
+    
     private static final String MIME_HTML = "text/html";
     private static final String MIME_CSS = "text/css";
     private static final String MIME_JS = "text/javascript";
@@ -170,6 +172,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
         } catch (Exception e) {
             logger.error("Error creating cdf content: ", e);
+            HttpServletResponse response = (HttpServletResponse) 
+                parameterProviders.get("path").getParameter("httpresponse");
+            response.sendError(
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                e.getLocalizedMessage());
         }
     }
 
@@ -217,7 +224,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
             } else {
                 getHeaders(requestParams, out);
             }
-        } else {
+        }
+        else if (urlPath.equalsIgnoreCase(PING)) {
+          out.write("{\"ping\":\"ok\"}".getBytes("UTF8"));
+        }
+        else {
             // we'll be providing the actual content with cache
             logger.warn("Getting resources through content generator is deprecated, please use static resources: " + urlPath);
             returnResource(urlPath, contentItem, out);
@@ -227,9 +238,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
 
     private void generateContext(final IParameterProvider requestParams, final OutputStream out) throws Exception {
-
+        HttpServletRequest request = ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest"));
         DashboardContext context = new DashboardContext(userSession);
-        out.write(context.getContext(requestParams).getBytes(ENCODING));
+        out.write(context.getContext(requestParams, request).getBytes(ENCODING));
 
     }
 
