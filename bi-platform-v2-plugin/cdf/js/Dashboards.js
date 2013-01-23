@@ -2453,15 +2453,6 @@ Dashboards.fetchData = function(cd, params, callback) {
 
         callback(json);
       },'json').error(Dashboards.handleServerError);
-    
-//    ,
-//    error: function(resp, txtStatus, error) {//TODO: settings overload
-//      $.prompt(
-//      {state0:{
-//      	html: resp.responseText,
-//      	title: error	
-//      }});
-//    }
   }
 
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
