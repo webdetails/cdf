@@ -205,6 +205,11 @@
 				   <include name="**/*" />
 			   </fileset>
 		   </copy>
+		   
+		   
+    <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
+       <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>		   
+		   
 
 		   <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.revision}"/> 
     <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.revision}"/> 
