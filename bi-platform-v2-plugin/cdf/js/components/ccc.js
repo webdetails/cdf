@@ -1,4 +1,4 @@
-pen.require(["cdf/lib/CCC/pvc-d1.0"], function(pvc){
+pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0"], function(pv, pvc){
     
 var ProtovisComponent = UnmanagedComponent.extend({
 
@@ -24,6 +24,7 @@ var ProtovisComponent = UnmanagedComponent.extend({
   processdata: function(values) {
     this.render(values);
   }
+
 });
 
 
