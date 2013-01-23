@@ -29,9 +29,13 @@ var pen = {
         if(definition){
             // Evaluate deps
             if(deps){
-                deps = deps.map(function(depId){
-                            return this._loadedModulesById[depId];
-                        }, this);
+            
+                var newDeps = [];
+                for (var i=0; i < deps.length; i++) {
+                    newDeps.push( this._loadedModulesById[deps[i]] );
+                }
+            
+      		deps = newDeps;
             } else {
                 deps = [];
             }
