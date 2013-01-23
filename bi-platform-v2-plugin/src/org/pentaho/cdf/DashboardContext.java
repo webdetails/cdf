@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
@@ -41,6 +44,8 @@ import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
 import pt.webdetails.cpf.InterPluginCall;
+import pt.webdetails.cpf.repository.RepositoryAccess;
+import pt.webdetails.cpf.repository.RepositoryAccess.FileAccess;
 
 /**
  *
@@ -48,9 +53,10 @@ import pt.webdetails.cpf.InterPluginCall;
  */
 public class DashboardContext {
 
-    protected IPentahoSession userSession;
     private static final Log logger = LogFactory.getLog(DashboardContext.class);
     private static Document repositoryCache;
+
+    protected IPentahoSession userSession;
 
     public DashboardContext(IPentahoSession userSession) {
         logger.debug("Creating Context for user " + userSession.getName());
@@ -66,7 +72,7 @@ public class DashboardContext {
         }
     }
 
-    public String getContext(IParameterProvider requestParams) {
+    public String getContext(IParameterProvider requestParams, HttpServletRequest request) {
         try {
             String solution = requestParams.getStringParameter("solution", ""),
                     path = requestParams.getStringParameter("path", ""),
@@ -79,6 +85,10 @@ public class DashboardContext {
 
             context.put("queryData", processAutoIncludes(fullPath, config));
             context.put("sessionAttributes", processSessionAttributes(config));
+            if(request != null && userSession.isAuthenticated()) {
+              
+              context.put("sessionTimeout", request.getSession().getMaxInactiveInterval());
+            }
             Calendar cal = Calendar.getInstance();
 
             long utcTime = cal.getTimeInMillis();
@@ -155,6 +165,7 @@ public class DashboardContext {
         return result;
     }
 
+
     private JSONObject processAutoIncludes(String dashboardPath, Document config) {
 
         JSONObject queries = new JSONObject();
@@ -166,9 +177,8 @@ public class DashboardContext {
 //        Document config = getConfigFile();
         logger.info("[Timing] Getting solution repo for auto-includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         Document solution = getRepository();
-        List<Node> includes, cdas;
-        includes = config.selectNodes("//autoincludes/autoinclude");
-        cdas = solution.selectNodes("//leaf[ends-with(leafText,'cda')]");
+        List<Node> includes = config.selectNodes("//autoincludes/autoinclude");
+        List<Node> cdas = solution.selectNodes("//leaf[ends-with(leafText,'cda')]");
         logger.info("[Timing] Starting testing includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
         for (Node include : includes) {
             String re = XmlDom4JHelper.getNodeText("cda", include, "");
@@ -295,9 +305,10 @@ public class DashboardContext {
 
     private static Document getRepository() {
         if (repositoryCache == null) {
-            IPentahoSession adminsession = getAdminSession();
-            ISolutionRepository solutionRepository = PentahoSystem.get(ISolutionRepository.class, adminsession);
-            repositoryCache = solutionRepository.getSolutionTree(ISolutionRepository.ACTION_ADMIN);
+            IPentahoSession adminSession = getAdminSession();
+            repositoryCache = RepositoryAccess.getRepository(adminSession).getFullSolutionTree(FileAccess.NONE , null);
+//            ISolutionRepository solutionRepository = PentahoSystem.get(ISolutionRepository.class, adminsession);
+//            repositoryCache = solutionRepository.getSolutionTree(ISolutionRepository.ACTION_ADMIN);
         }
         return repositoryCache;
     }
