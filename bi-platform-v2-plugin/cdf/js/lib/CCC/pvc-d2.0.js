@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130122
+//VERSION TRUNK-20130128
 
 
 /*global pvc:true */
@@ -140,10 +140,15 @@ var pvc = def.globalSpace('pvc', {
                             }
                         });
                         out.push(']');
-                    } else if(t.constructor === Object){
+                    } else {
+                        var ownOnly = def.get(keyArgs, 'ownOnly', true);
+                        if(t.constructor !== Object){
+                            remLevels = 1;
+                            ownOnly = true;
+                        }
+                        
                         out.push('{');
                         var first = true;
-                        var ownOnly  = def.get(keyArgs, 'ownOnly', true);
                         for(var p in t){
                             if(!ownOnly || def.hasOwnProp.call(t, p)){
                                 if(!first){ out.push(', '); }
@@ -156,10 +161,16 @@ var pvc = def.globalSpace('pvc', {
                                 }
                             }
                         }
+                        
+                        if(first){
+                            out.push('{'+ t + '}');
+                        }
+                        
                         out.push('}');
-                    } else {
-                        out.push(JSON.stringify("'new ...'"));
                     }
+//                    else {
+//                        out.push(JSON.stringify("'new ...'"));
+//                    }
                     return true;
                 
                 case 'number':
@@ -421,6 +432,68 @@ var pvc = def.globalSpace('pvc', {
         return function(a, b){
             return parser.parse(key(a)) - parser.parse(key(b));
         };
+    };
+    
+    pvc.time = {
+        intervals: {
+            'y':   31536e6,
+            
+            'm':   2592e6,
+            'd30': 2592e6,
+            
+            'w':   6048e5,
+            'd7':  6048e5,
+            
+            'd':   864e5,
+            'h':   36e5,
+            'M':   6e4,
+            's':   1e3,
+            'ms':  1
+        },
+        
+        withoutTime: function(t){
+            return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+        },
+        
+        weekday: {
+            previousOrSelf: function(t, toWd){
+                var wd  = t.getDay();
+                var difDays = wd - toWd;
+                if(difDays){
+                    // Round to the previous wanted week day
+                    var previousOffset = difDays < 0 ? (7 + difDays) : difDays;
+                    t = new Date(t - previousOffset * pvc.time.intervals.d);
+                }
+                return t;
+            },
+            
+            nextOrSelf: function(t, toWd){
+                var wd  = t.getDay();
+                var difDays = wd - toWd;
+                if(difDays){
+                    // Round to the next wanted week day
+                    var nextOffset = difDays > 0 ? (7 - difDays) : -difDays;
+                    t = new Date(t + nextOffset * pvc.time.intervals.d);
+                }
+                return t;
+            },
+            
+            closestOrSelf: function(t, toWd){
+                var wd = t.getDay(); // 0 - Sunday, ..., 6 - Friday
+                var difDays = wd - toWd;
+                if(difDays){
+                    var D = pvc.time.intervals.d;
+                    var sign = difDays > 0 ? 1 : -1;
+                    difDays = Math.abs(difDays);
+                    if(difDays >= 4){
+                        t = new Date(t.getTime() + sign * (7 - difDays) * D);
+                    } else {
+                        t = new Date(t.getTime() - sign * difDays * D);
+                    }
+                }
+                return t;
+            }
+        }
     };
     
     pv.Format.createParser = function(pvFormat) {
@@ -8247,6 +8320,11 @@ pvc.data.Data.add(/** @lends pvc.data.Data# */{
     replaceSelected: function(datums){
         /*global datum_deselect:true */
         
+        // materialize, cause we're using it twice
+        if(!def.array.is(datums)){
+            datums = datums.array();
+        }
+        
         // Clear all but the ones we'll be selecting.
         // This way we can have a correct changed flag.
         var alreadySelectedById = 
@@ -12294,7 +12372,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         };
         
         // defaultColor
-        methods[defName] = function(arg){ return; };
+        methods[defName]    = function(arg){ return; };
         
         // normalColor
         methods[normalName] = function(value, arg){ return value; };
@@ -12452,7 +12530,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .property('color')
 .constructor
 .add({
-    _bitShowsInteraction:  4,
+    _bitShowsActivity:     2,
+    _bitShowsSelection:    4,
+    _bitShowsInteraction:  4 | 2, // 6
     _bitShowsTooltip:      8,
     _bitSelectable:       16,
     _bitHoverable:        32,
@@ -12460,6 +12540,8 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _bitDoubleClickable: 128,
     
     showsInteraction:  function(){ return (this.bits & this._bitShowsInteraction) !== 0; },
+    showsActivity:     function(){ return (this.bits & this._bitShowsActivity   ) !== 0; },
+    showsSelection:    function(){ return (this.bits & this._bitShowsSelection  ) !== 0; },
     showsTooltip:      function(){ return (this.bits & this._bitShowsTooltip    ) !== 0; },
     isSelectable:      function(){ return (this.bits & this._bitSelectable      ) !== 0; },
     isHoverable:       function(){ return (this.bits & this._bitHoverable       ) !== 0; },
@@ -12471,27 +12553,29 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _addInteractive: function(keyArgs){
         var panel   = this.panel,
             pvMark  = this.pvMark,
-            options = this.chart.options;
+            chart   = this.chart,
+            options = chart.options;
         
         var bits = this.bits;
+        bits |= this._bitShowsInteraction;
         
-        if(this.chart._tooltipEnabled && !def.get(keyArgs, 'noTooltip')){
+        if(chart._tooltipEnabled && !def.get(keyArgs, 'noTooltip')){
             bits |= this._bitShowsTooltip;
             
             this.panel._addPropTooltip(pvMark, def.get(keyArgs, 'tooltipArgs'));
         }
         
-        var selectable = false;
-        var clickable  = false;
+        var clickSelectable = false;
+        var clickable = false;
         
         if(options.selectable || options.hoverable){
             if(options.selectable && !def.get(keyArgs, 'noSelect')){
-                bits |= (this._bitShowsInteraction | this._bitSelectable);
-                selectable = true;
+                bits |= this._bitSelectable;
+                clickSelectable = chart._canSelectWithClick();
             }
             
             if(options.hoverable && !def.get(keyArgs, 'noHover')){
-                bits |= (this._bitShowsInteraction | this._bitHoverable);
+                bits |= this._bitHoverable;
                 
                 panel._addPropHoverable(pvMark);
             }
@@ -12510,12 +12594,30 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             }
         }
         
+        var showsActivity = def.get(keyArgs, 'showsActivity');
+        if(showsActivity != null){
+            if(showsActivity){
+                bits |=  this._bitShowsActivity;
+            } else {
+                bits &= ~this._bitShowsActivity;
+            }
+        }
+        
+        var showsSelection = def.get(keyArgs, 'showsSelection');
+        if(showsSelection != null){
+            if(showsSelection){
+                bits |=  this._bitShowsSelection;
+            } else {
+                bits &= ~this._bitShowsSelection;
+            }
+        }
+        
         if(!def.get(keyArgs, 'noClick') && panel._isClickable()){
             bits |= this._bitClickable;
             clickable = true;
         }
         
-        if(selectable || clickable){
+        if(clickSelectable || clickable){
             panel._addPropClick(pvMark);
         }
         
@@ -12703,7 +12805,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             if(type === 'stroke') {
                 return color.brighter(1);
             }
-        } else if(scene.anySelected() && !scene.isSelected()) {
+        } else if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
             
             if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                 //return color.darker(1.5);
@@ -12801,7 +12903,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
      */
     interactiveColor: function(color, type){
         var scene = this.scene;
-        if(scene.anySelected() && !scene.isSelected()) {
+        if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
             
             if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                 //return color.darker(1.5);
@@ -12887,12 +12989,13 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
      * @override
      */
     interactiveColor: function(color, type){
-        if(type === 'fill'){
-            if(this.scene.anySelected() && !this.scene.isSelected()) {
-                return this.dimColor(color, type);
-            }
+        if(type === 'fill' && 
+           this.showsSelection() && 
+           this.scene.anySelected() && 
+           !this.scene.isSelected()) {
+            return this.dimColor(color, type);
         }
-
+        
         return this.base(color, type);
     }
 });
@@ -12941,13 +13044,16 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 return null;
             }
 
-            if(scene.anySelected() && !scene.isSelected()) {
+            if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
                 if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                     return pv.Color.names.darkgray.darker().darker();
                 }
-
+                
                 return this.dimColor(color, type);
-            } else if(this.isActiveSeriesAware && scene.isActiveSeries()){
+                
+            }
+            
+            if(this.isActiveSeriesAware && scene.isActiveSeries()){
                 return color.brighter(1).alpha(0.7);
             }
 
@@ -12956,13 +13062,15 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
                 return color.brighter(0.2).alpha(0.8);
             } 
 
-            if(scene.anySelected() && !scene.isSelected()) {
+            if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
                 if(this.isActiveSeriesAware && scene.isActiveSeries()) {
                     return pv.Color.names.darkgray.darker(2).alpha(0.8);
                 }
-
+                
                 return this.dimColor(color, type);
-            } else if(this.isActiveSeriesAware && scene.isActiveSeries()){
+            }
+            
+            if(this.isActiveSeriesAware && scene.isActiveSeries()){
                 return color.brighter(0.2).alpha(0.8);
             }
         }
@@ -13082,7 +13190,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
                 case 'fill':   return color.brighter(0.2).alpha(0.8);
                 case 'stroke': return color.brighter(1.3).alpha(0.7);
             }
-        } else if(scene.anySelected() && !scene.isSelected()) {
+        } else if(this.showsSelection() && scene.anySelected() && !scene.isSelected()) {
             //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
             if(type === 'fill') {
                 return this.dimColor(color, type);
@@ -13159,7 +13267,7 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     interactiveColor: function(color, type){
         var scene = this.scene;
         
-        if(!scene.isActive && scene.anySelected() && scene.datum && !scene.isSelected()) {
+        if(!scene.isActive && this.showsSelection() && scene.anySelected() && scene.datum && !scene.isSelected()) {
             return this.dimColor(color, type);
         }
         
@@ -13547,7 +13655,7 @@ def.scope(function(){
         },
         
         isDiscrete: function(){
-            return this.role && this.role.isDsiscrete();
+            return this.role && this.role.isDiscrete();
         },
         
         isBound: function(){
@@ -13883,10 +13991,10 @@ def.scope(function(){
             var roundingPaddings = this._roundingPaddings;
             if(!roundingPaddings){
                 roundingPaddings = {
-                        begin: 0, 
-                        end:   0, 
-                        beginLocked: false, 
-                        endLocked:   false
+                    begin: 0, 
+                    end:   0, 
+                    beginLocked: false, 
+                    endLocked:   false
                 };
                 
                 var scale = this.scale;
@@ -14364,7 +14472,8 @@ def.scope(function(){
         ClickAction: { 
             resolve: '_resolveFull',
             data: normalV1Data
-        }, // (v1 && index === 0) 
+        }, // (v1 && index === 0)
+        
         DoubleClickAction: { 
             resolve: '_resolveFull',
             data: normalV1Data
@@ -14408,6 +14517,582 @@ def
             def.get(keyArgs, 'tickLabel'),
             def.get(keyArgs, 'tickRaw'));
 });def.scope(function(){
+    
+    def
+    .type('pvc.visual.CartesianFocusWindow')
+    .init(function(chart){
+        //this.base(chart, 'focusWindow', 0, {byNaked: false});
+        
+        // TODO: ortho
+        var baseAxis = chart.axes.base;
+        this.base = new pvc.visual.CartesianFocusWindowAxis(baseAxis);
+    })
+    .add(/** @lends pvc.visual.FocusWindow# */{
+        _exportData: function(){
+            return {
+                base: def.copyProps(this.base, pvc.visual.CartesianFocusWindow.props)
+            };
+        },
+        
+        _importData: function(data){
+            var baseData = data.base;
+            
+            this.base.option.specify({
+                Begin:  baseData.begin,
+                End:    baseData.end,
+                Length: baseData.length
+            });
+        },
+        
+        _initFromOptions: function(){
+            this.base._initFromOptions();
+        }
+    });
+    
+    def
+    .type('pvc.visual.CartesianFocusWindowAxis', pvc.visual.OptionsBase)
+    .init(function(axis){
+        this.axis = axis;
+        
+        // focusWindowBase/Ortho
+        this.base(
+            axis.chart, 
+            'focusWindow' + def.firstUpperCase(axis.type), 
+            0,
+            {byNaked: false});
+    })
+    .addStatic({
+        props: ['begin', 'end', 'length']
+    })
+    .add(/** @lends pvc.visual.FocusWindow# */{
+        _getOptionsDefinition: function(){
+            return focusWindowAxis_optionsDef;
+        },
+        
+        _initFromOptions: function(){
+            var o = this.option;
+            this.set({
+                begin:  o('Begin'),
+                end:    o('End'),
+                length: o('Length')
+            });
+        },
+        
+        set: function(keyArgs){
+            var me = this;
+            
+            var render = def.get(keyArgs, 'render');
+            
+            var b, e, l;
+            keyArgs = me._readArgs(keyArgs);
+            if(!keyArgs){
+                if(this.begin != null && this.end != null && this.length != null){
+                    return;
+                }
+            } else {
+                b = keyArgs.begin;
+                e = keyArgs.end;
+                l = keyArgs.length;
+            }
+            
+            var axis       = me.axis;
+            var scale      = axis.scale;
+            var isDiscrete = axis.isDiscrete();
+            var contCast   = !isDiscrete ? axis.role.firstDimensionType().cast : null;
+            var domain     = scale.domain();
+            
+            var a, L;
+            if(isDiscrete){
+                L = domain.length;
+                var ib, ie, ia;
+                if(b != null){
+                    var nb = +b;
+                    if(!isNaN(nb)){
+                        if(nb === Infinity){
+                            ib = L - 1;
+                            b  = domain[ib];
+                        } else if(nb === -Infinity){
+                            ib = 0;
+                            b  = domain[ib];
+                        }
+                    }
+                    
+                    if(ib == null){
+                        ib = domain.indexOf(''+b);
+                        if(ib < 0){
+                            //b = null;
+                            ib = 0;
+                            b  = domain[ib];
+                        }
+                    }
+                }
+                
+                if(e != null){
+                    var ne = +e;
+                    if(!isNaN(ne)){
+                        if(ne === Infinity){
+                            ie = L - 1;
+                            e  = domain[ie];
+                        } else if(ne === -Infinity){
+                            ie = 0;
+                            e  = domain[ie];
+                        }
+                    }
+                    
+                    if(ie == null){
+                        ie = domain.indexOf(''+e);
+                        if(ie < 0){
+                            //e = null;
+                            ie = L - 1;
+                            e  = domain[ie];
+                        }
+                    }
+                }
+                
+                if(l != null){
+                    l = +l;
+                    if(isNaN(l)){
+                        l = null;
+                    } else if(l < 0 && (b != null || e != null)) {
+                        // Switch b and e 
+                        a  = b;
+                        ia = ib;
+                        b  = e, ib = ie, e = a, ie = ia;
+                        l  = -l;
+                    }
+                    
+                    // l > L ??
+                }
+                
+                if(b != null){
+                    if(e != null){
+                        if(ib > ie){
+                            // Switch b and e
+                            a  = b;
+                            ia = ib;
+                            b  = e, ib = ie, e = a, ie = ia;
+                        }
+                        // l is ignored
+                        l = ie - ib + 1;
+                    } else {
+                        // b && !e
+                        if(l == null){
+                            // to the end of the domain?
+                            l = L - ib;
+                        }
+                        
+                        ie = ib + l - 1;
+                        if(ie > L - 1){
+                            ie = L - 1;
+                            l = ie - ib + 1;
+                        }
+                        
+                        e = domain[ie];
+                    }
+                } else {
+                    // !b
+                    if(e != null){
+                        // !b && e
+                        if(l == null){
+                            // from the beginning of the domain?
+                            l = ie;
+                            // ib = 0
+                        }
+                        
+                        ib = ie - l + 1;
+                        if(ib < 0){
+                            ib = 0;
+                            l = ie - ib + 1;
+                        }
+                        
+                        b = domain[ib];
+                    } else {
+                        // !b && !e
+                        if(l == null){
+                            l = Math.max(~~(L / 3), 1); // 1/3 of the width?
+                        }
+                        
+                        if(l > L){
+                            l = L;
+                            ib = 0;
+                            ie = L - 1;
+                        } else {
+                            // ~~ <=> Math.floor for x >= 0
+                            ia = ~~(L / 2); // window center
+                            ib = ia - ~~(l/2);
+                            ie = ib + l - 1;
+                        }
+                        
+                        b = domain[ib];
+                        e = domain[ie];
+                    }
+                }
+                
+            } else {
+                // Continuous
+                
+                if(l != null){
+                    l = +l;
+                    if(isNaN(l)){
+                        l = null;
+                    } else if(l < 0 && (b != null || e != null)) {
+                        // Switch b and e 
+                        a  = b;
+                        b = e, e = a;
+                        l = -l;
+                    }
+                    
+                    // l > L ??
+                }
+                
+                var min = domain[0];
+                var max = domain[1];
+                L  = max - min; 
+                if(b != null){
+                    // -Infinity is a placeholder for min
+                    if(b < min){
+                        b = min;
+                    }
+                    
+                    // +Infinity is a placeholder for max
+                    if(b > max){
+                        b = max;
+                    }
+                }
+                
+                if(e != null){
+                    // -Infinity is a placeholder for min
+                    if(e < min){
+                        e = min;
+                    }
+                    
+                    // +Infinity is a placeholder for max
+                    if(e > max){
+                        e = max;
+                    }
+                }
+                
+                if(b != null){
+                    if(e != null){
+                        if(b > e){
+                            // Switch b and e
+                            a  = b;
+                            b = e, e = a;
+                        }
+                        l = e - b;
+                    } else {
+                        // b && !e
+                        if(l == null){
+                            // to the end of the domain?
+                            l = max - b;
+                        }
+                        
+                        e = b + l;
+                        if(e > max){
+                            e = max;
+                            l = e - b;
+                        }
+                    }
+                } else {
+                    // !b
+                    if(e != null){
+                        // !b && e
+                        if(l == null){
+                            // from the beginning of the domain?
+                            l = e - min;
+                            // b = min
+                        }
+                        
+                        b = e - l;
+                        if(b < min){
+                            b = min;
+                            l = e - b;
+                        }
+                    } else {
+                        // !b && !e
+                        if(l == null){
+                            l = Math.max(~~(L / 3), 1); // 1/3 of the width?
+                        }
+                        
+                        if(l > L){
+                            l = L;
+                            b = min;
+                            e = max;
+                        } else {
+                            // ~~ <=> Math.floor for x >= 0
+                            a = ~~(L / 2); // window center
+                            b = a - ~~(l/2);
+                            e = (+b) + (+l); // NOTE: Dates subtract, but don't add...
+                        }
+                    }
+                }
+                
+                b = contCast(b);
+                e = contCast(e);
+                l = contCast(l);
+                
+                var constraint = me.option('Constraint');
+                if(constraint){
+                    var oper2 = {
+                        type:    'new',
+                        target:  'begin',
+                        value:   b,
+                        length:  l,
+                        length0: l,
+                        min:     min,
+                        max:     max,
+                        minView: min,
+                        maxView: max
+                    };
+                    
+                    constraint(oper2);
+                    
+                    b = contCast(oper2.value );
+                    l = contCast(oper2.length);
+                    e = contCast((+b) + (+l)); // NOTE: Dates subtract, but don't add...
+                }
+            }
+            
+            me._set(b, e, l, render);
+        },
+        
+        _updatePosition: function(pbeg, pend, render){
+            var me = this;
+            var axis = me.axis;
+            var scale = axis.scale;
+            
+            var b, e, l;
+            
+            if(axis.isDiscrete()){
+                var ib = scale.invertIndex(pbeg);
+                var ie = scale.invertIndex(pend) - 1;
+                var domain = scale.domain();
+                
+                b = domain[ib];
+                e = domain[ie];
+                l = ie - ib + 1;
+            } else {
+                b = scale.invert(pbeg);
+                e = scale.invert(pend);
+                l = e - b;
+            }
+            
+            this._set(b, e, l, /*render*/ render);
+        },
+        
+        /*
+            var oper = {
+                type:    op,
+                target:  target,
+                point:   p,
+                length:  l,  // new length
+                length0: l0, // prev length
+                min:     drag.min[a_p],
+                max:     drag.max[a_p],
+                minView: 0,
+                maxView: w
+            };
+         */
+        _constraintPosition: function(oper){
+            var me = this;
+            var axis = me.axis;
+            var scale = axis.scale;
+            var constraint;
+            
+            if(axis.isDiscrete()){
+                // Align to category boundaries
+                var index = Math.floor(scale.invertIndex(oper.point, /* noRound */true));
+                if(index >= 0){
+                    var r = scale.range();
+                    var L = scale.domain().length;
+                    var S = (r.max - r.min) / L;
+                    if(index >= L && (oper.type === 'new' || oper.type === 'resize-begin')){
+                        index = L - 1;
+                    }
+                    oper.point = index * S;
+                }
+            } else if((constraint = me.option('Constraint'))){
+                var contCast = axis.role.firstDimensionType().cast;
+                var v = contCast(scale.invert(oper.point));
+                
+                var sign    = oper.target === 'begin' ? 1 : -1;
+                
+                var pother  = oper.point + sign * oper.length;
+                var vother  = contCast(scale.invert(pother));
+                var vlength = contCast(sign * (vother - v));
+                
+                var vlength0, pother0, vother0;
+                if(oper.length === oper.length0){
+                    vlength0 = vlength;
+                } else {
+                    pother0  = oper.point + sign * oper.length0;
+                    vother0  = contCast(scale.invert(pother0));
+                    vlength0 = sign * (vother0 - v);
+                }
+                
+                var vmin = contCast(scale.invert(oper.min));
+                var vmax = contCast(scale.invert(oper.max));
+                
+                var oper2 = {
+                    type:    oper.type,
+                    target:  oper.target,
+                    value:   v,
+                    length:  vlength,  // new length if value is accepted
+                    length0: vlength0, // prev length (with previous value)
+                    min:     vmin,
+                    max:     vmax,
+                    minView: contCast(scale.invert(oper.minView)),
+                    maxView: contCast(scale.invert(oper.maxView))
+                };
+                
+                constraint(oper2);
+                
+                // detect any changes and update oper
+                if(+oper2.value !== +v){
+                    v = oper2.value;
+                    oper.point = scale(v);
+                }
+                
+                var vlength2 = oper2.length;
+                if(+vlength2 !== +vlength){
+                    if(+vlength2 === +vlength0){
+                        oper.length = oper.length0;
+                    } else {
+                        var vother2 = (+v) + sign * (+vlength2); // NOTE: Dates subtract, but don't add...
+                        var pother2 = scale(vother2);
+                        
+                        oper.length = pother2 - sign * oper.point;
+                    }
+                }
+                
+                if(+oper2.min !== +vmin){
+                    oper.min = scale(oper2.min);
+                }
+                
+                if(+oper2.max !== +vmax){
+                    oper.max = scale(oper2.max);
+                }
+            }
+        },
+        
+        _set: function(b, e, l, render){
+            var me = this;
+            me.begin  = b;
+            me.end    = e;
+            me.length = l;
+            me._updateSelection({render: render});
+        },
+        
+        _readArgs: function(keyArgs){
+            if(keyArgs){
+                var out = {};
+                var any = 0;
+                
+                var read = function(p){
+                    var v = keyArgs[p];
+                    if(v != null){
+                        any = true;
+                    } else {
+                        v = this[p];
+                    }
+                    
+                    out[p] = v;
+                };
+                
+                pvc.visual.CartesianFocusWindowAxis.props.forEach(read, this);
+                
+                if(any){
+                    return out;
+                }
+            }
+        },
+        
+        // keyArgs: render: boolean [true]
+        _updateSelection: function(keyArgs){
+            var me = this;
+            
+            // TODO: Only the first dataCell is supported...
+            // TODO: cache domainData?
+            
+            var selectDatums;
+            var axis       = me.axis;
+            var isDiscrete = axis.isDiscrete();
+            var chart      = axis.chart;
+            var dataCell   = axis.dataCell;
+            var role       = dataCell.role;
+            var partData   = chart.partData(dataCell.dataPartValue, {visible: true});
+            var domainData;
+            if(isDiscrete){
+                domainData = partData.flattenBy(role);
+                
+                var dataBegin = domainData._childrenByKey[me.begin];
+                var dataEnd   = domainData._childrenByKey[me.end  ];
+                if(dataBegin && dataEnd){
+                    var indexBegin = dataBegin.childIndex();
+                    var indexEnd   = dataEnd  .childIndex();
+                    selectDatums = def
+                        .range(indexBegin, indexEnd - indexBegin + 1)
+                        .select(function(index){ return domainData._children[index]; })
+                        .selectMany(function(data){ return data._datums; })
+                        .distinct(function(datum){ return datum.key; })
+                        ;
+                }
+            } else {
+                domainData = partData;
+                
+                var dimName = role.firstDimensionName();
+                selectDatums = def
+                    .query(partData._datums)
+                    .where(function(datum){
+                        var v = datum.atoms[dimName].value;
+                        return v != null && v >= me.begin && v <= me.end;
+                    });
+            }
+            
+            if(selectDatums){
+                chart.data.replaceSelected(selectDatums);
+                
+                // Fire events; maybe render (keyArgs)
+                chart.root.updateSelections(keyArgs);
+            }
+        } 
+    });
+    
+    
+    /*global axis_optionsDef:true*/
+    var focusWindowAxis_optionsDef = def.create(axis_optionsDef, {
+        Resizable: {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   true
+        },
+        
+        Movable:   {
+            resolve: '_resolveFull',
+            cast:    Boolean,
+            value:   true
+        },
+        
+        Begin: {
+            resolve: '_resolveFull'
+        },
+        
+        End: {
+            resolve: '_resolveFull'
+        },
+        
+        Length: {
+            resolve: '_resolveFull'
+        },
+        
+        // Continuous Axis function(v, vother, op, vmax) -> vconstrained
+        Constraint: {
+            resolve: '_resolveFull',
+            cast:    def.fun.as
+        }
+    });
+});
+def.scope(function(){
 
     /**
      * Initializes a color axis.
@@ -15576,11 +16261,11 @@ def
     },
     
     /**
-     * Returns the value of the chart option "selectable". 
+     * Returns true if the chart is selectable by clicking. 
      * @type boolean
      */
     isClickable: function(){
-        return this.chart().options.selectable;
+        return this.chart()._canSelectWithClick();
     },
     
     /**
@@ -16831,8 +17516,6 @@ def
 .init(function(options) {
     var parent = this.parent = def.get(options, 'parent') || null;
     
-    this._initialOptions = options;
-    
     /* DEBUG options */
     if(pvc.debug >= 3 && !parent && options){
         try {
@@ -16842,8 +17525,16 @@ def
         }
     }
     
+    if(parent){
+        /*jshint expr:true */
+        options || def.fail.argumentRequired('options');
+    } else {
+        options = def.mixin.copy({}, this.defaults, options);
+    }
+    
+    this.options = options;
+    
     if(parent) {
-        // options != null
         this.root = parent.root;
         this.smallColIndex = options.smallColIndex;
         this.smallRowIndex = options.smallRowIndex;
@@ -16853,13 +17544,11 @@ def
         
         parent._addChild(this);
     } else {
-        this.root  = this;
+        this.root = this;
     }
 
     this._constructData(options);
     this._constructVisualRoles(options);
-    
-    this.options = def.mixin.copy({}, this.defaults, options);
 })
 .add({
     /**
@@ -16970,12 +17659,6 @@ def
      * @type number|null
      */
     multiChartPageIndex: null,
-    
-    /**
-     * The options object specified by the user,
-     * before any processing.
-     */
-    _initialOptions: null,
     
     left: 0,
     top:  0,
@@ -17272,38 +17955,50 @@ def
      * If not pre-rendered, do it now.
      */
     render: function(bypassAnimation, recreate, reloadData){
-        this.useTextMeasureCache(function(){
-            try{
-                if (!this.isPreRendered || recreate) {
-                    this._preRender({reloadData: reloadData});
-                } else if(!this.parent && this.isPreRendered) {
-                    pvc.removeTipsyLegends();
-                }
-    
-                this.basePanel.render({
-                    bypassAnimation: bypassAnimation, 
-                    recreate: recreate
-                 });
-                
-            } catch (e) {
-                /*global NoDataException:true*/
-                if (e instanceof NoDataException) {
-                    if(pvc.debug > 1){
-                        this._log("No data found.");
+        var hasError;
+        
+        // Don't let selection change events to fire before the render is finished
+        this._suspendSelectionUpdate();
+        try{
+            this.useTextMeasureCache(function(){
+                try{
+                    if (!this.isPreRendered || recreate){
+                        this._preRender({reloadData: reloadData});
+                    } else if(!this.parent && this.isPreRendered){
+                        pvc.removeTipsyLegends();
                     }
-    
-                    this._addErrorPanelMessage("No data found", true);
-                } else {
-                    // We don't know how to handle this
-                    pvc.logError(e.message);
                     
-                    if(pvc.debug > 0){
-                        this._addErrorPanelMessage("Error: " + e.message, false);
+                    this.basePanel.render({
+                        bypassAnimation: bypassAnimation, 
+                        recreate: recreate
+                    });
+                    
+                } catch (e) {
+                    /*global NoDataException:true*/
+                    if (e instanceof NoDataException) {
+                        if(pvc.debug > 1){
+                            this._log("No data found.");
+                        }
+        
+                        this._addErrorPanelMessage("No data found", true);
+                    } else {
+                        hasError = true;
+                        
+                        // We don't know how to handle this
+                        pvc.logError(e.message);
+                        
+                        if(pvc.debug > 0){
+                            this._addErrorPanelMessage("Error: " + e.message, false);
+                        }
+                        //throw e;
                     }
-                    //throw e;
                 }
+            });
+        } finally {
+            if(!hasError){
+                this._resumeSelectionUpdate();
             }
-        });
+        }
         
         return this;
     },
@@ -17496,7 +18191,10 @@ def
         doubleClickMaxDelay: 300, //ms
 //      
         hoverable:  false,
-        selectable: false,
+        
+        selectable:    false,
+        selectionMode: 'rubberband', // focuswindow, // single (click-only) // custom (by code only)
+        //selectionCountMax: 0, // <= 0 -> no limit
         
 //        selectionChangedAction: null,
 //        userSelectionAction: null, 
@@ -19282,7 +19980,7 @@ pvc.BaseChart
     _updatingSelections: function(method, context){
         this._suspendSelectionUpdate();
         
-        var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
+        //var datums = this._lastSelectedDatums ? this._lastSelectedDatums.values() : [];
         //this._log("Previous Datum count=" + datums.length + 
         //        " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
         
@@ -19319,7 +20017,7 @@ pvc.BaseChart
      * @type undefined
      * @virtual 
      */
-    updateSelections: function(){
+    updateSelections: function(keyArgs){
         if(this === this.root) {
             if(this._inUpdateSelections) {
                 return this;
@@ -19351,9 +20049,11 @@ pvc.BaseChart
                 }
                 
                 // Rendering afterwards allows the action to change the selection in between
-                this.useTextMeasureCache(function(){
-                    this.basePanel.renderInteractive();
-                }, this);
+                if(def.get(keyArgs, 'render', true)){
+                    this.useTextMeasureCache(function(){
+                        this.basePanel.renderInteractive();
+                    }, this);
+                }
             } finally {
                 this._inUpdateSelections = false;
             }
@@ -19408,6 +20108,24 @@ pvc.BaseChart
         }
         
         return this.root._onUserSelection(datums);
+    },
+    
+    _isSelectable: function(){
+        return this.options.selectable;
+    },
+    
+    _canSelectWithRubberband: function(){
+        var options = this.options;
+        return options.selectable && options.selectionMode === 'rubberband';
+    },
+    
+    _canSelectWithClick: function(){
+        return this._canSelectWithRubberband();
+    },
+    
+    _canSelectWithFocusWindow: function(){
+        var options = this.options;
+        return options.selectable && options.selectionMode === 'focuswindow';
     }
 });
 
@@ -20410,12 +21128,22 @@ def
                 hasPositions[this.anchorLength(side)] = true;
             }, this);
             
-            if(!hasPositions.width && margins.left > 0){
-                pvBorderPanel.left(margins.left);
+            if(!hasPositions.width){
+                if(margins.left > 0){
+                    pvBorderPanel.left(margins.left);
+                }
+                if(margins.right > 0){
+                    pvBorderPanel.right(margins.right);
+                }
             }
             
-            if(!hasPositions.height && margins.top > 0){
-                pvBorderPanel.top(margins.top);
+            if(!hasPositions.height){
+                if(margins.top > 0){
+                    pvBorderPanel.top(margins.top);
+                }
+                if(margins.bottom > 0){
+                    pvBorderPanel.bottom(margins.bottom);
+                }
             }
             
             // Check padding
@@ -20447,13 +21175,13 @@ def
             }
             
             var extensionId = this._getExtensionId();
-            if(extensionId != null){ // '' is allowed cause this is relative to #_getExtensionPrefix
-                // Wrap the panel that is extended with a Panel sign
-                new pvc.visual.Panel(this, null, {
-                    panel:       pvBorderPanel,
-                    extensionId: extensionId
-                });
-            }
+//            if(extensionId != null){ // '' is allowed cause this is relative to #_getExtensionPrefix
+            // Wrap the panel that is extended with a Panel sign
+            new pvc.visual.Panel(this, null, {
+                panel:       pvBorderPanel,
+                extensionId: extensionId
+            });
+//            }
             
             /* Protovis marks that are pvc Panel specific,
              * and/or create child panels.
@@ -20461,7 +21189,7 @@ def
             this._createCore(this._layoutInfo);
             
             /* RubberBand */
-            if (this.isTopRoot && this.chart.options.selectable && pv.renderer() !== 'batik'){
+            if (this.isTopRoot && pv.renderer() !== 'batik' && this.chart._canSelectWithRubberband()){
                 this._initRubberBand();
             }
 
@@ -20907,16 +21635,15 @@ def
         
         pvMark
             .event(onEvent, function(scene){
-                scene.setActive(true);
-
                 if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                    scene.setActive(true);
                     panel.renderInteractive();
                 }
             })
             .event(offEvent, function(scene){
-                if(scene.clearActive()) {
-                    /* Something was active */
-                    if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                if(!panel.isRubberBandSelecting() && !panel.isAnimating()) {
+                    if(scene.clearActive()) {
+                        /* Something was active */
                         panel.renderInteractive();
                     }
                 }
@@ -21236,14 +21963,12 @@ def
                 context.getV1Datum());
     },
     
-    _isClickable: function(keyArgs){
-        var options = keyArgs || this.chart.options;
-        return options.clickable && !!this.clickAction;
+    _isClickable: function(){
+        return this.chart.options.clickable && !!this.clickAction;
     },
     
-    _shouldHandleClick: function(keyArgs){
-        var options = keyArgs || this.chart.options;
-        return options.selectable || this._isClickable(options);
+    _shouldHandleClick: function(){
+        return this.chart._canSelectWithClick() || this._isClickable();
     },
     
     _handleClick: function(pvMark, ev){
@@ -21349,7 +22074,7 @@ def
             options  = chart.options,
             data = chart.data;
 
-        var dMin = 2; // Minimum dx or dy for a drag to be considered a rubber band selection
+        var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
         this._isRubberBandSelecting = false;
 
@@ -21382,7 +22107,6 @@ def
                 return color;
             })
             .pvMark
-            .lock('data', [new pvc.visual.Scene(null, {panel: this})])
             .lock('visible', function(){ return !!rb;  })
             .lock('left',    function(){ return rb.x;  })
             .lock('right')
@@ -21400,35 +22124,41 @@ def
         }
         
         // Require all events, wether it's painted or not
-        rubberPvParentPanel.events('all');
+        rubberPvParentPanel.lock('events', 'all');
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
          
+        var scene = new pvc.visual.Scene(null, {panel: this});
+        // Initialize x,y,dx and dy properties
+        scene.x = scene.y = scene.dx = scene.dy = 0;
+        
         var selectionEndedDate;
         rubberPvParentPanel
-            .event('mousedown', pv.Behavior.select({autoRefresh: false, datumIsRect: false}))
+            .lock('data', [scene]) 
+            .event('mousedown', pv.Behavior.select().autoRender(false))
             .event('select', function(){
                 if(!rb){
                     if(myself.isAnimating()){
                         return;
                     }
                     
-                    var rb1 = this.selectionRect;
-                    if(Math.sqrt(rb1.dx * rb1.dx + rb1.dy * rb1.dy) <= dMin){
+                    if(scene.dx * scene.dx + scene.dy * scene.dy <= dMin2){
                         return;
                     }
                     
-                    rb = rb1;
+                    rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
+                    
                     myself._isRubberBandSelecting = true;
                     
                     if(!toScreen){
                         toScreen = rubberPvParentPanel.toScreenTransform();
                     }
                     
-                    myself.rubberBand = rb.clone().apply(toScreen);
+                    myself.rubberBand = rb.apply(toScreen);
                 } else {
-                    rb = this.selectionRect;
+                    rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
+                    // not updating rubberBand ?
                 }
                 
                 selectBar.render();
@@ -21441,18 +22171,19 @@ def
                         toScreen = rubberPvParentPanel.toScreenTransform();
                     }
                     
-                    myself.rubberBand = rb = this.selectionRect.apply(toScreen);
+                    //rb = new pv.Shape.Rect(scene.x, scene.y, scene.dx, scene.dy);
+                    var rbs = rb.apply(toScreen);
                     
                     rb = null;
                     myself._isRubberBandSelecting = false;
                     selectBar.render(); // hide rubber band
                     
                     // Process selection
-                    myself._onRubberBandSelectionEnd(ev);
-                    
-                    selectionEndedDate = new Date();
-                    
-                    myself.rubberBand = rb = null;
+                    try{
+                        myself._processRubberBand(rbs, ev, {allowAdditive: true});
+                    } finally {
+                        selectionEndedDate = new Date();
+                    }
                 }
             });
         
@@ -21476,15 +22207,27 @@ def
         }
     },
     
-    _onRubberBandSelectionEnd: function(ev){
-        if(pvc.debug >= 3) {
-            this._log('rubberBand ' + pvc.stringify(this.rubberBand));
+    _processRubberBand: function(rb, ev, keyArgs){
+        this.rubberBand = rb;
+        try{
+            this._onRubberBandSelectionEnd(ev, keyArgs);
+        } finally {
+            this.rubberBand  = null;
+        }
+    },
+    
+    _onRubberBandSelectionEnd: function(ev, keyArgs){
+        if(pvc.debug >= 10) {
+            this._log("rubberBand " + pvc.stringify(this.rubberBand));
         }
         
-        var keyArgs = {toggle: false}; // output argument
+        keyArgs = Object.create(keyArgs || {});
+        keyArgs.toggle = false; // output argument
+        
         var datums = this._getDatumsOnRubberBand(ev, keyArgs);
         if(datums){
-        var chart = this.chart;
+            var allowAdditive = def.get(keyArgs, 'allowAdditive', true);
+            var chart = this.chart;
             
             //this._log("Selecting Datum count=" + datums.length + 
             //          " keys=\n" + datums.map(function(d){return d.key;}).join('\n'));
@@ -21492,9 +22235,10 @@ def
             // Make sure selection changed action is called only once
             // Checks if any datum's selected changed, at the end
             chart._updatingSelections(function(){
-                var clearBefore = !ev.ctrlKey && chart.options.ctrlSelectMode;
+                var clearBefore = !allowAdditive || 
+                                  (!ev.ctrlKey && chart.options.ctrlSelectMode);
                 if(clearBefore){
-                chart.data.owner.clearSelected();
+                    chart.data.owner.clearSelected();
                     pvc.data.Data.setSelected(datums, true);
                 } else if(keyArgs.toggle){
                     pvc.data.Data.toggleSelected(datums);
@@ -21544,7 +22288,9 @@ def
                     this._eachMarkDatumOnRect(pvMark, rect, function(datum){
                         datumMap.set(datum.id, datum);
                         any = true;
-                    }, this);
+                    }, 
+                    this,
+                    def.get(keyArgs, 'markSelectionMode'));
                     
                 }, this);
             }
@@ -21553,10 +22299,18 @@ def
         return any;
     },
     
-    _eachMarkDatumOnRect: function(pvMark, rect, fun, ctx){
+    _eachMarkDatumOnRect: function(pvMark, rect, fun, ctx, selectionMode){
         
+        var sign = pvMark.sign;
+        if(sign && !sign.isSelectable()){
+            return;
+        }
+                
         // center, partial and total (not implemented)
-        var selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
+        if(selectionMode == null){
+            selectionMode = def.get(pvMark, 'rubberBandSelectionMode', 'partial');
+        }
+        
         var useCenter = (selectionMode === 'center');
         
         pvMark.eachInstanceWithData(function(scenes, index, toScreen){
@@ -22976,6 +23730,9 @@ def
     },
     
     _preRenderContent: function(contentOptions){
+        
+        this._createFocusWindow();
+        
         /* Create the grid/docking panel */
         this._gridDockPanel = new pvc.CartesianGridDockingPanel(this, this.basePanel, {
             margins:  contentOptions.margins,
@@ -23001,9 +23758,33 @@ def
         /* Create main content panel 
          * (something derived from pvc.CartesianAbstractPanel) */
         this._createPlotPanels(this._gridDockPanel, {
-            clickAction:        contentOptions.clickAction,
-            doubleClickAction:  contentOptions.doubleClickAction
+            clickAction:       contentOptions.clickAction,
+            doubleClickAction: contentOptions.doubleClickAction
         });
+    },
+    
+    _createFocusWindow: function(){
+        if(this._canSelectWithFocusWindow()){
+            // In case we're being re-rendered,
+            // capture the axes' focuaWindow, if any.
+            // and set it as the next focusWindow.
+            var fwData;
+            var fw = this.focusWindow;
+            if(fw){
+                fwData = fw._exportData();
+            }
+            
+            fw = this.focusWindow = new pvc.visual.CartesianFocusWindow(this);
+            
+            if(fwData){
+                fw._importData(fwData);
+            }
+            
+            fw._initFromOptions();
+            
+        } else if(this.focusWindow){
+            delete this.focusWindow;
+        }
     },
     
     /**
@@ -24032,6 +24813,11 @@ def
 
 def
 .type('pvc.CartesianGridDockingPanel', pvc.GridDockingPanel)
+.init(function(chart, parent, options) {
+    this.base(chart, parent, options);
+    
+    this._plotBgPanel = new pvc.PlotBgPanel(chart, this);
+})
 .add({
     
     _getExtensionId: function(){
@@ -24047,6 +24833,7 @@ def
         var xAxis = axes.x;
         var yAxis = axes.y;
         
+        
         // Full grid lines
         if(xAxis.option('Visible') && xAxis.option('Grid')) {
             this.xGridRule = this._createGridRule(xAxis);
@@ -24057,7 +24844,11 @@ def
         }
         
         this.base(layoutInfo);
-
+        
+        if(chart.focusWindow){
+            this._createFocusWindow(layoutInfo);
+        }
+        
         var plotFrameVisible;
         if(chart.compatVersion() <= 1){
             plotFrameVisible = !!(xAxis.option('EndLine') || yAxis.option('EndLine'));
@@ -24146,6 +24937,7 @@ def
             [obeg_a](obeg)
             [oend_a](oend)
             .zOrder(-12)
+            .events('none')
             ;
         
         if(isDiscrete){
@@ -24218,6 +25010,7 @@ def
             .lock('top',    top)
             .lock('bottom', bottom)
             .lock('fillStyle', null)
+            .events('none')
             .strokeStyle("#666666")
             .lineWidth(1)
             .antialias(false)
@@ -24263,6 +25056,7 @@ def
                         return pv.color("#666666");
                     })
                     .pvMark
+                    .events('none')
                     .lineWidth(1)
                     .antialias(true)
                     .zOrder(-9)
@@ -24270,7 +25064,421 @@ def
             }
         }
     },
+    
+    _createFocusWindow: function(layoutInfo){
+        var me = this;
+        var topRoot = me.topRoot;
+        var chart   = me.chart;
+        
+        var focusWindow = chart.focusWindow.base;
+        
+        var axis  = focusWindow.axis;
+        var scale = axis.scale;
+        if(scale.isNull){
+            return;
+        }
+        
+        var resizable  = focusWindow.option('Resizable');
+        var movable    = focusWindow.option('Movable'  );
+        var isDiscrete = axis.isDiscrete();
+        
+        var isV     = chart.isOrientationVertical();
+        var a_left  = isV ? 'left' : 'top';
+        var a_top   = isV ? 'top' : 'left';
+        var a_width = me.anchorOrthoLength(a_left);
+        var a_right = me.anchorOpposite(a_left);
+        var a_height= me.anchorOrthoLength(a_top);
+        var a_bottom= me.anchorOpposite(a_top);
+        var a_x     = isV ? 'x' : 'y';
+        var a_dx    = 'd' + a_x;
+        var a_y     = isV ? 'y' : 'x';
+        var a_dy    = 'd' + a_y;
+        
+        var margins     = layoutInfo.gridMargins;
+        var paddings    = layoutInfo.gridPaddings;
+        
+        var space = {
+            left:   margins.left   + paddings.left,
+            right:  margins.right  + paddings.right,
+            top:    margins.top    + paddings.top,
+            bottom: margins.bottom + paddings.bottom
+        };
+        
+        space.width  = space.left + space.right;
+        space.height = space.top  + space.bottom;
+        
+        var clientSize = layoutInfo.clientSize;
+        
+        var wf = clientSize[a_width ];
+        var hf = clientSize[a_height];
+        
+        // Child plot's client size
+        var w  = wf - space[a_width ];
+        var h  = hf - space[a_height];
+        
+        var padLeft  = paddings[a_left ];
+        var padRight = paddings[a_right];
+        
+        // -----------------
+        
+        var scene = new pvc.visual.Scene(null, {panel: this});
+        
+        // Initialize x,y,dx and dy properties from focusWindow
+        var band     = isDiscrete ? scale.range().step : 0;
+        var halfBand = band/2;
+        
+        scene[a_x] = scale(focusWindow.begin) - halfBand,
+        
+        // Add band for an inclusive discrete end
+        scene[a_dx] = band + (scale(focusWindow.end) - halfBand) - scene[a_x],
+        
+        resetSceneY();
+        
+        function resetSceneY(){
+            scene[a_y ] = 0 - paddings[a_top   ];
+            scene[a_dy] = h + paddings[a_top] + paddings[a_bottom];
+        }
+        
+        // -----------------
+        
+        var sceneProp = function(p){
+            return function(){ return scene[p]; };
+        };
+        
+        var boundLeft = function(){
+            var begin = scene[a_x];
+            return Math.max(0, Math.min(w, begin));
+        };
 
+        var boundWidth = function(){
+            var begin = boundLeft();
+            var end   = scene[a_x] + scene[a_dx];
+            end = Math.max(0, Math.min(w, end));
+            return end - begin;
+        };
+            
+        var addSelBox = function(panel, id){
+            return new pvc.visual.Bar(me, panel, {
+                extensionId:   id,
+                normalStroke:  true,
+                noHover:       true,
+                noSelect:      true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltip:     true,
+                showsInteraction: false
+            })
+            //.override('defaultStrokeWidth', function( ){ return 0; })
+            .pvMark
+            .lock('data')
+            .lock('visible')
+            .lock(a_left,  boundLeft )
+            .lock(a_width, boundWidth)
+            .lock(a_top,    sceneProp(a_y ))
+            .lock(a_height, sceneProp(a_dy))
+            .lock(a_bottom)
+            .lock(a_right )
+            .sign
+            ;
+        };
+        
+        // BACKGROUND
+        var baseBgPanel = this._plotBgPanel.pvPanel.borderPanel;
+        baseBgPanel
+            .lock('data', [scene])
+            ;
+        
+        if(movable && resizable){ // cannot activate resizable while we can't guarantee that it respects length
+            // Allow creating a new focus area.
+            // Works when "dragging" on the courtains area,
+            // (if inside the paddings area).
+            baseBgPanel.paddingPanel
+                .lock('events', 'all')
+                .lock('cursor', 'crosshair')
+                .event('mousedown',
+                      pv.Behavior.select()
+                          .autoRender(false)
+                          .collapse(isV ? 'y' : 'x')
+                          //.preserveLength(!resizable)
+                          .positionConstraint(function(drag){
+                              var op = drag.phase ==='start' ? 
+                                      'new' : 
+                                      'resize-end';
+                              return positionConstraint(drag, op);
+                          }))
+                .event('selectstart', function(ev){
+                    // reset the scene's orthogonal props
+                    resetSceneY();
+                    
+                    // Redraw on mouse down.
+                    onDrag(ev);
+                })
+                .event('select',    onDrag)
+                .event('selectend', onDrag)
+                ;
+        } else {
+            baseBgPanel.paddingPanel
+                .events('all')
+                ;
+        }
+        
+        // This panel serves mainly to enable dragging of the focus area,
+        // and possibly, for bg coloring.
+        // The drag action is only available when there aren't visual elements
+        // in the front. This allows to keep elements interactive.
+        var focusBg = addSelBox(baseBgPanel.paddingPanel, 'focusWindowBg')
+            .override('defaultColor', function(type){ 
+                return pvc.invisibleFill;
+            })
+            .pvMark
+            ;
+        
+        if(movable){
+            focusBg
+                .lock('events', 'all' )
+                .lock('cursor', 'move')
+                .event("mousedown", 
+                        pv.Behavior.drag()
+                            .autoRender(false)
+                            .collapse(isV ? 'y' : 'x')
+                            .positionConstraint(function(drag){
+                                positionConstraint(drag, 'move');
+                             }))
+                .event("drag",    onDrag)
+                .event("dragend", onDrag)
+                ;
+        } else {
+            focusBg.events('none');
+        }
+        
+        // --------------------------------------
+        // FOREGROUND
+        
+        // Coordinate system like that of the plots.
+        // X and Y scales can be used on this.
+        var baseFgPanel = new pvc.visual.Panel(me, me.pvPanel)
+            .pvMark
+            .lock('data', [scene])
+            .lock('visible')
+            .lock('fillStyle', pvc.invisibleFill)
+            .lock('left',      space.left  )
+            .lock('right',     space.right )
+            .lock('top',       space.top   )
+            .lock('bottom',    space.bottom)
+            .lock('zOrder',    10) // above axis rules
+            /* Use the panel to show a steady cursor while moving/resizing,
+             * by receiving all events.
+             * The drag continues to live because it listens to the 
+             * root's mousemove/up and we're not cancelling the events.
+             * Visual elements do not receive the events because
+             * they're in a sibling panel.
+             */
+            .lock('events', function(){
+                var drag = scene.drag;
+                return drag && drag.phase !== 'end' ? 'all' : 'none';
+            })
+            .lock('cursor', function(){
+                var drag = scene.drag;
+                return drag && drag.phase !== 'end' ? 
+                        ((drag.type === 'drag' || (drag.type === 'select' && !resizable)) ? 
+                         'move' :
+                         (isV ? 'ew-resize' : 'ns-resize')) : null;
+            })
+            .antialias(false)
+            ;
+        
+        // FG BASE CURTAIN
+        var curtainFillColor = 'rgba(20, 20, 20, 0.1)';
+        
+        new pvc.visual.Bar(me, baseFgPanel, {
+                extensionId:   'focusWindowBaseCurtain',
+                normalStroke:  true,
+                noHover:       true,
+                noSelect:      true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltip:     true,
+                showsInteraction: false
+            })
+            .override('defaultColor', function(type){
+                return type === 'stroke' ? null : curtainFillColor; 
+            })
+            .pvMark
+            .lock('data', [scene, scene])
+            .lock('visible')
+            .lock('events', 'none')
+            .lock(a_left,   function(){ return !this.index ? -padLeft : boundLeft() + boundWidth(); })
+            .lock(a_right,  function(){ return !this.index ? null     : -padRight; })
+            .lock(a_width,  function(){ return !this.index ?  padLeft + boundLeft() : null; })
+            .lock(a_top,    sceneProp(a_y ))
+            .lock(a_height, sceneProp(a_dy))
+            .lock(a_bottom)
+            ;
+        
+        // FG FOCUS BOX
+        // for coloring and anchoring
+        var selectBoxFg = addSelBox(baseFgPanel, 'focusWindow')
+            .override('defaultColor', function(type){ return null; })
+            .pvMark
+            .lock('events', 'none')
+            ;
+        
+        // FG BOUNDARY/RESIZE GRIP
+        var addResizeSideGrip = function(side){
+            // TODO: reversed scale??
+            var a_begin = (side === 'left' || side === 'top') ? 'begin' : 'end';
+            
+            var opposite  = me.anchorOpposite(side);
+            var fillColor = 'linear-gradient(to ' + opposite + ', ' + curtainFillColor + ', #444 90%)';
+            var grip = new pvc.visual.Bar(me, selectBoxFg.anchor(side), {
+                    extensionId:   focusWindow.id + 'Grip' + def.firstUpperCase(a_begin),
+                    normalStroke:  true,
+                    noHover:       true,
+                    noSelect:      true,
+                    noClick:       true,
+                    noDoubleClick: true,
+                    noTooltip:     true,
+                    showsInteraction: false
+                })
+                .override('defaultColor', function(type){
+                    return type === 'stroke' ? null : fillColor;
+                })
+                .pvMark
+                .lock('data')
+                .lock('visible')
+                [a_top   ](scene[a_y ])
+                [a_height](scene[a_dy])
+                ;
+            
+            if(resizable){
+                var opId = 'resize-' + a_begin;
+                grip
+                    .lock('events', 'all')
+                    [a_width](5)
+                    .cursor(isV ? 'ew-resize' : 'ns-resize')
+                    .event("mousedown", 
+                        pv.Behavior.resize(side)
+                            .autoRender(false)
+                            .positionConstraint(function(drag){
+                                positionConstraint(drag, opId);
+                             })
+                            .preserveOrtho(true))
+                    .event("resize",    onDrag)
+                    .event("resizeend", onDrag)
+                    ;
+            } else {
+                grip
+                    .events('none')
+                    [a_width](1)
+                    ;
+            }
+            
+            return grip;
+        };
+            
+        addResizeSideGrip(a_left );
+        addResizeSideGrip(a_right);
+        
+        // --------------------
+        
+        function onDrag(){
+            var ev = arguments[arguments.length - 1];
+            var isEnd = ev.drag.phase === 'end';
+            
+            // Prevent tooltips and hovers
+            topRoot._isRubberBandSelecting = !isEnd;
+            
+            baseBgPanel.render();
+            baseFgPanel.render();
+            
+            if(isEnd){
+                var pbeg = scene[a_x];
+                var pend = scene[a_x] + scene[a_dx];
+                if(!isV){
+                    // from bottom, instead of top...
+                    var temp = w - pbeg;
+                    pbeg = w - pend;
+                    pend = temp;
+                }
+                focusWindow._updatePosition(pbeg, pend, /*render*/ true);
+            }
+        }
+        
+        // ----------------
+        var a_p  = a_x;
+        var a_dp = a_dx;
+        
+        function positionConstraint(drag, op){
+            // Never called on drag.phase === 'end'
+            var m = drag.m;
+            
+            // Only constraining the base position
+            var p = m[a_p];
+            var b, e, l;
+            var l0 = scene[a_dp];
+            
+            var target;
+            switch(op){
+                case 'new':
+                    l = 0;
+                    target = 'begin';
+                    break;
+                
+                case 'resize-begin':
+                    l = l0;
+                    target = 'begin';
+                    break;
+                    
+                case 'move':
+                    l = l0;
+                    target = 'begin';
+                    break;
+                
+                case 'resize-end': // use on Select and Resize
+                    l = p - scene[a_p];
+                    target = 'end';
+                    break;
+            }
+            
+            var min = drag.min[a_p];
+            var max = drag.max[a_p];
+            
+            var oper = {
+                type:    op,
+                target:  target,
+                point:   p,
+                length:  l,  // new length
+                length0: l0, // prev length
+                min:     min,
+                max:     max,
+                minView: 0,
+                maxView: w
+            };
+            
+            focusWindow._constraintPosition(oper);
+            
+            // Sync
+            m[a_p] = oper.point;
+            
+            // TODO: not working on horizontal orientation???
+            // Overwrite min or max on resize
+            switch(op){
+                case 'resize-begin':
+                    // The maximum position is the end grip
+                    oper.max = Math.min(oper.max, scene[a_p] + scene[a_dp]);
+                    break;
+                    
+                case 'resize-end':
+                    // The minimum position is the begin grip
+                    oper.min = Math.max(oper.min, scene[a_p]);
+                    break;
+            }
+            
+            drag.min[a_p] = oper.min;
+            drag.max[a_p] = oper.max;
+        }
+    },
+    
     _getOrthoAxis: function(type){
         var orthoType = type === 'base' ? 'ortho' : 'base';
         return this.chart.axes[orthoType];
@@ -24464,6 +25672,35 @@ def
     
     _getVisibleData: function(){
         return this.chart._getVisibleData(this.dataPartValue);
+    }
+});
+def
+.type('pvc.PlotBgPanel', pvc.BasePanel)
+.init(function(chart, parent, options) {
+    // Prevent the border from affecting the box model,
+    // providing a static 0 value, independently of the actual drawn value...
+    //this.borderWidth = 0;
+    
+    this.base(chart, parent, options);
+    
+    //this._extensionPrefix = "plotBg";
+})
+.add({
+    anchor:  'fill',
+
+    _getExtensionId: function(){
+        return 'plotBg';
+    },
+    
+    _createCore: function(layoutInfo) {
+        // Send the panel behind grid rules
+        this.pvPanel
+            .borderPanel
+            .lock('zOrder', -13)
+            .antialias(false)
+            ;
+        
+        this.base(layoutInfo);
     }
 });/**
  * CategoricalAbstract is the base class for all categorical or timeseries
@@ -28857,11 +30094,15 @@ def
         var isLineAreaVisible = isBaseDiscrete && isStacked ? 
                 function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
                 function(){ return !this.scene.isNull; };
-                
+        
+        var isLineAreaNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        
         this.pvArea = new pvc.visual.Area(this, this.pvScatterPanel, {
                 extensionId: 'area',
                 noTooltip:   false,
-                wrapper:     wrapper
+                wrapper:     wrapper,
+                noSelect:    isLineAreaNoSelect,
+                showsSelection: !isLineAreaNoSelect
             })
             
             .lock('visible', isLineAreaVisible)
@@ -28925,10 +30166,12 @@ def
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
             {
-                extensionId:  extensionIds,
-                freePosition: true,
-                wrapper:      wrapper,
-                noTooltip:    false
+                extensionId:    extensionIds,
+                freePosition:   true,
+                wrapper:        wrapper,
+                noTooltip:      false,
+                noSelect:       isLineAreaNoSelect,
+                showsSelection: !isLineAreaNoSelect
             })
             /* 
              * Line.visible =
@@ -29197,7 +30440,6 @@ def
         var chart = this.chart;
         var colorVarHelper = new pvc.visual.ColorVarHelper(chart, chart._colorRole);
         var valueDim = data.owner.dimensions(this.valueDimName);
-        var firstCategDim = !isBaseDiscrete ? data.owner.dimensions(this.axes.base.role.firstDimensionName()) : null;
         var isStacked = this.stacked;
         var visibleKeyArgs = {visible: true, zeroIfNone: false};
         var orthoScale = this.axes.ortho.scale;
