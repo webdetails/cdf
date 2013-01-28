@@ -7373,9 +7373,10 @@ function dim_createVirtualNullAtom(){
     // </Debug>
     
     if(!this._virtualNullAtom){
-        var label = "" + (this.type._formatter ? this.type._formatter.call(null, null, null) : "");
-        
-        this._virtualNullAtom = new pvc.data.Atom(this, null, label, null, '');
+        // The virtual null's label is always "".
+        // Don't bother the formatter with a value that
+        // does not exist in the data.
+        this._virtualNullAtom = new pvc.data.Atom(this, null, "", null, '');
 
         this.data._atomsBase[this.name] = this._virtualNullAtom; 
     }
@@ -14519,15 +14520,20 @@ def
 });def.scope(function(){
     
     def
-    .type('pvc.visual.CartesianFocusWindow')
+    .type('pvc.visual.CartesianFocusWindow', pvc.visual.OptionsBase)
     .init(function(chart){
-        //this.base(chart, 'focusWindow', 0, {byNaked: false});
+        
+        this.base(chart, 'focusWindow', 0, {byNaked: false});
         
         // TODO: ortho
         var baseAxis = chart.axes.base;
-        this.base = new pvc.visual.CartesianFocusWindowAxis(baseAxis);
+        this.base = new pvc.visual.CartesianFocusWindowAxis(this, baseAxis);
     })
     .add(/** @lends pvc.visual.FocusWindow# */{
+        _getOptionsDefinition: function(){
+            return focusWindow_optionsDef;
+        },
+        
         _exportData: function(){
             return {
                 base: def.copyProps(this.base, pvc.visual.CartesianFocusWindow.props)
@@ -14546,13 +14552,30 @@ def
         
         _initFromOptions: function(){
             this.base._initFromOptions();
+        },
+        
+        _onAxisChanged: function(axis){
+            // Fire event
+            var changed = this.option('Changed');
+            if(changed){
+                changed.call(this.chart.basePanel._getContext());
+            }
+        }
+    });
+    
+    var focusWindow_optionsDef = def.create(axis_optionsDef, {
+        Changed: {
+            resolve: '_resolveFull',
+            cast:    def.fun.as
         }
     });
     
     def
     .type('pvc.visual.CartesianFocusWindowAxis', pvc.visual.OptionsBase)
-    .init(function(axis){
+    .init(function(fw, axis){
+        this.window = fw;
         this.axis = axis;
+        this.isDiscrete = axis.isDiscrete();
         
         // focusWindowBase/Ortho
         this.base(
@@ -14572,8 +14595,8 @@ def
         _initFromOptions: function(){
             var o = this.option;
             this.set({
-                begin:  o('Begin'),
-                end:    o('End'),
+                begin:  o('Begin' ),
+                end:    o('End'   ),
                 length: o('Length')
             });
         },
@@ -14582,6 +14605,7 @@ def
             var me = this;
             
             var render = def.get(keyArgs, 'render');
+            var select = def.get(keyArgs, 'select', true);
             
             var b, e, l;
             keyArgs = me._readArgs(keyArgs);
@@ -14597,7 +14621,7 @@ def
             
             var axis       = me.axis;
             var scale      = axis.scale;
-            var isDiscrete = axis.isDiscrete();
+            var isDiscrete = me.isDiscrete;
             var contCast   = !isDiscrete ? axis.role.firstDimensionType().cast : null;
             var domain     = scale.domain();
             
@@ -14853,17 +14877,17 @@ def
                 }
             }
             
-            me._set(b, e, l, render);
+            me._set(b, e, l, select, render);
         },
         
-        _updatePosition: function(pbeg, pend, render){
+        _updatePosition: function(pbeg, pend, select, render){
             var me = this;
             var axis = me.axis;
             var scale = axis.scale;
             
             var b, e, l;
             
-            if(axis.isDiscrete()){
+            if(me.isDiscrete){
                 var ib = scale.invertIndex(pbeg);
                 var ie = scale.invertIndex(pend) - 1;
                 var domain = scale.domain();
@@ -14877,7 +14901,7 @@ def
                 l = e - b;
             }
             
-            this._set(b, e, l, /*render*/ render);
+            this._set(b, e, l, select, render);
         },
         
         /*
@@ -14899,7 +14923,7 @@ def
             var scale = axis.scale;
             var constraint;
             
-            if(axis.isDiscrete()){
+            if(me.isDiscrete){
                 // Align to category boundaries
                 var index = Math.floor(scale.invertIndex(oper.point, /* noRound */true));
                 if(index >= 0){
@@ -14975,12 +14999,40 @@ def
             }
         },
         
-        _set: function(b, e, l, render){
+        _compare: function(a, b){
+            return this.isDiscrete ? 
+                   (('' + a) === ('' + b)) : 
+                   ((+a) === (+b));
+        },
+        
+        _set: function(b, e, l, select, render){
             var me = this;
-            me.begin  = b;
-            me.end    = e;
-            me.length = l;
-            me._updateSelection({render: render});
+            var changed = false;
+            
+            if(!me._compare(b, me.begin)){
+                me.begin = b;
+                changed  = true;
+            }
+            
+            if(!me._compare(e, me.end)){
+                me.end  = e;
+                changed = true;
+            }
+            
+            if(!me._compare(l, me.length)){
+                me.length = l;
+                changed = true;
+            }
+            
+            if(changed){
+                me.window._onAxisChanged(this);
+            }
+            
+            if(select){
+                me._updateSelection({render: render});
+            }
+            
+            return changed;
         },
         
         _readArgs: function(keyArgs){
@@ -25391,17 +25443,17 @@ def
             baseBgPanel.render();
             baseFgPanel.render();
             
-            if(isEnd){
-                var pbeg = scene[a_x];
-                var pend = scene[a_x] + scene[a_dx];
-                if(!isV){
-                    // from bottom, instead of top...
-                    var temp = w - pbeg;
-                    pbeg = w - pend;
-                    pend = temp;
-                }
-                focusWindow._updatePosition(pbeg, pend, /*render*/ true);
+            
+            var pbeg = scene[a_x];
+            var pend = scene[a_x] + scene[a_dx];
+            if(!isV){
+                // from bottom, instead of top...
+                var temp = w - pbeg;
+                pbeg = w - pend;
+                pend = temp;
             }
+            
+            focusWindow._updatePosition(pbeg, pend, /*select*/ isEnd, /*render*/ true);
         }
         
         // ----------------
@@ -32402,25 +32454,12 @@ def
         // ------------------
         // DATA
         var rootScene = this._getRootScene(),
-            data      = rootScene.group,
-            // data._leafs.length is currently an approximation of datum count due to datum filtering in the scenes only...
-            isDense   = (this.width <= 0) || (data._leafs.length / this.width > 0.5); //  > 100 pts / 200 pxs 
-        
+            data      = rootScene.group;
+            
         this._finalizeScene(rootScene);
 
-        // Disable selection?
-        if(isDense && (options.selectable || options.hoverable)) {
-            options.selectable = false;
-            options.hoverable  = false;
-            if(pvc.debug >= 3) {
-                this._log("Warning: Disabling selection and hovering because the chart is to \"dense\".");
-            }
-        }
-       
         // ---------------
         // BUILD
-        
-        // this.pvPanel.strokeStyle('red');
         
         this.pvPanel.zOrder(1); // Above axes
         
@@ -32449,14 +32488,18 @@ def
         }
         
         // -- LINE --
+        var isLineNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
+        
         var line = new pvc.visual.Line(this, this.pvScatterPanel, {
                 extensionId: 'line',
                 wrapper:     wrapper,
                 noTooltip:   false,
-                noHover:     true // TODO: SIGN check if not broken
+                noHover:     true,
+                noSelect:       isLineNoSelect,
+                showsSelection: !isLineNoSelect
             })
             /* Data */
-            .lock('data', function(seriesScene){ return seriesScene.childNodes; }) // TODO    
+            .lock('data', function(seriesScene){ return seriesScene.childNodes; })    
             
             .lock('visible', this.linesVisible)
             
