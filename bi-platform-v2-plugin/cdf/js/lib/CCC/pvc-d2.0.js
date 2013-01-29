@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130128
+//VERSION TRUNK-20130129
 
 
 /*global pvc:true */
@@ -16111,7 +16111,7 @@ def
     
     this.base(rootScene, keyArgs);
     
-    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || 'legend';
+    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || '';
     this._renderer = def.get(keyArgs, 'renderer');
     
     this.colorAxis = def.get(keyArgs, 'colorAxis');
@@ -16452,7 +16452,9 @@ def
     create: function(legendPanel, pvBulletPanel, extensionPrefix, wrapper){
         var renderInfo = {};
         var drawRule = this.drawRule;
-        var sceneColorProp = function(scene){ return scene.color; };
+        var sceneColorProp = function(scene){ 
+            return scene.color; 
+        };
         
         if(drawRule){
             var rulePvBaseProto = new pv.Mark()
@@ -19985,7 +19987,7 @@ pvc.BaseChart
                                 group:           domainData,
                                 colorAxis:       colorAxis,
                                 clickMode:       locked ? 'none' : undefined,
-                                extensionPrefix: pvc.buildIndexedId('legend', legendIndex++)
+                                extensionPrefix: pvc.buildIndexedId('', legendIndex++)
                              });
                             
                             // For later binding an appropriate bullet renderer
@@ -29420,7 +29422,7 @@ def
     
     this.base(rootScene, keyArgs);
     
-    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || 'legend';
+    this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || '';
     
     var item = this.createItem({
         value:    null,
@@ -29884,7 +29886,7 @@ def
         var rootScene = legendPanel._getBulletRootScene();
         
         new pvc.visual.legend.WaterfallBulletGroupScene(rootScene, {
-            extensionPrefix: pvc.buildIndexedId('legend', 1), // legend2_ TODO
+            extensionPrefix: pvc.buildIndexedId('', 1),
             label: waterPlot.option('TotalLineLabel'),
             color: this._waterColor
         });
