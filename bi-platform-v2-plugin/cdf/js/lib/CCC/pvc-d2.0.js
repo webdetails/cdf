@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130129
+//VERSION TRUNK-20130130
 
 
 /*global pvc:true */
@@ -42,37 +42,69 @@ var pvc = def.globalSpace('pvc', {
         level = +level;
         pvc.debug = isNaN(level) ? 0 : level;
         
+        installPvcLog();
+        
         syncTipsyLog();
         
         return pvc.debug;
     };
     
-    /**
-     *  Utility function for logging messages to the console
-     */
-    pvc.log = function(m){
-        if (pvc.debug && typeof console !== "undefined"){
-            /*global console:true*/
-            console.log("[pvChart]: " + 
-              (typeof m === 'string' ? m : pvc.stringify(m)));
-        }
-    };
+    /*global console:true*/
     
-    pvc.logError = function(e){
-        if(e && typeof e === 'object' && e.message){
-            e = e.message;
+    pvc._installLog = function(o, pto, pfrom, prompt){
+        if(!pfrom) {
+            pfrom = pto;
         }
         
-        /*global console:true*/
-        if (typeof console != "undefined"){
-            console.log("[pvChart ERROR]: " + e);
-        } else {
-            throw new Error("[pvChart ERROR]: " + e);
+        var m  = console[pfrom];
+        var fun;
+        if(m){
+            if(def.fun.is(m)){
+                fun = console[pfrom].bind(console, prompt + ": %s");
+            } else {
+                // IE? Cannot bind so will have to wrap (no line numbers...)
+                // Apply doesn't work as well...
+                fun = function(a1, a2, a3, a4){
+                    console[pfrom](prompt + ": %s", a1 || '', a2 || '', a3 || '', a4 || '');
+                };
+            }
         }
+        
+        o[pto] = fun;
     };
     
+    function installPvcLog(){
+        if (pvc.debug && typeof console !== "undefined"){
+            ['log', 'info', ['trace', 'debug'], 'error'].forEach(function(ps){
+                ps = ps instanceof Array ? ps : [ps, ps];
+                
+                pvc._installLog(pvc, ps[0],  ps[1],  '[pvChart]');
+            });
+        } else {
+            if(pvc.debug > 1){
+                pvc.debug = 1;
+            }
+            
+            ['log', 'info', 'trace'].forEach(function(p){
+                pvc[p] = def.noop;
+            });
+            
+            pvc.error = function(e){
+                if(e && typeof e === 'object' && e.message){
+                    e = e.message;
+                }
+                
+                throw new Error("[pvChart ERROR]: " + e);
+            };
+        }
+    }
+    
+    installPvcLog();
+    
+    pvc.logError = pvc.error;
+    
     // Redirect protovis error handler
-    pv.error = pvc.logError;
+    pv.error = pvc.error;
     
     function syncTipsyLog(){
         var tip = pv.Behavior.tipsy;
@@ -3569,7 +3601,7 @@ function(dimTypeSpecs){
             out.push("  " + type.name + " (" + features.join(', ') + ")");
         });
         
-        out.push(pvc.logSeparator);
+        //out.push(pvc.logSeparator);
 
         return out.join("\n");
     },
@@ -4680,7 +4712,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 ")");
         });
         
-        out.push(pvc.logSeparator);
+        //out.push(pvc.logSeparator);
         pvc.log(out.join('\n'));
     },
     
@@ -5753,8 +5785,7 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                         return def.array.create(groupSpec.count, groupSpec.name).join('');
                     })
                     .join(' ') +
-                "]",
-                pvc.logSeparator
+                "]"
             ];
 
             pvc.log(out.join("\n"));
@@ -11149,7 +11180,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
      */
     getInfo: function(){
 
-        var out = ["DATA TYPE SUMMARY", pvc.logSeparator];
+        var out = ["DATA SUMMARY", pvc.logSeparator, "  Dimension", pvc.logSeparator];
         
         def.eachOwn(this.dimensions(), function(dimension, name){
             var count = dimension.count(),
@@ -11172,7 +11203,7 @@ function data_whereDatumFilter(datumFilter, keyArgs) {
                 (count > 10 ? "..." : ""));
         });
         
-        out.push(pvc.logSeparator);
+        //out.push(pvc.logSeparator);
 
         return out.join("\n");
     },
@@ -17528,12 +17559,27 @@ pvc.visual.BulletPlot.optionsDef = def.create(
         }
     });def
 .type('pvc.Abstract')
+.init(function(){
+    this._syncLog();
+})
 .add({
     invisibleLineWidth: 0.001,
     defaultLineWidth:   1.5,
     
     _logInstanceId: null,
     
+    _syncLog: function(){
+        if (pvc.debug && typeof console !== "undefined"){
+            var logId = this._getLogInstanceId();
+            
+            ['log', 'info', ['trace', 'debug'], 'error'].forEach(function(ps){
+                ps = ps instanceof Array ? ps : [ps, ps];
+                
+                pvc._installLog(this, '_' + ps[0],  ps[1], logId);
+            }, this);
+        }
+    },
+
     _getLogInstanceId: function(){
         return this._logInstanceId || 
                (this._logInstanceId = this._processLogInstanceId(this._createLogInstanceId()));
@@ -17551,17 +17597,18 @@ pvc.visual.BulletPlot.optionsDef = def.create(
         }
         
         return "[" + s + "]";
-    },
-    
-    _log: function(m){
-        if (pvc.debug && typeof console !== "undefined"){
-            /*global console:true*/
-            console.log(
-               this._getLogInstanceId() + ": " +  
-              (typeof m === 'string' ? m : pvc.stringify(m)));
-        }
     }
 });
+
+def.scope(function(){
+    var o = pvc.Abstract.prototype;
+    var syncLogHook = function(){ this._syncLog(); };
+    
+    ['log', 'info', 'trace', 'error'].forEach(function(p){
+        o['_' + p] = syncLogHook;
+    });
+});
+
 /**
  * The main chart component
  */
@@ -17570,10 +17617,22 @@ def
 .init(function(options) {
     var parent = this.parent = def.get(options, 'parent') || null;
     
+    this.base();
+    
+    if(pvc.debug >= 3){
+        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') + 
+                "\n  DebugLevel: " + pvc.debug);
+    }
+    
     /* DEBUG options */
     if(pvc.debug >= 3 && !parent && options){
         try {
-            this._log("OPTIONS:\n" + pvc.logSeparator + "\n" + pvc.stringify(options, {ownOnly: false, funs: true}));
+            this._info("OPTIONS:\n", options);
+            
+            if(pvc.debug >= 5){
+                // Log also as text, for easy copy paste of options JSON
+                this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
+            }
         } catch(ex) {
             /* SWALLOW usually a circular JSON structure */
         }
@@ -18011,6 +18070,11 @@ def
     render: function(bypassAnimation, recreate, reloadData){
         var hasError;
         
+        /*global console:true*/
+        if(pvc.debug > 1 && console.group){
+            console.group("CCC RENDER");
+        }
+        
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
         try{
@@ -18051,6 +18115,10 @@ def
         } finally {
             if(!hasError){
                 this._resumeSelectionUpdate();
+            }
+            
+            if(pvc.debug > 1 && console.group){
+                console.groupEnd();
             }
         }
         
@@ -18727,14 +18795,12 @@ pvc.BaseChart
     },
 
     _logVisualRoles: function(){
-        var out = ["VISUAL ROLES SUMMARY", pvc.logSeparator];
+        var out = ["VISUAL ROLES MAP SUMMARY", pvc.logSeparator, "  VisualRole         <-- Dimensions", pvc.logSeparator];
         
         def.eachOwn(this._visualRoles, function(role, name){
             out.push("  " + name + def.array.create(18 - name.length, " ").join("") +
                     (role.grouping ? (" <-- " + role.grouping) : ''));
         });
-        
-        out.push(pvc.logSeparator);
 
         this._log(out.join("\n"));
     },
@@ -18941,7 +19007,7 @@ pvc.BaseChart
 
         this._bindVisualRolesPostII(complexType);
         
-        if(pvc.debug >= 3){
+        if(pvc.debug >= 10){
             this._log(complexType.describe());
         }
         
@@ -20347,6 +20413,11 @@ pvc.BaseChart
 def
 .type('pvc.BasePanel', pvc.Abstract)
 .init(function(chart, parent, options) {
+    
+    this.chart = chart; // must be set before base() because of log init
+    
+    this.base();
+    
     this.axes = {};
     
     if(options){
@@ -26229,9 +26300,11 @@ def
     // providing a static 0 value, independently of the actual drawn value...
     //this.borderWidth = 0;
     
+    this.axis = axis; // must be set before calling base, because of log id
+    
     this.base(chart, parent, options);
     
-    this.axis = axis;
+    
     this.roleName = axis.role.name;
     this.isDiscrete = axis.role.isDiscrete();
     this._extensionPrefix = axis.extensionPrefixes;
