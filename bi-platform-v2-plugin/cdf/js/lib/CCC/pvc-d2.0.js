@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130130
+//VERSION TRUNK-20130201
 
 
 /*global pvc:true */
@@ -55,18 +55,23 @@ var pvc = def.globalSpace('pvc', {
         if(!pfrom) {
             pfrom = pto;
         }
-        
-        var m  = console[pfrom];
+        var c = console;
+        var m  = c[pfrom];
         var fun;
         if(m){
-            if(def.fun.is(m)){
-                fun = console[pfrom].bind(console, prompt + ": %s");
-            } else {
-                // IE? Cannot bind so will have to wrap (no line numbers...)
-                // Apply doesn't work as well...
-                fun = function(a1, a2, a3, a4){
-                    console[pfrom](prompt + ": %s", a1 || '', a2 || '', a3 || '', a4 || '');
+            var mask = prompt + ": %s";
+            if(!def.fun.is(m)){
+                // For IE these are not functions...but simply objects
+                // Bind is not available or may be a polyfill that won't work...
+                
+                var apply = Function.prototype.apply;
+                fun = function(){
+                    apply.call(m, c, def.array.append([mask], arguments));
                 };
+            } else {
+                // Calls to fun are like direct calls to m...
+                // and capture file and line numbers correctly!
+                fun = m.bind(console, mask);
             }
         }
         
@@ -27902,8 +27907,10 @@ def
                 (orientation === 'top'  ? [0, -baseDisplacement] : [0, baseDisplacement]);
 
         this.pvRule
-            .strokeStyle(null)
-            .lineWidth(0);
+            .sign
+            .override('defaultColor',       def.fun.constant(null))
+            .override('defaultStrokeWidth', def.fun.constant(0)   )
+            ;
 
         var panel = this.pvRule
             .add(pv.Panel)
@@ -30231,9 +30238,11 @@ def
                 noSelect:    isLineAreaNoSelect,
                 showsSelection: !isLineAreaNoSelect
             })
-            
             .lock('visible', isLineAreaVisible)
-            
+            // If it were allowed to hide the line this way, the anchored dot would fail to evaluate
+//            .intercept('visible', function(){
+//                return isLineAreaVisible && this.delegateExtension(true);
+//            })
             /* Data */
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
             
@@ -30289,6 +30298,19 @@ def
             extensionIds.push({abs: 'barSecondLine'});
         }
         
+        /* 
+         * Line.visible =
+         *  a) linesVisible
+         *     or
+         *  b) (!linesVisible and) areasVisible
+         *      and
+         *  b.1) discrete base and stacked
+         *       and
+         *       b.1.1) not null or is an intermediate null
+         *  b.2) not null
+         */
+        var isLineVisible = !dotsVisibleOnly && isLineAreaVisible;
+        
         this.pvLine = new pvc.visual.Line(
             this, 
             this.pvArea.anchor(this.anchorOpposite(anchor)), 
@@ -30300,19 +30322,11 @@ def
                 noSelect:       isLineAreaNoSelect,
                 showsSelection: !isLineAreaNoSelect
             })
-            /* 
-             * Line.visible =
-             *  a) linesVisible
-             *     or
-             *  b) (!linesVisible and) areasVisible
-             *      and
-             *  b.1) discrete base and stacked
-             *       and
-             *       b.1.1) not null or is an intermediate null
-             *  b.2) not null
-             */
-            .lock('visible', dotsVisibleOnly ? false : isLineAreaVisible)
-            
+            .lock('visible', isLineVisible)
+            // If it were allowed to hide the line this way, the anchored dot would fail to evaluate  
+//            .intercept('visible', function(){
+//                return isLineVisible && this.delegateExtension(true);
+//            })
             /* Color & Line */
             .override('defaultColor', function(type){
                 var color = this.base(type);
