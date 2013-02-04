@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130201
+//VERSION TRUNK-20130204
 
 
 var def = (function(){
@@ -2294,7 +2294,7 @@ def.type('Query')
 
 def.type('NullQuery', def.Query)
 .add({
-    _next: function(nextIndex){}
+    _next: function(/*nextIndex*/){}
 });
 
 def.type('AdhocQuery', def.Query)
