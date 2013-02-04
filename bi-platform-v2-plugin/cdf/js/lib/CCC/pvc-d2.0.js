@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130201
+//VERSION TRUNK-20130204
 
 
 /*global pvc:true */
@@ -56,7 +56,7 @@ var pvc = def.globalSpace('pvc', {
             pfrom = pto;
         }
         var c = console;
-        var m  = c[pfrom];
+        var m  = c[pfrom] || c.log;
         var fun;
         if(m){
             var mask = prompt + ": %s";
@@ -80,7 +80,8 @@ var pvc = def.globalSpace('pvc', {
     
     function installPvcLog(){
         if (pvc.debug && typeof console !== "undefined"){
-            ['log', 'info', ['trace', 'debug'], 'error'].forEach(function(ps){
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn', 'group', 'groupEnd']
+            .forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
                 pvc._installLog(pvc, ps[0],  ps[1],  '[pvChart]');
@@ -90,7 +91,8 @@ var pvc = def.globalSpace('pvc', {
                 pvc.debug = 1;
             }
             
-            ['log', 'info', 'trace'].forEach(function(p){
+            ['log', 'info', 'trace', 'warn', 'group', 'groupEnd']
+            .forEach(function(p){
                 pvc[p] = def.noop;
             });
             
@@ -179,7 +181,18 @@ var pvc = def.globalSpace('pvc', {
                         out.push(']');
                     } else {
                         var ownOnly = def.get(keyArgs, 'ownOnly', true);
-                        if(t.constructor !== Object){
+                        if(t === def.global){
+                            out.push('<window>');
+                            return true;
+                        }
+
+                        if(def.fun.is(t.cloneNode)){
+                            // DOM object
+                            out.push('<dom #' + (t.id || t.name || '?') + '>');
+                            return true;
+                        }
+
+                        if(remLevels > 1 && t.constructor !== Object){
                             remLevels = 1;
                             ownOnly = true;
                         }
@@ -200,7 +213,10 @@ var pvc = def.globalSpace('pvc', {
                         }
                         
                         if(first){
-                            out.push('{'+ t + '}');
+                            var s = '' + t;
+                            if(s !== '[object Object]'){ // not very useful
+                                out.push('{'+ s + '}');
+                            }
                         }
                         
                         out.push('}');
@@ -211,6 +227,9 @@ var pvc = def.globalSpace('pvc', {
                     return true;
                 
                 case 'number':
+                    out.push(''+(Math.round(100000 * t) / 100000)); // 6 dec places max
+                    return true;
+
                 case 'boolean': 
                     out.push(''+t);
                     return true;
@@ -12608,7 +12627,8 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         if(options.selectable || options.hoverable){
             if(options.selectable && !def.get(keyArgs, 'noSelect')){
                 bits |= this._bitSelectable;
-                clickSelectable = chart._canSelectWithClick();
+                clickSelectable = !def.get(keyArgs, 'noClickSelect') &&
+                                  chart._canSelectWithClick();
             }
             
             if(options.hoverable && !def.get(keyArgs, 'noHover')){
@@ -14020,7 +14040,11 @@ def.scope(function(){
             } else {
                 scale.range(scale.min, scale.max);
             }
-            
+
+            if(pvc.debug > 4){
+                this.chart._log("Axis " + this.id  + " setRange: " + pvc.stringify(scale.range()));
+            }
+
             return scale;
         },
         
@@ -14046,16 +14070,16 @@ def.scope(function(){
                         var origDomain = this.domain || def.assert("Original domain must be set");
                         var currLength = currDomain[1] - currDomain[0];
                         if(currLength){
-                            // begin dif
-                            var dif = origDomain[0] - currDomain[0];
-                            if(dif > 0){
-                                roundingPaddings.begin = dif / currLength;
+                            // begin diff
+                            var diff = origDomain[0] - currDomain[0];
+                            if(diff > 0){
+                                roundingPaddings.begin = diff / currLength;
                             }
                             
-                            // end dif
-                            dif = currDomain[1] - origDomain[1];
-                            if(dif > 0){
-                                roundingPaddings.end = dif / currLength;
+                            // end diff
+                            diff = currDomain[1] - origDomain[1];
+                            if(diff > 0){
+                                roundingPaddings.end = diff / currLength;
                             }
                         }
                     }
@@ -17577,7 +17601,7 @@ pvc.visual.BulletPlot.optionsDef = def.create(
         if (pvc.debug && typeof console !== "undefined"){
             var logId = this._getLogInstanceId();
             
-            ['log', 'info', ['trace', 'debug'], 'error'].forEach(function(ps){
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn', 'group', 'groupEnd'].forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
                 pvc._installLog(this, '_' + ps[0],  ps[1], logId);
@@ -17609,7 +17633,7 @@ def.scope(function(){
     var o = pvc.Abstract.prototype;
     var syncLogHook = function(){ this._syncLog(); };
     
-    ['log', 'info', 'trace', 'error'].forEach(function(p){
+    ['log', 'info', 'trace', 'error', 'warn', 'group', 'groupEnd'].forEach(function(p){
         o['_' + p] = syncLogHook;
     });
 });
@@ -17620,7 +17644,28 @@ def.scope(function(){
 def
 .type('pvc.BaseChart', pvc.Abstract)
 .init(function(options) {
+    var originalOptions = options;
+    
     var parent = this.parent = def.get(options, 'parent') || null;
+    if(parent){
+        /*jshint expr:true */
+        options || def.fail.argumentRequired('options');
+    } else {
+        options = def.mixin.copy({}, this.defaults, options);
+    }
+
+    this.options = options;
+
+    if(parent) {
+        this.root = parent.root;
+        this.smallColIndex = options.smallColIndex; // required for the logId msk, setup in base
+        this.smallRowIndex = options.smallRowIndex;
+
+        this._tooltipEnabled = parent._tooltipEnabled;
+        this._tooltipOptions = parent._tooltipOptions;
+    } else {
+        this.root = this;
+    }
     
     this.base();
     
@@ -17630,39 +17675,16 @@ def
     }
     
     /* DEBUG options */
-    if(pvc.debug >= 3 && !parent && options){
-        try {
-            this._info("OPTIONS:\n", options);
-            
-            if(pvc.debug >= 5){
-                // Log also as text, for easy copy paste of options JSON
-                this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
-            }
-        } catch(ex) {
-            /* SWALLOW usually a circular JSON structure */
+    if(pvc.debug >= 3 && !parent && originalOptions){
+        this._info("OPTIONS:\n", originalOptions);
+        if(pvc.debug >= 5){
+            // Log also as text, for easy copy paste of options JSON
+            this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
         }
     }
     
     if(parent){
-        /*jshint expr:true */
-        options || def.fail.argumentRequired('options');
-    } else {
-        options = def.mixin.copy({}, this.defaults, options);
-    }
-    
-    this.options = options;
-    
-    if(parent) {
-        this.root = parent.root;
-        this.smallColIndex = options.smallColIndex;
-        this.smallRowIndex = options.smallRowIndex;
-        
-        this._tooltipEnabled = parent._tooltipEnabled;
-        this._tooltipOptions = parent._tooltipOptions;
-        
-        parent._addChild(this);
-    } else {
-        this.root = this;
+         parent._addChild(this);
     }
 
     this._constructData(options);
@@ -17825,8 +17847,6 @@ def
     },
     
     _preRenderPhase1: function(keyArgs) {
-        var options = this.options;
-        
         /* Increment pre-render version to allow for cache invalidation  */
         this._createVersion++;
         
@@ -17891,7 +17911,7 @@ def
         this._setAxesScales(hasMultiRole);
     },
     
-    _preRenderPhase2: function(keyArgs){
+    _preRenderPhase2: function(/*keyArgs*/){
         var hasMultiRole = this._isRoleAssigned('multiChart');
         
         /* Initialize chart panels */
@@ -19080,7 +19100,7 @@ pvc.BaseChart
                 var isNull = datum.isNull;
                 
                 if(isNull && pvc.debug >= 4){
-                    me._log("Datum excluded.");
+                    me._info("Datum excluded.");
                 }
                 
                 return !isNull;
@@ -19397,6 +19417,9 @@ pvc.BaseChart
 pvc.BaseChart
 .add({
     _initPlots: function(hasMultiRole){
+        
+        this.plotPanelList = null;
+        
         // reset plots
         if(!this.parent){
             this.plots = {};
@@ -19413,7 +19436,7 @@ pvc.BaseChart
         }
     },
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         // NOOP
     },
 
@@ -19471,14 +19494,14 @@ pvc.BaseChart
         }
     },
     
-    // Called by the pvc.PlotPnel class
+    // Called by the pvc.PlotPanel class
     _addPlotPanel: function(plotPanel){
         def.lazy(this, 'plotPanels')[plotPanel.plot.id] = plotPanel;
         def.array.lazy(this, 'plotPanelList').push(plotPanel);
     },
     
     /* @abstract */
-    _createPlotPanels: function(parentPanel, baseOptions){
+    _createPlotPanels: function(/*parentPanel, baseOptions*/){
         throw def.error.notImplemented();
     }
 });
@@ -19802,7 +19825,7 @@ pvc.BaseChart
     },
     
     _onLaidOut: function(){
-        
+        // NOOP
     }
 });
 
@@ -20536,7 +20559,7 @@ def
             if(strokeStyle != null){
                 borderWidth = +this._getConstantExtension(extensionId, 'lineWidth'); 
                 if(isNaN(borderWidth) || !isFinite(borderWidth)){
-                    borderWidth = 1.5;
+                    borderWidth = null;
                 }
             }
         }
@@ -20836,8 +20859,11 @@ def
                 delete layoutInfo.previous;
             }
             
-            if(pvc.debug >= 4){
-                this._log("  -> layout size={width: " + this.width + ", height: " + this.height + "}"); 
+            if(pvc.debug >= 5){
+                this._log("Size       = " + pvc.stringify(size));
+                this._log("Margins    = " + pvc.stringify(layoutInfo.margins));
+                this._log("Paddings   = " + pvc.stringify(layoutInfo.paddings));
+                this._log("ClientSize = " + pvc.stringify(layoutInfo.clientSize));
             }
             
             this._onLaidOut();
@@ -20884,47 +20910,55 @@ def
      * @virtual
      */
     _calcLayout: function(layoutInfo){
-        
-        if(!this._children) {
-            return;
-        }
-        
-        var aolMap = pvc.BasePanel.orthogonalLength;
-        var aoMap  = pvc.BasePanel.relativeAnchor;
-        var altMap = pvc.BasePanel.leftTopAnchor;
-        var aofMap = pvc.Offset.namesSidesToOffset;
-        
-        // Classify children
-        
-        var fillChildren = [];
-        var sideChildren = [];
-        
-        this._children.forEach(function(child) {
-            var a = child.anchor;
-            if(a){ // requires layout
-                if(a === 'fill') {
-                    fillChildren.push(child);
-                } else {
-                    /*jshint expr:true */
-                    def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
-                    
-                    sideChildren.push(child);
+        var clientSize;
+        var me = this;
+
+        // These are used in layoutCycle
+        var margins, remSize, useLog;
+
+        if(me._children) {
+            var aolMap = pvc.BasePanel.orthogonalLength;
+            var aoMap  = pvc.BasePanel.relativeAnchor;
+            var altMap = pvc.BasePanel.leftTopAnchor;
+            var aofMap = pvc.Offset.namesSidesToOffset;
+
+            // Classify children
+
+            var fillChildren = [];
+            var sideChildren = [];
+
+            me._children.forEach(function(child) {
+                var a = child.anchor;
+                if(a){ // requires layout
+                    if(a === 'fill') {
+                        fillChildren.push(child);
+                    } else {
+                        /*jshint expr:true */
+                        def.hasOwn(aoMap, a) || def.fail.operationInvalid("Unknown anchor value '{0}'", [a]);
+
+                        sideChildren.push(child);
+                    }
                 }
+            });
+
+            useLog = pvc.debug >= 5;
+            
+            // When expanded (see checkChildLayout)
+            // a re-layout is performed.
+            clientSize = def.copyOwn(layoutInfo.clientSize);
+            var childKeyArgs = {
+                    force: true,
+                    referenceSize: clientSize
+                };
+
+            if(useLog){ me._group("CCC DOCK LAYOUT clientSize = " + pvc.stringify(clientSize)); }
+            try{
+                doMaxTimes(5, layoutCycle, me);
+            } finally {
+                if(useLog){ me._groupEnd(); }
             }
-        });
-    
-        // When expanded (see checkChildLayout)
-        // a re-layout is performed.
-        var clientSize = def.copyOwn(layoutInfo.clientSize);
-        var childKeyArgs = {
-                force: true,
-                referenceSize: clientSize
-            };
-        
-        var margins, remSize;
-        
-        doMaxTimes(5, layoutCycle, this);
-        
+        }
+
         /* Return possibly changed clientSize */
         return clientSize;
         
@@ -20943,51 +20977,52 @@ def
         }
         
         function layoutCycle(remTimes, iteration){
-            if(pvc.debug >= 5){
-                this._log("==== LayoutCycle #" + (iteration + 1));
+            if(useLog){ me._group("LayoutCycle #" + (iteration + 1) + " (remaining: " + remTimes + ")"); }
+            try{
+               var canResize = (remTimes > 0);
+
+                // Reset margins and remSize
+                // ** Instances we can mutate
+                margins = new pvc.Sides(0);
+                remSize = def.copyOwn(clientSize);
+
+                // Lay out SIDE child panels
+                var child;
+                var index = 0;
+                var count = sideChildren.length;
+                while(index < count){
+                    child = sideChildren[index];
+                    if(useLog){ me._group("SIDE Child #" + (index + 1) + " at " + child.anchor); }
+                    try{
+                        if(layoutChild.call(this, child, canResize)){
+                            return true; // resized => break
+                        }
+                    } finally {
+                        if(useLog){ me._groupEnd(); }
+                    }
+                    index++;
+                }
+
+                // Lay out FILL child panels
+                index = 0;
+                count = fillChildren.length;
+                while(index < count){
+                    child = fillChildren[index];
+                    if(useLog){ me._group("FILL Child #" + (index + 1)); }
+                    try{
+                        if(layoutChild.call(this, child, canResize)){
+                            return true; // resized => break
+                        }
+                    } finally {
+                        if(useLog){ me._groupEnd(); }
+                    }
+                    index++;
+                }
+
+                return false; // !resized
+            } finally {
+                if(useLog){ me._groupEnd(); }
             }
-            
-            var canResize = (remTimes > 0);
-            
-            // Reset margins and remSize
-            // ** Instances we can mutate
-            margins = new pvc.Sides(0);
-            remSize = def.copyOwn(clientSize);
-            
-            // Lay out SIDE child panels
-            var child;
-            var index = 0;
-            var count = sideChildren.length;
-            while(index < count){
-                child = sideChildren[index];
-                if(pvc.debug >= 5){
-                    this._log("SIDE Child i=" + index + " at " + child.anchor);
-                }
-                
-                if(layoutChild.call(this, child, canResize)){
-                    return true; // resized => break
-                }
-                
-                index++;
-            }
-            
-            // Lay out FILL child panels
-            index = 0;
-            count = fillChildren.length;
-            while(index < count){
-                child = fillChildren[index];
-                if(pvc.debug >= 5){
-                    this._log("FILL Child i=" + index);
-                }
-                
-                if(layoutChild.call(this, child, canResize)){
-                    return true; // resized => break
-                }
-                
-                index++;
-            }
-            
-            return false; // !resized
         }
         
         function layoutChild(child, canResize) {
@@ -20997,64 +21032,81 @@ def
             childKeyArgs.canChange = canResize;
             
             doMaxTimes(3, function(remTimes, iteration){
-                if(pvc.debug >= 5){
-                    this._log("  -> Attempt #" + (iteration + 1));
-                }
-                
-                childKeyArgs.paddings = paddings;
-                childKeyArgs.canChange = remTimes > 0;
-                
-                child.layout(new pvc.Size(remSize), childKeyArgs);
-                if(child.isVisible){
-                    resized = checkChildResize.call(this, child, canResize);
-                    if(resized){
-                        return false; // stop
-                    }
-                    
-                    paddings = child._layoutInfo.requestPaddings;
-                    if(paddings){
-                        // Child wants to repeat its layout with != paddings
-                        if(remTimes > 0){
-                            paddings = new pvc.Sides(paddings);
-                            if(pvc.debug >= 5){
-                                this._log("  -> Child requested paddings change: " + pvc.stringify(paddings));
+                if(useLog){ me._group("Attempt #" + (iteration + 1)); }
+                try{
+
+                    childKeyArgs.paddings  = paddings;
+                    childKeyArgs.canChange = remTimes > 0;
+
+                    child.layout(new pvc.Size(remSize), childKeyArgs);
+                    if(child.isVisible){
+                        resized = checkChildResize.call(this, child, canResize);
+                        if(resized){
+                            return false; // stop
+                        }
+
+                        var requestPaddings = child._layoutInfo.requestPaddings;
+                        if(checkPaddingsChanged(paddings, requestPaddings)){
+                            paddings = requestPaddings;
+
+                            // Child wants to repeat its layout with != paddings
+                            if(remTimes > 0){
+                                paddings = new pvc.Sides(paddings);
+                                if(useLog){ this._log("Child requested paddings change: " + pvc.stringify(paddings)); }
+                                return true; // again
                             }
-                            return true; // again
+
+                            if(pvc.debug >= 2){
+                                this._warn("Child requests paddings change but iterations limit has been reached.");
+                            }
+                            // ignore overflow
                         }
-                        
-                        if(pvc.debug >= 2){
-                            this._log("  -> [Warning] FILL Child requests paddings change but iterations limit has been reached.");
+
+                        // --------
+
+                        positionChild.call(this, child);
+
+                        if(child.anchor !== 'fill'){
+                            updateSide.call(this, child);
                         }
-                        
-                        // ignore overflow
                     }
-                    
-                    // --------
-                    
-                    positionChild.call(this, child);
-                        
-                    if(child.anchor !== 'fill'){
-                        updateSide.call(this, child);
-                    }
+
+                    return false; // stop
+                } finally {
+                    if(useLog){ me._groupEnd(); }
                 }
-                
-                return false; // stop
             }, this);
             
             return resized;
         }
-        
+
+        function checkPaddingsChanged(paddings, newPaddings){
+            if(!newPaddings){
+                return false;
+            }
+            
+            // true if stopped, false otherwise
+            return def.query(pvc.Sides.names).each(function(side){
+                var curPad = (paddings && paddings[side]) || 0;
+                var newPad = (newPaddings && newPaddings[side]) || 0;
+                 if(Math.abs(newPad - curPad) >= 0.1){
+                     // Stop iteration
+                     return false;
+                 }
+            });
+        }
+
         function checkChildResize(child, canResize){
             var resized = false;
             var addWidth = child.width - remSize.width;
             if(addWidth > 0){
                 if(pvc.debug >= 3){
-                    this._log("  -> addWidth=" + addWidth); 
+                    this._log("Child added width = " + addWidth);
                 }
                 
                 if(!canResize){
                     if(pvc.debug >= 2){
-                        this._log("  -> [Warning] Layout iterations limit reached.");
+                        this._warn("Child wanted more width, but layout iterations limit has been reached.");
                     }
                 } else {
                     resized = true;
@@ -21067,12 +21119,12 @@ def
             var addHeight = child.height - remSize.height;
             if(addHeight > 0){
                 if(pvc.debug >= 3){
-                    this._log("  -> addHeight=" + addHeight); 
+                    this._log("Child added height =" + addHeight);
                 }
                 
                 if(!canResize){
                     if(pvc.debug >= 2){
-                        this._log("  -> [Warning] Layout iterations limit reached.");
+                        this._warn("Child wanted more height, but layout iterations limit has been reached.");
                     }
                 } else {
                     resized = true;
@@ -21250,7 +21302,23 @@ def
             pvBorderPanel
                 .width (width)
                 .height(height);
-            
+
+            if(pvc.debug >= 15 && (margins.width > 0 || margins.height > 0)){
+                // Outer Box
+                (this.isTopRoot ? this.pvRootPanel : this.parent.pvPanel)
+                    .add(this.type)
+                    .width (this.width)
+                    .height(this.height)
+                    .left  (this.position.left   != null ? this.position.left   : null)
+                    .right (this.position.right  != null ? this.position.right  : null)
+                    .top   (this.position.top    != null ? this.position.top    : null)
+                    .bottom(this.position.bottom != null ? this.position.bottom : null)
+                    .strokeStyle('orange')
+                    .lineWidth(1)
+                    .strokeDasharray('- .')
+                    ;
+            }
+
             // Set panel positions
             var hasPositions = {};
             def.eachOwn(this.position, function(v, side){
@@ -21280,10 +21348,10 @@ def
             if(paddings.width > 0 || paddings.height > 0){
                 // We create separate border (outer) and inner (padding) panels
                 this.pvPanel = pvBorderPanel.add(pv.Panel)
-                                   .width (width  - paddings.width )
-                                   .height(height - paddings.height)
-                                   .left(paddings.left)
-                                   .top (paddings.top );
+                    .width (width  - paddings.width )
+                    .height(height - paddings.height)
+                    .left(paddings.left)
+                    .top (paddings.top );
             }
             
             pvBorderPanel.borderPanel  = pvBorderPanel;
@@ -21293,15 +21361,19 @@ def
             this.pvPanel.borderPanel   = pvBorderPanel;
             
             if(pvc.debug >= 15){
-                this.pvPanel // inner
+                // Client Box
+                this.pvPanel
                     .strokeStyle('lightgreen')
                     .lineWidth(1)
                     .strokeDasharray('- ');
-                
-                pvBorderPanel // outer
-                    .strokeStyle('lightblue')
-                    .lineWidth(1)
-                    .strokeDasharray(null); 
+
+                if(this.pvPanel !== pvBorderPanel){
+                    // Border Box
+                    pvBorderPanel
+                        .strokeStyle('blue')
+                        .lineWidth(1)
+                        .strokeDasharray('. ');
+                }
             }
             
             var extensionId = this._getExtensionId();
@@ -21346,7 +21418,7 @@ def
      * 
      * @virtual
      */
-    _createCore: function(layoutInfo){
+    _createCore: function(/*layoutInfo*/){
         if(this._children) {
             this._children.forEach(function(child){
                 child._create();
@@ -21666,8 +21738,7 @@ def
      * Initializes a new layer panel.
      * @virtual
      */
-    initLayerPanel: function(pvPanel, layer){
-    },
+    initLayerPanel: function(/*pvPanel, layer*/){},
     
     /* EVENTS & VISUALIZATION CONTEXT */
     _getV1DimName: function(v1Dim){
@@ -23472,12 +23543,10 @@ def
      * @override
      */
     _createCore: function(layoutInfo) {
-      var myself = this,
-          clientSize = layoutInfo.clientSize,
+      var clientSize = layoutInfo.clientSize,
           rootScene = this._getBulletRootScene(),
           itemPadding   = rootScene.vars.itemPadding,
-          contentSize = rootScene.vars.size,
-          sceneColorProp = function(scene){ return scene.color; };
+          contentSize = rootScene.vars.size;
       
        // Names are for horizontal layout (anchor = top or bottom)
       var isHorizontal = this.isAnchorTopOrBottom();
@@ -23532,7 +23601,9 @@ def
       // ROW > ITEM - A pvLegendPanel instance per bullet item in a row
       this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendRowPanel, {
               extensionId: 'panel',
-              wrapper:     wrapper
+              wrapper:     wrapper,
+              noSelect:    false,
+              noClickSelect: true // just rubber-band (the click is for other behaviors)
           })
           .lockMark('data', function(row){ return row.items; }) // each row has a list of bullet item scenes
           .lock(a_right,  null)
@@ -23559,7 +23630,7 @@ def
                   function(itemScene){ return itemScene.vars.clientSize.width; } :
                   
                    // The biggest child width of the column
-                  function(itemScene){ return this.parent.width(); })
+                  function(/*itemScene*/){ return this.parent.width(); })
           .pvMark
           .def("hidden", "false")
           .fillStyle(function(){ // TODO: ??
@@ -24150,12 +24221,13 @@ def
     },
     
     _setCartAxisScaleRange: function(axis){
-        var info = this.plotPanelList[0]._layoutInfo;
-        var size = (axis.orientation === 'x') ?
-           info.clientSize.width :
-           info.clientSize.height;
+        var info   = this.plotPanelList[0]._layoutInfo;
+        var size   = info.clientSize;
+        var length = (axis.orientation === 'x') ?
+                     size.width :
+                     size.height;
         
-        axis.setScaleRange(size);
+        axis.setScaleRange(length);
 
         return axis.scale;
     },
@@ -24186,11 +24258,11 @@ def
         function processAxis(axis){
             if(axis){
                 // {begin: , end: , beginLocked: , endLocked: }
-                var rp = axis.getScaleRoundingPaddings();
-                if(rp){
+                var tickRoundPads = axis.getScaleRoundingPaddings();
+                if(tickRoundPads){
                     var isX = axis.orientation === 'x';
-                    setSide(isX ? 'left'  : 'bottom', rp.begin, rp.beginLocked);
-                    setSide(isX ? 'right' : 'top'   , rp.end,   rp.endLocked);
+                    setSide(isX ? 'left'  : 'bottom', tickRoundPads.begin, tickRoundPads.beginLocked);
+                    setSide(isX ? 'right' : 'top'   , tickRoundPads.end,   tickRoundPads.endLocked);
                 }
             }
         }
@@ -24495,20 +24567,22 @@ def
      * @override
      */
     _calcLayout: function(layoutInfo){
+        var me = this;
         
-        if(!this._children) {
+        if(!me._children) {
             return;
         }
+
+        var useLog = pvc.debug >= 5;
         
         // Objects we can mutate
         var margins  = new pvc.Sides(0);
         var paddings = new pvc.Sides(0);
         var remSize = def.copyOwn(layoutInfo.clientSize);
-        var overFlowPaddings;
         var aolMap = pvc.BasePanel.orthogonalLength;
         var aoMap  = pvc.BasePanel.relativeAnchor;
         var alMap  = pvc.BasePanel.parallelLength;
-        var me = this;
+        
         var childKeyArgs = {
                 force: true,
                 referenceSize: layoutInfo.clientSize
@@ -24519,139 +24593,187 @@ def
         
         // loop detection
         var paddingHistory = {}; 
-        var loopSignal = {};
-        var overflowPaddingsSignal = {};
+
+        var LoopDetected = 1;
+        var NormalPaddingsChanged = 2;
+        var OverflowPaddingsChanged = 4;
+
+        var emptyNewPaddings = new pvc.Sides(); // used below in place of null requestPaddings
         var isDisasterRecovery = false;
-        
-        if(pvc.debug >= 5){
-            me._log("  ==== Layout Init - Side Panels Round");
+
+        if(useLog){ me._group("CCC GRID LAYOUT clientSize = " + pvc.stringify(remSize)); }
+        try{
+            // PHASE 0 - Initialization
+            //
+            // Splits children in two groups: FILL and SIDE, according to its anchor.
+            // Children explicitly not requiring layout are excluded (!child.anchor).
+            //
+            // For FILL children, finds the maximum of the resolved paddings.
+            // These paddings will be the minimum that will result from this layout.
+            /*global console:true*/
+            this._children.forEach(initChild);
+            
+            // PHASE 1 - "MARGINS" are imposed by SIDE children
+            //
+            // Lays out non-fill children receiving each, the remaining space as clientSize.
+            //
+            // Each adds its orthogonal length to the margin side where it is anchored.
+            // The normal length is only correctly known after all non-fill
+            // children have been laid out once.
+            //
+            // As such the child is only positioned on the anchor coordinate.
+            // The orthogonal anchor coordinate is only set on the second phase.
+            //
+            // SIDE children may change paddings as well.
+            if(useLog){ me._group("Phase 1 - Determine MARGINS and FILL SIZE from SIDE panels"); }
+            try{
+                sideChildren.forEach(layoutChild1Side);
+            } finally {
+                // -> remSize now contains the size of the CENTER cell and is not changed any more
+                
+                if(useLog){
+                    me._groupEnd();
+                    me._log("Final FILL margins = " + pvc.stringify(margins));
+                    me._log("Final FILL border size = " + pvc.stringify(remSize));
+                }
+            }
+
+            // PHASE 2 - Relayout each SIDE child with its final orthogonal length
+            // PHASE 3 - Layout FILL children
+            //
+            // Repeat 2 and 3 while paddings changed
+            if(useLog){ me._group("Phase 2 - Determine COMMON PADDINGS"); }
+            try{
+                doMaxTimes(9, layoutCycle);
+            } finally {
+                if(useLog){
+                    me._groupEnd();
+                    me._log("Final FILL clientSize = " + pvc.stringify({width: (remSize.width - paddings.width), height: (remSize.height - paddings.height)}));
+                    me._log("Final COMMON paddings = " + pvc.stringify(paddings));
+                }
+            }
+
+            layoutInfo.gridMargins  = new pvc.Sides(margins );
+            layoutInfo.gridPaddings = new pvc.Sides(paddings);
+            layoutInfo.gridSize     = new pvc.Size(remSize  );
+
+            // All available client space is consumed.
+            // As such, there's no need to return anything.
+            // return;
+        } finally {
+            if(useLog){ me._groupEnd(); }
         }
-        
-        // PHASE 0 - Initialization
-        //
-        // Splits children in two groups: FILL and SIDE, according to its anchor.
-        // Children explicitly not requiring layout are excluded (!child.anchor).
-        //
-        // For FILL children, finds the maximum of the resolved paddings.
-        // These paddings will be the minimum that will result from this layout.
-        this._children.forEach(initChild);
-        
-        // PHASE 1 - MARGINS are imposed by SIDE children
-        //
-        // Lays out non-fill children receiving each, the remaining space as clientSize.
-        //
-        // Each adds its orthogonal length to the margin side where it is anchored.
-        // The normal length is only correctly known after all non-fill
-        // children have been laid out once.
-        // 
-        // As such the child is only positioned on the anchor coordinate.
-        // The orthogonal anchor coordinate is only set on the second phase.
-        // 
-        // SIDE children may change paddings as well.
-        sideChildren.forEach(layoutChild1Side);
-        
-        // -> remSize now contains the size of the CENTER cell and is not changed any more
-        
-        // PHASE 2 - Relayout each SIDE child with its final orthogonal length
-        // PHASE 3 - Layout FILL children
-        // 
-        // Repeat 2 and 3 while paddings changed
-        
-        doMaxTimes(9, layoutCycle);
-        
-        layoutInfo.gridMargins  = new pvc.Sides(margins );
-        layoutInfo.gridPaddings = new pvc.Sides(paddings);
-        layoutInfo.gridSize     = new pvc.Size(remSize  );
-        
-        // All available client space is consumed.
-        // As such, there's no need to return anything.
-        // return;
-        
+
         // --------
         
         function layoutCycle(remTimes, iteration){
-            if(pvc.debug >= 5){
-                me._log("  ==== LayoutCycle " + (isDisasterRecovery ? "Disaster MODE" : ("#" + (iteration + 1))));
-            }
-            
-            var index, count;
-            var canChange = layoutInfo.canChange !== false && !isDisasterRecovery && (remTimes > 0);
-            var paddingsChanged;
-            var ownPaddingsChanged = false;
-            
-            index = 0;
-            count = sideChildren.length;
-            while(index < count){
-                if(pvc.debug >= 5){
-                    me._log("    SIDE Child i=" + index);
-                }
-                
-                paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
-                if(!isDisasterRecovery && paddingsChanged){
-                    if(paddingsChanged === loopSignal){
-                        // Oh no...
-                        isDisasterRecovery = true;
-                        layoutCycle(0);
-                        return false; // stop;
-                    }
-                    
-                    if(paddingsChanged === overflowPaddingsSignal){
-                        // Don't stop right away cause there might be other overflow paddings requests
-                        // of other side childs
-                        if(!ownPaddingsChanged){
-                            ownPaddingsChanged = true;
-                            layoutInfo.requestPaddings = layoutInfo.paddings; 
-                        }
-                    } else {
-                        if(remTimes > 0){
-                            if(pvc.debug >= 5){
-                                me._log("    SIDE Child i=" + index + " increased paddings");
+            if(useLog){ me._group("LayoutCycle " + (isDisasterRecovery ? "- Disaster MODE" : ("#" + (iteration + 1)))); }
+            try{
+                var index, count;
+                var canChange = layoutInfo.canChange !== false && !isDisasterRecovery && (remTimes > 0);
+                var paddingsChanged;
+                var ownPaddingsChanged = false;
+                var breakAndRepeat;
+
+                index = 0;
+                count = sideChildren.length;
+                while(index < count){
+                    if(useLog){ me._group("SIDE Child #" + (index + 1)); }
+                    try{
+                        paddingsChanged = layoutChild2Side(sideChildren[index], canChange);
+                        if(!isDisasterRecovery && paddingsChanged){
+                            breakAndRepeat = false;
+                            if((paddingsChanged & OverflowPaddingsChanged) !== 0){
+                                // Don't stop right away cause there might be
+                                // other overflow paddings requests,
+                                // of other side childs.
+                                // Translate children overflow paddings in
+                                // own paddings.
+                                if(useLog){ me._log("SIDE Child #" + (index + 1) + " changed overflow paddings"); }
+                                if(!ownPaddingsChanged){
+                                    ownPaddingsChanged = true;
+                                    // If others change we don't do nothing.
+                                    // The previous assignment remains.
+                                    // It's layoutInfo.paddings that is changed, internally.
+                                    layoutInfo.requestPaddings = layoutInfo.paddings;
+                                }
                             }
-                            return true; // repeat
-                        } else if(pvc.debug >= 2){
-                            me._log("    [Warning] SIDE Child i=" + index + " increased paddings but no more iterations possible.");
+
+                            if((paddingsChanged & NormalPaddingsChanged) !== 0){
+                                if(remTimes > 0){
+                                    if(useLog){ me._log("SIDE Child #" + (index + 1) + " changed normal paddings"); }
+                                    breakAndRepeat = true;
+                                } else if(pvc.debug >= 2){
+                                    me._warn("SIDE Child #" + (index + 1) + " changed paddings but no more iterations possible.");
+                                }
+                            }
+                            
+                            if((paddingsChanged & LoopDetected) !== 0){
+                                // Oh no...
+                                isDisasterRecovery = true;
+                                
+                                layoutCycle(0);
+                                
+                                return false; // stop;
+                            }
+
+                            if(breakAndRepeat) { 
+                                return true;
+                            }
                         }
+                    } finally {
+                        if(useLog){ me._groupEnd(); }
                     }
-                }
-                index++;
-            }
-            
-            if(ownPaddingsChanged){
-                if(pvc.debug >= 5){
-                    me._log("    Restarting due to overflowPaddings change");
-                }
-                return false; // stop;
-            }
-            
-            index = 0;
-            count = fillChildren.length;
-            while(index < count){
-                if(pvc.debug >= 5){
-                    me._log("    FILL Child i=" + index);
+                    index++;
                 }
                 
-                paddingsChanged = layoutChildFill(fillChildren[index], canChange);
-                if(!isDisasterRecovery && paddingsChanged){
-                    if(paddingsChanged === loopSignal){
-                        // Oh no...
-                        isDisasterRecovery = true;
-                        layoutCycle(0);
-                        return false; // stop;
+                if(ownPaddingsChanged){
+                    if(useLog){ me._log("Restarting due to overflowPaddings change"); }
+                    return false; // stop;
+                }
+
+                index = 0;
+                count = fillChildren.length;
+                while(index < count){
+                    if(useLog){ me._group("FILL Child #" + (index + 1)); }
+                    try{
+                        paddingsChanged = layoutChildFill(fillChildren[index], canChange);
+                        if(!isDisasterRecovery && paddingsChanged){
+                            breakAndRepeat = false;
+
+                            if((paddingsChanged & NormalPaddingsChanged) !== 0){
+                                if(remTimes > 0){
+                                    if(pvc.debug >= 5){
+                                        me._log("FILL Child #" + (index + 1) + " increased paddings");
+                                    }
+                                    breakAndRepeat = true; // repeat
+                                } else if(pvc.debug >= 2){
+                                    me._warn("FILL Child #" + (index + 1) + " increased paddings but no more iterations possible.");
+                                }
+                            }
+
+                            if((paddingsChanged & LoopDetected) !== 0){
+                                // Oh no...
+                                isDisasterRecovery = true;
+                                layoutCycle(0);
+                                return false; // stop;
+                            }
+
+                            if(breakAndRepeat) {
+                                return true;
+                            }
+                        }
+                    } finally {
+                        if(useLog){ me._groupEnd(); }
                     }
                     
-                    if(remTimes > 0){
-                        if(pvc.debug >= 5){
-                            me._log("    FILL Child i=" + index + " increased paddings");
-                        }
-                        return true; // repeat
-                    } else if(pvc.debug >= 2){
-                        me._log("    [Warning] FILL Child i=" + index + " increased paddings but no more iterations possible.");
-                    }
+                    index++;
                 }
-                index++;
+
+                return false; // stop
+            } finally {
+                if(useLog){ me._groupEnd(); }
             }
-            
-            return false; // stop
         }
         
         function doMaxTimes(maxTimes, fun){
@@ -24687,34 +24809,35 @@ def
         }
         
         function layoutChild1Side(child, index) {
-            if(pvc.debug >= 5){
-                me._log("    SIDE Child i=" + index);
-            }
-            
-            var paddingsChanged = false;
-            
-            var a = child.anchor;
-            
-            childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
-            
-            child.layout(new pvc.Size(remSize), childKeyArgs);
-            
-            if(child.isVisible){
-                
-                paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child);
+            if(useLog){ me._group("SIDE Child #" + (index + 1)); }
+            try{
+                var paddingsChanged = 0;
 
-                // Only set the *anchor* position
-                // The other orthogonal position is dependent on the size of the other non-fill children
-                positionChildNormal(a, child);
-                
-                updateSide(a, child);
+                var a = child.anchor;
+
+                childKeyArgs.paddings = filterAnchorPaddings(a, paddings);
+
+                child.layout(new pvc.Size(remSize), childKeyArgs);
+
+                if(child.isVisible){
+
+                    paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child);
+
+                    // Only set the *anchor* position
+                    // The other orthogonal position is dependent on the size of the other non-fill children
+                    positionChildNormal(a, child);
+
+                    updateSide(a, child);
+                }
+
+                return paddingsChanged;
+            } finally {
+                if(useLog){ me._groupEnd(); }
             }
-            
-            return paddingsChanged;
         }
         
         function layoutChildFill(child, canChange) {
-            var paddingsChanged = false;
+            var paddingsChanged = 0;
             
             var a = child.anchor; // 'fill'
             
@@ -24724,7 +24847,7 @@ def
             child.layout(new pvc.Size(remSize), childKeyArgs);
             
             if(child.isVisible){
-                paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange);
+                paddingsChanged |= checkAnchorPaddingsChanged(a, paddings, child, canChange);
                 
                 positionChildNormal(a, child);
                 positionChildOrtho (child, a);
@@ -24734,7 +24857,7 @@ def
         }
         
         function layoutChild2Side(child, canChange) {
-            var paddingsChanged = false;
+            var paddingsChanged = 0;
             if(child.isVisible){
                 var a = child.anchor;
                 var al  = alMap[a];
@@ -24750,13 +24873,12 @@ def
                 child.layout(childSize2, childKeyArgs);
                 
                 if(child.isVisible){
-                    paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange);
+                    paddingsChanged = checkAnchorPaddingsChanged(a, paddings, child, canChange) |   // <-- NOTE BITwise OR
+                                      checkOverflowPaddingsChanged(a, layoutInfo.paddings, child, canChange);
                     
-                    if(checkOverflowPaddingsChanged(a, layoutInfo.paddings, child, canChange)){
-                        return overflowPaddingsSignal;
+                    if(!paddingsChanged){
+                        positionChildOrtho(child, child.align);
                     }
-                        
-                    positionChildOrtho(child, child.align);
                 }
             }
             
@@ -24823,58 +24945,59 @@ def
             
             return filtered;
         }
-        
+
         function checkAnchorPaddingsChanged(a, paddings, child, canChange){
             var newPaddings = child._layoutInfo.requestPaddings;
+
+            var changed = 0;
             
-            var changed = false;
+            // Additional paddings are requested?
             if(newPaddings){
-                if(pvc.debug >= 10){
-                    me._log("    => clientSize=" + pvc.stringify(child._layoutInfo.clientSize));
-                    me._log("    <= requestPaddings=" + pvc.stringify(newPaddings));
+                if(useLog && pvc.debug >= 10){
+                    me._log("=> clientSize=" + pvc.stringify(child._layoutInfo.clientSize));
+                    me._log("<= requestPaddings=" + pvc.stringify(newPaddings));
                 }
-                
+
+                // Compare requested paddings with existing paddings
                 getAnchorPaddingsNames(a).forEach(function(side){
-                    if(newPaddings.hasOwnProperty(side)){
-                        var value    = paddings[side] || 0;
-                        var newValue = Math.floor(10000 * (newPaddings[side] || 0)) / 10000;
-                        var increase = newValue - value;
-                        var minChange = Math.max(1, Math.abs(0.01 * value));
-                        
-                        // STABILITY requirement
-                        if(increase !== 0 && Math.abs(increase) >= minChange){
-                            if(!canChange){
-                                if(pvc.debug >= 2){
-                                    me._log("    [Warning] CANNOT change but child wanted to: " + side + "=" + newValue);
-                                }
-                            } else {
-                                changed = true;
-                                paddings[side] = newValue;
-                                
-                                if(pvc.debug >= 5){
-                                    me._log("    changed padding " + side + " <- " + newValue);
-                                }
+                    var value     = paddings[side] || 0;
+                    var newValue  = Math.floor(10000 * (newPaddings[side] || 0)) / 10000;
+                    var increase  = newValue - value;
+                    var minChange = Math.max(1, Math.abs(0.01 * value));
+
+                    // STABILITY requirement
+                    if(increase !== 0 && Math.abs(increase) >= minChange){
+                        if(!canChange){
+                            if(pvc.debug >= 2){
+                                me._warn("CANNOT change but child wanted to: " + side + "=" + newValue);
+                            }
+                        } else {
+                            changed |= NormalPaddingsChanged;
+                            paddings[side] = newValue;
+
+                            if(useLog){
+                                me._log("Changed padding " + side + " <- " + newValue);
                             }
                         }
                     }
                 });
-                
+
                 if(changed){
                     var paddingKey = pvc.Sides
                                         .names
                                         .map(function(side){ return (paddings[side] || 0).toFixed(0); })
                                         .join('|');
-                    
+
                     if(def.hasOwn(paddingHistory, paddingKey)){
                         // LOOP detected
                         if(pvc.debug >= 2){
-                            me._log("    [Warning] LOOP detected");
+                            me._warn("LOOP detected!!!!");
                         }
-                        changed = loopSignal;
+                        changed |= LoopDetected;
                     } else {
                         paddingHistory[paddingKey] = true;
                     }
-                    
+
                     paddings.width  = paddings.left + paddings.right ;
                     paddings.height = paddings.top  + paddings.bottom;
                 }
@@ -24884,45 +25007,44 @@ def
         }
         
         function checkOverflowPaddingsChanged(a, ownPaddings, child, canChange){
-            var overflowPaddings = child._layoutInfo.overflowPaddings;
+            var overflowPaddings = child._layoutInfo.overflowPaddings || emptyNewPaddings;
             
-            var changed = false;
-            if(overflowPaddings){
-                if(pvc.debug >= 10){
-                    me._log("    <= overflowPaddings=" + pvc.stringify(overflowPaddings));
-                }
+            var changed = 0;
+            
+            if(useLog && pvc.debug >= 10){
+                me._log("<= overflowPaddings=" + pvc.stringify(overflowPaddings));
+            }
                 
-                getAnchorPaddingsNames(a).forEach(function(side){
-                    if(overflowPaddings.hasOwnProperty(side)){
-                        var value    = ownPaddings[side] || 0;
-                        var newValue = Math.floor(10000 * (overflowPaddings[side] || 0)) / 10000;
-                        newValue -= margins[side]; // corners absorb some of it
-                        
-                        var increase = newValue - value;
-                        var minChange = Math.max(1, Math.abs(0.05 * value));
-                        
-                        // STABILITY & SPEED requirement
-                        if(increase >= minChange){
-                            if(!canChange){
-                                if(pvc.debug >= 2){
-                                    me._log("    [Warning] CANNOT change overflow padding but child wanted to: " + side + "=" + newValue);
-                                }
-                            } else {
-                                changed = true;
-                                ownPaddings[side] = newValue;
-                                
-                                if(pvc.debug >= 5){
-                                    me._log("     changed overflow padding " + side + " <- " + newValue);
-                                }
+            getAnchorPaddingsNames(a).forEach(function(side){
+                if(overflowPaddings.hasOwnProperty(side)){
+                    var value    = ownPaddings[side] || 0;
+                    var newValue = Math.floor(10000 * (overflowPaddings[side] || 0)) / 10000;
+                    newValue -= margins[side]; // corners absorb some of it
+
+                    var increase = newValue - value;
+                    var minChange = Math.max(1, Math.abs(0.05 * value));
+
+                    // STABILITY & SPEED requirement
+                    if(increase >= minChange){
+                        if(!canChange){
+                            if(pvc.debug >= 2){
+                                me._warn("CANNOT change overflow padding but child wanted to: " + side + "=" + newValue);
+                            }
+                        } else {
+                            changed |= OverflowPaddingsChanged;
+                            ownPaddings[side] = newValue;
+
+                            if(useLog){
+                                me._log("changed overflow padding " + side + " <- " + newValue);
                             }
                         }
                     }
-                });
-                
-                if(changed){
-                    ownPaddings.width  = ownPaddings.left + ownPaddings.right ;
-                    ownPaddings.height = ownPaddings.top  + ownPaddings.bottom;
                 }
+            });
+
+            if(changed){
+                ownPaddings.width  = ownPaddings.left + ownPaddings.right ;
+                ownPaddings.height = ownPaddings.top  + ownPaddings.bottom;
             }
             
             return changed;
@@ -24937,7 +25059,6 @@ def
                 case 'fill':   return pvc.Sides.names;
             }
         }
-
     }
 });
 
@@ -25693,14 +25814,14 @@ def
     
     // Initialize paddings from **chart** axes offsets
     // TODO: move this to the chart??
-    var paddings = {};
+    var pctPaddings = {};
     var hasAny = false;
     
     function setSide(side, pct){
-        var value = paddings[side];
+        var value = pctPaddings[side];
         if(value == null || pct > value){
             hasAny = true;
-            paddings[side] = pct;
+            pctPaddings[side] = pct;
         }
     }
     
@@ -25727,7 +25848,7 @@ def
     });
     
     if(hasAny){
-        this.offsetPaddings = paddings;
+        this.offsetPaddings = pctPaddings;
     }
 })
 .add({
@@ -25739,36 +25860,41 @@ def
     },
     
     _calcRequestPaddings: function(layoutInfo){
-        var op = this.offsetPaddings;
-        if(!op){
-            return;
-        }
+        var reqPads;
+        var offPads = this.offsetPaddings;
+        if(offPads){
+            var tickRoundPads = this.chart._getAxesRoundingPaddings();
+            var clientSize = layoutInfo.clientSize;
+            var pads       = layoutInfo.paddings;
 
-        var rp = this.chart._getAxesRoundingPaddings();
-        var clientSize = layoutInfo.clientSize;
-        var paddings   = layoutInfo.paddings;
+            pvc.Sides.names.forEach(function(side){
+                var len_a = pvc.BasePanel.orthogonalLength[side];
+
+                var clientLen  = clientSize[len_a];
+                var paddingLen = pads[len_a];
+
+                var len = clientLen + paddingLen;
+
+                // Only request offset-padding if the tickRoundPads.side is not locked
+                if(!tickRoundPads[side + 'Locked']){
+                    // Offset paddings are a percentage of the outer length
+                    // (there are no margins in this panel).
+                    var offLen = len * (offPads[side] || 0);
+
+                    // Rounding paddings are the percentage of the
+                    // client length that already actually is padding
+                    // due to domain rounding.
+                    var roundLen = clientLen * (tickRoundPads[side] || 0);
+
+                    // So, if the user wants offLen padding but the
+                    // client area already contains roundLen of padding,
+                    // request only the remaining, if any.
+                    (reqPads || (reqPads = {}))[side] = Math.max(offLen - roundLen, 0);
+                }
+            }, this);
+        }
         
-        var reqPad = {};
-        pvc.Sides.names.forEach(function(side){
-            var len_a = pvc.BasePanel.orthogonalLength[side];
-            
-            var clientLen  = clientSize[len_a];
-            var paddingLen = paddings[len_a];
-            
-            var len = clientLen + paddingLen;
-            
-            // Only request offset-padding if the rp.side is not locked
-            if(!rp[side + 'Locked']){
-                var offset   = len * (op[side] || 0);
-                var rounding = clientLen * (rp[side] || 0);
-            
-                reqPad[side] = Math.max(offset - rounding, 0);
-            } else {
-                reqPad[side] = 0;
-            }
-        }, this);
-        
-        return reqPad;
+        return reqPads;
     },
     
     /**
@@ -26761,12 +26887,12 @@ def
             case 'numeric':    this._calcNumberTicks(layoutInfo); break;
             default: throw def.error.operationInvalid("Undefined axis scale type"); 
         }
-        
+
         this.axis.setTicks(layoutInfo.ticks);
         
         var clientLength = layoutInfo.clientSize[this.anchorLength()];
         this.axis.setScaleRange(clientLength);
-        
+
         if(layoutInfo.maxTextWidth == null){
             layoutInfo.maxTextWidth = 
                 def.query(layoutInfo.ticksText)
@@ -26824,7 +26950,7 @@ def
         this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
     },
     
-    _calcNumberTicks: function(layoutInfo){
+    _calcNumberTicks: function(/*layoutInfo*/){
         var desiredTickCount = this.desiredTickCount;
         if(desiredTickCount == null){
             if(this.isAnchorTopOrBottom()){
@@ -26852,6 +26978,11 @@ def
                                     numberExponentMin: this.tickExponentMin,
                                     numberExponentMax: this.tickExponentMax
                                 });
+
+        if(pvc.debug > 4){
+            this._log("DOMAIN: " + pvc.stringify(this.scale.domain()));
+            this._log("TICKS:  " + pvc.stringify(ticksInfo.ticks));
+        }
     },
     
     _calcContinuousTicksText: function(ticksInfo){
@@ -29372,7 +29503,6 @@ def
      * @override 
      */
     _createPlotPanels: function(parentPanel, baseOptions){
-        var options = this.options;
         var plots = this.plots;
         
         var barPlot = plots.bar;
@@ -30163,7 +30293,6 @@ def
         
         var myself = this;
         var chart = this.chart;
-        var options   = chart.options;
         var isStacked = this.stacked;
         var dotsVisible  = this.dotsVisible;
         var areasVisible = this.areasVisible;
@@ -30247,9 +30376,9 @@ def
             .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
             
             /* Position & size */
-            .override('x',  function(){ return this.scene.basePosition;  })
-            .override('y',  function(){ return this.scene.orthoPosition; })
-            .override('dy', function(){ return chart.animate(0, this.scene.orthoLength); })
+            .override('x',  function(){ return this.scene.basePosition;  }) // left
+            .override('y',  function(){ return this.scene.orthoPosition; }) // bottom
+            .override('dy', function(){ return chart.animate(0, this.scene.orthoLength); }) // height
             
             /* Color & Line */
             .override('color', function(type){
@@ -30597,7 +30726,7 @@ def
                 
                 return 0;
             });
-        var orthoZero = orthoScale(0);
+        var orthoZero = orthoScale(orthoNullValue/*0*/);
         var sceneBaseScale = this.axes.base.sceneScale({sceneVarName: 'category'});
         
         // ----------------------------------
@@ -30612,7 +30741,7 @@ def
                    ;
         })
         /* Create series scene */
-        .each(function(seriesData1, seriesIndex){
+        .each(function(seriesData1/*, seriesIndex*/){
             var seriesScene = new pvc.visual.Scene(rootScene, {group: seriesData1 || data});
 
             seriesScene.vars.series = new pvc.visual.ValueLabelVar(
@@ -30695,7 +30824,6 @@ def
         // reversed so that "below == before" w.r.t. stacked offset calculation
         // See {@link belowSeriesScenes2} variable.
         var reversedSeriesScenes = rootScene.children().reverse().array();
-        var seriesCount = reversedSeriesScenes.length;
         
         /** 
          * Update the scene tree to include intermediate leaf-scenes,
@@ -30711,7 +30839,7 @@ def
         
         return rootScene;
         
-       function completeSeriesScenes(seriesScene) {
+        function completeSeriesScenes(seriesScene) {
             var seriesScenes2 = [],
                 seriesScenes = seriesScene.childNodes, 
                 fromScene,
@@ -30984,7 +31112,7 @@ def
             });
     },
     
-    _initPlotsCore: function(hasMultiRole){
+    _initPlotsCore: function(/*hasMultiRole*/){
         var options = this.options;
         
         var pointPlot = this._createPointPlot();
@@ -31054,8 +31182,6 @@ def
     
     /* @override */
     _createPlotPanels: function(parentPanel, baseOptions){
-        var options = this.options;
-        var axes    = this.axes;
         var plots   = this.plots;
         
         var pointPlot = plots.point;
@@ -32972,10 +33098,7 @@ def
     }
 })
 .add({
-    
     _initPlotsCore: function(){
-        var options = this.options;
-        
         var pointPlot = this._createPointPlot();
         
         var trend = pointPlot.option('Trend');
