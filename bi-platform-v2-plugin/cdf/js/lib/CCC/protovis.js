@@ -10547,8 +10547,6 @@ pv.Mark.stack = [];
 pv.Mark.prototype
     .property("data")
     .property("visible", Boolean)
-    // DATUM - an object counterpart for each value of data.
-    .property("datum", Object)
     // CSS attributes pass-through
     .property("css", Object)
     // SVG attributes pass-through
@@ -10797,11 +10795,6 @@ pv.Mark.prototype._zOrder = 0;
  */
 pv.Mark.prototype.defaults = new pv.Mark()
     .data(function(d) { return [d]; })
-    // DATUM - an object counterpart for each value of data.
-    .datum(function() {
-        var parent = this.parent;
-        return parent ? parent.scene[parent.index].datum : null; 
-    })
     .visible(true)
     .antialias(true)
     .events("painted");
@@ -10921,10 +10914,6 @@ pv.Mark.prototype.anchor = function(name) {
     .name(name)
     .data(function() {
         return this.scene.target.map(function(s) { return s.data; });
-      })
-    // DATUM - an object counterpart for each value of data.
-    .datum(function() {
-        return this.scene.target[this.index].datum;
       })
     .visible(function() {
         return this.scene.target[this.index].visible;
@@ -11220,9 +11209,6 @@ pv.Mark.prototype.renderCore = function() {
       function() { render(this.root, 0, 1); });
 };
 
-/** @private */ 
-pv.Mark._requiredPropsPosition = {id: 0, datum: 1, visible: 3};
-
 /**
  * @private In the bind phase, inherited property definitions are cached so they
  * do not need to be queried during build.
@@ -11241,14 +11227,7 @@ pv.Mark.prototype.bind = function() {
        * 2 - prop/value, 
        * 3 - prop/fun 
        */
-      types = [[], [], [], []], 
-      
-      // DATUM - an object counterpart for each value of data.
-      // Ensure that required properties are evaluated in
-      // the order: id, datum, visible
-      // The reason is that the visible property function should 
-      // have access to id and datum to decide.
-      requiredPositions = pv.Mark._requiredPropsPosition;
+      types = [[], [], [], []];
   
   /*
    * **Evaluation** order (not precedence order for choosing props/defs)
@@ -11322,8 +11301,6 @@ pv.Mark.prototype.bind = function() {
               data = p;
               break;
 
-            // DATUM - an object counterpart for each value of data.
-            case "datum":
             case "visible":
             case "id":
               required.push(p);
@@ -11354,17 +11331,6 @@ pv.Mark.prototype.bind = function() {
   /* Scan the proto chain for all defined properties. */
   bind(this);
   bind(this.defaults);
-  
-  /*
-   * DATUM - an object counterpart for each value of data.
-   * Sort required properties.
-   * These may be out of order when one of the properties
-   * comes from 'this' and the other from 'this.defaults'.
-   */
-  required.sort(function(pa, pb){
-      return requiredPositions[pa.name] - requiredPositions[pb.name];
-  });
-
   types[1].reverse();
   types[3].reverse();
 
@@ -11376,7 +11342,7 @@ pv.Mark.prototype.bind = function() {
           types[2].push(seen[name] = {name: name, type: 2, value: null});
         }
     }
-  } while (mark = mark.proto);
+  } while ((mark = mark.proto));
 
   /* Define setter-getter for inherited defs. */
   var defs = types[0].concat(types[1]);
@@ -12134,25 +12100,25 @@ pv.Mark.prototype.eachInstance = function(fun, ctx){
     function mapRecursive(scene, level, toScreen){
         var D = scene.length;
         if(D > 0){
-        var isLastLevel = level === L, 
-            childIndex;
-        
-        if(!isLastLevel) {
-            childIndex = indexes[level];
-        }
-        
+            var isLastLevel = level === L,
+                childIndex;
+
+            if(!isLastLevel) {
+                childIndex = indexes[level];
+            }
+
             for(var index = 0 ; index < D ; index++){
                 var instance = scene[index];
                 if(instance.visible){
-                if(level === L){
+                    if(level === L){
                         fun.call(ctx, scene, index, toScreen);
                     } else {
-                    var childScene = instance.children[childIndex];
+                        var childScene = instance.children[childIndex];
                         if(childScene){ // Some nodes might have not been rendered???
                         var childToScreen = toScreen
-                                                .times(instance.transform)
-                                                .translate(instance.left, instance.top);
-                        
+                                            .times(instance.transform)
+                                            .translate(instance.left, instance.top);
+
                             mapRecursive(childScene, level + 1, childToScreen);
                         }
                     }

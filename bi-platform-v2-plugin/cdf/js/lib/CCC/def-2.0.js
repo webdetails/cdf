@@ -1,7 +1,5 @@
-<<<<<<< HEAD
-pen.define("cdf/lib/CCC/def", function(){
-=======
-//VERSION TRUNK-20130204
+//VERSION TRUNK-20130206
+>>>>>>> 59fa3a3... [PERF](CCC animate) Prevent the additional animation render in non-animatable charts
 
 var def = (function(){
 >>>>>>> c87da43... added workaround for 4.8 analyzer issue
@@ -449,13 +447,6 @@ var def = /** @lends def */{
         return values;
     },
     
-<<<<<<< HEAD
-    ownKeys: Object.keys,
-    
-    own: function(o){
-        return Object.keys(o)
-                     .map(function(key){ return o[key]; });
-=======
     uniqueIndex: function(o, key, ctx){
         var index = {};
         
@@ -476,7 +467,7 @@ var def = /** @lends def */{
         return f ?
                 keys.map(function(key){ return f.call(ctx, o[key], key); }) :
                 keys.map(function(key){ return o[key]; });
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
+
     },
     
     scope: function(scopeFun, ctx){
@@ -590,17 +581,12 @@ var def = /** @lends def */{
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
         },
         
-<<<<<<< HEAD
-        lazy: function(scope, p, f){
-            return scope[p] || (scope[p] = (f ? f(p, scope) : []));
-=======
         lazy: function(scope, p, f, ctx){
             return scope[p] || (scope[p] = (f ? f.call(ctx, p) : []));
         }, 
         
         copy: function(al/*, start, end*/){
             return arraySlice.apply(al, arraySlice.call(arguments, 1));
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
         }
     },
     
@@ -1074,43 +1060,6 @@ def.globalSpace = globalSpace;
 
 // -----------------------
 
-<<<<<<< HEAD
-/** @private */
-function mixinRecursive(instance, mixin){
-    for(var p in mixin){
-        var vMixin = mixin[p];
-        if(vMixin !== undefined){
-            var oMixin,
-                oTo = def.object.asNative(instance[p]);
-
-            if(oTo){
-                oMixin = def.object.as(vMixin);
-                if(oMixin){
-                    mixinRecursive(oTo, oMixin);
-                } else {
-                    // Overwrite oTo
-                    instance[p] = vMixin;
-                }
-            } else {
-                oMixin = def.object.asNative(vMixin);
-                if(oMixin){
-                    vMixin = Object.create(oMixin);
-                }
-
-                instance[p] = vMixin;
-            }
-        }
-    }
-}
-
-def.mixin = function(instance/*mixin1, mixin2, ...*/){
-    for(var i = 1, L = arguments.length ; i < L ; i++){
-        var mixin = arguments[i];
-        if(mixin){
-            mixin = def.object.as(mixin.prototype || mixin);
-            if(mixin){
-                mixinRecursive(instance, mixin);
-=======
 def.mixin = createMixin(Object.create);
 def.copyOwn(def.mixin, {
     custom:  createMixin,
@@ -1134,15 +1083,12 @@ function mixinMany(instance, mixins, protectNativeObject){
             mixin = def.object.as(mixin.prototype || mixin);
             if(mixin){
                 mixinRecursive(instance, mixin, protectNativeObject);
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
+
             }
         }
     }
 
     return instance;
-<<<<<<< HEAD
-};
-=======
 }
 
 /** @private */
@@ -1188,7 +1134,6 @@ function mixinProp(instance, p, vMixin, protectNativeObject){
         }
     }
 }
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
 
 // -----------------------
 
@@ -1339,12 +1284,6 @@ def.scope(function(){
                             // 'base' property before calling the original value function
                             value = baseMethod.override(method);
                         }
-<<<<<<< HEAD
-                    }
-                }
-                
-                proto[p] = value;
-=======
                         
                         proto[p] = value;
                         return;
@@ -1352,20 +1291,11 @@ def.scope(function(){
                 }
                 
                 mixinProp(proto, p, value, /*protectNativeValue*/def.identity); // Can use native object value directly
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
             });
 
             return this;
         },
         
-<<<<<<< HEAD
-        addStatic: function(mixin){
-            def.copy(this, mixin);
-            return this;
-        }
-    };
-
-=======
         getStatic: function(p){
             return getStatic(shared(this.safe), p);
         },
@@ -1418,7 +1348,7 @@ def.scope(function(){
         }
     }
     
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
+
     // TODO: improve this code with indexOf
     function TypeName(full){
         var parts;
@@ -1738,8 +1668,6 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
     
-<<<<<<< HEAD
-=======
     appendMany: function(target){
         var a = arguments;
         var S = a.length;
@@ -1760,7 +1688,6 @@ def.copyOwn(def.array, /** @lends def.array */{
         return target;
     },
     
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
     prepend: function(target, source, start){
         if(start == null){
             start = 0;
@@ -1854,15 +1781,9 @@ def.nextId = function(scope){
 // --------------------
 
 def.type('Set')
-<<<<<<< HEAD
-.init(function(source){
-    this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
-=======
 .init(function(source, count){
     this.source = source || {};
     this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
 })
 .add({
     has: function(p){
@@ -1904,15 +1825,9 @@ def.type('Set')
 // ---------------
 
 def.type('Map')
-<<<<<<< HEAD
-.init(function(source){
-    this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
-=======
 .init(function(source, count){
     this.source = source || {};
     this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
 })
 .add({
     has: function(p){
@@ -1952,8 +1867,6 @@ def.type('Map')
         return this;
     },
     
-<<<<<<< HEAD
-=======
     copy: function(other){
         // Add other to this one
         def.eachOwn(other.source, function(value, p){
@@ -1961,15 +1874,12 @@ def.type('Map')
         }, this);
     },
     
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
     values: function(){
         return def.own(this.source);
     },
     
     keys: function(){
         return def.ownKeys(this.source);
-<<<<<<< HEAD
-=======
     },
     
     clone: function(){
@@ -2028,7 +1938,6 @@ def.type('Map')
         });
         
         return result;
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
     }
 });
 
@@ -2064,16 +1973,6 @@ def.type('OrderedMap')
         }
     },
     
-<<<<<<< HEAD
-    add: function(key, v){
-        var map = this._map;
-        var bucket = def.getOwn(map, key);
-        if(!bucket){
-            this._list.push((map[key] = {
-               key:   key,
-               value: v
-            }));
-=======
     add: function(key, v, index){
         var map = this._map;
         var bucket = def.getOwn(map, key);
@@ -2088,7 +1987,6 @@ def.type('OrderedMap')
             } else {
                 def.array.insertAt(this._list, index, bucket);
             }
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
         } else if(bucket.value !== v){
             bucket.value = v;
         }
@@ -2202,8 +2100,6 @@ def.type('Query')
         return array;
     },
     
-<<<<<<< HEAD
-=======
     sort: function(compare, by){
         if(!compare){
             compare = def.compare;
@@ -2221,7 +2117,6 @@ def.type('Query')
         return new def.ArrayLikeQuery(sorted);
     },
     
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
     /**
      * Consumes the query and fills an object
      * with its items.
@@ -2507,11 +2402,7 @@ def.type('Query')
 
 def.type('NullQuery', def.Query)
 .add({
-<<<<<<< HEAD
-    _next: function(nextIndex){}
-=======
     _next: function(/*nextIndex*/){}
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
 });
 
 def.type('AdhocQuery', def.Query)
@@ -2528,10 +2419,6 @@ def.type('ArrayLikeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-<<<<<<< HEAD
-        if(nextIndex < this._count){
-            this.item = this._list[nextIndex];
-=======
         var count = this._count;
         if(nextIndex < count){
             var list = this._list;
@@ -2545,7 +2432,6 @@ def.type('ArrayLikeQuery', def.Query)
             }
             
             this.item = list[nextIndex];
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
             return 1;
         }
     },
@@ -2781,10 +2667,6 @@ def.type('ReverseQuery', def.Query)
             this._count  = this._source.length;
         }
         
-<<<<<<< HEAD
-        if(nextIndex < this._count){
-            this.item = this._source[this._count - nextIndex - 1];
-=======
         var count = this._count;
         if(nextIndex < count){
             var index = count - nextIndex - 1;
@@ -2798,7 +2680,6 @@ def.type('ReverseQuery', def.Query)
             }
             
             this.item = source[index];
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
             return 1;
         }
     }
@@ -2830,8 +2711,4 @@ def.range = function(start, count, step){
 // Reset namespace to global, instead of 'def'
 currentNamespace = def.global;    
     return def;
-<<<<<<< HEAD
-});
-=======
 }());
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
