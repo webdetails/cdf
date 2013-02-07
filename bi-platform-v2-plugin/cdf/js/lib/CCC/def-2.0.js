@@ -1,8 +1,7 @@
-//VERSION TRUNK-20130206
->>>>>>> 59fa3a3... [PERF](CCC animate) Prevent the additional animation render in non-animatable charts
+//VERSION TRUNK-20130207
 
 var def = (function(){
->>>>>>> c87da43... added workaround for 4.8 analyzer issue
+
 /** @private */
 var arraySlice = Array.prototype.slice;
 
