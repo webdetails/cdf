@@ -3767,6 +3767,7 @@ Query = function() {
     if( options.columnHeaders ){
 
       queryDefinition.settingcolumnHeaders = options.columnHeaders;
+    }
 
     if(options.dtFilter != null){
       queryDefinition.settingdtFilter = options.dtFilter;

@@ -1,3 +1,24 @@
+13.02.07
+    
+    * Introduced Async Behavior and new component life cycle
+    * Initial Storage fetch moved to server side
+    * Added a separate resource for all js shims
+    * Refactored CoreComponents into smaller pieces
+    * Fixed require.js dependencies. Had to reintroduce a resource called CoreComponents so that EE 4.8 still finds it when resolving dependencies
+    * Fix styling issues with widgets
+    * Upgraded jquery sparkline to 2.1
+    * Fix 'notNullMeasure' function in OlapUtils
+    * Added Jasmine testing library
+    * Added support for secondAxis minimum and maximum value (by Andrea Torre)
+    * Add support for arbitrary user data in Views
+    * Set TableComponent to use async ajax
+    * changed deps to newer pentaho version
+    * Implemented legacyProperty support
+    * Changed the way "earliestDate" and "latestDate" are retrieving their value. Either set by a property, or with a default value (no Dashboards.getParamaterValue)
+
+
+
+
 12.12.10
     * Fixes to avioid exportData to break due to url length
     * Changed Orient Dependency to 1.3.0
