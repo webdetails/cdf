@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130206
+//VERSION TRUNK-20130207
 
 
 /*global pvc:true */
@@ -12122,7 +12122,6 @@ pvc.visual.ValueLabelVar.fromComplex = function(complex){
            new pvc.visual.ValueLabelVar(null, "", null)
            ;
 };
-
 def
 .type('pvc.visual.RoleVarHelper')
 .init(function(rootScene, role, keyArgs){
@@ -14135,7 +14134,21 @@ def.scope(function(){
             
             return roundingPaddings;
         },
-        
+
+        calcContinuousTicks: function(desiredTickCount){
+            if(desiredTickCount == null) {
+                desiredTickCount = this.option('DesiredTickCount');
+            }
+
+            return this.scale.ticks(
+                desiredTickCount,
+                {
+                    roundInside:       this.option('DomainRoundMode') !== 'tick',
+                    numberExponentMin: this.option('TickExponentMin'),
+                    numberExponentMax: this.option('TickExponentMax')
+                });
+        },
+
         _getOptionsDefinition: function(){
             return cartAxis_optionsDef;
         },
@@ -20618,16 +20631,13 @@ def
         this.topRoot   = this;
         this.isRoot    = true;
         this.isTopRoot = true;
-        this.data      = this.chart.data;
-        
     } else {
         this.parent    = parent;
         this.isTopRoot = false;
         this.isRoot    = (parent.chart !== chart);
         this.root      = this.isRoot ? this : parent.root;
         this.topRoot   = parent.topRoot;
-        this.data      = parent.data; // TODO
-
+        
         if(this.isRoot) {
             this.position.left = chart.left; 
             this.position.top  = chart.top;
@@ -20636,6 +20646,8 @@ def
         parent._addChild(this);
     }
     
+    this.data = (this.isRoot ? chart : parent).data;
+
     /* Root panels do not need layout */
     if(this.isRoot) {
         this.anchor  = null;
@@ -23992,7 +24004,7 @@ def
         }
     },
     
-    _generateTrendsDataCellCore: function(dataCell, trendInfo){
+    _generateTrendsDataCellCore: function(/*dataCell, trendInfo*/){
         // abstract
         // see Metric and Categorical implementations
     },
@@ -24142,13 +24154,10 @@ def
                 useCompositeAxis:  axis.option('Composite'),
                 font:              axis.option('Font'),
                 labelSpacingMin:   axis.option('LabelSpacingMin'),
-                tickExponentMin:   axis.option('TickExponentMin'),
-                tickExponentMax:   axis.option('TickExponentMax'),
                 grid:              axis.option('Grid'),
                 gridCrossesMargin: axis.option('GridCrossesMargin'),
                 ruleCrossesMargin: axis.option('RuleCrossesMargin'),
                 zeroLine:          axis.option('ZeroLine'),
-                domainRoundMode:   axis.option('DomainRoundMode'),
                 desiredTickCount:  axis.option('DesiredTickCount'),
                 showTicks:         axis.option('Ticks'),
                 showMinorTicks:    axis.option('MinorTicks')
@@ -25149,11 +25158,11 @@ def
         
         
         // Full grid lines
-        if(xAxis.option('Visible') && xAxis.option('Grid')) {
+        if(xAxis.option('Grid')) {
             this.xGridRule = this._createGridRule(xAxis);
         }
         
-        if(yAxis.option('Visible') && yAxis.option('Grid')) {
+        if(yAxis.option('Grid')) {
             this.yGridRule = this._createGridRule(yAxis);
         }
         
@@ -25191,8 +25200,7 @@ def
         
         // Composite axis don't fill ticks
         var isDiscrete = axis.role.grouping.isDiscrete();
-        var axisPanel  = this.chart.axesPanels[axis.id];
-        var rootScene  = axisPanel._getRootScene();
+        var rootScene  = this._getAxisGridRootScene(axis);
         if(!rootScene){
             return;
         }
@@ -25275,7 +25283,45 @@ def
         
         return pvGridRule;
     },
-    
+
+    _getAxisGridRootScene: function(axis){
+        var data = this.data;
+        var isDiscrete = axis.isDiscrete();
+        if(isDiscrete){
+            data = axis.role.flatten(data, {visible: true});
+        }
+
+        var rootScene =
+            new pvc.visual.CartesianAxisRootScene(null, {
+                panel: this,
+                group: data
+            });
+            
+        if (isDiscrete){
+            data._children.forEach(function(tickData){
+                new pvc.visual.CartesianAxisTickScene(rootScene, {
+                    group:     tickData,
+                    tick:      tickData.value,
+                    tickRaw:   tickData.rawValue,
+                    tickLabel: tickData.label
+                });
+            });
+        } else {
+            // When the axis panel is visible, ticks will have been set in the axis.
+            var ticks = axis.ticks || axis.calcContinuousTicks();
+
+            ticks.forEach(function(majorTick){
+                new pvc.visual.CartesianAxisTickScene(rootScene, {
+                    tick:      majorTick,
+                    tickRaw:   majorTick,
+                    tickLabel: axis.scale.tickFormat(majorTick)
+                });
+            }, this);
+        }
+
+        return rootScene;
+    },
+
     /* zOrder
      *
      * TOP
@@ -25792,12 +25838,7 @@ def
             drag.max[a_p] = oper.max;
         }
     },
-    
-    _getOrthoAxis: function(type){
-        var orthoType = type === 'base' ? 'ortho' : 'base';
-        return this.chart.axes[orthoType];
-    },
-    
+
     /*
      * @override
      */
@@ -26499,8 +26540,8 @@ def
     this._extensionPrefix = axis.extensionPrefixes;
     
     if(this.labelSpacingMin == null){
-        // The user tolerance for "missing" stuff is much smaller with discrete stuff
-        this.labelSpacingMin = this.isDiscrete ? 0.1 : 1.5; // em
+        // The user tolerance for "missing" stuff is much smaller with discrete data
+        this.labelSpacingMin = this.isDiscrete ? 0.25 : 1.5; // em
     }
     
     if(this.showTicks == null){
@@ -26540,10 +26581,7 @@ def
     font: '9px sans-serif', // label font
     labelSpacingMin: null,
     // To be used in linear scales
-    domainRoundMode: 'none',
     desiredTickCount: null,
-    tickExponentMin:  null,
-    tickExponentMax:  null,
     showMinorTicks:   true,
     showTicks:        null,
     
@@ -26565,12 +26603,13 @@ def
     _calcLayout: function(layoutInfo){
         
         var scale = this.axis.scale;
-        
+
+        // First time setup
         if(!this._isScaleSetup){
             this.pvScale = scale;
             this.scale   = scale; // TODO: At least HeatGrid depends on this. Maybe Remove?
             
-            this.extend(scale, "scale"); // TODO - review extension interface
+            this.extend(scale, "scale"); // TODO - review extension interface - not documented
             
             this._isScaleSetup = true;
         }
@@ -26591,6 +26630,7 @@ def
         layoutInfo.axisSize = axisSize; // may be undefined
         
         if (this.isDiscrete && this.useCompositeAxis){
+            // TODO: composite axis auto axisSize determination
             if(layoutInfo.axisSize == null){
                 layoutInfo.axisSize = 50;
             }
@@ -26604,7 +26644,7 @@ def
             this._calcTicks();
             
             if(this.scale.type === 'discrete'){
-                this._calcDiscreteTicksHidden();
+                this._tickIncludeModulo = this._calcDiscreteTicksIncludeModulo();
             }
             
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
@@ -26616,7 +26656,6 @@ def
             
             /* III - Calculate Trimming Length if: FIXED/NEEDED > AVAILABLE */
             this._calcMaxTextLengthThatFits();
-            
             
             /* IV - Calculate overflow paddings */
             this._calcOverflowPaddings();
@@ -26726,7 +26765,7 @@ def
     _calcOverflowPaddings: function(){
         if(!this._layoutInfo.canChange){
             if(pvc.debug >= 2){
-                this._log("[WARNING] Layout cannot change. Skipping calculation of overflow paddings.");
+                this._warn("Layout cannot change. Skipping calculation of overflow paddings.");
             }
             return;
         }
@@ -26737,7 +26776,15 @@ def
         
         this._calcOverflowPaddingsFromLabelBBox();
     },
-    
+
+    // TODO: this method is using the biggest label size
+    // to estimate overflow on each end of the axis.
+    // When at either end, the text is much smaller
+    // than the biggest it often results in wider
+    // than needed margins being reserved.
+    //
+    // TODO: the halfband method for determining the overflow in
+    // discrete axes also doesn't take text-alignment into account.
     _calcOverflowPaddingsFromLabelBBox: function(){
         var overflowPaddings = null;
         
@@ -26748,7 +26795,7 @@ def
             var paddings   = layoutInfo.paddings;
             var labelBBox  = layoutInfo.labelBBox;
             var isTopOrBottom = this.isAnchorTopOrBottom();
-            var begSide    = isTopOrBottom ? 'left'  : 'top'   ;
+            var begSide    = isTopOrBottom ? 'left'  : 'top';
             var endSide    = isTopOrBottom ? 'right' : 'bottom';
             var isDiscrete = this.scale.type === 'discrete';
             
@@ -26931,8 +26978,14 @@ def
     
     _calcTicks: function(){
         var layoutInfo = this._layoutInfo;
-        
-        layoutInfo.textHeight = pv.Text.fontHeight(this.font);
+
+        /**
+         * The bbox's width is usually very close to the width of the text.
+         * The bbox's height is usually about 1/3 bigger than the height of the text,
+         * because it includes space for both the descent and the ascent of the font.
+         * We'll compensate this by reducing the height of text.
+         */
+        layoutInfo.textHeight = pv.Text.fontHeight(this.font) * 2/3;
         layoutInfo.maxTextWidth = null;
         
         // Reset scale to original unrounded domain
@@ -26965,9 +27018,9 @@ def
     
     _calcDiscreteTicks: function(){
         var layoutInfo = this._layoutInfo;
-        var role = this.chart.visualRoles(this.roleName);
-        var data = role.flatten(this.chart.data, {visible: true});
-        
+        var role = this.axis.role;
+        var data = role.flatten(this.data, {visible: true});
+
         layoutInfo.data  = data;
         layoutInfo.ticks = data._children;
         
@@ -27030,12 +27083,7 @@ def
     },
     
     _calcContinuousTicksValue: function(ticksInfo, desiredTickCount){
-        ticksInfo.ticks = this.scale.ticks(
-                                desiredTickCount, {
-                                    roundInside:       this.domainRoundMode !== 'tick',
-                                    numberExponentMin: this.tickExponentMin,
-                                    numberExponentMax: this.tickExponentMax
-                                });
+        ticksInfo.ticks = this.axis.calcContinuousTicks(desiredTickCount);
 
         if(pvc.debug > 4){
             this._log("DOMAIN: " + pvc.stringify(this.scale.domain()));
@@ -27052,11 +27100,7 @@ def
     
     // --------------
     
-    _calcDiscreteTicksHidden: function(){
-        return this._tickIncludeModulo = this._calcDiscreteTicksHiddenCore();
-    },
-    
-    _calcDiscreteTicksHiddenCore: function(){
+    _calcDiscreteTicksIncludeModulo: function(){
         var mode = this.axis.option('OverlappedLabelsMode');
         if(mode !== 'hide'){
             return 1;
@@ -27073,8 +27117,8 @@ def
             
         // scale is already setup
         
-        // How much label anchors are separated from each other
-        // (in the direction of the axis)
+        // How much are label anchors separated from each other
+        // (in the axis direction)
         var b = this.scale.range().step; // don't use .band, cause it does not include margins...
         
         // Height of label box
@@ -27090,7 +27134,7 @@ def
         // Minimum space that the user wants separating 
         // the closest edges of the bounding boxes of two consecutive labels, 
         // measured perpendicularly to the label text direction.
-        var sMin = h * this.labelSpacingMin /* parameter in em */;
+        var sMin = h * this.labelSpacingMin; /* parameter in em */
         
         // The angle that the text makes to the x axis (clockwise,y points downwards) 
         var a = layoutInfo.textAngle;
@@ -27127,7 +27171,7 @@ def
         } while(Math.ceil(tickCount / tickIncludeModulo) > 1);
         
         if(tickIncludeModulo > 1 && pvc.debug >= 3){
-            this._log("Showing only one in every " + tickIncludeModulo + " tick labels");
+            this._info("Showing only one in every " + tickIncludeModulo + " tick labels");
         }
         
         return tickIncludeModulo;
@@ -27330,8 +27374,6 @@ def
         var rMax = clientSize[size_a] + (this.ruleCrossesMargin ? paddings[end_a] : 0);
         var rSize = rMax - rMin;
         
-        var ruleParentPanel = this.pvPanel;
-
         this._rSize = rSize;
         
         var rootScene = this._getRootScene();
@@ -27454,29 +27496,14 @@ def
         return data;
     },
     
-    _getOrthoScale: function(){
-        var orthoType = this.axis.type === 'base' ? 'ortho' : 'base';
-        return this.chart.axes[orthoType].scale; // index 0
-    },
-
-    _getOrthoAxis: function(){
-        var orthoType = this.axis.type === 'base' ? 'ortho' : 'base';
-        return this.chart.axes[orthoType]; // index 0
-    },
-    
     renderOrdinalAxis: function(){
-        var myself = this,
-            scale = this.scale,
+        var scale = this.scale,
             hiddenLabelText   = this.hiddenLabelText,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
             anchorOrthoLength = this.anchorOrthoLength(),
-            layoutInfo        = this._layoutInfo,
             pvRule            = this.pvRule,
-            ticks             = layoutInfo.ticks,
-            data              = layoutInfo.data,
-            itemCount         = layoutInfo.ticks.length,
             rootScene         = this._getRootScene(),
             includeModulo     = this._tickIncludeModulo,
             isV1Compat        = this.compatVersion() <= 1;
@@ -27701,9 +27728,7 @@ def
         // so "tickScene.vars.tick.value" may be a number or a Date object...
         
         var scale  = this.scale,
-            orthoAxis  = this._getOrthoAxis(),
-            orthoScale = orthoAxis.scale,
-            pvRule     = this.pvRule,
+            pvRule = this.pvRule,
             anchorOpposite    = this.anchorOpposite(),
             anchorLength      = this.anchorLength(),
             anchorOrtho       = this.anchorOrtho(),
@@ -27808,20 +27833,12 @@ def
     renderLinearAxisLabel: function(pvTicksPanel, wrapper){
         // Labels are visible (only) on MAJOR ticks,
         // On first and last tick care is taken
-        //  with their H/V alignment so that
-        //  the label is not drawn off the chart.
+        // with their H/V alignment so that
+        // the label is not drawn off the chart.
 
-        // Use this margin instead of textMargin, 
-        // which affects all margins (left, right, top and bottom).
-        // Exception is the small 0.5 textMargin set below...
         var pvTicks = this.pvTicks;
         var anchorOpposite = this.anchorOpposite();
         var anchorOrtho    = this.anchorOrtho();
-        
-//        var pvLabelAnchor = pvTicks
-//            .anchor(this.anchor)
-//            .addMargin(this.anchorOpposite(), 2);
-        
         var scale = this.scale;
         var font  = this.font;
         
@@ -27919,8 +27936,7 @@ def
     /////////////////////////////////////////////////
     //begin: composite axis
     renderCompositeOrdinalAxis: function(){
-        var myself = this,
-            isTopOrBottom = this.isAnchorTopOrBottom(),
+        var isTopOrBottom = this.isAnchorTopOrBottom(),
             axisDirection = isTopOrBottom ? 'h' : 'v',
             diagDepthCutoff = 2, // depth in [-1/(n+1), 1]
             vertDepthCutoff = 2,
@@ -28063,8 +28079,8 @@ def
                     case 'd':
                        if(!fitInfo.d){
                           //var ang = Math.atan(tickScene.dy/tickScene.dx);
-                          var diagonalLength = Math.sqrt(tickScene.dy*tickScene.dy + tickScene.dx*tickScene.dx) ;
-                          return pvc.text.trimToWidth(diagonalLength - diagMargin, label, font,'..');
+                          var diagonalLength = Math.sqrt(tickScene.dy*tickScene.dy + tickScene.dx*tickScene.dx);
+                          return pvc.text.trimToWidth(diagonalLength - diagMargin, label, font, '..');
                         }
                         break;
                 }
@@ -30399,18 +30415,6 @@ def
         
         // -- LINE --
         var dotsVisibleOnly = dotsVisible && !linesVisible && !areasVisible,
-            
-            /* When not showing lines, but showing areas,
-             * we copy the area fillStyle so that
-             * the line can cover the area and not be noticed.
-             * We need this to hide the ladder 
-             * on the border of the area, 
-             * due to not using antialias.
-             * 
-             * When the scene has the active series,
-             * the line is shown "highlighted" anyway.
-             */
-            lineCopiesAreaColor = !linesVisible && areasVisible,
             
             /* When areas are shown with no alpha (stacked), 
              * make dots darker so they get 
