@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130207
+//VERSION TRUNK-20130212
 
 var def = (function(){
 /** @private */
@@ -521,7 +521,9 @@ var def = /** @lends def */{
             return !f.apply(this, arguments);
         };
     },
-    
+
+    sqr: function(v){ return v * v;},
+
     // Constant functions ----------------
     
     /**
