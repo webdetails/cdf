@@ -1,6 +1,6 @@
 pen.define("cdf/lib/CCC/protovis", function(){
 
-// 9ef98c36170614dde646cf2015c247dbe8d5b514
+// 7c7ae453d39a7ca8ba4f419820fe14b6722f21e0
 /**
  * @class The built-in Array class.
  * @name Array
@@ -227,11 +227,15 @@ pv.parent = function() { return this.parent.index; };
  * href="http://javascript.crockford.com/prototypal.html">prototypal
  * inheritance</a>.
  */
-pv.extend = function(f) {
-  function g() {}
-  g.prototype = f.prototype || f;
-  return new g();
-};
+pv.extend = Object.create ?
+    function(f){
+      return Object.create(f.prototype || f); 
+    } :
+    function(f) {
+      function g() {}
+      g.prototype = f.prototype || f;
+      return new g();
+    };
 
 // Is there any browser (still) supporting this syntax?
 // Commented cause this messes up with the debugger's break on exceptions.
@@ -317,16 +321,23 @@ pv.error = function(e) {
  * @param {function} the event handler callback.
  */
 pv.listen = function(target, type, listener) {
+  listener = pv.listener(listener);
+
   if (type === 'load' || type === 'onload'){
-      return pv.listenForPageLoad(pv.listener(listener));
+      return pv.listenForPageLoad(listener);
   }
 
-  listener = pv.listener(listener);
-  target.addEventListener
-      ? target.addEventListener(type, listener, false)
-      : target.attachEvent('on' + type, listener);
+  if(target.addEventListener){
+    target.addEventListener(type, listener, false);
+  } else {
+      if (target === window) {
+        target = document.documentElement;
+      }
+
+      target.attachEvent('on' + type, listener);
+  }
   
-   return listener;
+  return listener;
 };
 
 /**
@@ -357,28 +368,32 @@ pv.unlisten = function(target, type, listener){
  * @returns {function} the wrapped event handler.
  */
 pv.listener = function(f) {
-  return f.$listener || (f.$listener = function(e) {
+  return f.$listener || (f.$listener = function(ev) {
       try {
-        // Fix event (adapted from jQuery)
-        if(e.pageX == null && e.clientX != null) {
-            var eventDoc = (e.target && e.target.ownerDocument) || document;
-            var doc  = eventDoc.documentElement;
-            var body = eventDoc.body;
-
-            e.pageX = (e.clientX * 1) + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
-            e.pageY = (e.clientY * 1) + ( doc && doc.scrollTop  || body && body.scrollTop  || 0 ) - ( doc && doc.clientTop  || body && body.clientTop  || 0 );
-        }
+        pv.event = ev = pv.fixEvent(ev);
         
-        pv.event = e;
-        
-        return f.call(this, e);
+        return f.call(this, ev);
       } catch (ex) {
           // swallow top level error
           pv.error(ex);
       } finally {
         delete pv.event;
       }
-    });
+  });
+};
+
+pv.fixEvent = function(ev){
+    // Fix event (adapted from jQuery)
+    if(ev.pageX == null && ev.clientX != null) {
+        var eventDoc = (ev.target && ev.target.ownerDocument) || document;
+        var doc  = eventDoc.documentElement;
+        var body = eventDoc.body;
+
+        ev.pageX = (ev.clientX * 1) + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
+        ev.pageY = (ev.clientY * 1) + ( doc && doc.scrollTop  || body && body.scrollTop  || 0 ) - ( doc && doc.clientTop  || body && body.clientTop  || 0 );
+    }
+
+    return ev;
 };
 
 /**
@@ -448,17 +463,17 @@ pv.listenForPageLoad = function(listener) {
         listener();
     }
 
-    if (pv.renderer() == "svgweb") {
+    if (pv.renderer() === "svgweb") {
         // SVG web adds addEventListener to IE.
-        window.addEventListener( "SVGLoad", listener, false );
+        window.addEventListener("SVGLoad", listener, false);
     } else {
         // Mozilla, Opera and webkit nightlies currently support this event
         if ( document.addEventListener ) {
-            window.addEventListener( "load", listener, false );
+            window.addEventListener("load", listener, false);
 
         // If IE event model is used
         } else if ( document.attachEvent ) {
-            window.attachEvent( "onload", listener );
+            window.attachEvent("onload", listener);
         }
     }
 };
@@ -2320,7 +2335,7 @@ pv.Dom.Node.prototype.insertBefore = function(n, r){
  * @returns {pv.Dom.Node} the inserted child.
  */
 pv.Dom.Node.prototype.insertAt = function(n, i) {
-    if (i == null){     
+    if (i == null){
         return this.appendChild(n);
     }
     
@@ -2333,16 +2348,16 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
     if(i > L){
         throw new Error("Index out of range.");
     }
+
+    var pn = n.parentNode;
+    if (pn) { // may be that: pn === this, but should i be corrected in case n is below i?
+        pn.removeChild(n);
+    }
     
     var ni = i + 1;
     var firstDirtyIndex = this._firstDirtyChildIndex;
     if(ni < firstDirtyIndex){
         this._firstDirtyChildIndex = ni;
-    }
-    
-    var pn = n.parentNode;
-    if (pn) {
-        pn.removeChild(n);
     }
     
     var r = ns[i];
@@ -2351,6 +2366,7 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
     n._childIndex = i;
     
     var psib = n.previousSibling = r.previousSibling;
+    r.previousSibling = n;
     if (psib) {
         psib.nextSibling = n;
     } else {
@@ -2381,22 +2397,22 @@ pv.Dom.Node.prototype.removeAt = function(i) {
       }
       
       var psib = n.previousSibling;
-      if (psib) { 
-          psib.nextSibling = n.nextSibling; 
-      } else { 
-          this.firstChild = n.nextSibling; 
-      }
-      
       var nsib = n.nextSibling;
-      if (nsib) {
-          nsib.previousSibling = n.previousSibling;
+      if (psib) { 
+          psib.nextSibling = nsib;
       } else {
-          this.lastChild = n.previousSibling;
+          this.firstChild = nsib;
       }
       
-      delete n.nextSibling;
-      delete n.previousSibling;
-      delete n.parentNode;
+      if (nsib) {
+          nsib.previousSibling = psib;
+      } else {
+          this.lastChild = psib;
+      }
+      
+      n.nextSibling = null;
+      n.previousSibling = null;
+      n.parentNode = null;
   }
   
   return n;
@@ -3289,8 +3305,21 @@ pv.Scale.interpolator = function(start, end) {
   }
 
   /* For now, assume color. */
+  
+  // Gradients are not supported in animations
+  // Just show the first one if < 0.5 and the other if >= 0.5
+  var startGradient = (start.type && start.type !== 'solid');
+  var endGradient   = (end.type   && end  .type !== 'solid');
+  if (startGradient || endGradient) {
+      start = startGradient ? start : pv.color(start).rgb();
+      end   = endGradient   ? end   : pv.color(end  ).rgb();
+      return function(t){
+          return t < 0.5 ? start : end;
+      };
+  }
+  
   start = pv.color(start).rgb();
-  end = pv.color(end).rgb();
+  end   = pv.color(end  ).rgb();
   return function(t) {
     var a = start.a * (1 - t) + end.a * t;
     if (a < 1e-5) a = 0; // avoid scientific notation
@@ -3779,7 +3808,7 @@ pv.Scale.quantitative = function() {
         overflow = true;
     }
     
-    var step = Math.pow(10, exponent);
+    step = Math.pow(10, exponent);
     var mObtained = (span / step);
     
     var err = m / mObtained;
@@ -3794,8 +3823,8 @@ pv.Scale.quantitative = function() {
     // Account for floating point precision errors
     exponent = Math.floor(pv.log(step, 10) + 1e-10);
         
-    var start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
-    var end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
+    start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
+    end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
     
     usedNumberExponent = Math.max(0, -exponent);
     
@@ -4263,7 +4292,7 @@ pv.Scale.ordinal = function() {
     if (!(x in i)) i[x] = d.push(x) - 1;
     return r[i[x] % r.length];
   }
-
+  
   /**
    * Sets or gets the input domain. This method can be invoked several ways:
    *
@@ -4345,6 +4374,8 @@ pv.Scale.ordinal = function() {
           ? ((arguments.length > 1) ? pv.map(array, f) : array)
           : Array.prototype.slice.call(arguments);
       if (typeof r[0] == "string") r = r.map(pv.color);
+      r.min = r[0];
+      r.max = r[r.length - 1];
       return this;
     }
     return r;
@@ -4381,7 +4412,8 @@ pv.Scale.ordinal = function() {
         step = (max - min) / N;
         r = pv.range(min + step / 2, max, step);
     }
-    
+    r.min = min;
+    r.max = max;
     r.step = step;
     return this;
   };
@@ -4424,6 +4456,8 @@ pv.Scale.ordinal = function() {
     }
     r.band   = r.step * band;
     r.margin = r.step - r.band;
+    r.min = min;
+    r.max = max;
     return this;
   };
 
@@ -4482,7 +4516,8 @@ pv.Scale.ordinal = function() {
     r.step   = S;
     r.band   = B;
     r.margin = M;
-    
+    r.min = min;
+    r.max = max;
     return this;
   };
 
@@ -4507,6 +4542,8 @@ pv.Scale.ordinal = function() {
     
     r = (n == 1) ? [(min + max) / 2]
         : pv.range(min, max + step / 2, step);
+    r.min = min;
+    r.max = max;
     return this;
   };
 
@@ -4568,9 +4605,51 @@ pv.Scale.ordinal = function() {
       r.step = step;
       r.margin = step - r.band;
     }
+    r.min = min;
+    r.max = max;
     return this;
   };
-
+  
+  /**
+   * Inverts the specified value in the output range, 
+   * returning the index of the closest corresponding value in the input domain.
+   * This is frequently used to convert the mouse location (see {@link pv.Mark#mouse}) 
+   * to a value in the input domain. 
+   * 
+   * The number of input domain values is returned
+   * if the specified point is closest to the end margin of the last input domain value.
+   * 
+   * @function
+   * @name pv.Scale.quantitative.prototype.invertIndex
+   * @param {number} y a value in the output range (a pixel location).
+   * @param {boolean} [noRound=false] returns an un-rounded result.
+   * @returns {number} the index of the closest input domain value.
+   */
+  scale.invertIndex = function(y, noRound) {
+    var N = this.domain().length;
+    if(N === 0){
+        return -1;
+    }
+    
+    var r = this.range();
+    var R = r.max - r.min;
+    if(R === 0){
+        return 0;
+    }
+    
+    var S = R/N;
+    if(y >= r.max){
+        return N;
+    }
+    
+    if(y < r.min){
+        return 0;
+    }
+    
+    var i = (y - r.min) / S;
+    return noRound ? i : Math.round(i);
+  };
+  
   /**
    * Returns a view of this scale by the specified accessor function <tt>f</tt>.
    * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
@@ -5424,7 +5503,6 @@ pv.histogram = function(data, f) {
     Polygon.prototype.containsPoint = function(p){
         var bbox = this.bbox();
         if(!bbox.containsPoint(p)){
-            //console.log("Polygon point out of bbox");
             return false;
         }
         
@@ -5439,8 +5517,6 @@ pv.histogram = function(data, f) {
                 intersectCount++;
             }
         });
-        
-        //console.log("Polygon intersects=" + intersectCount + "/" + edges.length);
         
         // Inside if odd number of intersections
         return (intersectCount & 1) === 1;
@@ -6340,7 +6416,7 @@ pv.Color.Rgb.prototype.rgb = function() { return this; };
  * @returns {pv.Color.Rgb} a brighter color.
  */
 pv.Color.Rgb.prototype.brighter = function(k) {
-  k = Math.pow(0.7, arguments.length ? k : 1);
+  k = Math.pow(0.7, k != null ? k : 1);
   var r = this.r, g = this.g, b = this.b, i = 30;
   if (!r && !g && !b) return pv.rgb(i, i, i, this.a);
   if (r && (r < i)) r = i;
@@ -6365,7 +6441,7 @@ pv.Color.Rgb.prototype.brighter = function(k) {
  * @returns {pv.Color.Rgb} a darker color.
  */
 pv.Color.Rgb.prototype.darker = function(k) {
-  k = Math.pow(0.7, arguments.length ? k : 1);
+  k = Math.pow(0.7, k != null ? k : 1);
   return pv.rgb(
       Math.max(0, Math.floor(k * this.r)),
       Math.max(0, Math.floor(k * this.g)),
@@ -7363,8 +7439,8 @@ pv.Scene = pv.SvgScene = {
 pv.SvgScene.updateAll = function(scenes) {
   if (scenes.length
       && scenes[0].reverse
-      && (scenes.type != "line")
-      && (scenes.type != "area")) {
+      && (scenes.type !== "line")
+      && (scenes.type !== "area")) {
     var reversed = pv.extend(scenes);
     for (var i = 0, j = scenes.length - 1; j >= 0; i++, j--) {
       reversed[i] = scenes[j];
@@ -7553,10 +7629,11 @@ pv.SvgScene.dispatch = pv.listener(function(e) {
       case "mousewheel":
         e.wheel = (window.opera ? 12 : 1) * e.wheelDelta;
         break;
-      }
+    }
 
     if (pv.Mark.dispatch(type, t.scenes, t.index, e)) {
       e.preventDefault();
+      e.stopPropagation();
     }
   }
 });
@@ -8372,7 +8449,23 @@ pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
 };
 
 pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
+  if(!elm){
+    elm = scenes.$g.appendChild(this.create("g"));
+  }
+  var gg = elm;
   
+  // Create colored/no-events group
+  elm = gg.firstChild;
+  
+  var g1 = this.expect(elm, "g", scenes, 0, {'pointer-events': 'none'});
+  if (!g1.parentNode) {
+      gg.appendChild(g1);
+  }
+  
+  // Set current default parent
+  scenes.$g = g1;
+  elm = g1.firstChild;
+
   var eventsSegments = scenes.mark.$hasHandlers ? [] : null;
   
   /* Visual only */
@@ -8437,9 +8530,24 @@ pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
       return this.append(elm, scenes, from);
     });
   });
-  
+
+  // Remove any excess segments from previous render
+  this.removeSiblings(elm);
+
   /* Events */
+  var g2;
   if(eventsSegments){
+    // Create colored/no-events group
+    elm = g1.nextSibling;
+    g2 = this.expect(elm, "g", scenes, 0);
+    if (!g2.parentNode) {
+        gg.appendChild(g2);
+    }
+
+    // Set current default parent
+    scenes.$g = g2;
+    elm = g2.firstChild;
+
     eventsSegments.forEach(function(segment){
       var from  = segment.from;
       var pathsT = segment.top;
@@ -8472,9 +8580,15 @@ pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
         }
       }, this); 
     }, this);
+
+    // Remove any excess paths from previous render
+    this.removeSiblings(elm);
   }
   
-  return elm;
+  // Restore initial current parent
+  scenes.$g = gg;
+
+  return (g2 || g1).nextSibling;
 };
 
 pv.SvgScene.areaSegmentPaths = function(scenes, from, to) {
@@ -9040,6 +9154,32 @@ pv.SvgScene.label = function(scenes) {
   }
   return e;
 };
+/* not segmented
+ * <g> <-> scenes.$g
+ *    <path ... /> only segment
+ * </g>
+ *
+ * segmented full
+ * <g> <-> scenes.$g
+ *    <path ... /> instance 0
+ *    <path ... /> instance 1
+ *    ...
+ * </g>
+ *
+ * segmented smart
+ * <g> <-> scenes.$g
+ *    <g> colored, no events
+ *        <path /> segment 0
+ *        <path /> segment 1
+ *        ...
+ *    </g>
+ *    <g> transparent, fully segmented, events
+ *        <path /> instance 0
+ *        <path /> instance 1
+ *        ...
+ *    </g>
+ * </g>
+ */
 pv.SvgScene.line = function(scenes) {
   var e = scenes.$g.firstChild;
 
@@ -9140,7 +9280,39 @@ pv.SvgScene.lineFixed = function(elm, scenes) {
 };
 
 pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
-   
+  /*
+   * <g> <-> scenes.$g <-> elm --> gg
+   *    <g> colored, no events
+   *        <path /> segment 0
+   *        <path /> segment 1
+   *        ...
+   *    </g>
+   *    <g> transparent, fully segmented, events (wen existent)
+   *        <path /> instance 0
+   *        <path /> instance 1
+   *        ...
+   *    </g>
+   * </g>
+   */
+
+  if(!elm){
+    elm = scenes.$g.appendChild(this.create("g"));
+  }
+  
+  var gg = elm;
+
+  // Create colored/no-events group
+  elm = gg.firstChild;
+  
+  var g1 = this.expect(elm, "g", scenes, 0, {'pointer-events': 'none'});
+  if (!g1.parentNode) {
+      gg.appendChild(g1);
+  }
+
+  // Set current default parent
+  scenes.$g = g1;
+  elm = g1.firstChild;
+  
   var eventsSegments = scenes.mark.$hasHandlers ? [] : null;
   
   /* Visual only */
@@ -9206,9 +9378,24 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
       return this.append(elm, scenes, from);
     });
   });
+
+  // Remove any excess segments from previous render
+  this.removeSiblings(elm);
   
   /* Events */
+  var g2;
   if(eventsSegments){
+    // Create colored/no-events group
+    elm = g1.nextSibling;
+    g2 = this.expect(elm, "g", scenes, 0);
+    if (!g2.parentNode) {
+        gg.appendChild(g2);
+    }
+   
+    // Set current default parent
+    scenes.$g = g2;
+    elm = g2.firstChild;
+    
     eventsSegments.forEach(function(segment){
       var from  = segment.from;
       var paths = segment.paths;
@@ -9219,7 +9406,8 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
           'fill-opacity':      0.005, // VML requires this much to fire events
           'stroke':            'rgb(127,127,127)',
           'stroke-opacity':    0.005, // VML idem
-          'stroke-width':      5
+          'stroke-width':      10,
+          'stroke-dasharray':  null
         };
       
       paths.forEach(function(path, j){
@@ -9239,9 +9427,15 @@ pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
         }
       }, this); 
     }, this);
+
+    // Remove any excess paths from previous render
+    this.removeSiblings(elm);
   }
+
+  // Restore initial current parent
+  scenes.$g = gg;
   
-  return elm;
+  return (g2 || g1).nextSibling;
 };
 
 pv.SvgScene.lineSegmentedFull = function(e, scenes) {
@@ -9393,7 +9587,7 @@ pv.SvgScene.lineSegmentPaths = function(scenes, from, to) {
 
   NOTE: 
   As yy points down, and because of the way Vector.perp() is written,
-  perp() corresponds to rotating 90º clockwise.
+  perp() corresponds to rotating 90ï¿½ clockwise.
   
   -----
   
@@ -9699,11 +9893,51 @@ pv.SvgScene.equalSceneKeys = function(ka, kb){
   return true;
 };
 pv.SvgScene.panel = function(scenes) {
-  var g = scenes.$g, e = g && g.firstChild;
+  /* With clipping:
+   * <g> scenes.$g -> g
+   *     group for panel content
+   *
+   *     instance 0
+   *     <g clip-path="url(#123)"> -> c -> g -> scenes.$g
+   *        <clipPath id="123"> -> e
+   *            <rect x="s.left" y="s.top" width="s.width" height="s.height" />
+   *        </clipPath>
+   *        <rect fill="" /> -> e
+   *        <g>child 0 - childScenes $g</g>
+   *        <g>child 1 - childScenes.$g</g>
+   *        ...
+   *        <rect stroke="" /> -> e
+   *
+   *        restore initial group
+   *        scenes.$g <- g <- c.parentNode,
+   *     </g>
+   *
+   *     instance 1
+   *     
+   * </g>
+   *
+   * Without clipping:
+   * <g> -> g
+   *     group for panel content
+   *
+   *     instance 0
+   *     <rect fill="" /> -> e
+   *     <g>child 0</g>
+   *     <g>child 1</g>
+   *     ...
+   *     <rect stroke="" /> -> e
+   *     
+   *     instance 1
+   *     <rect fill="" />
+   *     ...
+   * </g>
+   */
+  var g = scenes.$g,
+      e = g && g.firstChild;
   var complete = false;
   for (var i = 0; i < scenes.length; i++) {
     var s = scenes[i];
-
+    
     /* visible */
     if (!s.visible) continue;
 
@@ -9809,7 +10043,7 @@ pv.SvgScene.panel = function(scenes) {
     }
 
     /* clip (nest children) */
-    if (s.overflow == "hidden") {
+    if (s.overflow === "hidden") {
       var id = pv.id().toString(36),
           c = this.expect(e, "g", scenes, i, {"clip-path": "url(#" + id + ")"});
       if (!c.parentNode) g.appendChild(c);
@@ -9833,21 +10067,25 @@ pv.SvgScene.panel = function(scenes) {
     var k = this.scale,
         t = s.transform,
         x = s.left + t.x,
-        y = s.top + t.y;
+        y = s.top  + t.y;
     this.scale *= t.k;
 
     /* children */
-    this.eachChild(scenes, i, function(childScenes){
-        childScenes.$g = e = this.expect(e, "g", scenes, i, {
-            "transform": "translate(" + x + "," + y + ")" + 
+    if(scenes[i].children.length){
+        var attrs = {
+            "transform": "translate(" + x + "," + y + ")" +
                          (t.k != 1 ? " scale(" + t.k + ")" : "")
-        });
+        };
         
-        this.updateAll(childScenes);
-        if (!e.parentNode) g.appendChild(e);
-        e = e.nextSibling;
-    });
-    
+        this.eachChild(scenes, i, function(childScenes){
+            childScenes.$g = e = this.expect(e, "g", scenes, i, attrs);
+
+            this.updateAll(childScenes);
+            if (!e.parentNode) g.appendChild(e);
+            e = e.nextSibling;
+        });
+    }
+
     /* transform (pop) */
     this.scale = k;
 
@@ -9855,11 +10093,12 @@ pv.SvgScene.panel = function(scenes) {
     e = this.stroke(e, scenes, i);
 
     /* clip (restore group) */
-    if (s.overflow == "hidden") {
+    if (s.overflow === "hidden") {
       scenes.$g = g = c.parentNode;
       e = c.nextSibling;
     }
-  }
+  } // for next panel instance
+  
   complete = true;
   return e;
 };
@@ -9883,7 +10122,7 @@ pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
 };
 
 pv.SvgScene.fill = function(e, scenes, i) {
-    this.removeFillStyleDefinitions(scenes);
+  this.removeFillStyleDefinitions(scenes);
 
   var s = scenes[i], fill = s.fillStyle;
   if (fill.opacity || s.events == "all") {
@@ -10484,8 +10723,6 @@ pv.Mark.stack = [];
 pv.Mark.prototype
     .property("data")
     .property("visible", Boolean)
-    // DATUM - an object counterpart for each value of data.
-    .property("datum", Object)
     // CSS attributes pass-through
     .property("css", Object)
     // SVG attributes pass-through
@@ -10734,11 +10971,6 @@ pv.Mark.prototype._zOrder = 0;
  */
 pv.Mark.prototype.defaults = new pv.Mark()
     .data(function(d) { return [d]; })
-    // DATUM - an object counterpart for each value of data.
-    .datum(function() {
-        var parent = this.parent;
-        return parent ? parent.scene[parent.index].datum : null; 
-    })
     .visible(true)
     .antialias(true)
     .events("painted");
@@ -10858,10 +11090,6 @@ pv.Mark.prototype.anchor = function(name) {
     .name(name)
     .data(function() {
         return this.scene.target.map(function(s) { return s.data; });
-      })
-    // DATUM - an object counterpart for each value of data.
-    .datum(function() {
-        return this.scene.target[this.index].datum;
       })
     .visible(function() {
         return this.scene.target[this.index].visible;
@@ -11053,112 +11281,129 @@ pv.Mark.prototype.render = function() {
 };
 
 pv.Mark.prototype.renderCore = function() {
-  var parent = this.parent,
-      stack = pv.Mark.stack;
+    var parent = this.parent,
+        stack = pv.Mark.stack;
 
-  /* Record the path to this mark. */
-  var indexes = [];
-  for (var mark = this; mark.parent; mark = mark.parent) {
-    indexes.unshift(mark.childIndex);
-  }
+    /* Record the path to this mark. */
+    var indexes = []; // [root excluded], ..., this.parent.childIndex, this.childIndex
+    for (var mark = this; mark.parent; mark = mark.parent) {
+      indexes.unshift(mark.childIndex);
+    }
 
-  /** @private */
-  function render(mark, depth, scale) {
-    mark.scale = scale;
-    if (depth < indexes.length) {
-      stack.unshift(null);
-      try{
-          if (mark.hasOwnProperty("index")) {
-            renderInstance(mark, depth, scale);
-          } else {
-            for (var i = 0, n = mark.scene.length; i < n; i++) {
-              mark.index = i;
-              renderInstance(mark, depth, scale);
+    var L = indexes.length;
+
+    /** @private
+     * Starts with mark = root with the call:
+     *   render(this.root, 0, 1);
+     *
+     * when in the context of the first ascendant of 'this'
+     * that has an index set.
+     * The stack will already be filled up to the context scene/index.
+     */
+    function render(mark, depth, scale) {
+      mark.scale = scale;
+      if (depth < L) {
+        var addStack = (depth >= stack.length);
+        if(addStack){
+            stack.unshift(null);
+        }
+        try{
+            if (mark.hasOwnProperty("index")) {
+              renderCurrentInstance(mark, depth, scale, addStack);
+            } else {
+              // Traverse every branch that leads to
+              // instances of the outer "this" mark.
+              for (var i = 0, n = mark.scene.length; i < n; i++) {
+                mark.index = i;
+                renderCurrentInstance(mark, depth, scale, addStack);
+              }
+              delete mark.index;
             }
-            delete mark.index;
-          }
-      } finally {
-          stack.shift();
-      }
-    } else {
-      mark.build();
-
-      /*
-       * In the update phase, the scene is rendered by creating and updating
-       * elements and attributes in the SVG image. No properties are evaluated
-       * during the update phase; instead the values computed previously in the
-       * build phase are simply translated into SVG. The update phase is
-       * decoupled (see pv.Scene) to allow different rendering engines.
-       */
-      pv.Scene.scale = scale;
-
-      var id = null; // SVGWeb performance enhancement.
-      if (mark.scene && mark.scene.$g && mark.scene.$g.suspendRedraw)
-        id = mark.scene.$g.suspendRedraw(1000);
-
-      pv.Scene.updateAll(mark.scene);
-
-      if (id) // SVGWeb performance enhancement.
-          mark.scene.$g.unsuspendRedraw(id);
-    }
-    delete mark.scale;
-  }
-
-  /**
-   * @private Recursively renders the current instance of the specified mark.
-   * This is slightly tricky because `index` and `scene` properties may or may
-   * not already be set; if they are set, it means we are rendering only a
-   * specific instance; if they are unset, we are rendering all instances.
-   * Furthermore, we must preserve the original context of these properties when
-   * rendering completes.
-   *
-   * <p>Another tricky aspect is that the `scene` attribute should be set for
-   * any preceding children, so as to allow property chaining. This is
-   * consistent with first-pass rendering.
-   */
-  function renderInstance(mark, depth, scale) {
-    var s = mark.scene[mark.index], i;
-    if (s.visible) {
-      var childIndex = indexes[depth],
-          child = mark.children[childIndex];
-
-      /* Set preceding child scenes. */
-      for (i = 0; i < childIndex; i++) {
-        mark.children[i].scene = s.children[i];
-      }
-
-      /* Set current child scene, if necessary. */
-      stack[0] = s.data;
-      if (child.scene) {
-        render(child, depth + 1, scale * s.transform.k);
+        } finally {
+            if(addStack){
+                stack.shift();
+            }
+        }
       } else {
-        child.scene = s.children[childIndex];
-        render(child, depth + 1, scale * s.transform.k);
-        delete child.scene;
-      }
+        // Got to a "scenes" node, of mark = outer "this".
+        // Build and UpdateAll
+        mark.build();
 
-      /* Clear preceding child scenes. */
-      for (i = 0; i < childIndex; i++) {
-        delete mark.children[i].scene;
+        /*
+         * In the update phase, the scene is rendered by creating and updating
+         * elements and attributes in the SVG image. No properties are evaluated
+         * during the update phase; instead the values computed previously in the
+         * build phase are simply translated into SVG. The update phase is
+         * decoupled (see pv.Scene) to allow different rendering engines.
+         */
+        pv.Scene.scale = scale;
+        pv.Scene.updateAll(mark.scene);
+      }
+      delete mark.scale;
+    }
+
+    /**
+     * @private Recursively renders the current instance of the specified mark.
+     * This is slightly tricky because `index` and `scene` properties may or may
+     * not already be set; if they are set, it means we are rendering only a
+     * specific instance; if they are unset, we are rendering all instances.
+     * Furthermore, we must preserve the original context of these properties when
+     * rendering completes.
+     *
+     * <p>Another tricky aspect is that the `scene` attribute should be set for
+     * any preceding children, so as to allow property chaining. This is
+     * consistent with first-pass rendering.
+     */
+    function renderCurrentInstance(mark, depth, scale, addStack) {
+      var s = mark.scene[mark.index], i;
+      if (s.visible) {
+        var markChildren = mark.children;
+        var instChildren = s.children;
+
+        var childIndex = indexes[depth];
+        var child = markChildren[childIndex];
+
+        /* If current child's scene is not set
+         * include it in the set/unset loops below.
+         */
+        if(!child.scene){
+            childIndex++;
+        }
+
+        /* Set preceding (and self?) child marks' scenes. */
+        for (i = 0; i < childIndex; i++) {
+          markChildren[i].scene = instChildren[i];
+        }
+
+        if(addStack){
+            stack[0] = s.data;
+        }
+
+        render(child, depth + 1, scale * s.transform.k);
+
+        /* Clear preceding (and self?) child mark's scenes. */
+        for (i = 0; i < childIndex; i++) {
+          // Cheaper to set to null than to delete
+          markChildren[i].scene = undefined;
+        }
       }
     }
-  }
 
-  /* Bind this mark's property definitions. */
-  this.bind();
+    /* Bind this mark's property definitions. */
+    this.bind();
 
-  /* The render context is the first ancestor with an explicit index. */
-  while (parent && !parent.hasOwnProperty("index")) parent = parent.parent;
+    /* The render context is the first ancestor with an explicit index. */
+    while (parent && !parent.hasOwnProperty("index")) parent = parent.parent;
 
-  /* Recursively render all instances of this mark. */
-  this.context(
-      parent ? parent.scene : undefined,
-      parent ? parent.index : -1,
-      function() { render(this.root, 0, 1); });
+    /* Recursively render all instances of this mark. */
+    this.context(
+        parent ? parent.scene : undefined,
+        parent ? parent.index : -1,
+        function() {
+            // Stack contains datas' until parent.scene, parent.index
+            render(this.root, 0, 1);
+        });
 };
-
-/** @private */ 
-pv.Mark._requiredPropsPosition = {id: 0, datum: 1, visible: 3};
 
 /**
  * @private In the bind phase, inherited property definitions are cached so they
@@ -11178,14 +11423,7 @@ pv.Mark.prototype.bind = function() {
        * 2 - prop/value, 
        * 3 - prop/fun 
        */
-      types = [[], [], [], []], 
-      
-      // DATUM - an object counterpart for each value of data.
-      // Ensure that required properties are evaluated in
-      // the order: id, datum, visible
-      // The reason is that the visible property function should 
-      // have access to id and datum to decide.
-      requiredPositions = pv.Mark._requiredPropsPosition;
+      types = [[], [], [], []];
   
   /*
    * **Evaluation** order (not precedence order for choosing props/defs)
@@ -11259,8 +11497,6 @@ pv.Mark.prototype.bind = function() {
               data = p;
               break;
 
-            // DATUM - an object counterpart for each value of data.
-            case "datum":
             case "visible":
             case "id":
               required.push(p);
@@ -11285,23 +11521,12 @@ pv.Mark.prototype.bind = function() {
             }
         }
       }
-    } while (mark = mark.proto);
+    } while ((mark = mark.proto));
   }
 
   /* Scan the proto chain for all defined properties. */
   bind(this);
   bind(this.defaults);
-  
-  /*
-   * DATUM - an object counterpart for each value of data.
-   * Sort required properties.
-   * These may be out of order when one of the properties
-   * comes from 'this' and the other from 'this.defaults'.
-   */
-  required.sort(function(pa, pb){
-      return requiredPositions[pa.name] - requiredPositions[pb.name];
-  });
-
   types[1].reverse();
   types[3].reverse();
 
@@ -11313,7 +11538,7 @@ pv.Mark.prototype.bind = function() {
           types[2].push(seen[name] = {name: name, type: 2, value: null});
         }
     }
-  } while (mark = mark.proto);
+  } while ((mark = mark.proto));
 
   /* Define setter-getter for inherited defs. */
   var defs = types[0].concat(types[1]);
@@ -11755,6 +11980,12 @@ pv.Mark.prototype.mouse = function() {
       if(offset){
           x -= offset.left;
           y -= offset.top;
+
+          var computed = pv.getWindow(n.ownerDocument).getComputedStyle(n, null);
+          if(computed){
+              x -= parseFloat(computed.paddingLeft || 0);
+              y -= parseFloat(computed.paddingTop  || 0);
+          }
       }
       
       /* Compute the inverse transform of all enclosing panels. */
@@ -11841,10 +12072,14 @@ pv.Mark.prototype.event = function(type, handler) {
   return this;
 };
 
-/** @private Evaluates the function <i>f</i> with the specified context. */
+/** @private Evaluates the function <i>f</i> with the specified context.
+ * The <tt>this</tt> mark is the JavaScript context on which
+ * the function <i>f</i> is called, but plays no other role.
+ * It may be the case that <tt>scenes.mark</tt> is not equal to <tt>this</tt>.
+ */
 pv.Mark.prototype.context = function(scene, index, f) {
-  var proto = pv.Mark.prototype,
-      stack = pv.Mark.stack,
+  var proto  = pv.Mark.prototype,
+      stack  = pv.Mark.stack,
       oscene = pv.Mark.scene,
       oindex = proto.index;
 
@@ -11858,7 +12093,7 @@ pv.Mark.prototype.context = function(scene, index, f) {
     
     var that = scene.mark,
         mark = that,
-        ancestors = [];
+        ancestors = []; // that, that.parent, ..., root
 
     /* Set ancestors' scene and index; populate data stack. */
     do {
@@ -11867,32 +12102,43 @@ pv.Mark.prototype.context = function(scene, index, f) {
       
       mark.index = index;
       mark.scene = scene;
-      
-      index = scene.parentIndex;
-      scene = scene.parent;
-    } while (mark = mark.parent);
 
-    /* Set ancestors' scale; requires top-down. */
-    for (var i = ancestors.length - 1, k = 1; i > 0; i--) {
+      if((mark = mark.parent)){
+        index = scene.parentIndex;
+        scene = scene.parent;
+      }
+    } while(mark);
+
+    /* Set ancestors' scale, excluding "that"; requires top-down. */
+    var k = 1; // root's scale is 1
+    for (var i = ancestors.length - 1; i > 0; i--) {
       mark = ancestors[i];
-      mark.scale = k;
+      mark.scale = k; // accumulated scale on mark
+
+      // children's scale
       k *= mark.scene[mark.index].transform.k;
     }
     
+    that.scale = k;
+
     /* Set direct children of "that"'s scene and scale. */
-    var children = that.children;
-    if (children){
-      var thatInstance = that.scene[that.index];
-      for (var i = 0, n = children.length ; i < n; i++) {
+    var children = that.children, n;
+    if (children && (n = children.length) > 0){
+      // "that" is a panel, has a transform.
+      var thatInst = that.scene[that.index];
+      k *= thatInst.transform.k;
+      
+      var instChildren = thatInst.children;
+      for (var i = 0 ; i < n; i++) {
         mark = children[i];
-        mark.scene = thatInstance.children[i];
+        mark.scene = instChildren[i];
         mark.scale = k;
       }
     }
   }
 
   /** @private Clears the context. */
-  function clear(scene, index) {
+  function clear(scene/*, index*/) {
     if (!scene) return;
     var that = scene.mark,
         mark;
@@ -11902,21 +12148,25 @@ pv.Mark.prototype.context = function(scene, index, f) {
     if (children){
       for (var i = 0, n = children.length ; i < n; i++) {
         mark = children[i];
-        delete mark.scene;
-        delete mark.scale;
+        // It's generally faster to set to something, than to delete
+        mark.scene = undefined;
+        mark.scale = 1;
       }
     }
     
     /* Reset ancestors. */
     mark = that;
-    do {
+    var parent;
+    do{
       stack.pop();
-      if (mark.parent) {
-        delete mark.scene;
-        delete mark.scale;
+      delete mark.index; // must be deleted!
+      
+      if ((parent = mark.parent)) {
+        // It's generally faster to set to something, than to delete
+        mark.scene = undefined;
+        mark.scale = 1;
       }
-      delete mark.index;
-    } while (mark = mark.parent);
+    } while((mark = parent));
   }
 
   /* Context switch, invoke the function, then switch back. */
@@ -11934,17 +12184,17 @@ pv.Mark.prototype.context = function(scene, index, f) {
       }
     } else {
       clear(oscene, oindex);
-      apply(scene, index);
+      apply(scene,   index);
       try {
         f.apply(this, stack);
       } catch (ex) {
           pv.error(ex);
           throw ex;
       } finally {
-        clear(scene, index);
+        clear(scene,   index);
         apply(oscene, oindex);
       }
-  }
+    }
 };
 
 pv.Mark.getEventHandler = function(type, scenes, index, event){
@@ -11966,51 +12216,57 @@ pv.Mark.dispatch = function(type, scenes, index, event) {
   if(root.animatingCount){
       return true;
   }
-  
   var handlerInfo;
   var interceptors = root.$interceptors && root.$interceptors[type];
   if(interceptors){
-    for(var i = 0, L = interceptors.length ; i < L ; i++){ 
-        handlerInfo = interceptors[i](type, event);
-        if(handlerInfo){
-            break;
-  }
-  
-        if(handlerInfo === false){
-            // Consider handled
-            return true;
-        }
+    for(var i = 0, L = interceptors.length ; i < L ; i++){
+      handlerInfo = interceptors[i](type, event);
+      if(handlerInfo){
+        break;
+      }
+
+      if(handlerInfo === false){
+        // Consider handled
+        return true;
+      }
     }
   }
-  
+
   if(!handlerInfo){
-      handlerInfo = this.getEventHandler(type, scenes, index, event);
+    handlerInfo = this.getEventHandler(type, scenes, index, event);
+    if(!handlerInfo){
+      return false;
+    }
   }
-  
-  return handlerInfo ? this.handle.apply(this, handlerInfo) : false;
+
+  return this.handle.apply(this, handlerInfo);
 };
 
 pv.Mark.handle = function(handler, type, scenes, index, event){
     var m = scenes.mark;
     
-    m.context(scenes, index, function() {
+    m.context(scenes, index, function(){
       var stack = pv.Mark.stack.concat(event);
-      if(handler instanceof Array) {
+      if(handler instanceof Array){
           var ms;
           handler.forEach(function(hi){
             var mi = hi.apply(m, stack);
             if(mi && mi.render) {
                 (ms || (ms = [])).push(mi);
             }
-        });
+          });
         
-        if(ms) { ms.forEach(function(mi){ mi.render(); }); }
-    } else {
+          if(ms) {
+              ms.forEach(function(mi){
+                mi.render();
+              });
+          }
+      } else {
         m = handler.apply(m, stack);
         if (m && m.render) {
             m.render();
         }
-    }
+      }
   });
   
   return true;
@@ -12065,25 +12321,25 @@ pv.Mark.prototype.eachInstance = function(fun, ctx){
     function mapRecursive(scene, level, toScreen){
         var D = scene.length;
         if(D > 0){
-        var isLastLevel = level === L, 
-            childIndex;
-        
-        if(!isLastLevel) {
-            childIndex = indexes[level];
-        }
-        
+            var isLastLevel = level === L,
+                childIndex;
+
+            if(!isLastLevel) {
+                childIndex = indexes[level];
+            }
+
             for(var index = 0 ; index < D ; index++){
                 var instance = scene[index];
                 if(instance.visible){
-                if(level === L){
+                    if(level === L){
                         fun.call(ctx, scene, index, toScreen);
                     } else {
-                    var childScene = instance.children[childIndex];
+                        var childScene = instance.children[childIndex];
                         if(childScene){ // Some nodes might have not been rendered???
                         var childToScreen = toScreen
-                                                .times(instance.transform)
-                                                .translate(instance.left, instance.top);
-                        
+                                            .times(instance.transform)
+                                            .translate(instance.left, instance.top);
+
                             mapRecursive(childScene, level + 1, childToScreen);
                         }
                     }
@@ -12124,18 +12380,36 @@ pv.Mark.prototype.on = function(state) {
 
 // --------------
 
-pv.Mark.prototype.getShape = function(scenes, index){
+// inset - percentage of width/height to discount on the shape, on each side
+pv.Mark.prototype.getShape = function(scenes, index, inset){
     var s = scenes[index];
     if(!s.visible){
         return null;
     }
+    if(inset == null){
+        inset = 0;
+    }
     
-    return s._shape || (s._shape = this.getShapeCore(scenes, index));
+    var key = '_shape_inset_' + inset;
+    return s[key] || (s[key] = this.getShapeCore(scenes, index, inset));
 };
 
-pv.Mark.prototype.getShapeCore = function(scenes, index){
-    var s = scenes[index];
-    return new pv.Shape.Rect(s.left, s.top, s.width, s.height);
+pv.Mark.prototype.getShapeCore = function(scenes, index, inset){
+    var s  = scenes[index];
+    var l = s.left;
+    var t = s.top;
+    var w = s.width;
+    var h = s.height;
+    if(inset > 0 && inset <= 1){
+        var dw = inset * w;
+        var dh = inset * h;
+        l += dw;
+        t += dh;
+        w -= dw*2;
+        h -= dh*2;
+    }
+    
+    return new pv.Shape.Rect(l, t, w, h);
 };
 /**
  * Constructs a new mark anchor with default properties.
@@ -13040,19 +13314,31 @@ pv.Label.prototype.defaults = new pv.Label()
     .textMargin(3);
 
 
-pv.Label.prototype.getShapeCore = function(scenes, index){
+pv.Label.prototype.getShapeCore = function(scenes, index, inset){
     var s = scenes[index];
-    
+
     var size = pv.Text.measure(s.text, s.font);
+    var l = s.left;
+    var t = s.top;
+    var w = size.width;
+    var h = size.height;
+    if(inset > 0 && inset <= 1){
+        var dw = inset * w;
+        var dh = inset * h;
+        l += dw;
+        t += dh;
+        w -= dw*2;
+        h -= dh*2;
+    }
     
     return pv.Label.getPolygon(
-            size.width,
-            size.height,
+            w,
+            h,
             s.textAlign,
             s.textBaseline,
             s.textAngle,
             s.textMargin)
-            .apply(pv.Transform.identity.translate(s.left, s.top));
+            .apply(pv.Transform.identity.translate(l, t));
 };
 
 pv.Label.getPolygon = function(textWidth, textHeight, align, baseline, angle, margin){
@@ -20085,6 +20371,255 @@ pv.Layout.Bullet.prototype.buildImplied = function(s) {
  * @extends function
  */
 pv.Behavior = {};
+ pv.Behavior.dragBase = function(shared){
+    var events, // event registrations held during each selection
+        downElem,
+        cancelClick,
+        inited,
+        drag;
+    
+    shared.autoRender = true;
+    shared.positionConstraint = null;
+    shared.bound = function(v, a_p){
+        return Math.max(drag.min[a_p], Math.min(drag.max[a_p], v));
+    };
+    
+    /** @private protovis mark event handler */
+    function mousedown(d) {
+        // Initialize
+        if(!inited){
+            inited = true;
+            this.addEventInterceptor('click', eventInterceptor, /*before*/true);
+        }
+        
+        // Add event handlers to follow the drag.
+        // These are unregistered on mouse up.
+        if(!events){
+            var root = this.root.scene.$g;
+            events = [
+                // Attaching events to the canvas (instead of only to the document)
+                // allows canceling the bubbling of the events before they 
+                // reach the handlers of ascendant elements (of canvas).
+                [root,     'mousemove', pv.listen(root, 'mousemove', mousemove)],
+                [root,     'mouseup',   pv.listen(root, 'mouseup',   mouseup  )],
+              
+                // It is still necessary to receive events
+                // that are sourced outside the canvas
+                [document, 'mousemove', pv.listen(document, 'mousemove', mousemove)],
+                [document, 'mouseup',   pv.listen(document, 'mouseup',   mouseup  )]
+            ];
+        }
+        
+        var ev = arguments[arguments.length - 1]; // last argument
+        downElem = ev.target;
+        cancelClick = false;
+        
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+        
+        // --------------
+        
+        var m1    = this.mouse();
+        var scene = this.scene;
+        var index = this.index;
+        
+        drag = 
+        scene[index].drag = {
+            phase: 'start',
+            m:     m1,    // current relevant mouse position
+            m1:    m1,    // the mouse position of the mousedown
+            m2:    null,  // the mouse position of the current/last mousemove
+            d:     d,     // the datum in mousedown
+            scene: scene, // scene context
+            index: index  // scene index
+        };
+
+        ev = wrapEvent(ev, drag);
+
+        shared.dragstart.call(this, ev);
+        
+        var m = drag.m;
+        if(m !== m1){
+            m1.x = m.x;
+            m1.y = m.y;
+        }
+    }
+    
+    /** @private DOM event handler */
+    function mousemove(ev) {
+        if (!drag) { return; }
+        
+        drag.phase = 'move';
+        
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+        
+        ev = wrapEvent(ev, drag);
+        
+        // In the context of the mousedown scene
+        var scene = drag.scene;
+        scene.mark.context(scene, drag.index, function() {
+            // this === scene.mark
+            var mprev = drag.m2 || drag.m1;
+            
+            var m2 = this.mouse();
+            if(mprev && m2.distance2(mprev).dist2 <= 2){
+                return;
+            }
+            
+            drag.m = drag.m2 = m2;
+            
+            shared.drag.call(this, ev);
+            
+            // m2 may have changed
+            var m = drag.m;
+            if(m !== m2){
+                m2.x = m.x;
+                m2.y = m.y;
+            }
+        });
+    }
+
+    /** @private DOM event handler */
+    function mouseup(ev) {
+        if (!drag) { return; }
+        
+        drag.phase = 'end';
+        
+        var m2 = drag.m2;
+        
+        // A click event is generated whenever
+        // the element where the mouse goes down
+        // is the same element of where the mouse goes up.
+        // We will try to intercept the generated click event and swallow it,
+        // when some selection has occurred.
+        var isDrag = m2 && drag.m1.distance2(m2).dist2 > 0.1;
+        drag.canceled = !isDrag;
+        
+        cancelClick = isDrag && (downElem === ev.target);
+        if(!cancelClick){
+            downElem = null;
+        }
+        
+        // Prevent the event from bubbling off the canvas 
+        // (if being handled by the root)
+        ev.stopPropagation();
+        
+        ev = wrapEvent(ev, drag);
+        
+        // Unregister events
+        if(events){
+            events.forEach(function(registration){
+                pv.unlisten.apply(pv, registration);
+            });
+            events = null;
+        }
+        
+        var scene = drag.scene;
+        var index = drag.index;
+        try{
+            scene.mark.context(scene, index, function() {
+                shared.dragend.call(this, ev);
+            });
+        } finally {
+            drag = null;
+            delete scene[index].drag;
+        }
+    }
+
+    function wrapEvent(ev, drag){
+        try{
+            ev.drag = drag;
+            return ev;
+        } catch(ex) {
+            // SWALLOW
+        }
+
+        // wrap
+        var ev2 = {};
+        for(var p in ev){
+            var v = ev[p];
+            ev2[p] = typeof v !== 'function' ? v : bindEventFun(f, ev);
+        }
+        
+        ev2._sourceEvent = ev;
+
+        return ev2;
+    }
+
+    function bindEventFun(f, ctx){
+        return function(){
+            return f.apply(ctx, arguments);
+        };
+    }
+
+    /**
+     * Intercepts click events and, 
+     * if they were consequence
+     * of a mouse down and up of a selection,
+     * cancels them.
+     * 
+     * @returns {boolean|array} 
+     * <tt>false</tt> to indicate that the event is handled,
+     * otherwise, an event handler info array: [handler, type, scenes, index, ev].
+     * 
+     * @private
+     */
+    function eventInterceptor(type, ev){
+        if(cancelClick && downElem === ev.target){
+            // Event is handled
+            cancelClick = false;
+            downElem = null;
+            return false;
+        }
+        
+        // Let event be handled normally
+    }
+    
+
+    /**
+     * Whether to automatically render the mark when appropriate.
+     * 
+     * @function
+     * @returns {pv.Behavior.dragBase | boolean} this, or the current autoRender parameter.
+     * @name pv.Behavior.dragBase.prototype.autoRender
+     * @param {string} [_] the new autoRender parameter
+     */
+    mousedown.autoRender = function(_) {
+        if (arguments.length) {
+            shared.autoRender = !!_;
+            return mousedown;
+        }
+        
+        return shared.autoRender;
+    };
+    
+    /**
+     * Gets or sets the positionConstraint parameter.
+     * 
+     * A function that given a drag object
+     * can change its property <tt>m</tt>, 
+     * containing a vector with the desired mouse position.
+     *  
+     * @function
+     * @returns {pv.Behavior.dragBase | function} this, or the current positionConstraint parameter.
+     * @name pv.Behavior.dragBase.prototype.positionConstraint
+     * @param {function} [_] the new positionConstraint parameter
+     */
+    mousedown.positionConstraint = function(_) {
+        if (arguments.length) {
+            shared.positionConstraint = _;
+            return mousedown;
+        }
+        
+        return shared.positionConstraint;
+    };
+    
+    return mousedown;
+};
+  
 /**
  * Returns a new drag behavior to be registered on mousedown events.
  *
@@ -20152,50 +20687,122 @@ pv.Behavior = {};
  * @see pv.Layout.force
  */
 pv.Behavior.drag = function() {
-  var scene, // scene context
-      index, // scene context
-      p, // particle being dragged
-      v1, // initial mouse-particle offset
-      max;
-
-  /** @private */
-  function mousedown(d, e) {
-    index = this.index;
-    scene = this.scene;
-    var m = this.mouse();
-    v1 = ((p = d).fix = pv.vector(d.x, d.y)).minus(m);
-    max = {
-      x: this.parent.width() - (d.dx || 0),
-      y: this.parent.height() - (d.dy || 0)
+    var collapse = null; // dimensions to collapse
+    var kx = 1; // x-dimension 1/0
+    var ky = 1; // y-dimension 1/0
+    
+    var v1;  // initial mouse-particle offset
+    
+    // Executed in context of initial mark scene
+    var shared = {
+        dragstart: function(ev){
+            var drag = ev.drag;
+            drag.type = 'drag';
+            
+            var p   = drag.d; // particle being dragged
+            var fix = pv.vector(p.x, p.y);
+            
+            p.fix  = fix;
+            p.drag = drag;
+            
+            v1 = fix.minus(drag.m1);
+            
+            var parent = this.parent;
+            drag.max = {
+               x: parent.width()  - (p.dx || 0),
+               y: parent.height() - (p.dy || 0)
+            };
+            
+            drag.min = {
+                x: 0,
+                y: 0
+            };
+            
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            pv.Mark.dispatch("dragstart", drag.scene, drag.index, ev);
+        },
+        
+        drag: function(ev){
+            var drag = ev.drag;
+            var m2   = drag.m2;
+            var p    = drag.d;
+            
+            drag.m = v1.plus(m2);
+            
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                constraint(drag);
+            }
+            
+            var m = drag.m;
+            if(kx){
+                p.x = p.fix.x = shared.bound(m.x, 'x');
+            }
+            
+            if(ky){
+                p.y = p.fix.y = shared.bound(m.y, 'y');
+            }
+            
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            pv.Mark.dispatch("drag", drag.scene, drag.index, ev);
+        },
+        
+        dragend: function(ev){
+            var drag = ev.drag;
+            var p    = drag.d;
+            
+            p.fix = null; // pv compatibility
+            v1 = null;
+             
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            try {
+                pv.Mark.dispatch('dragend', drag.scene, drag.index, ev);
+            } finally {
+                delete p.drag;
+            }
+        }
     };
-    scene.mark.context(scene, index, function() { this.render(); });
-    pv.Mark.dispatch("dragstart", scene, index, e);
-  }
-
-  /** @private */
-  function mousemove(e) {
-    if (!scene) return;
-    scene.mark.context(scene, index, function() {
-        var m = this.mouse();
-        p.x = p.fix.x = Math.max(0, Math.min(v1.x + m.x, max.x));
-        p.y = p.fix.y = Math.max(0, Math.min(v1.y + m.y, max.y));
-        this.render();
-      });
-    pv.Mark.dispatch("drag", scene, index, e);
-  }
-
-  /** @private */
-  function mouseup(e) {
-    if (!scene) return;
-    p.fix = null;
-    scene.mark.context(scene, index, function() { this.render(); });
-    pv.Mark.dispatch("dragend", scene, index, e);
-    scene = null;
-  }
-
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup",   mouseup);
-  return mousedown;
+    
+    var mousedown = pv.Behavior.dragBase(shared);
+    
+    /**
+     * Sets or gets the collapse parameter.
+     * By default, dragging is sensitive to both dimensions.
+     * However, with some visualizations it is desirable to
+     * consider only a single dimension, such as the <i>x</i>-dimension for an
+     * independent variable. In this case, the collapse parameter can be set to
+     * collapse the <i>y</i> dimension:
+     *
+     * <pre>    .event("mousedown", pv.Behavior.drag().collapse("y"))</pre>
+     *
+     * @function
+     * @returns {pv.Behavior.drag} this, or the current collapse parameter.
+     * @name pv.Behavior.drag.prototype.collapse
+     * @param {string} [x] the new collapse parameter
+     */
+    mousedown.collapse = function(x) {
+      if (arguments.length) {
+        collapse = String(x);
+        switch (collapse) {
+          case "y": kx = 1; ky = 0; break;
+          case "x": kx = 0; ky = 1; break;
+          default:  kx = 1; ky = 1; break;
+        }
+        return mousedown;
+      }
+      return collapse;
+    };
+    
+    return mousedown;
 };
 /**
  * Returns a new point behavior to be registered on mousemove events.
@@ -20417,180 +21024,155 @@ pv.Behavior.point = function(r) {
  * configuration of the selection behavior.
  *
  * @extends pv.Behavior
- * 
- * @constructor
- * @param {object}  [keyArgs] keyword arguments object  
- * @param {boolean} [keyArgs.autoRefresh=true] whether to render the selection mark on mouse moves
- * @param {boolean} [keyArgs.datumIsRect=true] whether the datum is where the selection rectangle coordinates are stored.
- * When <tt>false</tt>, the selection rectangle is  
- * published in a property created on the panel mark: 'selectionRect',
- * of type {@link pv.Shape.Rect}.
- * 
  * @see pv.Behavior.drag
  */
- pv.Behavior.select = function(keyArgs){
-  var scene, // scene context
-      index, // scene context
-      m1,     // initial mouse position
-      mprev,  // the mouse position of the previous event (mouse down or mouse move)
-      events, // event registrations held during each selection
-      r,      // current selection rect
-      downElem,
-      cancelClick,
-      inited;
-
-    // Redraw mark on mouse move - default is the same as the initial pv.Behavior.select
-    var autoRefresh = pv.get(keyArgs, 'autoRefresh', true);
+ pv.Behavior.select = function(){
+    var collapse = null; // dimensions to collapse
+    var kx = 1; // x-dimension 1/0
+    var ky = 1; // y-dimension 1/0
+    var preserveLength = false;
     
-    // Whether the datum is where the selection rect coordinates are stored
-    var datumIsRect = pv.get(keyArgs, 'datumIsRect', true);
-    
-    /** @private protovis mark event handler */
-    function mousedown(d) {
-      var ev = arguments[arguments.length - 1]; // last argument
-      
-      downElem = ev.target;
-      cancelClick = false;
-      index = this.index;
-      scene = this.scene;
-      m1 = this.mouse();
-      
-      // Initialize
-      if(!inited){
-          inited = true;
-          this.addEventInterceptor('click', eventInterceptor, /*before*/true);
-      }
-      
-      // Add event handlers to follow the selection.
-      // These are unregistered on mouse up.
-      if(!events){
-          var root = this.root.scene.$g;
-          events = [
-              // Attaching events to the canvas (instead of only to the document)
-              // allows canceling the bubbling of the events before they 
-              // reach the handlers of ascendant elements (of canvas).
-              [root,     'mousemove', pv.listen(root, 'mousemove', mousemove)],
-              [root,     'mouseup',   pv.listen(root, 'mouseup',   mouseup  )],
-              
-              // It is still necessary to receive events
-              // that are sourced outside the canvas
-              [document, 'mousemove', pv.listen(document, 'mousemove', mousemove)],
-              [document, 'mouseup',   pv.listen(document, 'mouseup',   mouseup  )]
-          ];
-      }
-      
-      if(datumIsRect){
-          r = d;
-          r.x = m1.x;
-          r.y = m1.y;
-          r.dx = r.dy = 0;
-      } else {
-          mprev = m1;
-          this.selectionRect = r = new pv.Shape.Rect(m1.x, m1.y, 0, 0);
-      }
-
-      pv.Mark.dispatch('selectstart', scene, index, ev);
-    }
-    
-    /** @private DOM event handler */
-    function mousemove(ev) {
-        if (!scene) { return; }
-      
-        // Prevent the event from bubbling off the canvas 
-        // (if being handled by the root)
-        ev.stopPropagation();
-      
-        scene.mark.context(scene, index, function() {
-            // this === scene.mark
-            var m2 = this.mouse();
-      
-            if(datumIsRect){
-                r.x = Math.max(0, Math.min(m1.x, m2.x));
-                r.y = Math.max(0, Math.min(m1.y, m2.y));
-                r.dx = Math.min(this.width(), Math.max(m2.x, m1.x)) - r.x;
-                r.dy = Math.min(this.height(), Math.max(m2.y, m1.y)) - r.y;
-            } else {
-                if(mprev && m2.distance2(mprev).dist2 <= 2){
-                    return;
-                }
-      
-                mprev = m2;
-          
-                var x = m1.x;
-                var y = m1.y;
-                this.selectionRect = r = new pv.Shape.Rect(x, y, m2.x - x, m2.y - y);
+    // Executed in context of initial mark scene
+    var shared = {
+        dragstart: function(ev){
+            var drag = ev.drag;
+            drag.type = 'select';
+            
+            var r  = drag.d;
+            r.drag = drag;
+            
+            drag.max = {
+                x: this.width(),
+                y: this.height()
+            };
+            
+            drag.min = {
+                x: 0,
+                y: 0
+            };
+                
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                drag.m = drag.m.clone();
+                constraint(drag);
             }
-      
-            if(autoRefresh){
+            
+            var m = drag.m;
+            if(kx){
+                r.x = shared.bound(m.x, 'x');
+                if(!preserveLength){
+                    r.dx = 0;
+                }
+            }
+            
+            if(ky){
+                r.y = shared.bound(m.y, 'y');
+                if(!preserveLength){
+                    r.dy = 0;
+                }
+            }
+            
+            pv.Mark.dispatch('selectstart', drag.scene, drag.index, ev);
+        },
+        
+        drag: function(ev){
+            var drag = ev.drag;
+            var m1 = drag.m1;
+            var r  = drag.d;
+            
+            drag.max.x = this.width();
+            drag.max.y = this.height();
+            
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                drag.m = drag.m.clone();
+                constraint(drag);
+            }
+            
+            var m = drag.m;
+            
+            if(kx){
+                var bx = Math.min(m1.x, m.x);
+                bx  = shared.bound(bx, 'x');
+                r.x = bx;
+                
+                if(!preserveLength){
+                    var ex = Math.max(m.x,  m1.x);
+                    ex = shared.bound(ex, 'x');
+                    r.dx = ex - bx;
+                }
+            }
+            
+            if(ky){
+                var by = Math.min(m1.y, m.y);
+                by  = shared.bound(by, 'y');
+                r.y = by;
+                
+                if(!preserveLength){
+                    var ey = Math.max(m.y,  m1.y);
+                    ey = shared.bound(ey, 'y');
+                    r.dy = ey - by;
+                }
+            }
+            
+            if(shared.autoRender){
                 this.render();
             }
       
-            pv.Mark.dispatch('select', scene, index, ev);
-        });
-    }   
-
-    /** @private DOM event handler */
-    function mouseup(ev) {
-        if (!scene) { return; }
-      
-        // A click event is generated whenever
-        // the element where the mouse goes down
-        // is the same element of where the mouse goes up.
-        // We will try to intercept the generated click event and swallow it,
-        // when a selection has occurred.
-        cancelClick = (downElem === ev.target) && (r.dx > 0 || r.dy > 0);
-        if(!cancelClick){
-            downElem = null;
-        }
-      
-        // Prevent the event from bubbling off the canvas 
-        // (if being handled by the root)
-        ev.stopPropagation();
-      
-        // Unregister events
-        if(events){
-            events.forEach(function(registration){
-                pv.unlisten.apply(pv, registration);
-            });
-            events = null;
-        }
-      
-        pv.Mark.dispatch('selectend', scene, index, ev);
-      
-        // Cleanup
-        if(!datumIsRect){
-            scene.mark.selectionRect = mprev = null;
-        }
-      
-        scene = index = m1 = r = null;
-    }
-
-    /**
-     * Intercepts click events and, 
-     * if they were consequence
-     * of a mouse down and up of a selection,
-     * cancels them.
-     * 
-     * @returns {boolean|array} 
-     * <tt>false</tt> to indicate that the event is handled,
-     * otherwise, an event handler info array: [handler, type, scenes, index, ev].
-     * 
-     * @private
-     */
-    function eventInterceptor(type, ev){
-        if(cancelClick && downElem === ev.target){
-            // Event is handled
-            cancelClick = false;
-            downElem = null;
-            return false;
-        }
+            pv.Mark.dispatch('select', drag.scene, drag.index, ev);
+        },
         
-        // Let event be handled normally
-    }
-
+        dragend: function(ev){
+            var drag = ev.drag;
+            try {
+                pv.Mark.dispatch('selectend', drag.scene, drag.index, ev);
+            } finally {
+                var r = drag.d;
+                delete r.drag;
+            }
+        }
+    };
+    
+    var mousedown = pv.Behavior.dragBase(shared);
+    
+    /**
+     * Sets or gets the collapse parameter.
+     * By default, the selection rectangle is sensitive to both dimensions.
+     * However, with some visualizations it is desirable to
+     * consider only a single dimension, such as the <i>x</i>-dimension for an
+     * independent variable. In this case, the collapse parameter can be set to
+     * collapse the <i>y</i> dimension:
+     *
+     * <pre>    .event("mousedown", pv.Behavior.select().collapse("y"))</pre>
+     *
+     * @function
+     * @returns {pv.Behavior.select} this, or the current collapse parameter.
+     * @name pv.Behavior.select.prototype.collapse
+     * @param {string} [x] the new collapse parameter
+     */
+    mousedown.collapse = function(x) {
+      if (arguments.length) {
+        collapse = String(x);
+        switch (collapse) {
+          case "y": kx = 1; ky = 0; break;
+          case "x": kx = 0; ky = 1; break;
+          default:  kx = 1; ky = 1; break;
+        }
+        return mousedown;
+      }
+      return collapse;
+    };
+    
+    mousedown.preserveLength = function(_) {
+      if (arguments.length) {
+        preserveLength = !!_;
+        return mousedown;
+      }
+       return preserveLength;
+    };
+    
     return mousedown;
 };
-  
 /**
  * Returns a new resize behavior to be registered on mousedown events.
  *
@@ -20650,50 +21232,123 @@ pv.Behavior.point = function(r) {
  * @see pv.Behavior.drag
  */
 pv.Behavior.resize = function(side) {
-  var scene, // scene context
-      index, // scene context
-      r, // region being selected
-      m1; // initial mouse position
+    var preserveOrtho = false;
+    
+    var isLeftRight = (side === 'left' || side === 'right');
+    
+    // Executed in context of initial mark scene
+    var shared = {
+        dragstart: function(ev){
+            var drag = ev.drag;
+            drag.type = 'resize';
+            
+            var m1 = drag.m1;
+            var r  = drag.d;
+            r.drag = drag;
+            
+            // Fix the position of m1 to be the opposite side,
+            // the one whose position is fixed during resizing
+            switch(side) {
+                case "left":   m1.x = r.x + r.dx; break;
+                case "right":  m1.x = r.x;        break;
+                case "top":    m1.y = r.y + r.dy; break;
+                case "bottom": m1.y = r.y;        break;
+            }
+            
+            // Capture parent's dimensions once
+            // These can be overridden to change the bounds checking behavior
+            var parent = this.parent;
+            drag.max = {
+                x: parent.width(),
+                y: parent.height()
+            };
+            
+            drag.min = {
+                x: 0,
+                y: 0
+            };
+            
+            pv.Mark.dispatch("resizestart", drag.scene, drag.index, ev);
+        },
+        
+        drag: function(ev){
+            var drag = ev.drag;
+            
+            var m1 = drag.m1;
+            var constraint = shared.positionConstraint;
+            if(constraint){
+                drag.m = drag.m.clone();
+                constraint(drag);
+            }
+            
+            var m = drag.m;
+            var r = drag.d;
+            
+            if(!preserveOrtho || isLeftRight){
+                var bx = Math.min(m1.x, m.x );
+                var ex = Math.max(m.x,  m1.x);
+                
+                bx = shared.bound(bx, 'x');
+                ex = shared.bound(ex, 'x');
+                
+                r.x  = bx;
+                r.dx = ex - bx;
+            }
+            
+            if(!preserveOrtho || !isLeftRight){
+                var by = Math.min(m1.y, m.y );
+                var ey = Math.max(m.y,  m1.y);
+                
+                bx = shared.bound(by, 'y');
+                ex = shared.bound(ey, 'y');
+                
+                r.y  = by;
+                r.dy = ey - by;
+            }
+            
+            if(shared.autoRender){
+                this.render();
+            }
+            
+            pv.Mark.dispatch("resize", drag.scene, drag.index, ev);
+        },
+        
+        dragend: function(ev){
+            var drag = ev.drag;
+            
+            max = null;
+            try {
+                pv.Mark.dispatch('resizeend', drag.scene, drag.index, ev);
+            } finally {
+                var r = drag.d;
+                delete r.drag;
+            }
+        }
+    };
 
-  /** @private */
-  function mousedown(d, e) {
-    index = this.index;
-    scene = this.scene;
-    m1 = this.mouse();
-    r = d;
-    switch (side) {
-      case "left": m1.x = r.x + r.dx; break;
-      case "right": m1.x = r.x; break;
-      case "top": m1.y = r.y + r.dy; break;
-      case "bottom": m1.y = r.y; break;
-    }
-    pv.Mark.dispatch("resizestart", scene, index, e);
-  }
-
-  /** @private */
-  function mousemove(e) {
-    if (!scene) return;
-    scene.mark.context(scene, index, function() {
-        var m2 = this.mouse();
-        r.x = Math.max(0, Math.min(m1.x, m2.x));
-        r.y = Math.max(0, Math.min(m1.y, m2.y));
-        r.dx = Math.min(this.parent.width(), Math.max(m2.x, m1.x)) - r.x;
-        r.dy = Math.min(this.parent.height(), Math.max(m2.y, m1.y)) - r.y;
-        this.render();
-      });
-    pv.Mark.dispatch("resize", scene, index, e);
-  }
-
-  /** @private */
-  function mouseup(e) {
-    if (!scene) return;
-    pv.Mark.dispatch("resizeend", scene, index, e);
-    scene = null;
-  }
-
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup", mouseup);
-  return mousedown;
+    var mousedown = pv.Behavior.dragBase(shared);
+    
+    /**
+     * Sets or gets the preserveOrtho.
+     * 
+     * When <tt>true</tt>
+     * doesn't update coordinates orthogonal to the behaviou's side.
+     * The default value is <tt>false</tt>.
+     *
+     * @function
+     * @returns {pv.Behavior.resize | boolean} this, or the current preserveOrtho parameter.
+     * @name pv.Behavior.resize.prototype.preserveOrtho
+     * @param {boolean} [_] the new preserveOrtho parameter
+     */
+    mousedown.preserveOrtho = function(_) {
+        if (arguments.length){
+            preserveOrtho = !!_;
+            return mousedown;
+        }
+        return preserveOrtho;
+    };
+    
+    return mousedown;
 };
 /**
  * Returns a new pan behavior to be registered on mousedown events.
