@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130212
+//VERSION TRUNK-20130213
 
 
 /*global pvc:true */
@@ -80,7 +80,7 @@ var pvc = def.globalSpace('pvc', {
     
     function installPvcLog(){
         if (pvc.debug && typeof console !== "undefined"){
-            ['log', 'info', ['trace', 'debug'], 'error', 'warn', 'group', 'groupEnd']
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
             .forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
@@ -310,6 +310,10 @@ var pvc = def.globalSpace('pvc', {
                type.add(exts2);
             }
         }
+    };
+    
+    pv.Color.prototype.stringify = function(out, remLevels, keyArgs){
+        return pvc.stringifyRecursive(out, this.key, remLevels, keyArgs);
     };
     
     pv.Mark.prototype.hasDelegateValue = function(name, tag) {
@@ -2065,6 +2069,9 @@ def.scope(function(){
             // some methods won't work on the result of by, by1 and transform.
             // Give it a bit of protovis looks
             def.copy(scale, pv.Scale.common);
+            
+            scale.domain = function(){ return domain; };
+            scale.range  = function(){ return range;  };
             
             return scale;
         }
@@ -6126,12 +6133,15 @@ def
         var ownerDims = owner._dimensions;
         
         var addAtom = function(dimName, value){
+            var dimension = def.getOwn(ownerDims, dimName);
             if(value != null){ // nulls are already in base proto object
-                var dimension = def.getOwn(ownerDims, dimName);
                 var atom = dimension.intern(value);
                 if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
                     atomsMap[dimName] = atom;
                 }
+            } else {
+                // But need to make sure it is interned
+                dimension.intern(null);
             }
         };
     
@@ -11865,7 +11875,28 @@ def.type('pvc.visual.Scene')
 
 .add(/** @lends pvc.visual.Scene# */{
     isNull: false,
-
+    
+    /** 
+     * Obtains the group of this scene, or if inexistent
+     * the group of the parent scene, if there is one, and so on.
+     * If no data can be obtained in this way,
+     * the data of the associated panel is returned.
+     */
+    data: function(){
+        var data = this.group;
+        if(!data){
+            var scene = this;
+            while(!data && (scene = scene.parent)){
+                data = scene.group;
+            }
+            if(!data){
+                data = this.panel.data;
+            }
+        }
+        
+        return data;
+    },
+    
     /**
      * Obtains an enumerable of the datums present in the scene.
      *
@@ -12181,34 +12212,44 @@ function scene_setActive(isActive){
 });def
 .type('pvc.visual.RoleVarHelper')
 .init(function(rootScene, role, keyArgs){
-    var g;
     var hasPercentSubVar = def.get(keyArgs, 'hasPercentSubVar', false);
-
-    if(!def.get(keyArgs, 'forceUnbound', false)){
-        g = this.grouping = role.grouping;
-        if(g){
-            this.role = role;
-            this.sourceRoleName = role.sourceRole && role.sourceRole.name;
-            if(!g.isDiscrete()){
-                var panel = rootScene.panel();
-                this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
-                if(hasPercentSubVar){
-                    this.percentFormatter = panel.chart.options.percentValueFormat;
-                }
+    var roleVarName = def.get(keyArgs, 'roleVar');
+    
+    var g = this.grouping = role && role.grouping;
+    if(g){
+        this.role = role;
+        this.sourceRoleName = role.sourceRole && role.sourceRole.name;
+        var panel = rootScene.panel();
+        this.panel = panel;
+        
+        if(!g.isDiscrete()){
+            this.rootContDim = panel.data.owner.dimensions(g.firstDimensionName());
+            if(hasPercentSubVar){
+                this.percentFormatter = panel.chart.options.percentValueFormat;
             }
         }
+    }
+    
+    if(!roleVarName){
+        if(!role){
+            throw def.error.operationInvalid("Role is not defined, so the roleVar argument is required.");
+        }
+        
+        roleVarName = role.name;
     }
     
     if(!g){
         // Unbound role
         // Place a null variable in the root scene
-        var roleVar = rootScene.vars[role.name] = new pvc.visual.ValueLabelVar(null, "");
+        var roleVar = rootScene.vars[roleVarName] = new pvc.visual.ValueLabelVar(null, "");
         if(hasPercentSubVar){
             roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
         }
     }
-
-    rootScene['is' + def.firstUpperCase(role.name) + 'Bound'] = !!g;
+    
+    this.roleVarName = roleVarName;
+    
+    rootScene['is' + def.firstUpperCase(roleVarName) + 'Bound'] = !!g;
 })
 .add({
     isBound: function(){
@@ -12220,8 +12261,8 @@ function scene_setActive(isActive){
             return;
         }
         
-        var roleName = this.role.name;
-        if(scene.vars[roleName]){
+        var roleVarName = this.roleVarName;
+        if(scene.vars[roleVarName]){
             return;
         }
         
@@ -12229,11 +12270,13 @@ function scene_setActive(isActive){
         if(sourceName){
             var sourceVar = def.getOwn(scene.vars, sourceName);
             if(sourceVar){
-                scene.vars[roleName] = sourceVar.clone();
+                scene.vars[roleVarName] = sourceVar.clone();
                 return;
             }
         }
-
+        
+        // TODO: gotta improve this spaghetti somehow
+        
         if(isLeaf){
             // Not grouped, so there's no guarantee that
             // there's a single value for all the datums of the group.
@@ -12250,34 +12293,52 @@ function scene_setActive(isActive){
                     roleVar = pvc.visual.ValueLabelVar.fromComplex(view);
                 }
             } else {
+                var valuePct, valueDim;
                 var group = scene.group;
                 var singleDatum = group ? group.singleDatum() : scene.datum;
                 if(singleDatum){
                     if(!singleDatum.isNull){
                         roleVar = pvc.visual.ValueLabelVar.fromAtom(singleDatum.atoms[rootContDim.name]);
+                        if(roleVar.value != null && this.percentFormatter){
+                            if(group){
+                                valueDim = group.dimensions(rootContDim.name);
+                                valuePct = valueDim.percentOverParent({visible: true});
+                            } else {
+                                valuePct = scene.data().dimensions(rootContDim.name).percent(roleVar.value);
+                            }
+                        }
                     }
                 } else if(group){
-                    var valueDim = group.dimensions(rootContDim.name);
-                    var value    = valueDim.sum({visible: true, zeroIfNone: false});
-                    var label    = rootContDim.format(value);
-                    
-                    roleVar = new pvc.visual.ValueLabelVar(value, label, value);
-                    if(this.percentFormatter){
-                        if(value == null){
-                            roleVar.percent = new pvc.visual.ValueLabelVar(value, label);
-                        } else {
-                            var valuePct = valueDim.percentOverParent({visible: true});
-
-                            roleVar.percent = new pvc.visual.ValueLabelVar(
-                                                    valuePct,
-                                                    this.percentFormatter.call(null, valuePct));
+                    valueDim = group.dimensions(rootContDim.name);
+                    var value = valueDim.sum({visible: true, zeroIfNone: false});
+                    if(value != null){
+                        var label = rootContDim.format(value);
+                        roleVar = new pvc.visual.ValueLabelVar(value, label, value);
+                        if(this.percentFormatter){
+                            valuePct = valueDim.percentOverParent({visible: true});
                         }
                     }
                 }
+                
+                if(roleVar && this.percentFormatter){
+                    if(roleVar.value == null){
+                        roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
+                    } else {
+                        roleVar.percent = new pvc.visual.ValueLabelVar(
+                                          valuePct,
+                                          this.percentFormatter.call(null, valuePct));
+                    }
+                }
             }
-
-            scene.vars[roleName] = roleVar ||
-                                   new pvc.visual.ValueLabelVar(null, "");
+            
+            if(!roleVar){
+                roleVar = new pvc.visual.ValueLabelVar(null, "");
+                if(this.percentFormatter){
+                    roleVar.percent = new pvc.visual.ValueLabelVar(null, "");
+                }
+            }
+            
+            scene.vars[roleVarName] = roleVar;
         }
     }
 });
@@ -12322,7 +12383,8 @@ function scene_setActive(isActive){
         this.chart  = panel.chart;
         this.panel  = panel;
         this.pvMark = pvMark;
-
+        
+        /*jshint expr:true*/
         !pvMark.sign || def.assert("Mark already has an attached Sign.");
 
         pvMark.sign = this;
@@ -12712,7 +12774,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _bitClickSelectable: 256,
     _bitRubberSelectable:512,
     
-    _bitHasEvents:        16 | 32 | 64 | 128, // 240
+    _bitHasEvents:       8 | 16 | 32 | 64 | 128, // 248
 
     showsInteraction:  function(){ return (this.bits & this._bitShowsInteraction) !== 0; },
     showsActivity:     function(){ return (this.bits & this._bitShowsActivity   ) !== 0; },
@@ -12855,7 +12917,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _initDefColorScale: function(){
         var colorAxis = this.panel.axes.color;
         return colorAxis ?
-               colorAxis.sceneScale() :
+               colorAxis.sceneScale({sceneVarName: 'color'}) :
                def.fun.constant(pvc.defaultColor);
     },
 
@@ -13133,6 +13195,7 @@ def
 .constructor
 .add({
     isColorBound: false,
+    isColorDiscrete: false,
     isSizeBound:  false,
     isSizeAbs:    false,
 
@@ -13145,7 +13208,7 @@ def
         return !scene.isNull && 
                ((!this.isSizeBound && !this.isColorBound) ||
                 (this.isSizeBound  && scene.vars.size.value  != null) ||
-                (this.isColorBound && scene.vars.color.value != null));
+                (this.isColorBound && (this.isColorDiscrete || scene.vars.color.value != null)));
     },
 
     _initColor: function(){
@@ -13154,13 +13217,17 @@ def
         var panel = this.panel;
         var colorRole = panel.visualRoles.color;
         if(colorRole){
-            var colorAxis    = panel.axes.color;
-            var colorScale   = colorAxis && colorAxis.scale;
-            var isColorBound = !!colorScale && colorRole.isBound() && !colorScale.isNull;
-            if(isColorBound){ // => colorAxis
+            this.isColorDiscrete = colorRole.isDiscrete();
+            
+            var colorAxis  = panel.axes.color;
+            var colorScale = colorAxis && colorAxis.scale;
+            
+            // Has at least one value? (possibly null, in discrete scales)
+            var isColorBound = !!colorScale && colorRole.isBound();
+            if(isColorBound) { // => colorAxis
                 this.isColorBound = true;
                 sceneColorScale = colorAxis.sceneScale({sceneVarName: colorRole.name});
-            } else if(colorScale){
+            } else if(colorScale) {
                 var r = colorScale.range();
                 if(r && r.length){
                     colorMissing = r[0];
@@ -13185,11 +13252,12 @@ def
         if(sizeRole){
             var sizeAxis  = panel.axes.size;
             var sizeScale = sizeAxis && sizeAxis.scale;
-            var isSizeBound = !!sizeScale && sizeRole.isBound() && !sizeScale.isNull;
+            var isSizeBound = !!sizeScale && sizeRole.isBound();
             if(isSizeBound){
                 this.isSizeBound = true;
-
-                var missingSize = sizeScale.min + (sizeScale.max - sizeScale.min) * 0.1; // 10% size
+                
+                var missingSize = sizeScale.min + (sizeScale.max - sizeScale.min) * 0.05; // 10% size
+                this.nullSizeShapeHasStrokeOnly = (nullSizeShape === 'cross');
                 
                 sceneShapeScale = function(scene){
                     return scene.vars.size.value != null ? shape : nullSizeShape;
@@ -13296,7 +13364,7 @@ def
     },
 
     defaultStrokeWidth: function(){
-        return (this.isSizeAbs && this.scene.vars.size.value < 0) ? 1 : 1;
+        return (this.nullSizeShapeHasStrokeOnly && this.scene.vars.size.value == null) ? 1.8 : 1;
     },
 
     interactiveStrokeWidth: function(width){
@@ -14146,10 +14214,10 @@ def.scope(function(){
             
             var by;
             
-            // Applying scaleNullRangeValue to discrete scales
-            // Caused problems in the discrete color scales
-            // where we want it to catch the first color of the color scale,
-            // in cases where there is only a null series...
+            // Applying 'scaleNullRangeValue' to discrete scales
+            // would cause problems in discrete color scales,
+            // where we want null to be matched to the first color of the color scale
+            // (typically happens when there is only a null series).
             if(scale.type !== 'discrete' ){
                 var useAbs = this.scaleUsesAbs();
                 var nullAs = this.scaleTreatsNullAs();
@@ -14452,10 +14520,6 @@ def.scope(function(){
                 }
             } else {
                 scale.range(scale.min, scale.max);
-            }
-
-            if(pvc.debug > 4){
-                this.chart._log("Axis " + this.id  + " setRange: " + pvc.stringify(scale.range()));
             }
 
             return scale;
@@ -15745,7 +15809,7 @@ def.scope(function(){
         // Called from within setScale
         _wrapScale: function(scale){
             // Check if there is a color transform set
-            // and if so, transform the color scheme
+            // and if so, transform the color scheme.
             // If the user specified the colors,
             // do not apply default color transforms...
             var applyTransf;
@@ -18052,7 +18116,7 @@ pvc.visual.BulletPlot.optionsDef = def.create(
         if (pvc.debug && typeof console !== "undefined"){
             var logId = this._getLogInstanceId();
             
-            ['log', 'info', ['trace', 'debug'], 'error', 'warn', 'group', 'groupEnd'].forEach(function(ps){
+            ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd'].forEach(function(ps){
                 ps = ps instanceof Array ? ps : [ps, ps];
                 
                 pvc._installLog(this, '_' + ps[0],  ps[1], logId);
@@ -21941,6 +22005,25 @@ def
 
             /* Extensions */
             this.applyExtensions();
+            
+            /* Log Axes Scales */
+            if(this.isRoot && pvc.debug > 5){
+                var out = ["SCALES SUMMARY", pvc.logSeparator];
+                
+                this.chart.axesList.forEach(function(axis){
+                    var scale = axis.scale;
+                    if(scale){
+                        var d = scale.domain && scale.domain();
+                        var r = scale.range  && scale.range ();
+                        out.push(axis.id);
+                        out.push("    domain: " + (!d ? '?' : pvc.stringify(d)));
+                        out.push("    range : " + (!r ? '?' : pvc.stringify(r)));
+                        
+                    }
+                }, this);
+                
+                this._log(out.join("\n"));
+            }
         }
     },
 
@@ -22556,7 +22639,8 @@ def
             return "";
         }
         
-        var data = this.data;
+        var data = scene.data();
+        
         var visibleKeyArgs = {visible: true};
         
         var tooltip = [];
@@ -27203,7 +27287,7 @@ def
     // than the biggest it often results in wider
     // than needed margins being reserved.
     //
-    // TODO: the halfband method for determining the overflow in
+    // TODO: the half-band method for determining the overflow in
     // discrete axes also doesn't take text-alignment into account.
     _calcOverflowPaddingsFromLabelBBox: function(){
         var overflowPaddings = null;
@@ -29047,7 +29131,7 @@ def
     
     this.base(null, {panel: panel, group: data});
 
-    var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color);
+    var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color, {roleVar: 'color'});
     
     // ---------------
     
@@ -29744,8 +29828,8 @@ def
         
         var categDatas = data._children;
         var roles = this.visualRoles;
-        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.value, {hasPercentSubVar: this.stacked});
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color);
+        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.value, {roleVar: 'value', hasPercentSubVar: this.stacked});
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
         
         /**
          * Create starting scene tree
@@ -31076,7 +31160,8 @@ def
         var rootScene  = new pvc.visual.Scene(null, {panel: this, group: data});
         var categDatas = data._children;
         var chart = this.chart;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole);
+        var serRole = this.visualRoles.series;
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
         var valueDim = data.owner.dimensions(this.valueDimName);
         var isStacked = this.stacked;
         var visibleKeyArgs = {visible: true, zeroIfNone: false};
@@ -31102,8 +31187,7 @@ def
         // ----------------------------------
         def
         .scope(function(){
-            var serRole = chart._serRole;
-            return (serRole && serRole.grouping)    ?
+            return (serRole && serRole.grouping) ?
                    serRole.flatten(data).children() : // data already only contains visible data
                    def.query([null]) // null series
                    ;
@@ -31705,19 +31789,27 @@ def
         // One multi-dimension single-level data grouping
         var rowRootData = me.data.flattenBy(me.visualRoles.series, {visible: true});
 
-        // One multi-dimensional, two-levels data grouping
+        // One multi-dimensional, two-levels grouping (Series -> Categ)
         var rootScene  = me._buildScene(me.visibleData(), rowRootData, cellSize);
         var hasColor   = rootScene.isColorBound;
         var hasSize    = rootScene.isSizeBound;
         var wrapper    = me._buildSignsWrapper(rootScene);
         var isV1Compat = me.compatVersion() <= 1;
-
+        
+        var rowScale   = this.axes.base.scale;
+        var colScale   = this.axes.ortho.scale;
+        
+        var rowStep = rowScale.range().step;
+        var colStep = colScale.range().step;
+        var rowStep2 = rowStep/2;
+        var colStep2 = colStep/2;
+        
         /* PV Panels */
         var pvRowPanel = new pvc.visual.Panel(me, me.pvPanel)
             .pvMark
             .data(rootScene.childNodes)
-            [a_bottom](function(){ return this.index * cellSize.height; })
-            [a_height](cellSize.height);
+            [a_bottom](function(scene){ return colScale(scene.vars.series.value) - colStep2; })
+            [a_height](colStep);
 
         /* Cell panel */
         var extensionIds = ['panel'];
@@ -31748,8 +31840,8 @@ def
         me.pvHeatGrid = new pvc.visual.Panel(me, pvRowPanel, keyArgs)
             .lock('data', function(serScene){ return serScene.childNodes; })
             .pvMark
-            .lock(a_left,  function(){ return this.index * cellSize.width; })
-            .lock(a_width, cellSize.width)
+            .lock(a_left,  function(scene){ return rowScale(scene.vars.category.value) - rowStep2; })
+            .lock(a_width, rowStep)
             .antialias(false);
             // THIS caused HUGE memory consumption and speed reduction (at least in use Shapes mode, and specially in Chrome)
             // Overflow can be important if valuesVisible=true
@@ -31930,7 +32022,7 @@ def
             // Protovis draws diamonds inscribed on
             // a square with half-side radius*Math.SQRT2
             // (so that diamonds just look like a rotated square)
-            // For the height of the dimanod not to exceed the cell size
+            // For the height of the diamond not to exceed the cell size
             // we compensate that factor here.
             maxRadius /= Math.SQRT2;
         }
@@ -32027,8 +32119,8 @@ def
         var categDatas = data._children;
 
         var roles = me.visualRoles;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color);
-        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size);
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
+        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size' });
         
         rootScene.cellSize = cellSize;
 
@@ -32468,10 +32560,10 @@ def
     this.axes.size  = chart._getAxis('size', (plot.option('SizeAxis') || 0) - 1); // may be undefined
 
     var sizeRoleName = plot.option('SizeRole'); // assumed to be always defined
-    this.visualRoles.size = chart.visualRoles(sizeRoleName);
-
-    this.linesVisible  = plot.option('LinesVisible'); // TODO
-    this.dotsVisible   = plot.option('DotsVisible' ); // TODO
+    this.visualRoles.size = sizeRoleName ? chart.visualRoles(sizeRoleName) : null;
+    
+    this.linesVisible = plot.option('LinesVisible'); // TODO
+    this.dotsVisible  = plot.option('DotsVisible' ); // TODO
     if(!this.linesVisible && !this.dotsVisible){
         this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
@@ -32596,7 +32688,7 @@ def
             // Protovis draws diamonds inscribed on
             // a square with half-side radius*Math.SQRT2
             // (so that diamonds just look like a rotated square)
-            // For the height/width of the diamondnot to exceed the cell size
+            // For the height/width of the diamond not to exceed the cell size
             // we compensate that factor here.
             radiusRange.max /= Math.SQRT2;
             radiusRange.min /= Math.SQRT2;
@@ -32769,6 +32861,9 @@ def
         // -- LINE --
         var isLineNoSelect = /*dotsVisible && */chart._canSelectWithFocusWindow();
         
+        // A discrete color role may have null values; the line is not hidden.
+        var isColorDiscrete = rootScene.isColorBound && this.visualRoles.color.isDiscrete();
+        
         var line = new pvc.visual.Line(me, me.pvScatterPanel, {
                 extensionId: 'line',
                 wrapper:     wrapper,
@@ -32787,7 +32882,7 @@ def
                     visible = !scene.isNull &&
                              ((!rootScene.isSizeBound && !rootScene.isColorBound) ||
                               (rootScene.isSizeBound  && scene.vars.size.value  != null) ||
-                              (rootScene.isColorBound && scene.vars.color.value != null));
+                              (rootScene.isColorBound && (isColorDiscrete || scene.vars.color.value != null)));
                 }
                 
                 return visible;
@@ -32903,14 +32998,12 @@ def
 
         var roles = this.visualRoles;
         var axes  = this.axes;
-        var hasColorRole = roles.color.isBound() && !axes.color.scale.isNull;
-        var hasSizeRole  = roles.size .isBound() && !axes.size .scale.isNull;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {forceUnbound: !hasColorRole});
-        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {forceUnbound: !hasSizeRole });
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, roles.color, {roleVar: 'color'});
+        var sizeVarHelper  = new pvc.visual.RoleVarHelper(rootScene, roles.size,  {roleVar: 'size' });
         
         var xDim = data.owner.dimensions(roles.x.firstDimensionName());
         var yDim = data.owner.dimensions(roles.y.firstDimensionName());
-
+        
         // --------------
         
         data.children()
@@ -35325,8 +35418,7 @@ def
             bandWidth  = baseScale.range().band,
             boxWidth   = Math.min(bandWidth * this.boxSizeRatio, this.maxBoxSize),
             orthoScale = this.axes.ortho.scale,
-            colorVarHelper = new pvc.visual.RoleVarHelper(chart, chart._colorRole)
-            ;
+            colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
 
         /**
          * Create starting scene tree
