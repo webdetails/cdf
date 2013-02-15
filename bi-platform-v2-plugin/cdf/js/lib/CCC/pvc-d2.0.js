@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130213
+//VERSION TRUNK-20130215
 
 
 /*global pvc:true */
@@ -29755,6 +29755,10 @@ def
                           (orthoScale.max + paddings[a_top]),
             angle;
 
+        // 0 degrees
+        //  /\
+        // /__\
+        //
         if(!isMin){
             angle = isVertical ? Math.PI: -Math.PI/2;
         } else {
