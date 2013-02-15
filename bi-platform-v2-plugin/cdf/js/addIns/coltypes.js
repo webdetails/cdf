@@ -195,7 +195,8 @@
       includeValue: false,
       valueFormat: function(v,format,st) {
         return sprintf(format || "%.1f",v);
-      }
+      },
+      thresholds: { up: 0 , down: 0 }
     },
     init: function(){
       $.fn.dataTableExt.oSort[this.name+'-asc'] = $.fn.dataTableExt.oSort['numeric-asc'];
@@ -210,7 +211,7 @@
          * to number and back to string.
          */
         isNumeric = typeof st.value == "number" || (typeof st.value == "string" && Number(st.value).toString() != 'NaN' ),
-        trendClass = !isNumeric ? "invalid": (st.value == 0 ? "neutral" : st.value < 0 ? "down" : "up");
+        trendClass = !isNumeric ? "invalid": (st.value > opt.thresholds.up ? "up" : st.value < opt.thresholds.down ? "down" : "neutral");
       var trend = $("<div>&nbsp;</div>");
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();
@@ -425,7 +426,8 @@
     defaults: {
       hide:true,
       columnHeadersInGroups: false,
-      replaceFirstHeader: true
+      replaceFirstHeader: true,
+      textFormat: function(v, st) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
     },
 
     init: function(){
@@ -470,7 +472,8 @@
     buildHeader: function(tgt, st, opt) {
       var $header,
           $dt = $(tgt).parents('table').eq(0).dataTable(),
-          $theader;
+          $theader,
+          headerText = opt.textFormat.call(this, st.value, st, opt);
 
       if(opt.columnHeadersInGroups) {
         $theader = $dt.find("thead").eq(0);
@@ -482,10 +485,10 @@
           newCell.addClass($(e).hasClass("hiddenCol")? "hiddenCol" : "");
           $header.append(newCell);
         });
-        $header.find("td").eq($(tgt).index() + 1).text(st.value).addClass("groupName");
+        $header.find("td").eq($(tgt).index() + 1).empty().append(headerText).addClass("groupName");
       } else {
         $header = $("<tr/>");
-        $("<td/>").addClass("groupName").text(st.value).attr("colspan",  $(tgt).siblings().length + 1).appendTo($header);
+        $("<td/>").addClass("groupName").empty().append(headerText).attr("colspan",  $(tgt).siblings().length + 1).appendTo($header);
       }
       $header.addClass("groupHeader group" + $(tgt).index());
       var $preSpace = $("<td>").attr("colspan",$(tgt).siblings().length + 1).wrap("<tr>").parent().addClass("groupHeader preSpace");
