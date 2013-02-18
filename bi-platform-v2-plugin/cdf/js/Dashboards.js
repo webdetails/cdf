@@ -423,12 +423,19 @@ Dashboards.handleServerError = function(resp, txtStatus, error) {
 /**
  * Default impl when not logged in
  */
-Dashboards.loginAlert = function() {
-  wd.popups.okPopup.show({
+Dashboards.loginAlert = function(newOpts) {
+  var opts = {
+    header: "Warning",
+    desc: "You are no longer logged in or the connection to the server timed out",
+    button: "Click to reload this page",
     callback: function(){
-      Dashboards.log("You are not logged in or there is no connection to the server. Please reload this page.");
+      window.location.reload(true);
     }
-  });
+  };
+  opts = _.extend( {} , opts, newOpts );
+
+  wd.popups.okPopup.show(opts);
+  this.trigger('cdf cdf:loginAlert', this);
 };
 
 /**
@@ -2668,24 +2675,23 @@ Query = function() {
  * 
  */
 
-(function () {
 
-wd = wd || {};
+var wd = wd || {};
 wd.popups = wd.popups || {};
 
 wd.popups.okPopup = {
   template: Mustache.compile(
               "<div class='cdfPopup'>" +
-              "  <div class='cdfPopupHeader'>{{header}}</div>" +
+              "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
               "  <div class='cdfPopupBody'>" +
-              "    <div class='cdfPopupDesc'>{{desc}}</div>" +
-              "    <div class='cdfPopupButton'>{{button}}</div>" +
+              "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
+              "    <div class='cdfPopupButton'>{{{button}}}</div>" +
               "  </div>" +
               "</div>"),
   defaults:{
-    header: "Warning",
-    desc:"You are no longer logged in or the connection to the server timed-out",
-    button:"Click to reload this page",
+    header: "Title",
+    desc:"Description Text",
+    button:"Button Text",
     callback: function (){ 
       return true 
     }
@@ -2708,8 +2714,8 @@ wd.popups.okPopup = {
         .appendTo('body');
       this.firstRender = false;
     };
-    this.$el.empty().html( this.template( opts.toJSON() ) );
+    this.$el.empty().html( this.template( opts ) );
+    this.$el.find('.cdfPopupButton').click( opts.callback );
   },
   firstRender: true
-})();
-
+} 

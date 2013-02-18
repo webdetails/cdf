@@ -145,3 +145,54 @@ div.cdfCommentsPagination a{
 .container .container{
 	width: auto;
 }
+
+
+/* Popups */
+
+
+.cdfPopupContainer * {
+  -moz-box-sizing: border-box; 
+  box-sizing: border-box; 
+  -webkit-box-sizing:border-box;    
+}
+.cdfPopupContainer {
+  position:fixed;
+  top: 30%;
+  left:50%;
+  z-index:2000;
+}
+.cdfPopup {
+  width: 390px;
+  margin-left: -195px;
+  background:#FFFFFF;
+  border: solid 1px #000000;
+  overflow:hidden;
+}
+.cdfPopupHeader {
+  height:42px;
+  line-height:42px;
+  width:100%;
+  text-align:center;
+  cursor:default;
+}
+.cdfPopupBody {
+  height:150px;
+}
+.cdfPopupDesc {
+  height: 90px;
+  padding-left:20px;
+  padding-right:20px;
+  text-align:center;
+  cursor:default;
+}
+.cdfPopupButton {
+  height:35px;
+  line-height:35px;
+  border: solid 1px #000000;
+  margin-left:27px;
+  margin-right:27px;
+  text-align:center;
+  cursor:pointer;
+}
+
+
