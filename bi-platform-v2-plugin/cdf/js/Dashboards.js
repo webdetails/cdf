@@ -424,7 +424,11 @@ Dashboards.handleServerError = function(resp, txtStatus, error) {
  * Default impl when not logged in
  */
 Dashboards.loginAlert = function() {
-	$.prompt("You are not logged in or there is no connection to the server. Please reload this page.");
+  wd.popups.okPopup.show({
+    callback: function(){
+      Dashboards.log("You are not logged in or there is no connection to the server. Please reload this page.");
+    }
+  });
 };
 
 /**
@@ -2653,3 +2657,59 @@ Query = function() {
     throw new Error("browser does not support setters");
   }
 })();
+
+
+
+
+
+/*
+ * Popups (Move somewhere else?)
+ *
+ * 
+ */
+
+(function () {
+
+wd = wd || {};
+wd.popups = wd.popups || {};
+
+wd.popups.okPopup = {
+  template: Mustache.compile(
+              "<div class='cdfPopup'>" +
+              "  <div class='cdfPopupHeader'>{{header}}</div>" +
+              "  <div class='cdfPopupBody'>" +
+              "    <div class='cdfPopupDesc'>{{desc}}</div>" +
+              "    <div class='cdfPopupButton'>{{button}}</div>" +
+              "  </div>" +
+              "</div>"),
+  defaults:{
+    header: "Warning",
+    desc:"You are no longer logged in or the connection to the server timed-out",
+    button:"Click to reload this page",
+    callback: function (){ 
+      return true 
+    }
+  },
+  $el: undefined,
+  show: function (opts){
+    if (opts || this.firstRender){
+      this.render(opts);
+    }
+    this.$el.show();
+  },
+  hide: function (){
+    this.$el.hide();
+  },
+  render: function (newOpts){
+    var opts = _.extend( {} , this.defaults, newOpts );
+    if (this.firstRender){
+      this.$el = $('<div/>').addClass('cdfPopupContainer')
+        .hide()
+        .appendTo('body');
+      this.firstRender = false;
+    };
+    this.$el.empty().html( this.template( opts.toJSON() ) );
+  },
+  firstRender: true
+})();
+
