@@ -3,7 +3,13 @@
   async: false,
   traditional: true,
   scriptCharset: "utf-8",
-  contentType: "application/x-www-form-urlencoded;charset=UTF-8"
+  contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+
+  dataFilter: function(data, dtype) {
+    // just tagging date
+    Dashboards.lastServerResponse = Date.now();
+    return data;
+  }
 });
 
 
@@ -53,6 +59,7 @@ if (typeof $.SetImpromptuDefaults == 'function')
   });
 
 var Dashboards = {
+  CDF_BASE_PATH: webAppPath + "/content/pentaho-cdf/",
   parameterModel: new Backbone.Model(),
   TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
   TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
@@ -89,6 +96,9 @@ var Dashboards = {
   
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  
+  lastServerResponse: Date.now(),
+  serverCheckResponseTimeout: 1800000, //ms, will be overridden at init
   /* Reference to current language code . Used in every place where jquery
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
    */
@@ -316,7 +326,10 @@ Dashboards.showProgressIndicator = function() {
   this.blockUIwithDrag();
 };
 
-Dashboards.hideProgressIndicator = function() {
+Dashboards.hideProgressIndicator = function(force) {
+  if (force) {
+    this.runningCalls = 0;
+  }
   if(this.runningCalls <= 0){
     $.unblockUI();
     this.showErrorTooltip();
@@ -398,6 +411,61 @@ Dashboards.bindControl = function(object) {
   }
 };
 
+Dashboards.handleServerError = function(resp, txtStatus, error) {
+	Dashboards.error(txtStatus + ': ' + error);
+//    $.prompt(
+//    {state0:{
+//    	html: resp.responseText,
+//    	title: error	
+//    }});
+};
+
+/**
+ * Default impl when not logged in
+ */
+Dashboards.loginAlert = function(newOpts) {
+  var opts = {
+    header: "Warning",
+    desc: "You are no longer logged in or the connection to the server timed out",
+    button: "Click to reload this page",
+    callback: function(){
+      window.location.reload(true);
+    }
+  };
+  opts = _.extend( {} , opts, newOpts );
+
+  wd.popups.okPopup.show(opts);
+  this.trigger('cdf cdf:loginAlert', this);
+};
+
+/**
+ * 
+ */
+Dashboards.checkServer = function() {
+	//check if is connecting to server ok
+	//use post to avoid cache
+	var retVal = false;
+	$.ajax({
+		type: 'POST',
+		async: false,
+		dataType: 'json',
+		url: Dashboards.CDF_BASE_PATH + 'ping',
+		success: function(result) {
+			if(result && result.ping == 'ok') {
+				retVal = true;
+			}
+			else {
+				retVal = false;
+			}
+		},
+		error: function() {
+			retVal = false;
+		}
+		
+	});
+	return retVal;
+};
+
 
 Dashboards.restoreDuplicates = function() {
   /*
@@ -472,7 +540,7 @@ Dashboards.blockUIwithDrag = function() {
 };
 
 Dashboards.updateLifecycle = function(object) {
-  var silent = object.lifecycle ? !!object.lifecycle.silent : false;
+    var silent = object.lifecycle ? !!object.lifecycle.silent : false;
 
     if( object.disabled ){
       return;
@@ -566,6 +634,15 @@ Dashboards.update = function(component) {
 };
 
 Dashboards.updateComponent = function(object) {
+  if(Date.now() - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
+    //too long in between ajax communications
+    if(!Dashboards.checkServer()) {
+    	Dashboards.hideProgressIndicator();
+    	Dashboards.loginAlert();
+    	throw "not logged in";
+    }
+  }
+
   if(object.isManaged === false && object.update) {
     object.update();
   } else {
@@ -648,6 +725,10 @@ Dashboards.init = function(components){
     _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
+  }
+  if(this.context != null && this.context.sessionTimeout != null ) {
+    //defaulting to 90% of ms value of sessionTimeout
+    Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
   this.restoreBookmarkables();
   this.restoreView();
@@ -1527,7 +1608,7 @@ Dashboards.fetchData = function(cd, params, callback) {
     $.post(webAppPath + "/content/cda/doQuery?", cd,
       function(json) {
         callback(json);
-      },'json');
+      },'json').error(Dashboards.handleServerError);
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
@@ -2103,7 +2184,8 @@ Query = function() {
   /* AJAX Options for the query */
   var _ajaxOptions = {
     type: "POST",
-    async: false
+    async: false,
+    error: Dashboards.handleServerError
   };
   // Datasource type definition
   var _mode = 'CDA';
@@ -2582,3 +2664,58 @@ Query = function() {
     throw new Error("browser does not support setters");
   }
 })();
+
+
+
+
+
+/*
+ * Popups (Move somewhere else?)
+ *
+ * 
+ */
+
+
+var wd = wd || {};
+wd.popups = wd.popups || {};
+
+wd.popups.okPopup = {
+  template: Mustache.compile(
+              "<div class='cdfPopup'>" +
+              "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
+              "  <div class='cdfPopupBody'>" +
+              "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
+              "    <div class='cdfPopupButton'>{{{button}}}</div>" +
+              "  </div>" +
+              "</div>"),
+  defaults:{
+    header: "Title",
+    desc:"Description Text",
+    button:"Button Text",
+    callback: function (){ 
+      return true 
+    }
+  },
+  $el: undefined,
+  show: function (opts){
+    if (opts || this.firstRender){
+      this.render(opts);
+    }
+    this.$el.show();
+  },
+  hide: function (){
+    this.$el.hide();
+  },
+  render: function (newOpts){
+    var opts = _.extend( {} , this.defaults, newOpts );
+    if (this.firstRender){
+      this.$el = $('<div/>').addClass('cdfPopupContainer')
+        .hide()
+        .appendTo('body');
+      this.firstRender = false;
+    };
+    this.$el.empty().html( this.template( opts ) );
+    this.$el.find('.cdfPopupButton').click( opts.callback );
+  },
+  firstRender: true
+} 
