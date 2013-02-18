@@ -4,8 +4,8 @@ BaseComponent = Base.extend({
   isManaged: true,
   timerStart: 0,
   timerSplit: 0,
-  elapsedSinceSplit: 0,
-  elapsedSinceStart: 0,
+  elapsedSinceSplit: -1,
+  elapsedSinceStart: -1,
   logColor: undefined,
   
   clear : function() {
@@ -233,19 +233,18 @@ BaseComponent = Base.extend({
   startTimer: function(){
     
     this.timerStart = new Date();
-    this.timerSplit = this.timerStart;
+    this.timerSplit = new Date();
     
   },
   
   splitTimer: function(){
     
-    var now = new Date();
-    
     // Sanity check, in case this component doesn't follow the correct workflow
-    if(this.elapsedSinceStart === 0 || this.elapsedSinceSplit === 0){
+    if(this.elapsedSinceStart === -1 || this.elapsedSinceSplit === -1){
       this.startTimer();
     }
     
+    var now = new Date();
     
     this.elapsedSinceStart = now.getTime() - this.timerStart.getTime();
     this.elapsedSinceSplit = now.getTime() - this.timerSplit.getTime();
