@@ -614,7 +614,7 @@ var UnmanagedComponent = BaseComponent.extend({
     if (!this.preExec()) {
       return;
     }
-    var silent = this.lifecycle ? !!this.lifecycle.silent : false;
+    var silent = this.isSilent();
     if(!silent) {
       this.block();
     }
@@ -653,7 +653,10 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    this.block();
+    var silent = this.isSilent();    
+    if (!silent){
+      this.block();
+    };
     userQueryOptions = userQueryOptions || {};
     /* 
      * The query response handler should trigger the component-provided callback
@@ -669,8 +672,13 @@ var UnmanagedComponent = BaseComponent.extend({
         this.postExec();
       }
     },this);
-    var always = _.bind(this.unblock, this);
-    var handler = this.getSuccessHandler(success, always);
+    var always = _.bind(function (){
+      if (!silent){
+        this.unblock();
+      }
+    }, this);
+    var handler = this.getSuccessHandler(success, always),
+        errorHandler = this.getErrorHandler();
 
     var query = this.queryState = this.query = new Query(queryDef);
     var ajaxOptions = {
@@ -683,7 +691,7 @@ var UnmanagedComponent = BaseComponent.extend({
     if(userQueryOptions.pageSize){
       query.setPageSize(userQueryOptions.pageSize);
     }
-    query.fetchData(this.parameters,handler);
+    query.fetchData(this.parameters, handler, errorHandler);
   },
 
   /* 
@@ -702,7 +710,10 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    this.block();
+    var silent = this.isSilent();    
+    if (!silent){
+      this.block();
+    };
     var ajaxParameters = {
       async: true
     };
@@ -725,9 +736,13 @@ var UnmanagedComponent = BaseComponent.extend({
         this.postExec();
       }
     },this);
-    var always = _.bind(this.unblock,this);
+    var always = _.bind(function (){
+      if (!silent){
+        this.unblock();
+      }
+    }, this);
     ajaxParameters.success = this.getSuccessHandler(success,always);
-    ajaxParameters.error = _.bind(this.unblock,this);
+    ajaxParameters.error = this.getErrorHandler();
     jQuery.ajax(ajaxParameters);
   },
 
@@ -745,8 +760,10 @@ var UnmanagedComponent = BaseComponent.extend({
    * Also 
    */
   error: function(msg, cause) {
-    this.unblock();
-    this.trigger("cdf cdf:error", this, msg, cause || null);
+    if (!this.isSilent()){
+      this.unblock();
+    };
+    this.trigger("cdf cdf:error", this, msg , cause || null);
   },
   /*
    * Build a generic response handler that runs the success callback when being
@@ -798,6 +815,33 @@ var UnmanagedComponent = BaseComponent.extend({
     },
     this);
   },
+
+  getErrorHandler: function() { 
+    return  _.bind(function() {
+      var err = Dashboards.parseServerError.apply(this, arguments );
+      var ph = ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined;
+      this.errorNotification(err, ph );
+      this.error();
+    },
+    this);  
+  },
+  errorNotification: function (err, ph) {
+    var name = this.name.replace('render_', '');
+    if (ph){
+      wd.notifications.component.render(
+        $(ph), {
+          title: err.description,
+          desc: ""
+      });
+    } else {
+      /*wd.popups.okPopup.show({
+        header: name,
+        desc: err.description,
+        button: "Click to close"
+      });*/ 
+    }
+  },
+
   /*
    * Trigger UI blocking while the component is updating. Default implementation
    * uses the global CDF blockUI, but implementers are encouraged to override
@@ -823,6 +867,10 @@ var UnmanagedComponent = BaseComponent.extend({
       this.dashboard.decrementRunningCalls();
       this.isRunning = false;
     }
+  },
+
+  isSilent: function (){
+    return (this.lifecycle) ? !!this.lifecycle.silent : false;
   }
 });
 
