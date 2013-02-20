@@ -326,14 +326,16 @@ Dashboards.showProgressIndicator = function() {
   this.blockUIwithDrag();
 };
 
-Dashboards.hideProgressIndicator = function(force) {
-  if (force) {
-    this.runningCalls = 0;
-  }
-  if(this.runningCalls <= 0){
-    $.unblockUI();
-    this.showErrorTooltip();
-  }
+Dashboards.hideProgressIndicator = function() {
+  $.unblockUI();
+  this.showErrorTooltip();
+};
+
+Dashboards.resetRunningCalls = function(){
+  this.runningCalls = 0;   
+  setTimeout(_.bind(function(){
+    this.hideProgressIndicator();
+  },this),10);
 };
 
 Dashboards.incrementRunningCalls = function() {
@@ -411,13 +413,40 @@ Dashboards.bindControl = function(object) {
   }
 };
 
-Dashboards.handleServerError = function(resp, txtStatus, error) {
-	Dashboards.error(txtStatus + ': ' + error);
-//    $.prompt(
-//    {state0:{
-//    	html: resp.responseText,
-//    	title: error	
-//    }});
+Dashboards.parseServerError = function (resp, txtStatus, error){
+  var out = {};
+  var regexs = [
+    { match: /Query timeout[a-zA-Z0-9 ]*/ , matchIndex: 0  }
+  ];
+
+  out.error = error;
+
+  out.description = "Error processing component.";
+  var str = $('<div/>').html(resp.responseText).find('h1').text();
+  _.find( regexs, function (el){
+    var matches = str.match( el.match );
+    if ( matches && el.matchIndex < matches.length ){
+      out.description = matches[el.matchIndex] + ".";
+      return true
+    } else {
+      return false
+    }
+  });
+  out.errorStatus = txtStatus;
+
+  return out
+}
+
+Dashboards.handleServerError = function() {
+  var err = Dashboards.parseServerError.apply( this, arguments );
+
+  wd.popups.okPopup.show({
+    header: 'Component Error' ,
+    desc: err.description ,
+    button: "Click to close"
+  });
+  Dashboards.trigger('cdf cdf:serverError', this);
+  Dashboards.resetRunningCalls();  
 };
 
 /**
@@ -435,7 +464,7 @@ Dashboards.loginAlert = function(newOpts) {
   opts = _.extend( {} , opts, newOpts );
 
   wd.popups.okPopup.show(opts);
-  this.trigger('cdf cdf:loginAlert', this);
+  this.trigger('cdf cdf:loginError', this);
 };
 
 /**
@@ -2184,8 +2213,7 @@ Query = function() {
   /* AJAX Options for the query */
   var _ajaxOptions = {
     type: "POST",
-    async: false,
-    error: Dashboards.handleServerError
+    async: false
   };
   // Datasource type definition
   var _mode = 'CDA';
@@ -2196,6 +2224,8 @@ Query = function() {
   var _query = '';
   // Callback for the data handler
   var _callback = null;
+  // Callback for the query error handler / default handler
+  var _errorCallback = Dashboards.handleServerError;
   // Result caching
   var _lastResultSet = null;
   // Paging and sorting
@@ -2263,6 +2293,7 @@ Query = function() {
     var url;
     var queryDefinition; 
     var callback = (outsideCallback ? outsideCallback : _callback);
+    var errorCallback = _errorCallback;
     if (_mode == 'CDA') {
       url = CDA_PATH;
       queryDefinition = buildQueryDefinition();
@@ -2299,11 +2330,17 @@ Query = function() {
       
       callback(clone);
     };
+    var errorHandler = function(resp, txtStatus, error ) {      
+      if (errorCallback){
+        errorCallback(resp, txtStatus, error );
+      }
+    };
 
     var settings = _.extend({},_ajaxOptions, {
       data: queryDefinition,
       url: url,
-      success: successHandler
+      success: successHandler,
+      error: errorHandler 
     });
     
     $.ajax(settings);
@@ -2391,7 +2428,7 @@ Query = function() {
     }
   };
 
-  this.fetchData = function(params, callback) {
+  this.fetchData = function(params, successCallback, errorCallback) {
     switch(arguments.length) {
       case 0:
         if(_params && _callback) {
@@ -2410,10 +2447,21 @@ Query = function() {
         }
         break;
       case 2:
+        if (typeof arguments[0] == "function"){
+          _callback = arguments[0];
+          _errorCallback = arguments[1];
+          return doQuery();
+        } else if( arguments[0] instanceof Array){
+          _params = arguments[0];
+          _callback = arguments[1];
+          return doQuery();
+        }
+        break;
       default:
         /* We're just going to discard anything over two params */
         _params = params;
-        _callback = callback;
+        _callback = successCallback;
+        _errorCallback = errorCallback;
         return doQuery();
     }
     /* If we haven't hit a return by this time,
@@ -2708,6 +2756,7 @@ wd.popups.okPopup = {
   },
   render: function (newOpts){
     var opts = _.extend( {} , this.defaults, newOpts );
+    var myself = this;
     if (this.firstRender){
       this.$el = $('<div/>').addClass('cdfPopupContainer')
         .hide()
@@ -2715,7 +2764,43 @@ wd.popups.okPopup = {
       this.firstRender = false;
     };
     this.$el.empty().html( this.template( opts ) );
-    this.$el.find('.cdfPopupButton').click( opts.callback );
+    this.$el.find('.cdfPopupButton').click( function (){
+      opts.callback();
+      myself.hide();
+    });
   },
   firstRender: true
-} 
+};
+
+
+/*
+ * Error information divs
+ *
+ * 
+ */
+
+wd.notifications = wd.notifications || {};
+
+wd.notifications.component = {
+  template: Mustache.compile(
+              "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
+              "  <div class='cdfNotificationBody'>" +
+              "    <div class='cdfNotificationImg'>&nbsp;</div>" +
+              "    <div class='cdfNotificationTitle'>{{{title}}}</div>" +
+              "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
+              "  </div>" +
+              "</div>" ),
+  defaults:{
+    title: "Component Error",
+    desc: "Something went wrong rendering this component."
+  },
+  render: function (ph, newOpts){
+    var opts = _.extend( {}, this.defaults, newOpts);
+    opts.isSmallComponent = ( $(ph).width() < 300 );
+    $(ph).empty().html( this.template( opts ) );
+    var $nt = $(ph).find('.cdfNotification');
+    $nt.css({'line-height': $nt.height() + 'px' });
+  }
+};
+
+
