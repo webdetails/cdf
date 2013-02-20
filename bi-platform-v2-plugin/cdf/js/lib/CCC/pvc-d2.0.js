@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130218
+//VERSION TRUNK-20130220
 
 
 /*global pvc:true */
@@ -16718,9 +16718,9 @@ def
     this._renderer = def.get(keyArgs, 'renderer');
     
     this.colorAxis = def.get(keyArgs, 'colorAxis');
-    this.clickMode = def.get(keyArgs, 'clickMode');
     
-    if(this.colorAxis && !this.clickMode){
+    this.clickMode = def.get(keyArgs, 'clickMode');
+    if(!this.clickMode && this.colorAxis){
         this.clickMode = this.colorAxis.option('LegendClickMode');
     }
 })
@@ -17121,9 +17121,10 @@ def
                     proto:        markerPvBaseProto,
                     freePosition: true,
                     activeSeriesAware: false, // no guarantee that series exist in the scene
-                    noTooltip:   true,
+                    noTooltip:    true,
                     noSelect:     this.noSelect,
                     noHover:      this.noHover,
+                    noClick:      true,
                     extensionId:  extensionPrefix + "Dot",
                     wrapper:      wrapper
                 })
@@ -18560,8 +18561,21 @@ def
     _processOptionsCore: function(options){
         // Disable animation if environment doesn't support it
         if(!this.parent){
-            if (!$.support.svg || pv.renderer() === 'batik') {
-                options.animate = false;
+            var interactive = options.interactive;
+            if(interactive == null){
+                interactive = options.interactive = (pv.renderer() !== 'batik');
+            }
+            
+            if(!interactive){
+                options.animated = 
+                options.tooltipEnabled = 
+                options.selectable = 
+                options.hoverable =
+                options.clickable = false;
+            } else {
+                if (!$.support.svg) {
+                    options.animate = false;
+                }
             }
             
             this._processTooltipOptions(options);
@@ -18890,6 +18904,8 @@ def
                 return pvFormat.format(d * 100) + "%";
             };
         }),
+        
+        //interactive: true,
         
         // Content/Plot area clicking
         clickable:  false,
@@ -20901,6 +20917,10 @@ pvc.BaseChart
         return this.root._onUserSelection(datums);
     },
     
+    _isInteractive: function(){
+        return this.options.interactive;
+    },
+    
     _isSelectable: function(){
         return this.options.selectable;
     },
@@ -22042,7 +22062,7 @@ def
             this._createCore(this._layoutInfo);
             
             /* RubberBand */
-            if (this.isTopRoot && pv.renderer() !== 'batik' && this.chart._canSelectWithRubberband()){
+            if (this.isTopRoot) {
                 this._initRubberBand();
             }
 
@@ -22953,19 +22973,50 @@ def
      * @virtual
      */
     _initRubberBand: function(){
+        if(!this.chart._isInteractive()) {
+            return;
+        }
+        
         var myself = this,
-            chart = this.chart,
+            chart = myself.chart,
             options  = chart.options,
-            data = chart.data;
-
+            clickClearsSelection = options.clearSelectionMode === 'emptySpaceClick',
+            useRubberband = this.chart._canSelectWithRubberband();
+        
+        if(!useRubberband && !clickClearsSelection){
+            return;
+        }
+        
+        var data = chart.data,
+            rubberPvParentPanel = myself.pvRootPanel || myself.pvPanel.paddingPanel;
+        
+        // IE must have a fill style to fire events
+        if(!myself._getExtensionAbs('base', 'fillStyle')){
+            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        }
+        
+        // Require all events, wether it's painted or not
+        rubberPvParentPanel.lock('events', 'all');
+        
+        if(!useRubberband) {
+            if(clickClearsSelection) {
+                // Install clearSelectionMode click
+                rubberPvParentPanel
+                    .event("click", function() {
+                        if(data.owner.clearSelected()) {
+                            chart.updateSelections();
+                        }
+                    });
+            }
+            return;
+        }
+        
         var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
         this._isRubberBandSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvRootPanel || this.pvPanel.paddingPanel,
-            toScreen,
-            rb;
+        var toScreen, rb;
         
         var selectBar = 
             this.selectBar = 
@@ -22978,18 +23029,14 @@ def
                 noDoubleClick: true,
                 noTooltip:    true
             })
-            .override('defaultStrokeWidth', function(){
-                return 1.5;
-            })
+            .override('defaultStrokeWidth', function(){ return 1.5; })
             .override('defaultColor', function(type){
                 return type === 'stroke' ? 
                        '#86fe00' :                 /* 'rgb(255,127,0)' */ 
                        'rgba(203, 239, 163, 0.6)'  /* 'rgba(255, 127, 0, 0.15)' */
                        ;
             })
-            .override('interactiveColor', function(color){
-                return color;
-            })
+            .override('interactiveColor', function(color){ return color; })
             .pvMark
             .lock('visible', function(){ return !!rb;  })
             .lock('left',    function(){ return rb.x;  })
@@ -23001,14 +23048,6 @@ def
             .lock('cursor')
             .lock('events', 'none')
             ;
-        
-        // IE must have a fill style to fire events
-        if(!this._getExtensionAbs('base', 'fillStyle')){
-            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
-        }
-        
-        // Require all events, wether it's painted or not
-        rubberPvParentPanel.lock('events', 'all');
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
@@ -23071,7 +23110,7 @@ def
                 }
             });
         
-        if(options.clearSelectionMode === 'emptySpaceClick'){
+        if(clickClearsSelection){
             rubberPvParentPanel
                 .event("click", function() {
                     // It happens sometimes that the click is fired 
@@ -23085,7 +23124,7 @@ def
                     }
                     
                     if(data.owner.clearSelected()) {
-                        myself.chart.updateSelections();
+                        chart.updateSelections();
                     }
                 });
         }
@@ -24292,6 +24331,7 @@ def
               extensionId: 'panel',
               wrapper:     wrapper,
               noSelect:    false,
+              noClick:     false,
               noClickSelect: true // just rubber-band (the click is for other behaviors)
           })
           .lockMark('data', function(row){ return row.items; }) // each row has a list of bullet item scenes
@@ -24327,6 +24367,7 @@ def
                      "rgba(200,200,200,1)" : 
                      "rgba(200,200,200,0.0001)";
           })
+          // See also the _isClickable override, below
           .cursor(function(itemScene){
               return itemScene.isClickable() ? "pointer" : null;
           })
@@ -24386,6 +24427,12 @@ def
           ;
     },
 
+    // Doesn't matter if the chart's clickable is false.
+    // Legend allows click based on legendClickMode
+    _isClickable: function(){
+        return true;
+    },
+    
     _getExtensionId: function(){
         return 'area'; 
     },
@@ -30784,6 +30831,8 @@ def
         this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
     }
+     
+    this.visualRoles.value = chart.visualRoles(plot.option('OrthoRole'));
 })
 .add({
     pvLine: null,
@@ -30855,10 +30904,6 @@ def
         var linesVisible = this.linesVisible;
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
-        this.valueRole     = chart.visualRoles(this.plot.option('OrthoRole'));
-        this.valueRoleName = this.valueRole.name;
-        this.valueDimName  = this.valueRole.firstDimensionName();
-        
         // ------------------
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
@@ -31229,10 +31274,13 @@ def
         var categDatas = data._children;
         var chart = this.chart;
         var serRole = this.visualRoles.series;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
-        var valueDim = data.owner.dimensions(this.valueDimName);
+        var valueRole = this.visualRoles.value;
         var isStacked = this.stacked;
-        var visibleKeyArgs = {visible: true, zeroIfNone: false};
+        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, valueRole, {roleVar: 'value', hasPercentSubVar: isStacked});
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
+        var valueDimName  = valueRole.firstDimensionName();
+        var valueDim = data.owner.dimensions(valueDimName);
+        
         var orthoScale = this.axes.ortho.scale;
         var orthoNullValue = def.scope(function(){
                 // If the data does not cross the origin, 
@@ -31275,29 +31323,25 @@ def
                     group = group._childrenByKey[seriesData1.key];
                 }
                 
-                var value = group ?
-                    group.dimensions(valueDim.name).sum(visibleKeyArgs) : 
-                    null;
-                
                 var serCatScene = new pvc.visual.Scene(seriesScene, {source: group});
                 
                 // -------------
+                
                 serCatScene.dataIndex = categIndex;
                 
                 serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
                 
                 // -------------
+
+                valueVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
+
+                var valueVar = serCatScene.vars.value;
+                var value    = valueVar.value;
                 
-                var valueVar = new pvc.visual.ValueLabelVar(
-                                    value,
-                                    valueDim.format(value),
-                                    value);
-                
-                /* accumulated value, for stacked */
-                // NOTE: the null value can only happen if interpolation is 'none'
+                // accumulated value, for stacked
                 valueVar.accValue = value != null ? value : orthoNullValue;
                 
-                serCatScene.vars.value = valueVar;
+                // -------------
                 
                 colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
                 
@@ -31472,7 +31516,7 @@ def
                 if(belowScene && isBaseDiscrete) {
                     var belowValueVar = belowScene.vars.value;
                     interAccValue = belowValueVar.accValue;
-                    interValue = belowValueVar[this.valueRoleName];
+                    interValue = belowValueVar[valueRole.name];
                 } else {
                     interValue = interAccValue = orthoNullValue;
                 }
