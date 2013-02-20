@@ -763,11 +763,11 @@ Dashboards.parseServerError = function (resp, txtStatus, error){
 Dashboards.handleServerError = function() {
   var err = Dashboards.parseServerError.apply( this, arguments );
 
-  wd.popups.okPopup.show({
+  /*wd.popups.okPopup.show({
     header: 'Component Error' ,
     desc: err.description ,
     button: "Click to close"
-  });
+  });*/
   Dashboards.trigger('cdf cdf:serverError', this);
   Dashboards.resetRunningCalls();  
 };
