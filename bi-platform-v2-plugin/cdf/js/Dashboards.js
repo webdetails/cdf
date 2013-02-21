@@ -91,7 +91,8 @@ ERROR_CODES["UNKNOWN"] = ["ERROR: ","resources/style/images/error.jpg"];
 ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","resources/style/images/alert.jpg"];
 
 ERROR_CODES["0006"] = ["Could not establish a connection to the database","resources/style/images/error.jpg"];
-
+ERROR_CODES['QUERY_TIMEOUT'] = ["Query timeout reached."];
+ERROR_CODES['COMPONENT_ERROR'] = ["Error processing component."];
 
 
 
@@ -736,20 +737,29 @@ Dashboards.bindControl = function(object) {
 
 };
 
+
+Dashboards.getErrorCode = function (errorCode){
+  var obj = {};
+  if ( ERROR_CODES[errorCode] ){
+    obj.msg = ERROR_CODES[errorCode][0] || errorCode;
+    obj.img = ERROR_CODES[errorCode][1];
+    obj.code = errorCode;
+  }
+  return obj
+};
+
 Dashboards.parseServerError = function (resp, txtStatus, error){
   var out = {};
   var regexs = [
-    { match: /Query timeout[a-zA-Z0-9 ]*/ , matchIndex: 0  }
+    { match: /Query timeout/ , msg: Dashboards.getErrorCode('QUERY_TIMEOUT').msg  }
   ];
 
   out.error = error;
-
-  out.description = "Error processing component.";
+  out.description = Dashboards.getErrorCode('COMPONENT_ERROR').msg;
   var str = $('<div/>').html(resp.responseText).find('h1').text();
   _.find( regexs, function (el){
-    var matches = str.match( el.match );
-    if ( matches && el.matchIndex < matches.length ){
-      out.description = matches[el.matchIndex] + ".";
+    if ( str.match( el.match )){
+      out.description = el.msg ;
       return true
     } else {
       return false
@@ -758,12 +768,12 @@ Dashboards.parseServerError = function (resp, txtStatus, error){
   out.errorStatus = txtStatus;
 
   return out
-}
+};
 
 Dashboards.handleServerError = function() {
   var err = Dashboards.parseServerError.apply( this, arguments );
 
-  /*wd.popups.okPopup.show({
+  /*wd.cdf.popups.okPopup.show({
     header: 'Component Error' ,
     desc: err.description ,
     button: "Click to close"
@@ -786,7 +796,7 @@ Dashboards.loginAlert = function(newOpts) {
   };
   opts = _.extend( {} , opts, newOpts );
 
-  wd.popups.okPopup.show(opts);
+  wd.cdf.popups.okPopup.show(opts);
   this.trigger('cdf cdf:loginError', this);
 };
 
@@ -4401,9 +4411,10 @@ Query = function() {
 
 
 var wd = wd || {};
-wd.popups = wd.popups || {};
+wd.cdf = wd.cdf || {};
+wd.cdf.popups = wd.cdf.popups || {};
 
-wd.popups.okPopup = {
+wd.cdf.popups.okPopup = {
   template: Mustache.compile(
               "<div class='cdfPopup'>" +
               "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
@@ -4455,20 +4466,20 @@ wd.popups.okPopup = {
  * 
  */
 
-wd.notifications = wd.notifications || {};
+wd.cdf.notifications = wd.cdf.notifications || {};
 
-wd.notifications.component = {
+wd.cdf.notifications.component = {
   template: Mustache.compile(
               "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
               "  <div class='cdfNotificationBody'>" +
               "    <div class='cdfNotificationImg'>&nbsp;</div>" +
-              "    <div class='cdfNotificationTitle'>{{{title}}}</div>" +
+              "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
               "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
               "  </div>" +
               "</div>" ),
   defaults:{
     title: "Component Error",
-    desc: "Something went wrong rendering this component."
+    desc: "Error processing component."
   },
   render: function (ph, newOpts){
     var opts = _.extend( {}, this.defaults, newOpts);
