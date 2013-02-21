@@ -828,13 +828,13 @@ var UnmanagedComponent = BaseComponent.extend({
   errorNotification: function (err, ph) {
     var name = this.name.replace('render_', '');
     if (ph){
-      wd.notifications.component.render(
+      wd.cdf.notifications.component.render(
         $(ph), {
           title: err.description,
           desc: ""
       });
     } else {
-      /*wd.popups.okPopup.show({
+      /*wd.cdf.popups.okPopup.show({
         header: name,
         desc: err.description,
         button: "Click to close"
