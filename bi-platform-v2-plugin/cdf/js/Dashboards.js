@@ -748,7 +748,7 @@ Dashboards.parseServerError = function (resp, txtStatus, error){
   ];
 
   out.error = error;
-  out.description = Dashboards.getErrorCode('COMPONENT_ERROR').msg;
+  out.description = Dashboards.getErrorObj('COMPONENT_ERROR').msg;
   var str = $('<div/>').html(resp.responseText).find('h1').text();
   _.find( regexs, function (el){
     if ( str.match( el.match )){
