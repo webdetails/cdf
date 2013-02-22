@@ -630,7 +630,10 @@ var UnmanagedComponent = BaseComponent.extend({
         this.postExec();
         this.showTooltip();
       } catch(e){
-        this.errorNotification(err);
+        this.errorNotification({
+          error: e,
+          description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
+        });
         this.error();
         this.dashboard.log(e,"error"); 
       } finally {
@@ -668,7 +671,10 @@ var UnmanagedComponent = BaseComponent.extend({
       try{
         callback(data);
       } catch (e) {
-        this.errorNotification(err);
+        this.errorNotification({
+          error: e,
+          description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
+        });
         this.error();
         this.dashboard.log(e,"error");
       } finally {
@@ -734,7 +740,10 @@ var UnmanagedComponent = BaseComponent.extend({
       try{
         callback(data);
       } catch (e) {
-        this.errorNotification(err);
+        this.errorNotification({
+          error: e,
+          description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
+        });
         this.error();
         this.dashboard.log(e,"error");
       } finally {
@@ -805,7 +814,10 @@ var UnmanagedComponent = BaseComponent.extend({
               newData = this.postFetch(data);
               data = typeof newData == "undefined" ? data : newData;
             } catch(e) {
-              this.errorNotification(err);
+              this.errorNotification({
+                error: e,
+                description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
+              });
               this.error();
               this.dashboard.log(e,"error");
             }
@@ -813,7 +825,10 @@ var UnmanagedComponent = BaseComponent.extend({
           try {
             success(data);
           } catch (e) {
-            this.errorNotification(err);
+            this.errorNotification({
+              error: e,
+              description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
+            });
             this.error();
             this.dashboard.log(e,"error");
           }
