@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130218
+//VERSION TRUNK-20130221
 
 
 /*global pvc:true */
@@ -16718,9 +16718,9 @@ def
     this._renderer = def.get(keyArgs, 'renderer');
     
     this.colorAxis = def.get(keyArgs, 'colorAxis');
-    this.clickMode = def.get(keyArgs, 'clickMode');
     
-    if(this.colorAxis && !this.clickMode){
+    this.clickMode = def.get(keyArgs, 'clickMode');
+    if(!this.clickMode && this.colorAxis){
         this.clickMode = this.colorAxis.option('LegendClickMode');
     }
 })
@@ -17121,9 +17121,10 @@ def
                     proto:        markerPvBaseProto,
                     freePosition: true,
                     activeSeriesAware: false, // no guarantee that series exist in the scene
-                    noTooltip:   true,
+                    noTooltip:    true,
                     noSelect:     this.noSelect,
                     noHover:      this.noHover,
+                    noClick:      true,
                     extensionId:  extensionPrefix + "Dot",
                     wrapper:      wrapper
                 })
@@ -18560,8 +18561,21 @@ def
     _processOptionsCore: function(options){
         // Disable animation if environment doesn't support it
         if(!this.parent){
-            if (!$.support.svg || pv.renderer() === 'batik') {
-                options.animate = false;
+            var interactive = options.interactive;
+            if(interactive == null){
+                interactive = options.interactive = (pv.renderer() !== 'batik');
+            }
+            
+            if(!interactive){
+                options.animated = 
+                options.tooltipEnabled = 
+                options.selectable = 
+                options.hoverable =
+                options.clickable = false;
+            } else {
+                if (!$.support.svg) {
+                    options.animate = false;
+                }
             }
             
             this._processTooltipOptions(options);
@@ -18890,6 +18904,8 @@ def
                 return pvFormat.format(d * 100) + "%";
             };
         }),
+        
+        //interactive: true,
         
         // Content/Plot area clicking
         clickable:  false,
@@ -20901,6 +20917,10 @@ pvc.BaseChart
         return this.root._onUserSelection(datums);
     },
     
+    _isInteractive: function(){
+        return this.options.interactive;
+    },
+    
     _isSelectable: function(){
         return this.options.selectable;
     },
@@ -22042,7 +22062,7 @@ def
             this._createCore(this._layoutInfo);
             
             /* RubberBand */
-            if (this.isTopRoot && pv.renderer() !== 'batik' && this.chart._canSelectWithRubberband()){
+            if (this.isTopRoot) {
                 this._initRubberBand();
             }
 
@@ -22894,7 +22914,7 @@ def
                 this._onClick(context);
             }
             
-            if((sign  && sign.isSelectable()) || 
+            if((sign  && sign.isClickSelectable()) || 
                (!sign && this.chart.options.selectable && context.scene.datum)){
                 this._onSelect(context);
             }
@@ -22953,19 +22973,50 @@ def
      * @virtual
      */
     _initRubberBand: function(){
+        if(!this.chart._isInteractive()) {
+            return;
+        }
+        
         var myself = this,
-            chart = this.chart,
+            chart = myself.chart,
             options  = chart.options,
-            data = chart.data;
-
+            clickClearsSelection = options.clearSelectionMode === 'emptySpaceClick',
+            useRubberband = this.chart._canSelectWithRubberband();
+        
+        if(!useRubberband && !clickClearsSelection){
+            return;
+        }
+        
+        var data = chart.data,
+            rubberPvParentPanel = myself.pvRootPanel || myself.pvPanel.paddingPanel;
+        
+        // IE must have a fill style to fire events
+        if(!myself._getExtensionAbs('base', 'fillStyle')){
+            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
+        }
+        
+        // Require all events, wether it's painted or not
+        rubberPvParentPanel.lock('events', 'all');
+        
+        if(!useRubberband) {
+            if(clickClearsSelection) {
+                // Install clearSelectionMode click
+                rubberPvParentPanel
+                    .event("click", function() {
+                        if(data.owner.clearSelected()) {
+                            chart.updateSelections();
+                        }
+                    });
+            }
+            return;
+        }
+        
         var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
         this._isRubberBandSelecting = false;
 
         // Rubber band
-        var rubberPvParentPanel = this.pvRootPanel || this.pvPanel.paddingPanel,
-            toScreen,
-            rb;
+        var toScreen, rb;
         
         var selectBar = 
             this.selectBar = 
@@ -22978,18 +23029,14 @@ def
                 noDoubleClick: true,
                 noTooltip:    true
             })
-            .override('defaultStrokeWidth', function(){
-                return 1.5;
-            })
+            .override('defaultStrokeWidth', function(){ return 1.5; })
             .override('defaultColor', function(type){
                 return type === 'stroke' ? 
                        '#86fe00' :                 /* 'rgb(255,127,0)' */ 
                        'rgba(203, 239, 163, 0.6)'  /* 'rgba(255, 127, 0, 0.15)' */
                        ;
             })
-            .override('interactiveColor', function(color){
-                return color;
-            })
+            .override('interactiveColor', function(color){ return color; })
             .pvMark
             .lock('visible', function(){ return !!rb;  })
             .lock('left',    function(){ return rb.x;  })
@@ -23001,14 +23048,6 @@ def
             .lock('cursor')
             .lock('events', 'none')
             ;
-        
-        // IE must have a fill style to fire events
-        if(!this._getExtensionAbs('base', 'fillStyle')){
-            rubberPvParentPanel.fillStyle(pvc.invisibleFill);
-        }
-        
-        // Require all events, wether it's painted or not
-        rubberPvParentPanel.lock('events', 'all');
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
@@ -23071,7 +23110,7 @@ def
                 }
             });
         
-        if(options.clearSelectionMode === 'emptySpaceClick'){
+        if(clickClearsSelection){
             rubberPvParentPanel
                 .event("click", function() {
                     // It happens sometimes that the click is fired 
@@ -23085,7 +23124,7 @@ def
                     }
                     
                     if(data.owner.clearSelected()) {
-                        myself.chart.updateSelections();
+                        chart.updateSelections();
                     }
                 });
         }
@@ -24216,9 +24255,9 @@ def
     
     pvLegendPanel: null,
     
-    textMargin: 6,    // The space *between* the marker and the text, in pixels.
-    itemPadding:    2.5,  // Half the space *between* legend items, in pixels.
-    markerSize: 15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
+    textMargin:  6,    // The space *between* the marker and the text, in pixels.
+    itemPadding: 2.5,  // Half the space *between* legend items, in pixels.
+    markerSize:  15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
     font:  '10px sans-serif',
 
     /**
@@ -24292,6 +24331,7 @@ def
               extensionId: 'panel',
               wrapper:     wrapper,
               noSelect:    false,
+              noClick:     false,
               noClickSelect: true // just rubber-band (the click is for other behaviors)
           })
           .lockMark('data', function(row){ return row.items; }) // each row has a list of bullet item scenes
@@ -24327,6 +24367,7 @@ def
                      "rgba(200,200,200,1)" : 
                      "rgba(200,200,200,0.0001)";
           })
+          // See also the _isClickable override, below
           .cursor(function(itemScene){
               return itemScene.isClickable() ? "pointer" : null;
           })
@@ -24384,8 +24425,54 @@ def
           .font(function(itemScene){ return itemScene.vars.font; }) // TODO: lock?
           .textDecoration(function(itemScene){ return itemScene.isOn() ? "" : "line-through"; })
           ;
+      
+      if(pvc.debug >= 16){
+          var font = this.font;
+          var textHeight = pv.Text.fontHeight(font) * 2/3;
+          
+          pvLegendMarkerPanel.anchor("right")
+       // Single-point panel (w=h=0)
+          .add(pv.Panel)
+              [this.anchorLength()](0)
+              [this.anchorOrthoLength()](0)
+              .fillStyle(null)
+              .strokeStyle(null)
+              .lineWidth(0)
+           .add(pv.Line)
+              .data(function(scene){
+                  
+                  var labelBBox = pvc.text.getLabelBBox(
+                          pv.Text.measure(scene.vars.value.label, font).width, 
+                          textHeight,  // shared stuff
+                          'left', 
+                          'middle', 
+                          0, 
+                          2);  
+                  var corners = labelBBox.source.points();
+                  
+                  // Close the path
+                  if(corners.length > 1){
+                      // not changing corners on purpose
+                      corners = corners.concat(corners[0]);
+                  }
+                  
+                  return corners;
+              })
+              .left(function(p){ return p.x; })
+              .top (function(p){ return p.y; })
+              .strokeStyle('red')
+              .lineWidth(0.5)
+              .strokeDasharray('-')
+              ;
+      }
     },
 
+    // Doesn't matter if the chart's clickable is false.
+    // Legend allows click based on legendClickMode
+    _isClickable: function(){
+        return true;
+    },
+    
     _getExtensionId: function(){
         return 'area'; 
     },
@@ -27180,8 +27267,7 @@ def
                 layoutInfo.axisSize = 50;
             }
         } else {
-            layoutInfo.textAngle  = def.number.as(this._getExtension('label', 'textAngle'),  0);
-            layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3);
+            this._readTextProperties(layoutInfo);
             
             /* I  - Calculate ticks
              * --> layoutInfo.{ ticks, ticksText, maxTextWidth } 
@@ -27193,7 +27279,7 @@ def
             }
             
             /* II - Calculate NEEDED axisSize so that all tick's labels fit */
-            this._calcAxisSizeFromLabel(); // -> layoutInfo.requiredAxisSize, layoutInfo.labelBBox
+            this._calcAxisSizeFromLabel(layoutInfo); // -> layoutInfo.requiredAxisSize, layoutInfo.maxLabelBBox, layoutInfo.ticksBBoxes
             
             if(layoutInfo.axisSize == null){
                 layoutInfo.axisSize = layoutInfo.requiredAxisSize;
@@ -27207,14 +27293,14 @@ def
         }
     },
     
-    _calcAxisSizeFromLabel: function(){
-        this._calcLabelBBox();
-        this._calcAxisSizeFromLabelBBox();
+    _calcAxisSizeFromLabel: function(layoutInfo){
+        this._calcTicksLabelBBoxes(layoutInfo);
+        this._calcAxisSizeFromLabelBBox(layoutInfo);
     },
 
-    // --> layoutInfo.labelBBox
-    _calcLabelBBox: function(){
-        var layoutInfo = this._layoutInfo;
+    _readTextProperties: function(layoutInfo){
+        layoutInfo.textAngle  = def.number.as(this._getExtension('label', 'textAngle'),  0);
+        layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3);
         
         var align = this._getExtension('label', 'textAlign');
         if(typeof align !== 'string'){
@@ -27222,6 +27308,7 @@ def
                     "center" : 
                     (this.anchor == "left") ? "right" : "left";
         }
+        layoutInfo.textAlign = align;
         
         var baseline = this._getExtension('label', 'textBaseline');
         if(typeof baseline !== 'string'){
@@ -27240,30 +27327,22 @@ def
                 //case "top":
                     baseline = "bottom";
             }
-        } 
-        
-        return (layoutInfo.labelBBox = pvc.text.getLabelBBox(
-                        layoutInfo.maxTextWidth != null ? layoutInfo.maxTextWidth : layoutInfo._maxTextWidth, 
-                        layoutInfo.textHeight, 
-                        align, 
-                        baseline, 
-                        layoutInfo.textAngle, 
-                        layoutInfo.textMargin));
+        }
+        layoutInfo.textBaseline = baseline;
     },
     
-    _calcAxisSizeFromLabelBBox: function(){
-        var layoutInfo = this._layoutInfo;
-        var labelBBox = layoutInfo.labelBBox;
+    _calcAxisSizeFromLabelBBox: function(layoutInfo){
+        var maxLabelBBox = layoutInfo.maxLabelBBox;
         
         // The length not over the plot area
-        var length = this._getLabelBBoxQuadrantLength(labelBBox, this.anchor);
+        var length = this._getLabelBBoxQuadrantLength(maxLabelBBox, this.anchor);
 
         // --------------
         
         var axisSize = this.tickLength + length; 
         
         // Add equal margin on both sides?
-        var angle = labelBBox.sourceAngle;
+        var angle = maxLabelBBox.sourceAngle;
         if(!(angle === 0 && this.isAnchorTopOrBottom())){
             // Text height already has some free space in that case
             // so no need to add more.
@@ -27314,83 +27393,71 @@ def
             return;
         }
 
-        if(!this._layoutInfo.labelBBox){
-            this._calcLabelBBox();
-        }
-        
         this._calcOverflowPaddingsFromLabelBBox();
     },
 
-    // TODO: this method is using the biggest label size
-    // to estimate overflow on each end of the axis.
-    // When at either end, the text is much smaller
-    // than the biggest it often results in wider
-    // than needed margins being reserved.
-    //
-    // TODO: the half-band method for determining the overflow in
-    // discrete axes also doesn't take text-alignment into account.
     _calcOverflowPaddingsFromLabelBBox: function(){
         var overflowPaddings = null;
-        
-        var layoutInfo = this._layoutInfo;
-        var ticks = layoutInfo.ticks;
+        var me = this;
+        var li = me._layoutInfo;
+        var ticks = li.ticks;
         var tickCount = ticks.length;
         if(tickCount){
-            var paddings   = layoutInfo.paddings;
-            var labelBBox  = layoutInfo.labelBBox;
-            var isTopOrBottom = this.isAnchorTopOrBottom();
-            var begSide    = isTopOrBottom ? 'left'  : 'top';
-            var endSide    = isTopOrBottom ? 'right' : 'bottom';
-            var isDiscrete = this.scale.type === 'discrete';
+            var ticksBBoxes  = li.ticksBBoxes;
+            var paddings     = li.paddings;
+            var isTopOrBottom = me.isAnchorTopOrBottom();
+            var begSide      = isTopOrBottom ? 'left'  : 'bottom';
+            var endSide      = isTopOrBottom ? 'right' : 'top';
+            var scale        = me.scale;
+            var isDiscrete   = scale.type === 'discrete';
+            var clientLength = li.clientSize[me.anchorLength()];
             
-            var clientLength = layoutInfo.clientSize[this.anchorLength()];
             this.axis.setScaleRange(clientLength);
             
-            var sideTickOffset;
-            if(isDiscrete){
-                var halfBand = this.scale.range().step / 2; // don't use .band, cause it does not include margins... 
-                sideTickOffset = def.set({}, 
-                        begSide, halfBand,
-                        endSide, halfBand);
-            } else {
-                sideTickOffset = def.set({}, 
-                        begSide, this.scale(ticks[0]),
-                        endSide, clientLength - this.scale(ticks[tickCount - 1]));
-            }
-            
-            [begSide, endSide].forEach(function(side){
-                var overflowPadding  = this._getLabelBBoxQuadrantLength(labelBBox, side);
-                if(overflowPadding > 0){
-                    // Discount real paddings that this panel already has
-                    // cause they're, in principle, empty space that can be occupied.
-                    overflowPadding -= (paddings[side] || 0);
-                    if(overflowPadding > 0){
-                        // On discrete axes, half of the band width is not yet overflow.
-                        overflowPadding -= sideTickOffset[side];
-                        if(overflowPadding > 1){ // small delta to avoid frequent relayouts... (the reported font height often causes this kind of "error" in BBox calculation)
+            var evalLabelSideOverflow = function(labelBBox, side, isBegin, index) {
+                var sideLength = me._getLabelBBoxQuadrantLength(labelBBox, side);
+                if(sideLength > 1) {// small delta to avoid frequent re-layouts... (the reported font height often causes this kind of "error" in BBox calculation)
+                    var anchorPosition = scale(isDiscrete ? ticks[index].value : ticks[index]);
+                    var sidePosition = isBegin ? (anchorPosition - sideLength) : (anchorPosition + sideLength);
+                    var sideOverflow = Math.max(0, isBegin ? -sidePosition : (sidePosition - clientLength));
+                    if(sideOverflow > 1) { 
+                        // Discount this panels' paddings 
+                        // cause they're, in principle, empty space that can be occupied.
+                        sideOverflow -= (paddings[side] || 0);
+                        if(sideOverflow > 1) {
                             if(isDiscrete){
                                 // reduction of space causes reduction of band width
                                 // which in turn usually causes the overflowPadding to increase,
                                 // as the size of the text usually does not change.
                                 // Ask a little bit more to hit the target faster.
-                                overflowPadding *= 1.05;
+                                sideOverflow *= 1.05;
                             }
-                            
-                            if(!overflowPaddings){ 
-                                overflowPaddings= {}; 
+                                
+                            if(!overflowPaddings) { 
+                                overflowPaddings= def.set({}, side, sideOverflow); 
+                            } else {
+                                var currrOverflowPadding = overflowPaddings[side];
+                                if(currrOverflowPadding == null || 
+                                   (currrOverflowPadding < sideOverflow)){
+                                    overflowPaddings[side] = sideOverflow;
+                                }
                             }
-                            overflowPaddings[side] = overflowPadding;
                         }
                     }
                 }
-            }, this);
+            };
+            
+            ticksBBoxes.forEach(function(labelBBox, index){
+                evalLabelSideOverflow(labelBBox, begSide, true,  index); 
+                evalLabelSideOverflow(labelBBox, endSide, false, index);
+            });
             
             if(pvc.debug >= 6 && overflowPaddings){
-                this._log("OverflowPaddings = " + pvc.stringify(overflowPaddings));
+                me._log("OverflowPaddings = " + pvc.stringify(overflowPaddings));
             }
         }
         
-        layoutInfo.overflowPaddings = overflowPaddings;
+        li.overflowPaddings = overflowPaddings;
     },
     
     _calcMaxTextLengthThatFits: function(){
@@ -27411,7 +27478,7 @@ def
         } else {
             // Text may not fit. 
             // Calculate maxTextWidth where text is to be trimmed.
-            var labelBBox = layoutInfo.labelBBox;
+            var maxLabelBBox = layoutInfo.maxLabelBBox;
             
             // Now move backwards, to the max text width...
             var maxOrthoLength = efSize - 2 * this.tickLength;
@@ -27447,7 +27514,7 @@ def
             // Intersect the line that passes through mostOrthoDistantPoint,
             // and has the direction parallelDirection with 
             // the top side and with the bottom side of the *original* label box.
-            var corners = labelBBox.source.points();
+            var corners = maxLabelBBox.source.points();
             var botL = corners[0];
             var botR = corners[1];
             var topR = corners[2];
@@ -27464,7 +27531,7 @@ def
             // the line that passes at mostOrthoDistantPoint and has direction parallelDirection (dividing line)
             // further away to the axis, are to be replaced.
             
-            var sideLRWidth  = labelBBox.sourceTextWidth;
+            var sideLRWidth  = maxLabelBBox.sourceTextWidth;
             var maxTextWidth = sideLRWidth;
             
             var botLI = botI.minus(botL);
@@ -27503,7 +27570,7 @@ def
             // just cutting on one side of the label original box
             // won't do, because when text is centered, the cut we make in length
             // ends up distributed by both sides...
-            if(labelBBox.sourceAlign === 'center'){
+            if(maxLabelBBox.sourceAlign === 'center'){
                 var cutWidth = sideLRWidth - maxTextWidth;
                 
                 // Cut same width on the opposite side. 
@@ -27532,7 +27599,7 @@ def
         layoutInfo.textHeight = pv.Text.fontHeight(this.font) * 2/3;
         layoutInfo.maxTextWidth = null;
         
-        // Reset scale to original unrounded domain
+        // Reset scale to original un-rounded domain
         this.axis.setTicks(null);
         
         // update maxTextWidth, ticks and ticksText
@@ -27549,15 +27616,8 @@ def
         this.axis.setScaleRange(clientLength);
 
         if(layoutInfo.maxTextWidth == null){
-            layoutInfo.maxTextWidth = 
-                def.query(layoutInfo.ticksText)
-                    .select(function(text){ return pv.Text.measure(text, this.font).width; }, this)
-                    .max();
+            this._calcTicksTextLength(layoutInfo);
         }
-        
-        // Backup value, cause the first one is cleared to prevent label trimming
-        // but the max text width is important for other uses
-        layoutInfo._maxTextWidth = layoutInfo.maxTextWidth;
     },
     
     _calcDiscreteTicks: function(){
@@ -27597,8 +27657,15 @@ def
         }
         
         layoutInfo.ticksText = data._children.map(format);
+        
+        this._clearTicksTextDeps(layoutInfo);
     },
     
+    _clearTicksTextDeps: function(ticksInfo){ 
+        ticksInfo.maxTextWidth = 
+        ticksInfo.ticksTextLength = 
+        ticksInfo.ticksBBoxes = null;
+    },
 
     _calcTimeSeriesTicks: function(){
         this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
@@ -27634,13 +27701,60 @@ def
         }
     },
     
-    _calcContinuousTicksText: function(ticksInfo){
-        
+    _calcContinuousTicksText: function(ticksInfo){        
         ticksInfo.ticksText = def.query(ticksInfo.ticks)
-                               .select(function(tick){ return this.scale.tickFormat(tick); }, this)
-                               .array();
+                   .select(function(tick){ return this.scale.tickFormat(tick); }, this)
+                   .array();
+        
+        this._clearTicksTextDeps(ticksInfo);
     },
     
+    _calcTicksTextLength: function(ticksInfo){
+        var max  = 0;
+        var font = this.font;
+        ticksInfo.ticksTextLength = def.query(ticksInfo.ticksText)
+            .select(function(text){
+                var len = pv.Text.measure(text, font).width;
+                if(len > max){ max = len; }
+                return len; 
+            })
+            .array();
+        
+        ticksInfo.maxTextWidth = max;
+        ticksInfo.ticksBBoxes  = null;
+    },
+    
+    _calcTicksLabelBBoxes: function(ticksInfo){
+        var me = this;
+        var li = me._layoutInfo;
+        var ticksTextLength = ticksInfo.ticksTextLength || 
+                              me._calcTicksTextLength(ticksInfo);
+        
+        var maxBBox;
+        var maxLen = li.maxTextWidth;
+        
+        ticksInfo.ticksBBoxes = def.query(ticksTextLength)
+            .select(function(len){
+                var labelBBox = me._calcLabelBBox(len);
+                if(!maxBBox && len === maxLen){ maxBBox = labelBBox; }
+                return labelBBox;
+            }, me)
+            .array();
+        
+        li.maxLabelBBox = maxBBox;
+    },
+    
+    _calcLabelBBox: function(textWidth){
+        var li = this._layoutInfo;
+        return pvc.text.getLabelBBox(
+                    textWidth, 
+                    li.textHeight,  // shared stuff
+                    li.textAlign, 
+                    li.textBaseline, 
+                    li.textAngle, 
+                    li.textMargin);
+    },
+
     // --------------
     
     _calcDiscreteTicksIncludeModulo: function(){
@@ -27663,11 +27777,7 @@ def
         // How much are label anchors separated from each other
         // (in the axis direction)
         var b = this.scale.range().step; // don't use .band, cause it does not include margins...
-        
-        // Height of label box
         var h = layoutInfo.textHeight;
-        
-        // Width of label box
         var w = layoutInfo.maxTextWidth;  // Should use the average value?
         
         if(!(w > 0 && h > 0 && b > 0)){
@@ -27973,38 +28083,42 @@ def
                     rootScene.vars.tickIncludeModulo = includeModulo;
                     rootScene.vars.hiddenLabelText   = hiddenLabelText;
                     
-                    var hiddenDatas, hiddenTexts, createHiddenScene;
+                    var hiddenDatas, hiddenTexts, createHiddenScene, hiddenIndex;
                     if(includeModulo > 2) {
                         var keySep = rootScene.group.owner.keySep;
                         
                         createHiddenScene = function() {
                             var k = hiddenDatas.map(function(d) { return d.key; }).join(keySep);
                             var l = hiddenTexts.slice(0, 10).join(', ') + (hiddenTexts.length > 10 ? ', ...' : '');
-                            new pvc.visual.CartesianAxisTickScene(rootScene, {
+                            var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
                                 source:    hiddenDatas,
                                 tick:      k,
                                 tickRaw:   k,
                                 tickLabel: l,
                                 isHidden:  true
                             });
-                            hiddenDatas = hiddenTexts = null;
+                            scene.dataIndex = hiddenIndex;
+                            hiddenDatas = hiddenTexts = hiddenIndex = null;
                         };
                     }
                     
                     ticks.forEach(function(tickData, index){
                         var isHidden = (index % includeModulo) !== 0;
                         if(isHidden && includeModulo > 2) {
+                            if(hiddenIndex == null){ hiddenIndex = index; }
                             (hiddenDatas || (hiddenDatas = [])).push(tickData);
                             (hiddenTexts || (hiddenTexts = [])).push(ticksText[index]);
                         } else {
                             if(hiddenDatas) { createHiddenScene(); }
-                            new pvc.visual.CartesianAxisTickScene(rootScene, {
+                            var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
                                 source:    tickData,
                                 tick:      tickData.value,
                                 tickRaw:   tickData.rawValue,
                                 tickLabel: ticksText[index],
                                 isHidden:  isHidden
                             });
+                            
+                            scene.dataIndex = index;
                         }
                     });
                     
@@ -28012,11 +28126,12 @@ def
                 }
             } else {
                 ticks.forEach(function(majorTick, index){
-                    new pvc.visual.CartesianAxisTickScene(rootScene, {
+                    var scene = new pvc.visual.CartesianAxisTickScene(rootScene, {
                         tick:      majorTick,
                         tickRaw:   majorTick,
                         tickLabel: ticksText[index]
                     });
+                    scene.dataIndex = index;
                 }, this);
             }
         }
@@ -28053,7 +28168,7 @@ def
                             tickRaw:   childData.rawValue,
                             tickLabel: childData.label
                         });
-                        
+                        childScene.dataIndex = childData.childIndex();
                         recursive(childScene);
                     });
             }
@@ -28085,6 +28200,7 @@ def
             anchorOrthoLength = this.anchorOrthoLength(),
             pvRule            = this.pvRule,
             rootScene         = this._getRootScene(),
+            layoutInfo        = this._layoutInfo,
             isV1Compat        = this.compatVersion() <= 1;
         
         var wrapper;
@@ -28165,33 +28281,7 @@ def
                 ;
         }
         
-        // Determine anchored text properties
-        var baseline;
-        var align;
-        switch(this.anchor){
-            case 'top':
-                align = 'center';
-                baseline = 'bottom';
-                break;
-                
-            case 'bottom':
-                align = 'center';
-                baseline = 'top';
-                break;
-                
-            case 'left': 
-                align = 'right';
-                baseline = 'middle';
-                break;
-            
-            case 'right': 
-                align = 'left';
-                baseline = 'middle';
-                break;
-        }
-        
         var font = this.font;
-        
         var maxTextWidth = this._layoutInfo.maxTextWidth;
         if(!isFinite(maxTextWidth)){
             maxTextWidth = 0;
@@ -28252,8 +28342,8 @@ def
             
             .font(font)
             .textStyle("#666666")
-            .textAlign(align)
-            .textBaseline(baseline)
+            .textAlign(layoutInfo.textAlign)
+            .textBaseline(layoutInfo.textBaseline)
             ;
         
         this._debugTicksPanel(pvTicksPanel);
@@ -28261,13 +28351,9 @@ def
     
     _debugTicksPanel: function(pvTicksPanel){
         if(pvc.debug >= 16){ // one more than general debug box model
-            var corners = this._layoutInfo.labelBBox.source.points();
-            
-            // Close the path
-            if(corners.length > 1){
-                // not changing corners on purpose
-                corners = corners.concat(corners[0]);
-            }
+            var font = this.font;
+            var li = this._layoutInfo;
+            var ticksBBoxes = li.ticksBBoxes || this._calcTicksLabelBBoxes(li);
             
             pvTicksPanel
                 // Single-point panel (w=h=0)
@@ -28279,9 +28365,20 @@ def
                     .fillStyle(null)
                     .strokeStyle(null)
                     .lineWidth(0)
-                 .add(pv.Line)
                     .visible(function(tickScene){ return !tickScene.isHidden; })
-                    .data(corners)
+                 .add(pv.Line)
+                    .data(function(scene){
+                        var labelBBox = ticksBBoxes[scene.dataIndex];
+                        var corners   = labelBBox.source.points();
+                        
+                        // Close the path
+                        if(corners.length > 1){
+                            // not changing corners on purpose
+                            corners = corners.concat(corners[0]);
+                        }
+                        
+                        return corners;
+                    })
                     .left(function(p){ return p.x; })
                     .top (function(p){ return p.y; })
                     .strokeStyle('red')
@@ -30784,6 +30881,8 @@ def
         this.linesVisible = true;
         plot.option.specify({'LinesVisible': true});
     }
+     
+    this.visualRoles.value = chart.visualRoles(plot.option('OrthoRole'));
 })
 .add({
     pvLine: null,
@@ -30855,10 +30954,6 @@ def
         var linesVisible = this.linesVisible;
         var anchor = this.isOrientationVertical() ? "bottom" : "left";
 
-        this.valueRole     = chart.visualRoles(this.plot.option('OrthoRole'));
-        this.valueRoleName = this.valueRole.name;
-        this.valueDimName  = this.valueRole.firstDimensionName();
-        
         // ------------------
         // DATA
         var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
@@ -31229,10 +31324,13 @@ def
         var categDatas = data._children;
         var chart = this.chart;
         var serRole = this.visualRoles.series;
-        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
-        var valueDim = data.owner.dimensions(this.valueDimName);
+        var valueRole = this.visualRoles.value;
         var isStacked = this.stacked;
-        var visibleKeyArgs = {visible: true, zeroIfNone: false};
+        var valueVarHelper = new pvc.visual.RoleVarHelper(rootScene, valueRole, {roleVar: 'value', hasPercentSubVar: isStacked});
+        var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
+        var valueDimName  = valueRole.firstDimensionName();
+        var valueDim = data.owner.dimensions(valueDimName);
+        
         var orthoScale = this.axes.ortho.scale;
         var orthoNullValue = def.scope(function(){
                 // If the data does not cross the origin, 
@@ -31275,29 +31373,25 @@ def
                     group = group._childrenByKey[seriesData1.key];
                 }
                 
-                var value = group ?
-                    group.dimensions(valueDim.name).sum(visibleKeyArgs) : 
-                    null;
-                
                 var serCatScene = new pvc.visual.Scene(seriesScene, {source: group});
                 
                 // -------------
+                
                 serCatScene.dataIndex = categIndex;
                 
                 serCatScene.vars.category = pvc.visual.ValueLabelVar.fromComplex(categData);
                 
                 // -------------
+
+                valueVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
+
+                var valueVar = serCatScene.vars.value;
+                var value    = valueVar.value;
                 
-                var valueVar = new pvc.visual.ValueLabelVar(
-                                    value,
-                                    valueDim.format(value),
-                                    value);
-                
-                /* accumulated value, for stacked */
-                // NOTE: the null value can only happen if interpolation is 'none'
+                // accumulated value, for stacked
                 valueVar.accValue = value != null ? value : orthoNullValue;
                 
-                serCatScene.vars.value = valueVar;
+                // -------------
                 
                 colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
                 
@@ -31472,7 +31566,7 @@ def
                 if(belowScene && isBaseDiscrete) {
                     var belowValueVar = belowScene.vars.value;
                     interAccValue = belowValueVar.accValue;
-                    interValue = belowValueVar[this.valueRoleName];
+                    interValue = belowValueVar[valueRole.name];
                 } else {
                     interValue = interAccValue = orthoNullValue;
                 }
