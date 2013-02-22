@@ -1,6 +1,6 @@
 pen.define("cdf/lib/CCC/protovis", function(){
 
-// cea1e1b345326bacb7cc119767ee770a18b92ea9
+// 8ef5fb05c583f3d8c688a2821d003cf056e53be7
 /**
  * @class The built-in Array class.
  * @name Array
@@ -1315,7 +1315,8 @@ pv.Format.number = function() {
             style.top  = 0;
             
             var svgElem = pv.SvgScene.create('svg');
-            svgElem.setAttribute('font', _lastFont);
+            svgElem.setAttribute('font-size',   '10px');
+            svgElem.setAttribute('font-family', 'sans-serif');
             div.appendChild(svgElem);
             
             
@@ -1689,7 +1690,7 @@ pv.search.index = function(array, value, f) {
 /**
  * Returns an array of numbers, starting at <tt>start</tt>, incrementing by
  * <tt>step</tt>, until <tt>stop</tt> is reached. The stop value is
- * exclusive. If only a single argument is specified, this value is interpeted
+ * exclusive. If only a single argument is specified, this value is interpreted
  * as the <i>stop</i> value, with the <i>start</i> value as zero. If only two
  * arguments are specified, the step value is implied to be one.
  *
@@ -3914,12 +3915,15 @@ pv.Scale.quantitative = function() {
    * @returns {string} a formatted tick value.
    */
   scale.tickFormat = function (t) {
+      var text;
       if(tickFormatter){
-          return tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
+          text = tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
+      } else {
+          text = tickFormat(t); 
       }
       
-      var formatter = tickFormatter || tickFormat;
-      return formatter(t);
+      // Make sure it is a string
+      return text == null ? '' : ('' + text);
   };
 
   /**
@@ -10079,7 +10083,7 @@ pv.SvgScene.panel = function(scenes) {
     this.scale *= t.k;
 
     /* children */
-    if(scenes[i].children.length){
+    if(s.children.length){
         var attrs = {
             "transform": "translate(" + x + "," + y + ")" +
                          (t.k != 1 ? " scale(" + t.k + ")" : "")
@@ -10105,7 +10109,7 @@ pv.SvgScene.panel = function(scenes) {
       scenes.$g = g = c.parentNode;
       e = c.nextSibling;
     }
-  } // for next panel instance
+  } // end for panel instance
   
   complete = true;
   return e;
