@@ -630,8 +630,9 @@ var UnmanagedComponent = BaseComponent.extend({
         this.postExec();
         this.showTooltip();
       } catch(e){
-        // Avoid IE8 error when there's no catch statement.
-        this.dashboard.log(e,'error');
+        this.errorNotification(err);
+        this.error();
+        this.dashboard.log(e,"error"); 
       } finally {
         if(!silent) {
           this.unblock();
@@ -667,7 +668,9 @@ var UnmanagedComponent = BaseComponent.extend({
       try{
         callback(data);
       } catch (e) {
-        this.dashboard.log(e,'error');
+        this.errorNotification(err);
+        this.error();
+        this.dashboard.log(e,"error");
       } finally {
         this.postExec();
       }
@@ -731,7 +734,9 @@ var UnmanagedComponent = BaseComponent.extend({
       try{
         callback(data);
       } catch (e) {
-        this.dashboard.log(e,'error');
+        this.errorNotification(err);
+        this.error();
+        this.dashboard.log(e,"error");
       } finally {
         this.postExec();
       }
@@ -800,12 +805,16 @@ var UnmanagedComponent = BaseComponent.extend({
               newData = this.postFetch(data);
               data = typeof newData == "undefined" ? data : newData;
             } catch(e) {
+              this.errorNotification(err);
+              this.error();
               this.dashboard.log(e,"error");
             }
           }
           try {
             success(data);
           } catch (e) {
+            this.errorNotification(err);
+            this.error();
             this.dashboard.log(e,"error");
           }
         }
@@ -819,13 +828,13 @@ var UnmanagedComponent = BaseComponent.extend({
   getErrorHandler: function() { 
     return  _.bind(function() {
       var err = Dashboards.parseServerError.apply(this, arguments );
-      var ph = ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined;
-      this.errorNotification(err, ph );
+      this.errorNotification(err);
       this.error();
     },
     this);  
   },
   errorNotification: function (err, ph) {
+    ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
     var name = this.name.replace('render_', '');
     if (ph){
       wd.cdf.notifications.component.render(
