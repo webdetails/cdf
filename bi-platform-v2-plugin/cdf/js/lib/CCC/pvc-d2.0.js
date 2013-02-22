@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130221
+//VERSION TRUNK-20130222
 
 
 /*global pvc:true */
@@ -13219,7 +13219,7 @@ def
             this.pvMark
                 .lineCap('round') // only used by strokeDashArray
                 .strokeDasharray(function (scene){
-                    return scene.vars.size.value < 0 ? 'shortdash' : null; // .  .  .
+                    return scene.vars.size.value < 0 ? 'dash' : null; // '-'
                 });
         }
     }
