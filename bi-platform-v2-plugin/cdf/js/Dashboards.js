@@ -46,12 +46,7 @@ if($.blockUI){
   $.blockUI.defaults.css.border = "none";
 }
 
-var ERROR_CODES = [];
-ERROR_CODES["UNKNOWN"] = ["ERROR: ","resources/style/images/error.jpg"];
-ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","resources/style/images/alert.jpg"];
-ERROR_CODES["0006"] = ["Could not establish a connection to the database","resources/style/images/error.jpg"];
-ERROR_CODES['QUERY_TIMEOUT'] = ["Query timeout reached."];
-ERROR_CODES['COMPONENT_ERROR'] = ["Error processing component."];
+
 
 if (typeof $.SetImpromptuDefaults == 'function')
   $.SetImpromptuDefaults({
@@ -60,6 +55,15 @@ if (typeof $.SetImpromptuDefaults == 'function')
   });
 
 var Dashboards = {
+
+  ERROR_CODES:{
+    'QUERY_TIMEOUT' : {
+      msg: "Query timeout reached."
+    },
+    "COMPONENT_ERROR" : {
+      msg: "Error processing component."  
+    }
+  },
   CDF_BASE_PATH: webAppPath + "/content/pentaho-cdf/",
   parameterModel: new Backbone.Model(),
   TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
@@ -415,20 +419,14 @@ Dashboards.bindControl = function(object) {
 };
 
 
-Dashboards.getErrorCode = function (errorCode){
-  var obj = {};
-  if ( ERROR_CODES[errorCode] ){
-    obj.msg = ERROR_CODES[errorCode][0] || errorCode;
-    obj.img = ERROR_CODES[errorCode][1];
-    obj.code = errorCode;
-  }
-  return obj
+Dashboards.getErrorObj = function (errorCode){
+  return Dashboards.ERROR_CODES[errorCode] || {};
 };
 
 Dashboards.parseServerError = function (resp, txtStatus, error){
   var out = {};
   var regexs = [
-    { match: /Query timeout/ , msg: Dashboards.getErrorCode('QUERY_TIMEOUT').msg  }
+    { match: /Query timeout/ , msg: Dashboards.getErrorObj('QUERY_TIMEOUT').msg  }
   ];
 
   out.error = error;
