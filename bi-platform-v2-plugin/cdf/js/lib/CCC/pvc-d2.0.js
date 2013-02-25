@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130222
+//VERSION TRUNK-20130225
 
 
 /*global pvc:true */
@@ -673,11 +673,13 @@ var pvc = def.globalSpace('pvc', {
     pvc.parseLegendClickMode = function(clickMode){
         if(!clickMode){
             clickMode = 'none';
+        } else {
+            clickMode = (''+clickMode).toLowerCase();
         }
         
         switch(clickMode){
-            case 'toggleSelected':
-            case 'toggleVisible':
+            case 'toggleselected':
+            case 'togglevisible':
             case 'none':
                 break;
                 
@@ -695,6 +697,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseShape = function(shape){
         if(shape){
+            shape = (''+shape).toLowerCase();
             switch(shape){
                 case 'square':
                 case 'circle':
@@ -718,6 +721,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseContinuousColorScaleType = function(scaleType){
         if(scaleType){
+            scaleType = (''+scaleType).toLowerCase();
             switch(scaleType){
                 case 'linear':
                 case 'normal':
@@ -739,6 +743,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseDomainScope = function(scope, orientation){
         if(scope){
+            scope = (''+scope).toLowerCase();
             switch(scope){
                 case 'cell':
                 case 'global':
@@ -778,6 +783,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseDomainRoundingMode = function(mode){
         if(mode){
+            mode = (''+mode).toLowerCase();
             switch(mode){
                 case 'none':
                 case 'nice':
@@ -799,9 +805,11 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseOverlappedLabelsMode = function(mode){
         if(mode){
+            mode = (''+mode).toLowerCase();
             switch(mode){
                 case 'leave':
                 case 'hide':
+                case 'rotatethenhide':
                     break;
                 
                 default:
@@ -830,6 +838,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseWaterDirection = function(value) {
         if(value){
+            value = (''+value).toLowerCase();
             switch(value){
                 case 'up':
                 case 'down':
@@ -844,6 +853,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseTrendType = function(value) {
         if(value){
+            value = (''+value).toLowerCase();
             if(value === 'none'){
                 return value;
             }
@@ -860,6 +870,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseNullInterpolationMode = function(value) {
         if(value){
+            value = (''+value).toLowerCase();
             switch(value){
                 case 'none':
                 case 'linear':
@@ -874,6 +885,7 @@ var pvc = def.globalSpace('pvc', {
     };
     
     pvc.parseAlign = function(side, align){
+        if(align){ align = (''+align).toLowerCase(); }
         var align2, isInvalid;
         if(side === 'left' || side === 'right'){
             align2 = align && pvc.BasePanel.verticalAlign[align];
@@ -899,6 +911,7 @@ var pvc = def.globalSpace('pvc', {
     // suitable for protovis.anchor(..) of all but the Wedge mark... 
     pvc.parseAnchor = function(anchor){
         if(anchor){
+            anchor = (''+anchor).toLowerCase();
             switch(anchor){
                 case 'top':
                 case 'left':
@@ -916,6 +929,7 @@ var pvc = def.globalSpace('pvc', {
     
     pvc.parseAnchorWedge = function(anchor){
         if(anchor){
+            anchor = (''+anchor).toLowerCase();
             switch(anchor){
                 case 'outer':
                 case 'inner':
@@ -975,19 +989,21 @@ var pvc = def.globalSpace('pvc', {
     pvc.Sides.namesSet = pv.dict(pvc.Sides.names, def.retTrue);
     
     pvc.parsePosition = function(side, defaultSide){
-        if(side && !def.hasOwn(pvc.Sides.namesSet, side)){
-            if(!defaultSide){
-                defaultSide = 'left';
-            }
+        if(side){ 
+            side = (''+side).toLowerCase();
             
-            if(pvc.debug >= 2){
-                pvc.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, defaultSide]));
+            if(!def.hasOwn(pvc.Sides.namesSet, side)){
+                var newSide = defaultSide || 'left';
+                
+                if(pvc.debug >= 2){
+                    pvc.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, newSide]));
+                }
+                
+                side = newSide;
             }
-            
-            side = defaultSide;
         }
         
-        return side;
+        return side || defaultSide || 'left';
     };
     
     pvc.Sides.as = function(v){
@@ -2243,6 +2259,8 @@ def.scope(function(){
             type      || def.fail.argumentRequired('type');
             trendSpec || def.fail.argumentRequired('trendSpec');
             def.object.is(trendSpec) || def.fail.argumentInvalid('trendSpec', "Must be a trend specification object.");
+            
+            type = (''+type).toLowerCase();
             
             if(pvc.debug >= 2 && def.hasOwn(_trends, type)){
                 pvc.log(def.format("[WARNING] A trend type with the name '{0}' is already defined.", [type]));
@@ -14925,7 +14943,7 @@ def.scope(function(){
         OverlappedLabelsMode: {
             resolve: '_resolveFull',
             cast:    pvc.parseOverlappedLabelsMode,
-            value:   'hide'
+            value:   'rotatethenhide'
         },
         
         /* RULES */
@@ -16278,7 +16296,7 @@ def.scope(function(){
             resolve: '_resolveFull',
             data:    legendData,
             cast:    pvc.parseLegendClickMode,
-            value:   'toggleVisible'
+            value:   'togglevisible'
         },
         
         LegendDrawLine: {
@@ -16761,11 +16779,11 @@ def
             // Mixin behavior depending on click mode
             var clickMode = this.clickMode;
             switch(clickMode){
-                case 'toggleSelected':
+                case 'toggleselected':
                     ItemType.add(pvc.visual.legend.BulletItemSceneSelection);
                     break;
                 
-                case 'toggleVisible':
+                case 'togglevisible':
                     ItemType.add(pvc.visual.legend.BulletItemSceneVisibility);
                     break;
             }
@@ -20728,7 +20746,7 @@ pvc.BaseChart
                             }
                             
                             var dataPartAtom;
-                            var locked = colorAxis.option('LegendClickMode') === 'toggleVisible' && 
+                            var locked = colorAxis.option('LegendClickMode') === 'togglevisible' && 
                                          (dataPartAtom = domainData.atoms[dataPartDimName]) && 
                                          dataPartAtom.value === 'trend';
                             
@@ -26959,7 +26977,7 @@ def
             .select(function(catGroup){
                 var range = this._getStackedCategoryValueExtent(catGroup, valueDimName, useAbs);
                 if(range){
-                    return {range: range, source: catGroup};
+                    return {range: range, group: catGroup};
                 }
             }, this)
             .where(def.notNully)
@@ -27299,7 +27317,10 @@ def
     },
 
     _readTextProperties: function(layoutInfo){
-        layoutInfo.textAngle  = def.number.as(this._getExtension('label', 'textAngle'),  0);
+        var textAngle = this._getExtension('label', 'textAngle');
+        layoutInfo.isTextAngleFixed = (textAngle != null);
+        
+        layoutInfo.textAngle  = def.number.as(textAngle, 0);
         layoutInfo.textMargin = def.number.as(this._getExtension('label', 'textMargin'), 3);
         
         var align = this._getExtension('label', 'textAlign');
@@ -27339,7 +27360,7 @@ def
 
         // --------------
         
-        var axisSize = this.tickLength + length; 
+        var axisSize = this.tickLength + length;
         
         // Add equal margin on both sides?
         var angle = maxLabelBBox.sourceAngle;
@@ -27759,14 +27780,14 @@ def
     
     _calcDiscreteTicksIncludeModulo: function(){
         var mode = this.axis.option('OverlappedLabelsMode');
-        if(mode !== 'hide'){
+        if(mode !== 'hide' && mode !== 'rotatethenhide'){
             return 1;
         }
         
-        var layoutInfo = this._layoutInfo;
-        var ticks = layoutInfo.ticks;
+        var li = this._layoutInfo;
+        var ticks = li.ticks;
         var tickCount = ticks.length;
-        if(tickCount <= 1) {
+        if(tickCount <= 2) {
             return 1;
         }
         
@@ -27777,8 +27798,9 @@ def
         // How much are label anchors separated from each other
         // (in the axis direction)
         var b = this.scale.range().step; // don't use .band, cause it does not include margins...
-        var h = layoutInfo.textHeight;
-        var w = layoutInfo.maxTextWidth;  // Should use the average value?
+        
+        var h = li.textHeight;
+        var w = li.maxTextWidth;  // Should use the average value?
         
         if(!(w > 0 && h > 0 && b > 0)){
             return 1;
@@ -27790,52 +27812,69 @@ def
         var sMin = h * this.labelSpacingMin; /* parameter in em */
         
         // The angle that the text makes to the x axis (clockwise,y points downwards) 
-        var a = layoutInfo.textAngle;
+        var a = li.textAngle;
         
-        var isTopOrBottom = this.isAnchorTopOrBottom();
-        var sinOrCos =  isTopOrBottom ? 'sin' : 'cos';
-        var cosOrSin = !isTopOrBottom ? 'sin' : 'cos';
+        // * Effective distance between anchors,
+        //   that results from showing only 
+        //   one in every 'tickIncludeModulo' (tim) ticks.
+        // 
+        //   bEf = (b * tim)
+        //
+        // * The space that separates the closest edges, 
+        //   that are parallel to the text direction,
+        //   of the bounding boxes of 
+        //   two consecutive (not skipped) labels: 
+        // 
+        //   sBase  = (b * timh) * |sinOrCos(a)| - h;
+        //
+        // * The same, for the edges orthogonal to the text direction:
+        //
+        //   sOrtho = (b * timw) * |cosOrSin(a)| - w;
+        // 
+        // * At least one of the distances, sBase or sOrtho must be 
+        //   greater than or equal to sMin:
+        //
+        //   NoOverlap If (sBase >= sMin) Or (sOrtho >= sMin)
+        //
+        // * Resolve each of the inequations in function of tim (timh/timw)
+        //
+
+        var isH = this.isAnchorTopOrBottom();
+        var sinOrCos = Math.abs( Math[isH ? 'sin' : 'cos'](a) );
+        var cosOrSin = Math.abs( Math[isH ? 'cos' : 'sin'](a) );
         
-        var tickIncludeModulo = 1;
-        do{
-            // Effective distance between anchors,
-            // that results from showing only 
-            // one in every 'tickIncludeModulo' ticks.
-            var bEf = tickIncludeModulo * b;
-            
-            // The space that separates the closest edges, 
-            // that are parallel to the text direction,
-            // of the bounding boxes of 
-            // two consecutive (not skipped) labels. 
-            var sBase  = bEf * Math.abs(Math[sinOrCos](a)) - h;
-            
-            // The same, for the edges orthogonal to the text direction
-            var sOrtho = bEf * Math.abs(Math[cosOrSin](a)) - w;
-            
-            // At least one of this distances must respect sMin
-            if(sBase >= sMin || sOrtho >= sMin){
-                break;
-            }
-            
-            // Hide one more tick
-            tickIncludeModulo++;
-            
-            // Are there still at least two ticks left?
-        } while(Math.ceil(tickCount / tickIncludeModulo) > 1);
-        
-        if(tickIncludeModulo > 1 && pvc.debug >= 3){
-            this._info("Showing only one in every " + tickIncludeModulo + " tick labels");
+        var timh = sinOrCos < 1e-8 ? Infinity : Math.ceil((sMin + h) / (b * sinOrCos));
+        var timw = cosOrSin < 1e-8 ? Infinity : Math.ceil((sMin + w) / (b * cosOrSin));
+        var tim  = Math.min(timh, timw);
+        if(!isFinite(tim) || tim < 1 || Math.ceil(tickCount / tim) < 2) {
+            tim = 1;
         }
         
-        return tickIncludeModulo;
+        if(tim > 1 && pvc.debug >= 3) {
+            this._info("Showing only one in every " + tim + " tick labels");
+        }
+        
+        return tim;
     },
     
-    // --------------
+    /* # For textAngles we're only interested in the [0, pi/2] range.
+         Taking the absolute value of the following two expressions, guarantees:
+         * asin from [0, 1] --> [0, pi/2]
+         * acos from [0, 1] --> [pi/2, 0]
+    
+       # textAngle will assume values from [-pi/2, 0] (<=> [vertical, horizontal])
+    
+         var sinOrCos = Math.abs((sMin + h) / bEf);
+         var cosOrSin = Math.abs((sMin + w) / bEf);
+    
+         var aBase  = Math.asin(sinOrCosVal);
+         var aOrtho = Math.acos(cosOrSinVal);
+    */
     
     _calcNumberVDesiredTickCount: function(){
-        var layoutInfo = this._layoutInfo;
-        var lineHeight = layoutInfo.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
-        var clientLength = layoutInfo.clientSize[this.anchorLength()];
+        var li = this._layoutInfo;
+        var lineHeight   = li.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
+        var clientLength = li.clientSize[this.anchorLength()];
         
         return Math.max(1, ~~(clientLength / lineHeight));
     },
