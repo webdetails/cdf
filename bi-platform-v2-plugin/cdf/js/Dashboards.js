@@ -430,11 +430,11 @@ Dashboards.parseServerError = function (resp, txtStatus, error){
   ];
 
   out.error = error;
-  out.description = Dashboards.getErrorObj('COMPONENT_ERROR').msg;
+  out.msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg;
   var str = $('<div/>').html(resp.responseText).find('h1').text();
   _.find( regexs, function (el){
     if ( str.match( el.match )){
-      out.description = el.msg ;
+      out.msg = el.msg ;
       return true
     } else {
       return false
@@ -448,13 +448,25 @@ Dashboards.parseServerError = function (resp, txtStatus, error){
 Dashboards.handleServerError = function() {
   var err = Dashboards.parseServerError.apply( this, arguments );
 
-  /*wd.cdf.popups.okPopup.show({
-    header: 'Component Error' ,
-    desc: err.description ,
-    button: "Click to close"
-  });*/
+  Dashboards.errorNotification( err ); 
   Dashboards.trigger('cdf cdf:serverError', this);
   Dashboards.resetRunningCalls();  
+};
+
+Dashboards.errorNotification = function (err, ph) {
+  if (ph){
+    wd.cdf.notifications.component.render(
+      $(ph), {
+        title: err.msg,
+        desc: ""
+    });
+  } else {
+    /*wd.cdf.popups.okPopup.show({
+      header: name,
+      desc: err.description,
+      button: "Click to close"
+    });*/ 
+  }
 };
 
 /**
@@ -629,6 +641,9 @@ Dashboards.updateLifecycle = function(object) {
           });
         }
       } catch (e) {
+        var ph = (object.htmlObject) ? $('#' + object.htmlObject) : undefined,
+            msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg;
+        this.errorNotification( { msg: msg} , ph );
         this.log("Error updating " + object.name +":",'error');
         this.log(e,'exception');
       } finally {
