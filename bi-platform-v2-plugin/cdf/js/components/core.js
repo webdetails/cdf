@@ -564,8 +564,14 @@ var UnmanagedComponent = BaseComponent.extend({
     }
     var ret;
     if (typeof this.preExecution == "function") {
-      ret = this.preExecution();
-      ret = typeof ret == "undefined" || ret;
+      try {
+        ret = this.preExecution();
+        ret = typeof ret == "undefined" || ret;
+      } catch(e){
+        this.error( Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
+        this.dashboard.log(e,"error");
+        ret = false;
+      }
     } else {
       ret = true;
     }
@@ -630,11 +636,7 @@ var UnmanagedComponent = BaseComponent.extend({
         this.postExec();
         this.showTooltip();
       } catch(e){
-        this.errorNotification({
-          error: e,
-          description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
-        });
-        this.error();
+        this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e );
         this.dashboard.log(e,"error"); 
       } finally {
         if(!silent) {
@@ -668,18 +670,8 @@ var UnmanagedComponent = BaseComponent.extend({
      * unblock the UI
      */
     var success = _.bind(function(data) {
-      try{
-        callback(data);
-      } catch (e) {
-        this.errorNotification({
-          error: e,
-          description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
-        });
-        this.error();
-        this.dashboard.log(e,"error");
-      } finally {
-        this.postExec();
-      }
+      callback(data);
+      this.postExec();
     },this);
     var always = _.bind(function (){
       if (!silent){
@@ -737,18 +729,9 @@ var UnmanagedComponent = BaseComponent.extend({
       });
     }
     var success = _.bind(function(data){ 
-      try{
-        callback(data);
-      } catch (e) {
-        this.errorNotification({
-          error: e,
-          description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
-        });
-        this.error();
-        this.dashboard.log(e,"error");
-      } finally {
-        this.postExec();
-      }
+      callback(data);
+      this.trigger('cdf cdf:render',this,data);
+      this.postExec();
     },this);
     var always = _.bind(function (){
       if (!silent){
@@ -774,9 +757,14 @@ var UnmanagedComponent = BaseComponent.extend({
    * Also 
    */
   error: function(msg, cause) {
+    msg = msg || Dashboards.getErrorObj('COMPONENT_ERROR').msg;
     if (!this.isSilent()){
       this.unblock();
     };
+    this.errorNotification({
+      error: cause,
+      msg: msg
+    });
     this.trigger("cdf cdf:error", this, msg , cause || null);
   },
   /*
@@ -808,28 +796,15 @@ var UnmanagedComponent = BaseComponent.extend({
     return _.bind(function(data) {
         var newData;
         if(counter >= this.runCounter) {
-          this.trigger('cdf cdf:postFetch',this,data);
-          if(typeof this.postFetch == "function") {
-            try {
-              newData = this.postFetch(data);
-              data = typeof newData == "undefined" ? data : newData;
-            } catch(e) {
-              this.errorNotification({
-                error: e,
-                description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
-              });
-              this.error();
-              this.dashboard.log(e,"error");
-            }
-          }
           try {
+            if(typeof this.postFetch == "function") {
+              newData = this.postFetch(data);
+              this.trigger('cdf cdf:postFetch',this,data);              
+              data = typeof newData == "undefined" ? data : newData;
+            }
             success(data);
-          } catch (e) {
-            this.errorNotification({
-              error: e,
-              description: Dashboards.getErrorObj('COMPONENT_ERROR').msg
-            });
-            this.error();
+          } catch(e) {
+            this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
             this.dashboard.log(e,"error");
           }
         }
@@ -843,27 +818,14 @@ var UnmanagedComponent = BaseComponent.extend({
   getErrorHandler: function() { 
     return  _.bind(function() {
       var err = Dashboards.parseServerError.apply(this, arguments );
-      this.errorNotification(err);
-      this.error();
+      this.error( err.msg, err.error );
     },
     this);  
   },
   errorNotification: function (err, ph) {
     ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
-    var name = this.name.replace('render_', '');
-    if (ph){
-      wd.cdf.notifications.component.render(
-        $(ph), {
-          title: err.description,
-          desc: ""
-      });
-    } else {
-      /*wd.cdf.popups.okPopup.show({
-        header: name,
-        desc: err.description,
-        button: "Click to close"
-      });*/ 
-    }
+    // var name = this.name.replace('render_', '');
+    Dashboards.errorNotification( err, ph );  
   },
 
   /*
