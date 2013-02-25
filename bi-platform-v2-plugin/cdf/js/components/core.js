@@ -824,7 +824,8 @@ var UnmanagedComponent = BaseComponent.extend({
   },
   errorNotification: function (err, ph) {
     ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
-    // var name = this.name.replace('render_', '');
+    var name = this.name.replace('render_', '');
+    err.msg = err.msg + ' (' + name + ')';
     Dashboards.errorNotification( err, ph );  
   },
 

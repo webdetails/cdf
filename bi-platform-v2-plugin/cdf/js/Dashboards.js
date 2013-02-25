@@ -103,10 +103,10 @@ var Dashboards = {
 
   ERROR_CODES:{
     'QUERY_TIMEOUT' : {
-      msg: "Query timeout reached."
+      msg: "Query timeout reached"
     },
     "COMPONENT_ERROR" : {
-      msg: "Error processing component."  
+      msg: "Error processing component"  
     }
   },
   CDF_BASE_PATH: webAppPath + "/content/pentaho-cdf/",
@@ -779,11 +779,10 @@ Dashboards.errorNotification = function (err, ph) {
         desc: ""
     });
   } else {
-    /*wd.cdf.popups.okPopup.show({
-      header: name,
-      desc: err.description,
-      button: "Click to close"
-    });*/ 
+    wd.cdf.notifications.growl.render({
+      title: err.msg,
+      desc: ''
+    });
   }
 };
 
@@ -1025,8 +1024,9 @@ Dashboards.updateLifecycle = function(object) {
         }
       } catch (e) {
         var ph = (object.htmlObject) ? $('#' + object.htmlObject) : undefined,
-            msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg;
-        this.errorNotification( { msg: msg} , ph );
+            msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg
+                  + ' (' + object.name.replace('render_', '') + ')';
+        this.errorNotification( { msg: msg  } , ph );
         this.log("Error updating " + object.name +":",'error');
         this.log(e,'exception');
       } finally {
@@ -4500,7 +4500,7 @@ wd.cdf.notifications.component = {
 
 wd.cdf.notifications.growl = {
   template: Mustache.compile(
-              "<div class='cdfNotification growlUI'>" +
+              "<div class='cdfNotification growl'>" +
               "  <div class='cdfNotificationBody'>" +
               "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
               "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
@@ -4509,9 +4509,11 @@ wd.cdf.notifications.growl = {
   defaults:{
     title: 'Title',
     desc: 'Default CDF notification.',
-    timeout: 3000,
+    timeout: 4000,
     onUnblock: function (){ return true },
-    css: $.blockUI.defaults.growlCSS,
+    css: $.extend( {}, 
+      $.blockUI.defaults.growlCSS,
+      { position: 'absolute' , width: '100%' , top:'10px' } ),
     showOverlay: false,
     fadeIn: 700,
     fadeOut: 1000,
@@ -4519,10 +4521,23 @@ wd.cdf.notifications.growl = {
   },
   render: function (newOpts){
     var opts = _.extend( {}, this.defaults, newOpts),
-        $m = $( this.template( opts ));
+        $m = $( this.template( opts )),
+        myself = this;
     opts.message = $m;
-    $.blockUI(opts);
-  }
+    var outerUnblock = opts.onUnblock;
+    opts.onUnblock = function(){
+      myself.$el.hide();
+      outerUnblock.call(this);
+    };
+    if (this.firstRender){
+      this.$el = $('<div/>').addClass('cdfNotificationContainer')
+        .hide()
+        .appendTo('body');
+      this.firstRender = false;
+    }
+    this.$el.show().block(opts);
+  },
+  firstRender: true
 }; 
 
 
