@@ -2812,4 +2812,32 @@ wd.cdf.notifications.component = {
   }
 };
 
+wd.cdf.notifications.growl = {
+  template: Mustache.compile(
+              "<div class='cdfNotification growlUI'>" +
+              "  <div class='cdfNotificationBody'>" +
+              "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
+              "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
+              "  </div>" +
+              "</div>" ),
+  defaults:{
+    title: 'Title',
+    desc: 'Default CDF notification.',
+    timeout: 3000,
+    onUnblock: function (){ return true },
+    css: $.blockUI.defaults.growlCSS,
+    showOverlay: false,
+    fadeIn: 700,
+    fadeOut: 1000,
+    centerY:false
+  },
+  render: function (newOpts){
+    var opts = _.extend( {}, this.defaults, newOpts),
+        $m = $( this.template( opts ));
+    opts.message = $m;
+    $.blockUI(opts);
+  }
+}; 
+
+
 

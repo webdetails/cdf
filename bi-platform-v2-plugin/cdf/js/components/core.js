@@ -736,7 +736,7 @@ var UnmanagedComponent = BaseComponent.extend({
         data: params
       });
     }
-    var success = _.bind(function(data){
+    var success = _.bind(function(data){ 
       try{
         callback(data);
       } catch (e) {
