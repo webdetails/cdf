@@ -631,20 +631,22 @@ Dashboards.resetRunningCalls = function(){
   },this),10);
 };
 
+Dashboards.getRunningCalls = function (){
+  return this.runningCalls;
+};
 
 
 Dashboards.incrementRunningCalls = function() {
   this.runningCalls++ ;
   this.showProgressIndicator();
-//Dashboards.log("+Running calls incremented to: " + Dashboards.runningCalls);
-
+//Dashboards.log("+Running calls incremented to: " + Dashboards.getRunningCalls());
 };
 
 
 
 Dashboards.decrementRunningCalls = function() {
   this.runningCalls-- ;
-  //Dashboards.log("-Running calls decremented to: " + Dashboards.runningCalls);
+  //Dashboards.log("-Running calls decremented to: " + Dashboards.getRunningCalls());
   setTimeout(_.bind(function(){
     if(this.runningCalls<=0){
       this.hideProgressIndicator();
@@ -729,7 +731,7 @@ Dashboards.bindControl = function(object) {
         
         var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceSplitDesc}} since last event",this.splitTimer());
         console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
-          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.getRunningCalls()  +")","color: " + this.getLogColor());
       }
     })
   }
@@ -1340,7 +1342,7 @@ Dashboards.initEngine = function(){
 
   this.incrementRunningCalls();
   if( this.logLifecycle && typeof console != "undefined" ){
-    console.log("%c          [Lifecycle >Start] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+    console.log("%c          [Lifecycle >Start] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
   }
 
   this.createAndCleanErrorDiv();
@@ -1429,7 +1431,7 @@ Dashboards.handlePostInit = function() {
     
     this.decrementRunningCalls();
     if( this.logLifecycle && typeof console != "undefined" ){
-      console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+      console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
     }
     
   }
