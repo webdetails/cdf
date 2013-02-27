@@ -366,9 +366,12 @@ Dashboards.bindControl = function(object) {
   } else {
     objectImpl.dashboard = this;
     /*
-     * extend the input object with all the component methods,
+     * Extend the input object with all the component methods,
      * and endow it with the Backbone event system.
+     * Make sure we clean all events in the case we're redefining the object.
      */
+    if(typeof object.off === "function")
+        object.off("all");
     $.extend(object,objectImpl,Backbone.Events);
     
     // Add logging lifeCycle
