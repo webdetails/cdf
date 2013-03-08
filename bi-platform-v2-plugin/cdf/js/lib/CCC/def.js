@@ -179,7 +179,7 @@ var def = /** @lends def */{
         
         return o;
     },
-        
+    
     /** 
      * Creates a property getter function,
      * for a specified property name.
@@ -469,6 +469,11 @@ var def = /** @lends def */{
         return scopeFun.call(ctx);
     },
     
+    // Bit -------------
+    bit: {
+        set: function(bits, set, on){ return (on || on == null) ? (bits | set) : (bits & ~set); }
+    },
+    
     // Special functions ----------------
     
     /**
@@ -735,7 +740,7 @@ var def = /** @lends def */{
     // -----------------
     
     /* Ensures the first letter is upper case */
-    firstUpperCase: function(s){
+    firstUpperCase: function(s) {
         if(s) {
             var c  = s.charAt(0),
                 cU = c.toUpperCase();
@@ -746,7 +751,7 @@ var def = /** @lends def */{
         return s;
     },
     
-    firstLowerCase: function(s){
+    firstLowerCase: function(s) {
         if(s) {
             var c  = s.charAt(0),
                 cL = c.toLowerCase();
@@ -1440,8 +1445,7 @@ def.scope(function(){
     
     // -----------------
     
-    function rootType(){
-    }
+    function rootType(){ }
     
     var rootProto = rootType.prototype;
     // Unfortunately, creates an enumerable property in every instance
@@ -1643,6 +1647,16 @@ def.scope(function(){
     def.type   = type;
     def.method = method;
 });
+
+def.makeEnum = function(a) {
+    var i = 1;
+    var e = {};
+    a.forEach(function(p) {
+        e[p] = i;
+        i = i << 1;
+    });
+    return e;
+};
 
 // ----------------------
 
@@ -2361,6 +2375,10 @@ def.type('Query')
     // deferred map
     select: function(fun, ctx){
         return new def.SelectQuery(this, fun, ctx);
+    },
+    
+    prop: function(p){
+        return new def.SelectQuery(this, function(item) { if(item) { return item[p]; }});
     },
 
     selectMany: function(fun, ctx){

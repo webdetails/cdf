@@ -26,10 +26,11 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             var tipsy = this;
             var options = this.options;
             
-            tipsy.hoverState = 'in';
             if (options.delayIn == 0) {
+                tipsy.hoverState = null;
                 tipsy.show();
             } else {
+                tipsy.hoverState = 'in';
                 setTimeout(function() {
                     if (tipsy.hoverState === 'in') {
                         tipsy.hoverState = null;
@@ -43,10 +44,10 @@ pen.define("cdf/lib/CCC/jquery.tipsy",["cdf/jquery"], function($){
             var tipsy = this;
             var options = this.options;
             
-            tipsy.hoverState = 'out';
             if (options.delayOut == 0) {
                 tipsy.hide();
             } else {
+                tipsy.hoverState = 'out';
                 setTimeout(function() { if (tipsy.hoverState === 'out') tipsy.hide(); }, options.delayOut);
             }
         },
