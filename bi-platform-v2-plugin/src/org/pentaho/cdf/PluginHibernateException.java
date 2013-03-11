@@ -7,6 +7,8 @@ package org.pentaho.cdf;
  * Time: 6:38:21 PM
  */
 public class PluginHibernateException extends Exception {
+  private static final long serialVersionUID = 1L;
+
   public PluginHibernateException(final String s, final Exception cause) {
     super(s,cause);
   }

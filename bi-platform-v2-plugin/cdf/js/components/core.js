@@ -564,8 +564,14 @@ var UnmanagedComponent = BaseComponent.extend({
     }
     var ret;
     if (typeof this.preExecution == "function") {
-      ret = this.preExecution();
-      ret = typeof ret == "undefined" || ret;
+      try {
+        ret = this.preExecution();
+        ret = typeof ret == "undefined" || ret;
+      } catch(e){
+        this.error( Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
+        this.dashboard.log(e,"error");
+        ret = false;
+      }
     } else {
       ret = true;
     }
@@ -614,7 +620,7 @@ var UnmanagedComponent = BaseComponent.extend({
     if (!this.preExec()) {
       return;
     }
-    var silent = this.lifecycle ? !!this.lifecycle.silent : false;
+    var silent = this.isSilent();
     if(!silent) {
       this.block();
     }
@@ -630,8 +636,8 @@ var UnmanagedComponent = BaseComponent.extend({
         this.postExec();
         this.showTooltip();
       } catch(e){
-        // Avoid IE8 error when there's no catch statement.
-        this.dashboard.log(e,'error');
+        this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e );
+        this.dashboard.log(e,"error"); 
       } finally {
         if(!silent) {
           this.unblock();
@@ -653,7 +659,10 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    this.block();
+    var silent = this.isSilent();    
+    if (!silent){
+      this.block();
+    };
     userQueryOptions = userQueryOptions || {};
     /* 
      * The query response handler should trigger the component-provided callback
@@ -661,16 +670,16 @@ var UnmanagedComponent = BaseComponent.extend({
      * unblock the UI
      */
     var success = _.bind(function(data) {
-      try{
-        callback(data);
-      } catch (e) {
-        this.dashboard.log(e,'error');
-      } finally {
-        this.postExec();
-      }
+      callback(data);
+      this.postExec();
     },this);
-    var always = _.bind(this.unblock, this);
-    var handler = this.getSuccessHandler(success, always);
+    var always = _.bind(function (){
+      if (!silent){
+        this.unblock();
+      }
+    }, this);
+    var handler = this.getSuccessHandler(success, always),
+        errorHandler = this.getErrorHandler();
 
     var query = this.queryState = this.query = new Query(queryDef);
     var ajaxOptions = {
@@ -683,7 +692,7 @@ var UnmanagedComponent = BaseComponent.extend({
     if(userQueryOptions.pageSize){
       query.setPageSize(userQueryOptions.pageSize);
     }
-    query.fetchData(this.parameters,handler);
+    query.fetchData(this.parameters, handler, errorHandler);
   },
 
   /* 
@@ -702,7 +711,10 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    this.block();
+    var silent = this.isSilent();    
+    if (!silent){
+      this.block();
+    };
     var ajaxParameters = {
       async: true
     };
@@ -716,18 +728,18 @@ var UnmanagedComponent = BaseComponent.extend({
         data: params
       });
     }
-    var success = _.bind(function(data){
-      try{
-        callback(data);
-      } catch (e) {
-        this.dashboard.log(e,'error');
-      } finally {
-        this.postExec();
-      }
+    var success = _.bind(function(data){ 
+      callback(data);
+      this.trigger('cdf cdf:render',this,data);
+      this.postExec();
     },this);
-    var always = _.bind(this.unblock,this);
+    var always = _.bind(function (){
+      if (!silent){
+        this.unblock();
+      }
+    }, this);
     ajaxParameters.success = this.getSuccessHandler(success,always);
-    ajaxParameters.error = _.bind(this.unblock,this);
+    ajaxParameters.error = this.getErrorHandler();
     jQuery.ajax(ajaxParameters);
   },
 
@@ -745,8 +757,15 @@ var UnmanagedComponent = BaseComponent.extend({
    * Also 
    */
   error: function(msg, cause) {
-    this.unblock();
-    this.trigger("cdf cdf:error", this, msg, cause || null);
+    msg = msg || Dashboards.getErrorObj('COMPONENT_ERROR').msg;
+    if (!this.isSilent()){
+      this.unblock();
+    };
+    this.errorNotification({
+      error: cause,
+      msg: msg
+    });
+    this.trigger("cdf cdf:error", this, msg , cause || null);
   },
   /*
    * Build a generic response handler that runs the success callback when being
@@ -777,18 +796,15 @@ var UnmanagedComponent = BaseComponent.extend({
     return _.bind(function(data) {
         var newData;
         if(counter >= this.runCounter) {
-          this.trigger('cdf cdf:postFetch',this,data);
-          if(typeof this.postFetch == "function") {
-            try {
-              newData = this.postFetch(data);
-              data = typeof newData == "undefined" ? data : newData;
-            } catch(e) {
-              this.dashboard.log(e,"error");
-            }
-          }
           try {
+            if(typeof this.postFetch == "function") {
+              newData = this.postFetch(data);
+              this.trigger('cdf cdf:postFetch',this,data);              
+              data = typeof newData == "undefined" ? data : newData;
+            }
             success(data);
-          } catch (e) {
+          } catch(e) {
+            this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
             this.dashboard.log(e,"error");
           }
         }
@@ -798,6 +814,21 @@ var UnmanagedComponent = BaseComponent.extend({
     },
     this);
   },
+
+  getErrorHandler: function() { 
+    return  _.bind(function() {
+      var err = Dashboards.parseServerError.apply(this, arguments );
+      this.error( err.msg, err.error );
+    },
+    this);  
+  },
+  errorNotification: function (err, ph) {
+    ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
+    var name = this.name.replace('render_', '');
+    err.msg = err.msg + ' (' + name + ')';
+    Dashboards.errorNotification( err, ph );  
+  },
+
   /*
    * Trigger UI blocking while the component is updating. Default implementation
    * uses the global CDF blockUI, but implementers are encouraged to override
@@ -823,6 +854,10 @@ var UnmanagedComponent = BaseComponent.extend({
       this.dashboard.decrementRunningCalls();
       this.isRunning = false;
     }
+  },
+
+  isSilent: function (){
+    return (this.lifecycle) ? !!this.lifecycle.silent : false;
   }
 });
 

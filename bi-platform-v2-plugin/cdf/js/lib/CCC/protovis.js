@@ -1,4 +1,4 @@
-// 7c7ae453d39a7ca8ba4f419820fe14b6722f21e0
+// 8ef5fb05c583f3d8c688a2821d003cf056e53be7
 /**
  * @class The built-in Array class.
  * @name Array
@@ -1294,60 +1294,69 @@ pv.Format.number = function() {
     pv.Text.measureCore = (function(){
         
         // SVG implementation
-        var _svgText, _svgTextFont;
+        var _svgText, _lastFont = '10px sans-serif';
         
-        function createTextSizePlaceholder(){
+        function getTextSizeElement(){
+            return _svgText || (_svgText = createTextSizeElement());
+        }
+        
+        function createTextSizeElement(){
             var div =  document.createElement('div');
             div.id = 'pvSVGText_' + new Date().getTime();
             
             var style = div.style;
             style.position   = 'absolute';
             style.visibility = 'hidden';
-            style.width = 0;
+            style.width  = 0;
             style.height = 0;
             style.left = 0;
-            style.top = 0;
+            style.top  = 0;
+            
+            var svgElem = pv.SvgScene.create('svg');
+            svgElem.setAttribute('font-size',   '10px');
+            svgElem.setAttribute('font-family', 'sans-serif');
+            div.appendChild(svgElem);
+            
+            
+            var svgText = pv.SvgScene.create('text');
+            svgElem.appendChild(svgText);
+            
+            var textNode;
+            if (pv.renderer() === "svgweb") { 
+                // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
+                textNode = document.createTextNode('', true);
+            } else {
+                textNode = document.createTextNode('');
+            }
+            svgText.appendChild(textNode);
             
             document.body.appendChild(div);
             
-            return div;
+            return svgText;
         }
         
         return function(text, font){
-            if(!_svgText){
-                var holder  = createTextSizePlaceholder();
-                var svgElem = pv.SvgScene.create('svg');
-                svgElem.setAttribute('font-size',   '10px');
-                svgElem.setAttribute('font-family', 'sans-serif');
-                
-                _svgText = pv.SvgScene.create('text');
-                svgElem.appendChild(_svgText);
-                
-                holder.appendChild(svgElem);
+            if(!font){ font = null; }
+            
+            var svgText = getTextSizeElement();
+            if(_lastFont !== font){
+                _lastFont = font;
+                pv.SvgScene.setStyle(svgText, {'font': font});
             }
             
-            if(!font){
-                font = null;
-            }
+            svgText.firstChild.nodeValue = '' + text;
             
-            if(_svgTextFont !== font){
-                _svgTextFont = font;
-                pv.SvgScene.setStyle(_svgText, {'font': font});
-            }
-            
-            var textNode = _svgText.firstChild;
-            if(textNode) {
-                textNode.nodeValue = ''+text;
-            } else {
-                if (pv.renderer() === "svgweb") { 
-                    // SVGWeb needs an extra 'true' to create SVG text nodes properly in IE.
-                    _svgText.appendChild(document.createTextNode(''+text, true));
-                } else {
-                    _svgText.appendChild(document.createTextNode(''+text));
+            var box;
+            try{
+                box = svgText.getBBox();
+            } catch(ex){
+                if(typeof console.error === 'function'){
+                    console.error("GetBBox failed: ", ex);
                 }
+                
+                throw ex;
             }
-    
-            var box = _svgText.getBBox();
+            
             return {width: box.width, height: box.height};
         };
     }());
@@ -1679,7 +1688,7 @@ pv.search.index = function(array, value, f) {
 /**
  * Returns an array of numbers, starting at <tt>start</tt>, incrementing by
  * <tt>step</tt>, until <tt>stop</tt> is reached. The stop value is
- * exclusive. If only a single argument is specified, this value is interpeted
+ * exclusive. If only a single argument is specified, this value is interpreted
  * as the <i>stop</i> value, with the <i>start</i> value as zero. If only two
  * arguments are specified, the step value is implied to be one.
  *
@@ -3904,12 +3913,15 @@ pv.Scale.quantitative = function() {
    * @returns {string} a formatted tick value.
    */
   scale.tickFormat = function (t) {
+      var text;
       if(tickFormatter){
-          return tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
+          text = tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
+      } else {
+          text = tickFormat(t); 
       }
       
-      var formatter = tickFormatter || tickFormat;
-      return formatter(t);
+      // Make sure it is a string
+      return text == null ? '' : ('' + text);
   };
 
   /**
@@ -10069,7 +10081,7 @@ pv.SvgScene.panel = function(scenes) {
     this.scale *= t.k;
 
     /* children */
-    if(scenes[i].children.length){
+    if(s.children.length){
         var attrs = {
             "transform": "translate(" + x + "," + y + ")" +
                          (t.k != 1 ? " scale(" + t.k + ")" : "")
@@ -10095,7 +10107,7 @@ pv.SvgScene.panel = function(scenes) {
       scenes.$g = g = c.parentNode;
       e = c.nextSibling;
     }
-  } // for next panel instance
+  } // end for panel instance
   
   complete = true;
   return e;
