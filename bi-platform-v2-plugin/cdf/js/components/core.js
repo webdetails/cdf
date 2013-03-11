@@ -601,7 +601,7 @@ var UnmanagedComponent = BaseComponent.extend({
   },
   showTooltip: function() {
     if(typeof this._tooltip != "undefined") {
-      $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+      $("#" + this.htmlObject).attr("title",this._tooltip).tooltip({
         delay:0,
         track: true,
         fade: 250
