@@ -41,7 +41,15 @@ var SelectBaseComponent = InputBaseComponent.extend({
   draw: function (myArray) {
     var ph = $("#" + this.htmlObject);
     isMultiple = false;
-
+	
+	var eo = {};
+	
+	if(this.extraOptions != undefined){
+		for(var i = 0; i < this.extraOptions.length; i++){
+			eo[this.extraOptions[i][0]] = this.extraOptions[i][1];
+		}
+	}
+	
     selectHTML = "<select";
 
     // set size
@@ -121,7 +129,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
     }
     
     if( this.externalPlugin == "chosen" ){ 
-      ph.find("select.chzn-select").chosen(); 
+      ph.find("select.chzn-select").chosen(eo); 
     }
     
     if( this.externalPlugin == "hynds" ){ 
@@ -147,7 +155,14 @@ var SelectComponent = SelectBaseComponent.extend({
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
   	var ph = $("#"+this.htmlObject + " select");
-    return ( ph.val() == null ) ? [] : ph.val();
+	// caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
+	if(ph.hasClass("chzn-select") && ph.val() == null)
+		return [];
+	// marpontes: regarding to caveat's comment, doing the same to hynds multiSelect
+	if(ph.hasClass("hynds-select") && ph.val() == null)
+		return [];
+
+    return ph.val();
   }
 });
 
