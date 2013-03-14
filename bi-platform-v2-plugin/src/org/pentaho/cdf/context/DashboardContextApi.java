@@ -301,7 +301,7 @@ public class DashboardContextApi {
         JSONObject queries = new JSONObject();
         /* Bail out immediately if CDA isn' available */
         InterPluginCall call = new InterPluginCall(InterPluginCall.CDA, ""); 
-        if (call == null) {
+        if (!call.pluginExists() ) {
             logger.warn("Couldn't find CDA. Skipping auto-includes");
             return queries;
         }
@@ -315,6 +315,7 @@ public class DashboardContextApi {
         
         List<RepositoryFile> files = new ArrayList<RepositoryFile>();
         List<String> filePaths = new ArrayList<String>();
+        
         
         RepositoryAccess.getRepository().listSolutionFiles("/public/pentaho-solutions/cdf/includes", true, extensions, true, files);
         
