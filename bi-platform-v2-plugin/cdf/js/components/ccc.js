@@ -385,4 +385,9 @@ var CccBoxplotChartComponent = CccComponent.extend({
 
 });
 
+var CccTreemapChartComponent = CccComponent.extend({
+
+    cccType: pvc.TreemapChart
+
+});
 

@@ -197,7 +197,7 @@ var TableComponent = UnmanagedComponent.extend({
             var position = dataTable.fnGetPosition(td),
                 rowIdx = position[0],
                 colIdx = position[2],
-                format = cd.colFormats[position[1]],
+                format = cd.colFormats[colIdx],
                 value = myself.rawData.resultset[rowIdx][colIdx];
             if (format && (typeof value != "undefined" && value !== null)) {
               $(td).text(sprintf(format,value));
