@@ -409,7 +409,13 @@ var TableComponent = UnmanagedComponent.extend({
 
       };
     };
-    alert("testing");
+    $("td.expandingClass").click(
+      function(event){
+        //Does nothing but it prevents problems on expandingClass clicks!
+        event.stopPropagation();
+        return;
+      }
+    );
   }
 },
 
