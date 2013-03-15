@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130313
+//VERSION TRUNK-20130315
 
 
 /*global pvc:true */
@@ -33602,7 +33602,7 @@ def
             titleRole = chart.visualRoles.title,
             titleGrouping = titleRole.grouping,
             
-            subTitleRole = chart.subTitle,
+            subTitleRole = chart.visualRoles.subTitle,
             subTitleGrouping = subTitleRole.grouping,
             
             valueRole = chart.visualRoles.value,
