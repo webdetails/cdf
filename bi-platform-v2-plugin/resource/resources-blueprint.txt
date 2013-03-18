@@ -30,6 +30,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.bui.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/AddIns.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
