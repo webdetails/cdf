@@ -1,4 +1,4 @@
-//VERSION TRUNK-20130315
+//VERSION TRUNK-20130319
 
 
 /*global pvc:true */
@@ -12499,7 +12499,7 @@ def
     }
 });
 
-(function(){
+(function() {
 
     function createBasic(pvMark) {
         var as = getAncestorSign(pvMark) || def.assert("There must exist an ancestor sign");
@@ -12507,14 +12507,10 @@ def
         var s = pvMark.scene;
         var i, pvInstance;
         if(s && (i = pvMark.index) != null && i >= 0 && (pvInstance = s[i])) {
-            // Mark is already rendering; build the current instance
-            bs._inContext(
-                    /*f*/function(){ this.__buildInstance(pvInstance); }, 
-                    /*x*/pvMark,
-                    /*scene*/pvInstance.data,
-                    pvInstance,
-                    /*lateCall*/true);
+            // Mark is already rendering; set the current instance in context
+            bs._inContext(/*scene*/pvInstance.data, pvInstance);
         }
+        
         return bs;
     }
     
@@ -12534,7 +12530,7 @@ def
     // with minimal impact and functionality.
     def
     .type('pvc.visual.BasicSign')
-    .init(function(panel, pvMark){
+    .init(function(panel, pvMark) {
         this.chart  = panel.chart;
         this.panel  = panel;
         this.pvMark = pvMark;
@@ -12546,45 +12542,46 @@ def
         
         // Intercept the protovis mark's buildInstance
         // Avoid doing a function bind, cause buildInstance is a very hot path
+        
         pvMark.__buildInstance = pvMark.buildInstance;
         pvMark.buildInstance   = this._dispatchBuildInstance;
     })
     .add({
-        compatVersion: function(){ return this.chart.compatVersion(); },
+        compatVersion: function() { return this.chart.compatVersion(); },
 
         // Defines a local property on the underlying protovis mark
-        localProperty: function(name, type){
+        localProperty: function(name, type) {
             this.pvMark.localProperty(name, type);
             return this;
         },
         
-        lock: function(name, value){
-            return this.lockMark(name, this._bindWhenFun(value));
+        lock: function(pvName, value) {
+            return this.lockMark(pvName, this._bindWhenFun(value, pvName));
         },
         
-        optional: function(name, value, tag){
-            return this.optionalMark(name, this._bindWhenFun(value), tag);
+        optional: function(pvName, value, tag) {
+            return this.optionalMark(pvName, this._bindWhenFun(value, pvName), tag);
         },
         
         // -------------
         
-        lockMark: function(name, value){
+        lockMark: function(name, value) {
             this.pvMark.lock(name, value);
             return this;
         },
         
-        optionalMark: function(name, value, tag){
+        optionalMark: function(name, value, tag) {
             this.pvMark[name](value, tag);
             return this;
         },
         
         // --------------
         
-        delegate: function(dv, tag){ return this.pvMark.delegate(dv, tag); },
+        delegate: function(dv, tag) { return this.pvMark.delegate(dv, tag); },
         
-        delegateExtension: function(dv){ return this.pvMark.delegate(dv, pvc.extensionTag); },
+        delegateExtension: function(dv) { return this.pvMark.delegate(dv, pvc.extensionTag); },
         
-        hasDelegate: function(tag){ return this.pvMark.hasDelegate(tag); },
+        hasDelegate: function(tag) { return this.pvMark.hasDelegate(tag); },
         
         // Using it is a smell...
     //    hasExtension: function(){
@@ -12593,43 +12590,85 @@ def
         
         // -------------
         
-        _bindWhenFun: function(value) {
+        _createPropInterceptor: function(pvName, fun) {
+            var me = this;
+            var isDataProp = pvName === 'data';
+            
+            return function() {
+                // Was function inherited by a pv.Mark without a sign?
+                var sign = this.sign;
+                if(!sign || sign !== me) {
+                    return me._getPvSceneProp(pvName, /*defaultIndex*/this.index);
+                }
+                
+                // Data prop is evaluated while this.index = -1, and the parent mark's stack
+                if(!isDataProp) {
+                    // Is sign _inContext or Is a stale context?
+                    var pvInstance = this.scene[this.index];
+                    if(!sign.scene || sign.scene !== pvInstance.data) {
+                        // This situation happens when animating, because buildInstance is not called.
+                        me._inContext(/*scene*/pvInstance.data, pvInstance);
+                    }
+                }
+                
+                return fun.apply(me, arguments);
+            };
+        },
+        
+        _getPvSceneProp: function(prop, defaultIndex) {
+            // Property method was inherited via pv proto(s)
+            var pvMark   = this.pvMark;
+            var pvScenes = pvMark.scene;
+            if(pvScenes) {
+                // Have a scenes object, but which index should be used?
+                var index = pvMark.hasOwnProperty('index') ? 
+                    pvMark.index : 
+                    Math.min(defaultIndex, pvScenes.length - 1);
+                
+               if(index != null) { return pvScenes[index][prop]; }
+            }
+            
+            throw def.error.operationInvalid("Cannot evaluate inherited property.");
+        },
+        
+        // -------------
+        
+        _bindWhenFun: function(value, pvName) {
             if(def.fun.is(value)) {
-                return function() { return value.apply(this.getSign(), arguments); };
+                var me = this;
+                return me._createPropInterceptor(pvName, function() {
+                    return value.apply(me, arguments);
+                });
             }
             
             return value;
         },
         
-        _lockDynamic: function(name, method) {
+        _lockDynamic: function(pvName, method) {
             /* def.methodCaller('' + method, this) */
             var me = this;
             return me.lockMark(
-                name,
-                function() {
-                    var sign = this.getSign();
-                    var m = sign[method] ||
-                            me  [method] ||
-                            def.assert("No method with name '" + method + "' is defined");
-                    
-                    return m.apply(sign, arguments);
-                });
+                pvName,
+                me._createPropInterceptor(pvName, function() {
+                    return me[method].apply(me, arguments);
+                }));
         },
-        
-        // --------------
         
         /* SCENE MAINTENANCE */
         // this: the mark
         _dispatchBuildInstance: function(pvInstance) {
+            function callBuildInstanceInContext() {
+                this.__buildInstance(pvInstance); 
+            }
+            
             this.sign._inContext(
-                    /*f*/function() { this.__buildInstance(pvInstance); }, 
-                    /*x*/this, 
                     /*scene*/pvInstance.data,
                     pvInstance,
-                    /*lateCall*/false);
+                    /*f*/callBuildInstanceInContext, 
+                    /*x*/this);
         },
         
-        _inContext: function(f, x, scene, pvInstance, lateCall) {
+        _inContext: function(scene, pvInstance, f, x) {
             var pvMark = this.pvMark;
             if(!pvInstance) { pvInstance = pvMark.scene[pvMark.index]; }
             if(!scene     ) { scene = pvInstance.data; }
@@ -12658,9 +12697,9 @@ def
             
             /* state per: sign & scene & render */
             this.state = {};
-            if(!lateCall) {
+            if(f) {
                 try {
-                    f.call(x, pvInstance);
+                    return f.call(x, pvInstance);
                 } finally {
                     this.state = oldState;
                     this.pvInstance = oldPvInstance;
@@ -12732,7 +12771,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
     
     // To be called on prototype
-    property: function(name){
+    property: function(name) {
         var upperName  = def.firstUpperCase(name);
         var baseName   = 'base'        + upperName;
         var defName    = 'default'     + upperName;
@@ -12741,30 +12780,28 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         var methods = {};
         
-        // color
-        methods[name] = function(arg){
+        // ex: color
+        methods[name] = function(arg) {
             delete this._finished;
             
             var value;
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
-            try{
+            try {
+                // ex: baseColor
                 value = this[baseName](arg);
-                if(value == null){ // undefined included
-                    return null;
-                }
                 
-                if(this.hasOwnProperty('_finished')){
-                    return value;
-                }
+                if(value == null) { return null; }  // undefined included
+                
+                if(this.hasOwnProperty('_finished')) { return value; }
                 
                 if(this.showsInteraction() && this.anyInteraction()) {
-                    // interactiveColor
+                    // ex: interactiveColor
                     value = this[interName](value, arg);
                 } else {
-                    // normalColor
+                    // ex: normalColor
                     value = this[normalName](value, arg);
                 }
-            } finally{
+            } finally {
                 delete this._arg;
             }
             
@@ -12772,24 +12809,21 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         };
         
         // baseColor
-        methods[baseName] = function(/*arg*/){
-            // Override this method if user extension
-            // should not always be called.
-            // It is possible to call the default method directly, if needed.
-            
-            // defName is installed as a user extension and 
-            // is called if the user hasn't extended...
-            return this.delegateExtension();
-        };
+        //   Override this method if user extension
+        //   should not always be called.
+        //   It is possible to call the default method directly, if needed.
+        //   defName is installed as a user extension and 
+        //   is called if the user hasn't extended...
+        methods[baseName]   = function(/*arg*/) { return this.delegateExtension(); };
         
         // defaultColor
-        methods[defName]    = function(/*arg*/){ return; };
+        methods[defName]    = function(/*arg*/) { return; };
         
         // normalColor
-        methods[normalName] = function(value/*, arg*/){ return value; };
+        methods[normalName] = function(value/*, arg*/) { return value; };
         
         // interactiveColor
-        methods[interName]  = function(value/*, arg*/){ return value; };
+        methods[interName]  = function(value/*, arg*/) { return value; };
         
         this.constructor.add(methods);
         
@@ -12820,13 +12854,13 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
      * will have access to the user extension by 
      * calling {@link pv.Mark#delegate}.
      */
-    applyExtensions: function(){
-        if(!this._extended){
+    applyExtensions: function() {
+        if(!this._extended) {
             this._extended = true;
             
             var extensionAbsIds = this.extensionAbsIds;
-            if(extensionAbsIds){
-                extensionAbsIds.forEach(function(extensionAbsId){
+            if(extensionAbsIds) {
+                extensionAbsIds.forEach(function(extensionAbsId) {
                     this.panel.extendAbs(this.pvMark, extensionAbsId);
                 }, this);
             }
@@ -12837,11 +12871,15 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     
     // -------------
     
-    intercept: function(name, fun) { return this._intercept(name, fun.bind(this)); },
+    intercept: function(pvName, fun) {
+        var interceptor = this._createPropInterceptor(pvName, fun);
+        
+        return this._intercept(pvName, interceptor); 
+    }, 
     
     // -------------
     
-    lockDimensions: function(){
+    lockDimensions: function() {
         this.pvMark
             .lock('left')
             .lock('right')
@@ -12856,15 +12894,13 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     // -------------
     _extensionKeyArgs: {tag: pvc.extensionTag},
     
-    _bindProperty: function(pvName, prop, realProp){
+    _bindProperty: function(pvName, prop, realProp) {
         var me = this;
         
-        if(!realProp){
-            realProp = prop;
-        }
+        if(!realProp) { realProp = prop; }
         
         var defaultPropName = "default" + def.firstUpperCase(realProp);
-        if(def.fun.is(this[defaultPropName])){
+        if(def.fun.is(me[defaultPropName])) {
             // Intercept with default method first, before extensions,
             // so that extensions, when ?existent?, can delegate to the default.
             
@@ -12878,15 +12914,12 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             // so that it is chosen when 
             // the user hasn't specified an extension point.
 
-            if(!this.pvMark.hasDelegateValue(pvName, pvc.extensionTag)){
-                var defaultMethodCaller = function(){
+            if(!me.pvMark.hasDelegateValue(pvName, pvc.extensionTag)) {
+                var defaultPropMethod = function() {
                     return me[defaultPropName](me._arg);
                 };
                 
-                this.pvMark.intercept(
-                        pvName, 
-                        defaultMethodCaller, 
-                        this._extensionKeyArgs);
+                me.pvMark.intercept(pvName, defaultPropMethod, me._extensionKeyArgs);
             }
         }
         
@@ -12896,13 +12929,15 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         // The "arg" argument can only be specified explicitly,
         // like in strokeColor -> color and fillColor -> color,
         // via "helper property methods" that ?fix? the argument.
-        // In these cases, 'strokeColor' is the "prop", while
-        // "color" is the "realProp".
-        function mainMethodCaller() {
-            return me[prop]();
-        }
+        // In these cases, 
+        // 'strokeColor' is the "prop", 
+        // 'color' is the "realProp" and
+        // 'strokeStyle' is the pvName.
+        var mainPropMethod = this._createPropInterceptor(
+                pvName, 
+                function() { return me[prop](); });
         
-        return this._intercept(pvName, mainMethodCaller);
+        return me._intercept(pvName, mainPropMethod);
     },
     
     _intercept: function(name, fun){
@@ -13234,11 +13269,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         // Setup the sign context
         me._inContext(
-            /*f*/function() { me._onClick(me.context()); }, 
-            /*x*/me, 
             /*scene*/pvInstance.data,
             pvInstance,
-            /*lateCall*/false);
+            /*f*/function() { me._onClick(me.context()); }, 
+            /*x*/me);
     },
 
     _handleDoubleClick: function() {
@@ -13254,11 +13288,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             
          // Setup the sign context
             me._inContext(
-                /*f*/function() { me._onDoubleClick(me.context()); }, 
-                /*x*/me, 
                 /*scene*/pvInstance.data,
                 pvInstance,
-                /*lateCall*/false);
+                /*f*/function() { me._onDoubleClick(me.context()); }, 
+                /*x*/me);
         }
     },
     
@@ -18855,15 +18888,18 @@ def
      * Processes options after user options and default options have been merged.
      * Override to apply restrictions, perform validation or
      * options values implications.
-     * When overriden, the base implementation should be called.
+     * When overridden, the base implementation should be called.
      * The implementation must be idempotent -
      * its successive application should yield the same results.
      * @virtual
      */
     _processOptionsCore: function(options) {
         if(!this.parent) {
-            var interactive = options.interactive;
-            if(interactive == null) { interactive = (pv.renderer() !== 'batik'); }
+            var interactive = (pv.renderer() !== 'batik');
+            if(interactive) {
+                interactive = options.interactive;
+                if(interactive == null) { interactive = true; }
+            }
             
             var ibits;
             if(!interactive) {
@@ -30724,8 +30760,8 @@ def
         }
         
         var isLineAreaVisible = isBaseDiscrete && isStacked ? 
-                function(){ return !this.scene.isNull || this.scene.isIntermediate; } :
-                function(){ return !this.scene.isNull; };
+                function(scene){ return !scene.isNull || scene.isIntermediate; } :
+                function(scene){ return !scene.isNull; };
         
         var isLineAreaNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
         
@@ -30737,10 +30773,11 @@ def
                 noRubberSelect: true, // Line is better for selection
                 showsSelection: !isLineAreaNoSelect
             })
-            .lock('visible', isLineAreaVisible)
-            // TODO: If it were allowed to hide the area, the anchored line would fail to evaluate
             /* Data */
-            .lock('data',   function(seriesScene){ return seriesScene.childNodes; }) // TODO
+            .lockMark('data',   function(seriesScene) { return seriesScene.childNodes; }) // TODO
+            
+            // TODO: If it were allowed to hide the area, the anchored line would fail to evaluate
+            .lockMark('visible', isLineAreaVisible)
             
             /* Position & size */
             .override('x',  function(){ return this.scene.basePosition;  }) // left
@@ -30778,7 +30815,7 @@ def
             darkerLineAndDotColor = isStacked && areasVisible;
          
         var extensionIds = ['line'];
-        if(this._applyV1BarSecondExtensions){
+        if(this._applyV1BarSecondExtensions) {
             extensionIds.push({abs: 'barSecondLine'});
         }
         
@@ -30815,7 +30852,7 @@ def
                 showsSelection: !isLineAreaNoSelect
             })
             // TODO: If it were allowed to hide the line, the anchored dot would fail to evaluate
-            .lock('visible', isLineVisible)
+            .lockMark('visible', isLineVisible)
             .override('defaultColor', function(type){
                 var color = this.base(type);
                 
@@ -32705,7 +32742,7 @@ def
                 noSelect:       isLineNoSelect,
                 showsSelection: !isLineNoSelect
             })
-            .lock('data', function(seriesScene){ return seriesScene.childNodes; })
+            .lockMark('data', function(seriesScene){ return seriesScene.childNodes; })
             .intercept('visible', function(scene){
                 if(!me.linesVisible){
                     return false;
@@ -32734,7 +32771,7 @@ def
             })
             .override('x',  function(){ return this.scene.basePosition;  })
             .override('y',  function(){ return this.scene.orthoPosition; })
-            .override('color', function(type){
+            .override('color', function(type) {
                 /* 
                  * Handle dotsVisible
                  * -----------------
@@ -32783,9 +32820,7 @@ def
         
         if(pvc.visual.ValueLabel.isNeeded(me)){
             var extensionIds = ['label'];
-            if(isV1Compat){
-                extensionIds.push('lineLabel');
-            }
+            if(isV1Compat) { extensionIds.push('lineLabel'); }
         
             var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvDot, {
                 extensionId: extensionIds,
@@ -32798,13 +32833,11 @@ def
         }
     },
 
-    _buildSignsWrapper: function(){
-        if(this.compatVersion() > 1){
-            return null;
-        }
+    _buildSignsWrapper: function() {
+        if(this.compatVersion() > 1) { return null; }
 
-        return function(v1f){
-            return function(scene){
+        return function(v1f) {
+            return function(scene) {
                 var d = {
                         category: scene.vars.x.rawValue,
                         value:    scene.vars.y.rawValue
