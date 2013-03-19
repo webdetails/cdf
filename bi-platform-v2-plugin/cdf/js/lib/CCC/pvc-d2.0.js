@@ -3571,7 +3571,7 @@ pvc.data.DimensionType.extendSpec = function(dimName, dimSpec, keyArgs){
 function dimType_addVisualRole(visualRole) {
     this.playedVisualRoles.set(visualRole.name, visualRole);
     /*global compType_dimensionRolesChanged:true */
-    compType_dimensionRolesChanged.call(this.type, this);
+    compType_dimensionRolesChanged.call(this.complexType, this);
 }
 
 /**
@@ -3586,7 +3586,7 @@ function dimType_addVisualRole(visualRole) {
  */
 function dimType_removeVisualRole(visualRole) {
     this.playedVisualRoles.rem(visualRole.name);
-    compType_dimensionRolesChanged.call(this.type, this);
+    compType_dimensionRolesChanged.call(this.complexType, this);
 }/**
  * Initializes a complex type instance.
  * 
@@ -22928,7 +22928,7 @@ def
         
         var tooltipFormat = tipOptions.format;
         if(!tooltipFormat) {
-            if(!isV1Compat){ return this._summaryTooltipFormatter.bind(this); }
+            if(!isV1Compat){ return this._summaryTooltipFormatter; }
             
             tooltipFormat = this.chart.options.v1StyleTooltipFormat;
             if(!tooltipFormat) { return; }
@@ -22981,8 +22981,8 @@ def
                                 complexType.getPlayingPercentVisualRoleDimensionMap();
 
         var percentValueFormat = playingPercentMap ?
-                               this.chart.options.percentValueFormat:
-                               null;
+                                 context.chart.options.percentValueFormat:
+                                 null;
 
         var commonAtoms = isMultiDatumGroup ? group.atoms : scene.datum.atoms;
         var commonAtomsKeys = complexType.sortDimensionNames(def.keys(commonAtoms));
@@ -26929,6 +26929,7 @@ def
     
     if(options.tickLength === undefined){
         // height or width
+        // TODO: isto está documentado?
         var tickLength = +this._getConstantExtension('ticks', this.anchorOrthoLength(anchor)); 
         if(!isNaN(tickLength) && isFinite(tickLength)){
             this.tickLength = tickLength;
