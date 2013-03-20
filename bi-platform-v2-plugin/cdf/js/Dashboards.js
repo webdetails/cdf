@@ -656,91 +656,128 @@ Dashboards.decrementRunningCalls = function() {
 
 };
 
-
-
-Dashboards.bindControl = function(object) {
-
-
-
-  // see if there is a class defined for this object
-
-  var objectType = typeof object["type"]=='function'?object.type():object.type;
-
-  var classNames = [
-
-  // try TypeComponent as class name
-
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component',
-
-  // try type as class name
-
-  objectType,
-
-  // try Type as class name with first letter uppercase
-
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1)
-
-  ];
-
+Dashboards.bindControl = function(control) {
+  var Class = this._getControlClass(control);
+  if(!Class) {
+    this.log("Object type " + control["type"] + " can't be mapped to a valid class", "error");
+  } else {
+    this._castControlToClass(control, Class);
+  }
   
+  this.bindExistingControl(control, Class);
+};
 
-  var objectImpl;
+Dashboards.bindExistingControl = function(control, Class) {
+  if(!control.dashboard) {
+    control.dashboard = this;
 
-  for (var i = 0; i < classNames.length && (objectImpl == null || typeof objectImpl == 'undefined'); i++) {
+    // Ensure BaseComponent's methods
+    this._castControlToComponent(control, Class);
+    
+    // Make sure we clean all events in the case we're redefining the control.
+    if(typeof control.off === "function") { control.off("all"); }
 
-    try {
-
-      eval('objectImpl = new ' + classNames[i]);
-
-    } catch (e) {
-
+    // Endow it with the Backbone event system.
+    $.extend(control, Backbone.Events);
+    
+    // Add logging lifeCycle
+    this._addLogLifecycleToControl(control);
+    
+    // For legacy dashboards, we'll automatically assign some priority for component execution.
+    if(control.priority == null || control.priority === "") {
+        control.priority = this.legacyPriority++;
     }
 
   }
 
   
+  return control;
+};
 
-  if (typeof objectImpl == 'undefined'){
-    this.log ("Object type " + object["type"] + " can't be mapped to a valid class","error");
-  } else {
-    objectImpl.dashboard = this;
-    /*
-     * Extend the input object with all the component methods,
-     * and endow it with the Backbone event system.
-     * Make sure we clean all events in the case we're redefining the object.
-     */
-    if(typeof object.off === "function")
-        object.off("all");
-    $.extend(object,objectImpl,Backbone.Events);
+Dashboards._castControlToClass = function(control, Class) {
+  if(!(control instanceof Class)) {
+    var controlImpl = this._makeInstance(Class);
     
-    // Add logging lifeCycle
+    // Copy implementation into control
+    $.extend(control, controlImpl);
+  }
+};
+
+Dashboards._getControlClass = function(control) {
+  // see if there is a class defined for this control
+  var typeName = control.type;
+  if(typeof typeName === 'function') { typeName = typeName.call(control); } // <=> control.type() ; the _this_ in the call is _control_
+  
+  var TypeName = typeName.substring(0,1).toUpperCase() + typeName.substring(1);
+  
+  // try _TypeComponent_, _type_ and _Type_ as class names
+  var typeNames = [TypeName + 'Component', typeName, TypeName];
+  
+  for (var i = 0, N = typeNames.length ; i < N ; i++) {
+    // TODO: window represents access to the JS global object.
+    // This, or a special object on which to eval types, should be provided by some FWK.
+    var Class = window[typeNames[i]];
+    if(Class) { return Class; }
+  }
+  // return undefined;
+};
+
+Dashboards._makeInstance = function(Class, args) {
+  var o = Object.create(Class.prototype);
+  if(args) { Class.apply(o, args); } else { Class.apply(o); }
+  return o;
+};
+
+Dashboards._castControlToComponent = function(control, Class) {
+  // Extend control with BaseComponent methods, if it's not an instance of it.
+  // Also, avoid extending if _Class_ was already applied
+  // and it is a subclass of BaseComponent.
+  if(!(control instanceof BaseComponent) && 
+     (!Class || !(Class.prototype instanceof BaseComponent))) {
     
-      
-    var myself = this;
-    object.on("all",function(e){
-      
-      if( myself.logLifecycle &&  e !== "cdf" && this.name !=="PostInitMarker" && typeof console != "undefined" ){
-        
-        var eventName = e.substr(4);
-        var eventStr = "      ";
-        if (eventName==="preExecution")
-          eventStr = ">Start";
-        else if(eventName==="postExecution")
-          eventStr = "<End  ";
-        else if(eventName === "error")
-          eventStr = "!Error";
-        
-        
-        
-        var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceSplitDesc}} since last event",this.splitTimer());
-        console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
-          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.getRunningCalls()  +")","color: " + this.getLogColor());
+    var baseProto = BaseComponent.prototype;
+    for(var p in baseProto) {
+      if(baseProto.hasOwnProperty(p) && 
+         (control[p] === undefined) && 
+         (typeof baseProto[p] === 'function')) {
+        switch(p) {
+          // Exceptions
+          case 'base': break;
+            
+          // Copy
+          default: control[p] = baseProto[p]; break;
+        }
       }
-    })
+    }
   }
 
 };
 
+Dashboards._addLogLifecycleToControl = function(control) {
+  // TODO: Could the _typeof console !== "undefined"_ test be made beforehand, 
+  // to avoid always installing the catch-all handler?
+  // The same could be said for the _this.logLifecycle_ test.
+  // To still allow changing the value dynamically, a Dashboards.setLogLifecycle(.) method could be provided.
+  
+  // Add logging lifeCycle
+  var myself = this;
+  control.on("all", function(e) {
+    if(myself.logLifecycle && e !== "cdf" && this.name !== "PostInitMarker" && typeof console !== "undefined") {
+      var eventStr;
+      var eventName = e.substr(4);
+      switch(eventName) {
+        case "preExecution":  eventStr = ">Start"; break;
+        case "postExecution": eventStr = "<End  "; break;
+        case "error":         eventStr = "!Error"; break;
+        default:              eventStr = "      "; break;
+      }
+        
+      var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event",this.splitTimer());
+      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
+          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+    }
+  });
+};
 
 Dashboards.getErrorObj = function (errorCode){
   return Dashboards.ERROR_CODES[errorCode] || {};
@@ -1128,9 +1165,7 @@ Dashboards.showErrorTooltip = function(){
 
 
 Dashboards.getComponent = function(name){
-
-  for (i in this.components){
-
+  for (var i in this.components){
     if (this.components[i].name == name)
 
       return this.components[i];
@@ -1154,20 +1189,45 @@ Dashboards.getComponentByName = function(name) {
 
 
 Dashboards.addComponents = function(components) {
-  // attempt to convert over to component implementation
+  components.forEach(function(component) {
+    this.bindControl(component);
+    this.components.push(component);
+  }, this);
+};
 
-  for (var i =0; i < components.length; i++) {
-    this.bindControl(components[i]);
-    
-    // For legacy dashboards, we'll automatically assign some priority for 
-    // component execution
-    if(typeof components[i].priority === "undefined" || components[i].priority === ""){
-      components[i].priority = this.legacyPriority++;
+Dashboards.addComponent = function(component, options) {
+  this.removeComponent(component);
+  
+  // Attempt to convert over to component implementation
+  this.bindControl(component);
+  
+  var index = options && options.index;
+  var L = this.components.length;
+  if(index == null || index < 0 || index > L) { index = L; } // <=> push
+  this.components[index] = component;
+};
+
+Dashboards.getComponentIndex = function(componentOrName) {
+  if(componentOrName) {
+    if(typeof componentOrName === 'string') {
+      for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
+        if(cs[i].name === componentOrName) { return i; }
+      }
+    } else {
+      return this.components.indexOf(componentOrName);
     }
   }
+  return -1;
+};
 
-  this.components = this.components.concat(components);
-
+Dashboards.removeComponent = function(componentOrName) {
+  var index = this.getComponentIndex(componentOrName);
+  var found = index >= 0;
+  if(found) {
+    this.components[index].dashboard = null;
+    this.components.splice(index, 1);
+  }
+  return found;
 };
 
 
