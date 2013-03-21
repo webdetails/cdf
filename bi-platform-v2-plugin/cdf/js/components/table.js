@@ -197,7 +197,7 @@ var TableComponent = UnmanagedComponent.extend({
             var position = dataTable.fnGetPosition(td),
                 rowIdx = position[0],
                 colIdx = position[2],
-                format = cd.colFormats[position[1]],
+                format = cd.colFormats[colIdx],
                 value = myself.rawData.resultset[rowIdx][colIdx];
             if (format && (typeof value != "undefined" && value !== null)) {
               $(td).text(sprintf(format,value));
@@ -366,11 +366,14 @@ var TableComponent = UnmanagedComponent.extend({
     var myself = this,
       detailContainerObj = myself.expandContainerObject,
       activeclass = "expandingClass";
+
     if(typeof activeclass === 'undefined'){
       activeclass = "activeRow";
     }
+
     var obj = event.target.closest("tr"),
         a = event.target.closest("a");
+
     if (a.hasClass ('info')) {
       return;
     } else {
@@ -384,6 +387,7 @@ var TableComponent = UnmanagedComponent.extend({
         obj.removeClass(activeclass);
         myself.dataTable.fnClose( row );
         anOpen.splice(i,1);
+
       } else {
         // Closes all open expandable rows .
         for ( var j=0; j < anOpen.length; j++ ) {
@@ -402,8 +406,16 @@ var TableComponent = UnmanagedComponent.extend({
         $(myself.expandParameters).each(function f(i, elt) {
           Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);              
         });
+
       };
     };
+    $("td.expandingClass").click(
+      function(event){
+        //Does nothing but it prevents problems on expandingClass clicks!
+        event.stopPropagation();
+        return;
+      }
+    );
   }
 },
 

@@ -3,7 +3,13 @@
   async: false,
   traditional: true,
   scriptCharset: "utf-8",
-  contentType: "application/x-www-form-urlencoded;charset=UTF-8"
+  contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+
+  dataFilter: function(data, dtype) {
+    // just tagging date
+    Dashboards.lastServerResponse = Date.now();
+    return data;
+  }
 });
 
 
@@ -40,10 +46,6 @@ if($.blockUI){
   $.blockUI.defaults.css.border = "none";
 }
 
-var ERROR_CODES = [];
-ERROR_CODES["UNKNOWN"] = ["ERROR: ","resources/style/images/error.jpg"];
-ERROR_CODES["0012"] = ["No data available (MDXLookupRule did not execute successfully)","resources/style/images/alert.jpg"];
-ERROR_CODES["0006"] = ["Could not establish a connection to the database","resources/style/images/error.jpg"];
 
 
 if (typeof $.SetImpromptuDefaults == 'function')
@@ -53,6 +55,16 @@ if (typeof $.SetImpromptuDefaults == 'function')
   });
 
 var Dashboards = {
+
+  ERROR_CODES:{
+    'QUERY_TIMEOUT' : {
+      msg: "Query timeout reached"
+    },
+    "COMPONENT_ERROR" : {
+      msg: "Error processing component"  
+    }
+  },
+  CDF_BASE_PATH: webAppPath + "/plugin/pentaho-cdf/api/",
   parameterModel: new Backbone.Model(),
   TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_red.png",
   TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_yellow.png",
@@ -89,6 +101,9 @@ var Dashboards = {
   
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  
+  lastServerResponse: Date.now(),
+  serverCheckResponseTimeout: 1800000, //ms, will be overridden at init
   /* Reference to current language code . Used in every place where jquery
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
    */
@@ -317,21 +332,30 @@ Dashboards.showProgressIndicator = function() {
 };
 
 Dashboards.hideProgressIndicator = function() {
-  if(this.runningCalls <= 0){
-    $.unblockUI();
-    this.showErrorTooltip();
-  }
+  $.unblockUI();
+  this.showErrorTooltip();
+};
+
+Dashboards.resetRunningCalls = function(){
+  this.runningCalls = 0;   
+  setTimeout(_.bind(function(){
+    this.hideProgressIndicator();
+  },this),10);
+};
+
+Dashboards.getRunningCalls = function (){
+  return this.runningCalls;
 };
 
 Dashboards.incrementRunningCalls = function() {
   this.runningCalls++ ;
   this.showProgressIndicator();
-//Dashboards.log("+Running calls incremented to: " + Dashboards.runningCalls);
+//Dashboards.log("+Running calls incremented to: " + Dashboards.getRunningCalls());
 };
 
 Dashboards.decrementRunningCalls = function() {
   this.runningCalls-- ;
-  //Dashboards.log("-Running calls decremented to: " + Dashboards.runningCalls);
+  //Dashboards.log("-Running calls decremented to: " + Dashboards.getRunningCalls());
   setTimeout(_.bind(function(){
     if(this.runningCalls<=0){
       this.hideProgressIndicator();
@@ -357,10 +381,10 @@ Dashboards.bindExistingControl = function(control, Class) {
 
     // Ensure BaseComponent's methods
     this._castControlToComponent(control, Class);
-
+    
     // Make sure we clean all events in the case we're redefining the control.
     if(typeof control.off === "function") { control.off("all"); }
-  
+
     // Endow it with the Backbone event system.
     $.extend(control, Backbone.Events);
     
@@ -384,7 +408,7 @@ Dashboards._castControlToClass = function(control, Class) {
     $.extend(control, controlImpl);
   }
 };
-    
+
 Dashboards._getControlClass = function(control) {
   // see if there is a class defined for this control
   var typeName = control.type;
@@ -403,13 +427,13 @@ Dashboards._getControlClass = function(control) {
   }
   // return undefined;
 };
-      
+
 Dashboards._makeInstance = function(Class, args) {
   var o = Object.create(Class.prototype);
   if(args) { Class.apply(o, args); } else { Class.apply(o); }
   return o;
 };
-      
+
 Dashboards._castControlToComponent = function(control, Class) {
   // Extend control with BaseComponent methods, if it's not an instance of it.
   // Also, avoid extending if _Class_ was already applied
@@ -425,7 +449,7 @@ Dashboards._castControlToComponent = function(control, Class) {
         switch(p) {
           // Exceptions
           case 'base': break;
-        
+            
           // Copy
           default: control[p] = baseProto[p]; break;
         }
@@ -433,13 +457,13 @@ Dashboards._castControlToComponent = function(control, Class) {
     }
   }
 };
-        
+
 Dashboards._addLogLifecycleToControl = function(control) {
   // TODO: Could the _typeof console !== "undefined"_ test be made beforehand, 
   // to avoid always installing the catch-all handler?
   // The same could be said for the _this.logLifecycle_ test.
   // To still allow changing the value dynamically, a Dashboards.setLogLifecycle(.) method could be provided.
-        
+  
   // Add logging lifeCycle
   var myself = this;
   control.on("all", function(e) {
@@ -453,11 +477,105 @@ Dashboards._addLogLifecycleToControl = function(control) {
         default:              eventStr = "      "; break;
       }
         
-        var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event",this.splitTimer());
-        console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
+      var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event",this.splitTimer());
+      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
           e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
-      }
+    }
   });
+};
+
+Dashboards.getErrorObj = function (errorCode){
+  return Dashboards.ERROR_CODES[errorCode] || {};
+};
+
+Dashboards.parseServerError = function (resp, txtStatus, error){
+  var out = {};
+  var regexs = [
+    { match: /Query timeout/ , msg: Dashboards.getErrorObj('QUERY_TIMEOUT').msg  }
+  ];
+
+  out.error = error;
+  out.msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg;
+  var str = $('<div/>').html(resp.responseText).find('h1').text();
+  _.find( regexs, function (el){
+    if ( str.match( el.match )){
+      out.msg = el.msg ;
+      return true
+    } else {
+      return false
+    }
+  });
+  out.errorStatus = txtStatus;
+
+  return out
+};
+
+Dashboards.handleServerError = function() {
+  var err = Dashboards.parseServerError.apply( this, arguments );
+
+  Dashboards.errorNotification( err ); 
+  Dashboards.trigger('cdf cdf:serverError', this);
+  Dashboards.resetRunningCalls();  
+};
+
+Dashboards.errorNotification = function (err, ph) {
+  if (ph){
+    wd.cdf.notifications.component.render(
+      $(ph), {
+        title: err.msg,
+        desc: ""
+    });
+  } else {
+    wd.cdf.notifications.growl.render({
+      title: err.msg,
+      desc: ''
+    });
+  }
+};
+
+/**
+ * Default impl when not logged in
+ */
+Dashboards.loginAlert = function(newOpts) {
+  var opts = {
+    header: "Warning",
+    desc: "You are no longer logged in or the connection to the server timed out",
+    button: "Click to reload this page",
+    callback: function(){
+      window.location.reload(true);
+    }
+  };
+  opts = _.extend( {} , opts, newOpts );
+
+  wd.cdf.popups.okPopup.show(opts);
+  this.trigger('cdf cdf:loginError', this);
+};
+
+/**
+ * 
+ */
+Dashboards.checkServer = function() {
+	//check if is connecting to server ok
+	//use post to avoid cache
+	var retVal = false;
+	$.ajax({
+		type: 'GET',
+		async: false,
+		dataType: 'json',
+		url: Dashboards.CDF_BASE_PATH + 'ping',
+		success: function(ok) {
+      if(ok != null){
+        retVal = false;
+      } else {
+        retVal = true;
+      }
+		},
+		error: function() {
+			retVal = false;
+		}
+		
+	});
+	return retVal;
 };
 
 
@@ -534,7 +652,7 @@ Dashboards.blockUIwithDrag = function() {
 };
 
 Dashboards.updateLifecycle = function(object) {
-  var silent = object.lifecycle ? !!object.lifecycle.silent : false;
+    var silent = object.lifecycle ? !!object.lifecycle.silent : false;
 
     if( object.disabled ){
       return;
@@ -586,6 +704,10 @@ Dashboards.updateLifecycle = function(object) {
           });
         }
       } catch (e) {
+        var ph = (object.htmlObject) ? $('#' + object.htmlObject) : undefined,
+            msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg
+                  + ' (' + object.name.replace('render_', '') + ')';
+        this.errorNotification( { msg: msg  } , ph );
         this.log("Error updating " + object.name +":",'error');
         this.log(e,'exception');
       } finally {
@@ -628,6 +750,15 @@ Dashboards.update = function(component) {
 };
 
 Dashboards.updateComponent = function(object) {
+  if(Date.now() - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
+    //too long in between ajax communications
+    if(!Dashboards.checkServer()) {
+    	Dashboards.hideProgressIndicator();
+    	Dashboards.loginAlert();
+    	throw "not logged in";
+    }
+  }
+
   if(object.isManaged === false && object.update) {
     object.update();
   } else {
@@ -674,7 +805,7 @@ Dashboards.addComponents = function(components) {
     this.components.push(component);
   }, this);
 };
-  
+
 Dashboards.addComponent = function(component, options) {
   this.removeComponent(component);
   
@@ -686,13 +817,13 @@ Dashboards.addComponent = function(component, options) {
   if(index == null || index < 0 || index > L) { index = L; } // <=> push
   this.components[index] = component;
 };
-    
+
 Dashboards.getComponentIndex = function(componentOrName) {
   if(componentOrName) {
     if(typeof componentOrName === 'string') {
       for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
         if(cs[i].name === componentOrName) { return i; }
-    }
+      }
     } else {
       return this.components.indexOf(componentOrName);
     }
@@ -737,6 +868,10 @@ Dashboards.init = function(components){
     _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
+  }
+  if(this.context != null && this.context.sessionTimeout != null ) {
+    //defaulting to 90% of ms value of sessionTimeout
+    Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
   this.restoreBookmarkables();
   this.restoreView();
@@ -857,7 +992,7 @@ Dashboards.initEngine = function(){
 
   this.incrementRunningCalls();
   if( this.logLifecycle && typeof console != "undefined" ){
-    console.log("%c          [Lifecycle >Start] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+    console.log("%c          [Lifecycle >Start] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
   }
 
   this.createAndCleanErrorDiv();
@@ -942,7 +1077,7 @@ Dashboards.handlePostInit = function() {
     
     this.decrementRunningCalls();
     if( this.logLifecycle && typeof console != "undefined" ){
-      console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.runningCalls  +")","color: #ddd ");
+      console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
     }
     
   }
@@ -1228,7 +1363,6 @@ Dashboards.generateBookmarkState = function() {
 Dashboards.persistBookmarkables = function(param) {
   var bookmarkables = this.bookmarkables,
       params = {};
-
   /*
    * We don't want to update the hash if we were passed a
    * non-bookmarkable parameter (why bother?), nor is there
@@ -1288,7 +1422,6 @@ Dashboards.getBookmarkState = function() {
           return pair;
       }),
       params = this.propertiesArrayToObject(query);
-
   if(params.bookmarkState) {
     return JSON.parse(decodeURIComponent(params.bookmarkState.replace(/\+/g,' '))) || {};
   } else  {
@@ -1302,7 +1435,6 @@ Dashboards.restoreBookmarkables = function() {
   try {
     state = this.getBookmarkState().params;
     for (var k in state) if (state.hasOwnProperty(k)) {
-
       this.setParameter(k,state[k]);
     }
   } catch (e) {
@@ -1416,7 +1548,6 @@ Dashboards.post = function(url,obj){
   var form = '<form action="' + url + '" method="post">';
   for(var o in obj){
 
-
     var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
 
     if (typeof v == 'string') {
@@ -1474,7 +1605,8 @@ Dashboards.ev = function(o){
 };
 
 Dashboards.callPentahoAction = function(obj, path, parameters, callback ){
-    var myself = this;
+  var myself = this;
+  
   // Encapsulate pentahoAction call
   // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
   if(typeof callback == 'function'){
@@ -1510,9 +1642,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
       error: function (XMLHttpRequest, textStatus, errorThrown) {
         myself.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
       }
-
-    }
-    );
+    });
   }
 	
   // Sync
@@ -1536,9 +1666,8 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
 }; 
 
 Dashboards.pentahoAction = function( path, params, func ) {
-  return Dashboards.pentahoServiceAction('ServiceAction', 'xml', path, params, func);
+  return this.pentahoServiceAction('ServiceAction', 'xml', path, params, func);
 };
-
 
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, params, func ) {
   // execute an Action Sequence on the server
@@ -1552,8 +1681,8 @@ Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, par
   $.each(params,function(i,val){
     arr[val[0]]=val[1];
   });
-  return Dashboards.executeAjax(returntype, url, arr, func);
-}    
+  return this.executeAjax(returntype, url, arr, func);
+};
 
 Dashboards.parseXActionResult = function(obj,html){
 
@@ -1620,7 +1749,7 @@ Dashboards.fetchData = function(cd, params, callback) {
     $.post(webAppPath + "/content/cda/doQuery?", cd,
       function(json) {
         callback(json);
-      },'json');
+      },'json').error(Dashboards.handleServerError);
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
@@ -2209,6 +2338,8 @@ Query = function() {
   var _query = '';
   // Callback for the data handler
   var _callback = null;
+  // Callback for the query error handler / default handler
+  var _errorCallback = Dashboards.handleServerError;
   // Result caching
   var _lastResultSet = null;
   // Paging and sorting
@@ -2276,6 +2407,7 @@ Query = function() {
     var url;
     var queryDefinition; 
     var callback = (outsideCallback ? outsideCallback : _callback);
+    var errorCallback = _errorCallback;
     if (_mode == 'CDA') {
       url = CDA_PATH;
       queryDefinition = buildQueryDefinition();
@@ -2312,11 +2444,17 @@ Query = function() {
       
       callback(clone);
     };
+    var errorHandler = function(resp, txtStatus, error ) {      
+      if (errorCallback){
+        errorCallback(resp, txtStatus, error );
+      }
+    };
 
     var settings = _.extend({},_ajaxOptions, {
       data: queryDefinition,
       url: url,
-      success: successHandler
+      success: successHandler,
+      error: errorHandler 
     });
     
     $.ajax(settings);
@@ -2405,7 +2543,7 @@ Query = function() {
     }
   };
 
-  this.fetchData = function(params, callback) {
+  this.fetchData = function(params, successCallback, errorCallback) {
     switch(arguments.length) {
       case 0:
         if(_params && _callback) {
@@ -2424,10 +2562,21 @@ Query = function() {
         }
         break;
       case 2:
+        if (typeof arguments[0] == "function"){
+          _callback = arguments[0];
+          _errorCallback = arguments[1];
+          return doQuery();
+        } else if( arguments[0] instanceof Array){
+          _params = arguments[0];
+          _callback = arguments[1];
+          return doQuery();
+        }
+        break;
       default:
         /* We're just going to discard anything over two params */
         _params = params;
-        _callback = callback;
+        _callback = successCallback;
+        _errorCallback = errorCallback;
         return doQuery();
     }
     /* If we haven't hit a return by this time,
@@ -2678,3 +2827,139 @@ Query = function() {
     throw new Error("browser does not support setters");
   }
 })();
+
+
+
+
+
+/*
+ * Popups (Move somewhere else?)
+ *
+ * 
+ */
+
+
+var wd = wd || {};
+wd.cdf = wd.cdf || {};
+wd.cdf.popups = wd.cdf.popups || {};
+
+wd.cdf.popups.okPopup = {
+  template: Mustache.compile(
+              "<div class='cdfPopup'>" +
+              "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
+              "  <div class='cdfPopupBody'>" +
+              "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
+              "    <div class='cdfPopupButton'>{{{button}}}</div>" +
+              "  </div>" +
+              "</div>"),
+  defaults:{
+    header: "Title",
+    desc:"Description Text",
+    button:"Button Text",
+    callback: function (){ 
+      return true 
+    }
+  },
+  $el: undefined,
+  show: function (opts){
+    if (opts || this.firstRender){
+      this.render(opts);
+    }
+    this.$el.show();
+  },
+  hide: function (){
+    this.$el.hide();
+  },
+  render: function (newOpts){
+    var opts = _.extend( {} , this.defaults, newOpts );
+    var myself = this;
+    if (this.firstRender){
+      this.$el = $('<div/>').addClass('cdfPopupContainer')
+        .hide()
+        .appendTo('body');
+      this.firstRender = false;
+    };
+    this.$el.empty().html( this.template( opts ) );
+    this.$el.find('.cdfPopupButton').click( function (){
+      opts.callback();
+      myself.hide();
+    });
+  },
+  firstRender: true
+};
+
+
+/*
+ * Error information divs
+ *
+ * 
+ */
+
+wd.cdf.notifications = wd.cdf.notifications || {};
+
+wd.cdf.notifications.component = {
+  template: Mustache.compile(
+              "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
+              "  <div class='cdfNotificationBody'>" +
+              "    <div class='cdfNotificationImg'>&nbsp;</div>" +
+              "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
+              "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
+              "  </div>" +
+              "</div>" ),
+  defaults:{
+    title: "Component Error",
+    desc: "Error processing component."
+  },
+  render: function (ph, newOpts){
+    var opts = _.extend( {}, this.defaults, newOpts);
+    opts.isSmallComponent = ( $(ph).width() < 300 );
+    $(ph).empty().html( this.template( opts ) );
+    var $nt = $(ph).find('.cdfNotification');
+    $nt.css({'line-height': $nt.height() + 'px' });
+  }
+};
+
+wd.cdf.notifications.growl = {
+  template: Mustache.compile(
+              "<div class='cdfNotification growl'>" +
+              "  <div class='cdfNotificationBody'>" +
+              "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
+              "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
+              "  </div>" +
+              "</div>" ),
+  defaults:{
+    title: 'Title',
+    desc: 'Default CDF notification.',
+    timeout: 4000,
+    onUnblock: function (){ return true },
+    css: $.extend( {}, 
+      $.blockUI.defaults.growlCSS,
+      { position: 'absolute' , width: '100%' , top:'10px' } ),
+    showOverlay: false,
+    fadeIn: 700,
+    fadeOut: 1000,
+    centerY:false
+  },
+  render: function (newOpts){
+    var opts = _.extend( {}, this.defaults, newOpts),
+        $m = $( this.template( opts )),
+        myself = this;
+    opts.message = $m;
+    var outerUnblock = opts.onUnblock;
+    opts.onUnblock = function(){
+      myself.$el.hide();
+      outerUnblock.call(this);
+    };
+    if (this.firstRender){
+      this.$el = $('<div/>').addClass('cdfNotificationContainer')
+        .hide()
+        .appendTo('body');
+      this.firstRender = false;
+    }
+    this.$el.show().block(opts);
+  },
+  firstRender: true
+}; 
+
+
+

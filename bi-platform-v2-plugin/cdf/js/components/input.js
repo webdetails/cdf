@@ -41,7 +41,15 @@ var SelectBaseComponent = InputBaseComponent.extend({
   draw: function (myArray) {
     var ph = $("#" + this.htmlObject);
     isMultiple = false;
-
+	
+	var eo = {};
+	
+	if(this.extraOptions != undefined){
+		for(var i = 0; i < this.extraOptions.length; i++){
+			eo[this.extraOptions[i][0]] = this.extraOptions[i][1];
+		}
+	}
+	
     selectHTML = "<select";
 
     // set size
@@ -96,7 +104,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
         if (i == 0) {
           firstVal = value;
         }
-        if (jQuery.inArray( value, currentValArray) > -1) {
+        if (jQuery.inArray(""+ value, currentValArray.map(function (v) {return "" + v;})) > -1) {
           currentIsValid = true;
         }
         selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
@@ -121,7 +129,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
     }
     
     if( this.externalPlugin == "chosen" ){ 
-      ph.find("select.chzn-select").chosen(); 
+      ph.find("select.chzn-select").chosen(eo); 
     }
     
     if( this.externalPlugin == "hynds" ){ 

@@ -8,9 +8,9 @@
                            http://jax-ws.dev.java.net/spring/servlet http://jax-ws.dev.java.net/spring/servlet.xsd">
 
   <context:annotation-config />
-  <bean id="xcdf" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
   <!-- JAX-RS beans -->
   <bean id="api" class="org.pentaho.platform.web.servlet.JAXRSPluginServlet"/>
+  <bean id="xcdf" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
   <bean id="storage" class="org.pentaho.cdf.storage.StorageApi"/>
   <bean id="comments" class="org.pentaho.cdf.comments.CommentsApi"/>
   <bean id="settings" class="org.pentaho.cdf.settings.SettingsApi"/>

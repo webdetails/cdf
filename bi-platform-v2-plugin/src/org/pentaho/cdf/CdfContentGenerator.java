@@ -18,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.xml.parsers.ParserConfigurationException;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
@@ -84,7 +85,7 @@ import pt.webdetails.packager.Packager;
  * @author Will Gorman (wgorman@pentaho.com)
  */
 
-@Path("/cdf")
+@Path("/pentaho-cdf/api")
 public class CdfContentGenerator extends SimpleContentGenerator {
 
     private static final long serialVersionUID = 5608691656289862706L;
@@ -528,6 +529,14 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         } catch (IOException ex){
             
         }        
+    }
+    
+    @GET
+    @Path("/ping")
+    @Produces("text/plain")
+    @Consumes({ APPLICATION_XML, APPLICATION_JSON })
+    public Response ping() throws InvalidCdfOperationException  {
+      return Response.ok().build();
     }
     
     private void init() throws Exception {
