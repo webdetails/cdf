@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130321
+//VERSION TRUNK-20130322
 
 var pvc = (function(def, pv) {
 
@@ -4700,6 +4700,8 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         
         this._processMetadata();
         
+        if(pvc.debug >= 3) { this.logVItem(); }
+        
         this.base();
     },
     
@@ -4805,13 +4807,57 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 "  [" + j + "] " + 
                 "'" + col.colName + "' (" +
                 "type: "      + col.colType + ", " + 
-                "inspected: " + (colTypes[j] ? 'continuous' : 'discrete') +
+                "inspected: " + (colTypes[j] ? 'number' : 'string') +
                  (col.colLabel ? (", label: '" + col.colLabel + "'") : "")  + 
                 ")");
         });
         
-        //out.push(pvc.logSeparator);
+        out.push("");
+        
         pvc.log(out.join('\n'));
+    },
+    
+    logVItem: def.method({isAbstract: true}),
+    
+    _logVItem: function(translType, kindList, kindScope) {
+        pvc.log(translType + " data source translator");
+                
+        var out = ["VIRTUAL ITEM ARRAY", pvc.logSeparator];
+        
+        // Headers
+        out.push("Index | Kind | Type", 
+                 "------+------+--------");
+        var index = 0;
+        kindList.forEach(function(kind) {
+            for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
+                var type = this._columnTypes[index];
+                out.push(
+                    " " + index + "    | " + 
+                          kind  + "    | " +
+                    (type ? 'number' : 'string'));
+                index++;
+            }
+        }, this);
+        
+        out.push("");
+        
+        /*
+        var kinds   = [];
+        var indexes = [];
+        kindList
+            .forEach(function(kind) {
+                for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
+                    indexes.push(indexes.length);
+                    kinds  .push(kind);
+                }
+            });
+        
+        out.push("\tcount:   " + pvc.stringify(kindScope));
+        out.push("\tkind:    [" + kinds  .join(" ") + "]");
+        out.push("\tindexes: [" + indexes.join(" ") + "]");
+        */
+        
+        pvc.log(out.join("\n"));
     },
     
     /**
@@ -5361,16 +5407,10 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             'category': this._itemLogicalGroup.series,
             'value':    this.C + this.R
         };
-        
-        // ----------------
-
-        if(pvc.debug >= 3){
-            pvc.log("Crosstab translator " + pvc.stringify({
-                R: this.R,
-                C: this.C,
-                M: this.M
-            }));
-        }
+    },
+    
+    logVItem: function() {
+        this._logVItem("Crosstab", ['R', 'C', 'M'], {R: this.R, C: this.C, M: this.M});
     },
 
     _getCategoriesCount: function(){
@@ -5873,21 +5913,10 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         };
         
         this._itemPerm = itemPerm;
-        
-        if(pvc.debug >= 3){
-            var out = [
-                "RELATIONAL TRANSLATOR MAPPING",
-                pvc.logSeparator,
-                "[" + 
-                    colGroupSpecs.map(function(groupSpec){
-                        return def.array.create(groupSpec.count, groupSpec.name).join('');
-                    })
-                    .join(' ') +
-                "]"
-            ];
-
-            pvc.log(out.join("\n"));
-        }
+    },
+    
+    logVItem: function() {
+        this._logVItem("Relational", ['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
     },
     
     /** 
@@ -13106,11 +13135,15 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
 
     mayShowNotAmongSelected: function() {
-        return this.showsSelection() && this.scene.anySelected() && !this.scene.isSelected();
+        return this.mayShowAnySelected() && !this.scene.isSelected();
     },
 
     mayShowSelected: function() {
         return this.showsSelection() && this.scene.isSelected();
+    },
+    
+    mayShowAnySelected: function() {
+        return this.showsSelection() && this.scene.anySelected();
     },
     
     /* TOOLTIP */
@@ -13790,17 +13823,16 @@ def
 
 
 def.type('pvc.visual.Line', pvc.visual.Sign)
-.init(function(panel, protoMark, keyArgs){
+.init(function(panel, protoMark, keyArgs) {
     
     var pvMark = protoMark.add(pv.Line);
     
     this.base(panel, pvMark, keyArgs);
     
     this.lock('segmented', 'smart') // fixed
-        .lock('antialias', true)
-        ;
+        .lock('antialias', true);
 
-    if(!def.get(keyArgs, 'freePosition', false)){
+    if(!def.get(keyArgs, 'freePosition', false)) {
         var basePosProp  = panel.isOrientationVertical() ? "left" : "bottom",
             orthoPosProp = panel.anchorOrtho(basePosProp);
 
@@ -13811,8 +13843,7 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
 
     this/* Colors & Line */
         ._bindProperty('strokeStyle', 'strokeColor', 'color')
-        ._bindProperty('lineWidth',   'strokeWidth')
-        ;
+        ._bindProperty('lineWidth',   'strokeWidth');
 
     // Segmented lines use fill color instead of stroke...so this doesn't work.
     //this.pvMark.lineCap('square');
@@ -13821,9 +13852,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
 .property('strokeWidth')
 .constructor
 .add({
-    _addInteractive: function(keyArgs){
-        keyArgs = def.setDefaults(keyArgs, 
-                        'noTooltip',  true);
+    _addInteractive: function(keyArgs) {
+        keyArgs = def.setDefaults(keyArgs, 'noTooltip',  true);
         
         this.base(keyArgs);
     },
@@ -13841,39 +13871,27 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
      *  |
      *  o-----> x
      */
-    y: function(){ return 0; },
-    x: function(){ return 0; },
+    y: def.fun.constant(0),
+    x: def.fun.constant(0),
 
     /* STROKE WIDTH */
-    defaultStrokeWidth: function(){
-        return 1.5;
-    },
+    defaultStrokeWidth: def.fun.constant(1.5),
 
-    interactiveStrokeWidth: function(strokeWidth){
-        if(this.mayShowActive()){ // debug ?
-            /* - Ensure a normal width of at least 1,
-             * - Double and a half that
-             */
-            return Math.max(1, strokeWidth) * 2.5;
-        }
-
-        return strokeWidth;
+    interactiveStrokeWidth: function(strokeWidth) {
+        return this.mayShowActive() ? 
+               Math.max(1, strokeWidth) * 2.5 :
+               strokeWidth;
     },
     
     /* STROKE COLOR */
     /**
      * @override
      */
-    interactiveColor: function(color, type){
-        var scene = this.scene;
+    interactiveColor: function(color, type) {
         if(this.mayShowNotAmongSelected()) {
-            if(this.mayShowActive()){
-                return pv.Color.names.darkgray.darker().darker();
-            }
-            
-            if(type === 'stroke'){
-                return this.dimColor(color, type);
-            }
+            return this.mayShowActive() ? 
+                   pv.Color.names.darkgray.darker().darker() : 
+                   this.dimColor(color, type);
         }
 
         return this.base(color, type);
@@ -19713,13 +19731,20 @@ pvc.BaseChart
     },
 
     _logVisualRoles: function() {
-        var out = ["VISUAL ROLES MAP SUMMARY", pvc.logSeparator, "  VisualRole         <-- Dimensions", pvc.logSeparator];
+        var names  = def.ownKeys(this.visualRoles);
+        var maxLen = Math.max(10, def.query(names).select(function(s){ return s.length; }).max());
+        var header = def.string.padRight("VisualRole", maxLen) + " < Dimension(s)";
+        var out = [
+            "VISUAL ROLES MAP SUMMARY", 
+            pvc.logSeparator, 
+            header, 
+            def.string.padRight('', maxLen + 1, '-') + '+--------------'
+        ];
         
         def.eachOwn(this.visualRoles, function(role, name) {
-            out.push("  " + name + def.array.create(18 - name.length, " ").join("") +
-                    (role.grouping ? (" <-- " + role.grouping) : ''));
+            out.push(def.string.padRight(name, maxLen) + ' | ' + (role.grouping || '-'));
         });
-
+        out.push("");
         this._log(out.join("\n"));
     },
     
@@ -30825,7 +30850,7 @@ def
        
         // ---------------
         // BUILD
-        if(areasVisible){
+        if(areasVisible) {
             // Areas don't look good above the axes
             this.pvPanel.zOrder(-7);
         } else {
@@ -30833,27 +30858,24 @@ def
             this.pvPanel.zOrder(1);
         }
         
-        this.pvScatterPanel = new pvc.visual.Panel(this, this.pvPanel, {
-                extensionId: 'panel'
-            })
+        this.pvScatterPanel = new pvc.visual.Panel(this, this.pvPanel, {extensionId: 'panel'})
             .lock('data', rootScene.childNodes)
-            .pvMark
-            ;
+            .pvMark;
         
         // -- AREA --
         var areaFillColorAlpha = areasVisible && linesVisible && !isStacked ? 0.5 : null;
         
         var wrapper;
-        if(this.compatVersion() <= 1){
-            if(isStacked){
-                wrapper = function(v1f){
-                    return function(dotScene){
+        if(this.compatVersion() <= 1) {
+            if(isStacked) {
+                wrapper = function(v1f) {
+                    return function(dotScene) {
                         return v1f.call(this, dotScene.vars.value.rawValue);
                     };
                 };
             } else {
-                wrapper = function(v1f){
-                    return function(dotScene){
+                wrapper = function(v1f) {
+                    return function(dotScene) {
                         var d = {
                                 category: dotScene.vars.category.rawValue,
                                 value:    dotScene.vars.value.rawValue
@@ -30868,9 +30890,9 @@ def
             }
         }
         
-        var isLineAreaVisible = isBaseDiscrete && isStacked ? 
-                function(scene){ return !scene.isNull || scene.isIntermediate; } :
-                function(scene){ return !scene.isNull; };
+        var lineAreaVisibleProp = isBaseDiscrete && isStacked ? 
+                function(scene) { return !scene.isNull || scene.isIntermediate; } :
+                function(scene) { return !scene.isNull; };
         
         var isLineAreaNoSelect = /*dotsVisible && */chart.selectableByFocusWindow();
         
@@ -30886,47 +30908,42 @@ def
             .lockMark('data',   function(seriesScene) { return seriesScene.childNodes; }) // TODO
             
             // TODO: If it were allowed to hide the area, the anchored line would fail to evaluate
-            .lockMark('visible', isLineAreaVisible)
+            // Do not use anchors to connect Area -> Line -> Dot ...
+            .lockMark('visible', lineAreaVisibleProp)
             
             /* Position & size */
-            .override('x',  function(){ return this.scene.basePosition;  }) // left
-            .override('y',  function(){ return this.scene.orthoPosition; }) // bottom
-            .override('dy', function(){ return chart.animate(0, this.scene.orthoLength); }) // height
+            .override('x',  function() { return this.scene.basePosition;  }) // left
+            .override('y',  function() { return this.scene.orthoPosition; }) // bottom
+            .override('dy', function() { return chart.animate(0, this.scene.orthoLength); }) // height
             
             /* Color & Line */
-            .override('color', function(type){
-                return areasVisible ? this.base(type) : null;
-            })
-            .override('baseColor', function(type){
+            .override('color', function(type) { return areasVisible ? this.base(type) : null; })
+            .override('baseColor', function(type) {
                 var color = this.base(type);
-                if(!this._finished && color && areaFillColorAlpha != null){
+                if(!this._finished && color && areaFillColorAlpha != null) {
                     color = color.alpha(areaFillColorAlpha);
                 }
-                
                 return color;
             })
-            .override('dimColor', function(color, type){
+            .override('dimColor', function(color, type) {
                 return isStacked ? 
                     pvc.toGrayScale(color, 1, null, null).brighter() :
                     this.base(color, type);
             })
             .lock('events', areasVisible ? 'painted' : 'none')
-            .pvMark
-            ;
+            .pvMark;
         
         // -- LINE --
-        var dotsVisibleOnly = dotsVisible && !linesVisible && !areasVisible,
+        var dotsVisibleOnly = dotsVisible && !linesVisible && !areasVisible;
             
-            /* When areas are shown with no alpha (stacked), 
-             * make dots darker so they get 
-             * distinguished from areas. 
-             */
-            darkerLineAndDotColor = isStacked && areasVisible;
+        /* When areas are shown with no alpha (stacked), 
+         * make dots darker so they get 
+         * distinguished from areas. 
+         */
+        var darkerLineAndDotColor = isStacked && areasVisible;
          
         var extensionIds = ['line'];
-        if(this._applyV1BarSecondExtensions) {
-            extensionIds.push({abs: 'barSecondLine'});
-        }
+        if(this._applyV1BarSecondExtensions) { extensionIds.push({abs: 'barSecondLine'}); }
         
         /* 
          * Line.visible =
@@ -30939,7 +30956,8 @@ def
          *       b.1.1) not null or is an intermediate null
          *  b.2) not null
          */
-        var isLineVisible = !dotsVisibleOnly && isLineAreaVisible;
+        // NOTE: false or a function
+        var lineVisibleProp = !dotsVisibleOnly && lineAreaVisibleProp;
         
         // When areasVisible && !linesVisible, lines are shown when active/activeSeries
         // and hidden if not. If lines that show/hide would react to events
@@ -30961,35 +30979,38 @@ def
                 showsSelection: !isLineAreaNoSelect
             })
             // TODO: If it were allowed to hide the line, the anchored dot would fail to evaluate
-            .lockMark('visible', isLineVisible)
-            .override('defaultColor', function(type){
+            .lockMark('visible', lineVisibleProp)
+            .override('defaultColor', function(type) {
                 var color = this.base(type);
-                
-                if(!this._finished && darkerLineAndDotColor && color){
-                    color = color.darker(0.6);
-                }
+                if(!this._finished && darkerLineAndDotColor && color) { color = color.darker(0.6); }
                 return color;
             })
-            .override('normalColor', function(color/*, type*/){
+            .override('normalColor', function(color/*, type*/) {
                 return linesVisible ? color : null;
             })
-            .override('baseStrokeWidth', function(){
-                var strokeWidth;
-                if(linesVisible){
-                    strokeWidth = this.base();
+            .override('interactiveColor', function(color, type) {
+                // When !linesVisible, 
+                // keep them hidden if nothing is selected and it is not active
+                if(!linesVisible && !this.mayShowAnySelected() && !this.mayShowActive()) {
+                    return null;
                 }
                 
+                return this.base(color, type);
+            })
+            .override('baseStrokeWidth', function() {
+                var strokeWidth;
+                if(linesVisible) { strokeWidth = this.base(); }
                 return strokeWidth == null ? 1.5 : strokeWidth; 
             })
-            .intercept('strokeDasharray', function(){
+            .intercept('strokeDasharray', function() {
                 var dashArray = this.delegateExtension();
-                if(dashArray === undefined){
+                if(dashArray === undefined) {
                     var scene = this.scene;
                     var useDash = scene.isInterpolated;
-                    if(!useDash){
+                    if(!useDash) {
                         var next = scene.nextSibling;
                         useDash = next && next.isIntermediate && next.isInterpolated;
-                        if(!useDash){
+                        if(!useDash) {
                             var previous = scene.previousSibling;
                             useDash = previous  && scene.isIntermediate && previous.isInterpolated;
                         }
@@ -31000,28 +31021,25 @@ def
                 
                 return dashArray;
             })
-            .pvMark
-            ;
+            .pvMark;
            
         // -- DOT --
         var showAloneDots = !(areasVisible && isBaseDiscrete && isStacked);
         
         extensionIds = ['dot'];
-        if(this._applyV1BarSecondExtensions){
-            extensionIds.push({abs: 'barSecondDot'});
-        }
+        if(this._applyV1BarSecondExtensions) { extensionIds.push({abs: 'barSecondDot'}); }
         
         this.pvDot = new pvc.visual.Dot(this, this.pvLine, {
                 extensionId:  extensionIds,
                 freePosition: true,
                 wrapper:      wrapper
             })
-            .intercept('visible', function(){
+            .intercept('visible', function() {
                 var scene = this.scene;
                 return (!scene.isNull && !scene.isIntermediate /*&& !scene.isInterpolated*/) && 
                        this.delegateExtension(true);
             })
-            .override('color', function(type){
+            .override('color', function(type) {
                 /* 
                  * Handle dotsVisible
                  * -----------------
@@ -31031,20 +31049,18 @@ def
                  * 2) it is single  (the only dot in its series and there's only one category) (and in areas+discreteCateg+stacked case)
                  * 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                  */
-                if(!dotsVisible){
+                if(!dotsVisible) {
                     var visible = this.scene.isActive ||
                                   (!showAloneDots && this.scene.isSingle) ||
                                   (showAloneDots && this.scene.isAlone);
-                    if(!visible) {
-                        return pvc.invisibleFill;
-                    }
+                    if(!visible) { return pvc.invisibleFill; }
                 }
                 
                 // Normal logic
                 var color = this.base(type);
                 
                 // TODO: review interpolated style/visibility
-                if(this.scene.isInterpolated && type === 'fill'){
+                if(this.scene.isInterpolated && type === 'fill') {
                     return color && pv.color(color).brighter(0.5);
                 }
                 
@@ -31065,15 +31081,12 @@ def
 //                
 //                return dashArray;
 //            })
-            .override('defaultColor', function(type){
+            .override('defaultColor', function(type) {
                 var color = this.base(type);
-                
-                if(!this._finished && darkerLineAndDotColor && color){
-                    color = color.darker(0.6);
-                }
+                if(!this._finished && darkerLineAndDotColor && color) { color = color.darker(0.6); }
                 return color;
             })
-            .override('baseSize', function(){
+            .override('baseSize', function() {
                 /* When not showing dots, 
                  * but a datum is alone and 
                  * wouldn't be visible using lines or areas,  
@@ -31094,17 +31107,14 @@ def
                 }
                 
                 // TODO: review interpolated style/visibility
-                if(this.scene.isInterpolated){
-                    return 0.8 * this.base();
-                }
+                if(this.scene.isInterpolated) { return 0.8 * this.base(); }
                 
                 return this.base();
             })
-            .pvMark
-            ;
+            .pvMark;
         
         var label = pvc.visual.ValueLabel.maybeCreate(this, this.pvDot, {wrapper: wrapper});
-        if(label){
+        if(label) {
             this.pvLabel = label.pvMark;
         }
     },
@@ -31113,9 +31123,7 @@ def
      * Renders this.pvScatterPanel - the parent of the marks that are affected by interaction changes.
      * @override
      */
-    renderInteractive: function(){
-        this.pvScatterPanel.render();
-    },
+    renderInteractive: function() { this.pvScatterPanel.render(); },
 
     /* On each series, scenes for existing categories are interleaved with intermediate scenes.
      * 
@@ -31183,7 +31191,7 @@ def
      * including the mid point are bound to the right data. 
      */
 
-    _buildScene: function(data, isBaseDiscrete){
+    _buildScene: function(data, isBaseDiscrete) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
         var categDatas = data._children;
         var chart = this.chart;
@@ -31196,7 +31204,7 @@ def
         var valueDim = data.owner.dimensions(valueDimName);
         
         var orthoScale = this.axes.ortho.scale;
-        var orthoNullValue = def.scope(function(){
+        var orthoNullValue = def.scope(function() {
                 // If the data does not cross the origin, 
                 // Choose the value that's closer to 0.
                 var domain = orthoScale.domain(),
@@ -31216,13 +31224,13 @@ def
         // I   - Create series scenes array.
         // ----------------------------------
         def
-        .scope(function(){
+        .scope(function() {
             return (serRole && serRole.grouping) ?
                     serRole.flatten(data).children() : // data already only contains visible data
                     def.query([null]); // null series
         })
         /* Create series scene */
-        .each(function(seriesData1/*, seriesIndex*/){
+        .each(function(seriesData1/*, seriesIndex*/) {
             var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1 || data});
 
             seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
@@ -31230,9 +31238,9 @@ def
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
             
             /* Create series-categ scene */
-            categDatas.forEach(function(categData, categIndex){
+            categDatas.forEach(function(categData, categIndex) {
                 var group = categData;
-                if(seriesData1){
+                if(seriesData1) {
                     group = group._childrenByKey[seriesData1.key];
                 }
                 
@@ -31262,9 +31270,9 @@ def
                 
                 var isInterpolated = false;
                 //var isInterpolatedMiddle = false;
-                if(group){
+                if(group) {
                     var firstDatum = group._datums[0];
-                    if(firstDatum && firstDatum.isInterpolated){
+                    if(firstDatum && firstDatum.isInterpolated) {
                         isInterpolated = true;
                         //isInterpolatedMiddle = firstDatum.isInterpolatedMiddle;
                     }
@@ -31337,13 +31345,9 @@ def
                         /* belowScene */
                         belowSeriesScenes2 && belowSeriesScenes2[c2]);
                 
-                if(toScene.isAlone && !firstAloneScene){
-                    firstAloneScene = toScene;
-                }
+                if(toScene.isAlone && !firstAloneScene) { firstAloneScene = toScene; }
                 
-                if(!toScene.isNull){
-                    notNullCount++;
-                }
+                if(!toScene.isNull) { notNullCount++; }
                 
                 /* Possibly create intermediate scene 
                  * (between fromScene and toScene) 
@@ -31357,7 +31361,7 @@ def
                             /* belowScene */
                             belowSeriesScenes2 && belowSeriesScenes2[c2 - 1]);
                     
-                    if(interScene){
+                    if(interScene) {
                         seriesScenes2[c2 - 1] = interScene;
                         toChildIndex++;
                     }
@@ -31368,28 +31372,20 @@ def
                 fromScene = toScene;
             }
             
-            if(notNullCount === 1 && firstAloneScene && categCount === 1){
+            if(notNullCount === 1 && firstAloneScene && categCount === 1) {
                 firstAloneScene.isSingle = true;
             }
             
-            if(isStacked){
-                belowSeriesScenes2 = seriesScenes2;
-            } 
+            if(isStacked) { belowSeriesScenes2 = seriesScenes2; } 
         }
         
-        function completeMainScene( 
-                      fromScene, 
-                      toScene, 
-                      belowScene){
+        function completeMainScene(fromScene, toScene, belowScene) {
             
             var toAccValue = toScene.vars.value.accValue;
             
             if(belowScene) {
-                if(toScene.isNull && !isBaseDiscrete) {
-                    toAccValue = orthoNullValue;
-                } else {
-                    toAccValue += belowScene.vars.value.accValue;
-                }
+                if(toScene.isNull && !isBaseDiscrete) { toAccValue = orthoNullValue; } 
+                else { toAccValue += belowScene.vars.value.accValue; }
                 
                 toScene.vars.value.accValue = toAccValue;
             }
@@ -31410,17 +31406,10 @@ def
             toScene.isSingle = false;
         }
         
-        function createIntermediateScene(
-                     seriesScene, 
-                     fromScene, 
-                     toScene, 
-                     toChildIndex,
-                     belowScene){
+        function createIntermediateScene(seriesScene, fromScene, toScene, toChildIndex, belowScene) {
             
             var interIsNull = fromScene.isNull || toScene.isNull;
-            if(interIsNull && !this.areasVisible) {
-                return null;
-            }
+            if(interIsNull && !this.areasVisible) { return null; }
             
             var interValue, interAccValue, interBasePosition;
                 
@@ -31504,9 +31493,7 @@ def
                 
                 // Don't remove the intermediate dot before the 1st non-null dot
                 siblingScene = scene.nextSibling;
-                if(siblingScene && !siblingScene.isNull){
-                    break;
-                }
+                if(siblingScene && !siblingScene.isNull) { break; }
                 
                 seriesScene.removeAt(0);
                 L--;
@@ -31517,9 +31504,7 @@ def
                 
                 // Don't remove the intermediate dot after the last non-null dot
                 siblingScene = scene.previousSibling;
-                if(siblingScene && !siblingScene.isNull){
-                    break;
-                }
+                if(siblingScene && !siblingScene.isNull) { break; }
                 
                 seriesScene.removeAt(L - 1);
                 L--;

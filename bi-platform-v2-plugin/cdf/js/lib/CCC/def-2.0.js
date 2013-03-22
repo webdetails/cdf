@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130321
+//VERSION TRUNK-20130322
 
 var def = (function() {
 
@@ -669,6 +669,14 @@ var def = /** @lends def */{
             }
         
             return args.join(sep);
+        },
+        
+        padRight: function(s, n, p) {
+            if(!s) { s = ''; }
+            if(p == null) { p = ' '; }
+            
+            var k = ~~((n - s.length) / p.length);
+            return k > 0 ? (s + new Array(k + 1).join(p)) : s;
         }
     },
     
