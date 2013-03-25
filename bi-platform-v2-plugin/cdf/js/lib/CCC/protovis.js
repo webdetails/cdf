@@ -10397,7 +10397,6 @@ pv.SvgScene.wedge = function(scenes) {
     e = this.append(e, scenes, i);
   }
   
-
   /*
   // DEBUG BEG
   var mark  = scenes.mark;

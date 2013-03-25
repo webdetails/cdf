@@ -470,7 +470,6 @@ var def = /** @lends def */{
         return f ?
                 keys.map(function(key){ return f.call(ctx, o[key], key); }) :
                 keys.map(function(key){ return o[key]; });
-
     },
     
     scope: function(scopeFun, ctx){
@@ -1106,7 +1105,6 @@ function mixinMany(instance, mixins, protectNativeObject){
             mixin = def.object.as(mixin.prototype || mixin);
             if(mixin){
                 mixinRecursive(instance, mixin, protectNativeObject);
-
             }
         }
     }
@@ -1369,7 +1367,6 @@ def.scope(function(){
         }
     }
     
-
     // TODO: improve this code with indexOf
     function TypeName(full){
         var parts;

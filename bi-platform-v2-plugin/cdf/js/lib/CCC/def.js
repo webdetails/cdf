@@ -1,5 +1,4 @@
 pen.define("cdf/lib/CCC/def", function(){
-
 /** @private */
 var arraySlice = Array.prototype.slice;
 
@@ -1641,7 +1640,6 @@ def.type('Map')
 });
 
 // --------------------
-
 
 def.html = {
     // TODO: lousy multipass implementation!

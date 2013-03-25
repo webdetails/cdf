@@ -104,7 +104,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
         if (i == 0) {
           firstVal = value;
         }
-        if (jQuery.inArray( value, currentValArray) > -1) {
+        if (jQuery.inArray(""+ value, currentValArray.map(function (v) {return "" + v;})) > -1) {
           currentIsValid = true;
         }
         selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
@@ -301,13 +301,16 @@ var DateRangeInputComponent = BaseComponent.extend({
         changed = closed = false;
       }
     };
+
+    var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
+
     $(function(){
       $("#" + myself.htmlObject + " input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
         latestDate: latestDate,
-        dateFormat: 'yy-mm-dd',
+        dateFormat: format,
         onOpen: function() {
           changed = closed = false;
           myself.startValue = null;
