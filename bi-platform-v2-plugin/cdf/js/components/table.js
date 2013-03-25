@@ -352,12 +352,10 @@ var TableComponent = UnmanagedComponent.extend({
         state.target = target;
 
         
-        if ( myself.expandOnClick && 
-             (typeof cd.selectExpand != 'function' || cd.selectExpand(state) ) ) {
+        if ( myself.expandOnClick ) {
         	myself.handleExpandOnClick(state);
         }
-        if ( cd.clickAction && 
-             (typeof cd.selectClickAction != 'function' || cd.selectClickAction(state) ) ){
+        if ( cd.clickAction  ){
 	        cd.clickAction.call(myself,state);
         }
       }
