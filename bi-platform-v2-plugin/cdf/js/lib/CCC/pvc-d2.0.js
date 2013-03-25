@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130322
+//VERSION TRUNK-20130325
 
 var pvc = (function(def, pv) {
 
@@ -4038,9 +4038,9 @@ function compType_dimensionRolesChanged(dimType) {
  * 
  * @class A complex type project is a work in progress set of dimension specifications.
  */
-def.type('pvc.data.ComplexTypeProject')
-.init(
-function(dimGroupSpecs){
+def
+.type('pvc.data.ComplexTypeProject')
+.init(function(dimGroupSpecs) {
     this._dims = {};
     this._dimList = [];
     this._dimGroupsDims = {};
@@ -4049,48 +4049,43 @@ function(dimGroupSpecs){
     this._calcList = [];
 })
 .add(/** @lends pvc.data.ComplexTypeProject# */{
-    _ensureDim: function(name){
+    _ensureDim: function(name, spec) {
         /*jshint expr:true*/
         name || def.fail.argumentInvalid('name', "Invalid dimension name '{0}'.", [name]);
         
         var info = def.getOwn(this._dims, name);
-        if(!info){
-            info = this._dims[name] = this._createDim(name);
+        if(!info) {
+            info = this._dims[name] = this._createDim(name, spec);
             
             this._dimList.push(info);
             
             var groupDimsNames = def.array.lazy(this._dimGroupsDims, info.groupName);
             // TODO: this sorting is lexicographic but should be numeric
             def.array.insert(groupDimsNames, name, def.compare);
+        } else if(spec) {
+            def.setUDefaults(info.spec, spec);
         }
         
         return info;
     },
     
-    hasDim: function(name){
-        return def.hasOwn(this._dims, name);
-    },
+    hasDim: function(name) { return def.hasOwn(this._dims, name); },
     
-    setDim: function(name, spec){
+    setDim: function(name, spec) {
         var _ = this._ensureDim(name).spec;
-        if(spec){
-            def.copy(_, spec);
-        }
-        
+        if(spec) { def.copy(_, spec); }
         return this;
     },
     
-    setDimDefaults: function(name, spec){
+    setDimDefaults: function(name, spec) {
         def.setUDefaults(this._ensureDim(name).spec, spec);
         return this;
     },
     
-    _createDim: function(name, spec){
+    _createDim: function(name, spec) {
         var dimGroupName = pvc.data.DimensionType.dimensionGroupName(name);
         var dimGroupSpec = this._dimGroupSpecs[dimGroupName];
-        if(dimGroupSpec) {
-            spec = def.create(dimGroupSpec, spec /* Can be null */); 
-        }
+        if(dimGroupSpec) { spec = def.create(dimGroupSpec, spec /* Can be null */); }
         return {
             name: name,
             groupName: dimGroupName,
@@ -4098,68 +4093,59 @@ function(dimGroupSpecs){
         };
     },
     
-    readDim: function(name){
-        var info = this._ensureDim(name);
-        if(info.isRead){
+    readDim: function(name, spec) {
+        var info = this._ensureDim(name, spec);
+        if(info.isRead) {
             throw def.error.operationInvalid("Dimension '{0}' already is the target of a reader.", [name]);
         }
-        if(info.isCalc){
+        if(info.isCalc) {
             throw def.error.operationInvalid("Dimension '{0}' is being calculated, so it cannot be the target of a reader.", [name]);
         }
         
         info.isRead = true;
     },
     
-    calcDim: function(name){
-        var info = this._ensureDim(name);
-        if(info.isCalc){
+    calcDim: function(name, spec) {
+        var info = this._ensureDim(name, spec);
+        if(info.isCalc) {
             throw def.error.operationInvalid("Dimension '{0}' already is being calculated.", [name]);
         }
-        if(info.isRead){
+        if(info.isRead) {
             throw def.error.operationInvalid("Dimension '{0}' is the target of a reader, so it cannot be calculated.", [name]);
         }
         
         info.isCalc = true;
     },
     
-    isReadOrCalc: function(name){
-        if(name){
+    isReadOrCalc: function(name) {
+        if(name) {
             var info = def.getOwn(this._dims, name);
-            if(info){
-                return info.isRead || info.isCalc;
-            }
+            if(info) { return info.isRead || info.isCalc; }
         }
         
         return false;
     },
     
-    groupDimensionsNames: function(groupDimName){
-        return this._dimGroupsDims[groupDimName];
-    },
+    groupDimensionsNames: function(groupDimName) { return this._dimGroupsDims[groupDimName]; },
     
-    setCalc: function(calcSpec){
+    setCalc: function(calcSpec) {
         /*jshint expr:true */
         calcSpec || def.fail.argumentRequired('calculations[i]');
         calcSpec.calculation || def.fail.argumentRequired('calculations[i].calculation');
         
         var dimNames = calcSpec.names;
-        if(typeof dimNames === 'string'){
-            dimNames = dimNames.split(/\s*\,\s*/);
-        } else {
-            dimNames = def.array.as(dimNames);
-        }
+        if(typeof dimNames === 'string') { dimNames = dimNames.split(/\s*\,\s*/); } 
+        else                             { dimNames = def.array.as(dimNames);     }
         
-        if(dimNames && dimNames.length){
-            dimNames.forEach(this.calcDim, this);
-        }
+        if(dimNames && dimNames.length) { dimNames.forEach(this.calcDim, this); }
         
         this._calcList.push(calcSpec);
     },
     
-    configureComplexType: function(complexType, translOptions){
+    configureComplexType: function(complexType, translOptions) {
         //var keyArgs = {assertExists: false};
         
-        this._dimList.forEach(function(dimInfo){
+        this._dimList.forEach(function(dimInfo) {
             var dimName = dimInfo.name;
             //if(!complexType.dimensions(dimName, keyArgs)){
             var spec = dimInfo.spec;
@@ -4170,9 +4156,7 @@ function(dimGroupSpecs){
             //} // TODO: else assert has not changed?
         });
         
-        this._calcList.forEach(function(calcSpec){
-            complexType.addCalculation(calcSpec);
-        });
+        this._calcList.forEach(function(calcSpec) { complexType.addCalculation(calcSpec); });
     }
 });
 
@@ -4225,6 +4209,15 @@ def.type('pvc.data.TranslationOper')
     logSource: def.method({isAbstract: true}),
 
     /**
+     * Logs the structure of the virtual item array.
+     */
+    logVItem: def.method({isAbstract: true}),
+    
+    _translType: "Unknown",
+    
+    logTranslatorType: function() { return this._translType + " data source translator"; },
+    
+    /**
      * Obtains the number of fields of the virtual item.
      * <p>
      * The default implementation returns the length of the metadata.
@@ -4238,13 +4231,13 @@ def.type('pvc.data.TranslationOper')
     freeVirtualItemSize: function() { return this.virtualItemSize() - this._userUsedIndexesCount; },
 
     collectFreeDiscreteAndConstinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
-        var itemTypes = this._itemTypes;
+        var itemInfos = this._itemInfos;
         
         def
-        .range(0, itemTypes.length)
+        .range(0, itemInfos.length)
         .each(function(j) {
             if(!this._userUsedIndexes[j]) {
-                if(itemTypes[j] === 1) {
+                if(itemInfos.type[j] === 1) {
                     if(freeMeaIndexes) { freeMeaIndexes.push(j); }
                 } else {
                     if(freeDisIndexes) { freeDisIndexes.push(j); }
@@ -4265,30 +4258,26 @@ def.type('pvc.data.TranslationOper')
         dimReaderSpec || def.fail.argumentRequired('readerSpec');
 
         var dimNames;
-        if(typeof dimReaderSpec === 'string'){
-            dimNames = dimReaderSpec;
-        } else {
-            dimNames = dimReaderSpec.names;
-        }
+        if(def.string.is(dimReaderSpec)) { dimNames = dimReaderSpec;       }
+        else                             { dimNames = dimReaderSpec.names; }
         
-        if(typeof dimNames === 'string'){
-            dimNames = dimNames.split(/\s*\,\s*/);
-        } else {
-            dimNames = def.array.as(dimNames);
-        }
+        if(def.string.is(dimNames)) { dimNames = dimNames.split(/\s*\,\s*/); } 
+        else                        { dimNames = def.array.as(dimNames);     }
         
         // Consumed/Reserved virtual item indexes
         var indexes = def.array.as(dimReaderSpec.indexes);
-        if(indexes) {
-            indexes.forEach(this._userUseIndex, this);
-        }
+        if(indexes) { indexes.forEach(this._userUseIndex, this); }
         
         var hasDims = !!(dimNames && dimNames.length);
         var reader = dimReaderSpec.reader;
         if(!reader) {
-            if(hasDims){
-                return this._userCreateReaders(dimNames, indexes); // -> indexes, possibly expanded
-            } // else a reader that only serves to exclude indexes
+            // -> indexes, possibly expanded
+            if(hasDims) { return this._userCreateReaders(dimNames, indexes); }
+            // else a reader that only serves to exclude indexes
+            if(indexes) {
+                // Mark index as being excluded
+                indexes.forEach(function(index) { this._userIndexesToSingleDim[index] = null; }, this);
+            }
         } else {
             hasDims || def.fail.argumentRequired('reader.names', "Required argument when a reader function is specified.");
             
@@ -4312,14 +4301,12 @@ def.type('pvc.data.TranslationOper')
      * @type undefined
      * @virtual
      */
-    configureType: function(){
-        this._configureTypeCore();
-    },
+    configureType: function() { this._configureTypeCore(); },
     
     /** @abstract */
     _configureTypeCore: def.method({isAbstract: true}),
     
-    _initType: function(){
+    _initType: function() {
         this._userDimsReaders = [];
         this._userDimsReadersByDim = {};
         
@@ -4328,28 +4315,30 @@ def.type('pvc.data.TranslationOper')
         this._userUsedIndexes = {};
         this._userUsedIndexesCount = 0;
         
+        // Indexes reserved for a single dimension or (null)
+        this._userIndexesToSingleDim = [];
+        
         // -------------
         
         var userDimReaders = this.options.readers;
-        if(userDimReaders) {
-            userDimReaders.forEach(this.defReader, this);
-        }
+        if(userDimReaders) { userDimReaders.forEach(this.defReader, this); }
 
         var multiChartIndexes = pvc.parseDistinctIndexArray(this.options.multiChartIndexes);
         if(multiChartIndexes) {
-            this._multiChartIndexes = this.defReader({names: 'multiChart', indexes: multiChartIndexes });
+            this._multiChartIndexes = 
+                this.defReader({names: 'multiChart', indexes: multiChartIndexes });
         }
     },
 
-    _userUseIndex: function(index){
+    _userUseIndex: function(index) {
         index = +index; // to number
 
-        /*jshint expr:true */
-        (index >= 0) || def.fail.argumentInvalid('index', "Invalid reader index: '{0}'.", [index]);
+        if(index < 0) { throw def.error.argumentInvalid('index', "Invalid reader index: '{0}'.", [index]); }
 
-        !def.hasOwn(this._userUsedIndexes, index) ||
-            def.fail.argumentInvalid('index', "Virtual item index '{0}' is already assigned.", [index]);
-
+        if(def.hasOwn(this._userUsedIndexes, index)) {
+            throw def.error.argumentInvalid('index', "Virtual item index '{0}' is already assigned.", [index]);
+        }
+        
         this._userUsedIndexes[index] = true;
         this._userUsedIndexesCount++;
         this._userItem[index] = true;
@@ -4357,14 +4346,12 @@ def.type('pvc.data.TranslationOper')
         return index;
     },
 
-    _userCreateReaders: function(dimNames, indexes){
-        if(!indexes){
+    _userCreateReaders: function(dimNames, indexes) {
+        if(!indexes) {
             indexes = [];
         } else {
             // Convert indexes to number
-            indexes.forEach(function(index, j){
-                indexes[j] = +index;
-            });
+            indexes.forEach(function(index, j) { indexes[j] = +index; });
         }
 
         // Distribute indexes to names, from left to right
@@ -4378,22 +4365,24 @@ def.type('pvc.data.TranslationOper')
         if(N > I) {
             // Pad indexes
             var nextIndex = I > 0 ? (indexes[I - 1] + 1) : 0;
-            do{
+            do {
                 nextIndex = this._nextAvailableItemIndex(nextIndex);
                 indexes[I] = nextIndex;
                 this._userUseIndex(nextIndex);
-
                 I++;
-            }while(N > I);
+            } while(N > I);
         }
 
         // If they match, it's one-one name <-- index
         var L = (I === N) ? N : (N - 1);
-
+        var index;
         // The first N-1 names get the first N-1 indexes
         for(var n = 0 ; n < L ; n++) {
             dimName = dimNames[n];
-            this._userRead(this._propGet(dimName, indexes[n]), dimName);
+            index = indexes[n];
+            this._userIndexesToSingleDim[index] = dimName;
+            
+            this._userRead(this._propGet(dimName, index), dimName);
         }
 
         // The last name is the dimension group name that gets all remaining indexes
@@ -4406,21 +4395,21 @@ def.type('pvc.data.TranslationOper')
 
             for(var i = L ; i < I ; i++, level++) {
                 dimName = pvc.buildIndexedId(groupName, level);
-                this._userRead(this._propGet(dimName, indexes[i]), dimName);
+                index = indexes[i];
+                this._userIndexesToSingleDim[index] = dimName;
+                this._userRead(this._propGet(dimName, index), dimName);
             }
         }
         
         return indexes;
     },
 
-    _userRead: function(reader, dimNames){
+    _userRead: function(reader, dimNames) {
         /*jshint expr:true */
         def.fun.is(reader) || def.fail.argumentInvalid('reader', "Reader must be a function.");
         
-        if(def.array.is(dimNames)){
-            dimNames.forEach(function(name){
-                this._readDim(name, reader);
-            }, this);
+        if(def.array.is(dimNames)) {
+            dimNames.forEach(function(name) { this._readDim(name, reader); }, this);
         } else {
             this._readDim(dimNames, reader);
         }
@@ -4428,8 +4417,19 @@ def.type('pvc.data.TranslationOper')
         this._userDimsReaders.push(reader);
     },
 
-    _readDim: function(name, reader){
-        this.complexTypeProj.readDim(name);
+    _readDim: function(name, reader) {
+        var info, spec;
+        var index = this._userIndexesToSingleDim.indexOf(name);
+        if(index >= 0) {
+            info = this._itemInfos[index];
+            if(info) {
+                spec = { label: info.label || info.name };
+                if(info.type != null) {
+                    spec.valueType = info.type === 0 ? /*Any*/null : Number;
+                }
+            }
+        }
+        this.complexTypeProj.readDim(name, spec);
         this._userDimsReadersByDim[name] = reader;
     },
     
@@ -4450,7 +4450,7 @@ def.type('pvc.data.TranslationOper')
      * 
      * @returns {def.Query} An enumerable of {@link pvc.data.Atom[]}
      */
-    execute: function(data){
+    execute: function(data) {
         this.data = data;
         
         return this._executeCore();
@@ -4472,13 +4472,11 @@ def.type('pvc.data.TranslationOper')
      * @returns {def.Query} An enumerable of {@link pvc.data.Atom[]}
      * @virtual
      */
-    _executeCore: function(){
+    _executeCore: function() {
         var dimsReaders = this._getDimensionsReaders();
         
         return def.query(this._getItems())
-                  .select(function(item){
-                      return this._readItem(item, dimsReaders);
-                  }, this);
+                  .select(function(item) { return this._readItem(item, dimsReaders); }, this);
     },
     
     /**
@@ -4491,9 +4489,7 @@ def.type('pvc.data.TranslationOper')
      * 
      * @type def.Query
      */
-    _getItems: function(){
-        return this.source;
-    },
+    _getItems: function() { return this.source; },
     
     /**
      * Obtains the dimensions readers array (virtual).
@@ -4515,9 +4511,7 @@ def.type('pvc.data.TranslationOper')
      * @type function[]
      * @virtual
      */
-    _getDimensionsReaders: function(){
-        return this._userDimsReaders;
-    },
+    _getDimensionsReaders: function() { return this._userDimsReaders; },
     
     /**
      * Applies all the specified dimensions reader functions to an item 
@@ -4539,6 +4533,8 @@ def.type('pvc.data.TranslationOper')
                 this._logItemCount++;
             } else {
                 pvc.log('...');
+                
+                // Stop logging vitems
                 logItem = this._logItems = false;
             }
         }
@@ -4554,10 +4550,11 @@ def.type('pvc.data.TranslationOper')
         }
         
         if(logItem) {
+            // Log read names/values
             var atoms = {};
-            for(var dimName in valuesByDimName){
+            for(var dimName in valuesByDimName) {
                 var atom = valuesByDimName[dimName];
-                if(def.object.is(atom)){
+                if(def.object.is(atom)) {
                     atom = ('v' in atom) ? atom.v : ('value' in atom) ? atom.value : '...';
                 }
                 
@@ -4583,51 +4580,17 @@ def.type('pvc.data.TranslationOper')
      */
     _propGet: function(dimName, prop) {
         
-        function propGet(item, atoms){
-            atoms[dimName] = item[prop];
-        }
+        function propGet(item, atoms) { atoms[dimName] = item[prop]; }
         
         return propGet;
     },
-    
-    /**
-     * Given a dimension name and a raw value of that dimension,
-     * creates a dimensions reader that returns the corresponding atom,
-     * regardless of the source item supplied to it (protected).
-     * 
-     * @param {string} dimName The name of the dimension on which to intern <i>constRawValue</i>.
-     * @param {string} constRawValue The raw value.
-     * 
-     * @param {object} [keyArgs] Keyword arguments. 
-     * @param {boolean} [keyArgs.ensureDim=true] Creates a dimension with the specified name, with default options, if one does not yet exist.
-     * 
-     * @type function
-     */
-    _constGet: function(dimName, constRawValue, keyArgs) {
-        var me = this,
-            constAtom;
-        
-        function constGet(item, atoms) {
-            atoms[dimName] = 
-                    constAtom || 
-                    (constAtom = me.data.dimensions(dimName).intern(constRawValue));
-        }
 
-        return constGet;
-    },
-    
     // TODO: docs
-    _nextAvailableItemIndex: function(index, L){
-        if(index == null) {
-            index = 0;
-        }
-        if(L == null){
-            L = Infinity;
-        }
+    _nextAvailableItemIndex: function(index, L) {
+        if(index == null) { index = 0;    }
+        if(L     == null) { L = Infinity; }
 
-        while(index < L && def.hasOwn(this._userItem, index)) {
-            index++;
-        }
+        while(index < L && def.hasOwn(this._userItem, index)) { index++; }
         
         return index < L ? index : -1;
     },
@@ -4694,20 +4657,20 @@ def.type('pvc.data.TranslationOper')
 def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
 .add(/** @lends pvc.data.MatrixTranslationOper# */{
     
-    _initType: function(){
+    _initType: function() {
         this.J = this.metadata.length;
         this.I = this.source.length;
         
         this._processMetadata();
-        
-        if(pvc.debug >= 3) { this.logVItem(); }
         
         this.base();
     },
     
     _knownContinuousColTypes: {'numeric': 1, 'number': 1, 'integer': 1},
     
-    _processMetadata: function(){
+    _processMetadata: function() {
+        // Confirm metadata column types.
+        
         // Get the indexes of columns which are 
         // not stated as continuous (numeric..)
         // In these, 
@@ -4719,17 +4682,16 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
             def
             .query(this.metadata)
             // Fix indexes of colDefs
-            .select(function(colDef, colIndex){
+            .select(function(colDef, colIndex) {
                 // Ensure colIndex is trustable
                 colDef.colIndex = colIndex;
                 return colDef; 
              })
-            .where(function(colDef){
+            .where(function(colDef) {
                 var colType = colDef.colType;
-                return !colType ||
-                       knownContinColTypes[colType.toLowerCase()] !== 1;
+                return !colType || knownContinColTypes[colType.toLowerCase()] !== 1;
             })
-            .select(function(colDef){ return colDef.colIndex; })
+            .select(function(colDef) { return colDef.colIndex; })
             .array();
         
         // 1 - continuous (number, date)
@@ -4744,13 +4706,13 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         // Number of columns remaining to confirm data type
         var J = columns.length;
         
-        for(var i = 0 ; i < I && J > 0 ; i++){
+        for(var i = 0 ; i < I && J > 0 ; i++) {
             var row = source[i];
             var m = 0;
-            while(m < J){
+            while(m < J) {
                 var j = columns[m];
                 var value = row[j];
-                if(value != null){
+                if(value != null) {
                     columnTypes[j] = this._getSourceValueType(value);
                     
                     columns.splice(m, 1);
@@ -4763,23 +4725,29 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         
         this._columnTypes = columnTypes;
     },
-
+    
+    _buildItemInfoFromMetadata: function(index) {
+        var meta = this.metadata[index];
+        return {
+            type:  this._columnTypes[index],
+            name:  meta.colName,
+            label: meta.colLabel
+        };
+    },
+    
     // 1 - continuous (number, date)
     // 0 - discrete   (anything else)
     /** @static */
-    _getSourceValueType: function(value){
-        switch(typeof value){
+    _getSourceValueType: function(value) {
+        switch(typeof value) {
             case 'number': return 1;
-            case 'object':
-                if(value instanceof Date){
-                    return 1;
-                }
+            case 'object': if(value instanceof Date) { return 1; }
         }
         
         return 0; // discrete
     },
     
-    logSource: function(){
+    logSource: function() {
         var out = [
             "DATA SOURCE SUMMARY",
             pvc.logSeparator,
@@ -4789,20 +4757,18 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         def
         .query(this.source)
         .take(10)
-        .each(function(row, index){
+        .each(function(row, index) {
             out.push("  [" + index + "] " + pvc.stringify(row));
         });
         
-        if(this.I > 10){
-            out.push('  ...');
-        }
+        if(this.I > 10) { out.push('  ...'); }
         
         out.push("COLS (" + this.J + ")");
         
         var colTypes = this._columnTypes;
         this
         .metadata
-        .forEach(function(col, j){
+        .forEach(function(col, j) {
             out.push(
                 "  [" + j + "] " + 
                 "'" + col.colName + "' (" +
@@ -4814,50 +4780,54 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
         
         out.push("");
         
-        pvc.log(out.join('\n'));
+        return out.join('\n');
     },
     
-    logVItem: def.method({isAbstract: true}),
-    
-    _logVItem: function(translType, kindList, kindScope) {
-        pvc.log(translType + " data source translator");
-                
+    _logVItem: function(kindList, kindScope) {
         var out = ["VIRTUAL ITEM ARRAY", pvc.logSeparator];
+        var maxName  = 4;// length of column header
+        var maxLabel = 5;// idem
+        var maxDim   = 9;// idem
+        this._itemInfos.forEach(function(info, index) {
+            maxName  = Math.max(maxName , (info.name  ||'').length);
+            maxLabel = Math.max(maxLabel, (info.label ||'').length);
+            var dimName = this._userIndexesToSingleDim[index];
+            if(dimName) { maxDim = Math.max(maxDim, dimName.length); }
+        }, this);
+        
+        // TODO: would be better off with a generic ASCII table layout code...
         
         // Headers
-        out.push("Index | Kind | Type", 
-                 "------+------+--------");
+        out.push("Index | Kind | Type   | " + 
+                 def.string.padRight("Name",  maxName ) + " | " + 
+                 def.string.padRight("Label", maxLabel) + " > " + 
+                 "Dimension",
+                 
+                 "------+------+--------+-" + 
+                 def.string.padRight("", maxName,  "-") + "-+-" +
+                 def.string.padRight("", maxLabel, "-") + "-+-" +
+                 def.string.padRight("", maxDim,   "-") + "-");
+
         var index = 0;
         kindList.forEach(function(kind) {
             for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
-                var type = this._columnTypes[index];
+                var info = this._itemInfos[index];
+                var dimName = this._userIndexesToSingleDim[index];
+                if(dimName === undefined) { dimName = ''; }
                 out.push(
                     " " + index + "    | " + 
                           kind  + "    | " +
-                    (type ? 'number' : 'string'));
+                          (info.type ? 'number' : 'string') + " | " +
+                          def.string.padRight(info.name  || '', maxName ) + " | " +
+                          def.string.padRight(info.label || '', maxLabel) + " | " +
+                          dimName);
                 index++;
             }
         }, this);
         
         out.push("");
         
-        /*
-        var kinds   = [];
-        var indexes = [];
-        kindList
-            .forEach(function(kind) {
-                for(var i = 0, L = kindScope[kind] ; i < L ; i++) {
-                    indexes.push(indexes.length);
-                    kinds  .push(kind);
-                }
-            });
-        
-        out.push("\tcount:   " + pvc.stringify(kindScope));
-        out.push("\tkind:    [" + kinds  .join(" ") + "]");
-        out.push("\tindexes: [" + indexes.join(" ") + "]");
-        */
-        
-        pvc.log(out.join("\n"));
+        return out.join("\n");
     },
     
     /**
@@ -4876,30 +4846,28 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
      * @private
      * @protected
      */
-    _createPlot2SeriesKeySet: function(plot2SeriesIndexes, seriesKeys){
+    _createPlot2SeriesKeySet: function(plot2SeriesIndexes, seriesKeys) {
         var plot2SeriesKeySet = null,
             seriesCount = seriesKeys.length;
-        def.query(plot2SeriesIndexes).each(function(indexText){
+        def.query(plot2SeriesIndexes).each(function(indexText) {
             // Validate
             var seriesIndex = +indexText; // + -> convert to number
-            if(isNaN(seriesIndex)){
+            if(isNaN(seriesIndex)) {
                 throw def.error.argumentInvalid('plot2SeriesIndexes', "Element is not a number '{0}'.", [indexText]);
             }
 
-            if(seriesIndex < 0){
-                if(seriesIndex <= -seriesCount){
+            if(seriesIndex < 0) {
+                if(seriesIndex <= -seriesCount) {
                     throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
                 }
 
                 seriesIndex = seriesCount + seriesIndex;
-            } else if(seriesIndex >= seriesCount){
+            } else if(seriesIndex >= seriesCount) {
                 throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
             }
 
             // Set
-            if(!plot2SeriesKeySet){
-                plot2SeriesKeySet = {};
-            }
+            if(!plot2SeriesKeySet) { plot2SeriesKeySet = {}; }
             
             plot2SeriesKeySet[seriesKeys[seriesIndex]] = true;
         });
@@ -4929,20 +4897,17 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
                 plot2SeriesKeySet = calcAxis2SeriesKeySet();
                 dataPartDimension = me.data.dimensions(dataPartDimName);
 
-                if(pvc.debug >=3 && plot2SeriesKeySet){
-                    pvc.log("Second axis series values: " +
-                        pvc.stringify(def.keys(plot2SeriesKeySet)));
+                if(pvc.debug >=3 && plot2SeriesKeySet) {
+                    pvc.log("Second axis series values: " + pvc.stringify(def.keys(plot2SeriesKeySet)));
                 }
             }
 
             var partAtom;
             seriesReader(item, outAtomsSeries);
             var series = outAtomsSeries.series;
-            if(series != null && series.v != null){
-                series = series.v;
-            }
+            if(series != null && series.v != null) { series = series.v; }
             
-            if(def.hasOwn(plot2SeriesKeySet, series)){
+            if(def.hasOwn(plot2SeriesKeySet, series)) {
                 partAtom = part2Atom || (part2Atom = dataPartDimension.intern("1"));
             } else {
                 partAtom = part1Atom || (part1Atom = dataPartDimension.intern("0"));
@@ -5124,6 +5089,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      *  virtual-item-component * <-> * dimension + <-> 1 dimensions reader
      */
 
+    _translType: "Crosstab",
+    
     /**
      * Obtains the number of fields of the virtual item.
      * @type number
@@ -5136,10 +5103,8 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * @returns {def.Query} An enumerable of {@link map(string any)}
      * @override
      */
-    _executeCore: function(){
-        if(!this.metadata.length){
-            return def.query(); 
-        }
+    _executeCore: function() {
+        if(!this.metadata.length) { return def.query(); }
         
         var dimsReaders = this._getDimensionsReaders();
         
@@ -5148,8 +5113,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         
         var item  = new Array(this.virtualItemSize()),
             itemCrossGroupIndex = this._itemCrossGroupIndex,
-            me = this
-            ;
+            me = this;
         
         // Updates VITEM
         // . <- source = line[0..R]
@@ -5160,9 +5124,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 sourceIndex = 0,
                 depth       = me[crossGroupId];
             
-            while((depth--) > 0) {
-                item[itemIndex++] = source[sourceIndex++];
-            }
+            while((depth--) > 0) { item[itemIndex++] = source[sourceIndex++]; }
         }
         
         // . <-  line[colGroupIndexes[0..M]]
@@ -5172,7 +5134,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             var cgIndexes = me._colGroupsIndexes[cg];
             var depth     = me.M;
             
-            for(var i = 0 ; i < depth ; i++){
+            for(var i = 0 ; i < depth ; i++) {
                 var lineIndex = cgIndexes[i];
                 item[itemIndex++] = lineIndex != null ? line[lineIndex] : null;
             }
@@ -5180,11 +5142,11 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         
         // ----------------
 
-        function expandLine(line/*, i*/){
+        function expandLine(line/*, i*/) {
             updateVItemCrossGroup('R', line);
             
             return def.query(this._colGroups)
-                .select(function(colGroup, cg){
+                .select(function(colGroup, cg) {
                     // Update ITEM
                     updateVItemCrossGroup('C', colGroup);
                     updateVItemMeasure(line, cg);
@@ -5198,11 +5160,10 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 }, this);
         }
         
-        return def.query(this._lines)
-                  .selectMany(expandLine, this);
+        return def.query(this._lines).selectMany(expandLine, this);
     },
     
-    _processMetadata: function(){
+    _processMetadata: function() {
         
         this.base();
         
@@ -5216,33 +5177,33 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         /* Determine R, C and M */
         
         // Default values
-        this.R = 1;
+        var R = this.R = 1;
         this.C = 1;
         this.M = 1;
         
         this.measuresDirection = null;
         
         var colNames;
-        if(this.options.seriesInRows){
-            colNames = this.metadata.map(function(d){ return d.colName; });
-        } else if(this.options.compatVersion <= 1){
-            colNames = this.metadata.map(function(d){ return {v: d.colName}; });
+        var metadata = this.metadata;
+        if(this.options.seriesInRows) {
+            colNames = metadata.map(function(d) { return d.colName; });
+        } else if(this.options.compatVersion <= 1) {
+            colNames = metadata.map(function(d) { return {v: d.colName}; });
         } else {
-            colNames = this.metadata.map(function(d){ return {v: d.colName, f: d.colLabel }; });
+            // Use the column label, if any, as the "column" value's format.
+            colNames = metadata.map(function(d) { return {v: d.colName, f: d.colLabel}; });
         }
-        
-        // For each cross group,
-        // an array with the value types of each of its columns 
-        // C|R|M -> [0|1, ...]
-        // 1 - continuous (number, date)
-        // 0 - discrete   (anything else)
-        var itemCrossGroupTypes = this._itemCrossGroupTypes = {
-                /*
-                'C': [],
-                'R': [],
-                'M': []
-                */
-            };
+         
+        /*
+         * For each cross group,
+         * an array with the item info of each of its columns
+         * {
+         *   'C': [ {name: , type: , label: } ],
+         *   'R': [],
+         *   'M': []
+         * }
+        */
+        var itemCrossGroupInfos = this._itemCrossGroupInfos = {};
         
         // --------------
         // * isMultiValued
@@ -5251,46 +5212,50 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         // * [categoriesCount = 1]
         
         // ~~~~ R*
-        
+
         if(!this.options.isMultiValued) {
             //    | C
             // ---|---
             // R* | M
             
-            this.R = this._getCategoriesCount();
+            R = this.R = this._getCategoriesCount();
             
             // C = 1
             // M = 1
             
-            this._colGroups = colNames.slice(this.R);
+            this._colGroups = colNames.slice(R);
             this._colGroupsIndexes = new Array(this._colGroups.length);
             
             // To Array
             this._colGroups.forEach(function(colGroup, cg){
                 this._colGroups[cg] = [colGroup];
-                this._colGroupsIndexes[cg] = [this.R + cg]; // all the same
+                this._colGroupsIndexes[cg] = [R + cg]; // all the same
             }, this);
 
-            // R is set below 
-            itemCrossGroupTypes.C = [0]; // 1 discrete column
-            itemCrossGroupTypes.M = [this._columnTypes[this.R]];
+            // R cross group is set below
+            
+            // Assume series are discrete (there's no metadata about them)
+            // No name or label info.
+            itemCrossGroupInfos.C = [{type: 0}];
+            
+            // The column labels are series labels. Only colType is relevant.
+            itemCrossGroupInfos.M = [{type: this._columnTypes[R]}];
         } else {
             /* MULTI-VALUED */
             
             var measuresInColumns = def.get(this.options, 'measuresInColumns', true);
             if(measuresInColumns || this.options.measuresIndex == null) {
                 
-                this.R = this._getCategoriesCount();
+                R = this.R = this._getCategoriesCount();
 
                 // First R columns are from row space
-                var encodedColGroups = colNames.slice(this.R);
+                var encodedColGroups = colNames.slice(R);
                 
                 // Remaining are column and measure types
                 var L = encodedColGroups.length;
 
                 // Any results in column direction...
                 if(L > 0) {
-                    
                     if(!measuresInColumns) {
                         // ~~~~ C*  M
                         
@@ -5307,8 +5272,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                             this._colGroupsIndexes[cg] = [this.R + cg]; // all the same
                         }, this);
                         
-                        itemCrossGroupTypes.M = [this._columnTypes[this.R]];
-                        
+                        itemCrossGroupInfos.M = [this._buildItemInfoFromMetadata(R)];
                     } else {
                         // ~~~~ C* M*
                         
@@ -5322,22 +5286,25 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                         //   _colGroups, 
                         //   _colGroupsIndexes and 
                         //   M
-                        //  _itemCrossGroupTypes.M
+                        //  itemCrossGroupInfos.M
                         this._processEncodedColGroups(encodedColGroups);
                     }
 
                     this.C = this._colGroups[0].length; // may be 0!
                     
-                    itemCrossGroupTypes.C = def.array.create(this.C, 0); // C discrete columns
+                    // C discrete columns
+                    itemCrossGroupInfos.C = 
+                        def.range(0, this.C).select(function() { return {type: 0}; }).array();
                     
                 } else {
                     this.C = this.M = 0;
-                    itemCrossGroupTypes.M = itemCrossGroupTypes.C = [];
+                    itemCrossGroupInfos.M = [];
+                    itemCrossGroupInfos.C = [];
                 }
 
             } else {
                 // TODO: complete this
-                // TODO: itemCrossGroupTypes
+                // TODO: itemCrossGroupInfos
                 
                 /* MEASURES IN ROWS */
                 
@@ -5352,9 +5319,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 this.R = +this.options.measuresIndex;
 
                 var measuresCount = this.options.measuresCount;
-                if (measuresCount == null) {
-                    measuresCount = 1;
-                }
+                if (measuresCount == null) { measuresCount = 1; }
 
                 // TODO: >= 1 check
                 this.M = measuresCount;
@@ -5371,11 +5336,12 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
         
         // First R columns are from row space
-        itemCrossGroupTypes.R = this._columnTypes.slice(0, this.R);
-
+        itemCrossGroupInfos.R =
+            def.range(0, this.R).select(this._buildItemInfoFromMetadata, this).array();
+        
         // ----------------
         // The index at which the first component of
-        // each cross group is placed in virtual item
+        // each cross group is placed in **virtual item**
         
         var seriesInRows = this.options.seriesInRows;
         
@@ -5385,12 +5351,12 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             'M': this.C + this.R
         };
         
-        var itemTypes = this._itemTypes = new Array(this.virtualItemSize()); // R + C + M
+        var itemInfos = this._itemInfos = new Array(this.virtualItemSize()); // R + C + M
         
         def.eachOwn(itemGroupIndex, function(groupStartIndex, crossGroup){
-            itemCrossGroupTypes[crossGroup]
-            .forEach(function(type, groupIndex){
-                itemTypes[groupStartIndex + groupIndex] = type;
+            itemCrossGroupInfos[crossGroup]
+            .forEach(function(info, groupIndex){
+                itemInfos[groupStartIndex + groupIndex] = info;
             });
         });
         
@@ -5410,22 +5376,20 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
     },
     
     logVItem: function() {
-        this._logVItem("Crosstab", ['R', 'C', 'M'], {R: this.R, C: this.C, M: this.M});
+        return this._logVItem(['C', 'R', 'M'], {C: this.C, R: this.R, M: this.M});
     },
 
-    _getCategoriesCount: function(){
+    _getCategoriesCount: function() {
         var R = this.options.categoriesCount;
-        if(R != null && (!isFinite(R) || R < 0)){
-            R = null;
-        }
+        if(R != null && (!isFinite(R) || R < 0)) { R = null; }
         
-        if(R == null){
+        if(R == null) {
             // Number of consecutive discrete columns, from left
             R = def
                 .query(this._columnTypes)
-                .whayl(function(type){ return type === 0; }) // 0 = discrete
+                .whayl(function(type) { return type === 0; }) // 0 = discrete
                 .count();
-            if(!R){
+            if(!R) {
                 // Having no R causes problems 
                 // when categories are continuous
                 // (in MetricDots for example).
@@ -5436,21 +5400,19 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         return R;
     },
     
-    _splitEncodedColGroupCell: function(colGroup){
+    _splitEncodedColGroupCell: function(colGroup) {
         var values = colGroup.v;
         var labels;
         
-        if(values == null){
+        if(values == null) {
             values = [];
         } else {
             values = values.split(this._separator);
             labels = colGroup.f;
-            if(labels){
-                labels = labels.split(this._separator);
-            }
+            if(labels) { labels = labels.split(this._separator); }
         }
 
-        return values.map(function(value, index){
+        return values.map(function(value, index) {
             return {
                 v: value,
                 f: labels && labels[index]
@@ -5479,7 +5441,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * This order is then used to place values in the virtual item.
      * </p>
      */
-    _processEncodedColGroups: function(encodedColGroups){
+    _processEncodedColGroups: function(encodedColGroups) {
         var L = encodedColGroups.length || def.assert("Must have columns"),
             R = this.R,
             colGroups = [],
@@ -5492,23 +5454,23 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
              *
              */
             measuresInfo  = {},
-            measuresInfoList = []
-            ;
+            measuresInfoList = [];
         
-        for(var i = 0 ; i < L ; i++){
+        for(var i = 0 ; i < L ; i++) {
             var colGroupCell = encodedColGroups[i];
             
             var encColGroupValues = colGroupCell.v;
             var encColGroupLabels = colGroupCell.f;
             var sepIndex = encColGroupValues.lastIndexOf(this._separator);
             
-            var meaName, colGroupValues, colGroupLabels;
+            var meaName, meaLabel, colGroupValues, colGroupLabels;
             
             // MeasureName has precedence,
             // so we may end up with no column group value (and C = 0).
-            if(sepIndex < 0){
+            if(sepIndex < 0) {
                 // C = 0
-                meaName = encColGroupValues;
+                meaName  = encColGroupValues;
+                meaLabel = encColGroupLabels;
                 encColGroupValues = '';
                 colGroupValues = [];
             } else {
@@ -5516,22 +5478,22 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 encColGroupValues = encColGroupValues.substring(0, sepIndex);
                 colGroupValues = encColGroupValues.split(this._separator);
 
-                if(encColGroupLabels != null){
+                if(encColGroupLabels != null) {
                     colGroupLabels = encColGroupLabels.split(this._separator);
-                    colGroupLabels.pop(); // measure label
+                    meaLabel = colGroupLabels.pop(); // measure label
                 }
                 
                 /*jshint loopfunc:true */
-                colGroupValues.forEach(function(value, index){
+                colGroupValues.forEach(function(value, index) {
                     var label = colGroupLabels && colGroupLabels[index];
                     colGroupValues[index] = {v: value, f: label};
                 });
             }
 
             // New column group?
-            if(!currColGroup || currColGroup.encValues !== encColGroupValues){
+            if(!currColGroup || currColGroup.encValues !== encColGroupValues) {
                 currColGroup = {
-                    startIndex:        i,
+                    startIndex:   i,
                     encValues:    encColGroupValues,
                     values:       colGroupValues,
                     measureNames: [meaName]
@@ -5545,12 +5507,15 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             // Check the measure
             var currMeaIndex = (i - currColGroup.startIndex),
                 meaInfo = def.getOwn(measuresInfo, meaName);
-            if(!meaInfo){
+            if(!meaInfo) {
                 measuresInfo[meaName] = meaInfo = {
-                    name: meaName,
+                    name:  meaName,
+                    label: meaLabel,
+                    type:  this._columnTypes[R + i], // Trust the type of the first column where the measure appears
+                    
+                    // More than needed info for CGInfo, but it's ok
                     groupIndex: currMeaIndex,
-                    index: i,
-                    type:  this._columnTypes[R + i] // Trust the type of the first column where the measure appears
+                    index: i
                 };
                 measuresInfoList.push(meaInfo);
             } else if(currMeaIndex > meaInfo.groupIndex) {
@@ -5559,37 +5524,28 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         }
 
         // Sort measures
-        measuresInfoList.sort(function(meaInfoA, meaInfoB){
+        measuresInfoList.sort(function(meaInfoA, meaInfoB) {
             return def.compare(meaInfoA.groupIndex, meaInfoB.groupIndex) ||
-                   def.compare(meaInfoA.index, meaInfoB.index)
-                   ;
+                   def.compare(meaInfoA.index, meaInfoB.index);
         });
 
         // Reassign measure group indexes
-        // Fill measure types
-        var M = measuresInfoList.length;
-        var meaTypes = new Array(M);
-        this._itemCrossGroupTypes.M = meaTypes;
+        measuresInfoList.forEach(function(meaInfoA, index) { meaInfoA.groupIndex = index; });
         
-        measuresInfoList.forEach(function(meaInfoA, index){
-            meaInfoA.groupIndex = index;
-            meaTypes[index] = meaInfoA.type;
-        });
-
         // Publish colgroups and colgroupIndexes, keeping only relevant information
         var CG = colGroups.length,
             colGroupsValues  = new Array(CG),
-            colGroupsIndexes = new Array(CG)
-            ;
+            colGroupsIndexes = new Array(CG),
+            M = measuresInfoList.length;
         
-        colGroups.map(function(colGroup, cg){
+        colGroups.map(function(colGroup, cg) {
             colGroupsValues[cg] = colGroup.values;
             
             var colGroupStartIndex = colGroup.startIndex;
             
             // The index in source *line* where each of the M measures can be read
             var meaIndexes = colGroupsIndexes[cg] = new Array(M);
-            colGroup.measureNames.forEach(function(meaName2, localMeaIndex){
+            colGroup.measureNames.forEach(function(meaName2, localMeaIndex) {
                 // The measure index in VITEM
                 var meaIndex = measuresInfo[meaName2].groupIndex;
                 
@@ -5600,6 +5556,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         
         this._colGroups        = colGroupsValues;
         this._colGroupsIndexes = colGroupsIndexes;
+        this._itemCrossGroupInfos.M = measuresInfoList; 
         this.M = M;
     },
     
@@ -5610,11 +5567,9 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * @type undefined
      * @override
      */
-    configureType: function(){
+    configureType: function() {
         // Map: Dimension Group -> Item cross-groups indexes
-        if(this.measuresDirection === 'rows') {
-            throw def.error.notImplemented();
-        }
+        if(this.measuresDirection === 'rows') { throw def.error.notImplemented(); }
 
         this.base();
     },
@@ -5623,7 +5578,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      * Default cross tab mapping from virtual item to dimensions. 
      * @override 
      */
-    _configureTypeCore: function(){
+    _configureTypeCore: function() {
         var me = this;
         var itemLogicalGroup = me._itemLogicalGroup;
         var itemLogicalGroupIndex = me._itemLogicalGroupIndex;
@@ -5659,26 +5614,20 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         if(dataPartDimName && this.C === 1 && !this.complexTypeProj.isReadOrCalc(dataPartDimName)) {
             // The null test is required because plot2SeriesIndexes can be a number, a string...
             var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-            if(plot2SeriesIndexes != null){
-                var seriesKeys = this._colGroups.map(function(colGroup){
-                    return '' + colGroup[0].v;
-                });
+            if(plot2SeriesIndexes != null) {
+                var seriesKeys = this._colGroups.map(function(colGroup) { return '' + colGroup[0].v; });
                 this._plot2SeriesKeySet = this._createPlot2SeriesKeySet(plot2SeriesIndexes, seriesKeys);
             }
         }
         
-        ['series', 'category', 'value'].forEach(function(dimGroupName){
+        ['series', 'category', 'value'].forEach(function(dimGroupName) {
             var L = itemLogicalGroup[dimGroupName];
-            if(L > 0){
-                add(dimGroupName, 0, L);
-            }
+            if(L > 0) { add(dimGroupName, 0, L); }
         });
         
-        if(dimsReaders) {
-            dimsReaders.forEach(this.defReader, this);
-        }
+        if(dimsReaders) { dimsReaders.forEach(this.defReader, this); }
         
-        if(this._plot2SeriesKeySet){
+        if(this._plot2SeriesKeySet) {
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var calcAxis2SeriesKeySet = def.fun.constant(this._plot2SeriesKeySet);
@@ -5754,13 +5703,16 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
  * It is also possible to specify a single index instead of an array.
  * </p>
  */
-def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
+def
+.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
 .add(/** @lends pvc.data.RelationalTranslationOper# */{
     M: 0, // number of measures
     C: 0, // number of categories
     S: 0, // number of series
     
-    _processMetadata: function(){
+    _translType: "Relational",
+    
+    _processMetadata: function() {
         
         this.base();
     
@@ -5770,23 +5722,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         
         // Split between series and categories
         var C = this.options.categoriesCount;
-        if(C != null && (!isFinite(C) || C < 0)){
-            C = 0;
-        }
+        if(C != null && (!isFinite(C) || C < 0)) { C = 0; }
 
         var S;
         
         // Assuming duplicate valuesColIndexes is not valid
         // (v1 did not make this assumption)
         var valuesColIndexes, M;
-        if(this.options.isMultiValued){
+        if(this.options.isMultiValued) {
             valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, J - 1);
             M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
         
         var D; // discrete count = D = S + C
-        if(M == null){
-            if(J > 0 && J <= 3 && (C == null || C === 1) && S == null){
+        if(M == null) {
+            if(J > 0 && J <= 3 && (C == null || C === 1) && S == null) {
                 // V1 Stability requirement
                 // Measure columns with all values = null,
                 // would be detected as type string,
@@ -5797,22 +5747,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
                 S = J >= 3 ? 1 : 0;
                 D = C + S;
                 
-            } else if(C != null &&  C >= J){
+            } else if(C != null &&  C >= J) {
                 D = J;
                 C = J;
                 S = 0;
                 M = 0;
             } else {
-                // finite C wins over M, and by last S
+                // specified C wins over M, and by last S
                 var Mmax = C != null ? (J - C) : Infinity; // >= 1
                 
                 // colIndex has already been fixed on _processMetadata
+                // 0 = discrete
                 valuesColIndexes = def
                     .query(metadata)
-                    .where(function(colDef, index){
-                        return this._columnTypes[index] !== 0; // 0 = discrete
-                    }, this)
-                    .select(function(colDef){ return colDef.colIndex; })
+                    .where(function(colDef, index) { return this._columnTypes[index] !== 0; }, this)
+                    .select(function(colDef) { return colDef.colIndex; })
                     .take(Mmax)
                     .array()
                     ;
@@ -5821,20 +5770,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        if(D == null){
+        if(D == null) {
             // M wins over C
             D = J - M;
-            if(D === 0){
+            if(D === 0) {
                 S = C = 0;
-            } else if(C != null){
-                if(C > D){
+            } else if(C != null) {
+                if(C > D) {
                     C = D;
                     S = 0;
                 } else {
                     S = D - C;
                 }
             } else {
-                // Distribute between categories and series
+                // "Distribute" between categories and series
+                // Categories have precedence.
                 S = D > 1 ? 1 : 0;
                 C = D - S;
             }
@@ -5842,30 +5792,20 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         
         var seriesInRows = this.options.seriesInRows;
         var colGroupSpecs = [];
-        if(D){
-            if(S && !seriesInRows){
-                colGroupSpecs.push({name: 'S', count: S});
-            }
-            
-            if(C){
-                colGroupSpecs.push({name: 'C', count: C});
-            }
-            
-            if(S && seriesInRows){
-                colGroupSpecs.push({name: 'S', count: S});
-            }
+        if(D) {
+            if(S && !seriesInRows) { colGroupSpecs.push({name: 'S', count: S}); }
+            if(C                 ) { colGroupSpecs.push({name: 'C', count: C}); }
+            if(S &&  seriesInRows) { colGroupSpecs.push({name: 'S', count: S}); }
         }
         
-        if(M){
-            colGroupSpecs.push({name: 'M', count: M});
-        }
+        if(M) { colGroupSpecs.push({name: 'M', count: M}); }
         
         var availableInputIndexes = def.range(0, J).array();
         
         // If valuesColIndexes != null, these are reserved for values
-        if(valuesColIndexes){
+        if(valuesColIndexes) {
             // Remove these indexes from available indexes
-            valuesColIndexes.forEach(function(inputIndex){
+            valuesColIndexes.forEach(function(inputIndex) {
                 availableInputIndexes.splice(inputIndex, 1);
             });
         }
@@ -5873,19 +5813,16 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         // Set the fields with actual number of columns of each group
         // Assign the input indexes of each group (Layout)
         var specsByName = {};
-        colGroupSpecs.forEach(function(groupSpec){
+        colGroupSpecs.forEach(function(groupSpec) {
             var count = groupSpec.count;
             var name  = groupSpec.name;
             
             // Index group by name
             specsByName[name] = groupSpec;
             
-            if(valuesColIndexes && name === 'M'){
-                groupSpec.indexes = valuesColIndexes;
-            } else {
-                groupSpec.indexes = availableInputIndexes.splice(0, count);
-            }
-        }, this);
+            if(valuesColIndexes && name === 'M') { groupSpec.indexes = valuesColIndexes; } 
+            else                                 { groupSpec.indexes = availableInputIndexes.splice(0, count); }
+        });
         
         this.M = M;
         this.S = S;
@@ -5895,28 +5832,21 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
         // that transforms the input into the virtual item "normal form":
         // S* C* M*
         var itemPerm = [];
-        ['S', 'C', 'M'].forEach(function(name){
+        ['S', 'C', 'M'].forEach(function(name) {
             var groupSpec = specsByName[name];
-            if(groupSpec){
-                def.array.append(itemPerm, groupSpec.indexes);
-            }
+            if(groupSpec) { def.array.append(itemPerm, groupSpec.indexes); }
         });
         
-        var colTypes = this._columnTypes;
-        this._itemTypes = itemPerm.map(function(index){ return colTypes[index]; });
+        this._itemInfos = itemPerm.map(this._buildItemInfoFromMetadata, this);
         
         // The start indexes of each column group
-        this._itemCrossGroupIndex = {
-            S: 0,
-            C: this.S, 
-            M: this.S + this.C
-        };
+        this._itemCrossGroupIndex = {S: 0, C: this.S, M: this.S + this.C};
         
         this._itemPerm = itemPerm;
     },
     
     logVItem: function() {
-        this._logVItem("Relational", ['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
+        return this._logVItem(['S', 'C', 'M'], {S: this.S, C: this.C, M: this.M});
     },
     
     /** 
@@ -5951,26 +5881,16 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        if(this.S > 0){
-            add('series', 'S', 0, this.S);
-        }
-        
-        if(this.C > 0){
-            add('category', 'C', 0, this.C);
-        }
-        
-        if(this.M > 0) {
-            add('value', 'M', 0, this.M);
-        }
+        if(this.S > 0) { add('series',   'S', 0, this.S); }
+        if(this.C > 0) { add('category', 'C', 0, this.C); }
+        if(this.M > 0) { add('value',    'M', 0, this.M); }
 
-        if(dimsReaders) {
-            dimsReaders.forEach(this.defReader, this);
-        }
+        if(dimsReaders) { dimsReaders.forEach(this.defReader, this); }
         
         // ----
         // The null test is required because plot2SeriesIndexes can be a number, a string...
         var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-        if(plot2SeriesIndexes != null){
+        if(plot2SeriesIndexes != null) {
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var dataPartDimName = this.options.dataPartDimName;
@@ -5980,15 +5900,13 @@ def.type('pvc.data.RelationalTranslationOper', pvc.data.MatrixTranslationOper)
     },
     
     // Permutes the input rows
-    _executeCore: function(){
+    _executeCore: function() {
         var dimsReaders = this._getDimensionsReaders();
         var permIndexes = this._itemPerm;
         
         return def.query(this._getItems())
-                  .select(function(item){
-                      
+                  .select(function(item) {
                       item = pv.permute(item, permIndexes);
-                      
                       return this._readItem(item, dimsReaders);
                   }, this);
     }
@@ -19864,7 +19782,10 @@ pvc.BaseChart
         var translOptions   = this._createTranslationOptions(dataPartDimName);
         var translation     = this._createTranslation(translOptions);
         
-        if(pvc.debug >= 3) { translation.logSource(); }
+        if(pvc.debug >= 3) {
+            this._log(translation.logSource());
+            this._log(translation.logTranslatorType());
+        }
         
         if(!data) {
             // Now the translation can also configure the type
@@ -19875,6 +19796,10 @@ pvc.BaseChart
             if(dataPartDimName && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
                 this._addDefaultDataPartCalculation(dataPartDimName);
             }
+        }
+        
+        if(pvc.debug >= 3) {
+            this._log(translation.logVItem());
         }
         
         // ----------
