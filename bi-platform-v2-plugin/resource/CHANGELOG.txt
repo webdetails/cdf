@@ -1,3 +1,16 @@
+13.03.25
+    * CCC V2 integration
+    * Added capability to detect session timeout and request new credentials (instead of silently failing)
+    * Feature: Support for extra options in select component    
+    * Feature:  Add clickAction & expand selectors to table component
+    * Fixed Heatgrid Sample
+    * Fix: Multiselect component now checks for null values regardless of the plugin used.
+    * Fix [REDMINE-1822] - Tooltip not showing in select components
+    * Fix [REDMINE-309] - td.expandingClass now has a dummy click for it to work as intended.
+    * Fix: Column format in table component now takes hidden columns into account. Ex: If column 0 is hidden: - Now: format for column 1 is colFormats[1] - Previously: format for column 1 was colFormats[0]
+
+
+
 13.02.07
     
     * Introduced Async Behavior and new component life cycle
