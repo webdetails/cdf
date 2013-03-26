@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130325
+//VERSION TRUNK-20130326
 
 var pvc = (function(def, pv) {
 
@@ -394,16 +394,12 @@ pvc.defaultColor = pv.Colors.category10()('?');
  * @returns {null|function} A color scheme function or null.
  */
 pvc.colorScheme = function(colors){
-    if(colors == null){
-        return null;
-    }
+    if(colors == null) { return null; }
     
     if(typeof colors === 'function') {
-        if(!colors.hasOwnProperty('range')){
-            // Assume already a color scheme (a color scale factory)
-            return colors;
-        }
-        
+        // Assume already a color scheme (a color scale factory)
+        if(!colors.hasOwnProperty('range')) { return colors; }
+            
         // A protovis color scale
         // Obtain its range colors array and discard the scale function.
         colors = colors.range();
@@ -411,9 +407,7 @@ pvc.colorScheme = function(colors){
         colors = def.array.as(colors);
     }
     
-    if(!colors.length){
-        return null;
-    }
+    if(!colors.length) { return null; }
     
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
@@ -677,7 +671,7 @@ pvc.parseLegendClickMode =
     pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
 
 pvc.parseTooltipAutoContent = 
-    pvc.makeEnumParser('tooltipAutoContent', ['summary', 'value', 'none'], 'summary');
+    pvc.makeEnumParser('tooltipAutoContent', ['summary', 'value'], 'value');
 
 pvc.parseSelectionMode =
     pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
@@ -4395,17 +4389,16 @@ def.type('pvc.data.TranslationOper')
         var index = this._userIndexesToSingleDim.indexOf(name);
         if(index >= 0) {
             info = this._itemInfos[index];
-            if(info) {
-                spec = {}; 
-                if(!this.options.ignoreMetadataLabels) {
-                    spec.label = info.label || info.name; 
-                }
-                
-                if(info.type != null) {
-                    spec.valueType = info.type === 0 ? /*Any*/null : Number;
-                }
+            if(info && !this.options.ignoreMetadataLabels) {
+                var label = info.label || info.name;
+                if(label) { spec = {label: label}; }
             }
+            // Not using the type information because it conflicts
+            // with defaults specified in other places.
+            // (like with the MetricXYAbstract x role valueType being a Date when timeSeries=true)
+            //if(info.type != null) { spec.valueType = info.type === 0 ? /*Any*/null : Number; }
         }
+        
         this.complexTypeProj.readDim(name, spec);
         this._userDimsReadersByDim[name] = reader;
     },
