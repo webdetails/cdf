@@ -44,12 +44,11 @@ pvc.logSeparator = "------------------------------------------";
 
 var pvc_arraySlice = Array.prototype.slice;
 
-pvc.setDebug = function(level){
+pvc.setDebug = function(level) {
     level = +level;
     pvc.debug = isNaN(level) ? 0 : level;
     
     pvc_syncLog();
-    
     pvc_syncTipsyLog();
     
     return pvc.debug;
@@ -58,38 +57,35 @@ pvc.setDebug = function(level){
 /*global console:true*/
 
 function pvc_syncLog() {
-    if (pvc.debug && typeof console !== "undefined"){
+    if (pvc.debug && typeof console !== "undefined") {
         ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
-        .forEach(function(ps){
+        .forEach(function(ps) {
             ps = ps instanceof Array ? ps : [ps, ps];
             
             pvc_installLog(pvc, ps[0],  ps[1],  '[pvChart]');
         });
     } else {
-        if(pvc.debug > 1){
-            pvc.debug = 1;
-        }
+        if(pvc.debug > 1) { pvc.debug = 1; }
         
         ['log', 'info', 'trace', 'warn', 'group', 'groupEnd']
-        .forEach(function(p){
-            pvc[p] = def.noop;
-        });
+        .forEach(function(p) { pvc[p] = def.noop; });
 
         var _errorPrefix = "[pvChart ERROR]: ";
         
-        pvc.error = function(e){
-            if(e && typeof e === 'object' && e.message){
-                e = e.message;
-            }
+        pvc.error = function(e) {
+            if(e && typeof e === 'object' && e.message) { e = e.message; }
 
             e = '' + def.nullyTo(e, '');
-            if(e.indexOf(_errorPrefix) < 0){
-                e = _errorPrefix + e;
-            }
+            if(e.indexOf(_errorPrefix) < 0) { e = _errorPrefix + e; }
             
             throw new Error(e);
         };
     }
+    
+    pvc.logError = pvc.error;
+    
+    // Redirect protovis error handler
+    pv.error = pvc.error;
 }
 
 function pvc_syncTipsyLog() {
@@ -103,7 +99,7 @@ function pvc_syncTipsyLog() {
 function pvc_installLog(o, pto, pfrom, prompt) {
     if(!pfrom) { pfrom = pto; }
     var c = console;
-    var m  = c[pfrom] || c.log;
+    var m = c[pfrom] || c.log;
     var fun;
     if(m) {
         var mask = prompt + ": %s";
@@ -118,21 +114,14 @@ function pvc_installLog(o, pto, pfrom, prompt) {
         } else {
             // Calls to fun are like direct calls to m...
             // and capture file and line numbers correctly!
-            fun = m.bind(console, mask);
+            fun = m.bind(c, mask);
         }
     }
     
     o[pto] = fun;
 }
 
-pvc_syncLog();
-
-pvc.logError = pvc.error;
-
-// Redirect protovis error handler
-pv.error = pvc.error;
-
-pvc_syncTipsyLog();
+pvc.setDebug(pvc.debug);
 
 /**
  * Gets or sets the default CCC compatibility mode. 
@@ -4230,22 +4219,6 @@ def.type('pvc.data.TranslationOper')
     
     freeVirtualItemSize: function() { return this.virtualItemSize() - this._userUsedIndexesCount; },
 
-    collectFreeDiscreteAndConstinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
-        var itemInfos = this._itemInfos;
-        
-        def
-        .range(0, itemInfos.length)
-        .each(function(j) {
-            if(!this._userUsedIndexes[j]) {
-                if(itemInfos.type[j] === 1) {
-                    if(freeMeaIndexes) { freeMeaIndexes.push(j); }
-                } else {
-                    if(freeDisIndexes) { freeDisIndexes.push(j); }
-                }
-            }
-        }, this);
-    },
-    
     /**
      * Defines a dimension reader.
      *
@@ -4423,7 +4396,11 @@ def.type('pvc.data.TranslationOper')
         if(index >= 0) {
             info = this._itemInfos[index];
             if(info) {
-                spec = { label: info.label || info.name };
+                spec = {}; 
+                if(!this.options.ignoreMetadataLabels) {
+                    spec.label = info.label || info.name; 
+                }
+                
                 if(info.type != null) {
                     spec.valueType = info.type === 0 ? /*Any*/null : Number;
                 }
@@ -4615,6 +4592,15 @@ def.type('pvc.data.TranslationOper')
                 return dims.length ? dims : null;
             }
         }
+    },
+    
+    collectFreeDiscreteAndConstinuousIndexes: function(freeDisIndexes, freeMeaIndexes) {
+        this._itemInfos.forEach(function(info, index) {
+            if(!this._userUsedIndexes[index]) {
+                var indexes = info.type === 1 ? freeMeaIndexes : freeDisIndexes;
+                if(indexes) { indexes.push(index); }
+            }
+        }, this);
     }
 });
 
@@ -7940,9 +7926,8 @@ def.type('pvc.data.Data', pvc.data.Complex)
             //atoms = null
             atomsBase = {};
             
-            if(keyArgs.labelSep){
-                this.labelSep = keyArgs.labelSep;
-            }
+            if(keyArgs.labelSep) { this.labelSep = keyArgs.labelSep; }
+            if(keyArgs.keySep  ) { this.keySep   = keyArgs.keySep;   }
             
             this.type = keyArgs.type || def.fail.argumentRequired('type');
             
@@ -19149,7 +19134,8 @@ def
 //        dataSeparator
 //        dataMeasuresInColumns
 //        dataCategoriesCount
-        
+//        dataIgnoreMetadataLabels: false
+
 //        timeSeries:        undefined,
 //        timeSeriesFormat:  undefined,
 
@@ -19833,7 +19819,8 @@ pvc.BaseChart
                 this.dataEngine = // V1 property
                 this.data = new pvc.data.Data({
                     type:     complexType,
-                    labelSep: options.groupedLabelSep
+                    labelSep: options.groupedLabelSep,
+                    keySep:   translOptions.separator
                 });
         } // else TODO: assert complexType has not changed...
         
@@ -19920,12 +19907,16 @@ pvc.BaseChart
         
         var dataSeparator = options.dataSeparator;
         if(dataSeparator === undefined) { dataSeparator = dataOptions.separator; }
+        if(!dataSeparator) { dataSeparator = '~'; }
         
         var dataMeasuresInColumns = options.dataMeasuresInColumns;
         if(dataMeasuresInColumns === undefined) { dataMeasuresInColumns = dataOptions.measuresInColumns; }
         
         var dataCategoriesCount = options.dataCategoriesCount;
         if(dataCategoriesCount === undefined) { dataCategoriesCount = dataOptions.categoriesCount; }
+        
+        var dataIgnoreMetadataLabels = options.dataIgnoreMetadataLabels;
+        if(dataIgnoreMetadataLabels === undefined) { dataIgnoreMetadataLabels = dataOptions.ignoreMetadataLabels; }
         
         var plot2 = options.plot2;
         
@@ -19950,7 +19941,7 @@ pvc.BaseChart
             dimensionGroups:   options.dimensionGroups,
             dimensions:        options.dimensions,
             readers:           options.readers,
-
+            
             measuresIndexes:   options.measuresIndexes, // relational multi-valued
 
             multiChartIndexes: options.multiChartIndexes,
@@ -19968,7 +19959,8 @@ pvc.BaseChart
             isCategoryTimeSeries: options.timeSeries,
 
             timeSeriesFormat:     options.timeSeriesFormat,
-            valueNumberFormatter: valueFormatter
+            valueNumberFormatter: valueFormatter,
+            ignoreMetadataLabels:  dataIgnoreMetadataLabels
         };
     },
     
