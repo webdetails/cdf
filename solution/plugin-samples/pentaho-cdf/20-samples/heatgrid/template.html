@@ -76,6 +76,7 @@ var render_grid = {
 	type: "cccHeatGridChart",
 	name: "render_grid",
 	chartDefinition: {
+		compatVersion: 1,
 		width: 400,
 		height: 400,
         dataOptions: {measuresInColumns: false},
@@ -103,6 +104,7 @@ var render_grid = {
 		orthoAxisOrdinal: false,
 		scalingType: "linear",
 		numSD: 2,
+		showTooltips: false,
 		nullColor: "#efc5ad",
 		extensionPoints: [],
                 valuesAnchor: "right",
@@ -114,18 +116,14 @@ var render_grid = {
                 useCompositeAxis:true
 },
 	parameters: [],
-	executeAtStart: true,
+	executeAtStart: false,
 	htmlObject: "sampleObject",
 	listeners: []
 
 };
 
 Dashboards.postInit = function initDummyData() {
-	render_grid.chart.setData(testHeatGrid,
-                                 {crosstabMode: true,
-                                  seriesInRows: false });
-    render_grid.chart._createVersion = 0;                                  
-	render_grid.chart.render();	
+	render_grid.render(testHeatGrid);
 }
 
 
@@ -136,4 +134,3 @@ Dashboards.init([render_grid]);
 
 					
 </script>
-
