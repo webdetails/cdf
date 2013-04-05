@@ -37,10 +37,10 @@ var XactionComponent = BaseComponent.extend({
         " height=\"100%\"" +
         " width=\"100%\" />";        
         var iframe = $(xactionIFrameHTML);        
-        var url = webAppPath + "/ViewAction?wrapper=false" +
-              "&solution=" + this.solution +
-              "&path=" + this.path +
-              "&action="+ this.action;
+			  
+		//var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&"; //legacy
+		var ts = "ts=" + new Date().getTime() + "&";
+		var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -144,15 +144,16 @@ var PivotLinkComponent = BaseComponent.extend({
 
 var PrptComponent = BaseComponent.extend({
 
-  update: function(){
-
+	update: function(){
+ 
     this.clear();
-
+ 
     var options = this.getOptions();
     //options.showParameters = false;
-
+ 
     if(options["dashboard-mode"]){
-      var url = webAppPath + '/content/reporting';
+	  var ts = "ts=" + new Date().getTime() + "&";
+      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
       var myself=this;
       $.ajax({
         url: url,
@@ -164,7 +165,8 @@ var PrptComponent = BaseComponent.extend({
       });
     }
     else{
-      var url = webAppPath + '/content/reporting/reportviewer/report.html';
+	  var ts = "ts=" + new Date().getTime() + "&";
+      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
       var encodeArray = function(k,v) {
         var arr = [];
         for (var i = 0; i < v.length;i++) {
@@ -206,9 +208,9 @@ var PrptComponent = BaseComponent.extend({
       iframe[0].contentWindow.location = url + "?"+ a.join('&');
     }
   },
-
+ 
   getOptions: function(){
-
+ 
     var options = {
       paginate : this.paginate || false,
       showParameters: this.showParameters || false,
@@ -219,28 +221,28 @@ var PrptComponent = BaseComponent.extend({
       action: this.action
     };
     if(this.paginate){
-
+ 
       options["output-target"] = "table/html;page-mode=page";
     } else {
       options["output-target"] = "table/html;page-mode=stream";
     }
-
+ 
     // process params and update options
     $.map(this.parameters,function(k){
-      options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
+      options[k[0]] = Dashboards.getParameterValue(k[1]);
     });
-
+ 
     options["output-type"] = "";
-
+ 
     return options;
-
+ 
   }
 });
-
-
+ 
+ 
 var ExecutePrptComponent = PrptComponent.extend({
   visible: false,
-
+ 
   update : function() {
     // 2 modes of working; if it's a div, create a button inside it
     var myself = this;
@@ -261,11 +263,12 @@ var ExecutePrptComponent = PrptComponent.extend({
       typeof(myself.postChange)=='undefined' ? true : myself.postChange();
     });
   },
-
+ 
   executePrptComponent: function(){
-
+ 
     var options = this.getOptions();
-    var url = webAppPath + '/content/reporting/reportviewer/report.html';
+    var ts = "ts=" + new Date().getTime() + "&";
+	var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
     var a=[];
     var encodeArray = function(k,v) {
       var arr = [];
@@ -287,7 +290,7 @@ var ExecutePrptComponent = PrptComponent.extend({
       width: $(window).width(),
       height:$(window).height() - 50
     });
-
+ 
   }
 }
 );
@@ -370,7 +373,9 @@ var ExecuteXactionComponent = BaseComponent.extend({
   },
 
   executeXAction : function() {
-    var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
+    //var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&"; //legacy
+	var ts = "ts=" + new Date().getTime() + "&";
+	var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
 
     var p = new Array(this.parameters.length);
     var parameters = [];

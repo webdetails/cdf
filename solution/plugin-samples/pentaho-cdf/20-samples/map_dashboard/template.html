@@ -34,6 +34,7 @@
 	<p class="links">
 	<span id="third_chart">&nbsp;</span>
 	</p>
+	<!--
 	<h2 class="title">Pivot Analysis</h2>
 	<p class="meta"> 
 	<small>JPivot analysis based on the chosen conditions</small>
@@ -44,6 +45,7 @@
 	</p>
 
 	<div id="pivot_object" style="width: 850px; height: 500px">&nbsp;</div>
+	-->
 	<!-- end content -->
 </form>
 	<!-- end sidebar -->
@@ -138,7 +140,7 @@ thirdChart =
   preExecution:function(){},
   postExecution:function(){}
 }
-
+/*
 pivot = 
 {
   name: "pivot",
@@ -152,7 +154,7 @@ pivot =
   iframeWidth: "850px",
   preExecution:function(){},
   postExecution:function(){}
-}
+}*/
 
 map =
 {
@@ -176,7 +178,7 @@ name: "map",
 }
 
 
-var components = [ territoryParameter, productLineParameter, firstChart, secondChart, thirdChart, map, pivot];
+var components = [ territoryParameter, productLineParameter, firstChart, secondChart, thirdChart, map, /*pivot*/];
 
 load();
 
