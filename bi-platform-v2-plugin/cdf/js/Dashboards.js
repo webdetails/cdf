@@ -422,8 +422,10 @@ Dashboards._getControlClass = function(control) {
   for (var i = 0, N = typeNames.length ; i < N ; i++) {
     // TODO: window represents access to the JS global object.
     // This, or a special object on which to eval types, should be provided by some FWK.
+    
+    // If the value of a name is not a function, keep on trying.
     var Class = window[typeNames[i]];
-    if(Class) { return Class; }
+    if(Class && typeof Class === 'function') { return Class; }
   }
   // return undefined;
 };
