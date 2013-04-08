@@ -280,9 +280,14 @@ pvc.extensionTag = 'extension';
 pvc.extendType = function(type, exts, names) {
     if(exts) {
         var exts2;
+        var sceneVars = type.prototype._vars;
         var addExtension = function(ext, n) {
             if(ext !== undefined) {
                 if(!exts2) { exts2 = {}; }
+                if(sceneVars && sceneVars[n]) {
+                    n = '_' + n + 'EvalCore';
+                }
+                
                 exts2[n] = def.fun.to(ext);
             }
         };
@@ -11726,6 +11731,12 @@ pvc.visual.Scene.prototype.variable = function(name, impl) {
     
     // Var already defined (local or inherited)?
     if(!(name in proto)) {
+        if(!(proto.hasOwnProperty('_vars'))) {
+            proto._vars = def.create(proto._vars);
+        }
+        
+        proto._vars[name] = true;
+        
         // Variable Class methods
         // ex:
         // series()                    (non-overridable: in cache or eval)
@@ -16921,7 +16932,7 @@ def
             var legendPanel = this.panel();
             
             // Apply legend item scene extensions
-            legendPanel._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute']);
+            legendPanel._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute', 'value']);
             
             // Apply legend item scene Vars extensions
             // extensionPrefix contains "", "2", "3", "trend"
