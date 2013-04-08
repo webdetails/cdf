@@ -1523,6 +1523,17 @@ Dashboards.getQueryParameter = function ( parameterName ) {
   }
 };
 
+Dashboards.getPathParameter = function(){
+  var pathName = window.location.pathname,
+      idxStart = window.location.pathname.indexOf(":"),
+      idxEnd = window.location.pathname.indexOf("/generatedContent");
+
+  var path = pathName.substring(idxStart, idxEnd);
+
+  return path.replace(/:/g, "/"); 
+
+};
+
 Dashboards.setParameter = function(parameterName, parameterValue) {
   if(parameterName == undefined || parameterName == "undefined"){
     this.log('Dashboards.setParameter: trying to set undefined!!','warn');

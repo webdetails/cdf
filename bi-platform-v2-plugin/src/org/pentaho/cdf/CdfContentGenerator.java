@@ -35,6 +35,8 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
+
 
 
 
@@ -54,6 +56,7 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
+import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.api.repository.IContentItem;
 import org.pentaho.platform.repository2.unified.fileio.RepositoryFileContentItem;
 import org.pentaho.platform.repository2.unified.fileio.RepositoryFileOutputHandler;
@@ -122,7 +125,13 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     private Packager packager;
     public static String ENCODING = "UTF-8";
     
-   
+    private static final String NAVIGATOR = "navigator";
+    private static final String CONTENTLIST = "contentList";
+    private static final String SOLUTIONTREE = "solutionTree";
+    private static final String TYPE_FOLDER = "FOLDER";
+    private static final String HIDDEN_DESC = "Hidden";
+    private static final String ROOT_FOLDER_PATH = "/";
+  
     public CdfContentGenerator() {
         try {
             this.init();
@@ -539,6 +548,145 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       return Response.ok().build();
     }
     
+    
+    @GET
+    @Path("/getJSONSolution")
+    @Produces(APPLICATION_JSON)
+    @Consumes({ APPLICATION_XML, APPLICATION_JSON })
+    public void getJSONSolution(
+        @QueryParam("path") @DefaultValue("/") String path, 
+        @QueryParam("depth") @DefaultValue("-1") int depth, 
+        @QueryParam("showHiddenFiles") @DefaultValue("false") boolean showHiddenFiles,
+        @QueryParam("mode") @DefaultValue("*") String mode,
+            @Context HttpServletResponse servletResponse, 
+            @Context HttpServletRequest servletRequest) throws InvalidCdfOperationException  {
+      
+      RepositoryFileTree tree = RepositoryAccess.getRepository(userSession).getRepositoryFileTree(path, depth, showHiddenFiles, "*");
+
+      if(tree != null){
+        
+        try{  
+          
+          JSONObject jsonRoot = new JSONObject();
+
+          if (mode.equalsIgnoreCase(NAVIGATOR)) {
+            
+        	JSONObject json = new JSONObject();
+            processTree(tree, json, false);
+            jsonRoot.put("solution", json);
+              
+            } else if (mode.equalsIgnoreCase(CONTENTLIST)) {
+              
+              jsonRoot = repositoryFileToJSONObject(tree.getFile());
+              jsonRoot.put("content", new JSONArray());
+              jsonRoot.remove("files");
+              jsonRoot.remove("folders");
+              
+              processContentListTree(tree, jsonRoot);
+              
+            } else if (mode.equalsIgnoreCase(SOLUTIONTREE)) {
+              
+            	JSONObject json = new JSONObject();
+                processTree(tree, json, true);
+                jsonRoot.put("solution", json);
+            } 
+                    
+          final PrintWriter pw = new PrintWriter(servletResponse.getOutputStream());
+          pw.println(jsonRoot);
+                pw.flush();
+                
+        }catch(Throwable t){
+        throw new InvalidCdfOperationException(t.getMessage());
+        }
+      }
+    }
+    
+    private JSONObject repositoryFileToJSONObject(RepositoryFile repositoryFile) throws JSONException {
+      
+      if(repositoryFile != null){
+      
+        JSONObject json = new JSONObject();
+        json.put("id", repositoryFile.getId());
+            json.put("name", wrapString(repositoryFile.getName()));
+            json.put("path", repositoryFile.getPath());
+            json.put("visible", !repositoryFile.isHidden());
+            json.put("title", repositoryFile.isHidden() ? HIDDEN_DESC : wrapString(repositoryFile.getTitle()));
+            json.put("description", wrapString(repositoryFile.getDescription()));
+            json.put("creatorId", wrapString(repositoryFile.getCreatorId()));
+            json.put("locked", repositoryFile.isLocked());
+            
+            if(repositoryFile.isFolder()){
+              json.put("type", TYPE_FOLDER); 
+              json.put("files", new JSONArray());
+              json.put("folders", new JSONArray());
+            }else{
+            	
+              json.put("link", wrapString("/api/repos/" + repositoryFile.getPath().replaceAll("/", ":") + "/generatedContent"));
+            	
+              int dot = repositoryFile.getName().lastIndexOf('.');
+              if(dot > 0){
+                json.put("type", repositoryFile.getName().substring(dot+1));
+              }
+            }
+        
+        return json;
+      }
+      
+      return null;
+    }
+    
+    private void processTree(final RepositoryFileTree tree, final JSONObject json, boolean includeAllFiles) throws Exception{
+        
+      JSONObject childJson = repositoryFileToJSONObject(tree.getFile());
+      
+      if(!tree.getFile().isFolder()){
+        
+        //is file
+      
+        if(includeAllFiles){
+        
+          json.append("files", childJson);
+        
+        }else{
+          
+          // only wcdf/xcdf files
+          String type = childJson.getString("type") != null ? childJson.getString("type").toLowerCase() : null; 
+          if("wcdf".equals(type) || "xcdf".equals(type)){
+            json.append("files", childJson);
+          }
+        }
+      
+      }else{
+        
+        //is folder
+        json.append("folders", childJson);         
+        
+        for (final RepositoryFileTree childNode : tree.getChildren()){
+          
+          processTree(childNode, childJson, includeAllFiles);         
+        }       
+      }
+    } 
+    
+    private void processContentListTree(final RepositoryFileTree tree, final JSONObject json) throws Exception{
+        
+      JSONObject childJson = repositoryFileToJSONObject(tree.getFile());
+      
+      if(!tree.getFile().isFolder()){
+        
+        //is file
+        json.append("content", childJson);
+      
+      }else{
+        
+        //is folder
+        for (final RepositoryFileTree childNode : tree.getChildren()){
+          
+          processContentListTree(childNode, json);         
+        }       
+      }
+    } 
+    
     private void init() throws Exception {
         String rootdir = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
         final File blueprintFile = new File(rootdir + "/resources-blueprint.txt");
@@ -622,4 +770,10 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     public String getPluginName(){
         return PLUGIN_NAME;
     }
+    
+    private String wrapString(String value){
+      if(value == null) return "";
+      else return value;
+    }
+    
 }
