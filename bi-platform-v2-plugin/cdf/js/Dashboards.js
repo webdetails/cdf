@@ -2533,9 +2533,8 @@ Query = function() {
       _exportIframe.appendTo($('body'));
     });    
     $.ajaxSetup({ async: x});
-    
-    
-  }
+
+  };
 
   this.setAjaxOptions = function(newOptions) {
     if(typeof newOptions == "object") {
