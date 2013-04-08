@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130327
+//VERSION TRUNK-20130408
 
 var pvc = (function(def, pv) {
 
@@ -277,29 +277,23 @@ pvc.extensionTag = 'extension';
  * @param {string[]} [names]
  *      The allowed property names. 
  */
-pvc.extendType = function(type, exts, names){
-    if(exts){
+pvc.extendType = function(type, exts, names) {
+    if(exts) {
         var exts2;
-        var addExtension = function(ext, name){
-            if(ext !== undefined){
-                if(!exts2){
-                    exts2 = {};
-                }
-                exts2[name] = def.fun.to(ext);
+        var addExtension = function(ext, n) {
+            if(ext !== undefined) {
+                if(!exts2) { exts2 = {}; }
+                exts2[n] = def.fun.to(ext);
             }
         };
         
-        if(names){
-            names.forEach(function(name){
-                addExtension(exts[name], name);
-            });
+        if(names) {
+            names.forEach(function(n) { addExtension(exts[n], n); });
         } else {
             def.each(addExtension);
         }
         
-        if(exts2){
-           type.add(exts2);
-        }
+        if(exts2) { type.add(exts2); }
     }
 };
 
@@ -610,17 +604,15 @@ function pvc_unwrapExtensionOne(id, prefix){
 
 var pvc_oneNullArray = [null];
 
-pvc.makeExtensionAbsId = function(id, prefix){
+pvc.makeExtensionAbsId = function(id, prefix) {
     if(!id) { return prefix; }
     
     return def
        .query(prefix || pvc_oneNullArray)
-       .selectMany(function(oneprefix){
+       .selectMany(function(oneprefix) {
            return def
                .query(id)
-               .select(function(oneid){
-                   return pvc_unwrapExtensionOne(oneid, oneprefix);
-               });
+               .select(function(oneid) { return pvc_unwrapExtensionOne(oneid, oneprefix); });
        })
        .where(def.truthy)
        .array()
@@ -11709,6 +11701,83 @@ function scene_setActive(isActive) {
     }
 }
 
+// -------------------------
+
+// Custom scene classes
+// Define a custom scene subclass that contains certain vars, for serving a certain
+// panel's scenes; for example: BarChartSeriesScene and BarChartSeriesAndCategoryScene.
+// Each instance of such sub-classes will evaluate the values of its vars.
+// 
+// External extension must affect all instances of a given custom scene sub-class.
+// This implies sub-classing once more, this time the custom sub-class, 
+// to be able to override the default vars' methods.
+// Note that no new vars will be defined,
+// just overrides of the base classes' default var functions.
+// Possibly, we could let the user declare additional vars
+// that could be used to store shared state.
+// Overriding default vars' methods may not be done by normal sub-classing
+// as some post-processing is required of the result of such functions.
+// Overriding a default _core_ method would make sense though.
+//
+// To be called on the class prototype, not on instances.
+pvc.visual.Scene.prototype.variable = function(name, impl) {
+    var proto = this;
+    var methods;
+    
+    // Var already defined (local or inherited)?
+    if(!(name in proto)) {
+        // Variable Class methods
+        // ex:
+        // series()                    (non-overridable: in cache or eval)
+        // |--> seriesEval()           (internally overridable; dispatches to evalCore; validates/processes/casts)
+        //      |--> seriesEvalCore()  (impl.; externally overridable)
+        methods = {};
+        
+        var nameEval = '_' + name + 'Eval';
+        methods[name] = scene_createVarMainMethod(name, nameEval);
+            
+        var nameEvalCore = nameEval + 'Core';
+        
+        // _Eval_ Already defined?
+        if(!def.hasOwn(proto, nameEval)) {
+            methods[nameEval] = def.methodCaller(nameEvalCore);
+        }
+        
+        // _EvalCore_ already defined?
+        if(!def.hasOwn(proto, nameEvalCore)) {
+            // Normalize undefined to null (working as a default value)
+            methods[nameEvalCore] = def.fun.to(impl === undefined ? null : impl);
+        }
+    } else if(impl !== undefined) {
+        // Override (EvalCore) implementation
+        methods = def.set({}, '_' + name + 'EvalCore', def.fun.to(impl));
+    }
+    
+    // Add methods to class
+    if(methods) { proto.constructor.add(methods); }
+    
+    return proto;
+};
+
+/* Not intended to be overridden. */
+function scene_createVarMainMethod(name, nameEval) {
+    return function() {
+        // Evaluate on first time used.
+        // If _baseImpl_ depends on other variables, 
+        // they too will be evaluated (if not already).
+        // No cycle detection is performed.
+        var vb = this.vars[name];
+        if(vb === undefined) {
+            vb = this[nameEval]();
+            if(vb === undefined) { vb = null; }
+            this.vars[name] = vb;
+        }
+        
+        return vb;
+    };
+}
+
+
 /**
  * Initializes a scene variable.
  *
@@ -11734,6 +11803,14 @@ var pvc_ValueLabelVar = pvc.visual.ValueLabelVar = function(value, label, rawVal
 def.set(
     pvc_ValueLabelVar.prototype,
     'rawValue', undefined,
+    'setValue', function(v) {
+        this.value = v;
+        return this;
+    },
+    'setLabel', function(v) {
+        this.label = v;
+        return this;
+    },
     'clone',    function(){
         return new pvc_ValueLabelVar(this.value, this.label, this.rawValue);
     },
@@ -11742,13 +11819,13 @@ def.set(
         return label == null ? "" :
                (typeof label !== 'string') ? ('' + label) :
                label;
-    });
+    },
+    'valueOf', function() { return this.value; });
 
-pvc_ValueLabelVar.fromComplex = function(complex){
+pvc_ValueLabelVar.fromComplex = function(complex) {
     return complex ?
            new pvc_ValueLabelVar(complex.value, complex.label, complex.rawValue, complex.absLabel) :
-           new pvc_ValueLabelVar(null, "", null)
-           ;
+           new pvc_ValueLabelVar(null, "", null);
 };
 
 pvc_ValueLabelVar.fromAtom = pvc_ValueLabelVar.fromComplex;
@@ -16826,6 +16903,7 @@ def
     itemSceneType: function() {
         var ItemType = this._itemSceneType;
         if(!ItemType) {
+            // Inherit, anonymously, from BulletItemScene
             ItemType = def.type(pvc.visual.legend.BulletItemScene);
             
             // Mixin behavior depending on click mode
@@ -16840,8 +16918,23 @@ def
                     break;
             }
             
+            var legendPanel = this.panel();
+            
             // Apply legend item scene extensions
-            this.panel()._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute']);
+            legendPanel._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute']);
+            
+            // Apply legend item scene Vars extensions
+            // extensionPrefix contains "", "2", "3", "trend"
+            // -> "legendItemScene", "legend$ItemScene", or
+            // -> "legend2ItemScene", "legend$ItemScene", or
+            var itemSceneExtIds = pvc.makeExtensionAbsId(
+                    pvc.makeExtensionAbsId("ItemScene", [this.extensionPrefix, '$']),
+                    legendPanel._getExtensionPrefix());
+            
+            var impl = legendPanel.chart._getExtension(itemSceneExtIds, 'value');
+            if(impl !== undefined) {
+                ItemType.prototype.variable('value', impl);
+            }
             
             this._itemSceneType = ItemType;
         }
@@ -16882,42 +16975,8 @@ def
                       I.ShowsInteraction | 
                       I.Hoverable | I.SelectableAny;
     }
-    
-    var value, rawValue, label;
-    if(keyArgs) {
-        value    = keyArgs.value;
-        rawValue = keyArgs.rawValue;
-        label    = keyArgs.label;
-    }
-    
-    if(value === undefined) {
-        var source = this.group || this.datum;
-        if(source){
-            value    = source.value;
-            rawValue = source.rawValue;
-            label    = source.ensureLabel() + this._getTrendLineSuffix(source);
-        }
-    }
-    
-    this.vars.value = new pvc_ValueLabelVar(value || null, label || "", rawValue);
 })
 .add(/** @lends pvc.visual.legend.BulletItemScene# */{
-    _getTrendLineSuffix: function(source) {
-        // TODO: This is to catch trend lines...
-        // Standard data source data parts are numbers, 
-        // so this shows the non-standard data part label
-        // after the item's label:
-        // 'Lisbon (Linear trend)'  
-        var dataPartDim = this.chart()._getDataPartDimName();
-        if(dataPartDim) {
-            var dataPartAtom = source.atoms[dataPartDim];
-            if(isNaN(+dataPartAtom.value)) {
-                return " (" + dataPartAtom.label + ")";
-            }
-        }
-        return "";
-    },
-    
     /**
      * Called during legend render (full or interactive) 
      * to determine if the item is in the "on" state.
@@ -16931,7 +16990,7 @@ def
      * 
      * @type boolean
      */
-    isOn:  def.fun.constant(true),
+    isOn: def.fun.constant(true),
     
     /**
      * Returns true if the item may be executed. 
@@ -16951,15 +17010,55 @@ def
     /**
      * Measures the item label's text and returns an object
      * with 'width' and 'height' properties, in pixels.
-     * <p>A nully value may be returned to indicate that there is no text.</p>
-     * 
      * @type object
      */
     labelTextSize: function() {
-        var valueVar = this.vars.value;
-        return valueVar && pv.Text.measure(valueVar.label, this.vars.font);
+        return pv.Text.measure(this.value().label, this.vars.font);
+    },
+    
+    // Value variable
+    // Assumes _value_ variable has not yet been defined, by using "variable".
+    // Declaring these methods prevents default _valueEval and _valueEvalCore
+    // implementations to be defined.
+    _valueEval: function() {
+        var valueVar = this._valueEvalCore();
+        if(!(valueVar instanceof pvc_ValueLabelVar)) {
+            valueVar = new pvc_ValueLabelVar(valueVar, valueVar);
+        }
+        
+        return valueVar;
+    },
+    
+    _valueEvalCore: function() {
+        var value, rawValue, label;
+        var source = this.group || this.datum;
+        if(source) {
+            value    = source.value;
+            rawValue = source.rawValue;
+            label    = source.ensureLabel() + this._getTrendLineSuffix(source);
+        }
+        
+        return new pvc_ValueLabelVar(value || null, label || "", rawValue);
+    },
+    
+    _getTrendLineSuffix: function(source) {
+        // TODO: This is to catch trend lines...
+        // Normal data source data part values are numbers: 0, 1.
+        // Trend data part value is not a number, it is: "trends".
+        // Shows the custom trend label after the item's label:
+        // ex: 'Lisbon (Linear trend)'  
+        var dataPartDim = this.chart()._getDataPartDimName();
+        if(dataPartDim) {
+            var dataPartAtom = source.atoms[dataPartDim];
+            if(isNaN(+dataPartAtom.value)) {
+                return " (" + dataPartAtom.label + ")";
+            }
+        }
+        return "";
     }
-});
+})
+.prototype
+.variable('value');
 
 
 /**
@@ -21226,7 +21325,7 @@ pvc.BaseChart
             // For later binding an appropriate bullet renderer
             dataCell.legendBulletGroupScene = groupScene;
             
-            // Create on item scene per domain item data
+            // Create one item scene per domain item data
             dataCell
             .domainItemDatas()
             .each(function(itemData) { 
@@ -21398,19 +21497,9 @@ pvc.BaseChart
         this._components = components;
     },
     
-    /**
-     * This is the method to be used for the extension points
-     * for the specific contents of the chart. already ge a pie
-     * chart! Goes through the list of options and, if it
-     * matches the prefix, execute that method on the mark.
-     * WARNING: It's the user's responsibility to make sure that
-     * unexisting methods don't blow this.
-     */
-    extend: function(mark, ids, keyArgs){
-        if(def.array.is(ids)){
-            ids.forEach(function(id){
-                this._extendCore(mark, id, keyArgs); 
-            }, this);
+    extend: function(mark, ids, keyArgs) {
+        if(def.array.is(ids)) {
+            ids.forEach(function(id) { this._extendCore(mark, id, keyArgs); }, this);
         } else {
             this._extendCore(mark, ids, keyArgs);
         }
@@ -21421,9 +21510,7 @@ pvc.BaseChart
         if (mark) {
             var component = def.getOwn(this._components, id);
             if(component){
-                if(mark.borderPanel){
-                    mark = mark.borderPanel;
-                }
+                if(mark.borderPanel) { mark = mark.borderPanel; }
                 
                 var logOut     = pvc.debug >= 3 ? [] : null;
                 var constOnly  = def.get(keyArgs, 'constOnly', false); 
@@ -21431,12 +21518,12 @@ pvc.BaseChart
                 var keyArgs2   = {tag: pvc.extensionTag};
                 var isRealMark = mark instanceof pv_Mark;
                 
-                component.forEach(function(v, m){
+                component.forEach(function(v, m) {
                     // Not everything that is passed to 'mark' argument
                     //  is actually a mark...(ex: scales)
                     // Not locked and
                     // Not intercepted and
-                    if(mark.isLocked && mark.isLocked(m)){
+                    if(mark.isLocked && mark.isLocked(m)) {
                         if(logOut) {logOut.push(m + ": locked extension point!");}
                     } else if(mark.isIntercepted && mark.isIntercepted(m)) {
                         if(logOut) {logOut.push(m + ":" + pvc.stringify(v) + " (controlled)");}
@@ -21444,29 +21531,24 @@ pvc.BaseChart
                         if(logOut) {logOut.push(m + ": " + pvc.stringify(v)); }
 
                         // Extend object css and svg properties
-                        if(v != null){
+                        if(v != null) {
                             var type = typeof v;
-                            if(type === 'object'){
-                                if(m === 'svg' || m === 'css'){
+                            if(type === 'object') {
+                                if(m === 'svg' || m === 'css') {
                                     var v2 = mark.propertyValue(m);
-                                    if(v2){
-                                        v = def.copy(v2, v);
-                                    }
+                                    if(v2) { v = def.copy(v2, v); }
                                 }
-                            } else if(isRealMark && (wrap || constOnly) && type === 'function'){
-                                if(constOnly){
-                                    return;
-                                }
+                            } else if(isRealMark && (wrap || constOnly) && type === 'function') {
+                                if(constOnly) { return; }
                                 
-                                if(m !== 'add'){ // TODO: "add" extension idiom - any other exclusions?
-                                    v = wrap.call(mark, v, m);
-                                }
+                                // TODO: "add" extension idiom - any other exclusions?
+                                if(m !== 'add') { v = wrap.call(mark, v, m); }
                             }
                         }
                         
                         // Distinguish between mark methods and properties
                         if (typeof mark[m] === "function") {
-                            if(m != 'add' && mark.intercept){
+                            if(m != 'add' && mark.intercept) {
                                 mark.intercept(m, v, keyArgs2);
                             } else {
                                 // Not really a mark or not a real protovis property 
@@ -21478,15 +21560,15 @@ pvc.BaseChart
                     }
                 });
 
-                if(logOut){
-                    if(logOut.length){
+                if(logOut) {
+                    if(logOut.length) {
                         this._log("Applying Extension Points for: '" + id + "'\n\t* " + logOut.join("\n\t* "));
                     } else if(pvc.debug >= 5) {
                         this._log("No Extension Points for: '" + id + "'");
                     }
                 }
             }
-        } else if(pvc.debug >= 4){
+        } else if(pvc.debug >= 4) {
             this._log("Applying Extension Points for: '" + id + "' (target mark does not exist)");
         }
     },
@@ -21496,28 +21578,28 @@ pvc.BaseChart
      */
     _getExtension: function(id, prop) {
         var component;
-        if(!def.array.is(id)){
+        if(!def.array.is(id)) {
             component = def.getOwn(this._components, id);
-            if(component){
-                return component.get(prop);
-            }
+            if(component) { return component.get(prop); }
         } else {
-            // Last extension points are applied last, so have priority...
+            // Last extension points are applied last, and so have priority...
             var i = id.length - 1, value;
-            while(i >= 0){
+            while(i >= 0) {
                 component = def.getOwn(this._components, id[i--]);
-                if(component && (value = component.get(prop)) !== undefined){
+                if(component && (value = component.get(prop)) !== undefined) {
                     return value;
                 }
             }
         }
     },
     
+    _getComponentExtensions: function(id) {
+        return def.getOwn(this._components, id);
+    },
+    
     _getConstantExtension: function(id, prop) {
         var value = this._getExtension(id, prop);
-        if(!def.fun.is(value)){
-            return value;
-        }
+        if(!def.fun.is(value)) { return value; }
     }
 });
 
@@ -22762,7 +22844,7 @@ def
     
     _extendSceneType: function(typeKey, type, names){
         var typeExts = def.get(this._sceneTypeExtensions, typeKey);
-        if(typeExts){
+        if(typeExts) {
             pvc.extendType(type, typeExts, names);
         }
     },
@@ -22776,11 +22858,9 @@ def
         }
     },
     
-    _getExtensionPrefix: function(){
-        return this._extensionPrefix;
-    },
+    _getExtensionPrefix: function() { return this._extensionPrefix; },
     
-    _makeExtensionAbsId: function(id){
+    _makeExtensionAbsId: function(id) {
         return pvc.makeExtensionAbsId(id, this._getExtensionPrefix());
     },
     
@@ -30085,16 +30165,7 @@ def
     }
 });
 
-def
-.type('pvc.visual.legend.WaterfallBulletItemScene', pvc.visual.legend.BulletItemScene)
-.init(function() {
-    
-    this.base.apply(this, arguments);
-    
-    // Don't allow any Action
-    var I = pvc.visual.Interactive;
-    this._ibits = I.Interactive | I.ShowsInteraction;
-});
+/*global pvc_ValueLabelVar:true */
 
 /**
  * Initializes a waterfall legend bullet group scene.
@@ -30113,15 +30184,11 @@ def
 .type('pvc.visual.legend.WaterfallBulletGroupScene', pvc.visual.legend.BulletGroupScene)
 .init(function(rootScene, keyArgs) {
     
-    this.base(rootScene, def.set(keyArgs, 'clickMode', 'none'));
+    keyArgs = def.set(keyArgs, 'clickMode', 'none');
     
-    var item = this.createItem({
-        value:    null,
-        rawValue: null,
-        label:    def.get(keyArgs, 'label')
-    });
+    this.base(rootScene, keyArgs);
     
-    item.color = def.get(keyArgs, 'color');
+    this.createItem(keyArgs); // label && color
 })
 .add(/** @lends pvc.visual.legend.WaterfallBulletGroupScene# */{
     renderer: function(renderer) {
@@ -30129,8 +30196,27 @@ def
         return this._renderer;
     },
     
-    itemSceneType: def.fun.constant(pvc.visual.legend.WaterfallBulletItemScene)
+    itemSceneType: function() {
+        return pvc.visual.legend.WaterfallBulletItemScene;
+    }
 });
+
+def
+.type('pvc.visual.legend.WaterfallBulletItemScene', pvc.visual.legend.BulletItemScene)
+.init(function(bulletGroup, keyArgs) {
+    
+    this.base.apply(this, arguments);
+    
+    // Don't allow any Action
+    var I = pvc.visual.Interactive;
+    this._ibits = I.Interactive | I.ShowsInteraction;
+    
+    this.color = def.get(keyArgs, 'color');
+    
+    // Pre-create 'value' variable
+    this.vars.value = new pvc_ValueLabelVar(null, def.get(keyArgs, 'label'));
+});
+
 
 /*global pv_Mark:true, pvc_ValueLabelVar:true */
 
@@ -31991,17 +32077,15 @@ def
                 buildTooltip: options.isMultiValued ?
                     function(context){
                         var group = context.scene.group;
+                        if(!group) { return ""; } // null scene
+                        
                         var s = pvc.data.Complex.values(group, seriesDimsNames);
                         var c = pvc.data.Complex.values(group, categDimsNames);
 
                         var d = [];
                         var vars = context.scene.vars;
-                        if(hasSize){
-                            d[options.sizeValIdx  || 0] = vars.size.value;
-                        }
-                        if(hasColor){
-                            d[options.colorValIdx || 0] = vars.color.value;
-                        }
+                        if(hasSize ) { d[options.sizeValIdx  || 0] = vars.size.value;  }
+                        if(hasColor) { d[options.colorValIdx || 0] = vars.color.value; }
 
                         return customTooltip.call(options, s, c, d);
                     } :
