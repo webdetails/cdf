@@ -4,6 +4,9 @@
  * Includes all components relating to XActions, PRPTs, JPivot, and other
  * Pentaho-owned technologies.
  */
+
+// TODO: could really use some refactoring: iframes, options, post
+
 var XactionComponent = BaseComponent.extend({
   update : function() {
     var myself=this;
@@ -144,12 +147,41 @@ var PivotLinkComponent = BaseComponent.extend({
 
 var PrptComponent = BaseComponent.extend({
 
+  getIframeName : function() {
+    return this.htmlObject + '_' + 'prptFrame';
+  },
+
+  getIframe: function() {
+    return '<iframe name="' + this.getIframeName() + '" style="width:100%;height:100%;border:0px" frameborder="0"/>';
+  },
+
+ /*************************************************************************
+  * We really shouldn't mess around with the CDF running call counter,
+  * but if we don't do so in this case, the report will count as "finished"
+  * even though nothing has been loaded into the iframe. We'll increment it
+  * here,decrement it again from the iframe's onload event.
+  */
+
+  startLoading: function() {
+    if (!this.loading) {
+      this.loading = true;
+      Dashboards.incrementRunningCalls();
+    }
+  },
+
+  stopLoading: function() {
+    if (this.loading) {
+      this.loading = false;
+      Dashboards.decrementRunningCalls();
+    }
+  },
+  /*************************************************************************/
+
   update: function(){
 
     this.clear();
 
     var options = this.getOptions();
-    //options.showParameters = false;
 
     if(options["dashboard-mode"]){
       var url = webAppPath + '/content/reporting';
@@ -158,56 +190,66 @@ var PrptComponent = BaseComponent.extend({
         url: url,
         data: options,
         dataType:"html",
-        success: function(json){
-          $("#"+myself.htmlObject).html(json);
+        success: function(resp){
+          $("#"+myself.htmlObject).html(resp);
         }
       });
     }
-    else{
-      var url = webAppPath + '/content/reporting/reportviewer/report.html';
-      var encodeArray = function(k,v) {
-        var arr = [];
-        for (var i = 0; i < v.length;i++) {
-          arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
+    else {
+      // set up our result iframe
+      var iframe = $(this.getIframe());
+      var htmlObj = $('#' + this.htmlObject);
+      htmlObj.empty();
+      iframe = iframe.appendTo(htmlObj);
+
+      if (this.autoResize) {
+        // we'll need to reset size before each resize,
+        // otherwise we'll get stuck with the size of the biggest report we get
+        if (this._sHeight == null) {
+          this._sHeight = htmlObj.height();
+          this._sWidth = htmlObj.width();
         }
-        return arr;
-      };
-      var a=[];
-      $.each(options,function(k,v){
-        if (typeof v == 'object') {
-          a.push.apply(a,encodeArray(k,v));
-        } else {
-          a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
+        else {
+          htmlObj.height(this._sHeight);
+          htmlObj.width(this._sWidth);
         }
-      });
-      /*
-       * We really shouldn't mess around with the CDF running call counter,
-       * but if we don't do so in this case, the report will count as "finished"
-       * even though nothing has been loaded into the iframe. We'll increment it
-       * here,decrement it again from the iframe's onload event.
-       */
-      var myself = this;
-      if(!this.loading){
-        this.loading = true;
-        Dashboards.incrementRunningCalls();
       }
-      var iframe = $("<iframe style='width:100%;height:100%;border:0px' frameborder='0' border='0' />");
-      iframe.load(function(){
-        /* This is going to get called several times with "about:blank"-style pages.
-         * We're only interested in the one call that happens once the page is _really_
-         * loaded -- which means an actual document body.
-         */
-        if(this.contentWindow.document.body.innerHTML){
-          myself.loading = false;
-          Dashboards.decrementRunningCalls();
+
+      if (this.usePost) {
+
+        var url = webAppPath + '/content/reporting';
+        this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
+
+      } else {
+
+        var url = webAppPath + '/content/reporting/reportviewer/report.html' + "?" + $.param(options);
+
+        if (options.showParameters && this.autoResize) {
+          Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
+          this.autoResize = false;
         }
-      });
-      $("#"+this.htmlObject).empty().append(iframe);
-      iframe[0].contentWindow.location = url + "?"+ a.join('&');
+
+        this.startLoading();
+        var myself = this;
+        iframe.load(function(){
+          var jqBody = $(this.contentWindow.document.body);
+          var reportContentFrame = jqBody.find('#reportContent');
+          reportContentFrame.load(function() {
+            if (myself.autoResize) {
+              myself._resizeToReportFrame(reportContentFrame[0],htmlObj, options);
+            }
+            myself.stopLoading();
+          });
+        });
+        iframe[0].contentWindow.location = url;
+      }
     }
   },
 
-  getOptions: function(){
+  /**
+   * report options
+   **/
+  getOptions: function() {
 
     var options = {
       paginate : this.paginate || false,
@@ -218,24 +260,118 @@ var PrptComponent = BaseComponent.extend({
       path: this.path,
       action: this.action
     };
-    if(this.paginate){
 
+    if (this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
     } else {
       options["output-target"] = "table/html;page-mode=stream";
     }
 
-    // process params and update options
-    $.map(this.parameters,function(k){
-      options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
-    });
-
-    options["output-type"] = "";
+    // update options with report parameters
+    for (var i=0; i < this.parameters.length; i++ ) {
+      // param: [<prptParam>, <dashParam>, <default>]
+      var param = this.parameters[i];
+      var value = Dashboards.getParameterValue(param[1]);
+      if(value == null && param.length == 3) {
+        value = param[2];
+      }
+      options[param[0]] = value;
+    }
 
     return options;
 
+  },
+
+
+  _postToUrl : function (htmlObj, iframe, path, params, target) {
+    this.startLoading();
+    // use a form to post, response will be set to iframe
+    var form = this._getParamsAsForm(document, path, params, this.getIframeName());
+    htmlObj[0].appendChild(form);
+
+    var self = this;
+    iframe.load(function() {
+      if(self.autoResize) {
+        self._resizeToReportFrame(iframe[0], htmlObj, params);
+      }
+      self.stopLoading();
+    });
+
+    form.submit();
+  },
+
+  _resizeToReportFrame : function(iframe, htmlObj, options) {
+    var outputTarget = options["output-target"];
+    // only makes sense for html, but let's keep it open
+    var isHtml = function(outputTarget) {
+      return outputTarget.indexOf('html') != -1 
+            && outputTarget.indexOf('mime') == -1;
+    };
+    var isText = function(outputTarget) {
+      return outputTarget.indexOf('text') != -1;
+    };
+    var isXml = function(outputTarget) {
+      return outputTarget.indexOf('xml') != -1;
+    };
+    try {
+      var idoc = iframe.contentWindow.document;
+      if (iframe.contentWindow.document) {
+        var sized = null;
+        if (isHtml(outputTarget) || isText(outputTarget)) {
+          sized = idoc.body;
+        }
+        else if (isXml(outputTarget)) {
+          // not much point in using this
+          sized = idoc.firstChild;
+        }
+
+        if (sized != null) {
+          var hMargin=0, wMargin=0;
+          if (isHtml(outputTarget)) {
+            // margins may not be taken into account in scrollHeight|Width
+            var jsized = $(sized);
+            hMargin = jsized.outerHeight(true) - jsized.outerHeight(false);
+            wMargin = jsized.outerWidth(true) - jsized.outerWidth(false);
+          }
+          htmlObj.height(sized.scrollHeight + hMargin);
+          htmlObj.width(sized.scrollWidth + wMargin);
+        }
+      }
+    } catch(e) {
+      Dashboards.log(e);
+    }
+  },
+
+  _getParamsAsForm : function (doc, path, params, target) {
+    var form = doc.createElement("form");
+    form.setAttribute("method", "post");
+    form.setAttribute("action", path);
+    form.setAttribute("target", target);
+    for (var key in params) {
+      if (params.hasOwnProperty(key)) {
+        var param = params[key];
+        if ($.isArray(param)) {
+          for(var i = 0; i < param.length; i++){
+            var hiddenField = doc.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", key);
+            hiddenField.setAttribute("value", param[i]);
+            form.appendChild(hiddenField);
+          }
+        }
+        else {
+          var hiddenField = doc.createElement("input");
+          hiddenField.setAttribute("type", "hidden");
+          hiddenField.setAttribute("name", key);
+          hiddenField.setAttribute("value", param);
+          form.appendChild(hiddenField);
+        }
+      }
+    }
+    return form;
   }
-});
+
+});//PrptComponent
 
 
 var ExecutePrptComponent = PrptComponent.extend({
@@ -295,9 +431,9 @@ var ExecutePrptComponent = PrptComponent.extend({
 var AnalyzerComponent = BaseComponent.extend({
 
   update: function(){
-    
+
     this.clear();
-            
+
     var options = this.getOptions();
     var url = webAppPath + '/content/analyzer/';
     var myself=this;
@@ -313,7 +449,7 @@ var AnalyzerComponent = BaseComponent.extend({
   },
 
   getOptions: function() {
-                            
+
     var options = {
       solution : this.solution,
       path: this.path,
@@ -327,22 +463,22 @@ var AnalyzerComponent = BaseComponent.extend({
     $.map(this.parameters,function(k){
       options[k[0]] = k.length==3?k[2]: Dashboards.getParameterValue(k[1]);
     });
-            
+
     return options;
   },
-  
-  generateIframe: function(htmlObject,url,parameters,height,width) {
-	  var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
-	  ' frameborder="0"' +
-	  ' height="' + height + '"' +
-	  ' width="' + width + '"' +
-	  ' src="' + url + "?";
 
-	  iFrameHTML += $.param(parameters, true);
-	  iFrameHTML += "\"></iframe>";
-	       
-	  return iFrameHTML;
-	}
+  generateIframe: function(htmlObject,url,parameters,height,width) {
+    var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
+    ' frameborder="0"' +
+    ' height="' + height + '"' +
+    ' width="' + width + '"' +
+    ' src="' + url + "?";
+
+    iFrameHTML += $.param(parameters, true);
+    iFrameHTML += "\"></iframe>";
+
+    return iFrameHTML;
+  }
 });
 
 var ExecuteXactionComponent = BaseComponent.extend({
@@ -379,12 +515,14 @@ var ExecuteXactionComponent = BaseComponent.extend({
       var key = this.parameters[i][0];
       var value = Dashboards.getParameterValue(this.parameters[i][1]);
 
-      if($.isArray(value))
+      if($.isArray(value)) {
         $(value).each(function(p) {
           parameters.push(key + "=" + encodeURIComponent(this));
         });
-      else
+      }
+      else {
         parameters.push(key + "=" + encodeURIComponent(value));
+      }
     }
 
     url += parameters.join("&");
