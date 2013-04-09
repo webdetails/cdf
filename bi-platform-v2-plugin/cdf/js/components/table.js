@@ -74,6 +74,7 @@ var TableComponent = UnmanagedComponent.extend({
        * Something went wrong and we won't have handlers firing in the future
        * that will trigger unblock, meaning we need to trigger unblock manually.
        */
+      this.dashboard.error(e);
       this.unblock();
     }
   },
