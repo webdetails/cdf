@@ -183,6 +183,16 @@ var PrptComponent = BaseComponent.extend({
 
     var options = this.getOptions();
 
+    // if you really must use this component to download stuff
+    if (this.downloadMode == null) {
+      var outputTarget = options["output-target"];
+      // take a guess
+      this.downloadMode =
+        !((outputTarget.indexOf('html') != -1 &&
+           outputTarget.indexOf('mime-message') == -1)
+          || outputTarget.indexOf('text') != -1);
+    }
+
     if(options["dashboard-mode"]){
       var url = webAppPath + '/content/reporting';
       var myself=this;
@@ -242,6 +252,10 @@ var PrptComponent = BaseComponent.extend({
           });
         });
         iframe[0].contentWindow.location = url;
+      }
+      if (this.downloadMode) {
+        // if call prompts a download window we'll never know when it's done
+        this.stopLoading();
       }
     }
   },
