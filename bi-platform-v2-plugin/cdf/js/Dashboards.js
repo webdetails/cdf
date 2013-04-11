@@ -3996,7 +3996,7 @@ Query = function() {
           _callback = arguments[0];
           _errorCallback = arguments[1];
           return doQuery();
-        } else if( arguments[0] instanceof Array){
+        } else {
           _params = arguments[0];
           _callback = arguments[1];
           return doQuery();
