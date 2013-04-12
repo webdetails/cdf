@@ -183,11 +183,12 @@ var PrptComponent = BaseComponent.extend({
 
     var options = this.getOptions();
 
+    var downloadMode = this.downloadMode;
     // if you really must use this component to download stuff
-    if (this.downloadMode == null) {
+    if (downloadMode == null) {
       var outputTarget = options["output-target"];
       // take a guess
-      this.downloadMode =
+      downloadMode =
         !((outputTarget.indexOf('html') != -1 &&
            outputTarget.indexOf('mime-message') == -1)
           || outputTarget.indexOf('text') != -1);
@@ -253,7 +254,7 @@ var PrptComponent = BaseComponent.extend({
         });
         iframe[0].contentWindow.location = url;
       }
-      if (this.downloadMode) {
+      if (downloadMode) {
         // if call prompts a download window we'll never know when it's done
         this.stopLoading();
       }
