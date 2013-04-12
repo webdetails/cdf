@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130411
+//VERSION TRUNK-20130412
 
 var pvc = (function(def, pv) {
 
@@ -19511,7 +19511,9 @@ pvc.BaseChart
                 // but, in between, prevents translators from 
                 // reading to dimensions that would bind into those roles...
                 if(groupingSpec !== undefined) {
-                    if(!groupingSpec) { this._assertUnboundRoleIsOptional(role); } // throws if required
+                    if(!groupingSpec && !role.defaultDimensionName) { 
+                        this._assertUnboundRoleIsOptional(role); // throws if required
+                    }
                     
                     var grouping = pvc.data.GroupingSpec.parse(groupingSpec);
     
@@ -30267,23 +30269,33 @@ def
          * From protovis help:
          * 
          * Band differential control pseudo-property.
+         * 
+         *  > 0 => go up
+         *  < 0 => go down
+         *  ...............
          *  2 - Drawn starting at previous band offset. Multiply values by  1. Don't update offset.
          *  1 - Drawn starting at previous band offset. Multiply values by  1. Update offset.
+         *  
          *  0 - Reset offset to 0. Drawn starting at 0. Default. Leave offset at 0.
+         *  
+         *  > 0 => go down 
+         *  < 0 => go up
+         *  ...............
          * -1 - Drawn starting at previous band offset. Multiply values by -1. Update offset.
          * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
          */
         return function(scene) {
             if(isFalling && !this.index) {
                 // First falling bar is the main total
-                // Must be accounted up and update the total
+                // Must be accounted up and update the offset
                 return 1;
             }
 
             var group = scene.vars.category.group;
-            if(group._isFlattenGroup && !group._isDegenerateFlattenGroup) {
-                // Groups don't update the total
-                // Groups, always go down, except the first falling...
+            var isProperGroup = group._isFlattenGroup && !group._isDegenerateFlattenGroup;
+            if(isProperGroup) {
+                // Groups don't update the offset
+                // Groups always go down (except for the first when falling)
                 return -2;
             }
             
@@ -30388,6 +30400,14 @@ def
                 return color;
             });
         
+        // If Falling,  
+        //   the offset is the initial y
+        //   the line covers this and the previous
+        //   the line goes from the left of the previous bar to the right of this bar
+        // If Climbing
+        //   the offset is the final y
+        //   the line covers this and the next
+        //   the line goes from the left of this bar to the right of the next bar
         this.pvWaterfallLine = new pvc.visual.Rule(this, this.pvPanel, {
                 extensionId:  'line',
                 noTooltip:    false,
@@ -30404,6 +30424,7 @@ def
             .optional(anchor, function(){ 
                 return orthoZero + chart.animate(0, sceneOrthoScale(this.scene) - orthoZero);
             })
+            
             .optional(this.anchorLength(anchor), barStepWidth + barWidth)
             .optional(ao,
                 isFalling ?
@@ -30434,7 +30455,8 @@ def
                 })
                 [this.anchorOrtho(anchor)](sceneBaseScale)
                 .textAlign(isVertical ? 'center' : 'left')
-                .textBaseline(function(categScene){
+                .textBaseline(function(categScene) {
+                    // Rules are drawn on the starting y position.
                     if(!isVertical) { return 'middle'; }
                     
                     var direction = categScene.vars.direction;
@@ -30451,10 +30473,25 @@ def
 
     _buildRuleScene: function() {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: this.visibleData({ignoreNulls: false})});
-        var prevValue;
-        
-        // Create starting scene tree
-        if(this.chart._ruleInfos) { this.chart._ruleInfos.forEach(createCategScene, this); }
+        var prevValue, isClimbing;
+        var ris = this.chart._ruleInfos;
+        if(ris) {
+            // Create scenes in order 
+            ris.forEach(createCategScene, this);
+            
+            // But fill in the direction variable this way
+            
+            var q = def.query(rootScene.childNodes);
+            
+            // When falling, 
+            // traversing from the end to the beginning 
+            // makes us be climbing...
+            isClimbing = !this.chart._isFalling;
+            
+            if(!isClimbing) { q = q.reverse(); }
+            
+            q.each(completeCategScene, this);
+        }
         
         return rootScene;
 
@@ -30474,9 +30511,15 @@ def
             categScene.vars.value = new pvc_ValueLabelVar(
                                 value,
                                 this.chart._valueDim.format(value));
+        }
+        
+        function completeCategScene(categScene, index) {
+            var value = categScene.vars.value.value;
             
             categScene.vars.direction = 
-                (prevValue == null || prevValue === value) ? null : (prevValue < value ? 'up' : 'down');
+                (!index || prevValue === value)      ? null : 
+                (isClimbing === (prevValue < value)) ? 'up' : 
+                'down';
             
             prevValue = value;
         }
