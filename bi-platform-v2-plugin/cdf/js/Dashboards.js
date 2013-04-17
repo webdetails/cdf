@@ -7,7 +7,7 @@
 
   dataFilter: function(data, dtype) {
     // just tagging date
-    Dashboards.lastServerResponse = Date.now();
+    Dashboards.lastServerResponse = (new Date().getTime());
     return data;
   }
 });
@@ -102,7 +102,7 @@ var Dashboards = {
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   
-  lastServerResponse: Date.now(),
+  lastServerResponse: (new Date().getTime()),
   serverCheckResponseTimeout: 1800000, //ms, will be overridden at init
   /* Reference to current language code . Used in every place where jquery
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
@@ -750,7 +750,7 @@ Dashboards.update = function(component) {
 };
 
 Dashboards.updateComponent = function(object) {
-  if(Date.now() - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
+  if((new Date().getTime()) - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
     //too long in between ajax communications
     if(!Dashboards.checkServer()) {
     	Dashboards.hideProgressIndicator();
