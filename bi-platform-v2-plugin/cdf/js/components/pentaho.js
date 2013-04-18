@@ -388,6 +388,113 @@ var PrptComponent = BaseComponent.extend({
 
 });//PrptComponent
 
+var SchedulePrptComponent = PrptComponent.extend({
+visible:false,
+
+update : function() {
+    // 2 modes of working; if it's a div, create a button inside it
+    var myself = this;
+    var o = $("#"+ this.htmlObject);
+    if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
+      // create a button
+      o = $("<button/>").appendTo(o.empty());
+      if (o[0].tagName=="DIV") o.wrap("<span/>");
+      if (this.label != undefined) o.text(this.label);
+      o.button();
+    }
+    o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+    o.bind("click", function(){
+      var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
+      if(success) {
+        myself.schedulePrptComponent();
+      }
+      typeof(myself.postChange)=='undefined' ? true : myself.postChange();
+    });
+  },
+
+ schedulePrptComponent: function(){
+    
+    var a="second (0-59)";
+
+
+    timeSwitcher= function(){
+      var e= $("#time").val();
+      var tag="";
+      if(e=="minute")
+        tag="second (0-59)";
+      else if(e=="hour")
+        tag="minute (0-59)";
+      else if(e=="day")
+        tag="hour (0-23)";
+      else if(e=="week")
+        tag="day of the week (1-7)";
+
+      $('#suffix').text(tag);
+    }
+
+
+    var basicStateHtml = ' <select id= "time" onChange="timeSwitcher()";>'+
+        '<option value="minute" selected >Every Minute</option>'+
+        '<option value="hour">Every Hour</option>'+
+        '<option value="day">Every Day</option>'+
+        '<option value="week">Every Week</option>'+
+        '</select>'+
+        '<form>on the<input type="text" name="onThe" value=""></form><label>'+
+       '<div id="suffix">'+a+'</div>'+'</label>'+
+        '<br/>'+
+        '<form>to: <input type="text" name = "to" value=""></form><br/>'+
+        '<form>cc: <input type="text" name = "to" value=""></form>';
+    var advancedStateHtml ='<form>Cron Expression: <input type="text" name = "to"></form>';
+
+      var promp = {
+
+      basicState : {
+        html: basicStateHtml, 
+        title: "Schedule Report",
+        buttons: {
+          "Advanced": 0,
+          "Cancel" : -1,
+          "Ok" : 1
+        },
+        submit: function(e,v,m,f){
+
+          if(e==0){
+            $.prompt.goToState('advancedState');
+            return false;
+          }
+          else if(e==-1) {$.prompt.close();}
+          else{
+            $.prompt.close();
+            }
+        }
+      },
+      advancedState : {
+        html: advancedStateHtml,
+        title: "Schedule Report",
+        buttons: {
+          "Basic":0,
+          "Cancel" : -1,
+          "Ok" : 1
+        },
+        submit: function(e,v,m,f){
+          if(e==0){
+            $.prompt.goToState('basicState');
+            return false;
+          }
+          else if(e==-1) $.prompt.close();
+          else
+            {
+              $.prompt.close();
+            }
+        }
+      }
+    };
+      $.prompt(promp);
+
+}
+
+
+});
 
 var ExecutePrptComponent = PrptComponent.extend({
   visible: false,
