@@ -88,7 +88,7 @@ var JpivotComponent = BaseComponent.extend({
     }
      // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-    jpivotHTML += webAppPath + "/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
+    jpivotHTML += webAppPath + "/ViewAction?solution="  + this.solution + "&path=" +  this.path + "&action="+ this.action;
 
     // Add args
     var p = new Array(this.parameters.length);
@@ -412,14 +412,49 @@ update : function() {
     });
   },
 
- schedulePrptComponent: function(){
+  schedulePrptComponent: function(){
     
     var a="second (0-59)";
 
+    setUp = function(){
+      var e= $("#time").val(); 
+      var txt;
+      if(base){
+      switch (e)
+      {
+        case "minute":
+        txt=$("#onThe").val();
+        if(isNaN(txt)||txt<0||txt>59||txt=="")
+          return false;
+        break;
+        case "hour":
+        txt=$("#onThe").val();
+        if(isNaN(txt)||txt<0||txt>59||txt=="")
+          return false;
+        break;
+        case "day":
+        txt=$("#onThe").val();
+        if(isNaN(txt)||txt<0||txt>23||txt=="")
+          return false;
+        break;
+        case "week":
+        txt=$("#onThe").val();
+        if(isNaN(txt)||txt<1||txt>7||txt=="")
+          return false;
+        break;
+      }
+    }
+      if(!base&&$("#cron").val()=="")
+        return false;
+      var to = $("#to").val();
+      if(to.indexOf("@")==-1||to.indexOf(".")==-1)
+        return false;
+      return true;
 
+    }
     timeSwitcher= function(){
       var e= $("#time").val();
-      var tag="";
+      var tag ="";
       if(e=="minute")
         tag="second (0-59)";
       else if(e=="hour")
@@ -431,25 +466,27 @@ update : function() {
 
       $('#suffix').text(tag);
     }
-
-
-    var basicStateHtml = ' <select id= "time" onChange="timeSwitcher()";>'+
+    var errorMessage = '<label id="err" style="display:none">Incorrect Input</label>';
+    var base=true;
+    var baseDiv = ' <div id="basicDiv"><select id= "time" onChange="timeSwitcher()">'+
         '<option value="minute" selected >Every Minute</option>'+
         '<option value="hour">Every Hour</option>'+
         '<option value="day">Every Day</option>'+
         '<option value="week">Every Week</option>'+
         '</select>'+
-        '<form>on the<input type="text" name="onThe" value=""></form><label>'+
-       '<div id="suffix">'+a+'</div>'+'</label>'+
-        '<br/>'+
-        '<form>to: <input type="text" name = "to" value=""></form><br/>'+
-        '<form>cc: <input type="text" name = "to" value=""></form>';
-    var advancedStateHtml ='<form>Cron Expression: <input type="text" name = "to"></form>';
+        '<form style="display:inline-block" id="onTheForm">on the: <input id="onThe" type="text" value=""></form><label>'+
+       '<div id="suffix" style="display:inline-block">'+a+'</div>'+'</label></div>';
+    var cronDiv = '<div id="cronDiv" style="display:none"><form>Cron Expression: <input id="cron" type="text" name = "to"></form></div>';
+    var baseHtml =errorMessage+baseDiv+cronDiv+
+        '<form>to: <input id="to" type="text" value=""></form>'+
+        '<form>cc: <input id ="cc" type="text" value=""></form>';
+  
 
+      
       var promp = {
 
       basicState : {
-        html: basicStateHtml, 
+        html: baseHtml, 
         title: "Schedule Report",
         buttons: {
           "Advanced": 0,
@@ -458,39 +495,72 @@ update : function() {
         },
         submit: function(e,v,m,f){
 
-          if(e==0){
-            $.prompt.goToState('advancedState');
+          if(e==-1) {$.prompt.close();}
+          else if(e==1){
+            var err = setUp();
+            if(err){
+              
+              var every = $("#time").val();
+              var interval = $("#onThe").val();
+              var email = $("#to").val();
+              var cc = $("#cc").val();
+              var cron = $("#cron").val();
+
+              if(base){
+                //schedule 
+
+              }
+              else{
+                //schedule with cron
+
+              }
+
+
+
+
+              $.prompt.goToState('doneState');
+            }           
+            else{
+              $("#err").show();
+              $("#err").css("color","red");
+              setTimeout(function(){
+                $("#err").hide();
+              },2000);
+            
+            }
+            return false;
+            }
+            else{
+            if(base){
+            $("#basicDiv").hide();
+            $("#cronDiv").show();
+            $('#jqi_basicState_buttonAdvanced').text("Basic");
+            base=false;
+          }
+            else{
+            $("#cronDiv").hide();
+            $("#basicDiv").show();
+            $('#jqi_basicState_buttonAdvanced').text("Advanced"); 
+            base=true;
+            }
             return false;
           }
-          else if(e==-1) {$.prompt.close();}
-          else{
-            $.prompt.close();
-            }
         }
       },
-      advancedState : {
-        html: advancedStateHtml,
+
+      doneState : {
+
+        html: "Report Scheduled", 
         title: "Schedule Report",
-        buttons: {
-          "Basic":0,
-          "Cancel" : -1,
-          "Ok" : 1
-        },
+        buttons: {"Ok" : true},
         submit: function(e,v,m,f){
-          if(e==0){
-            $.prompt.goToState('basicState');
-            return false;
-          }
-          else if(e==-1) $.prompt.close();
-          else
-            {
-              $.prompt.close();
-            }
         }
       }
     };
       $.prompt(promp);
-
+      $("#onThe").css("width","50px")
+      $("#jqi").css("width", "350px");
+      $("#jqi_basicState_buttonAdvanced").css("width","85px");
 }
 
 
