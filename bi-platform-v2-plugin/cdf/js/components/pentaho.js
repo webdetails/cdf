@@ -414,6 +414,14 @@ update : function() {
 
   schedulePrptComponent: function(){
     
+guid = function(){
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+});
+
+    }
+    
     var a="second (0-59)";
 
     setUp = function(){
@@ -452,7 +460,7 @@ update : function() {
       return true;
 
     }
-    timeSwitcher= function(){
+    changeOpts= function(){
       var e= $("#time").val();
       var tag ="";
       if(e=="minute")
@@ -468,25 +476,53 @@ update : function() {
     }
     var errorMessage = '<label id="err" style="display:none">Incorrect Input</label>';
     var base=true;
-    var baseDiv = ' <div id="basicDiv"><select id= "time" onChange="timeSwitcher()">'+
-        '<option value="minute" selected >Every Minute</option>'+
-        '<option value="hour">Every Hour</option>'+
-        '<option value="day">Every Day</option>'+
-        '<option value="week">Every Week</option>'+
-        '</select>'+
-        '<form style="display:inline-block" id="onTheForm">on the: <input id="onThe" type="text" value=""></form><label>'+
-       '<div id="suffix" style="display:inline-block">'+a+'</div>'+'</label></div>';
-    var cronDiv = '<div id="cronDiv" style="display:none"><form>Cron Expression: <input id="cron" type="text" name = "to"></form></div>';
-    var baseHtml =errorMessage+baseDiv+cronDiv+
+    var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"> Name :<input id="nameIn" type="text" value=""></form></div>';
+    var groupDiv= '<div id="groupDiv"><form style="display:inline-block" id="groupForm"> Group :<input id="groupIn" type="text" value=""></form></div>';
+    var descriptionDiv= '<div><form style="display:inline-block" id="descForm"> Description :<input id="descIn" type="text" value=""></form></div>';
+    var recurrenceDiv = '<div>'+
+    '<label>Recurrence :</label></br>'+
+    '<select id="recurrId" onChange="changeOpts()">'+
+    '<option value = "once" selected>Run Once</option>'+
+    '<option value = "seconds">Seconds</option>'+
+    '<option value = "minutes">Minutes</option>'+
+    '<option value = "hours">Hours</option>'+
+    '<option value = "daily">Daily</option>'+
+    '<option value = "weekly">Weekly</option>'+
+    '<option value = "monthly">Monthly</option>'+
+    '<option value = "yearly">Yearly</option>'+
+    '<option value = "cron">Cron</option></select></br>';
+
+    var amPm='<select id = amPm onChange="switchAmPm()"><option value="am">AM</option><option value="pm">PM</option></select>';
+
+    var startDate='<div id="startDateDiv"><form>Start Date : <input type="text" value=""></form></div>';
+    var rangeOfRecurrence='<>';
+    makeSelect = function(min,max,interval,id){
+      var selectHtml = '<select id ="'+id+'">';
+      for(var i=min;i<=max;i+=interval)
+        selectHtml += '<option value="'+i+'">'+
+      i+'</option>';
+      selectHtml += '</select>';
+      return selectHtml;
+
+    }
+    var hours = makeSelect(1,12,1,"hours");
+    var minutes = makeSelect(1,59,1,"minutes");
+
+    var runOnceOpts = hours+minutes+amPm;+'</br>';
+
+
+
+    var mailInfo =
         '<form>to: <input id="to" type="text" value=""></form>'+
         '<form>cc: <input id ="cc" type="text" value=""></form>';
   
 
-      
+      //var frontPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ runOnceOpts;
+      var frontPage= nameDiv+mailInfo+ recurrenceDiv+ runOnceOpts+startDate;
       var promp = {
 
       basicState : {
-        html: baseHtml, 
+        html: frontPage, 
         title: "Schedule Report",
         buttons: {
           "Advanced": 0,
@@ -507,16 +543,31 @@ update : function() {
               var cron = $("#cron").val();
 
               if(base){
-                //schedule 
+                   //schedule 
+                  var parameters = {
+                  name : "randomName",
+                  title: "randomTitle",
+                  cron : "00 00 0 ? * 2,7",
+                  desc: 'fdsdfsdf',
+                  "start-date-time": "1366628400000",
+                  schedRef: guid(),
+                  group:"randomref",
+                  schedulerAction: "doAddScheduleWithoutContent"
+
+
+                };
+
+
+                $.post("../../SubscriptionAdminService", parameters,
+                  function(xml) {
+                    alert(xml);
+                  },'xml');
 
               }
               else{
-                //schedule with cron
+
 
               }
-
-
-
 
               $.prompt.goToState('doneState');
             }           
