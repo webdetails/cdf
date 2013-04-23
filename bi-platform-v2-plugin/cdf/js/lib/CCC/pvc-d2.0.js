@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130412
+//VERSION TRUNK-20130423
 
 var pvc = (function(def, pv) {
 
@@ -19511,9 +19511,7 @@ pvc.BaseChart
                 // but, in between, prevents translators from 
                 // reading to dimensions that would bind into those roles...
                 if(groupingSpec !== undefined) {
-                    if(!groupingSpec && !role.defaultDimensionName) { 
-                        this._assertUnboundRoleIsOptional(role); // throws if required
-                    }
+                    if(!groupingSpec) { this._assertUnboundRoleIsOptional(role); } // throws if required
                     
                     var grouping = pvc.data.GroupingSpec.parse(groupingSpec);
     
@@ -27509,19 +27507,19 @@ def
         this._clearTicksTextDeps(layoutInfo);
     },
     
-    _clearTicksTextDeps: function(ticksInfo){ 
+    _clearTicksTextDeps: function(ticksInfo) {
         ticksInfo.maxTextWidth = 
         ticksInfo.ticksTextLength = 
         ticksInfo.ticksBBoxes = null;
     },
 
-    _calcTimeSeriesTicks: function(){
+    _calcTimeSeriesTicks: function() {
         this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
     },
     
-    _calcNumberTicks: function(/*layoutInfo*/){
+    _calcNumberTicks: function(/*layoutInfo*/) {
         var desiredTickCount = this.desiredTickCount;
-        if(desiredTickCount == null){
+        if(desiredTickCount == null) {
             if(this.isAnchorTopOrBottom()){
                 this._calcNumberHTicks();
                 return;
@@ -27535,12 +27533,12 @@ def
     
     // --------------
     
-    _calcContinuousTicks: function(ticksInfo, desiredTickCount){
+    _calcContinuousTicks: function(ticksInfo, desiredTickCount) {
         this._calcContinuousTicksValue(ticksInfo, desiredTickCount);
         this._calcContinuousTicksText(ticksInfo);
     },
     
-    _calcContinuousTicksValue: function(ticksInfo, desiredTickCount){
+    _calcContinuousTicksValue: function(ticksInfo, desiredTickCount) {
         ticksInfo.ticks = this.axis.calcContinuousTicks(desiredTickCount);
 
         if(pvc.debug > 4){
@@ -27549,30 +27547,32 @@ def
         }
     },
     
-    _calcContinuousTicksText: function(ticksInfo){        
-        ticksInfo.ticksText = def.query(ticksInfo.ticks)
-                   .select(function(tick){ return this.scale.tickFormat(tick); }, this)
-                   .array();
+    _calcContinuousTicksText: function(ticksInfo) {
+        var ticksText = ticksInfo.ticksText = ticksInfo.ticks.map(function(tick) { return this.scale.tickFormat(tick); }, this);
         
         this._clearTicksTextDeps(ticksInfo);
+
+        return ticksText;
     },
     
-    _calcTicksTextLength: function(ticksInfo){
+    _calcTicksTextLength: function(ticksInfo) {
         var max  = 0;
         var font = this.font;
-        ticksInfo.ticksTextLength = def.query(ticksInfo.ticksText)
-            .select(function(text){
-                var len = pv.Text.measure(text, font).width;
-                if(len > max){ max = len; }
-                return len; 
-            })
-            .array();
+        var ticksText = ticksInfo.ticksText || this._calcContinuousTicksText(ticksInfo);
+
+        var ticksTextLength = ticksInfo.ticksTextLength = ticksText.map(function(text) {
+            var len = pv.Text.measure(text, font).width;
+            if(len > max){ max = len; }
+            return len; 
+        });
         
         ticksInfo.maxTextWidth = max;
         ticksInfo.ticksBBoxes  = null;
+
+        return ticksTextLength;
     },
     
-    _calcTicksLabelBBoxes: function(ticksInfo){
+    _calcTicksLabelBBoxes: function(ticksInfo) {
         var me = this;
         var li = me._layoutInfo;
         var ticksTextLength = ticksInfo.ticksTextLength || 
@@ -27581,18 +27581,16 @@ def
         var maxBBox;
         var maxLen = li.maxTextWidth;
         
-        ticksInfo.ticksBBoxes = def.query(ticksTextLength)
-            .select(function(len){
-                var labelBBox = me._calcLabelBBox(len);
-                if(!maxBBox && len === maxLen){ maxBBox = labelBBox; }
-                return labelBBox;
-            }, me)
-            .array();
+        ticksInfo.ticksBBoxes = ticksTextLength.map(function(len) {
+            var labelBBox = me._calcLabelBBox(len);
+            if(!maxBBox && len === maxLen) { maxBBox = labelBBox; }
+            return labelBBox;
+        }, me);
         
         li.maxLabelBBox = maxBBox;
     },
     
-    _calcLabelBBox: function(textWidth){
+    _calcLabelBBox: function(textWidth) {
         var li = this._layoutInfo;
         return pvc.text.getLabelBBox(
                     textWidth, 
@@ -27707,13 +27705,47 @@ def
          var aBase  = Math.asin(sinOrCosVal);
          var aOrtho = Math.acos(cosOrSinVal);
     */
+
+    _tickMultipliers: [1, 2, 5, 10],
     
-    _calcNumberVDesiredTickCount: function(){
+    _calcNumberVDesiredTickCount: function() {
         var li = this._layoutInfo;
         var lineHeight   = li.textHeight * (1 + Math.max(0, this.labelSpacingMin /*em*/)); 
         var clientLength = li.clientSize[this.anchorLength()];
         
-        return Math.max(1, ~~(clientLength / lineHeight));
+        var tickCountMax = Math.max(1, ~~(clientLength / lineHeight));
+        if(tickCountMax <= 1) {
+            return 1;
+        }
+
+        var domain = this.scale.domain();
+        var span   = domain[1] - domain[0];
+        if(span <= 0) {
+            return tickCountMax;
+        }
+
+        var stepMin = span / tickCountMax;
+
+        // TODO: does not account for exponentMin and exponentMax options
+
+        // Find an adequate step = k * 10^n where k={1,2,5} and n is an integer
+        var exponMin = Math.floor(pv.log(stepMin, 10));
+        var stepBase = Math.pow(10, exponMin);
+        var step;
+        
+        // stepBase <= stepMin <= stepBase * 10
+        // Choose the first/smallest multiplier (among 1,2,5,10) 
+        // for which step = stepBase * m >= stepMin
+        var ms = this._tickMultipliers;
+        for(var i = 0 ; i < ms.length ; i++) {
+            step = ms[i] * stepBase;
+            if(step >= stepMin) {
+                break;
+            }
+        }
+        // else [should not happen], keep the highest (10)
+
+        return Math.max(1, Math.floor(span / step));
     },
     
     _calcNumberHTicks: function(){
@@ -31353,16 +31385,12 @@ def
                 colorVarHelper.onNewScene(serCatScene, /* isLeaf */ true);
                 
                 // -------------
-                
-                var isInterpolated = false;
-                //var isInterpolatedMiddle = false;
-                if(group) {
-                    var firstDatum = group._datums[0];
-                    if(firstDatum && firstDatum.isInterpolated) {
-                        isInterpolated = true;
-                        //isInterpolatedMiddle = firstDatum.isInterpolatedMiddle;
-                    }
-                }
+                // When ignoreNulls=false and nullInterpolatedMode!='none'
+                // an interpolated datum may appear along a null datum...
+                // Testing if the first datum is interpolated is thus not sufficient.
+                var isInterpolated = group != null && 
+                                     group.datums().prop('isInterpolated').any(def.truthy);
+                //isInterpolatedMiddle = firstDatum.isInterpolatedMiddle;
                 
                 serCatScene.isInterpolated = isInterpolated;
                 //serCatScene.isInterpolatedMiddle = isInterpolatedMiddle;
@@ -35479,7 +35507,7 @@ def
                     value: function(role) { return role.firstDimensionName(); }
                 }),
             visibleKeyArgs = {visible: true, zeroIfNone: false},
-            data       = this.visibleData(), // [ignoreNulls=true]
+            data       = this.visibleData({ignoreNulls: false}),
             rootScene  = new pvc.visual.Scene(null, {panel: this, source: data}),
             baseScale  = this.axes.base.scale,
             bandWidth  = baseScale.range().band,
