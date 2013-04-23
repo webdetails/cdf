@@ -413,15 +413,88 @@ update : function() {
   },
 
   schedulePrptComponent: function(){
+
     var parameters={};
       guid = function(){
-      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-      return v.toString(16);
-    });
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, 
+        function(c) {
+            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);  
+        });
 
     }
+    triggerError = function(msg,id){
 
+$(id).css("backgroundColor","red");
+var temp = $(id).val();
+$(id).val(msg);
+
+setTimeout(function(){$(id).css("backgroundColor","white");
+$(id).val(temp);},2000);
+
+
+    }
+    cronThis = function(exp){
+      var cron=exp;
+      var minute=$("#minutes").val();
+      var hour=$("#hours").val();
+      if($("#amPm").val()=="pm")
+        hour+=12;
+      var array =cron.split("/");//
+      var day=array[1];
+      var month = array[0];
+      var year = array[2];
+      var choice= $("#recurrId").val();
+      var week="?";
+      switch(choice)
+      {
+        case "daily":
+        week="mon-fri";
+        break;
+        case "weekly":
+        if ($("#monday").attr("checked")=="checked")
+          week+=",monday";
+        if ($("#tuesday").attr("checked")=="checked")
+          week+=",tuesday";
+        if ($("#wednesday").attr("checked")=="checked")
+          week+=",wednesday";
+        if ($("#thursday").attr("checked")=="checked")
+          week+=",thursday";
+        if ($("#friday").attr("checked")=="checked")
+          week+=",friday";
+        if ($("#saturday").attr("checked")=="checked")
+          week+=",saturday";
+        if ($("#sunday").attr("checked")=="checked")
+          week+=",sunday";
+        week.replace("\?","");
+        week.replace(",","");
+        break;
+        case "monthly":
+        if($("#monthRadio").attr("checked")==checked)
+        {
+
+        }
+        else
+        {
+
+        }
+        break;
+        case "yearly":
+        if($("#yearRadio").attr("checked")==checked)
+        {
+
+        }
+        else
+        {
+
+        }
+        break;
+
+      }
+
+      var builtCron = minute+" "+hour+" "+
+
+    }
      makeSelect = function(min,max,interval,id){
       var selectHtml = '<select id ="'+id+'">';
       for(var i=min;i<=max;i+=interval){
@@ -433,64 +506,114 @@ update : function() {
       return selectHtml;
 
     }
+    startTimeGetter=function(){
+        var hours = $("#hours").val();
+         if($("#amPm").val()=="pm")
+          hours+=12;
+        var minutes=$("#minutes").val();
+        var mili= (minutes*60000)+(hours*3600000);
+        var start = Date.UTC($("#rangeStartIn").val().replace("/",","));
+        return start+mili;
+    }
+     endTimeGetter=function(){
+        return Date.UTC($("#endByIn").val().replace("/",","));
+    }
 
       setParameters = function(){
+        parameters= {};
      var choice= $("#recurrId").val();
       parameters[name]=$("#nameIn").val();
       parameters[to]=$("#to").val();
-      if($("#cc").val()!="")
-        parameters[to]=$("#cc").val();
+      var now = new Date();
       switch (choice)
       {
          case "once":
-        $("#startTimeDiv").show();
-        $("#rangeOfRecurrOnceDiv").show();
+         var hours = $("#hours").val();
+         if($("#amPm").val()=="pm")
+          hours+=12;
+        var minutes=$("#minutes").val();
+        var mili= (minutes*60000)+(hours*3600000);
+        var start = Date.UTC($("#startDateIn").val().replace("/",","));
+        start+=mili;
+        if(!(start>now)){
+          triggerError("Incorrect Input","#startDateIn");
+          return "err";
+          }                                                   //XXX encode the errors ASAP
+        parameters["start-date-time"]=mili+start;
         break;
         case "seconds":
-        $("#startTimeDiv").show();
-        $("#recurrPatternDiv").show();
-        $("#patternSec").show();
-        $("#rangeOfRecurrDiv").show();
+        var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        parameters["repeat-time-millisecs"]="452452";
+        parameters["end-date-time"]=endTimeGetter()
         break;
         case "minutes":
-        $("#startTimeDiv").show();
-        $("#recurrPatternDiv").show();
-        $("#patternMin").show();
-        $("#rangeOfRecurrDiv").show();
+        var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        parameters["repeat-time-millisecs"]="";
+        parameters["end-date-time"]=endTimeGetter()
         break;
         case "hours":
-        $("#startTimeDiv").show();
-        $("#recurrPatternDiv").show();
-        $("#patternHour").show();
-        $("#rangeOfRecurrDiv").show();
+        var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        parameters["repeat-time-millisecs"]="42542";
+        parameters["end-date-time"]=endTimeGetter();
         break;
         case "daily":
-        $("#startTimeDiv").show();
-        $("#recurrPatternDiv").show();
-        $("#patternDay").show();
-        $("#rangeOfRecurrDiv").show();
+        if($("#endByRadio").attr("checked")==checked)
+          parameters["end-date-time"]=endTimeGetter();
+        if($("#weekDayRadio").checked){
+          parameters[cron]=cronThis($("#rangeStartIn").val());
+        }
+        else if($("#dayRadio").attr("checked")==checked){ 
+          parameters["repeat-time-millisecs"]="654654      FIXME";
+          var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        }
         break;
         case "weekly":
-        $("#startTimeDiv").show();
-        $("#recurrPatternDiv").show();
-        $("#patternWeek").show();
-        $("#rangeOfRecurrDiv").show();
+        parameters[cron]="13163123541602";
+        var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        if($("#endByRadio").attr("checked")==checked)
+          parameters["end-date-time"]=endTimeGetter();
         break;
         case "monthly":
-        $("#startTimeDiv").show();
-        $("#recurrPatternDiv").show();
-        $("#patternMonth").show();
-        $("#rangeOfRecurrDiv").show();
+        parameters[cron]="13163123541602";
+        var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        if($("#endByRadio").attr("checked")==checked)
+          parameters["end-date-time"]=endTimeGetter();
         break;
         case "yearly":
-        $("#startTimeDiv").show();
-        $("#recurrPatternDiv").show();
-        $("#patternYear").show();
-        $("#rangeOfRecurrDiv").show();
+        parameters[cron]="13163123541602";
+        var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        if($("#endByRadio").attr("checked")==checked)
+          parameters["end-date-time"]=endTimeGetter();
         break;
         case "cron":
-        $("#cronDiv").show();
-        $("#rangeOfRecurrDiv").show();
+        parameters[cron]="13163123541602";
+        var start = startTimeGetter();
+        if(start<now)
+          return "err";
+        parameters["start-date-time"]=start;
+        if($("#endByRadio").attr("checked")==checked)
+          parameters["end-date-time"]=endTimeGetter();
         break;
       }
     }
@@ -507,8 +630,6 @@ update : function() {
         $("#patternWeek").hide();
         $("#patternMonth").hide();
         $("#patternYear").hide();
-
-
     }
     changeOpts= function(){
       var choice= $("#recurrId").val();
@@ -601,7 +722,7 @@ update : function() {
     var cronString='<div id="cronDiv"  style="display:none"><form>Cron String: <input type="text" value=""></form></div>';
     var hours = makeSelect(1,12,1,"hours");
     var minutes = makeSelect(0,59,1,"minutes");
-    var amPm='<select id = "amPm" onChange="switchAmPm()"><option value="am">AM</option><option value="pm">PM</option></select>';
+    var amPm='<select id = "amPm"><option value="am">AM</option><option value="pm">PM</option></select>';
     var startTime = '<div id="startTimeDiv"><label>Start Time:</label></br>'+hours+minutes+amPm+'</div>';
     //var startDate='<div id="startDateDiv"><form>Start Date : <input id= "startDateIn" type="text" value=""></form></div>';
     var recurrencePattern='<div id="recurrPatternDiv" style = "display:none">'+
@@ -621,24 +742,24 @@ update : function() {
       '<label style="display:inline-block"> hour(s)</label>'+
     '</div>'+
     '<div id="patternDay" >'+
-      '<input type="radio" name ="day" value="day"><label style="display:inline-block">Every </label>'+
+      '<input type="radio" name ="day" value="day" id="dayRadio" checked><label style="display:inline-block">Every </label>'+
       '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
       '<label style="display:inline-block"> day(s)</label></br>'+
-      '<input type="radio" name ="day" value="weekDay">Every weekday'+
+      '<input type="radio" name ="day" value="weekDay" id="weekDayRadio">Every weekday'+
     '</div>'+
     '<div id="patternWeek" >'+
       '<form>'+
-      '<input type="checkbox" name="weekday" value="monday">Monday'+
-      '<input type="checkbox" name="weekday" value="tuesday">Tuesday'+
-      '<input type="checkbox" name="weekday" value="wednesday">Wednesday'+
-      '<input type="checkbox" name="weekday" value="thursday">Thursday'+'</br>'+
-      '<input type="checkbox" name="weekday" value="friday">Friday'+
-      '<input type="checkbox" name="weekday" value="saturday">Saturday'+
-      '<input type="checkbox" name="weekday" value="sunday">Sunday'+
+      '<input type="checkbox" name="weekday" value="monday" id="monday">Monday'+
+      '<input type="checkbox" name="weekday" value="tuesday" id="tuesday">Tuesday'+
+      '<input type="checkbox" name="weekday" value="wednesday" id="wednesday">Wednesday'+
+      '<input type="checkbox" name="weekday" value="thursday" id="thursday">Thursday'+'</br>'+
+      '<input type="checkbox" name="weekday" value="friday" id="friday">Friday'+
+      '<input type="checkbox" name="weekday" value="saturday" id="saturday">Saturday'+
+      '<input type="checkbox" name="weekday" value="sunday" id="sunday">Sunday'+
       '</form>'+
     '</div>'+
     '<div id="patternMonth" >'+
-      '<input type="radio" name ="month" value="day"><label style="display:inline-block">Day </label>'+
+      '<input id="monthRadio" type="radio" name ="month" value="day" checked><label style="display:inline-block">Day </label>'+
       '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
       '<label style="display:inline-block"> of every month</label></br>'+
       '<input type="radio" name ="month" value="the">The'+
@@ -650,7 +771,7 @@ update : function() {
         '</select><label> of every month</label>'+
     '</div>'+
     '<div id="patternYear" >'+
-      '<input type="radio" name ="year" value="month"><label style="display:inline-block">Every </label>'+
+      '<input id ="yearRadio" type="radio" name ="year" value="month" checked><label style="display:inline-block">Every </label>'+
       '<select>'+monthOpts+
         '</select><input type="text" size="3">'+'</br>'+
       '<input type="radio" name ="year" value="the">The'+
@@ -665,16 +786,14 @@ update : function() {
     '</div>';
    var rangeOfRecurrence='<div id="rangeOfRecurrDiv" style="display:none"><label>Range of Recurrence: </label>'+
     '<form>Start: <input type="text" id="rangeStartIn"></form>'+
-    '<form><input type="radio" name ="end" value="noEnd">No end date'+
-    '</br><input type="radio" name ="end" value ="endBy">End by :'+
+    '<form><input type="radio" name ="end" value="noEnd" checked>No end date'+
+    '</br><input type="radio" name ="end" value ="endBy" id="endByRadio">End by :'+
     '<input id= "endByIn" type="text"></form>'+
     '</div>';
    var rangeOfRecurrenceOnce='<div id="rangeOfRecurrOnceDiv"><form>Start Date : <input id= "startDateIn" type="text" value=""></form></div>';
 
 
-    var mailInfo =
-        '<form>to: <input id="to" type="text" value=""></form>'+
-        '<form>cc: <input id ="cc" type="text" value=""></form>';
+    var mailInfo = '<form>to: <input id="to" type="text" value=""></form>';
   
 
       //var fullPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ startTime;
@@ -693,18 +812,32 @@ update : function() {
 
           if(e==-1) {$.prompt.close();}
           else if(e==1){
-            //setParameters();
            
                   //schedule 
+                  var sharedUuid= guid();
                   var parameters = {
                   name : "randomName",
                   title: "randomTitle",
                   cron : "00 00 0 ? * 2,7",
                   desc: 'fdsdfsdf',
                   "start-date-time": "1366628400000",
-                  schedRef: guid(),
+                  schedRef: sharedUuid,
                   group:"randomref",
                   schedulerAction: "doAddScheduleWithoutContent"
+
+                };
+
+                var parameters2 = {
+                  path : "/reports",
+                  name : "Order Status.prpt",
+                  susbscribe : true,
+                  "susbscription-name" : "ere",
+                  "schedule-id" : sharedUuid,
+                  oStatus : "On Hold",
+                  "output-target" : "table/html;page-mode=pageaccepted-page=-1",
+                  showParameters : true,
+                  htmlProportionalWidth : false,
+                  renderMode : "SUBSCRIBE"
 
                 };
 
@@ -713,15 +846,17 @@ update : function() {
                   function(xml) {
                     alert(xml);
                   },'xml');
-
-             
+                
+                $.post("../../content/reporting", parameters2,
+                  function(xml) {
+                    alert(xml);
+                  },'xml');        
 
               $.prompt.goToState('doneState');
-                      
-            
-            return false;
-            }
-      },
+            return false;           
+          }
+      }
+    },
 
       doneState : {
 
@@ -731,10 +866,17 @@ update : function() {
         submit: function(e,v,m,f){
         }
       }
-    }
+    
   };
       $.prompt(promp);
       $("#jqi").css("width", "350px");
+      $(document).ready(function(ev) {
+        $("#startDateIn").datepicker({minDate:0});
+        $("#rangeStartIn").datepicker({minDate:0});
+        $("#endByIn").datepicker({minDate:0});
+
+});
+      
 }
 
 
