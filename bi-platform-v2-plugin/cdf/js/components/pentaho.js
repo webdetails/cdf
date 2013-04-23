@@ -413,69 +413,175 @@ update : function() {
   },
 
   schedulePrptComponent: function(){
-    
-guid = function(){
+    var parameters={};
+      guid = function(){
       'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-    return v.toString(16);
-});
+      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+      return v.toString(16);
+    });
 
     }
-    
-    var a="second (0-59)";
 
-    setUp = function(){
-      var e= $("#time").val(); 
-      var txt;
-      if(base){
-      switch (e)
+     makeSelect = function(min,max,interval,id){
+      var selectHtml = '<select id ="'+id+'">';
+      for(var i=min;i<=max;i+=interval){
+        if(i<10)
+        selectHtml += '<option value="'+i+'">0'+i+'</option>';
+      else selectHtml += '<option value="'+i+'">'+i+'</option>';
+      }
+      selectHtml += '</select>';
+      return selectHtml;
+
+    }
+
+      setParameters = function(){
+     var choice= $("#recurrId").val();
+      parameters[name]=$("#nameIn").val();
+      parameters[to]=$("#to").val();
+      if($("#cc").val()!="")
+        parameters[to]=$("#cc").val();
+      switch (choice)
       {
-        case "minute":
-        txt=$("#onThe").val();
-        if(isNaN(txt)||txt<0||txt>59||txt=="")
-          return false;
+         case "once":
+        $("#startTimeDiv").show();
+        $("#rangeOfRecurrOnceDiv").show();
         break;
-        case "hour":
-        txt=$("#onThe").val();
-        if(isNaN(txt)||txt<0||txt>59||txt=="")
-          return false;
+        case "seconds":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternSec").show();
+        $("#rangeOfRecurrDiv").show();
         break;
-        case "day":
-        txt=$("#onThe").val();
-        if(isNaN(txt)||txt<0||txt>23||txt=="")
-          return false;
+        case "minutes":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternMin").show();
+        $("#rangeOfRecurrDiv").show();
         break;
-        case "week":
-        txt=$("#onThe").val();
-        if(isNaN(txt)||txt<1||txt>7||txt=="")
-          return false;
+        case "hours":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternHour").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "daily":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternDay").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "weekly":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternWeek").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "monthly":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternMonth").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "yearly":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternYear").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "cron":
+        $("#cronDiv").show();
+        $("#rangeOfRecurrDiv").show();
         break;
       }
     }
-      if(!base&&$("#cron").val()=="")
-        return false;
-      var to = $("#to").val();
-      if(to.indexOf("@")==-1||to.indexOf(".")==-1)
-        return false;
-      return true;
+    hideAll = function(){
+        $("#rangeOfRecurrDiv").hide();
+        $("#cronDiv").hide();
+        $("#recurrPatternDiv").hide();
+        $("#startTimeDiv").hide();
+        $("#rangeOfRecurrOnceDiv").hide();
+        $("#patternSec").hide();
+        $("#patternMin").hide();
+        $("#patternHour").hide();
+        $("#patternDay").hide();
+        $("#patternWeek").hide();
+        $("#patternMonth").hide();
+        $("#patternYear").hide();
+
 
     }
     changeOpts= function(){
-      var e= $("#time").val();
-      var tag ="";
-      if(e=="minute")
-        tag="second (0-59)";
-      else if(e=="hour")
-        tag="minute (0-59)";
-      else if(e=="day")
-        tag="hour (0-23)";
-      else if(e=="week")
-        tag="day of the week (1-7)";
+      var choice= $("#recurrId").val();
+      hideAll();
+      switch (choice)
+      {
+        case "once":
+        $("#startTimeDiv").show();
+        $("#rangeOfRecurrOnceDiv").show();
+        break;
+        case "seconds":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternSec").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "minutes":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternMin").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "hours":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternHour").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "daily":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternDay").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "weekly":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternWeek").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "monthly":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternMonth").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "yearly":
+        $("#startTimeDiv").show();
+        $("#recurrPatternDiv").show();
+        $("#patternYear").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
+        case "cron":
+        $("#cronDiv").show();
+        $("#rangeOfRecurrDiv").show();
+        break;
 
-      $('#suffix').text(tag);
+      }
+
     }
+
+
+    var monthOpts = '<option value="january">January</option>'+'<option value="february">February</option>'+
+          '<option value="march">March</option>'+'<option value="april">April</option>'+
+          '<option value="may">May</option>'+'<option value="june">June</option>'+
+          '<option value="july">July</option>'+'<option value="august">August</option>'+
+          '<option value="september">September</option>'+'<option value="october">October</option>'+
+          '<option value="november">November</option>'+'<option value="december">December</option>';
+    var weekOpts = '<option value="sunday">sunday</option>'+'<option value="monday">monday</option>'+
+          '<option value="tuesday">tuesday</option>'+'<option value="wednesday">wednesday</option>'+
+          '<option value="thursday">thursday</option>'+'<option value="friday">friday</option>'+
+          '<option value="saturday">saturday</option>';
     var errorMessage = '<label id="err" style="display:none">Incorrect Input</label>';
-    var base=true;
     var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"> Name :<input id="nameIn" type="text" value=""></form></div>';
     var groupDiv= '<div id="groupDiv"><form style="display:inline-block" id="groupForm"> Group :<input id="groupIn" type="text" value=""></form></div>';
     var descriptionDiv= '<div><form style="display:inline-block" id="descForm"> Description :<input id="descIn" type="text" value=""></form></div>';
@@ -490,26 +596,80 @@ guid = function(){
     '<option value = "weekly">Weekly</option>'+
     '<option value = "monthly">Monthly</option>'+
     '<option value = "yearly">Yearly</option>'+
-    '<option value = "cron">Cron</option></select></br>';
+    '<option value = "cron">Cron</option></select></br></div>';
 
-    var amPm='<select id = amPm onChange="switchAmPm()"><option value="am">AM</option><option value="pm">PM</option></select>';
-
-    var startDate='<div id="startDateDiv"><form>Start Date : <input type="text" value=""></form></div>';
-    var rangeOfRecurrence='<>';
-    makeSelect = function(min,max,interval,id){
-      var selectHtml = '<select id ="'+id+'">';
-      for(var i=min;i<=max;i+=interval)
-        selectHtml += '<option value="'+i+'">'+
-      i+'</option>';
-      selectHtml += '</select>';
-      return selectHtml;
-
-    }
+    var cronString='<div id="cronDiv"  style="display:none"><form>Cron String: <input type="text" value=""></form></div>';
     var hours = makeSelect(1,12,1,"hours");
-    var minutes = makeSelect(1,59,1,"minutes");
-
-    var runOnceOpts = hours+minutes+amPm;+'</br>';
-
+    var minutes = makeSelect(0,59,1,"minutes");
+    var amPm='<select id = "amPm" onChange="switchAmPm()"><option value="am">AM</option><option value="pm">PM</option></select>';
+    var startTime = '<div id="startTimeDiv"><label>Start Time:</label></br>'+hours+minutes+amPm+'</div>';
+    //var startDate='<div id="startDateDiv"><form>Start Date : <input id= "startDateIn" type="text" value=""></form></div>';
+    var recurrencePattern='<div id="recurrPatternDiv" style = "display:none">'+
+    '<div id="patternSec" >'+
+      '<label style="display:inline-block">Every </label>'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
+      '<label style="display:inline-block"> second(s)</label>'+
+    '</div>'+
+    '<div id="patternMin" >'+
+      '<label style="display:inline-block">Every </label>'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
+      '<label style="display:inline-block"> minute(s)</label>'+
+    '</div>'+
+    '<div id="patternHour" >'+
+      '<label style="display:inline-block">Every </label>'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
+      '<label style="display:inline-block"> hour(s)</label>'+
+    '</div>'+
+    '<div id="patternDay" >'+
+      '<input type="radio" name ="day" value="day"><label style="display:inline-block">Every </label>'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
+      '<label style="display:inline-block"> day(s)</label></br>'+
+      '<input type="radio" name ="day" value="weekDay">Every weekday'+
+    '</div>'+
+    '<div id="patternWeek" >'+
+      '<form>'+
+      '<input type="checkbox" name="weekday" value="monday">Monday'+
+      '<input type="checkbox" name="weekday" value="tuesday">Tuesday'+
+      '<input type="checkbox" name="weekday" value="wednesday">Wednesday'+
+      '<input type="checkbox" name="weekday" value="thursday">Thursday'+'</br>'+
+      '<input type="checkbox" name="weekday" value="friday">Friday'+
+      '<input type="checkbox" name="weekday" value="saturday">Saturday'+
+      '<input type="checkbox" name="weekday" value="sunday">Sunday'+
+      '</form>'+
+    '</div>'+
+    '<div id="patternMonth" >'+
+      '<input type="radio" name ="month" value="day"><label style="display:inline-block">Day </label>'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
+      '<label style="display:inline-block"> of every month</label></br>'+
+      '<input type="radio" name ="month" value="the">The'+
+        '<select>'+'<option value="first">first</option>'+'<option value="second">second</option>'+
+          '<option value="third">third</option>'+'<option value="fourth">fourth</option>'+
+          '<option value="last">last</option>'+
+        '</select>'+
+        '<select>'+weekOpts+
+        '</select><label> of every month</label>'+
+    '</div>'+
+    '<div id="patternYear" >'+
+      '<input type="radio" name ="year" value="month"><label style="display:inline-block">Every </label>'+
+      '<select>'+monthOpts+
+        '</select><input type="text" size="3">'+'</br>'+
+      '<input type="radio" name ="year" value="the">The'+
+        '<select>'+'<option value="first">first</option>'+'<option value="second">second</option>'+
+          '<option value="third">third</option>'+'<option value="fourth">fourth</option>'+
+          '<option value="last">last</option>'+
+        '</select>'+
+        '<select>'+weekOpts+
+        '</select><label> of </label>'+
+        '<select>'+monthOpts+'</select>'+
+    '</div>'+
+    '</div>';
+   var rangeOfRecurrence='<div id="rangeOfRecurrDiv" style="display:none"><label>Range of Recurrence: </label>'+
+    '<form>Start: <input type="text" id="rangeStartIn"></form>'+
+    '<form><input type="radio" name ="end" value="noEnd">No end date'+
+    '</br><input type="radio" name ="end" value ="endBy">End by :'+
+    '<input id= "endByIn" type="text"></form>'+
+    '</div>';
+   var rangeOfRecurrenceOnce='<div id="rangeOfRecurrOnceDiv"><form>Start Date : <input id= "startDateIn" type="text" value=""></form></div>';
 
 
     var mailInfo =
@@ -517,15 +677,15 @@ guid = function(){
         '<form>cc: <input id ="cc" type="text" value=""></form>';
   
 
-      //var frontPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ runOnceOpts;
-      var frontPage= nameDiv+mailInfo+ recurrenceDiv+ runOnceOpts+startDate;
+      //var fullPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ startTime;
+      var fullPage= nameDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+
+      rangeOfRecurrence+rangeOfRecurrenceOnce;
       var promp = {
 
       basicState : {
-        html: frontPage, 
+        html: fullPage, 
         title: "Schedule Report",
         buttons: {
-          "Advanced": 0,
           "Cancel" : -1,
           "Ok" : 1
         },
@@ -533,17 +693,9 @@ guid = function(){
 
           if(e==-1) {$.prompt.close();}
           else if(e==1){
-            var err = setUp();
-            if(err){
-              
-              var every = $("#time").val();
-              var interval = $("#onThe").val();
-              var email = $("#to").val();
-              var cc = $("#cc").val();
-              var cron = $("#cron").val();
-
-              if(base){
-                   //schedule 
+            //setParameters();
+           
+                  //schedule 
                   var parameters = {
                   name : "randomName",
                   title: "randomTitle",
@@ -554,7 +706,6 @@ guid = function(){
                   group:"randomref",
                   schedulerAction: "doAddScheduleWithoutContent"
 
-
                 };
 
 
@@ -563,40 +714,13 @@ guid = function(){
                     alert(xml);
                   },'xml');
 
-              }
-              else{
-
-
-              }
+             
 
               $.prompt.goToState('doneState');
-            }           
-            else{
-              $("#err").show();
-              $("#err").css("color","red");
-              setTimeout(function(){
-                $("#err").hide();
-              },2000);
+                      
             
-            }
             return false;
             }
-            else{
-            if(base){
-            $("#basicDiv").hide();
-            $("#cronDiv").show();
-            $('#jqi_basicState_buttonAdvanced').text("Basic");
-            base=false;
-          }
-            else{
-            $("#cronDiv").hide();
-            $("#basicDiv").show();
-            $('#jqi_basicState_buttonAdvanced').text("Advanced"); 
-            base=true;
-            }
-            return false;
-          }
-        }
       },
 
       doneState : {
@@ -607,11 +731,10 @@ guid = function(){
         submit: function(e,v,m,f){
         }
       }
-    };
+    }
+  };
       $.prompt(promp);
-      $("#onThe").css("width","50px")
       $("#jqi").css("width", "350px");
-      $("#jqi_basicState_buttonAdvanced").css("width","85px");
 }
 
 
