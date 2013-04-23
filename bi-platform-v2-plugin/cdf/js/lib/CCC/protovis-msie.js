@@ -1,4 +1,4 @@
-pen.define("cdf/lib/CCC/protovis-msie", ["cdf/lib/CCC/protovis"], function(pv){
+pen.define("cdf/lib/CCC/protovis-msie", ["cdf/lib/CCC/protovis"], function(pv) {
 /*!
  * Protovis MSIE/VML addon
  * Copyright (C) 2011 by DataMarket <http://datamarket.com>
@@ -847,8 +847,6 @@ pv.VmlScene.removeSiblings = function(e) {
     e = n;
   }
 };
-
-pv.VmlScene.removeFillStyleDefinitions = function(/*scenes*/){};
 
 pv.VmlScene.addFillStyleDefinition = function(/*scenes, fill*/){};
 
