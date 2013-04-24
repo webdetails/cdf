@@ -747,6 +747,7 @@ div#jqi.jqi {
 	-moz-border-radius: 6px;
 	-webkit-border-radius: 6px;
 	overflow: hidden;
+	top: 10% !important;
 }
 
 div#jqi.jqi,
@@ -799,13 +800,18 @@ div.jqi .jqimessage {
 }
 
 form input[type="text"] {
-	margin-left: 10px;
 	padding: 5px;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	color: #666;
 	font-family: 'Open Sans', sans-serif;
+	margin-right: 5px;
+	width: 250px;
+}
+
+form input[type="checkbox"] {
+	margin: 5px 0px 5px 8px;
 }
 
 form input[type="text"]:focus {
@@ -824,8 +830,7 @@ select {
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border: 1px solid rgb(187, 187, 187);
-	margin-right: -15px;
-	margin-left: 20px;
+	margin-right: 5px;
 }
 
 select:focus {
@@ -873,4 +878,18 @@ select:focus {
 	display: inline-block;
 	padding: 15px 0px;
 	border: none;
+}
+
+.dialog-title {
+	color: #137bca;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.dialog-label {
+	display: inline-block;
+	width: 100px;
+	color: #137bca;
+	font-size: 14px;
+	font-weight: 500;
 }

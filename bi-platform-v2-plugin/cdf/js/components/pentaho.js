@@ -703,12 +703,12 @@ $(id).val(temp);},2000);
           '<option value="thursday">thursday</option>'+'<option value="friday">friday</option>'+
           '<option value="saturday">saturday</option>';
     var errorMessage = '<label id="err" style="display:none">Incorrect Input</label>';
-    var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"> Name :<input id="nameIn" type="text" value="' + this.action + ' Schedule"></form></div>';
-    var groupDiv= '<div id="groupDiv"><form style="display:inline-block" id="groupForm"> Group :<input id="groupIn" type="text" value=""></form></div>';
-    var descriptionDiv= '<div><form style="display:inline-block" id="descForm"> Description :<input id="descIn" type="text" value=""></form></div>';
+    var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"><span class="dialog-label">Name:</span><input id="nameIn" type="text" value="' + this.action + ' Schedule"></form></div>';
+    var groupDiv= '<div id="groupDiv"><form style="display:inline-block" id="groupForm"><span class="dialog-label">Group:</span><input id="groupIn" type="text" value=""></form></div>';
+    var descriptionDiv= '<div><form style="display:inline-block" id="descForm"><span class="dialog-label">Description:</span><input id="descIn" type="text" value=""></form></div>';
     var recurrenceDiv = '<div>'+
-    '<label>Recurrence :</label></br>'+
-    '<select id="recurrId" onChange="changeOpts()">'+
+    '<br><span class="dialog-title" style="width: 100px; display: inline-block;">Recurrence:</span>'+
+    '<select id="recurrId" onChange="changeOpts()" style="margin-left: 0px;">'+
     '<option value = "once" selected>Run Once</option>'+
     '<option value = "seconds">Seconds</option>'+
     '<option value = "minutes">Minutes</option>'+
@@ -719,81 +719,81 @@ $(id).val(temp);},2000);
     '<option value = "yearly">Yearly</option>'+
     '<option value = "cron">Cron</option></select></br></div>';
 
-    var cronString='<div id="cronDiv"  style="display:none"><form>Cron String: <input type="text" value=""></form></div>';
+    var cronString='<div id="cronDiv"  style="display:none"><form><span class="dialog-label">Cron String:</span><input type="text" value=""></form></div>';
     var hours = makeSelect(1,12,1,"hours");
     var minutes = makeSelect(0,59,1,"minutes");
     var amPm='<select id = "amPm"><option value="am">AM</option><option value="pm">PM</option></select>';
-    var startTime = '<div id="startTimeDiv"><label>Start Time:</label></br>'+hours+minutes+amPm+'</div>';
+    var startTime = '<div id="startTimeDiv"><br><span class="dialog-title" style="width: 100px; display: inline-block;">Start Time:</span>'+hours+minutes+amPm+'</div>';
     //var startDate='<div id="startDateDiv"><form>Start Date : <input id= "startDateIn" type="text" value=""></form></div>';
     var recurrencePattern='<div id="recurrPatternDiv" style = "display:none">'+
     '<div id="patternSec" >'+
-      '<label style="display:inline-block">Every </label>'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
-      '<label style="display:inline-block"> second(s)</label>'+
+      '<label style="display:inline-block; margin-left: 100px; font-weight: 500;">Every</label>&nbsp;&nbsp;'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<label style="display:inline-block; font-weight: 500;"> second(s)</label>'+
     '</div>'+
     '<div id="patternMin" >'+
-      '<label style="display:inline-block">Every </label>'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
-      '<label style="display:inline-block"> minute(s)</label>'+
+      '<label style="display:inline-block; margin-left: 100px; font-weight: 500;">Every</label>&nbsp;&nbsp;'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<label style="display:inline-block; font-weight: 500;"> minute(s)</label>'+
     '</div>'+
     '<div id="patternHour" >'+
-      '<label style="display:inline-block">Every </label>'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
-      '<label style="display:inline-block"> hour(s)</label>'+
+      '<label style="display:inline-block; margin-left: 100px; font-weight: 500;">Every</label>&nbsp;&nbsp;'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<label style="display:inline-block; font-weight: 500;"> hour(s)</label>'+
     '</div>'+
     '<div id="patternDay" >'+
-      '<input type="radio" name ="day" value="day" id="dayRadio" checked><label style="display:inline-block">Every </label>'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
-      '<label style="display:inline-block"> day(s)</label></br>'+
-      '<input type="radio" name ="day" value="weekDay" id="weekDayRadio">Every weekday'+
+      '<input type="radio" name ="day" value="day" id="dayRadio" style="margin-left: 100px; font-weight: 500;" checked> <label style="display:inline-block">Every</label>&nbsp;&nbsp;'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<label style="display:inline-block; font-weight: 500;"> day(s)</label></br>'+
+      '<input type="radio" name ="day" value="weekDay" id="weekDayRadio" style="margin-left: 100px;"> Every weekday'+
     '</div>'+
     '<div id="patternWeek" >'+
       '<form>'+
-      '<input type="checkbox" name="weekday" value="monday" id="monday">Monday'+
-      '<input type="checkbox" name="weekday" value="tuesday" id="tuesday">Tuesday'+
-      '<input type="checkbox" name="weekday" value="wednesday" id="wednesday">Wednesday'+
-      '<input type="checkbox" name="weekday" value="thursday" id="thursday">Thursday'+'</br>'+
-      '<input type="checkbox" name="weekday" value="friday" id="friday">Friday'+
-      '<input type="checkbox" name="weekday" value="saturday" id="saturday">Saturday'+
-      '<input type="checkbox" name="weekday" value="sunday" id="sunday">Sunday'+
+      '<input type="checkbox" name="weekday" value="monday" id="monday" style="margin-left: 100px;"> Monday'+
+      '<input type="checkbox" name="weekday" value="tuesday" id="tuesday"> Tuesday'+
+      '<input type="checkbox" name="weekday" value="wednesday" id="wednesday"> Wednesday'+
+      '<input type="checkbox" name="weekday" value="thursday" id="thursday"> Thursday'+'</br>'+
+      '<input type="checkbox" name="weekday" value="friday" id="friday" style="margin-left: 100px;"> Friday'+
+      '<input type="checkbox" name="weekday" value="saturday" id="saturday"> Saturday'+
+      '<input type="checkbox" name="weekday" value="sunday" id="sunday"> Sunday'+
       '</form>'+
     '</div>'+
     '<div id="patternMonth" >'+
-      '<input id="monthRadio" type="radio" name ="month" value="day" checked><label style="display:inline-block">Day </label>'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3"></form>'+
-      '<label style="display:inline-block"> of every month</label></br>'+
-      '<input type="radio" name ="month" value="the">The'+
+      '<input id="monthRadio" type="radio" name ="month" value="day" style="margin-left: 100px;" checked> <label style="display:inline-block; font-weight: 500;">Day</label>&nbsp;&nbsp;'+
+      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:205px;"></form>'+
+      '<label style="display:inline-block; font-weight: 500;"> of every month</label></br>'+
+      '<input type="radio" name ="month" value="the" style="margin-left: 100px;"> <label style="display:inline-block; font-weight: 500;">The</label>&nbsp;&nbsp;'+
         '<select>'+'<option value="first">first</option>'+'<option value="second">second</option>'+
           '<option value="third">third</option>'+'<option value="fourth">fourth</option>'+
           '<option value="last">last</option>'+
         '</select>'+
         '<select>'+weekOpts+
-        '</select><label> of every month</label>'+
+        '</select><label style=" font-weight: 500;"> of every month</label>'+
     '</div>'+
     '<div id="patternYear" >'+
-      '<input id ="yearRadio" type="radio" name ="year" value="month" checked><label style="display:inline-block">Every </label>'+
+      '<input id ="yearRadio" type="radio" name ="year" value="month" style="margin-left: 100px;" checked> <label style="display:inline-block; font-weight: 500;">Every</label>&nbsp;'+
       '<select>'+monthOpts+
         '</select><input type="text" size="3">'+'</br>'+
-      '<input type="radio" name ="year" value="the">The'+
+      '<input type="radio" name ="year" value="the" style="margin-left: 100px;"> <label style="display:inline-block; font-weight: 500;">The</label>&nbsp;'+
         '<select>'+'<option value="first">first</option>'+'<option value="second">second</option>'+
           '<option value="third">third</option>'+'<option value="fourth">fourth</option>'+
           '<option value="last">last</option>'+
         '</select>'+
         '<select>'+weekOpts+
-        '</select><label> of </label>'+
+        '</select><label style=" font-weight: 500;">of&nbsp;&nbsp;</label>'+
         '<select>'+monthOpts+'</select>'+
     '</div>'+
     '</div>';
-   var rangeOfRecurrence='<div id="rangeOfRecurrDiv" style="display:none"><label>Range of Recurrence: </label>'+
-    '<form>Start: <input type="text" id="rangeStartIn"></form>'+
-    '<form><input type="radio" name ="end" value="noEnd" checked>No end date'+
-    '</br><input type="radio" name ="end" value ="endBy" id="endByRadio">End by :'+
-    '<input id= "endByIn" type="text"></form>'+
+   var rangeOfRecurrence='<div id="rangeOfRecurrDiv" style="display:none"><br><span class="dialog-title"><strong>Range of Recurrence:</strong> </span>'+
+    '<form><span class="dialog-label">Start:</span><input type="text" id="rangeStartIn"></form>'+
+    '<form><span class="dialog-label">End:</span><input type="radio" name ="end" value="noEnd" checked> No end date'+
+    '</br><input type="radio" name ="end" value ="endBy" id="endByRadio" style="margin-left:100px;"> End by:&nbsp;&nbsp;'+
+    '<input id= "endByIn" type="text" style="width:187px;"></form>'+
     '</div>';
-   var rangeOfRecurrenceOnce='<div id="rangeOfRecurrOnceDiv"><form>Start Date : <input id= "startDateIn" type="text" value=""></form></div>';
+   var rangeOfRecurrenceOnce='<div id="rangeOfRecurrOnceDiv"><form><span class="dialog-label">Start Date:</span><input id= "startDateIn" type="text" value=""></form></div>';
 
 
-    var mailInfo = '<form>to: <input id="to" type="text" value=""></form>';
+    var mailInfo = '<form><span class="dialog-label">To:</span><input id="to" type="text" value=""></form>';
   
 
       //var fullPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ startTime;
@@ -885,7 +885,7 @@ $(id).val(temp);},2000);
     
   };
       $.prompt(promp);
-      $("#jqi").css("width", "350px");
+      $("#jqi").css("width", "510px");
       $(document).ready(function(ev) {
         $("#startDateIn").datepicker({minDate:0});
         $("#rangeStartIn").datepicker({minDate:0});
