@@ -41,7 +41,10 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.engine.IUITemplater;
 import org.pentaho.platform.api.repository.IContentItem;
+import org.pentaho.platform.api.repository.ISchedule;
 import org.pentaho.platform.api.repository.ISolutionRepository;
+import org.pentaho.platform.api.repository.ISubscribeContent;
+import org.pentaho.platform.api.repository.ISubscriptionRepository;
 import org.pentaho.platform.engine.core.solution.ActionInfo;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.services.actionsequence.ActionResource;
@@ -71,6 +74,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final String MIMETYPE = "text/html"; //$NON-NLS-1$
     public static final String SOLUTION_DIR = "cdf";
     // Possible actions
+    private static final String GET_SCHEDULES = "/getSchedules";
     private static final String RENDER_HTML = "/RenderHTML";
     private static final String VIEWS = "/Views";
     private static final String RENDER_XCDF = "/RenderXCDF";
@@ -228,6 +232,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
         else if (urlPath.equalsIgnoreCase(PING)) {
           out.write("{\"ping\":\"ok\"}".getBytes("UTF8"));
         }
+        else if(urlPath.equalsIgnoreCase(GET_SCHEDULES))
+          processGetSchedules(requestParams, out);
         else {
             // we'll be providing the actual content with cache
             logger.warn("Getting resources through content generator is deprecated, please use static resources: " + urlPath);
@@ -237,6 +243,40 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     }
 
+    
+    private void processGetSchedules(final IParameterProvider requestParams, final OutputStream out) throws Exception {
+      
+      
+         final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
+        final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
+        final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
+
+        final String fullPath = solution + "/" + path + "/" + action;
+      
+      ISubscriptionRepository subscriptionRepository = PentahoSystem.get(ISubscriptionRepository.class, userSession);
+      ISubscribeContent subscribeContent = subscriptionRepository.getContentByActionReference(fullPath); //$NON-NLS-1$
+      
+
+      
+      List<ISchedule> schedules = subscribeContent.getSchedules();
+      
+      String result  = "[";
+      for (ISchedule schedule : schedules) {
+        if (result.length() > 1)
+          result += ",";
+        result += "{";
+        result += " \"id\": \"" + schedule.getId() + "\",";
+        result += " \"name\": \"" + schedule.getTitle() + "\"";
+        result += "}";
+      }
+      
+      
+      result += "]";
+      out.write(result.getBytes(ENCODING));
+      
+    }
+    
+    
     private void generateContext(final IParameterProvider requestParams, final OutputStream out) throws Exception {
         HttpServletRequest request = ((HttpServletRequest) parameterProviders.get("path").getParameter("httprequest"));
         DashboardContext context = new DashboardContext(userSession);

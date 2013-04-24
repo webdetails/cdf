@@ -797,9 +797,28 @@ $(id).val(temp);},2000);
   
 
       //var fullPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ startTime;
-      var fullPage= nameDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+
-      rangeOfRecurrence+rangeOfRecurrenceOnce;
-      var myself = this;
+        var fullPage = "";
+        if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles) >= 0)
+            fullPage= nameDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+ rangeOfRecurrence+rangeOfRecurrenceOnce;
+        else {
+            //Build selector
+            var subscriptionSelector = "<span class='dialog-label'>Subscription: </span><select name='subscriptionSelector' id='subscriptionSelector'>";
+            var x = $.ajaxSettings.async;
+            $.ajaxSetup({ async: false });
+            $.getJSON("getSchedules", {solution: this.solution, path: this.path, action:this.action},
+                function(response) {
+                    for (var i=0; i < response.length; i++) {
+                        if (response[i]) {
+                            subscriptionSelector += "<option value='" + response[i].id + "'>" + response[i].name + "</option>";
+                        }
+                    }
+                },'text');
+            $.ajaxSetup({ async: x });
+            subscriptionSelector += "</select>";
+            fullPage = nameDiv + mailInfo + subscriptionSelector;
+        }       
+
+        var myself = this;
       var promp = {
 
       basicState : {
@@ -816,27 +835,30 @@ $(id).val(temp);},2000);
            
                   //schedule 
                   var sharedUuid= guid();
-                  var parameters = {
-//                  name : $("#nameIn").val(),
-                  title:  $("#nameIn").val(),
-                  cron : "00 00 0 ? * 2,7",
-                  desc:  $("#nameIn").val(),
-                  "start-date-time": "1366628400000",
-                  schedRef: sharedUuid,
-                  group:myself.group ? myself.group : "Default Schedule Group",
-                  requestedMimeType: "text/xml",
-                  actionRefs: myself.solution + "/" + myself.path + "/" + myself.action,
-                  schedulerAction: "doAddScheduleAndContent"
+                var parameters = {};
+                if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles)>= 0){
+                  
+                    parameters = {
+//                      name : $("#nameIn").val(),
+                      title:  $("#nameIn").val(),
+                      cron : "00 00 0 ? * 2,7",
+                      desc:  $("#nameIn").val(),
+                      "start-date-time": "1366628400000",
+                      schedRef: sharedUuid,
+                      group:myself.group ? myself.group : "Default Schedule Group",
+                      requestedMimeType: "text/xml",
+                      actionRefs: myself.solution + "/" + myself.path + "/" + myself.action,
+                      schedulerAction: "doAddScheduleAndContent"
 
-                };
-
+                    };
+                }
                 var parameters2 = {
                   path : myself.path,
                   solution: myself.solution,
                   name : myself.action,
                   subscribe : true,
                   destination: $("#to").val(),
-                  "subscription-name" : myself.action +  guid(),
+                  "subscription-name" :  $("#nameIn").val(),
                   "schedule-id" : sharedUuid,
                   showParameters : myself.showParameters,
                   htmlProportionalWidth : false,
@@ -852,6 +874,12 @@ $(id).val(temp);},2000);
                 }
 
 
+var success = false;
+            var x = $.ajaxSettings.async;
+            $.ajaxSetup({ async: false });
+
+ if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles)>= 0){
+
                 $.post("../../SubscriptionAdminService", parameters,
                   function(xml) {
                     if (xml &&
@@ -861,15 +889,27 @@ $(id).val(temp);},2000);
                         $.get("../../content/reporting", parameters2,
                           function(response) {
                             alert(response);
+                            success = response == 'Public Schedule saved/created';
                           },'text');                
                     } else {
                         alert('Error while creating schedule');
                     }
                   },'xml');
                 
+} else {
 
-//              $.prompt.goToState('doneState');
-            return true;           
+parameters2["schedule-id"] = $("#subscriptionSelector").val();
+$.get("../../content/reporting", parameters2,
+function(response) {
+alert(response);
+success = response == 'Public Schedule saved/created';
+},'text');
+
+
+}
+
+            $.ajaxSetup({ async: x });
+            return success;           
           }
       }
     },
