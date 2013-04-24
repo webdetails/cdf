@@ -36,6 +36,13 @@
 			<dt>action</dt>
 			<dd>Pentaho Reporting file name (unified file format *.prpt)</dd>
 
+			<dt>group</dt>
+			<dd>Scheduling Group - Default is 'Default Scheduling Group'</dd>
+
+			<dt>outputTarget</dt>
+			<dd>Output target for report. Default is table/html;page-mode=page</dd>
+
+
 			<dt>htmlObject</dt>
 			<dd>Id of the component (usually a div or a span tag) to be replaced by the result. It can point to a button or link</dd>
 
@@ -93,7 +100,9 @@ var executeTopTenCustomers =
   path: "reports",
   action: "Order Status.prpt",
   listeners:["productLine", "territory"],
-  parameters: [["oStatus"," 'Shipped' "]],
+  parameters: [["oStatus","Shipped"]],
+  group: 'My Schedules',
+  outputTarget: "table/html;page-mode=page",
   htmlObject: "sampleObject",
   paginate: false,
   showParameters: true,

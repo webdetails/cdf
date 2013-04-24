@@ -492,7 +492,7 @@ $(id).val(temp);},2000);
 
       }
 
-      var builtCron = minute+" "+hour+" "+
+      var builtCron = minute+" "+hour+" ";
 
     }
      makeSelect = function(min,max,interval,id){
@@ -703,7 +703,7 @@ $(id).val(temp);},2000);
           '<option value="thursday">thursday</option>'+'<option value="friday">friday</option>'+
           '<option value="saturday">saturday</option>';
     var errorMessage = '<label id="err" style="display:none">Incorrect Input</label>';
-    var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"> Name :<input id="nameIn" type="text" value=""></form></div>';
+    var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"> Name :<input id="nameIn" type="text" value="' + this.action + ' Schedule"></form></div>';
     var groupDiv= '<div id="groupDiv"><form style="display:inline-block" id="groupForm"> Group :<input id="groupIn" type="text" value=""></form></div>';
     var descriptionDiv= '<div><form style="display:inline-block" id="descForm"> Description :<input id="descIn" type="text" value=""></form></div>';
     var recurrenceDiv = '<div>'+
@@ -799,6 +799,7 @@ $(id).val(temp);},2000);
       //var fullPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ startTime;
       var fullPage= nameDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+
       rangeOfRecurrence+rangeOfRecurrenceOnce;
+      var myself = this;
       var promp = {
 
       basicState : {
@@ -816,44 +817,58 @@ $(id).val(temp);},2000);
                   //schedule 
                   var sharedUuid= guid();
                   var parameters = {
-                  name : "randomName",
-                  title: "randomTitle",
+//                  name : $("#nameIn").val(),
+                  title:  $("#nameIn").val(),
                   cron : "00 00 0 ? * 2,7",
-                  desc: 'fdsdfsdf',
+                  desc:  $("#nameIn").val(),
                   "start-date-time": "1366628400000",
                   schedRef: sharedUuid,
-                  group:"randomref",
-                  schedulerAction: "doAddScheduleWithoutContent"
+                  group:myself.group ? myself.group : "Default Schedule Group",
+                  requestedMimeType: "text/xml",
+                  actionRefs: myself.solution + "/" + myself.path + "/" + myself.action,
+                  schedulerAction: "doAddScheduleAndContent"
 
                 };
 
                 var parameters2 = {
-                  path : "/reports",
-                  name : "Order Status.prpt",
-                  susbscribe : true,
-                  "susbscription-name" : "ere",
+                  path : myself.path,
+                  solution: myself.solution,
+                  name : myself.action,
+                  subscribe : true,
+                  "subscription-name" : myself.action +  guid(),
                   "schedule-id" : sharedUuid,
-                  oStatus : "On Hold",
-                  "output-target" : "table/html;page-mode=pageaccepted-page=-1",
-                  showParameters : true,
+                  showParameters : myself.showParameters,
                   htmlProportionalWidth : false,
+                  "accepted-page":-1,
+                  "output-target":	myself.outputTarget ? myself.outputTarget: "table/html;page-mode=page",
                   renderMode : "SUBSCRIBE"
 
                 };
 
+                for (var i = 0; i < myself.parameters.length; i++) {
+                    var param = myself.parameters[i];
+                    parameters2[param[0]] = param[1];
+                }
+
 
                 $.post("../../SubscriptionAdminService", parameters,
                   function(xml) {
-                    alert(xml);
+                    if (xml &&
+                        xml.documentElement &&
+                        xml.documentElement.attributes['result'] &&
+                        xml.documentElement.attributes['result'].nodeValue == 'OK') {
+                        $.get("../../content/reporting", parameters2,
+                          function(response) {
+                            alert(response);
+                          },'text');                
+                    } else {
+                        alert('Error while creating schedule');
+                    }
                   },'xml');
                 
-                $.post("../../content/reporting", parameters2,
-                  function(xml) {
-                    alert(xml);
-                  },'xml');        
 
-              $.prompt.goToState('doneState');
-            return false;           
+//              $.prompt.goToState('doneState');
+            return true;           
           }
       }
     },
