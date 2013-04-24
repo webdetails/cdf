@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130423
+//VERSION TRUNK-20130424
 
 var pvc = (function(def, pv) {
 
@@ -644,20 +644,18 @@ pvc.makeEnumParser = function(enumName, keys, dk) {
     };
 };
 
-pvc.parseDistinctIndexArray = function(value, max){
+pvc.parseDistinctIndexArray = function(value, min, max){
     value = def.array.as(value);
-    if(value == null){
-        return null;
-    }
+    if(value == null) { return null; }
     
-    if(max == null){
-        max = Infinity;
-    }
+    if(min == null) { min = 0; }
+    
+    if(max == null) { max = Infinity; }
     
     var a = def
         .query(value)
-        .select(function(index){ return +index; }) // to number
-        .where(function(index){ return !isNaN(index) && index >= 0 && index <= max; })
+        .select(function(index) { return +index; }) // to number
+        .where(function(index) { return !isNaN(index) && index >= min && index <= max; })
         .distinct()
         .array();
     
@@ -4165,7 +4163,7 @@ def
  * TODO: missing common options here
  */
 def.type('pvc.data.TranslationOper')
-.init(function(chart, complexTypeProj, source, metadata, options){
+.init(function(chart, complexTypeProj, source, metadata, options) {
     this.chart = chart;
     this.complexTypeProj = complexTypeProj;
     this.source   = source;
@@ -4209,7 +4207,13 @@ def.type('pvc.data.TranslationOper')
     virtualItemSize:     function() { return this.metadata.length; },
     
     freeVirtualItemSize: function() { return this.virtualItemSize() - this._userUsedIndexesCount; },
-
+    
+    setSource: function(source) {
+        if(!source) { throw def.error.argumentRequired('source'); }
+        
+        this.source   = source;
+    },
+    
     /**
      * Defines a dimension reader.
      *
@@ -4253,7 +4257,7 @@ def.type('pvc.data.TranslationOper')
 
     /**
      * Called once, before {@link #execute},
-     * for the translation to configure the complex type (abstract).
+     * for the translation to configure the complex type project (abstract).
      *
      * <p>
      *    If this method is called more than once,
@@ -4615,7 +4619,7 @@ def.type('pvc.data.TranslationOper')
  * @param {boolean} [options.seriesInRows=false]
  * Indicates that series are to be switched with categories.
  *
- * @param {Number[]} [options.plot2SeriesIndexes]
+ * @param {Number[]} [options.plot2DataSeriesIndexes]
  * Array of series indexes in {@link #source} that are second axis' series.
  * Any non-null value is converted to an array.
  * Each value of the array is also converted to a number.
@@ -4635,11 +4639,17 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
     
     _initType: function() {
         this.J = this.metadata.length;
-        this.I = this.source.length;
+        this.I = this.source.length; // repeated in setSource
         
         this._processMetadata();
         
         this.base();
+    },
+    
+    setSource: function(source) {
+        this.base(source);
+        
+        this.I = this.source.length;
     },
     
     _knownContinuousColTypes: {'numeric': 1, 'number': 1, 'integer': 1},
@@ -4661,7 +4671,7 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
             .select(function(colDef, colIndex) {
                 // Ensure colIndex is trustable
                 colDef.colIndex = colIndex;
-                return colDef; 
+                return colDef;
              })
             .where(function(colDef) {
                 var colType = colDef.colType;
@@ -4809,12 +4819,12 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
     /**
      * Creates the set of second axis series keys
      * corresponding to the specified
-     * plot2SeriesIndexes and seriesAtoms arrays (protected).
+     * plot2DataSeriesIndexes and seriesAtoms arrays (protected).
      *
      * Validates that the specified series indexes are valid
      * indexes of seriesAtoms array.
      *
-     * @param {Array} plot2SeriesIndexes Array of indexes of the second axis series values.
+     * @param {Array} plot2DataSeriesIndexes Array of indexes of the second axis series values.
      * @param {Array} seriesKeys Array of the data source's series atom keys.
      *
      * @returns {Object} A set of second axis series values or null if none.
@@ -4822,24 +4832,24 @@ def.type('pvc.data.MatrixTranslationOper', pvc.data.TranslationOper)
      * @private
      * @protected
      */
-    _createPlot2SeriesKeySet: function(plot2SeriesIndexes, seriesKeys) {
+    _createPlot2SeriesKeySet: function(plot2DataSeriesIndexes, seriesKeys) {
         var plot2SeriesKeySet = null,
             seriesCount = seriesKeys.length;
-        def.query(plot2SeriesIndexes).each(function(indexText) {
+        def.query(plot2DataSeriesIndexes).each(function(indexText) {
             // Validate
             var seriesIndex = +indexText; // + -> convert to number
             if(isNaN(seriesIndex)) {
-                throw def.error.argumentInvalid('plot2SeriesIndexes', "Element is not a number '{0}'.", [indexText]);
+                throw def.error.argumentInvalid('plot2DataSeriesIndexes', "Element is not a number '{0}'.", [indexText]);
             }
 
             if(seriesIndex < 0) {
                 if(seriesIndex <= -seriesCount) {
-                    throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
+                    throw def.error.argumentInvalid('plot2DataSeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
                 }
 
                 seriesIndex = seriesCount + seriesIndex;
             } else if(seriesIndex >= seriesCount) {
-                throw def.error.argumentInvalid('plot2SeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
+                throw def.error.argumentInvalid('plot2DataSeriesIndexes', "Index is out of range '{0}'.", [seriesIndex]);
             }
 
             // Set
@@ -5016,7 +5026,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
      *                   X      | <~CG~>     |     | <~CG~>     | 
      *                          +------------+     +------------+
      *        
-     *      0 o    +------------+------------+ ... +------------+    <-- this._lines
+     *      0 o    +------------+------------+ ... +------------+    <-- this.source
      *        |    | <...RG...> | <...MG...> |     | <...MG...> |
      *        |    |            | <...MG...> |     | <...MG...> |
      *      1 +    +------------+------------+     +------------+
@@ -5136,7 +5146,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
                 }, this);
         }
         
-        return def.query(this._lines).selectMany(expandLine, this);
+        return def.query(this.source).selectMany(expandLine, this);
     },
     
     _processMetadata: function() {
@@ -5145,11 +5155,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         
         this._separator = this.options.separator || '~';
         
-        /* Don't change source */
-        var lines = pvc.cloneMatrix(this.source);
-
-        this._lines = lines;
-
         /* Determine R, C and M */
         
         // Default values
@@ -5585,14 +5590,14 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
             }
         }
         
-        /* plot2SeriesIndexes only implemented for single-series */
+        /* plot2DataSeriesIndexes only implemented for single-series */
         var dataPartDimName = this.options.dataPartDimName;
         if(dataPartDimName && this.C === 1 && !this.complexTypeProj.isReadOrCalc(dataPartDimName)) {
-            // The null test is required because plot2SeriesIndexes can be a number, a string...
-            var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-            if(plot2SeriesIndexes != null) {
+            // The null test is required because plot2DataSeriesIndexes can be a number, a string...
+            var plot2DataSeriesIndexes = this.options.plot2DataSeriesIndexes;
+            if(plot2DataSeriesIndexes != null) {
                 var seriesKeys = this._colGroups.map(function(colGroup) { return '' + colGroup[0].v; });
-                this._plot2SeriesKeySet = this._createPlot2SeriesKeySet(plot2SeriesIndexes, seriesKeys);
+                this._plot2SeriesKeySet = this._createPlot2SeriesKeySet(plot2DataSeriesIndexes, seriesKeys);
             }
         }
         
@@ -5669,7 +5674,7 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
  * are bound in order to the specified indexes.
  * </p>
  * <p>
- * The option 'plot2SeriesIndexes' 
+ * The option 'plot2DataSeriesIndexes' 
  * is incompatible with and 
  * takes precedence over 
  * this one.
@@ -5706,7 +5711,7 @@ def
         // (v1 did not make this assumption)
         var valuesColIndexes, M;
         if(this.options.isMultiValued) {
-            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, J - 1);
+            valuesColIndexes = pvc.parseDistinctIndexArray(this.options.measuresIndexes, 0, J - 1);
             M = valuesColIndexes ? valuesColIndexes.length : 0;
         }
         
@@ -5826,10 +5831,10 @@ def
     },
     
     /** 
-     * Default cross tab mapping from virtual item to dimensions. 
+     * Default relational mapping from virtual item to dimensions. 
      * @override 
      */
-    _configureTypeCore: function(){
+    _configureTypeCore: function() {
         var me = this;
         var index = 0;
         var dimsReaders = [];
@@ -5864,13 +5869,13 @@ def
         if(dimsReaders) { dimsReaders.forEach(this.defReader, this); }
         
         // ----
-        // The null test is required because plot2SeriesIndexes can be a number, a string...
-        var plot2SeriesIndexes = this.options.plot2SeriesIndexes;
-        if(plot2SeriesIndexes != null) {
+        // The null test is required because plot2DataSeriesIndexes can be a number, a string...
+        var plot2DataSeriesIndexes = this.options.plot2DataSeriesIndexes;
+        if(plot2DataSeriesIndexes != null) {
             var seriesReader = this._userDimsReadersByDim.series;
             if(seriesReader) {
                 var dataPartDimName = this.options.dataPartDimName;
-                this._userRead(relTransl_dataPartGet.call(this, plot2SeriesIndexes, seriesReader), dataPartDimName);
+                this._userRead(relTransl_dataPartGet.call(this, plot2DataSeriesIndexes, seriesReader), dataPartDimName);
             }
         }
     },
@@ -5893,11 +5898,11 @@ def
  * 
  * @name pvc.data.RelationalTranslationOper#_dataPartGet
  * @function
- * @param {Array} plot2SeriesIndexes The indexes of series that are to be shown on the second axis. 
+ * @param {Array} plot2DataSeriesIndexes The indexes of series that are to be shown on the second axis. 
  * @param {function} seriesReader Dimension series atom getter.
  * @type function
  */
-function relTransl_dataPartGet(plot2SeriesIndexes, seriesReader) {
+function relTransl_dataPartGet(plot2DataSeriesIndexes, seriesReader) {
     var me = this;
     
     /* Defer calculation of plot2SeriesKeySet because *data* isn't yet available. */
@@ -5917,7 +5922,7 @@ function relTransl_dataPartGet(plot2SeriesIndexes, seriesReader) {
                                 .distinct()
                                 .array();
 
-        return me._createPlot2SeriesKeySet(plot2SeriesIndexes, seriesKeys);
+        return me._createPlot2SeriesKeySet(plot2DataSeriesIndexes, seriesKeys);
     }
     
     return this._dataPartGet(calcAxis2SeriesKeySet, seriesReader);
@@ -18816,8 +18821,10 @@ def
          */
         this._checkNoDataI();
         
-        /* Initialize root visual roles */
-        if(!this.parent && this._createVersion === 1) {
+        /* Initialize root visual roles.
+         * The Complex Type gets defined on the first load of data.
+         */
+        if(!this.parent && !this.data) {
             this._initVisualRoles();
             
             this._bindVisualRolesPreI();
@@ -19833,53 +19840,72 @@ pvc.BaseChart
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
         if (!this.parent && !this.allowNoData && (!this.data || !this.data.count())) {
-           /*global NoDataException:true */
-           throw new NoDataException();
+            
+            this.data = null;
+            
+            /*global NoDataException:true */
+            throw new NoDataException();
         }
     },
     
     /**
-     * Initializes the data engine and roles
+     * Initializes the data engine and roles.
      */
     _initData: function(ka) {
+        // Root chart
         if(!this.parent) {
             var data = this.data;
-            if(!data || def.get(ka, 'reloadData', true)) {
-               this._onLoadData();
+            if(!data) {
+                this._onLoadData();
+            } else if(def.get(ka, 'reloadData', true)) {
+                // This **replaces** existing data (datums also existing in the new data are kept)
+                this._onReloadData();
             } else {
+                // Existing data is kept.
+                // This is used for re-layouting only.
+                // Yet...
+                
+                // Remove virtual datums (they are regenerated each time)
                 data.clearVirtuals();
+                
+                // Dispose all data children and linked children (recreated as well)
                 data.disposeChildren();
             }
         }
-
+        
+        // Cached data stuff
         delete this._partData;
         delete this._visibleDataCache;
-
+        
         if(pvc.debug >= 3) { this._log(this.data.getInfo()); }
     },
 
     _onLoadData: function() {
+        /*jshint expr:true*/
         var data = this.data;
-        var options = this.options;
+        var translation = this._translation;
+        
+        (!data && !translation) || def.assert("Invalid state.");
+        
+        var options  = this.options;
+        
         var dataPartDimName = this._getDataPartDimName();
-        var complexTypeProj = this._complexTypeProj;
+        var complexTypeProj = this._complexTypeProj || def.assert("Invalid state.");
         var translOptions   = this._createTranslationOptions(dataPartDimName);
-        var translation     = this._createTranslation(translOptions);
+        translation = this._translation = this._createTranslation(translOptions);
         
         if(pvc.debug >= 3) {
             this._log(translation.logSource());
             this._log(translation.logTranslatorType());
         }
         
-        if(!data) {
-            // Now the translation can also configure the type
-            translation.configureType();
-            
-            // If the the dataPart dimension isn't being read or calculated
-            // its value must be defaulted to 0.
-            if(dataPartDimName && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
-                this._addDefaultDataPartCalculation(dataPartDimName);
-            }
+        // Now the translation can also configure the type
+        translation.configureType();
+        
+        // If the the dataPart dimension isn't being read or calculated
+        // its value must be defaulted to 0.
+        if(dataPartDimName && !complexTypeProj.isReadOrCalc(dataPartDimName)) {
+            this._addDefaultDataPartCalculation(dataPartDimName);
         }
         
         if(pvc.debug >= 3) {
@@ -19891,39 +19917,49 @@ pvc.BaseChart
         // i) roles add default properties to dimensions bound to them
         // ii) in order to be able to filter datums
         //     whose "every dimension in a measure role is null".
-        //
-        // TODO: check why PRE is done only on createVersion 1 and this one 
-        // is done on every create version
         this._bindVisualRolesPostI();
         
         // Setup the complex type from complexTypeProj;
-        var complexType;
-        if(!data) {
-            complexType = new pvc.data.ComplexType();
-            complexTypeProj.configureComplexType(complexType, translOptions);
-        } else {
-            complexType = data.type;
-        }
-
-        this._bindVisualRolesPostII(complexType);
+        var complexType = new pvc.data.ComplexType();
+        complexTypeProj.configureComplexType(complexType, translOptions);
         
+        this._bindVisualRolesPostII(complexType);
+            
         if(pvc.debug >= 10) { this._log(complexType.describe()); }
         if(pvc.debug >= 3 ) { this._logVisualRoles(); }
+            
+        data =
+            this.dataEngine = // V1 property
+            this.data = new pvc.data.Data({
+                type:     complexType,
+                labelSep: options.groupedLabelSep,
+                keySep:   translOptions.separator
+            });
 
         // ----------
 
-        if(!data) {
-            data =
-                this.dataEngine = // V1 property
-                this.data = new pvc.data.Data({
-                    type:     complexType,
-                    labelSep: options.groupedLabelSep,
-                    keySep:   translOptions.separator
-                });
-        } // else TODO: assert complexType has not changed...
+        var loadKeyArgs = {where: this._getLoadFilter(), isNull: this._getIsNullDatum()};
         
-        // ----------
-
+        var resultQuery = translation.execute(data);
+        
+        data.load(resultQuery, loadKeyArgs);
+    },
+    
+    _onReloadData: function() {
+        /*jshint expr:true*/
+        
+        var data = this.data;
+        var translation = this._translation;
+        
+        (data && translation) || def.assert("Invalid state.");
+        
+        var options  = this.options;
+        
+        // pass new resultset to the translation (metadata is maintained!).
+        translation.setSource(this.resultset);
+        
+        if(pvc.debug >= 3) { this._log(translation.logSource()); }
+        
         var loadKeyArgs = {where: this._getLoadFilter(), isNull: this._getIsNullDatum()};
         
         var resultQuery = translation.execute(data);
@@ -20024,14 +20060,29 @@ pvc.BaseChart
             valueFormatter = function(v) { return v != null ? valueFormat(v) : ""; };
         }
         
-        var secondAxisIdx;
-        if(plot2 && this._allowV1SecondAxis && (this.compatVersion() <= 1)) {
-            secondAxisIdx = pvc.parseDistinctIndexArray(options.secondAxisIdx) || -1;
+        var plot2Series, plot2DataSeriesIndexes;
+        if(plot2) {
+            if(this._allowV1SecondAxis && (this.compatVersion() <= 1)) {
+                plot2DataSeriesIndexes = options.secondAxisIdx;
+            } else {
+                plot2Series = (this._serRole != null) && 
+                              options.plot2Series && 
+                              def.array.as(options.plot2Series);
+                
+                if(!plot2Series || !plot2Series.length) {
+                    plot2Series = null;
+                    plot2DataSeriesIndexes = options.plot2DataSeriesIndexes; 
+                }
+            }
+            
+            if(!plot2Series) {
+                plot2DataSeriesIndexes = pvc.parseDistinctIndexArray(plot2DataSeriesIndexes, -Infinity) || -1;
+            }
         }
         
         return {
             compatVersion:     this.compatVersion(),
-            plot2SeriesIndexes: secondAxisIdx,
+            plot2DataSeriesIndexes: plot2DataSeriesIndexes,
             seriesInRows:      options.seriesInRows,
             crosstabMode:      options.crosstabMode,
             isMultiValued:     options.isMultiValued,
@@ -22693,7 +22744,7 @@ def
                     .transition()
                     .duration(2000)
                     .ease("cubic-in-out")
-                    .start(function(){
+                    .start(function() {
                         me._animating = 0;
                         me._onRenderEnd(true);
                     });
