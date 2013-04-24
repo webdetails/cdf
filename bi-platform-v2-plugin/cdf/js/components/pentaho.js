@@ -415,6 +415,8 @@ update : function() {
   schedulePrptComponent: function(){
 
     var parameters={};
+    var sharedUuid;
+    var error=false;
       guid = function(){
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, 
         function(c) {
@@ -424,76 +426,126 @@ update : function() {
 
     }
     triggerError = function(msg,id){
+  error=true;
+  $(id).css("backgroundColor","rgb(255,159,159)");//error state color.
+  //$(id).css("backgroundColor","rgb(184,245,177)"); Valid state color. aplicable?
+  var temp = $(id).val();
+  $(id).val(msg);
 
-$(id).css("backgroundColor","red");
-var temp = $(id).val();
-$(id).val(msg);
-
-setTimeout(function(){$(id).css("backgroundColor","white");
-$(id).val(temp);},2000);
-
+  setTimeout(function(){$(id).css("backgroundColor","white");
+  $(id).val(temp);},2000);
 
     }
-    cronThis = function(exp){
-      var cron=exp;
-      var minute=$("#minutes").val();
-      var hour=$("#hours").val();
-      if($("#amPm").val()=="pm")
+
+    getHour = function(){
+    var hour=$("#hours").val();
+    if($("#amPm").val()=="pm")
         hour+=12;
-      var array =cron.split("/");//
-      var day=array[1];
-      var month = array[0];
-      var year = array[2];
+      if (hour==24)
+        hour=00;
+    return hour;
+    }
+    cronThis = function(){
+      var minute=$("#minutes").val();
+      var hour=getHour();
       var choice= $("#recurrId").val();
-      var week="?";
+      var dayOfWeek="?";
+      var month ="*";
+      var dayOfMonth="?";
+      var year="*";//really necessary?
       switch(choice)
       {
         case "daily":
-        week="mon-fri";
+        dayOfWeek="mon-fri";
         break;
         case "weekly":
-        if ($("#monday").attr("checked")=="checked")
-          week+=",monday";
-        if ($("#tuesday").attr("checked")=="checked")
-          week+=",tuesday";
-        if ($("#wednesday").attr("checked")=="checked")
-          week+=",wednesday";
-        if ($("#thursday").attr("checked")=="checked")
-          week+=",thursday";
-        if ($("#friday").attr("checked")=="checked")
-          week+=",friday";
-        if ($("#saturday").attr("checked")=="checked")
-          week+=",saturday";
-        if ($("#sunday").attr("checked")=="checked")
-          week+=",sunday";
-        week.replace("\?","");
-        week.replace(",","");
+        var i=0;
+        if ($("#monday").is(":checked")){
+          dayOfWeek+=",mon";
+          i++;
+        }
+        if ($("#tuesday").is(":checked")){
+          dayOfWeek+=",tue";
+          i++;
+      }
+        if ($("#wednesday").is(":checked")){
+          dayOfWeek+=",wed";
+          i++;
+      }
+        if ($("#thursday").is(":checked")){
+          dayOfWeek+=",thu";
+          i++;
+      }
+        if ($("#friday").is(":checked")){
+          dayOfWeek+=",fri";
+          i++;
+      }
+        if ($("#saturday").is(":checked")){
+          dayOfWeek+=",sat";
+          i++;
+      }
+        if ($("#sunday").is(":checked")){
+          dayOfWeek+=",sun";
+          i++;
+      }
+      if(i>0){
+        dayOfWeek=dayOfWeek.replace("\?","");
+        dayOfWeek=dayOfWeek.replace(",","");
+      }else{
+
+         $("#errWeek").css("color","rgb(255,159,159)");
+         $("#errorCheckboxes").show();
+         setTimeout(function(){
+         $("#errorCheckboxes").hide();
+            },2000);
+         error=true;
+
+      }
         break;
         case "monthly":
-        if($("#monthRadio").attr("checked")==checked)
+        if($("#monthRadio").is(":checked"))
         {
-
+          dayOfMonth=$("#recurrPatternIn").val();
+          if(dayOfMonth<1)
+            triggerError(">0","#recurrPatternIn");
+          else if(dayOfMonth>31)
+            triggerError("<=31","#recurrPatternIn");
         }
         else
         {
+          dayOfMonth="?";
+          dayOfWeek=$("#monthOpt2Select").val().substring(0,3)+"#"+$("#monthOpt1Select").val();
 
         }
         break;
         case "yearly":
-        if($("#yearRadio").attr("checked")==checked)
+        if($("#yearRadio").is(":checked"))
         {
+          dayOfWeek = "?";
+          month=$("#yearEveryMonth").val();
+          dayOfMonth=$("#yearDayMonth").val();
+          if(dayOfMonth<1)
+            triggerError(">0","#yearDayMonth");
+          else if(dayOfMonth>31)
+            triggerError("<=31","#yearDayMonth");
 
         }
         else
         {
-
+          dayOfMonth="?";
+          dayOfWeek=$("#yearOpt2Select").val().substring(0,3)+"#"+$("#yearOpt1Select").val();
+          month=$("#yearMonthSelect").val();
         }
         break;
 
       }
+      var builtCron = "0 "+minute+" "+hour+" "+dayOfMonth+" "+month+" "+dayOfWeek+" "+year;
+      return builtCron;
 
-      var builtCron = minute+" "+hour+" ";
-
+    }
+    getUTC = function(exp){
+      var arr=exp.split("/");
+      return Date.UTC(arr[2],arr[0],arr[1]);
     }
      makeSelect = function(min,max,interval,id){
       var selectHtml = '<select id ="'+id+'">';
@@ -506,116 +558,185 @@ $(id).val(temp);},2000);
       return selectHtml;
 
     }
+    validateStartDate=function(mili,id){
+      var now = new Date();
+      if(isNaN(mili)||mili<now.getTime())
+        triggerError("Incorrect Date, pick date from calendar",id);
+    }
+    validateEndDate=function(mili,id){
+      if($("#endByRadio").is(":checked")){
+      var now = new Date();
+      var startDate = $("#rangeStartIn").val();
+      var mil=getUTC(startDate);
+      if(isNaN(mil)){}
+      else if(mil>mili)
+        triggerError("End Date > Start Date",id); 
+      else if(isNaN(mili)||mili<now.getTime())
+        triggerError("Incorrect Date",id);
+    }
+    }
     startTimeGetter=function(){
-        var hours = $("#hours").val();
-         if($("#amPm").val()=="pm")
-          hours+=12;
+        var hours = getHour();
         var minutes=$("#minutes").val();
         var mili= (minutes*60000)+(hours*3600000);
-        var start = Date.UTC($("#rangeStartIn").val().replace("/",","));
-        return start+mili;
+        var start = getUTC($("#rangeStartIn").val());
+        start+=mili;
+        validateStartDate(start,"#rangeStartIn");
+        return start;
     }
      endTimeGetter=function(){
-        return Date.UTC($("#endByIn").val().replace("/",","));
+      var end =getUTC($("#endByIn").val());
+      validateEndDate(end,"#endByIn");
+        return end;
     }
 
       setParameters = function(){
-        parameters= {};
-     var choice= $("#recurrId").val();
-      parameters[name]=$("#nameIn").val();
-      parameters[to]=$("#to").val();
-      var now = new Date();
+
+         parameters = {
+                  name:  $("#nameIn").val(),
+                  title:  $("#nameIn").val(),
+                  desc:  $("#nameIn").val(),
+                  schedRef: sharedUuid,
+                  group:myself.group ? myself.group : "Default Schedule Group",
+                  requestedMimeType: "text/xml",
+                  actionRefs: myself.solution + "/" + myself.path + "/" + myself.action,
+                  schedulerAction: "doAddScheduleAndContent"
+                };
+
+      error=false;                               
+      var choice= $("#recurrId").val();
+      var name=$("#nameIn").val();
+      if(name=="")
+        triggerError("You must choose a name","#nameIn");
+      parameters["name"]=name;
       switch (choice)
       {
+
          case "once":
-         var hours = $("#hours").val();
-         if($("#amPm").val()=="pm")
-          hours+=12;
+         var hours = getHour();
         var minutes=$("#minutes").val();
         var mili= (minutes*60000)+(hours*3600000);
-        var start = Date.UTC($("#startDateIn").val().replace("/",","));
+        var start = getUTC($("#startDateIn").val());
         start+=mili;
-        if(!(start>now)){
-          triggerError("Incorrect Input","#startDateIn");
-          return "err";
-          }                                                   //XXX encode the errors ASAP
-        parameters["start-date-time"]=mili+start;
+        validateStartDate(start,"#startDateIn"); //XXX encode the errors ASAP
+        parameters["start-date-time"]=start;
+        parameters["repeat-time-millisecs"]=0;
+        parameters["repeat-count"]=0;
         break;
+
         case "seconds":
         var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
-        parameters["repeat-time-millisecs"]="452452";
-        parameters["end-date-time"]=endTimeGetter()
+        var repeatSec=$("#recurrPatternInSec").val();
+          if(repeatSec<1)
+            triggerError(">0","#recurrPatternInSec");
+        parameters["repeat-time-millisecs"]=repeatSec*1000;
+        if($("#endByRadio").is(":checked"))
+          parameters["end-date-time"]=endTimeGetter()
         break;
+
         case "minutes":
         var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
-        parameters["repeat-time-millisecs"]="";
-        parameters["end-date-time"]=endTimeGetter()
+        var repeatMin=$("#recurrPatternInMin").val();
+          if(repeatMin<1)
+            triggerError(">0","#recurrPatternInMin");
+        parameters["repeat-time-millisecs"]=repeatMin*60000;
+        if($("#endByRadio").is(":checked"))
+          parameters["end-date-time"]=endTimeGetter()
         break;
+
         case "hours":
         var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
-        parameters["repeat-time-millisecs"]="42542";
-        parameters["end-date-time"]=endTimeGetter();
+        var repeatHour=$("#recurrPatternInHour").val();
+          if(repeatHour<1)
+            triggerError(">0","#recurrPatternInHour");
+        parameters["repeat-time-millisecs"]=repeatHour*3600000;
+        if($("#endByRadio").is(":checked"))
+          parameters["end-date-time"]=endTimeGetter();
         break;
+
         case "daily":
-        if($("#endByRadio").attr("checked")==checked)
+        if($("#endByRadio").is(":checked"))
           parameters["end-date-time"]=endTimeGetter();
-        if($("#weekDayRadio").checked){
-          parameters[cron]=cronThis($("#rangeStartIn").val());
+        if($("#weekDayRadio").is(":checked")){
+          parameters["cron"]=cronThis();
         }
-        else if($("#dayRadio").attr("checked")==checked){ 
-          parameters["repeat-time-millisecs"]="654654      FIXME";
+        else if($("#dayRadio").is(":checked")){ 
+          var repeatDays=$("#recurrPatternInDay").val();
+          if(repeatDays<1)
+            triggerError(">0","#recurrPatternInDay");
+          parameters["repeat-time-millisecs"]=repeatDays*86400000;
           var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
         }
         break;
+
         case "weekly":
-        parameters[cron]="13163123541602";
+        parameters["cron"]=cronThis();
         var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
-        if($("#endByRadio").attr("checked")==checked)
+        if($("#endByRadio").is(":checked"))
           parameters["end-date-time"]=endTimeGetter();
         break;
+
         case "monthly":
-        parameters[cron]="13163123541602";
+        parameters["cron"]=cronThis();
         var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
-        if($("#endByRadio").attr("checked")==checked)
+        if($("#endByRadio").is(":checked"))
           parameters["end-date-time"]=endTimeGetter();
         break;
+
         case "yearly":
-        parameters[cron]="13163123541602";
+        parameters["cron"]=cronThis();
         var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
-        if($("#endByRadio").attr("checked")==checked)
+        if($("#endByRadio").is(":checked"))
           parameters["end-date-time"]=endTimeGetter();
         break;
+
         case "cron":
-        parameters[cron]="13163123541602";
+        var cronString=$("#cronString").val();
+        validateCron(cronString);
+        parameters["cron"]=cronString;
         var start = startTimeGetter();
-        if(start<now)
-          return "err";
         parameters["start-date-time"]=start;
-        if($("#endByRadio").attr("checked")==checked)
+        if($("#endByRadio").is(":checked"))
           parameters["end-date-time"]=endTimeGetter();
         break;
       }
+    }
+    validateCron=function(cron){
+      var arr=cron.split(" ");//7 elements - sec min hour dayOfMonth month dayOfWeek year
+      if(arr.length<7)
+        triggerError("Cron Expression too short","#cronString");
+      else if(arr.length>7)
+        triggerError("Cron Expression too long","#cronString");
+      else if((arr[3]!="?"||arr[3]!="*")&&(arr[5]!="?"||arr[5]!="*"))
+        triggerError("M+W unsuported.(M+? or W+?)","#cronString");//day of month and day of week not suported at the same time
+/*      var sec=parseInt(arr[0]);  cant evaluate the possible expressions...
+      var min=parseInt(arr[1]);
+      var hour=parseInt(arr[2]);
+      var day=parseInt(arr[3]);
+      var month=parseInt(arr[4]);
+      var week=arr[5];
+      var year=parseInt(arr[6]);
+      if(sec<0||sec>59)
+         triggerError("Seconds range: 0-59","#cronString");
+      if(min<0||sec>59)
+         triggerError("Minutes range: 0-59","#cronString");
+      if(hour<0||sec>23)
+         triggerError("Hours range: 00-23","#cronString");
+       if(day<1||sec>31)
+         triggerError("Days of Month range: 1-31","#cronString");
+       if(month<1||sec>12)
+         triggerError("Month range: 1-12","#cronString");
+       if(week<0||sec>59)
+         triggerError("Days of Week range: mon-sun","#cronString");
+       if(sec<0||sec>59)
+         triggerError("Seconds range: 0-59","#cronString");*/
     }
     hideAll = function(){
         $("#rangeOfRecurrDiv").hide();
@@ -692,12 +813,12 @@ $(id).val(temp);},2000);
     }
 
 
-    var monthOpts = '<option value="january">January</option>'+'<option value="february">February</option>'+
-          '<option value="march">March</option>'+'<option value="april">April</option>'+
-          '<option value="may">May</option>'+'<option value="june">June</option>'+
-          '<option value="july">July</option>'+'<option value="august">August</option>'+
-          '<option value="september">September</option>'+'<option value="october">October</option>'+
-          '<option value="november">November</option>'+'<option value="december">December</option>';
+    var monthOpts = '<option value="1">January</option>'+'<option value="2">February</option>'+
+          '<option value="3">March</option>'+'<option value="4">April</option>'+
+          '<option value="5">May</option>'+'<option value="6">June</option>'+
+          '<option value="7">July</option>'+'<option value="8">August</option>'+
+          '<option value="9">September</option>'+'<option value="10">October</option>'+
+          '<option value="11">November</option>'+'<option value="12">December</option>';
     var weekOpts = '<option value="sunday">sunday</option>'+'<option value="monday">monday</option>'+
           '<option value="tuesday">tuesday</option>'+'<option value="wednesday">wednesday</option>'+
           '<option value="thursday">thursday</option>'+'<option value="friday">friday</option>'+
@@ -719,7 +840,7 @@ $(id).val(temp);},2000);
     '<option value = "yearly">Yearly</option>'+
     '<option value = "cron">Cron</option></select></br></div>';
 
-    var cronString='<div id="cronDiv"  style="display:none"><form><span class="dialog-label">Cron String:</span><input type="text" value=""></form></div>';
+    var cronString='<div id="cronDiv"  style="display:none"><form><span class="dialog-label">Cron String:</span><input id="cronString" type="text" value=""></form></div>';
     var hours = makeSelect(1,12,1,"hours");
     var minutes = makeSelect(0,59,1,"minutes");
     var amPm='<select id = "amPm"><option value="am">AM</option><option value="pm">PM</option></select>';
@@ -728,27 +849,27 @@ $(id).val(temp);},2000);
     var recurrencePattern='<div id="recurrPatternDiv" style = "display:none">'+
     '<div id="patternSec" >'+
       '<label style="display:inline-block; margin-left: 100px; font-weight: 500;">Every</label>&nbsp;&nbsp;'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<form style="display:inline-block"><input id= "recurrPatternInSec" type="text" size="3" style="width:30px;"></form>'+
       '<label style="display:inline-block; font-weight: 500;"> second(s)</label>'+
     '</div>'+
     '<div id="patternMin" >'+
       '<label style="display:inline-block; margin-left: 100px; font-weight: 500;">Every</label>&nbsp;&nbsp;'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<form style="display:inline-block"><input id= "recurrPatternInMin" type="text" size="3" style="width:30px;"></form>'+
       '<label style="display:inline-block; font-weight: 500;"> minute(s)</label>'+
     '</div>'+
     '<div id="patternHour" >'+
       '<label style="display:inline-block; margin-left: 100px; font-weight: 500;">Every</label>&nbsp;&nbsp;'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<form style="display:inline-block"><input id= "recurrPatternInHour" type="text" size="3" style="width:30px;"></form>'+
       '<label style="display:inline-block; font-weight: 500;"> hour(s)</label>'+
     '</div>'+
     '<div id="patternDay" >'+
       '<input type="radio" name ="day" value="day" id="dayRadio" style="margin-left: 100px; font-weight: 500;" checked> <label style="display:inline-block">Every</label>&nbsp;&nbsp;'+
-      '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:30px;"></form>'+
+      '<form style="display:inline-block"><input id= "recurrPatternInDay" type="text" size="3" style="width:30px;"></form>'+
       '<label style="display:inline-block; font-weight: 500;"> day(s)</label></br>'+
       '<input type="radio" name ="day" value="weekDay" id="weekDayRadio" style="margin-left: 100px;"> Every weekday'+
     '</div>'+
     '<div id="patternWeek" >'+
-      '<form>'+
+      '<form>'+'<div id="errorCheckboxes" style="display:none"><label id="errWeek">Choose at least one week</label></div>'+
       '<input type="checkbox" name="weekday" value="monday" id="monday" style="margin-left: 100px;"> Monday'+
       '<input type="checkbox" name="weekday" value="tuesday" id="tuesday"> Tuesday'+
       '<input type="checkbox" name="weekday" value="wednesday" id="wednesday"> Wednesday'+
@@ -763,25 +884,25 @@ $(id).val(temp);},2000);
       '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:205px;"></form>'+
       '<label style="display:inline-block; font-weight: 500;"> of every month</label></br>'+
       '<input type="radio" name ="month" value="the" style="margin-left: 100px;"> <label style="display:inline-block; font-weight: 500;">The</label>&nbsp;&nbsp;'+
-        '<select>'+'<option value="first">first</option>'+'<option value="second">second</option>'+
-          '<option value="third">third</option>'+'<option value="fourth">fourth</option>'+
-          '<option value="last">last</option>'+
+        '<select id="monthOpt1Select">'+'<option value="1">first</option>'+'<option value="2">second</option>'+
+          '<option value="3">third</option>'+'<option value="4">fourth</option>'+
+          '<option value="5">last</option>'+
         '</select>'+
-        '<select>'+weekOpts+
+        '<select id="monthOpt2Select">'+weekOpts+
         '</select><label style=" font-weight: 500;"> of every month</label>'+
     '</div>'+
     '<div id="patternYear" >'+
       '<input id ="yearRadio" type="radio" name ="year" value="month" style="margin-left: 100px;" checked> <label style="display:inline-block; font-weight: 500;">Every</label>&nbsp;'+
-      '<select>'+monthOpts+
-        '</select><input type="text" size="3">'+'</br>'+
+      '<select id="yearEveryMonth">'+monthOpts+
+        '</select><input id="yearDayMonth"type="text" size="3">'+'</br>'+
       '<input type="radio" name ="year" value="the" style="margin-left: 100px;"> <label style="display:inline-block; font-weight: 500;">The</label>&nbsp;'+
-        '<select>'+'<option value="first">first</option>'+'<option value="second">second</option>'+
-          '<option value="third">third</option>'+'<option value="fourth">fourth</option>'+
-          '<option value="last">last</option>'+
+        '<select id="yearOpt1Select">'+'<option value="1">first</option>'+'<option value="2">second</option>'+
+          '<option value="3">third</option>'+'<option value="4">fourth</option>'+
+          '<option value="5">last</option>'+
         '</select>'+
-        '<select>'+weekOpts+
+        '<select id="yearOpt2Select">'+weekOpts+
         '</select><label style=" font-weight: 500;">of&nbsp;&nbsp;</label>'+
-        '<select>'+monthOpts+'</select>'+
+        '<select id="yearMonthSelect">'+monthOpts+'</select>'+
     '</div>'+
     '</div>';
    var rangeOfRecurrence='<div id="rangeOfRecurrDiv" style="display:none"><br><span class="dialog-title"><strong>Range of Recurrence:</strong> </span>'+
@@ -796,7 +917,6 @@ $(id).val(temp);},2000);
     var mailInfo = '<form><span class="dialog-label">To:</span><input id="to" type="text" value=""></form>';
   
 
-      //var fullPage= nameDiv+groupDiv+descriptionDiv+mailInfo+ recurrenceDiv+ startTime;
         var fullPage = "";
         if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles) >= 0)
             fullPage= nameDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+ rangeOfRecurrence+rangeOfRecurrenceOnce;
@@ -830,28 +950,16 @@ $(id).val(temp);},2000);
         },
         submit: function(e,v,m,f){
 
+          sharedUuid= guid();
           if(e==-1) {$.prompt.close();}
           else if(e==1){
-           
-                  //schedule 
-                  var sharedUuid= guid();
-                var parameters = {};
-                if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles)>= 0){
-                  
-                    parameters = {
-//                      name : $("#nameIn").val(),
-                      title:  $("#nameIn").val(),
-                      cron : "00 00 0 ? * 2,7",
-                      desc:  $("#nameIn").val(),
-                      "start-date-time": "1366628400000",
-                      schedRef: sharedUuid,
-                      group:myself.group ? myself.group : "Default Schedule Group",
-                      requestedMimeType: "text/xml",
-                      actionRefs: myself.solution + "/" + myself.path + "/" + myself.action,
-                      schedulerAction: "doAddScheduleAndContent"
+            setParameters();
+                  if(error){
+                    parameters={};
+                   return false;
+                  }
+                    
 
-                    };
-                }
                 var parameters2 = {
                   path : myself.path,
                   solution: myself.solution,
@@ -863,9 +971,8 @@ $(id).val(temp);},2000);
                   showParameters : myself.showParameters,
                   htmlProportionalWidth : false,
                   "accepted-page":-1,
-                  "output-target":	myself.outputTarget ? myself.outputTarget: "table/html;page-mode=page",
+                  "output-target":  myself.outputTarget ? myself.outputTarget: "table/html;page-mode=page",
                   renderMode : "SUBSCRIBE"
-
                 };
 
                 for (var i = 0; i < myself.parameters.length; i++) {
@@ -912,7 +1019,7 @@ success = response == 'Public Schedule saved/created';
             return success;           
           }
       }
-    },
+    }/*,
 
       doneState : {
 
@@ -922,7 +1029,7 @@ success = response == 'Public Schedule saved/created';
         submit: function(e,v,m,f){
         }
       }
-    
+    */
   };
       $.prompt(promp);
       $("#jqi").css("width", "510px");
@@ -930,6 +1037,8 @@ success = response == 'Public Schedule saved/created';
         $("#startDateIn").datepicker({minDate:0});
         $("#rangeStartIn").datepicker({minDate:0});
         $("#endByIn").datepicker({minDate:0});
+         $("#startDateIn").datepicker("setDate",new Date());
+        $("#rangeStartIn").datepicker("setDate",new Date());
 
 });
       
