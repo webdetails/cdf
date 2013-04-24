@@ -440,7 +440,7 @@ update : function() {
     getHour = function(){
     var hour=$("#hours").val();
     if($("#amPm").val()=="pm")
-        hour+=12;
+        hour= parseInt(hour, 10) + 12;
       if (hour==24)
         hour=00;
     return hour;
@@ -545,7 +545,7 @@ update : function() {
     }
     getUTC = function(exp){
       var arr=exp.split("/");
-      return Date.UTC(arr[2],arr[0],arr[1]);
+      return Date.UTC(arr[2],arr[0]-1,arr[1]);
     }
      makeSelect = function(min,max,interval,id){
       var selectHtml = '<select id ="'+id+'">';
@@ -914,7 +914,7 @@ update : function() {
    var rangeOfRecurrenceOnce='<div id="rangeOfRecurrOnceDiv"><form><span class="dialog-label">Start Date:</span><input id= "startDateIn" type="text" value=""></form></div>';
 
 
-    var mailInfo = '<form><span class="dialog-label">To:</span><input id="to" type="text" value=""></form>';
+    var mailInfo = '<form><span class="dialog-label">To (Email):</span><input id="to" type="text" value=""></form>';
   
 
         var fullPage = "";
