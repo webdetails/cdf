@@ -835,6 +835,7 @@ $(id).val(temp);},2000);
                   solution: myself.solution,
                   name : myself.action,
                   subscribe : true,
+                  destination: $("#to").val(),
                   "subscription-name" : myself.action +  guid(),
                   "schedule-id" : sharedUuid,
                   showParameters : myself.showParameters,
