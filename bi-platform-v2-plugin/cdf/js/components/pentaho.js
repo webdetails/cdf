@@ -545,7 +545,7 @@ update : function() {
     }
     getUTC = function(exp){
       var arr=exp.split("/");
-      return Date.UTC(arr[2],arr[0]-1,arr[1]);
+      return new Date(arr[2],arr[0]-1,arr[1],0,0,0,0).getTime();
     }
      makeSelect = function(min,max,interval,id){
       var selectHtml = '<select id ="'+id+'">';
