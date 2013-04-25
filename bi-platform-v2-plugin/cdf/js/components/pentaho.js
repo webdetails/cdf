@@ -993,6 +993,18 @@ var success = false;
                         xml.documentElement &&
                         xml.documentElement.attributes['result'] &&
                         xml.documentElement.attributes['result'].nodeValue == 'OK') {
+                        //get schedule id
+                        var scheduleId = sharedUuid;
+                        $.getJSON("getSchedules", {solution: myself.solution, path: myself.path, action:myself.action},
+                            function(response) {
+                                for (var i=0; i < response.length; i++) {
+                                    if (response[i]) {
+                                        if (response[i].name == $("#nameIn").val())
+                                            scheduleId = response[i].id;
+                                    }
+                                }
+                            },'text');                        
+                            parameters2["schedule-id"] = scheduleId;
                         $.get("../../content/reporting", parameters2,
                           function(response) {
                             alert(response);
