@@ -618,7 +618,7 @@ update : function() {
         var mili= (minutes*60000)+(hours*3600000);
         var start = getUTC($("#startDateIn").val());
         start+=mili;
-        validateStartDate(start,"#startDateIn"); //XXX encode the errors ASAP
+        validateStartDate(start,"#startDateIn"); 
         parameters["start-date-time"]=start;
         parameters["repeat-time-millisecs"]=0;
         parameters["repeat-count"]=0;
@@ -701,42 +701,24 @@ update : function() {
         var cronString=$("#cronString").val();
         validateCron(cronString);
         parameters["cron"]=cronString;
-        var start = startTimeGetter();
+        var start = getUTC($("#rangeStartIn").val());
         parameters["start-date-time"]=start;
         if($("#endByRadio").is(":checked"))
           parameters["end-date-time"]=endTimeGetter();
         break;
       }
     }
+
     validateCron=function(cron){
       var arr=cron.split(" ");//7 elements - sec min hour dayOfMonth month dayOfWeek year
       if(arr.length<7)
         triggerError("Cron Expression too short","#cronString");
       else if(arr.length>7)
         triggerError("Cron Expression too long","#cronString");
-      else if((arr[3]!="?"||arr[3]!="*")&&(arr[5]!="?"||arr[5]!="*"))
+      else if((arr[3]!="?"&&arr[3]!="*")&&(arr[5]!="?"&&arr[5]!="*"))
         triggerError("M+W unsuported.(M+? or W+?)","#cronString");//day of month and day of week not suported at the same time
-/*      var sec=parseInt(arr[0]);  cant evaluate the possible expressions...
-      var min=parseInt(arr[1]);
-      var hour=parseInt(arr[2]);
-      var day=parseInt(arr[3]);
-      var month=parseInt(arr[4]);
-      var week=arr[5];
-      var year=parseInt(arr[6]);
-      if(sec<0||sec>59)
-         triggerError("Seconds range: 0-59","#cronString");
-      if(min<0||sec>59)
-         triggerError("Minutes range: 0-59","#cronString");
-      if(hour<0||sec>23)
-         triggerError("Hours range: 00-23","#cronString");
-       if(day<1||sec>31)
-         triggerError("Days of Month range: 1-31","#cronString");
-       if(month<1||sec>12)
-         triggerError("Month range: 1-12","#cronString");
-       if(week<0||sec>59)
-         triggerError("Days of Week range: mon-sun","#cronString");
-       if(sec<0||sec>59)
-         triggerError("Seconds range: 0-59","#cronString");*/
+
+
     }
     hideAll = function(){
         $("#rangeOfRecurrDiv").hide();
