@@ -960,7 +960,6 @@ update : function() {
                   solution: myself.solution,
                   name : myself.action,
                   subscribe : true,
-                  destination: $("#to").val(),
                   "subscription-name" :  $("#nameIn").val(),
                   "schedule-id" : sharedUuid,
                   showParameters : myself.showParameters,
@@ -975,6 +974,9 @@ update : function() {
                     parameters2[param[0]] = param[1];
                 }
 
+                if ($("#to").val().length > 0 ) {
+                    parameters2.destination = $("#to").val();
+                }
 
 var success = false;
             var x = $.ajaxSettings.async;
