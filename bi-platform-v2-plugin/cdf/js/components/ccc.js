@@ -112,15 +112,15 @@ var CccComponent = BaseCccComponent.extend({
     query: null,
     chart: null,
 
-    update : function() {
-        if (this.parameters == undefined) {
+    update: function() {
+        if (this.parameters == null) {
             this.parameters = [];
         }
 
-        // clear previous table
+        // clear placeholder
         var ph = $("#"+this.htmlObject).empty();
         var myself = this;
-    
+        
         // Set up defaults for height and width
         if(typeof(this.chartDefinition.width) === "undefined")
             this.chartDefinition.width = ph.width();
@@ -128,7 +128,7 @@ var CccComponent = BaseCccComponent.extend({
         if(typeof(this.chartDefinition.height) === "undefined")
             this.chartDefinition.height = ph.height();
   
-        if (Modernizr != undefined && Modernizr.svg) {
+        if (typeof Modernizr !== 'undefined' && Modernizr.svg) {
             this.renderChart();
         } else {
             pv.listenForPageLoad(function() {
@@ -139,7 +139,7 @@ var CccComponent = BaseCccComponent.extend({
 
     renderChart: function() {
       var myself = this;
-      if(this.chartDefinition.dataAccessId || myself.chartDefinition.query){
+      if(this.chartDefinition.dataAccessId || myself.chartDefinition.query) {
         this.triggerQuery(this.chartDefinition,_.bind(this.render,this));
       }
       else if(this.valuesArray != undefined){
@@ -391,3 +391,8 @@ var CccTreemapChartComponent = CccComponent.extend({
 
 });
 
+var CccNormalizedBarChartComponent = CccComponent.extend({
+
+    cccType: pvc.NormalizedBarChart
+
+});
