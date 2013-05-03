@@ -439,10 +439,14 @@ update : function() {
 
     getHour = function(){
     var hour=$("#hours").val();
-    if($("#amPm").val()=="pm")
+    if($("#amPm").val()=="pm") {
         hour= parseInt(hour, 10) + 12;
       if (hour==24)
-        hour=00;
+        hour=12;
+    } else {
+        if (hour == "12")
+            hour = 0;
+    }
     return hour;
     }
     cronThis = function(){
