@@ -764,6 +764,8 @@ Dashboards.updateComponent = function(object) {
 
   if(object.isManaged === false && object.update) {
     object.update();
+	// check if component has periodic refresh and schedule next update
+    this.refreshEngine.processComponent(object);
   } else {
     this.updateLifecycle(object);
   }
