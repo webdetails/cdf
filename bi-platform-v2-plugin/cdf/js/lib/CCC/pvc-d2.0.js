@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130429
+//VERSION TRUNK-20130506
 
 var pvc = (function(def, pv) {
 
@@ -8186,10 +8186,18 @@ def.type('pvc.data.Data', pvc.data.Complex)
     /**
      * Obtains an enumerable of the child data instances of this data.
      * 
-     * @type pvc.data.Data | def.Query
+     * @type def.Query
      */
     children: function() { return this._children ? def.query(this._children) : def.query(); },
-
+    
+    /**
+     * Obtains a child data given its key.
+     * 
+     * @param {string} key The key of the child data.
+     * @type pvc.data.Data
+     */
+    child: function(key) { return this._childrenByKey ? (this._childrenByKey[key] || null) : null; },
+    
     /**
      * Obtains the number of children.
      *
@@ -11819,6 +11827,7 @@ var pvc_ValueLabelVar = pvc.visual.ValueLabelVar = function(value, label, rawVal
 def.set(
     pvc_ValueLabelVar.prototype,
     'rawValue', undefined,
+    'absLabel', undefined,
     'setValue', function(v) {
         this.value = v;
         return this;
@@ -20228,17 +20237,19 @@ pvc.BaseChart
      * @param {string|string[]} [dataPartValue=null] The desired data part value or values.
      * @param {object} [ka=null] Optional keyword arguments object.
      * @param {boolean} [ka.ignoreNulls=true] Indicates that null datums should be ignored.
+     * @param {boolean} [ka.inverted=false] Indicates that the inverted data grouping is desired.
      * 
      * @type pvc.data.Data
      */
     visibleData: function(dataPartValue, ka) {
         var ignoreNulls = def.get(ka, 'ignoreNulls', true);
+        var inverted    = def.get(ka, 'inverted', false);
         
         // If already globally ignoring nulls, there's no need to do it explicitly anywhere
         if(ignoreNulls && this.options.ignoreNulls) { ignoreNulls = false; }
         
         var cache = def.lazy(this, '_visibleDataCache');
-        var key   = ignoreNulls + '|' + dataPartValue; // relying on Array#toString, when an array
+        var key   = inverted + '|' + ignoreNulls + '|' + dataPartValue; // relying on Array#toString, when an array
         var data  = cache[key];
         if(!data) {
             ka = ka ? Object.create(ka) : {};
@@ -21967,6 +21978,8 @@ def
 
     visibleData: function(ka) { return this.chart.visibleData(this.dataPartValue, ka); },
 
+    partData: function() { return this.chart.partData(this.dataPartValue); },
+    
     /* LAYOUT PHASE */
     
     /** 
@@ -23117,7 +23130,7 @@ def
             if(group) {
                 pct = group.dimensions(dimName).percentOverParent(visibleKeyArgs);
             } else {
-                pct = data.dimensions(dimName).percent(atom.value);
+                pct = data.dimensions(dimName).percent(atom.value, visibleKeyArgs);
             }
             
             return percentValueFormat(pct);
@@ -26784,13 +26797,14 @@ def
         var partData    = this.partData(dataPartValue);
         
         var ignoreNulls = def.get(keyArgs, 'ignoreNulls');
+        var inverted    = def.get(keyArgs, 'inverted', false);
         
         // Allow for more caching when isNull is null
         var groupKeyArgs = {visible: true, isNull: ignoreNulls ? false : null};
         
         return serGrouping ?
            // <=> One multi-dimensional, two-levels data grouping
-           partData.groupBy([catGrouping, serGrouping], groupKeyArgs) :
+           partData.groupBy(inverted ? [serGrouping, catGrouping] : [catGrouping, serGrouping], groupKeyArgs) :
            partData.groupBy(catGrouping, groupKeyArgs);
     },
     
