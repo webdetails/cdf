@@ -2,10 +2,12 @@
 <ivysettings>
   <property name="ivy.local.default.root" value="${ivy.default.ivy.user.dir}/local" override="true"/>
   <property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact]-[revision].[ext]" override="false"/>
-
-  <settings defaultResolver="default"/>
+  <settings defaultResolver="pentaho-chained-resolver"/>
   <include url="${ivy.default.settings.dir}/ivysettings-public.xml"/>
-  <resolvers>
+  <include url="${ivy.default.settings.dir}/ivysettings-local.xml" />
+    <caches lockStrategy="artifact-lock" resolutionCacheDir="${ivy.default.ivy.user.dir}/resol-cache${env.EXECUTOR_NUMBER}" />
+   
+    <resolvers>
   	<dual name="shared">
 		<url name="shared-ivy">
 		  <ivy pattern="http://repo.pentaho.org/artifactory/repo/[organisation]/[module]/[revision]/[module]-[revision].ivy.xml" />
