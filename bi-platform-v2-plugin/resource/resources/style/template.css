@@ -16,7 +16,6 @@
 }
 
 body {
-
 	margin-top: 10px;
 	background-color: #f6f7f8;
 	min-height: 900px;
@@ -29,7 +28,6 @@ body {
 	z-index: 100;
 	margin-left: auto;
 	margin-right: auto;
-	/*background-color: green;*/
 	overflow: hidden;
 	clear: both;
 	position: relative;
@@ -131,7 +129,7 @@ body {
 }
 
 .webdetailsHead div.cdePanelSelected {
-	color: #393e3e
+	color: #393e3e;
 }
 
 .webdetailsHead div.cdeLinks:hover {
@@ -230,14 +228,14 @@ body {
 	background-image: url('images/panelTitleBg.png');
 	background-position: left bottom;
 	background-repeat: no-repeat;
-	color: rgb(224, 232, 236);
+	color: #333;
 }
 
 .panelTitleText {
 	font-size: 15px;
 	padding-top: 200px;
 	padding-bottom: 0px;
-	color: #222;
+	color: #333;
 }
 
 .panelTitleImages {
@@ -273,12 +271,13 @@ h1, h2 {
 }
 
 a {
-	color: #007788;
-	text-decoration: underline;
+	color: #007ee0;
+	text-decoration: none;
 }
 
 a:hover {
 	text-decoration: none;
+	color: #005ca4;
 }
 
 .clear {
@@ -379,7 +378,8 @@ a:hover {
 	margin-left: 50px;
 	margin-right: 50px;
 	margin-top: 20px;
-	color: rgb(34, 73, 79);
+	margin-bottom: 20px;
+	color: #333;
 	font-size: 13px;
 }
 
@@ -390,7 +390,7 @@ a:hover {
 #content h2 {
 	background: url("images/shape.png") no-repeat left top 1px;
 	font-size: 35px;
-	color: #137bca;
+	color: #005ca4;
 	letter-spacing: -1px;
 	font-weight: normal;
 }
@@ -409,17 +409,10 @@ a:hover {
 	line-height: inherit;
 }
 
-.h2NumEven {
-
-}
-
-.h2NumOdd {
-	text-align: right;
-	margin-top: 15px;
-}
-
 #content h3 {
-	color: rgb(34, 73, 79);
+	margin-top: 40px;
+	margin-bottom: 10px;
+	color: #333;
 	font-size: 20px;
 }
 
@@ -892,4 +885,9 @@ select:focus {
 	color: #137bca;
 	font-size: 14px;
 	font-weight: 500;
+}
+
+/* scrollable */
+#pentaho-cdf-screenshots {
+	margin-bottom: 40px;
 }
