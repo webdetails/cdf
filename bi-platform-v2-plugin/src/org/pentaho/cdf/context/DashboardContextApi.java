@@ -64,7 +64,6 @@ import org.pentaho.platform.repository2.unified.fileio.RepositoryFileInputStream
 
 
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
-import org.pentaho.reporting.engine.classic.core.modules.output.pageable.plaintext.driver.IBMCompatiblePrinterDriver;
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.GrantedAuthorityImpl;

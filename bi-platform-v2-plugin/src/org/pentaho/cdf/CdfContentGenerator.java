@@ -682,10 +682,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       }else{
         
         //is folder
-        for (final RepositoryFileTree childNode : tree.getChildren()){
-          
-          processContentListTree(childNode, json);         
-        }       
+        if(tree.getChildren() != null){
+          for (final RepositoryFileTree childNode : tree.getChildren()){
+            
+            processContentListTree(childNode, json);         
+          }   
+        }
       }
     } 
     
