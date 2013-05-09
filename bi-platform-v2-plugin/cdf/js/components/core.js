@@ -801,7 +801,7 @@ var QueryComponent = BaseComponent.extend({
      Dashboards.log("Fatal - No query definition passed","error");
       return;
     }
-    var query = new Query(cd);
+    var query = Dashboards.getQuery( 'cda', cd );
     object.queryState = query;
 
     query.fetchData(object.parameters, function(values) {
@@ -994,7 +994,7 @@ var UnmanagedComponent = BaseComponent.extend({
     var handler = this.getSuccessHandler(success, always),
         errorHandler = this.getErrorHandler();
 
-    var query = this.queryState = this.query = new Query(queryDef);
+    var query = this.queryState = this.query = Dashboards.getQuery('cda', queryDef);
     var ajaxOptions = {
       async: true
     }
