@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130506
+//VERSION TRUNK-20130509
 
 var pvc = (function(def, pv) {
 
@@ -1170,56 +1170,49 @@ pv_Mark.prototype.zOrder = function(zOrder) {
 };
 
 /* Render id */
-pv_Mark.prototype.renderCore = function(){
+pv_Mark.prototype.renderCore = function() {
     /* Assign a new render id to the root mark */
     var root = this.root;
     
     root._renderId = (root._renderId || 0) + 1;
     
-    if(pvc.debug >= 25){
-        pvc.log("BEGIN RENDER " + root._renderId);
-    }
+    if(pvc.debug >= 25) { pvc.log("BEGIN RENDER " + root._renderId); }
     
     /* Render */
-    pvc_markRenderCore.apply(this, arguments);
+    pvc_markRenderCore.call(this);
     
-    if(pvc.debug >= 25){
-        pvc.log("END RENDER " + root._renderId);
-    }
+    if(pvc.debug >= 25) { pvc.log("END RENDER " + root._renderId); }
 };
 
-pv_Mark.prototype.renderId = function(){
-    return this.root._renderId;
-};
+pv_Mark.prototype.renderId = function() { return this.root._renderId; };
 
 /* PROPERTIES */
-pv_Mark.prototype.wrapper = function(wrapper){
+pv_Mark.prototype.wrapper = function(wrapper) {
     this._wrapper = wrapper;
-    
     return this;
 };
 
-pv_Mark.prototype.wrap = function(f, m){
-    if(f && def.fun.is(f) && this._wrapper && !f._cccWrapped){
+pv_Mark.prototype.wrap = function(f, m) {
+    if(f && def.fun.is(f) && this._wrapper && !f._cccWrapped) {
         f = this._wrapper(f, m);
-        
+
         f._cccWrapped = true;
     }
-    
+
     return f;
 };
 
 pv_Mark.prototype.lock = function(prop, value){
-    if(value !== undefined){
+    if(value !== undefined) {
         this[prop](value);
     }
 
     (this._locked || (this._locked = {}))[prop] = true;
-    
+
     return this;
 };
 
-pv_Mark.prototype.isIntercepted = function(prop){
+pv_Mark.prototype.isIntercepted = function(prop) {
     return this._intercepted && this._intercepted[prop];
 };
 
@@ -1241,11 +1234,11 @@ pv_Mark.prototype.ensureEvents = function(defEvs) {
  * name = left | right | top | bottom
  */
 pv_Mark.prototype.addMargin = function(name, margin) {
-    if(margin !== 0){
+    if(margin !== 0) {
         var staticValue = def.nullyTo(this.propertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
         
-        this[name](function(){
+        this[name](function() {
             return margin + fMeasure.apply(this, pvc_arraySlice.call(arguments));
         });
     }
@@ -10675,20 +10668,24 @@ function data_processDatumAtoms(datum, intern, markVisited){
     // data is still initializing and dimensions are not yet created ?
     if(!dims) { intern = false; }
     
-    def.each(datum.atoms, function(atom) {
-        if(intern) {
-            // Ensure that the atom exists in the local dimension
+    if(intern || markVisited) {
+        var atoms = datum.atoms;
+        for(var dimName in atoms) {
+            var atom = atoms[dimName]; 
+            if(intern) {
+                // Ensure that the atom exists in the local dimension
+                
+                var localDim = def.getOwn(dims, dimName) ||
+                               def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
+                
+                /*global dim_internAtom:true */
+                dim_internAtom.call(localDim, atom);
+            }
             
-            var localDim = def.getOwn(dims, atom.dimension.name) ||
-                           def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
-            
-            /*global dim_internAtom:true */
-            dim_internAtom.call(localDim, atom);
+            // Mark atom as visited
+            if(markVisited) { atom.visited = true; }
         }
-        
-        // Mark atom as visited
-        if(markVisited) { atom.visited = true; }
-    });
+    }
 }
 
 function data_addDatumsSimple(newDatums) {
@@ -12665,7 +12662,7 @@ def
                 return me._getPvSceneProp(pvName, /*defaultIndex*/this.index);
             }
             
-            // Data prop is evaluated while this.index = -1, and the parent mark's stack
+            // Data prop is evaluated while this.index = -1, and with the parent mark's stack
             if(!isDataProp) {
                 // Is sign _inContext or Is a stale context?
                 var pvInstance = this.scene[this.index];
@@ -12700,8 +12697,12 @@ def
     _bindWhenFun: function(value, pvName) {
         if(def.fun.is(value)) {
             var me = this;
-            return me._createPropInterceptor(pvName, function() {
-                return value.apply(me, arguments);
+            
+            // NOTE: opted by this form, instead of: value.bind(me);
+            // because bind does not exist in some browsers
+            // and the bind polyfill uses apply (which would then be much slower).
+            return me._createPropInterceptor(pvName, function(scene) { 
+                return value.call(me, scene);
             });
         }
         
@@ -12713,8 +12714,8 @@ def
         var me = this;
         return me.lockMark(
             pvName,
-            me._createPropInterceptor(pvName, function() {
-                return me[method].apply(me, arguments);
+            me._createPropInterceptor(pvName, function(scene) {
+                return me[method].call(me, scene);
             }));
     },
     
@@ -12775,12 +12776,11 @@ def
     
     /* CONTEXT */
     context: function(createNew) {
+        // This is a hot function
         var state;
-        if(createNew || !(state = this.state)) { 
-           return this._createContext();
-        }
+        if(createNew || !(state = this.state)) { return this._createContext(); }
         
-        return def.lazy(state, 'context', this._createContext, this); 
+        return state.context || (state.context = this._createContext());
     },
     
     _createContext: function() { return new pvc.visual.Context(this.panel, this.pvMark); }
@@ -12846,28 +12846,30 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         // ex: color
         methods[name] = function(arg) {
-            delete this._finished;
+            this._finished = false;
             
-            var value;
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
-            try {
+            
                 // ex: baseColor
-                value = this[baseName](arg);
+            var value = this[baseName](arg);
                 
-                if(value == null) { return null; }  // undefined included
-                
-                if(this.hasOwnProperty('_finished')) { return value; }
-                
-                if(this.showsInteraction() && this.anyInteraction()) {
-                    // ex: interactiveColor
-                    value = this[interName](value, arg);
-                } else {
-                    // ex: normalColor
-                    value = this[normalName](value, arg);
-                }
-            } finally {
-                delete this._arg;
+            if(value == null) { return null; }  // undefined included
+            
+            if(this._finished) { return value; }
+            
+            if(this.showsInteraction() && this.anyInteraction()) {
+                // ex: interactiveColor
+                value = this[interName](value, arg);
+            } else {
+                // ex: normalColor
+                value = this[normalName](value, arg);
             }
+            
+            // Possible memory leak in case of error
+            // but it is not serious.
+            // Performance is more important 
+            // so no try/finally is added. 
+            this._arg = null;
             
             return value;
         };
@@ -12938,7 +12940,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     intercept: function(pvName, fun) {
         var interceptor = this._createPropInterceptor(pvName, fun);
         
-        return this._intercept(pvName, interceptor); 
+        return this._intercept(pvName, interceptor);
     }, 
     
     // -------------
@@ -13559,8 +13561,8 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
      *  |
      *  o-----> x
      */
-    y: function(){ return 0; },
-    x: function(){ return 0; },
+    y: def.fun.constant(0),
+    x: def.fun.constant(0),
     
     radius: function(){
         // Store extended value, if any
@@ -13957,9 +13959,9 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
      *  |
      *  o-----> x
      */
-    x:  function(){ return 0; },
-    y:  function(){ return 0; },
-    dy: function(){ return 0; },
+    y:  def.fun.constant(0),
+    x:  def.fun.constant(0),
+    dy: def.fun.constant(0),
     
     /* COLOR */
     /**
@@ -14088,22 +14090,20 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
 .constructor
 .add({
     // Ensures that it is evaluated before x and y
-    angle: function(){
-        return 0;
-    },
+    angle: def.fun.constant(0),
     
-    x: function(){
+    x: function() {
         return this._center.x + this._offsetSlice('cos'); 
     },
     
-    y: function(){ 
+    y: function() { 
         return this._center.y - this._offsetSlice('sin'); 
     },
     
     // ~ midAngle -> (endAngle + startAngle) / 2
     _offsetSlice: function(fun) {
         var offset = this._getOffsetRadius();
-        if(offset !== 0){
+        if(offset !== 0) {
             offset = offset * Math[fun](this.pvMark.midAngle());
         }
             
@@ -14113,7 +14113,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     // Get and cache offsetRadius 
     _getOffsetRadius: function(){
         var offset = this.state.offsetRadius;
-        if(offset == null){
+        if(offset == null) {
             offset = (this.state.offsetRadius = this.offsetRadius() || 0);
         }
         
@@ -14126,9 +14126,7 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
      * @override
      */
     defaultColor: function(type){
-        if(type === 'stroke'){
-            return null;
-        }
+        if(type === 'stroke') { return null; }
         
         return this.base(type);
     },
@@ -14154,13 +14152,10 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     },
     
     /* Offset */
-    baseOffsetRadius: function(){
-        // There's no extension point for this
-        return 0;
-    },
-
-    interactiveOffsetRadius: function(offsetRadius){
-        if(this.mayShowActive(/*noSeries*/true)){
+    baseOffsetRadius: def.fun.constant(0), // There's no extension point for this
+    
+    interactiveOffsetRadius: function(offsetRadius) {
+        if(this.mayShowActive(/*noSeries*/true)) {
             return offsetRadius + this._activeOffsetRadius;
         }
 
@@ -16169,7 +16164,7 @@ def
         if(fillColorScaleByColKey){
             var colorMissing = this.option('Missing');
             
-            return function(scene){
+            return function(scene) {
                 var colorValue = scene.vars[varName].value;
                 if(colorValue == null) {
                     return colorMissing;
@@ -20815,22 +20810,41 @@ pvc.BaseChart
             var tmp;
             var dMin = extent.min;
             var dMax = extent.max;
-            var epsi = 1e-12;
+            var epsi = 1e-10;
             
             var normalize = function() {
-                /* If bounds are not greater than epsilon, things break.
-                 * So, we add a wee bit of variation.
-                 */
-                if(dMax - dMin <= epsi) {
-                    if(extent.minLocked) {
-                        // If extent.maxLocked ignore the max lock :-(
+                var d = dMax - dMin;
+                
+                // very close to zero delta (<0 or >0) 
+                // is turned into 0 delta
+                if(d && Math.abs(d) <= epsi) {
+                    dMin = (dMin + dMax) / 2;
+                    dMin = dMax = +dMin.toFixed(10);
+                    d = 0;
+                }
+                
+                // zero delta?
+                if(!d) {
+                    // Adjust *all* that are not locked, or, if all locked, max
+                    if(!extent.minLocked) {
+                        dMin = Math.abs(dMin) > epsi ? (dMin * 0.99) : -0.1;
+                    }
+                    
+                    // If both are locked, ignore max lock!
+                    if(!extent.maxLocked || extent.minLocked) {
+                        dMax = Math.abs(dMax) > epsi ? (dMax * 1.01) : +0.1;
+                    }
+                } else if(d < 0) {
+                    // negative delta, bigger than epsi
+                    
+                    // adjust max if it is not locked, or
+                    // adjust min if it is not locked, or
+                    // adjust max (all locked)
+                    
+                    if(!extent.maxLocked || extent.minLocked) {
                         dMax = Math.abs(dMin) > epsi ? dMin * 1.01 : +0.1;
-                    } else if(extent.maxLocked) {
+                    } else /*if(!extent.minLocked)*/{
                         dMin = Math.abs(dMax) > epsi ? dMax * 0.99 : -0.1;
-                    } else {
-                        tmp = dMin;
-                        dMin = dMax;
-                        dMax = tmp;
                     }
                 }
             };
@@ -24363,9 +24377,9 @@ def
         var textAnchor = pvc.BasePanel.leftTopAnchor[this.anchor];
         
         var wrapper;
-        if(this.compatVersion() <= 1){
-            wrapper = function(v1f){
-                return function(itemScene){
+        if(this.compatVersion() <= 1) {
+            wrapper = function(v1f) {
+                return function(itemScene) {
                     return v1f.call(this);
                 };
             };
@@ -24384,7 +24398,7 @@ def
             })
             .textAlign(textAlign)
             [this.anchorOrtho(textAnchor)](function(lineScene){
-                switch(this.textAlign()){
+                switch(this.textAlign()) {
                     case 'center': return lineScene.vars.size.width / 2;
                     case 'left':   return 0;
                     case 'right':  return lineScene.vars.size.width;
@@ -24397,7 +24411,7 @@ def
             ;
     },
     
-    _buildScene: function(layoutInfo){
+    _buildScene: function(layoutInfo) {
         var rootScene = new pvc.visual.Scene(null, {panel: this, source: this.chart.data});
         var textLines = layoutInfo.lines;
         
@@ -24409,9 +24423,7 @@ def
         return rootScene;
     },
     
-    _getExtensionId: function() {
-        return '';
-    }
+    _getExtensionId: def.fun.constant('')
 });
 
 
@@ -29035,10 +29047,10 @@ def
         
         var wrapper;
         var extensionIds = ['slice'];
-        if(this.compatVersion() <= 1){
+        if(this.compatVersion() <= 1) {
             extensionIds.push(''); // let access as "pie_"
-            wrapper = function(v1f){
-                return function(pieCatScene){
+            wrapper = function(v1f) {
+                return function(pieCatScene) {
                     return v1f.call(this, pieCatScene.vars.value.value);
                 };
             };
@@ -29100,7 +29112,7 @@ def
             .pvMark
             ;
         
-        if(this.valuesVisible){
+        if(this.valuesVisible) {
             this.valuesFont = layoutInfo.labelFont;
             
             if(this.labelStyle === 'inside') {
@@ -29123,7 +29135,7 @@ def
                     .data(rootScene.childNodes)
                     .localProperty('pieSlice')
                     .pieSlice(function(/*scene*/){
-                        return myself.pvPie.scene[this.index];  
+                        return myself.pvPie.scene[this.index]; 
                      })
                     ;
                 
@@ -29188,14 +29200,14 @@ def
                         showsInteraction: true
                     })
                     .lockMark('data', function(scene){
-                        // Repeat the scene, once for each line
-                        return scene.lineScenes; 
+                    // Repeat the scene, once for each line
+                        return scene.lineScenes;
                     })
-                    .intercept('textStyle', function(){
-                        delete this._finished;
+                    .intercept('textStyle', function() {
+                        this._finished = false;
                         var style = this.delegate();
                         if(style && 
-                           !this.hasOwnProperty('_finished') &&
+                           !this._finished &&
                            !this.mayShowActive() &&
                            this.mayShowNotAmongSelected()){
                             style = this.dimColor(style, 'text');
@@ -29241,13 +29253,13 @@ def
         }
     },
     
-    _getExtensionId: function(){
+    _getExtensionId: function() {
         // 'chart' is deprecated
         // 'content' coincides, visually, with 'plot', in this chart type
         // - actually it shares the same panel...
         
         var extensionIds = [{abs: 'content'}];
-        if(this.chart.parent){ 
+        if(this.chart.parent) { 
             extensionIds.push({abs: 'smallContent'});
         }
         
@@ -29262,7 +29274,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(){
+    _buildScene: function() {
         var rootScene  = new pvc.visual.PieRootScene(this);
         
         // v1 property
@@ -29770,8 +29782,8 @@ def
              * var visibleSerIndex = this.stacked ? mark.parent.index : index,
              *     visibleCatIndex = this.stacked ? index : mark.parent.index;
              */
-            wrapper = function(v1f){
-                return function(scene){
+            wrapper = function(v1f) {
+                return function(scene) {
                     var markParent = Object.create(this.parent);
                     var mark = Object.create(this);
                     mark.parent = markParent;
@@ -29832,7 +29844,7 @@ def
             .antialias(false)
             ;
 
-        if(plot.option('OverflowMarkersVisible')){
+        if(plot.option('OverflowMarkersVisible')) {
             this._addOverflowMarkers(wrapper);
         }
         
@@ -29934,7 +29946,7 @@ def
                 extensionId:   isMin ? 'underflowMarker' : 'overflowMarker',
                 wrapper:       wrapper
             })
-            .intercept('visible', function(scene){
+            .intercept('visible', function(scene) {
                 var visible = this.delegateExtension();
                 if(visible !== undefined && !visible){
                     return false;
@@ -29981,7 +29993,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(data, seriesData){
+    _buildScene: function(data, seriesData) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
         
         var categDatas = data._children;
