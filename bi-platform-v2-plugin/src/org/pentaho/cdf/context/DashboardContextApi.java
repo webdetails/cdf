@@ -315,8 +315,12 @@ public class DashboardContextApi {
         List<RepositoryFile> files = new ArrayList<RepositoryFile>();
         List<String> filePaths = new ArrayList<String>();
         
+        RepositoryAccess repAccess = RepositoryAccess.getRepository();
+        String includesPath = "/public/pentaho-solutions/cdf/includes";
+        if (!repAccess.resourceExists(includesPath))        
+          return queries;
         
-        RepositoryAccess.getRepository().listSolutionFiles("/public/pentaho-solutions/cdf/includes", true, extensions, true, files);
+        repAccess.listSolutionFiles(includesPath, true, extensions, true, files);
         
         for(RepositoryFile file : files){
             filePaths.add(file.getPath());
