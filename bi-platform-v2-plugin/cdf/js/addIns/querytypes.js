@@ -337,16 +337,17 @@ var cdaQuery = $.extend(true, {}, baseQuery , {
     var cachedParams = this.getProperty('params'),
         params = $.extend( {}, cachedParams , overrides);
 
-    _.each( params , function (name, value) {
-        value = Dashboards.getParameterValue(value);
-        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-          //special case where single element will wrongly be treated as a parseable array by cda
-          value = doCsvQuoting(value[0],';');
-        }
-        //else will not be correctly handled for functions that return arrays
-        if (typeof value == 'function') value = value();
-        queryDefinition['param' + name] = value;
+    _.each( params , function (value, name) {
+      value = Dashboards.getParameterValue(value);
+      if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+        //special case where single element will wrongly be treated as a parseable array by cda
+        value = doCsvQuoting(value[0],';');
       }
+      //else will not be correctly handled for functions that return arrays
+      if (typeof value == 'function') {
+        value = value();
+      }
+      queryDefinition['param' + name] = value;
     });
     queryDefinition.path = this.getProperty('file');
     queryDefinition.dataAccessId = this.getProperty('id');
@@ -395,7 +396,13 @@ var cdaQuery = $.extend(true, {}, baseQuery , {
       _exportIframe[0].src = '/pentaho/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
       _exportIframe.appendTo($('body'));
     };
-
+    $.ajax({
+      type:'POST',
+      async: false,
+      data: queryDefinition,
+      url: this.getProperty('url'),
+      success: successCallback
+    });
   },
 
   setAjaxOptions: function(newOptions) {
@@ -525,12 +532,7 @@ var cdaQuery = $.extend(true, {}, baseQuery , {
 
 });
 
-Dashboards.registerAddIn("Query", "queryTypes", new AddIn(cdaQuery))
-
-
-
-
-
+Dashboards.registerAddIn("Query", "queryTypes", cdaQuery );
 
 
 
