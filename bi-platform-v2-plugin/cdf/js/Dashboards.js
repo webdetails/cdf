@@ -1757,7 +1757,8 @@ Dashboards.fetchData = function(cd, params, callback) {
     for (var param in params) {
       cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
-    $.post(webAppPath + "/content/cda/doQuery?", cd,
+    
+    $.post(webAppPath + "/plugin/cda/api/doQuery?", cd,
       function(json) {
         callback(json);
       },'json').error(Dashboards.handleServerError);
@@ -2329,7 +2330,7 @@ Dashboards.safeClone = function(){
 Query = function() {
 
   // Constants, or what passes for them... Pretty please leave these alone.
-  var CDA_PATH = webAppPath + "/content/cda/doQuery?";
+  var CDA_PATH = webAppPath + "/plugin/cda/api/doQuery?";
   var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:pentaho-cdf:actions:jtable.xaction/generatedContent";
 
   /*
@@ -2463,6 +2464,7 @@ Query = function() {
 
     var settings = _.extend({},_ajaxOptions, {
       data: queryDefinition,
+      type: 'GET',
       url: url,
       success: successHandler,
       error: errorHandler 
