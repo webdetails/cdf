@@ -401,6 +401,7 @@ update : function() {
       if (o[0].tagName=="DIV") o.wrap("<span/>");
       if (this.label != undefined) o.text(this.label);
       o.button();
+      o.addClass('scheduler_button');
     }
     o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
     o.bind("click", function(){
@@ -1031,8 +1032,8 @@ success = response == 'Public Schedule saved/created';
       }
     */
   };
-      $.prompt(promp);
-      $("#jqi").css("width", "510px");
+      $.prompt(promp, {classes: 'scheduler'});
+      $(".scheduler #jqi").css("width", "510px");
       $(document).ready(function(ev) {
         $("#startDateIn").datepicker({minDate:0});
         $("#rangeStartIn").datepicker({minDate:0});
