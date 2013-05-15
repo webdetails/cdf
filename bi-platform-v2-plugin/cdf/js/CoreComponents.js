@@ -372,7 +372,7 @@ var SelectComponent = SelectBaseComponent.extend({
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
   	var ph = $("#"+this.htmlObject + " select");
-	return ( ph.val() == null ) ? [] : ph.val();
+    return ( ph.val() == null ) ? [] : ph.val();
   }
 });
 
