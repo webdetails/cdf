@@ -7,7 +7,7 @@
 (function() {
 
 
-var baseQuery = {
+var baseQuery = new AddIn({
   // AddIn stuff
   name: "baseQuery",
   label: "Base Query",
@@ -256,7 +256,7 @@ var baseQuery = {
       throw "InvalidPageSize";
     }
   }
-};
+});
 
 Dashboards.registerAddIn("Query", "queryTypes", baseQuery);
 
@@ -266,7 +266,7 @@ Dashboards.registerAddIn("Query", "queryTypes", baseQuery);
 // Query(queryString) --> DEPRECATED
 // Query(queryDefinition{path, dataAccessId})
 // Query(path, dataAccessId)
-var cdaQuery = $.extend(true, {}, baseQuery , {
+var cdaQuery = baseQuery.clone({
   name: 'cda',
   label: 'CDA Query',
   defaults: {
@@ -533,6 +533,7 @@ var cdaQuery = $.extend(true, {}, baseQuery , {
 });
 
 Dashboards.registerAddIn("Query", "queryTypes", cdaQuery );
+
 
 
 
