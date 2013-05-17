@@ -1211,27 +1211,36 @@ Dashboards.addComponent = function(component, options) {
   this.components[index] = component;
 };
 
-Dashboards.getComponentIndex = function(componentOrName) {
-  if(componentOrName) {
-    if(typeof componentOrName === 'string') {
+Dashboards.getComponentIndex = function(compOrNameOrIndex) {
+  if(compOrNameOrIndex != null) {
+    switch(typeof compOrNameOrIndex) {
+      case 'string':
       for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
-        if(cs[i].name === componentOrName) { return i; }
+          if(cs[i].name === compOrNameOrIndex) { return i; }
       }
-    } else {
-      return this.components.indexOf(componentOrName);
+        break;
+      case 'number':
+        if(compOrNameOrIndex >= 0 && compOrNameOrIndex < this.components.length) {
+          return compOrNameOrIndex;
+        }
+        break;
+
+      default: return this.components.indexOf(compOrNameOrIndex);
     }
   }
   return -1;
 };
 
-Dashboards.removeComponent = function(componentOrName) {
-  var index = this.getComponentIndex(componentOrName);
-  var found = index >= 0;
-  if(found) {
-    this.components[index].dashboard = null;
-    this.components.splice(index, 1);
+Dashboards.removeComponent = function(compOrNameOrIndex) {
+  var index = this.getComponentIndex(compOrNameOrIndex);
+  var comp = null;
+  if(index >= 0) {
+    var cs = this.components;
+    comp = cs[index];
+    comp.dashboard = null;
+    cs.splice(index, 1);
   }
-  return found;
+  return comp;
 };
 
 
