@@ -2493,6 +2493,57 @@ Dashboards.safeClone = function(){
 
 
 
+// QUERIES begin
+
+Dashboards.getQuery = function (opts) {
+  var queryType = opts.queryType || 'cda';
+  var queryAddIn = this.getAddIn('Query' , 'queryTypes', queryType  , true);
+  if ( queryAddIn ){
+    queryAddIn.call(opts);
+    return queryAddIn.getObject();
+  }
+};
+
+/*
+ * Query STUFF
+ * (Here for legacy reasons)
+ * 
+ */
+//Ctors:
+// Query(queryString) --> DEPRECATED
+// Query(queryDefinition{path, dataAccessId})
+// Query(path, dataAccessId)
+Query = function( cd, dataAccessId) {
+
+  var opts;
+
+  if( typeof cd == 'object'){
+    opts = Dashboards.safeClone(true, cd);
+    if (typeof cd.queryType == 'undefined'){
+      if (typeof cd.query != 'undefined') {
+        // got a valid legacy cd object
+        opts.queryType = 'legacy';
+      } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
+        opts.queryType = 'cda';
+      } else {
+        throw 'InvalidQuery';
+      }
+    }
+  } else if (typeof cd == 'string' && typeof dataAccessId == 'string') {
+    opts = {
+      queryType:'cda',
+      path: cd,
+      dataAccessId: dataAccessId
+    };
+  } else {
+    throw 'InvalidQuery'
+  }
+
+  return Dashboards.getQuery(opts);
+};
+
+
+
 /*
  * UTILITY STUFF
  *
