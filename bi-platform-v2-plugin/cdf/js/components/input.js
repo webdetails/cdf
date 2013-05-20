@@ -155,14 +155,7 @@ var SelectComponent = SelectBaseComponent.extend({
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
   	var ph = $("#"+this.htmlObject + " select");
-	// caveat: chosen returns null when nothing's selected, and CDF doesn't handle nulls correctly
-	if(ph.hasClass("chzn-select") && ph.val() == null)
-		return [];
-	// marpontes: regarding to caveat's comment, doing the same to hynds multiSelect
-	if(ph.hasClass("hynds-select") && ph.val() == null)
-		return [];
-
-    return ph.val();
+  	return ( ph.val() == null ) ? [] : ph.val();
   }
 });
 
