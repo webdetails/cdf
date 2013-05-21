@@ -34,8 +34,8 @@
         <dependency org="pentaho" name="pentaho-bi-platform-engine-services" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
         <dependency org="pentaho" name="pentaho-bi-platform-repository" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
         <dependency org="pentaho" name="pentaho-bi-platform-plugin-services" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
-		<dependency org="pentaho" name="pentaho-bi-platform-web" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
-        <dependency org="pentaho" name="pentaho-bi-platform-web-servlet" rev="${dependency.bi-platform.revision}" transitive="false"  changing="true"/>
+		<dependency org="pentaho" name="pentaho-bi-platform-web" rev="${dependency.bi-platform-web.revision}" transitive="false"  changing="true"/>
+        <dependency org="pentaho" name="pentaho-bi-platform-web-servlet" rev="${dependency.bi-platform-web-servlet.revision}" transitive="false"  changing="true"/>
 		<dependency org="org.hibernate"       name="hibernate"           rev="3.2.6.ga">
 			<!--
 			 
