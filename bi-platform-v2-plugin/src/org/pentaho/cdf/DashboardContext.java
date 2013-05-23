@@ -103,6 +103,7 @@ public class DashboardContext {
 
             SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
             context.put("roles", securityParams.getParameter("principalRoles"));
+            context.put("isAdmin", Boolean.valueOf((String)securityParams.getParameter("principalAdministrator")));
 
             JSONObject params = new JSONObject();
 
