@@ -247,7 +247,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private void processGetSchedules(final IParameterProvider requestParams, final OutputStream out) throws Exception {
       
       
-         final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
+        final String solution = requestParams.getStringParameter("solution", null); //$NON-NLS-1$
         final String path = requestParams.getStringParameter("path", null); //$NON-NLS-1$
         final String action = requestParams.getStringParameter("action", null); //$NON-NLS-1$
 
