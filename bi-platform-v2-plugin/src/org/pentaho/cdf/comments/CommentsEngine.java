@@ -211,10 +211,10 @@ public class CommentsEngine
     CommentEntry comment = (CommentEntry) session.load(CommentEntry.class, commentId);
     switch (operationType) {
       case DELETE_OPERATION:
-        if (operationAuthorized(operationType, comment, userSession)) comment.setDeleted(Boolean.valueOf(requestParams.getStringParameter("value", "false")));
+        if (operationAuthorized(operationType, comment, userSession)) comment.setDeleted(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
         break;
       case ARCHIVE_OPERATION:
-        if (operationAuthorized(operationType, comment, userSession)) comment.setArchived(Boolean.valueOf(requestParams.getStringParameter("value", "false")));
+        if (operationAuthorized(operationType, comment, userSession)) comment.setArchived(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
         break;
     }
     session.save(comment);
