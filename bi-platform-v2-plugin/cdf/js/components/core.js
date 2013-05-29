@@ -421,8 +421,28 @@ var CommentsComponent = BaseComponent.extend({
       requestResponse: function (json, operation, collection, callback) {
         if ((operation == 'LIST_ALL') || (operation == 'LIST_ACTIVE')) {
           if ((collection) && (typeof collection != 'undefined')) {
-            if ((json) && (typeof json.result != 'undefined') && (json.result.length > 0)) {
-              collection.reset(json.result);
+            if ((json) && (typeof json.result != 'undefined')) {
+              if ((myself.options.paginate.activePageNumber==0) || (json.result.length!=0)) {
+                collection.reset(json.result);
+              }
+              if ((myself.options.paginate.activePageNumber==0) && (json.result.length==0)) {
+                json.result =  {
+                  id: 0,
+                  comment: 'no comments to show',
+                  createdOn: '', 
+                  elapsedMinutes: '',
+                  isArchived: false,
+                  isDeleted: false,
+                  isMe: false, 
+                  page: '',
+                  user: '',
+                  permissions: {
+                    delete: false,
+                    archive: false
+                  }
+                };
+                collection.reset(json.result);
+              }
             } 
           }
         }
@@ -670,8 +690,8 @@ var CommentsComponent = BaseComponent.extend({
     // Set page start and length for pagination
     this.paginateActive = (typeof this.paginate == 'undefined')? true: this.paginate;
     this.firstResult = (typeof this.firstResult == 'undefined')? 0: this.firstResult;
-    this.maxResults  = (typeof this.maxResults  == 'undefined')? 10: this.maxResults;
-    this.interval  = (typeof this.interval  == 'undefined')? 10000: this.interval;
+    this.maxResults  = (typeof this.maxResults  == 'undefined')? 4: this.maxResults;
+    this.interval  = (typeof this.interval  == 'undefined')? 60000: this.interval;
     this.intervalActive  = (typeof this.intervalActive  == 'undefined')? true: this.intervalActive;
 
     this.addPermission = (typeof this.addPermission == 'undefined')? true: this.addPermission;
