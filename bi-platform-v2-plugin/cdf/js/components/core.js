@@ -312,159 +312,406 @@ BaseComponent = Base.extend({
   
 });
 
+
 var TextComponent = BaseComponent.extend({
   update : function() {
     $("#"+this.htmlObject).html(this.expression());
   }
 });
 
-
-
+/*******
+Comments Component
+********/
 
 var CommentsComponent = BaseComponent.extend({
-  update : function() {
+  
+  processing: function () {
+   
+    var myself = {};
+    
+    myself.defaults = {
+            dataTemplates: {
 
-    // Set page start and length - for pagination
-    if(typeof this.firstResult == 'undefined'){
-      this.firstResult = 0;
-    }
-    if(typeof this.maxResults == 'undefined'){
-      this.maxResults = 4;
-    }
+              comments:         '<div class="commentsDetails">'+
+                                ' {{{user}}}, {{{createdOn}}}'+
+                                '</div>'+
+                                '<div class="commentsBody">'+
+                                ' <div class="comment">'+
+                                '   {{{comment}}}'+
+                                ' </div>'+
+                                ' <div class="operation">'+
+                                ' {{#permissions.delete}}'+
+                                '   <div class="delete">X</div>' +
+                                ' {{/permissions.delete}}'+
+                                ' {{#permissions.archive}}'+
+                                '  <div class="archive">X</div>' +
+                                ' {{/permissions.archive}}'+
+                                ' </div>'+
+                                '</div>'                                             
+                                ,
 
+              addComments:      '<div class="commentsAdd">'+
+                                '{{#add}}'+
+                                ' <div class="addComment">Add Comment</div>'+
+                                ' <div class="addCommentWrapper">'+
+                                '   <textarea class=addCommentText></textarea>'+
+                                '   <div class="commentsButtons">'+
+                                '   <div class="saveComment">Save</div>'+
+                                '   <div class="cancelComment">Cancel</div>'+
+                                '   </div>'+
+                                ' </div>'+
+                                '{{/add}}'+
+                                '</div>'
+                                ,
+
+              paginateComments: '<div class="paginate commentPaginate"> '+
+                                '{{#active}}'+
+                                ' <div class="navigateRefresh"> Refresh </div>'+
+                                ' <div class="navigatePrevious"> Newest Comments </div>'+
+                                ' <div class="navigateNext"> Oldest Comments </div>'+
+                                '{{/active}}'+
+                                '</div>'
+            }
+
+    };
+
+    // Process operations
+    myself.operations = {
+
+      processOperation: function(operation, comment, collection, callback, defaults) {
+        var ajaxOptions = {};
+        switch(operation) {
+          case 'LIST_ALL':
+            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults, where: false} };
+            break;
+          case 'LIST_ACTIVE':
+            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults} };
+            break;
+          case 'GET_LAST':
+            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: 0, maxResults: 1} };
+            break;
+          case 'DELETE_COMMENT':
+            ajaxOptions = {data: { action: 'delete', page: defaults.page, commentId: comment} };
+            break;
+          case 'ARCHIVE_COMMENT':
+            ajaxOptions = {data: { action: 'archive', page: defaults.page, commentId: comment} };
+            break;
+          case 'ADD_COMMENT':
+            ajaxOptions = {data: { action: 'add', page: defaults.page, comment: comment} };
+            break;
+        }
+        this.requestProcessing(ajaxOptions, operation, collection, callback);
+      },
+
+      requestProcessing: function(overrides, operation, collection, callback){
+        var myself = this;
+        overrides = overrides || {};
+        var ajaxOpts = {     
+          type: 'GET',
+          url: "/pentaho/content/pentaho-cdf/Comments",
+          success: function(data) {
+            myself.requestResponse(data, operation, collection, callback)
+          }, 
+          dataType: 'json'
+        };
+        ajaxOpts = _.extend( {}, ajaxOpts, overrides);
+        $.ajax(ajaxOpts);
+      },
+      
+      requestResponse: function (json, operation, collection, callback) {
+        if ((operation == 'LIST_ALL') || (operation == 'LIST_ACTIVE')) {
+          if ((collection) && (typeof collection != 'undefined')) {
+            if ((json) && (typeof json.result != 'undefined') && (json.result.length > 0)) {
+              collection.reset(json.result);
+            } 
+          }
+        }
+        if ((callback) && (typeof callback != 'undefined')) { 
+          callback.apply(this, [json, collection]);
+        } 
+      }
+    };
+    
+    myself.CommentModel = Backbone.Model.extend({
+        defaults: {
+            id: 0,
+            comment: 'Guest User',
+            createdOn: '', 
+            elapsedMinutes: '',
+            isArchived: false,
+            isDeleted: false,
+            isMe: true, 
+            page: 'comments',
+            user: 'comments',
+            permissions: {}
+        },
+
+        initialize: function(){
+          this.set('permissions', myself.options.permissions);
+        }
+  
+    });
+
+    myself.CommentView = Backbone.View.extend({
+      tagName: 'div',
+      className: 'commentView',
+
+      events: {
+        "click .delete": "deleteComment",
+        "click .archive": "archiveComment"
+      },
+
+      initialize: function(model){
+        _.bindAll(this, 'render', 'deleteComment', 'archiveComment');
+        this.model = model;
+      },
+
+      render: function(){  
+        this.$el.append(myself.dataTemplates.comments(this.attributes));
+        return this.$el; 
+      },
+
+      deleteComment: function() {
+        var callback = function(data, collection) {
+          myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
+        };
+        myself.operations.processOperation('DELETE_COMMENT', this.model.get('id'), this.model.collection, callback, myself.options);
+      },
+
+      archiveComment: function() {  
+        var callback = function(data, collection) {
+          myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
+        };
+        myself.operations.processOperation('ARCHIVE_COMMENT', this.model.get('id'), this.model.collection, callback, myself.options);
+      }
+
+    });
+
+    myself.CommentsCollection = Backbone.Collection.extend({
+      model: myself.CommentModel
+    });
+    
+    myself.CommentsView = Backbone.View.extend({
+      tagName: 'div',
+      className: 'commentComponent',
+
+      events: {
+        "click .addComment": "addComment",
+        "click .saveComment": "saveComment",
+        "click .cancelComment": "cancelComment",
+        "click .navigatePrevious": "navigatePrevious",
+        "click .navigateNext": "navigateNext",
+        "click .navigateRefresh": "navigateRefresh",
+      },
+
+      initialize: function(collection){
+         _.bindAll(this, 'render', 
+                         'addComment', 
+                         'saveComment', 
+                         'cancelComment', 
+                         'renderSingeComment', 
+                         'addComment', 
+                         'saveComment', 
+                         'cancelComment', 
+                         'navigateNext',
+                         'navigatePrevious',
+                         'commentsUpdateNotification');
+
+        this.collection = collection;
+
+        this.collection.on('reset', this.render);
+        this.collection.on('commentsUpdateNotification', this.commentsUpdateNotification);
+        
+        this.render();
+      },
+    
+      render: function() {
+        var $renderElem = $('#'+myself.options.htmlObject);
+        var $commentsElem = $('<div/>').addClass('commentsGroup');
+        Dashboards.log("Comments Component: Render comments", "debug");
+        _(this.collection.models).each(function(comment){
+          $commentsElem.append(this.renderSingeComment(comment));                          
+        }, this);
+        var $add = $(myself.dataTemplates.addComments(myself.options.permissions));
+        var $paginate = $(myself.dataTemplates.paginateComments(myself.options.paginate));
+        this.$el.empty().append($commentsElem, $add, $paginate)
+        $renderElem.append(this.$el);
+      },
+
+      renderSingeComment: function(comment) {
+        Dashboards.log("Comments Component: Render single comment", "debug");
+        var singleCommentView = new myself.CommentView(comment);
+        return singleCommentView.render();
+      },
+
+      addComment: function() {
+        Dashboards.log("Comments Component: Add comment", "debug");
+        this.showAddComment();
+      },
+
+      saveComment: function() {
+        Dashboards.log("Comments Component: Save comment", "debug");
+        var text = this.$el.find('.addCommentText').val();
+        var callback = function(data, collection) {
+          myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
+        };
+        myself.operations.processOperation('ADD_COMMENT', text, this.collection, callback, myself.options);
+
+      },
+
+      cancelComment: function() {  
+        Dashboards.log("Comments Component: Cancel comment", "debug");
+        this.hideAddComment();
+      },
+
+      navigateNext: function() {  
+        Dashboards.log("Comments Component: Next", "debug");
+        var paginate = myself.options.paginate;
+        var callback = function(data) {
+          if (data.result.length < 1) {
+            paginate.activePageNumber--;
+            paginate.firstResult-=paginate.maxResults;
+          }
+        };
+        paginate.activePageNumber++;
+        paginate.firstResult+=paginate.maxResults;
+        myself.operations.processOperation('LIST_ACTIVE', null, this.collection, callback, myself.options);
+      },
+
+      navigatePrevious: function() {  
+        Dashboards.log("Comments Component: Previous", "debug");
+        var paginate = myself.options.paginate;
+        if (paginate.activePageNumber > 0) {
+          paginate.activePageNumber--;
+          paginate.firstResult-=paginate.maxResults;
+          myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
+        }
+      },
+
+      navigateRefresh: function() {  
+        Dashboards.log("Comments Component: Refresh", "debug");
+        var paginate = myself.options.paginate;
+        paginate.activePageNumber = 0;
+        paginate.firstResult = 0;
+        myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
+        $('.navigateRefresh').text($('.navigateRefresh').text());
+      },
+
+      commentsUpdateNotification: function() {  
+        Dashboards.log("Comments Component: New Comments?", "debug");
+        var lastCommentDate = this.collection.models[0].get('createdOn');
+        var updated = false;
+        var callback = function(data) {
+          if (data.result.length > 0) {
+            if (!!(data.result[0].createdOn==lastCommentDate)) {
+              Dashboards.log("Comments Component: false", "debug");
+            } else {
+              Dashboards.log("Comments Component: true", "debug");
+              $('.navigateRefresh').text($('.navigateRefresh').contents().last().text());
+              $('.navigateRefresh').prepend("<span>New comments available!</span>");
+            }
+          }
+        };
+        myself.operations.processOperation('GET_LAST', null, null, callback, myself.options);
+      },
+
+      showAddComment: function() {
+        this.$el.find('.addCommentWrapper').show();
+        this.$el.find('.paginate').hide();
+        this.$el.find('.addCommentText').val('');
+      },
+
+      hideAddComment: function() {
+        this.$el.find('.addCommentWrapper').hide();
+        this.$el.find('.paginate').show();
+        this.$el.find('.addCommentText').val('');
+      }  
+
+    });
+
+    myself.compileTemplates = function() {
+      myself.dataTemplates = myself.dataTemplates || {};
+      _(myself.defaults.dataTemplates).each(function(value, key) {
+        myself.dataTemplates[key] = Mustache.compile(value);
+      });
+    };
+      
+    myself.start = function(options) {
+      myself.options = options;
+      myself.defaults = _.extend({}, myself.defaults, options.defaults);
+      myself.compileTemplates();
+
+      myself.commentsCollection = new myself.CommentsCollection();
+      myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
+      myself.commentsView = new myself.CommentsView(myself.commentsCollection);
+
+      if (myself.options.intervalActive) {
+        var refresh = function() {
+          Dashboards.log("Comments Component: Refresh", "debug");
+          myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
+        }
+        //setInterval(refresh, myself.options.interval);
+        setInterval(function () { myself.commentsCollection.trigger('commentsUpdateNotification'); }, myself.options.interval);
+      }
+
+    };
+
+    return myself;
+
+  },
+
+
+  /*****
+   Process component
+  *****/
+  
+  update: function() {
+
+    // Set page start and length for pagination
+    this.paginateActive = (typeof this.paginate == 'undefined')? true: this.paginate;
+    this.firstResult = (typeof this.firstResult == 'undefined')? 0: this.firstResult;
+    this.maxResults  = (typeof this.maxResults  == 'undefined')? 10: this.maxResults;
+    this.interval  = (typeof this.interval  == 'undefined')? 10000: this.interval;
+    this.intervalActive  = (typeof this.intervalActive  == 'undefined')? true: this.intervalActive;
+
+    this.addPermission = (typeof this.addPermission == 'undefined')? true: this.addPermission;
+    this.deletePermission = (typeof this.deletePermission == 'undefined')? false: this.deletePermission;
+    this.archivePermission = (typeof this.archivePermission == 'undefined')? true: this.archivePermission;
+
+    this.options = (typeof this.options == 'undefined')? {}: this.options;
+
+    // set the page name for the comments
     if (this.page == undefined){
-     Dashboards.log("Fatal - no page definition passed","error");
+      Dashboards.log("Fatal - no page definition passed","error");
       return;
     }
 
-    this.firePageUpdate();
-
-  },
-  firePageUpdate: function(json){
-
-    // Clear previous table
-    var placeHolder = $("#"+this.htmlObject);
-    placeHolder.empty();
-    placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
-    var myself = this;
-    var args = {
-      action: "list",
+    options = {
+      htmlObject: this.htmlObject,
       page: this.page,
-      firstResult: this.firstResult,
-      maxResults: this.maxResults + 1 // Add 1 to maxResults for pagination look-ahead
-    };
-    $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
-      myself.processCommentsList(json);
-    });
-  },
-
-  processCommentsList : function(json)
-  {
-    // Add the possibility to add new comments
-    var myself = this;
-    var placeHolder = $("#"+this.htmlObject + " dl ");
-    myself.addCommentContainer = $('<dt class="ui-widget-header comment-body"><textarea/></dt>'+
-      '<dl class="ui-widget-header comment-footer">'+
-      '<a class="cdfAddComment">Add Comment</a>'+
-      ' <a class="cdfCancelComment">Cancel</a></dl>'
-      );
-    myself.addCommentContainer.find("a").addClass("ui-state-default");
-    myself.addCommentContainer.find("a").hover(
-      function(){
-        $(this).addClass("ui-state-hover");
+      intervalActive: this.intervalActive,
+      interval: this.interval,
+      paginate: { 
+        active: this.paginateActive,
+        activePageNumber: 0,
+        firstResult: this.firstResult,
+        maxResults: this.maxResults
       },
-      function(){
-        $(this).removeClass("ui-state-hover");
-      }
-      )
-
-    // Cancel
-    $(".cdfCancelComment",myself.addCommentContainer).bind('click',function(e){
-      myself.addCommentContainer.hide("slow");
-      myself.addCommentContainer.find("textarea").val('');
-    });
-
-    // Add comment
-    $(".cdfAddComment",myself.addCommentContainer).bind('click',function(e){
-      var tarea = $("textarea",myself.addCommentContainer);
-      var code = tarea.val();
-      tarea.val('');
-      var args = {
-        action: "add",
-        page: myself.page,
-        comment: code
-      };
-      $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
-        myself.processCommentsAdd(json);
-      });
-      myself.addCommentContainer.hide("slow");
-    });
-
-    myself.addCommentContainer.hide();
-    myself.addCommentContainer.appendTo(placeHolder);
-
-    // Add comment option
-    var addCodeStr = '<div class="cdfAddComment"><a> Add comment</a></div>';
-
-    $(addCodeStr).insertBefore(placeHolder).bind('click',function(e){
-      myself.addCommentContainer.show("slow");
-      $("textarea",myself.addCommentContainer).focus();
-    });
-
-    if (typeof json.error != 'undefined' || typeof json.result == 'undefined') {
-      placeHolder.append('<span class="cdfNoComments">There was an error processing comments</span>' );
-      json.result = [];
-    } else
-    if (json.result.length == 0 ){
-      placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
+      permissions: { 
+        add: this.addPermission,
+        delete: this.deletePermission,
+        archive: this.archivePermission
+      },
+      defaults: this.options
     }
-    $.each(json.result.slice(0,this.maxResults), // We drop the lookahead item, if any
-      function(i,comment){
-        var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
-        placeHolder.append('<dt class="'+ bodyClass +' comment-body"><p>'+comment.comment+'</p></dt>');
-        placeHolder.append('<dl class="ui-widget-header comment-footer ">'+comment.user+ ",  " + comment.createdOn +  '</dl>');
 
-      });
+    this.processing().start(options);
 
-
-    // Add pagination support;
-    var paginationContent = $('<div class="cdfCommentsPagination ui-helper-clearfix"><ul class="ui-widget"></ul></div>');
-    var ul = $("ul",paginationContent);
-    if(this.firstResult > 0){
-      ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
-      ul.find(".cdfCommentPagePrev").bind("click",function(){
-        myself.firstResult -= myself.maxResults;
-        myself.firePageUpdate();
-      });
-    }
-    // check if we got a lookahead hit
-    if(this.maxResults < json.result.length) {
-      ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
-      ul.find(".cdfCommentPageNext").bind("click",function(){
-        myself.firstResult += myself.maxResults;
-        myself.firePageUpdate();
-      });
-    }
-    paginationContent.insertAfter(placeHolder);
-
-
-  },
-  processCommentsAdd: function(json){
-    // json response
-    var result = json.result;
-    var placeHolder = $("#"+this.htmlObject + " dl ");
-
-    var container = $('<dt class="ui-widget-header comment-body">'+ result.comment +'</dt>'+
-      '<dl class="ui-widget-header comment-footer">'+ result.user +
-      ", " + result.createdOn + '</dl>'
-      );
-    container.hide();
-    container.insertAfter($("dl:eq(0)",placeHolder));
-    container.show("slow");
-    this.update();
+    // Old comment component definition
+    // this.firePageUpdate(); 
   }
-}
-);
+
+});
 
 
 var QueryComponent = BaseComponent.extend({
