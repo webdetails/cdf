@@ -333,12 +333,13 @@ var CommentsComponent = BaseComponent.extend({
             dataTemplates: {
 
               comments:         '<div class="commentsDetails">'+
-                                ' {{{user}}}, {{{createdOn}}}'+
+                                ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
                                 '</div>'+
                                 '<div class="commentsBody">'+
                                 ' <div class="comment">'+
                                 '   {{{comment}}}'+
                                 ' </div>'+
+                                ' {{#user}}'+
                                 ' <div class="operation">'+
                                 ' {{#permissions.delete}}'+
                                 '   <div class="delete">X</div>' +
@@ -347,7 +348,8 @@ var CommentsComponent = BaseComponent.extend({
                                 '  <div class="archive">X</div>' +
                                 ' {{/permissions.archive}}'+
                                 ' </div>'+
-                                '</div>'                                             
+                                ' {{/user}}'+
+                                '</div>'                                        
                                 ,
 
               addComments:      '<div class="commentsAdd">'+
