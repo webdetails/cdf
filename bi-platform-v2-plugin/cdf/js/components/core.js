@@ -634,7 +634,7 @@ var CommentsComponent = BaseComponent.extend({
         var paginate = myself.options.paginate;
         myself.options.paginate.activePageNumber = 0;
         myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-        $('.commentComponent .navigateRefresh').tipsy('hide');
+        $('.tipsy').remove();
       },
 
       updateNavigateButtons: function() {
