@@ -420,32 +420,48 @@ var CommentsComponent = BaseComponent.extend({
         $.ajax(ajaxOpts);
       },
       
+      resetCollection: function(result) {
+        var paginate = myself.options.paginate;
+        var start = paginate.activePageNumber*paginate.pageCommentsSize;
+        var end = ((start+paginate.pageCommentsSize) < result.length) ? (start+paginate.pageCommentsSize) : result.length;
+        var commentsArray = [];
+
+        for (var idx = start; idx < end; idx++) {
+          var singleComment = new myself.CommentModel(result[idx]);
+          commentsArray.push(singleComment)
+        }
+        return commentsArray;
+      },  
+
       requestResponse: function (json, operation, collection, callback) {
         if ((operation == 'LIST_ALL') || (operation == 'LIST_ACTIVE')) {
-          if ((collection) && (typeof collection != 'undefined')) {
-            if ((json) && (typeof json.result != 'undefined')) {
-              if ((myself.options.paginate.activePageNumber==0) || (json.result.length!=0)) {
-                collection.reset(json.result);
-              }
-              if ((myself.options.paginate.activePageNumber==0) && (json.result.length==0)) {
-                json.result =  {
-                  id: 0,
-                  comment: 'no comments to show',
-                  createdOn: '', 
-                  elapsedMinutes: '',
-                  isArchived: false,
-                  isDeleted: false,
-                  isMe: false, 
-                  page: '',
-                  user: '',
-                  permissions: {
-                    delete: false,
-                    archive: false
-                  }
-                };
-                collection.reset(json.result);
-              }
-            } 
+          var paginate = myself.options.paginate;
+          if (paginate.activePageNumber > 0) {
+            if ((paginate.activePageNumber+1) > Math.ceil(json.result.length/paginate.pageCommentsSize))
+             paginate.activePageNumber--;
+          }
+          myself.options.queyResult = json.result;
+          collection.reset(this.resetCollection(json.result)); 
+          if ((paginate.activePageNumber == 0) && ((json) && (typeof json.result != 'undefined')) && (json.result.length == 0)) {
+            json.result = [{
+                id: 0,
+                comment: 'No Comments to show!',
+                createdOn: '', 
+                elapsedMinutes: '',
+                isArchived: false,
+                isDeleted: false,
+                isMe: true, 
+                page: '',
+                user: '',
+                permissions: {
+                  add: false,
+                  archive: false,
+                  remove: false
+                }
+            }];
+            if ((collection) && (typeof collection != 'undefined')) {
+              collection.reset(this.resetCollection(json.result));  
+            }
           }
         }
         if ((callback) && (typeof callback != 'undefined')) { 
@@ -558,6 +574,7 @@ var CommentsComponent = BaseComponent.extend({
         var $paginate = $(myself.dataTemplates.paginateComments(myself.options.paginate));
         this.$el.empty().append($commentsElem, $add, $paginate)
         $renderElem.append(this.$el);
+        this.updateNavigateButtons();
       },
 
       renderSingeComment: function(comment) {
@@ -575,6 +592,8 @@ var CommentsComponent = BaseComponent.extend({
         Dashboards.log("Comments Component: Save comment", "debug");
         var text = this.$el.find('.addCommentText').val();
         var callback = function(data, collection) {
+          var paginate = myself.options.paginate;
+          paginate.activePageNumber = 0;
           myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
         };
         myself.operations.processOperation('ADD_COMMENT', text, this.collection, callback, myself.options);
@@ -589,52 +608,74 @@ var CommentsComponent = BaseComponent.extend({
       navigateNext: function() {  
         Dashboards.log("Comments Component: Next", "debug");
         var paginate = myself.options.paginate;
-        var callback = function(data) {
-          if (data.result.length < 1) {
-            paginate.activePageNumber--;
-            paginate.firstResult-=paginate.maxResults;
-          }
-        };
-        paginate.activePageNumber++;
-        paginate.firstResult+=paginate.maxResults;
-        myself.operations.processOperation('LIST_ACTIVE', null, this.collection, callback, myself.options);
+        var start = paginate.activePageNumber*paginate.pageCommentsSize;
+        if ((start+paginate.pageCommentsSize) < myself.options.queyResult.length) {
+          paginate.activePageNumber++;
+          this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
+        }
+        this.commentsUpdateNotification();
+        this.updateNavigateButtons();
       },
 
       navigatePrevious: function() {  
         Dashboards.log("Comments Component: Previous", "debug");
         var paginate = myself.options.paginate;
+        var start = paginate.activePageNumber;
         if (paginate.activePageNumber > 0) {
           paginate.activePageNumber--;
-          paginate.firstResult-=paginate.maxResults;
-          myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-        }
+          this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
+        } 
+        this.commentsUpdateNotification();
+        this.updateNavigateButtons();
       },
 
       navigateRefresh: function() {  
         Dashboards.log("Comments Component: Refresh", "debug");
         var paginate = myself.options.paginate;
-        paginate.activePageNumber = 0;
-        paginate.firstResult = 0;
+        myself.options.paginate.activePageNumber = 0;
         myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
-        $('.navigateRefresh').text($('.navigateRefresh').text());
+        $('.commentComponent .navigateRefresh').tipsy('hide');
+      },
+
+      updateNavigateButtons: function() {
+        var paginate = myself.options.paginate;
+        $('.navigatePrevious').addClass("disabled");
+        $('.navigateNext').addClass("disabled");
+        if (paginate.activePageNumber > 0){
+          $('.navigatePrevious').removeClass("disabled");
+        }
+        if ((paginate.activePageNumber+1) < Math.ceil(myself.options.queyResult.length/paginate.pageCommentsSize)) {
+          $('.navigateNext').removeClass("disabled");
+        }
       },
 
       commentsUpdateNotification: function() {  
-        Dashboards.log("Comments Component: New Comments?", "debug");
-        var lastCommentDate = this.collection.models[0].get('createdOn');
-        var updated = false;
-        var callback = function(data) {
-          if (data.result.length > 0) {
-            if (!!(data.result[0].createdOn==lastCommentDate)) {
-              Dashboards.log("Comments Component: false", "debug");
-            } else {
-              Dashboards.log("Comments Component: true", "debug");
-              $('.navigateRefresh').text($('.navigateRefresh').contents().last().text());
-              $('.navigateRefresh').prepend("<span>New comments available!</span>");
+        Dashboards.log("Comments Component: Comments notification", "debug");
+        if (myself.options.queyResult.length > 0) {
+          var lastCommentDate = myself.options.queyResult[0].createdOn;
+          var callback = function(data) {
+            if (data.result.length > 0) {
+              if (!!(data.result[0].createdOn==lastCommentDate)) {
+                Dashboards.log("Comments Component: New Comments? false", "debug");
+              } else {
+                Dashboards.log("Comments Component: New Comments? true", "debug");
+                var tipsyOptions = {
+                  html: true, 
+                  fade: true, 
+                  trigger: 'manual',
+                  className: 'commentsComponentTipsy',
+                  title: function () {
+                    return 'New comments, please refresh!';
+                  }
+                }
+                $('.commentComponent .navigateRefresh').attr('title','New comments, please refresh!').tipsy(tipsyOptions);
+                $('.commentComponent .navigateRefresh').tipsy('show');
+
+              }
             }
-          }
-        };
-        myself.operations.processOperation('GET_LAST', null, null, callback, myself.options);
+          } 
+          myself.operations.processOperation('GET_LAST', null, null, callback, myself.options);
+        }
       },
 
       showAddComment: function() {
@@ -691,9 +732,10 @@ var CommentsComponent = BaseComponent.extend({
 
     // Set page start and length for pagination
     this.paginateActive = (typeof this.paginate == 'undefined')? true: this.paginate;
+    this.pageCommentsSize = (typeof this.pageCommentsSize == 'undefined')? 10: this.pageCommentsSize;
     this.firstResult = (typeof this.firstResult == 'undefined')? 0: this.firstResult;
-    this.maxResults  = (typeof this.maxResults  == 'undefined')? 4: this.maxResults;
-    this.interval  = (typeof this.interval  == 'undefined')? 60000: this.interval;
+    this.maxResults  = (typeof this.maxResults  == 'undefined')? 100: this.maxResults;
+    this.interval  = (typeof this.interval  == 'undefined')? /*60000*/ 5000: this.interval;
     this.intervalActive  = (typeof this.intervalActive  == 'undefined')? true: this.intervalActive;
 
     this.addPermission = (typeof this.addPermission == 'undefined')? true: this.addPermission;
@@ -716,6 +758,7 @@ var CommentsComponent = BaseComponent.extend({
       paginate: { 
         active: this.paginateActive,
         activePageNumber: 0,
+        pageCommentsSize: this.pageCommentsSize,
         firstResult: this.firstResult,
         maxResults: this.maxResults
       },

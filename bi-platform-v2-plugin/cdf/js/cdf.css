@@ -230,11 +230,20 @@ Comments Component
 }
 
 .commentComponent .paginate div:hover {
-     border: 1px solid #aaa;    
-     background-color: #ccc;
-
+  border: 1px solid #aaa;    
+  background-color: #ccc;
 }
 
+
+.commentComponent .paginate div.disabled {
+   color: #aaa ;
+}
+
+.commentComponent .paginate div:hover.disabled {
+    border: 1px solid #ccc;
+    background-color: #eee;
+    cursor: default;
+}
 
 
 

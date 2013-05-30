@@ -38,7 +38,7 @@ public class CommentsEngine
   private static final int ARCHIVE_OPERATION = 1;
   private static final int ADD_OPERATION = 2;
   private static final int LIST_OPERATION = 3;
-  private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+  private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   public static CommentsEngine getInstance()
   {
