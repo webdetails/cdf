@@ -44,8 +44,8 @@ import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
 import pt.webdetails.cpf.InterPluginCall;
-import pt.webdetails.cpf.repository.RepositoryAccess;
-import pt.webdetails.cpf.repository.RepositoryAccess.FileAccess;
+import pt.webdetails.cpf.repository.PentahoRepositoryAccess;
+import pt.webdetails.cpf.repository.BaseRepositoryAccess.FileAccess;
 
 /**
  *
@@ -307,7 +307,8 @@ public class DashboardContext {
     private static Document getRepository() {
         if (repositoryCache == null) {
             IPentahoSession adminSession = getAdminSession();
-            repositoryCache = RepositoryAccess.getRepository(adminSession).getFullSolutionTree(FileAccess.NONE , null);
+            PentahoRepositoryAccess repoAccess = (PentahoRepositoryAccess)PentahoRepositoryAccess.getRepository(adminSession);
+            repositoryCache = repoAccess.getFullSolutionTree(FileAccess.NONE , null);//XXX
 //            ISolutionRepository solutionRepository = PentahoSystem.get(ISolutionRepository.class, adminsession);
 //            repositoryCache = solutionRepository.getSolutionTree(ISolutionRepository.ACTION_ADMIN);
         }
