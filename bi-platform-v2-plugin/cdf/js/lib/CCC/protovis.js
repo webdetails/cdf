@@ -1,4 +1,4 @@
-// d2ea725afb0e27edf2a8ad3f361548a744ecd867
+// 03f5b2d2afaeee17c2fb9fc7c42fd78a7db91b0c
 /**
  * @class The built-in Array class.
  * @name Array
@@ -236,7 +236,7 @@ pv.parent = function() { return this.parent.index; };
  */
 pv.extend = Object.create ?
     function(f){
-      return Object.create(f.prototype || f); 
+      return Object.create(f.prototype || f);
     } :
     function(f) {
       function g() {}
@@ -246,10 +246,10 @@ pv.extend = Object.create ?
 
 pv.extendType = function(g, f) {
     var sub = g.prototype = pv.extend(f);
-    
+
     // Fix the constructor
     sub.constructor = g;
-    
+
     return g;
 };
 
@@ -338,14 +338,14 @@ pv.listen = function(target, type, listener) {
 
       target.attachEvent('on' + type, listener);
   }
-  
+
   return listener;
 };
 
 /**
  * @private Unregisters the specified listener for events of the specified type on
  * the specified target.
- * 
+ *
  * @param target a DOM element.
  * @param {string} type the type of event, such as "click".
  * @param {function} the event handler callback or the result of {@link pv.listen}.
@@ -354,7 +354,7 @@ pv.unlisten = function(target, type, listener){
     if(listener.$listener){
         listener = listener.$listener;
     }
-    
+
     target.removeEventListener
         ? target.removeEventListener(type, listener, false)
         : target.detachEvent('on' + type, listener);
@@ -372,8 +372,9 @@ pv.unlisten = function(target, type, listener){
 pv.listener = function(f) {
   return f.$listener || (f.$listener = function(ev) {
       try {
-        pv.event = ev = pv.fixEvent(ev);
-        
+        // In some rare cases, there's no event... (see {@see #listenForPageLoad})
+        pv.event = ev = ev && pv.fixEvent(ev);
+
         return f.call(this, ev);
       } catch (ex) {
           // swallow top level error
@@ -443,24 +444,24 @@ var _getCompStyle = window.getComputedStyle;
 pv.css = function(e, p) {
   // Assuming element is of the same window as this script.
   return _getCompStyle ?
-         _getCompStyle.call(window, e, null).getPropertyValue(p) : 
+         _getCompStyle.call(window, e, null).getPropertyValue(p) :
          e.currentStyle[p === 'float' ? 'styleFloat' : pv.hiphen2camel(p)];
 };
 
 pv.cssStyle = function(e) {
-    var style; 
+    var style;
     if(_getCompStyle) {
-        style = _getCompStyle.call(window, e, null); 
+        style = _getCompStyle.call(window, e, null);
         return function(p) { return style.getPropertyValue(p); };
     }
-    
+
     style = e.currentStyle;
     return function(p) { return style[p === 'float' ? 'styleFloat' : pv.hiphen2camel(p)]; };
 };
 
 pv._getElementsByClass = function(searchClass, node) {
   if(node == null) { node = document; }
-    
+
   var classElements = [],
       els = node.getElementsByTagName("*"),
       L = els.length,
@@ -478,7 +479,7 @@ pv._getElementsByClass = function(searchClass, node) {
 
 pv.getElementsByClassName = function(node, classname) {
   // use native implementation if available
-  return node.getElementsByClassName ? 
+  return node.getElementsByClassName ?
          node.getElementsByClassName(classname) :
          pv._getElementsByClass(classname, node);
 };
@@ -498,15 +499,15 @@ pv.elementOffset = function(elem) {
     if(body === elem)  {
         return; // not supported
     }
-    
+
     docElem = doc.documentElement;
 
     if ( typeof elem.getBoundingClientRect !== "undefined" ) {
         box = elem.getBoundingClientRect();
     }
-    
+
     win = pv.getWindow(doc);
-    
+
     clientTop  = docElem.clientTop  || body.clientTop  || 0;
     clientLeft = docElem.clientLeft || body.clientLeft || 0;
     scrollTop  = win.pageYOffset || docElem.scrollTop;
@@ -526,7 +527,7 @@ pv.listenForPageLoad = function(listener) {
     // Catch cases where $(document).ready() is called after the
     // browser event has already occurred.
     if ( document.readyState === "complete" ) {
-        listener();
+        listener(null); // <-- no event object to give
     }
 
     if (pv.renderer() === "svgweb") {
@@ -552,12 +553,12 @@ pv.listenForPageLoad = function(listener) {
  */
 
 pv.renderer = function(){
-    var renderer = (typeof document.svgImplementation !== "undefined") ? 
+    var renderer = (typeof document.svgImplementation !== "undefined") ?
                    document.svgImplementation :
                    (typeof window.svgweb === "undefined") ? "nativesvg" : "svgweb";
-    
+
     pv.renderer = function(){ return renderer; };
-    
+
     return renderer;
 };
 
@@ -574,13 +575,13 @@ pv.functor = function(v) {
 /**
  * Gets the value of an existing, own or inherited, and not "nully", property of an object,
  * or if unsatisfied, a specified default value.
- * 
+ *
  * @param {object} [o] The object whose property value is desired.
  * @param {string} p The desired property name.
- * If the value is not a string, 
+ * If the value is not a string,
  * it is converted to one, as if String(p) were used.
  * @param [dv=undefined] The default value.
- * 
+ *
  * @returns {any} The satisfying property value or the specified default value.
  */
 pv.get = function(o, p, dv){
@@ -20535,7 +20536,8 @@ pv.Layout.Bullet.prototype = pv.extend(pv.Layout)
     .property("ranges")
     .property("markers")
     .property("measures")
-    .property("maximum", Number);
+    .property("minimum")
+    .property("maximum");
 
 /**
  * Default properties for bullet layouts.
@@ -20584,12 +20586,58 @@ pv.Layout.Bullet.prototype.defaults = new pv.Layout.Bullet()
  * @name pv.Layout.Bullet.prototype.maximum
  */
 
+pv.Layout.Bullet.prototype._originIsZero = true;
+
+pv.Layout.Bullet.prototype.originIsZero = function(value) {
+    if(arguments.length) {
+        return this._originIsZero = !!value;
+    }
+    return this._originIsZero;
+};
+
 /** @private */
 pv.Layout.Bullet.prototype.buildImplied = function(s) {
   pv.Layout.prototype.buildImplied.call(this, s);
+  
   var size = this.parent[/^left|right$/.test(s.orient) ? "width" : "height"]();
-  s.maximum = s.maximum || pv.max([].concat(s.ranges, s.markers, s.measures));
-  this.x.domain(0, s.maximum).range(0, size);
+  
+  var allValues, 
+      max   = s.maximum,
+      min   = s.minimum,
+      delta = 1e-10;
+  
+  if(max == null) {
+      allValues = [].concat(s.ranges, s.markers, s.measures);
+      max = pv.max(allValues);
+  } else {
+      max = +max;
+  }
+  
+  if(min == null) {
+      if(!allValues) { allValues = [].concat(s.ranges, s.markers, s.measures); }
+      min = pv.min(allValues);
+      // It would be really strange that a range would end at the start of the scale. 
+      min = 0.95 * min;
+  } else {
+      min = +min;
+  }
+  
+  if(min > max || max - min < delta) {
+      min = Math.abs(max) < delta ? -0.1 : (0.99 * max);
+  }
+  
+  if(this._originIsZero && (min * max) > 0) {
+      if(min > 0) {
+          min = 0;
+      } else {
+          max = 0;
+      }
+  }
+
+  s.minimum = min;
+  s.maximum = max;
+  
+  this.x.domain(min, max).range(0, size);
 };
 /**
  * Abstract; see an implementing class for details.
