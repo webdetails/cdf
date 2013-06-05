@@ -49,10 +49,8 @@
       <exclude org="commons-collections"/>
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
-    <!--        <dependency org="pentaho" name="cpf" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf="runtime->default"/>          -->
 
     <dependency org="pt.webdetails" name="cpf-core" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
-
     <dependency org="pt.webdetails" name="cpf-pentaho" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
 
 

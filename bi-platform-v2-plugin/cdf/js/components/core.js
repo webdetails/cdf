@@ -341,9 +341,9 @@ var CommentsComponent = BaseComponent.extend({
                                 ' </div>'+
                                 ' {{#user}}'+
                                 ' <div class="operation">'+
-                                ' {{#permissions.delete}}'+
+                                ' {{#permissions.deletePermission}}'+
                                 '   <div class="delete">X</div>' +
-                                ' {{/permissions.delete}}'+
+                                ' {{/permissions.deletePermission}}'+
                                 ' {{#permissions.archive}}'+
                                 '  <div class="archive">X</div>' +
                                 ' {{/permissions.archive}}'+
@@ -749,7 +749,6 @@ var CommentsComponent = BaseComponent.extend({
       Dashboards.log("Fatal - no page definition passed","error");
       return;
     }
-
     options = {
       htmlObject: this.htmlObject,
       page: this.page,
@@ -764,7 +763,7 @@ var CommentsComponent = BaseComponent.extend({
       },
       permissions: { 
         add: this.addPermission,
-        delete: this.deletePermission,
+        deletePermission: this.deletePermission,
         archive: this.archivePermission
       },
       defaults: this.options
