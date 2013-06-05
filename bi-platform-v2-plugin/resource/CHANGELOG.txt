@@ -1,3 +1,39 @@
+13.06.05
+    * New Layout for samples
+    * Implemented [REDMINE-2120] - 	Adapt PrptComponent for post, auto-resize, progress indicator on report load    
+    * Updated heat grid sample due ccc version update
+    * Added SchedulePrpt Component
+    * [FEAT](CCC Extension Scenes Legend Item) New kind of extension points: Scene Variables extension points. Allow overriding the calculation of CCC scene variables. This is useful for things like changing the text of discrete ticks or legend items in a way that layout takes it into account. Normal "axisLabel_text" and "legendLabel_text" extension points are not taken into account by the automatic layout algorithms because they cannot be safely used in a context were protovis marks do not yet exist (as is the case). These are not suitable to be used when the size of panels is determined automatically. In practice, for now, there's a single new extension point: "legendItemScene_value" (or "legend2ItemScene_value", ..., and "legend$ItemScene_value", for any legend group) that allows changing the label of the legend item's scene variable 'value'.
+    * [CHG](dataSeparator) The option "dataSeparator" now also controls the pvc.data.Complex composite key separator, besides the crosstab translation separator character 
+    * [CHG] Removed the new Legend Item Scenes extension point syntax and instead exposed the already existing JSON legend.scenes.item.value property.
+    * [FEAT](CCC plot2DataSeriesIndexes) Restored the functionality exposed by the deprecated option "secondAxisIdx".    
+    * [CHG] (CCC plot2SeriesIndexes) On third thought, renamed the option plot2DataSeriesIndexes to plot2SeriesIndexes, although the current implementation stilll works like the deprecated v1 secondAxisIdx. The meaning of "series" should already be taken as the value of the "series" visual role.
+    * PRD-4429 Multi-value parameter - Select and de-select issue 
+    * [FEAT] (Dashboards.getComponentIndex) The single argument now also supports a number value. 
+    * [FEAT][CHG] (Dashboards.removeComponent) The return value is not a boolean indicating if the component existed anymore, but the removed component when existing. Also, the single argument now also accepts the index of the component to remove.
+    * Changes made to Comments Components: - Verify permissions for each operation; - Verify if user is an admin to show deleted and archived comments; - Return additional data for the client (it´s possible for the administrators see deleted and archived comments); - Depending on permission It´s possible for the administartor change the deleted and archived comments; Added info the the "Dashboards.context": - So we can know if the user can do operations over comments form other user;
+    * [FEAT](CCC PiePlot offSetRadius) New extension point slice_offsetRadius allows to easily implement exploded-style-selection.
+    * doQuery handles null parameters, fetchData shouldn't be picky
+    * Fixed [REDMINE-271] TableComponent with server side pag. hangs with "processing" when query fails
+    * Fixed [REDMINE-2112] There isn't any class in the chart components series to represent the cccNormalizedBarChart
+    * Fixed [REDMINE-2083] refreshPeriod not working after component lifecycle changes
+    * [PERF] (CCC protovis) Performance improvements mostly noticeable on updateAll, due to avoiding DOM calls like the setAttribute/removeAttribute and style setting
+    * [FIX](CCC scene var valueOf) removed the valueOf method, that would gain to the toString method, when returning a number.
+    * [FIX](Dashboards._castControlToClass) While searching for the first of a set of candidate class names, ignore any global name whose value is not a function.
+    * [FIX](CGG) Small fix to debugging code of generated CGG script files. 
+    * [FIX](pvc.setDebug) pvc.logError and pv.error weren't being updated on debug level change
+    * [FIX](protovis gradient OrdinalScale) Ordinal scales did not convert string ranges using pv.fillStyle but instead used pc.color. This caused a "colors" array containing gradient strings to not be correctly recognized. 
+    * [FIX](CCC Translation metadata.type) Reverted the use of metadata.type to default a single bound dimensions' type, because this would cause other relevant defaults not to be applied.    
+    * [FIX](protovis gradient multiple) Generally, multiple distinct gradients could render incorrectly, due to sharing of FillStyle/Color objects to store the multiple "color" urls that would refer to gradients defined in distinct parent elements. Urls would point to out-of-scope gradients. Now, all gradients are defined at the svg/defs element and are shared between FillStyles/Colors having the same key. There is no GC of gradients; it is assumed that the number of distinct gradients per root is relatively small, and that these are stable along consecutive renders.
+    * [FIX](CCC Waterfall) Bugs in ortho range calculation and water-group rectangles layout, sometimes revealed with the presence of negative values. There's still a bug with the placement of bars themselves. 
+    * [FIX](CCC def.string.format) Bug in evaluating toString of objects. If an object had a valueOf method, the toString of the result of valueOf would be used instead.
+    * [FIX](CCC Waterfall WaterLineLabel-Placement) With negative values, water-line labels would sometimes be placed in the wrong position (above or below the line) 
+    * [FIX](protovis Band Layout) For the stacked mode, a JS bug, would mess up negative values and cause the bars to be wrongly placed, affected the CCC waterfall chart only.
+    * [FIX](CCC AxisPanel LabelSpacing Vertical Number Ticks) The min label spacing for numeric label ticks, in vertical cartesian axes, was sometimes not being respected. Also fixed some AxisPanel existing bugs that surfaced when this one was uncovered. 
+    * [FIX](CCC PointPlot ignoreNulls nullInterpolationMode) When not ignoring nulls and the null interpolation mode was not none, the point (area, line, dot) plot was not recognizing interpolated scenes. Some interpolation scenes have both the null datum and the interpolated one, which confused the rpevious detection method.
+    * [FIX] (CCC Scales FixedMin/Max) The fixed minimum value of a numeric scale would get _switched_ with the maximum domain value when the fixed minimum was set to a value greater that the maximum domain value.
+    * [FIX] (CCC protovis) The window.getComputedStyle shim installed by protovis-msie caused problems to other libraries (ace). Refactored some of the code so that the shim is no longer necessary.
+
 13.03.25
     * CCC V2 integration
     * Added capability to detect session timeout and request new credentials (instead of silently failing)
