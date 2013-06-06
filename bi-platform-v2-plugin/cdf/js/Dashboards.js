@@ -2851,6 +2851,26 @@ Dashboards.parseMultipleValues = function(paramValue) {
 };
 
 /**
+ * Determines if two values are considered equal.
+ * @param {*} a the first value.
+ * @param {*} b the second value.
+ * @return {boolean}
+ */
+Dashboards.equalValues = function(a, b) {
+  // Identical or both null/undefined?
+  if((a === b) || (a == null && a == b)) { return true; }
+  if($.isArray(a) && $.isArray(b)) {
+    var L = a.length;
+    if(L !== b.length) { return false; }
+    while(L--) { if(!Dashboards.equalValues(a[L], b[L])) { return false; } }
+    return true;
+  }
+
+  // Last try, give it to JS equals
+  return a == b;
+};
+
+/**
 * Converts HSV to RGB value.
 *
 * @param {Integer} h Hue as a value between 0 - 360 degrees
