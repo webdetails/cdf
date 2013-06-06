@@ -48,7 +48,6 @@ var InputBaseComponent = UnmanagedComponent.extend({
 });
 
 
-
 var SelectBaseComponent = InputBaseComponent.extend({
   visible: false,
 
@@ -67,8 +66,6 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
     var allowMultiple = this._allowMultipleValues();
     if(allowMultiple) { selectHTML += " multiple"; }
-
-    this.isMultiple = allowMultiple;
 
     var size = this._getListSize(myArray);
     if(size != null) { selectHTML += " size='" + size + "'"; }
@@ -152,7 +149,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
       case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
     }
 
-    $("select", ph).change(function() { Dashboards.processChange(name); });
+    this._listenElement(ph);
   },
 
   /**
@@ -190,6 +187,77 @@ var SelectBaseComponent = InputBaseComponent.extend({
     if(this.externalPlugin && this.extraOptions) {
       return Dashboards.propertiesArrayToObject(this.extraOptions);
     }
+  },
+
+  /**
+   * Installs listeners in the HTML element/object.
+   * <p>
+   *    The default implementation listens to the change event
+   *    and dashboard-processes each change.
+   * </p>
+   * @param {!HTMLElement} elem the element.
+   */
+  _listenElement: function(elem) {
+    var me = this;
+    //Dashboards.log("changeMode: immediate trigger: " + me._changeTrigger());
+
+    var prevValue = me.getValue();
+    var check = function() {
+      var currValue = me.getValue();
+      if(!Dashboards.equalValues(prevValue, currValue)) {
+        prevValue = currValue;
+        Dashboards.processChange(me.name);
+      }
+    };
+
+    $("select", elem).on(me._changeTrigger(), check);
+  },
+
+  /**
+   * Obtains the appropriate jQuery event name
+   * for testing if changes have occured.
+   * @return {!string} the name of the event.
+   */
+  _changeTrigger: function() {
+    /**
+     * <p>
+     * Mobile user agents show a dialog/popup for choosing amongst possible values,
+     * for both single and multi-selection selects.
+     * </p>
+     * <ul>
+     *   <li>iPad/iPhone -
+     *       the popup shows a button "OK" only when in multiple selection.
+     *       As the user clicks on the items, "change" events are fired.
+     *       A "focusout" event is fired when the user dismisses the popup
+     *       (by clicking on the button or outside of the popup).
+     *   </li>
+     *   <li>Android -
+     *       the popup shows a button "Done" whether in single or multiple selection.
+     *       As the user clicks on the items no events are fired.
+     *       A change event is fired (whether or not values actually changed),
+     *       when the user dismisses the popup.
+     *   </li>
+     *   <li>Desktops -
+     *       no popup is shown.
+     *       As the user clicks on the items, "change" events are fired.
+     *       A "focusout" event is fired when it should...
+     *   </li>
+     * </ul>
+     */
+    return (/ipad|iphone/i).test(navigator.userAgent) ? 'focusout' : 'change';
+  },
+
+  /**
+   * Indicates if the user agent
+   * <p>A dialog may be shown even if {@link #isMultiple} is <tt>false</tt>.</p>
+   * <p>
+   * iPad/iPhone already show up a dialog for choosing between multiple options,
+   * with an ok button with it.
+   * </p>
+   * @return {boolean}
+   */
+  _hasValuesChoiceDialog: function() {
+    return (/ipad|iphone/i).test(navigator.userAgent);
   }
 });
 
@@ -201,10 +269,14 @@ var SelectComponent = SelectBaseComponent.extend({
 });
 
 var SelectMultiComponent = SelectBaseComponent.extend({
+  // These apply to isMultiple only:
+  // changeMode: {['immediate'], 'timeout-focus'}
+  // changeTimeout: [1500] // in ms - applies only to changeMode ='timeout-focus'
+
   getValue : function() {
-  	var ph = $("#"+this.htmlObject + " select");
+    var ph = $("#"+this.htmlObject + " select");
     var val = ph.val();
-  	return val == null ? [] : val;
+    return val == null ? [] : val;
   },
 
   /** @override */
@@ -223,8 +295,90 @@ var SelectMultiComponent = SelectBaseComponent.extend({
     }
 
     return size;
+  },
+
+  /**
+   * Obtains the change mode to use.
+   * <p>
+   * The default implementation takes into account
+   * the result of {@link #_allowMultipleValues},
+   * the desired {@link #changeMode} and
+   * the current user agent.
+   * </p>
+   * @return {!string} one of values: <tt>'immediate'</tt> or <tt>'timeout-focus'</tt>.
+   */
+  _getChangeMode: function() {
+    if(this._allowMultipleValues()) {
+      var changeMode = this.changeMode;
+      if(changeMode) {
+        changeMode = changeMode.toLowerCase();
+        switch(changeMode) {
+          case 'immediate':
+            return changeMode;
+
+          case 'timeout-focus':
+            // Mobile devices don't need/go-well-with the timeout mode.
+            // They show a value selection popup and it would be confusing
+            // to fire a change, on timeout, while still
+            // having a popup with an OK button open.
+            // Fall-back to immediate mode.
+            if((/ipad|iphone|android/i).test(navigator.userAgent)) { break; }
+
+            return changeMode;
+
+          default:
+            Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
+        }
+      }
+    }
+
+    // assume default
+    return 'immediate';
+  },
+
+  /** @override */
+  _listenElement: function(elem) {
+    var me = this;
+    var changeMode = me._getChangeMode();
+    if(changeMode === 'immediate') {
+      me.base(elem);
+    } else if(changeMode === 'timeout-focus') {
+      //Dasboards.log("changeMode: " + changeMode + " trigger: /NA");
+      var prevValue = me.getValue();
+
+      var changeTimeout = Math.max(100, me.changeTimeout || 1500);
+      var timeoutHandle;
+
+      var stop = function() {
+        if(timeoutHandle != null) {
+          clearTimeout(timeoutHandle);
+          timeoutHandle = null;
+        }
+      };
+
+      var renew = function() {
+        stop();
+        timeoutHandle = setTimeout(check, changeTimeout);
+      };
+
+      var check = function() {
+        stop();
+
+        var currValue = me.getValue();
+        if(!Dashboards.equalValues(prevValue, currValue)) {
+          prevValue = currValue;
+          Dashboards.processChange(me.name);
+        }
+      };
+
+      $("select", elem)
+        .change(renew)
+        .keypress(function(ev) { if(ev.which === 13) { check(); } })
+        .focusout(check);
+    }
   }
 });
+
 
 var TextInputComponent = BaseComponent.extend({
   update: function() {
