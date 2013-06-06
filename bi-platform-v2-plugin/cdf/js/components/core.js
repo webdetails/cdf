@@ -7,7 +7,9 @@ BaseComponent = Base.extend({
   elapsedSinceSplit: -1,
   elapsedSinceStart: -1,
   logColor: undefined,
-  
+  //valueAsId:
+  //valuesArray:
+
   clear : function() {
     $("#"+this.htmlObject).empty();
   },
@@ -229,36 +231,36 @@ BaseComponent = Base.extend({
     /* opts is falsy if null or undefined */
     return opts || {};
   },
-  
+
   startTimer: function(){
-    
+
     this.timerStart = new Date();
     this.timerSplit = new Date();
-    
+
   },
-  
+
   splitTimer: function(){
-    
+
     // Sanity check, in case this component doesn't follow the correct workflow
     if(this.elapsedSinceStart === -1 || this.elapsedSinceSplit === -1){
       this.startTimer();
     }
-    
+
     var now = new Date();
-    
+
     this.elapsedSinceStart = now.getTime() - this.timerStart.getTime();
     this.elapsedSinceSplit = now.getTime() - this.timerSplit.getTime();
-    
+
     this.timerSplit = now;
     return this.getTimerInfo();
   },
-  
+
   formatTimeDisplay: function(t){
     return Math.log(t)/Math.log(10)>=3?Math.round(t/100)/10+"s":t+"ms";
   },
-  
+
   getTimerInfo: function(){
-    
+
       return {
         timerStart: this.timerStart,
         timerSplit: this.timerSplit,
@@ -267,25 +269,25 @@ BaseComponent = Base.extend({
         elapsedSinceSplit: this.elapsedSinceSplit,
         elapsedSinceSplitDesc: this.formatTimeDisplay(this.elapsedSinceSplit)
       }
-    
+
   },
-  
+
   /*
-   * This method assigns and returns a unique and somewhat randomish color for 
-   * this log. The goal is to be able to track cdf lifecycle more easily in 
+   * This method assigns and returns a unique and somewhat randomish color for
+   * this log. The goal is to be able to track cdf lifecycle more easily in
    * the console logs. We're returning a Hue value between 0 and 360, a range between 0
    * and 75 for saturation and between 45 and 80 for value
    *
    */
-  
+
   getLogColor: function(){
-    
+
     if (this.logColor){
       return this.logColor;
     }
     else{
-      // generate a unique, 
-      
+      // generate a unique,
+
       var hashCode = function(str){
         var hash = 0;
         if (str.length == 0) return hash;
@@ -296,7 +298,7 @@ BaseComponent = Base.extend({
         }
         return hash;
       }
-      
+
       var hash = hashCode(this.name).toString();
       var hueSeed = hash.substr(hash.length-6,2) || 0;
       var saturationSeed = hash.substr(hash.length-2,2) || 0;
@@ -304,12 +306,12 @@ BaseComponent = Base.extend({
 
       this.logColor = Dashboards.hsvToRgb(360/100*hueSeed, 75/100*saturationSeed, 45 + (80-45)/100*valueSeed);
       return this.logColor;
-      
+
     }
-    
-    
+
+
   }
-  
+
 });
 
 var TextComponent = BaseComponent.extend({
@@ -474,7 +476,7 @@ var QueryComponent = BaseComponent.extend({
   },
   warnOnce: function() {
   Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
-    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" + 
+    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" +
     " for more information");
     delete(this.warnOnce);
   }
@@ -637,7 +639,7 @@ var UnmanagedComponent = BaseComponent.extend({
         this.showTooltip();
       } catch(e){
         this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e );
-        this.dashboard.log(e,"error"); 
+        this.dashboard.log(e,"error");
       } finally {
         if(!silent) {
           this.unblock();
@@ -650,7 +652,7 @@ var UnmanagedComponent = BaseComponent.extend({
    * The triggerQuery lifecycle handler builds a lifecycle around Query objects.
    *
    * It takes a query definition object that is passed directly into the Query
-   * constructor, and the component rendering callback, and implements the full 
+   * constructor, and the component rendering callback, and implements the full
    * preExecution->block->render->postExecution->unblock lifecycle. This method
    * detects concurrent updates to the component and ensures that only one
    * redraw is performed.
@@ -659,12 +661,12 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    var silent = this.isSilent();    
+    var silent = this.isSilent();
     if (!silent){
       this.block();
     };
     userQueryOptions = userQueryOptions || {};
-    /* 
+    /*
      * The query response handler should trigger the component-provided callback
      * and the postExec stage if the call wasn't skipped, and should always
      * unblock the UI
@@ -695,7 +697,7 @@ var UnmanagedComponent = BaseComponent.extend({
     query.fetchData(this.parameters, handler, errorHandler);
   },
 
-  /* 
+  /*
    * The triggerAjax method implements a lifecycle based on generic AJAX calls.
    * It implements the full preExecution->block->render->postExecution->unblock
    * lifecycle.
@@ -711,7 +713,7 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    var silent = this.isSilent();    
+    var silent = this.isSilent();
     if (!silent){
       this.block();
     };
@@ -728,7 +730,7 @@ var UnmanagedComponent = BaseComponent.extend({
         data: params
       });
     }
-    var success = _.bind(function(data){ 
+    var success = _.bind(function(data){
       callback(data);
       this.trigger('cdf cdf:render',this,data);
       this.postExec();
@@ -754,7 +756,7 @@ var UnmanagedComponent = BaseComponent.extend({
 
   /* Trigger an error event on the component. Takes as arguments the error
    * message and, optionally, a `cause` object.
-   * Also 
+   * Also
    */
   error: function(msg, cause) {
     msg = msg || Dashboards.getErrorObj('COMPONENT_ERROR').msg;
@@ -799,7 +801,7 @@ var UnmanagedComponent = BaseComponent.extend({
           try {
             if(typeof this.postFetch == "function") {
               newData = this.postFetch(data);
-              this.trigger('cdf cdf:postFetch',this,data);              
+              this.trigger('cdf cdf:postFetch',this,data);
               data = typeof newData == "undefined" ? data : newData;
             }
             success(data);
@@ -815,18 +817,18 @@ var UnmanagedComponent = BaseComponent.extend({
     this);
   },
 
-  getErrorHandler: function() { 
+  getErrorHandler: function() {
     return  _.bind(function() {
       var err = Dashboards.parseServerError.apply(this, arguments );
       this.error( err.msg, err.error );
     },
-    this);  
+    this);
   },
   errorNotification: function (err, ph) {
     ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
     var name = this.name.replace('render_', '');
     err.msg = err.msg + ' (' + name + ')';
-    Dashboards.errorNotification( err, ph );  
+    Dashboards.errorNotification( err, ph );
   },
 
   /*
@@ -840,16 +842,16 @@ var UnmanagedComponent = BaseComponent.extend({
       this.dashboard.incrementRunningCalls();
       this.isRunning = true;
     }
-    
+
   },
 
   /*
    * Trigger UI unblock when the component finishes updating. Functionality is
    * defined as undoing whatever was done in the block method. Should also be
-   * overridden in components that override UnmanagedComponent#block. 
+   * overridden in components that override UnmanagedComponent#block.
    */
   unblock: function() {
-  
+
     if(this.isRunning){
       this.dashboard.decrementRunningCalls();
       this.isRunning = false;
