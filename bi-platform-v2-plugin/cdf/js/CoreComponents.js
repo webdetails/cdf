@@ -195,6 +195,23 @@ BaseComponent = Base.extend({
     }
     /* opts is falsy if null or undefined */
     return opts || {};
+  },
+
+  /**
+   * Obtains the value of this component's parameter.
+   * <p>
+   * If the parameter value is a function, the result of evaluating it is returned instead.
+   * </p>
+   * <p>
+   * Normalizes return values by using {@link Dashboards.normalizeValue}.
+   * </p>
+   *
+   * @return {*} the parameter value.
+   */
+  _getParameterValue: function() {
+    return Dashboards.normalizeValue(
+            Dashboards.ev(
+              Dashboards.getParameterValue(this.parameter)));
   }
 });
 
@@ -267,112 +284,6 @@ var XactionComponent = BaseComponent.extend({
     } catch (e) {
     // don't cause the rest of CDF to fail if xaction component fails for whatever reason
     }
-  }
-});
-
-var SelectBaseComponent = BaseComponent.extend({
-  visible: false,
-  update: function () {
-    var ph = $("#" + this.htmlObject);
-    var myArray = this.getValuesArray(),
-    isMultiple = false;
-
-    selectHTML = "<select";
-
-    // set size
-    if (this.size != undefined) {
-      selectHTML += " size='" + this.size + "'";
-    }
-    if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
-      if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
-        selectHTML += " multiple";
-        isMultiple = true;
-      } else
-      if (!this.isMultiple && this.size == undefined) {
-        selectHTML += " size='" + myArray.length + "'";
-      }
-    }
-    if (this.externalPlugin == "chosen") {
-      selectHTML += " class='chzn-select'";
-    }
-    selectHTML += ">";
-    var firstVal,
-    currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
-    currentIsValid = false;
-
-    var hasCurrentVal = typeof currentVal != undefined;
-    //var vid = this.valueAsId == false ? false : true;
-    var vid = !!this.valueAsId;
-    var hasValueSelected = false;
-    var isSelected = false;
-
-    var currentValArray = [];
-    if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
-      currentValArray = currentVal;
-    } else if(typeof(currentVal) == "string"){
-      currentValArray = currentVal.split("|");
-    }
-
-    for (var i = 0, len = myArray.length; i < len; i++) {
-      if (myArray[i] != null && myArray[i].length > 0) {
-        var ivid = vid || myArray[i][0] == null;
-        var value, label;
-        if (myArray[i].length > 1) {
-          value = "" + myArray[i][ivid ? 1 : 0];
-          label = "" + myArray[i][1];
-        } else {
-          value = "" + myArray[i][0];
-          label = "" + myArray[i][0];
-        }
-        if (i == 0) {
-          firstVal = value;
-        }
-        if (jQuery.inArray( value, currentValArray) > -1) {
-          currentIsValid = true;
-        }
-        selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
-      }
-    }
-
-    selectHTML += "</select>";
-    ph.html(selectHTML);
-
-    /* If the current value for the parameter is invalid or empty, we need
-     * to pick a sensible default. If there is a defaultIfEmpty value,
-     * we use that; otherwise, we use the first value in the selector.
-     * An "invalid" value is, of course, one that's not in the values array.
-     */
-    if (isMultiple ? !currentIsValid && currentVal !== '' : !currentIsValid) {
-      var replacementValue = (this.defaultIfEmpty)? firstVal : null;
-      $("select", ph).val(replacementValue);
-      Dashboards.setParameter(this.parameter,replacementValue);
-      Dashboards.processChange(this.name);
-    } else {
-      $("select", ph).val(currentValArray);
-    }
-    
-    if( this.externalPlugin == "chosen" ){ 
-      ph.find("select.chzn-select").chosen(); 
-    }
-    
-    var myself = this;
-    $("select", ph).change(function () {
-      Dashboards.processChange(myself.name);
-    });
-  }
-});
-
-var SelectComponent = SelectBaseComponent.extend({
-  defaultIfEmpty: true,
-  getValue : function() {
-    return $("#"+this.htmlObject + " select").val();
-  }
-});
-
-var SelectMultiComponent = SelectBaseComponent.extend({
-  getValue : function() {
-  	var ph = $("#"+this.htmlObject + " select");
-    return ( ph.val() == null ) ? [] : ph.val();
   }
 });
 
@@ -973,6 +884,339 @@ var TimePlotComponent = BaseComponent.extend({
       Dashboards.update(this.chartDefinition.dateRangeInput);
       Dashboards.fireChange(this.startDateParameter,toDateString(start));
       this.updateTimeplot = true;
+    }
+  }
+});
+
+
+var SelectBaseComponent = BaseComponent.extend({
+  visible: false,
+
+  //defaultIfEmpty: [false]
+  //isMultiple: [true]
+  //size: if multiple, default is the number of possible values
+  //externalPlugin:
+  //extraOptions:
+
+  update: function () {
+    var myArray = this.getValuesArray();
+    this.draw(myArray);
+  },
+
+  draw: function(myArray) {
+    var ph = $("#" + this.htmlObject);
+    var name = this.name;
+
+    // Build the HTML
+    var selectHTML = "<select";
+
+    var allowMultiple = this._allowMultipleValues();
+    if(allowMultiple) { selectHTML += " multiple"; }
+
+    var size = this._getListSize(myArray);
+    if(size != null) { selectHTML += " size='" + size + "'"; }
+
+    var extPlugin = this.externalPlugin;
+    switch(extPlugin) {
+      case "chosen": selectHTML += " class='chzn-select'" ; break;
+      case "hynds":  selectHTML += " class='hynds-select'"; break;
+    }
+    selectHTML += ">";
+
+    // ------
+
+    var currentVal  = this._getParameterValue();
+    var currentVals = Dashboards.parseMultipleValues(currentVal); // may be null
+    var valuesIndex = {};
+    var firstVal;
+
+    Dashboards.eachValuesArray(myArray, {valueAsId: this.valueAsId},
+      function(value, label, id, index) {
+        selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" +
+                        Dashboards.escapeHtml(label) +
+                      "</option>";
+
+        // For value validation, below
+        if(!index) { firstVal = value; }
+        valuesIndex[value] = true;
+      },
+      this);
+
+    selectHTML += "</select>";
+    ph.html(selectHTML);
+
+    // ------
+
+    // All current values valid?
+    var currentIsValid = true;
+
+    // Filter out invalid current values
+    if(currentVals != null) {
+      var i = currentVals.length;
+      while(i--) {
+        if(valuesIndex[currentVals[i]] !== true) {
+          // At least one invalid value
+          currentIsValid = false;
+          currentVals.splice(i, 1);
+        }
+      }
+      if(!currentVals.length) { currentVals = null; }
+    }
+
+    /* If the current value for the parameter is invalid or empty,
+     * we need to pick a sensible default.
+     * If defaultIfEmpty is true, the first possible value is selected,
+     * otherwise, nothing is selected.
+     */
+    var isEmpty    = currentVals == null;
+    var hasChanged = !currentIsValid;
+    if(isEmpty && this.defaultIfEmpty && firstVal != null) {
+      // Won't remain empty
+      currentVals = [firstVal];
+      hasChanged = true;
+    }
+
+    $("select", ph).val(currentVals);
+
+    if(hasChanged) {
+      // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
+      Dashboards.setParameter(this.parameter, currentVals);
+      Dashboards.processChange(name);
+      }
+
+    // TODO: shouldn't this be called right after setting the value of select?
+    // Before hasChanged firing?
+    switch(extPlugin) {
+      case "chosen": ph.find("select.chzn-select" ).chosen(this._readExtraOptions()); break;
+      case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
+    }
+
+    this._listenElement(ph);
+  },
+
+  /**
+   * Indicates if the user can select multiple values.
+   * The default implementation returns <tt>false</tt>.
+   * @return {boolean}
+   * @protected
+   */
+  _allowMultipleValues: function() {
+    return false;
+  },
+
+  /**
+   * The number of elements that the list should show
+   * without scrolling.
+   * The default implementation
+   * returns the value of the {@link #size} property.
+   *
+   * @param {Array.<Array.<*>>} values the values array.
+   * @return {?number}
+   * @protected
+   */
+  _getListSize: function(values) {
+    return this.size;
+  },
+
+  /**
+   * Currently, reads extra options for the "chosen" plugin,
+   * by transforming the array of key/value pair arrays
+   * in {@link #extraOptions} into a JS object.
+   *
+   * @return {!Object.<string,*>} an options object.
+     */
+  _readExtraOptions: function() {
+    if(this.externalPlugin && this.extraOptions) {
+      return Dashboards.propertiesArrayToObject(this.extraOptions);
+    }
+  },
+    
+  /**
+   * Installs listeners in the HTML element/object.
+   * <p>
+   *    The default implementation listens to the change event
+   *    and dashboard-processes each change.
+   * </p>
+   * @param {!HTMLElement} elem the element.
+   */
+  _listenElement: function(elem) {
+    var me = this;
+    //Dashboards.log("changeMode: immediate trigger: " + me._changeTrigger());
+
+    var prevValue = me.getValue();
+    var check = function() {
+      var currValue = me.getValue();
+      if(!Dashboards.equalValues(prevValue, currValue)) {
+        prevValue = currValue;
+        Dashboards.processChange(me.name);
+      }
+    };
+    
+    $("select", elem).on(me._changeTrigger(), check);
+  },
+
+  /**
+   * Obtains the appropriate jQuery event name
+   * for testing if changes have occured.
+   * @return {!string} the name of the event.
+   */
+  _changeTrigger: function() {
+    /**
+     * <p>
+     * Mobile user agents show a dialog/popup for choosing amongst possible values,
+     * for both single and multi-selection selects.
+     * </p>
+     * <ul>
+     *   <li>iPad/iPhone -
+     *       the popup shows a button "OK" only when in multiple selection.
+     *       As the user clicks on the items, "change" events are fired.
+     *       A "focusout" event is fired when the user dismisses the popup
+     *       (by clicking on the button or outside of the popup).
+     *   </li>
+     *   <li>Android -
+     *       the popup shows a button "Done" whether in single or multiple selection.
+     *       As the user clicks on the items no events are fired.
+     *       A change event is fired (whether or not values actually changed),
+     *       when the user dismisses the popup.
+     *   </li>
+     *   <li>Desktops -
+     *       no popup is shown.
+     *       As the user clicks on the items, "change" events are fired.
+     *       A "focusout" event is fired when it should...
+     *   </li>
+     * </ul>
+     */
+    return (/ipad|iphone/i).test(navigator.userAgent) ? 'focusout' : 'change';
+  },
+
+  /**
+   * Indicates if the user agent
+   * <p>A dialog may be shown even if {@link #isMultiple} is <tt>false</tt>.</p>
+   * <p>
+   * iPad/iPhone already show up a dialog for choosing between multiple options,
+   * with an ok button with it.
+   * </p>
+   * @return {boolean}
+   */
+  _hasValuesChoiceDialog: function() {
+    return (/ipad|iphone/i).test(navigator.userAgent);
+  }
+});
+
+var SelectComponent = SelectBaseComponent.extend({
+  defaultIfEmpty: true,
+  getValue : function() {
+    return $("#"+this.htmlObject + " select").val();
+  }
+});
+
+var SelectMultiComponent = SelectBaseComponent.extend({
+  // These apply to isMultiple only:
+  // changeMode: {['immediate'], 'timeout-focus'}
+  // changeTimeout: [1500] // in ms - applies only to changeMode ='timeout-focus'
+
+  getValue : function() {
+  	var ph = $("#"+this.htmlObject + " select");
+    var val = ph.val();
+    return val == null ? [] : val;
+  },
+
+  /** @override */
+  _allowMultipleValues: function() {
+    return this.isMultiple == null || this.isMultiple;
+  },
+
+  /** @override */
+  _getListSize: function(values) {
+    var size = this.base(values);
+
+    if(size == null) {
+      if(!this._allowMultipleValues()) {
+        size = values.length;
+      } // TODO: otherwise no default... Why?
+    }
+
+    return size;
+  },
+
+  /**
+   * Obtains the change mode to use.
+   * <p>
+   * The default implementation takes into account
+   * the result of {@link #_allowMultipleValues},
+   * the desired {@link #changeMode} and
+   * the current user agent.
+   * </p>
+   * @return {!string} one of values: <tt>'immediate'</tt> or <tt>'timeout-focus'</tt>.
+   */
+  _getChangeMode: function() {
+    if(this._allowMultipleValues()) {
+      var changeMode = this.changeMode;
+      if(changeMode) {
+        changeMode = changeMode.toLowerCase();
+        switch(changeMode) {
+          case 'immediate':
+            return changeMode;
+
+          case 'timeout-focus':
+            // Mobile devices don't need/go-well-with the timeout mode.
+            // They show a value selection popup and it would be confusing
+            // to fire a change, on timeout, while still
+            // having a popup with an OK button open.
+            // Fall-back to immediate mode.
+            if((/ipad|iphone|android/i).test(navigator.userAgent)) { break; }
+
+            return changeMode;
+
+          default:
+            Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
+        }
+      }
+    }
+
+    // assume default
+    return 'immediate';
+  },
+
+  /** @override */
+  _listenElement: function(elem) {
+    var me = this;
+    var changeMode = me._getChangeMode();
+    if(changeMode === 'immediate') {
+      me.base(elem);
+    } else if(changeMode === 'timeout-focus') {
+      //Dasboards.log("changeMode: " + changeMode + " trigger: /NA");
+      var prevValue = me.getValue();
+
+      var changeTimeout = Math.max(100, me.changeTimeout || 1500);
+      var timeoutHandle;
+
+      var stop = function() {
+        if(timeoutHandle != null) {
+          clearTimeout(timeoutHandle);
+          timeoutHandle = null;
+        }
+      };
+
+      var renew = function() {
+        stop();
+        timeoutHandle = setTimeout(check, changeTimeout);
+      };
+
+      var check = function() {
+        stop();
+
+        var currValue = me.getValue();
+        if(!Dashboards.equalValues(prevValue, currValue)) {
+          prevValue = currValue;
+          Dashboards.processChange(me.name);
+        }
+      };
+
+      $("select", elem)
+        .change(renew)
+        .keypress(function(ev) { if(ev.which === 13) { check(); } })
+        .focusout(check);
     }
   }
 });

@@ -226,6 +226,32 @@ if ( !Array.prototype.reduce ) {
   };  
 }  
 
+if(!Object.create){
+    Object.create = (function(){
+
+        var Klass = function(){},
+            proto = Klass.prototype;
+        
+        function create(baseProto){
+            Klass.prototype = baseProto || {};
+            var instance = new Klass();
+            Klass.prototype = proto;
+            
+            return instance;
+        }
+
+        return create;
+    }());
+}
+
+if (!Array.prototype.forEach){
+    Array.prototype.forEach = function(fun, ctx){
+        for(var i = 0, len = this.length; i < len; ++i) {  
+            fun.call(ctx, this[i], i, this);
+        }
+    };
+}
+
 var pathArray = window.location.pathname.split( '/' );
 var webAppPath;
 if (!(typeof(CONTEXT_PATH) == 'undefined')){
@@ -538,35 +564,85 @@ Dashboards.decrementRunningCalls = function() {
   }
 };
 
-Dashboards.bindControl = function(object) {
-
-  // see if there is a class defined for this object
-  var objectType = typeof object["type"]=='function'?object.type():object.type;
-  var classNames = [
-  // try type as class name
-  objectType,
-  // try Type as class name with first letter uppercase
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1),
-  // try TypeComponent as class name
-  objectType.substring(0,1).toUpperCase() + objectType.substring(1) + 'Component'
-  ];
-  
-  var objectImpl;
-  for (var i = 0; i < classNames.length && (objectImpl == null || typeof objectImpl == 'undefined'); i++) {
-    try {
-      eval('objectImpl = new ' + classNames[i]);
-    } catch (e) {
-    }
-  }
-  
-  if (typeof objectImpl == 'undefined'){
-    Dashboards.log ("Object type " + object["type"] + " can't be mapped to a valid class","error");
+Dashboards.bindControl = function(control) {
+  var Class = this._getControlClass(control);
+  if(!Class) {
+    this.log("Object type " + control["type"] + " can't be mapped to a valid class", "error");
   } else {
-    // this will add the methods from the inherited class. Overrides not allowed
-    $.extend(object,objectImpl);
+    this._castControlToClass(control, Class);
+  }
+
+  this.bindExistingControl(control, Class);
+};
+
+Dashboards.bindExistingControl = function(control, Class) {
+  if(!control.dashboard) {
+    control.dashboard = this;
+
+    // Ensure BaseComponent's methods
+    this._castControlToComponent(control, Class);
+  }
+
+  return control;
+};
+
+Dashboards._castControlToClass = function(control, Class) {
+  if(!(control instanceof Class)) {
+    var controlImpl = this._makeInstance(Class);
+
+    // Copy implementation into control
+    $.extend(control, controlImpl);
   }
 };
 
+Dashboards._getControlClass = function(control) {
+  // see if there is a class defined for this control
+  var typeName = control.type;
+  if(typeof typeName === 'function') { typeName = typeName.call(control); } // <=> control.type() ; the _this_ in the call is _control_
+
+  var TypeName = typeName.substring(0,1).toUpperCase() + typeName.substring(1);
+
+  // try _TypeComponent_, _type_ and _Type_ as class names
+  var typeNames = [TypeName + 'Component', typeName, TypeName];
+
+  for (var i = 0, N = typeNames.length ; i < N ; i++) {
+    // TODO: window represents access to the JS global object.
+    // This, or a special object on which to eval types, should be provided by some FWK.
+    var Class = window[typeNames[i]];
+    if(Class) { return Class; }
+  }
+  // return undefined;
+};
+
+Dashboards._makeInstance = function(Class, args) {
+  var o = Object.create(Class.prototype);
+  if(args) { Class.apply(o, args); } else { Class.apply(o); }
+  return o;
+};
+
+Dashboards._castControlToComponent = function(control, Class) {
+  // Extend control with BaseComponent methods, if it's not an instance of it.
+  // Also, avoid extending if _Class_ was already applied
+  // and it is a subclass of BaseComponent.
+  if(!(control instanceof BaseComponent) &&
+     (!Class || !(Class.prototype instanceof BaseComponent))) {
+
+    var baseProto = BaseComponent.prototype;
+    for(var p in baseProto) {
+      if(baseProto.hasOwnProperty(p) &&
+         (control[p] === undefined) &&
+         (typeof baseProto[p] === 'function')) {
+        switch(p) {
+          // Exceptions
+          case 'base': break;
+
+          // Copy
+          default: control[p] = baseProto[p]; break;
+        }
+      }
+    }
+  }
+};
 Dashboards.blockUIwithDrag = function() {
   if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
@@ -644,7 +720,7 @@ Dashboards.showErrorTooltip = function(){
 };
 
 Dashboards.getComponent = function(name){
-  for (i in this.components){
+  for (var i in this.components){
     if (this.components[i].name == name)
       return this.components[i];
   }
@@ -659,11 +735,54 @@ Dashboards.getComponentByName = function(name) {
 };
 
 Dashboards.addComponents = function(components) {
-  // attempt to convert over to component implementation
-  for (var i =0; i < components.length; i++) {
-    Dashboards.bindControl(components[i]);
+  components.forEach(function(component) {
+    this.bindControl(component);
+    this.components.push(component);
+  }, this);
+};
+
+Dashboards.addComponent = function(component, options) {
+  this.removeComponent(component);
+
+  // Attempt to convert over to component implementation
+  this.bindControl(component);
+
+  var index = options && options.index;
+  var L = this.components.length;
+  if(index == null || index < 0 || index > L) { index = L; } // <=> push
+  this.components[index] = component;
+};
+
+Dashboards.getComponentIndex = function(compOrNameOrIndex) {
+  if(compOrNameOrIndex != null) {
+    switch(typeof compOrNameOrIndex) {
+      case 'string':
+      for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
+          if(cs[i].name === compOrNameOrIndex) { return i; }
   }
-  this.components = this.components.concat(components);
+        break;
+      case 'number':
+        if(compOrNameOrIndex >= 0 && compOrNameOrIndex < this.components.length) {
+          return compOrNameOrIndex;
+        }
+        break;
+
+      default: return this.components.indexOf(compOrNameOrIndex);
+    }
+  }
+  return -1;
+};
+
+Dashboards.removeComponent = function(compOrNameOrIndex) {
+  var index = this.getComponentIndex(compOrNameOrIndex);
+  var comp = null;
+  if(index >= 0) {
+    var cs = this.components;
+    comp = cs[index];
+    comp.dashboard = null;
+    cs.splice(index, 1);
+  }
+  return comp;
 };
 
 Dashboards.registerEvent = function (ev, callback) {
@@ -818,13 +937,13 @@ Dashboards.getQueryParameter = function ( parameterName ) {
   var parameterName = parameterName + "=";
   if ( queryString.length > 0 ) {
     // Find the beginning of the string
-    begin = queryString.indexOf ( parameterName );
+    var begin = queryString.indexOf ( parameterName );
     // If the parameter name is not found, skip it, otherwise return the value
     if ( begin != -1 ) {
       // Add the length (integer) to the beginning
       begin += parameterName.length;
       // Multiple parameters are separated by the "&" sign
-      end = queryString.indexOf ( "&" , begin );
+      var end = queryString.indexOf ( "&" , begin );
       if ( end == -1 ) {
         end = queryString.length
       }
@@ -857,7 +976,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
 Dashboards.post = function(url,obj){
 
   var form = '<form action="' + url + '" method="post">';
-  for(o in obj){
+  for(var o in obj){
 
     var v = (typeof obj[o] == 'function' ? obj[o]() : obj[o]);
 
@@ -1150,20 +1269,177 @@ Dashboards.cleanStorage = function(){
 
 Dashboards.propertiesArrayToObject = function(pArray) {
   var obj = {};
-  for (p in pArray) if (pArray.hasOwnProperty(p)) {
+  for (var p in pArray) if (pArray.hasOwnProperty(p)) {
     var prop = pArray[p];
     obj[prop[0]] = prop[1];
   }
   return obj;
-}
+};
 
 Dashboards.objectToPropertiesArray = function(obj) {
   var pArray = [];
-  for (key in obj) if (obj.hasOwnProperty(key)) {
+  for (var key in obj) if (obj.hasOwnProperty(key)) {
     pArray.push([key,obj[key]]);
   }
   return pArray;
-}
+};
+
+
+/**
+ * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
+ *
+ * @param {Array.<Array.<*>>} values the values array - an array of arrays.
+ *   <p>
+ *   Each second-level array is a <i>value specification</i> and contains
+ *   a value and, optionally, a label and an id.
+ *   It may have the following forms:
+ *   </p>
+ *   <ul>
+ *     <li><tt>[valueAndLabel]</tt> - when having <i>length</i> one</li>
+ *     <li><tt>[value, label,...]</tt> - when having <i>length</i> two or more and
+ *         <tt>opts.valueAsId</tt> is falsy
+ *     </li>
+ *     <li><tt>[id, valueAndLabel,..]</tt> - when having <i>length</i> two or more and
+ *         <tt>opts.valueAsId</tt> is truthy
+ *     </li>
+ *   </ul>
+ * @param {object} opts an object with options.
+ *
+ * @param {?boolean=} [opts.valueAsId=false] indicates if the first element of
+ *   the value specification array is the id, instead of the value.
+ *
+ * @param {function(string, string, string, number):?boolean} f
+ * the traversal function that is to be called with
+ * each value-label-id triple and with the JS content <tt>x</tt>.
+ * The function is called with arguments: <tt>value</tt>, <tt>label</tt>,
+ * <tt>id</tt> and <tt>index</tt>.
+ * <p>
+ * When the function returns the value <tt>false</tt>, traversal is stopped,
+ * and <tt>false</tt> is returned.
+ * </p>
+ *
+ * @param {object} x the JS context object on which <tt>f</tt> is to be called.
+ *
+ * @return {boolean} indicates if the traversal was complete, <tt>true</tt>,
+ *   or if explicitly stopped by the traversal function, <tt>false</tt>.
+ *
+ * @static
+ */
+Dashboards.eachValuesArray = function(values, opts, f, x) {
+  if(typeof opts === 'function') {
+    x = f;
+    f = opts;
+    opts = null;
+  }
+
+  var valueAsId = !!(opts && opts.valueAsId);
+  for(var i = 0, j = 0, L = values.length; i < L; i++) {
+    var valSpec = values[i];
+    if(valSpec && valSpec.length) {
+      var v0 = valSpec[0];
+      var value, label, id = undefined; // must reset on each iteration
+
+      if (valSpec.length > 1) {
+        if(valueAsId) { id = v0; }
+        label = "" + valSpec[1];
+        value = (valueAsId || v0 == null) ? label : ("" + v0);
+      } else {
+        value = label = "" + v0;
+      }
+
+      if(f.call(x, value, label, id, j, i) === false) { return false; }
+      j++;
+    }
+  }
+
+  return true;
+};
+
+
+/**
+ * Given a parameter value obtains an equivalent values array.
+ *
+ * <p>The parameter value may encode multiple values in a string format.</p>
+ * <p>A nully (i.e. null or undefined) input value or an empty string result in <tt>null</tt>,
+ *    and so the result of this method is normalized.
+ * </p>
+ * <p>
+ * A string value may contain multiple values separated by the character <tt>|</tt>.
+ * </p>
+ * <p>An array or array-like object is returned without modification.</p>
+ * <p>Any other value type returns <tt>null</tt>.</p>
+ *
+ * @param {*} value
+ * a parameter value, as returned by {@link Dashboards.getParameterValue}.
+ *
+ * @return {null|!Array.<*>|!{join}} null or an array or array-like object.
+ *
+ * @static
+ */
+Dashboards.parseMultipleValues = function(value) {
+  if(value != null && value !== '') {
+    // An array or array like?
+    if(this.isArray(value)) { return value; }
+    if(typeof value === "string") { return value.split("|"); }
+  }
+
+  // null or of invalid type
+  return null;
+};
+
+/**
+ * Normalizes a value so that <tt>undefined</tt>, empty string
+ * and empty array, are all translated to <tt>null</tt>.
+ * @param {*} value the value to normalize.
+ * @return {*} the normalized value.
+ *
+ * @static
+ */
+Dashboards.normalizeValue = function(value) {
+  if(value === '' || value == null) { return null }
+  if(this.isArray(value) && !value.length) return null;
+  return value;
+};
+
+/**
+ * Determines if a value is considered an array.
+ * @param {*} value the value.
+ * @return {boolean}
+ *
+ * @static
+ */
+Dashboards.isArray = function(value) {
+  // An array or array like?
+  return !!value &&
+         ((value instanceof Array) ||
+          (typeof value === 'object' && value.join && value.length != null));
+};
+
+/**
+ * Determines if two values are considered equal.
+ * @param {*} a the first value.
+ * @param {*} b the second value.
+ * @return {boolean}
+ *
+ * @static
+ */
+Dashboards.equalValues = function(a, b) {
+  // Identical or both null/undefined?
+  a = this.normalizeValue(a);
+  b = this.normalizeValue(b);
+
+  if(a === b) { return true; }
+
+  if(this.isArray(a) && this.isArray(b)) {
+    var L = a.length;
+    if(L !== b.length) { return false; }
+    while(L--) { if(!this.equalValues(a[L], b[L])) { return false; } }
+    return true;
+  }
+
+  // Last try, give it to JS equals
+  return a == b;
+};
 
 /**
  *
@@ -1231,7 +1507,8 @@ var Utf8 = {
   decode : function (utftext) {
     var string = "";
     var i = 0;
-    var c = c1 = c2 = 0;
+    var c = 0, c2 = 0, c3 = 0;
+
 
     while ( i < utftext.length ) {
 
@@ -1268,7 +1545,7 @@ function getURLParameters(sURL)
     var arrURLParams = arrParams[1].split("&");
     var arrParam = [];
 
-    for (i=0;i<arrURLParams.length;i++){
+    for (var i=0;i<arrURLParams.length;i++){
       var sParam =  arrURLParams[i].split("=");
 
       if (sParam[0].indexOf("param",0) == 0){
@@ -1280,18 +1557,20 @@ function getURLParameters(sURL)
   }
 
   return arrParam;
-};
+}
+
 
 function toFormatedString(value) {
   value += '';
-  x = value.split('.');
-  x1 = x[0];
-  x2 = x.length > 1 ? '.' + x[1] : '';
+  var x = value.split('.');
+  var x1 = x[0];
+  var x2 = x.length > 1 ? '.' + x[1] : '';
   var rgx = /(\d+)(\d{3})/;
   while (rgx.test(x1))
     x1 = x1.replace(rgx, '$1' + ',' + '$2');
   return x1 + x2;
-};
+}
+
 
 //quote csv values in a way compatible with CSVTokenizer
 function doCsvQuoting(value, separator, alwaysEscape){
@@ -1311,7 +1590,8 @@ function doCsvQuoting(value, separator, alwaysEscape){
     value =  QUOTE_CHAR.concat(value, QUOTE_CHAR);
   }
   return value;
-};
+}
+
 
 /*!
 *
@@ -1348,7 +1628,7 @@ sprintfWrapper = {
     var newString = '';
     var match = null;
 
-    while (match = exp.exec(string)) {
+    while ((match = exp.exec(string))) {
       if (match[9]) {
         convCount += 1;
       }
@@ -1359,8 +1639,8 @@ sprintfWrapper = {
 
       matchPosEnd = exp.lastIndex;
       
-      var negative = parseInt(arguments[convCount]) < 0 ? true : false;
-      if(negative == 0) negative = parseFloat(arguments[convCount]) < 0 ? true : false;
+      var negative = parseInt(arguments[convCount]) < 0;
+      if(!negative) negative = parseFloat(arguments[convCount]) < 0;
       
       matches[matches.length] = {
         match: match[0],
@@ -1383,12 +1663,13 @@ sprintfWrapper = {
       return null;
     }
 
-    var code = null;
-    var match = null;
+    match = null;
+
     var i = null;
 
     for (i=0; i<matches.length; i++) {
       var m =matches[i];
+      var substitution;
 
       if (m.code == '%') {
         substitution = '%'
@@ -1516,7 +1797,8 @@ Dashboards.listAddIns = function(component,slot) {
 var key = this.normalizeAddInKey(component);
   var addInList = [];
   try {
-    var slot = this.addIns[key][slot];
+    slot = this.addIns[key][slot];
+
     for (var addIn in slot) if (slot.hasOwnProperty(addIn)) { 
       addInList.push([addIn, slot[addIn].getLabel()]);
     }
@@ -1806,7 +2088,7 @@ Query = function() {
     }
   };
 
-  this.reprocessResults = function(outerCallback) {
+  this.reprocessResults = function(outsideCallback) {
     if (_lastResultSet !== null) {
       var clone = Dashboards.safeClone(true,{},_lastResultSet);
       var callback = (outsideCallback ? outsideCallback : _callback);
@@ -1911,8 +2193,8 @@ Query = function() {
   /* Pagination
      *
      * We paginate by having an initial position (_page) and page size (_pageSize)
-     * Paginating consists of incrementing/decrementing the initial position by the page size
-     * All paging operations change the paging cursor.
+   * Paginating consists of incrementing/decrementing the initial position by
+   * the page size. All paging operations change the paging cursor.
      */
 
   // Gets the next _pageSize results
