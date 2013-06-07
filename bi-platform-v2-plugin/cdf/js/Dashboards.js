@@ -1539,7 +1539,7 @@ Dashboards.getPathParameter = function(){
 
   var path = pathName.substring(idxStart, idxEnd);
 
-  return path.replace(/:/g, "/"); 
+  return path.replace(/:/g, "/");
 
 };
 
@@ -1693,7 +1693,7 @@ Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, par
   // execute an Action Sequence on the server
 
   var url = webAppPath + "/api/repos/" + path.replace(/\//g, ":") + "/generatedContent";
-  
+
   // Add the solution to the params
   var arr = {};
   arr.wrapper = false;
@@ -1766,7 +1766,7 @@ Dashboards.fetchData = function(cd, params, callback) {
     for (var param in params) {
       cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
-    
+
     $.post(webAppPath + "/plugin/cda/api/doQuery?", cd,
       function(json) {
         callback(json);
@@ -1908,6 +1908,8 @@ Dashboards.objectToPropertiesArray = function(obj) {
  *
  * @return {boolean} indicates if the traversal was complete, <tt>true</tt>,
  *   or if explicitly stopped by the traversal function, <tt>false</tt>.
+ *
+ * @static
  */
 Dashboards.eachValuesArray = function(values, opts, f, x) {
   if(typeof opts === 'function') {
@@ -1944,38 +1946,59 @@ Dashboards.eachValuesArray = function(values, opts, f, x) {
  * Given a parameter value obtains an equivalent values array.
  *
  * <p>The parameter value may encode multiple values in a string format.</p>
- * <p>A nully input value (i.e. null or undefined) results in an emtpy array.</p>
+ * <p>A nully (i.e. null or undefined) input value or an empty string result in <tt>null</tt>,
+ *    and so the result of this method is normalized.
+ * </p>
  * <p>
  * A string value may contain multiple values separated by the character <tt>|</tt>.
- * Note that (mostly for legacy reasons) an empty string results in an
- * array with one empty string.
  * </p>
  * <p>An array or array-like object is returned without modification.</p>
- * <p>Any other value type returns an empty array.</p>
+ * <p>Any other value type returns <tt>null</tt>.</p>
  *
- * @param {null|undefined|Array.<*>|{join}} paramValue
- * the parameter value, as returned by {@link Dashboards.getParameterValue}.
+ * @param {*} value
+ * a parameter value, as returned by {@link Dashboards.getParameterValue}.
  *
- * @return {!Array.<*>|!{join}} an array or array-like object.
+ * @return {null|!Array.<*>|!{join}} null or an array or array-like object.
  *
  * @static
  */
-Dashboards.parseMultipleValues = function(paramValue) {
-  if(paramValue != null) {
+Dashboards.parseMultipleValues = function(value) {
+  if(value != null && value !== '') {
     // An array or array like?
-    if(paramValue instanceof Array ||
-       (typeof paramValue === "object" && paramValue.join)) {
-      return paramValue;
-    }
-
-    // NOTE: An empty string, "", will be returned as [""];
-    if(typeof paramValue === "string") {
-      return paramValue.split("|");
-    }
+    if(this.isArray(value)) { return value; }
+    if(typeof value === "string") { return value.split("|"); }
   }
 
   // null or of invalid type
-  return [];
+  return null;
+};
+
+/**
+ * Normalizes a value so that <tt>undefined</tt>, empty string
+ * and empty array, are all translated to <tt>null</tt>.
+ * @param {*} value the value to normalize.
+ * @return {*} the normalized value.
+ *
+ * @static
+ */
+Dashboards.normalizeValue = function(value) {
+  if(value === '' || value == null) { return null }
+  if(this.isArray(value) && !value.length) return null;
+  return value;
+};
+
+/**
+ * Determines if a value is considered an array.
+ * @param {*} value the value.
+ * @return {boolean}
+ *
+ * @static
+ */
+Dashboards.isArray = function(value) {
+  // An array or array like?
+  return !!value &&
+         ((value instanceof Array) ||
+          (typeof value === 'object' && value.join && value.length != null));
 };
 
 /**
@@ -1983,14 +2006,20 @@ Dashboards.parseMultipleValues = function(paramValue) {
  * @param {*} a the first value.
  * @param {*} b the second value.
  * @return {boolean}
+ *
+ * @static
  */
 Dashboards.equalValues = function(a, b) {
   // Identical or both null/undefined?
-  if((a === b) || (a == null && a == b)) { return true; }
-  if($.isArray(a) && $.isArray(b)) {
+  a = this.normalizeValue(a);
+  b = this.normalizeValue(b);
+
+  if(a === b) { return true; }
+
+  if(this.isArray(a) && this.isArray(b)) {
     var L = a.length;
     if(L !== b.length) { return false; }
-    while(L--) { if(!Dashboards.equalValues(a[L], b[L])) { return false; } }
+    while(L--) { if(!this.equalValues(a[L], b[L])) { return false; } }
     return true;
   }
 
@@ -2004,7 +2033,9 @@ Dashboards.equalValues = function(a, b) {
 * @param {Integer} h Hue as a value between 0 - 360 degrees
 * @param {Integer} s Saturation as a value between 0 - 100 %
 * @param {Integer} v Value as a value between 0 - 100 %
-* @returns {Array} The RGB values  EG: [r,g,b], [255,255,255]
+* @return {Array} The RGB values  EG: [r,g,b], [255,255,255]
+*
+* @static
 */
 Dashboards.hsvToRgb = function (h,s,v) {
 
@@ -2683,8 +2714,8 @@ Query = function() {
       _exportIframe.appendTo($('body'));
     });
     $.ajaxSetup({ async: x});
-    
-    
+
+
   }
 
   this.setAjaxOptions = function(newOptions) {

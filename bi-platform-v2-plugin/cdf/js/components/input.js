@@ -40,10 +40,16 @@ var InputBaseComponent = UnmanagedComponent.extend({
    * <p>
    * If the parameter value is a function, the result of evaluating it is returned instead.
    * </p>
+   * <p>
+   * Normalizes return values by using {@link Dashboards.normalizeValue}.
+   * </p>
+   *
    * @return {*} the parameter value.
    */
   _getParameterValue: function() {
-    return Dashboards.ev(Dashboards.getParameterValue(this.parameter));
+    return Dashboards.normalizeValue(
+            Dashboards.ev(
+              Dashboards.getParameterValue(this.parameter)));
   }
 });
 
@@ -81,7 +87,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
     // ------
 
     var currentVal  = this._getParameterValue();
-    var currentVals = Dashboards.parseMultipleValues(currentVal);
+    var currentVals = Dashboards.parseMultipleValues(currentVal); // may be null
     var valuesIndex = {};
     var firstVal;
 
@@ -102,16 +108,20 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
     // ------
 
-    // Filter out invalid current values
-    var i = currentVals.length;
     // All current values valid?
     var currentIsValid = true;
-    while(i--) {
-      if(valuesIndex[currentVals[i]] !== true) {
-        // At least one invalid value
-        currentIsValid = false;
-        currentVals.splice(i, 1);
+
+    // Filter out invalid current values
+    if(currentVals != null) {
+      var i = currentVals.length;
+      while(i--) {
+        if(valuesIndex[currentVals[i]] !== true) {
+          // At least one invalid value
+          currentIsValid = false;
+          currentVals.splice(i, 1);
+        }
       }
+      if(!currentVals.length) { currentVals = null; }
     }
 
     /* If the current value for the parameter is invalid or empty,
@@ -119,19 +129,12 @@ var SelectBaseComponent = InputBaseComponent.extend({
      * If defaultIfEmpty is true, the first possible value is selected,
      * otherwise, nothing is selected.
      */
-
-    // Empty if [] or ['']
-    var V = currentVals.length;
-    var isEmpty = !V || (V < 2 && !String(currentVals[0]));
+    var isEmpty    = currentVals == null;
     var hasChanged = !currentIsValid;
-    if(isEmpty) {
-      currentVals = (this.defaultIfEmpty && firstVal != null) ? [firstVal] : null;
-
-      // Still empty?
-      isEmpty = (currentVals != null);
-
-      // Changed unless it was valid, empty and remained empty...
-      hasChanged |= isEmpty;
+    if(isEmpty && this.defaultIfEmpty && firstVal != null) {
+      // Won't remain empty
+      currentVals = [firstVal];
+      hasChanged = true;
     }
 
     $("select", ph).val(currentVals);
