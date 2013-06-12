@@ -81,7 +81,7 @@
       sparklineData = st.value,
       data = sparklineData.split(",");
       n = data.length,
-      w = opt.width || ph.width(),
+      w = opt.width || ph.width() - opt.canvasMargin * 2,
       h = opt.height,
       min = pv.min.index(data),
       max = pv.max.index(data);
