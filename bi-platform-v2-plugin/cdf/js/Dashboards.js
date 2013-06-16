@@ -4003,8 +4003,6 @@ Dashboards.getQuery = function (opts) {
 };
 
 
-
-
 /*
  * Query STUFF
  * (Here for legacy reasons)
@@ -4014,7 +4012,7 @@ Dashboards.getQuery = function (opts) {
 // Query(queryString) --> DEPRECATED
 // Query(queryDefinition{path, dataAccessId})
 // Query(path, dataAccessId)
-Query = function( cd, dataAccessId) {
+Query = function( cd, dataAccessId ) {
 
   var opts;
 
@@ -4044,8 +4042,6 @@ Query = function( cd, dataAccessId) {
 };
 
 // QUERIES end
-
-
 
 
 

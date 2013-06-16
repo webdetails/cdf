@@ -18,6 +18,19 @@ var baseQuery = new AddIn({
     page: 0,
     pageSize: 0
   },
+  validators: {
+    successCallback: '_function',
+    errorCallback: '_function',
+    pageSize: '_positive',
+    params: '_objectOrPropertiesArray'
+  },
+  readers: {
+    params: '_propertiesObject'
+  },
+  writers: {
+
+  },
+
   init: function (){
     this.properties = $.extend( true, {}, this.properties, this.defaults);
 
