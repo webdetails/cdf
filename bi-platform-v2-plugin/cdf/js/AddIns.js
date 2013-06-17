@@ -46,15 +46,6 @@ function AddIn(options) {
     return _name;
   }
 
-  this.clone = function (overrides){
-    var newOpts = jQuery.extend( true, {} , myself, overrides );
-    return new AddIn( newOpts );
-  }
-
-  this.getObject = function (){
-    return myself
-  }
-
   /**
    * Call the AddIn. If the AddIn is static, all parameters are
    * irrelevant, and this method will simply return the value.
