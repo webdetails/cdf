@@ -1,3 +1,4 @@
+
  $.ajaxSetup({
   type: "POST",
   async: false,
@@ -2373,6 +2374,7 @@ sprintfWrapper = {
 sprintf = sprintfWrapper.init;
 
 
+
 // CONTAINER begin
 ;(function (D){
 
@@ -2814,14 +2816,203 @@ Dashboards.safeClone = function(){
 
 // QUERIES begin
 
-Dashboards.getQuery = function (opts) {
-  var queryType = opts.queryType || 'cda';
-  var queryAddIn = this.getAddIn('Query' , 'queryTypes', queryType  , true);
-  if ( queryAddIn ){
-    queryAddIn.call(opts);
-    return queryAddIn.getObject();
-  }
-};
+(function (){
+
+  var BaseQuery = Base.extend(
+    {
+      name: "baseQuery",
+      label: "Base Query",
+      defaults: {
+        successCallback: null,
+        errorCallback: Dashboards.handleServerError,
+        lastResultSet: null,
+        page: 0,
+        pageSize: 0
+      },
+      constructor: function (_instance, _static){
+        this.base(_instance, _static);
+      }
+    },
+    {
+      getProperty: function (prop){
+        return this.defaults[prop];
+      },
+      setProperty: function (prop, value){
+        this.defaults[prop] = value;
+      },
+      doQuery: function (outerCallback){ 
+        // Override 
+      },
+      exportData: function() {
+        // Override 
+      },
+      setAjaxOptions: function() {
+        // Override 
+      },
+      fetchData: function(params, successCallback, errorCallback) {
+        // Override 
+      },
+
+      // Result caching
+      lastResults: function(){
+        if ( this.getProperty('lastResultSet') !== null) {
+          return $.extend(true,{}, this.getProperty('lastResultSet') );
+        } else {
+          throw "NoCachedResults";
+        }
+      },
+      reprocessLastResults: function(outerCallback){
+        if ( this.getProperty('lastResultSet') !== null) {
+          var clone = $.extend(true,{}, this.getProperty('lastResultSet') );
+          var callback = outerCallback || this.getProperty('successCallback') ;
+          return callback(clone);
+        } else {
+          throw "NoCachedResults";
+        }
+      },
+      reprocessResults: function(outsideCallback) {
+        if ( this.getProperty('lastResultSet') !== null) {
+          var clone = $.extend(true,{}, this.getProperty('lastResultSet') );
+          var callback = (outsideCallback ? outsideCallback : this.getProperty('successCallback'));
+          callback( clone );
+        } else {
+          throw "NoCachedResults";
+        }
+      },
+
+    setSortBy: function(sortBy) {
+      // Override 
+    },
+    sortBy: function(sortBy,outsideCallback) {
+      // Override 
+    },
+
+    setParameters: function (params) {
+      this.setProperty('params', params);
+    },
+    setCallback: function(callback) {
+      this.setProperty('successCallback' , callback);
+    },
+    setErrorCallback: function(callback) {
+      this.setProperty('errorCallback', callback);
+    },
+
+    /* Pagination
+     *
+     * We paginate by having an initial position ( page ) and page size ( pageSize )
+     * Paginating consists of incrementing/decrementing the initial position by
+     * the page size. All paging operations change the paging cursor.
+     */
+
+    // Gets the next _pageSize results
+    nextPage: function(outsideCallback) {
+      var page = this.getProperty('page'),
+          pageSize = this.getProperty('pageSize');
+      if ( pageSize > 0) {
+        page += pageSize;
+        this.setProperty('page' , page );
+        return this.doQuery(outsideCallback);
+      } else {
+        throw "InvalidPageSize";
+      }
+    },
+    // Gets the previous _pageSize results
+    previousPage: function(outsideCallback) {
+      var page = this.getProperty('page'),
+          pageSize = this.getProperty('pageSize');
+      if (page > pageSize) {
+        page -= pageSize;
+        this.setProperty('page' , page );
+        return this.doQuery(outsideCallback);
+      } else if (_pageSize > 0) {
+        this.setProperty('page' , 0 );
+        return this.doQuery(outsideCallback);
+      } else {
+        throw "AtBeggining";
+      }
+    },
+    // Gets the page-th set of _pageSize results (0-indexed)
+    getPage: function( targetPage, outsideCallback) {
+      var page = this.getProperty('page'),
+          pageSize = this.getProperty('pageSize');
+      if (targetPage * pageSize == page) {
+        return false;
+      } else if (typeof targetPage == 'number' && targetPage >= 0) {
+        this.setProperty('page' , targetPage * pageSize );
+        return this.doQuery(outsideCallback);
+      } else {
+        throw "InvalidPage";
+      }
+    },
+
+    // Gets pageSize results starting at page
+    setPageStartingAt: function(targetPage) {
+      if (targetPage == this.getProperty('page')) {
+        return false;
+      } else if (typeof targetPage == 'number' && targetPage >= 0) {
+        this.setProperty('page' , targetPage );
+      } else {
+        throw "InvalidPage";
+      }
+    },
+  
+    pageStartingAt: function(page,outsideCallback) {
+      if(this.setPageStartingAt(page) !== false) {
+        return this.doQuery(outsideCallback);
+      } else {
+        return false;
+      }
+    },
+  
+    // Sets the page size
+    setPageSize: function(pageSize) {
+      this.setProperty('pageSize', pageSize);
+    },
+  
+    // sets _pageSize to pageSize, and gets the first page of results
+    initPage: function(pageSize,outsideCallback) {
+      if (pageSize == this.getProperty('pageSize') && this.getProperty('page') == 0) {
+        return false;
+      } else if (typeof pageSize == 'number' && pageSize > 0) {
+        this.setProperty('page' , 0 );
+        this.setProperty('pageSize' , pageSize );
+        return this.doQuery(outsideCallback);
+      } else {
+        throw "InvalidPageSize";
+      }
+    }
+  });
+
+  BaseQuery.implement( Dashboards.OptionsManager );
+
+
+
+  Dashboards.queryFactories = new Dashboards.Container ();
+
+  Dashboards.registerQuery = function(type, name, _instance, _static){
+    var QueryClass = BaseQuery.extend(_instance, _static);
+
+    // Registers a new query factory with a custom class
+    this.queryFactories.register(type, name, function (container, config){
+      return new QueryClass(config);
+    }));
+  };
+
+  Dashboards.hasQuery = function(type, name){
+    return Boolean(this.queryFactories && this.queryFactories.has(type, name));
+  };
+
+  Dashboards.getQuery = function(type, name, opts){
+    var query = this.queryFactories.getNew(type, name, opts);
+    return query;
+  };
+
+  Dashboards.listQueries = function(type) {
+    return this.queryFactories.getAll(type);
+  };
+
+})();
+
 
 
 /*
@@ -2835,23 +3026,23 @@ Dashboards.getQuery = function (opts) {
 // Query(path, dataAccessId)
 Query = function( cd, dataAccessId ) {
 
-  var opts;
+  var opts, queryType;
 
   if( typeof cd == 'object'){
     opts = Dashboards.safeClone(true, cd);
     if (typeof cd.queryType == 'undefined'){
       if (typeof cd.query != 'undefined') {
         // got a valid legacy cd object
-        opts.queryType = 'legacy';
+        queryType = 'legacy';
       } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
-        opts.queryType = 'cda';
+        queryType = 'cda';
       } else {
         throw 'InvalidQuery';
       }
     }
   } else if (typeof cd == 'string' && typeof dataAccessId == 'string') {
+    queryType = 'cda';
     opts = {
-      queryType:'cda',
       path: cd,
       dataAccessId: dataAccessId
     };
@@ -2859,7 +3050,7 @@ Query = function( cd, dataAccessId ) {
     throw 'InvalidQuery'
   }
 
-  return Dashboards.getQuery(opts);
+  return Dashboards.getQuery('Base', queryType, opts);
 };
 
 // QUERIES end
