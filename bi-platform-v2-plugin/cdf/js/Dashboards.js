@@ -3004,6 +3004,13 @@ function encode_prepare( s )
 };
 
 
+/**
+*
+* UTF-8 data encode / decode
+* http://www.webtoolkit.info/
+*
+**/ 
+
 
 var Utf8 = {
 
