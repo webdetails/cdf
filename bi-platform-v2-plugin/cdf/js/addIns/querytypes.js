@@ -7,279 +7,8 @@
 (function() {
 
 
-var baseQuery = new AddIn({
-  // AddIn stuff
-  name: "baseQuery",
-  label: "Base Query",
-  defaults: {
-    successCallback: null,
-    errorCallback: Dashboards.handleServerError,
-    lastResultSet: null,
-    page: 0,
-    pageSize: 0
-  },
-  validators: {
-    successCallback: '_function',
-    errorCallback: '_function',
-    pageSize: '_positive',
-    params: '_objectOrPropertiesArray'
-  },
-  readers: {
-    params: '_propertiesObject'
-  },
-  writers: {
 
-  },
-
-  init: function (){
-    this.properties = $.extend( true, {}, this.properties, this.defaults);
-
-    function bindLibraryFunctions ( library ){
-      _.each( library , function(el, key){
-        if (typeof el == 'string'){
-          library[key] = library[el];
-        }
-      });
-    };
-
-    bindLibraryFunctions( this.validators );
-    bindLibraryFunctions( this.setters );
-    bindLibraryFunctions( this.getters );
-
-  },
-  implementation: function (opts){
-    var QueryCreator = Base.extend( this ),
-        query = new QueryCreator;
-    query.initOpts(opts);
-    return query
-  },
-  initOpts: function(opts){
-
-  },
-
-  // Query stuff
-  properties: {
-  },
-  validators: {
-    _default: function (value){
-      return true
-    },
-    _function: function (value){
-      return (typeof value == "function");
-    },
-    _positive: function (value){
-      return (typeof pageSize == 'number' && pageSize > 0); 
-    },
-    _objectOrPropertiesArray : function (value){
-      return (value instanceof Array) || (typeof value == 'object')
-    },
-
-    successCallback: '_function',
-    errorCallback: '_function',
-    pageSize: '_positive',
-    params: '_objectOrPropertiesArray'
-  },
-  setters: {
-    _default: function (prop, value){
-      this.properties[prop] = value;
-    },
-    _propertiesObject: function (prop, value) {
-      value = (value instanceof Array) ? Dashboards.propertiesArrayToObject(value) : value;
-      this.properties[prop] = value;
-    },
-
-    params: '_propertiesObject'
-  },
-  getters: {
-    _default: function (prop){
-      return this.properties[prop];
-    }
-  },
-
-  setProperty: function (prop, value){
-    var setter = _.bind( this.setters[prop] || this.setters['_default'], this ),
-        validator = _.bind( this.validators[prop] || this.validators['_default'] , this );
-    if ( validator(value) ){
-      setter(prop, value);
-    } else {
-      throw "Invalid" + prop.charAt(0).toUpperCase() + prop.slice(1);;
-    }
-  },
-  getProperty: function (prop){
-    var getter = _.bind( this.getters[prop] || this.getters['_default'] , this );
-    return getter(prop);
-  },
-
-  doQuery: function (outerCallback){
-
-  },
-
-  /*
-   * Public interface
-   */
-
-  exportData: function() {
-
-  },
-
-  setAjaxOptions: function() {
-
-  },
-
-  fetchData: function(params, successCallback, errorCallback) {
-  
-  },
-
-  // Result caching
-  lastResults: function(){
-    if ( this.getProperty('lastResultSet') !== null) {
-      return $.extend(true,{}, this.getProperty('lastResultSet') );
-    } else {
-      throw "NoCachedResults";
-    }
-  },
-
-  reprocessLastResults: function(outerCallback){
-    if ( this.getProperty('lastResultSet') !== null) {
-      var clone = $.extend(true,{}, this.getProperty('lastResultSet') );
-      var callback = outerCallback || this.getProperty('successCallback') ;
-      return callback(clone);
-    } else {
-      throw "NoCachedResults";
-    }
-  },
-
-  reprocessResults: function(outsideCallback) {
-    if ( this.getProperty('lastResultSet') !== null) {
-      var clone = $.extend(true,{}, this.getProperty('lastResultSet') );
-      var callback = (outsideCallback ? outsideCallback : this.getProperty('successCallback'));
-      callback( clone );
-    } else {
-      throw "NoCachedResults";
-    }
-  },
-
-
-  setSortBy: function(sortBy) {
-
-  },
-
-  sortBy: function(sortBy,outsideCallback) {
-
-  },
-
-
-  setParameters: function (params) {
-    this.setProperty('params', params);
-  },
-
-  setCallback: function(callback) {
-    this.setProperty('successCallback' , callback);
-  },
-
-  setErrorCallback: function(callback) {
-    this.setProperty('errorCallback', callback);
-  },
-
-
-
-  /* Pagination
-   *
-   * We paginate by having an initial position ( page ) and page size ( pageSize )
-   * Paginating consists of incrementing/decrementing the initial position by
-   * the page size. All paging operations change the paging cursor.
-   */
-
-  // Gets the next _pageSize results
-  nextPage: function(outsideCallback) {
-    var page = this.getProperty('page'),
-        pageSize = this.getProperty('pageSize');
-    if ( pageSize > 0) {
-      page += pageSize;
-      this.setProperty('page' , page );
-      return this.doQuery(outsideCallback);
-    } else {
-      throw "InvalidPageSize";
-    }
-  },
-
-  // Gets the previous _pageSize results
-  prevPage: function(outsideCallback) {
-    var page = this.getProperty('page'),
-        pageSize = this.getProperty('pageSize');
-    if (page > pageSize) {
-      page -= pageSize;
-      this.setProperty('page' , page );
-      return this.doQuery(outsideCallback);
-    } else if (_pageSize > 0) {
-      this.setProperty('page' , 0 );
-      return this.doQuery(outsideCallback);
-    } else {
-      throw "AtBeggining";
-    }
-  },
-
-  // Gets the page-th set of _pageSize results (0-indexed)
-  getPage: function( targetPage, outsideCallback) {
-    var page = this.getProperty('page'),
-        pageSize = this.getProperty('pageSize');
-    if (targetPage * pageSize == page) {
-      return false;
-    } else if (typeof targetPage == 'number' && targetPage >= 0) {
-      this.setProperty('page' , targetPage * pageSize );
-      return this.doQuery(outsideCallback);
-    } else {
-      throw "InvalidPage";
-    }
-  },
-
-  // Gets pageSize results starting at page
-  setPageStartingAt: function(targetPage) {
-    if (targetPage == this.getProperty('page')) {
-      return false;
-    } else if (typeof targetPage == 'number' && targetPage >= 0) {
-      this.setProperty('page' , targetPage );
-    } else {
-      throw "InvalidPage";
-    }
-  },
-
-  pageStartingAt: function(page,outsideCallback) {
-    if(this.setPageStartingAt(page) !== false) {
-      return this.doQuery(outsideCallback);
-    } else {
-      return false;
-    }
-  },
-
-  // Sets the page size
-  setPageSize: function(pageSize) {
-    this.setProperty('pageSize', pageSize);
-  },
-
-  // sets _pageSize to pageSize, and gets the first page of results
-  initPage: function(pageSize,outsideCallback) {
-    if (pageSize == this.getProperty('pageSize') && this.getProperty('page') == 0) {
-      return false;
-    } else if (typeof pageSize == 'number' && pageSize > 0) {
-      this.setProperty('page' , 0 );
-      this.setProperty('pageSize' , pageSize );
-      return this.doQuery(outsideCallback);
-    } else {
-      throw "InvalidPageSize";
-    }
-  }
-});
-
-Dashboards.registerAddIn("Query", "queryTypes", baseQuery);
-
-
-
-//Ctors:
-// Query(queryString) --> DEPRECATED
-// Query(queryDefinition{path, dataAccessId})
-// Query(path, dataAccessId)
-var cdaQuery = baseQuery.clone({
+var cdaQueryOpts = {
   name: 'cda',
   label: 'CDA Query',
   defaults: {
@@ -296,16 +25,16 @@ var cdaQuery = baseQuery.clone({
   initOpts: function (opts){
     if (typeof opts.path != 'undefined' && typeof opts.dataAccessId != 'undefined'){
       // CDA-style cd object
-      this.setProperty('file' , opts.path );
-      this.setProperty( 'id' , opts.dataAccessId );
+      this.setOption('file' , opts.path );
+      this.setOption( 'id' , opts.dataAccessId );
       if (typeof opts.sortBy == 'string' && opts.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-        this.setProperty('sortBy', opts.sortBy);
+        this.setOption('sortBy', opts.sortBy);
       }
       if(opts.pageSize != null){
-        this.setProperty('pageSize' , opts.pageSize);
+        this.setOption('pageSize' , opts.pageSize);
       }
       if(opts.outputIndexId != null){
-        this.setProperty( 'outputIdx' , opts.outputIndexId );
+        this.setOption( 'outputIdx' , opts.outputIndexId );
       }     
       } else {
         throw 'InvalidQuery';
@@ -313,18 +42,18 @@ var cdaQuery = baseQuery.clone({
   },
 
   doQuery: function(outsideCallback){
-    if (typeof this.getProperty('successCallback') != 'function') {
+    if (typeof this.getOption('successCallback') != 'function') {
       throw 'QueryNotInitialized';
     }
-    var url = this.getProperty('url'),
-        callback = (outsideCallback ? outsideCallback : this.getProperty('successCallback')),
-        errorCallback = this.getProperty('errorCallback') ,
+    var url = this.getOption('url'),
+        callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
+        errorCallback = this.getOption('errorCallback') ,
         queryDefinition = this.buildQueryDefinition(),
         myself = this;
     
     var successHandler = function(json) {
-      myself.setProperty('lastResultSet' , json );
-      var clone = $.extend(true,{}, myself.getProperty('lastResultSet') );
+      myself.setOption('lastResultSet' , json );
+      var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
       callback(clone);
     };
     var errorHandler = function(resp, txtStatus, error ) {      
@@ -333,7 +62,7 @@ var cdaQuery = baseQuery.clone({
       }
     };
 
-    var settings = _.extend({}, this.getProperty('ajaxOptions'), {
+    var settings = _.extend({}, this.getOption('ajaxOptions'), {
       data: queryDefinition,
       url: url,
       success: successHandler,
@@ -347,7 +76,7 @@ var cdaQuery = baseQuery.clone({
     overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
     var queryDefinition = {};
     
-    var cachedParams = this.getProperty('params'),
+    var cachedParams = this.getOption('params'),
         params = $.extend( {}, cachedParams , overrides);
 
     _.each( params , function (value, name) {
@@ -362,12 +91,12 @@ var cdaQuery = baseQuery.clone({
       }
       queryDefinition['param' + name] = value;
     });
-    queryDefinition.path = this.getProperty('file');
-    queryDefinition.dataAccessId = this.getProperty('id');
-    queryDefinition.outputIndexId = this.getProperty('outputIdx');
-    queryDefinition.pageSize = this.getProperty('pageSize');
-    queryDefinition.pageStart = this.getProperty('page');
-    queryDefinition.sortBy = this.getProperty('sortBy');
+    queryDefinition.path = this.getOption('file');
+    queryDefinition.dataAccessId = this.getOption('id');
+    queryDefinition.outputIndexId = this.getOption('outputIdx');
+    queryDefinition.pageSize = this.getOption('pageSize');
+    queryDefinition.pageStart = this.getOption('page');
+    queryDefinition.sortBy = this.getOption('sortBy');
     return queryDefinition;
   },
 
@@ -413,21 +142,21 @@ var cdaQuery = baseQuery.clone({
       type:'POST',
       async: false,
       data: queryDefinition,
-      url: this.getProperty('url'),
+      url: this.getOption('url'),
       success: successCallback
     });
   },
 
   setAjaxOptions: function(newOptions) {
     if(typeof newOptions == "object") {
-      _.extend( this.getProperty('ajaxOptions') , newOptions);
+      _.extend( this.getOption('ajaxOptions') , newOptions);
     }
   },
 
   fetchData: function(params, successCallback, errorCallback) {
     switch(arguments.length) {
       case 0:
-        if( this.getProperty('params') &&  this.getProperty('successCallback') ) {
+        if( this.getOption('params') &&  this.getOption('successCallback') ) {
           return this.doQuery();
         }
         break;
@@ -438,26 +167,26 @@ var cdaQuery = baseQuery.clone({
            */
           return this.doQuery(arguments[0]);
         } else if( arguments[0] instanceof Array){
-          this.setProperty('params' , arguments[0] );
+          this.setOption('params' , arguments[0] );
           return this.doQuery();
         }
         break;
       case 2:
         if (typeof arguments[0] == "function"){
           this.setParameter( arguments[0] );
-          this.setProperty('errorCallback'  , arguments[1] );
+          this.setOption('errorCallback'  , arguments[1] );
           return this.doQuery();
         } else {
-          this.setProperty('params' , arguments[0] );
-          this.setProperty('successCallback' , arguments[1] );
+          this.setOption('params' , arguments[0] );
+          this.setOption('successCallback' , arguments[1] );
           return this.doQuery();
         }
         break;
       default:
         /* We're just going to discard anything over two params */
-        this.setProperty('params' , params );
-        this.setProperty('successCallback' , successCallback );
-        this.setProperty('errorCallback' , errorCallback );
+        this.setOption('params' , params );
+        this.setOption('successCallback' , successCallback );
+        this.setOption('errorCallback' , errorCallback );
         return this.doQuery();
     }
     /* If we haven't hit a return by this time,
@@ -517,17 +246,17 @@ var cdaQuery = baseQuery.clone({
      */
     var same;
     if (newSort instanceof Array) {
-      same = newSort.length != this.getProperty('sortBy').length;
+      same = newSort.length != this.getOption('sortBy').length;
       $.each(newSort,function(i,d){
-        same = (same && d == this.getProperty('sortBy')[i]);
+        same = (same && d == this.getOption('sortBy')[i]);
         if(!same) {
           return false;
         }
       });
     } else {
-      same = (newSort === this.getProperty('sortBy'));
+      same = (newSort === this.getOption('sortBy'));
     }
-    this.setProperty('sortBy' , newSort);
+    this.setOption('sortBy' , newSort);
     return !same;
   },
 
@@ -538,14 +267,14 @@ var cdaQuery = baseQuery.clone({
     var changed = this.setSortBy(sortBy);
     if (!changed) {
       return false;
-    } else if ( this.getProperty('successCallback') !== null) {
+    } else if ( this.getOption('successCallback') !== null) {
       return this.doQuery(outsideCallback);
     }
   }
 
-});
+};
 
-Dashboards.registerAddIn("Query", "queryTypes", cdaQuery );
+Dashboards.registerQuery("Base", "cda", cdaQueryOpts );
 
 
 
