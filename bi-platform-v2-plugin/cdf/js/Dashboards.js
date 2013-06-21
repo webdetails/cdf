@@ -4008,15 +4008,18 @@ Dashboards.safeClone = function(){
         page: 0,
         pageSize: 0
       },
-      constructor: function (_instance, _static){
-        this.base(_instance, _static);
+      constructor: function (options){
+        this.initOpts(options);
       }
     },
     {
-      getProperty: function (prop){
+      initOpts: function (opts){
+        // Override
+      },
+      getOption: function (prop){
         return this.defaults[prop];
       },
-      setProperty: function (prop, value){
+      setOption: function (prop, value){
         this.defaults[prop] = value;
       },
       doQuery: function (outerCallback){ 
@@ -4034,25 +4037,25 @@ Dashboards.safeClone = function(){
 
       // Result caching
       lastResults: function(){
-        if ( this.getProperty('lastResultSet') !== null) {
-          return $.extend(true,{}, this.getProperty('lastResultSet') );
+        if ( this.getOption('lastResultSet') !== null) {
+          return $.extend(true,{}, this.getOption('lastResultSet') );
         } else {
           throw "NoCachedResults";
         }
       },
       reprocessLastResults: function(outerCallback){
-        if ( this.getProperty('lastResultSet') !== null) {
-          var clone = $.extend(true,{}, this.getProperty('lastResultSet') );
-          var callback = outerCallback || this.getProperty('successCallback') ;
+        if ( this.getOption('lastResultSet') !== null) {
+          var clone = $.extend(true,{}, this.getOption('lastResultSet') );
+          var callback = outerCallback || this.getOption('successCallback') ;
           return callback(clone);
         } else {
           throw "NoCachedResults";
         }
       },
       reprocessResults: function(outsideCallback) {
-        if ( this.getProperty('lastResultSet') !== null) {
-          var clone = $.extend(true,{}, this.getProperty('lastResultSet') );
-          var callback = (outsideCallback ? outsideCallback : this.getProperty('successCallback'));
+        if ( this.getOption('lastResultSet') !== null) {
+          var clone = $.extend(true,{}, this.getOption('lastResultSet') );
+          var callback = (outsideCallback ? outsideCallback : this.getOption('successCallback'));
           callback( clone );
         } else {
           throw "NoCachedResults";
@@ -4067,13 +4070,13 @@ Dashboards.safeClone = function(){
     },
 
     setParameters: function (params) {
-      this.setProperty('params', params);
+      this.setOption('params', params);
     },
     setCallback: function(callback) {
-      this.setProperty('successCallback' , callback);
+      this.setOption('successCallback' , callback);
     },
     setErrorCallback: function(callback) {
-      this.setProperty('errorCallback', callback);
+      this.setOption('errorCallback', callback);
     },
 
     /* Pagination
@@ -4085,11 +4088,11 @@ Dashboards.safeClone = function(){
 
     // Gets the next _pageSize results
     nextPage: function(outsideCallback) {
-      var page = this.getProperty('page'),
-          pageSize = this.getProperty('pageSize');
+      var page = this.getOption('page'),
+          pageSize = this.getOption('pageSize');
       if ( pageSize > 0) {
         page += pageSize;
-        this.setProperty('page' , page );
+        this.setOption('page' , page );
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPageSize";
@@ -4097,14 +4100,14 @@ Dashboards.safeClone = function(){
     },
     // Gets the previous _pageSize results
     previousPage: function(outsideCallback) {
-      var page = this.getProperty('page'),
-          pageSize = this.getProperty('pageSize');
+      var page = this.getOption('page'),
+          pageSize = this.getOption('pageSize');
       if (page > pageSize) {
         page -= pageSize;
-        this.setProperty('page' , page );
+        this.setOption('page' , page );
         return this.doQuery(outsideCallback);
       } else if (_pageSize > 0) {
-        this.setProperty('page' , 0 );
+        this.setOption('page' , 0 );
         return this.doQuery(outsideCallback);
       } else {
         throw "AtBeggining";
@@ -4112,12 +4115,12 @@ Dashboards.safeClone = function(){
     },
     // Gets the page-th set of _pageSize results (0-indexed)
     getPage: function( targetPage, outsideCallback) {
-      var page = this.getProperty('page'),
-          pageSize = this.getProperty('pageSize');
+      var page = this.getOption('page'),
+          pageSize = this.getOption('pageSize');
       if (targetPage * pageSize == page) {
         return false;
       } else if (typeof targetPage == 'number' && targetPage >= 0) {
-        this.setProperty('page' , targetPage * pageSize );
+        this.setOption('page' , targetPage * pageSize );
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPage";
@@ -4126,10 +4129,10 @@ Dashboards.safeClone = function(){
 
     // Gets pageSize results starting at page
     setPageStartingAt: function(targetPage) {
-      if (targetPage == this.getProperty('page')) {
+      if (targetPage == this.getOption('page')) {
         return false;
       } else if (typeof targetPage == 'number' && targetPage >= 0) {
-        this.setProperty('page' , targetPage );
+        this.setOption('page' , targetPage );
       } else {
         throw "InvalidPage";
       }
@@ -4145,16 +4148,16 @@ Dashboards.safeClone = function(){
   
     // Sets the page size
     setPageSize: function(pageSize) {
-      this.setProperty('pageSize', pageSize);
+      this.setOption('pageSize', pageSize);
     },
   
     // sets _pageSize to pageSize, and gets the first page of results
     initPage: function(pageSize,outsideCallback) {
-      if (pageSize == this.getProperty('pageSize') && this.getProperty('page') == 0) {
+      if (pageSize == this.getOption('pageSize') && this.getOption('page') == 0) {
         return false;
       } else if (typeof pageSize == 'number' && pageSize > 0) {
-        this.setProperty('page' , 0 );
-        this.setProperty('pageSize' , pageSize );
+        this.setOption('page' , 0 );
+        this.setOption('pageSize' , pageSize );
         return this.doQuery(outsideCallback);
       } else {
         throw "InvalidPageSize";
@@ -4174,7 +4177,7 @@ Dashboards.safeClone = function(){
     // Registers a new query factory with a custom class
     this.queryFactories.register(type, name, function (container, config){
       return new QueryClass(config);
-    }));
+    });
   };
 
   Dashboards.hasQuery = function(type, name){
