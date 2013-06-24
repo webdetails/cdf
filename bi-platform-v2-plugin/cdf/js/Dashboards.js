@@ -2814,7 +2814,6 @@ Dashboards.safeClone = function(){
 // OPTIONS MANAGER end
 
 
-// QUERIES begin
 
 (function (){
 
@@ -2829,8 +2828,14 @@ Dashboards.safeClone = function(){
         page: 0,
         pageSize: 0
       },
-      constructor: function (options){
-        this.initOpts(options);
+      constructor: function (config ){
+        this.base(config);
+        // TODO: Rewrite this later. Right now just want it to work, somehow
+        if ( Dashboards && Dashboards.OptionsManager ) {
+          this._optionsManager = new Dashboards.OptionsManager( this );
+          this._optionsManager.mixin( this );
+        }
+        this.initOpts(config);
       }
     },
     {
@@ -2986,14 +2991,11 @@ Dashboards.safeClone = function(){
     }
   });
 
-  BaseQuery.implement( Dashboards.OptionsManager );
-
-
 
   Dashboards.queryFactories = new Dashboards.Container ();
 
   Dashboards.registerQuery = function(type, name, _instance, _static){
-    var QueryClass = BaseQuery.extend(_instance, _static);
+    var QueryClass = BaseQuery.extend( _instance, _static );
 
     // Registers a new query factory with a custom class
     this.queryFactories.register(type, name, function (container, config){
