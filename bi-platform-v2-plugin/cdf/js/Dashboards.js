@@ -2815,6 +2815,8 @@ Dashboards.safeClone = function(){
 
 
 
+// QUERIES begin
+
 (function (){
 
   var BaseQuery = Base.extend(
@@ -2826,7 +2828,12 @@ Dashboards.safeClone = function(){
         errorCallback: Dashboards.handleServerError,
         lastResultSet: null,
         page: 0,
-        pageSize: 0
+        pageSize: 0,
+        params: {}
+      },
+      interfaces:{
+        params: { reader:'propertiesObject', validator:'isObjectOrPropertiesArray'}
+
       },
       constructor: function (config ){
         this.base(config);
@@ -3008,6 +3015,11 @@ Dashboards.safeClone = function(){
   };
 
   Dashboards.getQuery = function(type, name, opts){
+    if ( _.isObject(type) ) {
+      opts = type;
+      type = opts.queryGroup || 'Base';
+      name = opts.queryType || 'cda';
+    }
     var query = this.queryFactories.getNew(type, name, opts);
     return query;
   };
