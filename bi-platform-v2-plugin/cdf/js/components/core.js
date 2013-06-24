@@ -541,7 +541,7 @@ var CommentsComponent = BaseComponent.extend({
         "click .cancelComment": "cancelComment",
         "click .navigatePrevious": "navigatePrevious",
         "click .navigateNext": "navigateNext",
-        "click .navigateRefresh": "navigateRefresh",
+        "click .navigateRefresh": "navigateRefresh"
       },
 
       initialize: function(collection){
