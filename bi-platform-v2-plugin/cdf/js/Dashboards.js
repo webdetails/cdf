@@ -1908,8 +1908,6 @@ Dashboards.objectToPropertiesArray = function(obj) {
  *
  * @return {boolean} indicates if the traversal was complete, <tt>true</tt>,
  *   or if explicitly stopped by the traversal function, <tt>false</tt>.
- *
- * @static
  */
 Dashboards.eachValuesArray = function(values, opts, f, x) {
   if(typeof opts === 'function') {
@@ -1982,7 +1980,7 @@ Dashboards.parseMultipleValues = function(value) {
  * @static
  */
 Dashboards.normalizeValue = function(value) {
-  if(value === '' || value == null) { return null }
+  if(value === '' || value == null) { return null; }
   if(this.isArray(value) && !value.length) return null;
   return value;
 };
