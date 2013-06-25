@@ -59,9 +59,10 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
   //defaultIfEmpty: [false]
   //isMultiple: [true]
-  //size: if multiple, default is the number of possible values
+  //size: when isMultiple==true, the default value is the number of possible values
   //externalPlugin:
   //extraOptions:
+  //changeMode: ['immediate'], 'focus'
 
   draw: function(myArray) {
     var ph = $("#" + this.htmlObject);
@@ -202,8 +203,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
    */
   _listenElement: function(elem) {
     var me = this;
-    //Dashboards.log("changeMode: immediate trigger: " + me._changeTrigger());
-
+    
     var prevValue = me.getValue();
     var check = function() {
       var currValue = me.getValue();
@@ -213,12 +213,40 @@ var SelectBaseComponent = InputBaseComponent.extend({
       }
     };
 
-    $("select", elem).on(me._changeTrigger(), check);
+    $("select", elem)
+      .on(me._changeTrigger(), check)
+      .keypress(function(ev) { if(ev.which === 13) { check(); } });
   },
 
   /**
-   * Obtains the appropriate jQuery event name
-   * for testing if changes have occured.
+   * Obtains the change mode to use.
+   * 
+   * <p>
+   * The default implementation normalizes, validates and defaults
+   * the change mode value.
+   * </p>
+   *
+   * @return {!string} one of values: <tt>'immediate'</tt> or <tt>'focus'</tt>.
+   */
+  _getChangeMode: function() {
+    var changeMode = this.changeMode;
+    if(changeMode) {
+      changeMode = changeMode.toLowerCase();
+      switch(changeMode) {
+        case 'immediate':
+        case 'focus': return changeMode;
+
+        default: 
+          Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
+      }
+    }
+    return 'immediate';
+  },
+
+  /**
+   * Obtains an appropriate jQuery event name
+   * for when testing for changes is done.
+   * 
    * @return {!string} the name of the event.
    */
   _changeTrigger: function() {
@@ -246,21 +274,21 @@ var SelectBaseComponent = InputBaseComponent.extend({
      *       A "focusout" event is fired when it should...
      *   </li>
      * </ul>
+     *
+     * | Change mode: | Immediate  | Focus    |
+     * +--------------+------------+----------+
+     * | Desktop      | change     | focusout |
+     * | iPad         | change     | focusout |
+     * | Android      | change *   | change   |
+     *
+     * (*) this is the most immediate that android can do
+     *     resulting in Immediate = Focus
+     *
+     *  On mobile devices the Done/OK is equiparated with the
+     *  behavior of focus out and of the ENTER key.
      */
-    return (/ipad|iphone/i).test(navigator.userAgent) ? 'focusout' : 'change';
-  },
-
-  /**
-   * Indicates if the user agent
-   * <p>A dialog may be shown even if {@link #isMultiple} is <tt>false</tt>.</p>
-   * <p>
-   * iPad/iPhone already show up a dialog for choosing between multiple options,
-   * with an ok button with it.
-   * </p>
-   * @return {boolean}
-   */
-  _hasValuesChoiceDialog: function() {
-    return (/ipad|iphone/i).test(navigator.userAgent);
+    if(this._getChangeMode() === 'immediate') { return 'change'; }
+    return (/android/i).test(navigator.userAgent) ? 'change' : 'focusout';
   }
 });
 
@@ -272,25 +300,34 @@ var SelectComponent = SelectBaseComponent.extend({
 });
 
 var SelectMultiComponent = SelectBaseComponent.extend({
-  // These apply to isMultiple only:
-  // changeMode: {['immediate'], 'timeout-focus'}
-  // changeTimeout: [1500] // in ms - applies only to changeMode ='timeout-focus'
-
   getValue : function() {
     var ph = $("#"+this.htmlObject + " select");
     var val = ph.val();
     return val == null ? [] : val;
   },
 
-  /** @override */
+
+  /**
+   * Obtains the normalized and defaulted value of
+   * the {@link #isMultiple} option.
+   * 
+   * @override
+   * @return {boolean}
+   */
   _allowMultipleValues: function() {
-    return this.isMultiple == null || this.isMultiple;
+    return this.isMultiple == null || !!this.isMultiple;
   },
 
-  /** @override */
+  /**
+   * When the size option is unspecified,
+   * and multiple values are allowed,
+   * returns the number of items in the
+   * provided possible values list.
+   * 
+   * @override
+   */
   _getListSize: function(values) {
     var size = this.base(values);
-
     if(size == null) {
       if(!this._allowMultipleValues()) {
         size = values.length;
@@ -298,87 +335,6 @@ var SelectMultiComponent = SelectBaseComponent.extend({
     }
 
     return size;
-  },
-
-  /**
-   * Obtains the change mode to use.
-   * <p>
-   * The default implementation takes into account
-   * the result of {@link #_allowMultipleValues},
-   * the desired {@link #changeMode} and
-   * the current user agent.
-   * </p>
-   * @return {!string} one of values: <tt>'immediate'</tt> or <tt>'timeout-focus'</tt>.
-   */
-  _getChangeMode: function() {
-    if(this._allowMultipleValues()) {
-      var changeMode = this.changeMode;
-      if(changeMode) {
-        changeMode = changeMode.toLowerCase();
-        switch(changeMode) {
-          case 'immediate':
-            return changeMode;
-
-          case 'timeout-focus':
-            // Mobile devices don't need/go-well-with the timeout mode.
-            // They show a value selection popup and it would be confusing
-            // to fire a change, on timeout, while still
-            // having a popup with an OK button open.
-            // Fall-back to immediate mode.
-            if((/ipad|iphone|android/i).test(navigator.userAgent)) { break; }
-
-            return changeMode;
-
-          default:
-            Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
-        }
-      }
-    }
-
-    // assume default
-    return 'immediate';
-  },
-
-  /** @override */
-  _listenElement: function(elem) {
-    var me = this;
-    var changeMode = me._getChangeMode();
-    if(changeMode === 'immediate') {
-      me.base(elem);
-    } else if(changeMode === 'timeout-focus') {
-      //Dasboards.log("changeMode: " + changeMode + " trigger: /NA");
-      var prevValue = me.getValue();
-
-      var changeTimeout = Math.max(100, me.changeTimeout || 1500);
-      var timeoutHandle;
-
-      var stop = function() {
-        if(timeoutHandle != null) {
-          clearTimeout(timeoutHandle);
-          timeoutHandle = null;
-        }
-      };
-
-      var renew = function() {
-        stop();
-        timeoutHandle = setTimeout(check, changeTimeout);
-      };
-
-      var check = function() {
-        stop();
-
-        var currValue = me.getValue();
-        if(!Dashboards.equalValues(prevValue, currValue)) {
-          prevValue = currValue;
-          Dashboards.processChange(me.name);
-        }
-      };
-
-      $("select", elem)
-        .change(renew)
-        .keypress(function(ev) { if(ev.which === 13) { check(); } })
-        .focusout(check);
-    }
   }
 });
 
