@@ -3682,6 +3682,7 @@ sprintf = sprintfWrapper.init;
 // CONTAINER end 
 
 
+
 // ADDINS begin
 ;(function (D){
   D.addIns = new D.Container ();
@@ -3995,15 +3996,13 @@ Dashboards.safeClone = function(){
 
 
 // QUERIES begin
+(function (D){
 
+  D.queryFactories = new D.Container ();
 
-(function (){
-
-  Dashboards.queryFactories = new Dashboards.Container ();
-
-  Dashboards.registerQuery = function(type, query){
+  D.registerQuery = function(type, query){
     var QueryClass  = ( _.isFunction(query) && query ) || 
-          ( _.isObject(query) && Dashboards.BaseQuery.extend(query) );
+          ( _.isObject(query) && this.BaseQuery.extend(query) );
  
     // Registers a new query factory with a custom class
     this.queryFactories.register('Query', type, function (container, config){
@@ -4011,11 +4010,11 @@ Dashboards.safeClone = function(){
     });
   };
 
-  Dashboards.hasQuery = function(type){
+  D.hasQuery = function(type){
     return Boolean(this.queryFactories && this.queryFactories.has('Query', type));
   };
 
-  Dashboards.getQuery = function(type, opts){
+  D.getQuery = function(type, opts){
     if ( _.isObject(type) ) {
       opts = type;
       type = opts.queryType || 'cda';
@@ -4024,11 +4023,10 @@ Dashboards.safeClone = function(){
     return query;
   };
 
-  Dashboards.listQueries = function() {
+  D.listQueries = function() {
     return this.queryFactories.getAll('Query');
   };
-
-})();
+})(Dashboards);
 
 
 /*
@@ -4060,7 +4058,6 @@ Query = function( cd, dataAccessId ) {
 
   return Dashboards.getQuery(queryType, opts);
 };
-
 // QUERIES end
 
 
