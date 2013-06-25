@@ -2825,18 +2825,17 @@ Dashboards.safeClone = function(){
     return _BaseQuery;
   };
   D.setBaseQuery = function ( QueryClass ){
-    if ( _.isFunction(QueryClass) ){
+    if ( _.isFunction(QueryClass) && QueryClass.extend ){
       _BaseQuery = QueryClass;
     }
   };
-
 
   D.queryFactories = new D.Container ();
 
   D.registerQuery = function(type, query){
     var BaseQuery = this.getBaseQuery(),
         QueryClass  = ( _.isFunction(query) && query ) || 
-          ( _.isObject(query) && BaseQuery.extend && BaseQuery.extend(query) ) || Base;
+          ( _.isObject(query) && BaseQuery.extend(query) );
  
     // Registers a new query factory with a custom class
     this.queryFactories.register('Query', type, function (container, config){
