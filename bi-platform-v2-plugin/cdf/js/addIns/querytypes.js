@@ -153,48 +153,6 @@ var cdaQueryOpts = {
     }
   },
 
-  fetchData: function(params, successCallback, errorCallback) {
-    switch(arguments.length) {
-      case 0:
-        if( this.getOption('params') &&  this.getOption('successCallback') ) {
-          return this.doQuery();
-        }
-        break;
-      case 1:
-        if (typeof arguments[0] == "function"){
-          /* If we're receiving _only_ the callback, we're not
-           * going to change the internal callback
-           */
-          return this.doQuery(arguments[0]);
-        } else if( arguments[0] instanceof Array){
-          this.setOption('params' , arguments[0] );
-          return this.doQuery();
-        }
-        break;
-      case 2:
-        if (typeof arguments[0] == "function"){
-          this.setParameter( arguments[0] );
-          this.setOption('errorCallback'  , arguments[1] );
-          return this.doQuery();
-        } else {
-          this.setOption('params' , arguments[0] );
-          this.setOption('successCallback' , arguments[1] );
-          return this.doQuery();
-        }
-        break;
-      default:
-        /* We're just going to discard anything over two params */
-        this.setOption('params' , params );
-        this.setOption('successCallback' , successCallback );
-        this.setOption('errorCallback' , errorCallback );
-        return this.doQuery();
-    }
-    /* If we haven't hit a return by this time,
-     * the user gave us some wrong input
-     */
-    throw "InvalidInput";
-  },
-
   /* Sorting
    *
    * CDA expects an array of terms consisting of a number and a letter
@@ -275,6 +233,91 @@ var cdaQueryOpts = {
 };
 
 Dashboards.registerQuery( "cda", cdaQueryOpts );
+
+
+
+var cpkEndpointOpts = {
+  name: "cpk",
+  label: "CPK",
+  defaults: {
+    baseUrl: '/pentaho/content',
+    pluginId: '',
+    endpoint: '',
+    systemParams: {},
+    ajaxOptions: {
+      dataType:'json'
+    }
+  },
+
+  initOpts: function (opts){
+      if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
+        this.setOption('pluginId' , opts.pluginId);
+        this.setOption('endpoint' , opts.endpoint);
+      }
+  },
+  
+  doQuery: function(outsideCallback){
+    if (typeof this.getOption('successCallback') != 'function') {
+      throw 'QueryNotInitialized';
+    }
+    var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
+        url = urlArray.join('/') ,
+        callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
+        errorCallback = this.getOption('errorCallback') ,
+        queryDefinition = this.buildQueryDefinition(),
+        myself = this;
+    
+    var successHandler = function(json) {
+      myself.setOption('lastResultSet' , json );
+      var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
+      callback(clone);
+    };
+    var errorHandler = function(resp, txtStatus, error ) {      
+      if (errorCallback){
+        errorCallback(resp, txtStatus, error );
+      }
+    };
+
+    var settings = _.extend({}, this.getOption('ajaxOptions'), {
+      data: queryDefinition,
+      url: url,
+      success: successHandler,
+      error: errorHandler 
+    });
+    
+    $.ajax(settings);
+  },
+
+  buildQueryDefinition: function(overrides) {
+    overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
+    var queryDefinition = this.getOption('systemParams');
+    
+    var cachedParams = this.getOption('params'),
+        params = $.extend( {}, cachedParams , overrides);
+
+    _.each( params , function (value, name) {
+      value = Dashboards.getParameterValue(value);
+      if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+        //special case where single element will wrongly be treated as a parseable array by cda
+        value = doCsvQuoting(value[0],';');
+      }
+      //else will not be correctly handled for functions that return arrays
+      if (typeof value == 'function') {
+        value = value();
+      }
+      queryDefinition['param' + name] = value;
+    });
+
+    return queryDefinition;
+  }
+
+  /*
+   * Public interface
+   */
+
+}
+
+Dashboards.registerQuery( "cpk", cpkEndpointOpts );
 
 
 
