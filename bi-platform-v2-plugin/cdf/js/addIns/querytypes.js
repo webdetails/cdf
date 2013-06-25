@@ -6,7 +6,7 @@
 ;
 (function() {
 
-  var BaseQuery = Dashboards.BaseQuery = Base.extend({
+  var BaseQuery = Base.extend({
     name: "baseQuery",
     label: "Base Query",
     defaults: {
@@ -221,7 +221,10 @@
       }
     }
   });
-  Dashboards.registerQuery( "base", BaseQuery );
+  // Sets the query class that can extended to create new ones. 
+  // The registered Base needs to have an extend method.
+  Dashboards.setBaseQuery ( BaseQuery );
+
 
   var CpkEndpoints = BaseQuery.extend({
     name: "cpk",

@@ -2819,11 +2819,24 @@ Dashboards.safeClone = function(){
 // QUERIES begin
 (function (D){
 
+  var _BaseQuery = Base;
+
+  D.getBaseQuery = function (){
+    return _BaseQuery;
+  };
+  D.setBaseQuery = function ( QueryClass ){
+    if ( _.isFunction(QueryClass) ){
+      _BaseQuery = QueryClass;
+    }
+  };
+
+
   D.queryFactories = new D.Container ();
 
   D.registerQuery = function(type, query){
-    var QueryClass  = ( _.isFunction(query) && query ) || 
-          ( _.isObject(query) && this.BaseQuery.extend(query) );
+    var BaseQuery = this.getBaseQuery(),
+        QueryClass  = ( _.isFunction(query) && query ) || 
+          ( _.isObject(query) && BaseQuery.extend && BaseQuery.extend(query) ) || Base;
  
     // Registers a new query factory with a custom class
     this.queryFactories.register('Query', type, function (container, config){
