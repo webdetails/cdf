@@ -12,3 +12,10 @@
 /build
 /dist
 /manifest.mf
+/bin
+override.properties
+
+#Eclipse project files
+.classpath
+.project
+.settings
