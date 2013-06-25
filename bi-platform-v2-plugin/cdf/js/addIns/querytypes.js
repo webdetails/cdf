@@ -274,7 +274,7 @@ var cdaQueryOpts = {
 
 };
 
-Dashboards.registerQuery("Base", "cda", cdaQueryOpts );
+Dashboards.registerQuery( "cda", cdaQueryOpts );
 
 
 

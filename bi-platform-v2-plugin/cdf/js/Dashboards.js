@@ -3001,31 +3001,30 @@ Dashboards.safeClone = function(){
 
   Dashboards.queryFactories = new Dashboards.Container ();
 
-  Dashboards.registerQuery = function(type, name, _instance, _static){
+  Dashboards.registerQuery = function(type, _instance, _static){
     var QueryClass = BaseQuery.extend( _instance, _static );
 
     // Registers a new query factory with a custom class
-    this.queryFactories.register(type, name, function (container, config){
+    this.queryFactories.register('Query', type, function (container, config){
       return new QueryClass(config);
     });
   };
 
-  Dashboards.hasQuery = function(type, name){
-    return Boolean(this.queryFactories && this.queryFactories.has(type, name));
+  Dashboards.hasQuery = function(type){
+    return Boolean(this.queryFactories && this.queryFactories.has('Query', type));
   };
 
-  Dashboards.getQuery = function(type, name, opts){
+  Dashboards.getQuery = function(type, opts){
     if ( _.isObject(type) ) {
       opts = type;
-      type = opts.queryGroup || 'Base';
-      name = opts.queryType || 'cda';
+      type = opts.queryType || 'cda';
     }
-    var query = this.queryFactories.getNew(type, name, opts);
+    var query = this.queryFactories.getNew('Query', type, opts);
     return query;
   };
 
-  Dashboards.listQueries = function(type) {
-    return this.queryFactories.getAll(type);
+  Dashboards.listQueries = function() {
+    return this.queryFactories.getAll('Query');
   };
 
 })();
@@ -3043,7 +3042,7 @@ Dashboards.safeClone = function(){
 // Query(path, dataAccessId)
 Query = function( cd, dataAccessId ) {
 
-  var opts, queryType;
+  var opts, queryType, queryGroup;
 
   if( typeof cd == 'object'){
     opts = Dashboards.safeClone(true, cd);
