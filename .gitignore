@@ -9,3 +9,13 @@ bi-platform-v2-plugin/lib/
 bi-platform-v2-plugin/runtime-lib/
 solution/system/
 /nbproject/private/
+/build
+/dist
+/manifest.mf
+/bin
+override.properties
+
+#Eclipse project files
+.classpath
+.project
+.settings
