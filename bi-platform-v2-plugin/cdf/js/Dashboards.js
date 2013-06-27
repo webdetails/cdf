@@ -2526,6 +2526,8 @@ Query = function() {
   var _page = 0;
   var _pageSize = 0;
   var _sortBy = "";
+  // search box value
+  var _paramsearchBox = "";
   // Exporting support
   var _exportIframe = null;
   var _params = [];
@@ -2679,6 +2681,7 @@ Query = function() {
     queryDefinition.pageSize = _pageSize;
     queryDefinition.pageStart = _page;
     queryDefinition.sortBy = _sortBy;
+    queryDefinition.paramsearchBox = _paramsearchBox;
     return queryDefinition;
   }
 
@@ -2965,6 +2968,11 @@ Query = function() {
     } else {
       throw "InvalidPageSize";
     }
+  };
+
+  // Sets the search box value
+  this.setParamsearchBox = function(paramsearchBox) {
+      _paramsearchBox = paramsearchBox;
   };
 
   // sets _pageSize to pageSize, and gets the first page of results
