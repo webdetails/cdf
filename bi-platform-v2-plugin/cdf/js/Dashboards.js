@@ -3784,7 +3784,8 @@ Query = function() {
   var _pageSize = 0;
 
   var _sortBy = "";
-
+  // search box value
+  var _paramsearchBox = "";
   // Exporting support
 
   var _exportIframe = null;
@@ -4017,7 +4018,7 @@ Query = function() {
     queryDefinition.pageStart = _page;
 
     queryDefinition.sortBy = _sortBy;
-
+    queryDefinition.paramsearchBox = _paramsearchBox;
     return queryDefinition;
   }
 
@@ -4497,7 +4498,10 @@ Query = function() {
 
   };
 
-
+  // Sets the search box value
+  this.setParamsearchBox = function(paramsearchBox) {
+      _paramsearchBox = paramsearchBox;
+  };
 
   // sets _pageSize to pageSize, and gets the first page of results
 
