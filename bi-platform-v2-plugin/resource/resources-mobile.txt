@@ -23,7 +23,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/AddIns.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/addIns/querytypes.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/queries/coreQueries.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OlapUtils.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/json.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
