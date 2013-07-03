@@ -1,8 +1,21 @@
 /*
- Purpose: Provide extensible datasources via Dashboard Addins
- Author: Andy Grohe
- Contact: agrohe21@gmail.com
-*/
+ * queryTypes.js
+ *
+ * Registers several query types and sets the base query class.
+ * 
+ * Additional query types can be registered at any time using the Dashboards method:
+ *    Dashboards.registerQuery( name, query )
+ * The second argument, the query definition, can be one of two things:
+ *    1. An object, which will be used to extend the BaseQuery class, and the resulting class used
+ *       to create new query instances.
+ *    2. A class constructor function, which will be used directly to create new query instances
+ *       without depending on BaseQuery.
+ *
+ * Additionally, the BaseQuery class can be set to something other than the default by using:
+ *    Dashboards.setBaseQuery( constructor )
+ * but this is a risky operation which considerable implications. Use at your own risk!
+ *
+ */
 ;
 (function() {
 
