@@ -3552,6 +3552,9 @@ sprintf = sprintfWrapper.init;
         this.getAll    = function(type) { return getAll(type, false); };
         this.tryGetAll = function(type) { return getAll(type, true ); };
 
+        this.listType = function(type) { return getType(type,false); };
+        this.tryListType = function(type) { return getType(type,true); };
+
         this.dispose = function() {
             if(_typesTable) {
                 for(var type in _typesTable) {
@@ -3605,7 +3608,7 @@ sprintf = sprintfWrapper.init;
 
             // Can't store as singletons instances with special config params
             if(config) { isNew = true;  } else
-            if(!isNew) { config = null; }
+            if(!isNew) { config = {}; }
 
             return holder ? holder.build(config, isNew) : null;
         }
@@ -3616,7 +3619,7 @@ sprintf = sprintfWrapper.init;
             // Includes the default (unnamed) instance
             var instances = [];
             for(var name in holdersByName) {
-                instances.push(holdersByName[name].build(null, false));
+                instances.push(holdersByName[name].build({}, false));
             }
             return instances;
         }
@@ -3729,7 +3732,7 @@ sprintf = sprintfWrapper.init;
   var type = this.normalizeAddInKey(type, subType);
     var addInList = [];
     try {
-      return this.addIns.getAll(type);
+      return this.addIns.listType(type);
     } catch (e) {
       return [];
     }
@@ -4024,7 +4027,7 @@ Dashboards.safeClone = function(){
   };
 
   D.listQueries = function() {
-    return this.queryFactories.getAll('Query');
+    return _.keys( this.queryFactories.listType('Query') );
   };
 })(Dashboards);
 
