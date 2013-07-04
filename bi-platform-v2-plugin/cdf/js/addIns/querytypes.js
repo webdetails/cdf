@@ -534,7 +534,8 @@
     label: "XMLA",
     datasource: {}, //cache the datasource as there should be only one xmla server
     defaults: {
-      url: webAppPath + "/Xmla" //defaults to Pentaho's Mondrian servlet. can be overridden in options
+      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction",
+      query:{}
     },
     getDataSources: function(){
       xmla.xmla = new Xmla({
@@ -626,22 +627,9 @@
   };
   // Dashboards.registerQuery("xmla",  xmlaQueryOpts );
 
-
-  var legacyOpts = {
-    name: "legacy",
-    label: "Legacy",
-    defaults: {
-      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction"
-    },    
-    
-    implementation: function (tgt, st, opt) {
-      //uses the legacy way with json.values array
-      $.post(opt.url, st, function(json) {
-        json = eval("(" + json + ")");
-        _lastResultSet = json;
-        var clone = $.extend(true,{},_lastResultSet);
-        opt.callback({metadata:{}, resultset:clone.values});
-      });
+    //TODO: is this enough?
+    buildQueryDefinition: function(overrides) {
+      return _.extend({}, this.get('query'), overrides);
     }
   };
   // Dashboards.registerQuery( "legacy", legacyOpts );
