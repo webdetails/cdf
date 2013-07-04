@@ -527,7 +527,8 @@
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction"
+      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction",
+      query:{}
     },
     interfaces:{
       lastResultSet:{
@@ -542,26 +543,9 @@
       }
     },
 
+    //TODO: is this enough?
     buildQueryDefinition: function(overrides) {
-      overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
-      
-      var cachedParams = this.getOption('params'),
-          params = $.extend( {}, cachedParams , overrides);
-
-      _.each( params , function (value, name) {
-        value = Dashboards.getParameterValue(value);
-        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-          //special case where single element will wrongly be treated as a parseable array by cda
-          value = doCsvQuoting(value[0],';');
-        }
-        //else will not be correctly handled for functions that return arrays
-        if (typeof value == 'function') {
-          value = value();
-        }
-        queryDefinition['param' + name] = value;
-      });
-
-      return queryDefinition;
+      return _.extend({}, this.get('query'), overrides);
     }
 
   };
