@@ -28,7 +28,9 @@
       lastResultSet: null,
       page: 0,
       pageSize: 0,
-      params: {}
+      params: {},
+      ajaxOptions: {},
+      url: ''
     },
     interfaces:{
       params: { reader:'propertiesObject', validator:'isObjectOrPropertiesArray'},
@@ -39,7 +41,6 @@
     },
     constructor: function (config ){
       this.base(config);
-      // TODO: Rewrite this later. Right now just want it to work, somehow
       if ( Dashboards && Dashboards.OptionsManager ) {
         this._optionsManager = new Dashboards.OptionsManager( this );
         this._optionsManager.mixin( this );
@@ -48,16 +49,45 @@
     },
     // Default options interface in case there is no options manager defined.
     getOption: function (prop){
+      // Fallback for when Dashboards.OptionManager is not available
       return this.defaults[prop];
     },
     setOption: function (prop, value){
+      // Fallback for when Dashboards.OptionManager is not available
       this.defaults[prop] = value;
     },
     init: function (opts){
       // Override
     },
-    doQuery: function (outerCallback){ 
-      // Override 
+    doQuery: function(outsideCallback){
+      if (typeof this.getOption('successCallback') != 'function') {
+        throw 'QueryNotInitialized';
+      }
+      var url = this.getOption('url'),
+          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
+          errorCallback = this.getOption('errorCallback') ,
+          queryDefinition = this.buildQueryDefinition(),
+          myself = this;
+      
+      var successHandler = function(json) {
+        myself.setOption('lastResultSet' , json );
+        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
+        callback(clone);
+      };
+      var errorHandler = function(resp, txtStatus, error ) {      
+        if (errorCallback){
+          errorCallback(resp, txtStatus, error );
+        }
+      };
+
+      var settings = _.extend({}, this.getOption('ajaxOptions'), {
+        data: queryDefinition,
+        url: url,
+        success: successHandler,
+        error: errorHandler 
+      });
+      
+      $.ajax(settings);
     },
     exportData: function() {
       // Override 
@@ -256,39 +286,10 @@
         if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
           this.setOption('pluginId' , opts.pluginId);
           this.setOption('endpoint' , opts.endpoint);
+          var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
+              url = urlArray.join('/');
+          this.setOption('url', url );
         }
-    },
-    
-    doQuery: function(outsideCallback){
-      if (typeof this.getOption('successCallback') != 'function') {
-        throw 'QueryNotInitialized';
-      }
-      var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
-          url = urlArray.join('/') ,
-          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
-          errorCallback = this.getOption('errorCallback') ,
-          queryDefinition = this.buildQueryDefinition(),
-          myself = this;
-      
-      var successHandler = function(json) {
-        myself.setOption('lastResultSet' , json );
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
-        callback(clone);
-      };
-      var errorHandler = function(resp, txtStatus, error ) {      
-        if (errorCallback){
-          errorCallback(resp, txtStatus, error );
-        }
-      };
-
-      var settings = _.extend({}, this.getOption('ajaxOptions'), {
-        data: queryDefinition,
-        url: url,
-        success: successHandler,
-        error: errorHandler 
-      });
-      
-      $.ajax(settings);
     },
 
     buildQueryDefinition: function(overrides) {
@@ -321,6 +322,7 @@
   // Registering a class will use that class directly when getting new queries.
   Dashboards.registerQuery( "cpk", CpkEndpoints );
 
+
   var cdaQueryOpts = {
     name: 'cda',
     label: 'CDA Query',
@@ -350,37 +352,6 @@
         } else {
           throw 'InvalidQuery';
         }
-    },
-
-    doQuery: function(outsideCallback){
-      if (typeof this.getOption('successCallback') != 'function') {
-        throw 'QueryNotInitialized';
-      }
-      var url = this.getOption('url'),
-          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
-          errorCallback = this.getOption('errorCallback') ,
-          queryDefinition = this.buildQueryDefinition(),
-          myself = this;
-      
-      var successHandler = function(json) {
-        myself.setOption('lastResultSet' , json );
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
-        callback(clone);
-      };
-      var errorHandler = function(resp, txtStatus, error ) {      
-        if (errorCallback){
-          errorCallback(resp, txtStatus, error );
-        }
-      };
-
-      var settings = _.extend({}, this.getOption('ajaxOptions'), {
-        data: queryDefinition,
-        url: url,
-        success: successHandler,
-        error: errorHandler 
-      });
-      
-      $.ajax(settings);
     },
 
     buildQueryDefinition: function(overrides) {
@@ -546,24 +517,54 @@
   Dashboards.registerQuery( "cda", cdaQueryOpts );
 
 
+
+
+  function makeMetadataElement (idx, name, type){
+    return { "colIndex" : idx || 0, "colType" : type || "String" , "colName" : name || "Name" }
+  }
+
   var legacyOpts = {
     name: "legacy",
     label: "Legacy",
     defaults: {
       url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction"
-    },    
-    
-    implementation: function (tgt, st, opt) {
-      //uses the legacy way with json.values array
-      $.post(opt.url, st, function(json) {
-        json = eval("(" + json + ")");
-        _lastResultSet = json;
-        var clone = $.extend(true,{},_lastResultSet);
-        opt.callback({metadata:{}, resultset:clone.values});
-      });
-    }
-  };
-  // Dashboards.registerQuery( "legacy", legacyOpts );
+    },
+    interfaces:{
+      lastResultSet:{
+        reader: function (json){
+          json = eval("(" + json + ")");
+          var result = { metadata: [ makeMetadataElement(0)] , resultset:json.values || [] };
+          _.each( json.metadata , function (el, idx){
+            return result.metadata.push( makeMetadataElement(idx+1, el) );
+          });
+          return result
+        }
+      }
+    },
 
-  
+    buildQueryDefinition: function(overrides) {
+      overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
+      
+      var cachedParams = this.getOption('params'),
+          params = $.extend( {}, cachedParams , overrides);
+
+      _.each( params , function (value, name) {
+        value = Dashboards.getParameterValue(value);
+        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
+          //special case where single element will wrongly be treated as a parseable array by cda
+          value = doCsvQuoting(value[0],';');
+        }
+        //else will not be correctly handled for functions that return arrays
+        if (typeof value == 'function') {
+          value = value();
+        }
+        queryDefinition['param' + name] = value;
+      });
+
+      return queryDefinition;
+    }
+
+  };
+  Dashboards.registerQuery( "legacy", legacyOpts );
+
 })();
