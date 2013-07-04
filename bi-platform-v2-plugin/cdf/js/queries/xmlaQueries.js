@@ -130,7 +130,7 @@
           properties[Xmla.PROP_DATASOURCEINFO] = _sharedXmla.datasource[Xmla.PROP_DATASOURCEINFO];
           properties[Xmla.PROP_CATALOG]        = param.catalog;
           properties[Xmla.PROP_FORMAT]         = _sharedXmla.PROP_FORMAT_TABULAR;//Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
-          var result = _sharedXmla.execute({
+          var result = _sharedXmla.xmla.execute({
               statement: param.query(),
               properties: properties
           });
