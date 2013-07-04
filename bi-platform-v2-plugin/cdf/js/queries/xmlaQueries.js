@@ -5,44 +5,92 @@
 */
 
 (function() {
-  /*
-    XMLA Query
-    requires queryType="xmla" in chartDefintion of CDF object
-  */
-  var xmla = {
-    name: "xmla",
-    label: "XMLA",
+
+  SharedXmla = Base.extend({
     xmla: null,
     datasource: null, //cache the datasource as there should be only one xmla server
     catalogs: null,
-    defaults: {
-      url: webAppPath + "/Xmla" //defaults to Pentaho's Mondrian servlet. can be overridden in options
-    },
+
     getDataSources: function(){
       var datasourceCache = [],
-        rowset_ds = xmla.xmla.discoverDataSources();
+        rowset_ds = this.xmla.discoverDataSources();
       if (rowset_ds.hasMoreRows()) {
         datasourceCache = rowset_ds.fetchAllAsObject();
-        xmla.datasource = datasourceCache[0];
+        this.datasource = datasourceCache[0];
         rowset_ds.close();
         return;
       }
     },
     getCatalogs: function(){
         var properties = {};
-        xmla.catalogs = [], catalog = {};
-        properties[Xmla.PROP_DATASOURCEINFO] = xmla.datasource[Xmla.PROP_DATASOURCEINFO];
-        var rowset_cat = xmla.xmla.discoverDBCatalogs({
+        this.catalogs = [], catalog = {};
+        properties[Xmla.PROP_DATASOURCEINFO] = this.datasource[Xmla.PROP_DATASOURCEINFO];
+        var rowset_cat = this.xmla.discoverDBCatalogs({
             properties: properties
         });
         if (rowset_cat.hasMoreRows()) {
             while (catalog = rowset_cat.fetchAsObject()){
-              xmla.catalogs[xmla.catalogs.length] = catalog;
+              this.catalogs[this.catalogs.length] = catalog;
             }
             rowset_cat.close();
         }
     },
+    discover: function(param){
+        var properties = {}, rows =[], restrictions={}, qry=param.query(); //user must pass in valid XMLA requestTypes
+        properties[Xmla.PROP_DATASOURCEINFO] = this.datasource[Xmla.PROP_DATASOURCEINFO];
+        if (param.catalog) {
+          properties[Xmla.PROP_CATALOG] = param.catalog;
+        }
+        var rowset_discover = this.discover({properties:properties, requestType:qry});
+        return rowset_discover;
+    },
+  });
+
+  
+  var _sharedXmla = new SharedXmla();
+  var _scriptName = 'Xmla.js';
+  var _isScriptLoaded = false;
+  var _scriptLocation = '/pentaho/content/pentaho-cdf/js/queries/';
+
+
+  function loadXmlaScript (){
+    if (!_isScriptLoaded){
+      $.ajax({
+        url: _scriptLocation + _scriptName,
+        dataType: "script",
+        success: function (){
+          _isScriptLoaded = true;
+        },
+        async: false
+      });
+    }
+  }
+
+
+  /*
+    XMLA Query
+    requires queryType="xmla" in chartDefintion of CDF object
+  */
+  var xmlaOpts = {
+    name: "xmla",
+    label: "XMLA",
+    defaults: {
+      url: webAppPath + "/Xmla" //defaults to Pentaho's Mondrian servlet. can be overridden in options
+    },
     init: function(){
+      loadXmlaScript();
+      if (_sharedXmla.xmla == null) {
+        _sharedXmla.xmla = new Xmla({
+                async: false,
+                url: this.getOption('url')
+        });
+      }
+      if (_sharedXmla.datasource == null) {
+        _sharedXmla.getDataSources();
+      }
+      if (_sharedXmla.catalogs == null) {
+        _sharedXmla.getCatalogs();
+      }
     },
     transformXMLAresults: function(results){
       var rows = results.fetchAllAsArray(),
@@ -74,15 +122,15 @@
       //TODO SafeClone?
       return res;
     },
-    executeQuery: function(param, options){
+    executeQuery: function(param){
       //find the requested catalog in internal array of valid catalogs
-      for (var i=0,j=xmla.catalogs.length;i<j;i++){
-        if (xmla.catalogs[i]["CATALOG_NAME"] == param.catalog ){
+      for (var i=0,j=_sharedXmla.catalogs.length;i<j;i++){
+        if (_sharedXmla.catalogs[i]["CATALOG_NAME"] == param.catalog ){
           var properties = {};
-          properties[Xmla.PROP_DATASOURCEINFO] = xmla.datasource[Xmla.PROP_DATASOURCEINFO];
+          properties[Xmla.PROP_DATASOURCEINFO] = _sharedXmla.datasource[Xmla.PROP_DATASOURCEINFO];
           properties[Xmla.PROP_CATALOG]        = param.catalog;
-          properties[Xmla.PROP_FORMAT]         = Xmla.PROP_FORMAT_TABULAR;//Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
-          var result = xmla.xmla.execute({
+          properties[Xmla.PROP_FORMAT]         = _sharedXmla.PROP_FORMAT_TABULAR;//Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
+          var result = _sharedXmla.execute({
               statement: param.query(),
               properties: properties
           });
@@ -92,33 +140,25 @@
       //should never make it here if param.catalog is on server
       throw new Error("Catalog: " + param.catalog + " was not found on Pentaho server.");
     },
-    implementation: function (tgt, st, opt) {
-      if (xmla.xmla == null) {
-        xmla.xmla = new Xmla({
-                async: false,
-                url: xmla.defaults.url
-        });
-      }
-      if (xmla.datasource == null) {
-        xmla.getDataSources();
-      }
-      if (xmla.catalogs == null) {
-        xmla.getCatalogs();
-      }
+
+    doQuery: function(outsideCallback){
+      var url = this.getOption('url'),
+          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
+          errorCallback = this.getOption('errorCallback'),
+          params = this.getOption('params');
 
       try {      
-        var result = xmla.executeQuery(st, opt);
+        var result = this.executeQuery(params);
       } catch (e) {
         Dashboards.log('unable to execute xmla addin query: ' +e+' :', 'error')
       }
-      opt.callback(this.transformXMLAresults(result));
+      callback(this.transformXMLAresults(result));
+    
     }
+
   };
-  try {
-    Dashboards.registerAddIn("Query", "queryType", new AddIn(xmla));
-  } catch (e) {
-    Dashboards.log(e, 'error')
-  }
+  Dashboards.registerQuery("xmla", xmlaOpts );
+
 
 
 
@@ -126,34 +166,23 @@
     XMLA Metadata Query
     requires queryType="xmla_discover" in chartDefintion of CDF object
   */
- var xmla_discover = {
-    name: "xmla_discover",
+ var xmlaDiscoverOpts = {
+    name: "xmlaDiscover",
     label: "XMLA Discover",
-    xmla: null,
-    datasource: null, //cache the datasource as there should be only one xmla datasource with Pentaho
     defaults: {
       url: webAppPath + "/Xmla" //defaults to Pentaho's Mondrian servlet. can be overridden in options
     },
-    getDataSources: function(){
-      var datasourceCache = [],
-        rowset_ds = xmla_discover.xmla.discoverDataSources();
-      if (rowset_ds.hasMoreRows()) {
-        datasourceCache = rowset_ds.fetchAllAsObject();
-        xmla_discover.datasource = datasourceCache[0]; //cache this object for later usage
-        rowset_ds.close();
-        return;
-      }
-    },
-    discover: function(param, options){
-        var properties = {}, rows =[], restrictions={}, qry=param.query(); //user must pass in valid XMLA requestTypes
-        properties[Xmla.PROP_DATASOURCEINFO] = xmla_discover.datasource[Xmla.PROP_DATASOURCEINFO];
-        if (param.catalog) {
-          properties[Xmla.PROP_CATALOG] = param.catalog;
-        }
-        var rowset_discover = xmla_discover.xmla.discover({properties:properties, requestType:qry});
-        return rowset_discover;
-    },
     init: function(){
+      loadXmlaScript();
+      if (_sharedXmla.xmla == null) { //lazily load object when needed only
+        _sharedXmla.xmla = new Xmla({
+                async: false,
+                url: this.getOption('url')
+        });
+      }
+      if (_sharedXmla.datasource == null){
+        _sharedXmla.getDataSources(); //another lazy load
+      }
     },
     transformDiscoverresults: function(results){ //format results into standard format with metadata and resultset.
       var 
@@ -185,30 +214,22 @@
       //TODO SafeClone?
       return res;
     },
-    implementation: function (tgt, st, opt) {
-      if (xmla_discover.xmla == null) { //lazily load object when needed only
-        xmla_discover.xmla = new Xmla({
-                async: false,
-                url: xmla_discover.defaults.url
-        });
-      }
-      if (xmla_discover.datasource == null){
-        xmla_discover.getDataSources(); //another lazy load
-      }
-      
+    doQuery: function(outsideCallback){
+      var url = this.getOption('url'),
+          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
+          errorCallback = this.getOption('errorCallback'),
+          params = this.getOption('params');
+
       try {      
-        var result = xmla_discover.discover(st, opt);
+        var result = this.discoveries(params);
       } catch (e) {
-        Dashboards.log('unable to execute xmla_discover discover query: ' +e+' :', 'error')
+        Dashboards.log('unable to execute xmla addin query: ' +e+' :', 'error')
       }
-      opt.callback(this.transformDiscoverresults(result));
+      callback(this.transformDiscoverresults(result));
     }
   };
-  try {
-    Dashboards.registerAddIn("Query", "queryType", new AddIn(xmla_discover));
-  } catch (e) {
-    Dashboards.log(e, 'error xmla_discover')
-  }
+  Dashboards.registerQuery("xmlaDiscover", xmlaDiscoverOpts);
+
 
 })();
 
