@@ -41,9 +41,27 @@
         if (param.catalog) {
           properties[Xmla.PROP_CATALOG] = param.catalog;
         }
-        var rowset_discover = this.discover({properties:properties, requestType:qry});
+        var rowset_discover = this.xmla.discover({properties:properties, requestType:qry});
         return rowset_discover;
     },
+    execute: function(param){
+      //find the requested catalog in internal array of valid catalogs
+      for (var i=0,j=_sharedXmla.catalogs.length;i<j;i++){
+        if (_sharedXmla.catalogs[i]["CATALOG_NAME"] == param.catalog ){
+          var properties = {};
+          properties[Xmla.PROP_DATASOURCEINFO] = _sharedXmla.datasource[Xmla.PROP_DATASOURCEINFO];
+          properties[Xmla.PROP_CATALOG]        = param.catalog;
+          properties[Xmla.PROP_FORMAT]         = _sharedXmla.PROP_FORMAT_TABULAR;//Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
+          var result = this.xmla.execute({
+              statement: param.query(),
+              properties: properties
+          });
+          return result;
+        }
+      }
+      //should never make it here if param.catalog is on server
+      throw new Error("Catalog: " + param.catalog + " was not found on Pentaho server.");
+    }
   });
 
   
@@ -122,24 +140,6 @@
       //TODO SafeClone?
       return res;
     },
-    executeQuery: function(param){
-      //find the requested catalog in internal array of valid catalogs
-      for (var i=0,j=_sharedXmla.catalogs.length;i<j;i++){
-        if (_sharedXmla.catalogs[i]["CATALOG_NAME"] == param.catalog ){
-          var properties = {};
-          properties[Xmla.PROP_DATASOURCEINFO] = _sharedXmla.datasource[Xmla.PROP_DATASOURCEINFO];
-          properties[Xmla.PROP_CATALOG]        = param.catalog;
-          properties[Xmla.PROP_FORMAT]         = _sharedXmla.PROP_FORMAT_TABULAR;//Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
-          var result = _sharedXmla.xmla.execute({
-              statement: param.query(),
-              properties: properties
-          });
-          return result;
-        }
-      }
-      //should never make it here if param.catalog is on server
-      throw new Error("Catalog: " + param.catalog + " was not found on Pentaho server.");
-    },
 
     doQuery: function(outsideCallback){
       var url = this.getOption('url'),
@@ -148,7 +148,7 @@
           params = this.getOption('params');
 
       try {      
-        var result = this.executeQuery(params);
+        var result = _sharedXmla.execute(params);
       } catch (e) {
         Dashboards.log('unable to execute xmla addin query: ' +e+' :', 'error')
       }
@@ -221,7 +221,7 @@
           params = this.getOption('params');
 
       try {      
-        var result = this.discoveries(params);
+        var result = _sharedXmla.discover(params);
       } catch (e) {
         Dashboards.log('unable to execute xmla addin query: ' +e+' :', 'error')
       }
