@@ -9,13 +9,21 @@
   var BaseQuery = Dashboards.BaseQuery = Base.extend({
     name: "baseQuery",
     label: "Base Query",
+    deepProperties: [ 'defaults' , 'interfaces' ],
     defaults: {
-      successCallback: null,
+      successCallback: function(){ 
+        Dashboards.log('Query callback not defined. Override.');
+      },
       errorCallback: Dashboards.handleServerError,
       lastResultSet: null,
       page: 0,
       pageSize: 0,
-      params: {}
+      params: {},
+      ajaxOptions: {
+        async: false,
+        type:'POST'
+      },
+      url: ''
     },
     interfaces:{
       params: { reader:'propertiesObject', validator:'isObjectOrPropertiesArray'},
@@ -25,8 +33,6 @@
 
     },
     constructor: function (config ){
-      this.base(config);
-      // TODO: Rewrite this later. Right now just want it to work, somehow
       if ( Dashboards && Dashboards.OptionsManager ) {
         this._optionsManager = new Dashboards.OptionsManager( this );
         this._optionsManager.mixin( this );
@@ -43,14 +49,44 @@
     init: function (opts){
       // Override
     },
-    doQuery: function (outerCallback){ 
-      // Override 
+    getSuccessHandler: function (callback){
+      var myself = this;
+      return function(json) {
+        myself.setOption('lastResultSet' , json );
+        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
+        callback(clone);
+      }
+    },
+    getErrorHandler: function (callback){
+      return function(resp, txtStatus, error ) {      
+        if (callback){
+          callback(resp, txtStatus, error );
+        }
+      }
+    },
+    doQuery: function(outsideCallback){
+      if (typeof this.getOption('successCallback') != 'function') {
+        throw 'QueryNotInitialized';
+      }
+      var url = this.getOption('url'),
+          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
+          errorCallback = this.getOption('errorCallback') ,
+          queryDefinition = this.buildQueryDefinition();
+
+      var settings = _.extend({}, this.getOption('ajaxOptions'), {
+        data: queryDefinition,
+        url: url,
+        success: this.getSuccessHandler(callback),
+        error: this.getErrorHandler(errorCallback) 
+      });
+      
+      $.ajax(settings);
     },
     exportData: function() {
       // Override 
     },
-    setAjaxOptions: function() {
-      // Override 
+    setAjaxOptions: function(newOptions) {
+        this.setOption( 'ajaxOptions' , _.extend({}, this.getOption('ajaxOptions') , newOptions) );
     },
     setSortBy: function(sortBy) {
       // Override 
@@ -71,18 +107,19 @@
             * going to change the internal callback
             */
             return this.doQuery(arguments[0]);
-          } else if( _.isObject(arguments[0]) || _.isArray(arguments[0]) ){
-            this.setOption('params' , arguments[0] );
+          } else if(  !_.isEmpty(arguments[0]) && 
+              (_.isObject(arguments[0]) || _.isArray(arguments[0]) ) ) {
+            this.setOption('params' , arguments[0] || {} );
             return this.doQuery();
           }
           break;
         case 2:
           if (typeof arguments[0] == "function"){
-            this.setParameter( arguments[0] );
+            this.setOption( 'successCallback' , arguments[0] );
             this.setOption('errorCallback'  , arguments[1] );
             return this.doQuery();
           } else {
-            this.setOption('params' , arguments[0] );
+            this.setOption('params' , arguments[0] || {} );
             this.setOption('successCallback' , arguments[1] );
             return this.doQuery();
           }
@@ -232,7 +269,9 @@
       endpoint: '',
       systemParams: {},
       ajaxOptions: {
-        dataType:'json'
+        dataType:'json',
+        type:'POST',
+        async: true
       }
     },
 
@@ -442,12 +481,6 @@
       });
     },
 
-    setAjaxOptions: function(newOptions) {
-      if(typeof newOptions == "object") {
-        _.extend( this.getOption('ajaxOptions') , newOptions);
-      }
-    },
-
     /* Sorting
      *
      * CDA expects an array of terms consisting of a number and a letter
@@ -629,6 +662,28 @@
 
     init: function (opts){
       this.setOption('queryDef', opts);
+    },
+
+    getSuccessHandler: function (callback){
+      var myself = this;
+      return function(json) {
+        try{
+          myself.setOption('lastResultSet' , json );
+        }catch(e){
+          if(this.async){
+            // async + legacy errors while parsing json response aren't caught
+            var msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
+            Dashboards.error(msg);
+            json = {"metadata":[msg],"values":[]};
+          }else{
+            //exceptions while parsing json response are 
+            //already being caught+handled in updateLifecyle()  
+            throw e;
+          }  
+        }
+        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
+        callback(clone);
+      }
     },
 
     //TODO: is this enough?
