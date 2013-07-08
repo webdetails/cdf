@@ -150,7 +150,7 @@ var TableComponent = UnmanagedComponent.extend({
     query.setSortBy(sort.join(","));
     query.setPageSize(parseInt(p("iDisplayLength")));
     query.setPageStartingAt(p("iDisplayStart"));
-    query.setParamsearchBox(p("sSearch") ? p("sSearch") : "");
+    query.setSearchPattern(p("sSearch") ? p("sSearch") : "");
     query.fetchData(function(d) {
       if (myself.postFetch){
         var mod = myself.postFetch(d,dataTable);
