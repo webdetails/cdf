@@ -528,7 +528,7 @@
     label: "Legacy",
     defaults: {
       url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction",
-      query:{}
+      queryDef:{}
     },
     interfaces:{
       lastResultSet:{
@@ -543,12 +543,22 @@
       }
     },
 
+    init: function (opts){
+      this.setOption('queryDef', opts);
+    },
+
     //TODO: is this enough?
     buildQueryDefinition: function(overrides) {
-      return _.extend({}, this.get('query'), overrides);
+      return _.extend({}, this.getOption('queryDef'), overrides);
     }
 
   };
   Dashboards.registerQuery( "legacy", legacyOpts );
+  
+  // TODO: Temporary until CDE knows how to write queryTypes definitions, with all these old queries 
+  // falling under the 'legacy' umbrella.
+  Dashboards.registerQuery( "mdx", legacyOpts );
+  Dashboards.registerQuery( "sql", legacyOpts );
+
 
 })();
