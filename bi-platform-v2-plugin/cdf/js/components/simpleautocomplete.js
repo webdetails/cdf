@@ -9,7 +9,7 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
       if(this.ph == undefined) {
       this.ph = $("#" + this.htmlObject).empty();
       this.input = $("<input type='text'>").appendTo(this.ph);
-      this.query = new Query(this.queryDefinition);
+      this.query = Dashboards.getQuery(this.queryDefinition);
       var myself = this;
       this.input.autocomplete({
         source:function(obj,callback){return myself.triggerQuery(obj.term,callback);}

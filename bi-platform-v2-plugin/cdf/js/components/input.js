@@ -6,7 +6,7 @@ var InputBaseComponent = UnmanagedComponent.extend({
         this.draw(this.valuesArray);
       },this);
       this.synchronous(handler);
-    } else if(qd && (qd.dataAccessId || qd.query)){
+    } else if(qd){
       var handler = _.bind(function(data){
         var filtered;
         if(this.valueAsId) {

@@ -4018,7 +4018,9 @@ Dashboards.safeClone = function(){
   };
 
   D.getQuery = function(type, opts){
-    if ( _.isObject(type) ) {
+    if (_.isUndefined(type) ) {
+      type = 'cda';
+    } else if ( _.isObject(type) ) {
       opts = type;
       type = opts.queryType || 'cda';
     }
