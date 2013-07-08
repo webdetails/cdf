@@ -3907,7 +3907,8 @@ Dashboards.safeClone = function(){
       });
       _.each( defaults, function(el, key) {
         var ifaces = ( interfaces && interfaces[key] ) || {};
-        myself.setOption(key, el, ifaces);
+        setInterfaces( key, ifaces);
+        setValue( key, el );
       })
     };
 
@@ -3920,7 +3921,7 @@ Dashboards.safeClone = function(){
         setValue( opt, value );
         return true
       } else {
-        throw new Error( "Invalid Property " + prop.charAt(0).toUpperCase() + prop.slice(1) );
+        throw new Error( "Invalid Option " + opt.charAt(0).toUpperCase() + opt.slice(1) );
       }
     };
 
@@ -4004,8 +4005,19 @@ Dashboards.safeClone = function(){
   D.queryFactories = new D.Container ();
 
   D.registerQuery = function(type, query){
+    var BaseQuery = this.getBaseQuery();
+
+    // Goes a level deeper one extending these properties. Usefull to preserve defaults and
+    // options interfaces from BaseQuery.
+    if (!_.isFunction(query) && _.isObject(query)){
+      var deepProperties = {};
+      _.each( BaseQuery.prototype.deepProperties, function (prop){
+          deepProperties[prop] = _.extend({} , BaseQuery.prototype[prop], query[prop]);
+      });
+    }
+
     var QueryClass  = ( _.isFunction(query) && query ) || 
-          ( _.isObject(query) && this.BaseQuery.extend(query) );
+          ( _.isObject(query) && BaseQuery.extend( _.extend( {}, query, deepProperties ) ) );
  
     // Registers a new query factory with a custom class
     this.queryFactories.register('Query', type, function (container, config){
