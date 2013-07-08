@@ -62,7 +62,11 @@ var SelectBaseComponent = InputBaseComponent.extend({
   //size: when isMultiple==true, the default value is the number of possible values
   //externalPlugin:
   //extraOptions:
-  //changeMode: ['immediate'], 'focus'
+  //changeMode: ['immediate'], 'focus', 'timeout-focus'
+  //changeTimeout: [1500], // in milliseconds
+  //changeTimeoutScrollFraction: 1,
+  //changeTimeoutChangeFraction: 2/3,
+  //NOTE: changeMode 'timeout-focus' is not supported in mobile and fallsback to 'focus'
 
   draw: function(myArray) {
     var ph = $("#" + this.htmlObject);
@@ -203,19 +207,59 @@ var SelectBaseComponent = InputBaseComponent.extend({
    */
   _listenElement: function(elem) {
     var me = this;
-    
     var prevValue = me.getValue();
+    var stop;
     var check = function() {
+      
+      stop && stop();
+      
       var currValue = me.getValue();
       if(!Dashboards.equalValues(prevValue, currValue)) {
         prevValue = currValue;
         Dashboards.processChange(me.name);
       }
     };
+    
+    var selElem = $("select", elem);
+    
+    selElem
+        .keypress(function(ev) { if(ev.which === 13) { check(); } });
 
-    $("select", elem)
-      .on(me._changeTrigger(), check)
-      .keypress(function(ev) { if(ev.which === 13) { check(); } });
+    var changeMode = this._getChangeMode();
+    if(changeMode !== 'timeout-focus') {
+      selElem
+        .on(me._changeTrigger(), check);
+    } else {
+      
+      var timScrollFraction = me.changeTimeoutScrollFraction;
+      timScrollFraction = Math.max(0, timScrollFraction != null ? timScrollFraction : 1  );
+      
+      var timChangeFraction = me.changeTimeoutChangeFraction;
+      timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 2/3);
+      
+      var changeTimeout = Math.max(100, me.changeTimeout || 1500);
+      var changeTimeoutScroll = timScrollFraction * changeTimeout;
+      var changeTimeoutChange = timChangeFraction * changeTimeout;
+      
+      var timeoutHandle;
+
+      stop = function() {
+        if(timeoutHandle != null) {
+          clearTimeout(timeoutHandle);
+          timeoutHandle = null;
+        }
+      };
+
+      var renew = function(tim) {
+        stop();
+        timeoutHandle = setTimeout(check, tim || changeTimeout);
+      };
+      
+      selElem
+        .change(function() { renew(changeTimeoutChange); })
+        .scroll(function() { renew(changeTimeoutScroll); })
+        .focusout(check);
+    }
   },
 
   /**
@@ -226,7 +270,10 @@ var SelectBaseComponent = InputBaseComponent.extend({
    * the change mode value.
    * </p>
    *
-   * @return {!string} one of values: <tt>'immediate'</tt> or <tt>'focus'</tt>.
+   * @return {!string} one of values: 
+   * <tt>'immediate'</tt>, 
+   * <tt>'focus'</tt> or 
+   * <tt>'timeout-focus'</tt>.
    */
   _getChangeMode: function() {
     var changeMode = this.changeMode;
@@ -234,9 +281,14 @@ var SelectBaseComponent = InputBaseComponent.extend({
       changeMode = changeMode.toLowerCase();
       switch(changeMode) {
         case 'immediate':
-        case 'focus': return changeMode;
+        case 'focus':  return changeMode;
+          
+        case 'timeout-focus': 
+          // Mobiles do not support this strategy. Downgrade to 'focus'.
+          if((/android|ipad|iphone/i).test(navigator.userAgent)) { return 'focus'; }
+          return changeMode;
 
-        default: 
+        default:
           Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
       }
     }
@@ -275,11 +327,11 @@ var SelectBaseComponent = InputBaseComponent.extend({
      *   </li>
      * </ul>
      *
-     * | Change mode: | Immediate  | Focus    |
-     * +--------------+------------+----------+
-     * | Desktop      | change     | focusout |
-     * | iPad         | change     | focusout |
-     * | Android      | change *   | change   |
+     * | Change mode: | Immediate  | Focus    | Timeout-Focus |
+     * +--------------+------------+----------+---------------+
+     * | Desktop      | change     | focusout | focusout      |
+     * | iPad         | change     | focusout | -             |
+     * | Android      | change *   | change   | -             |
      *
      * (*) this is the most immediate that android can do
      *     resulting in Immediate = Focus
@@ -549,7 +601,7 @@ var MonthPickerComponent = BaseComponent.extend({
     });
   },
   getValue : function() {
-    var value = $("#" + this.name).val()
+    var value = $("#" + this.name).val();
 
     var year = value.substring(0,4);
     var month = parseInt(value.substring(5,7) - 1);
@@ -563,26 +615,85 @@ var MonthPickerComponent = BaseComponent.extend({
       Dashboards.processChange(myself.name);
     });
     return value;
-  },
-  getMonthPicker : function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
+  },parseDate : function(aDateString){
+    //This works assuming the Date comes in this format -> yyyy-mm-dd or yyyy-mm
+    //Date.UTC(year[year after 1900],month[0 to 11],day[1 to 31], hours[0 to 23], min[0 to 59], sec[0 to 59], ms[0 to 999])
+    var parsedDate = null;
+    var yearIndex = 0, monthIndex = 1, dayindex = 2;
+    var split = aDateString.split("-");
+    var year, month, day;
+
+    if(split.length == 3){
+      year = parseInt(split[yearIndex]);
+      month = parseInt(split[monthIndex]);
+      day = parseInt(split[dayindex]);
+      parsedDate = new Date(Date.UTC(year,(month-1),day));
+    }else if(split.length == 2){
+      year = parseInt(split[yearIndex]);
+      month = parseInt(split[monthIndex]);
+      parsedDate = new Date(Date.UTC(year,(month-1)));
+    }
+
+    return parsedDate;
+  },getMonthsAppart : function(aDateOne, aDateTwo){
+    var min, max;
+    if(aDateOne < aDateTwo){
+      min = aDateOne;
+      max = aDateTwo;
+    }else{
+      min = aDateTwo;
+      max = aDateOne;
+    }
+
+    var yearsAppart = (max.getFullYear() - min.getFullYear());
+    var monthsToAdd = yearsAppart * 12;
+    var monthCount = (max.getMonth() - min.getMonth()) + monthsToAdd; //TODO verify this calculation
+    
+    return monthCount;
+  },normalizeDateToCompare : function(dateObject){
+    var normalizedDate = dateObject;
+    normalizedDate.setDate(1);
+    normalizedDate.setHours(0);
+    normalizedDate.setMinutes(0);
+    normalizedDate.setSeconds(0);
+    normalizedDate.setMilliseconds(0);
+
+    return normalizedDate;
+
+  },getMonthPicker : function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
 
 
     var selectHTML = "<select";
     selectHTML += " id='" + object_name + "'";
 
-    if (minDate == undefined){
+    if(initialDate == undefined || initialDate == null){
+      initialDate = new Date();
+    }
+    if (minDate == undefined || minDate == null){
       minDate = new Date();
       minDate.setYear(1980);
     }
-    if (maxDate == undefined){
+    if (maxDate == undefined || maxDate == null){
       maxDate = new Date();
       maxDate.setYear(2060);
     }
 
+    //if any of the dates comes in string format this will parse them
+    if(typeof initialDate === "string"){
+      initialDate = this.parseDate(initialDate);
+    }
+    if(typeof minDate === "string"){
+      minDate = this.parseDate(minDate);
+    }
+    if(typeof maxDate === "string"){
+      maxDate = this.parseDate(maxDate);
+    }
+
     // if monthCount is not defined we'll use everything between max and mindate
+    var monthCountUndefined = false;
     if(monthCount == undefined || monthCount == 0) {
-      var monthsToAdd = (maxDate.getFullYear() - minDate.getFullYear())*12;
-      monthCount = (maxDate.getMonth() - minDate.getMonth()) + monthsToAdd;
+      monthCount = this.getMonthsAppart(minDate,maxDate);
+      monthCountUndefined = true;
     }
 
     //set size
@@ -592,14 +703,27 @@ var MonthPickerComponent = BaseComponent.extend({
     selectHTML += '>';
 
     var currentDate = new Date(+initialDate);
-    currentDate.setMonth(currentDate.getMonth()- monthCount/2 - 1);
+
+    /*
+    * This block is to make sure the months are compared equally. A millisecond can ruin the comparation.
+    */
+
+      if(monthCountUndefined == true){
+        currentDate.setMonth(currentDate.getMonth() - (this.getMonthsAppart(minDate,currentDate)) - 1);
+      }else{
+        currentDate.setMonth(currentDate.getMonth() - (monthCount/2) - 1);
+      }
+    currentDate = this.normalizeDateToCompare(currentDate);
+    var normalizedMinDate = this.normalizeDateToCompare(minDate);
+    var normalizedMaxDate = this.normalizeDateToCompare(maxDate);
 
     for(var i= 0; i <= monthCount; i++){
-
+      
       currentDate.setMonth(currentDate.getMonth() + 1);
-      if(currentDate >= minDate && currentDate <= maxDate)
+
+      if(currentDate >= normalizedMinDate && currentDate <= normalizedMaxDate)
       {
-        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad(currentDate.getMonth()+1,2) + "' ";
+        selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad((currentDate.getMonth()+1),2) + "' ";
 
         if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()){
           selectHTML += "selected='selected'"

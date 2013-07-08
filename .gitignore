@@ -19,3 +19,7 @@ override.properties
 .classpath
 .project
 .settings
+
+#IntelliJ files
+.idea/
+*.iml

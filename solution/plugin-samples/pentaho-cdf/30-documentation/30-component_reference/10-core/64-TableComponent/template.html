@@ -101,7 +101,10 @@
     <dd>The pagination type to be used. Possible values: "two_button" and "full_numbers". Default: two_button</dd>
 
     <dt>paginateServerSide</dt>
-    <dd>Whether the pagination should be handled by the server instead of the client. This feature requires a CDA Datasource! Default: false</dd>
+    <dd>Whether the pagination should be handled by the server instead of the client. This feature requires a CDA Datasource! Default: false.
+        When both paginateServerSide and filter features are set to true, then filtering of data will be performed server-side; the input typed
+        in the searchbox will be sent in request (paramsearchBox).
+    </dd>
 
     <dt>filter</dt>
     <dd>Enable or disable filtering of data. Note that filtering in DataTables is smart in that it allows the end user

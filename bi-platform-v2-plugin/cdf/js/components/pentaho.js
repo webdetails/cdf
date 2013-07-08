@@ -1130,6 +1130,7 @@ var AnalyzerComponent = BaseComponent.extend({
       action: this.action,
       command: this.command == undefined? "open": this.command,
       showFieldList: this.showFieldList == undefined? false: this.showFieldList,
+      showRepositoryButtons: this.showRepositoryButtons == undefined? false: this.showRepositoryButtons,
       frameless: this.frameless
     };
 
