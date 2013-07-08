@@ -172,6 +172,9 @@
     setErrorCallback: function(callback) {
       this.setOption('errorCallback', callback);
     },
+    setSearchPattern: function (pattern){
+      this.setOption('searchPattern', pattern);
+    },
 
     /* Pagination
      *
@@ -353,7 +356,8 @@
       id: '',
       outputIdx: '1',
       sortBy: '',
-      ajaxOptions: { }
+      ajaxOptions: { },
+      searchPattern: ''
     },
 
     init: function (opts){
@@ -431,6 +435,7 @@
       queryDefinition.pageSize = this.getOption('pageSize');
       queryDefinition.pageStart = this.getOption('page');
       queryDefinition.sortBy = this.getOption('sortBy');
+      queryDefinition.paramsearchBox = this.getOption('searchPattern');
       return queryDefinition;
     },
 
