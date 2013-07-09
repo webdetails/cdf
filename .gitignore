@@ -14,6 +14,7 @@
 /manifest.mf
 /bin
 override.properties
+.ant*
 
 #Eclipse project files
 .classpath
