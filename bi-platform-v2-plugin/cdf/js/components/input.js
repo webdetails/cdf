@@ -62,7 +62,11 @@ var SelectBaseComponent = InputBaseComponent.extend({
   //size: when isMultiple==true, the default value is the number of possible values
   //externalPlugin:
   //extraOptions:
-  //changeMode: ['immediate'], 'focus'
+  //changeMode: ['immediate'], 'focus', 'timeout-focus'
+  //changeTimeout: [2000], // in milliseconds
+  //changeTimeoutScrollFraction: 1,
+  //changeTimeoutChangeFraction: 5/8,
+  //NOTE: changeMode 'timeout-focus' is not supported in mobile and fallsback to 'focus'
 
   draw: function(myArray) {
     var ph = $("#" + this.htmlObject);
@@ -212,6 +216,36 @@ var SelectBaseComponent = InputBaseComponent.extend({
         Dashboards.processChange(me.name);
       }
     };
+    
+    var selElem = $("select", elem);
+    
+    selElem
+        .keypress(function(ev) { if(ev.which === 13) { check(); } });
+
+    var changeMode = this._getChangeMode();
+    if(changeMode !== 'timeout-focus') {
+      selElem
+        .on(me._changeTrigger(), check);
+    } else {
+      
+      var timScrollFraction = me.changeTimeoutScrollFraction;
+      timScrollFraction = Math.max(0, timScrollFraction != null ? timScrollFraction : 1  );
+      
+      var timChangeFraction = me.changeTimeoutChangeFraction;
+      timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 5/8);
+      
+      var changeTimeout = Math.max(100, me.changeTimeout || 2000);
+      var changeTimeoutScroll = timScrollFraction * changeTimeout;
+      var changeTimeoutChange = timChangeFraction * changeTimeout;
+      
+      var timeoutHandle;
+
+      stop = function() {
+        if(timeoutHandle != null) {
+          clearTimeout(timeoutHandle);
+          timeoutHandle = null;
+        }
+      };
 
     $("select", elem)
       .on(me._changeTrigger(), check)
