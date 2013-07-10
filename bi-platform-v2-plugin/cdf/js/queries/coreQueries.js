@@ -458,7 +458,8 @@
      * column (descending).
      */
     setSortBy: function(sortBy) {
-      var newSort;
+      var newSort,
+          myself = this;
       if (sortBy === null || sortBy === undefined || sortBy === '') {
         newSort = '';
       }
@@ -496,9 +497,9 @@
        */
       var same;
       if (newSort instanceof Array) {
-        same = newSort.length != this.getOption('sortBy').length;
+        same = newSort.length != myself.getOption('sortBy').length;
         $.each(newSort,function(i,d){
-          same = (same && d == this.getOption('sortBy')[i]);
+          same = (same && d == myself.getOption('sortBy')[i]);
           if(!same) {
             return false;
           }
