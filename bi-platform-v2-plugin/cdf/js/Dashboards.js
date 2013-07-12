@@ -1481,7 +1481,7 @@ Dashboards.initEngine = function(){
 };
 
 Dashboards.handlePostInit = function() {
-  if(!this.waitingForInit || this.waitingForInit.length === 0) {
+  if( (!this.waitingForInit || this.waitingForInit.length === 0) && !this.finishedInit ) {
     this.trigger("cdf cdf:postInit",this);
     /* Legacy Event -- don't rely on this! */
     $(window).trigger('cdfLoaded');
