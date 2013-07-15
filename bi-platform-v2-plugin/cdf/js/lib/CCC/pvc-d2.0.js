@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130612
+//VERSION TRUNK-20130715
 
 var pvc = (function(def, pv) {
 
@@ -57,7 +57,7 @@ pvc.setDebug = function(level) {
 /*global console:true*/
 
 function pvc_syncLog() {
-    if (pvc.debug && typeof console !== "undefined") {
+    if (pvc.debug > 0 && typeof console !== "undefined") {
         ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
         .forEach(function(ps) {
             ps = ps instanceof Array ? ps : [ps, ps];
@@ -628,17 +628,21 @@ pvc.makeExtensionAbsId = function(id, prefix) {
        ;
 };
 
-pvc.makeEnumParser = function(enumName, keys, dk) {
-    var keySet = {};
-    keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
+pvc.makeEnumParser = function(enumName, hasKey, dk) {
+    if(def.array.is(hasKey)) {
+        var keySet = {};
+        hasKey.forEach(function(k) { if(k) { keySet[k.toLowerCase()] = k; }});
+        hasKey = function(k) { return def.hasOwn(keySet, k); };
+    }
+    
     if(dk) { dk = dk.toLowerCase(); }
 
     return function(k) {
         if(k) { k = (''+k).toLowerCase(); }
 
-        if(!def.hasOwn(keySet, k)) {
+        if(!hasKey(k)) {
             if(k && pvc.debug >= 2) {
-                pvc.log("[Warning] Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
+                pvc.warn("Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
             }
 
             k = dk;
@@ -675,11 +679,11 @@ pvc.parseTooltipAutoContent =
 pvc.parseSelectionMode =
     pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
 
-    pvc.parseClearSelectionMode =
-        pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
+pvc.parseClearSelectionMode =
+    pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
-pvc.parseShape =
-    pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
+// ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar']
+pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
 
 pvc.parseTreemapColorMode =
     pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
@@ -4163,8 +4167,8 @@ def.type('pvc.data.TranslationOper')
 .init(function(chart, complexTypeProj, source, metadata, options) {
     this.chart = chart;
     this.complexTypeProj = complexTypeProj;
-    this.source   = source;
-    this.metadata = metadata || {};
+    this.source   = source   || def.fail.argumentRequired('source'  );
+    this.metadata = metadata || def.fail.argumentRequired('metadata');
     this.options  = options  || {};
 
     this._initType();
@@ -18982,6 +18986,7 @@ def
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
                 
+                var preventUnselect = false;
                 if(options.selectable) {
                     ibits |= I.Selectable;
                     
@@ -18992,11 +18997,13 @@ def
                             
                         case 'focuswindow':
                             ibits |= I.SelectableByFocusWindow; 
+                            preventUnselect = true;
                             break;
                     }
                 }
                 
-                if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
+                if(!preventUnselect && 
+                   pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
                     ibits |= I.Unselectable;
                 }
                 
@@ -19847,7 +19854,7 @@ pvc.BaseChart
     _checkNoDataI: function() {
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
-        if (!this.parent && !this.allowNoData && this.resultset.length === 0) {
+        if (!this.parent && !this.allowNoData && !this.resultset.length) {
             /*global NoDataException:true */
             throw new NoDataException();
         }
@@ -20336,8 +20343,8 @@ pvc.BaseChart
      * {metadata: [], resultset: []}
      */
     setData: function(data, options) {
-        this.setResultset(data.resultset);
-        this.setMetadata(data.metadata);
+        this.setResultset(data && data.resultset);
+        this.setMetadata (data && data.metadata);
 
         // TODO: Danger!
         $.extend(this.options, options);
@@ -20352,9 +20359,9 @@ pvc.BaseChart
         /*jshint expr:true */
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
-        this.resultset = resultset;
+        this.resultset = resultset || [];
         if (!resultset.length) {
-            this._log("Warning: Resultset is empty");
+            this._warn("Resultset is empty");
         }
 
         return this;
@@ -20366,11 +20373,11 @@ pvc.BaseChart
      */
     setMetadata: function(metadata) {
         /*jshint expr:true */
-        !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
+        !this.parent || def.fail.operationInvalid("Can only set metadata on root chart.");
 
-        this.metadata = metadata;
+        this.metadata = metadata || [];
         if (!metadata.length) {
-            this._log("Warning: Metadata is empty");
+            this._warn("Metadata is empty");
         }
 
         return this;
@@ -21770,6 +21777,7 @@ def
     
     this.chart = chart; // must be set before base() because of log init
     
+
     this.base();
     
     this.axes = {};
@@ -22727,10 +22735,8 @@ def
              */
             this._createCore(this._layoutInfo);
             
-            /* RubberBand */
-            if (this.isTopRoot) {
-                this._initRubberBand();
-            }
+            /* Selection */
+            if (this.isTopRoot) { this._initSelection(); }
 
             /* Extensions */
             this.applyExtensions();
@@ -23333,24 +23339,24 @@ def
     selectingByRubberband: function() { return this.topRoot._selectingByRubberband; },
     
     /**
-     * Add rubber-band functionality to panel.
+     * Add rubber-band and clickClearSelection functionality to the panel.
      * Override to prevent rubber band selection.
      * 
      * @virtual
      */
-    _initRubberBand: function() {
+    _initSelection: function() {
         var me = this,
             chart = me.chart;
         
-        if(!chart.interactive()) { return; }
+        if(!me.interactive()) { return; }
         
-        var options = chart.options,
-            clickClearsSelection = options.clearSelectionMode === 'emptySpaceClick',
-            useRubberband = this.chart.selectableByRubberband();
+        var clickClearsSelection = me.unselectable(),
+            useRubberband        = me.selectableByRubberband();
         
+        // NOOP?
         if(!useRubberband && !clickClearsSelection) { return; }
         
-        var data = chart.data,
+        var data = me.data,
             pvParentPanel = me.pvRootPanel || me.pvPanel.paddingPanel;
         
         // IE must have a fill style to fire events
@@ -23367,7 +23373,7 @@ def
                 pvParentPanel
                     .event("click", function() {
                         /*jshint expr:true */
-                        data.owner.clearSelected() && chart.updateSelections();
+                        data.clearSelected() && chart.updateSelections();
                     });
             }
             return;
@@ -23375,14 +23381,14 @@ def
         
         var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
-        this._selectingByRubberband = false;
+        me._selectingByRubberband = false;
 
         // Rubber band
         var toScreen, rb;
         
         var selectBar = 
             this.selectBar = 
-            new pvc.visual.Bar(this, pvParentPanel, {
+            new pvc.visual.Bar(me, pvParentPanel, {
                 extensionId:   'rubberBand',
                 normalStroke:  true,
                 noHover:       true,
@@ -23413,7 +23419,7 @@ def
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
-        var selectionEndedDate;
+        var selectionEndedDate; 
         pvParentPanel
             .intercept('data', function() {
                 var scenes = this.delegate();
@@ -23476,7 +23482,7 @@ def
                         }
                     }
                     
-                    if(data.owner.clearSelected()) { chart.updateSelections(); }
+                    if(data.clearSelected()) { chart.updateSelections(); }
                 });
         }
     },
