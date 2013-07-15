@@ -285,7 +285,7 @@
     name: "cpk",
     label: "CPK",
     defaults: {
-      baseUrl: '/pentaho/content',
+      baseUrl:  Dashboards.getWebAppPath() + '/content',
       pluginId: '',
       endpoint: '',
       systemParams: {},
@@ -341,7 +341,7 @@
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: "/pentaho/content/cda/doQuery?",
+      url: Dashboards.getWebAppPath() + "/content/cda/doQuery?",
       file: '',
       id: '',
       outputIdx: '1',

@@ -133,6 +133,11 @@ Dashboards.error = function(m){
   this.log(m, 'error');
 }
 
+
+Dashboards.getWebAppPath = function (){
+  return webAppPath
+}
+
 // REFRESH ENGINE begin
 
 Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
@@ -644,7 +649,7 @@ Dashboards.restoreDuplicates = function() {
 Dashboards.blockUIwithDrag = function() {
   if (typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
-    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
+    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + this.getWebAppPath() + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
   }
 
   $.blockUI();
@@ -1687,7 +1692,7 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = webAppPath + "/" + serviceMethod;
+  var url = this.getWebAppPath() + "/" + serviceMethod;
 
   // Add the solution to the params
   var arr = {};
