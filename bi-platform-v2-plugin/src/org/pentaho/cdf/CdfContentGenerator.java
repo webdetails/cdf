@@ -879,6 +879,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
         if (dashboardType.equals("mobile")) {
             suffix = "-mobile";
             file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-mobile.txt"));
+        } else if (dashboardType.equals("bootstrap")) {
+            suffix = "-bootstrap";
+            file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-bootstrap.txt"));
         } else if (dashboardType.equals("blueprint")) {
             suffix = "";
             file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-blueprint.txt"));
@@ -1029,11 +1032,14 @@ public class CdfContentGenerator extends BaseContentGenerator {
         String rootdir = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
         final File blueprintFile = new File(rootdir + "/resources-blueprint.txt");
         final File mobileFile = new File(rootdir + "/resources-mobile.txt");
+        final File bootstrapFile = new File(rootdir + "/resources-bootstrap.txt");
 
         final Properties blueprintResources = new Properties();
         blueprintResources.load(new FileInputStream(blueprintFile));
         final Properties mobileResources = new Properties();
         mobileResources.load(new FileInputStream(mobileFile));
+        final Properties bootstrapResources = new Properties();
+        bootstrapResources.load(new FileInputStream(bootstrapFile));
         ArrayList<String> scriptsList = new ArrayList<String>();
         ArrayList<String> stylesList = new ArrayList<String>();
 
@@ -1043,6 +1049,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
         boolean stylesAvailable = packager.isPackageRegistered("styles");
         boolean mobileScriptsAvailable = packager.isPackageRegistered("scripts-mobile");
         boolean mobileStylesAvailable = packager.isPackageRegistered("styles-mobile");
+        boolean bootstrapScriptsAvailable = packager.isPackageRegistered("scripts-bootstrap");
+        boolean bootstrapStylesAvailable = packager.isPackageRegistered("styles-bootstrap");
         if (!scriptsAvailable) {
             scriptsList.clear();
             scriptsList.addAll(Arrays.asList(blueprintResources.get("commonLibrariesScript").toString().split(",")));
@@ -1080,6 +1088,25 @@ public class CdfContentGenerator extends BaseContentGenerator {
                 stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
             }
             packager.registerPackage("styles-mobile", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles-mobile.css", stylesList.toArray(new String[stylesList.size()]));
+        }
+        if (!bootstrapScriptsAvailable) {
+            scriptsList.clear();
+            scriptsList.addAll(Arrays.asList(bootstrapResources.get("commonLibrariesScript").toString().split(",")));
+            for (int i = 0; i < scriptsList.size(); i++) {
+                String fname = scriptsList.get(i);
+                scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+            }
+            packager.registerPackage("scripts-bootstrap", Packager.Filetype.JS, rootdir, rootdir + "/js/scripts-bootstrap.js", scriptsList.toArray(new String[scriptsList.size()]));
+        }
+
+        if (!bootstrapStylesAvailable) {
+            stylesList.clear();
+            stylesList.addAll(Arrays.asList(bootstrapResources.get("commonLibrariesLink").toString().split(",")));
+            for (int i = 0; i < stylesList.size(); i++) {
+                String fname = stylesList.get(i);
+                stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+            }
+            packager.registerPackage("styles-bootstrap", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles-bootstrap.css", stylesList.toArray(new String[stylesList.size()]));
         }
     }
 
