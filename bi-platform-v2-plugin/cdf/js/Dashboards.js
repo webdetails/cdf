@@ -475,7 +475,7 @@ Dashboards._addLogLifecycleToControl = function(control) {
   // Add logging lifeCycle
   var myself = this;
   control.on("all", function(e) {
-    if(myself.logLifecycle && e !== "cdf" && this.name !== "PostInitMarker" && typeof console !== "undefined") {
+    if(myself.logLifecycle && e !== "cdf" && this.name !== "PostInitMarker" && typeof console !== "undefined" && this.dashboard) {
       var eventStr;
       var eventName = e.substr(4);
       switch(eventName) {
@@ -856,6 +856,7 @@ Dashboards.removeComponent = function(compOrNameOrIndex) {
     var cs = this.components;
     comp = cs[index];
     comp.dashboard = null;
+    if(typeof comp.off === "function") { comp.off("all"); }
     cs.splice(index, 1);
   }
   return comp;
