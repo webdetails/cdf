@@ -15,6 +15,7 @@
 /bin
 override.properties
 .ant*
+/bi-platform-v2-plugin/dev-lib/*
 
 #Eclipse project files
 .classpath
