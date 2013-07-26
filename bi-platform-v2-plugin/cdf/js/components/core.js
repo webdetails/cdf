@@ -350,12 +350,11 @@ var CommentsComponent = BaseComponent.extend({
     placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
     var myself = this;
     var args = {
-      action: "list",
       page: this.page,
       firstResult: this.firstResult,
       maxResults: this.maxResults + 1 // Add 1 to maxResults for pagination look-ahead
     };
-    $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
+    $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/comments/list", args, function(json) {
       myself.processCommentsList(json);
     });
   },
@@ -392,11 +391,10 @@ var CommentsComponent = BaseComponent.extend({
       var code = tarea.val();
       tarea.val('');
       var args = {
-        action: "add",
         page: myself.page,
         comment: code
       };
-      $.getJSON(webAppPath + "/content/pentaho-cdf/Comments", args, function(json) {
+      $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/comments/add", args, function(json) {
         myself.processCommentsAdd(json);
       });
       myself.addCommentContainer.hide("slow");
