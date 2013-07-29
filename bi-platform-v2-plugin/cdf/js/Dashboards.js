@@ -133,6 +133,11 @@ Dashboards.error = function(m){
   this.log(m, 'error');
 }
 
+
+Dashboards.getWebAppPath = function (){
+  return webAppPath
+}
+
 // REFRESH ENGINE begin
 
 Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
@@ -468,9 +473,9 @@ Dashboards._addLogLifecycleToControl = function(control) {
   // To still allow changing the value dynamically, a Dashboards.setLogLifecycle(.) method could be provided.
 
   // Add logging lifeCycle
-  var myself = this;
   control.on("all", function(e) {
-    if(myself.logLifecycle && e !== "cdf" && this.name !== "PostInitMarker" && typeof console !== "undefined") {
+    var dashs = this.dashboard;
+    if(dashs && dashs.logLifecycle && e !== "cdf" && this.name !== "PostInitMarker" && typeof console !== "undefined") {
       var eventStr;
       var eventName = e.substr(4);
       switch(eventName) {
@@ -479,9 +484,9 @@ Dashboards._addLogLifecycleToControl = function(control) {
         case "error":         eventStr = "!Error"; break;
         default:              eventStr = "      "; break;
       }
-
-      var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event",this.splitTimer());
-      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " +
+      
+      var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
+      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
           e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
     }
   });
@@ -644,7 +649,7 @@ Dashboards.restoreDuplicates = function() {
 Dashboards.blockUIwithDrag = function() {
   if (typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
-    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
+    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + this.getWebAppPath() + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
   }
 
   $.blockUI();
@@ -850,9 +855,15 @@ Dashboards.removeComponent = function(compOrNameOrIndex) {
   if(index >= 0) {
     var cs = this.components;
     comp = cs[index];
-    comp.dashboard = null;
     cs.splice(index, 1);
+    comp.dashboard = null;
+    
+    comp.off('cdf:postExecution');
+    comp.off('cdf:preExecution');
+    comp.off('cdf:error');
+    comp.off('all');
   }
+
   return comp;
 };
 
@@ -1001,7 +1012,12 @@ Dashboards.syncParametersInit = function() {
 }
 
 
-Dashboards.initEngine = function(){
+Dashboards.initEngine = function() {
+  // Should really throw an error? Or return?
+  if(this.waitingForInit && this.waitingForInit.length) {
+    this.log("Overlapping initEngine!", 'warn');
+  }
+
   var myself = this;
   var components = this.components;
 
@@ -1687,7 +1703,7 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = webAppPath + "/" + serviceMethod;
+  var url = this.getWebAppPath() + "/" + serviceMethod;
 
   // Add the solution to the params
   var arr = {};
