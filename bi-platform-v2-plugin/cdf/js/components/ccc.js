@@ -138,16 +138,14 @@ var CccComponent = BaseCccComponent.extend({
     },
 
     renderChart: function() {
-      var myself = this;
-      if(this.chartDefinition.dataAccessId || myself.chartDefinition.query) {
-        this.triggerQuery(this.chartDefinition,_.bind(this.render,this));
-      }
-      else if(this.valuesArray != undefined){
-        this.synchronous(_.bind(function(){this.render(this.valuesArray)},this));
-      }
-      else{
+      var cd = this.chartDefinition;
+      if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
+        this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
+      } else if(this.valuesArray != undefined) {
+        this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
+      } else {
         // initialize the component only
-        this.synchronous(_.bind(this.render,this));
+        this.synchronous(_.bind(this.render, this));
       }
     },
   
@@ -280,7 +278,7 @@ var CccComponent2 = BaseCccComponent.extend({
             seriesInRows: this.seriesInRows
         });
 
-        this.chart.setStructData(sValues)
+        this.chart.setStructData(sValues);
         this.chart.render();
     }
 
