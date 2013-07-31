@@ -358,6 +358,33 @@ pvc.buildIndexedId = function(prefix, index){
     return prefix + "" + (index + 1); // base2, ortho3,..., legend2
 };
 
+pvc.makeEnumParser = function(enumName, hasKey, dk) {
+    if(def.array.is(hasKey)) {
+        var keySet = {};
+        hasKey.forEach(function(k) { if(k) { keySet[k.toLowerCase()] = k; }});
+        hasKey = function(k) { return def.hasOwn(keySet, k); };
+    }
+    
+    if(dk) { dk = dk.toLowerCase(); }
+
+    return function(k) {
+        if(k) { k = (''+k).toLowerCase(); }
+
+        if(!hasKey(k)) {
+            if(k && pvc.debug >= 2) {
+                pvc.warn("Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
+            }
+
+            k = dk;
+        }
+
+        return k;
+    };
+};
+
+pvc.parseMultiChartOverflow =
+    pvc.makeEnumParser('multiChartOverflow', ['grow', 'fit', 'clip'], 'grow');
+
 pvc.parseLegendClickMode = function(clickMode){
     if(!clickMode){
         clickMode = 'none';
@@ -13018,6 +13045,8 @@ pvc.BaseChart = pvc.Abstract.extend({
      */
     multiChartPageIndex: null,
     
+    _multiChartOverflowClipped: false,
+
     constructor: function(options) {
         var parent = this.parent = def.get(options, 'parent') || null;
         
@@ -13922,16 +13951,33 @@ pvc.BaseChart = pvc.Abstract.extend({
     render: function(bypassAnimation, recreate, reloadData){
         this.useTextMeasureCache(function(){
             try{
-                if (!this.isPreRendered || recreate) {
-                    this._preRender({reloadData: reloadData});
-                } else if(!this.parent && this.isPreRendered) {
-                    pvc.removeTipsyLegends();
+            	while(true) {
+	                if (!this.isPreRendered || recreate) {
+	                    this._preRender({reloadData: reloadData});
+	                } else if(!this.parent && this.isPreRendered) {
+	                    pvc.removeTipsyLegends();
+	                }
+	    
+	                this.basePanel.render({
+	                    bypassAnimation: bypassAnimation, 
+	                    recreate: recreate
+	                });
+
+	                // Check if it is necessary to retry the create
+                    // due to multi-chart clip overflow.
+                    if(!this._isMultiChartOverflowClip) {
+                        // NO
+                        this._isMultiChartOverflowClipRetry = false;
+                        break; 
+                    }
+
+                    // Overflowed & Clip
+                    recreate   = true;
+                    reloadData = false;
+                    this._isMultiChartOverflowClipRetry = true;
+                    this._isMultiChartOverflowClip = false;
+                    this._multiChartOverflowClipped = true;
                 }
-    
-                this.basePanel.render({
-                    bypassAnimation: bypassAnimation, 
-                    recreate: recreate
-                 });
                 
             } catch (e) {
                 if (e instanceof NoDataException) {
@@ -14862,9 +14908,10 @@ pvc.BasePanel = pvc.Abstract.extend({
                 }
                 
                 if(layoutChild.call(this, child, canResize)){
+                    if(child.chart._isMultiChartOverflowClip) { return false; } // OUT of here
                     return true; // resized => break
                 }
-                
+                if(child.chart._isMultiChartOverflowClip) { return false; } // OUT of here
                 index++;
             }
             
@@ -15073,6 +15120,11 @@ pvc.BasePanel = pvc.Abstract.extend({
             /* Layout */
             this.layout();
             
+            if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+                // Must repeat chart._create
+                return;
+            }
+
             if(!this.isVisible){
                 return;
             }
@@ -15156,14 +15208,22 @@ pvc.BasePanel = pvc.Abstract.extend({
                     .lineWidth(1)
                     .strokeDasharray(null); 
             }
+
             /* Protovis marks that are pvcPanel specific,
              * and/or #_creates child panels.
              */
             this._createCore(this._layoutInfo);
             
-            /* RubberBand */
-            if (this.isTopRoot && this.chart.options.selectable && pv.renderer() !== 'batik'){
-                this._initRubberBand();
+            if(this.isTopRoot) { 
+                /* Multi-chart overflow & clip */
+                if(this.chart._multiChartOverflowClipped) {
+                    this._addMultichartOverflowClipMarker();
+                }
+
+                /* RubberBand */
+                if(this.chart.options.selectable && pv.renderer() !== 'batik') {
+                	this._initRubberBand();
+                }
             }
 
             /* Extensions */
@@ -15224,6 +15284,11 @@ pvc.BasePanel = pvc.Abstract.extend({
         
         this._create(def.get(keyArgs, 'recreate', false));
         
+        if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+            // Must repeat chart._create
+            return;
+        }
+
         if(!this.isVisible){
             return;
         }
@@ -15801,6 +15866,52 @@ pvc.BasePanel = pvc.Abstract.extend({
         }
     },
     
+    /* OVERFLOW */
+    _addMultichartOverflowClipMarker: function() {
+        var m = 10;
+        var dr = 5;
+        function getRadius(mark) {
+            var r = mark.shapeRadius();
+            if(r == null) { 
+                var  s = mark.shapeSize();
+                if(s != null) { r = Math.sqrt(s); }
+            }
+
+            return r || dr;
+        }
+
+        var pvDot = new pvc.visual.Dot(
+            this,
+            this.pvPanel,
+            {
+                noSelect:      true,
+                noHover:       true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltip:     false,
+                freePosition:  true,
+                extensionId:   'multiChartOverflowMarker'
+            })
+            .pvMark
+            .lock('data', [new pvc.visual.Scene(null, {panel: this})])
+            .shape("triangle")
+            .shapeRadius(dr)
+            .top (null)
+            .left(null)
+            .bottom(function() { return getRadius(this) + m; })
+            .right (function() { return getRadius(this) + m; })
+            .shapeAngle(0)
+            .lineWidth(1.5)
+            .strokeStyle("red")
+            .fillStyle("rgba(255, 0, 0, 0.2)");
+        
+        // When non-interactive tooltip prop is not created...
+        if(def.fun.is(pvDot.tooltip)) {
+            pvDot.tooltip("Some charts did not fit the available space.");
+        }
+
+    },
+
     /* SELECTION & RUBBER-BAND */
     _onSelect: function(context){
         var datums = context.scene.datums().array(),
@@ -16346,16 +16457,28 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             // Not assigned
             return;
         }
-        
+        var data  = multiChartRole.flatten(chart.data, {visible: true});
+        var leafCount = data._children.length;
+
         var clientSize = layoutInfo.clientSize;
         var options = chart.options;
         
-        // multiChartMax can be Infinity
-        var multiChartMax = Number(options.multiChartMax);
-        if(isNaN(multiChartMax) || multiChartMax < 1) {
-            multiChartMax = Infinity;
+        /* I - Determine how many small charts to create */
+        var multiChartMax, colCount, rowCount, multiChartMaxColumns;
+
+        if(chart._isMultiChartOverflowClipRetry) {
+            rowCount = chart._clippedMultiChartRowsMax;
+            colCount = chart._clippedMultiChartColsMax;
+            multiChartMaxColumns = colCount;
+            multiChartMax = rowCount * colCount;
+        } else {
+            // multiChartMax can be Infinity
+            multiChartMax = Number(options.multiChartMax);
+            if(isNaN(multiChartMax) || multiChartMax < 1) {
+                multiChartMax = Infinity;
+            }
         }
-        
+
         // TODO - multi-chart pagination
 //        var multiChartPageIndex;
 //        if(isFinite(multiChartMax)) {
@@ -16369,8 +16492,6 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
 //            }
 //        }
         
-        var data  = multiChartRole.flatten(chart.data, {visible: true});
-        var leafCount = data._children.length;
         var count = Math.min(leafCount, multiChartMax);
         if(count === 0) {
             // Shows no message to the user.
@@ -16378,24 +16499,33 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             return;
         }
         
-        // multiChartMaxColumns can be Infinity
-        var multiChartMaxColumns = +options.multiChartMaxColumns; // to number
-        if(isNaN(multiChartMaxColumns) || multiChartMax < 1) {
-            multiChartMaxColumns = 3;
+        if(!chart._isMultiChartOverflowClipRetry) {
+            /* Determine basic layout (row and col count) */
+
+            // multiChartMaxColumns can be Infinity
+	        multiChartMaxColumns = +options.multiChartMaxColumns; // to number
+	        if(isNaN(multiChartMaxColumns) || multiChartMax < 1) {
+	            multiChartMaxColumns = 3;
+	        }
+
+	        colCount = Math.min(count, multiChartMaxColumns);
+	        // <Debug>
+	        /*jshint expr:true */
+	        colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
+	        // </Debug>
+	        
+	        rowCount = Math.ceil(count / colCount);
+	        // <Debug>
+	        /*jshint expr:true */
+	        rowCount >= 1 || def.assert("Must be at least 1");
+	        // </Debug>
         }
-        
-        var colCount = Math.min(count, multiChartMaxColumns);
-        // <Debug>
-        /*jshint expr:true */
-        colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
-        // </Debug>
-        
-        var rowCount = Math.ceil(count / colCount);
-        // <Debug>
-        /*jshint expr:true */
-        rowCount >= 1 || def.assert("Must be at least 1");
-        // </Debug>
-        
+
+        // ----------------
+        var prevLayoutInfo = layoutInfo.previous;
+        var initialClientWidth   = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
+        var initialClientHeight  = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
+
         var width = pvc.PercentValue.parse(options.multiChartWidth);
         if(width == null){
             var colsInAvailableWidth = isFinite(multiChartMaxColumns) ? colCount : 3;
@@ -16408,11 +16538,10 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         if((rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
            (colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
             // Use the initial client height
-            var prevLayoutInfo = layoutInfo.previous;
             if(!prevLayoutInfo){
                 height = clientSize.height;
             } else {
-                height = prevLayoutInfo.height;
+                height = initialClientHeight;
             }
         } else {
             // ar ::= width / height
@@ -16432,6 +16561,54 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
         }
 
         // ----------------------
+        var finalClientWidth  = width  * colCount;
+        var finalClientHeight = height * rowCount;
+
+        // If not already repeating due to multiChartOverflow=clip
+        if(!chart._isMultiChartOverflowClipRetry) {
+            
+            chart._isMultiChartOverflowClip = false;
+
+            switch(pvc.parseMultiChartOverflow(options.multiChartOverflow)) {
+                case 'fit': 
+                    if(finalClientWidth > initialClientWidth) {
+                        finalClientWidth = initialClientWidth;
+                        width = finalClientWidth / colCount;
+                    }
+                    if(finalClientHeight > initialClientHeight) {
+                        finalClientHeight = initialClientHeight;
+                        height = finalClientHeight / rowCount;
+                    }
+                    break;
+
+                case 'clip': 
+                    // Limit the number of charts to those that actually fit entirely.
+                    // If this layout is actually used, it will be necessary
+                    // to repeat chart._create .
+                    var clipW = finalClientWidth > initialClientWidth;
+                    if(clipW) {
+                        // May be 0
+                        colCount = Math.floor(initialClientWidth / width);
+                    }
+
+                    
+                    var clipH = finalClientHeight > initialClientHeight;
+                    if(clipH) {
+                        rowCount = Math.floor(initialClientHeight / height);
+                    }
+
+                    if(clipH || clipW) {
+                        // HACK: Notify the top chart that multi-charts overflowed...
+                        chart._isMultiChartOverflowClip = true;
+                        chart._clippedMultiChartRowsMax = rowCount;
+                        chart._clippedMultiChartColsMax = colCount;
+                    }
+                    break;
+                // default 'grow'
+            }
+        }
+
+        // ----------------------
         
         def.set(
            layoutInfo, 
@@ -16443,8 +16620,8 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
             'rowCount', rowCount);
         
         return {
-            width:  width  * colCount,
-            height: Math.max(clientSize.height, height * rowCount) // vertical align center: pass only: height * rowCount
+            width:  finalClientWidth,
+            height: Math.max(clientSize.height, finalClientHeight) // vertical align center: pass only: height * rowCount
         };
     },
     
@@ -16511,7 +16688,7 @@ pvc.MultiChartPanel = pvc.BasePanel.extend({
 //    },
     
     _createCore: function(li){
-        if(!li.data){
+    	if(!li.data){
             // Empty
             return;
         }
