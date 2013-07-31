@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130411
+//VERSION TRUNK-20130731
 
 var def = (function() {
 
@@ -1321,11 +1321,10 @@ def.scope(function(){
             
             for(var p in mixin){
                 if(p !== 'prototype'){
-                    var v1 = def.getOwn(this, p);
-                    
                     var v2 = mixin[p];
                     var o2 = def.object.as(v2);
                     if(o2){
+                        var v1 = def.getOwn(this, p);
                         var v1Local = (v1 !== undefined);
                         if(!v1Local){
                             v1 = getStatic(state.base, p);
