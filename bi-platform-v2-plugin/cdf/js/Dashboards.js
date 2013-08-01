@@ -2902,58 +2902,57 @@ Dashboards.equalValues = function(a, b) {
   return a == b;
 };
 
+// Adapted from http://www.cs.rit.edu/~ncs/color/t_convert.html
 /**
-* Converts HSV to RGB value.
-*
-* @param {Integer} h Hue as a value between 0 - 360 degrees
-* @param {Integer} s Saturation as a value between 0 - 100 %
-* @param {Integer} v Value as a value between 0 - 100 %
-* @return {Array} The RGB values  EG: [r,g,b], [255,255,255]
-*
-* @static
-*/
-Dashboards.hsvToRgb = function (h,s,v) {
+ * Converts an HSV to an RGB color value.
+ * 
+ * @param {number} h Hue as a value between 0 - 360 (degrees)
+ * @param {number} s Saturation as a value between 0 - 100 (%)
+ * @param {number} v Value as a value between 0 - 100 (%)
+ * @return {string} An rgb(...) color string.
+ *
+ * @static
+ */
+Dashboards.hsvToRgb = function(h, s, v) {
+    v = v / 100; // idem
 
-    s = s / 100;
-    v = v / 100;
+    var rgb;
+    if(s === 0) {
+      // achromatic (grey)
+      rgb = [v, v, v];
+    } else {
+        var h6  = (h % 360) / 60; // [0, 360[ -> [0 - 6[
+        var h6i = ~~h6;           // floor (0, 1, 2, 3, 4, 5)
+        var h6r = h6 - h6i;       // remainder [0, 1[
 
-    var hi = Math.floor((h/60) % 6);
-    var f = (h / 60) - hi;
-    var p = v * (1 - s);
-    var q = v * (1 - f * s);
-    var t = v * (1 - (1 - f) * s);
+        s = s / 100; // 0 - 1
 
-    var rgb = [];
+        var a = 1 - s;
+        var b = 1 - s * h6r;
+        var c = 1 - s * (1 - h6r);
 
-    switch (hi) {
-        case 0: rgb = [v,t,p];break;
-        case 1: rgb = [q,v,p];break;
-        case 2: rgb = [p,v,t];break;
-        case 3: rgb = [p,q,v];break;
-        case 4: rgb = [t,p,v];break;
-        case 5: rgb = [v,p,q];break;
+        switch(h6i) {
+            case 0: rgb = [1, c, a]; break;
+            case 1: rgb = [b, 1, a]; break;
+            case 2: rgb = [a, 1, c]; break;
+            case 3: rgb = [a, b, 1]; break;
+            case 4: rgb = [c, a, 1]; break;
+            case 5: rgb = [1, a, b]; break;
+        }
+        
+        rgb.forEach(function(val, i) {
+          val *= v;
+          rgb[i] = Math.min(255, Math.round(val * 256));
+        });
     }
 
-    var r = Math.min(255, Math.round(rgb[0]*256)),
-        g = Math.min(255, Math.round(rgb[1]*256)),
-        b = Math.min(255, Math.round(rgb[2]*256));
-
-    return "rgb("+ [r,g,b].join(",")+")";
-
-}
+    return "rgb(" + rgb.join(",") + ")";
+};
 
 /**
-
- *
-
  * UTF-8 data encode / decode
 
  * http://www.webtoolkit.info/
-
- *
-
- *
-
  **/
 
 function encode_prepare_arr(value) {
