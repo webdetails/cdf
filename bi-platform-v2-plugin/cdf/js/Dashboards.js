@@ -2902,7 +2902,7 @@ Dashboards.equalValues = function(a, b) {
   return a == b;
 };
 
-// Adapted from http://www.cs.rit.edu/~ncs/color/t_convert.html
+// Based on the algorithm described at http://en.wikipedia.org/wiki/HSL_and_HSV.
 /**
  * Converts an HSV to an RGB color value.
  * 
@@ -2914,37 +2914,32 @@ Dashboards.equalValues = function(a, b) {
  * @static
  */
 Dashboards.hsvToRgb = function(h, s, v) {
-    v = v / 100; // idem
+    v = v / 100; // 0 - 1
+    s = s / 100; // idem
+    
+    var h6 = (h % 360) /60;
+    var chroma = v * s;
+    var m = v - chroma;
+    var h6t = Math.abs((h6 % 2) - 1);
+    //var r = 1 - h6t;
+    //var x = chroma * r;
+    var x_m = v * (1 - s * h6t); // x + m
+    var c_m = v; // chroma + m
+    // floor(h6) (0, 1, 2, 3, 4, 5)
 
     var rgb;
-    if(s === 0) {
-      // achromatic (grey)
-      rgb = [v, v, v];
-    } else {
-        var h6  = (h % 360) / 60; // [0, 360[ -> [0 - 6[
-        var h6i = ~~h6;           // floor (0, 1, 2, 3, 4, 5)
-        var h6r = h6 - h6i;       // remainder [0, 1[
-
-        s = s / 100; // 0 - 1
-
-        var a = 1 - s;
-        var b = 1 - s * h6r;
-        var c = 1 - s * (1 - h6r);
-
-        switch(h6i) {
-            case 0: rgb = [1, c, a]; break;
-            case 1: rgb = [b, 1, a]; break;
-            case 2: rgb = [a, 1, c]; break;
-            case 3: rgb = [a, b, 1]; break;
-            case 4: rgb = [c, a, 1]; break;
-            case 5: rgb = [1, a, b]; break;
-        }
-        
-        rgb.forEach(function(val, i) {
-          val *= v;
-          rgb[i] = Math.min(255, Math.round(val * 256));
-        });
+    switch(~~h6) {
+        case 0: rgb = [c_m, x_m, m  ]; break;
+        case 1: rgb = [x_m, c_m, m  ]; break;
+        case 2: rgb = [m,   c_m, x_m]; break;
+        case 3: rgb = [m,   x_m, c_m]; break;
+        case 4: rgb = [x_m, m,   c_m]; break;
+        case 5: rgb = [c_m, m,   x_m]; break;
     }
+
+    rgb.forEach(function(val, i) {
+      rgb[i] = Math.min(255, Math.round(val * 256));
+    });
 
     return "rgb(" + rgb.join(",") + ")";
 };
