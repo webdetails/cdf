@@ -45,7 +45,7 @@ import org.springframework.security.GrantedAuthority;
 import org.springframework.security.providers.anonymous.AnonymousAuthenticationToken;
 import pt.webdetails.cpf.InterPluginCall;
 import pt.webdetails.cpf.repository.PentahoRepositoryAccess;
-import pt.webdetails.cpf.repository.BaseRepositoryAccess.FileAccess;
+import pt.webdetails.cpf.repository.IRepositoryAccess.FileAccess;
 
 /**
  *
