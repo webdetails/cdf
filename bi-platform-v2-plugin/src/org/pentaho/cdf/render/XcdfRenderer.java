@@ -1,19 +1,14 @@
-package org.pentaho.cdf;
+package org.pentaho.cdf.render;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.Document;
 import org.pentaho.platform.api.action.IVarArgsAction;
-import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
-import org.pentaho.platform.api.repository2.unified.data.simple.SimpleRepositoryFileData;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 import org.pentaho.platform.web.http.api.resources.IFileResourceRenderer;

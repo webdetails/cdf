@@ -1,4 +1,4 @@
-package org.pentaho.cdf;
+package org.pentaho.cdf.render;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,20 +8,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import org.pentaho.cdf.context.DashboardContextApi;
+import org.pentaho.cdf.CdfConstants;
+import org.pentaho.cdf.Messages;
+import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
 
 import org.pentaho.platform.api.engine.IPentahoSession;
@@ -44,6 +39,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
 
   private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@"; //$NON-NLS-1$
   public static final String PLUGIN_NAME = "pentaho-cdf"; //$NON-NLS-1$
+  private static final String PREFIX_PARAMETER = "param";
  
   OutputStream outputStream = null;
   RepositoryFile jcrSourceFile;
@@ -245,8 +241,21 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     getHeaders(dashboardContent, getOutputStream());
     outputStream.write(intro.substring(headIndex + 7, length - 1).getBytes("UTF-8")); //$NON-NLS-1$
 
-    DashboardContextApi contextApi = new DashboardContextApi();
-    contextApi.getContext(filePath, getRequestParams(), getOutputStream());
+    IParameterProvider parameters = getRequestParams();
+    HashMap<String, String> params = new HashMap<String, String>();
+
+    Iterator enumeration = parameters.getParameterNames();
+    while (enumeration.hasNext()){
+      final String param = (String)enumeration.next();
+
+      if (param.startsWith(PREFIX_PARAMETER)){
+        params.put(param.substring(PREFIX_PARAMETER.length()), parameters.getStringParameter(param, ""));
+      }
+    }
+
+    String viewId = parameters.getStringParameter("view", parameters.getStringParameter("action", ""));
+
+    ContextEngine.getInstance().getContext(filePath, viewId , "", params, getOutputStream());
     outputStream.write("<div id=\"dashboardContent\">".getBytes("UTF-8")); //$NON-NLS-1$
 
     outputStream.write(dashboardContent.getBytes("UTF-8")); //$NON-NLS-1$
