@@ -1,5 +1,10 @@
 package org.pentaho.cdf.utils;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Created by IntelliJ IDEA.
  * User: pedro
@@ -44,5 +49,35 @@ public class Util {
   public static final boolean IsNullOrEmpty(final String str){
   	return (str == null || str.trim().length() == 0);
   }
-
+  
+  /**
+   * extracts all request parameters from a given http request
+   * @param request HttpServletRequest
+   * @return HashMap where (key,value) = (paramName, paramValue)
+   */
+  public static HashMap<String,String> getRequestParameters(HttpServletRequest request){
+	  
+	  HashMap<String, String> params = new HashMap<String, String>();
+	  
+	  if(request != null && request.getParameterMap() != null && request.getParameterMap().size() > 0){
+		  @SuppressWarnings("rawtypes")
+		  Enumeration enumeration = request.getParameterNames();
+		  
+		  while (enumeration.hasMoreElements()) {
+	        String param = (String)enumeration.nextElement();
+	        params.put(param, request.getParameter(param));
+	      }
+	  }
+	  
+	  return params;
+  }
+  
+  /**
+   * a string is deemed 'empty' when it is null or when its trimmed size is zero
+   * @param s string to check
+   * @return true if empty, false otherwise
+   */
+  public static boolean isEmpty(String s){
+	  return s == null || s.trim().equals("");
+  }
 }

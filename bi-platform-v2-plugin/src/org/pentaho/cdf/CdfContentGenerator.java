@@ -43,13 +43,16 @@ import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.api.repository.IContentItem;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.pentaho.platform.repository2.unified.fileio.RepositoryFileInputStream;
 import org.pentaho.platform.util.web.MimeHelper;
 
 import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.cpf.repository.RepositoryAccess;
 import pt.webdetails.cpf.SimpleContentGenerator;
 import pt.webdetails.packager.Packager;
+import org.pentaho.cdf.utils.Util;
 
 
 
@@ -66,22 +69,9 @@ import pt.webdetails.packager.Packager;
 @Path("/pentaho-cdf/api")
 public class CdfContentGenerator extends SimpleContentGenerator {
 
-  public static final String PLUGIN_NAME = "pentaho-cdf"; //$NON-NLS-1$
   private static final long serialVersionUID = 5608691656289862706L;
   private static final Log logger = LogFactory.getLog(CdfContentGenerator.class);
-  private static final String MIMETYPE = "text/html"; //$NON-NLS-1$
-  // Possible actions
-  private static final String MIME_HTML = "text/html";
-  private static final String MIME_CSV = "text/csv";
-  private static final String MIME_XLS = "application/vnd.ms-excel";
-  // CDF Resource Relative URL
-  private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
-  //SUGAR
-  private static final String NAVIGATOR = "navigator";
-  private static final String CONTENTLIST = "contentList";
-  private static final String SOLUTIONTREE = "solutionTree";
-  private static final String TYPE_FOLDER = "FOLDER";
-  private static final String HIDDEN_DESC = "Hidden";
+    
   public String RELATIVE_URL;
   private Packager packager;
 
@@ -135,7 +125,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         RELATIVE_URL = RELATIVE_URL.substring(0, RELATIVE_URL.length() - 1);
       }
 
-      contentItem = outputHandler.getOutputContentItem("response", "content", instanceId, MIME_HTML);
+      contentItem = outputHandler.getOutputContentItem("response", "content", instanceId, CdfConstants.MIME_HTML);
       out = contentItem.getOutputStream(null);
 
       // If callbacks is properly setup, we assume we're being called from another plugin
@@ -174,22 +164,22 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   private void renderXcdf(final OutputStream out, final IParameterProvider requestParams, final String xcdfFilePath, String template) throws Exception {
     long start = System.currentTimeMillis();
 
-    UUID uuid = CpfAuditHelper.startAudit(PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, requestParams);
+    UUID uuid = CpfAuditHelper.startAudit(CdfConstants.PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, requestParams);
 
     try {
       final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
       if (mimeTypeListener != null) {
-        mimeTypeListener.setMimeType(MIMETYPE);
+        mimeTypeListener.setMimeType(CdfConstants.MIME_HTML);
       }
 
       renderXCDFDashboard(requestParams, out, xcdfFilePath, template);
 
       long end = System.currentTimeMillis();
-      CpfAuditHelper.endAudit(PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
+      CpfAuditHelper.endAudit(CdfConstants.PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
 
     } catch (Exception e) {
       long end = System.currentTimeMillis();
-      CpfAuditHelper.endAudit(PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
+      CpfAuditHelper.endAudit(CdfConstants.PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
       throw e;
     }
   }
@@ -197,12 +187,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   public void renderXCDFDashboard(final IParameterProvider requestParams, final OutputStream out, final String xcdfFilePath, String template) throws Exception {
     long start = System.currentTimeMillis();
 
-    UUID uuid = CpfAuditHelper.startAudit(PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, requestParams);
+    UUID uuid = CpfAuditHelper.startAudit(CdfConstants.PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, requestParams);
     try {
 
       final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
       if (mimeTypeListener != null) {
-        mimeTypeListener.setMimeType(MIMETYPE);
+        mimeTypeListener.setMimeType(CdfConstants.MIME_HTML);
       }
 
       XcdfRenderer xcdfRenderer = new XcdfRenderer();
@@ -239,12 +229,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         out.write("Can not open file".getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
       }
       long end = System.currentTimeMillis();
-      CpfAuditHelper.endAudit(PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
+      CpfAuditHelper.endAudit(CdfConstants.PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
 
     } catch (Exception e) {
       e.printStackTrace();
       long end = System.currentTimeMillis();
-      CpfAuditHelper.endAudit(PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
+      CpfAuditHelper.endAudit(CdfConstants.PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
       throw e;
     }
 
@@ -253,10 +243,18 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @GET
   @Path("/getResource")
   @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
-  public void getResource(
-          @QueryParam("path") String path,
-          @Context HttpServletResponse servletResponse) throws Exception {
+  public void getResource(@QueryParam(CdfConstants.PARAM_RESOURCE) String resource,
+		  				  @QueryParam(CdfConstants.PARAM_PATH) String path,
+          				  @Context HttpServletResponse servletResponse) throws Exception {
     try {
+    
+      if(!Util.isEmpty(resource) && Util.isEmpty(path)){
+    	  //legacy calls used resource param; 5.0 calls use path param
+    	  path = resource;
+      }
+      
+      path = path != null && path.endsWith("/content") ? path.substring(0, path.indexOf("/content")) : path;
+      
       servletResponse.setHeader("Content-Type", MimeHelper.getMimeTypeFromFileName(path));
 
       final IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
@@ -268,98 +266,102 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         // We can't provide this type of file
         throw new SecurityException("Not allowed");
       }
-      RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(userSession);
+      RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(PentahoSessionHolder.getSession());
 
       final InputStream in = repositoryAccess.getResourceInputStream(path, RepositoryAccess.FileAccess.EXECUTE);
+      
       try {
         IOUtils.copy(in, servletResponse.getOutputStream());
+        servletResponse.getOutputStream().flush();
       } finally {
         IOUtils.closeQuietly(in);
       }
     } catch (SecurityException e) {
-      getResponse().sendError(HttpServletResponse.SC_FORBIDDEN);
+    	servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
   }
-
+  
   @GET
   @Path("/export")
   @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
-  public void export(@QueryParam("path") String path,
-                     @QueryParam("exportType") @DefaultValue("excel") String exportType,
+  public void export(@QueryParam(CdfConstants.PARAM_SOLUTION) String solution,
+		  			 @QueryParam(CdfConstants.PARAM_PATH) String path,
+		  			 @QueryParam(CdfConstants.PARAM_ACTION) String action,
+		  			 @QueryParam(CdfConstants.PARAM_CONTENT_TYPE) @DefaultValue(CdfConstants.MIME_HTML) String contentType,
+                     @QueryParam(CdfConstants.PARAM_EXPORT_TYPE) @DefaultValue(CdfConstants.EXCEL) String exportType,
                      @Context HttpServletRequest servletRequest,
                      @Context HttpServletResponse servletResponse) throws Exception{
+	  
+	  String value = "";
 
-    try {
-      OutputStream output = servletResponse.getOutputStream();
-      HashMap<String, String> params = new HashMap<String, String>();
-
-      Enumeration enumeration = servletRequest.getParameterNames();
-      while (enumeration.hasMoreElements()) {
-        String param = (String)enumeration.nextElement();
-        params.put(param, servletRequest.getParameter(param));
-      }
-
-      if(ActionEngine.getInstance().executeAction(path, userSession, output, params)){
+	  if(!Util.isEmpty(solution) || !Util.isEmpty(action)){
+		  //legacy call using solution, path, action request parameters
+		  value = concatSolutionAndPathAndAction(solution, path, action);
+		  
+	  }else if (!Util.isEmpty(path)){
+		  // 5.0 call using path
+		 value = path;
+	  }
+	  
+      if(ActionEngine.getInstance().executeAction(value, contentType, servletRequest, servletResponse, PentahoSessionHolder.getSession(), Util.getRequestParameters(servletRequest), outputHandler.getMimeTypeListener())){
         Export export;
 
-        if (exportType.equals("csv")) {
-          export = new ExportCSV(output);
-          setResponseHeaders(MIME_CSV, 0, "export" + export.getExtension());
+        if ("csv".equalsIgnoreCase(exportType)) {
+          export = new ExportCSV(servletResponse.getOutputStream());
+          setResponseHeaders(CdfConstants.MIME_CSV, 0, "export" + export.getExtension());
         } else {
-          export = new ExportExcel(output);
-          setResponseHeaders(MIME_XLS, 0, "export" + export.getExtension());
+          export = new ExportExcel(servletResponse.getOutputStream());
+          setResponseHeaders(CdfConstants.MIME_XLS, 0, "export" + export.getExtension());
         }
 
-        export.exportFile(new JSONObject(output));
+        export.exportFile(new JSONObject(servletResponse.getOutputStream()));
       }
-    } catch (IOException ex){
-      logger.error(ex.getMessage());
-    }
   }
-
 
   @GET
   @Path("/callAction")
-  public void callAction(@QueryParam("path") String resource,
+  public void callAction(@QueryParam(CdfConstants.PARAM_SOLUTION) String solution,
+						 @QueryParam(CdfConstants.PARAM_PATH) String path,
+						 @QueryParam(CdfConstants.PARAM_ACTION) String action,
+		  				 @QueryParam(CdfConstants.PARAM_CONTENT_TYPE) @DefaultValue(CdfConstants.MIME_HTML) String contentType,
                          @Context HttpServletRequest servletRequest,
-                         @Context HttpServletResponse servletResponse){
-    try {
-      OutputStream output = servletResponse.getOutputStream();
-      HashMap<String, String> params = new HashMap<String, String>();
-
-      Enumeration enumeration = servletRequest.getParameterNames();
-      while (enumeration.hasMoreElements()) {
-        String param = (String)enumeration.nextElement();
-        params.put(param, servletRequest.getParameter(param));
-      }
-
-      ActionEngine.getInstance().executeAction(resource, userSession, output, params);
-    } catch (IOException ex){
-      logger.error(ex.getMessage());
-    }
-
+                         @Context HttpServletResponse servletResponse) throws Exception{
+	  
+	  String value = "";
+	  
+	  if(!Util.isEmpty(solution) || !Util.isEmpty(action)){
+		  //legacy call using solution, path, action request parameters
+		  value = concatSolutionAndPathAndAction(solution, path, action);
+		  
+	  }else if (!Util.isEmpty(path)){
+		  // 5.0 call using path
+		 value = path;
+	  }
+	  
+	  ActionEngine.getInstance().executeAction(value, contentType, servletRequest, servletResponse, PentahoSessionHolder.getSession(), Util.getRequestParameters(servletRequest), outputHandler.getMimeTypeListener());
   }
-
+  
   @GET
   @Path("/viewAction")
-  public void viewAction(@QueryParam("path") String resource,
+  public void viewAction(@QueryParam(CdfConstants.PARAM_SOLUTION) String solution,
+						 @QueryParam(CdfConstants.PARAM_PATH) String path,
+						 @QueryParam(CdfConstants.PARAM_ACTION) String action,
+		  				 @QueryParam(CdfConstants.PARAM_CONTENT_TYPE) @DefaultValue(CdfConstants.MIME_HTML) String contentType,
                          @Context HttpServletRequest servletRequest,
-                         @Context HttpServletResponse servletResponse){
-    try {
-      OutputStream output = servletResponse.getOutputStream();
-      HashMap<String, String> params = new HashMap<String, String>();
-
-      Enumeration enumeration = servletRequest.getParameterNames();
-      while (enumeration.hasMoreElements()) {
-        String param = (String)enumeration.nextElement();
-        params.put(param, servletRequest.getParameter(param));
-      }
-
-      ActionEngine.getInstance().executeAction(resource, userSession, output, params);
-    } catch (IOException ex){
-      logger.error(ex.getMessage());
-    }
-
+                         @Context HttpServletResponse servletResponse) throws Exception{
+	  
+	  String value = "";
+	  
+	  if(!Util.isEmpty(solution) || !Util.isEmpty(action)){
+		  //legacy call using solution, path, action request parameters
+		  value = concatSolutionAndPathAndAction(solution, path, action);
+		  
+	  }else if (!Util.isEmpty(path)){
+		  // 5.0 call using path
+		 value = path;
+	  }
+      
+      ActionEngine.getInstance().executeAction(value, contentType, servletRequest, servletResponse, PentahoSessionHolder.getSession(), Util.getRequestParameters(servletRequest), outputHandler.getMimeTypeListener());
   }
 
   @GET
@@ -388,30 +390,43 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @Produces(APPLICATION_JSON)
   @Consumes({ APPLICATION_XML, APPLICATION_JSON })
   public void getJSONSolution(
-          @QueryParam("path") @DefaultValue("/") String path,
-          @QueryParam("depth") @DefaultValue("-1") int depth,
-          @QueryParam("showHiddenFiles") @DefaultValue("false") boolean showHiddenFiles,
-          @QueryParam("mode") @DefaultValue("*") String mode,
+		  @QueryParam(CdfConstants.PARAM_SOLUTION) String solution,
+		  @QueryParam(CdfConstants.PARAM_PATH) @DefaultValue(CdfConstants.DIR_SEPARATOR) String path,
+		  @QueryParam(CdfConstants.PARAM_ACTION) String action,
+          @QueryParam(CdfConstants.PARAM_DEPTH) @DefaultValue("-1") int depth,
+          @QueryParam(CdfConstants.PARAM_SHOW_HIDDEN_FILES) @DefaultValue("false") boolean showHiddenFiles,
+          @QueryParam(CdfConstants.PARAM_MODE) @DefaultValue("*") String mode,
           @Context HttpServletResponse servletResponse) throws InvalidCdfOperationException  {
 
-    RepositoryFileTree tree = RepositoryAccess.getRepository(userSession).getRepositoryFileTree(path, depth, showHiddenFiles, "*");
+	String value = "";
+	  
+	if(!Util.isEmpty(solution) || !Util.isEmpty(action)){
+	  //legacy call using solution, path, action request parameters
+	  value = concatSolutionAndPathAndAction(solution, path, action);
+		  
+	}else if (!Util.isEmpty(path)){
+	  // 5.0 call using path
+	 value = path;
+	}  
+	  
+    RepositoryFileTree tree = RepositoryAccess.getRepository(PentahoSessionHolder.getSession()).getRepositoryFileTree(value, depth, showHiddenFiles, "*");
 
     if(tree != null) {
       try {
         JSONObject jsonRoot = new JSONObject();
 
-        if (mode.equalsIgnoreCase(NAVIGATOR)) {
+        if (mode.equalsIgnoreCase(CdfConstants.NAVIGATOR)) {
           JSONObject json = new JSONObject();
           processTree(tree, json, false);
           jsonRoot.put("solution", json);
-        } else if (mode.equalsIgnoreCase(CONTENTLIST)) {
+        } else if (mode.equalsIgnoreCase(CdfConstants.CONTENTLIST)) {
           jsonRoot = repositoryFileToJSONObject(tree.getFile());
           jsonRoot.put("content", new JSONArray());
           jsonRoot.remove("files");
           jsonRoot.remove("folders");
 
           processContentListTree(tree, jsonRoot);
-        } else if (mode.equalsIgnoreCase(SOLUTIONTREE)) {
+        } else if (mode.equalsIgnoreCase(CdfConstants.SOLUTIONTREE)) {
           JSONObject json = new JSONObject();
           processTree(tree, json, true);
           jsonRoot.put("solution", json);
@@ -430,23 +445,14 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @GET
   @Path("/getContext")
   @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
-  public void getContext(@DefaultValue("") @QueryParam("path") String path,
-                         @DefaultValue("") @QueryParam("viewId") String viewId,
-                         @DefaultValue("") @QueryParam("action") String action,
-
+  public void getContext(@QueryParam(CdfConstants.PARAM_PATH) @DefaultValue(CdfConstants.EMPTY_STRING) String path,
+						 @QueryParam(CdfConstants.PARAM_ACTION) @DefaultValue(CdfConstants.EMPTY_STRING) String action,
+                         @DefaultValue(CdfConstants.EMPTY_STRING) @QueryParam(CdfConstants.PARAM_VIEW_ID) String viewId,
                          @Context HttpServletResponse servletResponse,
                          @Context HttpServletRequest servletRequest){
+	try {
 
-    try {
-      HashMap<String, String> params = new HashMap<String, String>();
-
-      Enumeration enumeration = servletRequest.getParameterNames();
-      while (enumeration.hasMoreElements()) {
-        String param = (String)enumeration.nextElement();
-        params.put(param, servletRequest.getParameter(param));
-      }
-
-      ContextEngine.getInstance().getContext(path, viewId, action, params, servletResponse.getOutputStream());
+      ContextEngine.getInstance().getContext(path, viewId, action, Util.getRequestParameters(servletRequest), servletResponse.getOutputStream());
     } catch (IOException ex){
       logger.error(ex.getMessage());
     }
@@ -473,13 +479,13 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       json.put("name", wrapString(repositoryFile.getName()));
       json.put("path", repositoryFile.getPath());
       json.put("visible", !repositoryFile.isHidden());
-      json.put("title", repositoryFile.isHidden() ? HIDDEN_DESC : wrapString(repositoryFile.getTitle()));
+      json.put("title", repositoryFile.isHidden() ? CdfConstants.HIDDEN_DESC : wrapString(repositoryFile.getTitle()));
       json.put("description", wrapString(repositoryFile.getDescription()));
       json.put("creatorId", wrapString(repositoryFile.getCreatorId()));
       json.put("locked", repositoryFile.isLocked());
 
       if(repositoryFile.isFolder()){
-        json.put("type", TYPE_FOLDER);
+        json.put("type", CdfConstants.TYPE_FOLDER);
         json.put("files", new JSONArray());
         json.put("folders", new JSONArray());
       }else{
@@ -555,7 +561,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   }
 
   private void init() throws Exception {
-    String rootdir = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
+    String rootdir = PentahoSystem.getApplicationContext().getSolutionPath("system/" + CdfConstants.PLUGIN_NAME);
     final File blueprintFile = new File(rootdir + "/resources-blueprint.txt");
     final File mobileFile = new File(rootdir + "/resources-mobile.txt");
 
@@ -577,7 +583,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       scriptsList.addAll(Arrays.asList(blueprintResources.get("commonLibrariesScript").toString().split(",")));
       for (int i = 0; i < scriptsList.size(); i++) {
         String fname = scriptsList.get(i);
-        scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+        scriptsList.set(i, fname.replaceAll(CdfConstants.RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
       }
       packager.registerPackage("scripts", Packager.Filetype.JS, rootdir, rootdir + "/js/scripts.js", scriptsList.toArray(new String[scriptsList.size()]));
     }
@@ -587,7 +593,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       stylesList.addAll(Arrays.asList(blueprintResources.get("commonLibrariesLink").toString().split(",")));
       for (int i = 0; i < stylesList.size(); i++) {
         String fname = stylesList.get(i);
-        stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+        stylesList.set(i, fname.replaceAll(CdfConstants.RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
       }
       packager.registerPackage("styles", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles.css", stylesList.toArray(new String[stylesList.size()]));
     }
@@ -596,7 +602,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       scriptsList.addAll(Arrays.asList(mobileResources.get("commonLibrariesScript").toString().split(",")));
       for (int i = 0; i < scriptsList.size(); i++) {
         String fname = scriptsList.get(i);
-        scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+        scriptsList.set(i, fname.replaceAll(CdfConstants.RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
       }
       packager.registerPackage("scripts-mobile", Packager.Filetype.JS, rootdir, rootdir + "/js/scripts-mobile.js", scriptsList.toArray(new String[scriptsList.size()]));
     }
@@ -606,19 +612,55 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       stylesList.addAll(Arrays.asList(mobileResources.get("commonLibrariesLink").toString().split(",")));
       for (int i = 0; i < stylesList.size(); i++) {
         String fname = stylesList.get(i);
-        stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+        stylesList.set(i, fname.replaceAll(CdfConstants.RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
       }
       packager.registerPackage("styles-mobile", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles-mobile.css", stylesList.toArray(new String[stylesList.size()]));
     }
   }
 
   public String getPluginName(){
-    return PLUGIN_NAME;
+    return CdfConstants.PLUGIN_NAME;
   }
 
   private String wrapString(String value){
     if(value == null) return "";
     else return value;
   }
-
+  
+  private String concatSolutionAndPathAndAction(String solution, String path, String action){
+	  
+	  if(Util.isEmpty(solution) && Util.isEmpty(path) && Util.isEmpty(action)){
+		  return null;
+	  }
+	  
+	  if(solution != null){
+		  if(solution.trim().startsWith(CdfConstants.DIR_SEPARATOR)){ solution = solution.trim().replaceFirst(CdfConstants.DIR_SEPARATOR, ""); }
+		  if(solution.trim().endsWith(CdfConstants.DIR_SEPARATOR)){ solution = solution.trim().substring(0, solution.lastIndexOf(CdfConstants.DIR_SEPARATOR)); }
+	  }
+	  
+	  if(path != null){
+		  if(path.trim().startsWith(CdfConstants.DIR_SEPARATOR)){ path = path.trim().replaceFirst(CdfConstants.DIR_SEPARATOR, ""); }
+		  if(path.trim().endsWith(CdfConstants.DIR_SEPARATOR)){ path = path.trim().substring(0, path.lastIndexOf(CdfConstants.DIR_SEPARATOR)); }
+	  }
+	  
+	  if(action != null){
+		  if(action.trim().startsWith(CdfConstants.DIR_SEPARATOR)){ action = action.trim().replaceFirst(CdfConstants.DIR_SEPARATOR, ""); }
+		  if(action.trim().endsWith(CdfConstants.DIR_SEPARATOR)){ action = action.trim().substring(0, action.lastIndexOf(CdfConstants.DIR_SEPARATOR)); }
+	  }
+	  
+	  // a) request params contain solution, path and action
+	  if(!Util.isEmpty(solution) && !Util.isEmpty(path) && !Util.isEmpty(action)){
+		  return solution + CdfConstants.DIR_SEPARATOR + path + CdfConstants.DIR_SEPARATOR + action;
+	  
+		// b) request params contain solution and path (path already includes action file)
+	  } else if(!Util.isEmpty(solution) && !Util.isEmpty(path)){
+		  return solution + CdfConstants.DIR_SEPARATOR + path;
+	  
+		// c) request params contain solution and action (no path used)
+	  } else if(!Util.isEmpty(solution) && !Util.isEmpty(action)){
+		  return solution + CdfConstants.DIR_SEPARATOR + action;		  
+	  }
+	  
+	  return null;
+  }
 }
