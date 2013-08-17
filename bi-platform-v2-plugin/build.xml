@@ -330,6 +330,8 @@ excludes="**/Thumbs.db"
 	  </target>
 
 
+  <target name="publish" depends='publish-pentaho'/>
+
 	  <!--=======================================================================
 		publish-pentaho-nojar (override)
 
