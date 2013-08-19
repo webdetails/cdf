@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130718
+//VERSION TRUNK-20130819
 
 pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/lib/CCC/def", "cdf/lib/CCC/protovis"], function(def, pv) {
 
@@ -2904,6 +2904,13 @@ def
  */
 def.global.NoDataException = function(){};
 
+/**
+ * @name InvalidDataException
+ * @class An error thrown when data exists but the chart cannot be rendered from it.
+ */
+def.global.InvalidDataException = function(msg) {
+    this.message = msg ? msg : "Invalid Data.";
+};
 
 pvc.data = {
     visibleKeyArgs: {visible: true}
@@ -2993,6 +3000,7 @@ function data_removeColChild(parent, childrenProp, child, parentProp) {
     
     child[parentProp] = null;
 }
+
 
 /**
  * Initializes a dimension type
@@ -19137,11 +19145,17 @@ def
                     }
                 } catch (e) {
                     /*global NoDataException:true*/
-                    if (e instanceof NoDataException) {
+                    if (e instanceof NoDataException)
+                    {
                         if(pvc.debug > 1){ this._log("No data found."); }
-
                         this._addErrorPanelMessage("No data found", true);
-                    } else {
+                    }
+                    else if (e instanceof InvalidDataException)
+                    {
+                        if(pvc.debug > 1) { this._log(e.message);}
+                        this._addErrorPanelMessage(e.message, true);
+                    }
+                    else {
                         hasError = true;
 
                         // We don't know how to handle this
@@ -20382,7 +20396,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
         this.resultset = resultset || [];
-        if (!resultset.length) {
+        if (!this.resultset.length) {
             this._warn("Resultset is empty");
         }
 
@@ -20398,7 +20412,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set metadata on root chart.");
 
         this.metadata = metadata || [];
-        if (!metadata.length) {
+        if (!this.metadata.length) {
             this._warn("Metadata is empty");
         }
 
@@ -29501,11 +29515,19 @@ def
     panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
 
     /* Create child category scenes */
+    var hasNonZeroValue = false;
     data.children().each(function(categData) {
         // Value may be negative
         // Don't create 0-value scenes
         var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
-        if(value !== 0) { new CategSceneClass(categData, value); }
+        if(value !== 0) {
+            hasNonZeroValue = true;
+            new CategSceneClass(categData, value);
+        }
+        // there is no pie
+        if (!hasNonZeroValue){
+           throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+        }
     });
 
     // -----------
@@ -29763,6 +29785,7 @@ def
     this.y = y;
 })
 .add(pv.Vector);
+
 
 /*global pvc_PercentValue:true */
 
