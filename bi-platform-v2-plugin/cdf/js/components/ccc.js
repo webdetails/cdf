@@ -11,10 +11,12 @@ var ProtovisComponent =  UnmanagedComponent.extend({
 
   render: function(values) {
     $("#" + this.htmlObject).html('<div id="'+ this.htmlObject +'protovis"></div>');
+    
     var vis = new pv.Panel()
       .canvas(this.htmlObject + "protovis")
       .width(this.width)
       .height(this.height);
+    this.vis = vis;
     this.customfunction(vis,values);
     vis.root.render();
   },
