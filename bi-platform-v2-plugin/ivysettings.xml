@@ -18,7 +18,7 @@
  <resolver ref="public" />
       <ibiblio name="java-net-maven2" root="http://download.java.net/maven/2/" m2compatible="true" />
         <ibiblio name="sonatype" root="https://oss.sonatype.org/content/groups/public/" m2compatible="true" />	
-        <ibiblio name="analytical-labs" root="http://repo.analytical-labs.com/repo" m2compatible="true" />
+        <ibiblio name="analytical-labs" root="http://repo.analytical-labs.com/alabs-snapshot-local" m2compatible="true" />
       </chain>
     </resolvers>
   <include url="${ivy.default.settings.dir}/ivysettings-local.xml"/>
