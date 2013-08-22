@@ -804,6 +804,9 @@ var QueryComponent = BaseComponent.extend({
     var query = Dashboards.getQuery( cd );
     object.queryState = query;
 
+    // Force synchronous queries
+    query.setAjaxOptions({async: false});
+
     query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
