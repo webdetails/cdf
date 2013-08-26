@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
-	<cache>false</cache>
-	<max-age>2628001</max-age>
+    <!-- set this to true for production, and false for development/localization -->
+    <cache-messages>true</cache-messages>
+    <!-- how far ahead to set the browser's cache -->
+    <max-age>2628001</max-age>
+    <cache>true</cache>	
+	
         <resources>
             <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff,ico,zip,xml</downloadable-formats>
         </resources>
