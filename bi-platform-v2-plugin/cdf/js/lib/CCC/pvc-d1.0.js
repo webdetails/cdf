@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130819
+//VERSION TRUNK-20130828
 
 pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/lib/CCC/def", "cdf/lib/CCC/protovis"], function(def, pv) {
 
@@ -29515,20 +29515,19 @@ def
     panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
 
     /* Create child category scenes */
-    var hasNonZeroValue = false;
     data.children().each(function(categData) {
-        // Value may be negative
-        // Don't create 0-value scenes
+        // Value may be negative.
+        // Don't create 0-value scenes.
+        // null is returned as 0.
         var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
-        if(value !== 0) {
-            hasNonZeroValue = true;
-            new CategSceneClass(categData, value);
-        }
-        // there is no pie
-        if (!hasNonZeroValue){
-           throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
-        }
+        if(value !== 0) { new CategSceneClass(categData, value); }
     });
+
+    // Not possible to represent as pie if there are no child scenes (=> sumAbs === 0)
+    // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
+    if (!sumAbs && !panel.visualRoles.multiChart.isBound()) {
+        throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+    }
 
     // -----------
 
