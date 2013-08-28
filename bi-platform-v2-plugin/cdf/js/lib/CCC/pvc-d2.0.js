@@ -24,8 +24,10 @@ var pvc = def.globalSpace('pvc', {
 (function() {
     /*global window:true*/
     if((typeof window !== 'undefined')  && window.location) {
-        var url = window.top.location.href;
-        if(url && (/\bdebug=true\b/).test(url)) {
+        var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+        var url = urlIfHasDebug(window.location.href) ||
+                  urlIfHasDebug(window.top.location.href);
+        if(url) {
             var m = /\bdebugLevel=(\d+)/.exec(url);
             pvc.debug = m ? (+m[1]) : 3;
         }
@@ -8961,9 +8963,7 @@ def.type('pvc.data.GroupingLevelSpec')
             if(result !== 0) { return result; }
         }
         
-        // At last, use datum source order
-        return (a.id - b.id);
-        //return 0;
+        return 0;
     },
     
     key: function(datum) {
@@ -9018,14 +9018,12 @@ def.type('pvc.data.GroupingDimensionSpec')
     },
 
     compareDatums: function(a, b) {
-        if(this.type.isComparable) {
-          var name = this.name;
-          var result =  this.comparer(a.atoms[name], b.atoms[name]);
-          if(result !== 0) { return result; }
-        }
+        //if(this.type.isComparable) {
+            return this.comparer(a.atoms[this.name], b.atoms[this.name]);
+        //}
         
         // Use datum source order
-        return this.reverse ? (b.id - a.id) : (a.id - b.id);
+        //return this.reverse ? (b.id - a.id) : (a.id - b.id);
     },
 
     toString: function() { return this.name + (this.reverse ? ' desc' : ''); }
@@ -35929,7 +35927,7 @@ def
             {name: 'median',       label: 'Median',        defaultDimension: 'median', isRequired: true},
             {name: 'lowerQuartil', label: 'Lower Quartil', defaultDimension: 'lowerQuartil'},
             {name: 'upperQuartil', label: 'Upper Quartil', defaultDimension: 'upperQuartil'},
-            {name: 'minimum',      label: 'Minimum',       defaultDimension: 'minimum'},
+            {name: 'minimum',      label: 'Minimum',       defaultDimension: 'minimum' },
             {name: 'maximum',      label: 'Maximum',       defaultDimension: 'maximum'}
         ].forEach(function(info){
             this._addVisualRole(info.name, def.create(roleSpecBase, info));
