@@ -2740,10 +2740,12 @@ Dashboards.cleanStorage = function(){
   };
 
   // Exports
+  // NOTE: using underscore.js predicates but we could also use Dashboards.isArray() and 
+  //       Dashboards.isObject() (would need to create this one.)
   D.propertiesArrayToObject = function(pArray) {
     // Mantra 1: "Order matters!"
     // Mantra 2: "Arrays are Objects!"
-        return ( _.isArray(pArray) && _pa2obj(pArray) ) || ( _.isObject(pArray) && pArray ) || undefined;  
+    return ( _.isArray(pArray) && _pa2obj(pArray) ) || ( _.isObject(pArray) && pArray ) || undefined;  
   };
 
   D.objectToPropertiesArray = function(obj) {
