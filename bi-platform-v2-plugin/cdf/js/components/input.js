@@ -78,6 +78,9 @@ var SelectBaseComponent = InputBaseComponent.extend({
     var allowMultiple = this._allowMultipleValues();
     if(allowMultiple) { selectHTML += " multiple"; }
 
+    var placeholderText = this._getPlaceholderText();
+    if(placeholderText) { selectHTML += " data-placeholder='" + placeholderText + "'" ; }
+
     var size = this._getListSize(myArray);
     if(size != null) { selectHTML += " size='" + size + "'"; }
 
@@ -142,7 +145,9 @@ var SelectBaseComponent = InputBaseComponent.extend({
       hasChanged = true;
     }
 
-    $("select", ph).val(currentVals);
+
+    // jQuery only cleans the value if it receives an empty array. 
+    $("select", ph).val( (currentVals == null && []) || currentVals );
 
     if(hasChanged) {
       // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
@@ -168,6 +173,15 @@ var SelectBaseComponent = InputBaseComponent.extend({
    */
   _allowMultipleValues: function() {
     return false;
+  },
+
+  /**
+   * Returns the placeholder label for empty values, or false if it is an non-empty String.
+   * @protected
+   */
+  _getPlaceholderText: function() {
+    var txt = this.placeholderText;
+    return ( _.isString(txt) && !_.isEmpty(txt) && txt ) || false;
   },
 
   /**
