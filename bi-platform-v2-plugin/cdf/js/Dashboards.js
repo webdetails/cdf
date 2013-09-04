@@ -1869,22 +1869,42 @@ Dashboards.cleanStorage = function(){
   });
 };
 
-Dashboards.propertiesArrayToObject = function(pArray) {
-  var obj = {};
-  for (var p in pArray) if (pArray.hasOwnProperty(p)) {
-    var prop = pArray[p];
-    obj[prop[0]] = prop[1];
-  }
-  return obj;
-};
 
-Dashboards.objectToPropertiesArray = function(obj) {
-  var pArray = [];
-  for (var key in obj) if (obj.hasOwnProperty(key)) {
-    pArray.push([key,obj[key]]);
-  }
-  return pArray;
-};
+(function (D) {
+  
+  // Conversion functions
+  function _pa2obj (pArray) {
+    var obj = {};
+      for (var p in pArray) if (pArray.hasOwnProperty(p)) {
+        var prop = pArray[p];
+        obj[prop[0]] = prop[1];
+      }
+    return obj;
+  };
+  function _obj2pa (obj) {
+    var pArray = [];
+    for (var key in obj) if (obj.hasOwnProperty(key)) {
+      pArray.push([key,obj[key]]);
+    }
+    return pArray;
+  };
+
+  // Exports
+  D.propertiesArrayToObject = function(pArray) {
+    // Mantra 1: "Order matters!"
+    // Mantra 2: "Arrays are Objects!"
+        return ( _.isArray(pArray) && _pa2obj(pArray) ) || ( _.isObject(pArray) && pArray ) || undefined;  
+  };
+
+  D.objectToPropertiesArray = function(obj) {
+    // Mantra 1: "Order matters!"
+    // Mantra 2: "Arrays are Objects!"
+    return ( _.isArray(obj) && obj) || ( _.isObject(obj) && _obj2pa(obj)) || undefined;
+  };
+
+})(Dashboards);
+
+
 
 
 /**
