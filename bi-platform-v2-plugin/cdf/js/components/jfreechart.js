@@ -539,7 +539,7 @@ var TimePlotComponent = BaseComponent.extend({
     var allData = undefined;
     //var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelinefeeder.xaction&" + parameters.join('&'); //legacy
 	var ts = "ts=" + new Date().getTime() + "&";
-    var timePlotEventSourceUrl = webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:cdf:components:timelinefeeder.xaction/xaction?" + ts + parameters.join('&');
+    var timePlotEventSourceUrl = webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:pentaho-cdf:actions:timelinefeeder.xaction/xaction?" + ts + parameters.join('&');
 	
     var myself = this;
     if(cd.events && cd.events.show == true){
@@ -554,7 +554,7 @@ var TimePlotComponent = BaseComponent.extend({
 
       //var eventUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelineeventfeeder.xaction&" + parameters.join('&'); //legacy
 	  var ts = "ts=" + new Date().getTime() + "&";
-      var eventUrl = wwebAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:cdf:components:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
+      var eventUrl = wwebAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:pentaho-cdf:actions:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){

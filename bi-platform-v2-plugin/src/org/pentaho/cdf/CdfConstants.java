@@ -37,7 +37,7 @@ public class CdfConstants {
     public static final String RELATIVE_URL_TAG = "@RELATIVE_URL@"; //$NON-NLS-1$
     
     //request parameters
-    public static final String PARAM_SOLUTION = "path"; //$NON-NLS-1$
+    public static final String PARAM_SOLUTION = "solution"; //$NON-NLS-1$
     public static final String PARAM_PATH = "path"; //$NON-NLS-1$
     public static final String PARAM_ACTION = "action"; //$NON-NLS-1$
     public static final String PARAM_VIEW_ID = "viewId"; //$NON-NLS-1$
