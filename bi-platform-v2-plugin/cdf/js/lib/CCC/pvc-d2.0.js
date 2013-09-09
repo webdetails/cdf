@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130828
+//VERSION TRUNK-20130909
 
 var pvc = (function(def, pv) {
 
@@ -18996,6 +18996,9 @@ def
                 ibits = I.Interactive | I.ShowsInteraction;
                 
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
+
+                // NOTE: VML animations perform really bad,
+                //  and so its better for the user experience to be deactivated.
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
                 
                 var preventUnselect = false;
@@ -22846,11 +22849,9 @@ def
      * @param {boolean} [ka.bypassAnimation=false] Indicates that animation should not be performed.
      * @param {boolean} [ka.recreate=false] Indicates that the panel and its descendants should be recreated.
      */
-    render: function(ka){
+    render: function(ka) {
         
-        if(!this.isTopRoot) {
-            return this.topRoot.render(ka);
-        }
+        if(!this.isTopRoot) { return this.topRoot.render(ka); }
         
         this._create(def.get(ka, 'recreate', false));
         
@@ -22859,15 +22860,21 @@ def
             return;
         }
 
-        if(!this.isVisible){
-            return;
-        }
+        if(!this.isVisible) { return; }
         
         this._onRender();
         
         var options = this.chart.options;
         var pvPanel = this.pvRootPanel;
-        
+
+        // May be animating already...
+        // If that is the case,
+        //  the following pvPanel.render() call will cause
+        //  the ongoing animation to be stopped, 
+        //  and consequently, the previous passed callback handler to be called,
+        //  before leaving the pvPanel.render() call.
+        // See the callback below.
+        var prevAnimating = this._animating;
         var animate = this.chart.animatable();
         this._animating = animate && !def.get(ka, 'bypassAnimation', false) ? 1 : 0;
         try {
@@ -22875,7 +22882,7 @@ def
             pvPanel.render();
             
             // Transition to the animation's 'end' point
-            if (this._animating) {
+            if(this._animating) {
                 this._animating = 2;
                 
                 var me = this;
@@ -22884,8 +22891,12 @@ def
                     .duration(2000)
                     .ease("cubic-in-out")
                     .start(function() {
-                        me._animating = 0;
-                        me._onRenderEnd(true);
+                        if(prevAnimating) {
+                            prevAnimating = 0;
+                        } else {
+                            me._animating = 0;
+                            me._onRenderEnd(true);
+                        }
                     });
             } else {
                 this._onRenderEnd(false);
@@ -27962,10 +27973,6 @@ def
             tim = 1;
         }
 
-        if(tim > 1 && pvc.debug >= 3) {
-            this._info("Showing only one in every " + tim + " tick labels");
-        }
-
         return tim;
     },
 
@@ -28268,6 +28275,10 @@ def
 
                     var hiddenDatas, hiddenTexts, createHiddenScene, hiddenIndex;
                     if(includeModulo > 2) {
+                        if(pvc.debug >= 3) {
+                            this._info("Showing only one in every " + includeModulo + " tick labels");
+                        }
+                        
                         var keySep = rootScene.group.owner.keySep;
 
                         createHiddenScene = function() {
