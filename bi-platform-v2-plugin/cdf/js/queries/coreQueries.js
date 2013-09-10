@@ -1,12 +1,25 @@
 /*
- Purpose: Provide extensible datasources via Dashboard Addins
- Author: Andy Grohe
- Contact: agrohe21@gmail.com
-*/
+ * queryTypes.js
+ *
+ * Registers several query types and sets the base query class.
+ * 
+ * Additional query types can be registered at any time using the Dashboards method:
+ *    Dashboards.registerQuery( name, query )
+ * The second argument, the query definition, can be one of two things:
+ *    1. An object, which will be used to extend the BaseQuery class, and the resulting class used
+ *       to create new query instances.
+ *    2. A class constructor function, which will be used directly to create new query instances
+ *       without depending on BaseQuery.
+ *
+ * Additionally, the BaseQuery class can be set to something other than the default by using:
+ *    Dashboards.setBaseQuery( constructor )
+ * but this is a risky operation which considerable implications. Use at your own risk!
+ *
+ */
 ;
 (function() {
 
-  var BaseQuery = Dashboards.BaseQuery = Base.extend({
+  var BaseQuery = Base.extend({
     name: "baseQuery",
     label: "Base Query",
     deepProperties: [ 'defaults' , 'interfaces' ],
@@ -41,9 +54,11 @@
     },
     // Default options interface in case there is no options manager defined.
     getOption: function (prop){
+      // Fallback for when Dashboards.OptionManager is not available
       return this.defaults[prop];
     },
     setOption: function (prop, value){
+      // Fallback for when Dashboards.OptionManager is not available
       this.defaults[prop] = value;
     },
     init: function (opts){
@@ -261,7 +276,10 @@
       }
     }
   });
-  Dashboards.registerQuery( "base", BaseQuery );
+  // Sets the query class that can extended to create new ones. 
+  // The registered Base needs to have an extend method.
+  Dashboards.setBaseQuery ( BaseQuery );
+
 
   var CpkEndpoints = BaseQuery.extend({
     name: "cpk",
@@ -282,39 +300,10 @@
         if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
           this.setOption('pluginId' , opts.pluginId);
           this.setOption('endpoint' , opts.endpoint);
+          var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
+              url = urlArray.join('/');
+          this.setOption('url', url );
         }
-    },
-    
-    doQuery: function(outsideCallback){
-      if (typeof this.getOption('successCallback') != 'function') {
-        throw 'QueryNotInitialized';
-      }
-      var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
-          url = urlArray.join('/') ,
-          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
-          errorCallback = this.getOption('errorCallback') ,
-          queryDefinition = this.buildQueryDefinition(),
-          myself = this;
-      
-      var successHandler = function(json) {
-        myself.setOption('lastResultSet' , json );
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
-        callback(clone);
-      };
-      var errorHandler = function(resp, txtStatus, error ) {      
-        if (errorCallback){
-          errorCallback(resp, txtStatus, error );
-        }
-      };
-
-      var settings = _.extend({}, this.getOption('ajaxOptions'), {
-        data: queryDefinition,
-        url: url,
-        success: successHandler,
-        error: errorHandler 
-      });
-      
-      $.ajax(settings);
     },
 
     buildQueryDefinition: function(overrides) {
@@ -347,6 +336,7 @@
   // Registering a class will use that class directly when getting new queries.
   Dashboards.registerQuery( "cpk", CpkEndpoints );
 
+
   var cdaQueryOpts = {
     name: 'cda',
     label: 'CDA Query',
@@ -377,37 +367,6 @@
         } else {
           throw 'InvalidQuery';
         }
-    },
-
-    doQuery: function(outsideCallback){
-      if (typeof this.getOption('successCallback') != 'function') {
-        throw 'QueryNotInitialized';
-      }
-      var url = this.getOption('url'),
-          callback = (outsideCallback ? outsideCallback : this.getOption('successCallback')),
-          errorCallback = this.getOption('errorCallback') ,
-          queryDefinition = this.buildQueryDefinition(),
-          myself = this;
-      
-      var successHandler = function(json) {
-        myself.setOption('lastResultSet' , json );
-        var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
-        callback(clone);
-      };
-      var errorHandler = function(resp, txtStatus, error ) {      
-        if (errorCallback){
-          errorCallback(resp, txtStatus, error );
-        }
-      };
-
-      var settings = _.extend({}, this.getOption('ajaxOptions'), {
-        data: queryDefinition,
-        url: url,
-        success: successHandler,
-        error: errorHandler 
-      });
-      
-      $.ajax(settings);
     },
 
     buildQueryDefinition: function(overrides) {
@@ -568,103 +527,32 @@
   // and use that class to generate new queries.
   Dashboards.registerQuery( "cda", cdaQueryOpts );
 
-  var xmlaQueryOpts = {
-    name: "xmla",
-    label: "XMLA",
-    datasource: {}, //cache the datasource as there should be only one xmla server
+
+
+
+  function makeMetadataElement (idx, name, type){
+    return { "colIndex" : idx || 0, "colType" : type || "String" , "colName" : name || "Name" }
+  }
+
+  var legacyOpts = {
+    name: "legacy",
+    label: "Legacy",
     defaults: {
       url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction",
       queryDef:{}
     },
-    getDataSources: function(){
-      xmla.xmla = new Xmla({
-              async: false,
-              url: xmla.defaults.url
-      });
-      var datasourceCache = [],
-        rowset_ds = xmla.xmla.discoverDataSources();
-      if (rowset_ds.hasMoreRows()) {
-        datasourceCache = rowset_ds.fetchAllAsObject();
-        xmla.datasource = datasourceCache[0];
-        rowset_ds.close();
-        return;
-      }
-    },
-    getCatalogs: function(){
-        var properties = {};
-        xmla.catalogs = [], catalog = {};
-        properties[Xmla.PROP_DATASOURCEINFO] = xmla.datasource[Xmla.PROP_DATASOURCEINFO];
-        var rowset_cat = xmla.xmla.discoverDBCatalogs({
-            properties: properties
-        });
-        if (rowset_cat.hasMoreRows()) {
-            while (catalog = rowset_cat.fetchAsObject()){
-              xmla.catalogs[xmla.catalogs.length] = catalog;
-            }
-            rowset_cat.close();
-        }
-    },
-    init: function(){
-      //TODO $.getScript('/content/xmla4js/src/Xmla.js' function(){} //only load Xmla.js when needed
-      //prefetch the datasource and catalogs
-      xmla.getDataSources();
-      xmla.getCatalogs();
-    },
-    transformXMLAresults: function(results){
-      var rows = results.fetchAllAsArray(),
-        cols = results.getFields(), col,
-        res={resultset:[], metadata:[]};
-
-      //build metadata object for each column
-      for (var i=0,j=cols.length;i<j;i++){
-        col = cols[i];
-        res.metadata[i] = {
-          colIndex:col.index,
-          colName:col.label
-        }
-        switch (col.jsType){
-          case "string":
-            res.metadata[i].colType = "string";
-            break;
-          case "number":
-            res.metadata[i].colType = "numeric";
-            break;
-          //TODO addin DateTime boolean or anything else
-          default:
-            res.metadata[i].colType = "string";
-        }
-      }
-      //build resultset object
-      res.resultset = rows; //just use array of rows as it comes back from xmla.fetchAllAsArray
-      results.close(); //clear up memory
-      //TODO SafeClone?
-      return res;
-    },
-    executeQuery: function(param, options){
-      //find the requested catalog in internal array of valid catalogs
-      for (var i=0,j=xmla.catalogs.length;i<j;i++){
-        if (xmla.catalogs[i]["CATALOG_NAME"] == param.catalog ){
-          var properties = {};
-          properties[Xmla.PROP_DATASOURCEINFO] = xmla.datasource[Xmla.PROP_DATASOURCEINFO];
-          properties[Xmla.PROP_CATALOG]        = param.catalog;
-          properties[Xmla.PROP_FORMAT]         = Xmla.PROP_FORMAT_TABULAR;//Xmla.PROP_FORMAT_MULTIDIMENSIONAL;
-          var result = xmla.xmla.execute({
-              statement: param.query(),
-              properties: properties
+    interfaces:{
+      lastResultSet:{
+        reader: function (json){
+          json = eval("(" + json + ")");
+          var result = { metadata: [ makeMetadataElement(0)] , resultset:json.values || [] };
+          _.each( json.metadata , function (el, idx){
+            return result.metadata.push( makeMetadataElement(idx+1, el) );
           });
-          return result;
+          return result
         }
       }
-      //should never make it here if param.catalog is on server
-      throw new Error("Catalog: " + param.catalog + " was not found on Pentaho server.");
     },
-    implementation: function (tgt, st, opt) {
-      //just execute the query each time, don't worry about metadata setup as it is done in init
-      var result = xmla.executeQuery(st, opt);
-      opt.callback(this.transformXMLAresults(result));
-    }
-  };
-  // Dashboards.registerQuery("xmla",  xmlaQueryOpts );
 
     init: function (opts){
       this.setOption('queryDef', opts);
@@ -696,37 +584,7 @@
     buildQueryDefinition: function(overrides) {
       return _.extend({}, this.getOption('queryDef'), overrides);
     }
-  };
-  // Dashboards.registerQuery( "legacy", legacyOpts );
 
-  var yqlOpts = {
-    name: "yql",
-    label: "YQL",
-    defaults: {
-      url: "query.yahooapis.com/v1/public/yql",
-      user: "agrohe21",
-      passcode: "",
-      data: {
-        format: 'json',
-        env: 'store://datatables.org/alltableswithkeys'
-      }
-    },    
-    init: function(){
-      var myself = this;
-    },
-    
-    implementation: function (target, state, options) {
-        var json = {
-          resultset:[["East", "100"],["West", "200"]],
-          metadata:[{colIndex:"0", colName:"Region", colType:"string"}, {colIndex:"1", colName:"Sales", colType:"numeric"}]
-        };
-      var localCallback = function(results){
-        //do something else here
-        options.callback(results);
-      }
-      //$.get(options.url, options.data, localCallback, 'jsonp');
-      options.callback(json);
-    }
   };
   Dashboards.registerQuery( "legacy", legacyOpts );
   

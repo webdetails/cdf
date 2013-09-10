@@ -1,3 +1,62 @@
+13.09.10
+
+    * Query add-ins makes it easier to add new datasource types to CDF
+    * Make pvSparkline rendering respect canvas margin
+    * [FEAT] (CCC MultiChart Overflow) New option multiChartOverflow controls whether to 'grow' (the default value), 'fit' or 'clip' if small charts would otherwise not fit in the initially given chart size.
+    * [FEAT] (protovis Symbols) Ability to register new kinds of Symbols (i.e. new shape types for pv.Dot). pv.Scene.registerSymbol. 
+    * [FEAT] (protovis pv.Dot aspectRatio) Dots now support the creation of rectangles and ellipsis, through the use of the new "aspectRatio" mark property. 
+    * [FEAT] Implementation of [ANALYZER-1711] Avoid empty charts for all-null-or-zero data: * (protovis band layout) added small visible bars, centered at the axis, for bands with nothing but zero-or-null-values. This affects BarChart, NormalizedBarChart and WaterfallChart. * (ccc Pie) +InvalidDataException is thrown, in non-multi-chart pie charts, causing a message to be printed, in place of the chart.
+    * [FEAT] (SelectBaseComponent changeMode) Readded the 'timeout-focus' value of option "changeMode".  Distant scrolling is now handled by resetting the timeout counter when scroll occurs. Also, different timeouts control click/select changes ans scrolling.
+    * [FEAT] (SelectBaseComponent changeMode) Moved option changeMode from SelectMultiComponent to the base class. Removed option changeTimeout. ChangeMode now only has options 'immediate' and 'focus'. Timeout behavior was still not good in scroll-to-distant-item selection cases.
+    * [FEAT](CCC CartesianAxis FixedMin/Max options) The FixedMin and FixedMax options now support reading values in the corresponding dimension's source format - the one used to read data from the data source. 
+    * [FEAT](CCC timeSeries FixedMin/Max options) Cartesian axes of Date type now also support the FixedMin and FixedMax options (until now only implemented for numeric axes). 
+    * [FEAT](CCC timeSeries) The default converter created for date dimensions now accepts numbers (date in milliseconds), Date objects, as well as the already supported strings in the default/specified date format.    This affects data source reading, but, as well, of "FixedMin" and "FixedMax" cart. axis options and of base values specified in the pvc.CartesianChart#markEvent method. ---- 
+    * [FEAT] (Dashboards.normalizeValue) New method for starting to kill the "empty" value confusion. The following are all considered equivalent, and converted to null: null, undefined, "", [] . 
+    * [FEAT] (Dashboards.isArray) New method for uniformizing what is considered an array accross multiple component implementations. [FIX] (SelectMultiComponent) An empty value, compared to a null value, was being considered a value change and caused the dashboard processing it on startup...
+    * [FEAT] (Dashboards.equalValues) New method abstracts the logic required to compare CDF parameter values, whether they are multiple or not. 
+    * [FEAT] (SelectMultiComponent changeMode) Added options changeMode and changeTimeout, applicable whrn isMultiple is true.     The default changeMode is 'immediate' and corresponds to legacy behavior.     The new changeMode is 'timeout-focus' and waits for a given time before considering a change, a change.     Care was taken to support Android and iPad/iPhone. In this devices, the immediate mode is used, cause they already show a popup that allows the user to make multiple choices.     Yet, the code now guarantees that a change is only signaled when the user dismisses the popup.
+    * [FEAT] (Dashboards) New "eachValuesArray" method for enumerating the commonly used values array. 
+    * [FEAT] (Dashboards) New "parseMultipleValues" method which contains common logic for parsing a parameter value into its multiple values. 
+    * [FEAT] (InputBaseComponent) New "#_getParameterValue" method which contains a many times repeated pattern of getting and evaluating the value of a component's bound parameter. 
+    * [FEAT] (protovis Bullet layout) Added a mark-wide property "originIsZero" to allow preventing that zero is always part of the scale. Also added the "minimum" mark property, to pair with the existing "maximum" mark property. 
+    * [CHG](CCC timeSeries) Improved code of time series scale calculation in that it now better handles degenerate conditions like 0-length or negative length intervals. 
+    * [CDF-194] (Dashboards.hsvToRgb) Rewrote the algorithm directly from the source at http://www.cs.rit.edu/~ncs/color/t_convert.html
+    * PDB-1571: License Attribution
+    * [PRD-3687] (SelectBaseComponent timeout-focus) Adjusted default timeout values.
+    * Fixed bug with QueryComponent where server calls were being run asynchronously, which causes lifecycle inconsistencies on managed components.
+    * Fixed bug where select components were not cleaning the selection even with defaultIfEmpty flag set to false. Added a component property as support for for a data-placeholder attribute.
+    * Dashboards object conversion functions between properties arrays and objects now do nothing if the arguments is already of the intended conversion type.
+    * Fixed [REDMINE-92]- Max and Min options in dataBar addIn not considering 0 values.
+    * Fixed [REDMINE-1828] - New Async Framework gets stuck in waiting mode....
+    * Fixed [REDMINE-2250] - Error OrientDB
+    * Fixed [REDMINE-2266] - Rendering of pvSparkline...
+    * Fixed [REDMINE-2409] - Error refreshing individual CCC2 components
+    * Fixed [REDMINE-1040] - Properties of the MonthPicker component are expecting date objects and getting strings
+    * Fixed [REDMINE-1525] - tableComponent: search box (filter) doesn't work with "Paginate server-side"
+    * [FIX] (pvcBaseChart#setData) NPE occurring when an null or empty data is supplied to #setData. 
+    * [FIX] (clearSelectionMode focusWindow) When selectionMode='focuswindow' clicking an empty area would clear the selection. 
+    * [FIX] (NPE nodata allowNoData TranslationOper) When data was set to null and the chart allowed having no data (like the BulletChart does), a NPE would occur.   Now, setting data to null always results in setting it to an empty array. 
+    * [FIX] (log level) Some log calls were not using the correct level method.
+    * [FIX] (CCC MultiChartOverflow Tooltip) When non-interactive, an error would be thrown when defining the tooltip.
+    * [FIX] (NPE Log Comp Lifecycle) Component lifecycle would continue to be logged after component had been removed from the dashboards.
+    * [FIX] (CCC Render multiple animation) Problems when rendering and re-rendering, possibly with multiple charts to the same canvas, and animations.
+    * [FIX] (SelectBaseComponent#draw) A bug where the firstVal variable would remain undefined, despite existing at least one valuesArray element. 
+    * [FIX] (SelectBaseComponent#draw) The whole currentIsValid determination was erroneously validating possible values (valuesArray) against the currentValues, instead of the opposite. 
+    * [FIX] (SelectBaseComponent#draw) When !defaultIsEmpty and no currentValue existed an parameter change would be fired despite the assumed default value would be empty as the initial one. 
+    * [FIX] (SelectBaseComponent#draw) Normalized the empty/invalid condition for assuming a default value accross the multiple and non-multiple cases. 
+    * [FIX] (MultiButtonComponent#draw) A NPE bug that could occur if the current value was «null». 
+    * [FIX] (input.js) Some other inadvertently global variable fixes and small code cleanup/refactoring.
+    * [FIX] (protovis) NPE occuring when a handler is registered for page load, after the page load had occurred. No event object is available in that situation. 
+    * [FIX](CCC userSelectionAction) Documentation stated that the handler supplied a pvc.visual.Context as JS content/this but it was being called on the global object. 
+    * [FIX] (CCC plot2SeriesIndex dataPart) Bug that occurred when an explicit reader for the "dataPart" dimension were defined, in a *relational* resultset.     The option plot2SeriesIndexes was being registered even though the dataPart dimension was already being read. 
+    * [FIX] (CCC extension points) Do not intercept protovis pseudo-properties (those not in the Mark#properties hash).
+    * Added a 'vis' property to the protovis component, containing the root prototis pv.Panel. This makes it easier to later access the panel, from an event handler of the component itself, or, more importantly, from another CDE component.
+    * [REF](protovis Dom) Some code optimizations and made the childNodes property, initially, an array of the prototype, being created locally on firt child addition. 
+    * [REF](CCC Data childNodes) Removed the duplicate _children property of the Data class.    Now always using the childNodes property provided by the pv.Dom class mixin.    Also all direct accesses to te data._childrenByKey property were replaced by a call to data.child(key).
+    * [REF] (CCC Selection) Small refactorings and cleanup on selection code     
+    * [REF] (SelectBaseComponent) Refactored the code. Also, in #draw explicitly declared local variable "selectHTML" and removed unused variables "hasValueSelected", "isSelected". 
+    * CDF now uses cpf-core and cpf-pentaho
+
 13.06.05
     * New Layout for samples
     * Implemented [REDMINE-2120] - 	Adapt PrptComponent for post, auto-resize, progress indicator on report load    

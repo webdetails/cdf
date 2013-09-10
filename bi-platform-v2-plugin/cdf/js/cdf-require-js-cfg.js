@@ -27,7 +27,7 @@ requireCfg['shim']['cdf/cdf-module'] = [
     'cdf/lib/CCC/jquery.tipsy',
     'cdf/lib/CCC/def',     
     'cdf/lib/CCC/pvc-d2.0',
-    'cdf/lib/CCC/compatVersion'/*, This should only be introduced when we migrate to Sugar         
+    'cdf/lib/CCC/compatVersion'/*,       This should only be introduced when we migrate to Sugar  
 	'cdf/components/ccc',
 	'cdf/components/core',
     'cdf/components/input'	,

@@ -940,26 +940,13 @@ update : function() {
           sharedUuid= guid();
           if(e==-1) {$.prompt.close();}
           else if(e==1){
-           
-                  //schedule 
-                  var sharedUuid= guid();
-                var parameters = {};
-                if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles)>= 0){
-                  
-                    parameters = {
-//                      name : $("#nameIn").val(),
-                      title:  $("#nameIn").val(),
-                      cron : "00 00 0 ? * 2,7",
-                      desc:  $("#nameIn").val(),
-                      "start-date-time": "1366628400000",
-                      schedRef: sharedUuid,
-                      group:myself.group ? myself.group : "Default Schedule Group",
-                      requestedMimeType: "text/xml",
-                      actionRefs: myself.solution + "/" + myself.path + "/" + myself.action,
-                      schedulerAction: "doAddScheduleAndContent"
+            setParameters();
+                  if(error){
+                    parameters={};
+                   return false;
+                  }
+                    
 
-                    };
-                }
                 var parameters2 = {
                   path : myself.path,
                   solution: myself.solution,
@@ -1143,6 +1130,7 @@ var AnalyzerComponent = BaseComponent.extend({
       action: this.action,
       command: this.command == undefined? "open": this.command,
       showFieldList: this.showFieldList == undefined? false: this.showFieldList,
+      showRepositoryButtons: this.showRepositoryButtons == undefined? false: this.showRepositoryButtons,
       frameless: this.frameless
     };
 

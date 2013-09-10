@@ -142,18 +142,27 @@
           tblMin = Math.min.apply(Math,st.tableData.map(function(e){
                                return e[st.colIdx];
                              }));
+
+      var optMax = parseFloat(opt.max);
+      var optMin = parseFloat(opt.min);
+
+      var isValidNumber = function(nr){
+        return _.isNumber(nr) && isFinite(nr);
+      };
+
+      var validMaxValue = isValidNumber(optMax);
+      var validMinValue = isValidNumber(optMin);
+
       if (opt.absValue){
-        var max = opt.max || Math.max( Math.abs(tblMax), Math.abs(tblMin) ),
-            min = opt.min || 0,
+        var max = (validMaxValue == true) ? optMax : Math.max( Math.abs(tblMax), Math.abs(tblMin) ),
+            min = (validMinValue == true) ? optMin : 0,
             val = Math.abs(parseFloat(st.value));
-        min = Math.max(min,0);
+            min = Math.max(min,0);
       }else{
-        var max = opt.max || Math.max(0, tblMax),
-            min = opt.min || Math.min(0, tblMin),
+        var max = (validMaxValue == true) ? optMax : Math.max(0, tblMax),
+            min = (validMinValue == true) ? optMin : Math.min(0, tblMin),
             val = parseFloat(st.value);
       }
-      var maxTotal = max - min;
-
 
       var cell = $(tgt);
       cell.empty(); 
@@ -165,6 +174,7 @@
       var leftVal  = Math.min(val,0),
           rightVal = Math.max(val,0);
 
+      // xx = x axis
       var xx = pv.Scale.linear(min,max).range(0,wtmp); 
       
       var paperSize = xx(Math.min(rightVal,max)) - xx(min);

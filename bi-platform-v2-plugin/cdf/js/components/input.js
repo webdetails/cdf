@@ -221,9 +221,12 @@ var SelectBaseComponent = InputBaseComponent.extend({
    */
   _listenElement: function(elem) {
     var me = this;
-    
     var prevValue = me.getValue();
+    var stop;
     var check = function() {
+      
+      stop && stop();
+      
       var currValue = me.getValue();
       if(!Dashboards.equalValues(prevValue, currValue)) {
         prevValue = currValue;
@@ -261,9 +264,16 @@ var SelectBaseComponent = InputBaseComponent.extend({
         }
       };
 
-    $("select", elem)
-      .on(me._changeTrigger(), check)
-      .keypress(function(ev) { if(ev.which === 13) { check(); } });
+      var renew = function(tim) {
+        stop();
+        timeoutHandle = setTimeout(check, tim || changeTimeout);
+      };
+      
+      selElem
+        .change(function() { renew(changeTimeoutChange); })
+        .scroll(function() { renew(changeTimeoutScroll); })
+        .focusout(check);
+    }
   },
 
   /**
@@ -274,7 +284,10 @@ var SelectBaseComponent = InputBaseComponent.extend({
    * the change mode value.
    * </p>
    *
-   * @return {!string} one of values: <tt>'immediate'</tt> or <tt>'focus'</tt>.
+   * @return {!string} one of values: 
+   * <tt>'immediate'</tt>, 
+   * <tt>'focus'</tt> or 
+   * <tt>'timeout-focus'</tt>.
    */
   _getChangeMode: function() {
     var changeMode = this.changeMode;
@@ -282,9 +295,14 @@ var SelectBaseComponent = InputBaseComponent.extend({
       changeMode = changeMode.toLowerCase();
       switch(changeMode) {
         case 'immediate':
-        case 'focus': return changeMode;
+        case 'focus':  return changeMode;
+          
+        case 'timeout-focus': 
+          // Mobiles do not support this strategy. Downgrade to 'focus'.
+          if((/android|ipad|iphone/i).test(navigator.userAgent)) { return 'focus'; }
+          return changeMode;
 
-        default: 
+        default:
           Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
       }
     }
@@ -323,11 +341,11 @@ var SelectBaseComponent = InputBaseComponent.extend({
      *   </li>
      * </ul>
      *
-     * | Change mode: | Immediate  | Focus    |
-     * +--------------+------------+----------+
-     * | Desktop      | change     | focusout |
-     * | iPad         | change     | focusout |
-     * | Android      | change *   | change   |
+     * | Change mode: | Immediate  | Focus    | Timeout-Focus |
+     * +--------------+------------+----------+---------------+
+     * | Desktop      | change     | focusout | focusout      |
+     * | iPad         | change     | focusout | -             |
+     * | Android      | change *   | change   | -             |
      *
      * (*) this is the most immediate that android can do
      *     resulting in Immediate = Focus
