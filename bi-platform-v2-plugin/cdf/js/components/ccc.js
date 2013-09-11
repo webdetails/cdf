@@ -1,4 +1,78 @@
-var ProtovisComponent =  UnmanagedComponent.extend({
+var ChartComponent =  UnmanagedComponent.extend({
+    exportChart: function(outputType, overrides) {
+        var me = this;
+        
+        var buildUrlParameters = function(overrides) {
+            overrides = overrides || {};
+
+            var urlParams = {};
+
+            // Pass the parameters defined in this component to the used data source.
+            var paramDefsArray = me.parameters;
+            if(paramDefsArray && paramDefsArray.length) {
+                var paramDefs = $.extend({}, Dashboards.propertiesArrayToObject(paramDefsArray), overrides);
+                for(var name in paramDefs) {
+                    if(paramDefs.hasOwnProperty(name)) {
+                        // Works with eval ...
+                        var value = Dashboards.getParameterValue(paramDefs[name]);
+                        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0) {
+                            // Special case where single element will wrongly be treated as a parseable array by cda
+                            value = doCsvQuoting(value[0],';');
+                        }
+                        //else Will not be correctly handled for functions that return arrays
+
+                        if(typeof value == 'function') { value = value(); }
+
+                        urlParams['param' + name] = value;
+                    }
+                }
+            }
+
+            // Check debug level and pass as parameter
+            // TODO: Place this in Dashboards?
+            var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+            var url = urlIfHasDebug(window.location.href) ||
+                      urlIfHasDebug(window.top.location.href);
+            if(url) {
+                var m = /\bdebugLevel=(\d+)/.exec(url);
+                var level = m ? (+m[1]) : 3;
+                if(level > 1) {
+                    urlParams.paramdebug = true;
+                    urlParams.paramdebugLevel = level;
+                }
+            }
+
+            var scriptName =  me.name.replace(/render_/, '');
+
+            urlParams.script = ("/"+ 
+                Dashboards.context.solution + "/" + 
+                Dashboards.context.path     + "/" + 
+                
+                /* Dashboards.context.file.split('.')[0] + "_" + */ 
+                scriptName + ".js") // TODO: This prevents deprecating the generation of 2 file names in CDE/CGG
+
+                .replace(/\/+/g, '/');
+
+            urlParams.attachmentName = scriptName;
+
+            return urlParams;
+        };
+
+        var urlParams = buildUrlParameters(overrides);
+        urlParams.outputType = outputType || 'png';
+        
+        var $exportIFrame = $('#cccExportIFrame');
+        if(!$exportIFrame.length) {
+            $exportIFrame = $('<iframe id="cccExportIFrame" style="display:none">');
+            $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
+            $exportIFrame.appendTo($('body')); 
+        } else {
+            $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
+        }
+    }
+});
+
+var ProtovisComponent =  ChartComponent.extend({
 
   update : function() {
     if (this.parameters == undefined) {
@@ -6,7 +80,7 @@ var ProtovisComponent =  UnmanagedComponent.extend({
     };
     // clear previous table
 
-    this.triggerQuery(this.chartDefinition,_.bind(this.render,this));
+    this.triggerQuery(this.chartDefinition, _.bind(this.render,this));
   },
 
   render: function(values) {
@@ -14,10 +88,10 @@ var ProtovisComponent =  UnmanagedComponent.extend({
     
     var vis = new pv.Panel()
       .canvas(this.htmlObject + "protovis")
-      .width(this.width)
+      .width (this.width)
       .height(this.height);
     this.vis = vis;
-    this.customfunction(vis,values);
+    this.customfunction(vis, values);
     vis.root.render();
   },
 
@@ -26,56 +100,12 @@ var ProtovisComponent =  UnmanagedComponent.extend({
   }
 });
 
-var BaseCccComponent = UnmanagedComponent.extend({
+var BaseCccComponent = ChartComponent.extend({
     
     query: null,
     chart: null,
-      
-    exportChart: function(outputType, overrides) {
-        
-        var _exportIframe = null;
-
-        // We need the same parameters passed here
-        var myself = this;
     
-        var buildChartDefinition = function(overrides) {
-            
-            overrides = overrides || {};
-            var chartDefinition = {};
-            
-            var _params = Dashboards.objectToPropertiesArray( $.extend({},Dashboards.propertiesArrayToObject(myself.parameters), overrides) )
-            
-            for (var param in _params) {
-                if(myself.parameters.hasOwnProperty(param)) {
-                    var value; 
-                    var name = myself.parameters[param][0];
-                    value = Dashboards.getParameterValue(myself.parameters[param][1]);
-                    if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-                        //special case where single element will wrongly be treated as a parseable array by cda
-                        value = doCsvQuoting(value[0],';');
-                    }
-                    //else will not be correctly handled for functions that return arrays
-                    if (typeof value == 'function') value = value();
-                    chartDefinition['param' + name] = value;
-                }
-            }
-            
-            var scriptName =  myself.name.replace(/render_/,"");
-            chartDefinition.script = ("/"+ Dashboards.context.solution + "/" + Dashboards.context.path + "/" + /* Dashboards.context.file.split('.')[0] + "_" +*/ scriptName +".js").replace(/\/+/g,'/') ;
-            chartDefinition.attachmentName = scriptName;
-            return chartDefinition;
-        };
-
-        var chartDefinition = buildChartDefinition(overrides);
-        chartDefinition.outputType = outputType;
-        
-        _exportIframe = _exportIframe || $('<iframe style="display:none">');
-        _exportIframe.detach();
-        _exportIframe[0].src = "../cgg/draw?" + $.param(chartDefinition);
-        _exportIframe.appendTo($('body'));
-    },
-    
-    _preProcessChartDefinition: function(){
+    _preProcessChartDefinition: function() {
         var chartDef = this.chartDefinition;
         if(chartDef){
             // Obtain effective compatVersion
@@ -111,17 +141,14 @@ var BaseCccComponent = UnmanagedComponent.extend({
 
 var CccComponent = BaseCccComponent.extend({
 
-    query: null,
-    chart: null,
-
     update: function() {
-        if (this.parameters == null) {
+        if(this.parameters == null) {
             this.parameters = [];
         }
 
         // clear placeholder
         var ph = $("#"+this.htmlObject).empty();
-        var myself = this;
+        var me = this;
         
         // Set up defaults for height and width
         if(typeof(this.chartDefinition.width) === "undefined")
@@ -134,7 +161,7 @@ var CccComponent = BaseCccComponent.extend({
             this.renderChart();
         } else {
             pv.listenForPageLoad(function() {
-                myself.renderChart();
+                me.renderChart();
             });
         }
     },
@@ -200,7 +227,7 @@ var CccComponent2 = BaseCccComponent.extend({
 
         // clear previous table
         $("#"+this.htmlObject).empty();
-        var myself = this;
+        var me = this;
 
 
         this.query = Dashboards.getQuery(this.chartDefinition);
@@ -216,7 +243,7 @@ var CccComponent2 = BaseCccComponent.extend({
                 && (sDataQuery != null)
                 && !executed) {
 
-                myself.render(dataQuery, sDataQuery);
+                me.render(dataQuery, sDataQuery);
                 executed = true;   // safety in case both queries return
             // simultaneously (is this possible in single-threaded Javascript?)
             }
@@ -224,11 +251,11 @@ var CccComponent2 = BaseCccComponent.extend({
         };
 
         pv.listenForPageLoad(function() {
-            myself.query.fetchData(myself.parameters, function(values) {
+            me.query.fetchData(me.parameters, function(values) {
                 // why is changedValues a GLOBAL ??  potential conflicts!!
                 var changedValues = undefined;
-                if((typeof(myself.postFetch)=='function')){
-                    changedValues = myself.postFetch(values);
+                if((typeof(me.postFetch)=='function')){
+                    changedValues = me.postFetch(values);
                     $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
                 }
                 if (changedValues != undefined) {
@@ -242,10 +269,10 @@ var CccComponent2 = BaseCccComponent.extend({
 
         // load the second query (in parallel)
         pv.listenForPageLoad(function() {
-            myself.sQuery.fetchData(myself.parameters, function(values) {
+            me.sQuery.fetchData(me.parameters, function(values) {
                 var changedValues = undefined;
-                if((typeof(myself.postFetch)=='function')){
-                    changedValues = myself.postFetch(values);
+                if((typeof(me.postFetch)=='function')){
+                    changedValues = me.postFetch(values);
                     $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
                 }
                 if (changedValues != undefined) {

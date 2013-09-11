@@ -2918,7 +2918,7 @@ Dashboards.safeClone = function(){
 /*
  * Query STUFF
  * (Here for legacy reasons)
- * 
+ * NOTE: The query type detection code should be kept in sync with CGG's UnmanagedComponent#detectQueryType.
  */
 //Ctors:
 // Query(queryString) --> DEPRECATED
