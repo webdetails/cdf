@@ -29,17 +29,10 @@ var ChartComponent =  UnmanagedComponent.extend({
             }
 
             // Check debug level and pass as parameter
-            // TODO: Place this in Dashboards?
-            var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
-            var url = urlIfHasDebug(window.location.href) ||
-                      urlIfHasDebug(window.top.location.href);
-            if(url) {
-                var m = /\bdebugLevel=(\d+)/.exec(url);
-                var level = m ? (+m[1]) : 3;
-                if(level > 1) {
-                    urlParams.paramdebug = true;
-                    urlParams.paramdebugLevel = level;
-                }
+            var level = me.dashboard.debug;
+            if(level > 1) {
+                urlParams.paramdebug = true;
+                urlParams.paramdebugLevel = level;
             }
 
             var scriptName =  me.name.replace(/render_/, '');

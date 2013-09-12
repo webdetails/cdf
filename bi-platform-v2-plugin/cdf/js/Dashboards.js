@@ -889,25 +889,28 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 };
 
 Dashboards.init = function(components){
-  var myself =this;
+  var myself = this;
+
+  this.syncDebugLevel();
+
   if(this.initialStorage) {
     _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
   }
+  
   if(this.context != null && this.context.sessionTimeout != null ) {
     //defaulting to 90% of ms value of sessionTimeout
     Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
+  
   this.restoreBookmarkables();
   this.restoreView();
   this.syncParametersInit();
-  if ($.isArray(components)) {
-    this.addComponents(components);
-  }
-  $(function() {
-    myself.initEngine();
-  });
+  
+  if($.isArray(components)) { this.addComponents(components); }
+  
+  $(function() { myself.initEngine(); });
 };
 
 
@@ -1112,6 +1115,25 @@ Dashboards.handlePostInit = function() {
     }
 
   }
+};
+
+Dashboards.debug = 1;
+
+Dashboards.syncDebugLevel = function() {
+  var level = 1; // log errors
+  try {
+    var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+    var url = urlIfHasDebug(window.location.href) ||
+              urlIfHasDebug(window.top.location.href);
+    if(url) {
+        var m = /\bdebugLevel=(\d+)/.exec(url);
+        level = m ? (+m[1]) : 3;
+    }
+  } catch(ex) {
+    // swallow
+  }
+
+  return this.debug = level;
 };
 
 Dashboards.resetAll = function(){
