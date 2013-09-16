@@ -378,7 +378,7 @@ Dashboards.bindControl = function(control) {
     this._castControlToClass(control, Class);
   }
 
-  this.bindExistingControl(control, Class);
+  return this.bindExistingControl(control, Class);
 };
 
 Dashboards.bindExistingControl = function(control, Class) {
@@ -487,7 +487,7 @@ Dashboards._addLogLifecycleToControl = function(control) {
       
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
       console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
-          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+          eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
     }
   });
 };
