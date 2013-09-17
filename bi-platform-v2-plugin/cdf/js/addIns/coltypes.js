@@ -127,7 +127,7 @@
       min: undefined,
       includeValue: false,
       absValue: true,
-      valueFormat: function(v, format, st) {
+      valueFormat: function(v, format, st, opt) {
         return "" + sprintf(format || "%.1f",v) ;
       }
     },
@@ -189,7 +189,7 @@
       });
 
       if(opt.includeValue) {
-        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st));
+        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st, opt));
         valph.appendTo(ph);
       }
     }
@@ -203,7 +203,7 @@
     defaults: {
       good: true,
       includeValue: false,
-      valueFormat: function(v,format,st) {
+      valueFormat: function(v,format,st, opt) {
         return sprintf(format || "%.1f",v);
       },
       thresholds: { up: 0 , down: 0 }
@@ -226,7 +226,7 @@
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();
       if(opt.includeValue) {
-        var valph = $("<div class='value'></div>").append(opt.valueFormat(st.value, st.colFormat, st));
+        var valph = $("<div class='value'></div>").append(opt.valueFormat(st.value, st.colFormat, st, opt));
         valph.appendTo(ph);
       }
       ph.append(trend);
@@ -289,7 +289,7 @@
       canvasSize: 10,
       radius: 4,
       color: 'black',
-      title: function(st) {return "Value: " + st.value;}
+      title: function(st, opt) {return "Value: " + st.value;}
     },
     
     implementation: function(tgt, st, opt){
@@ -303,7 +303,7 @@
       for (key in opt) if (opt.hasOwnProperty(key)) {
         op = opt[key];
         options[key] = typeof op == 'function' ?
-          op.call(this,st):
+          op.call(this,st, opt):
           op;
       }
       w = options.canvasSize;
@@ -389,7 +389,7 @@
     name: "formattedText",
     label: "Formatted Text",
     defaults: {
-      textFormat: function(v, st) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
+      textFormat: function(v, st, opt) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
     },
 
     init: function(){
@@ -409,7 +409,7 @@
     name: "localizedText",
     label: "Localized Text",
     defaults: {
-      localize: function(v) {return Dashboards.i18nSupport.prop(v);}
+      localize: function(v, st, opt) {return Dashboards.i18nSupport.prop(v);}
     },
 
     init: function(){
@@ -419,7 +419,7 @@
     
     implementation: function(tgt, st, opt){
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        var text = this.defaults.localize(st.value) ;
+        var text = this.defaults.localize(st.value, st, opt) ;
       	$(tgt).empty().append(text);
       	//change data, too, in order for search and sorting to work correctly on the localized text
       	st.tableData[st.rowIdx][st.colIdx] = text;
@@ -437,7 +437,7 @@
       hide:true,
       columnHeadersInGroups: false,
       replaceFirstHeader: true,
-      textFormat: function(v, st) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
+      textFormat: function(v, st, opt) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
     },
 
     init: function(){
