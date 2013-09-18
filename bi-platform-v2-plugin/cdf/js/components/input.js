@@ -142,7 +142,9 @@ var SelectBaseComponent = InputBaseComponent.extend({
       hasChanged = true;
     }
 
-    $("select", ph).val(currentVals);
+    // jQuery only cleans the value if it receives an empty array. 
+    $("select", ph).val(currentVals == null ? [] : currentVals);
+
 
     if(hasChanged) {
       // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
