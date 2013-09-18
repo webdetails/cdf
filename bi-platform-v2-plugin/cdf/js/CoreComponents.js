@@ -980,13 +980,14 @@ var SelectBaseComponent = BaseComponent.extend({
       hasChanged = true;
     }
 
-    $("select", ph).val(currentVals);
+    // jQuery only cleans the value if it receives an empty array. 
+	$("select", ph).val(currentVals == null ? [] : currentVals);
 
     if(hasChanged) {
       // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
       Dashboards.setParameter(this.parameter, currentVals);
       Dashboards.processChange(name);
-      }
+    }
 
     // TODO: shouldn't this be called right after setting the value of select?
     // Before hasChanged firing?
