@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130909
+//VERSION TRUNK-20130920
 
 var pvc = (function(def, pv) {
 
@@ -27802,7 +27802,7 @@ def
     },
 
     _calcTimeSeriesTicks: function() {
-        this._calcContinuousTicks(this._layoutInfo/*, this.desiredTickCount */); // not used
+        this._calcContinuousTicks(this._layoutInfo, this.desiredTickCount);
     },
 
     _calcNumberTicks: function(/*layoutInfo*/) {
