@@ -322,7 +322,7 @@
 
     buildQueryDefinition: function(overrides) {
       overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
-      var queryDefinition = this.getOption('systemParams');
+      var queryDefinition = Dashboards.safeClone(true, this.getOption('systemParams'));
       
       var cachedParams = this.getOption('params'),
           params = $.extend( {}, cachedParams , overrides);
