@@ -1,11 +1,11 @@
-/**
- *
- *  Base64 encode / decode
- *  http://www.webtoolkit.info
- *  http://www.webtoolkit.info/license
- *
- **/
- 
+/*! *
+*
+*  Base64 encode / decode
+*  http://www.webtoolkit.info
+*  http://www.webtoolkit.info/license
+*
+**/
+
 var Base64 = {
  
   // private property

@@ -1,11 +1,11 @@
 /*!
- * jQuery corner plugin: simple corner rounding
- * Examples and documentation at: http://jquery.malsup.com/corner/
- * version 1.98 (02-JUN-2009)
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
- */
+* jQuery corner plugin: simple corner rounding
+* Examples and documentation at: http://jquery.malsup.com/corner/
+* version 1.98 (02-JUN-2009)
+* Dual licensed under the MIT and GPL licenses:
+* http://www.opensource.org/licenses/mit-license.php
+* http://www.gnu.org/licenses/gpl.html
+*/
 
 /**
  *  corner() takes a single string argument:  $('#myDiv').corner("effect corners width")
@@ -24,6 +24,7 @@
  * @author Dave Methvin (http://methvin.com/jquery/jq-corner.html)
  * @author Mike Alsup   (http://jquery.malsup.com/corner/)
  */
+
 ;(function($) { 
 
 var expr = (function() {
