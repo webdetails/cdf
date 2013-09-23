@@ -1,3 +1,8 @@
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
+
 /* Translators (2009 onwards):
  *  - Mvrban
  */
@@ -12,6 +17,7 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
+
 OpenLayers.Lang["hr"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Nepodržani zahtjev ${statusText}",
@@ -26,15 +32,15 @@ OpenLayers.Lang["hr"] = OpenLayers.Util.applyDefaults({
 
     'writeNotImplemented': "Pisanje nije implementirano.",
 
-    'noFID': "Ne mogu ažurirati značajku za koju ne postoji FID.",
+    'noFID': "Ne mogu ažurirati zna�?ajku za koju ne postoji FID.",
 
-    'errorLoadingGML': "Greška u učitavanju GML datoteke ${url}",
+    'errorLoadingGML': "Greška u u�?itavanju GML datoteke ${url}",
 
     'browserNotSupported': "Vaš preglednik ne podržava vektorsko renderiranje. Trenutno podržani rendereri su: ${renderers}",
 
     'componentShouldBe': "addFeatures : komponenta bi trebala biti ${geomType}",
 
-    'getFeatureError': "getFeatureFromEvent je pozvao Layer bez renderera. Ovo obično znači da ste uništiili Layer, a ne neki Handler koji je povezan s njim.",
+    'getFeatureError': "getFeatureFromEvent je pozvao Layer bez renderera. Ovo obi�?no zna�?i da ste uništiili Layer, a ne neki Handler koji je povezan s njim.",
 
     'commitSuccess': "WFS Transakcija: USPJEŠNA ${response}",
 

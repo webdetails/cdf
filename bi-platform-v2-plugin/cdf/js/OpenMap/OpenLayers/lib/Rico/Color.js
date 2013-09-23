@@ -1,15 +1,15 @@
+/*!
+* This file has been edited substantially from the Rico-released version by
+* the OpenLayers development team.
+*
+* This file is licensed under the Apache License, Version 2.0.
+*/
+
 /** 
  * @requires OpenLayers/BaseTypes/Class.js
  * @requires OpenLayers/BaseTypes/Element.js
  */
 
-
-/*
- * This file has been edited substantially from the Rico-released version by
- * the OpenLayers development team.
- *
- * This file is licensed under the Apache License, Version 2.0.
- */
 OpenLayers.Rico = OpenLayers.Rico || {};
 OpenLayers.Rico.Color = OpenLayers.Class({
 

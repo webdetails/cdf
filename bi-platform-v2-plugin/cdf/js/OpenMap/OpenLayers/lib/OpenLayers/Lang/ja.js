@@ -1,3 +1,8 @@
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
+
 /* Translators (2009 onwards):
  *  - Fryed-peach
  *  - Mage Whopper
@@ -13,64 +18,65 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
+
 OpenLayers.Lang["ja"] = OpenLayers.Util.applyDefaults({
 
-    'unhandledRequest': "未処理の要求は ${statusText} を返します",
+    'unhandledRequest': "未処�?��?��?求�?� ${statusText} を返�?��?��?�",
 
     'Permalink': "パーマリンク",
 
-    'Overlays': "オーバーレイ",
+    'Overlays': "オー�?ーレイ",
 
     'Base Layer': "基底レイヤー",
 
-    'readNotImplemented': "読み込みは実装されていません。",
+    'readNotImplemented': "読�?�込�?��?�実装�?�れ�?��?��?��?�ん。",
 
-    'writeNotImplemented': "書き込みは実装されていません。",
+    'writeNotImplemented': "書�??込�?��?�実装�?�れ�?��?��?��?�ん。",
 
-    'noFID': "FID のない地物は更新できません。",
+    'noFID': "FID �?��?��?�地物�?�更新�?��??�?��?�ん。",
 
-    'errorLoadingGML': "GML ファイル ${url} の読み込みエラー",
+    'errorLoadingGML': "GML ファイル ${url} �?�読�?�込�?�エラー",
 
-    'browserNotSupported': "あなたのブラウザはベクターグラフィックスの描写に対応していません。現時点で対応しているソフトウェアは以下のものです。\n${renderers}",
+    'browserNotSupported': "�?��?��?��?�ブラウザ�?�ベクターグラフィックス�?��??写�?�対応�?��?��?��?��?�ん。�?�時点�?�対応�?��?��?�るソフトウェア�?�以下�?�も�?��?��?�。\n${renderers}",
 
-    'componentShouldBe': "addFeatures: 要素は ${geomType} であるべきです",
+    'componentShouldBe': "addFeatures: �?素�?� ${geomType} �?��?�る�?��??�?��?�",
 
-    'getFeatureError': "getFeatureFromEvent がレンダラーのないレイヤーから呼ばれました。通常、これはあなたがレイヤーを、それに関連づけられたいくつかのハンドラを除いて、破壊してしまったことを意味します。",
+    'getFeatureError': "getFeatureFromEvent �?�レンダラー�?��?��?�レイヤー�?�ら呼�?�れ�?��?��?�。通常�?�?�れ�?��?��?��?��?�レイヤーを�?�??れ�?�関連�?��?�られ�?��?��??�?��?��?��?ンドラを除�?��?��?破壊�?��?��?��?��?��?��?��?�を�?味�?��?��?�。",
 
-    'minZoomLevelError': "minZoomLevel プロパティは FixedZoomLevels を継承するレイヤーでの使用のみを想定しています。この minZoomLevel に対する WFS レイヤーの検査は歴史的なものです。しかしながら、この検査を除去するとそれに依存する OpenLayers ベースのアプリケーションを破壊してしまう可能性があります。よって廃止が予定されており、この minZoomLevel 検査はバージョン3.0で除去されます。代わりに、http://trac.openlayers.org/wiki/SettingZoomLevels で解説されている、最小および最大解像度設定を使用してください。",
+    'minZoomLevelError': "minZoomLevel プロパティ�?� FixedZoomLevels を継承�?�るレイヤー�?��?�使用�?��?�を想定�?��?��?��?��?�。�?��?� minZoomLevel �?�対�?�る WFS レイヤー�?�検査�?�歴�?�的�?�も�?��?��?�。�?��?��?��?��?�ら�?�?��?�検査を除去�?�る�?��??れ�?��?存�?�る OpenLayers ベース�?�アプリケーションを破壊�?��?��?��?��?��?�能性�?��?�り�?��?�。よ�?��?�廃止�?�予定�?�れ�?��?�り�?�?��?� minZoomLevel 検査�?��?ージョン3.0�?�除去�?�れ�?��?�。代�?り�?��?http://trac.openlayers.org/wiki/SettingZoomLevels �?�解説�?�れ�?��?�る�?最�?�?�よ�?�最大解�?度設定を使用�?��?��??�?��?��?�。",
 
-    'commitSuccess': "WFS トランザクション: 成功 ${response}",
+    'commitSuccess': "WFS トランザクション: �?功 ${response}",
 
     'commitFailed': "WFS トランザクション: 失敗 ${response}",
 
-    'googleWarning': "Google レイヤーが正しく読み込みを行えませんでした。\x3cbr\x3e\x3cbr\x3eこのメッセージを消すには、右上の隅にあるレイヤー切り替え部分で新しい基底レイヤーを選んでください。\x3cbr\x3e\x3cbr\x3eおそらく、これは Google マップ用ライブラリのスクリプトが組み込まれていないか、あなたのサイトに対応する正しい API キーが設定されていないためです。\x3cbr\x3e\x3cbr\x3e開発者の方へ: 正しい動作をさせるために\x3ca href=\'http://trac.openlayers.org/wiki/Google\' target=\'_blank\'\x3eこちらのウィキ\x3c/a\x3eを参照してください。",
+    'googleWarning': "Google レイヤー�?�正�?��??読�?�込�?�を行�?��?��?�ん�?��?��?�。\x3cbr\x3e\x3cbr\x3e�?��?�メッセージを消�?��?��?��?�?�上�?�隅�?��?�るレイヤー切り替�?�部分�?�新�?��?�基底レイヤーを�?�ん�?��??�?��?��?�。\x3cbr\x3e\x3cbr\x3e�?��??ら�??�?�?�れ�?� Google マップ用ライブラリ�?�スクリプト�?�組�?�込�?�れ�?��?��?��?��?��?�?��?��?��?�サイト�?�対応�?�る正�?��?� API キー�?�設定�?�れ�?��?��?��?��?��?�?��?�。\x3cbr\x3e\x3cbr\x3e開発者�?�方�?�: 正�?��?�動作を�?��?�る�?��?�?�\x3ca href=\'http://trac.openlayers.org/wiki/Google\' target=\'_blank\'\x3e�?��?�ら�?�ウィキ\x3c/a\x3eを�?�照�?��?��??�?��?��?�。",
 
-    'getLayerWarning': "${layerType} レイヤーが正しく読み込みを行えませんでした。\x3cbr\x3e\x3cbr\x3eこのメッセージを消すには、右上の隅にあるレイヤー切り替え部分で新しい基底レイヤーを選んでください。\x3cbr\x3e\x3cbr\x3eおそらく、これは ${layerLib} ライブラリのスクリプトが正しく組み込まれていないためです。\x3cbr\x3e\x3cbr\x3e開発者の方へ: 正しい動作をさせるために\x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3eこちらのウィキ\x3c/a\x3eを参照してください。",
+    'getLayerWarning': "${layerType} レイヤー�?�正�?��??読�?�込�?�を行�?��?��?�ん�?��?��?�。\x3cbr\x3e\x3cbr\x3e�?��?�メッセージを消�?��?��?��?�?�上�?�隅�?��?�るレイヤー切り替�?�部分�?�新�?��?�基底レイヤーを�?�ん�?��??�?��?��?�。\x3cbr\x3e\x3cbr\x3e�?��??ら�??�?�?�れ�?� ${layerLib} ライブラリ�?�スクリプト�?�正�?��??組�?�込�?�れ�?��?��?��?��?��?�?��?�。\x3cbr\x3e\x3cbr\x3e開発者�?�方�?�: 正�?��?�動作を�?��?�る�?��?�?�\x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3e�?��?�ら�?�ウィキ\x3c/a\x3eを�?�照�?��?��??�?��?��?�。",
 
     'Scale = 1 : ${scaleDenom}': "縮尺 = 1 : ${scaleDenom}",
 
     'W': "西",
 
-    'E': "東",
+    'E': "�?�",
 
     'N': "北",
 
-    'S': "南",
+    'S': "�?�",
 
-    'layerAlreadyAdded': "あなたは「${layerName}」を地図に追加しようと試みましたが、そのレイヤーは既に追加されています",
+    'layerAlreadyAdded': "�?��?��?��?�「${layerName}�?を地図�?�追加�?�よ�?��?�試�?��?��?��?��?��?�??�?�レイヤー�?�既�?�追加�?�れ�?��?��?��?�",
 
-    'reprojectDeprecated': "あなたは「${layerName}」レイヤーで reproject オプションを使っています。このオプションは商用の基底地図上に情報を表示する目的で設計されましたが、現在ではその機能は Spherical Mercator サポートを利用して実現されており、このオプションの使用は非推奨です。追加の情報は http://trac.openlayers.org/wiki/SphericalMercator で入手できます。",
+    'reprojectDeprecated': "�?��?��?��?�「${layerName}�?レイヤー�?� reproject オプションを使�?��?��?��?��?�。�?��?�オプション�?�商用�?�基底地図上�?�情報を表示�?�る目的�?�設計�?�れ�?��?��?��?��?�?�在�?��?��??�?�機能�?� Spherical Mercator サ�?ートを利用�?��?�実�?��?�れ�?��?�り�?�?��?�オプション�?�使用�?��?�推奨�?��?�。追加�?�情報�?� http://trac.openlayers.org/wiki/SphericalMercator �?�入手�?��??�?��?�。",
 
-    'methodDeprecated': "このメソッドは廃止が予定されており、バージョン3.0で除去されます。代わりに ${newMethod} を使用してください。",
+    'methodDeprecated': "�?��?�メソッド�?�廃止�?�予定�?�れ�?��?�り�?�?ージョン3.0�?�除去�?�れ�?��?�。代�?り�?� ${newMethod} を使用�?��?��??�?��?��?�。",
 
-    'boundsAddError': "x と y 両方の値を add 関数に渡さなければなりません。",
+    'boundsAddError': "x �?� y 両方�?�値を add 関数�?�渡�?��?��?�れ�?��?�り�?��?�ん。",
 
-    'lonlatAddError': "lon と lat 両方の値を add 関数に渡さなければなりません。",
+    'lonlatAddError': "lon �?� lat 両方�?�値を add 関数�?�渡�?��?��?�れ�?��?�り�?��?�ん。",
 
-    'pixelAddError': "x と y の値両方を add 関数に渡さなければなりません。",
+    'pixelAddError': "x �?� y �?�値両方を add 関数�?�渡�?��?��?�れ�?��?�り�?��?�ん。",
 
-    'unsupportedGeometryType': "未対応の形状型: ${geomType}",
+    'unsupportedGeometryType': "未対応�?�形状型: ${geomType}",
 
-    'filterEvaluateNotImplemented': "このフィルター型について evaluate は実装されていません。"
+    'filterEvaluateNotImplemented': "�?��?�フィルター型�?��?��?��?� evaluate �?�実装�?�れ�?��?��?��?�ん。"
 
 });

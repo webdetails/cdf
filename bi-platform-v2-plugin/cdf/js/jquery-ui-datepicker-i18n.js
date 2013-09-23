@@ -1,4 +1,18 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 ﻿/* Afrikaans initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Renier Pretorius. */
 jQuery(function($){
 	$.datepicker.regional['af'] = {
@@ -22,9 +36,8 @@ jQuery(function($){
 	$.datepicker.setDefaults($.datepicker.regional['af']);
 });
 ﻿/* Arabic Translation for jQuery UI date picker plugin. */
-/* Khaled Al Horani -- koko.dw@gmail.com */
-/* خالد الحوراني -- koko.dw@gmail.com */
-/* NOTE: monthNames are the original months names and they are the Arabic names, not the new months name فبراير - يناير and there isn't any Arabic roots for these months */
+
+/* NOTE: monthNames are the original months names and they are the Arabic names, not the new months name �?براير - يناير and there isn't any Arabic roots for these months */
 jQuery(function($){
 	$.datepicker.regional['ar'] = {
 		closeText: 'إغلاق',
@@ -45,6 +58,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['ar']);
 });﻿/* Azerbaijani (UTF-8) initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Jamil Najafov (necefov33@gmail.com). */
 jQuery(function($) {
 	$.datepicker.regional['az'] = {
@@ -67,6 +81,7 @@ jQuery(function($) {
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['az']);
 });﻿/* Bulgarian initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Stoyan Kyosev (http://svest.org). */
 jQuery(function($){
     $.datepicker.regional['bg'] = {
@@ -74,14 +89,14 @@ jQuery(function($){
         prevText: '&#x3c;назад',
         nextText: 'напред&#x3e;',
 		nextBigText: '&#x3e;&#x3e;',
-        currentText: 'днес',
-        monthNames: ['Януари','Февруари','Март','Април','Май','Юни',
-        'Юли','Август','Септември','Октомври','Ноември','Декември'],
-        monthNamesShort: ['Яну','Фев','Мар','Апр','Май','Юни',
-        'Юли','Авг','Сеп','Окт','Нов','Дек'],
-        dayNames: ['Неделя','Понеделник','Вторник','Сряда','Четвъртък','Петък','Събота'],
-        dayNamesShort: ['Нед','Пон','Вто','Сря','Чет','Пет','Съб'],
-        dayNamesMin: ['Не','По','Вт','Ср','Че','Пе','Съ'],
+        currentText: 'дне�?',
+        monthNames: ['Януари','Февруари','Март','�?прил','Май','Юни',
+        'Юли','�?вгу�?т','Септември','Октомври','�?оември','Декември'],
+        monthNamesShort: ['Яну','Фев','Мар','�?пр','Май','Юни',
+        'Юли','�?вг','Сеп','Окт','�?ов','Дек'],
+        dayNames: ['�?едел�?','Понеделник','Вторник','Ср�?да','Четвъртък','Петък','Събота'],
+        dayNamesShort: ['�?ед','Пон','Вто','Ср�?','Чет','Пет','Съб'],
+        dayNamesMin: ['�?е','По','Вт','Ср','Че','Пе','Съ'],
 		weekHeader: 'Wk',
         dateFormat: 'dd.mm.yy',
 		firstDay: 1,
@@ -91,6 +106,7 @@ jQuery(function($){
     $.datepicker.setDefaults($.datepicker.regional['bg']);
 });
 ﻿/* Bosnian i18n for the jQuery UI date picker plugin. */
+
 /* Written by Kenan Konjo. */
 jQuery(function($){
 	$.datepicker.regional['bs'] = {
@@ -113,6 +129,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['bs']);
 });/* Inicialització en català per a l'extenció 'calendar' per jQuery. */
+
 /* Writers: (joan.leon@gmail.com). */
 jQuery(function($){
 	$.datepicker.regional['ca'] = {
@@ -135,6 +152,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['ca']);
 });﻿/* Czech initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Tomas Muller (tomas@tomas-muller.net). */
 jQuery(function($){
 	$.datepicker.regional['cs'] = {
@@ -142,13 +160,13 @@ jQuery(function($){
 		prevText: '&#x3c;Dříve',
 		nextText: 'Později&#x3e;',
 		currentText: 'Nyní',
-		monthNames: ['leden','únor','březen','duben','květen','červen',
-        'červenec','srpen','září','říjen','listopad','prosinec'],
-		monthNamesShort: ['led','úno','bře','dub','kvě','čer',
-		'čvc','srp','zář','říj','lis','pro'],
-		dayNames: ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'],
-		dayNamesShort: ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'],
-		dayNamesMin: ['ne','po','út','st','čt','pá','so'],
+		monthNames: ['leden','únor','březen','duben','květen','�?erven',
+        '�?ervenec','srpen','září','říjen','listopad','prosinec'],
+		monthNamesShort: ['led','úno','bře','dub','kvě','�?er',
+		'�?vc','srp','zář','říj','lis','pro'],
+		dayNames: ['neděle', 'pondělí', 'úterý', 'středa', '�?tvrtek', 'pátek', 'sobota'],
+		dayNamesShort: ['ne', 'po', 'út', 'st', '�?t', 'pá', 'so'],
+		dayNamesMin: ['ne','po','út','st','�?t','pá','so'],
 		weekHeader: 'Týd',
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
@@ -158,6 +176,7 @@ jQuery(function($){
 	$.datepicker.setDefaults($.datepicker.regional['cs']);
 });
 ﻿/* Danish initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Jan Christensen ( deletestuff@gmail.com). */
 jQuery(function($){
     $.datepicker.regional['da'] = {
@@ -181,6 +200,7 @@ jQuery(function($){
     $.datepicker.setDefaults($.datepicker.regional['da']);
 });
 ﻿/* German initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Milian Wolff (mail@milianw.de). */
 jQuery(function($){
 	$.datepicker.regional['de'] = {
@@ -204,20 +224,21 @@ jQuery(function($){
 	$.datepicker.setDefaults($.datepicker.regional['de']);
 });
 ﻿/* Greek (el) initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Alex Cicovic (http://www.alexcicovic.com) */
 jQuery(function($){
 	$.datepicker.regional['el'] = {
 		closeText: 'Κλείσιμο',
-		prevText: 'Προηγούμενος',
+		prevText: 'Π�?οηγο�?μενος',
 		nextText: 'Επόμενος',
-		currentText: 'Τρέχων Μήνας',
-		monthNames: ['Ιανουάριος','Φεβρουάριος','Μάρτιος','Απρίλιος','Μάιος','Ιούνιος',
-		'Ιούλιος','Αύγουστος','Σεπτέμβριος','Οκτώβριος','Νοέμβριος','Δεκέμβριος'],
-		monthNamesShort: ['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν',
-		'Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'],
-		dayNames: ['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'],
-		dayNamesShort: ['Κυρ','Δευ','Τρι','Τετ','Πεμ','Παρ','Σαβ'],
-		dayNamesMin: ['Κυ','Δε','Τρ','Τε','Πε','Πα','Σα'],
+		currentText: 'Τ�?έχων Μήνας',
+		monthNames: ['Ιανουά�?ιος','Φεβ�?ουά�?ιος','Μά�?τιος','Απ�?ίλιος','Μάιος','Ιο�?νιος',
+		'Ιο�?λιος','Α�?γουστος','Σεπτέμβ�?ιος','Οκτώβ�?ιος','�?οέμβ�?ιος','Δεκέμβ�?ιος'],
+		monthNamesShort: ['Ιαν','Φεβ','Μα�?','Απ�?','Μαι','Ιουν',
+		'Ιουλ','Αυγ','Σεπ','Οκτ','�?οε','Δεκ'],
+		dayNames: ['Κυ�?ιακή','Δευτέ�?α','Τ�?ίτη','Τετά�?τη','Πέμπτη','Πα�?ασκευή','Σάββατο'],
+		dayNamesShort: ['Κυ�?','Δευ','Τ�?ι','Τετ','Πεμ','Πα�?','Σαβ'],
+		dayNamesMin: ['Κυ','Δε','Τ�?','Τε','Πε','Πα','Σα'],
 		weekHeader: 'Εβδ',
 		dateFormat: 'dd/mm/yy',
 		firstDay: 1,
@@ -226,6 +247,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['el']);
 });﻿/* English/UK initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Stuart. */
 jQuery(function($){
 	$.datepicker.regional['en-GB'] = {
@@ -249,29 +271,7 @@ jQuery(function($){
 	$.datepicker.setDefaults($.datepicker.regional['en-GB']);
 });
 ﻿/* Esperanto initialisation for the jQuery UI date picker plugin. */
-/* Written by Olivier M. (olivierweb@ifrance.com). */
-jQuery(function($){
-	$.datepicker.regional['eo'] = {
-		closeText: 'Fermi',
-		prevText: '&lt;Anta',
-		nextText: 'Sekv&gt;',
-		currentText: 'Nuna',
-		monthNames: ['Januaro','Februaro','Marto','Aprilo','Majo','Junio',
-		'Julio','Aŭgusto','Septembro','Oktobro','Novembro','Decembro'],
-		monthNamesShort: ['Jan','Feb','Mar','Apr','Maj','Jun',
-		'Jul','Aŭg','Sep','Okt','Nov','Dec'],
-		dayNames: ['Dimanĉo','Lundo','Mardo','Merkredo','Ĵaŭdo','Vendredo','Sabato'],
-		dayNamesShort: ['Dim','Lun','Mar','Mer','Ĵaŭ','Ven','Sab'],
-		dayNamesMin: ['Di','Lu','Ma','Me','Ĵa','Ve','Sa'],
-		weekHeader: 'Sb',
-		dateFormat: 'dd/mm/yy',
-		firstDay: 0,
-		isRTL: false,
-		showMonthAfterYear: false,
-		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['eo']);
-});
-/* Inicialización en español para la extensión 'UI date picker' para jQuery. */
+
 /* Traducido por Vester (xvester@gmail.com). */
 jQuery(function($){
 	$.datepicker.regional['es'] = {
@@ -294,6 +294,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['es']);
 });﻿/* Estonian initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Mart Sõmermaa (mrts.pydev at gmail com). */
 jQuery(function($){
 	$.datepicker.regional['et'] = {
@@ -316,6 +317,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['et']);
 }); ﻿/* Euskarako oinarria 'UI date picker' jquery-ko extentsioarentzat */
+
 /* Karrikas-ek itzulia (karrikas@karrikas.com) */
 jQuery(function($){
 	$.datepicker.regional['eu'] = {
@@ -338,7 +340,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['eu']);
 });﻿/* Persian (Farsi) Translation for the jQuery UI date picker plugin. */
-/* Javad Mowlanezhad -- jmowla@gmail.com */
+
 /* Jalali calendar should supported soon! (Its implemented but I have to test it) */
 jQuery(function($) {
 	$.datepicker.regional['fa'] = {
@@ -346,13 +348,13 @@ jQuery(function($) {
 		prevText: '&#x3c;قبلي',
 		nextText: 'بعدي&#x3e;',
 		currentText: 'امروز',
-		monthNames: ['فروردين','ارديبهشت','خرداد','تير','مرداد','شهريور',
-		'مهر','آبان','آذر','دي','بهمن','اسفند'],
+		monthNames: ['�?روردين','ارديبهشت','خرداد','تير','مرداد','شهريور',
+		'مهر','آبان','آذر','دي','بهمن','اس�?ند'],
 		monthNamesShort: ['1','2','3','4','5','6','7','8','9','10','11','12'],
 		dayNames: ['يکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'],
 		dayNamesShort: ['ي','د','س','چ','پ','ج', 'ش'],
 		dayNamesMin: ['ي','د','س','چ','پ','ج', 'ش'],
-		weekHeader: 'هف',
+		weekHeader: 'ه�?',
 		dateFormat: 'yy/mm/dd',
 		firstDay: 6,
 		isRTL: true,
@@ -360,6 +362,7 @@ jQuery(function($) {
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['fa']);
 });/* Finnish initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Harri Kilpi� (harrikilpio@gmail.com). */
 jQuery(function($){
     $.datepicker.regional['fi'] = {
@@ -383,13 +386,14 @@ jQuery(function($){
     $.datepicker.setDefaults($.datepicker.regional['fi']);
 });
 ﻿/* Faroese initialisation for the jQuery UI date picker plugin */
+
 /* Written by Sverri Mohr Olsen, sverrimo@gmail.com */
 jQuery(function($){
 	$.datepicker.regional['fo'] = {
 		closeText: 'Lat aftur',
 		prevText: '&#x3c;Fyrra',
 		nextText: 'Næsta&#x3e;',
-		currentText: 'Í dag',
+		currentText: '�? dag',
 		monthNames: ['Januar','Februar','Mars','Apríl','Mei','Juni',
 		'Juli','August','September','Oktober','November','Desember'],
 		monthNamesShort: ['Jan','Feb','Mar','Apr','Mei','Jun',
@@ -406,6 +410,7 @@ jQuery(function($){
 	$.datepicker.setDefaults($.datepicker.regional['fo']);
 });
 ﻿/* Swiss-French initialisation for the jQuery UI date picker plugin. */
+
 /* Written Martin Voelkle (martin.voelkle@e-tc.ch). */
 jQuery(function($){
 	$.datepicker.regional['fr-CH'] = {
@@ -428,6 +433,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['fr-CH']);
 });﻿/* French initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Keith Wood (kbwood{at}iinet.com.au) and Stéphane Nahmani (sholby@sholby.net). */
 jQuery(function($){
 	$.datepicker.regional['fr'] = {
@@ -450,20 +456,21 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['fr']);
 });﻿/* Hebrew initialisation for the UI Datepicker extension. */
+
 /* Written by Amir Hardon (ahardon at gmail dot com). */
 jQuery(function($){
 	$.datepicker.regional['he'] = {
 		closeText: 'סגור',
-		prevText: '&#x3c;הקודם',
-		nextText: 'הבא&#x3e;',
-		currentText: 'היום',
-		monthNames: ['ינואר','פברואר','מרץ','אפריל','מאי','יוני',
-		'יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'],
+		prevText: '&#x3c;הקוד�?',
+		nextText: 'הב�?&#x3e;',
+		currentText: 'היו�?',
+		monthNames: ['ינו�?ר','פברו�?ר','מרץ','�?פריל','מ�?י','יוני',
+		'יולי','�?וגוסט','ספטמבר','�?וקטובר','נובמבר','דצמבר'],
 		monthNamesShort: ['1','2','3','4','5','6',
 		'7','8','9','10','11','12'],
-		dayNames: ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'],
-		dayNamesShort: ['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','שבת'],
-		dayNamesMin: ['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','שבת'],
+		dayNames: ['ר�?שון','שני','שלישי','רביעי','חמישי','שישי','שבת'],
+		dayNamesShort: ['�?\'','ב\'','ג\'','ד\'','ה\'','ו\'','שבת'],
+		dayNamesMin: ['�?\'','ב\'','ג\'','ד\'','ה\'','ו\'','שבת'],
 		weekHeader: 'Wk',
 		dateFormat: 'dd/mm/yy',
 		firstDay: 0,
@@ -473,6 +480,7 @@ jQuery(function($){
 	$.datepicker.setDefaults($.datepicker.regional['he']);
 });
 ﻿/* Croatian i18n for the jQuery UI date picker plugin. */
+
 /* Written by Vjekoslav Nesek. */
 jQuery(function($){
 	$.datepicker.regional['hr'] = {
@@ -480,7 +488,7 @@ jQuery(function($){
 		prevText: '&#x3c;',
 		nextText: '&#x3e;',
 		currentText: 'Danas',
-		monthNames: ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj',
+		monthNames: ['Sije�?anj','Velja�?a','Ožujak','Travanj','Svibanj','Lipanj',
 		'Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'],
 		monthNamesShort: ['Sij','Velj','Ožu','Tra','Svi','Lip',
 		'Srp','Kol','Ruj','Lis','Stu','Pro'],
@@ -495,29 +503,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['hr']);
 });/* Hungarian initialisation for the jQuery UI date picker plugin. */
-/* Written by Istvan Karaszi (jquery@spam.raszi.hu). */
-jQuery(function($){
-	$.datepicker.regional['hu'] = {
-		closeText: 'bezárás',
-		prevText: '&laquo;&nbsp;vissza',
-		nextText: 'előre&nbsp;&raquo;',
-		currentText: 'ma',
-		monthNames: ['Január', 'Február', 'Március', 'Április', 'Május', 'Június',
-		'Július', 'Augusztus', 'Szeptember', 'Október', 'November', 'December'],
-		monthNamesShort: ['Jan', 'Feb', 'Már', 'Ápr', 'Máj', 'Jún',
-		'Júl', 'Aug', 'Szep', 'Okt', 'Nov', 'Dec'],
-		dayNames: ['Vasárnap', 'Hétfö', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'],
-		dayNamesShort: ['Vas', 'Hét', 'Ked', 'Sze', 'Csü', 'Pén', 'Szo'],
-		dayNamesMin: ['V', 'H', 'K', 'Sze', 'Cs', 'P', 'Szo'],
-		weekHeader: 'Hé',
-		dateFormat: 'yy-mm-dd',
-		firstDay: 1,
-		isRTL: false,
-		showMonthAfterYear: false,
-		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['hu']);
-});
-/* Armenian(UTF-8) initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Levon Zakaryan (levon.zakaryan@gmail.com)*/
 jQuery(function($){
 	$.datepicker.regional['hy'] = {
@@ -526,13 +512,13 @@ jQuery(function($){
 		nextText: 'Հաջ.&#x3e;',
 		currentText: 'Այսօր',
 		monthNames: ['Հունվար','Փետրվար','Մարտ','Ապրիլ','Մայիս','Հունիս',
-		'Հուլիս','Օգոստոս','Սեպտեմբեր','Հոկտեմբեր','Նոյեմբեր','Դեկտեմբեր'],
+		'Հուլիս','Օգոստոս','�?եպտեմբեր','Հոկտեմբեր','Նոյեմբեր','Դեկտեմբեր'],
 		monthNamesShort: ['Հունվ','Փետր','Մարտ','Ապր','Մայիս','Հունիս',
-		'Հուլ','Օգս','Սեպ','Հոկ','Նոյ','Դեկ'],
+		'Հուլ','Օգս','�?եպ','Հոկ','Նոյ','Դեկ'],
 		dayNames: ['կիրակի','եկուշաբթի','երեքշաբթի','չորեքշաբթի','հինգշաբթի','ուրբաթ','շաբաթ'],
 		dayNamesShort: ['կիր','երկ','երք','չրք','հնգ','ուրբ','շբթ'],
 		dayNamesMin: ['կիր','երկ','երք','չրք','հնգ','ուրբ','շբթ'],
-		weekHeader: 'ՇԲՏ',
+		weekHeader: 'ՇԲ�?',
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
 		isRTL: false,
@@ -540,6 +526,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['hy']);
 });/* Indonesian initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Deden Fathurahman (dedenf@gmail.com). */
 jQuery(function($){
 	$.datepicker.regional['id'] = {
@@ -562,6 +549,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['id']);
 });/* Icelandic initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Haukur H. Thorsson (haukur@eskill.is). */
 jQuery(function($){
 	$.datepicker.regional['is'] = {
@@ -584,6 +572,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['is']);
 });/* Italian initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Antonello Pasella (antonello.pasella@gmail.com). */
 jQuery(function($){
 	$.datepicker.regional['it'] = {
@@ -607,20 +596,21 @@ jQuery(function($){
 	$.datepicker.setDefaults($.datepicker.regional['it']);
 });
 ﻿/* Japanese initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Kentaro SATO (kentaro@ranvis.com). */
 jQuery(function($){
 	$.datepicker.regional['ja'] = {
-		closeText: '閉じる',
-		prevText: '&#x3c;前',
+		closeText: '閉�?�る',
+		prevText: '&#x3c;�?',
 		nextText: '次&#x3e;',
 		currentText: '今日',
 		monthNames: ['1月','2月','3月','4月','5月','6月',
 		'7月','8月','9月','10月','11月','12月'],
 		monthNamesShort: ['1月','2月','3月','4月','5月','6月',
 		'7月','8月','9月','10月','11月','12月'],
-		dayNames: ['日曜日','月曜日','火曜日','水曜日','木曜日','金曜日','土曜日'],
-		dayNamesShort: ['日','月','火','水','木','金','土'],
-		dayNamesMin: ['日','月','火','水','木','金','土'],
+		dayNames: ['日曜日','月曜日','�?�曜日','水曜日','木曜日','金曜日','土曜日'],
+		dayNamesShort: ['日','月','�?�','水','木','金','土'],
+		dayNamesMin: ['日','月','�?�','水','木','金','土'],
 		weekHeader: '週',
 		dateFormat: 'yy/mm/dd',
 		firstDay: 0,
@@ -629,20 +619,21 @@ jQuery(function($){
 		yearSuffix: '年'};
 	$.datepicker.setDefaults($.datepicker.regional['ja']);
 });/* Korean initialisation for the jQuery calendar extension. */
+
 /* Written by DaeKwon Kang (ncrash.dk@gmail.com). */
 jQuery(function($){
 	$.datepicker.regional['ko'] = {
 		closeText: '닫기',
-		prevText: '이전달',
-		nextText: '다음달',
+		prevText: '�?�전달',
+		nextText: '다�?�달',
 		currentText: '오늘',
 		monthNames: ['1월(JAN)','2월(FEB)','3월(MAR)','4월(APR)','5월(MAY)','6월(JUN)',
 		'7월(JUL)','8월(AUG)','9월(SEP)','10월(OCT)','11월(NOV)','12월(DEC)'],
 		monthNamesShort: ['1월(JAN)','2월(FEB)','3월(MAR)','4월(APR)','5월(MAY)','6월(JUN)',
 		'7월(JUL)','8월(AUG)','9월(SEP)','10월(OCT)','11월(NOV)','12월(DEC)'],
-		dayNames: ['일','월','화','수','목','금','토'],
-		dayNamesShort: ['일','월','화','수','목','금','토'],
-		dayNamesMin: ['일','월','화','수','목','금','토'],
+		dayNames: ['�?�','월','화','수','목','금','토'],
+		dayNamesShort: ['�?�','월','화','수','목','금','토'],
+		dayNamesMin: ['�?�','월','화','수','목','금','토'],
 		weekHeader: 'Wk',
 		dateFormat: 'yy-mm-dd',
 		firstDay: 0,
@@ -651,6 +642,7 @@ jQuery(function($){
 		yearSuffix: '년'};
 	$.datepicker.setDefaults($.datepicker.regional['ko']);
 });/* Lithuanian (UTF-8) initialisation for the jQuery UI date picker plugin. */
+
 /* @author Arturas Paleicikas <arturas@avalon.lt> */
 jQuery(function($){
 	$.datepicker.regional['lt'] = {
@@ -662,7 +654,7 @@ jQuery(function($){
 		'Liepa','Rugpjūtis','Rugsėjis','Spalis','Lapkritis','Gruodis'],
 		monthNamesShort: ['Sau','Vas','Kov','Bal','Geg','Bir',
 		'Lie','Rugp','Rugs','Spa','Lap','Gru'],
-		dayNames: ['sekmadienis','pirmadienis','antradienis','trečiadienis','ketvirtadienis','penktadienis','šeštadienis'],
+		dayNames: ['sekmadienis','pirmadienis','antradienis','tre�?iadienis','ketvirtadienis','penktadienis','šeštadienis'],
 		dayNamesShort: ['sek','pir','ant','tre','ket','pen','šeš'],
 		dayNamesMin: ['Se','Pr','An','Tr','Ke','Pe','Še'],
 		weekHeader: 'Wk',
@@ -673,14 +665,15 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['lt']);
 });/* Latvian (UTF-8) initialisation for the jQuery UI date picker plugin. */
+
 /* @author Arturas Paleicikas <arturas.paleicikas@metasite.net> */
 jQuery(function($){
 	$.datepicker.regional['lv'] = {
 		closeText: 'Aizvērt',
 		prevText: 'Iepr',
-		nextText: 'Nāka',
+		nextText: 'N�?ka',
 		currentText: 'Šodien',
-		monthNames: ['Janvāris','Februāris','Marts','Aprīlis','Maijs','Jūnijs',
+		monthNames: ['Janv�?ris','Febru�?ris','Marts','Aprīlis','Maijs','Jūnijs',
 		'Jūlijs','Augusts','Septembris','Oktobris','Novembris','Decembris'],
 		monthNamesShort: ['Jan','Feb','Mar','Apr','Mai','Jūn',
 		'Jūl','Aug','Sep','Okt','Nov','Dec'],
@@ -695,6 +688,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['lv']);
 });/* Malaysian initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Mohd Nawawi Mohamad Jamili (nawawi@ronggeng.net). */
 jQuery(function($){
 	$.datepicker.regional['ms'] = {
@@ -717,11 +711,12 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional['ms']);
 });﻿/* Dutch (UTF-8) initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Mathias Bynens <http://mathiasbynens.be/> */
 jQuery(function($){
 	$.datepicker.regional.nl = {
 		closeText: 'Sluiten',
-		prevText: '←',
+		prevText: '�?',
 		nextText: '→',
 		currentText: 'Vandaag',
 		monthNames: ['januari', 'februari', 'maart', 'april', 'mei', 'juni',
@@ -739,52 +734,7 @@ jQuery(function($){
 		yearSuffix: ''};
 	$.datepicker.setDefaults($.datepicker.regional.nl);
 });/* Norwegian initialisation for the jQuery UI date picker plugin. */
-/* Written by Naimdjon Takhirov (naimdjon@gmail.com). */
-jQuery(function($){
-    $.datepicker.regional['no'] = {
-		closeText: 'Lukk',
-        prevText: '&laquo;Forrige',
-		nextText: 'Neste&raquo;',
-		currentText: 'I dag',
-        monthNames: ['Januar','Februar','Mars','April','Mai','Juni',
-        'Juli','August','September','Oktober','November','Desember'],
-        monthNamesShort: ['Jan','Feb','Mar','Apr','Mai','Jun',
-        'Jul','Aug','Sep','Okt','Nov','Des'],
-		dayNamesShort: ['Søn','Man','Tir','Ons','Tor','Fre','Lør'],
-		dayNames: ['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'],
-		dayNamesMin: ['Sø','Ma','Ti','On','To','Fr','Lø'],
-		weekHeader: 'Uke',
-        dateFormat: 'yy-mm-dd',
-		firstDay: 0,
-		isRTL: false,
-		showMonthAfterYear: false,
-		yearSuffix: ''};
-    $.datepicker.setDefaults($.datepicker.regional['no']);
-});
-/* Polish initialisation for the jQuery UI date picker plugin. */
-/* Written by Jacek Wysocki (jacek.wysocki@gmail.com). */
-jQuery(function($){
-	$.datepicker.regional['pl'] = {
-		closeText: 'Zamknij',
-		prevText: '&#x3c;Poprzedni',
-		nextText: 'Następny&#x3e;',
-		currentText: 'Dziś',
-		monthNames: ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec',
-		'Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'],
-		monthNamesShort: ['Sty','Lu','Mar','Kw','Maj','Cze',
-		'Lip','Sie','Wrz','Pa','Lis','Gru'],
-		dayNames: ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'],
-		dayNamesShort: ['Nie','Pn','Wt','Śr','Czw','Pt','So'],
-		dayNamesMin: ['N','Pn','Wt','Śr','Cz','Pt','So'],
-		weekHeader: 'Tydz',
-		dateFormat: 'dd.mm.yy',
-		firstDay: 1,
-		isRTL: false,
-		showMonthAfterYear: false,
-		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['pl']);
-});
-/* Brazilian initialisation for the jQuery UI date picker plugin. */
+
 /* Written by Leonildo Costa Silva (leocsilva@gmail.com). */
 jQuery(function($){
 	$.datepicker.regional['pt-BR'] = {
@@ -811,6 +761,7 @@ jQuery(function($){
  * Written by Edmond L. (ll_edmond@walla.com)
  * and Ionut G. Stan (ionut.g.stan@gmail.com)
  */
+
 jQuery(function($){
 	$.datepicker.regional['ro'] = {
 		closeText: 'Închide',
@@ -839,15 +790,15 @@ jQuery(function($){
 		closeText: 'Закрыть',
 		prevText: '&#x3c;Пред',
 		nextText: 'След&#x3e;',
-		currentText: 'Сегодня',
-		monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь',
-		'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
-		monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн',
-		'Июл','Авг','Сен','Окт','Ноя','Дек'],
-		dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
-		dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
-		dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
-		weekHeader: 'Не',
+		currentText: 'Сегодн�?',
+		monthNames: ['Январь','Февраль','Март','�?прель','Май','Июнь',
+		'Июль','�?вгу�?т','Сент�?брь','Окт�?брь','�?о�?брь','Декабрь'],
+		monthNamesShort: ['Янв','Фев','Мар','�?пр','Май','Июн',
+		'Июл','�?вг','Сен','Окт','�?о�?','Дек'],
+		dayNames: ['во�?кре�?енье','понедельник','вторник','�?реда','четверг','п�?тница','�?уббота'],
+		dayNamesShort: ['в�?к','пнд','втр','�?рд','чтв','птн','�?бт'],
+		dayNamesMin: ['В�?','Пн','Вт','Ср','Чт','Пт','Сб'],
+		weekHeader: '�?е',
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
 		isRTL: false,
@@ -954,14 +905,14 @@ jQuery(function($){
 		closeText: 'Затвори',
 		prevText: '&#x3c;',
 		nextText: '&#x3e;',
-		currentText: 'Данас',
-		monthNames: ['Јануар','Фебруар','Март','Април','Мај','Јун',
-		'Јул','Август','Септембар','Октобар','Новембар','Децембар'],
-		monthNamesShort: ['Јан','Феб','Мар','Апр','Мај','Јун',
-		'Јул','Авг','Сеп','Окт','Нов','Дец'],
-		dayNames: ['Недеља','Понедељак','Уторак','Среда','Четвртак','Петак','Субота'],
-		dayNamesShort: ['Нед','Пон','Уто','Сре','Чет','Пет','Суб'],
-		dayNamesMin: ['Не','По','Ут','Ср','Че','Пе','Су'],
+		currentText: 'Дана�?',
+		monthNames: ['Јануар','Фебруар','Март','�?прил','Мај','Јун',
+		'Јул','�?вгу�?т','Септембар','Октобар','�?овембар','Децембар'],
+		monthNamesShort: ['Јан','Феб','Мар','�?пр','Мај','Јун',
+		'Јул','�?вг','Сеп','Окт','�?ов','Дец'],
+		dayNames: ['�?едеља','Понедељак','Уторак','Среда','Четвртак','Петак','Субота'],
+		dayNamesShort: ['�?ед','Пон','Уто','Сре','Чет','Пет','Суб'],
+		dayNamesMin: ['�?е','По','Ут','Ср','Че','Пе','Су'],
 		weekHeader: 'Сед',
 		dateFormat: 'dd/mm/yy',
 		firstDay: 1,
@@ -997,18 +948,18 @@ jQuery(function($){
 /* Written by S A Sureshkumar (saskumar@live.com). */
 jQuery(function($){
 	$.datepicker.regional['ta'] = {
-		closeText: 'மூடு',
-		prevText: 'முன்னையது',
-		nextText: 'அடுத்தது',
-		currentText: 'இன்று',
-		monthNames: ['தை','மாசி','பங்குனி','சித்திரை','வைகாசி','ஆனி',
-		'ஆடி','ஆவணி','புரட்டாசி','ஐப்பசி','கார்த்திகை','மார்கழி'],
-		monthNamesShort: ['தை','மாசி','பங்','சித்','வைகா','ஆனி',
-		'ஆடி','ஆவ','புர','ஐப்','கார்','மார்'],
-		dayNames: ['ஞாயிற்றுக்கிழமை','திங்கட்கிழமை','செவ்வாய்க்கிழமை','புதன்கிழமை','வியாழக்கிழமை','வெள்ளிக்கிழமை','சனிக்கிழமை'],
-		dayNamesShort: ['ஞாயிறு','திங்கள்','செவ்வாய்','புதன்','வியாழன்','வெள்ளி','சனி'],
-		dayNamesMin: ['ஞா','தி','செ','பு','வி','வெ','ச'],
-		weekHeader: 'Не',
+		closeText: 'மூட�?',
+		prevText: 'ம�?ன�?னையத�?',
+		nextText: 'அட�?த�?தத�?',
+		currentText: 'இன�?ற�?',
+		monthNames: ['தை','மாசி','பங�?க�?னி','சித�?திரை','வைகாசி','ஆனி',
+		'ஆடி','ஆவணி','ப�?ரட�?டாசி','�?ப�?பசி','கார�?த�?திகை','மார�?கழி'],
+		monthNamesShort: ['தை','மாசி','பங�?','சித�?','வைகா','ஆனி',
+		'ஆடி','ஆவ','ப�?ர','�?ப�?','கார�?','மார�?'],
+		dayNames: ['ஞாயிற�?ற�?க�?கிழமை','திங�?கட�?கிழமை','செவ�?வாய�?க�?கிழமை','ப�?தன�?கிழமை','வியாழக�?கிழமை','வெள�?ளிக�?கிழமை','சனிக�?கிழமை'],
+		dayNamesShort: ['ஞாயிற�?','திங�?கள�?','செவ�?வாய�?','ப�?தன�?','வியாழன�?','வெள�?ளி','சனி'],
+		dayNamesMin: ['ஞா','தி','செ','ப�?','வி','வெ','ச'],
+		weekHeader: '�?е',
 		dateFormat: 'dd/mm/yy',
 		firstDay: 1,
 		isRTL: false,
@@ -1024,11 +975,11 @@ jQuery(function($){
 		prevText: '&laquo;&nbsp;ย้อน',
 		nextText: 'ถัดไป&nbsp;&raquo;',
 		currentText: 'วันนี้',
-		monthNames: ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
-		'กรกฏาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'],
-		monthNamesShort: ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
-		'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'],
-		dayNames: ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'],
+		monthNames: ['ม�?ราคม','�?ุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+		'�?ร�?�?าคม','สิงหาคม','�?ันยายน','ตุลาคม','พฤศจิ�?ายน','ธันวาคม'],
+		monthNamesShort: ['ม.ค.','�?.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+		'�?.ค.','ส.ค.','�?.ย.','ต.ค.','พ.ย.','ธ.ค.'],
+		dayNames: ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุ�?ร์','เสาร์'],
 		dayNamesShort: ['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'],
 		dayNamesMin: ['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'],
 		weekHeader: 'Wk',
@@ -1069,13 +1020,13 @@ jQuery(function($){
 		nextText: '&#x3e;',
 		currentText: 'Сьогодні',
 		monthNames: ['Січень','Лютий','Березень','Квітень','Травень','Червень',
-		'Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'],
+		'Липень','Серпень','Вере�?ень','Жовтень','Ли�?топад','Грудень'],
 		monthNamesShort: ['Січ','Лют','Бер','Кві','Тра','Чер',
-		'Лип','Сер','Вер','Жов','Лис','Гру'],
-		dayNames: ['неділя','понеділок','вівторок','середа','четвер','п’ятниця','субота'],
-		dayNamesShort: ['нед','пнд','вів','срд','чтв','птн','сбт'],
-		dayNamesMin: ['Нд','Пн','Вт','Ср','Чт','Пт','Сб'],
-		weekHeader: 'Не',
+		'Лип','Сер','Вер','Жов','Ли�?','Гру'],
+		dayNames: ['неділ�?','понеділок','вівторок','�?ереда','четвер','п’�?тниц�?','�?убота'],
+		dayNamesShort: ['нед','пнд','вів','�?рд','чтв','птн','�?бт'],
+		dayNamesMin: ['�?д','Пн','Вт','Ср','Чт','Пт','Сб'],
+		weekHeader: '�?е',
 		dateFormat: 'dd/mm/yy',
 		firstDay: 1,
 		isRTL: false,
@@ -1086,12 +1037,12 @@ jQuery(function($){
 /* Translated by Le Thanh Huy (lthanhhuy@cit.ctu.edu.vn). */
 jQuery(function($){
 	$.datepicker.regional['vi'] = {
-		closeText: 'Đóng',
+		closeText: '�?óng',
 		prevText: '&#x3c;Trước',
 		nextText: 'Tiếp&#x3e;',
 		currentText: 'Hôm nay',
 		monthNames: ['Tháng Một', 'Tháng Hai', 'Tháng Ba', 'Tháng Tư', 'Tháng Năm', 'Tháng Sáu',
-		'Tháng Bảy', 'Tháng Tám', 'Tháng Chín', 'Tháng Mười', 'Tháng Mười Một', 'Tháng Mười Hai'],
+		'Tháng Bảy', 'Tháng Tám', 'Tháng Chín', 'Tháng Mư�?i', 'Tháng Mư�?i Một', 'Tháng Mư�?i Hai'],
 		monthNamesShort: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
 		'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
 		dayNames: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'],
@@ -1114,9 +1065,9 @@ jQuery(function($){
 		nextText: '下月&#x3e;',
 		currentText: '今天',
 		monthNames: ['一月','二月','三月','四月','五月','六月',
-		'七月','八月','九月','十月','十一月','十二月'],
+		'七月','八月','�?月','�??月','�??一月','�??二月'],
 		monthNamesShort: ['一','二','三','四','五','六',
-		'七','八','九','十','十一','十二'],
+		'七','八','�?','�??','�??一','�??二'],
 		dayNames: ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'],
 		dayNamesShort: ['周日','周一','周二','周三','周四','周五','周六'],
 		dayNamesMin: ['日','一','二','三','四','五','六'],
@@ -1137,9 +1088,9 @@ jQuery(function($){
 		nextText: '下月&#x3e;',
 		currentText: '今天',
 		monthNames: ['一月','二月','三月','四月','五月','六月',
-		'七月','八月','九月','十月','十一月','十二月'],
+		'七月','八月','�?月','�??月','�??一月','�??二月'],
 		monthNamesShort: ['一','二','三','四','五','六',
-		'七','八','九','十','十一','十二'],
+		'七','八','�?','�??','�??一','�??二'],
 		dayNames: ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'],
 		dayNamesShort: ['周日','周一','周二','周三','周四','周五','周六'],
 		dayNamesMin: ['日','一','二','三','四','五','六'],
@@ -1160,9 +1111,9 @@ jQuery(function($){
 		nextText: '下月&#x3e;',
 		currentText: '今天',
 		monthNames: ['一月','二月','三月','四月','五月','六月',
-		'七月','八月','九月','十月','十一月','十二月'],
+		'七月','八月','�?月','�??月','�??一月','�??二月'],
 		monthNamesShort: ['一','二','三','四','五','六',
-		'七','八','九','十','十一','十二'],
+		'七','八','�?','�??','�??一','�??二'],
 		dayNames: ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'],
 		dayNamesShort: ['周日','周一','周二','周三','周四','周五','周六'],
 		dayNamesMin: ['日','一','二','三','四','五','六'],

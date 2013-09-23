@@ -1,33 +1,32 @@
-/*
-    Copyright 2009,2010,2011 Roland Bouman
-    contact: Roland.Bouman@gmail.com ~ http://rpbouman.blogspot.com/ ~ http://code.google.com/p/xmla4js
-    twitter: @rolandbouman
+/*!
+Copyright 2009,2010,2011 Roland Bouman
 
-    This is xmla4js - a stand-alone, cross-browser javascript library for working with "XML for Analysis".
-    XML for Analysis (XML/A) is a vendor-neutral industry-standard protocol for OLAP services over HTTP.
-    xmla4js enables web-browser-based analytical business intelligence applications.
+This is xmla4js - a stand-alone, cross-browser javascript library for working with "XML for Analysis".
+XML for Analysis (XML/A) is a vendor-neutral industry-standard protocol for OLAP services over HTTP.
+xmla4js enables web-browser-based analytical business intelligence applications.
 
-    This file contains human-readable javascript source along with the YUI Doc compatible annotations.
-    Note: some portions of the API documentation were adopted from the original XML/A specification.
-    I believe that this constitutes fair use, but if you have reason to believe that the documentation
-    violates any copyright, or is otherwise incompatible with the LGPL license please contact me.
+This file contains human-readable javascript source along with the YUI Doc compatible annotations.
+Note: some portions of the API documentation were adopted from the original XML/A specification.
+I believe that this constitutes fair use, but if you have reason to believe that the documentation
+violates any copyright, or is otherwise incompatible with the LGPL license please contact me.
 
-    Include this in your web-pages for debug and development purposes only.
-    For production purposes, consider using the minified/obfuscated versions in the /js directory.
+Include this in your web-pages for debug and development purposes only.
+For production purposes, consider using the minified/obfuscated versions in the /js directory.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 /**
 *
 *  This is xmla4js - a stand-alone, cross-browser javascript library for working with "XML for Analysis".
@@ -36,6 +35,7 @@
 *  @module xmla
 *  @title Xmla
 */
+
 (function(root) {
 var Xmla,
     _soap = "http://schemas.xmlsoap.org/soap/",

@@ -1,3 +1,8 @@
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
+
 /**
  * @requires OpenLayers/Lang/en.js
  */
@@ -12,6 +17,7 @@
  *     bodies are normal strings or strings formatted for use with
  *     <OpenLayers.String.format> calls.
  */
+
 OpenLayers.Lang['en-CA'] = OpenLayers.Util.applyDefaults({
 
     // add any entries specific for this region here

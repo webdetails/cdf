@@ -1,3 +1,8 @@
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
+
 /* Translators (2009 onwards):
  *  - Michawiki
  */
@@ -12,6 +17,7 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
+
 OpenLayers.Lang["hsb"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Wotmołwa njewobdźěłaneho naprašowanja ${statusText}",
@@ -28,13 +34,13 @@ OpenLayers.Lang["hsb"] = OpenLayers.Util.applyDefaults({
 
     'noFID': "Funkcija, za kotruž FID njeje, njeda so aktualizować.",
 
-    'errorLoadingGML': "Zmylk při začitowanju dataje ${url}",
+    'errorLoadingGML': "Zmylk při za�?itowanju dataje ${url}",
 
     'browserNotSupported': "Twój wobhladowak wektorowe rysowanje njepodpěruje. Tuchwilu podpěrowane rysowaki su:\n${renderers}",
 
     'componentShouldBe': "addFeatures: komponenta měła ${geomType} być",
 
-    'getFeatureError': "getFeatureFromEvent bu na woršće bjez rysowak zawołany. To zwjetša woznamjenja, zo sy worštu zničił, ale nic wobdźěłak, kotryž je z njej zwjazany.",
+    'getFeatureError': "getFeatureFromEvent bu na woršće bjez rysowak zawołany. To zwjetša woznamjenja, zo sy worštu zni�?ił, ale nic wobdźěłak, kotryž je z njej zwjazany.",
 
     'minZoomLevelError': "Kajkosć minZoomLevel je jenož za wužiwanje z worštami myslena, kotrež wot FixedZoomLevels pochadźeja. Zo tuta woršta wfs za minZoomLevel přepruwuje, je relikt zańdźenosće. Njemóžemy wšak ju wotstronić, bjeztoho zo aplikacije, kotrež na OpenLayers bazěruja a snano tutu kajkosć wužiwaja, hižo njefunguja. Tohodla smy ju jako zestarjenu woznamjenili -- přepruwowanje za minZoomLevel budu so we wersiji 3.0 wotstronjeć. Prošu wužij město toho nastajenje min/max, kaž je tu wopisane: http://trac.openlayers.org/wiki/SettingZoomLevels",
 
@@ -42,9 +48,9 @@ OpenLayers.Lang["hsb"] = OpenLayers.Util.applyDefaults({
 
     'commitFailed': "WFS-Transakcija: NJEPORADŹENA ${response}",
 
-    'googleWarning': "Woršta Google njemóžeše so korektnje začitać.\x3cbr\x3e\x3cbr\x3eZo by tutu zdźělenku wotbył, wubjer nowy BaseLayer z wuběra worštow horjeka naprawo.\x3cbr\x3e\x3cbr\x3eNajskerje so to stawa, dokelž skript biblioteki Google Maps pak njebu zapřijaty pak njewobsahuje korektny kluč API za twoje sydło.\x3cbr\x3e\x3cbr\x3eWuwiwarjo: Za pomoc ke korektnemu fungowanju worštow\n\x3ca href=\'http://trac.openlayers.org/wiki/Google\' target=\'_blank\'\x3etu kliknyć\x3c/a\x3e",
+    'googleWarning': "Woršta Google njemóžeše so korektnje za�?itać.\x3cbr\x3e\x3cbr\x3eZo by tutu zdźělenku wotbył, wubjer nowy BaseLayer z wuběra worštow horjeka naprawo.\x3cbr\x3e\x3cbr\x3eNajskerje so to stawa, dokelž skript biblioteki Google Maps pak njebu zapřijaty pak njewobsahuje korektny klu�? API za twoje sydło.\x3cbr\x3e\x3cbr\x3eWuwiwarjo: Za pomoc ke korektnemu fungowanju worštow\n\x3ca href=\'http://trac.openlayers.org/wiki/Google\' target=\'_blank\'\x3etu kliknyć\x3c/a\x3e",
 
-    'getLayerWarning': "Woršta ${layerType} njemóžeše so korektnje začitać.\x3cbr\x3e\x3cbr\x3eZo by tutu zdźělenku wotbył, wubjer nowy BaseLayer z wuběra worštow horjeka naprawo.\x3cbr\x3e\x3cbr\x3eNajskerje so to stawa, dokelž skript biblioteki ${layerLib} njebu korektnje zapřijaty.\x3cbr\x3e\x3cbr\x3eWuwiwarjo: Za pomoc ke korektnemu fungowanju worštow\n\x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3etu kliknyć\x3c/a\x3e",
+    'getLayerWarning': "Woršta ${layerType} njemóžeše so korektnje za�?itać.\x3cbr\x3e\x3cbr\x3eZo by tutu zdźělenku wotbył, wubjer nowy BaseLayer z wuběra worštow horjeka naprawo.\x3cbr\x3e\x3cbr\x3eNajskerje so to stawa, dokelž skript biblioteki ${layerLib} njebu korektnje zapřijaty.\x3cbr\x3e\x3cbr\x3eWuwiwarjo: Za pomoc ke korektnemu fungowanju worštow\n\x3ca href=\'http://trac.openlayers.org/wiki/${layerLib}\' target=\'_blank\'\x3etu kliknyć\x3c/a\x3e",
 
     'Scale = 1 : ${scaleDenom}': "Měritko = 1 : ${scaleDenom}",
 
