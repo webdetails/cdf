@@ -2782,8 +2782,8 @@ Dashboards.safeClone = function(){
     this.init = function (defaults, interfaces, libraries) {
       var myself = this;
       
-      defaults = Dashboards.safeClone(true, defaults);
-      interfaces = Dashboards.safeClone(true, interfaces);
+      defaults = $.extend(true, {}, defaults);
+      interfaces = $.extend(true, {}, interfaces);
 
       this._libraries = $.extend(true, {}, this._libraries, libraries);
       _.each( interfaces, function (el,key){
@@ -2955,7 +2955,7 @@ Query = function( cd, dataAccessId ) {
   var opts, queryType;
 
   if( _.isObject(cd) ){
-    opts = Dashboards.safeClone(true, cd);
+    opts = $.extend(true, {}, cd);
     queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') || 
       ( !_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined ;
   } else if ( _.isString(cd) && _.isString(dataAccessId) ) {
