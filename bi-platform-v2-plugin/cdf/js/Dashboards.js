@@ -2793,6 +2793,11 @@ Dashboards.safeClone = function(){
 
     this.init = function (defaults, interfaces, libraries) {
       var myself = this;
+      
+      defaults = Dashboards.safeClone(true, defaults);
+      interfaces = Dashboards.safeClone(true, interfaces);
+      libraries = Dashboards.safeClone(true, libraries);
+
       this._libraries = $.extend(true, {}, this._libraries, libraries);
       _.each( interfaces, function (el,key){
         setInterfaces( key, el );
