@@ -2784,7 +2784,6 @@ Dashboards.safeClone = function(){
       
       defaults = Dashboards.safeClone(true, defaults);
       interfaces = Dashboards.safeClone(true, interfaces);
-      libraries = Dashboards.safeClone(true, libraries);
 
       this._libraries = $.extend(true, {}, this._libraries, libraries);
       _.each( interfaces, function (el,key){
