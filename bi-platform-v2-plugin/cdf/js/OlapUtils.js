@@ -1,15 +1,64 @@
-/*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+/******************************************************************************************************/
+/**************************************** OLAP UTILS**************************************************/
+/******************************************************************************************************/
+
+
+var OlapUtils= {};
+
+var OlapUtils = {
+
+	mdxGroups: {},
+	evolutionType: "Week"
+}
+	
+OlapUtils.initMdxQueryGroup = function(obj){
+
+	var mdxQueryGroup = new OlapUtils.mdxQueryGroup(obj.name);
+
+	for(m in obj.mdxQueries){
+
+		mdxQueryGroup.addMdxQuery( 
+			obj.mdxQueries[m].name,
+			obj.mdxQueries[m].query,
+			obj.mdxQueries[m].dimension,
+			obj.mdxQueries[m].axis,   
+			obj.mdxQueries[m].chart
+		);
+	}
+
+	OlapUtils.mdxGroups[obj.name] = mdxQueryGroup;
+
+	if(("#" + obj.htmlObject + "_evolutionType")  != undefined)
+		$("#" + obj.htmlObject+ "_evolutionType").html(mdxQueryGroup.printEvolutionType(obj.htmlObject + "_evolutionType"));
+
+	return mdxQueryGroup;
+}
+
+
+OlapUtils.updateMdxQueryGroup = function(obj){
+
+	var mdxGroup = OlapUtils.mdxGroups[obj.name];
+	if (mdxGroup == undefined){
+		mdxGroup = OlapUtils.initMdxQueryGroup(obj);
+	}
+
+	$("#" + obj.htmlObject).html(mdxGroup.printConditions());
+
+}
+
+OlapUtils.buttonsDescription = {
+	"Drill Down": 'Drill down to the selected value and add the condition to the other charts',
+	"Drill Up": 'Drill up and add the condition to the other charts',
+	'Focus': "Focus on this value, adding the conditions to the other charts", 
+	'Exclude': "Exclude this value from the chart",
+	"Expand":'Expand the depth of the chart, showing an extra sublevel',
+	"Collapse":'Collapse all previous expansions to the top most level',
+	"Reset All": 'Reset all filters and conditions from this chart group, returning to the original conditions',
+	"Cancel": "Cancel" 
+}
+
+
+OlapUtils.fireMdxGroupAction = function(mdxQueryGroup,idx,param1, param2, param3){
 
 	/**         http://jira.pentaho.com/browse/BISERVER-3542	   *
 	 *								   *

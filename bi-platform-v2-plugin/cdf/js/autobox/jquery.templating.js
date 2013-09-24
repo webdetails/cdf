@@ -1,9 +1,9 @@
-/*! *
-* Copyright Yehuda Katz
-* with assistance by Jay Freeman
-*
-* You may distribute this code under the same license as jQuery (BSD or GPL
-**/
+/**
+ * Copyright Yehuda Katz
+ * with assistance by Jay Freeman
+ * 
+ * You may distribute this code under the same license as jQuery (BSD or GPL
+ **/
 
 /*
 

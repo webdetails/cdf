@@ -1,8 +1,8 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
+ 
 /**
  * @requires OpenLayers/Layer.js
  * @requires OpenLayers/Tile/Image.js
@@ -14,7 +14,6 @@
  * accessible image as a map layer.  Create a new image layer with the
  * <OpenLayers.Layer.Image> constructor.  Inherits from <OpenLayers.Layer>.
  */
-
 OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
 
     /**

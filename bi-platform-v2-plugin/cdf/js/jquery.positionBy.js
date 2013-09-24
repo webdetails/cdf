@@ -1,16 +1,15 @@
-/*!
-* positionBy 1.0.7 (2008-01-29)
-*
-* Copyright (c) 2006,2007 Jonathan Sharp (http://jdsharp.us)
-* Dual licensed under the MIT (MIT-LICENSE.txt)
-* and GPL (GPL-LICENSE.txt) licenses.
-*
-* http://jdsharp.us/
-*
-* Built upon jQuery 1.2.2 (http://jquery.com)
-* This also requires the jQuery dimensions plugin
-*/
-
+/*
+ * positionBy 1.0.7 (2008-01-29)
+ *
+ * Copyright (c) 2006,2007 Jonathan Sharp (http://jdsharp.us)
+ * Dual licensed under the MIT (MIT-LICENSE.txt)
+ * and GPL (GPL-LICENSE.txt) licenses.
+ *
+ * http://jdsharp.us/
+ *
+ * Built upon jQuery 1.2.2 (http://jquery.com)
+ * This also requires the jQuery dimensions plugin
+ */
 (function($){
 	/**
 	 * This function centers an absolutely positioned element

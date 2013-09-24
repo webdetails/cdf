@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/Context.js
@@ -16,7 +16,6 @@
  * can be stored. Also, nesting of layers is supported since version 0.3.1.
  * For more information see: http://www.ogcnetwork.net/context
  */
-
 OpenLayers.Format.OWSContext = OpenLayers.Class(OpenLayers.Format.Context,{
     
     /**

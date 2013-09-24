@@ -1,16 +1,16 @@
-/*!
-* jQuery Impromptu
-* By: Trent Richardson [http://trentrichardson.com]
-* Version 3.1
-* Last Modified: 3/30/2010
-*
-* Copyright 2010 Trent Richardson
-* Dual licensed under the MIT and GPL licenses.
-* http://trentrichardson.com/Impromptu/GPL-LICENSE.txt
-* http://trentrichardson.com/Impromptu/MIT-LICENSE.txt
-*
-*/
-
+/*
+ * jQuery Impromptu
+ * By: Trent Richardson [http://trentrichardson.com]
+ * Version 3.1
+ * Last Modified: 3/30/2010
+ * 
+ * Copyright 2010 Trent Richardson
+ * Dual licensed under the MIT and GPL licenses.
+ * http://trentrichardson.com/Impromptu/GPL-LICENSE.txt
+ * http://trentrichardson.com/Impromptu/MIT-LICENSE.txt
+ * 
+ */
+ 
 (function($) {
 	$.prompt = function(message, options) {
 		options = $.extend({},$.prompt.defaults,options);

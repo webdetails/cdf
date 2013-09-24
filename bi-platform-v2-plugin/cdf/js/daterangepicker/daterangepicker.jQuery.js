@@ -1,22 +1,22 @@
-/*! *
-* --------------------------------------------------------------------
-* jQuery-Plugin "daterangepicker.jQuery.js"
-* http://www.filamentgroup.com
-* reference article: http://www.filamentgroup.com/lab/update_date_range_picker_with_jquery_ui/
-* demo page: http://www.filamentgroup.com/examples/daterangepicker/
-*
-* Copyright (c) 2008 Filament Group, Inc
-* Dual licensed under the MIT (filamentgroup.com/examples/mit-license.txt) and GPL (filamentgroup.com/examples/gpl-license.txt) licenses.
-*
-* Dependencies: jquery, jquery UI datepicker, date.js library (included at bottom), jQuery UI CSS Framework
-* Changelog:
-* 	10.23.2008 initial Version
-*  11.12.2008 changed dateFormat option to allow custom date formatting (credit: http://alexgoldstone.com/)
-*  01.04.09 updated markup to new jQuery UI CSS Framework
-*  01.19.2008 changed presets hash to support different text
-* --------------------------------------------------------------------
-*/
-
+/**
+ * --------------------------------------------------------------------
+ * jQuery-Plugin "daterangepicker.jQuery.js"
+ * by Scott Jehl, scott@filamentgroup.com
+ * http://www.filamentgroup.com
+ * reference article: http://www.filamentgroup.com/lab/update_date_range_picker_with_jquery_ui/
+ * demo page: http://www.filamentgroup.com/examples/daterangepicker/
+ * 
+ * Copyright (c) 2008 Filament Group, Inc
+ * Dual licensed under the MIT (filamentgroup.com/examples/mit-license.txt) and GPL (filamentgroup.com/examples/gpl-license.txt) licenses.
+ *
+ * Dependencies: jquery, jquery UI datepicker, date.js library (included at bottom), jQuery UI CSS Framework
+ * Changelog:
+ * 	10.23.2008 initial Version
+ *  11.12.2008 changed dateFormat option to allow custom date formatting (credit: http://alexgoldstone.com/)
+ *  01.04.09 updated markup to new jQuery UI CSS Framework
+ *  01.19.2008 changed presets hash to support different text 
+ * --------------------------------------------------------------------
+ */
 jQuery.fn.daterangepicker = function(settings){
 	var rangeInput = jQuery(this);
 	

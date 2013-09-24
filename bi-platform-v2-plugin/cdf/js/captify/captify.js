@@ -1,8 +1,9 @@
-/*! jQuery Captify Plugin
-*
+/* jQuery Captify Plugin
+* 
 * Copyright (C) 2008 Brian Reavis
 * Licenced under the MIT license
 *
+* $Date: 2008-2-27 [Fri, 27 Feb 2009] $
 */
 
 jQuery.fn.extend({

@@ -1,15 +1,16 @@
 /*!
-* jQuery blockUI plugin
-* Version 2.33 (29-MAR-2010)
-*
-* Examples at: http://malsup.com/jquery/block/
-* Copyright (c) 2007-2008 M. Alsup
-* Dual licensed under the MIT and GPL licenses:
-* http://www.opensource.org/licenses/mit-license.php
-* http://www.gnu.org/licenses/gpl.html
-*
-* Thanks to Amir-Hossein Sobhi for some excellent contributions!
-*/
+ * jQuery blockUI plugin
+ * Version 2.33 (29-MAR-2010)
+ * @requires jQuery v1.2.3 or later
+ *
+ * Examples at: http://malsup.com/jquery/block/
+ * Copyright (c) 2007-2008 M. Alsup
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ * Thanks to Amir-Hossein Sobhi for some excellent contributions!
+ */
 
 ;(function($) {
 

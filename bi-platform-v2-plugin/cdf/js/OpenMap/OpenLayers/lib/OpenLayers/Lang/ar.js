@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Meno25
  *  - Mutarjem horr
@@ -18,7 +13,6 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
-
 OpenLayers.Lang["ar"] = OpenLayers.Util.applyDefaults({
 
     'Permalink': "وصلة دائمة",
@@ -29,7 +23,7 @@ OpenLayers.Lang["ar"] = OpenLayers.Util.applyDefaults({
 
     'writeNotImplemented': "الكتابة غير محققة",
 
-    'errorLoadingGML': "خطأ عند تحميل المل�? جي ام ال ${url}",
+    'errorLoadingGML': "خطأ عند تحميل الملف جي ام ال ${url}",
 
     'Scale = 1 : ${scaleDenom}': "النسبة = 1 : ${scaleDenom}",
 

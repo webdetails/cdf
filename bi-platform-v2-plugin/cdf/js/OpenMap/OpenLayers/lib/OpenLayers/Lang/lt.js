@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -13,7 +8,6 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
-
 OpenLayers.Lang['lt'] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Neapdorota užklausa gražino ${statusText}",
@@ -56,7 +50,7 @@ OpenLayers.Lang['lt'] = OpenLayers.Util.applyDefaults({
 
     // console message
     'layerAlreadyAdded':
-        "Bandėte pridėti prie žemėlapio sluoksnį ${layerName}, ta�?iau jis jau yra pridėtas",
+        "Bandėte pridėti prie žemėlapio sluoksnį ${layerName}, tačiau jis jau yra pridėtas",
 
     // console message
     'methodDeprecated':

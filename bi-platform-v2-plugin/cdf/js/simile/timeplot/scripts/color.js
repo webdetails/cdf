@@ -1,9 +1,3 @@
-/*!
-* Inspired by Plotr
-* Copyright 2007 (c) Bas Wenneker <sabmann[a]gmail[d]com>
-* For use under the BSD license. <http://www.solutoire.com/plotr>
-*/
-
 /**
  * Color
  *
@@ -11,10 +5,15 @@
  * @name Color
  */
 
+/*
+ * Inspired by Plotr
+ * Copyright 2007 (c) Bas Wenneker <sabmann[a]gmail[d]com>
+ * For use under the BSD license. <http://www.solutoire.com/plotr>
+ */
+
 /**
  * Create a Color object that can be used to manipulate colors programmatically.
  */
-
 Timeplot.Color = function(color) {
     this._fromHex(color);
 };

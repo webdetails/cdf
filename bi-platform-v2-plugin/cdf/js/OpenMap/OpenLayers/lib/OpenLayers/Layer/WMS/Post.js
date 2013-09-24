@@ -1,8 +1,9 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
 
+ 
 /**
  * @requires OpenLayers/Layer/WMS.js
  * @requires OpenLayers/Tile/Image/IFrame.js
@@ -21,7 +22,6 @@
  * Inherits from:
  *  - <OpenLayers.Layer.WMS>
  */
-
 OpenLayers.Layer.WMS.Post = OpenLayers.Class(OpenLayers.Layer.WMS, {
 
     /**

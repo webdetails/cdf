@@ -1,12 +1,16 @@
-/*! *****************************************************************************
-* jquery.i18n.properties
-*
-* Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and
-* MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses.
-*
-*              by Keith Wood (kbwood{at}iinet.com.au) June 2007
-*
-*****************************************************************************/
+/******************************************************************************
+ * jquery.i18n.properties
+ * 
+ * Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
+ * MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses.
+ * 
+ * @version     1.0.x
+ * @author      Nuno Fernandes
+ * @url         www.codingwithcoffee.com
+ * @inspiration Localisation assistance for jQuery (http://keith-wood.name/localisation.html)
+ *              by Keith Wood (kbwood{at}iinet.com.au) June 2007
+ * 
+ *****************************************************************************/
 
 (function($) {
 $.i18n = {};

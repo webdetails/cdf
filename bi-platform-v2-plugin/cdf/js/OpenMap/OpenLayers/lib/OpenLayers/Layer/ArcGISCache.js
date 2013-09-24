@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /** 
  * @requires OpenLayers/Layer/XYZ.js 
  */ 
@@ -36,7 +31,6 @@
  *Inherits from: 
  *  - <OpenLayers.Layer.XYZ>             
  */    
-
 OpenLayers.Layer.ArcGISCache = OpenLayers.Class(OpenLayers.Layer.XYZ, {  
 
     /**

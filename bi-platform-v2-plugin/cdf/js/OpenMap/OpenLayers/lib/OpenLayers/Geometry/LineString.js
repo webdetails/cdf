@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
+ * full list of contributors). Published under the Clear BSD license.  
+ * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Geometry/Curve.js
@@ -15,7 +15,6 @@
  * Inherits from:
  *  - <OpenLayers.Geometry.Curve>
  */
-
 OpenLayers.Geometry.LineString = OpenLayers.Class(OpenLayers.Geometry.Curve, {
 
     /**
