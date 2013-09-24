@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130920
+//VERSION TRUNK-20130924
 
 var pvc = (function(def, pv) {
 
@@ -13540,7 +13540,7 @@ def
     optimizeLegibilityColor: function(color, type) {
         if(this.panel.valuesOptimizeLegibility) {
             var bgColor = this.backgroundColor();
-            return bgColor.isDark() ? color.complementary().alpha(0.9) : color;
+            return bgColor.isDark() === color.isDark() ? color.complementary().alpha(0.9) : color;
         }
         
         return color;
@@ -30025,7 +30025,7 @@ def
             .end
             ;
 
-        this.pvBar = new pvc.visual.Bar(me, me.pvBarPanel.item, {
+        var pvBar = this.pvBar = new pvc.visual.Bar(me, me.pvBarPanel.item, {
                 extensionId: '', // with the prefix, it gets 'bar_'
                 freePosition: true,
                 wrapper:      wrapper
@@ -30039,9 +30039,15 @@ def
             this._addOverflowMarkers(wrapper);
         }
 
-        var label = pvc.visual.ValueLabel.maybeCreate(me, me.pvBar, {wrapper: wrapper});
-        if(label){
-            me.pvBarLabel = label.pvMark
+        var label = pvc.visual.ValueLabel.maybeCreate(me, pvBar, {wrapper: wrapper});
+        if(label) {
+            var valuesAnchor = this.valuesAnchor;
+            me.pvBarLabel = label
+                .override('calcBackgroundColor', function(type) {
+                    var bgColor = this.pvMark.target.fillStyle();
+                    return bgColor || this.base(type);
+                })
+                .pvMark
                 .visible(function() { // no space for text otherwise
                     // this === pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
