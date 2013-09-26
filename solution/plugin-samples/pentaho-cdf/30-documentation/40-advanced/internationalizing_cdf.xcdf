@@ -5,4 +5,5 @@
 	<description>Adding internationalization support to CDF dashboards</description>
 	<icon></icon>
 	<template>internationalizing_cdf.html</template>
+	<style>mantle</style>
 </cdf>

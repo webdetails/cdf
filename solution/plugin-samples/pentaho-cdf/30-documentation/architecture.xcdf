@@ -5,4 +5,5 @@
 	<description>CDF Architecture</description>
 	<icon></icon>
 	<template>architecture.html</template>
+	<style>mantle</style>
 </cdf>

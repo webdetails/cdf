@@ -44,7 +44,7 @@
                     $("<span/>").addClass("h2Num h2Num"+(i%2==0?"Even":"Odd")).text(zPad(i+1,2)).prependTo(h);
         
                     h.css("vertical-align",i%2==0?"top":"bottom");
-                    h.add(h.nextUntil("h2")).wrapAll($("<div/>").addClass("webdetailsBoxShadow"));
+                    h.add(h.nextUntil("h2")).wrapAll($("<div/>").addClass("webdetailsBoxShadow"))
         
                 })
     
@@ -88,6 +88,9 @@
         <div class="webdetailsWrapper">
             <div class="webdetailsHead">
                 <div class="webdetailsLogo"><a href="http://www.webdetails.pt"></a></div>
+                <div class="buttoncontact ">
+					<a href="mailto:lead@webdetails.pt" title="Contact Webdetails directly here.">Get in Touch</a>
+				</div>
                 <!--div class="webdetailsTitle">webdetails</div>
                 <div class="webdetailsActions">
                     <div class="cdeAction cdeLinks">New</div>
@@ -96,7 +99,6 @@
                     <div class="cdePanel cdeLinks cdePanelSelected">About</div><div class="cdePanel cdeLinks ">Layout</div>
                     <div class="cdePanel cdeLinks ">Components</div><div class="cdePanel cdeLinks ">Datasources</div>
                 </div-->
-                <div class="webdetailsHShadow"></div>
             </div>
             <div class="webdetailsPanelsContainerWrapper">
                 <div class="webdetailsPanelsContainer">
@@ -105,12 +107,11 @@
                         <div class="webdetailsPanelContainerCenter">
                             <div class="panelTitle">
                                 <div class="container">
-                                    <div class="span-16 panelTitleText">Your Dashboard's Engine</div>
+                                	<span class="span-3">&nbsp;</span>
+                                    <div class="span-13 panelTitleText">&nbsp;</div>
                                     <div class="span-8 last panelTitleImages"></div>
 
-                                    <div class="span-12">&nbsp;</div>
-                                    <div class="span-3"><a class="ctoolsLogo" href="http://ctools.webdetails.org"></a></div>
-                                    <div class="span-3 last"><a class="pentahoLogo" href="http://www.pentaho.com"></a></div>
+                                    <div class="span-17">&nbsp;</div>
 
 
                                 </div>
@@ -124,13 +125,6 @@
 
                         </div>
                         <div class="webdetailsPanelContainerRight">
-                            <ul class="webdetailsSocial">
-                                <li class="webdetailsSocialMail"><a target="_blank" href="mailto:imagine@webdetails.pt"></a></li>
-                                <li class="webdetailsSocialBlog"><a target="_blank" href="http://pedroalves-bi.blogspot.com/"></a></li>
-                                <li class="webdetailsSocialTwitter"><a target="_blank" href="https://twitter.com/#!/webdetails"></a></li>
-                                <li class="webdetailsSocialFacebook"><a target="_blank" href="https://www.facebook.com/webdetails"></a></li>
-
-                            </ul>
 
 
 
@@ -141,7 +135,7 @@
             </div>
             <div class="webdetailsFooter">
                 <div class="webdetailsFooterWebdetails"><a href="http://www.webdetails.pt"></a></div>
-                <div class="webdetailsFooterCtools"><a href="http://ctools.webdetails.org"></a></div>
+                <div class="webdetailsFooterCtools"><a href="http://www.webdetails.pt/ctools.html"></a></div>
             </div>
 
         </div>

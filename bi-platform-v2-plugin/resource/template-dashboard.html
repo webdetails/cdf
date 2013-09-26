@@ -44,7 +44,7 @@
                     $("<span/>").addClass("h2Num h2Num"+(i%2==0?"Even":"Odd")).text(zPad(i+1,2)).prependTo(h);
         
                     h.css("vertical-align",i%2==0?"top":"bottom");
-                    h.add(h.nextUntil("h2")).wrapAll($("<div/>").addClass("webdetailsBoxShadow"));
+                    h.add(h.nextUntil("h2")).wrapAll($("<div/>").addClass("webdetailsBoxShadow"))
         
                 })
     

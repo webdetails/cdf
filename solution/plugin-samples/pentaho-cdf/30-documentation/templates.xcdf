@@ -5,4 +5,5 @@
 	<description>CDF Templates</description>
 	<icon></icon>
 	<template>templates.html</template>
+	<style>mantle</style>
 </cdf>

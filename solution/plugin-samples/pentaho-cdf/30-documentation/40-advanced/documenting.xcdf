@@ -5,4 +5,5 @@
 	<description>Documenting with CDF</description>
 	<icon></icon>
 	<template>documenting.html</template>
+	<style>mantle</style>
 </cdf>

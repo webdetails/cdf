@@ -5,4 +5,5 @@
 	<description>RadioComponent</description>
 	<icon></icon>
 	<template>template.html</template>
+	<style>mantle</style>
 </cdf>
