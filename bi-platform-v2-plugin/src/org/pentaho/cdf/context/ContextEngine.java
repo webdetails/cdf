@@ -241,7 +241,7 @@ public class ContextEngine {
     logger.info("[Timing] Getting solution repo for auto-includes: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
 
 
-    //RepositoryFileTree solution2 = RepositoryAccess.getRepository().getRepositoryFileTree("/public/pentaho-solutions/cdf/includes", -1, true, null);
+    //RepositoryFileTree solution2 = RepositoryAccess.getRepository().getRepositoryFileTree("/public/cdf/includes", -1, true, null);
 
     List<String> extensions = new ArrayList<String>();
     extensions.add("cda");
@@ -250,7 +250,7 @@ public class ContextEngine {
     List<String> filePaths = new ArrayList<String>();
 
     RepositoryAccess repAccess = RepositoryAccess.getRepository();
-    String includesPath = "/public/pentaho-solutions/cdf/includes";
+    String includesPath = "/public/cdf/includes";
     if (!repAccess.resourceExists(includesPath))
       return queries;
 

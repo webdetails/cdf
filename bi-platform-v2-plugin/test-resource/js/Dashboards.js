@@ -785,7 +785,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 	
-    $.post(webAppPath + "/api/repos/:public:pentaho-solutions:pentaho-cdf:actions:jtable.xaction/generatedContent", cd,
+    $.post(webAppPath + "/api/repos/:public:pentaho-cdf:actions:jtable.xaction/generatedContent", cd,
       function(json) {  callback(json.values); });
   }
   // ... or just call the callback when no valid definition is passed

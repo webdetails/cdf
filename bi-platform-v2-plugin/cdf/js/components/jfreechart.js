@@ -65,7 +65,7 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    var actionPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/" + action;
+    var actionPath = "/public/plugin-samples/pentaho-cdf/actions/" + action;
     Dashboards.callPentahoAction(myself,actionPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
@@ -161,7 +161,7 @@ var JFreeChartComponent = BaseComponent.extend({
           myself.zoomCallBack = function(value){
             eval(urlTemplate.replace("{" + parameterName + "}",value));
           };
-          var componentPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/" + cdfComponent;
+          var componentPath = "/public/plugin-samples/pentaho-cdf/actions/" + cdfComponent;
           Dashboards.callPentahoAction(myself, componentPath, parameters,function(jXML){
             if(jXML != null){
               var openWindow = window.open(webAppPath + "/api/plugins/pentaho-cdf/files/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
@@ -292,7 +292,7 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
     var myself = this;
     
     
-    var componentPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/openflashchart.xaction";
+    var componentPath = "/public/plugin-samples/pentaho-cdf/actions/openflashchart.xaction";
     
     Dashboards.callPentahoAction(myself,componentPath, this.getParameters(),function(jXML){
 
@@ -347,7 +347,7 @@ var TrafficComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    var componentPath = "/public/pentaho-solutions/plugin-samples/pentaho-cdf/actions/traffic.xaction";
+    var componentPath = "/public/plugin-samples/pentaho-cdf/actions/traffic.xaction";
     
     Dashboards.callPentahoAction(myself,componentPath, parameters,
       function(result){
@@ -539,7 +539,7 @@ var TimePlotComponent = BaseComponent.extend({
     var allData = undefined;
     //var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelinefeeder.xaction&" + parameters.join('&'); //legacy
 	var ts = "ts=" + new Date().getTime() + "&";
-    var timePlotEventSourceUrl = webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:pentaho-cdf:actions:timelinefeeder.xaction/xaction?" + ts + parameters.join('&');
+    var timePlotEventSourceUrl = webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelinefeeder.xaction/xaction?" + ts + parameters.join('&');
 	
     var myself = this;
     if(cd.events && cd.events.show == true){
@@ -554,7 +554,7 @@ var TimePlotComponent = BaseComponent.extend({
 
       //var eventUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelineeventfeeder.xaction&" + parameters.join('&'); //legacy
 	  var ts = "ts=" + new Date().getTime() + "&";
-      var eventUrl = wwebAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:pentaho-cdf:actions:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
+      var eventUrl = wwebAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){

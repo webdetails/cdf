@@ -162,7 +162,7 @@
 			<component-definition>
 				<title>Pivot analysis</title>
 				<viewer><![CDATA[Pivot]]></viewer>
-				<model>/public/pentaho-solutions/steel-wheels/analysis/steelwheels.mondrian.xml</model>  
+				<model>/public/steel-wheels/analysis/steelwheels.mondrian.xml</model>  
 				<jndi><![CDATA[SampleData]]></jndi>
 				<options>
 					<personal/>

@@ -1787,7 +1787,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   else if (cd != undefined){
 
     var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
-    $.post(webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:pentaho-cdf:actions:"+xactionFile+"/generatedContent?", cd,
+    $.post(webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:"+xactionFile+"/generatedContent?", cd,
       function(result) {
         callback(result.values);
       },'json');
@@ -2516,7 +2516,7 @@ Query = function() {
 
   // Constants, or what passes for them... Pretty please leave these alone.
   var CDA_PATH = webAppPath + "/plugin/cda/api/doQuery?";
-  var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:pentaho-solutions:plugin-samples:pentaho-cdf:actions:jtable.xaction/generatedContent";
+  var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:jtable.xaction/generatedContent";
 
   /*
    * Private fields
