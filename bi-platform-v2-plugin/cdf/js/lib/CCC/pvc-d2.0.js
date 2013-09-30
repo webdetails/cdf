@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130924
+//VERSION TRUNK-20130930
 
 var pvc = (function(def, pv) {
 
@@ -618,16 +618,18 @@ var pvc_oneNullArray = [null];
 pvc.makeExtensionAbsId = function(id, prefix) {
     if(!id) { return prefix; }
 
-    return def
-       .query(prefix || pvc_oneNullArray)
-       .selectMany(function(oneprefix) {
-           return def
-               .query(id)
-               .select(function(oneid) { return pvc_unwrapExtensionOne(oneid, oneprefix); });
-       })
-       .where(def.truthy)
-       .array()
-       ;
+    var result = [];
+
+    prefix = def.array.to(prefix) || pvc_oneNullArray;
+    id     = def.array.to(id);
+    for(var i = 0, I = prefix.length ; i < I ; i++) {
+        for(var j = 0, J = id.length ; j < J ; j++) {
+            var absId = pvc_unwrapExtensionOne(id[j], prefix[i]);
+            if(absId) { result.push(absId); }
+        }
+    }
+
+    return result;
 };
 
 pvc.makeEnumParser = function(enumName, hasKey, dk) {
@@ -1169,9 +1171,8 @@ pvc_PercentValue.resolve = function(value, total){
 
 /* Z-Order */
 
-// Backup original methods
-var pvc_markRenderCore = pv_Mark.prototype.renderCore,
-    pvc_markZOrder = pv_Mark.prototype.zOrder;
+// Backup original method
+var pvc_markZOrder = pv_Mark.prototype.zOrder;
 
 pv_Mark.prototype.zOrder = function(zOrder) {
     var borderPanel = this.borderPanel;
@@ -1181,23 +1182,6 @@ pv_Mark.prototype.zOrder = function(zOrder) {
 
     return pvc_markZOrder.call(this, zOrder);
 };
-
-/* Render id */
-pv_Mark.prototype.renderCore = function() {
-    /* Assign a new render id to the root mark */
-    var root = this.root;
-
-    root._renderId = (root._renderId || 0) + 1;
-
-    if(pvc.debug >= 25) { pvc.log("BEGIN RENDER " + root._renderId); }
-
-    /* Render */
-    pvc_markRenderCore.call(this);
-
-    if(pvc.debug >= 25) { pvc.log("END RENDER " + root._renderId); }
-};
-
-pv_Mark.prototype.renderId = function() { return this.root._renderId; };
 
 /* PROPERTIES */
 pv_Mark.prototype.wrapper = function(wrapper) {
@@ -1640,11 +1624,9 @@ pvc_Offset
 
 pvc.text = {
     getFitInfo: function(w, h, text, font, diagMargin){
-        if(text === '') {
-            return {h: true, v: true, d: true};
-        }
+        if(text === '') { return {h: true, v: true, d: true}; }
         
-        var len = pv.Text.measure(text, font).width;
+        var len = pv.Text.measureWidth(text, font);
         return {
             h: len <= w,
             v: len <= h,
@@ -1653,34 +1635,30 @@ pvc.text = {
     },
 
     trimToWidthB: function(len, text, font, trimTerminator, before){
-        len -= pv.Text.measure(trimTerminator, font).width;
+        len -= pv.Text.measureWidth(trimTerminator, font);
         
         return pvc.text.trimToWidth(len, text, font, trimTerminator, before);
     },
     
     trimToWidth: function(len, text, font, trimTerminator, before){
-        if(text === '') {
-            return text;
-        }
+        if(text === '') { return text; }
   
-        var textLen = pv.Text.measure(text, font).width;
-        if(textLen <= len){
-            return text;
-        }
+        var textLen = pv.Text.measureWidth(text, font);
+        if(textLen <= len) { return text; }
     
-        if(textLen > len * 1.5){ //cutoff for using other algorithm
+        if(textLen > len * 1.5) { //cutoff for using other algorithm
             return pvc.text.trimToWidthBin(len, text, font, trimTerminator, before);
         }
     
-        while(textLen > len){
+        while(textLen > len) {
             text = before ? text.slice(1) : text.slice(0, text.length -1);
-            textLen = pv.Text.measure(text, font).width;
+            textLen = pv.Text.measureWidth(text, font);
         }
     
         return before ? (trimTerminator + text) : (text + trimTerminator);
     },
     
-    trimToWidthBin: function(len, text, font, trimTerminator, before){
+    trimToWidthBin: function(len, text, font, trimTerminator, before) {
 
         var ilen = text.length,
             high = ilen - 2,
@@ -1688,15 +1666,15 @@ pvc.text = {
             mid,
             textLen;
 
-        while(low <= high && high > 0){
+        while(low <= high && high > 0) {
 
             mid = Math.ceil((low + high)/2);
             
             var textMid = before ? text.slice(ilen - mid) : text.slice(0, mid);
-            textLen = pv.Text.measure(textMid, font).width;
-            if(textLen > len){
+            textLen = pv.Text.measureWidth(textMid, font);
+            if(textLen > len) {
                 high = mid - 1;
-            } else if(pv.Text.measure(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font).width < len){
+            } else if(pv.Text.measureWidth(before ? text.slice(ilen - mid - 1) : text.slice(0, mid + 1), font) < len) {
                 low = mid + 1;
             } else {
                 return before ? (trimTerminator + textMid) : (textMid + trimTerminator);
@@ -1706,10 +1684,10 @@ pvc.text = {
         return before ? (trimTerminator + text.slice(ilen - high)) : (text.slice(0, high) + trimTerminator);
     },
     
-    justify: function(text, lineWidth, font){
+    justify: function(text, lineWidth, font) {
         var lines = [];
         
-        if(lineWidth < pv.Text.measure('a', font).width){
+        if(lineWidth < pv.Text.measureWidth('a', font)) {
             // Not even one letter fits...
             return lines;
         } 
@@ -1717,17 +1695,15 @@ pvc.text = {
         var words = (text || '').split(/\s+/);
         
         var line = "";
-        while(words.length){
+        while(words.length) {
             var word = words.shift();
             if(word){
                 var nextLine = line ? (line + " " + word) : word;
-                if(pv.Text.measure(nextLine, font).width > lineWidth){
+                if(pv.Text.measureWidth(nextLine, font) > lineWidth) {
                     // The word by itself may overflow the line width
                     
                     // Start new line
-                    if(line){
-                        lines.push(line);
-                    }
+                    if(line) { lines.push(line); }
                     
                     line = word;
                 } else {
@@ -1736,15 +1712,13 @@ pvc.text = {
             }
         }
         
-        if(line){
-            lines.push(line);
-        }
+        if(line) { lines.push(line); }
         
         return lines;
     },
     
     /* Returns a label's BBox relative to its anchor point */
-    getLabelBBox: function(textWidth, textHeight, align, baseline, angle, margin){
+    getLabelBBox: function(textWidth, textHeight, align, baseline, angle, margin) {
             
         var polygon = pv.Label.getPolygon(textWidth, textHeight, align, baseline, angle, margin);
         
@@ -2568,10 +2542,8 @@ function pvc_options(specs, context) {
     
     /** @private */
     function resolve(name) {
-        var info = def.getOwn(_infos, name) || 
-                   def.fail.operationInvalid("Undefined option '{0}'", [name]);
-        
-        return info.resolve();
+        // Throws if option does not exist. But it's as is because of perf. reasons.
+        return _infos[name].resolve();
     }
     
     /**
@@ -2671,7 +2643,7 @@ function pvc_options(specs, context) {
     /** @private */
     function set(opts, isDefault) {
         for(var name in opts) {
-            var info = def.getOwn(_infos, name);
+            var info = def.hasOwnProp.call(_infos, name) && _infos[name];
             if(info) {
                 var value = opts[name];
                 if(value !== undefined) { info.set(value, isDefault); }
@@ -2707,7 +2679,7 @@ function options_resolvers(list) {
         for(var i = 0, L = list.length ; i < L ; i++) {
             var m = list[i];
             
-            if(def.string.is(m)) { m = this[m]; } 
+            if(typeof m === 'string') { m = this[m]; } 
             
             if(m.call(this, optionInfo) === true) { return true; }
         }
@@ -2888,7 +2860,7 @@ def
         var fun = this[name];
         if(fun) {
             var context = this._context;
-            if(context && def.string.is(fun)) { fun = context[fun]; }
+            if(context && typeof fun === 'string') { fun = context[fun]; }
         }
         return fun;
     }
@@ -2930,15 +2902,17 @@ pvc.data = {
  * @private
  */
 function data_disposeChildList(list, parentProp) {
-    if(list){
-        list.forEach(function(child){
-            if(parentProp) {
-                child[parentProp] = null; // HACK: to avoid child removing itself from its parent (this)
-            }
+    var L = list && list.length;
+    if(L) {
+        for(var i = 0, L ; i < L ; i++) {
+            var child = list[i];
+
+            // Avoid child removing itself from its parent.
+            // removeAt is generally an expensive operation.
+            if(parentProp) { child[parentProp] = null; }
             
             child.dispose(); 
-        });
-        
+        }
         list.length = 0;
     }
 }
@@ -2960,7 +2934,7 @@ function data_disposeChildList(list, parentProp) {
 function data_addColChild(parent, childrenProp, child, parentProp, index) {
     // <Debug>
     /*jshint expr:true */
-    (child && !child[parentProp]) || def.assert("Must not have a '" + parentProp + "'.");
+    //(child && !child[parentProp]) || def.assert("Must not have a '" + parentProp + "'.");
     // </Debug>
     
     child[parentProp] = parent;
@@ -2989,7 +2963,7 @@ function data_addColChild(parent, childrenProp, child, parentProp, index) {
 function data_removeColChild(parent, childrenProp, child, parentProp) {
     // <Debug>
     /*jshint expr:true */
-    (child && (!child[parentProp] || child[parentProp] === parent)) || def.assert("Not a child");
+    //(child && (!child[parentProp] || child[parentProp] === parent)) || def.assert("Not a child");
     // </Debug>
     
     var children = parent[childrenProp];
@@ -3944,12 +3918,13 @@ function(dimTypeSpecs){
     
     _calculate: function(complex){
         var calcs = this._calculations;
-        if(calcs.length){
+        var L = calcs.length;
+        if(L) {
             var valuesByName = {}; 
-            
-            calcs.forEach(function(calc){
+            for(var i = 0 ; i < L ; i++) {
+                var calc = calcs[i];
                 calc(complex, valuesByName);
-            });
+            }
             
             return valuesByName;
         }
@@ -5177,10 +5152,10 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         this.M = 1;
         
         this.measuresDirection = null;
-        
+        var seriesInRows = this.options.seriesInRows;
         var colNames;
         var metadata = this.metadata;
-        if(this.options.seriesInRows) {
+        if(seriesInRows) {
             colNames = metadata.map(function(d) { return d.colName; });
         } else if(this.options.compatVersion <= 1) {
             colNames = metadata.map(function(d) { return {v: d.colName}; });
@@ -5337,8 +5312,6 @@ def.type('pvc.data.CrosstabTranslationOper', pvc.data.MatrixTranslationOper)
         // ----------------
         // The index at which the first component of
         // each cross group is placed in **virtual item**
-        
-        var seriesInRows = this.options.seriesInRows;
         
         var itemGroupIndex = this._itemCrossGroupIndex = {
             'C': !seriesInRows ? 0      : this.R,
@@ -6100,115 +6073,97 @@ def
     /*jshint expr:true */
 
     /* NOTE: this function is a hot spot and as such is performance critical */
+    var me = this;
 
-    this.id = complex_nextId++;
+    me.id = complex_nextId++;
 
     var owner;
-    if(source){
+    if(source) {
         owner = source.owner;
-        if(!atomsBase){
-            atomsBase = source.atoms;
-        }
+        if(!atomsBase) { atomsBase = source.atoms; }
     }
 
-    this.owner = owner || this;
-    this.atoms = atomsBase ? Object.create(atomsBase) : {};
+    me.owner = owner = (owner || me);
+    
+    var type = owner.type || def.fail.argumentRequired('owner.type');
 
-    var hadDimNames = !!dimNames;
-    if(!dimNames){
-        dimNames = owner.type._dimsNames;
-    }
+    me.atoms = atomsBase ? Object.create(atomsBase) : {};
 
-    var atomsMap = this.atoms;
+    var dimNamesSpecified = !!dimNames;
+    if(!dimNames) { dimNames = type._dimsNames; }
+
+    var atomsMap = me.atoms;
     var D = dimNames.length;
     var i, dimName;
 
     if(atomsByName){
-        /* Fill the atoms map */
+        // Fill the atoms map
+
         var ownerDims = owner._dimensions;
 
-        var addAtom = function(dimName, value){
-            var dimension = def.getOwn(ownerDims, dimName);
-            if(value != null){ // nulls are already in base proto object
-                var atom = dimension.intern(value);
-                if(!atomsBase || atom !== atomsBase[dimName]) { // don't add atoms already in base proto object
-                    atomsMap[dimName] = atom;
-                }
-            } else {
-                // But need to make sure it is interned
-                dimension.intern(null);
+        var addAtom = function(dimName) { // ownerDims, atomsBase, atomsMap, atomsByName
+            var v = atomsByName[dimName];
+
+            // Need to intern, even if null.
+            var atom = ownerDims[dimName].intern(v);
+
+            // Don't add atoms already in base proto object.
+            // (virtual) nulls are already in the root proto object.
+            if(v != null && (!atomsBase || atom !== atomsBase[dimName])) {
+                atomsMap[dimName] = atom;
             }
         };
 
-        if(!hadDimNames){
-            for(dimName in atomsByName){
-                addAtom(dimName, atomsByName[dimName]);
-            }
+        if(!dimNamesSpecified) {
+            for(dimName in atomsByName) { addAtom(dimName); }
         } else {
-            for(i = 0 ; i < D ; i++){
-                dimName = dimNames[i];
-                addAtom(dimName, atomsByName[dimName]);
-            }
+            i = D;
+            while(i--) { addAtom(dimNames[i]); }
         }
 
-        if(calculate){
-            var newAtomsByName = owner.type._calculate(this); // may be null
-            for(dimName in newAtomsByName){
-                if(!def.hasOwnProp.call(atomsMap, dimName)){ // not yet added
-                    addAtom(dimName, newAtomsByName[dimName]);
-                }
+        if(calculate) {
+            // May be null
+            atomsByName = type._calculate(me);
+            for(dimName in atomsByName) {
+                // Not yet added
+                if(!def.hasOwnProp.call(atomsMap, dimName)) { addAtom(dimName); }
             }
         }
     }
 
     /* Build Key and Label */
-    if(!D){
-        this.value = null;
-        this.key   = '';
-        if(wantLabel){
-            this.label = "";
-        }
-    } else if(D === 1){
-        var singleAtom = atomsMap[dimNames[0]];
-        this.value     = singleAtom.value;    // always typed when only one
-        this.rawValue  = singleAtom.rawValue; // original
-        this.key       = singleAtom.key;      // string
-        if(wantLabel){
-            this.label = singleAtom.label;
-        }
+    var atom;
+    if(!D) {
+        me.value = null;
+        me.key   = '';
+        if(wantLabel) { me.label = ""; }
+    } else if(D === 1) {
+        atom = atomsMap[dimNames[0]];
+        me.value     = atom.value;    // always typed when only one
+        me.rawValue  = atom.rawValue; // original
+        me.key       = atom.key;      // string
+        if(wantLabel) { me.label = atom.label; }
     } else {
-        var key, label;
-        var labelSep = owner.labelSep;
+        var key, label, alabel;
         var keySep   = owner.keySep;
+        var labelSep = owner.labelSep;
 
-        for(i = 0 ; i < D ; i++){
-            dimName = dimNames[i];
-            var atom = atomsMap[dimName];
+        for(i = 0 ; i < D ; i++) {
+            atom = atomsMap[dimNames[i]];
 
             // Add to key, null or not
-            if(!i){
-                key = atom.key;
-            } else {
-                key += keySep + atom.key;
-            }
+            if(!i) { key  = atom.key; }
+            else   { key += (keySep + atom.key); }
 
             // Add to label, when non-empty
-            if(wantLabel){
-                var atomLabel = atom.label;
-                if(atomLabel){
-                    if(!label){
-                        label = atomLabel;
-                    } else {
-                        label += labelSep + atomLabel;
-                    }
-                }
+            if(wantLabel && (alabel = atom.label)) {
+                if(label) { label += (labelSep + alabel); }
+                else      { label  = alabel; }
             }
         }
 
-        this.value = this.rawValue = this.key = key;
-        if(wantLabel){
-            this.label = label;
-        }
+        me.value = me.rawValue = me.key = key;
+        if(wantLabel) { me.label = label; }
     }
 })
 .add(/** @lends pvc.data.Complex# */{
@@ -6216,6 +6171,7 @@ def
     /**
      * The separator used between labels of dimensions of a complex.
      * Generally, it is the owner data's labelSep that is used.
+     * @type string
      */
     labelSep: " ~ ",
 
@@ -6223,11 +6179,12 @@ def
      * The separator used between keys of dimensions of a complex,
      * to form a composite key or an absolute key.
      * Generally, it is the owner data's keySep that is used.
+     * @type string
      */
     keySep: '~',
 
+    value: null,
     label: null,
-
     rawValue: undefined,
 
     ensureLabel: function(){
@@ -6235,14 +6192,11 @@ def
         if(label == null){
             label = "";
             var labelSep = this.owner.labelSep;
-            def.eachOwn(this.atoms, function(atom){
+            def.eachOwn(this.atoms, function(atom) {
                 var alabel = atom.label;
-                if(alabel){
-                    if(label){
-                        label += labelSep + alabel;
-                    } else {
-                        label = alabel;
-                    }
+                if(alabel) {
+                    if(label) { label += (labelSep + alabel); }
+                    else      { label  = alabel; }
                 }
             });
 
@@ -7286,26 +7240,33 @@ def.type('pvc.data.Dimension')
     /**
      * Disposes the dimension and all its children.
      */
-    dispose: function(){
-        if(!this._disposed){
+    dispose: function() {
+        var me = this;
+        if(!me._disposed){
             /*global data_disposeChildList:true */
-            data_disposeChildList(this.childNodes,     'parent');
-            data_disposeChildList(this._linkChildren, 'linkParent');
+            data_disposeChildList(me.childNodes,    'parent');
+            data_disposeChildList(me._linkChildren, 'linkParent');
             
             // myself
+            var v;
+
+            /*global data_removeColChild:true */
+            if((v = me.parent)) { 
+                data_removeColChild(v, 'childNodes', /*child*/me, 'parent');
+            }
+
+            if((v = me.linkParent)) { 
+                data_removeColChild(v, '_linkChildren', /*linkChild*/me, 'linkParent');
+            }
             
-            if(this.parent)     { dim_removeChild.call(this.parent, this); }
-            if(this.linkParent) { dim_removeLinkChild.call(this.linkParent, this); }
+            dim_clearVisiblesCache.call(me);
             
-            dim_clearVisiblesCache.call(this);
+            me._lazyInit  =
+            me._atoms = 
+            me._nullAtom = 
+            me._virtualNullAtom = null;
             
-            this._lazyInit  = null;
-            
-            this._atoms = 
-            this._nullAtom = 
-            this._virtualNullAtom = null;
-            
-            this._disposed = true;
+            me._disposed = true;
         }
     }
 });
@@ -7391,13 +7352,14 @@ function dim_createAtom(type, sourceValue, key, value, label, isVirtual){
  */
 function dim_internAtom(atom){
     var key = atom.key;
-    
+    var me = this;
+
     // Root load will fall in this case
-    if(atom.dimension === this){
+    if(atom.dimension === me) {
         /*jshint expr:true */
-        (this.owner === this) || def.assert("Should be an owner dimension");
+        (me.owner === me) || def.assert("Should be an owner dimension");
         
-        if(!key && atom === this._virtualNullAtom){
+        if(!key && atom === me._virtualNullAtom){
             /* This indicates that there is a dimension for which 
              * there was no configured reader, 
              * so nulls weren't read.
@@ -7407,43 +7369,40 @@ function dim_internAtom(atom){
              * because it appears through the prototype chain
              * as a default value.
              */
-            atom = this.intern(null);
+            atom = me.intern(null);
         }
         
         return atom;
     }
     
-    if(!this._lazyInit){
+    var hasInited = !me._lazyInit;
+    if(hasInited) {
         // Else, not yet initialized, so there's no need to add the atom now
-        var localAtom = this._atomsByKey[key];
+        var localAtom = me._atomsByKey[key];
         if(localAtom){
-            if(localAtom !== atom){
-                throw def.error.operationInvalid("Atom is from a different root data.");
-            }
+            if(localAtom !== atom) { throw def.error.operationInvalid("Atom is from a different root data."); }
             
             return atom;
         }
         
-        if(this.owner === this) {
-            // Should have been created in a dimension along the way.
-            throw def.error.operationInvalid("Atom is from a different root data.");
-        }
+        // Should have been created in a dimension along the way.
+        if(me.owner === me) { throw def.error.operationInvalid("Atom is from a different root data."); }
     }
     
-    dim_internAtom.call(this.parent || this.linkParent, atom);
+    dim_internAtom.call(me.parent || me.linkParent, atom);
     
-    if(!this._lazyInit){
+    if(hasInited) {
         // Insert atom in order (or at the end when !_atomComparer)
-        this._atomsByKey[key] = atom;
+        me._atomsByKey[key] = atom;
         
         if(!key){
-            this._nullAtom = atom;
-            this._atoms.unshift(atom);
+            me._nullAtom = atom;
+            me._atoms.unshift(atom);
         } else {
-            def.array.insert(this._atoms, atom, this._atomComparer);
+            def.array.insert(me._atoms, atom, me._atomComparer);
         }
         
-        dim_clearVisiblesCache.call(this);
+        dim_clearVisiblesCache.call(me);
     }
     
     return atom;
@@ -7667,19 +7626,6 @@ function dim_addChild(child){
     child.owner = this.owner;
 }
 
-/**
- * Removes a child dimension.
- *
- * @name pvc.data.Dimension#_removeChild
- * @function
- * @param {pvc.data.Dimension} child The child to remove.
- * @type undefined
- * @private
- */
-function dim_removeChild(child){
-    /*global data_removeColChild:true */
-    data_removeColChild(this, 'childNodes', child, 'parent');
-}
 
 /**
  * Adds a link child dimension.
@@ -7694,19 +7640,6 @@ function dim_addLinkChild(linkChild){
     data_addColChild(this, '_linkChildren', linkChild, 'linkParent');
     
     linkChild.owner = this.owner;
-}
-
-/**
- * Removes a link child dimension.
- *
- * @name pvc.data.Dimension#_removeLinkChild
- * @function
- * @param {pvc.data.Dimension} linkChild The child to remove.
- * @type undefined
- * @private
- */
-function dim_removeLinkChild(linkChild){
-    data_removeColChild(this, '_linkChildren', linkChild, 'linkParent');
 }
 
 /**
@@ -8267,26 +8200,34 @@ def.type('pvc.data.Data', pvc.data.Complex)
      * @type undefined
      */
     dispose: function() {
-        if(!this._disposed) {
-            data_disposeChildLists.call(this);
-            if(this._selectedNotNullDatums) { this._selectedNotNullDatums.clear(); }
-            this._visibleNotNullDatums.clear();
+        var me = this;
+        if(!me._disposed) {
+            data_disposeChildLists.call(me);
+
+            var v;
+            (v = me._selectedNotNullDatums) && v.clear();
+
+            me._visibleNotNullDatums.clear();
             
-            def.eachOwn(this._dimensions, function(dimension){ dimension.dispose(); });
-            
+            v = me._dimensions;
+            for(var dimName in v) {
+                if(def.hasOwnProp.call(v, dimName)) { v[dimName].dispose(); }
+            }
+            me._dimensions = null;
+
             //  myself
-            
-            if(this.parent) {
-                this.parent.removeChild(this);
-                this.parent = null;
+
+            if((v = me.parent)) {
+                v.removeChild(me);
+                me.parent = null;
             }
             
-            if(this.linkParent) {
+            if((v = me.linkParent)) {
                 /*global data_removeLinkChild:true */
-                data_removeLinkChild.call(this.linkParent, this);
+                data_removeLinkChild.call(v, me);
             }
             
-            this._disposed = true;
+            me._disposed = true;
         }
     },
     
@@ -8533,33 +8474,42 @@ function data_onDatumSelectedChanged(datum, selected) {
  * @internal
  */
 function data_onDatumVisibleChanged(datum, visible){
-    if(def.hasOwn(this._datumsById, datum.id)) {
+    var did = datum.id;
+    var me  = this;
+    var hasOwn = def.hasOwnProp;
+    if(hasOwn.call(me._datumsById, did)) {
 
         // <Debug>
         /*jshint expr:true */
         !datum.isNull || def.assert("Null datums do not notify visible changes");
         // </Debug>
 
-        if(visible) { this._visibleNotNullDatums.set(datum.id, datum); }
-        else        { this._visibleNotNullDatums.rem(datum.id);        }
+        if(visible) { me._visibleNotNullDatums.set(did, datum); }
+        else        { me._visibleNotNullDatums.rem(did);        }
 
-        this._sumAbsCache = null;
+        me._sumAbsCache = null;
 
         // Notify dimensions
         /*global dim_onDatumVisibleChanged:true */
-        def.eachOwn(this._dimensions, function(dimension) {
-            dim_onDatumVisibleChanged.call(dimension, datum, visible);
-        });
-
+        var dims = me._dimensions;
+        for(var dimName in dims) {
+            if(hasOwn.call(dims, dimName)) {
+                dim_onDatumVisibleChanged.call(dims[dimName], datum, visible);
+            }
+        }
+        
         // Notify child and link child datas
-        this.childNodes.forEach(function(data) {
-            data_onDatumVisibleChanged.call(data, datum, visible);
-        });
-
-        if(this._linkChildren) {
-            this._linkChildren.forEach(function(data) {
-                data_onDatumVisibleChanged.call(data, datum, visible);
-            });
+        var i, L;
+        var list = me.childNodes;
+        for(i = 0, L = list.length ; i < L ; i++) {
+            data_onDatumVisibleChanged.call(list[i], datum, visible);
+        }
+        
+        list = me._linkChildren;
+        if(list && (L = list.length)) {
+            for(i = 0 ; i < L ; i++) {
+                data_onDatumVisibleChanged.call(list[i], datum, visible);
+            }
         }
     }
 }
@@ -9560,15 +9510,18 @@ add(/** @lends pvc.data.GroupingOper */{
                 if(rootData && (siblings = parentData.childNodes)) {
                     // Insert the new sibling in correct order
                     // node.datums[0] is representative of the new Data's position
-                    index = ~def.array.binarySearch(siblings, node.datums[0], parentNode.groupLevelSpec.comparer);
+                    index = ~def.array.binarySearch(
+                        siblings, 
+                        node.datums[0], 
+                        parentNode.groupLevelSpec.comparer);
                 }
 
                 data = new pvc.data.Data({
                     parent:   parentData,
                     atoms:    node.atoms,
                     dimNames: node.dimNames,
-                    datums: node.datums,
-                    index:  index
+                    datums:   node.datums,
+                    index:    index
                 });
             }
         }
@@ -9587,16 +9540,16 @@ add(/** @lends pvc.data.GroupingOper */{
         }
 
         var childNodes = node.children;
-        if(childNodes && childNodes.length) {
+        var L = childNodes && childNodes.length;
+        if(L) {
             if(isNew) {
                 data._groupSpec      = node.groupSpec;
                 data._groupLevelSpec = node.groupLevelSpec;
             }
 
-            childNodes.forEach(function(childNode) {
-                this._generateData(childNode, node, data, rootData);
-            }, this);
-
+            for(var i = 0 ; i < L ; i++) {
+                this._generateData(childNodes[i], node, data, rootData);
+            }
         } else if(isNew && !node.isRoot) {
             // A leaf node
             var leafs = data.root._leafs;
@@ -10647,14 +10600,14 @@ function data_setDatums(newDatums, keyArgs) {
     function setDatum(newDatum) {
         if(!newDatum) {  return; } // Ignore
 
-        /* Use already existing same-key datum, if any */
+        // Use already existing same-key datum, if any
         var key = newDatum.key;
 
         // Duplicate in input datums, ignore
         if(def.hasOwnProp.call(newDatumsByKey, key)) { return; }
 
         if(prevDatumsByKey) {
-            var prevDatum = def.getOwn(prevDatumsByKey, key);
+            var prevDatum = def.hasOwnProp.call(prevDatumsByKey, key) && prevDatumsByKey[key];
             if(prevDatum) {
                 // Duplicate with previous datums, ignore
                 if(isAdditive) { return; }
@@ -10693,8 +10646,8 @@ function data_setDatums(newDatums, keyArgs) {
 
 /**
  * Processes the atoms of this datum.
- * If a virtual null atom is found then the null atom of that dimension
- * is interned.
+ * If a virtual null atom is found then 
+ * the null atom of that dimension is interned.
  * If desired the processed atoms are marked as visited.
  *
  * @name pvc.data.Datum._processAtoms
@@ -10715,13 +10668,8 @@ function data_processDatumAtoms(datum, intern, markVisited){
         for(var dimName in atoms) {
             var atom = atoms[dimName];
             if(intern) {
-                // Ensure that the atom exists in the local dimension
-
-                var localDim = def.getOwn(dims, dimName) ||
-                               def.fail.argumentInvalid("Datum has atoms of foreign dimension.");
-
                 /*global dim_internAtom:true */
-                dim_internAtom.call(localDim, atom);
+                dim_internAtom.call(dims[dimName], atom);
             }
 
             // Mark atom as visited
@@ -10747,43 +10695,45 @@ function data_addDatumsSimple(newDatums) {
     }
 
     // Distribute added datums by linked children
-    if(this._linkChildren) {
-        this._linkChildren.forEach(function(linkChildData) {
-            data_addDatumsSimple.call(linkChildData, newDatums);
-        });
+    var list = this._linkChildren;
+    var L = list && list.length;
+    if(L) {
+        for(var i = 0 ; i < L ; i++) {
+            data_addDatumsSimple.call(list[i], newDatums);
+        }
     }
 }
 
 function data_addDatumsLocal(newDatums) {
-    var visibleNotNullDatums  = this._visibleNotNullDatums;
-    var selectedNotNullDatums = this._selectedNotNullDatums;
-
+    var me = this;
+    
     // Clear caches
-    this._sumAbsCache = null;
+    me._sumAbsCache = null;
 
-    var datumsById = this._datumsById;
-    var datums = this._datums;
+    var ds  = me._datums;
+    var vds = me._visibleNotNullDatums;
+    var sds = me._selectedNotNullDatums;
+    var dsById = me._datumsById;
 
-    newDatums.forEach(addDatum, this);
-
-    function addDatum(newDatum) {
+    for(var i = 0, L = newDatums.length ; i < L ; i++) {
+        var newDatum = newDatums[i];
         var id = newDatum.id;
 
-        datumsById[id] = newDatum;
+        dsById[id] = newDatum;
 
         data_processDatumAtoms.call(
-                this,
+                me,
                 newDatum,
                 /* intern      */ true,
                 /* markVisited */ false);
 
         // TODO: make this lazy?
         if(!newDatum.isNull) {
-            if(selectedNotNullDatums && newDatum.isSelected) { selectedNotNullDatums.set(id, newDatum); }
-            if(newDatum.isVisible) { visibleNotNullDatums.set(id, newDatum); }
+            if(sds && newDatum.isSelected) { sds.set(id, newDatum); }
+            if(       newDatum.isVisible ) { vds.set(id, newDatum); }
         }
 
-        datums.push(newDatum);
+        ds.push(newDatum);
     }
 }
 
@@ -11649,14 +11599,14 @@ def.type('pvc.visual.Scene')
     },
 
     /* VISIBILITY */
-    isVisible:  function() { return this._visibleData().is;  },
-    anyVisible: function() { return this._visibleData().any; },
+    isVisible:  function() { return this._visibleInfo().is;  },
+    anyVisible: function() { return this._visibleInfo().any; },
 
-    _visibleData: function() {
-        return def.lazy(this.renderState, '_visibleData', this._createVisibleData, this);
+    _visibleInfo: function() {
+        return def.lazy(this.renderState, 'visibleInfo', this._createVisibleInfo, this);
     },
 
-    _createVisibleData: function() {
+    _createVisibleInfo: function() {
         var any = this.chart().data.owner.visibleCount() > 0,
             isSelected = any && this.datums().any(def.propGet('isVisible'));
 
@@ -11664,14 +11614,14 @@ def.type('pvc.visual.Scene')
     },
 
     /* SELECTION */
-    isSelected:  function() { return this._selectedData().is;  },
-    anySelected: function() { return this._selectedData().any; },
+    isSelected:  function() { return this._selectedInfo().is;  },
+    anySelected: function() { return this._selectedInfo().any; },
 
-    _selectedData: function() {
-        return def.lazy(this.renderState, '_selectedData', this._createSelectedData, this);
+    _selectedInfo: function() {
+        return def.lazy(this.renderState, 'selectedInfo', this._createSelectedInfo, this);
     },
 
-    _createSelectedData: function() {
+    _createSelectedInfo: function() {
         /*global datum_isSelected:true */
         var any = this.chart().data.owner.selectedCount() > 0,
             isSelected = any && this.datums().any(datum_isSelected);
@@ -11741,12 +11691,13 @@ function rootScene_setActive(scene) {
     var ownerScene;
     if(scene && (ownerScene = scene.ownerScene)) { scene = ownerScene; }
 
-    if(this._active !== scene) {
-        if(this._active) { scene_setActive.call(this._active, false); }
+    var active = this._active;
+    if(active !== scene) {
+        if(active) { scene_setActive.call(active, false); }
 
-        this._active = scene || null;
+        this._active = active = scene || null;
 
-        if(this._active) { scene_setActive.call(this._active, true); }
+        if(active) { scene_setActive.call(active, true); }
 
         return true;
     }
@@ -11922,14 +11873,14 @@ pvc_ValueLabelVar.fromAtom = pvc_ValueLabelVar.fromComplex;
  * @constructor
  * @param {pvc.BasePanel} panel The panel instance.
  * @param {pv.Mark} mark The protovis mark.
- * @param {object} [event] An event object.
+ * @param {pvc.visual.Scene} [scene] A scene object.
  */
 def.type('pvc.visual.Context')
-.init(function(panel, mark, event){
+.init(function(panel, mark, scene){
     this.chart = panel.chart;
     this.panel = panel;
     
-    visualContext_update.call(this, mark, event);
+    visualContext_update.call(this, mark, scene);
 })
 .add(/** @lends pvc.visual.Context */{
     isPinned: false,
@@ -12024,21 +11975,20 @@ if(Object.defineProperty){
  * @name pvc.visual.Context#_update
  * @function
  * @param {pv.Mark} [pvMark] The protovis mark being rendered or targeted by an event.
- * @param {object} [ev] An event object.
+ * @param {pvc.visual.Scene} [scene] A scene object.
  * @type undefined
  * @private
  * @virtual
  * @internal
  */
-function visualContext_update(pvMark, ev){
+function visualContext_update(pvMark, scene){
 
-    this.event  = ev || pv.event;
+    this.event  = pv.event;
     this.pvMark = pvMark;
     
-    var scene;
     if(pvMark) {
         var sign = this.sign = pvMark.sign || null;
-        if(sign) { scene = pvMark.instance().data; }
+        if(!scene && sign) { scene = sign.scene(); }
         
         if(!scene) {
             this.index = null;
@@ -12608,17 +12558,13 @@ def
 
 /*global pv_Mark:true */
 
+pv_Mark.prototype.getSign    = function() { return this.sign || sign_createBasic(this); };
+pv_Mark.prototype.getScene   = function() { return this.getSign().scene();   };
+pv_Mark.prototype.getContext = function() { return this.getSign().context(); };
+
 function sign_createBasic(pvMark) {
     var as = mark_getAncestorSign(pvMark) || def.assert("There must exist an ancestor sign");
-    var bs = new pvc.visual.BasicSign(as.panel, pvMark);
-    var s = pvMark.scene;
-    var i, pvInstance;
-    if(s && (i = pvMark.index) != null && i >= 0 && (pvInstance = s[i])) {
-        // Mark is already rendering; set the current instance in context
-        bs._inContext(/*scene*/pvInstance.data, pvInstance);
-    }
-    
-    return bs;
+    return new pvc.visual.BasicSign(as.panel, pvMark);
 }
 
 // Obtains the first sign accessible from the argument mark.
@@ -12629,9 +12575,17 @@ function mark_getAncestorSign(pvMark) {
     return sign;
 }
 
-pv_Mark.prototype.getSign    = function() { return this.sign || sign_createBasic(this); };
-pv_Mark.prototype.getScene   = function() { return this.getSign().scene;     };
-pv_Mark.prototype.getContext = function() { return this.getSign().context(); };
+// Override without respect.
+pv_Mark.prototype.preBuildInstance = function(s) {
+    // Update the scene's render id,
+    // which possibly invalidates per-render cached data.
+
+     /*global scene_renderId:true */
+    var scene = s.data;
+    if(scene instanceof pvc.visual.Scene) {
+        scene_renderId.call(scene, this.renderId());
+    }
+};
 
 // Used to wrap a mark, dynamically, 
 // with minimal impact and functionality.
@@ -12640,18 +12594,12 @@ def
 .init(function(panel, pvMark) {
     this.chart  = panel.chart;
     this.panel  = panel;
-    this.pvMark = pvMark;
     
     /*jshint expr:true*/
     !pvMark.sign || def.assert("Mark already has an attached Sign.");
 
+    this.pvMark = pvMark;
     pvMark.sign = this;
-    
-    // Intercept the protovis mark's buildInstance
-    // Avoid doing a function bind, cause buildInstance is a very hot path
-    
-    pvMark.__buildInstance = pvMark.buildInstance;
-    pvMark.buildInstance   = this._dispatchBuildInstance;
 })
 .add({
     compatVersion: function() { return this.chart.compatVersion(); },
@@ -12672,15 +12620,8 @@ def
     
     // -------------
     
-    lockMark: function(name, value) {
-        this.pvMark.lock(name, value);
-        return this;
-    },
-    
-    optionalMark: function(name, value, tag) {
-        this.pvMark[name](value, tag);
-        return this;
-    },
+    lockMark:     function(name, value)      { return this.pvMark.lock(name, value), this; },
+    optionalMark: function(name, value, tag) { return this.pvMark[name](value, tag), this; },
     
     // --------------
     
@@ -12699,23 +12640,13 @@ def
     
     _createPropInterceptor: function(pvName, fun) {
         var me = this;
-        var isDataProp = pvName === 'data';
-        
         return function() {
+            // this instanceof pv.Mark
+            
             // Was function inherited by a pv.Mark without a sign?
             var sign = this.sign;
             if(!sign || sign !== me) {
                 return me._getPvSceneProp(pvName, /*defaultIndex*/this.index);
-            }
-            
-            // Data prop is evaluated while this.index = -1, and with the parent mark's stack
-            if(!isDataProp) {
-                // Is sign _inContext or Is a stale context?
-                var pvInstance = this.scene[this.index];
-                if(!sign.scene || sign.scene !== pvInstance.data) {
-                    // This situation happens when animating, because buildInstance is not called.
-                    me._inContext(/*scene*/pvInstance.data, pvInstance);
-                }
             }
             
             return fun.apply(me, arguments);
@@ -12723,6 +12654,8 @@ def
     },
     
     _getPvSceneProp: function(prop, defaultIndex) {
+        // TODO: Why is pvMark.instance(defaultIndex) is not used???
+
         // Property method was inherited via pv proto(s)
         var pvMark   = this.pvMark;
         var pvScenes = pvMark.scene;
@@ -12764,72 +12697,25 @@ def
                 return me[method].call(me, scene);
             }));
     },
-    
-    /* SCENE MAINTENANCE */
-    // this: the mark
-    _dispatchBuildInstance: function(pvInstance) {
-        function callBuildInstanceInContext() {
-            this.__buildInstance(pvInstance); 
-        }
-        
-        this.sign._inContext(
-                /*scene*/pvInstance.data,
-                pvInstance,
-                /*f*/callBuildInstanceInContext, 
-                /*x*/this);
-    },
-    
-    _inContext: function(scene, pvInstance, f, x) {
-        var pvMark = this.pvMark;
-        if(!pvInstance) { pvInstance = pvMark.scene[pvMark.index]; }
-        if(!scene     ) { scene = pvInstance.data || def.assert("A scene is required!"); }
-        
-        var index = scene.childIndex();
-        
-        var oldScene, oldIndex, oldState;
-        var oldPvInstance = this.pvInstance;
-        if(oldPvInstance) {
-            oldScene = this.scene;
-            oldIndex = this.index;
-            oldState = this.state;
-        }
-        
-        this.pvInstance = pvInstance;
-        this.scene = scene;
-        this.index = index < 0 ? 0 : index;
 
-        /*
-         * Update the scene's render id,
-         * which possibly invalidates per-render
-         * cached data.
-         */
-        /*global scene_renderId:true */
-        scene_renderId.call(scene, pvMark.renderId());
-        
-        /* state per: sign & scene & render */
-        this.state = {};
-        if(f) {
-            try {
-                return f.call(x, pvInstance);
-            } finally {
-                this.state = oldState;
-                this.pvInstance = oldPvInstance;
-                this.scene = oldScene;
-                this.index = oldIndex;
-            }
-        } // otherwise... old stuff gets stale... but there's no big problem
+    scene: function() {
+        var instance = this.pvMark.instance();
+        var scene = instance && instance.data;
+        return scene instanceof pvc.visual.Scene ? scene : null;
     },
-    
-    /* CONTEXT */
-    context: function(createNew) {
+
+    // per-instance/per-render state
+    instanceState: function(s) { return this.pvMark.instanceState(s); },
+
+    context: function(scene, createIndep) {
         // This is a hot function
         var state;
-        if(createNew || !(state = this.state)) { return this._createContext(); }
+        if(createIndep || !(state = this.instanceState())) { return this._createContext(scene); }
         
-        return state.context || (state.context = this._createContext());
+        return state.cccContext || (state.cccContext = this._createContext(scene));
     },
-    
-    _createContext: function() { return new pvc.visual.Context(this.panel, this.pvMark); }
+
+    _createContext: function(scene) { return new pvc.visual.Context(this.panel, this.pvMark, scene); }
 });
 
 def.type('pvc.visual.Sign', pvc.visual.BasicSign)
@@ -12891,24 +12777,22 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         var methods = {};
         
         // ex: color
-        methods[name] = function(arg) {
+        methods[name] = function(scene, arg) {
             this._finished = false;
             
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
             
-                // ex: baseColor
-            var value = this[baseName](arg);
-                
-            if(value == null) { return null; }  // undefined included
-            
+            // ex: baseColor
+            var value = this[baseName](scene, arg);
+            if(value == null ) { return null;  } // undefined included
             if(this._finished) { return value; }
             
-            if(this.showsInteraction() && this.anyInteraction()) {
+            if(this.showsInteraction() && scene.anyInteraction()) {
                 // ex: interactiveColor
-                value = this[interName](value, arg);
+                value = this[interName](scene, value, arg);
             } else {
                 // ex: normalColor
-                value = this[normalName](value, arg);
+                value = this[normalName](scene, value, arg);
             }
             
             // Possible memory leak in case of error
@@ -12926,23 +12810,24 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         //   It is possible to call the default method directly, if needed.
         //   defName is installed as a user extension and 
         //   is called if the user hasn't extended...
-        methods[baseName]   = function(/*arg*/) { return this.delegateExtension(); };
+        methods[baseName]   = function(/*scene, arg*/) { return this.delegateExtension(); };
         
         // defaultColor
-        methods[defName]    = function(/*arg*/) { return; };
+        methods[defName]    = function(/*scene, arg*/) { return; };
         
         // normalColor
-        methods[normalName] = function(value/*, arg*/) { return value; };
+        methods[normalName] = function(scene, value/*, arg*/) { return value; };
         
         // interactiveColor
-        methods[interName]  = function(value/*, arg*/) { return value; };
+        methods[interName]  = function(scene, value/*, arg*/) { return value; };
         
         this.constructor.add(methods);
         
         return this;
     },
     
-    anyInteraction: function() { return this.scene.anyInteraction(); },
+    // Use (at least) in TreemapPanel to add isActiveDescendantOrSelf
+    anyInteraction: function(scene) { return scene.anyInteraction(); },
     
     // Call this function with a final property value
     // to ensure that it will not be processed anymore
@@ -13027,8 +12912,8 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             // the user hasn't specified an extension point.
 
             if(!me.pvMark.hasDelegateValue(pvName, pvc.extensionTag)) {
-                var defaultPropMethod = function() {
-                    return me[defaultPropName](me._arg);
+                var defaultPropMethod = function(scene) {
+                    return me[defaultPropName](scene, me._arg);
                 };
                 
                 me.pvMark.intercept(pvName, defaultPropMethod, me._extensionKeyArgs);
@@ -13047,7 +12932,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         // 'strokeStyle' is the pvName.
         var mainPropMethod = this._createPropInterceptor(
                 pvName, 
-                function() { return me[prop](); });
+                function(scene) { return me[prop](scene); });
         
         return me._intercept(pvName, mainPropMethod);
     },
@@ -13137,10 +13022,10 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
     
     /* COLOR */
-    fillColor:   function() { return this.color('fill'  ); },
-    strokeColor: function() { return this.color('stroke'); },
+    fillColor:   function(scene) { return this.color(scene, 'fill'  ); },
+    strokeColor: function(scene) { return this.color(scene, 'stroke'); },
 
-    defaultColor: function(/*type*/) { return this.defaultColorSceneScale()(this.scene); },
+    defaultColor: function(scene/*, type*/) { return this.defaultColorSceneScale()(scene); },
 
     dimColor: function(color, type) {
         if(type === 'text'){
@@ -13170,26 +13055,17 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                def.fun.constant(pvc.defaultColor);
     },
 
-    mayShowActive: function(noSeries) {
+    mayShowActive: function(scene, noSeries) {
         if(!this.showsActivity() ){ return false; }
         
-        var scene = this.scene;
         return scene.isActive || 
                (!noSeries && this.isActiveSeriesAware && scene.isActiveSeries()) ||
                scene.isActiveDatum();
     },
 
-    mayShowNotAmongSelected: function() {
-        return this.mayShowAnySelected() && !this.scene.isSelected();
-    },
-
-    mayShowSelected: function() {
-        return this.showsSelection() && this.scene.isSelected();
-    },
-    
-    mayShowAnySelected: function() {
-        return this.showsSelection() && this.scene.anySelected();
-    },
+    mayShowNotAmongSelected: function(scene) { return this.mayShowAnySelected(scene) && !scene.isSelected(); },
+    mayShowSelected:         function(scene) { return this.showsSelection() && scene.isSelected();  },
+    mayShowAnySelected:      function(scene) { return this.showsSelection() && scene.anySelected(); },
     
     /* TOOLTIP */
     _addPropTooltip: function(ka) {
@@ -13242,14 +13118,14 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         
         var formatTooltip;
         if(!isLazy) {
-            formatTooltip = function() {
-                var context = me.context();
+            formatTooltip = function(scene) {
+                var context = me.context(scene);
                 return tooltipFormatter(context); 
             };
         } else {
-            formatTooltip = function() {
+            formatTooltip = function(scene) {
                 // Capture current context
-                var context = me.context(/*createNew*/true);
+                var context = me.context(scene, /*createNew*/true);
                 var tooltip;
                 
                 // Function that formats the tooltip only on first use
@@ -13264,10 +13140,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             };
         }
         
-        return function() {
-            var scene = me.scene;
+        return function(scene) {
             if(scene && !scene.isIntermediate && scene.showsTooltip()) {
-                return formatTooltip();
+                return formatTooltip(scene);
             }
         };
     },
@@ -13344,6 +13219,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     _handleClick: function() {
         /*global window:true*/
         
+        // TODO: implement click/doubleClick exclusiveness directly on protovis...
+        // Avoid this PV context plumbing here!
+
         // Not yet in context...
         var me = this;
         var pvMark = me.pvMark;
@@ -13380,15 +13258,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     },
     
     _handleClickCore: function() {
-        var me = this;
-        var pvInstance = me.pvMark.instance();
-        
-        // Setup the sign context
-        me._inContext(
-            /*scene*/pvInstance.data,
-            pvInstance,
-            /*f*/function() { me._onClick(me.context()); }, 
-            /*x*/me);
+        this._onClick(this.context());
     },
 
     _handleDoubleClick: function() {
@@ -13396,18 +13266,12 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         // because we might not need to ignore the clicks.
         // Assumes that: this.doubleClickable()
         var me = this;
-        var pvInstance = me.pvMark.instance();
-        var scene = pvInstance.data;
-        if(scene.doubleClickable()) {
+        var scene = me.scene();
+        if(scene && scene.doubleClickable()) {
             // TODO: explain why 2 ignores
             me._ignoreClicks = 2;
-            
-         // Setup the sign context
-            me._inContext(
-                /*scene*/pvInstance.data,
-                pvInstance,
-                /*f*/function() { me._onDoubleClick(me.context()); }, 
-                /*x*/me);
+            // Setup the sign context
+            me._onDoubleClick(me.context(scene));
         }
     },
     
@@ -13514,46 +13378,45 @@ def
         this.base(keyArgs);
     },
     
-    defaultText: function() { return this.scene.format(this.panel.valuesMask); },
+    defaultText: function(scene) { return scene.format(this.panel.valuesMask); },
     
-    normalText: function(text) { return this.trimText(text); },
+    normalText: function(scene, text) { return this.trimText(scene, text); },
     
-    interactiveText: function(text) {
-        return this.showsActivity() && this.scene.isActive ? text : this.trimText(text); 
+    interactiveText: function(scene, text) {
+        return this.showsActivity() && scene.isActive ? text : this.trimText(scene, text); 
     },
     
-    trimText: function(text) { return text; },
+    trimText: function(scene, text) { return text; },
     
-    textColor: function() { return this.color('text'); },
+    textColor: function(scene) { return this.color(scene, 'text'); },
     
-    backgroundColor: function(type) {
-        var state = this.state;
-        if(!state) { return this.calcBackgroundColor(type); }
-        var cache = def.lazy(state, 'bgColorCache');
+    backgroundColor: function(scene, type) {
+        var state = this.instanceState();
+        if(!state) { return this.calcBackgroundColor(scene, type); }
+        var cache = def.lazy(state, 'cccBgColorCache');
         var color = def.getOwn(cache, type);
-        if(!color) { color = cache[type] = this.calcBackgroundColor(type); }
+        if(!color) { color = cache[type] = this.calcBackgroundColor(scene, type); }
         return color;
     },
     
     calcBackgroundColor: def.fun.constant(pv.Color.names.white), // TODO: ??
     
-    optimizeLegibilityColor: function(color, type) {
+    optimizeLegibilityColor: function(scene, color, type) {
         if(this.panel.valuesOptimizeLegibility) {
-            var bgColor = this.backgroundColor();
+            var bgColor = this.backgroundColor(scene, type);
             return bgColor.isDark() === color.isDark() ? color.complementary().alpha(0.9) : color;
         }
-        
         return color;
     },
     
-    normalColor: function(color, type) { return this.optimizeLegibilityColor(color, type); },
+    normalColor: function(scene, color, type) { return this.optimizeLegibilityColor(scene, color, type); },
     
-    interactiveColor: function(color, type) {
-        if(!this.mayShowActive() && this.mayShowNotAmongSelected()) {
+    interactiveColor: function(scene, color, type) {
+        if(!this.mayShowActive(scene) && this.mayShowNotAmongSelected(scene)) {
             return this.dimColor(color, type);
         }
         
-        return this.optimizeLegibilityColor(color, type);
+        return this.optimizeLegibilityColor(scene, color, type);
     }
 });
 
@@ -13613,22 +13476,20 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     radius: function(){
         // Store extended value, if any
         // See #baseSize
-        this.state.radius = this.delegateExtension();
+        this.instanceState().cccRadius = this.delegateExtension();
     },
     
     /* SIZE */
-    baseSize: function(){
+    baseSize: function(scene) {
         /* Radius has precedence */
-        var radius = this.state.radius;
-        return radius != null ? def.sqr(radius) : this.base();
+        var radius = this.instanceState().cccRadius;
+        return radius != null ? def.sqr(radius) : this.base(scene);
     },
 
-    defaultSize: function(){
-        return 12;
-    },
+    defaultSize: def.fun.constant(12),
     
-    interactiveSize: function(size){
-        return this.mayShowActive(/*noSeries*/true) ?
+    interactiveSize: function(scene, size){
+        return this.mayShowActive(scene, /*noSeries*/true) ?
                (Math.max(size, 5) * 2.5) : 
                size;
     },
@@ -13638,15 +13499,11 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type){
-        if(this.mayShowActive(/*noSeries*/true)) {
-            if(type === 'stroke') {
-                return color.brighter(1);
-            }
-        } else if(this.mayShowNotAmongSelected()) {
-            if(this.mayShowActive()) {
-                return color.alpha(0.8);
-            }
+    interactiveColor: function(scene, color, type){
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
+            if(type === 'stroke') { return color.brighter(1); }
+        } else if(this.mayShowNotAmongSelected(scene)) {
+            if(this.mayShowActive(scene)) { return color.alpha(0.8); }
             
             switch(type) {
                 case 'fill':   return this.dimColor(color, type);
@@ -13654,7 +13511,7 @@ def.type('pvc.visual.Dot', pvc.visual.Sign)
             }
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });
 
@@ -13670,11 +13527,11 @@ def
     
     this
     ._bindProperty('lineWidth', 'strokeWidth')
-    .intercept('visible', function() {
-        if(!this.canShow()) { return false; }
+    .intercept('visible', function(scene) {
+        if(!this.canShow(scene)) { return false; }
         
         var visible = this.delegateExtension();
-        if(visible == null) { visible = isV1Compat || this.defaultVisible(); }
+        if(visible == null) { visible = isV1Compat || this.defaultVisible(scene); }
         return visible;
     });
     
@@ -13711,17 +13568,16 @@ def
     isSizeBound:  false,
     isSizeAbs:    false,
 
-    canShow: function() { return !this.scene.isIntermediate; },
+    canShow: function(scene) { return !scene.isIntermediate; },
 
-    defaultVisible: function(){
-        var scene = this.scene;
+    defaultVisible: function(scene) {
         return !scene.isNull && 
                ((!this.isSizeBound && !this.isColorBound) ||
                 (this.isSizeBound  && scene.vars.size.value  != null) ||
                 (this.isColorBound && (this.isColorDiscrete || scene.vars.color.value != null)));
     },
 
-    _initColor: function(){
+    _initColor: function() {
         // TODO: can't most of this be incorporated in the sizeAxis code
         // or in Sign#_initDefColorScale ??
         var colorConstant;
@@ -13798,28 +13654,26 @@ def
     //  if(!me.linesVisible) {
     //     color = color.alpha(color.opacity * 0.85);
     //  }
-    defaultColor: function(type) { return this._sceneDefColor(this.scene, type); },
+    defaultColor: function(scene, type) { return this._sceneDefColor(scene, type); },
 
-    normalColor: function(color, type) {
+    normalColor: function(scene, color, type) {
         // When normal, the stroke shows a darker color
-        return type === 'stroke' ? color.darker() : this.base(color, type);
+        return type === 'stroke' ? color.darker() : this.base(scene, color, type);
     },
 
-    interactiveColor: function(color, type) {
-        var scene = this.scene;
-
-        if(this.mayShowActive(/*noSeries*/true)){
+    interactiveColor: function(scene, color, type) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
             switch(type) {
                 case 'fill':   return this.isSizeBound ? color.alpha(0.75) : color;
                 
                 // When active, the stroke shows a darker color, as well
                 case 'stroke': return color.darker();
             }
-        } else if(this.showsSelection()){
+        } else if(this.showsSelection()) {
             var isSelected = scene.isSelected();
             var notAmongSelected = !isSelected && scene.anySelected();
             if(notAmongSelected){
-                if(this.mayShowActive()) { return color.alpha(0.8); }
+                if(this.mayShowActive(scene)) { return color.alpha(0.8); }
 
                 switch(type) {
                     // Metric sets an alpha while HG does not
@@ -13842,12 +13696,12 @@ def
         return color;
     },
 
-    defaultSize: function() { return this._sceneDefSize(this.scene); },
+    defaultSize: function(scene) { return this._sceneDefSize(scene); },
 
-    defaultShape: function() { return this._sceneDefShape(this.scene); },
+    defaultShape: function(scene) { return this._sceneDefShape(scene); },
 
-    interactiveSize: function(size) {
-        if(!this.mayShowActive(/*noSeries*/true)) { return size; }
+    interactiveSize: function(scene, size) {
+        if(!this.mayShowActive(scene, /*noSeries*/true)) { return size; }
 
         // At least 1 px, no more than 10% of the radius, and no more that 3px.
         var radius    = Math.sqrt(size);
@@ -13855,13 +13709,13 @@ def
         return def.sqr(radius + radiusInc);
     },
 
-    defaultStrokeWidth: function() {
-        return (this.nullSizeShapeHasStrokeOnly && this.scene.vars.size.value == null) ? 1.8 : 1;
+    defaultStrokeWidth: function(scene) {
+        return (this.nullSizeShapeHasStrokeOnly && scene.vars.size.value == null) ? 1.8 : 1;
     },
 
-    interactiveStrokeWidth: function(width) {
-        return this.mayShowActive(/*noSeries*/true) ? (2 * width) :
-               this.mayShowSelected() ? (1.5 * width) :
+    interactiveStrokeWidth: function(scene, width) {
+        return this.mayShowActive(scene, /*noSeries*/true) ? (2 * width) :
+               this.mayShowSelected(scene) ? (1.5 * width) :
                width;
     }
 });
@@ -13922,8 +13776,8 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     /* STROKE WIDTH */
     defaultStrokeWidth: def.fun.constant(1.5),
 
-    interactiveStrokeWidth: function(strokeWidth) {
-        return this.mayShowActive() ? 
+    interactiveStrokeWidth: function(scene, strokeWidth) {
+        return this.mayShowActive(scene) ? 
                Math.max(1, strokeWidth) * 2.5 :
                strokeWidth;
     },
@@ -13932,14 +13786,14 @@ def.type('pvc.visual.Line', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type) {
-        if(this.mayShowNotAmongSelected()) {
-            return this.mayShowActive() ? 
+    interactiveColor: function(scene, color, type) {
+        if(this.mayShowNotAmongSelected(scene)) {
+            return this.mayShowActive(scene) ? 
                    pv.Color.names.darkgray.darker().darker() : 
                    this.dimColor(color, type);
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });
 
@@ -14013,12 +13867,12 @@ def.type('pvc.visual.Area', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type){
-        if(type === 'fill' && this.mayShowNotAmongSelected()) {
+    interactiveColor: function(scene, color, type){
+        if(type === 'fill' && this.mayShowNotAmongSelected(scene)) {
             return this.dimColor(color, type);
         }
         
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });
 
@@ -14044,8 +13898,8 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     /**
      * @override
      */
-    normalColor: function(color, type){
-        if(type === 'stroke' && !this.normalStroke){ return null; }
+    normalColor: function(scene, color, type) {
+        if(type === 'stroke' && !this.normalStroke) { return null; }
 
         return color;
     },
@@ -14053,42 +13907,40 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
     /**
      * @override
      */
-    interactiveColor: function(color, type) {
-        var scene = this.scene;
-        
+    interactiveColor: function(scene, color, type) {
         if(type === 'stroke') {
-            if(this.mayShowActive(/*noSeries*/true)) { return color.brighter(1.3).alpha(0.7); }
+            if(this.mayShowActive(scene, /*noSeries*/true)) { return color.brighter(1.3).alpha(0.7); }
             
             if(!this.normalStroke) { return null; }
             
-            if(this.mayShowNotAmongSelected()) {
-                if(this.mayShowActive()) { return pv.Color.names.darkgray.darker().darker(); }
+            if(this.mayShowNotAmongSelected(scene)) {
+                if(this.mayShowActive(scene)) { return pv.Color.names.darkgray.darker().darker(); }
                 
                 return this.dimColor(color, type);
             }
             
-            if(this.mayShowActive()) { return color.brighter(1).alpha(0.7); }
+            if(this.mayShowActive(scene)) { return color.brighter(1).alpha(0.7); }
 
         } else if(type === 'fill') {
-            if(this.mayShowActive(/*noSeries*/true)) { return color.brighter(0.2).alpha(0.8); } 
+            if(this.mayShowActive(scene, /*noSeries*/true)) { return color.brighter(0.2).alpha(0.8); } 
 
-            if(this.mayShowNotAmongSelected()) {
-                if(this.mayShowActive()) { return pv.Color.names.darkgray.darker(2).alpha(0.8); }
+            if(this.mayShowNotAmongSelected(scene)) {
+                if(this.mayShowActive(scene)) { return pv.Color.names.darkgray.darker(2).alpha(0.8); }
                 
                 return this.dimColor(color, type);
             }
             
-            if(this.mayShowActive()) { return color.brighter(0.2).alpha(0.8); }
+            if(this.mayShowActive(scene)) { return color.brighter(0.2).alpha(0.8); }
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     },
 
     /* STROKE WIDTH */    
     defaultStrokeWidth: function() { return 0.5; },
 
-    interactiveStrokeWidth: function(strokeWidth) {
-        if(this.mayShowActive(/*noSeries*/true)) { return Math.max(1, strokeWidth) * 1.3; }
+    interactiveStrokeWidth: function(scene, strokeWidth) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) { return Math.max(1, strokeWidth) * 1.3; }
 
         return strokeWidth;
     }
@@ -14162,38 +14014,38 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
     /* COLOR */
 
     // @override
-    defaultColor: function(type) { return type === 'stroke' ? null : this.base(type); },
+    defaultColor: function(scene, type) { return type === 'stroke' ? null : this.base(scene, type); },
 
     // @override
-    interactiveColor: function(color, type) {
-        if(this.mayShowActive(/*noSeries*/true)) {
+    interactiveColor: function(scene, color, type) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
             switch(type) {
                 // Like the bar chart
                 case 'fill':   return color.brighter(0.2).alpha(0.8);
                 case 'stroke': return color.brighter(1.3).alpha(0.7);
             }
-        } else if(this.mayShowNotAmongSelected()) {
+        } else if(this.mayShowNotAmongSelected(scene)) {
             //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
             if(type === 'fill') { return this.dimColor(color, type); }
         }
 
-        return this.base(color, type);
+        return this.base(scene, color, type);
     },
 
     /* OffsetRadius */
-    offsetRadius: function() {
-        var offsetRadius = this.base();
+    offsetRadius: function(scene) {
+        var offsetRadius = this.base(scene);
         return Math.min(Math.max(0, offsetRadius), this._maxOffsetRadius);
     },
 
-    baseOffsetRadius: function() {
-        var offsetRadius = this.base() || 0;
+    baseOffsetRadius: function(scene) {
+        var offsetRadius = this.base(scene) || 0;
         return this._resolvePctRadius(pvc_PercentValue.parse(offsetRadius));
     },
 
-    interactiveOffsetRadius: function(offsetRadius) {
+    interactiveOffsetRadius: function(scene, offsetRadius) {
         return offsetRadius +
-            (this.mayShowActive(/*noSeries*/true) ? this._activeOffsetRadius : 0);
+            (this.mayShowActive(scene, /*noSeries*/true) ? this._activeOffsetRadius : 0);
     }
 });
 
@@ -14235,12 +14087,10 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     /* STROKE WIDTH */
-    defaultStrokeWidth: function(){
-        return 1;
-    },
+    defaultStrokeWidth: def.fun.constant(1),
 
-    interactiveStrokeWidth: function(strokeWidth){
-        if(this.mayShowActive(/*noSeries*/true)){
+    interactiveStrokeWidth: function(scene, strokeWidth) {
+        if(this.mayShowActive(scene, /*noSeries*/true)) {
             return Math.max(1, strokeWidth) * 2.2;
         }
 
@@ -14248,16 +14098,14 @@ def.type('pvc.visual.Rule', pvc.visual.Sign)
     },
 
     /* STROKE COLOR */
-    interactiveColor: function(color, type){
-        var scene = this.scene;
-        
+    interactiveColor: function(scene, color, type){
         if(scene.datum && 
-           !this.mayShowActive(/*noSeries*/true) &&
-           this.mayShowNotAmongSelected()) {
+           !this.mayShowActive(scene, /*noSeries*/true) &&
+           this.mayShowNotAmongSelected(scene)) {
             return this.dimColor(color, type);
         }
         
-        return this.base(color, type);
+        return this.base(scene, color, type);
     }
 });
 
@@ -16801,9 +16649,7 @@ def
             
             var hidden = !textSize || !textSize.width || !textSize.height;
             itemScene.isHidden = hidden;
-            if(hidden){
-                return;
-            }  
+            if(hidden) { return; }
             
             // Add small margin to the end of the text eq to 0.5em
             var widthMargin = 0;// (textSize.height / 2);
@@ -19930,11 +19776,11 @@ pvc.BaseChart
                 // This is used for re-layouting only.
                 // Yet...
 
-                // Remove virtual datums (they are regenerated each time)
-                data.clearVirtuals();
-
                 // Dispose all data children and linked children (recreated as well)
                 data.disposeChildren();
+
+                // Remove virtual datums (they are regenerated each time)
+                data.clearVirtuals();
             }
         }
 
@@ -21662,6 +21508,8 @@ pvc.BaseChart
     _processExtensionPoints: function() {
         var components;
         if(!this.parent) {
+            // TODO: It's kind of non-sensical to keep the order
+            // of a map (like `extensionPoints`) - JS maps have no guaranteed order.
             var points = this.options.extensionPoints;
             components = {};
             if(points) {
@@ -21699,7 +21547,7 @@ pvc.BaseChart
         // if mark is null or undefined, skip
         if (mark) {
             var component = def.getOwn(this._components, id);
-            if(component){
+            if(component) {
                 if(mark.borderPanel) { mark = mark.borderPanel; }
                 
                 var logOut     = pvc.debug >= 3 ? [] : null;
@@ -21707,45 +21555,68 @@ pvc.BaseChart
                 var wrap       = mark.wrap;
                 var keyArgs2   = {tag: pvc.extensionTag};
                 var isRealMark = mark instanceof pv_Mark;
-                
+                var isRealMarkAndWrapOrConstOnly = isRealMark && (wrap || constOnly);
+
+                var processValue = function(v, m) {
+                    // Extend object css and svg properties
+                    if(v != null) {
+                        var type = typeof v;
+                        if(type === 'object') {
+                            if(m === 'svg' || m === 'css') {
+                                var v2 = mark.propertyValue(m);
+                                if(v2) { v = def.copy(v2, v); }
+                            } else if(v instanceof Array) {
+                                return v.map(function(vi) { return processValue(vi, m); });
+                            }
+                        } else if(isRealMarkAndWrapOrConstOnly && type === 'function') {
+                            if(constOnly) { return; }
+                            
+                            // TODO: "add" extension idiom - any other exclusions?
+                            if(m !== 'add') { v = wrap.call(mark, v, m); }
+                        }
+                    }
+                    return v;
+                };
+
+                var callMethod = function(mm, v) {
+                    if(v instanceof Array) {
+                        mm.apply(mark, v);
+                    } else {
+                        mm.call(mark, v);
+                    }
+                };
+
                 component.forEach(function(v, m) {
                     // Not everything that is passed to 'mark' argument
                     //  is actually a mark...(ex: scales)
                     // Not locked and
                     // Not intercepted and
                     if(mark.isLocked && mark.isLocked(m)) {
-                        if(logOut) {logOut.push(m + ": locked extension point!");}
+                        if(logOut) { logOut.push(m + ": locked extension point!"); }
                     } else if(mark.isIntercepted && mark.isIntercepted(m)) {
-                        if(logOut) {logOut.push(m + ":" + pvc.stringify(v) + " (controlled)");}
+                        if(logOut) { logOut.push(m + ":" + pvc.stringify(v) + " (controlled)"); }
                     } else {
-                        if(logOut) {logOut.push(m + ": " + pvc.stringify(v)); }
+                        if(logOut) { logOut.push(m + ": " + pvc.stringify(v)); }
 
-                        // Extend object css and svg properties
-                        if(v != null) {
-                            var type = typeof v;
-                            if(type === 'object') {
-                                if(m === 'svg' || m === 'css') {
-                                    var v2 = mark.propertyValue(m);
-                                    if(v2) { v = def.copy(v2, v); }
+                        v = processValue(v, m);
+                        if(v !== undefined) {
+                            // Distinguish between mark methods and properties
+                            var mm = mark[m];
+                            if(typeof mm === "function") {
+                                if(isRealMark && mark.properties[m]) {
+                                    mark.intercept(m, v, keyArgs2);
+                                } else {
+                                    // Not really a mark or not a real protovis property.
+                                    // In this case, multiple calls and then ultiple arguments are allowed in v.
+                                    if(v instanceof Array) {
+                                        v.forEach(function(vi) { callMethod(mm, vi); });
+                                    } else {
+                                        callMethod(mm, v);
+                                    }
                                 }
-                            } else if(isRealMark && (wrap || constOnly) && type === 'function') {
-                                if(constOnly) { return; }
-                                
-                                // TODO: "add" extension idiom - any other exclusions?
-                                if(m !== 'add') { v = wrap.call(mark, v, m); }
-                            }
-                        }
-                        
-                        // Distinguish between mark methods and properties
-                        if (typeof mark[m] === "function") {
-                            if(m != 'add' && mark.intercept && mark.properties[m]) {
-                                mark.intercept(m, v, keyArgs2);
                             } else {
-                                // Not really a mark or not a real protovis property 
-                                mark[m](v);
+                                mark[m] = v;
                             }
-                        } else {
-                            mark[m] = v;
                         }
                     }
                 });
@@ -21868,7 +21739,6 @@ def
         this.isRoot    = true;
         this.isTopRoot = true;
         this._ibits    = chart._ibits;
-        
     } else {
         this.parent    = parent;
         this.isTopRoot = false;
@@ -22880,7 +22750,7 @@ def
         try {
             // When animating, renders the animation's 'start' point
             pvPanel.render();
-            
+
             // Transition to the animation's 'end' point
             if(this._animating) {
                 this._animating = 2;
@@ -23498,13 +23368,13 @@ def
                 noTooltip:     true
             })
             .override('defaultStrokeWidth', def.fun.constant(1.5))
-            .override('defaultColor', function(type) {
+            .override('defaultColor', function(scene, type) {
                 return type === 'stroke' ? 
                        '#86fe00' :                 /* 'rgb(255,127,0)' */ 
                        'rgba(203, 239, 163, 0.6)'  /* 'rgba(255, 127, 0, 0.15)' */
                        ;
             })
-            .override('interactiveColor', function(color) { return color; })
+            .override('interactiveColor', function(scene, color) { return color; })
             .pvMark
             .lock('visible', function() { return !!rb;  })
             .lock('left',    function() { return rb.x;  })
@@ -24506,7 +24376,7 @@ def
         var a_height = this.anchorOrthoLength(a);
         
         // 2 - Small factor to avoid cropping text on either side
-        var textWidth    = pv.Text.measure(this.title, this.font).width + 2;
+        var textWidth    = pv.Text.measureWidth(this.title, this.font) + 2;
         var clientWidth  = layoutInfo.clientSize[a_width];
         var desiredWidth = layoutInfo.desiredClientSize[a_width];
         
@@ -24876,7 +24746,7 @@ def
                .add(pv.Line)
                   .data(function(scene) {
                       var labelBBox = pvc.text.getLabelBBox(
-                              pv.Text.measure(scene.vars.value.label, font).width, 
+                              pv.Text.measureWidth(scene.vars.value.label, font),
                               textHeight,  // shared stuff
                               'left', 
                               'middle', 
@@ -25328,7 +25198,7 @@ def
             var alignRight    = ha === "right";
             var availableSize = alignRight ? (baseEndPos - basePos) : basePos;
             
-            var labelSize = pv.Text.measure(pseudoAtom.label, o.font).width;
+            var labelSize = pv.Text.measureWidth(pseudoAtom.label, o.font);
             if (availableSize < labelSize) {
                 ha = alignRight ? "left" : "right";
             }
@@ -26024,9 +25894,7 @@ def
             })
             .lock('data', tickScenes)
             .lock(len_a, null)
-            .override('defaultColor', function(){
-                return pv.color("#f0f0f0");
-            })
+            .override('defaultColor', def.fun.constant(pv.color("#f0f0f0")))
             .pvMark
             .lineWidth(1)
             .antialias(true)
@@ -26186,9 +26054,7 @@ def
                     .lock(obeg_a, obeg)
                     .lock(oend_a, oend)
                     .lock(a,      zeroPosition)
-                    .override('defaultColor', function(){
-                        return pv.color("#666666");
-                    })
+                    .override('defaultColor', def.fun.constant(pv.color("#666666")))
                     .pvMark
                     .events('none')
                     .lineWidth(1)
@@ -26361,9 +26227,7 @@ def
         // The drag action is only available when there aren't visual elements
         // in the front. This allows to keep elements interactive.
         var focusBg = addSelBox(baseBgPanel.paddingPanel, 'focusWindowBg')
-            .override('defaultColor', function(type){
-                return pvc.invisibleFill;
-            })
+            .override('defaultColor', def.fun.constant(pvc.invisibleFill))
             .pvMark
             ;
 
@@ -26434,7 +26298,7 @@ def
                 noTooltip:     true,
                 showsInteraction: false
             })
-            .override('defaultColor', function(type){
+            .override('defaultColor', function(scene, type) {
                 return type === 'stroke' ? null : curtainFillColor;
             })
             .pvMark
@@ -26452,7 +26316,7 @@ def
         // FG FOCUS BOX
         // for coloring and anchoring
         var selectBoxFg = addSelBox(baseFgPanel, 'focusWindow')
-            .override('defaultColor', function(type){ return null; })
+            .override('defaultColor', def.fun.constant(null))
             .pvMark
             .lock('events', 'none')
             ;
@@ -26474,7 +26338,7 @@ def
                     noTooltip:     true,
                     showsInteraction: false
                 })
-                .override('defaultColor', function(type){
+                .override('defaultColor', function(scene, type) {
                     return type === 'stroke' ? null : fillColor;
                 })
                 .pvMark
@@ -27849,7 +27713,7 @@ def
         var ticksText = ticksInfo.ticksText || this._calcContinuousTicksText(ticksInfo);
 
         var ticksTextLength = ticksInfo.ticksTextLength = ticksText.map(function(text) {
-            var len = pv.Text.measure(text, font).width;
+            var len = pv.Text.measureWidth(text, font);
             if(len > max){ max = len; }
             return len;
         });
@@ -27931,7 +27795,7 @@ def
         // Vertically, it is much easier to differentiate different lines.
         // So the minimum horizontal space between labels has the length
         // a white space character, and sMin is the additional required spacing.
-        var spaceW = pv.Text.measure('x', this.font).width;
+        var spaceW = pv.Text.measureWidth('x', this.font);
         var sMinW  = spaceW + sMin; // Between sides (orthogonal to baseline)
 
         // The angle that the text makes to the x axis (clockwise,y points downwards)
@@ -28172,7 +28036,7 @@ def
         var domainTextLength = this.scale.domain().map(function(tick){
                 tick = +tick.toFixed(2); // crop some decimal places...
                 var text = this.scale.tickFormat(tick);
-                return pv.Text.measure(text, this.font).width;
+                return pv.Text.measureWidth(text, this.font);
             }, this);
 
         var avgTextLength = Math.max((domainTextLength[1] + domainTextLength[0]) / 2, layoutInfo.textHeight);
@@ -28188,7 +28052,7 @@ def
         var maxTextWidth =
             def.query(ticksText)
                 .select(function(text){
-                    return pv.Text.measure(text, this.font).width;
+                    return pv.Text.measureWidth(text, this.font);
                 }, this)
                 .max();
 
@@ -28451,18 +28315,16 @@ def
                     wrapper:  wrapper
                 })
                 .lock('data') // Inherited
-                .intercept('visible', function(){
-                    return !this.scene.isHidden && this.delegateExtension(true);
+                .intercept('visible', function(scene) {
+                    return !scene.isHidden && this.delegateExtension(true);
                 })
                 .optional('lineWidth', 1)
                 .lock(anchorOpposite,  0) // top
                 .lock(anchorOrtho,     0) // left
                 .lock(anchorLength,    null)
                 .optional(anchorOrthoLength, this.tickLength * 2/3) // slightly smaller than continuous ticks
-                .override('defaultColor', function(type){
-                    if(isV1Compat) {
-                        return pv.Color.names.transparent;
-                    }
+                .override('defaultColor', function(){
+                    if(isV1Compat) { return pv.Color.names.transparent; }
 
                     // Inherit ticks color from rule
                     // Control visibility through .visible or lineWidth
@@ -28512,7 +28374,7 @@ def
                         text = tickScene.vars.tick.label;
                     }
 
-                    if(maxTextWidth && (!this.showsInteraction() || !this.scene.isActive)) {
+                    if(maxTextWidth && (!this.showsInteraction() || !tickScene.isActive)) {
                         text = pvc.text.trimToWidthB(maxTextWidth, text, font, "..", false);
                     }
                 }
@@ -28676,10 +28538,10 @@ def
                         wrapper: wrapper
                     })
                     .lock('data') // Inherited
-                    .intercept('visible', function(){
+                    .intercept('visible', function(scene) {
                         // The last minor tick isn't visible - only show between major ticks.
                         // Hide if the previous major tick is hidden.
-                        var visible = (this.index < tickCount - 1) &&
+                        var visible = (scene.childIndex() < tickCount - 1) &&
                                       (!pvTicks.scene || pvTicks.scene[0].visible);
 
                         return visible && this.delegateExtension(true);
@@ -28722,7 +28584,7 @@ def
             maxTextWidth = 0;
         }
 
-        var label = this.pvLabel = new pvc.visual.Label(this, pvTicksPanel, {
+        var pvLabel = this.pvLabel = new pvc.visual.Label(this, pvTicksPanel, {
                 extensionId: 'label',
                 noHover: false,
                 showsInteraction: true,
@@ -28731,7 +28593,7 @@ def
             .lock('data') // inherited
             .intercept('text', function(tickScene) {
                 var text = tickScene.vars.tick.label;
-                if(maxTextWidth && (!this.showsInteraction() || !this.scene.isActive)) {
+                if(maxTextWidth && (!this.showsInteraction() || !tickScene.isActive)) {
                     text = pvc.text.trimToWidthB(maxTextWidth, text, font, '..', false);
                 }
                 return text;
@@ -28748,17 +28610,17 @@ def
         // Label alignment
         var rootPanel = this.pvPanel.root;
         if(this.isAnchorTopOrBottom()){
-            label
+            pvLabel
                 .textBaseline(anchorOpposite)
                 .textAlign(function(tickScene){
                     var absLeft;
                     if(this.index === 0){
-                        absLeft = label.toScreenTransform().transformHPosition(label.left());
+                        absLeft = pvLabel.toScreenTransform().transformHPosition(pvLabel.left());
                         if(absLeft <= 0){
                             return 'left'; // the "left" of the text is anchored to the tick's anchor
                         }
                     } else if(this.index === tickScene.parent.childNodes.length - 1) {
-                        absLeft = label.toScreenTransform().transformHPosition(label.left());
+                        absLeft = pvLabel.toScreenTransform().transformHPosition(pvLabel.left());
                         if(absLeft >= rootPanel.width()){
                             return 'right'; // the "right" of the text is anchored to the tick's anchor
                         }
@@ -28767,17 +28629,17 @@ def
                     return 'center';
                 });
         } else {
-            label
+            pvLabel
                 .textAlign(anchorOpposite)
                 .textBaseline(function(tickScene){
                     var absTop;
                     if(this.index === 0){
-                        absTop = label.toScreenTransform().transformVPosition(label.top());
+                        absTop = pvLabel.toScreenTransform().transformVPosition(pvLabel.top());
                         if(absTop >= rootPanel.height()){
                             return 'bottom'; // the "bottom" of the text is anchored to the tick's anchor
                         }
                     } else if(this.index === tickScene.parent.childNodes.length - 1) {
-                        absTop = label.toScreenTransform().transformVPosition(label.top());
+                        absTop = pvLabel.toScreenTransform().transformVPosition(pvLabel.top());
                         if(absTop <= 0){
                             return 'top'; // the "top" of the text is anchored to the tick's anchor
                         }
@@ -28934,8 +28796,7 @@ def
             .textStyle("#666666")
             .text(function(tickScene){
                 var label = tickScene.vars.tick.label;
-                var sign = this.sign;
-                if(!sign.scene.isActive || !sign.showsInteraction()){
+                if(!tickScene.isActive || !this.sign.showsInteraction()){
                     var fitInfo = this.fitInfo();
                     switch(this.lblDirection()){
                         case 'h':
@@ -29289,7 +29150,7 @@ def
 
             .lock('data', rootScene.childNodes)
 
-            .override('angle', function() { return this.scene.vars.value.angle;  })
+            .override('angle', function(scene) { return scene.vars.value.angle;  })
 
             .override('defaultOffsetRadius', function() {
                 var explodeIndex = me.explodedSliceIndex;
@@ -29300,7 +29161,7 @@ def
                 return 0;
             })
 
-            .lock('outerRadius', function() { return chart.animate(0, normalRadius); })
+            .lockMark('outerRadius', function() { return chart.animate(0, normalRadius); })
 
             .localProperty('innerRadiusEx', pvc_PercentValue.parse)
 
@@ -29332,7 +29193,7 @@ def
                     .intercept('visible', function(scene) {
                         return (scene.vars.value.angle >= 0.001) && this.delegateExtension(true);
                     })
-                    .override('defaultText', function() { return this.scene.vars.value.sliceLabel; })
+                    .override('defaultText', function(scene) { return scene.vars.value.sliceLabel; })
                     .pvMark
                     .textMargin(10);
 
@@ -29344,7 +29205,7 @@ def
                 this.pvLinkPanel = this.pvPanel.add(pv.Panel)
                     .data(rootScene.childNodes)
                     .localProperty('pieSlice')
-                    .pieSlice(function(/*scene*/) { return me.pvPie.scene[this.index]; });
+                    .pieSlice(function() { return me.pvPie.scene[this.index]; });
 
                 var f = false, t = true;
                 this.pvLinkLine = new pvc.visual.Line(
@@ -29382,8 +29243,8 @@ def
 
                         return scene.childNodes;
                     })
-                    .override('defaultColor', function(type) {
-                        return type === 'stroke' ? 'black' : this.base(type);
+                    .override('defaultColor', function(scene, type) {
+                        return type === 'stroke' ? 'black' : this.base(scene, type);
                     })
                     .override('defaultStrokeWidth', def.fun.constant(0.5))
                     .pvMark
@@ -29406,13 +29267,13 @@ def
                         // Repeat the scene, once for each line
                         return scene.lineScenes;
                     })
-                    .intercept('textStyle', function() {
+                    .intercept('textStyle', function(scene) {
                         this._finished = f;
                         var style = this.delegate();
                         if(style &&
                            !this._finished &&
-                           !this.mayShowActive() &&
-                           this.mayShowNotAmongSelected()){
+                           !this.mayShowActive(scene) &&
+                            this.mayShowNotAmongSelected(scene)){
                             style = this.dimColor(style, 'text');
                         }
 
@@ -30043,13 +29904,13 @@ def
         if(label) {
             var valuesAnchor = this.valuesAnchor;
             me.pvBarLabel = label
-                .override('calcBackgroundColor', function(type) {
+                .override('calcBackgroundColor', function(scene, type) {
                     var bgColor = this.pvMark.target.fillStyle();
-                    return bgColor || this.base(type);
+                    return bgColor || this.base(scene, type);
                 })
                 .pvMark
                 .visible(function() { // no space for text otherwise
-                    // this === pvMark
+                    // this instanceof pvMark
                     var length = this.scene.target[this.index][isVertical ? 'height' : 'width'];
 
                     // Too small a bar to show any value?
@@ -30145,16 +30006,12 @@ def
             })
             .intercept('visible', function(scene){
                 var visible = this.delegateExtension();
-                if(visible !== undefined && !visible){
-                    return false;
-                }
+                if(visible !== undefined && !visible) { return false; }
 
                 var value = scene.vars.value.value;
-                if(value == null){
-                    return false;
-                }
+                if(value == null) { return false; }
 
-                var targetInstance = this.pvMark.scene.target[this.index];
+                var targetInstance = this.pvMark.scene.target[this.pvMark.index];
 
                 // Where is the position of the max of the bar?
                 var orthoMaxPos = targetInstance[a_bottom] +
@@ -30167,7 +30024,8 @@ def
             .lock('shapeSize')
             .pvMark
             .shape("triangle")
-            .shapeRadius(function(){
+            .shapeRadius(function() {
+                // this instanceof pvMark
                 return Math.min(
                         Math.sqrt(10),
                         this.scene.target[this.index][a_width] / 2);
@@ -30176,7 +30034,7 @@ def
             .lineWidth(1.5)
             .strokeStyle("red")
             .fillStyle("white")
-            [a_bottom](function(){
+            [a_bottom](function() {
                 return rOrthoBound + (isMin ? 1 : -1) * (this.shapeRadius() + 2);
             })
             ;
@@ -30588,6 +30446,8 @@ def
          * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
          */
         return function(scene) {
+            // this instanceof pv.Mark
+            
             if(isFalling && !this.index) {
                 // First falling bar is the main total
                 // Must be accounted up and update the offset
@@ -30689,10 +30549,10 @@ def
 
         this.pvBar
             .sign
-            .override('baseColor', function(type){
-                var color = this.base(type);
+            .override('baseColor', function(scene, type){
+                var color = this.base(scene, type);
                 if(type === 'fill'){
-                    if(!this.scene.vars.category.group._isFlattenGroup){
+                    if(!scene.vars.category.group._isFlattenGroup) {
                         return pv.color(color).alpha(0.5);
                     }
 //                    else {
@@ -30720,20 +30580,20 @@ def
                 noDoubleClick: false
             })
             .lock('data', ruleRootScene.childNodes)
-            .optional('visible', function(){
-                return ( isFalling && !!this.scene.previousSibling) ||
-                       (!isFalling && !!this.scene.nextSibling);
+            .optional('visible', function(scene) {
+                return ( isFalling && !!scene.previousSibling) ||
+                       (!isFalling && !!scene.nextSibling);
             })
-            .optional(anchor, function(){
-                return orthoZero + chart.animate(0, sceneOrthoScale(this.scene) - orthoZero);
+            .optional(anchor, function(scene) {
+                return orthoZero + chart.animate(0, sceneOrthoScale(scene) - orthoZero);
             })
 
             .optional(this.anchorLength(anchor), barStepWidth + barWidth)
             .optional(ao,
                 isFalling ?
-                    function(){ return sceneBaseScale(this.scene) - barStepWidth - barWidth2; } :
-                    function(){ return sceneBaseScale(this.scene) - barWidth2; })
-            .override('defaultColor', function(){ return waterColor; })
+                    function(scene) { return sceneBaseScale(scene) - barStepWidth - barWidth2; } :
+                    function(scene) { return sceneBaseScale(scene) - barWidth2; })
+            .override('defaultColor', def.fun.constant(waterColor))
             .pvMark
             .antialias(true)
             .lineCap('butt');
@@ -30745,10 +30605,8 @@ def
                 {
                     extensionId: 'lineLabel'
                 })
-                .intercept('visible', function(scene){
-                    if(scene.vars.category.group._isFlattenGroup){
-                        return false;
-                    }
+                .intercept('visible', function(scene) {
+                    if(scene.vars.category.group._isFlattenGroup) { return false; }
 
                     return isFalling || !!scene.nextSibling;
                 })
@@ -31301,14 +31159,14 @@ def
             .lockMark('visible', lineAreaVisibleProp)
 
             /* Position & size */
-            .override('x',  function() { return this.scene.basePosition;  }) // left
-            .override('y',  function() { return this.scene.orthoPosition; }) // bottom
-            .override('dy', function() { return chart.animate(0, this.scene.orthoLength); }) // height
+            .override('x',  function(scene) { return scene.basePosition;  }) // left
+            .override('y',  function(scene) { return scene.orthoPosition; }) // bottom
+            .override('dy', function(scene) { return chart.animate(0, scene.orthoLength); }) // height
 
             /* Color & Line */
-            .override('color', function(type) { return areasVisible ? this.base(type) : null; })
-            .override('baseColor', function(type) {
-                var color = this.base(type);
+            .override('color', function(scene, type) { return areasVisible ? this.base(scene, type) : null; })
+            .override('baseColor', function(scene, type) {
+                var color = this.base(scene, type);
                 if(!this._finished && color && areaFillColorAlpha != null) {
                     color = color.alpha(areaFillColorAlpha);
                 }
@@ -31369,32 +31227,32 @@ def
             })
             // TODO: If it were allowed to hide the line, the anchored dot would fail to evaluate
             .lockMark('visible', lineVisibleProp)
-            .override('defaultColor', function(type) {
-                var color = this.base(type);
+            .override('defaultColor', function(scene, type) {
+                var color = this.base(scene, type);
                 if(!this._finished && darkerLineAndDotColor && color) { color = color.darker(0.6); }
                 return color;
             })
-            .override('normalColor', function(color/*, type*/) {
+            .override('normalColor', function(scene, color/*, type*/) {
                 return linesVisible ? color : null;
             })
-            .override('interactiveColor', function(color, type) {
+            .override('interactiveColor', function(scene, color, type) {
                 // When !linesVisible,
                 // keep them hidden if nothing is selected and it is not active
-                if(!linesVisible && !this.mayShowAnySelected() && !this.mayShowActive()) {
+                if(!linesVisible && !this.mayShowAnySelected(scene) && !this.mayShowActive(scene)) {
                     return null;
                 }
 
-                return this.base(color, type);
+                return this.base(scene, color, type);
             })
-            .override('baseStrokeWidth', function() {
+            .override('baseStrokeWidth', function(scene) {
                 var strokeWidth;
-                if(linesVisible) { strokeWidth = this.base(); }
+                if(linesVisible) { strokeWidth = this.base(scene); }
                 return strokeWidth == null ? 1.5 : strokeWidth;
             })
-            .intercept('strokeDasharray', function() {
+            .intercept('strokeDasharray', function(scene) {
                 var dashArray = this.delegateExtension();
+                var useDash;
                 if(dashArray === undefined) {
-                    var scene = this.scene;
                     var useDash = scene.isInterpolated;
                     if(!useDash) {
                         var next = scene.nextSibling;
@@ -31423,12 +31281,11 @@ def
                 freePosition: true,
                 wrapper:      wrapper
             })
-            .intercept('visible', function() {
-                var scene = this.scene;
+            .intercept('visible', function(scene) {
                 return (!scene.isNull && !scene.isIntermediate /*&& !scene.isInterpolated*/) &&
                        this.delegateExtension(true);
             })
-            .override('color', function(type) {
+            .override('color', function(scene, type) {
                 /*
                  * Handle dotsVisible
                  * -----------------
@@ -31439,43 +31296,43 @@ def
                  * 3) it is alone   (surrounded by null dots) (and not in areas+discreteCateg+stacked case)
                  */
                 if(!dotsVisible) {
-                    var visible = this.scene.isActive ||
-                                  (!showAloneDots && this.scene.isSingle) ||
-                                  (showAloneDots && this.scene.isAlone);
+                    var visible = scene.isActive ||
+                                  (!showAloneDots && scene.isSingle) ||
+                                  (showAloneDots && scene.isAlone);
                     if(!visible) { return pvc.invisibleFill; }
                 }
 
                 // Normal logic
-                var color = this.base(type);
+                var color = this.base(scene, type);
 
                 // TODO: review interpolated style/visibility
-                if(this.scene.isInterpolated && type === 'fill') {
+                if(scene.isInterpolated && type === 'fill') {
                     return color && pv.color(color).brighter(0.5);
                 }
 
                 return color;
             })
-//            .override('interactiveColor', function(color, type){
-//              return this.scene.isInterpolated && type === 'stroke' ?
+//            .override('interactiveColor', function(scene, color, type){
+//              return scene.isInterpolated && type === 'stroke' ?
 //                     color :
-//                     this.base(color, type);
+//                     this.base(scene, color, type);
 //            })
 //            .optionalMark('lineCap', 'round')
-//            .intercept('strokeDasharray', function(){
+//            .intercept('strokeDasharray', function(scene){
 //                var dashArray = this.delegateExtension();
 //                if(dashArray === undefined){
 //                    // TODO: review interpolated style/visibility
-//                    dashArray = this.scene.isInterpolated ? '.' : null;
+//                    dashArray = scene.isInterpolated ? '.' : null;
 //                }
 //
 //                return dashArray;
 //            })
-            .override('defaultColor', function(type) {
-                var color = this.base(type);
+            .override('defaultColor', function(scene, type) {
+                var color = this.base(scene, type);
                 if(!this._finished && darkerLineAndDotColor && color) { color = color.darker(0.6); }
                 return color;
             })
-            .override('baseSize', function() {
+            .override('baseSize', function(scene) {
                 /* When not showing dots,
                  * but a datum is alone and
                  * wouldn't be visible using lines or areas,
@@ -31484,11 +31341,11 @@ def
                  * (ideally, a line would show as a dot when only one point?)
                  */
                 if(!dotsVisible) {
-                    var visible = this.scene.isActive ||
-                                  (!showAloneDots && this.scene.isSingle) ||
-                                  (showAloneDots && this.scene.isAlone);
+                    var visible = scene.isActive ||
+                                  (!showAloneDots && scene.isSingle) ||
+                                  (showAloneDots && scene.isAlone);
 
-                    if(visible && !this.scene.isActive) {
+                    if(visible && !scene.isActive) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(myself.pvLine.lineWidth(), 0.2) / 2;
                         return def.sqr(lineWidth);
@@ -31496,9 +31353,9 @@ def
                 }
 
                 // TODO: review interpolated style/visibility
-                if(this.scene.isInterpolated) { return 0.8 * this.base(); }
+                if(scene.isInterpolated) { return 0.8 * this.base(scene); }
 
-                return this.base();
+                return this.base(scene);
             })
             .pvMark;
 
@@ -32234,8 +32091,8 @@ def
         }
 
         me.pvHeatGrid = new pvc.visual.Panel(me, pvRowPanel, keyArgs)
-            .lock('data', function(serScene){ return serScene.childNodes; })
             .pvMark
+            .lock('data',  function(serScene) { return serScene.childNodes; })
             .lock(a_left,  function(scene){ return rowScale(scene.vars.category.value) - rowStep2; })
             .lock(a_width, rowStep)
             .antialias(false);
@@ -32336,24 +32193,19 @@ def
         var getBaseColor = this._buildGetBaseFillColor(hasColor);
         return this.pvHeatGrid
             .sign
-            .override('defaultColor', function(type){
-                if(type === 'stroke'){
-                    return null;
-                }
+            .override('defaultColor', function(scene, type) {
+                if(type === 'stroke') { return null; }
 
-                return getBaseColor.call(this.pvMark, this.scene);
+                return getBaseColor.call(this.pvMark, scene);
             })
-            .override('interactiveColor', function(color, type){
-                var scene = this.scene;
-                if(scene.isActive) {
-                    return color.alpha(0.6);
-                }
+            .override('interactiveColor', function(scene, color, type){
+                if(scene.isActive) { return color.alpha(0.6); }
 
                 if(scene.anySelected() && !scene.isSelected()) {
                     return this.dimColor(color, type);
                 }
 
-                return this.base(color, type);
+                return this.base(scene, color, type);
             })
             .override('dimColor', function(color/*, type*/){
                 return pvc.toGrayScale(color, 0.6);
@@ -33122,9 +32974,7 @@ def
                 var defaultSize = def.number.as(this._getExtension('dot', 'shapeRadius'), 0);
                 if(defaultSize <= 0){
                     defaultSize = def.number.as(this._getExtension('dot', 'shapeSize'), 0);
-                    if(defaultSize <= 0){
-                        defaultSize = 12;
-                    }
+                    if(defaultSize <= 0) { defaultSize = 12; }
                 } else {
                     // Radius -> Size
                     defaultSize = def.sqr(defaultSize);
@@ -33229,12 +33079,10 @@ def
             })
             .lockMark('data', function(seriesScene){ return seriesScene.childNodes; })
             .intercept('visible', function(scene){
-                if(!me.linesVisible){
-                    return false;
-                }
+                if(!me.linesVisible) { return false; }
 
                 var visible = this.delegateExtension();
-                if(visible == null){
+                if(visible == null) {
                     visible = !scene.isNull &&
                              ((!rootScene.isSizeBound && !rootScene.isColorBound) ||
                               (rootScene.isSizeBound  && scene.vars.size.value  != null) ||
@@ -33243,8 +33091,8 @@ def
                 
                 return visible;
             })
-            .override('x',   function(){ return this.scene.basePosition;  })
-            .override('y',   function(){ return this.scene.orthoPosition; });
+            .override('x', function(scene) { return scene.basePosition;  })
+            .override('y', function(scene) { return scene.orthoPosition; });
         
         me.pvLine = line.pvMark;
         
@@ -33254,9 +33102,9 @@ def
                 wrapper:     wrapper,
                 activeSeriesAware: me.linesVisible
             })
-            .override('x',  function(){ return this.scene.basePosition;  })
-            .override('y',  function(){ return this.scene.orthoPosition; })
-            .override('color', function(type) {
+            .override('x',  function(scene) { return scene.basePosition;  })
+            .override('y',  function(scene) { return scene.orthoPosition; })
+            .override('color', function(scene, type) {
                 /* 
                  * Handle dotsVisible
                  * -----------------
@@ -33265,17 +33113,17 @@ def
                  * 1) it is active, or
                  * 2) it is single  (the only dot in the dataset)
                  */
-                if(!me.dotsVisible && !this.scene.isActive && !this.scene.isSingle){
+                if(!me.dotsVisible && !scene.isActive && !scene.isSingle){
                     return pvc.invisibleFill;
                 }
                 
                 // Follow normal logic
-                return this.base(type);
+                return this.base(scene, type);
             });
             
         if(!rootScene.isSizeBound){           
             dot
-            .override('baseSize', function(){
+            .override('baseSize', function(scene) {
                 /* When not showing dots, 
                  * but a datum is alone and 
                  * wouldn't be visible using lines,  
@@ -33283,14 +33131,14 @@ def
                  * with a size = to the line's width^2
                  */
                 if(!me.dotsVisible) {
-                    if(this.scene.isSingle) {
+                    if(scene.isSingle) {
                         // Obtain the line Width of the "sibling" line
                         var lineWidth = Math.max(me.pvLine.scene[this.pvMark.index].lineWidth, 0.2) / 2;
                         return def.sqr(lineWidth);
                     }
                 }
 
-                return this.base();
+                return this.base(scene);
             });
         } else if(!(me.autoPaddingByDotSize && me.sizeAxisRatioTo === 'minWidthHeight')){
             // Default is to hide overflow dots, 
@@ -33312,9 +33160,7 @@ def
                 wrapper: wrapper
             });
             
-            if(label){
-                me.pvHeatGridLabel = label.pvMark;
-            }
+            if(label) { me.pvHeatGridLabel = label.pvMark; }
         }
     },
 
@@ -35607,8 +35453,8 @@ def
             a_width  = this.anchorLength(a_bottom),
             a_height = this.anchorOrthoLength(a_bottom);
 
-        function defaultColor(type){
-            var color = this.base(type);
+        function defaultColor(scene, type){
+            var color = this.base(scene, type);
             return type === 'stroke' ? color.darker(1) : color;
         }
         
@@ -35653,9 +35499,9 @@ def
             .intercept('visible', function(scene){
                 return scene.vars.category.showRuleWhiskerUpper && this.delegateExtension(true);
             })
+            .pvMark
             .lock(a_bottom, function(scene){ return scene.vars.category.ruleWhiskerUpperBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.ruleWhiskerUpperHeight; })
-            .pvMark
             ;
 
         this.pvRuleWhiskerLower = setupRuleWhisker(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -35670,15 +35516,15 @@ def
             .intercept('visible', function(scene){
                 return scene.vars.category.showRuleWhiskerBelow && this.delegateExtension(true);
             })
+            .pvMark
             .lock(a_bottom, function(scene){ return scene.vars.category.ruleWhiskerLowerBottom; })
             .lock(a_height, function(scene){ return scene.vars.category.ruleWhiskerLowerHeight; })
-            .pvMark
             ;
 
         /* Box Bar */
         function setupHCateg(sign){
-            sign.lock(a_left,  function(scene){ return scene.vars.category.boxLeft;  })
-                .lock(a_width, function(scene){ return scene.vars.category.boxWidth; })
+            sign.lockMark(a_left,  function(scene){ return scene.vars.category.boxLeft;  })
+                .lockMark(a_width, function(scene){ return scene.vars.category.boxWidth; })
                 ;
             
             return sign;
@@ -35692,8 +35538,8 @@ def
             .intercept('visible', function(scene){
                 return scene.vars.category.showBox && this.delegateExtension(true);
             })
-            .lock(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
-            .lock(a_height, function(scene){ return scene.vars.category.boxHeight; })
+            .lockMark(a_bottom, function(scene){ return scene.vars.category.boxBottom; })
+            .lockMark(a_height, function(scene){ return scene.vars.category.boxHeight; })
             .override('defaultColor', defaultColor)
             .override('defaultStrokeWidth', def.fun.constant(1))
             .pvMark
@@ -35717,11 +35563,11 @@ def
                 noDoubleClick: false,
                 showsInteraction: true
             }))
-            .intercept('visible', function(){
-                return this.scene.vars.minimum.value != null && this.delegateExtension(true);
+            .intercept('visible', function(scene) {
+                return scene.vars.minimum.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.minimum.position; }) // bottom
             .pvMark
+            .lock(a_bottom,  function(scene) { return scene.vars.minimum.position; }) // bottom
             ;
 
         this.pvRuleMax = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -35733,11 +35579,11 @@ def
                 noDoubleClick: false,
                 showsInteraction: true
             }))
-            .intercept('visible', function(){
-                return this.scene.vars.maximum.value != null && this.delegateExtension(true);
+            .intercept('visible', function(scene) {
+                return scene.vars.maximum.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.maximum.position; }) // bottom
             .pvMark
+            .lock(a_bottom, function(scene) { return scene.vars.maximum.position; }) // bottom
             ;
 
         this.pvRuleMedian = setupHRule(new pvc.visual.Rule(this, this.pvBoxPanel, {
@@ -35749,10 +35595,10 @@ def
                 noDoubleClick: false,
                 showsInteraction: true
             }))
-            .intercept('visible', function(){
-                return this.scene.vars.median.value != null && this.delegateExtension(true);
+            .intercept('visible', function(scene) {
+                return scene.vars.median.value != null && this.delegateExtension(true);
             })
-            .lock(a_bottom,  function(){ return this.scene.vars.median.position; }) // bottom
+            .lockMark(a_bottom,  function(scene) { return scene.vars.median.position; }) // bottom
             .override('defaultStrokeWidth', def.fun.constant(2))
             .pvMark
             ;
@@ -36158,7 +36004,7 @@ def
         
         var pvLeafMark = new pvc.visual.Bar(me, panel.leaf, {extensionId: 'leaf'})
             .lockMark('visible')
-            .override('defaultColor', function(type) { return colorScaleLeaf(this.scene); })
+            .override('defaultColor', function(scene) { return colorScaleLeaf(scene); })
             .override('defaultStrokeWidth', function() { return lw0; })
             .pvMark
             .antialias(false)
@@ -36179,31 +36025,30 @@ def
                    !!scene.firstChild &&
                    this.delegateExtension(true); 
          })
-        .override('anyInteraction', function() {
-            return this.scene.anyInteraction() ||
-                   this.scene.isActiveDescendantOrSelf(); // special kind of interaction
+        .override('anyInteraction', function(scene) {
+            return scene.anyInteraction() ||
+                   scene.isActiveDescendantOrSelf(); // special kind of interaction
         })
         .override('defaultStrokeWidth', function() { return 1.5 * lw; })
-        .override('interactiveStrokeWidth', function(w) {
-            if(this.showsActivity() && 
-               this.scene.isActiveDescendantOrSelf()) {
+        .override('interactiveStrokeWidth', function(scene, w) {
+            if(this.showsActivity() && scene.isActiveDescendantOrSelf()) {
                w = Math.max(1, w) * 1.5;
             }
             return w;
         })
-        .override('defaultColor',     function(type) { return colorScaleDirect(this.scene); })
+        .override('defaultColor',     function(scene) { return colorScaleDirect(scene); })
         .override('normalColor',      def.fun.constant(null))
-        .override('interactiveColor', function(color, type) {
+        .override('interactiveColor', function(scene, color, type) {
             if(type === 'stroke') {
                 if(this.showsActivity()) {
-                    if(this.scene.isActiveDescendantOrSelf()) {
+                    if(scene.isActiveDescendantOrSelf()) {
                         return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
                     }
                     
-                    if(this.scene.anyActive()) { return null; }
+                    if(scene.anyActive()) { return null; }
                }
                 
-               if(this.showsSelection() && this.scene.isSelectedDescendantOrSelf()) {
+               if(this.showsSelection() && scene.isSelectedDescendantOrSelf()) {
                    return pv.color(color).brighter(0.5)/*.alpha(0.7)*/;
                }
             }
@@ -36216,14 +36061,14 @@ def
         if(label) {
             var valuesFont = this.valuesFont;
             label
-            .override('trimText', function(text) {
+            .override('trimText', function(scene, text) {
                 // Vertical/Horizontal orientation?
                 var side = this.pvMark.textAngle() ? 'dy' : 'dx';
                 // Add a small margin (2 px)
-                var maxWidth = this.scene[side] - 2;
+                var maxWidth = scene[side] - 2;
                 return pvc.text.trimToWidthB(maxWidth, text, valuesFont, "..");
             })
-            .override('calcBackgroundColor', function(/*type*/) {
+            .override('calcBackgroundColor', function() {
                 // Corresponding scene on pvLeafMark sibling mark (rendered before)
                 var pvSiblingScenes = pvLeafMark.scene;
                 var pvLeafScene     = pvSiblingScenes[this.pvMark.index];
