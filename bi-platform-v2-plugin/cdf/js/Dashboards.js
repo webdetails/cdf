@@ -328,11 +328,11 @@ Dashboards.setGlobalContext = function(globalContext) {
 };
 
 Dashboards.showProgressIndicator = function() {
-  this.blockUIwithDrag();
+  $.blockUI && this.blockUIwithDrag();
 };
 
 Dashboards.hideProgressIndicator = function() {
-  $.unblockUI();
+  $.unblockUI && $.unblockUI();
   this.showErrorTooltip();
 };
 
@@ -422,8 +422,10 @@ Dashboards._getControlClass = function(control) {
   for (var i = 0, N = typeNames.length ; i < N ; i++) {
     // TODO: window represents access to the JS global object.
     // This, or a special object on which to eval types, should be provided by some FWK.
+
+    // If the value of a name is not a function, keep on trying.
     var Class = window[typeNames[i]];
-    if(Class) { return Class; }
+    if(Class && typeof Class === 'function') { return Class; }
   }
   // return undefined;
 };
@@ -479,7 +481,7 @@ Dashboards._addLogLifecycleToControl = function(control) {
       
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
       console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
-          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+          eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
     }
   });
 };
@@ -761,6 +763,8 @@ Dashboards.updateComponent = function(object) {
 
   if(object.isManaged === false && object.update) {
     object.update();
+    // check if component has periodic refresh and schedule next update
+    this.refreshEngine.processComponent(object);
   } else {
     this.updateLifecycle(object);
   }
@@ -775,12 +779,14 @@ Dashboards.createAndCleanErrorDiv = function(){
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
-    $(".cdf_error").tooltip({
-      delay:0,
-      track: true,
-      fade: 250,
-      showBody: " -- "
-    })
+    if($.tooltip) {
+      $(".cdf_error").tooltip({
+        delay:0,
+        track: true,
+        fade: 250,
+        showBody: " -- "
+      });
+    }
   });
 };
 
@@ -879,24 +885,27 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 
 Dashboards.init = function(components){
   var myself =this;
+
+  this.syncDebugLevel();
+
   if(this.initialStorage) {
     _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
   }
+  
   if(this.context != null && this.context.sessionTimeout != null ) {
     //defaulting to 90% of ms value of sessionTimeout
     Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
+  
   this.restoreBookmarkables();
   this.restoreView();
   this.syncParametersInit();
-  if ($.isArray(components)) {
-    this.addComponents(components);
-  }
-  $(function() {
-    myself.initEngine();
-  });
+  
+  if($.isArray(components)) { this.addComponents(components); }
+  
+  $(function() { myself.initEngine(); });
 };
 
 
@@ -1101,6 +1110,25 @@ Dashboards.handlePostInit = function() {
     }
 
   }
+};
+
+Dashboards.debug = 1;
+
+Dashboards.syncDebugLevel = function() {
+  var level = 1; // log errors
+  try {
+    var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+    var url = urlIfHasDebug(window.location.href) ||
+              urlIfHasDebug(window.top.location.href);
+    if(url) {
+        var m = /\bdebugLevel=(\d+)/.exec(url);
+        level = m ? (+m[1]) : 3;
+    }
+  } catch(ex) {
+    // swallow
+  }
+
+  return this.debug = level;
 };
 
 Dashboards.resetAll = function(){
@@ -2506,7 +2534,7 @@ Dashboards.safeClone = function(){
 
   // Return the modified object
   return target;
-}
+};
 
 //Ctors:
 // Query(queryString) --> DEPRECATED

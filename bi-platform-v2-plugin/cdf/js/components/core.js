@@ -9,9 +9,30 @@ BaseComponent = Base.extend({
   logColor: undefined,
   //valueAsId:
   //valuesArray:
+  //autoFocus: false,
 
-  clear : function() {
-    $("#"+this.htmlObject).empty();
+  placeholder: function(selector) {
+    var ho = this.htmlObject;
+    return ho ? $("#"+ ho + (selector ? (" " + selector) : "")) : $();
+  },
+
+  focus: function() {
+    try {
+      this
+        .placeholder("*:first")
+        .focus();
+    } catch(ex) { /* Swallow, maybe hidden. */ }
+  },
+
+  _doAutoFocus: function() {
+    if(this.autoFocus) {
+      delete this.autoFocus;
+      this.focus();
+    }
+  },
+
+  clear: function() {
+    this.placeholder().empty();
   },
 
   copyEvents: function(target,events) {
@@ -316,7 +337,7 @@ BaseComponent = Base.extend({
 
 var TextComponent = BaseComponent.extend({
   update : function() {
-    $("#"+this.htmlObject).html(this.expression());
+    this.placeholder().html(this.expression());
   }
 });
 
@@ -345,7 +366,7 @@ var CommentsComponent = BaseComponent.extend({
   firePageUpdate: function(json){
 
     // Clear previous table
-    var placeHolder = $("#"+this.htmlObject);
+    var placeHolder = this.placeholder();
     placeHolder.empty();
     placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
     var myself = this;
@@ -363,7 +384,7 @@ var CommentsComponent = BaseComponent.extend({
   {
     // Add the possibility to add new comments
     var myself = this;
-    var placeHolder = $("#"+this.htmlObject + " dl ");
+    var placeHolder = this.placeholder("dl ");
     myself.addCommentContainer = $('<dt class="ui-widget-header comment-body"><textarea/></dt>'+
       '<dl class="ui-widget-header comment-footer">'+
       '<a class="cdfAddComment">Add Comment</a>'+
@@ -452,7 +473,7 @@ var CommentsComponent = BaseComponent.extend({
   processCommentsAdd: function(json){
     // json response
     var result = json.result;
-    var placeHolder = $("#"+this.htmlObject + " dl ");
+    var placeHolder = this.placeholder("dl ");
 
     var container = $('<dt class="ui-widget-header comment-body">'+ result.comment +'</dt>'+
       '<dl class="ui-widget-header comment-footer">'+ result.user +
@@ -601,7 +622,7 @@ var UnmanagedComponent = BaseComponent.extend({
   },
   showTooltip: function() {
     if(typeof this._tooltip != "undefined") {
-      $("#" + this.htmlObject).attr("title",this._tooltip).tooltip({
+      this.placeholder().attr("title",this._tooltip).tooltip({
         delay:0,
         track: true,
         fade: 250
@@ -823,7 +844,7 @@ var UnmanagedComponent = BaseComponent.extend({
     this);
   },
   errorNotification: function (err, ph) {
-    ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
+    ph = ph || (this.htmlObject ? this.placeholder() : undefined);
     var name = this.name.replace('render_', '');
     err.msg = err.msg + ' (' + name + ')';
     Dashboards.errorNotification( err, ph );
@@ -840,7 +861,6 @@ var UnmanagedComponent = BaseComponent.extend({
       this.dashboard.incrementRunningCalls();
       this.isRunning = true;
     }
-
   },
 
   /*
@@ -849,8 +869,7 @@ var UnmanagedComponent = BaseComponent.extend({
    * overridden in components that override UnmanagedComponent#block.
    */
   unblock: function() {
-
-    if(this.isRunning){
+    if(this.isRunning) {
       this.dashboard.decrementRunningCalls();
       this.isRunning = false;
     }
