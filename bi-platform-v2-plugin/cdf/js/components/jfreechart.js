@@ -30,7 +30,7 @@ var JFreeChartComponent = BaseComponent.extend({
             var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
 
             if(value){
-              value = doCsvQuoting(value, '=');	//quote if needed for '='
+              value = doCsvQuoting(value, '='); //quote if needed for '='
             }
             if(i == 0) cdaParameterString = "";
             else cdaParameterString += ";";
@@ -91,7 +91,7 @@ var JFreeChartComponent = BaseComponent.extend({
         action: xactionFile,
         exportType: type
       },cd);
-      Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj);
+      Dashboards.post(webAppPath + '/pentaho/plugin/pentaho-cdf/api/export',obj);
     };
 
     var myself = this;
@@ -107,7 +107,7 @@ var JFreeChartComponent = BaseComponent.extend({
           return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")
         },
         icon: function(){
-          return cd.chartType == "BarChart" ? webAppPath + '/content/pentaho-cdf/resources/style/images/pie_icon.png': webAppPath + '/content/pentaho-cdf/resources/style/images/bar_icon.png';
+          return cd.chartType == "BarChart" ? webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/pie_icon.png': webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/bar_icon.png';
         },
         oclass: 'options',
         callback: function(){
@@ -117,7 +117,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       excel: {
         title: "Excel",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/excel_icon.png',
+        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/excel_icon.png',
         oclass: 'options',
         callback: function(){
           exportFile("excel",cd);
@@ -125,7 +125,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       csv: {
         title: "CSV",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/csv_icon.gif',
+        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/csv_icon.gif',
         oclass: 'options',
         callback: function(){
           exportFile("csv",cd);
@@ -133,7 +133,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       zoom: {
         title:'Zoom',
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/magnify.png',
+        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/magnify.png',
         oclass: 'options',
         callback: function(){
           Dashboards.incrementRunningCalls();
@@ -181,7 +181,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       details:{
         title:'Details',
-        icon:webAppPath + '/content/pentaho-cdf/resources/style/images/table.png',
+        icon:webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/table.png',
         oclass: 'options',
         callback: function(){
           myself.pivotDefinition = {
@@ -538,9 +538,9 @@ var TimePlotComponent = BaseComponent.extend({
     }
     var allData = undefined;
     //var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelinefeeder.xaction&" + parameters.join('&'); //legacy
-	var ts = "ts=" + new Date().getTime() + "&";
+  var ts = "ts=" + new Date().getTime() + "&";
     var timePlotEventSourceUrl = webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelinefeeder.xaction/xaction?" + ts + parameters.join('&');
-	
+  
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -553,7 +553,7 @@ var TimePlotComponent = BaseComponent.extend({
       }
 
       //var eventUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelineeventfeeder.xaction&" + parameters.join('&'); //legacy
-	  var ts = "ts=" + new Date().getTime() + "&";
+    var ts = "ts=" + new Date().getTime() + "&";
       var eventUrl = wwebAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){

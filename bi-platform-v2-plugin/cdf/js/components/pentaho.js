@@ -37,10 +37,10 @@ var XactionComponent = BaseComponent.extend({
         " height=\"100%\"" +
         " width=\"100%\" />";        
         var iframe = $(xactionIFrameHTML);        
-			  
-		//var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&"; //legacy
-		var ts = "ts=" + new Date().getTime() + "&";
-		var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
+        
+    //var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&"; //legacy
+    var ts = "ts=" + new Date().getTime() + "&";
+    var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -85,7 +85,7 @@ var JpivotComponent = BaseComponent.extend({
     }
      // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-    jpivotHTML += webAppPath + "/ViewAction?solution="	+ this.solution + "&path=" + 	this.path + "&action="+ this.action;
+    jpivotHTML += webAppPath + "/ViewAction?solution="  + this.solution + "&path=" +  this.path + "&action="+ this.action;
 
     // Add args
     var p = new Array(this.parameters.length);
@@ -102,21 +102,7 @@ var JpivotComponent = BaseComponent.extend({
 });
 
 var PivotLinkComponent = BaseComponent.extend({
-  update : function() {
-    var title = this.tooltip==undefined?"View details in a Pivot table":this.tooltip;
-    // WPG: this assumes name is global name, can I pass in the object directly instead?
-    var link = $('<a class="pivotLink"> </a>').html(this.content).attr("href","javascript:PivotLinkComponent.openPivotLink("+ this.name +")").attr("title",title);
-
-    $("#"+this.htmlObject).empty();
-    $("#"+this.htmlObject).html(link);
-
-    $('a.pivotLink').tooltip({
-      showURL: false,
-      track:true,
-      delay: 1000,
-      opacity: 0.5
-    });
-  }
+  update : function() {}
 },{
   openPivotLink : function(object) {
     var url = webAppPath + "/Pivot?solution=system&path=pentaho-cdf/actions&action=jpivot.xaction&";
@@ -144,7 +130,7 @@ var PivotLinkComponent = BaseComponent.extend({
 
 var PrptComponent = BaseComponent.extend({
 
-	update: function(){
+  update: function(){
  
     this.clear();
  
@@ -152,7 +138,7 @@ var PrptComponent = BaseComponent.extend({
     //options.showParameters = false;
  
     if(options["dashboard-mode"]){
-	  var ts = "ts=" + new Date().getTime() + "&";
+    var ts = "ts=" + new Date().getTime() + "&";
       var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
       var myself=this;
       $.ajax({
@@ -165,7 +151,7 @@ var PrptComponent = BaseComponent.extend({
       });
     }
     else{
-	  var ts = "ts=" + new Date().getTime() + "&";
+    var ts = "ts=" + new Date().getTime() + "&";
       var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
       var encodeArray = function(k,v) {
         var arr = [];
@@ -268,7 +254,7 @@ var ExecutePrptComponent = PrptComponent.extend({
  
     var options = this.getOptions();
     var ts = "ts=" + new Date().getTime() + "&";
-	var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+  var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
     var a=[];
     var encodeArray = function(k,v) {
       var arr = [];
@@ -335,17 +321,17 @@ var AnalyzerComponent = BaseComponent.extend({
   },
   
   generateIframe: function(htmlObject,url,parameters,height,width) {
-	  var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
-	  ' frameborder="0"' +
-	  ' height="' + height + '"' +
-	  ' width="' + width + '"' +
-	  ' src="' + url + "?";
+    var iFrameHTML = '<iframe id="iframe_'+ htmlObject + '"' +
+    ' frameborder="0"' +
+    ' height="' + height + '"' +
+    ' width="' + width + '"' +
+    ' src="' + url + "?";
 
-	  iFrameHTML += $.param(parameters, true);
-	  iFrameHTML += "\"></iframe>";
-	       
-	  return iFrameHTML;
-	}
+    iFrameHTML += $.param(parameters, true);
+    iFrameHTML += "\"></iframe>";
+         
+    return iFrameHTML;
+  }
 });
 
 var ExecuteXactionComponent = BaseComponent.extend({
@@ -374,8 +360,8 @@ var ExecuteXactionComponent = BaseComponent.extend({
 
   executeXAction : function() {
     //var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&"; //legacy
-	var ts = "ts=" + new Date().getTime() + "&";
-	var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
+  var ts = "ts=" + new Date().getTime() + "&";
+  var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
 
     var p = new Array(this.parameters.length);
     var parameters = [];
