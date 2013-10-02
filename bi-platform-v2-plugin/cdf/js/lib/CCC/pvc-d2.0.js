@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130930
+//VERSION TRUNK-20131002
 
 var pvc = (function(def, pv) {
 
@@ -27118,12 +27118,6 @@ def
             // Invalidate their previous layout
             childChart.basePanel.invalidateLayout();
         }, this);
-    },
-
-    defaults: {
-     // Ortho <- value role
-        // TODO: this should go somewhere else
-        orthoAxisOrdinal: false // when true => ortho axis gets the series role (instead of the value role)
     }
 });
 
@@ -29194,6 +29188,10 @@ def
                         return (scene.vars.value.angle >= 0.001) && this.delegateExtension(true);
                     })
                     .override('defaultText', function(scene) { return scene.vars.value.sliceLabel; })
+                    .override('calcBackgroundColor', function(scene, type) {
+                        var bgColor = this.pvMark.target.fillStyle();
+                        return bgColor || this.base(scene, type);
+                    })
                     .pvMark
                     .textMargin(10);
 
@@ -32419,9 +32417,8 @@ def
         this.base(options);
         
         def.set(options, 
-            'orthoAxisOrdinal', true,
             'legend', false,
-                
+            
             // Has no meaning in the current implementation
             'panelSizeRatio', 1);
         
