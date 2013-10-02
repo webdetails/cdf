@@ -178,7 +178,8 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
         _path="path="+file.path;
       }
 			
-      var _template = NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
+      var _template = NavigatorBaseComponent.template != undefined && NavigatorBaseComponent.template.length != undefined && 
+          NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
       if (file.link != undefined){
         s += "<li><a "+ classString +" title=\"" + file.title + "\"  href=\"" + webAppPath + file.link + "\">" + file.title + "</a>";
 
@@ -272,7 +273,8 @@ var ContentListComponent = NavigatorBaseComponent.extend({
         var cls = "";
         var target = "";
         var href = "";
-        var template =  NavigatorBaseComponent.template.length > 0 ? "&template=" + NavigatorBaseComponent.template : "";
+        var template = NavigatorBaseComponent.template != undefined && NavigatorBaseComponent.template.length != undefined && 
+           NavigatorBaseComponent.template.length > 0 ? "&template=" + NavigatorBaseComponent.template : "";
         var anchor;
     
         if (this.type=="FOLDER"){
