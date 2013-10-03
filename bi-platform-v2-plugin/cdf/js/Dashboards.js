@@ -2924,6 +2924,19 @@ Dashboards.safeClone = function(){
     return Boolean(this.queryFactories && this.queryFactories.has('Query', type));
   };
 
+  D.detectQueryType = function(qd) {
+    if(qd) {
+      var qt = qd.queryType                 ? qd.queryType : // cpk goes here
+               qd.query                     ? 'legacy'     :
+               (qd.path && qd.dataAccessId) ? 'cda'        : 
+               undefined;
+      
+      qd.queryType = qt;
+
+      return this.hasQuery(qt)? qt : undefined;
+    }
+  }
+
   D.getQuery = function(type, opts){
     if (_.isUndefined(type) ) {
       type = 'cda';
