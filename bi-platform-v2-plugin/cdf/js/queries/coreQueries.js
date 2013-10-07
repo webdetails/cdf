@@ -2,7 +2,7 @@
  * queryTypes.js
  *
  * Registers several query types and sets the base query class.
- * 
+ *
  * Additional query types can be registered at any time using the Dashboards method:
  *    Dashboards.registerQuery( name, query )
  * The second argument, the query definition, can be one of two things:
@@ -24,7 +24,7 @@
     label: "Base Query",
     deepProperties: [ 'defaults' , 'interfaces' ],
     defaults: {
-      successCallback: function(){ 
+      successCallback: function(){
         Dashboards.log('Query callback not defined. Override.');
       },
       errorCallback: Dashboards.handleServerError,
@@ -73,7 +73,7 @@
       }
     },
     getErrorHandler: function (callback){
-      return function(resp, txtStatus, error ) {      
+      return function(resp, txtStatus, error ) {
         if (callback){
           callback(resp, txtStatus, error );
         }
@@ -92,22 +92,22 @@
         data: queryDefinition,
         url: url,
         success: this.getSuccessHandler(callback),
-        error: this.getErrorHandler(errorCallback) 
+        error: this.getErrorHandler(errorCallback)
       });
-      
+
       $.ajax(settings);
     },
     exportData: function() {
-      // Override 
+      // Override
     },
     setAjaxOptions: function(newOptions) {
         this.setOption( 'ajaxOptions' , _.extend({}, this.getOption('ajaxOptions') , newOptions) );
     },
     setSortBy: function(sortBy) {
-      // Override 
+      // Override
     },
     sortBy: function(sortBy,outsideCallback) {
-      // Override 
+      // Override
     },
     fetchData: function(params, successCallback, errorCallback) {
       switch(arguments.length) {
@@ -122,7 +122,7 @@
             * going to change the internal callback
             */
             return this.doQuery(arguments[0]);
-          } else if(  !_.isEmpty(arguments[0]) && 
+          } else if(  !_.isEmpty(arguments[0]) &&
               (_.isObject(arguments[0]) || _.isArray(arguments[0]) ) ) {
             this.setOption('params' , arguments[0] || {} );
             return this.doQuery();
@@ -276,7 +276,7 @@
       }
     }
   });
-  // Sets the query class that can extended to create new ones. 
+  // Sets the query class that can extended to create new ones.
   // The registered Base needs to have an extend method.
   Dashboards.setBaseQuery ( BaseQuery );
 
@@ -290,7 +290,8 @@
       endpoint: '',
       systemParams: {},
       ajaxOptions: {
-        dataType:'json',
+          dataType:'json',
+          mimeType:'application/json; charset utf-8', //solves nasty "not well formed" error in Firefox 24
         type:'POST',
         async: true
       }
@@ -309,7 +310,7 @@
     buildQueryDefinition: function(overrides) {
       overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
       var queryDefinition = $.extend(true, {}, this.getOption('systemParams'));
-      
+
       var cachedParams = this.getOption('params'),
           params = $.extend( {}, cachedParams , overrides);
 
@@ -320,15 +321,41 @@
           value = doCsvQuoting(value[0],';');
         }
         //else will not be correctly handled for functions that return arrays
-        if (typeof value == 'function') {
-          value = value();
-        }
+          if ($.isArray(value)){
+              // kettle does not handle arrays natively,
+              // nor does it interpret multiple parameters with the same name as elements of an array,
+              // nor does CPK do any sort of array handling.
+              // A stringify ensures the array is passed as a string, that can be parsed using kettle.
+              value = JSON.stringify(value);
+              // Another option would be to add futher:
+              // value = value.split('],').join(';').split('[').join('').split(']').join('');
+              // which transforms [[0,1],[2,3]] into "0,1;2,3"
+          }
+          if (typeof value == 'function') {
+              value = value();
+          }
         queryDefinition['param' + name] = value;
       });
 
       return queryDefinition;
-    }
+    },
 
+      getSuccessHandler: function (callback){
+          // copy-pasted from BaseQuery + added errorCallback
+          var myself = this;
+          return function(json) {
+              myself.setOption('lastResultSet' , json );
+              var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
+              if ( json && json.result == false ) {
+                  // the ajax call might have been successful (no network erros),
+                  // but the endpoint might have failed, which is signalled by json.result
+                  var errorCallback = myself.getErrorHandler( myself.getOption('errorCallback') );
+                  errorCallback(clone);
+              } else {
+                  callback(clone);
+              }
+          };
+      }
     /*
      * Public interface
      */
@@ -363,7 +390,7 @@
         }
         if(opts.outputIndexId != null){
           this.setOption( 'outputIdx' , opts.outputIndexId );
-        }     
+        }
         } else {
           throw 'InvalidQuery';
         }
@@ -372,7 +399,7 @@
     buildQueryDefinition: function(overrides) {
       overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
       var queryDefinition = {};
-      
+
       var cachedParams = this.getOption('params'),
           params = $.extend( {}, cachedParams , overrides);
 
@@ -428,7 +455,7 @@
         }
       }
       queryDefinition.wrapItUp = 'wrapit';
-      
+
       var successCallback = function(uuid) {
         var _exportIframe = $('<iframe style="display:none">');
         _exportIframe.detach();
@@ -491,7 +518,7 @@
           throw "InvalidSortExpression";
         }
       }
-        
+
       /* We check whether the parameter is the same as before,
        * and notify the caller on whether it changed
        */
@@ -523,7 +550,7 @@
       }
     }
   };
-  // Registering an object will use it to create a class by extending Dashboards.BaseQuery, 
+  // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
   // and use that class to generate new queries.
   Dashboards.registerQuery( "cda", cdaQueryOpts );
 
@@ -570,10 +597,10 @@
             Dashboards.error(msg);
             json = {"metadata":[msg],"values":[]};
           }else{
-            //exceptions while parsing json response are 
-            //already being caught+handled in updateLifecyle()  
+            //exceptions while parsing json response are
+            //already being caught+handled in updateLifecyle()
             throw e;
-          }  
+          }
         }
         var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
         callback(clone);
@@ -587,8 +614,8 @@
 
   };
   Dashboards.registerQuery( "legacy", legacyOpts );
-  
-  // TODO: Temporary until CDE knows how to write queryTypes definitions, with all these old queries 
+
+  // TODO: Temporary until CDE knows how to write queryTypes definitions, with all these old queries
   // falling under the 'legacy' umbrella.
   Dashboards.registerQuery( "mdx", legacyOpts );
   Dashboards.registerQuery( "sql", legacyOpts );
