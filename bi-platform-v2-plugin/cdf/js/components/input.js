@@ -45,7 +45,7 @@ var InputBaseComponent = UnmanagedComponent.extend({
     }
   },
 
-  // TODO: is the result of Dashoards.getParameterValue subject or not to HTML encoding?
+  // TODO: is the result of Dashboards.getParameterValue subject or not to HTML encoding?
   // Some controls in this file do html encode the result while others don't.
 
   /**
@@ -76,13 +76,15 @@ var SelectBaseComponent = InputBaseComponent.extend({
   //externalPlugin:
   //extraOptions:
   //changeMode: ['immediate'], 'focus', 'timeout-focus'
+  //NOTE: changeMode 'timeout-focus' is not supported in mobile and fallsback to 'focus'
   //changeTimeout: [2000], // in milliseconds
   //changeTimeoutScrollFraction: 1,
   //changeTimeoutChangeFraction: 5/8,
-  //NOTE: changeMode 'timeout-focus' is not supported in mobile and fallsback to 'focus'
+  //autoTopValue: ''
+  //autoTopIndex: ''
 
   draw: function(myArray) {
-    var ph = $("#" + this.htmlObject);
+    var ph = this.placeholder();
     var name = this.name;
 
     // Build the HTML
@@ -158,9 +160,21 @@ var SelectBaseComponent = InputBaseComponent.extend({
       hasChanged = true;
     }
 
-
     // jQuery only cleans the value if it receives an empty array. 
-    $("select", ph).val( (currentVals == null && []) || currentVals );
+    $("select", ph).val(currentVals == null ? [] : currentVals);
+
+    // Automatically assume a given top scroll position, given by value or index.
+    if(allowMultiple) {
+      if(this.autoTopValue != null) {
+        this.topValue(this.autoTopValue);
+        delete this.autoTopValue;
+      } else if(this.autoTopIndex != null) {
+        this.topIndex(this.autoTopIndex);
+        delete this.autoTopIndex;
+      }
+    }
+
+    this._doAutoFocus();
 
     if(hasChanged) {
       // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
@@ -237,13 +251,16 @@ var SelectBaseComponent = InputBaseComponent.extend({
     var prevValue = me.getValue();
     var stop;
     var check = function() {
-      
       stop && stop();
       
+      // Have been disposed?
+      var dash = me.dashboard;
+      if(dash) {
       var currValue = me.getValue();
-      if(!Dashboards.equalValues(prevValue, currValue)) {
+        if(!dash.equalValues(prevValue, currValue)) {
         prevValue = currValue;
-        Dashboards.processChange(me.name);
+          dash.processChange(me.name);
+        }
       }
     };
     
@@ -279,7 +296,9 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
       var renew = function(tim) {
         stop();
+        if(me.dashboard) {
         timeoutHandle = setTimeout(check, tim || changeTimeout);
+        }
       };
       
       selElem
@@ -374,13 +393,13 @@ var SelectBaseComponent = InputBaseComponent.extend({
 var SelectComponent = SelectBaseComponent.extend({
   defaultIfEmpty: true,
   getValue : function() {
-    return $("#"+this.htmlObject + " select").val();
+    return this.placeholder("select").val();
   }
 });
 
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
-    var ph = $("#"+this.htmlObject + " select");
+    var ph = this.placeholder("select");
     var val = ph.val();
     return val == null ? [] : val;
   },
@@ -414,6 +433,62 @@ var SelectMultiComponent = SelectBaseComponent.extend({
     }
 
     return size;
+  },
+
+  topIndex: function(_) {
+    var $elem = this.placeholder("select");
+    var elem = $elem[0];
+    
+    var L = elem.length;
+    if(!L) { return arguments.length ? this : 0; }
+
+    var h  = Math.max(1, elem.scrollHeight);
+    var hi = Math.max(1, h / L);
+
+    if(arguments.length) {
+      var topIndex = +_;
+      
+      topIndex = isNaN(topIndex) ? 0 : Math.max(0, Math.min(topIndex, L - 1));
+      
+      $elem.scrollTop(Math.ceil(topIndex * hi));
+      
+      return this;
+    }
+    return Math.round($elem.scrollTop() / hi);
+  },
+
+  indexOf: function(value) {
+      if(value != null) {
+        var $options = this.placeholder("select option");
+        var L = $options.length;
+        if(L) {
+          value = String(value);
+          for(var i = 0; i < L; i++) {
+            if($options[i].value === value) { 
+              return i; 
+            }
+          }
+        }
+      }
+      return -1;
+  },
+
+  valueAt: function(index) {
+      if(index >= 0) {
+        return this.placeholder("select :nth-child(" + (index + 1) + ")").val();
+      }
+  },
+
+  topValue: function(_) {
+    if(arguments.length) {
+      var topIndex = this.indexOf(_);
+      if(topIndex >= 0) {
+        this.topIndex(topIndex);
+      }
+      return this;
+    }
+    
+    return this.valueAt(this.topIndex());
   }
 });
 
@@ -428,11 +503,13 @@ var TextInputComponent = BaseComponent.extend({
       (this.maxLength ? ("' maxlength='" + this.maxLength) : "") +
       "'>";
 
-    $("#" + this.htmlObject).html(selectHTML);
+    this.placeholder().html(selectHTML);
 
     $("#" + name)
       .change(function() { Dashboards.processChange(name); })
       .keyup(function(ev) { if (ev.keyCode == 13) { Dashboards.processChange(name); } });
+
+    this._doAutoFocus();
   },
   getValue : function() {
     return $("#"+this.name).val();
@@ -451,7 +528,7 @@ var TextareaInputComponent = BaseComponent.extend({
       Dashboards.getParameterValue(this.parameter) +
       '</textarea>';
 
-    $("#" + this.htmlObject).html(selectHTML);
+    this.placeholder().html(selectHTML);
 
     $("#" + name)
       .change(function() { Dashboards.processChange(name); })
@@ -487,9 +564,9 @@ var DateInputComponent = BaseComponent.extend({
     //ToDo: stretch interval to catch defaultValue?..
     //Dashboards.getParameterValue(this.parameter))
 
-    $("#" + this.htmlObject).html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
+    this.placeholder().html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
     $(function(){
-      $("#" + myself.htmlObject + " input").datepicker({
+      myself.placeholder("input").datepicker({
         dateFormat: format,
         changeMonth: true,
         changeYear: true,
@@ -501,7 +578,7 @@ var DateInputComponent = BaseComponent.extend({
       });
       // Add JQuery DatePicker standard localization support only if the dashboard is localized
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        var $input = $("#" + myself.htmlObject + " input");
+        var $input = myself.placeholder("input");
 
         $input.datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
 
@@ -511,6 +588,7 @@ var DateInputComponent = BaseComponent.extend({
         $input.datepicker("option", "altField", "#" + myself.name + "_hidden" );
         $input.datepicker("option", "altFormat", format );
       }
+      myself._doAutoFocus();
     });
   },
   getValue : function() {
@@ -527,10 +605,10 @@ var DateRangeInputComponent = BaseComponent.extend({
     var dr;
     if (this.singleInput == undefined || this.singleInput == true){
       dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0]) + " > " + Dashboards.getParameterValue(this.parameter[1]) ).css("width","170px");
-      $("#"+this.htmlObject).html(dr);
+      this.placeholder().html(dr);
     } else {
       dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0])).css("width","80px");
-      $("#"+this.htmlObject).html(dr);
+      this.placeholder().html(dr);
       dr.after($("<input/>").attr("id",this.name + "2").attr("value",Dashboards.getParameterValue(this.parameter[1])).css("width","80px"));
       if(this.inputSeparator != undefined){
         dr.after(this.inputSeparator);
@@ -554,7 +632,7 @@ var DateRangeInputComponent = BaseComponent.extend({
     var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
 
     $(function(){
-      $("#" + myself.htmlObject + " input").daterangepicker({
+      myself.placeholder("input").daterangepicker({
         posX: offset.left + leftOffset,
         posY: offset.top + topOffset,
         earliestDate: earliestDate,
@@ -575,6 +653,7 @@ var DateRangeInputComponent = BaseComponent.extend({
           triggerWhenDone();
         }
       });
+      myself._doAutoFocus();
     });
   },
 
@@ -621,11 +700,12 @@ var DateRangeInputComponent = BaseComponent.extend({
 var MonthPickerComponent = BaseComponent.extend({
   update : function() {
     var selectHTML = this.getMonthPicker(this.name, this.size, this.initialDate, this.minDate, this.maxDate, this.months);
-    $("#" + this.htmlObject).html(selectHTML);
+    this.placeholder().html(selectHTML);
     var myself = this;
     $("#"+this.name).change(function() {
       Dashboards.processChange(myself.name);
     });
+    this._doAutoFocus();
   },
   getValue : function() {
     var value = $("#" + this.name).val();
@@ -636,7 +716,7 @@ var MonthPickerComponent = BaseComponent.extend({
 
     // rebuild picker
     var selectHTML = this.getMonthPicker(this.name, this.size, d, this.minDate, this.maxDate, this.months);
-    $("#" + this.htmlObject).html(selectHTML);
+    this.placeholder().html(selectHTML);
     var myself = this;
     $("#"+this.name).change(function() {
       Dashboards.processChange(myself.name);
@@ -840,8 +920,9 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     }
     selectHTML += "</ul>"
     // update the placeholder
-    $("#" + this.htmlObject).html(selectHTML);
+    this.placeholder().html(selectHTML);
     this.currentVal = null;
+    this._doAutoFocus();
   },
   callAjaxAfterRender: function(name){
     setTimeout(function(){
@@ -855,7 +936,7 @@ var RadioComponent = ToggleButtonBaseComponent.extend({
     if (this.currentVal != 'undefined' && this.currentVal != null) {
       return this.currentVal;
     } else {
-      return $("#"+this.htmlObject + " ."+this.name+":checked").val()
+      return this.placeholder("."+this.name+":checked").val();
     }
   }
 });
@@ -866,7 +947,7 @@ var CheckComponent = ToggleButtonBaseComponent.extend({
       return this.currentVal;
     } else {
       var a = new Array()
-      $("#"+this.htmlObject + " ."+this.name + ":checked").each(function(i,val){
+      this.placeholder("."+this.name + ":checked").each(function(i,val){
         a.push($(this).val());
       });
       return a;
@@ -888,7 +969,8 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     if (this.isMultiple == undefined) this.isMultiple = false;
 
     var ph = $("<div>");
-    ph.appendTo($("#" + this.htmlObject).empty());
+    ph.appendTo(this.placeholder().empty());
+
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx],
         label = myArray[i][lblIdx],
@@ -976,6 +1058,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       // don't remove it, since it's inside the outer div it will handle that
     });
 
+    this._doAutoFocus();
   },
 
   getValue: function(){
@@ -1108,7 +1191,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
   update : function() {
 
-    $("#"+ this.htmlObject).empty();
+    this.placeholder().empty();
 
     var initialValue = null;
     if(this.parameter){
@@ -1182,12 +1265,14 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     };
 
 
-    this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
+    this.autoBoxOpt = this.placeholder().autobox(opt);
 
     //setInitialValue
     this.autoBoxOpt.setInitialValue(this.htmlObject, initialValue, this.name);
 
-    this.textbox = $('#' + this.htmlObject + ' input');
+    this.textbox = this.placeholder('input');
+
+    this._doAutoFocus();
   },
   getValue : function() {
     return this.value;
@@ -1205,6 +1290,8 @@ var ButtonComponent = BaseComponent.extend({
     });
     if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
       b.button();
-    b.appendTo($("#"+ this.htmlObject).empty());
+    b.appendTo(this.placeholder().empty());
+
+    this._doAutoFocus();
   }
 });

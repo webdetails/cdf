@@ -346,11 +346,11 @@ Dashboards.setGlobalContext = function(globalContext) {
 };
 
 Dashboards.showProgressIndicator = function() {
-  this.blockUIwithDrag();
+  $.blockUI && this.blockUIwithDrag();
 };
 
 Dashboards.hideProgressIndicator = function() {
-  $.unblockUI();
+  $.unblockUI && $.unblockUI();
   this.showErrorTooltip();
 };
 
@@ -798,12 +798,14 @@ Dashboards.createAndCleanErrorDiv = function(){
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
-    $(".cdf_error").tooltip({
-      delay:0,
-      track: true,
-      fade: 250,
-      showBody: " -- "
-    })
+    if($.tooltip) {
+      $(".cdf_error").tooltip({
+        delay:0,
+        track: true,
+        fade: 250,
+        showBody: " -- "
+      });
+    }
   });
 };
 
