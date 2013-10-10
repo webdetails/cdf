@@ -45,7 +45,6 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.api.repository.IContentItem;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
-import org.pentaho.platform.repository2.unified.fileio.RepositoryFileInputStream;
 import org.pentaho.platform.util.web.MimeHelper;
 
 import pt.webdetails.cpf.audit.CpfAuditHelper;
@@ -83,6 +82,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     }
   }
 
+  
   @Override
   public void createContent() throws Exception {
     OutputStream out;
@@ -367,13 +367,16 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @GET
   @Path("/getHeaders")
   @Produces("text/html")
-  public void getHeaders(@QueryParam("dashboardContent") String dashboardContent,
-                         @Context HttpServletResponse servletResponse) throws Exception{
+  public String getHeaders(@QueryParam("dashboardContent") String dashboardContent) throws Exception {
     try {
       CdfHtmlTemplateRenderer renderer = new CdfHtmlTemplateRenderer();
-      renderer.getHeaders(dashboardContent, servletResponse.getOutputStream());
+      if (renderer.getBaseUrl() == null) {
+        renderer.setBaseUrl( StringUtils.removeEnd( Utils.getBaseUrl(), "/") );
+      }
+      return renderer.getHeaders(dashboardContent);
     } catch (IOException ex){
-      logger.error(ex.getMessage());
+      logger.error("getHeaders: " + ex.getMessage(), ex);
+      throw ex;
     }
   }
 

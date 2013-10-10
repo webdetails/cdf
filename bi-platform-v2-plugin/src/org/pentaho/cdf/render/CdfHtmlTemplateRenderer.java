@@ -13,6 +13,8 @@ import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.Messages;
@@ -28,7 +30,6 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.services.pluginmgr.PluginClassLoader;
-import org.pentaho.platform.plugin.services.security.userrole.ldap.transform.GrantedAuthorityToString;
 import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.web.http.api.resources.IFileResourceRenderer;
 
@@ -40,6 +41,9 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@"; //$NON-NLS-1$
   public static final String PLUGIN_NAME = "pentaho-cdf"; //$NON-NLS-1$
   private static final String PREFIX_PARAMETER = "param";
+  private static final String STATIC_CDF_PATH = "/api/repos/pentaho-cdf";
+  
+  private static Log logger = LogFactory.getLog(CdfHtmlTemplateRenderer.class);
  
   OutputStream outputStream = null;
   RepositoryFile jcrSourceFile;
@@ -149,10 +153,14 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     return new File(((PluginClassLoader) this.getClass().getClassLoader()).getPluginDir(), "template-dashboard" + template + ".html");
   }
   
-  public void execute() throws Exception {
+  private Packager getPackager() throws IOException {
     if (packager == null) {
       packager = createPackager();
     }
+    return packager;
+  }
+  
+  public void execute() throws Exception {
     RepositoryAccess repositoryAccess = RepositoryAccess.getRepository();
     
     //IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
@@ -214,7 +222,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       for (int i = 0; i < scriptsList.size(); i++)
       {
         String fname = scriptsList.get(i);
-        scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+        scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + STATIC_CDF_PATH, ""));
       }
       packager.registerPackage("scripts", Packager.Filetype.JS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/scripts.js", scriptsList.toArray(new String[scriptsList.size()]));
     }
@@ -225,7 +233,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       for (int i = 0; i < stylesList.size(); i++)
       {
         String fname = stylesList.get(i);
-        stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+        stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + STATIC_CDF_PATH, ""));
       }
       packager.registerPackage("styles", Packager.Filetype.CSS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/styles.css", stylesList.toArray(new String[stylesList.size()]));
     }
@@ -238,7 +246,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
 
     outputStream.write(intro.substring(0, headIndex + 6).getBytes("UTF-8")); //$NON-NLS-1$   
     //Concat libraries to html head content
-    getHeaders(dashboardContent, getOutputStream());
+    outputStream.write(getHeaders(dashboardContent).getBytes( "UTF-8" ));
     outputStream.write(intro.substring(headIndex + 7, length - 1).getBytes("UTF-8")); //$NON-NLS-1$
 
     IParameterProvider parameters = getRequestParams();
@@ -270,14 +278,23 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     return auths;
   }
   
-  public void getHeaders(final String dashboardContent, final OutputStream out) throws Exception
+  private String replaceRelative(String headerPath) {
+    if (baseUrl != null) {
+      return headerPath.replaceAll(RELATIVE_URL_TAG, baseUrl);
+    }
+    else {
+      logger.warn("no baseURL");
+      return headerPath;
+    }
+  }
+  
+  public String getHeaders(final String dashboardContent) throws Exception
   {
 
     final File file = new File(getPluginRootDir(), "resources-blueprint.txt");
     HashMap<String, String> includes = new HashMap<String, String>();
     final Properties resources = new Properties();
     resources.load(new FileInputStream(file));
-
 
     final ArrayList<String> miniscripts = new ArrayList<String>();
     final ArrayList<String> ministyles = new ArrayList<String>();
@@ -299,35 +316,37 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       //DEBUG MODE
       for (String header : miniscripts)
       {
-        scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@RELATIVE_URL@", baseUrl) + "\"></script>\n");
+        scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + replaceRelative(header) + "\"></script>\n");
       }
       for (String header : ministyles)
       {
-        stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@RELATIVE_URL@", baseUrl) + "\"/>\n");
+        stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + replaceRelative(header) + "\"/>\n");
       }
 
     }
     else
     {
       // NORMAL MODE
+      Packager packager = getPackager();
       String stylesHash = packager.minifyPackage("styles");
       String scriptsHash = packager.minifyPackage("scripts");
-      stylesBuilders.append("<link href=\"" + baseUrl + "/content/pentaho-cdf/js/styles.css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
-      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + baseUrl + "/content/pentaho-cdf/js/scripts.js?version=" + scriptsHash + "\"></script>");
+      stylesBuilders.append("<link href=\"" + baseUrl + STATIC_CDF_PATH + "/js/styles.css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
+      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + baseUrl + STATIC_CDF_PATH + "/js/scripts.js?version=" + scriptsHash + "\"></script>");
     }
     //Add extra components libraries
 
-    for (String header : scripts)
-    {
-      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + header.replaceAll("@RELATIVE_URL@", baseUrl) + "\"></script>\n");
+    for ( String header : scripts ) {
+      scriptsBuilders.append( "<script type=\"text/javascript\" src=\"" + replaceRelative(header) + "\"></script>\n" );
     }
-    for (String header : styles)
-    {
-      stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + header.replaceAll("@RELATIVE_URL@", baseUrl) + "\"/>\n");
+    for ( String header : styles ) {
+      stylesBuilders.append( 
+          "<link rel=\"stylesheet\" type=\"text/css\" href=\""
+          + replaceRelative( header )
+          + "\"/>\n" );
     }
 
     // Add ie8 blueprint condition
-    stylesBuilders.append("<!--[if lt IE 8]><link rel=\"stylesheet\" href=\"" + baseUrl + "/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
+    stylesBuilders.append("<!--[if lt IE 8]><link rel=\"stylesheet\" href=\"" + baseUrl + STATIC_CDF_PATH + "/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
 
     StringBuilder stuff = new StringBuilder();
     includes.put("scripts", scriptsBuilders.toString());
@@ -336,7 +355,8 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     {
       stuff.append(includes.get(key));
     }
-    out.write(stuff.toString().getBytes("UTF8"));
+    return stuff.toString();
+    //out.write(stuff.toString().getBytes("UTF8"));
   }
   
   private ArrayList<String> getExtraScripts(String dashboardContentOrig, Properties resources)
