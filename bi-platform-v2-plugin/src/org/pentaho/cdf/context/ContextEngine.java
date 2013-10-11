@@ -112,7 +112,7 @@ public class ContextEngine {
     repositoryCache = null;
   }
 
-  public void getContext(String path, String viewId, String action, HashMap<String, String> parameters, final OutputStream output){
+  public String getContext(String path, String viewId, String action, HashMap<String, String> parameters){
     final JSONObject contextObj = new JSONObject();
 
     Document config = getConfigFile();
@@ -133,12 +133,11 @@ public class ContextEngine {
       buildContextParams(params, parameters);
       contextObj.put("params", params);
 
-      buildContextScript(output, contextObj, viewId, action);
-
       logger.info("[Timing] Finished building context: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
 
+      return buildContextScript(contextObj, viewId, action);
     } catch (JSONException e) {
-
+      return "";
     }
   }
 
@@ -165,34 +164,26 @@ public class ContextEngine {
     return contextObj;
   }
 
-  private OutputStream buildContextScript(final OutputStream out, JSONObject contextObj, String viewId, String action) throws JSONException{
+  private String buildContextScript(JSONObject contextObj, String viewId, String action) throws JSONException{
     final StringBuilder s = new StringBuilder();
+    s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
+    s.append("  Dashboards.context = ");
+    s.append(contextObj.toString(2) + "\n");
 
-    try {
-      s.append("\n<script language=\"javascript\" type=\"text/javascript\">\n");
-      s.append("  Dashboards.context = ");
-      s.append(contextObj.toString(2) + "\n");
-
-      ViewEntry view = ViewsEngine.getInstance().getView(viewId.isEmpty() ? action : viewId);
-      if (view != null) {
-        s.append("Dashboards.view = ");
-        s.append(view.toJSON().toString(2) + "\n");
-      }
-      String storage = getStorage();
-      if (!"".equals(storage)) {
-        s.append("Dashboards.initialStorage = ");
-        s.append(storage);
-        s.append("\n");
-      }
-      s.append("</script>\n");
-
-      writeOut(out,s.toString());
-    } catch(IOException ex){
-      logger.error("Error while writting to steam", ex);
+    ViewEntry view = ViewsEngine.getInstance().getView(viewId.isEmpty() ? action : viewId);
+    if (view != null) {
+      s.append("Dashboards.view = ");
+      s.append(view.toJSON().toString(2) + "\n");
     }
+    String storage = getStorage();
+    if (!"".equals(storage)) {
+      s.append("Dashboards.initialStorage = ");
+      s.append(storage);
+      s.append("\n");
+    }
+    s.append("</script>\n");
 
-
-    return out;
+    return s.toString();
   }
 
   private JSONObject buildContextParams(final JSONObject contextObj, HashMap<String, String> params) throws JSONException{

@@ -448,17 +448,11 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @GET
   @Path("/getContext")
   @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
-  public void getContext(@QueryParam(CdfConstants.PARAM_PATH) @DefaultValue(CdfConstants.EMPTY_STRING) String path,
+  public String getContext(@QueryParam(CdfConstants.PARAM_PATH) @DefaultValue(CdfConstants.EMPTY_STRING) String path,
 						 @QueryParam(CdfConstants.PARAM_ACTION) @DefaultValue(CdfConstants.EMPTY_STRING) String action,
                          @DefaultValue(CdfConstants.EMPTY_STRING) @QueryParam(CdfConstants.PARAM_VIEW_ID) String viewId,
-                         @Context HttpServletResponse servletResponse,
                          @Context HttpServletRequest servletRequest){
-	try {
-
-      ContextEngine.getInstance().getContext(path, viewId, action, Util.getRequestParameters(servletRequest), servletResponse.getOutputStream());
-    } catch (IOException ex){
-      logger.error(ex.getMessage());
-    }
+      return ContextEngine.getInstance().getContext(path, viewId, action, Util.getRequestParameters(servletRequest));
   }
 
   @GET

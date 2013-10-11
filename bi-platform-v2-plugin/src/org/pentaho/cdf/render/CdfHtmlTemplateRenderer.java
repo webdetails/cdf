@@ -262,10 +262,10 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     }
 
     String viewId = parameters.getStringParameter("view", parameters.getStringParameter("action", ""));
+    String context = ContextEngine.getInstance().getContext(filePath, viewId , "", params);
 
-    ContextEngine.getInstance().getContext(filePath, viewId , "", params, getOutputStream());
+    outputStream.write(context.getBytes("UTF-8"));
     outputStream.write("<div id=\"dashboardContent\">".getBytes("UTF-8")); //$NON-NLS-1$
-
     outputStream.write(dashboardContent.getBytes("UTF-8")); //$NON-NLS-1$
     outputStream.write("</div>".getBytes("UTF-8")); //$NON-NLS-1$
     outputStream.write(footer.getBytes("UTF-8")); //$NON-NLS-1$
