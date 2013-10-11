@@ -291,7 +291,6 @@
       systemParams: {},
       ajaxOptions: {
           dataType:'json',
-          mimeType:'application/json; charset utf-8', //solves nasty "not well formed" error in Firefox 24
         type:'POST',
         async: true
       }
@@ -301,9 +300,16 @@
         if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
           this.setOption('pluginId' , opts.pluginId);
           this.setOption('endpoint' , opts.endpoint);
-          var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
+            var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
               url = urlArray.join('/');
           this.setOption('url', url );
+        }
+        this.setOption('systemParams', opts.systemParams || {} );
+        this.setOption('ajaxOptions' , $.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
+        var ajaxOptions = this.getOption('ajaxOptions');
+        if (ajaxOptions.dataType == 'json'){
+            ajaxOptions.mimeType = 'application/json; charset utf-8'; //solves "not well formed" error in Firefox 24
+            this.setOption('ajaxOptions', ajaxOptions);
         }
     },
 
@@ -316,12 +322,7 @@
 
       _.each( params , function (value, name) {
         value = Dashboards.getParameterValue(value);
-        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-          //special case where single element will wrongly be treated as a parseable array by cda
-          value = doCsvQuoting(value[0],';');
-        }
-        //else will not be correctly handled for functions that return arrays
-          if ($.isArray(value)){
+          if (_.isObject(value)){
               // kettle does not handle arrays natively,
               // nor does it interpret multiple parameters with the same name as elements of an array,
               // nor does CPK do any sort of array handling.
