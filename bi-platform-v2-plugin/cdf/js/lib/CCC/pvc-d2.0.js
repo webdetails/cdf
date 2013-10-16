@@ -25899,7 +25899,7 @@ def
             .lock(len_a, null)
             .override('defaultColor', def.fun.constant(pv.color("#f0f0f0")))
             .pvMark
-            .lineWidth(1)
+            //.lineWidth(1) PATCH 2013-10-16
             .antialias(true)
             [obeg_a](obeg)
             [oend_a](oend)
