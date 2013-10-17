@@ -30,118 +30,265 @@ var InputBaseComponent = UnmanagedComponent.extend({
       this.synchronous(handler);
 
     }
+  },
+
+  // TODO: is the result of Dashoards.getParameterValue subject or not to HTML encoding?
+  // Some controls in this file do html encode the result while others don't.
+
+  /**
+   * Obtains the value of this component's parameter.
+   * <p>
+   * If the parameter value is a function, the result of evaluating it is returned instead.
+   * </p>
+   * <p>
+   * Normalizes return values by using {@link Dashboards.normalizeValue}.
+   * </p>
+   *
+   * @return {*} the parameter value.
+   */
+  _getParameterValue: function() {
+    return Dashboards.normalizeValue(
+            Dashboards.ev(
+              Dashboards.getParameterValue(this.parameter)));
   }
 });
-
 
 
 var SelectBaseComponent = InputBaseComponent.extend({
   visible: false,
 
-  draw: function (myArray) {
-    var ph = $("#" + this.htmlObject);
-    isMultiple = false;
-	
-	var eo = {};
-	
-	if(this.extraOptions != undefined){
-		for(var i = 0; i < this.extraOptions.length; i++){
-			eo[this.extraOptions[i][0]] = this.extraOptions[i][1];
-		}
-	}
-	
-    selectHTML = "<select";
+  //defaultIfEmpty: [false]
+  //isMultiple: [true]
+  //size: when isMultiple==true, the default value is the number of possible values
+  //externalPlugin:
+  //extraOptions:
+  //changeMode: ['immediate'], 'focus'
 
-    // set size
-    if (this.size != undefined) {
-      selectHTML += " size='" + this.size + "'";
-    }
-    if (this.type.toLowerCase().indexOf("selectmulti") != -1) {
-      if (typeof(this.isMultiple) == 'undefined' || this.isMultiple == true) {
-        selectHTML += " multiple";
-        isMultiple = true;
-      } else
-      if (!this.isMultiple && this.size == undefined) {
-        selectHTML += " size='" + myArray.length + "'";
-      }
-    }
-    if (this.externalPlugin == "chosen") {
-      selectHTML += " class='chzn-select'";
-    }
-    if (this.externalPlugin == "hynds") {
-      selectHTML += " class='hynds-select'";
+  draw: function(myArray) {
+    var ph = $("#" + this.htmlObject);
+    var name = this.name;
+
+    // Build the HTML
+    var selectHTML = "<select";
+
+    var allowMultiple = this._allowMultipleValues();
+    if(allowMultiple) { selectHTML += " multiple"; }
+
+    var size = this._getListSize(myArray);
+    if(size != null) { selectHTML += " size='" + size + "'"; }
+
+    var extPlugin = this.externalPlugin;
+    switch(extPlugin) {
+      case "chosen": selectHTML += " class='chzn-select'" ; break;
+      case "hynds":  selectHTML += " class='hynds-select'"; break;
     }
 
     selectHTML += ">";
-    var firstVal,
-    currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter)),
-    currentIsValid = false;
 
-    var hasCurrentVal = currentVal != null; //typeof currentVal != undefined;
-    //var vid = this.valueAsId == false ? false : true;
-    var vid = !!this.valueAsId;
-    var hasValueSelected = false;
-    var isSelected = false;
+    // ------
 
-    var currentValArray = [];
-    if(currentVal instanceof Array || (currentVal != null && typeof(currentVal) == "object" && currentVal.join)) {
-      currentValArray = currentVal;
-    } else if(typeof(currentVal) == "string"){
-      currentValArray = currentVal.split("|");
-    }
+    var currentVal  = this._getParameterValue();
+    var currentVals = Dashboards.parseMultipleValues(currentVal); // may be null
+    var valuesIndex = {};
+    var firstVal;
 
-    for (var i = 0, len = myArray.length; i < len; i++) {
-      if (myArray[i] != null && myArray[i].length > 0) {
-        var ivid = vid || myArray[i][0] == null;
-        var value, label;
-        if (myArray[i].length > 1) {
-          value = "" + myArray[i][ivid ? 1 : 0];
-          label = "" + myArray[i][1];
-        } else {
-          value = "" + myArray[i][0];
-          label = "" + myArray[i][0];
-        }
-        if (i == 0) {
-          firstVal = value;
-        }
-        if (jQuery.inArray(""+ value, currentValArray.map(function (v) {return "" + v;})) > -1) {
-          currentIsValid = true;
-        }
-        selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" + Dashboards.escapeHtml(label) + "</option>";
-      }
-    }
+    Dashboards.eachValuesArray(myArray, {valueAsId: this.valueAsId},
+      function(value, label, id, index) {
+        selectHTML += "<option value = '" + Dashboards.escapeHtml(value) + "' >" +
+                        Dashboards.escapeHtml(label) +
+                      "</option>";
+
+        // For value validation, below
+        if(!index) { firstVal = value; }
+        valuesIndex[value] = true;
+      },
+      this);
 
     selectHTML += "</select>";
     ph.html(selectHTML);
 
-    /* If the current value for the parameter is invalid or empty, we need
-     * to pick a sensible default. If there is a defaultIfEmpty value,
-     * we use that; otherwise, we use the first value in the selector.
-     * An "invalid" value is, of course, one that's not in the values array.
+    // ------
+
+    // All current values valid?
+    var currentIsValid = true;
+
+    // Filter out invalid current values
+    if(currentVals != null) {
+      var i = currentVals.length;
+      while(i--) {
+        if(valuesIndex[currentVals[i]] !== true) {
+          // At least one invalid value
+          currentIsValid = false;
+          currentVals.splice(i, 1);
+        }
+      }
+      if(!currentVals.length) { currentVals = null; }
+    }
+
+    /* If the current value for the parameter is invalid or empty,
+     * we need to pick a sensible default.
+     * If defaultIfEmpty is true, the first possible value is selected,
+     * otherwise, nothing is selected.
      */
-    if (isMultiple ? !currentIsValid && currentVal !== '' : !currentIsValid) {
-      var replacementValue = (this.defaultIfEmpty)? firstVal : null;
-      $("select", ph).val(replacementValue);
-      Dashboards.setParameter(this.parameter,replacementValue);
-      Dashboards.processChange(this.name);
-    } else {
-      $("select", ph).val(currentValArray);
+    var isEmpty    = currentVals == null;
+    var hasChanged = !currentIsValid;
+    if(isEmpty && this.defaultIfEmpty && firstVal != null) {
+      // Won't remain empty
+      currentVals = [firstVal];
+      hasChanged = true;
     }
-    
-    if( this.externalPlugin == "chosen" ){ 
-      ph.find("select.chzn-select").chosen(eo); 
+
+    $("select", ph).val(currentVals);
+
+    if(hasChanged) {
+      // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
+      Dashboards.setParameter(this.parameter, currentVals);
+      Dashboards.processChange(name);
     }
-    
-    if( this.externalPlugin == "hynds" ){ 
-      	ph.find("select.hynds-select").multiselect({
-			multiple: (isMultiple)? true : false  
-		}); 
+
+    // TODO: shouldn't this be called right after setting the value of select?
+    // Before hasChanged firing?
+    switch(extPlugin) {
+      case "chosen": ph.find("select.chzn-select" ).chosen(this._readExtraOptions()); break;
+      case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
     }
+
+    this._listenElement(ph);
+  },
+
+  /**
+   * Indicates if the user can select multiple values.
+   * The default implementation returns <tt>false</tt>.
+   * @return {boolean}
+   * @protected
+   */
+  _allowMultipleValues: function() {
+    return false;
+  },
+
+  /**
+   * The number of elements that the list should show
+   * without scrolling.
+   * The default implementation
+   * returns the value of the {@link #size} property.
+   *
+   * @param {Array.<Array.<*>>} values the values array.
+   * @return {?number}
+   * @protected
+   */
+  _getListSize: function(values) {
+    return this.size;
+  },
+
+  /**
+   * Currently, reads extra options for the "chosen" plugin,
+   * by transforming the array of key/value pair arrays
+   * in {@link #extraOptions} into a JS object.
+   *
+   * @return {!Object.<string,*>} an options object.
+   */
+  _readExtraOptions: function() {
+    if(this.externalPlugin && this.extraOptions) {
+      return Dashboards.propertiesArrayToObject(this.extraOptions);
+    }
+  },
+
+  /**
+   * Installs listeners in the HTML element/object.
+   * <p>
+   *    The default implementation listens to the change event
+   *    and dashboard-processes each change.
+   * </p>
+   * @param {!HTMLElement} elem the element.
+   */
+  _listenElement: function(elem) {
+    var me = this;
     
-    var myself = this;
-    $("select", ph).change(function () {
-      Dashboards.processChange(myself.name);
-    });
+    var prevValue = me.getValue();
+    var check = function() {
+      var currValue = me.getValue();
+      if(!Dashboards.equalValues(prevValue, currValue)) {
+        prevValue = currValue;
+        Dashboards.processChange(me.name);
+      }
+    };
+
+    $("select", elem)
+      .on(me._changeTrigger(), check)
+      .keypress(function(ev) { if(ev.which === 13) { check(); } });
+  },
+
+  /**
+   * Obtains the change mode to use.
+   * 
+   * <p>
+   * The default implementation normalizes, validates and defaults
+   * the change mode value.
+   * </p>
+   *
+   * @return {!string} one of values: <tt>'immediate'</tt> or <tt>'focus'</tt>.
+   */
+  _getChangeMode: function() {
+    var changeMode = this.changeMode;
+    if(changeMode) {
+      changeMode = changeMode.toLowerCase();
+      switch(changeMode) {
+        case 'immediate':
+        case 'focus': return changeMode;
+
+        default: 
+          Dashboards.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
+      }
+    }
+    return 'immediate';
+  },
+
+  /**
+   * Obtains an appropriate jQuery event name
+   * for when testing for changes is done.
+   * 
+   * @return {!string} the name of the event.
+   */
+  _changeTrigger: function() {
+    /**
+     * <p>
+     * Mobile user agents show a dialog/popup for choosing amongst possible values,
+     * for both single and multi-selection selects.
+     * </p>
+     * <ul>
+     *   <li>iPad/iPhone -
+     *       the popup shows a button "OK" only when in multiple selection.
+     *       As the user clicks on the items, "change" events are fired.
+     *       A "focusout" event is fired when the user dismisses the popup
+     *       (by clicking on the button or outside of the popup).
+     *   </li>
+     *   <li>Android -
+     *       the popup shows a button "Done" whether in single or multiple selection.
+     *       As the user clicks on the items no events are fired.
+     *       A change event is fired (whether or not values actually changed),
+     *       when the user dismisses the popup.
+     *   </li>
+     *   <li>Desktops -
+     *       no popup is shown.
+     *       As the user clicks on the items, "change" events are fired.
+     *       A "focusout" event is fired when it should...
+     *   </li>
+     * </ul>
+     *
+     * | Change mode: | Immediate  | Focus    |
+     * +--------------+------------+----------+
+     * | Desktop      | change     | focusout |
+     * | iPad         | change     | focusout |
+     * | Android      | change *   | change   |
+     *
+     * (*) this is the most immediate that android can do
+     *     resulting in Immediate = Focus
+     *
+     *  On mobile devices the Done/OK is equiparated with the
+     *  behavior of focus out and of the ENTER key.
+     */
+    if(this._getChangeMode() === 'immediate') { return 'change'; }
+    return (/android/i).test(navigator.userAgent) ? 'change' : 'focusout';
   }
 });
 
@@ -154,29 +301,59 @@ var SelectComponent = SelectBaseComponent.extend({
 
 var SelectMultiComponent = SelectBaseComponent.extend({
   getValue : function() {
-  	var ph = $("#"+this.htmlObject + " select");
-  	return ( ph.val() == null ) ? [] : ph.val();
+    var ph = $("#"+this.htmlObject + " select");
+    var val = ph.val();
+    return val == null ? [] : val;
+  },
+
+
+  /**
+   * Obtains the normalized and defaulted value of
+   * the {@link #isMultiple} option.
+   * 
+   * @override
+   * @return {boolean}
+   */
+  _allowMultipleValues: function() {
+    return this.isMultiple == null || !!this.isMultiple;
+  },
+
+  /**
+   * When the size option is unspecified,
+   * and multiple values are allowed,
+   * returns the number of items in the
+   * provided possible values list.
+   * 
+   * @override
+   */
+  _getListSize: function(values) {
+    var size = this.base(values);
+    if(size == null) {
+      if(!this._allowMultipleValues()) {
+        size = values.length;
+      } // TODO: otherwise no default... Why?
+    }
+
+    return size;
   }
 });
 
+
 var TextInputComponent = BaseComponent.extend({
-  update: function(){
-    selectHTML = "<input";
-    selectHTML += " type=text id='" + this.name + "' name='" + this.name +
-    "'  value='" +
-    Dashboards.getParameterValue(this.parameter) +
-    (this.size ? ("' size='" + this.size) : "") +
-    (this.maxLength ? ("' maxlength='" + this.maxLength) : "") +
-    "'>";
+  update: function() {
+    var name = this.name;
+    var selectHTML = "<input type='text' id='" + name +
+      "' name='"  + name +
+      "' value='" + Dashboards.getParameterValue(this.parameter) +
+      (this.size ? ("' size='" + this.size) : "") +
+      (this.maxLength ? ("' maxlength='" + this.maxLength) : "") +
+      "'>";
+
     $("#" + this.htmlObject).html(selectHTML);
-    var myself = this;
-    $("#" + this.name).change(function(){
-      Dashboards.processChange(myself.name);
-    }).keyup(function(event){
-      if (event.keyCode == 13) {
-        Dashboards.processChange(myself.name);
-      }
-    });
+
+    $("#" + name)
+      .change(function() { Dashboards.processChange(name); })
+      .keyup(function(ev) { if (ev.keyCode == 13) { Dashboards.processChange(name); } });
   },
   getValue : function() {
     return $("#"+this.name).val();
@@ -185,21 +362,21 @@ var TextInputComponent = BaseComponent.extend({
 
 
 var TextareaInputComponent = BaseComponent.extend({
-  update: function(){
-    selectHTML = "<textarea";
-    selectHTML += " id='" + this.name + "' name='" + this.name +
-    (this.numRows ? ("' rows='" + this.numRows) : "") +
-    (this.numColumns ? ("' cols='" + this.numColumns) : "") +
-    "'>" + Dashboards.getParameterValue(this.parameter) + 
-    '</textarea>';
+  update: function() {
+    var name = this.name;
+    var selectHTML = "<textarea id='" + name +
+      "' name='" + name +
+      (this.numRows ? ("' rows='" + this.numRows) : "") +
+      (this.numColumns ? ("' cols='" + this.numColumns) : "") +
+      "'>" +
+      Dashboards.getParameterValue(this.parameter) +
+      '</textarea>';
+
     $("#" + this.htmlObject).html(selectHTML);
-    var myself = this;
-    $("#" + this.name).change(function(){
-      Dashboards.processChange(myself.name);
-    }).keyup(function(event){
-      if (event.keyCode == 13) {
-        Dashboards.processChange(myself.name);
-      }
+
+    $("#" + name)
+      .change(function() { Dashboards.processChange(name); })
+      .keyup(function(ev){ if (ev.keyCode == 13) { Dashboards.processChange(name); }
     });
   },
   getValue : function() {
@@ -211,7 +388,7 @@ var TextareaInputComponent = BaseComponent.extend({
 
 // Start by setting a sane i18n default to datepicker
 //TODO: move this to where we know for sure datepicker is loaded..
-if($.datepicker != null){
+if($.datepicker) {
   $(function(){$.datepicker.setDefaults($.datepicker.regional[''])});
 }
 
@@ -248,8 +425,8 @@ var DateInputComponent = BaseComponent.extend({
         var $input = $("#" + myself.htmlObject + " input");
 
         $input.datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
-        
-        
+
+
         //Setup alt field and format to keep iso format
         $input.parent().append($('<hidden>').attr("id", myself.name + "_hidden"));
         $input.datepicker("option", "altField", "#" + myself.name + "_hidden" );
@@ -258,7 +435,7 @@ var DateInputComponent = BaseComponent.extend({
     });
   },
   getValue : function() {
-    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) 
+    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null)
         return $("#" + this.name + "_hidden").val();
     else
         return $("#"+this.name).val();
@@ -286,7 +463,7 @@ var DateRangeInputComponent = BaseComponent.extend({
     var latestDate = this.latestDate != undefined  ?  this.latestDate : Date.parse('+1years');
     var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
     var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
-    
+
     var changed, closed;
     function triggerWhenDone() {
       if(changed && closed) {
@@ -321,19 +498,19 @@ var DateRangeInputComponent = BaseComponent.extend({
       });
     });
   },
-  
+
   fireInputChange : function(start, end){
     //TODO: review this!
     if(this.preChange){
       this.preChange(start, end);
     }
-    
+
     if(this.parameter)
     {
       if( this.parameter.length == 2) Dashboards.setParameter(this.parameter[1], end);
       if( this.parameter.length > 0) Dashboards.fireChange(this.parameter[0], start);
     }
-    
+
     if(this.postChange){
       this.postChange(start, end);
     }
@@ -445,7 +622,7 @@ var MonthPickerComponent = BaseComponent.extend({
 var ToggleButtonBaseComponent = InputBaseComponent.extend({
   draw: function(myArray){
 
-    selectHTML = "";
+    var selectHTML = "";
 
     //default
     var currentVal = Dashboards.getParameterValue(this.parameter);
@@ -551,7 +728,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   draw: function(myArray){
     this.cachedArray = myArray;
     var cssWrapperClass= "pentaho-toggle-button pentaho-toggle-button-up "+ ((this.verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
-    selectHTML = "";
+    var selectHTML = "";
     var firstVal;
 
     var valIdx = this.valueAsId ? 1 : 0;
@@ -587,14 +764,14 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
       }
     }
 
-    
+
     //default
     var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
 
     var isSelected = false;
 
     var currentValArray;
-    if(typeof currentVal == "undefined") {
+    if(currentVal == null) {
       currentValArray = [];
     } else if(currentVal instanceof Array || (typeof(currentVal) == "object" && currentVal.join)) {
       currentValArray = currentVal;
@@ -748,48 +925,50 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 });
 
 var AutocompleteBoxComponent = BaseComponent.extend({
-  
+
   searchedWord : '',
   result: [],
-  
+
   queryServer : function(searchString){
-    
+
     if(!this.parameters) this.parameters = [];
-    
+
     if(this.searchParam){
       this.parameters = [ [this.searchParam, this.getInnerParameterName()] ];
     }
     else if (this.parameters.length > 0){
       this.parameters[0][1] = this.getInnerParameterName();
     }
-    
+
     if(this.maxResults){
       this.queryDefinition.pageSize = this.maxResults;
     }
     Dashboards.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
     QueryComponent.makeQuery(this);
   },
-  
+
   getTextBoxValue: function(){
     return this.textbox.val();
   },
-  
+
   getInnerParameterName : function(){
     return this.parameter + '_textboxValue';
   },
-  
+
   update : function() {
-    
+
     $("#"+ this.htmlObject).empty();
-    
+
     var initialValue = null;
     if(this.parameter){
       initialValue = Dashboards.getParameterValue(this.parameter);
     }
 
     var myself = this;
-    
+
     //init parameter
+    // TODO: FIXME: dcl - Isn't the following
+    // this.getInnerParameterName missing parentesis?
     if(!Dashboards.getParameterValue(this.getInnerParameterName)){
       Dashboards.setParameter(this.getInnerParameterName(), '' );
     }
@@ -802,12 +981,12 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var processElementChange = myself.processElementChange == true ? function(value){
       Dashboards.fireChange(myself.parameter,value);
     } : undefined;
-    
+
     //TODO:typo on minTextLength
     if(this.minTextLenght == undefined){
       this.minTextLenght = 0;
     }
-    
+
     var opt = {
       list: function(){
         var val = myself.textbox.val();
@@ -817,8 +996,8 @@ var AutocompleteBoxComponent = BaseComponent.extend({
              val == myself.searchedWord
              ||
             ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
-             myself.searchedWord != '' && 
-             ((myself.matchType == "fromStart")? 
+             myself.searchedWord != '' &&
+             ((myself.matchType == "fromStart")?
                 val.indexOf(myself.searchedWord) == 0 :
                 val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
         {
@@ -853,10 +1032,10 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
 
     this.autoBoxOpt = $("#" + this.htmlObject ).autobox(opt);
-    
+
     //setInitialValue
     this.autoBoxOpt.setInitialValue(this.htmlObject, initialValue, this.name);
-    
+
     this.textbox = $('#' + this.htmlObject + ' input');
   },
   getValue : function() {
