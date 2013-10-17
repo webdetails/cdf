@@ -378,7 +378,7 @@ Dashboards.bindControl = function(control) {
     this._castControlToClass(control, Class);
   }
 
-  this.bindExistingControl(control, Class);
+  return this.bindExistingControl(control, Class);
 };
 
 Dashboards.bindExistingControl = function(control, Class) {
@@ -487,7 +487,7 @@ Dashboards._addLogLifecycleToControl = function(control) {
       
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
       console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
-          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+          eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
     }
   });
 };
@@ -888,25 +888,28 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 };
 
 Dashboards.init = function(components){
-  var myself =this;
+  var myself = this;
+
+  this.syncDebugLevel();
+
   if(this.initialStorage) {
     _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
   }
+  
   if(this.context != null && this.context.sessionTimeout != null ) {
     //defaulting to 90% of ms value of sessionTimeout
     Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
+  
   this.restoreBookmarkables();
   this.restoreView();
   this.syncParametersInit();
-  if ($.isArray(components)) {
-    this.addComponents(components);
-  }
-  $(function() {
-    myself.initEngine();
-  });
+  
+  if($.isArray(components)) { this.addComponents(components); }
+  
+  $(function() { myself.initEngine(); });
 };
 
 
@@ -1111,6 +1114,25 @@ Dashboards.handlePostInit = function() {
     }
 
   }
+};
+
+Dashboards.debug = 1;
+
+Dashboards.syncDebugLevel = function() {
+  var level = 1; // log errors
+  try {
+    var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+    var url = urlIfHasDebug(window.location.href) ||
+              urlIfHasDebug(window.top.location.href);
+    if(url) {
+        var m = /\bdebugLevel=(\d+)/.exec(url);
+        level = m ? (+m[1]) : 3;
+    }
+  } catch(ex) {
+    // swallow
+  }
+
+  return this.debug = level;
 };
 
 Dashboards.resetAll = function(){
@@ -1863,22 +1885,44 @@ Dashboards.cleanStorage = function(){
   });
 };
 
-Dashboards.propertiesArrayToObject = function(pArray) {
-  var obj = {};
-  for (var p in pArray) if (pArray.hasOwnProperty(p)) {
-    var prop = pArray[p];
-    obj[prop[0]] = prop[1];
-  }
-  return obj;
-};
 
-Dashboards.objectToPropertiesArray = function(obj) {
-  var pArray = [];
-  for (var key in obj) if (obj.hasOwnProperty(key)) {
-    pArray.push([key,obj[key]]);
-  }
-  return pArray;
-};
+(function (D) {
+  
+  // Conversion functions
+  function _pa2obj (pArray) {
+    var obj = {};
+      for (var p in pArray) if (pArray.hasOwnProperty(p)) {
+        var prop = pArray[p];
+        obj[prop[0]] = prop[1];
+      }
+    return obj;
+  };
+  function _obj2pa (obj) {
+    var pArray = [];
+    for (var key in obj) if (obj.hasOwnProperty(key)) {
+      pArray.push([key,obj[key]]);
+    }
+    return pArray;
+  };
+
+  // Exports
+  // NOTE: using underscore.js predicates but we could also use Dashboards.isArray() and 
+  //       Dashboards.isObject() (would need to create this one.)
+  D.propertiesArrayToObject = function(pArray) {
+    // Mantra 1: "Order matters!"
+    // Mantra 2: "Arrays are Objects!"
+    return ( _.isArray(pArray) && _pa2obj(pArray) ) || ( _.isObject(pArray) && pArray ) || undefined;  
+  };
+
+  D.objectToPropertiesArray = function(obj) {
+    // Mantra 1: "Order matters!"
+    // Mantra 2: "Arrays are Objects!"
+    return ( _.isArray(obj) && obj) || ( _.isObject(obj) && _obj2pa(obj)) || undefined;
+  };
+
+})(Dashboards);
+
+
 
 
 /**
@@ -2890,7 +2934,7 @@ Dashboards.safeClone = function(){
 /*
  * Query STUFF
  * (Here for legacy reasons)
- * 
+ * NOTE: The query type detection code should be kept in sync with CGG's UnmanagedComponent#detectQueryType.
  */
 //Ctors:
 // Query(queryString) --> DEPRECATED

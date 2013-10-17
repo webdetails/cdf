@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130731
+//VERSION TRUNK-20130909
 
 var pvc = (function(def, pv) {
 
@@ -23,9 +23,11 @@ var pvc = def.globalSpace('pvc', {
 // Check URL debug and debugLevel
 (function() {
     /*global window:true*/
-    if((typeof window.location) !== 'undefined') {
-        var url = window.location.href;
-        if(url && (/\bdebug=true\b/).test(url)) {
+    if((typeof window !== 'undefined')  && window.location) {
+        var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+        var url = urlIfHasDebug(window.location.href) ||
+                  urlIfHasDebug(window.top.location.href);
+        if(url) {
             var m = /\bdebugLevel=(\d+)/.exec(url);
             pvc.debug = m ? (+m[1]) : 3;
         }
@@ -2904,6 +2906,13 @@ def
  */
 def.global.NoDataException = function(){};
 
+/**
+ * @name InvalidDataException
+ * @class An error thrown when data exists but the chart cannot be rendered from it.
+ */
+def.global.InvalidDataException = function(msg) {
+    this.message = msg ? msg : "Invalid Data.";
+};
 
 pvc.data = {
     visibleKeyArgs: {visible: true}
@@ -2993,6 +3002,7 @@ function data_removeColChild(parent, childrenProp, child, parentProp) {
     
     child[parentProp] = null;
 }
+
 
 /**
  * Initializes a dimension type
@@ -8953,9 +8963,7 @@ def.type('pvc.data.GroupingLevelSpec')
             if(result !== 0) { return result; }
         }
         
-        // At last, use datum source order
-        return (a.id - b.id);
-        //return 0;
+        return 0;
     },
     
     key: function(datum) {
@@ -9010,14 +9018,12 @@ def.type('pvc.data.GroupingDimensionSpec')
     },
 
     compareDatums: function(a, b) {
-        if(this.type.isComparable) {
-          var name = this.name;
-          var result =  this.comparer(a.atoms[name], b.atoms[name]);
-          if(result !== 0) { return result; }
-        }
+        //if(this.type.isComparable) {
+            return this.comparer(a.atoms[this.name], b.atoms[this.name]);
+        //}
         
         // Use datum source order
-        return this.reverse ? (b.id - a.id) : (a.id - b.id);
+        //return this.reverse ? (b.id - a.id) : (a.id - b.id);
     },
 
     toString: function() { return this.name + (this.reverse ? ' desc' : ''); }
@@ -18990,6 +18996,9 @@ def
                 ibits = I.Interactive | I.ShowsInteraction;
                 
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
+
+                // NOTE: VML animations perform really bad,
+                //  and so its better for the user experience to be deactivated.
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
                 
                 var preventUnselect = false;
@@ -19141,11 +19150,17 @@ def
                     }
                 } catch (e) {
                     /*global NoDataException:true*/
-                    if (e instanceof NoDataException) {
+                    if (e instanceof NoDataException)
+                    {
                         if(pvc.debug > 1){ this._log("No data found."); }
-
                         this._addErrorPanelMessage("No data found", true);
-                    } else {
+                    }
+                    else if (e instanceof InvalidDataException)
+                    {
+                        if(pvc.debug > 1) { this._log(e.message);}
+                        this._addErrorPanelMessage(e.message, true);
+                    }
+                    else {
                         hasError = true;
 
                         // We don't know how to handle this
@@ -22834,11 +22849,9 @@ def
      * @param {boolean} [ka.bypassAnimation=false] Indicates that animation should not be performed.
      * @param {boolean} [ka.recreate=false] Indicates that the panel and its descendants should be recreated.
      */
-    render: function(ka){
+    render: function(ka) {
         
-        if(!this.isTopRoot) {
-            return this.topRoot.render(ka);
-        }
+        if(!this.isTopRoot) { return this.topRoot.render(ka); }
         
         this._create(def.get(ka, 'recreate', false));
         
@@ -22847,15 +22860,21 @@ def
             return;
         }
 
-        if(!this.isVisible){
-            return;
-        }
+        if(!this.isVisible) { return; }
         
         this._onRender();
         
         var options = this.chart.options;
         var pvPanel = this.pvRootPanel;
-        
+
+        // May be animating already...
+        // If that is the case,
+        //  the following pvPanel.render() call will cause
+        //  the ongoing animation to be stopped, 
+        //  and consequently, the previous passed callback handler to be called,
+        //  before leaving the pvPanel.render() call.
+        // See the callback below.
+        var prevAnimating = this._animating;
         var animate = this.chart.animatable();
         this._animating = animate && !def.get(ka, 'bypassAnimation', false) ? 1 : 0;
         try {
@@ -22863,7 +22882,7 @@ def
             pvPanel.render();
             
             // Transition to the animation's 'end' point
-            if (this._animating) {
+            if(this._animating) {
                 this._animating = 2;
                 
                 var me = this;
@@ -22872,8 +22891,12 @@ def
                     .duration(2000)
                     .ease("cubic-in-out")
                     .start(function() {
-                        me._animating = 0;
-                        me._onRenderEnd(true);
+                        if(prevAnimating) {
+                            prevAnimating = 0;
+                        } else {
+                            me._animating = 0;
+                            me._onRenderEnd(true);
+                        }
                     });
             } else {
                 this._onRenderEnd(false);
@@ -27950,10 +27973,6 @@ def
             tim = 1;
         }
 
-        if(tim > 1 && pvc.debug >= 3) {
-            this._info("Showing only one in every " + tim + " tick labels");
-        }
-
         return tim;
     },
 
@@ -28256,6 +28275,10 @@ def
 
                     var hiddenDatas, hiddenTexts, createHiddenScene, hiddenIndex;
                     if(includeModulo > 2) {
+                        if(pvc.debug >= 3) {
+                            this._info("Showing only one in every " + includeModulo + " tick labels");
+                        }
+                        
                         var keySep = rootScene.group.owner.keySep;
 
                         createHiddenScene = function() {
@@ -29506,11 +29529,18 @@ def
 
     /* Create child category scenes */
     data.children().each(function(categData) {
-        // Value may be negative
-        // Don't create 0-value scenes
+        // Value may be negative.
+        // Don't create 0-value scenes.
+        // null is returned as 0.
         var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
         if(value !== 0) { new CategSceneClass(categData, value); }
     });
+
+    // Not possible to represent as pie if there are no child scenes (=> sumAbs === 0)
+    // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
+    if (!sumAbs && !panel.visualRoles.multiChart.isBound()) {
+       throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+    }
 
     // -----------
 
@@ -29767,6 +29797,7 @@ def
     this.y = y;
 })
 .add(pv.Vector);
+
 
 /*global pvc_PercentValue:true */
 
