@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130717
+//VERSION TRUNK-20130731
 
 var pvc = (function(def, pv) {
 
@@ -8953,7 +8953,9 @@ def.type('pvc.data.GroupingLevelSpec')
             if(result !== 0) { return result; }
         }
         
-        return 0;
+        // At last, use datum source order
+        return (a.id - b.id);
+        //return 0;
     },
     
     key: function(datum) {
@@ -9008,12 +9010,14 @@ def.type('pvc.data.GroupingDimensionSpec')
     },
 
     compareDatums: function(a, b) {
-        //if(this.type.isComparable) {
-            return this.comparer(a.atoms[this.name], b.atoms[this.name]);
-        //}
+        if(this.type.isComparable) {
+          var name = this.name;
+          var result =  this.comparer(a.atoms[name], b.atoms[name]);
+          if(result !== 0) { return result; }
+        }
         
         // Use datum source order
-        //return this.reverse ? (b.id - a.id) : (a.id - b.id);
+        return this.reverse ? (b.id - a.id) : (a.id - b.id);
     },
 
     toString: function() { return this.name + (this.reverse ? ' desc' : ''); }
@@ -20382,7 +20386,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
         this.resultset = resultset || [];
-        if (!resultset.length) {
+        if (!this.resultset.length) {
             this._warn("Resultset is empty");
         }
 
@@ -20398,7 +20402,7 @@ pvc.BaseChart
         !this.parent || def.fail.operationInvalid("Can only set metadata on root chart.");
 
         this.metadata = metadata || [];
-        if (!metadata.length) {
+        if (!this.metadata.length) {
             this._warn("Metadata is empty");
         }
 

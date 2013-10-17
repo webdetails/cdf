@@ -11,10 +11,12 @@ var ProtovisComponent =  UnmanagedComponent.extend({
 
   render: function(values) {
     $("#" + this.htmlObject).html('<div id="'+ this.htmlObject +'protovis"></div>');
+    
     var vis = new pv.Panel()
       .canvas(this.htmlObject + "protovis")
       .width(this.width)
       .height(this.height);
+    this.vis = vis;
     this.customfunction(vis,values);
     vis.root.render();
   },
@@ -138,16 +140,14 @@ var CccComponent = BaseCccComponent.extend({
     },
 
     renderChart: function() {
-      var myself = this;
-      if(this.chartDefinition.dataAccessId || myself.chartDefinition.query) {
-        this.triggerQuery(this.chartDefinition,_.bind(this.render,this));
-      }
-      else if(this.valuesArray != undefined){
-        this.synchronous(_.bind(function(){this.render(this.valuesArray)},this));
-      }
-      else{
+      var cd = this.chartDefinition;
+      if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
+        this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
+      } else if(this.valuesArray != undefined) {
+        this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
+      } else {
         // initialize the component only
-        this.synchronous(_.bind(this.render,this));
+        this.synchronous(_.bind(this.render, this));
       }
     },
   
@@ -280,7 +280,7 @@ var CccComponent2 = BaseCccComponent.extend({
             seriesInRows: this.seriesInRows
         });
 
-        this.chart.setStructData(sValues)
+        this.chart.setStructData(sValues);
         this.chart.render();
     }
 
