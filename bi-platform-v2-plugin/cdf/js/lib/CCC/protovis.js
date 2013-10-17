@@ -1,15 +1,17 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
+ pen.define("cdf/lib/CCC/protovis", function() {
 
 // b5a46722ee7f324e2c1a80ce5e2e889dbc89d761
 /**
@@ -31,14 +33,14 @@
  * @param [o] object to use as <tt>this</tt> when executing <tt>f</tt>.
  */
 if (!Array.prototype.map) Array.prototype.map = function(f, o) {
-  var n = this.length;
-  var result = new Array(n);
-  for (var i = 0; i < n; i++) {
-    if (i in this) {
-      result[i] = f.call(o, this[i], i, this);
+    var n = this.length;
+    var result = new Array(n);
+    for (var i = 0; i < n; i++) {
+        if (i in this) {
+            result[i] = f.call(o, this[i], i, this);
+        }
     }
-  }
-  return result;
+    return result;
 };
 
 /**
@@ -54,15 +56,15 @@ if (!Array.prototype.map) Array.prototype.map = function(f, o) {
  * @param [o] object to use as <tt>this</tt> when executing <tt>f</tt>.
  */
 if (!Array.prototype.filter) Array.prototype.filter = function(f, o) {
-  var n = this.length;
-  var result = new Array();
-  for (var i = 0; i < n; i++) {
-    if (i in this) {
-      var v = this[i];
-      if (f.call(o, v, i, this)) result.push(v);
+    var n = this.length;
+    var result = new Array();
+    for (var i = 0; i < n; i++) {
+        if (i in this) {
+            var v = this[i];
+            if (f.call(o, v, i, this)) result.push(v);
+        }
     }
-  }
-  return result;
+    return result;
 };
 
 /**
@@ -78,10 +80,10 @@ if (!Array.prototype.filter) Array.prototype.filter = function(f, o) {
  * @param [o] object to use as <tt>this</tt> when executing <tt>f</tt>.
  */
 if (!Array.prototype.forEach) Array.prototype.forEach = function(f, o) {
-  var n = this.length >>> 0;
-  for (var i = 0; i < n; i++) {
-    if (i in this) f.call(o, this[i], i, this);
-  }
+    var n = this.length >>> 0;
+    for (var i = 0; i < n; i++) {
+        if (i in this) f.call(o, this[i], i, this);
+    }
 };
 
 /**
@@ -99,37 +101,41 @@ if (!Array.prototype.forEach) Array.prototype.forEach = function(f, o) {
  * <tt>t</tt>.
  */
 if (!Array.prototype.reduce) Array.prototype.reduce = function(f, v) {
-  var len = this.length;
-  if (!len && (arguments.length == 1)) {
-    throw new Error("reduce: empty array, no initial value");
-  }
-
-  var i = 0;
-  if (arguments.length < 2) {
-    while (true) {
-      if (i in this) {
-        v = this[i++];
-        break;
-      }
-      if (++i >= len) {
-        throw new Error("reduce: no values, no initial value");
-      }
+    var len = this.length;
+    if (!len && (arguments.length == 1)) {
+        throw new Error("reduce: empty array, no initial value");
     }
-  }
 
-  for (; i < len; i++) {
-    if (i in this) {
-      v = f(v, this[i], i, this);
+    var i = 0;
+    if (arguments.length < 2) {
+        while (true) {
+            if (i in this) {
+                v = this[i++];
+                break;
+            }
+            if (++i >= len) {
+                throw new Error("reduce: no values, no initial value");
+            }
+        }
     }
-  }
-  return v;
+
+    for (; i < len; i++) {
+        if (i in this) {
+            v = f(v, this[i], i, this);
+        }
+    }
+    return v;
 };
 
-if (!Array.prototype.indexOf) Array.prototype.indexOf = function (s, from) {
-  var n = this.length >>> 0,
-      i = (!isFinite(from) || from < 0) ? 0 : (from > this.length) ? this.length : from;
-  for (; i < n; i++) { if (this[i] === s) { return i; } }
-  return -1;
+if (!Array.prototype.indexOf) Array.prototype.indexOf = function(s, from) {
+    var n = this.length >>> 0,
+        i = (!isFinite(from) || from < 0) ? 0 : (from > this.length) ? this.length : from;
+    for (; i < n; i++) {
+        if (this[i] === s) {
+            return i;
+        }
+    }
+    return -1;
 };
 
 /**
@@ -149,21 +155,21 @@ var pv = {};
  * @namespace Protovis major and minor version numbers.
  */
 pv.version = {
-  /**
-   * The major version number.
-   *
-   * @type number
-   * @constant
-   */
-  major: 3,
+    /**
+     * The major version number.
+     *
+     * @type number
+     * @constant
+     */
+    major: 3,
 
-  /**
-   * The minor version number.
-   *
-   * @type number
-   * @constant
-   */
-  minor: 3
+    /**
+     * The minor version number.
+     *
+     * @type number
+     * @constant
+     */
+    minor: 3
 };
 
 /**
@@ -174,7 +180,9 @@ pv.version = {
  * @param x a value.
  * @returns the value <tt>x</tt>.
  */
-pv.identity = function(x) { return x; };
+pv.identity = function(x) {
+    return x;
+};
 
 /**
  * Returns <tt>this.index</tt>. This method is provided for convenience for use
@@ -190,7 +198,9 @@ pv.identity = function(x) { return x; };
  * @see pv.Scale
  * @see pv.Mark#index
  */
-pv.index = function() { return this.index; };
+pv.index = function() {
+    return this.index;
+};
 
 /**
  * Returns <tt>this.childIndex</tt>. This method is provided for convenience for
@@ -204,7 +214,9 @@ pv.index = function() { return this.index; };
  * @see pv.Scale
  * @see pv.Mark#childIndex
  */
-pv.child = function() { return this.childIndex; };
+pv.child = function() {
+    return this.childIndex;
+};
 
 /**
  * Returns <tt>this.parent.index</tt>. This method is provided for convenience
@@ -219,7 +231,9 @@ pv.child = function() { return this.childIndex; };
  * @see pv.Scale
  * @see pv.Mark#index
  */
-pv.parent = function() { return this.parent.index; };
+pv.parent = function() {
+    return this.parent.index;
+};
 
 /**
  * Stores the current event. This field is only set within event handlers.
@@ -228,52 +242,52 @@ pv.parent = function() { return this.parent.index; };
  * @name pv.event
  */
 (function() {
-/**
- * @private Returns a prototype object suitable for extending the given class
- * <tt>f</tt>. Rather than constructing a new instance of <tt>f</tt> to serve as
- * the prototype (which unnecessarily runs the constructor on the created
- * prototype object, potentially polluting it), an anonymous function is
- * generated internally that shares the same prototype:
- *
- * <pre>function g() {}
- * g.prototype = f.prototype;
- * return new g();</pre>
- *
- * For more details, see Douglas Crockford's essay on prototypal inheritance.
- *
- * @param {Function} f a constructor.
- * @returns a suitable prototype object.
- * @see Douglas Crockford's essay on <a
- * href="http://javascript.crockford.com/prototypal.html">prototypal
- * inheritance</a>.
- */
-pv.extend = Object.create ?
-  function(f) {
-    return Object.create(f.prototype || f);
-  } :
-  function(f) {
-    function g() {}
-    g.prototype = f.prototype || f;
-    return new g();
-  };
+    /**
+     * @private Returns a prototype object suitable for extending the given class
+     * <tt>f</tt>. Rather than constructing a new instance of <tt>f</tt> to serve as
+     * the prototype (which unnecessarily runs the constructor on the created
+     * prototype object, potentially polluting it), an anonymous function is
+     * generated internally that shares the same prototype:
+     *
+     * <pre>function g() {}
+     * g.prototype = f.prototype;
+     * return new g();</pre>
+     *
+     * For more details, see Douglas Crockford's essay on prototypal inheritance.
+     *
+     * @param {Function} f a constructor.
+     * @returns a suitable prototype object.
+     * @see Douglas Crockford's essay on <a
+     * href="http://javascript.crockford.com/prototypal.html">prototypal
+     * inheritance</a>.
+     */
+    pv.extend = Object.create ?
+        function(f) {
+            return Object.create(f.prototype || f);
+    } :
+        function(f) {
+            function g() {}
+            g.prototype = f.prototype || f;
+            return new g();
+    };
 
-pv.extendType = function(g, f) {
-  var sub = g.prototype = pv.extend(f);
+    pv.extendType = function(g, f) {
+        var sub = g.prototype = pv.extend(f);
 
-  // Fix the constructor
-  // Note this may make the constructor property to be enumerable.
-  sub.constructor = g;
+        // Fix the constructor
+        // Note this may make the constructor property to be enumerable.
+        sub.constructor = g;
 
-  return g;
-};
+        return g;
+    };
 
-// TODO: Is there any browser (still) supporting this syntax?
-// Commented cause this messes up with the debugger's break on exceptions.
-//try {
-//  eval("pv.parse = function(x) x;"); // native support
-//} catch (e) {
+    // TODO: Is there any browser (still) supporting this syntax?
+    // Commented cause this messes up with the debugger's break on exceptions.
+    //try {
+    //  eval("pv.parse = function(x) x;"); // native support
+    //} catch (e) {
 
-/**
+    /**
  * @private
 
  * Parses a Protovis specification, which may use JavaScript 1.8
@@ -286,341 +300,383 @@ pv.extendType = function(g, f) {
  * source code).
  * @returns {string} a conformant JavaScript 1.6 source code.
  */
- pv.parse = function(js) { // hacky regex support
-  var re = new RegExp("function\\s*(\\b\\w+)?\\s*\\([^)]*\\)\\s*", "mg");
-  var i  = 0;
-  var s  = "";
-  var m, d;
+    pv.parse = function(js) { // hacky regex support
+        var re = new RegExp("function\\s*(\\b\\w+)?\\s*\\([^)]*\\)\\s*", "mg");
+        var i = 0;
+        var s = "";
+        var m, d;
 
-  while((m = re.exec(js))) {
-    var j = m.index + m[0].length;
-    if(js.charAt(j) != '{') {
-      s += js.substring(i, j) + "{return ";
-      i = j;
-      for(var p = 0; p >= 0 && j < js.length; j++) {
-        var c = js.charAt(j);
-        switch(c) {
-          case '"':
-          case '\'': {
-            while(++j < js.length && (d = js.charAt(j)) != c) {
-              if(d == '\\') { j++; }
+        while ((m = re.exec(js))) {
+            var j = m.index + m[0].length;
+            if (js.charAt(j) != '{') {
+                s += js.substring(i, j) + "{return ";
+                i = j;
+                for (var p = 0; p >= 0 && j < js.length; j++) {
+                    var c = js.charAt(j);
+                    switch (c) {
+                        case '"':
+                        case '\'':
+                            {
+                                while (++j < js.length && (d = js.charAt(j)) != c) {
+                                    if (d == '\\') {
+                                        j++;
+                                    }
+                                }
+                                break;
+                            }
+                        case '[':
+                        case '(':
+                            p++;
+                            break;
+                        case ']':
+                        case ')':
+                            p--;
+                            break;
+                        case ';':
+                        case ',':
+                            if (p == 0) p--;
+                            break;
+                    }
+                }
+                s += pv.parse(js.substring(i, --j)) + ";}";
+                i = j;
             }
-            break;
-          }
-          case '[': case '(': p++; break;
-          case ']': case ')': p--; break;
-          case ';':
-          case ',': if(p == 0) p--; break;
+            re.lastIndex = j;
         }
-      }
-      s += pv.parse(js.substring(i, --j)) + ";}";
-      i = j;
-    }
-    re.lastIndex = j;
-  }
-  s += js.substring(i);
-  return s;
-};
+        s += js.substring(i);
+        return s;
+    };
 
-/**
- * @private Reports the specified error to the JavaScript console. Mozilla only
- * allows logging to the console for privileged code; if the console is
- * unavailable, the alert dialog box is used instead.
- *
- * @param e the exception that triggered the error.
- */
-pv.error = function(e) {
-  (typeof console === "undefined" || !console.error) ? alert(e) : console.error(e);
-};
+    /**
+     * @private Reports the specified error to the JavaScript console. Mozilla only
+     * allows logging to the console for privileged code; if the console is
+     * unavailable, the alert dialog box is used instead.
+     *
+     * @param e the exception that triggered the error.
+     */
+    pv.error = function(e) {
+        (typeof console === "undefined" || !console.error) ? alert(e) : console.error(e);
+    };
 
-/**
- * @private Registers the specified listener for events of the specified type on
- * the specified target. For standards-compliant browsers, this method uses
- * <tt>addEventListener</tt>; for Internet Explorer, <tt>attachEvent</tt>.
- *
- * @param target a DOM element.
- * @param {string} type the type of event, such as "click".
- * @param {Function} the event handler callback.
- */
-pv.listen = function(target, type, listener) {
-  listener = pv.listener(listener);
+    /**
+     * @private Registers the specified listener for events of the specified type on
+     * the specified target. For standards-compliant browsers, this method uses
+     * <tt>addEventListener</tt>; for Internet Explorer, <tt>attachEvent</tt>.
+     *
+     * @param target a DOM element.
+     * @param {string} type the type of event, such as "click".
+     * @param {Function} the event handler callback.
+     */
+    pv.listen = function(target, type, listener) {
+        listener = pv.listener(listener);
 
-  if(type === 'load' || type === 'onload') {
-      return pv.listenForPageLoad(listener);
-  }
+        if (type === 'load' || type === 'onload') {
+            return pv.listenForPageLoad(listener);
+        }
 
-  if(target.addEventListener) {
-    target.addEventListener(type, listener, false);
-  } else {
-      if(target === window) { target = document.documentElement; }
+        if (target.addEventListener) {
+            target.addEventListener(type, listener, false);
+        } else {
+            if (target === window) {
+                target = document.documentElement;
+            }
 
-      target.attachEvent('on' + type, listener);
-  }
+            target.attachEvent('on' + type, listener);
+        }
 
-  return listener;
-};
+        return listener;
+    };
 
-/**
- * @private Unregisters the specified listener for events of the specified type on
- * the specified target.
- *
- * @param target a DOM element.
- * @param {string} type the type of event, such as "click".
- * @param {Function} the event handler callback or the result of {@link pv.listen}.
- */
-pv.unlisten = function(target, type, listener) {
-    if(listener.$listener) { listener = listener.$listener; }
+    /**
+     * @private Unregisters the specified listener for events of the specified type on
+     * the specified target.
+     *
+     * @param target a DOM element.
+     * @param {string} type the type of event, such as "click".
+     * @param {Function} the event handler callback or the result of {@link pv.listen}.
+     */
+    pv.unlisten = function(target, type, listener) {
+        if (listener.$listener) {
+            listener = listener.$listener;
+        }
 
-    target.removeEventListener ?
-      target.removeEventListener(type, listener, false) :
-      target.detachEvent('on' + type, listener);
-};
+        target.removeEventListener ?
+            target.removeEventListener(type, listener, false) :
+            target.detachEvent('on' + type, listener);
+    };
 
-/**
- * Binds to the page ready event in a browser-agnostic
- * fashion (i.e. that works under IE!)
- */
-pv.listenForPageLoad = function(listener) {
-  // Catch cases where $(document).ready() is called after the
-  // browser event has already occurred.
-  if(document.readyState === "complete") {
-    listener(null); // <-- no event object to give
-    return;
-  }
+    /**
+     * Binds to the page ready event in a browser-agnostic
+     * fashion (i.e. that works under IE!)
+     */
+    pv.listenForPageLoad = function(listener) {
+        // Catch cases where $(document).ready() is called after the
+        // browser event has already occurred.
+        if (document.readyState === "complete") {
+            listener(null); // <-- no event object to give
+            return;
+        }
 
-  if(document.addEventListener) {
-    // Mozilla, Opera and webkit nightlies currently support this event
-    window.addEventListener("load", listener, false);
-  } else if(document.attachEvent) {
-    // IE event model
-    window.attachEvent("onload", listener);
-  }
-};
+        if (document.addEventListener) {
+            // Mozilla, Opera and webkit nightlies currently support this event
+            window.addEventListener("load", listener, false);
+        } else if (document.attachEvent) {
+            // IE event model
+            window.attachEvent("onload", listener);
+        }
+    };
 
-/**
- * @private Returns a wrapper for the specified listener function such that the
- * {@link pv.event} is set for the duration of the listener's invocation. The
- * wrapper is cached on the returned function, such that duplicate registrations
- * of the wrapped event handler are ignored.
- *
- * @param {Function} f an event handler.
- * @returns {Function} the wrapped event handler.
- */
-pv.listener = function(f) {
-  return f.$listener || (f.$listener = function(ev) {
-      try {
-        // In some rare cases, there's no event... (see {@see #listenForPageLoad})
-        pv.event = ev = ev && pv.fixEvent(ev);
+    /**
+     * @private Returns a wrapper for the specified listener function such that the
+     * {@link pv.event} is set for the duration of the listener's invocation. The
+     * wrapper is cached on the returned function, such that duplicate registrations
+     * of the wrapped event handler are ignored.
+     *
+     * @param {Function} f an event handler.
+     * @returns {Function} the wrapped event handler.
+     */
+    pv.listener = function(f) {
+        return f.$listener || (f.$listener = function(ev) {
+            try {
+                // In some rare cases, there's no event... (see {@see #listenForPageLoad})
+                pv.event = ev = ev && pv.fixEvent(ev);
 
-        return f.call(this, ev);
-      } catch(ex) {
-          // swallow top level error
-          pv.error(ex);
-      } finally {
-        delete pv.event;
-      }
-  });
-};
-
-// Fix event - adapted from jQuery
-pv.fixEvent = function(ev) {
-    if(ev.pageX == null && ev.clientX != null) {
-        var eventDoc = (ev.target && ev.target.ownerDocument) || document;
-        var doc  = eventDoc.documentElement;
-        var body = eventDoc.body;
-
-        ev.pageX = (ev.clientX * 1) + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc && doc.clientLeft || body && body.clientLeft || 0);
-        ev.pageY = (ev.clientY * 1) + (doc && doc.scrollTop  || body && body.scrollTop  || 0) - (doc && doc.clientTop  || body && body.clientTop  || 0);
-    }
-    return ev;
-};
-
-/**
- * @private Returns true iff <i>a</i> is an ancestor of <i>e</i>. This is useful
- * for ignoring mouseout and mouseover events that are contained within the
- * target element.
- */
-pv.ancestor = function(a, e) {
-  while(e) {
-    if(e === a) { return true; }
-    e = e.parentNode;
-  }
-  return false;
-};
-
-pv.removeChildren = function(p) {
-  while(p.lastChild) { p.removeChild(p.lastChild); }
-};
-
-pv.getWindow = function(elem) {
-    return (elem != null && elem == elem.window) ? elem :
-           elem.nodeType === 9                   ? (elem.defaultView || elem.parentWindow) :
-           false;
-};
-
-var _reHiphenSep = /\-([a-z])/g;
-
-pv.hiphen2camel = function(prop) {
-    if(_reHiphenSep.test(prop)) {
-        return prop.replace(_reHiphenSep, function($0, $1) {
-            return $1.toUpperCase();
+                return f.call(this, ev);
+            } catch (ex) {
+                // swallow top level error
+                pv.error(ex);
+            } finally {
+                delete pv.event;
+            }
         });
-    }
-    return prop;
-};
+    };
 
-// Capture the "most" native possible version, not some poly-fill
-var _getCompStyle = window.getComputedStyle;
+    // Fix event - adapted from jQuery
+    pv.fixEvent = function(ev) {
+        if (ev.pageX == null && ev.clientX != null) {
+            var eventDoc = (ev.target && ev.target.ownerDocument) || document;
+            var doc = eventDoc.documentElement;
+            var body = eventDoc.body;
 
+            ev.pageX = (ev.clientX * 1) + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc && doc.clientLeft || body && body.clientLeft || 0);
+            ev.pageY = (ev.clientY * 1) + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        return ev;
+    };
+
+    /**
+     * @private Returns true iff <i>a</i> is an ancestor of <i>e</i>. This is useful
+     * for ignoring mouseout and mouseover events that are contained within the
+     * target element.
+     */
+    pv.ancestor = function(a, e) {
+        while (e) {
+            if (e === a) {
+                return true;
+            }
+            e = e.parentNode;
+        }
+        return false;
+    };
+
+    pv.removeChildren = function(p) {
+        while (p.lastChild) {
+            p.removeChild(p.lastChild);
+        }
+    };
+
+    pv.getWindow = function(elem) {
+        return (elem != null && elem == elem.window) ? elem :
+            elem.nodeType === 9 ? (elem.defaultView || elem.parentWindow) :
+            false;
+    };
+
+    var _reHiphenSep = /\-([a-z])/g;
+
+    pv.hiphen2camel = function(prop) {
+        if (_reHiphenSep.test(prop)) {
+            return prop.replace(_reHiphenSep, function($0, $1) {
+                return $1.toUpperCase();
+            });
+        }
+        return prop;
+    };
+
+    // Capture the "most" native possible version, not some poly-fill
+    var _getCompStyle = window.getComputedStyle;
+
+    /**
+     * @private Computes the value of the specified CSS property <tt>p</tt> on the
+     * specified element <tt>e</tt>.
+     *
+     * @param {string} p the name of the CSS property.
+     * @param e the element on which to compute the CSS property.
+     */
+    pv.css = function(e, p) {
+        // Assuming element is of the same window as this script.
+        return _getCompStyle ?
+            _getCompStyle.call(window, e, null).getPropertyValue(p) :
+            e.currentStyle[p === 'float' ? 'styleFloat' : pv.hiphen2camel(p)];
+    };
+
+    pv.cssStyle = function(e) {
+        var style;
+        if (_getCompStyle) {
+            style = _getCompStyle.call(window, e, null);
+            return function(p) {
+                return style.getPropertyValue(p);
+            };
+        }
+
+        style = e.currentStyle;
+        return function(p) {
+            return style[p === 'float' ? 'styleFloat' : pv.hiphen2camel(p)];
+        };
+    };
+
+    pv._getElementsByClass = function(searchClass, node) {
+        if (node == null) {
+            node = document;
+        }
+
+        var classElements = [];
+        var els = node.getElementsByTagName("*");
+        var L = els.length;
+        var pattern = new RegExp("(^|\\s)" + searchClass + "(\\s|$)");
+
+        for (var i = 0, j = 0; i < L; i++) {
+            if (pattern.test(els[i].className)) {
+                classElements[j] = els[i];
+                j++;
+            }
+        }
+
+        return classElements;
+    };
+
+    pv.getElementsByClassName = function(node, classname) {
+        // Use native implementation if available
+        return node.getElementsByClassName ?
+            node.getElementsByClassName(classname) :
+            pv._getElementsByClass(classname, node);
+    };
+
+    /* Adapted from jQuery.offset() */
+    pv.elementOffset = function(elem) {
+        var doc = elem && elem.ownerDocument;
+        if (!doc) {
+            return;
+        }
+
+        var body = doc.body;
+        if (body === elem) {
+            return;
+        } // not supported
+
+        var box;
+        if (typeof elem.getBoundingClientRect !== "undefined") {
+            box = elem.getBoundingClientRect();
+        } else {
+            box = {
+                top: 0,
+                left: 0
+            };
+        }
+
+        var win = pv.getWindow(doc);
+        var docElem = doc.documentElement;
+
+        var clientTop = docElem.clientTop || body.clientTop || 0;
+        var clientLeft = docElem.clientLeft || body.clientLeft || 0;
+        var scrollTop = win.pageYOffset || docElem.scrollTop;
+        var scrollLeft = win.pageXOffset || docElem.scrollLeft;
+        return {
+            top: box.top + scrollTop - clientTop,
+            left: box.left + scrollLeft - clientLeft
+        };
+    };
+
+    /**
+     * @public Returns the name of the renderer we're using -
+     * 'nativesvg' is the default - the native svg of the browser.
+     */
+    pv.renderer = function() {
+        var renderer = document.svgImplementation || "nativesvg";
+
+        pv.renderer = function() {
+            return renderer;
+        };
+
+        return renderer;
+    };
+
+    /** @private */
+    var _id = 1;
+
+    /** @private Returns a locally-unique positive id. */
+    pv.id = function() {
+        return _id++;
+    };
+
+    /** @private Returns a function wrapping the specified constant. */
+    pv.functor = function(v) {
+        return typeof v === "function" ? v : function() {
+            return v;
+        };
+    };
+
+    /**
+     * Gets the value of an existing, own or inherited, and not "nully", property of an object,
+     * or if unsatisfied, a specified default value.
+     *
+     * @param {object} [o] The object whose property value is desired.
+     * @param {string} p The desired property name.
+     * If the value is not a string,
+     * it is converted to one, as if String(p) were used.
+     * @param [dv=undefined] The default value.
+     *
+     * @returns {any} The satisfying property value or the specified default value.
+     */
+    pv.get = function(o, p, dv) {
+        var v;
+        return o && (v = o[p]) != null ? v : dv;
+    };
+
+    var hasOwn = Object.prototype.hasOwnProperty;
+    pv.lazyArrayOwn = function(o, p) {
+        var v;
+        return o && hasOwn.call(o, p) && (v = o[p]) ? v : (o[p] = []);
+    };
+
+}());
 /**
- * @private Computes the value of the specified CSS property <tt>p</tt> on the
- * specified element <tt>e</tt>.
- *
- * @param {string} p the name of the CSS property.
- * @param e the element on which to compute the CSS property.
- */
-pv.css = function(e, p) {
-  // Assuming element is of the same window as this script.
-  return _getCompStyle ?
-         _getCompStyle.call(window, e, null).getPropertyValue(p) :
-         e.currentStyle[p === 'float' ? 'styleFloat' : pv.hiphen2camel(p)];
-};
-
-pv.cssStyle = function(e) {
-  var style;
-  if(_getCompStyle) {
-      style = _getCompStyle.call(window, e, null);
-      return function(p) { return style.getPropertyValue(p); };
-  }
-
-  style = e.currentStyle;
-  return function(p) { return style[p === 'float' ? 'styleFloat' : pv.hiphen2camel(p)]; };
-};
-
-pv._getElementsByClass = function(searchClass, node) {
-  if(node == null) { node = document; }
-
-  var classElements = [];
-  var els = node.getElementsByTagName("*");
-  var L = els.length;
-  var pattern = new RegExp("(^|\\s)" + searchClass + "(\\s|$)");
-
-  for(var i = 0, j = 0 ; i < L ; i++) {
-    if(pattern.test(els[i].className)) {
-      classElements[j] = els[i];
-      j++;
-    }
-  }
-
-  return classElements;
-};
-
-pv.getElementsByClassName = function(node, classname) {
-  // Use native implementation if available
-  return node.getElementsByClassName ?
-         node.getElementsByClassName(classname) :
-         pv._getElementsByClass(classname, node);
-};
-
-/* Adapted from jQuery.offset() */
-pv.elementOffset = function(elem) {
-  var doc = elem && elem.ownerDocument;
-  if(!doc) { return; }
-
-  var body = doc.body;
-  if(body === elem) { return; } // not supported
-
-  var box;
-  if(typeof elem.getBoundingClientRect !== "undefined") {
-    box = elem.getBoundingClientRect();
-  } else {
-    box = {top: 0, left: 0};
-  }
-
-  var win = pv.getWindow(doc);
-  var docElem = doc.documentElement;
-
-  var clientTop  = docElem.clientTop  || body.clientTop  || 0;
-  var clientLeft = docElem.clientLeft || body.clientLeft || 0;
-  var scrollTop  = win.pageYOffset || docElem.scrollTop;
-  var scrollLeft = win.pageXOffset || docElem.scrollLeft;
-  return {
-    top:  box.top  + scrollTop  - clientTop,
-    left: box.left + scrollLeft - clientLeft
-  };
-};
-
-/**
- * @public Returns the name of the renderer we're using -
- * 'nativesvg' is the default - the native svg of the browser.
- */
-pv.renderer = function() {
-    var renderer = document.svgImplementation || "nativesvg";
-
-    pv.renderer = function() { return renderer; };
-
-    return renderer;
-};
-
-/** @private */
-var _id = 1;
-
-/** @private Returns a locally-unique positive id. */
-pv.id = function() { return _id++; };
-
-/** @private Returns a function wrapping the specified constant. */
-pv.functor = function(v) {
-  return typeof v === "function" ? v : function() { return v; };
-};
-
-/**
- * Gets the value of an existing, own or inherited, and not "nully", property of an object,
- * or if unsatisfied, a specified default value.
- *
- * @param {object} [o] The object whose property value is desired.
- * @param {string} p The desired property name.
- * If the value is not a string,
- * it is converted to one, as if String(p) were used.
- * @param [dv=undefined] The default value.
- *
- * @returns {any} The satisfying property value or the specified default value.
- */
-pv.get = function(o, p, dv){
-    var v;
-    return o && (v = o[p]) != null ? v : dv;
-};
-
-var hasOwn = Object.prototype.hasOwnProperty;
-pv.lazyArrayOwn = function(o, p) {
-    var v;
-    return o && hasOwn.call(o, p) && (v = o[p]) ? v : (o[p] = []);
-};
-
-}());/**
  * Parses the Protovis specifications on load, allowing the use of JavaScript
  * 1.8 function expressions on browsers that only support JavaScript 1.6.
  * @see pv.parse
  */
 pv.listen(window, "load", function() {
-  /*
-   * Note: in Firefox any variables declared here are visible to the eval'd
-   * script below. Even worse, any global variables declared by the script
-   * could overwrite local variables here (such as the index, `i`)!  To protect
-   * against this, all variables are explicitly scoped on a pv.$ object.
-   */
-  pv.$ = {i: 0, x: document.getElementsByTagName("script")};
-  pv.$.xlen = pv.$.x.length;
-  for(; pv.$.i < pv.$.xlen; pv.$.i++) {
-    pv.$.s = pv.$.x[pv.$.i];
-    if(pv.$.s.type == "text/javascript+protovis") {
-      try {
-        window.eval(pv.parse(pv.$.s.text));
-      } catch(e) {
-        pv.error(e);
-      }
+    /*
+     * Note: in Firefox any variables declared here are visible to the eval'd
+     * script below. Even worse, any global variables declared by the script
+     * could overwrite local variables here (such as the index, `i`)!  To protect
+     * against this, all variables are explicitly scoped on a pv.$ object.
+     */
+    pv.$ = {
+        i: 0,
+        x: document.getElementsByTagName("script")
+    };
+    pv.$.xlen = pv.$.x.length;
+    for (; pv.$.i < pv.$.xlen; pv.$.i++) {
+        pv.$.s = pv.$.x[pv.$.i];
+        if (pv.$.s.type == "text/javascript+protovis") {
+            try {
+                window.eval(pv.parse(pv.$.s.text));
+            } catch (e) {
+                pv.error(e);
+            }
+        }
     }
-  }
-  delete pv.$;
+    delete pv.$;
 });
 /**
  * Abstract; see an implementing class.
@@ -684,7 +740,7 @@ pv.Format = {};
  * @returns {string} the quoted string.
  */
 pv.Format.re = function(s) {
-  return s.replace(/[\\\^\$\*\+\?\[\]\(\)\.\{\}]/g, "\\$&");
+    return s.replace(/[\\\^\$\*\+\?\[\]\(\)\.\{\}]/g, "\\$&");
 };
 
 /**
@@ -697,8 +753,8 @@ pv.Format.re = function(s) {
  * @returns {string} the padded string.
  */
 pv.Format.pad = function(c, n, s) {
-  var m = n - String(s).length;
-  return (m < 1) ? s : new Array(m + 1).join(c) + s;
+    var m = n - String(s).length;
+    return (m < 1) ? s : new Array(m + 1).join(c) + s;
 };
 /**
  * Constructs a new date format with the specified string pattern.
@@ -775,192 +831,267 @@ pv.Format.pad = function(c, n, s) {
  * @param {string} pattern the format pattern.
  */
 pv.Format.date = function(pattern) {
-  var pad = pv.Format.pad;
+    var pad = pv.Format.pad;
 
-  /** @private */
-  function format(d) {
-    return pattern.replace(/%[a-zA-Z0-9]/g, function(s) {
-        switch (s) {
-          case '%a': return [
-              "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-            ][d.getDay()];
-          case '%A': return [
-              "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-              "Saturday"
-            ][d.getDay()];
-          case '%h':
-          case '%b': return [
-              "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-              "Oct", "Nov", "Dec"
-            ][d.getMonth()];
-          case '%B': return [
-              "January", "February", "March", "April", "May", "June", "July",
-              "August", "September", "October", "November", "December"
-            ][d.getMonth()];
-          case '%c': return d.toLocaleString();
-          case '%C': return pad("0", 2, Math.floor(d.getFullYear() / 100) % 100);
-          case '%d': return pad("0", 2, d.getDate());
-          case '%x':
-          case '%D': return pad("0", 2, d.getMonth() + 1)
-                    + "/" + pad("0", 2, d.getDate())
-                    + "/" + pad("0", 2, d.getFullYear() % 100);
-          case '%e': return pad(" ", 2, d.getDate());
-          case '%H': return pad("0", 2, d.getHours());
-          case '%I': {
-            var h = d.getHours() % 12;
-            return h ? pad("0", 2, h) : 12;
-          }
-          // TODO %j: day of year as a decimal number [001,366]
-          case '%m': return pad("0", 2, d.getMonth() + 1);
-          case '%M': return pad("0", 2, d.getMinutes());
-          case '%n': return "\n";
-          case '%p': return d.getHours() < 12 ? "AM" : "PM";
-          case '%T':
-          case '%X':
-          case '%r': {
-            var h = d.getHours() % 12;
-            return (h ? pad("0", 2, h) : 12)
-                    + ":" + pad("0", 2, d.getMinutes())
-                    + ":" + pad("0", 2, d.getSeconds())
-                    + " " + (d.getHours() < 12 ? "AM" : "PM");
-          }
-          case '%R': return pad("0", 2, d.getHours()) + ":" + pad("0", 2, d.getMinutes());
-          case '%S': return pad("0", 2, d.getSeconds());
-          case '%Q': return pad("0", 3, d.getMilliseconds());
-          case '%t': return "\t";
-          case '%u': {
-            var w = d.getDay();
-            return w ? w : 1;
-          }
-          // TODO %U: week number (sunday first day) [00,53]
-          // TODO %V: week number (monday first day) [01,53] ... with weirdness
-          case '%w': return d.getDay();
-          // TODO %W: week number (monday first day) [00,53] ... with weirdness
-          case '%y': return pad("0", 2, d.getFullYear() % 100);
-          case '%Y': return d.getFullYear();
-          // TODO %Z: timezone name or abbreviation
-          case '%%': return "%";
-        }
-        return s;
-      });
-  }
+    /** @private */
 
-  /**
-   * Converts a date to a string using the associated formatting pattern.
-   *
-   * @function
-   * @name pv.Format.date.prototype.format
-   * @param {Date} date a date to format.
-   * @returns {string} the formatted date as a string.
-   */
-  format.format = format;
+    function format(d) {
+        return pattern.replace(/%[a-zA-Z0-9]/g, function(s) {
+            switch (s) {
+                case '%a':
+                    return [
+                        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+                    ][d.getDay()];
+                case '%A':
+                    return [
+                        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+                        "Saturday"
+                    ][d.getDay()];
+                case '%h':
+                case '%b':
+                    return [
+                        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+                        "Oct", "Nov", "Dec"
+                    ][d.getMonth()];
+                case '%B':
+                    return [
+                        "January", "February", "March", "April", "May", "June", "July",
+                        "August", "September", "October", "November", "December"
+                    ][d.getMonth()];
+                case '%c':
+                    return d.toLocaleString();
+                case '%C':
+                    return pad("0", 2, Math.floor(d.getFullYear() / 100) % 100);
+                case '%d':
+                    return pad("0", 2, d.getDate());
+                case '%x':
+                case '%D':
+                    return pad("0", 2, d.getMonth() + 1) + "/" + pad("0", 2, d.getDate()) + "/" + pad("0", 2, d.getFullYear() % 100);
+                case '%e':
+                    return pad(" ", 2, d.getDate());
+                case '%H':
+                    return pad("0", 2, d.getHours());
+                case '%I':
+                    {
+                        var h = d.getHours() % 12;
+                        return h ? pad("0", 2, h) : 12;
+                    }
+                    // TODO %j: day of year as a decimal number [001,366]
+                case '%m':
+                    return pad("0", 2, d.getMonth() + 1);
+                case '%M':
+                    return pad("0", 2, d.getMinutes());
+                case '%n':
+                    return "\n";
+                case '%p':
+                    return d.getHours() < 12 ? "AM" : "PM";
+                case '%T':
+                case '%X':
+                case '%r':
+                    {
+                        var h = d.getHours() % 12;
+                        return (h ? pad("0", 2, h) : 12) + ":" + pad("0", 2, d.getMinutes()) + ":" + pad("0", 2, d.getSeconds()) + " " + (d.getHours() < 12 ? "AM" : "PM");
+                    }
+                case '%R':
+                    return pad("0", 2, d.getHours()) + ":" + pad("0", 2, d.getMinutes());
+                case '%S':
+                    return pad("0", 2, d.getSeconds());
+                case '%Q':
+                    return pad("0", 3, d.getMilliseconds());
+                case '%t':
+                    return "\t";
+                case '%u':
+                    {
+                        var w = d.getDay();
+                        return w ? w : 1;
+                    }
+                    // TODO %U: week number (sunday first day) [00,53]
+                    // TODO %V: week number (monday first day) [01,53] ... with weirdness
+                case '%w':
+                    return d.getDay();
+                    // TODO %W: week number (monday first day) [00,53] ... with weirdness
+                case '%y':
+                    return pad("0", 2, d.getFullYear() % 100);
+                case '%Y':
+                    return d.getFullYear();
+                    // TODO %Z: timezone name or abbreviation
+                case '%%':
+                    return "%";
+            }
+            return s;
+        });
+    }
 
-  /**
-   * Parses a date from a string using the associated formatting pattern.
-   *
-   * @function
-   * @name pv.Format.date.prototype.parse
-   * @param {string} s the string to parse as a date.
-   * @returns {Date} the parsed date.
-   */
-  format.parse = function(s) {
-    var year = 1970, month = 0, date = 1, hour = 0, minute = 0, second = 0;
-    var fields = [function() {}];
+    /**
+     * Converts a date to a string using the associated formatting pattern.
+     *
+     * @function
+     * @name pv.Format.date.prototype.format
+     * @param {Date} date a date to format.
+     * @returns {string} the formatted date as a string.
+     */
+    format.format = format;
 
-    /* Register callbacks for each field in the format pattern. */
-    var re = pv.Format.re(pattern).replace(/%[a-zA-Z0-9]/g, function(s) {
-        switch (s) {
-          // TODO %a: day of week, either abbreviated or full name
-          // TODO %A: same as %a
-          case '%b': {
-            fields.push(function(x) { month = {
-                  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7,
-                  Sep: 8, Oct: 9, Nov: 10, Dec: 11
-                }[x]; });
-            return "([A-Za-z]+)";
-          }
-          case '%h':
-          case '%B': {
-            fields.push(function(x) { month = {
-                  January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
-                  July: 6, August: 7, September: 8, October: 9, November: 10,
-                  December: 11
-                }[x]; });
-            return "([A-Za-z]+)";
-          }
-          // TODO %c: locale's appropriate date and time
-          // TODO %C: century number[0,99]
-          case '%e':
-          case '%d': {
-            fields.push(function(x) { date = x; });
-            return "([0-9]+)";
-          }
-          // TODO %D: same as %m/%d/%y
-          case '%I':
-          case '%H': {
-            fields.push(function(x) { hour = x; });
-            return "([0-9]+)";
-          }
-          // TODO %j: day number [1,366]
-          case '%m': {
-            fields.push(function(x) { month = x - 1; });
-            return "([0-9]+)";
-          }
-          case '%M': {
-            fields.push(function(x) { minute = x; });
-            return "([0-9]+)";
-          }
-          // TODO %n: any white space
-          // TODO %p: locale's equivalent of a.m. or p.m.
-          case '%p': { // TODO this is a hack
-            fields.push(function(x) {
-              if (hour == 12) {
-                if (x == "am") hour = 0;
-              } else if (x == "pm") {
-                hour = Number(hour) + 12;
-              }
-            });
-            return "(am|pm)";
-          }
-          // TODO %r: %I:%M:%S %p
-          // TODO %R: %H:%M
-          case '%S': {
-            fields.push(function(x) { second = x; });
-            return "([0-9]+)";
-          }
-          // TODO %t: any white space
-          // TODO %T: %H:%M:%S
-          // TODO %U: week number [00,53]
-          // TODO %w: weekday [0,6]
-          // TODO %W: week number [00, 53]
-          // TODO %x: locale date (%m/%d/%y)
-          // TODO %X: locale time (%I:%M:%S %p)
-          case '%y': {
-            fields.push(function(x) {
-                x = Number(x);
-                year = x + (((0 <= x) && (x < 69)) ? 2000
-                    : (((x >= 69) && (x < 100) ? 1900 : 0)));
-              });
-            return "([0-9]+)";
-          }
-          case '%Y': {
-            fields.push(function(x) { year = x; });
-            return "([0-9]+)";
-          }
-          case '%%': {
-            fields.push(function() {});
-            return "%";
-          }
-        }
-        return s;
-      });
+    /**
+     * Parses a date from a string using the associated formatting pattern.
+     *
+     * @function
+     * @name pv.Format.date.prototype.parse
+     * @param {string} s the string to parse as a date.
+     * @returns {Date} the parsed date.
+     */
+    format.parse = function(s) {
+        var year = 1970,
+            month = 0,
+            date = 1,
+            hour = 0,
+            minute = 0,
+            second = 0;
+        var fields = [
+            function() {}
+        ];
 
-    var match = s.match(re);
-    if (match) match.forEach(function(m, i) { fields[i](m); });
-    return new Date(year, month, date, hour, minute, second);
-  };
+        /* Register callbacks for each field in the format pattern. */
+        var re = pv.Format.re(pattern).replace(/%[a-zA-Z0-9]/g, function(s) {
+            switch (s) {
+                // TODO %a: day of week, either abbreviated or full name
+                // TODO %A: same as %a
+                case '%b':
+                    {
+                        fields.push(function(x) {
+                            month = {
+                                Jan: 0,
+                                Feb: 1,
+                                Mar: 2,
+                                Apr: 3,
+                                May: 4,
+                                Jun: 5,
+                                Jul: 6,
+                                Aug: 7,
+                                Sep: 8,
+                                Oct: 9,
+                                Nov: 10,
+                                Dec: 11
+                            }[x];
+                        });
+                        return "([A-Za-z]+)";
+                    }
+                case '%h':
+                case '%B':
+                    {
+                        fields.push(function(x) {
+                            month = {
+                                January: 0,
+                                February: 1,
+                                March: 2,
+                                April: 3,
+                                May: 4,
+                                June: 5,
+                                July: 6,
+                                August: 7,
+                                September: 8,
+                                October: 9,
+                                November: 10,
+                                December: 11
+                            }[x];
+                        });
+                        return "([A-Za-z]+)";
+                    }
+                    // TODO %c: locale's appropriate date and time
+                    // TODO %C: century number[0,99]
+                case '%e':
+                case '%d':
+                    {
+                        fields.push(function(x) {
+                            date = x;
+                        });
+                        return "([0-9]+)";
+                    }
+                    // TODO %D: same as %m/%d/%y
+                case '%I':
+                case '%H':
+                    {
+                        fields.push(function(x) {
+                            hour = x;
+                        });
+                        return "([0-9]+)";
+                    }
+                    // TODO %j: day number [1,366]
+                case '%m':
+                    {
+                        fields.push(function(x) {
+                            month = x - 1;
+                        });
+                        return "([0-9]+)";
+                    }
+                case '%M':
+                    {
+                        fields.push(function(x) {
+                            minute = x;
+                        });
+                        return "([0-9]+)";
+                    }
+                    // TODO %n: any white space
+                    // TODO %p: locale's equivalent of a.m. or p.m.
+                case '%p':
+                    { // TODO this is a hack
+                        fields.push(function(x) {
+                            if (hour == 12) {
+                                if (x == "am") hour = 0;
+                            } else if (x == "pm") {
+                                hour = Number(hour) + 12;
+                            }
+                        });
+                        return "(am|pm)";
+                    }
+                    // TODO %r: %I:%M:%S %p
+                    // TODO %R: %H:%M
+                case '%S':
+                    {
+                        fields.push(function(x) {
+                            second = x;
+                        });
+                        return "([0-9]+)";
+                    }
+                    // TODO %t: any white space
+                    // TODO %T: %H:%M:%S
+                    // TODO %U: week number [00,53]
+                    // TODO %w: weekday [0,6]
+                    // TODO %W: week number [00, 53]
+                    // TODO %x: locale date (%m/%d/%y)
+                    // TODO %X: locale time (%I:%M:%S %p)
+                case '%y':
+                    {
+                        fields.push(function(x) {
+                            x = Number(x);
+                            year = x + (((0 <= x) && (x < 69)) ? 2000 : (((x >= 69) && (x < 100) ? 1900 : 0)));
+                        });
+                        return "([0-9]+)";
+                    }
+                case '%Y':
+                    {
+                        fields.push(function(x) {
+                            year = x;
+                        });
+                        return "([0-9]+)";
+                    }
+                case '%%':
+                    {
+                        fields.push(function() {});
+                        return "%";
+                    }
+            }
+            return s;
+        });
 
-  return format;
+        var match = s.match(re);
+        if (match) match.forEach(function(m, i) {
+            fields[i](m);
+        });
+        return new Date(year, month, date, hour, minute, second);
+    };
+
+    return format;
 };
 /**
  * Returns a time format of the given type, either "short" or "long".
@@ -975,107 +1106,133 @@ pv.Format.date = function(pattern) {
  * @param {string} type the type; "short" or "long".
  */
 pv.Format.time = function(type) {
-  var pad = pv.Format.pad;
+    var pad = pv.Format.pad;
 
-  /*
-   * MILLISECONDS = 1
-   * SECONDS = 1e3
-   * MINUTES = 6e4
-   * HOURS = 36e5
-   * DAYS = 864e5
-   * WEEKS = 6048e5
-   * MONTHS = 2592e6
-   * YEARS = 31536e6
-   */
+    /*
+     * MILLISECONDS = 1
+     * SECONDS = 1e3
+     * MINUTES = 6e4
+     * HOURS = 36e5
+     * DAYS = 864e5
+     * WEEKS = 6048e5
+     * MONTHS = 2592e6
+     * YEARS = 31536e6
+     */
 
-  /** @private */
-  function format(t) {
-    t = Number(t); // force conversion from Date
-    switch (type) {
-      case "short": {
-        if (t >= 31536e6) {
-          return (t / 31536e6).toFixed(1) + " years";
-        } else if (t >= 6048e5) {
-          return (t / 6048e5).toFixed(1) + " weeks";
-        } else if (t >= 864e5) {
-          return (t / 864e5).toFixed(1) + " days";
-        } else if (t >= 36e5) {
-          return (t / 36e5).toFixed(1) + " hours";
-        } else if (t >= 6e4) {
-          return (t / 6e4).toFixed(1) + " minutes";
+    /** @private */
+
+    function format(t) {
+        t = Number(t); // force conversion from Date
+        switch (type) {
+            case "short":
+                {
+                    if (t >= 31536e6) {
+                        return (t / 31536e6).toFixed(1) + " years";
+                    } else if (t >= 6048e5) {
+                        return (t / 6048e5).toFixed(1) + " weeks";
+                    } else if (t >= 864e5) {
+                        return (t / 864e5).toFixed(1) + " days";
+                    } else if (t >= 36e5) {
+                        return (t / 36e5).toFixed(1) + " hours";
+                    } else if (t >= 6e4) {
+                        return (t / 6e4).toFixed(1) + " minutes";
+                    }
+                    return (t / 1e3).toFixed(1) + " seconds";
+                }
+            case "long":
+                {
+                    var a = [],
+                        s = ((t % 6e4) / 1e3) >> 0,
+                        m = ((t % 36e5) / 6e4) >> 0;
+                    a.push(pad("0", 2, s));
+                    if (t >= 36e5) {
+                        var h = ((t % 864e5) / 36e5) >> 0;
+                        a.push(pad("0", 2, m));
+                        if (t >= 864e5) {
+                            a.push(pad("0", 2, h));
+                            a.push(Math.floor(t / 864e5).toFixed());
+                        } else {
+                            a.push(h.toFixed());
+                        }
+                    } else {
+                        a.push(m.toFixed());
+                    }
+                    return a.reverse().join(":");
+                }
         }
-        return (t / 1e3).toFixed(1) + " seconds";
-      }
-      case "long": {
-        var a = [],
-            s = ((t % 6e4) / 1e3) >> 0,
-            m = ((t % 36e5) / 6e4) >> 0;
-        a.push(pad("0", 2, s));
-        if (t >= 36e5) {
-          var h = ((t % 864e5) / 36e5) >> 0;
-          a.push(pad("0", 2, m));
-          if (t >= 864e5) {
-            a.push(pad("0", 2, h));
-            a.push(Math.floor(t / 864e5).toFixed());
-          } else {
-            a.push(h.toFixed());
-          }
-        } else {
-          a.push(m.toFixed());
-        }
-        return a.reverse().join(":");
-      }
     }
-  }
 
-  /**
-   * Formats the specified time, returning the string representation.
-   *
-   * @function
-   * @name pv.Format.time.prototype.format
-   * @param {number} t the duration in milliseconds. May also be a <tt>Date</tt>.
-   * @returns {string} the formatted string.
-   */
-  format.format = format;
+    /**
+     * Formats the specified time, returning the string representation.
+     *
+     * @function
+     * @name pv.Format.time.prototype.format
+     * @param {number} t the duration in milliseconds. May also be a <tt>Date</tt>.
+     * @returns {string} the formatted string.
+     */
+    format.format = format;
 
-  /**
-   * Parses the specified string, returning the time in milliseconds.
-   *
-   * @function
-   * @name pv.Format.time.prototype.parse
-   * @param {string} s a formatted string.
-   * @returns {number} the parsed duration in milliseconds.
-   */
-  format.parse = function(s) {
-    switch (type) {
-      case "short": {
-        var re = /([0-9,.]+)\s*([a-z]+)/g, a, t = 0;
-        while (a = re.exec(s)) {
-          var f = parseFloat(a[0].replace(",", "")), u = 0;
-          switch (a[2].toLowerCase()) {
-            case "year": case "years": u = 31536e6; break;
-            case "week": case "weeks": u = 6048e5; break;
-            case "day": case "days": u = 864e5; break;
-            case "hour": case "hours": u = 36e5; break;
-            case "minute": case "minutes": u = 6e4; break;
-            case "second": case "seconds": u = 1e3; break;
-          }
-          t += f * u;
+    /**
+     * Parses the specified string, returning the time in milliseconds.
+     *
+     * @function
+     * @name pv.Format.time.prototype.parse
+     * @param {string} s a formatted string.
+     * @returns {number} the parsed duration in milliseconds.
+     */
+    format.parse = function(s) {
+        switch (type) {
+            case "short":
+                {
+                    var re = /([0-9,.]+)\s*([a-z]+)/g,
+                        a, t = 0;
+                    while (a = re.exec(s)) {
+                        var f = parseFloat(a[0].replace(",", "")),
+                            u = 0;
+                        switch (a[2].toLowerCase()) {
+                            case "year":
+                            case "years":
+                                u = 31536e6;
+                                break;
+                            case "week":
+                            case "weeks":
+                                u = 6048e5;
+                                break;
+                            case "day":
+                            case "days":
+                                u = 864e5;
+                                break;
+                            case "hour":
+                            case "hours":
+                                u = 36e5;
+                                break;
+                            case "minute":
+                            case "minutes":
+                                u = 6e4;
+                                break;
+                            case "second":
+                            case "seconds":
+                                u = 1e3;
+                                break;
+                        }
+                        t += f * u;
+                    }
+                    return t;
+                }
+            case "long":
+                {
+                    var a = s.replace(",", "").split(":").reverse(),
+                        t = 0;
+                    if (a.length) t += parseFloat(a[0]) * 1e3;
+                    if (a.length > 1) t += parseFloat(a[1]) * 6e4;
+                    if (a.length > 2) t += parseFloat(a[2]) * 36e5;
+                    if (a.length > 3) t += parseFloat(a[3]) * 864e5;
+                    return t;
+                }
         }
-        return t;
-      }
-      case "long": {
-        var a = s.replace(",", "").split(":").reverse(), t = 0;
-        if (a.length) t += parseFloat(a[0]) * 1e3;
-        if (a.length > 1) t += parseFloat(a[1]) * 6e4;
-        if (a.length > 2) t += parseFloat(a[2]) * 36e5;
-        if (a.length > 3) t += parseFloat(a[3]) * 864e5;
-        return t;
-      }
     }
-  }
 
-  return format;
+    return format;
 };
 /**
  * Returns a default number format.
@@ -1089,246 +1246,247 @@ pv.Format.time = function(type) {
  * @returns {pv.Format.number} a number format.
  */
 pv.Format.number = function() {
-  var mini = 0, // default minimum integer digits
-      maxi = Infinity, // default maximum integer digits
-      mins = 0, // mini, including group separators
-      minf = 0, // default minimum fraction digits
-      maxf = 0, // default maximum fraction digits
-      maxk = 1, // 10^maxf
-      padi = "0", // default integer pad
-      padf = "0", // default fraction pad
-      padg = true, // whether group separator affects integer padding
-      decimal = ".", // default decimal separator
-      group = ",", // default group separator
-      np = "\u2212", // default negative prefix
-      ns = ""; // default negative suffix
+    var mini = 0, // default minimum integer digits
+        maxi = Infinity, // default maximum integer digits
+        mins = 0, // mini, including group separators
+        minf = 0, // default minimum fraction digits
+        maxf = 0, // default maximum fraction digits
+        maxk = 1, // 10^maxf
+        padi = "0", // default integer pad
+        padf = "0", // default fraction pad
+        padg = true, // whether group separator affects integer padding
+        decimal = ".", // default decimal separator
+        group = ",", // default group separator
+        np = "\u2212", // default negative prefix
+        ns = ""; // default negative suffix
 
-  /** @private */
-  function format(x) {
-    /* Round the fractional part, and split on decimal separator. */
-    if (Infinity > maxf) x = Math.round(x * maxk) / maxk;
-    var s = String(Math.abs(x)).split(".");
-        
-    /* Pad, truncate and group the integral part. */
-    var i = s[0];
-    if (i.length > maxi) i = i.substring(i.length - maxi);
-    if (padg && (i.length < mini)) i = new Array(mini - i.length + 1).join(padi) + i;
-    if (i.length > 3) i = i.replace(/\B(?=(?:\d{3})+(?!\d))/g, group);
-    if (!padg && (i.length < mins)) i = new Array(mins - i.length + 1).join(padi) + i;
-    s[0] = x < 0 ? np + i + ns : i;
+    /** @private */
 
-    /* Pad the fractional part. */
-    var f = s[1] || "";
-    if (f.length > maxf){
-        // In IE9 64 bit strange things happen with floating points
-        // and the above division by maxk seems to sometimes result in 
-        // floating point precision problems...
-        f = s[1] = f.substr(0, maxf);
+    function format(x) {
+        /* Round the fractional part, and split on decimal separator. */
+        if (Infinity > maxf) x = Math.round(x * maxk) / maxk;
+        var s = String(Math.abs(x)).split(".");
+
+        /* Pad, truncate and group the integral part. */
+        var i = s[0];
+        if (i.length > maxi) i = i.substring(i.length - maxi);
+        if (padg && (i.length < mini)) i = new Array(mini - i.length + 1).join(padi) + i;
+        if (i.length > 3) i = i.replace(/\B(?=(?:\d{3})+(?!\d))/g, group);
+        if (!padg && (i.length < mins)) i = new Array(mins - i.length + 1).join(padi) + i;
+        s[0] = x < 0 ? np + i + ns : i;
+
+        /* Pad the fractional part. */
+        var f = s[1] || "";
+        if (f.length > maxf) {
+            // In IE9 64 bit strange things happen with floating points
+            // and the above division by maxk seems to sometimes result in 
+            // floating point precision problems...
+            f = s[1] = f.substr(0, maxf);
+        }
+
+        if (f.length < minf) s[1] = f + new Array(minf - f.length + 1).join(padf);
+
+        return s.join(decimal);
     }
 
-    if (f.length < minf) s[1] = f + new Array(minf - f.length + 1).join(padf);
+    /**
+     * @function
+     * @name pv.Format.number.prototype.format
+     * @param {number} x
+     * @returns {string}
+     */
+    format.format = format;
 
-    return s.join(decimal);
-  }
+    /**
+     * Parses the specified string as a number. Before parsing, leading and
+     * trailing padding is removed. Group separators are also removed, and the
+     * decimal separator is replaced with the standard point ("."). The integer
+     * part is truncated per the maximum integer digits, and the fraction part is
+     * rounded per the maximum fraction digits.
+     *
+     * @function
+     * @name pv.Format.number.prototype.parse
+     * @param {string} x the string to parse.
+     * @returns {number} the parsed number.
+     */
+    format.parse = function(x) {
+        var re = pv.Format.re;
 
-  /**
-   * @function
-   * @name pv.Format.number.prototype.format
-   * @param {number} x
-   * @returns {string}
-   */
-  format.format = format;
+        /* Remove leading and trailing padding. Split on the decimal separator, if exists. */
+        var s = String(x).split(decimal);
+        if (s.length == 1)
+            s[1] = "";
+        s[0].replace(new RegExp("^(" + re(padi) + ")*"), "");
+        s[1].replace(new RegExp("(" + re(padf) + ")*$"), "")
 
-  /**
-   * Parses the specified string as a number. Before parsing, leading and
-   * trailing padding is removed. Group separators are also removed, and the
-   * decimal separator is replaced with the standard point ("."). The integer
-   * part is truncated per the maximum integer digits, and the fraction part is
-   * rounded per the maximum fraction digits.
-   *
-   * @function
-   * @name pv.Format.number.prototype.parse
-   * @param {string} x the string to parse.
-   * @returns {number} the parsed number.
-   */
-  format.parse = function(x) {
-    var re = pv.Format.re;
+        /* Remove grouping and truncate the integral part. */
+        var i = s[0].replace(new RegExp(re(group), "g"), "");
+        if (i.length > maxi) i = i.substring(i.length - maxi);
 
-    /* Remove leading and trailing padding. Split on the decimal separator, if exists. */
-    var s = String(x).split(decimal);
-    if(s.length == 1)
-      s[1]="";
-    s[0].replace(new RegExp("^(" + re(padi) + ")*"), "");
-    s[1].replace(new RegExp("(" + re(padf) + ")*$"), "")
+        /* Round the fractional part. */
+        var f = s[1] ? Number("0." + s[1]) : 0;
+        if (Infinity > maxf) f = Math.round(f * maxk) / maxk;
 
-    /* Remove grouping and truncate the integral part. */
-    var i = s[0].replace(new RegExp(re(group), "g"), "");
-    if (i.length > maxi) i = i.substring(i.length - maxi);
+        return Math.round(i) + f;
+    };
 
-    /* Round the fractional part. */
-    var f = s[1] ? Number("0." + s[1]) : 0;
-    if (Infinity > maxf) f = Math.round(f * maxk) / maxk;
+    /**
+     * Sets or gets the minimum and maximum number of integer digits. This
+     * controls the number of decimal digits to display before the decimal
+     * separator for the integral part of the number. If the number of digits is
+     * smaller than the minimum, the digits are padded; if the number of digits is
+     * larger, the digits are truncated, showing only the lower-order digits. The
+     * default range is [0, Infinity].
+     *
+     * <p>If only one argument is specified to this method, this value is used as
+     * both the minimum and maximum number. If no arguments are specified, a
+     * two-element array is returned containing the minimum and the maximum.
+     *
+     * @function
+     * @name pv.Format.number.prototype.integerDigits
+     * @param {number} [min] the minimum integer digits.
+     * @param {number} [max] the maximum integer digits.
+     * @returns {pv.Format.number} <tt>this</tt>, or the current integer digits.
+     */
+    format.integerDigits = function(min, max) {
+        if (arguments.length) {
+            mini = Number(min);
+            maxi = (arguments.length > 1) ? Number(max) : mini;
+            mins = mini + Math.floor(mini / 3) * group.length;
+            return this;
+        }
+        return [mini, maxi];
+    };
 
-    return Math.round(i) + f;
-  };
+    /**
+     * Sets or gets the minimum and maximum number of fraction digits. The
+     * controls the number of decimal digits to display after the decimal
+     * separator for the fractional part of the number. If the number of digits is
+     * smaller than the minimum, the digits are padded; if the number of digits is
+     * larger, the fractional part is rounded, showing only the higher-order
+     * digits. The default range is [0, 0].
+     *
+     * <p>If only one argument is specified to this method, this value is used as
+     * both the minimum and maximum number. If no arguments are specified, a
+     * two-element array is returned containing the minimum and the maximum.
+     *
+     * @function
+     * @name pv.Format.number.prototype.fractionDigits
+     * @param {number} [min] the minimum fraction digits.
+     * @param {number} [max] the maximum fraction digits.
+     * @returns {pv.Format.number} <tt>this</tt>, or the current fraction digits.
+     */
+    format.fractionDigits = function(min, max) {
+        if (arguments.length) {
+            minf = Number(min);
+            maxf = (arguments.length > 1) ? Number(max) : minf;
+            maxk = Math.pow(10, maxf);
+            return this;
+        }
+        return [minf, maxf];
+    };
 
-  /**
-   * Sets or gets the minimum and maximum number of integer digits. This
-   * controls the number of decimal digits to display before the decimal
-   * separator for the integral part of the number. If the number of digits is
-   * smaller than the minimum, the digits are padded; if the number of digits is
-   * larger, the digits are truncated, showing only the lower-order digits. The
-   * default range is [0, Infinity].
-   *
-   * <p>If only one argument is specified to this method, this value is used as
-   * both the minimum and maximum number. If no arguments are specified, a
-   * two-element array is returned containing the minimum and the maximum.
-   *
-   * @function
-   * @name pv.Format.number.prototype.integerDigits
-   * @param {number} [min] the minimum integer digits.
-   * @param {number} [max] the maximum integer digits.
-   * @returns {pv.Format.number} <tt>this</tt>, or the current integer digits.
-   */
-  format.integerDigits = function(min, max) {
-    if (arguments.length) {
-      mini = Number(min);
-      maxi = (arguments.length > 1) ? Number(max) : mini;
-      mins = mini + Math.floor(mini / 3) * group.length;
-      return this;
-    }
-    return [mini, maxi];
-  };
+    /**
+     * Sets or gets the character used to pad the integer part. The integer pad is
+     * used when the number of integer digits is smaller than the minimum. The
+     * default pad character is "0" (zero).
+     *
+     * @param {string} [x] the new pad character.
+     * @returns {pv.Format.number} <tt>this</tt> or the current pad character.
+     */
+    format.integerPad = function(x) {
+        if (arguments.length) {
+            padi = String(x);
+            padg = /\d/.test(padi);
+            return this;
+        }
+        return padi;
+    };
 
-  /**
-   * Sets or gets the minimum and maximum number of fraction digits. The
-   * controls the number of decimal digits to display after the decimal
-   * separator for the fractional part of the number. If the number of digits is
-   * smaller than the minimum, the digits are padded; if the number of digits is
-   * larger, the fractional part is rounded, showing only the higher-order
-   * digits. The default range is [0, 0].
-   *
-   * <p>If only one argument is specified to this method, this value is used as
-   * both the minimum and maximum number. If no arguments are specified, a
-   * two-element array is returned containing the minimum and the maximum.
-   *
-   * @function
-   * @name pv.Format.number.prototype.fractionDigits
-   * @param {number} [min] the minimum fraction digits.
-   * @param {number} [max] the maximum fraction digits.
-   * @returns {pv.Format.number} <tt>this</tt>, or the current fraction digits.
-   */
-  format.fractionDigits = function(min, max) {
-    if (arguments.length) {
-      minf = Number(min);
-      maxf = (arguments.length > 1) ? Number(max) : minf;
-      maxk = Math.pow(10, maxf);
-      return this;
-    }
-    return [minf, maxf];
-  };
+    /**
+     * Sets or gets the character used to pad the fration part. The fraction pad
+     * is used when the number of fraction digits is smaller than the minimum. The
+     * default pad character is "0" (zero).
+     *
+     * @param {string} [x] the new pad character.
+     * @returns {pv.Format.number} <tt>this</tt> or the current pad character.
+     */
+    format.fractionPad = function(x) {
+        if (arguments.length) {
+            padf = String(x);
+            return this;
+        }
+        return padf;
+    };
 
-  /**
-   * Sets or gets the character used to pad the integer part. The integer pad is
-   * used when the number of integer digits is smaller than the minimum. The
-   * default pad character is "0" (zero).
-   *
-   * @param {string} [x] the new pad character.
-   * @returns {pv.Format.number} <tt>this</tt> or the current pad character.
-   */
-  format.integerPad = function(x) {
-    if (arguments.length) {
-      padi = String(x);
-      padg = /\d/.test(padi);
-      return this;
-    }
-    return padi;
-  };
+    /**
+     * Sets or gets the character used as the decimal point, separating the
+     * integer and fraction parts of the number. The default decimal point is ".".
+     *
+     * @param {string} [x] the new decimal separator.
+     * @returns {pv.Format.number} <tt>this</tt> or the current decimal separator.
+     */
+    format.decimal = function(x) {
+        if (arguments.length) {
+            decimal = String(x);
+            return this;
+        }
+        return decimal;
+    };
 
-  /**
-   * Sets or gets the character used to pad the fration part. The fraction pad
-   * is used when the number of fraction digits is smaller than the minimum. The
-   * default pad character is "0" (zero).
-   *
-   * @param {string} [x] the new pad character.
-   * @returns {pv.Format.number} <tt>this</tt> or the current pad character.
-   */
-  format.fractionPad = function(x) {
-    if (arguments.length) {
-      padf = String(x);
-      return this;
-    }
-    return padf;
-  };
+    /**
+     * Sets or gets the character used as the group separator, grouping integer
+     * digits by thousands. The default decimal point is ",". Grouping can be
+     * disabled by using "" for the separator.
+     *
+     * @param {string} [x] the new group separator.
+     * @returns {pv.Format.number} <tt>this</tt> or the current group separator.
+     */
+    format.group = function(x) {
+        if (arguments.length) {
+            group = x ? String(x) : "";
+            mins = mini + Math.floor(mini / 3) * group.length;
+            return this;
+        }
+        return group;
+    };
 
-  /**
-   * Sets or gets the character used as the decimal point, separating the
-   * integer and fraction parts of the number. The default decimal point is ".".
-   *
-   * @param {string} [x] the new decimal separator.
-   * @returns {pv.Format.number} <tt>this</tt> or the current decimal separator.
-   */
-  format.decimal = function(x) {
-    if (arguments.length) {
-      decimal = String(x);
-      return this;
-    }
-    return decimal;
-  };
+    /**
+     * Sets or gets the negative prefix and suffix. The default negative prefix is
+     * "&minus;", and the default negative suffix is the empty string.
+     *
+     * @param {string} [x] the negative prefix.
+     * @param {string} [y] the negative suffix.
+     * @returns {pv.Format.number} <tt>this</tt> or the current negative format.
+     */
+    format.negativeAffix = function(x, y) {
+        if (arguments.length) {
+            np = String(x || "");
+            ns = String(y || "");
+            return this;
+        }
+        return [np, ns];
+    };
 
-  /**
-   * Sets or gets the character used as the group separator, grouping integer
-   * digits by thousands. The default decimal point is ",". Grouping can be
-   * disabled by using "" for the separator.
-   *
-   * @param {string} [x] the new group separator.
-   * @returns {pv.Format.number} <tt>this</tt> or the current group separator.
-   */
-  format.group = function(x) {
-    if (arguments.length) {
-      group = x ? String(x) : "";
-      mins = mini + Math.floor(mini / 3) * group.length;
-      return this;
-    }
-    return group;
-  };
-
-  /**
-   * Sets or gets the negative prefix and suffix. The default negative prefix is
-   * "&minus;", and the default negative suffix is the empty string.
-   *
-   * @param {string} [x] the negative prefix.
-   * @param {string} [y] the negative suffix.
-   * @returns {pv.Format.number} <tt>this</tt> or the current negative format.
-   */
-  format.negativeAffix = function(x, y) {
-    if (arguments.length) {
-      np = String(x || "");
-      ns = String(y || "");
-      return this;
-    }
-    return [np, ns];
-  };
-
-  return format;
+    return format;
 };
 (function() {
-    
+
     var _cache;
-    
+
     pv.Text = {};
-    
+
     pv.Text.createCache = function() {
         return new FontSizeCache();
     };
-    
-    pv.Text.usingCache = function(cache, fun, ctx){
-        if(!(cache instanceof FontSizeCache)) {
+
+    pv.Text.usingCache = function(cache, fun, ctx) {
+        if (!(cache instanceof FontSizeCache)) {
             throw new Error("Not a valid cache.");
         }
-        
+
         var prevCache = _cache;
-        
+
         _cache = cache;
         try {
             return fun.call(ctx);
@@ -1336,136 +1494,150 @@ pv.Format.number = function() {
             _cache = prevCache;
         }
     };
-    
+
     pv.Text.measure = function(text, font) {
         text = text == null ? "" : String(text);
-        
+
         var bbox = _cache && _cache.get(font, text);
-        if(!bbox) {
-            if(!text) {
-                bbox = {width: 0, height: 0};
+        if (!bbox) {
+            if (!text) {
+                bbox = {
+                    width: 0,
+                    height: 0
+                };
             } else {
                 bbox = this.measureCore(text, font);
             }
-            if(_cache) { _cache.put(font, text, bbox); }
+            if (_cache) {
+                _cache.put(font, text, bbox);
+            }
         }
-        
+
         return bbox;
     };
 
     pv.Text.measureWidth = function(text, font) {
         return pv.Text.measure(text, font).width;
     };
-    
+
     pv.Text.fontHeight = function(font) {
         return pv.Text.measure('M', font).height;
     };
-    
+
     // Replace with another custom implementation if necessary
     pv.Text.measureCore = (function() {
-        
+
         // SVG implementation
         var _svgText, _lastFont = '10px sans-serif';
-        
+
         function getTextSizeElement() {
             return _svgText || (_svgText = createTextSizeElement());
         }
-        
+
         function createTextSizeElement() {
-            var div =  document.createElement('div');
+            var div = document.createElement('div');
             div.id = 'pvSVGText_' + new Date().getTime();
-            
+
             var style = div.style;
-            style.position   = 'absolute';
+            style.position = 'absolute';
             style.visibility = 'hidden';
-            style.width  = 0;
+            style.width = 0;
             style.height = 0;
             style.left = 0;
-            style.top  = 0;
-            
+            style.top = 0;
+
             // Reset text-size affecting attributes
-            style.lineHeight    = 1;
+            style.lineHeight = 1;
             style.textTransform = 'none';
             style.letterSpacing = 'normal'; // 0
-            style.whiteSpace    = 'nowrap'; // support very long lines
+            style.whiteSpace = 'nowrap'; // support very long lines
 
             var svgElem = pv.SvgScene.create('svg');
-            svgElem.setAttribute('font-size',   '10px');
+            svgElem.setAttribute('font-size', '10px');
             svgElem.setAttribute('font-family', 'sans-serif');
             div.appendChild(svgElem);
-            
+
             var svgText = pv.SvgScene.create('text');
             svgElem.appendChild(svgText);
-            
+
             svgText.appendChild(document.createTextNode(''));
-            
+
             document.body.appendChild(div);
-            
+
             return svgText;
         }
-        
-        return function(text, font){
-            if(!font){ font = null; }
-            
-            var svgText = getTextSizeElement();
-            if(_lastFont !== font) {
-                _lastFont = font;
-                pv.SvgScene.setStyle(svgText, {'font': font});
+
+        return function(text, font) {
+            if (!font) {
+                font = null;
             }
-            
+
+            var svgText = getTextSizeElement();
+            if (_lastFont !== font) {
+                _lastFont = font;
+                pv.SvgScene.setStyle(svgText, {
+                    'font': font
+                });
+            }
+
             svgText.firstChild.nodeValue = String(text);
-            
+
             var box;
             try {
                 box = svgText.getBBox();
-            } catch(ex) {
-                if(typeof console.error === 'function') {
+            } catch (ex) {
+                if (typeof console.error === 'function') {
                     console.error("GetBBox failed: ", ex);
                 }
-                
+
                 throw ex;
             }
-            
-            return {width: box.width, height: box.height};
+
+            return {
+                width: box.width,
+                height: box.height
+            };
         };
     }());
 
     // --------
-    
-    var FontSizeCache = function(){
+
+    var FontSizeCache = function() {
         this._fontsCache = {};
     };
-    
+
     var hasOwnProp = Object.prototype.hasOwnProperty;
-    
-    FontSizeCache.prototype._getFont = function(font){
+
+    FontSizeCache.prototype._getFont = function(font) {
         font = font || '';
         return hasOwnProp.call(this._fontsCache, font) ?
-               this._fontsCache[font] :
-               (this._fontsCache[font] = {});
+            this._fontsCache[font] :
+            (this._fontsCache[font] = {});
     };
-        
-    FontSizeCache.prototype.get = function(font, text){
+
+    FontSizeCache.prototype.get = function(font, text) {
         text = text || '';
-        
+
         var fontCache = this._getFont(font);
         return hasOwnProp.call(fontCache, text) ?
-               fontCache[text] :
-               null;
+            fontCache[text] :
+            null;
     };
-        
-    FontSizeCache.prototype.put = function(font, text, size){
-        return this._getFont(font)[text||''] = size;
+
+    FontSizeCache.prototype.put = function(font, text, size) {
+        return this._getFont(font)[text || ''] = size;
     };
-}());/**
+}());
+/**
  * @private A private variant of Array.prototype.map that supports the index
  * property.
  */
 pv.map = function(array, f) {
-  var o = {};
-  return f
-      ? array.map(function(d, i) { o.index = i; return f.call(o, d); })
-      : array.slice();
+    var o = {};
+    return f ? array.map(function(d, i) {
+        o.index = i;
+        return f.call(o, d);
+    }) : array.slice();
 };
 
 /**
@@ -1477,8 +1649,10 @@ pv.map = function(array, f) {
  * @returns {array} an array that repeats the specified array.
  */
 pv.repeat = function(array, n) {
-  if (arguments.length == 1) n = 2;
-  return pv.blend(pv.range(n).map(function() { return array; }));
+    if (arguments.length == 1) n = 2;
+    return pv.blend(pv.range(n).map(function() {
+        return array;
+    }));
 };
 
 /**
@@ -1489,10 +1663,10 @@ pv.repeat = function(array, n) {
  * @param {number} [dv] the default value with which to initialize each position; defaults to undefined.
  * @returns {array} an array as specified.
  */
-pv.array = function(len, dv){
+pv.array = function(len, dv) {
     var a = len >= 0 ? new Array(len) : [];
-    if(dv !== undefined){
-        for(var i = 0 ; i < len ; i++){
+    if (dv !== undefined) {
+        for (var i = 0; i < len; i++) {
             a[i] = dv;
         }
     }
@@ -1516,13 +1690,13 @@ pv.array = function(len, dv){
  * @returns {array} an array of pairs of elements in <tt>a</tt> and <tt>b</tt>.
  */
 pv.cross = function(a, b) {
-  var array = [];
-  for (var i = 0, n = a.length, m = b.length; i < n; i++) {
-    for (var j = 0, x = a[i]; j < m; j++) {
-      array.push([x, b[j]]);
+    var array = [];
+    for (var i = 0, n = a.length, m = b.length; i < n; i++) {
+        for (var j = 0, x = a[i]; j < m; j++) {
+            array.push([x, b[j]]);
+        }
     }
-  }
-  return array;
+    return array;
 };
 
 /**
@@ -1541,7 +1715,7 @@ pv.cross = function(a, b) {
  * <tt>arrays</tt>.
  */
 pv.blend = function(arrays) {
-  return Array.prototype.concat.apply([], arrays);
+    return Array.prototype.concat.apply([], arrays);
 };
 
 /**
@@ -1556,39 +1730,42 @@ pv.blend = function(arrays) {
  * @returns {Array.<Array>} the passed-in array, after transposing the elements.
  */
 pv.transpose = function(arrays) {
-  var n = arrays.length, m = pv.max(arrays, function(d) { return d.length; });
+    var n = arrays.length,
+        m = pv.max(arrays, function(d) {
+            return d.length;
+        });
 
-  if (m > n) {
+    if (m > n) {
+        arrays.length = m;
+        for (var i = n; i < m; i++) {
+            arrays[i] = new Array(n);
+        }
+        for (var i = 0; i < n; i++) {
+            for (var j = i + 1; j < m; j++) {
+                var t = arrays[i][j];
+                arrays[i][j] = arrays[j][i];
+                arrays[j][i] = t;
+            }
+        }
+    } else {
+        for (var i = 0; i < m; i++) {
+            arrays[i].length = n;
+        }
+        for (var i = 0; i < n; i++) {
+            for (var j = 0; j < i; j++) {
+                var t = arrays[i][j];
+                arrays[i][j] = arrays[j][i];
+                arrays[j][i] = t;
+            }
+        }
+    }
+
     arrays.length = m;
-    for (var i = n; i < m; i++) {
-      arrays[i] = new Array(n);
-    }
-    for (var i = 0; i < n; i++) {
-      for (var j = i + 1; j < m; j++) {
-        var t = arrays[i][j];
-        arrays[i][j] = arrays[j][i];
-        arrays[j][i] = t;
-      }
-    }
-  } else {
     for (var i = 0; i < m; i++) {
-      arrays[i].length = n;
+        arrays[i].length = n;
     }
-    for (var i = 0; i < n; i++) {
-      for (var j = 0; j < i; j++) {
-        var t = arrays[i][j];
-        arrays[i][j] = arrays[j][i];
-        arrays[j][i] = t;
-      }
-    }
-  }
 
-  arrays.length = m;
-  for (var i = 0; i < m; i++) {
-    arrays[i].length = n;
-  }
-
-  return arrays;
+    return arrays;
 };
 
 /**
@@ -1609,9 +1786,10 @@ pv.transpose = function(arrays) {
  * @returns {Array.<number>} an array of numbers that sums to one.
  */
 pv.normalize = function(array, f) {
-  var norm = pv.map(array, f), sum = pv.sum(norm);
-  for (var i = 0; i < norm.length; i++) norm[i] /= sum;
-  return norm;
+    var norm = pv.map(array, f),
+        sum = pv.sum(norm);
+    for (var i = 0; i < norm.length; i++) norm[i] /= sum;
+    return norm;
 };
 
 /**
@@ -1633,10 +1811,14 @@ pv.normalize = function(array, f) {
  * @returns {array} an array of elements from <tt>array</tt>; a permutation.
  */
 pv.permute = function(array, indexes, f) {
-  if (!f) f = pv.identity;
-  var p = new Array(indexes.length), o = {};
-  indexes.forEach(function(j, i) { o.index = j; p[i] = f.call(o, array[j]); });
-  return p;
+    if (!f) f = pv.identity;
+    var p = new Array(indexes.length),
+        o = {};
+    indexes.forEach(function(j, i) {
+        o.index = j;
+        p[i] = f.call(o, array[j]);
+    });
+    return p;
 };
 
 /**
@@ -1656,10 +1838,13 @@ pv.permute = function(array, indexes, f) {
  * @returns a map from key to index.
  */
 pv.numerate = function(keys, f) {
-  if (!f) f = pv.identity;
-  var map = {}, o = {};
-  keys.forEach(function(x, i) { o.index = i; map[f.call(o, x)] = i; });
-  return map;
+    if (!f) f = pv.identity;
+    var map = {}, o = {};
+    keys.forEach(function(x, i) {
+        o.index = i;
+        map[f.call(o, x)] = i;
+    });
+    return map;
 };
 
 /**
@@ -1675,14 +1860,15 @@ pv.numerate = function(keys, f) {
  * @returns {array} the unique values.
  */
 pv.uniq = function(array, f) {
-  if (!f) f = pv.identity;
-  var map = {}, keys = [], o = {}, y;
-  array.forEach(function(x, i) {
-    o.index = i;
-    y = f.call(o, x);
-    if (!(y in map)) map[y] = keys.push(y);
-  });
-  return keys;
+    if (!f) f = pv.identity;
+    var map = {}, keys = [],
+        o = {}, y;
+    array.forEach(function(x, i) {
+        o.index = i;
+        y = f.call(o, x);
+        if (!(y in map)) map[y] = keys.push(y);
+    });
+    return keys;
 };
 
 /**
@@ -1699,7 +1885,7 @@ pv.uniq = function(array, f) {
  * @returns {number} negative if a &lt; b; positive if a &gt; b; otherwise 0.
  */
 pv.naturalOrder = function(a, b) {
-  return (a < b) ? -1 : ((a > b) ? 1 : 0);
+    return (a < b) ? -1 : ((a > b) ? 1 : 0);
 };
 
 /**
@@ -1715,7 +1901,7 @@ pv.naturalOrder = function(a, b) {
  * @returns {number} negative if a &lt; b; positive if a &gt; b; otherwise 0.
  */
 pv.reverseOrder = function(b, a) {
-  return (a < b) ? -1 : ((a > b) ? 1 : 0);
+    return (a < b) ? -1 : ((a > b) ? 1 : 0);
 };
 
 /**
@@ -1738,20 +1924,22 @@ pv.reverseOrder = function(b, a) {
  * @param {Function} [f] an optional key function.
  */
 pv.search = function(array, value, f) {
-  if (!f) f = pv.identity;
-  var low = 0, high = array.length - 1;
-  while (low <= high) {
-    var mid = (low + high) >> 1, midValue = f(array[mid]);
-    if (midValue < value) low = mid + 1;
-    else if (midValue > value) high = mid - 1;
-    else return mid;
-  }
-  return -low - 1;
+    if (!f) f = pv.identity;
+    var low = 0,
+        high = array.length - 1;
+    while (low <= high) {
+        var mid = (low + high) >> 1,
+            midValue = f(array[mid]);
+        if (midValue < value) low = mid + 1;
+        else if (midValue > value) high = mid - 1;
+        else return mid;
+    }
+    return -low - 1;
 };
 
 pv.search.index = function(array, value, f) {
-  var i = pv.search(array, value, f);
-  return (i < 0) ? (-i - 1) : i;
+    var i = pv.search(array, value, f);
+    return (i < 0) ? (-i - 1) : i;
 };
 /**
  * Returns an array of numbers, starting at <tt>start</tt>, incrementing by
@@ -1770,24 +1958,26 @@ pv.search.index = function(array, value, f) {
  * @returns {Array.<number>} an array of numbers.
  */
 pv.range = function(start, stop, step) {
-  if (arguments.length == 1) {
-    stop = start;
-    start = 0;
-  }
-  if (step == undefined) step = 1;
-  if ((stop - start) / step == Infinity) throw new Error("range must be finite");
-  var array = [], i = 0, j;
-  stop -= (stop - start) * 1e-10; // floating point precision!
-  if (step < 0) {
-    while ((j = start + step * i++) > stop) {
-      array.push(j);
+    if (arguments.length == 1) {
+        stop = start;
+        start = 0;
     }
-  } else {
-    while ((j = start + step * i++) < stop) {
-      array.push(j);
+    if (step == undefined) step = 1;
+    if ((stop - start) / step == Infinity) throw new Error("range must be finite");
+    var array = [],
+        i = 0,
+        j;
+    stop -= (stop - start) * 1e-10; // floating point precision!
+    if (step < 0) {
+        while ((j = start + step * i++) > stop) {
+            array.push(j);
+        }
+    } else {
+        while ((j = start + step * i++) < stop) {
+            array.push(j);
+        }
     }
-  }
-  return array;
+    return array;
 };
 
 /**
@@ -1803,14 +1993,12 @@ pv.range = function(start, stop, step) {
  * @returns {number} a random number between <i>start</i> and <i>stop</i>.
  */
 pv.random = function(start, stop, step) {
-  if (arguments.length == 1) {
-    stop = start;
-    start = 0;
-  }
-  if (step == undefined) step = 1;
-  return step
-      ? (Math.floor(Math.random() * (stop - start) / step) * step + start)
-      : (Math.random() * (stop - start) + start);
+    if (arguments.length == 1) {
+        stop = start;
+        start = 0;
+    }
+    if (step == undefined) step = 1;
+    return step ? (Math.floor(Math.random() * (stop - start) / step) * step + start) : (Math.random() * (stop - start) + start);
 };
 
 /**
@@ -1824,10 +2012,13 @@ pv.random = function(start, stop, step) {
  * @returns {number} the sum of the specified array.
  */
 pv.sum = function(array, f) {
-  var o = {};
-  return array.reduce(f
-      ? function(p, d, i) { o.index = i; return p + f.call(o, d); }
-      : function(p, d) { return p + d; }, 0);
+    var o = {};
+    return array.reduce(f ? function(p, d, i) {
+        o.index = i;
+        return p + f.call(o, d);
+    } : function(p, d) {
+        return p + d;
+    }, 0);
 };
 
 /**
@@ -1841,8 +2032,8 @@ pv.sum = function(array, f) {
  * @returns {number} the maximum value of the specified array.
  */
 pv.max = function(array, f) {
-  if (f == pv.index) return array.length - 1;
-  return Math.max.apply(null, f ? pv.map(array, f) : array);
+    if (f == pv.index) return array.length - 1;
+    return Math.max.apply(null, f ? pv.map(array, f) : array);
 };
 
 /**
@@ -1857,19 +2048,21 @@ pv.max = function(array, f) {
  * @returns {number} the index of the maximum value of the specified array.
  */
 pv.max.index = function(array, f) {
-  if (!array.length) return -1;
-  if (f == pv.index) return array.length - 1;
-  if (!f) f = pv.identity;
-  var maxi = 0, maxx = -Infinity, o = {};
-  for (var i = 0; i < array.length; i++) {
-    o.index = i;
-    var x = f.call(o, array[i]);
-    if (x > maxx) {
-      maxx = x;
-      maxi = i;
+    if (!array.length) return -1;
+    if (f == pv.index) return array.length - 1;
+    if (!f) f = pv.identity;
+    var maxi = 0,
+        maxx = -Infinity,
+        o = {};
+    for (var i = 0; i < array.length; i++) {
+        o.index = i;
+        var x = f.call(o, array[i]);
+        if (x > maxx) {
+            maxx = x;
+            maxi = i;
+        }
     }
-  }
-  return maxi;
+    return maxi;
 };
 
 /**
@@ -1883,8 +2076,8 @@ pv.max.index = function(array, f) {
  * @returns {number} the minimum value of the specified array.
  */
 pv.min = function(array, f) {
-  if (f == pv.index) return 0;
-  return Math.min.apply(null, f ? pv.map(array, f) : array);
+    if (f == pv.index) return 0;
+    return Math.min.apply(null, f ? pv.map(array, f) : array);
 };
 
 /**
@@ -1899,19 +2092,21 @@ pv.min = function(array, f) {
  * @returns {number} the index of the minimum value of the specified array.
  */
 pv.min.index = function(array, f) {
-  if (!array.length) return -1;
-  if (f == pv.index) return 0;
-  if (!f) f = pv.identity;
-  var mini = 0, minx = Infinity, o = {};
-  for (var i = 0; i < array.length; i++) {
-    o.index = i;
-    var x = f.call(o, array[i]);
-    if (x < minx) {
-      minx = x;
-      mini = i;
+    if (!array.length) return -1;
+    if (f == pv.index) return 0;
+    if (!f) f = pv.identity;
+    var mini = 0,
+        minx = Infinity,
+        o = {};
+    for (var i = 0; i < array.length; i++) {
+        o.index = i;
+        var x = f.call(o, array[i]);
+        if (x < minx) {
+            minx = x;
+            mini = i;
+        }
     }
-  }
-  return mini;
+    return mini;
 };
 
 /**
@@ -1926,7 +2121,7 @@ pv.min.index = function(array, f) {
  * @returns {number} the mean of the specified array.
  */
 pv.mean = function(array, f) {
-  return pv.sum(array, f) / array.length;
+    return pv.sum(array, f) / array.length;
 };
 
 /**
@@ -1940,11 +2135,11 @@ pv.mean = function(array, f) {
  * @returns {number} the median of the specified array.
  */
 pv.median = function(array, f) {
-  if (f == pv.index) return (array.length - 1) / 2;
-  array = pv.map(array, f).sort(pv.naturalOrder);
-  if (array.length % 2) return array[Math.floor(array.length / 2)];
-  var i = array.length / 2;
-  return (array[i - 1] + array[i]) / 2;
+    if (f == pv.index) return (array.length - 1) / 2;
+    array = pv.map(array, f).sort(pv.naturalOrder);
+    if (array.length % 2) return array[Math.floor(array.length / 2)];
+    var i = array.length / 2;
+    return (array[i - 1] + array[i]) / 2;
 };
 
 /**
@@ -1958,16 +2153,18 @@ pv.median = function(array, f) {
  * @returns {number} the variance of the specified array.
  */
 pv.variance = function(array, f) {
-  if (array.length < 1) return NaN;
-  if (array.length == 1) return 0;
-  var mean = pv.mean(array, f), sum = 0, o = {};
-  if (!f) f = pv.identity;
-  for (var i = 0; i < array.length; i++) {
-    o.index = i;
-    var d = f.call(o, array[i]) - mean;
-    sum += d * d;
-  }
-  return sum;
+    if (array.length < 1) return NaN;
+    if (array.length == 1) return 0;
+    var mean = pv.mean(array, f),
+        sum = 0,
+        o = {};
+    if (!f) f = pv.identity;
+    for (var i = 0; i < array.length; i++) {
+        o.index = i;
+        var d = f.call(o, array[i]) - mean;
+        sum += d * d;
+    }
+    return sum;
 };
 
 /**
@@ -1982,7 +2179,7 @@ pv.variance = function(array, f) {
  * @returns {number} the standard deviation of the specified array.
  */
 pv.deviation = function(array, f) {
-  return Math.sqrt(pv.variance(array, f) / (array.length - 1));
+    return Math.sqrt(pv.variance(array, f) / (array.length - 1));
 };
 
 /**
@@ -1993,7 +2190,7 @@ pv.deviation = function(array, f) {
  * @returns {number} the logarithm value.
  */
 pv.log = function(x, b) {
-  return Math.log(x) / Math.log(b);
+    return Math.log(x) / Math.log(b);
 };
 
 /**
@@ -2006,7 +2203,7 @@ pv.log = function(x, b) {
  * @returns {number} the symmetric log value.
  */
 pv.logSymmetric = function(x, b) {
-  return (x == 0) ? 0 : ((x < 0) ? -pv.log(-x, b) : pv.log(x, b));
+    return (x == 0) ? 0 : ((x < 0) ? -pv.log(-x, b) : pv.log(x, b));
 };
 
 /**
@@ -2020,10 +2217,10 @@ pv.logSymmetric = function(x, b) {
  * @returns {number} the adjusted, symmetric log value.
  */
 pv.logAdjusted = function(x, b) {
-  if (!isFinite(x)) return x;
-  var negative = x < 0;
-  if (x < b) x += (b - x) / b;
-  return negative ? -pv.log(x, b) : pv.log(x, b);
+    if (!isFinite(x)) return x;
+    var negative = x < 0;
+    if (x < b) x += (b - x) / b;
+    return negative ? -pv.log(x, b) : pv.log(x, b);
 };
 
 /**
@@ -2036,9 +2233,7 @@ pv.logAdjusted = function(x, b) {
  * @returns {number} the rounded-by-logarithm value.
  */
 pv.logFloor = function(x, b) {
-  return (x > 0)
-      ? Math.pow(b, Math.floor(pv.log(x, b)))
-      : -Math.pow(b, -Math.floor(-pv.log(-x, b)));
+    return (x > 0) ? Math.pow(b, Math.floor(pv.log(x, b))) : -Math.pow(b, -Math.floor(-pv.log(-x, b)));
 };
 
 /**
@@ -2051,20 +2246,22 @@ pv.logFloor = function(x, b) {
  * @returns {number} the rounded-by-logarithm value.
  */
 pv.logCeil = function(x, b) {
-  return (x > 0)
-      ? Math.pow(b, Math.ceil(pv.log(x, b)))
-      : -Math.pow(b, -Math.ceil(-pv.log(-x, b)));
+    return (x > 0) ? Math.pow(b, Math.ceil(pv.log(x, b))) : -Math.pow(b, -Math.ceil(-pv.log(-x, b)));
 };
 
 (function() {
-  var _radians = Math.PI / 180,
-      _degrees = 180 / Math.PI;
+    var _radians = Math.PI / 180,
+        _degrees = 180 / Math.PI;
 
-  /** Returns the number of radians corresponding to the specified degrees. */
-  pv.radians = function(degrees) { return _radians * degrees; };
+    /** Returns the number of radians corresponding to the specified degrees. */
+    pv.radians = function(degrees) {
+        return _radians * degrees;
+    };
 
-  /** Returns the number of degrees corresponding to the specified radians. */
-  pv.degrees = function(radians) { return _degrees * radians; };
+    /** Returns the number of degrees corresponding to the specified radians. */
+    pv.degrees = function(radians) {
+        return _degrees * radians;
+    };
 })();
 /**
  * Returns all of the property names (keys) of the specified object (a map). The
@@ -2075,11 +2272,11 @@ pv.logCeil = function(x, b) {
  * @see #entries
  */
 pv.keys = function(map) {
-  var array = [];
-  for (var key in map) {
-    array.push(key);
-  }
-  return array;
+    var array = [];
+    for (var key in map) {
+        array.push(key);
+    }
+    return array;
 };
 
 /**
@@ -2092,11 +2289,14 @@ pv.keys = function(map) {
  * @returns {array} an array of key-value pairs corresponding to the keys.
  */
 pv.entries = function(map) {
-  var array = [];
-  for (var key in map) {
-    array.push({ key: key, value: map[key] });
-  }
-  return array;
+    var array = [];
+    for (var key in map) {
+        array.push({
+            key: key,
+            value: map[key]
+        });
+    }
+    return array;
 };
 
 /**
@@ -2108,11 +2308,11 @@ pv.entries = function(map) {
  * @see #entries
  */
 pv.values = function(map) {
-  var array = [];
-  for (var key in map) {
-    array.push(map[key]);
-  }
-  return array;
+    var array = [];
+    for (var key in map) {
+        array.push(map[key]);
+    }
+    return array;
 };
 
 /**
@@ -2134,15 +2334,15 @@ pv.values = function(map) {
  * @returns a map from keys to values.
  */
 pv.dict = function(keys, f) {
-  var m = {}, o = {};
-  for (var i = 0; i < keys.length; i++) {
-    if (i in keys) {
-      var k = keys[i];
-      o.index = i;
-      m[k] = f.call(o, k);
+    var m = {}, o = {};
+    for (var i = 0; i < keys.length; i++) {
+        if (i in keys) {
+            var k = keys[i];
+            o.index = i;
+            m[k] = f.call(o, k);
+        }
     }
-  }
-  return m;
+    return m;
 };
 
 /** @private */
@@ -2155,16 +2355,16 @@ pv.hasOwnProp = Object.prototype.hasOwnProperty;
  * @param {object} [b] the source object.
  * @returns {object} the target object.
  */
-pv.copyOwn = function(a, b){
-  if(b){
-    var hop = pv.hasOwnProp;
-      for(var p in b){
-        if(hop.call(b, p)){
-          a[p] = b[p];
+pv.copyOwn = function(a, b) {
+    if (b) {
+        var hop = pv.hasOwnProp;
+        for (var p in b) {
+            if (hop.call(b, p)) {
+                a[p] = b[p];
+            }
         }
     }
-  }
-  return a;
+    return a;
 };
 /**
  * Returns a {@link pv.Dom} operator for the given map. This is a convenience
@@ -2177,7 +2377,7 @@ pv.copyOwn = function(a, b){
  * @returns {pv.Dom} a DOM operator for the specified map.
  */
 pv.dom = function(map) {
-  return new pv.Dom(map);
+    return new pv.Dom(map);
 };
 
 /**
@@ -2196,12 +2396,12 @@ pv.dom = function(map) {
  * @param map a map from which to construct a DOM.
  */
 pv.Dom = function(map) {
-  this.$map = map;
+    this.$map = map;
 };
 
 /** @private The default leaf function. */
 pv.Dom.prototype.$leaf = function(n) {
-  return typeof n != "object";
+    return typeof n != "object";
 };
 
 /**
@@ -2214,11 +2414,11 @@ pv.Dom.prototype.$leaf = function(n) {
  * @returns the current leaf function, or <tt>this</tt>.
  */
 pv.Dom.prototype.leaf = function(f) {
-  if (arguments.length) {
-    this.$leaf = f;
-    return this;
-  }
-  return this.$leaf;
+    if (arguments.length) {
+        this.$leaf = f;
+        return this;
+    }
+    return this.$leaf;
 };
 
 /**
@@ -2228,20 +2428,22 @@ pv.Dom.prototype.leaf = function(f) {
  * @param {string} [nodeName] optional node name for the root.
  */
 pv.Dom.prototype.root = function(nodeName) {
-  var leaf = this.$leaf, root = recurse(this.$map);
+    var leaf = this.$leaf,
+        root = recurse(this.$map);
 
-  /** @private */
-  function recurse(map) {
-    var n = new pv.Dom.Node();
-    for (var k in map) {
-      var v = map[k];
-      n.appendChild(leaf(v) ? new pv.Dom.Node(v) : recurse(v)).nodeName = k;
+    /** @private */
+
+    function recurse(map) {
+        var n = new pv.Dom.Node();
+        for (var k in map) {
+            var v = map[k];
+            n.appendChild(leaf(v) ? new pv.Dom.Node(v) : recurse(v)).nodeName = k;
+        }
+        return n;
     }
-    return n;
-  }
 
-  root.nodeName = nodeName;
-  return root;
+    root.nodeName = nodeName;
+    return root;
 };
 
 /**
@@ -2251,7 +2453,7 @@ pv.Dom.prototype.root = function(nodeName) {
  * @returns {array} the array of nodes in preorder traversal.
  */
 pv.Dom.prototype.nodes = function() {
-  return this.root().nodes();
+    return this.root().nodes();
 };
 
 /**
@@ -2262,7 +2464,9 @@ pv.Dom.prototype.nodes = function() {
  * @class Represents a <tt>Node</tt> in the W3C Document Object Model.
  */
 pv.Dom.Node = function(value) {
-  if(value !== undefined) { this.nodeValue = value; }
+    if (value !== undefined) {
+        this.nodeValue = value;
+    }
 };
 
 /**
@@ -2289,7 +2493,7 @@ pv.Dom.Node.prototype.nodeValue = undefined;
  * @type array
  * @field pv.Dom.Node.prototype.childNodes
  */
- pv.Dom.Node.prototype.childNodes = [];
+pv.Dom.Node.prototype.childNodes = [];
 
 /**
  * The parent node, which is null for root nodes.
@@ -2349,17 +2553,19 @@ pv.Dom.Node.prototype._childIndex = -1;
  * Throws if the child is null or isn't a child of this node.
  */
 pv.Dom.Node.prototype.findChildIndex = function(n) {
-  if (!n) throw new Error("Argument 'n' required");
-  if(n.parentNode === this) {
-    var i = n.childIndex(/*noRebuild*/true);
-    if(i > -1) { return i; }
-  }
+    if (!n) throw new Error("Argument 'n' required");
+    if (n.parentNode === this) {
+        var i = n.childIndex( /*noRebuild*/ true);
+        if (i > -1) {
+            return i;
+        }
+    }
 
-  throw new Error("child not found");
+    throw new Error("child not found");
 };
 
 pv.Dom.Node.prototype._childRemoved = function(n, i) { /*NOOP*/ };
-pv.Dom.Node.prototype._childAdded   = function(n, i) { /*NOOP*/ };
+pv.Dom.Node.prototype._childAdded = function(n, i) { /*NOOP*/ };
 
 /**
  * Removes the specified child node from this node.
@@ -2368,8 +2574,8 @@ pv.Dom.Node.prototype._childAdded   = function(n, i) { /*NOOP*/ };
  * @returns {pv.Dom.Node} the removed child.
  */
 pv.Dom.Node.prototype.removeChild = function(n) {
-  var i = this.findChildIndex(n);
-  return this.removeAt(i);
+    var i = this.findChildIndex(n);
+    return this.removeAt(i);
 };
 
 /**
@@ -2380,24 +2586,26 @@ pv.Dom.Node.prototype.removeChild = function(n) {
  * @returns {pv.Dom.Node} the appended child.
  */
 pv.Dom.Node.prototype.appendChild = function(n) {
-  var pn = n.parentNode;
-  if(pn) { pn.removeChild(n); }
+    var pn = n.parentNode;
+    if (pn) {
+        pn.removeChild(n);
+    }
 
-  var lc = this.lastChild;
-  n.parentNode = this;
-  n.previousSibling = lc;
-  if(lc) {
-      lc.nextSibling = n;
-      n._childIndex  = lc._childIndex + 1;
-  } else {
-      this.firstChild = n;
-      n._childIndex   = 0;
-  }
+    var lc = this.lastChild;
+    n.parentNode = this;
+    n.previousSibling = lc;
+    if (lc) {
+        lc.nextSibling = n;
+        n._childIndex = lc._childIndex + 1;
+    } else {
+        this.firstChild = n;
+        n._childIndex = 0;
+    }
 
-  this.lastChild = n;
-  var L = pv.lazyArrayOwn(this, 'childNodes').push(n);
-  this._childAdded(n, L - 1);
-  return n;
+    this.lastChild = n;
+    var L = pv.lazyArrayOwn(this, 'childNodes').push(n);
+    this._childAdded(n, L - 1);
+    return n;
 };
 
 /**
@@ -2410,9 +2618,11 @@ pv.Dom.Node.prototype.appendChild = function(n) {
  * @returns {pv.Dom.Node} the inserted child.
  */
 pv.Dom.Node.prototype.insertBefore = function(n, r) {
-  if(!r) { return this.appendChild(n); }
-  var i = this.findChildIndex(r);
-  return this.insertAt(n, i);
+    if (!r) {
+        return this.appendChild(n);
+    }
+    var i = this.findChildIndex(r);
+    return this.insertAt(n, i);
 };
 
 /**
@@ -2428,35 +2638,47 @@ pv.Dom.Node.prototype.insertBefore = function(n, r) {
  */
 pv.Dom.Node.prototype.insertAt = function(n, i) {
 
-    if(i == null) { return this.appendChild(n); }
+    if (i == null) {
+        return this.appendChild(n);
+    }
 
     var ns = this.childNodes; // may be the inherited array!
-    var L  = ns.length;
-    if(i === L) { return this.appendChild(n); }
+    var L = ns.length;
+    if (i === L) {
+        return this.appendChild(n);
+    }
 
-    if(i < 0 || i > L) { throw new Error("Index out of range."); }
+    if (i < 0 || i > L) {
+        throw new Error("Index out of range.");
+    }
 
     // At this time, if L were 0, any i would throw an error at the previous line.
     // So we conclude that ns must be the local array.
 
     // may be that: pn === this, but should i be corrected in case n is below i?
     var pn = n.parentNode;
-    if(pn) { pn.removeChild(n); }
+    if (pn) {
+        pn.removeChild(n);
+    }
 
     var ni = i + 1;
-    if(ni < this._firstDirtyChildIndex) { this._firstDirtyChildIndex = ni; }
+    if (ni < this._firstDirtyChildIndex) {
+        this._firstDirtyChildIndex = ni;
+    }
 
     var r = ns[i];
-    n.parentNode  = this;
+    n.parentNode = this;
     n.nextSibling = r;
     n._childIndex = i;
 
     var psib = n.previousSibling = r.previousSibling;
     r.previousSibling = n;
-    if(psib) {
+    if (psib) {
         psib.nextSibling = n;
     } else {
-        if(r === this.lastChild) { this.lastChild = n; }
+        if (r === this.lastChild) {
+            this.lastChild = n;
+        }
         this.firstChild = n;
     }
 
@@ -2469,28 +2691,38 @@ pv.Dom.Node.prototype.insertAt = function(n, i) {
  * Removes the child node at the specified index from this node.
  */
 pv.Dom.Node.prototype.removeAt = function(i) {
-  var ns = this.childNodes;
-  var L = ns.length;
-  if(i < 0 || i >= L) { return /*undefined*/; }
+    var ns = this.childNodes;
+    var L = ns.length;
+    if (i < 0 || i >= L) {
+        return /*undefined*/ ;
+    }
 
-  // ns must be the local array
-  var n = ns[i];
-  ns.splice(i, 1);
+    // ns must be the local array
+    var n = ns[i];
+    ns.splice(i, 1);
 
-  if(i < L - 1 && i < this._firstDirtyChildIndex) { this._firstDirtyChildIndex = i; }
+    if (i < L - 1 && i < this._firstDirtyChildIndex) {
+        this._firstDirtyChildIndex = i;
+    }
 
-  var psib = n.previousSibling;
-  var nsib = n.nextSibling;
-  if (psib) { psib.nextSibling     = nsib; }
-  else      { this.firstChild      = nsib; }
-  if (nsib) { nsib.previousSibling = psib; }
-  else      { this.lastChild       = psib; }
+    var psib = n.previousSibling;
+    var nsib = n.nextSibling;
+    if (psib) {
+        psib.nextSibling = nsib;
+    } else {
+        this.firstChild = nsib;
+    }
+    if (nsib) {
+        nsib.previousSibling = psib;
+    } else {
+        this.lastChild = psib;
+    }
 
-  n.nextSibling = n.previousSibling = n.parentNode = null;
+    n.nextSibling = n.previousSibling = n.parentNode = null;
 
-  this._childRemoved(n, i);
+    this._childRemoved(n, i);
 
-  return n;
+    return n;
 };
 
 /**
@@ -2500,30 +2732,38 @@ pv.Dom.Node.prototype.removeAt = function(i) {
  * @throws Error if <i>r</i> is not a child of this node.
  */
 pv.Dom.Node.prototype.replaceChild = function(n, r) {
-  // Also validates that r is a child of `this`.
-  var i = this.findChildIndex(r);
+    // Also validates that r is a child of `this`.
+    var i = this.findChildIndex(r);
 
-  var pn = n.parentNode;
-  if(pn) { pn.removeChild(n); }
+    var pn = n.parentNode;
+    if (pn) {
+        pn.removeChild(n);
+    }
 
-  n.parentNode  = this;
-  n.nextSibling = r.nextSibling;
-  n._childIndex = r._childIndex;
+    n.parentNode = this;
+    n.nextSibling = r.nextSibling;
+    n._childIndex = r._childIndex;
 
-  var psib = n.previousSibling = r.previousSibling;
-  if(psib) { psib.nextSibling = n; }
-  else     { this.firstChild  = n; }
+    var psib = n.previousSibling = r.previousSibling;
+    if (psib) {
+        psib.nextSibling = n;
+    } else {
+        this.firstChild = n;
+    }
 
-  var nsib = r.nextSibling;
-  if(nsib) { nsib.previousSibling = n; }
-  else     { this.lastChild       = n; }
+    var nsib = r.nextSibling;
+    if (nsib) {
+        nsib.previousSibling = n;
+    } else {
+        this.lastChild = n;
+    }
 
-  // Must be the local array, otherwise r could not be a child of `this`
-  this.childNodes[i] = n;
+    // Must be the local array, otherwise r could not be a child of `this`
+    this.childNodes[i] = n;
 
-  this._childRemoved(r, i);
-  this._childAdded(n, i);
-  return r;
+    this._childRemoved(r, i);
+    this._childAdded(n, i);
+    return r;
 };
 
 
@@ -2534,26 +2774,28 @@ pv.Dom.Node.prototype.replaceChild = function(n, r) {
  * @type number
  */
 pv.Dom.Node.prototype.childIndex = function(noRebuild) {
-  var p = this.parentNode;
-  if(p) {
-      var di = p._firstDirtyChildIndex;
-      if(di < Infinity) {
-          var ns = p.childNodes;
-          if(!noRebuild) { return ns.indexOf(this); }
+    var p = this.parentNode;
+    if (p) {
+        var di = p._firstDirtyChildIndex;
+        if (di < Infinity) {
+            var ns = p.childNodes;
+            if (!noRebuild) {
+                return ns.indexOf(this);
+            }
 
-          var L = ns.length;
-          while(di < L) {
-            ns[di]._childIndex = di;
-            di++;
-          }
+            var L = ns.length;
+            while (di < L) {
+                ns[di]._childIndex = di;
+                di++;
+            }
 
-          p._firstDirtyChildIndex = Infinity;
-      }
+            p._firstDirtyChildIndex = Infinity;
+        }
 
-      return this._childIndex;
-  }
+        return this._childIndex;
+    }
 
-  return -1;
+    return -1;
 };
 
 /**
@@ -2566,13 +2808,13 @@ pv.Dom.Node.prototype.childIndex = function(noRebuild) {
  * @param {Function} f a function to apply to each node.
  */
 pv.Dom.Node.prototype.visitBefore = function(f) {
-  function visit(n, d) {
-    f(n, d);
-    for (var c = n.firstChild; c; c = c.nextSibling) {
-      visit(c, d + 1);
+    function visit(n, d) {
+        f(n, d);
+        for (var c = n.firstChild; c; c = c.nextSibling) {
+            visit(c, d + 1);
+        }
     }
-  }
-  visit(this, 0);
+    visit(this, 0);
 };
 
 /**
@@ -2585,13 +2827,13 @@ pv.Dom.Node.prototype.visitBefore = function(f) {
  * @param {Function} f a function to apply to each node.
  */
 pv.Dom.Node.prototype.visitAfter = function(f) {
-  function visit(n, d) {
-    for (var c = n.firstChild; c; c = c.nextSibling) {
-      visit(c, d + 1);
+    function visit(n, d) {
+        for (var c = n.firstChild; c; c = c.nextSibling) {
+            visit(c, d + 1);
+        }
+        f(n, d);
     }
-    f(n, d);
-  }
-  visit(this, 0);
+    visit(this, 0);
 };
 
 /**
@@ -2608,34 +2850,34 @@ pv.Dom.Node.prototype.visitAfter = function(f) {
  * @returns this.
  */
 pv.Dom.Node.prototype.sort = function(f) {
-  if (this.firstChild) {
-    this._firstDirtyChildIndex = Infinity;
+    if (this.firstChild) {
+        this._firstDirtyChildIndex = Infinity;
 
-    // this.firstChild => local childNodes
-    var cs = this.childNodes;
-    cs.sort(f);
+        // this.firstChild => local childNodes
+        var cs = this.childNodes;
+        cs.sort(f);
 
-    var p = (this.firstChild = cs[0]);
-    var c;
-    
-    delete p.previousSibling;
-    p._childIndex = 0;
+        var p = (this.firstChild = cs[0]);
+        var c;
 
-    for (var i = 1, L = cs.length; i < L; i++) {
-      p.sort(f);
-      c = cs[i];
-      c._childIndex = i;
-      c.previousSibling = p;
-      p = p.nextSibling = c;
+        delete p.previousSibling;
+        p._childIndex = 0;
+
+        for (var i = 1, L = cs.length; i < L; i++) {
+            p.sort(f);
+            c = cs[i];
+            c._childIndex = i;
+            c.previousSibling = p;
+            p = p.nextSibling = c;
+        }
+
+        this.lastChild = p;
+        delete p.nextSibling;
+
+        p.sort(f);
     }
 
-    this.lastChild = p;
-    delete p.nextSibling;
-
-    p.sort(f);
-  }
-
-  return this;
+    return this;
 };
 
 /**
@@ -2644,29 +2886,31 @@ pv.Dom.Node.prototype.sort = function(f) {
  * @returns this.
  */
 pv.Dom.Node.prototype.reverse = function() {
-  var childNodes = [];
-  this.visitAfter(function(n) {
-      this._firstDirtyChildIndex = Infinity;
+    var childNodes = [];
+    this.visitAfter(function(n) {
+        this._firstDirtyChildIndex = Infinity;
 
-      var c;
-      while ((c = n.lastChild)) {
-        childNodes.push(n.removeChild(c));
-      }
-
-      if(childNodes.length) {
-        while((c = childNodes.pop())) {
-          n.insertBefore(c, n.firstChild);
+        var c;
+        while ((c = n.lastChild)) {
+            childNodes.push(n.removeChild(c));
         }
-      }
+
+        if (childNodes.length) {
+            while ((c = childNodes.pop())) {
+                n.insertBefore(c, n.firstChild);
+            }
+        }
     });
-  return this;
+    return this;
 };
 
 /** Returns all descendants of this node in preorder traversal. */
 pv.Dom.Node.prototype.nodes = function() {
-  var array = [];
-  this.visitBefore(function(n) { array.push(n); });
-  return array;
+    var array = [];
+    this.visitBefore(function(n) {
+        array.push(n);
+    });
+    return array;
 };
 
 /**
@@ -2680,22 +2924,28 @@ pv.Dom.Node.prototype.nodes = function() {
  * @param {boolean} [recursive] whether the toggle should apply to descendants.
  */
 pv.Dom.Node.prototype.toggle = function(recursive) {
-  if (recursive) {
-    return this.toggled
-      ? this.visitBefore(function(n) { if( n.toggled) n.toggle(); })
-      : this.visitAfter (function(n) { if(!n.toggled) n.toggle(); });
-  }
+    if (recursive) {
+        return this.toggled ? this.visitBefore(function(n) {
+            if (n.toggled) n.toggle();
+        }) : this.visitAfter(function(n) {
+            if (!n.toggled) n.toggle();
+        });
+    }
 
-  var c;
-  var n = this;
-  if(n.toggled) {
-    while((c = n.toggled.pop())) { n.appendChild(c); }
-    delete n.toggled;
-  } else if((c = n.lastChild)) {
-    n.toggled = [];
-    do { n.toggled.push(n.removeChild(c)); }
-    while((c = n.lastChild));
-  }
+    var c;
+    var n = this;
+    if (n.toggled) {
+        while ((c = n.toggled.pop())) {
+            n.appendChild(c);
+        }
+        delete n.toggled;
+    } else if ((c = n.lastChild)) {
+        n.toggled = [];
+        do {
+            n.toggled.push(n.removeChild(c));
+        }
+        while ((c = n.lastChild));
+    }
 };
 
 /**
@@ -2706,11 +2956,11 @@ pv.Dom.Node.prototype.toggle = function(recursive) {
  * @returns {array} nodes.
  */
 pv.nodes = function(values) {
-  var root = new pv.Dom.Node();
-  for (var i = 0, V = values.length; i < V; i++) {
-    root.appendChild(new pv.Dom.Node(values[i]));
-  }
-  return root.nodes();
+    var root = new pv.Dom.Node();
+    for (var i = 0, V = values.length; i < V; i++) {
+        root.appendChild(new pv.Dom.Node(values[i]));
+    }
+    return root.nodes();
 };
 /**
  * Returns a {@link pv.Tree} operator for the specified array. This is a
@@ -2721,7 +2971,7 @@ pv.nodes = function(values) {
  * @returns {pv.Tree} a tree operator for the specified array.
  */
 pv.tree = function(array) {
-  return new pv.Tree(array);
+    return new pv.Tree(array);
 };
 
 /**
@@ -2786,7 +3036,7 @@ pv.tree = function(array) {
  * @param {array} array an array from which to construct a tree.
  */
 pv.Tree = function(array) {
-  this.array = array;
+    this.array = array;
 };
 
 /**
@@ -2800,8 +3050,8 @@ pv.Tree = function(array) {
  * @returns {pv.Tree} this.
  */
 pv.Tree.prototype.keys = function(k) {
-  this.k = k;
-  return this;
+    this.k = k;
+    return this;
 };
 
 /**
@@ -2814,8 +3064,8 @@ pv.Tree.prototype.keys = function(k) {
  * @returns {pv.Tree} this.
  */
 pv.Tree.prototype.value = function(v) {
-  this.v = v;
-  return this;
+    this.v = v;
+    return this;
 };
 
 /**
@@ -2825,16 +3075,18 @@ pv.Tree.prototype.value = function(v) {
  * @returns a hierarchical map of values.
  */
 pv.Tree.prototype.map = function() {
-  var map = {}, o = {};
-  for (var i = 0; i < this.array.length; i++) {
-    o.index = i;
-    var value = this.array[i], keys = this.k.call(o, value), node = map;
-    for (var j = 0; j < keys.length - 1; j++) {
-      node = node[keys[j]] || (node[keys[j]] = {});
+    var map = {}, o = {};
+    for (var i = 0; i < this.array.length; i++) {
+        o.index = i;
+        var value = this.array[i],
+            keys = this.k.call(o, value),
+            node = map;
+        for (var j = 0; j < keys.length - 1; j++) {
+            node = node[keys[j]] || (node[keys[j]] = {});
+        }
+        node[keys[j]] = this.v ? this.v.call(o, value) : value;
     }
-    node[keys[j]] = this.v ? this.v.call(o, value) : value;
-  }
-  return map;
+    return map;
 };
 /**
  * Returns a {@link pv.Nest} operator for the specified array. This is a
@@ -2845,7 +3097,7 @@ pv.Tree.prototype.map = function() {
  * @returns {pv.Nest} a nest operator for the specified array.
  */
 pv.nest = function(array) {
-  return new pv.Nest(array);
+    return new pv.Nest(array);
 };
 
 /**
@@ -2900,8 +3152,8 @@ pv.nest = function(array) {
  * @param {array} array an array of elements to nest.
  */
 pv.Nest = function(array) {
-  this.array = array;
-  this.keys = [];
+    this.array = array;
+    this.keys = [];
 };
 
 /**
@@ -2913,8 +3165,8 @@ pv.Nest = function(array) {
  * @returns {pv.Nest} this.
  */
 pv.Nest.prototype.key = function(key) {
-  this.keys.push(key);
-  return this;
+    this.keys.push(key);
+    return this;
 };
 
 /**
@@ -2941,8 +3193,8 @@ pv.Nest.prototype.key = function(key) {
  * @returns {pv.Nest} this.
  */
 pv.Nest.prototype.sortKeys = function(order) {
-  this.keys[this.keys.length - 1].order = order || pv.naturalOrder;
-  return this;
+    this.keys[this.keys.length - 1].order = order || pv.naturalOrder;
+    return this;
 };
 
 /**
@@ -2968,8 +3220,8 @@ pv.Nest.prototype.sortKeys = function(order) {
  * @returns {pv.Nest} this.
  */
 pv.Nest.prototype.sortValues = function(order) {
-  this.order = order || pv.naturalOrder;
-  return this;
+    this.order = order || pv.naturalOrder;
+    return this;
 };
 
 /**
@@ -2990,34 +3242,34 @@ pv.Nest.prototype.sortValues = function(order) {
  * @returns a hierarchical map of values.
  */
 pv.Nest.prototype.map = function() {
-  var map = {}, values = [];
+    var map = {}, values = [];
 
-  /* Build the map. */
-  for (var i, j = 0; j < this.array.length; j++) {
-    var x = this.array[j];
-    var m = map;
-    for (i = 0; i < this.keys.length - 1; i++) {
-      var k = this.keys[i](x);
-      if (!m[k]) m[k] = {};
-      m = m[k];
+    /* Build the map. */
+    for (var i, j = 0; j < this.array.length; j++) {
+        var x = this.array[j];
+        var m = map;
+        for (i = 0; i < this.keys.length - 1; i++) {
+            var k = this.keys[i](x);
+            if (!m[k]) m[k] = {};
+            m = m[k];
+        }
+        k = this.keys[i](x);
+        if (!m[k]) {
+            var a = [];
+            values.push(a);
+            m[k] = a;
+        }
+        m[k].push(x);
     }
-    k = this.keys[i](x);
-    if (!m[k]) {
-      var a = [];
-      values.push(a);
-      m[k] = a;
-    }
-    m[k].push(x);
-  }
 
-  /* Sort each leaf array. */
-  if (this.order) {
-    for (var i = 0; i < values.length; i++) {
-      values[i].sort(this.order);
+    /* Sort each leaf array. */
+    if (this.order) {
+        for (var i = 0; i < values.length; i++) {
+            values[i].sort(this.order);
+        }
     }
-  }
 
-  return map;
+    return map;
 };
 
 /**
@@ -3035,29 +3287,36 @@ pv.Nest.prototype.map = function() {
  */
 pv.Nest.prototype.entries = function() {
 
-  /** Recursively extracts the entries for the given map. */
-  function entries(map) {
-    var array = [];
-    for (var k in map) {
-      var v = map[k];
-      array.push({ key: k, values: (v instanceof Array) ? v : entries(v) });
-    };
-    return array;
-  }
+    /** Recursively extracts the entries for the given map. */
 
-  /** Recursively sorts the values for the given key-values array. */
-  function sort(array, i) {
-    var o = this.keys[i].order;
-    if (o) array.sort(function(a, b) { return o(a.key, b.key); });
-    if (++i < this.keys.length) {
-      for (var j = 0; j < array.length; j++) {
-        sort.call(this, array[j].values, i);
-      }
+    function entries(map) {
+        var array = [];
+        for (var k in map) {
+            var v = map[k];
+            array.push({
+                key: k,
+                values: (v instanceof Array) ? v : entries(v)
+            });
+        };
+        return array;
     }
-    return array;
-  }
 
-  return sort.call(this, entries(this.map()), 0);
+    /** Recursively sorts the values for the given key-values array. */
+
+    function sort(array, i) {
+        var o = this.keys[i].order;
+        if (o) array.sort(function(a, b) {
+            return o(a.key, b.key);
+        });
+        if (++i < this.keys.length) {
+            for (var j = 0; j < array.length; j++) {
+                sort.call(this, array[j].values, i);
+            }
+        }
+        return array;
+    }
+
+    return sort.call(this, entries(this.map()), 0);
 };
 
 /**
@@ -3078,20 +3337,21 @@ pv.Nest.prototype.entries = function() {
  */
 pv.Nest.prototype.rollup = function(f) {
 
-  /** Recursively descends to the leaf nodes (arrays) and does rollup. */
-  function rollup(map) {
-    for (var key in map) {
-      var value = map[key];
-      if (value instanceof Array) {
-        map[key] = f(value);
-      } else {
-        rollup(value);
-      }
-    }
-    return map;
-  }
+    /** Recursively descends to the leaf nodes (arrays) and does rollup. */
 
-  return rollup(this.map());
+    function rollup(map) {
+        for (var key in map) {
+            var value = map[key];
+            if (value instanceof Array) {
+                map[key] = f(value);
+            } else {
+                rollup(value);
+            }
+        }
+        return map;
+    }
+
+    return rollup(this.map());
 };
 /**
  * Returns a {@link pv.Flatten} operator for the specified map. This is a
@@ -3102,7 +3362,7 @@ pv.Nest.prototype.rollup = function(f) {
  * @returns {pv.Flatten} a flatten operator for the specified map.
  */
 pv.flatten = function(map) {
-  return new pv.Flatten(map);
+    return new pv.Flatten(map);
 };
 
 /**
@@ -3154,8 +3414,8 @@ pv.flatten = function(map) {
  * @param map a map to flatten.
  */
 pv.Flatten = function(map) {
-  this.map = map;
-  this.keys = [];
+    this.map = map;
+    this.keys = [];
 };
 
 /**
@@ -3169,9 +3429,12 @@ pv.Flatten = function(map) {
  * @returns {pv.Nest} this.
  */
 pv.Flatten.prototype.key = function(key, f) {
-  this.keys.push({name: key, value: f});
-  delete this.$leaf;
-  return this;
+    this.keys.push({
+        name: key,
+        value: f
+    });
+    delete this.$leaf;
+    return this;
 };
 
 /**
@@ -3185,9 +3448,9 @@ pv.Flatten.prototype.key = function(key, f) {
  * @returns {pv.Nest} this.
  */
 pv.Flatten.prototype.leaf = function(f) {
-  this.keys.length = 0;
-  this.$leaf = f;
-  return this;
+    this.keys.length = 0;
+    this.$leaf = f;
+    return this;
 };
 
 /**
@@ -3197,46 +3460,54 @@ pv.Flatten.prototype.leaf = function(f) {
  * @returns an array of elements from the flattened map.
  */
 pv.Flatten.prototype.array = function() {
-  var entries = [], stack = [], keys = this.keys, leaf = this.$leaf;
+    var entries = [],
+        stack = [],
+        keys = this.keys,
+        leaf = this.$leaf;
 
-  /* Recursively visit using the leaf function. */
-  if (leaf) {
-    function recurse(value, i) {
-      if (leaf(value)) {
-        entries.push({keys: stack.slice(), value: value});
-      } else {
-        for (var key in value) {
-          stack.push(key);
-          recurse(value[key], i + 1);
-          stack.pop();
+    /* Recursively visit using the leaf function. */
+    if (leaf) {
+        function recurse(value, i) {
+            if (leaf(value)) {
+                entries.push({
+                    keys: stack.slice(),
+                    value: value
+                });
+            } else {
+                for (var key in value) {
+                    stack.push(key);
+                    recurse(value[key], i + 1);
+                    stack.pop();
+                }
+            }
         }
-      }
+        recurse(this.map, 0);
+        return entries;
     }
-    recurse(this.map, 0);
-    return entries;
-  }
 
-  /* Recursively visits the specified value. */
-  function visit(value, i) {
-    if (i < keys.length - 1) {
-      for (var key in value) {
-        stack.push(key);
-        visit(value[key], i + 1);
-        stack.pop();
-      }
-    } else {
-      entries.push(stack.concat(value));
+    /* Recursively visits the specified value. */
+
+    function visit(value, i) {
+        if (i < keys.length - 1) {
+            for (var key in value) {
+                stack.push(key);
+                visit(value[key], i + 1);
+                stack.pop();
+            }
+        } else {
+            entries.push(stack.concat(value));
+        }
     }
-  }
 
-  visit(this.map, 0);
-  return entries.map(function(stack) {
-      var m = {};
-      for (var i = 0; i < keys.length; i++) {
-        var k = keys[i], v = stack[i];
-        m[k.name] = k.value ? k.value.call(null, v) : v;
-      }
-      return m;
+    visit(this.map, 0);
+    return entries.map(function(stack) {
+        var m = {};
+        for (var i = 0; i < keys.length; i++) {
+            var k = keys[i],
+                v = stack[i];
+            m[k.name] = k.value ? k.value.call(null, v) : v;
+        }
+        return m;
     });
 };
 /**
@@ -3251,7 +3522,11 @@ pv.Flatten.prototype.array = function() {
  * alternatively, that the matrix fields can be get and set directly.
  */
 pv.Transform = function() {};
-pv.Transform.prototype = {k: 1, x: 0, y: 0};
+pv.Transform.prototype = {
+    k: 1,
+    x: 0,
+    y: 0
+};
 
 /**
  * The scale magnitude; defaults to 1.
@@ -3293,11 +3568,11 @@ pv.Transform.identity = new pv.Transform();
  * @returns {pv.Transform} the translated transformation matrix.
  */
 pv.Transform.prototype.translate = function(x, y) {
-  var v = new pv.Transform();
-  v.k = this.k;
-  v.x = this.k * x + this.x;
-  v.y = this.k * y + this.y;
-  return v;
+    var v = new pv.Transform();
+    v.k = this.k;
+    v.x = this.k * x + this.x;
+    v.y = this.k * y + this.y;
+    return v;
 };
 
 // k 0 x   d 0 0   kd  0 x
@@ -3311,11 +3586,11 @@ pv.Transform.prototype.translate = function(x, y) {
  * @returns {pv.Transform} the scaled transformation matrix.
  */
 pv.Transform.prototype.scale = function(k) {
-  var v = new pv.Transform();
-  v.k = this.k * k;
-  v.x = this.x;
-  v.y = this.y;
-  return v;
+    var v = new pv.Transform();
+    v.k = this.k * k;
+    v.x = this.x;
+    v.y = this.y;
+    return v;
 };
 
 /**
@@ -3324,11 +3599,12 @@ pv.Transform.prototype.scale = function(k) {
  * @returns {pv.Transform} the inverted transformation matrix.
  */
 pv.Transform.prototype.invert = function() {
-  var v = new pv.Transform(), k = 1 / this.k;
-  v.k = k;
-  v.x = -this.x * k;
-  v.y = -this.y * k;
-  return v;
+    var v = new pv.Transform(),
+        k = 1 / this.k;
+    v.k = k;
+    v.x = -this.x * k;
+    v.y = -this.y * k;
+    return v;
 };
 
 // k 0 x   d 0 a   kd  0 ka+x
@@ -3342,11 +3618,11 @@ pv.Transform.prototype.invert = function() {
  * @returns {pv.Transform} the post-multiplied transformation matrix.
  */
 pv.Transform.prototype.times = function(m) {
-  var v = new pv.Transform();
-  v.k = this.k * m.k;
-  v.x = this.k * m.x + this.x;
-  v.y = this.k * m.y + this.y;
-  return v;
+    var v = new pv.Transform();
+    v.k = this.k * m.k;
+    v.x = this.k * m.x + this.x;
+    v.y = this.k * m.y + this.y;
+    return v;
 };
 /**
  * Abstract; see the various scale implementations.
@@ -3389,37 +3665,39 @@ pv.Scale = function() {};
  * @param end the end value.
  */
 pv.Scale.interpolator = function(start, end) {
-  if (typeof start == "number") {
+    if (typeof start == "number") {
+        return function(t) {
+            return t * (end - start) + start;
+        };
+    }
+
+    /* For now, assume color. */
+
+    // Gradients are not supported in animations
+    // Just show the first one if < 0.5 and the other if >= 0.5
+    var startGradient = (start.type && start.type !== 'solid');
+    var endGradient = (end.type && end.type !== 'solid');
+    if (startGradient || endGradient) {
+        start = startGradient ? start : pv.color(start).rgb();
+        end = endGradient ? end : pv.color(end).rgb();
+        return function(t) {
+            return t < 0.5 ? start : end;
+        };
+    }
+
+    start = pv.color(start).rgb();
+    end = pv.color(end).rgb();
     return function(t) {
-      return t * (end - start) + start;
+        var a = start.a * (1 - t) + end.a * t;
+        if (a < 1e-5) {
+            a = 0;
+        } // avoid scientific notation
+        return (start.a == 0) ? pv.rgb(end.r, end.g, end.b, a) :
+            (end.a == 0) ? pv.rgb(start.r, start.g, start.b, a) :
+            pv.rgb(Math.round(start.r * (1 - t) + end.r * t),
+                Math.round(start.g * (1 - t) + end.g * t),
+                Math.round(start.b * (1 - t) + end.b * t), a);
     };
-  }
-
-  /* For now, assume color. */
-
-  // Gradients are not supported in animations
-  // Just show the first one if < 0.5 and the other if >= 0.5
-  var startGradient = (start.type && start.type !== 'solid');
-  var endGradient   = (end.type   && end  .type !== 'solid');
-  if (startGradient || endGradient) {
-      start = startGradient ? start : pv.color(start).rgb();
-      end   = endGradient   ? end   : pv.color(end  ).rgb();
-      return function(t){
-          return t < 0.5 ? start : end;
-      };
-  }
-
-  start = pv.color(start).rgb();
-  end   = pv.color(end  ).rgb();
-  return function(t) {
-    var a = start.a * (1 - t) + end.a * t;
-    if(a < 1e-5) { a = 0; } // avoid scientific notation
-    return (start.a == 0) ? pv.rgb(end.r,   end.g,   end.b,   a) : 
-           (end.a   == 0) ? pv.rgb(start.r, start.g, start.b, a) : 
-           pv.rgb(Math.round(start.r * (1 - t) + end.r * t),
-                  Math.round(start.g * (1 - t) + end.g * t),
-                  Math.round(start.b * (1 - t) + end.b * t), a);
-  };
 };
 
 /**
@@ -3449,28 +3727,35 @@ pv.Scale.interpolator = function(start, end) {
 
 pv.Scale.common = {
     by: function(f) {
-      var scale = this;
-      function by() { return scale(f.apply(this, arguments)); }
-      for (var method in scale) by[method] = scale[method];
-      return by;
+        var scale = this;
+
+        function by() {
+            return scale(f.apply(this, arguments));
+        }
+        for (var method in scale) by[method] = scale[method];
+        return by;
     },
 
     by1: function(f) {
-      var scale = this;
-      function by1(x) { return scale(f.call(this, x)); }
-      for (var method in scale) by1[method] = scale[method];
-      return by1;
+        var scale = this;
+
+        function by1(x) {
+            return scale(f.call(this, x));
+        }
+        for (var method in scale) by1[method] = scale[method];
+        return by1;
     },
 
-    transform: function(t){
-      var scale = this;
-      function transfScale(){
-        return t.call(this, scale.apply(scale, arguments));
-      }
+    transform: function(t) {
+        var scale = this;
 
-      for (var method in scale) transfScale[method] = scale[method];
+        function transfScale() {
+            return t.call(this, scale.apply(scale, arguments));
+        }
 
-      return transfScale;
+        for (var method in scale) transfScale[method] = scale[method];
+
+        return transfScale;
     }
 };
 /**
@@ -3532,436 +3817,488 @@ pv.Scale.common = {
  * @extends pv.Scale
  */
 pv.Scale.quantitative = function() {
-  var d = [0, 1], // default domain
-      l = [0, 1], // default transformed domain
-      r = [0, 1], // default range
-      i = [pv.identity], // default interpolators
-      type = Number, // default type
-      n = false, // whether the domain is negative
-      f = pv.identity, // default forward transform
-      g = pv.identity, // default inverse transform
-      tickFormat = String, // default tick formatting function
-      tickFormatter = null, // custom tick formatting function
-      dateTickFormat, //custom date tick format
-      dateTickPrecision, //custom date tick precision
-      usedDateTickPrecision,
-      usedNumberExponent;
+    var d = [0, 1], // default domain
+        l = [0, 1], // default transformed domain
+        r = [0, 1], // default range
+        i = [pv.identity], // default interpolators
+        type = Number, // default type
+        n = false, // whether the domain is negative
+        f = pv.identity, // default forward transform
+        g = pv.identity, // default inverse transform
+        tickFormat = String, // default tick formatting function
+        tickFormatter = null, // custom tick formatting function
+        dateTickFormat, //custom date tick format
+        dateTickPrecision, //custom date tick precision
+        usedDateTickPrecision,
+        usedNumberExponent;
 
-  /** @private */
-  function newDate(x) {
-    return new Date(x);
-  }
+    /** @private */
 
-  /** @private */
-  function scale(x) {
-    var j = pv.search(d, x);
-    if (j < 0) j = -j - 2;
-    j = Math.max(0, Math.min(i.length - 1, j));
-    return i[j]((f(x) - l[j]) / (l[j + 1] - l[j]));
-  }
-
-  /** @private */
-  scale.transform = function(forward, inverse) {
-    /** @ignore */ f = function(x) { return n ? -forward(-x) : forward(x); };
-    /** @ignore */ g = function(y) { return n ? -inverse(-y) : inverse(y); };
-    l = d.map(f);
-    return this;
-  };
-
-  /**
-   * Sets or gets the input domain. This method can be invoked several ways:
-   *
-   * <p>1. <tt>domain(min, ..., max)</tt>
-   *
-   * <p>Specifying the domain as a series of numbers is the most explicit and
-   * recommended approach. Most commonly, two numbers are specified: the minimum
-   * and maximum value. However, for a diverging scale, or other subdivided
-   * non-uniform scales, multiple values can be specified. Values can be derived
-   * from data using {@link pv.min} and {@link pv.max}. For example:
-   *
-   * <pre>    .domain(0, pv.max(array))</pre>
-   *
-   * An alternative method for deriving minimum and maximum values from data
-   * follows.
-   *
-   * <p>2. <tt>domain(array, minf, maxf)</tt>
-   *
-   * <p>When both the minimum and maximum value are derived from data, the
-   * arguments to the <tt>domain</tt> method can be specified as the array of
-   * data, followed by zero, one or two accessor functions. For example, if the
-   * array of data is just an array of numbers:
-   *
-   * <pre>    .domain(array)</pre>
-   *
-   * On the other hand, if the array elements are objects representing stock
-   * values per day, and the domain should consider the stock's daily low and
-   * daily high:
-   *
-   * <pre>    .domain(array, function(d) d.low, function(d) d.high)</pre>
-   *
-   * The first method of setting the domain is preferred because it is more
-   * explicit; setting the domain using this second method should be used only
-   * if brevity is required.
-   *
-   * <p>3. <tt>domain()</tt>
-   *
-   * <p>Invoking the <tt>domain</tt> method with no arguments returns the
-   * current domain as an array of numbers.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.domain
-   * @param {number...} domain... domain values.
-   * @returns {pv.Scale.quantitative} <tt>this</tt>, or the current domain.
-   */
-  scale.domain = function(array, min, max) {
-    if (arguments.length) {
-      var o; // the object we use to infer the domain type
-      if (array instanceof Array) {
-        if (arguments.length < 2) min = pv.identity;
-        if (arguments.length < 3) max = min;
-        o = array.length && min(array[0]);
-        d = array.length ? [pv.min(array, min), pv.max(array, max)] : [];
-      } else {
-        o = array;
-        d = Array.prototype.slice.call(arguments).map(Number);
-      }
-      if (!d.length) d = [-Infinity, Infinity];
-      else if (d.length == 1) d = [d[0], d[0]];
-      n = (d[0] || d[d.length - 1]) < 0;
-      l = d.map(f);
-      type = (o instanceof Date) ? newDate : Number;
-      return this;
-    }
-    return d.map(type);
-  };
-
-  /**
-   * Sets or gets the output range. This method can be invoked several ways:
-   *
-   * <p>1. <tt>range(min, ..., max)</tt>
-   *
-   * <p>The range may be specified as a series of numbers or colors. Most
-   * commonly, two numbers are specified: the minimum and maximum pixel values.
-   * For a color scale, values may be specified as {@link pv.Color}s or
-   * equivalent strings. For a diverging scale, or other subdivided non-uniform
-   * scales, multiple values can be specified. For example:
-   *
-   * <pre>    .range("red", "white", "green")</pre>
-   *
-   * <p>Currently, only numbers and colors are supported as range values. The
-   * number of range values must exactly match the number of domain values, or
-   * the behavior of the scale is undefined.
-   *
-   * <p>2. <tt>range()</tt>
-   *
-   * <p>Invoking the <tt>range</tt> method with no arguments returns the current
-   * range as an array of numbers or colors.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.range
-   * @param {...} range... range values.
-   * @returns {pv.Scale.quantitative} <tt>this</tt>, or the current range.
-   */
-  scale.range = function() {
-    if (arguments.length) {
-      r = Array.prototype.slice.call(arguments);
-      if (!r.length) r = [-Infinity, Infinity];
-      else if (r.length == 1) r = [r[0], r[0]];
-      i = [];
-      for (var j = 0; j < r.length - 1; j++) {
-        i.push(pv.Scale.interpolator(r[j], r[j + 1]));
-      }
-      return this;
-    }
-    return r;
-  };
-
-  /**
-   * Inverts the specified value in the output range, returning the
-   * corresponding value in the input domain. This is frequently used to convert
-   * the mouse location (see {@link pv.Mark#mouse}) to a value in the input
-   * domain. Inversion is only supported for numeric ranges, and not colors.
-   *
-   * <p>Note that this method does not do any rounding or bounds checking. If
-   * the input domain is discrete (e.g., an array index), the returned value
-   * should be rounded. If the specified <tt>y</tt> value is outside the range,
-   * the returned value may be equivalently outside the input domain.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.invert
-   * @param {number} y a value in the output range (a pixel location).
-   * @returns {number} a value in the input domain.
-   */
-  scale.invert = function(y) {
-    var j = pv.search(r, y);
-    if (j < 0) j = -j - 2;
-    j = Math.max(0, Math.min(i.length - 1, j));
-    return type(g(l[j] + (y - r[j]) / (r[j + 1] - r[j]) * (l[j + 1] - l[j])));
-  };
-
-  /**
-   * Returns an array of evenly-spaced, suitably-rounded values in the input
-   * domain. This method attempts to return between 5 and 10 tick values. These
-   * values are frequently used in conjunction with {@link pv.Rule} to display
-   * tick marks or grid lines.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.ticks
-   * @param {number} [m] optional number of desired numeric ticks.
-   * @param {object} [options] optional keyword arguments object.
-   * @param {boolean} [options.roundInside=true] should the ticks be ensured to be strictly inside the scale domain, or to strictly outside the scale domain.
-   * @param {boolean} [options.numberExponentMin=-Inifinity] minimum value for the step exponent.
-   * @param {boolean} [options.numberExponentMax=+Inifinity] maximum value for the step exponent.
-   * @returns {Array.<number>} an array input domain values to use as ticks.
-   */
-  scale.ticks = function(m, options) {
-    var start = d[0],
-        end = d[d.length - 1],
-        reverse = end < start,
-        min = reverse ? end : start,
-        max = reverse ? start : end,
-        span = max - min;
-
-    /* Special case: empty, invalid or infinite span. */
-    if (!span || !isFinite(span)) {
-      if (type == newDate) tickFormat = pv.Format.date("%x");
-      return [type(min)];
+    function newDate(x) {
+        return new Date(x);
     }
 
-    /* Special case: dates. */
-    if (type == newDate) {
-      /* Floor the date d given the precision p. */
-      function floor(d, p) {
-        switch (p) {
-          case 31536e6: d.setMonth(0);
-          case 2592e6: d.setDate(1);
-          case 6048e5: if (p == 6048e5) d.setDate(d.getDate() - d.getDay());
-          case 864e5: d.setHours(0);
-          case 36e5: d.setMinutes(0);
-          case 6e4: d.setSeconds(0);
-          case 1e3: d.setMilliseconds(0);
+    /** @private */
+
+    function scale(x) {
+        var j = pv.search(d, x);
+        if (j < 0) j = -j - 2;
+        j = Math.max(0, Math.min(i.length - 1, j));
+        return i[j]((f(x) - l[j]) / (l[j + 1] - l[j]));
+    }
+
+    /** @private */
+    scale.transform = function(forward, inverse) {
+        /** @ignore */
+        f = function(x) {
+            return n ? -forward(-x) : forward(x);
+        };
+        /** @ignore */
+        g = function(y) {
+            return n ? -inverse(-y) : inverse(y);
+        };
+        l = d.map(f);
+        return this;
+    };
+
+    /**
+     * Sets or gets the input domain. This method can be invoked several ways:
+     *
+     * <p>1. <tt>domain(min, ..., max)</tt>
+     *
+     * <p>Specifying the domain as a series of numbers is the most explicit and
+     * recommended approach. Most commonly, two numbers are specified: the minimum
+     * and maximum value. However, for a diverging scale, or other subdivided
+     * non-uniform scales, multiple values can be specified. Values can be derived
+     * from data using {@link pv.min} and {@link pv.max}. For example:
+     *
+     * <pre>    .domain(0, pv.max(array))</pre>
+     *
+     * An alternative method for deriving minimum and maximum values from data
+     * follows.
+     *
+     * <p>2. <tt>domain(array, minf, maxf)</tt>
+     *
+     * <p>When both the minimum and maximum value are derived from data, the
+     * arguments to the <tt>domain</tt> method can be specified as the array of
+     * data, followed by zero, one or two accessor functions. For example, if the
+     * array of data is just an array of numbers:
+     *
+     * <pre>    .domain(array)</pre>
+     *
+     * On the other hand, if the array elements are objects representing stock
+     * values per day, and the domain should consider the stock's daily low and
+     * daily high:
+     *
+     * <pre>    .domain(array, function(d) d.low, function(d) d.high)</pre>
+     *
+     * The first method of setting the domain is preferred because it is more
+     * explicit; setting the domain using this second method should be used only
+     * if brevity is required.
+     *
+     * <p>3. <tt>domain()</tt>
+     *
+     * <p>Invoking the <tt>domain</tt> method with no arguments returns the
+     * current domain as an array of numbers.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.domain
+     * @param {number...} domain... domain values.
+     * @returns {pv.Scale.quantitative} <tt>this</tt>, or the current domain.
+     */
+    scale.domain = function(array, min, max) {
+        if (arguments.length) {
+            var o; // the object we use to infer the domain type
+            if (array instanceof Array) {
+                if (arguments.length < 2) min = pv.identity;
+                if (arguments.length < 3) max = min;
+                o = array.length && min(array[0]);
+                d = array.length ? [pv.min(array, min), pv.max(array, max)] : [];
+            } else {
+                o = array;
+                d = Array.prototype.slice.call(arguments).map(Number);
+            }
+            if (!d.length) d = [-Infinity, Infinity];
+            else if (d.length == 1) d = [d[0], d[0]];
+            n = (d[0] || d[d.length - 1]) < 0;
+            l = d.map(f);
+            type = (o instanceof Date) ? newDate : Number;
+            return this;
         }
-      }
+        return d.map(type);
+    };
 
-      var nn = m == null ? 5 : m;
-      var precision, format, increment, step = 1;
-      if (span >= nn * 31536e6) {
-        precision = 31536e6;
-        format = "%Y";
-        /** @ignore */ increment = function(d) { d.setFullYear(d.getFullYear() + step); };
-      } else if (span >= nn * 2592e6) {
-        precision = 2592e6;
-        format = "%m/%Y";
-        /** @ignore */ increment = function(d) { d.setMonth(d.getMonth() + step); };
-      } else if (span >= nn * 6048e5) {
-        precision = 6048e5;
-        format = "%m/%d";
-        /** @ignore */ increment = function(d) { d.setDate(d.getDate() + 7 * step); };
-      } else if (span >= nn * 864e5) {
-        precision = 864e5;
-        format = "%m/%d";
-        /** @ignore */ increment = function(d) { d.setDate(d.getDate() + step); };
-      } else if (span >= nn * 36e5) {
-        precision = 36e5;
-        format = "%I:%M %p";
-        /** @ignore */ increment = function(d) { d.setHours(d.getHours() + step); };
-      } else if (span >= nn * 6e4) {
-        precision = 6e4;
-        format = "%I:%M %p";
-        /** @ignore */ increment = function(d) { d.setMinutes(d.getMinutes() + step); };
-      } else if (span >= nn * 1e3) {
-        precision = 1e3;
-        format = "%I:%M:%S";
-        /** @ignore */ increment = function(d) { d.setSeconds(d.getSeconds() + step); };
-      } else {
-        precision = 1;
-        format = "%S.%Qs";
-        /** @ignore */ increment = function(d) { d.setTime(d.getTime() + step); };
-      }
-
-      precision = dateTickPrecision ? dateTickPrecision : precision;
-      format = dateTickFormat ? dateTickFormat : format;
-
-      usedDateTickPrecision = precision;
-
-      tickFormat = pv.Format.date(format);
-
-      var date = new Date(min), dates = [];
-      floor(date, precision);
-
-      /* If we'd generate too many ticks, skip some!. */
-      var n = span / precision;
-      if (n > 10) {
-        switch (precision) {
-          // 1 hour
-          case 36e5: {
-            step = (n > 20) ? 6 : 3;
-            date.setHours(Math.floor(date.getHours() / step) * step);
-            break;
-          }
-
-          // 30 days
-          case 2592e6: {
-            step = (n > 24) ? 3 : ((n > 12) ? 2 : 1);
-            date.setMonth(Math.floor(date.getMonth() / step) * step);
-            break;
-          }
-
-          // 7 day
-          // (nn = 5:
-          //     span >= 35 days (n >= 5)
-          //     span < 150 days (n <  ~21.43)
-          case 6048e5: {
-            // span (days) | n (ticks/weeks) | step     | new n | description
-            // -----------------------------------------------------------------
-            // 106 - 149   | 15 - 22         | 3*7 = 21 | 5 - 7 | 15 weeks, ~3 months
-            //  71 - 105   | 11 - 15         | 2*7 = 14 | 5 - 7 | 11 weeks, ~2.2 months
-            //  35 -  70   |  5 - 10         | 1*7 =  7 |    -  |  5 weeks, ~1 month
-            step = (n > 15) ? 3 : (n > 10 ? 2 : 1);
-            date.setDate(Math.floor(date.getDate() / (7 * step)) * (7 * step));
-            break;
-          }
-
-          // 1 day (nn = 5: span >= 5 hours and span < 35 days)
-          // span > 10 days: more than 10 ticks
-          case 864e5: {
-            step = (n >= 30) ? 5 : ((n >= 15) ? 3 : 2);
-            date.setDate(Math.floor(date.getDate() / step) * step);
-            break;
-          }
-
-          // 1 minute
-          case 6e4: {
-            step = (n > 30) ? 15 : ((n > 15) ? 10 : 5);
-            date.setMinutes(Math.floor(date.getMinutes() / step) * step);
-            break;
-          }
-
-          // 1 second
-          case 1e3: {
-            step = (n > 90) ? 15 : ((n > 60) ? 10 : 5);
-            date.setSeconds(Math.floor(date.getSeconds() / step) * step);
-            break;
-          }
-
-          // 1 millisecond
-          case 1: {
-            step = (n > 1000) ? 250 : ((n > 200) ? 100 : ((n > 100) ? 50 : ((n > 50) ? 25 : 5)));
-            date.setMilliseconds(Math.floor(date.getMilliseconds() / step) * step);
-            break;
-          }
-
-          // 31536e6 - 1 year
-          default: {
-            step = pv.logCeil(n / 15, 10);
-            if (n / step < 2) step /= 5;
-            else if (n / step < 5) step /= 2;
-            date.setFullYear(Math.floor(date.getFullYear() / step) * step);
-            break;
-          }
+    /**
+     * Sets or gets the output range. This method can be invoked several ways:
+     *
+     * <p>1. <tt>range(min, ..., max)</tt>
+     *
+     * <p>The range may be specified as a series of numbers or colors. Most
+     * commonly, two numbers are specified: the minimum and maximum pixel values.
+     * For a color scale, values may be specified as {@link pv.Color}s or
+     * equivalent strings. For a diverging scale, or other subdivided non-uniform
+     * scales, multiple values can be specified. For example:
+     *
+     * <pre>    .range("red", "white", "green")</pre>
+     *
+     * <p>Currently, only numbers and colors are supported as range values. The
+     * number of range values must exactly match the number of domain values, or
+     * the behavior of the scale is undefined.
+     *
+     * <p>2. <tt>range()</tt>
+     *
+     * <p>Invoking the <tt>range</tt> method with no arguments returns the current
+     * range as an array of numbers or colors.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.range
+     * @param {...} range... range values.
+     * @returns {pv.Scale.quantitative} <tt>this</tt>, or the current range.
+     */
+    scale.range = function() {
+        if (arguments.length) {
+            r = Array.prototype.slice.call(arguments);
+            if (!r.length) r = [-Infinity, Infinity];
+            else if (r.length == 1) r = [r[0], r[0]];
+            i = [];
+            for (var j = 0; j < r.length - 1; j++) {
+                i.push(pv.Scale.interpolator(r[j], r[j + 1]));
+            }
+            return this;
         }
-      }
+        return r;
+    };
+
+    /**
+     * Inverts the specified value in the output range, returning the
+     * corresponding value in the input domain. This is frequently used to convert
+     * the mouse location (see {@link pv.Mark#mouse}) to a value in the input
+     * domain. Inversion is only supported for numeric ranges, and not colors.
+     *
+     * <p>Note that this method does not do any rounding or bounds checking. If
+     * the input domain is discrete (e.g., an array index), the returned value
+     * should be rounded. If the specified <tt>y</tt> value is outside the range,
+     * the returned value may be equivalently outside the input domain.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.invert
+     * @param {number} y a value in the output range (a pixel location).
+     * @returns {number} a value in the input domain.
+     */
+    scale.invert = function(y) {
+        var j = pv.search(r, y);
+        if (j < 0) j = -j - 2;
+        j = Math.max(0, Math.min(i.length - 1, j));
+        return type(g(l[j] + (y - r[j]) / (r[j + 1] - r[j]) * (l[j + 1] - l[j])));
+    };
+
+    /**
+     * Returns an array of evenly-spaced, suitably-rounded values in the input
+     * domain. This method attempts to return between 5 and 10 tick values. These
+     * values are frequently used in conjunction with {@link pv.Rule} to display
+     * tick marks or grid lines.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.ticks
+     * @param {number} [m] optional number of desired numeric ticks.
+     * @param {object} [options] optional keyword arguments object.
+     * @param {boolean} [options.roundInside=true] should the ticks be ensured to be strictly inside the scale domain, or to strictly outside the scale domain.
+     * @param {boolean} [options.numberExponentMin=-Inifinity] minimum value for the step exponent.
+     * @param {boolean} [options.numberExponentMax=+Inifinity] maximum value for the step exponent.
+     * @returns {Array.<number>} an array input domain values to use as ticks.
+     */
+    scale.ticks = function(m, options) {
+        var start = d[0],
+            end = d[d.length - 1],
+            reverse = end < start,
+            min = reverse ? end : start,
+            max = reverse ? start : end,
+            span = max - min;
+
+        /* Special case: empty, invalid or infinite span. */
+        if (!span || !isFinite(span)) {
+            if (type == newDate) tickFormat = pv.Format.date("%x");
+            return [type(min)];
+        }
+
+        /* Special case: dates. */
+        if (type == newDate) {
+            /* Floor the date d given the precision p. */
+
+            function floor(d, p) {
+                switch (p) {
+                    case 31536e6:
+                        d.setMonth(0);
+                    case 2592e6:
+                        d.setDate(1);
+                    case 6048e5:
+                        if (p == 6048e5) d.setDate(d.getDate() - d.getDay());
+                    case 864e5:
+                        d.setHours(0);
+                    case 36e5:
+                        d.setMinutes(0);
+                    case 6e4:
+                        d.setSeconds(0);
+                    case 1e3:
+                        d.setMilliseconds(0);
+                }
+            }
+
+            var nn = m == null ? 5 : m;
+            var precision, format, increment, step = 1;
+            if (span >= nn * 31536e6) {
+                precision = 31536e6;
+                format = "%Y";
+                /** @ignore */
+                increment = function(d) {
+                    d.setFullYear(d.getFullYear() + step);
+                };
+            } else if (span >= nn * 2592e6) {
+                precision = 2592e6;
+                format = "%m/%Y";
+                /** @ignore */
+                increment = function(d) {
+                    d.setMonth(d.getMonth() + step);
+                };
+            } else if (span >= nn * 6048e5) {
+                precision = 6048e5;
+                format = "%m/%d";
+                /** @ignore */
+                increment = function(d) {
+                    d.setDate(d.getDate() + 7 * step);
+                };
+            } else if (span >= nn * 864e5) {
+                precision = 864e5;
+                format = "%m/%d";
+                /** @ignore */
+                increment = function(d) {
+                    d.setDate(d.getDate() + step);
+                };
+            } else if (span >= nn * 36e5) {
+                precision = 36e5;
+                format = "%I:%M %p";
+                /** @ignore */
+                increment = function(d) {
+                    d.setHours(d.getHours() + step);
+                };
+            } else if (span >= nn * 6e4) {
+                precision = 6e4;
+                format = "%I:%M %p";
+                /** @ignore */
+                increment = function(d) {
+                    d.setMinutes(d.getMinutes() + step);
+                };
+            } else if (span >= nn * 1e3) {
+                precision = 1e3;
+                format = "%I:%M:%S";
+                /** @ignore */
+                increment = function(d) {
+                    d.setSeconds(d.getSeconds() + step);
+                };
+            } else {
+                precision = 1;
+                format = "%S.%Qs";
+                /** @ignore */
+                increment = function(d) {
+                    d.setTime(d.getTime() + step);
+                };
+            }
+
+            precision = dateTickPrecision ? dateTickPrecision : precision;
+            format = dateTickFormat ? dateTickFormat : format;
+
+            usedDateTickPrecision = precision;
+
+            tickFormat = pv.Format.date(format);
+
+            var date = new Date(min),
+                dates = [];
+            floor(date, precision);
+
+            /* If we'd generate too many ticks, skip some!. */
+            var n = span / precision;
+            if (n > 10) {
+                switch (precision) {
+                    // 1 hour
+                    case 36e5:
+                        {
+                            step = (n > 20) ? 6 : 3;
+                            date.setHours(Math.floor(date.getHours() / step) * step);
+                            break;
+                        }
+
+                        // 30 days
+                    case 2592e6:
+                        {
+                            step = (n > 24) ? 3 : ((n > 12) ? 2 : 1);
+                            date.setMonth(Math.floor(date.getMonth() / step) * step);
+                            break;
+                        }
+
+                        // 7 day
+                        // (nn = 5:
+                        //     span >= 35 days (n >= 5)
+                        //     span < 150 days (n <  ~21.43)
+                    case 6048e5:
+                        {
+                            // span (days) | n (ticks/weeks) | step     | new n | description
+                            // -----------------------------------------------------------------
+                            // 106 - 149   | 15 - 22         | 3*7 = 21 | 5 - 7 | 15 weeks, ~3 months
+                            //  71 - 105   | 11 - 15         | 2*7 = 14 | 5 - 7 | 11 weeks, ~2.2 months
+                            //  35 -  70   |  5 - 10         | 1*7 =  7 |    -  |  5 weeks, ~1 month
+                            step = (n > 15) ? 3 : (n > 10 ? 2 : 1);
+                            date.setDate(Math.floor(date.getDate() / (7 * step)) * (7 * step));
+                            break;
+                        }
+
+                        // 1 day (nn = 5: span >= 5 hours and span < 35 days)
+                        // span > 10 days: more than 10 ticks
+                    case 864e5:
+                        {
+                            step = (n >= 30) ? 5 : ((n >= 15) ? 3 : 2);
+                            date.setDate(Math.floor(date.getDate() / step) * step);
+                            break;
+                        }
+
+                        // 1 minute
+                    case 6e4:
+                        {
+                            step = (n > 30) ? 15 : ((n > 15) ? 10 : 5);
+                            date.setMinutes(Math.floor(date.getMinutes() / step) * step);
+                            break;
+                        }
+
+                        // 1 second
+                    case 1e3:
+                        {
+                            step = (n > 90) ? 15 : ((n > 60) ? 10 : 5);
+                            date.setSeconds(Math.floor(date.getSeconds() / step) * step);
+                            break;
+                        }
+
+                        // 1 millisecond
+                    case 1:
+                        {
+                            step = (n > 1000) ? 250 : ((n > 200) ? 100 : ((n > 100) ? 50 : ((n > 50) ? 25 : 5)));
+                            date.setMilliseconds(Math.floor(date.getMilliseconds() / step) * step);
+                            break;
+                        }
+
+                        // 31536e6 - 1 year
+                    default:
+                        {
+                            step = pv.logCeil(n / 15, 10);
+                            if (n / step < 2) step /= 5;
+                            else if (n / step < 5) step /= 2;
+                            date.setFullYear(Math.floor(date.getFullYear() / step) * step);
+                            break;
+                        }
+                }
+            }
 
 
-      if(dateTickPrecision){
-        step = 1;
-        increment = function(d) { d.setSeconds(d.getSeconds() + step*dateTickPrecision/1000);};
-      }
+            if (dateTickPrecision) {
+                step = 1;
+                increment = function(d) {
+                    d.setSeconds(d.getSeconds() + step * dateTickPrecision / 1000);
+                };
+            }
 
 
-      while (true) {
-        increment(date);
-        if (date > max) break;
-        dates.push(new Date(date));
-      }
-      return reverse ? dates.reverse() : dates;
-    }
+            while (true) {
+                increment(date);
+                if (date > max) break;
+                dates.push(new Date(date));
+            }
+            return reverse ? dates.reverse() : dates;
+        }
 
-    /* Normal case: numbers */
-    if (m == null) {
-        m = 10;
-    }
+        /* Normal case: numbers */
+        if (m == null) {
+            m = 10;
+        }
 
-    var roundInside = pv.get(options, 'roundInside', true);
-    var exponentMin = pv.get(options, 'numberExponentMin', -Infinity);
-    var exponentMax = pv.get(options, 'numberExponentMax', +Infinity);
+        var roundInside = pv.get(options, 'roundInside', true);
+        var exponentMin = pv.get(options, 'numberExponentMin', -Infinity);
+        var exponentMax = pv.get(options, 'numberExponentMax', +Infinity);
 
-    //var step = pv.logFloor(span / m, 10);
-    var exponent = Math.floor(pv.log(span / m, 10));
-    var overflow = false;
-    if(exponent > exponentMax){
-        exponent = exponentMax;
-        overflow = true;
-    } else if(exponent < exponentMin){
-        exponent = exponentMin;
-        overflow = true;
-    }
+        //var step = pv.logFloor(span / m, 10);
+        var exponent = Math.floor(pv.log(span / m, 10));
+        var overflow = false;
+        if (exponent > exponentMax) {
+            exponent = exponentMax;
+            overflow = true;
+        } else if (exponent < exponentMin) {
+            exponent = exponentMin;
+            overflow = true;
+        }
 
-    step = Math.pow(10, exponent);
-    var mObtained = (span / step);
+        step = Math.pow(10, exponent);
+        var mObtained = (span / step);
 
-    var err = m / mObtained;
-    if (err <= .15 && exponent < exponentMax - 1) {
-        step *= 10;
-    } else if (err <= .35) {
-        step *= 5;
-    } else if (err <= .75) {
-        step *= 2;
-    }
+        var err = m / mObtained;
+        if (err <= .15 && exponent < exponentMax - 1) {
+            step *= 10;
+        } else if (err <= .35) {
+            step *= 5;
+        } else if (err <= .75) {
+            step *= 2;
+        }
 
-    // Account for floating point precision errors
-    exponent = Math.floor(pv.log(step, 10) + 1e-10);
+        // Account for floating point precision errors
+        exponent = Math.floor(pv.log(step, 10) + 1e-10);
 
-    start = step * Math[roundInside ? 'ceil'  : 'floor'](min / step);
-    end   = step * Math[roundInside ? 'floor' : 'ceil' ](max / step);
+        start = step * Math[roundInside ? 'ceil' : 'floor'](min / step);
+        end = step * Math[roundInside ? 'floor' : 'ceil'](max / step);
 
-    usedNumberExponent = Math.max(0, -exponent);
+        usedNumberExponent = Math.max(0, -exponent);
 
-    tickFormat = pv.Format.number().fractionDigits(usedNumberExponent);
+        tickFormat = pv.Format.number().fractionDigits(usedNumberExponent);
 
-    var ticks = pv.range(start, end + step, step);
-    if(reverse){
-        ticks.reverse();
-    }
+        var ticks = pv.range(start, end + step, step);
+        if (reverse) {
+            ticks.reverse();
+        }
 
-    ticks.roundInside = roundInside;
-    ticks.step        = step;
-    ticks.exponent    = exponent;
-    ticks.exponentOverflow = overflow;
-    ticks.exponentMin = exponentMin;
-    ticks.exponentMax = exponentMax;
+        ticks.roundInside = roundInside;
+        ticks.step = step;
+        ticks.exponent = exponent;
+        ticks.exponentOverflow = overflow;
+        ticks.exponentMin = exponentMin;
+        ticks.exponentMax = exponentMax;
 
-    return ticks;
-  };
+        return ticks;
+    };
 
 
-  /**
-   * Formats the specified tick with a well defined string for the date
-   * @function
-   * @name pv.Scale.quantitative.prototype.dateTickFormat
-   * @returns {string} a string with the desired tick format.
-   */
-  scale.dateTickFormat = function () {
-    if (arguments.length) {
-      dateTickFormat = arguments[0];
-      return this;
-    }
-    return dateTickFormat;  };
+    /**
+     * Formats the specified tick with a well defined string for the date
+     * @function
+     * @name pv.Scale.quantitative.prototype.dateTickFormat
+     * @returns {string} a string with the desired tick format.
+     */
+    scale.dateTickFormat = function() {
+        if (arguments.length) {
+            dateTickFormat = arguments[0];
+            return this;
+        }
+        return dateTickFormat;
+    };
 
-  /**
-   * Generates date ticks with a specified precision.
-   * @function
-   * @name pv.Scale.quantitative.prototype.dateTickPrecision
-   * @param {number} [precision] The number of milliseconds that separate ticks.
-   * @returns {number} the current date tick precision.
-   */
-  scale.dateTickPrecision = function () {
-    if (arguments.length) {
-      dateTickPrecision = arguments[0];
-      return this;
-    }
-    return dateTickPrecision;
-  };
+    /**
+     * Generates date ticks with a specified precision.
+     * @function
+     * @name pv.Scale.quantitative.prototype.dateTickPrecision
+     * @param {number} [precision] The number of milliseconds that separate ticks.
+     * @returns {number} the current date tick precision.
+     */
+    scale.dateTickPrecision = function() {
+        if (arguments.length) {
+            dateTickPrecision = arguments[0];
+            return this;
+        }
+        return dateTickPrecision;
+    };
 
 
     /**
@@ -3975,99 +4312,99 @@ pv.Scale.quantitative = function() {
      *
      * @returns {pv.Scale|function((number|Date)):string} a custom formatter function or this instance.
      */
-    scale.tickFormatter = function (f) {
-      if (arguments.length) {
-        tickFormatter = f;
+    scale.tickFormatter = function(f) {
+        if (arguments.length) {
+            tickFormatter = f;
+            return this;
+        }
+
+        return tickFormatter;
+    };
+
+    /**
+     * Formats the specified tick value using the appropriate precision, based on
+     * the step interval between tick marks. If {@link #ticks} has not been called,
+     * the argument is converted to a string, but no formatting is applied.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.tickFormat
+     * @param {number|Date} t a tick value.
+     * @returns {string} a formatted tick value.
+     */
+    scale.tickFormat = function(t) {
+        var text;
+        if (tickFormatter) {
+            text = tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
+        } else {
+            text = tickFormat(t);
+        }
+
+        // Make sure it is a string
+        return text == null ? '' : ('' + text);
+    };
+
+    /**
+     * "Nices" this scale, extending the bounds of the input domain to
+     * evenly-rounded values. Nicing is useful if the domain is computed
+     * dynamically from data, and may be irregular. For example, given a domain of
+     * [0.20147987687960267, 0.996679553296417], a call to <tt>nice()</tt> might
+     * extend the domain to [0.2, 1].
+     *
+     * <p>This method must be invoked each time after setting the domain.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.nice
+     * @returns {pv.Scale.quantitative} <tt>this</tt>.
+     */
+    scale.nice = function() {
+        if (d.length != 2) return this; // TODO support non-uniform domains
+        var start = d[0],
+            end = d[d.length - 1],
+            reverse = end < start,
+            min = reverse ? end : start,
+            max = reverse ? start : end,
+            span = max - min;
+
+        /* Special case: empty, invalid or infinite span. */
+        if (!span || !isFinite(span)) return this;
+
+        var step = Math.pow(10, Math.round(Math.log(span) / Math.log(10)) - 1);
+        d = [Math.floor(min / step) * step, Math.ceil(max / step) * step];
+        if (reverse) d.reverse();
+        l = d.map(f);
         return this;
-      }
+    };
 
-      return tickFormatter;
-   };
+    /**
+     * Returns a view of this scale by the specified accessor function <tt>f</tt>.
+     * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
+     * <tt>function(d) y(d.foo)</tt>.
+     *
+     * <p>This method is provided for convenience, such that scales can be
+     * succinctly defined inline. For example, given an array of data elements
+     * that have a <tt>score</tt> attribute with the domain [0, 1], the height
+     * property could be specified as:
+     *
+     * <pre>    .height(pv.Scale.linear().range(0, 480).by(function(d) d.score))</pre>
+     *
+     * This is equivalent to:
+     *
+     * <pre>    .height(function(d) d.score * 480)</pre>
+     *
+     * This method should be used judiciously; it is typically more clear to
+     * invoke the scale directly, passing in the value to be scaled.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.by
+     * @param {Function} f an accessor function.
+     * @returns {pv.Scale.quantitative} a view of this scale by the specified
+     * accessor function.
+     */
 
-  /**
-   * Formats the specified tick value using the appropriate precision, based on
-   * the step interval between tick marks. If {@link #ticks} has not been called,
-   * the argument is converted to a string, but no formatting is applied.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.tickFormat
-   * @param {number|Date} t a tick value.
-   * @returns {string} a formatted tick value.
-   */
-  scale.tickFormat = function (t) {
-      var text;
-      if(tickFormatter){
-          text = tickFormatter(t, type !== Number ? usedDateTickPrecision : usedNumberExponent);
-      } else {
-          text = tickFormat(t);
-      }
+    pv.copyOwn(scale, pv.Scale.common);
 
-      // Make sure it is a string
-      return text == null ? '' : ('' + text);
-  };
-
-  /**
-   * "Nices" this scale, extending the bounds of the input domain to
-   * evenly-rounded values. Nicing is useful if the domain is computed
-   * dynamically from data, and may be irregular. For example, given a domain of
-   * [0.20147987687960267, 0.996679553296417], a call to <tt>nice()</tt> might
-   * extend the domain to [0.2, 1].
-   *
-   * <p>This method must be invoked each time after setting the domain.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.nice
-   * @returns {pv.Scale.quantitative} <tt>this</tt>.
-   */
-  scale.nice = function() {
-    if (d.length != 2) return this; // TODO support non-uniform domains
-    var start = d[0],
-        end = d[d.length - 1],
-        reverse = end < start,
-        min = reverse ? end : start,
-        max = reverse ? start : end,
-        span = max - min;
-
-    /* Special case: empty, invalid or infinite span. */
-    if (!span || !isFinite(span)) return this;
-
-    var step = Math.pow(10, Math.round(Math.log(span) / Math.log(10)) - 1);
-    d = [Math.floor(min / step) * step, Math.ceil(max / step) * step];
-    if (reverse) d.reverse();
-    l = d.map(f);
-    return this;
-  };
-
-  /**
-   * Returns a view of this scale by the specified accessor function <tt>f</tt>.
-   * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
-   * <tt>function(d) y(d.foo)</tt>.
-   *
-   * <p>This method is provided for convenience, such that scales can be
-   * succinctly defined inline. For example, given an array of data elements
-   * that have a <tt>score</tt> attribute with the domain [0, 1], the height
-   * property could be specified as:
-   *
-   * <pre>    .height(pv.Scale.linear().range(0, 480).by(function(d) d.score))</pre>
-   *
-   * This is equivalent to:
-   *
-   * <pre>    .height(function(d) d.score * 480)</pre>
-   *
-   * This method should be used judiciously; it is typically more clear to
-   * invoke the scale directly, passing in the value to be scaled.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.by
-   * @param {Function} f an accessor function.
-   * @returns {pv.Scale.quantitative} a view of this scale by the specified
-   * accessor function.
-   */
-
-  pv.copyOwn(scale, pv.Scale.common);
-
-  scale.domain.apply(scale, arguments);
-  return scale;
+    scale.domain.apply(scale, arguments);
+    return scale;
 };
 /**
  * Returns a linear scale for the specified domain. The arguments to this
@@ -4119,9 +4456,9 @@ pv.Scale.quantitative = function() {
  * @extends pv.Scale.quantitative
  */
 pv.Scale.linear = function() {
-  var scale = pv.Scale.quantitative();
-  scale.domain.apply(scale, arguments);
-  return scale;
+    var scale = pv.Scale.quantitative();
+    scale.domain.apply(scale, arguments);
+    return scale;
 };
 /**
  * Returns a log scale for the specified domain. The arguments to this
@@ -4176,94 +4513,102 @@ pv.Scale.linear = function() {
  * @extends pv.Scale.quantitative
  */
 pv.Scale.log = function() {
-  var scale = pv.Scale.quantitative(1, 10),
-      b, // logarithm base
-      p, // cached Math.log(b)
-      /** @ignore */ log = function(x) { return Math.log(x) / p; },
-      /** @ignore */ pow = function(y) { return Math.pow(b, y); };
+    var scale = pv.Scale.quantitative(1, 10),
+        b, // logarithm base
+        p, // cached Math.log(b)
+        /** @ignore */
+        log = function(x) {
+            return Math.log(x) / p;
+        },
+        /** @ignore */
+        pow = function(y) {
+            return Math.pow(b, y);
+        };
 
-  /**
-   * Returns an array of evenly-spaced, suitably-rounded values in the input
-   * domain. These values are frequently used in conjunction with
-   * {@link pv.Rule} to display tick marks or grid lines.
-   *
-   * @function
-   * @name pv.Scale.log.prototype.ticks
-   * @returns {Array.<number>} an array input domain values to use as ticks.
-   */
-  scale.ticks = function() {
-    // TODO support non-uniform domains
-    var d = scale.domain(),
-        n = d[0] < 0,
-        i = Math.floor(n ? -log(-d[0]) : log(d[0])),
-        j = Math.ceil(n ? -log(-d[1]) : log(d[1])),
-        ticks = [];
-    if (n) {
-      ticks.push(-pow(-i));
-      for (; i++ < j;) for (var k = b - 1; k > 0; k--) ticks.push(-pow(-i) * k);
-    } else {
-      for (; i < j; i++) for (var k = 1; k < b; k++) ticks.push(pow(i) * k);
-      ticks.push(pow(i));
-    }
-    for (i = 0; ticks[i] < d[0]; i++); // strip small values
-    for (j = ticks.length; ticks[j - 1] > d[1]; j--); // strip big values
-    return ticks.slice(i, j);
-  };
+    /**
+     * Returns an array of evenly-spaced, suitably-rounded values in the input
+     * domain. These values are frequently used in conjunction with
+     * {@link pv.Rule} to display tick marks or grid lines.
+     *
+     * @function
+     * @name pv.Scale.log.prototype.ticks
+     * @returns {Array.<number>} an array input domain values to use as ticks.
+     */
+    scale.ticks = function() {
+        // TODO support non-uniform domains
+        var d = scale.domain(),
+            n = d[0] < 0,
+            i = Math.floor(n ? -log(-d[0]) : log(d[0])),
+            j = Math.ceil(n ? -log(-d[1]) : log(d[1])),
+            ticks = [];
+        if (n) {
+            ticks.push(-pow(-i));
+            for (; i++ < j;)
+                for (var k = b - 1; k > 0; k--) ticks.push(-pow(-i) * k);
+        } else {
+            for (; i < j; i++)
+                for (var k = 1; k < b; k++) ticks.push(pow(i) * k);
+            ticks.push(pow(i));
+        }
+        for (i = 0; ticks[i] < d[0]; i++); // strip small values
+        for (j = ticks.length; ticks[j - 1] > d[1]; j--); // strip big values
+        return ticks.slice(i, j);
+    };
 
-  /**
-   * Formats the specified tick value using the appropriate precision, assuming
-   * base 10.
-   *
-   * @function
-   * @name pv.Scale.log.prototype.tickFormat
-   * @param {number} t a tick value.
-   * @returns {string} a formatted tick value.
-   */
-  scale.tickFormat = function(t) {
-    return t.toPrecision(1);
-  };
+    /**
+     * Formats the specified tick value using the appropriate precision, assuming
+     * base 10.
+     *
+     * @function
+     * @name pv.Scale.log.prototype.tickFormat
+     * @param {number} t a tick value.
+     * @returns {string} a formatted tick value.
+     */
+    scale.tickFormat = function(t) {
+        return t.toPrecision(1);
+    };
 
-  /**
-   * "Nices" this scale, extending the bounds of the input domain to
-   * evenly-rounded values. This method uses {@link pv.logFloor} and
-   * {@link pv.logCeil}. Nicing is useful if the domain is computed dynamically
-   * from data, and may be irregular. For example, given a domain of
-   * [0.20147987687960267, 0.996679553296417], a call to <tt>nice()</tt> might
-   * extend the domain to [0.1, 1].
-   *
-   * <p>This method must be invoked each time after setting the domain (and
-   * base).
-   *
-   * @function
-   * @name pv.Scale.log.prototype.nice
-   * @returns {pv.Scale.log} <tt>this</tt>.
-   */
-  scale.nice = function() {
-    // TODO support non-uniform domains
-    var d = scale.domain();
-    return scale.domain(pv.logFloor(d[0], b), pv.logCeil(d[1], b));
-  };
+    /**
+     * "Nices" this scale, extending the bounds of the input domain to
+     * evenly-rounded values. This method uses {@link pv.logFloor} and
+     * {@link pv.logCeil}. Nicing is useful if the domain is computed dynamically
+     * from data, and may be irregular. For example, given a domain of
+     * [0.20147987687960267, 0.996679553296417], a call to <tt>nice()</tt> might
+     * extend the domain to [0.1, 1].
+     *
+     * <p>This method must be invoked each time after setting the domain (and
+     * base).
+     *
+     * @function
+     * @name pv.Scale.log.prototype.nice
+     * @returns {pv.Scale.log} <tt>this</tt>.
+     */
+    scale.nice = function() {
+        // TODO support non-uniform domains
+        var d = scale.domain();
+        return scale.domain(pv.logFloor(d[0], b), pv.logCeil(d[1], b));
+    };
 
-  /**
-   * Sets or gets the logarithm base. Defaults to 10.
-   *
-   * @function
-   * @name pv.Scale.log.prototype.base
-   * @param {number} [v] the new base.
-   * @returns {pv.Scale.log} <tt>this</tt>, or the current base.
-   */
-  scale.base = function(v) {
-    if (arguments.length) {
-      b = Number(v);
-      p = Math.log(b);
-      scale.transform(log, pow); // update transformed domain
-      return this;
-    }
-    return b;
-  };
+    /**
+     * Sets or gets the logarithm base. Defaults to 10.
+     *
+     * @function
+     * @name pv.Scale.log.prototype.base
+     * @param {number} [v] the new base.
+     * @returns {pv.Scale.log} <tt>this</tt>, or the current base.
+     */
+    scale.base = function(v) {
+        if (arguments.length) {
+            b = Number(v);
+            p = Math.log(b);
+            scale.transform(log, pow); // update transformed domain
+            return this;
+        }
+        return b;
+    };
 
-  scale.domain.apply(scale, arguments);
-  return scale.base(10);
+    scale.domain.apply(scale, arguments);
+    return scale.base(10);
 };
 /**
  * Returns a root scale for the specified domain. The arguments to this
@@ -4296,29 +4641,34 @@ pv.Scale.log = function() {
  * @extends pv.Scale.quantitative
  */
 pv.Scale.root = function() {
-  var scale = pv.Scale.quantitative();
+    var scale = pv.Scale.quantitative();
 
-  /**
-   * Sets or gets the exponent; defaults to 2.
-   *
-   * @function
-   * @name pv.Scale.root.prototype.power
-   * @param {number} [v] the new exponent.
-   * @returns {pv.Scale.root} <tt>this</tt>, or the current base.
-   */
-  scale.power = function(v) {
-    if (arguments.length) {
-      var b = Number(v), p = 1 / b;
-      scale.transform(
-        function(x) { return Math.pow(x, p); },
-        function(y) { return Math.pow(y, b); });
-      return this;
-    }
-    return b;
-  };
+    /**
+     * Sets or gets the exponent; defaults to 2.
+     *
+     * @function
+     * @name pv.Scale.root.prototype.power
+     * @param {number} [v] the new exponent.
+     * @returns {pv.Scale.root} <tt>this</tt>, or the current base.
+     */
+    scale.power = function(v) {
+        if (arguments.length) {
+            var b = Number(v),
+                p = 1 / b;
+            scale.transform(
+                function(x) {
+                    return Math.pow(x, p);
+                },
+                function(y) {
+                    return Math.pow(y, b);
+                });
+            return this;
+        }
+        return b;
+    };
 
-  scale.domain.apply(scale, arguments);
-  return scale.power(2);
+    scale.domain.apply(scale, arguments);
+    return scale.power(2);
 };
 /**
  * Returns an ordinal scale for the specified domain. The arguments to this
@@ -4377,389 +4727,387 @@ pv.Scale.root = function() {
  * @see pv.colors
  */
 pv.Scale.ordinal = function() {
-  var d = [], i = {}, r = [], band = 0;
+    var d = [],
+        i = {}, r = [],
+        band = 0;
 
-  /** @private */
-  function scale(x) {
-    if (!(x in i)) i[x] = d.push(x) - 1;
-    return r[i[x] % r.length];
-  }
+    /** @private */
 
-  /**
-   * Sets or gets the input domain. This method can be invoked several ways:
-   *
-   * <p>1. <tt>domain(values...)</tt>
-   *
-   * <p>Specifying the domain as a series of values is the most explicit and
-   * recommended approach. However, if the domain values are derived from data,
-   * you may find the second method more appropriate.
-   *
-   * <p>2. <tt>domain(array, f)</tt>
-   *
-   * <p>Rather than enumerating the domain values as explicit arguments to this
-   * method, you can specify a single argument of an array. In addition, you can
-   * specify an optional accessor function to extract the domain values from the
-   * array.
-   *
-   * <p>3. <tt>domain()</tt>
-   *
-   * <p>Invoking the <tt>domain</tt> method with no arguments returns the
-   * current domain as an array.
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.domain
-   * @param {...} domain... domain values.
-   * @returns {pv.Scale.ordinal} <tt>this</tt>, or the current domain.
-   */
-  scale.domain = function(array, f) {
-    if (arguments.length) {
-      array = (array instanceof Array)
-          ? ((arguments.length > 1) ? pv.map(array, f) : array)
-          : Array.prototype.slice.call(arguments);
+    function scale(x) {
+        if (!(x in i)) i[x] = d.push(x) - 1;
+        return r[i[x] % r.length];
+    }
 
-      /* Filter the specified ordinals to their unique values. */
-      d = [];
-      var seen = {};
-      for (var j = 0; j < array.length; j++) {
-        var o = array[j];
-        if (!(o in seen)) {
-          seen[o] = true;
-          d.push(o);
+    /**
+     * Sets or gets the input domain. This method can be invoked several ways:
+     *
+     * <p>1. <tt>domain(values...)</tt>
+     *
+     * <p>Specifying the domain as a series of values is the most explicit and
+     * recommended approach. However, if the domain values are derived from data,
+     * you may find the second method more appropriate.
+     *
+     * <p>2. <tt>domain(array, f)</tt>
+     *
+     * <p>Rather than enumerating the domain values as explicit arguments to this
+     * method, you can specify a single argument of an array. In addition, you can
+     * specify an optional accessor function to extract the domain values from the
+     * array.
+     *
+     * <p>3. <tt>domain()</tt>
+     *
+     * <p>Invoking the <tt>domain</tt> method with no arguments returns the
+     * current domain as an array.
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.domain
+     * @param {...} domain... domain values.
+     * @returns {pv.Scale.ordinal} <tt>this</tt>, or the current domain.
+     */
+    scale.domain = function(array, f) {
+        if (arguments.length) {
+            array = (array instanceof Array) ? ((arguments.length > 1) ? pv.map(array, f) : array) : Array.prototype.slice.call(arguments);
+
+            /* Filter the specified ordinals to their unique values. */
+            d = [];
+            var seen = {};
+            for (var j = 0; j < array.length; j++) {
+                var o = array[j];
+                if (!(o in seen)) {
+                    seen[o] = true;
+                    d.push(o);
+                }
+            }
+
+            i = pv.numerate(d);
+            return this;
         }
-      }
+        return d;
+    };
 
-      i = pv.numerate(d);
-      return this;
-    }
-    return d;
-  };
+    /**
+     * Sets or gets the output range. This method can be invoked several ways:
+     *
+     * <p>1. <tt>range(values...)</tt>
+     *
+     * <p>Specifying the range as a series of values is the most explicit and
+     * recommended approach. However, if the range values are derived from data,
+     * you may find the second method more appropriate.
+     *
+     * <p>2. <tt>range(array, f)</tt>
+     *
+     * <p>Rather than enumerating the range values as explicit arguments to this
+     * method, you can specify a single argument of an array. In addition, you can
+     * specify an optional accessor function to extract the range values from the
+     * array.
+     *
+     * <p>3. <tt>range()</tt>
+     *
+     * <p>Invoking the <tt>range</tt> method with no arguments returns the
+     * current range as an array.
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.range
+     * @param {...} range... range values.
+     * @returns {pv.Scale.ordinal} <tt>this</tt>, or the current range.
+     */
+    scale.range = function(array, f) {
+        if (arguments.length) {
+            r = (array instanceof Array) ? ((arguments.length > 1) ? pv.map(array, f) : array) : Array.prototype.slice.call(arguments);
+            if (typeof r[0] == "string") r = r.map(pv.fillStyle);
+            r.min = r[0];
+            r.max = r[r.length - 1];
+            return this;
+        }
+        return r;
+    };
 
-  /**
-   * Sets or gets the output range. This method can be invoked several ways:
-   *
-   * <p>1. <tt>range(values...)</tt>
-   *
-   * <p>Specifying the range as a series of values is the most explicit and
-   * recommended approach. However, if the range values are derived from data,
-   * you may find the second method more appropriate.
-   *
-   * <p>2. <tt>range(array, f)</tt>
-   *
-   * <p>Rather than enumerating the range values as explicit arguments to this
-   * method, you can specify a single argument of an array. In addition, you can
-   * specify an optional accessor function to extract the range values from the
-   * array.
-   *
-   * <p>3. <tt>range()</tt>
-   *
-   * <p>Invoking the <tt>range</tt> method with no arguments returns the
-   * current range as an array.
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.range
-   * @param {...} range... range values.
-   * @returns {pv.Scale.ordinal} <tt>this</tt>, or the current range.
-   */
-  scale.range = function(array, f) {
-    if (arguments.length) {
-      r = (array instanceof Array)
-          ? ((arguments.length > 1) ? pv.map(array, f) : array)
-          : Array.prototype.slice.call(arguments);
-      if (typeof r[0] == "string") r = r.map(pv.fillStyle);
-      r.min = r[0];
-      r.max = r[r.length - 1];
-      return this;
-    }
-    return r;
-  };
+    /**
+     * Sets the range from the given continuous interval. The interval
+     * [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced points,
+     * where <i>n</i> is the number of (unique) values in the domain. The first
+     * and last point are offset from the edge of the range by half the distance
+     * between points.
+     *
+     * <p>This method must be called <i>after</i> the domain is set.
+     * <p>
+     * The computed step width can be retrieved from the range as
+     * <tt>scale.range().step</tt>.
+     * </p>
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.split
+     * @param {number} min minimum value of the output range.
+     * @param {number} max maximum value of the output range.
+     * @returns {pv.Scale.ordinal} <tt>this</tt>.
+     * @see #splitFlush
+     * @see #splitBanded
+     */
+    scale.split = function(min, max) {
+        var R = max - min;
+        var N = this.domain().length;
+        var step = 0;
+        if (R === 0) {
+            r = pv.array(N, min);
+        } else if (N) {
+            step = (max - min) / N;
+            r = pv.range(min + step / 2, max, step);
+        }
+        r.min = min;
+        r.max = max;
+        r.step = step;
+        return this;
+    };
 
-  /**
-   * Sets the range from the given continuous interval. The interval
-   * [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced points,
-   * where <i>n</i> is the number of (unique) values in the domain. The first
-   * and last point are offset from the edge of the range by half the distance
-   * between points.
-   *
-   * <p>This method must be called <i>after</i> the domain is set.
-   * <p>
-   * The computed step width can be retrieved from the range as
-   * <tt>scale.range().step</tt>.
-   * </p>
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.split
-   * @param {number} min minimum value of the output range.
-   * @param {number} max maximum value of the output range.
-   * @returns {pv.Scale.ordinal} <tt>this</tt>.
-   * @see #splitFlush
-   * @see #splitBanded
-   */
-  scale.split = function(min, max) {
-    var R = max - min;
-    var N = this.domain().length;
-    var step = 0;
-    if(R === 0){
-        r = pv.array(N, min);
-    } else if(N){
-        step = (max - min) / N;
-        r = pv.range(min + step / 2, max, step);
-    }
-    r.min = min;
-    r.max = max;
-    r.step = step;
-    return this;
-  };
+    /**
+     * Sets the range from the given continuous interval.
+     * The interval [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
+     * where <i>n</i> is the number of (unique) values in the domain.
+     *
+     * The first and last band are offset from the edge of the range by
+     * half the distance between bands.
+     *
+     * The positions are centered in each band.
+     * <pre>
+     * m = M/2
+     *
+     *  |mBm|mBm| ... |mBm|
+     * min               max
+     *   r0 -> min + m + B/2
+     * </pre>
+     * <p>This method must be called <i>after</i> the domain is set.</p>
+     * <p>
+     * The computed absolute band width can be retrieved from the range as
+     * <tt>scale.range().band</tt>.
+     * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
+     * </p>
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.splitBandedCenter
+     * @param {number} min minimum value of the output range.
+     * @param {number} max maximum value of the output range.
+     * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
+     * @returns {pv.Scale.ordinal} <tt>this</tt>.
+     * @see #split
+     */
+    scale.splitBandedCenter = function(min, max, band) {
+        scale.split(min, max);
+        if (band == null) {
+            band = 1;
+        }
+        r.band = r.step * band;
+        r.margin = r.step - r.band;
+        r.min = min;
+        r.max = max;
+        return this;
+    };
 
-  /**
-   * Sets the range from the given continuous interval.
-   * The interval [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
-   * where <i>n</i> is the number of (unique) values in the domain.
-   *
-   * The first and last band are offset from the edge of the range by
-   * half the distance between bands.
-   *
-   * The positions are centered in each band.
-   * <pre>
-   * m = M/2
-   *
-   *  |mBm|mBm| ... |mBm|
-   * min               max
-   *   r0 -> min + m + B/2
-   * </pre>
-   * <p>This method must be called <i>after</i> the domain is set.</p>
-   * <p>
-   * The computed absolute band width can be retrieved from the range as
-   * <tt>scale.range().band</tt>.
-   * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
-   * </p>
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.splitBandedCenter
-   * @param {number} min minimum value of the output range.
-   * @param {number} max maximum value of the output range.
-   * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
-   * @returns {pv.Scale.ordinal} <tt>this</tt>.
-   * @see #split
-   */
-  scale.splitBandedCenter = function(min, max, band) {
-    scale.split(min, max);
-    if (band == null) {
-        band = 1;
-    }
-    r.band   = r.step * band;
-    r.margin = r.step - r.band;
-    r.min = min;
-    r.max = max;
-    return this;
-  };
+    /**
+     * Sets the range from the given continuous interval.
+     * The interval [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
+     * where <i>n</i> is the number of (unique) values in the domain.
+     *
+     * The first and last bands are aligned to the edges of the range.
+     * <pre>
+     *  |Bm|mBm| ...|mB|
+     *  or
+     *  |BM |BM |... |B|
+     * min           max
+     *   r0 -> min + B/2
+     * </pre>
+     * <p>
+     * The positions are centered in each band
+     * (the first position is at <tt>min + band / 2</tt>).
+     * </p>
+     * <p>This method must be called <i>after</i> the domain is set.</p>
+     * <p>
+     * The computed absolute band width can be retrieved from the range as
+     * <tt>scale.range().band</tt>.
+     * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
+     * </p>
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.splitBandedFlushCenter
+     * @param {number} min minimum value of the output range.
+     * @param {number} max maximum value of the output range.
+     * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
+     * @returns {pv.Scale.ordinal} <tt>this</tt>.
+     * @see #split
+     */
+    scale.splitBandedFlushCenter = function(min, max, band) {
+        if (band == null) {
+            band = 1;
+        }
 
-  /**
-   * Sets the range from the given continuous interval.
-   * The interval [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
-   * where <i>n</i> is the number of (unique) values in the domain.
-   *
-   * The first and last bands are aligned to the edges of the range.
-   * <pre>
-   *  |Bm|mBm| ...|mB|
-   *  or
-   *  |BM |BM |... |B|
-   * min           max
-   *   r0 -> min + B/2
-   * </pre>
-   * <p>
-   * The positions are centered in each band
-   * (the first position is at <tt>min + band / 2</tt>).
-   * </p>
-   * <p>This method must be called <i>after</i> the domain is set.</p>
-   * <p>
-   * The computed absolute band width can be retrieved from the range as
-   * <tt>scale.range().band</tt>.
-   * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
-   * </p>
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.splitBandedFlushCenter
-   * @param {number} min minimum value of the output range.
-   * @param {number} max maximum value of the output range.
-   * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
-   * @returns {pv.Scale.ordinal} <tt>this</tt>.
-   * @see #split
-   */
-  scale.splitBandedFlushCenter = function(min, max, band) {
-    if (band == null) {
-        band = 1;
-    }
+        var R = (max - min),
+            N = this.domain().length,
+            S = 0,
+            B = 0,
+            M = 0;
+        if (R === 0) {
+            r = pv.array(N, min);
+        } else if (N) {
+            B = (R * band) / N;
+            M = N > 1 ? ((R - N * B) / (N - 1)) : 0;
+            S = M + B;
 
-    var R = (max - min),
-        N = this.domain().length,
-        S = 0,
-        B = 0,
-        M = 0;
-    if(R === 0){
-        r = pv.array(N, min);
-    } else if(N){
-        B = (R * band) / N;
-        M = N > 1 ? ((R - N * B) / (N - 1)) : 0;
-        S = M + B;
+            r = pv.range(min + B / 2, max, S);
+        }
 
-        r = pv.range(min + B / 2, max, S);
-    }
+        r.step = S;
+        r.band = B;
+        r.margin = M;
+        r.min = min;
+        r.max = max;
+        return this;
+    };
 
-    r.step   = S;
-    r.band   = B;
-    r.margin = M;
-    r.min = min;
-    r.max = max;
-    return this;
-  };
+    /**
+     * Sets the range from the given continuous interval. The interval
+     * [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced points,
+     * where <i>n</i> is the number of (unique) values in the domain. The first
+     * and last point are exactly on the edge of the range.
+     *
+     * <p>This method must be called <i>after</i> the domain is set.
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.splitFlush
+     * @param {number} min minimum value of the output range.
+     * @param {number} max maximum value of the output range.
+     * @returns {pv.Scale.ordinal} <tt>this</tt>.
+     * @see #split
+     */
+    scale.splitFlush = function(min, max) {
+        var n = this.domain().length,
+            step = (max - min) / (n - 1);
 
-  /**
-   * Sets the range from the given continuous interval. The interval
-   * [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced points,
-   * where <i>n</i> is the number of (unique) values in the domain. The first
-   * and last point are exactly on the edge of the range.
-   *
-   * <p>This method must be called <i>after</i> the domain is set.
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.splitFlush
-   * @param {number} min minimum value of the output range.
-   * @param {number} max maximum value of the output range.
-   * @returns {pv.Scale.ordinal} <tt>this</tt>.
-   * @see #split
-   */
-  scale.splitFlush = function(min, max) {
-    var n = this.domain().length,
-        step = (max - min) / (n - 1);
+        r = (n == 1) ? [(min + max) / 2] : pv.range(min, max + step / 2, step);
+        r.min = min;
+        r.max = max;
+        return this;
+    };
 
-    r = (n == 1) ? [(min + max) / 2]
-        : pv.range(min, max + step / 2, step);
-    r.min = min;
-    r.max = max;
-    return this;
-  };
+    /**
+     * Sets the range from the given continuous interval. The interval
+     * [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
+     * where <i>n</i> is the number of (unique) values in the domain. The first
+     * and last band are offset from the edge of the range by the distance between
+     * bands.
+     *
+     * <p>The band width argument, <tt>band</tt>, is typically in the range [0, 1]
+     * and defaults to 1. This fraction corresponds to the amount of space in the
+     * range to allocate to the bands, as opposed to padding. A value of 0.5 means
+     * that the band width will be equal to the padding width. The computed
+     * absolute band width can be retrieved from the range as
+     * <tt>scale.range().band</tt>.
+     * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
+     * </p>
+     *
+     * <pre>
+     * m = M/2
+     *
+     *  |MBm|mBm| ... |mBM|
+     * min               max
+     *   r0 -> min + M
+     * </pre>
+     *
+     * <p>If the band width argument is negative, this method will allocate bands
+     * of a <i>fixed</i> width <tt>-band</tt>, rather than a relative fraction of
+     * the available space.
+     *
+     * <p>Tip: to inset the bands by a fixed amount <tt>p</tt>, specify a minimum
+     * value of <tt>min + p</tt> (or simply <tt>p</tt>, if <tt>min</tt> is
+     * 0). Then set the mark width to <tt>scale.range().band - p</tt>.
+     *
+     * <p>This method must be called <i>after</i> the domain is set.
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.splitBanded
+     * @param {number} min minimum value of the output range.
+     * @param {number} max maximum value of the output range.
+     * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
+     * @returns {pv.Scale.ordinal} <tt>this</tt>.
+     * @see #split
+     */
+    scale.splitBanded = function(min, max, band) {
+        if (arguments.length < 3) band = 1;
+        if (band < 0) {
+            var n = this.domain().length,
+                total = -band * n,
+                remaining = max - min - total,
+                padding = remaining / (n + 1);
+            r = pv.range(min + padding, max, padding - band);
+            r.band = -band;
+        } else {
+            var step = (max - min) / (this.domain().length + (1 - band));
+            r = pv.range(min + step * (1 - band), max, step);
+            r.band = step * band;
+            r.step = step;
+            r.margin = step - r.band;
+        }
+        r.min = min;
+        r.max = max;
+        return this;
+    };
 
-  /**
-   * Sets the range from the given continuous interval. The interval
-   * [<i>min</i>, <i>max</i>] is subdivided into <i>n</i> equispaced bands,
-   * where <i>n</i> is the number of (unique) values in the domain. The first
-   * and last band are offset from the edge of the range by the distance between
-   * bands.
-   *
-   * <p>The band width argument, <tt>band</tt>, is typically in the range [0, 1]
-   * and defaults to 1. This fraction corresponds to the amount of space in the
-   * range to allocate to the bands, as opposed to padding. A value of 0.5 means
-   * that the band width will be equal to the padding width. The computed
-   * absolute band width can be retrieved from the range as
-   * <tt>scale.range().band</tt>.
-   * The properties <tt>step</tt> and <tt>margin</tt> are also exposed.
-   * </p>
-   *
-   * <pre>
-   * m = M/2
-   *
-   *  |MBm|mBm| ... |mBM|
-   * min               max
-   *   r0 -> min + M
-   * </pre>
-   *
-   * <p>If the band width argument is negative, this method will allocate bands
-   * of a <i>fixed</i> width <tt>-band</tt>, rather than a relative fraction of
-   * the available space.
-   *
-   * <p>Tip: to inset the bands by a fixed amount <tt>p</tt>, specify a minimum
-   * value of <tt>min + p</tt> (or simply <tt>p</tt>, if <tt>min</tt> is
-   * 0). Then set the mark width to <tt>scale.range().band - p</tt>.
-   *
-   * <p>This method must be called <i>after</i> the domain is set.
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.splitBanded
-   * @param {number} min minimum value of the output range.
-   * @param {number} max maximum value of the output range.
-   * @param {number} [band] the fractional band width in [0, 1]; defaults to 1.
-   * @returns {pv.Scale.ordinal} <tt>this</tt>.
-   * @see #split
-   */
-  scale.splitBanded = function(min, max, band) {
-    if (arguments.length < 3) band = 1;
-    if (band < 0) {
-      var n = this.domain().length,
-          total = -band * n,
-          remaining = max - min - total,
-          padding = remaining / (n + 1);
-      r = pv.range(min + padding, max, padding - band);
-      r.band = -band;
-    } else {
-      var step = (max - min) / (this.domain().length + (1 - band));
-      r = pv.range(min + step * (1 - band), max, step);
-      r.band = step * band;
-      r.step = step;
-      r.margin = step - r.band;
-    }
-    r.min = min;
-    r.max = max;
-    return this;
-  };
+    /**
+     * Inverts the specified value in the output range,
+     * returning the index of the closest corresponding value in the input domain.
+     * This is frequently used to convert the mouse location (see {@link pv.Mark#mouse})
+     * to a value in the input domain.
+     *
+     * The number of input domain values is returned
+     * if the specified point is closest to the end margin of the last input domain value.
+     *
+     * @function
+     * @name pv.Scale.quantitative.prototype.invertIndex
+     * @param {number} y a value in the output range (a pixel location).
+     * @param {boolean} [noRound=false] returns an un-rounded result.
+     * @returns {number} the index of the closest input domain value.
+     */
+    scale.invertIndex = function(y, noRound) {
+        var N = this.domain().length;
+        if (N === 0) {
+            return -1;
+        }
 
-  /**
-   * Inverts the specified value in the output range,
-   * returning the index of the closest corresponding value in the input domain.
-   * This is frequently used to convert the mouse location (see {@link pv.Mark#mouse})
-   * to a value in the input domain.
-   *
-   * The number of input domain values is returned
-   * if the specified point is closest to the end margin of the last input domain value.
-   *
-   * @function
-   * @name pv.Scale.quantitative.prototype.invertIndex
-   * @param {number} y a value in the output range (a pixel location).
-   * @param {boolean} [noRound=false] returns an un-rounded result.
-   * @returns {number} the index of the closest input domain value.
-   */
-  scale.invertIndex = function(y, noRound) {
-    var N = this.domain().length;
-    if(N === 0){
-        return -1;
-    }
+        var r = this.range();
+        var R = r.max - r.min;
+        if (R === 0) {
+            return 0;
+        }
 
-    var r = this.range();
-    var R = r.max - r.min;
-    if(R === 0){
-        return 0;
-    }
+        var S = R / N;
+        if (y >= r.max) {
+            return N;
+        }
 
-    var S = R/N;
-    if(y >= r.max){
-        return N;
-    }
+        if (y < r.min) {
+            return 0;
+        }
 
-    if(y < r.min){
-        return 0;
-    }
+        var i = (y - r.min) / S;
+        return noRound ? i : Math.round(i);
+    };
 
-    var i = (y - r.min) / S;
-    return noRound ? i : Math.round(i);
-  };
+    /**
+     * Returns a view of this scale by the specified accessor function <tt>f</tt>.
+     * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
+     * <tt>function(d) y(d.foo)</tt>. This method should be used judiciously; it
+     * is typically more clear to invoke the scale directly, passing in the value
+     * to be scaled.
+     *
+     * @function
+     * @name pv.Scale.ordinal.prototype.by
+     * @param {Function} f an accessor function.
+     * @returns {pv.Scale.ordinal} a view of this scale by the specified accessor
+     * function.
+     */
 
-  /**
-   * Returns a view of this scale by the specified accessor function <tt>f</tt>.
-   * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
-   * <tt>function(d) y(d.foo)</tt>. This method should be used judiciously; it
-   * is typically more clear to invoke the scale directly, passing in the value
-   * to be scaled.
-   *
-   * @function
-   * @name pv.Scale.ordinal.prototype.by
-   * @param {Function} f an accessor function.
-   * @returns {pv.Scale.ordinal} a view of this scale by the specified accessor
-   * function.
-   */
+    pv.copyOwn(scale, pv.Scale.common);
 
-  pv.copyOwn(scale, pv.Scale.common);
-
-  scale.domain.apply(scale, arguments);
-  return scale;
+    scale.domain.apply(scale, arguments);
+    return scale;
 };
 /**
  * Constructs a default quantile scale. The arguments to this constructor are
@@ -4789,154 +5137,153 @@ pv.Scale.ordinal = function() {
  * @extends pv.Scale
  */
 pv.Scale.quantile = function() {
-  var n = -1, // number of quantiles
-      j = -1, // max quantile index
-      q = [], // quantile boundaries
-      d = [], // domain
-      y = pv.Scale.linear(); // range
+    var n = -1, // number of quantiles
+        j = -1, // max quantile index
+        q = [], // quantile boundaries
+        d = [], // domain
+        y = pv.Scale.linear(); // range
 
-  /** @private */
-  function scale(x) {
-    return y(Math.max(0, Math.min(j, pv.search.index(q, x) - 1)) / j);
-  }
+    /** @private */
 
-  /**
-   * Sets or gets the quantile boundaries. By default, each element in the
-   * domain is in its own quantile. If the argument to this method is a number,
-   * it specifies the number of equal-sized quantiles by which to divide the
-   * domain.
-   *
-   * <p>If no arguments are specified, this method returns the quantile
-   * boundaries; the first element is always the minimum value of the domain,
-   * and the last element is the maximum value of the domain. Thus, the length
-   * of the returned array is always one greater than the number of quantiles.
-   *
-   * @function
-   * @name pv.Scale.quantile.prototype.quantiles
-   * @param {number} x the number of quantiles.
-   */
-  scale.quantiles = function(x) {
-    if (arguments.length) {
-      n = Number(x);
-      if (n < 0) {
-        q = [d[0]].concat(d);
-        j = d.length - 1;
-      } else {
-        q = [];
-        q[0] = d[0];
-        for (var i = 1; i <= n; i++) {
-          q[i] = d[~~(i * (d.length - 1) / n)];
+    function scale(x) {
+        return y(Math.max(0, Math.min(j, pv.search.index(q, x) - 1)) / j);
+    }
+
+    /**
+     * Sets or gets the quantile boundaries. By default, each element in the
+     * domain is in its own quantile. If the argument to this method is a number,
+     * it specifies the number of equal-sized quantiles by which to divide the
+     * domain.
+     *
+     * <p>If no arguments are specified, this method returns the quantile
+     * boundaries; the first element is always the minimum value of the domain,
+     * and the last element is the maximum value of the domain. Thus, the length
+     * of the returned array is always one greater than the number of quantiles.
+     *
+     * @function
+     * @name pv.Scale.quantile.prototype.quantiles
+     * @param {number} x the number of quantiles.
+     */
+    scale.quantiles = function(x) {
+        if (arguments.length) {
+            n = Number(x);
+            if (n < 0) {
+                q = [d[0]].concat(d);
+                j = d.length - 1;
+            } else {
+                q = [];
+                q[0] = d[0];
+                for (var i = 1; i <= n; i++) {
+                    q[i] = d[~~(i * (d.length - 1) / n)];
+                }
+                j = n - 1;
+            }
+            return this;
         }
-        j = n - 1;
-      }
-      return this;
-    }
-    return q;
-  };
+        return q;
+    };
 
-  /**
-   * Sets or gets the input domain. This method can be invoked several ways:
-   *
-   * <p>1. <tt>domain(values...)</tt>
-   *
-   * <p>Specifying the domain as a series of values is the most explicit and
-   * recommended approach. However, if the domain values are derived from data,
-   * you may find the second method more appropriate.
-   *
-   * <p>2. <tt>domain(array, f)</tt>
-   *
-   * <p>Rather than enumerating the domain values as explicit arguments to this
-   * method, you can specify a single argument of an array. In addition, you can
-   * specify an optional accessor function to extract the domain values from the
-   * array.
-   *
-   * <p>3. <tt>domain()</tt>
-   *
-   * <p>Invoking the <tt>domain</tt> method with no arguments returns the
-   * current domain as an array.
-   *
-   * @function
-   * @name pv.Scale.quantile.prototype.domain
-   * @param {...} domain... domain values.
-   * @returns {pv.Scale.quantile} <tt>this</tt>, or the current domain.
-   */
-  scale.domain = function(array, f) {
-    if (arguments.length) {
-      d = (array instanceof Array)
-          ? pv.map(array, f)
-          : Array.prototype.slice.call(arguments);
-      d.sort(pv.naturalOrder);
-      scale.quantiles(n); // recompute quantiles
-      return this;
-    }
-    return d;
-  };
+    /**
+     * Sets or gets the input domain. This method can be invoked several ways:
+     *
+     * <p>1. <tt>domain(values...)</tt>
+     *
+     * <p>Specifying the domain as a series of values is the most explicit and
+     * recommended approach. However, if the domain values are derived from data,
+     * you may find the second method more appropriate.
+     *
+     * <p>2. <tt>domain(array, f)</tt>
+     *
+     * <p>Rather than enumerating the domain values as explicit arguments to this
+     * method, you can specify a single argument of an array. In addition, you can
+     * specify an optional accessor function to extract the domain values from the
+     * array.
+     *
+     * <p>3. <tt>domain()</tt>
+     *
+     * <p>Invoking the <tt>domain</tt> method with no arguments returns the
+     * current domain as an array.
+     *
+     * @function
+     * @name pv.Scale.quantile.prototype.domain
+     * @param {...} domain... domain values.
+     * @returns {pv.Scale.quantile} <tt>this</tt>, or the current domain.
+     */
+    scale.domain = function(array, f) {
+        if (arguments.length) {
+            d = (array instanceof Array) ? pv.map(array, f) : Array.prototype.slice.call(arguments);
+            d.sort(pv.naturalOrder);
+            scale.quantiles(n); // recompute quantiles
+            return this;
+        }
+        return d;
+    };
 
-  /**
-   * Sets or gets the output range. This method can be invoked several ways:
-   *
-   * <p>1. <tt>range(min, ..., max)</tt>
-   *
-   * <p>The range may be specified as a series of numbers or colors. Most
-   * commonly, two numbers are specified: the minimum and maximum pixel values.
-   * For a color scale, values may be specified as {@link pv.Color}s or
-   * equivalent strings. For a diverging scale, or other subdivided non-uniform
-   * scales, multiple values can be specified. For example:
-   *
-   * <pre>    .range("red", "white", "green")</pre>
-   *
-   * <p>Currently, only numbers and colors are supported as range values. The
-   * number of range values must exactly match the number of domain values, or
-   * the behavior of the scale is undefined.
-   *
-   * <p>2. <tt>range()</tt>
-   *
-   * <p>Invoking the <tt>range</tt> method with no arguments returns the current
-   * range as an array of numbers or colors.
-   *
-   * @function
-   * @name pv.Scale.quantile.prototype.range
-   * @param {...} range... range values.
-   * @returns {pv.Scale.quantile} <tt>this</tt>, or the current range.
-   */
-  scale.range = function() {
-    if (arguments.length) {
-      y.range.apply(y, arguments);
-      return this;
-    }
-    return y.range();
-  };
+    /**
+     * Sets or gets the output range. This method can be invoked several ways:
+     *
+     * <p>1. <tt>range(min, ..., max)</tt>
+     *
+     * <p>The range may be specified as a series of numbers or colors. Most
+     * commonly, two numbers are specified: the minimum and maximum pixel values.
+     * For a color scale, values may be specified as {@link pv.Color}s or
+     * equivalent strings. For a diverging scale, or other subdivided non-uniform
+     * scales, multiple values can be specified. For example:
+     *
+     * <pre>    .range("red", "white", "green")</pre>
+     *
+     * <p>Currently, only numbers and colors are supported as range values. The
+     * number of range values must exactly match the number of domain values, or
+     * the behavior of the scale is undefined.
+     *
+     * <p>2. <tt>range()</tt>
+     *
+     * <p>Invoking the <tt>range</tt> method with no arguments returns the current
+     * range as an array of numbers or colors.
+     *
+     * @function
+     * @name pv.Scale.quantile.prototype.range
+     * @param {...} range... range values.
+     * @returns {pv.Scale.quantile} <tt>this</tt>, or the current range.
+     */
+    scale.range = function() {
+        if (arguments.length) {
+            y.range.apply(y, arguments);
+            return this;
+        }
+        return y.range();
+    };
 
-  /**
-   * Returns a view of this scale by the specified accessor function <tt>f</tt>.
-   * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
-   * <tt>function(d) y(d.foo)</tt>.
-   *
-   * <p>This method is provided for convenience, such that scales can be
-   * succinctly defined inline. For example, given an array of data elements
-   * that have a <tt>score</tt> attribute with the domain [0, 1], the height
-   * property could be specified as:
-   *
-   * <pre>.height(pv.Scale.linear().range(0, 480).by(function(d) d.score))</pre>
-   *
-   * This is equivalent to:
-   *
-   * <pre>.height(function(d) d.score * 480)</pre>
-   *
-   * This method should be used judiciously; it is typically more clear to
-   * invoke the scale directly, passing in the value to be scaled.
-   *
-   * @function
-   * @name pv.Scale.quantile.prototype.by
-   * @param {Function} f an accessor function.
-   * @returns {pv.Scale.quantile} a view of this scale by the specified
-   * accessor function.
-   */
+    /**
+     * Returns a view of this scale by the specified accessor function <tt>f</tt>.
+     * Given a scale <tt>y</tt>, <tt>y.by(function(d) d.foo)</tt> is equivalent to
+     * <tt>function(d) y(d.foo)</tt>.
+     *
+     * <p>This method is provided for convenience, such that scales can be
+     * succinctly defined inline. For example, given an array of data elements
+     * that have a <tt>score</tt> attribute with the domain [0, 1], the height
+     * property could be specified as:
+     *
+     * <pre>.height(pv.Scale.linear().range(0, 480).by(function(d) d.score))</pre>
+     *
+     * This is equivalent to:
+     *
+     * <pre>.height(function(d) d.score * 480)</pre>
+     *
+     * This method should be used judiciously; it is typically more clear to
+     * invoke the scale directly, passing in the value to be scaled.
+     *
+     * @function
+     * @name pv.Scale.quantile.prototype.by
+     * @param {Function} f an accessor function.
+     * @returns {pv.Scale.quantile} a view of this scale by the specified
+     * accessor function.
+     */
 
-  pv.copyOwn(scale, pv.Scale.common);
+    pv.copyOwn(scale, pv.Scale.common);
 
-  scale.domain.apply(scale, arguments);
-  return scale;
+    scale.domain.apply(scale, arguments);
+    return scale;
 };
 /**
  * Returns a histogram operator for the specified data, with an optional
@@ -4949,80 +5296,84 @@ pv.Scale.quantile = function() {
  * @param {Function} [f] an optional accessor function.
  */
 pv.histogram = function(data, f) {
-  var frequency = true;
-  return {
+    var frequency = true;
+    return {
 
-    /**
-     * Returns the computed histogram bins. An optional array of numbers,
-     * <tt>ticks</tt>, may be specified as the break points. If the ticks are
-     * not specified, default ticks will be computed using a linear scale on the
-     * data domain.
-     *
-     * <p>The returned array contains {@link pv.histogram.Bin}s. The <tt>x</tt>
-     * attribute corresponds to the bin's start value (inclusive), while the
-     * <tt>dx</tt> attribute stores the bin size (end - start). The <tt>y</tt>
-     * attribute stores either the frequency count or probability, depending on
-     * how the histogram operator has been configured.
-     *
-     * <p>The {@link pv.histogram.Bin} objects are themselves arrays, containing
-     * the data elements present in each bin, i.e., the elements in the
-     * <tt>data</tt> array (prior to invoking the accessor function, if any).
-     * For example, if the data represented countries, and the accessor function
-     * returned the GDP of each country, the returned bins would be arrays of
-     * countries (not GDPs).
-     *
-     * @function
-     * @name pv.histogram.prototype.bins
-     * @param {array} [ticks]
-     * @returns {array}
-     */ /** @private */
-    bins: function(ticks) {
-      var x = pv.map(data, f), bins = [];
+        /**
+         * Returns the computed histogram bins. An optional array of numbers,
+         * <tt>ticks</tt>, may be specified as the break points. If the ticks are
+         * not specified, default ticks will be computed using a linear scale on the
+         * data domain.
+         *
+         * <p>The returned array contains {@link pv.histogram.Bin}s. The <tt>x</tt>
+         * attribute corresponds to the bin's start value (inclusive), while the
+         * <tt>dx</tt> attribute stores the bin size (end - start). The <tt>y</tt>
+         * attribute stores either the frequency count or probability, depending on
+         * how the histogram operator has been configured.
+         *
+         * <p>The {@link pv.histogram.Bin} objects are themselves arrays, containing
+         * the data elements present in each bin, i.e., the elements in the
+         * <tt>data</tt> array (prior to invoking the accessor function, if any).
+         * For example, if the data represented countries, and the accessor function
+         * returned the GDP of each country, the returned bins would be arrays of
+         * countries (not GDPs).
+         *
+         * @function
+         * @name pv.histogram.prototype.bins
+         * @param {array} [ticks]
+         * @returns {array}
+         */
+        /** @private */
+        bins: function(ticks) {
+            var x = pv.map(data, f),
+                bins = [];
 
-      /* Initialize default ticks. */
-      if (!arguments.length) ticks = pv.Scale.linear(x).ticks();
+            /* Initialize default ticks. */
+            if (!arguments.length) ticks = pv.Scale.linear(x).ticks();
 
-      /* Initialize the bins. */
-      for (var i = 0; i < ticks.length - 1; i++) {
-        var bin = bins[i] = [];
-        bin.x = ticks[i];
-        bin.dx = ticks[i + 1] - ticks[i];
-        bin.y = 0;
-      }
+            /* Initialize the bins. */
+            for (var i = 0; i < ticks.length - 1; i++) {
+                var bin = bins[i] = [];
+                bin.x = ticks[i];
+                bin.dx = ticks[i + 1] - ticks[i];
+                bin.y = 0;
+            }
 
-      /* Count the number of samples per bin. */
-      for (var i = 0; i < x.length; i++) {
-        var j = pv.search.index(ticks, x[i]) - 1,
-            bin = bins[Math.max(0, Math.min(bins.length - 1, j))];
-        bin.y++;
-        bin.push(data[i]);
-      }
+            /* Count the number of samples per bin. */
+            for (var i = 0; i < x.length; i++) {
+                var j = pv.search.index(ticks, x[i]) - 1,
+                    bin = bins[Math.max(0, Math.min(bins.length - 1, j))];
+                bin.y++;
+                bin.push(data[i]);
+            }
 
-      /* Convert frequencies to probabilities. */
-      if (!frequency) for (var i = 0; i < bins.length; i++) {
-        bins[i].y /= x.length;
-      }
+            /* Convert frequencies to probabilities. */
+            if (!frequency)
+                for (var i = 0; i < bins.length; i++) {
+                    bins[i].y /= x.length;
+                }
 
-      return bins;
-    },
+            return bins;
+        },
 
-    /**
-     * Sets or gets whether this histogram operator returns frequencies or
-     * probabilities.
-     *
-     * @function
-     * @name pv.histogram.prototype.frequency
-     * @param {boolean} [x]
-     * @returns {pv.histogram} this.
-     */ /** @private */
-    frequency: function(x) {
-      if (arguments.length) {
-        frequency = Boolean(x);
-        return this;
-      }
-      return frequency;
-    }
-  };
+        /**
+         * Sets or gets whether this histogram operator returns frequencies or
+         * probabilities.
+         *
+         * @function
+         * @name pv.histogram.prototype.frequency
+         * @param {boolean} [x]
+         * @returns {pv.histogram} this.
+         */
+        /** @private */
+        frequency: function(x) {
+            if (arguments.length) {
+                frequency = Boolean(x);
+                return this;
+            }
+            return frequency;
+        }
+    };
 };
 
 /**
@@ -5059,59 +5410,62 @@ pv.histogram = function(data, f) {
  * @name pv.histogram.Bin.prototype.y
  */
 
-(function(){
+(function() {
 
-    pv.Shape = function(){};
-    
+    pv.Shape = function() {};
+
     // -----------------
-    
-    var _k0 = {x: 1, y: 1};
-    
+
+    var _k0 = {
+        x: 1,
+        y: 1
+    };
+
     pv.Shape.dist2 = function(v, w, k) {
         k = k || _k0;
-        
+
         var dx = v.x - w.x;
         var dy = v.y - w.y;
-        var dx2 = dx*dx;
-        var dy2 = dy*dy;
-        
+        var dx2 = dx * dx;
+        var dy2 = dy * dy;
+
         return {
-            cost:  dx2 + dy2,
+            cost: dx2 + dy2,
             dist2: k.x * dx2 + k.y * dy2
         };
     };
-    
+
     // Returns an angle between 0 and and 2*pi
-    var pi    = Math.PI;
-    var pi2   = 2 * pi;
+    var pi = Math.PI;
+    var pi2 = 2 * pi;
     var atan2 = Math.atan2;
-    
-    pv.Shape.normalizeAngle = function(a){
+
+    pv.Shape.normalizeAngle = function(a) {
         a = a % pi2;
-        if(a < 0){
+        if (a < 0) {
             a += pi2;
         }
-        
+
         return a;
     };
-    
+
     // 0 - 2*pi
-    pv.Shape.atan2Norm = function(dy, dx){
+    pv.Shape.atan2Norm = function(dy, dx) {
         // between -pi and pi
         var a = atan2(dy, dx);
-        if(a < 0){
+        if (a < 0) {
             a += pi2;
         }
-        
+
         return a;
     };
-    
+
     // -----------------
-    
-    pv.Shape.prototype.hasArea = function(){
+
+    pv.Shape.prototype.hasArea = function() {
         return true;
     };
-    
+
     // hasArea
     // apply
     // clone
@@ -5123,16 +5477,16 @@ pv.histogram = function(data, f) {
     // center
     // distance2
     // bbox (some)
-    
+
 }());
-(function(){
-    
+(function() {
+
     var dist2 = pv.Shape.dist2;
-    var cos   = Math.cos;
-    var sin   = Math.sin;
-    var sqrt  = Math.sqrt;
-    
-    
+    var cos = Math.cos;
+    var sin = Math.sin;
+    var sqrt = Math.sqrt;
+
+
     /**
      * Returns a {@link pv.Vector} for the specified <i>x</i> and <i>y</i>
      * coordinate. This is a convenience factory method, equivalent to <tt>new
@@ -5144,9 +5498,9 @@ pv.histogram = function(data, f) {
      * @returns {pv.Vector} a vector for the specified coordinates.
      */
     pv.vector = function(x, y) {
-      return new Point(x, y);
+        return new Point(x, y);
     };
-    
+
     /**
      * Constructs a {@link pv.Vector} for the specified <i>x</i> and <i>y</i>
      * coordinate. This constructor should not be invoked directly; use
@@ -5162,35 +5516,35 @@ pv.histogram = function(data, f) {
      * @param {number} y the <i>y</i> coordinate.
      */
     pv.Vector = function(x, y) {
-      this.x = x;
-      this.y = y;
+        this.x = x;
+        this.y = y;
     };
-    
+
     var Point = pv.Shape.Point = pv.Vector;
-    
+
     pv.Vector.prototype = pv.extend(pv.Shape);
-    
+
     /**
      * Returns a vector perpendicular to this vector: <i>&#x27e8;-y, x&#x27e9;</i>.
      *
      * @returns {pv.Vector} a perpendicular vector.
      */
     pv.Vector.prototype.perp = function() {
-      return new Point(-this.y, this.x);
+        return new Point(-this.y, this.x);
     };
-    
+
     /**
      * Returns a vector which is the result of rotating this vector by the specified angle.
-     * 
+     *
      * @returns {pv.Vector} a rotated vector.
      */
     pv.Vector.prototype.rotate = function(angle) {
         var c = cos(angle);
         var s = sin(angle);
-        
-        return new Point(c*this.x -s*this.y, s*this.x + c*this.y);
+
+        return new Point(c * this.x - s * this.y, s * this.x + c * this.y);
     };
-    
+
     /**
      * Returns a normalized copy of this vector: a vector with the same direction,
      * but unit length. If this vector has zero length this method returns a copy of
@@ -5199,19 +5553,19 @@ pv.histogram = function(data, f) {
      * @returns {pv.Vector} a unit vector.
      */
     pv.Vector.prototype.norm = function() {
-      var l = this.length();
-      return this.times(l ? (1 / l) : 1);
+        var l = this.length();
+        return this.times(l ? (1 / l) : 1);
     };
-    
+
     /**
      * Returns the magnitude of this vector, defined as <i>sqrt(x * x + y * y)</i>.
      *
      * @returns {number} a length.
      */
     pv.Vector.prototype.length = function() {
-      return sqrt(this.x * this.x + this.y * this.y);
+        return sqrt(this.x * this.x + this.y * this.y);
     };
-    
+
     /**
      * Returns a scaled copy of this vector: <i>&#x27e8;x * k, y * k&#x27e9;</i>.
      * To perform the equivalent divide operation, use <i>1 / k</i>.
@@ -5220,9 +5574,9 @@ pv.histogram = function(data, f) {
      * @returns {pv.Vector} a scaled vector.
      */
     pv.Vector.prototype.times = function(k) {
-      return new Point(this.x * k, this.y * k);
+        return new Point(this.x * k, this.y * k);
     };
-    
+
     /**
      * Returns this vector plus the vector <i>v</i>: <i>&#x27e8;x + v.x, y +
      * v.y&#x27e9;</i>. If only one argument is specified, it is interpreted as the
@@ -5233,11 +5587,9 @@ pv.histogram = function(data, f) {
      * @returns {pv.Vector} a new vector.
      */
     pv.Vector.prototype.plus = function(x, y) {
-      return (arguments.length == 1)
-          ? new Point(this.x + x.x, this.y + x.y)
-          : new Point(this.x + x, this.y + y);
+        return (arguments.length == 1) ? new Point(this.x + x.x, this.y + x.y) : new Point(this.x + x, this.y + y);
     };
-    
+
     /**
      * Returns this vector minus the vector <i>v</i>: <i>&#x27e8;x - v.x, y -
      * v.y&#x27e9;</i>. If only one argument is specified, it is interpreted as the
@@ -5248,11 +5600,9 @@ pv.histogram = function(data, f) {
      * @returns {pv.Vector} a new vector.
      */
     pv.Vector.prototype.minus = function(x, y) {
-      return (arguments.length == 1)
-          ? new Point(this.x - x.x, this.y - x.y)
-          : new Point(this.x - x, this.y - y);
+        return (arguments.length == 1) ? new Point(this.x - x.x, this.y - x.y) : new Point(this.x - x, this.y - y);
     };
-    
+
     /**
      * Returns the dot product of this vector and the vector <i>v</i>: <i>x * v.x +
      * y * v.y</i>. If only one argument is specified, it is interpreted as the
@@ -5263,572 +5613,590 @@ pv.histogram = function(data, f) {
      * @returns {number} a dot product.
      */
     pv.Vector.prototype.dot = function(x, y) {
-      return (arguments.length == 1)
-          ? this.x * x.x + this.y * x.y
-          : this.x * x + this.y * y;
+        return (arguments.length == 1) ? this.x * x.x + this.y * x.y : this.x * x + this.y * y;
     };
-    
-    pv.Vector.prototype.hasArea = function(){
+
+    pv.Vector.prototype.hasArea = function() {
         return false;
     };
-    
-    pv.Vector.prototype.clone = function(){
+
+    pv.Vector.prototype.clone = function() {
         return new Point(this.x, this.y);
     };
-    
-    pv.Vector.prototype.apply = function(t){
+
+    pv.Vector.prototype.apply = function(t) {
         return new Point(t.x + (t.k * this.x), t.y + (t.k * this.y));
     };
-    
-    pv.Vector.prototype.intersectsRect = function(rect){
+
+    pv.Vector.prototype.intersectsRect = function(rect) {
         // Does rect contain the point
         return (this.x >= rect.x) && (this.x <= rect.x2) &&
-               (this.y >= rect.y) && (this.y <= rect.y2);
+            (this.y >= rect.y) && (this.y <= rect.y2);
     };
-    
-    pv.Vector.prototype.containsPoint = function(p){
+
+    pv.Vector.prototype.containsPoint = function(p) {
         return (this.x === p.x) && (this.y === p.y);
     };
-    
-    pv.Vector.prototype.points = function(){
+
+    pv.Vector.prototype.points = function() {
         return [this];
     };
-    
-    pv.Vector.prototype.edges = function(){
+
+    pv.Vector.prototype.edges = function() {
         return [];
     };
-    
-    pv.Vector.prototype.center = function(){
+
+    pv.Vector.prototype.center = function() {
         return this;
     };
-    
-    pv.Vector.prototype.distance2 = function(p, k){
+
+    pv.Vector.prototype.distance2 = function(p, k) {
         return dist2(this, p, k);
     };
 }());
 
-(function(){
+(function() {
     var Point = pv.Shape.Point;
     var dist2 = pv.Shape.dist2;
-    
+
     // -----------------
-    
-    pv.Shape.Line = function(x, y, x2, y2){
-        this.x  = x  || 0;
-        this.y  = y  || 0;
+
+    pv.Shape.Line = function(x, y, x2, y2) {
+        this.x = x || 0;
+        this.y = y || 0;
         this.x2 = x2 || 0;
         this.y2 = y2 || 0;
     };
-    
+
     var Line = pv.Shape.Line;
-    
+
     Line.prototype = pv.extend(pv.Shape);
-    
-    Line.prototype.hasArea = function(){
+
+    Line.prototype.hasArea = function() {
         return false;
     };
-    
-    Line.prototype.clone = function(){
+
+    Line.prototype.clone = function() {
         return new Line(this.x, this.y, this.x2, this.x2);
     };
-    
-    Line.prototype.apply = function(t){
-        var x  = t.x + (t.k * this.x );
-        var y  = t.y + (t.k * this.y );
+
+    Line.prototype.apply = function(t) {
+        var x = t.x + (t.k * this.x);
+        var y = t.y + (t.k * this.y);
         var x2 = t.x + (t.k * this.x2);
         var y2 = t.y + (t.k * this.y2);
         return new Line(x, y, x2, y2);
     };
-    
-    Line.prototype.points = function(){
+
+    Line.prototype.points = function() {
         return [new Point(this.x, this.y), new Point(this.x2, this.y2)];
     };
-    
-    Line.prototype.edges = function(){
+
+    Line.prototype.edges = function() {
         return [this];
     };
-    
-    Line.prototype.center = function(){
-        return new Point((this.x + this.x2)/2, (this.y + this.y2)/2);
+
+    Line.prototype.center = function() {
+        return new Point((this.x + this.x2) / 2, (this.y + this.y2) / 2);
     };
-    
-    Line.prototype.normal = function(at, shapeCenter){
+
+    Line.prototype.normal = function(at, shapeCenter) {
         // Any point (at) laying on the line has the same normal 
         var points = this.points();
         var norm = points[1].minus(points[0]).perp().norm();
-        
+
         // If shapeCenter point is specified, 
         // return the norm direction that 
         // points to the outside of the shape
-        if(shapeCenter){
+        if (shapeCenter) {
             var outside = points[0].minus(shapeCenter);
-            if(outside.dot(norm) < 0){
+            if (outside.dot(norm) < 0) {
                 // opposite directions
                 norm = norm.times(-1);
             }
         }
-        
+
         return norm;
     };
-    
-    Line.prototype.intersectsRect = function(rect){
+
+    Line.prototype.intersectsRect = function(rect) {
         var i, L;
         var points = this.points();
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
+        for (i = 0; i < L; i++) {
+            if (points[i].intersectsRect(rect)) {
                 return true;
             }
         }
-        
+
         var edges = rect.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(this.intersectsLine(edges[i])){
+        for (i = 0; i < L; i++) {
+            if (this.intersectsLine(edges[i])) {
                 return true;
             }
         }
-    
+
         return false;
     };
-    
-    Line.prototype.containsPoint = function(p){
-        var x  = this.x ;
+
+    Line.prototype.containsPoint = function(p) {
+        var x = this.x;
         var x2 = this.x2;
-        var y  = this.y ;
+        var y = this.y;
         var y2 = this.y2;
         return x <= p.x && p.x <= x2 &&
-               ((x === x2) ? 
-                (Math.min(y, y2) <= p.y && p.y <= Math.max(y, y2)) :
-                (Math.abs((y2-y)/(x2-x) * (p.x-x) + y - p.y) <= 1e-10));
+            ((x === x2) ?
+            (Math.min(y, y2) <= p.y && p.y <= Math.max(y, y2)) :
+            (Math.abs((y2 - y) / (x2 - x) * (p.x - x) + y - p.y) <= 1e-10));
     };
-    
-    Line.prototype.intersectsLine = function(b){
+
+    Line.prototype.intersectsLine = function(b) {
         // See: http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
         var a = this,
-    
+
             x21 = a.x2 - a.x,
             y21 = a.y2 - a.y,
-    
+
             x43 = b.x2 - b.x,
             y43 = b.y2 - b.y,
-    
+
             denom = y43 * x21 - x43 * y21;
-    
-        if(denom === 0){
+
+        if (denom === 0) {
             // Parallel lines: no intersection
             return false;
         }
-    
+
         var y13 = a.y - b.y,
             x13 = a.x - b.x,
             numa = (x43 * y13 - y43 * x13),
             numb = (x21 * y13 - y21 * x13);
-    
-        if(denom === 0){
+
+        if (denom === 0) {
             // Both 0  => coincident
             // Only denom 0 => parallel, but not coincident
             return (numa === 0) && (numb === 0);
         }
-    
+
         var ua = numa / denom;
-        if(ua < 0 || ua > 1){
+        if (ua < 0 || ua > 1) {
             // Intersection not within segment a
             return false;
         }
-    
+
         var ub = numb / denom;
-        if(ub < 0 || ub > 1){
+        if (ub < 0 || ub > 1) {
             // Intersection not within segment b
             return false;
         }
-    
+
         return true;
     };
-    
+
     // Adapted from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment (commenter Grumdrig)
     // Return minimum distance (squared) between the point p and the line segment
     // k: cost vector
-    Line.prototype.distance2 = function(p, k){
+    Line.prototype.distance2 = function(p, k) {
         var v = this;
-        var w = {x: this.x2, y: this.y2};
-        
+        var w = {
+            x: this.x2,
+            y: this.y2
+        };
+
         var l2 = dist2(v, w).dist2;
         if (l2 <= 1e-10) {
             // v == w case
             return dist2(p, v, k);
         }
-      
+
         // Consider the line extending the segment, parameterized as v + t (w - v).
         // We find projection of point p onto the line. 
         // It falls where t = [(p-v) . (w-v)] / |w-v|^2
         var wvx = w.x - v.x;
         var wvy = w.y - v.y;
-        
+
         var t = ((p.x - v.x) * wvx + (p.y - v.y) * wvy) / l2;
-        
-        if (t < 0) { return dist2(p, v, k); } // lies before v, so return the distance between v and p
-        
-        if (t > 1) { return dist2(p, w, k); } // lies after  w, so return the distance between w and p
-        
-        var proj = {x: v.x + t * wvx, y: v.y + t * wvy};
-        
+
+        if (t < 0) {
+            return dist2(p, v, k);
+        } // lies before v, so return the distance between v and p
+
+        if (t > 1) {
+            return dist2(p, w, k);
+        } // lies after  w, so return the distance between w and p
+
+        var proj = {
+            x: v.x + t * wvx,
+            y: v.y + t * wvy
+        };
+
         return dist2(p, proj, k);
     };
-    
+
 }());
 
-(function(){
-    
+(function() {
+
     var Point = pv.Shape.Point;
     var Line = pv.Shape.Line;
-    
-    pv.Shape.Polygon = function(points){
+
+    pv.Shape.Polygon = function(points) {
         this._points = points || [];
     };
-    
+
     var Polygon = pv.Shape.Polygon;
-    
+
     Polygon.prototype = pv.extend(pv.Shape);
-    
-    Polygon.prototype.points = function(){
+
+    Polygon.prototype.points = function() {
         return this._points;
     };
-        
-    Polygon.prototype.clone = function(){
+
+    Polygon.prototype.clone = function() {
         return new Polygon(this.points().slice());
     };
-    
-    Polygon.prototype.apply = function(t){
+
+    Polygon.prototype.apply = function(t) {
         var points = this.points();
         var L = points.length;
         var points2 = new Array(L);
-        
-        for(var i = 0 ; i < L ; i++){
+
+        for (var i = 0; i < L; i++) {
             points2[i] = points[i].apply(t);
         }
-        
+
         return new Polygon(points2);
     };
 
-    Polygon.prototype.intersectsRect = function(rect){
+    Polygon.prototype.intersectsRect = function(rect) {
         // I - Any point is inside the rect?
         var i, L;
         var points = this.points();
-        
+
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
+        for (i = 0; i < L; i++) {
+            if (points[i].intersectsRect(rect)) {
                 return true;
             }
         }
-        
+
         // II - Any side intersects the rect?
         var edges = this.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(edges[i].intersectsRect(rect)){
+        for (i = 0; i < L; i++) {
+            if (edges[i].intersectsRect(rect)) {
                 return true;
             }
         }
-        
+
         return false;
     };
-    
-    Polygon.prototype.edges = function(){
+
+    Polygon.prototype.edges = function() {
         var edges = this._edges;
-        if(!edges){
+        if (!edges) {
             edges = this._edges = [];
-            
+
             var points = this.points();
             var L = points.length;
-            if(L){
-                var prevPoint  = points[0];
+            if (L) {
+                var prevPoint = points[0];
                 var firstPoint = prevPoint;
-                
+
                 var point;
-                for(var i = 1 ; i < L ; i++){
+                for (var i = 1; i < L; i++) {
                     point = points[i];
-                    
-                    edges.push(new Line(prevPoint.x, prevPoint.y,  point.x, point.y));
-                    
+
+                    edges.push(new Line(prevPoint.x, prevPoint.y, point.x, point.y));
+
                     prevPoint = point;
                 }
-                
-                if(L > 2){
+
+                if (L > 2) {
                     // point will have the last point
-                    edges.push(new Line(point.x, point.y,  firstPoint.x, firstPoint.y));
+                    edges.push(new Line(point.x, point.y, firstPoint.x, firstPoint.y));
                 }
             }
         }
-    
+
         return edges;
     };
-    
-    Polygon.prototype.distance2 = function(p, k){
-        var min = {cost: Infinity, dist2: Infinity}; //dist2(p, this.center(), k);
-        
-        this.edges().forEach(function(edge){
+
+    Polygon.prototype.distance2 = function(p, k) {
+        var min = {
+            cost: Infinity,
+            dist2: Infinity
+        }; //dist2(p, this.center(), k);
+
+        this.edges().forEach(function(edge) {
             var d = edge.distance2(p, k);
-            if(d.cost < min.cost){
+            if (d.cost < min.cost) {
                 min = d;
             }
         }, this);
-        
+
         return min;
     };
-    
-    Polygon.prototype.center = function(){
+
+    Polygon.prototype.center = function() {
         var points = this.points();
         var x = 0;
         var y = 0;
-        for(var i = 0, L = points.length ; i < L ; i++){
+        for (var i = 0, L = points.length; i < L; i++) {
             var p = points[i];
             x += p.x;
             y += p.y;
         }
-        
+
         return new Point(x / L, y / L);
     };
-    
+
     // Adapted from http://stackoverflow.com/questions/217578/point-in-polygon-aka-hit-test (author Mecki)
-    Polygon.prototype.containsPoint = function(p){
+    Polygon.prototype.containsPoint = function(p) {
         var bbox = this.bbox();
-        if(!bbox.containsPoint(p)){
+        if (!bbox.containsPoint(p)) {
             return false;
         }
-        
+
         // "e" ensures the ray starts outside the polygon
         var e = bbox.dx * 0.01;
         var ray = new Line(bbox.x - e, p.y, p.x, p.y);
-        
+
         var intersectCount = 0;
         var edges = this.edges();
-        edges.forEach(function(edge){
-            if(edge.intersectsLine(ray)){
+        edges.forEach(function(edge) {
+            if (edge.intersectsLine(ray)) {
                 intersectCount++;
             }
         });
-        
+
         // Inside if odd number of intersections
         return (intersectCount & 1) === 1;
     };
-    
-    Polygon.prototype.bbox = function(){
+
+    Polygon.prototype.bbox = function() {
         var bbox = this._bbox;
-        if(!bbox){
+        if (!bbox) {
             var min, max;
-            
+
             this
-            .points()
-            .forEach(function(point, index){
-                if(min == null){
-                    min = {x: point.x, y: point.y};
-                } else {
-                    if(point.x < min.x){
-                        min.x = point.x;
+                .points()
+                .forEach(function(point, index) {
+                    if (min == null) {
+                        min = {
+                            x: point.x,
+                            y: point.y
+                        };
+                    } else {
+                        if (point.x < min.x) {
+                            min.x = point.x;
+                        }
+
+                        if (point.y < min.y) {
+                            min.y = point.y;
+                        }
                     }
-                    
-                    if(point.y < min.y){
-                        min.y = point.y;
+
+                    if (max == null) {
+                        max = {
+                            x: point.x,
+                            y: point.y
+                        };
+                    } else {
+                        if (point.x > max.x) {
+                            max.x = point.x;
+                        }
+
+                        if (point.y > max.y) {
+                            max.y = point.y;
+                        }
                     }
-                }
-                
-                if(max == null){
-                    max = {x: point.x, y: point.y};
-                } else {
-                    if(point.x > max.x){
-                        max.x = point.x;
-                    }
-                    
-                    if(point.y > max.y){
-                        max.y = point.y;
-                    }
-                }
-            });
-            
-            if(min){
+                });
+
+            if (min) {
                 bbox = this._bbox = new pv.Shape.Rect(min.x, min.y, max.x - min.x, max.y - min.y);
             }
         }
-        
+
         return bbox;
-    };    
-    
+    };
+
 }());
 
-(function(){
-    
+(function() {
+
     var Point = pv.Shape.Point;
-    var Line  = pv.Shape.Line;
-    
-    pv.Shape.Rect = function(x, y, dx, dy){
-        this.x  =  x || 0;
-        this.y  =  y || 0;
+    var Line = pv.Shape.Line;
+
+    pv.Shape.Rect = function(x, y, dx, dy) {
+        this.x = x || 0;
+        this.y = y || 0;
         this.dx = dx || 0;
         this.dy = dy || 0;
-        
+
         // Ensure normalized
-        if(this.dx < 0){
+        if (this.dx < 0) {
             this.dx = -this.dx;
-            this.x  = this.x - this.dx;
+            this.x = this.x - this.dx;
         }
-        
-        if(this.dy < 0){
+
+        if (this.dy < 0) {
             this.dy = -this.dy;
             this.y = this.y - this.dy;
         }
-        
-        this.x2  = this.x + this.dx;
-        this.y2  = this.y + this.dy;
+
+        this.x2 = this.x + this.dx;
+        this.y2 = this.y + this.dy;
     };
-    
+
     var Rect = pv.Shape.Rect;
-    
+
     Rect.prototype = pv.extend(pv.Shape.Polygon);
-    
-    Rect.prototype.clone = function(){
+
+    Rect.prototype.clone = function() {
         var r2 = Object.create(Rect.prototype);
-        r2.x  = this.x;
-        r2.y  = this.y;
+        r2.x = this.x;
+        r2.y = this.y;
         r2.dx = this.dx;
         r2.dy = this.dy;
         r2.x2 = this.x2;
         r2.y2 = this.y2;
-        
+
         return r2;
     };
-    
-    Rect.prototype.apply = function(t){
-        var x  = t.x + (t.k * this.x);
-        var y  = t.y + (t.k * this.y);
+
+    Rect.prototype.apply = function(t) {
+        var x = t.x + (t.k * this.x);
+        var y = t.y + (t.k * this.y);
         var dx = t.k * this.dx;
         var dy = t.k * this.dy;
         return new Rect(x, y, dx, dy);
     };
-    
-    Rect.prototype.containsPoint = function(p){
-        return this.x <= p.x && p.x <= this.x2 && 
-               this.y <= p.y && p.y <= this.y2;
+
+    Rect.prototype.containsPoint = function(p) {
+        return this.x <= p.x && p.x <= this.x2 &&
+            this.y <= p.y && p.y <= this.y2;
     };
-    
-    Rect.prototype.intersectsRect = function(rect){
-        return (this.x2 > rect.x ) &&  // Some intersection on X
-               (this.x  < rect.x2) &&
-               (this.y2 > rect.y ) &&  // Some intersection on Y
-               (this.y  < rect.y2);
+
+    Rect.prototype.intersectsRect = function(rect) {
+        return (this.x2 > rect.x) && // Some intersection on X
+        (this.x < rect.x2) &&
+            (this.y2 > rect.y) && // Some intersection on Y
+        (this.y < rect.y2);
     };
-    
-    Rect.prototype.edges = function(){
-        if(!this._edges){
-            var x  = this.x,
-                y  = this.y,
+
+    Rect.prototype.edges = function() {
+        if (!this._edges) {
+            var x = this.x,
+                y = this.y,
                 x2 = this.x2,
                 y2 = this.y2;
-    
+
             this._edges = [
-                new Line(x,  y,  x2, y),
-                new Line(x2, y,  x2, y2),
-                new Line(x2, y2, x,  y2),
-                new Line(x,  y2, x,  y)
+                new Line(x, y, x2, y),
+                new Line(x2, y, x2, y2),
+                new Line(x2, y2, x, y2),
+                new Line(x, y2, x, y)
             ];
         }
-    
+
         return this._edges;
     };
-    
-    Rect.prototype.center = function(){
-        return new Point(this.x + this.dx/2, this.y + this.dy/2);
+
+    Rect.prototype.center = function() {
+        return new Point(this.x + this.dx / 2, this.y + this.dy / 2);
     };
-    
-    Rect.prototype.points = function(){
+
+    Rect.prototype.points = function() {
         var points = this._points;
-        if(!points){
-            var x  = this.x,
-                y  = this.y,
+        if (!points) {
+            var x = this.x,
+                y = this.y,
                 x2 = this.x2,
                 y2 = this.y2;
-            
+
             points = this._points = [
-                new Point(x,  y ),
-                new Point(x2, y ),
+                new Point(x, y),
+                new Point(x2, y),
                 new Point(x2, y2),
-                new Point(x,  y2)
+                new Point(x, y2)
             ];
         }
-        
+
         return points;
     };
-    
-    Rect.prototype.bbox = function(){
+
+    Rect.prototype.bbox = function() {
         return this.clone();
     };
-    
-}());(function(){
+
+}());
+(function() {
     var Point = pv.Shape.Point;
     var dist2 = pv.Shape.dist2;
     var sqrt = Math.sqrt;
-    var abs  = Math.abs;
-    var pow  = Math.pow;
-    
-    pv.Shape.Circle = function(x, y, radius){
+    var abs = Math.abs;
+    var pow = Math.pow;
+
+    pv.Shape.Circle = function(x, y, radius) {
         this.x = x || 0;
         this.y = y || 0;
         this.radius = radius || 0;
     };
-    
+
     var Circle = pv.Shape.Circle;
-    
+
     Circle.prototype = pv.extend(pv.Shape);
-    
-    Circle.prototype.clone = function(){
+
+    Circle.prototype.clone = function() {
         return new Circle(this.x, this.y, this.radius);
     };
-    
-    Circle.prototype.apply = function(t){
-        var x  = t.x + (t.k * this.x);
-        var y  = t.y + (t.k * this.y);
-        var r  = t.k * this.radius;
+
+    Circle.prototype.apply = function(t) {
+        var x = t.x + (t.k * this.x);
+        var y = t.y + (t.k * this.y);
+        var r = t.k * this.radius;
         return new Circle(x, y, r);
     };
-    
+
     // Adapted from http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
-    Circle.prototype.intersectsRect = function(rect){
+    Circle.prototype.intersectsRect = function(rect) {
         var dx2 = rect.dx / 2,
             dy2 = rect.dy / 2,
-            r   = this.radius;
-    
+            r = this.radius;
+
         var circleDistX = abs(this.x - rect.x - dx2),
             circleDistY = abs(this.y - rect.y - dy2);
-    
+
         if ((circleDistX > dx2 + r) ||
             (circleDistY > dy2 + r)) {
             return false;
         }
-    
+
         if (circleDistX <= dx2 || circleDistY <= dy2) {
             return true;
         }
-        
+
         var sqCornerDistance = pow(circleDistX - dx2, 2) +
-                               pow(circleDistY - dy2, 2);
-    
+            pow(circleDistY - dy2, 2);
+
         return sqCornerDistance <= r * r;
     };
-    
+
     // Adapted from http://stackoverflow.com/questions/13053061/circle-line-intersection-points (author arne.b)
     Circle.prototype.intersectLine = function(line, isInfiniteLine) {
         // Line: A -> B 
         var baX = line.x2 - line.x;
         var baY = line.y2 - line.y;
-        
+
         var caX = this.x - line.x;
         var caY = this.y - line.y;
 
-        var ba2  = baX * baX + baY * baY; // square norm of ba
+        var ba2 = baX * baX + baY * baY; // square norm of ba
         var bBy2 = baX * caX + baY * caY; // dot product of ba and ca
-        var r    = this.radius;
-        var c    = caX * caX + caY * caY - r * r;
+        var r = this.radius;
+        var c = caX * caX + caY * caY - r * r;
 
         var pBy2 = bBy2 / ba2;
 
@@ -5836,96 +6204,96 @@ pv.histogram = function(data, f) {
         if (disc < 0) {
             return; // no intersection
         }
-        
+
         // if disc == 0 ... dealt with later
         var discSqrt = sqrt(disc);
         var t1 = pBy2 - discSqrt;
         var t2 = pBy2 + discSqrt;
-        
+
         // t1 < 0 || t1 > 1 => p1 off the segment 
-        
+
         var ps = [];
-        if(isInfiniteLine || (t1 >= 0 && t1 <= 1)){
+        if (isInfiniteLine || (t1 >= 0 && t1 <= 1)) {
             ps.push(new Point(line.x + baX * t1, line.y + baY * t1));
         }
-        
+
         if (disc !== 0) { // t1 != t2
-            if(isInfiniteLine || (t2 >= 0 && t2 <= 1)){
+            if (isInfiniteLine || (t2 >= 0 && t2 <= 1)) {
                 ps.push(new Point(line.x + baX * t2, line.y + baY * t2));
             }
         }
-        
+
         return ps;
     };
-    
-    Circle.prototype.points = function(){
+
+    Circle.prototype.points = function() {
         return [this.center()];
     };
-    
-    Circle.prototype.center = function(){
+
+    Circle.prototype.center = function() {
         return new Point(this.x, this.y);
     };
-    
-    Circle.prototype.normal = function(at){
+
+    Circle.prototype.normal = function(at) {
         return at.minus(this.x, this.y).norm();
     };
-    
-    Circle.prototype.containsPoint = function(p){
+
+    Circle.prototype.containsPoint = function(p) {
         var dx = p.x - this.x,
             dy = p.y - this.y,
-            r  = this.radius;
-        
-        return dx * dx + dy * dy <= r * r; 
+            r = this.radius;
+
+        return dx * dx + dy * dy <= r * r;
     };
-    
+
     // Distance (squared) to the border of the circle (inside or not)
     // //or to the center of the circle, whichever is smaller
-    Circle.prototype.distance2 = function(p, k){
+    Circle.prototype.distance2 = function(p, k) {
         var dx = p.x - this.x,
             dy = p.y - this.y,
-            r  = this.radius;
-        
+            r = this.radius;
+
         //var dCenter = dist2(p, this, k);
-        
+
         // The point at the Border of the circle, in the direction from c to p
         var b = p.minus(this).norm().times(r).plus(this);
-        
+
         var dBorder = dist2(p, b, k);
-        
-        return /*dCenter.cost < dBorder.cost ? dCenter : */dBorder; 
+
+        return /*dCenter.cost < dBorder.cost ? dCenter : */ dBorder;
     };
 
 }());
-(function(){
-    
+(function() {
+
     var Point = pv.Shape.Point;
     var dist2 = pv.Shape.dist2;
     var normalizeAngle = pv.Shape.normalizeAngle;
     var atan2Norm = pv.Shape.atan2Norm;
-    
-    var cos   = Math.cos;
-    var sin   = Math.sin;
-    var sqrt  = Math.sqrt;
-    
-    pv.Shape.Arc = function(x, y, radius, startAngle, angleSpan){
+
+    var cos = Math.cos;
+    var sin = Math.sin;
+    var sqrt = Math.sqrt;
+
+    pv.Shape.Arc = function(x, y, radius, startAngle, angleSpan) {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        
+
         this.startAngle = normalizeAngle(startAngle);
-        this.angleSpan  = normalizeAngle(angleSpan); // always positive...
-        this.endAngle   = this.startAngle + this.angleSpan; // may be > 2*pi
+        this.angleSpan = normalizeAngle(angleSpan); // always positive...
+        this.endAngle = this.startAngle + this.angleSpan; // may be > 2*pi
     };
-    
+
     var Arc = pv.Shape.Arc;
-    
+
     Arc.prototype = pv.extend(pv.Shape);
-    
-    Arc.prototype.hasArea = function(){
+
+    Arc.prototype.hasArea = function() {
         return false;
     };
-    
-    Arc.prototype.clone = function(){
+
+    Arc.prototype.clone = function() {
         var arc = Object.create(Arc.prototype);
         var me = this;
         arc.x = me.x;
@@ -5936,228 +6304,230 @@ pv.histogram = function(data, f) {
         arc.endAngle = me.endAngle;
         return arc;
     };
-    
-    Arc.prototype.apply = function(t){
-        var x   = t.x + (t.k * this.x);
-        var y   = t.y + (t.k * this.y);
-        var r   = t.k * this.radius;
+
+    Arc.prototype.apply = function(t) {
+        var x = t.x + (t.k * this.x);
+        var y = t.y + (t.k * this.y);
+        var r = t.k * this.radius;
         return new Arc(x, y, r, this.startAngle, this.angleSpan);
     };
-    
-    Arc.prototype.containsPoint = function(p){
+
+    Arc.prototype.containsPoint = function(p) {
         var dx = p.x - this.x;
         var dy = p.y - this.y;
-        var r  = sqrt(dx*dx + dy*dy);
-        
-        if(Math.abs(r - this.radius) <= 1e-10){
-            var a  = atan2Norm(dy, dx);
+        var r = sqrt(dx * dx + dy * dy);
+
+        if (Math.abs(r - this.radius) <= 1e-10) {
+            var a = atan2Norm(dy, dx);
             return this.startAngle <= a && a <= this.endAngle;
         }
-        
+
         return false;
     };
-    
+
     Arc.prototype.intersectsRect = function(rect) {
         var i, L;
-        
+
         // I - Any endpoint is inside the rect?
         var points = this.points();
         var L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
+        for (i = 0; i < L; i++) {
+            if (points[i].intersectsRect(rect)) {
                 return true;
             }
         }
-        
+
         // II - Any rect edge intersects the arc?
         var edges = rect.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(this.intersectLine(edges[i])){
+        for (i = 0; i < L; i++) {
+            if (this.intersectLine(edges[i])) {
                 return true;
             }
         }
-        
+
         return false;
     };
-    
+
     var circleIntersectLine = pv.Shape.Circle.prototype.intersectLine;
-    
+
     Arc.prototype.intersectLine = function(line, isInfiniteLine) {
         var ps = circleIntersectLine.call(this, line, isInfiniteLine);
-        if(ps){
+        if (ps) {
             // Filter ps belonging to the arc
-            ps = ps.filter(function(p){ return this.containsPoint(p); }, this);
-            if(ps.length){
+            ps = ps.filter(function(p) {
+                return this.containsPoint(p);
+            }, this);
+            if (ps.length) {
                 return ps;
             }
         }
     };
-    
-    Arc.prototype.points = function(){
-        var x  = this.x;
-        var y  = this.y;
-        var r  = this.radius;
+
+    Arc.prototype.points = function() {
+        var x = this.x;
+        var y = this.y;
+        var r = this.radius;
         var ai = this.startAngle;
         var af = this.endAngle;
-        
+
         return [
             new Point(x + r * cos(ai), y + r * sin(ai)),
             new Point(x + r * cos(af), y + r * sin(af))
         ];
     };
-    
-    Arc.prototype.center = function(){
-        var x  = this.x;
-        var y  = this.y;
-        var r  = this.radius;
+
+    Arc.prototype.center = function() {
+        var x = this.x;
+        var y = this.y;
+        var r = this.radius;
         var am = (this.startAngle + this.endAngle) / 2;
-        
+
         return new Point(x + r * cos(am), y + r * sin(am));
     };
-    
-    Arc.prototype.normal = function(at, shapeCenter){
+
+    Arc.prototype.normal = function(at, shapeCenter) {
         var norm = at.minus(this.x, this.y).norm();
-        
+
         // If shapeCenter point is specified, 
         // return the norm direction that 
         // points to the outside of the shape
-        if(shapeCenter){
+        if (shapeCenter) {
             var outside = this.center().minus(shapeCenter);
-            if(outside.dot(norm) < 0){
+            if (outside.dot(norm) < 0) {
                 // opposite directions
                 norm = norm.times(-1);
             }
         }
-        
+
         return norm;
     };
-    
+
     // Distance (squared) to the border of the Arc (inside or not)
-    Arc.prototype.distance2 = function(p, k){
+    Arc.prototype.distance2 = function(p, k) {
         var dx = p.x - this.x;
         var dy = p.y - this.y;
-        var a  = atan2Norm(dy, dx); // between 0 and 2*pi
-        
-        if(this.startAngle <= a && a <= this.endAngle){
+        var a = atan2Norm(dy, dx); // between 0 and 2*pi
+
+        if (this.startAngle <= a && a <= this.endAngle) {
             // Within angle span
-            
+
             // The point at the Border of the circle, in the direction from c to p
             var b = new Point(
-                    this.x + this.radius * cos(a),
-                    this.y + this.radius * sin(a));
-            
+                this.x + this.radius * cos(a),
+                this.y + this.radius * sin(a));
+
             return dist2(p, b, k);
         }
-        
+
         // Smallest distance to one of the two end points
         var points = this.points();
         var d1 = dist2(p, points[0], k);
         var d2 = dist2(p, points[1], k);
         return d1.cost < d2.cost ? d1 : d2;
     };
-   
+
 }());
-(function(){
-    
-    var Arc   = pv.Shape.Arc;
-    var Line  = pv.Shape.Line;
+(function() {
+
+    var Arc = pv.Shape.Arc;
+    var Line = pv.Shape.Line;
     var Point = pv.Shape.Point;
-    
-    var cos   = Math.cos;
-    var sin   = Math.sin;
-    var sqrt  = Math.sqrt;
+
+    var cos = Math.cos;
+    var sin = Math.sin;
+    var sqrt = Math.sqrt;
     var atan2Norm = pv.Shape.atan2Norm;
     var normalizeAngle = pv.Shape.normalizeAngle;
-    
-    pv.Shape.Wedge = function(x, y, innerRadius, outerRadius, startAngle, angleSpan){
+
+    pv.Shape.Wedge = function(x, y, innerRadius, outerRadius, startAngle, angleSpan) {
         this.x = x;
         this.y = y;
         this.innerRadius = innerRadius;
         this.outerRadius = outerRadius;
-        
+
         this.startAngle = normalizeAngle(startAngle);
-        this.angleSpan  = normalizeAngle(angleSpan); // always positive...
-        this.endAngle   = this.startAngle + this.angleSpan; // may be > 2*pi
+        this.angleSpan = normalizeAngle(angleSpan); // always positive...
+        this.endAngle = this.startAngle + this.angleSpan; // may be > 2*pi
     };
-    
+
     var Wedge = pv.Shape.Wedge;
-    
+
     Wedge.prototype = pv.extend(pv.Shape);
-    
-    Wedge.prototype.clone = function(){
+
+    Wedge.prototype.clone = function() {
         return new Wedge(
-                this.x, this.y, this.innerRadius, 
-                this.outerRadius, this.startAngle, this.angleSpan);
+            this.x, this.y, this.innerRadius,
+            this.outerRadius, this.startAngle, this.angleSpan);
     };
-    
-    Wedge.prototype.apply = function(t){
-        var x   = t.x + (t.k * this.x);
-        var y   = t.y + (t.k * this.y);
-        var ir  = t.k * this.innerRadius;
-        var or  = t.k * this.outerRadius;
+
+    Wedge.prototype.apply = function(t) {
+        var x = t.x + (t.k * this.x);
+        var y = t.y + (t.k * this.y);
+        var ir = t.k * this.innerRadius;
+        var or = t.k * this.outerRadius;
         return new Wedge(x, y, ir, or, this.startAngle, this.angleSpan);
     };
-    
-    Wedge.prototype.containsPoint = function(p){
+
+    Wedge.prototype.containsPoint = function(p) {
         var dx = p.x - this.x;
-        var dy = p.y - this.y ;
-        var r  = sqrt(dx*dx + dy*dy);
-        if(r >= this.innerRadius &&  r <= this.outerRadius){
-            var a  = atan2Norm(dy, dx); // between -pi and pi -> 0 - 2*pi
+        var dy = p.y - this.y;
+        var r = sqrt(dx * dx + dy * dy);
+        if (r >= this.innerRadius && r <= this.outerRadius) {
+            var a = atan2Norm(dy, dx); // between -pi and pi -> 0 - 2*pi
             return this.startAngle <= a && a <= this.endAngle;
         }
-        
+
         return false;
     };
-    
-    Wedge.prototype.intersectsRect = function(rect){
+
+    Wedge.prototype.intersectsRect = function(rect) {
         var i, L;
-        
+
         // I - Any point of the wedge is inside the rect?
         var points = this.points();
-        
+
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(points[i].intersectsRect(rect)){
+        for (i = 0; i < L; i++) {
+            if (points[i].intersectsRect(rect)) {
                 return true;
             }
         }
-        
+
         // II - Any point of the rect inside the wedge?
         points = rect.points();
         L = points.length;
-        for(i = 0 ; i < L ; i++){
-            if(this.containsPoint(points[i])){
+        for (i = 0; i < L; i++) {
+            if (this.containsPoint(points[i])) {
                 return true;
             }
         }
-        
+
         // III - Any edge intersects the rect?
         var edges = this.edges();
         L = edges.length;
-        for(i = 0 ; i < L ; i++){
-            if(edges[i].intersectsRect(rect)){
+        for (i = 0; i < L; i++) {
+            if (edges[i].intersectsRect(rect)) {
                 return true;
             }
         }
-        
+
         return false;
     };
-    
-    Wedge.prototype.points = function(){
-        if(!this._points){
+
+    Wedge.prototype.points = function() {
+        if (!this._points) {
             this.edges();
         }
-        
+
         return this._points;
     };
-    
-    Wedge.prototype.edges = function(){
+
+    Wedge.prototype.edges = function() {
         var edges = this._edges;
-        if(!edges){
-            var x  = this.x;
-            var y  = this.y;
+        if (!edges) {
+            var x = this.x;
+            var y = this.y;
             var ir = this.innerRadius;
             var or = this.outerRadius;
             var ai = this.startAngle;
@@ -6167,59 +6537,62 @@ pv.histogram = function(data, f) {
             var sai = sin(ai);
             var caf = cos(af);
             var saf = sin(af);
-            
+
             var pii, pfi;
-            if(ir > 0){
+            if (ir > 0) {
                 pii = new Point(x + ir * cai, y + ir * sai);
                 pfi = new Point(x + ir * caf, y + ir * saf);
             } else {
                 pii = pfi = new Point(x, y);
             }
-            
+
             var pio = new Point(x + or * cai, y + or * sai);
             var pfo = new Point(x + or * caf, y + or * saf);
-            
+
             edges = this._edges = [];
-            
-            if(ir > 0){
-               edges.push(new Arc(x, y, ir, ai, aa));
+
+            if (ir > 0) {
+                edges.push(new Arc(x, y, ir, ai, aa));
             }
-            
+
             edges.push(
                 new Line(pii.x, pii.y, pio.x, pio.y),
                 new Arc(x, y, or, ai, aa),
                 new Line(pfi.x, pfi.y, pfo.x, pfo.y));
-            
+
             var points = this._points = [pii, pio, pfo];
-            if(ir > 0){
+            if (ir > 0) {
                 points.push(pfi);
             }
         }
-        
+
         return edges;
     };
-    
+
     // Distance (squared) to the border of the Wedge,
     // // or to its center, whichever is smaller.
-    Wedge.prototype.distance2 = function(p, k){
-        var min = {cost: Infinity, dist2: Infinity}; //dist2(p, this.center(), k);
-        
-        this.edges().forEach(function(edge){
+    Wedge.prototype.distance2 = function(p, k) {
+        var min = {
+            cost: Infinity,
+            dist2: Infinity
+        }; //dist2(p, this.center(), k);
+
+        this.edges().forEach(function(edge) {
             var d = edge.distance2(p, k);
-            if(d.cost < min.cost){
+            if (d.cost < min.cost) {
                 min = d;
             }
         });
-        
+
         return min;
     };
-    
-    Wedge.prototype.center = function(){
-        var midAngle  = (this.startAngle  + this.endAngle)/2;
-        var midRadius = (this.innerRadius + this.outerRadius)/2;
+
+    Wedge.prototype.center = function() {
+        var midAngle = (this.startAngle + this.endAngle) / 2;
+        var midRadius = (this.innerRadius + this.outerRadius) / 2;
         return new Point(
-                this.x + midRadius * cos(midAngle), 
-                this.y + midRadius * sin(midAngle));
+            this.x + midRadius * cos(midAngle),
+            this.y + midRadius * sin(midAngle));
     };
 }());
 /**
@@ -6252,82 +6625,90 @@ pv.histogram = function(data, f) {
 (function() {
 
     var round = Math.round;
-    
+
     var parseRgb = function(c) { // either integer or percentage
         var f = parseFloat(c);
         return (c[c.length - 1] == '%') ? round(f * 2.55) : f;
     };
-    
+
     var reSysColor = /([a-z]+)\((.*)\)/i;
-    
+
     var createColor = function(format) {
         /* Hexadecimal colors: #rgb and #rrggbb. */
         if (format.charAt(0) === "#") {
-          var r, g, b;
-          if (format.length === 4) {
-            r = format.charAt(1); r += r;
-            g = format.charAt(2); g += g;
-            b = format.charAt(3); b += b;
-          } else if (format.length === 7) {
-            r = format.substring(1, 3);
-            g = format.substring(3, 5);
-            b = format.substring(5, 7);
-          }
-          
-          return pv.rgb(parseInt(r, 16), parseInt(g, 16), parseInt(b, 16), 1);
+            var r, g, b;
+            if (format.length === 4) {
+                r = format.charAt(1);
+                r += r;
+                g = format.charAt(2);
+                g += g;
+                b = format.charAt(3);
+                b += b;
+            } else if (format.length === 7) {
+                r = format.substring(1, 3);
+                g = format.substring(3, 5);
+                b = format.substring(5, 7);
+            }
+
+            return pv.rgb(parseInt(r, 16), parseInt(g, 16), parseInt(b, 16), 1);
         }
-        
+
         /* Handle hsl, rgb. */
         var m1 = reSysColor.exec(format);
         if (m1) {
-          var m2 = m1[2].split(","), 
-              a = 1;
-          
-          switch (m1[1]) {
-            case "hsla":
-            case "rgba": {
-              a = parseFloat(m2[3]);
-              if (!a) return pv.Color.transparent;
-              break;
+            var m2 = m1[2].split(","),
+                a = 1;
+
+            switch (m1[1]) {
+                case "hsla":
+                case "rgba":
+                    {
+                        a = parseFloat(m2[3]);
+                        if (!a) return pv.Color.transparent;
+                        break;
+                    }
             }
-          }
-          
-          switch (m1[1]) {
-            case "hsla":
-            case "hsl": {
-              var h = parseFloat(m2[0]), // degrees
-                  s = parseFloat(m2[1]) / 100, // percentage
-                  l = parseFloat(m2[2]) / 100; // percentage
-              return (new pv.Color.Hsl(h, s, l, a)).rgb();
+
+            switch (m1[1]) {
+                case "hsla":
+                case "hsl":
+                    {
+                        var h = parseFloat(m2[0]), // degrees
+                            s = parseFloat(m2[1]) / 100, // percentage
+                            l = parseFloat(m2[2]) / 100; // percentage
+                        return (new pv.Color.Hsl(h, s, l, a)).rgb();
+                    }
+
+                case "rgba":
+                case "rgb":
+                    {
+                        var r = parseRgb(m2[0]),
+                            g = parseRgb(m2[1]),
+                            b = parseRgb(m2[2]);
+                        return pv.rgb(r, g, b, a);
+                    }
             }
-            
-            case "rgba":
-            case "rgb": {
-              var r = parseRgb(m2[0]), 
-                  g = parseRgb(m2[1]), 
-                  b = parseRgb(m2[2]);
-              return pv.rgb(r, g, b, a);
-            }
-          }
         }
-      
+
         /* Otherwise, pass-through unsupported colors. */
         return new pv.Color(format, 1);
     };
-    
+
     var colorsByFormat = {}; // TODO: unbounded cache 
-    
+
     pv.color = function(format) {
-      if(format.rgb) { return format.rgb(); }
-      
-      /* Named colors. */
-      var color = pv.Color.names[format];
-      if(!color) {
-          color = colorsByFormat[format] ||
-                  (colorsByFormat[format] = createColor(format));
-      }
-      
-      return color;
+        if (format.rgb) {
+            return format.rgb();
+        }
+
+        /* Named colors. */
+        var color = pv.Color.names[format];
+        if (!color) {
+            color = colorsByFormat[format] ||
+                (colorsByFormat[format] = createColor(format));
+        }
+
+        return color;
     };
 }());
 
@@ -6348,33 +6729,33 @@ pv.histogram = function(data, f) {
  * @see pv.color
  */
 pv.Color = function(color, opacity) {
-  /**
-   * An opaque color format string, such as "#f00".
-   *
-   * @type string
-   * @see <a href="http://www.w3.org/TR/SVG/types.html#ColorKeywords">SVG color
-   * keywords</a>
-   * @see <a href="http://www.w3.org/TR/css3-color/">CSS3 color module</a>
-   */
-  this.color = color;
+    /**
+     * An opaque color format string, such as "#f00".
+     *
+     * @type string
+     * @see <a href="http://www.w3.org/TR/SVG/types.html#ColorKeywords">SVG color
+     * keywords</a>
+     * @see <a href="http://www.w3.org/TR/css3-color/">CSS3 color module</a>
+     */
+    this.color = color;
 
-  /**
-   * The opacity, a float in [0, 1].
-   *
-   * @type number
-   */
-  this.opacity = opacity;
-  
-  this.key = "solid " + color + " alpha(" + opacity + ")";
+    /**
+     * The opacity, a float in [0, 1].
+     *
+     * @type number
+     */
+    this.opacity = opacity;
+
+    this.key = "solid " + color + " alpha(" + opacity + ")";
 };
 
 /**
  * Returns an equivalent color in the HSL color space.
- * 
+ *
  * @returns {pv.Color.Hsl} an HSL color.
  */
-pv.Color.prototype.hsl = function() { 
-    return this.rgb().hsl(); 
+pv.Color.prototype.hsl = function() {
+    return this.rgb().hsl();
 };
 
 /**
@@ -6389,7 +6770,7 @@ pv.Color.prototype.hsl = function() {
  * @returns {pv.Color} a brighter color.
  */
 pv.Color.prototype.brighter = function(k) {
-  return this.rgb().brighter(k);
+    return this.rgb().brighter(k);
 };
 
 /**
@@ -6404,53 +6785,59 @@ pv.Color.prototype.brighter = function(k) {
  * @returns {pv.Color} a darker color.
  */
 pv.Color.prototype.darker = function(k) {
-  return this.rgb().darker(k);
+    return this.rgb().darker(k);
 };
 
 /**
  * Blends a color with transparency with a given mate color.
  * Returns an RGB color.
- * 
- * @param {pv.Color} [mate='white'] the mate color. Defaults to 'white'. 
+ *
+ * @param {pv.Color} [mate='white'] the mate color. Defaults to 'white'.
  */
 pv.Color.prototype.alphaBlend = function(mate) {
-  var rgb = this.rgb();
-  var a = rgb.a;
-  if(a === 1){ return this; }
-    
-  if(!mate){ mate = pv.Color.names.white; } else { mate = pv.color(mate); }
-  
-  mate = mate.rgb();
-  
-  var z = (1 - a);
-  return pv.rgb(
-          z * rgb.r + a * mate.r, 
-          z * rgb.g + a * mate.g,
-          z * rgb.b + a * mate.b,
-          1);
+    var rgb = this.rgb();
+    var a = rgb.a;
+    if (a === 1) {
+        return this;
+    }
+
+    if (!mate) {
+        mate = pv.Color.names.white;
+    } else {
+        mate = pv.color(mate);
+    }
+
+    mate = mate.rgb();
+
+    var z = (1 - a);
+    return pv.rgb(
+        z * rgb.r + a * mate.r,
+        z * rgb.g + a * mate.g,
+        z * rgb.b + a * mate.b,
+        1);
 };
-  
+
 /**
  * Returns the decimal number corresponding to the rgb hexadecimal representation.
- * 
+ *
  * If a mate color is provided it is used for blending the alpha channel of this color, if any.
- * 
+ *
  * @param {pv.Color} [mate='white'] the mate color. Defaults to 'white'.
  */
 pv.Color.prototype.rgbDecimal = function(mate) {
-  var rgb = this.alphaBlend(mate);
-  return rgb.r << 16 | rgb.g << 8 | rgb.b;
+    var rgb = this.alphaBlend(mate);
+    return rgb.r << 16 | rgb.g << 8 | rgb.b;
 };
 
 /**
  * Determines if a color is in the "dark" category.
  * If this is a background color, you may then choose a color for text
  * that is in the "bright" category.
- * 
+ *
  * Adapted from {@link http://us2.php.net/manual/en/function.hexdec.php#74092}.
  */
 pv.Color.prototype.isDark = function() {
-  return this.rgbDecimal() < 0xffffff/2;
+    return this.rgbDecimal() < 0xffffff / 2;
 };
 
 /**
@@ -6463,7 +6850,7 @@ pv.Color.prototype.isDark = function() {
  * @returns pv.Color.Rgb
  */
 pv.rgb = function(r, g, b, a) {
-  return new pv.Color.Rgb(r, g, b, (arguments.length == 4) ? a : 1);
+    return new pv.Color.Rgb(r, g, b, (arguments.length == 4) ? a : 1);
 };
 
 /**
@@ -6478,35 +6865,35 @@ pv.rgb = function(r, g, b, a) {
  * @extends pv.Color
  */
 pv.Color.Rgb = function(r, g, b, a) {
-  pv.Color.call(this, a ? ("rgb(" + r + "," + g + "," + b + ")") : "none", a);
+    pv.Color.call(this, a ? ("rgb(" + r + "," + g + "," + b + ")") : "none", a);
 
-  /**
-   * The red channel, an integer in [0, 255].
-   *
-   * @type number
-   */
-  this.r = r;
+    /**
+     * The red channel, an integer in [0, 255].
+     *
+     * @type number
+     */
+    this.r = r;
 
-  /**
-   * The green channel, an integer in [0, 255].
-   *
-   * @type number
-   */
-  this.g = g;
+    /**
+     * The green channel, an integer in [0, 255].
+     *
+     * @type number
+     */
+    this.g = g;
 
-  /**
-   * The blue channel, an integer in [0, 255].
-   *
-   * @type number
-   */
-  this.b = b;
+    /**
+     * The blue channel, an integer in [0, 255].
+     *
+     * @type number
+     */
+    this.b = b;
 
-  /**
-   * The alpha channel, a float in [0, 1].
-   *
-   * @type number
-   */
-  this.a = a;
+    /**
+     * The alpha channel, a float in [0, 1].
+     *
+     * @type number
+     */
+    this.a = a;
 };
 pv.Color.Rgb.prototype = pv.extend(pv.Color);
 
@@ -6517,7 +6904,7 @@ pv.Color.Rgb.prototype = pv.extend(pv.Color);
  * @param {number} r the red channel, an integer in [0,255].
  */
 pv.Color.Rgb.prototype.red = function(r) {
-  return pv.rgb(r, this.g, this.b, this.a);
+    return pv.rgb(r, this.g, this.b, this.a);
 };
 
 /**
@@ -6527,7 +6914,7 @@ pv.Color.Rgb.prototype.red = function(r) {
  * @param {number} g the green channel, an integer in [0,255].
  */
 pv.Color.Rgb.prototype.green = function(g) {
-  return pv.rgb(this.r, g, this.b, this.a);
+    return pv.rgb(this.r, g, this.b, this.a);
 };
 
 /**
@@ -6537,7 +6924,7 @@ pv.Color.Rgb.prototype.green = function(g) {
  * @param {number} b the blue channel, an integer in [0,255].
  */
 pv.Color.Rgb.prototype.blue = function(b) {
-  return pv.rgb(this.r, this.g, b, this.a);
+    return pv.rgb(this.r, this.g, b, this.a);
 };
 
 /**
@@ -6547,7 +6934,7 @@ pv.Color.Rgb.prototype.blue = function(b) {
  * @param {number} a the alpha channel, a float in [0,1].
  */
 pv.Color.Rgb.prototype.alpha = function(a) {
-  return pv.rgb(this.r, this.g, this.b, a);
+    return pv.rgb(this.r, this.g, this.b, a);
 };
 
 /**
@@ -6564,7 +6951,9 @@ pv.Color.Rgb.prototype.alpha = function(a) {
  *
  * @returns {pv.Color.Rgb} this.
  */
-pv.Color.Rgb.prototype.rgb = function() { return this; };
+pv.Color.Rgb.prototype.rgb = function() {
+    return this;
+};
 
 /**
  * Returns a new color that is a brighter version of this color. This method
@@ -6578,17 +6967,20 @@ pv.Color.Rgb.prototype.rgb = function() { return this; };
  * @returns {pv.Color.Rgb} a brighter color.
  */
 pv.Color.Rgb.prototype.brighter = function(k) {
-  k = Math.pow(0.7, k != null ? k : 1);
-  var r = this.r, g = this.g, b = this.b, i = 30;
-  if (!r && !g && !b) return pv.rgb(i, i, i, this.a);
-  if (r && (r < i)) r = i;
-  if (g && (g < i)) g = i;
-  if (b && (b < i)) b = i;
-  return pv.rgb(
-      Math.min(255, Math.floor(r / k)),
-      Math.min(255, Math.floor(g / k)),
-      Math.min(255, Math.floor(b / k)),
-      this.a);
+    k = Math.pow(0.7, k != null ? k : 1);
+    var r = this.r,
+        g = this.g,
+        b = this.b,
+        i = 30;
+    if (!r && !g && !b) return pv.rgb(i, i, i, this.a);
+    if (r && (r < i)) r = i;
+    if (g && (g < i)) g = i;
+    if (b && (b < i)) b = i;
+    return pv.rgb(
+        Math.min(255, Math.floor(r / k)),
+        Math.min(255, Math.floor(g / k)),
+        Math.min(255, Math.floor(b / k)),
+        this.a);
 };
 
 /**
@@ -6603,44 +6995,50 @@ pv.Color.Rgb.prototype.brighter = function(k) {
  * @returns {pv.Color.Rgb} a darker color.
  */
 pv.Color.Rgb.prototype.darker = function(k) {
-  k = Math.pow(0.7, k != null ? k : 1);
-  return pv.rgb(
-      Math.max(0, Math.floor(k * this.r)),
-      Math.max(0, Math.floor(k * this.g)),
-      Math.max(0, Math.floor(k * this.b)),
-      this.a);
+    k = Math.pow(0.7, k != null ? k : 1);
+    return pv.rgb(
+        Math.max(0, Math.floor(k * this.r)),
+        Math.max(0, Math.floor(k * this.g)),
+        Math.max(0, Math.floor(k * this.b)),
+        this.a);
 };
 
 /**
- * Converts an RGB color value to HSL. 
+ * Converts an RGB color value to HSL.
  * Conversion formula adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * 
+ *
  * (Adapted from http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript)
- * 
+ *
  * @returns pv.Color.Hsl
  */
-pv.Color.Rgb.prototype.hsl = function(){
+pv.Color.Rgb.prototype.hsl = function() {
     var r = this.r / 255;
     var g = this.g / 255;
     var b = this.b / 255;
-    
-    var max = Math.max(r, g, b); 
+
+    var max = Math.max(r, g, b);
     var min = Math.min(r, g, b);
-    
+
     var l = (max + min) / 2;
     var h, s;
 
-    if(max === min){
+    if (max === min) {
         h = s = 0; // achromatic
     } else {
         var d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
         }
-        
+
         h /= 6;
     }
 
@@ -6651,7 +7049,7 @@ pv.Color.Rgb.prototype.hsl = function(){
  * Constructs a new RGB color which is the complementary color of this color.
  */
 pv.Color.Rgb.prototype.complementary = function() {
-  return this.hsl().complementary().rgb();
+    return this.hsl().complementary().rgb();
 };
 
 
@@ -6665,7 +7063,7 @@ pv.Color.Rgb.prototype.complementary = function() {
  * @returns pv.Color.Hsl
  */
 pv.hsl = function(h, s, l, a) {
-  return new pv.Color.Hsl(h, s, l,  (arguments.length == 4) ? a : 1);
+    return new pv.Color.Hsl(h, s, l, (arguments.length == 4) ? a : 1);
 };
 
 /**
@@ -6680,35 +7078,35 @@ pv.hsl = function(h, s, l, a) {
  * @extends pv.Color
  */
 pv.Color.Hsl = function(h, s, l, a) {
-  pv.Color.call(this, "hsl(" + h + "," + (s * 100) + "%," + (l * 100) + "%)", a);
+    pv.Color.call(this, "hsl(" + h + "," + (s * 100) + "%," + (l * 100) + "%)", a);
 
-  /**
-   * The hue, an integer in [0, 360].
-   *
-   * @type number
-   */
-  this.h = h;
+    /**
+     * The hue, an integer in [0, 360].
+     *
+     * @type number
+     */
+    this.h = h;
 
-  /**
-   * The saturation, a float in [0, 1].
-   *
-   * @type number
-   */
-  this.s = s;
+    /**
+     * The saturation, a float in [0, 1].
+     *
+     * @type number
+     */
+    this.s = s;
 
-  /**
-   * The lightness, a float in [0, 1].
-   *
-   * @type number
-   */
-  this.l = l;
+    /**
+     * The lightness, a float in [0, 1].
+     *
+     * @type number
+     */
+    this.l = l;
 
-  /**
-   * The opacity, a float in [0, 1].
-   *
-   * @type number
-   */
-  this.a = a;
+    /**
+     * The opacity, a float in [0, 1].
+     *
+     * @type number
+     */
+    this.a = a;
 };
 pv.Color.Hsl.prototype = pv.extend(pv.Color);
 
@@ -6717,7 +7115,9 @@ pv.Color.Hsl.prototype = pv.extend(pv.Color);
  *
  * @returns {pv.Color.Hsl} this.
  */
-pv.Color.Hsl.prototype.hsl = function() { return this; };
+pv.Color.Hsl.prototype.hsl = function() {
+    return this;
+};
 
 
 /**
@@ -6727,7 +7127,7 @@ pv.Color.Hsl.prototype.hsl = function() { return this; };
  * @param {number} h the hue, an integer in [0, 360].
  */
 pv.Color.Hsl.prototype.hue = function(h) {
-  return pv.hsl(h, this.s, this.l, this.a);
+    return pv.hsl(h, this.s, this.l, this.a);
 };
 
 /**
@@ -6737,7 +7137,7 @@ pv.Color.Hsl.prototype.hue = function(h) {
  * @param {number} s the saturation, a float in [0, 1].
  */
 pv.Color.Hsl.prototype.saturation = function(s) {
-  return pv.hsl(this.h, s, this.l, this.a);
+    return pv.hsl(this.h, s, this.l, this.a);
 };
 
 /**
@@ -6747,7 +7147,7 @@ pv.Color.Hsl.prototype.saturation = function(s) {
  * @param {number} l the lightness, a float in [0, 1].
  */
 pv.Color.Hsl.prototype.lightness = function(l) {
-  return pv.hsl(this.h, this.s, l, this.a);
+    return pv.hsl(this.h, this.s, l, this.a);
 };
 
 /**
@@ -6757,45 +7157,50 @@ pv.Color.Hsl.prototype.lightness = function(l) {
  * @param {number} a the opacity, a float in [0, 1].
  */
 pv.Color.Hsl.prototype.alpha = function(a) {
-  return pv.hsl(this.h, this.s, this.l, a);
+    return pv.hsl(this.h, this.s, this.l, a);
 };
 
 /**
  * Constructs a new HSL color which is the complementary color of this color.
  */
 pv.Color.Hsl.prototype.complementary = function() {
-  return pv.hsl((this.h + 180) % 360, 1 - this.s, 1 - this.l, this.a);
+    return pv.hsl((this.h + 180) % 360, 1 - this.s, 1 - this.l, this.a);
 };
-  
+
 /**
  * Returns the RGB color equivalent to this HSL color.
  *
  * @returns {pv.Color.Rgb} an RGB color.
  */
 pv.Color.Hsl.prototype.rgb = function() {
-  var h = this.h, s = this.s, l = this.l;
+    var h = this.h,
+        s = this.s,
+        l = this.l;
 
-  /* Some simple corrections for h, s and l. */
-  h = h % 360; if (h < 0) h += 360;
-  s = Math.max(0, Math.min(s, 1));
-  l = Math.max(0, Math.min(l, 1));
+    /* Some simple corrections for h, s and l. */
+    h = h % 360;
+    if (h < 0) h += 360;
+    s = Math.max(0, Math.min(s, 1));
+    l = Math.max(0, Math.min(l, 1));
 
-  /* From FvD 13.37, CSS Color Module Level 3 */
-  var m2 = (l <= .5) ? (l * (1 + s)) : (l + s - l * s);
-  var m1 = 2 * l - m2;
-  function v(h) {
-    if (h > 360) h -= 360;
-    else if (h < 0) h += 360;
-    if (h < 60) return m1 + (m2 - m1) * h / 60;
-    if (h < 180) return m2;
-    if (h < 240) return m1 + (m2 - m1) * (240 - h) / 60;
-    return m1;
-  }
-  function vv(h) {
-    return Math.round(v(h) * 255);
-  }
+    /* From FvD 13.37, CSS Color Module Level 3 */
+    var m2 = (l <= .5) ? (l * (1 + s)) : (l + s - l * s);
+    var m1 = 2 * l - m2;
 
-  return pv.rgb(vv(h + 120), vv(h), vv(h - 120), this.a);
+    function v(h) {
+        if (h > 360) h -= 360;
+        else if (h < 0) h += 360;
+        if (h < 60) return m1 + (m2 - m1) * h / 60;
+        if (h < 180) return m2;
+        if (h < 240) return m1 + (m2 - m1) * (240 - h) / 60;
+        return m1;
+    }
+
+    function vv(h) {
+        return Math.round(v(h) * 255);
+    }
+
+    return pv.rgb(vv(h + 120), vv(h), vv(h - 120), this.a);
 };
 
 /**
@@ -6805,161 +7210,161 @@ pv.Color.Hsl.prototype.rgb = function() {
  * keywords</a>
  */
 pv.Color.names = {
-  aliceblue: "#f0f8ff",
-  antiquewhite: "#faebd7",
-  aqua: "#00ffff",
-  aquamarine: "#7fffd4",
-  azure: "#f0ffff",
-  beige: "#f5f5dc",
-  bisque: "#ffe4c4",
-  black: "#000000",
-  blanchedalmond: "#ffebcd",
-  blue: "#0000ff",
-  blueviolet: "#8a2be2",
-  brown: "#a52a2a",
-  burlywood: "#deb887",
-  cadetblue: "#5f9ea0",
-  chartreuse: "#7fff00",
-  chocolate: "#d2691e",
-  coral: "#ff7f50",
-  cornflowerblue: "#6495ed",
-  cornsilk: "#fff8dc",
-  crimson: "#dc143c",
-  cyan: "#00ffff",
-  darkblue: "#00008b",
-  darkcyan: "#008b8b",
-  darkgoldenrod: "#b8860b",
-  darkgray: "#a9a9a9",
-  darkgreen: "#006400",
-  darkgrey: "#a9a9a9",
-  darkkhaki: "#bdb76b",
-  darkmagenta: "#8b008b",
-  darkolivegreen: "#556b2f",
-  darkorange: "#ff8c00",
-  darkorchid: "#9932cc",
-  darkred: "#8b0000",
-  darksalmon: "#e9967a",
-  darkseagreen: "#8fbc8f",
-  darkslateblue: "#483d8b",
-  darkslategray: "#2f4f4f",
-  darkslategrey: "#2f4f4f",
-  darkturquoise: "#00ced1",
-  darkviolet: "#9400d3",
-  deeppink: "#ff1493",
-  deepskyblue: "#00bfff",
-  dimgray: "#696969",
-  dimgrey: "#696969",
-  dodgerblue: "#1e90ff",
-  firebrick: "#b22222",
-  floralwhite: "#fffaf0",
-  forestgreen: "#228b22",
-  fuchsia: "#ff00ff",
-  gainsboro: "#dcdcdc",
-  ghostwhite: "#f8f8ff",
-  gold: "#ffd700",
-  goldenrod: "#daa520",
-  gray: "#808080",
-  green: "#008000",
-  greenyellow: "#adff2f",
-  grey: "#808080",
-  honeydew: "#f0fff0",
-  hotpink: "#ff69b4",
-  indianred: "#cd5c5c",
-  indigo: "#4b0082",
-  ivory: "#fffff0",
-  khaki: "#f0e68c",
-  lavender: "#e6e6fa",
-  lavenderblush: "#fff0f5",
-  lawngreen: "#7cfc00",
-  lemonchiffon: "#fffacd",
-  lightblue: "#add8e6",
-  lightcoral: "#f08080",
-  lightcyan: "#e0ffff",
-  lightgoldenrodyellow: "#fafad2",
-  lightgray: "#d3d3d3",
-  lightgreen: "#90ee90",
-  lightgrey: "#d3d3d3",
-  lightpink: "#ffb6c1",
-  lightsalmon: "#ffa07a",
-  lightseagreen: "#20b2aa",
-  lightskyblue: "#87cefa",
-  lightslategray: "#778899",
-  lightslategrey: "#778899",
-  lightsteelblue: "#b0c4de",
-  lightyellow: "#ffffe0",
-  lime: "#00ff00",
-  limegreen: "#32cd32",
-  linen: "#faf0e6",
-  magenta: "#ff00ff",
-  maroon: "#800000",
-  mediumaquamarine: "#66cdaa",
-  mediumblue: "#0000cd",
-  mediumorchid: "#ba55d3",
-  mediumpurple: "#9370db",
-  mediumseagreen: "#3cb371",
-  mediumslateblue: "#7b68ee",
-  mediumspringgreen: "#00fa9a",
-  mediumturquoise: "#48d1cc",
-  mediumvioletred: "#c71585",
-  midnightblue: "#191970",
-  mintcream: "#f5fffa",
-  mistyrose: "#ffe4e1",
-  moccasin: "#ffe4b5",
-  navajowhite: "#ffdead",
-  navy: "#000080",
-  oldlace: "#fdf5e6",
-  olive: "#808000",
-  olivedrab: "#6b8e23",
-  orange: "#ffa500",
-  orangered: "#ff4500",
-  orchid: "#da70d6",
-  palegoldenrod: "#eee8aa",
-  palegreen: "#98fb98",
-  paleturquoise: "#afeeee",
-  palevioletred: "#db7093",
-  papayawhip: "#ffefd5",
-  peachpuff: "#ffdab9",
-  peru: "#cd853f",
-  pink: "#ffc0cb",
-  plum: "#dda0dd",
-  powderblue: "#b0e0e6",
-  purple: "#800080",
-  red: "#ff0000",
-  rosybrown: "#bc8f8f",
-  royalblue: "#4169e1",
-  saddlebrown: "#8b4513",
-  salmon: "#fa8072",
-  sandybrown: "#f4a460",
-  seagreen: "#2e8b57",
-  seashell: "#fff5ee",
-  sienna: "#a0522d",
-  silver: "#c0c0c0",
-  skyblue: "#87ceeb",
-  slateblue: "#6a5acd",
-  slategray: "#708090",
-  slategrey: "#708090",
-  snow: "#fffafa",
-  springgreen: "#00ff7f",
-  steelblue: "#4682b4",
-  tan: "#d2b48c",
-  teal: "#008080",
-  thistle: "#d8bfd8",
-  tomato: "#ff6347",
-  turquoise: "#40e0d0",
-  violet: "#ee82ee",
-  wheat: "#f5deb3",
-  white: "#ffffff",
-  whitesmoke: "#f5f5f5",
-  yellow: "#ffff00",
-  yellowgreen: "#9acd32",
-  transparent: pv.Color.transparent = pv.rgb(0, 0, 0, 0)
+    aliceblue: "#f0f8ff",
+    antiquewhite: "#faebd7",
+    aqua: "#00ffff",
+    aquamarine: "#7fffd4",
+    azure: "#f0ffff",
+    beige: "#f5f5dc",
+    bisque: "#ffe4c4",
+    black: "#000000",
+    blanchedalmond: "#ffebcd",
+    blue: "#0000ff",
+    blueviolet: "#8a2be2",
+    brown: "#a52a2a",
+    burlywood: "#deb887",
+    cadetblue: "#5f9ea0",
+    chartreuse: "#7fff00",
+    chocolate: "#d2691e",
+    coral: "#ff7f50",
+    cornflowerblue: "#6495ed",
+    cornsilk: "#fff8dc",
+    crimson: "#dc143c",
+    cyan: "#00ffff",
+    darkblue: "#00008b",
+    darkcyan: "#008b8b",
+    darkgoldenrod: "#b8860b",
+    darkgray: "#a9a9a9",
+    darkgreen: "#006400",
+    darkgrey: "#a9a9a9",
+    darkkhaki: "#bdb76b",
+    darkmagenta: "#8b008b",
+    darkolivegreen: "#556b2f",
+    darkorange: "#ff8c00",
+    darkorchid: "#9932cc",
+    darkred: "#8b0000",
+    darksalmon: "#e9967a",
+    darkseagreen: "#8fbc8f",
+    darkslateblue: "#483d8b",
+    darkslategray: "#2f4f4f",
+    darkslategrey: "#2f4f4f",
+    darkturquoise: "#00ced1",
+    darkviolet: "#9400d3",
+    deeppink: "#ff1493",
+    deepskyblue: "#00bfff",
+    dimgray: "#696969",
+    dimgrey: "#696969",
+    dodgerblue: "#1e90ff",
+    firebrick: "#b22222",
+    floralwhite: "#fffaf0",
+    forestgreen: "#228b22",
+    fuchsia: "#ff00ff",
+    gainsboro: "#dcdcdc",
+    ghostwhite: "#f8f8ff",
+    gold: "#ffd700",
+    goldenrod: "#daa520",
+    gray: "#808080",
+    green: "#008000",
+    greenyellow: "#adff2f",
+    grey: "#808080",
+    honeydew: "#f0fff0",
+    hotpink: "#ff69b4",
+    indianred: "#cd5c5c",
+    indigo: "#4b0082",
+    ivory: "#fffff0",
+    khaki: "#f0e68c",
+    lavender: "#e6e6fa",
+    lavenderblush: "#fff0f5",
+    lawngreen: "#7cfc00",
+    lemonchiffon: "#fffacd",
+    lightblue: "#add8e6",
+    lightcoral: "#f08080",
+    lightcyan: "#e0ffff",
+    lightgoldenrodyellow: "#fafad2",
+    lightgray: "#d3d3d3",
+    lightgreen: "#90ee90",
+    lightgrey: "#d3d3d3",
+    lightpink: "#ffb6c1",
+    lightsalmon: "#ffa07a",
+    lightseagreen: "#20b2aa",
+    lightskyblue: "#87cefa",
+    lightslategray: "#778899",
+    lightslategrey: "#778899",
+    lightsteelblue: "#b0c4de",
+    lightyellow: "#ffffe0",
+    lime: "#00ff00",
+    limegreen: "#32cd32",
+    linen: "#faf0e6",
+    magenta: "#ff00ff",
+    maroon: "#800000",
+    mediumaquamarine: "#66cdaa",
+    mediumblue: "#0000cd",
+    mediumorchid: "#ba55d3",
+    mediumpurple: "#9370db",
+    mediumseagreen: "#3cb371",
+    mediumslateblue: "#7b68ee",
+    mediumspringgreen: "#00fa9a",
+    mediumturquoise: "#48d1cc",
+    mediumvioletred: "#c71585",
+    midnightblue: "#191970",
+    mintcream: "#f5fffa",
+    mistyrose: "#ffe4e1",
+    moccasin: "#ffe4b5",
+    navajowhite: "#ffdead",
+    navy: "#000080",
+    oldlace: "#fdf5e6",
+    olive: "#808000",
+    olivedrab: "#6b8e23",
+    orange: "#ffa500",
+    orangered: "#ff4500",
+    orchid: "#da70d6",
+    palegoldenrod: "#eee8aa",
+    palegreen: "#98fb98",
+    paleturquoise: "#afeeee",
+    palevioletred: "#db7093",
+    papayawhip: "#ffefd5",
+    peachpuff: "#ffdab9",
+    peru: "#cd853f",
+    pink: "#ffc0cb",
+    plum: "#dda0dd",
+    powderblue: "#b0e0e6",
+    purple: "#800080",
+    red: "#ff0000",
+    rosybrown: "#bc8f8f",
+    royalblue: "#4169e1",
+    saddlebrown: "#8b4513",
+    salmon: "#fa8072",
+    sandybrown: "#f4a460",
+    seagreen: "#2e8b57",
+    seashell: "#fff5ee",
+    sienna: "#a0522d",
+    silver: "#c0c0c0",
+    skyblue: "#87ceeb",
+    slateblue: "#6a5acd",
+    slategray: "#708090",
+    slategrey: "#708090",
+    snow: "#fffafa",
+    springgreen: "#00ff7f",
+    steelblue: "#4682b4",
+    tan: "#d2b48c",
+    teal: "#008080",
+    thistle: "#d8bfd8",
+    tomato: "#ff6347",
+    turquoise: "#40e0d0",
+    violet: "#ee82ee",
+    wheat: "#f5deb3",
+    white: "#ffffff",
+    whitesmoke: "#f5f5f5",
+    yellow: "#ffff00",
+    yellowgreen: "#9acd32",
+    transparent: pv.Color.transparent = pv.rgb(0, 0, 0, 0)
 };
 
 /* Initialized named colors. */
 (function() {
-  var names = pv.Color.names;
-  names.none = names.transparent;
-  for (var name in names) names[name] = pv.color(names[name]);
+    var names = pv.Color.names;
+    names.none = names.transparent;
+    for (var name in names) names[name] = pv.color(names[name]);
 })();
 /**
  * Returns a new categorical color encoding using the specified colors.  The
@@ -6978,9 +7383,9 @@ pv.Color.names = {
  * @returns {pv.Scale.ordinal} an ordinal color scale.
  */
 pv.colors = function() {
-  var scale = pv.Scale.ordinal();
-  scale.range.apply(scale, arguments);
-  return scale;
+    var scale = pv.Scale.ordinal();
+    scale.range.apply(scale, arguments);
+    return scale;
 };
 
 /**
@@ -7011,11 +7416,11 @@ pv.Colors = {};
  * @see pv.color
  */
 pv.Colors.category10 = function() {
-  var scale = pv.colors(
-      "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf");
-  scale.domain.apply(scale, arguments);
-  return scale;
+    var scale = pv.colors(
+        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+        "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf");
+    scale.domain.apply(scale, arguments);
+    return scale;
 };
 
 /**
@@ -7047,15 +7452,15 @@ pv.Colors.category10 = function() {
  * @param {number...} domain... domain values.
  * @returns {pv.Scale.ordinal} a new ordinal color scale.
  * @see pv.color
-*/
+ */
 pv.Colors.category20 = function() {
-  var scale = pv.colors(
-      "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c",
-      "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5",
-      "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f",
-      "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5");
-  scale.domain.apply(scale, arguments);
-  return scale;
+    var scale = pv.colors(
+        "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c",
+        "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5",
+        "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f",
+        "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5");
+    scale.domain.apply(scale, arguments);
+    return scale;
 };
 
 /**
@@ -7088,17 +7493,17 @@ pv.Colors.category20 = function() {
  * @see pv.color
  */
 pv.Colors.category19 = function() {
-  var scale = pv.colors(
-      "#9c9ede", "#7375b5", "#4a5584", "#cedb9c", "#b5cf6b",
-      "#8ca252", "#637939", "#e7cb94", "#e7ba52", "#bd9e39",
-      "#8c6d31", "#e7969c", "#d6616b", "#ad494a", "#843c39",
-      "#de9ed6", "#ce6dbd", "#a55194", "#7b4173");
-  scale.domain.apply(scale, arguments);
-  return scale;
+    var scale = pv.colors(
+        "#9c9ede", "#7375b5", "#4a5584", "#cedb9c", "#b5cf6b",
+        "#8ca252", "#637939", "#e7cb94", "#e7ba52", "#bd9e39",
+        "#8c6d31", "#e7969c", "#d6616b", "#ad494a", "#843c39",
+        "#de9ed6", "#ce6dbd", "#a55194", "#7b4173");
+    scale.domain.apply(scale, arguments);
+    return scale;
 };
 (function() {
     /* Adapted from https://gitorious.org/~brendansterne/protovis/brendansternes-protovis */
-    
+
     /**
      * TBD Returns the {@link pv.FillStyle} for the specified format string.
      * For example:
@@ -7108,77 +7513,84 @@ pv.Colors.category19 = function() {
      * <li>linear-gradient(to top, white, red 40%, black 100%)</li>
      * <li>linear-gradient(90deg, white, red 40%, black 100%)</li>
      * </ul>
-     * 
+     *
      * @param {string} format the gradient specification string.
      * @returns {pv.FillStyle} the corresponding <tt>FillStyle</tt>.
      * @see <a href="http://www.w3.org/TR/css3-images/#gradients">CSS3 Gradients</a>
      */
     pv.fillStyle = function(format) {
         /* A FillStyle object? */
-        if (format.type) { return format; }
+        if (format.type) {
+            return format;
+        }
 
         var k = format.key || format;
         var fillStyle = fillStylesByKey[k];
-        if(!fillStyle) { 
+        if (!fillStyle) {
             fillStyle = fillStylesByKey[k] = createFillStyle(format);
         } else {
             fillStyle = fillStyle.clone();
         }
-        
+
         return fillStyle;
     };
-    
+
     var fillStylesByKey = {}; // TODO: unbounded cache
-    
+
     var createFillStyle = function(format) {
         /* A Color object? */
-        if (format.rgb) { return new pv.FillStyle.Solid(format.color, format.opacity); }
+        if (format.rgb) {
+            return new pv.FillStyle.Solid(format.color, format.opacity);
+        }
 
         /* A gradient spec. ? */
         var match = /^\s*([a-z\-]+)\(\s*(.*?)\s*\)\s*$/.exec(format);
         if (match) {
             switch (match[1]) {
-                case "linear-gradient": return parseLinearGradient(match[2]);
-                case "radial-gradient": return parseRadialGradient(match[2]);
+                case "linear-gradient":
+                    return parseLinearGradient(match[2]);
+                case "radial-gradient":
+                    return parseRadialGradient(match[2]);
             }
         }
 
         // Default to solid fill
         return new pv.FillStyle.Solid(pv.color(format));
     };
-    
+
     var keyAnglesDeg = {
-        top:    0,
+        top: 0,
         'top right': 45,
-        right:  90,
+        right: 90,
         'bottom right': 135,
         bottom: 180,
         'bottom left': 225,
-        left:   270,
+        left: 270,
         'top left': 315
     };
 
     /*
      * linear-gradient(<text>) <text> := [<angle-spec>, ]<color-stop>, ...
-     * 
-     * <angle-spec> := <to-side-or-corner> | <angle-number> 
+     *
+     * <angle-spec> := <to-side-or-corner> | <angle-number>
      *   -> default <angle-spec> is "to bottom"
-     *    
-     * <to-side-or-corner> := to (top | bottom) || (left | right) 
-     *   top    -> 0deg 
-     *   right  -> 90deg 
-     *   bottom -> 180deg 
+     *
+     * <to-side-or-corner> := to (top | bottom) || (left | right)
+     *   top    -> 0deg
+     *   right  -> 90deg
+     *   bottom -> 180deg
      *   left   -> 270deg
-     * 
-     * <angle-number> := <number>[deg] 
-     * 
-     * examples: 
+     *
+     * <angle-number> := <number>[deg]
+     *
+     * examples:
      * "bottom~white to top~black"
-     *    linear-gradient(to top, white, black) 
-     *   
-     * "bottom-right~white to top-left~black" 
+     *    linear-gradient(to top, white, black)
+     *
+     * "bottom-right~white to top-left~black"
      *    linear-gradient(to top left, white, black)
      */
+
     function parseLinearGradient(text) {
         var terms = parseText(text);
         if (!terms.length) {
@@ -7192,20 +7604,24 @@ pv.Colors.category19 = function() {
         if (term.indexOf('to ') === 0) {
             // to side / corner
             m = /^to\s+(?:((top|bottom)(?:\s+(left|right))?)|((left|right)(?:\\s+(top|bottom))?))$/
-                    .exec(term);
+                .exec(term);
             if (m) {
                 if (m[1]) {
                     // (top|bottom)(?:\s+(left|right))?
                     keyAngle = m[2];
-                    if(m[3]) { keyAngle += ' ' + m[3]; }
+                    if (m[3]) {
+                        keyAngle += ' ' + m[3];
+                    }
                 } else { // m[4]
                     // (left|right)(?:\\s+(top|bottom))?
                     keyAngle = m[5];
-                    if(m[6]) { keyAngle = m[6] + ' ' + keyAngle; }
+                    if (m[6]) {
+                        keyAngle = m[6] + ' ' + keyAngle;
+                    }
                 }
-                
+
                 angle = pv.radians(keyAnglesDeg[keyAngle]);
-                
+
                 terms.shift();
             }
         } else {
@@ -7221,84 +7637,90 @@ pv.Colors.category19 = function() {
                 terms.shift();
             }
         }
-                
+
         var stops = parseStops(terms);
         switch (stops.length) {
-            case 0: return null;
-            case 1: return new pv.FillStyle.Solid(stops[0].color, 1);
+            case 0:
+                return null;
+            case 1:
+                return new pv.FillStyle.Solid(stops[0].color, 1);
         }
 
         return new pv.FillStyle.LinearGradient(angle, stops, text);
     }
 
     /*
-     * radial-gradient(<text>) 
-     * 
-     * <text> := [<focal-point-spec>, ]<color-stop>, ... 
-     * 
-     * not implemented: 
+     * radial-gradient(<text>)
+     *
+     * <text> := [<focal-point-spec>, ]<color-stop>, ...
+     *
+     * not implemented:
      * <focal-point-spec> := at <point-or-side-or-corner> |
-     *                       at <percentage-position> | 
+     *                       at <percentage-position> |
      *                       at <percentage-position> <percentage-position>
-     * 
-     * <point-or-side-or-corner> := center | top left | top right | bottom left | bottom right | ... 
+     *
+     * <point-or-side-or-corner> := center | top left | top right | bottom left | bottom right | ...
      *   -> default <point-or-side-or-corner> = "center"
-     * 
-     * <percentage-position> := <number>% 
-     * 
-     * examples: 
+     *
+     * <percentage-position> := <number>%
+     *
+     * examples:
      *   radial-gradient(at center, white, black)
      */
+
     function parseRadialGradient(text) {
         var terms = parseText(text);
         if (!terms.length) {
             return null;
         }
-        
+
         var stops = parseStops(terms);
         switch (stops.length) {
-            case 0: return null;
-            case 1: return new pv.FillStyle.Solid(stops[0].color, 1);
+            case 0:
+                return null;
+            case 1:
+                return new pv.FillStyle.Solid(stops[0].color, 1);
         }
 
         return new pv.FillStyle.RadialGradient(50, 50, stops, text);
     }
 
     function parseText(text) {
-        var colorFuns  = {};
+        var colorFuns = {};
         var colorFunId = 0;
-        
-        text = text.replace(/\b\w+?\(.*?\)/g, function($0){
+
+        text = text.replace(/\b\w+?\(.*?\)/g, function($0) {
             var id = '__color' + (colorFunId++);
             colorFuns[id] = $0;
             return id;
         });
-        
+
         var terms = text.split(/\s*,\s*/);
         if (!terms.length) {
             return null;
         }
-        
+
         // Re-insert color functions
-        if(colorFunId){
-            terms.forEach(function(id, index){
-                if(colorFuns.hasOwnProperty(id)){
+        if (colorFunId) {
+            terms.forEach(function(id, index) {
+                if (colorFuns.hasOwnProperty(id)) {
                     terms[index] = colorFuns[id];
                 }
             });
         }
-        
+
         return terms;
     }
-    
+
     /*
-     * COLOR STOPS 
-     * <color-stop> := <color-spec> [<percentage-position>] 
-     * 
-     * <percentage-position> := <number>% 
-     * 
+     * COLOR STOPS
+     * <color-stop> := <color-spec> [<percentage-position>]
+     *
+     * <percentage-position> := <number>%
+     *
      * <color-spec> := rgb() | rgba() | hsl() | hsla() | white | ...
      */
+
     function parseStops(terms) {
         var stops = [];
         var minOffsetPercent = +Infinity;
@@ -7329,7 +7751,7 @@ pv.Colors.category19 = function() {
                 var stop = {
                     color: pv.color(m[1])
                 };
-                
+
                 var offsetPercent = parseFloat(m[2]); // tolerates text suffixes
                 if (isNaN(offsetPercent)) {
                     if (!stops.length) {
@@ -7338,9 +7760,9 @@ pv.Colors.category19 = function() {
                         offsetPercent = Math.max(maxOffsetPercent, 100);
                     }
                 }
-                
+
                 stops.push(stop);
-                
+
                 if (isNaN(offsetPercent)) {
                     pendingOffsetStops.push(stop);
                 } else {
@@ -7363,7 +7785,7 @@ pv.Colors.category19 = function() {
             }
         }
 
-        if (stops.length >= 2 && 
+        if (stops.length >= 2 &&
             (minOffsetPercent < 0 || maxOffsetPercent > 100)) {
             // Normalize < 0 and > 100 values, cause SVG does not support them
             // TODO: what about the interpretation of an end < 100 or begin > 0?
@@ -7397,38 +7819,38 @@ pv.Colors.category19 = function() {
 
                 stops.push({
                     offset: 100,
-                    color:  colorScale(100)
+                    color: colorScale(100)
                 });
             }
         }
 
         return stops;
     }
-    
+
     // -----------
-    
+
     var FillStyle = pv.FillStyle = function(type) {
         this.type = type;
-        this.key  = type;
+        this.key = type;
     };
-    
+
     /* 
      * Provide {@link pv.Color} compatibility.
      */
     pv.extendType(FillStyle, new pv.Color('none', 1));
-    
+
     FillStyle.prototype.rgb = function() {
         var color = pv.color(this.color);
-        if(this.opacity !== color.opacity){
+        if (this.opacity !== color.opacity) {
             color = color.alpha(this.opacity);
         }
         return color;
     };
-    
+
     FillStyle.prototype.alphaBlend = function(mate) {
         return this.rgb().alphaBlend(mate);
     };
-      
+
     FillStyle.prototype.rgbDecimal = function(mate) {
         return this.rgb().rgbDecimal(mate);
     };
@@ -7436,180 +7858,195 @@ pv.Colors.category19 = function() {
     FillStyle.prototype.isDark = function() {
         return this.rgb().isDark();
     };
-    
+
     // FillStyle.prototype.clone
-    
+
     /**
      * Constructs a solid fill style. This constructor should not be invoked
      * directly; use {@link pv.fillStyle} instead.
-     * 
+     *
      * @class represents a solid fill.
-     * 
+     *
      * @extends pv.FillStyle
      */
     var Solid = pv.FillStyle.Solid = function(color, opacity) {
         FillStyle.call(this, 'solid');
-        
-        if(color.rgb){
-            this.color   = color.color;
+
+        if (color.rgb) {
+            this.color = color.color;
             this.opacity = color.opacity;
         } else {
-            this.color   = color;
+            this.color = color;
             this.opacity = opacity;
         }
-          
+
         this.key += " " + this.color + " alpha(" + this.opacity + ")";
     };
-    
+
     pv.extendType(Solid, FillStyle);
-    
-    Solid.prototype.alpha = function(opacity){
+
+    Solid.prototype.alpha = function(opacity) {
         return new Solid(this.color, opacity);
     };
-    
-    Solid.prototype.brighter = function(k){
+
+    Solid.prototype.brighter = function(k) {
         return new Solid(this.rgb().brighter(k));
     };
 
-    Solid.prototype.darker = function(k){
+    Solid.prototype.darker = function(k) {
         return new Solid(this.rgb().darker(k));
     };
-    
+
     Solid.prototype.complementary = function() {
         return new Solid(this.rgb().complementary());
     };
-    
+
     Solid.prototype.clone = function() {
         var o = pv.extend(Solid);
-        o.type    = this.type;
-        o.key     = this.key;
-        o.color   = this.color;
+        o.type = this.type;
+        o.key = this.key;
+        o.color = this.color;
         o.opacity = this.opacity;
         return o;
     };
-    
+
     pv.FillStyle.transparent = new Solid(pv.Color.transparent);
-    
+
     // ----------------
-    
+
     var gradient_id = 0;
 
     var Gradient = pv.FillStyle.Gradient = function(type, stops) {
         FillStyle.call(this, type);
-        
+
         this.id = ++gradient_id;
         this.stops = stops;
-        
-        if(stops.length){
+
+        if (stops.length) {
             // Default color for renderers that do not support gradients
             this.color = stops[0].color.color;
         }
-        
-        this.key +=  
-          " stops(" + 
-          stops
-          .map(function(stop){
-            var color = stop.color;
-            return color.color + " alpha(" + color.opacity + ") at(" + stop.offset + ")"; 
-          })
-          .join(", ") + 
-          ")";
+
+        this.key +=
+            " stops(" +
+            stops
+            .map(function(stop) {
+                var color = stop.color;
+                return color.color + " alpha(" + color.opacity + ") at(" + stop.offset + ")";
+            })
+            .join(", ") +
+            ")";
     };
-    
+
     pv.extendType(Gradient, FillStyle);
-    
-    Gradient.prototype.rgb = function(){
+
+    Gradient.prototype.rgb = function() {
         return this.stops.length ? this.stops[0].color : undefined;
     };
-    
-    Gradient.prototype.alpha = function(opacity){
-        return this._cloneWithStops(this.stops.map(function(stop){
-            return {offset: stop.offset, color: stop.color.alpha(opacity)};
+
+    Gradient.prototype.alpha = function(opacity) {
+        return this._cloneWithStops(this.stops.map(function(stop) {
+            return {
+                offset: stop.offset,
+                color: stop.color.alpha(opacity)
+            };
         }));
     };
-    
-    Gradient.prototype.darker = function(k){
-        return this._cloneWithStops(this.stops.map(function(stop){
-            return {offset: stop.offset, color: stop.color.darker(k)};
+
+    Gradient.prototype.darker = function(k) {
+        return this._cloneWithStops(this.stops.map(function(stop) {
+            return {
+                offset: stop.offset,
+                color: stop.color.darker(k)
+            };
         }));
     };
-    
-    Gradient.prototype.brighter = function(k){
-        return this._cloneWithStops(this.stops.map(function(stop){
-            return {offset: stop.offset, color: stop.color.brighter(k)};
+
+    Gradient.prototype.brighter = function(k) {
+        return this._cloneWithStops(this.stops.map(function(stop) {
+            return {
+                offset: stop.offset,
+                color: stop.color.brighter(k)
+            };
         }));
     };
-    
-    Gradient.prototype.complementary = function(){
-        return this._cloneWithStops(this.stops.map(function(stop){
-            return {offset: stop.offset, color: stop.color.complementary()};
+
+    Gradient.prototype.complementary = function() {
+        return this._cloneWithStops(this.stops.map(function(stop) {
+            return {
+                offset: stop.offset,
+                color: stop.color.complementary()
+            };
         }));
     };
-    
+
     Gradient.prototype.alphaBlend = function(mate) {
-        return this._cloneWithStops(this.stops.map(function(stop){
-            return {offset: stop.offset, color: stop.color.alphaBlend(mate)};
+        return this._cloneWithStops(this.stops.map(function(stop) {
+            return {
+                offset: stop.offset,
+                color: stop.color.alphaBlend(mate)
+            };
         }));
     };
-    
+
     Gradient.prototype.clone = function() {
         var Type = this.constructor;
         var o = pv.extend(Type);
         o.constructor = Type;
-        o.id   = ++gradient_id;
+        o.id = ++gradient_id;
         o.type = this.type;
         o.key = this.key;
 
         var stops = this.stops;
         o.stops = stops;
-        if(stops.length) {
+        if (stops.length) {
             // Default color for renderers that do not support gradients
             // Cannot use the this.color because it is assigned an per-mark-root id on render...
             o.color = stops[0].color.color;
         }
-        
+
         this._initClone(o);
-        
+
         return o;
     };
-     
+
     // Gradient.prototype._initClone
-    
+
     // ----------------
-    
+
     var LinearGradient = pv.FillStyle.LinearGradient = function(angle, stops) {
         Gradient.call(this, 'lineargradient', stops);
-        
+
         this.angle = angle;
-        this.key +=  " angle(" + angle + ")";
+        this.key += " angle(" + angle + ")";
     };
 
     pv.extendType(LinearGradient, Gradient);
-    
-    LinearGradient.prototype._cloneWithStops = function(stops){
+
+    LinearGradient.prototype._cloneWithStops = function(stops) {
         return new LinearGradient(this.angle, stops);
     };
-    
+
     LinearGradient.prototype._initClone = function(o) {
         o.angle = this.angle;
     };
-    
+
     // ----------------
-    
+
     var RadialGradient = pv.FillStyle.RadialGradient = function(cx, cy, stops) {
         Gradient.call(this, 'radialgradient', stops);
-        
+
         this.cx = cx;
         this.cy = cy;
-        this.key +=  " center(" + cx + "," + cy + ")";
+        this.key += " center(" + cx + "," + cy + ")";
     };
-    
+
     pv.extendType(RadialGradient, Gradient);
-    
+
     RadialGradient.prototype._cloneWithStops = function(stops) {
         return new RadialGradient(this.cx, this.cy, stops);
     };
-    
+
     RadialGradient.prototype._initClone = function(o) {
         o.cx = this.cx;
         o.cy = this.cy;
@@ -7628,62 +8065,62 @@ pv.Colors.category19 = function() {
  * @see pv.Scale.linear
  */
 pv.ramp = function(start, end) {
-  var scale = pv.Scale.linear();
-  scale.range.apply(scale, arguments);
-  return scale;
+    var scale = pv.Scale.linear();
+    scale.range.apply(scale, arguments);
+    return scale;
 };
 /**
  * @private
  * @namespace
  */
 pv.Scene = pv.SvgScene = {
-  /* Various namespaces. */
-  svg: "http://www.w3.org/2000/svg",
-  xmlns: "http://www.w3.org/2000/xmlns",
-  xlink: "http://www.w3.org/1999/xlink",
-  xhtml: "http://www.w3.org/1999/xhtml",
+    /* Various namespaces. */
+    svg: "http://www.w3.org/2000/svg",
+    xmlns: "http://www.w3.org/2000/xmlns",
+    xlink: "http://www.w3.org/1999/xlink",
+    xhtml: "http://www.w3.org/1999/xhtml",
 
-  /** The pre-multipled scale, based on any enclosing transforms. */
-  scale: 1,
+    /** The pre-multipled scale, based on any enclosing transforms. */
+    scale: 1,
 
-  /** The set of supported events. */
-  events: [
-    "DOMMouseScroll", // for Firefox
-    "mousewheel",
-    "mousedown",
-    "mouseup",
-    "mouseover",
-    "mouseout",
-    "mousemove",
-    "click",
-    "dblclick",
-    "contextmenu"
-  ],
+    /** The set of supported events. */
+    events: [
+        "DOMMouseScroll", // for Firefox
+        "mousewheel",
+        "mousedown",
+        "mouseup",
+        "mouseover",
+        "mouseout",
+        "mousemove",
+        "click",
+        "dblclick",
+        "contextmenu"
+    ],
 
-  /** Implicit values for SVG and CSS properties. */
-  implicit: {
-    svg: {
-      "shape-rendering": "auto",
-      "pointer-events": "painted",
-      "x": 0,
-      "y": 0,
-      "dy": 0,
-      "text-anchor": "start",
-      "transform": "translate(0,0)",
-      "fill": "none",
-      "fill-opacity": 1,
-      "stroke": "none",
-      "stroke-opacity": 1,
-      "stroke-width": 1.5,
-      "stroke-linejoin":   "miter",
-      "stroke-linecap":    "butt",
-      "stroke-miterlimit": 8,
-      "stroke-dasharray":  "none"
-    },
-    css: {
-      "font": "10px sans-serif"
+    /** Implicit values for SVG and CSS properties. */
+    implicit: {
+        svg: {
+            "shape-rendering": "auto",
+            "pointer-events": "painted",
+            "x": 0,
+            "y": 0,
+            "dy": 0,
+            "text-anchor": "start",
+            "transform": "translate(0,0)",
+            "fill": "none",
+            "fill-opacity": 1,
+            "stroke": "none",
+            "stroke-opacity": 1,
+            "stroke-width": 1.5,
+            "stroke-linejoin": "miter",
+            "stroke-linecap": "butt",
+            "stroke-miterlimit": 8,
+            "stroke-dasharray": "none"
+        },
+        css: {
+            "font": "10px sans-serif"
+        }
     }
-  }
 };
 
 /**
@@ -7692,17 +8129,14 @@ pv.Scene = pv.SvgScene = {
  * @param scenes {array} an array of scene nodes.
  */
 pv.SvgScene.updateAll = function(scenes) {
-  if (scenes.length
-      && scenes[0].reverse
-      && (scenes.type !== "line")
-      && (scenes.type !== "area")) {
-    var reversed = pv.extend(scenes);
-    for (var i = 0, j = scenes.length - 1; j >= 0; i++, j--) {
-      reversed[i] = scenes[j];
+    if (scenes.length && scenes[0].reverse && (scenes.type !== "line") && (scenes.type !== "area")) {
+        var reversed = pv.extend(scenes);
+        for (var i = 0, j = scenes.length - 1; j >= 0; i++, j--) {
+            reversed[i] = scenes[j];
+        }
+        scenes = reversed;
     }
-    scenes = reversed;
-  }
-  this.removeSiblings(this[scenes.type](scenes));
+    this.removeSiblings(this[scenes.type](scenes));
 };
 
 /**
@@ -7712,7 +8146,7 @@ pv.SvgScene.updateAll = function(scenes) {
  * @returns a new SVG element.
  */
 pv.SvgScene.create = function(type) {
-  return document.createElementNS(this.svg, type);
+    return document.createElementNS(this.svg, type);
 };
 
 /**
@@ -7728,29 +8162,31 @@ pv.SvgScene.create = function(type) {
  */
 pv.SvgScene.expect = function(e, type, scenes, i, attributes, style) {
     var tagName;
-    if(e) {
+    if (e) {
         tagName = e.tagName;
-        if(tagName === 'defs') {
+        if (tagName === 'defs') {
             e = e.nextSibling; // may be null
-            if(e) { tagName = e.tagName; }
-        } else if(tagName === 'a') {
+            if (e) {
+                tagName = e.tagName;
+            }
+        } else if (tagName === 'a') {
             e = e.firstChild;
             // ends up replacing the "a" tag with its child
         }
     }
-    
-    if(e) {
+
+    if (e) {
         if (tagName !== type) {
-          var n = this.create(type);
-          e.parentNode.replaceChild(n, e);
-          e = n;
+            var n = this.create(type);
+            e.parentNode.replaceChild(n, e);
+            e = n;
         }
     } else {
         e = this.create(type);
     }
 
-    if(attributes) this.setAttributes(e, attributes);
-    if(style)      this.setStyle(e, style);
+    if (attributes) this.setAttributes(e, attributes);
+    if (style) this.setStyle(e, style);
 
     return e;
 };
@@ -7758,52 +8194,61 @@ pv.SvgScene.expect = function(e, type, scenes, i, attributes, style) {
 pv.SvgScene.setAttributes = function(e, attributes) {
     var implicitSvg = this.implicit.svg;
     var prevAttrs = e.__attributes__;
-    if(prevAttrs === attributes) { prevAttrs = null; }
-    
+    if (prevAttrs === attributes) {
+        prevAttrs = null;
+    }
+
     for (var name in attributes) {
         var value = attributes[name];
-        if(!prevAttrs || (value !== prevAttrs[name])) {
+        if (!prevAttrs || (value !== prevAttrs[name])) {
             if (value == null || value == implicitSvg[name]) {
                 e.removeAttribute(name);
-            }  else {
+            } else {
                 e.setAttribute(name, value);
             }
         }
     }
-    
+
     e.__attributes__ = attributes;
 };
 
 pv.SvgScene.setStyle = function(e, style) {
-  var implicitCss = this.implicit.css;
-  var prevStyle = e.__style__;
-  if(prevStyle === style) { prevStyle = null; }
-  
-  for (var name in style) {
-    var value = style[name];
-    if(!prevStyle || (value !== prevStyle[name])) {
-      if (value == null || value == implicitCss[name]){
-        e.style.removeProperty(name);
-      } else {
-        e.style[name] = value;
-      }
+    var implicitCss = this.implicit.css;
+    var prevStyle = e.__style__;
+    if (prevStyle === style) {
+        prevStyle = null;
     }
- }
-  
-  e.__style__ = style;
+
+    for (var name in style) {
+        var value = style[name];
+        if (!prevStyle || (value !== prevStyle[name])) {
+            if (value == null || value == implicitCss[name]) {
+                e.style.removeProperty(name);
+            } else {
+                e.style[name] = value;
+            }
+        }
+    }
+
+    e.__style__ = style;
 };
 
 /** TODO - ??<<--what is to be done?? */
 pv.SvgScene.append = function(e, scenes, index) {
-  e.$scene = {scenes: scenes, index: index};
-  
-  // May wrap passed in e
-  e = this.title(e, scenes[index]);
+    e.$scene = {
+        scenes: scenes,
+        index: index
+    };
 
-  // scenes.$g is the default parent of appended elements.
-  if(!e.parentNode) { scenes.$g.appendChild(e); }
+    // May wrap passed in e
+    e = this.title(e, scenes[index]);
 
-  return e.nextSibling;
+    // scenes.$g is the default parent of appended elements.
+    if (!e.parentNode) {
+        scenes.$g.appendChild(e);
+    }
+
+    return e.nextSibling;
 };
 
 /**
@@ -7817,78 +8262,81 @@ pv.SvgScene.append = function(e, scenes, index) {
  * @param s a scene node.
  */
 pv.SvgScene.title = function(e, s) {
-  var a = e.parentNode;
-  if (a && (a.tagName != "a")) a = null;
-  if (s.title) {
-    if (!a) {
-      a = this.create("a");
-      // for FF>=4 when showing non-title element tooltips
-      a.setAttributeNS(this.xlink, "xlink:href", "");
-      if (e.parentNode) e.parentNode.replaceChild(a, e);
-      a.appendChild(e);
+    var a = e.parentNode;
+    if (a && (a.tagName != "a")) a = null;
+    if (s.title) {
+        if (!a) {
+            a = this.create("a");
+            // for FF>=4 when showing non-title element tooltips
+            a.setAttributeNS(this.xlink, "xlink:href", "");
+            if (e.parentNode) e.parentNode.replaceChild(a, e);
+            a.appendChild(e);
+        }
+
+        // Set the title. Using xlink:title ensures the call works in IE
+        // but only FireFox seems to show the title.
+        // without xlink: in there, it breaks IE.
+        a.setAttributeNS(this.xlink, "xlink:title", s.title); // for FF<4
+
+        // for SVG renderers that follow the recommended approach
+        var t = null;
+        for (var c = e.firstChild; c != null; c = c.nextSibling) {
+            if (c.nodeName == "title") {
+                t = c;
+                break;
+            }
+        }
+
+        if (!t) {
+            t = this.create("title");
+            e.appendChild(t);
+        } else {
+            t.removeChild(t.firstChild); // empty out the text
+        }
+
+        t.appendChild(document.createTextNode(s.title));
+
+        return a;
     }
-
-    // Set the title. Using xlink:title ensures the call works in IE
-    // but only FireFox seems to show the title.
-    // without xlink: in there, it breaks IE.
-    a.setAttributeNS(this.xlink, "xlink:title", s.title); // for FF<4
-
-    // for SVG renderers that follow the recommended approach
-    var t = null;
-    for(var c = e.firstChild; c != null; c = c.nextSibling) {
-      if(c.nodeName == "title") { t = c; break; }
-    }
-    
-    if(!t) {
-      t = this.create("title");
-      e.appendChild(t);
-    } else {
-      t.removeChild(t.firstChild); // empty out the text
-    }
-
-    t.appendChild(document.createTextNode(s.title));
-
-    return a;
-  }
-  if(a) a.parentNode.replaceChild(e, a);
-  return e;
+    if (a) a.parentNode.replaceChild(e, a);
+    return e;
 };
 
 /** TODO */
 pv.SvgScene.dispatch = pv.listener(function(e) {
-  var t = e.target.$scene;
-  if (t) {
-    var type = e.type;
+    var t = e.target.$scene;
+    if (t) {
+        var type = e.type;
 
-    /* Fixes for mousewheel support on Firefox & Opera. */
-    switch (type) {
-      case "DOMMouseScroll":
-        type = "mousewheel";
-        e.wheel = -480 * e.detail;
-        break;
+        /* Fixes for mousewheel support on Firefox & Opera. */
+        switch (type) {
+            case "DOMMouseScroll":
+                type = "mousewheel";
+                e.wheel = -480 * e.detail;
+                break;
 
-      case "mousewheel":
-        e.wheel = (window.opera ? 12 : 1) * e.wheelDelta;
-        break;
+            case "mousewheel":
+                e.wheel = (window.opera ? 12 : 1) * e.wheelDelta;
+                break;
+        }
+
+        if (pv.Mark.dispatch(type, t.scenes, t.index, e)) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
     }
-
-    if (pv.Mark.dispatch(type, t.scenes, t.index, e)) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }
 });
 
 /** @private Remove siblings following element <i>e</i>. */
 pv.SvgScene.removeSiblings = function(e) {
-  while (e) {
-    var n = e.nextSibling;
-    // don't remove a sibling <defs> node
-    if (e.nodeName !== 'defs') {
-      e.parentNode.removeChild(e);
+    while (e) {
+        var n = e.nextSibling;
+        // don't remove a sibling <defs> node
+        if (e.nodeName !== 'defs') {
+            e.parentNode.removeChild(e);
+        }
+        e = n;
     }
-    e = n;
-  }
 };
 
 /** @private Do nothing when rendering undefined mark types. */
@@ -7896,174 +8344,178 @@ pv.SvgScene.undefined = function() {};
 
 (function() {
     var dashAliasMap = {
-        '-':    'shortdash',
-        '.':    'shortdot',
-        '-.':   'shortdashdot',
-        '-..':  'shortdashdotdot',
-        '. ':   'dot',
-        '- ':   'dash',
-        '--':   'longdash',
-        '- .':  'dashdot',
-        '--.':  'longdashdot',
+        '-': 'shortdash',
+        '.': 'shortdot',
+        '-.': 'shortdashdot',
+        '-..': 'shortdashdotdot',
+        '. ': 'dot',
+        '- ': 'dash',
+        '--': 'longdash',
+        '- .': 'dashdot',
+        '--.': 'longdashdot',
         '--..': 'longdashdotdot'
     };
-    
+
     var dashMap = { // SVG specific - values for cap=butt
-        'shortdash':       [3, 1],
-        'shortdot':        [1, 1],
-        'shortdashdot':    [3, 1, 1, 1],
+        'shortdash': [3, 1],
+        'shortdot': [1, 1],
+        'shortdashdot': [3, 1, 1, 1],
         'shortdashdotdot': [3, 1, 1, 1, 1, 1],
-        'dot':             [1, 3],
-        'dash':            [4, 3],
-        'longdash':        [8, 3],
-        'dashdot':         [4, 3, 1, 3],
-        'longdashdot':     [8, 3, 1, 3],
-        'longdashdotdot':  [8, 3, 1, 3, 1, 3]
+        'dot': [1, 3],
+        'dash': [4, 3],
+        'longdash': [8, 3],
+        'dashdot': [4, 3, 1, 3],
+        'longdashdot': [8, 3, 1, 3],
+        'longdashdotdot': [8, 3, 1, 3, 1, 3]
     };
-    
-    pv.SvgScene.isStandardDashStyle = function(dashArray){
+
+    pv.SvgScene.isStandardDashStyle = function(dashArray) {
         return dashMap.hasOwnProperty(dashArray);
     };
-    
-    pv.SvgScene.translateDashStyleAlias = function(dashArray){
+
+    pv.SvgScene.translateDashStyleAlias = function(dashArray) {
         return dashAliasMap.hasOwnProperty(dashArray) ?
-                    dashAliasMap[dashArray] :
-                    dashArray;
+            dashAliasMap[dashArray] :
+            dashArray;
     };
-    
-    pv.SvgScene.parseDasharray = function(s){
+
+    pv.SvgScene.parseDasharray = function(s) {
         // This implementation tries to mimic the VML dashStyle,
         // cause the later is more limited...
         //
         // cap = square and butt result in the same dash pattern
-        var dashArray = s.strokeDasharray; 
-        if(dashArray && dashArray !== 'none'){
+        var dashArray = s.strokeDasharray;
+        if (dashArray && dashArray !== 'none') {
             dashArray = this.translateDashStyleAlias(dashArray);
-            
+
             var standardDashArray = dashMap[dashArray];
-            if(standardDashArray){
+            if (standardDashArray) {
                 dashArray = standardDashArray;
             } else {
                 // Make measures relative to line width
                 dashArray = dashArray.split(/[\s,]+/);
             }
-            
+
             var lineWidth = s.lineWidth;
-            var lineCap   = s.lineCap || 'butt';
+            var lineCap = s.lineCap || 'butt';
             var isButtCap = lineCap === 'butt';
-            
-            dashArray = 
+
+            dashArray =
                 dashArray
-                    .map(function(num, index){
-                        num = +num;
-                        if(!isButtCap){
-                            // Steal one unit to dash and give it to the gap,
-                            // to compensate for the round/square cap
-                            if(index % 2){
-                                // gap
-                                num++;
-                            } else {
-                                // dash/dot
-                                num -= 1;
-                            }
+                .map(function(num, index) {
+                    num = +num;
+                    if (!isButtCap) {
+                        // Steal one unit to dash and give it to the gap,
+                        // to compensate for the round/square cap
+                        if (index % 2) {
+                            // gap
+                            num++;
+                        } else {
+                            // dash/dot
+                            num -= 1;
                         }
-                        
-                        if(num <= 0){
-                            num = .001; // SVG does not support 0-width; with cap=square/round is useful.
-                        }
-                        
-                        return num * lineWidth / this.scale; 
-                     }, this)
-                    .join(' ');
+                    }
+
+                    if (num <= 0) {
+                        num = .001; // SVG does not support 0-width; with cap=square/round is useful.
+                    }
+
+                    return num * lineWidth / this.scale;
+                }, this)
+                .join(' ');
         } else {
             dashArray = null;
         }
-        
+
         return dashArray;
     };
 })();
 
 (function() {
-  
-  var reTestUrlColor = /^url\(#/;
-  var next_gradient_id = 1;
-  var pi2 = Math.PI/2;
-  var pi4 = pi2/2;
-  var sqrt22 = Math.SQRT2/2;
-  var abs = Math.abs;
-  var sin = Math.sin;
-  var cos = Math.cos;
-  
-  var zr  = function(x) { return abs(x) <= 1e-12 ? 0 : x; };
-  
-  pv.SvgScene.addFillStyleDefinition = function(scenes, fill) {
-    if(!fill.type || fill.type === 'solid' || reTestUrlColor.test(fill.color)) { return; }
-    
-    var rootMark = scenes.mark.root;
-    var fillStyleMap = rootMark.__fillStyleMap__ || (rootMark.__fillStyleMap__ = {});
-    var k = fill.key;
-    var instId = fillStyleMap[k];
-    if(!instId) {
-        instId = fillStyleMap[k] = '__pvGradient' + (next_gradient_id++);
-        var elem = createGradientDef.call(this, scenes, fill, instId);
 
-        rootMark.scene.$defs.appendChild(elem);
-    }
-    
-    fill.color = 'url(#' + instId + ')';
-  };
- 
-  var createGradientDef = function (scenes, fill, instId) {
-      var isLinear = (fill.type === 'lineargradient');
-      var elem     = this.create(isLinear ? "linearGradient" : "radialGradient");
-      elem.setAttribute("id", instId);
-      
-      // Use the default: objectBoundingBox units
-      // Coordinates are %s of the width and height of the BBox
-      // 0,0 = top, left
-      // 1,1 = bottom, right
-//    elem.setAttribute("gradientUnits","userSpaceOnUse");
-      if(isLinear) {
-        // x1,y1 -> x2,y2 form the gradient vector
-        // See http://www.w3.org/TR/css3-images/#gradients example 11 on calculating the gradient line
-        // Gradient-Top angle -> SVG angle -> From diagonal angle
-        // angle = (gradAngle - 90) - 45 = angle - 135
-        var svgAngle  = fill.angle - pi2;
-        var diagAngle = abs(svgAngle % pi2) - pi4;
-            
-        // Radius from the center of the normalized bounding box
-        var r = abs(sqrt22 * cos(diagAngle));
-        var dirx = r * cos(svgAngle);
-        var diry = r * sin(svgAngle);
+    var reTestUrlColor = /^url\(#/;
+    var next_gradient_id = 1;
+    var pi2 = Math.PI / 2;
+    var pi4 = pi2 / 2;
+    var sqrt22 = Math.SQRT2 / 2;
+    var abs = Math.abs;
+    var sin = Math.sin;
+    var cos = Math.cos;
 
-        elem.setAttribute("x1", zr(0.5 - dirx));
-        elem.setAttribute("y1", zr(0.5 - diry));
-        elem.setAttribute("x2", zr(0.5 + dirx));
-        elem.setAttribute("y2", zr(0.5 + diry));
-      }
-      //else {
-      // TODO radial focus
+    var zr = function(x) {
+        return abs(x) <= 1e-12 ? 0 : x;
+    };
+
+    pv.SvgScene.addFillStyleDefinition = function(scenes, fill) {
+        if (!fill.type || fill.type === 'solid' || reTestUrlColor.test(fill.color)) {
+            return;
+        }
+
+        var rootMark = scenes.mark.root;
+        var fillStyleMap = rootMark.__fillStyleMap__ || (rootMark.__fillStyleMap__ = {});
+        var k = fill.key;
+        var instId = fillStyleMap[k];
+        if (!instId) {
+            instId = fillStyleMap[k] = '__pvGradient' + (next_gradient_id++);
+            var elem = createGradientDef.call(this, scenes, fill, instId);
+
+            rootMark.scene.$defs.appendChild(elem);
+        }
+
+        fill.color = 'url(#' + instId + ')';
+    };
+
+    var createGradientDef = function(scenes, fill, instId) {
+        var isLinear = (fill.type === 'lineargradient');
+        var elem = this.create(isLinear ? "linearGradient" : "radialGradient");
+        elem.setAttribute("id", instId);
+
+        // Use the default: objectBoundingBox units
+        // Coordinates are %s of the width and height of the BBox
+        // 0,0 = top, left
+        // 1,1 = bottom, right
+        //    elem.setAttribute("gradientUnits","userSpaceOnUse");
+        if (isLinear) {
+            // x1,y1 -> x2,y2 form the gradient vector
+            // See http://www.w3.org/TR/css3-images/#gradients example 11 on calculating the gradient line
+            // Gradient-Top angle -> SVG angle -> From diagonal angle
+            // angle = (gradAngle - 90) - 45 = angle - 135
+            var svgAngle = fill.angle - pi2;
+            var diagAngle = abs(svgAngle % pi2) - pi4;
+
+            // Radius from the center of the normalized bounding box
+            var r = abs(sqrt22 * cos(diagAngle));
+            var dirx = r * cos(svgAngle);
+            var diry = r * sin(svgAngle);
+
+            elem.setAttribute("x1", zr(0.5 - dirx));
+            elem.setAttribute("y1", zr(0.5 - diry));
+            elem.setAttribute("x2", zr(0.5 + dirx));
+            elem.setAttribute("y2", zr(0.5 + diry));
+        }
+        //else {
+        // TODO radial focus
         // Currently using defaults cx = cy = r = 0.5
-//      elem.setAttribute("cx", fill.cx);
-//      elem.setAttribute("cy", fill.cy);
-//      elem.setAttribute("r",  fill.r );
-      //}
+        //      elem.setAttribute("cx", fill.cx);
+        //      elem.setAttribute("cy", fill.cy);
+        //      elem.setAttribute("r",  fill.r );
+        //}
 
-      var stops = fill.stops;
-      var S = stops.length;
-      for (var i = 0 ; i < S ; i++) {
-        var stop = stops[i];
-        
-        var stopElem = elem.appendChild(this.create("stop"));
-        var color = stop.color;
-        stopElem.setAttribute("offset",       stop.offset   + '%');
-        stopElem.setAttribute("stop-color",   color.color        );
-        stopElem.setAttribute("stop-opacity", color.opacity + '' );
-      }
-      
-      return elem;
-  };
-  
+        var stops = fill.stops;
+        var S = stops.length;
+        for (var i = 0; i < S; i++) {
+            var stop = stops[i];
+
+            var stopElem = elem.appendChild(this.create("stop"));
+            var color = stop.color;
+            stopElem.setAttribute("offset", stop.offset + '%');
+            stopElem.setAttribute("stop-color", color.color);
+            stopElem.setAttribute("stop-opacity", color.opacity + '');
+        }
+
+        return elem;
+    };
+
 })();
 /**
  * @private Converts the specified b-spline curve segment to a bezier curve
@@ -8076,50 +8528,49 @@ pv.SvgScene.undefined = function() {};
  */
 pv.SvgScene.pathBasis = (function() {
 
-  /**
-   * Matrix to transform basis (b-spline) control points to bezier control
-   * points. Derived from FvD 11.2.8.
-   */
-  var basis = [
-    [ 1/6, 2/3, 1/6,   0 ],
-    [   0, 2/3, 1/3,   0 ],
-    [   0, 1/3, 2/3,   0 ],
-    [   0, 1/6, 2/3, 1/6 ]
-  ];
+    /**
+     * Matrix to transform basis (b-spline) control points to bezier control
+     * points. Derived from FvD 11.2.8.
+     */
+    var basis = [
+        [1 / 6, 2 / 3, 1 / 6, 0],
+        [0, 2 / 3, 1 / 3, 0],
+        [0, 1 / 3, 2 / 3, 0],
+        [0, 1 / 6, 2 / 3, 1 / 6]
+    ];
 
-  /**
-   * Returns the point that is the weighted sum of the specified control points,
-   * using the specified weights. This method requires that there are four
-   * weights and four control points.
-   */
-  function weight(w, p0, p1, p2, p3) {
-    return {
-      x: w[0] * p0.left + w[1] * p1.left + w[2] * p2.left + w[3] * p3.left,
-      y: w[0] * p0.top  + w[1] * p1.top  + w[2] * p2.top  + w[3] * p3.top
+    /**
+     * Returns the point that is the weighted sum of the specified control points,
+     * using the specified weights. This method requires that there are four
+     * weights and four control points.
+     */
+
+    function weight(w, p0, p1, p2, p3) {
+        return {
+            x: w[0] * p0.left + w[1] * p1.left + w[2] * p2.left + w[3] * p3.left,
+            y: w[0] * p0.top + w[1] * p1.top + w[2] * p2.top + w[3] * p3.top
+        };
+    }
+
+    var convert = function(p0, p1, p2, p3) {
+        var b1 = weight(basis[1], p0, p1, p2, p3),
+            b2 = weight(basis[2], p0, p1, p2, p3),
+            b3 = weight(basis[3], p0, p1, p2, p3);
+        return "C" + b1.x + "," + b1.y + "," + b2.x + "," + b2.y + "," + b3.x + "," + b3.y;
     };
-  }
 
-  var convert = function(p0, p1, p2, p3) {
-    var b1 = weight(basis[1], p0, p1, p2, p3),
-        b2 = weight(basis[2], p0, p1, p2, p3),
-        b3 = weight(basis[3], p0, p1, p2, p3);
-    return "C" + b1.x + "," + b1.y
-         + "," + b2.x + "," + b2.y
-         + "," + b3.x + "," + b3.y;
-  };
+    convert.segment = function(p0, p1, p2, p3) {
+        var b0 = weight(basis[0], p0, p1, p2, p3),
+            b1 = weight(basis[1], p0, p1, p2, p3),
+            b2 = weight(basis[2], p0, p1, p2, p3),
+            b3 = weight(basis[3], p0, p1, p2, p3);
+        return ["M" + b0.x + "," + b0.y,
+            "C" + b1.x + "," + b1.y + "," +
+            b2.x + "," + b2.y + "," +
+            b3.x + "," + b3.y];
+    };
 
-  convert.segment = function(p0, p1, p2, p3) {
-    var b0 = weight(basis[0], p0, p1, p2, p3),
-        b1 = weight(basis[1], p0, p1, p2, p3),
-        b2 = weight(basis[2], p0, p1, p2, p3),
-        b3 = weight(basis[3], p0, p1, p2, p3);
-    return ["M" + b0.x + "," + b0.y, 
-            "C" + b1.x + "," + b1.y + "," + 
-                  b2.x + "," + b2.y + "," + 
-                  b3.x + "," + b3.y];
-  };
-
-  return convert;
+    return convert;
 })();
 
 /**
@@ -8130,34 +8581,34 @@ pv.SvgScene.pathBasis = (function() {
  * @param points the array of points.
  */
 pv.SvgScene.curveBasis = function(points, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1; 
-  } else {
-    L = to - from + 1;
-  }
-  
-  if (L <= 2) return "";
-  
-  var path = "",
-      p0 = points[from],
-      p1 = p0,
-      p2 = p0,
-      p3 = points[from + 1];
-  path += this.pathBasis(p0, p1, p2, p3);
-  for (var i = from + 2 ; i <= to ; i++) {
-    p0 = p1;
-    p1 = p2;
-    p2 = p3;
-    p3 = points[i];
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
+
+    if (L <= 2) return "";
+
+    var path = "",
+        p0 = points[from],
+        p1 = p0,
+        p2 = p0,
+        p3 = points[from + 1];
     path += this.pathBasis(p0, p1, p2, p3);
-  }
-  /* Cycle through to get the last point. */
-  path += this.pathBasis(p1, p2, p3, p3);
-  path += this.pathBasis(p2, p3, p3, p3);
-  return path;
+    for (var i = from + 2; i <= to; i++) {
+        p0 = p1;
+        p1 = p2;
+        p2 = p3;
+        p3 = points[i];
+        path += this.pathBasis(p0, p1, p2, p3);
+    }
+    /* Cycle through to get the last point. */
+    path += this.pathBasis(p1, p2, p3, p3);
+    path += this.pathBasis(p2, p3, p3, p3);
+    return path;
 };
 
 /**
@@ -8170,45 +8621,45 @@ pv.SvgScene.curveBasis = function(points, from, to) {
  * @param points the array of points.
  */
 pv.SvgScene.curveBasisSegments = function(points, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1; 
-  } else {
-    L = to - from + 1;
-  }
-  
-  if (L <= 2) return ""; // BUG?
-  
-  var paths = [],
-      p0 = points[from],
-      p1 = p0,
-      p2 = p0,
-      p3 = points[from + 1],
-      firstPath = this.pathBasis.segment(p0, p1, p2, p3);
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
 
-  p0 = p1;
-  p1 = p2;
-  p2 = p3;
-  p3 = points[from + 2];
-  firstPath[1] += this.pathBasis(p0, p1, p2, p3); // merge first & second path
-  paths.push(firstPath);
-  
-  for (var i = from + 3; i <= to ; i++) {
+    if (L <= 2) return ""; // BUG?
+
+    var paths = [],
+        p0 = points[from],
+        p1 = p0,
+        p2 = p0,
+        p3 = points[from + 1],
+        firstPath = this.pathBasis.segment(p0, p1, p2, p3);
+
     p0 = p1;
     p1 = p2;
     p2 = p3;
-    p3 = points[i];
-    paths.push(this.pathBasis.segment(p0, p1, p2, p3));
-  }
+    p3 = points[from + 2];
+    firstPath[1] += this.pathBasis(p0, p1, p2, p3); // merge first & second path
+    paths.push(firstPath);
 
-  // merge last & second-to-last path
-  var lastPath = this.pathBasis.segment(p1, p2, p3, p3);
-  lastPath[1] += this.pathBasis(p2, p3, p3, p3);
-  paths.push(lastPath);
-  
-  return paths;
+    for (var i = from + 3; i <= to; i++) {
+        p0 = p1;
+        p1 = p2;
+        p2 = p3;
+        p3 = points[i];
+        paths.push(this.pathBasis.segment(p0, p1, p2, p3));
+    }
+
+    // merge last & second-to-last path
+    var lastPath = this.pathBasis.segment(p1, p2, p3, p3);
+    lastPath[1] += this.pathBasis(p2, p3, p3, p3);
+    paths.push(lastPath);
+
+    return paths;
 };
 
 /**
@@ -8222,62 +8673,62 @@ pv.SvgScene.curveBasisSegments = function(points, from, to) {
  * @param tangents the array of tangent vectors.
  */
 pv.SvgScene.curveHermite = function(points, tangents, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  var T = tangents.length;
-  if (T < 1 || (L !== T && L !== T + 2)) {
-    return "";
-  }
-  
-  var quad = L !== T,
-      path = "",
-      p0 = points[from],
-      p  = points[from + 1],
-      t0 = tangents[0],
-      t  = t0,
-      pi = from + 1;
-
-  if (quad) {
-    path += "Q" + 
-            (p.left - t0.x * 2 / 3) + "," + (p.top  - t0.y * 2 / 3) + "," + 
-            p.left + "," + p.top;
-    p0 = points[from + 1];
-    pi = from + 2;
-  }
-
-  if (T > 1) {
-    t = tangents[1];
-    p = points[pi];
-    pi++;
-    path += "C" + 
-            (p0.left + t0.x) + "," + (p0.top  + t0.y) + "," + 
-            (p.left  -  t.x) + "," + (p.top   -  t.y) + "," + 
-             p.left + "," + p.top;
-    
-    for (var i = 2 ; i < T ; i++, pi++) {
-      p = points[pi];
-      t = tangents[i];
-      path += "S" + 
-              (p.left - t.x) + "," + (p.top - t.y) + "," + 
-              p.left + "," + p.top;
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
     }
-  }
 
-  if (quad) {
-    var lp = points[pi];
-    path += "Q" + 
-            (p.left + t.x * 2 / 3) + ","  + (p.top + t.y * 2 / 3) + "," + 
+    var T = tangents.length;
+    if (T < 1 || (L !== T && L !== T + 2)) {
+        return "";
+    }
+
+    var quad = L !== T,
+        path = "",
+        p0 = points[from],
+        p = points[from + 1],
+        t0 = tangents[0],
+        t = t0,
+        pi = from + 1;
+
+    if (quad) {
+        path += "Q" +
+            (p.left - t0.x * 2 / 3) + "," + (p.top - t0.y * 2 / 3) + "," +
+            p.left + "," + p.top;
+        p0 = points[from + 1];
+        pi = from + 2;
+    }
+
+    if (T > 1) {
+        t = tangents[1];
+        p = points[pi];
+        pi++;
+        path += "C" +
+            (p0.left + t0.x) + "," + (p0.top + t0.y) + "," +
+            (p.left - t.x) + "," + (p.top - t.y) + "," +
+            p.left + "," + p.top;
+
+        for (var i = 2; i < T; i++, pi++) {
+            p = points[pi];
+            t = tangents[i];
+            path += "S" +
+                (p.left - t.x) + "," + (p.top - t.y) + "," +
+                p.left + "," + p.top;
+        }
+    }
+
+    if (quad) {
+        var lp = points[pi];
+        path += "Q" +
+            (p.left + t.x * 2 / 3) + "," + (p.top + t.y * 2 / 3) + "," +
             lp.left + "," + lp.top;
-  }
-  
-  return path;
+    }
+
+    return path;
 };
 
 /**
@@ -8288,56 +8739,59 @@ pv.SvgScene.curveHermite = function(points, tangents, from, to) {
  * @param tangents the array of tangent vectors.
  */
 pv.SvgScene.curveHermiteSegments = function(points, tangents, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  var T = tangents.length;
-  if (T < 1 || (L !== T && L !== T + 2)) {
-    return [];
-  }
-  
-  var quad = L !== T,
-      paths = [],
-      p0 = points[from],
-      p = p0,
-      t0 = tangents[0],
-      t  = t0,
-      pi = from + 1;
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
 
-  if (quad) {
-    p = points[from + 1];
-    paths.push(["M" + p0.left + "," + p0.top, 
-                "Q" +  (p.left - t.x * 2 / 3) + "," + 
-                       (p.top  - t.y * 2 / 3) + "," + 
-                        p.left + "," + p.top]);
-    pi = from + 2;
-  }
+    var T = tangents.length;
+    if (T < 1 || (L !== T && L !== T + 2)) {
+        return [];
+    }
 
-  for (var i = 1; i < T; i++, pi++) {
-    p0 = p;
-    t0 = t;
-    p = points[pi];
-    t = tangents[i];
-    paths.push(["M" + p0.left + "," + p0.top, 
-                "C" + (p0.left + t0.x) + "," + (p0.top + t0.y) + "," + 
-                      (p.left  - t.x ) + "," + (p.top  -  t.y) + "," + 
-                       p.left + "," + p.top]);
-  }
+    var quad = L !== T,
+        paths = [],
+        p0 = points[from],
+        p = p0,
+        t0 = tangents[0],
+        t = t0,
+        pi = from + 1;
 
-  if (quad) {
-    var lp = points[pi];
-    paths.push(["M" + p.left + "," + p.top,  
-                "Q" + (p.left  + t.x * 2 / 3) + ","  + (p.top + t.y * 2 / 3) + "," + 
-                       lp.left + "," + lp.top]);
-  }
+    if (quad) {
+        p = points[from + 1];
+        paths.push(["M" + p0.left + "," + p0.top,
+            "Q" + (p.left - t.x * 2 / 3) + "," +
+            (p.top - t.y * 2 / 3) + "," +
+            p.left + "," + p.top
+        ]);
+        pi = from + 2;
+    }
 
-  return paths;
+    for (var i = 1; i < T; i++, pi++) {
+        p0 = p;
+        t0 = t;
+        p = points[pi];
+        t = tangents[i];
+        paths.push(["M" + p0.left + "," + p0.top,
+            "C" + (p0.left + t0.x) + "," + (p0.top + t0.y) + "," +
+            (p.left - t.x) + "," + (p.top - t.y) + "," +
+            p.left + "," + p.top
+        ]);
+    }
+
+    if (quad) {
+        var lp = points[pi];
+        paths.push(["M" + p.left + "," + p.top,
+            "Q" + (p.left + t.x * 2 / 3) + "," + (p.top + t.y * 2 / 3) + "," +
+            lp.left + "," + lp.top
+        ]);
+    }
+
+    return paths;
 };
 
 /**
@@ -8349,31 +8803,37 @@ pv.SvgScene.curveHermiteSegments = function(points, tangents, from, to) {
  * @param tension the tension of hte cardinal spline.
  */
 pv.SvgScene.cardinalTangents = function(points, tension, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  var tangents = [],
-      a = (1 - tension) / 2,
-      p0 = points[from],
-      p1 = points[from + 1],
-      p2 = points[from + 2];
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
 
-  for (var i = from + 3 ; i <= to ; i++) {
-    tangents.push({x: a * (p2.left - p0.left), y: a * (p2.top - p0.top)});
-    p0 = p1;
-    p1 = p2;
-    p2 = points[i];
-  }
+    var tangents = [],
+        a = (1 - tension) / 2,
+        p0 = points[from],
+        p1 = points[from + 1],
+        p2 = points[from + 2];
 
-  tangents.push({x: a * (p2.left - p0.left), y: a * (p2.top - p0.top)});
-  
-  return tangents;
+    for (var i = from + 3; i <= to; i++) {
+        tangents.push({
+            x: a * (p2.left - p0.left),
+            y: a * (p2.top - p0.top)
+        });
+        p0 = p1;
+        p1 = p2;
+        p2 = points[i];
+    }
+
+    tangents.push({
+        x: a * (p2.left - p0.left),
+        y: a * (p2.top - p0.top)
+    });
+
+    return tangents;
 };
 
 /**
@@ -8385,17 +8845,17 @@ pv.SvgScene.cardinalTangents = function(points, tension, from, to) {
  * @param tension the tension of the cardinal spline.
  */
 pv.SvgScene.curveCardinal = function(points, tension, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  if (L <= 2) return "";
-  return this.curveHermite(points, this.cardinalTangents(points, tension, from, to), from, to);
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
+
+    if (L <= 2) return "";
+    return this.curveHermite(points, this.cardinalTangents(points, tension, from, to), from, to);
 };
 
 /**
@@ -8406,17 +8866,17 @@ pv.SvgScene.curveCardinal = function(points, tension, from, to) {
  * @param tension the tension of the cardinal spline.
  */
 pv.SvgScene.curveCardinalSegments = function(points, tension, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  if (L <= 2) return ""; // BUG?
-  return this.curveHermiteSegments(points, this.cardinalTangents(points, tension, from, to), from, to);
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
+
+    if (L <= 2) return ""; // BUG?
+    return this.curveHermiteSegments(points, this.cardinalTangents(points, tension, from, to), from, to);
 };
 
 /**
@@ -8426,67 +8886,70 @@ pv.SvgScene.curveCardinalSegments = function(points, tension, from, to) {
  * @param points the array of points.
  */
 pv.SvgScene.monotoneTangents = function(points, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  var tangents = [],
-      d = [],
-      m = [],
-      dx = [],
-      k = 0,
-      j;
-
-  /* Compute the slopes of the secant lines between successive points. */
-  for (k = 0 ; k < L - 1 ; k++) {
-    j = from + k;
-    var den = points[j+1].left - points[j].left;
-    d[k] = Math.abs(den) <= 1e-12 ? 0 : (points[j+1].top - points[j].top)/den;
-  }
-
-  /* Initialize the tangents at every point as the average of the secants. */
-  m[0] = d[0];
-  dx[0] = points[from + 1].left - points[from].left;
-  for (k = 1, j = from + k ; k < L - 1 ; k++, j++) {
-    m[k]  = (d[k-1]+d[k])/2;
-    dx[k] = (points[j+1].left - points[j-1].left)/2;
-  }
-  m[k]  = d[k-1];
-  dx[k] = (points[j].left - points[j-1].left);
-
-  /* Step 3. Very important, step 3. Yep. Wouldn't miss it. */
-  for (k = 0; k < L - 1; k++) {
-    if (d[k] == 0) {
-      m[ k ] = 0;
-      m[k+1] = 0;
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
     }
-  }
 
-  /* Step 4 + 5. Out of 5 or more steps. */
-  for (k = 0; k < L - 1; k++) {
-    if ((Math.abs(m[k]) < 1e-5) || (Math.abs(m[k+1]) < 1e-5)) continue;
-    var ak = m[k] / d[k],
-        bk = m[k + 1] / d[k],
-        s = ak * ak + bk * bk; // monotone constant (?)
-    if (s > 9) {
-      var tk = 3 / Math.sqrt(s);
-      m[k] = tk * ak * d[k];
-      m[k + 1] = tk * bk * d[k];
+    var tangents = [],
+        d = [],
+        m = [],
+        dx = [],
+        k = 0,
+        j;
+
+    /* Compute the slopes of the secant lines between successive points. */
+    for (k = 0; k < L - 1; k++) {
+        j = from + k;
+        var den = points[j + 1].left - points[j].left;
+        d[k] = Math.abs(den) <= 1e-12 ? 0 : (points[j + 1].top - points[j].top) / den;
     }
-  }
 
-  var len;
-  for (var i = 0 ; i < L ; i++) {
-    len = 1 + m[i] * m[i]; // pv.vector(1, m[i]).norm().times(dx[i]/3)
-    tangents.push({x: dx[i] / 3 / len, y: m[i] * dx[i] / 3 / len});
-  }
+    /* Initialize the tangents at every point as the average of the secants. */
+    m[0] = d[0];
+    dx[0] = points[from + 1].left - points[from].left;
+    for (k = 1, j = from + k; k < L - 1; k++, j++) {
+        m[k] = (d[k - 1] + d[k]) / 2;
+        dx[k] = (points[j + 1].left - points[j - 1].left) / 2;
+    }
+    m[k] = d[k - 1];
+    dx[k] = (points[j].left - points[j - 1].left);
 
-  return tangents;
+    /* Step 3. Very important, step 3. Yep. Wouldn't miss it. */
+    for (k = 0; k < L - 1; k++) {
+        if (d[k] == 0) {
+            m[k] = 0;
+            m[k + 1] = 0;
+        }
+    }
+
+    /* Step 4 + 5. Out of 5 or more steps. */
+    for (k = 0; k < L - 1; k++) {
+        if ((Math.abs(m[k]) < 1e-5) || (Math.abs(m[k + 1]) < 1e-5)) continue;
+        var ak = m[k] / d[k],
+            bk = m[k + 1] / d[k],
+            s = ak * ak + bk * bk; // monotone constant (?)
+        if (s > 9) {
+            var tk = 3 / Math.sqrt(s);
+            m[k] = tk * ak * d[k];
+            m[k + 1] = tk * bk * d[k];
+        }
+    }
+
+    var len;
+    for (var i = 0; i < L; i++) {
+        len = 1 + m[i] * m[i]; // pv.vector(1, m[i]).norm().times(dx[i]/3)
+        tangents.push({
+            x: dx[i] / 3 / len,
+            y: m[i] * dx[i] / 3 / len
+        });
+    }
+
+    return tangents;
 };
 
 /**
@@ -8497,17 +8960,17 @@ pv.SvgScene.monotoneTangents = function(points, from, to) {
  * @param points the array of points.
  */
 pv.SvgScene.curveMonotone = function(points, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  if (L <= 2) return "";
-  return this.curveHermite(points, this.monotoneTangents(points, from, to), from, to);
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
+
+    if (L <= 2) return "";
+    return this.curveHermite(points, this.monotoneTangents(points, from, to), from, to);
 };
 
 /**
@@ -8518,882 +8981,930 @@ pv.SvgScene.curveMonotone = function(points, from, to) {
  * @param points the array of points.
  */
 pv.SvgScene.curveMonotoneSegments = function(points, from, to) {
-  var L;
-  if(from == null){
-    L = points.length;
-    from = 0;
-    to   = L -1;
-  } else {
-    L = to - from + 1;
-  }
-  
-  if (L <= 2) return ""; // BUG?
-  return this.curveHermiteSegments(points, this.monotoneTangents(points, from, to), from, to);
+    var L;
+    if (from == null) {
+        L = points.length;
+        from = 0;
+        to = L - 1;
+    } else {
+        L = to - from + 1;
+    }
+
+    if (L <= 2) return ""; // BUG?
+    return this.curveHermiteSegments(points, this.monotoneTangents(points, from, to), from, to);
 };
 pv.SvgScene.area = function(scenes) {
-  var e = scenes.$g.firstChild;
+    var e = scenes.$g.firstChild;
 
-  var count = scenes.length;
-  if (!count){
-    return e;
-  }
-  
-  var s = scenes[0];
-  
-  /* smart segmentation */
-  if (s.segmented === 'smart') {
-    return this.areaSegmentedSmart(e, scenes);
-  }
-  
-  /* full segmented */
-  if (s.segmented) {
-    return this.areaSegmentedFull(e, scenes);
-  }
-  
-  return this.areaFixed(e, scenes, 0, count - 1, /*addEvents*/ true);
+    var count = scenes.length;
+    if (!count) {
+        return e;
+    }
+
+    var s = scenes[0];
+
+    /* smart segmentation */
+    if (s.segmented === 'smart') {
+        return this.areaSegmentedSmart(e, scenes);
+    }
+
+    /* full segmented */
+    if (s.segmented) {
+        return this.areaSegmentedFull(e, scenes);
+    }
+
+    return this.areaFixed(e, scenes, 0, count - 1, /*addEvents*/ true);
 };
 
 pv.SvgScene.areaFixed = function(elm, scenes, from, to, addEvents) {
-  var count = to - from + 1;
-  
-  // count > 0
-  
-  if(count === 1){
-    return this.lineAreaDot(elm, scenes, from);
-  }
-  
-  var s = scenes[from];
-  if (!s.visible) {
-    return elm;
-  }
-  
-  /* fill & stroke */
-  
-  var fill   = s.fillStyle;
-  var stroke = s.strokeStyle;
-  
-  if (!fill.opacity && !stroke.opacity) {
-    return elm;
-  }
-  
-  this.addFillStyleDefinition(scenes, fill);
-  this.addFillStyleDefinition(scenes, stroke);
-  
-  var isInterpBasis      = false;
-  var isInterpCardinal   = false;
-  var isInterpMonotone   = false;
-  var isInterpStepAfter  = false;
-  var isInterpStepBefore = false;
-  switch(s.interpolate){
-    case 'basis':       isInterpBasis      = true; break;
-    case 'cardinal':    isInterpCardinal   = true; break;
-    case 'monotone':    isInterpMonotone   = true; break;
-    case 'step-after':  isInterpStepAfter  = true; break;
-    case 'step-before': isInterpStepBefore = true; break;
-  }
-  
-  var isInterpBasisCardinalOrMonotone = isInterpBasis || isInterpCardinal || isInterpMonotone;
-  
-  /* points */
-  var d = [], si, sj;
-  for (var i = from ; i <= to ; i++) {
-    si = scenes[i];
-    if (!si.width && !si.height) {
-      continue;
-    }
-    
-    for (var j = i + 1; j <= to ; j++) {
-      sj = scenes[j];
-      if (!sj.width && !sj.height) {
-        break;
-      }
-    }
-    
-    if ((i > from) && !isInterpStepAfter){ 
-      i--;
-    }
-    
-    if ((j <= to) && !isInterpStepBefore) {
-      j++;
-    }
-    
-    var fun = isInterpBasisCardinalOrMonotone && (j - i > 2) ? 
-              this.areaPathCurve : 
-              this.areaPathStraight;
-    
-    d.push( fun.call(this, scenes, i, j - 1, s) );
-    i = j - 1;
-  }
-  
-  if (!d.length) {
-    return elm;
-  }
+    var count = to - from + 1;
 
-  var sop = stroke.opacity;
-  elm = this.expect(elm, "path", scenes, from, {
-      "shape-rendering":   s.antialias ? null : "crispEdges",
-      "pointer-events":    addEvents ? s.events : 'none',
-      "cursor":            s.cursor,
-      "d":                 "M" + d.join("ZM") + "Z",
-      "fill":              fill.color,
-      "fill-opacity":      fill.opacity || null,
-      "stroke":            stroke.color,
-      "stroke-opacity":    sop || null,
-      "stroke-width":      sop ? (s.lineWidth / this.scale) : null,
-      "stroke-linecap":    s.lineCap,
-      "stroke-linejoin":   s.lineJoin,
-      "stroke-miterlimit": s.strokeMiterLimit,
-      "stroke-dasharray":  sop ? this.parseDasharray(s) : null
+    // count > 0
+
+    if (count === 1) {
+        return this.lineAreaDot(elm, scenes, from);
+    }
+
+    var s = scenes[from];
+    if (!s.visible) {
+        return elm;
+    }
+
+    /* fill & stroke */
+
+    var fill = s.fillStyle;
+    var stroke = s.strokeStyle;
+
+    if (!fill.opacity && !stroke.opacity) {
+        return elm;
+    }
+
+    this.addFillStyleDefinition(scenes, fill);
+    this.addFillStyleDefinition(scenes, stroke);
+
+    var isInterpBasis = false;
+    var isInterpCardinal = false;
+    var isInterpMonotone = false;
+    var isInterpStepAfter = false;
+    var isInterpStepBefore = false;
+    switch (s.interpolate) {
+        case 'basis':
+            isInterpBasis = true;
+            break;
+        case 'cardinal':
+            isInterpCardinal = true;
+            break;
+        case 'monotone':
+            isInterpMonotone = true;
+            break;
+        case 'step-after':
+            isInterpStepAfter = true;
+            break;
+        case 'step-before':
+            isInterpStepBefore = true;
+            break;
+    }
+
+    var isInterpBasisCardinalOrMonotone = isInterpBasis || isInterpCardinal || isInterpMonotone;
+
+    /* points */
+    var d = [],
+        si, sj;
+    for (var i = from; i <= to; i++) {
+        si = scenes[i];
+        if (!si.width && !si.height) {
+            continue;
+        }
+
+        for (var j = i + 1; j <= to; j++) {
+            sj = scenes[j];
+            if (!sj.width && !sj.height) {
+                break;
+            }
+        }
+
+        if ((i > from) && !isInterpStepAfter) {
+            i--;
+        }
+
+        if ((j <= to) && !isInterpStepBefore) {
+            j++;
+        }
+
+        var fun = isInterpBasisCardinalOrMonotone && (j - i > 2) ?
+            this.areaPathCurve :
+            this.areaPathStraight;
+
+        d.push(fun.call(this, scenes, i, j - 1, s));
+        i = j - 1;
+    }
+
+    if (!d.length) {
+        return elm;
+    }
+
+    var sop = stroke.opacity;
+    elm = this.expect(elm, "path", scenes, from, {
+        "shape-rendering": s.antialias ? null : "crispEdges",
+        "pointer-events": addEvents ? s.events : 'none',
+        "cursor": s.cursor,
+        "d": "M" + d.join("ZM") + "Z",
+        "fill": fill.color,
+        "fill-opacity": fill.opacity || null,
+        "stroke": stroke.color,
+        "stroke-opacity": sop || null,
+        "stroke-width": sop ? (s.lineWidth / this.scale) : null,
+        "stroke-linecap": s.lineCap,
+        "stroke-linejoin": s.lineJoin,
+        "stroke-miterlimit": s.strokeMiterLimit,
+        "stroke-dasharray": sop ? this.parseDasharray(s) : null
     });
 
-  if(s.svg) this.setAttributes(elm, s.svg);
-  if(s.css) this.setStyle(elm, s.css);
+    if (s.svg) this.setAttributes(elm, s.svg);
+    if (s.css) this.setStyle(elm, s.css);
 
-  return this.append(elm, scenes, from);
+    return this.append(elm, scenes, from);
 };
 
 pv.SvgScene.areaSegmentedSmart = function(elm, scenes) {
-  if(!elm){
-    elm = scenes.$g.appendChild(this.create("g"));
-  }
-  var gg = elm;
-  
-  // Create colored/no-events group
-  elm = gg.firstChild;
-  
-  var g1 = this.expect(elm, "g", scenes, 0, {'pointer-events': 'none'});
-  if (!g1.parentNode) {
-      gg.appendChild(g1);
-  }
-  
-  // Set current default parent
-  scenes.$g = g1;
-  elm = g1.firstChild;
-
-  var eventsSegments = scenes.mark.$hasHandlers ? [] : null;
-  
-  /* Visual only */
-  // Iterate *visible* scene segments
-  elm = this.eachLineAreaSegment(elm, scenes, function(elm, scenes, from, to){
-    
-    // Paths depend only on visibility
-    var segment = this.areaSegmentPaths(scenes, from, to);
-    var pathsT = segment.top;
-    var pathsB = segment.bottom;
-    var fromp = from;
-    
-    // Events segments also, depend only on visibility
-    if(eventsSegments){
-      eventsSegments.push(segment);
+    if (!elm) {
+        elm = scenes.$g.appendChild(this.create("g"));
     }
-    
-    // Split this visual scenes segment, 
-    // on key properties changes
-    var options = {
-        breakOnKeyChange: true,
-        from:  from,
-        to:    to
-      };
-    
-    return this.eachLineAreaSegment(elm, scenes, options, function(elm, scenes, from, to){
-      
-      var s1 = scenes[from];
-      
-      var fill   = s1.fillStyle;
-      var stroke = s1.strokeStyle;
-      
-      this.addFillStyleDefinition(scenes, fill);
-      this.addFillStyleDefinition(scenes, stroke);
-      
-      if(from === to){
-        // Visual and events
-        return this.lineAreaDotAlone(elm, scenes, from);
-      }
-      
-      var d = this.areaJoinPaths(pathsT, pathsB, from - fromp, to - fromp - 1); // N - 1 paths connect N points
+    var gg = elm;
 
-      var sop = stroke.opacity;
-      var attrs = {
-        'shape-rendering':   s1.antialias ? null : 'crispEdges',
-        'pointer-events':    'none',
-        'cursor':            s1.cursor,
-        'd':                 d,
-        'fill':              fill.color,
-        'fill-opacity':      fill.opacity || null,
-        'stroke':            stroke.color,
-        'stroke-opacity':    sop || null,
-        'stroke-width':      sop ? (s1.lineWidth / this.scale) : null,
-        'stroke-linecap':    s1.lineCap,
-        'stroke-linejoin':   s1.lineJoin,
-        'stroke-miterlimit': s1.strokeMiterLimit,
-        'stroke-dasharray':  sop ? this.parseDasharray(s1) : null
-      };
-      
-      elm = this.expect(elm, 'path', scenes, from, attrs, s1.css);
-
-      return this.append(elm, scenes, from);
-    });
-  });
-
-  // Remove any excess segments from previous render
-  this.removeSiblings(elm);
-
-  /* Events */
-  var g2;
-  if(eventsSegments){
     // Create colored/no-events group
-    elm = g1.nextSibling;
-    g2 = this.expect(elm, "g", scenes, 0);
-    if (!g2.parentNode) {
-        gg.appendChild(g2);
+    elm = gg.firstChild;
+
+    var g1 = this.expect(elm, "g", scenes, 0, {
+        'pointer-events': 'none'
+    });
+    if (!g1.parentNode) {
+        gg.appendChild(g1);
     }
 
     // Set current default parent
-    scenes.$g = g2;
-    elm = g2.firstChild;
+    scenes.$g = g1;
+    elm = g1.firstChild;
 
-    eventsSegments.forEach(function(segment){
-      var from  = segment.from;
-      var pathsT = segment.top;
-      var pathsB = segment.bottom;
-      var P = pathsT.length;
-      
-      var attrsBase = {
-          'shape-rendering': 'crispEdges',
-          'fill':            'rgb(127,127,127)',
-          'fill-opacity':    0.005, // VML requires this much to fire events
-          'stroke':          null
-        };
-      
-      pathsT.forEach(function(pathT, j){
-        var i = from + j;
-        var s = scenes[i];
-        
-        var events = s.events;
-        if(events && events !== "none"){
-          var pathB = pathsB[P - j - 1];
-          
-          var attrs = Object.create(attrsBase);
-          attrs['pointer-events'] = events;
-          attrs.cursor = s.cursor;
-          attrs.d = pathT.join("") + "L" + pathB[0].substr(1) + pathB[1] + "Z";
-          
-          elm = this.expect(elm, 'path', scenes, i, attrs);
-          
-          elm = this.append(elm, scenes, i);
+    var eventsSegments = scenes.mark.$hasHandlers ? [] : null;
+
+    /* Visual only */
+    // Iterate *visible* scene segments
+    elm = this.eachLineAreaSegment(elm, scenes, function(elm, scenes, from, to) {
+
+        // Paths depend only on visibility
+        var segment = this.areaSegmentPaths(scenes, from, to);
+        var pathsT = segment.top;
+        var pathsB = segment.bottom;
+        var fromp = from;
+
+        // Events segments also, depend only on visibility
+        if (eventsSegments) {
+            eventsSegments.push(segment);
         }
-      }, this); 
-    }, this);
 
-    // Remove any excess paths from previous render
+        // Split this visual scenes segment, 
+        // on key properties changes
+        var options = {
+            breakOnKeyChange: true,
+            from: from,
+            to: to
+        };
+
+        return this.eachLineAreaSegment(elm, scenes, options, function(elm, scenes, from, to) {
+
+            var s1 = scenes[from];
+
+            var fill = s1.fillStyle;
+            var stroke = s1.strokeStyle;
+
+            this.addFillStyleDefinition(scenes, fill);
+            this.addFillStyleDefinition(scenes, stroke);
+
+            if (from === to) {
+                // Visual and events
+                return this.lineAreaDotAlone(elm, scenes, from);
+            }
+
+            var d = this.areaJoinPaths(pathsT, pathsB, from - fromp, to - fromp - 1); // N - 1 paths connect N points
+
+            var sop = stroke.opacity;
+            var attrs = {
+                'shape-rendering': s1.antialias ? null : 'crispEdges',
+                'pointer-events': 'none',
+                'cursor': s1.cursor,
+                'd': d,
+                'fill': fill.color,
+                'fill-opacity': fill.opacity || null,
+                'stroke': stroke.color,
+                'stroke-opacity': sop || null,
+                'stroke-width': sop ? (s1.lineWidth / this.scale) : null,
+                'stroke-linecap': s1.lineCap,
+                'stroke-linejoin': s1.lineJoin,
+                'stroke-miterlimit': s1.strokeMiterLimit,
+                'stroke-dasharray': sop ? this.parseDasharray(s1) : null
+            };
+
+            elm = this.expect(elm, 'path', scenes, from, attrs, s1.css);
+
+            return this.append(elm, scenes, from);
+        });
+    });
+
+    // Remove any excess segments from previous render
     this.removeSiblings(elm);
-  }
-  
-  // Restore initial current parent
-  scenes.$g = gg;
 
-  return (g2 || g1).nextSibling;
+    /* Events */
+    var g2;
+    if (eventsSegments) {
+        // Create colored/no-events group
+        elm = g1.nextSibling;
+        g2 = this.expect(elm, "g", scenes, 0);
+        if (!g2.parentNode) {
+            gg.appendChild(g2);
+        }
+
+        // Set current default parent
+        scenes.$g = g2;
+        elm = g2.firstChild;
+
+        eventsSegments.forEach(function(segment) {
+            var from = segment.from;
+            var pathsT = segment.top;
+            var pathsB = segment.bottom;
+            var P = pathsT.length;
+
+            var attrsBase = {
+                'shape-rendering': 'crispEdges',
+                'fill': 'rgb(127,127,127)',
+                'fill-opacity': 0.005, // VML requires this much to fire events
+                'stroke': null
+            };
+
+            pathsT.forEach(function(pathT, j) {
+                var i = from + j;
+                var s = scenes[i];
+
+                var events = s.events;
+                if (events && events !== "none") {
+                    var pathB = pathsB[P - j - 1];
+
+                    var attrs = Object.create(attrsBase);
+                    attrs['pointer-events'] = events;
+                    attrs.cursor = s.cursor;
+                    attrs.d = pathT.join("") + "L" + pathB[0].substr(1) + pathB[1] + "Z";
+
+                    elm = this.expect(elm, 'path', scenes, i, attrs);
+
+                    elm = this.append(elm, scenes, i);
+                }
+            }, this);
+        }, this);
+
+        // Remove any excess paths from previous render
+        this.removeSiblings(elm);
+    }
+
+    // Restore initial current parent
+    scenes.$g = gg;
+
+    return (g2 || g1).nextSibling;
 };
 
 pv.SvgScene.areaSegmentPaths = function(scenes, from, to) {
-  return this.areaSegmentCurvePaths   (scenes, from, to) ||
-         this.areaSegmentStraightPaths(scenes, from, to);
+    return this.areaSegmentCurvePaths(scenes, from, to) ||
+        this.areaSegmentStraightPaths(scenes, from, to);
 };
 
-pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to){
-  var count = to - from + 1;
-  
-  // count > 0
-  
-  var s = scenes[from];
-  
-  // Interpolated paths for scenes 0 to count-1
-  var isBasis    = s.interpolate === "basis";
-  var isCardinal = !isBasis && s.interpolate === "cardinal";
-  if (isBasis || isCardinal || s.interpolate == "monotone") {
-    var pointsT = [];
-    var pointsB = [];
-    for (var i = 0 ; i < count ; i++) {
-      var si = scenes[from + i]; // from -> to
-      var sj = scenes[to   - i]; // to -> from
-      
-      pointsT.push(si);
-      pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
+pv.SvgScene.areaSegmentCurvePaths = function(scenes, from, to) {
+    var count = to - from + 1;
+
+    // count > 0
+
+    var s = scenes[from];
+
+    // Interpolated paths for scenes 0 to count-1
+    var isBasis = s.interpolate === "basis";
+    var isCardinal = !isBasis && s.interpolate === "cardinal";
+    if (isBasis || isCardinal || s.interpolate == "monotone") {
+        var pointsT = [];
+        var pointsB = [];
+        for (var i = 0; i < count; i++) {
+            var si = scenes[from + i]; // from -> to
+            var sj = scenes[to - i]; // to -> from
+
+            pointsT.push(si);
+            pointsB.push({
+                left: sj.left + sj.width,
+                top: sj.top + sj.height
+            });
+        }
+
+        var pathsT, pathsB;
+        if (isBasis) {
+            pathsT = this.curveBasisSegments(pointsT);
+            pathsB = this.curveBasisSegments(pointsB);
+        } else if (isCardinal) {
+            pathsT = this.curveCardinalSegments(pointsT, s.tension);
+            pathsB = this.curveCardinalSegments(pointsB, s.tension);
+        } else { // monotone
+            pathsT = this.curveMonotoneSegments(pointsT);
+            pathsB = this.curveMonotoneSegments(pointsB);
+        }
+
+        if (pathsT || pathsT.length) {
+            return {
+                from: from,
+                top: pathsT,
+                bottom: pathsB
+            };
+        }
     }
-    
-    var pathsT, pathsB;
-    if (isBasis) {
-      pathsT = this.curveBasisSegments(pointsT);
-      pathsB = this.curveBasisSegments(pointsB);
-    } else if (isCardinal) {
-      pathsT = this.curveCardinalSegments(pointsT, s.tension);
-      pathsB = this.curveCardinalSegments(pointsB, s.tension);
-    } else { // monotone
-      pathsT = this.curveMonotoneSegments(pointsT);
-      pathsB = this.curveMonotoneSegments(pointsB);
-    }
-    
-    if(pathsT || pathsT.length){
-      return {
-        from:   from,
-        top:    pathsT, 
-        bottom: pathsB
-      };
-    }
-  }
 };
 
 /** @private Computes the straight path for the range [i, j]. */
-pv.SvgScene.areaSegmentStraightPaths = function(scenes, i, j){
-  var pathsT = [];
-  var pathsB = [];
-  
-  for (var k = j, m = i ; i < k ; i++, j--) {
-    // i - top    line index, from i to j
-    // j - bottom line index, from j to i
-    var si = scenes[i],
-        sj = scenes[j],
-        pi = ['M' + si.left + "," + si.top],
-        pj = ['M' + (sj.left + sj.width) + "," + (sj.top + sj.height)];
+pv.SvgScene.areaSegmentStraightPaths = function(scenes, i, j) {
+    var pathsT = [];
+    var pathsB = [];
 
-    /* interpolate */
-    var sk = scenes[i + 1], // top    line
-        sl = scenes[j - 1]; // bottom line
-    switch(si.interpolate){
-      case 'step-before':
-        pi.push("V" + sk.top + "H" + sk.left);
-        //pj.push("H" + (sl.left + sl.width));
-        break;
-      
-      case 'step-after':
-        pi.push("H" + sk.left + "V" + sk.top);
-        //pj.push("V" + (sl.top + sl.height));
-        break;
-        
-     default: // linear
-       pi.push("L" +  sk.left + "," + sk.top);
+    for (var k = j, m = i; i < k; i++, j--) {
+        // i - top    line index, from i to j
+        // j - bottom line index, from j to i
+        var si = scenes[i],
+            sj = scenes[j],
+            pi = ['M' + si.left + "," + si.top],
+            pj = ['M' + (sj.left + sj.width) + "," + (sj.top + sj.height)];
+
+        /* interpolate */
+        var sk = scenes[i + 1], // top    line
+            sl = scenes[j - 1]; // bottom line
+        switch (si.interpolate) {
+            case 'step-before':
+                pi.push("V" + sk.top + "H" + sk.left);
+                //pj.push("H" + (sl.left + sl.width));
+                break;
+
+            case 'step-after':
+                pi.push("H" + sk.left + "V" + sk.top);
+                //pj.push("V" + (sl.top + sl.height));
+                break;
+
+            default: // linear
+                pi.push("L" + sk.left + "," + sk.top);
+        }
+
+        pj.push("L" + (sl.left + sl.width) + "," + (sl.top + sl.height));
+
+        pathsT.push(pi);
+        pathsB.push(pj);
     }
-    
-    pj.push("L" + (sl.left + sl.width) + "," + (sl.top + sl.height));
-    
-    pathsT.push(pi);
-    pathsB.push(pj);
-  }
-  
-  return {
-    from:   m,
-    top:    pathsT, 
-    bottom: pathsB
-  };
+
+    return {
+        from: m,
+        top: pathsT,
+        bottom: pathsB
+    };
 };
 
-pv.SvgScene.areaJoinPaths = function(pathsT, pathsB, i, j){
-  /*             
-   *  Scenes ->  0 ...             N-1
-   *  pathsT ->  0 1 2 3 4 5 6 7 8 9
-   *             9 8 7 6 5 4 3 2 1 0 <- pathsB
-   *                   |   |
-   *                   i<->j
-   *                   
-   */
-  var fullPathT = "";
-  var fullPathB = "";
-  
-  var N = pathsT.length;
-  
-  for (var k = i, l = N - 1 - j ; k <= j ; k++, l++) {
-    var pathT = pathsT[k];
-    var pathB = pathsB[l];
-    
-    var dT;
-    var dB;
-    if(k === i){
-      // Add moveTo and lineTo of first (top) part
-      dT = pathT.join("");
-      
-      // Join top and bottom parts with a line to the bottom right point
-      dB = "L" + pathB[0].substr(1) + pathB[1]; 
-    } else {
-      // Add lineTo only, on following parts
-      dT = pathT[1];
-      dB = pathB[1];
+pv.SvgScene.areaJoinPaths = function(pathsT, pathsB, i, j) {
+    /*             
+     *  Scenes ->  0 ...             N-1
+     *  pathsT ->  0 1 2 3 4 5 6 7 8 9
+     *             9 8 7 6 5 4 3 2 1 0 <- pathsB
+     *                   |   |
+     *                   i<->j
+     *
+     */
+    var fullPathT = "";
+    var fullPathB = "";
+
+    var N = pathsT.length;
+
+    for (var k = i, l = N - 1 - j; k <= j; k++, l++) {
+        var pathT = pathsT[k];
+        var pathB = pathsB[l];
+
+        var dT;
+        var dB;
+        if (k === i) {
+            // Add moveTo and lineTo of first (top) part
+            dT = pathT.join("");
+
+            // Join top and bottom parts with a line to the bottom right point
+            dB = "L" + pathB[0].substr(1) + pathB[1];
+        } else {
+            // Add lineTo only, on following parts
+            dT = pathT[1];
+            dB = pathB[1];
+        }
+
+        fullPathT += dT;
+        fullPathB += dB;
     }
-    
-    fullPathT += dT;
-    fullPathB += dB;
-  }
-  
-  // Close the path with Z
-  return fullPathT + fullPathB + "Z";
+
+    // Close the path with Z
+    return fullPathT + fullPathB + "Z";
 };
 
 pv.SvgScene.areaSegmentedFull = function(e, scenes) {
-  // Curve interpolations paths for each scene
-  var count = scenes.length;
-  
-  var pathsT, pathsB;
-  var result = this.areaSegmentCurvePaths(scenes, 0, count - 1);
-  if(result){
-    pathsT = result.top;
-    pathsB = result.bottom;
-  }
-  
-  // -------------
-  
-  var s = scenes[0];
-  for (var i = 0 ; i < count - 1 ; i++) {
-    var s1 = scenes[i];
-    var s2 = scenes[i + 1];
-    
-    /* visible */
-    if (!s1.visible || !s2.visible) {
-      continue;
-    }
-    
-    var fill   = s1.fillStyle;
-    var stroke = s1.strokeStyle;
-    if (!fill.opacity && !stroke.opacity) {
-      continue;
-    }
-    
-    var d;
-    if (pathsT) {
-      var pathT = pathsT[i].join(""),
-          pathB = "L" + pathsB[count - i - 2].join("").substr(1);
+    // Curve interpolations paths for each scene
+    var count = scenes.length;
 
-      d = pathT + pathB + "Z";
-    } else {
-      /* interpolate */
-      var si = s1;
-      var sj = s2;
-      switch (s1.interpolate) {
-        case "step-before": si = s2; break;
-        case "step-after":  sj = s1; break;
-      }
-
-      /* path */
-      d = "M" + s1.left + "," + si.top
-        + "L" + s2.left + "," + sj.top
-        + "L" + (s2.left + s2.width) + "," + (sj.top + sj.height)
-        + "L" + (s1.left + s1.width) + "," + (si.top + si.height)
-        + "Z";
+    var pathsT, pathsB;
+    var result = this.areaSegmentCurvePaths(scenes, 0, count - 1);
+    if (result) {
+        pathsT = result.top;
+        pathsB = result.bottom;
     }
 
-    var attrs = {
-        "shape-rendering": s1.antialias ? null : "crispEdges",
-        "pointer-events":  s1.events,
-        "cursor":          s1.cursor,
-        "d":               d,
-        "fill":            fill.color,
-        "fill-opacity":    fill.opacity || null,
-        "stroke":          stroke.color,
-        "stroke-opacity":  stroke.opacity || null,
-        "stroke-width":    stroke.opacity ? s1.lineWidth / this.scale : null
-      };
-    
-    e = this.expect(e, "path", scenes, i, attrs);
+    // -------------
 
-    if(s1.svg) this.setAttributes(e, s1.svg);
-    if(s1.css) this.setStyle(e, s1.css);
+    var s = scenes[0];
+    for (var i = 0; i < count - 1; i++) {
+        var s1 = scenes[i];
+        var s2 = scenes[i + 1];
 
-    e = this.append(e, scenes, i);
-  }
-  return e;
+        /* visible */
+        if (!s1.visible || !s2.visible) {
+            continue;
+        }
+
+        var fill = s1.fillStyle;
+        var stroke = s1.strokeStyle;
+        if (!fill.opacity && !stroke.opacity) {
+            continue;
+        }
+
+        var d;
+        if (pathsT) {
+            var pathT = pathsT[i].join(""),
+                pathB = "L" + pathsB[count - i - 2].join("").substr(1);
+
+            d = pathT + pathB + "Z";
+        } else {
+            /* interpolate */
+            var si = s1;
+            var sj = s2;
+            switch (s1.interpolate) {
+                case "step-before":
+                    si = s2;
+                    break;
+                case "step-after":
+                    sj = s1;
+                    break;
+            }
+
+            /* path */
+            d = "M" + s1.left + "," + si.top + "L" + s2.left + "," + sj.top + "L" + (s2.left + s2.width) + "," + (sj.top + sj.height) + "L" + (s1.left + s1.width) + "," + (si.top + si.height) + "Z";
+        }
+
+        var attrs = {
+            "shape-rendering": s1.antialias ? null : "crispEdges",
+            "pointer-events": s1.events,
+            "cursor": s1.cursor,
+            "d": d,
+            "fill": fill.color,
+            "fill-opacity": fill.opacity || null,
+            "stroke": stroke.color,
+            "stroke-opacity": stroke.opacity || null,
+            "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null
+        };
+
+        e = this.expect(e, "path", scenes, i, attrs);
+
+        if (s1.svg) this.setAttributes(e, s1.svg);
+        if (s1.css) this.setStyle(e, s1.css);
+
+        e = this.append(e, scenes, i);
+    }
+    return e;
 };
 
 
 /** @private Computes the straight path for the range [i, j]. */
-pv.SvgScene.areaPathStraight = function(scenes, i, j, s){
-  var pointsT = [];
-  var pointsB = [];
-  
-  for (var k = j ; i <= k ; i++, j--) {
-    // i - top    line index, from i to j
-    // j - bottom line index, from j to i
-    var si = scenes[i],
-        sj = scenes[j],
-        pi = si.left + "," + si.top,
-        pj = (sj.left + sj.width) + "," + (sj.top + sj.height);
+pv.SvgScene.areaPathStraight = function(scenes, i, j, s) {
+    var pointsT = [];
+    var pointsB = [];
 
-    /* interpolate */
-    if (i < k) {
-      var sk = scenes[i + 1], // top    line 
-          sl = scenes[j - 1]; // bottom line
-      switch(s.interpolate){
-        case 'step-before':
-          pi += "V" + sk.top;
-          pj += "H" + (sl.left + sl.width);
-          break;
-        case 'step-after':
-          pi += "H" + sk.left;
-          pj += "V" + (sl.top + sl.height);
-          break;
-      }
+    for (var k = j; i <= k; i++, j--) {
+        // i - top    line index, from i to j
+        // j - bottom line index, from j to i
+        var si = scenes[i],
+            sj = scenes[j],
+            pi = si.left + "," + si.top,
+            pj = (sj.left + sj.width) + "," + (sj.top + sj.height);
+
+        /* interpolate */
+        if (i < k) {
+            var sk = scenes[i + 1], // top    line 
+                sl = scenes[j - 1]; // bottom line
+            switch (s.interpolate) {
+                case 'step-before':
+                    pi += "V" + sk.top;
+                    pj += "H" + (sl.left + sl.width);
+                    break;
+                case 'step-after':
+                    pi += "H" + sk.left;
+                    pj += "V" + (sl.top + sl.height);
+                    break;
+            }
+        }
+
+        pointsT.push(pi);
+        pointsB.push(pj);
     }
 
-    pointsT.push(pi);
-    pointsB.push(pj);
-  }
-  
-  return pointsT.concat(pointsB).join("L");
+    return pointsT.concat(pointsB).join("L");
 };
 
 /** @private Computes the curved path for the range [i, j]. */
-pv.SvgScene.areaPathCurve = function(scenes, i, j, s){
-  var pointsT = [];
-  var pointsB = []; 
-  var pathT, pathB;
+pv.SvgScene.areaPathCurve = function(scenes, i, j, s) {
+    var pointsT = [];
+    var pointsB = [];
+    var pathT, pathB;
 
-  for (var k = j; i <= k; i++, j--) {
-    var sj = scenes[j];
-    pointsT.push(scenes[i]);
-    pointsB.push({left: sj.left + sj.width, top: sj.top + sj.height});
-  }
-  
-  switch(s.interpolate){
-    case 'basis':
-      pathT = this.curveBasis(pointsT);
-      pathB = this.curveBasis(pointsB);
-      break;
-      
-    case 'cardinal':
-      pathT = this.curveCardinal(pointsT, s.tension);
-      pathB = this.curveCardinal(pointsB, s.tension);
-      break;
-      
-    default: // monotone
-      pathT  = this.curveMonotone(pointsT);
-      pathB = this.curveMonotone(pointsB);
-  }
+    for (var k = j; i <= k; i++, j--) {
+        var sj = scenes[j];
+        pointsT.push(scenes[i]);
+        pointsB.push({
+            left: sj.left + sj.width,
+            top: sj.top + sj.height
+        });
+    }
 
-  return pointsT[0].left + "," + pointsT[0].top + 
-         pathT + 
-         "L" + 
-         pointsB[0].left + "," + pointsB[0].top + 
-         pathB;
+    switch (s.interpolate) {
+        case 'basis':
+            pathT = this.curveBasis(pointsT);
+            pathB = this.curveBasis(pointsB);
+            break;
+
+        case 'cardinal':
+            pathT = this.curveCardinal(pointsT, s.tension);
+            pathB = this.curveCardinal(pointsB, s.tension);
+            break;
+
+        default: // monotone
+            pathT = this.curveMonotone(pointsT);
+            pathB = this.curveMonotone(pointsB);
+    }
+
+    return pointsT[0].left + "," + pointsT[0].top +
+        pathT +
+        "L" +
+        pointsB[0].left + "," + pointsB[0].top +
+        pathB;
 };
 pv.SvgScene.minBarWidth = 1;
 pv.SvgScene.minBarHeight = 1;
 pv.SvgScene.minBarLineWidth = 0.2;
 
 pv.SvgScene.bar = function(scenes) {
-  var e = scenes.$g.firstChild;
+    var e = scenes.$g.firstChild;
 
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+    for (var i = 0; i < scenes.length; i++) {
+        var s = scenes[i];
 
-    /* visible */
-    if (!s.visible || Math.abs(s.width) <= 1E-10 || Math.abs(s.height) <= 1E-10) continue;
-    if(s.width < this.minBarWidth){
-        s.width = this.minBarWidth;
-    }
-    
-    if(s.height < this.minBarHeight){
-        s.height = this.minBarHeight;
-    }
-    
-    var fill = s.fillStyle, stroke = s.strokeStyle;
-    if (!fill.opacity && !stroke.opacity) continue;
-
-    this.addFillStyleDefinition(scenes, fill);
-    this.addFillStyleDefinition(scenes, stroke);
-    
-    var lineWidth;
-    if(stroke.opacity){
-        lineWidth = s.lineWidth;
-        if(lineWidth < 1e-10){
-            lineWidth = 0;
-        } else {
-            lineWidth = Math.max(this.minBarLineWidth, lineWidth / this.scale);
+        /* visible */
+        if (!s.visible || Math.abs(s.width) <= 1E-10 || Math.abs(s.height) <= 1E-10) continue;
+        if (s.width < this.minBarWidth) {
+            s.width = this.minBarWidth;
         }
-    } else {
-        lineWidth = null;
+
+        if (s.height < this.minBarHeight) {
+            s.height = this.minBarHeight;
+        }
+
+        var fill = s.fillStyle,
+            stroke = s.strokeStyle;
+        if (!fill.opacity && !stroke.opacity) continue;
+
+        this.addFillStyleDefinition(scenes, fill);
+        this.addFillStyleDefinition(scenes, stroke);
+
+        var lineWidth;
+        if (stroke.opacity) {
+            lineWidth = s.lineWidth;
+            if (lineWidth < 1e-10) {
+                lineWidth = 0;
+            } else {
+                lineWidth = Math.max(this.minBarLineWidth, lineWidth / this.scale);
+            }
+        } else {
+            lineWidth = null;
+        }
+
+        e = this.expect(e, "rect", scenes, i, {
+            "shape-rendering": s.antialias ? null : "crispEdges",
+            "pointer-events": s.events,
+            "cursor": s.cursor,
+            "x": s.left,
+            "y": s.top,
+            "width": Math.max(1E-10, s.width),
+            "height": Math.max(1E-10, s.height),
+            "fill": fill.color,
+            "fill-opacity": fill.opacity || null,
+            "stroke": stroke.color,
+            "stroke-opacity": stroke.opacity || null,
+            "stroke-width": lineWidth,
+            "stroke-linecap": s.lineCap,
+            "stroke-dasharray": stroke.opacity ? this.parseDasharray(s) : null
+        });
+
+        if (s.svg) this.setAttributes(e, s.svg);
+        if (s.css) this.setStyle(e, s.css);
+
+        e = this.append(e, scenes, i);
     }
-    
-    e = this.expect(e, "rect", scenes, i, {
-        "shape-rendering": s.antialias ? null : "crispEdges",
-        "pointer-events": s.events,
-        "cursor": s.cursor,
-        "x": s.left,
-        "y": s.top,
-        "width": Math.max(1E-10, s.width),
-        "height": Math.max(1E-10, s.height),
-        "fill": fill.color,
-        "fill-opacity": fill.opacity || null,
-        "stroke": stroke.color,
-        "stroke-opacity": stroke.opacity || null,
-        "stroke-width": lineWidth,
-        "stroke-linecap":    s.lineCap,
-        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
-      });
-
-    if(s.svg) this.setAttributes(e, s.svg);
-    if(s.css) this.setStyle(e, s.css);
-
-    e = this.append(e, scenes, i);
-  }
-  return e;
+    return e;
 };
 pv.SvgScene.dot = function(scenes) {
-  var e = scenes.$g.firstChild;
-  
-  for(var i = 0, L = scenes.length ; i < L ; i++) {
-    var s = scenes[i];
+    var e = scenes.$g.firstChild;
 
-    /* visible */
-    if(!s.visible) continue;
+    for (var i = 0, L = scenes.length; i < L; i++) {
+        var s = scenes[i];
 
-    var fill     = s.fillStyle, 
-        fillOp   = fill.opacity,
-        stroke   = s.strokeStyle,
-        strokeOp = stroke.opacity;
+        /* visible */
+        if (!s.visible) continue;
 
-    if(!fillOp && !strokeOp) continue;
+        var fill = s.fillStyle,
+            fillOp = fill.opacity,
+            stroke = s.strokeStyle,
+            strokeOp = stroke.opacity;
 
-    this.addFillStyleDefinition(scenes, fill  );
-    this.addFillStyleDefinition(scenes, stroke);
+        if (!fillOp && !strokeOp) continue;
 
-    var svg = {
-      "shape-rendering":  s.antialias ? null : "crispEdges",
-      "pointer-events":   s.events,
-      "cursor":           s.cursor,
-      "fill":             fill.color,
-      "fill-opacity":     fillOp   || null,
-      "stroke":           stroke.color,
-      "stroke-opacity":   strokeOp || null,
-      "stroke-width":     strokeOp ? (s.lineWidth / this.scale) : null,
-      "stroke-linecap":   s.lineCap,
-      "stroke-dasharray": strokeOp ? this.parseDasharray(s) : null
-    };
+        this.addFillStyleDefinition(scenes, fill);
+        this.addFillStyleDefinition(scenes, stroke);
 
-    // Use <circle> for circles, <path> for everything else.
-    var shape = s.shape || 'circle';
-    var ar = s.aspectRatio;
-    var sa = s.shapeAngle;
-    var t;
-    if(shape === 'circle') {
-      if(ar === 1) {
-        svg.cx = s.left;
-        svg.cy = s.top;
-        svg.r  = s.shapeRadius;
-      } else {
-        shape = 'ellipse';
+        var svg = {
+            "shape-rendering": s.antialias ? null : "crispEdges",
+            "pointer-events": s.events,
+            "cursor": s.cursor,
+            "fill": fill.color,
+            "fill-opacity": fillOp || null,
+            "stroke": stroke.color,
+            "stroke-opacity": strokeOp || null,
+            "stroke-width": strokeOp ? (s.lineWidth / this.scale) : null,
+            "stroke-linecap": s.lineCap,
+            "stroke-dasharray": strokeOp ? this.parseDasharray(s) : null
+        };
 
-        svg.cx = svg.cy = 0;
-        
-        t = 'translate(' + s.left + ',' + s.top + ') ';
-        if(sa) { t += 'rotate(' + pv.degrees(sa) + ') '; }
+        // Use <circle> for circles, <path> for everything else.
+        var shape = s.shape || 'circle';
+        var ar = s.aspectRatio;
+        var sa = s.shapeAngle;
+        var t;
+        if (shape === 'circle') {
+            if (ar === 1) {
+                svg.cx = s.left;
+                svg.cy = s.top;
+                svg.r = s.shapeRadius;
+            } else {
+                shape = 'ellipse';
 
-        svg.rx = s._width  / 2;
-        svg.ry = s._height / 2;
-      }
-    } else {
-      svg.d = this.renderSymbol(shape, s);
-      shape = 'path';
+                svg.cx = svg.cy = 0;
 
-      t = 'translate(' + s.left + ',' + s.top + ') ';
+                t = 'translate(' + s.left + ',' + s.top + ') ';
+                if (sa) {
+                    t += 'rotate(' + pv.degrees(sa) + ') ';
+                }
 
-      if(sa) { t += 'rotate(' + pv.degrees(sa) + ') '; }
+                svg.rx = s._width / 2;
+                svg.ry = s._height / 2;
+            }
+        } else {
+            svg.d = this.renderSymbol(shape, s);
+            shape = 'path';
 
-      if(ar !== 1) {
-        var sy =  1 / Math.sqrt(ar);
-        var sx = ar * sy;
+            t = 'translate(' + s.left + ',' + s.top + ') ';
 
-        t += 'scale(' + sx + ',' + sy + ')';
-      }
+            if (sa) {
+                t += 'rotate(' + pv.degrees(sa) + ') ';
+            }
+
+            if (ar !== 1) {
+                var sy = 1 / Math.sqrt(ar);
+                var sx = ar * sy;
+
+                t += 'scale(' + sx + ',' + sy + ')';
+            }
+        }
+
+        if (t) {
+            svg.transform = t;
+        }
+
+        e = this.expect(e, shape, scenes, i, svg);
+
+        if (s.svg) {
+            this.setAttributes(e, s.svg);
+        }
+        if (s.css) {
+            this.setStyle(e, s.css);
+        }
+
+        e = this.append(e, scenes, i);
     }
 
-    if(t) { svg.transform = t; }
-
-    e = this.expect(e, shape, scenes, i, svg);
-
-    if(s.svg) { this.setAttributes(e, s.svg); }
-    if(s.css) { this.setStyle     (e, s.css); }
-
-    e = this.append(e, scenes, i);
-  }
-
-  return e;
+    return e;
 };
 
 (function(S) {
-  var _renderersBySymName = {};
+    var _renderersBySymName = {};
 
-  // NOTE: circle has special render treatment
-  // Only path-generating shapes are registered this way
+    // NOTE: circle has special render treatment
+    // Only path-generating shapes are registered this way
 
-  S.registerSymbol = function(symName, funRenderer) {
-    _renderersBySymName[symName] = funRenderer;
-    return S;
-  };
+    S.registerSymbol = function(symName, funRenderer) {
+        _renderersBySymName[symName] = funRenderer;
+        return S;
+    };
 
-  S.renderSymbol = function(symName, instance) {
-    return _renderersBySymName[symName].call(S, instance, symName);
-  };
+    S.renderSymbol = function(symName, instance) {
+        return _renderersBySymName[symName].call(S, instance, symName);
+    };
 
-  S.hasSymbol = function(symName) {
-    return _renderersBySymName.hasOwnProperty(symName);
-  };
+    S.hasSymbol = function(symName) {
+        return _renderersBySymName.hasOwnProperty(symName);
+    };
 
-  S.symbols = function() {
-    return pv.keys(_renderersBySymName);
-  };
+    S.symbols = function() {
+        return pv.keys(_renderersBySymName);
+    };
 
-  var C1 = 2 / Math.sqrt(3);
+    var C1 = 2 / Math.sqrt(3);
 
-  S
-  .registerSymbol('circle', function(s) {
-    throw new Error("Not implemented as a symbol");
-  })
-  .registerSymbol('cross', function(s) {
-    var rp = s.shapeRadius,
-        rn = -rp;
+    S
+        .registerSymbol('circle', function(s) {
+            throw new Error("Not implemented as a symbol");
+        })
+        .registerSymbol('cross', function(s) {
+            var rp = s.shapeRadius,
+                rn = -rp;
 
-    return "M" + rn + "," + rn + "L" + rp + "," + rp + 
-           "M" + rp + "," + rn + "L" + rn + "," + rp;
-  })
-  .registerSymbol('triangle', function(s) {
-    var hp = s.shapeRadius,
-        wp = hp * C1,
-        hn = -hp,
-        wn = -wp;
+            return "M" + rn + "," + rn + "L" + rp + "," + rp +
+                "M" + rp + "," + rn + "L" + rn + "," + rp;
+        })
+        .registerSymbol('triangle', function(s) {
+            var hp = s.shapeRadius,
+                wp = hp * C1,
+                hn = -hp,
+                wn = -wp;
 
-    return "M0," + hp + "L" + wp + "," + hn + " " + wn + "," + hn + "Z";
-  })
-  .registerSymbol('diamond', function(s) {
-    var rp = s.shapeRadius * Math.SQRT2,
-        rn = -rp;
+            return "M0," + hp + "L" + wp + "," + hn + " " + wn + "," + hn + "Z";
+        })
+        .registerSymbol('diamond', function(s) {
+            var rp = s.shapeRadius * Math.SQRT2,
+                rn = -rp;
 
-    return "M0,"      + rn   + 
-           "L" + rp   + ",0" + 
-           " " + "0," + rp   + 
-           " " + rn   + ",0" + 
-           "Z";
-  })
-  .registerSymbol('square', function(s) {
-    var rp = s.shapeRadius,
-        rn = -rp;
+            return "M0," + rn +
+                "L" + rp + ",0" +
+                " " + "0," + rp +
+                " " + rn + ",0" +
+                "Z";
+        })
+        .registerSymbol('square', function(s) {
+            var rp = s.shapeRadius,
+                rn = -rp;
 
-    return "M" + rn + "," + rn + 
-           "L" + rp + "," + rn +
-           " " + rp + "," + rp +
-           " " + rn + "," + rp +
-           "Z";
-  })
-  .registerSymbol('tick', function(s) {
-    return "M0,0L0," + -s.shapeSize;
-  })
-  .registerSymbol('bar', function(s) {
-    var z2 = s.shapeSize / 2;
-    return "M0," + z2 + "L0," + -z2;
-  });
+            return "M" + rn + "," + rn +
+                "L" + rp + "," + rn +
+                " " + rp + "," + rp +
+                " " + rn + "," + rp +
+                "Z";
+        })
+        .registerSymbol('tick', function(s) {
+            return "M0,0L0," + -s.shapeSize;
+        })
+        .registerSymbol('bar', function(s) {
+            var z2 = s.shapeSize / 2;
+            return "M0," + z2 + "L0," + -z2;
+        });
 
 }(pv.SvgScene));
 pv.SvgScene.image = function(scenes) {
-  var e = scenes.$g.firstChild;
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+    var e = scenes.$g.firstChild;
+    for (var i = 0; i < scenes.length; i++) {
+        var s = scenes[i];
 
-    /* visible */
-    if (!s.visible) continue;
+        /* visible */
+        if (!s.visible) continue;
 
-    /* fill */
-    e = this.fill(e, scenes, i);
+        /* fill */
+        e = this.fill(e, scenes, i);
 
-    /* image */
-    if (s.image) {
-      e = this.expect(e, "foreignObject", scenes, i, {
-          "cursor": s.cursor,
-          "x": s.left,
-          "y": s.top,
-          "width": s.width,
-          "height": s.height
-        });
-      if(s.svg) this.setAttributes(e, s.svg);
-      if(s.css) this.setStyle(e, s.css);
-      var c = e.firstChild || e.appendChild(document.createElementNS(this.xhtml, "canvas"));
-      c.$scene = {scenes:scenes, index:i};
-      c.style.width = s.width;
-      c.style.height = s.height;
-      c.width = s.imageWidth;
-      c.height = s.imageHeight;
-      c.getContext("2d").putImageData(s.image, 0, 0);
-    } else {
-      e = this.expect(e, "image", scenes, i, {
-          "preserveAspectRatio": "none",
-          "cursor": s.cursor,
-          "x": s.left,
-          "y": s.top,
-          "width": s.width,
-          "height": s.height
-        });
+        /* image */
+        if (s.image) {
+            e = this.expect(e, "foreignObject", scenes, i, {
+                "cursor": s.cursor,
+                "x": s.left,
+                "y": s.top,
+                "width": s.width,
+                "height": s.height
+            });
+            if (s.svg) this.setAttributes(e, s.svg);
+            if (s.css) this.setStyle(e, s.css);
+            var c = e.firstChild || e.appendChild(document.createElementNS(this.xhtml, "canvas"));
+            c.$scene = {
+                scenes: scenes,
+                index: i
+            };
+            c.style.width = s.width;
+            c.style.height = s.height;
+            c.width = s.imageWidth;
+            c.height = s.imageHeight;
+            c.getContext("2d").putImageData(s.image, 0, 0);
+        } else {
+            e = this.expect(e, "image", scenes, i, {
+                "preserveAspectRatio": "none",
+                "cursor": s.cursor,
+                "x": s.left,
+                "y": s.top,
+                "width": s.width,
+                "height": s.height
+            });
 
-      if(s.svg) this.setAttributes(e, s.svg);
-      if(s.css) this.setStyle(e, s.css);
+            if (s.svg) this.setAttributes(e, s.svg);
+            if (s.css) this.setStyle(e, s.css);
 
-      e.setAttributeNS(this.xlink, "xlink:href", s.url);
+            e.setAttributeNS(this.xlink, "xlink:href", s.url);
+        }
+        e = this.append(e, scenes, i);
+
+        /* stroke */
+        e = this.stroke(e, scenes, i);
     }
-    e = this.append(e, scenes, i);
-
-    /* stroke */
-    e = this.stroke(e, scenes, i);
-  }
-  return e;
+    return e;
 };
 pv.SvgScene.label = function(scenes) {
-  var e = scenes.$g.firstChild;
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+    var e = scenes.$g.firstChild;
+    for (var i = 0; i < scenes.length; i++) {
+        var s = scenes[i];
 
-    /* visible */
-    if (!s.visible) continue;
-    var fill = s.textStyle;
-    if (!fill.opacity || !s.text) continue;
+        /* visible */
+        if (!s.visible) continue;
+        var fill = s.textStyle;
+        if (!fill.opacity || !s.text) continue;
 
-    /* text-baseline, text-align */
-    var x = 0, y = 0, dy = 0, anchor = "start";
-    switch(s.textBaseline) {
-      case "middle": dy = ".35em"; break;
-      case "top":    dy = ".71em"; y = s.textMargin; break;
-      case "bottom":  y = "-" + s.textMargin; break;
+        /* text-baseline, text-align */
+        var x = 0,
+            y = 0,
+            dy = 0,
+            anchor = "start";
+        switch (s.textBaseline) {
+            case "middle":
+                dy = ".35em";
+                break;
+            case "top":
+                dy = ".71em";
+                y = s.textMargin;
+                break;
+            case "bottom":
+                y = "-" + s.textMargin;
+                break;
+        }
+
+        switch (s.textAlign) {
+            case "right":
+                anchor = "end";
+                x = "-" + s.textMargin;
+                break;
+            case "center":
+                anchor = "middle";
+                break;
+            case "left":
+                x = s.textMargin;
+                break;
+        }
+
+        e = this.expect(e, "text", scenes, i, {
+            "pointer-events": s.events,
+            "cursor": s.cursor,
+            "x": x,
+            "y": y,
+            "dy": dy,
+            "transform": "translate(" + s.left + "," + s.top + ")" + (s.textAngle ? " rotate(" + 180 * s.textAngle / Math.PI + ")" : "") + (this.scale != 1 ? " scale(" + 1 / this.scale + ")" : ""),
+            "fill": fill.color,
+            "fill-opacity": fill.opacity || null,
+            "text-anchor": anchor
+        }, {
+            "font": s.font,
+            "text-shadow": s.textShadow,
+            "text-decoration": s.textDecoration
+        });
+
+        if (s.svg) this.setAttributes(e, s.svg);
+        if (s.css) this.setStyle(e, s.css);
+
+        if (e.firstChild) {
+            e.firstChild.nodeValue = s.text;
+        } else {
+            e.appendChild(document.createTextNode(s.text));
+        }
+
+        e = this.append(e, scenes, i);
     }
-
-    switch(s.textAlign) {
-      case "right":  anchor = "end"; x = "-" + s.textMargin; break;
-      case "center": anchor = "middle"; break;
-      case "left":   x = s.textMargin; break;
-    }
-
-    e = this.expect(e, "text", scenes, i, {
-        "pointer-events": s.events,
-        "cursor": s.cursor,
-        "x":  x,
-        "y":  y,
-        "dy": dy,
-        "transform": "translate(" + s.left + "," + s.top + ")"
-            + (s.textAngle ? " rotate(" + 180 * s.textAngle / Math.PI + ")" : "")
-            + (this.scale != 1 ? " scale(" + 1 / this.scale + ")" : ""),
-        "fill": fill.color,
-        "fill-opacity": fill.opacity || null,
-        "text-anchor": anchor
-      }, {
-        "font": s.font,
-        "text-shadow": s.textShadow,
-        "text-decoration": s.textDecoration
-      });
-
-    if(s.svg) this.setAttributes(e, s.svg);
-    if(s.css) this.setStyle(e, s.css);
-
-    if(e.firstChild) { 
-      e.firstChild.nodeValue = s.text; 
-    } else { 
-      e.appendChild(document.createTextNode(s.text));
-    }
-
-    e = this.append(e, scenes, i);
-  }
-  return e;
+    return e;
 };
 /* not segmented
  * <g> <-> scenes.$g
@@ -9422,352 +9933,378 @@ pv.SvgScene.label = function(scenes) {
  * </g>
  */
 pv.SvgScene.line = function(scenes) {
-  var e = scenes.$g.firstChild;
-  
-  var count = scenes.length;
-  if (!count){
-    return e;
-  }
-  
-  var s = scenes[0];
-  
-  /* smart segmentation */
-  if (s.segmented === 'smart') {
-    return this.lineSegmentedSmart(e, scenes);
-  }
-  
-  if (count < 2) {
-    return e;
-  }
-  
-  /* full segmentation */
-  if (s.segmented) {
-    return this.lineSegmentedFull(e, scenes);
-  }
+    var e = scenes.$g.firstChild;
 
-  return this.lineFixed(e, scenes);
+    var count = scenes.length;
+    if (!count) {
+        return e;
+    }
+
+    var s = scenes[0];
+
+    /* smart segmentation */
+    if (s.segmented === 'smart') {
+        return this.lineSegmentedSmart(e, scenes);
+    }
+
+    if (count < 2) {
+        return e;
+    }
+
+    /* full segmentation */
+    if (s.segmented) {
+        return this.lineSegmentedFull(e, scenes);
+    }
+
+    return this.lineFixed(e, scenes);
 };
 
 pv.SvgScene.lineFixed = function(elm, scenes) {
-  
-  var count = scenes.length; 
-  
-  // count > 0
-  
-  if(count === 1){
-    return this.lineAreaDotAlone(elm, scenes, 0);
-  }
-  
-  var s = scenes[0];
-  if (!s.visible) {
-    return elm;
-  }
-  
-  /* fill & stroke */
-  
-  var fill   = s.fillStyle;
-  var stroke = s.strokeStyle;
-  
-  if (!fill.opacity && !stroke.opacity) {
-    return elm;
-  }
-  
-  this.addFillStyleDefinition(scenes, fill);
-  this.addFillStyleDefinition(scenes, stroke);
-  
-  /* points */
-  var d = "M" + s.left + "," + s.top;
-  
-  var curveInterpolated = (count > 2);
-  if(curveInterpolated) {
-    switch(s.interpolate) {
-      case "basis":    d += this.curveBasis   (scenes); break;
-      case "cardinal": d += this.curveCardinal(scenes, s.tension); break;
-      case "monotone": d += this.curveMonotone(scenes); break;
-      default: curveInterpolated = false;
-    }
-  }
-  
-  if(!curveInterpolated){
-    for (var i = 1 ; i < count ; i++) {
-      d += this.lineSegmentPath(scenes[i - 1], scenes[i]);
-    }
-  }
-  
-  var sop = stroke.opacity;
-  var attrs = {
-    'shape-rendering':   s.antialias ? null : 'crispEdges',
-    'pointer-events':    s.events,
-    'cursor':            s.cursor,
-    'd':                 d,
-    'fill':              fill.color,
-    'fill-opacity':      fill.opacity || null,
-    'stroke':            stroke.color,
-    'stroke-opacity':    sop || null,
-    'stroke-width':      sop ? (s.lineWidth / this.scale) : null,
-    'stroke-linecap':    s.lineCap,
-    'stroke-linejoin':   s.lineJoin,
-    'stroke-miterlimit': s.strokeMiterLimit,
-    'stroke-dasharray':  sop ? this.parseDasharray(s) : null
-  };
-  
-  elm = this.expect(elm, 'path', scenes, 0, attrs, s.css);
 
-  if(s.svg) this.setAttributes(elm, s.svg);
-  
-  return this.append(elm, scenes, 0);
+    var count = scenes.length;
+
+    // count > 0
+
+    if (count === 1) {
+        return this.lineAreaDotAlone(elm, scenes, 0);
+    }
+
+    var s = scenes[0];
+    if (!s.visible) {
+        return elm;
+    }
+
+    /* fill & stroke */
+
+    var fill = s.fillStyle;
+    var stroke = s.strokeStyle;
+
+    if (!fill.opacity && !stroke.opacity) {
+        return elm;
+    }
+
+    this.addFillStyleDefinition(scenes, fill);
+    this.addFillStyleDefinition(scenes, stroke);
+
+    /* points */
+    var d = "M" + s.left + "," + s.top;
+
+    var curveInterpolated = (count > 2);
+    if (curveInterpolated) {
+        switch (s.interpolate) {
+            case "basis":
+                d += this.curveBasis(scenes);
+                break;
+            case "cardinal":
+                d += this.curveCardinal(scenes, s.tension);
+                break;
+            case "monotone":
+                d += this.curveMonotone(scenes);
+                break;
+            default:
+                curveInterpolated = false;
+        }
+    }
+
+    if (!curveInterpolated) {
+        for (var i = 1; i < count; i++) {
+            d += this.lineSegmentPath(scenes[i - 1], scenes[i]);
+        }
+    }
+
+    var sop = stroke.opacity;
+    var attrs = {
+        'shape-rendering': s.antialias ? null : 'crispEdges',
+        'pointer-events': s.events,
+        'cursor': s.cursor,
+        'd': d,
+        'fill': fill.color,
+        'fill-opacity': fill.opacity || null,
+        'stroke': stroke.color,
+        'stroke-opacity': sop || null,
+        'stroke-width': sop ? (s.lineWidth / this.scale) : null,
+        'stroke-linecap': s.lineCap,
+        'stroke-linejoin': s.lineJoin,
+        'stroke-miterlimit': s.strokeMiterLimit,
+        'stroke-dasharray': sop ? this.parseDasharray(s) : null
+    };
+
+    elm = this.expect(elm, 'path', scenes, 0, attrs, s.css);
+
+    if (s.svg) this.setAttributes(elm, s.svg);
+
+    return this.append(elm, scenes, 0);
 };
 
 pv.SvgScene.lineSegmentedSmart = function(elm, scenes) {
-  /*
-   * <g> <-> scenes.$g <-> elm --> gg
-   *    <g> colored, no events
-   *        <path /> segment 0
-   *        <path /> segment 1
-   *        ...
-   *    </g>
-   *    <g> transparent, fully segmented, events (wen existent)
-   *        <path /> instance 0
-   *        <path /> instance 1
-   *        ...
-   *    </g>
-   * </g>
-   */
+    /*
+     * <g> <-> scenes.$g <-> elm --> gg
+     *    <g> colored, no events
+     *        <path /> segment 0
+     *        <path /> segment 1
+     *        ...
+     *    </g>
+     *    <g> transparent, fully segmented, events (wen existent)
+     *        <path /> instance 0
+     *        <path /> instance 1
+     *        ...
+     *    </g>
+     * </g>
+     */
 
-  if(!elm){
-    elm = scenes.$g.appendChild(this.create("g"));
-  }
-  
-  var gg = elm;
-
-  // Create colored/no-events group
-  elm = gg.firstChild;
-  
-  var g1 = this.expect(elm, "g", scenes, 0, {'pointer-events': 'none'});
-  if (!g1.parentNode) {
-      gg.appendChild(g1);
-  }
-
-  // Set current default parent
-  scenes.$g = g1;
-  elm = g1.firstChild;
-  
-  var eventsSegments = scenes.mark.$hasHandlers ? [] : null;
-  
-  /* Visual only */
-  // Iterate *visible* scene segments
-  elm = this.eachLineAreaSegment(elm, scenes, function(elm, scenes, from, to){
-    
-    // Paths depend only on visibility
-    var paths = this.lineSegmentPaths(scenes, from, to);
-    var fromp = from;
-    
-    // Events segments also, depend only on visibility
-    if(eventsSegments){
-      eventsSegments.push({
-        from:  from,
-        paths: paths
-      });
+    if (!elm) {
+        elm = scenes.$g.appendChild(this.create("g"));
     }
-    
-    // Split this visual scenes segment, 
-    // on key properties changes
-    var options = {
-        breakOnKeyChange: true,
-        from:  from,
-        to:    to
-      };
-    
-    return this.eachLineAreaSegment(elm, scenes, options, function(elm, scenes, from, to){
-      
-      var s1 = scenes[from];
-      
-      var fill = s1.fillStyle;
-      this.addFillStyleDefinition(scenes, fill);
-      
-      var stroke = s1.strokeStyle;
-      this.addFillStyleDefinition(scenes, stroke);
-      
-      if(from === to){
-        // Visual and events
-        return this.lineAreaDotAlone(elm, scenes, from);
-      }
-      
-      var d = this.lineJoinPaths(paths, from - fromp, to - fromp - 1); // N - 1 paths connect N points
-      
-      var sop = stroke.opacity;
-      var attrs = {
-        'shape-rendering':   s1.antialias ? null : 'crispEdges',
-        'pointer-events':    'none',
-        'cursor':            s1.cursor,
-        'd':                 d,
-        'fill':              fill.color,
-        'fill-opacity':      fill.opacity || null,
-        'stroke':            stroke.color,
-        'stroke-opacity':    sop || null,
-        'stroke-width':      sop ? (s1.lineWidth / this.scale) : null,
-        'stroke-linecap':    s1.lineCap,
-        'stroke-linejoin':   s1.lineJoin,
-        'stroke-miterlimit': s1.strokeMiterLimit,
-        'stroke-dasharray':  sop ? this.parseDasharray(s1) : null
-      };
-      
-      elm = this.expect(elm, 'path', scenes, from, attrs, s1.css);
 
-      return this.append(elm, scenes, from);
-    });
-  });
+    var gg = elm;
 
-  // Remove any excess segments from previous render
-  this.removeSiblings(elm);
-  
-  /* Events */
-  var g2;
-  if(eventsSegments){
     // Create colored/no-events group
-    elm = g1.nextSibling;
-    g2 = this.expect(elm, "g", scenes, 0);
-    if (!g2.parentNode) {
-        gg.appendChild(g2);
+    elm = gg.firstChild;
+
+    var g1 = this.expect(elm, "g", scenes, 0, {
+        'pointer-events': 'none'
+    });
+    if (!g1.parentNode) {
+        gg.appendChild(g1);
     }
-   
+
     // Set current default parent
-    scenes.$g = g2;
-    elm = g2.firstChild;
-    
-    eventsSegments.forEach(function(segment){
-      var from  = segment.from;
-      var paths = segment.paths;
-      
-      var attrsBase = {
-          'shape-rendering':   'crispEdges',
-          'fill':              'rgb(127,127,127)',
-          'fill-opacity':      0.005, // VML requires this much to fire events
-          'stroke':            'rgb(127,127,127)',
-          'stroke-opacity':    0.005, // VML idem
-          'stroke-width':      10,
-          'stroke-dasharray':  null
-        };
-      
-      paths.forEach(function(path, j){
-        var i = from + j;
-        var s = scenes[i];
-        
-        var events = s.events;
-        if(events && events !== 'none'){
-          var attrs = Object.create(attrsBase);
-          attrs['pointer-events'] = events;
-          attrs.cursor = s.cursor;
-          attrs.d = path.join('');
-          
-          elm = this.expect(elm, 'path', scenes, i, attrs);
-          
-          elm = this.append(elm, scenes, i);
+    scenes.$g = g1;
+    elm = g1.firstChild;
+
+    var eventsSegments = scenes.mark.$hasHandlers ? [] : null;
+
+    /* Visual only */
+    // Iterate *visible* scene segments
+    elm = this.eachLineAreaSegment(elm, scenes, function(elm, scenes, from, to) {
+
+        // Paths depend only on visibility
+        var paths = this.lineSegmentPaths(scenes, from, to);
+        var fromp = from;
+
+        // Events segments also, depend only on visibility
+        if (eventsSegments) {
+            eventsSegments.push({
+                from: from,
+                paths: paths
+            });
         }
-      }, this); 
-    }, this);
 
-    // Remove any excess paths from previous render
+        // Split this visual scenes segment, 
+        // on key properties changes
+        var options = {
+            breakOnKeyChange: true,
+            from: from,
+            to: to
+        };
+
+        return this.eachLineAreaSegment(elm, scenes, options, function(elm, scenes, from, to) {
+
+            var s1 = scenes[from];
+
+            var fill = s1.fillStyle;
+            this.addFillStyleDefinition(scenes, fill);
+
+            var stroke = s1.strokeStyle;
+            this.addFillStyleDefinition(scenes, stroke);
+
+            if (from === to) {
+                // Visual and events
+                return this.lineAreaDotAlone(elm, scenes, from);
+            }
+
+            var d = this.lineJoinPaths(paths, from - fromp, to - fromp - 1); // N - 1 paths connect N points
+
+            var sop = stroke.opacity;
+            var attrs = {
+                'shape-rendering': s1.antialias ? null : 'crispEdges',
+                'pointer-events': 'none',
+                'cursor': s1.cursor,
+                'd': d,
+                'fill': fill.color,
+                'fill-opacity': fill.opacity || null,
+                'stroke': stroke.color,
+                'stroke-opacity': sop || null,
+                'stroke-width': sop ? (s1.lineWidth / this.scale) : null,
+                'stroke-linecap': s1.lineCap,
+                'stroke-linejoin': s1.lineJoin,
+                'stroke-miterlimit': s1.strokeMiterLimit,
+                'stroke-dasharray': sop ? this.parseDasharray(s1) : null
+            };
+
+            elm = this.expect(elm, 'path', scenes, from, attrs, s1.css);
+
+            return this.append(elm, scenes, from);
+        });
+    });
+
+    // Remove any excess segments from previous render
     this.removeSiblings(elm);
-  }
 
-  // Restore initial current parent
-  scenes.$g = gg;
-  
-  return (g2 || g1).nextSibling;
+    /* Events */
+    var g2;
+    if (eventsSegments) {
+        // Create colored/no-events group
+        elm = g1.nextSibling;
+        g2 = this.expect(elm, "g", scenes, 0);
+        if (!g2.parentNode) {
+            gg.appendChild(g2);
+        }
+
+        // Set current default parent
+        scenes.$g = g2;
+        elm = g2.firstChild;
+
+        eventsSegments.forEach(function(segment) {
+            var from = segment.from;
+            var paths = segment.paths;
+
+            var attrsBase = {
+                'shape-rendering': 'crispEdges',
+                'fill': 'rgb(127,127,127)',
+                'fill-opacity': 0.005, // VML requires this much to fire events
+                'stroke': 'rgb(127,127,127)',
+                'stroke-opacity': 0.005, // VML idem
+                'stroke-width': 10,
+                'stroke-dasharray': null
+            };
+
+            paths.forEach(function(path, j) {
+                var i = from + j;
+                var s = scenes[i];
+
+                var events = s.events;
+                if (events && events !== 'none') {
+                    var attrs = Object.create(attrsBase);
+                    attrs['pointer-events'] = events;
+                    attrs.cursor = s.cursor;
+                    attrs.d = path.join('');
+
+                    elm = this.expect(elm, 'path', scenes, i, attrs);
+
+                    elm = this.append(elm, scenes, i);
+                }
+            }, this);
+        }, this);
+
+        // Remove any excess paths from previous render
+        this.removeSiblings(elm);
+    }
+
+    // Restore initial current parent
+    scenes.$g = gg;
+
+    return (g2 || g1).nextSibling;
 };
 
 pv.SvgScene.lineSegmentedFull = function(e, scenes) {
-  var s = scenes[0];
-  var paths;
-  switch (s.interpolate) {
-    case "basis":    paths = this.curveBasisSegments(scenes); break;
-    case "cardinal": paths = this.curveCardinalSegments(scenes, s.tension); break;
-    case "monotone": paths = this.curveMonotoneSegments(scenes); break;
-  }
-
-  for (var i = 0, n = scenes.length - 1; i < n; i++) {
-    var s1 = scenes[i], s2 = scenes[i + 1];
-
-    /* visible */
-    if (!s1.visible || !s2.visible) continue;
-    var stroke = s1.strokeStyle, fill = pv.FillStyle.transparent;
-    if (!stroke.opacity) continue;
-
-    /* interpolate */
-    var d;
-    if ((s1.interpolate == "linear") && (s1.lineJoin == "miter")) {
-      fill = stroke;
-      stroke = pv.FillStyle.transparent;
-      d = this.pathJoin(scenes[i - 1], s1, s2, scenes[i + 2]);
-    } else if(paths) {
-      d = paths[i].join("");
-    } else {
-      d = "M" + s1.left + "," + s1.top + this.lineSegmentPath(s1, s2);
+    var s = scenes[0];
+    var paths;
+    switch (s.interpolate) {
+        case "basis":
+            paths = this.curveBasisSegments(scenes);
+            break;
+        case "cardinal":
+            paths = this.curveCardinalSegments(scenes, s.tension);
+            break;
+        case "monotone":
+            paths = this.curveMonotoneSegments(scenes);
+            break;
     }
 
-    e = this.expect(e, "path", scenes, i, {
-        "shape-rendering": s1.antialias ? null : "crispEdges",
-        "pointer-events": s1.events,
-        "cursor": s1.cursor,
-        "d": d,
-        "fill": fill.color,
-        "fill-opacity": fill.opacity || null,
-        "stroke": stroke.color,
-        "stroke-opacity": stroke.opacity || null,
-        "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null,
-        "stroke-linejoin": s1.lineJoin
-      });
-    
-    if(s1.svg) this.setAttributes(e, s1.svg);
-    if(s1.css) this.setStyle(e, s1.css);
+    for (var i = 0, n = scenes.length - 1; i < n; i++) {
+        var s1 = scenes[i],
+            s2 = scenes[i + 1];
 
-    e = this.append(e, scenes, i);
-  }
-  return e;
+        /* visible */
+        if (!s1.visible || !s2.visible) continue;
+        var stroke = s1.strokeStyle,
+            fill = pv.FillStyle.transparent;
+        if (!stroke.opacity) continue;
+
+        /* interpolate */
+        var d;
+        if ((s1.interpolate == "linear") && (s1.lineJoin == "miter")) {
+            fill = stroke;
+            stroke = pv.FillStyle.transparent;
+            d = this.pathJoin(scenes[i - 1], s1, s2, scenes[i + 2]);
+        } else if (paths) {
+            d = paths[i].join("");
+        } else {
+            d = "M" + s1.left + "," + s1.top + this.lineSegmentPath(s1, s2);
+        }
+
+        e = this.expect(e, "path", scenes, i, {
+            "shape-rendering": s1.antialias ? null : "crispEdges",
+            "pointer-events": s1.events,
+            "cursor": s1.cursor,
+            "d": d,
+            "fill": fill.color,
+            "fill-opacity": fill.opacity || null,
+            "stroke": stroke.color,
+            "stroke-opacity": stroke.opacity || null,
+            "stroke-width": stroke.opacity ? s1.lineWidth / this.scale : null,
+            "stroke-linejoin": s1.lineJoin
+        });
+
+        if (s1.svg) this.setAttributes(e, s1.svg);
+        if (s1.css) this.setStyle(e, s1.css);
+
+        e = this.append(e, scenes, i);
+    }
+    return e;
 };
 
 /** @private Returns the path segment for the specified points. */
 pv.SvgScene.lineSegmentPath = function(s1, s2) {
-  var l = 1; // sweep-flag
-  switch (s1.interpolate) {
-    case "polar-reverse":
-      l = 0;
-    case "polar": {
-      var dx = s2.left - s1.left,
-          dy = s2.top - s1.top,
-          e = 1 - s1.eccentricity,
-          r = Math.sqrt(dx * dx + dy * dy) / (2 * e);
-      if ((e <= 0) || (e > 1)) break; // draw a straight line
-      return "A" + r + "," + r + " 0 0," + l + " " + s2.left + "," + s2.top;
+    var l = 1; // sweep-flag
+    switch (s1.interpolate) {
+        case "polar-reverse":
+            l = 0;
+        case "polar":
+            {
+                var dx = s2.left - s1.left,
+                    dy = s2.top - s1.top,
+                    e = 1 - s1.eccentricity,
+                    r = Math.sqrt(dx * dx + dy * dy) / (2 * e);
+                if ((e <= 0) || (e > 1)) break; // draw a straight line
+                return "A" + r + "," + r + " 0 0," + l + " " + s2.left + "," + s2.top;
+            }
+        case "step-before":
+            return "V" + s2.top + "H" + s2.left;
+        case "step-after":
+            return "H" + s2.left + "V" + s2.top;
     }
-    case "step-before": return "V" + s2.top + "H" + s2.left;
-    case "step-after":  return "H" + s2.left + "V" + s2.top;
-  }
-  return "L" + s2.left + "," + s2.top;
+    return "L" + s2.left + "," + s2.top;
 };
 
 pv.SvgScene.lineSegmentPaths = function(scenes, from, to) {
-  var s = scenes[from];
-  
-  var paths;
-  switch (s.interpolate) {
-    case "basis":    paths = this.curveBasisSegments   (scenes, from, to); break;
-    case "cardinal": paths = this.curveCardinalSegments(scenes, s.tension, from, to); break;
-    case "monotone": paths = this.curveMonotoneSegments(scenes, from, to); break;
-  }
-  
-  //"polar-reverse", "polar", "step-before", "step-after", and linear
-  if(!paths || !paths.length){ // not curve interpolation or not enough points for it 
-    paths = [];
-    for (var i = from + 1 ; i <= to ; i++) {
-      var s1 = scenes[i - 1];
-      var s2 = scenes[i    ];
-      paths.push(["M" + s1.left + "," + s1.top, this.lineSegmentPath(s1, s2)]);
+    var s = scenes[from];
+
+    var paths;
+    switch (s.interpolate) {
+        case "basis":
+            paths = this.curveBasisSegments(scenes, from, to);
+            break;
+        case "cardinal":
+            paths = this.curveCardinalSegments(scenes, s.tension, from, to);
+            break;
+        case "monotone":
+            paths = this.curveMonotoneSegments(scenes, from, to);
+            break;
     }
-  }
-  
-  return paths;
+
+    //"polar-reverse", "polar", "step-before", "step-after", and linear
+    if (!paths || !paths.length) { // not curve interpolation or not enough points for it 
+        paths = [];
+        for (var i = from + 1; i <= to; i++) {
+            var s1 = scenes[i - 1];
+            var s2 = scenes[i];
+            paths.push(["M" + s1.left + "," + s1.top, this.lineSegmentPath(s1, s2)]);
+        }
+    }
+
+    return paths;
 };
 
 /* 
@@ -9840,47 +10377,47 @@ pv.strokeMiterLimit = 4;
 
 /** @private Returns the miter join path for the specified points. */
 pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
-  /*
-   * P1-P2 is the current line segment. 
-   * V is a vector that is perpendicular to the line segment, and has length lineWidth / 2. 
-   * ABCD forms the initial bounding box of the line segment 
-   * (i.e., the line segment if we were to do no joins).
-   */
+    /*
+     * P1-P2 is the current line segment.
+     * V is a vector that is perpendicular to the line segment, and has length lineWidth / 2.
+     * ABCD forms the initial bounding box of the line segment
+     * (i.e., the line segment if we were to do no joins).
+     */
     var pts = [];
     var miterLimit, miterRatio, miterLength;
-    
+
     var w1 = s1.lineWidth / this.scale;
     var p1 = pv.vector(s1.left, s1.top);
     var p2 = pv.vector(s2.left, s2.top);
-    
+
     var p21 = p2.minus(p1);
     var v21 = p21.perp().norm();
     var w21 = v21.times(w1 / 2);
-    
-    var a = p1.plus (w21);
+
+    var a = p1.plus(w21);
     var d = p1.minus(w21);
-    
-    var b = p2.plus (w21);
+
+    var b = p2.plus(w21);
     var c = p2.minus(w21);
-    
+
     // --------------------
-    
-    if(!s0 || !s0.visible){
+
+    if (!s0 || !s0.visible) {
         // Starting point
         pts.push(d, a);
     } else {
-        var p0  = pv.vector(s0.left, s0.top);
+        var p0 = pv.vector(s0.left, s0.top);
         var p10 = p1.minus(p0);
         var v10 = p10.perp().norm(); // may point inwards or outwards
-        
+
         // v1 points from p1 to the inner or outer corner.
         var v1 = v10.plus(v21).norm();
-        
+
         // Miter Join
         // One is the outer corner, the other is the inner corner
         var am = this.lineIntersect(p1, v1, a, p21);
         var dm = this.lineIntersect(p1, v1, d, p21);
-        
+
         // Check Miter Limit
         // The line width is taken as the average of the widths
         // of the p0-p1 segment and that of the p1-p2 segment.
@@ -9889,7 +10426,7 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
         var w10avg = (w1 + w0) / 2;
         miterRatio = miterLength / w10avg;
         miterLimit = s1.strokeMiterLimit || pv.strokeMiterLimit;
-        if(miterRatio <= miterLimit){
+        if (miterRatio <= miterLimit) {
             // Accept the miter join
             pts.push(dm, am);
         } else {
@@ -9897,14 +10434,14 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
             // v1Outer is parallel to v1, but always points outwards
             var p12 = p21.times(-1);
             var v1Outer = p10.norm().plus(p12.norm()).norm();
-            
+
             // The bevel intermediate point
             // Place it along v1Outer, at a distance w10avg/2 from p1.
             // If it were a circumference, it would have that radius.
             // The inner corner is am or dm.
             // The other corner is the original d or a.
             var bevel10 = p1.plus(v1Outer.times(w10avg / 2));
-            if(v1Outer.dot(v21) >= 0){
+            if (v1Outer.dot(v21) >= 0) {
                 // a is outer, d is inner
                 pts.push(dm, bevel10, a);
             } else {
@@ -9913,28 +10450,28 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
             }
         }
     }
-    
+
     // -------------------
-    
-    if(!s3 || !s3.visible){
+
+    if (!s3 || !s3.visible) {
         // Starting point
         pts.push(b, c);
     } else {
-        var p3  = pv.vector(s3.left, s3.top);
+        var p3 = pv.vector(s3.left, s3.top);
         var p32 = p3.minus(p2);
         var v32 = p32.perp().norm();
-        var v2  = v32.plus(v21).norm();
-        
+        var v2 = v32.plus(v21).norm();
+
         // Miter Join
         var bm = this.lineIntersect(p2, v2, b, p21);
         var cm = this.lineIntersect(p2, v2, c, p21);
-        
+
         miterLength = bm.minus(cm).length();
         var w3 = s3.lineWidth / this.scale;
         var w31avg = (w3 + w1) / 2;
         miterRatio = miterLength / w31avg;
         miterLimit = s2.strokeMiterLimit || pv.strokeMiterLimit;
-        if(miterRatio <= miterLimit){
+        if (miterRatio <= miterLimit) {
             // Accept the miter join
             pts.push(bm, cm);
         } else {
@@ -9942,7 +10479,7 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
             var p23 = p32.times(-1);
             var v2Outer = p21.norm().plus(p23.norm()).norm();
             var bevel31 = p2.plus(v2Outer.times(w31avg / 2));
-            if(v2Outer.dot(v21) >= 0){
+            if (v2Outer.dot(v21) >= 0) {
                 // b is outer, c is inner
                 pts.push(b, bevel31, cm);
             } else {
@@ -9951,37 +10488,39 @@ pv.SvgScene.pathJoin = function(s0, s1, s2, s3) {
             }
         }
     }
-    
+
     // Render pts to svg path
     var pt = pts.shift();
-    return "M" + pt.x + "," + pt.y + 
-           "L" + pts.map(function(pt2){ return pt2.x + "," + pt2.y; })
-                  .join(" ");
+    return "M" + pt.x + "," + pt.y +
+        "L" + pts.map(function(pt2) {
+            return pt2.x + "," + pt2.y;
+        })
+        .join(" ");
 };
 
 /** @private Line-line intersection, per Akenine-Moller 16.16.1. */
 pv.SvgScene.lineIntersect = function(o1, d1, o2, d2) {
-  return o1.plus(d1.times(o2.minus(o1).dot(d2.perp()) / d1.dot(d2.perp())));
+    return o1.plus(d1.times(o2.minus(o1).dot(d2.perp()) / d1.dot(d2.perp())));
 };
 
 /* Line & Area Commons */
 
 pv.SvgScene.lineJoinPaths = function(paths, from, to) {
-  // Curve-interpolated paths of each segment
-  var d = paths[from].join(""); // Move And LineTo from the first step
-  for (var i = from + 1 ; i <= to ; i++) {
-    d += paths[i][1];  // LineTo of the following steps
-  }
-  
-  return d;
+    // Curve-interpolated paths of each segment
+    var d = paths[from].join(""); // Move And LineTo from the first step
+    for (var i = from + 1; i <= to; i++) {
+        d += paths[i][1]; // LineTo of the following steps
+    }
+
+    return d;
 };
 
 /* Draws a single circle with a diameter equal to the line width, 
- * when neighbour scenes are invisible. 
+ * when neighbour scenes are invisible.
  */
 pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
-  return elm;
-  /*
+    return elm;
+    /*
   var s = scenes[i];
   var s2;
   if(i > 0){
@@ -10028,111 +10567,111 @@ pv.SvgScene.lineAreaDotAlone = function(elm, scenes, i) {
 };
 
 pv.SvgScene.eachLineAreaSegment = function(elm, scenes, keyArgs, lineAreaSegment) {
-  
-  if(typeof keyArgs === 'function'){
-    lineAreaSegment = keyArgs;
-    keyArgs = null;
-  }
-  
-  // Besides breaking paths on visible, 
-  // should they break on properties as well?
-  var breakOnKeyChange = pv.get(keyArgs, 'breakOnKeyChange', false);
-  var from = pv.get(keyArgs, 'from') || 0;
-  var to   = pv.get(keyArgs, 'to', scenes.length - 1);
-  
-  var ki, kf;
-  if(breakOnKeyChange){
-      ki = [];
-      kf = [];
-  }
-  
-  var i = from;
-  while(i <= to){
-    
-    // Find the INITIAL scene
-    var si = scenes[i];
-    if(!this.isSceneVisible(si)){
-      i++;
-      continue;
+
+    if (typeof keyArgs === 'function') {
+        lineAreaSegment = keyArgs;
+        keyArgs = null;
     }
-    
-    // Compute its line-area-key
-    if(breakOnKeyChange){
-      this.lineAreaSceneKey(si, ki);
+
+    // Besides breaking paths on visible, 
+    // should they break on properties as well?
+    var breakOnKeyChange = pv.get(keyArgs, 'breakOnKeyChange', false);
+    var from = pv.get(keyArgs, 'from') || 0;
+    var to = pv.get(keyArgs, 'to', scenes.length - 1);
+
+    var ki, kf;
+    if (breakOnKeyChange) {
+        ki = [];
+        kf = [];
     }
-    
-    // Find the FINAL scene
-    // the "i" in which to start the next part
-    var i2;
-    var f = i;
-    while(true){
-      var f2 = f + 1;
-      if(f2 > to){
-        // No next scene
-        // Connect i to f (possibly, i === f)
-        // Continue with f + 1, to make it stop...
-        i2 = f2;
-        break;
-      }
-      
-      var sf = scenes[f2];
-      if(!this.isSceneVisible(sf)){  
-        // f + 1 exists but is NOT strictly visible
-        // Connect i to f (possibly, i === f)
-        // Continue with f + 2
-        i2 = f2 + 1;
-        break;
-      }
-      
-      // Accept f + 1 as final point
-      // f > i
-      f = f2;
-      
-      if(breakOnKeyChange){
-        this.lineAreaSceneKey(sf, kf);
-        if(!this.equalSceneKeys(ki, kf)){
-          // Break path due to != path properties
-          // Connect i to f
-          // Continue with f
-          i2 = f;
-          break;
+
+    var i = from;
+    while (i <= to) {
+
+        // Find the INITIAL scene
+        var si = scenes[i];
+        if (!this.isSceneVisible(si)) {
+            i++;
+            continue;
         }
-      }
+
+        // Compute its line-area-key
+        if (breakOnKeyChange) {
+            this.lineAreaSceneKey(si, ki);
+        }
+
+        // Find the FINAL scene
+        // the "i" in which to start the next part
+        var i2;
+        var f = i;
+        while (true) {
+            var f2 = f + 1;
+            if (f2 > to) {
+                // No next scene
+                // Connect i to f (possibly, i === f)
+                // Continue with f + 1, to make it stop...
+                i2 = f2;
+                break;
+            }
+
+            var sf = scenes[f2];
+            if (!this.isSceneVisible(sf)) {
+                // f + 1 exists but is NOT strictly visible
+                // Connect i to f (possibly, i === f)
+                // Continue with f + 2
+                i2 = f2 + 1;
+                break;
+            }
+
+            // Accept f + 1 as final point
+            // f > i
+            f = f2;
+
+            if (breakOnKeyChange) {
+                this.lineAreaSceneKey(sf, kf);
+                if (!this.equalSceneKeys(ki, kf)) {
+                    // Break path due to != path properties
+                    // Connect i to f
+                    // Continue with f
+                    i2 = f;
+                    break;
+                }
+            }
+        }
+
+        elm = lineAreaSegment.call(this, elm, scenes, i, f, keyArgs);
+
+        // next part
+        i = i2;
     }
-  
-    elm = lineAreaSegment.call(this, elm, scenes, i, f, keyArgs);
-    
-    // next part
-    i = i2;
-  }
-  
-  return elm;
+
+    return elm;
 };
 
-pv.SvgScene.lineAreaSceneKey = function(s, k){
-  k[0] = s.fillStyle.key;
-  k[1] = s.strokeStyle.key;
-  k[2] = s.lineWidth;
-  k[3] = (s.strokeDasharray || 'none');
-  k[4] = s.interpolate;
-  return k;
+pv.SvgScene.lineAreaSceneKey = function(s, k) {
+    k[0] = s.fillStyle.key;
+    k[1] = s.strokeStyle.key;
+    k[2] = s.lineWidth;
+    k[3] = (s.strokeDasharray || 'none');
+    k[4] = s.interpolate;
+    return k;
 };
 
-pv.SvgScene.isSceneVisible = function(s){
-  return s.visible && 
+pv.SvgScene.isSceneVisible = function(s) {
+    return s.visible &&
         (s.fillStyle.opacity > 0 || s.strokeStyle.opacity > 0);
 };
 
-pv.SvgScene.equalSceneKeys = function(ka, kb){
-  for(var i = 0, K = ka.length ; i < K ; i++){
-    if(ka[i] !== kb[i]){
-      return false;
+pv.SvgScene.equalSceneKeys = function(ka, kb) {
+    for (var i = 0, K = ka.length; i < K; i++) {
+        if (ka[i] !== kb[i]) {
+            return false;
+        }
     }
-  }
-  return true;
+    return true;
 };
 /* The following applies generally only to non-root panels.
-* See below for more info on root panels.
+ * See below for more info on root panels.
  *
  * With clipping:
  * <g> scenes.$g -> g
@@ -10154,7 +10693,7 @@ pv.SvgScene.equalSceneKeys = function(ka, kb){
  *     </g>
  *
  *     instance 1
- *     
+ *
  * </g>
  *
  * Without clipping:
@@ -10167,447 +10706,454 @@ pv.SvgScene.equalSceneKeys = function(ka, kb){
  *     <g>child 1</g>
  *     ...
  *     <rect stroke="" /> -> e
- *     
+ *
  *     instance 1
  *     <rect fill="" />
  *     ...
  * </g>
  */
 pv.SvgScene.panel = function(scenes) {
-  // scenes.$g is the default parent of elements appended in the context of
-  // this `scenes` instance (see pv.SvgScene.append).
-  // 
-  // When clipping is used, a different clipping container is used per panel instance, 
-  //  and scenes.$g will have one child "g" element per panel instance, 
-  //  that itself is a container for child marks' rendered content.
-  // When clipping is not used, there's no real need to separate content from 
-  //  different panel instances (although explicit zOrder may result quite differently...),
-  //  and so, scenes.$g will be the parent of every instance's content.
-  // 
-  // On the first render, scenes.$g is undefined.
-  // Otherwise, holds the default parent left there from the previous render.
-  // 
-  // On ROOT PANELS, it is quite more elaborate...
-  // 
-  // Each root panel instance has an associated canvas element (usually shared by all).
-  // The canvas is generally not an svg namespaced element.
-  // It is the intended container for the root svg:svg element of 
-  //  each root panel instance.
-  // 
-  // Sharing canvases, results in:
-  //   <div>           = scenes[0,2,3].canvas
-  //      <svg ... />  = g <-> scenes[0]
-  //      <svg ... />  = g <-> scenes[2]
-  //      <svg ... />  = g <-> scenes[3]
-  //   </div>
-  // 
-  // and in some other div:
-  //   <div>           = scenes[1,4].canvas
-  //      <svg ... />  = g <-> scenes[1]
-  //      <svg ... />  = g <-> scenes[4]
-  //   </div>
-  //   
-  // Unspecified canvases (auto/ created):
-  //   <span>         = scenes[0].canvas
-  //     <svg ... />  = g <-> scenes[0]
-  //   </span>
-  //   <span>         = scenes[1].canvas
-  //     <svg ... />  = g <-> scenes[1]
-  //   </span>
-  //   <span>         = scenes[2].canvas
-  //     <svg ... />  = g <-> scenes[2]
-  //   </span>
-  //
-  var g = scenes.$g;
-  var e = g && g.firstChild; // !g => !e
-  var pendingAppendRootElems;
-  for(var i = 0, L = scenes.length ; i < L ; i++) {
-    var s = scenes[i];
-    
-    if(!s.visible) { continue; }
+    // scenes.$g is the default parent of elements appended in the context of
+    // this `scenes` instance (see pv.SvgScene.append).
+    // 
+    // When clipping is used, a different clipping container is used per panel instance, 
+    //  and scenes.$g will have one child "g" element per panel instance, 
+    //  that itself is a container for child marks' rendered content.
+    // When clipping is not used, there's no real need to separate content from 
+    //  different panel instances (although explicit zOrder may result quite differently...),
+    //  and so, scenes.$g will be the parent of every instance's content.
+    // 
+    // On the first render, scenes.$g is undefined.
+    // Otherwise, holds the default parent left there from the previous render.
+    // 
+    // On ROOT PANELS, it is quite more elaborate...
+    // 
+    // Each root panel instance has an associated canvas element (usually shared by all).
+    // The canvas is generally not an svg namespaced element.
+    // It is the intended container for the root svg:svg element of 
+    //  each root panel instance.
+    // 
+    // Sharing canvases, results in:
+    //   <div>           = scenes[0,2,3].canvas
+    //      <svg ... />  = g <-> scenes[0]
+    //      <svg ... />  = g <-> scenes[2]
+    //      <svg ... />  = g <-> scenes[3]
+    //   </div>
+    // 
+    // and in some other div:
+    //   <div>           = scenes[1,4].canvas
+    //      <svg ... />  = g <-> scenes[1]
+    //      <svg ... />  = g <-> scenes[4]
+    //   </div>
+    //   
+    // Unspecified canvases (auto/ created):
+    //   <span>         = scenes[0].canvas
+    //     <svg ... />  = g <-> scenes[0]
+    //   </span>
+    //   <span>         = scenes[1].canvas
+    //     <svg ... />  = g <-> scenes[1]
+    //   </span>
+    //   <span>         = scenes[2].canvas
+    //     <svg ... />  = g <-> scenes[2]
+    //   </span>
+    //
+    var g = scenes.$g;
+    var e = g && g.firstChild; // !g => !e
+    var pendingAppendRootElems;
+    for (var i = 0, L = scenes.length; i < L; i++) {
+        var s = scenes[i];
 
-    // Root panel
-    if(!scenes.parent) {
-      // s.canvas != null cause pv.Panel#buildImplied creates one when undefined.
-      var canvas = s.canvas;
+        if (!s.visible) {
+            continue;
+        }
 
-      // TODO: Any way to do this only once per render and canvas element?
-      this.applyCanvasStyle(canvas);
+        // Root panel
+        if (!scenes.parent) {
+            // s.canvas != null cause pv.Panel#buildImplied creates one when undefined.
+            var canvas = s.canvas;
 
-      // First render and First visible instance
-      // => !g => !e and **not enter this if**
-      // ----
-      // !First render => g
-      //  * i is the first visible instance _and_ g is the previous' render last scenes.$g set.
-      //    if only one instance, g will probably be ok, 
-      //    otherwise...we just pick the probable old g.
-      //    OR
-      //  * g is previous instance's _refreshed_ svg element,
-      //    and this instance might have a different canvas.
-      // ----
+            // TODO: Any way to do this only once per render and canvas element?
+            this.applyCanvasStyle(canvas);
 
-      // Active canvas changed?
-      if(g && (g.parentNode !== canvas)) { // TODO: batik may not work with ===
-        g = canvas.firstChild; // can be null
-        e = g && g.firstChild; // !g ==> !e
-      }
-      // TODO: Can't understand how g is not always set to the corresponding instance's svg...
-      // How this is being done, this seems to work on the first render, but not for non-first instances of later renders.
-      
-      if(!g) { // => !e
-        g = this.createRootPanelElement(); // factory of svg/whatever element
-        e = null; // J.I.C.?
+            // First render and First visible instance
+            // => !g => !e and **not enter this if**
+            // ----
+            // !First render => g
+            //  * i is the first visible instance _and_ g is the previous' render last scenes.$g set.
+            //    if only one instance, g will probably be ok, 
+            //    otherwise...we just pick the probable old g.
+            //    OR
+            //  * g is previous instance's _refreshed_ svg element,
+            //    and this instance might have a different canvas.
+            // ----
 
-        this.initRootPanelElement(g, scenes.mark);
-        if(!pendingAppendRootElems) { pendingAppendRootElems = []; }
-        pendingAppendRootElems.push([canvas, g]);
+            // Active canvas changed?
+            if (g && (g.parentNode !== canvas)) { // TODO: batik may not work with ===
+                g = canvas.firstChild; // can be null
+                e = g && g.firstChild; // !g ==> !e
+            }
+            // TODO: Can't understand how g is not always set to the corresponding instance's svg...
+            // How this is being done, this seems to work on the first render, but not for non-first instances of later renders.
 
-        //canvas.appendChild(g);
-        // canvas.firstChild === g ? Not necessarily!
-        // g.parentNode === canvas ? Yes sure!
+            if (!g) { // => !e
+                g = this.createRootPanelElement(); // factory of svg/whatever element
+                e = null; // J.I.C.?
 
-        // Create the global defs element (whether or not it is actually used).
-        scenes.$defs = g.appendChild(this.create("defs"));
+                this.initRootPanelElement(g, scenes.mark);
+                if (!pendingAppendRootElems) {
+                    pendingAppendRootElems = [];
+                }
+                pendingAppendRootElems.push([canvas, g]);
 
-        // Set g as the current default parent.
-        // TODO: Shouldn't this be done every time that g changes during the loop?
-        scenes.$g = g;
+                //canvas.appendChild(g);
+                // canvas.firstChild === g ? Not necessarily!
+                // g.parentNode === canvas ? Yes sure!
 
-        // <div>    -> scenes[i].canvas
-        //   .. ? ..   (other instances <svg /> elements may already exist here)
-        //   <svg>  -> g, scenes.$g <-> scenes[i] 
-        //     <defs/>
-        
-      } else if(e && e.tagName === 'defs') {
-        e = e.nextSibling;
-      }
+                // Create the global defs element (whether or not it is actually used).
+                scenes.$defs = g.appendChild(this.create("defs"));
 
-      g.setAttribute("width",  s.width  + s.left + s.right );
-      g.setAttribute("height", s.height + s.top  + s.bottom);
+                // Set g as the current default parent.
+                // TODO: Shouldn't this be done every time that g changes during the loop?
+                scenes.$g = g;
+
+                // <div>    -> scenes[i].canvas
+                //   .. ? ..   (other instances <svg /> elements may already exist here)
+                //   <svg>  -> g, scenes.$g <-> scenes[i] 
+                //     <defs/>
+
+            } else if (e && e.tagName === 'defs') {
+                e = e.nextSibling;
+            }
+
+            g.setAttribute("width", s.width + s.left + s.right);
+            g.setAttribute("height", s.height + s.top + s.bottom);
+        }
+
+        // clip (nest children)
+        var clip_g = null;
+        if (s.overflow === "hidden") {
+            var clipResult = this.addPanelClipPath(g, e, scenes, i, s);
+            clip_g = clipResult.g;
+
+            // clip_g.parentNode holds the initial g at scenes.$g.
+            // And so we have a way to recover it later!
+            // Make clip_g the current default parent of appended nodes.
+            scenes.$g = g = clip_g;
+            e = clipResult.next;
+        }
+
+        // fill rect
+        e = this.fill(e, scenes, i);
+
+        // transform (push)
+        var k = this.scale,
+            t = s.transform,
+            x = s.left + t.x,
+            y = s.top + t.y;
+        this.scale *= t.k;
+
+        // children
+        if (s.children.length) {
+            var attrs = {
+                "transform": "translate(" + x + "," + y + ")" + (t.k != 1 ? " scale(" + t.k + ")" : "")
+            };
+
+            this.eachChild(scenes, i, function(childScenes) {
+                childScenes.$g = e = this.expect(e, "g", scenes, i, attrs);
+
+                this.updateAll(childScenes);
+                if (!e.parentNode) {
+                    g.appendChild(e)
+                };
+                e = e.nextSibling;
+            });
+        }
+
+        // transform (pop)
+        this.scale = k;
+
+        // stroke rect
+        e = this.stroke(e, scenes, i);
+
+        // clip (restore group)
+        if (clip_g) {
+            // restore initial g, from clip_g
+            scenes.$g = g = clip_g.parentNode; // g != null !
+            e = clip_g.nextSibling;
+        }
+    } // end for panel instance
+
+    // Defer appending to canvas when fully built.
+    if (pendingAppendRootElems) {
+        pendingAppendRootElems.forEach(function(cg) {
+            cg[0].appendChild(cg[1]);
+        })
     }
 
-    // clip (nest children)
-    var clip_g = null;
-    if(s.overflow === "hidden") {
-      var clipResult = this.addPanelClipPath(g, e, scenes, i, s);
-      clip_g = clipResult.g;
-
-      // clip_g.parentNode holds the initial g at scenes.$g.
-      // And so we have a way to recover it later!
-      // Make clip_g the current default parent of appended nodes.
-      scenes.$g = g = clip_g;
-      e = clipResult.next;
-    }
-    
-    // fill rect
-    e = this.fill(e, scenes, i);
-
-    // transform (push)
-    var k = this.scale,
-        t = s.transform,
-        x = s.left + t.x,
-        y = s.top  + t.y;
-    this.scale *= t.k;
-
-    // children
-    if(s.children.length) {
-        var attrs = {
-            "transform": "translate(" + x + "," + y + ")" +
-                         (t.k != 1 ? " scale(" + t.k + ")" : "")
-        };
-        
-        this.eachChild(scenes, i, function(childScenes) {
-            childScenes.$g = e = this.expect(e, "g", scenes, i, attrs);
-
-            this.updateAll(childScenes);
-            if(!e.parentNode) { g.appendChild(e) };
-            e = e.nextSibling;
-        });
-    }
-
-    // transform (pop)
-    this.scale = k;
-
-    // stroke rect
-    e = this.stroke(e, scenes, i);
-    
-    // clip (restore group)
-    if(clip_g) {
-      // restore initial g, from clip_g
-      scenes.$g = g = clip_g.parentNode; // g != null !
-      e = clip_g.nextSibling;
-    }
-  } // end for panel instance
-  
-  // Defer appending to canvas when fully built.
-  if(pendingAppendRootElems) {
-    pendingAppendRootElems.forEach(function(cg) {
-      cg[0].appendChild(cg[1]);
-    })
-  }
-
-  return e;
+    return e;
 };
 
 pv.SvgScene.applyCanvasStyle = function(canvas) {
-  // TODO: Is "inline-block" because a canvas can be placed inline with text?
-  canvas.style.display = "inline-block";
+    // TODO: Is "inline-block" because a canvas can be placed inline with text?
+    canvas.style.display = "inline-block";
 };
 
 pv.SvgScene.createRootPanelElement = function() {
-  return this.create("svg");
+    return this.create("svg");
 };
 
 pv.SvgScene.initRootPanelElement = function(g, panel) {
-  // Only runs when the panel is created by createRootPanelElement.
-  // Default values for attributes, inherited by descendant svg:* elements.
-  g.setAttribute("font-size",    "10px");
-  g.setAttribute("font-family",  "sans-serif");
-  g.setAttribute("fill",         "none");
-  g.setAttribute("stroke",       "none");
-  g.setAttribute("stroke-width", 1.5);
-  
-  this.disableElementSelection(g);
+    // Only runs when the panel is created by createRootPanelElement.
+    // Default values for attributes, inherited by descendant svg:* elements.
+    g.setAttribute("font-size", "10px");
+    g.setAttribute("font-family", "sans-serif");
+    g.setAttribute("fill", "none");
+    g.setAttribute("stroke", "none");
+    g.setAttribute("stroke-width", 1.5);
 
-  this.listenRootPanelElement(g, panel);
+    this.disableElementSelection(g);
+
+    this.listenRootPanelElement(g, panel);
 };
 
 pv.SvgScene.listenRootPanelElement = function(g, panel) {
-  for(var j = 0, evs = this.events, J = evs.length ; j < J ; j++) {
-    g.addEventListener(evs[j], this.dispatch, false);
+    for (var j = 0, evs = this.events, J = evs.length; j < J; j++) {
+        g.addEventListener(evs[j], this.dispatch, false);
 
-    panel._registerBoundEvent(g, evs[j], this.dispatch, false);
-  }
+        panel._registerBoundEvent(g, evs[j], this.dispatch, false);
+    }
 };
 
 pv.SvgScene.disableElementSelection = function(g) {
-  // Prevent selecting elements when dragging
-  
-  // TODO: last time I tested, not working for IE10 or IE9...
+    // Prevent selecting elements when dragging
 
-  // Supported by IE10 SVG
-  g.setAttribute("style", "-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;");
+    // TODO: last time I tested, not working for IE10 or IE9...
 
-  if(typeof g.onselectstart !== 'undefined') { // TODO: really strange test...
-      // IE9 SVG
-      g.setAttribute('unselectable', 'on');
-      g.onselectstart = function() { return false; };
-  }
+    // Supported by IE10 SVG
+    g.setAttribute("style", "-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;");
+
+    if (typeof g.onselectstart !== 'undefined') { // TODO: really strange test...
+        // IE9 SVG
+        g.setAttribute('unselectable', 'on');
+        g.onselectstart = function() {
+            return false;
+        };
+    }
 };
 
 pv.SvgScene.addPanelClipPath = function(g, e, scenes, i, s) {
-  // <g clip-path="url(#ID)">  // clip-g
-  //    <clipPath id="ID">     // e
-  //        <rect x="s.left" y="s.top" width="s.width" height="s.height" />  // r
-  //    </clipPath>
-  //    e <= next insertion/replace point
-  // </g>
+    // <g clip-path="url(#ID)">  // clip-g
+    //    <clipPath id="ID">     // e
+    //        <rect x="s.left" y="s.top" width="s.width" height="s.height" />  // r
+    //    </clipPath>
+    //    e <= next insertion/replace point
+    // </g>
 
-  // An ID for the clipping path element
-  var id = pv.id().toString(36);
+    // An ID for the clipping path element
+    var id = pv.id().toString(36);
 
-  // The clipping group
-  var clip_g = this.expect(e, "g", scenes, i, {"clip-path": "url(#" + id + ")"});
-  
-  // The clipping path
-  var clip_p = this.expect(clip_g.firstChild, "clipPath", scenes, i, {"id": id});
-  
-  // The clipping rect
-  var r = clip_p.firstChild || clip_p.appendChild(this.create("rect"));
-  r.setAttribute("x",      s.left);
-  r.setAttribute("y",      s.top);
-  r.setAttribute("width",  s.width);
-  r.setAttribute("height", s.height);
+    // The clipping group
+    var clip_g = this.expect(e, "g", scenes, i, {
+        "clip-path": "url(#" + id + ")"
+    });
 
-  // Ensure connected
-  if(!clip_p.parentNode) { clip_g.appendChild(clip_p); }
-  if(!clip_g.parentNode) { g.appendChild(clip_g); }
-  
-  return {g: clip_g, next: clip_p.nextSibling};
+    // The clipping path
+    var clip_p = this.expect(clip_g.firstChild, "clipPath", scenes, i, {
+        "id": id
+    });
+
+    // The clipping rect
+    var r = clip_p.firstChild || clip_p.appendChild(this.create("rect"));
+    r.setAttribute("x", s.left);
+    r.setAttribute("y", s.top);
+    r.setAttribute("width", s.width);
+    r.setAttribute("height", s.height);
+
+    // Ensure connected
+    if (!clip_p.parentNode) {
+        clip_g.appendChild(clip_p);
+    }
+    if (!clip_g.parentNode) {
+        g.appendChild(clip_g);
+    }
+
+    return {
+        g: clip_g,
+        next: clip_p.nextSibling
+    };
 };
 
-pv.SvgScene.eachChild = function(scenes, i, fun, ctx){
-  var children = scenes[i].children;
-  if(scenes.mark._zOrderChildCount){
-    children = children.slice(0);
-    children.sort(function(scenes1, scenes2){ // sort ascending
-      var compare = scenes1.mark._zOrder - scenes2.mark._zOrder;
-      if(compare === 0){
-          // Preserve original order for same zOrder childs
-          compare = scenes1.childIndex - scenes2.childIndex;
-      }
-      return compare;
-    });
-  }
+pv.SvgScene.eachChild = function(scenes, i, fun, ctx) {
+    var children = scenes[i].children;
+    if (scenes.mark._zOrderChildCount) {
+        children = children.slice(0);
+        children.sort(function(scenes1, scenes2) { // sort ascending
+            var compare = scenes1.mark._zOrder - scenes2.mark._zOrder;
+            if (compare === 0) {
+                // Preserve original order for same zOrder childs
+                compare = scenes1.childIndex - scenes2.childIndex;
+            }
+            return compare;
+        });
+    }
 
-  for(var j = 0, L = children.length ; j < L; j++) {
-    fun.call(ctx || this, children[j], j);
-  }
+    for (var j = 0, L = children.length; j < L; j++) {
+        fun.call(ctx || this, children[j], j);
+    }
 };
 
 pv.SvgScene.fill = function(e, scenes, i) {
-  var s = scenes[i], fill = s.fillStyle;
-  if (fill.opacity || s.events == "all") {
-    this.addFillStyleDefinition(scenes, fill);
+    var s = scenes[i],
+        fill = s.fillStyle;
+    if (fill.opacity || s.events == "all") {
+        this.addFillStyleDefinition(scenes, fill);
 
-    e = this.expect(e, "rect", scenes, i, {
-        "shape-rendering": s.antialias ? null : "crispEdges",
-        "pointer-events": s.events,
-        "cursor": s.cursor,
-        "x": s.left,
-        "y": s.top,
-        "width":  s.width,
-        "height": s.height,
-        "fill": fill.color,
-        "fill-opacity": fill.opacity,
-        "stroke": null
-      });
-    e = this.append(e, scenes, i);
-  }
-  return e;
+        e = this.expect(e, "rect", scenes, i, {
+            "shape-rendering": s.antialias ? null : "crispEdges",
+            "pointer-events": s.events,
+            "cursor": s.cursor,
+            "x": s.left,
+            "y": s.top,
+            "width": s.width,
+            "height": s.height,
+            "fill": fill.color,
+            "fill-opacity": fill.opacity,
+            "stroke": null
+        });
+        e = this.append(e, scenes, i);
+    }
+    return e;
 };
 
 pv.SvgScene.stroke = function(e, scenes, i) {
-  var s = scenes[i], stroke = s.strokeStyle;
-  if (stroke.opacity || s.events == "all") {
-    e = this.expect(e, "rect", scenes, i, {
-        "shape-rendering": s.antialias ? null : "crispEdges",
-        "pointer-events": s.events == "all" ? "stroke" : s.events,
-        "cursor": s.cursor,
-        "x": s.left,
-        "y": s.top,
-        "width": Math.max(1E-10, s.width),
-        "height": Math.max(1E-10, s.height),
-        "fill": null,
-        "stroke": stroke.color,
-        "stroke-opacity": stroke.opacity,
-        "stroke-width": s.lineWidth / this.scale,
-        "stroke-linecap":    s.lineCap,
-        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
-      });
-    e = this.append(e, scenes, i);
-  }
-  return e;
+    var s = scenes[i],
+        stroke = s.strokeStyle;
+    if (stroke.opacity || s.events == "all") {
+        e = this.expect(e, "rect", scenes, i, {
+            "shape-rendering": s.antialias ? null : "crispEdges",
+            "pointer-events": s.events == "all" ? "stroke" : s.events,
+            "cursor": s.cursor,
+            "x": s.left,
+            "y": s.top,
+            "width": Math.max(1E-10, s.width),
+            "height": Math.max(1E-10, s.height),
+            "fill": null,
+            "stroke": stroke.color,
+            "stroke-opacity": stroke.opacity,
+            "stroke-width": s.lineWidth / this.scale,
+            "stroke-linecap": s.lineCap,
+            "stroke-dasharray": stroke.opacity ? this.parseDasharray(s) : null
+        });
+        e = this.append(e, scenes, i);
+    }
+    return e;
 };
 pv.SvgScene.minRuleLineWidth = 1;
 
 pv.SvgScene.rule = function(scenes) {
-  var e = scenes.$g.firstChild;
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+    var e = scenes.$g.firstChild;
+    for (var i = 0; i < scenes.length; i++) {
+        var s = scenes[i];
 
-    /* visible */
-    if (!s.visible) continue;
-    var stroke = s.strokeStyle;
-    if (!stroke.opacity) continue;
+        /* visible */
+        if (!s.visible) continue;
+        var stroke = s.strokeStyle;
+        if (!stroke.opacity) continue;
 
-    var lineWidth = s.lineWidth;
-    if(lineWidth < 1e-10){
-        lineWidth = 0;
-    } else {
-        lineWidth = Math.max(this.minRuleLineWidth, lineWidth / this.scale);
+        var lineWidth = s.lineWidth;
+        if (lineWidth < 1e-10) {
+            lineWidth = 0;
+        } else {
+            lineWidth = Math.max(this.minRuleLineWidth, lineWidth / this.scale);
+        }
+
+        e = this.expect(e, "line", scenes, i, {
+            "shape-rendering": s.antialias ? null : "crispEdges",
+            "pointer-events": s.events,
+            "cursor": s.cursor,
+            "x1": s.left,
+            "y1": s.top,
+            "x2": s.left + s.width,
+            "y2": s.top + s.height,
+            "stroke": stroke.color,
+            "stroke-opacity": stroke.opacity,
+            "stroke-width": lineWidth,
+            "stroke-linecap": s.lineCap,
+            "stroke-dasharray": stroke.opacity ? this.parseDasharray(s) : null
+        });
+
+        if (s.svg) this.setAttributes(e, s.svg);
+        if (s.css) this.setStyle(e, s.css);
+
+        e = this.append(e, scenes, i);
     }
-    
-    e = this.expect(e, "line", scenes, i, {
-        "shape-rendering": s.antialias ? null : "crispEdges",
-        "pointer-events": s.events,
-        "cursor": s.cursor,
-        "x1": s.left,
-        "y1": s.top,
-        "x2": s.left + s.width,
-        "y2": s.top + s.height,
-        "stroke": stroke.color,
-        "stroke-opacity": stroke.opacity,
-        "stroke-width": lineWidth,
-        "stroke-linecap":    s.lineCap,
-        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
-      });
-    
-    if(s.svg) this.setAttributes(e, s.svg);
-    if(s.css) this.setStyle(e, s.css);
-
-    e = this.append(e, scenes, i);
-  }
-  return e;
+    return e;
 };
 pv.SvgScene.wedge = function(scenes) {
-  var e = scenes.$g.firstChild;
+    var e = scenes.$g.firstChild;
 
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+    for (var i = 0; i < scenes.length; i++) {
+        var s = scenes[i];
 
-    /* visible */
-    if (!s.visible) continue;
-    var fill = s.fillStyle, stroke = s.strokeStyle;
-    if (!fill.opacity && !stroke.opacity) continue;
+        /* visible */
+        if (!s.visible) continue;
+        var fill = s.fillStyle,
+            stroke = s.strokeStyle;
+        if (!fill.opacity && !stroke.opacity) continue;
 
-    /* points */
-    var r1 = s.innerRadius, r2 = s.outerRadius, a = Math.abs(s.angle), p;
-    if (a >= 2 * Math.PI) {
-      if (r1) {
-        p = "M0," + r2
-            + "A" + r2 + "," + r2 + " 0 1,1 0," + (-r2)
-            + "A" + r2 + "," + r2 + " 0 1,1 0," + r2
-            + "M0," + r1
-            + "A" + r1 + "," + r1 + " 0 1,1 0," + (-r1)
-            + "A" + r1 + "," + r1 + " 0 1,1 0," + r1
-            + "Z";
-      } else {
-        p = "M0," + r2
-            + "A" + r2 + "," + r2 + " 0 1,1 0," + (-r2)
-            + "A" + r2 + "," + r2 + " 0 1,1 0," + r2
-            + "Z";
-      }
-    } else {
-      var sa = Math.min(s.startAngle, s.endAngle),
-          ea = Math.max(s.startAngle, s.endAngle),
-          c1 = Math.cos(sa), c2 = Math.cos(ea),
-          s1 = Math.sin(sa), s2 = Math.sin(ea);
-      if (r1) {
-        p = "M" + r2 * c1 + "," + r2 * s1
-            + "A" + r2 + "," + r2 + " 0 "
-            + ((a < Math.PI) ? "0" : "1") + ",1 "
-            + r2 * c2 + "," + r2 * s2
-            + "L" + r1 * c2 + "," + r1 * s2
-            + "A" + r1 + "," + r1 + " 0 "
-            + ((a < Math.PI) ? "0" : "1") + ",0 "
-            + r1 * c1 + "," + r1 * s1 + "Z";
-      } else {
-        p = "M" + r2 * c1 + "," + r2 * s1
-            + "A" + r2 + "," + r2 + " 0 "
-            + ((a < Math.PI) ? "0" : "1") + ",1 "
-            + r2 * c2 + "," + r2 * s2 + "L0,0Z";
-      }
+        /* points */
+        var r1 = s.innerRadius,
+            r2 = s.outerRadius,
+            a = Math.abs(s.angle),
+            p;
+        if (a >= 2 * Math.PI) {
+            if (r1) {
+                p = "M0," + r2 + "A" + r2 + "," + r2 + " 0 1,1 0," + (-r2) + "A" + r2 + "," + r2 + " 0 1,1 0," + r2 + "M0," + r1 + "A" + r1 + "," + r1 + " 0 1,1 0," + (-r1) + "A" + r1 + "," + r1 + " 0 1,1 0," + r1 + "Z";
+            } else {
+                p = "M0," + r2 + "A" + r2 + "," + r2 + " 0 1,1 0," + (-r2) + "A" + r2 + "," + r2 + " 0 1,1 0," + r2 + "Z";
+            }
+        } else {
+            var sa = Math.min(s.startAngle, s.endAngle),
+                ea = Math.max(s.startAngle, s.endAngle),
+                c1 = Math.cos(sa),
+                c2 = Math.cos(ea),
+                s1 = Math.sin(sa),
+                s2 = Math.sin(ea);
+            if (r1) {
+                p = "M" + r2 * c1 + "," + r2 * s1 + "A" + r2 + "," + r2 + " 0 " + ((a < Math.PI) ? "0" : "1") + ",1 " + r2 * c2 + "," + r2 * s2 + "L" + r1 * c2 + "," + r1 * s2 + "A" + r1 + "," + r1 + " 0 " + ((a < Math.PI) ? "0" : "1") + ",0 " + r1 * c1 + "," + r1 * s1 + "Z";
+            } else {
+                p = "M" + r2 * c1 + "," + r2 * s1 + "A" + r2 + "," + r2 + " 0 " + ((a < Math.PI) ? "0" : "1") + ",1 " + r2 * c2 + "," + r2 * s2 + "L0,0Z";
+            }
+        }
+
+        this.addFillStyleDefinition(scenes, fill);
+        this.addFillStyleDefinition(scenes, stroke);
+
+        e = this.expect(e, "path", scenes, i, {
+            "shape-rendering": s.antialias ? null : "crispEdges",
+            "pointer-events": s.events,
+            "cursor": s.cursor,
+            "transform": "translate(" + s.left + "," + s.top + ")",
+            "d": p,
+            "fill": fill.color,
+            "fill-rule": "evenodd",
+            "fill-opacity": fill.opacity || null,
+            "stroke": stroke.color,
+            "stroke-opacity": stroke.opacity || null,
+            "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
+            "stroke-linejoin": s.lineJoin,
+            "stroke-miterlimit": s.strokeMiterLimit,
+            "stroke-linecap": s.lineCap,
+            "stroke-dasharray": stroke.opacity ? this.parseDasharray(s) : null
+        });
+
+        if (s.svg) this.setAttributes(e, s.svg);
+        if (s.css) this.setStyle(e, s.css);
+
+        e = this.append(e, scenes, i);
     }
-    
-    this.addFillStyleDefinition(scenes, fill);
-    this.addFillStyleDefinition(scenes, stroke);
-    
-    e = this.expect(e, "path", scenes, i, {
-        "shape-rendering": s.antialias ? null : "crispEdges",
-        "pointer-events": s.events,
-        "cursor": s.cursor,
-        "transform": "translate(" + s.left + "," + s.top + ")",
-        "d": p,
-        "fill": fill.color,
-        "fill-rule": "evenodd",
-        "fill-opacity": fill.opacity || null,
-        "stroke": stroke.color,
-        "stroke-opacity": stroke.opacity || null,
-        "stroke-width": stroke.opacity ? s.lineWidth / this.scale : null,
-        "stroke-linejoin":   s.lineJoin,
-        "stroke-miterlimit": s.strokeMiterLimit,
-        "stroke-linecap":    s.lineCap,
-        "stroke-dasharray":  stroke.opacity ? this.parseDasharray(s) : null
-      });
 
-    if(s.svg) this.setAttributes(e, s.svg);
-    if(s.css) this.setStyle(e, s.css);
-
-    e = this.append(e, scenes, i);
-  }
-  
-  /*
+    /*
   // DEBUG BEG
   var mark  = scenes.mark;
   for (var i = 0; i < scenes.length; i+=2) {
@@ -10660,7 +11206,7 @@ pv.SvgScene.wedge = function(scenes) {
   }
   // DEBUG END
   */
-  return e;
+    return e;
 };
 /**
  * Constructs a new mark with default properties. Marks, with the exception of
@@ -10722,16 +11268,16 @@ pv.SvgScene.wedge = function(scenes) {
  * <p>See also the <a href="../../api/">Protovis guide</a>.
  */
 pv.Mark = function() {
-  /*
-   * TYPE 0 constant defs
-   * TYPE 1 function defs
-   * TYPE 2 constant properties
-   * TYPE 3 function properties
-   * in order of evaluation!
-   */
-  this.$properties = [];
-  this.$propertiesMap = {};
-  this.$handlers = {};
+    /*
+     * TYPE 0 constant defs
+     * TYPE 1 function defs
+     * TYPE 2 constant properties
+     * TYPE 3 function properties
+     * in order of evaluation!
+     */
+    this.$properties = [];
+    this.$propertiesMap = {};
+    this.$handlers = {};
 };
 
 /** @private Records which properties are defined on this mark type. */
@@ -10798,20 +11344,20 @@ pv.Mark.cast = {};
  * @param {Function} [cast] the cast function for this property.
  */
 pv.Mark.prototype.property = function(name, cast) {
-  if (!this.hasOwnProperty("properties")) {
-    this.properties = pv.extend(this.properties);
-  }
-  this.properties[name] = true;
+    if (!this.hasOwnProperty("properties")) {
+        this.properties = pv.extend(this.properties);
+    }
+    this.properties[name] = true;
 
-  /*
-   * Define the setter-getter globally, since the default behavior should be the
-   * same for all properties, and since the Protovis inheritance chain is
-   * independent of the JavaScript inheritance chain. For example, anchors
-   * define a "name" property that is evaluated on derived marks, even though
-   * those marks don't normally have a name.
-   */
-  pv.Mark.prototype.propertyMethod(name, false, pv.Mark.cast[name] = cast);
-  return this;
+    /*
+     * Define the setter-getter globally, since the default behavior should be the
+     * same for all properties, and since the Protovis inheritance chain is
+     * independent of the JavaScript inheritance chain. For example, anchors
+     * define a "name" property that is evaluated on derived marks, even though
+     * those marks don't normally have a name.
+     */
+    pv.Mark.prototype.propertyMethod(name, false, pv.Mark.cast[name] = cast);
+    return this;
 };
 
 // Adapted from pv.Layout#property
@@ -10825,17 +11371,19 @@ pv.Mark.prototype.property = function(name, cast) {
  * @param {Function} [cast] the cast function for this property.
  */
 pv.Mark.prototype.localProperty = function(name, cast) {
-  if (!this.hasOwnProperty("properties")) {
-    this.properties = pv.extend(this.properties);
-  }
-  this.properties[name] = true;
+    if (!this.hasOwnProperty("properties")) {
+        this.properties = pv.extend(this.properties);
+    }
+    this.properties[name] = true;
 
-  var currCast = pv.Mark.cast[name];
-  if(cast) { pv.Mark.cast[name] = currCast = cast; }
+    var currCast = pv.Mark.cast[name];
+    if (cast) {
+        pv.Mark.cast[name] = currCast = cast;
+    }
 
-  // NOTE: propertyMethod is called on the Mark instance and not on the prototype
-  this.propertyMethod(name, /*def*/false, /*cast*/currCast);
-  return this;
+    // NOTE: propertyMethod is called on the Mark instance and not on the prototype
+    this.propertyMethod(name, /*def*/ false, /*cast*/ currCast);
+    return this;
 };
 
 
@@ -10857,9 +11405,9 @@ pv.Mark.prototype.localProperty = function(name, cast) {
  * function.
  */
 pv.Mark.prototype.def = function(name, v) {
-  // NOTE: propertyMethod is called on the Mark instance and not on the prototype
-  this.propertyMethod(name, /*def*/true);
-  return this[name](arguments.length > 1 ? v : null);
+    // NOTE: propertyMethod is called on the Mark instance and not on the prototype
+    this.propertyMethod(name, /*def*/ true);
+    return this[name](arguments.length > 1 ? v : null);
 };
 
 /**
@@ -10875,57 +11423,61 @@ pv.Mark.prototype.def = function(name, v) {
  * @param {Function} [cast] the cast function for this property.
  */
 pv.Mark.prototype.propertyMethod = function(name, isDef, cast) {
-  if(!cast) cast = pv.Mark.cast[name];
+    if (!cast) cast = pv.Mark.cast[name];
 
-  this[name] = function(v, tag) {
+    this[name] = function(v, tag) {
 
-    // A def. being read/written during render?
-    if(isDef && this.scene) {
-      var defs = this.scene.defs;
+        // A def. being read/written during render?
+        if (isDef && this.scene) {
+            var defs = this.scene.defs;
 
-      if(arguments.length) {
-        defs[name] = {
-          id:    (v == null) ? 0 : pv.id(),
-          value: ((v != null) && cast) ? cast(v) : v
-        };
+            if (arguments.length) {
+                defs[name] = {
+                    id: (v == null) ? 0 : pv.id(),
+                    value: ((v != null) && cast) ? cast(v) : v
+                };
 
-        return this;
-      }
+                return this;
+            }
 
-      var def = defs[name];
-      return def ? def.value : null;
-    }
+            var def = defs[name];
+            return def ? def.value : null;
+        }
 
-    if(arguments.length) {
-      this.setPropertyValue(name, v, isDef, cast, /* chain */false, tag);
-      return this;
-    }
+        if (arguments.length) {
+            this.setPropertyValue(name, v, isDef, cast, /* chain */ false, tag);
+            return this;
+        }
 
-    // Listening to function property dependencies?
-    var propEval = pv.propertyEval;
-    if(propEval && propEval.name !== name) { // When you call another marks method of same name...
-      var binds = this.binds;
-      var propRead = binds.properties[name];
-      if(propRead) {
-        var net = binds.net;
-        var readNetIndex = net[name];
-        if(readNetIndex == null) { readNetIndex = net[name] = 0; }
+        // Listening to function property dependencies?
+        var propEval = pv.propertyEval;
+        if (propEval && propEval.name !== name) { // When you call another marks method of same name...
+            var binds = this.binds;
+            var propRead = binds.properties[name];
+            if (propRead) {
+                var net = binds.net;
+                var readNetIndex = net[name];
+                if (readNetIndex == null) {
+                    readNetIndex = net[name] = 0;
+                }
 
-        (propRead.dependents || (propRead.dependents = {}))[propEval.name] = true;
+                (propRead.dependents || (propRead.dependents = {}))[propEval.name] = true;
 
-        (pv.propertyEvalDependencies || (pv.propertyEvalDependencies = {}))[name] = true;
+                (pv.propertyEvalDependencies || (pv.propertyEvalDependencies = {}))[name] = true;
 
-        // evalNetIndex must be at least one higher than readNetIndex
-        if(readNetIndex >= pv.propertyEvalNetIndex) { pv.propertyEvalNetIndex = readNetIndex + 1; }
-      }
-    }
+                // evalNetIndex must be at least one higher than readNetIndex
+                if (readNetIndex >= pv.propertyEvalNetIndex) {
+                    pv.propertyEvalNetIndex = readNetIndex + 1;
+                }
+            }
+        }
 
-    return this.instance()[name];
-  };
+        return this.instance()[name];
+    };
 };
 
 /** @private Creates and returns a wrapper function to 
- *  call a property function and a property cast. 
+ *  call a property function and a property cast.
  */
 pv.Mark.funPropertyCaller = function(fun, cast) {
     // Avoiding the use of arguments object to try to speed things up
@@ -10940,7 +11492,7 @@ pv.Mark.funPropertyCaller = function(fun, cast) {
 };
 
 /** @private Sets the value of the property <i>name</i> to <i>v</i>. */
-pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag){
+pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag) {
     /* bit 0: 0 = value, 1 = function
      * bit 1: 0 = isDef,   1 = prop
      * ------------------------------
@@ -10956,10 +11508,10 @@ pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag){
      */
     var type = !isDef << 1 | (typeof v === "function");
     // A function and cast?
-    if((type & 1) && cast) {
-      v = pv.Mark.funPropertyCaller(v, cast);
-    } else if(v != null && cast) {
-      v = cast(v);
+    if ((type & 1) && cast) {
+        v = pv.Mark.funPropertyCaller(v, cast);
+    } else if (v != null && cast) {
+        v = cast(v);
     }
 
     // ------
@@ -10968,32 +11520,32 @@ pv.Mark.prototype.setPropertyValue = function(name, v, isDef, cast, chain, tag){
     var properties = this.$properties;
 
     var p = {
-        name:  name,
-        id:    pv.id(),
+        name: name,
+        id: pv.id(),
         value: v,
-        type:  type,
-        tag:   tag
+        type: type,
+        tag: tag
     };
 
     var specified = propertiesMap[name];
 
     propertiesMap[name] = p;
 
-    if(specified) {
-      // Find it and remove it
-      for(var i = 0, P = properties.length; i < P; i++) {
-        if(properties[i] === specified) {
-          properties.splice(i, 1);
-          break;
+    if (specified) {
+        // Find it and remove it
+        for (var i = 0, P = properties.length; i < P; i++) {
+            if (properties[i] === specified) {
+                properties.splice(i, 1);
+                break;
+            }
         }
-      }
     }
 
     properties.push(p);
 
-    if(chain && specified && type === 3) { // is a prop fun
-      p.proto = specified;
-      p.root  = specified.root || specified;
+    if (chain && specified && type === 3) { // is a prop fun
+        p.proto = specified;
+        p.root = specified.root || specified;
     }
 
     return p;
@@ -11003,9 +11555,11 @@ pv.Mark.prototype.intercept = function(name, v, keyArgs) {
     this.setPropertyValue(
         name,
         v,
-        /* isDef */ false,
+        /* isDef */
+        false,
         pv.get(keyArgs, 'noCast') ? null : pv.Mark.cast[name],
-        /* chain*/ true,
+        /* chain*/
+        true,
         pv.get(keyArgs, 'tag'));
 
     return this;
@@ -11018,15 +11572,15 @@ pv.Mark.prototype.intercept = function(name, v, keyArgs) {
  */
 pv.Mark.prototype.propertyValue = function(name, inherit) {
     var p = this.$propertiesMap[name];
-    if(p){
+    if (p) {
         return p.value;
     }
 
     // This mimics the way #bind works
-    if(inherit){
-        if(this.proto){
+    if (inherit) {
+        if (this.proto) {
             var value = this.proto._propertyValueRecursive(name);
-            if(value !== undefined){
+            if (value !== undefined) {
                 return value;
             }
         }
@@ -11040,8 +11594,12 @@ pv.Mark.prototype.propertyValue = function(name, inherit) {
 /** @private */
 pv.Mark.prototype._propertyValueRecursive = function(name) {
     var p = this.$propertiesMap[name];
-    if(p         ) { return p.value; }
-    if(this.proto) { return this.proto._propertyValueRecursive(name); }
+    if (p) {
+        return p.value;
+    }
+    if (this.proto) {
+        return this.proto._propertyValueRecursive(name);
+    }
     //return undefined;
 };
 
@@ -11053,10 +11611,10 @@ pv.Mark.stack = [];
 pv.Mark.prototype
     .property("data")
     .property("visible", Boolean)
-    // CSS attributes pass-through
-    .property("css", Object)
-    // SVG attributes pass-through
-    .property("svg", Object)
+// CSS attributes pass-through
+.property("css", Object)
+// SVG attributes pass-through
+.property("svg", Object)
     .property("left", Number)
     .property("right", Number)
     .property("top", Number)
@@ -11300,8 +11858,10 @@ pv.Mark.prototype._zOrder = 0;
  * @type pv.Mark
  */
 pv.Mark.prototype.defaults = new pv.Mark()
-    // If the root panel has no data, this default function receives d === undefined -> [undefined]
-    .data(function(d) { return [d]; })
+// If the root panel has no data, this default function receives d === undefined -> [undefined]
+.data(function(d) {
+    return [d];
+})
     .visible(true)
     .antialias(true)
     .events("painted");
@@ -11318,9 +11878,9 @@ pv.Mark.prototype.defaults = new pv.Mark()
  * @see #add
  */
 pv.Mark.prototype.extend = function(proto) {
-  this.proto  = proto;
-  this.target = proto.target;
-  return this;
+    this.proto = proto;
+    this.target = proto.target;
+    return this;
 };
 
 /**
@@ -11333,7 +11893,7 @@ pv.Mark.prototype.extend = function(proto) {
  * @see #extend
  */
 pv.Mark.prototype.add = function(type) {
-  return this.parent.add(type).extend(this);
+    return this.parent.add(type).extend(this);
 };
 
 /**
@@ -11344,19 +11904,25 @@ pv.Mark.prototype.add = function(type) {
  * @param {number} zOrder the Z order of the mark.
  * @return {number|pv.Mark} the zOrder or this.
  */
-pv.Mark.prototype.zOrder = function(zOrder){
-  if(!arguments.length) { return this._zOrder; }
+pv.Mark.prototype.zOrder = function(zOrder) {
+    if (!arguments.length) {
+        return this._zOrder;
+    }
 
-  zOrder = (+zOrder) || 0; // NaN -> 0
+    zOrder = (+zOrder) || 0; // NaN -> 0
 
-  if(this._zOrder !== zOrder) {
-    var p = this.parent;
-    if(p && this._zOrder !== 0) { p._zOrderChildCount--; }
-    this._zOrder = zOrder;
-    if(p && this._zOrder !== 0) { p._zOrderChildCount++; }
-  }
+    if (this._zOrder !== zOrder) {
+        var p = this.parent;
+        if (p && this._zOrder !== 0) {
+            p._zOrderChildCount--;
+        }
+        this._zOrder = zOrder;
+        if (p && this._zOrder !== 0) {
+            p._zOrderChildCount++;
+        }
+    }
 
-  return this;
+    return this;
 };
 
 /**
@@ -11386,62 +11952,80 @@ pv.Mark.prototype.zOrder = function(zOrder){
  * @returns {pv.Anchor} the new anchor.
  */
 pv.Mark.prototype.anchor = function(name) {
-  return new pv.Anchor(this)
-    .name   (name || "center") // default anchor name
-    .data   (function() { return this.scene.target.map(function(s) { return s.data; }); })
-    .visible(function() { return this.scene.target[this.index].visible; })
-    .id     (function() { return this.scene.target[this.index].id; })
-    .left(function() {
-        var s = this.scene.target[this.index], w = s.width || 0;
-        switch(this.name()) {
-          case "bottom":
-          case "top":
-          case "center": return s.left + w / 2;
-          case "left":   return null;
-        }
-        return s.left + w;
+    return new pv.Anchor(this)
+        .name(name || "center") // default anchor name
+    .data(function() {
+        return this.scene.target.map(function(s) {
+            return s.data;
+        });
     })
-    .top(function() {
-        var s = this.scene.target[this.index], h = s.height || 0;
-        switch(this.name()) {
-          case "left":
-          case "right":
-          case "center": return s.top + h / 2;
-          case "top":    return null;
-        }
-        return s.top + h;
-    })
-    .right(function() {
-        var s = this.scene.target[this.index];
-        return this.name() == "left" ? s.right + (s.width || 0) : null;
-    })
-    .bottom(function() {
-        var s = this.scene.target[this.index];
-        return this.name() == "top" ? s.bottom + (s.height || 0) : null;
-    })
-    .textAlign(function() {
-        switch(this.name()) {
-          case "bottom":
-          case "top":
-          case "center": return "center";
-          case "right":  return "right";
-        }
-        return "left";
-    })
-    .textBaseline(function() {
-        switch(this.name()) {
-          case "right":
-          case "left":
-          case "center": return "middle";
-          case "top":    return "top";
-        }
-        return "bottom";
-    });
+        .visible(function() {
+            return this.scene.target[this.index].visible;
+        })
+        .id(function() {
+            return this.scene.target[this.index].id;
+        })
+        .left(function() {
+            var s = this.scene.target[this.index],
+                w = s.width || 0;
+            switch (this.name()) {
+                case "bottom":
+                case "top":
+                case "center":
+                    return s.left + w / 2;
+                case "left":
+                    return null;
+            }
+            return s.left + w;
+        })
+        .top(function() {
+            var s = this.scene.target[this.index],
+                h = s.height || 0;
+            switch (this.name()) {
+                case "left":
+                case "right":
+                case "center":
+                    return s.top + h / 2;
+                case "top":
+                    return null;
+            }
+            return s.top + h;
+        })
+        .right(function() {
+            var s = this.scene.target[this.index];
+            return this.name() == "left" ? s.right + (s.width || 0) : null;
+        })
+        .bottom(function() {
+            var s = this.scene.target[this.index];
+            return this.name() == "top" ? s.bottom + (s.height || 0) : null;
+        })
+        .textAlign(function() {
+            switch (this.name()) {
+                case "bottom":
+                case "top":
+                case "center":
+                    return "center";
+                case "right":
+                    return "right";
+            }
+            return "left";
+        })
+        .textBaseline(function() {
+            switch (this.name()) {
+                case "right":
+                case "left":
+                case "center":
+                    return "middle";
+                case "top":
+                    return "top";
+            }
+            return "bottom";
+        });
 };
 
 /** @deprecated Replaced by {@link #target}. */
 pv.Mark.prototype.anchorTarget = function() {
-  return this.target;
+    return this.target;
 };
 
 /**
@@ -11454,7 +12038,7 @@ pv.Mark.prototype.anchorTarget = function() {
  * @returns {pv.Mark} this.
  */
 pv.Mark.prototype.margin = function(n) {
-  return this.left(n).right(n).top(n).bottom(n);
+    return this.left(n).right(n).top(n).bottom(n);
 };
 
 /**
@@ -11468,11 +12052,11 @@ pv.Mark.prototype.margin = function(n) {
  * @returns a node in the scene graph.
  */
 pv.Mark.prototype.instance = function(defaultIndex) {
-  var scene = this.scene || this.parent.instance(-1).children[this.childIndex],
-      index = (defaultIndex == null) || this.hasOwnProperty("index") ?
-              this.index :
-              defaultIndex;
-  return scene[index < 0 ? scene.length - 1 : index];
+    var scene = this.scene || this.parent.instance(-1).children[this.childIndex],
+        index = (defaultIndex == null) || this.hasOwnProperty("index") ?
+            this.index :
+            defaultIndex;
+    return scene[index < 0 ? scene.length - 1 : index];
 };
 
 /**
@@ -11481,36 +12065,38 @@ pv.Mark.prototype.instance = function(defaultIndex) {
  * @see pv.Anchor
  */
 pv.Mark.prototype.instances = function(source) {
-  var mark = this, index = [], scene;
+    var mark = this,
+        index = [],
+        scene;
 
-  /* Mirrored descent. */
-  while(!(scene = mark.scene)) {
-    index.push({
-      index:      source.parentIndex,
-      childIndex: mark.childIndex
-    });
-    
-    source = source.parent;
-    mark   = mark.parent;
-  }
+    /* Mirrored descent. */
+    while (!(scene = mark.scene)) {
+        index.push({
+            index: source.parentIndex,
+            childIndex: mark.childIndex
+        });
 
-  var j = index.length;
-  while(j--) {
-    var info = index[j];
-    scene = scene[info.index].children[info.childIndex];
-  }
+        source = source.parent;
+        mark = mark.parent;
+    }
 
-  /*
-   * When the anchor target is also an ancestor, as in the case of adding
-   * to a panel anchor, only generate one instance per panel. Also, set
-   * the margins to zero, since they are offset by the enclosing panel.
-   */
-  if (this.hasOwnProperty("index")) {
-    var s = pv.extend(scene[this.index]);
-    s.right = s.top = s.left = s.bottom = 0;
-    return [s];
-  }
-  return scene;
+    var j = index.length;
+    while (j--) {
+        var info = index[j];
+        scene = scene[info.index].children[info.childIndex];
+    }
+
+    /*
+     * When the anchor target is also an ancestor, as in the case of adding
+     * to a panel anchor, only generate one instance per panel. Also, set
+     * the margins to zero, since they are offset by the enclosing panel.
+     */
+    if (this.hasOwnProperty("index")) {
+        var s = pv.extend(scene[this.index]);
+        s.right = s.top = s.left = s.bottom = 0;
+        return [s];
+    }
+    return scene;
 };
 
 /**
@@ -11521,7 +12107,7 @@ pv.Mark.prototype.instances = function(source) {
  * @returns a node in the scene graph.
  */
 pv.Mark.prototype.first = function() {
-  return this.scene[0];
+    return this.scene[0];
 };
 
 /**
@@ -11534,7 +12120,7 @@ pv.Mark.prototype.first = function() {
  * @returns a node in the scene graph.
  */
 pv.Mark.prototype.last = function() {
-  return this.scene[this.scene.length - 1];
+    return this.scene[this.scene.length - 1];
 };
 
 /**
@@ -11544,7 +12130,7 @@ pv.Mark.prototype.last = function() {
  * @returns a node in the scene graph, or null.
  */
 pv.Mark.prototype.sibling = function() {
-  return (this.index == 0) ? null : this.scene[this.index - 1];
+    return (this.index == 0) ? null : this.scene[this.index - 1];
 };
 
 /**
@@ -11555,8 +12141,9 @@ pv.Mark.prototype.sibling = function() {
  * @returns a node in the scene graph, or null.
  */
 pv.Mark.prototype.cousin = function() {
-  var p = this.parent, s = p && p.sibling();
-  return (s && s.children) ? s.children[this.childIndex][this.index] : null;
+    var p = this.parent,
+        s = p && p.sibling();
+    return (s && s.children) ? s.children[this.childIndex][this.index] : null;
 };
 
 /**
@@ -11572,8 +12159,8 @@ pv.Mark.prototype._renderId = 0;
  * The id of the last render that occurred for the associated given mark tree.
  * @type number
  */
-pv.Mark.prototype.renderId = function() { 
-  return this.root._renderId; 
+pv.Mark.prototype.renderId = function() {
+    return this.root._renderId;
 };
 
 /**
@@ -11590,17 +12177,17 @@ pv.Mark.prototype.renderId = function() {
  * will be rendered.
  */
 pv.Mark.prototype.render = function() {
-  // For the first render, take it from the top.
-  var root = this.root;
-  if(this.parent && !root.scene) {
-    root.render();
-    return;
-  }
+    // For the first render, take it from the top.
+    var root = this.root;
+    if (this.parent && !root.scene) {
+        root.render();
+        return;
+    }
 
-  // Increment the (root) render id.
-  root._renderId++;
+    // Increment the (root) render id.
+    root._renderId++;
 
-  this.renderCore();
+    this.renderCore();
 };
 
 pv.Mark.prototype.renderCore = function() {
@@ -11610,7 +12197,9 @@ pv.Mark.prototype.renderCore = function() {
 
     // Record the path to this mark.
     var indexes = []; // [root excluded], ..., this.parent.childIndex, this.childIndex
-    for(var mark = this; mark.parent; mark = mark.parent) { indexes.unshift(mark.childIndex); }
+    for (var mark = this; mark.parent; mark = mark.parent) {
+        indexes.unshift(mark.childIndex);
+    }
 
     var L = indexes.length;
 
@@ -11621,46 +12210,51 @@ pv.Mark.prototype.renderCore = function() {
      * when in the context of the first ascendant of 'this' that has an index set.
      * The stack will already be filled up to the context scene/index.
      */
+
     function render(mark, depth, scale) {
-      mark.scale = scale;
-      if(depth < L) {
-        // At least one more child index to traverse, for getting to the initial mark
+        mark.scale = scale;
+        if (depth < L) {
+            // At least one more child index to traverse, for getting to the initial mark
 
-        // If addStack, then we've reached a level not covered by #context.
-        // TODO: Can't think of a situation in which addStack and index is an own property.
-        var addStack = (depth >= stack.length);
-        if(addStack) { stack.unshift(null); }
-        if(mark.hasOwnProperty("index")) {
-          // Render only instances of the outer "this" mark
-          // that are found along along this branch.
-          renderCurrentInstance(mark, depth, scale, addStack);
+            // If addStack, then we've reached a level not covered by #context.
+            // TODO: Can't think of a situation in which addStack and index is an own property.
+            var addStack = (depth >= stack.length);
+            if (addStack) {
+                stack.unshift(null);
+            }
+            if (mark.hasOwnProperty("index")) {
+                // Render only instances of the outer "this" mark
+                // that are found along along this branch.
+                renderCurrentInstance(mark, depth, scale, addStack);
+            } else {
+                // Traverse every branch that leads to
+                // instances of the outer "this" mark.
+                for (var i = 0, n = mark.scene.length; i < n; i++) {
+                    mark.index = i;
+                    renderCurrentInstance(mark, depth, scale, addStack);
+                }
+                delete mark.index;
+            }
+            if (addStack) {
+                stack.shift();
+            }
         } else {
-          // Traverse every branch that leads to
-          // instances of the outer "this" mark.
-          for(var i = 0, n = mark.scene.length; i < n; i++) {
-            mark.index = i;
-            renderCurrentInstance(mark, depth, scale, addStack);
-          }
-          delete mark.index;
+            // Got to a "scenes" node of mark = outer "this".
+            // Build and UpdateAll
+            mark.build();
+
+            /*
+             * In the update phase, the scene is rendered by creating and updating
+             * elements and attributes in the SVG image. No properties are evaluated
+             * during the update phase; instead the values computed previously in the
+             * build phase are simply translated into SVG. The update phase is
+             * decoupled (see pv.Scene) to allow different rendering engines.
+             */
+            pv.Scene.scale = scale;
+            pv.Scene.updateAll(mark.scene);
         }
-        if(addStack) { stack.shift(); }
-      } else {
-        // Got to a "scenes" node of mark = outer "this".
-        // Build and UpdateAll
-        mark.build();
 
-        /*
-         * In the update phase, the scene is rendered by creating and updating
-         * elements and attributes in the SVG image. No properties are evaluated
-         * during the update phase; instead the values computed previously in the
-         * build phase are simply translated into SVG. The update phase is
-         * decoupled (see pv.Scene) to allow different rendering engines.
-         */
-        pv.Scene.scale = scale;
-        pv.Scene.updateAll(mark.scene);
-      }
-
-      delete mark.scale;
+        delete mark.scale;
     }
 
     /**
@@ -11675,49 +12269,63 @@ pv.Mark.prototype.renderCore = function() {
      * any preceding children, so as to allow property chaining. This is
      * consistent with first-pass rendering.
      */
+
     function renderCurrentInstance(mark, depth, scale, fillStack) {
-      var s = mark.scene[mark.index], i;
-      if(s.visible) {
-        var childMarks  = mark.children;
-        var childScenez = s.children;
-        var childIndex  = indexes[depth];
-        var childMark   = childMarks[childIndex];
+        var s = mark.scene[mark.index],
+            i;
+        if (s.visible) {
+            var childMarks = mark.children;
+            var childScenez = s.children;
+            var childIndex = indexes[depth];
+            var childMark = childMarks[childIndex];
 
-        // If current child's scene is not set, include it in the loops below.
-        if(!childMark.scene) { childIndex++; }
+            // If current child's scene is not set, include it in the loops below.
+            if (!childMark.scene) {
+                childIndex++;
+            }
 
-        // Set preceding (and possibly self) child marks' scenes.
-        for(i = 0; i < childIndex; i++) { childMarks[i].scene = childScenez[i]; }
+            // Set preceding (and possibly self) child marks' scenes.
+            for (i = 0; i < childIndex; i++) {
+                childMarks[i].scene = childScenez[i];
+            }
 
-        if(fillStack) { stack[0] = s.data; }
+            if (fillStack) {
+                stack[0] = s.data;
+            }
 
-        render(childMark, depth + 1, scale * s.transform.k);
+            render(childMark, depth + 1, scale * s.transform.k);
 
-        // Clear preceding (and possibly self) child mark's scenes.
-        // It's cheaper to set to null than to delete.
-        for(i = 0; i < childIndex; i++) { childMarks[i].scene = undefined; }
-      }
+            // Clear preceding (and possibly self) child mark's scenes.
+            // It's cheaper to set to null than to delete.
+            for (i = 0; i < childIndex; i++) {
+                childMarks[i].scene = undefined;
+            }
+        }
     }
 
     // Bind this mark's property definitions.
     this.bind();
 
     // The render context is the first ancestor with an explicit index.
-    while(parent && !parent.hasOwnProperty("index")) { parent = parent.parent; }
+    while (parent && !parent.hasOwnProperty("index")) {
+        parent = parent.parent;
+    }
 
     // Recursively render all instances of this mark.
     try {
-      this.context(
-        parent ? parent.scene : undefined,
-        parent ? parent.index : -1,
-        function() {
-          // pv.Mark.stack contains the data until parent.scene, parent.index
-          // parent and all its ascendants have scene, index and scale set.
-          // Direct children of parent have scene and scale set.
-          render(this.root, 0, 1);
-        });
-    } catch(e) {
-      if(stack.length > S) { stack.length = S; }
+        this.context(
+            parent ? parent.scene : undefined,
+            parent ? parent.index : -1,
+            function() {
+                // pv.Mark.stack contains the data until parent.scene, parent.index
+                // parent and all its ascendants have scene, index and scale set.
+                // Direct children of parent have scene and scale set.
+                render(this.root, 0, 1);
+            });
+    } catch (e) {
+        if (stack.length > S) {
+            stack.length = S;
+        }
     }
 };
 
@@ -11777,121 +12385,141 @@ pv.Mark.prototype.bind = function() {
          * 2 - prop/value,
          * 3 - prop/fun
          */
-        types = [[], [], [], []];
+        types = [
+            [],
+            [],
+            [],
+            []
+        ];
 
-  /**
-   * Scans the proto chain for the specified mark.
-   *
-   * On each mark properties are traversed in reverse
-   * so that, below, when reverse() is called
-   * function props/defs recover their original defining order.
-   *
-   * M1 -> P1_0, P1_1, P1_2, P1_3
-   * ^
-   * |
-   * M2 -> P2_0, P2_1
-   * ^
-   * |
-   * M3 -> P3_0, P3_1
-   *
-   * List     -> P3_1, P3_0, P2_1, P2_0, P1_3, P1_2, P1_1, P1_0
-   *
-   * Reversed -> P1_0, P1_1, P1_2, P1_3, P2_0, P2_1, P3_0, P3_1
-   */
-  function bind(mark) {
+    /**
+     * Scans the proto chain for the specified mark.
+     *
+     * On each mark properties are traversed in reverse
+     * so that, below, when reverse() is called
+     * function props/defs recover their original defining order.
+     *
+     * M1 -> P1_0, P1_1, P1_2, P1_3
+     * ^
+     * |
+     * M2 -> P2_0, P2_1
+     * ^
+     * |
+     * M3 -> P3_0, P3_1
+     *
+     * List     -> P3_1, P3_0, P2_1, P2_0, P1_3, P1_2, P1_1, P1_0
+     *
+     * Reversed -> P1_0, P1_1, P1_2, P1_3, P2_0, P2_1, P3_0, P3_1
+     */
+
+    function bind(mark) {
+        do {
+            var properties = mark.$properties;
+            var i = properties.length;
+            while (i--) {
+                var p = properties[i];
+                var name = p.name;
+                var pLeaf = seen[name];
+                if (!pLeaf) {
+                    seen[name] = p;
+                    switch (name) {
+                        case 'data':
+                            data = p;
+                            break;
+                        case 'visible':
+                        case 'id':
+                            required.push(p);
+                            break;
+                        default:
+                            types[p.type].push(p);
+                            break;
+                    }
+                } else if (pLeaf.type === 3) { // prop/fun
+                    // Chain properties
+                    //
+                    // seen[name]-> (leaf).proto-> (B).proto-> (C).proto-> (root)
+                    //                    .root-------------------------------^
+                    var pRoot = pLeaf.root;
+                    pLeaf.root = p;
+                    if (!pRoot) {
+                        pLeaf.proto = p;
+                    } else if (!pRoot.proto) {
+                        pRoot.proto = p;
+                    }
+                }
+            }
+        } while ((mark = mark.proto));
+    }
+
+    /* Scan the proto chain for all defined properties. */
+    bind(this);
+    bind(this.defaults);
+
+    var types0 = types[0];
+    var types1 = types[1].reverse();
+    var types2 = types[2];
+
+    types[3].reverse();
+
+    /* Any undefined properties are null. */
+    var mark = this;
     do {
-      var properties = mark.$properties;
-      var i = properties.length;
-      while(i--) {
-        var p = properties[i];
-        var name = p.name;
-        var pLeaf = seen[name];
-        if(!pLeaf) {
-          seen[name] = p;
-          switch(name) {
-            case 'data': data = p; break;
-            case 'visible': case 'id': required.push(p); break;
-            default: types[p.type].push(p); break;
-          }
-        } else if(pLeaf.type === 3) { // prop/fun
-          // Chain properties
-          //
-          // seen[name]-> (leaf).proto-> (B).proto-> (C).proto-> (root)
-          //                    .root-------------------------------^
-          var pRoot  = pLeaf.root;
-          pLeaf.root = p;
-          if(!pRoot)            { pLeaf.proto = p; }
-          else if(!pRoot.proto) { pRoot.proto = p; }
+        for (var name in mark.properties) {
+            if (!(name in seen)) {
+                types2.push((seen[name] = {
+                    name: name,
+                    type: 2,
+                    value: null
+                }));
+            }
         }
-      }
-    } while((mark = mark.proto));
-  }
+    } while ((mark = mark.proto));
 
-  /* Scan the proto chain for all defined properties. */
-  bind(this);
-  bind(this.defaults);
-
-  var types0 = types[0];
-  var types1 = types[1].reverse();
-  var types2 = types[2];
-
-  types[3].reverse();
-
-  /* Any undefined properties are null. */
-  var mark  = this;
-  do {
-    for(var name in mark.properties) {
-      if(!(name in seen)) {
-        types2.push((seen[name] = {name: name, type: 2, value: null}));
-      }
+    /* Define setter-getter for inherited defs. */
+    var defs;
+    if (types0.length || types1.length) {
+        defs = types0.concat(types1);
+        for (var i = 0, D = defs.length; i < D; i++) {
+            this.propertyMethod(defs[i].name, true);
+        }
+    } else {
+        defs = [];
     }
-  } while((mark = mark.proto));
 
-  /* Define setter-getter for inherited defs. */
-  var defs;
-  if(types0.length || types1.length) {
-    defs = types0.concat(types1);
-    for(var i = 0, D = defs.length ; i < D ; i++) {
-      this.propertyMethod(defs[i].name, true);
-    }
-  } else {
-    defs = [];
-  }
+    /* Setup binds to evaluate constants before functions. */
+    this.binds = {
+        properties: seen,
+        net: {}, // name -> net index // null = 0 is default position
+        data: data,
+        defs: defs,
+        required: required,
 
-  /* Setup binds to evaluate constants before functions. */
-  this.binds = {
-    properties: seen,
-    net:        {}, // name -> net index // null = 0 is default position
-    data:       data,
-    defs:       defs,
-    required:   required,
-
-    // NOTE: although defs are included in the optional properties
-    // they are evaluated once per parent instance, before other non-def properties.
-    // Yet, for each instance, the already evaluated's def values
-    // are copied to the instance scene - all instances share the same value...
-    // Only to satisfy this copy operation they go in the instance-props array.
-    optional:   pv.blend(types)
-  };
+        // NOTE: although defs are included in the optional properties
+        // they are evaluated once per parent instance, before other non-def properties.
+        // Yet, for each instance, the already evaluated's def values
+        // are copied to the instance scene - all instances share the same value...
+        // Only to satisfy this copy operation they go in the instance-props array.
+        optional: pv.blend(types)
+    };
 };
 
-pv.Mark.prototype.updateNet = function(pDependent, netIndex){
+pv.Mark.prototype.updateNet = function(pDependent, netIndex) {
     var binds = this.binds;
     var props = binds.properties;
-    var net   = binds.net;
+    var net = binds.net;
 
     propagateRecursive(pDependent, netIndex);
 
-    function propagateRecursive(p, minNetIndex){
-        if(minNetIndex > (net[p.name] || 0)){
+    function propagateRecursive(p, minNetIndex) {
+        if (minNetIndex > (net[p.name] || 0)) {
             net[p.name] = minNetIndex;
             var deps = p.dependents;
-            if(deps){
+            if (deps) {
                 minNetIndex++;
-                for(var depName in deps){
-                    if(deps.hasOwnProperty(depName)){
+                for (var depName in deps) {
+                    if (deps.hasOwnProperty(depName)) {
                         var pDep = props[depName];
-                        if(pDep){
+                        if (pDep) {
                             propagateRecursive(pDep, minNetIndex);
                         }
                     }
@@ -11936,88 +12564,90 @@ pv.Mark.prototype.updateNet = function(pDependent, netIndex){
  * @param parent the instance of the parent panel from the scene graph.
  */
 pv.Mark.prototype.build = function() {
-  var stack = pv.Mark.stack;
-  var scene = this.scene;
-  if(!scene) {
-    // Create scene
-    scene = this.scene = [];
-    scene.mark = this;
-    scene.type = this.type;
-    scene.childIndex = this.childIndex;
-    var parent = this.parent;
-    if(parent) {
-      scene.parent = parent.scene;
-      scene.parentIndex = parent.index;
+    var stack = pv.Mark.stack;
+    var scene = this.scene;
+    if (!scene) {
+        // Create scene
+        scene = this.scene = [];
+        scene.mark = this;
+        scene.type = this.type;
+        scene.childIndex = this.childIndex;
+        var parent = this.parent;
+        if (parent) {
+            scene.parent = parent.scene;
+            scene.parentIndex = parent.index;
+        }
     }
-  }
 
-  // Resolve anchor target.
-  if(this.target) { scene.target = this.target.instances(scene); }
-
-  // Evaluate defs. 
-  // Defs are evaluated once per `scene`, 
-  // and their values' are thus shared by every instance.
-  var bdefs = this.binds.defs;
-  if(bdefs.length) {
-    var defs = scene.defs || (scene.defs = {});
-    for(var i = 0, B = bdefs.length ; i < B ; i++) {
-      var p = bdefs[i];
-      var d = defs[p.name];
-      if(!d || (p.id > d.id)) {
-        defs[p.name] = {
-          id: 0, // this def will be re-evaluated on next build
-          // The same that's said below about the data property, applies here.
-          value: (p.type & 1) ? p.value.apply(this, stack) : p.value
-        };
-      }
+    // Resolve anchor target.
+    if (this.target) {
+        scene.target = this.target.instances(scene);
     }
-  }
 
-  // Evaluate special data property.
-  // With the stack of the parent!!
-  // this.index is -1
-  var datas = this.evalProperty(this.binds.data);
-  var L = datas.length;
-
-  // Create, update and delete scene nodes.
-  var markProto = pv.Mark.prototype;
-
-  // Adjust scene length to data length.
-  scene.length = L;
-
-  // Create stack position to receive each datas[i]
-  stack.unshift(null);
-  try {
-    for(var i = 0 ; i < L ; i++) {
-      markProto.index = this.index = i;
-
-      // Create scene instance
-      var instance = scene[i];
-      if(!instance) {
-        instance = scene[i] = {};
-      } else if(instance._state) {
-        // Reset any per-render/build state
-        delete instance._state;
-      }
-
-      // Fill special data property and update the stack.
-      instance.data = stack[0] = datas[i];
-
-      this.preBuildInstance(instance);
-
-      this.buildInstance(instance);
+    // Evaluate defs. 
+    // Defs are evaluated once per `scene`, 
+    // and their values' are thus shared by every instance.
+    var bdefs = this.binds.defs;
+    if (bdefs.length) {
+        var defs = scene.defs || (scene.defs = {});
+        for (var i = 0, B = bdefs.length; i < B; i++) {
+            var p = bdefs[i];
+            var d = defs[p.name];
+            if (!d || (p.id > d.id)) {
+                defs[p.name] = {
+                    id: 0, // this def will be re-evaluated on next build
+                    // The same that's said below about the data property, applies here.
+                    value: (p.type & 1) ? p.value.apply(this, stack) : p.value
+                };
+            }
+        }
     }
-  } finally {
-    markProto.index = -1;
-    delete this.index;
-    stack.shift();
-  }
 
-  return this;
+    // Evaluate special data property.
+    // With the stack of the parent!!
+    // this.index is -1
+    var datas = this.evalProperty(this.binds.data);
+    var L = datas.length;
+
+    // Create, update and delete scene nodes.
+    var markProto = pv.Mark.prototype;
+
+    // Adjust scene length to data length.
+    scene.length = L;
+
+    // Create stack position to receive each datas[i]
+    stack.unshift(null);
+    try {
+        for (var i = 0; i < L; i++) {
+            markProto.index = this.index = i;
+
+            // Create scene instance
+            var instance = scene[i];
+            if (!instance) {
+                instance = scene[i] = {};
+            } else if (instance._state) {
+                // Reset any per-render/build state
+                delete instance._state;
+            }
+
+            // Fill special data property and update the stack.
+            instance.data = stack[0] = datas[i];
+
+            this.preBuildInstance(instance);
+
+            this.buildInstance(instance);
+        }
+    } finally {
+        markProto.index = -1;
+        delete this.index;
+        stack.shift();
+    }
+
+    return this;
 };
 
 /**
- * Obtains an instance's state object, 
+ * Obtains an instance's state object,
  * creating one if not already created.
  * <p>
  * Use this to store per-instance and per-render
@@ -12026,18 +12656,20 @@ pv.Mark.prototype.build = function() {
  * @param object [s] the instance from which the state is desired.
  * @return object the instance state or <tt>null</tt> when there is no current instance.
  */
-pv.Mark.prototype.instanceState = function(s) { 
-  if(!s) { s = this.instance(); }
-  return s ? (s._state || (s._state = {})) : null;
+pv.Mark.prototype.instanceState = function(s) {
+    if (!s) {
+        s = this.instance();
+    }
+    return s ? (s._state || (s._state = {})) : null;
 };
 
 /**
- * Allows performing any per scene instance initialization 
+ * Allows performing any per scene instance initialization
  * without requiring to override method {@link #buildInstance},
  * a solution that incurs in stack depth cost.
  */
 pv.Mark.prototype.preBuildInstance = function(s) {
-  // NOOP
+    // NOOP
 };
 
 /**
@@ -12048,72 +12680,79 @@ pv.Mark.prototype.preBuildInstance = function(s) {
  * @param properties an array of properties.
  */
 pv.Mark.prototype.buildProperties = function(s, properties) {
-  var stack = pv.Mark.stack;
-  var oldProtoProp = pv.propertyProto;
-  try {
-    for(var i = 0, n = properties.length; i < n; i++) {
-      var p = properties[i];
-      var v;
+    var stack = pv.Mark.stack;
+    var oldProtoProp = pv.propertyProto;
+    try {
+        for (var i = 0, n = properties.length; i < n; i++) {
+            var p = properties[i];
+            var v;
 
-      // Most heavy, then most frequent
-      switch(p.type) {
-        // prop/fun
-        case 3:
-          pv.propertyProto = p.proto;
-          v = p.value.apply(this, stack);
-          break;
+            // Most heavy, then most frequent
+            switch (p.type) {
+                // prop/fun
+                case 3:
+                    pv.propertyProto = p.proto;
+                    v = p.value.apply(this, stack);
+                    break;
 
-        // prop/value
-        case 2: v = p.value; break;
+                    // prop/value
+                case 2:
+                    v = p.value;
+                    break;
 
-        // def/value,fun
-        // case 0: case 1: 
-        default: v = this.scene.defs[p.name].value; break;
-      }
-      
-      s[p.name] = v;
+                    // def/value,fun
+                    // case 0: case 1: 
+                default:
+                    v = this.scene.defs[p.name].value;
+                    break;
+            }
+
+            s[p.name] = v;
+        }
+    } finally {
+        pv.propertyProto = oldProtoProp;
     }
-  } finally {
-    pv.propertyProto = oldProtoProp;
-  }
 };
 
 pv.Mark.prototype.evalProperty = function(p) {
-  // Most heavy, then most frequent
-  switch(p.type) {
-    // prop/fun
-    case 3:
-      var oldProtoProp = pv.propertyProto;
-      try {
-        pv.propertyProto = p.proto;
-        return p.value.apply(this, pv.Mark.stack);
-      } finally {
-        pv.propertyProto = oldProtoProp;
-      }
-      break;
+    // Most heavy, then most frequent
+    switch (p.type) {
+        // prop/fun
+        case 3:
+            var oldProtoProp = pv.propertyProto;
+            try {
+                pv.propertyProto = p.proto;
+                return p.value.apply(this, pv.Mark.stack);
+            } finally {
+                pv.propertyProto = oldProtoProp;
+            }
+            break;
 
-    // prop/value
-    case 2: return p.value;
-  }
+            // prop/value
+        case 2:
+            return p.value;
+    }
 
-  // def/value,fun
-  // case 0: case 1:
-  return this.scene.defs[p.name].value;
+    // def/value,fun
+    // case 0: case 1:
+    return this.scene.defs[p.name].value;
 };
 
-pv.Mark.prototype.delegate = function(dv, tag){
-  var protoProp = pv.propertyProto;
-  if(protoProp && (!tag || protoProp.tag === tag)){
-    var value = this.evalProperty(protoProp);
-    if(value !== undefined) { return value; }
-  }
+pv.Mark.prototype.delegate = function(dv, tag) {
+    var protoProp = pv.propertyProto;
+    if (protoProp && (!tag || protoProp.tag === tag)) {
+        var value = this.evalProperty(protoProp);
+        if (value !== undefined) {
+            return value;
+        }
+    }
 
-  return dv;
+    return dv;
 };
 
 pv.Mark.prototype.hasDelegate = function(tag) {
-  var protoProp = pv.propertyProto;
-  return !!protoProp && (!tag || protoProp.tag === tag);
+    var protoProp = pv.propertyProto;
+    return !!protoProp && (!tag || protoProp.tag === tag);
 };
 
 pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
@@ -12125,18 +12764,18 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
 
     var n = properties.length;
     try {
-        while(true) {
+        while (true) {
             netDirtyProps = null;
             evaluatedProps = {};
             var oldProtoProp = pv.propertyProto;
             try {
-                for (var i = 0 ; i < n; i++) {
+                for (var i = 0; i < n; i++) {
                     var p = properties[i];
                     var name = p.name;
                     evaluatedProps[name] = true;
 
                     // Only re-evaluate properties marked dirty on the previous iteration
-                    if(!prevNetDirtyProps || prevNetDirtyProps[name]) {
+                    if (!prevNetDirtyProps || prevNetDirtyProps[name]) {
                         var v;
                         switch (p.type) {
                             case 3:
@@ -12145,17 +12784,18 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                                 pv.propertyEvalDependencies = null;
 
                                 pv.propertyProto = p.proto;
-                                v = p.value.apply(this,  stack);
+                                v = p.value.apply(this, stack);
 
                                 newNetIndex = pv.propertyEvalNetIndex;
-                                if(newNetIndex > netIndex) {
+                                if (newNetIndex > netIndex) {
                                     var evalDeps = pv.propertyEvalDependencies;
-                                    for(var depName in evalDeps) {
+                                    for (var depName in evalDeps) {
                                         // If dependent property has not yet been evaluated
                                         // set it as dirty
-                                        if(evalDeps.hasOwnProperty(depName) &&
-                                           !evaluatedProps.hasOwnProperty(name)){
-                                            if(!netDirtyProps) { netDirtyProps = {}; }
+                                        if (evalDeps.hasOwnProperty(depName) && !evaluatedProps.hasOwnProperty(name)) {
+                                            if (!netDirtyProps) {
+                                                netDirtyProps = {};
+                                            }
                                             netDirtyProps[depName] = true;
                                         }
                                     }
@@ -12168,7 +12808,7 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                                 v = p.value;
                                 break;
 
-                            // copy already evaluated def value to each instance's scene
+                                // copy already evaluated def value to each instance's scene
                             case 0:
                             case 1:
                                 v = this.scene.defs[name].value;
@@ -12182,17 +12822,21 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
                 pv.propertyProto = oldProtoProp;
             }
 
-            if(!netDirtyProps) { break; }
+            if (!netDirtyProps) {
+                break;
+            }
 
             prevNetDirtyProps = netDirtyProps;
 
             // Sort properties on net index and repeat...
 
-            propertyIndexes = pv.numerate(properties, function(p) { return p.name; });
+            propertyIndexes = pv.numerate(properties, function(p) {
+                return p.name;
+            });
 
             properties.sort(function(pa, pb) {
                 var comp = pv.naturalOrder(net[pa.name] || 0, net[pb.name] || 0);
-                if(!comp) {
+                if (!comp) {
                     // Force mantaining original order
                     comp = pv.naturalOrder(propertyIndexes[pa.name], propertyIndexes[pb.name]);
                 }
@@ -12223,16 +12867,16 @@ pv.Mark.prototype.buildPropertiesWithDepTracking = function(s, properties) {
  * @param s a node in the scene graph; the instance of the mark to build.
  */
 pv.Mark.prototype.buildInstance = function(s) {
-  this.buildProperties(s, this.binds.required);
-  if(s.visible) {
-    if(!this.index) {
-      this.buildPropertiesWithDepTracking(s, this.binds.optional);
-    } else {
-      this.buildProperties(s, this.binds.optional);
-    }
+    this.buildProperties(s, this.binds.required);
+    if (s.visible) {
+        if (!this.index) {
+            this.buildPropertiesWithDepTracking(s, this.binds.optional);
+        } else {
+            this.buildProperties(s, this.binds.optional);
+        }
 
-    this.buildImplied(s);
-  }
+        this.buildImplied(s);
+    }
 };
 
 /**
@@ -12246,68 +12890,80 @@ pv.Mark.prototype.buildInstance = function(s) {
  * @param s a node in the scene graph; the instance of the mark to build.
  */
 pv.Mark.prototype.buildImplied = function(s) {
-  var l = s.left;
-  var r = s.right;
-  var t = s.top;
-  var b = s.bottom;
+    var l = s.left;
+    var r = s.right;
+    var t = s.top;
+    var b = s.bottom;
 
-  /* Assume width and height are zero if not supported by this mark type. */
-  var p = this.properties;
-  var w = p.width  ? s.width  : 0;
-  var h = p.height ? s.height : 0;
+    /* Assume width and height are zero if not supported by this mark type. */
+    var p = this.properties;
+    var w = p.width ? s.width : 0;
+    var h = p.height ? s.height : 0;
 
-  /* Compute implied width, right and left. */
-  var parent_s, checked;
+    /* Compute implied width, right and left. */
+    var parent_s, checked;
 
-  if(w == null || r == null || l == null) {
-    parent_s = this.parent && this.parent.instance();
-    checked  = true;
+    if (w == null || r == null || l == null) {
+        parent_s = this.parent && this.parent.instance();
+        checked = true;
 
-    var width = parent_s ? parent_s.width : (w + l + r);
-    if(w == null) {
-      w = width - (r = r || 0) - (l = l || 0);
-    } else if(r == null) {
-      if(l == null) {
-        l = r = (width - w) / 2;
-      } else {
-        r = width - w - l;
-      }
-    } else {  // => l == null
-      l = width - w - r;
+        var width = parent_s ? parent_s.width : (w + l + r);
+        if (w == null) {
+            w = width - (r = r || 0) - (l = l || 0);
+        } else if (r == null) {
+            if (l == null) {
+                l = r = (width - w) / 2;
+            } else {
+                r = width - w - l;
+            }
+        } else { // => l == null
+            l = width - w - r;
+        }
     }
-  }
 
-  /* Compute implied height, bottom and top. */
-  if(h == null || b == null || t == null) {
-    if(!checked) { parent_s = this.parent && this.parent.instance(); }
+    /* Compute implied height, bottom and top. */
+    if (h == null || b == null || t == null) {
+        if (!checked) {
+            parent_s = this.parent && this.parent.instance();
+        }
 
-    var height = parent_s ? parent_s.height : (h + t + b);
-    if(h == null) {
-      h = height - (t = t || 0) - (b = b || 0);
-    } else if(b == null) {
-      if(t == null) {
-        b = t = (height - h) / 2;
-      } else {
-        b = height - h - t;
-      }
-    } else { // => t == null
-      t = height - h - b;
+        var height = parent_s ? parent_s.height : (h + t + b);
+        if (h == null) {
+            h = height - (t = t || 0) - (b = b || 0);
+        } else if (b == null) {
+            if (t == null) {
+                b = t = (height - h) / 2;
+            } else {
+                b = height - h - t;
+            }
+        } else { // => t == null
+            t = height - h - b;
+        }
     }
-  }
 
-  s.left   = l;
-  s.right  = r;
-  s.top    = t;
-  s.bottom = b;
+    s.left = l;
+    s.right = r;
+    s.top = t;
+    s.bottom = b;
 
-  /* Only set width and height if they are supported by this mark type. */
-  if(p.width ) { s.width  = w; }
-  if(p.height) { s.height = h; }
+    /* Only set width and height if they are supported by this mark type. */
+    if (p.width) {
+        s.width = w;
+    }
+    if (p.height) {
+        s.height = h;
+    }
 
-  /* Set any null colors to pv.FillStyle.transparent. */
-  if(p.textStyle   && !s.textStyle  ) { s.textStyle   = pv.FillStyle.transparent; }
-  if(p.fillStyle   && !s.fillStyle  ) { s.fillStyle   = pv.FillStyle.transparent; }
-  if(p.strokeStyle && !s.strokeStyle) { s.strokeStyle = pv.FillStyle.transparent; }
+    /* Set any null colors to pv.FillStyle.transparent. */
+    if (p.textStyle && !s.textStyle) {
+        s.textStyle = pv.FillStyle.transparent;
+    }
+    if (p.fillStyle && !s.fillStyle) {
+        s.fillStyle = pv.FillStyle.transparent;
+    }
+    if (p.strokeStyle && !s.strokeStyle) {
+        s.strokeStyle = pv.FillStyle.transparent;
+    }
 };
 
 /**
@@ -12318,37 +12974,39 @@ pv.Mark.prototype.buildImplied = function(s) {
  * @returns {pv.Vector} the mouse location.
  */
 pv.Mark.prototype.mouse = function() {
-  var n = this.root.canvas();
+    var n = this.root.canvas();
 
-  // Calling #mouse from outside a mouse event (like during load, to follow mouse position)
-  // may result in there being no pv.event  or the event not having pageX/Y defined.
-  var ev = pv.event;
-  var x  = (ev && ev.pageX) || 0;
-  var y  = (ev && ev.pageY) || 0;
+    // Calling #mouse from outside a mouse event (like during load, to follow mouse position)
+    // may result in there being no pv.event  or the event not having pageX/Y defined.
+    var ev = pv.event;
+    var x = (ev && ev.pageX) || 0;
+    var y = (ev && ev.pageY) || 0;
 
-  // Compute x/y-coordinates relative to the panel.
-  var offset = pv.elementOffset(n);
-  if(offset) {
-    var getStyle = pv.cssStyle(n);
-    x -= offset.left + parseFloat(getStyle('paddingLeft') || 0);
-    y -= offset.top  + parseFloat(getStyle('paddingTop')  || 0);
-  }
+    // Compute x/y-coordinates relative to the panel.
+    var offset = pv.elementOffset(n);
+    if (offset) {
+        var getStyle = pv.cssStyle(n);
+        x -= offset.left + parseFloat(getStyle('paddingLeft') || 0);
+        y -= offset.top + parseFloat(getStyle('paddingTop') || 0);
+    }
 
-  // Compute the inverse transform of all enclosing panels.
-  var t = pv.Transform.identity;
-  var p = this.properties.transform ? this : this.parent;
-  var pz = [];
+    // Compute the inverse transform of all enclosing panels.
+    var t = pv.Transform.identity;
+    var p = this.properties.transform ? this : this.parent;
+    var pz = [];
 
-  do { pz.push(p); } while((p = p.parent));
+    do {
+        pz.push(p);
+    } while ((p = p.parent));
 
-  while((p = pz.pop())) {
-    var pinst = p.instance();
-    t = t.translate(pinst.left, pinst.top)
-         .times(pinst.transform);
-  }
+    while ((p = pz.pop())) {
+        var pinst = p.instance();
+        t = t.translate(pinst.left, pinst.top)
+            .times(pinst.transform);
+    }
 
-  t = t.invert();
-  return pv.vector(x * t.k + t.x, y * t.k + t.y);
+    t = t.invert();
+    return pv.vector(x * t.k + t.x, y * t.k + t.y);
 };
 
 /**
@@ -12400,20 +13058,20 @@ pv.Mark.prototype.mouse = function() {
  * @returns {pv.Mark} this.
  */
 pv.Mark.prototype.event = function(type, handler) {
-  handler = pv.functor(handler);
+    handler = pv.functor(handler);
 
-  var hs = this.$handlers[type];
-  if(!hs) {
-    hs = handler;
-  } else if(hs instanceof Array) {
-    hs.push(handler);
-  } else {
-    hs = [hs, handler];
-  }
+    var hs = this.$handlers[type];
+    if (!hs) {
+        hs = handler;
+    } else if (hs instanceof Array) {
+        hs.push(handler);
+    } else {
+        hs = [hs, handler];
+    }
 
-  this.$hasHandlers = true;
-  this.$handlers[type] = hs;
-  return this;
+    this.$hasHandlers = true;
+    this.$handlers[type] = hs;
+    return this;
 };
 
 /** @private Evaluates the function <i>f</i> with the specified context.
@@ -12422,190 +13080,209 @@ pv.Mark.prototype.event = function(type, handler) {
  * It may be the case that <tt>scenes.mark</tt> is not equal to <tt>this</tt>.
  */
 pv.Mark.prototype.context = function(scene, index, f) {
-  var proto  = pv.Mark.prototype,
-      stack  = pv.Mark.stack,
-      oscene = pv.Mark.scene,
-      oindex = proto.index;
+    var proto = pv.Mark.prototype,
+        stack = pv.Mark.stack,
+        oscene = pv.Mark.scene,
+        oindex = proto.index;
 
-  /** @private Sets the context. */
-  function apply(scene, index) {
-    pv.Mark.scene = scene;
-    proto.index = index;
-    if(!scene) { return; }
+    /** @private Sets the context. */
 
-    var i;
-    var that = scene.mark;
-    var mark = that;
-    var ancestors = []; // that, that.parent, ..., root
+    function apply(scene, index) {
+        pv.Mark.scene = scene;
+        proto.index = index;
+        if (!scene) {
+            return;
+        }
 
-    /* Set scene and index in ancestors and self; populate data stack. */
-    do {
-      ancestors.push(mark);
-      stack.push(scene[index].data);
+        var i;
+        var that = scene.mark;
+        var mark = that;
+        var ancestors = []; // that, that.parent, ..., root
 
-      mark.index = index;
-      mark.scene = scene;
+        /* Set scene and index in ancestors and self; populate data stack. */
+        do {
+            ancestors.push(mark);
+            stack.push(scene[index].data);
 
-      if((mark = mark.parent)){
-        index = scene.parentIndex;
-        scene = scene.parent;
-      }
-    } while(mark);
+            mark.index = index;
+            mark.scene = scene;
 
-    /* Set ancestors' scale, excluding "that"; requires top-down. */
-    var k = 1; // root's scale is 1
-    i = ancestors.length - 1;
-    while(i) { // i = 1 is the last one in
-      mark = ancestors[i--];
-      mark.scale = k; // accumulated scale on mark
+            if ((mark = mark.parent)) {
+                index = scene.parentIndex;
+                scene = scene.parent;
+            }
+        } while (mark);
 
-      // children's scale
-      k *= mark.scene[mark.index].transform.k;
-    }
-    
-    that.scale = k;
+        /* Set ancestors' scale, excluding "that"; requires top-down. */
+        var k = 1; // root's scale is 1
+        i = ancestors.length - 1;
+        while (i) { // i = 1 is the last one in
+            mark = ancestors[i--];
+            mark.scale = k; // accumulated scale on mark
 
-    /* Set direct children of "that"'s scene and scale. */
-    var children = that.children, n;
-    if(children && (n = children.length) > 0) {
-      // "that" is a panel, has a transform.
-      var thatInst = that.scene[that.index];
-      k *= thatInst.transform.k;
+            // children's scale
+            k *= mark.scene[mark.index].transform.k;
+        }
 
-      var childScenez = thatInst.children;
-      i = n;
-      while(i--) {
-        mark = children[i];
-        mark.scene = childScenez[i];
-        mark.scale = k;
-      }
-    }
-  }
+        that.scale = k;
 
-  /** @private Clears the context. */
-  function clear(scene/*, index*/) {
-    if (!scene) return;
+        /* Set direct children of "that"'s scene and scale. */
+        var children = that.children,
+            n;
+        if (children && (n = children.length) > 0) {
+            // "that" is a panel, has a transform.
+            var thatInst = that.scene[that.index];
+            k *= thatInst.transform.k;
 
-    var that = scene.mark;
-    var mark;
-
-    /* Reset children. */
-    var children = that.children;
-    if(children) {
-      var i = children.length;
-      while(i--) {
-        mark = children[i];
-        // It's generally faster to set to something, than to delete
-        mark.scene = undefined;
-        mark.scale = 1;
-      }
+            var childScenez = thatInst.children;
+            i = n;
+            while (i--) {
+                mark = children[i];
+                mark.scene = childScenez[i];
+                mark.scale = k;
+            }
+        }
     }
 
-    /* Reset ancestors. */
-    mark = that;
-    var parent;
-    do {
-      stack.pop();
-      delete mark.index; // must be deleted!
+    /** @private Clears the context. */
 
-      if((parent = mark.parent)) {
-        // Idem.
-        mark.scene = undefined;
-        mark.scale = 1;
-      }
-    } while((mark = parent));
-  }
+    function clear(scene /*, index*/ ) {
+        if (!scene) return;
 
-  /* Context switch, invoke the function, then switch back. */
-  if(scene && scene === oscene && index === oindex) {
-      // already there
-      try {
-          f.apply(this, stack);
-      } catch(ex) {
-          pv.error(ex);
-          throw ex;
-      } finally {
-          // Some guys like setting index to -1...
-          pv.Mark.scene = oscene;
-          proto.index = oindex;
-      }
-  } else {
-    clear(oscene, oindex);
-    apply(scene,   index);
-    try {
-      f.apply(this, stack);
-    } catch(ex) {
-        pv.error(ex);
-        throw ex;
-    } finally {
-      clear(scene,   index);
-      apply(oscene, oindex);
+        var that = scene.mark;
+        var mark;
+
+        /* Reset children. */
+        var children = that.children;
+        if (children) {
+            var i = children.length;
+            while (i--) {
+                mark = children[i];
+                // It's generally faster to set to something, than to delete
+                mark.scene = undefined;
+                mark.scale = 1;
+            }
+        }
+
+        /* Reset ancestors. */
+        mark = that;
+        var parent;
+        do {
+            stack.pop();
+            delete mark.index; // must be deleted!
+
+            if ((parent = mark.parent)) {
+                // Idem.
+                mark.scene = undefined;
+                mark.scale = 1;
+            }
+        } while ((mark = parent));
     }
-  }
+
+    /* Context switch, invoke the function, then switch back. */
+    if (scene && scene === oscene && index === oindex) {
+        // already there
+        try {
+            f.apply(this, stack);
+        } catch (ex) {
+            pv.error(ex);
+            throw ex;
+        } finally {
+            // Some guys like setting index to -1...
+            pv.Mark.scene = oscene;
+            proto.index = oindex;
+        }
+    } else {
+        clear(oscene, oindex);
+        apply(scene, index);
+        try {
+            f.apply(this, stack);
+        } catch (ex) {
+            pv.error(ex);
+            throw ex;
+        } finally {
+            clear(scene, index);
+            apply(oscene, oindex);
+        }
+    }
 };
 
-pv.Mark.getEventHandler = function(type, scenes, index, event){
-  var handler = scenes.mark.$handlers[type];
-  if(handler){
-    return [handler, type, scenes, index, event];
-  }
+pv.Mark.getEventHandler = function(type, scenes, index, event) {
+    var handler = scenes.mark.$handlers[type];
+    if (handler) {
+        return [handler, type, scenes, index, event];
+    }
 
-  var parentScenes = scenes.parent;
-  if(parentScenes){
-    return this.getEventHandler(type, parentScenes, scenes.parentIndex, event);
-  }
+    var parentScenes = scenes.parent;
+    if (parentScenes) {
+        return this.getEventHandler(type, parentScenes, scenes.parentIndex, event);
+    }
 };
 
 /** @private Execute the event listener, then re-render the returned mark. */
 pv.Mark.dispatch = function(type, scenes, index, event) {
 
-  var root = scenes.mark.root;
-  
-  // While animating, ignore any UI event notifications
-  if(root.$transition) { return true; }
+    var root = scenes.mark.root;
 
-  var handlerInfo;
-  var interceptors = root.$interceptors && root.$interceptors[type];
-  if(interceptors) {
-    for(var i = 0, L = interceptors.length ; i < L ; i++) {
-      handlerInfo = interceptors[i](type, event);
-      if(handlerInfo) { break; }
-
-      if(handlerInfo === false) { return true; } // Consider handled
+    // While animating, ignore any UI event notifications
+    if (root.$transition) {
+        return true;
     }
-  }
 
-  if(!handlerInfo) {
-    handlerInfo = this.getEventHandler(type, scenes, index, event);
-    if(!handlerInfo) { return false; }
-  }
+    var handlerInfo;
+    var interceptors = root.$interceptors && root.$interceptors[type];
+    if (interceptors) {
+        for (var i = 0, L = interceptors.length; i < L; i++) {
+            handlerInfo = interceptors[i](type, event);
+            if (handlerInfo) {
+                break;
+            }
 
-  return this.handle.apply(this, handlerInfo);
+            if (handlerInfo === false) {
+                return true;
+            } // Consider handled
+        }
+    }
+
+    if (!handlerInfo) {
+        handlerInfo = this.getEventHandler(type, scenes, index, event);
+        if (!handlerInfo) {
+            return false;
+        }
+    }
+
+    return this.handle.apply(this, handlerInfo);
 };
 
-pv.Mark.handle = function(handler, type, scenes, index, event){
+pv.Mark.handle = function(handler, type, scenes, index, event) {
     var m = scenes.mark;
 
     m.context(scenes, index, function() {
-      var stack = pv.Mark.stack.concat(event);
-      var i, L, mi;
-      if(handler instanceof Array) {
-        var ms;
-        for(i = 0, L = handler.length; i < L; i++) {
-          mi = handler[i].apply(m, stack);
-          if(mi && mi.render) {
-              (ms || (ms = [])).push(mi);
-          }
+        var stack = pv.Mark.stack.concat(event);
+        var i, L, mi;
+        if (handler instanceof Array) {
+            var ms;
+            for (i = 0, L = handler.length; i < L; i++) {
+                mi = handler[i].apply(m, stack);
+                if (mi && mi.render) {
+                    (ms || (ms = [])).push(mi);
+                }
+            }
+
+            if (ms) {
+                for (i = 0, L = ms.length; i < L; i++) {
+                    ms[i].render();
+                }
+            }
+        } else {
+            mi = handler.apply(m, stack);
+            if (mi && mi.render) {
+                mi.render();
+            }
         }
+    });
 
-        if(ms) { for(i = 0, L = ms.length; i < L; i++) { ms[i].render(); } }
-      } else {
-        mi = handler.apply(m, stack);
-        if(mi && mi.render) { mi.render(); }
-      }
-  });
-
-  return true;
+    return true;
 };
 
 /**
@@ -12615,15 +13292,18 @@ pv.Mark.handle = function(handler, type, scenes, index, event){
  * @param {Function} handler the interceptor function
  * @param {boolean} [before=false] indicates that the interceptor should be applied <i>before</i> "after" interceptors
  */
-pv.Mark.prototype.addEventInterceptor = function(type, handler, before){
-  var root = this.root;
-  if(root) {
-    var ints = root.$interceptors || (root.$interceptors = {});
-    var list = ints[type] || (ints[type] = []);
+pv.Mark.prototype.addEventInterceptor = function(type, handler, before) {
+    var root = this.root;
+    if (root) {
+        var ints = root.$interceptors || (root.$interceptors = {});
+        var list = ints[type] || (ints[type] = []);
 
-    if(before) { list.unshift(handler); } 
-    else       { list.push(handler);    }
-  }
+        if (before) {
+            list.unshift(handler);
+        } else {
+            list.push(handler);
+        }
+    }
 };
 
 /**
@@ -12631,93 +13311,97 @@ pv.Mark.prototype.addEventInterceptor = function(type, handler, before){
  * this mark has rendered.
  */
 pv.Mark.prototype.eachInstance = function(fun, ctx) {
-  var mark = this;
-  var indexes = [];
+    var mark = this;
+    var indexes = [];
 
-  /* Go up to the root and register our way back.
-   * The root mark never "looses" its scene.
-   */
-  while(mark.parent) {
-    indexes.unshift(mark.childIndex);
-    mark = mark.parent;
-  }
-
-  // mark != null
-
-  // root scene exists if rendered at least once
-  var rootScene = mark.scene;
-  if(!rootScene) { return; }
-
-  var L = indexes.length;
-
-  function mapRecursive(scene, level, toScreen){
-    var D = scene.length;
-    if(D > 0) {
-      var childIndex;
-      var isLastLevel = (level === L);
-
-      if(!isLastLevel) { childIndex = indexes[level]; }
-
-      for(var index = 0 ; index < D ; index++) {
-        var instance = scene[index];
-        if(instance.visible) {
-          if(level === L) {
-            fun.call(ctx, scene, index, toScreen);
-          } else {
-            // Some nodes might have not been rendered???
-            var childScene = instance.children[childIndex];
-            if(childScene) {
-              var childToScreen = toScreen
-                  .times(instance.transform)
-                  .translate(instance.left, instance.top);
-
-              mapRecursive(childScene, level + 1, childToScreen);
-            }
-          }
-        }
-      }
+    /* Go up to the root and register our way back.
+     * The root mark never "looses" its scene.
+     */
+    while (mark.parent) {
+        indexes.unshift(mark.childIndex);
+        mark = mark.parent;
     }
-  }
 
-  mapRecursive(rootScene, 0, pv.Transform.identity);
+    // mark != null
+
+    // root scene exists if rendered at least once
+    var rootScene = mark.scene;
+    if (!rootScene) {
+        return;
+    }
+
+    var L = indexes.length;
+
+    function mapRecursive(scene, level, toScreen) {
+        var D = scene.length;
+        if (D > 0) {
+            var childIndex;
+            var isLastLevel = (level === L);
+
+            if (!isLastLevel) {
+                childIndex = indexes[level];
+            }
+
+            for (var index = 0; index < D; index++) {
+                var instance = scene[index];
+                if (instance.visible) {
+                    if (level === L) {
+                        fun.call(ctx, scene, index, toScreen);
+                    } else {
+                        // Some nodes might have not been rendered???
+                        var childScene = instance.children[childIndex];
+                        if (childScene) {
+                            var childToScreen = toScreen
+                                .times(instance.transform)
+                                .translate(instance.left, instance.top);
+
+                            mapRecursive(childScene, level + 1, childToScreen);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    mapRecursive(rootScene, 0, pv.Transform.identity);
 };
 
-pv.Mark.prototype.toScreenTransform = function(){
-  var t = pv.Transform.identity;
+pv.Mark.prototype.toScreenTransform = function() {
+    var t = pv.Transform.identity;
 
-  if(this instanceof pv.Panel) {
-    t = t.translate(this.left(), this.top())
-         .times(this.transform());
-  }
+    if (this instanceof pv.Panel) {
+        t = t.translate(this.left(), this.top())
+            .times(this.transform());
+    }
 
-  var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
-  if(parent){
-    do {
-      t = t.translate(parent.left(), parent.top())
-           .times(parent.transform());
-    } while((parent = parent.parent));
-  }
+    var parent = this.parent; // TODO : this.properties.transform ? this : this.parent
+    if (parent) {
+        do {
+            t = t.translate(parent.left(), parent.top())
+                .times(parent.transform());
+        } while ((parent = parent.parent));
+    }
 
-  return t;
+    return t;
 };
 
 pv.Mark.prototype.transition = function() {
-  return new pv.Transition(this);
+    return new pv.Transition(this);
 };
 
 pv.Mark.prototype.on = function(state) {
-  return this["$" + state] = new pv.Transient(this);
+    return this["$" + state] = new pv.Transient(this);
 };
 
 // --------------
 
 // inset - percentage of width/height to discount on the shape, on each side
-pv.Mark.prototype.getShape = function(scenes, index, inset){
+pv.Mark.prototype.getShape = function(scenes, index, inset) {
     var s = scenes[index];
-    if(!s.visible){
+    if (!s.visible) {
         return null;
     }
-    if(inset == null){
+    if (inset == null) {
         inset = 0;
     }
 
@@ -12725,19 +13409,19 @@ pv.Mark.prototype.getShape = function(scenes, index, inset){
     return s[key] || (s[key] = this.getShapeCore(scenes, index, inset));
 };
 
-pv.Mark.prototype.getShapeCore = function(scenes, index, inset){
-    var s  = scenes[index];
+pv.Mark.prototype.getShapeCore = function(scenes, index, inset) {
+    var s = scenes[index];
     var l = s.left;
     var t = s.top;
     var w = s.width;
     var h = s.height;
-    if(inset > 0 && inset <= 1){
+    if (inset > 0 && inset <= 1) {
         var dw = inset * w;
         var dh = inset * h;
         l += dw;
         t += dh;
-        w -= dw*2;
-        h -= dh*2;
+        w -= dw * 2;
+        h -= dh * 2;
     }
 
     return new pv.Shape.Rect(l, t, w, h);
@@ -12779,9 +13463,9 @@ pv.Mark.prototype.getShapeCore = function(scenes, index, inset){
  * @param {pv.Mark} target the anchor target.
  */
 pv.Anchor = function(target) {
-  pv.Mark.call(this);
-  this.target = target;
-  this.parent = target.parent; // same parent as target, but not added as child...
+    pv.Mark.call(this);
+    this.target = target;
+    this.parent = target.parent; // same parent as target, but not added as child...
 };
 
 pv.Anchor.prototype = pv.extend(pv.Mark)
@@ -12820,8 +13504,8 @@ pv.Anchor.prototype = pv.extend(pv.Mark)
  * @see pv.Mark#add
  */
 pv.Anchor.prototype.extend = function(proto) {
-  this.proto = proto;
-  return this;
+    this.proto = proto;
+    return this;
 };
 /**
  * Constructs a new area mark with default properties. Areas are not typically
@@ -12845,33 +13529,33 @@ pv.Anchor.prototype.extend = function(proto) {
  * @extends pv.Mark
  */
 pv.Area = function() {
-  pv.Mark.call(this);
+    pv.Mark.call(this);
 };
 
-pv.Area.castSegmented = function(v){
-  if(!v){
-    return '';
-  }
-  
-  switch(v){
-    case 'smart':
-    case 'full':
-      break;
-    
-    default:
-      v = 'full';
-  }
-  
-  return v;
+pv.Area.castSegmented = function(v) {
+    if (!v) {
+        return '';
+    }
+
+    switch (v) {
+        case 'smart':
+        case 'full':
+            break;
+
+        default:
+            v = 'full';
+    }
+
+    return v;
 };
 
 pv.Area.prototype = pv.extend(pv.Mark)
     .property("width", Number)
     .property("height", Number)
     .property("lineWidth", Number)
-    .property("lineJoin",   String)
+    .property("lineJoin", String)
     .property("strokeMiterLimit", Number)
-    .property("lineCap",   String)
+    .property("lineCap", String)
     .property("strokeDasharray", String)
     .property("strokeStyle", pv.fillStyle)
     .property("fillStyle", pv.fillStyle)
@@ -12999,23 +13683,23 @@ pv.Area.prototype.defaults = new pv.Area()
 
 /** @private Sets width and height to zero if null. */
 pv.Area.prototype.buildImplied = function(s) {
-  if (s.height == null) s.height = 0;
-  if (s.width == null) s.width = 0;
-  pv.Mark.prototype.buildImplied.call(this, s);
+    if (s.height == null) s.height = 0;
+    if (s.width == null) s.width = 0;
+    pv.Mark.prototype.buildImplied.call(this, s);
 };
 
 /** @private Records which properties may be fixed. */
 pv.Area.fixed = {
-  lineWidth: 1,
-  lineJoin: 1,
-  strokeMiterLimit: 1,
-  lineCap: 1,
-  strokeStyle: 1,
-  strokeDasharray: 1,
-  fillStyle: 1,
-  segmented: 1,
-  interpolate: 1,
-  tension: 1
+    lineWidth: 1,
+    lineJoin: 1,
+    strokeMiterLimit: 1,
+    lineCap: 1,
+    strokeStyle: 1,
+    strokeDasharray: 1,
+    fillStyle: 1,
+    segmented: 1,
+    interpolate: 1,
+    tension: 1
 };
 
 /**
@@ -13024,24 +13708,24 @@ pv.Area.fixed = {
  * properties are normally fixed.
  */
 pv.Area.prototype.bind = function() {
-  pv.Mark.prototype.bind.call(this);
-  var binds = this.binds,
-      required = binds.required,
-      optional = binds.optional;
-  for (var i = 0, n = optional.length; i < n; i++) {
-    var p = optional[i];
-    p.fixed = p.name in pv.Area.fixed;
-    if (p.name == "segmented") {
-      required.push(p);
-      optional.splice(i, 1);
-      i--;
-      n--;
+    pv.Mark.prototype.bind.call(this);
+    var binds = this.binds,
+        required = binds.required,
+        optional = binds.optional;
+    for (var i = 0, n = optional.length; i < n; i++) {
+        var p = optional[i];
+        p.fixed = p.name in pv.Area.fixed;
+        if (p.name == "segmented") {
+            required.push(p);
+            optional.splice(i, 1);
+            i--;
+            n--;
+        }
     }
-  }
 
-  /* Cache the original arrays so they can be restored on build. */
-  this.binds.$required = required;
-  this.binds.$optional = optional;
+    /* Cache the original arrays so they can be restored on build. */
+    this.binds.$required = required;
+    this.binds.$optional = optional;
 };
 
 /**
@@ -13052,41 +13736,43 @@ pv.Area.prototype.bind = function() {
  * are available for property chaining and the like.
  */
 pv.Area.prototype.buildInstance = function(s) {
-  var binds = this.binds;
+    var binds = this.binds;
 
-  /* Handle fixed properties on secondary instances. */
-  if (this.index) {
-    var fixed = binds.fixed;
+    /* Handle fixed properties on secondary instances. */
+    if (this.index) {
+        var fixed = binds.fixed;
 
-    /* Determine which properties are fixed. */
-    if (!fixed) {
-      fixed = binds.fixed = [];
-      
-      function f(p) { return !p.fixed || (fixed.push(p), false); }
-      
-      binds.required = binds.required.filter(f);
-      if (!this.scene[0].segmented) binds.optional = binds.optional.filter(f);
+        /* Determine which properties are fixed. */
+        if (!fixed) {
+            fixed = binds.fixed = [];
+
+            function f(p) {
+                return !p.fixed || (fixed.push(p), false);
+            }
+
+            binds.required = binds.required.filter(f);
+            if (!this.scene[0].segmented) binds.optional = binds.optional.filter(f);
+        }
+
+        /* Copy fixed property values from the first instance. */
+        var n = fixed.length;
+        if (n) {
+            var firstScene = this.scene[0];
+            for (var i = 0; i < n; i++) {
+                var p = fixed[i].name;
+                s[p] = firstScene[p];
+            }
+        }
     }
 
-    /* Copy fixed property values from the first instance. */
-    var n = fixed.length;
-    if(n){
-      var firstScene = this.scene[0];
-      for (var i = 0 ; i < n ; i++) {
-        var p = fixed[i].name;
-        s[p] = firstScene[p];
-      }
+    /* Evaluate all properties on the first instance. */
+    else {
+        binds.required = binds.$required;
+        binds.optional = binds.$optional;
+        binds.fixed = null;
     }
-  }
 
-  /* Evaluate all properties on the first instance. */
-  else {
-    binds.required = binds.$required;
-    binds.optional = binds.$optional;
-    binds.fixed = null;
-  }
-
-  pv.Mark.prototype.buildInstance.call(this, s);
+    pv.Mark.prototype.buildInstance.call(this, s);
 };
 
 /**
@@ -13113,35 +13799,41 @@ pv.Area.prototype.buildInstance = function(s) {
  * @returns {pv.Anchor}
  */
 pv.Area.prototype.anchor = function(name) {
-  return pv.Mark.prototype.anchor.call(this, name)
-    .interpolate (function() { return this.scene.target[this.index].interpolate;  })
-    .eccentricity(function() { return this.scene.target[this.index].eccentricity; })
-    .tension     (function() { return this.scene.target[this.index].tension;      });
+    return pv.Mark.prototype.anchor.call(this, name)
+        .interpolate(function() {
+            return this.scene.target[this.index].interpolate;
+        })
+        .eccentricity(function() {
+            return this.scene.target[this.index].eccentricity;
+        })
+        .tension(function() {
+            return this.scene.target[this.index].tension;
+        });
 };
 
 
-pv.Area.prototype.getShapeCore = function(scenes, index){
+pv.Area.prototype.getShapeCore = function(scenes, index) {
     var s = scenes[index];
-    var w = (s.width  || 0),
+    var w = (s.width || 0),
         h = (s.height || 0),
         x = s.left,
         y = s.top;
-    
+
     var s2 = index + 1 < scenes.length ? scenes[index + 1] : null;
-    if(!s2 || !s2.visible){
+    if (!s2 || !s2.visible) {
         return new pv.Shape.Line(x, y, x + w, y + h);
     }
-    
+
     var x2 = s2.left,
         y2 = s2.top,
         h2 = s2.height || 0,
-        w2 = s2.width  || 0;
-    
+        w2 = s2.width || 0;
+
     return new pv.Shape.Polygon([
-        new pv.Vector(x,       y      ),
-        new pv.Vector(x2,      y2     ),
+        new pv.Vector(x, y),
+        new pv.Vector(x2, y2),
         new pv.Vector(x2 + w2, y2 + h2),
-        new pv.Vector(x  + w,  y  + h )
+        new pv.Vector(x + w, y + h)
     ]);
 };
 /**
@@ -13170,7 +13862,7 @@ pv.Area.prototype.getShapeCore = function(scenes, index){
  * @extends pv.Mark
  */
 pv.Bar = function() {
-  pv.Mark.call(this);
+    pv.Mark.call(this);
 };
 
 pv.Bar.prototype = pv.extend(pv.Mark)
@@ -13179,7 +13871,7 @@ pv.Bar.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
     .property("fillStyle", pv.fillStyle)
-    .property("lineCap",   String)
+    .property("lineCap", String)
     .property("strokeDasharray", String);
 
 pv.Bar.prototype.type = "bar";
@@ -13258,7 +13950,7 @@ pv.Bar.prototype.defaults = new pv.Bar()
  * @extends pv.Mark
  */
 pv.Dot = function() {
-  pv.Mark.call(this);
+    pv.Mark.call(this);
 };
 
 pv.Dot.prototype = pv.extend(pv.Mark)
@@ -13269,7 +13961,7 @@ pv.Dot.prototype = pv.extend(pv.Mark)
     .property("aspectRatio", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
-    .property("lineCap",   String)
+    .property("lineCap", String)
     .property("strokeDasharray", String)
     .property("fillStyle", pv.fillStyle);
 
@@ -13286,13 +13978,13 @@ pv.Dot.prototype.type = "dot";
  * @name pv.Dot.prototype.shapeSize
  */
 
- /**
- * The aspect ratio of the shape. 
+/**
+ * The aspect ratio of the shape.
  * A positive number that is equal to the ratio of the shape's width and height.
- * 
+ *
  * <p>When equal to 1 the shape has equal with and height (both equal to twice the <i>shapeRadius</i>).</p>
  * <p>When less that 1, the shape has a width smaller than its height.
- *    The actual value of each is calculated such that the 
+ *    The actual value of each is calculated such that the
  *    original area is maintained:
  *    <ul>
  *      <li>area = width * height = 4 * shapeRadius^2</li>
@@ -13413,106 +14105,114 @@ pv.Dot.prototype.defaults = new pv.Dot()
  * @returns {pv.Anchor}
  */
 pv.Dot.prototype.anchor = function(name) {
-  var scene;
-  return pv.Mark.prototype.anchor.call(this, name)
-    .left(function() {
-        var s = this.scene.target[this.index];
-        switch (this.name()) {
-          case "bottom":
-          case "top":
-          case "center": return s.left;
-          case "left":   return null;
-        }
-        return s.left + s._width/2;
-      })
-    .right(function() {
-        var s = this.scene.target[this.index];
-        return this.name() == "left" ? (s.right + s._width/2) : null;
-      })
-    .top(function() {
-        var s = this.scene.target[this.index];
-        switch (this.name()) {
-          case "left":
-          case "right":
-          case "center": return s.top;
-          case "top":    return null;
-        }
-        return s.top + s._height/2;
-      })
-    .bottom(function() {
-        var s = this.scene.target[this.index];
-        return this.name() == "top" ? (s.bottom + s._height/2) : null;
-      })
-    .textAlign(function() {
-        switch (this.name()) {
-          case "left": return "right";
-          case "bottom":
-          case "top":
-          case "center": return "center";
-        }
-        return "left";
-      })
-    .textBaseline(function() {
-        switch (this.name()) {
-          case "right":
-          case "left":
-          case "center": return "middle";
-          case "bottom": return "top";
-        }
-        return "bottom";
-      });
+    var scene;
+    return pv.Mark.prototype.anchor.call(this, name)
+        .left(function() {
+            var s = this.scene.target[this.index];
+            switch (this.name()) {
+                case "bottom":
+                case "top":
+                case "center":
+                    return s.left;
+                case "left":
+                    return null;
+            }
+            return s.left + s._width / 2;
+        })
+        .right(function() {
+            var s = this.scene.target[this.index];
+            return this.name() == "left" ? (s.right + s._width / 2) : null;
+        })
+        .top(function() {
+            var s = this.scene.target[this.index];
+            switch (this.name()) {
+                case "left":
+                case "right":
+                case "center":
+                    return s.top;
+                case "top":
+                    return null;
+            }
+            return s.top + s._height / 2;
+        })
+        .bottom(function() {
+            var s = this.scene.target[this.index];
+            return this.name() == "top" ? (s.bottom + s._height / 2) : null;
+        })
+        .textAlign(function() {
+            switch (this.name()) {
+                case "left":
+                    return "right";
+                case "bottom":
+                case "top":
+                case "center":
+                    return "center";
+            }
+            return "left";
+        })
+        .textBaseline(function() {
+            switch (this.name()) {
+                case "right":
+                case "left":
+                case "center":
+                    return "middle";
+                case "bottom":
+                    return "top";
+            }
+            return "bottom";
+        });
 };
 
 /** @private Sets radius based on size or vice versa. */
 pv.Dot.prototype.buildImplied = function(s) {
-  var r = s.shapeRadius, 
-      z = s.shapeSize,
-      a = s.aspectRatio || 1;
-  
-  if(r == null) {
-    if(z == null) {
-      z = s.shapeSize = 20.25;
-      r = s.shapeRadius = 4.5;
-    } else {
-      r = s.shapeRadius = Math.sqrt(z);
-    }
-  } else if(z == null) {
-    z = s.shapeSize = r * r;
-  }
+    var r = s.shapeRadius,
+        z = s.shapeSize,
+        a = s.aspectRatio || 1;
 
-  var h, w;
-  if(a === 1 || a < 0) {
-    h = w = 2 * r;
-  } else {
-    h = 2 * r / Math.sqrt(a);
-    w = a * h;
-  }
-  
-  // Not using normal width/height properties
-  // Because some code uses the existence of these to detect stuff...
-  s._height = h;
-  s._width  = w;
-  
-  pv.Mark.prototype.buildImplied.call(this, s);
+    if (r == null) {
+        if (z == null) {
+            z = s.shapeSize = 20.25;
+            r = s.shapeRadius = 4.5;
+        } else {
+            r = s.shapeRadius = Math.sqrt(z);
+        }
+    } else if (z == null) {
+        z = s.shapeSize = r * r;
+    }
+
+    var h, w;
+    if (a === 1 || a < 0) {
+        h = w = 2 * r;
+    } else {
+        h = 2 * r / Math.sqrt(a);
+        w = a * h;
+    }
+
+    // Not using normal width/height properties
+    // Because some code uses the existence of these to detect stuff...
+    s._height = h;
+    s._width = w;
+
+    pv.Mark.prototype.buildImplied.call(this, s);
 };
 
 pv.Dot.prototype.width = function() {
-  return this.instance()._width;
+    return this.instance()._width;
 };
 
 pv.Dot.prototype.height = function() {
-  return this.instance()._height;
+    return this.instance()._height;
 };
 
 pv.Dot.prototype.getShapeCore = function(scenes, index) {
     var s = scenes[index];
-    
-    var h  = s._width,
-        w  = s._height,
+
+    var h = s._width,
+        w = s._height,
         cx = s.left,
         cy = s.top;
 
-    switch(s.shape) {
+    switch (s.shape) {
         case 'diamond':
             h *= Math.SQRT2;
             w *= Math.SQRT2;
@@ -13521,11 +14221,11 @@ pv.Dot.prototype.getShapeCore = function(scenes, index) {
         case 'square':
         case 'cross':
             // TODO: this breaks when angle is used...
-            return new pv.Shape.Rect(cx - w/2, cy - h/2, w, h);
+            return new pv.Shape.Rect(cx - w / 2, cy - h / 2, w, h);
     }
-    
+
     // 'circle' included
-    
+
     // TODO: Need an Ellipse shape...
     return new pv.Shape.Circle(cx, cy, s.shapeRadius);
 };
@@ -13555,7 +14255,7 @@ pv.Dot.prototype.getShapeCore = function(scenes, index) {
  * @extends pv.Mark
  */
 pv.Label = function() {
-  pv.Mark.call(this);
+    pv.Mark.call(this);
 };
 
 pv.Label.prototype = pv.extend(pv.Mark)
@@ -13686,7 +14386,7 @@ pv.Label.prototype.defaults = new pv.Label()
     .textMargin(3);
 
 
-pv.Label.prototype.getShapeCore = function(scenes, index, inset){
+pv.Label.prototype.getShapeCore = function(scenes, index, inset) {
     var s = scenes[index];
 
     var size = pv.Text.measure(s.text, s.font);
@@ -13694,73 +14394,73 @@ pv.Label.prototype.getShapeCore = function(scenes, index, inset){
     var t = s.top;
     var w = size.width;
     var h = size.height;
-    if(inset > 0 && inset <= 1){
+    if (inset > 0 && inset <= 1) {
         var dw = inset * w;
         var dh = inset * h;
         l += dw;
         t += dh;
-        w -= dw*2;
-        h -= dh*2;
+        w -= dw * 2;
+        h -= dh * 2;
     }
-    
+
     return pv.Label.getPolygon(
-            w,
-            h,
-            s.textAlign,
-            s.textBaseline,
-            s.textAngle,
-            s.textMargin)
-            .apply(pv.Transform.identity.translate(l, t));
+        w,
+        h,
+        s.textAlign,
+        s.textBaseline,
+        s.textAngle,
+        s.textMargin)
+        .apply(pv.Transform.identity.translate(l, t));
 };
 
-pv.Label.getPolygon = function(textWidth, textHeight, align, baseline, angle, margin){
+pv.Label.getPolygon = function(textWidth, textHeight, align, baseline, angle, margin) {
     // x, y are the position of the left-bottom corner
     // of the text relative to its anchor point (at x=0,y=0)
     // x points right, y points down
     var x, y;
-    
+
     switch (baseline) {
         case "middle":
             y = textHeight / 2; // estimate middle (textHeight is not em, the height of capital M)
             break;
-          
+
         case "top":
             y = margin + textHeight;
             break;
-      
+
         case "bottom":
-            y = -margin; 
+            y = -margin;
             break;
     }
-    
+
     switch (align) {
-        case "right": 
-            x = -margin -textWidth; 
+        case "right":
+            x = -margin - textWidth;
             break;
-      
-        case "center": 
+
+        case "center":
             x = -textWidth / 2;
             break;
-      
-        case "left": 
+
+        case "left":
             x = margin;
             break;
     }
-    
+
     var bl = new pv.Vector(x, y);
     var br = bl.plus(textWidth, 0);
     var tr = br.plus(0, -textHeight);
     var tl = bl.plus(0, -textHeight);
-    
+
     // Rotate
-    
-    if(angle !== 0){
+
+    if (angle !== 0) {
         bl = bl.rotate(angle);
         br = br.rotate(angle);
         tl = tl.rotate(angle);
         tr = tr.rotate(angle);
     }
-    
+
     return new pv.Shape.Polygon([bl, br, tr, tl]);
 };
 /**
@@ -13784,14 +14484,14 @@ pv.Label.getPolygon = function(textWidth, textHeight, align, baseline, angle, ma
  * @extends pv.Mark
  */
 pv.Line = function() {
-  pv.Mark.call(this);
+    pv.Mark.call(this);
 };
 
 pv.Line.prototype = pv.extend(pv.Mark)
     .property("lineWidth", Number)
-    .property("lineJoin",  String)
+    .property("lineJoin", String)
     .property("strokeMiterLimit", Number)
-    .property("lineCap",   String)
+    .property("lineCap", String)
     .property("strokeStyle", pv.fillStyle)
     .property("strokeDasharray", String)
     .property("fillStyle", pv.fillStyle)
@@ -13944,34 +14644,40 @@ pv.Line.prototype.buildInstance = pv.Area.prototype.buildInstance;
  * @returns {pv.Anchor}
  */
 pv.Line.prototype.anchor = function(name) {
-  return pv.Area.prototype.anchor.call(this, name)
-    .textAlign(function(d) {
-        switch (this.name()) {
-          case "left": return "right";
-          case "bottom":
-          case "top":
-          case "center": return "center";
-          case "right": return "left";
-        }
-      })
-    .textBaseline(function(d) {
-        switch (this.name()) {
-          case "right":
-          case "left":
-          case "center": return "middle";
-          case "top": return "bottom";
-          case "bottom": return "top";
-        }
-      });
+    return pv.Area.prototype.anchor.call(this, name)
+        .textAlign(function(d) {
+            switch (this.name()) {
+                case "left":
+                    return "right";
+                case "bottom":
+                case "top":
+                case "center":
+                    return "center";
+                case "right":
+                    return "left";
+            }
+        })
+        .textBaseline(function(d) {
+            switch (this.name()) {
+                case "right":
+                case "left":
+                case "center":
+                    return "middle";
+                case "top":
+                    return "bottom";
+                case "bottom":
+                    return "top";
+            }
+        });
 };
 
-pv.Line.prototype.getShapeCore = function(scenes, index){
-    var s  = scenes[index];
+pv.Line.prototype.getShapeCore = function(scenes, index) {
+    var s = scenes[index];
     var s2 = index + 1 < scenes.length ? scenes[index + 1] : null;
-    if(s2 == null || !s2.visible){
+    if (s2 == null || !s2.visible) {
         return new pv.Shape.Point(s.left, s.top);
     }
-    
+
     return new pv.Shape.Line(s.left, s.top, s2.left, s2.top);
 };
 /**
@@ -14019,7 +14725,7 @@ pv.Line.prototype.getShapeCore = function(scenes, index){
  * @extends pv.Mark
  */
 pv.Rule = function() {
-  pv.Mark.call(this);
+    pv.Mark.call(this);
 };
 
 pv.Rule.prototype = pv.extend(pv.Mark)
@@ -14027,7 +14733,7 @@ pv.Rule.prototype = pv.extend(pv.Mark)
     .property("height", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
-    .property("lineCap",   String)
+    .property("lineCap", String)
     .property("strokeDasharray", String);
 
 pv.Rule.prototype.type = "rule";
@@ -14108,24 +14814,25 @@ pv.Rule.prototype.anchor = pv.Line.prototype.anchor;
 
 /** @private Sets width or height based on orientation. */
 pv.Rule.prototype.buildImplied = function(s) {
-  var l = s.left, r = s.right, t = s.top, b = s.bottom;
+    var l = s.left,
+        r = s.right,
+        t = s.top,
+        b = s.bottom;
 
-  /* Determine horizontal or vertical orientation. */
-  if ((s.width != null)
-      || ((l == null) && (r == null))
-      || ((r != null) && (l != null))) {
-    s.height = 0;
-  } else {
-    s.width = 0;
-  }
+    /* Determine horizontal or vertical orientation. */
+    if ((s.width != null) || ((l == null) && (r == null)) || ((r != null) && (l != null))) {
+        s.height = 0;
+    } else {
+        s.width = 0;
+    }
 
-  pv.Mark.prototype.buildImplied.call(this, s);
+    pv.Mark.prototype.buildImplied.call(this, s);
 };
 
-pv.Rule.prototype.getShapeCore = function(scenes, index){
+pv.Rule.prototype.getShapeCore = function(scenes, index) {
     var s = scenes[index];
     return new pv.Shape.Line(
-        s.left,           s.top, 
+        s.left, s.top,
         s.left + s.width, s.top + s.height);
 };
 
@@ -14164,26 +14871,26 @@ pv.Rule.prototype.getShapeCore = function(scenes, index){
  * @extends pv.Bar
  */
 pv.Panel = function() {
-  pv.Bar.call(this);
+    pv.Bar.call(this);
 
-  /**
-   * The child marks; zero or more {@link pv.Mark}s in the order they were
-   * added.
-   *
-   * @see #add
-   * @type pv.Mark[]
-   */
-  this.children = [];
-  this.root = this;
+    /**
+     * The child marks; zero or more {@link pv.Mark}s in the order they were
+     * added.
+     *
+     * @see #add
+     * @type pv.Mark[]
+     */
+    this.children = [];
+    this.root = this;
 
-  /**
-   * The internal $dom field is set by the Protovis loader; see lang/init.js. It
-   * refers to the script element that contains the Protovis specification, so
-   * that the panel knows where in the DOM to insert the generated SVG element.
-   *
-   * @private
-   */
-  this.$dom = pv.$ && pv.$.s;
+    /**
+     * The internal $dom field is set by the Protovis loader; see lang/init.js. It
+     * refers to the script element that contains the Protovis specification, so
+     * that the panel knows where in the DOM to insert the generated SVG element.
+     *
+     * @private
+     */
+    this.$dom = pv.$ && pv.$.s;
 };
 
 pv.Panel.prototype = pv.extend(pv.Bar)
@@ -14248,7 +14955,7 @@ pv.Panel.prototype._zOrderChildCount = 0;
 pv.Panel.prototype.defaults = new pv.Panel()
     .extend(pv.Bar.prototype.defaults)
     .fillStyle(null) // override Bar default
-    .overflow("visible");
+.overflow("visible");
 
 /**
  * Returns an anchor with the specified name. This method is overridden such
@@ -14259,9 +14966,9 @@ pv.Panel.prototype.defaults = new pv.Panel()
  * @returns {pv.Anchor} the new anchor.
  */
 pv.Panel.prototype.anchor = function(name) {
-  var anchor = pv.Bar.prototype.anchor.call(this, name);
-  anchor.parent = this;
-  return anchor;
+    var anchor = pv.Bar.prototype.anchor.call(this, name);
+    anchor.parent = this;
+    return anchor;
 };
 
 /**
@@ -14276,27 +14983,29 @@ pv.Panel.prototype.anchor = function(name) {
  * @returns {pv.Mark} the new mark.
  */
 pv.Panel.prototype.add = function(Type) {
-  var child = new Type();
-  child.parent = this;
-  child.root = this.root;
-  child.childIndex = this.children.length;
-  this.children.push(child);
-  
-  // Process possibly set zOrder
-  var zOrder = (+child._zOrder) || 0; // NaN -> 0
-  if(zOrder !== 0) { this._zOrderChildCount++; }
+    var child = new Type();
+    child.parent = this;
+    child.root = this.root;
+    child.childIndex = this.children.length;
+    this.children.push(child);
 
-  return child;
+    // Process possibly set zOrder
+    var zOrder = (+child._zOrder) || 0; // NaN -> 0
+    if (zOrder !== 0) {
+        this._zOrderChildCount++;
+    }
+
+    return child;
 };
 
 /** @private Bind this panel, then any child marks recursively. */
 pv.Panel.prototype.bind = function() {
-  pv.Mark.prototype.bind.call(this);
+    pv.Mark.prototype.bind.call(this);
 
-  var children = this.children;
-  for(var i = 0, n = children.length ; i < n ; i++) {
-    children[i].bind();
-  }
+    var children = this.children;
+    for (var i = 0, n = children.length; i < n; i++) {
+        children[i].bind();
+    }
 };
 
 /**
@@ -14308,54 +15017,56 @@ pv.Panel.prototype.bind = function() {
  * @see Mark#scene
  */
 pv.Panel.prototype.buildInstance = function(s) {
-  // calls buildProperties and then buildImplied
-  pv.Bar.prototype.buildInstance.call(this, s);
+    // calls buildProperties and then buildImplied
+    pv.Bar.prototype.buildInstance.call(this, s);
 
-  if(!s.visible) { return; }
+    if (!s.visible) {
+        return;
+    }
 
-  /*
-   * Multiply the current scale factor by this panel's transform. Also clear the
-   * default index as we recurse into child marks; it will be reset to the
-   * current index when the next panel instance is built.
-   */
-  var scale = this.scale * s.transform.k;
-  pv.Mark.prototype.index = -1;
+    /*
+     * Multiply the current scale factor by this panel's transform. Also clear the
+     * default index as we recurse into child marks; it will be reset to the
+     * current index when the next panel instance is built.
+     */
+    var scale = this.scale * s.transform.k;
+    pv.Mark.prototype.index = -1;
 
-  /*
-   * Build each child, passing in the parent (this panel) scene graph node. The
-   * child mark's scene is initialized from the corresponding entry in the
-   * existing scene graph, such that properties from the previous build can be
-   * reused; this is largely to facilitate the recycling of SVG elements.
-   */
-  var child;
-  var children = this.children;
-  var childScenes = s.children || (s.children = []);
-  for(var i = 0, n = children.length; i < n; i++) {
-    child = children[i];
-    child.scene = childScenes[i]; // possibly undefined
-    child.scale = scale;
-    child.build();
-    // Leave scene in children, because these might me used
-    // during build of siblings; 
-    // calling a sibling mark's property method (instance() evaluates to same index).
-  }
+    /*
+     * Build each child, passing in the parent (this panel) scene graph node. The
+     * child mark's scene is initialized from the corresponding entry in the
+     * existing scene graph, such that properties from the previous build can be
+     * reused; this is largely to facilitate the recycling of SVG elements.
+     */
+    var child;
+    var children = this.children;
+    var childScenes = s.children || (s.children = []);
+    for (var i = 0, n = children.length; i < n; i++) {
+        child = children[i];
+        child.scene = childScenes[i]; // possibly undefined
+        child.scale = scale;
+        child.build();
+        // Leave scene in children, because these might me used
+        // during build of siblings; 
+        // calling a sibling mark's property method (instance() evaluates to same index).
+    }
 
-  /*
-   * Once the child marks have been built, the new scene graph nodes are removed
-   * from the child marks and placed into the scene graph. The nodes cannot
-   * remain on the child nodes because this panel (or a parent panel) may be
-   * instantiated multiple times!
-   */
-  i = n;
-  while(i--) {
-    child = children[i];
-    childScenes[i] = child.scene;
-    delete child.scene;
-    delete child.scale;
-  }
+    /*
+     * Once the child marks have been built, the new scene graph nodes are removed
+     * from the child marks and placed into the scene graph. The nodes cannot
+     * remain on the child nodes because this panel (or a parent panel) may be
+     * instantiated multiple times!
+     */
+    i = n;
+    while (i--) {
+        child = children[i];
+        childScenes[i] = child.scene;
+        delete child.scene;
+        delete child.scale;
+    }
 
-  /* Delete any expired child scenes. */
-  childScenes.length = n;
+    /* Delete any expired child scenes. */
+    childScenes.length = n;
 };
 
 /**
@@ -14385,153 +15096,161 @@ pv.Panel.prototype.buildInstance = function(s) {
  * @param s a node in the scene graph; the instance of the panel to build.
  */
 pv.Panel.prototype.buildImplied = function(s) {
-  if(!this.parent && !this._buildRootInstanceImplied(s)) {
-    // Canvas was stolen by other root panel.
-    // Set the root scene instance as invisible, 
-    //  to prevent rendering on the stolen canvas.
-    s.visible = false;
-    return;
-  }
+    if (!this.parent && !this._buildRootInstanceImplied(s)) {
+        // Canvas was stolen by other root panel.
+        // Set the root scene instance as invisible, 
+        //  to prevent rendering on the stolen canvas.
+        s.visible = false;
+        return;
+    }
 
-  if(!s.transform) { s.transform = pv.Transform.identity; }
+    if (!s.transform) {
+        s.transform = pv.Transform.identity;
+    }
 
-  pv.Mark.prototype.buildImplied.call(this, s);
+    pv.Mark.prototype.buildImplied.call(this, s);
 };
 
 pv.Panel.prototype._buildRootInstanceImplied = function(s) {
-  // Was a canvas specified for *this* instance?
-  var c = s.canvas;
-  if(!c) {
-    // For every instance that doesn't specify a canvas, 
-    //  a new canvas element (a span) is created for it.
-    // This is a typical case of a viz having multiple canvas.
-    s.canvas = this._rootInstanceGetInlineCanvas(s);
-  } else {
-    if(!this._rootInstanceStealCanvas(s, c)) { return false; }
+    // Was a canvas specified for *this* instance?
+    var c = s.canvas;
+    if (!c) {
+        // For every instance that doesn't specify a canvas, 
+        //  a new canvas element (a span) is created for it.
+        // This is a typical case of a viz having multiple canvas.
+        s.canvas = this._rootInstanceGetInlineCanvas(s);
+    } else {
+        if (!this._rootInstanceStealCanvas(s, c)) {
+            return false;
+        }
 
-    this._rootInstanceInitCanvas(s, c);
-  }
+        this._rootInstanceInitCanvas(s, c);
+    }
 
-  return true;
+    return true;
 };
 
 pv.Panel.prototype._rootInstanceStealCanvas = function(s, c) {
-  // Clear the container if it's not associated with this panel.
-  // This may happen if concurrent viz's are using the same canvas
-  //  and start stealing the canvas to one another...
-  // TODO: There's no provision here to deal with the same canvas being used
-  //  by different instances of the same root panel?
-  // If this is the first render of this root panel, 
-  //  then we're allowed to steal it from another panel.
-  // If this is not our first render, 
-  //  then just accept that the canvas has been stolen.
-  var cPanel = c.$panel;
-  if(cPanel !== this) {
-    if(cPanel) {
-      if(this.$lastCreateId) {
-        // Let the current canvas panel win the fight.
-        return false;
-      }
+    // Clear the container if it's not associated with this panel.
+    // This may happen if concurrent viz's are using the same canvas
+    //  and start stealing the canvas to one another...
+    // TODO: There's no provision here to deal with the same canvas being used
+    //  by different instances of the same root panel?
+    // If this is the first render of this root panel, 
+    //  then we're allowed to steal it from another panel.
+    // If this is not our first render, 
+    //  then just accept that the canvas has been stolen.
+    var cPanel = c.$panel;
+    if (cPanel !== this) {
+        if (cPanel) {
+            if (this.$lastCreateId) {
+                // Let the current canvas panel win the fight.
+                return false;
+            }
 
-      // We win the fight, 
-      // dispose the other root panel.
-      cPanel._disposeRootPanel();
-      
-      this._updateCreateId(c);  
+            // We win the fight, 
+            // dispose the other root panel.
+            cPanel._disposeRootPanel();
+
+            this._updateCreateId(c);
+        }
+
+        c.$panel = this;
+        pv.removeChildren(c);
+    } else {
+        // Update createId
+        this._updateCreateId(c);
     }
-    
-    c.$panel = this;
-    pv.removeChildren(c);
-  } else {
-    // Update createId
-    this._updateCreateId(c);
-  }
-  return true;
+    return true;
 };
 
 pv.Panel.prototype._registerBoundEvent = function(source, name, listener, capturePhase) {
-  if(source.removeEventListener) {
-    var boundEvents = this._boundEvents || (this._boundEvents = []);
-    boundEvents.push([source, name, listener, capturePhase]);
-  }
+    if (source.removeEventListener) {
+        var boundEvents = this._boundEvents || (this._boundEvents = []);
+        boundEvents.push([source, name, listener, capturePhase]);
+    }
 };
 
 pv.Panel.prototype._disposeRootPanel = function() {
-  // Clear running transitions.
-  // If we don't do this,
-  //  a running animation's setTimeouts will
-  //  continue rendering, over a canvas that 
-  //  might already b being used by other panel,
-  //  resulting in "concurrent" updates to 
-  //  the same dom elements -- a big mess.
-  var t = this.$transition;
-  t && t.stop();
+    // Clear running transitions.
+    // If we don't do this,
+    //  a running animation's setTimeouts will
+    //  continue rendering, over a canvas that 
+    //  might already b being used by other panel,
+    //  resulting in "concurrent" updates to 
+    //  the same dom elements -- a big mess.
+    var t = this.$transition;
+    t && t.stop();
 
-  var boundEvents = this._boundEvents;
-  if(boundEvents) {
-    this._boundEvents = null;
+    var boundEvents = this._boundEvents;
+    if (boundEvents) {
+        this._boundEvents = null;
 
-    for(var i = 0, L = boundEvents.length; i < L ; i++) {
-      var be = boundEvents[i];
-      be[0].removeEventListener(be[1], be[2], be[3]);
+        for (var i = 0, L = boundEvents.length; i < L; i++) {
+            var be = boundEvents[i];
+            be[0].removeEventListener(be[1], be[2], be[3]);
+        }
     }
-  }
 };
 
 pv.Panel.prototype._rootInstanceInitCanvas = function(s, c) {
-  // If width and height weren't specified, inspect the container.
-  var w, h, cssStyle;
-  if(s.width == null) {
-    cssStyle = pv.cssStyle(c);
-    w = parseFloat(cssStyle("width") || 0);
-    s.width = w - s.left - s.right;
-  }
+    // If width and height weren't specified, inspect the container.
+    var w, h, cssStyle;
+    if (s.width == null) {
+        cssStyle = pv.cssStyle(c);
+        w = parseFloat(cssStyle("width") || 0);
+        s.width = w - s.left - s.right;
+    }
 
-  if(s.height == null) {
-    cssStyle || (cssStyle = pv.cssStyle(c));
-    h = parseFloat(cssStyle("height") || 0);
-    s.height = h - s.top - s.bottom;
-  }
+    if (s.height == null) {
+        cssStyle || (cssStyle = pv.cssStyle(c));
+        h = parseFloat(cssStyle("height") || 0);
+        s.height = h - s.top - s.bottom;
+    }
 
-  cssStyle = null;
+    cssStyle = null;
 };
 
 pv.Panel.prototype._rootInstanceGetInlineCanvas = function(s) {
-  // When no container is specified, 
-  //  the vis is added inline, as a span.
-  // The spans are created on first render only, 
-  //  and cached for later renders.
-  // If the visualization was created using a 
-  //  script element with language "text/javascript+protovis",
-  //  the span of each instance is added right before the script tag.
-  // Otherwise, the canvas is added as a sibling of 
-  //  the last (leaf) element of the page.
-  var cache = this.$canvas || (this.$canvas = []);
-  var c;
-  if(!(c = cache[this.index])) {
-    c = cache[this.index] =  document.createElement("span");
-    if(this.$dom) {
-      // Script element for text/javascript+protovis
-      this.$dom.parentNode.insertBefore(c, this.$dom);
-    } else {
-      // Find the last (leaf) element in the body.
-      var n = document.body;
-      while(n.lastChild && n.lastChild.tagName) { n = n.lastChild; }
+    // When no container is specified, 
+    //  the vis is added inline, as a span.
+    // The spans are created on first render only, 
+    //  and cached for later renders.
+    // If the visualization was created using a 
+    //  script element with language "text/javascript+protovis",
+    //  the span of each instance is added right before the script tag.
+    // Otherwise, the canvas is added as a sibling of 
+    //  the last (leaf) element of the page.
+    var cache = this.$canvas || (this.$canvas = []);
+    var c;
+    if (!(c = cache[this.index])) {
+        c = cache[this.index] = document.createElement("span");
+        if (this.$dom) {
+            // Script element for text/javascript+protovis
+            this.$dom.parentNode.insertBefore(c, this.$dom);
+        } else {
+            // Find the last (leaf) element in the body.
+            var n = document.body;
+            while (n.lastChild && n.lastChild.tagName) {
+                n = n.lastChild;
+            }
 
-      // Take its parent.
-      if(n != document.body) { n = n.parentNode; }
-      
-      // Add canvas as last child.
-      n.appendChild(c);
+            // Take its parent.
+            if (n != document.body) {
+                n = n.parentNode;
+            }
+
+            // Add canvas as last child.
+            n.appendChild(c);
+        }
     }
-  }
-  return c;
+    return c;
 };
 
 /** 
  * Updates the protovis create counter in the specified canvas.
  * This allows external entities to detect that a previous
- * panel attached to this canvas has been disposed of, 
+ * panel attached to this canvas has been disposed of,
  * or is no longer in control of this panel.
  * Also, by storing the latest counter on which this panel updated
  *  the canvas we're able to detect when we lost the canvas,
@@ -14564,7 +15283,7 @@ pv.Panel.prototype._updateCreateId = function(c) {
  * @extends pv.Bar
  */
 pv.Image = function() {
-  pv.Bar.call(this);
+    pv.Bar.call(this);
 };
 
 pv.Image.prototype = pv.extend(pv.Bar)
@@ -14636,63 +15355,62 @@ pv.Image.prototype.defaults = new pv.Image()
  * @returns {pv.Layout.Pack} this.
  */
 pv.Image.prototype.image = function(f) {
-  /** @private */
-  this.$image = function() {
-      var c = f.apply(this, arguments);
-      return c == null ? pv.Color.transparent
-          : typeof c == "string" ? pv.color(c)
-          : c;
+    /** @private */
+    this.$image = function() {
+        var c = f.apply(this, arguments);
+        return c == null ? pv.Color.transparent : typeof c == "string" ? pv.color(c) : c;
     };
-  return this;
+    return this;
 };
 
 /** @private Scan the proto chain for an image function. */
 pv.Image.prototype.bind = function() {
-  pv.Bar.prototype.bind.call(this);
-  var binds = this.binds, mark = this;
-  do {
-    binds.image = mark.$image;
-  } while (!binds.image && (mark = mark.proto));
+    pv.Bar.prototype.bind.call(this);
+    var binds = this.binds,
+        mark = this;
+    do {
+        binds.image = mark.$image;
+    } while (!binds.image && (mark = mark.proto));
 };
 
 /** @private */
 pv.Image.prototype.buildImplied = function(s) {
-  pv.Bar.prototype.buildImplied.call(this, s);
-  if (!s.visible) return;
+    pv.Bar.prototype.buildImplied.call(this, s);
+    if (!s.visible) return;
 
-  /* Compute the implied image dimensions. */
-  if (s.imageWidth == null) s.imageWidth = s.width;
-  if (s.imageHeight == null) s.imageHeight = s.height;
+    /* Compute the implied image dimensions. */
+    if (s.imageWidth == null) s.imageWidth = s.width;
+    if (s.imageHeight == null) s.imageHeight = s.height;
 
-  /* Compute the pixel values. */
-  if ((s.url == null) && this.binds.image) {
+    /* Compute the pixel values. */
+    if ((s.url == null) && this.binds.image) {
 
-    /* Cache the canvas element to reuse across renders. */
-    var canvas = this.$canvas || (this.$canvas = document.createElement("canvas")),
-        context = canvas.getContext("2d"),
-        w = s.imageWidth,
-        h = s.imageHeight,
-        stack = pv.Mark.stack,
-        data;
+        /* Cache the canvas element to reuse across renders. */
+        var canvas = this.$canvas || (this.$canvas = document.createElement("canvas")),
+            context = canvas.getContext("2d"),
+            w = s.imageWidth,
+            h = s.imageHeight,
+            stack = pv.Mark.stack,
+            data;
 
-    /* Evaluate the image function, storing into a CanvasPixelArray. */
-    canvas.width = w;
-    canvas.height = h;
-    data = (s.image = context.createImageData(w, h)).data;
-    stack.unshift(null, null);
-    for (var y = 0, p = 0; y < h; y++) {
-      stack[1] = y;
-      for (var x = 0; x < w; x++) {
-        stack[0] = x;
-        var color = this.binds.image.apply(this, stack);
-        data[p++] = color.r;
-        data[p++] = color.g;
-        data[p++] = color.b;
-        data[p++] = 255 * color.a;
-      }
+        /* Evaluate the image function, storing into a CanvasPixelArray. */
+        canvas.width = w;
+        canvas.height = h;
+        data = (s.image = context.createImageData(w, h)).data;
+        stack.unshift(null, null);
+        for (var y = 0, p = 0; y < h; y++) {
+            stack[1] = y;
+            for (var x = 0; x < w; x++) {
+                stack[0] = x;
+                var color = this.binds.image.apply(this, stack);
+                data[p++] = color.r;
+                data[p++] = color.g;
+                data[p++] = color.b;
+                data[p++] = 255 * color.a;
+            }
+        }
+        stack.splice(0, 2);
     }
-    stack.splice(0, 2);
-  }
 };
 /**
  * Constructs a new wedge with default properties. Wedges are not typically
@@ -14715,7 +15433,7 @@ pv.Image.prototype.buildImplied = function(s) {
  * @extends pv.Mark
  */
 pv.Wedge = function() {
-  pv.Mark.call(this);
+    pv.Mark.call(this);
 };
 
 pv.Wedge.prototype = pv.extend(pv.Mark)
@@ -14726,9 +15444,9 @@ pv.Wedge.prototype = pv.extend(pv.Mark)
     .property("outerRadius", Number)
     .property("lineWidth", Number)
     .property("strokeStyle", pv.fillStyle)
-    .property("lineJoin",  String)
+    .property("lineJoin", String)
     .property("strokeMiterLimit", Number)
-    .property("lineCap",   String)
+    .property("lineCap", String)
     .property("strokeDasharray", String)
     .property("fillStyle", pv.fillStyle);
 
@@ -14818,7 +15536,7 @@ pv.Wedge.prototype.defaults = new pv.Wedge()
     .startAngle(function() {
         var s = this.sibling();
         return s ? s.endAngle : -Math.PI / 2;
-      })
+    })
     .innerRadius(0)
     .lineWidth(1.5)
     .strokeStyle(null)
@@ -14837,7 +15555,7 @@ pv.Wedge.prototype.defaults = new pv.Wedge()
  * @returns {number} the mid-radius, in pixels.
  */
 pv.Wedge.prototype.midRadius = function() {
-  return (this.innerRadius() + this.outerRadius()) / 2;
+    return (this.innerRadius() + this.outerRadius()) / 2;
 };
 
 /**
@@ -14849,7 +15567,7 @@ pv.Wedge.prototype.midRadius = function() {
  * @returns {number} the mid-angle, in radians.
  */
 pv.Wedge.prototype.midAngle = function() {
-  return (this.startAngle() + this.endAngle()) / 2;
+    return (this.startAngle() + this.endAngle()) / 2;
 };
 
 /**
@@ -14870,59 +15588,88 @@ pv.Wedge.prototype.midAngle = function() {
  * @returns {pv.Anchor}
  */
 pv.Wedge.prototype.anchor = function(name) {
-  function partial(s) { return s.innerRadius || s.angle < 2 * Math.PI; }
-  function midRadius(s) { return (s.innerRadius + s.outerRadius) / 2; }
-  function midAngle(s) { return (s.startAngle + s.endAngle) / 2; }
-  return pv.Mark.prototype.anchor.call(this, name)
-    .left(function() {
-        var s = this.scene.target[this.index];
-        if (partial(s)) switch (this.name()) {
-          case "outer": return s.left + s.outerRadius * Math.cos(midAngle(s));
-          case "inner": return s.left + s.innerRadius * Math.cos(midAngle(s));
-          case "start": return s.left + midRadius(s) * Math.cos(s.startAngle);
-          case "center": return s.left + midRadius(s) * Math.cos(midAngle(s));
-          case "end": return s.left + midRadius(s) * Math.cos(s.endAngle);
-        }
-        return s.left;
-      })
-    .top(function() {
-        var s = this.scene.target[this.index];
-        if (partial(s)) switch (this.name()) {
-          case "outer": return s.top + s.outerRadius * Math.sin(midAngle(s));
-          case "inner": return s.top + s.innerRadius * Math.sin(midAngle(s));
-          case "start": return s.top + midRadius(s) * Math.sin(s.startAngle);
-          case "center": return s.top + midRadius(s) * Math.sin(midAngle(s));
-          case "end": return s.top + midRadius(s) * Math.sin(s.endAngle);
-        }
-        return s.top;
-      })
-    .textAlign(function() {
-        var s = this.scene.target[this.index];
-        if (partial(s)) switch (this.name()) {
-          case "outer": return pv.Wedge.upright(midAngle(s)) ? "right" : "left";
-          case "inner": return pv.Wedge.upright(midAngle(s)) ? "left" : "right";
-        }
-        return "center";
-      })
-    .textBaseline(function() {
-        var s = this.scene.target[this.index];
-        if (partial(s)) switch (this.name()) {
-          case "start": return pv.Wedge.upright(s.startAngle) ? "top" : "bottom";
-          case "end": return pv.Wedge.upright(s.endAngle) ? "bottom" : "top";
-        }
-        return "middle";
-      })
-    .textAngle(function() {
-        var s = this.scene.target[this.index], a = 0;
-        if (partial(s)) switch (this.name()) {
-          case "center":
-          case "inner":
-          case "outer": a = midAngle(s); break;
-          case "start": a = s.startAngle; break;
-          case "end": a = s.endAngle; break;
-        }
-        return pv.Wedge.upright(a) ? a : (a + Math.PI);
-      });
+    function partial(s) {
+        return s.innerRadius || s.angle < 2 * Math.PI;
+    }
+
+    function midRadius(s) {
+        return (s.innerRadius + s.outerRadius) / 2;
+    }
+
+    function midAngle(s) {
+        return (s.startAngle + s.endAngle) / 2;
+    }
+    return pv.Mark.prototype.anchor.call(this, name)
+        .left(function() {
+            var s = this.scene.target[this.index];
+            if (partial(s)) switch (this.name()) {
+                case "outer":
+                    return s.left + s.outerRadius * Math.cos(midAngle(s));
+                case "inner":
+                    return s.left + s.innerRadius * Math.cos(midAngle(s));
+                case "start":
+                    return s.left + midRadius(s) * Math.cos(s.startAngle);
+                case "center":
+                    return s.left + midRadius(s) * Math.cos(midAngle(s));
+                case "end":
+                    return s.left + midRadius(s) * Math.cos(s.endAngle);
+            }
+            return s.left;
+        })
+        .top(function() {
+            var s = this.scene.target[this.index];
+            if (partial(s)) switch (this.name()) {
+                case "outer":
+                    return s.top + s.outerRadius * Math.sin(midAngle(s));
+                case "inner":
+                    return s.top + s.innerRadius * Math.sin(midAngle(s));
+                case "start":
+                    return s.top + midRadius(s) * Math.sin(s.startAngle);
+                case "center":
+                    return s.top + midRadius(s) * Math.sin(midAngle(s));
+                case "end":
+                    return s.top + midRadius(s) * Math.sin(s.endAngle);
+            }
+            return s.top;
+        })
+        .textAlign(function() {
+            var s = this.scene.target[this.index];
+            if (partial(s)) switch (this.name()) {
+                case "outer":
+                    return pv.Wedge.upright(midAngle(s)) ? "right" : "left";
+                case "inner":
+                    return pv.Wedge.upright(midAngle(s)) ? "left" : "right";
+            }
+            return "center";
+        })
+        .textBaseline(function() {
+            var s = this.scene.target[this.index];
+            if (partial(s)) switch (this.name()) {
+                case "start":
+                    return pv.Wedge.upright(s.startAngle) ? "top" : "bottom";
+                case "end":
+                    return pv.Wedge.upright(s.endAngle) ? "bottom" : "top";
+            }
+            return "middle";
+        })
+        .textAngle(function() {
+            var s = this.scene.target[this.index],
+                a = 0;
+            if (partial(s)) switch (this.name()) {
+                case "center":
+                case "inner":
+                case "outer":
+                    a = midAngle(s);
+                    break;
+                case "start":
+                    a = s.startAngle;
+                    break;
+                case "end":
+                    a = s.endAngle;
+                    break;
+            }
+            return pv.Wedge.upright(a) ? a : (a + Math.PI);
+        });
 };
 
 /**
@@ -14935,19 +15682,19 @@ pv.Wedge.prototype.anchor = function(name) {
  * @returns {boolean} true if the specified angle is upright.
  */
 pv.Wedge.upright = function(angle) {
-  angle = angle % (2 * Math.PI);
-  angle = (angle < 0) ? (2 * Math.PI + angle) : angle;
-  return (angle < Math.PI / 2) || (angle >= 3 * Math.PI / 2);
+    angle = angle % (2 * Math.PI);
+    angle = (angle < 0) ? (2 * Math.PI + angle) : angle;
+    return (angle < Math.PI / 2) || (angle >= 3 * Math.PI / 2);
 };
 
 /** @private Sets angle based on endAngle or vice versa. */
 pv.Wedge.prototype.buildImplied = function(s) {
-  if (s.angle == null) s.angle = s.endAngle - s.startAngle;
-  else if (s.endAngle == null) s.endAngle = s.startAngle + s.angle;
-  pv.Mark.prototype.buildImplied.call(this, s);
+    if (s.angle == null) s.angle = s.endAngle - s.startAngle;
+    else if (s.endAngle == null) s.endAngle = s.startAngle + s.angle;
+    pv.Mark.prototype.buildImplied.call(this, s);
 };
 
-pv.Wedge.prototype.getShapeCore = function(scenes, index){
+pv.Wedge.prototype.getShapeCore = function(scenes, index) {
     var s = scenes[index];
     return new pv.Shape.Wedge(s.left, s.top, s.innerRadius, s.outerRadius, s.startAngle, s.angle);
 };
@@ -14988,406 +15735,438 @@ pv.Wedge.prototype.getShapeCore = function(scenes, index){
 
 pv.Ease = (function() {
 
-  function reverse(f) {
-    return function(t) {
-      return 1 - f(1 - t);
-    };
-  }
-
-  function reflect(f) {
-    return function(t) {
-      return .5 * (t < .5 ? f(2 * t) : (2 - f(2 - 2 * t)));
-    };
-  }
-
-  function poly(e) {
-    return function(t) {
-      return t < 0 ? 0 : t > 1 ? 1 : Math.pow(t, e);
+    function reverse(f) {
+        return function(t) {
+            return 1 - f(1 - t);
+        };
     }
-  }
 
-  function sin(t) {
-    return 1 - Math.cos(t * Math.PI / 2);
-  }
+    function reflect(f) {
+        return function(t) {
+            return .5 * (t < .5 ? f(2 * t) : (2 - f(2 - 2 * t)));
+        };
+    }
 
-  function exp(t) {
-    return t ? Math.pow(2, 10 * (t - 1)) - 0.001 : 0;
-  }
+    function poly(e) {
+        return function(t) {
+            return t < 0 ? 0 : t > 1 ? 1 : Math.pow(t, e);
+        }
+    }
 
-  function circle(t) {
-    return -(Math.sqrt(1 - t * t) - 1);
-  }
+    function sin(t) {
+        return 1 - Math.cos(t * Math.PI / 2);
+    }
 
-  function elastic(a, p) {
-    var s;
-    if (!p) p = 0.45;
-    if (!a || a < 1) { a = 1; s = p / 4; }
-    else s = p / (2 * Math.PI) * Math.asin(1 / a);
-    return function(t) {
-      return t <= 0 || t >= 1 ? t
-          : -(a * Math.pow(2, 10 * (--t)) * Math.sin((t - s) * (2 * Math.PI) / p));
+    function exp(t) {
+        return t ? Math.pow(2, 10 * (t - 1)) - 0.001 : 0;
+    }
+
+    function circle(t) {
+        return -(Math.sqrt(1 - t * t) - 1);
+    }
+
+    function elastic(a, p) {
+        var s;
+        if (!p) p = 0.45;
+        if (!a || a < 1) {
+            a = 1;
+            s = p / 4;
+        } else s = p / (2 * Math.PI) * Math.asin(1 / a);
+        return function(t) {
+            return t <= 0 || t >= 1 ? t : -(a * Math.pow(2, 10 * (--t)) * Math.sin((t - s) * (2 * Math.PI) / p));
+        };
+    }
+
+    function back(s) {
+        if (!s) s = 1.70158;
+        return function(t) {
+            return t * t * ((s + 1) * t - s);
+        };
+    }
+
+    function bounce(t) {
+        return t < 1 / 2.75 ? 7.5625 * t * t : t < 2 / 2.75 ? 7.5625 * (t -= 1.5 / 2.75) * t + .75 : t < 2.5 / 2.75 ? 7.5625 * (t -= 2.25 / 2.75) * t + .9375 : 7.5625 * (t -= 2.625 / 2.75) * t + .984375;
+    }
+
+    var quad = poly(2),
+        cubic = poly(3),
+        elasticDefault = elastic(),
+        backDefault = back();
+
+    var eases = {
+        "linear": pv.identity,
+        "quad-in": quad,
+        "quad-out": reverse(quad),
+        "quad-in-out": reflect(quad),
+        "quad-out-in": reflect(reverse(quad)),
+        "cubic-in": cubic,
+        "cubic-out": reverse(cubic),
+        "cubic-in-out": reflect(cubic),
+        "cubic-out-in": reflect(reverse(cubic)),
+        "sin-in": sin,
+        "sin-out": reverse(sin),
+        "sin-in-out": reflect(sin),
+        "sin-out-in": reflect(reverse(sin)),
+        "exp-in": exp,
+        "exp-out": reverse(exp),
+        "exp-in-out": reflect(exp),
+        "exp-out-in": reflect(reverse(exp)),
+        "circle-in": circle,
+        "circle-out": reverse(circle),
+        "circle-in-out": reflect(circle),
+        "circle-out-in": reflect(reverse(circle)),
+        "elastic-in": elasticDefault,
+        "elastic-out": reverse(elasticDefault),
+        "elastic-in-out": reflect(elasticDefault),
+        "elastic-out-in": reflect(reverse(elasticDefault)),
+        "back-in": backDefault,
+        "back-out": reverse(backDefault),
+        "back-in-out": reflect(backDefault),
+        "back-out-in": reflect(reverse(backDefault)),
+        "bounce-in": bounce,
+        "bounce-out": reverse(bounce),
+        "bounce-in-out": reflect(bounce),
+        "bounce-out-in": reflect(reverse(bounce))
     };
-  }
 
-  function back(s) {
-    if (!s) s = 1.70158;
-    return function(t) {
-      return t * t * ((s + 1) * t - s);
+    pv.ease = function(f) {
+        return eases[f];
     };
-  }
 
-  function bounce(t) {
-    return t < 1 / 2.75 ? 7.5625 * t * t
-        : t < 2 / 2.75 ? 7.5625 * (t -= 1.5 / 2.75) * t + .75
-        : t < 2.5 / 2.75 ? 7.5625 * (t -= 2.25 / 2.75) * t + .9375
-        : 7.5625 * (t -= 2.625 / 2.75) * t + .984375;
-  }
-
-  var quad = poly(2),
-      cubic = poly(3),
-      elasticDefault = elastic(),
-      backDefault = back();
-
-  var eases = {
-    "linear": pv.identity,
-    "quad-in": quad,
-    "quad-out": reverse(quad),
-    "quad-in-out": reflect(quad),
-    "quad-out-in": reflect(reverse(quad)),
-    "cubic-in": cubic,
-    "cubic-out": reverse(cubic),
-    "cubic-in-out": reflect(cubic),
-    "cubic-out-in": reflect(reverse(cubic)),
-    "sin-in": sin,
-    "sin-out": reverse(sin),
-    "sin-in-out": reflect(sin),
-    "sin-out-in": reflect(reverse(sin)),
-    "exp-in": exp,
-    "exp-out": reverse(exp),
-    "exp-in-out": reflect(exp),
-    "exp-out-in": reflect(reverse(exp)),
-    "circle-in": circle,
-    "circle-out": reverse(circle),
-    "circle-in-out": reflect(circle),
-    "circle-out-in": reflect(reverse(circle)),
-    "elastic-in": elasticDefault,
-    "elastic-out": reverse(elasticDefault),
-    "elastic-in-out": reflect(elasticDefault),
-    "elastic-out-in": reflect(reverse(elasticDefault)),
-    "back-in": backDefault,
-    "back-out": reverse(backDefault),
-    "back-in-out": reflect(backDefault),
-    "back-out-in": reflect(reverse(backDefault)),
-    "bounce-in": bounce,
-    "bounce-out": reverse(bounce),
-    "bounce-in-out": reflect(bounce),
-    "bounce-out-in": reflect(reverse(bounce))
-  };
-
-  pv.ease = function(f) {
-    return eases[f];
-  };
-
-  return {
-    reverse: reverse,
-    reflect: reflect,
-    linear: function() { return pv.identity; },
-    sin: function() { return sin; },
-    exp: function() { return exp; },
-    circle: function() { return circle; },
-    elastic: elastic,
-    back: back,
-    bounce: bounce,
-    poly: poly
-  };
+    return {
+        reverse: reverse,
+        reflect: reflect,
+        linear: function() {
+            return pv.identity;
+        },
+        sin: function() {
+            return sin;
+        },
+        exp: function() {
+            return exp;
+        },
+        circle: function() {
+            return circle;
+        },
+        elastic: elastic,
+        back: back,
+        bounce: bounce,
+        poly: poly
+    };
 })();
 pv.Transition = function(mark) {
-  var that = this,
-      ease = pv.ease("cubic-in-out"),
-      duration = 250,
-      timer,
-      onEndCallback,
-      cleanedup;
+    var that = this,
+        ease = pv.ease("cubic-in-out"),
+        duration = 250,
+        timer,
+        onEndCallback,
+        cleanedup;
 
-  var interpolated = {
-    top: 1,
-    left: 1,
-    right: 1,
-    bottom: 1,
-    width: 1,
-    height: 1,
-    innerRadius: 1,
-    outerRadius: 1,
-    radius: 1,
-    shapeRadius: 1,
-    shapeSize: 1,
-    startAngle: 1,
-    endAngle: 1,
-    angle: 1,
-    fillStyle: 1,
-    strokeStyle: 1,
-    lineWidth: 1,
-    eccentricity: 1,
-    tension: 1,
-    textAngle: 1,
-    textStyle: 1,
-    textMargin: 1
-  };
-
-  var defaults = new pv.Transient();
-
-  /** @private */
-  function ids(marks) {
-    var map = {};
-    for (var i = 0; i < marks.length; i++) {
-      var mark = marks[i];
-      if (mark.id) {
-          map[mark.id] = mark;
-      }
-    }
-    
-    return map;
-  }
-
-  /** @private */
-  function interpolateProperty(list, name, before, after) {
-    var f;
-    if (name in interpolated) {
-      var i = pv.Scale.interpolator(before[name], after[name]);
-      f = function(t) {
-          before[name] = i(t); 
-      };
-    } else {
-      f = function(t) {
-          if (t > .5) {
-              before[name] = after[name];
-          }
-      };
-    }
-    f.next = list.head;
-    list.head = f;
-  }
-
-  /** @private */
-  function interpolateInstance(list, before, after) {
-    for (var name in before) {
-      if (name == "children") continue; // not a property
-      if (before[name] == after[name]) continue; // unchanged
-      interpolateProperty(list, name, before, after);
-    }
-    if (before.children) {
-      for (var j = 0; j < before.children.length; j++) {
-        interpolate(list, before.children[j], after.children[j]);
-      }
-    }
-  }
-
-  /** @private */
-  function interpolate(list, before, after) {
-    var mark = before.mark, 
-        bi = ids(before), 
-        ai = ids(after);
-    
-    for (var i = 0; i < before.length; i++) {
-      var b = before[i], 
-          a = b.id ? ai[b.id] : after[i];
-      
-      b.index = i;
-      
-      if (!b.visible) { 
-          continue;
-      }
-      
-      // No after or not after.visible
-      if (!(a && a.visible)) {
-        var o = override(before, i, mark.$exit, after);
-
-        /*
-         * After the transition finishes, we need to do a little cleanup to
-         * ensure that the final state of the scenegraph is consistent with the
-         * "after" render. For instances that were removed, we need to remove
-         * them from the scenegraph; for instances that became invisible, we
-         * need to mark them invisible. See the cleanup method for details.
-         */
-        b.transition = a ? 
-                2 : 
-                (after.push(o), 1);
-        a = o;
-      }
-      interpolateInstance(list, b, a);
-    }
-    
-    for (var i = 0; i < after.length; i++) {
-      var a = after[i], 
-          b = a.id ? bi[a.id] : before[i];
-      
-      if (!(b && b.visible) && a.visible) {
-        var o = override(after, i, mark.$enter, before);
-        if (!b) 
-            before.push(o);
-        else 
-            before[b.index] = o;
-        
-        interpolateInstance(list, o, a);
-      }
-    }
-  }
-
-  /** @private */
-  function override(scene, index, proto, other) {
-    var s = pv.extend(scene[index]),
-        m = scene.mark,
-        r = m.root.scene,
-        p = (proto || defaults).$properties,
-        t;
-
-    /* Correct the target reference, if this is an anchor. */
-    if (other.target && (t = other.target[other.length])) {
-      scene = pv.extend(scene);
-      scene.target = pv.extend(other.target);
-      scene.target[index] = t;
-    }
-
-    /* Determine the set of properties to evaluate. */
-    var seen = {};
-    for (var i = 0; i < p.length; i++) {
-        seen[p[i].name] = 1;
-    }
-    
-    /* Add to p all optional properties in binds not in proto properties (p) */
-    p = m.binds.optional
-         .filter(function(p) { return !(p.name in seen); })
-         .concat(p);
-
-    /* Evaluate the properties and update any implied ones. */
-    m.context(scene, index, function() {
-      this.buildProperties(s, p);
-      this.buildImplied(s);
-    });
-
-    /* Restore the root scene. This should probably be done by context(). */
-    m.root.scene = r;
-    return s;
-  }
-
-  /** @private */
-  function cleanup(scene) {
-    if(!cleanedup) {
-      cleanedup = true;
-
-      for(var i = 0, j = 0; i < scene.length; i++) {
-        var s = scene[i];
-        if(s.transition != 1) {
-          scene[j++] = s;
-          if(s.transition == 2) s.visible = false;
-          if(s.children) s.children.forEach(cleanup);
-        }
-      }
-      scene.length = j;
-    }
-  }
-
-  that.ease = function(x) {
-    return arguments.length
-        ? (ease = typeof x == "function" ? x : pv.ease(x), that)
-        : ease;
-  };
-
-  that.duration = function(x) {
-    return arguments.length
-        ? (duration = Number(x), that)
-        : duration;
-  };
-
-  that.start = function(onEnd) {
-    // TODO allow partial rendering
-    if(mark.parent) { throw new Error("Animated partial rendering is not supported."); }
-    
-    onEndCallback = onEnd;
-
-    var root = mark.root;
-
-    // TODO allow parallel and sequenced transitions
-    if(root.$transition) {
-      try { root.$transition.stop(); } catch(ex) { return doEnd(false); }
-    }
-
-    // ---------------
-
-    var list, start;
-    root.$transition = that;
-
-    // TODO clearing the scene like this forces total re-build
-    var before = mark.scene;
-    mark.scene = null;
-    var i0 = pv.Mark.prototype.index;
-    try {
-        mark.bind();
-        mark.build();
-        
-        var after = mark.scene;
-        mark.scene = before;
-        pv.Mark.prototype.index = i0;
-    
-        start = Date.now();
-        list = {};
-        interpolate(list, before, after);
-    } catch(ex) {
-        pv.Mark.prototype.index = i0; // JIC
-        return doEnd(false);
-    }
-    
-    if(!list.head) { return doEnd(true); }
-    
-    var advance = function() {
-      var t = Math.max(0, Math.min(1, (Date.now() - start) / duration)),
-          e = ease(t);
-      
-      /* Advance every property of every mark */
-      var i = list.head;
-      do { i(e); } while((i = i.next));
-      
-      if(t === 1) {
-        cleanup(mark.scene);
-        pv.Scene.updateAll(before);
-        doEnd(true);
-      } else {
-        pv.Scene.updateAll(before);
-      }
+    var interpolated = {
+        top: 1,
+        left: 1,
+        right: 1,
+        bottom: 1,
+        width: 1,
+        height: 1,
+        innerRadius: 1,
+        outerRadius: 1,
+        radius: 1,
+        shapeRadius: 1,
+        shapeSize: 1,
+        startAngle: 1,
+        endAngle: 1,
+        angle: 1,
+        fillStyle: 1,
+        strokeStyle: 1,
+        lineWidth: 1,
+        eccentricity: 1,
+        tension: 1,
+        textAngle: 1,
+        textStyle: 1,
+        textMargin: 1
     };
 
-    timer = setInterval(function() {
-      try { advance(); } catch(ex) { doEnd(false); }
-    }, 24);
-  }; // end that.start
+    var defaults = new pv.Transient();
 
-  that.stop = function() { doEnd(true); };
+    /** @private */
 
-  function doEnd(success) {
-    var started = (mark.root.$transition === that);
-    if(started) { mark.root.$transition = null; }
-    
-    if(timer != null) {
-      clearInterval(timer);
-      timer = null;
+    function ids(marks) {
+        var map = {};
+        for (var i = 0; i < marks.length; i++) {
+            var mark = marks[i];
+            if (mark.id) {
+                map[mark.id] = mark;
+            }
+        }
+
+        return map;
     }
 
-    if(started) { cleanup(mark.scene); }
+    /** @private */
 
-    if(onEndCallback) {
-      var cb = onEndCallback;
-      onEndCallback = null;
-      cb(success);
+    function interpolateProperty(list, name, before, after) {
+        var f;
+        if (name in interpolated) {
+            var i = pv.Scale.interpolator(before[name], after[name]);
+            f = function(t) {
+                before[name] = i(t);
+            };
+        } else {
+            f = function(t) {
+                if (t > .5) {
+                    before[name] = after[name];
+                }
+            };
+        }
+        f.next = list.head;
+        list.head = f;
     }
 
-    // Only useful when it fails synchronous in #start.
-    return success;
-  }
+    /** @private */
+
+    function interpolateInstance(list, before, after) {
+        for (var name in before) {
+            if (name == "children") continue; // not a property
+            if (before[name] == after[name]) continue; // unchanged
+            interpolateProperty(list, name, before, after);
+        }
+        if (before.children) {
+            for (var j = 0; j < before.children.length; j++) {
+                interpolate(list, before.children[j], after.children[j]);
+            }
+        }
+    }
+
+    /** @private */
+
+    function interpolate(list, before, after) {
+        var mark = before.mark,
+            bi = ids(before),
+            ai = ids(after);
+
+        for (var i = 0; i < before.length; i++) {
+            var b = before[i],
+                a = b.id ? ai[b.id] : after[i];
+
+            b.index = i;
+
+            if (!b.visible) {
+                continue;
+            }
+
+            // No after or not after.visible
+            if (!(a && a.visible)) {
+                var o = override(before, i, mark.$exit, after);
+
+                /*
+                 * After the transition finishes, we need to do a little cleanup to
+                 * ensure that the final state of the scenegraph is consistent with the
+                 * "after" render. For instances that were removed, we need to remove
+                 * them from the scenegraph; for instances that became invisible, we
+                 * need to mark them invisible. See the cleanup method for details.
+                 */
+                b.transition = a ?
+                    2 :
+                    (after.push(o), 1);
+                a = o;
+            }
+            interpolateInstance(list, b, a);
+        }
+
+        for (var i = 0; i < after.length; i++) {
+            var a = after[i],
+                b = a.id ? bi[a.id] : before[i];
+
+            if (!(b && b.visible) && a.visible) {
+                var o = override(after, i, mark.$enter, before);
+                if (!b)
+                    before.push(o);
+                else
+                    before[b.index] = o;
+
+                interpolateInstance(list, o, a);
+            }
+        }
+    }
+
+    /** @private */
+
+    function override(scene, index, proto, other) {
+        var s = pv.extend(scene[index]),
+            m = scene.mark,
+            r = m.root.scene,
+            p = (proto || defaults).$properties,
+            t;
+
+        /* Correct the target reference, if this is an anchor. */
+        if (other.target && (t = other.target[other.length])) {
+            scene = pv.extend(scene);
+            scene.target = pv.extend(other.target);
+            scene.target[index] = t;
+        }
+
+        /* Determine the set of properties to evaluate. */
+        var seen = {};
+        for (var i = 0; i < p.length; i++) {
+            seen[p[i].name] = 1;
+        }
+
+        /* Add to p all optional properties in binds not in proto properties (p) */
+        p = m.binds.optional
+            .filter(function(p) {
+                return !(p.name in seen);
+            })
+            .concat(p);
+
+        /* Evaluate the properties and update any implied ones. */
+        m.context(scene, index, function() {
+            this.buildProperties(s, p);
+            this.buildImplied(s);
+        });
+
+        /* Restore the root scene. This should probably be done by context(). */
+        m.root.scene = r;
+        return s;
+    }
+
+    /** @private */
+
+    function cleanup(scene) {
+        if (!cleanedup) {
+            cleanedup = true;
+
+            for (var i = 0, j = 0; i < scene.length; i++) {
+                var s = scene[i];
+                if (s.transition != 1) {
+                    scene[j++] = s;
+                    if (s.transition == 2) s.visible = false;
+                    if (s.children) s.children.forEach(cleanup);
+                }
+            }
+            scene.length = j;
+        }
+    }
+
+    that.ease = function(x) {
+        return arguments.length ? (ease = typeof x == "function" ? x : pv.ease(x), that) : ease;
+    };
+
+    that.duration = function(x) {
+        return arguments.length ? (duration = Number(x), that) : duration;
+    };
+
+    that.start = function(onEnd) {
+        // TODO allow partial rendering
+        if (mark.parent) {
+            throw new Error("Animated partial rendering is not supported.");
+        }
+
+        onEndCallback = onEnd;
+
+        var root = mark.root;
+
+        // TODO allow parallel and sequenced transitions
+        if (root.$transition) {
+            try {
+                root.$transition.stop();
+            } catch (ex) {
+                return doEnd(false);
+            }
+        }
+
+        // ---------------
+
+        var list, start;
+        root.$transition = that;
+
+        // TODO clearing the scene like this forces total re-build
+        var before = mark.scene;
+        mark.scene = null;
+        var i0 = pv.Mark.prototype.index;
+        try {
+            mark.bind();
+            mark.build();
+
+            var after = mark.scene;
+            mark.scene = before;
+            pv.Mark.prototype.index = i0;
+
+            start = Date.now();
+            list = {};
+            interpolate(list, before, after);
+        } catch (ex) {
+            pv.Mark.prototype.index = i0; // JIC
+            return doEnd(false);
+        }
+
+        if (!list.head) {
+            return doEnd(true);
+        }
+
+        var advance = function() {
+            var t = Math.max(0, Math.min(1, (Date.now() - start) / duration)),
+                e = ease(t);
+
+            /* Advance every property of every mark */
+            var i = list.head;
+            do {
+                i(e);
+            } while ((i = i.next));
+
+            if (t === 1) {
+                cleanup(mark.scene);
+                pv.Scene.updateAll(before);
+                doEnd(true);
+            } else {
+                pv.Scene.updateAll(before);
+            }
+        };
+
+        timer = setInterval(function() {
+            try {
+                advance();
+            } catch (ex) {
+                doEnd(false);
+            }
+        }, 24);
+    }; // end that.start
+
+    that.stop = function() {
+        doEnd(true);
+    };
+
+    function doEnd(success) {
+        var started = (mark.root.$transition === that);
+        if (started) {
+            mark.root.$transition = null;
+        }
+
+        if (timer != null) {
+            clearInterval(timer);
+            timer = null;
+        }
+
+        if (started) {
+            cleanup(mark.scene);
+        }
+
+        if (onEndCallback) {
+            var cb = onEndCallback;
+            onEndCallback = null;
+            cb(success);
+        }
+
+        // Only useful when it fails synchronous in #start.
+        return success;
+    }
 };
 pv.Transient = function(mark) {
-  pv.Mark.call(this);
-  this.fillStyle(null).strokeStyle(null).textStyle(null);
-  this.on = function(state) { return mark.on(state); };
+    pv.Mark.call(this);
+    this.fillStyle(null).strokeStyle(null).textStyle(null);
+    this.on = function(state) {
+        return mark.on(state);
+    };
 };
 
 pv.Transient.prototype = pv.extend(pv.Mark);
@@ -15480,7 +16259,7 @@ pv.Transient.prototype = pv.extend(pv.Mark);
  * @see pv.Simulation
  */
 pv.simulation = function(particles) {
-  return new pv.Simulation(particles);
+    return new pv.Simulation(particles);
 };
 
 /**
@@ -15514,7 +16293,7 @@ pv.simulation = function(particles) {
  * @see pv.Constraint
  */
 pv.Simulation = function(particles) {
-  for (var i = 0; i < particles.length; i++) this.particle(particles[i]);
+    for (var i = 0; i < particles.length; i++) this.particle(particles[i]);
 };
 
 /**
@@ -15551,14 +16330,14 @@ pv.Simulation = function(particles) {
  * @returns {pv.Simulation} this.
  */
 pv.Simulation.prototype.particle = function(p) {
-  p.next = this.particles;
-  /* Default velocities and forces to zero if unset. */
-  if (isNaN(p.px)) p.px = p.x;
-  if (isNaN(p.py)) p.py = p.y;
-  if (isNaN(p.fx)) p.fx = 0;
-  if (isNaN(p.fy)) p.fy = 0;
-  this.particles = p;
-  return this;
+    p.next = this.particles;
+    /* Default velocities and forces to zero if unset. */
+    if (isNaN(p.px)) p.px = p.x;
+    if (isNaN(p.py)) p.py = p.y;
+    if (isNaN(p.fx)) p.fx = 0;
+    if (isNaN(p.fy)) p.fy = 0;
+    this.particles = p;
+    return this;
 };
 
 /**
@@ -15568,9 +16347,9 @@ pv.Simulation.prototype.particle = function(p) {
  * @returns {pv.Simulation} this.
  */
 pv.Simulation.prototype.force = function(f) {
-  f.next = this.forces;
-  this.forces = f;
-  return this;
+    f.next = this.forces;
+    this.forces = f;
+    return this;
 };
 
 /**
@@ -15580,9 +16359,9 @@ pv.Simulation.prototype.force = function(f) {
  * @returns {pv.Simulation} this.
  */
 pv.Simulation.prototype.constraint = function(c) {
-  c.next = this.constraints;
-  this.constraints = c;
-  return this;
+    c.next = this.constraints;
+    this.constraints = c;
+    return this;
 };
 
 /**
@@ -15591,45 +16370,46 @@ pv.Simulation.prototype.constraint = function(c) {
  * @returns {pv.Simulation} this.
  */
 pv.Simulation.prototype.stabilize = function(n) {
-  var c;
-  if (!arguments.length) n = 3; // TODO use cooling schedule
-  for (var i = 0; i < n; i++) {
-    var q = new pv.Quadtree(this.particles);
-    for (c = this.constraints; c; c = c.next) c.apply(this.particles, q);
-  }
-  for (var p = this.particles; p; p = p.next) {
-    p.px = p.x;
-    p.py = p.y;
-  }
-  return this;
+    var c;
+    if (!arguments.length) n = 3; // TODO use cooling schedule
+    for (var i = 0; i < n; i++) {
+        var q = new pv.Quadtree(this.particles);
+        for (c = this.constraints; c; c = c.next) c.apply(this.particles, q);
+    }
+    for (var p = this.particles; p; p = p.next) {
+        p.px = p.x;
+        p.py = p.y;
+    }
+    return this;
 };
 
 /**
  * Advances the simulation one time-step.
  */
 pv.Simulation.prototype.step = function() {
-  var p, f, c;
+    var p, f, c;
 
-  /*
-   * Assumptions:
-   * - The mass (m) of every particles is 1.
-   * - The time step (dt) is 1.
-   */
+    /*
+     * Assumptions:
+     * - The mass (m) of every particles is 1.
+     * - The time step (dt) is 1.
+     */
 
-  /* Position Verlet integration. */
-  for (p = this.particles; p; p = p.next) {
-    var px = p.px, py = p.py;
-    p.px = p.x;
-    p.py = p.y;
-    p.x += p.vx = ((p.x - px) + p.fx);
-    p.y += p.vy = ((p.y - py) + p.fy);
-  }
+    /* Position Verlet integration. */
+    for (p = this.particles; p; p = p.next) {
+        var px = p.px,
+            py = p.py;
+        p.px = p.x;
+        p.py = p.y;
+        p.x += p.vx = ((p.x - px) + p.fx);
+        p.y += p.vy = ((p.y - py) + p.fy);
+    }
 
-  /* Apply constraints, then accumulate new forces. */
-  var q = new pv.Quadtree(this.particles);
-  for (c = this.constraints; c; c = c.next) c.apply(this.particles, q);
-  for (p = this.particles; p; p = p.next) p.fx = p.fy = 0;
-  for (f = this.forces; f; f = f.next) f.apply(this.particles, q);
+    /* Apply constraints, then accumulate new forces. */
+    var q = new pv.Quadtree(this.particles);
+    for (c = this.constraints; c; c = c.next) c.apply(this.particles, q);
+    for (p = this.particles; p; p = p.next) p.fx = p.fy = 0;
+    for (f = this.forces; f; f = f.next) f.apply(this.particles, q);
 };
 /**
  * Constructs a new quadtree for the specified array of particles.
@@ -15649,88 +16429,103 @@ pv.Simulation.prototype.step = function() {
  * @param {pv.Particle} particles the linked list of particles.
  */
 pv.Quadtree = function(particles) {
-  var p;
+    var p;
 
-  /* Compute bounds. */
-  var x1 = Number.POSITIVE_INFINITY, y1 = x1,
-      x2 = Number.NEGATIVE_INFINITY, y2 = x2;
-  for (p = particles; p; p = p.next) {
-    if (p.x < x1) x1 = p.x;
-    if (p.y < y1) y1 = p.y;
-    if (p.x > x2) x2 = p.x;
-    if (p.y > y2) y2 = p.y;
-  }
+    /* Compute bounds. */
+    var x1 = Number.POSITIVE_INFINITY,
+        y1 = x1,
+        x2 = Number.NEGATIVE_INFINITY,
+        y2 = x2;
+    for (p = particles; p; p = p.next) {
+        if (p.x < x1) x1 = p.x;
+        if (p.y < y1) y1 = p.y;
+        if (p.x > x2) x2 = p.x;
+        if (p.y > y2) y2 = p.y;
+    }
 
-  /* Squarify the bounds. */
-  var dx = x2 - x1, dy = y2 - y1;
-  if (dx > dy) y2 = y1 + dx;
-  else x2 = x1 + dy;
-  this.xMin = x1;
-  this.yMin = y1;
-  this.xMax = x2;
-  this.yMax = y2;
+    /* Squarify the bounds. */
+    var dx = x2 - x1,
+        dy = y2 - y1;
+    if (dx > dy) y2 = y1 + dx;
+    else x2 = x1 + dy;
+    this.xMin = x1;
+    this.yMin = y1;
+    this.xMax = x2;
+    this.yMax = y2;
 
-  /**
-   * @ignore Recursively inserts the specified particle <i>p</i> at the node
-   * <i>n</i> or one of its descendants. The bounds are defined by [<i>x1</i>,
-   * <i>x2</i>] and [<i>y1</i>, <i>y2</i>].
-   */
-  function insert(n, p, x1, y1, x2, y2) {
-    if (isNaN(p.x) || isNaN(p.y)) return; // ignore invalid particles
-    if (n.leaf) {
-      if (n.p) {
-        /*
-         * If the particle at this leaf node is at the same position as the new
-         * particle we are adding, we leave the particle associated with the
-         * internal node while adding the new particle to a child node. This
-         * avoids infinite recursion.
-         */
-        if ((Math.abs(n.p.x - p.x) + Math.abs(n.p.y - p.y)) < .01) {
-          insertChild(n, p, x1, y1, x2, y2);
+    /**
+     * @ignore Recursively inserts the specified particle <i>p</i> at the node
+     * <i>n</i> or one of its descendants. The bounds are defined by [<i>x1</i>,
+     * <i>x2</i>] and [<i>y1</i>, <i>y2</i>].
+     */
+
+    function insert(n, p, x1, y1, x2, y2) {
+        if (isNaN(p.x) || isNaN(p.y)) return; // ignore invalid particles
+        if (n.leaf) {
+            if (n.p) {
+                /*
+                 * If the particle at this leaf node is at the same position as the new
+                 * particle we are adding, we leave the particle associated with the
+                 * internal node while adding the new particle to a child node. This
+                 * avoids infinite recursion.
+                 */
+                if ((Math.abs(n.p.x - p.x) + Math.abs(n.p.y - p.y)) < .01) {
+                    insertChild(n, p, x1, y1, x2, y2);
+                } else {
+                    var v = n.p;
+                    n.p = null;
+                    insertChild(n, v, x1, y1, x2, y2);
+                    insertChild(n, p, x1, y1, x2, y2);
+                }
+            } else {
+                n.p = p;
+            }
         } else {
-          var v = n.p;
-          n.p = null;
-          insertChild(n, v, x1, y1, x2, y2);
-          insertChild(n, p, x1, y1, x2, y2);
+            insertChild(n, p, x1, y1, x2, y2);
         }
-      } else {
-        n.p = p;
-      }
-    } else {
-      insertChild(n, p, x1, y1, x2, y2);
-    }
-  }
-
-  /**
-   * @ignore Recursively inserts the specified particle <i>p</i> into a
-   * descendant of node <i>n</i>. The bounds are defined by [<i>x1</i>,
-   * <i>x2</i>] and [<i>y1</i>, <i>y2</i>].
-   */
-  function insertChild(n, p, x1, y1, x2, y2) {
-    /* Compute the split point, and the quadrant in which to insert p. */
-    var sx = (x1 + x2) * .5,
-        sy = (y1 + y2) * .5,
-        right = p.x >= sx,
-        bottom = p.y >= sy;
-
-    /* Recursively insert into the child node. */
-    n.leaf = false;
-    switch ((bottom << 1) + right) {
-      case 0: n = n.c1 || (n.c1 = new pv.Quadtree.Node()); break;
-      case 1: n = n.c2 || (n.c2 = new pv.Quadtree.Node()); break;
-      case 2: n = n.c3 || (n.c3 = new pv.Quadtree.Node()); break;
-      case 3: n = n.c4 || (n.c4 = new pv.Quadtree.Node()); break;
     }
 
-    /* Update the bounds as we recurse. */
-    if (right) x1 = sx; else x2 = sx;
-    if (bottom) y1 = sy; else y2 = sy;
-    insert(n, p, x1, y1, x2, y2);
-  }
+    /**
+     * @ignore Recursively inserts the specified particle <i>p</i> into a
+     * descendant of node <i>n</i>. The bounds are defined by [<i>x1</i>,
+     * <i>x2</i>] and [<i>y1</i>, <i>y2</i>].
+     */
 
-  /* Insert all particles. */
-  this.root = new pv.Quadtree.Node();
-  for (p = particles; p; p = p.next) insert(this.root, p, x1, y1, x2, y2);
+    function insertChild(n, p, x1, y1, x2, y2) {
+        /* Compute the split point, and the quadrant in which to insert p. */
+        var sx = (x1 + x2) * .5,
+            sy = (y1 + y2) * .5,
+            right = p.x >= sx,
+            bottom = p.y >= sy;
+
+        /* Recursively insert into the child node. */
+        n.leaf = false;
+        switch ((bottom << 1) + right) {
+            case 0:
+                n = n.c1 || (n.c1 = new pv.Quadtree.Node());
+                break;
+            case 1:
+                n = n.c2 || (n.c2 = new pv.Quadtree.Node());
+                break;
+            case 2:
+                n = n.c3 || (n.c3 = new pv.Quadtree.Node());
+                break;
+            case 3:
+                n = n.c4 || (n.c4 = new pv.Quadtree.Node());
+                break;
+        }
+
+        /* Update the bounds as we recurse. */
+        if (right) x1 = sx;
+        else x2 = sx;
+        if (bottom) y1 = sy;
+        else y2 = sy;
+        insert(n, p, x1, y1, x2, y2);
+    }
+
+    /* Insert all particles. */
+    this.root = new pv.Quadtree.Node();
+    for (p = particles; p; p = p.next) insert(this.root, p, x1, y1, x2, y2);
 };
 
 /**
@@ -15776,17 +16571,17 @@ pv.Quadtree = function(particles) {
  * @see pv.Quadtree
  */
 pv.Quadtree.Node = function() {
-  /*
-   * Prepopulating all attributes significantly increases performance! Also,
-   * letting the language interpreter manage garbage collection was moderately
-   * faster than creating a cache pool.
-   */
-  this.leaf = true;
-  this.c1 = null;
-  this.c2 = null;
-  this.c3 = null;
-  this.c4 = null;
-  this.p = null;
+    /*
+     * Prepopulating all attributes significantly increases performance! Also,
+     * letting the language interpreter manage garbage collection was moderately
+     * faster than creating a cache pool.
+     */
+    this.leaf = true;
+    this.c1 = null;
+    this.c2 = null;
+    this.c3 = null;
+    this.c4 = null;
+    this.p = null;
 };
 
 /**
@@ -15874,166 +16669,171 @@ pv.Force = {};
  * @param {number} [k] the charge constant.
  */
 pv.Force.charge = function(k) {
-  var min = 2, // minimum distance at which to observe forces
-      min1 = 1 / min,
-      max = 500, // maximum distance at which to observe forces
-      max1 = 1 / max,
-      theta = .9, // Barnes-Hut theta approximation constant
-      force = {};
+    var min = 2, // minimum distance at which to observe forces
+        min1 = 1 / min,
+        max = 500, // maximum distance at which to observe forces
+        max1 = 1 / max,
+        theta = .9, // Barnes-Hut theta approximation constant
+        force = {};
 
-  if (!arguments.length) k = -40; // default charge constant (repulsion)
+    if (!arguments.length) k = -40; // default charge constant (repulsion)
 
-  /**
-   * Sets or gets the charge constant. If an argument is specified, it is the
-   * new charge constant. The charge constant can be negative for repulsion
-   * (e.g., particles with electrical charge of equal sign), or positive for
-   * attraction (e.g., massive particles with mutual gravity). The default
-   * charge constant is -40.
-   *
-   * @function
-   * @name pv.Force.charge.prototype.constant
-   * @param {number} x the charge constant.
-   * @returns {pv.Force.charge} this.
-   */
-  force.constant = function(x) {
-    if (arguments.length) {
-      k = Number(x);
-      return force;
+    /**
+     * Sets or gets the charge constant. If an argument is specified, it is the
+     * new charge constant. The charge constant can be negative for repulsion
+     * (e.g., particles with electrical charge of equal sign), or positive for
+     * attraction (e.g., massive particles with mutual gravity). The default
+     * charge constant is -40.
+     *
+     * @function
+     * @name pv.Force.charge.prototype.constant
+     * @param {number} x the charge constant.
+     * @returns {pv.Force.charge} this.
+     */
+    force.constant = function(x) {
+        if (arguments.length) {
+            k = Number(x);
+            return force;
+        }
+        return k;
+    };
+
+    /**
+     * Sets or gets the domain; specifies the minimum and maximum domain within
+     * which charge forces are applied. A minimum distance threshold avoids
+     * applying forces that are two strong (due to granularity of the simulation's
+     * numeric integration). A maximum distance threshold improves performance by
+     * skipping force calculations for particles that are far apart.
+     *
+     * <p>The default domain is [2, 500].
+     *
+     * @function
+     * @name pv.Force.charge.prototype.domain
+     * @param {number} a
+     * @param {number} b
+     * @returns {pv.Force.charge} this.
+     */
+    force.domain = function(a, b) {
+        if (arguments.length) {
+            min = Number(a);
+            min1 = 1 / min;
+            max = Number(b);
+            max1 = 1 / max;
+            return force;
+        }
+        return [min, max];
+    };
+
+    /**
+     * Sets or gets the Barnes-Hut approximation factor. The Barnes-Hut
+     * approximation criterion is the ratio of the size of the quadtree node to
+     * the distance from the point to the node's center of mass is beneath some
+     * threshold.
+     *
+     * @function
+     * @name pv.Force.charge.prototype.theta
+     * @param {number} x the new Barnes-Hut approximation factor.
+     * @returns {pv.Force.charge} this.
+     */
+    force.theta = function(x) {
+        if (arguments.length) {
+            theta = Number(x);
+            return force;
+        }
+        return theta;
+    };
+
+    /**
+     * @ignore Recursively computes the center of charge for each node in the
+     * quadtree. This is equivalent to the center of mass, assuming that all
+     * particles have unit weight.
+     */
+
+    function accumulate(n) {
+        var cx = 0,
+            cy = 0;
+        n.cn = 0;
+
+        function accumulateChild(c) {
+            accumulate(c);
+            n.cn += c.cn;
+            cx += c.cn * c.cx;
+            cy += c.cn * c.cy;
+        }
+        if (!n.leaf) {
+            if (n.c1) accumulateChild(n.c1);
+            if (n.c2) accumulateChild(n.c2);
+            if (n.c3) accumulateChild(n.c3);
+            if (n.c4) accumulateChild(n.c4);
+        }
+        if (n.p) {
+            n.cn += k;
+            cx += k * n.p.x;
+            cy += k * n.p.y;
+        }
+        n.cx = cx / n.cn;
+        n.cy = cy / n.cn;
     }
-    return k;
-  };
 
-  /**
-   * Sets or gets the domain; specifies the minimum and maximum domain within
-   * which charge forces are applied. A minimum distance threshold avoids
-   * applying forces that are two strong (due to granularity of the simulation's
-   * numeric integration). A maximum distance threshold improves performance by
-   * skipping force calculations for particles that are far apart.
-   *
-   * <p>The default domain is [2, 500].
-   *
-   * @function
-   * @name pv.Force.charge.prototype.domain
-   * @param {number} a
-   * @param {number} b
-   * @returns {pv.Force.charge} this.
-   */
-  force.domain = function(a, b) {
-    if (arguments.length) {
-      min = Number(a);
-      min1 = 1 / min;
-      max = Number(b);
-      max1 = 1 / max;
-      return force;
-    }
-    return [min, max];
-  };
+    /**
+     * @ignore Recursively computes forces on the given particle using the given
+     * quadtree node. The Barnes-Hut approximation criterion is the ratio of the
+     * size of the quadtree node to the distance from the point to the node's
+     * center of mass is beneath some threshold.
+     */
 
-  /**
-   * Sets or gets the Barnes-Hut approximation factor. The Barnes-Hut
-   * approximation criterion is the ratio of the size of the quadtree node to
-   * the distance from the point to the node's center of mass is beneath some
-   * threshold.
-   *
-   * @function
-   * @name pv.Force.charge.prototype.theta
-   * @param {number} x the new Barnes-Hut approximation factor.
-   * @returns {pv.Force.charge} this.
-   */
-  force.theta = function(x) {
-    if (arguments.length) {
-      theta = Number(x);
-      return force;
-    }
-    return theta;
-  };
+    function forces(n, p, x1, y1, x2, y2) {
+        var dx = n.cx - p.x,
+            dy = n.cy - p.y,
+            dn = 1 / Math.sqrt(dx * dx + dy * dy);
 
-  /**
-   * @ignore Recursively computes the center of charge for each node in the
-   * quadtree. This is equivalent to the center of mass, assuming that all
-   * particles have unit weight.
-   */
-  function accumulate(n) {
-    var cx = 0, cy = 0;
-    n.cn = 0;
-    function accumulateChild(c) {
-      accumulate(c);
-      n.cn += c.cn;
-      cx += c.cn * c.cx;
-      cy += c.cn * c.cy;
+        /* Barnes-Hut criterion. */
+        if ((n.leaf && (n.p != p)) || ((x2 - x1) * dn < theta)) {
+            if (dn < max1) return;
+            if (dn > min1) dn = min1;
+            var kc = n.cn * dn * dn * dn,
+                fx = dx * kc,
+                fy = dy * kc;
+            p.fx += fx;
+            p.fy += fy;
+        } else if (!n.leaf) {
+            var sx = (x1 + x2) * .5,
+                sy = (y1 + y2) * .5;
+            if (n.c1) forces(n.c1, p, x1, y1, sx, sy);
+            if (n.c2) forces(n.c2, p, sx, y1, x2, sy);
+            if (n.c3) forces(n.c3, p, x1, sy, sx, y2);
+            if (n.c4) forces(n.c4, p, sx, sy, x2, y2);
+            if (dn < max1) return;
+            if (dn > min1) dn = min1;
+            if (n.p && (n.p != p)) {
+                var kc = k * dn * dn * dn,
+                    fx = dx * kc,
+                    fy = dy * kc;
+                p.fx += fx;
+                p.fy += fy;
+            }
+        }
     }
-    if (!n.leaf) {
-      if (n.c1) accumulateChild(n.c1);
-      if (n.c2) accumulateChild(n.c2);
-      if (n.c3) accumulateChild(n.c3);
-      if (n.c4) accumulateChild(n.c4);
-    }
-    if (n.p) {
-      n.cn += k;
-      cx += k * n.p.x;
-      cy += k * n.p.y;
-    }
-    n.cx = cx / n.cn;
-    n.cy = cy / n.cn;
-  }
 
-  /**
-   * @ignore Recursively computes forces on the given particle using the given
-   * quadtree node. The Barnes-Hut approximation criterion is the ratio of the
-   * size of the quadtree node to the distance from the point to the node's
-   * center of mass is beneath some threshold.
-   */
-  function forces(n, p, x1, y1, x2, y2) {
-    var dx = n.cx - p.x,
-        dy = n.cy - p.y,
-        dn = 1 / Math.sqrt(dx * dx + dy * dy);
+    /**
+     * Applies this force to the specified particles. The force is applied between
+     * all pairs of particles within the domain, using the specified quadtree to
+     * accelerate n-body force calculation using the Barnes-Hut approximation
+     * criterion.
+     *
+     * @function
+     * @name pv.Force.charge.prototype.apply
+     * @param {pv.Particle} particles particles to which to apply this force.
+     * @param {pv.Quadtree} q a quadtree for spatial acceleration.
+     */
+    force.apply = function(particles, q) {
+        accumulate(q.root);
+        for (var p = particles; p; p = p.next) {
+            forces(q.root, p, q.xMin, q.yMin, q.xMax, q.yMax);
+        }
+    };
 
-    /* Barnes-Hut criterion. */
-    if ((n.leaf && (n.p != p)) || ((x2 - x1) * dn < theta)) {
-      if (dn < max1) return;
-      if (dn > min1) dn = min1;
-      var kc = n.cn * dn * dn * dn,
-          fx = dx * kc,
-          fy = dy * kc;
-      p.fx += fx;
-      p.fy += fy;
-    } else if (!n.leaf) {
-      var sx = (x1 + x2) * .5, sy = (y1 + y2) * .5;
-      if (n.c1) forces(n.c1, p, x1, y1, sx, sy);
-      if (n.c2) forces(n.c2, p, sx, y1, x2, sy);
-      if (n.c3) forces(n.c3, p, x1, sy, sx, y2);
-      if (n.c4) forces(n.c4, p, sx, sy, x2, y2);
-      if (dn < max1) return;
-      if (dn > min1) dn = min1;
-      if (n.p && (n.p != p)) {
-        var kc = k * dn * dn * dn,
-            fx = dx * kc,
-            fy = dy * kc;
-        p.fx += fx;
-        p.fy += fy;
-      }
-    }
-  }
-
-  /**
-   * Applies this force to the specified particles. The force is applied between
-   * all pairs of particles within the domain, using the specified quadtree to
-   * accelerate n-body force calculation using the Barnes-Hut approximation
-   * criterion.
-   *
-   * @function
-   * @name pv.Force.charge.prototype.apply
-   * @param {pv.Particle} particles particles to which to apply this force.
-   * @param {pv.Quadtree} q a quadtree for spatial acceleration.
-   */
-  force.apply = function(particles, q) {
-    accumulate(q.root);
-    for (var p = particles; p; p = p.next) {
-      forces(q.root, p, q.xMin, q.yMin, q.xMax, q.yMax);
-    }
-  };
-
-  return force;
+    return force;
 };
 /**
  * Constructs a new drag force with the specified constant.
@@ -16049,40 +16849,44 @@ pv.Force.charge = function(k) {
  * @see #constant
  */
 pv.Force.drag = function(k) {
-  var force = {};
+    var force = {};
 
-  if (!arguments.length) k = .1; // default drag constant
+    if (!arguments.length) k = .1; // default drag constant
 
-  /**
-   * Sets or gets the drag constant, in the range [0,1]. The default drag
-   * constant is 0.1. The drag forces scales linearly with the particle's
-   * velocity based on the given drag constant.
-   *
-   * @function
-   * @name pv.Force.drag.prototype.constant
-   * @param {number} x the new drag constant.
-   * @returns {pv.Force.drag} this, or the current drag constant.
-   */
-  force.constant = function(x) {
-    if (arguments.length) { k = x; return force; }
-    return k;
-  };
+    /**
+     * Sets or gets the drag constant, in the range [0,1]. The default drag
+     * constant is 0.1. The drag forces scales linearly with the particle's
+     * velocity based on the given drag constant.
+     *
+     * @function
+     * @name pv.Force.drag.prototype.constant
+     * @param {number} x the new drag constant.
+     * @returns {pv.Force.drag} this, or the current drag constant.
+     */
+    force.constant = function(x) {
+        if (arguments.length) {
+            k = x;
+            return force;
+        }
+        return k;
+    };
 
-  /**
-   * Applies this force to the specified particles.
-   *
-   * @function
-   * @name pv.Force.drag.prototype.apply
-   * @param {pv.Particle} particles particles to which to apply this force.
-   */
-  force.apply = function(particles) {
-    if (k) for (var p = particles; p; p = p.next) {
-      p.fx -= k * p.vx;
-      p.fy -= k * p.vy;
-    }
-  };
+    /**
+     * Applies this force to the specified particles.
+     *
+     * @function
+     * @name pv.Force.drag.prototype.apply
+     * @param {pv.Particle} particles particles to which to apply this force.
+     */
+    force.apply = function(particles) {
+        if (k)
+            for (var p = particles; p; p = p.next) {
+                p.fx -= k * p.vx;
+                p.fy -= k * p.vy;
+            }
+    };
 
-  return force;
+    return force;
 };
 /**
  * Constructs a new spring force with the specified constant. The links
@@ -16108,122 +16912,122 @@ pv.Force.drag = function(k) {
  * @see #links
  */
 pv.Force.spring = function(k) {
-  var d = .1, // default damping factor
-      l = 20, // default rest length
-      links, // links on which to apply spring forces
-      kl, // per-spring normalization
-      force = {};
+    var d = .1, // default damping factor
+        l = 20, // default rest length
+        links, // links on which to apply spring forces
+        kl, // per-spring normalization
+        force = {};
 
-  if (!arguments.length) k = .1; // default spring constant (tension)
+    if (!arguments.length) k = .1; // default spring constant (tension)
 
-  /**
-   * Sets or gets the links associated with this spring force. Unlike other
-   * forces (such as charge and drag forces) which may be applied globally,
-   * spring forces are only applied between linked particles. Therefore, an
-   * array of links must be specified before this force can be applied; the
-   * links should be an array of {@link pv.Layout.Network.Link}s.
-   *
-   * @function
-   * @name pv.Force.spring.prototype.links
-   * @param {array} x the new array of links.
-   * @returns {pv.Force.spring} this, or the current array of links.
-   */
-  force.links = function(x) {
-    if (arguments.length) {
-      links = x;
-      kl = x.map(function(l) {
-          return 1 / Math.sqrt(Math.max(
-              l.sourceNode.linkDegree,
-              l.targetNode.linkDegree));
-        });
-      return force;
-    }
-    return links;
-  };
+    /**
+     * Sets or gets the links associated with this spring force. Unlike other
+     * forces (such as charge and drag forces) which may be applied globally,
+     * spring forces are only applied between linked particles. Therefore, an
+     * array of links must be specified before this force can be applied; the
+     * links should be an array of {@link pv.Layout.Network.Link}s.
+     *
+     * @function
+     * @name pv.Force.spring.prototype.links
+     * @param {array} x the new array of links.
+     * @returns {pv.Force.spring} this, or the current array of links.
+     */
+    force.links = function(x) {
+        if (arguments.length) {
+            links = x;
+            kl = x.map(function(l) {
+                return 1 / Math.sqrt(Math.max(
+                    l.sourceNode.linkDegree,
+                    l.targetNode.linkDegree));
+            });
+            return force;
+        }
+        return links;
+    };
 
-  /**
-   * Sets or gets the spring constant. The default value is 0.1; greater values
-   * will result in stronger tension. The spring tension is automatically
-   * normalized using the inverse square root of the maximum link degree of
-   * attached nodes.
-   *
-   * @function
-   * @name pv.Force.spring.prototype.constant
-   * @param {number} x the new spring constant.
-   * @returns {pv.Force.spring} this, or the current spring constant.
-   */
-  force.constant = function(x) {
-    if (arguments.length) {
-      k = Number(x);
-      return force;
-    }
-    return k;
-  };
+    /**
+     * Sets or gets the spring constant. The default value is 0.1; greater values
+     * will result in stronger tension. The spring tension is automatically
+     * normalized using the inverse square root of the maximum link degree of
+     * attached nodes.
+     *
+     * @function
+     * @name pv.Force.spring.prototype.constant
+     * @param {number} x the new spring constant.
+     * @returns {pv.Force.spring} this, or the current spring constant.
+     */
+    force.constant = function(x) {
+        if (arguments.length) {
+            k = Number(x);
+            return force;
+        }
+        return k;
+    };
 
-  /**
-   * The spring damping factor, in the range [0,1]. Damping functions
-   * identically to drag forces, damping spring bounciness by applying a force
-   * in the opposite direction of attached nodes' velocities. The default value
-   * is 0.1. The spring damping is automatically normalized using the inverse
-   * square root of the maximum link degree of attached nodes.
-   *
-   * @function
-   * @name pv.Force.spring.prototype.damping
-   * @param {number} x the new spring damping factor.
-   * @returns {pv.Force.spring} this, or the current spring damping factor.
-   */
-  force.damping = function(x) {
-    if (arguments.length) {
-      d = Number(x);
-      return force;
-    }
-    return d;
-  };
+    /**
+     * The spring damping factor, in the range [0,1]. Damping functions
+     * identically to drag forces, damping spring bounciness by applying a force
+     * in the opposite direction of attached nodes' velocities. The default value
+     * is 0.1. The spring damping is automatically normalized using the inverse
+     * square root of the maximum link degree of attached nodes.
+     *
+     * @function
+     * @name pv.Force.spring.prototype.damping
+     * @param {number} x the new spring damping factor.
+     * @returns {pv.Force.spring} this, or the current spring damping factor.
+     */
+    force.damping = function(x) {
+        if (arguments.length) {
+            d = Number(x);
+            return force;
+        }
+        return d;
+    };
 
-  /**
-   * The spring rest length. The default value is 20 pixels.
-   *
-   * @function
-   * @name pv.Force.spring.prototype.length
-   * @param {number} x the new spring rest length.
-   * @returns {pv.Force.spring} this, or the current spring rest length.
-   */
-  force.length = function(x) {
-    if (arguments.length) {
-      l = Number(x);
-      return force;
-    }
-    return l;
-  };
+    /**
+     * The spring rest length. The default value is 20 pixels.
+     *
+     * @function
+     * @name pv.Force.spring.prototype.length
+     * @param {number} x the new spring rest length.
+     * @returns {pv.Force.spring} this, or the current spring rest length.
+     */
+    force.length = function(x) {
+        if (arguments.length) {
+            l = Number(x);
+            return force;
+        }
+        return l;
+    };
 
-  /**
-   * Applies this force to the specified particles.
-   *
-   * @function
-   * @name pv.Force.spring.prototype.apply
-   * @param {pv.Particle} particles particles to which to apply this force.
-   */
-  force.apply = function(particles) {
-    for (var i = 0; i < links.length; i++) {
-      var a = links[i].sourceNode,
-          b = links[i].targetNode,
-          dx = a.x - b.x,
-          dy = a.y - b.y,
-          dn = Math.sqrt(dx * dx + dy * dy),
-          dd = dn ? (1 / dn) : 1,
-          ks = k * kl[i], // normalized tension
-          kd = d * kl[i], // normalized damping
-          kk = (ks * (dn - l) + kd * (dx * (a.vx - b.vx) + dy * (a.vy - b.vy)) * dd) * dd,
-          fx = -kk * (dn ? dx : (.01 * (.5 - Math.random()))),
-          fy = -kk * (dn ? dy : (.01 * (.5 - Math.random())));
-      a.fx += fx;
-      a.fy += fy;
-      b.fx -= fx;
-      b.fy -= fy;
-    }
-  };
+    /**
+     * Applies this force to the specified particles.
+     *
+     * @function
+     * @name pv.Force.spring.prototype.apply
+     * @param {pv.Particle} particles particles to which to apply this force.
+     */
+    force.apply = function(particles) {
+        for (var i = 0; i < links.length; i++) {
+            var a = links[i].sourceNode,
+                b = links[i].targetNode,
+                dx = a.x - b.x,
+                dy = a.y - b.y,
+                dn = Math.sqrt(dx * dx + dy * dy),
+                dd = dn ? (1 / dn) : 1,
+                ks = k * kl[i], // normalized tension
+                kd = d * kl[i], // normalized damping
+                kk = (ks * (dn - l) + kd * (dx * (a.vx - b.vx) + dy * (a.vy - b.vy)) * dd) * dd,
+                fx = -kk * (dn ? dx : (.01 * (.5 - Math.random()))),
+                fy = -kk * (dn ? dy : (.01 * (.5 - Math.random())));
+            a.fx += fx;
+            a.fy += fy;
+            b.fx -= fx;
+            b.fy -= fy;
+        }
+    };
 
-  return force;
+    return force;
 };
 /**
  * Abstract; see an implementing class.
@@ -16271,98 +17075,99 @@ pv.Constraint = {};
  * @param {Function} radius the radius function.
  */
 pv.Constraint.collision = function(radius) {
-  var n = 1, // number of times to repeat the constraint
-      r1,
-      px1,
-      py1,
-      px2,
-      py2,
-      constraint = {};
+    var n = 1, // number of times to repeat the constraint
+        r1,
+        px1,
+        py1,
+        px2,
+        py2,
+        constraint = {};
 
-  if (!arguments.length) r1 = 10; // default search radius
+    if (!arguments.length) r1 = 10; // default search radius
 
-  /**
-   * Sets or gets the repeat count. If the repeat count is greater than 1, the
-   * constraint will be applied repeatedly; this is a form of the Gauss-Seidel
-   * method for constraints relaxation. Repeating the collision constraint makes
-   * the constraint have more of an effect when there is a potential for many
-   * co-occurring collisions.
-   *
-   * @function
-   * @name pv.Constraint.collision.prototype.repeat
-   * @param {number} x the number of times to repeat this constraint.
-   * @returns {pv.Constraint.collision} this.
-   */
-  constraint.repeat = function(x) {
-    if (arguments.length) {
-      n = Number(x);
-      return constraint;
-    }
-    return n;
-  };
+    /**
+     * Sets or gets the repeat count. If the repeat count is greater than 1, the
+     * constraint will be applied repeatedly; this is a form of the Gauss-Seidel
+     * method for constraints relaxation. Repeating the collision constraint makes
+     * the constraint have more of an effect when there is a potential for many
+     * co-occurring collisions.
+     *
+     * @function
+     * @name pv.Constraint.collision.prototype.repeat
+     * @param {number} x the number of times to repeat this constraint.
+     * @returns {pv.Constraint.collision} this.
+     */
+    constraint.repeat = function(x) {
+        if (arguments.length) {
+            n = Number(x);
+            return constraint;
+        }
+        return n;
+    };
 
-  /** @private */
-  function constrain(n, p, x1, y1, x2, y2) {
-    if (!n.leaf) {
-      var sx = (x1 + x2) * .5,
-          sy = (y1 + y2) * .5,
-          top = sy > py1,
-          bottom = sy < py2,
-          left = sx > px1,
-          right = sx < px2;
-      if (top) {
-        if (n.c1 && left) constrain(n.c1, p, x1, y1, sx, sy);
-        if (n.c2 && right) constrain(n.c2, p, sx, y1, x2, sy);
-      }
-      if (bottom) {
-        if (n.c3 && left) constrain(n.c3, p, x1, sy, sx, y2);
-        if (n.c4 && right) constrain(n.c4, p, sx, sy, x2, y2);
-      }
-    }
-    if (n.p && (n.p != p)) {
-      var dx = p.x - n.p.x,
-          dy = p.y - n.p.y,
-          l = Math.sqrt(dx * dx + dy * dy),
-          d = r1 + radius(n.p);
-      if (l < d) {
-        var k = (l - d) / l * .5;
-        dx *= k;
-        dy *= k;
-        p.x -= dx;
-        p.y -= dy;
-        n.p.x += dx;
-        n.p.y += dy;
-      }
-    }
-  }
+    /** @private */
 
-  /**
-   * Applies this constraint to the specified particles.
-   *
-   * @function
-   * @name pv.Constraint.collision.prototype.apply
-   * @param {pv.Particle} particles particles to which to apply this constraint.
-   * @param {pv.Quadtree} q a quadtree for spatial acceleration.
-   */
-  constraint.apply = function(particles, q) {
-    var p, r, max = -Infinity;
-    for (p = particles; p; p = p.next) {
-      r = radius(p);
-      if (r > max) max = r;
+    function constrain(n, p, x1, y1, x2, y2) {
+        if (!n.leaf) {
+            var sx = (x1 + x2) * .5,
+                sy = (y1 + y2) * .5,
+                top = sy > py1,
+                bottom = sy < py2,
+                left = sx > px1,
+                right = sx < px2;
+            if (top) {
+                if (n.c1 && left) constrain(n.c1, p, x1, y1, sx, sy);
+                if (n.c2 && right) constrain(n.c2, p, sx, y1, x2, sy);
+            }
+            if (bottom) {
+                if (n.c3 && left) constrain(n.c3, p, x1, sy, sx, y2);
+                if (n.c4 && right) constrain(n.c4, p, sx, sy, x2, y2);
+            }
+        }
+        if (n.p && (n.p != p)) {
+            var dx = p.x - n.p.x,
+                dy = p.y - n.p.y,
+                l = Math.sqrt(dx * dx + dy * dy),
+                d = r1 + radius(n.p);
+            if (l < d) {
+                var k = (l - d) / l * .5;
+                dx *= k;
+                dy *= k;
+                p.x -= dx;
+                p.y -= dy;
+                n.p.x += dx;
+                n.p.y += dy;
+            }
+        }
     }
-    for (var i = 0; i < n; i++) {
-      for (p = particles; p; p = p.next) {
-        r = (r1 = radius(p)) + max;
-        px1 = p.x - r;
-        px2 = p.x + r;
-        py1 = p.y - r;
-        py2 = p.y + r;
-        constrain(q.root, p, q.xMin, q.yMin, q.xMax, q.yMax);
-      }
-    }
-  };
 
-  return constraint;
+    /**
+     * Applies this constraint to the specified particles.
+     *
+     * @function
+     * @name pv.Constraint.collision.prototype.apply
+     * @param {pv.Particle} particles particles to which to apply this constraint.
+     * @param {pv.Quadtree} q a quadtree for spatial acceleration.
+     */
+    constraint.apply = function(particles, q) {
+        var p, r, max = -Infinity;
+        for (p = particles; p; p = p.next) {
+            r = radius(p);
+            if (r > max) max = r;
+        }
+        for (var i = 0; i < n; i++) {
+            for (p = particles; p; p = p.next) {
+                r = (r1 = radius(p)) + max;
+                px1 = p.x - r;
+                px2 = p.x + r;
+                py1 = p.y - r;
+                py2 = p.y + r;
+                constrain(q.root, p, q.xMin, q.yMin, q.xMax, q.yMax);
+            }
+        }
+    };
+
+    return constraint;
 };
 /**
  * Constructs a default position constraint using the <tt>fix</tt> attribute.
@@ -16391,50 +17196,52 @@ pv.Constraint.collision = function(radius) {
  * @param {Function} [f] the position function.
  */
 pv.Constraint.position = function(f) {
-  var a = 1, // default alpha
-      constraint = {};
+    var a = 1, // default alpha
+        constraint = {};
 
-  if (!arguments.length) /** @ignore */ f = function(p) { return p.fix; };
+    if (!arguments.length) /** @ignore */ f = function(p) {
+        return p.fix;
+    };
 
-  /**
-   * Sets or gets the alpha parameter for position interpolation. If the alpha
-   * parameter is in the range [0,1], then rather than setting the particle's
-   * new position directly to the position returned by the supplied position
-   * function, the particle's position is interpolated towards the fixed
-   * position.
-   *
-   * @function
-   * @name pv.Constraint.position.prototype.alpha
-   * @param {number} x the new alpha parameter, in the range [0,1].
-   * @returns {pv.Constraint.position} this.
-   */
-  constraint.alpha = function(x) {
-    if (arguments.length) {
-      a = Number(x);
-      return constraint;
-    }
-    return a;
-  };
+    /**
+     * Sets or gets the alpha parameter for position interpolation. If the alpha
+     * parameter is in the range [0,1], then rather than setting the particle's
+     * new position directly to the position returned by the supplied position
+     * function, the particle's position is interpolated towards the fixed
+     * position.
+     *
+     * @function
+     * @name pv.Constraint.position.prototype.alpha
+     * @param {number} x the new alpha parameter, in the range [0,1].
+     * @returns {pv.Constraint.position} this.
+     */
+    constraint.alpha = function(x) {
+        if (arguments.length) {
+            a = Number(x);
+            return constraint;
+        }
+        return a;
+    };
 
-  /**
-   * Applies this constraint to the specified particles.
-   *
-   * @function
-   * @name pv.Constraint.position.prototype.apply
-   * @param {pv.Particle} particles particles to which to apply this constraint.
-   */
-  constraint.apply = function(particles) {
-    for (var p = particles; p; p = p.next) {
-      var v = f(p);
-      if (v) {
-        p.x += (v.x - p.x) * a;
-        p.y += (v.y - p.y) * a;
-        p.fx = p.fy = p.vx = p.vy = 0;
-      }
-    }
-  };
+    /**
+     * Applies this constraint to the specified particles.
+     *
+     * @function
+     * @name pv.Constraint.position.prototype.apply
+     * @param {pv.Particle} particles particles to which to apply this constraint.
+     */
+    constraint.apply = function(particles) {
+        for (var p = particles; p; p = p.next) {
+            var v = f(p);
+            if (v) {
+                p.x += (v.x - p.x) * a;
+                p.y += (v.y - p.y) * a;
+                p.fx = p.fy = p.vx = p.vy = 0;
+            }
+        }
+    };
 
-  return constraint;
+    return constraint;
 };
 /**
  * Constructs a new bound constraint. Before the constraint can be used, the
@@ -16455,61 +17262,69 @@ pv.Constraint.position = function(f) {
  * @extends pv.Constraint
  */
 pv.Constraint.bound = function() {
-  var constraint = {},
-      x,
-      y;
+    var constraint = {},
+        x,
+        y;
 
-  /**
-   * Sets or gets the bounds on the x-coordinate.
-   *
-   * @function
-   * @name pv.Constraint.bound.prototype.x
-   * @param {number} min the minimum allowed x-coordinate.
-   * @param {number} max the maximum allowed x-coordinate.
-   * @returns {pv.Constraint.bound} this.
-   */
-  constraint.x = function(min, max) {
-    if (arguments.length) {
-      x = {min: Math.min(min, max), max: Math.max(min, max)};
-      return this;
-    }
-    return x;
-  };
+    /**
+     * Sets or gets the bounds on the x-coordinate.
+     *
+     * @function
+     * @name pv.Constraint.bound.prototype.x
+     * @param {number} min the minimum allowed x-coordinate.
+     * @param {number} max the maximum allowed x-coordinate.
+     * @returns {pv.Constraint.bound} this.
+     */
+    constraint.x = function(min, max) {
+        if (arguments.length) {
+            x = {
+                min: Math.min(min, max),
+                max: Math.max(min, max)
+            };
+            return this;
+        }
+        return x;
+    };
 
-  /**
-   * Sets or gets the bounds on the y-coordinate.
-   *
-   * @function
-   * @name pv.Constraint.bound.prototype.y
-   * @param {number} min the minimum allowed y-coordinate.
-   * @param {number} max the maximum allowed y-coordinate.
-   * @returns {pv.Constraint.bound} this.
-   */
-  constraint.y = function(min, max) {
-    if (arguments.length) {
-      y = {min: Math.min(min, max), max: Math.max(min, max)};
-      return this;
-    }
-    return y;
-  };
+    /**
+     * Sets or gets the bounds on the y-coordinate.
+     *
+     * @function
+     * @name pv.Constraint.bound.prototype.y
+     * @param {number} min the minimum allowed y-coordinate.
+     * @param {number} max the maximum allowed y-coordinate.
+     * @returns {pv.Constraint.bound} this.
+     */
+    constraint.y = function(min, max) {
+        if (arguments.length) {
+            y = {
+                min: Math.min(min, max),
+                max: Math.max(min, max)
+            };
+            return this;
+        }
+        return y;
+    };
 
-  /**
-   * Applies this constraint to the specified particles.
-   *
-   * @function
-   * @name pv.Constraint.bound.prototype.apply
-   * @param {pv.Particle} particles particles to which to apply this constraint.
-   */
-  constraint.apply = function(particles) {
-    if (x) for (var p = particles; p; p = p.next) {
-      p.x = p.x < x.min ? x.min : (p.x > x.max ? x.max : p.x);
-    }
-    if (y) for (var p = particles; p; p = p.next) {
-      p.y = p.y < y.min ? y.min : (p.y > y.max ? y.max : p.y);
-    }
-  };
+    /**
+     * Applies this constraint to the specified particles.
+     *
+     * @function
+     * @name pv.Constraint.bound.prototype.apply
+     * @param {pv.Particle} particles particles to which to apply this constraint.
+     */
+    constraint.apply = function(particles) {
+        if (x)
+            for (var p = particles; p; p = p.next) {
+                p.x = p.x < x.min ? x.min : (p.x > x.max ? x.max : p.x);
+            }
+        if (y)
+            for (var p = particles; p; p = p.next) {
+                p.y = p.y < y.min ? y.min : (p.y > y.max ? y.max : p.y);
+            }
+    };
 
-  return constraint;
+    return constraint;
 };
 /**
  * Constructs a new, empty layout with default properties. Layouts are not
@@ -16546,7 +17361,7 @@ pv.Constraint.bound = function() {
  * @extends pv.Panel
  */
 pv.Layout = function() {
-  pv.Panel.call(this);
+    pv.Panel.call(this);
 };
 
 pv.Layout.prototype = pv.extend(pv.Panel);
@@ -16638,68 +17453,82 @@ pv.Layout.prototype.property = pv.Mark.prototype.localProperty;
  * @extends pv.Layout
  */
 pv.Layout.Network = function() {
-  pv.Layout.call(this);
-  var that = this;
+    pv.Layout.call(this);
+    var that = this;
 
-  /** @private Version tracking to cache layout state, improving performance. */
-  this.$id = pv.id();
+    /** @private Version tracking to cache layout state, improving performance. */
+    this.$id = pv.id();
 
-  /**
-   * The node prototype. This prototype is intended to be used with a Dot mark
-   * in conjunction with the link prototype.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Network.prototype.node
-   */
-  (this.node = new pv.Mark()
-      .data(function() { return that.nodes(); })
-      .strokeStyle("#1f77b4")
-      .fillStyle("#fff")
-      .left(function(n) { return n.x; })
-      .top(function(n) { return n.y; })).parent = this;
-
-  /**
-   * The link prototype, which renders edges between source nodes and target
-   * nodes. This prototype is intended to be used with a Line mark in
-   * conjunction with the node prototype.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Network.prototype.link
-   */
-  this.link = new pv.Mark()
-      .extend(this.node)
-      .data(function(p) { return [p.sourceNode, p.targetNode]; })
-      .fillStyle(null)
-      .lineWidth(function(d, p) { return p.linkValue * 1.5; })
-      .strokeStyle("rgba(0,0,0,.2)");
-
-  this.link.add = function(type) {
-    return that.add(pv.Panel)
-        .data(function() { return that.links(); })
-      .add(type)
-        .extend(this);
-  };
-
-  /**
-   * The node label prototype, which renders the node name adjacent to the node.
-   * This prototype is provided as an alternative to using the anchor on the
-   * node mark; it is primarily intended to be used with radial node-link
-   * layouts, since it provides a convenient mechanism to set the text angle.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Network.prototype.label
-   */
-  (this.label = new pv.Mark()
-      .extend(this.node)
-      .textMargin(7)
-      .textBaseline("middle")
-      .text(function(n) { return n.nodeName || n.nodeValue; })
-      .textAngle(function(n) {
-          var a = n.midAngle;
-          return pv.Wedge.upright(a) ? a : (a + Math.PI);
+    /**
+     * The node prototype. This prototype is intended to be used with a Dot mark
+     * in conjunction with the link prototype.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Network.prototype.node
+     */
+    (this.node = new pv.Mark()
+        .data(function() {
+            return that.nodes();
         })
-      .textAlign(function(n) {
-          return pv.Wedge.upright(n.midAngle) ? "left" : "right";
+        .strokeStyle("#1f77b4")
+        .fillStyle("#fff")
+        .left(function(n) {
+            return n.x;
+        })
+        .top(function(n) {
+            return n.y;
+        })).parent = this;
+
+    /**
+     * The link prototype, which renders edges between source nodes and target
+     * nodes. This prototype is intended to be used with a Line mark in
+     * conjunction with the node prototype.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Network.prototype.link
+     */
+    this.link = new pv.Mark()
+        .extend(this.node)
+        .data(function(p) {
+            return [p.sourceNode, p.targetNode];
+        })
+        .fillStyle(null)
+        .lineWidth(function(d, p) {
+            return p.linkValue * 1.5;
+        })
+        .strokeStyle("rgba(0,0,0,.2)");
+
+    this.link.add = function(type) {
+        return that.add(pv.Panel)
+            .data(function() {
+                return that.links();
+            })
+            .add(type)
+            .extend(this);
+    };
+
+    /**
+     * The node label prototype, which renders the node name adjacent to the node.
+     * This prototype is provided as an alternative to using the anchor on the
+     * node mark; it is primarily intended to be used with radial node-link
+     * layouts, since it provides a convenient mechanism to set the text angle.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Network.prototype.label
+     */
+    (this.label = new pv.Mark()
+        .extend(this.node)
+        .textMargin(7)
+        .textBaseline("middle")
+        .text(function(n) {
+            return n.nodeName || n.nodeValue;
+        })
+        .textAngle(function(n) {
+            var a = n.midAngle;
+            return pv.Wedge.upright(a) ? a : (a + Math.PI);
+        })
+        .textAlign(function(n) {
+            return pv.Wedge.upright(n.midAngle) ? "left" : "right";
         })).parent = this;
 };
 
@@ -16815,17 +17644,19 @@ pv.Layout.Network = function() {
 pv.Layout.Network.prototype = pv.extend(pv.Layout)
     .property("nodes", function(v) {
         return v.map(function(d, i) {
-            if (typeof d != "object") d = {nodeValue: d};
+            if (typeof d != "object") d = {
+                nodeValue: d
+            };
             d.index = i;
             return d;
-          });
-      })
+        });
+    })
     .property("links", function(v) {
         return v.map(function(d) {
             if (isNaN(d.linkValue)) d.linkValue = isNaN(d.value) ? 1 : d.value;
             return d;
-          });
-      });
+        });
+    });
 
 /**
  * Resets the cache, such that changes to layout property definitions will be
@@ -16837,29 +17668,29 @@ pv.Layout.Network.prototype = pv.extend(pv.Layout)
  * @returns {pv.Layout.Network} this.
  */
 pv.Layout.Network.prototype.reset = function() {
-  this.$id = pv.id();
-  return this;
+    this.$id = pv.id();
+    return this;
 };
 
 /** @private Skip evaluating properties if cached. */
 pv.Layout.Network.prototype.buildProperties = function(s, properties) {
-  if ((s.$id || 0) < this.$id) {
-    pv.Layout.prototype.buildProperties.call(this, s, properties);
-  }
+    if ((s.$id || 0) < this.$id) {
+        pv.Layout.prototype.buildProperties.call(this, s, properties);
+    }
 };
 
 /** @private Compute link degrees; map source and target indexes to nodes. */
 pv.Layout.Network.prototype.buildImplied = function(s) {
-  pv.Layout.prototype.buildImplied.call(this, s);
-  if (s.$id >= this.$id) return true;
-  s.$id = this.$id;
-  s.nodes.forEach(function(d) {
-      d.linkDegree = 0;
+    pv.Layout.prototype.buildImplied.call(this, s);
+    if (s.$id >= this.$id) return true;
+    s.$id = this.$id;
+    s.nodes.forEach(function(d) {
+        d.linkDegree = 0;
     });
-  s.links.forEach(function(d) {
-      var v = d.linkValue;
-      (d.sourceNode || (d.sourceNode = s.nodes[d.source])).linkDegree += v;
-      (d.targetNode || (d.targetNode = s.nodes[d.target])).linkDegree += v;
+    s.links.forEach(function(d) {
+        var v = d.linkValue;
+        (d.sourceNode || (d.sourceNode = s.nodes[d.source])).linkDegree += v;
+        (d.targetNode || (d.targetNode = s.nodes[d.target])).linkDegree += v;
     });
 };
 /**
@@ -16897,219 +17728,277 @@ pv.Layout.Network.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Network
  */
 pv.Layout.Hierarchy = function() {
-  pv.Layout.Network.call(this);
-  this.link.strokeStyle("#ccc");
+    pv.Layout.Network.call(this);
+    this.link.strokeStyle("#ccc");
 };
 
 pv.Layout.Hierarchy.prototype = pv.extend(pv.Layout.Network);
 
 /** @private Compute the implied links. (Links are null by default.) */
 pv.Layout.Hierarchy.prototype.buildImplied = function(s) {
-  if (!s.links) s.links = pv.Layout.Hierarchy.links.call(this);
-  pv.Layout.Network.prototype.buildImplied.call(this, s);
+    if (!s.links) s.links = pv.Layout.Hierarchy.links.call(this);
+    pv.Layout.Network.prototype.buildImplied.call(this, s);
 };
 
 /** The implied links; computes links using the <tt>parentNode</tt> attribute. */
 pv.Layout.Hierarchy.links = function() {
-  return this.nodes()
-      .filter(function(n) { return n.parentNode; })
-      .map(function(n) {
-          return {
-              sourceNode: n,
-              targetNode: n.parentNode,
-              linkValue: 1
+    return this.nodes()
+        .filter(function(n) {
+            return n.parentNode;
+        })
+        .map(function(n) {
+            return {
+                sourceNode: n,
+                targetNode: n.parentNode,
+                linkValue: 1
             };
-      });
+        });
 };
 
 /** @private Provides standard node-link layout based on breadth & depth. */
 pv.Layout.Hierarchy.NodeLink = {
 
-  /** @private */
-  buildImplied: function(s) {
-    var nodes = s.nodes,
-        orient = s.orient,
-        horizontal = /^(top|bottom)$/.test(orient),
-        w = s.width,
-        h = s.height;
-
-    /* Compute default inner and outer radius. */
-    if (orient == "radial") {
-      var ir = s.innerRadius, or = s.outerRadius;
-      if (ir == null) ir = 0;
-      if (or == null) or = Math.min(w, h) / 2;
-    }
-
-    /** @private Returns the radius of the given node. */
-    function radius(n) {
-      return n.parentNode ? (n.depth * (or - ir) + ir) : 0;
-    }
-
-    /** @private Returns the angle of the given node. */
-    function midAngle(n) {
-      return (n.parentNode ? (n.breadth - .25) * 2 * Math.PI : 0);
-    }
-
     /** @private */
-    function x(n) {
-      switch (orient) {
-        case "left": return n.depth * w;
-        case "right": return w - n.depth * w;
-        case "top": return n.breadth * w;
-        case "bottom": return w - n.breadth * w;
-        case "radial": return w / 2 + radius(n) * Math.cos(n.midAngle);
-      }
-    }
+    buildImplied: function(s) {
+        var nodes = s.nodes,
+            orient = s.orient,
+            horizontal = /^(top|bottom)$/.test(orient),
+            w = s.width,
+            h = s.height;
 
-    /** @private */
-    function y(n) {
-      switch (orient) {
-        case "left": return n.breadth * h;
-        case "right": return h - n.breadth * h;
-        case "top": return n.depth * h;
-        case "bottom": return h - n.depth * h;
-        case "radial": return h / 2 + radius(n) * Math.sin(n.midAngle);
-      }
-    }
+        /* Compute default inner and outer radius. */
+        if (orient == "radial") {
+            var ir = s.innerRadius,
+                or = s.outerRadius;
+            if (ir == null) ir = 0;
+            if (or == null) or = Math.min(w, h) / 2;
+        }
 
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      n.midAngle = orient == "radial" ? midAngle(n)
-          : horizontal ? Math.PI / 2 : 0;
-      n.x = x(n);
-      n.y = y(n);
-      if (n.firstChild) n.midAngle += Math.PI;
+        /** @private Returns the radius of the given node. */
+
+        function radius(n) {
+            return n.parentNode ? (n.depth * (or - ir) + ir) : 0;
+        }
+
+        /** @private Returns the angle of the given node. */
+
+        function midAngle(n) {
+            return (n.parentNode ? (n.breadth - .25) * 2 * Math.PI : 0);
+        }
+
+        /** @private */
+
+        function x(n) {
+            switch (orient) {
+                case "left":
+                    return n.depth * w;
+                case "right":
+                    return w - n.depth * w;
+                case "top":
+                    return n.breadth * w;
+                case "bottom":
+                    return w - n.breadth * w;
+                case "radial":
+                    return w / 2 + radius(n) * Math.cos(n.midAngle);
+            }
+        }
+
+        /** @private */
+
+        function y(n) {
+            switch (orient) {
+                case "left":
+                    return n.breadth * h;
+                case "right":
+                    return h - n.breadth * h;
+                case "top":
+                    return n.depth * h;
+                case "bottom":
+                    return h - n.depth * h;
+                case "radial":
+                    return h / 2 + radius(n) * Math.sin(n.midAngle);
+            }
+        }
+
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            n.midAngle = orient == "radial" ? midAngle(n) : horizontal ? Math.PI / 2 : 0;
+            n.x = x(n);
+            n.y = y(n);
+            if (n.firstChild) n.midAngle += Math.PI;
+        }
     }
-  }
 };
 
 /** @private Provides standard space-filling layout based on breadth & depth. */
 pv.Layout.Hierarchy.Fill = {
 
-  /** @private */
-  constructor: function() {
-    this.node
-        .strokeStyle("#fff")
-        .fillStyle("#ccc")
-        .width(function(n) { return n.dx; })
-        .height(function(n) { return n.dy; })
-        .innerRadius(function(n) { return n.innerRadius; })
-        .outerRadius(function(n) { return n.outerRadius; })
-        .startAngle(function(n) { return n.startAngle; })
-        .angle(function(n) { return n.angle; });
+    /** @private */
+    constructor: function() {
+        this.node
+            .strokeStyle("#fff")
+            .fillStyle("#ccc")
+            .width(function(n) {
+                return n.dx;
+            })
+            .height(function(n) {
+                return n.dy;
+            })
+            .innerRadius(function(n) {
+                return n.innerRadius;
+            })
+            .outerRadius(function(n) {
+                return n.outerRadius;
+            })
+            .startAngle(function(n) {
+                return n.startAngle;
+            })
+            .angle(function(n) {
+                return n.angle;
+            });
 
-    this.label
-        .textAlign("center")
-        .left(function(n) { return n.x + (n.dx / 2); })
-        .top(function(n) { return n.y + (n.dy / 2); });
+        this.label
+            .textAlign("center")
+            .left(function(n) {
+                return n.x + (n.dx / 2);
+            })
+            .top(function(n) {
+                return n.y + (n.dy / 2);
+            });
 
-    /* Hide unsupported link. */
-    delete this.link;
-  },
-
-  /** @private */
-  buildImplied: function(s) {
-    var nodes = s.nodes,
-        orient = s.orient,
-        horizontal = /^(top|bottom)$/.test(orient),
-        w = s.width,
-        h = s.height,
-        depth = -nodes[0].minDepth;
-
-    /* Compute default inner and outer radius. */
-    if (orient == "radial") {
-      var ir = s.innerRadius, or = s.outerRadius;
-      if (ir == null) ir = 0;
-      if (ir) depth *= 2; // use full depth step for root
-      if (or == null) or = Math.min(w, h) / 2;
-    }
-
-    /** @private Scales the specified depth for a space-filling layout. */
-    function scale(d, depth) {
-      return (d + depth) / (1 + depth);
-    }
+        /* Hide unsupported link. */
+        delete this.link;
+    },
 
     /** @private */
-    function x(n) {
-      switch (orient) {
-        case "left": return scale(n.minDepth, depth) * w;
-        case "right": return (1 - scale(n.maxDepth, depth)) * w;
-        case "top": return n.minBreadth * w;
-        case "bottom": return (1 - n.maxBreadth) * w;
-        case "radial": return w / 2;
-      }
-    }
+    buildImplied: function(s) {
+        var nodes = s.nodes,
+            orient = s.orient,
+            horizontal = /^(top|bottom)$/.test(orient),
+            w = s.width,
+            h = s.height,
+            depth = -nodes[0].minDepth;
 
-    /** @private */
-    function y(n) {
-      switch (orient) {
-        case "left": return n.minBreadth * h;
-        case "right": return (1 - n.maxBreadth) * h;
-        case "top": return scale(n.minDepth, depth) * h;
-        case "bottom": return (1 - scale(n.maxDepth, depth)) * h;
-        case "radial": return h / 2;
-      }
-    }
+        /* Compute default inner and outer radius. */
+        if (orient == "radial") {
+            var ir = s.innerRadius,
+                or = s.outerRadius;
+            if (ir == null) ir = 0;
+            if (ir) depth *= 2; // use full depth step for root
+            if (or == null) or = Math.min(w, h) / 2;
+        }
 
-    /** @private */
-    function dx(n) {
-      switch (orient) {
-        case "left":
-        case "right": return (n.maxDepth - n.minDepth) / (1 + depth) * w;
-        case "top":
-        case "bottom": return (n.maxBreadth - n.minBreadth) * w;
-        case "radial": return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.cos(n.midAngle) : 0;
-      }
-    }
+        /** @private Scales the specified depth for a space-filling layout. */
 
-    /** @private */
-    function dy(n) {
-      switch (orient) {
-        case "left":
-        case "right": return (n.maxBreadth - n.minBreadth) * h;
-        case "top":
-        case "bottom": return (n.maxDepth - n.minDepth) / (1 + depth) * h;
-        case "radial": return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.sin(n.midAngle) : 0;
-      }
-    }
+        function scale(d, depth) {
+            return (d + depth) / (1 + depth);
+        }
 
-    /** @private */
-    function innerRadius(n) {
-      return Math.max(0, scale(n.minDepth, depth / 2)) * (or - ir) + ir;
-    }
+        /** @private */
 
-    /** @private */
-    function outerRadius(n) {
-      return scale(n.maxDepth, depth / 2) * (or - ir) + ir;
-    }
+        function x(n) {
+            switch (orient) {
+                case "left":
+                    return scale(n.minDepth, depth) * w;
+                case "right":
+                    return (1 - scale(n.maxDepth, depth)) * w;
+                case "top":
+                    return n.minBreadth * w;
+                case "bottom":
+                    return (1 - n.maxBreadth) * w;
+                case "radial":
+                    return w / 2;
+            }
+        }
 
-    /** @private */
-    function startAngle(n) {
-      return (n.parentNode ? n.minBreadth - .25 : 0) * 2 * Math.PI;
-    }
+        /** @private */
 
-    /** @private */
-    function angle(n) {
-      return (n.parentNode ? n.maxBreadth - n.minBreadth : 1) * 2 * Math.PI;
-    }
+        function y(n) {
+            switch (orient) {
+                case "left":
+                    return n.minBreadth * h;
+                case "right":
+                    return (1 - n.maxBreadth) * h;
+                case "top":
+                    return scale(n.minDepth, depth) * h;
+                case "bottom":
+                    return (1 - scale(n.maxDepth, depth)) * h;
+                case "radial":
+                    return h / 2;
+            }
+        }
 
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      n.x = x(n);
-      n.y = y(n);
-      if (orient == "radial") {
-        n.innerRadius = innerRadius(n);
-        n.outerRadius = outerRadius(n);
-        n.startAngle = startAngle(n);
-        n.angle = angle(n);
-        n.midAngle = n.startAngle + n.angle / 2;
-      } else {
-        n.midAngle = horizontal ? -Math.PI / 2 : 0;
-      }
-      n.dx = dx(n);
-      n.dy = dy(n);
+        /** @private */
+
+        function dx(n) {
+            switch (orient) {
+                case "left":
+                case "right":
+                    return (n.maxDepth - n.minDepth) / (1 + depth) * w;
+                case "top":
+                case "bottom":
+                    return (n.maxBreadth - n.minBreadth) * w;
+                case "radial":
+                    return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.cos(n.midAngle) : 0;
+            }
+        }
+
+        /** @private */
+
+        function dy(n) {
+            switch (orient) {
+                case "left":
+                case "right":
+                    return (n.maxBreadth - n.minBreadth) * h;
+                case "top":
+                case "bottom":
+                    return (n.maxDepth - n.minDepth) / (1 + depth) * h;
+                case "radial":
+                    return n.parentNode ? (n.innerRadius + n.outerRadius) * Math.sin(n.midAngle) : 0;
+            }
+        }
+
+        /** @private */
+
+        function innerRadius(n) {
+            return Math.max(0, scale(n.minDepth, depth / 2)) * (or - ir) + ir;
+        }
+
+        /** @private */
+
+        function outerRadius(n) {
+            return scale(n.maxDepth, depth / 2) * (or - ir) + ir;
+        }
+
+        /** @private */
+
+        function startAngle(n) {
+            return (n.parentNode ? n.minBreadth - .25 : 0) * 2 * Math.PI;
+        }
+
+        /** @private */
+
+        function angle(n) {
+            return (n.parentNode ? n.maxBreadth - n.minBreadth : 1) * 2 * Math.PI;
+        }
+
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            n.x = x(n);
+            n.y = y(n);
+            if (orient == "radial") {
+                n.innerRadius = innerRadius(n);
+                n.outerRadius = outerRadius(n);
+                n.startAngle = startAngle(n);
+                n.angle = angle(n);
+                n.midAngle = n.startAngle + n.angle / 2;
+            } else {
+                n.midAngle = horizontal ? -Math.PI / 2 : 0;
+            }
+            n.dx = dx(n);
+            n.dy = dy(n);
+        }
     }
-  }
 };
 /**
  * Constructs a new, empty grid layout. Layouts are not typically constructed
@@ -17154,31 +18043,31 @@ pv.Layout.Hierarchy.Fill = {
  * @extends pv.Layout
  */
 pv.Layout.Grid = function() {
-  pv.Layout.call(this);
-  var that = this;
+    pv.Layout.call(this);
+    var that = this;
 
-  /**
-   * The cell prototype. This prototype is intended to be used with a bar,
-   * panel, or layout (or subclass thereof) to render the grid cells.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Grid.prototype.cell
-   */
-  (this.cell = new pv.Mark()
-      .data(function() {
-          return that.scene[that.index].$grid;
+    /**
+     * The cell prototype. This prototype is intended to be used with a bar,
+     * panel, or layout (or subclass thereof) to render the grid cells.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Grid.prototype.cell
+     */
+    (this.cell = new pv.Mark()
+        .data(function() {
+            return that.scene[that.index].$grid;
         })
-      .width(function() {
-          return that.width() / that.cols();
+        .width(function() {
+            return that.width() / that.cols();
         })
-      .height(function() {
-          return that.height() / that.rows();
+        .height(function() {
+            return that.height() / that.rows();
         })
-      .left(function() {
-          return this.width() * (this.index % that.cols());
+        .left(function() {
+            return this.width() * (this.index % that.cols());
         })
-      .top(function() {
-          return this.height() * Math.floor(this.index / that.cols());
+        .top(function() {
+            return this.height() * Math.floor(this.index / that.cols());
         })).parent = this;
 };
 
@@ -17199,16 +18088,17 @@ pv.Layout.Grid.prototype.defaults = new pv.Layout.Grid()
 
 /** @private */
 pv.Layout.Grid.prototype.buildImplied = function(s) {
-  pv.Layout.prototype.buildImplied.call(this, s);
-  var r = s.rows, c = s.cols;
-  if (typeof c == "object") r = pv.transpose(c);
-  if (typeof r == "object") {
-    s.$grid = pv.blend(r);
-    s.rows = r.length;
-    s.cols = r[0] ? r[0].length : 0;
-  } else {
-    s.$grid = pv.repeat([s.data], r * c);
-  }
+    pv.Layout.prototype.buildImplied.call(this, s);
+    var r = s.rows,
+        c = s.cols;
+    if (typeof c == "object") r = pv.transpose(c);
+    if (typeof r == "object") {
+        s.$grid = pv.blend(r);
+        s.rows = r.length;
+        s.cols = r[0] ? r[0].length : 0;
+    } else {
+        s.$grid = pv.repeat([s.data], r * c);
+    }
 };
 
 /**
@@ -17309,184 +18199,227 @@ pv.Layout.Grid.prototype.buildImplied = function(s) {
  * @extends pv.Layout
  */
 pv.Layout.Stack = function() {
-  pv.Layout.call(this);
-  var that = this,
-      /** @ignore */ none = function() { return null; },
-      prop = {t: none, l: none, r: none, b: none, w: none, h: none},
-      values,
-      buildImplied = that.buildImplied;
+    pv.Layout.call(this);
+    var that = this,
+        /** @ignore */
+        none = function() {
+            return null;
+        },
+        prop = {
+            t: none,
+            l: none,
+            r: none,
+            b: none,
+            w: none,
+            h: none
+        },
+        values,
+        buildImplied = that.buildImplied;
 
-  /** @private Proxy the given property on the layer. */
-  function proxy(name) {
-    return function() {
-        return prop[name](this.parent.index, this.index);
-      };
-  }
+    /** @private Proxy the given property on the layer. */
 
-  /** @private Compute the layout! */
-  this.buildImplied = function(s) {
-    buildImplied.call(this, s);
-
-    var data = s.layers,
-        n = data.length,
-        m,
-        orient = s.orient,
-        horizontal = /^(top|bottom)\b/.test(orient),
-        h = this.parent[horizontal ? "height" : "width"](),
-        x = [],
-        y = [],
-        dy = [];
-
-    /*
-     * Iterate over the data, evaluating the values, x and y functions. The
-     * context in which the x and y psuedo-properties are evaluated is a
-     * pseudo-mark that is a grandchild of this layout.
-     */
-    var stack = pv.Mark.stack, o = {parent: {parent: this}};
-    stack.unshift(null);
-    values = [];
-    for (var i = 0; i < n; i++) {
-      dy[i] = [];
-      y[i] = [];
-      o.parent.index = i;
-      stack[0] = data[i];
-      values[i] = this.$values.apply(o.parent, stack);
-      if (!i) m = values[i].length;
-      stack.unshift(null);
-      for (var j = 0; j < m; j++) {
-        stack[0] = values[i][j];
-        o.index = j;
-        if (!i) x[j] = this.$x.apply(o, stack);
-        dy[i][j] = this.$y.apply(o, stack);
-      }
-      stack.shift();
+    function proxy(name) {
+        return function() {
+            return prop[name](this.parent.index, this.index);
+        };
     }
-    stack.shift();
 
-    /* order */
-    var index;
-    switch (s.order) {
-      case "inside-out": {
-        var max = dy.map(function(v) { return pv.max.index(v); }),
-            map = pv.range(n).sort(function(a, b) { return max[a] - max[b]; }),
-            sums = dy.map(function(v) { return pv.sum(v); }),
-            top = 0,
-            bottom = 0,
-            tops = [],
-            bottoms = [];
+    /** @private Compute the layout! */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, s);
+
+        var data = s.layers,
+            n = data.length,
+            m,
+            orient = s.orient,
+            horizontal = /^(top|bottom)\b/.test(orient),
+            h = this.parent[horizontal ? "height" : "width"](),
+            x = [],
+            y = [],
+            dy = [];
+
+        /*
+         * Iterate over the data, evaluating the values, x and y functions. The
+         * context in which the x and y psuedo-properties are evaluated is a
+         * pseudo-mark that is a grandchild of this layout.
+         */
+        var stack = pv.Mark.stack,
+            o = {
+                parent: {
+                    parent: this
+                }
+            };
+        stack.unshift(null);
+        values = [];
         for (var i = 0; i < n; i++) {
-          var j = map[i];
-          if (top < bottom) {
-            top += sums[j];
-            tops.push(j);
-          } else {
-            bottom += sums[j];
-            bottoms.push(j);
-          }
-        }
-        index = bottoms.reverse().concat(tops);
-        break;
-      }
-      case "reverse": index = pv.range(n - 1, -1, -1); break;
-      default: index = pv.range(n); break;
-    }
-
-    /* offset */
-    switch (s.offset) {
-      case "silohouette": {
-        for (var j = 0; j < m; j++) {
-          var o = 0;
-          for (var i = 0; i < n; i++) o += dy[i][j];
-          y[index[0]][j] = (h - o) / 2;
-        }
-        break;
-      }
-      case "wiggle": {
-        var o = 0;
-        for (var i = 0; i < n; i++) o += dy[i][0];
-        y[index[0]][0] = o = (h - o) / 2;
-        for (var j = 1; j < m; j++) {
-          var s1 = 0, s2 = 0, dx = x[j] - x[j - 1];
-          for (var i = 0; i < n; i++) s1 += dy[i][j];
-          for (var i = 0; i < n; i++) {
-            var s3 = (dy[index[i]][j] - dy[index[i]][j - 1]) / (2 * dx);
-            for (var k = 0; k < i; k++) {
-              s3 += (dy[index[k]][j] - dy[index[k]][j - 1]) / dx;
+            dy[i] = [];
+            y[i] = [];
+            o.parent.index = i;
+            stack[0] = data[i];
+            values[i] = this.$values.apply(o.parent, stack);
+            if (!i) m = values[i].length;
+            stack.unshift(null);
+            for (var j = 0; j < m; j++) {
+                stack[0] = values[i][j];
+                o.index = j;
+                if (!i) x[j] = this.$x.apply(o, stack);
+                dy[i][j] = this.$y.apply(o, stack);
             }
-            s2 += s3 * dy[index[i]][j];
-          }
-          y[index[0]][j] = o -= s1 ? s2 / s1 * dx : 0;
+            stack.shift();
         }
-        break;
-      }
-      case "expand": {
+        stack.shift();
+
+        /* order */
+        var index;
+        switch (s.order) {
+            case "inside-out":
+                {
+                    var max = dy.map(function(v) {
+                        return pv.max.index(v);
+                    }),
+                        map = pv.range(n).sort(function(a, b) {
+                            return max[a] - max[b];
+                        }),
+                        sums = dy.map(function(v) {
+                            return pv.sum(v);
+                        }),
+                        top = 0,
+                        bottom = 0,
+                        tops = [],
+                        bottoms = [];
+                    for (var i = 0; i < n; i++) {
+                        var j = map[i];
+                        if (top < bottom) {
+                            top += sums[j];
+                            tops.push(j);
+                        } else {
+                            bottom += sums[j];
+                            bottoms.push(j);
+                        }
+                    }
+                    index = bottoms.reverse().concat(tops);
+                    break;
+                }
+            case "reverse":
+                index = pv.range(n - 1, -1, -1);
+                break;
+            default:
+                index = pv.range(n);
+                break;
+        }
+
+        /* offset */
+        switch (s.offset) {
+            case "silohouette":
+                {
+                    for (var j = 0; j < m; j++) {
+                        var o = 0;
+                        for (var i = 0; i < n; i++) o += dy[i][j];
+                        y[index[0]][j] = (h - o) / 2;
+                    }
+                    break;
+                }
+            case "wiggle":
+                {
+                    var o = 0;
+                    for (var i = 0; i < n; i++) o += dy[i][0];
+                    y[index[0]][0] = o = (h - o) / 2;
+                    for (var j = 1; j < m; j++) {
+                        var s1 = 0,
+                            s2 = 0,
+                            dx = x[j] - x[j - 1];
+                        for (var i = 0; i < n; i++) s1 += dy[i][j];
+                        for (var i = 0; i < n; i++) {
+                            var s3 = (dy[index[i]][j] - dy[index[i]][j - 1]) / (2 * dx);
+                            for (var k = 0; k < i; k++) {
+                                s3 += (dy[index[k]][j] - dy[index[k]][j - 1]) / dx;
+                            }
+                            s2 += s3 * dy[index[i]][j];
+                        }
+                        y[index[0]][j] = o -= s1 ? s2 / s1 * dx : 0;
+                    }
+                    break;
+                }
+            case "expand":
+                {
+                    for (var j = 0; j < m; j++) {
+                        y[index[0]][j] = 0;
+                        var k = 0;
+                        for (var i = 0; i < n; i++) k += dy[i][j];
+                        if (k) {
+                            k = h / k;
+                            for (var i = 0; i < n; i++) dy[i][j] *= k;
+                        } else {
+                            k = h / n;
+                            for (var i = 0; i < n; i++) dy[i][j] = k;
+                        }
+                    }
+                    break;
+                }
+            default:
+                {
+                    for (var j = 0; j < m; j++) y[index[0]][j] = 0;
+                    break;
+                }
+        }
+
+        /* Propagate the offset to the other series. */
         for (var j = 0; j < m; j++) {
-          y[index[0]][j] = 0;
-          var k = 0;
-          for (var i = 0; i < n; i++) k += dy[i][j];
-          if (k) {
-            k = h / k;
-            for (var i = 0; i < n; i++) dy[i][j] *= k;
-          } else {
-            k = h / n;
-            for (var i = 0; i < n; i++) dy[i][j] = k;
-          }
+            var o = y[index[0]][j];
+            for (var i = 1; i < n; i++) {
+                o += dy[index[i - 1]][j];
+                y[index[i]][j] = o;
+            }
         }
-        break;
-      }
-      default: {
-        for (var j = 0; j < m; j++) y[index[0]][j] = 0;
-        break;
-      }
-    }
 
-    /* Propagate the offset to the other series. */
-    for (var j = 0; j < m; j++) {
-      var o = y[index[0]][j];
-      for (var i = 1; i < n; i++) {
-        o += dy[index[i - 1]][j];
-        y[index[i]][j] = o;
-      }
-    }
+        /* Find the property definitions for dynamic substitution. */
+        var i = orient.indexOf("-"),
+            pdy = horizontal ? "h" : "w",
+            px = i < 0 ? (horizontal ? "l" : "b") : orient.charAt(i + 1),
+            py = orient.charAt(0);
+        for (var p in prop) prop[p] = none;
+        prop[px] = function(i, j) {
+            return x[j];
+        };
+        prop[py] = function(i, j) {
+            return y[i][j];
+        };
+        prop[pdy] = function(i, j) {
+            return dy[i][j];
+        };
+    };
 
-    /* Find the property definitions for dynamic substitution. */
-    var i = orient.indexOf("-"),
-        pdy = horizontal ? "h" : "w",
-        px = i < 0 ? (horizontal ? "l" : "b") : orient.charAt(i + 1),
-        py = orient.charAt(0);
-    for (var p in prop) prop[p] = none;
-    prop[px] = function(i, j) { return x[j]; };
-    prop[py] = function(i, j) { return y[i][j]; };
-    prop[pdy] = function(i, j) { return dy[i][j]; };
-  };
+    /**
+     * The layer prototype. This prototype is intended to be used with an area,
+     * bar or panel mark (or subclass thereof). Other mark types may be possible,
+     * though note that the stack layout is not currently designed to support
+     * radial stacked visualizations using wedges.
+     *
+     * <p>The layer is not a direct child of the stack layout; a hidden panel is
+     * used to replicate layers.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Stack.prototype.layer
+     */
+    this.layer = new pv.Mark()
+        .data(function() {
+            return values[this.parent.index];
+        })
+        .top(proxy("t"))
+        .left(proxy("l"))
+        .right(proxy("r"))
+        .bottom(proxy("b"))
+        .width(proxy("w"))
+        .height(proxy("h"));
 
-  /**
-   * The layer prototype. This prototype is intended to be used with an area,
-   * bar or panel mark (or subclass thereof). Other mark types may be possible,
-   * though note that the stack layout is not currently designed to support
-   * radial stacked visualizations using wedges.
-   *
-   * <p>The layer is not a direct child of the stack layout; a hidden panel is
-   * used to replicate layers.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Stack.prototype.layer
-   */
-  this.layer = new pv.Mark()
-      .data(function() { return values[this.parent.index]; })
-      .top(proxy("t"))
-      .left(proxy("l"))
-      .right(proxy("r"))
-      .bottom(proxy("b"))
-      .width(proxy("w"))
-      .height(proxy("h"));
-
-  this.layer.add = function(type) {
-    return that.add(pv.Panel)
-        .data(function() { return that.layers(); })
-      .add(type)
-        .extend(this);
-  };
+    this.layer.add = function(type) {
+        return that.add(pv.Panel)
+            .data(function() {
+                return that.layers();
+            })
+            .add(type)
+            .extend(this);
+    };
 };
 
 pv.Layout.Stack.prototype = pv.extend(pv.Layout)
@@ -17506,12 +18439,14 @@ pv.Layout.Stack.prototype.defaults = new pv.Layout.Stack()
     .extend(pv.Layout.prototype.defaults)
     .orient("bottom-left")
     .offset("zero")
-    .layers([[]]);
+    .layers([
+        []
+    ]);
 
 /** @private */
-pv.Layout.Stack.prototype.$x
-    = /** @private */ pv.Layout.Stack.prototype.$y
-    = function() { return 0; };
+pv.Layout.Stack.prototype.$x = /** @private */ pv.Layout.Stack.prototype.$y = function() {
+    return 0;
+};
 
 /**
  * The x psuedo-property; determines the position of the value within the layer.
@@ -17522,8 +18457,9 @@ pv.Layout.Stack.prototype.$x
  * @returns {pv.Layout.Stack} this.
  */
 pv.Layout.Stack.prototype.x = function(f) {
-  /** @private */ this.$x = pv.functor(f);
-  return this;
+    /** @private */
+    this.$x = pv.functor(f);
+    return this;
 };
 
 /**
@@ -17536,8 +18472,9 @@ pv.Layout.Stack.prototype.x = function(f) {
  * @returns {pv.Layout.Stack} this.
  */
 pv.Layout.Stack.prototype.y = function(f) {
-  /** @private */ this.$y = pv.functor(f);
-  return this;
+    /** @private */
+    this.$y = pv.functor(f);
+    return this;
 };
 
 /** @private The default value function; identity. */
@@ -17552,8 +18489,8 @@ pv.Layout.Stack.prototype.$values = pv.identity;
  * @returns {pv.Layout.Stack} this.
  */
 pv.Layout.Stack.prototype.values = function(f) {
-  this.$values = pv.functor(f);
-  return this;
+    this.$values = pv.functor(f);
+    return this;
 };
 
 /**
@@ -17644,18 +18581,21 @@ pv.Layout.Band = function() {
      * The prototype mark of the items mark.
      */
     var itemProto = new pv.Mark()
-        .data  (function() { return values[this.parent.index]; })
-        .top   (proxy("t"))
-        .left  (proxy("l"))
-        .right (proxy("r"))
+        .data(function() {
+            return values[this.parent.index];
+        })
+        .top(proxy("t"))
+        .left(proxy("l"))
+        .right(proxy("r"))
         .bottom(proxy("b"))
-        .width (proxy("w"))
+        .width(proxy("w"))
         .height(proxy("h"));
 
     /**
      * Proxy the given property for an item of a band.
      * @private
      */
+
     function proxy(name) {
         return function() {
             /* bandIndex, layerIndex */
@@ -17676,7 +18616,7 @@ pv.Layout.Band = function() {
 
         var data = s.layers,
             L = data.length;
-        if(L > 0){
+        if (L > 0) {
             var orient = s.orient,
                 horizontal = /^(top|bottom)\b/.test(orient),
                 bh = this.parent[horizontal ? "height" : "width"](),
@@ -17684,12 +18624,12 @@ pv.Layout.Band = function() {
                 B = bands.length;
 
             /* Band order */
-            if(s.bandOrder === "reverse") {
+            if (s.bandOrder === "reverse") {
                 bands.reverse();
             }
 
             /* Layer order */
-            if(s.order === "reverse") {
+            if (s.order === "reverse") {
                 values.reverse();
 
                 for (var b = 0; b < B; b++) {
@@ -17698,13 +18638,17 @@ pv.Layout.Band = function() {
             }
 
             /* Layout kind */
-            switch(s.layout){
-                case "grouped": this._calcGrouped(bands, L, s);     break;
-                case "stacked": this._calcStacked(bands, L, bh, s); break;
+            switch (s.layout) {
+                case "grouped":
+                    this._calcGrouped(bands, L, s);
+                    break;
+                case "stacked":
+                    this._calcStacked(bands, L, bh, s);
+                    break;
             }
 
             this._bindItemProps(bands, itemProps, orient, horizontal);
-       }
+        }
     };
 
     var itemAccessor = this.item = {
@@ -17712,12 +18656,14 @@ pv.Layout.Band = function() {
 
         add: function(type) {
             return that.add(pv.Panel)
-                    .data(function(){return that.layers();})
-                    .add(type)
-                    .extend(itemProto);
+                .data(function() {
+                    return that.layers();
+                })
+                .add(type)
+                .extend(itemProto);
         },
 
-        order: function(value){
+        order: function(value) {
             that.order(value);
             return this;
         },
@@ -17726,7 +18672,7 @@ pv.Layout.Band = function() {
          * The item width pseudo-property;
          * determines the width of an item.
          */
-        w: function(f){
+        w: function(f) {
             that.$iw = pv.functor(f);
             return this;
         },
@@ -17735,7 +18681,7 @@ pv.Layout.Band = function() {
          * The item height pseudo-property;
          * determines the height of an item.
          */
-        h: function(f){
+        h: function(f) {
             that.$ih = pv.functor(f);
             return this;
         },
@@ -17755,7 +18701,7 @@ pv.Layout.Band = function() {
          * f: (item, series) -> percentage
          * </pre>
          */
-        horizontalRatio: function(f){
+        horizontalRatio: function(f) {
             that.$ihorizRatio = pv.functor(f);
             return this;
         },
@@ -17776,7 +18722,7 @@ pv.Layout.Band = function() {
          * f: (item, series) -> height
          * </pre>
          */
-        verticalMargin: function(f){
+        verticalMargin: function(f) {
             that.$ivertiMargin = pv.functor(f);
             return this;
         }
@@ -17797,7 +18743,7 @@ pv.Layout.Band = function() {
          * f: (item, series) -> width
          * </pre>
          */
-        w: function(f){
+        w: function(f) {
             that.$bw = pv.functor(f);
             return this;
         },
@@ -17815,12 +18761,12 @@ pv.Layout.Band = function() {
          * f: (item, series) -> x
          * </pre>
          */
-        x: function(f){
+        x: function(f) {
             that.$bx = pv.functor(f);
             return this;
         },
 
-        order: function(value){
+        order: function(value) {
             that.bandOrder(value);
             return this;
         },
@@ -17834,7 +18780,7 @@ pv.Layout.Band = function() {
          * -2 - Drawn starting at previous band offset. Multiply values by -1. Don't update offset.
          * @private
          */
-        differentialControl: function(f){
+        differentialControl: function(f) {
             that.$bDiffControl = pv.functor(f);
             return this;
         }
@@ -17844,21 +18790,30 @@ pv.Layout.Band = function() {
     this.item.band = bandAccessor;
 };
 
-pv.Layout.Band.$baseItemProps = (function(){
-    var none = function() {return null;};
-    return {t: none, l: none, r: none, b: none, w: none, h: none};
+pv.Layout.Band.$baseItemProps = (function() {
+    var none = function() {
+        return null;
+    };
+    return {
+        t: none,
+        l: none,
+        r: none,
+        b: none,
+        w: none,
+        h: none
+    };
 }());
 
 pv.Layout.Band.prototype = pv.extend(pv.Layout)
-    .property("orient", String)     // x-y orientation
-    .property("layout", String)     // items layout within band: "grouped", "stacked"
-    .property("layers") // data
-    .property("yZero",     Number)  // The y zero base line
-    .property("verticalMode",   String) // The vertical mode: 'expand', null
-    .property("horizontalMode", String) // The horizontal mode: 'expand', null
-    .property("order",     String)  // layer order; "reverse" or null
-    .property("bandOrder", String)  // band order;  "reverse" or null
-    ;
+    .property("orient", String) // x-y orientation
+.property("layout", String) // items layout within band: "grouped", "stacked"
+.property("layers") // data
+.property("yZero", Number) // The y zero base line
+.property("verticalMode", String) // The vertical mode: 'expand', null
+.property("horizontalMode", String) // The horizontal mode: 'expand', null
+.property("order", String) // layer order; "reverse" or null
+.property("bandOrder", String) // band order;  "reverse" or null
+;
 
 /**
  * Default properties for stack layouts.
@@ -17874,17 +18829,25 @@ pv.Layout.Band.prototype.defaults = new pv.Layout.Band()
     .orient("bottom-left")
     .layout("grouped")
     .yZero(0)
-    .layers([[]])
-    ;
+    .layers([
+        []
+    ]);
 
-/** @private */ pv.Layout.Band.prototype.$bx =
-/** @private */ pv.Layout.Band.prototype.$bw =
-/** @private */ pv.Layout.Band.prototype.$bDiffControl =
-/** @private */ pv.Layout.Band.prototype.$iw =
-/** @private */ pv.Layout.Band.prototype.$ih =
-/** @private */ pv.Layout.Band.prototype.$ivertiMargin = pv.functor(0);
+/** @private */
+pv.Layout.Band.prototype.$bx =
+/** @private */
+pv.Layout.Band.prototype.$bw =
+/** @private */
+pv.Layout.Band.prototype.$bDiffControl =
+/** @private */
+pv.Layout.Band.prototype.$iw =
+/** @private */
+pv.Layout.Band.prototype.$ih =
+/** @private */
+pv.Layout.Band.prototype.$ivertiMargin = pv.functor(0);
 
-/** @private */ pv.Layout.Band.prototype.$ihorizRatio = pv.functor(0.9);
+/** @private */
+pv.Layout.Band.prototype.$ihorizRatio = pv.functor(0.9);
 
 /** @private The default values function; identity. */
 pv.Layout.Band.prototype.$values = pv.identity;
@@ -17899,11 +18862,11 @@ pv.Layout.Band.prototype.$values = pv.identity;
  * @returns {pv.Layout.Band} this.
  */
 pv.Layout.Band.prototype.values = function(f) {
-  this.$values = pv.functor(f);
-  return this;
+    this.$values = pv.functor(f);
+    return this;
 };
 
-pv.Layout.prototype._readData = function(data, layersValues, scene){
+pv.Layout.prototype._readData = function(data, layersValues, scene) {
     var L = data.length,
         bands = [
             /*
@@ -17929,7 +18892,11 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
      * pseudo-mark that is a *grandchild* of this layout.
      */
     var stack = pv.Mark.stack,
-        o = {parent: {parent: this}};
+        o = {
+            parent: {
+                parent: this
+            }
+        };
 
     stack.unshift(null);
 
@@ -17940,21 +18907,21 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
         /* Eval per-layer properties */
 
         var layerValues = layersValues[l] = this.$values.apply(o.parent, stack);
-        if(!l){
+        if (!l) {
             B = layerValues.length;
         }
 
         /* Eval per-item properties */
         stack.unshift(null);
-        for (var b = 0; b < B ; b++) {
+        for (var b = 0; b < B; b++) {
             stack[0] = layerValues[b];
-            o.index  = b;
+            o.index = b;
 
             /* First series evaluates band stuff, for each band */
             var band = bands[b];
-            if(!band) {
+            if (!band) {
                 band = bands[b] = {
-                    horizRatio:  this.$ihorizRatio.apply(o, stack),
+                    horizRatio: this.$ihorizRatio.apply(o, stack),
                     vertiMargin: this.$ivertiMargin.apply(o, stack),
                     w: this.$bw.apply(o, stack),
                     x: this.$bx.apply(o, stack),
@@ -17979,9 +18946,9 @@ pv.Layout.prototype._readData = function(data, layersValues, scene){
     return bands;
 };
 
-pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
+pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene) {
     /* Compute item x positions relative to parent panel */
-    for (var b = 0, B = bands.length; b < B ; b++) {
+    for (var b = 0, B = bands.length; b < B; b++) {
         var band = bands[b],
             items = band.items,
             w = band.w,
@@ -17989,34 +18956,36 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
             wItems = 0;
 
         /* Total items width */
-        for (var l = 0 ; l < L ; l++) { wItems += items[l].w; }
+        for (var l = 0; l < L; l++) {
+            wItems += items[l].w;
+        }
 
-        if(L === 1) {
+        if (L === 1) {
             /*
              * Horizontal ratio does not apply
              * There's no space between...
              */
             horizRatio = 1;
-        } else if(!(horizRatio > 0 && horizRatio <= 1)) {
+        } else if (!(horizRatio > 0 && horizRatio <= 1)) {
             horizRatio = 1;
         }
 
-        if(w == null){
+        if (w == null) {
             /* Expand band width to contain all items plus ratio */
             w = band.w = wItems / horizRatio;
 
-        } else if(scene.horizontalMode === 'expand'){
+        } else if (scene.horizontalMode === 'expand') {
             /* Scale items width to fit in band's width */
 
             var wItems2 = horizRatio * w;
             if (wItems) {
                 var wScale = wItems2 / wItems;
-                for (var l = 0 ; l < L ; l++) {
+                for (var l = 0; l < L; l++) {
                     items[l].w *= wScale;
                 }
             } else {
                 var wiavg = wItems2 / L;
-                for (var l = 0 ; l < L; l++) {
+                for (var l = 0; l < L; l++) {
                     items[l].w = wiavg;
                 }
             }
@@ -18029,29 +18998,30 @@ pv.Layout.Band.prototype._calcGrouped = function(bands, L, scene){
             ix = band.x - (wItemsWithMargin / 2),
             margin = L > 1 ? ((wItemsWithMargin - wItems) / (L - 1)) : 0;
 
-        for (var l = 0 ; l < L ; l++) {
+        for (var l = 0; l < L; l++) {
             var item = items[l];
             item.x = ix;
             ix += item.w + margin;
 
             /* Negative direction turns into a lower iy */
-            if(item.dir < 0){
+            if (item.dir < 0) {
                 item.y -= item.h;
             }
         }
     }
 };
 
-pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
+pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene) {
     var B = bands.length,
         items;
 
-    if(scene.verticalMode === "expand") {
+    if (scene.verticalMode === "expand") {
         for (var b = 0; b < B; b++) {
             items = bands[b].items;
 
             /* Sum across layers for this band */
-            var hSum = null, nonNullCount = 0;
+            var hSum = null,
+                nonNullCount = 0;
             for (var l = 0; l < L; l++) {
                 /* We get rid of negative heights
                  * because it is preferable to respect the layer's order
@@ -18061,19 +19031,19 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
                 var item = items[l];
                 item.dir = 1;
                 var h = item.h;
-                if(h != null){
+                if (h != null) {
                     nonNullCount++;
                     hSum += h; // null + 1 = 0 + 1
                 }
             }
 
             /* Scale hs */
-            if(nonNullCount){
+            if (nonNullCount) {
                 if (hSum) {
                     var hScale = bh / hSum;
                     for (var l = 0; l < L; l++) {
                         var h = items[l].h;
-                        if(h != null){
+                        if (h != null) {
                             items[l].h = h * hScale;
                         }
                     }
@@ -18081,7 +19051,7 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
                     var hAvg = bh / nonNullCount;
                     for (var l = 0; l < L; l++) {
                         var h = items[l].h;
-                        if(h != null){
+                        if (h != null) {
                             items[l].h = hAvg;
                         }
                     }
@@ -18111,16 +19081,16 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
         // diffControl
         var resultPos = this._layoutItemsOfDir(+1, positiveGoesDown, items, vertiMargin, bx, yOffset),
             resultNeg = null; // reset on each iteration
-        if(resultPos.existsOtherDir) {
+        if (resultPos.existsOtherDir) {
             resultNeg = this._layoutItemsOfDir(-1, positiveGoesDown, items, vertiMargin, bx, yOffset);
         }
 
-        if(bDiffControl) {
+        if (bDiffControl) {
             // Update offset?
-            if(Math.abs(bDiffControl) === 1) {
+            if (Math.abs(bDiffControl) === 1) {
                 var yOffset0 = yOffset;
                 yOffset = resultPos.yOffset;
-                if(resultNeg) {
+                if (resultNeg) {
                     yOffset -= (yOffset0 - resultNeg.yOffset);
                 }
             }
@@ -18131,18 +19101,18 @@ pv.Layout.Band.prototype._calcStacked = function(bands, L, bh, scene){
     }
 };
 
-pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, positiveGoesDown, items, vertiMargin, bx, yOffset){
+pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, positiveGoesDown, items, vertiMargin, bx, yOffset) {
     var existsOtherDir = false,
         vertiMargin2 = vertiMargin / 2,
         efDir = (positiveGoesDown ? -stackDir : stackDir),
         reverseLayers = positiveGoesDown;
 
-    for (var l = 0, L = items.length ; l < L ; l+=1) {
-        var item = items[reverseLayers ? (L -l -1) : l];
-        if(item.dir === stackDir){
+    for (var l = 0, L = items.length; l < L; l += 1) {
+        var item = items[reverseLayers ? (L - l - 1) : l];
+        if (item.dir === stackDir) {
             var h = item.h || 0; // null -> 0
 
-            if(efDir > 0) {
+            if (efDir > 0) {
                 item.y = yOffset + vertiMargin2;
                 yOffset += h;
             } else {
@@ -18164,7 +19134,7 @@ pv.Layout.Band.prototype._layoutItemsOfDir = function(stackDir, positiveGoesDown
     };
 };
 
-pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, horizontal){
+pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, horizontal) {
     /*
      * Find the property definitions for dynamic substitution.
      *
@@ -18174,25 +19144,33 @@ pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, hor
         ph = horizontal ? "h" : "w",
         pw = horizontal ? "w" : "h",
         px = index < 0 ?
-            /* Default yOrientation
-            * horizontal -> left
-            * vertical   -> bottom
-            */
-            (horizontal ? "l" : "b") :
-            /*
-            * -l,r,t,b ...
-            */
-            orient.charAt(index + 1),
+        /* Default yOrientation
+         * horizontal -> left
+         * vertical   -> bottom
+         */
+        (horizontal ? "l" : "b") :
+        /*
+         * -l,r,t,b ...
+         */
+        orient.charAt(index + 1),
 
         /*
-        * b,t,l,r
-        */
-        py  = orient.charAt(0);
+         * b,t,l,r
+         */
+        py = orient.charAt(0);
 
-    itemProps[px] = function(b, l) {return bands[b].items[l].x;};
-    itemProps[py] = function(b, l) {return bands[b].items[l].y;};
-    itemProps[pw] = function(b, l) {return bands[b].items[l].w;};
-    itemProps[ph] = function(b, l) {return bands[b].items[l].h || 0;}; // null -> 0
+    itemProps[px] = function(b, l) {
+        return bands[b].items[l].x;
+    };
+    itemProps[py] = function(b, l) {
+        return bands[b].items[l].y;
+    };
+    itemProps[pw] = function(b, l) {
+        return bands[b].items[l].w;
+    };
+    itemProps[ph] = function(b, l) {
+        return bands[b].items[l].h || 0;
+    }; // null -> 0
 };
 /**
  * Constructs a new, empty treemap layout. Layouts are not typically
@@ -18230,35 +19208,49 @@ pv.Layout.Band.prototype._bindItemProps = function(bands, itemProps, orient, hor
  * @extends pv.Layout.Hierarchy
  */
 pv.Layout.Treemap = function() {
-  pv.Layout.Hierarchy.call(this);
+    pv.Layout.Hierarchy.call(this);
 
-  this.node
-      .strokeStyle("#fff")
-      .fillStyle("rgba(31, 119, 180, .25)")
-      .width(function(n) { return n.dx; })
-      .height(function(n) { return n.dy; });
+    this.node
+        .strokeStyle("#fff")
+        .fillStyle("rgba(31, 119, 180, .25)")
+        .width(function(n) {
+            return n.dx;
+        })
+        .height(function(n) {
+            return n.dy;
+        });
 
-  this.label
-      .visible(function(n) { return !n.firstChild; })
-      .left(function(n) { return n.x + (n.dx / 2); })
-      .top(function(n) { return n.y + (n.dy / 2); })
-      .textAlign("center")
-      .textAngle(function(n) { return n.dx > n.dy ? 0 : -Math.PI / 2; });
+    this.label
+        .visible(function(n) {
+            return !n.firstChild;
+        })
+        .left(function(n) {
+            return n.x + (n.dx / 2);
+        })
+        .top(function(n) {
+            return n.y + (n.dy / 2);
+        })
+        .textAlign("center")
+        .textAngle(function(n) {
+            return n.dx > n.dy ? 0 : -Math.PI / 2;
+        });
 
-  (this.leaf = new pv.Mark()
-      .extend(this.node)
-      .fillStyle(null)
-      .strokeStyle(null)
-      .visible(function(n) { return !n.firstChild; })).parent = this;
+    (this.leaf = new pv.Mark()
+        .extend(this.node)
+        .fillStyle(null)
+        .strokeStyle(null)
+        .visible(function(n) {
+            return !n.firstChild;
+        })).parent = this;
 
-  /* Hide unsupported link. */
-  delete this.link;
+    /* Hide unsupported link. */
+    delete this.link;
 };
 
 pv.Layout.Treemap.prototype = pv.extend(pv.Layout.Hierarchy)
-    .property("round",         Boolean)
-    .property("mode",          String)
-    .property("order",         String);
+    .property("round", Boolean)
+    .property("mode", String)
+    .property("order", String);
 
 /**
  * Default properties for treemap layouts. The default mode is "squarify" and
@@ -18269,7 +19261,7 @@ pv.Layout.Treemap.prototype = pv.extend(pv.Layout.Hierarchy)
 pv.Layout.Treemap.prototype.defaults = new pv.Layout.Treemap()
     .extend(pv.Layout.Hierarchy.prototype.defaults)
     .mode("squarify") // squarify, slice-and-dice, slice, dice
-    .order("ascending"); // ascending, descending, reverse, null
+.order("ascending"); // ascending, descending, reverse, null
 
 /**
  * Whether node sizes should be rounded to integer values. This has a similar
@@ -18340,14 +19332,19 @@ pv.Layout.Treemap.prototype.defaults = new pv.Layout.Treemap()
  */
 
 /** @private The default size function. */
-pv.Layout.Treemap.prototype.$size = function(d) { return Number(d.nodeValue); };
+pv.Layout.Treemap.prototype.$size = function(d) {
+    return Number(d.nodeValue);
+};
 
-pv.Layout.Treemap.prototype.$padLeft   =
-pv.Layout.Treemap.prototype.$padRight  =
-pv.Layout.Treemap.prototype.$padBottom =
-pv.Layout.Treemap.prototype.$padTop    =
-    /** @private The default padding function. */
-    function() { return 0; };
+pv.Layout.Treemap.prototype.$padLeft =
+    pv.Layout.Treemap.prototype.$padRight =
+    pv.Layout.Treemap.prototype.$padBottom =
+    pv.Layout.Treemap.prototype.$padTop =
+/** @private The default padding function. */
+
+function() {
+    return 0;
+};
 
 
 /**
@@ -18366,8 +19363,8 @@ pv.Layout.Treemap.prototype.$padTop    =
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.size = function(f) {
-  this.$size = pv.functor(f);
-  return this;
+    this.$size = pv.functor(f);
+    return this;
 };
 
 /**
@@ -18394,7 +19391,10 @@ pv.Layout.Treemap.prototype.padding = function(n) {
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingLeft = function(f) {
-    if(arguments.length) { this.$padLeft = pv.functor(f); return this; }
+    if (arguments.length) {
+        this.$padLeft = pv.functor(f);
+        return this;
+    }
     return this.$padLeft;
 };
 
@@ -18407,7 +19407,10 @@ pv.Layout.Treemap.prototype.paddingLeft = function(f) {
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingRight = function(f) {
-    if(arguments.length) { this.$padRight = pv.functor(f); return this; }
+    if (arguments.length) {
+        this.$padRight = pv.functor(f);
+        return this;
+    }
     return this.$padRight;
 };
 
@@ -18420,7 +19423,10 @@ pv.Layout.Treemap.prototype.paddingRight = function(f) {
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingBottom = function(f) {
-    if(arguments.length) { this.$padBottom = pv.functor(f); return this; }
+    if (arguments.length) {
+        this.$padBottom = pv.functor(f);
+        return this;
+    }
     return this.$padBottom;
 };
 
@@ -18433,188 +19439,214 @@ pv.Layout.Treemap.prototype.paddingBottom = function(f) {
  * @returns {pv.Layout.Treemap} this.
  */
 pv.Layout.Treemap.prototype.paddingTop = function(f) {
-    if(arguments.length) { this.$padTop = pv.functor(f); return this; }
+    if (arguments.length) {
+        this.$padTop = pv.functor(f);
+        return this;
+    }
     return this.$padTop;
 };
 
 /** @private */
 pv.Layout.Treemap.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
 
-  var that = this,
-      nodes = s.nodes,
-      root = nodes[0],
-      stack = pv.Mark.stack,
-      left   = 0,
-      right  = 0,
-      top    = 0,
-      bottom = 0,
-      /** @ignore */ size = function(n) { return n.size; },
-      round = s.round ? Math.round : Number,
-      mode  = s.mode;
+    var that = this,
+        nodes = s.nodes,
+        root = nodes[0],
+        stack = pv.Mark.stack,
+        left = 0,
+        right = 0,
+        top = 0,
+        bottom = 0,
+        /** @ignore */
+        size = function(n) {
+            return n.size;
+        },
+        round = s.round ? Math.round : Number,
+        mode = s.mode;
 
-  /** @private */
-  function slice(row, sum, horizontal, x, y, w, h) {
-    for (var i = 0, d = 0; i < row.length; i++) {
-      var n = row[i];
-      if (horizontal) {
-        n.x = x + d;
-        n.y = y;
-        d += n.dx = round(w * n.size / sum);
-        n.dy = h;
-      } else {
-        n.x = x;
-        n.y = y + d;
-        n.dx = w;
-        d += n.dy = round(h * n.size / sum);
-      }
-    }
-    if (n) { // correct on-axis rounding error
-      if (horizontal) {
-        n.dx += w - d;
-      } else {
-        n.dy += h - d;
-      }
-    }
-  }
+    /** @private */
 
-  /** @private */
-  function ratio(row, l) {
-    var rmax = -Infinity, rmin = Infinity, s = 0;
-    for (var i = 0; i < row.length; i++) {
-      var r = row[i].size;
-      if (r < rmin) rmin = r;
-      if (r > rmax) rmax = r;
-      s += r;
-    }
-    s = s * s;
-    l = l * l;
-    return Math.max(l * rmax / s, s / (l * rmin));
-  }
-
-  /** @private */
-  function layout(n, i) {
-    var p = n.parentNode,
-        x = n.x,
-        y = n.y,
-        w = n.dx,
-        h = n.dy;
-
-    if(p) {
-        x += p.paddingLeft;
-        y += p.paddingTop;
-        w += -p.paddingLeft -p.paddingRight,
-        h += -p.paddingTop  -p.paddingBottom;
+    function slice(row, sum, horizontal, x, y, w, h) {
+        for (var i = 0, d = 0; i < row.length; i++) {
+            var n = row[i];
+            if (horizontal) {
+                n.x = x + d;
+                n.y = y;
+                d += n.dx = round(w * n.size / sum);
+                n.dy = h;
+            } else {
+                n.x = x;
+                n.y = y + d;
+                n.dx = w;
+                d += n.dy = round(h * n.size / sum);
+            }
+        }
+        if (n) { // correct on-axis rounding error
+            if (horizontal) {
+                n.dx += w - d;
+            } else {
+                n.dy += h - d;
+            }
+        }
     }
 
-    /* Assume squarify by default. */
-    if (mode != "squarify") {
-      slice(
-        n.childNodes,
-        n.size,
-        mode == "slice" ? true  :
-        mode == "dice"  ? false : i & 1,
-        x,
-        y,
-        w,
-        h);
-      return;
+    /** @private */
+
+    function ratio(row, l) {
+        var rmax = -Infinity,
+            rmin = Infinity,
+            s = 0;
+        for (var i = 0; i < row.length; i++) {
+            var r = row[i].size;
+            if (r < rmin) rmin = r;
+            if (r > rmax) rmax = r;
+            s += r;
+        }
+        s = s * s;
+        l = l * l;
+        return Math.max(l * rmax / s, s / (l * rmin));
     }
 
-    var row = [],
-        mink = Infinity,
-        l = Math.min(w, h),
-        k = w * h / n.size;
+    /** @private */
 
-    /* Abort if the size is non-positive. */
-    if (n.size <= 0) return;
+    function layout(n, i) {
+        var p = n.parentNode,
+            x = n.x,
+            y = n.y,
+            w = n.dx,
+            h = n.dy;
 
-    /* Scale the sizes to fill the current sub-region. */
-    n.visitBefore(function(n) { n.size *= k; });
+        if (p) {
+            x += p.paddingLeft;
+            y += p.paddingTop;
+            w += -p.paddingLeft - p.paddingRight,
+            h += -p.paddingTop - p.paddingBottom;
+        }
 
-    /** @private Position the specified nodes along one dimension. */
-    function position(row) {
-      var horizontal = w == l,
-          sum = pv.sum(row, size),
-          r = l ? round(sum / l) : 0;
-      slice(row, sum, horizontal, x, y, horizontal ? w : r, horizontal ? r : h);
-      if (horizontal) {
-        y += r;
-        h -= r;
-      } else {
-        x += r;
-        w -= r;
-      }
-      l = Math.min(w, h);
-      return horizontal;
+        /* Assume squarify by default. */
+        if (mode != "squarify") {
+            slice(
+                n.childNodes,
+                n.size,
+                mode == "slice" ? true :
+                mode == "dice" ? false : i & 1,
+                x,
+                y,
+                w,
+                h);
+            return;
+        }
+
+        var row = [],
+            mink = Infinity,
+            l = Math.min(w, h),
+            k = w * h / n.size;
+
+        /* Abort if the size is non-positive. */
+        if (n.size <= 0) return;
+
+        /* Scale the sizes to fill the current sub-region. */
+        n.visitBefore(function(n) {
+            n.size *= k;
+        });
+
+        /** @private Position the specified nodes along one dimension. */
+
+        function position(row) {
+            var horizontal = w == l,
+                sum = pv.sum(row, size),
+                r = l ? round(sum / l) : 0;
+            slice(row, sum, horizontal, x, y, horizontal ? w : r, horizontal ? r : h);
+            if (horizontal) {
+                y += r;
+                h -= r;
+            } else {
+                x += r;
+                w -= r;
+            }
+            l = Math.min(w, h);
+            return horizontal;
+        }
+
+        var children = n.childNodes.slice(); // copy
+        while (children.length) {
+            var child = children[children.length - 1];
+            if (!child.size) {
+                children.pop();
+                continue;
+            }
+            row.push(child);
+
+            var k = ratio(row, l);
+            if (k <= mink) {
+                children.pop();
+                mink = k;
+            } else {
+                row.pop();
+                position(row);
+                row.length = 0;
+                mink = Infinity;
+            }
+        }
+
+        /* correct off-axis rounding error */
+        if (position(row))
+            for (var i = 0; i < row.length; i++) {
+                row[i].dy += h;
+            } else
+                for (var i = 0; i < row.length; i++) {
+                    row[i].dx += w;
+                }
     }
 
-    var children = n.childNodes.slice(); // copy
-    while (children.length) {
-      var child = children[children.length - 1];
-      if (!child.size) {
-        children.pop();
-        continue;
-      }
-      row.push(child);
+    /* Recursively compute the node depth and size. */
+    stack.unshift(null);
+    try {
+        root.visitAfter(function(n, i) {
+            n.depth = i;
+            n.x = n.y = n.dx = n.dy = 0;
 
-      var k = ratio(row, l);
-      if (k <= mink) {
-        children.pop();
-        mink = k;
-      } else {
-        row.pop();
-        position(row);
-        row.length = 0;
-        mink = Infinity;
-      }
+            stack[0] = n;
+
+            var f;
+            if (n.firstChild) {
+                n.size = pv.sum(n.childNodes, size);
+                n.paddingRight = +that.$padRight.apply(that, stack) || 0;
+                n.paddingLeft = +that.$padLeft.apply(that, stack) || 0;
+                n.paddingBottom = +that.$padBottom.apply(that, stack) || 0;
+                n.paddingTop = +that.$padTop.apply(that, stack) || 0;
+            } else {
+                n.size = that.$size.apply(that, stack);
+            }
+        });
+    } finally {
+        stack.shift();
     }
 
-    /* correct off-axis rounding error */
-    if (position(row)) for (var i = 0; i < row.length; i++) {
-      row[i].dy += h;
-    } else for (var i = 0; i < row.length; i++) {
-      row[i].dx += w;
+    /* Sort. */
+    switch (s.order) {
+        case "ascending":
+            root.sort(function(a, b) {
+                return a.size - b.size;
+            });
+            break;
+        case "descending":
+            root.sort(function(a, b) {
+                return b.size - a.size;
+            });
+            break;
+        case "reverse":
+            root.reverse();
+            break;
     }
-  }
 
-  /* Recursively compute the node depth and size. */
-  stack.unshift(null);
-  try{
-      root.visitAfter(function(n, i) {
-          n.depth = i;
-          n.x = n.y = n.dx = n.dy = 0;
-
-          stack[0] = n;
-
-          var f;
-          if(n.firstChild) {
-              n.size = pv.sum(n.childNodes, size);
-              n.paddingRight  = +that.$padRight .apply(that, stack) || 0;
-              n.paddingLeft   = +that.$padLeft  .apply(that, stack) || 0;
-              n.paddingBottom = +that.$padBottom.apply(that, stack) || 0;
-              n.paddingTop    = +that.$padTop   .apply(that, stack) || 0;
-          } else {
-              n.size = that.$size.apply(that, stack);
-          }
-      });
-  } finally {
-      stack.shift();
-  }
-
-  /* Sort. */
-  switch (s.order) {
-    case "ascending":  root.sort(function(a, b) { return a.size - b.size; }); break;
-    case "descending": root.sort(function(a, b) { return b.size - a.size; }); break;
-    case "reverse":    root.reverse(); break;
-  }
-
-  /* Recursively compute the layout. */
-  root.x = 0;
-  root.y = 0;
-  root.dx = s.width;
-  root.dy = s.height;
-  root.visitBefore(layout);
+    /* Recursively compute the layout. */
+    root.x = 0;
+    root.y = 0;
+    root.dx = s.width;
+    root.dy = s.height;
+    root.visitBefore(layout);
 };
 /**
  * Constructs a new, empty tree layout. Layouts are not typically constructed
@@ -18640,7 +19672,7 @@ pv.Layout.Treemap.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Hierarchy
  */
 pv.Layout.Tree = function() {
-  pv.Layout.Hierarchy.call(this);
+    pv.Layout.Hierarchy.call(this);
 };
 
 pv.Layout.Tree.prototype = pv.extend(pv.Layout.Hierarchy)
@@ -18665,198 +19697,219 @@ pv.Layout.Tree.prototype.defaults = new pv.Layout.Tree()
 
 /** @private */
 pv.Layout.Tree.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
 
-  var nodes = s.nodes,
-      orient = s.orient,
-      depth = s.depth,
-      breadth = s.breadth,
-      group = s.group,
-      w = s.width,
-      h = s.height;
+    var nodes = s.nodes,
+        orient = s.orient,
+        depth = s.depth,
+        breadth = s.breadth,
+        group = s.group,
+        w = s.width,
+        h = s.height;
 
-  /** @private */
-  function firstWalk(v) {
-    var l, r, a;
-    if (!v.firstChild) {
-      if (l = v.previousSibling) {
-        v.prelim = l.prelim + distance(v.depth, true);
-      }
-    } else {
-      l = v.firstChild;
-      r = v.lastChild;
-      a = l; // default ancestor
-      for (var c = l; c; c = c.nextSibling) {
-        firstWalk(c);
-        a = apportion(c, a);
-      }
-      executeShifts(v);
-      var midpoint = .5 * (l.prelim + r.prelim);
-      if (l = v.previousSibling) {
-        v.prelim = l.prelim + distance(v.depth, true);
-        v.mod = v.prelim - midpoint;
-      } else {
-        v.prelim = midpoint;
-      }
-    }
-  }
+    /** @private */
 
-  /** @private */
-  function secondWalk(v, m, depth) {
-    v.breadth = v.prelim + m;
-    m += v.mod;
-    for (var c = v.firstChild; c; c = c.nextSibling) {
-      secondWalk(c, m, depth);
-    }
-  }
-
-  /** @private */
-  function apportion(v, a) {
-    var w = v.previousSibling;
-    if (w) {
-      var vip = v,
-          vop = v,
-          vim = w,
-          vom = v.parentNode.firstChild,
-          sip = vip.mod,
-          sop = vop.mod,
-          sim = vim.mod,
-          som = vom.mod,
-          nr = nextRight(vim),
-          nl = nextLeft(vip);
-      while (nr && nl) {
-        vim = nr;
-        vip = nl;
-        vom = nextLeft(vom);
-        vop = nextRight(vop);
-        vop.ancestor = v;
-        var shift = (vim.prelim + sim) - (vip.prelim + sip) + distance(vim.depth, false);
-        if (shift > 0) {
-          moveSubtree(ancestor(vim, v, a), v, shift);
-          sip += shift;
-          sop += shift;
+    function firstWalk(v) {
+        var l, r, a;
+        if (!v.firstChild) {
+            if (l = v.previousSibling) {
+                v.prelim = l.prelim + distance(v.depth, true);
+            }
+        } else {
+            l = v.firstChild;
+            r = v.lastChild;
+            a = l; // default ancestor
+            for (var c = l; c; c = c.nextSibling) {
+                firstWalk(c);
+                a = apportion(c, a);
+            }
+            executeShifts(v);
+            var midpoint = .5 * (l.prelim + r.prelim);
+            if (l = v.previousSibling) {
+                v.prelim = l.prelim + distance(v.depth, true);
+                v.mod = v.prelim - midpoint;
+            } else {
+                v.prelim = midpoint;
+            }
         }
-        sim += vim.mod;
-        sip += vip.mod;
-        som += vom.mod;
-        sop += vop.mod;
-        nr = nextRight(vim);
-        nl = nextLeft(vip);
-      }
-      if (nr && !nextRight(vop)) {
-        vop.thread = nr;
-        vop.mod += sim - sop;
-      }
-      if (nl && !nextLeft(vom)) {
-        vom.thread = nl;
-        vom.mod += sip - som;
-        a = v;
-      }
     }
-    return a;
-  }
 
-  /** @private */
-  function nextLeft(v) {
-    return v.firstChild || v.thread;
-  }
+    /** @private */
 
-  /** @private */
-  function nextRight(v) {
-    return v.lastChild || v.thread;
-  }
-
-  /** @private */
-  function moveSubtree(wm, wp, shift) {
-    var subtrees = wp.number - wm.number;
-    wp.change -= shift / subtrees;
-    wp.shift += shift;
-    wm.change += shift / subtrees;
-    wp.prelim += shift;
-    wp.mod += shift;
-  }
-
-  /** @private */
-  function executeShifts(v) {
-    var shift = 0, change = 0;
-    for (var c = v.lastChild; c; c = c.previousSibling) {
-      c.prelim += shift;
-      c.mod += shift;
-      change += c.change;
-      shift += c.shift + change;
+    function secondWalk(v, m, depth) {
+        v.breadth = v.prelim + m;
+        m += v.mod;
+        for (var c = v.firstChild; c; c = c.nextSibling) {
+            secondWalk(c, m, depth);
+        }
     }
-  }
 
-  /** @private */
-  function ancestor(vim, v, a) {
-    return (vim.ancestor.parentNode == v.parentNode) ? vim.ancestor : a;
-  }
+    /** @private */
 
-  /** @private */
-  function distance(depth, siblings) {
-    return (siblings ? 1 : (group + 1)) / ((orient == "radial") ? depth : 1);
-  }
+    function apportion(v, a) {
+        var w = v.previousSibling;
+        if (w) {
+            var vip = v,
+                vop = v,
+                vim = w,
+                vom = v.parentNode.firstChild,
+                sip = vip.mod,
+                sop = vop.mod,
+                sim = vim.mod,
+                som = vom.mod,
+                nr = nextRight(vim),
+                nl = nextLeft(vip);
+            while (nr && nl) {
+                vim = nr;
+                vip = nl;
+                vom = nextLeft(vom);
+                vop = nextRight(vop);
+                vop.ancestor = v;
+                var shift = (vim.prelim + sim) - (vip.prelim + sip) + distance(vim.depth, false);
+                if (shift > 0) {
+                    moveSubtree(ancestor(vim, v, a), v, shift);
+                    sip += shift;
+                    sop += shift;
+                }
+                sim += vim.mod;
+                sip += vip.mod;
+                som += vom.mod;
+                sop += vop.mod;
+                nr = nextRight(vim);
+                nl = nextLeft(vip);
+            }
+            if (nr && !nextRight(vop)) {
+                vop.thread = nr;
+                vop.mod += sim - sop;
+            }
+            if (nl && !nextLeft(vom)) {
+                vom.thread = nl;
+                vom.mod += sip - som;
+                a = v;
+            }
+        }
+        return a;
+    }
 
-  /* Initialize temporary layout variables. TODO: store separately. */
-  var root = nodes[0];
-  root.visitAfter(function(v, i) {
-      v.ancestor = v;
-      v.prelim = 0;
-      v.mod = 0;
-      v.change = 0;
-      v.shift = 0;
-      v.number = v.previousSibling ? (v.previousSibling.number + 1) : 0;
-      v.depth = i;
+    /** @private */
+
+    function nextLeft(v) {
+        return v.firstChild || v.thread;
+    }
+
+    /** @private */
+
+    function nextRight(v) {
+        return v.lastChild || v.thread;
+    }
+
+    /** @private */
+
+    function moveSubtree(wm, wp, shift) {
+        var subtrees = wp.number - wm.number;
+        wp.change -= shift / subtrees;
+        wp.shift += shift;
+        wm.change += shift / subtrees;
+        wp.prelim += shift;
+        wp.mod += shift;
+    }
+
+    /** @private */
+
+    function executeShifts(v) {
+        var shift = 0,
+            change = 0;
+        for (var c = v.lastChild; c; c = c.previousSibling) {
+            c.prelim += shift;
+            c.mod += shift;
+            change += c.change;
+            shift += c.shift + change;
+        }
+    }
+
+    /** @private */
+
+    function ancestor(vim, v, a) {
+        return (vim.ancestor.parentNode == v.parentNode) ? vim.ancestor : a;
+    }
+
+    /** @private */
+
+    function distance(depth, siblings) {
+        return (siblings ? 1 : (group + 1)) / ((orient == "radial") ? depth : 1);
+    }
+
+    /* Initialize temporary layout variables. TODO: store separately. */
+    var root = nodes[0];
+    root.visitAfter(function(v, i) {
+        v.ancestor = v;
+        v.prelim = 0;
+        v.mod = 0;
+        v.change = 0;
+        v.shift = 0;
+        v.number = v.previousSibling ? (v.previousSibling.number + 1) : 0;
+        v.depth = i;
     });
 
-  /* Compute the layout using Buchheim et al.'s algorithm. */
-  firstWalk(root);
-  secondWalk(root, -root.prelim, 0);
+    /* Compute the layout using Buchheim et al.'s algorithm. */
+    firstWalk(root);
+    secondWalk(root, -root.prelim, 0);
 
-  /** @private Returns the angle of the given node. */
-  function midAngle(n) {
-    return (orient == "radial") ? n.breadth / depth : 0;
-  }
+    /** @private Returns the angle of the given node. */
 
-  /** @private */
-  function x(n) {
-    switch (orient) {
-      case "left": return n.depth;
-      case "right": return w - n.depth;
-      case "top":
-      case "bottom": return n.breadth + w / 2;
-      case "radial": return w / 2 + n.depth * Math.cos(midAngle(n));
+    function midAngle(n) {
+        return (orient == "radial") ? n.breadth / depth : 0;
     }
-  }
 
-  /** @private */
-  function y(n) {
-    switch (orient) {
-      case "left":
-      case "right": return n.breadth + h / 2;
-      case "top": return n.depth;
-      case "bottom": return h - n.depth;
-      case "radial": return h / 2 + n.depth * Math.sin(midAngle(n));
+    /** @private */
+
+    function x(n) {
+        switch (orient) {
+            case "left":
+                return n.depth;
+            case "right":
+                return w - n.depth;
+            case "top":
+            case "bottom":
+                return n.breadth + w / 2;
+            case "radial":
+                return w / 2 + n.depth * Math.cos(midAngle(n));
+        }
     }
-  }
 
-  /* Clear temporary layout variables; transform depth and breadth. */
-  root.visitAfter(function(v) {
-      v.breadth *= breadth;
-      v.depth *= depth;
-      v.midAngle = midAngle(v);
-      v.x = x(v);
-      v.y = y(v);
-      if (v.firstChild) v.midAngle += Math.PI;
-      delete v.breadth;
-      delete v.depth;
-      delete v.ancestor;
-      delete v.prelim;
-      delete v.mod;
-      delete v.change;
-      delete v.shift;
-      delete v.number;
-      delete v.thread;
+    /** @private */
+
+    function y(n) {
+        switch (orient) {
+            case "left":
+            case "right":
+                return n.breadth + h / 2;
+            case "top":
+                return n.depth;
+            case "bottom":
+                return h - n.depth;
+            case "radial":
+                return h / 2 + n.depth * Math.sin(midAngle(n));
+        }
+    }
+
+    /* Clear temporary layout variables; transform depth and breadth. */
+    root.visitAfter(function(v) {
+        v.breadth *= breadth;
+        v.depth *= depth;
+        v.midAngle = midAngle(v);
+        v.x = x(v);
+        v.y = y(v);
+        if (v.firstChild) v.midAngle += Math.PI;
+        delete v.breadth;
+        delete v.depth;
+        delete v.ancestor;
+        delete v.prelim;
+        delete v.mod;
+        delete v.change;
+        delete v.shift;
+        delete v.number;
+        delete v.thread;
     });
 };
 
@@ -18925,8 +19978,8 @@ pv.Layout.Tree.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Hierarchy
  */
 pv.Layout.Indent = function() {
-  pv.Layout.Hierarchy.call(this);
-  this.link.interpolate("step-after");
+    pv.Layout.Hierarchy.call(this);
+    this.link.interpolate("step-after");
 };
 
 pv.Layout.Indent.prototype = pv.extend(pv.Layout.Hierarchy)
@@ -18960,26 +20013,27 @@ pv.Layout.Indent.prototype.defaults = new pv.Layout.Indent()
 
 /** @private */
 pv.Layout.Indent.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
 
-  var nodes = s.nodes,
-      bspace = s.breadth,
-      dspace = s.depth,
-      ax = 0,
-      ay = 0;
+    var nodes = s.nodes,
+        bspace = s.breadth,
+        dspace = s.depth,
+        ax = 0,
+        ay = 0;
 
-  /** @private */
-  function position(n, breadth, depth) {
-    n.x = ax + depth++ * dspace;
-    n.y = ay + breadth++ * bspace;
-    n.midAngle = 0;
-    for (var c = n.firstChild; c; c = c.nextSibling) {
-      breadth = position(c, breadth, depth);
+    /** @private */
+
+    function position(n, breadth, depth) {
+        n.x = ax + depth++ * dspace;
+        n.y = ay + breadth++ * bspace;
+        n.midAngle = 0;
+        for (var c = n.firstChild; c; c = c.nextSibling) {
+            breadth = position(c, breadth, depth);
+        }
+        return breadth;
     }
-    return breadth;
-  }
 
-  position(nodes[0], 1, 1);
+    position(nodes[0], 1, 1);
 };
 /**
  * Constructs a new, empty circle-packing layout. Layouts are not typically
@@ -19018,18 +20072,20 @@ pv.Layout.Indent.prototype.buildImplied = function(s) {
  * H. Wang, G. Dai, and H. Wang, ACM CHI 2006.
  */
 pv.Layout.Pack = function() {
-  pv.Layout.Hierarchy.call(this);
+    pv.Layout.Hierarchy.call(this);
 
-  this.node
-      .shapeRadius(function(n) { return n.radius; })
-      .strokeStyle("rgb(31, 119, 180)")
-      .fillStyle("rgba(31, 119, 180, .25)");
+    this.node
+        .shapeRadius(function(n) {
+            return n.radius;
+        })
+        .strokeStyle("rgb(31, 119, 180)")
+        .fillStyle("rgba(31, 119, 180, .25)");
 
-  this.label
-      .textAlign("center");
+    this.label
+        .textAlign("center");
 
-  /* Hide unsupported link. */
-  delete this.link;
+    /* Hide unsupported link. */
+    delete this.link;
 };
 
 pv.Layout.Pack.prototype = pv.extend(pv.Layout.Hierarchy)
@@ -19071,7 +20127,9 @@ pv.Layout.Pack.prototype.defaults = new pv.Layout.Pack()
  */
 
 /** @private The default size function. */
-pv.Layout.Pack.prototype.$radius = function() { return 1; };
+pv.Layout.Pack.prototype.$radius = function() {
+    return 1;
+};
 
 // TODO is it possible for spacing to operate in pixel space?
 // Right now it appears to be multiples of the smallest radius.
@@ -19094,215 +20152,236 @@ pv.Layout.Pack.prototype.$radius = function() { return 1; };
  * @returns {pv.Layout.Pack} this.
  */
 pv.Layout.Pack.prototype.size = function(f) {
-  this.$radius = typeof f == "function"
-      ? function() { return Math.sqrt(f.apply(this, arguments)); }
-      : (f = Math.sqrt(f), function() { return f; });
-  return this;
+    this.$radius = typeof f == "function" ? function() {
+        return Math.sqrt(f.apply(this, arguments));
+    } : (f = Math.sqrt(f), function() {
+        return f;
+    });
+    return this;
 };
 
 /** @private */
 pv.Layout.Pack.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
 
-  var that = this,
-      nodes = s.nodes,
-      root = nodes[0];
+    var that = this,
+        nodes = s.nodes,
+        root = nodes[0];
 
-  /** @private Compute the radii of the leaf nodes. */
-  function radii(nodes) {
-    var stack = pv.Mark.stack;
-    stack.unshift(null);
-    for (var i = 0, n = nodes.length; i < n; i++) {
-      var c = nodes[i];
-      if (!c.firstChild) {
-        c.radius = that.$radius.apply(that, (stack[0] = c, stack));
-      }
-    }
-    stack.shift();
-  }
+    /** @private Compute the radii of the leaf nodes. */
 
-  /** @private */
-  function packTree(n) {
-    var nodes = [];
-    for (var c = n.firstChild; c; c = c.nextSibling) {
-      if (c.firstChild) c.radius = packTree(c);
-      c.n = c.p = c;
-      nodes.push(c);
-    }
-
-    /* Sort. */
-    switch (s.order) {
-      case "ascending": {
-        nodes.sort(function(a, b) { return a.radius - b.radius; });
-        break;
-      }
-      case "descending": {
-        nodes.sort(function(a, b) { return b.radius - a.radius; });
-        break;
-      }
-      case "reverse": nodes.reverse(); break;
-    }
-
-    return packCircle(nodes);
-  }
-
-  /** @private */
-  function packCircle(nodes) {
-    var xMin = Infinity,
-        xMax = -Infinity,
-        yMin = Infinity,
-        yMax = -Infinity,
-        a, b, c, j, k;
-
-    /** @private */
-    function bound(n) {
-      xMin = Math.min(n.x - n.radius, xMin);
-      xMax = Math.max(n.x + n.radius, xMax);
-      yMin = Math.min(n.y - n.radius, yMin);
-      yMax = Math.max(n.y + n.radius, yMax);
-    }
-
-    /** @private */
-    function insert(a, b) {
-      var c = a.n;
-      a.n = b;
-      b.p = a;
-      b.n = c;
-      c.p = b;
-    }
-
-    /** @private */
-    function splice(a, b) {
-      a.n = b;
-      b.p = a;
-    }
-
-    /** @private */
-    function intersects(a, b) {
-      var dx = b.x - a.x,
-          dy = b.y - a.y,
-          dr = a.radius + b.radius;
-      return (dr * dr - dx * dx - dy * dy) > .001; // within epsilon
-    }
-
-    /* Create first node. */
-    a = nodes[0];
-    a.x = -a.radius;
-    a.y = 0;
-    bound(a);
-
-    /* Create second node. */
-    if (nodes.length > 1) {
-      b = nodes[1];
-      b.x = b.radius;
-      b.y = 0;
-      bound(b);
-
-      /* Create third node and build chain. */
-      if (nodes.length > 2) {
-        c = nodes[2];
-        place(a, b, c);
-        bound(c);
-        insert(a, c);
-        a.p = c;
-        insert(c, b);
-        b = a.n;
-
-        /* Now iterate through the rest. */
-        for (var i = 3; i < nodes.length; i++) {
-          place(a, b, c = nodes[i]);
-
-          /* Search for the closest intersection. */
-          var isect = 0, s1 = 1, s2 = 1;
-          for (j = b.n; j != b; j = j.n, s1++) {
-            if (intersects(j, c)) {
-              isect = 1;
-              break;
+    function radii(nodes) {
+        var stack = pv.Mark.stack;
+        stack.unshift(null);
+        for (var i = 0, n = nodes.length; i < n; i++) {
+            var c = nodes[i];
+            if (!c.firstChild) {
+                c.radius = that.$radius.apply(that, (stack[0] = c, stack));
             }
-          }
-          if (isect == 1) {
-            for (k = a.p; k != j.p; k = k.p, s2++) {
-              if (intersects(k, c)) {
-                if (s2 < s1) {
-                  isect = -1;
-                  j = k;
-                }
-                break;
-              }
-            }
-          }
-
-          /* Update node chain. */
-          if (isect == 0) {
-            insert(a, c);
-            b = c;
-            bound(c);
-          } else if (isect > 0) {
-            splice(a, j);
-            b = j;
-            i--;
-          } else if (isect < 0) {
-            splice(j, b);
-            a = j;
-            i--;
-          }
         }
-      }
+        stack.shift();
     }
 
-    /* Re-center the circles and return the encompassing radius. */
-    var cx = (xMin + xMax) / 2,
-        cy = (yMin + yMax) / 2,
-        cr = 0;
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      n.x -= cx;
-      n.y -= cy;
-      cr = Math.max(cr, n.radius + Math.sqrt(n.x * n.x + n.y * n.y));
+    /** @private */
+
+    function packTree(n) {
+        var nodes = [];
+        for (var c = n.firstChild; c; c = c.nextSibling) {
+            if (c.firstChild) c.radius = packTree(c);
+            c.n = c.p = c;
+            nodes.push(c);
+        }
+
+        /* Sort. */
+        switch (s.order) {
+            case "ascending":
+                {
+                    nodes.sort(function(a, b) {
+                        return a.radius - b.radius;
+                    });
+                    break;
+                }
+            case "descending":
+                {
+                    nodes.sort(function(a, b) {
+                        return b.radius - a.radius;
+                    });
+                    break;
+                }
+            case "reverse":
+                nodes.reverse();
+                break;
+        }
+
+        return packCircle(nodes);
     }
-    return cr + s.spacing;
-  }
 
-  /** @private */
-  function place(a, b, c) {
-    var da = b.radius + c.radius,
-        db = a.radius + c.radius,
-        dx = b.x - a.x,
-        dy = b.y - a.y,
-        dc = Math.sqrt(dx * dx + dy * dy),
-        cos = (db * db + dc * dc - da * da) / (2 * db * dc),
-        theta = Math.acos(cos),
-        x = cos * db,
-        h = Math.sin(theta) * db;
-    dx /= dc;
-    dy /= dc;
-    c.x = a.x + x * dx + h * dy;
-    c.y = a.y + x * dy - h * dx;
-  }
+    /** @private */
 
-  /** @private */
-  function transform(n, x, y, k) {
-    for (var c = n.firstChild; c; c = c.nextSibling) {
-      c.x += n.x;
-      c.y += n.y;
-      transform(c, x, y, k);
+    function packCircle(nodes) {
+        var xMin = Infinity,
+            xMax = -Infinity,
+            yMin = Infinity,
+            yMax = -Infinity,
+            a, b, c, j, k;
+
+        /** @private */
+
+        function bound(n) {
+            xMin = Math.min(n.x - n.radius, xMin);
+            xMax = Math.max(n.x + n.radius, xMax);
+            yMin = Math.min(n.y - n.radius, yMin);
+            yMax = Math.max(n.y + n.radius, yMax);
+        }
+
+        /** @private */
+
+        function insert(a, b) {
+            var c = a.n;
+            a.n = b;
+            b.p = a;
+            b.n = c;
+            c.p = b;
+        }
+
+        /** @private */
+
+        function splice(a, b) {
+            a.n = b;
+            b.p = a;
+        }
+
+        /** @private */
+
+        function intersects(a, b) {
+            var dx = b.x - a.x,
+                dy = b.y - a.y,
+                dr = a.radius + b.radius;
+            return (dr * dr - dx * dx - dy * dy) > .001; // within epsilon
+        }
+
+        /* Create first node. */
+        a = nodes[0];
+        a.x = -a.radius;
+        a.y = 0;
+        bound(a);
+
+        /* Create second node. */
+        if (nodes.length > 1) {
+            b = nodes[1];
+            b.x = b.radius;
+            b.y = 0;
+            bound(b);
+
+            /* Create third node and build chain. */
+            if (nodes.length > 2) {
+                c = nodes[2];
+                place(a, b, c);
+                bound(c);
+                insert(a, c);
+                a.p = c;
+                insert(c, b);
+                b = a.n;
+
+                /* Now iterate through the rest. */
+                for (var i = 3; i < nodes.length; i++) {
+                    place(a, b, c = nodes[i]);
+
+                    /* Search for the closest intersection. */
+                    var isect = 0,
+                        s1 = 1,
+                        s2 = 1;
+                    for (j = b.n; j != b; j = j.n, s1++) {
+                        if (intersects(j, c)) {
+                            isect = 1;
+                            break;
+                        }
+                    }
+                    if (isect == 1) {
+                        for (k = a.p; k != j.p; k = k.p, s2++) {
+                            if (intersects(k, c)) {
+                                if (s2 < s1) {
+                                    isect = -1;
+                                    j = k;
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    /* Update node chain. */
+                    if (isect == 0) {
+                        insert(a, c);
+                        b = c;
+                        bound(c);
+                    } else if (isect > 0) {
+                        splice(a, j);
+                        b = j;
+                        i--;
+                    } else if (isect < 0) {
+                        splice(j, b);
+                        a = j;
+                        i--;
+                    }
+                }
+            }
+        }
+
+        /* Re-center the circles and return the encompassing radius. */
+        var cx = (xMin + xMax) / 2,
+            cy = (yMin + yMax) / 2,
+            cr = 0;
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            n.x -= cx;
+            n.y -= cy;
+            cr = Math.max(cr, n.radius + Math.sqrt(n.x * n.x + n.y * n.y));
+        }
+        return cr + s.spacing;
     }
-    n.x = x + k * n.x;
-    n.y = y + k * n.y;
-    n.radius *= k;
-  }
 
-  radii(nodes);
+    /** @private */
 
-  /* Recursively compute the layout. */
-  root.x = 0;
-  root.y = 0;
-  root.radius = packTree(root);
+    function place(a, b, c) {
+        var da = b.radius + c.radius,
+            db = a.radius + c.radius,
+            dx = b.x - a.x,
+            dy = b.y - a.y,
+            dc = Math.sqrt(dx * dx + dy * dy),
+            cos = (db * db + dc * dc - da * da) / (2 * db * dc),
+            theta = Math.acos(cos),
+            x = cos * db,
+            h = Math.sin(theta) * db;
+        dx /= dc;
+        dy /= dc;
+        c.x = a.x + x * dx + h * dy;
+        c.y = a.y + x * dy - h * dx;
+    }
 
-  var w = this.width(),
-      h = this.height(),
-      k = 1 / Math.max(2 * root.radius / w, 2 * root.radius / h);
-  transform(root, w / 2, h / 2, k);
+    /** @private */
+
+    function transform(n, x, y, k) {
+        for (var c = n.firstChild; c; c = c.nextSibling) {
+            c.x += n.x;
+            c.y += n.y;
+            transform(c, x, y, k);
+        }
+        n.x = x + k * n.x;
+        n.y = y + k * n.y;
+        n.radius *= k;
+    }
+
+    radii(nodes);
+
+    /* Recursively compute the layout. */
+    root.x = 0;
+    root.y = 0;
+    root.radius = packTree(root);
+
+    var w = this.width(),
+        h = this.height(),
+        k = 1 / Math.max(2 * root.radius / w, 2 * root.radius / h);
+    transform(root, w / 2, h / 2, k);
 };
 /**
  * Constructs a new, empty force-directed layout. Layouts are not typically
@@ -19350,11 +20429,13 @@ pv.Layout.Pack.prototype.buildImplied = function(s) {
  * E. Reingold, Software--Practice &amp; Experience, November 1991.
  */
 pv.Layout.Force = function() {
-  pv.Layout.Network.call(this);
+    pv.Layout.Network.call(this);
 
-  /* Force-directed graphs can be messy, so reduce the link width. */
-  this.link.lineWidth(function(d, p) { return Math.sqrt(p.linkValue) * 1.5; });
-  this.label.textAlign("center");
+    /* Force-directed graphs can be messy, so reduce the link width. */
+    this.link.lineWidth(function(d, p) {
+        return Math.sqrt(p.linkValue) * 1.5;
+    });
+    this.label.textAlign("center");
 };
 
 pv.Layout.Force.prototype = pv.extend(pv.Layout.Network)
@@ -19524,94 +20605,96 @@ pv.Layout.Force.prototype.defaults = new pv.Layout.Force()
 /** @private Initialize the physics simulation. */
 pv.Layout.Force.prototype.buildImplied = function(s) {
 
-  /* Any cached interactive layouts need to be rebound for the timer. */
-  if (pv.Layout.Network.prototype.buildImplied.call(this, s)) {
-    var f = s.$force;
-    if (f) {
-      f.next = this.binds.$force;
-      this.binds.$force = f;
-    }
-    return;
-  }
-
-  var that = this,
-      nodes = s.nodes,
-      links = s.links,
-      k = s.iterations,
-      w = s.width,
-      h = s.height;
-
-  /* Initialize positions randomly near the center. */
-  for (var i = 0, n; i < nodes.length; i++) {
-    n = nodes[i];
-    if (isNaN(n.x)) n.x = w / 2 + 40 * Math.random() - 20;
-    if (isNaN(n.y)) n.y = h / 2 + 40 * Math.random() - 20;
-  }
-
-  /* Initialize the simulation. */
-  var sim = pv.simulation(nodes);
-
-  /* Drag force. */
-  sim.force(pv.Force.drag(s.dragConstant));
-
-  /* Charge (repelling) force. */
-  sim.force(pv.Force.charge(s.chargeConstant)
-      .domain(s.chargeMinDistance, s.chargeMaxDistance)
-      .theta(s.chargeTheta));
-
-  /* Spring (attracting) force. */
-  sim.force(pv.Force.spring(s.springConstant)
-      .damping(s.springDamping)
-      .length(s.springLength)
-      .links(links));
-
-  /* Position constraint (for interactive dragging). */
-  sim.constraint(pv.Constraint.position());
-
-  /* Optionally add bound constraint. TODO: better padding. */
-  if (s.bound) {
-    sim.constraint(pv.Constraint.bound().x(6, w - 6).y(6, h - 6));
-  }
-
-  /** @private Returns the speed of the given node, to determine cooling. */
-  function speed(n) {
-    return n.fix ? 1 : n.vx * n.vx + n.vy * n.vy;
-  }
-
-  /*
-   * If the iterations property is null (the default), the layout is
-   * interactive. The simulation is run until the fastest particle drops below
-   * an arbitrary minimum speed. Although the timer keeps firing, this speed
-   * calculation is fast so there is minimal CPU overhead. Note: if a particle
-   * is fixed for interactivity, treat this as a high speed and resume
-   * simulation.
-   */
-  if (k == null) {
-    sim.step(); // compute initial previous velocities
-    sim.step(); // compute initial velocities
-
-    /* Add the simulation state to the bound list. */
-    var force = s.$force = this.binds.$force = {
-      next: this.binds.$force,
-      nodes: nodes,
-      min: 1e-4 * (links.length + 1),
-      sim: sim
-    };
-
-    /* Start the timer, if not already started. */
-    if (!this.$timer) this.$timer = setInterval(function() {
-      var render = false;
-      for (var f = that.binds.$force; f; f = f.next) {
-        if (pv.max(f.nodes, speed) > f.min) {
-          f.sim.step();
-          render = true;
+    /* Any cached interactive layouts need to be rebound for the timer. */
+    if (pv.Layout.Network.prototype.buildImplied.call(this, s)) {
+        var f = s.$force;
+        if (f) {
+            f.next = this.binds.$force;
+            this.binds.$force = f;
         }
-      }
-      if (render) that.render();
-    }, 42);
-  } else for (var i = 0; i < k; i++) {
-    sim.step();
-  }
+        return;
+    }
+
+    var that = this,
+        nodes = s.nodes,
+        links = s.links,
+        k = s.iterations,
+        w = s.width,
+        h = s.height;
+
+    /* Initialize positions randomly near the center. */
+    for (var i = 0, n; i < nodes.length; i++) {
+        n = nodes[i];
+        if (isNaN(n.x)) n.x = w / 2 + 40 * Math.random() - 20;
+        if (isNaN(n.y)) n.y = h / 2 + 40 * Math.random() - 20;
+    }
+
+    /* Initialize the simulation. */
+    var sim = pv.simulation(nodes);
+
+    /* Drag force. */
+    sim.force(pv.Force.drag(s.dragConstant));
+
+    /* Charge (repelling) force. */
+    sim.force(pv.Force.charge(s.chargeConstant)
+        .domain(s.chargeMinDistance, s.chargeMaxDistance)
+        .theta(s.chargeTheta));
+
+    /* Spring (attracting) force. */
+    sim.force(pv.Force.spring(s.springConstant)
+        .damping(s.springDamping)
+        .length(s.springLength)
+        .links(links));
+
+    /* Position constraint (for interactive dragging). */
+    sim.constraint(pv.Constraint.position());
+
+    /* Optionally add bound constraint. TODO: better padding. */
+    if (s.bound) {
+        sim.constraint(pv.Constraint.bound().x(6, w - 6).y(6, h - 6));
+    }
+
+    /** @private Returns the speed of the given node, to determine cooling. */
+
+    function speed(n) {
+        return n.fix ? 1 : n.vx * n.vx + n.vy * n.vy;
+    }
+
+    /*
+     * If the iterations property is null (the default), the layout is
+     * interactive. The simulation is run until the fastest particle drops below
+     * an arbitrary minimum speed. Although the timer keeps firing, this speed
+     * calculation is fast so there is minimal CPU overhead. Note: if a particle
+     * is fixed for interactivity, treat this as a high speed and resume
+     * simulation.
+     */
+    if (k == null) {
+        sim.step(); // compute initial previous velocities
+        sim.step(); // compute initial velocities
+
+        /* Add the simulation state to the bound list. */
+        var force = s.$force = this.binds.$force = {
+            next: this.binds.$force,
+            nodes: nodes,
+            min: 1e-4 * (links.length + 1),
+            sim: sim
+        };
+
+        /* Start the timer, if not already started. */
+        if (!this.$timer) this.$timer = setInterval(function() {
+            var render = false;
+            for (var f = that.binds.$force; f; f = f.next) {
+                if (pv.max(f.nodes, speed) > f.min) {
+                    f.sim.step();
+                    render = true;
+                }
+            }
+            if (render) that.render();
+        }, 42);
+    } else
+        for (var i = 0; i < k; i++) {
+            sim.step();
+        }
 };
 /**
  * Constructs a new, empty cluster layout. Layouts are not typically
@@ -19637,20 +20720,19 @@ pv.Layout.Force.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Hierarchy
  */
 pv.Layout.Cluster = function() {
-  pv.Layout.Hierarchy.call(this);
-  var interpolate, // cached interpolate
-      buildImplied = this.buildImplied;
+    pv.Layout.Hierarchy.call(this);
+    var interpolate, // cached interpolate
+        buildImplied = this.buildImplied;
 
-  /** @private Cache layout state to optimize properties. */
-  this.buildImplied = function(s) {
-    buildImplied.call(this, s);
-    interpolate
-        = /^(top|bottom)$/.test(s.orient) ? "step-before"
-        : /^(left|right)$/.test(s.orient) ? "step-after"
-        : "linear";
-  };
+    /** @private Cache layout state to optimize properties. */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, s);
+        interpolate = /^(top|bottom)$/.test(s.orient) ? "step-before" : /^(left|right)$/.test(s.orient) ? "step-after" : "linear";
+    };
 
-  this.link.interpolate(function() { return interpolate; });
+    this.link.interpolate(function() {
+        return interpolate;
+    });
 };
 
 pv.Layout.Cluster.prototype = pv.extend(pv.Layout.Hierarchy)
@@ -19720,67 +20802,63 @@ pv.Layout.Cluster.prototype.defaults = new pv.Layout.Cluster()
 
 /** @private */
 pv.Layout.Cluster.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
 
-  var root = s.nodes[0],
-      group = s.group,
-      breadth,
-      depth,
-      leafCount = 0,
-      leafIndex = .5 - group / 2;
+    var root = s.nodes[0],
+        group = s.group,
+        breadth,
+        depth,
+        leafCount = 0,
+        leafIndex = .5 - group / 2;
 
-  /* Count the leaf nodes and compute the depth of descendants. */
-  var p = undefined;
-  root.visitAfter(function(n) {
-      if (n.firstChild) {
-        n.depth = 1 + pv.max(n.childNodes, function(n) { return n.depth; });
-      } else {
-        if (group && (p != n.parentNode)) {
-          p = n.parentNode;
-          leafCount += group;
+    /* Count the leaf nodes and compute the depth of descendants. */
+    var p = undefined;
+    root.visitAfter(function(n) {
+        if (n.firstChild) {
+            n.depth = 1 + pv.max(n.childNodes, function(n) {
+                return n.depth;
+            });
+        } else {
+            if (group && (p != n.parentNode)) {
+                p = n.parentNode;
+                leafCount += group;
+            }
+            leafCount++;
+            n.depth = 0;
         }
-        leafCount++;
-        n.depth = 0;
-      }
     });
-  breadth = 1 / leafCount;
-  depth = 1 / root.depth;
+    breadth = 1 / leafCount;
+    depth = 1 / root.depth;
 
-  /* Compute the unit breadth and depth of each node. */
-  var p = undefined;
-  root.visitAfter(function(n) {
-      if (n.firstChild) {
-        n.breadth = pv.mean(n.childNodes, function(n) { return n.breadth; });
-      } else {
-        if (group && (p != n.parentNode)) {
-          p = n.parentNode;
-          leafIndex += group;
+    /* Compute the unit breadth and depth of each node. */
+    var p = undefined;
+    root.visitAfter(function(n) {
+        if (n.firstChild) {
+            n.breadth = pv.mean(n.childNodes, function(n) {
+                return n.breadth;
+            });
+        } else {
+            if (group && (p != n.parentNode)) {
+                p = n.parentNode;
+                leafIndex += group;
+            }
+            n.breadth = breadth * leafIndex++;
         }
-        n.breadth = breadth * leafIndex++;
-      }
-      n.depth = 1 - n.depth * depth;
+        n.depth = 1 - n.depth * depth;
     });
 
-  /* Compute breadth and depth ranges for space-filling layouts. */
-  root.visitAfter(function(n) {
-      n.minBreadth = n.firstChild
-          ? n.firstChild.minBreadth
-          : (n.breadth - breadth / 2);
-      n.maxBreadth = n.firstChild
-          ? n.lastChild.maxBreadth
-          : (n.breadth + breadth / 2);
+    /* Compute breadth and depth ranges for space-filling layouts. */
+    root.visitAfter(function(n) {
+        n.minBreadth = n.firstChild ? n.firstChild.minBreadth : (n.breadth - breadth / 2);
+        n.maxBreadth = n.firstChild ? n.lastChild.maxBreadth : (n.breadth + breadth / 2);
     });
-  root.visitBefore(function(n) {
-      n.minDepth = n.parentNode
-          ? n.parentNode.maxDepth
-          : 0;
-      n.maxDepth = n.parentNode
-          ? (n.depth + root.depth)
-          : (n.minDepth + 2 * root.depth);
+    root.visitBefore(function(n) {
+        n.minDepth = n.parentNode ? n.parentNode.maxDepth : 0;
+        n.maxDepth = n.parentNode ? (n.depth + root.depth) : (n.minDepth + 2 * root.depth);
     });
-  root.minDepth = -depth;
+    root.minDepth = -depth;
 
-  pv.Layout.Hierarchy.NodeLink.buildImplied.call(this, s);
+    pv.Layout.Hierarchy.NodeLink.buildImplied.call(this, s);
 };
 
 /**
@@ -19807,16 +20885,16 @@ pv.Layout.Cluster.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Cluster
  */
 pv.Layout.Cluster.Fill = function() {
-  pv.Layout.Cluster.call(this);
-  pv.Layout.Hierarchy.Fill.constructor.call(this);
+    pv.Layout.Cluster.call(this);
+    pv.Layout.Hierarchy.Fill.constructor.call(this);
 };
 
 pv.Layout.Cluster.Fill.prototype = pv.extend(pv.Layout.Cluster);
 
 /** @private */
 pv.Layout.Cluster.Fill.prototype.buildImplied = function(s) {
-  if (pv.Layout.Cluster.prototype.buildImplied.call(this, s)) return;
-  pv.Layout.Hierarchy.Fill.buildImplied.call(this, s);
+    if (pv.Layout.Cluster.prototype.buildImplied.call(this, s)) return;
+    pv.Layout.Hierarchy.Fill.buildImplied.call(this, s);
 };
 /**
  * Constructs a new, empty partition layout. Layouts are not typically
@@ -19847,13 +20925,13 @@ pv.Layout.Cluster.Fill.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Hierarchy
  */
 pv.Layout.Partition = function() {
-  pv.Layout.Hierarchy.call(this);
+    pv.Layout.Hierarchy.call(this);
 };
 
 pv.Layout.Partition.prototype = pv.extend(pv.Layout.Hierarchy)
     .property("order", String) // null, ascending, descending?
-    .property("orient", String) // top, left, right, bottom, radial
-    .property("innerRadius", Number)
+.property("orient", String) // top, left, right, bottom, radial
+.property("innerRadius", Number)
     .property("outerRadius", Number);
 
 /**
@@ -19916,7 +20994,9 @@ pv.Layout.Partition.prototype.defaults = new pv.Layout.Partition()
     .orient("top");
 
 /** @private */
-pv.Layout.Partition.prototype.$size = function() { return 1; };
+pv.Layout.Partition.prototype.$size = function() {
+    return 1;
+};
 
 /**
  * Specifies the sizing function. By default, a sizing function is disabled and
@@ -19936,59 +21016,67 @@ pv.Layout.Partition.prototype.$size = function() { return 1; };
  * @returns {pv.Layout.Partition} this.
  */
 pv.Layout.Partition.prototype.size = function(f) {
-  this.$size = f;
-  return this;
+    this.$size = f;
+    return this;
 };
 
 /** @private */
 pv.Layout.Partition.prototype.buildImplied = function(s) {
-  if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Hierarchy.prototype.buildImplied.call(this, s)) return;
 
-  var that = this,
-      root = s.nodes[0],
-      stack = pv.Mark.stack,
-      maxDepth = 0;
+    var that = this,
+        root = s.nodes[0],
+        stack = pv.Mark.stack,
+        maxDepth = 0;
 
-  /* Recursively compute the tree depth and node size. */
-  stack.unshift(null);
-  root.visitAfter(function(n, depth) {
-      if (depth > maxDepth) maxDepth = depth;
-      n.size = n.firstChild
-          ? pv.sum(n.childNodes, function(n) { return n.size; })
-          : that.$size.apply(that, (stack[0] = n, stack));
+    /* Recursively compute the tree depth and node size. */
+    stack.unshift(null);
+    root.visitAfter(function(n, depth) {
+        if (depth > maxDepth) maxDepth = depth;
+        n.size = n.firstChild ? pv.sum(n.childNodes, function(n) {
+            return n.size;
+        }) : that.$size.apply(that, (stack[0] = n, stack));
     });
-  stack.shift();
+    stack.shift();
 
-  /* Order */
-  switch (s.order) {
-    case "ascending":  root.sort(function(a, b) { return a.size - b.size; }); break;
-    case "descending": root.sort(function(b, a) { return a.size - b.size; }); break;
-  }
+    /* Order */
+    switch (s.order) {
+        case "ascending":
+            root.sort(function(a, b) {
+                return a.size - b.size;
+            });
+            break;
+        case "descending":
+            root.sort(function(b, a) {
+                return a.size - b.size;
+            });
+            break;
+    }
 
-  /* Compute the unit breadth and depth of each node. */
-  root.minBreadth = 0;
-  root.breadth    = .5;
-  root.maxBreadth = 1;
+    /* Compute the unit breadth and depth of each node. */
+    root.minBreadth = 0;
+    root.breadth = .5;
+    root.maxBreadth = 1;
 
-  root.visitBefore(function(n) {
-    var b = n.minBreadth,
-        s = n.maxBreadth - b; // span
+    root.visitBefore(function(n) {
+        var b = n.minBreadth,
+            s = n.maxBreadth - b; // span
 
-      for (var c = n.firstChild; c; c = c.nextSibling) {
-        c.minBreadth = b;
-        b += (c.size / n.size) * s;
-        c.maxBreadth = b;
+        for (var c = n.firstChild; c; c = c.nextSibling) {
+            c.minBreadth = b;
+            b += (c.size / n.size) * s;
+            c.maxBreadth = b;
 
-        c.breadth = (b + c.minBreadth) / 2;
-      }
+            c.breadth = (b + c.minBreadth) / 2;
+        }
     });
 
-  root.visitAfter(function(n, depth) {
-      n.minDepth = (depth - 1) / maxDepth;
-      n.maxDepth = (n.depth = depth / maxDepth);
+    root.visitAfter(function(n, depth) {
+        n.minDepth = (depth - 1) / maxDepth;
+        n.maxDepth = (n.depth = depth / maxDepth);
     });
 
-  pv.Layout.Hierarchy.NodeLink.buildImplied.call(this, s);
+    pv.Layout.Hierarchy.NodeLink.buildImplied.call(this, s);
 };
 
 /**
@@ -20015,16 +21103,16 @@ pv.Layout.Partition.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Partition
  */
 pv.Layout.Partition.Fill = function() {
-  pv.Layout.Partition.call(this);
-  pv.Layout.Hierarchy.Fill.constructor.call(this);
+    pv.Layout.Partition.call(this);
+    pv.Layout.Hierarchy.Fill.constructor.call(this);
 };
 
 pv.Layout.Partition.Fill.prototype = pv.extend(pv.Layout.Partition);
 
 /** @private */
 pv.Layout.Partition.Fill.prototype.buildImplied = function(s) {
-  if (pv.Layout.Partition.prototype.buildImplied.call(this, s)) return;
-  pv.Layout.Hierarchy.Fill.buildImplied.call(this, s);
+    if (pv.Layout.Partition.prototype.buildImplied.call(this, s)) return;
+    pv.Layout.Hierarchy.Fill.buildImplied.call(this, s);
 };
 /**
  * Constructs a new, empty arc layout. Layouts are not typically constructed
@@ -20064,27 +21152,30 @@ pv.Layout.Partition.Fill.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Network
  **/
 pv.Layout.Arc = function() {
-  pv.Layout.Network.call(this);
-  var interpolate, // cached interpolate
-      directed, // cached directed
-      reverse, // cached reverse
-      buildImplied = this.buildImplied;
+    pv.Layout.Network.call(this);
+    var interpolate, // cached interpolate
+        directed, // cached directed
+        reverse, // cached reverse
+        buildImplied = this.buildImplied;
 
-  /** @private Cache layout state to optimize properties. */
-  this.buildImplied = function(s) {
-    buildImplied.call(this, s);
-    directed = s.directed;
-    interpolate = s.orient == "radial" ? "linear" : "polar";
-    reverse = s.orient == "right" || s.orient == "top";
-  };
+    /** @private Cache layout state to optimize properties. */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, s);
+        directed = s.directed;
+        interpolate = s.orient == "radial" ? "linear" : "polar";
+        reverse = s.orient == "right" || s.orient == "top";
+    };
 
-  /* Override link properties to handle directedness and orientation. */
-  this.link
-      .data(function(p) {
-          var s = p.sourceNode, t = p.targetNode;
-          return reverse != (directed || (s.breadth < t.breadth)) ? [s, t] : [t, s];
+    /* Override link properties to handle directedness and orientation. */
+    this.link
+        .data(function(p) {
+            var s = p.sourceNode,
+                t = p.targetNode;
+            return reverse != (directed || (s.breadth < t.breadth)) ? [s, t] : [t, s];
         })
-      .interpolate(function() { return interpolate; });
+        .interpolate(function() {
+            return interpolate;
+        });
 };
 
 pv.Layout.Arc.prototype = pv.extend(pv.Layout.Network)
@@ -20117,65 +21208,84 @@ pv.Layout.Arc.prototype.defaults = new pv.Layout.Arc()
  * @returns {pv.Layout.Arc} this.
  */
 pv.Layout.Arc.prototype.sort = function(f) {
-  this.$sort = f;
-  return this;
+    this.$sort = f;
+    return this;
 };
 
 /** @private Populates the x, y and angle attributes on the nodes. */
 pv.Layout.Arc.prototype.buildImplied = function(s) {
-  if (pv.Layout.Network.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Network.prototype.buildImplied.call(this, s)) return;
 
-  var nodes = s.nodes,
-      orient = s.orient,
-      sort = this.$sort,
-      index = pv.range(nodes.length),
-      w = s.width,
-      h = s.height,
-      r = Math.min(w, h) / 2;
+    var nodes = s.nodes,
+        orient = s.orient,
+        sort = this.$sort,
+        index = pv.range(nodes.length),
+        w = s.width,
+        h = s.height,
+        r = Math.min(w, h) / 2;
 
-  /* Sort the nodes. */
-  if (sort) index.sort(function(a, b) { return sort(nodes[a], nodes[b]); });
+    /* Sort the nodes. */
+    if (sort) index.sort(function(a, b) {
+        return sort(nodes[a], nodes[b]);
+    });
 
-  /** @private Returns the mid-angle, given the breadth. */
-  function midAngle(b) {
-    switch (orient) {
-      case "top": return -Math.PI / 2;
-      case "bottom": return Math.PI / 2;
-      case "left": return Math.PI;
-      case "right": return 0;
-      case "radial": return (b - .25) * 2 * Math.PI;
+    /** @private Returns the mid-angle, given the breadth. */
+
+    function midAngle(b) {
+        switch (orient) {
+            case "top":
+                return -Math.PI / 2;
+            case "bottom":
+                return Math.PI / 2;
+            case "left":
+                return Math.PI;
+            case "right":
+                return 0;
+            case "radial":
+                return (b - .25) * 2 * Math.PI;
+        }
     }
-  }
 
-  /** @private Returns the x-position, given the breadth. */
-  function x(b) {
-    switch (orient) {
-      case "top":
-      case "bottom": return b * w;
-      case "left": return 0;
-      case "right": return w;
-      case "radial": return w / 2 + r * Math.cos(midAngle(b));
+    /** @private Returns the x-position, given the breadth. */
+
+    function x(b) {
+        switch (orient) {
+            case "top":
+            case "bottom":
+                return b * w;
+            case "left":
+                return 0;
+            case "right":
+                return w;
+            case "radial":
+                return w / 2 + r * Math.cos(midAngle(b));
+        }
     }
-  }
 
-  /** @private Returns the y-position, given the breadth. */
-  function y(b) {
-    switch (orient) {
-      case "top": return 0;
-      case "bottom": return h;
-      case "left":
-      case "right": return b * h;
-      case "radial": return h / 2 + r * Math.sin(midAngle(b));
+    /** @private Returns the y-position, given the breadth. */
+
+    function y(b) {
+        switch (orient) {
+            case "top":
+                return 0;
+            case "bottom":
+                return h;
+            case "left":
+            case "right":
+                return b * h;
+            case "radial":
+                return h / 2 + r * Math.sin(midAngle(b));
+        }
     }
-  }
 
-  /* Populate the x, y and mid-angle attributes. */
-  for (var i = 0; i < nodes.length; i++) {
-    var n = nodes[index[i]], b = n.breadth = (i + .5) / nodes.length;
-    n.x = x(b);
-    n.y = y(b);
-    n.midAngle = midAngle(b);
-  }
+    /* Populate the x, y and mid-angle attributes. */
+    for (var i = 0; i < nodes.length; i++) {
+        var n = nodes[index[i]],
+            b = n.breadth = (i + .5) / nodes.length;
+        n.x = x(b);
+        n.y = y(b);
+        n.midAngle = midAngle(b);
+    }
 };
 
 /**
@@ -20244,59 +21354,63 @@ pv.Layout.Arc.prototype.buildImplied = function(s) {
  * @extends pv.Layout
  */
 pv.Layout.Horizon = function() {
-  pv.Layout.call(this);
-  var that = this,
-      bands, // cached bands
-      mode, // cached mode
-      size, // cached height
-      fill, // cached background style
-      red, // cached negative color (ramp)
-      blue, // cached positive color (ramp)
-      buildImplied = this.buildImplied;
+    pv.Layout.call(this);
+    var that = this,
+        bands, // cached bands
+        mode, // cached mode
+        size, // cached height
+        fill, // cached background style
+        red, // cached negative color (ramp)
+        blue, // cached positive color (ramp)
+        buildImplied = this.buildImplied;
 
-  /** @private Cache the layout state to optimize properties. */
-  this.buildImplied = function(s) {
-    buildImplied.call(this, s);
-    bands = s.bands;
-    mode = s.mode;
-    size = Math.round((mode == "color" ? .5 : 1) * s.height);
-    fill = s.backgroundStyle;
-    red = pv.ramp(fill, s.negativeStyle).domain(0, bands);
-    blue = pv.ramp(fill, s.positiveStyle).domain(0, bands);
-  };
+    /** @private Cache the layout state to optimize properties. */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, s);
+        bands = s.bands;
+        mode = s.mode;
+        size = Math.round((mode == "color" ? .5 : 1) * s.height);
+        fill = s.backgroundStyle;
+        red = pv.ramp(fill, s.negativeStyle).domain(0, bands);
+        blue = pv.ramp(fill, s.positiveStyle).domain(0, bands);
+    };
 
-  var bands = new pv.Panel()
-      .data(function() { return pv.range(bands * 2); })
-      .overflow("hidden")
-      .height(function() { return size; })
-      .top(function(i) { return mode == "color" ? (i & 1) * size : 0; })
-      .fillStyle(function(i) { return i ? null : fill; });
-
-  /**
-   * The band prototype. This prototype is intended to be used with an Area
-   * mark to render the horizon bands.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Horizon.prototype.band
-   */
-  this.band = new pv.Mark()
-      .top(function(d, i) {
-          return mode == "mirror" && i & 1
-              ? (i + 1 >> 1) * size
-              : null;
+    var bands = new pv.Panel()
+        .data(function() {
+            return pv.range(bands * 2);
         })
-      .bottom(function(d, i) {
-          return mode == "mirror"
-              ? (i & 1 ? null : (i + 1 >> 1) * -size)
-              : ((i & 1 || -1) * (i + 1 >> 1) * size);
+        .overflow("hidden")
+        .height(function() {
+            return size;
         })
-      .fillStyle(function(d, i) {
-          return (i & 1 ? red : blue)((i >> 1) + 1);
+        .top(function(i) {
+            return mode == "color" ? (i & 1) * size : 0;
+        })
+        .fillStyle(function(i) {
+            return i ? null : fill;
         });
 
-  this.band.add = function(type) {
-    return that.add(pv.Panel).extend(bands).add(type).extend(this);
-  };
+    /**
+     * The band prototype. This prototype is intended to be used with an Area
+     * mark to render the horizon bands.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Horizon.prototype.band
+     */
+    this.band = new pv.Mark()
+        .top(function(d, i) {
+            return mode == "mirror" && i & 1 ? (i + 1 >> 1) * size : null;
+        })
+        .bottom(function(d, i) {
+            return mode == "mirror" ? (i & 1 ? null : (i + 1 >> 1) * -size) : ((i & 1 || -1) * (i + 1 >> 1) * size);
+        })
+        .fillStyle(function(d, i) {
+            return (i & 1 ? red : blue)((i >> 1) + 1);
+        });
+
+    this.band.add = function(type) {
+        return that.add(pv.Panel).extend(bands).add(type).extend(this);
+    };
 };
 
 pv.Layout.Horizon.prototype = pv.extend(pv.Layout)
@@ -20419,35 +21533,41 @@ pv.Layout.Horizon.prototype.defaults = new pv.Layout.Horizon()
  * >"Visual Exploration of Multivariate Graphs"</a> by M. Wattenberg, CHI 2006.
  */
 pv.Layout.Rollup = function() {
-  pv.Layout.Network.call(this);
-  var that = this,
-      nodes, // cached rollup nodes
-      links, // cached rollup links
-      buildImplied = that.buildImplied;
+    pv.Layout.Network.call(this);
+    var that = this,
+        nodes, // cached rollup nodes
+        links, // cached rollup links
+        buildImplied = that.buildImplied;
 
-  /** @private Cache layout state to optimize properties. */
-  this.buildImplied = function(s) {
-    buildImplied.call(this, s);
-    nodes = s.$rollup.nodes;
-    links = s.$rollup.links;
-  };
+    /** @private Cache layout state to optimize properties. */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, s);
+        nodes = s.$rollup.nodes;
+        links = s.$rollup.links;
+    };
 
-  /* Render rollup nodes. */
-  this.node
-      .data(function() { return nodes; })
-      .shapeSize(function(d) { return d.nodes.length * 20; });
+    /* Render rollup nodes. */
+    this.node
+        .data(function() {
+            return nodes;
+        })
+        .shapeSize(function(d) {
+            return d.nodes.length * 20;
+        });
 
-  /* Render rollup links. */
-  this.link
-      .interpolate("polar")
-      .eccentricity(.8);
+    /* Render rollup links. */
+    this.link
+        .interpolate("polar")
+        .eccentricity(.8);
 
-  this.link.add = function(type) {
-    return that.add(pv.Panel)
-        .data(function() { return links; })
-      .add(type)
-        .extend(this);
-  };
+    this.link.add = function(type) {
+        return that.add(pv.Panel)
+            .data(function() {
+                return links;
+            })
+            .add(type)
+            .extend(this);
+    };
 };
 
 pv.Layout.Rollup.prototype = pv.extend(pv.Layout.Network)
@@ -20474,8 +21594,8 @@ pv.Layout.Rollup.prototype = pv.extend(pv.Layout.Network)
  * @see pv.Scale.ordinal
  */
 pv.Layout.Rollup.prototype.x = function(f) {
-  this.$x = pv.functor(f);
-  return this;
+    this.$x = pv.functor(f);
+    return this;
 };
 
 /**
@@ -20489,82 +21609,84 @@ pv.Layout.Rollup.prototype.x = function(f) {
  * @see pv.Scale.ordinal
  */
 pv.Layout.Rollup.prototype.y = function(f) {
-  this.$y = pv.functor(f);
-  return this;
+    this.$y = pv.functor(f);
+    return this;
 };
 
 /** @private */
 pv.Layout.Rollup.prototype.buildImplied = function(s) {
-  if (pv.Layout.Network.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Network.prototype.buildImplied.call(this, s)) return;
 
-  var nodes = s.nodes,
-      links = s.links,
-      directed = s.directed,
-      n = nodes.length,
-      x = [],
-      y = [],
-      rnindex = 0,
-      rnodes = {},
-      rlinks = {};
+    var nodes = s.nodes,
+        links = s.links,
+        directed = s.directed,
+        n = nodes.length,
+        x = [],
+        y = [],
+        rnindex = 0,
+        rnodes = {},
+        rlinks = {};
 
-  /** @private */
-  function id(i) {
-    return x[i] + "," + y[i];
-  }
+    /** @private */
 
-  /* Iterate over the data, evaluating the x and y functions. */
-  var stack = pv.Mark.stack, o = {parent: this};
-  stack.unshift(null);
-  for (var i = 0; i < n; i++) {
-    o.index = i;
-    stack[0] = nodes[i];
-    x[i] = this.$x.apply(o, stack);
-    y[i] = this.$y.apply(o, stack);
-  }
-  stack.shift();
-
-  /* Compute rollup nodes. */
-  for (var i = 0; i < nodes.length; i++) {
-    var nodeId = id(i),
-        rn = rnodes[nodeId];
-    if (!rn) {
-      rn = rnodes[nodeId] = pv.extend(nodes[i]);
-      rn.index = rnindex++;
-      rn.x = x[i];
-      rn.y = y[i];
-      rn.nodes = [];
+    function id(i) {
+        return x[i] + "," + y[i];
     }
-    rn.nodes.push(nodes[i]);
-  }
 
-  /* Compute rollup links. */
-  for (var i = 0; i < links.length; i++) {
-    var source = links[i].sourceNode,
-        target = links[i].targetNode,
-        rsource = rnodes[id(source.index)],
-        rtarget = rnodes[id(target.index)],
-        reverse = !directed && rsource.index > rtarget.index,
-        linkId = reverse
-            ? rtarget.index + "," + rsource.index
-            : rsource.index + "," + rtarget.index,
-        rl = rlinks[linkId];
-    if (!rl) {
-      rl = rlinks[linkId] = {
-        sourceNode: rsource,
-        targetNode: rtarget,
-        linkValue: 0,
-        links: []
-      };
+    /* Iterate over the data, evaluating the x and y functions. */
+    var stack = pv.Mark.stack,
+        o = {
+            parent: this
+        };
+    stack.unshift(null);
+    for (var i = 0; i < n; i++) {
+        o.index = i;
+        stack[0] = nodes[i];
+        x[i] = this.$x.apply(o, stack);
+        y[i] = this.$y.apply(o, stack);
     }
-    rl.links.push(links[i]);
-    rl.linkValue += links[i].linkValue;
-  }
+    stack.shift();
 
-  /* Export the rolled up nodes and links to the scene. */
-  s.$rollup = {
-    nodes: pv.values(rnodes),
-    links: pv.values(rlinks)
-  };
+    /* Compute rollup nodes. */
+    for (var i = 0; i < nodes.length; i++) {
+        var nodeId = id(i),
+            rn = rnodes[nodeId];
+        if (!rn) {
+            rn = rnodes[nodeId] = pv.extend(nodes[i]);
+            rn.index = rnindex++;
+            rn.x = x[i];
+            rn.y = y[i];
+            rn.nodes = [];
+        }
+        rn.nodes.push(nodes[i]);
+    }
+
+    /* Compute rollup links. */
+    for (var i = 0; i < links.length; i++) {
+        var source = links[i].sourceNode,
+            target = links[i].targetNode,
+            rsource = rnodes[id(source.index)],
+            rtarget = rnodes[id(target.index)],
+            reverse = !directed && rsource.index > rtarget.index,
+            linkId = reverse ? rtarget.index + "," + rsource.index : rsource.index + "," + rtarget.index,
+            rl = rlinks[linkId];
+        if (!rl) {
+            rl = rlinks[linkId] = {
+                sourceNode: rsource,
+                targetNode: rtarget,
+                linkValue: 0,
+                links: []
+            };
+        }
+        rl.links.push(links[i]);
+        rl.linkValue += links[i].linkValue;
+    }
+
+    /* Export the rolled up nodes and links to the scene. */
+    s.$rollup = {
+        nodes: pv.values(rnodes),
+        links: pv.values(rlinks)
+    };
 };
 /**
  * Constructs a new, empty matrix network layout. Layouts are not typically
@@ -20611,51 +21733,73 @@ pv.Layout.Rollup.prototype.buildImplied = function(s) {
  * @extends pv.Layout.Network
  */
 pv.Layout.Matrix = function() {
-  pv.Layout.Network.call(this);
-  var that = this,
-      n, // cached matrix size
-      dx, // cached cell width
-      dy, // cached cell height
-      labels, // cached labels (array of strings)
-      pairs, // cached pairs (array of links)
-      buildImplied = that.buildImplied;
+    pv.Layout.Network.call(this);
+    var that = this,
+        n, // cached matrix size
+        dx, // cached cell width
+        dy, // cached cell height
+        labels, // cached labels (array of strings)
+        pairs, // cached pairs (array of links)
+        buildImplied = that.buildImplied;
 
-  /** @private Cache layout state to optimize properties. */
-  this.buildImplied = function(s) {
-    buildImplied.call(this, s);
-    n = s.nodes.length;
-    dx = s.width / n;
-    dy = s.height / n;
-    labels = s.$matrix.labels;
-    pairs = s.$matrix.pairs;
-  };
+    /** @private Cache layout state to optimize properties. */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, s);
+        n = s.nodes.length;
+        dx = s.width / n;
+        dy = s.height / n;
+        labels = s.$matrix.labels;
+        pairs = s.$matrix.pairs;
+    };
 
-  /* Links are all pairs of nodes. */
-  this.link
-      .data(function() { return pairs; })
-      .left(function() { return dx * (this.index % n); })
-      .top(function() { return dy * Math.floor(this.index / n); })
-      .width(function() { return dx; })
-      .height(function() { return dy; })
-      .lineWidth(1.5)
-      .strokeStyle("#fff")
-      .fillStyle(function(l) { return l.linkValue ? "#555" : "#eee"; })
-      .parent = this;
+    /* Links are all pairs of nodes. */
+    this.link
+        .data(function() {
+            return pairs;
+        })
+        .left(function() {
+            return dx * (this.index % n);
+        })
+        .top(function() {
+            return dy * Math.floor(this.index / n);
+        })
+        .width(function() {
+            return dx;
+        })
+        .height(function() {
+            return dy;
+        })
+        .lineWidth(1.5)
+        .strokeStyle("#fff")
+        .fillStyle(function(l) {
+            return l.linkValue ? "#555" : "#eee";
+        })
+        .parent = this;
 
-  /* No special add for links! */
-  delete this.link.add;
+    /* No special add for links! */
+    delete this.link.add;
 
-  /* Labels are duplicated for top & left. */
-  this.label
-      .data(function() { return labels; })
-      .left(function() { return this.index & 1 ? dx * ((this.index >> 1) + .5) : 0; })
-      .top(function() { return this.index & 1 ? 0 : dy * ((this.index >> 1) + .5); })
-      .textMargin(4)
-      .textAlign(function() { return this.index & 1 ? "left" : "right"; })
-      .textAngle(function() { return this.index & 1 ? -Math.PI / 2 : 0; });
+    /* Labels are duplicated for top & left. */
+    this.label
+        .data(function() {
+            return labels;
+        })
+        .left(function() {
+            return this.index & 1 ? dx * ((this.index >> 1) + .5) : 0;
+        })
+        .top(function() {
+            return this.index & 1 ? 0 : dy * ((this.index >> 1) + .5);
+        })
+        .textMargin(4)
+        .textAlign(function() {
+            return this.index & 1 ? "left" : "right";
+        })
+        .textAngle(function() {
+            return this.index & 1 ? -Math.PI / 2 : 0;
+        });
 
-  /* The node mark is unused. */
-  delete this.node;
+    /* The node mark is unused. */
+    delete this.node;
 };
 
 pv.Layout.Matrix.prototype = pv.extend(pv.Layout.Network)
@@ -20689,59 +21833,64 @@ pv.Layout.Matrix.prototype = pv.extend(pv.Layout.Network)
  * @returns {pv.Layout.Matrix} this.
  */
 pv.Layout.Matrix.prototype.sort = function(f) {
-  this.$sort = f;
-  return this;
+    this.$sort = f;
+    return this;
 };
 
 /** @private */
 pv.Layout.Matrix.prototype.buildImplied = function(s) {
-  if (pv.Layout.Network.prototype.buildImplied.call(this, s)) return;
+    if (pv.Layout.Network.prototype.buildImplied.call(this, s)) return;
 
-  var nodes = s.nodes,
-      links = s.links,
-      sort = this.$sort,
-      n = nodes.length,
-      index = pv.range(n),
-      labels = [],
-      pairs = [],
-      map = {};
+    var nodes = s.nodes,
+        links = s.links,
+        sort = this.$sort,
+        n = nodes.length,
+        index = pv.range(n),
+        labels = [],
+        pairs = [],
+        map = {};
 
-  s.$matrix = {labels: labels, pairs: pairs};
+    s.$matrix = {
+        labels: labels,
+        pairs: pairs
+    };
 
-  /* Sort the nodes. */
-  if (sort) index.sort(function(a, b) { return sort(nodes[a], nodes[b]); });
+    /* Sort the nodes. */
+    if (sort) index.sort(function(a, b) {
+        return sort(nodes[a], nodes[b]);
+    });
 
-  /* Create pairs. */
-  for (var i = 0; i < n; i++) {
-    for (var j = 0; j < n; j++) {
-      var a = index[i],
-          b = index[j],
-          p = {
-            row: i,
-            col: j,
-            sourceNode: nodes[a],
-            targetNode: nodes[b],
-            linkValue: 0
-          };
-      pairs.push(map[a + "." + b] = p);
+    /* Create pairs. */
+    for (var i = 0; i < n; i++) {
+        for (var j = 0; j < n; j++) {
+            var a = index[i],
+                b = index[j],
+                p = {
+                    row: i,
+                    col: j,
+                    sourceNode: nodes[a],
+                    targetNode: nodes[b],
+                    linkValue: 0
+                };
+            pairs.push(map[a + "." + b] = p);
+        }
     }
-  }
 
-  /* Create labels. */
-  for (var i = 0; i < n; i++) {
-    var a = index[i];
-    labels.push(nodes[a], nodes[a]);
-  }
+    /* Create labels. */
+    for (var i = 0; i < n; i++) {
+        var a = index[i];
+        labels.push(nodes[a], nodes[a]);
+    }
 
-  /* Accumulate link values. */
-  for (var i = 0; i < links.length; i++) {
-    var l = links[i],
-        source = l.sourceNode.index,
-        target = l.targetNode.index,
-        value = l.linkValue;
-    map[source + "." + target].linkValue += value;
-    if (!s.directed) map[target + "." + source].linkValue += value;
-  }
+    /* Accumulate link values. */
+    for (var i = 0; i < links.length; i++) {
+        var l = links[i],
+            source = l.sourceNode.index,
+            target = l.targetNode.index,
+            value = l.linkValue;
+        map[source + "." + target].linkValue += value;
+        if (!s.directed) map[target + "." + source].linkValue += value;
+    }
 };
 // ranges (bad, satisfactory, good)
 // measures (actual, forecast)
@@ -20762,93 +21911,147 @@ pv.Layout.Matrix.prototype.buildImplied = function(s) {
  * @extends pv.Layout
  */
 pv.Layout.Bullet = function() {
-  pv.Layout.call(this);
-  var that = this,
-      buildImplied = that.buildImplied,
-      scale = that.x = pv.Scale.linear(),
-      orient,
-      horizontal,
-      rangeColor,
-      measureColor,
-      x;
+    pv.Layout.call(this);
+    var that = this,
+        buildImplied = that.buildImplied,
+        scale = that.x = pv.Scale.linear(),
+        orient,
+        horizontal,
+        rangeColor,
+        measureColor,
+        x;
 
-  /** @private Cache layout state to optimize properties. */
-  this.buildImplied = function(s) {
-    buildImplied.call(this, x = s);
-    orient = s.orient;
-    horizontal = /^left|right$/.test(orient);
-    rangeColor = pv.ramp("#bbb", "#eee")
-        .domain(0, Math.max(1, x.ranges.length - 1));
-    measureColor = pv.ramp("steelblue", "lightsteelblue")
-        .domain(0, Math.max(1, x.measures.length - 1));
-  };
+    /** @private Cache layout state to optimize properties. */
+    this.buildImplied = function(s) {
+        buildImplied.call(this, x = s);
+        orient = s.orient;
+        horizontal = /^left|right$/.test(orient);
+        rangeColor = pv.ramp("#bbb", "#eee")
+            .domain(0, Math.max(1, x.ranges.length - 1));
+        measureColor = pv.ramp("steelblue", "lightsteelblue")
+            .domain(0, Math.max(1, x.measures.length - 1));
+    };
 
-  /**
-   * The range prototype.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Bullet.prototype.range
-   */
-  (this.range = new pv.Mark())
-      .data(function() { return x.ranges; })
-      .reverse(true)
-      .left(function() { return orient == "left" ? 0 : null; })
-      .top(function() { return orient == "top" ? 0 : null; })
-      .right(function() { return orient == "right" ? 0 : null; })
-      .bottom(function() { return orient == "bottom" ? 0 : null; })
-      .width(function(d) { return horizontal ? scale(d) : null; })
-      .height(function(d) { return horizontal ? null : scale(d); })
-      .fillStyle(function() { return rangeColor(this.index); })
-      .antialias(false)
-      .parent = that;
+    /**
+     * The range prototype.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Bullet.prototype.range
+     */
+    (this.range = new pv.Mark())
+        .data(function() {
+            return x.ranges;
+        })
+        .reverse(true)
+        .left(function() {
+            return orient == "left" ? 0 : null;
+        })
+        .top(function() {
+            return orient == "top" ? 0 : null;
+        })
+        .right(function() {
+            return orient == "right" ? 0 : null;
+        })
+        .bottom(function() {
+            return orient == "bottom" ? 0 : null;
+        })
+        .width(function(d) {
+            return horizontal ? scale(d) : null;
+        })
+        .height(function(d) {
+            return horizontal ? null : scale(d);
+        })
+        .fillStyle(function() {
+            return rangeColor(this.index);
+        })
+        .antialias(false)
+        .parent = that;
 
-  /**
-   * The measure prototype.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Bullet.prototype.measure
-   */
-  (this.measure = new pv.Mark())
-      .extend(this.range)
-      .data(function() { return x.measures; })
-      .left(function() { return orient == "left" ? 0 : horizontal ? null : this.parent.width() / 3.25; })
-      .top(function() { return orient == "top" ? 0 : horizontal ? this.parent.height() / 3.25 : null; })
-      .right(function() { return orient == "right" ? 0 : horizontal ? null : this.parent.width() / 3.25; })
-      .bottom(function() { return orient == "bottom" ? 0 : horizontal ? this.parent.height() / 3.25 : null; })
-      .fillStyle(function() { return measureColor(this.index); })
-      .parent = that;
+    /**
+     * The measure prototype.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Bullet.prototype.measure
+     */
+    (this.measure = new pv.Mark())
+        .extend(this.range)
+        .data(function() {
+            return x.measures;
+        })
+        .left(function() {
+            return orient == "left" ? 0 : horizontal ? null : this.parent.width() / 3.25;
+        })
+        .top(function() {
+            return orient == "top" ? 0 : horizontal ? this.parent.height() / 3.25 : null;
+        })
+        .right(function() {
+            return orient == "right" ? 0 : horizontal ? null : this.parent.width() / 3.25;
+        })
+        .bottom(function() {
+            return orient == "bottom" ? 0 : horizontal ? this.parent.height() / 3.25 : null;
+        })
+        .fillStyle(function() {
+            return measureColor(this.index);
+        })
+        .parent = that;
 
-  /**
-   * The marker prototype.
-   *
-   * @type pv.Mark
-   * @name pv.Layout.Bullet.prototype.marker
-   */
-  (this.marker = new pv.Mark())
-      .data(function() { return x.markers; })
-      .left(function(d) { return orient == "left" ? scale(d) : horizontal ? null : this.parent.width() / 2; })
-      .top(function(d) { return orient == "top" ? scale(d) : horizontal ? this.parent.height() / 2 : null; })
-      .right(function(d) { return orient == "right" ? scale(d) : null; })
-      .bottom(function(d) { return orient == "bottom" ? scale(d) : null; })
-      .strokeStyle("black")
-      .shape("bar")
-      .shapeAngle(function() { return horizontal ? 0 : Math.PI / 2; })
-      .parent = that;
+    /**
+     * The marker prototype.
+     *
+     * @type pv.Mark
+     * @name pv.Layout.Bullet.prototype.marker
+     */
+    (this.marker = new pv.Mark())
+        .data(function() {
+            return x.markers;
+        })
+        .left(function(d) {
+            return orient == "left" ? scale(d) : horizontal ? null : this.parent.width() / 2;
+        })
+        .top(function(d) {
+            return orient == "top" ? scale(d) : horizontal ? this.parent.height() / 2 : null;
+        })
+        .right(function(d) {
+            return orient == "right" ? scale(d) : null;
+        })
+        .bottom(function(d) {
+            return orient == "bottom" ? scale(d) : null;
+        })
+        .strokeStyle("black")
+        .shape("bar")
+        .shapeAngle(function() {
+            return horizontal ? 0 : Math.PI / 2;
+        })
+        .parent = that;
 
-  (this.tick = new pv.Mark())
-      .data(function() { return scale.ticks(7); })
-      .left(function(d) { return orient == "left" ? scale(d) : null; })
-      .top(function(d) { return orient == "top" ? scale(d) : null; })
-      .right(function(d) { return orient == "right" ? scale(d) : horizontal ? null : -6; })
-      .bottom(function(d) { return orient == "bottom" ? scale(d) : horizontal ? -8 : null; })
-      .height(function() { return horizontal ? 6 : null; })
-      .width(function() { return horizontal ? null : 6; })
-      .parent = that;
+    (this.tick = new pv.Mark())
+        .data(function() {
+            return scale.ticks(7);
+        })
+        .left(function(d) {
+            return orient == "left" ? scale(d) : null;
+        })
+        .top(function(d) {
+            return orient == "top" ? scale(d) : null;
+        })
+        .right(function(d) {
+            return orient == "right" ? scale(d) : horizontal ? null : -6;
+        })
+        .bottom(function(d) {
+            return orient == "bottom" ? scale(d) : horizontal ? -8 : null;
+        })
+        .height(function() {
+            return horizontal ? 6 : null;
+        })
+        .width(function() {
+            return horizontal ? null : 6;
+        })
+        .parent = that;
 };
 
 pv.Layout.Bullet.prototype = pv.extend(pv.Layout)
     .property("orient", String) // left, right, top, bottom
-    .property("ranges")
+.property("ranges")
     .property("markers")
     .property("measures")
     .property("minimum")
@@ -20904,55 +22107,57 @@ pv.Layout.Bullet.prototype.defaults = new pv.Layout.Bullet()
 pv.Layout.Bullet.prototype._originIsZero = true;
 
 pv.Layout.Bullet.prototype.originIsZero = function(value) {
-    if(arguments.length) {
-        return this._originIsZero = !!value;
+    if (arguments.length) {
+        return this._originIsZero = !! value;
     }
     return this._originIsZero;
 };
 
 /** @private */
 pv.Layout.Bullet.prototype.buildImplied = function(s) {
-  pv.Layout.prototype.buildImplied.call(this, s);
-  
-  var size = this.parent[/^left|right$/.test(s.orient) ? "width" : "height"]();
-  
-  var allValues, 
-      max   = s.maximum,
-      min   = s.minimum,
-      delta = 1e-10;
-  
-  if(max == null) {
-      allValues = [].concat(s.ranges, s.markers, s.measures);
-      max = pv.max(allValues);
-  } else {
-      max = +max;
-  }
-  
-  if(min == null) {
-      if(!allValues) { allValues = [].concat(s.ranges, s.markers, s.measures); }
-      min = pv.min(allValues);
-      // It would be really strange that a range would end at the start of the scale. 
-      min = 0.95 * min;
-  } else {
-      min = +min;
-  }
-  
-  if(min > max || max - min < delta) {
-      min = Math.abs(max) < delta ? -0.1 : (0.99 * max);
-  }
-  
-  if(this._originIsZero && (min * max) > 0) {
-      if(min > 0) {
-          min = 0;
-      } else {
-          max = 0;
-      }
-  }
+    pv.Layout.prototype.buildImplied.call(this, s);
 
-  s.minimum = min;
-  s.maximum = max;
-  
-  this.x.domain(min, max).range(0, size);
+    var size = this.parent[/^left|right$/.test(s.orient) ? "width" : "height"]();
+
+    var allValues,
+        max = s.maximum,
+        min = s.minimum,
+        delta = 1e-10;
+
+    if (max == null) {
+        allValues = [].concat(s.ranges, s.markers, s.measures);
+        max = pv.max(allValues);
+    } else {
+        max = +max;
+    }
+
+    if (min == null) {
+        if (!allValues) {
+            allValues = [].concat(s.ranges, s.markers, s.measures);
+        }
+        min = pv.min(allValues);
+        // It would be really strange that a range would end at the start of the scale. 
+        min = 0.95 * min;
+    } else {
+        min = +min;
+    }
+
+    if (min > max || max - min < delta) {
+        min = Math.abs(max) < delta ? -0.1 : (0.99 * max);
+    }
+
+    if (this._originIsZero && (min * max) > 0) {
+        if (min > 0) {
+            min = 0;
+        } else {
+            max = 0;
+        }
+    }
+
+    s.minimum = min;
+    s.maximum = max;
+
+    this.x.domain(min, max).range(0, size);
 };
 /**
  * Abstract; see an implementing class for details.
@@ -20986,7 +22191,7 @@ pv.Layout.Bullet.prototype.buildImplied = function(s) {
  * @extends function
  */
 pv.Behavior = {};
- pv.Behavior.dragBase = function(shared){
+pv.Behavior.dragBase = function(shared) {
     var events, // event registrations held during each selection
         downElem,
         cancelClick,
@@ -21000,28 +22205,29 @@ pv.Behavior = {};
     };
 
     /** @private protovis mark event handler */
+
     function mousedown(d) {
         // Initialize
-        if(!inited){
+        if (!inited) {
             inited = true;
-            this.addEventInterceptor('click', eventInterceptor, /*before*/true);
+            this.addEventInterceptor('click', eventInterceptor, /*before*/ true);
         }
 
         // Add event handlers to follow the drag.
         // These are unregistered on mouse up.
-        if(!events){
+        if (!events) {
             var root = this.root.scene.$g;
             events = [
                 // Attaching events to the canvas (instead of only to the document)
                 // allows canceling the bubbling of the events before they
                 // reach the handlers of ascendant elements (of canvas).
-                [root,     'mousemove', pv.listen(root, 'mousemove', mousemove)],
-                [root,     'mouseup',   pv.listen(root, 'mouseup',   mouseup  )],
+                [root, 'mousemove', pv.listen(root, 'mousemove', mousemove)],
+                [root, 'mouseup', pv.listen(root, 'mouseup', mouseup)],
 
                 // It is still necessary to receive events
                 // that are sourced outside the canvas
                 [document, 'mousemove', pv.listen(document, 'mousemove', mousemove)],
-                [document, 'mouseup',   pv.listen(document, 'mouseup',   mouseup  )]
+                [document, 'mouseup', pv.listen(document, 'mouseup', mouseup)]
             ];
         }
 
@@ -21035,19 +22241,19 @@ pv.Behavior = {};
 
         // --------------
 
-        var m1    = this.mouse();
+        var m1 = this.mouse();
         var scene = this.scene;
         var index = this.index;
 
         drag =
-        scene[index].drag = {
-            phase: 'start',
-            m:     m1,    // current relevant mouse position
-            m1:    m1,    // the mouse position of the mousedown
-            m2:    null,  // the mouse position of the current/last mousemove
-            d:     d,     // the datum in mousedown
-            scene: scene, // scene context
-            index: index  // scene index
+            scene[index].drag = {
+                phase: 'start',
+                m: m1, // current relevant mouse position
+                m1: m1, // the mouse position of the mousedown
+                m2: null, // the mouse position of the current/last mousemove
+                d: d, // the datum in mousedown
+                scene: scene, // scene context
+                index: index // scene index
         };
 
         ev = wrapEvent(ev, drag);
@@ -21055,15 +22261,18 @@ pv.Behavior = {};
         shared.dragstart.call(this, ev);
 
         var m = drag.m;
-        if(m !== m1){
+        if (m !== m1) {
             m1.x = m.x;
             m1.y = m.y;
         }
     }
 
     /** @private DOM event handler */
+
     function mousemove(ev) {
-        if (!drag) { return; }
+        if (!drag) {
+            return;
+        }
 
         drag.phase = 'move';
 
@@ -21080,7 +22289,7 @@ pv.Behavior = {};
             var mprev = drag.m2 || drag.m1;
 
             var m2 = this.mouse();
-            if(mprev && m2.distance2(mprev).dist2 <= 2){
+            if (mprev && m2.distance2(mprev).dist2 <= 2) {
                 return;
             }
 
@@ -21090,7 +22299,7 @@ pv.Behavior = {};
 
             // m2 may have changed
             var m = drag.m;
-            if(m !== m2){
+            if (m !== m2) {
                 m2.x = m.x;
                 m2.y = m.y;
             }
@@ -21098,8 +22307,11 @@ pv.Behavior = {};
     }
 
     /** @private DOM event handler */
+
     function mouseup(ev) {
-        if (!drag) { return; }
+        if (!drag) {
+            return;
+        }
 
         drag.phase = 'end';
 
@@ -21114,7 +22326,7 @@ pv.Behavior = {};
         drag.canceled = !isDrag;
 
         cancelClick = isDrag && (downElem === ev.target);
-        if(!cancelClick){
+        if (!cancelClick) {
             downElem = null;
         }
 
@@ -21125,8 +22337,8 @@ pv.Behavior = {};
         ev = wrapEvent(ev, drag);
 
         // Unregister events
-        if(events){
-            events.forEach(function(registration){
+        if (events) {
+            events.forEach(function(registration) {
                 pv.unlisten.apply(pv, registration);
             });
             events = null;
@@ -21134,7 +22346,7 @@ pv.Behavior = {};
 
         var scene = drag.scene;
         var index = drag.index;
-        try{
+        try {
             scene.mark.context(scene, index, function() {
                 shared.dragend.call(this, ev);
             });
@@ -21148,13 +22360,13 @@ pv.Behavior = {};
         try {
             ev.drag = drag;
             return ev;
-        } catch(ex) {
+        } catch (ex) {
             // SWALLOW
         }
 
         // wrap
         var ev2 = {};
-        for(var p in ev) {
+        for (var p in ev) {
             var v = ev[p];
             ev2[p] = typeof v !== 'function' ? v : bindEventFun(v, ev);
         }
@@ -21165,7 +22377,9 @@ pv.Behavior = {};
     }
 
     function bindEventFun(f, ctx) {
-        return function() { return f.apply(ctx, arguments); };
+        return function() {
+            return f.apply(ctx, arguments);
+        };
     }
 
     /**
@@ -21180,8 +22394,9 @@ pv.Behavior = {};
      *
      * @private
      */
-    function eventInterceptor(type, ev){
-        if(cancelClick && downElem === ev.target){
+
+    function eventInterceptor(type, ev) {
+        if (cancelClick && downElem === ev.target) {
             // Event is handled
             cancelClick = false;
             downElem = null;
@@ -21202,7 +22417,7 @@ pv.Behavior = {};
      */
     mousedown.autoRender = function(_) {
         if (arguments.length) {
-            shared.autoRender = !!_;
+            shared.autoRender = !! _;
             return mousedown;
         }
 
@@ -21303,80 +22518,80 @@ pv.Behavior.drag = function() {
     var collapse = null; // dimensions to collapse
     var kx = 1; // x-dimension 1/0
     var ky = 1; // y-dimension 1/0
-    
-    var v1;  // initial mouse-particle offset
-    
+
+    var v1; // initial mouse-particle offset
+
     // Executed in context of initial mark scene
     var shared = {
-        dragstart: function(ev){
+        dragstart: function(ev) {
             var drag = ev.drag;
             drag.type = 'drag';
-            
-            var p   = drag.d; // particle being dragged
+
+            var p = drag.d; // particle being dragged
             var fix = pv.vector(p.x, p.y);
-            
-            p.fix  = fix;
+
+            p.fix = fix;
             p.drag = drag;
-            
+
             v1 = fix.minus(drag.m1);
-            
+
             var parent = this.parent;
             drag.max = {
-               x: parent.width()  - (p.dx || 0),
-               y: parent.height() - (p.dy || 0)
+                x: parent.width() - (p.dx || 0),
+                y: parent.height() - (p.dy || 0)
             };
-            
+
             drag.min = {
                 x: 0,
                 y: 0
             };
-            
-            if(shared.autoRender){
+
+            if (shared.autoRender) {
                 this.render();
             }
-            
+
             pv.Mark.dispatch("dragstart", drag.scene, drag.index, ev);
         },
-        
-        drag: function(ev){
+
+        drag: function(ev) {
             var drag = ev.drag;
-            var m2   = drag.m2;
-            var p    = drag.d;
-            
+            var m2 = drag.m2;
+            var p = drag.d;
+
             drag.m = v1.plus(m2);
-            
+
             var constraint = shared.positionConstraint;
-            if(constraint){
+            if (constraint) {
                 constraint(drag);
             }
-            
+
             var m = drag.m;
-            if(kx){
+            if (kx) {
                 p.x = p.fix.x = shared.bound(m.x, 'x');
             }
-            
-            if(ky){
+
+            if (ky) {
                 p.y = p.fix.y = shared.bound(m.y, 'y');
             }
-            
-            if(shared.autoRender){
+
+            if (shared.autoRender) {
                 this.render();
             }
-            
+
             pv.Mark.dispatch("drag", drag.scene, drag.index, ev);
         },
-        
-        dragend: function(ev){
+
+        dragend: function(ev) {
             var drag = ev.drag;
-            var p    = drag.d;
-            
+            var p = drag.d;
+
             p.fix = null; // pv compatibility
             v1 = null;
-             
-            if(shared.autoRender){
+
+            if (shared.autoRender) {
                 this.render();
             }
-            
+
             try {
                 pv.Mark.dispatch('dragend', drag.scene, drag.index, ev);
             } finally {
@@ -21384,9 +22599,9 @@ pv.Behavior.drag = function() {
             }
         }
     };
-    
+
     var mousedown = pv.Behavior.dragBase(shared);
-    
+
     /**
      * Sets or gets the collapse parameter.
      * By default, dragging is sensitive to both dimensions.
@@ -21403,18 +22618,27 @@ pv.Behavior.drag = function() {
      * @param {string} [x] the new collapse parameter
      */
     mousedown.collapse = function(x) {
-      if (arguments.length) {
-        collapse = String(x);
-        switch (collapse) {
-          case "y": kx = 1; ky = 0; break;
-          case "x": kx = 0; ky = 1; break;
-          default:  kx = 1; ky = 1; break;
+        if (arguments.length) {
+            collapse = String(x);
+            switch (collapse) {
+                case "y":
+                    kx = 1;
+                    ky = 0;
+                    break;
+                case "x":
+                    kx = 0;
+                    ky = 1;
+                    break;
+                default:
+                    kx = 1;
+                    ky = 1;
+                    break;
+            }
+            return mousedown;
         }
-        return mousedown;
-      }
-      return collapse;
+        return collapse;
     };
-    
+
     return mousedown;
 };
 /**
@@ -21474,115 +22698,130 @@ pv.Behavior.drag = function() {
  * Cursor's Activation Area"</a> by T. Grossman &amp; R. Balakrishnan, CHI 2005.
  */
 pv.Behavior.point = function(r) {
-  var unpoint, // the current pointer target
-      collapse = null, // dimensions to collapse
-      kx = 1, // x-dimension cost scale
-      ky = 1, // y-dimension cost scale
-      pointingPanel = null, 
-      r2 = arguments.length ? r * r : 900; // fuzzy radius
+    var unpoint, // the current pointer target
+        collapse = null, // dimensions to collapse
+        kx = 1, // x-dimension cost scale
+        ky = 1, // y-dimension cost scale
+        pointingPanel = null,
+        r2 = arguments.length ? r * r : 900; // fuzzy radius
 
-  /** @private Search for the mark closest to the mouse. */
-  function search(scene, index) {
-    var s = scene[index],
-        point = {cost: Infinity};
-    for (var i = (s.visible ? s.children.length : 0) - 1 ; i >= 0; i--) {
-      var child = s.children[i], mark = child.mark, p;
-      if (mark.type == "panel") {
-        mark.scene = child;
-        for (var j = child.length - 1 ; j >= 0; j--) {
-          mark.index = j;
-          p = search(child, j);
-          if (p.cost < point.cost) point = p;
+    /** @private Search for the mark closest to the mouse. */
+
+    function search(scene, index) {
+        var s = scene[index],
+            point = {
+                cost: Infinity
+            };
+        for (var i = (s.visible ? s.children.length : 0) - 1; i >= 0; i--) {
+            var child = s.children[i],
+                mark = child.mark,
+                p;
+            if (mark.type == "panel") {
+                mark.scene = child;
+                for (var j = child.length - 1; j >= 0; j--) {
+                    mark.index = j;
+                    p = search(child, j);
+                    if (p.cost < point.cost) point = p;
+                }
+                delete mark.scene;
+                delete mark.index;
+            } else if (mark.$handlers.point) {
+                var v = mark.mouse();
+                for (var j = child.length - 1; j >= 0; j--) {
+                    var c = child[j],
+                        dx = v.x - c.left - (c.width || 0) / 2,
+                        dy = v.y - c.top - (c.height || 0) / 2,
+                        dd = kx * dx * dx + ky * dy * dy;
+                    if (dd < point.cost) {
+                        point.distance = dx * dx + dy * dy;
+                        point.cost = dd;
+                        point.scene = child;
+                        point.index = j;
+                    }
+                }
+            }
         }
-        delete mark.scene;
-        delete mark.index;
-      } else if (mark.$handlers.point) {
-        var v = mark.mouse();
-        for (var j = child.length - 1 ; j >= 0; j--) {
-          var c = child[j],
-              dx = v.x - c.left - (c.width || 0) / 2,
-              dy = v.y - c.top - (c.height || 0) / 2,
-              dd = kx * dx * dx + ky * dy * dy;
-          if (dd < point.cost) {
-            point.distance = dx * dx + dy * dy;
-            point.cost = dd;
-            point.scene = child;
-            point.index = j;
-          }
+        return point;
+    }
+
+    /** @private */
+
+    function mousemove(e) {
+        /* If the closest mark is far away, clear the current target. */
+        var point = search(this.scene, this.index);
+        if ((point.cost == Infinity) || (point.distance > r2)) point = null;
+
+        /* Unpoint the old target, if it's not the new target. */
+        if (unpoint) {
+            if (point && (unpoint.scene == point.scene) && (unpoint.index == point.index)) return;
+            pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
         }
-      }
+
+        /* Point the new target, if there is one. */
+        if (unpoint = point) {
+            pv.Mark.dispatch("point", point.scene, point.index, e);
+
+            /* Unpoint when the mouse leaves the pointing panel. */
+            if (!pointingPanel && this.type === 'panel') {
+                pointingPanel = this;
+                pointingPanel.event('mouseout', function() {
+                    var ev = arguments[arguments.length - 1];
+                    mouseout.call(pointingPanel.scene.$g, ev);
+                });
+            } else {
+                pv.listen(this.root.canvas(), "mouseout", mouseout);
+            }
+        }
     }
-    return point;
-  }
 
-  /** @private */
-  function mousemove(e) {
-    /* If the closest mark is far away, clear the current target. */
-    var point = search(this.scene, this.index);
-    if ((point.cost == Infinity) || (point.distance > r2)) point = null;
+    /** @private */
 
-    /* Unpoint the old target, if it's not the new target. */
-    if (unpoint) {
-      if (point
-          && (unpoint.scene == point.scene)
-          && (unpoint.index == point.index)) return;
-      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
+    function mouseout(e) {
+        if (unpoint && !pv.ancestor(this, e.relatedTarget)) {
+            pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
+            unpoint = null;
+        }
     }
 
-    /* Point the new target, if there is one. */
-    if (unpoint = point) {
-      pv.Mark.dispatch("point", point.scene, point.index, e);
+    /**
+     * Sets or gets the collapse parameter. By default, the standard Cartesian
+     * distance is computed. However, with some visualizations it is desirable to
+     * consider only a single dimension, such as the <i>x</i>-dimension for an
+     * independent variable. In this case, the collapse parameter can be set to
+     * collapse the <i>y</i> dimension:
+     *
+     * <pre>    .event("mousemove", pv.Behavior.point(Infinity).collapse("y"))</pre>
+     *
+     * @function
+     * @returns {pv.Behavior.point} this, or the current collapse parameter.
+     * @name pv.Behavior.point.prototype.collapse
+     * @param {string} [x] the new collapse parameter
+     */
+    mousemove.collapse = function(x) {
+        if (arguments.length) {
+            collapse = String(x);
+            switch (collapse) {
+                case "y":
+                    kx = 1;
+                    ky = 0;
+                    break;
+                case "x":
+                    kx = 0;
+                    ky = 1;
+                    break;
+                default:
+                    kx = 1;
+                    ky = 1;
+                    break;
+            }
+            return mousemove;
+        }
+        return collapse;
+    };
 
-      /* Unpoint when the mouse leaves the pointing panel. */
-      if(!pointingPanel && this.type === 'panel') {
-          pointingPanel = this;
-          pointingPanel.event('mouseout', function(){
-              var ev = arguments[arguments.length - 1];
-              mouseout.call(pointingPanel.scene.$g, ev);
-          });
-      } else {
-          pv.listen(this.root.canvas(), "mouseout", mouseout);
-      }
-    }
-  }
-
-  /** @private */
-  function mouseout(e) {
-    if (unpoint && !pv.ancestor(this, e.relatedTarget)) {
-      pv.Mark.dispatch("unpoint", unpoint.scene, unpoint.index, e);
-      unpoint = null;
-    }
-  }
-
-  /**
-   * Sets or gets the collapse parameter. By default, the standard Cartesian
-   * distance is computed. However, with some visualizations it is desirable to
-   * consider only a single dimension, such as the <i>x</i>-dimension for an
-   * independent variable. In this case, the collapse parameter can be set to
-   * collapse the <i>y</i> dimension:
-   *
-   * <pre>    .event("mousemove", pv.Behavior.point(Infinity).collapse("y"))</pre>
-   *
-   * @function
-   * @returns {pv.Behavior.point} this, or the current collapse parameter.
-   * @name pv.Behavior.point.prototype.collapse
-   * @param {string} [x] the new collapse parameter
-   */
-  mousemove.collapse = function(x) {
-    if (arguments.length) {
-      collapse = String(x);
-      switch (collapse) {
-        case "y": kx = 1; ky = 0; break;
-        case "x": kx = 0; ky = 1; break;
-        default: kx = 1; ky = 1; break;
-      }
-      return mousemove;
-    }
-    return collapse;
-  };
-
-  return mousemove;
-};/**
+    return mousemove;
+};
+/**
  * Returns a new select behavior to be registered on mousedown events.
  *
  * @class Implements interactive selecting starting with mousedown events.
@@ -21639,103 +22878,103 @@ pv.Behavior.point = function(r) {
  * @extends pv.Behavior
  * @see pv.Behavior.drag
  */
- pv.Behavior.select = function(){
+pv.Behavior.select = function() {
     var collapse = null; // dimensions to collapse
     var kx = 1; // x-dimension 1/0
     var ky = 1; // y-dimension 1/0
     var preserveLength = false;
-    
+
     // Executed in context of initial mark scene
     var shared = {
-        dragstart: function(ev){
+        dragstart: function(ev) {
             var drag = ev.drag;
             drag.type = 'select';
-            
-            var r  = drag.d;
+
+            var r = drag.d;
             r.drag = drag;
-            
+
             drag.max = {
                 x: this.width(),
                 y: this.height()
             };
-            
+
             drag.min = {
                 x: 0,
                 y: 0
             };
-                
+
             var constraint = shared.positionConstraint;
-            if(constraint){
+            if (constraint) {
                 drag.m = drag.m.clone();
                 constraint(drag);
             }
-            
+
             var m = drag.m;
-            if(kx){
+            if (kx) {
                 r.x = shared.bound(m.x, 'x');
-                if(!preserveLength){
+                if (!preserveLength) {
                     r.dx = 0;
                 }
             }
-            
-            if(ky){
+
+            if (ky) {
                 r.y = shared.bound(m.y, 'y');
-                if(!preserveLength){
+                if (!preserveLength) {
                     r.dy = 0;
                 }
             }
-            
+
             pv.Mark.dispatch('selectstart', drag.scene, drag.index, ev);
         },
-        
-        drag: function(ev){
+
+        drag: function(ev) {
             var drag = ev.drag;
             var m1 = drag.m1;
-            var r  = drag.d;
-            
+            var r = drag.d;
+
             drag.max.x = this.width();
             drag.max.y = this.height();
-            
+
             var constraint = shared.positionConstraint;
-            if(constraint){
+            if (constraint) {
                 drag.m = drag.m.clone();
                 constraint(drag);
             }
-            
+
             var m = drag.m;
-            
-            if(kx){
+
+            if (kx) {
                 var bx = Math.min(m1.x, m.x);
-                bx  = shared.bound(bx, 'x');
+                bx = shared.bound(bx, 'x');
                 r.x = bx;
-                
-                if(!preserveLength){
-                    var ex = Math.max(m.x,  m1.x);
+
+                if (!preserveLength) {
+                    var ex = Math.max(m.x, m1.x);
                     ex = shared.bound(ex, 'x');
                     r.dx = ex - bx;
                 }
             }
-            
-            if(ky){
+
+            if (ky) {
                 var by = Math.min(m1.y, m.y);
-                by  = shared.bound(by, 'y');
+                by = shared.bound(by, 'y');
                 r.y = by;
-                
-                if(!preserveLength){
-                    var ey = Math.max(m.y,  m1.y);
+
+                if (!preserveLength) {
+                    var ey = Math.max(m.y, m1.y);
                     ey = shared.bound(ey, 'y');
                     r.dy = ey - by;
                 }
             }
-            
-            if(shared.autoRender){
+
+            if (shared.autoRender) {
                 this.render();
             }
-      
+
             pv.Mark.dispatch('select', drag.scene, drag.index, ev);
         },
-        
-        dragend: function(ev){
+
+        dragend: function(ev) {
             var drag = ev.drag;
             try {
                 pv.Mark.dispatch('selectend', drag.scene, drag.index, ev);
@@ -21745,9 +22984,9 @@ pv.Behavior.point = function(r) {
             }
         }
     };
-    
+
     var mousedown = pv.Behavior.dragBase(shared);
-    
+
     /**
      * Sets or gets the collapse parameter.
      * By default, the selection rectangle is sensitive to both dimensions.
@@ -21764,26 +23003,35 @@ pv.Behavior.point = function(r) {
      * @param {string} [x] the new collapse parameter
      */
     mousedown.collapse = function(x) {
-      if (arguments.length) {
-        collapse = String(x);
-        switch (collapse) {
-          case "y": kx = 1; ky = 0; break;
-          case "x": kx = 0; ky = 1; break;
-          default:  kx = 1; ky = 1; break;
+        if (arguments.length) {
+            collapse = String(x);
+            switch (collapse) {
+                case "y":
+                    kx = 1;
+                    ky = 0;
+                    break;
+                case "x":
+                    kx = 0;
+                    ky = 1;
+                    break;
+                default:
+                    kx = 1;
+                    ky = 1;
+                    break;
+            }
+            return mousedown;
         }
-        return mousedown;
-      }
-      return collapse;
+        return collapse;
     };
-    
+
     mousedown.preserveLength = function(_) {
-      if (arguments.length) {
-        preserveLength = !!_;
-        return mousedown;
-      }
-       return preserveLength;
+        if (arguments.length) {
+            preserveLength = !! _;
+            return mousedown;
+        }
+        return preserveLength;
     };
-    
+
     return mousedown;
 };
 /**
@@ -21846,28 +23094,36 @@ pv.Behavior.point = function(r) {
  */
 pv.Behavior.resize = function(side) {
     var preserveOrtho = false;
-    
+
     var isLeftRight = (side === 'left' || side === 'right');
-    
+
     // Executed in context of initial mark scene
     var shared = {
-        dragstart: function(ev){
+        dragstart: function(ev) {
             var drag = ev.drag;
             drag.type = 'resize';
-            
+
             var m1 = drag.m1;
-            var r  = drag.d;
+            var r = drag.d;
             r.drag = drag;
-            
+
             // Fix the position of m1 to be the opposite side,
             // the one whose position is fixed during resizing
-            switch(side) {
-                case "left":   m1.x = r.x + r.dx; break;
-                case "right":  m1.x = r.x;        break;
-                case "top":    m1.y = r.y + r.dy; break;
-                case "bottom": m1.y = r.y;        break;
+            switch (side) {
+                case "left":
+                    m1.x = r.x + r.dx;
+                    break;
+                case "right":
+                    m1.x = r.x;
+                    break;
+                case "top":
+                    m1.y = r.y + r.dy;
+                    break;
+                case "bottom":
+                    m1.y = r.y;
+                    break;
             }
-            
+
             // Capture parent's dimensions once
             // These can be overridden to change the bounds checking behavior
             var parent = this.parent;
@@ -21875,60 +23131,60 @@ pv.Behavior.resize = function(side) {
                 x: parent.width(),
                 y: parent.height()
             };
-            
+
             drag.min = {
                 x: 0,
                 y: 0
             };
-            
+
             pv.Mark.dispatch("resizestart", drag.scene, drag.index, ev);
         },
-        
-        drag: function(ev){
+
+        drag: function(ev) {
             var drag = ev.drag;
-            
+
             var m1 = drag.m1;
             var constraint = shared.positionConstraint;
-            if(constraint){
+            if (constraint) {
                 drag.m = drag.m.clone();
                 constraint(drag);
             }
-            
+
             var m = drag.m;
             var r = drag.d;
-            
-            if(!preserveOrtho || isLeftRight){
-                var bx = Math.min(m1.x, m.x );
-                var ex = Math.max(m.x,  m1.x);
-                
+
+            if (!preserveOrtho || isLeftRight) {
+                var bx = Math.min(m1.x, m.x);
+                var ex = Math.max(m.x, m1.x);
+
                 bx = shared.bound(bx, 'x');
                 ex = shared.bound(ex, 'x');
-                
-                r.x  = bx;
+
+                r.x = bx;
                 r.dx = ex - bx;
             }
-            
-            if(!preserveOrtho || !isLeftRight){
-                var by = Math.min(m1.y, m.y );
-                var ey = Math.max(m.y,  m1.y);
-                
+
+            if (!preserveOrtho || !isLeftRight) {
+                var by = Math.min(m1.y, m.y);
+                var ey = Math.max(m.y, m1.y);
+
                 bx = shared.bound(by, 'y');
                 ex = shared.bound(ey, 'y');
-                
-                r.y  = by;
+
+                r.y = by;
                 r.dy = ey - by;
             }
-            
-            if(shared.autoRender){
+
+            if (shared.autoRender) {
                 this.render();
             }
-            
+
             pv.Mark.dispatch("resize", drag.scene, drag.index, ev);
         },
-        
-        dragend: function(ev){
+
+        dragend: function(ev) {
             var drag = ev.drag;
-            
+
             max = null;
             try {
                 pv.Mark.dispatch('resizeend', drag.scene, drag.index, ev);
@@ -21940,10 +23196,10 @@ pv.Behavior.resize = function(side) {
     };
 
     var mousedown = pv.Behavior.dragBase(shared);
-    
+
     /**
      * Sets or gets the preserveOrtho.
-     * 
+     *
      * When <tt>true</tt>
      * doesn't update coordinates orthogonal to the behaviou's side.
      * The default value is <tt>false</tt>.
@@ -21954,13 +23210,13 @@ pv.Behavior.resize = function(side) {
      * @param {boolean} [_] the new preserveOrtho parameter
      */
     mousedown.preserveOrtho = function(_) {
-        if (arguments.length){
-            preserveOrtho = !!_;
+        if (arguments.length) {
+            preserveOrtho = !! _;
             return mousedown;
         }
         return preserveOrtho;
     };
-    
+
     return mousedown;
 };
 /**
@@ -22003,75 +23259,78 @@ pv.Behavior.resize = function(side) {
  * @see pv.Panel#transform
  */
 pv.Behavior.pan = function() {
-  var scene, // scene context
-      index, // scene context
-      m1, // transformation matrix at the start of panning
-      v1, // mouse location at the start of panning
-      k, // inverse scale
-      bound; // whether to bound to the panel
+    var scene, // scene context
+        index, // scene context
+        m1, // transformation matrix at the start of panning
+        v1, // mouse location at the start of panning
+        k, // inverse scale
+        bound; // whether to bound to the panel
 
-  /** @private */
-  function mousedown() {
-    index = this.index;
-    scene = this.scene;
-    v1 = pv.vector(pv.event.pageX, pv.event.pageY);
-    m1 = this.transform();
-    k = 1 / (m1.k * this.scale);
-    if (bound) {
-      bound = {
-        x: (1 - m1.k) * this.width(),
-        y: (1 - m1.k) * this.height()
-      };
-    }
-  }
+    /** @private */
 
-  /** @private */
-  function mousemove(e) {
-    if (!scene) return;
-    scene.mark.context(scene, index, function() {
-        var x = (pv.event.pageX - v1.x) * k,
-            y = (pv.event.pageY - v1.y) * k,
-            m = m1.translate(x, y);
+    function mousedown() {
+        index = this.index;
+        scene = this.scene;
+        v1 = pv.vector(pv.event.pageX, pv.event.pageY);
+        m1 = this.transform();
+        k = 1 / (m1.k * this.scale);
         if (bound) {
-          m.x = Math.max(bound.x, Math.min(0, m.x));
-          m.y = Math.max(bound.y, Math.min(0, m.y));
+            bound = {
+                x: (1 - m1.k) * this.width(),
+                y: (1 - m1.k) * this.height()
+            };
         }
-        this.transform(m).render();
-      });
-    pv.Mark.dispatch("pan", scene, index, e);
-  }
-
-  /** @private */
-  function mouseup() {
-    scene = null;
-  }
-
-  /**
-   * Sets or gets the bound parameter. If bounding is enabled, the user will not
-   * be able to pan outside the initial panel bounds; this typically applies
-   * only when the pan behavior is used in tandem with the zoom behavior.
-   * Bounding is not enabled by default.
-   *
-   * <p>Note: enabling bounding after panning has already occurred will not
-   * immediately reset the transform. Bounding should be enabled before the
-   * panning behavior is applied.
-   *
-   * @function
-   * @returns {pv.Behavior.pan} this, or the current bound parameter.
-   * @name pv.Behavior.pan.prototype.bound
-   * @param {boolean} [x] the new bound parameter.
-   */
-  mousedown.bound = function(x) {
-    if (arguments.length) {
-      bound = Boolean(x);
-      return this;
     }
-    return Boolean(bound);
-  };
 
-  pv.listen(window, "mousemove", mousemove);
-  pv.listen(window, "mouseup", mouseup);
-  return mousedown;
+    /** @private */
+
+    function mousemove(e) {
+        if (!scene) return;
+        scene.mark.context(scene, index, function() {
+            var x = (pv.event.pageX - v1.x) * k,
+                y = (pv.event.pageY - v1.y) * k,
+                m = m1.translate(x, y);
+            if (bound) {
+                m.x = Math.max(bound.x, Math.min(0, m.x));
+                m.y = Math.max(bound.y, Math.min(0, m.y));
+            }
+            this.transform(m).render();
+        });
+        pv.Mark.dispatch("pan", scene, index, e);
+    }
+
+    /** @private */
+
+    function mouseup() {
+        scene = null;
+    }
+
+    /**
+     * Sets or gets the bound parameter. If bounding is enabled, the user will not
+     * be able to pan outside the initial panel bounds; this typically applies
+     * only when the pan behavior is used in tandem with the zoom behavior.
+     * Bounding is not enabled by default.
+     *
+     * <p>Note: enabling bounding after panning has already occurred will not
+     * immediately reset the transform. Bounding should be enabled before the
+     * panning behavior is applied.
+     *
+     * @function
+     * @returns {pv.Behavior.pan} this, or the current bound parameter.
+     * @name pv.Behavior.pan.prototype.bound
+     * @param {boolean} [x] the new bound parameter.
+     */
+    mousedown.bound = function(x) {
+        if (arguments.length) {
+            bound = Boolean(x);
+            return this;
+        }
+        return Boolean(bound);
+    };
+
+    pv.listen(window, "mousemove", mousemove);
+    pv.listen(window, "mouseup", mouseup);
+    return mousedown;
 };
 /**
  * Returns a new zoom behavior to be registered on mousewheel events.
@@ -22113,50 +23372,51 @@ pv.Behavior.pan = function() {
  * @param {number} speed
  */
 pv.Behavior.zoom = function(speed) {
-  var bound; // whether to bound to the panel
+    var bound; // whether to bound to the panel
 
-  if (!arguments.length) speed = 1 / 48;
+    if (!arguments.length) speed = 1 / 48;
 
-  /** @private */
-  function mousewheel(e) {
-    var v = this.mouse(),
-        k = pv.event.wheel * speed,
-        m = this.transform().translate(v.x, v.y)
-            .scale((k < 0) ? (1e3 / (1e3 - k)) : ((1e3 + k) / 1e3))
-            .translate(-v.x, -v.y);
-    if (bound) {
-      m.k = Math.max(1, m.k);
-      m.x = Math.max((1 - m.k) * this.width(), Math.min(0, m.x));
-      m.y = Math.max((1 - m.k) * this.height(), Math.min(0, m.y));
+    /** @private */
+
+    function mousewheel(e) {
+        var v = this.mouse(),
+            k = pv.event.wheel * speed,
+            m = this.transform().translate(v.x, v.y)
+                .scale((k < 0) ? (1e3 / (1e3 - k)) : ((1e3 + k) / 1e3))
+                .translate(-v.x, -v.y);
+        if (bound) {
+            m.k = Math.max(1, m.k);
+            m.x = Math.max((1 - m.k) * this.width(), Math.min(0, m.x));
+            m.y = Math.max((1 - m.k) * this.height(), Math.min(0, m.y));
+        }
+        this.transform(m).render();
+        pv.Mark.dispatch("zoom", this.scene, this.index, e);
     }
-    this.transform(m).render();
-    pv.Mark.dispatch("zoom", this.scene, this.index, e);
-  }
 
-  /**
-   * Sets or gets the bound parameter. If bounding is enabled, the user will not
-   * be able to zoom out farther than the initial panel bounds. Bounding is not
-   * enabled by default. If this behavior is used in tandem with the pan
-   * behavior, both should use the same bound parameter.
-   *
-   * <p>Note: enabling bounding after zooming has already occurred will not
-   * immediately reset the transform. Bounding should be enabled before the zoom
-   * behavior is applied.
-   *
-   * @function
-   * @returns {pv.Behavior.zoom} this, or the current bound parameter.
-   * @name pv.Behavior.zoom.prototype.bound
-   * @param {boolean} [x] the new bound parameter.
-   */
-  mousewheel.bound = function(x) {
-    if (arguments.length) {
-      bound = Boolean(x);
-      return this;
-    }
-    return Boolean(bound);
-  };
+    /**
+     * Sets or gets the bound parameter. If bounding is enabled, the user will not
+     * be able to zoom out farther than the initial panel bounds. Bounding is not
+     * enabled by default. If this behavior is used in tandem with the pan
+     * behavior, both should use the same bound parameter.
+     *
+     * <p>Note: enabling bounding after zooming has already occurred will not
+     * immediately reset the transform. Bounding should be enabled before the zoom
+     * behavior is applied.
+     *
+     * @function
+     * @returns {pv.Behavior.zoom} this, or the current bound parameter.
+     * @name pv.Behavior.zoom.prototype.bound
+     * @param {boolean} [x] the new bound parameter.
+     */
+    mousewheel.bound = function(x) {
+        if (arguments.length) {
+            bound = Boolean(x);
+            return this;
+        }
+        return Boolean(bound);
+    };
 
-  return mousewheel;
+    return mousewheel;
 };
 /**
  * @ignore
@@ -22237,114 +23497,112 @@ pv.Geo = function() {};
  */
 pv.Geo.projections = {
 
-  /** @see http://en.wikipedia.org/wiki/Mercator_projection */
-  mercator: {
-    project: function(latlng) {
-      return {
-          x: latlng.lng / 180,
-          y: latlng.lat > 85 ? 1 : latlng.lat < -85 ? -1
-              : Math.log(Math.tan(Math.PI / 4
-              + pv.radians(latlng.lat) / 2)) / Math.PI
-        };
+    /** @see http://en.wikipedia.org/wiki/Mercator_projection */
+    mercator: {
+        project: function(latlng) {
+            return {
+                x: latlng.lng / 180,
+                y: latlng.lat > 85 ? 1 : latlng.lat < -85 ? -1 : Math.log(Math.tan(Math.PI / 4 + pv.radians(latlng.lat) / 2)) / Math.PI
+            };
+        },
+        invert: function(xy) {
+            return {
+                lng: xy.x * 180,
+                lat: pv.degrees(2 * Math.atan(Math.exp(xy.y * Math.PI)) - Math.PI / 2)
+            };
+        }
     },
-    invert: function(xy) {
-      return {
-          lng: xy.x * 180,
-          lat: pv.degrees(2 * Math.atan(Math.exp(xy.y * Math.PI)) - Math.PI / 2)
-        };
-    }
-  },
 
-  /** @see http://en.wikipedia.org/wiki/Gall-Peters_projection */
-  "gall-peters": {
-    project: function(latlng) {
-      return {
-          x: latlng.lng / 180,
-          y: Math.sin(pv.radians(latlng.lat))
-        };
+    /** @see http://en.wikipedia.org/wiki/Gall-Peters_projection */
+    "gall-peters": {
+        project: function(latlng) {
+            return {
+                x: latlng.lng / 180,
+                y: Math.sin(pv.radians(latlng.lat))
+            };
+        },
+        invert: function(xy) {
+            return {
+                lng: xy.x * 180,
+                lat: pv.degrees(Math.asin(xy.y))
+            };
+        }
     },
-    invert: function(xy) {
-      return {
-          lng: xy.x * 180,
-          lat: pv.degrees(Math.asin(xy.y))
-        };
-    }
-  },
 
-  /** @see http://en.wikipedia.org/wiki/Sinusoidal_projection */
-  sinusoidal: {
-    project: function(latlng) {
-      return {
-          x: pv.radians(latlng.lng) * Math.cos(pv.radians(latlng.lat)) / Math.PI,
-          y: latlng.lat / 90
-        };
+    /** @see http://en.wikipedia.org/wiki/Sinusoidal_projection */
+    sinusoidal: {
+        project: function(latlng) {
+            return {
+                x: pv.radians(latlng.lng) * Math.cos(pv.radians(latlng.lat)) / Math.PI,
+                y: latlng.lat / 90
+            };
+        },
+        invert: function(xy) {
+            return {
+                lng: pv.degrees((xy.x * Math.PI) / Math.cos(xy.y * Math.PI / 2)),
+                lat: xy.y * 90
+            };
+        }
     },
-    invert: function(xy) {
-      return {
-          lng: pv.degrees((xy.x * Math.PI) / Math.cos(xy.y * Math.PI / 2)),
-          lat: xy.y * 90
-        };
-    }
-  },
 
-  /** @see http://en.wikipedia.org/wiki/Aitoff_projection */
-  aitoff: {
-    project: function(latlng) {
-      var l = pv.radians(latlng.lng),
-          f = pv.radians(latlng.lat),
-          a = Math.acos(Math.cos(f) * Math.cos(l / 2));
-      return {
-          x: 2 * (a ? (Math.cos(f) * Math.sin(l / 2) * a / Math.sin(a)) : 0) / Math.PI,
-          y: 2 * (a ? (Math.sin(f) * a / Math.sin(a)) : 0) / Math.PI
-        };
+    /** @see http://en.wikipedia.org/wiki/Aitoff_projection */
+    aitoff: {
+        project: function(latlng) {
+            var l = pv.radians(latlng.lng),
+                f = pv.radians(latlng.lat),
+                a = Math.acos(Math.cos(f) * Math.cos(l / 2));
+            return {
+                x: 2 * (a ? (Math.cos(f) * Math.sin(l / 2) * a / Math.sin(a)) : 0) / Math.PI,
+                y: 2 * (a ? (Math.sin(f) * a / Math.sin(a)) : 0) / Math.PI
+            };
+        },
+        invert: function(xy) {
+            var x = xy.x * Math.PI / 2,
+                y = xy.y * Math.PI / 2;
+            return {
+                lng: pv.degrees(x / Math.cos(y)),
+                lat: pv.degrees(y)
+            };
+        }
     },
-    invert: function(xy) {
-      var x = xy.x * Math.PI / 2,
-          y = xy.y * Math.PI / 2;
-      return {
-          lng: pv.degrees(x / Math.cos(y)),
-          lat: pv.degrees(y)
-        };
-    }
-  },
 
-  /** @see http://en.wikipedia.org/wiki/Hammer_projection */
-  hammer: {
-    project: function(latlng) {
-      var l = pv.radians(latlng.lng),
-          f = pv.radians(latlng.lat),
-          c = Math.sqrt(1 + Math.cos(f) * Math.cos(l / 2));
-      return {
-          x: 2 * Math.SQRT2 * Math.cos(f) * Math.sin(l / 2) / c / 3,
-          y: Math.SQRT2 * Math.sin(f) / c / 1.5
-        };
+    /** @see http://en.wikipedia.org/wiki/Hammer_projection */
+    hammer: {
+        project: function(latlng) {
+            var l = pv.radians(latlng.lng),
+                f = pv.radians(latlng.lat),
+                c = Math.sqrt(1 + Math.cos(f) * Math.cos(l / 2));
+            return {
+                x: 2 * Math.SQRT2 * Math.cos(f) * Math.sin(l / 2) / c / 3,
+                y: Math.SQRT2 * Math.sin(f) / c / 1.5
+            };
+        },
+        invert: function(xy) {
+            var x = xy.x * 3,
+                y = xy.y * 1.5,
+                z = Math.sqrt(1 - x * x / 16 - y * y / 4);
+            return {
+                lng: pv.degrees(2 * Math.atan2(z * x, 2 * (2 * z * z - 1))),
+                lat: pv.degrees(Math.asin(z * y))
+            };
+        }
     },
-    invert: function(xy) {
-      var x = xy.x * 3,
-          y = xy.y * 1.5,
-          z = Math.sqrt(1 - x * x / 16 - y * y / 4);
-      return {
-          lng: pv.degrees(2 * Math.atan2(z * x, 2 * (2 * z * z - 1))),
-          lat: pv.degrees(Math.asin(z * y))
-        };
-    }
-  },
 
-  /** The identity or "none" projection. */
-  identity: {
-    project: function(latlng) {
-      return {
-          x: latlng.lng / 180,
-          y: latlng.lat / 90
-        };
-    },
-    invert: function(xy) {
-      return {
-          lng: xy.x * 180,
-          lat: xy.y * 90
-        };
+    /** The identity or "none" projection. */
+    identity: {
+        project: function(latlng) {
+            return {
+                x: latlng.lng / 180,
+                y: latlng.lat / 90
+            };
+        },
+        invert: function(xy) {
+            return {
+                lng: xy.x * 180,
+                lat: xy.y * 90
+            };
+        }
     }
-  }
 };
 /**
  * Returns a geographic scale. The arguments to this constructor are optional,
@@ -22364,290 +23622,338 @@ pv.Geo.projections = {
  * @see pv.Geo.scale#ticks
  */
 pv.Geo.scale = function(p) {
-  var rmin = {x: 0, y: 0}, // default range minimum
-      rmax = {x: 1, y: 1}, // default range maximum
-      d = [], // default domain
-      j = pv.Geo.projections.identity, // domain <-> normalized range
-      x = pv.Scale.linear(-1, 1).range(0, 1), // normalized <-> range
-      y = pv.Scale.linear(-1, 1).range(1, 0), // normalized <-> range
-      c = {lng: 0, lat: 0}, // Center Point
-      lastLatLng, // cached latlng
-      lastPoint; // cached point
-
-  /** @private */
-  function scale(latlng) {
-    if (!lastLatLng
-        || (latlng.lng != lastLatLng.lng)
-        || (latlng.lat != lastLatLng.lat)) {
-      lastLatLng = latlng;
-      var p = project(latlng);
-      lastPoint = {x: x(p.x), y: y(p.y)};
-    }
-    return lastPoint;
-  }
-
-  /** @private */
-  function project(latlng) {
-    var offset = {lng: latlng.lng - c.lng, lat: latlng.lat};
-    return j.project(offset);
-  }
-
-  /** @private */
-  function invert(xy) {
-    var latlng = j.invert(xy);
-    latlng.lng += c.lng;
-    return latlng;
-  }
-
-  /** Returns the projected x-coordinate. */
-  scale.x = function(latlng) {
-    return scale(latlng).x;
-  };
-
-  /** Returns the projected y-coordinate. */
-  scale.y = function(latlng) {
-    return scale(latlng).y;
-  };
-
-  /**
-   * Abstract; this is a local namespace on a given geographic scale.
-   *
-   * @namespace Tick functions for geographic scales. Because geographic scales
-   * represent two-dimensional transformations (as opposed to one-dimensional
-   * transformations typical of other scales), the tick values are similarly
-   * represented as two-dimensional coordinates in the input domain, i.e.,
-   * {@link pv.Geo.LatLng} objects.
-   *
-   * <p>Also, note that non-rectilinear projections, such as sinsuoidal and
-   * aitoff, may not produce straight lines for constant longitude or constant
-   * latitude. Therefore the returned array of ticks is a two-dimensional array,
-   * sampling various latitudes as constant longitude, and vice versa.
-   *
-   * <p>The tick lines can therefore be approximated as polylines, either with
-   * "linear" or "cardinal" interpolation. This is not as accurate as drawing
-   * the true curve through the projection space, but is usually sufficient.
-   *
-   * @name pv.Geo.scale.prototype.ticks
-   * @see pv.Geo.scale
-   * @see pv.Geo.LatLng
-   * @see pv.Line#interpolate
-   */
-  scale.ticks = {
-
-    /**
-     * Returns longitude ticks.
-     *
-     * @function
-     * @param {number} [m] the desired number of ticks.
-     * @returns {array} a nested array of <tt>pv.Geo.LatLng</tt> ticks.
-     * @name pv.Geo.scale.prototype.ticks.prototype.lng
-     */
-    lng: function(m) {
-      var lat, lng;
-      if (d.length > 1) {
-        var s = pv.Scale.linear();
-        if (m == undefined) m = 10;
-        lat = s.domain(d, function(d) { return d.lat; }).ticks(m);
-        lng = s.domain(d, function(d) { return d.lng; }).ticks(m);
-      } else {
-        lat = pv.range(-80, 81, 10);
-        lng = pv.range(-180, 181, 10);
-      }
-      return lng.map(function(lng) {
-        return lat.map(function(lat) {
-          return {lat: lat, lng: lng};
-        });
-      });
-    },
-
-    /**
-     * Returns latitude ticks.
-     *
-     * @function
-     * @param {number} [m] the desired number of ticks.
-     * @returns {array} a nested array of <tt>pv.Geo.LatLng</tt> ticks.
-     * @name pv.Geo.scale.prototype.ticks.prototype.lat
-     */
-    lat: function(m) {
-      return pv.transpose(scale.ticks.lng(m));
-    }
-  };
-
-  /**
-   * Inverts the specified value in the output range, returning the
-   * corresponding value in the input domain. This is frequently used to convert
-   * the mouse location (see {@link pv.Mark#mouse}) to a value in the input
-   * domain. Inversion is only supported for numeric ranges, and not colors.
-   *
-   * <p>Note that this method does not do any rounding or bounds checking. If
-   * the input domain is discrete (e.g., an array index), the returned value
-   * should be rounded. If the specified <tt>y</tt> value is outside the range,
-   * the returned value may be equivalently outside the input domain.
-   *
-   * @function
-   * @name pv.Geo.scale.prototype.invert
-   * @param {number} y a value in the output range (a pixel location).
-   * @returns {number} a value in the input domain.
-   */
-  scale.invert = function(p) {
-    return invert({x: x.invert(p.x), y: y.invert(p.y)});
-  };
-
-  /**
-   * Sets or gets the input domain. Note that unlike quantitative scales, the
-   * domain cannot be reduced to a simple rectangle (i.e., minimum and maximum
-   * values for latitude and longitude). Instead, the domain values must be
-   * projected to normalized space, effectively finding the domain in normalized
-   * space rather than in terms of latitude and longitude. Thus, changing the
-   * projection requires recomputing the normalized domain.
-   *
-   * <p>This method can be invoked several ways:
-   *
-   * <p>1. <tt>domain(values...)</tt>
-   *
-   * <p>Specifying the domain as a series of {@link pv.Geo.LatLng}s is the most
-   * explicit and recommended approach. However, if the domain values are
-   * derived from data, you may find the second method more appropriate.
-   *
-   * <p>2. <tt>domain(array, f)</tt>
-   *
-   * <p>Rather than enumerating the domain explicitly, you can specify a single
-   * argument of an array. In addition, you can specify an optional accessor
-   * function to extract the domain values (as {@link pv.Geo.LatLng}s) from the
-   * array. If the specified array has fewer than two elements, this scale will
-   * default to the full normalized domain.
-   *
-   * <p>2. <tt>domain()</tt>
-   *
-   * <p>Invoking the <tt>domain</tt> method with no arguments returns the
-   * current domain as an array.
-   *
-   * @function
-   * @name pv.Geo.scale.prototype.domain
-   * @param {...} domain... domain values.
-   * @returns {pv.Geo.scale} <tt>this</tt>, or the current domain.
-   */
-  scale.domain = function(array, f) {
-    if (arguments.length) {
-      d = (array instanceof Array)
-          ? ((arguments.length > 1) ? pv.map(array, f) : array)
-          : Array.prototype.slice.call(arguments);
-      if (d.length > 1) {
-        var lngs = d.map(function(c) { return c.lng; });
-        var lats = d.map(function(c) { return c.lat; });
+    var rmin = {
+        x: 0,
+        y: 0
+    }, // default range minimum
+        rmax = {
+            x: 1,
+            y: 1
+        }, // default range maximum
+        d = [], // default domain
+        j = pv.Geo.projections.identity, // domain <-> normalized range
+        x = pv.Scale.linear(-1, 1).range(0, 1), // normalized <-> range
+        y = pv.Scale.linear(-1, 1).range(1, 0), // normalized <-> range
         c = {
-          lng: (pv.max(lngs) + pv.min(lngs)) / 2,
-          lat: (pv.max(lats) + pv.min(lats)) / 2
+            lng: 0,
+            lat: 0
+        }, // Center Point
+        lastLatLng, // cached latlng
+        lastPoint; // cached point
+
+    /** @private */
+
+    function scale(latlng) {
+        if (!lastLatLng || (latlng.lng != lastLatLng.lng) || (latlng.lat != lastLatLng.lat)) {
+            lastLatLng = latlng;
+            var p = project(latlng);
+            lastPoint = {
+                x: x(p.x),
+                y: y(p.y)
+            };
+        }
+        return lastPoint;
+    }
+
+    /** @private */
+
+    function project(latlng) {
+        var offset = {
+            lng: latlng.lng - c.lng,
+            lat: latlng.lat
         };
-        var n = d.map(project); // normalized domain
-        x.domain(n, function(p) { return p.x; });
-        y.domain(n, function(p) { return p.y; });
-      } else {
-        c = {lng: 0, lat: 0};
-        x.domain(-1, 1);
-        y.domain(-1, 1);
-      }
-      lastLatLng = null; // invalidate the cache
-      return this;
+        return j.project(offset);
     }
-    return d;
-  };
 
-  /**
-   * Sets or gets the output range. This method can be invoked several ways:
-   *
-   * <p>1. <tt>range(min, max)</tt>
-   *
-   * <p>If two objects are specified, the arguments should be {@link pv.Vector}s
-   * which specify the minimum and maximum values of the x- and y-coordinates
-   * explicitly.
-   *
-   * <p>2. <tt>range(width, height)</tt>
-   *
-   * <p>If two numbers are specified, the arguments specify the maximum values
-   * of the x- and y-coordinates explicitly; the minimum values are implicitly
-   * zero.
-   *
-   * <p>3. <tt>range()</tt>
-   *
-   * <p>Invoking the <tt>range</tt> method with no arguments returns the current
-   * range as an array of two {@link pv.Vector}s: the minimum (top-left) and
-   * maximum (bottom-right) values.
-   *
-   * @function
-   * @name pv.Geo.scale.prototype.range
-   * @param {...} range... range values.
-   * @returns {pv.Geo.scale} <tt>this</tt>, or the current range.
-   */
-  scale.range = function(min, max) {
-    if (arguments.length) {
-      if (typeof min == "object") {
-        rmin = {x: Number(min.x), y: Number(min.y)};
-        rmax = {x: Number(max.x), y: Number(max.y)};
-      } else {
-        rmin = {x: 0, y: 0};
-        rmax = {x: Number(min), y: Number(max)};
-      }
-      x.range(rmin.x, rmax.x);
-      y.range(rmax.y, rmin.y); // XXX flipped?
-      lastLatLng = null; // invalidate the cache
-      return this;
+    /** @private */
+
+    function invert(xy) {
+        var latlng = j.invert(xy);
+        latlng.lng += c.lng;
+        return latlng;
     }
-    return [rmin, rmax];
-  };
 
-  /**
-   * Sets or gets the projection. This method can be invoked several ways:
-   *
-   * <p>1. <tt>projection(string)</tt>
-   *
-   * <p>Specifying a string sets the projection to the given named projection in
-   * {@link pv.Geo.projections}. If no such projection is found, the identity
-   * projection is used.
-   *
-   * <p>2. <tt>projection(object)</tt>
-   *
-   * <p>Specifying an object sets the projection to the given custom projection,
-   * which must implement the <i>forward</i> and <i>inverse</i> methods per the
-   * {@link pv.Geo.Projection} interface.
-   *
-   * <p>3. <tt>projection()</tt>
-   *
-   * <p>Invoking the <tt>projection</tt> method with no arguments returns the
-   * current object that defined the projection.
-   *
-   * @function
-   * @name pv.Scale.geo.prototype.projection
-   * @param {...} range... range values.
-   * @returns {pv.Scale.geo} <tt>this</tt>, or the current range.
-   */
-  scale.projection = function(p) {
-    if (arguments.length) {
-      j = typeof p == "string"
-          ? pv.Geo.projections[p] || pv.Geo.projections.identity
-          : p;
-      return this.domain(d); // recompute normalized domain
-    }
-    return p;
-  };
+    /** Returns the projected x-coordinate. */
+    scale.x = function(latlng) {
+        return scale(latlng).x;
+    };
 
-  /**
-   * Returns a view of this scale by the specified accessor function <tt>f</tt>.
-   * Given a scale <tt>g</tt>, <tt>g.by(function(d) d.foo)</tt> is equivalent to
-   * <tt>function(d) g(d.foo)</tt>. This method should be used judiciously; it
-   * is typically more clear to invoke the scale directly, passing in the value
-   * to be scaled.
-   *
-   * @function
-   * @name pv.Geo.scale.prototype.by
-   * @param {Function} f an accessor function.
-   * @returns {pv.Geo.scale} a view of this scale by the specified accessor
-   * function.
-   */
+    /** Returns the projected y-coordinate. */
+    scale.y = function(latlng) {
+        return scale(latlng).y;
+    };
 
-  pv.copyOwn(scale, pv.Scale.common);
+    /**
+     * Abstract; this is a local namespace on a given geographic scale.
+     *
+     * @namespace Tick functions for geographic scales. Because geographic scales
+     * represent two-dimensional transformations (as opposed to one-dimensional
+     * transformations typical of other scales), the tick values are similarly
+     * represented as two-dimensional coordinates in the input domain, i.e.,
+     * {@link pv.Geo.LatLng} objects.
+     *
+     * <p>Also, note that non-rectilinear projections, such as sinsuoidal and
+     * aitoff, may not produce straight lines for constant longitude or constant
+     * latitude. Therefore the returned array of ticks is a two-dimensional array,
+     * sampling various latitudes as constant longitude, and vice versa.
+     *
+     * <p>The tick lines can therefore be approximated as polylines, either with
+     * "linear" or "cardinal" interpolation. This is not as accurate as drawing
+     * the true curve through the projection space, but is usually sufficient.
+     *
+     * @name pv.Geo.scale.prototype.ticks
+     * @see pv.Geo.scale
+     * @see pv.Geo.LatLng
+     * @see pv.Line#interpolate
+     */
+    scale.ticks = {
+
+        /**
+         * Returns longitude ticks.
+         *
+         * @function
+         * @param {number} [m] the desired number of ticks.
+         * @returns {array} a nested array of <tt>pv.Geo.LatLng</tt> ticks.
+         * @name pv.Geo.scale.prototype.ticks.prototype.lng
+         */
+        lng: function(m) {
+            var lat, lng;
+            if (d.length > 1) {
+                var s = pv.Scale.linear();
+                if (m == undefined) m = 10;
+                lat = s.domain(d, function(d) {
+                    return d.lat;
+                }).ticks(m);
+                lng = s.domain(d, function(d) {
+                    return d.lng;
+                }).ticks(m);
+            } else {
+                lat = pv.range(-80, 81, 10);
+                lng = pv.range(-180, 181, 10);
+            }
+            return lng.map(function(lng) {
+                return lat.map(function(lat) {
+                    return {
+                        lat: lat,
+                        lng: lng
+                    };
+                });
+            });
+        },
+
+        /**
+         * Returns latitude ticks.
+         *
+         * @function
+         * @param {number} [m] the desired number of ticks.
+         * @returns {array} a nested array of <tt>pv.Geo.LatLng</tt> ticks.
+         * @name pv.Geo.scale.prototype.ticks.prototype.lat
+         */
+        lat: function(m) {
+            return pv.transpose(scale.ticks.lng(m));
+        }
+    };
+
+    /**
+     * Inverts the specified value in the output range, returning the
+     * corresponding value in the input domain. This is frequently used to convert
+     * the mouse location (see {@link pv.Mark#mouse}) to a value in the input
+     * domain. Inversion is only supported for numeric ranges, and not colors.
+     *
+     * <p>Note that this method does not do any rounding or bounds checking. If
+     * the input domain is discrete (e.g., an array index), the returned value
+     * should be rounded. If the specified <tt>y</tt> value is outside the range,
+     * the returned value may be equivalently outside the input domain.
+     *
+     * @function
+     * @name pv.Geo.scale.prototype.invert
+     * @param {number} y a value in the output range (a pixel location).
+     * @returns {number} a value in the input domain.
+     */
+    scale.invert = function(p) {
+        return invert({
+            x: x.invert(p.x),
+            y: y.invert(p.y)
+        });
+    };
+
+    /**
+     * Sets or gets the input domain. Note that unlike quantitative scales, the
+     * domain cannot be reduced to a simple rectangle (i.e., minimum and maximum
+     * values for latitude and longitude). Instead, the domain values must be
+     * projected to normalized space, effectively finding the domain in normalized
+     * space rather than in terms of latitude and longitude. Thus, changing the
+     * projection requires recomputing the normalized domain.
+     *
+     * <p>This method can be invoked several ways:
+     *
+     * <p>1. <tt>domain(values...)</tt>
+     *
+     * <p>Specifying the domain as a series of {@link pv.Geo.LatLng}s is the most
+     * explicit and recommended approach. However, if the domain values are
+     * derived from data, you may find the second method more appropriate.
+     *
+     * <p>2. <tt>domain(array, f)</tt>
+     *
+     * <p>Rather than enumerating the domain explicitly, you can specify a single
+     * argument of an array. In addition, you can specify an optional accessor
+     * function to extract the domain values (as {@link pv.Geo.LatLng}s) from the
+     * array. If the specified array has fewer than two elements, this scale will
+     * default to the full normalized domain.
+     *
+     * <p>2. <tt>domain()</tt>
+     *
+     * <p>Invoking the <tt>domain</tt> method with no arguments returns the
+     * current domain as an array.
+     *
+     * @function
+     * @name pv.Geo.scale.prototype.domain
+     * @param {...} domain... domain values.
+     * @returns {pv.Geo.scale} <tt>this</tt>, or the current domain.
+     */
+    scale.domain = function(array, f) {
+        if (arguments.length) {
+            d = (array instanceof Array) ? ((arguments.length > 1) ? pv.map(array, f) : array) : Array.prototype.slice.call(arguments);
+            if (d.length > 1) {
+                var lngs = d.map(function(c) {
+                    return c.lng;
+                });
+                var lats = d.map(function(c) {
+                    return c.lat;
+                });
+                c = {
+                    lng: (pv.max(lngs) + pv.min(lngs)) / 2,
+                    lat: (pv.max(lats) + pv.min(lats)) / 2
+                };
+                var n = d.map(project); // normalized domain
+                x.domain(n, function(p) {
+                    return p.x;
+                });
+                y.domain(n, function(p) {
+                    return p.y;
+                });
+            } else {
+                c = {
+                    lng: 0,
+                    lat: 0
+                };
+                x.domain(-1, 1);
+                y.domain(-1, 1);
+            }
+            lastLatLng = null; // invalidate the cache
+            return this;
+        }
+        return d;
+    };
+
+    /**
+     * Sets or gets the output range. This method can be invoked several ways:
+     *
+     * <p>1. <tt>range(min, max)</tt>
+     *
+     * <p>If two objects are specified, the arguments should be {@link pv.Vector}s
+     * which specify the minimum and maximum values of the x- and y-coordinates
+     * explicitly.
+     *
+     * <p>2. <tt>range(width, height)</tt>
+     *
+     * <p>If two numbers are specified, the arguments specify the maximum values
+     * of the x- and y-coordinates explicitly; the minimum values are implicitly
+     * zero.
+     *
+     * <p>3. <tt>range()</tt>
+     *
+     * <p>Invoking the <tt>range</tt> method with no arguments returns the current
+     * range as an array of two {@link pv.Vector}s: the minimum (top-left) and
+     * maximum (bottom-right) values.
+     *
+     * @function
+     * @name pv.Geo.scale.prototype.range
+     * @param {...} range... range values.
+     * @returns {pv.Geo.scale} <tt>this</tt>, or the current range.
+     */
+    scale.range = function(min, max) {
+        if (arguments.length) {
+            if (typeof min == "object") {
+                rmin = {
+                    x: Number(min.x),
+                    y: Number(min.y)
+                };
+                rmax = {
+                    x: Number(max.x),
+                    y: Number(max.y)
+                };
+            } else {
+                rmin = {
+                    x: 0,
+                    y: 0
+                };
+                rmax = {
+                    x: Number(min),
+                    y: Number(max)
+                };
+            }
+            x.range(rmin.x, rmax.x);
+            y.range(rmax.y, rmin.y); // XXX flipped?
+            lastLatLng = null; // invalidate the cache
+            return this;
+        }
+        return [rmin, rmax];
+    };
+
+    /**
+     * Sets or gets the projection. This method can be invoked several ways:
+     *
+     * <p>1. <tt>projection(string)</tt>
+     *
+     * <p>Specifying a string sets the projection to the given named projection in
+     * {@link pv.Geo.projections}. If no such projection is found, the identity
+     * projection is used.
+     *
+     * <p>2. <tt>projection(object)</tt>
+     *
+     * <p>Specifying an object sets the projection to the given custom projection,
+     * which must implement the <i>forward</i> and <i>inverse</i> methods per the
+     * {@link pv.Geo.Projection} interface.
+     *
+     * <p>3. <tt>projection()</tt>
+     *
+     * <p>Invoking the <tt>projection</tt> method with no arguments returns the
+     * current object that defined the projection.
+     *
+     * @function
+     * @name pv.Scale.geo.prototype.projection
+     * @param {...} range... range values.
+     * @returns {pv.Scale.geo} <tt>this</tt>, or the current range.
+     */
+    scale.projection = function(p) {
+        if (arguments.length) {
+            j = typeof p == "string" ? pv.Geo.projections[p] || pv.Geo.projections.identity : p;
+            return this.domain(d); // recompute normalized domain
+        }
+        return p;
+    };
+
+    /**
+     * Returns a view of this scale by the specified accessor function <tt>f</tt>.
+     * Given a scale <tt>g</tt>, <tt>g.by(function(d) d.foo)</tt> is equivalent to
+     * <tt>function(d) g(d.foo)</tt>. This method should be used judiciously; it
+     * is typically more clear to invoke the scale directly, passing in the value
+     * to be scaled.
+     *
+     * @function
+     * @name pv.Geo.scale.prototype.by
+     * @param {Function} f an accessor function.
+     * @returns {pv.Geo.scale} a view of this scale by the specified accessor
+     * function.
+     */
+
+    pv.copyOwn(scale, pv.Scale.common);
 
 
-  if (arguments.length) scale.projection(p);
-  return scale;
+    if (arguments.length) scale.projection(p);
+    return scale;
 };
+
+    return pv;
+});
