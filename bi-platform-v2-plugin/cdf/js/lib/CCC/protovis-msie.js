@@ -795,7 +795,8 @@ pv.VmlScene = {
     "mouseout",
     "mousemove",
     "click",
-    "dblclick"
+    "dblclick",
+    "contextmenu"
   ],
 
   // implicit values are not used for VML, assigned render faster and we have

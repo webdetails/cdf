@@ -62,6 +62,18 @@ var ChartComponent =  UnmanagedComponent.extend({
         } else {
             $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
         }
+    },
+
+    renderChart: function() {
+      var cd = this.chartDefinition;
+      if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
+        this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
+      } else if(this.valuesArray != undefined) {
+        this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
+      } else {
+        // initialize the component only
+        this.synchronous(_.bind(this.render, this));
+      }
     }
 });
 
@@ -71,9 +83,8 @@ var ProtovisComponent =  ChartComponent.extend({
     if (this.parameters == undefined) {
       this.parameters = [];
     };
-    // clear previous table
-
-    this.triggerQuery(this.chartDefinition, _.bind(this.render,this));
+    
+    this.renderChart();
   },
 
   render: function(values) {
@@ -159,18 +170,6 @@ var CccComponent = BaseCccComponent.extend({
         }
     },
 
-    renderChart: function() {
-      var cd = this.chartDefinition;
-      if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
-        this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
-      } else if(this.valuesArray != undefined) {
-        this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
-      } else {
-        // initialize the component only
-        this.synchronous(_.bind(this.render, this));
-      }
-    },
-  
     render: function(values) {
 
         $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
@@ -197,7 +196,6 @@ var CccComponent = BaseCccComponent.extend({
         }
         this.chart.render();
     }
-
 });
 
 
