@@ -187,6 +187,9 @@
     setErrorCallback: function(callback) {
       this.setOption('errorCallback', callback);
     },
+    setSearchPattern: function (pattern){
+      this.setOption('searchPattern', pattern);
+    },
 
     /* Pagination
      *
@@ -282,7 +285,7 @@
     name: "cpk",
     label: "CPK",
     defaults: {
-      baseUrl: '/pentaho/content',
+      baseUrl:  Dashboards.getWebAppPath() + '/content',
       pluginId: '',
       endpoint: '',
       systemParams: {},
@@ -338,12 +341,13 @@
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: "/pentaho/content/cda/doQuery?",
+      url: Dashboards.getWebAppPath() + "/content/cda/doQuery?",
       file: '',
       id: '',
       outputIdx: '1',
       sortBy: '',
-      ajaxOptions: { }
+      ajaxOptions: { },
+      searchPattern: ''
     },
 
     init: function (opts){
@@ -390,6 +394,7 @@
       queryDefinition.pageSize = this.getOption('pageSize');
       queryDefinition.pageStart = this.getOption('page');
       queryDefinition.sortBy = this.getOption('sortBy');
+      queryDefinition.paramsearchBox = this.getOption('searchPattern');
       return queryDefinition;
     },
 
@@ -453,7 +458,8 @@
      * column (descending).
      */
     setSortBy: function(sortBy) {
-      var newSort;
+      var newSort,
+          myself = this;
       if (sortBy === null || sortBy === undefined || sortBy === '') {
         newSort = '';
       }
@@ -491,9 +497,9 @@
        */
       var same;
       if (newSort instanceof Array) {
-        same = newSort.length != this.getOption('sortBy').length;
+        same = newSort.length != myself.getOption('sortBy').length;
         $.each(newSort,function(i,d){
-          same = (same && d == this.getOption('sortBy')[i]);
+          same = (same && d == myself.getOption('sortBy')[i]);
           if(!same) {
             return false;
           }

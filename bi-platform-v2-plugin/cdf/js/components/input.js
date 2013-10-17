@@ -63,9 +63,9 @@ var SelectBaseComponent = InputBaseComponent.extend({
   //externalPlugin:
   //extraOptions:
   //changeMode: ['immediate'], 'focus', 'timeout-focus'
-  //changeTimeout: [1500], // in milliseconds
+  //changeTimeout: [2000], // in milliseconds
   //changeTimeoutScrollFraction: 1,
-  //changeTimeoutChangeFraction: 2/3,
+  //changeTimeoutChangeFraction: 5/8,
   //NOTE: changeMode 'timeout-focus' is not supported in mobile and fallsback to 'focus'
 
   draw: function(myArray) {
@@ -235,9 +235,9 @@ var SelectBaseComponent = InputBaseComponent.extend({
       timScrollFraction = Math.max(0, timScrollFraction != null ? timScrollFraction : 1  );
       
       var timChangeFraction = me.changeTimeoutChangeFraction;
-      timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 2/3);
+      timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 5/8);
       
-      var changeTimeout = Math.max(100, me.changeTimeout || 1500);
+      var changeTimeout = Math.max(100, me.changeTimeout || 2000);
       var changeTimeoutScroll = timScrollFraction * changeTimeout;
       var changeTimeoutChange = timChangeFraction * changeTimeout;
       

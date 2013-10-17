@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130612
+//VERSION TRUNK-20130717
 
 var pvc = (function(def, pv) {
 
@@ -57,7 +57,7 @@ pvc.setDebug = function(level) {
 /*global console:true*/
 
 function pvc_syncLog() {
-    if (pvc.debug && typeof console !== "undefined") {
+    if (pvc.debug > 0 && typeof console !== "undefined") {
         ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
         .forEach(function(ps) {
             ps = ps instanceof Array ? ps : [ps, ps];
@@ -628,17 +628,21 @@ pvc.makeExtensionAbsId = function(id, prefix) {
        ;
 };
 
-pvc.makeEnumParser = function(enumName, keys, dk) {
-    var keySet = {};
-    keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
+pvc.makeEnumParser = function(enumName, hasKey, dk) {
+    if(def.array.is(hasKey)) {
+        var keySet = {};
+        hasKey.forEach(function(k) { if(k) { keySet[k.toLowerCase()] = k; }});
+        hasKey = function(k) { return def.hasOwn(keySet, k); };
+    }
+    
     if(dk) { dk = dk.toLowerCase(); }
 
     return function(k) {
         if(k) { k = (''+k).toLowerCase(); }
 
-        if(!def.hasOwn(keySet, k)) {
+        if(!hasKey(k)) {
             if(k && pvc.debug >= 2) {
-                pvc.log("[Warning] Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
+                pvc.warn("Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
             }
 
             k = dk;
@@ -666,6 +670,9 @@ pvc.parseDistinctIndexArray = function(value, min, max){
     return a.length ? a : null;
 };
 
+pvc.parseMultiChartOverflow =
+    pvc.makeEnumParser('multiChartOverflow', ['grow', 'fit', 'clip'], 'grow');
+
 pvc.parseLegendClickMode =
     pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
 
@@ -675,11 +682,11 @@ pvc.parseTooltipAutoContent =
 pvc.parseSelectionMode =
     pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
 
-    pvc.parseClearSelectionMode =
-        pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
+pvc.parseClearSelectionMode =
+    pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
-pvc.parseShape =
-    pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
+// ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar']
+pvc.parseShape = pvc.makeEnumParser('shape', pv.Scene.hasSymbol, null);
 
 pvc.parseTreemapColorMode =
     pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
@@ -4163,8 +4170,8 @@ def.type('pvc.data.TranslationOper')
 .init(function(chart, complexTypeProj, source, metadata, options) {
     this.chart = chart;
     this.complexTypeProj = complexTypeProj;
-    this.source   = source;
-    this.metadata = metadata || {};
+    this.source   = source   || def.fail.argumentRequired('source'  );
+    this.metadata = metadata || def.fail.argumentRequired('metadata');
     this.options  = options  || {};
 
     this._initType();
@@ -18628,7 +18635,7 @@ def
 
     if(parent) {
         this.root = parent.root;
-        this.smallColIndex   = options.smallColIndex; // required for the logId msk, setup in base
+        this.smallColIndex   = options.smallColIndex; // required for the logId mask, setup in base
         this.smallRowIndex   = options.smallRowIndex;
     } else {
         this.root = this;
@@ -18693,26 +18700,26 @@ def
     root: null,
 
     /**
-     * Indicates if the chart has been pre-rendered.
+     * Indicates if the chart has been created.
      * <p>
      * This field is set to <tt>false</tt>
-     * at the beginning of the {@link #_preRender} method
+     * at the beginning of the {@link #_create} method
      * and set to <tt>true</tt> at the end.
      * </p>
      * <p>
      * When a chart is re-rendered it can, 
-     * optionally, also repeat the pre-render phase. 
+     * optionally, also repeat the creation phase. 
      * </p>
      * 
      * @type boolean
      */
-    isPreRendered: false,
+    isCreated: false,
 
     /**
      * The version value of the current/last creation.
      * 
      * <p>
-     * This value is changed on each pre-render of the chart.
+     * This value is changed on each creation of the chart.
      * It can be useful to invalidate cached information that 
      * is only valid for each creation.
      * </p>
@@ -18729,7 +18736,7 @@ def
      * when the protovis' panel render is about to start.
      * 
      * <p>
-     * Note that this is <i>after</i> the pre-render phase.
+     * Note that this is <i>after</i> the creation phase.
      * </p>
      * 
      * <p>
@@ -18767,6 +18774,8 @@ def
      */
     multiChartPageIndex: null,
     
+    _multiChartOverflowClipped: false,
+
     left: 0,
     top:  0,
     
@@ -18785,7 +18794,7 @@ def
             this.constructor + this._createLogChildSuffix();
     },
     
-    _createLogChildSuffix: function(){
+    _createLogChildSuffix: function() {
         return this.parent ? 
                (" (" + (this.smallRowIndex + 1) + "," + 
                        (this.smallColIndex + 1) + ")") : 
@@ -18801,25 +18810,23 @@ def
     
     /**
      * Building the visualization is made in 2 stages:
-     * First, the {@link #_preRender} method prepares and builds 
+     * First, the {@link #_create} method prepares and builds 
      * every object that will be used.
      * 
      * Later the {@link #render} method effectively renders.
      */
-    _preRender: function(keyArgs) {
-        this._preRenderPhase1(keyArgs);
-        this._preRenderPhase2(keyArgs);
+    _create: function(keyArgs) {
+        this._createPhase1(keyArgs);
+        this._createPhase2(keyArgs);
     },
     
-    _preRenderPhase1: function(keyArgs) {
-        /* Increment pre-render version to allow for cache invalidation  */
+    _createPhase1: function(keyArgs) {
+        /* Increment create version to allow for cache invalidation  */
         this._createVersion++;
         
-        this.isPreRendered = false;
+        this.isCreated = false;
         
-        if(pvc.debug >= 3){
-            this._log("Prerendering");
-        }
+        if(pvc.debug >= 3) { this._log("Creating"); }
         
         this.children = [];
         
@@ -18836,7 +18843,7 @@ def
          * (must be done AFTER processing options
          *  because of width, height properties and noData extension point...) 
          */
-        this._checkNoDataI();
+        if(!this.parent) { this._checkNoDataI(); }
         
         /* Initialize root visual roles.
          * The Complex Type gets defined on the first load of data.
@@ -18855,7 +18862,7 @@ def
         this._initData(keyArgs);
 
         /* When data is excluded, there may be no data after all */
-        this._checkNoDataII();
+        if(!this.parent) { this._checkNoDataII(); }
         
         var hasMultiRole = this.visualRoles.multiChart.isBound();
         
@@ -18864,9 +18871,8 @@ def
         
         /* Initialize axes */
         this._initAxes(hasMultiRole);
-        this._bindAxes(hasMultiRole);
-        
-        /* Trends and Interpolation */
+
+        /* Trends and Interpolation on Leaf Charts */
         if(this.parent || !hasMultiRole){
             // Interpolated data affects generated trends
             this._interpolate(hasMultiRole);
@@ -18878,18 +18884,18 @@ def
         this._setAxesScales(hasMultiRole);
     },
     
-    _preRenderPhase2: function(/*keyArgs*/){
+    _createPhase2: function(/*keyArgs*/) {
         var hasMultiRole = this.visualRoles.multiChart.isBound();
         
         /* Initialize chart panels */
         this._initChartPanels(hasMultiRole);
         
-        this.isPreRendered = true;
+        this.isCreated = true;
     },
 
     // --------------
     
-    _setSmallLayout: function(keyArgs){
+    _setSmallLayout: function(keyArgs) {
         if(keyArgs){
             var basePanel = this.basePanel;
             
@@ -18904,7 +18910,7 @@ def
             
             if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
                 if(basePanel){
-                    basePanel.size = new pvc_Size (this.width, this.height);
+                    basePanel.size = new pvc_Size(this.width, this.height);
                 }
             }
             
@@ -18982,6 +18988,7 @@ def
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
                 
+                var preventUnselect = false;
                 if(options.selectable) {
                     ibits |= I.Selectable;
                     
@@ -18992,11 +18999,13 @@ def
                             
                         case 'focuswindow':
                             ibits |= I.SelectableByFocusWindow; 
+                            preventUnselect = true;
                             break;
                     }
                 }
                 
-                if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
+                if(!preventUnselect && 
+                   pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
                     ibits |= I.Unselectable;
                 }
                 
@@ -19083,7 +19092,7 @@ def
     
     /**
      * Render the visualization.
-     * If not pre-rendered, do it now.
+     * If not created, do it now.
      */
     render: function(bypassAnimation, recreate, reloadData) {
         var hasError;
@@ -19096,17 +19105,36 @@ def
         try {
             this.useTextMeasureCache(function() {
                 try {
-                    if (!this.isPreRendered || recreate) {
-                        this._preRender({reloadData: reloadData});
-                    } else if(!this.parent && this.isPreRendered) {
-                        pvc.removeTipsyLegends();
+                    while(true) {
+                        if (!this.isCreated || recreate) {
+                            this._create({reloadData: reloadData});
+                        } else if(!this.parent && this.isCreated) {
+                            pvc.removeTipsyLegends();
+                        }
+                        
+                        // TODO: Currently, the following always redirects the call
+                        // to topRoot.render; 
+                        // so why should BaseChart.render not do the same?
+                        this.basePanel.render({
+                            bypassAnimation: bypassAnimation, 
+                            recreate: recreate
+                        });
+
+                        // Check if it is necessary to retry the create
+                        // due to multi-chart clip overflow.
+                        if(!this._isMultiChartOverflowClip) {
+                            // NO
+                            this._isMultiChartOverflowClipRetry = false;
+                            break; 
+                        }
+
+                        // Overflowed & Clip
+                        recreate   = true;
+                        reloadData = false;
+                        this._isMultiChartOverflowClipRetry = true;
+                        this._isMultiChartOverflowClip = false;
+                        this._multiChartOverflowClipped = true;
                     }
-                    
-                    this.basePanel.render({
-                        bypassAnimation: bypassAnimation, 
-                        recreate: recreate
-                    });
-                    
                 } catch (e) {
                     /*global NoDataException:true*/
                     if (e instanceof NoDataException) {
@@ -19215,7 +19243,8 @@ def
 //      multiChartColumnsMax: undefined,
 //      multiChartSingleRowFillsHeight: undefined,
 //      multiChartSingleColFillsHeight: undefined,
-        
+//      multiChartOverflow: 'grow',
+
 //      smallWidth:       undefined,
 //      smallHeight:      undefined,
 //      smallAspectRatio: undefined,
@@ -19847,7 +19876,7 @@ pvc.BaseChart
     _checkNoDataI: function() {
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
-        if (!this.parent && !this.allowNoData && this.resultset.length === 0) {
+        if (!this.allowNoData && !this.resultset.length) {
             /*global NoDataException:true */
             throw new NoDataException();
         }
@@ -19856,7 +19885,7 @@ pvc.BaseChart
     _checkNoDataII: function() {
         // Child charts are created to consume *existing* data
         // If we don't have data, we just need to set a "no data" message and go on with life.
-        if (!this.parent && !this.allowNoData && (!this.data || !this.data.count())) {
+        if (!this.allowNoData && (!this.data || !this.data.count())) {
 
             this.data = null;
 
@@ -20336,8 +20365,8 @@ pvc.BaseChart
      * {metadata: [], resultset: []}
      */
     setData: function(data, options) {
-        this.setResultset(data.resultset);
-        this.setMetadata(data.metadata);
+        this.setResultset(data && data.resultset);
+        this.setMetadata (data && data.metadata);
 
         // TODO: Danger!
         $.extend(this.options, options);
@@ -20352,9 +20381,9 @@ pvc.BaseChart
         /*jshint expr:true */
         !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
 
-        this.resultset = resultset;
+        this.resultset = resultset || [];
         if (!resultset.length) {
-            this._log("Warning: Resultset is empty");
+            this._warn("Resultset is empty");
         }
 
         return this;
@@ -20366,11 +20395,11 @@ pvc.BaseChart
      */
     setMetadata: function(metadata) {
         /*jshint expr:true */
-        !this.parent || def.fail.operationInvalid("Can only set resultset on root chart.");
+        !this.parent || def.fail.operationInvalid("Can only set metadata on root chart.");
 
-        this.metadata = metadata;
+        this.metadata = metadata || [];
         if (!metadata.length) {
-            this._log("Warning: Metadata is empty");
+            this._warn("Metadata is empty");
         }
 
         return this;
@@ -20524,7 +20553,9 @@ pvc.BaseChart
 
     },
 
-    _initAxes: function(hasMultiRole){
+    _initAxes: function(hasMultiRole) {
+        // TODO: almost sure that some of the below loops can be merged
+        
         this.axes = {};
         this.axesList = [];
         this.axesByType = {};
@@ -20543,12 +20574,11 @@ pvc.BaseChart
             }, this);
 
             this._fixTrendsLabel(dataCellsByAxisTypeThenIndex);
+
+            this._dataCellsByAxisTypeThenIndex = dataCellsByAxisTypeThenIndex;
         } else {
             dataCellsByAxisTypeThenIndex = this.root._dataCellsByAxisTypeThenIndex;
         }
-
-        // Used later in _bindAxes as well.
-        this._dataCellsByAxisTypeThenIndex = dataCellsByAxisTypeThenIndex;
 
         /* NOTE: Cartesian axes are created even when hasMultiRole && !parent
          * because it is needed to read axis options in the root chart.
@@ -20559,49 +20589,59 @@ pvc.BaseChart
         // 1 = root, 2 = leaf, 1 | 2 = 3 = everywhere
         var here = 0;
         // Root?
-        if(!this.parent){
-            here |= 1;
-        }
+        if(!this.parent) { here |= 1; }
+
         // Leaf?
-        if(this.parent || !hasMultiRole){
-            here |= 2;
-        }
+        if(this.parent || !hasMultiRole) { here |= 2; }
 
-        // Used later in _bindAxes as well.
-        this._axisCreateHere = here;
-
-        this._axisCreationOrder.forEach(function(type){
+        this._axisCreationOrder.forEach(function(type) {
             // Create **here** ?
-            if((this._axisCreateWhere[type] & here) !== 0){
+            if((this._axisCreateWhere[type] & here) !== 0) {
                 var AxisClass;
                 var dataCellsByAxisIndex = dataCellsByAxisTypeThenIndex[type];
-                if(dataCellsByAxisIndex){
+                if(dataCellsByAxisIndex) {
 
                     AxisClass = this._axisClassByType[type];
-                    if(AxisClass){
+                    if(AxisClass) {
                         dataCellsByAxisIndex.forEach(function(dataCells, axisIndex){
 
                             new AxisClass(this, type, axisIndex);
 
                         }, this);
                     }
-                } else if(this._axisCreateIfUnbound[type]){
+                } else if(this._axisCreateIfUnbound[type]) {
                     AxisClass = this._axisClassByType[type];
-                    if(AxisClass){
+                    if(AxisClass) {
                         new AxisClass(this, type, 0);
                     }
                 }
             }
         }, this);
 
-        if(this.parent){
+        if(this.parent) {
             // Copy axes that exist in root and not here
             this.root.axesList.forEach(function(axis){
-                if(!def.hasOwn(this.axes, axis.id)){
+                if(!def.hasOwn(this.axes, axis.id)) {
                     this._addAxis(axis);
                 }
             }, this);
         }
+
+        // Bind
+        // Bind all axes with dataCells registered in dataCellsByAxisTypeThenIndex
+        // and which were created **here**
+        def.eachOwn(
+            dataCellsByAxisTypeThenIndex,
+            function(dataCellsByAxisIndex, type) {
+                // Should create **here** ?
+                if((this._axisCreateWhere[type] & here)) {
+                    dataCellsByAxisIndex.forEach(function(dataCells, index) {
+                        var axis = this.axes[pvc.buildIndexedId(type, index)];
+                        if(!axis.isBound()) { axis.bind(dataCells); }
+                    }, this);
+                }
+            },
+            this);
     },
 
     _fixTrendsLabel: function(dataCellsByAxisTypeThenIndex){
@@ -20678,25 +20718,6 @@ pvc.BaseChart
         if(typeAxes && index != null && (+index >= 0)){
             return typeAxes[index];
         }
-    },
-
-    _bindAxes: function(/*hasMultiRole*/){
-        // Bind all axes with dataCells registered in #_dataCellsByAxisTypeThenIndex
-        // and which were created **here**
-        var here = this._axisCreateHere;
-
-        def.eachOwn(
-            this._dataCellsByAxisTypeThenIndex,
-            function(dataCellsByAxisIndex, type) {
-                // Should create **here** ?
-                if((this._axisCreateWhere[type] & here)) {
-                    dataCellsByAxisIndex.forEach(function(dataCells, index) {
-                        var axis = this.axes[pvc.buildIndexedId(type, index)];
-                        if(!axis.isBound()) { axis.bind(dataCells); }
-                    }, this);
-                }
-            },
-            this);
     },
 
     _setAxesScales: function(/*isMulti*/) {
@@ -21282,19 +21303,18 @@ pvc.BaseChart
         this._initBasePanel ();
         this._initTitlePanel();
         
-        var isMultichartRoot = hasMultiRole && !this.parent;
-        
         // null on small charts or when not enabled
         var legendPanel = this._initLegendPanel();
         
         // Is multi-chart root?
+        var isMultichartRoot = hasMultiRole && !this.parent;
         if(isMultichartRoot) { this._initMultiChartPanel(); }
         
         if(legendPanel) { this._initLegendScenes(legendPanel); }
         
         if(!isMultichartRoot) {
             var o = this.options;
-            this._preRenderContent({
+            this._createContent({
                 margins:           hasMultiRole ? o.smallContentMargins  : o.contentMargins,
                 paddings:          hasMultiRole ? o.smallContentPaddings : o.contentPaddings,
                 clickAction:       o.clickAction,
@@ -21312,7 +21332,8 @@ pvc.BaseChart
      * @param {pvc.Sides} [contentOptions.paddings] The paddings for the content panels.
      * @virtual
      */
-    _preRenderContent: function(/*contentOptions*/) { /* NOOP */ },
+     // TODO: maybe this should always call _createPlotPanels?
+    _createContent: function(/*contentOptions*/) { /* NOOP */ },
     
     /**
      * Creates and initializes the base panel.
@@ -21453,7 +21474,7 @@ pvc.BaseChart
             
             // Trend series cannot be set to invisible.
             // They are created each time that visible changes.
-            // So trend legend groups are created locked (clicMode = 'none')
+            // So trend legend groups are created locked (clickMode = 'none')
             var clickMode;
             if(isToggleVisible) {
                 var dataPartAtom = domainData.atoms[dataPartDimName];
@@ -21770,6 +21791,7 @@ def
     
     this.chart = chart; // must be set before base() because of log init
     
+
     this.base();
     
     this.axes = {};
@@ -22192,11 +22214,11 @@ def
             this.width  = size.width;
             this.height = size.height;
             
-            if(!canChange && prevLayoutInfo){
+            if(!canChange && prevLayoutInfo) {
                 delete layoutInfo.previous;
             }
             
-            if(pvc.debug >= 5){
+            if(pvc.debug >= 5) {
                 this._log("Size       = " + pvc.stringify(size));
                 this._log("Margins    = " + pvc.stringify(layoutInfo.margins));
                 this._log("Paddings   = " + pvc.stringify(layoutInfo.paddings));
@@ -22207,8 +22229,8 @@ def
         }
     },
     
-    _onLaidOut: function(){
-        if(this.isRoot){
+    _onLaidOut: function() {
+        if(this.isRoot) {
             this.chart._onLaidOut();
         }
     },
@@ -22593,12 +22615,18 @@ def
         if(!this.pvPanel || force) {
             
             this.pvPanel = null;
-            
+            if(this.pvRootPanel) { this.pvRootPanel = null; }
+
             delete this._signs;
             
             /* Layout */
             this.layout();
-            
+
+            if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+                // Must repeat chart._create
+                return;
+            }
+
             if(!this.isVisible) { return; }
             
             if(this.isRoot) { this._creating(); }
@@ -22697,7 +22725,7 @@ def
             this.pvPanel.paddingPanel  = this.pvPanel;
             this.pvPanel.borderPanel   = pvBorderPanel;
             
-            if(pvc.debug >= 15){
+            if(pvc.debug >= 15) {
                 // Client Box
                 this.pvPanel
                     .strokeStyle('lightgreen')
@@ -22727,21 +22755,26 @@ def
              */
             this._createCore(this._layoutInfo);
             
-            /* RubberBand */
-            if (this.isTopRoot) {
-                this._initRubberBand();
+            if(this.isTopRoot) { 
+                /* Multi-chart overflow & clip */
+                if(this.chart._multiChartOverflowClipped) {
+                    this._addMultichartOverflowClipMarker();
+                }
+
+                /* Selection */
+                this._initSelection(); 
             }
 
             /* Extensions */
             this.applyExtensions();
             
             /* Log Axes Scales */
-            if(this.isRoot && pvc.debug > 5){
+            if(this.isRoot && pvc.debug > 5) {
                 var out = ["SCALES SUMMARY", pvc.logSeparator];
                 
-                this.chart.axesList.forEach(function(axis){
+                this.chart.axesList.forEach(function(axis) {
                     var scale = axis.scale;
-                    if(scale){
+                    if(scale) {
                         var d = scale.domain && scale.domain();
                         var r = scale.range  && scale.range ();
                         out.push(axis.id);
@@ -22756,11 +22789,9 @@ def
         }
     },
 
-    _creating: function(){
+    _creating: function() {
         if(this._children) {
-            this._children.forEach(function(child){
-                child._creating();
-            });
+            this._children.forEach(function(child) { child._creating(); });
         }
     },
     
@@ -22776,9 +22807,7 @@ def
      */
     _createCore: function(/*layoutInfo*/){
         if(this._children) {
-            this._children.forEach(function(child){
-                child._create();
-            });
+            this._children.forEach(function(child) { child._create(); });
         }
     },
     
@@ -22809,6 +22838,11 @@ def
         
         this._create(def.get(ka, 'recreate', false));
         
+        if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
+            // Must repeat chart._create
+            return;
+        }
+
         if(!this.isVisible){
             return;
         }
@@ -23328,29 +23362,74 @@ def
                 context.event,
                 context.getV1Datum());
     },
+
+    /* OVERFLOW */
+    _addMultichartOverflowClipMarker: function() {
+        var m = 10;
+        var dr = 5;
+        function getRadius(mark) {
+            var r = mark.shapeRadius();
+            if(r == null) { 
+                var  s = mark.shapeSize();
+                if(s != null) { r = Math.sqrt(s); }
+            }
+
+            return r || dr;
+        }
+
+        var pvDot = new pvc.visual.Dot(
+            this,
+            this.pvPanel,
+            {
+                noSelect:      true,
+                noHover:       true,
+                noClick:       true,
+                noDoubleClick: true,
+                noTooltip:     false,
+                freePosition:  true,
+                extensionId:   'multiChartOverflowMarker'
+            })
+            .lock('data')
+            .pvMark
+            .shape("triangle")
+            .shapeRadius(dr)
+            .top (null)
+            .left(null)
+            .bottom(function() { return getRadius(this) + m; })
+            .right (function() { return getRadius(this) + m; })
+            .shapeAngle(0)
+            .lineWidth(1.5)
+            .strokeStyle("red")
+            .fillStyle("rgba(255, 0, 0, 0.2)");
+
+        // When non-interactive tooltip prop is not created...
+        if(def.fun.is(pvDot.tooltip)) {
+            pvDot.tooltip("Some charts did not fit the available space.");
+        }
+    },
     
     /* SELECTION & RUBBER-BAND */
     selectingByRubberband: function() { return this.topRoot._selectingByRubberband; },
     
     /**
-     * Add rubber-band functionality to panel.
+     * Add rubber-band and clickClearSelection functionality to the panel.
      * Override to prevent rubber band selection.
      * 
      * @virtual
      */
-    _initRubberBand: function() {
+    _initSelection: function() {
         var me = this,
             chart = me.chart;
         
-        if(!chart.interactive()) { return; }
+        if(!me.interactive()) { return; }
         
-        var options = chart.options,
-            clickClearsSelection = options.clearSelectionMode === 'emptySpaceClick',
-            useRubberband = this.chart.selectableByRubberband();
+        var clickClearsSelection = me.unselectable(),
+            useRubberband        = me.selectableByRubberband();
         
+        // NOOP?
         if(!useRubberband && !clickClearsSelection) { return; }
         
-        var data = chart.data,
+        var data = me.data,
             pvParentPanel = me.pvRootPanel || me.pvPanel.paddingPanel;
         
         // IE must have a fill style to fire events
@@ -23367,7 +23446,7 @@ def
                 pvParentPanel
                     .event("click", function() {
                         /*jshint expr:true */
-                        data.owner.clearSelected() && chart.updateSelections();
+                        data.clearSelected() && chart.updateSelections();
                     });
             }
             return;
@@ -23375,14 +23454,14 @@ def
         
         var dMin2 = 4; // Minimum dx or dy, squared, for a drag to be considered a rubber band selection
 
-        this._selectingByRubberband = false;
+        me._selectingByRubberband = false;
 
         // Rubber band
         var toScreen, rb;
         
         var selectBar = 
             this.selectBar = 
-            new pvc.visual.Bar(this, pvParentPanel, {
+            new pvc.visual.Bar(me, pvParentPanel, {
                 extensionId:   'rubberBand',
                 normalStroke:  true,
                 noHover:       true,
@@ -23413,7 +23492,7 @@ def
         
         // NOTE: Rubber band coordinates are always transformed to canvas/client 
         // coordinates (see 'select' and 'selectend' events)
-        var selectionEndedDate;
+        var selectionEndedDate; 
         pvParentPanel
             .intercept('data', function() {
                 var scenes = this.delegate();
@@ -23476,7 +23555,7 @@ def
                         }
                     }
                     
-                    if(data.owner.clearSelected()) { chart.updateSelections(); }
+                    if(data.clearSelected()) { chart.updateSelections(); }
                 });
         }
     },
@@ -23749,17 +23828,26 @@ def
         var chart = this.chart;
         var options = chart.options;
 
-        /* I - Determine how many small charts to create */
-
-        // multiChartMax can be Infinity
-        var multiChartMax = Number(options.multiChartMax);
-        if(isNaN(multiChartMax) || multiChartMax < 1) {
-            multiChartMax = Infinity;
-        }
-
         var multiChartRole = chart.visualRoles.multiChart;
         var data = multiChartRole.flatten(chart.data, {visible: true});
         var leafCount = data.childNodes.length;
+
+        /* I - Determine how many small charts to create */
+        var multiChartMax, colCount, rowCount, multiChartColumnsMax;
+
+        if(chart._isMultiChartOverflowClipRetry) {
+            rowCount = chart._clippedMultiChartRowsMax;
+            colCount = chart._clippedMultiChartColsMax;
+            multiChartColumnsMax = colCount;
+            multiChartMax = rowCount * colCount;
+        } else {
+            // multiChartMax can be Infinity
+            multiChartMax = Number(options.multiChartMax);
+            if(isNaN(multiChartMax) || multiChartMax < 1) {
+                multiChartMax = Infinity;
+            }
+        }
+        
         var count = Math.min(leafCount, multiChartMax);
         if(count === 0) {
             // Shows no message to the user.
@@ -23767,25 +23855,28 @@ def
             return;
         }
 
-        /* II - Determine basic layout (row and col count) */
+        if(!chart._isMultiChartOverflowClipRetry) {
+            /* II - Determine basic layout (row and col count) */
 
-        // multiChartColumnsMax can be Infinity
-        var multiChartColumnsMax = +options.multiChartColumnsMax; // to number
-        if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
-            multiChartColumnsMax = 3;
+            // multiChartColumnsMax can be Infinity
+            multiChartColumnsMax = +options.multiChartColumnsMax; // to number
+            if(isNaN(multiChartColumnsMax) || multiChartMax < 1) {
+                multiChartColumnsMax = 3;
+            }
+
+            colCount = Math.min(count, multiChartColumnsMax);
+            
+            // <Debug>
+            /*jshint expr:true */
+            colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
+            // </Debug>
+
+            rowCount = Math.ceil(count / colCount);
+            // <Debug>
+            /*jshint expr:true */
+            rowCount >= 1 || def.assert("Must be at least 1");
+            // </Debug>
         }
-
-        var colCount = Math.min(count, multiChartColumnsMax);
-        // <Debug>
-        /*jshint expr:true */
-        colCount >= 1 && isFinite(colCount) || def.assert("Must be at least 1 and finite");
-        // </Debug>
-
-        var rowCount = Math.ceil(count / colCount);
-        // <Debug>
-        /*jshint expr:true */
-        rowCount >= 1 || def.assert("Must be at least 1");
-        // </Debug>
 
         /* III - Determine if axes need coordination (null if no coordination needed) */
 
@@ -23819,7 +23910,7 @@ def
             };
         }
 
-        /* IV - Create and _preRender small charts */
+        /* IV - Construct and _create small charts */
         var childOptionsBase = this._buildSmallChartsBaseOptions();
         var ChildClass = chart.constructor;
         for(var index = 0 ; index < count ; index++) {
@@ -23837,17 +23928,17 @@ def
             var childChart = new ChildClass(childOptions);
 
             if(!coordRootAxesByScopeType){
-                childChart._preRender();
+                childChart._create();
             } else {
                 // options, data, plots, axes,
                 // trends, interpolation, axes_scales
-                childChart._preRenderPhase1();
+                childChart._createPhase1();
 
                 indexChartByScope(childChart);
             }
         }
 
-        // Need _preRenderPhase2?
+        // Need _createPhase2
         if(coordRootAxesByScopeType){
             // For each scope type having scales requiring coordination
             // find the union of the scales' domains for each
@@ -23865,9 +23956,9 @@ def
                 }, this);
             }, this);
 
-            // Finalize _preRender, now that scales are coordinated
+            // Finalize _create, now that scales are coordinated
             chart.children.forEach(function(childChart){
-                childChart._preRenderPhase2();
+                childChart._createPhase2();
             });
         }
 
@@ -23880,7 +23971,8 @@ def
           rowCount: rowCount,
           colCount: colCount,
           multiChartColumnsMax: multiChartColumnsMax,
-          coordScopesByType: coordScopesByType
+          coordScopesByType: coordScopesByType,
+          multiChartOverflow: pvc.parseMultiChartOverflow(options.multiChartOverflow)
         };
     },
 
@@ -24062,11 +24154,9 @@ def
      *
      * @override
      */
-    _calcLayout: function(layoutInfo){
+    _calcLayout: function(layoutInfo) {
         var multiInfo = this._multiInfo;
-        if(!multiInfo){
-            return;
-        }
+        if(!multiInfo) { return; }
 
         var chart = this.chart;
         var options = chart.options;
@@ -24086,32 +24176,32 @@ def
 //        }
 
         var prevLayoutInfo = layoutInfo.previous;
-        var initialClientWidth  = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
-        var initialClientHeight = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
-
+        var initialClientWidth   = prevLayoutInfo ? prevLayoutInfo.initialClientWidth  : clientSize.width ;
+        var initialClientHeight  = prevLayoutInfo ? prevLayoutInfo.initialClientHeight : clientSize.height;
+        
         var smallWidth  = pvc_PercentValue.parse(options.smallWidth);
-        if(smallWidth != null){
+        if(smallWidth != null) {
             smallWidth = pvc_PercentValue.resolve(smallWidth, initialClientWidth);
         }
 
         var smallHeight = pvc_PercentValue.parse(options.smallHeight);
-        if(smallHeight != null){
+        if(smallHeight != null) {
             smallHeight = pvc_PercentValue.resolve(smallHeight, initialClientHeight);
         }
 
         var ar = +options.smallAspectRatio; // + is to number
-        if(isNaN(ar) || ar <= 0){
-            ar = this._calulateDefaultAspectRatio();
+        if(isNaN(ar) || ar <= 0) {
+            ar = this._calculateDefaultAspectRatio();
         }
 
-        if(smallWidth == null){
-            if(isFinite(multiInfo.multiChartColumnsMax)){
+        if(smallWidth == null) {
+            if(isFinite(multiInfo.multiChartColumnsMax)) {
                 // Distribute currently available client width by the effective max columns.
                 smallWidth = clientSize.width / multiInfo.colCount;
             } else {
                 // Single Row
                 // Chart grows in width as needed
-                if(smallHeight == null){
+                if(smallHeight == null) {
                     // Both null
                     // Height uses whole height
                     smallHeight = initialClientHeight;
@@ -24122,11 +24212,10 @@ def
             }
         }
 
-        if(smallHeight == null){
+        if(smallHeight == null) {
+            // Should use whole height?
             if((multiInfo.rowCount === 1 && def.get(options, 'multiChartSingleRowFillsHeight', true)) ||
                (multiInfo.colCount === 1 && def.get(options, 'multiChartSingleColFillsHeight', true))){
-
-                // Height uses whole height
                 smallHeight = initialClientHeight;
             } else {
                 smallHeight = smallWidth / ar;
@@ -24134,7 +24223,56 @@ def
         }
 
         // ----------------------
+        var finalClientWidth  = smallWidth  * multiInfo.colCount;
+        var finalClientHeight = smallHeight * multiInfo.rowCount;
 
+        // If not already repeating due to multiChartOverflow=clip
+        if(!chart._isMultiChartOverflowClipRetry) {
+            
+            chart._isMultiChartOverflowClip = false;
+
+            switch(multiInfo.multiChartOverflow) {
+                case 'fit': 
+                    if(finalClientWidth > initialClientWidth) {
+                        finalClientWidth = initialClientWidth;
+                        smallWidth = finalClientWidth / multiInfo.colCount;
+                    }
+                    if(finalClientHeight > initialClientHeight) {
+                        finalClientHeight = initialClientHeight;
+                        smallHeight = finalClientHeight / multiInfo.rowCount;
+                    }
+                    break;
+
+                case 'clip': 
+                    // Limit the number of charts to those that actually fit entirely.
+                    // If this layout is actually used, it will be necessary
+                    // to repeat chart._create .
+                    var colsMax = multiInfo.colCount;
+                    var rowsMax = multiInfo.rowCount;
+                    var clipW = finalClientWidth > initialClientWidth;
+                    if(clipW) {
+                        // May be 0
+                        colsMax = Math.floor(initialClientWidth / smallWidth);
+                    }
+
+                    
+                    var clipH = finalClientHeight > initialClientHeight;
+                    if(clipH) {
+                        rowsMax = Math.floor(initialClientHeight / smallHeight);
+                    }
+
+                    if(clipH || clipW) {
+                        // HACK: Notify the top chart that multi-charts overflowed...
+                        chart._isMultiChartOverflowClip = true;
+                        chart._clippedMultiChartRowsMax = rowsMax;
+                        chart._clippedMultiChartColsMax = colsMax;
+                    }
+                    break;
+                // default 'grow'
+            }
+        }
+
+        // ----------------------
         def.set(
            layoutInfo,
             'initialClientWidth',  initialClientWidth,
@@ -24143,12 +24281,12 @@ def
             'height', smallHeight);
 
         return {
-            width:  smallWidth * multiInfo.colCount,
-            height: Math.max(clientSize.height, smallHeight * multiInfo.rowCount) // vertical align center: pass only: smallHeight * multiInfo.rowCount
+            width:  finalClientWidth,
+            height: Math.max(clientSize.height, finalClientHeight) // vertical align center: pass only: smallHeight * multiInfo.rowCount
         };
     },
 
-    _calulateDefaultAspectRatio: function(/*totalWidth*/){
+    _calculateDefaultAspectRatio: function(/*totalWidth*/){
         if(this.chart instanceof pvc.PieChart){
             // 5/4 <=> 10/8 < 10/7
             return 10/7;
@@ -24214,26 +24352,21 @@ def
         return 'content';
     },
 
-    _createCore: function(li){
+    _createCore: function(li) {
+        !this._isMultiChartOverflowClip || def.assert("Overflow&clip condition should be resolved.");
+
         var mi = this._multiInfo;
-        if(!mi){
-            // Empty
-            return;
-        }
+        if(!mi) { return; } // Empty
 
         var chart = this.chart;
         var options = chart.options;
 
         var smallMargins = options.smallMargins;
-        if(smallMargins == null){
-            smallMargins = new pvc_Sides(new pvc_PercentValue(0.02));
-        } else {
-            smallMargins = new pvc_Sides(smallMargins);
-        }
-
+        smallMargins = new pvc_Sides(smallMargins != null ? smallMargins : new pvc_PercentValue(0.02));
+        
         var smallPaddings = new pvc_Sides(options.smallPaddings);
 
-        chart.children.forEach(function(childChart){
+        chart.children.forEach(function(childChart) {
             childChart._setSmallLayout({
                 left:      childChart.smallColIndex * li.width,
                 top:       childChart.smallRowIndex * li.height,
@@ -24245,34 +24378,26 @@ def
         }, this);
 
         var coordScopesByType = mi.coordScopesByType;
-        if(coordScopesByType){
+        if(coordScopesByType) {
             chart._coordinateSmallChartsLayout(coordScopesByType);
         }
 
-        this.base(li); // calls _create on child chart's basePanel
+        this.base(li); // calls _create on child chart's basePanel, which then calls layout, etc...
     },
 
+    // Margins are only applied *between* small charts
     _buildSmallMargins: function(childChart, smallMargins){
         var mi = this._multiInfo;
-        var lastColIndex = mi.colCount - 1;
-        var lastRowIndex = mi.rowCount - 1;
-        var colIndex = childChart.smallColIndex;
-        var rowIndex = childChart.smallRowIndex;
+        var C = mi.colCount - 1;
+        var R = mi.rowCount - 1;
+        var c = childChart.smallColIndex;
+        var r = childChart.smallRowIndex;
 
         var margins = {};
-        if(colIndex > 0){
-            margins.left = smallMargins.left;
-        }
-        if(colIndex < lastColIndex){
-            margins.right = smallMargins.right;
-        }
-        if(rowIndex > 0){
-            margins.top = smallMargins.top;
-        }
-        if(rowIndex < lastRowIndex){
-            margins.bottom = smallMargins.bottom;
-        }
-
+        if(c > 0) { margins.left   = smallMargins.left;   }
+        if(c < C) { margins.right  = smallMargins.right;  }
+        if(r > 0) { margins.top    = smallMargins.top;    }
+        if(r < R) { margins.bottom = smallMargins.bottom; }
         return margins;
     }
 });
@@ -24951,7 +25076,7 @@ def
         return scale;
     },
     
-    _preRenderContent: function(contentOptions){
+    _createContent: function(contentOptions){
         
         this._createFocusWindow();
         
@@ -29684,7 +29809,7 @@ def
         new pvc.visual.PiePlot(this);
     },
     
-    _preRenderContent: function(contentOptions) {
+    _createContent: function(contentOptions) {
 
         this.base();
         
@@ -31813,7 +31938,7 @@ def
         }
     },
     
-    _bindAxes: function(hasMultiRole){
+    _initAxes: function(hasMultiRole) {
         
         this.base(hasMultiRole);
         
@@ -33643,7 +33768,7 @@ def
         new pvc.visual.BulletPlot(this);
     },
     
-    _preRenderContent: function(contentOptions){
+    _createContent: function(contentOptions){
         var bulletPlot = this.plots.bullet;
         this.bulletChartPanel = new pvc.BulletChartPanel(
             this, 
@@ -34059,7 +34184,7 @@ def
 
     parCoordPanel : null,
     
-    _preRenderContent: function(contentOptions){
+    _createContent: function(contentOptions){
         this.parCoordPanel = new pvc.ParCoordPanel(this, this.basePanel, def.create(contentOptions, {
             topRuleOffset : this.options.topRuleOffset,
             botRuleOffset : this.options.botRuleOffset,
@@ -34679,7 +34804,7 @@ def
         }
     },
   
-    _preRenderContent: function(contentOptions){
+    _createContent: function(contentOptions){
         // Create DataEngine
         var structEngine  = this.structEngine;
         var structType    = structEngine ? structEngine.type : new pvc.data.ComplexType();
@@ -35811,7 +35936,7 @@ def
         }
     },
     
-    _bindAxes: function(hasMultiRole){
+    _initAxes: function(hasMultiRole){
         
         this.base(hasMultiRole);
         
@@ -36234,7 +36359,7 @@ def
         this.visualRoles.color   .setRootLabel(rootCategoryLabel);
     },
     
-    _preRenderContent: function(contentOptions) {
+    _createContent: function(contentOptions) {
 
         this.base();
         
