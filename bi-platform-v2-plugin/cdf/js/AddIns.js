@@ -27,12 +27,12 @@ function AddIn(options) {
     throw TypeError;
   }
   var _name = options.name,
-  _label = options.label,
-  _type = options.implementation ? "scriptable" : "static",
-  /* It's OK if any of these ends up being undefined */
-  _implementation = options.implementation,
-  _defaults = options.defaults,
-  _value = options.options;
+      _label = options.label,
+      _type = options.implementation ? "scriptable" : "static",
+      /* It's OK if any of these ends up being undefined */
+      _implementation = options.implementation,
+      _defaults = options.defaults,
+      _value = options.options;
     
   /* Do we have an init method? Call it now */
   if(typeof options.init === 'function'){

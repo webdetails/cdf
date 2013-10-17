@@ -1,3 +1,4 @@
+
  $.ajaxSetup({
   type: "POST",
   async: false,
@@ -221,11 +222,11 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
 
   var refreshComponent = function(component){
     //if refresh period is too short, progress indicator will stay in user's face
-    //		let(Dashboards.runningCalls = 0){
+    //    let(Dashboards.runningCalls = 0){
     Dashboards.update(component);
-  //			Dashboards.runningCalls = 0;
-  //			Dashboards.hideProgressIndicator()
-  //		}
+  //      Dashboards.runningCalls = 0;
+  //      Dashboards.hideProgressIndicator()
+  //    }
   };
 
   var insertInQueue = function(component){
@@ -755,15 +756,15 @@ Dashboards.updateComponent = function(object) {
   if(Date.now() - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
     //too long in between ajax communications
     if(!Dashboards.checkServer()) {
-    	Dashboards.hideProgressIndicator();
-    	Dashboards.loginAlert();
-    	throw "not logged in";
+      Dashboards.hideProgressIndicator();
+      Dashboards.loginAlert();
+      throw "not logged in";
     }
   }
 
   if(object.isManaged === false && object.update) {
     object.update();
-	// check if component has periodic refresh and schedule next update
+  // check if component has periodic refresh and schedule next update
     this.refreshEngine.processComponent(object);
   } else {
     this.updateLifecycle(object);
@@ -1853,7 +1854,7 @@ Dashboards.propertiesArrayToObject = function(pArray) {
     obj[prop[0]] = prop[1];
   }
   return obj;
-}
+};
 
 Dashboards.objectToPropertiesArray = function(obj) {
   var pArray = [];
@@ -1861,7 +1862,7 @@ Dashboards.objectToPropertiesArray = function(obj) {
     pArray.push([key,obj[key]]);
   }
   return pArray;
-}
+};
 
 
 /**
@@ -2365,66 +2366,255 @@ sprintfWrapper = {
 
 sprintf = sprintfWrapper.init;
 
-//Normalization - Ensure component does not finish with component and capitalize first letter
-Dashboards.normalizeAddInKey = function(key) {
-  	if (key.indexOf('Component', key.length - 'Component'.length) !== -1)
-  		key = key.substring(0, key.length - 'Component'.length);
-	return key.charAt(0).toUpperCase() + key.substring(1);
-}
-
-Dashboards.registerAddIn = function(component,slot,addIn){
-  if (!this.addIns) {
-    this.addIns = {};
-  }
 
 
-  var key = this.normalizeAddInKey(component);
+// CONTAINER begin
+;(function (D){
 
+    function Container() {
 
-  if (!this.addIns[key]) {
-    this.addIns[key] = {};
-  }
-  if (!this.addIns[key][slot]) {
-    this.addIns[key][slot] = {};
-  }
-  this.addIns[key][slot][addIn.getName()] = addIn;
-};
+        // PUBLIC
 
-Dashboards.hasAddIn = function(component,slot,addIn){
-	var key = this.normalizeAddInKey(component);
-  return Boolean(this.addIns && this.addIns[key] &&
-    this.addIns[key][slot] && this.addIns[key][slot][addIn]);
-};
+        // register(type, what [, scope])
+        // register(type, name, what [, scope])
+        this.register = function(type, name, what, scope) {
+            if(!type) { throw new Error("Argument 'type' is required."); }
+            if(typeof type !== 'string') { throw new Error("Argument 'type' must be a string."); }
 
-Dashboards.getAddIn = function(component,slot,addIn){
-	var key = this.normalizeAddInKey(component);
-  try {
-    return this.addIns[key][slot][addIn];
-  } catch (e) {
-    return null;
-  }
-};
+            if(name != null) {
+                if(typeof name !== 'string') {
+                    scope = what;
+                    what  = name;
+                    name  = null;
+                } else if(!name) {
+                    name = null;
+                }
+            }
 
-Dashboards.setAddInDefaults = function(component, slot, addInName, defaults) {
-var key = this.normalizeAddInKey(component);
-  var addIn = this.getAddIn(key,slot,addInName);
-  if(addIn) {
-    addIn.setDefaults(defaults);
-  }
-};
-Dashboards.listAddIns = function(component,slot) {
-var key = this.normalizeAddInKey(component);
-  var addInList = [];
-  try {
-    slot = this.addIns[key][slot];
-    for (var addIn in slot) if (slot.hasOwnProperty(addIn)) {
-      addInList.push([addIn, slot[addIn].getLabel()]);
+            if(!what) { throw new Error("Argument 'what' is required."); }
+
+            var holder;
+            switch(typeof what) {
+                case 'function': holder = new FactoryHolder (this, what, scope); break;
+                case 'object':   holder = new InstanceHolder(this, what, scope); break;
+                default: throw new Error("Argument 'what' is of an invalid type.");
+            }
+
+            if(!name) { name = ''; }
+
+            var holdersByName = _typesTable[type] || (_typesTable[type] = {});
+            var currHolder = holdersByName[name];
+            if(currHolder) {
+                // throw? log?
+                currHolder.dispose();
+            }
+            holdersByName[name] = holder;
+        };
+
+        this.has    = function(type, name) { return !!getHolder(type, name, true); };
+        this.canNew = function(type, name) { return getHolder(type, name, false) instanceof FactoryHolder; };
+
+        this.get       = function(type, name)         { return get(type, name, null,   false, false); };
+        this.tryGet    = function(type, name)         { return get(type, name, null,   false, true ); };
+
+        this.getNew    = function(type, name, config) { return get(type, name, config, true,  false); };
+        this.tryGetNew = function(type, name, config) { return get(type, name, config, true,  true ); };
+
+        this.getAll    = function(type) { return getAll(type, false); };
+        this.tryGetAll = function(type) { return getAll(type, true ); };
+
+        this.listType = function(type) { return getType(type,false); };
+        this.tryListType = function(type) { return getType(type,true); };
+
+        this.dispose = function() {
+            if(_typesTable) {
+                for(var type in _typesTable) {
+                    var holdersByName = _typesTable[type];
+                    for(var name in holdersByName) {
+                        holdersByName[name].dispose();
+                    }
+                }
+
+                _typesTable = null;
+            }
+        };
+
+        // PRIVATE
+
+        var _typesTable = {}; // type -> []
+
+        function getType(type, isTry) {
+            if(!type) { throw new Error("Argument 'type' is required."); }
+            if(typeof type !== 'string') { throw new Error("Argument 'type' must be a string."); }
+
+            var holdersByName = _typesTable[type];
+            if(!isTry && (!holdersByName || isOwnEmpty(holdersByName))) {
+                throw new Error("There are no registrations for type '" + type + "'.");
+            }
+            return holdersByName;
+        }
+
+        function getHolder(type, name, isTry) {
+            var holder;
+            var holdersByName = getType(type, isTry);
+            if(holdersByName) {
+                holder = holdersByName[name || ''];
+                if(!holder && !isTry) {
+                    throw new Error(
+                        "There is no registration for type '" + type + "'" +
+                        (name ? (" and name '" + name + "'") : "") + ".");
+                }
+            }
+
+            return holder;
+        }
+
+        function get(type, name, config, isNew, isTry) {
+            if(typeof name !== 'string') {
+                config = name;
+                name = '';
+            }
+
+            var holder = getHolder(type, name, isTry);
+
+            // Can't store as singletons instances with special config params
+            if(config) { isNew = true;  } else
+            if(!isNew) { config = {}; }
+
+            return holder ? holder.build(config, isNew) : null;
+        }
+
+        function getAll(type, isTry) {
+            var holdersByName = getType(type, isTry);
+
+            // Includes the default (unnamed) instance
+            var instances = [];
+            for(var name in holdersByName) {
+                instances.push(holdersByName[name].build({}, false));
+            }
+            return instances;
+        }
     }
-    return addInList;
-  } catch (e) {
-    return [];
+
+    // Shared/Static stuff
+
+    // Allows creating multiple instances
+    function FactoryHolder(container, factory, scope) {
+        var instance;
+
+        if(!scope) { scope = 'instance'; }
+
+        this.build = function(config, buildNew) {
+            if(instance && !buildNew) { return instance; }
+
+            var inst = factory(container, config);
+
+            if(!buildNew && scope === 'singleton') { instance = inst; }
+
+            return inst;
+        };
+
+        this.dispose = function() {
+            if(instance) {
+                doDispose(instance);
+                instance = null;
+            }
+        };
+    }
+
+    function InstanceHolder(container, instance, scope) {
+        if(!scope) { scope = 'external'; }
+
+        this.build = function(/*config, buildNew*/) { return instance; };
+
+        // external scope is managed outside the container
+        this.dispose = function() {
+            if(instance) {
+                scope === 'singleton' && doDispose(instance);
+                instance = null;
+            }
+        };
+    }
+
+    // Fwk stuff
+
+    function doDispose(instance) {
+        if(typeof instance.dispose === 'function') { instance.dispose(); }
+    }
+
+    var hasOwn = Object.prototype.hasOwnProperty;
+
+    function isOwnEmpty(o) {
+        // tolerates o == null
+        for(var n in o) { if(hasOwn.call(o, n)) { return false; } }
+        return true;
+    }
+
+    // Export
+    D.Container = Container;
+})(Dashboards);
+// CONTAINER end 
+
+
+
+// ADDINS begin
+;(function (D){
+  D.addIns = new D.Container ();
+
+  //Normalization - Ensure component does not finish with component and capitalize first letter
+  D.normalizeAddInKey = function(key, subKey) {
+      if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
+        key = key.substring(0, key.length - 'Component'.length);  
+      key = key.charAt(0).toUpperCase() + key.substring(1);
+
+      if(subKey) { key += "." + subKey; }
+
+    return key;
   }
-};
+
+  D.registerAddIn = function(type,subType,addIn){
+    var type = this.normalizeAddInKey(type, subType),
+        name = addIn.getName ? addIn.getName() : null;
+    this.addIns.register(type, name, addIn);
+  };
+
+  D.hasAddIn = function(type,subType,addInName){
+    var type = this.normalizeAddInKey(type, subType);
+    return Boolean(this.addIns && this.addIns.has(type,addInName));
+  };
+
+  D.getAddIn = function(type,subType,addInName){
+    var type = this.normalizeAddInKey(type, subType);
+    try {
+      var addIn = this.addIns.get(type,addInName);
+      return addIn;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  D.setAddInDefaults = function(type, subType, addInName, defaults) {
+    var addIn = this.getAddIn(type, subType,addInName);
+    if(addIn) {
+      addIn.setDefaults(defaults);
+    }
+  };
+  D.listAddIns = function(type, subType) {
+  var type = this.normalizeAddInKey(type, subType);
+    var addInList = [];
+    try {
+      return this.addIns.listType(type);
+    } catch (e) {
+      return [];
+    }
+  };
+})(Dashboards);
+// ADDINS end
+
+
+
+
+
 
 Dashboards.safeClone = function(){
   var options, name, src, copy, copyIsArray, clone,
@@ -2482,497 +2672,237 @@ Dashboards.safeClone = function(){
 
   // Return the modified object
   return target;
-}
+};
 
+
+
+// OPTIONS MANAGER begin
+;(function (D){
+
+  // This class is intended to be used as a generic Options Manager, by providing a way to
+  // keep record of the values of an options set, but also custom readers, writers and validators 
+  // for each of the options.
+  function OptionsManager (config ){ /* { defaults: {}, interfaces: {}, libraries: {} }*/
+    var myself = this;
+
+    // PROTECTED
+    this._options = {};
+    this._interfaces = {};
+    this._libraries = {
+      predicates: {
+        tautology: function (value){ return true },
+        isFunction: _.isFunction ,
+        isPositive: function (value){ return (_.isNumber(value) && value > 0); },
+        isObjectOrPropertiesArray : function (value){ 
+          return _.isArray(value) || _.isObject(value);
+        },
+        isObject: _.isObject,
+        isArray: _.isArray
+      },
+      mappers: {
+        identity: _.identity,
+        propertiesObject: function (value) {
+          return (_.isArray(value)) ? D.propertiesArrayToObject(value) : value;
+        }
+      }
+    };
+
+    // PUBLIC
+    this.mixin = function (instance){
+      instance.getOption = this.getOption;
+      instance.setOption = this.setOption;
+    };
+
+    this.init = function (defaults, interfaces, libraries) {
+      var myself = this;
+      this._libraries = $.extend(true, {}, this._libraries, libraries);
+      _.each( interfaces, function (el,key){
+        setInterfaces( key, el );
+      });
+      _.each( defaults, function(el, key) {
+        var ifaces = ( interfaces && interfaces[key] ) || {};
+        setInterfaces( key, ifaces);
+        setValue( key, el );
+      })
+    };
+
+    this.setOption = function (opt, value, interfaces){
+      setInterfaces(opt, interfaces);
+      var reader = getReader(opt),
+          validator = getValidator(opt);
+      if ( validator(value) ){
+        value = reader(value);
+        setValue( opt, value );
+        return true
+      } else {
+        throw new Error( "Invalid Option " + opt.charAt(0).toUpperCase() + opt.slice(1) );
+      }
+    };
+
+    this.getOption = function (opt){
+      var writer = getWriter( opt ),
+          value = getValue(opt);
+      return writer( value );
+    }; 
+
+    // PRIVATE
+    function setInterfaces (opt, interfaces){
+      interfaces = interfaces || {};
+      setReader(opt, interfaces['reader']);
+      setWriter(opt, interfaces['writer']);
+      setValidator(opt, interfaces['validator']);
+    };
+
+    function getReader(opt){ 
+      return get( myself._interfaces, opt, 'reader', myself._libraries.mappers['identity'] 
+    )};
+    function getWriter(opt){
+      return get( myself._interfaces, opt, 'writer', myself._libraries.mappers['identity'] 
+    )};
+    function getValidator(opt){ 
+      return get( myself._interfaces, opt, 'validator', myself._libraries.predicates['tautology'] 
+    )};
+    function getValue(opt){ return get( myself._options, opt, 'value') };
+    
+    // Reader, Writer and Validator work in the same way:
+    // If the value is a function, use it. 
+    // Otherwise, if it is a string and a valid library key, use it.
+    // Otherwise, use a default library function: for readers and writers an indentity map, 
+    //    for validators a predicate that always returns true.
+
+    function setReader(opt, fn){
+      var lib = myself._libraries.mappers;
+      fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getReader(opt) || lib['identity'] ;
+      return set( myself._interfaces , opt, 'reader', fn) 
+    };
+    function setWriter(opt, fn){ 
+      var lib = myself._libraries.mappers;
+      fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getWriter(opt) || lib['identity'] ;
+      return set( myself._interfaces, opt, 'writer', fn) 
+    };
+    function setValidator(opt, fn){ 
+      var lib = myself._libraries.predicates;
+      fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getValidator(opt) || lib['tautology'] ;
+      return set( myself._interfaces, opt, 'validator', fn)
+    };
+    function setValue(opt, value){ return set( myself._options, opt, 'value', value) };
+
+    // Init
+    this.init( config.defaults, config.interfaces, config.libraries);
+
+  }
+
+  // Shared / Static
+  function get ( container, opt, attr, defaultValue ){
+    var val = defaultValue || undefined ;   
+    if ( container && container[opt] && container[opt].hasOwnProperty(attr) ){
+      val = container[opt][attr];
+    }
+    return val
+  }
+  function set (container, opt, attr, value){
+    if (container && opt && attr){
+      container[opt] = container[opt] || {};
+      container[opt][attr] = value ; 
+    }
+  }
+
+  D.OptionsManager = OptionsManager;
+})(Dashboards);
+// OPTIONS MANAGER end
+
+
+
+// QUERIES begin
+(function (D){
+
+  var _BaseQuery = Base;
+
+  D.getBaseQuery = function (){
+    return _BaseQuery;
+  };
+  D.setBaseQuery = function ( QueryClass ){
+    if ( _.isFunction(QueryClass) && QueryClass.extend ){
+      _BaseQuery = QueryClass;
+    }
+  };
+
+  D.queryFactories = new D.Container ();
+
+  D.registerQuery = function(type, query){
+    var BaseQuery = this.getBaseQuery();
+
+    // Goes a level deeper one extending these properties. Usefull to preserve defaults and
+    // options interfaces from BaseQuery.
+    if (!_.isFunction(query) && _.isObject(query)){
+      var deepProperties = {};
+      _.each( BaseQuery.prototype.deepProperties, function (prop){
+          deepProperties[prop] = _.extend({} , BaseQuery.prototype[prop], query[prop]);
+      });
+    }
+
+    var QueryClass  = ( _.isFunction(query) && query ) || 
+          ( _.isObject(query) && BaseQuery.extend( _.extend( {}, query, deepProperties ) ) );
+ 
+    // Registers a new query factory with a custom class
+    this.queryFactories.register('Query', type, function (container, config){
+      return new QueryClass(config);
+    });
+  };
+
+  D.hasQuery = function(type){
+    return Boolean(this.queryFactories && this.queryFactories.has('Query', type));
+  };
+
+  D.getQuery = function(type, opts){
+    if (_.isUndefined(type) ) {
+      type = 'cda';
+    } else if ( _.isObject(type) ) {
+      opts = type;
+      type = opts.queryType || 'cda';
+    }
+    var query = this.queryFactories.getNew('Query', type, opts);
+    return query;
+  };
+
+  D.listQueries = function() {
+    return _.keys( this.queryFactories.listType('Query') );
+  };
+})(Dashboards);
+
+
+/*
+ * Query STUFF
+ * (Here for legacy reasons)
+ * 
+ */
 //Ctors:
 // Query(queryString) --> DEPRECATED
 // Query(queryDefinition{path, dataAccessId})
 // Query(path, dataAccessId)
-Query = function() {
+Query = function( cd, dataAccessId ) {
 
-  // Constants, or what passes for them... Pretty please leave these alone.
-  var CDA_PATH = webAppPath + "/plugin/cda/api/doQuery?";
-  var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:jtable.xaction/generatedContent";
+  var opts, queryType;
 
-  /*
-   * Private fields
-   */
-  /* AJAX Options for the query */
-  var _ajaxOptions = {
-    type: "POST",
-    async: false
-  };
-  // Datasource type definition
-  var _mode = 'CDA';
-  // CDA uses file+id, Legacy uses a raw query
-  var _file = '';
-  var _id = '';
-  var _outputIdx = '1';
-  var _query = '';
-  // Callback for the data handler
-  var _callback = null;
-  // Callback for the query error handler / default handler
-  var _errorCallback = Dashboards.handleServerError;
-  // Result caching
-  var _lastResultSet = null;
-  // Paging and sorting
-  var _page = 0;
-  var _pageSize = 0;
-  var _sortBy = "";
-  // Exporting support
-  var _exportIframe = null;
-  var _params = [];
-  /*
-   * Initialization code
-   */
-
-  //
-  (function(args){
-    switch (args.length) {
-      case 1:
-        var cd = args[0];
-        if (typeof cd.query != 'undefined') {
-          // got a valid legacy cd object
-          _mode = 'Legacy';
-          _query = args[0];
-        } else if (typeof cd.path != 'undefined' && typeof cd.dataAccessId != 'undefined'){
-          // CDA-style cd object
-          _mode = 'CDA';
-          _file = cd.path;
-          _id = cd.dataAccessId;
-          if (typeof cd.sortBy == 'string' && cd.sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-            _sortBy = cd.sortBy;
-          }
-          if(cd.pageSize != null){
-            _pageSize = cd.pageSize;
-          }
-          if(cd.outputIndexId != null){
-            _outputIdx = cd.outputIndexId;
-          }
-        } else {
-          throw 'InvalidQuery';
-        }
-        break;
-      case 2:
-        _mode = 'CDA';
-        var file = args[0];
-        var id = args[1];
-		if (typeof file != 'string' || typeof id != 'string') {
-          throw 'InvalidQuery';
-        } else {
-          // Seems like we have valid parameters
-          _id = id;
-          _file = file;
-        }
-        break;
-      default:
-        throw "InvalidQuery";
-    }
-  }(arguments));
-  /*
-   * Private methods
-   */
-
-  function doQuery(outsideCallback){
-    if (typeof _callback != 'function') {
-      throw 'QueryNotInitialized';
-    }
-    var url;
-    var queryDefinition;
-    var callback = (outsideCallback ? outsideCallback : _callback);
-    var errorCallback = _errorCallback;
-    if (_mode == 'CDA') {
-      url = CDA_PATH;
-      queryDefinition = buildQueryDefinition();
-    // Assemble parameters
-    } else if (_mode == 'Legacy') {
-      queryDefinition = _query;
-      url = LEGACY_QUERY_PATH;
-    }
-    var successHandler = function(json) {
-	if(_mode == 'Legacy'){
-        try{
-          json = eval("(" + json + ")");
-        }catch(e){
-          if(this.async){
-            // async + legacy errors while parsing json response aren't caught
-            var msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
-            Dashboards.error(msg);
-            json = {"metadata":[msg],"values":[]};
-          }else{
-            //exceptions while parsing json response are
-            //already being caught+handled in updateLifecyle()
-            throw e;
-          }
-        }
-      }
-      _lastResultSet = json;
-      var clone = Dashboards.safeClone(true,{},_lastResultSet);
-
-      if (_mode == 'Legacy') {
-        var newMetadata = [{
-          "colIndex":0,
-          "colType":"String",
-          "colName":"Name"
-        }];
-        for (var i = 0 ; i < clone.metadata.length; i++) {
-          var x = i;
-          newMetadata.push({
-            "colIndex":x+1,
-            "colType":"String",
-            "colName":clone.metadata[x]
-          });
-        }
-        clone.resultset = clone.values;
-        clone.metadata = newMetadata;
-        clone.values = null;
-      }
-
-      callback(clone);
+  if( _.isObject(cd) ){
+    opts = Dashboards.safeClone(true, cd);
+    queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') || 
+      ( !_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined ;
+  } else if ( _.isString(cd) && _.isString(dataAccessId) ) {
+    queryType = 'cda';
+    opts = {
+      path: cd,
+      dataAccessId: dataAccessId
     };
-    var errorHandler = function(resp, txtStatus, error ) {
-      if (errorCallback){
-        errorCallback(resp, txtStatus, error );
-      }
-    };
+  } 
 
-    var settings = _.extend({},_ajaxOptions, {
-      data: queryDefinition,
-      url: url,
-      success: successHandler,
-      error: errorHandler
-    });
+  if (!queryType) { throw 'InvalidQuery' }
 
-    $.ajax(settings);
-  }
-
-  function buildQueryDefinition(overrides) {
-    overrides = overrides || {};
-    var queryDefinition = {};
-
-    var p = Dashboards.objectToPropertiesArray( Dashboards.safeClone({},Dashboards.propertiesArrayToObject(_params), overrides) )
-
-    for (var param in p) {
-      if(p.hasOwnProperty(param)) {
-        var value;
-        var name = p[param][0];
-        value = Dashboards.getParameterValue(p[param][1]);
-        if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
-          //special case where single element will wrongly be treated as a parseable array by cda
-          value = doCsvQuoting(value[0],';');
-        }
-        //else will not be correctly handled for functions that return arrays
-        if (typeof value == 'function') value = value();
-        queryDefinition['param' + name] = value;
-      }
-    }
-    queryDefinition.path = _file;
-    queryDefinition.dataAccessId = _id;
-    queryDefinition.outputIndexId = _outputIdx;
-    queryDefinition.pageSize = _pageSize;
-    queryDefinition.pageStart = _page;
-    queryDefinition.sortBy = _sortBy;
-    return queryDefinition;
-  }
-
-  /*
-   * Public interface
-   */
-
-  this.exportData = function(outputType, overrides, options) {
-    if (_mode != 'CDA') {
-      throw "UnsupportedOperation";
-    }
-    if (!options) {
-      options = {};
-    }
-    var queryDefinition = buildQueryDefinition(overrides);
-    queryDefinition.outputType = outputType;
-    if (outputType == 'csv' && options.separator) {
-      queryDefinition.settingcsvSeparator = options.separator;
-    }
-    if (options.filename) {
-      queryDefinition.settingattachmentName= options.filename ;
-    }
-    if (outputType == 'xls' && options.template) {
-      queryDefinition.settingtemplateName= options.template ;
-    }
-    if( options.columnHeaders ){
-      queryDefinition.settingcolumnHeaders = options.columnHeaders;
-    }
-
-    if(options.dtFilter != null){
-      queryDefinition.settingdtFilter = options.dtFilter;
-      if(options.dtSearchableColumns != null){
-        queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
-      }
-    }
-
-    var theDoQuery = CDA_PATH + 'wrapItUp=wrapit';
-    var x = $.ajaxSettings.async;
-    $.ajaxSetup({ async: false });
-    $.post(theDoQuery, queryDefinition, function(uuid) {
-      var _exportIframe = $('<iframe style="display:none">');
-      _exportIframe.detach();
-      _exportIframe[0].src = webAppPath + '/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
-      _exportIframe.appendTo($('body'));
-    });
-    $.ajaxSetup({ async: x});
-
-  };
-
-  this.setAjaxOptions = function(newOptions) {
-    if(typeof newOptions == "object") {
-      _.extend(_ajaxOptions,newOptions);
-    }
-  };
-
-  this.fetchData = function(params, successCallback, errorCallback) {
-    switch(arguments.length) {
-      case 0:
-        if(_params && _callback) {
-          return doQuery();
-        }
-        break;
-      case 1:
-        if (typeof arguments[0] == "function"){
-          /* If we're receiving _only_ the callback, we're not
-           * going to change the internal callback
-           */
-          return doQuery(arguments[0]);
-        } else if( arguments[0] instanceof Array){
-          _params = arguments[0];
-          return doQuery();
-        }
-        break;
-      case 2:
-        if (typeof arguments[0] == "function"){
-          _callback = arguments[0];
-          _errorCallback = arguments[1];
-          return doQuery();
-        } else {
-          _params = arguments[0];
-          _callback = arguments[1];
-          return doQuery();
-        }
-        break;
-      default:
-        /* We're just going to discard anything over two params */
-        _params = params;
-        _callback = successCallback;
-        _errorCallback = errorCallback;
-        return doQuery();
-    }
-    /* If we haven't hit a return by this time,
-     * the user gave us some wrong input
-     */
-    throw "InvalidInput";
-  };
-
-  // Result caching
-  this.lastResults = function(){
-    if (_lastResultSet !== null) {
-      return Dashboards.safeClone(true,{},_lastResultSet);
-    } else {
-      throw "NoCachedResults";
-    }
-  };
-
-  this.reprocessLastResults = function(outerCallback){
-    if (_lastResultSet !== null) {
-      var clone = Dashboards.safeClone(true,{},_lastResultSet);
-      var callback = outerCallback || _callback;
-      return callback(clone);
-    } else {
-      throw "NoCachedResults";
-    }
-  };
-
-  this.reprocessResults = function(outsideCallback) {
-    if (_lastResultSet !== null) {
-      var clone = Dashboards.safeClone(true,{},_lastResultSet);
-      var callback = (outsideCallback ? outsideCallback : _callback);
-      callback(_mode == 'CDA' ? clone : clone.values);
-    } else {
-      throw "NoCachedResults";
-    }
-  };
-
-  /* Sorting
-   *
-   * CDA expects an array of terms consisting of a number and a letter
-   * that's either 'A' or 'D'. Each term denotes, in order, a column
-   * number and sort direction: 0A would then be sorting the first column
-   * ascending, and 1D would sort the second column in descending order.
-   * This function accepts either an array with the search terms, or
-   * a comma-separated string with the terms:  "0A,1D" would then mean
-   * the same as the array ["0A","1D"], which would sort the results
-   * first by the first column (ascending), and then by the second
-   * column (descending).
-   */
-  this.setSortBy = function(sortBy) {
-    var newSort;
-    if (sortBy === null || sortBy === undefined || sortBy === '') {
-      newSort = '';
-    }
-    /* If we have a string as input, we need to split it into
-     * an array of sort terms. Also, independently of the parameter
-     * type, we need to convert everything to upper case, since want
-     * to accept 'a' and 'd' even though CDA demands capitals.
-     */
-    else if (typeof sortBy == "string") {
-      /* Valid sortBy Strings are column numbers, optionally
-       * succeeded by A or D (ascending or descending), and separated by commas
-       */
-      if (!sortBy.match("^(?:[0-9]+[adAD]?,?)*$")) {
-        throw "InvalidSortExpression";
-      }
-      /* Break the string into its constituent terms, filter out empty terms, if any */
-      newSort = sortBy.toUpperCase().split(',').filter(function(e){
-        return e !== "";
-      });
-    } else if (sortBy instanceof Array) {
-      newSort = sortBy.map(function(d){
-        return d.toUpperCase();
-      });
-      /* We also need to validate that each individual term is valid */
-      var invalidEntries = newSort.filter(function(e){
-        return !e.match("^[0-9]+[adAD]?,?$")
-      });
-      if ( invalidEntries.length > 0) {
-        throw "InvalidSortExpression";
-      }
-    }
-
-    /* We check whether the parameter is the same as before,
-     * and notify the caller on whether it changed
-     */
-    var same;
-    if (newSort instanceof Array) {
-      same = newSort.length != _sortBy.length;
-      $.each(newSort,function(i,d){
-        same = (same && d == _sortBy[i]);
-        if(!same) {
-          return false;
-        }
-      });
-    } else {
-      same = (newSort === _sortBy);
-    }
-    _sortBy = newSort;
-    return !same;
-  };
-
-  this.sortBy = function(sortBy,outsideCallback) {
-    /* If the parameter is not the same, and we have a valid state,
-     * we can fire the query.
-     */
-    var changed = this.setSortBy(sortBy);
-    if (!changed) {
-      return false;
-    } else if (_callback !== null) {
-      return doQuery(outsideCallback);
-    }
-  };
-
-  this.setParameters = function (params) {
-    if((params instanceof Array)) {
-      _params = params;
-    } else {
-      throw "InvalidParameters";
-    }
-  };
-
-  this.setCallback = function(callback) {
-    if(typeof callback == "function") {
-      _callback = callback;
-    } else {
-      throw "InvalidCallback";
-    }
-  };
-  /* Pagination
-   *
-   * We paginate by having an initial position (_page) and page size (_pageSize)
-   * Paginating consists of incrementing/decrementing the initial position by
-   * the page size. All paging operations change the paging cursor.
-   */
-
-  // Gets the next _pageSize results
-  this.nextPage = function(outsideCallback) {
-    if (_pageSize > 0) {
-      _page += _pageSize;
-      return doQuery(outsideCallback);
-    } else {
-      throw "InvalidPageSize";
-    }
-  };
-
-  // Gets the previous _pageSize results
-  this.prevPage = function(outsideCallback) {
-    if (_page > _pageSize) {
-      _page -= _pageSize;
-      return doQuery(outsideCallback);
-    } else if (_pageSize > 0) {
-      _page = 0;
-      return doQuery(outsideCallback);
-    } else {
-      throw "AtBeggining";
-    }
-  };
-
-  // Gets the page-th set of _pageSize results (0-indexed)
-  this.getPage = function(page, outsideCallback) {
-    if (page * _pageSize == _page) {
-      return false;
-    } else if (typeof page == 'number' && page >= 0) {
-      _page = page * _pageSize;
-      return doQuery(outsideCallback);
-    } else {
-      throw "InvalidPage";
-    }
-  };
-
-  // Gets _pageSize results starting at page
-  this.setPageStartingAt = function(page) {
-    if (page == _page) {
-      return false;
-    } else if (typeof page == 'number' && page >= 0) {
-      _page = page;
-    } else {
-      throw "InvalidPage";
-    }
-  };
-
-  this.pageStartingAt = function(page,outsideCallback) {
-    if(this.setPageStartingAt(page) !== false) {
-      return doQuery(outsideCallback);
-    } else {
-      return false;
-    }
-  };
-
-  // Sets the page size
-  this.setPageSize = function(pageSize) {
-    if (typeof pageSize == 'number' && pageSize > 0) {
-      _pageSize = pageSize;
-    } else {
-      throw "InvalidPageSize";
-    }
-  };
-
-  // sets _pageSize to pageSize, and gets the first page of results
-  this.initPage = function(pageSize,outsideCallback) {
-    if (pageSize == _pageSize && _page == 0) {
-      return false;
-    } else if (typeof pageSize == 'number' && pageSize > 0) {
-      _page = 0;
-      _pageSize = pageSize;
-      return doQuery(outsideCallback);
-    } else {
-      throw "InvalidPageSize";
-    }
-  };
+  return Dashboards.getQuery(queryType, opts);
 };
+// QUERIES end
+
+
 
 /*
  * UTILITY STUFF

@@ -203,12 +203,11 @@ var CccComponent2 = BaseCccComponent.extend({
         var myself = this;
 
 
-        this.query = new Query(this.chartDefinition);
+        this.query = Dashboards.getQuery(this.chartDefinition);
 
-        this.sQuery = new Query({
-            path: this.chartDefinition.path,
-            dataAccessId: this.chartDefinition.structDatasource
-        }); 
+        var sQueryDef = $.extend({}, this.chartDefinition);
+        sQueryDef.dataAccessId = sQueryDef.structDatasource;
+        this.sQuery = Dashboards.getQuery(sQueryDef); 
 
         var executed = false;
         var execComponent = function() {
