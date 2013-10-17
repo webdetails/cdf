@@ -57,7 +57,10 @@ orderStatusReport =
 {
   name: "orderStatus",
   type: "prpt",
-  path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
+  solution: "steel-wheels",
+  path: "reports",
+  action: "Order Status.prpt",
+  autoResize: true,
   listeners:["oStatus"],
   parameters: [["oStatus","oStatus", "Shipped"]],
   htmlObject: "orderStatusPrptObject",
@@ -67,7 +70,7 @@ orderStatusReport =
 
 function load(){
   var components = [titleString, statusSelector, orderStatusReport];
-	Dashboards.init(components);
+  Dashboards.init(components);
 }
 
 load();

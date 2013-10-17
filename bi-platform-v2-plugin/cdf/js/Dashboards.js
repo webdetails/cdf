@@ -7,7 +7,7 @@
 
   dataFilter: function(data, dtype) {
     // just tagging date
-    Dashboards.lastServerResponse = (new Date().getTime());
+    Dashboards.lastServerResponse = Date.now();
     return data;
   }
 });
@@ -61,7 +61,7 @@ var Dashboards = {
       msg: "Query timeout reached"
     },
     "COMPONENT_ERROR" : {
-      msg: "Error processing component"
+      msg: "Error processing component"  
     }
   },
   CDF_BASE_PATH: webAppPath + "/plugin/pentaho-cdf/api/",
@@ -84,25 +84,25 @@ var Dashboards = {
   components: [],
   /* Holds the dashboard parameters if globalContext = false */
   parameters: [],
-
+  
   // Holder for context
   context:{},
 
-
-  /*
+  
+  /* 
    * Legacy dashboards don't have priority, so we'll assign a very low priority
    * to them.
    * */
-
+  
   legacyPriority: -1000,
-
+  
   /* Log lifecycle events? */
   logLifecycle: true,
-
+  
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-
-  lastServerResponse: (new Date().getTime()),
+  
+  lastServerResponse: Date.now(),
   serverCheckResponseTimeout: 1800000, //ms, will be overridden at init
   /* Reference to current language code . Used in every place where jquery
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
@@ -328,16 +328,16 @@ Dashboards.setGlobalContext = function(globalContext) {
 };
 
 Dashboards.showProgressIndicator = function() {
-  $.blockUI && this.blockUIwithDrag();
+  this.blockUIwithDrag();
 };
 
 Dashboards.hideProgressIndicator = function() {
-  $.unblockUI && $.unblockUI();
+  $.unblockUI();
   this.showErrorTooltip();
 };
 
 Dashboards.resetRunningCalls = function(){
-  this.runningCalls = 0;
+  this.runningCalls = 0;   
   setTimeout(_.bind(function(){
     this.hideProgressIndicator();
   },this),10);
@@ -371,7 +371,7 @@ Dashboards.bindControl = function(control) {
   } else {
     this._castControlToClass(control, Class);
   }
-
+  
   this.bindExistingControl(control, Class);
 };
 
@@ -381,29 +381,29 @@ Dashboards.bindExistingControl = function(control, Class) {
 
     // Ensure BaseComponent's methods
     this._castControlToComponent(control, Class);
-
+    
     // Make sure we clean all events in the case we're redefining the control.
     if(typeof control.off === "function") { control.off("all"); }
 
     // Endow it with the Backbone event system.
     $.extend(control, Backbone.Events);
-
+    
     // Add logging lifeCycle
     this._addLogLifecycleToControl(control);
-
+    
     // For legacy dashboards, we'll automatically assign some priority for component execution.
     if(control.priority == null || control.priority === "") {
         control.priority = this.legacyPriority++;
     }
   }
-
+  
   return control;
 };
 
 Dashboards._castControlToClass = function(control, Class) {
   if(!(control instanceof Class)) {
     var controlImpl = this._makeInstance(Class);
-
+    
     // Copy implementation into control
     $.extend(control, controlImpl);
   }
@@ -413,16 +413,16 @@ Dashboards._getControlClass = function(control) {
   // see if there is a class defined for this control
   var typeName = control.type;
   if(typeof typeName === 'function') { typeName = typeName.call(control); } // <=> control.type() ; the _this_ in the call is _control_
-
+  
   var TypeName = typeName.substring(0,1).toUpperCase() + typeName.substring(1);
-
+  
   // try _TypeComponent_, _type_ and _Type_ as class names
   var typeNames = [TypeName + 'Component', typeName, TypeName];
-
+  
   for (var i = 0, N = typeNames.length ; i < N ; i++) {
     // TODO: window represents access to the JS global object.
     // This, or a special object on which to eval types, should be provided by some FWK.
-
+    
     // If the value of a name is not a function, keep on trying.
     var Class = window[typeNames[i]];
     if(Class && typeof Class === 'function') { return Class; }
@@ -440,18 +440,18 @@ Dashboards._castControlToComponent = function(control, Class) {
   // Extend control with BaseComponent methods, if it's not an instance of it.
   // Also, avoid extending if _Class_ was already applied
   // and it is a subclass of BaseComponent.
-  if(!(control instanceof BaseComponent) &&
+  if(!(control instanceof BaseComponent) && 
      (!Class || !(Class.prototype instanceof BaseComponent))) {
-
+    
     var baseProto = BaseComponent.prototype;
     for(var p in baseProto) {
-      if(baseProto.hasOwnProperty(p) &&
-         (control[p] === undefined) &&
+      if(baseProto.hasOwnProperty(p) && 
+         (control[p] === undefined) && 
          (typeof baseProto[p] === 'function')) {
         switch(p) {
           // Exceptions
           case 'base': break;
-
+            
           // Copy
           default: control[p] = baseProto[p]; break;
         }
@@ -461,15 +461,15 @@ Dashboards._castControlToComponent = function(control, Class) {
 };
 
 Dashboards._addLogLifecycleToControl = function(control) {
-  // TODO: Could the _typeof console !== "undefined"_ test be made beforehand,
+  // TODO: Could the _typeof console !== "undefined"_ test be made beforehand, 
   // to avoid always installing the catch-all handler?
   // The same could be said for the _this.logLifecycle_ test.
   // To still allow changing the value dynamically, a Dashboards.setLogLifecycle(.) method could be provided.
-
+  
   // Add logging lifeCycle
+  var myself = this;
   control.on("all", function(e) {
-    var dashs = this.dashboard;
-    if(dashs && dashs.logLifecycle && e !== "cdf" && this.name !== "PostInitMarker" && typeof console !== "undefined") {
+    if(myself.logLifecycle && e !== "cdf" && this.name !== "PostInitMarker" && typeof console !== "undefined") {
       var eventStr;
       var eventName = e.substr(4);
       switch(eventName) {
@@ -478,10 +478,10 @@ Dashboards._addLogLifecycleToControl = function(control) {
         case "error":         eventStr = "!Error"; break;
         default:              eventStr = "      "; break;
       }
-      
-      var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
-      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
-          eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+        
+      var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event",this.splitTimer());
+      console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " (P: "+ this.priority +" ): " + 
+          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
     }
   });
 };
@@ -515,9 +515,9 @@ Dashboards.parseServerError = function (resp, txtStatus, error){
 Dashboards.handleServerError = function() {
   var err = Dashboards.parseServerError.apply( this, arguments );
 
-  Dashboards.errorNotification( err );
+  Dashboards.errorNotification( err ); 
   Dashboards.trigger('cdf cdf:serverError', this);
-  Dashboards.resetRunningCalls();
+  Dashboards.resetRunningCalls();  
 };
 
 Dashboards.errorNotification = function (err, ph) {
@@ -554,7 +554,7 @@ Dashboards.loginAlert = function(newOpts) {
 };
 
 /**
- *
+ * 
  */
 Dashboards.checkServer = function() {
 	//check if is connecting to server ok
@@ -597,7 +597,7 @@ Dashboards.restoreDuplicates = function() {
    * all of those that end with the _nn suffix (possibly several
    * such suffixes piled up, like _1_2, as we can re-duplicate
    * existing duplicates).
-   *
+   * 
    * The suffixes object then maps those suffixes to a mapping of
    * the root parameter names to their respective values.
    * E.g. a parameter 'foo_1 = 1' yields '{_1: {foo: 1}}'
@@ -617,7 +617,7 @@ Dashboards.restoreDuplicates = function() {
 
 
   /*
-   * Once we have the suffix list, we'll check each suffix's
+   * Once we have the suffix list, we'll check each suffix's 
    * parameter list against each of the DuplicateComponents
    * in the dashboard. We consider that a suffix matches a
    * DuplicateComponent if the suffix contains all of the
@@ -721,7 +721,7 @@ Dashboards.updateLifecycle = function(object) {
       // Triggering the event for the rest of the process
       object.trigger('cdf cdf:postExecution', object);
 
-  },this);
+  },this);  
   setTimeout(handler,1);
 };
 
@@ -752,7 +752,7 @@ Dashboards.update = function(component) {
 };
 
 Dashboards.updateComponent = function(object) {
-  if((new Date().getTime()) - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
+  if(Date.now() - Dashboards.lastServerResponse > Dashboards.serverCheckResponseTimeout) {
     //too long in between ajax communications
     if(!Dashboards.checkServer()) {
     	Dashboards.hideProgressIndicator();
@@ -763,7 +763,7 @@ Dashboards.updateComponent = function(object) {
 
   if(object.isManaged === false && object.update) {
     object.update();
-    // check if component has periodic refresh and schedule next update
+	// check if component has periodic refresh and schedule next update
     this.refreshEngine.processComponent(object);
   } else {
     this.updateLifecycle(object);
@@ -779,14 +779,12 @@ Dashboards.createAndCleanErrorDiv = function(){
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
-    if($.tooltip) {
-      $(".cdf_error").tooltip({
-        delay:0,
-        track: true,
-        fade: 250,
-        showBody: " -- "
-      });
-    }
+    $(".cdf_error").tooltip({
+      delay:0,
+      track: true,
+      fade: 250,
+      showBody: " -- "
+    })
   });
 };
 
@@ -814,10 +812,10 @@ Dashboards.addComponents = function(components) {
 
 Dashboards.addComponent = function(component, options) {
   this.removeComponent(component);
-
+  
   // Attempt to convert over to component implementation
   this.bindControl(component);
-
+  
   var index = options && options.index;
   var L = this.components.length;
   if(index == null || index < 0 || index > L) { index = L; } // <=> push
@@ -850,15 +848,9 @@ Dashboards.removeComponent = function(compOrNameOrIndex) {
   if(index >= 0) {
     var cs = this.components;
     comp = cs[index];
-    cs.splice(index, 1);
     comp.dashboard = null;
-    
-    comp.off('cdf:postExecution');
-    comp.off('cdf:preExecution');
-    comp.off('cdf:error');
-    comp.off('all');
+    cs.splice(index, 1);
   }
-
   return comp;
 };
 
@@ -885,27 +877,24 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 
 Dashboards.init = function(components){
   var myself =this;
-
-  this.syncDebugLevel();
-
   if(this.initialStorage) {
     _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
   }
-  
   if(this.context != null && this.context.sessionTimeout != null ) {
     //defaulting to 90% of ms value of sessionTimeout
     Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
-  
   this.restoreBookmarkables();
   this.restoreView();
   this.syncParametersInit();
-  
-  if($.isArray(components)) { this.addComponents(components); }
-  
-  $(function() { myself.initEngine(); });
+  if ($.isArray(components)) {
+    this.addComponents(components);
+  }
+  $(function() {
+    myself.initEngine();
+  });
 };
 
 
@@ -942,7 +931,7 @@ Dashboards.syncParametersOnInit = function (master, slave){
       slaveChain, slaveChainIdx, i;
   if(!parameters[master]) parameters[master] = [];
   parameters[master].push(slave);
-
+  
   /* When inserting an entry into Dashboards.chains, we need to check whether
    * any of the master or the slave are already in one of the chains.
    */
@@ -954,14 +943,14 @@ Dashboards.syncParametersOnInit = function (master, slave){
     if (currChain.indexOf(slave) > -1) {
       slaveChain = currChain;
       slaveChainIdx = i;
-    }
+    }    
   }
   /* If both slave and master are present in different chains, we merge the
    * chains.
    *
    * If only one of the two is present, we insert the slave at the end
    * of the master's chain, or the master at the head of the slave's chain.
-   *
+   * 
    * Note that, since a parameter can be both a master and a slave, and because
    * no slave can have two masters, it is guaranteed that we can only add the
    * master to the head of the chain if the slave was the head before, and, when
@@ -1010,12 +999,7 @@ Dashboards.syncParametersInit = function() {
 }
 
 
-Dashboards.initEngine = function() {
-  // Should really throw an error? Or return?
-  if(this.waitingForInit && this.waitingForInit.length) {
-    this.log("Overlapping initEngine!", 'warn');
-  }
-
+Dashboards.initEngine = function(){
   var myself = this;
   var components = this.components;
 
@@ -1044,9 +1028,9 @@ Dashboards.initEngine = function() {
     this.handlePostInit();
     return;
   }
-
-  // Since we can get into racing conditions between last component's
-  // preExecution and dashboard.postInit, we'll add a last component with very
+  
+  // Since we can get into racing conditions between last component's 
+  // preExecution and dashboard.postInit, we'll add a last component with very 
   // low priority who's funcion is only to act as a marker.
   var postInitComponent = {
     name: "PostInitMarker",
@@ -1059,8 +1043,8 @@ Dashboards.initEngine = function() {
   };
   this.bindControl(postInitComponent)
   updating.push(postInitComponent);
-
-
+  
+  
   this.waitingForInit = updating.slice();
 
   var callback = function(comp,isExecuting) {
@@ -1103,32 +1087,13 @@ Dashboards.handlePostInit = function() {
     }
     this.restoreDuplicates();
     this.finishedInit = true;
-
+    
     this.decrementRunningCalls();
     if( this.logLifecycle && typeof console != "undefined" ){
       console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
     }
-
+    
   }
-};
-
-Dashboards.debug = 1;
-
-Dashboards.syncDebugLevel = function() {
-  var level = 1; // log errors
-  try {
-    var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
-    var url = urlIfHasDebug(window.location.href) ||
-              urlIfHasDebug(window.top.location.href);
-    if(url) {
-        var m = /\bdebugLevel=(\d+)/.exec(url);
-        level = m ? (+m[1]) : 3;
-    }
-  } catch(ex) {
-    // swallow
-  }
-
-  return this.debug = level;
 };
 
 Dashboards.resetAll = function(){
@@ -1146,9 +1111,9 @@ Dashboards.resetAll = function(){
 };
 
 Dashboards.processChange = function(object_name){
-
+  
   //Dashboards.log("Processing change on " + object_name);
-
+  
   var object = this.getComponentByName(object_name);
   var parameter = object.parameter;
   var value;
@@ -1285,7 +1250,7 @@ Dashboards.updateAll = function(components) {
       // Start timer
       component.startTimer();
       component.on("cdf:postExecution cdf:preExecution cdf:error",postExec,this);
-
+      
       // Logging this.updating. Uncomment if needed to trace issues with lifecycle
       // Dashboards.log("Processing "+ component.name +" (priority " + this.updating.current.priority +"); Next in queue: " +
       //  _(this.updating.tiers).map(function(v,k){return k + ": [" + _(v).pluck("name").join(",") + "]"}).join(", "));
@@ -1493,7 +1458,7 @@ Dashboards.restoreBookmarkables = function() {
 Dashboards.setParameterViewMode = function(parameter, value) {
     if(!this.viewParameters) this.viewParameters = {};
     if (arguments.length === 1) value = this.viewFlags.VIEW;
-    //if(!Dashboards.viewFlags.hasOwnProperty(value)) throw
+    //if(!Dashboards.viewFlags.hasOwnProperty(value)) throw 
     this.viewParameters[parameter] = value;
 };
 
@@ -1571,21 +1536,10 @@ Dashboards.getQueryParameter = function ( parameterName ) {
   }
 };
 
-Dashboards.getPathParameter = function(){
-  var pathName = window.location.pathname,
-      idxStart = window.location.pathname.indexOf(":"),
-      idxEnd = window.location.pathname.indexOf("/generatedContent");
-
-  var path = pathName.substring(idxStart, idxEnd);
-
-  return path.replace(/:/g, "/");
-
-};
-
 Dashboards.setParameter = function(parameterName, parameterValue) {
   if(parameterName == undefined || parameterName == "undefined"){
     this.log('Dashboards.setParameter: trying to set undefined!!','warn');
-    return;
+    return;  
   }
   if (this.globalContext) {
     //ToDo: this should really be sanitized!
@@ -1665,7 +1619,7 @@ Dashboards.ev = function(o){
 
 Dashboards.callPentahoAction = function(obj, path, parameters, callback ){
   var myself = this;
-
+  
   // Encapsulate pentahoAction call
   // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
   if(typeof callback == 'function'){
@@ -1703,7 +1657,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
       }
     });
   }
-
+	
   // Sync
   var result = $.ajax({
     url: url,
@@ -1722,7 +1676,7 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
     return result.responseText;
   }
 
-};
+}; 
 
 Dashboards.pentahoAction = function( path, params, func ) {
   return this.pentahoServiceAction('ServiceAction', 'xml', path, params, func);
@@ -1794,7 +1748,7 @@ Dashboards.getSettingsValue = function(key,value){
   var callback = typeof value == 'function' ? value : function(json){
     value = json;
   };
-
+	
   $.getJSON("Settings?method=get&key=" + key , callback);
 };
 
@@ -1813,11 +1767,11 @@ Dashboards.fetchData = function(cd, params, callback) {
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
-
+	
     var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
     $.post(webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:"+xactionFile+"/generatedContent?", cd,
       function(result) {
-        callback(result.values);
+        callback(result.values); 
       },'json');
   }
   // ... or just call the callback when no valid definition is passed
@@ -1882,7 +1836,7 @@ Dashboards.cleanStorage = function(){
   if( this.context && this.context.user === "anonymousUser") {
     return;
   }
-
+  
   var args = {
   };
   $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/delete", args, function(ok) {
@@ -1899,7 +1853,7 @@ Dashboards.propertiesArrayToObject = function(pArray) {
     obj[prop[0]] = prop[1];
   }
   return obj;
-};
+}
 
 Dashboards.objectToPropertiesArray = function(obj) {
   var pArray = [];
@@ -1907,8 +1861,45 @@ Dashboards.objectToPropertiesArray = function(obj) {
     pArray.push([key,obj[key]]);
   }
   return pArray;
-};
+}
 
+/** 
+* Converts HSV to RGB value. 
+* 
+* @param {Integer} h Hue as a value between 0 - 360 degrees 
+* @param {Integer} s Saturation as a value between 0 - 100 % 
+* @param {Integer} v Value as a value between 0 - 100 % 
+* @returns {Array} The RGB values  EG: [r,g,b], [255,255,255] 
+*/  
+Dashboards.hsvToRgb = function (h,s,v) {  
+  
+    s = s / 100;
+    v = v / 100;
+  
+    var hi = Math.floor((h/60) % 6);  
+    var f = (h / 60) - hi;  
+    var p = v * (1 - s);  
+    var q = v * (1 - f * s);  
+    var t = v * (1 - (1 - f) * s);  
+  
+    var rgb = [];  
+  
+    switch (hi) {  
+        case 0: rgb = [v,t,p];break;  
+        case 1: rgb = [q,v,p];break;  
+        case 2: rgb = [p,v,t];break;  
+        case 3: rgb = [p,q,v];break;  
+        case 4: rgb = [t,p,v];break;  
+        case 5: rgb = [v,p,q];break;  
+    }  
+  
+    var r = Math.min(255, Math.round(rgb[0]*256)),  
+        g = Math.min(255, Math.round(rgb[1]*256)),  
+        b = Math.min(255, Math.round(rgb[2]*256));  
+  
+    return "rgb("+ [r,g,b].join(",")+")";  
+  
+}     
 
 /**
  * Traverses each <i>value</i>, <i>label</i> and <i>id</i> triple of a <i>values array</i>.
@@ -2180,7 +2171,6 @@ var Utf8 = {
     var i = 0;
     var c = 0, c2 = 0, c3 = 0;
 
-
     while ( i < utftext.length ) {
 
       c = utftext.charCodeAt(i);
@@ -2208,7 +2198,7 @@ var Utf8 = {
 
 }
 
-function getURLParameters(sURL)
+function getURLParameters(sURL) 
 {
   if (sURL.indexOf("?") > 0){
 
@@ -2230,7 +2220,6 @@ function getURLParameters(sURL)
   return arrParam;
 }
 
-
 function toFormatedString(value) {
   value += '';
   var x = value.split('.');
@@ -2241,7 +2230,6 @@ function toFormatedString(value) {
     x1 = x1.replace(rgx, '$1' + ',' + '$2');
   return x1 + x2;
 }
-
 
 //quote csv values in a way compatible with CSVTokenizer
 function doCsvQuoting(value, separator, alwaysEscape){
@@ -2262,7 +2250,6 @@ function doCsvQuoting(value, separator, alwaysEscape){
   }
   return value;
 }
-
 
 /**
 *
@@ -2309,10 +2296,10 @@ sprintfWrapper = {
       strings[strings.length] = string.substring(stringPosStart, stringPosEnd);
 
       matchPosEnd = exp.lastIndex;
-
+      
       var negative = parseInt(arguments[convCount]) < 0;
       if(!negative) negative = parseFloat(arguments[convCount]) < 0;
-
+      
       matches[matches.length] = {
         match: match[0],
         left: match[3] ? true : false,
@@ -2335,13 +2322,11 @@ sprintfWrapper = {
     }
 
     match = null;
-
     var i = null;
 
     for (i=0; i<matches.length; i++) {
       var m =matches[i];
       var substitution;
-
       if (m.code == '%') {
         substitution = '%'
       }
@@ -2384,6 +2369,7 @@ sprintfWrapper = {
       newString += strings[i];
       newString += substitution;
     }
+    
     newString += strings[i];
 
     return newString;
@@ -2418,8 +2404,8 @@ sprintf = sprintfWrapper.init;
 
 //Normalization - Ensure component does not finish with component and capitalize first letter
 Dashboards.normalizeAddInKey = function(key) {
-  	if (key.indexOf('Component', key.length - 'Component'.length) !== -1)
-  		key = key.substring(0, key.length - 'Component'.length);
+  	if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
+  		key = key.substring(0, key.length - 'Component'.length);	
 	return key.charAt(0).toUpperCase() + key.substring(1);
 }
 
@@ -2427,18 +2413,18 @@ Dashboards.registerAddIn = function(component,slot,addIn){
   if (!this.addIns) {
     this.addIns = {};
   }
-
+  
 
   var key = this.normalizeAddInKey(component);
-
-
+  
+  
   if (!this.addIns[key]) {
-    this.addIns[key] = {};
+    this.addIns[key] = {};  
   }
   if (!this.addIns[key][slot]) {
-    this.addIns[key][slot] = {};
+    this.addIns[key][slot] = {};  
   }
-  this.addIns[key][slot][addIn.getName()] = addIn;
+  this.addIns[key][slot][addIn.getName()] = addIn;  
 };
 
 Dashboards.hasAddIn = function(component,slot,addIn){
@@ -2468,8 +2454,7 @@ var key = this.normalizeAddInKey(component);
   var addInList = [];
   try {
     slot = this.addIns[key][slot];
-
-    for (var addIn in slot) if (slot.hasOwnProperty(addIn)) {
+    for (var addIn in slot) if (slot.hasOwnProperty(addIn)) { 
       addInList.push([addIn, slot[addIn].getLabel()]);
     }
     return addInList;
@@ -2534,7 +2519,7 @@ Dashboards.safeClone = function(){
 
   // Return the modified object
   return target;
-};
+}
 
 //Ctors:
 // Query(queryString) --> DEPRECATED
@@ -2600,7 +2585,7 @@ Query = function() {
           }
           if(cd.outputIndexId != null){
             _outputIdx = cd.outputIndexId;
-          }
+          }		  
         } else {
           throw 'InvalidQuery';
         }
@@ -2619,7 +2604,7 @@ Query = function() {
         break;
       default:
         throw "InvalidQuery";
-    }
+    } 
   }(arguments));
   /*
    * Private methods
@@ -2630,7 +2615,7 @@ Query = function() {
       throw 'QueryNotInitialized';
     }
     var url;
-    var queryDefinition;
+    var queryDefinition; 
     var callback = (outsideCallback ? outsideCallback : _callback);
     var errorCallback = _errorCallback;
     if (_mode == 'CDA') {
@@ -2647,7 +2632,7 @@ Query = function() {
       }
       _lastResultSet = json;
       var clone = Dashboards.safeClone(true,{},_lastResultSet);
-
+      
       if (_mode == 'Legacy') {
         var newMetadata = [{
           "colIndex":0,
@@ -2661,15 +2646,15 @@ Query = function() {
             "colType":"String",
             "colName":clone.metadata[x]
           });
-        }
+        }      
         clone.resultset = clone.values;
         clone.metadata = newMetadata;
         clone.values = null;
       }
-
+      
       callback(clone);
     };
-    var errorHandler = function(resp, txtStatus, error ) {
+    var errorHandler = function(resp, txtStatus, error ) {      
       if (errorCallback){
         errorCallback(resp, txtStatus, error );
       }
@@ -2677,24 +2662,23 @@ Query = function() {
 
     var settings = _.extend({},_ajaxOptions, {
       data: queryDefinition,
-      type: 'GET',
       url: url,
       success: successHandler,
-      error: errorHandler
+      error: errorHandler 
     });
-
+    
     $.ajax(settings);
   }
 
   function buildQueryDefinition(overrides) {
     overrides = overrides || {};
     var queryDefinition = {};
-
+    
     var p = Dashboards.objectToPropertiesArray( Dashboards.safeClone({},Dashboards.propertiesArrayToObject(_params), overrides) )
 
     for (var param in p) {
       if(p.hasOwnProperty(param)) {
-        var value;
+        var value; 
         var name = p[param][0];
         value = Dashboards.getParameterValue(p[param][1]);
         if($.isArray(value) && value.length == 1 && ('' + value[0]).indexOf(';') >= 0){
@@ -2714,7 +2698,6 @@ Query = function() {
     queryDefinition.sortBy = _sortBy;
     return queryDefinition;
   }
-
 
   /*
    * Public interface
@@ -2748,7 +2731,7 @@ Query = function() {
         queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
       }
     }
-
+    
     var theDoQuery = CDA_PATH + 'wrapItUp=wrapit';
     var x = $.ajaxSettings.async;
     $.ajaxSetup({ async: false });
@@ -2757,11 +2740,10 @@ Query = function() {
       _exportIframe.detach();
       _exportIframe[0].src = webAppPath + '/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
       _exportIframe.appendTo($('body'));
-    });
+    });    
     $.ajaxSetup({ async: x});
 
-
-  }
+  };
 
   this.setAjaxOptions = function(newOptions) {
     if(typeof newOptions == "object") {
@@ -2792,7 +2774,7 @@ Query = function() {
           _callback = arguments[0];
           _errorCallback = arguments[1];
           return doQuery();
-        } else if( arguments[0] instanceof Array){
+        } else {
           _params = arguments[0];
           _callback = arguments[1];
           return doQuery();
@@ -2885,7 +2867,7 @@ Query = function() {
         throw "InvalidSortExpression";
       }
     }
-
+      
     /* We check whether the parameter is the same as before,
      * and notify the caller on whether it changed
      */
@@ -3019,37 +3001,37 @@ Query = function() {
 /*
  * UTILITY STUFF
  *
- *
+ * 
  */
 
 (function() {
   function accessorDescriptor(field, fun)
   {
     var desc = {
-      enumerable: true,
+      enumerable: true, 
       configurable: true
     };
     desc[field] = fun;
     return desc;
   }
-
+  
   this.defineGetter = function defineGetter(obj, prop, get)
   {
     if (Object.prototype.__defineGetter__)
       return obj.__defineGetter__(prop, get);
     if (Object.defineProperty)
       return Object.defineProperty(obj, prop, accessorDescriptor("get", get));
-
+  
     throw new Error("browser does not support getters");
   }
-
+  
   this.defineSetter = function defineSetter(obj, prop, set)
   {
     if (Object.prototype.__defineSetter__)
       return obj.__defineSetter__(prop, set);
     if (Object.defineProperty)
       return Object.defineProperty(obj, prop, accessorDescriptor("set", set));
-
+  
     throw new Error("browser does not support setters");
   }
 })();
@@ -3061,7 +3043,7 @@ Query = function() {
 /*
  * Popups (Move somewhere else?)
  *
- *
+ * 
  */
 
 
@@ -3082,8 +3064,8 @@ wd.cdf.popups.okPopup = {
     header: "Title",
     desc:"Description Text",
     button:"Button Text",
-    callback: function (){
-      return true
+    callback: function (){ 
+      return true 
     }
   },
   $el: undefined,
@@ -3118,7 +3100,7 @@ wd.cdf.popups.okPopup = {
 /*
  * Error information divs
  *
- *
+ * 
  */
 
 wd.cdf.notifications = wd.cdf.notifications || {};
@@ -3158,7 +3140,7 @@ wd.cdf.notifications.growl = {
     desc: 'Default CDF notification.',
     timeout: 4000,
     onUnblock: function (){ return true },
-    css: $.extend( {},
+    css: $.extend( {}, 
       $.blockUI.defaults.growlCSS,
       { position: 'absolute' , width: '100%' , top:'10px' } ),
     showOverlay: false,
@@ -3185,7 +3167,7 @@ wd.cdf.notifications.growl = {
     this.$el.show().block(opts);
   },
   firstRender: true
-};
+}; 
 
 
 

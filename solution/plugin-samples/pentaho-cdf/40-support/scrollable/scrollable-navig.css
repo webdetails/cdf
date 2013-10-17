@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url('http://themes.googleusercontent.com/static/fonts/opensans/v4/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Open Sans Light'), local('OpenSans-Light'), url('http://themes.googleusercontent.com/static/fonts/opensans/v4/DXI1ORHCpsQm3Vp6mXoaTXhCUOGz7vYGh680lGh-uXM.woff') format('woff');
+}
+
 /* this makes it possible to add next button beside scrollable */
 div.scrollable {
 	float:left;		
@@ -112,10 +126,10 @@ a.prev, a.next {
 }
 
 #thumbs h3, #thumbs p, #thumbs span {
-	margin:13px;		
-	font-family:"bitstream vera sans";
-	font-size:13px;
+	margin: 20px 13px 0px;
+	font-size:12px;
 	color:#fff;	
+	font-family: 'Open Sans', Arial, sans-serif;
 }
 
 #thumbs h3 em {
@@ -129,10 +143,11 @@ a.prev, a.next {
 }
 
 .header3 {
-	margin:13px;		
-	font-family:"bitstream vera sans";
-	font-size:13px;
+	margin: 13px;	
+	line-height: 30px;
+	font-size:12px;
 	color:#fff;	
+	font-family: 'Open Sans', Arial, sans-serif;
 }
 
 .header3 em {

@@ -74,6 +74,7 @@ var TableComponent = UnmanagedComponent.extend({
        * Something went wrong and we won't have handlers firing in the future
        * that will trigger unblock, meaning we need to trigger unblock manually.
        */
+      this.dashboard.error(e);
       this.unblock();
     }
   },
@@ -340,7 +341,7 @@ var TableComponent = UnmanagedComponent.extend({
         var position = myself.dataTable.fnGetPosition(target.get(0));
         state.rawData = myself.rawData;
         state.tableData = myself.dataTable.fnGetData();
-        state.colIdx = position[1];
+        state.colIdx = position[2];
         state.rowIdx = position[0];
         state.series = results.resultset[state.rowIdx][0];
         
@@ -352,11 +353,12 @@ var TableComponent = UnmanagedComponent.extend({
         state.target = target;
 
         
-        if (myself.expandOnClick) {
+        if ( myself.expandOnClick ) {
         	myself.handleExpandOnClick(state);
         }
-        if (cd.clickAction)
+        if ( cd.clickAction  ){
 	        cd.clickAction.call(myself,state);
+        }
       }
     });
     myself.ph.trigger('cdfTableComponentFinishRendering');
