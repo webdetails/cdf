@@ -1,30 +1,29 @@
-/**
- * jQuery Autobox Plugin
- * Copyright (c) 2008 Big Red Switch
- *
- * http://www.bigredswitch.com/blog/2008/12/autobox2/
- *
- * Dual licensed under the BSD and GPL licenses:
- *  http://en.wikipedia.org/wiki/Bsd_license
- *  http://en.wikipedia.org/wiki/GNU_General_Public_License
- *
- * 0.7.0 : Initial version
- *         Rolled up autocomplete and autotext plugins
- *
- * ****************************************************************************
- *
- * jQuery Autocomplete
- * Written by Yehuda Katz (wycats@gmail.com) and Rein Henrichs (reinh@reinh.com)
- * Copyright 2007 Yehuda Katz, Rein Henrichs
- * Dual licensed under the MIT and GPL licenses:
- *   http://www.opensource.org/licenses/mit-license.php
- *   http://www.gnu.org/licenses/gpl.html
- *
- * Facebook style text list from Guillermo Rauch's mootools script:
- *  http://devthought.com/textboxlist-fancy-facebook-like-dynamic-inputs/
- *
- * Caret position method: Diego Perini: http://javascript.nwbox.com/cursor_position/cursor.js
- */
+/*! *
+* jQuery Autobox Plugin
+* Copyright (c) 2008 Big Red Switch
+*
+* http://www.bigredswitch.com/blog/2008/12/autobox2/
+*
+* Dual licensed under the BSD and GPL licenses:
+*  http://en.wikipedia.org/wiki/Bsd_license
+*  http://en.wikipedia.org/wiki/GNU_General_Public_License
+*
+* 0.7.0 : Initial version
+*         Rolled up autocomplete and autotext plugins
+*
+* ****************************************************************************
+*
+* jQuery Autocomplete
+* Copyright 2007 Yehuda Katz, Rein Henrichs
+* Dual licensed under the MIT and GPL licenses:
+*   http://www.opensource.org/licenses/mit-license.php
+*   http://www.gnu.org/licenses/gpl.html
+*
+* Facebook style text list from Guillermo Rauch's mootools script:
+*  http://devthought.com/textboxlist-fancy-facebook-like-dynamic-inputs/
+*
+* Caret position method: Diego Perini: http://javascript.nwbox.com/cursor_position/cursor.js
+*/
 
 //TODO: should be completely redone, using new jquery autobox; current component code is too cryptic and fragile
 

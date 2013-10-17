@@ -1,13 +1,17 @@
 /*!
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-//VERSION TRUNK-20130423
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
 
-pen.define("cdf/lib/CCC/def", function() {
-
-
+pen.define("cdf/lib/CCC/def", function(){
 /** @private */
 var arraySlice = Array.prototype.slice;
 
@@ -110,6 +114,8 @@ if(!this.JSON.stringify){
 
 /** @private */
 var objectHasOwn = Object.prototype.hasOwnProperty;
+/** @private */
+var arraySlice = Array.prototype.slice;
 
 /**
  * @name def
@@ -146,12 +152,8 @@ var def = /** @lends def */{
         return props.map(function(p){ return o[p]; });
     },
     
-    getPath: function(o, path, dv, create){
-        if(!o) { 
-            return dv;
-        }
-        
-        if(path != null){
+    getPath: function(o, path, create, dv){
+        if(o && path != null){
             var parts = def.array.is(path) ? path : path.split('.');
             var L = parts.length;
             if(L){
@@ -160,12 +162,10 @@ var def = /** @lends def */{
                     var part = parts[i++];
                     var value = o[part];
                     if(value == null){
-                        if(!create){ 
-                            return dv; 
-                        }
-                        value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
+                        if(!create){ return dv; }
+                        
+                        value = o[part] = {};
                     }
-                    
                     o = value;
                 }
             }
@@ -173,22 +173,7 @@ var def = /** @lends def */{
         
         return o;
     },
-    
-    setPath: function(o, path, v){
-        if(o && path != null){
-            var parts = def.array.is(path) ? path : path.split('.');
-            if(parts.length){
-                var pLast = parts.pop();
-                o = def.getPath(o, parts, pLast, true);
-                if(o != null){
-                    o[pLast] = v;
-                }
-            }
-        }
         
-        return o;
-    },
-    
     /** 
      * Creates a property getter function,
      * for a specified property name.
@@ -199,7 +184,7 @@ var def = /** @lends def */{
      * if the property would be accessed on null or undefined.
      * @type function
      */
-    propGet: function(p, dv) {
+    propGet: function(p, dv){
         p = '' + p;
         
         /**
@@ -223,7 +208,9 @@ var def = /** @lends def */{
          * 
          * @private
          */
-        return function(o) { return o ? o[p] : dv; };
+        return function(o){ 
+            return o != null ? o[p] : dv;
+        };
     },
     
     // TODO: propSet ?
@@ -268,57 +255,35 @@ var def = /** @lends def */{
         return o;
     },
 
-    setDefaults: function(o, o2){
+    setDefaults: function(o){
         if(!o) {
             o = {};
         }
 
         var a = arguments;
-        var A = a.length;
-        var p;
-        if(A === 2 && def.object.is(o2)){
-            for(p in o2){
-                if(o[p] == null){
-                    o[p] = o2[p];
-                }
-            }
-        } else {
-            A--;
-            for(var i = 1 ; i < A ; i += 2) {
-                p = a[i];
-                if(o[p] == null){
-                    o[p] = a[i+1];
-                }
+        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
+            var p = a[i];
+            if(o[p] == null){
+                o[p] = a[i+1];
             }
         }
-        
+
         return o;
     },
 
-    setUDefaults: function(o, o2){
+    setUDefaults: function(o){
         if(!o) {
             o = {};
         }
 
         var a = arguments;
-        var A = a.length;
-        var p;
-        if(A === 2 && def.object.is(o2)){
-            for(p in o2){
-                if(o[p] === undefined){
-                    o[p] = o2[p];
-                }
-            }
-        } else {
-            A--;
-            for(var i = 1 ; i < A ; i += 2) {
-                p = a[i];
-                if(o[p] === undefined){
-                    o[p] = a[i+1];
-                }
+        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
+            var p = a[i];
+            if(o[p] === undefined){
+                o[p] = a[i+1];
             }
         }
-        
+
         return o;
     },
     
@@ -432,6 +397,8 @@ var def = /** @lends def */{
         return to;
     },
     
+    ownKeys: Object.keys,
+    
     keys: function(o){
         var keys = [];
         for(var p in o) {
@@ -441,44 +408,13 @@ var def = /** @lends def */{
         return keys;
     },
     
-    values: function(o){
-        var values = [];
-        for(var p in o) {
-            values.push(o[p]);
-        }
-        
-        return values;
-    },
-    
-    uniqueIndex: function(o, key, ctx){
-        var index = {};
-        
-        for(var p in o){
-            var v = key ? key.call(ctx, o[p]) : o[p];
-            if(v != null && !objectHasOwn.call(index, v)){
-                index[v] = p;
-            }
-        }
-        
-        return index;
-    },
-    
-    ownKeys: Object.keys,
-    
-    own: function(o, f, ctx){
-        var keys = Object.keys(o);
-        return f ?
-                keys.map(function(key){ return f.call(ctx, o[key], key); }) :
-                keys.map(function(key){ return o[key]; });
+    own: function(o){
+        return Object.keys(o)
+                     .map(function(key){ return o[key]; });
     },
     
     scope: function(scopeFun, ctx){
         return scopeFun.call(ctx);
-    },
-    
-    // Bit -------------
-    bit: {
-        set: function(bits, set, on){ return (on || on == null) ? (bits | set) : (bits & ~set); }
     },
     
     // Special functions ----------------
@@ -499,15 +435,17 @@ var def = /** @lends def */{
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
     },
     
-    compareReverse: function(a, b) {
-        return (a === b) ? 0 : ((a > b) ? -1 : 1);
-    },
-    
-    methodCaller: function(p, x) {
-        if(x) { return function() { return x[p].apply(x, arguments); }; }
+    methodCaller: function(p, context){
+        if(context){
+            return function(){
+                return context[p].apply(context, arguments); 
+            };
+        }
         
         /* floating method */
-        return function() { return this[p].apply(this, arguments); };
+        return function(){
+            return this[p].apply(this, arguments); 
+        };
     },
     
     /**
@@ -520,14 +458,7 @@ var def = /** @lends def */{
     add: function(a, b){ return a + b; },
 
     // negate?
-    negate: function(f){
-        return function(){
-            return !f.apply(this, arguments);
-        };
-    },
-
-    sqr: function(v){ return v * v;},
-
+    
     // Constant functions ----------------
     
     /**
@@ -564,12 +495,10 @@ var def = /** @lends def */{
             return (v instanceof Array);
         },
         
-        // TODO: def.array.like.is
-        isLike: function(v) {
+        isLike: function(v){
             return v && (v.length != null) && (typeof v !== 'string');
         },
-
-        // TODO: this should work as other 'as' methods...
+        
         /**
          * Converts something to an array if it is not one already,
          * and if it is not nully.
@@ -579,18 +508,6 @@ var def = /** @lends def */{
          */
         as: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
-        },
-        
-        to: function(thing){
-            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
-        },
-        
-        lazy: function(scope, p, f, ctx){
-            return scope[p] || (scope[p] = (f ? f.call(ctx, p) : []));
-        }, 
-        
-        copy: function(al/*, start, end*/){
-            return arraySlice.apply(al, arraySlice.call(arguments, 1));
         }
     },
     
@@ -613,21 +530,12 @@ var def = /** @lends def */{
             return v && /*typeof(v) === 'object' &&*/ v.constructor === Object ?
                     v :
                     null;
-        },
-        
-        lazy: function(scope, p, f, ctx){
-            return scope[p] || 
-                  (scope[p] = (f ? f.call(ctx, p) : {}));
         }
     },
     
     string: {
         is: function(v){
             return typeof v === 'string';
-        },
-        
-        to: function(v, ds){
-            return v != null ? ('' + v) : (ds || '');
         },
         
         join: function(sep){
@@ -669,14 +577,6 @@ var def = /** @lends def */{
             }
         
             return args.join(sep);
-        },
-        
-        padRight: function(s, n, p) {
-            if(!s) { s = ''; }
-            if(p == null) { p = ' '; }
-            
-            var k = ~~((n - s.length) / p.length);
-            return k > 0 ? (s + new Array(k + 1).join(p)) : s;
         }
     },
     
@@ -685,8 +585,9 @@ var def = /** @lends def */{
             return typeof v === 'function';
         },
         
+        // TODO: this is not an as...
         as: function(v){
-            return typeof v === 'function' ? v : null;
+            return typeof v === 'function' ? v : def.fun.constant(v);
         },
         
         to: function(v){
@@ -719,11 +620,6 @@ var def = /** @lends def */{
         return v != null;
     },
     
-    // !== undefined
-    notUndef: function(v){
-        return v !== undefined;
-    },
-    
     empty: function(v){
         return v == null || v === '';
     },
@@ -749,23 +645,12 @@ var def = /** @lends def */{
     // -----------------
     
     /* Ensures the first letter is upper case */
-    firstUpperCase: function(s) {
+    firstUpperCase: function(s){
         if(s) {
             var c  = s.charAt(0),
                 cU = c.toUpperCase();
             if(c !== cU) {
                 s = cU + s.substr(1);
-            }
-        }
-        return s;
-    },
-    
-    firstLowerCase: function(s) {
-        if(s) {
-            var c  = s.charAt(0),
-                cL = c.toLowerCase();
-            if(c !== cL) {
-                s = cL + s.substr(1);
             }
         }
         return s;
@@ -795,21 +680,27 @@ var def = /** @lends def */{
      * 
      * @returns {string} The formatted string.
      */
-    format: function(mask, scope, ctx) {
-        if(mask == null || mask === '') { return ""; }
+    format: function(mask, scope, ctx){
+        if(mask == null || mask === '') {
+            return "";
+        }
         
         var isScopeFun = scope && def.fun.is(scope);
         
-        return mask.replace(/(^|[^{])\{([^{}]+)\}/g, function($0, before, prop) {
-            var value = !scope     ? null : 
-                        isScopeFun ? scope.call(ctx, prop) : 
-                        scope[prop];
+        return mask.replace(/(^|[^{])\{([^{}]+)\}/g, function($0, before, prop){
+            var value;
+            if(scope){
+                if(isScopeFun){
+                    value = scope.call(ctx, prop);
+                } else {
+                    value = scope[prop];
+                }
+            } else {
+                value = null;
+            }
             
             // NOTE: calls .toString() of value as a side effect of the + operator
-            // NOTE2: when value is an object, that contains a valueOf method,
-            // valueOf is called instead, and toString is called on that result only.
-            // Using String(value) ensures toString() is called on the object itself.
-            return before + (value == null ? "" : String(value));
+            return before + (value == null ? "" : value);
         });
     },
     
@@ -818,7 +709,7 @@ var def = /** @lends def */{
     /**
      * Binds a list of types with the specified values, by position.
      * <p>
-     * A null value is bindable to any type.
+     * A null value is bound to any type.
      * <p>
      * <p>
      * When a value is of a different type than the type desired at a given position
@@ -828,25 +719,25 @@ var def = /** @lends def */{
      * 
      * @returns {any[]} An array representing the binding, with the values bound to each type.
      */
-    destructuringTypeBind: function(types, values) {
+    destructuringTypeBind: function(types, values){
         var T = types.length;
         var result = new Array(T);
-        if(T && values) {
+        if(T && values){
             var V = values.length;
-            if(V) {
+            if(V){
                 var v = 0;
                 var t = 0;
-                do {
+                do{
                     var value = values[v];
                     
                     // any type matches null
-                    if(value == null || typeof value === types[t]) {
+                    if(value == null || typeof value === types[t]){
                         // bind value to type
                         result[t] = value;
                         v++;
                     }
                     t++;
-                } while(t < T && v < V);
+                }while(t < T && v < V);
             }
         }
         
@@ -867,18 +758,6 @@ var def = /** @lends def */{
         throw def.error.assertionFailed(msg, scope);
     }
 };
-
-
-var AL = def.array.like = def.copyOwn(
-    function(v){ return AL.is(v) ? v : [v]; }, {
-        
-    is: function(v) { return v && (v.length != null) && (typeof v !== 'string'); },
-    
-    as: function(v){ return AL.is(v) ? v : null; }
-});
-AL.to = AL;
-
-def.lazy = def.object.lazy;
 
 // Adapted from
 // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
@@ -1076,79 +955,47 @@ def.globalSpace = globalSpace;
 
 // -----------------------
 
-def.mixin = createMixin(Object.create);
-def.copyOwn(def.mixin, {
-    custom:  createMixin,
-    inherit: def.mixin,
-    copy:    createMixin(def.copy),
-    share:   createMixin(def.identity)
-});
-
 /** @private */
-function createMixin(protectNativeObject){
-    return function(instance/*mixin1, mixin2, ...*/){
-        return mixinMany(instance, arraySlice.call(arguments, 1), protectNativeObject);
-    };
+function mixinRecursive(instance, mixin){
+    for(var p in mixin){
+        var vMixin = mixin[p];
+        if(vMixin !== undefined){
+            var oMixin,
+                oTo = def.object.asNative(instance[p]);
+
+            if(oTo){
+                oMixin = def.object.as(vMixin);
+                if(oMixin){
+                    mixinRecursive(oTo, oMixin);
+                } else {
+                    // Overwrite oTo
+                    instance[p] = vMixin;
+                }
+            } else {
+                oMixin = def.object.asNative(vMixin);
+                if(oMixin){
+                    vMixin = Object.create(oMixin);
+                }
+
+                instance[p] = vMixin;
+            }
+        }
+    }
 }
 
-/** @private */
-function mixinMany(instance, mixins, protectNativeObject){
-    for(var i = 0, L = mixins.length ; i < L ; i++){
-        var mixin = mixins[i];
+def.mixin = function(instance/*mixin1, mixin2, ...*/){
+    for(var i = 1, L = arguments.length ; i < L ; i++){
+        var mixin = arguments[i];
         if(mixin){
             mixin = def.object.as(mixin.prototype || mixin);
             if(mixin){
-                mixinRecursive(instance, mixin, protectNativeObject);
+                mixinRecursive(instance, mixin);
             }
         }
     }
 
     return instance;
-}
-
-/** @private */
-function mixinRecursive(instance, mixin, protectNativeObject){
-    for(var p in mixin){
-        mixinProp(instance, p, mixin[p], protectNativeObject);
-    }
-}
-
-/** @private */
-function mixinProp(instance, p, vMixin, protectNativeObject){
-    if(vMixin !== undefined){
-        var oMixin,
-            oTo = def.object.asNative(instance[p]);
-
-        if(oTo){
-            oMixin = def.object.as(vMixin);
-            if(oMixin){
-                // If oTo is inherited, don't change it
-                // Inherit from it and assign it locally.
-                // It will be the target of the mixin.
-                if(!objectHasOwn.call(instance, p)){
-                    instance[p] = oTo = Object.create(oTo);
-                }
-                
-                // Mixin the two objects
-                mixinRecursive(oTo, oMixin, protectNativeObject);
-            } else {
-                // Overwrite oTo with a simple value
-                instance[p] = vMixin;
-            }
-        } else {
-            // Target property does not contain a native object.
-            oMixin = def.object.asNative(vMixin);
-            if(oMixin){
-                // Should vMixin be set directly in instance[p] ?
-                // Should we copy its properties into a fresh object ?
-                // Should we inherit from it ?
-                vMixin = (protectNativeObject || Object.create)(oMixin);
-            }
-            
-            instance[p] = vMixin;
-        }
-    }
-}
+};
 
 // -----------------------
 
@@ -1163,21 +1010,23 @@ function createRecursive(instance){
 }
     
 // Creates an object whose prototype is the specified object.
-def.create = function(/*[deep,] baseProto, mixin1, mixin2, ...*/){
+def.create = function(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
     var mixins = arraySlice.call(arguments),
         deep = true,
         baseProto = mixins.shift();
 
-    if(typeof(baseProto) === 'boolean') {
+    if(typeof(baseProto) === 'boolean'){
         deep = baseProto;
         baseProto = mixins.shift();
     }
 
     var instance = baseProto ? Object.create(baseProto) : {};
-    if(deep) { createRecursive(instance); }
+    if(deep){
+        createRecursive(instance);
+    }
 
     // NOTE:
-    if(mixins.length > 0) {
+    if(mixins.length > 0){
         mixins.unshift(instance);
         def.mixin.apply(def, mixins);
     }
@@ -1274,93 +1123,29 @@ def.scope(function(){
                     // Try to convert to method
                     var method = asMethod(value);
                     if(method) {
-                        var baseMethod;
-                        
-                        // Check if it is an override
-                        
-                        // Exclude inherited stuff from Object.prototype
-                        var bm = state.methods[p];
-                        if(bm && (bm instanceof Method)){
-                            baseMethod = bm;
-                        } else if(baseState) {
-                            bm = baseState.methods[p];
-                            if(bm && (bm instanceof Method)){
-                                baseMethod = bm;
-                            }
-                        }
-                        
                         state.methods[p] = method;
                         
-                        if(baseMethod){
+                        // Check if it is an override
+                        var baseMethod;
+                        if(baseState && (baseMethod = baseState.methods[p]) &&
+                           // Exclude inherited stuff from Object.prototype
+                           (baseMethod instanceof Method)){
+                            
                             // Replace value with an override function 
                             // that intercepts the call and sets the correct
                             // 'base' property before calling the original value function
                             value = baseMethod.override(method);
                         }
-                        
-                        proto[p] = value;
-                        return;
                     }
                 }
                 
-                mixinProp(proto, p, value, /*protectNativeValue*/def.identity); // Can use native object value directly
+                proto[p] = value;
             });
 
             return this;
-        },
-        
-        getStatic: function(p){
-            return getStatic(shared(this.safe), p);
-        },
-        
-        addStatic: function(mixin){
-            var state = shared(this.safe);
-            
-            /*jshint expr:true */
-            !state.locked || def.fail(typeLocked());
-            
-            for(var p in mixin){
-                if(p !== 'prototype'){
-                    var v1 = def.getOwn(this, p);
-                    
-                    var v2 = mixin[p];
-                    var o2 = def.object.as(v2);
-                    if(o2){
-                        var v1Local = (v1 !== undefined);
-                        if(!v1Local){
-                            v1 = getStatic(state.base, p);
-                        }
-                        
-                        var o1 = def.object.asNative(v1);
-                        if(o1){
-                            if(v1Local){
-                                def.mixin(v1, v2);
-                                continue;
-                            }
-                            
-                            v2 = def.create(v1, v2); // Extend from v1 and mixin v2
-                        }
-                    } // else v2 smashes anything in this[p]
-    
-                    this[p] = v2;
-                }
-            }
-            
-            return this;
         }
     };
-    
-    function getStatic(state, p){
-        if(state){
-            do{
-                var v = def.getOwn(state.constructor, p);
-                if(v !== undefined){
-                    return v;
-                }
-            } while((state = state.base));
-        }
-    }
-    
+
     // TODO: improve this code with indexOf
     function TypeName(full){
         var parts;
@@ -1446,7 +1231,8 @@ def.scope(function(){
     
     // -----------------
     
-    function rootType(){ }
+    function rootType(){
+    }
     
     var rootProto = rootType.prototype;
     // Unfortunately, creates an enumerable property in every instance
@@ -1563,7 +1349,7 @@ def.scope(function(){
         function constructor(){
             if(S){
                 var i = 0;
-                while(steps[i].apply(this, arguments) !== false && ++i < S){}
+                while(steps[i].apply(this, arguments) !== false && ++i < S);
             }
         }
         
@@ -1649,16 +1435,6 @@ def.scope(function(){
     def.method = method;
 });
 
-def.makeEnum = function(a) {
-    var i = 1;
-    var e = {};
-    a.forEach(function(p) {
-        e[p] = i;
-        i = i << 1;
-    });
-    return e;
-};
-
 // ----------------------
 
 def.copyOwn(def.array, /** @lends def.array */{
@@ -1684,38 +1460,6 @@ def.copyOwn(def.array, /** @lends def.array */{
 
         for(var i = 0, L = source.length, T = target.length ; i < L ; i++){
             target[T + i] = source[start + i];
-        }
-
-        return target;
-    },
-    
-    appendMany: function(target){
-        var a = arguments;
-        var S = a.length;
-        if(S > 1){
-            var t = target.length;
-            for(var s = 1 ; s < S ; s++){
-                var source = a[s];
-                if(source){
-                    var i = 0;
-                    var L = source.length;
-                    while(i < L){
-                        target[t++] = source[i++];
-                    }
-                }
-            }
-        }
-        
-        return target;
-    },
-    
-    prepend: function(target, source, start){
-        if(start == null){
-            start = 0;
-        }
-
-        for(var i = 0, L = source.length ; i < L ; i++){
-            target.unshift(source[start + i]);
         }
 
         return target;
@@ -1749,6 +1493,17 @@ def.copyOwn(def.array, /** @lends def.array */{
         
         /* Item was not found but would be inserted at ~low */
         return ~low; // two's complement <=> -low - 1
+        
+        /*
+        case low == high (== mid)
+          if result > 0
+               [low <- mid + 1]  => (low > high)
+            insert at (new) low
+          
+          if result < 0
+               [high <- mid - 1] => (low > high)
+            insert at low
+       */
     },
 
     /**
@@ -1802,9 +1557,9 @@ def.nextId = function(scope){
 // --------------------
 
 def.type('Set')
-.init(function(source, count){
+.init(function(source){
     this.source = source || {};
-    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
+    this.count  = source ? def.ownKeys(source).length : 0;
 })
 .add({
     has: function(p){
@@ -1846,9 +1601,9 @@ def.type('Set')
 // ---------------
 
 def.type('Map')
-.init(function(source, count){
+.init(function(source){
     this.source = source || {};
-    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
+    this.count  = source ? def.ownKeys(source).length : 0;
 })
 .add({
     has: function(p){
@@ -1888,162 +1643,12 @@ def.type('Map')
         return this;
     },
     
-    copy: function(other){
-        // Add other to this one
-        def.eachOwn(other.source, function(value, p){
-            this.set(p, value);
-        }, this);
-    },
-    
     values: function(){
         return def.own(this.source);
     },
     
     keys: function(){
         return def.ownKeys(this.source);
-    },
-    
-    clone: function(){
-        return new def.Map(def.copy(this.source), this.count);
-    },
-    
-    /**
-     * The union of the current map with the specified
-     * map minus their intersection.
-     * 
-     * (A U B) \ (A /\ B)
-     * (A \ B) U (B \ A)
-     * @param {def.Map} other The map with which to perform the operation.
-     * @type {def.Map}
-     */
-    symmetricDifference: function(other){
-        if(!this.count){
-            return other.clone();
-        }
-        if(!other.count){
-            return this.clone();
-        }
-        
-        var result = {};
-        var count  = 0;
-        
-        var as = this.source;
-        var bs = other.source;
-        
-        def.eachOwn(as, function(a, p){
-            if(!objectHasOwn.call(bs, p)){
-                result[p] = a;
-                count++;
-            }
-        });
-        
-        def.eachOwn(bs, function(b, p){
-            if(!objectHasOwn.call(as, p)){
-                result[p] = b;
-                count++;
-            }
-        });
-        
-        return new def.Map(result, count);
-    },
-    
-    intersect: function(other, result){
-        if(!result){
-            result = new def.Map();
-        }
-        
-        def.eachOwn(this.source, function(value, p){
-            if(other.has(p)) {
-                result.set(p, value);
-            }
-        });
-        
-        return result;
-    }
-});
-
-// --------------------
-
-//---------------
-
-def.type('OrderedMap')
-.init(function(){
-    this._list = [];
-    this._map  = {};
-})
-.add({
-    has: function(key){
-        return objectHasOwn.call(this._map, key);
-    },
-    
-    count: function(){
-        return this._list.length;
-    },
-    
-    get: function(key){
-        var bucket = def.getOwn(this._map, key);
-        if(bucket) { 
-            return bucket.value;
-        }
-    },
-    
-    at: function(index){
-        var bucket = this._list[index];
-        if(bucket){
-            return bucket.value;
-        }
-    },
-    
-    add: function(key, v, index){
-        var map = this._map;
-        var bucket = def.getOwn(map, key);
-        if(!bucket){
-            bucket = map[key] = {
-                key:   key,
-                value: v
-            };
-            
-            if(index == null){
-                this._list.push(bucket);
-            } else {
-                def.array.insertAt(this._list, index, bucket);
-            }
-        } else if(bucket.value !== v){
-            bucket.value = v;
-        }
-        
-        return this;
-    },
-    
-    rem: function(key){
-        var bucket = def.getOwn(this._map, key);
-        if(bucket){
-            // Find it
-            var index = this._list.indexOf(bucket);
-            this._list.splice(index, 1);
-            delete this._map[key];
-        }
-        
-        return this;
-    },
-    
-    clear: function(){
-        if(this._list.length) {
-            this._map = {}; 
-            this._list.length = 0;
-        }
-        
-        return this;
-    },
-    
-    keys: function(){
-        return def.ownKeys(this._map);
-    },
-    
-    forEach: function(fun, ctx){
-        return this._list.forEach(function(bucket){
-            fun.call(ctx, bucket.value, bucket.key);
-        });
     }
 });
 
@@ -2052,12 +1657,10 @@ def.type('OrderedMap')
 def.html = {
     // TODO: lousy multipass implementation!
     escape: function(str){
-        return def
-            .string.to(str)
-            .replace(/&/gm, "&amp;")
-            .replace(/</gm, "&lt;")
-            .replace(/>/gm, "&gt;")
-            .replace(/"/gm, "&quot;");    
+        return str.replace(/&/gm, "&amp;")
+                  .replace(/</gm, "&lt;")
+                  .replace(/>/gm, "&gt;")
+                  .replace(/"/gm, "&quot;");    
     }
 };
 
@@ -2119,23 +1722,6 @@ def.type('Query')
             array.push(this.item);
         }
         return array;
-    },
-    
-    sort: function(compare, by){
-        if(!compare){
-            compare = def.compare;
-        }
-        
-        if(by){
-            var keyCompare = compare;
-            compare = function(a, b){
-                return keyCompare(by(a), by(b));
-            };
-        }
-        
-        var sorted = this.array().sort(compare);
-        
-        return new def.ArrayLikeQuery(sorted);
     },
     
     /**
@@ -2237,29 +1823,6 @@ def.type('Query')
     },
     
     /**
-     * Returns the last item that satisfies a specified predicate.
-     * <p>
-     * If no predicate is specified, the last item is returned. 
-     * </p>
-     *  
-     * @param {function} [pred] A predicate to apply to every item.
-     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-     * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
-     * 
-     * @type any
-     */
-    last: function(pred, ctx, dv){
-        var theItem = dv;
-        while(this.next()){
-            if(!pred || pred.call(ctx, this.item, this.index)) {
-                theItem = this.item;
-            }
-        }
-        
-        return theItem;
-    },
-    
-    /**
      * Returns <tt>true</tt> if there is at least one item satisfying a specified predicate.
      * <p>
      * If no predicate is specified, returns <tt>true</tt> if there is at least one item. 
@@ -2342,7 +1905,7 @@ def.type('Query')
         return min != null ? {min: min, max: max} : null;
     },
     
-    multipleIndex: function(keyFun, ctx){
+    index: function(keyFun, ctx){
         var keyIndex = {};
         
         this.each(function(item){
@@ -2359,7 +1922,7 @@ def.type('Query')
     
     uniqueIndex: function(keyFun, ctx){
         var keyIndex = {};
-
+        
         this.each(function(item){
             var key = keyFun ? keyFun.call(ctx, item) : item;
             if(key != null && !def.hasOwn(keyIndex, key)) {
@@ -2374,42 +1937,48 @@ def.type('Query')
     // Query -> Query
     
     // deferred map
-    select: function(fun, ctx) { return new def.SelectQuery(this, fun, ctx); },
-    
-    prop: function(p) {
-        return new def.SelectQuery(this, function(item) { if(item) { return item[p]; }});
+    select: function(fun, ctx){
+        return new def.SelectQuery(this, fun, ctx);
     },
 
-    selectMany: function(fun, ctx) { return new def.SelectManyQuery(this, fun, ctx); },
+    selectMany: function(fun, ctx){
+        return new def.SelectManyQuery(this, fun, ctx);
+    },
     
-    union: function(/*others*/) {
+    union: function(/*others*/){
         var queries = def.array.append([this], arguments);
         return new def.SelectManyQuery(new def.ArrayLikeQuery(queries));
     },
 
     // deferred filter
-    where: function(fun, ctx) { return new def.WhereQuery(this, fun, ctx); },
+    where: function(fun, ctx){
+        return new def.WhereQuery(this, fun, ctx);
+    },
 
-    distinct: function(fun, ctx) { return new def.DistinctQuery(this, fun, ctx); },
+    distinct: function(fun, ctx){
+        return new def.DistinctQuery(this, fun, ctx);
+    },
 
-    skip: function(n) { return new def.SkipQuery(this, n); },
+    skip: function(n){
+        return new def.SkipQuery(this, n);
+    },
     
-    take: function(n) {
-        if(n <= 0) { return new def.NullQuery(); }
-        
-        if(!isFinite(n)) { return this; } // all
-        
+    take: function(n){
         return new def.TakeQuery(this, n);
     },
     
-    whayl: function(pred, ctx) { return new def.WhileQuery(this, pred, ctx); },
+    wahyl: function(pred, ctx){
+        return new def.WhileQuery(this, pred, ctx);
+    },
     
-    reverse: function() { return new def.ReverseQuery(this); }
+    reverse: function(){
+        return new def.ReverseQuery(this);
+    }
 });
 
 def.type('NullQuery', def.Query)
 .add({
-    _next: function(/*nextIndex*/){}
+    _next: function(nextIndex){}
 });
 
 def.type('AdhocQuery', def.Query)
@@ -2426,19 +1995,8 @@ def.type('ArrayLikeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        var count = this._count;
-        if(nextIndex < count){
-            var list = this._list;
-            
-            while(!objectHasOwn.call(list, nextIndex)){
-                nextIndex++;
-                if(nextIndex >= count){
-                    return 0;
-                }
-                this._count--;
-            }
-            
-            this.item = list[nextIndex];
+        if(nextIndex < this._count){
+            this.item = this._list[nextIndex];
             return 1;
         }
     },
@@ -2467,7 +2025,7 @@ def.type('RangeQuery', def.Query)
 .init(function(start, count, step){
     this.base();
     this._index = start;
-    this._count = count; // may be infinte
+    this._count = count;
     this._step  = step == null ? 1 : step;
 })
 .add({
@@ -2555,7 +2113,7 @@ def.type('SelectQuery', def.Query)
 });
 
 def.type('SelectManyQuery', def.Query)
-.init(function(source, selectMany, ctx) {
+.init(function(source, selectMany, ctx){
     this.base();
     this._selectMany = selectMany;
     this._ctx    = ctx;
@@ -2563,11 +2121,11 @@ def.type('SelectManyQuery', def.Query)
     this._manySource = null;
 })
 .add({
-    _next: function(nextIndex) {
-        while(true) {
+    _next: function(nextIndex){
+        while(true){
             // Consume all of existing manySource
-            if(this._manySource) {
-                if(this._manySource.next()) {
+            if(this._manySource){
+                if(this._manySource.next()){
                     this.item = this._manySource.item;
                     return 1;
                 }
@@ -2575,17 +2133,19 @@ def.type('SelectManyQuery', def.Query)
                 this._manySource = null;
             }
 
-            if(!query_nextMany.call(this)) { break; }
+            if(!query_nextMany.call(this)){
+                break;
+            }
         }
     }
 });
 
-function query_nextMany() {
-    while(this._source.next()) {
+function query_nextMany(){
+    while(this._source.next()){
         var manySource = this._selectMany ?
                             this._selectMany.call(this._ctx, this._source.item, this._source.index) :
                             this._source.item;
-        if(manySource != null) {
+        if(manySource != null){
             this._manySource = def.query(manySource);
             return 1;
         }
@@ -2645,10 +2205,12 @@ def.type('TakeQuery', def.Query)
 })
 .add({
     _next: function(nextIndex){
-        if(this._take > 0 && this._source.next()){
-            this._take--;
-            this.item = this._source.item;
-            return 1;
+        while(this._source.next()){
+            if(this._take > 0){
+                this._take--;
+                this.item = this._source.item;
+                return 1;
+            }
         }
     }
 });
@@ -2672,19 +2234,8 @@ def.type('ReverseQuery', def.Query)
             this._count  = this._source.length;
         }
         
-        var count = this._count;
-        if(nextIndex < count){
-            var index = count - nextIndex - 1;
-            var source = this._source;
-            
-            while(!objectHasOwn.call(source, index)){
-                if(--index < 0){
-                    return 0;
-                }
-                this._count--;
-            }
-            
-            this.item = source[index];
+        if(nextIndex < this._count){
+            this.item = this._source[this._count - nextIndex - 1];
             return 1;
         }
     }
@@ -2693,14 +2244,25 @@ def.type('ReverseQuery', def.Query)
 
 // -------------------
 
-def.query = function(q) {
-    if(q === undefined)        { return new def.NullQuery(); }
-    if(q instanceof def.Query) { return q; }
-    if(def.fun.is(q))          { return new def.AdhocQuery(q); }
+def.query = function(q){
+    if(q === undefined) {
+        return new def.NullQuery();
+    }
+    
+    if(q instanceof def.Query){
+        return q;
+    }
+    
+    if(def.fun.is(q)){
+        return new def.AdhocQuery(q);
+    }
+
     return new def.ArrayLikeQuery(q);
 };
 
-def.range = function(start, count, step) { return new def.RangeQuery(start, count, step); };
+def.range = function(start, count, step){
+    return new def.RangeQuery(start, count, step);
+};
 
 // Reset namespace to global, instead of 'def'
 currentNamespace = def.global;    

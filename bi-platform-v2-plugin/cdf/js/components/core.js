@@ -1,3 +1,16 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 BaseComponent = Base.extend({
   //type : "unknown",
   visible: true,
@@ -9,9 +22,30 @@ BaseComponent = Base.extend({
   logColor: undefined,
   //valueAsId:
   //valuesArray:
+  //autoFocus: false,
+
+  placeholder: function(selector) {
+    var ho = this.htmlObject;
+    return ho ? $("#"+ ho + (selector ? (" " + selector) : "")) : $();
+  },
+
+  focus: function() {
+    try {
+      this
+        .placeholder("*:first")
+        .focus();
+    } catch(ex) { /* Swallow, maybe hidden. */ }
+  },
+
+  _doAutoFocus: function() {
+    if(this.autoFocus) {
+      delete this.autoFocus;
+      this.focus();
+    }
+  },
 
   clear : function() {
-    $("#"+this.htmlObject).empty();
+    this.placeholder().empty();
   },
 
   copyEvents: function(target,events) {
@@ -317,7 +351,7 @@ BaseComponent = Base.extend({
 
 var TextComponent = BaseComponent.extend({
   update : function() {
-    $("#"+this.htmlObject).html(this.expression());
+    this.placeholder().html(this.expression());
   }
 });
 
@@ -917,7 +951,7 @@ var UnmanagedComponent = BaseComponent.extend({
   },
   showTooltip: function() {
     if(typeof this._tooltip != "undefined") {
-      $("#" + this.htmlObject).attr("title",this._tooltip).tooltip({
+      this.placeholder().attr("title",this._tooltip).tooltip({
         delay:0,
         track: true,
         fade: 250
@@ -1139,7 +1173,7 @@ var UnmanagedComponent = BaseComponent.extend({
     this);
   },
   errorNotification: function (err, ph) {
-    ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
+    ph = ph || (this.htmlObject ? this.placeholder() : undefined);
     var name = this.name.replace('render_', '');
     err.msg = err.msg + ' (' + name + ')';
     Dashboards.errorNotification( err, ph );

@@ -1,16 +1,16 @@
 pen.define("cdf/lib/CCC/protovis-msie", ["cdf/lib/CCC/protovis"], function(pv) {
 /*!
- * Protovis MSIE/VML addon
- * Copyright (C) 2011 by DataMarket <http://datamarket.com>
- * Dual licensed under the terms of the MIT or GPL Version 2 software licenses.
- * 
- * This software includes code from jQuery, http://jquery.com/
- * jQuery is licensed under the MIT or GPL Version 2 license.
- * 
- * This software includes code from the Protovis, http://mbostock.github.com/protovis/
- * Protovis is licensed under the BSD license.
- * 
- */
+* Protovis MSIE/VML addon
+* Copyright (C) 2011 by DataMarket <http://datamarket.com>
+* Dual licensed under the terms of the MIT or GPL Version 2 software licenses.
+*
+* This software includes code from jQuery, http://jquery.com/
+* jQuery is licensed under the MIT or GPL Version 2 license.
+*
+* This software includes code from the Protovis, http://mbostock.github.com/protovis/
+* Protovis is licensed under the BSD license.
+*
+*/
 
 // detect SVG support
 pv.have_SVG = !!(

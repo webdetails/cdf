@@ -1,3 +1,15 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
 
  $.ajaxSetup({
   type: "POST",
@@ -334,11 +346,11 @@ Dashboards.setGlobalContext = function(globalContext) {
 };
 
 Dashboards.showProgressIndicator = function() {
-  this.blockUIwithDrag();
+  $.blockUI && this.blockUIwithDrag();
 };
 
 Dashboards.hideProgressIndicator = function() {
-  $.unblockUI();
+  $.unblockUI && $.unblockUI();
   this.showErrorTooltip();
 };
 
@@ -785,12 +797,14 @@ Dashboards.createAndCleanErrorDiv = function(){
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
-    $(".cdf_error").tooltip({
-      delay:0,
-      track: true,
-      fade: 250,
-      showBody: " -- "
-    })
+    if($.tooltip) {
+      $(".cdf_error").tooltip({
+        delay:0,
+        track: true,
+        fade: 250,
+        showBody: " -- "
+      });
+    }
   });
 };
 

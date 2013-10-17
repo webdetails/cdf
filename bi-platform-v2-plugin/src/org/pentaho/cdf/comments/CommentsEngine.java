@@ -1,3 +1,16 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 package org.pentaho.cdf.comments;
 
 import java.io.InputStream;
@@ -62,7 +75,7 @@ public class CommentsEngine
 
 
   public JSONObject add(String page, String comment, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
-  {
+    {
     String user = userSession.getName();
 
     if (page == null || page.equals("") || comment == null || comment.equals("")) {
@@ -221,13 +234,13 @@ public class CommentsEngine
     try {
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
       
-        IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
-        InputStream in = resLoader.getResourceAsStream(CommentsEngine.class, "resources/hibernate/Comments.hbm.xml");
+    IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
+    InputStream in = resLoader.getResourceAsStream(CommentsEngine.class, "resources/hibernate/Comments.hbm.xml");
 
-        // Close session and rebuild
-        PluginHibernateUtil.closeSession();
-        PluginHibernateUtil.getConfiguration().addInputStream(in);
-        PluginHibernateUtil.rebuildSessionFactory();
+    // Close session and rebuild
+    PluginHibernateUtil.closeSession();
+    PluginHibernateUtil.getConfiguration().addInputStream(in);
+    PluginHibernateUtil.rebuildSessionFactory();
       
       
     }

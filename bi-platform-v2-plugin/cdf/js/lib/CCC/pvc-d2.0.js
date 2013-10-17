@@ -1,8 +1,9 @@
 /*!
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
 //VERSION TRUNK-20131002
 
 var pvc = (function(def, pv) {
@@ -25,8 +26,10 @@ var pvc = def.globalSpace('pvc', {
     /*global window:true*/
     if((typeof window !== 'undefined')  && window.location) {
         var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
-        var url = urlIfHasDebug(window.location.href) ||
-                  urlIfHasDebug(window.top.location.href);
+        var url = urlIfHasDebug(window.location.href);
+        if(!url) {
+            try { url = urlIfHasDebug(window.top.location.href); } catch(ex) { /*XSS*/ }
+        }        
         if(url) {
             var m = /\bdebugLevel=(\d+)/.exec(url);
             pvc.debug = m ? (+m[1]) : 3;
@@ -25896,7 +25899,7 @@ def
             .lock(len_a, null)
             .override('defaultColor', def.fun.constant(pv.color("#f0f0f0")))
             .pvMark
-            .lineWidth(1)
+            //.lineWidth(1) PATCH 2013-10-16
             .antialias(true)
             [obeg_a](obeg)
             [oend_a](oend)
