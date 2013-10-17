@@ -29,12 +29,13 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
  */
 public class CommentsEngine
 {
-
   private static final Log logger = LogFactory.getLog(CommentsEngine.class);
   private static CommentsEngine _instance;
   private static final int DELETE_OPERATION = 0;
   private static final int ARCHIVE_OPERATION = 1;
-  private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+  private static final int ADD_OPERATION = 2;
+  private static final int LIST_OPERATION = 3;
+  private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   public static CommentsEngine getInstance()
   {
@@ -64,21 +65,16 @@ public class CommentsEngine
   {
     String user = userSession.getName();
 
-    if (page == null || page.equals("") || comment == null || comment.equals(""))
-    {
-
+    if (page == null || page.equals("") || comment == null || comment.equals("")) {
       logger.error("Parameters 'page' and 'comment' are not optional");
       throw new InvalidCdfOperationException("Page cannot be null");
-
     }
 
     logger.debug("Adding comment");
 
-
     CommentEntry commentEntry = new CommentEntry(page, user, comment);
 
     Session session = getSession();
-
     session.beginTransaction();
     session.save(commentEntry);
     session.flush();
@@ -89,29 +85,36 @@ public class CommentsEngine
     json.put("result", commentToJson(commentEntry, userSession));
 
     return json;
-
   }
 
-  public JSONObject list(String page, int firstResult, int maxResults, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject list(String page, int firstResult, int maxResults, boolean where, boolean deleted, boolean archived, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
-
     logger.debug("Listing messages");
     String user = userSession.getName();
 
-    if (page == null || page.equals(""))
-    {
+    String queryName = "getCommentsByPageWhere";
 
-      logger.error("Parameters 'page' and 'comment' are not optional");
-      throw new InvalidCdfOperationException("Page cannot be null");
-
+    if (page == null || page.equals("")) {
+        logger.error("Parameters 'page' and 'comment' are not optional");
+        throw new InvalidCdfOperationException("Page cannot be null");
     }
 
     logger.debug("Adding comment");
-
-
     Session session = getSession();
 
-    Query query = session.getNamedQuery("org.pentaho.cdf.comments.CommentEntry.getCommentsByPage").setString("page", page);
+    if (!where) {
+        queryName = "getCommentsByPage";
+    }
+
+    Query query = session.getNamedQuery("org.pentaho.cdf.comments.CommentEntry."+queryName);
+    query.setString("page", page);
+
+    if (where)
+    {
+        query.setBoolean("deleted", deleted);
+        query.setBoolean("archived", archived);
+    }
+
     query.setFirstResult(firstResult);
     query.setMaxResults(maxResults);
 
@@ -124,47 +127,38 @@ public class CommentsEngine
       jsonArray.put(commentJson);
     }
 
-
     // Get it and build the tree
     JSONObject json = new JSONObject();
     json.put("result", jsonArray);
 
     return json;
-
   }
 
   public JSONObject delete(int commentId, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
     logger.debug("Deleting comment " + commentId);
-    return changeCommentStatus(DELETE_OPERATION, commentId, userSession);
-
+    return changeCommentStatus(DELETE_OPERATION, commentId, requestParams, userSession);
   }
 
   public JSONObject archive(int commentId, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
     logger.debug("Archiving comment " + commentId);
-    return changeCommentStatus(ARCHIVE_OPERATION, commentId, userSession);
-
+    return changeCommentStatus(ARCHIVE_OPERATION, commentId, requestParams, userSession);
   }
 
-  private JSONObject changeCommentStatus(int operationType, int commentId, IPentahoSession userSession) throws JSONException, PluginHibernateException
+  private JSONObject changeCommentStatus(int operationType, int commentId, IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, PluginHibernateException
   {
-
-
     Session session = getSession();
     session.beginTransaction();
-
     CommentEntry comment = (CommentEntry) session.load(CommentEntry.class, commentId);
-
-    if (operationType == ARCHIVE_OPERATION)
-    {
-      comment.setArchived(true);
+    switch (operationType) {
+      case DELETE_OPERATION:
+        if (operationAuthorized(operationType, comment, userSession)) comment.setDeleted(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
+        break;
+      case ARCHIVE_OPERATION:
+        if (operationAuthorized(operationType, comment, userSession)) comment.setArchived(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
+        break;
     }
-    else if (operationType == DELETE_OPERATION)
-    {
-      comment.setDeleted(true);
-    }
-
     session.save(comment);
     session.getTransaction().commit();
 
@@ -172,8 +166,6 @@ public class CommentsEngine
     JSONObject json = new JSONObject();
     json.put("result", commentToJson(comment, userSession));
     return json;
-
-
   }
 
   private JSONObject commentToJson(CommentEntry comment, IPentahoSession userSession) throws JSONException
@@ -186,21 +178,45 @@ public class CommentsEngine
     commentJson.put("elapsedMinutes", comment.getMinutesSinceCreation());
     commentJson.put("comment", comment.getComment());
     commentJson.put("isMe", comment.getUser().equals(userSession.getName()) ? true : false);
+    commentJson.put("isDeleted", comment.isDeleted());
+    commentJson.put("isArchived", comment.isArchived());
     return commentJson;
   }
 
   private Session getSession() throws PluginHibernateException
   {
-
     return PluginHibernateUtil.getSession();
-
+  }
+  
+  private Boolean operationAuthorized(int operation, CommentEntry comment, IPentahoSession userSession) throws PluginHibernateException
+  {
+    SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
+    Boolean isAdministrator = Boolean.valueOf((String)securityParams.getParameter("principalAdministrator"));
+    Boolean isAuthenticated = userSession.isAuthenticated();
+    Boolean isAuthorized = false;
+    switch (operation) {
+      case DELETE_OPERATION: {
+        Boolean isUser = comment.getUser().equals(userSession.getName());
+        isAuthorized = (isUser && isAdministrator && isAuthenticated);
+        break;
+      }
+      case ARCHIVE_OPERATION: {
+        Boolean isUser = comment.getUser().equals(userSession.getName());
+        isAuthorized = (isUser && isAdministrator && isAuthenticated);
+        break;
+      }
+      case ADD_OPERATION: 
+        isAuthorized = true;
+        break;
+      case LIST_OPERATION: 
+        isAuthorized = true;
+        break;
+    }
+    return isAuthorized;
   }
 
   private void initialize() throws PluginHibernateException
   {
-
-
-      
     ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
     try {
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
@@ -219,9 +235,6 @@ public class CommentsEngine
     finally {
         Thread.currentThread().setContextClassLoader(contextCL);
     }      
-      
-    // Get hbm file
-
   }
 
   private String getExceptionDescription(Exception ex)

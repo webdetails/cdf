@@ -43,13 +43,20 @@
         <property name="createdDate" type="timestamp" not-null="true">
             <column name="CREATED" not-null="true" />
         </property>
-        <query name="getCommentsByPage"><![CDATA[
-    from CommentEntry where page=:page and deleted=false and archived=false order by commentId desc
-]]>
+        <query name="getCommentsByPage">
+            <![CDATA[
+                from CommentEntry where page=:page order by commentId desc
+            ]]>
         </query>
-        <query name="getCommentByid"><![CDATA[
-    from CommentEntry where commentId=:commentId
-]]>
+         <query name="getCommentsByPageWhere">
+             <![CDATA[
+                from CommentEntry where page=:page and deleted=:deleted and archived=:archived order by commentId desc
+            ]]>
+        </query>
+        <query name="getCommentByid">
+            <![CDATA[
+                from CommentEntry where commentId=:commentId
+            ]]>
         </query>
     </class>
 </hibernate-mapping>

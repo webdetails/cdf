@@ -128,6 +128,7 @@ public class ContextEngine {
 
       SecurityParameterProvider securityParams = new SecurityParameterProvider(getUserSession());
       contextObj.put("roles", securityParams.getParameter("principalRoles"));
+      contextObj.put("isAdmin", Boolean.valueOf((String)securityParams.getParameter("principalAdministrator")));
 
       final JSONObject params = new JSONObject();
       buildContextParams(params, parameters);

@@ -7,32 +7,9 @@ BaseComponent = Base.extend({
   elapsedSinceSplit: -1,
   elapsedSinceStart: -1,
   logColor: undefined,
-  //valueAsId:
-  //valuesArray:
-  //autoFocus: false,
-
-  placeholder: function(selector) {
-    var ho = this.htmlObject;
-    return ho ? $("#"+ ho + (selector ? (" " + selector) : "")) : $();
-  },
-
-  focus: function() {
-    try {
-      this
-        .placeholder("*:first")
-        .focus();
-    } catch(ex) { /* Swallow, maybe hidden. */ }
-  },
-
-  _doAutoFocus: function() {
-    if(this.autoFocus) {
-      delete this.autoFocus;
-      this.focus();
-    }
-  },
-
-  clear: function() {
-    this.placeholder().empty();
+  
+  clear : function() {
+    $("#"+this.htmlObject).empty();
   },
 
   copyEvents: function(target,events) {
@@ -155,7 +132,7 @@ BaseComponent = Base.extend({
           });
           jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
         } else {
-          jXML = Dashboards.callPentahoAction(myself, this.path, p,null);
+          jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
         }
         //transform the result int a javascript array
         var myArray = this.parseArray(jXML, false);
@@ -252,36 +229,36 @@ BaseComponent = Base.extend({
     /* opts is falsy if null or undefined */
     return opts || {};
   },
-
+  
   startTimer: function(){
-
+    
     this.timerStart = new Date();
     this.timerSplit = new Date();
-
+    
   },
-
+  
   splitTimer: function(){
-
+    
     // Sanity check, in case this component doesn't follow the correct workflow
     if(this.elapsedSinceStart === -1 || this.elapsedSinceSplit === -1){
       this.startTimer();
     }
-
+    
     var now = new Date();
-
+    
     this.elapsedSinceStart = now.getTime() - this.timerStart.getTime();
     this.elapsedSinceSplit = now.getTime() - this.timerSplit.getTime();
-
+    
     this.timerSplit = now;
     return this.getTimerInfo();
   },
-
+  
   formatTimeDisplay: function(t){
     return Math.log(t)/Math.log(10)>=3?Math.round(t/100)/10+"s":t+"ms";
   },
-
+  
   getTimerInfo: function(){
-
+    
       return {
         timerStart: this.timerStart,
         timerSplit: this.timerSplit,
@@ -290,25 +267,25 @@ BaseComponent = Base.extend({
         elapsedSinceSplit: this.elapsedSinceSplit,
         elapsedSinceSplitDesc: this.formatTimeDisplay(this.elapsedSinceSplit)
       }
-
+    
   },
-
+  
   /*
-   * This method assigns and returns a unique and somewhat randomish color for
-   * this log. The goal is to be able to track cdf lifecycle more easily in
+   * This method assigns and returns a unique and somewhat randomish color for 
+   * this log. The goal is to be able to track cdf lifecycle more easily in 
    * the console logs. We're returning a Hue value between 0 and 360, a range between 0
    * and 75 for saturation and between 45 and 80 for value
    *
    */
-
+  
   getLogColor: function(){
-
+    
     if (this.logColor){
       return this.logColor;
     }
     else{
-      // generate a unique,
-
+      // generate a unique, 
+      
       var hashCode = function(str){
         var hash = 0;
         if (str.length == 0) return hash;
@@ -319,7 +296,7 @@ BaseComponent = Base.extend({
         }
         return hash;
       }
-
+      
       var hash = hashCode(this.name).toString();
       var hueSeed = hash.substr(hash.length-6,2) || 0;
       var saturationSeed = hash.substr(hash.length-2,2) || 0;
@@ -327,165 +304,479 @@ BaseComponent = Base.extend({
 
       this.logColor = Dashboards.hsvToRgb(360/100*hueSeed, 75/100*saturationSeed, 45 + (80-45)/100*valueSeed);
       return this.logColor;
-
+      
     }
-
-
+    
+    
   }
-
+  
 });
+
 
 var TextComponent = BaseComponent.extend({
   update : function() {
-    this.placeholder().html(this.expression());
+    $("#"+this.htmlObject).html(this.expression());
   }
 });
 
-
-
+/*******
+Comments Component
+********/
 
 var CommentsComponent = BaseComponent.extend({
-  update : function() {
+  
+  processing: function () {
+   
+    var myself = {};
+    
+    myself.defaults = {
+            dataTemplates: {
 
-    // Set page start and length - for pagination
-    if(typeof this.firstResult == 'undefined'){
-      this.firstResult = 0;
-    }
-    if(typeof this.maxResults == 'undefined'){
-      this.maxResults = 4;
-    }
+              comments:         '<div class="commentsDetails">'+
+                                ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
+                                '</div>'+
+                                '<div class="commentsBody">'+
+                                ' <div class="comment">'+
+                                '   {{{comment}}}'+
+                                ' </div>'+
+                                ' {{#user}}'+
+                                ' <div class="operation">'+
+                                ' {{#permissions.delete}}'+
+                                '   <div class="delete">X</div>' +
+                                ' {{/permissions.delete}}'+
+                                ' {{#permissions.archive}}'+
+                                '  <div class="archive">X</div>' +
+                                ' {{/permissions.archive}}'+
+                                ' </div>'+
+                                ' {{/user}}'+
+                                '</div>'                                        
+                                ,
 
+              addComments:      '<div class="commentsAdd">'+
+                                '{{#add}}'+
+                                ' <div class="addComment">Add Comment</div>'+
+                                ' <div class="addCommentWrapper">'+
+                                '   <textarea class=addCommentText></textarea>'+
+                                '   <div class="commentsButtons">'+
+                                '   <div class="saveComment">Save</div>'+
+                                '   <div class="cancelComment">Cancel</div>'+
+                                '   </div>'+
+                                ' </div>'+
+                                '{{/add}}'+
+                                '</div>'
+                                ,
+
+              paginateComments: '<div class="paginate commentPaginate"> '+
+                                '{{#active}}'+
+                                ' <div class="navigateRefresh"> Refresh </div>'+
+                                ' <div class="navigatePrevious"> Newest Comments </div>'+
+                                ' <div class="navigateNext"> Oldest Comments </div>'+
+                                '{{/active}}'+
+                                '</div>'
+            }
+
+    };
+
+    // Process operations
+    myself.operations = {
+
+      processOperation: function(operation, comment, collection, callback, defaults) {
+        var ajaxOptions = {};
+        switch(operation) {
+          case 'LIST_ALL':
+            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults, where: false} };
+            break;
+          case 'LIST_ACTIVE':
+            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults} };
+            break;
+          case 'GET_LAST':
+            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: 0, maxResults: 1} };
+            break;
+          case 'DELETE_COMMENT':
+            ajaxOptions = {data: { action: 'delete', page: defaults.page, commentId: comment} };
+            break;
+          case 'ARCHIVE_COMMENT':
+            ajaxOptions = {data: { action: 'archive', page: defaults.page, commentId: comment} };
+            break;
+          case 'ADD_COMMENT':
+            ajaxOptions = {data: { action: 'add', page: defaults.page, comment: comment} };
+            break;
+        }
+        this.requestProcessing(ajaxOptions, operation, collection, callback);
+      },
+
+      requestProcessing: function(overrides, operation, collection, callback){
+        var myself = this;
+        overrides = overrides || {};
+        var ajaxOpts = {     
+          type: 'GET',
+          url: "/plugin/pentaho-cdf/api/comments/"+operation,
+          success: function(data) {
+            myself.requestResponse(data, operation, collection, callback)
+          }, 
+          dataType: 'json'
+        };
+        ajaxOpts = _.extend( {}, ajaxOpts, overrides);
+        $.ajax(ajaxOpts);
+      },
+      
+      resetCollection: function(result) {
+        var paginate = myself.options.paginate;
+        var start = paginate.activePageNumber*paginate.pageCommentsSize;
+        var end = ((start+paginate.pageCommentsSize) < result.length) ? (start+paginate.pageCommentsSize) : result.length;
+        var commentsArray = [];
+
+        for (var idx = start; idx < end; idx++) {
+          var singleComment = new myself.CommentModel(result[idx]);
+          commentsArray.push(singleComment)
+        }
+        return commentsArray;
+      },  
+
+      requestResponse: function (json, operation, collection, callback) {
+        if ((operation == 'LIST_ALL') || (operation == 'LIST_ACTIVE')) {
+          var paginate = myself.options.paginate;
+          if (paginate.activePageNumber > 0) {
+            if ((paginate.activePageNumber+1) > Math.ceil(json.result.length/paginate.pageCommentsSize))
+             paginate.activePageNumber--;
+          }
+          myself.options.queyResult = json.result;
+          collection.reset(this.resetCollection(json.result)); 
+          if ((paginate.activePageNumber == 0) && ((json) && (typeof json.result != 'undefined')) && (json.result.length == 0)) {
+            json.result = [{
+                id: 0,
+                comment: 'No Comments to show!',
+                createdOn: '', 
+                elapsedMinutes: '',
+                isArchived: false,
+                isDeleted: false,
+                isMe: true, 
+                page: '',
+                user: '',
+                permissions: {
+                  add: false,
+                  archive: false,
+                  remove: false
+                }
+            }];
+            if ((collection) && (typeof collection != 'undefined')) {
+              collection.reset(this.resetCollection(json.result));  
+            }
+          }
+        }
+        if ((callback) && (typeof callback != 'undefined')) { 
+          callback.apply(this, [json, collection]);
+        } 
+      }
+    };
+    
+    myself.CommentModel = Backbone.Model.extend({
+        defaults: {
+            id: 0,
+            comment: 'Guest User',
+            createdOn: '', 
+            elapsedMinutes: '',
+            isArchived: false,
+            isDeleted: false,
+            isMe: true, 
+            page: 'comments',
+            user: 'comments',
+            permissions: {}
+        },
+
+        initialize: function(){
+          this.set('permissions', myself.options.permissions);
+        }
+  
+    });
+
+    myself.CommentView = Backbone.View.extend({
+      tagName: 'div',
+      className: 'commentView',
+
+      events: {
+        "click .delete": "deleteComment",
+        "click .archive": "archiveComment"
+      },
+
+      initialize: function(model){
+        _.bindAll(this, 'render', 'deleteComment', 'archiveComment');
+        this.model = model;
+      },
+
+      render: function(){  
+        this.$el.append(myself.dataTemplates.comments(this.attributes));
+        return this.$el; 
+      },
+
+      deleteComment: function() {
+        var callback = function(data, collection) {
+          myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
+        };
+        myself.operations.processOperation('DELETE_COMMENT', this.model.get('id'), this.model.collection, callback, myself.options);
+      },
+
+      archiveComment: function() {  
+        var callback = function(data, collection) {
+          myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
+        };
+        myself.operations.processOperation('ARCHIVE_COMMENT', this.model.get('id'), this.model.collection, callback, myself.options);
+      }
+
+    });
+
+    myself.CommentsCollection = Backbone.Collection.extend({
+      model: myself.CommentModel
+    });
+    
+    myself.CommentsView = Backbone.View.extend({
+      tagName: 'div',
+      className: 'commentComponent',
+
+      events: {
+        "click .addComment": "addComment",
+        "click .saveComment": "saveComment",
+        "click .cancelComment": "cancelComment",
+        "click .navigatePrevious": "navigatePrevious",
+        "click .navigateNext": "navigateNext",
+        "click .navigateRefresh": "navigateRefresh",
+      },
+
+      initialize: function(collection){
+         _.bindAll(this, 'render', 
+                         'addComment', 
+                         'saveComment', 
+                         'cancelComment', 
+                         'renderSingeComment', 
+                         'addComment', 
+                         'saveComment', 
+                         'cancelComment', 
+                         'navigateNext',
+                         'navigatePrevious',
+                         'commentsUpdateNotification');
+
+        this.collection = collection;
+
+        this.collection.on('reset', this.render);
+        this.collection.on('commentsUpdateNotification', this.commentsUpdateNotification);
+        
+        this.render();
+      },
+    
+      render: function() {
+        var $renderElem = $('#'+myself.options.htmlObject);
+        var $commentsElem = $('<div/>').addClass('commentsGroup');
+        Dashboards.log("Comments Component: Render comments", "debug");
+        _(this.collection.models).each(function(comment){
+          $commentsElem.append(this.renderSingeComment(comment));                          
+        }, this);
+        var $add = $(myself.dataTemplates.addComments(myself.options.permissions));
+        var $paginate = $(myself.dataTemplates.paginateComments(myself.options.paginate));
+        this.$el.empty().append($commentsElem, $add, $paginate)
+        $renderElem.append(this.$el);
+        this.updateNavigateButtons();
+      },
+
+      renderSingeComment: function(comment) {
+        Dashboards.log("Comments Component: Render single comment", "debug");
+        var singleCommentView = new myself.CommentView(comment);
+        return singleCommentView.render();
+      },
+
+      addComment: function() {
+        Dashboards.log("Comments Component: Add comment", "debug");
+        this.showAddComment();
+      },
+
+      saveComment: function() {
+        Dashboards.log("Comments Component: Save comment", "debug");
+        var text = this.$el.find('.addCommentText').val();
+        var callback = function(data, collection) {
+          var paginate = myself.options.paginate;
+          paginate.activePageNumber = 0;
+          myself.operations.processOperation('LIST_ACTIVE', null, collection, null, myself.options);
+        };
+        myself.operations.processOperation('ADD_COMMENT', text, this.collection, callback, myself.options);
+
+      },
+
+      cancelComment: function() {  
+        Dashboards.log("Comments Component: Cancel comment", "debug");
+        this.hideAddComment();
+      },
+
+      navigateNext: function() {  
+        Dashboards.log("Comments Component: Next", "debug");
+        var paginate = myself.options.paginate;
+        var start = paginate.activePageNumber*paginate.pageCommentsSize;
+        if ((start+paginate.pageCommentsSize) < myself.options.queyResult.length) {
+          paginate.activePageNumber++;
+          this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
+        }
+        this.commentsUpdateNotification();
+        this.updateNavigateButtons();
+      },
+
+      navigatePrevious: function() {  
+        Dashboards.log("Comments Component: Previous", "debug");
+        var paginate = myself.options.paginate;
+        var start = paginate.activePageNumber;
+        if (paginate.activePageNumber > 0) {
+          paginate.activePageNumber--;
+          this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
+        } 
+        this.commentsUpdateNotification();
+        this.updateNavigateButtons();
+      },
+
+      navigateRefresh: function() {  
+        Dashboards.log("Comments Component: Refresh", "debug");
+        var paginate = myself.options.paginate;
+        myself.options.paginate.activePageNumber = 0;
+        myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
+        $('.tipsy').remove();
+      },
+
+      updateNavigateButtons: function() {
+        var paginate = myself.options.paginate;
+        $('.navigatePrevious').addClass("disabled");
+        $('.navigateNext').addClass("disabled");
+        if (paginate.activePageNumber > 0){
+          $('.navigatePrevious').removeClass("disabled");
+        }
+        if ((paginate.activePageNumber+1) < Math.ceil(myself.options.queyResult.length/paginate.pageCommentsSize)) {
+          $('.navigateNext').removeClass("disabled");
+        }
+      },
+
+      commentsUpdateNotification: function() {  
+        Dashboards.log("Comments Component: Comments notification", "debug");
+        if (myself.options.queyResult.length > 0) {
+          var lastCommentDate = myself.options.queyResult[0].createdOn;
+          var callback = function(data) {
+            if (data.result.length > 0) {
+              if (!!(data.result[0].createdOn==lastCommentDate)) {
+                Dashboards.log("Comments Component: New Comments? false", "debug");
+              } else {
+                Dashboards.log("Comments Component: New Comments? true", "debug");
+                var tipsyOptions = {
+                  html: true, 
+                  fade: true, 
+                  trigger: 'manual',
+                  className: 'commentsComponentTipsy',
+                  title: function () {
+                    return 'New comments, please refresh!';
+                  }
+                }
+                $('.commentComponent .navigateRefresh').attr('title','New comments, please refresh!').tipsy(tipsyOptions);
+                $('.commentComponent .navigateRefresh').tipsy('show');
+
+              }
+            }
+          } 
+          myself.operations.processOperation('GET_LAST', null, null, callback, myself.options);
+        }
+      },
+
+      showAddComment: function() {
+        this.$el.find('.addCommentWrapper').show();
+        this.$el.find('.paginate').hide();
+        this.$el.find('.addCommentText').val('');
+      },
+
+      hideAddComment: function() {
+        this.$el.find('.addCommentWrapper').hide();
+        this.$el.find('.paginate').show();
+        this.$el.find('.addCommentText').val('');
+      }  
+
+    });
+
+    myself.compileTemplates = function() {
+      myself.dataTemplates = myself.dataTemplates || {};
+      _(myself.defaults.dataTemplates).each(function(value, key) {
+        myself.dataTemplates[key] = Mustache.compile(value);
+      });
+    };
+      
+    myself.start = function(options) {
+      myself.options = options;
+      myself.defaults = _.extend({}, myself.defaults, options.defaults);
+      myself.compileTemplates();
+
+      myself.commentsCollection = new myself.CommentsCollection();
+      myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
+      myself.commentsView = new myself.CommentsView(myself.commentsCollection);
+
+      if (myself.options.intervalActive) {
+        var refresh = function() {
+          Dashboards.log("Comments Component: Refresh", "debug");
+          myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
+        }
+        //setInterval(refresh, myself.options.interval);
+        setInterval(function () { myself.commentsCollection.trigger('commentsUpdateNotification'); }, myself.options.interval);
+      }
+
+    };
+
+    return myself;
+
+  },
+
+
+  /*****
+   Process component
+  *****/
+  
+  update: function() {
+
+    // Set page start and length for pagination
+    this.paginateActive = (typeof this.paginate == 'undefined')? true: this.paginate;
+    this.pageCommentsSize = (typeof this.pageCommentsSize == 'undefined')? 10: this.pageCommentsSize;
+    this.firstResult = (typeof this.firstResult == 'undefined')? 0: this.firstResult;
+    this.maxResults  = (typeof this.maxResults  == 'undefined')? 100: this.maxResults;
+    this.interval  = (typeof this.interval  == 'undefined')? /*60000*/ 5000: this.interval;
+    this.intervalActive  = (typeof this.intervalActive  == 'undefined')? true: this.intervalActive;
+
+    this.addPermission = (typeof this.addPermission == 'undefined')? true: this.addPermission;
+    this.deletePermission = (typeof this.deletePermission == 'undefined')? false: this.deletePermission;
+    this.archivePermission = (typeof this.archivePermission == 'undefined')? true: this.archivePermission;
+
+    this.options = (typeof this.options == 'undefined')? {}: this.options;
+
+    // set the page name for the comments
     if (this.page == undefined){
-     Dashboards.log("Fatal - no page definition passed","error");
+      Dashboards.log("Fatal - no page definition passed","error");
       return;
     }
 
-    this.firePageUpdate();
-
-  },
-  firePageUpdate: function(json){
-
-    // Clear previous table
-    var placeHolder = this.placeholder();
-    placeHolder.empty();
-    placeHolder.append('<div class="cdfCommentsWrapper ui-widget"><dl class="cdfCommentsBlock"/></div>');
-    var myself = this;
-    var args = {
+    options = {
+      htmlObject: this.htmlObject,
       page: this.page,
-      firstResult: this.firstResult,
-      maxResults: this.maxResults + 1 // Add 1 to maxResults for pagination look-ahead
-    };
-    $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/comments/list", args, function(json) {
-      myself.processCommentsList(json);
-    });
-  },
-
-  processCommentsList : function(json)
-  {
-    // Add the possibility to add new comments
-    var myself = this;
-    var placeHolder = this.placeholder("dl ");
-    myself.addCommentContainer = $('<dt class="ui-widget-header comment-body"><textarea/></dt>'+
-      '<dl class="ui-widget-header comment-footer">'+
-      '<a class="cdfAddComment">Add Comment</a>'+
-      ' <a class="cdfCancelComment">Cancel</a></dl>'
-      );
-    myself.addCommentContainer.find("a").addClass("ui-state-default");
-    myself.addCommentContainer.find("a").hover(
-      function(){
-        $(this).addClass("ui-state-hover");
+      intervalActive: this.intervalActive,
+      interval: this.interval,
+      paginate: { 
+        active: this.paginateActive,
+        activePageNumber: 0,
+        pageCommentsSize: this.pageCommentsSize,
+        firstResult: this.firstResult,
+        maxResults: this.maxResults
       },
-      function(){
-        $(this).removeClass("ui-state-hover");
-      }
-      )
-
-    // Cancel
-    $(".cdfCancelComment",myself.addCommentContainer).bind('click',function(e){
-      myself.addCommentContainer.hide("slow");
-      myself.addCommentContainer.find("textarea").val('');
-    });
-
-    // Add comment
-    $(".cdfAddComment",myself.addCommentContainer).bind('click',function(e){
-      var tarea = $("textarea",myself.addCommentContainer);
-      var code = tarea.val();
-      tarea.val('');
-      var args = {
-        page: myself.page,
-        comment: code
-      };
-      $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/comments/add", args, function(json) {
-        myself.processCommentsAdd(json);
-      });
-      myself.addCommentContainer.hide("slow");
-    });
-
-    myself.addCommentContainer.hide();
-    myself.addCommentContainer.appendTo(placeHolder);
-
-    // Add comment option
-    var addCodeStr = '<div class="cdfAddComment"><a> Add comment</a></div>';
-
-    $(addCodeStr).insertBefore(placeHolder).bind('click',function(e){
-      myself.addCommentContainer.show("slow");
-      $("textarea",myself.addCommentContainer).focus();
-    });
-
-    if (typeof json.error != 'undefined' || typeof json.result == 'undefined') {
-      placeHolder.append('<span class="cdfNoComments">There was an error processing comments</span>' );
-      json.result = [];
-    } else
-    if (json.result.length == 0 ){
-      placeHolder.append('<span class="cdfNoComments">No comments yet</span>' );
+      permissions: { 
+        add: this.addPermission,
+        delete: this.deletePermission,
+        archive: this.archivePermission
+      },
+      defaults: this.options
     }
-    $.each(json.result.slice(0,this.maxResults), // We drop the lookahead item, if any
-      function(i,comment){
-        var bodyClass = comment.isMe?"ui-widget-header":"ui-widget-content";
-        placeHolder.append('<dt class="'+ bodyClass +' comment-body"><p>'+comment.comment+'</p></dt>');
-        placeHolder.append('<dl class="ui-widget-header comment-footer ">'+comment.user+ ",  " + comment.createdOn +  '</dl>');
 
-      });
+    this.processing().start(options);
 
-
-    // Add pagination support;
-    var paginationContent = $('<div class="cdfCommentsPagination ui-helper-clearfix"><ul class="ui-widget"></ul></div>');
-    var ul = $("ul",paginationContent);
-    if(this.firstResult > 0){
-      ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPagePrev ui-icon ui-icon-carat-1-w"></a></li>');
-      ul.find(".cdfCommentPagePrev").bind("click",function(){
-        myself.firstResult -= myself.maxResults;
-        myself.firePageUpdate();
-      });
-    }
-    // check if we got a lookahead hit
-    if(this.maxResults < json.result.length) {
-      ul.append('<li class="ui-state-default ui-corner-all"><span class="cdfCommentPageNext ui-icon ui-icon-carat-1-e"></a></li>');
-      ul.find(".cdfCommentPageNext").bind("click",function(){
-        myself.firstResult += myself.maxResults;
-        myself.firePageUpdate();
-      });
-    }
-    paginationContent.insertAfter(placeHolder);
-
-
-  },
-  processCommentsAdd: function(json){
-    // json response
-    var result = json.result;
-    var placeHolder = this.placeholder("dl ");
-
-    var container = $('<dt class="ui-widget-header comment-body">'+ result.comment +'</dt>'+
-      '<dl class="ui-widget-header comment-footer">'+ result.user +
-      ", " + result.createdOn + '</dl>'
-      );
-    container.hide();
-    container.insertAfter($("dl:eq(0)",placeHolder));
-    container.show("slow");
-    this.update();
+    // Old comment component definition
+    // this.firePageUpdate(); 
   }
-}
-);
+
+});
 
 
 var QueryComponent = BaseComponent.extend({
@@ -495,7 +786,7 @@ var QueryComponent = BaseComponent.extend({
   },
   warnOnce: function() {
   Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
-    "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" +
+    "http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" + 
     " for more information");
     delete(this.warnOnce);
   }
@@ -512,7 +803,7 @@ var QueryComponent = BaseComponent.extend({
     var query = new Query(cd);
     object.queryState = query;
 
-    query.fetchData(object.parameters == undefined ? [] : object.parameters, function(values) {
+    query.fetchData(object.parameters, function(values) {
       // We need to make sure we're getting data from the right place,
       // depending on whether we're using CDA
 
@@ -622,7 +913,7 @@ var UnmanagedComponent = BaseComponent.extend({
   },
   showTooltip: function() {
     if(typeof this._tooltip != "undefined") {
-      this.placeholder().attr("title",this._tooltip).tooltip({
+      $("#" + this.htmlObject).attr("title",this._tooltip).tooltip({
         delay:0,
         track: true,
         fade: 250
@@ -658,7 +949,7 @@ var UnmanagedComponent = BaseComponent.extend({
         this.showTooltip();
       } catch(e){
         this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e );
-        this.dashboard.log(e,"error");
+        this.dashboard.log(e,"error"); 
       } finally {
         if(!silent) {
           this.unblock();
@@ -671,7 +962,7 @@ var UnmanagedComponent = BaseComponent.extend({
    * The triggerQuery lifecycle handler builds a lifecycle around Query objects.
    *
    * It takes a query definition object that is passed directly into the Query
-   * constructor, and the component rendering callback, and implements the full
+   * constructor, and the component rendering callback, and implements the full 
    * preExecution->block->render->postExecution->unblock lifecycle. This method
    * detects concurrent updates to the component and ensures that only one
    * redraw is performed.
@@ -680,12 +971,12 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    var silent = this.isSilent();
+    var silent = this.isSilent();    
     if (!silent){
       this.block();
     };
     userQueryOptions = userQueryOptions || {};
-    /*
+    /* 
      * The query response handler should trigger the component-provided callback
      * and the postExec stage if the call wasn't skipped, and should always
      * unblock the UI
@@ -716,7 +1007,7 @@ var UnmanagedComponent = BaseComponent.extend({
     query.fetchData(this.parameters, handler, errorHandler);
   },
 
-  /*
+  /* 
    * The triggerAjax method implements a lifecycle based on generic AJAX calls.
    * It implements the full preExecution->block->render->postExecution->unblock
    * lifecycle.
@@ -732,7 +1023,7 @@ var UnmanagedComponent = BaseComponent.extend({
     if(!this.preExec()) {
       return;
     }
-    var silent = this.isSilent();
+    var silent = this.isSilent();    
     if (!silent){
       this.block();
     };
@@ -749,7 +1040,7 @@ var UnmanagedComponent = BaseComponent.extend({
         data: params
       });
     }
-    var success = _.bind(function(data){
+    var success = _.bind(function(data){ 
       callback(data);
       this.trigger('cdf cdf:render',this,data);
       this.postExec();
@@ -775,7 +1066,7 @@ var UnmanagedComponent = BaseComponent.extend({
 
   /* Trigger an error event on the component. Takes as arguments the error
    * message and, optionally, a `cause` object.
-   * Also
+   * Also 
    */
   error: function(msg, cause) {
     msg = msg || Dashboards.getErrorObj('COMPONENT_ERROR').msg;
@@ -820,7 +1111,7 @@ var UnmanagedComponent = BaseComponent.extend({
           try {
             if(typeof this.postFetch == "function") {
               newData = this.postFetch(data);
-              this.trigger('cdf cdf:postFetch',this,data);
+              this.trigger('cdf cdf:postFetch',this,data);              
               data = typeof newData == "undefined" ? data : newData;
             }
             success(data);
@@ -836,18 +1127,18 @@ var UnmanagedComponent = BaseComponent.extend({
     this);
   },
 
-  getErrorHandler: function() {
+  getErrorHandler: function() { 
     return  _.bind(function() {
       var err = Dashboards.parseServerError.apply(this, arguments );
       this.error( err.msg, err.error );
     },
-    this);
+    this);  
   },
   errorNotification: function (err, ph) {
-    ph = ph || (this.htmlObject ? this.placeholder() : undefined);
+    ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
     var name = this.name.replace('render_', '');
     err.msg = err.msg + ' (' + name + ')';
-    Dashboards.errorNotification( err, ph );
+    Dashboards.errorNotification( err, ph );  
   },
 
   /*
@@ -861,15 +1152,17 @@ var UnmanagedComponent = BaseComponent.extend({
       this.dashboard.incrementRunningCalls();
       this.isRunning = true;
     }
+    
   },
 
   /*
    * Trigger UI unblock when the component finishes updating. Functionality is
    * defined as undoing whatever was done in the block method. Should also be
-   * overridden in components that override UnmanagedComponent#block.
+   * overridden in components that override UnmanagedComponent#block. 
    */
   unblock: function() {
-    if(this.isRunning) {
+  
+    if(this.isRunning){
       this.dashboard.decrementRunningCalls();
       this.isRunning = false;
     }

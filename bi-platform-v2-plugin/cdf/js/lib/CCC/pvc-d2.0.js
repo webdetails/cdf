@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-//VERSION TRUNK-20130509
+//VERSION TRUNK-20130528
 
 var pvc = (function(def, pv) {
 
@@ -11,7 +11,7 @@ var pvc = (function(def, pv) {
 /*global pvc:true */
 var pvc = def.globalSpace('pvc', {
     // 0 - off
-    // 1 - errors 
+    // 1 - errors
     // 2 - errors, warnings
     // 3 - errors, warnings, info
     // 4 - verbose
@@ -47,10 +47,10 @@ var pvc_arraySlice = Array.prototype.slice;
 pvc.setDebug = function(level) {
     level = +level;
     pvc.debug = isNaN(level) ? 0 : level;
-    
+
     pvc_syncLog();
     pvc_syncTipsyLog();
-    
+
     return pvc.debug;
 };
 
@@ -61,29 +61,29 @@ function pvc_syncLog() {
         ['log', 'info', ['trace', 'debug'], 'error', 'warn', ['group', 'groupCollapsed'], 'groupEnd']
         .forEach(function(ps) {
             ps = ps instanceof Array ? ps : [ps, ps];
-            
+
             pvc_installLog(pvc, ps[0],  ps[1],  '[pvChart]');
         });
     } else {
         if(pvc.debug > 1) { pvc.debug = 1; }
-        
+
         ['log', 'info', 'trace', 'warn', 'group', 'groupEnd']
         .forEach(function(p) { pvc[p] = def.noop; });
 
         var _errorPrefix = "[pvChart ERROR]: ";
-        
+
         pvc.error = function(e) {
             if(e && typeof e === 'object' && e.message) { e = e.message; }
 
             e = '' + def.nullyTo(e, '');
             if(e.indexOf(_errorPrefix) < 0) { e = _errorPrefix + e; }
-            
+
             throw new Error(e);
         };
     }
-    
+
     pvc.logError = pvc.error;
-    
+
     // Redirect protovis error handler
     pv.error = pvc.error;
 }
@@ -106,7 +106,7 @@ function pvc_installLog(o, pto, pfrom, prompt) {
         if(!def.fun.is(m)) {
             // For IE these are not functions...but simply objects
             // Bind is not available or may be a polyfill that won't work...
-            
+
             var apply = Function.prototype.apply;
             fun = function() {
                 apply.call(m, c, def.array.append([mask], arguments));
@@ -117,27 +117,27 @@ function pvc_installLog(o, pto, pfrom, prompt) {
             fun = m.bind(c, mask);
         }
     }
-    
+
     o[pto] = fun;
 }
 
 pvc.setDebug(pvc.debug);
 
 /**
- * Gets or sets the default CCC compatibility mode. 
+ * Gets or sets the default CCC compatibility mode.
  * <p>
  * Use <tt>Infinity</tt> for the <i>latest</i> version.
  * Use <tt>1</tt> for CCC version 1.
  * </p>
- * 
- * @param {number} [compatVersion] The new compatibility version.    
+ *
+ * @param {number} [compatVersion] The new compatibility version.
  */
 pvc.defaultCompatVersion = function(compatVersion) {
     var defaults = pvc.BaseChart.prototype.defaults;
     if(compatVersion != null) {
         return defaults.compatVersion = compatVersion;
-    } 
-    
+    }
+
     return defaults.compatVersion;
 };
 
@@ -147,7 +147,7 @@ pvc.cloneMatrix = function(m) {
 
 pvc.stringify = function(t, keyArgs) {
     var maxLevel = def.get(keyArgs, 'maxLevel') || 5;
-    
+
     var out = [];
     pvc.stringifyRecursive(out, t, maxLevel, keyArgs);
     return out.join('');
@@ -163,11 +163,11 @@ pvc.stringifyRecursive = function(out, t, remLevels, keyArgs) {
                     out.push('null');
                     return true;
                 }
-                
+
                 if(def.fun.is(t.stringify)) {
                     return t.stringify(out, remLevels, keyArgs);
                 }
-                
+
                 if(t instanceof Array) {
                     out.push('[');
                     t.forEach(function(item, index) {
@@ -194,7 +194,7 @@ pvc.stringifyRecursive = function(out, t, remLevels, keyArgs) {
                         remLevels = 1;
                         ownOnly = true;
                     }
-                    
+
                     out.push('{');
                     var first = true;
                     for(var p in t) {
@@ -209,42 +209,42 @@ pvc.stringifyRecursive = function(out, t, remLevels, keyArgs) {
                             }
                         }
                     }
-                    
+
                     if(first) {
                         var s = '' + t;
                         if(s !== '[object Object]') { // not very useful
                             out.push('{'+ s + '}');
                         }
                     }
-                    
+
                     out.push('}');
                 }
 //                    else {
 //                        out.push(JSON.stringify("'new ...'"));
 //                    }
                 return true;
-            
+
             case 'number':
                 out.push(''+(Math.round(100000 * t) / 100000)); // 6 dec places max
                 return true;
 
-            case 'boolean': 
+            case 'boolean':
                 out.push(''+t);
                 return true;
-                
-            case 'string': 
+
+            case 'string':
                 out.push(JSON.stringify(t));
                 return true;
-                
+
             case 'function':
                 if(def.get(keyArgs, 'funs', false)) {
                     out.push(JSON.stringify(t.toString().substr(0, 13) + '...'));
                     return true;
                 }
-                
+
                 return false;
         }
-        
+
         out.push("'new ???'");
         return true;
     }
@@ -255,16 +255,16 @@ pvc.orientation = {
     horizontal: 'horizontal'
 };
 
-/** 
+/**
  * To tag pv properties set by extension points
- * @type string 
+ * @type string
  * @see pvc.BaseChart#extend
  */
 pvc.extensionTag = 'extension';
 
 /**
  * Extends a type created with {@link def.type}
- * with the properties in {@link exts}, 
+ * with the properties in {@link exts},
  * possibly constrained to the properties of specified names.
  * <p>
  * The properties whose values are not functions
@@ -272,10 +272,10 @@ pvc.extensionTag = 'extension';
  * </p>
  * @param {function} type
  *      The type to extend.
- * @param {object} [exts] 
+ * @param {object} [exts]
  *      The extension object whose properties will extend the type.
  * @param {string[]} [names]
- *      The allowed property names. 
+ *      The allowed property names.
  */
 pvc.extendType = function(type, exts, names) {
     if(exts) {
@@ -287,17 +287,17 @@ pvc.extendType = function(type, exts, names) {
                 if(sceneVars && sceneVars[n]) {
                     n = '_' + n + 'EvalCore';
                 }
-                
+
                 exts2[n] = def.fun.to(ext);
             }
         };
-        
+
         if(names) {
             names.forEach(function(n) { addExtension(exts[n], n); });
         } else {
             def.each(addExtension);
         }
-        
+
         if(exts2) { type.add(exts2); }
     }
 };
@@ -311,42 +311,42 @@ pv_Mark.prototype.hasDelegateValue = function(name, tag) {
     if(p){
         return (!tag || p.tag === tag);
     }
-    
+
     // This mimics the way #bind works
     if(this.proto){
         return this.proto.hasDelegateValue(name, tag);
     }
-    
+
     return false;
 };
 
 /**
  * The default color scheme used by charts.
  * <p>
- * Charts use the color scheme specified in the chart options 
+ * Charts use the color scheme specified in the chart options
  * {@link pvc.BaseChart#options.colors}
- * and 
- * {@link pvc.BaseChart#options.color2AxisColorss}, 
- * for the main and second axis series, respectively, 
- * or, when any is unspecified, 
+ * and
+ * {@link pvc.BaseChart#options.color2AxisColorss},
+ * for the main and second axis series, respectively,
+ * or, when any is unspecified,
  * the default color scheme.
  * </p>
  * <p>
- * When null, the color scheme {@link pv.Colors.category10} is implied. 
+ * When null, the color scheme {@link pv.Colors.category10} is implied.
  * To obtain the default color scheme call {@link pvc.createColorScheme}
- * with no arguments. 
+ * with no arguments.
  * </p>
  * <p>
- * To be generically useful, 
+ * To be generically useful,
  * a color scheme should contain at least 10 colors.
  * </p>
  * <p>
  * A color scheme is a function that creates a {@link pv.Scale} color scale function
- * each time it is called. 
- * It sets as its domain the specified arguments and as range 
+ * each time it is called.
+ * It sets as its domain the specified arguments and as range
  * the pre-spcecified colors of the color scheme.
  * </p>
- * 
+ *
  * @readonly
  * @type function
  */
@@ -357,12 +357,12 @@ pvc.brighterColorTransform = function(color){
 };
 
 /**
- * Sets the colors of the default color scheme used by charts 
+ * Sets the colors of the default color scheme used by charts
  * to a specified color array.
  * <p>
  * If null is specified, the default color scheme is reset to its original value.
  * </p>
- * 
+ *
  * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] Something convertible to a color scheme by {@link pvc.colorScheme}.
  * @return {null|pv.Scale} A color scale function or null.
  */
@@ -374,40 +374,40 @@ pvc.defaultColor = pv.Colors.category10()('?');
 
 /**
  * Creates a color scheme if the specified argument is not one already.
- * 
+ *
  * <p>
  * A color scheme function is a factory of protovis color scales.
  * Given the domain values, returns a protovis color scale.
  * The arguments of the function are suitable for passing
  * to a protovis scale's <tt>domain</tt> method.
  * </p>
- * 
- * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] A value convertible to a color scheme: 
- * a color string, 
- * a color object, 
- * an array of color strings or objects, 
+ *
+ * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] A value convertible to a color scheme:
+ * a color string,
+ * a color object,
+ * an array of color strings or objects,
  * a protovis color scale function,
- * a color scale factory function (i.e. a color scheme), 
+ * a color scale factory function (i.e. a color scheme),
  * or null.
- * 
+ *
  * @returns {null|function} A color scheme function or null.
  */
 pvc.colorScheme = function(colors){
     if(colors == null) { return null; }
-    
+
     if(typeof colors === 'function') {
         // Assume already a color scheme (a color scale factory)
         if(!colors.hasOwnProperty('range')) { return colors; }
-            
+
         // A protovis color scale
         // Obtain its range colors array and discard the scale function.
         colors = colors.range();
     } else {
         colors = def.array.as(colors);
     }
-    
+
     if(!colors.length) { return null; }
-    
+
     return function() {
         var scale = pv.colors(colors); // creates a color scale with a defined range
         scale.domain.apply(scale, arguments); // defines the domain of the color scale
@@ -418,8 +418,8 @@ pvc.colorScheme = function(colors){
 /**
  * Creates a color scheme based on the specified colors.
  * When no colors are specified, the default color scheme is returned.
- * 
- * @see pvc.defaultColorScheme 
+ *
+ * @see pvc.defaultColorScheme
  * @param {string|pv.Color|string[]|pv.Color[]|pv.Scale|function} [colors=null] Something convertible to a color scheme by {@link pvc.colorScheme}.
  * @type function
  */
@@ -432,7 +432,7 @@ pvc.createColorScheme = function(colors){
 // Convert to Grayscale using YCbCr luminance conv.
 pvc.toGrayScale = function(color, alpha, maxGrayLevel, minGrayLevel){
     color = pv.color(color);
-    
+
     var avg = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
     // Don't let the color get near white, or it becomes unperceptible in most monitors
     if(maxGrayLevel === undefined) {
@@ -440,13 +440,13 @@ pvc.toGrayScale = function(color, alpha, maxGrayLevel, minGrayLevel){
     } else if(maxGrayLevel == null){
         maxGrayLevel = 255; // no effect
     }
-    
+
     if(minGrayLevel === undefined){
         minGrayLevel = 30;
     } else if(minGrayLevel == null){
         minGrayLevel = 0; // no effect
     }
-    
+
     var delta = (maxGrayLevel - minGrayLevel);
     if(delta <= 0){
         avg = maxGrayLevel;
@@ -454,15 +454,15 @@ pvc.toGrayScale = function(color, alpha, maxGrayLevel, minGrayLevel){
         // Compress
         avg = minGrayLevel + (avg / 255) * delta;
     }
-    
+
     if(alpha == null){
         alpha = color.opacity;
     } else if(alpha < 0){
         alpha = (-alpha) * color.opacity;
     }
-    
+
     avg = Math.round(avg);
-    
+
     return pv.rgb(avg, avg, avg, alpha);
 };
 
@@ -479,7 +479,7 @@ pvc.createDateComparer = function(parser, key){
     if(!key){
         key = pv.identity;
     }
-    
+
     return function(a, b){
         return parser.parse(key(a)) - parser.parse(key(b));
     };
@@ -488,24 +488,24 @@ pvc.createDateComparer = function(parser, key){
 pvc.time = {
     intervals: {
         'y':   31536e6,
-        
+
         'm':   2592e6,
         'd30': 2592e6,
-        
+
         'w':   6048e5,
         'd7':  6048e5,
-        
+
         'd':   864e5,
         'h':   36e5,
         'M':   6e4,
         's':   1e3,
         'ms':  1
     },
-    
+
     withoutTime: function(t){
         return new Date(t.getFullYear(), t.getMonth(), t.getDate());
     },
-    
+
     weekday: {
         previousOrSelf: function(t, toWd){
             var wd  = t.getDay();
@@ -517,7 +517,7 @@ pvc.time = {
             }
             return t;
         },
-        
+
         nextOrSelf: function(t, toWd){
             var wd  = t.getDay();
             var difDays = wd - toWd;
@@ -528,7 +528,7 @@ pvc.time = {
             }
             return t;
         },
-        
+
         closestOrSelf: function(t, toWd){
             var wd = t.getDay(); // 0 - Sunday, ..., 6 - Friday
             var difDays = wd - toWd;
@@ -548,16 +548,16 @@ pvc.time = {
 };
 
 pv.Format.createParser = function(pvFormat) {
-    
+
     function parse(value) { return pvFormat.parse(value); }
-    
+
     return parse;
 };
 
 pv.Format.createFormatter = function(pvFormat) {
-    
+
     function format(value) { return value != null ? pvFormat.format(value) : ""; }
-    
+
     return format;
 };
 
@@ -568,21 +568,21 @@ pvc.buildTitleFromName = function(name) {
 
 pvc.buildIndexedId = function(prefix, index) {
     if(index > 0) { return prefix + "" + (index + 1); } // base2, ortho3,..., legend2
-    
+
     return prefix; // base, ortho, legend
 };
 
 /**
  * Splits an indexed id into its prefix and index.
- * 
+ *
  * @param {string} indexedId The indexed id.
- * 
+ *
  * @type Array
  */
 pvc.splitIndexedId = function(indexedId){
     var match = /^(.*?)(\d*)$/.exec(indexedId);
     var index = null;
-    
+
     if(match[2]) {
         index = Number(match[2]);
         if(index <= 1) {
@@ -591,7 +591,7 @@ pvc.splitIndexedId = function(indexedId){
             index--;
         }
     }
-    
+
     return [match[1], index];
 };
 
@@ -600,10 +600,10 @@ function pvc_unwrapExtensionOne(id, prefix){
         if(def.object.is(id)){
             return id.abs;
         }
-        
+
         return prefix ? (prefix + def.firstUpperCase(id)) : id;
     }
-    
+
     return prefix;
 }
 
@@ -611,7 +611,7 @@ var pvc_oneNullArray = [null];
 
 pvc.makeExtensionAbsId = function(id, prefix) {
     if(!id) { return prefix; }
-    
+
     return def
        .query(prefix || pvc_oneNullArray)
        .selectMany(function(oneprefix) {
@@ -628,18 +628,18 @@ pvc.makeEnumParser = function(enumName, keys, dk) {
     var keySet = {};
     keys.forEach(function(k){ if(k) { keySet[k.toLowerCase()] = k; }});
     if(dk) { dk = dk.toLowerCase(); }
-    
+
     return function(k) {
         if(k) { k = (''+k).toLowerCase(); }
-        
+
         if(!def.hasOwn(keySet, k)) {
             if(k && pvc.debug >= 2) {
                 pvc.log("[Warning] Invalid '" + enumName + "' value: '" + k + "'. Assuming '" + dk + "'.");
             }
-        
+
             k = dk;
         }
-        
+
         return k;
     };
 };
@@ -647,40 +647,40 @@ pvc.makeEnumParser = function(enumName, keys, dk) {
 pvc.parseDistinctIndexArray = function(value, min, max){
     value = def.array.as(value);
     if(value == null) { return null; }
-    
+
     if(min == null) { min = 0; }
-    
+
     if(max == null) { max = Infinity; }
-    
+
     var a = def
         .query(value)
         .select(function(index) { return +index; }) // to number
         .where(function(index) { return !isNaN(index) && index >= min && index <= max; })
         .distinct()
         .array();
-    
+
     return a.length ? a : null;
 };
 
-pvc.parseLegendClickMode = 
+pvc.parseLegendClickMode =
     pvc.makeEnumParser('legendClickMode', ['toggleSelected', 'toggleVisible', 'none'], 'toggleVisible');
 
-pvc.parseTooltipAutoContent = 
+pvc.parseTooltipAutoContent =
     pvc.makeEnumParser('tooltipAutoContent', ['summary', 'value'], 'value');
 
 pvc.parseSelectionMode =
     pvc.makeEnumParser('selectionMode', ['rubberBand', 'focusWindow'], 'rubberBand');
-   
+
     pvc.parseClearSelectionMode =
         pvc.makeEnumParser('clearSelectionMode', ['emptySpaceClick', 'manual'], 'emptySpaceClick');
 
-pvc.parseShape = 
+pvc.parseShape =
     pvc.makeEnumParser('shape', ['square', 'circle', 'diamond', 'triangle', 'cross', 'bar'], null);
 
-pvc.parseTreemapColorMode = 
+pvc.parseTreemapColorMode =
     pvc.makeEnumParser('colorMode', ['byParent', 'bySelf'], 'byParent');
 
-pvc.parseTreemapLayoutMode = 
+pvc.parseTreemapLayoutMode =
     pvc.makeEnumParser('layoutMode', ['squarify', 'slice-and-dice', 'slice', 'dice'], 'squarify');
 
 pvc.parseContinuousColorScaleType = function(scaleType) {
@@ -691,18 +691,18 @@ pvc.parseContinuousColorScaleType = function(scaleType) {
             case 'normal':
             case 'discrete':
                 break;
-            
+
             default:
                 if(pvc.debug >= 2){
                     pvc.log("[Warning] Invalid 'ScaleType' option value: '" + scaleType + "'.");
                 }
-            
+
             scaleType = null;
                 break;
         }
     }
-    
-    return scaleType;  
+
+    return scaleType;
 };
 
 pvc.parseDomainScope = function(scope, orientation){
@@ -712,36 +712,36 @@ pvc.parseDomainScope = function(scope, orientation){
             case 'cell':
             case 'global':
                 break;
-            
+
             case 'section': // row (for y) or col (for x), depending on the associated orientation
                 if(!orientation){
                     throw def.error.argumentRequired('orientation');
                 }
-                
+
                 scope = orientation === 'y' ? 'row' : 'column';
                 break;
-                
+
             case 'column':
             case 'row':
                 if(orientation && orientation !== (scope === 'row' ? 'y' : 'x')){
                     scope = 'section';
-                    
+
                     if(pvc.debug >= 2){
                         pvc.log("[Warning] Invalid 'DomainScope' option value: '" + scope + "' for the orientation: '" + orientation + "'.");
                     }
                 }
                 break;
-            
+
             default:
                 if(pvc.debug >= 2){
                     pvc.log("[Warning] Invalid 'DomainScope' option value: '" + scope + "'.");
                 }
-            
+
                 scope = null;
                 break;
         }
     }
-    
+
     return scope;
 };
 
@@ -753,17 +753,17 @@ pvc.parseDomainRoundingMode = function(mode){
             case 'nice':
             case 'tick':
                 break;
-                
+
             default:
                 if(pvc.debug >= 2){
                     pvc.log("[Warning] Invalid 'DomainRoundMode' value: '" + mode + "'.");
                 }
-            
+
                 mode = null;
                 break;
         }
     }
-    
+
     return mode;
 };
 
@@ -775,17 +775,17 @@ pvc.parseOverlappedLabelsMode = function(mode){
             case 'hide':
             case 'rotatethenhide':
                 break;
-            
+
             default:
                 if(pvc.debug >= 2){
                     pvc.log("[Warning] Invalid 'OverlappedLabelsMode' option value: '" + mode + "'.");
                 }
-            
+
                 mode = null;
                 break;
         }
     }
-    
+
     return mode;
 };
 
@@ -796,7 +796,7 @@ pvc.castNumber = function(value) {
             value = null;
         }
     }
-    
+
     return value;
 };
 
@@ -808,7 +808,7 @@ pvc.parseWaterDirection = function(value) {
             case 'down':
                 return value;
         }
-        
+
         if(pvc.debug >= 2){
             pvc.log("[Warning] Invalid 'WaterDirection' value: '" + value + "'.");
         }
@@ -821,11 +821,11 @@ pvc.parseTrendType = function(value) {
         if(value === 'none'){
             return value;
         }
-        
+
         if(pvc.trends.has(value)){
             return value;
         }
-        
+
         if(pvc.debug >= 2){
             pvc.log("[Warning] Invalid 'TrendType' value: '" + value + "'.");
         }
@@ -841,7 +841,7 @@ pvc.parseNullInterpolationMode = function(value) {
             case 'zero':
                 return value;
         }
-        
+
         if(pvc.debug >= 2){
             pvc.log("[Warning] Invalid 'NullInterpolationMode' value: '" + value + "'.");
         }
@@ -864,15 +864,15 @@ pvc.parseAlign = function(side, align){
             isInvalid = !!align;
         }
     }
-    
+
     if(isInvalid && pvc.debug >= 2){
         pvc.log(def.format("Invalid alignment value '{0}'. Assuming '{1}'.", [align, align2]));
     }
-    
+
     return align2;
 };
 
-// suitable for protovis.anchor(..) of all but the Wedge mark... 
+// suitable for protovis.anchor(..) of all but the Wedge mark...
 pvc.parseAnchor = function(anchor){
     if(anchor){
         anchor = (''+anchor).toLowerCase();
@@ -884,7 +884,7 @@ pvc.parseAnchor = function(anchor){
             case 'right':
                 return anchor;
         }
-        
+
         if(pvc.debug >= 2){
             pvc.log(def.format("Invalid anchor value '{0}'.", [anchor]));
         }
@@ -902,7 +902,7 @@ pvc.parseAnchorWedge = function(anchor){
             case 'end':
                 return anchor;
         }
-        
+
         if(pvc.debug >= 2){
             pvc.log(def.format("Invalid wedge anchor value '{0}'.", [anchor]));
         }
@@ -933,7 +933,7 @@ pvc.unionExtents = function(result, range){
  * Creates a margins/sides object.
  * @constructor
  * @param {string|number|object} sides May be a css-like shorthand margin string.
- * 
+ *
  * <ol>
  *   <li> "1" - {all: '1'}</li>
  *   <li> "1 2" - {top: '1', left: '2', right: '2', bottom: '1'}</li>
@@ -951,20 +951,20 @@ pvc_Sides.names = 'left right top bottom'.split(' ');
 pvc_Sides.namesSet = pv.dict(pvc_Sides.names, def.retTrue);
 
 pvc.parsePosition = function(side, defaultSide){
-    if(side){ 
+    if(side){
         side = (''+side).toLowerCase();
-        
+
         if(!def.hasOwn(pvc_Sides.namesSet, side)){
             var newSide = defaultSide || 'left';
-            
+
             if(pvc.debug >= 2){
                 pvc.log(def.format("Invalid position value '{0}. Assuming '{1}'.", [side, newSide]));
             }
-            
+
             side = newSide;
         }
     }
-    
+
     return side || defaultSide || 'left';
 };
 
@@ -972,7 +972,7 @@ pvc_Sides.as = function(v){
     if(v != null && !(v instanceof pvc_Sides)){
         v = new pvc_Sides().setSides(v);
     }
-    
+
     return v;
 };
 
@@ -985,33 +985,33 @@ pvc_Sides.prototype.setSides = function(sides){
         var comps = sides.split(/\s+/).map(function(comp){
             return pvc_PercentValue.parse(comp);
         });
-        
+
         switch(comps.length){
             case 1:
                 this.set('all', comps[0]);
                 return this;
-                
+
             case 2:
                 this.set('top',    comps[0]);
                 this.set('left',   comps[1]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[0]);
                 return this;
-                
+
             case 3:
                 this.set('top',    comps[0]);
                 this.set('left',   comps[1]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[2]);
                 return this;
-                
+
             case 4:
                 this.set('top',    comps[0]);
                 this.set('right',  comps[1]);
                 this.set('bottom', comps[2]);
                 this.set('left',   comps[3]);
                 return this;
-                
+
             case 0:
                 return this;
         }
@@ -1029,14 +1029,14 @@ pvc_Sides.prototype.setSides = function(sides){
                 }
             }
         }
-        
+
         return this;
     }
-    
+
     if(pvc.debug) {
         pvc.log("Invalid 'sides' value: " + pvc.stringify(sides));
     }
-    
+
     return this;
 };
 
@@ -1048,7 +1048,7 @@ pvc_Sides.prototype.set = function(prop, value){
             pvc_Sides.names.forEach(function(p){
                 this[p] = value;
             }, this);
-            
+
         } else if(def.hasOwn(pvc_Sides.namesSet, prop)){
             this[prop] = value;
         }
@@ -1060,9 +1060,9 @@ pvc_Sides.prototype.resolve = function(width, height){
         height = width.height;
         width  = width.width;
     }
-    
+
     var sides = {};
-    
+
     pvc_Sides.names.forEach(function(side){
         var value  = 0;
         var sideValue = this[side];
@@ -1073,37 +1073,37 @@ pvc_Sides.prototype.resolve = function(width, height){
                 value = sideValue.resolve((side === 'left' || side === 'right') ? width : height);
             }
         }
-        
+
         sides[side] = value;
     }, this);
-    
+
     return pvc_Sides.updateSize(sides);
 };
 
 pvc_Sides.updateSize = function(sides){
     sides.width  = (sides.left   || 0) + (sides.right || 0);
     sides.height = (sides.bottom || 0) + (sides.top   || 0);
-    
+
     return sides;
 };
 
 pvc_Sides.resolvedMax = function(a, b){
     var sides = {};
-    
+
     pvc_Sides.names.forEach(function(side){
         sides[side] = Math.max(a[side] || 0, b[side] || 0);
     });
-    
+
     return sides;
 };
 
 pvc_Sides.inflate = function(sides, by){
     var sidesOut = {};
-    
+
     pvc_Sides.names.forEach(function(side){
         sidesOut[side] = (sides[side] || 0) + by;
     });
-    
+
     return pvc_Sides.updateSize(sidesOut);
 };
 
@@ -1136,14 +1136,14 @@ pvc_PercentValue.parse = function(value){
                     }
                 }
                 break;
-                
+
             case 'object':
                 if(value instanceof pvc_PercentValue){
                     return value;
                 }
                 break;
         }
-        
+
         if(pvc.debug){
             pvc.log(def.format("Invalid margins component '{0}'", [''+value]));
         }
@@ -1165,7 +1165,7 @@ pv_Mark.prototype.zOrder = function(zOrder) {
     if(borderPanel && borderPanel !== this){
         return pvc_markZOrder.call(borderPanel, zOrder);
     }
-    
+
     return pvc_markZOrder.call(this, zOrder);
 };
 
@@ -1173,14 +1173,14 @@ pv_Mark.prototype.zOrder = function(zOrder) {
 pv_Mark.prototype.renderCore = function() {
     /* Assign a new render id to the root mark */
     var root = this.root;
-    
+
     root._renderId = (root._renderId || 0) + 1;
-    
+
     if(pvc.debug >= 25) { pvc.log("BEGIN RENDER " + root._renderId); }
-    
+
     /* Render */
     pvc_markRenderCore.call(this);
-    
+
     if(pvc.debug >= 25) { pvc.log("END RENDER " + root._renderId); }
 };
 
@@ -1237,12 +1237,12 @@ pv_Mark.prototype.addMargin = function(name, margin) {
     if(margin !== 0) {
         var staticValue = def.nullyTo(this.propertyValue(name), 0),
             fMeasure    = pv.functor(staticValue);
-        
+
         this[name](function() {
             return margin + fMeasure.apply(this, pvc_arraySlice.call(arguments));
         });
     }
-    
+
     return this;
 };
 
@@ -1257,12 +1257,12 @@ pv_Mark.prototype.addMargin = function(name, margin) {
  */
 pv_Mark.prototype.addMargins = function(margins) {
     var all = def.get(margins, 'all', 0);
-    
+
     this.addMargin('left',   def.get(margins, 'left',   all));
     this.addMargin('right',  def.get(margins, 'right',  all));
     this.addMargin('top',    def.get(margins, 'top',    all));
     this.addMargin('bottom', def.get(margins, 'bottom', all));
-    
+
     return this;
 };
 
@@ -1279,23 +1279,23 @@ pv_Mark.prototype.eachSceneWithDataOnRect = function(rect, fun, ctx, selectionMo
     var me   = this;
     var sign = me.sign;
     if(sign && !sign.selectable()) { return; } // TODO: shouldn't it be selectableByRubberband?
-            
+
     // center, partial and total (not implemented)
     if(selectionMode == null) {
         selectionMode = me.rubberBandSelectionMode || 'partial';
     }
-    
+
     var useCenter = (selectionMode === 'center');
-    
+
     me.eachInstanceWithData(function(scenes, index, toScreen) {
         // Apply size reduction to tolerate user unprecise selections
         var shape = me.getShape(scenes, index, /*inset margin each side*/0.15);
-        
+
         shape = (useCenter ? shape.center() : shape).apply(toScreen);
-        
+
         processShape(shape, scenes[index], index);
     });
-    
+
     function processShape(shape, instance, index) {
         if (shape.intersectsRect(rect)) {
             var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData)
@@ -1308,23 +1308,23 @@ pv_Mark.prototype.eachDatumOnRect = function(rect, fun, ctx, selectionMode) {
     var me   = this;
     var sign = me.sign;
     if(sign && !sign.selectable()) { return; }
-            
+
     // center, partial and total (not implemented)
     if(selectionMode == null) {
         selectionMode = me.rubberBandSelectionMode || 'partial';
     }
-    
+
     var useCenter = (selectionMode === 'center');
-    
+
     me.eachInstanceWithData(function(scenes, index, toScreen) {
         // Apply size reduction to tolerate user unprecise selections
         var shape = me.getShape(scenes, index, /*inset margin each side*/0.15);
-        
+
         shape = (useCenter ? shape.center() : shape).apply(toScreen);
-        
+
         processShape(shape, scenes[index], index);
     });
-    
+
     function processShape(shape, instance, index) {
         if (shape.intersectsRect(rect)) {
             var cccScene = instance.data; // exists for sure (ensured by eachInstanceWithData)
@@ -1363,7 +1363,7 @@ var pvc_Size = def.type('pvc.Size')
         if(width != null){
             this.width  = width;
         }
-        
+
         if(height != null){
             this.height = height;
         }
@@ -1373,23 +1373,23 @@ var pvc_Size = def.type('pvc.Size')
     stringify: function(out, remLevels, keyArgs){
         return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
     },
-    
+
     setSize: function(size, keyArgs){
         if(typeof size === 'string'){
             var comps = size.split(/\s+/).map(function(comp){
                 return pvc_PercentValue.parse(comp);
             });
-            
+
             switch(comps.length){
-                case 1: 
+                case 1:
                     this.set(def.get(keyArgs, 'singleProp', 'all'), comps[0]);
                     return this;
-                    
+
                 case 2:
                     this.set('width',  comps[0]);
                     this.set('height', comps[1]);
                     return this;
-                    
+
                 case 0:
                     return this;
             }
@@ -1400,7 +1400,7 @@ var pvc_Size = def.type('pvc.Size')
             if(size instanceof pvc_PercentValue){
                 this.set(def.get(keyArgs, 'singleProp', 'all'), size);
             } else {
-                
+
                 this.set('all', size.all);
                 for(var p in size){
                     if(p !== 'all'){
@@ -1410,14 +1410,14 @@ var pvc_Size = def.type('pvc.Size')
             }
             return this;
         }
-        
+
         if(pvc.debug) {
             pvc.log("Invalid 'size' value: " + pvc.stringify(size));
         }
-        
+
         return this;
     },
-    
+
     set: function(prop, value){
         if(value != null && (prop === 'all' || def.hasOwn(pvc_Size.namesSet, prop))){
             value = pvc_PercentValue.parse(value);
@@ -1427,29 +1427,29 @@ var pvc_Size = def.type('pvc.Size')
                     pvc_Size.names.forEach(function(p){
                         this[p] = value;
                     }, this);
-                    
+
                 } else {
                     this[prop] = value;
                 }
             }
         }
-        
+
         return this;
     },
-    
+
     clone: function(){
         return new pvc_Size(this.width, this.height);
     },
-    
+
     intersect: function(size){
         return new pvc_Size(
-               Math.min(this.width,  size.width), 
+               Math.min(this.width,  size.width),
                Math.min(this.height, size.height));
     },
-    
+
     resolve: function(refSize){
         var size = {};
-        
+
         pvc_Size.names.forEach(function(length){
             var lengthValue = this[length];
             if(lengthValue != null){
@@ -1463,7 +1463,7 @@ var pvc_Size = def.type('pvc.Size')
                 }
             }
         }, this);
-        
+
         return size;
     }
 });
@@ -1479,14 +1479,14 @@ pvc_Size.toOrtho = function(value, anchor){
         if(anchor){
             a_ol = pvc.BasePanel.orthogonalLength[anchor];
         }
-        
+
         value = pvc_Size.to(value, {singleProp: a_ol});
-        
+
         if(anchor){
             delete value[pvc.BasePanel.oppositeLength[a_ol]];
         }
     }
-    
+
     return value;
 };
 
@@ -1494,13 +1494,13 @@ pvc_Size.to = function(v, keyArgs){
     if(v != null && !(v instanceof pvc_Size)){
         v = new pvc_Size().setSize(v, keyArgs);
     }
-    
+
     return v;
 };
 
 // --------------------
 
-var pvc_Offset = 
+var pvc_Offset =
 def
 .type('pvc.Offset')
 .init(function(x, y){
@@ -1512,7 +1512,7 @@ def
         if(x != null){
             this.x = x;
         }
-        
+
         if(y != null){
             this.y = y;
         }
@@ -1522,23 +1522,23 @@ def
     stringify: function(out, remLevels, keyArgs){
         return pvc.stringifyRecursive(out, def.copyOwn(this), remLevels, keyArgs);
     },
-    
+
     setOffset: function(offset, keyArgs){
         if(typeof offset === 'string'){
             var comps = offset.split(/\s+/).map(function(comp){
                 return pvc_PercentValue.parse(comp);
             });
-            
+
             switch(comps.length){
-                case 1: 
+                case 1:
                     this.set(def.get(keyArgs, 'singleProp', 'all'), comps[0]);
                     return this;
-                    
+
                 case 2:
                     this.set('x', comps[0]);
                     this.set('y', comps[1]);
                     return this;
-                    
+
                 case 0:
                     return this;
             }
@@ -1554,13 +1554,13 @@ def
             }
             return this;
         }
-        
+
         if(pvc.debug) {
             pvc.log("Invalid 'offset' value: " + pvc.stringify(offset));
         }
         return this;
     },
-    
+
     set: function(prop, value){
         if(value != null && def.hasOwn(pvc_Offset.namesSet, prop)){
             value = pvc_PercentValue.parse(value);
@@ -1570,17 +1570,17 @@ def
                     pvc_Offset.names.forEach(function(p){
                         this[p] = value;
                     }, this);
-                    
+
                 } else {
                     this[prop] = value;
                 }
             }
         }
     },
-    
+
     resolve: function(refSize){
         var offset = {};
-        
+
         pvc_Size.names.forEach(function(length){
             var offsetProp  = pvc_Offset.namesSizeToOffset[length];
             var offsetValue = this[offsetProp];
@@ -1595,14 +1595,14 @@ def
                 }
             }
         }, this);
-        
+
         return offset;
     }
 });
 
 pvc_Offset
 .addStatic({ names: ['x', 'y'] })
-.addStatic({ 
+.addStatic({
     namesSet: pv.dict(pvc_Offset.names, def.retTrue),
     namesSizeToOffset: {width: 'x', height: 'y'},
     namesSidesToOffset: {left: 'x', right: 'x', top: 'y', bottom: 'y'},
@@ -1610,7 +1610,7 @@ pvc_Offset
         if(v != null && !(v instanceof pvc_Offset)) {
             v = new pvc_Offset().setOffset(v);
         }
-        
+
         return v;
     }
 });
@@ -1620,7 +1620,7 @@ pvc_Offset
  */
 (function($) {
     /*global document:true */
-    jQuery.support.svg = jQuery.support.svg || 
+    jQuery.support.svg = jQuery.support.svg ||
         document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1");
 }(/*global jQuery:true */jQuery));
 
@@ -12789,16 +12789,16 @@ def
 def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .init(function(panel, pvMark, keyArgs){
     var me = this;
-    
+
     me.base(panel, pvMark, keyArgs);
-    
+
     me._ibits = panel._ibits;
-    
+
     var extensionIds = def.get(keyArgs, 'extensionId');
     if(extensionIds != null){ // empty string is a valid extension id.
         me.extensionAbsIds = def.array.to(panel._makeExtensionAbsId(extensionIds));
     }
-    
+
     me.isActiveSeriesAware = def.get(keyArgs, 'activeSeriesAware', true);
     if(me.isActiveSeriesAware) {
         // Should also check if the corresponding data has > 1 atom?
@@ -12811,14 +12811,14 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
     /* Extend the pv mark */
     pvMark.wrapper(def.get(keyArgs, 'wrapper') || me.createDefaultWrapper());
-    
+
     if(!def.get(keyArgs, 'freeColor', true)) {
         me._bindProperty('fillStyle',   'fillColor',   'color')
           ._bindProperty('strokeStyle', 'strokeColor', 'color');
     }
 })
 .postInit(function(panel, pvMark, keyArgs){
-    
+
     this._addInteractive(keyArgs);
 
     panel._addSign(this);
@@ -12833,7 +12833,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             return function(scene) { return f.call(me.context(), scene); };
         };
     },
-    
+
     // To be called on prototype
     property: function(name) {
         var upperName  = def.firstUpperCase(name);
@@ -12841,22 +12841,22 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         var defName    = 'default'     + upperName;
         var normalName = 'normal'      + upperName;
         var interName  = 'interactive' + upperName;
-        
+
         var methods = {};
-        
+
         // ex: color
         methods[name] = function(arg) {
             this._finished = false;
-            
+
             this._arg = arg; // for use in calling default methods (see #_bindProperty)
-            
-                // ex: baseColor
+
+            // ex: baseColor
             var value = this[baseName](arg);
-                
+
             if(value == null) { return null; }  // undefined included
-            
+
             if(this._finished) { return value; }
-            
+
             if(this.showsInteraction() && this.anyInteraction()) {
                 // ex: interactiveColor
                 value = this[interName](value, arg);
@@ -12864,66 +12864,66 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 // ex: normalColor
                 value = this[normalName](value, arg);
             }
-            
+
             // Possible memory leak in case of error
             // but it is not serious.
-            // Performance is more important 
-            // so no try/finally is added. 
+            // Performance is more important
+            // so no try/finally is added.
             this._arg = null;
-            
+
             return value;
         };
-        
+
         // baseColor
         //   Override this method if user extension
         //   should not always be called.
         //   It is possible to call the default method directly, if needed.
-        //   defName is installed as a user extension and 
+        //   defName is installed as a user extension and
         //   is called if the user hasn't extended...
         methods[baseName]   = function(/*arg*/) { return this.delegateExtension(); };
-        
+
         // defaultColor
         methods[defName]    = function(/*arg*/) { return; };
-        
+
         // normalColor
         methods[normalName] = function(value/*, arg*/) { return value; };
-        
+
         // interactiveColor
         methods[interName]  = function(value/*, arg*/) { return value; };
-        
+
         this.constructor.add(methods);
-        
+
         return this;
     },
-    
+
     anyInteraction: function() { return this.scene.anyInteraction(); },
-    
+
     // Call this function with a final property value
     // to ensure that it will not be processed anymore
     finished: function(value) {
         this._finished = true;
         return value;
     },
-    
+
     /* Extensibility */
     /**
-     * Any protovis properties that have been specified 
+     * Any protovis properties that have been specified
      * before the call to this method
      * are either locked or are defaults.
-     * 
+     *
      * This method applies user extensions to the protovis mark.
      * Default properties are replaced.
      * Locked properties are respected.
-     * 
-     * Any function properties that are specified 
+     *
+     * Any function properties that are specified
      * after the call to this method
-     * will have access to the user extension by 
+     * will have access to the user extension by
      * calling {@link pv.Mark#delegate}.
      */
     applyExtensions: function() {
         if(!this._extended) {
             this._extended = true;
-            
+
             var extensionAbsIds = this.extensionAbsIds;
             if(extensionAbsIds) {
                 extensionAbsIds.forEach(function(extensionAbsId) {
@@ -12931,20 +12931,20 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 }, this);
             }
         }
-        
+
         return this;
     },
-    
+
     // -------------
-    
+
     intercept: function(pvName, fun) {
         var interceptor = this._createPropInterceptor(pvName, fun);
-        
+
         return this._intercept(pvName, interceptor);
-    }, 
-    
+    },
+
     // -------------
-    
+
     lockDimensions: function() {
         this.pvMark
             .lock('left')
@@ -12953,88 +12953,88 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .lock('bottom')
             .lock('width')
             .lock('height');
-        
+
         return this;
     },
-    
+
     // -------------
     _extensionKeyArgs: {tag: pvc.extensionTag},
-    
+
     _bindProperty: function(pvName, prop, realProp) {
         var me = this;
-        
+
         if(!realProp) { realProp = prop; }
-        
+
         var defaultPropName = "default" + def.firstUpperCase(realProp);
         if(def.fun.is(me[defaultPropName])) {
             // Intercept with default method first, before extensions,
             // so that extensions, when ?existent?, can delegate to the default.
-            
+
             // Extensions will be applied next.
-            
+
             // If there already exists an applied extension then
             // do not install the default (used by legend proto defaults,
             // that should act like user extensions, and not be shadowed by prop defaults).
-            
-            // Mark default as pvc.extensionTag, 
-            // so that it is chosen when 
+
+            // Mark default as pvc.extensionTag,
+            // so that it is chosen when
             // the user hasn't specified an extension point.
 
             if(!me.pvMark.hasDelegateValue(pvName, pvc.extensionTag)) {
                 var defaultPropMethod = function() {
                     return me[defaultPropName](me._arg);
                 };
-                
+
                 me.pvMark.intercept(pvName, defaultPropMethod, me._extensionKeyArgs);
             }
         }
-        
+
         // Intercept with main property method
         // Do not pass arguments, cause property methods do not use them,
         // they use this.scene instead.
         // The "arg" argument can only be specified explicitly,
         // like in strokeColor -> color and fillColor -> color,
         // via "helper property methods" that ?fix? the argument.
-        // In these cases, 
-        // 'strokeColor' is the "prop", 
+        // In these cases,
+        // 'strokeColor' is the "prop",
         // 'color' is the "realProp" and
         // 'strokeStyle' is the pvName.
         var mainPropMethod = this._createPropInterceptor(
-                pvName, 
+                pvName,
                 function() { return me[prop](); });
-        
+
         return me._intercept(pvName, mainPropMethod);
     },
-    
+
     _intercept: function(name, fun){
         var mark = this.pvMark;
-        
+
         // Apply all extensions, in order
-        
+
         var extensionAbsIds = this.extensionAbsIds;
         if(extensionAbsIds){
             def
             .query(extensionAbsIds)
-            .select(function(extensionAbsId){ 
+            .select(function(extensionAbsId){
                 return this.panel._getExtensionAbs(extensionAbsId, name);
              }, this)
             .where(def.notUndef)
             .each(function(extValue){
                 extValue = mark.wrap(extValue, name);
-                
+
                 // Gets set on the mark; We intercept it afterwards.
-                // Mark with the pvc.extensionTag so that it is 
+                // Mark with the pvc.extensionTag so that it is
                 // possible to filter extensions.
                 mark.intercept(name, extValue, this._extensionKeyArgs);
             }, this);
         }
-        
+
         // Intercept with specified function (may not be a property function)
-        
+
         (mark._intercepted || (mark._intercepted = {}))[name] = true;
-        
+
         mark.intercept(name, fun);
-        
+
         return this;
     }
 })
@@ -13044,44 +13044,44 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 .add(pvc.visual.Interactive)
 .add({
     extensionAbsIds: null,
-    
+
     _addInteractive: function(ka) {
         var me  = this,
             get = def.get;
-        
+
         if(me.interactive()) {
             var bits = me._ibits,
                 I    = pvc.visual.Interactive;
-            
+
             if(get(ka, 'noTooltip'    )) { bits &= ~I.ShowsTooltip;    }
             if(get(ka, 'noHover'      )) { bits &= ~I.Hoverable;       }
             if(get(ka, 'noClick'      )) { bits &= ~I.Clickable;       }
             if(get(ka, 'noDoubleClick')) { bits &= ~I.DoubleClickable; }
-            if(get(ka, 'noSelect'     )) { bits &= ~I.SelectableAny;   } 
+            if(get(ka, 'noSelect'     )) { bits &= ~I.SelectableAny;   }
             else if(this.selectable()) {
                 if(get(ka, 'noClickSelect' )) { bits &= ~I.SelectableByClick;      }
                 if(get(ka, 'noRubberSelect')) { bits &= ~I.SelectableByRubberband; }
             }
-            
+
             // By default interaction is SHOWN if the sign
             // is sensitive to interactive events.
             if(me.showsInteraction()) {
                 if(get(ka, 'showsInteraction') === false) { bits &= ~I.ShowsInteraction; }
-                
+
                 if(me.showsActivity()) {
                     if(get(ka, 'showsActivity') === false) { bits &= ~I.ShowsActivity; }
                 }
-                
+
                 if(me.showsSelection()) {
                     if(get(ka, 'showsSelection') === false) { bits &= ~I.ShowsSelection; }
                 }
             }
-            
+
             me._ibits = bits;
         }
-        
-        if(!me.handlesEvents()) { 
-            me.pvMark.events('none'); 
+
+        if(!me.handlesEvents()) {
+            me.pvMark.events('none');
         } else {
             if(me.showsTooltip()     ) { me._addPropTooltip(get(ka, 'tooltipArgs')); }
             if(me.hoverable()        ) { me._addPropHoverable();   }
@@ -13089,7 +13089,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             if(me.doubleClickable()  ) { me._addPropDoubleClick(); }
         }
     },
-    
+
     /* COLOR */
     fillColor:   function() { return this.color('fill'  ); },
     strokeColor: function() { return this.color('stroke'); },
@@ -13112,7 +13112,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 /*maxGrayLevel*/ null,  // null => no clipping
                 /*minGrayLevel*/ null); // idem
     },
-    
+
     defaultColorSceneScale: function() {
         return def.lazy(this, '_defaultColorSceneScale', this._initDefColorScale, this);
     },
@@ -13126,9 +13126,9 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 
     mayShowActive: function(noSeries) {
         if(!this.showsActivity() ){ return false; }
-        
+
         var scene = this.scene;
-        return scene.isActive || 
+        return scene.isActive ||
                (!noSeries && this.isActiveSeriesAware && scene.isActiveSeries()) ||
                scene.isActiveDatum();
     },
@@ -13140,27 +13140,27 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
     mayShowSelected: function() {
         return this.showsSelection() && this.scene.isSelected();
     },
-    
+
     mayShowAnySelected: function() {
         return this.showsSelection() && this.scene.anySelected();
     },
-    
+
     /* TOOLTIP */
     _addPropTooltip: function(ka) {
         if(this.pvMark.hasTooltip) { return; }
 
         var tipOptions = def.create(
-                            this.chart._tooltipOptions, 
+                            this.chart._tooltipOptions,
                             def.get(ka, 'options'));
-        
+
         tipOptions.isLazy = def.get(ka, 'isLazy', true);
-        
-        var tooltipFormatter = def.get(ka, 'buildTooltip') || 
+
+        var tooltipFormatter = def.get(ka, 'buildTooltip') ||
                            this._getTooltipFormatter(tipOptions);
         if(!tooltipFormatter) { return; }
-        
+
         tipOptions.isEnabled = this._isTooltipEnabled.bind(this);
-        
+
         var tipsyEvent = def.get(ka, 'tipsyEvent');
         if(!tipsyEvent) {
 //          switch(pvMark.type) {
@@ -13171,7 +13171,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
 //                    tipsyEvent = 'point';
 //                    tipOptions.usesPoint = true;
 //                    break;
-                
+
 //                default:
                     tipsyEvent = 'mouseover';
 //            }
@@ -13185,39 +13185,39 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .event(tipsyEvent, pv.Behavior.tipsy(tipOptions))
             .hasTooltip = true;
     },
-    
+
     _getTooltipFormatter: function(tipOptions) { return this.panel._getTooltipFormatter(tipOptions); },
-    
+
     // Dynamic result version
     _isTooltipEnabled: function() { return this.panel._isTooltipEnabled(); },
-    
+
     _createTooltipProp: function(tooltipFormatter, isLazy) {
         var me = this;
-        
+
         var formatTooltip;
         if(!isLazy) {
             formatTooltip = function() {
                 var context = me.context();
-                return tooltipFormatter(context); 
+                return tooltipFormatter(context);
             };
         } else {
             formatTooltip = function() {
                 // Capture current context
                 var context = me.context(/*createNew*/true);
                 var tooltip;
-                
+
                 // Function that formats the tooltip only on first use
                 return function() {
                     if(context) {
                         tooltip = tooltipFormatter(context);
                         context = null; // release context;
-                    } 
-                    
+                    }
+
                     return tooltip;
                 };
             };
         }
-        
+
         return function() {
             var scene = me.scene;
             if(scene && !scene.isIntermediate && scene.showsTooltip()) {
@@ -13225,11 +13225,11 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             }
         };
     },
-    
+
     /* HOVERABLE */
     _addPropHoverable: function() {
         var panel  = this.panel;
-        
+
         var onEvent;
         var offEvent;
 //        switch(pvMark.type) {
@@ -13248,7 +13248,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 offEvent = 'mouseout';
 //                break;
 //        }
-        
+
         this.pvMark
             .ensureEvents()
             .event(onEvent, function(scene) {
@@ -13264,21 +13264,21 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                 }
             });
     },
-    
+
     /* CLICK & DOUBLE-CLICK */
     /**
      * Shared state between {@link _handleClick} and {@link #_handleDoubleClick}.
      */
     _ignoreClicks: 0,
-    
+
     _propCursorClick: function(s) {
         var ibits = (this._ibits & s._ibits);
         var I = pvc.visual.Interactive;
-        return (ibits & I.HandlesClickEvent) || (ibits & I.DoubleClickable) ? 
-               'pointer' : 
+        return (ibits & I.HandlesClickEvent) || (ibits & I.DoubleClickable) ?
+               'pointer' :
                null;
     },
-    
+
     _addPropClick: function() {
         var me = this;
         me.pvMark
@@ -13286,7 +13286,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .ensureEvents()
             .event('click', me._handleClick.bind(me));
     },
-    
+
     _addPropDoubleClick: function() {
         var me = this;
         me.pvMark
@@ -13294,16 +13294,16 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             .ensureEvents()
             .event('dblclick', me._handleDoubleClick.bind(me));
     },
-    
+
     _handleClick: function() {
         /*global window:true*/
-        
+
         // Not yet in context...
         var me = this;
         var pvMark = me.pvMark;
         var pvInstance = pvMark.instance();
         var scene = pvInstance.data;
-        
+
         var wait  = me.doubleClickable() && scene.doubleClickable();
         if(!wait) {
             if(me._ignoreClicks) { me._ignoreClicks--;    }
@@ -13312,7 +13312,7 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
             var pvScene = pvMark.scene;
             var pvIndex = pvMark.index;
             var pvEvent = pv.event;
-            
+
             // Delay click evaluation so that
             // it may be canceled if a double-click meanwhile fires.
             // When timeout finished, reestablish protovis context.
@@ -13323,25 +13323,25 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
                         pv.event = pvEvent;
                         pvMark.context(pvScene, pvIndex, function() { me._handleClickCore(); });
                     } catch (ex) {
-                        pv.error(ex); 
+                        pv.error(ex);
                     } finally {
-                        delete pv.event; 
+                        delete pv.event;
                     }
                 }
              },
              me.chart.options.doubleClickMaxDelay || 300);
         }
     },
-    
+
     _handleClickCore: function() {
         var me = this;
         var pvInstance = me.pvMark.instance();
-        
+
         // Setup the sign context
         me._inContext(
             /*scene*/pvInstance.data,
             pvInstance,
-            /*f*/function() { me._onClick(me.context()); }, 
+            /*f*/function() { me._onClick(me.context()); },
             /*x*/me);
     },
 
@@ -13355,16 +13355,16 @@ def.type('pvc.visual.Sign', pvc.visual.BasicSign)
         if(scene.doubleClickable()) {
             // TODO: explain why 2 ignores
             me._ignoreClicks = 2;
-            
+
          // Setup the sign context
             me._inContext(
                 /*scene*/pvInstance.data,
                 pvInstance,
-                /*f*/function() { me._onDoubleClick(me.context()); }, 
+                /*f*/function() { me._onDoubleClick(me.context()); },
                 /*x*/me);
         }
     },
-    
+
     _onClick:       function(context) { context.click();       },
     _onDoubleClick: function(context) { context.doubleClick(); }
 });
@@ -14049,92 +14049,77 @@ def.type('pvc.visual.Bar', pvc.visual.Sign)
 });
 
 
-pv.PieSlice = function(){
+// Custom protovis mark inherited from pv.Wedge
+pv.PieSlice = function() {
     pv.Wedge.call(this);
 };
 
-pv.PieSlice.prototype = pv.extend(pv.Wedge);
+pv.PieSlice.prototype = pv.extend(pv.Wedge)
+    // How much radius to offset the slice from the Pie center.
+    // Must be a value between 0 and the Pie's:
+    // ActiveSliceRadius + ExplodedSliceRadius
+    .property('offsetRadius'/*, NumberOrString*/);
 
 // There's already a Wedge#midAngle method
 // but it doesn't work well when end-angle isn't explicitly set,
 // so we override the method.
-pv.PieSlice.prototype.midAngle = function(){
+pv.PieSlice.prototype.midAngle = function() {
     var instance = this.instance();
     return instance.startAngle + (instance.angle / 2);
 };
-    
+
+pv.PieSlice.prototype.defaults = new pv.PieSlice()
+    .extend(pv.Wedge.prototype.defaults)
+    .offsetRadius(0);
+
+// -----------
 
 def.type('pvc.visual.PieSlice', pvc.visual.Sign)
 .init(function(panel, protoMark, keyArgs){
 
     var pvMark = protoMark.add(pv.PieSlice);
-    
+
     keyArgs = def.setDefaults(keyArgs, 'freeColor', false);
-    
+
     this.base(panel, pvMark, keyArgs);
-    
+
     this._activeOffsetRadius = def.get(keyArgs, 'activeOffsetRadius', 0);
+    this._maxOffsetRadius = def.get(keyArgs, 'maxOffsetRadius', 0);
+    this._resolvePctRadius = def.get(keyArgs, 'resolvePctRadius');
     this._center = def.get(keyArgs, 'center');
-    
+
     this/* Colors */
         .optional('lineWidth',  0.6)
+        // Ensures that it is evaluated before x and y
         ._bindProperty('angle', 'angle')
+        ._bindProperty('offsetRadius', 'offsetRadius')
         ._lockDynamic('bottom', 'y')
         ._lockDynamic('left',   'x')
         .lock('top',   null)
-        .lock('right', null)
-        ;
+        .lock('right', null);
 })
 .prototype
 .property('offsetRadius')
 .constructor
 .add({
-    // Ensures that it is evaluated before x and y
     angle: def.fun.constant(0),
-    
-    x: function() {
-        return this._center.x + this._offsetSlice('cos'); 
-    },
-    
-    y: function() { 
-        return this._center.y - this._offsetSlice('sin'); 
-    },
-    
-    // ~ midAngle -> (endAngle + startAngle) / 2
+
+    x: function() { return this._center.x + this._offsetSlice('cos'); },
+    y: function() { return this._center.y - this._offsetSlice('sin'); },
+
     _offsetSlice: function(fun) {
-        var offset = this._getOffsetRadius();
-        if(offset !== 0) {
-            offset = offset * Math[fun](this.pvMark.midAngle());
-        }
-            
+        var offset = this.pvMark.offsetRadius() || 0;
+        if(offset) { offset *= Math[fun](this.pvMark.midAngle()); }
         return offset;
     },
-    
-    // Get and cache offsetRadius 
-    _getOffsetRadius: function(){
-        var offset = this.state.offsetRadius;
-        if(offset == null) {
-            offset = (this.state.offsetRadius = this.offsetRadius() || 0);
-        }
-        
-        return offset;
-    },
-    
+
     /* COLOR */
-    
-    /**
-     * @override
-     */
-    defaultColor: function(type){
-        if(type === 'stroke') { return null; }
-        
-        return this.base(type);
-    },
-    
-    /**
-     * @override
-     */
-    interactiveColor: function(color, type){
+
+    // @override
+    defaultColor: function(type) { return type === 'stroke' ? null : this.base(type); },
+
+    // @override
+    interactiveColor: function(color, type) {
         if(this.mayShowActive(/*noSeries*/true)) {
             switch(type) {
                 // Like the bar chart
@@ -14143,23 +14128,26 @@ def.type('pvc.visual.PieSlice', pvc.visual.Sign)
             }
         } else if(this.mayShowNotAmongSelected()) {
             //case 'stroke': // ANALYZER requirements, so until there's no way to configure it...
-            if(type === 'fill') {
-                return this.dimColor(color, type);
-            }
+            if(type === 'fill') { return this.dimColor(color, type); }
         }
 
         return this.base(color, type);
     },
-    
-    /* Offset */
-    baseOffsetRadius: def.fun.constant(0), // There's no extension point for this
-    
-    interactiveOffsetRadius: function(offsetRadius) {
-        if(this.mayShowActive(/*noSeries*/true)) {
-            return offsetRadius + this._activeOffsetRadius;
-        }
 
-        return offsetRadius;
+    /* OffsetRadius */
+    offsetRadius: function() {
+        var offsetRadius = this.base();
+        return Math.min(Math.max(0, offsetRadius), this._maxOffsetRadius);
+    },
+
+    baseOffsetRadius: function() {
+        var offsetRadius = this.base() || 0;
+        return this._resolvePctRadius(pvc_PercentValue.parse(offsetRadius));
+    },
+
+    interactiveOffsetRadius: function(offsetRadius) {
+        return offsetRadius +
+            (this.mayShowActive(/*noSeries*/true) ? this._activeOffsetRadius : 0);
     }
 });
 
@@ -16164,7 +16152,7 @@ def
         if(fillColorScaleByColKey){
             var colorMissing = this.option('Missing');
             
-            return function(scene) {
+            return function(scene){
                 var colorValue = scene.vars[varName].value;
                 if(colorValue == null) {
                     return colorMissing;
@@ -18602,7 +18590,7 @@ def
 .add(pvc.visual.Interactive)
 .init(function(options) {
     var originalOptions = options;
-    
+
     var parent = this.parent = def.get(options, 'parent') || null;
     if(parent){
         /*jshint expr:true */
@@ -18620,14 +18608,14 @@ def
     } else {
         this.root = this;
     }
-    
+
     this.base();
-    
+
     if(pvc.debug >= 3){
-        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') + 
+        this._info("NEW CHART\n" + pvc.logSeparator.replace(/-/g, '=') +
                 "\n  DebugLevel: " + pvc.debug);
     }
-    
+
     /* DEBUG options */
     if(pvc.debug >= 3 && !parent && originalOptions){
         this._info("OPTIONS:\n", originalOptions);
@@ -18636,7 +18624,7 @@ def
             this._trace(pvc.stringify(options, {ownOnly: false, funs: true}));
         }
     }
-    
+
     if(parent) { parent._addChild(this); }
 
     this._constructData(options);
@@ -18652,29 +18640,29 @@ def
 
     /**
      * The chart's parent chart.
-     * 
+     *
      * <p>
      * The root chart has null as the value of its parent property.
      * </p>
-     * 
+     *
      * @type pvc.BaseChart
      */
     parent: null,
-    
+
     /**
      * The chart's child charts.
-     * 
+     *
      * @type pvc.BaseChart[]
      */
     children: null,
-    
+
     /**
      * The chart's root chart.
-     * 
+     *
      * <p>
      * The root chart has itself as the value of the root property.
      * </p>
-     * 
+     *
      * @type pvc.BaseChart
      */
     root: null,
@@ -18687,43 +18675,43 @@ def
      * and set to <tt>true</tt> at the end.
      * </p>
      * <p>
-     * When a chart is re-rendered it can, 
-     * optionally, also repeat the pre-render phase. 
+     * When a chart is re-rendered it can,
+     * optionally, also repeat the pre-render phase.
      * </p>
-     * 
+     *
      * @type boolean
      */
     isPreRendered: false,
 
     /**
      * The version value of the current/last creation.
-     * 
+     *
      * <p>
      * This value is changed on each pre-render of the chart.
-     * It can be useful to invalidate cached information that 
+     * It can be useful to invalidate cached information that
      * is only valid for each creation.
      * </p>
      * <p>
      * Version values can be compared using the identity operator <tt>===</tt>.
      * </p>
-     * 
+     *
      * @type any
      */
     _createVersion: 0,
-    
+
     /**
-     * A callback function that is called 
+     * A callback function that is called
      * when the protovis' panel render is about to start.
-     * 
+     *
      * <p>
      * Note that this is <i>after</i> the pre-render phase.
      * </p>
-     * 
+     *
      * <p>
-     * The callback is called with no arguments, 
-     * but having the chart instance as its context (<tt>this</tt> value). 
+     * The callback is called with no arguments,
+     * but having the chart instance as its context (<tt>this</tt> value).
      * </p>
-     * 
+     *
      * @function
      */
     renderCallback: undefined,
@@ -18734,177 +18722,177 @@ def
      * <p>
      * This property is updated after a render of a chart
      * where the visual role "multiChart" is assigned and
-     * the option "multiChartPageIndex" has been specified. 
+     * the option "multiChartPageIndex" has been specified.
      * </p>
-     * 
+     *
      * @type number|null
      */
     multiChartPageCount: null,
-    
+
     /**
-     * Contains the currently rendered multi-chart page index, 
+     * Contains the currently rendered multi-chart page index,
      * relative to the previous render options.
      * <p>
      * This property is updated after a render of a chart
      * where the visual role "multiChart" is assigned and
-     * the <i>option</i> "multiChartPageIndex" has been specified. 
+     * the <i>option</i> "multiChartPageIndex" has been specified.
      * </p>
-     * 
+     *
      * @type number|null
      */
     multiChartPageIndex: null,
-    
+
     left: 0,
     top:  0,
-    
+
     width: null,
     height: null,
     margins:  null,
     paddings: null,
-    
-    _allowV1SecondAxis: false, 
-        
+
+    _allowV1SecondAxis: false,
+
     //------------------
     compatVersion: function(options) { return (options || this.options).compatVersion; },
-    
+
     _createLogInstanceId: function() {
-        return "" + 
+        return "" +
             this.constructor + this._createLogChildSuffix();
     },
-    
+
     _createLogChildSuffix: function(){
-        return this.parent ? 
-               (" (" + (this.smallRowIndex + 1) + "," + 
-                       (this.smallColIndex + 1) + ")") : 
+        return this.parent ?
+               (" (" + (this.smallRowIndex + 1) + "," +
+                       (this.smallColIndex + 1) + ")") :
                "";
     },
-    
+
     _addChild: function(childChart){
         /*jshint expr:true */
         (childChart.parent === this) || def.assert("Not a child of this chart.");
-        
+
         this.children.push(childChart);
     },
-    
+
     /**
      * Building the visualization is made in 2 stages:
-     * First, the {@link #_preRender} method prepares and builds 
+     * First, the {@link #_preRender} method prepares and builds
      * every object that will be used.
-     * 
+     *
      * Later the {@link #render} method effectively renders.
      */
     _preRender: function(keyArgs) {
         this._preRenderPhase1(keyArgs);
         this._preRenderPhase2(keyArgs);
     },
-    
+
     _preRenderPhase1: function(keyArgs) {
         /* Increment pre-render version to allow for cache invalidation  */
         this._createVersion++;
-        
+
         this.isPreRendered = false;
-        
+
         if(pvc.debug >= 3){
             this._log("Prerendering");
         }
-        
+
         this.children = [];
-        
+
         if (!this.parent) {
             // Now's as good a time as any to completely clear out all
             //  tipsy tooltips
             pvc.removeTipsyLegends();
         }
-        
+
         /* Options may be changed between renders */
         this._processOptions();
-        
+
         /* Any data exists or throws
          * (must be done AFTER processing options
-         *  because of width, height properties and noData extension point...) 
+         *  because of width, height properties and noData extension point...)
          */
         this._checkNoDataI();
-        
+
         /* Initialize root visual roles.
          * The Complex Type gets defined on the first load of data.
          */
         if(!this.parent && !this.data) {
             this._initVisualRoles();
-            
+
             this._bindVisualRolesPreI();
-            
+
             this._complexTypeProj = this._createComplexTypeProject();
-            
+
             this._bindVisualRolesPreII();
         }
-        
+
         /* Initialize the data (and _bindVisualRolesPost) */
         this._initData(keyArgs);
 
         /* When data is excluded, there may be no data after all */
         this._checkNoDataII();
-        
+
         var hasMultiRole = this.visualRoles.multiChart.isBound();
-        
+
         /* Initialize plots */
         this._initPlots(hasMultiRole);
-        
+
         /* Initialize axes */
         this._initAxes(hasMultiRole);
         this._bindAxes(hasMultiRole);
-        
+
         /* Trends and Interpolation */
         if(this.parent || !hasMultiRole){
             // Interpolated data affects generated trends
             this._interpolate(hasMultiRole);
-            
+
             this._generateTrends(hasMultiRole);
         }
-        
+
         /* Set axes scales */
         this._setAxesScales(hasMultiRole);
     },
-    
+
     _preRenderPhase2: function(/*keyArgs*/){
         var hasMultiRole = this.visualRoles.multiChart.isBound();
-        
+
         /* Initialize chart panels */
         this._initChartPanels(hasMultiRole);
-        
+
         this.isPreRendered = true;
     },
 
     // --------------
-    
+
     _setSmallLayout: function(keyArgs){
         if(keyArgs){
             var basePanel = this.basePanel;
-            
+
             if(this._setProp('left', keyArgs) | this._setProp('top', keyArgs)){
                 if(basePanel) {
                     def.set(
                        basePanel.position,
-                       'left', this.left, 
+                       'left', this.left,
                        'top',  this.top);
                 }
             }
-            
+
             if(this._setProp('width', keyArgs) | this._setProp('height', keyArgs)){
                 if(basePanel){
                     basePanel.size = new pvc_Size (this.width, this.height);
                 }
             }
-            
+
             if(this._setProp('margins', keyArgs) && basePanel){
                 basePanel.margins = new pvc_Sides(this.margins);
             }
-            
+
             if(this._setProp('paddings', keyArgs) && basePanel){
                 basePanel.paddings = new pvc_Sides(this.paddings);
             }
         }
     },
-    
+
     _setProp: function(p, keyArgs) {
         var v = keyArgs[p];
         if(v != null) {
@@ -18912,9 +18900,9 @@ def
             return true;
         }
     },
-    
+
     // --------------
-    
+
     /**
      * Processes options after user options and defaults have been merged.
      * Applies restrictions,
@@ -18924,20 +18912,20 @@ def
     _processOptions: function() {
         var options = this.options;
         if(!this.parent) {
-            this.width    = options.width; 
+            this.width    = options.width;
             this.height   = options.height;
             this.margins  = options.margins;
             this.paddings = options.paddings;
         }
-        
+
         if(this.compatVersion() <= 1) {
             options.plot2 = this._allowV1SecondAxis && !!options.secondAxis;
         }
-        
+
         this._processOptionsCore(options);
-        
+
         this._processExtensionPoints();
-        
+
         return options;
     },
 
@@ -18957,47 +18945,47 @@ def
                 interactive = options.interactive;
                 if(interactive == null) { interactive = true; }
             }
-            
+
             var ibits;
             if(!interactive) {
                 ibits = 0;
             } else {
                 var I = pvc.visual.Interactive;
-                
+
                 ibits = I.Interactive | I.ShowsInteraction;
-                
+
                 if(this._processTooltipOptions(options)) { ibits |= I.ShowsTooltip; }
                 if(options.animate && $.support.svg) { ibits |= I.Animatable; }
-                
+
                 if(options.selectable) {
                     ibits |= I.Selectable;
-                    
+
                     switch(pvc.parseSelectionMode(options.selectionMode)) {
                         case 'rubberband':
-                            ibits |= (I.SelectableByRubberband | I.SelectableByClick); 
+                            ibits |= (I.SelectableByRubberband | I.SelectableByClick);
                             break;
-                            
+
                         case 'focuswindow':
-                            ibits |= I.SelectableByFocusWindow; 
+                            ibits |= I.SelectableByFocusWindow;
                             break;
                     }
                 }
-                
+
                 if(pvc.parseClearSelectionMode(options.clearSelectionMode) === 'emptyspaceclick') {
                     ibits |= I.Unselectable;
                 }
-                
+
                 if(options.hoverable) { ibits |= I.Hoverable; }
                 if(options.clickable) { ibits |= (I.Clickable | I.DoubleClickable); }
             }
-            
+
             this._ibits = ibits;
         } else {
             this._ibits = this.parent._ibits;
             this._tooltipOptions = this.parent._tooltipOptions;
         }
     },
-    
+
     _tooltipDefaults: {
         gravity:     's',
         delayIn:      200,
@@ -19011,28 +18999,28 @@ def
         followMouse:  false,
         format:       undefined
     },
-    
+
     _processTooltipOptions: function(options) {
         var isV1Compat = this.compatVersion() <= 1;
         var tipOptions = options.tooltip;
         var tipEnabled = options.tooltipEnabled;
         if(tipEnabled == null) {
             if(tipOptions) { tipEnabled = tipOptions.enabled; }
-            
+
             if(tipEnabled == null) {
                 if(isV1Compat) { tipEnabled = options.showTooltips; }
-                
-                if(tipEnabled == null) { 
-                    tipEnabled = true; 
+
+                if(tipEnabled == null) {
+                    tipEnabled = true;
                 }
             }
         }
-        
+
         if(tipEnabled) {
             if(!tipOptions) { tipOptions = {}; }
-            
+
             if(isV1Compat) { this._importV1TooltipOptions(tipOptions, options); }
-            
+
             def.eachOwn(this._tooltipDefaults, function(dv, p) {
                 var value = options['tooltip' + def.firstUpperCase(p)];
                 if(value !== undefined) {
@@ -19044,40 +19032,40 @@ def
         } else {
             tipOptions = {};
         }
-        
+
         this._tooltipOptions = tipOptions;
-        
+
         return tipEnabled;
     },
-    
+
     _importV1TooltipOptions: function(tipOptions, options) {
         var v1TipOptions = options.tipsySettings;
         if(v1TipOptions) {
             this.extend(v1TipOptions, 'tooltip');
-            
+
             for(var p in v1TipOptions) {
                 if(tipOptions[p] === undefined) {
                     tipOptions[p] = v1TipOptions[p];
                 }
             }
-            
+
             // Force V1 html default
             if(tipOptions.html == null) { tipOptions.html = false; }
         }
     },
-    
+
     // --------------
-    
+
     /**
      * Render the visualization.
      * If not pre-rendered, do it now.
      */
     render: function(bypassAnimation, recreate, reloadData) {
         var hasError;
-        
+
         /*global console:true*/
         if(pvc.debug > 1) { pvc.group("CCC RENDER"); }
-        
+
         // Don't let selection change events to fire before the render is finished
         this._suspendSelectionUpdate();
         try {
@@ -19088,12 +19076,12 @@ def
                     } else if(!this.parent && this.isPreRendered) {
                         pvc.removeTipsyLegends();
                     }
-                    
+
                     this.basePanel.render({
-                        bypassAnimation: bypassAnimation, 
+                        bypassAnimation: bypassAnimation,
                         recreate: recreate
                     });
-                    
+
                 } catch (e) {
                     /*global NoDataException:true*/
                     if (e instanceof NoDataException) {
@@ -19115,10 +19103,10 @@ def
             });
         } finally {
             if(!hasError){ this._resumeSelectionUpdate(); }
-            
+
             if(pvc.debug > 1) { pvc.groupEnd(); }
         }
-        
+
         return this;
     },
 
@@ -19132,41 +19120,41 @@ def
                         .text(text);
 
         if(isNoData) { this.extend(pvMsg, "noDataMessage"); }
-        
+
         pvPanel.render();
     },
-    
+
     useTextMeasureCache: function(fun, ctx) {
         var root = this.root;
-        var textMeasureCache = root._textMeasureCache || 
+        var textMeasureCache = root._textMeasureCache ||
                                (root._textMeasureCache = pv.Text.createCache());
-        
+
         return pv.Text.usingCache(textMeasureCache, fun, ctx || this);
     },
-    
+
     /**
      * Animation
      */
     animate: function(start, end) { return this.basePanel.animate(start, end); },
-    
+
     /**
-     * Indicates if the chart is currently 
+     * Indicates if the chart is currently
      * rendering the animation start phase.
      * <p>
-     * Prefer using this function instead of {@link #animate} 
+     * Prefer using this function instead of {@link #animate}
      * whenever its <tt>start</tt> or <tt>end</tt> arguments
-     * involve a non-trivial calculation. 
+     * involve a non-trivial calculation.
      * </p>
-     * 
+     *
      * @type boolean
      */
     animatingStart: function() { return this.basePanel.animatingStart(); },
-    
+
     /* @override Interactive */
     animatable: function() {
         return this._animatable && this.base();
     },
-    
+
     isOrientationVertical: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.vertical;
     },
@@ -19174,19 +19162,19 @@ def
     isOrientationHorizontal: function(orientation) {
         return (orientation || this.options.orientation) === pvc.orientation.horizontal;
     },
-    
+
     /**
      * Disposes the chart, any of its panels and child charts.
      */
     dispose: function(){
         if(!this._disposed){
-            
+
             // TODO: implement chart dispose
-            
+
             this._disposed = true;
         }
     },
-    
+
     defaults: {
 //        canvas: null,
 
@@ -19202,13 +19190,13 @@ def
 //      multiChartColumnsMax: undefined,
 //      multiChartSingleRowFillsHeight: undefined,
 //      multiChartSingleColFillsHeight: undefined,
-        
+
 //      smallWidth:       undefined,
 //      smallHeight:      undefined,
 //      smallAspectRatio: undefined,
 //      smallMargins:     undefined,
 //      smallPaddings:    undefined,
-        
+
 //      smallContentMargins:  undefined,
 //      smallContentPaddings: undefined,
 //      smallTitlePosition: undefined,
@@ -19221,17 +19209,17 @@ def
 //      smallTitleMargins:  undefined,
 //      smallTitlePaddings: undefined,
 //      smallTitleFont:     undefined,
-        
+
         orientation: 'vertical',
-        
+
 //        extensionPoints:   undefined,
-//        
+//
 //        visualRoles:       undefined,
 //        dimensions:        undefined,
 //        dimensionGroups:   undefined,
 //        calculations:      undefined,
 //        readers:           undefined,
-        
+
         ignoreNulls:       true, // whether to ignore or keep "null"-measure datums upon loading
         crosstabMode:      true,
 //        multiChartIndexes: undefined,
@@ -19251,7 +19239,7 @@ def
         animate: true,
 
 //        title:         null,
-        
+
         titlePosition: "top", // options: bottom || left || right
         titleAlign:    "center", // left / right / center
 //        titleAlignTo:  undefined,
@@ -19262,7 +19250,7 @@ def
 //        titleMargins:  undefined,
 //        titlePaddings: undefined,
 //        titleFont:     undefined,
-        
+
         legend:           false, // Show Legends
         legendPosition:   "bottom",
 //        legendFont:       undefined,
@@ -19277,53 +19265,53 @@ def
 //        legendTextMargin: undefined,
 //        legendItemPadding:    undefined, // ATTENTION: this is different from legendPaddings
 //        legendMarkerSize: undefined,
-        
+
 //        colors: null,
 
         v1StyleTooltipFormat: function(s, c, v, datum) {
             return s + ", " + c + ":  " + this.chart.options.valueFormat(v) +
                    (datum && datum.percent ? ( " (" + datum.percent.label + ")") : "");
         },
-        
+
         valueFormat: def.scope(function(){
             var pvFormat = pv.Format.number().fractionDigits(0, 2);
-            
+
             return function(d) {
                 return pvFormat.format(d);
                 // pv.Format.number().fractionDigits(0, 10).parse(d));
             };
         }),
-        
+
         /* For numeric values in percentage */
         percentValueFormat: def.scope(function(){
             var pvFormat = pv.Format.number().fractionDigits(0, 1);
-            
+
             return function(d){
                 return pvFormat.format(d * 100) + "%";
             };
         }),
-        
+
         //interactive: true,
-        
+
         // Content/Plot area clicking
         clickable:  false,
 //        clickAction: null,
 //        doubleClickAction: null,
         doubleClickMaxDelay: 300, //ms
-//      
+//
         hoverable:  false,
-        
+
         selectable:    false,
         selectionMode: 'rubberband', // focuswindow, // single (click-only) // custom (by code only)
         //selectionCountMax: 0, // <= 0 -> no limit
-        
+
 //        selectionChangedAction: null,
-//        userSelectionAction: null, 
-            
+//        userSelectionAction: null,
+
         // Use CTRL key to make fine-grained selections
         ctrlSelectMode: true,
         clearSelectionMode: 'emptySpaceClick', // or null <=> 'manual' (i.e., by code)
-        
+
 //        renderCallback: undefined,
 
         compatVersion: Infinity // numeric, 1 currently recognized
@@ -28850,33 +28838,33 @@ def
 /*global pvc_Size:true, pvc_PercentValue:true, pvc_ValueLabelVar:true */
 
 /*
- * Pie chart panel. Generates a pie chart. 
- * 
- * Specific options are: 
- * 
- * <i>valuesVisible</i> - Show or hide slice value. Default: false 
- * 
+ * Pie chart panel. Generates a pie chart.
+ *
+ * Specific options are:
+ *
+ * <i>valuesVisible</i> - Show or hide slice value. Default: false
+ *
  * <i>explodedSliceIndex</i> - Index of the slice which is <i>always</i> exploded, or null to explode every slice. Default: null.
- * 
+ *
  * <i>explodedOffsetRadius</i> - The radius by which an exploded slice is offset from the center of the pie (in pixels).
  * If one wants a pie with an exploded effect, specify a value in pixels here.
- * If above argument is specified, explodes only one slice, else explodes all. 
+ * If above argument is specified, explodes only one slice, else explodes all.
  * Default: 0
- * 
+ *
  * <i>activeOffsetRadius</i> - Percentage of slice radius to (additionally) explode an active slice.
  * Only used if the chart has option hoverable equal to true.
- * 
- * <i>innerGap</i> - The percentage of (the smallest of) the panel width or height used by the pie. 
+ *
+ * <i>innerGap</i> - The percentage of (the smallest of) the panel width or height used by the pie.
  * Default: 0.9 (90%)
- * 
+ *
  * Deprecated in favor of options <i>leafContentMargins</i> and <i>leafContentPaddings</i>.
- * 
- * Has the following protovis extension points: 
- * <i>chart_</i> - for the main chart Panel 
- * <i>slice_</i> - for the main pie wedge 
+ *
+ * Has the following protovis extension points:
+ * <i>chart_</i> - for the main chart Panel
+ * <i>slice_</i> - for the main pie wedge
  * <i>sliceLabel_</i> - for the main pie label
  * <i>sliceLinkLine_</i> - for the link lines, for when labelStyle = 'linked'
- * 
+ *
  * Example Pie Category Scene extension:
  * pie: {
  *     scenes: {
@@ -28890,12 +28878,12 @@ def
 def
 .type('pvc.PiePanel', pvc.PlotPanel)
 .init(function(chart, parent, plot, options){
-    
+
     // Before base, just to bring to attention that ValuesMask depends on it
     var labelStyle = plot.option('ValuesLabelStyle');
-    
+
     this.base(chart, parent, plot, options);
-    
+
     this.explodedOffsetRadius = plot.option('ExplodedSliceRadius');
     this.explodedSliceIndex   = plot.option('ExplodedSliceIndex' );
     this.activeOffsetRadius   = plot.option('ActiveSliceRadius'  );
@@ -28912,86 +28900,82 @@ def
 .add({
     pvPie: null,
     pvPieLabel: null,
-    
+
     valueRoleName: 'value',
-    
+
     _getV1Datum: function(scene){
-        // Ensure V1 tooltip function compatibility 
+        // Ensure V1 tooltip function compatibility
         var datum = scene.datum;
         if(datum){
             var datumEx = Object.create(datum);
             datumEx.percent = scene.vars.value.percent;
             datum = datumEx;
         }
-        
+
         return datum;
     },
-    
+
     /**
      * @override
      */
-    _calcLayout: function(layoutInfo){
+    _calcLayout: function(layoutInfo) {
         var clientSize   = layoutInfo.clientSize;
         var clientWidth  = clientSize.width;
         var clientRadius = Math.min(clientWidth, clientSize.height) / 2;
-        if(!clientRadius){
-            return new pvc_Size(0,0);
-        }
-        
+        if(!clientRadius) { return new pvc_Size(0, 0); }
+
         var center = pv.vector(clientSize.width / 2, clientSize.height / 2);
-        
-        function resolvePercentRadius(radius){
+
+        function resolvePercentRadius(radius) {
             return def.between(pvc_PercentValue.resolve(radius, clientRadius), 0, clientRadius);
         }
-        
-        function resolvePercentWidth(width){
+
+        function resolvePercentWidth(width) {
             return def.between(pvc_PercentValue.resolve(width, clientWidth), 0, clientWidth);
         }
-        
+
         // ---------------------
-        
+
         var labelFont = this._getConstantExtension('label', 'font');
-        if(!def.string.is(labelFont)){
-            labelFont = this.valuesFont;
-        }
-        
+        if(!def.string.is(labelFont)) { labelFont = this.valuesFont; }
+
         var maxPieRadius = clientRadius;
-        
-        if(this.valuesVisible && this.labelStyle === 'linked'){
+
+        if(this.valuesVisible && this.labelStyle === 'linked') {
             // Reserve space for labels and links
             var linkInsetRadius  = resolvePercentRadius(this.linkInsetRadius );
             var linkOutsetRadius = resolvePercentRadius(this.linkOutsetRadius);
             var linkMargin       = resolvePercentWidth (this.linkMargin      );
             var linkLabelSize    = resolvePercentWidth (this.linkLabelSize   );
-            
+
             var textMargin = def.number.to(this._getConstantExtension('label', 'textMargin'), 3);
             var textHeight = pv.Text.fontHeight(labelFont) * 2/3;
-            
+
             var linkHandleWidth = this.linkHandleWidth * textHeight; // em
             linkMargin += linkHandleWidth;
-            
+
             var linkLabelSpacingMin = this.linkLabelSpacingMin * textHeight; // em
-            
+
             var freeWidthSpace = Math.max(0, clientWidth / 2 - clientRadius);
-            
+
             // Radius stolen to pie by link and label
             var spaceH = Math.max(0, linkOutsetRadius + linkMargin + linkLabelSize - freeWidthSpace);
             var spaceV = linkOutsetRadius + textHeight; // at least one line of text (should be half line, but this way there's a small margin...)
-            
+
             var linkAndLabelRadius = Math.max(0, spaceV, spaceH);
-            
+
             // Use the extra width on the label
             //linkLabelSize += freeWidthSpace / 2;
-            
-            if(linkAndLabelRadius >= maxPieRadius){
+
+            if(linkAndLabelRadius >= maxPieRadius) {
                 this.valuesVisible = false;
-                if(pvc.debug >= 2){
+                if(pvc.debug >= 2) {
                     this._log("Hiding linked labels due to insufficient space.");
                 }
             } else {
-                
+
                 maxPieRadius -= linkAndLabelRadius;
-                
+
                 layoutInfo.link = {
                     insetRadius:     linkInsetRadius,
                     outsetRadius:    linkOutsetRadius,
@@ -29005,46 +28989,45 @@ def
                     lineHeight:      textHeight
                 };
             }
-        } 
-        
+        }
+
         // ---------------------
-        
+
         var explodedOffsetRadius = resolvePercentRadius(this.explodedOffsetRadius);
-        
+
         var activeOffsetRadius = 0;
         if(this.hoverable()) {
             activeOffsetRadius = resolvePercentRadius(this.activeOffsetRadius);
         }
-        
-        var effectOffsetRadius = explodedOffsetRadius + activeOffsetRadius;
-        
-        var normalPieRadius = maxPieRadius - effectOffsetRadius;
-        if(normalPieRadius < 0){
-            return new pvc_Size(0,0);
-        }
-        
+
+        var maxOffsetRadius = explodedOffsetRadius + activeOffsetRadius;
+
+        var normalPieRadius = maxPieRadius - maxOffsetRadius;
+        if(normalPieRadius < 0) { return new pvc_Size(0,0); }
+
         // ---------------------
-        
+        layoutInfo.resolvePctRadius = resolvePercentRadius;
         layoutInfo.center = center;
         layoutInfo.clientRadius = clientRadius;
         layoutInfo.normalRadius = normalPieRadius;
         layoutInfo.explodedOffsetRadius = explodedOffsetRadius;
         layoutInfo.activeOffsetRadius = activeOffsetRadius;
+        layoutInfo.maxOffsetRadius = maxOffsetRadius;
         layoutInfo.labelFont = labelFont;
     },
-    
+
     /**
      * @override
      */
     _createCore: function(layoutInfo) {
-        var myself = this;
-        var chart = myself.chart;
+        var me = this;
+        var chart = me.chart;
         var rootScene = this._buildScene();
         var center = layoutInfo.center;
         var normalRadius = layoutInfo.normalRadius;
-        
+
         // ------------
-        
+
         var wrapper;
         var extensionIds = ['slice'];
         if(this.compatVersion() <= 1) {
@@ -29055,66 +29038,67 @@ def
                 };
             };
         }
-        
+
         this.pvPie = new pvc.visual.PieSlice(this, this.pvPanel, {
                 extensionId: extensionIds,
                 center: center,
                 activeOffsetRadius: layoutInfo.activeOffsetRadius,
+                maxOffsetRadius: layoutInfo.maxOffsetRadius,
+                resolvePctRadius: layoutInfo.resolvePctRadius,
                 wrapper: wrapper,
-                tooltipArgs:   {
+                tooltipArgs: {
                     options: {
                         useCorners: true,
-                        gravity: function(){
-                            var isRightPlane = Math.cos(this.midAngle()) >= 0;
-                            var isTopPlane   = Math.sin(this.midAngle()) >= 0;
+                        gravity: function() {
+                            var ma = this.midAngle();
+                            var isRightPlane = Math.cos(ma) >= 0;
+                            var isTopPlane   = Math.sin(ma) >= 0;
                             return  isRightPlane ?
                                     (isTopPlane ? 'nw' : 'sw') :
-                                    (isTopPlane ? 'ne' : 'se')
-                                    ;
+                                    (isTopPlane ? 'ne' : 'se');
                         }
                     }
                 }
             })
-            
+
             .lock('data', rootScene.childNodes)
-            
-            .override('angle', function(){ return this.scene.vars.value.angle;  })
-            
-            .override('baseOffsetRadius', function(){
-                var explodeIndex = myself.explodedSliceIndex;
+
+            .override('angle', function() { return this.scene.vars.value.angle;  })
+
+            .override('defaultOffsetRadius', function() {
+                var explodeIndex = me.explodedSliceIndex;
                 if (explodeIndex == null || explodeIndex == this.pvMark.index) {
                     return layoutInfo.explodedOffsetRadius;
                 }
-                
-                return this.base();
+
+                return 0;
             })
-            
-            .lock('outerRadius', function(){ return chart.animate(0, normalRadius); })
-            
+
+            .lock('outerRadius', function() { return chart.animate(0, normalRadius); })
+
             .localProperty('innerRadiusEx', pvc_PercentValue.parse)
-            
+
             // In case the inner radius is specified, we better animate it as well
-            .intercept('innerRadius', function(scene){
+            .intercept('innerRadius', function(scene) {
                 var innerRadius = this.delegateExtension();
-                if(innerRadius == null){
+                if(innerRadius == null) {
                     var innerRadiusPct = this.pvMark.innerRadiusEx();
-                    if(innerRadiusPct != null){
+                    if(innerRadiusPct != null) {
                         innerRadius = pvc_PercentValue.resolve(
-                                    innerRadiusPct, 
+                                    innerRadiusPct,
                                     this.pvMark.outerRadius()) || 0;
                     } else {
                         innerRadius = 0;
                     }
                 }
-                
+
                 return innerRadius > 0 ? chart.animate(0, innerRadius) : 0;
             })
-            .pvMark
-            ;
-        
+            .pvMark;
+
         if(this.valuesVisible) {
             this.valuesFont = layoutInfo.labelFont;
-            
+
             if(this.labelStyle === 'inside') {
                 this.pvPieLabel = pvc.visual.ValueLabel.maybeCreate(this, this.pvPie, {
                         wrapper: wrapper
@@ -29125,88 +29109,81 @@ def
                     .override('defaultText', function() { return this.scene.vars.value.sliceLabel; })
                     .pvMark
                     .textMargin(10);
-            
+
             } else if(this.labelStyle === 'linked') {
                 var linkLayout = layoutInfo.link;
-                
+
                 rootScene.layoutLinkLabels(layoutInfo);
-                
+
                 this.pvLinkPanel = this.pvPanel.add(pv.Panel)
                     .data(rootScene.childNodes)
                     .localProperty('pieSlice')
-                    .pieSlice(function(/*scene*/){
-                        return myself.pvPie.scene[this.index]; 
-                     })
-                    ;
-                
+                    .pieSlice(function(/*scene*/) { return me.pvPie.scene[this.index]; });
+
+                var f = false, t = true;
                 this.pvLinkLine = new pvc.visual.Line(
-                    this, 
-                    this.pvLinkPanel, 
+                    this,
+                    this.pvLinkPanel,
                     {
                         extensionId:  'linkLine',
-                        freePosition:  true,
-                        noClick:       true,
-                        noDoubleClick: true,
-                        noSelect:      true,
-                        noTooltip:     true,
-                        noHover:       true,
-                        showsActivity: false
+                        freePosition:  t,
+                        noClick:       t,
+                        noDoubleClick: t,
+                        noSelect:      t,
+                        noTooltip:     t,
+                        noHover:       t,
+                        showsActivity: f
                     })
-                    .lockMark('data', function(scene){
-                        // Calculate the dynamic dot at the 
+                    .lockMark('data', function(scene) {
+                        // Calculate the dynamic dot at the
                         // slice's middle angle and outer radius...
                         var pieSlice = this.parent.pieSlice();
                         var midAngle = pieSlice.startAngle + pieSlice.angle / 2;
                         var outerRadius = pieSlice.outerRadius - linkLayout.insetRadius;
                         var x = pieSlice.left + outerRadius * Math.cos(midAngle);
                         var y = pieSlice.top  + outerRadius * Math.sin(midAngle);
-                        
+
                         var firstDotScene = scene.childNodes[0];
-                        if(!firstDotScene || !firstDotScene._isFirstDynamicScene){
+                        if(!firstDotScene || !firstDotScene._isFirstDynamicScene) {
                             firstDotScene = new pvc.visual.PieLinkLineScene(
                                 scene, x, y, /* index */ 0);
-                            
-                            firstDotScene._isFirstDynamicScene = true;
+
+                            firstDotScene._isFirstDynamicScene = t;
                         } else {
                             firstDotScene.x = x;
                             firstDotScene.y = y;
                         }
-                        
+
                         return scene.childNodes;
                     })
-                    .override('defaultColor', function(type){
-                        if(type === 'stroke'){
-                            return 'black';
-                        }
-                        return this.base(type);
+                    .override('defaultColor', function(type) {
+                        return type === 'stroke' ? 'black' : this.base(type);
                     })
                     .override('defaultStrokeWidth', def.fun.constant(0.5))
                     .pvMark
                     .lock('visible')
-                    .lock('top',  function(dot){ return dot.y; })
-                    .lock('left', function(dot){ return dot.x; })
-                    ;
-                
-                var f = false;
+                    .lock('top',  function(dot) { return dot.y; })
+                    .lock('left', function(dot) { return dot.x; });
+
                 this.pvPieLabel = new pvc.visual.Label(
-                    this, 
-                    this.pvLinkPanel, 
+                    this,
+                    this.pvLinkPanel,
                     {
                         extensionId:   'label',
                         noClick:       f,
                         noDoubleClick: f,
                         noSelect:      f,
                         noHover:       f,
-                        showsInteraction: true
+                        showsInteraction: t
                     })
-                    .lockMark('data', function(scene){
-                    // Repeat the scene, once for each line
+                    .lockMark('data', function(scene) {
+                        // Repeat the scene, once for each line
                         return scene.lineScenes;
                     })
                     .intercept('textStyle', function() {
-                        this._finished = false;
+                        this._finished = f;
                         var style = this.delegate();
-                        if(style && 
+                        if(style &&
                            !this._finished &&
                            !this.mayShowActive() &&
                            this.mayShowNotAmongSelected()){
@@ -29217,233 +29194,225 @@ def
                     })
                     .pvMark
                     .lock('visible')
-                    .left     (function(scene){ return scene.vars.link.labelX; })
-                    .top      (function(scene){ return scene.vars.link.labelY + ((this.index + 1) * linkLayout.lineHeight); }) // must be mark.index because of repeating scene...
-                    .textAlign(function(scene){ return scene.vars.link.labelAnchor; })
+                    .left     (function(scene) { return scene.vars.link.labelX; })
+                    .top      (function(scene) { return scene.vars.link.labelY + ((this.index + 1) * linkLayout.lineHeight); }) // must be mark.index because of repeating scene...
+                    .textAlign(function(scene) { return scene.vars.link.labelAnchor; })
                     .textMargin(linkLayout.textMargin)
                     .textBaseline('bottom')
-                    .text     (function(scene){ return scene.vars.link.labelLines[this.index]; })
-                    ;
-                
+                    .text     (function(scene) { return scene.vars.link.labelLines[this.index]; });
+
                 // <Debug>
-                if(pvc.debug >= 20){
+                if(pvc.debug >= 20) {
                     this.pvPanel.add(pv.Panel)
                         .zOrder(-10)
                         .left  (center.x - layoutInfo.clientRadius)
                         .top   (center.y - layoutInfo.clientRadius)
                         .width (layoutInfo.clientRadius * 2)
                         .height(layoutInfo.clientRadius * 2)
-                        .strokeStyle('red')
-                    ;
-                    
+                        .strokeStyle('red');
+
                     // Client Area
                     this.pvPanel
                         .strokeStyle('green');
-                    
+
                     var linkColors = pv.Colors.category10();
                     this.pvLinkLine
-                        .segmented(true)
-                        .strokeStyle(function(){ return linkColors(this.index); });
+                        .segmented(t)
+                        .strokeStyle(function() { return linkColors(this.index); });
                 }
                 // </Debug>
             }
-            
+
             this.pvPieLabel
                 .font(layoutInfo.labelFont);
         }
     },
-    
+
     _getExtensionId: function() {
         // 'chart' is deprecated
         // 'content' coincides, visually, with 'plot', in this chart type
         // - actually it shares the same panel...
-        
+
         var extensionIds = [{abs: 'content'}];
-        if(this.chart.parent) { 
+        if(this.chart.parent) {
             extensionIds.push({abs: 'smallContent'});
         }
-        
+
         return extensionIds.concat(this.base());
     },
-    
+
     /**
      * Renders this.pvBarPanel - the parent of the marks that are affected by selection changes.
      * @override
      */
-    renderInteractive: function(){
+    renderInteractive: function() {
         this.pvPanel.render();
     },
 
     _buildScene: function() {
         var rootScene  = new pvc.visual.PieRootScene(this);
-        
+
         // v1 property
         this.sum = rootScene.vars.sumAbs.value;
-        
+
         return rootScene;
     }
 });
 
 def
 .type('pvc.visual.PieRootScene', pvc.visual.Scene)
-.init(function(panel){
+.init(function(panel) {
     var data = panel.visualRoles.category.flatten(panel.data, pvc.data.visibleKeyArgs);
-    
+
     this.base(null, {panel: panel, source: data});
 
     var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color, {roleVar: 'color'});
-    
+
     // ---------------
-    
+
     var valueRoleName = panel.valueRoleName;
     var valueDimName  = panel.visualRoles[valueRoleName].firstDimensionName();
     var valueDim      = data.dimensions(valueDimName);
-    
+
     var options = panel.chart.options;
     var percentValueFormat = options.percentValueFormat;
-    
+
     var rootScene = this;
     var sumAbs = 0;
-    
+
     /* Create category scene sub-class */
     var CategSceneClass = def.type(pvc.visual.PieCategoryScene)
-        .init(function(categData, value){
-            
+        .init(function(categData, value) {
+
             // Adds to parent scene...
             this.base(rootScene, {source: categData});
-            
+
             this.vars.category = pvc_ValueLabelVar.fromComplex(categData);
 
             sumAbs += Math.abs(value);
-            
+
             this.vars.value = new pvc_ValueLabelVar(
                             value,
                             formatValue(value, categData));
-            
+
             colorVarHelper.onNewScene(this, /* isLeaf */ true);
         });
-    
+
     /* Extend with any user extensions */
     panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
-    
+
     /* Create child category scenes */
-    data.children().each(function(categData){
+    data.children().each(function(categData) {
         // Value may be negative
         // Don't create 0-value scenes
         var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
-        if(value !== 0){
-            new CategSceneClass(categData, value);
-        }
+        if(value !== 0) { new CategSceneClass(categData, value); }
     });
-    
+
     // -----------
-    
+
     // TODO: should this be in something like: chart.axes.angle.scale ?
     this.angleScale = pv.Scale
                         .linear(0, sumAbs)
                         .range(0, 2 * Math.PI)
                         .by1(Math.abs);
-    
+
     this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
-    
-    this.childNodes.forEach(function(categScene){
+
+    this.childNodes.forEach(function(categScene) {
         completeBuildCategScene.call(categScene);
     });
-    
-    function formatValue(value, categData){
-        if(categData){
+
+    function formatValue(value, categData) {
+        if(categData) {
             var datums = categData._datums;
-            if(datums.length === 1){
+            if(datums.length === 1) {
                 // Prefer to return the already formatted/provided label
                 return datums[0].atoms[valueDimName].label;
             }
         }
-        
+
         return valueDim.format(value);
     }
-    
-    /** 
-     * @private 
+
+    /**
+     * @private
      * @instance pvc.visual.PieCategoryScene
      */
-    function completeBuildCategScene(){
+    function completeBuildCategScene() {
         var valueVar = this.vars.value;
-        
+
         // Calculate angle (span)
         valueVar.angle = this.parent.angleScale(valueVar.value);
-        
+
         // Create percent sub-var of the value var
         var percent = Math.abs(valueVar.value) / sumAbs;
-        
+
         valueVar.percent = new pvc_ValueLabelVar(
                 percent,
                 percentValueFormat(percent));
-        
+
         // Calculate slice label
         valueVar.sliceLabel = this.sliceLabel();
     }
 })
 .add({
-    layoutLinkLabels: function(layoutInfo){
+    layoutLinkLabels: function(layoutInfo) {
         var startAngle = -Math.PI / 2;
-        
+
         var leftScenes  = [];
         var rightScenes = [];
-        
-        this.childNodes.forEach(function(categScene){
+
+        this.childNodes.forEach(function(categScene) {
             startAngle = categScene.layoutI(layoutInfo, startAngle);
-            
+
             (categScene.vars.link.dir > 0 ? rightScenes : leftScenes)
             .push(categScene);
         });
-        
+
         // Distribute left and right labels and finish their layout
         this._distributeLabels(-1, leftScenes,  layoutInfo);
         this._distributeLabels(+1, rightScenes, layoutInfo);
     },
-    
-    _distributeLabels: function(dir, scenes, layoutInfo){
-        // Initially, for each category scene, 
+
+    _distributeLabels: function(dir, scenes, layoutInfo) {
+        // Initially, for each category scene,
         //   targetY = elbowY
         // Taking additionally labelHeight into account,
         //  if this position causes overlapping, find a != targetY
         //  that does not cause overlap.
-        
+
         // Sort scenes by Y position
-        scenes.sort(function(sceneA, sceneB){
+        scenes.sort(function(sceneA, sceneB) {
             return def.compare(sceneA.vars.link.targetY, sceneB.vars.link.targetY);
         });
-        
+
         /*jshint expr:true */
         this._distributeLabelsDownwards(scenes, layoutInfo) &&
         this._distributeLabelsUpwards  (scenes, layoutInfo) &&
         this._distributeLabelsEvenly   (scenes, layoutInfo);
-        
-        scenes.forEach(function(categScene){
-            categScene.layoutII(layoutInfo);
-        });
+
+        scenes.forEach(function(categScene) { categScene.layoutII(layoutInfo); });
     },
-    
-    _distributeLabelsDownwards: function(scenes, layoutInfo){
+
+    _distributeLabelsDownwards: function(scenes, layoutInfo) {
         var linkLayout = layoutInfo.link;
         var labelSpacingMin = linkLayout.labelSpacingMin;
         var yMax = layoutInfo.clientSize.height;
         var overlapping = false;
-        for(var i = 0, J = scenes.length - 1 ; i < J ; i++){
+        for(var i = 0, J = scenes.length - 1 ; i < J ; i++) {
             var linkVar0 = scenes[i].vars.link;
-            
-            if(!i && linkVar0.labelTop() < 0){
-                overlapping = true;
-            }
-            
+
+            if(!i && linkVar0.labelTop() < 0) { overlapping = true; }
+
             var linkVar1 = scenes[i + 1].vars.link;
             var labelTopMin1 = linkVar0.labelBottom() + labelSpacingMin;
             if (linkVar1.labelTop() < labelTopMin1) {
-                
+
                 var halfLabelHeight1 = linkVar1.labelHeight / 2;
                 var targetY1 = labelTopMin1 + halfLabelHeight1;
                 var targetYMax = yMax - halfLabelHeight1;
-                if(targetY1 > targetYMax){
+                if(targetY1 > targetYMax) {
                     overlapping = true;
                     linkVar1.targetY = targetYMax;
                 } else {
@@ -29451,60 +29420,58 @@ def
                 }
             }
         }
-        
+
         return overlapping;
     },
-    
-    _distributeLabelsUpwards: function(scenes, layoutInfo){
+
+    _distributeLabelsUpwards: function(scenes, layoutInfo) {
         var linkLayout = layoutInfo.link;
         var labelSpacingMin = linkLayout.labelSpacingMin;
-        
+
         var overlapping = false;
-        for(var i = scenes.length - 1 ; i > 0 ; i--){
+        for(var i = scenes.length - 1 ; i > 0 ; i--) {
             var linkVar1 = scenes[i - 1].vars.link;
             var linkVar0 = scenes[i].vars.link;
-            if(i === 1 && linkVar1.labelTop() < 0){
-                overlapping = true;
-            }
-            
+            if(i === 1 && linkVar1.labelTop() < 0) { overlapping = true; }
+
             var labelBottomMax1 = linkVar0.labelTop() - labelSpacingMin;
             if (linkVar1.labelBottom() > labelBottomMax1) {
                 var halfLabelHeight1 = linkVar1.labelHeight / 2;
                 var targetY1   = labelBottomMax1 - halfLabelHeight1;
                 var targetYMin = halfLabelHeight1;
-                if(targetY1 < targetYMin){
+                if(targetY1 < targetYMin) {
                     overlapping = true;
                     linkVar1.targetY = targetYMin;
                 } else {
-                    linkVar1.targetY = targetY1;                    
+                    linkVar1.targetY = targetY1;
                 }
             }
         }
-        
+
         return overlapping;
     },
-    
-    _distributeLabelsEvenly: function(scenes, layoutInfo){
+
+    _distributeLabelsEvenly: function(scenes, layoutInfo) {
         var totalHeight = 0;
-        scenes.forEach(function(categScene){
+        scenes.forEach(function(categScene) {
             totalHeight += categScene.vars.link.labelHeight;
         });
-        
+
         var freeSpace = layoutInfo.clientSize.height - totalHeight; // may be < 0
         var labelSpacing = freeSpace;
-        if(scenes.length > 1){
+        if(scenes.length > 1) {
             labelSpacing /= (scenes.length - 1);
         }
-        
+
         var y = 0;
-        scenes.forEach(function(scene){
+        scenes.forEach(function(scene) {
             var linkVar = scene.vars.link;
             var halfLabelHeight = linkVar.labelHeight / 2;
             y += halfLabelHeight;
             linkVar.targetY = y;
             y += halfLabelHeight + labelSpacing;
         });
-        
+
         return true;
     }
 });
@@ -29512,86 +29479,77 @@ def
 def
 .type('pvc.visual.PieLinkLabelVar') // TODO : Var base class
 .add({
-    labelTop: function(){
-        return this.targetY - this.labelHeight / 2;
-    },
-    
-    labelBottom: function(){
-        return this.targetY + this.labelHeight / 2;
-    }
+    labelTop:    function() { return this.targetY - this.labelHeight / 2; },
+    labelBottom: function() { return this.targetY + this.labelHeight / 2; }
 });
 
 def
 .type('pvc.visual.PieCategoryScene', pvc.visual.Scene)
 .add({
     // extendable
-    sliceLabelMask: function(){
-        return this.panel().valuesMask;
-    },
-    
+    sliceLabelMask: function() { return this.panel().valuesMask; },
+
     // extendable
-    sliceLabel: function(){
-        return this.format(this.sliceLabelMask());
-    },
-    
-    layoutI: function(layoutInfo, startAngle){
+    sliceLabel: function() { return this.format(this.sliceLabelMask()); },
+
+    layoutI: function(layoutInfo, startAngle) {
         var valueVar = this.vars.value;
         var endAngle = startAngle + valueVar.angle;
         var midAngle = (startAngle + endAngle) / 2;
-        
+
         // Overwrite existing link var, if any.
         var linkVar = (this.vars.link = new pvc.visual.PieLinkLabelVar());
-        
+
         var linkLayout = layoutInfo.link;
-        
+
         var labelLines = pvc.text.justify(valueVar.sliceLabel, linkLayout.maxTextWidth, layoutInfo.labelFont);
         var lineCount = labelLines.length;
         linkVar.labelLines  = labelLines;
         linkVar.labelHeight = lineCount * linkLayout.lineHeight;
-        
+
         this.lineScenes = def.array.create(lineCount, this);
-        
+
         var cosMid = Math.cos(midAngle);
         var sinMid = Math.sin(midAngle);
-        
+
         var isAtRight = cosMid >= 0;
         var dir = isAtRight ? 1 : -1;
-        
+
         // Label anchor is at the side with opposite name to the side of the pie where it is placed.
-        linkVar.labelAnchor = isAtRight ?  'left' : 'right'; 
-        
+        linkVar.labelAnchor = isAtRight ?  'left' : 'right';
+
         var center = layoutInfo.center;
         var elbowRadius = linkLayout.elbowRadius;
         var elbowX = center.x + elbowRadius * cosMid;
         var elbowY = center.y + elbowRadius * sinMid; // baseY
-        
+
         var anchorX = center.x + dir * elbowRadius;
         var targetX = anchorX + dir * linkLayout.linkMargin;
-        
+
         new pvc.visual.PieLinkLineScene(this, elbowX,  elbowY);
         new pvc.visual.PieLinkLineScene(this, anchorX, elbowY);
-        
+
         linkVar.elbowY  = elbowY;
         linkVar.targetY = elbowY + 0;
         linkVar.targetX = targetX;
         linkVar.dir = dir;
-        
+
         return endAngle;
     },
-    
-    layoutII: function(layoutInfo){
+
+    layoutII: function(layoutInfo) {
         var linkVar = this.vars.link;
-        
+
         var targetY = linkVar.targetY;
         var targetX = linkVar.targetX;
-        
+
         var handleWidth = layoutInfo.link.handleWidth;
-        if(handleWidth > 0){
+        if(handleWidth > 0) {
             new pvc.visual.PieLinkLineScene(this, targetX - linkVar.dir * handleWidth, targetY);
         }
-        
+
         new pvc.visual.PieLinkLineScene(this, targetX, targetY);
-                
+
         linkVar.labelX = targetX;
         linkVar.labelY = targetY - linkVar.labelHeight/2;
     }
@@ -29599,14 +29557,13 @@ def
 
 def
 .type('pvc.visual.PieLinkLineScene', pvc.visual.Scene)
-.init(function(catScene, x, y, index){
+.init(function(catScene, x, y, index) {
     this.base(catScene, {source: catScene.group, index: index});
-    
+
     this.x = x;
     this.y = y;
 })
-.add(pv.Vector)
-;
+.add(pv.Vector);
 
 /*global pvc_PercentValue:true */
 
@@ -29782,8 +29739,8 @@ def
              * var visibleSerIndex = this.stacked ? mark.parent.index : index,
              *     visibleCatIndex = this.stacked ? index : mark.parent.index;
              */
-            wrapper = function(v1f) {
-                return function(scene) {
+            wrapper = function(v1f){
+                return function(scene){
                     var markParent = Object.create(this.parent);
                     var mark = Object.create(this);
                     mark.parent = markParent;
@@ -29844,7 +29801,7 @@ def
             .antialias(false)
             ;
 
-        if(plot.option('OverflowMarkersVisible')) {
+        if(plot.option('OverflowMarkersVisible')){
             this._addOverflowMarkers(wrapper);
         }
         
@@ -29946,7 +29903,7 @@ def
                 extensionId:   isMin ? 'underflowMarker' : 'overflowMarker',
                 wrapper:       wrapper
             })
-            .intercept('visible', function(scene) {
+            .intercept('visible', function(scene){
                 var visible = this.delegateExtension();
                 if(visible !== undefined && !visible){
                     return false;
@@ -29993,7 +29950,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(data, seriesData) {
+    _buildScene: function(data, seriesData){
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
         
         var categDatas = data._children;

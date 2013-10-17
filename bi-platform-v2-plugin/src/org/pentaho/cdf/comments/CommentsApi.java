@@ -86,6 +86,9 @@ public class CommentsApi {
     public void list(@DefaultValue("") @QueryParam("page") String page,
                      @DefaultValue("0") @QueryParam("firstResult") int firstResult,
                      @DefaultValue("20") @QueryParam("maxResults") int maxResults,
+                     @DefaultValue("true") @QueryParam("where") boolean where,
+                     @DefaultValue("false") @QueryParam("deleted") boolean delete,
+                     @DefaultValue("false") @QueryParam("archived") boolean archived,
             
                      @Context HttpServletResponse servletResponse, 
                      @Context HttpServletRequest servletRequest){
@@ -94,7 +97,7 @@ public class CommentsApi {
         String result = "";
 
         try {
-            json = CommentsEngine.getInstance().list(page, firstResult, maxResults ,getUserSession());
+            json = CommentsEngine.getInstance().list(page, firstResult, maxResults, where, delete, archived ,getUserSession());
             result = json.toString(2);
         } catch (InvalidCdfOperationException ex) {
             logger.error("Error processing comment: " + ex);
