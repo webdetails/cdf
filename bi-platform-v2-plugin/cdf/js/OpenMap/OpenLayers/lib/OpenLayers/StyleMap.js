@@ -1,17 +1,18 @@
-/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the Clear BSD license.  
- * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
 
 /**
  * @requires OpenLayers/BaseTypes/Class.js
  * @requires OpenLayers/Style.js
  * @requires OpenLayers/Feature/Vector.js
  */
- 
+
 /**
  * Class: OpenLayers.StyleMap
  */
+
 OpenLayers.StyleMap = OpenLayers.Class({
     
     /**

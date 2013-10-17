@@ -1,10 +1,9 @@
-/**
+/*! *
 *
 * jquery.sparkline.js
 *
 * v2.1
 * (c) Splunk, Inc
-* Contact: Gareth Watts (gareth@splunk.com)
 * http://omnipotent.net/jquery.sparkline/
 *
 * Generates inline sparkline charts from data supplied either to the method
@@ -42,33 +41,25 @@
 *
 *
 * Usage:
-*  $(selector).sparkline(values, options)
 *
 * If values is undefined or set to 'html' then the data values are read from the specified tag:
 *   <p>Sparkline: <span class="sparkline">1,4,6,6,8,5,3,5</span></p>
-*   $('.sparkline').sparkline();
 * There must be no spaces in the enclosed data set
 *
 * Otherwise values must be an array of numbers or null values
 *    <p>Sparkline: <span id="sparkline1">This text replaced if the browser is compatible</span></p>
-*    $('#sparkline1').sparkline([1,4,6,6,8,5,3,5])
-*    $('#sparkline2').sparkline([1,4,6,null,null,5,3,5])
 *
 * Values can also be specified in an HTML comment, or as a values attribute:
 *    <p>Sparkline: <span class="sparkline"><!--1,4,6,6,8,5,3,5 --></span></p>
 *    <p>Sparkline: <span class="sparkline" values="1,4,6,6,8,5,3,5"></span></p>
-*    $('.sparkline').sparkline();
 *
 * For line charts, x values can also be specified:
 *   <p>Sparkline: <span class="sparkline">1:1,2.7:4,3.4:6,5:6,6:8,8.7:5,9:3,10:5</span></p>
-*    $('#sparkline1').sparkline([ [1,1], [2.7,4], [3.4,6], [5,6], [6,8], [8.7,5], [9,3], [10,5] ])
 *
 * By default, options should be passed in as teh second argument to the sparkline function:
-*   $('.sparkline').sparkline([1,2,3,4], {type: 'bar'})
 *
 * Options can also be set by passing them on the tag itself.  This feature is disabled by default though
 * as there's a slight performance overhead:
-*   $('.sparkline').sparkline([1,2,3,4], {enableTagOptions: true})
 *   <p>Sparkline: <span class="sparkline" sparkType="bar" sparkBarColor="red">loading</span></p>
 * Prefix all options supplied as tag attribute with "spark" (configurable by setting tagOptionPrefix)
 *
@@ -192,12 +183,6 @@
 *
 *
 *   Examples:
-*   $('#sparkline1').sparkline(myvalues, { lineColor: '#f00', fillColor: false });
-*   $('.barsparks').sparkline('html', { type:'bar', height:'40px', barWidth:5 });
-*   $('#tristate').sparkline([1,1,-1,1,0,0,-1], { type:'tristate' }):
-*   $('#discrete').sparkline([1,3,4,5,5,3,4,5], { type:'discrete' });
-*   $('#bullet').sparkline([10,12,12,9,7], { type:'bullet' });
-*   $('#pie').sparkline([1,1,2], { type:'pie' });
 */
 
 /*jslint regexp: true, browser: true, jquery: true, white: true, nomen: false, plusplus: false, maxerr: 500, indent: 4 */

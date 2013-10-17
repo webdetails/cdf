@@ -1,3 +1,16 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 var ChartComponent =  UnmanagedComponent.extend({
     exportChart: function(outputType, overrides) {
         var me = this;
@@ -62,6 +75,18 @@ var ChartComponent =  UnmanagedComponent.extend({
         } else {
             $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
         }
+    },
+
+    renderChart: function() {
+      var cd = this.chartDefinition;
+      if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
+        this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
+      } else if(this.valuesArray != undefined) {
+        this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
+      } else {
+        // initialize the component only
+        this.synchronous(_.bind(this.render, this));
+      }
     }
 });
 
@@ -71,9 +96,8 @@ var ProtovisComponent =  ChartComponent.extend({
     if (this.parameters == undefined) {
       this.parameters = [];
     };
-    // clear previous table
-
-    this.triggerQuery(this.chartDefinition, _.bind(this.render,this));
+    
+    this.renderChart();
   },
 
   render: function(values) {
@@ -159,18 +183,6 @@ var CccComponent = BaseCccComponent.extend({
         }
     },
 
-    renderChart: function() {
-      var cd = this.chartDefinition;
-      if(cd.dataAccessId || cd.query || cd.endpoint /*cpk*/) {
-        this.triggerQuery(this.chartDefinition,_.bind(this.render, this));
-      } else if(this.valuesArray != undefined) {
-        this.synchronous(_.bind(function() { this.render(this.valuesArray); }, this));
-      } else {
-        // initialize the component only
-        this.synchronous(_.bind(this.render, this));
-      }
-    },
-  
     render: function(values) {
 
         $("#" + this.htmlObject).append('<div id="'+ this.htmlObject  +'protovis"></div>');
@@ -197,7 +209,6 @@ var CccComponent = BaseCccComponent.extend({
         }
         this.chart.render();
     }
-
 });
 
 
