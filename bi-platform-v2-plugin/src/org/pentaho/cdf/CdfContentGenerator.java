@@ -380,11 +380,15 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @GET
   @Path("/getHeaders")
   @Produces("text/html")
-  public String getHeaders(@QueryParam("dashboardContent") String dashboardContent) throws Exception {
+  public String getHeaders(@QueryParam("dashboardContent") @DefaultValue("") String dashboardContent,
+                           @QueryParam("dashboardType") String dashboardType,
+                           @QueryParam("debug") @DefaultValue("false") boolean debug) throws Exception {
     try {
       CdfHtmlTemplateRenderer renderer = new CdfHtmlTemplateRenderer();
       if (renderer.getBaseUrl() == null) {
         renderer.setBaseUrl( StringUtils.removeEnd( Utils.getBaseUrl(), "/") );
+        renderer.setDebug(debug);
+        renderer.setTemplate(dashboardType);
       }
       return renderer.getHeaders(dashboardContent);
     } catch (IOException ex){
