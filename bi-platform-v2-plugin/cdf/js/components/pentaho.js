@@ -205,15 +205,6 @@ var PrptComponent = BaseComponent.extend({
         }
       });
     }
-<<<<<<< HEAD
-    else{
-    var ts = "ts=" + new Date().getTime() + "&";
-      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
-      var encodeArray = function(k,v) {
-        var arr = [];
-        for (var i = 0; i < v.length;i++) {
-          arr.push(encodeURIComponent(k)+'='+encodeURIComponent(v[i]));
-=======
     else {
       // set up our result iframe
       var iframe = $(this.getIframe());
@@ -227,7 +218,6 @@ var PrptComponent = BaseComponent.extend({
         if (this._sHeight == null) {
           this._sHeight = htmlObj.height();
           this._sWidth = htmlObj.width();
->>>>>>> 6b636c2e150446c9a7ccc552ed5307d3fb7dfad9
         }
         else {
           htmlObj.height(this._sHeight);
@@ -237,12 +227,12 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/content/reporting';
+        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
         this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/content/reporting/reportviewer/report.html' + "?" + $.param(options);
+        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');

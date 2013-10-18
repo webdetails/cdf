@@ -11,6 +11,13 @@
 * the license for the specific language governing your rights and limitations.
 */
 
+pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def"], function(pv, pvc, def) {
+    window.pvc = pvc;
+    window.pv = pv;
+    window.def = def;
+
+});
+
 var ChartComponent =  UnmanagedComponent.extend({
     exportChart: function(outputType, overrides) {
         var me = this;

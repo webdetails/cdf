@@ -35,6 +35,7 @@ import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.pentaho.platform.engine.security.SecurityParameterProvider;
 
 /**
  *
@@ -147,29 +148,29 @@ public class CommentsEngine
     return json;
   }
 
-  public JSONObject delete(int commentId, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject delete(int commentId, boolean value, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
     logger.debug("Deleting comment " + commentId);
-    return changeCommentStatus(DELETE_OPERATION, commentId, requestParams, userSession);
+    return changeCommentStatus(DELETE_OPERATION, commentId, value, userSession);
   }
 
-  public JSONObject archive(int commentId, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject archive(int commentId, boolean value, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
     logger.debug("Archiving comment " + commentId);
-    return changeCommentStatus(ARCHIVE_OPERATION, commentId, requestParams, userSession);
+    return changeCommentStatus(ARCHIVE_OPERATION, commentId, value, userSession);
   }
 
-  private JSONObject changeCommentStatus(int operationType, int commentId, IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, PluginHibernateException
+  private JSONObject changeCommentStatus(int operationType, int commentId, boolean value, IPentahoSession userSession) throws JSONException, PluginHibernateException
   {
     Session session = getSession();
     session.beginTransaction();
     CommentEntry comment = (CommentEntry) session.load(CommentEntry.class, commentId);
     switch (operationType) {
       case DELETE_OPERATION:
-        if (operationAuthorized(operationType, comment, userSession)) comment.setDeleted(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
+        if (operationAuthorized(operationType, comment, userSession)) comment.setDeleted(value);
         break;
       case ARCHIVE_OPERATION:
-        if (operationAuthorized(operationType, comment, userSession)) comment.setArchived(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
+        if (operationAuthorized(operationType, comment, userSession)) comment.setArchived(value);
         break;
     }
     session.save(comment);

@@ -11,6 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
+
 (function(){
 
     var _nextTipsyId = 0;

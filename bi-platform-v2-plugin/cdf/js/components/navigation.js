@@ -12,7 +12,7 @@
 */
 
 var NavigatorBaseComponent = BaseComponent.extend({},{
-  path : Dashboards.getPathParameter(),
+  path: Dashboards.getQueryParameter("path"),
   solution : Dashboards.getQueryParameter("solution"),
   template: Dashboards.getQueryParameter("template"),
   navigatorResponse : -1,

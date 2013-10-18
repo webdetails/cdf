@@ -6,7 +6,8 @@
 
 //VERSION TRUNK-20131002
 
-pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/lib/CCC/def", "cdf/lib/CCC/protovis"], function(def, pv) {
+var pvc = (function(def, pv) {
+
 
 /*global pvc:true */
 var pvc = def.globalSpace('pvc', {
@@ -36258,11 +36259,11 @@ def
         // There are no null datums in this chart type (see #_getIsNullDatum) 
         return visibleData ? this.visualRoles.category.select(visibleData, {visible: true}) : null;
     },
-
+    
     defaults: {
         legend: null  // dynamic default, when nully
     }
-
-    });
-    return pvc;
 });
+    
+    return pvc;
+}(def, pv));

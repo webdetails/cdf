@@ -118,6 +118,7 @@ public class CommentsApi {
     @Path("/archive")
     @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
     public void archive(@DefaultValue("0") @QueryParam("commentId") int commentId,
+                        @DefaultValue("false") @QueryParam("value") boolean value,
     
                         @Context HttpServletResponse servletResponse, 
                         @Context HttpServletRequest servletRequest){
@@ -126,7 +127,7 @@ public class CommentsApi {
         String result = "";
 
         try {
-            json = CommentsEngine.getInstance().archive(commentId, getUserSession());
+            json = CommentsEngine.getInstance().archive(commentId, value, getUserSession());
             result = json.toString(2);
         } catch (InvalidCdfOperationException ex) {
             logger.error("Error processing comment: " + ex);
@@ -147,6 +148,7 @@ public class CommentsApi {
     @Path("/delete")
     @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
     public void delete(@DefaultValue("0") @QueryParam("commentId") int commentId,
+                       @DefaultValue("false") @QueryParam("value") boolean value,
     
                         @Context HttpServletResponse servletResponse, 
                         @Context HttpServletRequest servletRequest){
@@ -155,7 +157,7 @@ public class CommentsApi {
         String result = "";
 
         try {
-            json = CommentsEngine.getInstance().delete(commentId, getUserSession());
+            json = CommentsEngine.getInstance().delete(commentId, value, getUserSession());
             result = json.toString(2);
         } catch (InvalidCdfOperationException ex) {
             logger.error("Error processing comment: " + ex);

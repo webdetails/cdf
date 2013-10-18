@@ -36,8 +36,6 @@ import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import pt.webdetails.cpf.packager.Concatenate;
-
 /**
  *
  * @author pdpi
