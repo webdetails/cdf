@@ -11,11 +11,11 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def"], function(pv, pvc, def) {
-    window.pvc = pvc;
-    window.pv = pv;
-    window.def = def;
-
+pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d2.0", "cdf/lib/CCC/def"], function(_pv, _pvc, _def) {
+    // Publish globally
+    pvc = _pvc;
+    pv  = _pv;
+    def = _def;
 });
 
 var ChartComponent =  UnmanagedComponent.extend({
@@ -57,15 +57,12 @@ var ChartComponent =  UnmanagedComponent.extend({
 
             var scriptName =  me.name.replace(/render_/, '');
 
-            urlParams.script = ("/"+ 
-                Dashboards.context.solution + "/" + 
-                Dashboards.context.path     + "/" + 
-                
-                /* Dashboards.context.file.split('.')[0] + "_" + */ 
-                scriptName + ".js") // TODO: This prevents deprecating the generation of 2 file names in CDE/CGG
-
-                .replace(/\/+/g, '/');
-
+            // Dasboards.context path example: 
+            // "/public/cde/mine/MySampleDash.wcdf"
+            // Remove the last segment.
+            // TODO: Using the script name without the dashboard name prefix, for backward compatibility.
+            urlParams.script = Dashboards.context.path.replace(/[^\/]+$/, "") + scriptName + ".js";
+            
             urlParams.attachmentName = scriptName;
 
             return urlParams;
@@ -74,13 +71,17 @@ var ChartComponent =  UnmanagedComponent.extend({
         var urlParams = buildUrlParameters(overrides);
         urlParams.outputType = outputType || 'png';
         
+        // pentaho/api/repos/path:in:repo:MySampleDash.wcdf/generatedContent
+        // pentaho/plugin/cgg/api/services/draw
+        var serviceUrl = "../../../plugin/cgg/api/services/draw?" + $.param(urlParams);
+
         var $exportIFrame = $('#cccExportIFrame');
         if(!$exportIFrame.length) {
             $exportIFrame = $('<iframe id="cccExportIFrame" style="display:none">');
-            $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
+            $exportIFrame[0].src = serviceUrl;
             $exportIFrame.appendTo($('body')); 
         } else {
-            $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
+            $exportIFrame[0].src = serviceUrl;
         }
     },
 

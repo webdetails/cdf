@@ -10,7 +10,7 @@
 * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
 * the license for the specific language governing your rights and limitations.
 */
-pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
+pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis", "cdf/jquery", "cdf/lib/CCC/jquery.tipsy"], function(pv, $) {
 
 (function(){
 
@@ -721,4 +721,6 @@ pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
     }
 
 }());
+
+    return pv.Behavior.tipsy;
 });

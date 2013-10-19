@@ -6,8 +6,9 @@
 
 //VERSION TRUNK-20131002
 
-var pvc = (function(def, pv) {
+pen.define("cdf/lib/CCC/pvc-d2.0", ["cdf/lib/CCC/def", "cdf/lib/CCC/protovis", "cdf/jquery", "cdf/lib/CCC/tipsy"], function(def, pv, $) {
 
+var jQuery = $;
 
 /*global pvc:true */
 var pvc = def.globalSpace('pvc', {
@@ -35051,7 +35052,7 @@ def
 
       var noBox = false;
 
-	if (typeof(dat[2]) != "undefined") {
+    if (typeof(dat[2]) != "undefined") {
         // switch order (assume computational artifact)
         if (dat[4] < dat[0]) {
           dat = dat.reverse();
@@ -36259,11 +36260,11 @@ def
         // There are no null datums in this chart type (see #_getIsNullDatum) 
         return visibleData ? this.visualRoles.category.select(visibleData, {visible: true}) : null;
     },
-    
+
     defaults: {
         legend: null  // dynamic default, when nully
     }
-});
-    
+
+    });
     return pvc;
-}(def, pv));
+});

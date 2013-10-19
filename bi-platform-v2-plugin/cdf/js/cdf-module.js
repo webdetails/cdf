@@ -35,7 +35,7 @@ define([
   'cdf/simile/ajax/simile-ajax-api',
   'cdf/simile/ajax/scripts/json',
 
-  'cdf/lib/CCC/pvc-d1.0',
+  'cdf/lib/CCC/pvc-d2.0',
   'cdf/lib/CCC/protovis',
   'cdf/lib/CCC/jquery.tipsy',
   'cdf/lib/CCC/tipsy',
