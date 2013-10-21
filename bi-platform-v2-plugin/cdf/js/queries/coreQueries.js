@@ -580,7 +580,7 @@
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction",
+      url: webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:jtable.xaction/xaction",
       queryDef:{}
     },
     interfaces:{
