@@ -383,7 +383,7 @@
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: Dashboards.getWebAppPath() + "/content/cda/doQuery?",
+      url: Dashboards.getWebAppPath() + "/plugin/cda/api/doQuery?",
       file: '',
       id: '',
       outputIdx: '1',

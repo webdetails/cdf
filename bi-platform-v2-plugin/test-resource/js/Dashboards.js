@@ -779,7 +779,7 @@ Dashboards.fetchData = function(cd, params, callback) {
     for (param in params) {
       cd['param' + params[param][0]] = Dashboards.getParameterValue(params[param][1]);
     }
-    $.post(webAppPath + "/content/cda/doQuery?", cd,
+    $.post(webAppPath + "/plugin/cda/api/doQuery?", cd,
       function(json) {callback(json);});
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
@@ -1108,7 +1108,7 @@ sprintf = sprintfWrapper.init;
 Query = function() {
 
     // Constants, or what passes for them... Pretty please leave these alone.
-    var CDA_PATH = webAppPath + "/content/cda/doQuery?";
+    var CDA_PATH = webAppPath + "/plugin/cda/api/doQuery?";
     var LEGACY_QUERY_PATH = webAppPath + "/api/repos/:public:cdf:components:jtable.xaction/generatedContent?";
 
     /*
