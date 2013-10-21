@@ -610,7 +610,7 @@
             // async + legacy errors while parsing json response aren't caught
             var msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
             Dashboards.error(msg);
-            json = {"metadata":[msg],"values":[]};
+            myself.setOption('lastResultSet' , "{metadata:[],values:[]}" );
           }else{
             //exceptions while parsing json response are
             //already being caught+handled in updateLifecyle()
