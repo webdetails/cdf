@@ -71,17 +71,15 @@ var ChartComponent =  UnmanagedComponent.extend({
         var urlParams = buildUrlParameters(overrides);
         urlParams.outputType = outputType || 'png';
         
-        // pentaho/api/repos/path:in:repo:MySampleDash.wcdf/generatedContent
-        // pentaho/plugin/cgg/api/services/draw
-        var serviceUrl = "../../../plugin/cgg/api/services/draw?" + $.param(urlParams);
+        var url = Dashboards.getCggDrawUrl() + "?" + $.param(urlParams);
 
         var $exportIFrame = $('#cccExportIFrame');
         if(!$exportIFrame.length) {
             $exportIFrame = $('<iframe id="cccExportIFrame" style="display:none">');
-            $exportIFrame[0].src = serviceUrl;
+            $exportIFrame[0].src = url;
             $exportIFrame.appendTo($('body')); 
         } else {
-            $exportIFrame[0].src = serviceUrl;
+            $exportIFrame[0].src = url;
         }
     },
 

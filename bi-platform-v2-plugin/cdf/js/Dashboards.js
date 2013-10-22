@@ -150,6 +150,10 @@ Dashboards.getWebAppPath = function (){
   return webAppPath
 }
 
+Dashboards.getCggDrawUrl = function() {
+    return "../../../plugin/cgg/api/services/draw";
+};
+
 // REFRESH ENGINE begin
 
 Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
