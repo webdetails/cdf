@@ -1,10 +1,17 @@
 /*!
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
  */
-/*! VERSION TRUNK-20131023*/
-
+ 
+/*! VERSION TRUNK-20131023 */
 var pvc = (function(def, pv) {
 
 
@@ -17340,7 +17347,7 @@ def
     create: function(legendPanel, pvBulletPanel, extensionPrefix, wrapper){
         var renderInfo = {};
         var drawRule = this.drawRule;
-        var sceneColorProp = function(scene) { return scene._color; };
+        var sceneColorProp = function(scene) { return scene.color; };
         
         if(drawRule) {
             var rulePvBaseProto = new pv_Mark()
@@ -21706,7 +21713,7 @@ pvc.BaseChart
                 var colorValue = dataCell.domainItemDataValue(itemData);
                 
                 // TODO: HACK...
-                itemScene._color = colorAxis.scale(colorValue);
+                itemScene.color = colorAxis.scale(colorValue);
             });
         }
     }
@@ -30742,7 +30749,7 @@ def
     var I = pvc.visual.Interactive;
     this._ibits = I.Interactive | I.ShowsInteraction;
     
-    this._color = def.get(keyArgs, 'color');
+    this.color = def.get(keyArgs, 'color');
     
     // Pre-create 'value' variable
     this.vars.value = new pvc_ValueLabelVar(null, def.get(keyArgs, 'label'));
