@@ -17349,7 +17349,7 @@ def
     create: function(legendPanel, pvBulletPanel, extensionPrefix, wrapper){
         var renderInfo = {};
         var drawRule = this.drawRule;
-        var sceneColorProp = function(scene) { return scene._color; };
+        var sceneColorProp = function(scene) { return scene.color; };
         
         if(drawRule) {
             var rulePvBaseProto = new pv_Mark()
@@ -21715,7 +21715,7 @@ pvc.BaseChart
                 var colorValue = dataCell.domainItemDataValue(itemData);
                 
                 // TODO: HACK...
-                itemScene._color = colorAxis.scale(colorValue);
+                itemScene.color = colorAxis.scale(colorValue);
             });
         }
     }
@@ -30751,7 +30751,7 @@ def
     var I = pvc.visual.Interactive;
     this._ibits = I.Interactive | I.ShowsInteraction;
     
-    this._color = def.get(keyArgs, 'color');
+    this.color = def.get(keyArgs, 'color');
     
     // Pre-create 'value' variable
     this.vars.value = new pvc_ValueLabelVar(null, def.get(keyArgs, 'label'));
