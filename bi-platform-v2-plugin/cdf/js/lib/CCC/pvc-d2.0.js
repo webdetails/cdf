@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  
-/*! VERSION TRUNK-20131023 */
+/*! VERSION TRUNK-20131024 */
 var pvc = (function(def, pv) {
 
 
@@ -14839,13 +14839,11 @@ def
                 this.domain.minLocked = !!scale.minLocked;
                 this.domain.maxLocked = !!scale.maxLocked;
 
-                if(this.scaleType === 'numeric') {
-                    var roundMode = this.option('DomainRoundMode');
-                    if(roundMode === 'nice') { scale.nice(); }
+                var roundMode = this.option('DomainRoundMode');
+                if(roundMode === 'nice') { scale.nice(); }
 
-                    var tickFormatter = this.option('TickFormatter');
-                    if(tickFormatter) { scale.tickFormatter(tickFormatter); }
-                }
+                var tickFormatter = this.option('TickFormatter');
+                if(tickFormatter) { scale.tickFormatter(tickFormatter); }
             }
         }
 
@@ -14860,7 +14858,7 @@ def
 
         this.ticks = ticks;
 
-        if(scale.type === 'numeric' && this.option('DomainRoundMode') === 'tick'){
+        if(scale.type !== 'discrete' && this.option('DomainRoundMode') === 'tick'){
 
             delete this._roundingPaddings;
 
