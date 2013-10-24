@@ -57,10 +57,6 @@ requireCfg['shim']['cdf/Dashboards'] = [
 
 requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
 
-// This supports common-ui's ccc_wrapper.js, that keeps on requiring for version 1.
-(requireCfg['map'] || (requireCfg['map'] = {}))['cdf/lib/CCC/pvc-d1.0'] = 'cdf/lib/CCC/pvc-d2.0';
-//requireCfg['paths']['cdf/lib/CCC/pvc-d1.0'] = CONTEXT_PATH+'content/pentaho-cdf/js/lib/CCC/pvc-d2.0';
-
 requireCfg['shim']['cdf/components/core']       = ['cdf/Dashboards'];
 requireCfg['shim']['cdf/components/input']      = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];

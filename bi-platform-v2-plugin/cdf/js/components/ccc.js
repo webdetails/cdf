@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d2.0", "cdf/lib/CCC/def"], function(_pv, _pvc, _def) {
+pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def"], function(_pv, _pvc, _def) {
     // Publish globally
     pvc = _pvc;
     pv  = _pv;

@@ -9262,6 +9262,10 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 	define( "jquery", [], function () { return jQuery; } );
 }
 
-
+// TODO: HACK: Adding this here so that jQuery is registered under this name.
+// No shims support on the server???
+if(typeof pen !== "undefined" && pen.define) {
+	pen.define("cdf/jquery", function() { return jQuery; });
+}
 
 })( window );

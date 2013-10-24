@@ -54,9 +54,3 @@ var pen = {
         return this.define.apply(this, args);
     }
 };
-
-// Pre-register known global stuff with the pen.define facade.
-// pvc-d2.0.js requires jquery.
-if(typeof jQuery !== 'undefined') {
-    pen.define("cdf/jquery", function() { return jQuery; });
-}
