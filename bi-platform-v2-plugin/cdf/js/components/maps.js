@@ -269,7 +269,7 @@ var MapComponent = BaseComponent.extend({
 			p[i] = [key,value];
 		} 
 
-		html = Dashboards.pentahoAction(this.solution, this.path, this.action, p,null);
+		html = Dashboards.pentahoAction(this.path, p, null);
 
 		var myArray = this.parseArray(html,true);
 		var len = myArray.length;
@@ -322,6 +322,6 @@ var MapBubbleComponent = BaseComponent.extend({
 				var value = Dashboards.getParameterValue(this.parameters[i][1]);
 				parameters.push([key,value]);
 			}
-		DashboardsMap.updateInfoWindow(Dashboards.pentahoAction(this.solution, this.path, this.action, parameters ,null));
+		DashboardsMap.updateInfoWindow(Dashboards.pentahoAction(this.path, parameters ,null));
 	}
 });

@@ -43,7 +43,6 @@ public class CdfFileInfoGenerator extends SolutionFileMetaAdapter {
   public CdfFileInfoGenerator() {
   }
 
-  @Override
   public IFileInfo getFileInfo(ISolutionFile solutionFile, InputStream in) {
     Document doc = null;
     try {

@@ -17,7 +17,7 @@ import org.pentaho.cdf.utils.PluginHibernateUtil;
 import org.pentaho.platform.api.engine.IPluginLifecycleListener;
 import org.pentaho.platform.api.engine.PluginLifecycleException;
 import pt.webdetails.cpf.persistence.PersistenceEngine;
-import org.pentaho.cdf.views.View;
+import org.pentaho.cdf.views.ViewEntry;
 
 /**
  * This class inits Cda plugin within the bi-platform
@@ -33,8 +33,8 @@ public class CdfLifecycleListener implements IPluginLifecycleListener
 
 	  //initialize orientDb and initialize org.pentaho.cdf.views.View
 	  PersistenceEngine pe = PersistenceEngine.getInstance();
-	  if (!pe.classExists(View.class.getName())) {
-		  pe.initializeClass(View.class.getName());
+	  if (!pe.classExists(ViewEntry.class.getName())) {
+		  pe.initializeClass(ViewEntry.class.getName());
 	  }
           
     PluginHibernateUtil.initialize();

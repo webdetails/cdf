@@ -1,0 +1,22 @@
+<html>
+<head>
+  <script language="javascript" type="text/javascript" src="../jquery.js"></script> 
+</head>
+<body>
+	<div id="chart"></div>
+</body>
+<script>
+
+function loadChart(chart) {
+    $("#chart").html(chart);
+}
+
+function chartClick(object,value){
+
+window.close();
+window.opener.Dashboards.getComponent(object).zoomCallBack(value);
+
+}
+
+</script>
+</html>

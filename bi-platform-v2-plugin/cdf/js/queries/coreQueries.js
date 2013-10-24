@@ -383,7 +383,7 @@
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: Dashboards.getWebAppPath() + "/content/cda/doQuery?",
+      url: Dashboards.getWebAppPath() + "/plugin/cda/api/doQuery?",
       file: '',
       id: '',
       outputIdx: '1',
@@ -580,7 +580,7 @@
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction",
+      url: webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:jtable.xaction/xaction",
       queryDef:{}
     },
     interfaces:{
@@ -610,7 +610,7 @@
             // async + legacy errors while parsing json response aren't caught
             var msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg + ":" + e.message;
             Dashboards.error(msg);
-            json = {"metadata":[msg],"values":[]};
+            myself.setOption('lastResultSet' , "{metadata:[],values:[]}" );
           }else{
             //exceptions while parsing json response are
             //already being caught+handled in updateLifecyle()

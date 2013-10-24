@@ -37,13 +37,13 @@ var XactionComponent = BaseComponent.extend({
         }
 
         if (typeof(this.serviceMethod) == 'undefined' || this.serviceMethod == 'ServiceAction') {
-          var jXML = Dashboards.callPentahoAction(myself,this.solution, this.path, this.action, p,null);
+          var jXML = Dashboards.callPentahoAction(myself,this.path, p,null);
 
           if(jXML != null){
             $('#'+myself.htmlObject).html(jXML.find("ExecuteActivityResponse:first-child").text());
           }
         } else {
-          var html = Dashboards.pentahoServiceAction(this.serviceMethod, 'html', this.solution, this.path, this.action, p, null);
+          var html = Dashboards.pentahoServiceAction(this.serviceMethod, 'html', this.path, p, null);
           $('#'+myself.htmlObject).html(html);
         }
 
@@ -53,10 +53,10 @@ var XactionComponent = BaseComponent.extend({
         " height=\"100%\"" +
         " width=\"100%\" />";        
         var iframe = $(xactionIFrameHTML);        
-        var url = webAppPath + "/ViewAction?wrapper=false" +
-              "&solution=" + this.solution +
-              "&path=" + this.path +
-              "&action="+ this.action;
+        
+    //var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&"; //legacy
+    var ts = "ts=" + new Date().getTime() + "&";
+    var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -101,7 +101,7 @@ var JpivotComponent = BaseComponent.extend({
     }
      // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-    jpivotHTML += webAppPath + "/ViewAction?solution="  + this.solution + "&path=" +  this.path + "&action="+ this.action;
+    jpivotHTML += webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" ;
 
     // Add args
     var p = new Array(this.parameters.length);
@@ -118,21 +118,7 @@ var JpivotComponent = BaseComponent.extend({
 });
 
 var PivotLinkComponent = BaseComponent.extend({
-  update : function() {
-    var title = this.tooltip==undefined?"View details in a Pivot table":this.tooltip;
-    // WPG: this assumes name is global name, can I pass in the object directly instead?
-    var link = $('<a class="pivotLink"> </a>').html(this.content).attr("href","javascript:PivotLinkComponent.openPivotLink("+ this.name +")").attr("title",title);
-
-    $("#"+this.htmlObject).empty();
-    $("#"+this.htmlObject).html(link);
-
-    $('a.pivotLink').tooltip({
-      showURL: false,
-      track:true,
-      delay: 1000,
-      opacity: 0.5
-    });
-  }
+  update : function() {}
 },{
   openPivotLink : function(object) {
     var url = webAppPath + "/Pivot?solution=system&path=pentaho-cdf/actions&action=jpivot.xaction&";
@@ -191,11 +177,10 @@ var PrptComponent = BaseComponent.extend({
   /*************************************************************************/
 
   update: function(){
-
+ 
     this.clear();
-
+ 
     var options = this.getOptions();
-
     var downloadMode = this.downloadMode;
     // if you really must use this component to download stuff
     if (downloadMode == null) {
@@ -208,7 +193,8 @@ var PrptComponent = BaseComponent.extend({
     }
 
     if(options["dashboard-mode"]){
-      var url = webAppPath + '/content/reporting';
+   	  var ts = "ts=" + new Date().getTime() + "&";
+      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
       var myself=this;
       $.ajax({
         url: url,
@@ -241,12 +227,12 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/content/reporting';
+        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
         this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/content/reporting/reportviewer/report.html' + "?" + $.param(options);
+        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
@@ -278,7 +264,6 @@ var PrptComponent = BaseComponent.extend({
    * report options
    **/
   getOptions: function() {
-
     var options = {
       paginate : this.paginate || false,
       showParameters: this.showParameters || false,
@@ -294,7 +279,7 @@ var PrptComponent = BaseComponent.extend({
     } else {
       options["output-target"] = "table/html;page-mode=stream";
     }
-
+ 
     // update options with report parameters
     for (var i=0; i < this.parameters.length; i++ ) {
       // param: [<prptParam>, <dashParam>, <default>]
@@ -1063,7 +1048,7 @@ success = response == 'Public Schedule saved/created';
 
 var ExecutePrptComponent = PrptComponent.extend({
   visible: false,
-
+ 
   update : function() {
     // 2 modes of working; if it's a div, create a button inside it
     var myself = this;
@@ -1084,11 +1069,12 @@ var ExecutePrptComponent = PrptComponent.extend({
       typeof(myself.postChange)=='undefined' ? true : myself.postChange();
     });
   },
-
+ 
   executePrptComponent: function(){
-
+ 
     var options = this.getOptions();
-    var url = webAppPath + '/content/reporting/reportviewer/report.html';
+    var ts = "ts=" + new Date().getTime() + "&";
+  var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
     var a=[];
     var encodeArray = function(k,v) {
       var arr = [];
@@ -1110,7 +1096,7 @@ var ExecutePrptComponent = PrptComponent.extend({
       width: $(window).width(),
       height:$(window).height() - 50
     });
-
+ 
   }
 }
 );
@@ -1164,7 +1150,7 @@ var AnalyzerComponent = BaseComponent.extend({
 
     iFrameHTML += $.param(parameters, true);
     iFrameHTML += "\"></iframe>";
-
+    
     return iFrameHTML;
   }
 });
@@ -1194,7 +1180,9 @@ var ExecuteXactionComponent = BaseComponent.extend({
   },
 
   executeXAction : function() {
-    var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&";
+    //var url = webAppPath + "/ViewAction?solution=" + this.solution + "&path=" + this.path + "&action=" + this.action + "&"; //legacy
+  var ts = "ts=" + new Date().getTime() + "&";
+  var url = webAppPath + "/api/repos/" + this.path.replace(/\//g, ':') + "/xaction?" + ts;
 
     var p = new Array(this.parameters.length);
     var parameters = [];

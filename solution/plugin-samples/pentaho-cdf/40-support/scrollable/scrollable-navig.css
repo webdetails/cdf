@@ -22,7 +22,7 @@ a.prev, a.next, a.prevPage, a.nextPage {
 	display:block;
 	width:18px;
 	height:18px;
-	background:url(GetCDFResource?resource=/plugin-samples/pentaho-cdf/40-support/scrollable/left.png) no-repeat;
+	background:url(left.png) no-repeat;
 	float:left;
 	margin:43px 10px;
 	cursor:pointer;
@@ -40,7 +40,7 @@ a.disabled {
 
 /* next button uses another background image */
 a.next, a.nextPage {
-	background-image:url(GetCDFResource?resource=/plugin-samples/pentaho-cdf/40-support/scrollable/right.png);
+	background-image:url(right.png);
 	clear:right;	
 }
 
@@ -63,7 +63,7 @@ div.navi a {
 	height:8px;
 	float:left;
 	margin:3px;
-	background:url(GetCDFResource?resource=/plugin-samples/pentaho-cdf/40-support/scrollable/navigator.png) 0 0 no-repeat;     
+	background:url(GetCDFResource?resource=/public/plugin-samples/pentaho-cdf/40-support/scrollable/navigator.png) 0 0 no-repeat;     
 	cursor:pointer;	
 }
 
@@ -108,7 +108,7 @@ a.prev, a.next {
 	float:left;
 	width:214px;
 	height:300px;
-	background:#333 url(GetCDFResource?resource=/plugin-samples/pentaho-cdf/40-support/scrollable/scrollable-gradient.png) repeat-x 0 170px;
+	background:#333 url(scrollable-gradient.png) repeat-x 0 170px;
 	color:#fff;
 	border-left:1px solid #333;
 	cursor:pointer;

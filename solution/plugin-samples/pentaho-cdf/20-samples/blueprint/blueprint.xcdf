@@ -5,4 +5,5 @@
 	<description>This is a sample of blueprint css framework usage</description>
 	<icon></icon>
 	<template>template.html</template>
+	<style>mantle</style>
 </cdf>

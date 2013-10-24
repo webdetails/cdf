@@ -18,23 +18,39 @@
   <dependencies defaultconf="default->default">
     <!--  third party dependencies -->
     <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false"/>
-    <dependency org="commons-io" name="commons-io" rev="1.3" transitive="false"/>
+    <dependency org="commons-io" name="commons-io" rev="2.1" transitive="false"/>
+        <dependency org="commons-codec" name="commons-codec" rev="1.5" transitive="false"/>
     <dependency org="dom4j" name="dom4j" rev="1.6.1" transitive="false"/>
     <dependency org="commons-lang" name="commons-lang" rev="2.2"/>
     <dependency org="org.json" name="json" rev="${dependency.json.revision}" transitive="false"/>
     <dependency org="javax.servlet" name="servlet-api" rev="2.4"/>
+    <dependency org="javax.ws.rs"            name="jsr311-api"         rev="0.11"/>
+    <dependency org="javax.xml" name="jaxrpc-api" rev="1.1" />
+    
+    <dependency org="org.springframework" name="spring" rev="2.5.6" transitive="false"/>
+    <dependency org="org.springframework.security" name="spring-security-core" rev="2.0.5.RELEASE" transitive="false"/>
+    
+    
     <!--  pentaho dependencies -->
-
-		
-    <dependency org="pentaho" name="pentaho-bi-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-    <dependency org="pentaho" name="pentaho-bi-platform-util" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-    <dependency org="pentaho" name="pentaho-bi-platform-engine-security" rev="${dependency.bi-platform.revision}" transitive="true" changing="true"/>    
-    <dependency org="pentaho" name="pentaho-bi-platform-engine-core" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-    <dependency org="pentaho" name="pentaho-bi-platform-engine-services" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-    <dependency org="pentaho" name="pentaho-bi-platform-repository" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-    <dependency org="pentaho" name="pentaho-bi-platform-plugin-services" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-    <dependency org="pentaho" name="pentaho-bi-platform-web" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
-    <dependency org="pentaho" name="pentaho-bi-platform-web-servlet" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
+    
+    
+    <dependency org="pentaho" name="pentaho-platform-extensions" 
+                rev="${dependency.bi-platform.revision}" transitive="false" changing="true" />
+    <dependency org="pentaho" name="pentaho-user-console-package" 
+                rev="${dependency.bi-platform.revision}" transitive="false" changing="true" />
+    <dependency org="pentaho" name="pentaho-platform-api" 
+                rev="${dependency.bi-platform.revision}" changing="true" transitive="false" />
+    <dependency org="pentaho" name="pentaho-platform-core" 
+                rev="${dependency.bi-platform.revision}" changing="true" transitive="false" />
+    <dependency org="pentaho" name="pentaho-platform-repository" 
+                rev="${dependency.bi-platform.revision}" changing="true" transitive="false" />
+    <dependency org="pentaho" name="pentaho-platform-scheduler" 
+                rev="${dependency.bi-platform.revision}" changing="true" transitive="false" />
+    <dependency org="pentaho" name="common-ui" 
+                rev="${dependency.bi-platform.revision}" changing="true" transitive="false" >
+      <artifact name="common-ui" type="zip" />
+    </dependency>
+    
     <dependency org="org.hibernate" name="hibernate" rev="3.2.6.ga">
       <!--
 			 
@@ -50,16 +66,14 @@
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
 
-    <dependency org="pt.webdetails" name="cpf-core" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
-    <dependency org="pt.webdetails" name="cpf-pentaho" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
-
+    <dependency org="pentaho" name="cpf" rev="${dependency.pentaho-cpf-plugin.revision}" transitive="false" changing="true" conf="runtime->default"/>
 
     <!-- orient db (persistence) -->
-    <dependency org="com.orientechnologies" name="orient-commons" rev="1.5.0" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-core" rev="1.5.0" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-server" rev="1.5.0" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-client" rev="1.5.0" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-enterprise" rev="1.5.0" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orient-commons" rev="1.3.0" transitive="false" conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies" name="orientdb-core" rev="1.3.0" transitive="false" conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies" name="orientdb-server" rev="1.3.0" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orientdb-client" rev="1.3.0" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies" name="orientdb-enterprise" rev="1.3.0" transitive="false" conf="runtime,default->default" />
 
 
   </dependencies>

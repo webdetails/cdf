@@ -24,11 +24,33 @@ define([
   'cdf/jquery.positionBy',
   'cdf/jquery.sparkline',
   'cdf/jquery.tooltip',
-  'cdf/json',
+
+  'cdf/Base',
+  'cdf/underscore',
+  'cdf/backbone',
+  'cdf/mustache',
+  'cdf/lib/shims',
+  'cdf/Dashboards',
+
   'cdf/simile/ajax/simile-ajax-api',
   'cdf/simile/ajax/scripts/json',
-  'cdf/Base',
-  'cdf/Dashboards',
-  'cdf/CoreComponents'
-], function(){
-});
+
+  'cdf/lib/CCC/pvc-d1.0',
+  'cdf/lib/CCC/protovis',
+  'cdf/lib/CCC/jquery.tipsy',
+  'cdf/lib/CCC/tipsy',
+  'cdf/lib/CCC/def',
+
+  'cdf/components/core',
+  'cdf/components/ccc',
+  'cdf/components/input'	,
+  'cdf/components/jfreechart',
+  'cdf/components/maps',
+  'cdf/components/navigation',
+  'cdf/components/pentaho',
+  'cdf/components/simpleautocomplete',
+  'cdf/components/table'
+
+],
+    function(){
+    });

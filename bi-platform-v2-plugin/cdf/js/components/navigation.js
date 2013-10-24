@@ -12,7 +12,7 @@
 */
 
 var NavigatorBaseComponent = BaseComponent.extend({},{
-  path : Dashboards.getQueryParameter("path"),
+  path: Dashboards.getQueryParameter("path"),
   solution : Dashboards.getQueryParameter("solution"),
   template: Dashboards.getQueryParameter("template"),
   navigatorResponse : -1,
@@ -115,7 +115,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
+      $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/getJSONSolution?mode=navigator", function(json){
         myself.processNavigatorResponse(json);
       });
     }
@@ -126,7 +126,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   processNavigatorResponse : function(json) {
     NavigatorBaseComponent.navigatorResponse = json;
 	
-    var files = this.includeSolutions?json.solution.folders:NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
+    var files = this.includeSolutions?json.solution.folders[0].folders:NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
 		
     files.sort(function(a,b){
       return a.name>b.name
@@ -190,23 +190,15 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
         _path="path="+file.path;
       }
 			
-      var _template = NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
+      var _template = NavigatorBaseComponent.template != undefined && NavigatorBaseComponent.template.length != undefined && 
+          NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
       if (file.link != undefined){
-        s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + file.link + "\">" + file.title + "</a>";
+        s += "<li><a "+ classString +" title=\"" + file.title + "\"  href=\"" + webAppPath + file.link + "\">" + file.title + "</a>";
 
       }
       else{
-        s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+        s += "<li><a "+ classString +" title=\"" + file.title + "\" onClick=\"return false;\" href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
       }
-
-      /*
-			if(file.type == "wcdf")
-				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf-dd/Render?solution=" + file.solution + "&amp;path=" + file.path + "&amp;file=" + file.file + "\">" + file.title + "</a>";
-			else if (file.type == "xcdf")
-				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf/RenderXCDF?solution=" + file.solution + "&amp;path=" + file.path + "&amp;action=" + file.file + "\">" + file.title + "</a>";
-			else
-				s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
-			*/
 
       var files = file.folders || [];
       files.sort(function(a,b){
@@ -236,11 +228,15 @@ var ContentListComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     var path = this.mode != 4  ? NavigatorBaseComponent.path : NavigatorBaseComponent.getParentPath();
-    $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + path, function(json){
-      myself.processContentListResponse(json);
+    myself.draw(path);
+  },
+  draw: function(path){
+    var myself = this;
+    $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/getJSONSolution?mode=contentList" + (path != "" ? "&path=" + path : ""), function(json){
+      myself.processContentListResponse(json,path);
     });
   },
-  processContentListResponse : function(json) {
+  processContentListResponse : function(json, path) {
 
     // 1 - Get my solution and path from the object;
     // 2 - get the content
@@ -271,7 +267,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
     }
 
     var myself = this;
-		
+    
     $.each(files,function(i,val){
       // We want to iterate only depending on the options:
       // 1 - Files only
@@ -289,11 +285,21 @@ var ContentListComponent = NavigatorBaseComponent.extend({
         var cls = "";
         var target = "";
         var href = "";
-        var template =  NavigatorBaseComponent.template.length > 0 ? "&template=" + NavigatorBaseComponent.template : "";
-		
+        var template = NavigatorBaseComponent.template != undefined && NavigatorBaseComponent.template.length != undefined && 
+           NavigatorBaseComponent.template.length > 0 ? "&template=" + NavigatorBaseComponent.template : "";
+        var anchor;
+    
         if (this.type=="FOLDER"){
           cls = "folder";
-          href = webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + this.solution + "&path=" + this.path + template;
+
+          var parentPath = path,
+              lastIndex = path.lastIndexOf("/");
+
+          parentPath = parentPath.substring(0,parentPath.substring(0,lastIndex).lastIndexOf("/"));
+
+          anchor = $("<a></a>").attr("target",target).attr("title",this.description).attr("parentPath",parentPath).text(this.title).click(function(){
+            myself.draw($(this).attr("parentPath"));
+          })
         }
         else{
           if (this.url != undefined){
@@ -306,12 +312,10 @@ var ContentListComponent = NavigatorBaseComponent.extend({
             cls = "action greybox";
             href = webAppPath + this.link;
           }
-							
-        }
 
-
-        var anchor = $("<a></a>").attr("href",href).attr("target",target).attr("title",this.description).text(this.title)
-        $("<li></li>").attr("class",cls).appendTo(container).append(anchor);
+          anchor = $("<a></a>").attr("target",target).attr("title",this.description).text(this.title).attr("href",href);
+        }   
+        $("<li></li>").attr("class",cls).appendTo(container).append(anchor);   
       }
 
     });
@@ -339,7 +343,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+	  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/getJSONSolution?mode=contentlist" + (NavigatorBaseComponent.path != "" ? "&path=" + NavigatorBaseComponent.path : ""), function(json){
         myself.processPageTitleResponse(json);
       });
     }
@@ -351,12 +355,10 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
     // Store the value
     NavigatorBaseComponent.navigatorResponse = json;
 	
-    var _id = json.solution.id +"/" + NavigatorBaseComponent.solution + (NavigatorBaseComponent.path.length > 1?
-      (NavigatorBaseComponent.path.charAt(0) == '/' ? NavigatorBaseComponent.path : '/' + NavigatorBaseComponent.path) : "");
-    var file = this.findPageTitleObject(json.solution.folders,_id);
+    var file = this.findPageTitleObject(json.content,json.id);
 
     if (file.title != undefined && file.description != undefined){
-      $("#"+this.htmlObject).text(file.title + " - " + file.description);
+      $("#"+this.htmlObject).text(file.title + (file.description != "" ? (" - " + file.description) : ""));
     }
   },
   findPageTitleObject : function(folders,id){

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+	<title>Kettle Transformation</title>
+	<version>1</version>
+	<logging-level>debug</logging-level>
+	<documentation> 
+	<author>Pedro Alves</author>  
+		<description></description>  
+		<help/>  
+		<result-type/>
+	</documentation>
+
+	<inputs> 
+		<DIRECTORY type="string">
+			<sources>
+				<request>DIRECTORY</request>
+			</sources>
+			<default-value/>
+		</DIRECTORY>
+		<TRANSFORMATION type="string">
+			<sources>
+				<request>TRANSFORMATION</request>
+			</sources>
+			<default-value/>
+		</TRANSFORMATION>
+		<IMPORTSTEP type="string">
+			<sources>
+				<request>IMPORTSTEP</request>
+			</sources>
+			<default-value>Output</default-value>
+		</IMPORTSTEP>
+		<PARAMETER1 type="string">
+			<sources>
+				<request>PARAMETER1</request>
+			</sources>
+			<default-value/>
+		</PARAMETER1>
+		<PARAMETER2 type="string">
+			<sources>
+				<request>PARAMETER2</request>
+			</sources>
+			<default-value/>
+		</PARAMETER2>
+		<PARAMETER3 type="string">
+			<sources>
+				<request>PARAMETER3</request>
+			</sources>
+			<default-value/>
+		</PARAMETER3>
+		<PARAMETER4 type="string">
+			<sources>
+				<request>PARAMETER4</request>
+			</sources>
+			<default-value/>
+		</PARAMETER4>
+		<PARAMETER5 type="string">
+			<sources>
+				<request>PARAMETER5</request>
+			</sources>
+			<default-value/>
+		</PARAMETER5>
+		<PARAMETER6 type="string">
+			<sources>
+				<request>PARAMETER6</request>
+			</sources>
+			<default-value/>
+		</PARAMETER6>
+		<PARAMETER7 type="string">
+			<sources>
+				<request>PARAMETER7</request>
+			</sources>
+			<default-value/>
+		</PARAMETER7>
+		<PARAMETER8 type="string">
+			<sources>
+				<request>PARAMETER8</request>
+			</sources>
+			<default-value/>
+		</PARAMETER8>
+		<PARAMETER9 type="string">
+			<sources>
+				<request>PARAMETER9</request>
+			</sources>
+			<default-value/>
+		</PARAMETER9>
+	</inputs>
+
+	<outputs> 
+		<newResults type="result-set"/> 
+	</outputs>
+
+	<actions>
+		<action-definition> 
+			<component-name>KettleComponent</component-name>
+			<action-type>Execute Kettle Transformation</action-type>
+			<action-inputs>
+				<PARAMETER1 type="string"/>
+				<PARAMETER2 type="string"/>
+				<PARAMETER3 type="string"/>
+				<PARAMETER4 type="string"/>
+				<PARAMETER5 type="string"/>
+				<PARAMETER6 type="string"/>
+				<PARAMETER7 type="string"/>
+				<PARAMETER8 type="string"/>
+				<PARAMETER9 type="string"/>
+				<TRANSFORMATION type="string"/>
+				<DIRECTORY type="string"/>
+				<IMPORTSTEP type="string"/>
+			</action-inputs>
+			<action-outputs> 
+				<transformation-output type="result-set" mapping="newResults"/> 
+			</action-outputs>
+			<component-definition> 
+				<transformation>{TRANSFORMATION}</transformation>
+				<directory>{DIRECTORY}</directory>
+				<importstep>{IMPORTSTEP}</importstep> 
+			</component-definition> 
+		</action-definition>
+	</actions>
+</action-sequence>

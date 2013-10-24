@@ -1,5 +1,4 @@
-<script type="text/javascript"
-	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+<script type="text/javascript" src="../../repo/files/:public:plugin-samples:pentaho-cdf:30-documentation:30-component_reference:MetaLayerSamples.js"></script>
 
 <div class="shadow">
 
@@ -47,24 +46,24 @@
 
 			<dt>queryDefinition</dt>
 			<dd>MetaLayer object with the definition of pivot (see MetaLayer options)</dd>
-		</dl>	
-		
+		</dl>
+
 		<h3>MetaLayer options</h3>
 
 		<dl class="documentation">
 			<dt>queryType</dt>
 			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
 
-			<dt>jndi</dt> 
+			<dt>jndi</dt>
 			<dd>Connection to use for the query</dd>
 
-			<dt>query</dt> 
+			<dt>query</dt>
 			<dd>sql or mdx Query to execute</dd>
 
-			<dt>cube</dt> 
+			<dt>cube</dt>
 			<dd>Cube name to use when queryType is mdx</dd>
 
-			<dt>catalog</dt> 
+			<dt>catalog</dt>
 			<dd>Mondrian schema to use when queryType is mdx</dd>
 		</dl>
 
@@ -86,22 +85,22 @@
 					<textarea cols="80" rows="20" id="samplecode">
 
 result="";
-					
+
 MetaLayerHome2 = {
 executeQueryComponentDefinition: {
 	queryType: 'mdx',
 	jndi: "SampleData",
-	catalog: "solution:steel-wheels/analysis/steelwheels.mondrian.xml",
+	catalog: "mondrian:/SteelWheels",
 	query: function(){
-		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," + 
-		"NON EMPTY TopCount([Customers].[All Customers].Children," + 
+		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," +
+		"NON EMPTY TopCount([Customers].[All Customers].Children," +
 		"10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
 		}
 	}
 }
 
 
-var executeQueryComponent = 
+var executeQueryComponent =
 {
 name: "executeQueryComponent",
 type: "queryComponent",

@@ -1,5 +1,4 @@
-<script type="text/javascript"
-	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+<script type="text/javascript" src="../../repo/files/:public:plugin-samples:pentaho-cdf:30-documentation:30-component_reference:MetaLayerSamples.js"></script>
 <div class="shadow">
 
 	<div class="contents">
@@ -140,33 +139,33 @@
 
 var MetaLayer = {
 timePlotDefinition: {
-	width: 500,
-	height: 300,
-	title: "Total order income",
-	queryType: 'mdx',
-	jndi: "SampleData",
-	catalog: "solution:/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
-	query: function(){
-
-		var query = "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
-		return query;
-	},
-	columns: ["Total Price"],
-	dots: false,
-	showValues: true,
-	fill: true
+        width: 500,
+        height: 300,
+        title: "Total order income",
+        queryType: 'mdx',
+        jndi: "SampleData",
+        catalog: "solution:/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
+        query: function(){
+ 
+                var query = "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
+                return query;
+        },
+        columns: ["Total Price"],
+        dots: false,
+        showValues: true,
+        fill: true
 }
 };
-
-var timePlotComponent = 
+ 
+var timePlotComponent =
 {
-	name: "timePlotComponent",
-	type: "timePlotComponent",
-	chartDefinition: MetaLayer.timePlotDefinition,
-	htmlObject: "sampleObject",
-	executeAtStart: true
+        name: "timePlotComponent",
+        type: "timePlotComponent",
+        chartDefinition: MetaLayer.timePlotDefinition,
+        htmlObject: "sampleObject",
+        executeAtStart: true
 };
-
+ 
 $("#sampleObject").empty();
 Dashboards.init([timePlotComponent]);
 					</textarea>

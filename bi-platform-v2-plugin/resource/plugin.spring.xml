@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ws="http://jax-ws.dev.java.net/spring/core" xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd
+                           http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd
+                           http://jax-ws.dev.java.net/spring/servlet http://jax-ws.dev.java.net/spring/servlet.xsd">
+
+  <context:annotation-config />
+  <!-- JAX-RS beans -->
+  <bean id="api" class="org.pentaho.platform.web.servlet.JAXRSPluginServlet"/>
+  <bean id="xcdf" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
+  <bean id="xcdf.mobile" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype"/>
+  <bean id="storage" class="org.pentaho.cdf.storage.StorageApi"/>
+  <bean id="comments" class="org.pentaho.cdf.comments.CommentsApi"/>
+  <bean id="settings" class="org.pentaho.cdf.settings.SettingsApi"/>
+  <bean id="views" class="org.pentaho.cdf.views.ViewsApi"/>
+  
+</beans>

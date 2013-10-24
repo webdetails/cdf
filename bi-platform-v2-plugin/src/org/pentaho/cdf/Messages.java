@@ -23,7 +23,7 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.repository.ISolutionRepository;
+import org.pentaho.platform.api.engine.IPluginResourceLoader;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.core.system.StandaloneSession;
 import org.pentaho.platform.util.logging.Logger;
@@ -45,7 +45,8 @@ public class Messages {
     if (bundle == null) {
       IPentahoSession session = new StandaloneSession( "dashboards messages" ); //$NON-NLS-1$
         try {
-          InputStream in = PentahoSystem.get(ISolutionRepository.class, session).getResourceInputStream("system/"+CdfContentGenerator.PLUGIN_NAME+"/messages.properties", true, ISolutionRepository.ACTION_EXECUTE); //$NON-NLS-1$ //$NON-NLS-2$
+          IPluginResourceLoader pluginResourceLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
+          InputStream in = pluginResourceLoader.getResourceAsStream(Messages.class, "messages.properties"); //$NON-NLS-1$
           bundle = new PropertyResourceBundle( in );
           Messages.locales.put(locale, bundle);
         } catch (Exception e) {

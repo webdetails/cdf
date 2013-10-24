@@ -43,13 +43,13 @@ if(webAppPath.endsWith("/")) {
 var GB_ANIMATION = true;
 var CDF_CHILDREN = 1;
 var CDF_SELF = 2;
-var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
+var ERROR_IMAGE = webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/error.png";
 var CDF_ERROR_DIV = 'cdfErrorDiv';
 
 
 if($.blockUI){
   $.blockUI.defaults.fadeIn = 0;
-  $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" />';
+  $.blockUI.defaults.message = '<div style="padding: 15px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/processing_transparent.gif" />';
   $.blockUI.defaults.css.left = '50%';
   $.blockUI.defaults.css.top = '40%';
   $.blockUI.defaults.css.marginLeft = '-16px';
@@ -77,11 +77,11 @@ var Dashboards = {
       msg: "Error processing component"
     }
   },
-  CDF_BASE_PATH: webAppPath + "/content/pentaho-cdf/",
+  CDF_BASE_PATH: webAppPath + "/plugin/pentaho-cdf/api/",
   parameterModel: new Backbone.Model(),
-  TRAFFIC_RED: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_red.png",
-  TRAFFIC_YELLOW: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_yellow.png",
-  TRAFFIC_GREEN: webAppPath + "/content/pentaho-cdf/resources/style/images/traffic_green.png",
+  TRAFFIC_RED: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_red.png",
+  TRAFFIC_YELLOW: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_yellow.png",
+  TRAFFIC_GREEN: webAppPath + "/api/plugins/pentaho-cdf/files/resources/style/images/traffic_green.png",
   viewFlags: {
     UNUSED: "unused",
     UNBOUND: "unbound",
@@ -149,6 +149,10 @@ Dashboards.error = function(m){
 Dashboards.getWebAppPath = function (){
   return webAppPath
 }
+
+Dashboards.getCggDrawUrl = function() {
+    return "../../../plugin/cgg/api/services/draw";
+};
 
 // REFRESH ENGINE begin
 
@@ -575,28 +579,27 @@ Dashboards.loginAlert = function(newOpts) {
  *
  */
 Dashboards.checkServer = function() {
-  //check if is connecting to server ok
-  //use post to avoid cache
-  var retVal = false;
-  $.ajax({
-    type: 'POST',
-    async: false,
-    dataType: 'json',
-    url: Dashboards.CDF_BASE_PATH + 'ping',
-    success: function(result) {
-      if(result && result.ping == 'ok') {
+	//check if is connecting to server ok
+	//use post to avoid cache
+	var retVal = false;
+	$.ajax({
+		type: 'GET',
+		async: false,
+		dataType: 'json',
+		url: Dashboards.CDF_BASE_PATH + 'ping',
+		success: function(ok) {
+      if(ok != null){
+        retVal = false;
+      } else {
         retVal = true;
       }
-      else {
-        retVal = false;
-      }
-    },
-    error: function() {
-      retVal = false;
-    }
-    
-  });
-  return retVal;
+		},
+		error: function() {
+			retVal = false;
+		}
+
+	});
+	return retVal;
 };
 
 
@@ -661,7 +664,7 @@ Dashboards.restoreDuplicates = function() {
 Dashboards.blockUIwithDrag = function() {
   if (typeof this.i18nSupport !== "undefined" && this.i18nSupport != null) {
     // If i18n support is enabled process the message accordingly
-    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + this.getWebAppPath() + '/content/pentaho-cdf/resources/style/images/processing_transparent.gif" /></div>';
+    $.blockUI.defaults.message = '<div style="padding: 0px;"><img src="' + webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/processing_transparent.gif" /></div>';
   }
 
   $.blockUI();
@@ -1671,20 +1674,20 @@ Dashboards.ev = function(o){
   return typeof o == 'function'?o():o
 };
 
-Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
+Dashboards.callPentahoAction = function(obj, path, parameters, callback ){
   var myself = this;
 
   // Encapsulate pentahoAction call
   // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
   if(typeof callback == 'function'){
-    return this.pentahoAction( solution, path, action, parameters,
+    return this.pentahoAction( path, parameters,
       function(json){
         callback(myself.parseXActionResult(obj,json));
       }
       );
   }
   else{
-    return this.parseXActionResult(obj,this.pentahoAction( solution, path, action, parameters, callback ));
+    return this.parseXActionResult(obj,this.pentahoAction( path, parameters, callback ));
   }
 };
 
@@ -1732,21 +1735,19 @@ Dashboards.executeAjax = function( returnType, url, params, func ) {
 
 };
 
-Dashboards.pentahoAction = function( solution, path, action, params, func ) {
-  return this.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
+Dashboards.pentahoAction = function( path, params, func ) {
+  return this.pentahoServiceAction('ServiceAction', 'xml', path, params, func);
 };
 
-Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
+Dashboards.pentahoServiceAction = function( serviceMethod, returntype, path, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = this.getWebAppPath() + "/" + serviceMethod;
+  var url = webAppPath + "/api/repos/" + path.replace(/\//g, ":") + "/generatedContent";
 
   // Add the solution to the params
   var arr = {};
   arr.wrapper = false;
-  arr.solution = solution;
   arr.path = path;
-  arr.action = action;
   $.each(params,function(i,val){
     arr[val[0]]=val[1];
   });
@@ -1815,7 +1816,8 @@ Dashboards.fetchData = function(cd, params, callback) {
     for (var param in params) {
       cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
-    $.post(webAppPath + "/content/cda/doQuery?", cd,
+
+    $.post(webAppPath + "/plugin/cda/api/doQuery?", cd,
       function(json) {
         callback(json);
       },'json').error(Dashboards.handleServerError);
@@ -1824,8 +1826,7 @@ Dashboards.fetchData = function(cd, params, callback) {
   else if (cd != undefined){
 
     var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
-
-    $.post(webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=" + xactionFile, cd,
+    $.post(webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:"+xactionFile+"/generatedContent?", cd,
       function(result) {
         callback(result.values);
       },'json');
@@ -1859,10 +1860,9 @@ Dashboards.loadStorage = function(){
   }
 
   var args = {
-    action: "read",
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/read", args, function(json) {
     $.extend(myself.storage,json);
   });
 };
@@ -1875,12 +1875,11 @@ Dashboards.saveStorage = function(){
   }
 
   var args = {
-    action: "store",
     storageValue: JSON.stringify(this.storage),
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-    if(json.result != true){
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/store", args, function(ok) {
+    if(ok != null){
       myself.log("Error saving storage",'error');
     }
   });
@@ -1896,10 +1895,9 @@ Dashboards.cleanStorage = function(){
   }
 
   var args = {
-    action: "delete"
   };
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
-    if(json.result != true){
+  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/storage/delete", args, function(ok) {
+    if(ok != null){
       myself.log("Error deleting storage", 'error');
     }
   });

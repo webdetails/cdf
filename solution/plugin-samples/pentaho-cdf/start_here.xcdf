@@ -5,4 +5,5 @@
 	<description>Start Here</description>
 	<icon></icon>
 	<template>10-cdf/template.html</template>
+	<style>mantle</style>
 </cdf>

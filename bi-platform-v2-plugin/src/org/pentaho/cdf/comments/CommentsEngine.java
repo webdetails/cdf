@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
@@ -72,48 +74,9 @@ public class CommentsEngine
     }
   }
 
-  public String process(IParameterProvider requestParams, IPentahoSession userSession) throws InvalidCdfOperationException
-  {
 
-    String actionParam = requestParams.getStringParameter("action", "");
-
-    Class<?>[] params =
+  public JSONObject add(String page, String comment, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
     {
-      IParameterProvider.class, IPentahoSession.class
-    };
-    try
-    {
-
-      Method mthd = this.getClass().getMethod(actionParam, params);
-      JSONObject json;
-
-      json = (JSONObject) mthd.invoke(this, requestParams, userSession);
-
-      return json.toString(2);
-
-    }
-    catch (JSONException ex)
-    {
-      logger.error("JSONException while building return information: " + getExceptionDescription(ex));
-      throw new InvalidCdfOperationException(ex);
-    }
-    catch (NoSuchMethodException ex)
-    {
-      logger.error("NoSuchMethodException : " + actionParam + " - " + getExceptionDescription(ex));
-      throw new InvalidCdfOperationException(ex);
-    }
-    catch (Exception ex)
-    {
-      logger.error(Messages.getErrorString("DashboardDesignerContentGenerator.ERROR_001_INVALID_METHOD_EXCEPTION") + " : " + actionParam);
-      throw new InvalidCdfOperationException(ex);
-    }
-
-  }
-
-  public JSONObject add(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
-  {
-   String page = requestParams.getStringParameter("page", "");
-    String comment = requestParams.getStringParameter("comment", "");
     String user = userSession.getName();
 
     if (page == null || page.equals("") || comment == null || comment.equals("")) {
@@ -138,18 +101,12 @@ public class CommentsEngine
     return json;
   }
 
-  public JSONObject list(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject list(String page, int firstResult, int maxResults, boolean where, boolean deleted, boolean archived, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
     logger.debug("Listing messages");
+    String user = userSession.getName();
 
-    Boolean whereParam = true;
-    Boolean deletedParam = false;
-    Boolean archivedParam = false;
     String queryName = "getCommentsByPageWhere";
-
-    String page = requestParams.getStringParameter("page", "");
-    int firstResult = Integer.parseInt(requestParams.getStringParameter("firstResult", "0"));
-    int maxResults = Integer.parseInt(requestParams.getStringParameter("maxResults", "20"));
 
     if (page == null || page.equals("")) {
         logger.error("Parameters 'page' and 'comment' are not optional");
@@ -159,30 +116,22 @@ public class CommentsEngine
     logger.debug("Adding comment");
     Session session = getSession();
 
-    SecurityParameterProvider securityParams = new SecurityParameterProvider(userSession);
-    if (Boolean.valueOf((String)securityParams.getParameter("principalAdministrator"))) {
-        whereParam = Boolean.valueOf(requestParams.getStringParameter("where", "true"));
-        deletedParam = Boolean.valueOf(requestParams.getStringParameter("deleted", "false"));
-        archivedParam = Boolean.valueOf(requestParams.getStringParameter("archived", "false"));
-    }
-
-    if (!whereParam) {
+    if (!where) {
         queryName = "getCommentsByPage";
     }
 
     Query query = session.getNamedQuery("org.pentaho.cdf.comments.CommentEntry."+queryName);
     query.setString("page", page);
 
-    if (whereParam)
+    if (where)
     {
-        query.setBoolean("deleted", deletedParam);
-        query.setBoolean("archived", archivedParam);
+        query.setBoolean("deleted", deleted);
+        query.setBoolean("archived", archived);
     }
 
     query.setFirstResult(firstResult);
     query.setMaxResults(maxResults);
 
-    @SuppressWarnings("unchecked")
     List<CommentEntry> comments = query.list();
 
     JSONArray jsonArray = new JSONArray();
@@ -199,31 +148,29 @@ public class CommentsEngine
     return json;
   }
 
-  public JSONObject delete(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject delete(int commentId, boolean value, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
-    int commentId = Integer.parseInt(requestParams.getStringParameter("commentId", ""));
     logger.debug("Deleting comment " + commentId);
-    return changeCommentStatus(DELETE_OPERATION, commentId, requestParams, userSession);
+    return changeCommentStatus(DELETE_OPERATION, commentId, value, userSession);
   }
 
-  public JSONObject archive(IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
+  public JSONObject archive(int commentId, boolean value, IPentahoSession userSession) throws JSONException, InvalidCdfOperationException, PluginHibernateException
   {
-    int commentId = Integer.parseInt(requestParams.getStringParameter("commentId", ""));
     logger.debug("Archiving comment " + commentId);
-    return changeCommentStatus(ARCHIVE_OPERATION, commentId, requestParams, userSession);
+    return changeCommentStatus(ARCHIVE_OPERATION, commentId, value, userSession);
   }
 
-  private JSONObject changeCommentStatus(int operationType, int commentId, IParameterProvider requestParams, IPentahoSession userSession) throws JSONException, PluginHibernateException
+  private JSONObject changeCommentStatus(int operationType, int commentId, boolean value, IPentahoSession userSession) throws JSONException, PluginHibernateException
   {
     Session session = getSession();
     session.beginTransaction();
     CommentEntry comment = (CommentEntry) session.load(CommentEntry.class, commentId);
     switch (operationType) {
       case DELETE_OPERATION:
-        if (operationAuthorized(operationType, comment, userSession)) comment.setDeleted(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
+        if (operationAuthorized(operationType, comment, userSession)) comment.setDeleted(value);
         break;
       case ARCHIVE_OPERATION:
-        if (operationAuthorized(operationType, comment, userSession)) comment.setArchived(Boolean.valueOf(requestParams.getStringParameter("value", "true")));
+        if (operationAuthorized(operationType, comment, userSession)) comment.setArchived(value);
         break;
     }
     session.save(comment);
@@ -284,7 +231,10 @@ public class CommentsEngine
 
   private void initialize() throws PluginHibernateException
   {
-    // Get hbm file
+    ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+    try {
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      
     IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
     InputStream in = resLoader.getResourceAsStream(CommentsEngine.class, "resources/hibernate/Comments.hbm.xml");
 
@@ -292,6 +242,13 @@ public class CommentsEngine
     PluginHibernateUtil.closeSession();
     PluginHibernateUtil.getConfiguration().addInputStream(in);
     PluginHibernateUtil.rebuildSessionFactory();
+      
+      
+    }
+    catch (Exception e){}
+    finally {
+        Thread.currentThread().setContextClassLoader(contextCL);
+    }      
   }
 
   private String getExceptionDescription(Exception ex)

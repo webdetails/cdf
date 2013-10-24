@@ -11,6 +11,13 @@
 * the license for the specific language governing your rights and limitations.
 */
 
+pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def"], function(_pv, _pvc, _def) {
+    // Publish globally
+    pvc = _pvc;
+    pv  = _pv;
+    def = _def;
+});
+
 var ChartComponent =  UnmanagedComponent.extend({
     exportChart: function(outputType, overrides) {
         var me = this;
@@ -50,15 +57,12 @@ var ChartComponent =  UnmanagedComponent.extend({
 
             var scriptName =  me.name.replace(/render_/, '');
 
-            urlParams.script = ("/"+ 
-                Dashboards.context.solution + "/" + 
-                Dashboards.context.path     + "/" + 
-                
-                /* Dashboards.context.file.split('.')[0] + "_" + */ 
-                scriptName + ".js") // TODO: This prevents deprecating the generation of 2 file names in CDE/CGG
-
-                .replace(/\/+/g, '/');
-
+            // Dasboards.context path example: 
+            // "/public/cde/mine/MySampleDash.wcdf"
+            // Remove the last segment.
+            // TODO: Using the script name without the dashboard name prefix, for backward compatibility.
+            urlParams.script = Dashboards.context.path.replace(/[^\/]+$/, "") + scriptName + ".js";
+            
             urlParams.attachmentName = scriptName;
 
             return urlParams;
@@ -67,13 +71,15 @@ var ChartComponent =  UnmanagedComponent.extend({
         var urlParams = buildUrlParameters(overrides);
         urlParams.outputType = outputType || 'png';
         
+        var url = Dashboards.getCggDrawUrl() + "?" + $.param(urlParams);
+
         var $exportIFrame = $('#cccExportIFrame');
         if(!$exportIFrame.length) {
             $exportIFrame = $('<iframe id="cccExportIFrame" style="display:none">');
-            $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
+            $exportIFrame[0].src = url;
             $exportIFrame.appendTo($('body')); 
         } else {
-            $exportIFrame[0].src = "../cgg/draw?" + $.param(urlParams);
+            $exportIFrame[0].src = url;
         }
     },
 

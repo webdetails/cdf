@@ -34,6 +34,7 @@
 	<p class="links">
 	<span id="third_chart">&nbsp;</span>
 	</p>
+	<!--
 	<h2 class="title">Pivot Analysis</h2>
 	<p class="meta"> 
 	<small>JPivot analysis based on the chosen conditions</small>
@@ -44,6 +45,7 @@
 	</p>
 
 	<div id="pivot_object" style="width: 850px; height: 500px">&nbsp;</div>
+	-->
 	<!-- end content -->
 </form>
 	<!-- end sidebar -->
@@ -55,7 +57,6 @@
 var territory="";
 var productLine="";
 var dateStart="2003-04-01";
-var dashBoardName = "pentaho-cdf/20-samples/map_dashboard";
 var bottomThreshold = 1000000;
 var topThreshold = 2000000;
 var selectedPoint;
@@ -90,9 +91,7 @@ territorySelector =
 {
   name: "territorySelector",
   type: "select",
-  solution: "plugin-samples",
-  path: dashBoardName,
-  action: "GetTerritory.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetTerritory.xaction",
   parameters:[],
   parameter:"territory",
   htmlObject: "territory_selector",
@@ -107,9 +106,7 @@ firstChart =
 {
   name: "Chart",
   type: "xaction",
-  solution: "plugin-samples",
-  path: dashBoardName,
-  action: "PieChart1.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/PieChart1.xaction",
   parameters: [["productLine","productLine"]],
   listeners:["productLine"],
   htmlObject: "first_chart",
@@ -122,9 +119,7 @@ secondChart =
 {
   name: "Chart",
   type: "xaction",
-  solution: "plugin-samples",
-  path: dashBoardName,
-  action: "BarChart2.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/BarChart2.xaction",
   parameters:[["territory","territory"]],
   listeners:["territory"],
   htmlObject: "second_chart",
@@ -137,9 +132,7 @@ thirdChart =
 {
   name: "Chart",
   type: "xaction",
-  solution: "plugin-samples",
-  path: dashBoardName,
-  action: "LineChart3.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/LineChart3.xaction",
   parameters:[["territory","territory"],["productLine","productLine"]],
   listeners:["territory","productLine"],
   htmlObject: "third_chart",
@@ -147,14 +140,12 @@ thirdChart =
   preExecution:function(){},
   postExecution:function(){}
 }
-
+/*
 pivot = 
 {
   name: "pivot",
   type: "jpivot",
-  solution: "plugin-samples",
-  path: dashBoardName,
-  action: "Pivot.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/Pivot.xaction",
   parameters:[["territory","territory"],["productLine","productLine"]],
   listeners:["territory","productLine"],
   htmlObject: "pivot_object",
@@ -163,15 +154,13 @@ pivot =
   iframeWidth: "850px",
   preExecution:function(){},
   postExecution:function(){}
-}
+}*/
 
 map =
 {
 name: "map",
 	  type: "map",
-	  solution: "plugin-samples",
-	  path: dashBoardName,
-	  action: "GetPoints.xaction",
+	  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetPoints.xaction",
 	  parameters:[["territory","territory"]],
 	  listeners:["territory"],
 	  messageElementId: "messages",
@@ -189,7 +178,7 @@ name: "map",
 }
 
 
-var components = [ territoryParameter, productLineParameter, firstChart, secondChart, thirdChart, map, pivot];
+var components = [ territoryParameter, productLineParameter, firstChart, secondChart, thirdChart, map, /*pivot*/];
 
 load();
 

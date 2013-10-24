@@ -58,7 +58,7 @@ var MetaLayerHome2 = {
 		foregroundAlpha: 1,
 		//queryType: 'sql',
 		queryType: 'mdx',
-        catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
+        catalog: 'mondrian:/SteelWheels',
 		jndi: "SampleData",
 		query: function(){
 
@@ -86,7 +86,7 @@ var MetaLayerHome2 = {
 		//queryType: 'sql',
 		queryType: 'mdx',
 		jndi: "SampleData",
-        catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
+        catalog: 'mondrian:/SteelWheels',
 		query: function(){
 
             // var query = "SELECT PRODUCTS.PRODUCTLINE, SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) REVENUE FROM ORDERS INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE  INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER  INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE GROUP BY PRODUCTS.PRODUCTLINE ORDER BY 2 DESC";
@@ -111,7 +111,7 @@ var MetaLayerHome2 = {
 		parameterName: "PRODUCTLINE",
 		foregroundAlpha: 1,
 		queryType: 'mdx',
-        catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
+        catalog: 'mondrian:/SteelWheels',
         orientation: 'horizontal',
 		jndi: "SampleData",
 		query: function(){

@@ -104,7 +104,7 @@ function loadAndParseFile(filename, language, mode) {
     $.ajax({
         url:        filename,
         async:      false,
-        contentType: "text/plain;charset=UTF-8",
+        contentType: "application/x-www-form-urlencoded",
         dataType:   'text',
         success:    function(data, status) {
                        var parsed = '';

@@ -5,4 +5,5 @@
 	<description>MetaLayer Usage Description</description>
 	<icon></icon>
 	<template>metaLayer_usage.html</template>
+	<style>mantle</style>
 </cdf>

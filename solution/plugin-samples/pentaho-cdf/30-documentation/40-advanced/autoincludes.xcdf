@@ -5,4 +5,5 @@
 	<description>Documenting with CDF</description>
 	<icon></icon>
 	<template>autoincludes.html</template>
+	<style>mantle</style>
 </cdf>

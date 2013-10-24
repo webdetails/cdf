@@ -43,7 +43,7 @@ var JFreeChartComponent = BaseComponent.extend({
             var value = param[1]; //TODO: in pho dashboard designer static parameters may be in the form [["name", "", "value" ] ... ]
 
             if(value){
-              value = doCsvQuoting(value, '=');	//quote if needed for '='
+              value = doCsvQuoting(value, '='); //quote if needed for '='
             }
             if(i == 0) cdaParameterString = "";
             else cdaParameterString += ";";
@@ -78,7 +78,8 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", action, this.getParameters(),function(jXML){
+    var actionPath = "/public/plugin-samples/pentaho-cdf/actions/" + action;
+    Dashboards.callPentahoAction(myself,actionPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
         if(myself.chartDefinition.caption != undefined){
@@ -103,7 +104,7 @@ var JFreeChartComponent = BaseComponent.extend({
         action: xactionFile,
         exportType: type
       },cd);
-      Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj);
+      Dashboards.post(webAppPath + '/pentaho/plugin/pentaho-cdf/api/export',obj);
     };
 
     var myself = this;
@@ -119,7 +120,7 @@ var JFreeChartComponent = BaseComponent.extend({
           return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")
         },
         icon: function(){
-          return cd.chartType == "BarChart" ? webAppPath + '/content/pentaho-cdf/resources/style/images/pie_icon.png': webAppPath + '/content/pentaho-cdf/resources/style/images/bar_icon.png';
+          return cd.chartType == "BarChart" ? webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/pie_icon.png': webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/bar_icon.png';
         },
         oclass: 'options',
         callback: function(){
@@ -129,7 +130,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       excel: {
         title: "Excel",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/excel_icon.png',
+        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/excel_icon.png',
         oclass: 'options',
         callback: function(){
           exportFile("excel",cd);
@@ -137,7 +138,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       csv: {
         title: "CSV",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/csv_icon.gif',
+        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/csv_icon.gif',
         oclass: 'options',
         callback: function(){
           exportFile("csv",cd);
@@ -145,7 +146,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       zoom: {
         title:'Zoom',
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/magnify.png',
+        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/magnify.png',
         oclass: 'options',
         callback: function(){
           Dashboards.incrementRunningCalls();
@@ -173,9 +174,10 @@ var JFreeChartComponent = BaseComponent.extend({
           myself.zoomCallBack = function(value){
             eval(urlTemplate.replace("{" + parameterName + "}",value));
           };
-          Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
+          var componentPath = "/public/plugin-samples/pentaho-cdf/actions/" + cdfComponent;
+          Dashboards.callPentahoAction(myself, componentPath, parameters,function(jXML){
             if(jXML != null){
-              var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
+              var openWindow = window.open(webAppPath + "/api/plugins/pentaho-cdf/files/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
               var loadChart = function(){
                 if(openWindow.loadChart != undefined)openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())
@@ -192,7 +194,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       details:{
         title:'Details',
-        icon:webAppPath + '/content/pentaho-cdf/resources/style/images/table.png',
+        icon:webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/table.png',
         oclass: 'options',
         callback: function(){
           myself.pivotDefinition = {
@@ -301,11 +303,14 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
     Dashboards.incrementRunningCalls();
 
     var myself = this;
-
-    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML){
+    
+    
+    var componentPath = "/public/plugin-samples/pentaho-cdf/actions/openflashchart.xaction";
+    
+    Dashboards.callPentahoAction(myself,componentPath, this.getParameters(),function(jXML){
 
       if(jXML != null){
-        var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
+        var result = jXML.find("ExecuteActivityResponse:first-child").text()/*.replace(/openflashchart/g,webAppPath + "/openflashchart")*/;
         getDataFuntion = result.match(/getData.*\(\)/gi);
         $("#"+myself.htmlObject).html(result);
       }
@@ -355,7 +360,9 @@ var TrafficComponent = BaseComponent.extend({
 
     var myself = this;
     // callback async mode
-    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "traffic.xaction", parameters,
+    var componentPath = "/public/plugin-samples/pentaho-cdf/actions/traffic.xaction";
+    
+    Dashboards.callPentahoAction(myself,componentPath, parameters,
       function(result){
         var value = $(result).find("VALUE").text();
         var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
@@ -543,7 +550,10 @@ var TimePlotComponent = BaseComponent.extend({
       parameters.push(key+"="+value);
     }
     var allData = undefined;
-    var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelinefeeder.xaction&" + parameters.join('&');
+    //var timePlotEventSourceUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelinefeeder.xaction&" + parameters.join('&'); //legacy
+  var ts = "ts=" + new Date().getTime() + "&";
+    var timePlotEventSourceUrl = webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelinefeeder.xaction/xaction?" + ts + parameters.join('&');
+  
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -555,7 +565,9 @@ var TimePlotComponent = BaseComponent.extend({
         parameters.push(key+"="+value);
       }
 
-      var eventUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelineeventfeeder.xaction&" + parameters.join('&');
+      //var eventUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelineeventfeeder.xaction&" + parameters.join('&'); //legacy
+    var ts = "ts=" + new Date().getTime() + "&";
+      var eventUrl = wwebAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){

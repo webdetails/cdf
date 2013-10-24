@@ -34,6 +34,13 @@
 	<property file='${CLIENT}/includes.properties' />
 
 
+
+
+<property name="js.module.script.dir" value="cdf/js"/>
+  <property name="js.module.script.namespace" value="cdf"/>
+  <property name="ivy.repository.publish" value="file:///Users/nbaker/.m2/repository"/>
+
+
 <property name="js.module.script.dir" value="cdf/js"/>
   <property name="js.module.script.namespace" value="cdf"/>
   <property name="ivy.repository.publish" value="file:///Users/nbaker/.m2/repository"/>
@@ -45,6 +52,9 @@
 	<import file="common_build.xml"/>
 
 <import file="build-res/subfloor-js.xml"/>
+
+
+	<property name="project.revision" value="4.5-SNAPSHOT"/>
 
 	<!--
 	  AS STATED ABOVE, THE ONLY TASKS THAT SHOULD EXIST IN THIS BUILD FILE ARE
@@ -136,7 +146,7 @@
    	<property name="sonar.language" value="js"/>
     <property name="sonar.dynamicAnalysis" value="false"/>
     <property name="sonar.sources" value="cdf/js" />
-    <sonar:sonar key="pt.webdetails:CDF-js" version="${project.revision}" xmlns:sonar="antlib:org.sonar.ant"/>    
+    <sonar:sonar key="pt.webdetails:CDF-js-Release" version="${distribution.version}" xmlns:sonar="antlib:org.sonar.ant"/>    
 
     
 </target>
@@ -156,7 +166,7 @@
 		   <mkdir dir="${stage.dir}/${plugin.name}" />
 		   <mkdir dir="${stage.dir}/${plugin.name}/lib" />
 
-<mkdir dir="${stage.dir}/${plugin.name}/actions" />
+<mkdir dir="${stage.dir}/${plugin.name}/resources/actions" />
 	
 		   <!-- copy the plugin jar to the plugin dist lib folder -->
 		   <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
@@ -179,7 +189,7 @@
 		   </copy>
 
 		   	  <!-- copy over all the xactions within the cdf folder -->
-		  <copy todir="${stage.dir}/${plugin.name}/actions" overwrite="true" >
+		  <copy todir="${stage.dir}/${plugin.name}/resources/actions" overwrite="true" >
 			  <fileset dir="../solution/cdf/components">
 				  <include name="*.xaction*"/>
 				  <include name="*.xml"/>
@@ -198,7 +208,8 @@
 		   <tstamp/>			
 			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
 
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='${project.stage}' buildId=''>${project.revision}&lt;/version>"/>		   
+
 
 		   <!-- Copy js folder into dist -->
 		   <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
@@ -226,15 +237,6 @@
 			   excludes="**/Thumbs.db" />
 
 
-	<echo file="${dist.dir}/marketplace.xml">&lt;version>
-	    &lt;branch>TRUNK&lt;/branch>
-		&lt;version>${project.revision}&lt;/version>
-		&lt;name>Trunk&lt;/name>
-		&lt;package_url>http://ci.analytical-labs.com/job/Webdetails-CDF/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-TRUNK-SNAPSHOT.zip&lt;/package_url>
-		&lt;samples_url>http://ci.analytical-labs.com/job/Webdetails-CDF/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-TRUNK-SNAPSHOT.zip&lt;/samples_url>
-		&lt;description>Trunk Snapshot. Get the latest, edgy, still work in progress features here...&lt;/description>
-		&lt;build_id>${sequential.build.id}&lt;/build_id>
-		&lt;/version>	</echo>         
 
 	   </target>
 
@@ -257,6 +259,11 @@
 				  <include name="**/*" />
 			  </fileset>
 		  </copy>
+                  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}/lib">
+                      <fileset dir="../../cpf/dist">
+                          <include name="cpf-TRUNK-SNAPSHOT.jar"/>
+                      </fileset>
+                  </copy>
 
 		  <!-- Copy solution 
 		  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}/actions">
@@ -316,6 +323,8 @@ excludes="**/Thumbs.db"
 			  -->
 	  </target>
 
+
+  <target name="publish" depends='publish-pentaho'/>
 
 	  <!--=======================================================================
 		publish-pentaho-nojar (override)
