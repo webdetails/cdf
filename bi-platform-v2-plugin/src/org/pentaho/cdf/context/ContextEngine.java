@@ -280,7 +280,7 @@ public class ContextEngine {
             params.put("dataAccessId", id);
             params.put("path", path);
             logger.info("[Timing] Executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-            InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "doQuery", params);
+            InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "doQueryGet", params);
             String reply = ipc.callInPluginClassLoader();
             logger.info("[Timing] Done executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
             try {
