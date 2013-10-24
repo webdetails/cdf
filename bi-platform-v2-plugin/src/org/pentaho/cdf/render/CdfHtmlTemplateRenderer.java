@@ -1,12 +1,6 @@
 package org.pentaho.cdf.render;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -42,6 +36,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   public static final String PLUGIN_NAME = "pentaho-cdf"; //$NON-NLS-1$
   private static final String PREFIX_PARAMETER = "param";
   private static final String STATIC_CDF_PATH = "/api/repos/pentaho-cdf";
+  private static final String CDF_TEMPLATES = "/public/cdf/templates/";
   
   private static Log logger = LogFactory.getLog(CdfHtmlTemplateRenderer.class);
  
@@ -143,14 +138,21 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     this.debug = debug;
   }
   
-  protected File getTemplateFile() {
+  protected InputStream getTemplateFile() throws FileNotFoundException {
+    RepositoryAccess repositoryAccess = RepositoryAccess.getRepository();
     String template = this.template;
     if (template == null) {
       IPluginResourceLoader pluginResourceLoader = PentahoSystem.get(IPluginResourceLoader.class);
       template = pluginResourceLoader.getPluginSetting(this.getClass(), "default-template");
     }
-    template = (template == null || template.equals("") ? "" : "-" + template); //$NON-NLS-1$
-    return new File(((PluginClassLoader) this.getClass().getClassLoader()).getPluginDir(), "template-dashboard" + template + ".html");
+    template = "template-dashboard" + (template == null || template.equals("") ? "" : "-" + template) + ".html";
+
+    if(repositoryAccess.resourceExists(CDF_TEMPLATES + template)){
+      return repositoryAccess.getResourceInputStream(CDF_TEMPLATES + template);
+    } else {
+      File file = new File(((PluginClassLoader) this.getClass().getClassLoader()).getPluginDir(), template);
+      return new FileInputStream(file);
+    }
   }
   
   private Packager getPackager() throws IOException {
@@ -165,7 +167,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     
     //IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
 
-   File templateFile = getTemplateFile();
+   InputStream templateFile = getTemplateFile();
 
     ArrayList<String> i18nTagsList = new ArrayList<String>();
     String[] templateSections = new String[] { "", "" };
@@ -573,12 +575,12 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     return messageCodeSet.toString();
   }
 
-  private void getTemplateSections(File templateFile, String[] templateSections, ArrayList<String> i18nTagsList) throws Exception{
+  private void getTemplateSections(InputStream templateFile, String[] templateSections, ArrayList<String> i18nTagsList) throws Exception{
     final IUITemplater templater = PentahoSystem.get(IUITemplater.class, userSession);
     if (templater == null) {
       templateSections[0] = Messages.getErrorString("CdfContentGenerator.ERROR_0005_BAD_TEMPLATE_OBJECT"); //$NON-NLS-1$
     } else {
-      String templateContent = IOUtils.toString(new FileInputStream(templateFile), LocaleHelper.getSystemEncoding());
+      String templateContent = IOUtils.toString(templateFile, LocaleHelper.getSystemEncoding());
       // Process i18n on dashboard outer template
       templateContent = updateUserLanguageKey(templateContent);
       templateContent = processi18nTags(templateContent, i18nTagsList);
