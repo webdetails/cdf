@@ -35,6 +35,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,6 +88,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   public String RELATIVE_URL;
   private Packager packager;
 
+  public boolean cdfResource;
+
   public CdfContentGenerator() {
     try {
       this.init();
@@ -100,16 +103,25 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   public void createContent() throws Exception {
     OutputStream out;
     final IContentItem contentItem;
-    IParameterProvider pathParams;
-    IParameterProvider requestParams = null;
+    IParameterProvider pathParams = parameterProviders.get("path");
+    IParameterProvider requestParams = parameterProviders.get(IParameterProvider.SCOPE_REQUEST);
     String filePath = "";
     String template = "";
+
+    if(isCdfResource()){
+      String path = requestParams.getStringParameter("path", null);
+      String resource = requestParams.getStringParameter("resource", null);
+
+      getResource(resource, path, getResponse());
+      return;
+    }
+
 
     logger.info("[Timing] CDF content generator took over: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
     try {
       if(parameterProviders.get("path") != null){
-        pathParams = parameterProviders.get("path");
-        requestParams = parameterProviders.get(IParameterProvider.SCOPE_REQUEST);
+
+
         filePath = pathParams.getStringParameter("path", null);
         template = requestParams.getStringParameter("template", null);
 
@@ -676,5 +688,13 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 	  }
 	  
 	  return null;
+  }
+
+  public boolean isCdfResource() {
+    return cdfResource;
+  }
+
+  public void setCdfResource(boolean cdfResource) {
+    this.cdfResource = cdfResource;
   }
 }
