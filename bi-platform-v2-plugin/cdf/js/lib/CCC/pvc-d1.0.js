@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  
-/*! VERSION TRUNK-20131024 */
+/*! VERSION TRUNK-20131025 */
 pen.define("cdf/lib/CCC/pvc-d1.0", ["cdf/lib/CCC/def", "cdf/lib/CCC/protovis", "cdf/jquery", "cdf/lib/CCC/tipsy"], function(def, pv, $) {
 
 var jQuery = $;
@@ -973,7 +973,7 @@ var pvc_Sides = pvc.Sides = function(sides) {
 
 pvc_Sides.hnames = 'left right'.split(' ');
 pvc_Sides.vnames = 'top bottom'.split(' ');
-pvc_Sides.names = 'left right top bottom'.split(' ');
+pvc_Sides.names  = 'left right top bottom'.split(' ');
 pvc_Sides.namesSet = pv.dict(pvc_Sides.names, def.retTrue);
 
 pvc.parsePosition = function(side, defaultSide){
@@ -1048,9 +1048,11 @@ pvc_Sides.prototype.setSides = function(sides){
         if(sides instanceof pvc_PercentValue){
             this.set('all', sides);
         } else {
-            this.set('all', sides.all);
-            for(var p in sides){
-                if(p !== 'all' && pvc_Sides.namesSet.hasOwnProperty(p)){
+            this.set('all',    sides.all);
+            this.set('width',  sides.width);
+            this.set('height', sides.height);
+            for(var p in sides) {
+                if(pvc_Sides.namesSet.hasOwnProperty(p)) {
                     this.set(p, sides[p]);
                 }
             }
@@ -1066,17 +1068,26 @@ pvc_Sides.prototype.setSides = function(sides){
     return this;
 };
 
-pvc_Sides.prototype.set = function(prop, value){
+pvc_Sides.prototype.set = function(prop, value) {
     value = pvc_PercentValue.parse(value);
-    if(value != null){
-        if(prop === 'all'){
-            // expand
-            pvc_Sides.names.forEach(function(p){
-                this[p] = value;
-            }, this);
+    if(value != null) {
+        switch(prop) {
+            case 'all': 
+                // expand
+                pvc_Sides.names.forEach(function(p) { this[p] = value; }, this);
+                break;
 
-        } else if(def.hasOwn(pvc_Sides.namesSet, prop)){
-            this[prop] = value;
+            case 'width':
+                this.left = this.right = pvc_PercentValue.divide(value, 2);
+                break;
+
+            case 'height':
+                this.top = this.bottom = pvc_PercentValue.divide(value, 2);
+                break;
+
+            default: if(def.hasOwn(pvc_Sides.namesSet, prop)) {
+                this[prop] = value;
+            }
         }
     }
 };
@@ -1141,6 +1152,16 @@ var pvc_PercentValue = pvc.PercentValue = function(pct){
 
 pvc_PercentValue.prototype.resolve = function(total){
     return this.percent * total;
+};
+
+pvc_PercentValue.prototype.divide = function(divisor) {
+    return new pvc_PercentValue(this.percent / divisor);
+};
+
+pvc_PercentValue.divide = function(value, divisor) {
+    return (value instanceof pvc_PercentValue) ? 
+        value.divide(divisor) : 
+        (value / divisor);
 };
 
 pvc_PercentValue.parse = function(value){
@@ -16697,6 +16718,10 @@ function legend_castAlign(align) {
     return pvc.parseAlign(position, align);
 }
 
+function legendItem_castSize(size) {
+    return new pvc_Size().setSize(size, {singleProp: 'width'});
+}
+
 /*global axis_optionsDef:true*/
 var legend_optionsDef = {
     /* legendPosition */
@@ -16769,6 +16794,11 @@ var legend_optionsDef = {
     Font: {
         resolve: '_resolveFull',
         cast:    String
+    },
+
+    ItemSize: {
+        resolve: '_resolveFull',
+        cast:    legendItem_castSize
     }
 };
 
@@ -16791,78 +16821,98 @@ def
     
     this.base(parent, keyArgs);
     
-    var markerDiam = def.get(keyArgs, 'markerSize', 15);
-    var itemPadding = new pvc_Sides(def.get(keyArgs, 'itemPadding', 5))
-                          .resolve(markerDiam, markerDiam);
+    this._unresolvedMarkerDiam  = def.get(keyArgs, 'markerSize');
+    this._unresolvedItemPadding = new pvc_Sides(def.get(keyArgs, 'itemPadding', 5));
+    this._unresolvedItemSize    = pvc_Size.to(def.get(keyArgs, 'itemSize')) || new pvc_Size();
+
     def.set(this.vars,
         'horizontal',  def.get(keyArgs, 'horizontal', false),
         'font',        def.get(keyArgs, 'font'),
-        'markerSize',  markerDiam, // Diameter of bullet/marker zone
-
         // Space between marker and text.
-        // -4 is to compensate for now the label being anchored to 
+        // -3 is to compensate for now the label being anchored to 
         // the panel instead of the rule or the dot...
-        'textMargin',  (def.get(keyArgs, 'textMargin', 6) - 4),
-        'itemPadding', itemPadding);
+        'textMargin',  (def.get(keyArgs, 'textMargin', 6) - 3));
 })
 .add(/** @lends pvc.visual.legend.BulletRootScene# */{
     layout: function(layoutInfo){
         // Any size available?
         var clientSize = layoutInfo.clientSize;
-        if(!(clientSize.width > 0 && clientSize.height > 0)){
+        if(!(clientSize.width > 0 && clientSize.height > 0)) {
             return new pvc_Size(0,0);
         }
-        
+
         var desiredClientSize = layoutInfo.desiredClientSize;
         
         // The size of the biggest cell
-        var markerDiam    = this.vars.markerSize;
-        var textLeft      = markerDiam + this.vars.textMargin;
-        var labelWidthMax = Math.max(0, 
-                Math.min((desiredClientSize.width || Infinity), clientSize.width) - textLeft);
 
-        var itemPadding = this.vars.itemPadding;
+        var itemPadding = this._unresolvedItemPadding.resolve(clientSize);
+
+        // This facilitates making the calculations for the margins of border items
+        //  to not be included.
+        var extClientSize = {
+            width:  clientSize.width  + itemPadding.width,
+            height: clientSize.height + itemPadding.height
+        };
+        var desiredItemSize = this._unresolvedItemSize.resolve(extClientSize);
+
+        var desiredItemClientSize = {
+            width:  Math.max(0, desiredItemSize.width  - itemPadding.width ),
+            height: Math.max(0, desiredItemSize.height - itemPadding.height)
+        };
+
+        var markerDiam = this._unresolvedMarkerDiam || desiredItemClientSize.height || 15;
         
-        // Names are for legend items when laid out in rows
+        this.vars.itemPadding           = itemPadding;
+        this.vars.desiredItemSize       = desiredItemSize;
+        this.vars.desiredItemClientSize = desiredItemClientSize;
+        this.vars.markerSize            = markerDiam;
+        
+        var textLeft      = markerDiam + this.vars.textMargin;
+        var labelWidthMax = Math.max(0,
+                Math.min(
+                    (desiredItemClientSize.width || Infinity),
+                    (desiredClientSize.width     || Infinity), 
+                    clientSize.width) - 
+                textLeft);
+
+        // Names are for legend items when laid out in sections
         var a_width  = this.vars.horizontal ? 'width' : 'height';
         var a_height = pvc.BasePanel.oppositeLength[a_width]; // height or width
         
-        var maxRowWidth = desiredClientSize[a_width];
-        if(!maxRowWidth || maxRowWidth < 0){
-            maxRowWidth = clientSize[a_width]; // row or col
+        var $maxSectionWidth = desiredClientSize[a_width];
+        if(!$maxSectionWidth || $maxSectionWidth < 0) {
+            $maxSectionWidth = clientSize[a_width]; // row or col
         }
         
-        var row;
-        var rows = [];
+        var section;
+        var sections = [];
         var contentSize = {width: 0, height: 0};
 
         this.childNodes.forEach(function(groupScene){
             groupScene.childNodes.forEach(layoutItem, this);
         }, this);
         
-        // If there's no pending row to commit, there are no rows...
+        // If there's no pending section to commit, there are no sections...
         // No items or just items with no text -> hide
-        if(!row) { return new pvc_Size(0,0); }
+        if(!section) { return new pvc_Size(0,0); }
         
-        commitRow(/* isLast */ true);
+        commitSection(/* isLast */ true);
         
-        // In logical "row" naming
         def.set(this.vars,
-            'rows',          rows,
-            'rowCount',      row,
+            'sections',      sections,
             'contentSize',   contentSize,
             'labelWidthMax', labelWidthMax);
         
         var isV1Compat = this.compatVersion() <= 1;
         
         // Request used width / all available width (V1)
-        var w = isV1Compat ? maxRowWidth : contentSize.width;
-        var h = desiredClientSize[a_height];
-        if(!h || h < 0) { h = contentSize.height; }
+        var $w = isV1Compat ? $maxSectionWidth : contentSize[a_width];
+        var $h = desiredClientSize[a_height];
+        if(!$h || $h < 0) { $h = contentSize[a_height]; }
         
         var requestSize = this.vars.size = def.set({},
-            a_width,  Math.min(w, clientSize[a_width ]),
-            a_height, Math.min(h, clientSize[a_height]));
+            a_width,  Math.min($w, clientSize[a_width ]),
+            a_height, Math.min($h, clientSize[a_height]));
 
         return requestSize;
         
@@ -16876,63 +16926,74 @@ def
             itemScene.isHidden = hidden;
             if(hidden) { return; }
             
-            // not padded size
-            var itemClientSize = {
+            var itemContentSize = {
                 width:  textLeft + textSize.width,
                 height: Math.max(textSize.height, markerDiam)
             };
-            
+
+            var itemSize = {
+                width:  desiredItemSize.width  || (itemPadding.width  + itemContentSize.width ),
+                height: desiredItemSize.height || (itemPadding.height + itemContentSize.height)
+            };
+
+            var itemClientSize = {
+                width:  Math.max(0, itemSize.width  - itemPadding.width ),
+                height: Math.max(0, itemSize.height - itemPadding.height)
+            };
+
             // -------------
             
-            var isFirstInRow;
-            if(!row) {
-                row = new pvc.visual.legend.BulletItemSceneRow(0);
-                isFirstInRow = true;
+            var isFirstInSection;
+            if(!section) {
+                section = new pvc.visual.legend.BulletItemSceneSection(0);
+                isFirstInSection = true;
             } else {
-                isFirstInRow = !row.items.length;
+                isFirstInSection = !section.items.length;
             }
             
-            var newRowWidth = row.size.width + itemClientSize[a_width]; // or bottom
-            if(!isFirstInRow) {
-                newRowWidth += itemPadding[a_width]; // separate from previous item
+            var $newSectionWidth = section.size[a_width] + itemClientSize[a_width]; // or bottom
+            if(!isFirstInSection) {
+                $newSectionWidth += itemPadding[a_width]; // separate from previous item
             }
             
-            // If not the first column of a row and the item does not fit
-            if(!isFirstInRow && (newRowWidth > maxRowWidth)) {
-                commitRow(/* isLast */false);
+            // If not the first item of a section and it does not fit
+            if(!isFirstInSection && ($newSectionWidth > $maxSectionWidth)) {
+                commitSection(/* isLast */false);
                 
-                newRowWidth = itemClientSize[a_width];
+                $newSectionWidth = itemClientSize[a_width];
             }
             
-            // Add item to row
-            var rowSize = row.size;
-            rowSize.width  = newRowWidth;
-            rowSize.height = Math.max(rowSize.height, itemClientSize[a_height]);
+            // Add item to section
+            var sectionSize = section.size;
+            sectionSize[a_width ] = $newSectionWidth;
+            sectionSize[a_height] = Math.max(sectionSize[a_height], itemClientSize[a_height]);
             
-            var rowItemIndex = row.items.length;
-            row.items.push(itemScene);
+            var sectionIndex = section.items.length;
+            section.items.push(itemScene);
             
-            // Small margin to avoid trimming text
             def.set(itemScene.vars,
-                    'row', row, // In logical "row" naming
-                    'rowIndex', rowItemIndex, // idem
-                    'clientSize', itemClientSize);
+                'section',         section,
+                'sectionIndex',    sectionIndex,
+                'textSize',        textSize,
+                'itemSize',        itemSize,
+                'itemClientSize',  itemClientSize,
+                'itemContentSize', itemContentSize);
         }
         
-        function commitRow(isLast) {
-            var rowSize = row.size;
-            contentSize.height += rowSize.height;
-            if(rows.length) {
-                // Separate rows
-                contentSize.height += itemPadding[a_height];
+        function commitSection(isLast) {
+            var sectionSize = section.size;
+            contentSize[a_height] += sectionSize[a_height];
+            if(sections.length) {
+                // Separate sections
+                contentSize[a_height] += itemPadding[a_height];
             }
             
-            contentSize.width = Math.max(contentSize.width, rowSize.width);
-            rows.push(row);
+            contentSize[a_width] = Math.max(contentSize[a_width], sectionSize[a_width]);
+            sections.push(section);
             
-            // New row
+            // New section
             if(!isLast) {
-                row = new pvc.visual.legend.BulletItemSceneRow(rows.length);
+                section = new pvc.visual.legend.BulletItemSceneSection(sections.length);
             }
         }
     },
@@ -16958,7 +17019,7 @@ def
 });
 
 def
-.type('pvc.visual.legend.BulletItemSceneRow')
+.type('pvc.visual.legend.BulletItemSceneSection')
 .init(function(index){
     this.index = index;
     this.items = [];
@@ -21613,6 +21674,7 @@ pvc.BaseChart
                 // Bullet legend
                 textMargin:   o.legendTextMargin,
                 itemPadding:  o.legendItemPadding,
+                itemSize:     legend.option('ItemSize'),
                 markerSize:   o.legendMarkerSize
                 //shape:        options.legendShape // TODO: <- doesn't this come from the various color axes?
             });
@@ -24928,6 +24990,7 @@ def
     
     textMargin:  6,    // The space *between* the marker and the text, in pixels.
     itemPadding: 2.5,  // Half the space *between* legend items, in pixels.
+    itemSize:    null, // Item size, including padding. When unspecified, item size is dependent on each items text.
     markerSize:  15,   // *diameter* of marker *zone* (the marker itself may be a little smaller)
     font:  '10px sans-serif',
 
@@ -24947,20 +25010,20 @@ def
           itemPadding = rootScene.vars.itemPadding,
           contentSize = rootScene.vars.contentSize;
       
-       // Names are for horizontal layout (anchor = top or bottom)
+      // Names are for horizontal layout (anchor = top or bottom)
       var isHorizontal = this.isAnchorTopOrBottom();
       var a_top    = isHorizontal ? 'top' : 'left';
-      var a_bottom = this.anchorOpposite(a_top);    // top or bottom
+      var a_bottom = this.anchorOpposite(a_top);    // bottom or right
       var a_width  = this.anchorLength(a_top);      // width or height
       var a_height = this.anchorOrthoLength(a_top); // height or width
       var a_center = isHorizontal ? 'center' : 'middle';
       var a_left   = isHorizontal ? 'left' : 'top';
-      var a_right  = this.anchorOpposite(a_left);   // left or right
+      var a_right  = this.anchorOpposite(a_left);   // right or bottom
       
       // When V1 compat or size is fixed to less/more than content needs, 
       // it is still needed to align content inside
       
-      // We align all rows left (or top), using the length of the widest row.
+      // Rows are aligned left (or top), using the length of the widest row.
       // So "center" is a kind of centered-left align?
       
       var leftOffset = 0;
@@ -24976,17 +25039,16 @@ def
       
       this.pvPanel.overflow("hidden");
       
-      // ROW - A panel instance per row
-      var pvLegendRowPanel = this.pvPanel.add(pv.Panel)
-          .data(rootScene.vars.rows) // rows are "lists" of bullet item scenes
+      // SECTION - A panel instance per section
+      var pvLegendSectionPanel = this.pvPanel.add(pv.Panel)
+          .data(rootScene.vars.sections) // sections are "lists" of bullet item scenes
           [a_left  ](leftOffset)
           [a_top   ](function() {
-              var prevRow = this.sibling(); 
-              return prevRow ? (prevRow[a_top] + prevRow[a_height] + itemPadding[a_height]) : 0;
+              var prevSection = this.sibling(); 
+              return prevSection ? (prevSection[a_top] + prevSection[a_height] + itemPadding[a_height]) : 0;
           })
-          [a_width ](function(row) { return row.size.width;  })
-          [a_height](function(row) { return row.size.height; })
-          ;
+          [a_width ](function(section) { return section.size[a_width ]; })
+          [a_height](function(section) { return section.size[a_height]; });
       
       var wrapper;
       if(this.compatVersion() <= 1) {
@@ -24995,8 +25057,8 @@ def
           };
       }
       
-      // ROW > ITEM - A pvLegendPanel instance per bullet item in a row
-      this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendRowPanel, {
+      // SECTION > ITEM - A pvLegendPanel instance per bullet item in a section
+      var pvLegendItemPanel = this.pvLegendPanel = new pvc.visual.Panel(this, pvLegendSectionPanel, {
               extensionId:   'panel',
               wrapper:       wrapper,
               noSelect:      false,
@@ -25004,33 +25066,31 @@ def
               noClick:       false, // see also #_onClick below and constructor change of Clickable
               noClickSelect: true   // just rubber-band (the click is for other behaviors)
           })
-          .lockMark('data', function(row) { return row.items; }) // each row has a list of bullet item scenes
-          .lock(a_right,  null)
-          .lock(a_bottom, null)
-          .lockMark(a_left, function(clientScene) {
-              var itemPadding  = clientScene.vars.itemPadding;
-              var prevItem = this.sibling();
-              return prevItem ? 
-                      (prevItem[a_left] + prevItem[a_width] + itemPadding[a_width]) : 
-                      0;
-          })
-          .lockMark('height', function(itemScene) { return itemScene.vars.clientSize.height; })
-          .lockMark(a_top,
-                  isHorizontal ?
-                  // Center items in row's height, that may be higher
-                  function(itemScene) {
-                      var vars = itemScene.vars;
-                      return vars.row.size.height / 2 - vars.clientSize.height / 2;
-                  } :
-                  // Left align items of a same column
-                  0)
-          .lockMark('width',  
-                  isHorizontal ?
-                  function(itemScene) { return itemScene.vars.clientSize.width; } :
-                  
-                   // The biggest child width of the column
-                  function(/*itemScene*/) { return this.parent.width(); })
           .pvMark
+          .lock('data', function(section) { return section.items; }) // each section has a list of bullet item scenes
+          [a_right](null)
+          [a_bottom](null)
+          [a_left](function(clientScene) {
+              var itemPadding = clientScene.vars.itemPadding;
+              var prevItem = this.sibling();
+              return prevItem ?
+                     (prevItem[a_left] + prevItem[a_width] + itemPadding[a_width]) :
+                     0;
+          })
+          [a_top](isHorizontal ?
+              // Center items in row's height, that may be taller than the item
+              function(itemScene) {
+                  var vars = itemScene.vars;
+                  return vars.section.size.height / 2 - vars.itemClientSize.height / 2;
+              } :
+              // Left align items of a same column
+              0)
+          ['height'](function(itemScene) { return itemScene.vars.itemClientSize.height; })
+          ['width'](isHorizontal ?
+              function(itemScene) { return itemScene.vars.itemClientSize.width; } :
+              
+               // The biggest child width of the column
+              function(/*itemScene*/) { return this.parent.width(); })
           .def("hidden", "false")
           .fillStyle(function() { // TODO: ??
               return this.hidden() == "true" ? 
@@ -25038,20 +25098,22 @@ def
                      "rgba(200,200,200,0.0001)";
           });
           
-      // ROW > ITEM > MARKER
-      var pvLegendMarkerPanel = new pvc.visual.Panel(this, this.pvLegendPanel)
+      // SECTION > ITEM > MARKER
+      var pvLegendMarkerPanel = new pvc.visual.Panel(this, pvLegendItemPanel, {
+              extensionId: 'markerPanel'
+          })
           .pvMark
           .left(0)
           .top (0)
           .right (null)
           .bottom(null)
           .width (function(itemScene){ return itemScene.vars.markerSize; })
-          .height(function(itemScene){ return itemScene.vars.clientSize.height; })
+          .height(function(itemScene){ return itemScene.vars.itemClientSize.height; })
           ;
       
       if(pvc.debug >= 20) {
-          pvLegendRowPanel.strokeStyle('red');
-          this.pvLegendPanel.strokeStyle('green');
+          pvLegendSectionPanel.strokeStyle('red');
+          pvLegendItemPanel.strokeStyle('green');
           pvLegendMarkerPanel.strokeStyle('blue');
       }
       
@@ -25088,7 +25150,7 @@ def
               "..",
               false);
           })
-          .lock('textMargin', function(itemScene) { return itemScene.vars.textMargin; })
+          .textMargin(function(itemScene) { return itemScene.vars.textMargin; })
           .font(function(itemScene) { return itemScene.vars.font; })
           .textDecoration(function(itemScene) { return itemScene.isOn() ? "" : "line-through"; });
       
@@ -25104,10 +25166,9 @@ def
                .add(pv.Line)
                   .data(function(scene) {
                       var vars = scene.vars;
-                      var textHeight = scene.labelTextSize().height * 2/3;
                       var labelBBox  = pvc.text.getLabelBBox(
-                              vars.labelWidthMax,
-                              textHeight,
+                              vars.textSize.width,
+                              vars.textSize.height * 2/3,
                               'left', 
                               'middle',
                               0,
@@ -25153,7 +25214,8 @@ def
                 font:        this.font,
                 markerSize:  this.markerSize,
                 textMargin:  this.textMargin, 
-                itemPadding: this.itemPadding
+                itemPadding: this.itemPadding,
+                itemSize:    this.itemSize
             });
             
             this._rootScene = rootScene;
