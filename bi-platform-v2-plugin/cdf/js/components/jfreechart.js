@@ -567,7 +567,7 @@ var TimePlotComponent = BaseComponent.extend({
 
       //var eventUrl = webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=timelineeventfeeder.xaction&" + parameters.join('&'); //legacy
     var ts = "ts=" + new Date().getTime() + "&";
-      var eventUrl = wwebAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
+      var eventUrl = webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:timelineeventfeeder.xaction/xaction?" + ts + parameters.join('&'); 
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){
