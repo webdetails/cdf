@@ -104,7 +104,7 @@ var JFreeChartComponent = BaseComponent.extend({
         action: xactionFile,
         exportType: type
       },cd);
-      Dashboards.post(webAppPath + '/pentaho/plugin/pentaho-cdf/api/export',obj);
+      Dashboards.post(webAppPath + '/plugin/pentaho-cdf/api/export',obj);
     };
 
     var myself = this;
@@ -120,7 +120,7 @@ var JFreeChartComponent = BaseComponent.extend({
           return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")
         },
         icon: function(){
-          return cd.chartType == "BarChart" ? webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/pie_icon.png': webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/bar_icon.png';
+          return cd.chartType == "BarChart" ? webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/pie_icon.png': webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/bar_icon.png';
         },
         oclass: 'options',
         callback: function(){
@@ -130,7 +130,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       excel: {
         title: "Excel",
-        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/excel_icon.png',
+        icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/excel_icon.png',
         oclass: 'options',
         callback: function(){
           exportFile("excel",cd);
@@ -138,7 +138,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       csv: {
         title: "CSV",
-        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/csv_icon.gif',
+        icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/csv_icon.gif',
         oclass: 'options',
         callback: function(){
           exportFile("csv",cd);
@@ -146,7 +146,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       zoom: {
         title:'Zoom',
-        icon: webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/magnify.png',
+        icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/magnify.png',
         oclass: 'options',
         callback: function(){
           Dashboards.incrementRunningCalls();
@@ -194,7 +194,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       details:{
         title:'Details',
-        icon:webAppPath + '/pentaho/api/plugins/pentaho-cdf/files/resources/style/images/table.png',
+        icon:webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/table.png',
         oclass: 'options',
         callback: function(){
           myself.pivotDefinition = {
