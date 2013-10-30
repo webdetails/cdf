@@ -22,7 +22,7 @@
 (function() {
 
 	var debug = false;
-    var local = true;
+    var local = false;
 
     // obtain local mode from the document URL    
     if (document.location.search.length > 0) {
