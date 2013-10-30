@@ -408,7 +408,7 @@ Dashboards.bindExistingControl = function(control, Class) {
     if(typeof control.off === "function") { control.off("all"); }
 
     // Endow it with the Backbone event system.
-    $.extend(control, Backbone.Events);
+    if (!control.on){ $.extend(control, Backbone.Events); };
 
     // Add logging lifeCycle
     this._addLogLifecycleToControl(control);
@@ -2953,7 +2953,7 @@ Dashboards.safeClone = function(){
 
       return this.hasQuery(qt)? qt : undefined;
     }
-  }
+  };
 
   D.getQuery = function(type, opts){
     if (_.isUndefined(type) ) {

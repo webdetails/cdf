@@ -11,7 +11,8 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-BaseComponent = Base.extend({
+BaseComponent = Base.extend(Backbone.Events).extend({
+
   //type : "unknown",
   visible: true,
   isManaged: true,
