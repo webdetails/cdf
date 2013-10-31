@@ -481,6 +481,7 @@
       $.ajax({
         type:'POST',
         async: false,
+        dataType: 'text',
         data: queryDefinition,
         url: this.getOption('url'),
         success: successCallback
