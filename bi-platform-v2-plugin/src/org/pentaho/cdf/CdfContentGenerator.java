@@ -197,7 +197,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         mimeTypeListener.setMimeType(CdfConstants.MIME_HTML);
       }
 
-      renderXCDFDashboard(requestParams, out, xcdfFilePath, template == null ? "mantle" : template);
+      renderXCDFDashboard(requestParams, out, xcdfFilePath, template);
 
       long end = System.currentTimeMillis();
       CpfAuditHelper.endAudit(CdfConstants.PLUGIN_NAME, xcdfFilePath, getObjectName(), this.userSession, this, start, uuid, end);
