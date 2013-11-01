@@ -598,7 +598,6 @@
 
     init: function (opts){
       this.setOption('queryDef', opts);
-      this.setOption('ajaxOptions', {dataType: "text"});
     },
 
     getSuccessHandler: function (callback){
