@@ -62,7 +62,7 @@ public class XcdfRenderer extends CdfHtmlTemplateRenderer implements IFileResour
       }
 
       // If a "style" tag exists, use that one
-      if (doc.selectSingleNode("/cdf/style") != null) //$NON-NLS-1$
+      if (doc.selectSingleNode("/cdf/style") != null && template == null) //$NON-NLS-1$
       {
         setTemplate(XmlDom4JHelper.getNodeText("/cdf/style", doc)); //$NON-NLS-1$
       }
