@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  
-/*! VERSION TRUNK-20131025 */
+/*! VERSION TRUNK-20131101 */
 var pvc = (function(def, pv) {
 
 
@@ -19402,23 +19402,16 @@ def
                     }
                 } catch (e) {
                     /*global NoDataException:true*/
-                    if (e instanceof NoDataException)
-                    {
+                    if (e instanceof NoDataException) {
                         if(pvc.debug > 1){ this._log("No data found."); }
                         this._addErrorPanelMessage("No data found", true);
-                    }
-                    else if (e instanceof InvalidDataException)
-                    {
-                        if(pvc.debug > 1) { this._log(e.message);}
-                        this._addErrorPanelMessage(e.message, true);
-                    }
-                    else {
+                    } else {
                         hasError = true;
 
                         // We don't know how to handle this
                         pvc.logError(e.message);
 
-                        if(pvc.debug > 0){
+                        if(pvc.debug > 0) {
                             this._addErrorPanelMessage("Error: " + e.message, false);
                         }
                         //throw e;
@@ -22909,17 +22902,29 @@ def
      */
     _create: function(force) {
         if(!this.pvPanel || force) {
+            var invalidDataError;
             
+            delete this._invalidDataError;
+
             this.pvPanel = null;
             if(this.pvRootPanel) { this.pvRootPanel = null; }
 
             delete this._signs;
             
-            /* Layout */
-            this.layout();
-
+            // Layout
+            try {
+                this.layout();
+            } catch(ex) {
+                if(ex instanceof InvalidDataException) {
+                    this._invalidDataError = invalidDataError = ex;
+                } else {
+                    throw ex;
+                }
+            }
+            
             if(this.isTopRoot && this.chart._isMultiChartOverflowClip) {
                 // Must repeat chart._create
+                // In principle, no invalidDataError will have been thrown
                 return;
             }
 
@@ -23049,7 +23054,26 @@ def
             /* Protovis marks that are pvc Panel specific,
              * and/or create child panels.
              */
-            this._createCore(this._layoutInfo);
+            if(!invalidDataError) {
+                try {
+                    this._createCore(this._layoutInfo);
+                } catch(ex) {
+                    if(ex instanceof InvalidDataException) {
+                        this._invalidDataError = invalidDataError = ex;
+                    } else {
+                        throw ex;
+                    }
+                }
+            }
+
+            if(invalidDataError) {
+                var pvMsg = pvBorderPanel
+                    .anchor("center")
+                    .add(pv.Label)
+                    .text(invalidDataError.message);
+
+                this.chart.extend(pvMsg, "invalidDataMessage");
+            }
             
             if(this.isTopRoot) { 
                 /* Multi-chart overflow & clip */
@@ -23139,11 +23163,17 @@ def
 
         if(!this.isVisible) { return; }
         
+        var pvPanel = this.pvRootPanel;
+
+        if(this._invalidDataError) {
+            pvPanel.render();
+            return;
+        }
+
         this._onRender();
         
         var options = this.chart.options;
-        var pvPanel = this.pvRootPanel;
-
+        
         // May be animating already...
         // If that is the case,
         //  the following pvPanel.render() call will cause
@@ -25035,7 +25065,7 @@ def
               break;
       }
       
-      this.pvPanel.overflow("hidden");
+      this.pvPanel.borderPanel.overflow("hidden");
       
       // SECTION - A panel instance per section
       var pvLegendSectionPanel = this.pvPanel.add(pv.Panel)
@@ -25110,9 +25140,9 @@ def
           ;
       
       if(pvc.debug >= 20) {
-          pvLegendSectionPanel.strokeStyle('red');
-          pvLegendItemPanel.strokeStyle('green');
-          pvLegendMarkerPanel.strokeStyle('blue');
+          pvLegendSectionPanel.strokeStyle('red'  ).lineWidth(0.5).strokeDasharray('.');
+          pvLegendItemPanel   .strokeStyle('green').lineWidth(0.5).strokeDasharray('.');
+          pvLegendMarkerPanel .strokeStyle('blue' ).lineWidth(0.5).strokeDasharray('.');
       }
       
       /* RULE/MARKER */
@@ -25127,7 +25157,7 @@ def
       /* LABEL */
       this.pvLabel = new pvc.visual.Label(this, pvLegendMarkerPanel.anchor('right'), {
               extensionId: 'label',
-              noTooltip:   false,
+              noTooltip:   false, // see #_getTooltipFormatter
               noClick:     false,
               wrapper:     wrapper
           })
@@ -25140,13 +25170,12 @@ def
           .pvMark
           .textAlign('left') // panel type anchors don't adjust textAlign this way
           .text(function(itemScene) {
+          	var text = itemScene.labelText();
             var vars = itemScene.vars;
-            return pvc.text.trimToWidthB(
-              vars.labelWidthMax,
-              itemScene.labelText(),
-              vars.font,
-              "..",
-              false);
+            if(vars.textSize.width > vars.labelWidthMax) {
+            	text = pvc.text.trimToWidthB(vars.labelWidthMax, text, vars.font, "..", false);
+            }
+            return text;
           })
           .textMargin(function(itemScene) { return itemScene.vars.textMargin; })
           .font(function(itemScene) { return itemScene.vars.font; })
@@ -25165,7 +25194,7 @@ def
                   .data(function(scene) {
                       var vars = scene.vars;
                       var labelBBox  = pvc.text.getLabelBBox(
-                              vars.textSize.width,
+                              Math.min(vars.labelWidthMax, vars.textSize.width),
                               vars.textSize.height * 2/3,
                               'left', 
                               'middle',
@@ -25225,8 +25254,12 @@ def
     _getTooltipFormatter: function(tipOptions) {
         tipOptions.isLazy = false;
         return function(context) { 
+          // Only return tooltip text if the text is trimmed (!=).
           var valueVar = context.scene.vars.value;
-          return valueVar.absLabel || valueVar.label;
+          var valueText = valueVar.absLabel || valueVar.label;
+          var itemText  = context.pvMark.text();
+
+          return valueText !== itemText ? valueText : "";
         };
     }
 });
@@ -29812,27 +29845,29 @@ def
     panel._extendSceneType('category', CategSceneClass, ['sliceLabel', 'sliceLabelMask']);
 
     /* Create child category scenes */
-    data.children().each(function(categData) {
-        // Value may be negative.
-        // Don't create 0-value scenes.
-        // null is returned as 0.
-        var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
-        if(value !== 0) { new CategSceneClass(categData, value); }
-    });
+    if(data.childCount()) {
+        data.children().each(function(categData) {
+            // Value may be negative.
+            // Don't create 0-value scenes.
+            // null is returned as 0.
+            var value = categData.dimensions(valueDimName).sum(pvc.data.visibleKeyArgs);
+            if(value !== 0) { new CategSceneClass(categData, value); }
+        });
 
-    // Not possible to represent as pie if there are no child scenes (=> sumAbs === 0)
-    // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
-    if (!sumAbs && !panel.visualRoles.multiChart.isBound()) {
-       throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+        // Not possible to represent as pie if sumAbs === 0
+        // If this is a small chart, don't show message, which results in a pie with no slices..., a blank plot.
+        if(!sumAbs && !panel.visualRoles.multiChart.isBound()) {
+           throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
+        }
     }
 
     // -----------
 
     // TODO: should this be in something like: chart.axes.angle.scale ?
     this.angleScale = pv.Scale
-                        .linear(0, sumAbs)
-                        .range(0, 2 * Math.PI)
-                        .by1(Math.abs);
+        .linear(0, sumAbs)
+        .range(0, 2 * Math.PI)
+        .by1(Math.abs);
 
     this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
 
@@ -30226,19 +30261,26 @@ def
             baseRange = baseAxis.scale.range(),
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
+            barMarginWidth = baseRange.margin,
             barWidth,
-            reverseSeries = isVertical === isStacked; // (V && S) || (!V && !S)
+            barGroupedMargin,
+            reverseSeries = isVertical === isStacked, // (V && S) || (!V && !S)
+            seriesCount;
 
         if(isStacked){
             barWidth = bandWidth;
         } else {
-            var S = seriesData.childCount();
-            barWidth = S > 0 ? (bandWidth * barSizeRatio / S) : 0;
+            seriesCount = seriesData.childCount();
+
+            barWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
+                       seriesCount === 1 ? bandWidth : 
+                       (barSizeRatio * bandWidth / seriesCount);
+
+            barGroupedMargin = seriesCount < 2 ? 0 :
+            				   ((1 - barSizeRatio) * bandWidth / (seriesCount - 1));
         }
 
-        if (barWidth > barSizeMax) {
-            barWidth = barSizeMax;
-        }
+        if (barWidth > barSizeMax) { barWidth = barSizeMax;}
 
         me.barWidth     = barWidth;
         me.barStepWidth = barStepWidth;
@@ -30316,8 +30358,7 @@ def
             })
             .lockDimensions()
             .pvMark
-            .antialias(false)
-            ;
+            .antialias(barWidth <= 4 || barMarginWidth < 2); // when bars or the spacing are too thin, with no antialias, they each show with a different width.
 
         if(plot.option('OverflowMarkersVisible')){
             this._addOverflowMarkers(wrapper);
