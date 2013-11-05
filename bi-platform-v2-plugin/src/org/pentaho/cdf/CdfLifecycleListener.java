@@ -30,13 +30,6 @@ public class CdfLifecycleListener implements IPluginLifecycleListener
   public void init() throws PluginLifecycleException
   {
     // Initialize plugin
-
-	  //initialize orientDb and initialize org.pentaho.cdf.views.View
-	  PersistenceEngine pe = PersistenceEngine.getInstance();
-	  if (!pe.classExists(ViewEntry.class.getName())) {
-		  pe.initializeClass(ViewEntry.class.getName());
-	  }
-          
     PluginHibernateUtil.initialize();
   }
 
