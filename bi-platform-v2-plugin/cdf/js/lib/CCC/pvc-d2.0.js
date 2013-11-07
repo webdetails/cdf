@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  
-/*! VERSION TRUNK-20131101 */
+/*! VERSION TRUNK-20131107 */
 var pvc = (function(def, pv) {
 
 
@@ -16851,11 +16851,13 @@ def
             width:  clientSize.width  + itemPadding.width,
             height: clientSize.height + itemPadding.height
         };
+
+        // may come with both width/height to null
         var desiredItemSize = this._unresolvedItemSize.resolve(extClientSize);
 
         var desiredItemClientSize = {
-            width:  Math.max(0, desiredItemSize.width  - itemPadding.width ),
-            height: Math.max(0, desiredItemSize.height - itemPadding.height)
+            width:  desiredItemSize.width  && Math.max(0, desiredItemSize.width  - itemPadding.width ),
+            height: desiredItemSize.height && Math.max(0, desiredItemSize.height - itemPadding.height)
         };
 
         var markerDiam = this._unresolvedMarkerDiam || desiredItemClientSize.height || 15;
@@ -25057,11 +25059,11 @@ def
       var leftOffset = 0;
       switch(this.align){
           case a_right:
-              leftOffset = clientSize[a_width] - contentSize.width;
+              leftOffset = clientSize[a_width] - contentSize[a_width];
               break;
               
           case a_center:
-              leftOffset = (clientSize[a_width] - contentSize.width) / 2;
+              leftOffset = (clientSize[a_width] - contentSize[a_width]) / 2;
               break;
       }
       
