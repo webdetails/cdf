@@ -36,6 +36,11 @@ public class ViewManager {
     private static final Log logger = LogFactory.getLog(ViewManager.class);
 
     private ViewManager() {
+      //initialize orientDb and initialize org.pentaho.cdf.views.View
+      PersistenceEngine pe = PersistenceEngine.getInstance();
+      if (!pe.classExists(View.class.getName())) {
+          pe.initializeClass(View.class.getName());
+      }
     }
 
     public synchronized static ViewManager getInstance() {
