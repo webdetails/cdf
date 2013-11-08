@@ -93,7 +93,8 @@ var vml = {
   
   _fontCache: {},
   
-  _fontSubst: { // Pass with substitution fonts
+  // Substitution fonts
+  _fontSubst: {
       'default':     'Arial',
       // Java Logical Fonts
       'sans-serif':  'Arial', //'Microsoft Sans Serif',
@@ -107,7 +108,7 @@ var vml = {
   
   // IE 64 bit does not do proper fall-back of unknown fonts,
   // so we decided to allow only a known subset of them.
-  _fontWhiteListIE64Bit: { // Allowed IE 64 bit font families
+  _fontWhiteListIE64Bit: {// Safe IE 64 bit font families
       'agency fb': 1, 'aharoni': 1, 'algerian': 1, 'andalus': 1, 'angsana new': 1, 'angsanaupc': 1, 'aparajita': 1, 'arabic typesetting': 1, 'arial': 1, 'arial black': 1, 'arial narrow': 1, 'arial rounded mt bold': 1, 'arial unicode ms': 1, 'baskerville old face': 1, 'batang': 1, 'batangche': 1, 'bauhaus 93': 1, 'bell mt': 1, 'berlin sans fb': 1, 'berlin sans fb demi': 1, 'bernard mt condensed': 1, 'blackadder itc': 1, 'bodoni mt': 1, 'bodoni mt black': 1, 'bodoni mt condensed': 1, 'bodoni mt poster compressed': 1, 'book antiqua': 1, 'bookman old style': 1, 'bookshelf symbol 7': 1, 'bradley hand itc': 1, 'britannic bold': 1, 'broadway': 1, 'browallia new': 1, 'browalliaupc': 1, 'brush script mt': 1, 'calibri': 1, 'californian fb': 1, 'calisto mt': 1, 'cambria': 1, 'cambria math': 1, 'candara': 1, 'castellar': 1, 'centaur': 1, 'century': 1, 'century gothic': 1, 'century schoolbook': 1, 'chiller': 1, 'colonna mt': 1, 'comic sans ms': 1, 'consolas': 1, 'constantia': 1, 'cooper black': 1, 'copperplate gothic bold': 1, 'copperplate gothic light': 1, 'corbel': 1, 'cordia new': 1, 'cordiaupc': 1, 'courier new': 1, 'curlz mt': 1, 'daunpenh': 1, 'david': 1, 'dfkai-sb': 1, 'dilleniaupc': 1, 'dokchampa': 1, 'dotum': 1, 'dotumche': 1, 'ebrima': 1, 'edwardian script itc': 1, 'elephant': 1, 'engravers mt': 1, 'eras bold itc': 1, 'eras demi itc': 1, 'eras light itc': 1, 'eras medium itc': 1, 'estrangelo edessa': 1, 'eucrosiaupc': 1, 'euphemia': 1, 'fangsong': 1, 'felix titling': 1, 'footlight mt light': 1, 'forte': 1, 'franklin gothic book': 1, 'franklin gothic demi': 1, 'franklin gothic demi cond': 1, 'franklin gothic heavy': 1, 'franklin gothic medium': 1, 'franklin gothic medium cond': 1, 'frankruehl': 1, 'freesiaupc': 1, 'freestyle script': 1, 'french script mt': 1, 'gabriola': 1, 'garamond': 1, 'gautami': 1, 'georgia': 1, 'gigi': 1, 'gill sans mt': 1, 'gill sans mt condensed': 1, 'gill sans mt ext condensed bold': 1, 'gill sans ultra bold': 1, 'gill sans ultra bold condensed': 1, 'gisha': 1, 'gloucester mt extra condensed': 1, 'goudy old style': 1, 'goudy stout': 1, 'gulim': 1, 'gulimche': 1, 'gungsuh': 1, 'gungsuhche': 1, 'guttman adii': 1, 'guttman adii-light': 1, 'guttman aharoni': 1, 'guttman calligraphic': 1, 'guttman david': 1, 'guttman drogolin': 1, 'guttman frank': 1, 'guttman frnew': 1, 'guttman haim': 1, 'guttman haim-condensed': 1, 'guttman hatzvi': 1, 'guttman hodes': 1, 'guttman kav': 1, 'guttman kav-light': 1, 'guttman keren': 1, 'guttman logo1': 1, 'guttman mantova': 1, 'guttman mantova-decor': 1, 'guttman miryam': 1, 'guttman myamfix': 1, 'guttman rashi': 1, 'guttman stam': 1, 'guttman stam1': 1, 'guttman vilna': 1, 'guttman yad': 1, 'guttman yad-brush': 1, 'guttman yad-light': 1, 'guttman-aharoni': 1, 'guttman-aram': 1, 'guttman-courmir': 1, 'guttman-soncino': 1, 'guttman-toledo': 1, 'haettenschweiler': 1, 'harlow solid italic': 1, 'harrington': 1, 'high tower text': 1, 'impact': 1, 'imprint mt shadow': 1, 'informal roman': 1, 'irisupc': 1, 'iskoola pota': 1, 'jasmineupc': 1, 'jokerman': 1, 'juice itc': 1, 'kaiti': 1, 'kalinga': 1, 'kartika': 1, 'khmer ui': 1, 'kodchiangupc': 1, 'kokila': 1, 'kristen itc': 1, 'kunstler script': 1, 'lao ui': 1, 'latha': 1, 'leelawadee': 1, 'levenim mt': 1, 'lilyupc': 1, 'lucida bright': 1, 'lucida calligraphy': 1, 'lucida console': 1, 'lucida fax': 1, 'lucida handwriting': 1, 'lucida sans': 1, 'lucida sans typewriter': 1, 'lucida sans unicode': 1, 'magneto': 1, 'maiandra gd': 1, 'malgun gothic': 1, 'mangal': 1, 'marlett': 1, 'matura mt script capitals': 1, 'meiryo': 1, 'meiryo ui': 1, 'microsoft himalaya': 1, 'microsoft jhenghei': 1, 'microsoft new tai lue': 1, 'microsoft phagspa': 1, 'microsoft sans serif': 1, 'microsoft tai le': 1, 'microsoft uighur': 1, 'microsoft yahei': 1, 'microsoft yi baiti': 1, 'mingliu': 1, 'mingliu-extb': 1, 'mingliu_hkscs': 1, 'mingliu_hkscs-extb': 1, 'miriam': 1, 'miriam fixed': 1, 'mistral': 1, 'modern no. 20': 1, 'mongolian baiti': 1, 'monotype corsiva': 1, 'monotype hadassah': 1, 'moolboran': 1, 'ms gothic': 1, 'ms mincho': 1, 'ms outlook': 1, 'ms pgothic': 1, 'ms pmincho': 1, 'ms reference sans serif': 1, 'ms reference specialty': 1, 'ms ui gothic': 1, 'mt extra': 1, 'mv boli': 1, 'narkisim': 1, 'niagara engraved': 1, 'niagara solid': 1, 'nsimsun': 1, 'nyala': 1, 'ocr a extended': 1, 'old english text mt': 1, 'onyx': 1, 'palace script mt': 1, 'palatino linotype': 1, 'papyrus': 1, 'parchment': 1, 'perpetua': 1, 'perpetua titling mt': 1, 'plantagenet cherokee': 1, 'playbill': 1, 'pmingliu': 1, 'pmingliu-extb': 1, 'poor richard': 1, 'pristina': 1, 'raavi': 1, 'rage italic': 1, 'ravie': 1, 'rockwell': 1, 'rockwell condensed': 1, 'rockwell extra bold': 1, 'rod': 1, 'sakkal majalla': 1, 'script mt bold': 1, 'segoe print': 1, 'segoe script': 1, 'segoe ui': 1, 'segoe ui light': 1, 'segoe ui semibold': 1, 'segoe ui symbol': 1, 'shonar bangla': 1, 'showcard gothic': 1, 'shruti': 1, 'simhei': 1, 'simplified arabic': 1, 'simplified arabic fixed': 1, 'simsun': 1, 'simsun-extb': 1, 'snap itc': 1, 'stencil': 1, 'sylfaen': 1, 'symbol': 1, 'tahoma': 1, 'tempus sans itc': 1, 'times new roman': 1, 'toptype soncino': 1, 'traditional arabic': 1, 'trebuchet ms': 1, 'tunga': 1, 'tw cen mt': 1, 'tw cen mt condensed': 1, 'tw cen mt condensed extra bold': 1, 'utsaah': 1, 'vani': 1, 'verdana': 1, 'vijaya': 1, 'viner hand itc': 1, 'vivaldi': 1, 'vladimir script': 1, 'vrinda': 1, 'webdings': 1, 'wide latin': 1, 'wingdings': 1, 'wingdings 2': 1, 'wingdings 3': 1
   },
   
@@ -145,22 +146,34 @@ var vml = {
 
   get_dim: function ( attr, target ) {
     var o = target || {};
-    // reformat the most common attributes
-    o.translate_x = 0;
-    o.translate_y = 0;
-    if ( attr.transform ) {
-      var t = /translate\((-?\d+(?:\.\d+)?(?:e-?\d+)?)(?:,(-?\d+(?:\.\d+)?(?:e-?\d+)?))?\)/.exec( attr.transform ); //support exp
-      ///translate\((-?\d+(?:\.\d+)?)(?:,(-?\d+(?:\.\d+)?))?\)/.exec( attr.transform );//support negative translations
-      //var t = /translate\((\d+(?:\.\d+)?)(?:,(\d+(?:\.\d+)?))?\)/.exec( attr.transform );
-      if ( t && t[1] ) { o.translate_x = parseFloat( t[1] ); }
-      if ( t && t[2] ) { o.translate_y = parseFloat( t[2] ); }
-      var r = /rotate\((\d+\.\d+|\d+)\)/.exec( attr.transform );
-      if ( r ) { o.rotation = parseFloat( r[1] ) % 360; }
-      // var scale_x = 1, scale_y = 1,
-      // var s = /scale\((\d+)(?:,(\d+))?\)/i.exec( value );
-      // if ( s && s[1] ) { scale[0] = parseInt( s[1], 10 ); }
-      // if ( s && s[2] ) { scale[1] = parseInt( s[2], 10 ); }
+    
+    o.rotation = o.tx = o.ty = 0;
+    o.sx = o.sy = 1;
+
+    var transf = attr.transform;
+    if(transf) {
+      var t = /translate\((-?\d+(?:\.\d+)?(?:e-?\d+)?)(?:,(-?\d+(?:\.\d+)?(?:e-?\d+)?))?\)/.exec(transf);
+      if(t) {
+        if(t[1]) { o.tx = +t[1]; }
+        if(t[2]) { o.ty = +t[2]; }
     }
+      
+      var r = /rotate\((-?\d+(?:\.\d+)?(?:e-?\d+)?)\)/.exec(transf);
+      if (r) { 
+          var r = (+r[1]) % 360;
+          if(r < 0) { r += 360; }
+          r = pv.radians(r);
+      }
+
+      var s = /scale\((-?\d+(?:\.\d+)?(?:e-?\d+)?)(?:,(-?\d+(?:\.\d+)?(?:e-?\d+)?))?\)/.exec(transf);
+      if(s) {
+        if(s[1]) { o.sx = +s[1]; }
+        if(s[2]) { o.sy = +s[2]; }
+      }
+      
+      o.rotation = r || 0;
+    }
+
     o.x = parseFloat( attr.x||0 );
     o.y = parseFloat( attr.y||0 );
     if ( 'width' in attr ) {
@@ -175,21 +188,22 @@ var vml = {
   // constant
   solidFillStyle: {type: 'solid'},
   
+  // helper objects that assist in the conversion of specific SVG elements into VML
   elm_defaults: {
 
     "g": {
       rewrite: 'span',
-      attr: function ( attr, style, elm, scenes, i ) {
+      attr: function (attr, style, elm, scene, i) {
         var d = vml.get_dim( attr );
-        elm.style.cssText = "position:absolute;zoom:1;left:"+
-                        (d.translate_x + d.x)+"px;top:"+
-                        (d.translate_y + d.y)+"px;";
+        elm.style.cssText = "position:absolute;zoom:1;" + 
+                    "left:" + (d.tx + d.x) + "px;" + 
+                    "top:"  + (d.ty + d.y) + "px;";
       }
     },
 
     "line": {
       rewrite: 'shape',
-      attr: function ( attr, style, elm, scenes, i ) {
+      attr: function (attr, style, elm, scene, i) {
         var x1 = parseFloat( attr.x1 || 0 ),
             y1 = parseFloat( attr.y1 || 0 ),
             x2 = parseFloat( attr.x2 || 0 ),
@@ -198,21 +212,21 @@ var vml = {
         elm.coordorigin = "0,0";
         elm.coordsize = "21600,21600";
         vml.path( elm ).v = 'M '+ r(x1) + ' ' + r(y1) + ' L ' + r(x2) + ' ' + r(y2) + ' E';
-        vml.stroke( elm, attr, scenes, i );
+        vml.stroke(elm, attr, scene, i);
       },
       css: "top:0px;left:0px;width:1000px;height:1000px"
     },
 
     "rect": {
       rewrite: 'shape',
-      attr: function ( attr, style, elm, scenes, i ) {
+      attr: function (attr, style, elm, scene, i) {
         var d = vml.get_dim( attr ),
             p = vml.path( elm ),
             r = vml.round;
         elm.coordorigin = "0,0";
         elm.coordsize = "21600,21600";
-        var x = r(d.translate_x + d.x),
-            y = r(d.translate_y + d.y),
+        var x = r(d.tx + d.x),
+            y = r(d.ty + d.y),
             w = r(d.width),
             h = r(d.height);
         p.v = 'M ' + x       + ' ' + y       + 
@@ -220,24 +234,39 @@ var vml = {
              ' L ' + (x + w) + ' ' + (y + h) + 
              ' L ' + x       + ' ' + (y + h) + 
              ' x';
-        vml.stroke( elm, attr, scenes, i );
-        vml.fill( elm, attr, scenes, i );
+        vml.stroke(elm, attr, scene, i);
+        vml.fill  (elm, attr, scene, i);
       },
       css: "top:0px;left:0px;width:1000px;height:1000px"
     },
 
     "path": {
       rewrite: 'shape',
-      attr: function ( attr, style, elm, scenes, i ) {
+      attr: function (attr, style, elm, scene, i) {
         var d = vml.get_dim( attr ),
             es = elm.style;
-        es.left = (d.translate_x + d.x) + "px";
-        es.top = (d.translate_y + d.y) + "px";
+        
+        es.visibility = "hidden";
+        
+        es.left = (d.tx + d.x) + "px";
+        es.top  = (d.ty + d.y) + "px";
+        
         elm.coordorigin = "0,0";
         elm.coordsize = "21600,21600";
+        
+        elm._events = attr["pointer-events"] || 'none';
         vml.path( elm, attr.d );
-        vml.fill( elm, attr, scenes, i );
-        vml.stroke( elm, attr, scenes, i );
+        
+        var skew = vml.rotateAndScale(elm, d.rotation && -d.rotation, d.sx, d.sy);
+        if(skew) {
+            // No science. Just tried and it worked...
+            skew.origin = "-0.5,-0.5";
+        }
+        
+        vml.fill  (elm, attr, scene, i);
+        vml.stroke(elm, attr, scene, i);
+        
+        es.visibility = "visible";
       },
       css: "top:0px;left:0px;width:1000px;height:1000px"
     },
@@ -251,8 +280,8 @@ var vml = {
             cx = parseFloat( attr.cx || 0 ),
             cy = parseFloat( attr.cy || 0 ),
             es = elm.style;
-        es.left = (d.translate_x + d.x + cx + 0.3) + "px";
-        es.top  = (d.translate_y + d.y + cy + 0.3) + "px";
+        es.left = (d.tx + d.x + cx + 0.3) + "px";
+        es.top  = (d.ty + d.y + cy + 0.3) + "px";
         elm.coordorigin = "0,0";
         elm.coordsize = "21600,21600";
         vml.path( elm ).v = "ar-" + r + ",-" + r + "," + r + "," + r + ",0,0,0,0x";
@@ -262,36 +291,36 @@ var vml = {
       css: "top:0px;left:0px;width:1000px;height:1000px"
       */
       rewrite: 'oval',
-      attr: function ( attr, style, elm, scenes, i ) {
+      attr: function (attr, style, elm, scene, i) {
         var d  = vml.get_dim( attr ),
-            es = elm.style,
+            r  = parseFloat(attr.r  || 0) + 0.5,
             cx = parseFloat( attr.cx || 0 ) + 0.7,
             cy = parseFloat( attr.cy || 0 ) + 0.7,
-            r  = parseFloat( attr.r  || 0 ) + 0.5;
-        es.top = ( d.translate_y + cy - r ) + "px";
-        es.left = ( d.translate_x + cx - r ) + "px";
-        es.width = ( r * 2 ) + "px";
-        es.height = ( r * 2 ) + "px";
-        vml.fill( elm, attr, scenes, i );
-        vml.stroke( elm, attr, scenes, i );
+            es = elm.style;
+        es.left   = (d.tx + cx - r) + "px";
+        es.top    = (d.ty + cy - r) + "px";
+        es.width  = 
+        es.height = (2 * r) + "px";
+
+        vml.fill  (elm, attr, scene, i);
+        vml.stroke(elm, attr, scene, i);
       }
     },
 
     "text": {
       rewrite: 'shape',
-      attr: function ( attr, style, elm, scenes, i ) {
-        var d  = vml.get_dim( attr );
+      attr: function (attr, style, elm, scene, i) {
         var es = elm.style;
         
-//        es.left = (d.translate_x + d.x) + "px";
-//        es.top = (d.translate_y + d.y) + "px";
+//        es.left = (d.tx + d.x) + "px";
+//        es.top = (d. + d.y) + "px";
         
 //        elm.coordorigin = "0,0";
 //        elm.coordsize   = "21600,21600";
         
         // Set stroke off,
         elm.stroked = "False";
-        //vml.stroke(elm, attr, scenes, i);
+        //vml.stroke(elm, attr, scene, i);
         
         elm.path = "m0,0 l1,0 e";
         
@@ -314,26 +343,11 @@ var vml = {
         vml.path(elm)
            .textpathok = 'True';
         
-        // Need to set the rotation matrix
-        var r = attr.rotation;
-        if (r){
-            r = 180 * r / Math.PI;
-            r = - (~~r % 360) * vml.d2r;
-            
-            if (r) {
-                var ct = Math.cos(r).toFixed(8),
-                    st = Math.sin(r).toFixed(8);
-                
-                var skew = vml.skew(elm);
-                skew.on = 'true';
-                skew.matrix= ct + "," + st + "," + -st + "," + ct + ",0,0";
-                //elm.rotation = ~~(r / vml.d2r); // does not work
-            }
-        }
+        vml.rotateAndScale(elm, attr.rotation && -attr.rotation);
         
-        var s = scenes[i];
+        var s = scene[i];
         s.fillStyle = vml.solidFillStyle;
-        vml.fill(elm, attr, scenes, i);
+        vml.fill(elm, attr, scene, i);
         s.fillStyle = null;
       },
       css: "position:absolute;top:0px;left:0px;width:1px;height:1px;"
@@ -341,7 +355,7 @@ var vml = {
 
     "svg": {
       rewrite: 'span',
-      css: 'position:relative;overflow:hidden;display:inline-block;~display:block;'
+      css: 'position:relative;overflow:hidden;display:inline-block;' // ~display:block;
     },
 
     // this allows reuse of the createElement function for actual VML
@@ -359,21 +373,22 @@ var vml = {
     'div': document.createElement( 'div' )
   },
 
-  createElement: function ( type, reformat ) {
+  createElement: function (type){
     var elm,
         cache = vml._elmcache,
         helper = vml.elm_defaults[ type ] || {};
+        
     var tagName = helper.rewrite || type;
     if ( tagName in cache ) {
       elm = cache[ tagName ].cloneNode( false );
-    }
-    else {
+    } else {
       cache[ tagName ] = document.createElement( vml.pre + tagName + vml.post );
       if ( tagName in vml.block ) {
         cache[ tagName ].className += ' msvml_block';
       }
       elm = cache[ tagName ].cloneNode( false );
     }
+    
     helper.css && (elm.style.cssText = helper.css);
     return elm;
   },
@@ -394,22 +409,23 @@ var vml = {
     return result || value;
   },
 
-  fill: function ( elm, attr, scenes, i ) {
-    var fill = elm.getElementsByTagName( 'fill' )[0];
-    if (!fill) {
-      fill = elm.appendChild( vml.createElement( 'vml:fill' ) );
-    }
+  fill: function (elm, attr, scene, i) {
+    var fill = elm.getElementsByTagName('fill')[0] ||
+               (fill = elm.appendChild(vml.createElement('vml:fill')));
     
-    var fillStyle = scenes[i].fillStyle;
-    if (!attr.fill || !fillStyle || (fillStyle.type === 'solid' && attr.fill === 'none')) {
+    var fillStyle = scene[i].fillStyle;
+    var fillType  = fillStyle && fillStyle.type;
+    if(!fillType) { fillType = 'solid'; }
+    
+    if (!attr.fill || !fillStyle || (fillType === 'solid' && attr.fill === 'none')) {
       fill.on = 'false';
     } else {
       fill.on = 'true';
-      if(fillStyle.type === 'solid'){
+      if(fillType === 'solid') {
           fill.type  = 'solid';
           fill.color = vml.color(attr.fill);
       } else {    
-          var isLinear = fillStyle.type === 'lineargradient';
+          var isLinear = fillType === 'lineargradient';
           fill.method = 'none';
           
           var stops = fillStyle.stops;
@@ -421,9 +437,13 @@ var vml = {
                   stopsText.push(stop.offset + '% ' + vml.color(stop.color.color)); // TODO: color.opacity being ignored
               }
               
-              fill.color  = vml.color(stops[0].color.color);
-              fill.color2 = vml.color(stops[S - 1].color.color);
-              fill.colors = stopsText.join(',');
+              //fill.color  = vml.color(stops[0].color.color);
+              //fill.color2 = vml.color(stops[S - 1].color.color);
+              if(fill.colors && typeof fill.colors === 'object'){
+                fill.colors.value = stopsText.join(',');
+              } else {
+                fill.colors = stopsText.join(',');
+              }
           }
           
           if(isLinear){
@@ -444,11 +464,10 @@ var vml = {
     }
   },
   
-  stroke: function ( elm, attr, scenes, i  ) {
-    var stroke = elm.getElementsByTagName('stroke')[0];
-    if ( !stroke ) {
-      stroke = elm.appendChild( vml.createElement( 'vml:stroke' ) );
-    }
+  stroke: function (elm, attr, scene, i) {
+    var stroke = elm.getElementsByTagName('stroke')[0] ||
+                 (stroke = elm.appendChild(vml.createElement('vml:stroke')));
+    
     if ( !attr.stroke || attr.stroke === 'none' ) {
       stroke.on = 'false';
       stroke.weight = 0;
@@ -488,30 +507,62 @@ var vml = {
   },
 
   path: function ( elm, svgpath ) {
-    var p = elm.getElementsByTagName( 'path' )[0];
-    if ( !p ) {
-      p = elm.appendChild( vml.createElement( 'vml:path' ) );
-    }
+    var p = elm.getElementsByTagName('path')[0] ||
+            (p = elm.appendChild(vml.createElement('vml:path')));
+    
     if ( arguments.length > 1 ) {
       p.v = vml.rewritePath( svgpath );
     }
+    
     return p;
   },
 
   
   skew: function (elm) {
-    var sk = elm.getElementsByTagName('skew')[0];
-    if (!sk) 
-        sk = elm.appendChild(vml.createElement('vml:skew'));
+    var sk = elm.getElementsByTagName('skew')[0] ||
+             (sk = elm.appendChild(vml.createElement('vml:skew')));
     sk.on = "false";
     return sk;  
   },
   
-  textpath: function (elm) {
-    var tp = elm.getElementsByTagName( 'textpath') [0];
-    if (!tp) {
-        tp = elm.appendChild(vml.createElement('vml:textpath'));
+  rotateAndScale: function(elm, r /*radians*/, sx, sy) {
+      if(r) {
+          r = pv.radians(Math.round(pv.degrees(r)) % 360);
+      }
+
+      var hasScale = (sx && sx !== 1) || (sy && sy !== 1);
+      if(r || hasScale) {
+        var skew = vml.skew(elm);
+        skew.on = 'true';
+        skew.offset = '0,0';
+
+        if(!sx) { sx = 1; }
+        if(!sy) { sy = 1; }
+
+        var m;
+        if(!r) {
+          // Only Scale
+          m = sx.toFixed(8) + ",0,0," + sy.toFixed(8) + ",0,0";
+        } else {
+          // Rotation and, possibly, scale
+          var ct = Math.cos(r);
+          var st = Math.sin(r);
+
+          m = (sx* ct).toFixed(8) + "," + (sy*st).toFixed(8) + "," + 
+              (sx*-st).toFixed(8) + "," + (sy*ct).toFixed(8) + ",0,0";
+
+          //elm.rotation = ~~(r / vml.d2r); // does not work
     }
+    
+        skew.matrix = m;
+
+        return skew;
+      }
+  },
+  
+  textpath: function (elm) {
+    var tp = elm.getElementsByTagName('textpath')[0] ||
+             (tp = elm.appendChild(vml.createElement('vml:textpath')));
     
     tp.style['v-text-align'] = 'center';
     tp.style['v-text-kern' ] = 'true';
@@ -526,6 +577,7 @@ var vml = {
       vml.text_shim.style.cssText = "position:absolute;left:-9999em;top:-9999em;padding:0;margin:0;line-height:1;display:inline-block;white-space:nowrap;";
       document.body.appendChild( vml.text_shim );
     }
+    
     if ( !vml.styles ) {
       vml.styles = document.getElementById('protovisvml_styles') || document.createElement("style");
       vml.styles.id = 'protovisvml_styles';
@@ -550,7 +602,8 @@ var vml = {
   //    implemented, but it would be trivial to complete this.
   // - ARCs need solving
    _pathcache: {},
-  rewritePath:function ( p, deb ) {
+   
+  rewritePath: function (p/*, deb */){
     var x = 0, y = 0, round = vml.round;
 
     if ( !p ) { return p; }
@@ -578,6 +631,7 @@ var vml = {
           y = round( args[1] );
           args = [ x, y ];
           break;
+        
         case 'm':  // moveto (relative)
           op = 'm';
           x += round( args[0] );
@@ -603,6 +657,7 @@ var vml = {
           args = [ (x = round( args[0] )),
                    (y = round( args[1] )) ];
           break;
+       
         case "l": // lineTo (relative)
           op = 'l';
           args = [ (x = x + round( args[0] )),
@@ -613,6 +668,7 @@ var vml = {
           op = 'l';
           args = [ (x = round( args[0] )), y ];
           break;
+       
         case "h": // horizontal lineto (relative)
           op = 'l';
           args = [ (x = x + round( args[0] )), y ];
@@ -622,6 +678,7 @@ var vml = {
           op = 'l';
           args = [ x, (y = round( args[0] )) ];
           break;
+        
         case "v": // vertical lineto (relative)
           op = 'l';
           args = [ x, (y = y + round( args[0] )) ];
@@ -636,6 +693,7 @@ var vml = {
             (y = round( args[5] ))
           ];
           break;
+        
         case "c": // curveto (relative)
           op = 'c';
           lastcurve = args = [
@@ -659,6 +717,7 @@ var vml = {
             (y = round( args[3] ))
           ];
           break;
+        
         case "s":  // shorthand/smooth curveto (relative)
           op = 'c';
           lastcurve = args = [
@@ -686,6 +745,7 @@ var vml = {
             (y = y2)
           ];
           break;
+        
         case "q": // TODO: quadratic Bezier (relative)
           op = 'l';
           x += round( args[2] );
@@ -700,6 +760,7 @@ var vml = {
           op = 'xe';
           args = [];
           break;
+        
         default:
           // unsupported path command
           op = '';
@@ -709,14 +770,12 @@ var vml = {
     }
     return ( vml._pathcache[p] = (np.join('') + 'e') );
   }
+}; // end vml object
 
-};
-
-//ext access to vml functions
+// external access to vml functions
 pv.Vml = vml;
 
 pv.VmlScene = {
-  
   // The pre-multipled scale, based on any enclosing transforms.
   scale: 1,
 
@@ -760,8 +819,9 @@ pv.renderer = function() { return 'vml'; };
     pv.VmlScene.minBarLineWidth  = is64bit ? 1.2 : 1.0;
 }(vml.is64Bit));
 
-pv.VmlScene.expect = function (e, type, scenes, i, attr, style) {
+pv.VmlScene.expect = function(e, type, scene, i, attr, style) {
   style = style || {};
+  
   var helper = vml.elm_defaults[type] || {}, 
       _type = helper.rewrite || type;
 
@@ -775,16 +835,20 @@ pv.VmlScene.expect = function (e, type, scenes, i, attr, style) {
     e = vml.createElement( type );
   }
   
+  if(attr) {
   if ( 'attr' in helper ) {
-    helper.attr( attr, style, e, scenes, i );
+        helper.attr(attr, style, e, scene, i);
   }
   
   if ( attr.cursor in vml.cursorstyles ) {
     var curs = vml.cursorstyles[attr.cursor];
     style.cursor = ( curs === 1 ) ? attr.cursor : curs;
   }
+  }
   
-  if(style) this.setStyle(e, style);
+  if(style) {
+    this.setStyle(e, style);
+  }
   
   return e;
 };
@@ -803,30 +867,39 @@ pv.VmlScene.removeFillStyleDefinitions = function(scenes){
 pv.VmlScene.addFillStyleDefinition = function(scenes, fill){
 };
 
-pv.VmlScene.setAttributes = function(e, attributes){
-    // Not supported - exists for svg custom attributes
-};
+// Done differently
+pv.VmlScene.setAttributes = function(/*e, attributes*/) {};
 
 pv.VmlScene.setStyle = function(e, style){
+    var prevStyle = e.__style__;
+    if(prevStyle === style) { prevStyle = null; }
+    
     var eStyle = e.style;
     for (var name in style) {
         var value = style[name];
-        if (value == null) 
+        if(!prevStyle || (value !== prevStyle[name])) {
+            if(value == null) {
             eStyle.removeAttribute(name);   // cssText 
-        else 
+            } else { 
             eStyle[name] = value;
     }
+        }
+    }
+    
+    e.__style__ = style;
 };
 
-pv.VmlScene.append = function(e, scenes, index) {
+pv.VmlScene.append = function(e, scene, index) {
   // FIXME: hooks the scene onto the element --- this is probably hemorrhaging memory in MSIE
   // it is only ever used by the envent dispatcher so it should probably be stored in a cache
-  e.$scene = {scenes:scenes, index:index};
+  e.$scene = {scenes: scene, index: index};
+  
   // attach a title to element
-  e = this.title(e, scenes[index]);
+  e = this.title(e, scene[index]);
   if ( !e.parentNode || e.parentNode.nodeType === 11 ) {  // 11 == documentFragment
-    scenes.$g.appendChild( e );
+    scene.$g.appendChild(e);
   }
+  
   return e.nextSibling;
 };
 
@@ -836,20 +909,24 @@ pv.VmlScene.title = function(e, s) {
 };
 
 // mostly the same code as pv.SvgScene.panel, but with less MSIE crashing...
-pv.VmlScene.panel = function(scenes) {
-  var g = scenes.$g, e = g && g.firstChild;
+pv.VmlScene.panel = function(scene){
+  var g = scene.$g, 
+      e = g && g.firstChild;
+  
   var inited = false;
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+  var style;
+  for(var i = 0, L = scene.length; i < L; i++) {
+    var s = scene[i];
 
     /* visible */
     if (!s.visible) continue;
 
-    /* svg */
-    if (!scenes.parent) {
+    /* top level element */
+    if(!scene.parent) {
       var canvas = s.canvas;
-      canvas.style.display = "inline-block";
-      canvas.style.zoom = 1;
+      style = canvas.style;
+      style.display = "inline-block";
+      style.zoom    = 1;
       
       if (g && (g.parentNode !== canvas)) {
         g = canvas.firstChild;
@@ -868,7 +945,7 @@ pv.VmlScene.panel = function(scenes) {
         
         var events = this.events;
         var dispatch = this.dispatch;
-        for (var j = 0, L = events.length; j < L; j++) {
+        for(var j = 0, E = events.length; j < E; j++) {
           g.addEventListener
               ? g.addEventListener(events[j], dispatch, false)
               : g.attachEvent("on" + events[j], dispatch);
@@ -877,29 +954,50 @@ pv.VmlScene.panel = function(scenes) {
         e = g.firstChild;
       }
       
-      scenes.$g = g;
+      scene.$g = g;
       
       var w = (s.width + s.left + s.right),
           h = (s.height + s.top + s.bottom);
       
-      g.style.width  = w + 'px';
-      g.style.height = h + 'px';
-      g.style.clip = "rect(0px " + w + "px " + h + "px 0px)";
+      style = g.style;
+      style.width  = w + 'px';
+      style.height = h + 'px';
+      style.clip   = "rect(0px " + w + "px " + h + "px 0px)";
+    } // end if top level element
+    
+    /* clip (nest children) */
+    var c;
+    if(s.overflow === "hidden") {
+      c = this.expect(e, "g", scene, i);
+      c.style.position = "absolute";
+      c.style.clip = "rect(" + 
+                  s.top.toFixed(2) + "px " + 
+                  (s.left + s.width).toFixed(2) + "px " + 
+                  (s.top + s.height).toFixed(2) + "px " + 
+                  s.left.toFixed(2) + "px)";
+      
+      if(!c.parentNode) { 
+          g.appendChild(c); 
+      }
+      
+      scene.$g = g = c;
+      e = c.firstChild;
     }
 
     /* fill */
-    e = this.fill( e, scenes, i );
+    e = this.fill(e, scene, i);
 
     /* transform (push) */
     var k = this.scale,
         t = s.transform,
         x = s.left + t.x,
         y = s.top + t.y;
+      
     this.scale *= t.k;
 
     /* children */
-    this.eachChild(scenes, i, function(child){
-        child.$g = e = this.expect(e, "g", scenes, i, {
+    this.eachChild(scene, i, function(child){
+        child.$g = e = this.expect(e, "g", scene, i, {
             "transform": "translate(" + x + "," + y + ")" + 
                          (t.k != 1 ? " scale(" + t.k + ")" : "")
         });
@@ -911,7 +1009,7 @@ pv.VmlScene.panel = function(scenes) {
           g.appendChild(e);
           var helper = vml.elm_defaults[ e.svgtype ];
           if ( helper && typeof helper.onappend === 'function' ) {
-            helper.onappend( e, scenes[i] );
+              helper.onappend(e, scene[i]);
           }
         }
         
@@ -922,9 +1020,14 @@ pv.VmlScene.panel = function(scenes) {
     this.scale = k;
 
     /* stroke */
-    e = this.stroke( e, scenes, i );
+    e = this.stroke(e, scene, i);
 
-  }
+    /* clip (restore group) */
+    if (c) {
+      scene.$g = g = c.parentNode;
+      e = c.nextSibling;
+    }
+  } // end for panel instance
   
   if(inited){
     this.removeSiblings(e);
@@ -934,6 +1037,7 @@ pv.VmlScene.panel = function(scenes) {
     // Adding a dummy last element in the VML DOM solves the issue.
     e = g.appendChild( vml.createElement( "oval" ) );
   }
+  
   return e;
 };
 
@@ -966,6 +1070,10 @@ pv.VmlScene.parseDasharray = function(s){
     }
     
     return dashArray;
+};
+
+pv.VmlScene.create = function(type){
+    return vml.createElement(type);
 };
 
 // Much of the event rewriting code is copyed and watered down
@@ -1151,22 +1259,26 @@ pv.listen = function(target, type, listener) {
 
 pv.VmlScene.dispatch = pv.listener(function(e){
   var t = e.target.$scene;
-  if (t && pv.Mark.dispatch(e.type, t.scenes, t.index, e)){
+  if (t){
+    var events = e.target._events;
+    if(events === 'none' ||
+       pv.Mark.dispatch(e.type, t.scenes, t.index, e)){
       e.preventDefault();
+      e.stopPropagation();
+    }
   }
 });
 
-//
-pv.VmlScene.image = function(scenes) {
-  var e = scenes.$g.firstChild;
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+pv.VmlScene.image = function(scene) {
+  var e = scene.$g.firstChild;
+  for (var i = 0; i < scene.length; i++) {
+    var s = scene[i];
 
     /* visible */
     if (!s.visible) continue;
 
     /* fill */
-    e = this.fill(e, scenes, i);
+    e = this.fill(e, scene, i);
 
     /* image */
     if (s.image) {
@@ -1184,19 +1296,16 @@ pv.VmlScene.image = function(scenes) {
       st.msInterpolationMode = 'bicubic';
     }
     
-    e = this.append(e, scenes, i);
-
-    /* stroke */
-    e = this.stroke(e, scenes, i);
+    e = this.append(e, scene, i);
+    e = this.stroke(e, scene, i);
   }
   return e;
 };
 
-pv.VmlScene.label = function(scenes) {
-  var e = scenes.$g.firstChild,
-      round = Math.round;
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+pv.VmlScene.label = function(scene) {
+  var e = scene.$g.firstChild;
+  for(var i = 0, L = scene.length ; i < L ; i++) {
+    var s = scene[i];
 
     // visible
     if (!s.visible) continue;
@@ -1219,29 +1328,16 @@ pv.VmlScene.label = function(scenes) {
     var dx = 0;
     var dy = 0;
     switch(s.textBaseline){
-        case 'middle':
-            dy  = (.1 * label.fontsize); // slight middle baseline correction
-            break;
-            
-        case 'top':
-            dy  = s.textMargin + .5 * label.fontsize;
-            break;
-            
-        case 'bottom':
-            dy  = -(s.textMargin + .5 * label.fontsize);
-            break;
+        case 'middle': dy  = (.1 * label.height); break; // slight middle baseline correction
+        case 'top':    dy =  (s.textMargin + .5 * label.height); break;
+        case 'bottom': dy = -(s.textMargin + .5 * label.height); break;
     }
 
     // Text alignment is already handled by VML's textPath "v-text-align" style attribute
     // So, only the text margin must be explicitly handled.
     switch(s.textAlign){
-        case 'left':
-            dx  = s.textMargin;
-            break;
-            
-        case 'right':
-            dx  = -s.textMargin;
-            break;
+        case 'left':  dx =  s.textMargin; break;
+        case 'right': dx = -s.textMargin; break;
     }
  
     // VML already handles rotation relative to the elements position.
@@ -1263,9 +1359,7 @@ pv.VmlScene.label = function(scenes) {
     // ---------------
     
     var attr = {};
-    if(s.cursor) { 
-        attr.cursor = s.cursor; 
-    }
+    if(s.cursor) { attr.cursor = s.cursor; }
     
     attr.fill = vml.color(fill.color) || "black";
     
@@ -1282,7 +1376,7 @@ pv.VmlScene.label = function(scenes) {
     attr.font = font;
     attr.textDecoration = s.textDecoration;
     
-    e = this.expect(e, "text", scenes, i, attr, {    
+    e = this.expect(e, "text", scene, i, attr, {    
       'display':    'block',
       'lineHeight': 1,
       'whiteSpace': 'nowrap',
@@ -1293,64 +1387,27 @@ pv.VmlScene.label = function(scenes) {
       'left':       left + 'px'
     });
 
-    /*
-    e = this.expect(e, "text", scenes, i, attr, {
-      "font": s.font,
-      // "text-shadow": s.textShadow,
-      "textDecoration": s.textDecoration,
-      'top': Math.round( s.top + dy ) + 'px',
-      'left': Math.round( s.left + dx ) + 'px',
-      'position': 'absolute',
-      'display': 'block',
-      'lineHeight': 1,
-      'whiteSpace': 'nowrap',
-      'zoom': 1,
-      'cursor': 'default',
-      'color': vml.color( fill.color ) || 'black'
-    });
-    e.innerText = txt;
-    */
-
-
-/*
-    // Rotation is broken in several different ways:
-    // 1. it looks REALLY ugly
-    // 2. it is incredibly slow
-    // 3. rotated text is offset completely wrong and it takes a ton of math to correct it
-    // when text is rotated we need to switch to a VML textpath solution
-    var rotation = 180 * s.textAngle / Math.PI;
-    if ( rotation ) {
-      var r = (~~rotation % 360) * vml.d2r,
-          ct = Math.cos(r),
-          st = Math.sin(r);
-      e.style.filter = ['progid:DXImageTransform.Microsoft.Chroma(color="white") progid:DXImageTransform.Microsoft.Matrix(',
-                    'M11=',  ct.toFixed( 8 ), ',',
-                    'M12=', -st.toFixed( 8 ), ',',
-                    'M21=',  st.toFixed( 8 ), ',',
-                    'M22=',  ct.toFixed( 8 ), ',sizingMethod=\'auto expand\')";'].join('');
-      e.style.backgroundColor = "white";    
-    } else {
-      e.style.filter = '';
-    }
-*/
-    e = this.append(e, scenes, i);
+    e = this.append(e, scene, i);
   }
   return e;
 };
 
-pv.VmlScene.wedge = function(scenes) {
-  var e = scenes.$g.firstChild,
+pv.VmlScene.wedge = function(scene) {
+  var e = scene.$g.firstChild,
       round = vml.round;
-  for (var i = 0; i < scenes.length; i++) {
-    var s = scenes[i];
+
+  for(var i = 0, L = scene.length ; i < L ; i++) {
+    var s = scene[i];
 
     // visible
     if (!s.visible) continue;
-    var fill = s.fillStyle, stroke = s.strokeStyle;
+
+    var fill   = s.fillStyle, 
+        stroke = s.strokeStyle;
     if (!fill.opacity && !stroke.opacity) continue;
 
     // create element sans path
-    e = this.expect(e, "path", scenes, i, {
+    e = this.expect(e, "path", scene, i, {
       "pointer-events": s.events,
       "cursor": s.cursor,
       "transform": "translate(" + s.left + "," + s.top + ")",
@@ -1382,20 +1439,17 @@ pv.VmlScene.wedge = function(scenes) {
       if (r1) {
         d = "AE0,0 " + r2 + "," + r2 + " 0 23592960"
           + "AL0,0 " + r1 + "," + r1 + " 0 23592960";
-      }
-      else {
+      } else {
         d = "AE0,0 " + r2 + "," + r2 + " 0 23592960";
       }
-    }
-    else {
+    } else {
       var sa = Math.round(s.startAngle / Math.PI * 11796480),
            a = Math.round(s.angle / Math.PI * 11796480);
       if (r1) {
         d = "AE 0,0 " + r2 + "," + r2 + " " + -sa + " " + -a
           + " 0,0 " + r1 + "," + r1 + " " + -(sa + a) + " " + a
           + "X";
-      }
-      else {
+      } else {
         d = "M0,0"
           + "AE0,0 " + r2 + "," + r2 + " " + -sa + " " + -a
           + "X";
@@ -1403,12 +1457,13 @@ pv.VmlScene.wedge = function(scenes) {
     }
     p.v = d;
 
-    e = this.append(e, scenes, i);
-
+    e = this.append(e, scene, i);
   }
+  
   return e;
 };
 
 // end VML override
 })();}
+
 });
