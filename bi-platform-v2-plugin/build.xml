@@ -208,7 +208,7 @@
 		   <tstamp/>			
 			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
 
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='${project.stage}' buildId=''>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='${project.stage}' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
 
 
 		   <!-- Copy js folder into dist -->
