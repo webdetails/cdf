@@ -603,7 +603,6 @@ var CommentsComponent = BaseComponent.extend({
       render: function() {
         var $renderElem = $('#'+myself.options.htmlObject);
         var $commentsElem = $('<div/>').addClass('commentsGroup');
-        //Dashboards.log("Comments Component: Render comments", "debug");
         _(this.collection.models).each(function(comment){
           $commentsElem.append(this.renderSingeComment(comment));
         }, this);
@@ -615,18 +614,15 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       renderSingeComment: function(comment) {
-        //Dashboards.log("Comments Component: Render single comment", "debug");
         var singleCommentView = new myself.CommentView(comment);
         return singleCommentView.render();
       },
 
       addComment: function() {
-        //Dashboards.log("Comments Component: Add comment", "debug");
         this.showAddComment();
       },
 
       saveComment: function() {
-        //Dashboards.log("Comments Component: Save comment", "debug");
         var text = this.$el.find('.addCommentText').val();
         var callback = function(data, collection) {
           var paginate = myself.options.paginate;
@@ -638,12 +634,10 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       cancelComment: function() {
-        //Dashboards.log("Comments Component: Cancel comment", "debug");
         this.hideAddComment();
       },
 
       navigateNext: function() {
-        //Dashboards.log("Comments Component: Next", "debug");
         var paginate = myself.options.paginate;
         var start = paginate.activePageNumber*paginate.pageCommentsSize;
         if ((start+paginate.pageCommentsSize) < myself.options.queyResult.length) {
@@ -655,7 +649,6 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       navigatePrevious: function() {
-        //Dashboards.log("Comments Component: Previous", "debug");
         var paginate = myself.options.paginate;
         var start = paginate.activePageNumber;
         if (paginate.activePageNumber > 0) {
@@ -667,7 +660,6 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       navigateRefresh: function() {
-        //Dashboards.log("Comments Component: Refresh", "debug");
         var paginate = myself.options.paginate;
         myself.options.paginate.activePageNumber = 0;
         myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
@@ -687,15 +679,12 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       commentsUpdateNotification: function() {
-        //Dashboards.log("Comments Component: Comments notification", "debug");
         if (myself.options.queyResult.length > 0) {
           var lastCommentDate = myself.options.queyResult[0].createdOn;
           var callback = function(data) {
             if (data.result.length > 0) {
               if (!!(data.result[0].createdOn==lastCommentDate)) {
-                //Dashboards.log("Comments Component: New Comments? false", "debug");
               } else {
-                //Dashboards.log("Comments Component: New Comments? true", "debug");
                 var tipsyOptions = {
                   html: true,
                   fade: true,
@@ -747,7 +736,6 @@ var CommentsComponent = BaseComponent.extend({
 
       if (myself.options.intervalActive) {
         var refresh = function() {
-          //Dashboards.log("Comments Component: Refresh", "debug");
           myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
         }
         setInterval(function () { myself.commentsCollection.trigger('commentsUpdateNotification'); }, myself.options.interval);
@@ -806,9 +794,6 @@ var CommentsComponent = BaseComponent.extend({
     }
 
     this.processing().start(options);
-
-    // Old comment component definition
-    // this.firePageUpdate();
   }
 
 });
