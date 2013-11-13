@@ -1,10 +1,10 @@
 /*!
- * Modernizr v2.0.6
- * http://www.modernizr.com
- *
- * Copyright (c) 2009-2011 Faruk Ates, Paul Irish, Alex Sexton
- * Dual-licensed under the BSD or MIT licenses: www.modernizr.com/license/
- */
+* Modernizr v2.0.6
+* http://www.modernizr.com
+*
+* Copyright (c) 2009-2011 Faruk Ates, Paul Irish, Alex Sexton
+* Dual-licensed under the BSD or MIT licenses: www.modernizr.com/license/
+*/
 
 /*
  * Modernizr tests which native CSS3 and HTML5 features are available in

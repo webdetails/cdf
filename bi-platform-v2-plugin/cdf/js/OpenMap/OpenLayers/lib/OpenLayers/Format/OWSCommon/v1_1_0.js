@@ -1,7 +1,7 @@
-/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the Clear BSD license.  
- * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
 
 /**
  * @requires OpenLayers/Format/OWSCommon/v1.js
@@ -11,6 +11,7 @@
  * Class: OpenLayers.Format.OWSCommon.v1_1_0
  * Parser for OWS Common version 1.1.0.
  */
+
 OpenLayers.Format.OWSCommon.v1_1_0 = OpenLayers.Class(OpenLayers.Format.OWSCommon.v1, {
 
     /**

@@ -1,7 +1,7 @@
-/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the Clear BSD license.  
- * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
 
 /**
  * @requires OpenLayers/Control.js
@@ -27,6 +27,7 @@
  * Will create a button with CSS class MyButtonItemInactive, that
  *     will call the function MyFunction() when clicked.
  */
+
 OpenLayers.Control.Button = OpenLayers.Class(OpenLayers.Control, {
     /**
      * Property: type

@@ -1,7 +1,7 @@
-/* Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for 
- * full list of contributors). Published under the Clear BSD license.  
- * See http://svn.openlayers.org/trunk/openlayers/license.txt for the
- * full text of the license. */
+/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
+* full list of contributors). Published under the Clear BSD license.
+* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
+* full text of the license. */
 
 /**
  * @requires OpenLayers/Format/SOSCapabilities.js
@@ -16,6 +16,7 @@
  * Inherits from:
  *  - <OpenLayers.Format.SOSCapabilities>
  */
+
 OpenLayers.Format.SOSCapabilities.v1_0_0 = OpenLayers.Class(
     OpenLayers.Format.SOSCapabilities, {
 
