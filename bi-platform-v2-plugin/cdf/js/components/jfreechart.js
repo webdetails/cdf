@@ -128,7 +128,7 @@ var JFreeChartComponent = BaseComponent.extend({
           myself.update();
         }
       },
-      excel: {
+      /*excel: {
         title: "Excel",
         icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/excel_icon.png',
         oclass: 'options',
@@ -143,7 +143,7 @@ var JFreeChartComponent = BaseComponent.extend({
         callback: function(){
           exportFile("csv",cd);
         }
-      },
+      },*/
       zoom: {
         title:'Zoom',
         icon: webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/magnify.png',
@@ -191,7 +191,7 @@ var JFreeChartComponent = BaseComponent.extend({
             Dashboards.decrementRunningCalls();
           });
         }
-      },
+      }/*,
       details:{
         title:'Details',
         icon:webAppPath + '/api/plugins/pentaho-cdf/files/resources/style/images/table.png',
@@ -205,7 +205,7 @@ var JFreeChartComponent = BaseComponent.extend({
           PivotLinkComponent.openPivotLink(myself);
         }
 
-      }
+      }*/
 
     }, cd.caption);
 
