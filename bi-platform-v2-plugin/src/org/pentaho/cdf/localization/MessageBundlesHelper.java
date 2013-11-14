@@ -50,7 +50,7 @@ public class MessageBundlesHelper {
       this.msgsDir = msgsDir;
       String relativeDirPath = FilenameUtils.getPath(msgsDir.getAbsolutePath()) + msgsDir.getName();
       sourceDashboardBaseMsgFile = msgsBaseFileName;
-      languagesCacheUrl = CdfConstants.CDF_PLUGIN_URL_PREFIX + File.separator + CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
+      languagesCacheUrl = File.separator + relativeDirPath;
     }
     
     
@@ -59,7 +59,7 @@ public class MessageBundlesHelper {
       this.msgsDir = msgsDir;
       String relativeDirPath = FilenameUtils.getPath(msgsDir.getPath()) + msgsDir.getName();
       sourceDashboardBaseMsgFile = msgsBaseFileName;
-      languagesCacheUrl = CdfConstants.CDF_PLUGIN_URL_PREFIX + File.separator + CdfConstants.BASE_CDF_CACHE_DIR + File.separator + relativeDirPath;
+      languagesCacheUrl = File.separator + relativeDirPath;
     }
 
     protected File getGlobalBaseMessageFile() {

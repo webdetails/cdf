@@ -21,12 +21,7 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -303,6 +298,47 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       }
     } catch (SecurityException e) {
     	servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
+    }
+  }
+
+  @POST
+  @Path("/getResource")
+  @Consumes({ APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED })
+  public void getResourcePost(@FormParam(CdfConstants.PARAM_RESOURCE) String resource,
+                          @FormParam(CdfConstants.PARAM_PATH) String path,
+                          @Context HttpServletResponse servletResponse) throws Exception {
+    try {
+
+      if(!Util.isEmpty(resource) && Util.isEmpty(path)){
+        //legacy calls used resource param; 5.0 calls use path param
+        path = resource;
+      }
+
+      path = path != null && path.endsWith("/content") ? path.substring(0, path.indexOf("/content")) : path;
+
+      servletResponse.setHeader("Content-Type", MimeHelper.getMimeTypeFromFileName(path));
+
+      final IPluginResourceLoader resLoader = PentahoSystem.get(IPluginResourceLoader.class, null);
+      final String formats = resLoader.getPluginSetting(this.getClass(), "settings/resources/downloadable-formats");
+
+      List<String> allowedFormats = Arrays.asList(StringUtils.split(formats, ','));
+      String extension = path.replaceAll(".*\\.(.*)", "$1");
+      if (allowedFormats.indexOf(extension) < 0) {
+        // We can't provide this type of file
+        throw new SecurityException("Not allowed");
+      }
+      RepositoryAccess repositoryAccess = RepositoryAccess.getRepository(PentahoSessionHolder.getSession());
+
+      final InputStream in = repositoryAccess.getResourceInputStream(path, RepositoryAccess.FileAccess.EXECUTE);
+
+      try {
+        IOUtils.copy(in, servletResponse.getOutputStream());
+        servletResponse.getOutputStream().flush();
+      } finally {
+        IOUtils.closeQuietly(in);
+      }
+    } catch (SecurityException e) {
+      servletResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
   }
   
