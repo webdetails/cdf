@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdf>
-	<title>Components</title>
+	<title>Lifecycle</title>
 	<author>Webdetails</author>
-	<description>Components</description>
+	<description>Lifecycle</description>
 	<icon></icon>
-	<template>components.html</template>
+	<template>lifecycle.html</template>
 	<style>mantle</style>
 </cdf>
