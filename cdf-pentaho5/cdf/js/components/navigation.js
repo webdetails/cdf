@@ -84,11 +84,11 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       }
 
     }
-    alert("Fatal: path " + NavigatorBaseComponent.path +" not found in navigation object");
+    alert("Fatal: path " + (NavigatorBaseComponent.path || Dashboards.getPathParameter()) +" not found in navigation object");
     return;
   },
   getParentSolution : function(){
-    if (NavigatorBaseComponent.path.length>0){
+    if ( (NavigatorBaseComponent.path || Dashboards.getPathParameter()).length>0){
       return NavigatorBaseComponent.solution;
     } else {
       return "";
@@ -116,7 +116,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      $.getJSON(Endpoints.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json){
+      $.getJSON(Endpoints.getJSONSolution() + "?mode=navigator&path=" + (NavigatorBaseComponent.path || Dashboards.getPathParameter()), function(json){
         myself.processNavigatorResponse(json);
       });
     }
