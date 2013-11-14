@@ -12,10 +12,33 @@
 */
 
 var NavigatorBaseComponent = BaseComponent.extend({},{
-  path: Dashboards.getQueryParameter("path"),
+  
+  
+  getFilePathFromUrl: function(){
+        // ex: /pentaho/api/repos/:public:plugin-samples:pentaho-cdf-dd:cde_sample1.wcdf/wcdf.edit
+
+        var file = ""; // empty file path that represents a new dash
+
+        if(window.location.pathname.indexOf("/:") == -1){
+            return file;
+        } else {
+            var regExp = window.location.pathname.match("(/:)(.*)(/)");
+
+            if(regExp[2]){
+                file = "/"+regExp[2].replace(new RegExp(":", "g"), "/");
+            }
+
+        }
+        return file;
+    }  ,
+  
+  
   solution : Dashboards.getQueryParameter("solution"),
   template: Dashboards.getQueryParameter("template"),
   navigatorResponse : -1,
+  
+  
+  
   getSolutionJSON : function(solution) {
     var json = NavigatorBaseComponent.navigatorResponse;
     var files = json.solution.folders;
@@ -84,22 +107,22 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       }
 
     }
-    alert("Fatal: path " + NavigatorBaseComponent.path +" not found in navigation object");
+    alert("Fatal: path " + NavigatorBaseComponent.getFilePathFromUrl() +" not found in navigation object");
     return;
   },
   getParentSolution : function(){
-    if (NavigatorBaseComponent.path.length>0){
+    if (NavigatorBaseComponent.getFilePathFromUrl().length>0){
       return NavigatorBaseComponent.solution;
     } else {
       return "";
     }
   },
   getParentPath : function(){
-    var index = NavigatorBaseComponent.path.lastIndexOf("/");
+    var index = NavigatorBaseComponent.getFilePathFromUrl().lastIndexOf("/");
     if (index==-1){
       return "";
     }
-    var parentPath = NavigatorBaseComponent.path.substring(0, NavigatorBaseComponent.path.lastIndexOf("/"));
+    var parentPath = NavigatorBaseComponent.getFilePathFromUrl().substring(0, NavigatorBaseComponent.getFilePathFromUrl().lastIndexOf("/"));
     return parentPath;
   },
   isAncestor : function(solution, path){
@@ -227,7 +250,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 var ContentListComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
-    var path = this.mode != 4  ? NavigatorBaseComponent.path : NavigatorBaseComponent.getParentPath();
+    var path = this.mode != 4  ? NavigatorBaseComponent.getFilePathFromUrl() : NavigatorBaseComponent.getParentPath();
     myself.draw(path);
   },
   draw: function(path){
@@ -252,7 +275,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
     var container = $("<ul></ul>").attr("id","contentList-"+this.name).appendTo("#"+this.htmlObject);
 
     // We need to append the parent dir
-    if( this.mode != 1 && this.mode != 4 && NavigatorBaseComponent.path != ""){
+    if( this.mode != 1 && this.mode != 4 && NavigatorBaseComponent.getFilePathFromUrl() != ""){
       var parentDir =  {
         name: "Up",
         title:"Up",
@@ -343,7 +366,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-	  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/getJSONSolution?mode=contentlist" + (NavigatorBaseComponent.path != "" ? "&path=" + NavigatorBaseComponent.path : ""), function(json){
+	  $.getJSON(webAppPath + "/plugin/pentaho-cdf/api/getJSONSolution?mode=contentlist" + (NavigatorBaseComponent.getFilePathFromUrl() != "" ? "&path=" + NavigatorBaseComponent.getFilePathFromUrl() : ""), function(json){
         myself.processPageTitleResponse(json);
       });
     }
