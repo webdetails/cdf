@@ -7,7 +7,7 @@
     <cache>true</cache>	
 	
         <resources>
-            <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff,ico,zip,xml</downloadable-formats>
+            <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff,ico,zip,xml,properties</downloadable-formats>
         </resources>
 
 
