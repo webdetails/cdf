@@ -130,10 +130,7 @@ public class ViewsApi {
     }
     
     protected IPentahoSession getUserSession(){
-        if(userSession == null){
-            userSession = PentahoSessionHolder.getSession();
-        } 
-        return userSession;
+        return PentahoSessionHolder.getSession();
     }
     
     protected void writeOut(OutputStream out, String contents) throws IOException {
