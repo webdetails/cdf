@@ -69,11 +69,7 @@ public class ContextEngine {
   }
 
   protected IPentahoSession getUserSession() {
-    if ( userSession == null ) {
-      userSession = PentahoSessionHolder.getSession();
-    }
-
-    return userSession;
+	return PentahoSessionHolder.getSession();
   }
 
   public String getContext( String path, String viewId, String action, Map<String, String> parameters ) {
