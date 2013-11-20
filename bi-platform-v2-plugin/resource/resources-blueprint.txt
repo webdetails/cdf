@@ -29,7 +29,14 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.4.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Main.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Notifications.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.RefreshEngine.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Query.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Utils.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Legacy.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.AddIns.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Bookmarks.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/AddIns.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/queries/coreQueries.js,\
