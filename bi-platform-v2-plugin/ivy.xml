@@ -50,8 +50,8 @@
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
 
-    <dependency org="pt.webdetails" name="cpf-core" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
-    <dependency org="pt.webdetails" name="cpf-pentaho" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
+    <dependency org="pentaho" name="cpf-core" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
+    <dependency org="pentaho" name="cpf-pentaho" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
 
 
     <!-- orient db (persistence) -->
