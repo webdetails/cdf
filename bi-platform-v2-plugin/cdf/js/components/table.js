@@ -99,7 +99,8 @@ var TableComponent = UnmanagedComponent.extend({
     this.extraOptions.push(["bServerSide",true]);
     this.extraOptions.push(["bProcessing",true]);
     this.queryState.setPageSize(parseInt(cd.displayLength || 10));
-    this.queryState.setCallback(_.bind(function(values) {
+    
+    var success = _.bind(function(values) {
       changedValues = undefined;
       if((typeof(this.postFetch)=='function')){
         changedValues = this.postFetch(values);
@@ -108,10 +109,12 @@ var TableComponent = UnmanagedComponent.extend({
         values = changedValues;
       }
       this.processTableComponentResponse(values);
-    },this));
+    },this);
+
+    this.queryState.setCallback(success);
     this.queryState.setParameters(this.parameters);
     this.queryState.setAjaxOptions({async:true});
-    this.processTableComponentResponse();
+    this.queryState.fetchData(this.parameters, success);
    },
 
   /* Initial setup: clearing out the htmlObject and building the query object */
