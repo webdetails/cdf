@@ -13,9 +13,14 @@
 
 package org.pentaho.cdf;
 
+import org.pentaho.cdf.packager.CdfHeadersProvider;
 import org.pentaho.cdf.utils.PluginHibernateUtil;
 import org.pentaho.platform.api.engine.IPluginLifecycleListener;
 import org.pentaho.platform.api.engine.PluginLifecycleException;
+
+import pt.webdetails.cpf.PentahoPluginEnvironment;
+import pt.webdetails.cpf.PluginEnvironment;
+import pt.webdetails.cpf.SimpleLifeCycleListener;
 
 /**
  * This class inits Cda plugin within the bi-platform
@@ -23,23 +28,30 @@ import org.pentaho.platform.api.engine.PluginLifecycleException;
  * @author gorman
  * 
  */
-public class CdfLifecycleListener implements IPluginLifecycleListener {
+public class CdfLifecycleListener extends SimpleLifeCycleListener {
 
   public void init() throws PluginLifecycleException {
+    super.init();
     // Initialize plugin
     PluginHibernateUtil.initialize();
+    CdfHeadersProvider.init();
   }
 
   public void loaded() throws PluginLifecycleException {
-    ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
-    try {
-      Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
-    } catch ( Exception e ) {
-    } finally {
-      Thread.currentThread().setContextClassLoader( contextCL );
-    }
+//    ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+//    try {
+//      Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
+//    } catch ( Exception e ) {
+//    } finally {
+//      Thread.currentThread().setContextClassLoader( contextCL );
+//    }
   }
 
   public void unLoaded() throws PluginLifecycleException {
+  }
+
+  @Override
+  public PluginEnvironment getEnvironment() {
+    return PentahoPluginEnvironment.getInstance();
   }
 }

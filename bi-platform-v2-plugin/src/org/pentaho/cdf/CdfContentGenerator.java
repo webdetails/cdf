@@ -44,6 +44,7 @@ import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
 import org.pentaho.cdf.export.ExportExcel;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
+import org.pentaho.cdf.packager.CdfHeadersProvider;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.views.ViewManager;
 import org.pentaho.platform.api.engine.IActionSequenceResource;
@@ -66,9 +67,8 @@ import org.pentaho.platform.util.messages.LocaleHelper;
 import org.pentaho.platform.util.web.MimeHelper;
 import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 
-
 import pt.webdetails.cpf.audit.CpfAuditHelper;
-import pt.webdetails.packager.Packager;
+import pt.webdetails.cpf.utils.CharsetHelper;
 
 /**
  * This is the main class of the CDF plugin. It handles all requests to
@@ -104,24 +104,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
     private static final String PING = "/ping"; //$NON-NLS-1$
     
     private static final String MIME_HTML = "text/html";
-    private static final String MIME_CSS = "text/css";
-    private static final String MIME_JS = "text/javascript";
-    private static final String MIME_PLAIN = "text/plain";
     private static final String MIME_CSV = "text/csv";
     private static final String MIME_XLS = "application/vnd.ms-excel";
     // CDF Resource Relative URL
-    private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
     public String RELATIVE_URL;
-    private Packager packager;
-    public static String ENCODING = "UTF-8";
 
-    public CdfContentGenerator() {
-        try {
-            this.init();
-        } catch (Exception e) {
-            logger.error("Failed to initialize CDF");
-        }
-    }
+    public static String ENCODING = "UTF-8";
 
     @Override
     public void createContent() throws Exception {
@@ -582,13 +570,21 @@ public class CdfContentGenerator extends BaseContentGenerator {
         // Concat libraries to html head content
         getHeaders(dashboardContent, requestParams, out);
         out.write(intro.substring(headIndex + 6, length).getBytes(ENCODING));
-        // Add context
-        generateContext(requestParams, out);
-        // Add storage
-        generateStorage(requestParams, out);
+        final String loadErrorMsg = "Unable to load %s. Functionality will be missing.";
 
+        try {
+          // Add context
+          generateContext( requestParams, out );
+        } catch ( Exception e ) {
+          logger.error( String.format( loadErrorMsg, "context" ), e );
+        }
+        try {
+          // Add storage
+          generateStorage( requestParams, out );
+        } catch ( Exception e ) {
+          logger.error( String.format( loadErrorMsg, "storage" ), e );
+        }
         out.write("<div id=\"dashboardContent\">".getBytes(ENCODING));
-
         out.write(dashboardContent.getBytes(ENCODING));
         out.write("</div>".getBytes(ENCODING));
         out.write(footer.getBytes(ENCODING));
@@ -758,31 +754,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
         return null;
     }
 
-    public String concatFiles(String includeString, final Hashtable filesAdded, final Hashtable files) {
-//TODO: is this used?
-        final String newLine = System.getProperty("line.separator");
-        final Enumeration keys = files.keys();
-        while (keys.hasMoreElements()) {
-
-            final String key = (String) keys.nextElement();
-            final String[] includeFiles = (String[]) files.get(key);
-
-            for (int i = 0; i < includeFiles.length; i++) {
-                if (!filesAdded.containsKey(includeFiles[i])) {
-
-                    filesAdded.put(includeFiles[i], '1');
-                    if (key.equals("script")) {
-                        includeString += "<script language=\"javascript\" type=\"text/javascript\" src=\"" + includeFiles[i].replaceAll(RELATIVE_URL_TAG, RELATIVE_URL) + "\"></script>" + newLine;
-                    } else {
-                        includeString += "<link rel=\"stylesheet\" href=\"" + includeFiles[i].replaceAll(RELATIVE_URL_TAG, RELATIVE_URL) + "\" type=\"text/css\" />";
-                    }
-                }
-            }
-        }
-
-        return includeString;
-    }
-
     public boolean matchComponent(int keyIndex, final String key, final String content) {
 
         for (int i = keyIndex - 1; i > 0; i--) {
@@ -859,229 +830,33 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     private void getHeaders(final IParameterProvider requestParams, final OutputStream out) throws Exception {
 
-        String dashboard = requestParams.getStringParameter("dashboardContent", "");
-        getHeaders(dashboard, requestParams, out);
+        String dashboardContent = requestParams.getStringParameter("dashboardContent", null);
+        getHeaders(dashboardContent, requestParams, out);
     }
 
     private void getHeaders(final String dashboardContent, final IParameterProvider requestParams, final OutputStream out) throws Exception {
-
-
-        final String dashboardType = requestParams.getStringParameter("dashboardType", "blueprint");
-        final String scheme = requestParams.hasParameter("scheme") ? requestParams.getStringParameter("scheme", "") : "http";
-        final String suffix;
-        final File file;
-
-        /*
-         * depending on the dashboard type, the minification engine and its file
-         * set will vary.
-         */
-        logger.info("[Timing] opening resources file: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-        if (dashboardType.equals("mobile")) {
-            suffix = "-mobile";
-            file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-mobile.txt"));
-        } else if (dashboardType.equals("blueprint")) {
-            suffix = "";
-            file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-blueprint.txt"));
-        } else {
-            suffix = "";
-            file = new File(PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME + "/resources-blueprint.txt"));
+      CdfHeadersProvider cdfHeaders = CdfHeadersProvider.getDefaultInstance();
+      boolean includeAll = dashboardContent != null;
+      final String dashboardType = requestParams.getStringParameter("dashboardType", "blueprint");
+      final boolean isDebugMode = Boolean.parseBoolean( requestParams.getStringParameter( "debug", "" ) );
+      String root = requestParams.getStringParameter("root", null);
+      String headers;
+      if ( !StringUtils.isEmpty( root ) ) {
+        String scheme = requestParams.getStringParameter("scheme", "http");
+        // some dashboards need full absolute urls
+        if ( root.contains( "/" ) ) {
+          // file paths are already absolute, which didn't happen before
+          root = root.substring( 0, root.indexOf( "/" ) );
         }
-        HashMap<String, String> includes = new HashMap<String, String>();
-        final Properties resources = new Properties();
-        resources.load(new FileInputStream(file));
-
-        final ArrayList<String> miniscripts = new ArrayList<String>();
-        final ArrayList<String> ministyles = new ArrayList<String>();
-
-        final ArrayList<String> scripts = new ArrayList<String>();
-        final ArrayList<String> styles = new ArrayList<String>();
-
-        miniscripts.addAll(Arrays.asList(resources.getProperty("commonLibrariesScript", "").split(",")));
-        ministyles.addAll(Arrays.asList(resources.getProperty("commonLibrariesLink", "").split(",")));
-        scripts.addAll(getExtraScripts(dashboardContent, resources));
-        styles.addAll(getExtraStyles(dashboardContent, resources));
-        styles.addAll(Arrays.asList(resources.getProperty("style", "").split(",")));
-        StringBuilder scriptsBuilders = new StringBuilder();
-        StringBuilder stylesBuilders = new StringBuilder();
-        final String absRoot = requestParams.hasParameter("root") ? (scheme.equals("") ? "" : (scheme + "://")) + requestParams.getParameter("root").toString() : "";
-
-        // Add common libraries
-        if (requestParams.hasParameter("debug") && requestParams.getParameter("debug").toString().equals("true")) {
-            // DEBUG MODE
-            for (String header : miniscripts) {
-                scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"></script>\n");
-            }
-            for (String header : ministyles) {
-                stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"/>\n");
-            }
-
-        } else {
-            // NORMAL MODE
-            logger.info("[Timing] starting minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-            String stylesHash = packager.minifyPackage("styles" + suffix);
-            String scriptsHash = packager.minifyPackage("scripts" + suffix);
-            stylesBuilders.append("<link href=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/styles").append(suffix).append(".css?version=").append(stylesHash).append("\" rel=\"stylesheet\" type=\"text/css\" />");
-            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(absRoot).append(RELATIVE_URL).append("/content/pentaho-cdf/js/scripts").append(suffix).append(".js?version=").append(scriptsHash).append("\"></script>");
-            logger.info("[Timing] finished minification: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-        }
-        // Add extra components libraries
-
-        for (String header : scripts) {
-            scriptsBuilders.append("<script type=\"text/javascript\" src=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"></script>\n");
-        }
-        for (String header : styles) {
-            stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(header.replaceAll("@RELATIVE_URL@", absRoot + RELATIVE_URL)).append("\"/>\n");
-        }
-
-        // Add ie8 blueprint condition
-        stylesBuilders.append("<!--[if lte IE 8]><link rel=\"stylesheet\" href=\"").append(absRoot).append(RELATIVE_URL)
-                .append("/content/pentaho-cdf/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
-
-        StringBuilder stuff = new StringBuilder();
-        includes.put("scripts", scriptsBuilders.toString());
-        includes.put("styles", stylesBuilders.toString());
-        for (String key : includes.keySet()) {
-            stuff.append(includes.get(key));
-        }
-        out.write(stuff.toString().getBytes("UTF8"));
+        String absRoot = scheme + "://" + root;
+        headers = cdfHeaders.getHeaders( dashboardType, isDebugMode, absRoot, includeAll );
+      }
+      else {
+        headers = cdfHeaders.getHeaders( dashboardType, isDebugMode, includeAll );
+      }
+      out.write( headers.getBytes( CharsetHelper.getEncoding() ) );
     }
 
-    private ArrayList<String> getExtraScripts(String dashboardContentOrig, Properties resources) {
-
-        // Compare this ignoring case
-        final String dashboardContent = dashboardContentOrig.toLowerCase();
-
-        ArrayList<String> scripts = new ArrayList<String>();
-        boolean all;
-        if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
-            all = true;
-        } else {
-            all = false;
-        }
-
-        final Enumeration<?> resourceKeys = resources.propertyNames();
-        while (resourceKeys.hasMoreElements()) {
-
-            final String scriptkey = (String) resourceKeys.nextElement();
-
-            final String key;
-
-            if (scriptkey.indexOf("Script") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
-                key = scriptkey.replaceAll("Script$", "");
-            } else {
-                continue;
-            }
-
-            final int keyIndex = all ? 0 : dashboardContent.indexOf(key.toLowerCase());
-            if (keyIndex != -1) {
-                if (all || matchComponent(keyIndex, key.toLowerCase(), dashboardContent)) {
-                    // ugly hack -- if we don't know for sure we need OpenStreetMaps,
-                    // don't load it!
-                    if (all && scriptkey.indexOf("mapScript") != -1) {
-                        continue;
-                    }
-                    scripts.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
-                }
-            }
-        }
-
-        return scripts;
-    }
-
-    private ArrayList<String> getExtraStyles(String dashboardContentOrig, Properties resources) {
-        // Compare this ignoring case
-        final String dashboardContent = dashboardContentOrig.toLowerCase();
-
-        ArrayList<String> styles = new ArrayList<String>();
-        boolean all;
-        if (dashboardContent == null || StringUtils.isEmpty(dashboardContent)) {
-            all = true;
-        } else {
-            all = false;
-        }
-
-        if (dashboardContent != null && !StringUtils.isEmpty(dashboardContent)) {
-            final Enumeration<?> resourceKeys = resources.propertyNames();
-            while (resourceKeys.hasMoreElements()) {
-
-                final String scriptkey = (String) resourceKeys.nextElement();
-
-                final String key;
-
-                if (scriptkey.indexOf("Link") != -1 && scriptkey.indexOf("commonLibraries") == -1) {
-                    key = scriptkey.replaceAll("Link$", "");
-                } else {
-                    continue;
-                }
-
-                final int keyIndex = all ? 0 : dashboardContent.indexOf(key.toLowerCase());
-                if (keyIndex != -1) {
-                    if (matchComponent(keyIndex, key.toLowerCase(), dashboardContent)) {
-                        styles.addAll(Arrays.asList(resources.getProperty(scriptkey).split(",")));
-                    }
-                }
-            }
-        }
-        return styles;
-    }
-
-    private void init() throws Exception {
-        String rootdir = PentahoSystem.getApplicationContext().getSolutionPath("system/" + PLUGIN_NAME);
-        final File blueprintFile = new File(rootdir + "/resources-blueprint.txt");
-        final File mobileFile = new File(rootdir + "/resources-mobile.txt");
-
-        final Properties blueprintResources = new Properties();
-        blueprintResources.load(new FileInputStream(blueprintFile));
-        final Properties mobileResources = new Properties();
-        mobileResources.load(new FileInputStream(mobileFile));
-        ArrayList<String> scriptsList = new ArrayList<String>();
-        ArrayList<String> stylesList = new ArrayList<String>();
-
-        this.packager = Packager.getInstance();
-
-        boolean scriptsAvailable = packager.isPackageRegistered("scripts");
-        boolean stylesAvailable = packager.isPackageRegistered("styles");
-        boolean mobileScriptsAvailable = packager.isPackageRegistered("scripts-mobile");
-        boolean mobileStylesAvailable = packager.isPackageRegistered("styles-mobile");
-        if (!scriptsAvailable) {
-            scriptsList.clear();
-            scriptsList.addAll(Arrays.asList(blueprintResources.get("commonLibrariesScript").toString().split(",")));
-            for (int i = 0; i < scriptsList.size(); i++) {
-                String fname = scriptsList.get(i);
-                scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
-            }
-            packager.registerPackage("scripts", Packager.Filetype.JS, rootdir, rootdir + "/js/scripts.js", scriptsList.toArray(new String[scriptsList.size()]));
-        }
-
-        if (!stylesAvailable) {
-            stylesList.clear();
-            stylesList.addAll(Arrays.asList(blueprintResources.get("commonLibrariesLink").toString().split(",")));
-            for (int i = 0; i < stylesList.size(); i++) {
-                String fname = stylesList.get(i);
-                stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
-            }
-            packager.registerPackage("styles", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles.css", stylesList.toArray(new String[stylesList.size()]));
-        }
-        if (!mobileScriptsAvailable) {
-            scriptsList.clear();
-            scriptsList.addAll(Arrays.asList(mobileResources.get("commonLibrariesScript").toString().split(",")));
-            for (int i = 0; i < scriptsList.size(); i++) {
-                String fname = scriptsList.get(i);
-                scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
-            }
-            packager.registerPackage("scripts-mobile", Packager.Filetype.JS, rootdir, rootdir + "/js/scripts-mobile.js", scriptsList.toArray(new String[scriptsList.size()]));
-        }
-
-        if (!mobileStylesAvailable) {
-            stylesList.clear();
-            stylesList.addAll(Arrays.asList(mobileResources.get("commonLibrariesLink").toString().split(",")));
-            for (int i = 0; i < stylesList.size(); i++) {
-                String fname = stylesList.get(i);
-                stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
-            }
-            packager.registerPackage("styles-mobile", Packager.Filetype.CSS, rootdir, rootdir + "/js/styles-mobile.css", stylesList.toArray(new String[stylesList.size()]));
-        }
-    }
 
     private static String getBaseUrl() {
 
