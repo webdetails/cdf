@@ -115,6 +115,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
+      //TODO hcoded path
       $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
         myself.processNavigatorResponse(json);
       });
@@ -236,6 +237,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     var path = this.mode != 4  ? NavigatorBaseComponent.path : NavigatorBaseComponent.getParentPath();
+    //TODO hcoded path
     $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + path, function(json){
       myself.processContentListResponse(json);
     });
@@ -293,6 +295,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 		
         if (this.type=="FOLDER"){
           cls = "folder";
+          //TODO hcoded path
           href = webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + this.solution + "&path=" + this.path + template;
         }
         else{
@@ -339,6 +342,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
+      //TODO hcoded path
       $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
         myself.processPageTitleResponse(json);
       });

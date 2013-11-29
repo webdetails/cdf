@@ -11,6 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
+
 Dashboards.callPentahoAction = function(obj, solution, path, action, parameters, callback ){
   var myself = this;
 
@@ -93,8 +94,27 @@ Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution,
   return this.executeAjax(returntype, url, arr, func);
 };
 
-// TODO hcoded path, does this need to be global??
-var ERROR_IMAGE = webAppPath + "/content/pentaho-cdf/resources/style/images/error.png";
+Dashboards.CDF_ERROR_DIV = 'cdfErrorDiv';
+
+Dashboards.createAndCleanErrorDiv = function(){
+  if ($("#" + Dashboards.CDF_ERROR_DIV).length == 0){
+    $("body").append("<div id='" +  Dashboards.CDF_ERROR_DIV + "'></div>");
+  }
+  $("#" + Dashboards.CDF_ERROR_DIV).empty();
+};
+
+Dashboards.showErrorTooltip = function(){
+  $(function(){
+    if($.tooltip) {
+      $(".cdf_error").tooltip({
+        delay:0,
+        track: true,
+        fade: 250,
+        showBody: " -- "
+      });
+    }
+  });
+};
 
 Dashboards.parseXActionResult = function(obj,html){
 
@@ -116,12 +136,13 @@ Dashboards.parseXActionResult = function(obj,html){
     errorDetails = errorDetails.slice(0,7);
     errorDetails.push("...");
   }
-
-  var out = "<table class='errorMessageTable' border='0'><tr><td><img src='"+ ERROR_IMAGE + "'></td><td><span class=\"cdf_error\" title=\" " + errorDetails.join('<br/>').replace(/"/g,"'") +"\" >" + errorMessage + " </span></td></tr></table/>";
+  //<img src='"+ ERROR_IMAGE + "'>
+  // TODO errorDetails in title: is this right?
+  var out = "<table class='errorMessageTable' border='0'><tr><td class='errorIcon'></td><td><span class='cdf_error' title=\"" + errorDetails.join('<br/>').replace(/"/g,"'") +"\" >" + errorMessage + " </span></td></tr></table/>";
 
   // if this is a hidden component, we'll place this in the error div
   if (obj.visible == false){
-    $("#"+CDF_ERROR_DIV).append("<br />" + out);
+    $("#" + Dashboards.CDF_ERROR_DIV).append("<br />" + out);
   }
   else{
     $('#'+obj.htmlObject).html(out);
@@ -158,6 +179,7 @@ Dashboards.fetchData = function(cd, params, callback) {
     for (var param in params) {
       cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
+    // TODO hcoded path
     $.post(webAppPath + "/content/cda/doQuery?", cd,
       function(json) {
         callback(json);
@@ -168,6 +190,7 @@ Dashboards.fetchData = function(cd, params, callback) {
 
     var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
 
+    // TODO hcoded path
     $.post(webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=" + xactionFile, cd,
       function(result) {
         callback(result.values);

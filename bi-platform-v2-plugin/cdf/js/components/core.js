@@ -447,7 +447,7 @@ var CommentsComponent = BaseComponent.extend({
         overrides = overrides || {};
         var ajaxOpts = {
           type: 'GET',
-          url: "/pentaho/content/pentaho-cdf/Comments",
+          url: "/pentaho/content/pentaho-cdf/Comments",// TODO hcoded path
           success: function(data) {
             myself.requestResponse(data, operation, collection, callback)
           },

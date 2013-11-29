@@ -474,7 +474,7 @@
       var successCallback = function(uuid) {
         var _exportIframe = $('<iframe style="display:none">');
         _exportIframe.detach();
-        //_exportIframe[0].src = webAppPath + 'content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
+        // TODO hcoded path
         _exportIframe[0].src = '/pentaho/content/cda/unwrapQuery?' + $.param( {"path": queryDefinition.path, "uuid": uuid});
         _exportIframe.appendTo($('body'));
       };

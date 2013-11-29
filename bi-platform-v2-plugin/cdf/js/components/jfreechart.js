@@ -103,7 +103,7 @@ var JFreeChartComponent = BaseComponent.extend({
         action: xactionFile,
         exportType: type
       },cd);
-      Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj);
+      Dashboards.post(webAppPath + '/content/pentaho-cdf/Export',obj); //TODO hcoded path
     };
 
     var myself = this;
@@ -119,7 +119,7 @@ var JFreeChartComponent = BaseComponent.extend({
           return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")
         },
         icon: function(){
-          return cd.chartType == "BarChart" ? webAppPath + '/content/pentaho-cdf/resources/style/images/pie_icon.png': webAppPath + '/content/pentaho-cdf/resources/style/images/bar_icon.png';
+          return cd.chartType == "BarChart" ? "jfPieIcon" : "jfBarIcon" ;
         },
         oclass: 'options',
         callback: function(){
@@ -129,7 +129,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       excel: {
         title: "Excel",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/excel_icon.png',
+        icon: "jfExcelIcon",
         oclass: 'options',
         callback: function(){
           exportFile("excel",cd);
@@ -137,7 +137,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       csv: {
         title: "CSV",
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/csv_icon.gif',
+        icon: "jfCsvIcon",
         oclass: 'options',
         callback: function(){
           exportFile("csv",cd);
@@ -145,7 +145,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       zoom: {
         title:'Zoom',
-        icon: webAppPath + '/content/pentaho-cdf/resources/style/images/magnify.png',
+        icon: 'jfMagnifyIcon',
         oclass: 'options',
         callback: function(){
           Dashboards.incrementRunningCalls();
@@ -175,6 +175,7 @@ var JFreeChartComponent = BaseComponent.extend({
           };
           Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
             if(jXML != null){
+              //TODO hcoded path
               var openWindow = window.open(webAppPath + "/content/pentaho-cdf/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
               var loadChart = function(){
@@ -192,7 +193,7 @@ var JFreeChartComponent = BaseComponent.extend({
       },
       details:{
         title:'Details',
-        icon:webAppPath + '/content/pentaho-cdf/resources/style/images/table.png',
+        icon: "jfTableIcon",//webAppPath + '/content/pentaho-cdf/resources/style/images/table.png',
         oclass: 'options',
         callback: function(){
           myself.pivotDefinition = {
@@ -222,7 +223,9 @@ var JFreeChartComponent = BaseComponent.extend({
       };
       if(show){
         var icon = captionOptions[o].icon != undefined ? (typeof captionOptions[o].icon=='function'?captionOptions[o].icon():captionOptions[o].icon) : undefined;
-        var op = icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
+        
+        //var op = icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
+        var op = icon != undefined ? $('<div id ="' + captionId + o + '" class=" img ' + icon + '"></div>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
         op.attr("class",captionOptions[o].oclass != undefined ? captionOptions[o].oclass : "options");
         op.attr("title",captionOptions[o].title);
         caption.append(op);
@@ -358,11 +361,12 @@ var TrafficComponent = BaseComponent.extend({
     Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "traffic.xaction", parameters,
       function(result){
         var value = $(result).find("VALUE").text();
-        var i = $("<img>").attr("src",value<=cd.intervals[0]?Dashboards.TRAFFIC_RED:(value>=cd.intervals[1]?Dashboards.TRAFFIC_GREEN:Dashboards.TRAFFIC_YELLOW));
+        var greenClass = "img trafficGreen", yellowClass = "img trafficYellow", redClass = "img trafficRed";
+        var i = $( "<div>" ).attr( "class",value<=cd.intervals[0]? redClass : ( value>=cd.intervals[1] ? greenClass : yellowClass ) );
         $('#'+myself.htmlObject).html(i);
 
         if(cd.showValue != undefined && cd.showValue == true){
-          var tooltip = "Value: " + value + " <br /><img align='middle' src='" + Dashboards.TRAFFIC_RED + "'/> &le; "  + cd.intervals[0] + " &lt;  <img align='middle' src='" + Dashboards.TRAFFIC_YELLOW + "'/> &lt; " + cd.intervals[1] + " &le; <img align='middle' src='" + Dashboards.TRAFFIC_GREEN + "'/> <br/>" + (tooltip != undefined?tooltip:"");
+          var tooltip = "Value: " + value + " <br /><div align='middle' class='" + redClass + "'/> &le; "  + cd.intervals[0] + " &lt;  <div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; <div align='middle' class='" + greenClass + "'/> <br/>" + (tooltip != undefined?tooltip:"");
           $('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({
             delay:0,
             track: true,
