@@ -521,9 +521,17 @@ public class CdfContentGenerator extends BaseContentGenerator {
     getHeaders( dashboardContent, requestParams, out );
     out.write( intro.substring( headIndex + 6, length ).getBytes( CharsetHelper.getEncoding() ) );
     // Add context
-    generateContext( requestParams, out );
+    try {
+      generateContext( requestParams, out );
+    } catch (Exception e) {
+      logger.error( "Error generating cdf context.", e );
+    }
     // Add storage
-    generateStorage( out );
+    try {
+      generateStorage( out );
+    } catch ( Exception e ) {
+      logger.error( "Error in cdf storage.", e );
+    }
 
     out.write( "<div id=\"dashboardContent\">".getBytes( CharsetHelper.getEncoding() ) );
 
