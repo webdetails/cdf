@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+  <title>Region Variance Bar Chart</title>
+  <version>1</version>
+  <logging-level>ERROR</logging-level>
+  <documentation> 
+    <author>Ingo Klose</author>  
+     <result-type>none</result-type> 
+    <description>Bar chart with the regions variance by department</description> 
+  </documentation>
+
+  <inputs> 
+    <REGION type="string"> 
+      <sources> 
+        <request>REGION</request> 
+      </sources> 
+    </REGION> 
+  </inputs>
+
+  <outputs> 
+    <image-tag type="string"/> 
+  </outputs>
+
+  <resources/>
+  
+  <actions> 
+    <action-definition> 
+      <component-name>SQLLookupRule</component-name>
+      <action-type>Relational</action-type>
+      <action-inputs> 
+        <REGION type="string"/> 
+      </action-inputs>
+      <action-outputs> 
+        <query-result type="result-set" mapping="query_result"/> 
+      </action-outputs>
+      <component-definition> 
+        <jndi><![CDATA[SampleData]]></jndi>  
+        <live><![CDATA[true]]></live>  
+        <query><![CDATA[select department, sum(variance) as Variance
+from QUADRANT_ACTUALS
+where region in( '{REGION}' )
+group by department]]></query> 
+      </component-definition> 
+    </action-definition>
+  
+    <action-definition> 
+      <component-name>ChartComponent</component-name>
+      <action-type>Bar Chart</action-type>
+      <action-inputs> 
+        <chart-data type="result-set" mapping="query_result"/> 
+        <REGION type="string"/>
+      </action-inputs>
+      <action-outputs> 
+        <image-tag type="string"/> 
+      </action-outputs>
+      <component-definition> 
+        <chart-attributes> 
+          <chart-type>BarChart</chart-type>  
+          <orientation>horizontal</orientation>  
+          <color-palette> 
+            <color>#336699</color>  
+            <color>#99CCFF</color>  
+            <color>#999933</color>  
+            <color>#666699</color>  
+            <color>#CC9933</color>  
+            <color>#006666</color>  
+            <color>#3399FF</color>  
+            <color>#993300</color>  
+            <color>#CCCC99</color>  
+            <color>#666666</color>  
+            <color>#FFCC66</color>  
+            <color>#6699CC</color>  
+            <color>#663366</color> 
+          </color-palette>  
+          <chart-background type="color">#FFFFFF</chart-background>  
+          <plot-background type="color">#EEEEEE</plot-background>  
+          <url-template><![CDATA[#]]></url-template>  
+          <series-name>department</series-name>  
+          <use-base-url>false</use-base-url>  
+          <url-target>_self</url-target>  
+          <title-font> 
+            <font-family>Arial</font-family>  
+            <size>12</size>  
+            <is-bold>true</is-bold>  
+            <is-italic>false</is-italic> 
+          </title-font> 
+        </chart-attributes>  
+        <width><![CDATA[450]]></width>  
+        <height><![CDATA[300]]></height>  
+        <title><![CDATA[Headcount Variance - ]]>{REGION}</title>  
+        <by-row>true</by-row> 
+      </component-definition> 
+    </action-definition>
+ 
+  </actions> 
+</action-sequence>

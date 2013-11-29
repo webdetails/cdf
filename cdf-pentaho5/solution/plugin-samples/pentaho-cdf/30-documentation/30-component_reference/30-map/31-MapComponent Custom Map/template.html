@@ -1,0 +1,173 @@
+<script type="text/javascript"
+	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>MapComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+			This component allow the user to navigate through the map and see information about marked locations. 
+			This locations are obtained with a Pentaho Action that must return a result set with this format:
+		</p>
+
+		<h3>Locations Result Set</h3>			
+		<dl class="documentation">
+			<dt>Column 1</dt>
+			<dd>Location id</dd>
+			<dt>Column 2</dt>
+			<dd>Latitude - empty string if unknown</dd>
+			<dt>Column 3</dt>
+			<dd>Longitude - empty string if unknown</dd>
+			<dt>Column 4</dt>
+			<dd>Location name</dd>
+			<dt>Column 5</dt>
+			<dd>Location value</dd>
+			<dt>Column 6</dt>
+			<dd>Location title - used by MapBubble component</dd>
+		</dl>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>mapComponent</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>parameters</dt>
+			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
+
+			<dt>solution</dt>
+			<dd>Solution where the xaction is</dd>
+
+			<dt>path</dt>
+			<dd>Path where the xaction file is</dd>
+
+			<dt>htmlObject</dt>
+			<dd>map. Not optional for now</dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+			
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+			
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed. The component will be executed only if the result of preChange equals true.</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>messageElementId</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the map error/info messages</dd>
+			
+			<dt>initPosLon</dt>
+			<dd>Initial longitude position</dd>
+			
+			<dt>initPosLat</dt>
+			<dd>Initial latitude position</dd>
+			
+			<dt>initZoom</dt>
+			<dd>Initial map zoom</dd>
+			
+			<dt>mapDiv</dt>
+			<dd>Name of the traget div to hold the map (default = map)</dd>
+			
+			<dt>showCustomMap</dt>
+			<dd>Turn on custom map support (default = false)</dd>
+			
+			<dt>customMapCode</dt>
+			<dd>JS Code to add the map object and the layers</dd>
+			
+			<dt>useMercator</dt>
+			<dd>Depending on the used map server you need to turn off the Mercator transformation for the coordinates (default = true)</dd>
+			
+			<dt>markers</dt>
+			<dd>Markers Array - Marker is represented either as a URL-string or with an array consisting of URL-string, width, height</dd>
+			
+			<dt>expression</dt>
+			<dd>Javascript expression to be evaluated. Returns the correct marker for each position</dd>
+
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+				<span id="messages">&nbsp;</span>
+				<div id="sampleObject">&nbsp;</div>
+				<div id="myMap" style="width: 600px; height: 200px; z-index:0;">&nbsp;</div>
+			</div>
+
+			<div id="code">
+				<textarea cols="80" rows="20" id="samplecode">
+					
+textElement = 
+{
+	name: "regionSelector",
+	type: "textComponent",
+	listeners:["selectedPoint"],
+	parameters:[],
+	expression: function(){return "" + selectedPoint},
+	htmlObject: "sampleObject",
+	executeAtStart: true
+}		
+
+bottomThreshold = 1000000;
+topThreshold = 2000000;
+selectedPoint = "";
+
+mapComponent =
+{
+	  name: "mapComponent",
+	  type: "map",
+	  solution: "plugin-samples",
+	  path: "cdf-samples/20-samples/map_dashboard",
+	  action: "GetPoints.xaction",
+	  parameters:[],
+	  listeners:[],
+	  messageElementId: "messages",
+	  htmlObject: "map",
+	  executeAtStart: true,
+	  initPosLon: -7.5,
+	  initPosLat: 39.8,
+	  initZoom: 1,
+	  mapDiv:"myMap",
+	  showCustomMap:true,
+	  customMapCode:"map = new OpenLayers.Map( map_div );layer = new OpenLayers.Layer.MapServer('OpenLayers WMS', 'http://labs.metacarta.com/wms/vmap0', {layers: 'basic'},{gutter: 15}); map.addLayer(layer);",
+	  useMercator:false,
+	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
+	  preExecution:function(){},
+	  postExecution:function(){},
+	  markers: [["js/OpenMap/OpenLayers/img/marker-green.png",42,50],"js/OpenMap/OpenLayers/img/marker-gold.png","js/OpenMap/OpenLayers/img/marker.png"]
+}
+	
+Dashboards.init([mapComponent,textElement]);
+
+				</textarea>
+				<br />
+				<button onclick="evaluateCode(true)">Try me</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script language="javascript" type="text/javascript">
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+</script>

@@ -1,0 +1,45 @@
+<style>
+	.contents li {font-weight: bold;}
+</style>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Extending CDF</h2>
+		<p>
+
+		With the collaboration of <a href="http://www.willgorman.com">Will Gorman</a> CDF has now a modularized and extensible
+		library of components that can be extended by users.
+
+		Using an object oriented approach, the key is to extend the class <i>BaseComponent</i>.
+
+		Here's the simplest component of them all, the <i>TextComponent:</i>
+
+
+		<code>
+			<pre>
+var TextComponent = BaseComponent.extend({
+	update : function() {
+		$("#"+this.htmlObject).html(this.expression());
+	}
+});
+			</pre>
+		</code>
+
+		<p>
+
+		Having defined this, when CDF reads a component with <i>type="textComponent"</i> it will automatically use the 
+		supplied definition. The source code with all the components definition is the best resource for 
+		additional information.
+
+		</p>
+
+		
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

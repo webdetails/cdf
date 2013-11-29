@@ -1,0 +1,180 @@
+<script type="text/javascript"
+	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>AutocompleteBoxComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+			Renders a auto complete box to choose the correct option from.
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>autocompleteBox</code></dd>
+
+			<dt>parameter</dt>
+			<dd>Variable where the selection is stored</dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function(value) - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function(value) - </i> Function to be called after the component is changed</dd>
+			
+			<dt>queryDefinition</dt>
+			<dd>MetaLayer object with the definition of the query (see MetaLayer options)</dd>
+			
+			<dt>selectMulti</dt>
+			<dd>Allow multiple selection. Default: false</dd>
+			
+			<dt>minTextLenght</dt>
+			<dd>The minimal word length to check if there is a match</dd>
+			
+			<dt>matchType</dt>
+			<dd>The type of the word match (fromStart/all). Default: fromStart </dd>
+			
+			<dt>scrollHeight</dt>
+			<dd>The size of the scrollbar. Default: Not defined (without scrollbar) </dd>
+			
+			<dt>showApplyButton</dt>
+			<dd>Show apply Button in multi selection mode. Default: true </dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+			
+			<dt>autoUpdateFunction</dt>
+			<dd>Function to be called every X second according to the autoUpdateTimeout setting</dd>
+			
+			<dt>autoUpdateTimeout</dt>
+			<dd>timeout in milliseconds to call the function defined by autoUpdateFunction. Default 3 secs </dd>
+			
+			<dt>reloadOnUpdate</dt>
+			<dd>on update event the component should be reloaded or only update the list of values</dd>				
+			
+		</dl>	
+		
+		<h3>MetaLayer options</h3>
+
+		<dl class="documentation">
+			<dt>queryType</dt>
+			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+			<dt>jndi</dt> 
+			<dd>Connection to use for the query</dd>
+
+			<dt>query</dt> 
+			<dd>sql or mdx Query to execute</dd>
+
+			<dt>cube</dt> 
+			<dd>Cube name to use when queryType is mdx</dd>
+
+			<dt>catalog</dt> 
+			<dd>Mondrian schema to use when queryType is mdx</dd>
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+				<div id="sampleObject"></div>
+				<div id="sampleObjectResult"></div>
+			</div>
+
+				<div id="code">
+					<textarea cols="80" rows="20" id="samplecode">
+				
+window.clients = "";				
+MetaLayerHome2 = {
+clientSelectorDefinition: {
+	queryType: 'mdx',
+	jndi: "SampleData",
+	catalog: "solution:steel-wheels/analysis/steelwheels.mondrian.xml",
+	query: function(){
+		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," + 
+		"NON EMPTY TopCount( Filter([Customers].[All Customers].Children,"+ 
+		"(Left([Customers].CurrentMember.Name, Len(\""+clients+"\")) = \""+clients+"\")),100.0,[Measures].[Sales]) ON ROWS "+
+		"from [SteelWheelsSales]";
+		}
+	}
+}
+
+
+clientSelector = 
+{
+  name: "clientSelector",
+  type: "autocompleteBox",
+  matchType: "fromStart",
+  queryDefinition: MetaLayerHome2.clientSelectorDefinition,
+  selectMulti: true,
+  showApplyButton: true,
+  minTextLenght: 0,
+  scrollHeight: 250,
+  parameter:"clients",
+  htmlObject: "sampleObject",
+  reloadOnUpdate:true,
+  autoUpdateTimeout:3000,
+  executeAtStart: true,
+  autoUpdateFunction:function()
+  {
+		if(!clients)
+			clients="";
+		console.log("!update");
+		var inputValue=$("#autoboxInput").val();
+		console.log("inputValue;"+inputValue);
+		console.log("clients;"+clients);
+		if(clients!=inputValue)
+		{
+			clients=inputValue;
+			Dashboards.update(clientSelector);
+		}
+  }
+}
+
+Dashboards.init([clientSelector]);
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<script language="javascript" type="text/javascript">
+		
+		var tabs = $("#example").tabs();
+		evaluateCode(false);
+	</script>

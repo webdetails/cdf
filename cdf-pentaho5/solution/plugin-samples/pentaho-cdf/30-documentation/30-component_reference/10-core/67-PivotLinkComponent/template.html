@@ -1,0 +1,124 @@
+<script type="text/javascript"
+	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>PivotLinkComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+			Creates a pivot action link. Usually it's used together with chart components which allows the user to
+			analyze, with more detail, the chart results.
+			
+		</p>
+
+		<h3>Options</h3>
+		
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>pivotLink</code></dd>
+			
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag)</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+			
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>	
+			
+			<dt>content</dt>
+			<dd>The value of the pivot action link</dd>
+			
+			<dt>pivotDefinition</dt>
+			<dd>MetaLayer object with the definition of pivot (see MetaLayer options)</dd>
+		</dl>	
+		
+		<h3>MetaLayer options</h3>
+
+		The options related to pivot action described in pentaho wiki.
+
+		<dl class="documentation">
+			<dt>queryType</dt>
+			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+			<dt>jndi</dt> 
+			<dd>Connection to use for the query</dd>
+
+			<dt>query</dt> 
+			<dd>sql or mdx Query to execute</dd>
+
+			<dt>cube</dt> 
+			<dd>Cube name to use when queryType is mdx</dd>
+
+			<dt>catalog</dt> 
+			<dd>Mondrian schema to use when queryType is mdx</dd>
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+					<span id="sampleObject">&nbsp;</span>
+			</div>
+
+
+				<div id="code">
+					<textarea cols="80" rows="20" id="samplecode">
+					
+MetaLayerHome2 = {
+topTenCustomersPivotDefinition: {
+	queryType: 'mdx',
+	jndi: "SampleData",
+	catalog: "solution:steel-wheels/analysis/steelwheels.mondrian.xml",
+	query: function(){
+		return "select NON EMPTY {[Measures].[Sales]} ON COLUMNS," + 
+		"NON EMPTY TopCount([Customers].[All Customers].Children," + 
+		"10.0,[Measures].[Sales]) ON ROWS from [SteelWheelsSales]";
+		}
+	}
+}
+
+topTenCustomersPivot = 
+{
+name: "topTenCustomersPivot",
+type: "pivotLink",
+htmlObject: "sampleObject",
+content: "Open...",
+executeAtStart: true,
+pivotDefinition: MetaLayerHome2.topTenCustomersPivotDefinition
+}
+
+Dashboards.init([topTenCustomersPivot]);
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<script language="javascript" type="text/javascript">
+
+	
+		var tabs = $("#example").tabs();
+		evaluateCode(false);
+		
+	</script>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<action-sequence> 
+	<name>PieChart1.xaction</name>
+	<title>CDF Demo</title>
+	<version>1</version>
+	<logging-level>TRACE</logging-level>
+	<documentation> 
+		<author>Pedro Alves</author>  
+		<description>PieChart Component Demonstration</description>  
+		<help/>  
+		<result-type>none</result-type> 
+		<icon/> 
+	</documentation>
+
+	<inputs>
+		<productLine type="string">
+			<sources>
+				<request>productLine</request>
+			</sources>
+			<default-value><![CDATA[]]></default-value>
+		</productLine>
+	</inputs>
+
+	<outputs> 
+		<image-tag type="string"/>  
+		<!--query_result/-->  
+		<!--swresult/--> 
+	</outputs>
+
+	<resources> 
+	</resources>
+
+	<actions> 
+		<action-definition>
+			<component-name>JavascriptRule</component-name>
+			<action-type>JavaScript</action-type>
+			<action-inputs>
+				<productLine type="string"/>
+			</action-inputs>
+			<action-outputs>
+				<condition type="string"/>
+			</action-outputs>
+			<component-definition>
+				<script><![CDATA[
+					condition=" where 1=1 ";
+					if (productLine.length >1){
+					condition += " AND PRODUCTS.PRODUCTLINE='" + productLine + "'";
+					}
+
+					]]></script>
+			</component-definition>
+		</action-definition>
+
+		<action-definition> 
+			<component-name>SQLLookupRule</component-name>
+			<action-type>Relational</action-type>
+			<action-inputs>
+				<condition type="string"/>
+			</action-inputs>
+			<action-outputs> 
+				<query-result type="result-set" mapping="query_result"/>  
+				<id type="integer"/>  
+				<name type="string"/> 
+			</action-outputs>
+			<component-definition> 
+				<jndi><![CDATA[SampleData]]></jndi>  
+				<query><![CDATA[
+					SELECT
+					OFFICES.TERRITORY,
+					SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) SOLD_PRICE
+					FROM ORDERS
+					INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER
+					INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE
+					INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER
+					INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER
+					INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE
+					{condition}
+					GROUP BY OFFICES.TERRITORY
+					ORDER BY 2 DESC
+					]]></query>  
+				<live><![CDATA[true]]></live> 
+			</component-definition> 
+		</action-definition>
+
+
+
+		<action-definition> 
+			<component-name>ChartComponent</component-name>
+			<action-type>Chart</action-type>
+			<action-inputs> 
+				<chart-data type="result-set" mapping="query_result"/> 
+				<territory type="string"/>
+			</action-inputs>
+			<action-outputs> 
+				<image-tag type="string"/> 
+			</action-outputs>
+			<component-definition>
+				<chart-attributes> 
+					<chart-type>PieChart</chart-type>  
+					<title-font> 
+						<font-family>Arial</font-family>  
+						<size>14</size> 
+						<is-bold>true</is-bold>
+					</title-font>  
+					<border-visible>false</border-visible>  
+					<foreground-alpha>0.7</foreground-alpha>
+					<background-alpha>1</background-alpha>
+					<include-legend>false</include-legend>  
+					<is-3D>true</is-3D>  
+					<domain-label-rotation>0</domain-label-rotation>  
+					<url-template><![CDATA[javascript:Dashboards.fireChange('territory','{TERRITORY}')]]></url-template>  
+					<paramName>TERRITORY</paramName>  
+					<series-name>teste</series-name>  
+					<use-base-url>false</use-base-url>  
+					<url-target>_self</url-target>  
+					<chart-background type="color">#F8F8F8</chart-background>  
+					<plot-background type="color">#F8F8F8</plot-background>  
+					<label-gap>0.02</label-gap>  
+					<label-font> 
+						<font-family>Arial</font-family>  
+						<size>8</size>  
+						<is-bold>false</is-bold>  
+						<is-italic>false</is-italic> 
+					</label-font>  
+					<subtitle/>  
+					<color-palette> 
+						<color>#93cfc3</color>  
+						<color>#007a62</color>  
+						<color>#d9fff6</color>  
+						<color>#2fcd54</color>  
+						<color>#136f29</color>  
+					</color-palette> 
+				</chart-attributes>  
+				<width><![CDATA[280]]></width>  
+				<height><![CDATA[200]]></height>  
+				<title>Sales by territory</title>
+			</component-definition> 
+		</action-definition>
+
+	</actions> 
+</action-sequence>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin title="pentaho-cdf">
+
+	<lifecycle-listener class="org.pentaho.cdf.CdfLifecycleListener"/>
+	<content-types>
+                <static-paths>
+                        <static-path url="/pentaho-cdf/js" localFolder="js"/>
+                        <static-path url="/pentaho-cdf/resources" localFolder="resources"/>
+                </static-paths> 
+
+		<content-type type="xcdf" mime-type="text/html">
+        	<title>Dashboard</title>
+        	<description>Community Dashboard File</description>
+	        <icon-url>content/pentaho-cdf/resources/cdfFileType.png</icon-url>
+	        <meta-provider>org.pentaho.cdf.CdfFileInfoGenerator</meta-provider>
+	        <operations>
+    	    	<operation>
+        			<id>RUN</id>
+        			<command>content/pentaho-cdf/RenderXCDF?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
+        		</operation>
+    	    	<operation>
+        			<id>NEWWINDOW</id>
+        			<command>content/pentaho-cdf/RenderXCDF?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
+        		</operation>        		
+	        </operations>
+    	</content-type>
+	</content-types>
+
+    <content-generator id="pentaho-cdf" type="xcdf" title="CDF Display Handler" class="org.pentaho.cdf.CdfContentGenerator"/>
+
+
+<external-resources>
+    <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
+  </external-resources>
+
+    
+</plugin>

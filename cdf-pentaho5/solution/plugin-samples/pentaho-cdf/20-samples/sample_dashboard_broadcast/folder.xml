@@ -1,0 +1,27 @@
+<files>
+	<location>Pentaho Solution Browser/dashboard/</location>
+	<file type="FILE.FOLDER" name="dashboards" path="" visible="true" displaytype="icons">
+		<title>dashboard</title>
+		<description>This soution is part of the Dshboard Framework</description>
+		<icon>folder.png</icon>
+		<rollovericon>solutions.png</rollovericon>
+		<solution>dashboards</solution>
+		<file type="FILE.FOLDER" name="test" path="test" visible="true" displaytype="icons">
+			<path>test</path>
+			<title>Test Folder</title>
+			<description>Varius files to test the dashboard framework</description>
+			<icon>folder.png</icon><rollovericon>solutions.png</rollovericon>
+			<solution>dashboards</solution>
+				<file type="FILE.ACTIVITY" visible="true" displaytype="chart">
+					<filename>chartComponent.xaction</filename>
+					<path>test</path>
+					<solution>dashboards</solution>
+					<title>Chart Component Test (Bar Chart)</title>
+					<description>Testing the Pentaho Chart component with a Bar Chart</description>
+					<author>Ingo Klose</author>
+					<properties>subscribable=false</properties>
+				</file>
+		</file>
+	</file>
+</files>
+
