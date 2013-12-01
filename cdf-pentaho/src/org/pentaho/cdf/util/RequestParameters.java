@@ -17,5 +17,8 @@ public class RequestParameters {
   public static final String NAME = "name";
   public static final String VIEW = "view";
   public static final String RESOURCE = "resource";
-
+  public static final String FIRST_RESULT = "firstResult";
+  public static final String MAX_RESULTS = "maxResults";
+  public static final String DELETED = "deleted";
+  public static final String ARCHIVED = "archived";
 }

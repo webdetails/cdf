@@ -1,6 +1,8 @@
 package org.pentaho.cdf.environment.configurations;
 
 import org.hibernate.cfg.Configuration;
+import org.pentaho.cdf.CdfConstants;
+import org.pentaho.cdf.CdfContentGenerator;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.platform.repository.hibernate.HibernateUtil;
 
@@ -18,12 +20,12 @@ public class PentahoHibernanteConfigurations implements IHibernateConfigurations
 
   @Override
   public IBasicFile getCommentsConfigurationFile() {
-    return CdfEngine.getPluginSystemReader( null ).fetchFile( COMMENTS_HBM_FILE );
+    return CdfEngine.getPluginSystemReader( CdfConstants.PLUGIN_HIBERNATE_DIR ).fetchFile( COMMENTS_HBM_FILE );
   }
 
   @Override
   public IBasicFile getStorageConfigurationFile() {
-    return CdfEngine.getPluginSystemReader( null ).fetchFile( STORAGE_HBM_FILE );
+    return CdfEngine.getPluginSystemReader( CdfConstants.PLUGIN_HIBERNATE_DIR ).fetchFile( STORAGE_HBM_FILE );
   }
 
 }

@@ -433,10 +433,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     String intro = ""; //$NON-NLS-1$
     String footer = ""; //$NON-NLS-1$
-    
+
     IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
     template = StringUtils.isEmpty( template ) ? "" : "-" + template;
-    
+
     final String dashboardTemplate = "template-dashboard" + template + ".html"; //$NON-NLS-1$
 
     final IUITemplater templater = PentahoSystem.get( IUITemplater.class, userSession );
@@ -523,7 +523,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     // Add context
     try {
       generateContext( requestParams, out );
-    } catch (Exception e) {
+    } catch ( Exception e ) {
       logger.error( "Error generating cdf context.", e );
     }
     // Add storage
@@ -653,6 +653,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
     JSONObject result = null;
 
+    SecurityParameterProvider securityParams = new SecurityParameterProvider( userSession );
+    boolean isAdministrator = Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) );
+    boolean isAuthenticated = userSession.isAuthenticated();
+
     try {
       final CommentsEngine engine = CommentsEngine.getInstance();
 
@@ -661,9 +665,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
       final CommentsEngine.Operation operation = CommentsEngine.Operation.get( action );
 
       if ( operation == Operation.DELETE || operation == Operation.ARCHIVE ) {
-        SecurityParameterProvider securityParams = new SecurityParameterProvider( userSession );
-        Boolean isAdministrator = Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) );
-        Boolean isAuthenticated = userSession.isAuthenticated();
 
         if ( !isAdministrator || !isAuthenticated ) {
 
@@ -695,9 +696,13 @@ public class CdfContentGenerator extends BaseContentGenerator {
           break;
         case LIST:
           result =
-              engine.delete( Integer.parseInt( params.getStringParameter( RequestParameters.COMMENT_ID, "-1" ) ),
-                  Boolean.valueOf( params.getStringParameter( RequestParameters.VALUE, "true" ) ), userSession
-                      .getName() );
+              engine.list( params.getStringParameter( RequestParameters.PAGE, "" ), Integer.parseInt( params
+                  .getStringParameter( RequestParameters.FIRST_RESULT, "0" ) ), Integer.parseInt( params
+                  .getStringParameter( RequestParameters.MAX_RESULTS, "20" ) ), ( isAdministrator ? Boolean
+                  .valueOf( params.getStringParameter( RequestParameters.DELETED, "false" ) ) : false ),
+                  ( isAdministrator ? Boolean
+                      .valueOf( params.getStringParameter( RequestParameters.ARCHIVED, "false" ) ) : false ),
+                  userSession.getName() );
           break;
 
         default:
