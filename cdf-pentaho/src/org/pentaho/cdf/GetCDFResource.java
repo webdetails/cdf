@@ -21,13 +21,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.environment.CdfEngine;
+import org.pentaho.cdf.util.RequestParameters;
 import org.pentaho.platform.util.StringUtil;
 import org.pentaho.platform.web.servlet.ServletBase;
 
 import pt.webdetails.cpf.repository.api.IReadAccess;
+import pt.webdetails.cpf.utils.MimeTypes;
+import pt.webdetails.cpf.utils.PluginIOUtils;
 
 /**
  * 
@@ -51,7 +55,7 @@ public class GetCDFResource extends ServletBase {
     IOException {
 
     IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
-    String resource = request.getParameter( "resource" ); //$NON-NLS-1$
+    String resource = request.getParameter( RequestParameters.RESOURCE ); //$NON-NLS-1$
 
     if ( resource == null || StringUtil.doesPathContainParentPathSegment( resource ) ) {
       error( Messages.getErrorString( "GetResource.ERROR_0001_RESOURCE_PARAMETER_MISSING" ) ); //$NON-NLS-1$
@@ -66,34 +70,25 @@ public class GetCDFResource extends ServletBase {
     }
 
     InputStream in = systemAccess.getFileInputStream( resource );
-    String mimeType = getServletContext().getMimeType( resource );
+    String mimeType = MimeTypes.getMimeType( resource );
 
-    if ( ( null == mimeType ) || ( mimeType.length() <= 0 ) ) {
-      // Hard coded to PNG because BIRT does not give us a mime type at
-      // all...
-      response.setContentType( "image/png" ); //$NON-NLS-1$
-    } else {
-      response.setContentType( mimeType );
+    if ( StringUtils.isEmpty( mimeType ) ) {
+      // Hard coded to PNG because BIRT does not give us a mime type at all...
+      response.setContentType( MimeTypes.PNG );
     }
+    
+    response.setContentType( mimeType );
     response.setCharacterEncoding( CdfEngine.getEnvironment().getSystemEncoding() );
     response.setHeader( "expires", "0" ); //$NON-NLS-1$ //$NON-NLS-2$
     // Open the input and output streams
     OutputStream out = response.getOutputStream();
     try {
       // Copy the contents of the file to the output stream
-      byte[] buf = new byte[1024];
-      int count = 0;
-      int totalBytes = 0;
-      while ( ( count = in.read( buf ) ) >= 0 ) {
-        out.write( buf, 0, count );
-        totalBytes += count;
-      }
-      response.setContentLength( totalBytes );
+      PluginIOUtils.writeOut( out, in );
     } finally {
-      in.close();
-      out.close();
+      if( in != null ){ in.close(); }
+      if (out != null){ out.close(); }
     }
-
   }
 
   public Log getLogger() {

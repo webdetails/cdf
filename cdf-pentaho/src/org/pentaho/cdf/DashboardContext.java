@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,14 +40,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.storage.StorageEngine;
+import org.pentaho.cdf.util.RequestParameters;
 import org.pentaho.cdf.views.View;
 import org.pentaho.cdf.views.ViewEngine;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
-import org.pentaho.platform.util.xml.dom4j.XmlDom4JHelper;
 
 import pt.webdetails.cpf.InterPluginCall;
+import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 import pt.webdetails.cpf.repository.api.IBasicFileFilter;
 import pt.webdetails.cpf.repository.api.IReadAccess;
@@ -82,10 +84,13 @@ public class DashboardContext {
 
   public String getContext( IParameterProvider requestParams, HttpServletRequest request ) {
     try {
-      String solution = requestParams.getStringParameter( "solution", "" ), path =
-          requestParams.getStringParameter( "path", "" ), file = requestParams.getStringParameter( "file", "" ), viewId =
-          requestParams.getStringParameter( "view", requestParams.getStringParameter( "action", "" ) ), fullPath =
-          ( "/" + solution + "/" + path + "/" + file ).replaceAll( "/+", "/" );
+      String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, "" );
+      String path = requestParams.getStringParameter( RequestParameters.PATH, "" );
+      String file = requestParams.getStringParameter( RequestParameters.FILE, "" );
+      String viewId =
+          requestParams.getStringParameter( RequestParameters.VIEW, requestParams.getStringParameter(
+              RequestParameters.ACTION, "" ) );
+      String fullPath = FilenameUtils.separatorsToUnix( Util.joinPath( solution, path, file ) );
       final JSONObject context = new JSONObject();
 
       IBasicFile configFile = getConfigFile();
@@ -93,7 +98,6 @@ public class DashboardContext {
       context.put( "queryData", processAutoIncludes( fullPath, configFile ) );
       context.put( "sessionAttributes", processSessionAttributes( configFile ) );
       if ( request != null && userSession.isAuthenticated() ) {
-
         context.put( "sessionTimeout", request.getSession().getMaxInactiveInterval() );
       }
       Calendar cal = Calendar.getInstance();
@@ -167,7 +171,7 @@ public class DashboardContext {
     for ( Node attribute : attributes ) {
 
       String name = attribute.getText();
-      String key = XmlDom4JHelper.getNodeText( "@name", attribute );
+      String key = XmlDom4JUtils.getNodeText( "@name", attribute );
       if ( key == null ) {
         key = name;
       }
@@ -216,7 +220,7 @@ public class DashboardContext {
     logger.info( "[Timing] Starting testing includes: "
         + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     for ( Node include : includes ) {
-      String re = XmlDom4JHelper.getNodeText( "cda", include, "" );
+      String re = XmlDom4JUtils.getNodeText( "cda", include, "" );
       for ( IBasicFile cda : cdaFiles ) {
         String path = cda.getPath();
 
@@ -326,7 +330,7 @@ public class DashboardContext {
     }
     return null;
   }
-  
+
   public static void clearCache() {
     // TODO figure out what to clear
   }

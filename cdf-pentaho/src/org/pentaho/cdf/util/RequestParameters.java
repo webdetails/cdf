@@ -21,4 +21,7 @@ public class RequestParameters {
   public static final String MAX_RESULTS = "maxResults";
   public static final String DELETED = "deleted";
   public static final String ARCHIVED = "archived";
+  public static final String DEBUG = "debug";
+  public static final String DASHBOARD = "dashboard";
+  public static final String CALLBACK = "callback";
 }

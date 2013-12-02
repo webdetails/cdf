@@ -58,11 +58,9 @@ import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.RequestParameters;
 import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.cdf.views.ViewEngine;
-import org.pentaho.platform.api.engine.IMimeTypeListener;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IUITemplater;
-import org.pentaho.platform.api.repository.IContentItem;
 import org.pentaho.platform.api.repository.ISchedule;
 import org.pentaho.platform.api.repository.ISubscribeContent;
 import org.pentaho.platform.api.repository.ISubscriptionRepository;
@@ -112,9 +110,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
   private static final String PING = "/ping"; //$NON-NLS-1$
 
   private static final String MIME_HTML = "text/html";
-  private static final String MIME_CSS = "text/css";
-  private static final String MIME_JS = "text/javascript";
-  private static final String MIME_PLAIN = "text/plain";
   private static final String MIME_CSV = "text/csv";
   private static final String MIME_XLS = "application/vnd.ms-excel";
   // CDF Resource Relative URL
@@ -123,14 +118,21 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   @Override
   public void createContent() throws Exception {
-    final OutputStream out;
-    final IContentItem contentItem;
+    OutputStream out = null;
     final IParameterProvider pathParams;
     final String method;
     final String payload;
     logger.info( "[Timing] CDF content generator took over: "
         + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     try {
+
+      if ( parameterProviders.get( RequestParameters.PATH ) != null
+          && parameterProviders.get( RequestParameters.PATH ).getParameter( "httpresponse" ) != null ) {
+        out =
+            ( (HttpServletResponse) parameterProviders.get( RequestParameters.PATH ).getParameter( "httpresponse" ) )
+                .getOutputStream();
+      }
+
       if ( parameterProviders.get( RequestParameters.PATH ) != null
           && parameterProviders.get( RequestParameters.PATH ).getParameter( "httprequest" ) != null
           && ( (HttpServletRequest) parameterProviders.get( RequestParameters.PATH ).getParameter( "httprequest" ) )
@@ -162,15 +164,11 @@ public class CdfContentGenerator extends BaseContentGenerator {
       if ( this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance( callbacks.get( 0 ) ) ) {
         HashMap<String, Object> iface = (HashMap<String, Object>) callbacks.get( 0 );
         pathParams = parameterProviders.get( RequestParameters.PATH );
-        contentItem = outputHandler.getOutputContentItem( "response", "content", "", instanceId, MIME_HTML );
-        out = (OutputStream) iface.get( "output" );
         method = "/" + (String) iface.get( "method" );
         payload = (String) iface.get( "payload" );
         this.userSession = this.userSession != null ? this.userSession : (IPentahoSession) iface.get( "usersession" );
       } else { // if not, we handle the request normally
         pathParams = parameterProviders.get( RequestParameters.PATH );
-        contentItem = outputHandler.getOutputContentItem( "response", "content", "", instanceId, MIME_HTML );
-        out = contentItem.getOutputStream( null );
         method = pathParams.getStringParameter( RequestParameters.PATH, null );
         payload = "";
       }
@@ -179,15 +177,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
       if ( outputHandler == null ) {
         error( Messages.getErrorString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
         throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
-      } else if ( contentItem == null ) {
-        error( Messages.getErrorString( "CdfContentGenerator.ERROR_0002_NO_CONTENT_ITEM" ) ); //$NON-NLS-1$
-        throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0002_NO_CONTENT_ITEM" ) ); //$NON-NLS-1$
       } else if ( out == null ) {
         error( Messages.getErrorString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
         throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
       }
 
-      findMethod( method, contentItem, out, payload );
+      findMethod( method, out, payload );
 
     } catch ( Exception e ) {
       logger.error( "Error creating cdf content: ", e );
@@ -197,22 +192,19 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
   }
 
-  private void
-    findMethod( final String urlPath, final IContentItem contentItem, final OutputStream out, String payload )
-      throws Exception {
+  private void findMethod( final String urlPath, final OutputStream out, String payload ) throws Exception {
 
     // Each block will call a different method. If in the future this extends a lot we can think
     // about using reflection for class loading, but I don't expect that to happen.
 
     final IParameterProvider requestParams = parameterProviders.get( IParameterProvider.SCOPE_REQUEST );
-    final IParameterProvider pathParams = parameterProviders.get( "pathparams" );
 
     if ( urlPath.equals( RENDER_XCDF ) ) {
       renderXcdf( out, requestParams );
     } else if ( urlPath.equals( JSON_SOLUTION ) ) {
       jsonSolution( out, requestParams );
     } else if ( urlPath.equals( GET_CDF_RESOURCE ) ) {
-      getCDFResource( urlPath, contentItem, out, requestParams );
+      getCDFResource( urlPath, out, requestParams );
     } else if ( urlPath.equals( RENDER_HTML ) ) {
       renderHtml( out, requestParams );
     } else if ( urlPath.equals( EXPORT ) ) {
@@ -243,9 +235,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
       processGetSchedules( requestParams, out );
     else {
       // we'll be providing the actual content with cache
-      logger
-          .warn( "Getting resources through content generator is deprecated, please use static resources: " + urlPath );
-      returnResource( urlPath, contentItem, out );
+      logger.warn( "Getting resources via content generator is deprecated, please use static resources: " + urlPath );
+      returnResource( urlPath, out );
     }
   }
 
@@ -311,11 +302,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
     UUID uuid = CpfAuditHelper.startAudit( pluginId, action, getObjectName(), this.userSession, this, requestParams );
 
     try {
-      final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-      if ( mimeTypeListener != null ) {
-        mimeTypeListener.setMimeType( MIMETYPE );
-      }
-
       renderXCDFDashboard( requestParams, out, solution, path, action, template );
 
       long end = System.currentTimeMillis();
@@ -348,7 +334,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     final PrintWriter pw = new PrintWriter( out );
 
     // jsonp?
-    String callback = requestParams.getStringParameter( "callback", null );
+    String callback = requestParams.getStringParameter( RequestParameters.CALLBACK, null );
     if ( callback != null ) {
       pw.println( callback + "(" + json + ");" );
 
@@ -359,19 +345,18 @@ public class CdfContentGenerator extends BaseContentGenerator {
     pw.flush();
   }
 
-  private void getCDFResource( final String urlPath, final IContentItem contentItem, final OutputStream out,
-      final IParameterProvider requestParams ) throws Exception {
+  private void getCDFResource( String urlPath, OutputStream out, IParameterProvider requestParams ) throws Exception {
     if ( requestParams == null ) {
       error( Messages.getErrorString( "CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
       throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
     }
 
     final String resource = requestParams.getStringParameter( RequestParameters.RESOURCE, null ); //$NON-NLS-1$
-    contentItem.setMimeType( MimeTypes.getMimeType( resource ) );
 
     final HttpServletResponse response =
         (HttpServletResponse) parameterProviders.get( RequestParameters.PATH ).getParameter( "httpresponse" );
     try {
+      response.setContentType( MimeTypes.getMimeType( resource ) );
       getSolutionFile( resource, out );
     } catch ( SecurityException e ) {
       response.sendError( HttpServletResponse.SC_FORBIDDEN );
@@ -379,30 +364,25 @@ public class CdfContentGenerator extends BaseContentGenerator {
   }
 
   private void renderHtml( final OutputStream out, final IParameterProvider requestParams ) throws Exception {
-    final IMimeTypeListener mimeTypeListener = outputHandler.getMimeTypeListener();
-    if ( mimeTypeListener != null ) {
-      mimeTypeListener.setMimeType( MIMETYPE );
-    }
 
     final String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, null ); //$NON-NLS-1$
     final String template = requestParams.getStringParameter( RequestParameters.TEMPLATE, null ); //$NON-NLS-1$
     final String path = requestParams.getStringParameter( RequestParameters.PATH, null ); //$NON-NLS-1$
-    final String templateName = requestParams.getStringParameter( "dashboard", null );
+    final String templateName = requestParams.getStringParameter( RequestParameters.DASHBOARD, null );
     // Get messages base filename from url if given otherwise defaults to Messages
     String messageBaseFilename = requestParams.getStringParameter( "messages", null );
     renderHtmlDashboard( requestParams, out, solution, path, templateName == null ? "template.html" : templateName,
         template, messageBaseFilename );
   }
 
-  private void returnResource( final String urlPath, final IContentItem contentItem, final OutputStream out )
-    throws Exception {
+  private void returnResource( final String urlPath, final OutputStream out ) throws Exception {
     final IParameterProvider pathParams = parameterProviders.get( RequestParameters.PATH ); //$NON-NLS-1$
-    contentItem.setMimeType( MimeTypes.getMimeType( urlPath ) );
 
     final IResourceLoader resLoader = CdfEngine.getEnvironment().getResourceLoader();
     final String maxAge = resLoader.getPluginSetting( CdfContentGenerator.class, "settings/max-age" );
     final HttpServletResponse response = (HttpServletResponse) pathParams.getParameter( "httpresponse" );
     if ( maxAge != null && response != null ) {
+      response.setContentType( MimeTypes.getMimeType( urlPath ) );
       response.setHeader( "Cache-Control", "max-age=" + maxAge );
     }
 
@@ -644,9 +624,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
   }
 
   private void callAction( final IParameterProvider requestParams, final OutputStream out ) {
-
-    final ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
-    serviceCallAction.execute( requestParams, userSession, out );
+    ServiceCallAction.getInstance().execute( requestParams, userSession, out );
   }
 
   private void processComments( final IParameterProvider params, final OutputStream out ) throws JSONException {
@@ -926,7 +904,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
         CdfEngine.getEnvironment().getCdfHeadersProvider();
     boolean includeAll = dashboardContent != null;
     final String dashboardType = requestParams.getStringParameter( "dashboardType", "blueprint" );
-    final boolean isDebugMode = Boolean.parseBoolean( requestParams.getStringParameter( "debug", "" ) );
+    final boolean isDebugMode = Boolean.parseBoolean( requestParams.getStringParameter( RequestParameters.DEBUG, "" ) );
     String root = requestParams.getStringParameter( "root", null );
     String headers;
     if ( !StringUtils.isEmpty( root ) ) {
