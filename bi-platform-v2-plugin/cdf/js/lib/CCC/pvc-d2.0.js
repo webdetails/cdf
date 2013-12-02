@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  
-/*! VERSION TRUNK-20131114 */
+/*! VERSION TRUNK-20131202 */
 var pvc = (function(def, pv) {
 
 
@@ -647,7 +647,7 @@ pvc.makeEnumParser = function(enumName, hasKey, dk) {
         hasKey.forEach(function(k) { if(k) { keySet[k.toLowerCase()] = k; }});
         hasKey = function(k) { return def.hasOwn(keySet, k); };
     }
-    
+
     if(dk) { dk = dk.toLowerCase(); }
 
     return function(k) {
@@ -827,6 +827,14 @@ pvc.castNumber = function(value) {
 pvc.castPositiveNumber = function(value) {
     value = pvc.castNumber(value);
     if(value != null && !(value > 0)) {
+        value = null;
+    }
+    return value;
+};
+
+pvc.castNonNegativeNumber = function(value) {
+    value = pvc.castNumber(value);
+    if(value != null && value < 0) {
         value = null;
     }
     return value;
@@ -1085,7 +1093,7 @@ pvc_Sides.prototype.set = function(prop, value) {
     value = pvc_PercentValue.parse(value);
     if(value != null) {
         switch(prop) {
-            case 'all': 
+            case 'all':
                 // expand
                 pvc_Sides.names.forEach(function(p) { this[p] = value; }, this);
                 break;
@@ -1172,8 +1180,8 @@ pvc_PercentValue.prototype.divide = function(divisor) {
 };
 
 pvc_PercentValue.divide = function(value, divisor) {
-    return (value instanceof pvc_PercentValue) ? 
-        value.divide(divisor) : 
+    return (value instanceof pvc_PercentValue) ?
+        value.divide(divisor) :
         (value / divisor);
 };
 
@@ -18260,7 +18268,7 @@ pvc.visual.CategoricalPlot.optionsDef = def.create(
 
 /**
  * Initializes an abstract bar plot.
- * 
+ *
  * @name pvc.visual.BarPlotAbstract
  * @class Represents an abstract bar plot.
  * @extends pvc.visual.CategoricalPlot
@@ -18275,7 +18283,7 @@ def
 
 pvc.visual.BarPlotAbstract.optionsDef = def.create(
     pvc.visual.CategoricalPlot.optionsDef, {
-    
+
     BarSizeRatio: { // for grouped bars
         resolve: '_resolveFull',
         cast: function(value){
@@ -18287,12 +18295,12 @@ pvc.visual.BarPlotAbstract.optionsDef = def.create(
             } else if(value > 1){
                 value = 1;
             }
-            
+
             return value;
         },
         value: 0.9
     },
-    
+
     BarSizeMax: {
         resolve: '_resolveFull',
         data: {
@@ -18309,12 +18317,18 @@ pvc.visual.BarPlotAbstract.optionsDef = def.create(
             } else if(value < 1){
                 value = 1;
             }
-            
+
             return value;
         },
         value: 2000
     },
-    
+
+    BarOrthoSizeMin: {
+        resolve: '_resolveFull',
+        cast:    pvc.castNonNegativeNumber,
+        value:   1.5 // px
+    },
+
     BarStackedMargin: { // for stacked bars
         resolve: '_resolveFull',
         cast: function(value){
@@ -18322,18 +18336,18 @@ pvc.visual.BarPlotAbstract.optionsDef = def.create(
             if(value != null && value < 0){
                 value = 0;
             }
-            
+
             return value;
         },
         value: 0
     },
-    
+
     OverflowMarkersVisible: {
         resolve: '_resolveFull',
         cast:    Boolean,
         value:   true
     },
-    
+
     ValuesAnchor: { // override default value only
         value: 'center'
     }
@@ -30340,7 +30354,7 @@ def
             seriesData = me.visualRoles.series.flatten(
                 me.partData(),
                 {visible: true, isNull: chart.options.ignoreNulls ? false : null}),
-            
+
             rootScene  = me._buildScene(data, seriesData),
             orthoAxis  = me.axes.ortho,
             baseAxis   = me.axes.base,
@@ -30351,6 +30365,7 @@ def
             barSizeRatio = plot.option('BarSizeRatio'),
             barSizeMax   = plot.option('BarSizeMax'),
             barStackedMargin = plot.option('BarStackedMargin'),
+            barOrthoSizeMin = plot.option('BarOrthoSizeMin'),
             baseRange = baseAxis.scale.range(),
             bandWidth = baseRange.band,
             barStepWidth = baseRange.step,
@@ -30366,7 +30381,7 @@ def
             seriesCount = seriesData.childCount();
 
             barWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
-                       seriesCount === 1 ? bandWidth : 
+                       seriesCount === 1 ? bandWidth :
                        (barSizeRatio * bandWidth / seriesCount);
 
             barGroupedMargin = seriesCount < 2 ? 0 :
@@ -30424,6 +30439,7 @@ def
             .lockMark('layout', isStacked  ? 'stacked' : 'grouped')
             .lockMark('verticalMode', me._barVerticalMode())
             .lockMark('yZero',  orthoZero)
+            .optionalMark('hZero', barOrthoSizeMin)
             .pvMark
             .band // categories
                 .x(sceneBaseScale)
@@ -30444,6 +30460,10 @@ def
             .end
             ;
 
+        // When bars or the spacing are too thin,
+        // with no antialias, they each show with a different width.
+        var widthNeedsAntialias = barWidth <= 4 || barMarginWidth < 2;
+
         var pvBar = this.pvBar = new pvc.visual.Bar(me, me.pvBarPanel.item, {
                 extensionId: '', // with the prefix, it gets 'bar_'
                 freePosition: true,
@@ -30451,9 +30471,16 @@ def
             })
             .lockDimensions()
             .pvMark
-            .antialias(barWidth <= 4 || barMarginWidth < 2); // when bars or the spacing are too thin, with no antialias, they each show with a different width.
+            .antialias(function(scene) {
+                if(widthNeedsAntialias) return true;
 
-        if(plot.option('OverflowMarkersVisible')){
+                // Height needs antialias?
+                var y = sceneOrthoScale(scene);
+                var h = y == null ? 0 : Math.abs(y - orthoZero);
+                return h < 1e-8;
+            });
+
+        if(plot.option('OverflowMarkersVisible')) {
             this._addOverflowMarkers(wrapper);
         }
 
