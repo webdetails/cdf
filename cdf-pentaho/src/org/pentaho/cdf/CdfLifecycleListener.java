@@ -13,17 +13,14 @@
 
 package org.pentaho.cdf;
 
+import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.utils.PluginHibernateUtil;
-import org.pentaho.platform.api.engine.IPluginLifecycleListener;
 import org.pentaho.platform.api.engine.PluginLifecycleException;
 
-/**
- * This class inits Cda plugin within the bi-platform
- * 
- * @author gorman
- * 
- */
-public class CdfLifecycleListener implements IPluginLifecycleListener {
+import pt.webdetails.cpf.PluginEnvironment;
+import pt.webdetails.cpf.SimpleLifeCycleListener;
+
+public class CdfLifecycleListener extends SimpleLifeCycleListener {
 
   public void init() throws PluginLifecycleException {
     // Initialize plugin
@@ -41,5 +38,10 @@ public class CdfLifecycleListener implements IPluginLifecycleListener {
   }
 
   public void unLoaded() throws PluginLifecycleException {
+  }
+
+  @Override
+  public PluginEnvironment getEnvironment() {
+    return (PluginEnvironment) CdfEngine.getEnvironment();
   }
 }

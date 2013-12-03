@@ -20,9 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.engine.security.SecurityHelper;
 
 import pt.webdetails.cpf.persistence.Filter;
 import pt.webdetails.cpf.persistence.PersistenceEngine;
@@ -33,9 +30,13 @@ import pt.webdetails.cpf.persistence.SimplePersistence;
  * @author pdpi
  */
 public class ViewEngine {
-
-  private static ViewEngine instance;
+  
   private static final Log logger = LogFactory.getLog( ViewEngine.class );
+  
+  private static final String RESULT_OK = "ok";
+  private static final String RESULT_ERROR = "error";
+  
+  private static ViewEngine instance;
 
   public static enum Operation {
     GET_VIEW( "GETVIEW" ), LIST_VIEWS( "LISTVIEWS" ), LIST_ALL_VIEWS( "LISTALLVIEWS" ), SAVE_VIEW( "SAVEVIEW" ), DELETE_VIEW(
@@ -73,21 +74,19 @@ public class ViewEngine {
     return instance;
   }
 
-  public View getView( String name ) {
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
+  public View getView( String viewName, String user ) {
     SimplePersistence sp = SimplePersistence.getInstance();
     Filter filter = new Filter();
-    filter.where( "name" ).equalTo( name ).and().where( "user" ).equalTo( userSession.getName() );
+    filter.where( "name" ).equalTo( viewName ).and().where( "user" ).equalTo( user );
     List<View> views = sp.load( View.class, filter );
 
     return ( views != null && views.size() > 0 ) ? views.get( 0 ) : null;
   }
 
-  public JSONObject listViews() {
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
+  public JSONObject listViews( String user ) {
     SimplePersistence sp = SimplePersistence.getInstance();
     Filter filter = new Filter();
-    filter.where( "user" ).equalTo( userSession.getName() );
+    filter.where( "user" ).equalTo( user );
     List<View> views = sp.load( View.class, filter );
     JSONObject obj = new JSONObject();
     JSONArray arr = new JSONArray();
@@ -96,26 +95,17 @@ public class ViewEngine {
     }
     try {
       obj.put( "views", arr );
-      obj.put( "status", "ok" );
+      obj.put( "status", RESULT_OK );
     } catch ( JSONException e ) {
     }
     return obj;
   }
 
-  public JSONObject listAllViews() {
+  public JSONObject listAllViews( String user ) {
     JSONObject response = new JSONObject();
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
-    if ( !SecurityHelper.isPentahoAdministrator( userSession ) ) {
-      try {
-        response.put( "status", "error" );
-        response.put( "message", "You need to be an administrator to poll all views" );
-      } catch ( JSONException e ) {
-      }
-      return response;
-    }
     SimplePersistence sp = SimplePersistence.getInstance();
     Filter filter = new Filter();
-    filter.where( "user" ).equalTo( userSession.getName() );
+    filter.where( "user" ).equalTo( user );
     List<View> views = sp.loadAll( View.class );
     JSONArray arr = new JSONArray();
     for ( View v : views ) {
@@ -123,38 +113,36 @@ public class ViewEngine {
     }
     try {
       response.put( "views", arr );
-      response.put( "status", "ok" );
+      response.put( "status", RESULT_OK );
     } catch ( JSONException e ) {
     }
     return response;
   }
 
-  public String saveView( String view ) {
+  public String saveView( String view, String user ) {
     View viewObj = new View();
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
 
     try {
       JSONObject json = new JSONObject( view );
       viewObj.fromJSON( json );
-      viewObj.setUser( userSession.getName() );
+      viewObj.setUser( user );
       PersistenceEngine pe = PersistenceEngine.getInstance();
       pe.store( viewObj );
     } catch ( JSONException e ) {
       logger.error( e );
-      return "error";
+      return RESULT_ERROR;
     }
-    return "ok";
+    return RESULT_OK;
   }
 
-  public String deleteView( String name ) {
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
+  public String deleteView( String viewName, String user ) {
     try {
       Filter filter = new Filter();
-      filter.where( "user" ).equalTo( userSession.getName() ).and().where( "name" ).equalTo( name );
+      filter.where( "user" ).equalTo( user ).and().where( "name" ).equalTo( viewName );
       SimplePersistence.getInstance().delete( View.class, filter );
-      return "ok";
+      return RESULT_OK;
     } catch ( Exception e ) {
-      return "error";
+      return RESULT_ERROR;
     }
   }
 

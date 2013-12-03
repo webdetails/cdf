@@ -64,7 +64,9 @@ import org.pentaho.platform.api.engine.IUITemplater;
 import org.pentaho.platform.api.repository.ISchedule;
 import org.pentaho.platform.api.repository.ISubscribeContent;
 import org.pentaho.platform.api.repository.ISubscriptionRepository;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
+import org.pentaho.platform.engine.security.SecurityHelper;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
 import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
 
@@ -642,7 +644,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
       final CommentsEngine.Operation operation = CommentsEngine.Operation.get( action );
 
-      if ( operation == Operation.DELETE || operation == Operation.ARCHIVE ) {
+      if ( Operation.DELETE == operation || Operation.ARCHIVE == operation ) {
 
         if ( !isAdministrator || !isAuthenticated ) {
 
@@ -855,21 +857,35 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
       final ViewEngine.Operation operation = ViewEngine.Operation.get( method );
 
+      if ( ViewEngine.Operation.LIST_ALL_VIEWS == operation ) {
+
+        if ( !SecurityHelper.isPentahoAdministrator( PentahoSessionHolder.getSession() ) ) {
+          out.write( "You need to be an administrator to poll all views".getBytes( CharsetHelper.getEncoding() ) );
+          return;
+        }
+      }
+
       switch ( operation ) {
         case GET_VIEW:
-          result = engine.getView( requestParams.getStringParameter( RequestParameters.NAME, "" ) ).toJSON().toString();
+          result =
+              engine.getView( requestParams.getStringParameter( RequestParameters.NAME, "" ),
+                  PentahoSessionHolder.getSession().getName() ).toJSON().toString();
           break;
         case SAVE_VIEW:
-          result = engine.saveView( requestParams.getStringParameter( RequestParameters.VIEW, "" ) );
+          result =
+              engine.saveView( requestParams.getStringParameter( RequestParameters.VIEW, "" ), PentahoSessionHolder
+                  .getSession().getName() );
           break;
         case DELETE_VIEW:
-          result = engine.deleteView( requestParams.getStringParameter( RequestParameters.NAME, "" ) );
+          result =
+              engine.deleteView( requestParams.getStringParameter( RequestParameters.NAME, "" ), PentahoSessionHolder
+                  .getSession().getName() );
           break;
         case LIST_VIEWS:
-          result = engine.listViews().toString( 2 );
+          result = engine.listViews( PentahoSessionHolder.getSession().getName() ).toString( 2 );
           break;
         case LIST_ALL_VIEWS:
-          result = engine.listAllViews().toString( 2 );
+          result = engine.listAllViews( PentahoSessionHolder.getSession().getName() ).toString( 2 );
           break;
         default:
           result = JsonUtil.makeJsonErrorResponse( "Unknown View operation: " + method, true ).toString( 2 );

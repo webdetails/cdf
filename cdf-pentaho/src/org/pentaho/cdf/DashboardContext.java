@@ -132,7 +132,7 @@ public class DashboardContext {
       s.append( "  Dashboards.context = " );
       s.append( context.toString( 2 ) + "\n" );
 
-      View view = ViewEngine.getInstance().getView( viewId );
+      View view = ViewEngine.getInstance().getView( viewId, userSession.getName() );
       if ( view != null ) {
         s.append( "Dashboards.view = " );
         s.append( view.toJSON().toString( 2 ) + "\n" );

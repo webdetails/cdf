@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.util.RequestParameters;
-import org.pentaho.platform.util.StringUtil;
 import org.pentaho.platform.web.servlet.ServletBase;
 
 import pt.webdetails.cpf.repository.api.IReadAccess;
@@ -57,7 +56,7 @@ public class GetCDFResource extends ServletBase {
     IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
     String resource = request.getParameter( RequestParameters.RESOURCE ); //$NON-NLS-1$
 
-    if ( resource == null || StringUtil.doesPathContainParentPathSegment( resource ) ) {
+    if ( StringUtils.isEmpty( resource ) ) {
       error( Messages.getErrorString( "GetResource.ERROR_0001_RESOURCE_PARAMETER_MISSING" ) ); //$NON-NLS-1$
       response.setStatus( HttpServletResponse.SC_SERVICE_UNAVAILABLE );
       return;
@@ -86,8 +85,8 @@ public class GetCDFResource extends ServletBase {
       // Copy the contents of the file to the output stream
       PluginIOUtils.writeOut( out, in );
     } finally {
-      if( in != null ){ in.close(); }
-      if (out != null){ out.close(); }
+      if ( in != null ){ in.close(); }
+      if ( out != null ){ out.close(); }
     }
   }
 
