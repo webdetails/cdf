@@ -2,6 +2,7 @@ style=\
 @RELATIVE_URL@/content/pentaho-cdf/js/theme/cupertino/jquery-ui-1.8.custom.css
 
 commonLibrariesScript=\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/pen-shim.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/jquery.tipsy.js,\
@@ -33,7 +34,9 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/json.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/MetaLayer/MetaLayer.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/def.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/compatVersion.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js

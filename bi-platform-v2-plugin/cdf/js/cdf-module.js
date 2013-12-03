@@ -16,6 +16,7 @@ define([
   'cdf/simile/ajax/scripts/json',
   'cdf/Base',
   'cdf/Dashboards',
+  'cdf/lib/CCC/pvc-d1.0',
   'cdf/CoreComponents'
 ], function(){
 });

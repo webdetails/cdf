@@ -1,4 +1,20 @@
-pen.define("cdf/lib/CCC/def", function(){
+/*!
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+ 
+/*! VERSION TRUNK-20131202 */
+pen.define("cdf/lib/CCC/def", function() {
+
+
 /** @private */
 var arraySlice = Array.prototype.slice;
 
@@ -48,7 +64,7 @@ if(!Object.keys) {
 //protovis has it
 //if (!Array.prototype.forEach){
 //    Array.prototype.forEach = function(fun, ctx){
-//        for(var i = 0, len = this.length; i < len; ++i) {  
+//        for(var i = 0, len = this.length; i < len; ++i) {
 //            fun.call(ctx, this[i], i, this);
 //        }
 //    };
@@ -60,13 +76,13 @@ if(!Object.create){
 
         var Klass = function(){},
             proto = Klass.prototype;
-        
+
         /** @private */
         function create(baseProto){
             Klass.prototype = baseProto || {};
             var instance = new Klass();
             Klass.prototype = proto;
-            
+
             return instance;
         }
 
@@ -74,11 +90,11 @@ if(!Object.create){
     }());
 }
 
-if (!Function.prototype.bind) {  
+if (!Function.prototype.bind) {
     Function.prototype.bind = function (ctx) {
-        var staticArgs = arraySlice.call(arguments, 1);   
+        var staticArgs = arraySlice.call(arguments, 1);
         var fToBind = this;
-        
+
         return function (){
             return fToBind.apply(ctx, staticArgs.concat(arraySlice.call(arguments)));
         };
@@ -101,8 +117,6 @@ if(!this.JSON.stringify){
 
 /** @private */
 var objectHasOwn = Object.prototype.hasOwnProperty;
-/** @private */
-var arraySlice = Array.prototype.slice;
 
 /**
  * @name def
@@ -114,33 +128,37 @@ var def = /** @lends def */{
      * @type {object}
      */
     global: this,
-    
+
     /**
      * Gets the value of an existing, own or inherited, and not "nully", property of an object,
      * or if unsatisfied, a specified default value.
-     * 
+     *
      * @param {object} [o] The object whose property value is desired.
      * @param {string} p The desired property name.
-     * If the value is not a string, 
+     * If the value is not a string,
      * it is converted to one, as if String(p) were used.
      * @param [dv=undefined] The default value.
-     * 
+     *
      * @returns {any} The satisfying property value or the specified default value.
-     * 
+     *
      * @see def.getOwn
      * @see def.nully
      */
-    get: function(o, p, dv){
+    get: function(o, p, dv) {
         var v;
         return o && (v = o[p]) != null ? v : dv;
     },
-    
-    gets: function(o, props){
+
+    gets: function(o, props) {
         return props.map(function(p){ return o[p]; });
     },
-    
-    getPath: function(o, path, create, dv){
-        if(o && path != null){
+
+    getPath: function(o, path, dv, create){
+        if(!o) {
+            return dv;
+        }
+
+        if(path != null){
             var parts = def.array.is(path) ? path : path.split('.');
             var L = parts.length;
             if(L){
@@ -149,179 +167,191 @@ var def = /** @lends def */{
                     var part = parts[i++];
                     var value = o[part];
                     if(value == null){
-                        if(!create){ return dv; }
-                        
-                        value = o[part] = {};
+                        if(!create){
+                            return dv;
+                        }
+                        value = o[part] = (dv == null || isNaN(+dv)) ? {} : [];
                     }
+
                     o = value;
                 }
             }
         }
-        
+
         return o;
     },
-        
-    /** 
+
+    setPath: function(o, path, v){
+        if(o && path != null){
+            var parts = def.array.is(path) ? path : path.split('.');
+            if(parts.length){
+                var pLast = parts.pop();
+                o = def.getPath(o, parts, pLast, true);
+                if(o != null){
+                    o[pLast] = v;
+                }
+            }
+        }
+
+        return o;
+    },
+
+    /**
      * Creates a property getter function,
      * for a specified property name.
-     * 
+     *
      * @param {string} name The name of the property.
-     * @param [dv=undefined] 
-     * The default value to return 
+     * @param [dv=undefined]
+     * The default value to return
      * if the property would be accessed on null or undefined.
      * @type function
      */
-    propGet: function(p, dv){
+    propGet: function(p, dv) {
         p = '' + p;
-        
+
         /**
-         * Gets the value of a prespecified property 
+         * Gets the value of a prespecified property
          * of a given thing.
-         * 
+         *
          * @param [o] The <i>thing</i> whose prespecified property is to be read.
          * <p>
-         * If {@link o} is not "nully", 
-         * but is not of type 'object', 
+         * If {@link o} is not "nully",
+         * but is not of type 'object',
          * the function behaves equivalently to:
          * </p>
          * <pre>
          * return Object(o)[propName];
          * </pre>
-         * 
+         *
          * @returns {any}
-         * If the specified {@link o} is not "nully", 
-         * returns the value of the prespecified property on it; 
+         * If the specified {@link o} is not "nully",
+         * returns the value of the prespecified property on it;
          * otherwise, returns the prespecified default value.
-         * 
+         *
          * @private
          */
-        return function(o){ 
-            return o != null ? o[p] : dv;
-        };
+        return function(o) { return o ? o[p] : dv; };
     },
-    
+
     // TODO: propSet ?
-    
+
     /**
      * Gets the value of an existing, own, and not "nully", property of an object,
      * or if unsatisfied, a specified default value.
-     * 
+     *
      * @param {object} [o] The object whose property value is desired.
      * @param {string} p The desired property name.
-     * If the value is not a string, 
+     * If the value is not a string,
      * it is converted to one, as if String(p) were used.
      * @param dv The default value.
-     * 
+     *
      * @returns {any} The satisfying property value or the specified default value.
-     * 
+     *
      * @see def.get
      * @see def.hasOwn
      * @see def.nully
      */
-    getOwn: function(o, p, dv){
+    getOwn: function(o, p, dv) {
         var v;
         return o && objectHasOwn.call(o, p) && (v = o[p]) != null ? v : dv;
     },
-    
-    hasOwn: function(o, p){
+
+    hasOwn: function(o, p) {
         return !!o && objectHasOwn.call(o, p);
     },
-    
+
     hasOwnProp: objectHasOwn,
-    
-    set: function(o){
-        if(!o) {
-            o = {};
-        }
-        
-        var a = arguments;
+
+    set: function(o) {
+        // Not assigning to arguments variable allows optimizations.
+        var oo = o || {};
+        var a  = arguments;
         for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-            o[a[i]] = a[i+1];
+            oo[a[i]] = a[i+1];
         }
-        
-        return o;
+        return oo;
     },
 
-    setDefaults: function(o){
-        if(!o) {
-            o = {};
-        }
-
+    setDefaults: function(o, o2){
+        // Not assigning to arguments variable allows optimizations.
+        var oo = o || {};
         var a = arguments;
-        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-            var p = a[i];
-            if(o[p] == null){
-                o[p] = a[i+1];
+        var A = a.length;
+        var p;
+        if(A === 2 && def.object.is(o2)){
+            for(p in o2) { if(oo[p] == null) { oo[p] = o2[p]; } }
+        } else {
+            A--;
+            for(var i = 1 ; i < A ; i += 2) {
+                p = a[i];
+                if(oo[p] == null) { oo[p] = a[i+1]; }
             }
         }
 
-        return o;
+        return oo;
     },
 
-    setUDefaults: function(o){
-        if(!o) {
-            o = {};
-        }
-
+    setUDefaults: function(o, o2) {
+        // Not assigning to arguments variable allows optimizations.
+        var oo = o || {};
         var a = arguments;
-        for(var i = 1, A = a.length - 1 ; i < A ; i += 2) {
-            var p = a[i];
-            if(o[p] === undefined){
-                o[p] = a[i+1];
+        var A = a.length;
+        var p;
+        if(A === 2 && def.object.is(o2)) {
+            for(p in o2) { if(oo[p] === undefined) { oo[p] = o2[p]; } }
+        } else {
+            A--;
+            for(var i = 1 ; i < A ; i += 2) {
+                p = a[i];
+                if(oo[p] === undefined) { oo[p] = a[i+1]; }
             }
         }
 
-        return o;
+        return oo;
     },
-    
+
     /**
-     * Calls a function 
+     * Calls a function
      * for every <i>own</i> property of a specified object.
-     * 
+     *
      * @param {object} [o] The object whose own properties are traversed.
-     * @param {function} [fun] The function to be called once per own property of <i>o</i>. 
+     * @param {function} [fun] The function to be called once per own property of <i>o</i>.
      * The signature of the function is:
      * <pre>
      * function(value, property : string, o : object) : any
      * </pre>
-     * 
+     *
      * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
-     * 
+     *
      * @type undefined
      */
-    eachOwn: function(o, fun, ctx){
-        if(o){
-            for(var p in o){
-                if(objectHasOwn.call(o, p)){
-                    fun.call(ctx, o[p], p, o);
-                }
+    eachOwn: function(o, fun, ctx) {
+        if(o) {
+            for(var p in o) {
+                if(objectHasOwn.call(o, p)) { fun.call(ctx, o[p], p, o); }
             }
         }
     },
-    
+
     /**
-     * Calls a function 
+     * Calls a function
      * for every property of a specified object, own or inherited.
-     * 
+     *
      * @param {object} [o] The object whose own properties are traversed.
-     * @param {function} [fun] The function to be called once per own property of <i>o</i>. 
+     * @param {function} [fun] The function to be called once per own property of <i>o</i>.
      * The signature of the function is:
      * <pre>
      * function(value, property : string, o : object) : any
      * </pre>
-     * 
+     *
      * @param {object} [ctx=null] The context object on which to call <i>fun</i>.
-     * 
+     *
      * @type undefined
      */
-    each: function(o, fun, ctx){
-        if(o){
-            for(var p in o){
-                fun.call(ctx, o[p], p, o);
-            }
-        }
+    each: function(o, fun, ctx) {
+        if(o) { for(var p in o) { fun.call(ctx, o[p], p, o); } }
     },
-    
+
     copyOwn: function(a, b){
         var to, from;
         if(arguments.length >= 2) {
@@ -331,19 +361,17 @@ var def = /** @lends def */{
             to   = {};
             from = a;
         }
-        
-        if(from){
-            for(var p in from){
-                if(objectHasOwn.call(from, p)){
-                    to[p] = from[p];
-                }
+
+        if(from) {
+            for(var p in from) {
+                if(objectHasOwn.call(from, p)) { to[p] = from[p]; }
             }
         }
 
         return to;
     },
-    
-    copy: function(a, b){
+
+    copy: function(a, b) {
         var to, from;
         if(arguments.length >= 2) {
             to = a || {};
@@ -352,16 +380,12 @@ var def = /** @lends def */{
             to   = {};
             from = a;
         }
-        
-        if(from) {
-            for(var p in from) { 
-                to[p] = from[p];
-            }
-        }
-        
+
+        if(from) { for(var p in from) { to[p] = from[p]; } }
+
         return to;
     },
-    
+
     copyProps: function(a, b, props){
         var to, from;
         if(arguments.length >= 3) {
@@ -372,7 +396,7 @@ var def = /** @lends def */{
             from  = a;
             props = b;
         }
-        
+
         if(props) {
             if(from){
                 props.forEach(function(p){ to[p] = from[p];   });
@@ -380,32 +404,61 @@ var def = /** @lends def */{
                 props.forEach(function(p){ to[p] = undefined; });
             }
         }
-        
+
         return to;
     },
-    
-    ownKeys: Object.keys,
-    
+
     keys: function(o){
         var keys = [];
         for(var p in o) {
             keys.push(p);
         }
-        
+
         return keys;
     },
-    
-    own: function(o){
-        return Object.keys(o)
-                     .map(function(key){ return o[key]; });
+
+    values: function(o){
+        var values = [];
+        for(var p in o) {
+            values.push(o[p]);
+        }
+
+        return values;
     },
-    
+
+    uniqueIndex: function(o, key, ctx){
+        var index = {};
+
+        for(var p in o){
+            var v = key ? key.call(ctx, o[p]) : o[p];
+            if(v != null && !objectHasOwn.call(index, v)){
+                index[v] = p;
+            }
+        }
+
+        return index;
+    },
+
+    ownKeys: Object.keys,
+
+    own: function(o, f, ctx){
+        var keys = Object.keys(o);
+        return f ?
+                keys.map(function(key){ return f.call(ctx, o[key], key); }) :
+                keys.map(function(key){ return o[key]; });
+    },
+
     scope: function(scopeFun, ctx){
         return scopeFun.call(ctx);
     },
-    
+
+    // Bit -------------
+    bit: {
+        set: function(bits, set, on){ return (on || on == null) ? (bits | set) : (bits & ~set); }
+    },
+
     // Special functions ----------------
-    
+
     /**
      * The natural order comparator function.
      * @field
@@ -421,115 +474,143 @@ var def = /** @lends def */{
         return (a === b) ? 0 : ((a > b) ? 1 : -1);
         //return (a < b) ? -1 : ((a > b) ? 1 : 0);
     },
-    
-    methodCaller: function(p, context){
-        if(context){
-            return function(){
-                return context[p].apply(context, arguments); 
-            };
-        }
-        
-        /* floating method */
-        return function(){
-            return this[p].apply(this, arguments); 
-        };
+
+    compareReverse: function(a, b) {
+        return (a === b) ? 0 : ((a > b) ? -1 : 1);
     },
-    
+
+    methodCaller: function(p, x) {
+        if(x) { return function() { return x[p].apply(x, arguments); }; }
+
+        /* floating method */
+        return function() { return this[p].apply(this, arguments); };
+    },
+
     /**
      * The identity function.
      * @field
      * @type function
      */
     identity: function(x){ return x; },
-    
+
     add: function(a, b){ return a + b; },
 
     // negate?
-    
+    negate: function(f){
+        return function(){
+            return !f.apply(this, arguments);
+        };
+    },
+
+    sqr: function(v){ return v * v;},
+
     // Constant functions ----------------
-    
+
     /**
      * The NO OPeration function.
      * @field
      * @type function
      */
     noop: function noop(){ /* NOOP */ },
-    
+
     retTrue:  function(){ return true;  },
     retFalse: function(){ return false; },
-    
+
     // Type namespaces ----------------
-    
+
     number: {
         is: function(v){
             return typeof v === 'number';
         },
-        
+
         as: function(d, dv){
             var v = parseFloat(d);
             return isNaN(v) ? (dv || 0) : v;
         },
-        
+
         to: function(d, dv){
             var v = parseFloat(d);
             return isNaN(v) ? (dv || 0) : v;
         }
     },
-    
+
     array: {
 
         is: function(v){
             return (v instanceof Array);
         },
-        
-        isLike: function(v){
+
+        // TODO: def.array.like.is
+        isLike: function(v) {
             return v && (v.length != null) && (typeof v !== 'string');
         },
-        
+
+        // TODO: this should work as other 'as' methods...
         /**
          * Converts something to an array if it is not one already,
          * and if it is not nully.
-         * 
+         *
          * @param thing A thing to convert to an array.
-         * @returns {Array} 
+         * @returns {Array}
          */
         as: function(thing){
             return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+        },
+
+        to: function(thing){
+            return (thing instanceof Array) ? thing : ((thing != null) ? [thing] : null);
+        },
+
+        lazy: function(scope, p, f, ctx){
+            return scope[p] || (scope[p] = (f ? f.call(ctx, p) : []));
+        },
+
+        copy: function(al/*, start, end*/){
+            return arraySlice.apply(al, arraySlice.call(arguments, 1));
         }
     },
-    
+
     object: {
         is: function(v){
             return v && typeof(v) === 'object'; // Is (v instanceof Object) faster?
         },
-        
+
         isNative: function(v){
             // Sightly faster, but may cause boxing?
             return (!!v) && /*typeof(v) === 'object' &&*/ v.constructor === Object;
         },
-        
+
         as: function(v){
             return v && typeof(v) === 'object' ? v : null;
         },
-        
+
         asNative: function(v){
             // Sightly faster, but may cause boxing?
             return v && /*typeof(v) === 'object' &&*/ v.constructor === Object ?
                     v :
                     null;
+        },
+
+        lazy: function(scope, p, f, ctx){
+            return scope[p] ||
+                  (scope[p] = (f ? f.call(ctx, p) : {}));
         }
     },
-    
+
     string: {
         is: function(v){
             return typeof v === 'string';
         },
-        
+
+        to: function(v, ds){
+            return v != null ? ('' + v) : (ds || '');
+        },
+
         join: function(sep){
             var a = arguments;
             var L = a.length;
             var v, v2;
-            
+
             switch(L){
                 case 3:
                     v  = a[1];
@@ -542,19 +623,19 @@ var def = /** @lends def */{
                     } else if(v2 != null && v2 !== "") {
                         return (""+v2);
                     }
-                    
+
                     return "";
-                
+
                 case 2:
                     v = a[1];
                     return v != null ? (""+v) : "";
-                
+
                 case 1:
                 case 0: return "";
             }
-            
+
             // general case
-            
+
             var args = [];
             for(var i = 1 ; i < L ; i++){
                 v = a[i];
@@ -562,77 +643,89 @@ var def = /** @lends def */{
                     args.push("" + v);
                 }
             }
-        
+
             return args.join(sep);
+        },
+
+        padRight: function(s, n, p) {
+            if(!s) { s = ''; }
+            if(p == null) { p = ' '; }
+
+            var k = ~~((n - s.length) / p.length);
+            return k > 0 ? (s + new Array(k + 1).join(p)) : s;
         }
     },
-    
+
     fun: {
         is: function(v){
             return typeof v === 'function';
         },
-        
-        // TODO: this is not an as...
+
         as: function(v){
-            return typeof v === 'function' ? v : def.fun.constant(v);
+            return typeof v === 'function' ? v : null;
         },
-        
+
         to: function(v){
             return typeof v === 'function' ? v : def.fun.constant(v);
         },
-        
+
         constant: function(v){
             return function(){ return v; };
         }
     },
-    
+
     // nully to 'dv'
     nullyTo: function(v, dv){
         return v != null ? v : dv;
     },
-    
+
     between: function(v, min, max){
         return Math.max(min, Math.min(v, max));
     },
-    
+
     // Predicates ----------------
-    
+
     // === null || === undefined
     nully: function(v){
         return v == null;
     },
-    
+
     // !== null && !== undefined
     notNully: function(v){
         return v != null;
     },
-    
+
+    // !== undefined
+    notUndef: function(v){
+        return v !== undefined;
+    },
+
     empty: function(v){
         return v == null || v === '';
     },
-    
+
     notEmpty: function(v){
         return v != null && v !== '';
     },
-    
+
     /**
      * The truthy function.
      * @field
      * @type function
      */
     truthy: function(x){ return !!x; },
-    
+
     /**
      * The falsy function.
      * @field
      * @type function
      */
     falsy: function(x){ return !x; },
-    
+
     // -----------------
-    
+
     /* Ensures the first letter is upper case */
-    firstUpperCase: function(s){
+    firstUpperCase: function(s) {
         if(s) {
             var c  = s.charAt(0),
                 cU = c.toUpperCase();
@@ -642,109 +735,128 @@ var def = /** @lends def */{
         }
         return s;
     },
-    
+
+    firstLowerCase: function(s) {
+        if(s) {
+            var c  = s.charAt(0),
+                cL = c.toLowerCase();
+            if(c !== cL) {
+                s = cL + s.substr(1);
+            }
+        }
+        return s;
+    },
+
     /**
-     * Formats a string by replacing 
+     * Formats a string by replacing
      * place-holder markers, of the form "{foo}",
      * with the value of corresponding properties
      * of the specified scope argument.
-     * 
+     *
      * @param {string} mask The string to format.
      * @param {object|function} [scope] The scope object or function.
      * @param {object} [ctx] The context object for a scope function.
-     * 
+     *
      * @example
      * <pre>
      * def.format("The name '{0}' is undefined.", ['foo']);
      * // == "The name 'foo' is undefined."
-     * 
+     *
      * def.format("The name '{foo}' is undefined, and so is '{what}'.", {foo: 'bar'});
      * // == "The name 'bar' is undefined, and so is ''."
-     * 
+     *
      * def.format("The name '{{foo}}' is undefined.", {foo: 'bar'});
      * // == "The name '{{foo}}' is undefined."
      * </pre>
-     * 
+     *
      * @returns {string} The formatted string.
      */
-    format: function(mask, scope, ctx){
-        if(mask == null || mask === '') {
-            return "";
-        }
-        
+    format: function(mask, scope, ctx) {
+        if(mask == null || mask === '') { return ""; }
+
         var isScopeFun = scope && def.fun.is(scope);
-        
-        return mask.replace(/(^|[^{])\{([^{}]+)\}/g, function($0, before, prop){
-            var value;
-            if(scope){
-                if(isScopeFun){
-                    value = scope.call(ctx, prop);
-                } else {
-                    value = scope[prop];
-                }
-            } else {
-                value = null;
-            }
-            
+
+        return mask.replace(/(^|[^{])\{([^{}]+)\}/g, function($0, before, prop) {
+            var value = !scope     ? null :
+                        isScopeFun ? scope.call(ctx, prop) :
+                        scope[prop];
+
             // NOTE: calls .toString() of value as a side effect of the + operator
-            return before + (value == null ? "" : value);
+            // NOTE2: when value is an object, that contains a valueOf method,
+            // valueOf is called instead, and toString is called on that result only.
+            // Using String(value) ensures toString() is called on the object itself.
+            return before + (value == null ? "" : String(value));
         });
     },
-    
+
     // --------------
-    
+
     /**
      * Binds a list of types with the specified values, by position.
      * <p>
-     * A null value is bound to any type.
+     * A null value is bindable to any type.
      * <p>
      * <p>
      * When a value is of a different type than the type desired at a given position
-     * the position is bound to <c>undefined</c> and 
-     * the unbound value is passed to the next position.  
+     * the position is bound to <c>undefined</c> and
+     * the unbound value is passed to the next position.
      * </p>
-     * 
+     *
      * @returns {any[]} An array representing the binding, with the values bound to each type.
      */
-    destructuringTypeBind: function(types, values){
+    destructuringTypeBind: function(types, values) {
         var T = types.length;
         var result = new Array(T);
-        if(T && values){
+        if(T && values) {
             var V = values.length;
-            if(V){
+            if(V) {
                 var v = 0;
                 var t = 0;
-                do{
+                do {
                     var value = values[v];
-                    
+
                     // any type matches null
-                    if(value == null || typeof value === types[t]){
+                    if(value == null || typeof value === types[t]) {
                         // bind value to type
                         result[t] = value;
                         v++;
                     }
                     t++;
-                }while(t < T && v < V);
+                } while(t < T && v < V);
             }
         }
-        
+
         return result;
     },
-    
+
     // --------------
-    
+
     error: function(error){
         return (error instanceof Error) ? error : new Error(error);
     },
-    
+
     fail: function(error){
         throw def.error(error);
     },
-    
+
     assert: function(msg, scope){
         throw def.error.assertionFailed(msg, scope);
     }
 };
+
+def.ascending  = def.compare;
+def.descending = def.compareReverse;
+
+var AL = def.array.like = def.copyOwn(
+    function(v){ return AL.is(v) ? v : [v]; }, {
+
+    is: function(v) { return v && (v.length != null) && (typeof v !== 'string'); },
+
+    as: function(v){ return AL.is(v) ? v : null; }
+});
+AL.to = AL;
+
+def.lazy = def.object.lazy;
 
 // Adapted from
 // http://www.codeproject.com/Articles/133118/Safe-Factory-Pattern-Private-instance-state-in-Jav/
@@ -773,7 +885,7 @@ def.shared = function(){
         _channel = null;
         return value;
     }
-    
+
     opener.safe = create;
 
     return opener;
@@ -795,14 +907,14 @@ var errors = {
     argumentInvalid: function(name, msg, scope){
         return def.error(
                    def.string.join(" ",
-                       def.format("Invalid argument '{0}'.", [name]), 
+                       def.format("Invalid argument '{0}'.", [name]),
                        def.format(msg, scope)));
     },
 
     assertionFailed: function(msg, scope){
         return def.error(
-                   def.string.join(" ", 
-                       "Assertion failed.", 
+                   def.string.join(" ",
+                       "Assertion failed.",
                        def.format(msg, scope)));
     }
 };
@@ -845,7 +957,7 @@ function getNamespace(name, base){
                     i++;
                 }
             }
-            
+
             while(i < L){
                 part = parts[i++];
                 current = current[part] || (current[part] = {});
@@ -856,26 +968,26 @@ function getNamespace(name, base){
     return current;
 }
 
-/** 
+/**
  * Ensures a namespace exists given its name and, optionally, its base namespace.
  * If a definition function is specified,
  * it is executed having the namespace as current namespace.
- *  
+ *
  * @param {string} name The namespace name.
  * @param {object} [base] The base namespace object.
  * @param {function} [definition] The namespace definition function.
  * @type object
- * 
- * @private 
+ *
+ * @private
  */
 function createSpace(name, base, definition){
     if(def.fun.is(base)){
         definition = base;
         base = null;
     }
-    
+
     var namespace = getNamespace(name, base);
-    
+
     if(definition){
         namespaceStack.push(currentNamespace);
         try{
@@ -898,14 +1010,14 @@ function defineName(namespace, name, value){
 }
 
 /**
- * Defines a relative namespace with 
+ * Defines a relative namespace with
  * name <i>name</i> on the current namespace.
- * 
+ *
  * <p>
  * Namespace declarations may be nested.
  * </p>
  * <p>
- * The current namespace can be obtained by 
+ * The current namespace can be obtained by
  * calling {@link def.space} with no arguments.
  * The current namespace affects other nested declarations, such as {@link def.type}.
  * </p>
@@ -923,11 +1035,11 @@ function defineName(namespace, name, value){
  *
  * @param {String} name The name of the namespace to obtain.
  * If nully, the current namespace is implied.
- * 
+ *
  * @param {Function} definition
  * A function that is called whith the desired namespace
  * as first argument and while it is current.
- * 
+ *
  * @returns {object} The namespace.
  */
 def.space = createSpace;
@@ -942,47 +1054,79 @@ def.globalSpace = globalSpace;
 
 // -----------------------
 
+def.mixin = createMixin(Object.create);
+def.copyOwn(def.mixin, {
+    custom:  createMixin,
+    inherit: def.mixin,
+    copy:    createMixin(def.copy),
+    share:   createMixin(def.identity)
+});
+
 /** @private */
-function mixinRecursive(instance, mixin){
-    for(var p in mixin){
-        var vMixin = mixin[p];
-        if(vMixin !== undefined){
-            var oMixin,
-                oTo = def.object.asNative(instance[p]);
-
-            if(oTo){
-                oMixin = def.object.as(vMixin);
-                if(oMixin){
-                    mixinRecursive(oTo, oMixin);
-                } else {
-                    // Overwrite oTo
-                    instance[p] = vMixin;
-                }
-            } else {
-                oMixin = def.object.asNative(vMixin);
-                if(oMixin){
-                    vMixin = Object.create(oMixin);
-                }
-
-                instance[p] = vMixin;
-            }
-        }
-    }
+function createMixin(protectNativeObject){
+    return function(instance/*mixin1, mixin2, ...*/){
+        return mixinMany(instance, arraySlice.call(arguments, 1), protectNativeObject);
+    };
 }
 
-def.mixin = function(instance/*mixin1, mixin2, ...*/){
-    for(var i = 1, L = arguments.length ; i < L ; i++){
-        var mixin = arguments[i];
+/** @private */
+function mixinMany(instance, mixins, protectNativeObject){
+    for(var i = 0, L = mixins.length ; i < L ; i++){
+        var mixin = mixins[i];
         if(mixin){
             mixin = def.object.as(mixin.prototype || mixin);
             if(mixin){
-                mixinRecursive(instance, mixin);
+                mixinRecursive(instance, mixin, protectNativeObject);
             }
         }
     }
 
     return instance;
-};
+}
+
+/** @private */
+function mixinRecursive(instance, mixin, protectNativeObject){
+    for(var p in mixin){
+        mixinProp(instance, p, mixin[p], protectNativeObject);
+    }
+}
+
+/** @private */
+function mixinProp(instance, p, vMixin, protectNativeObject){
+    if(vMixin !== undefined){
+        var oMixin,
+            oTo = def.object.asNative(instance[p]);
+
+        if(oTo){
+            oMixin = def.object.as(vMixin);
+            if(oMixin){
+                // If oTo is inherited, don't change it
+                // Inherit from it and assign it locally.
+                // It will be the target of the mixin.
+                if(!objectHasOwn.call(instance, p)){
+                    instance[p] = oTo = Object.create(oTo);
+                }
+
+                // Mixin the two objects
+                mixinRecursive(oTo, oMixin, protectNativeObject);
+            } else {
+                // Overwrite oTo with a simple value
+                instance[p] = vMixin;
+            }
+        } else {
+            // Target property does not contain a native object.
+            oMixin = def.object.asNative(vMixin);
+            if(oMixin){
+                // Should vMixin be set directly in instance[p] ?
+                // Should we copy its properties into a fresh object ?
+                // Should we inherit from it ?
+                vMixin = (protectNativeObject || Object.create)(oMixin);
+            }
+
+            instance[p] = vMixin;
+        }
+    }
+}
 
 // -----------------------
 
@@ -995,25 +1139,23 @@ function createRecursive(instance){
         }
     }
 }
-    
+
 // Creates an object whose prototype is the specified object.
-def.create = function(/* [deep, ] baseProto, mixin1, mixin2, ...*/){
+def.create = function(/*[deep,] baseProto, mixin1, mixin2, ...*/){
     var mixins = arraySlice.call(arguments),
         deep = true,
         baseProto = mixins.shift();
 
-    if(typeof(baseProto) === 'boolean'){
+    if(typeof(baseProto) === 'boolean') {
         deep = baseProto;
         baseProto = mixins.shift();
     }
 
     var instance = baseProto ? Object.create(baseProto) : {};
-    if(deep){
-        createRecursive(instance);
-    }
+    if(deep) { createRecursive(instance); }
 
     // NOTE:
-    if(mixins.length > 0){
+    if(mixins.length > 0) {
         mixins.unshift(instance);
         def.mixin.apply(def, mixins);
     }
@@ -1035,51 +1177,51 @@ def.scope(function(){
     var typeProto = /** lends def.type# */{
         init: function(init){
             /*jshint expr:true */
-            
+
             init || def.fail.argumentRequired('init');
-            
+
             var state = shared(this.safe);
-            
+
             !state.locked || def.fail(typeLocked());
-            
-            // NOTE: access to init inherits baseState's init! 
-            // Before calling init or postInit, baseState.initOrPost is inherited as well. 
+
+            // NOTE: access to init inherits baseState's init!
+            // Before calling init or postInit, baseState.initOrPost is inherited as well.
             var baseInit = state.init;
             if(baseInit){
                 init = override(init, baseInit);
             }
-            
+
             state.init = init;
             state.initOrPost = true;
-            
+
             return this;
         },
 
         postInit: function(postInit){
             /*jshint expr:true */
-            
+
             postInit || def.fail.argumentRequired('postInit');
-            
+
             var state = shared(this.safe);
-            
+
             !state.locked || def.fail(typeLocked());
-            
-            // NOTE: access to post inherits baseState's post! 
+
+            // NOTE: access to post inherits baseState's post!
             // Before calling init or postInit, baseState.initOrPost is inherited as well.
             var basePostInit = state.post;
             if(basePostInit){
                 postInit = override(postInit, basePostInit);
             }
-            
+
             state.post = postInit;
             state.initOrPost = true;
-            
+
             return this;
         },
-        
+
         add: function(mixin){
             var state = shared(this.safe);
-            
+
             /*jshint expr:true */
             !state.locked || def.fail(typeLocked());
 
@@ -1092,46 +1234,109 @@ def.scope(function(){
                     case 'base':
                     case 'constructor': // don't let overwrite 'constructor' of prototype
                         return;
-                    
+
                     case 'toString':
                         if(value === toStringMethod){
                             return;
                         }
                         break;
-                    
+
                     case 'override':
                         if(value === overrideMethod){
                             return;
                         }
                         break;
                 }
-                
+
                 if(value){
                     // Try to convert to method
                     var method = asMethod(value);
                     if(method) {
-                        state.methods[p] = method;
-                        
-                        // Check if it is an override
                         var baseMethod;
-                        if(baseState && (baseMethod = baseState.methods[p]) &&
-                           // Exclude inherited stuff from Object.prototype
-                           (baseMethod instanceof Method)){
-                            
-                            // Replace value with an override function 
+
+                        // Check if it is an override
+
+                        // Exclude inherited stuff from Object.prototype
+                        var bm = state.methods[p];
+                        if(bm && (bm instanceof Method)){
+                            baseMethod = bm;
+                        } else if(baseState) {
+                            bm = baseState.methods[p];
+                            if(bm && (bm instanceof Method)){
+                                baseMethod = bm;
+                            }
+                        }
+
+                        state.methods[p] = method;
+
+                        if(baseMethod){
+                            // Replace value with an override function
                             // that intercepts the call and sets the correct
                             // 'base' property before calling the original value function
                             value = baseMethod.override(method);
                         }
+
+                        proto[p] = value;
+                        return;
                     }
                 }
-                
-                proto[p] = value;
+
+                mixinProp(proto, p, value, /*protectNativeValue*/def.identity); // Can use native object value directly
             });
+
+            return this;
+        },
+
+        getStatic: function(p){
+            return getStatic(shared(this.safe), p);
+        },
+
+        addStatic: function(mixin){
+            var state = shared(this.safe);
+
+            /*jshint expr:true */
+            !state.locked || def.fail(typeLocked());
+
+            for(var p in mixin){
+                if(p !== 'prototype'){
+                    var v2 = mixin[p];
+                    var o2 = def.object.as(v2);
+                    if(o2){
+                        var v1 = def.getOwn(this, p);
+                        var v1Local = (v1 !== undefined);
+                        if(!v1Local){
+                            v1 = getStatic(state.base, p);
+                        }
+
+                        var o1 = def.object.asNative(v1);
+                        if(o1){
+                            if(v1Local){
+                                def.mixin(v1, v2);
+                                continue;
+                            }
+
+                            v2 = def.create(v1, v2); // Extend from v1 and mixin v2
+                        }
+                    } // else v2 smashes anything in this[p]
+
+                    this[p] = v2;
+                }
+            }
 
             return this;
         }
     };
+
+    function getStatic(state, p){
+        if(state){
+            do{
+                var v = def.getOwn(state.constructor, p);
+                if(v !== undefined){
+                    return v;
+                }
+            } while((state = state.base));
+        }
+    }
 
     // TODO: improve this code with indexOf
     function TypeName(full){
@@ -1144,7 +1349,7 @@ def.scope(function(){
                 parts = full.split('.');
             }
         }
-        
+
         if(parts && parts.length > 1){
             this.name           = parts.pop();
             this.namespace      = parts.join('.');
@@ -1155,22 +1360,17 @@ def.scope(function(){
             this.namespaceParts = [];
         }
     }
-    
+
     TypeName.prototype.toString = function(){
-        return def.string.join('.', this.namespace + '.' + this.name); 
+        return def.string.join('.', this.namespace + '.' + this.name);
     };
-    
+
     function Method(spec) {
         this.fun = spec.as;
-        if(spec) {
-            if(spec.isAbstract) {
-                this.isAbstract = true;
-            }
-        }
+        this.isAbstract = !!spec.isAbstract;
     }
-    
+
     def.copyOwn(Method.prototype, {
-        isAbstract: false,
         override: function(method){
             // *this* is the base method
             if(this.isAbstract) {
@@ -1178,53 +1378,52 @@ def.scope(function(){
                 // Interception is not needed.
                 return method.fun;
             }
-            
+
             var fun2 = override(method.fun, this.fun);
             // replacing the original function with the wrapper function
             // makes sure that multiple (> 1) overrides work
             method.fun = fun2;
-            
+
             return fun2;
         }
     });
-    
+
     /** @private */
     function asMethod(fun) {
         if(fun) {
             if(def.fun.is(fun)) {
                 return new Method({as: fun});
             }
-            
+
             if(fun instanceof Method) {
                 return fun;
             }
-            
+
             if(def.fun.is(fun.as)) {
                 return new Method(fun);
             }
-            
+
             if(fun.isAbstract) {
                 return new Method({isAbstract: true, as: def.fail.notImplemented });
             }
         }
-        
+
         return null;
     }
-    
+
     /** @private */
     function method(fun) {
         return asMethod(fun) || def.fail.argumentInvalid('fun');
     }
-    
+
     // -----------------
-    
-    function rootType(){
-    }
-    
+
+    function rootType(){ }
+
     var rootProto = rootType.prototype;
     // Unfortunately, creates an enumerable property in every instance
     rootProto.base = undefined;
-    
+
     var rootState = {
         locked:      true,
         init:        undefined,
@@ -1233,14 +1432,14 @@ def.scope(function(){
         methods:     {},
         constructor: rootType
     };
-    
+
     rootType.safe = shared.safe(rootState);
-    
+
     // -----------------
-    
+
     /** @private */
     function override(method, base){
-        
+
         return function(){
             var prevBase = rootProto.base;
             rootProto.base = base;
@@ -1251,33 +1450,33 @@ def.scope(function(){
             }
         };
     }
-    
+
     function overrideMethod(mname, method){
         this[mname] = override(method, this[mname]);
         return this;
     }
-    
+
     function toStringMethod(){
         return ''+this.constructor;
     }
-    
+
     // -----------------
-    
+
     /** @private */
     function inherits(type, base){
      // Inherit
         var proto = type.prototype = Object.create(base.prototype);
         // Unfortunately, creates an enumerable property in every instance
         proto.constructor = type;
-        
+
         return proto;
     }
-    
+
     // -----------------
-    
+
     /** @private */
     function createConstructor(state){
-        
+
 //        function constructor(){
 //            /*jshint expr:true */
 //            var method;
@@ -1286,7 +1485,7 @@ def.scope(function(){
 //                (method = state.post) && method.apply(this, arguments);
 //            }
 //        }
-        
+
         // Slightly faster version
 //        var init, post;
 //        var start = function(){
@@ -1296,15 +1495,15 @@ def.scope(function(){
 //                post = state.post;
 //            }
 //        };
-//        
+//
 //        function constructor(){
 //            /*jshint expr:true */
 //            start && start();
-//            
+//
 //            init && init.apply(this, arguments);
 //            post && post.apply(this, arguments);
 //        }
-        
+
         // Even faster, still
         var S = 1;
         var steps = [
@@ -1317,58 +1516,58 @@ def.scope(function(){
                         steps.push(state.init);
                         S++;
                     }
-                    
-                    if(state.post){ 
+
+                    if(state.post){
                         steps.push(state.post);
                         S++;
                     }
-                    
+
                     // Call constructor recursively
                     constructor.apply(this, arguments);
-                    
+
                     return false; // stop initial constructor from running postInit again...
                 } else {
                     steps = null;
                 }
             }
         ];
-        
+
         function constructor(){
             if(S){
                 var i = 0;
-                while(steps[i].apply(this, arguments) !== false && ++i < S);
+                while(steps[i].apply(this, arguments) !== false && ++i < S){}
             }
         }
-        
+
         return constructor;
     }
-    
+
     /** @private The type of the arguments of the {@link def.type} function. */
     var _typeFunArgTypes = ['string', 'function', 'object'];
-    
+
     /**
      * Constructs a type with the specified name in the current namespace.
-     * 
+     *
      * @param {string} [name] The new type name, relative to the base argument.
      * When unspecified, an anonymous type is created.
      * The type is not published in any namespace.
-     *  
+     *
      * @param {object} [baseType] The base type.
      * @param {object} [space] The namespace where to define a named type.
      * The default namespace is the current namespace.
      */
     function type(/* name[, baseType[, space]] | baseType[, space] | space */){
-        
+
         var args = def.destructuringTypeBind(_typeFunArgTypes, arguments);
-        
+
         return typeCore.apply(this, args);
     }
-    
+
     function typeCore(name, baseType, space){
         var typeName = new TypeName(name);
-        
+
         // ---------------
-        
+
         var baseState;
         if(baseType){
             baseState = (baseType.safe && shared(baseType.safe)) ||
@@ -1378,49 +1577,59 @@ def.scope(function(){
             baseType  = rootType;
             baseState = rootState;
         }
-        
+
         // ---------------
-        
+
         var state = Object.create(baseState);
         state.locked  = false;
         state.base    = baseState;
         state.methods = Object.create(baseState.methods);
-        
+
         // ---------------
-        
+
         var constructor = createConstructor(state);
-        
+
         def.copyOwn(constructor, typeProto);
-        
+
         constructor.name     = typeName.name;
         constructor.typeName = typeName;
         constructor.safe     = shared.safe(state);
         constructor.toString = function(){ return (''+this.typeName) || "Anonymous type"; };
-        
+
         var proto = inherits(constructor, baseType);
-        
+
         state.constructor = constructor;
-        
+
         // ---------------
         // Default methods (can be overwritten with Type#add)
-        
+
         proto.override = overrideMethod;
         proto.toString = toStringMethod;
-        
+
         // ---------------
-        
+
         if(typeName.name){
-            defineName(def.space(typeName.namespace, space), 
-                       typeName.name, 
+            defineName(def.space(typeName.namespace, space),
+                       typeName.name,
                        constructor);
         }
-        
+
         return constructor;
     }
-    
+
     def.type   = type;
     def.method = method;
 });
+
+def.makeEnum = function(a) {
+    var i = 1;
+    var e = {};
+    a.forEach(function(p) {
+        e[p] = i;
+        i = i << 1;
+    });
+    return e;
+};
 
 // ----------------------
 
@@ -1436,7 +1645,7 @@ def.copyOwn(def.array, /** @lends def.array */{
                 a[i] = dv;
             }
         }
-        
+
         return a;
     },
 
@@ -1451,23 +1660,69 @@ def.copyOwn(def.array, /** @lends def.array */{
 
         return target;
     },
-    
+
+    appendMany: function(target){
+        var a = arguments;
+        var S = a.length;
+        if(S > 1){
+            var t = target.length;
+            for(var s = 1 ; s < S ; s++){
+                var source = a[s];
+                if(source){
+                    var i = 0;
+                    var L = source.length;
+                    while(i < L){
+                        target[t++] = source[i++];
+                    }
+                }
+            }
+        }
+
+        return target;
+    },
+
+    prepend: function(target, source, start){
+        if(start == null){
+            start = 0;
+        }
+
+        for(var i = 0, L = source.length ; i < L ; i++){
+            target.unshift(source[start + i]);
+        }
+
+        return target;
+    },
+
     removeAt: function(array, index){
         return array.splice(index, 1)[0];
     },
-    
+
     insertAt: function(array, index, elem){
         array.splice(index, 0, elem);
         return array;
     },
-    
+
+    removeIf: function(array, p, x) {
+        var i = 0;
+        var L = array.length;
+        while(i < L) {
+            if(p.call(x, array[i], i)) {
+                L--;
+                array.splice(i, 1);
+            } else {
+                i++;
+            }
+        }
+        return array;
+    },
+
     binarySearch: function(array, item, comparer, key){
         if(!comparer) { comparer = def.compare; }
-        
+
         var low  = 0, high = array.length - 1;
         while(low <= high) {
             var mid = (low + high) >> 1; // <=>  Math.floor((l+h) / 2)
-            
+
             var result = comparer(item, key ? key(array[mid]) : array[mid]);
             if (result < 0) {
                 high = mid - 1;
@@ -1477,47 +1732,36 @@ def.copyOwn(def.array, /** @lends def.array */{
                 return mid;
             }
         }
-        
+
         /* Item was not found but would be inserted at ~low */
         return ~low; // two's complement <=> -low - 1
-        
-        /*
-        case low == high (== mid)
-          if result > 0
-               [low <- mid + 1]  => (low > high)
-            insert at (new) low
-          
-          if result < 0
-               [high <- mid - 1] => (low > high)
-            insert at low
-       */
     },
 
     /**
-     * Inserts an item in an array, 
+     * Inserts an item in an array,
      * previously sorted with a specified comparer,
      * if the item is not already contained in it.
      *
      * @param {Array} array A sorted array.
      * @param item An item to insert in the array.
      * @param {Function} [comparer] A comparer function.
-     * 
+     *
      * @returns {Number}
      * If the item is already contained in the array returns its index.
      * If the item was not contained in the array returns the two's complement
      * of the index where the item was inserted.
      */
     insert: function(array, item, comparer){
-        
+
         var index = def.array.binarySearch(array, item, comparer);
         if(index < 0){
             // Insert at the two's complement of index
             array.splice(~index, 0, item);
         }
-        
+
         return index;
     },
-    
+
     remove: function(array, item, comparer){
         var index = def.array.binarySearch(array, item, comparer);
         if(index >= 0) {
@@ -1537,49 +1781,49 @@ def.nextId = function(scope){
         nextIdByScope[scope] = nextId + 1;
         return nextId;
     }
-    
+
     return nextGlobalId++;
 };
 
 // --------------------
 
 def.type('Set')
-.init(function(source){
+.init(function(source, count){
     this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
+    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
 .add({
     has: function(p){
         return objectHasOwn.call(this.source, p);
     },
-    
+
     add: function(p){
         var source = this.source;
         if(!objectHasOwn.call(source, p)) {
             this.count++;
             source[p] = true;
         }
-        
+
         return this;
     },
-    
+
     rem: function(p){
         if(objectHasOwn.call(this.source, p)) {
             delete this.source[p];
             this.count--;
         }
-        
+
         return this;
     },
-    
+
     clear: function(){
         if(this.count) {
-            this.source = {}; 
+            this.source = {};
             this.count  = 0;
         }
         return this;
     },
-    
+
     members: function(){
         return def.ownKeys(this.source);
     }
@@ -1588,54 +1832,201 @@ def.type('Set')
 // ---------------
 
 def.type('Map')
-.init(function(source){
+.init(function(source, count){
     this.source = source || {};
-    this.count  = source ? def.ownKeys(source).length : 0;
+    this.count  = source ? (count != null ? count : def.ownKeys(source).length) : 0;
 })
 .add({
     has: function(p){
         return objectHasOwn.call(this.source, p);
     },
-    
+
     get: function(p){
-        return objectHasOwn.call(this.source, p) ? 
-               this.source[p] : 
+        return objectHasOwn.call(this.source, p) ?
+               this.source[p] :
                undefined;
     },
-    
+
     set: function(p, v){
         var source = this.source;
         if(!objectHasOwn.call(source, p)) {
             this.count++;
         }
-        
+
         source[p] = v;
         return this;
     },
-    
+
     rem: function(p){
         if(objectHasOwn.call(this.source, p)) {
             delete this.source[p];
             this.count--;
         }
-        
+
         return this;
     },
-    
+
     clear: function(){
         if(this.count) {
-            this.source = {}; 
+            this.source = {};
             this.count  = 0;
         }
         return this;
     },
-    
+
+    copy: function(other){
+        // Add other to this one
+        def.eachOwn(other.source, function(value, p){
+            this.set(p, value);
+        }, this);
+    },
+
     values: function(){
         return def.own(this.source);
     },
-    
+
     keys: function(){
         return def.ownKeys(this.source);
+    },
+
+    clone: function(){
+        return new def.Map(def.copy(this.source), this.count);
+    },
+
+    /**
+     * The union of the current map with the specified
+     * map minus their intersection.
+     *
+     * (A U B) \ (A /\ B)
+     * (A \ B) U (B \ A)
+     * @param {def.Map} other The map with which to perform the operation.
+     * @type {def.Map}
+     */
+    symmetricDifference: function(other){
+        if(!this.count){
+            return other.clone();
+        }
+        if(!other.count){
+            return this.clone();
+        }
+
+        var result = {};
+        var count  = 0;
+
+        var as = this.source;
+        var bs = other.source;
+
+        def.eachOwn(as, function(a, p){
+            if(!objectHasOwn.call(bs, p)){
+                result[p] = a;
+                count++;
+            }
+        });
+
+        def.eachOwn(bs, function(b, p){
+            if(!objectHasOwn.call(as, p)){
+                result[p] = b;
+                count++;
+            }
+        });
+
+        return new def.Map(result, count);
+    },
+
+    intersect: function(other, result){
+        if(!result){
+            result = new def.Map();
+        }
+
+        def.eachOwn(this.source, function(value, p){
+            if(other.has(p)) {
+                result.set(p, value);
+            }
+        });
+
+        return result;
+    }
+});
+
+// --------------------
+
+//---------------
+
+def.type('OrderedMap')
+.init(function(){
+    this._list = [];
+    this._map  = {};
+})
+.add({
+    has: function(key){
+        return objectHasOwn.call(this._map, key);
+    },
+
+    count: function(){
+        return this._list.length;
+    },
+
+    get: function(key){
+        var map = this._map;
+        return objectHasOwn.call(map, key) ? map[key].value : undefined;
+    },
+
+    at: function(index){
+        var bucket = this._list[index];
+        return bucket ? bucket.value : undefined;
+    },
+
+    add: function(key, v, index){
+        var map = this._map;
+        var bucket = objectHasOwn.call(map, key) && map[key];
+        if(!bucket){
+            bucket = map[key] = {
+                key:   key,
+                value: v
+            };
+
+            if(index == null){
+                this._list.push(bucket);
+            } else {
+                def.array.insertAt(this._list, index, bucket);
+            }
+        } else if(bucket.value !== v){
+            bucket.value = v;
+        }
+
+        return this;
+    },
+
+    rem: function(key){
+        var map = this._map;
+        var bucket = objectHasOwn.call(map, key) && map[key];
+        if(bucket){
+            // Find it
+            var index = this._list.indexOf(bucket);
+            this._list.splice(index, 1);
+            delete this._map[key];
+        }
+
+        return this;
+    },
+
+    clear: function(){
+        if(this._list.length) {
+            this._map = {};
+            this._list.length = 0;
+        }
+
+        return this;
+    },
+
+    keys: function(){
+        return def.ownKeys(this._map);
+    },
+
+    forEach: function(fun, ctx){
+        return this._list.forEach(function(bucket){
+            fun.call(ctx, bucket.value, bucket.key);
+        });
     }
 });
 
@@ -1644,39 +2035,38 @@ def.type('Map')
 def.html = {
     // TODO: lousy multipass implementation!
     escape: function(str){
-        return str.replace(/&/gm, "&amp;")
-                  .replace(/</gm, "&lt;")
-                  .replace(/>/gm, "&gt;")
-                  .replace(/"/gm, "&quot;");    
+        return def
+            .string.to(str)
+            .replace(/&/gm, "&amp;")
+            .replace(/</gm, "&lt;")
+            .replace(/>/gm, "&gt;")
+            .replace(/"/gm, "&quot;");
     }
 };
 
 // --------------------
 
 def.type('Query')
-.init(function(){
-    this.index = -1;
-    this.item = undefined;
-})
 .add({
-    next: function(){
-        var index = this.index;
+    index: -1,
+    item: undefined,
+    next: function() {
+        var me = this;
+        var index = me.index;
+
         // already was finished
-        if(index === -2){
-            return false;
-        }
-        
+        if(index === -2) { return false; }
+
         index++;
-        if(!this._next(index)){
-            this.index = -2;
-            this.item  = undefined;
+        if(!me._next(index)) {
+            me._finish();
             return false;
         }
-        
-        this.index = index;
+
+        me.index = index;
         return true;
     },
-    
+
     /**
      * @name _next
      * @function
@@ -1685,32 +2075,47 @@ def.type('Query')
      * @returns {boolean} truthy if there is a next item, falsy otherwise.
      */
     _next: def.method({isAbstract: true}),
-    
-    _finish: function(){
-        this.index = -2;
-        this.item  = undefined;
-    },
-    
-    // ------------
-    
-    each: function(fun, ctx){
-        while(this.next()){
-            if(fun.call(ctx, this.item, this.index) === false) {
-                return true;
-            }
+
+    _finish: function() {
+        var me = this;
+        if(me.index > -2) {
+            me.next  = def.retFalse;
+            me.index = -2;
+            delete me.item;
         }
-        
+    },
+
+    // ------------
+
+    each: function(f, x) {
+        var me = this;
+        while(me.next()) {
+            if(f.call(x, me.item, me.index) === false) { return true; }
+        }
+
         return false;
     },
-    
-    array: function(){
+
+    array: function() {
         var array = [];
-        while(this.next()){
-            array.push(this.item);
-        }
+        var me = this;
+        while(me.next()) { array.push(me.item); }
         return array;
     },
-    
+
+    sort: function(compare, by){
+        if(!compare) { compare = def.compare; }
+
+        if(by) {
+            var keyCompare = compare;
+            compare = function(a, b) { return keyCompare(by(a), by(b)); };
+        }
+
+        var sorted = this.array().sort(compare);
+
+        return new def.ArrayLikeQuery(sorted);
+    },
+
     /**
      * Consumes the query and fills an object
      * with its items.
@@ -1720,299 +2125,317 @@ def.type('Query')
      * The default value of the property is the item itself.
      * </p>
      * <p>
-     * In the case where two items have the same key, 
-     * the last one overwrites the first. 
+     * In the case where two items have the same key,
+     * the last one overwrites the first.
      * </p>
-     * 
+     *
      * @param {object}   [keyArgs] Keyword arguments.
      * @param {function} [keyArgs.value] A function that computes the value of each property.
      * @param {function} [keyArgs.name]  A function that computes the name of each property.
      * @param {object}   [keyArgs.context] The context object on which <tt>keyArgs.name</tt> and <tt>keyArgs.value</tt>
      * are called.
-     * @param {object}   [keyArgs.target] The object that is to receive the properties, 
+     * @param {object}   [keyArgs.target] The object that is to receive the properties,
      * instead of a new one being creating.
-     * 
+     *
      * @returns {object} A newly created object, or the specified <tt>keyArgs.target</tt> object,
-     * filled with properties. 
+     * filled with properties.
      */
     object: function(keyArgs){
         var target   = def.get(keyArgs, 'target') || {},
-            nameFun  = def.get(keyArgs, 'name' ),    
+            nameFun  = def.get(keyArgs, 'name' ),
             valueFun = def.get(keyArgs, 'value'),
             ctx      = def.get(keyArgs, 'context');
-        
+
         while(this.next()){
             var name = '' + (nameFun ? nameFun.call(ctx, this.item, this.index) : this.item);
             target[name] = valueFun ? valueFun.call(ctx, this.item, this.index) : this.item;
         }
-        
+
         return target;
     },
-    
+
     reduce: function(accumulator/*, [initialValue]*/){
-        var i = 0, 
+        var i = 0,
             result;
-      
+
         if(arguments.length < 2) {
             if(!this.next()) {
                 throw new TypeError("Length is 0 and no second argument");
             }
-            
+
             result = this.item;
-        } else {  
+        } else {
             result = arguments[1];
         }
-        
+
         while(this.next()) {
             result = accumulator(result, this.item, this.index);
-          
+
             ++i;
         }
-      
+
         return result;
     },
-    
+
     /**
      * Consumes the query and obtains the number of items.
-     * 
+     *
      * @type number
      */
-    count: function(){
+    count: function() {
         var count = 0;
-        
-        while(this.next()){ count++; }
-        
+        while(this.next()) { count++; }
         return count;
     },
-    
+
     /**
      * Returns the first item that satisfies a specified predicate.
      * <p>
-     * If no predicate is specified, the first item is returned. 
+     * If no predicate is specified, the first item is returned.
      * </p>
-     *  
+     *
      * @param {function} [pred] A predicate to apply to every item.
      * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
      * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
-     * 
+     *
      * @type any
      */
-    first: function(pred, ctx, dv){
-        while(this.next()){
+    first: function(pred, ctx, dv) {
+        while(this.next()) {
             if(!pred || pred.call(ctx, this.item, this.index)) {
                 var item = this.item;
                 this._finish();
                 return item;
             }
         }
-        
+
         return dv;
     },
-    
+
+    /**
+     * Returns the last item that satisfies a specified predicate.
+     * <p>
+     * If no predicate is specified, the last item is returned.
+     * </p>
+     *
+     * @param {function} [pred] A predicate to apply to every item.
+     * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
+     * @param {any} [dv=undefined] The value returned in case no item exists or satisfies the predicate.
+     *
+     * @type any
+     */
+    last: function(pred, ctx, dv) {
+        var theItem = dv;
+        while(this.next()) {
+            if(!pred || pred.call(ctx, this.item, this.index)) {
+                theItem = this.item;
+            }
+        }
+
+        return theItem;
+    },
+
     /**
      * Returns <tt>true</tt> if there is at least one item satisfying a specified predicate.
      * <p>
-     * If no predicate is specified, returns <tt>true</tt> if there is at least one item. 
+     * If no predicate is specified, returns <tt>true</tt> if there is at least one item.
      * </p>
-     *  
+     *
      * @param {function} [pred] A predicate to apply to every item.
      * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-     * 
+     *
      * @type boolean
      */
-    any: function(pred, ctx){
-        while(this.next()){
+    any: function(pred, ctx) {
+        while(this.next()) {
             if(!pred || pred.call(ctx, this.item, this.index)) {
                 this._finish();
-                return true; 
+                return true;
             }
         }
-        
+
         return false;
     },
-    
+
     /**
      * Returns <tt>true</tt> if all the query items satisfy the specified predicate.
      * @param {function} pred A predicate to apply to every item.
      * @param {any} [ctx] The context object on which to call <tt>pred</tt>.
-     * 
+     *
      * @type boolean
      */
-    all: function(pred, ctx){
-        while(this.next()){
+    all: function(pred, ctx) {
+        while(this.next()) {
             if(!pred.call(ctx, this.item, this.index)) {
                 this._finish();
-                return false; 
+                return false;
             }
         }
-        
+
         return true;
     },
-    
-    min: function(){
+
+    min: function() {
         var min = null;
-        while(this.next()){
+        while(this.next()) {
             if(min === null || this.item < min) {
                 min = this.item;
             }
         }
-        
         return min;
     },
-    
-    max: function(){
+
+    max: function() {
         var max = null;
-        while(this.next()){
+        while(this.next()) {
             if(max === null || this.item > max) {
                 max = this.item;
             }
         }
-        
         return max;
     },
-    
-    range: function(){
-        var min = null,
-            max = null;
-        
-        while(this.next()){
+
+    range: function() {
+        var min = null;
+        var max = null;
+
+        while(this.next()) {
             var item = this.item;
             if(min === null) {
                 min = max = item;
             } else {
-                if(item < min) {
-                    min = item;
-                }
-                if(item > max) {
-                    max = item;
-                }
+                if(item < min) { min = item; }
+                if(item > max) { max = item; }
             }
         }
-        
+
         return min != null ? {min: min, max: max} : null;
     },
-    
-    index: function(keyFun, ctx){
+
+    multipleIndex: function(keyFun, ctx) {
         var keyIndex = {};
-        
-        this.each(function(item){
+
+        this.each(function(item) {
             var key = keyFun ? keyFun.call(ctx, item) : item;
             if(key != null) {
                 var sameKeyItems = def.getOwn(keyIndex, key) || (keyIndex[key] = []);
-            
+
                 sameKeyItems.push(item);
             }
         });
-        
+
         return keyIndex;
     },
-    
-    uniqueIndex: function(keyFun, ctx){
+
+    uniqueIndex: function(keyFun, ctx) {
         var keyIndex = {};
-        
-        this.each(function(item){
+
+        this.each(function(item) {
             var key = keyFun ? keyFun.call(ctx, item) : item;
-            if(key != null && !def.hasOwn(keyIndex, key)) {
+            if(key != null && !objectHasOwn.call(keyIndex, key)) {
                 keyIndex[key] = item;
             }
         });
-        
+
         return keyIndex;
     },
-    
+
     // ---------------
     // Query -> Query
-    
+
     // deferred map
-    select: function(fun, ctx){
-        return new def.SelectQuery(this, fun, ctx);
+    select: function(fun, ctx) { return new def.SelectQuery(this, fun, ctx); },
+
+    prop: function(p) {
+        return new def.SelectQuery(this, function(item) { if(item) { return item[p]; }});
     },
 
-    selectMany: function(fun, ctx){
-        return new def.SelectManyQuery(this, fun, ctx);
-    },
-    
-    union: function(/*others*/){
+    selectMany: function(fun, ctx) { return new def.SelectManyQuery(this, fun, ctx); },
+
+    union: function(/*others*/) {
         var queries = def.array.append([this], arguments);
         return new def.SelectManyQuery(new def.ArrayLikeQuery(queries));
     },
 
     // deferred filter
-    where: function(fun, ctx){
-        return new def.WhereQuery(this, fun, ctx);
-    },
+    where: function(fun, ctx) { return new def.WhereQuery(this, fun, ctx); },
 
-    distinct: function(fun, ctx){
-        return new def.DistinctQuery(this, fun, ctx);
-    },
+    distinct: function(fun, ctx) { return new def.DistinctQuery(this, fun, ctx); },
 
-    skip: function(n){
-        return new def.SkipQuery(this, n);
-    },
-    
-    take: function(n){
+    skip: function(n) { return new def.SkipQuery(this, n); },
+
+    take: function(n) {
+        if(n <= 0) { return new def.NullQuery(); }
+
+        if(!isFinite(n)) { return this; } // all
+
         return new def.TakeQuery(this, n);
     },
-    
-    wahyl: function(pred, ctx){
-        return new def.WhileQuery(this, pred, ctx);
-    },
-    
-    reverse: function(){
-        return new def.ReverseQuery(this);
-    }
+
+    whayl: function(pred, ctx) { return new def.WhileQuery(this, pred, ctx); },
+
+    reverse: function() { return new def.ReverseQuery(this); }
 });
 
 def.type('NullQuery', def.Query)
-.add({
-    _next: function(nextIndex){}
-});
+.add({ next: def.retFalse });
 
 def.type('AdhocQuery', def.Query)
 .init(function(next){
-    this.base();
     this._next = next;
 });
 
 def.type('ArrayLikeQuery', def.Query)
-.init(function(list){
-    this.base();
-    this._list  = def.array.isLike(list) ? list : [list];
-    this._count = this._list.length;
+.init(function(list) {
+    var me = this;
+
+    if(!def.array.isLike(list)) { list = [list] };
+
+    me._list  = list;
+    me._count = list.length;
+
+    var i  = -1;
+    var I  = list.length;
+    me.next = arraLike_next;
+
+    function arraLike_next() {
+        while(++i < I) {
+            if(objectHasOwn.call(list, i)) {
+                me.index = i;
+                me.item  = list[i];
+                return true;
+            }
+        }
+
+        me._finish();
+        return false;
+    }
 })
 .add({
-    _next: function(nextIndex){
-        if(nextIndex < this._count){
-            this.item = this._list[nextIndex];
-            return 1;
-        }
-    },
-    
     /**
      * Obtains the number of items of a query.
-     * 
+     *
      * This is a more efficient implementation for the array-like class.
      * @type number
      */
     count: function(){
         // Count counts remaining items
         var remaining = this._count;
-        if(this.index >= 0){
+        if(this.index >= 0) {
             remaining -= (this.index + 1);
         }
-        
+
         // Count consumes all remaining items
         this._finish();
-        
+
         return remaining;
     }
 });
 
 def.type('RangeQuery', def.Query)
-.init(function(start, count, step){
-    this.base();
+.init(function(start, count, step) {
     this._index = start;
-    this._count = count;
+    this._count = count; // may be infinte
     this._step  = step == null ? 1 : step;
 })
 .add({
@@ -2020,10 +2443,10 @@ def.type('RangeQuery', def.Query)
         if(nextIndex < this._count){
             this.item = this._index;
             this._index += this._step;
-            return 1;
+            return true;
         }
     },
-    
+
     /**
      * Obtains the number of items of a query.
      * This is a more efficient implementation.
@@ -2035,180 +2458,174 @@ def.type('RangeQuery', def.Query)
         if(this.index >= 0){
             remaining -= (this.index + 1);
         }
-        
+
         // Count consumes all remaining items
         this._finish();
-        
+
         return remaining;
     }
 });
 
 def.type('WhereQuery', def.Query)
-.init(function(source, where, ctx){
-    this.base();
-    this._where  = where;
-    this._ctx    = ctx;
-    this._source = source;
-})
-.add({
-    _next: function(nextIndex){
-        var source = this._source;
-        while(source.next()){
-            var nextItem = source.item;
-            if(this._where.call(this._ctx, nextItem, source.index)){
-                this.item = nextItem;
-                return 1;
+.init(function(source, p, x){
+    var me = this;
+    var i  = -1;
+
+    me.next = where_next;
+
+    function where_next() {
+        while(source.next()) {
+            var e = source.item;
+            if(p.call(x, e, source.index)) {
+                me.item  = e;
+                me.index = ++i;
+                return true;
             }
         }
+        me._finish();
+        return false;
     }
 });
 
 def.type('WhileQuery', def.Query)
-.init(function(source, pred, ctx){
-    this.base();
-    this._pred  = pred;
-    this._ctx    = ctx;
-    this._source = source;
-})
-.add({
-    _next: function(nextIndex){
-        while(this._source.next()){
-            var nextItem = this._source.item;
-            if(this._pred.call(this._ctx, nextItem, this._source.index)){
-                this.item = nextItem;
-                return 1;
+.init(function(s, p, x) {
+    var me = this;
+    var i  = -1;
+
+    me.next = while_next;
+
+    function while_next() {
+        if(s.next()) {
+            var e = s.item;
+            if(p.call(x, e, s.index)) {
+                me.item  = e;
+                me.index = ++i;
+                return true;
             }
-            return 0;
         }
+        me._finish();
+        return false;
     }
 });
 
 def.type('SelectQuery', def.Query)
-.init(function(source, select, ctx){
-    this.base();
-    this._select = select;
-    this._ctx    = ctx;
-    this._source = source;
-})
-.add({
-    _next: function(nextIndex){
-        if(this._source.next()){
-            this.item = this._select.call(this._ctx, this._source.item, this._source.index);
-            return 1;
+.init(function(s, f, x){
+    var me = this;
+    var i  = -1;
+
+    me.next = select_next;
+
+    function select_next() {
+        if(s.next()) {
+            me.item  = f.call(x, s.item, s.index);
+            me.index = ++i;
+            return true;
         }
+        me._finish();
+        return false;
     }
 });
 
 def.type('SelectManyQuery', def.Query)
-.init(function(source, selectMany, ctx){
-    this.base();
+.init(function(source, selectMany, ctx) {
     this._selectMany = selectMany;
     this._ctx    = ctx;
     this._source = source;
     this._manySource = null;
 })
 .add({
-    _next: function(nextIndex){
-        while(true){
+    _next: function(nextIndex) {
+        while(true) {
             // Consume all of existing manySource
-            if(this._manySource){
-                if(this._manySource.next()){
+            if(this._manySource) {
+                if(this._manySource.next()) {
                     this.item = this._manySource.item;
-                    return 1;
+                    return true;
                 }
-                
+
                 this._manySource = null;
             }
 
-            if(!query_nextMany.call(this)){
-                break;
-            }
+            if(!query_nextMany.call(this)) { break; }
         }
     }
 });
 
-function query_nextMany(){
-    while(this._source.next()){
+function query_nextMany() {
+    while(this._source.next()) {
         var manySource = this._selectMany ?
                             this._selectMany.call(this._ctx, this._source.item, this._source.index) :
                             this._source.item;
-        if(manySource != null){
+        if(manySource != null) {
             this._manySource = def.query(manySource);
-            return 1;
+            return true;
         }
     }
 }
 
 def.type('DistinctQuery', def.Query)
-.init(function(source, key, ctx){
-    this.base();
-    this._key    = key;
-    this._ctx    = ctx;
-    this._source = source;
-    this._keys   = {};
-})
-.add({
-    _next: function(nextIndex){
-        while(this._source.next()){
-            var nextItem = this._source.item,
-                keyValue = this._key ?
-                           this._key.call(this._ctx, nextItem, this._source.index) :
-                           nextItem;
+.init(function(s, k, x) {
+    var me = this;
+    var i  = -1;
+    var ks = {};
 
-            // items with null keys are ignored!
-            if(keyValue != null && !def.hasOwn(this._keys, keyValue)){
-                this._keys[keyValue] = true;
-                this.item = nextItem;
-                return 1;
+    me.next = distinct_next;
+
+    function distinct_next() {
+        while(s.next()) {
+            // null key items are ignored!
+            var e = s.item;
+            var v = k ? k.call(x, e, s.index) : e;
+            if(v != null && !objectHasOwn.call(ks, v)) {
+                me.item  = e;
+                me.index = ++i;
+                return (ks[v] = true);
             }
         }
+        me._finish();
+        return false;
     }
 });
 
 def.type('SkipQuery', def.Query)
 .init(function(source, skip){
-    this.base();
     this._source = source;
     this._skip = skip;
 })
 .add({
-    _next: function(nextIndex){
-        while(this._source.next()){
-            if(this._skip > 0){
+    _next: function(nextIndex) {
+        while(this._source.next()) {
+            if(this._skip > 0) {
                 this._skip--;
             } else {
                 this.item = this._source.item;
-                return 1;
+                return true;
             }
         }
     }
 });
 
 def.type('TakeQuery', def.Query)
-.init(function(source, take){
-    this.base();
+.init(function(source, take) {
     this._source = source;
     this._take = take;
 })
 .add({
-    _next: function(nextIndex){
-        while(this._source.next()){
-            if(this._take > 0){
-                this._take--;
-                this.item = this._source.item;
-                return 1;
-            }
+    _next: function(nextIndex) {
+        if(this._take > 0 && this._source.next()) {
+            this._take--;
+            this.item = this._source.item;
+            return true;
         }
     }
 });
 
 def.type('ReverseQuery', def.Query)
-.init(function(source){
-    this.base();
+.init(function(source) {
     this._source = source;
 })
 .add({
-    _next: function(nextIndex){
+    _next: function(nextIndex) {
         if(!nextIndex) {
             if(this._source instanceof def.Query) {
                 if(this._source instanceof def.ArrayLikeQuery){
@@ -2217,13 +2634,22 @@ def.type('ReverseQuery', def.Query)
                     this._source = this._source.array();
                 }
             } // else assume array-like
-            
+
             this._count  = this._source.length;
         }
-        
-        if(nextIndex < this._count){
-            this.item = this._source[this._count - nextIndex - 1];
-            return 1;
+
+        var count = this._count;
+        if(nextIndex < count) {
+            var index = count - nextIndex - 1;
+            var source = this._source;
+
+            while(!objectHasOwn.call(source, index)) {
+                if(--index < 0) { return false; }
+                this._count--;
+            }
+
+            this.item = source[index];
+            return true;
         }
     }
 });
@@ -2231,25 +2657,14 @@ def.type('ReverseQuery', def.Query)
 
 // -------------------
 
-def.query = function(q){
-    if(q === undefined) {
-        return new def.NullQuery();
-    }
-    
-    if(q instanceof def.Query){
-        return q;
-    }
-    
-    if(def.fun.is(q)){
-        return new def.AdhocQuery(q);
-    }
-
+def.query = function(q) {
+    if(q === undefined)        { return new def.NullQuery(); }
+    if(q instanceof def.Query) { return q; }
+    if(def.fun.is(q))          { return new def.AdhocQuery(q); }
     return new def.ArrayLikeQuery(q);
 };
 
-def.range = function(start, count, step){
-    return new def.RangeQuery(start, count, step);
-};
+def.range = function(start, count, step) { return new def.RangeQuery(start, count, step); };
 
 // Reset namespace to global, instead of 'def'
 currentNamespace = def.global;    
