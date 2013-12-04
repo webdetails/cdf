@@ -85,11 +85,12 @@ public class DashboardContext {
 
   public String getContext( IParameterProvider requestParams, HttpServletRequest request ) {
     try {
-      String solution = requestParams.getStringParameter( "solution", "" ),
-             path = requestParams.getStringParameter( "path", "" ),
-             file = requestParams.getStringParameter( "file", "" ),
-             action = requestParams.getStringParameter( "action", "" ),
-             viewId = requestParams.getStringParameter( "view", action );
+      String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, "" ),
+             path = requestParams.getStringParameter( RequestParameters.PATH, "" ),
+             file = requestParams.getStringParameter( RequestParameters.FILE, "" ),
+             action = requestParams.getStringParameter( RequestParameters.ACTION, "" ),
+             // TODO: why does view default to action?
+             viewId = requestParams.getStringParameter( RequestParameters.VIEW, action );
       String fullPath = RepositoryHelper.joinPaths( solution, path, file );
       // old xcdf dashboards use solution + path + action 
       if ( RepositoryHelper.getExtension( action ).equals( "xcdf" ) ) {
@@ -301,6 +302,7 @@ public class DashboardContext {
     // TODO figure out what to clear
     synchronized ( autoIncludesLock ) {
       autoIncludes = null;
+      logger.debug( "auto-includes cleared." );
     }
   }
 }
