@@ -97,6 +97,7 @@ public class ViewEngine {
       obj.put( "views", arr );
       obj.put( "status", RESULT_OK );
     } catch ( JSONException e ) {
+      logger.error( e );
     }
     return obj;
   }
@@ -115,6 +116,7 @@ public class ViewEngine {
       response.put( "views", arr );
       response.put( "status", RESULT_OK );
     } catch ( JSONException e ) {
+      logger.error( e );
     }
     return response;
   }

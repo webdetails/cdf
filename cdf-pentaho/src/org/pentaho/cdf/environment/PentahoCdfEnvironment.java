@@ -73,8 +73,9 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
   }
 
   @Override
-  public String getPluginId() {
-    return super.getPluginId();
+  protected String getPluginRepositoryDir() {
+    // needed because differs from plugin id
+    return "cdf";
   }
 
   @Override

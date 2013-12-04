@@ -13,7 +13,6 @@
 
 package org.pentaho.cdf;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,12 +22,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +34,7 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.RequestParameters;
@@ -48,10 +45,9 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
 
 import pt.webdetails.cpf.InterPluginCall;
-import pt.webdetails.cpf.Util;
-import pt.webdetails.cpf.repository.api.IBasicFile;
-import pt.webdetails.cpf.repository.api.IBasicFileFilter;
+import pt.webdetails.cpf.repository.api.IContentAccessFactory;
 import pt.webdetails.cpf.repository.api.IReadAccess;
+import pt.webdetails.cpf.repository.util.RepositoryHelper;
 import pt.webdetails.cpf.utils.XmlDom4JUtils;
 
 /**
@@ -61,6 +57,11 @@ import pt.webdetails.cpf.utils.XmlDom4JUtils;
 public class DashboardContext {
 
   private static final Log logger = LogFactory.getLog( DashboardContext.class );
+
+  private static String CONFIG_FILE = "dashboardContext.xml";
+
+  private static List<AutoInclude> autoIncludes;
+  private static Object autoIncludesLock = new Object();
 
   protected IPentahoSession userSession;
 
@@ -84,19 +85,26 @@ public class DashboardContext {
 
   public String getContext( IParameterProvider requestParams, HttpServletRequest request ) {
     try {
-      String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, "" );
-      String path = requestParams.getStringParameter( RequestParameters.PATH, "" );
-      String file = requestParams.getStringParameter( RequestParameters.FILE, "" );
-      String viewId =
-          requestParams.getStringParameter( RequestParameters.VIEW, requestParams.getStringParameter(
-              RequestParameters.ACTION, "" ) );
-      String fullPath = FilenameUtils.separatorsToUnix( Util.joinPath( solution, path, file ) );
+      String solution = requestParams.getStringParameter( "solution", "" ),
+             path = requestParams.getStringParameter( "path", "" ),
+             file = requestParams.getStringParameter( "file", "" ),
+             action = requestParams.getStringParameter( "action", "" ),
+             viewId = requestParams.getStringParameter( "view", action );
+      String fullPath = RepositoryHelper.joinPaths( solution, path, file );
+      // old xcdf dashboards use solution + path + action 
+      if ( RepositoryHelper.getExtension( action ).equals( "xcdf" ) ) {
+        fullPath = RepositoryHelper.joinPaths( fullPath, action );
+      }
       final JSONObject context = new JSONObject();
 
-      IBasicFile configFile = getConfigFile();
-
-      context.put( "queryData", processAutoIncludes( fullPath, configFile ) );
-      context.put( "sessionAttributes", processSessionAttributes( configFile ) );
+      Document configFile = getConfigFile();
+      if ( configFile != null ) {
+        context.put( "queryData", processAutoIncludes( fullPath, configFile ) );
+        context.put( "sessionAttributes", processSessionAttributes( configFile ) );
+      } else {
+        logger
+            .error( "Unable to read dashboardContext.xml; auto-includes and session attributes will not be available" );
+      }
       if ( request != null && userSession.isAuthenticated() ) {
         context.put( "sessionTimeout", request.getSession().getMaxInactiveInterval() );
       }
@@ -118,9 +126,10 @@ public class DashboardContext {
 
       JSONObject params = new JSONObject();
 
-      Iterator it = requestParams.getParameterNames();
+      @SuppressWarnings( "unchecked" )
+      Iterator<String> it = requestParams.getParameterNames();
       while ( it.hasNext() ) {
-        String p = (String) it.next();
+        String p = it.next();
         if ( p.indexOf( "param" ) == 0 ) {
           params.put( p.substring( 5 ), requestParams.getParameter( p ) );
         }
@@ -138,7 +147,7 @@ public class DashboardContext {
         s.append( view.toJSON().toString( 2 ) + "\n" );
       }
       String storage = getStorage();
-      if ( !"".equals( storage ) ) {
+      if ( !StringUtils.isEmpty( storage ) ) {
         s.append( "Dashboards.initialStorage = " );
         s.append( storage );
         s.append( "\n" );
@@ -150,21 +159,14 @@ public class DashboardContext {
 
       return s.toString();
     } catch ( JSONException e ) {
+      logger.error( "Error building dashboard context.", e );
       return "";
     }
   }
 
-  private JSONObject processSessionAttributes( IBasicFile configFile ) {
+  private JSONObject processSessionAttributes( Document config ) {
 
     JSONObject result = new JSONObject();
-
-    Document config = null;
-    try {
-      config = XmlDom4JUtils.getDocumentFromFile( configFile );
-    } catch ( IOException e ) {
-      logger.equals( e );
-      return result;
-    }
 
     @SuppressWarnings( "unchecked" )
     List<Node> attributes = config.selectNodes( "//sessionattributes/attribute" );
@@ -186,8 +188,10 @@ public class DashboardContext {
     return result;
   }
 
-  private JSONObject processAutoIncludes( String dashboardPath, IBasicFile configFile ) {
-
+  /**
+   * will add a json entry for each data access id in the cda queries applicable to currents dashboard.
+   */
+  private JSONObject processAutoIncludes( String dashboardPath, Document config ) {
     JSONObject queries = new JSONObject();
     /* Bail out immediately if CDA isn' available */
     if ( !( new InterPluginCall( InterPluginCall.CDA, "" ) ).pluginExists() ) {
@@ -195,143 +199,108 @@ public class DashboardContext {
       return queries;
     }
 
-    logger.info( "[Timing] Getting solution repo for auto-includes: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-
-    IBasicFileFilter cdaFilter = new IBasicFileFilter() {
-      @Override
-      public boolean accept( IBasicFile file ) {
-        return StringUtils.equals( "cda", file.getExtension() );
-      }
-    };
-
-    List<IBasicFile> cdaFiles =
-        CdfEngine.getUserContentReader( null ).listFiles( "/", cdaFilter, IReadAccess.DEPTH_ALL, false );
-
-    List<Node> includes = new ArrayList<Node>();
-
-    try {
-      Document doc = XmlDom4JUtils.getDocumentFromFile( configFile );
-      includes = XmlDom4JUtils.getDocumentFromFile( configFile ).selectNodes( "//autoincludes/autoinclude" );
-    } catch ( IOException e ) {
-      logger.error( e );
-    }
-
-    logger.info( "[Timing] Starting testing includes: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-    for ( Node include : includes ) {
-      String re = XmlDom4JUtils.getNodeText( "cda", include, "" );
-      for ( IBasicFile cda : cdaFiles ) {
-        String path = cda.getPath();
-
-        /*
-         * There's a stupid bug in the filebased rep that makes this not work (see BISERVER-3538) Path comes out as
-         * pentaho-solutions/<solution>/..., and filebase rep doesn't handle that well We'll remote the initial part and
-         * that apparently works ok
-         */
-        path = path.substring( path.indexOf( '/', 1 ) + 1 );
-
-        if ( !path.matches( re ) ) {
-          continue;
-        }
-        logger.debug( path + " matches the rule " + re );
-        Pattern pat = Pattern.compile( re );
-        if ( canInclude( dashboardPath, include.selectNodes( "dashboards/*" ), pat.matcher( path ) ) ) {
-          logger.debug( "Accepted dashboard " + dashboardPath );
-          List<String> ids = listQueries( path );
-          // String idPattern = (String) cda.selectObject("string(ids)");
-          for ( String id : ids ) {
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put( "dataAccessId", id );
-            params.put( "path", path );
-            logger.info( "[Timing] Executing autoinclude query: "
-                + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-            InterPluginCall ipc = new InterPluginCall( InterPluginCall.CDA, "doQuery", params );
-            String reply = ipc.callInPluginClassLoader();
-            logger.info( "[Timing] Done executing autoinclude query: "
-                + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-            try {
-              queries.put( id, new JSONObject( reply ) );
-            } catch ( JSONException e ) {
-              logger.error( "Failed to add query " + id + " to contex object" );
-            }
-          }
-        }
+    List<AutoInclude> autoIncludes = getAutoIncludes( config );
+    for ( AutoInclude autoInclude : autoIncludes ) {
+      if ( autoInclude.canInclude( dashboardPath ) ) {
+        String cdaPath = autoInclude.getCdaPath();
+        addCdaQueries( queries, cdaPath );
       }
     }
-    logger.info( "[Timing] Finished testing includes: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-
     return queries;
   }
 
-  private boolean canInclude( String path, List<Node> rules, Matcher matcher ) {
-    boolean canInclude = false;
-    logger.info( "[Timing] Testing inclusion rule: " + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-    /* Rules are listed from least to most important */
-    matcher.find();
-    for ( Node rule : rules ) {
-      String mode = rule.getName();
-      String tokenizedRule = rule.getText();
-      for ( int i = 1; i <= matcher.groupCount(); i++ ) {
-        tokenizedRule = tokenizedRule.replaceAll( "\\$" + i, matcher.group( i ) );
+  private List<AutoInclude> getAutoIncludes( Document config ) {
+    synchronized ( autoIncludesLock ) {
+      if ( autoIncludes == null ) {
+        IReadAccess cdaRoot = CdfEngine.getUserContentReader( "/" );
+        autoIncludes = AutoInclude.buildAutoIncludeList( config, cdaRoot );
       }
-      if ( "include".equals( mode ) ) {
-        if ( path.matches( tokenizedRule ) ) {
-          canInclude = true;
-        }
-      } else if ( "exclude".equals( mode ) ) {
-        if ( path.matches( tokenizedRule ) ) {
-          canInclude = false;
-        }
-      } else {
-        logger.warn( "Inclusion rule mode " + mode + " not supported." );
+      return autoIncludes;
+    }
+  }
+
+  private void addCdaQueries( JSONObject queries, String cdaPath ) {
+    List<String> dataAccessIds = listQueries( cdaPath );
+    // String idPattern = (String) cda.selectObject("string(ids)");
+    if ( logger.isDebugEnabled() ) {
+      logger.debug(
+          String.format( "data access ids for %s:( %s )",
+              cdaPath, StringUtils.join( dataAccessIds.iterator(), ", " ) ) );
+    }
+    for ( String id : dataAccessIds ) {
+      String reply = executeQuery( cdaPath, id );
+      try {
+        queries.put( id, new JSONObject( reply ) );
+      } catch ( JSONException e ) {
+        logger.error( "Failed to add query " + id + " to contex object" );
       }
     }
-    logger.info( "[Timing] Finished testing inclusion rule: "
+  }
+
+  private String executeQuery( String path, String id ) {
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put( "dataAccessId", id );
+    params.put( "path", path );
+    logger.info( "[Timing] Executing autoinclude query: "
         + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-    return canInclude;
+    InterPluginCall ipc = new InterPluginCall( InterPluginCall.CDA, "doQuery", params );
+    String reply = ipc.callInPluginClassLoader();
+    logger.info( "[Timing] Done executing autoinclude query: "
+        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
+    return reply;
   }
 
   private List<String> listQueries( String cda ) {
     SAXReader reader = new SAXReader();
     List<String> queryOutput = new ArrayList<String>();
     try {
+      // call listQueries on CDA
       Map<String, Object> params = new HashMap<String, Object>();
-
       params.put( "path", cda );
       params.put( "outputType", "xml" );
       InterPluginCall ipc = new InterPluginCall( InterPluginCall.CDA, "listQueries", params );
       String reply = ipc.call();
       Document queryList = reader.read( new StringReader( reply ) );
+      @SuppressWarnings( "unchecked" )
       List<Node> queries = queryList.selectNodes( "//ResultSet/Row/Col[1]" );
       for ( Node query : queries ) {
         queryOutput.add( query.getText() );
       }
     } catch ( DocumentException e ) {
+      logger.error( "Error reading listQueries result", e );
       return null;
     }
     return queryOutput;
-
   }
 
-  private IBasicFile getConfigFile() {
+  private Document getConfigFile() {
 
     try {
+      IContentAccessFactory factory = CdfEngine.getEnvironment().getContentAccessFactory();
+      IReadAccess access = factory.getPluginRepositoryReader( null );
 
-      IReadAccess access = CdfEngine.getEnvironment().getContentAccessFactory().getPluginSystemReader( null );
-
-      if ( access.fileExists( "dashboardContext.xml" ) ) {
-        return access.fetchFile( "dashboardContext.xml" );
+      if ( !access.fileExists( CONFIG_FILE ) ) {
+        access = factory.getPluginSystemReader( null );
+        if ( !access.fileExists( CONFIG_FILE ) ) {
+          logger.error( CONFIG_FILE + " not found!" );
+          return null;
+        }
       }
+      if ( logger.isDebugEnabled() ) {
+        logger.debug( String.format( "Reading %s from %s", CONFIG_FILE, access )  );
+      }
+      return XmlDom4JUtils.getDocumentFromStream( access.getFileInputStream( CONFIG_FILE ) );
 
     } catch ( Exception e ) {
-      logger.error( "Couldn't get context configuration file! Cause:\n" + e.toString() );
+      logger.error( "Couldn't read context configuration file.", e );
+      return null;
     }
-    return null;
   }
 
   public static void clearCache() {
     // TODO figure out what to clear
+    synchronized ( autoIncludesLock ) {
+      autoIncludes = null;
+    }
   }
 }
