@@ -193,8 +193,8 @@ var PrptComponent = BaseComponent.extend({
     }
 
     if(options["dashboard-mode"]){
-   	  var ts = "ts=" + new Date().getTime() + "&";
-      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+      var ts = "ts=" + new Date().getTime() + "&";
+      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/report?' + ts;
       var myself=this;
       $.ajax({
         url: url,
@@ -227,12 +227,12 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/report?' + ts;
         this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts + $.param(options);
+        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/report?' + ts + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
@@ -242,14 +242,7 @@ var PrptComponent = BaseComponent.extend({
         this.startLoading();
         var myself = this;
         iframe.load(function(){
-          var jqBody = $(this.contentWindow.document.body);
-          var reportContentFrame = jqBody.find('#reportContent');
-          reportContentFrame.load(function() {
-            if (myself.autoResize) {
-              myself._resizeToReportFrame(reportContentFrame[0],htmlObj, options);
-            }
-            myself.stopLoading();
-          });
+          myself.stopLoading();
         });
         iframe[0].contentWindow.location = url;
       }
@@ -1074,7 +1067,7 @@ var ExecutePrptComponent = PrptComponent.extend({
  
     var options = this.getOptions();
     var ts = "ts=" + new Date().getTime() + "&";
-  var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+  var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/report?' + ts;
     var a=[];
     var encodeArray = function(k,v) {
       var arr = [];
@@ -1213,4 +1206,3 @@ var ExecuteXactionComponent = BaseComponent.extend({
   }
 
 });
-
