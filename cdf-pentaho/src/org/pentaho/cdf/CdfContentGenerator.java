@@ -919,7 +919,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
     org.pentaho.cdf.environment.packager.ICdfHeadersProvider cdfHeaders =
         CdfEngine.getEnvironment().getCdfHeadersProvider();
     boolean includeAll = dashboardContent != null;
-    final String dashboardType = requestParams.getStringParameter( "dashboardType", "blueprint" );
+    String dashboardType = requestParams.getStringParameter( "dashboardType", "blueprint" );
+    if ( dashboardType.equals( "desktop" ) ) {
+      dashboardType = "blueprint";
+    }
     final boolean isDebugMode = Boolean.parseBoolean( requestParams.getStringParameter( RequestParameters.DEBUG, "" ) );
     String root = requestParams.getStringParameter( "root", null );
     String headers;

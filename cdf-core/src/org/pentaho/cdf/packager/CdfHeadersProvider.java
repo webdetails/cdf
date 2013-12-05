@@ -50,6 +50,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     acceptedDashboardTypes.add( "blueprint" );
     acceptedDashboardTypes.add( "mobile" );
   }
+  private static final String DEFAULT_DASHBOARD_TYPE = "blueprint";
 
   // base properties cache
   private Properties baseProperties;
@@ -72,9 +73,6 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     // dashboard types
     for ( String dashboardType : acceptedDashboardTypes ) {
       try {
-        if ( !isAcceptedDashboardType( dashboardType ) ) {
-          getLog().error( dashboardType + " is not a valid dashboard type." );
-        }
         dashboardIncludes.put( dashboardType, createDependenciesPackages( dashboardType ) );
       } catch ( Exception e ) {
         logError( "Unable to load headers for " + dashboardType, e );
@@ -109,6 +107,10 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
    */
   @Override
   public String getHeaders( String dashboardType, boolean isDebugMode, String absRoot, boolean includeExtra ) {
+    if ( !isAcceptedDashboardType( dashboardType ) ) {
+      getLog().error( dashboardType + " is not a valid dashboard type. Defaulting to " + DEFAULT_DASHBOARD_TYPE );
+      dashboardType = DEFAULT_DASHBOARD_TYPE;
+    }
     StringBuilder deps = new StringBuilder();
     for ( DependenciesPackage pkg : getDependenciesPackages( dashboardType ) ) {
       deps.append( String.format( "<!-- %s -->", pkg.getName() ) );
