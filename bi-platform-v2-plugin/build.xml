@@ -259,12 +259,8 @@
 				  <include name="**/*" />
 			  </fileset>
 		  </copy>
-                  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}/lib">
-                      <fileset dir="../../cpf/dist">
-                          <include name="cpf-TRUNK-SNAPSHOT.jar"/>
-                      </fileset>
-                  </copy>
-
+		  
+		  
 		  <!-- Copy solution 
 		  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}/actions">
 			  <fileset dir="${solution.stage.dir}/cdf/components">
