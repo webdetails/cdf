@@ -110,7 +110,7 @@ var PrptComponent = BaseComponent.extend({
                 Dashboards.log("showParameters not supported with IFrame = False");
             }
             var requestType = this.usePost ? "POST" : "GET";
-            var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
+            var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
             $.each(reportOptions, function(key, value) {
                 if (params[key] == undefined) {
                     params[key] = value;
@@ -150,10 +150,10 @@ var PrptComponent = BaseComponent.extend({
                         params[key] = value;
                     }
                 });
-                var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
+                var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
                 this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
             } else {
-                var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
+                var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
                 if (options.showParameters && this.autoResize) {
                     Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
                     this.autoResize = false;
