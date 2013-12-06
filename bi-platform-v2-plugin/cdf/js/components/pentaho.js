@@ -207,6 +207,7 @@ var PrptComponent = BaseComponent.extend({
  
     this.clear();
  
+    var ts = "ts=" + new Date().getTime() + "&";
     var options = this.getOptions();
     var pathSegments = {
       solution: options.solution,
@@ -228,8 +229,7 @@ var PrptComponent = BaseComponent.extend({
           || outputTarget.indexOf('text') != -1);
     }
 
-    if(options["dashboard-mode"]){
-      var ts = "ts=" + new Date().getTime() + "&";
+    if(options["dashboard-mode"]){      
       var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
       var myself=this;
       $.ajax({
