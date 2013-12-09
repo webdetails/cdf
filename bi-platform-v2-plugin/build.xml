@@ -219,6 +219,20 @@
 		   </copy>
 		   
 		   
+        <echo file="${dist.dir}/marketplace.xml">&lt;version>
+            &lt;branch>TRUNK&lt;/branch>
+            &lt;version>${distribution.version}&lt;/version>
+            &lt;name>Trunk&lt;/name>
+                &lt;package_url>http://ci.pentaho.com/job/pentaho-cdf/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-TRUNK-SNAPSHOT.zip&lt;/package_url>
+                &lt;samples_url>http://ci.pentaho.com/job/pentaho-cdf/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-TRUNK-SNAPSHOT.zip&lt;/samples_url>
+                &lt;description>Build for Pentaho 5.0&lt;/description>
+                &lt;min_parent_version>5.0&lt;/min_parent_version>
+                &lt;build_id>${sequential.build.id}&lt;/build_id>
+            &lt;/version>
+        </echo>
+		   
+		   
+		   
     <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
        <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>		   
 		   
