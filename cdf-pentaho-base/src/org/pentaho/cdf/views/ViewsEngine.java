@@ -1,6 +1,6 @@
 /*!
- * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
- * 
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ *
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
  * this file except in compliance with the license. If you need a copy of the license,
@@ -20,22 +20,21 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import pt.webdetails.cpf.persistence.Filter;
+import org.pentaho.platform.api.engine.IPentahoSession;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
+import pt.webdetails.cpf.persistence.IPersistenceEngine;
+import pt.webdetails.cpf.persistence.ISimplePersistence;
 import pt.webdetails.cpf.persistence.PersistenceEngine;
 import pt.webdetails.cpf.persistence.SimplePersistence;
+import pt.webdetails.cpf.persistence.Filter;
 
-/**
- * 
- * @author pdpi
- */
 public class ViewsEngine {
-  
+
   private static final Log logger = LogFactory.getLog( ViewsEngine.class );
-  
+
   private static final String RESULT_OK = "ok";
   private static final String RESULT_ERROR = "error";
-  
+
   private static ViewsEngine instance;
 
   public static enum Operation {
@@ -59,15 +58,33 @@ public class ViewsEngine {
     }
   };
 
-  private ViewsEngine() {
+  protected ViewsEngine() {
     // initialize orientDb and initialize org.pentaho.cdf.views.View
-    PersistenceEngine pe = PersistenceEngine.getInstance();
-    if ( !pe.classExists( View.class.getName() ) ) {
-      pe.initializeClass( View.class.getName() );
+    IPersistenceEngine pe = null;
+    try {
+      pe = getPersistenceEngine();
+      if ( pe != null && !pe.classExists( View.class.getName() ) ) {
+        pe.initializeClass( View.class.getName() );
+      }
+    } catch ( Exception e ) {
+      // Intended general exception catch - do not want any PersistenceEngine initialization exception
+      // to bubble up
+      logger.error( "Error while initializing Views Engine. CDF will work but no views will be available", e );
     }
+
   }
 
-  public synchronized static ViewsEngine getInstance() {
+  protected IPersistenceEngine getPersistenceEngine() {
+    return PersistenceEngine.getInstance();
+  }
+
+
+  protected ISimplePersistence getSimplePersistence() {
+    return SimplePersistence.getInstance();
+  }
+
+
+  public static synchronized ViewsEngine getInstance() {
     if ( instance == null ) {
       instance = new ViewsEngine();
     }
@@ -75,7 +92,13 @@ public class ViewsEngine {
   }
 
   public View getView( String viewName, String user ) {
-    SimplePersistence sp = SimplePersistence.getInstance();
+    ISimplePersistence sp;
+    try {
+      sp = getSimplePersistence();
+    } catch ( Exception e ) {
+      logger.error( "Error while getting view.", e );
+      return null;
+    }
     Filter filter = new Filter();
     filter.where( "name" ).equalTo( viewName ).and().where( "user" ).equalTo( user );
     List<View> views = sp.load( View.class, filter );
@@ -84,7 +107,13 @@ public class ViewsEngine {
   }
 
   public JSONObject listViews( String user ) {
-    SimplePersistence sp = SimplePersistence.getInstance();
+    ISimplePersistence sp;
+    try {
+      sp = getSimplePersistence();
+    } catch ( Exception e ) {
+      logger.error( "Error while getting view.", e );
+      return null;
+    }
     Filter filter = new Filter();
     filter.where( "user" ).equalTo( user );
     List<View> views = sp.load( View.class, filter );
@@ -103,7 +132,13 @@ public class ViewsEngine {
 
   public JSONObject listAllViews( String user ) {
     JSONObject response = new JSONObject();
-    SimplePersistence sp = SimplePersistence.getInstance();
+    ISimplePersistence sp;
+    try {
+      sp = getSimplePersistence();
+    } catch ( Exception e ) {
+      logger.error( "Error while getting view.", e );
+      return null;
+    }
     Filter filter = new Filter();
     filter.where( "user" ).equalTo( user );
     List<View> views = sp.loadAll( View.class );
@@ -122,11 +157,17 @@ public class ViewsEngine {
   public String saveView( String view, String user ) {
     View viewObj = new View();
 
+    IPersistenceEngine pe = null;
+    try {
+      pe = getPersistenceEngine();
+    } catch ( Exception e ) {
+      logger.error( "Exception while getting persistence engine. View Will not be saved", e );
+    }
+
     try {
       JSONObject json = new JSONObject( view );
       viewObj.fromJSON( json );
       viewObj.setUser( user );
-      PersistenceEngine pe = PersistenceEngine.getInstance();
       pe.store( viewObj );
     } catch ( JSONException e ) {
       logger.error( e );
@@ -139,11 +180,13 @@ public class ViewsEngine {
     try {
       Filter filter = new Filter();
       filter.where( "user" ).equalTo( user ).and().where( "name" ).equalTo( viewName );
-      SimplePersistence.getInstance().delete( View.class, filter );
+      ISimplePersistence sp = getSimplePersistence();
+      sp.delete( View.class, filter );
       return RESULT_OK;
     } catch ( Exception e ) {
       return RESULT_ERROR;
     }
+
   }
 
   public void listReports() {
