@@ -175,12 +175,49 @@ var PrptComponent = BaseComponent.extend({
     }
   },
   /*************************************************************************/
+  //util function to compose paths - solution:path:action
+  composePath: function(options) {
+    var clean = function(segment) {
+      if (segment.charAt(0) == ":") {
+        segment = segment.substring(1,segment.length);
+      }
+      if (segment.charAt(segment.length - 1) == ":") {
+        segment = segment.substring(0,segment.length - 1);
+      }
+      return segment
+    };
+    var solution = options.solution != undefined ? options.solution.replace(/\//g, ':') : "";
+    var path =  options.path != undefined ? options.path.replace(/\//g, ':') : "";
+    var action =  options.action != undefined ? options.action.replace(/\//g, ':') : "";
+    var fullPath = ":";
+    if (solution != "") {
+      fullPath += clean(solution) + ":";
+    }
+    if (path != "") {
+      fullPath += clean(path);
+    }
+    if (action != "") {
+      fullPath += ":" + clean(action);
+    }
+    return fullPath;
+  },
+  /*************************************************************************/
 
   update: function(){
  
     this.clear();
  
+    var ts = "ts=" + new Date().getTime() + "&";
     var options = this.getOptions();
+    var pathSegments = {
+      solution: options.solution,
+      path: options.path,
+      action: options.action
+    }    
+    //we don't want to pass these as parameters
+    delete options.solution;
+    delete options.path;
+    delete options.action;
     var downloadMode = this.downloadMode;
     // if you really must use this component to download stuff
     if (downloadMode == null) {
@@ -192,9 +229,8 @@ var PrptComponent = BaseComponent.extend({
           || outputTarget.indexOf('text') != -1);
     }
 
-    if(options["dashboard-mode"]){
-   	  var ts = "ts=" + new Date().getTime() + "&";
-      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+    if(options["dashboard-mode"]){      
+      var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
       var myself=this;
       $.ajax({
         url: url,
@@ -227,12 +263,12 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
         this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts + $.param(options);
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
@@ -242,14 +278,7 @@ var PrptComponent = BaseComponent.extend({
         this.startLoading();
         var myself = this;
         iframe.load(function(){
-          var jqBody = $(this.contentWindow.document.body);
-          var reportContentFrame = jqBody.find('#reportContent');
-          reportContentFrame.load(function() {
-            if (myself.autoResize) {
-              myself._resizeToReportFrame(reportContentFrame[0],htmlObj, options);
-            }
-            myself.stopLoading();
-          });
+          myself.stopLoading();
         });
         iframe[0].contentWindow.location = url;
       }
@@ -1074,7 +1103,7 @@ var ExecutePrptComponent = PrptComponent.extend({
  
     var options = this.getOptions();
     var ts = "ts=" + new Date().getTime() + "&";
-  var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+    var url = webAppPath + '/api/repos/' + this.composePath(options) + '/report?' + ts;
     var a=[];
     var encodeArray = function(k,v) {
       var arr = [];
@@ -1213,4 +1242,3 @@ var ExecuteXactionComponent = BaseComponent.extend({
   }
 
 });
-
