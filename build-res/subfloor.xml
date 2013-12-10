@@ -744,7 +744,6 @@ TYPICAL TARGET SEQUENCE
       currently referencing a locally published dependency
       ====================================================================-->
   <target name="ivy-clean-pentaho" depends="install-ivy">
-   <ivy:configure url="${ivy.settingsurl}" />
     <mkdir dir="${ivy.local.default.root}" />
     <!-- just in case it doesn't exist -->
     <for param="dir">

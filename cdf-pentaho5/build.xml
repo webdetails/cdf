@@ -934,5 +934,35 @@ excludes="**/Thumbs.db"
     	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_FOOTER@" value="${cdf.ccc.require.footer}" />
 
     </target>
+
+    <target name="ivy-clean-by-name" depends="install-ivy">
+	    <echo message="${ivy.local.default.root}"/>
+	        <echo message="${ivy.settingsurl}"/>
+	    <echo message="${ivy.default.ivy.user.dir}        "/>
+	   <ivy:configure url="${ivy.settingsurl}" override="true" />
+	   
+	       <echo message="${ivy.local.default.root}"/>
+	   
+	    <mkdir dir="${ivy.local.default.root}" />
+	    <!-- just in case it doesn't exist -->
+	    <for param="dir">
+	      <path>
+	        <dirset dir="${ivy.local.default.root}" includes="*${ivy.clean.pattern}*" />
+	        <dirset dir="${ivy.default.ivy.user.dir}/cache" includes="*${ivy.clean.pattern}*" />
+	      </path>
+	      <sequential>
+	        <delete dir="@{dir}" includeemptydirs="true" />
+	      </sequential>
+	    </for>
+	    <for param="file">
+	      <path>
+	        <fileset dir="${ivy.local.default.root}" includes="*${ivy.clean.pattern}*" />
+	        <fileset dir="${ivy.default.ivy.user.dir}/cache" includes="*${ivy.clean.pattern}*" />
+	      </path>
+	      <sequential>
+	        <delete file="@{file}" />
+	      </sequential>
+	    </for>
+	  </target>  
   
 </project>
