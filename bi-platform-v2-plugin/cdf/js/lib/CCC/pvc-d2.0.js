@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
  
-/*! VERSION TRUNK-20131202 */
+/*! VERSION TRUNK-20131213 */
 var pvc = (function(def, pv) {
 
 
@@ -9803,7 +9803,8 @@ def
     // TODO: It is usually the case, but not certain, that the base axis'
     // dataCell(s) span "all" data parts.
     // Shouldn't this just use the baseAxis's dataPartValues?
-    var qAllCatDatas = catRole.flatten(baseData, {visible: true, isNull: false}).children();
+    // Need categories of hidden and/or null datums as well.
+    var qAllCatDatas = catRole.flatten(baseData).children();
 
     var serDatas1 = serRole.isBound()
         ? serRole.flatten(partData, {visible: true, isNull: false}).children().array()
@@ -9871,7 +9872,7 @@ def
         var catInfo;
         while((catInfo = this._catInfos.shift()))
             catInfo.serInfos.forEach(this._visitSeries, this);
-        
+
         // Add datums created during interpolation
         var newDatums = this._newDatums;
         if(newDatums.length) this._data.owner.add(newDatums);
@@ -10114,7 +10115,8 @@ def
     // TODO: It is usually the case, but not certain, that the base axis'
     // dataCell(s) span "all" data parts.
     // Shouldn't this just use the baseAxis's dataPartValues?
-    var qAllCatDatas = catRole.flatten(baseData, {visible: true, isNull: false}).children();
+    // Need categories of hidden and/or null datums as well.
+    var qAllCatDatas = catRole.flatten(baseData).children();
 
     var serDatas1 = serRole.isBound()
         ? serRole.flatten(partData, {visible: true, isNull: false}).children().array()
@@ -14746,16 +14748,16 @@ def
 
 /**
  * Initializes an axis.
- * 
+ *
  * @name pvc.visual.Axis
- * 
+ *
  * @class Represents an axis for a role in a chart.
- * 
+ *
  * @extends pvc.visual.OptionsBase
- * 
+ *
  * @property {pvc.visual.Role} role The associated visual role.
  * @property {pv.Scale} scale The associated scale.
- * 
+ *
  * @constructor
  * @param {pvc.BaseChart} chart The associated chart.
  * @param {string} type The type of the axis.
@@ -14766,14 +14768,14 @@ var pvc_Axis =
 def
 .type('pvc.visual.Axis', pvc.visual.OptionsBase)
 .init(function(chart, type, index, keyArgs){
-    
+
     this.base(chart, type, index, keyArgs);
-    
+
     // Fills #axisIndex and #typeIndex
     chart._addAxis(this);
 })
 .add(/** @lends pvc.visual.Axis# */{
-    
+
     // should null values be converted to zero or to the minimum value in what scale is concerned?
     // 'null', 'zero', 'min'
     /** @virtual */scaleTreatsNullAs:   function() { return 'null'; },
@@ -14788,12 +14790,12 @@ def
 
     /**
      * Binds the axis to a set of data cells.
-     * 
+     *
      * <p>
      * Only after this operation is performed will
      * options with a scale type prefix be found.
      * </p>
-     * 
+     *
      * @param {object|object[]} dataCells The associated data cells.
      * @type pvc.visual.Axis
      */
@@ -14802,7 +14804,7 @@ def
         var me = this;
         dataCells || def.fail.argumentRequired('dataCells');
         !me.dataCells || def.fail.operationInvalid('Axis is already bound.');
-        
+
         me.dataCells = def.array.to(dataCells);
         me.dataCell  = me.dataCells[0];
         me.role      = me.dataCell && me.dataCell.role;
@@ -14810,14 +14812,14 @@ def
         me._domainData   = null;
         me._domainValues = null;
         me._domainItems  = null;
-        
+
         // TODO
-        
+
         me._checkRoleCompatibility();
-        
+
         return this;
     },
-    
+
     domainData: function() {
         this.isBound() || def.fail.operationInvalid('Axis is not bound.');
 
@@ -14853,7 +14855,7 @@ def
         } else {
             cellData = cellDataOrIndex;
         }
-        
+
         return this._selectDomainItems(cellData).array();
     },
 
@@ -14881,23 +14883,23 @@ def
     },
 
     isDiscrete: function() { return !!this.role && this.role.isDiscrete(); },
-    
+
     isBound:    function() { return !!this.role; },
-    
+
     setScale: function(scale, noWrap) {
         /*jshint expr:true */
         this.isBound() || def.fail.operationInvalid('Axis is not bound.');
-        
+
         this.scale = scale ? (noWrap ? scale : this._wrapScale(scale)) : null;
 
         return this;
     },
-    
+
     _wrapScale: function(scale) {
         scale.type = this.scaleType;
-        
+
         var by;
-        
+
         // Applying 'scaleNullRangeValue' to discrete scales
         // would cause problems in discrete color scales,
         // where we want null to be matched to the first color of the color scale
@@ -14922,7 +14924,7 @@ def
             } else {
                 var nullRangeValue = this.scaleNullRangeValue();
                 if(useAbs) {
-                    by = function(v) { 
+                    by = function(v) {
                         return v == null ? nullRangeValue : scale(v < 0 ? -v : v);
                     };
                 } else {
@@ -14937,14 +14939,14 @@ def
                 return scale(v == null ? '' : v);
             };
         }
-        
+
         // don't overwrite scale with by! it would cause infinite recursion...
         return def.copy(by, scale);
     },
-    
+
     /**
      * Obtains a scene-scale function to compute values of this axis' main role.
-     * 
+     *
      * @param {object} [keyArgs] Keyword arguments object.
      * @param {string} [keyArgs.sceneVarName] The local scene variable name by which this axis's role is known. Defaults to the role's name.
      * @param {boolean} [keyArgs.nullToZero=true] Indicates that null values should be converted to zero before applying the scale.
@@ -14953,12 +14955,12 @@ def
     sceneScale: function(keyArgs) {
         var varName  = def.get(keyArgs, 'sceneVarName') || this.role.name,
             grouping = this.role.grouping;
-        
+
         // TODO: isn't this redundant with the code in _wrapScale??
         if(grouping.isSingleDimension && grouping.firstDimensionValueType() === Number) {
             var scale = this.scale,
                 nullToZero = def.get(keyArgs, 'nullToZero', true);
-            
+
             var by = function(scene) {
                 var value = scene.vars[varName].value;
                 if(value == null) {
@@ -14968,7 +14970,7 @@ def
                 return scale(value);
             };
             def.copy(by, scale);
-            
+
             return by;
         }
 
@@ -14976,7 +14978,7 @@ def
             return scene.vars[varName].value;
         });
     },
-    
+
     _checkRoleCompatibility: function() {
         var L = this.dataCells.length;
         if(L > 1) {
@@ -15010,7 +15012,7 @@ def
         if(!grouping) { throw def.error.operationInvalid("Axis' role '" + role.name + "' is unbound."); }
         return grouping;
     },
-    
+
     /** @virtual */
     _createDomainData: function(baseData) {
         var keyArgs = {
@@ -15035,8 +15037,6 @@ def
 
         var domainData = this.domainData();
 
-        // TODO: this does not work on trend datapart data
-        // when in multicharts. DomainItemDatas are not yet created.
         this._selectDomainItems(domainData).each(function(itemData) {
             var itemValue = this.domainItemValue(itemData);
             if(!(hasOwn.call(domainValuesSet, itemValue))) {
@@ -15046,7 +15046,7 @@ def
                 domainItems .push(itemData );
             }
         }, this);
-        
+
         this._domainItems  = domainItems ;
         this._domainValues = domainValues;
     },
@@ -17414,11 +17414,11 @@ def
 
 /**
  * Initializes a legend bullet group scene.
- * 
+ *
  * @name pvc.visual.legend.BulletGroupScene
 
  * @extends pvc.visual.Scene
- * 
+ *
  * @constructor
  * @param {pvc.visual.legend.BulletRootScene} parent The parent bullet root scene.
  * @param {object} [keyArgs] Keyword arguments.
@@ -17428,12 +17428,12 @@ def
 def
 .type('pvc.visual.legend.BulletGroupScene', pvc.visual.Scene)
 .init(function(rootScene, keyArgs) {
-    
+
     this.base(rootScene, keyArgs);
-    
+
     this.extensionPrefix =  def.get(keyArgs, 'extensionPrefix') || '';
     this._renderer = def.get(keyArgs, 'renderer');
-    
+
     this.colorAxis = def.get(keyArgs, 'colorAxis');
     this.clickMode = def.get(keyArgs, 'clickMode');
     if(!this.clickMode && this.colorAxis) {
@@ -17442,7 +17442,7 @@ def
 })
 .add(/** @lends pvc.visual.legend.BulletGroupScene# */{
     hasRenderer: function() { return !!this._renderer; },
-    
+
     renderer: function(renderer) {
         if(renderer != null) {
             this._renderer = renderer;
@@ -17458,57 +17458,57 @@ def
                         markerShape: colorAxis.option('LegendShape')
                     };
                 }
-                
+
                 renderer = new pvc.visual.legend.BulletItemDefaultRenderer(keyArgs);
                 this._renderer = renderer;
             }
         }
-        
+
         return renderer;
     },
-    
+
     itemSceneType: function() {
         var ItemType = this._itemSceneType;
         if(!ItemType) {
             // Inherit, anonymously, from BulletItemScene
             ItemType = def.type(pvc.visual.legend.BulletItemScene);
-            
+
             // Mixin behavior depending on click mode
             var clickMode = this.clickMode;
             switch(clickMode) {
                 case 'toggleselected':
                     ItemType.add(pvc.visual.legend.BulletItemSceneSelection);
                     break;
-                
+
                 case 'togglevisible':
                     ItemType.add(pvc.visual.legend.BulletItemSceneVisibility);
                     break;
             }
-            
+
             var legendPanel = this.panel();
-            
+
             // Apply legend item scene extensions
             legendPanel._extendSceneType('item', ItemType, ['isOn', 'executable', 'execute', 'value', 'labelText']);
-            
+
             // Apply legend item scene Vars extensions
-            // extensionPrefix contains "", "2", "3", "trend"
+            // extensionPrefix contains "", "2", "3", ...
             // -> "legendItemScene", "legend$ItemScene", or
             // -> "legend2ItemScene", "legend$ItemScene", or
             var itemSceneExtIds = pvc.makeExtensionAbsId(
                     pvc.makeExtensionAbsId("ItemScene", [this.extensionPrefix, '$']),
                     legendPanel._getExtensionPrefix());
-            
+
             var impl = legendPanel.chart._getExtension(itemSceneExtIds, 'value');
             if(impl !== undefined) {
                 ItemType.prototype.variable('value', impl);
             }
-            
+
             this._itemSceneType = ItemType;
         }
-        
+
         return ItemType;
     },
-    
+
     createItem: function(keyArgs) {
         var ItemType = this.itemSceneType();
         return new ItemType(this, keyArgs);
@@ -17744,11 +17744,11 @@ def.type('pvc.visual.legend.BulletItemRenderer');
 
 /**
  * Initializes a default legend bullet renderer.
- * 
+ *
  * @name pvc.visual.legend.BulletItemDefaultRenderer
  * @class The default bullet renderer.
  * @extends pvc.visual.legend.BulletItemRenderer
- * 
+ *
  * @constructor
  * @param {pvc.visual.legend.BulletGroupScene} bulletGroup The parent legend bullet group scene.
  * @param {object} [keyArgs] Optional keyword arguments.
@@ -17763,9 +17763,9 @@ def
 .type('pvc.visual.legend.BulletItemDefaultRenderer', pvc.visual.legend.BulletItemRenderer)
 .init(function(keyArgs) {
     this.drawRule = def.get(keyArgs, 'drawRule', false);
-    
+
     if(this.drawRule) { this.rulePvProto = def.get(keyArgs, 'rulePvProto'); }
-    
+
     this.drawMarker = !this.drawRule || def.get(keyArgs, 'drawMarker', true);
     if(this.drawMarker) {
         this.markerShape   = def.get(keyArgs, 'markerShape', 'square');
@@ -17778,12 +17778,12 @@ def
     markerShape: null,
     rulePvProto: null,
     markerPvProto: null,
-    
+
     create: function(legendPanel, pvBulletPanel, extensionPrefix, wrapper){
         var renderInfo = {};
         var drawRule = this.drawRule;
         var sceneColorProp = function(scene) { return scene.color; };
-        
+
         if(drawRule) {
             var rulePvBaseProto = new pv_Mark()
                 .left (0)
@@ -17791,28 +17791,34 @@ def
                 .width(function() { return this.parent.width();      })
                 .lineWidth(1, pvc.extensionTag) // act as if it were a user extension
                 .strokeStyle(sceneColorProp, pvc.extensionTag); // idem
-            
+
             var rp = this.rulePvProto;
             if(rp) { rulePvBaseProto = rp.extend(rulePvBaseProto); }
-            
+
             renderInfo.pvRule = new pvc.visual.Rule(legendPanel, pvBulletPanel, {
                     proto: rulePvBaseProto,
                     noSelect: false,
                     noHover:  false,
                     activeSeriesAware: false,// no guarantee that series exist in the scene
                     extensionId: extensionPrefix + "Rule",
+                    // extensionPrefix contains "", "2", "3", ...
+                    // So the result is something like:
+                    // -> "legendRule", "legend$Rule", or
+                    // -> "legend2Rule", "legend$Rule", or
+                    // -> ...
+                    extensionId:   pvc.makeExtensionAbsId('Rule', [extensionPrefix, '$']),
                     showsInteraction: true,
                     wrapper: wrapper
                 })
                 .pvMark;
         }
-        
+
         if(this.drawMarker){
             var markerPvBaseProto = new pv_Mark()
                 // Center the marker in the panel
                 .left(function() { return this.parent.width () / 2; })
                 .top (function() { return this.parent.height() / 2; })
-                // If order of properties is changed, by extension, 
+                // If order of properties is changed, by extension,
                 // dependent properties will not work...
                 .shapeSize(function() { return this.parent.width(); }, pvc.extensionTag) // width <= height
                 .lineWidth(2, pvc.extensionTag)
@@ -17825,25 +17831,30 @@ def
                     if(cos !== 0 && cos !== 1) {
                         switch(this.shape()) { case 'square': case 'bar': return false; }
                     }
-                    
+
                     return true;
                 }, pvc.extensionTag);
-            
+
             var mp = this.markerPvProto;
             if(mp) { markerPvBaseProto = mp.extend(markerPvBaseProto); }
-            
+
             renderInfo.pvDot = new pvc.visual.Dot(legendPanel, pvBulletPanel, {
                     proto:         markerPvBaseProto,
                     freePosition:  true,
                     activeSeriesAware: false, // no guarantee that series exist in the scene
                     noTooltip:     true,
                     noClick:       true, //otherwise the legend panel handles it and triggers the default action (visibility change)
-                    extensionId:   extensionPrefix + "Dot",
+                    // extensionPrefix contains "", "2", "3", ...
+                    // So the result is something like:
+                    // -> "legendDot", "legend$Dot", or
+                    // -> "legend2Dot", "legend$Dot", or
+                    // -> ...
+                    extensionId:   pvc.makeExtensionAbsId('Dot', [extensionPrefix, '$']),
                     wrapper:       wrapper
                 })
                 .pvMark;
         }
-        
+
         return renderInfo;
     }
 });
@@ -21834,11 +21845,11 @@ pvc.BaseChart
      * The base panel of a <i>non-root chart</i> is the root of the chart's panels,
      * but is not the top-most root panel, over the charts hierarchy.
      * </p>
-     * 
+     *
      * @type pvc.BasePanel
      */
     basePanel:   null,
-    
+
     /**
      * The panel that shows the chart's title.
      * <p>
@@ -21846,15 +21857,15 @@ pvc.BaseChart
      * It is only created when the chart has a non-empty title.
      * </p>
      * <p>
-     * Being the first child causes it to occupy the 
-     * whole length of the side of {@link #basePanel} 
+     * Being the first child causes it to occupy the
+     * whole length of the side of {@link #basePanel}
      * to which it is <i>docked</i>.
      * </p>
-     * 
+     *
      * @type pvc.TitlePanel
      */
     titlePanel:  null,
-    
+
     /**
      * The panel that shows the chart's main legend.
      * <p>
@@ -21862,36 +21873,36 @@ pvc.BaseChart
      * There is an option to not show the chart's legend,
      * in which case this panel is not created.
      * </p>
-     * 
+     *
      * <p>
      * The current implementation of the legend panel
      * presents a <i>discrete</i> association of colors and labels.
      * </p>
-     * 
+     *
      * @type pvc.LegendPanel
      */
     legendPanel: null,
-    
+
     /**
      * The panel that hosts child chart's base panels.
-     * 
+     *
      * @type pvc.MultiChartPanel
      */
     _multiChartPanel: null,
-    
+
     _initChartPanels: function(hasMultiRole) {
         this._initBasePanel ();
         this._initTitlePanel();
-        
+
         // null on small charts or when not enabled
         var legendPanel = this._initLegendPanel();
-        
+
         // Is multi-chart root?
         var isMultichartRoot = hasMultiRole && !this.parent;
         if(isMultichartRoot) { this._initMultiChartPanel(); }
-        
+
         if(legendPanel) { this._initLegendScenes(legendPanel); }
-        
+
         if(!isMultichartRoot) {
             var o = this.options;
             this._createContent({
@@ -21902,32 +21913,32 @@ pvc.BaseChart
             });
         }
     },
-    
+
     /**
      * Override to create chart specific content panels here.
      * No need to call base.
-     * 
+     *
      * @param {object} contentOptions Object with content specific options. Can be modified.
-     * @param {pvc.Sides} [contentOptions.margins] The margins for the content panels. 
+     * @param {pvc.Sides} [contentOptions.margins] The margins for the content panels.
      * @param {pvc.Sides} [contentOptions.paddings] The paddings for the content panels.
      * @virtual
      */
      // TODO: maybe this should always call _createPlotPanels?
     _createContent: function(/*contentOptions*/) { /* NOOP */ },
-    
+
     /**
      * Creates and initializes the base panel.
      */
     _initBasePanel: function() {
         var p = this.parent;
-        
+
         this.basePanel = new pvc.BasePanel(this, p && p._multiChartPanel, {
             margins:  this.margins,
             paddings: this.paddings,
             size:     {width: this.width, height: this.height}
         });
     },
-    
+
     /**
      * Creates and initializes the title panel,
      * if the title is specified.
@@ -21936,7 +21947,7 @@ pvc.BaseChart
         var me = this;
         var o = me.options;
         var title = o.title;
-        if (!def.empty(title)) { // V1 depends on being able to pass "   " spaces... 
+        if (!def.empty(title)) { // V1 depends on being able to pass "   " spaces...
             var isRoot = !me.parent;
             this.titlePanel = new pvc.TitlePanel(me, me.basePanel, {
                 title:        title,
@@ -21953,7 +21964,7 @@ pvc.BaseChart
             });
         }
     },
-    
+
     /**
      * Creates and initializes the legend panel,
      * if the legend is active.
@@ -21963,7 +21974,7 @@ pvc.BaseChart
         // global legend(s) switch
         if (o.legend) { // legend is disabled on small charts...
             var legend = new pvc.visual.Legend(this, 'legend', 0);
-            
+
             // TODO: pass all these options to LegendPanel class
             return this.legendPanel = new pvc.LegendPanel(this, this.basePanel, {
                 anchor:       legend.option('Position'),
@@ -21977,7 +21988,7 @@ pvc.BaseChart
                 paddings:     legend.option('Paddings'),
                 font:         legend.option('Font'),
                 scenes:       def.getPath(o, 'legend.scenes'),
-                
+
                 // Bullet legend
                 textMargin:   o.legendTextMargin,
                 itemPadding:  o.legendItemPadding,
@@ -21987,53 +21998,56 @@ pvc.BaseChart
             });
         }
     },
-    
+
     _getLegendBulletRootScene: function() {
         return this.legendPanel && this.legendPanel._getBulletRootScene();
     },
-    
+
     /**
      * Creates and initializes the multi-chart panel.
      */
     _initMultiChartPanel: function() {
         var basePanel = this.basePanel;
         var options = this.options;
-        
+
         this._multiChartPanel = new pvc.MultiChartPanel(
-            this, 
-            basePanel, 
+            this,
+            basePanel,
             {
                 margins:  options.contentMargins,
                 paddings: options.contentPaddings
             });
-        
+
         this._multiChartPanel.createSmallCharts();
-        
-        // BIG HACK: force legend to be rendered after the small charts, 
+
+        // BIG HACK: force legend to be rendered after the small charts,
         // to allow them to register legend renderers.
         // Currently is: Title -> Legend -> MultiChart
         // Changes to: MultiChart -> Title -> Legend
         basePanel._children.unshift(basePanel._children.pop());
     },
-    
+
     _coordinateSmallChartsLayout: function(/*scopesByType*/) {},
-    
+
     /**
      * Creates the legend group scenes of a chart.
      *
      * The default implementation creates
      * one legend group per each data cell of each color axis.
-     * 
+     *
      * One legend item per domain data value of each data cell.
      */
     _initLegendScenes: function(legendPanel) {
-        // A legend group is created for each data cell of color axes that 
+        // A legend group is created for each data cell of color axes that
         //  are bound, discrete and visible.
         var colorAxes = this.axesByType.color;
         if(!colorAxes) { return; }
-        
+
         var _dataPartAtom, _dataPartDimName, _rootScene;
-        
+
+        // Always index from 0 (independently of the first color axis' index)
+        var legendIndex = 0;
+
         var me = this;
 
         var getCellClickMode = function(axis, cellData) {
@@ -22045,8 +22059,8 @@ pvc.BaseChart
                     _dataPartAtom = me._getTrendDataPartAtom() || null;
                     if(_dataPartAtom) { _dataPartDimName = _dataPartAtom.dimension.name; }
                 }
-                
-                if(_dataPartAtom && 
+
+                if(_dataPartAtom &&
                    (cellData.firstAtoms()[_dataPartDimName] === _dataPartAtom)) {
                     return 'none';
                 }
@@ -22056,11 +22070,11 @@ pvc.BaseChart
         var getRootScene = function() {
             return _rootScene || (rootScene = legendPanel._getBulletRootScene());
         };
-        
+
         def
         .query(colorAxes)
         .where(function(axis) {
-            return axis.option('LegendVisible') && 
+            return axis.option('LegendVisible') &&
                axis.isBound() &&
                axis.isDiscrete();
         })
@@ -22074,14 +22088,13 @@ pvc.BaseChart
             var C = dataCells.length;
             while(++cellIndex < C) {
                 var dataCell = dataCells[cellIndex];
-                
+
                 var cellData = axis.domainCellData(cellIndex);
                 var groupScene = getRootScene().createGroup({
                     source:    cellData,
                     colorAxis: axis,
                     clickMode: getCellClickMode(axis, cellData),
-                    // Always index from 0 (whatever the color axis index)
-                    extensionPrefix: pvc.buildIndexedId('', cellIndex)
+                    extensionPrefix: pvc.buildIndexedId('', legendIndex++)
                 });
 
                 // For later binding of an appropriate bullet renderer
@@ -22091,8 +22104,8 @@ pvc.BaseChart
                 axis.domainCellItems(cellData).forEach(function(itemData, itemIndex) {
                     var itemScene = groupScene.createItem({source: itemData});
                     var itemValue = axis.domainItemValue(itemData);
-                    
-                    // TODO: HACK: how to make this integrate better 
+
+                    // TODO: HACK: how to make this integrate better
                     // with the way scenes/signs get the default color.
                     // NOTE: CommonUI/Analyzer currently accesses this field, though. Must fix that first.
                     itemScene.color = colorScale(itemValue);
@@ -30346,18 +30359,27 @@ def
             plot = me.plot,
             isStacked = !!me.stacked,
             isVertical = me.isOrientationVertical(),
+
             data = me.visibleData({ignoreNulls: false}), // shared "categ then series" grouped data
+
+            orthoAxis = me.axes.ortho,
+            baseAxis  = me.axes.base,
+
+            // Need to use the order that the axis uses.
+            // Note that the axis may show data from multiple plots,
+            //  and thus consider null datums inexistent in `data`,
+            //  and thus have a different categories order.
+            axisCategDatas = baseAxis.domainItems(),
 
             // TODO: There's no series axis...so something like what an axis would select must be repeated here.
             // Maintaining order requires basing the operation on a data with nulls still in it.
             // `data` may not have nulls anymore.
-            seriesData = me.visualRoles.series.flatten(
+            axisSeriesDatas = me.visualRoles.series.flatten(
                 me.partData(),
-                {visible: true, isNull: chart.options.ignoreNulls ? false : null}),
+                {visible: true, isNull: chart.options.ignoreNulls ? false : null})
+                .childNodes,
 
-            rootScene  = me._buildScene(data, seriesData),
-            orthoAxis  = me.axes.ortho,
-            baseAxis   = me.axes.base,
+            rootScene  = me._buildScene(data, axisSeriesDatas, axisCategDatas),
             orthoScale = orthoAxis.scale,
             orthoZero  = orthoScale(0),
             sceneOrthoScale = orthoAxis.sceneScale({sceneVarName: 'value', nullToZero: false}),
@@ -30378,7 +30400,7 @@ def
         if(isStacked){
             barWidth = bandWidth;
         } else {
-            seriesCount = seriesData.childCount();
+            seriesCount = axisSeriesDatas.length;
 
             barWidth = !seriesCount      ? 0 : // Don't think this ever happens... no data, no layout?
                        seriesCount === 1 ? bandWidth :
@@ -30632,7 +30654,7 @@ def
         this.pvPanel.render();
     },
 
-    _buildScene: function(data, seriesData){
+    _buildScene: function(data, axisSeriesDatas, axisCategDatas) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
 
         var categDatas = data.childNodes;
@@ -30643,30 +30665,28 @@ def
         /**
          * Create starting scene tree
          */
-        seriesData
-            .children()
-            .each(createSeriesScene);
+        axisSeriesDatas.forEach(createSeriesScene);
 
         return rootScene;
 
-        function createSeriesScene(seriesData1){
+        function createSeriesScene(axisSeriesData) {
             /* Create series scene */
-            var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1}),
-                seriesKey   = seriesData1.key;
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: axisSeriesData}),
+                seriesKey   = axisSeriesData.key;
 
-            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
+            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(axisSeriesData);
 
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
 
-            categDatas.forEach(function(categData1){
+            axisCategDatas.forEach(function(axisCategData) {
                 /* Create leaf scene */
-                var group = data.child(categData1.key).child(seriesKey),
-                    scene = new pvc.visual.Scene(seriesScene, {source: group});
+                var categData = data.child(axisCategData.key),
+                    group = categData && categData.child(seriesKey),
+                    scene = new pvc.visual.Scene(seriesScene, {source: group}),
+                    categVar = scene.vars.category =
+                        pvc_ValueLabelVar.fromComplex(categData);
 
-                var categVar =
-                    scene.vars.category = pvc_ValueLabelVar.fromComplex(categData1);
-
-                categVar.group = categData1;
+                categVar.group = categData;
 
                 valueVarHelper.onNewScene(scene, /* isLeaf */ true);
                 colorVarHelper.onNewScene(scene, /* isLeaf */ true);
@@ -31677,9 +31697,16 @@ def
 
         // ------------------
         // DATA
-        var isBaseDiscrete = this.axes.base.role.grouping.isDiscrete();
+        var baseAxis = this.axes.base;
+        // Need to use the order that the axis uses.
+        // Note that the axis may show data from multiple plots,
+        //  and thus consider null datums inexistent in `data`,
+        //  and thus have a different categories order.
+        var axisCategDatas = baseAxis.domainItems();
+        var isBaseDiscrete = baseAxis.role.grouping.isDiscrete();
+
         var data = this.visibleData({ignoreNulls: false}); // shared "categ then series" grouped data
-        var rootScene = this._buildScene(data, isBaseDiscrete);
+        var rootScene = this._buildScene(data, axisCategDatas, isBaseDiscrete);
 
         // ---------------
         // BUILD
@@ -32022,10 +32049,9 @@ def
      * including the mid point are bound to the right data.
      */
 
-    _buildScene: function(data, isBaseDiscrete) {
+    _buildScene: function(data, axisCategDatas, isBaseDiscrete) {
         var rootScene  = new pvc.visual.Scene(null, {panel: this, source: data});
-        var categDatas = data.childNodes;
-        var chart = this.chart;
+        var chart     = this.chart;
         var serRole   = this.visualRoles.series;
         var valueRole = this.visualRoles.value;
         var isStacked = this.stacked;
@@ -32033,7 +32059,11 @@ def
         var colorVarHelper = new pvc.visual.RoleVarHelper(rootScene, this.visualRoles.color, {roleVar: 'color'});
         var valueDimName  = valueRole.firstDimensionName();
         var valueDim = data.owner.dimensions(valueDimName);
-        var seriesData = serRole.isBound()
+
+        // TODO: There's no series axis...so something like what an axis would select must be repeated here.
+        // Maintaining order requires basing the operation on a data with nulls still in it.
+        // `data` may not have nulls anymore.
+        var axisSeriesData = serRole.isBound()
             ? serRole.flatten(
                 this.partData(),
                 {visible: true, isNull: chart.options.ignoreNulls ? false : null})
@@ -32059,19 +32089,20 @@ def
         // ----------------------------------
         // I   - Create series scenes array.
         // ----------------------------------
-        (seriesData ? seriesData.children() : def.query([null])) // null series
+        (axisSeriesData ? axisSeriesData.children() : def.query([null])) // null series
         /* Create series scene */
-        .each(function(seriesData1/*, seriesIndex*/) {
-            var seriesScene = new pvc.visual.Scene(rootScene, {source: seriesData1 || data});
+        .each(function(axisSeriesData/*, seriesIndex*/) {
+            var seriesScene = new pvc.visual.Scene(rootScene, {source: axisSeriesData || data});
 
-            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(seriesData1);
+            seriesScene.vars.series = pvc_ValueLabelVar.fromComplex(axisSeriesData);
 
             colorVarHelper.onNewScene(seriesScene, /* isLeaf */ false);
 
             /* Create series-categ scene */
-            categDatas.forEach(function(categData, categIndex) {
+            axisCategDatas.forEach(function(axisCategData, categIndex) {
+                var categData = data.child(axisCategData.key);
                 var group = categData;
-                if(seriesData1) { group = group.child(seriesData1.key); }
+                if(group && axisSeriesData) { group = group.child(axisSeriesData.key); }
 
                 var serCatScene = new pvc.visual.Scene(seriesScene, {source: group});
 
