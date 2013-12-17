@@ -13,7 +13,7 @@ http://jax-ws.dev.java.net/spring/servlet http://jax-ws.dev.java.net/spring/serv
 
   <context:annotation-config />
 
-  <bean id="ICdfEnvironment" class="org.pentaho.cdf.PentahoCdfEnvironment" scope="prototype"/>
+  <bean id="ICdfEnvironment" class="org.pentaho.cdf.environment.PentahoCdfEnvironment" scope="prototype"/>
   <bean id="IResourceLoader" class="pt.webdetails.cpf.resources.PentahoPluginResourceLoader" scope="prototype"/>
 
 </beans>

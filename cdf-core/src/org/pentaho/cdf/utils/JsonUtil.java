@@ -53,4 +53,13 @@ public class JsonUtil {
     return json;
   }
 
+  public static boolean isSuccessResponse( JSONObject json ) {
+    try {
+      return json != null && JsonResult.SUCCESS.equals( json.get( JsonFields.STATUS ) );
+    } catch ( JSONException e ) {
+      logger.error( e );
+    }
+    return false;
+  }
+
 }

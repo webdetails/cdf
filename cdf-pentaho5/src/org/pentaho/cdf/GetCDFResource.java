@@ -21,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,7 +75,7 @@ public class GetCDFResource extends ServletBase {
       // Hard coded to PNG because BIRT does not give us a mime type at all...
       response.setContentType( MimeTypes.PNG );
     }
-    
+
     response.setContentType( mimeType );
     response.setCharacterEncoding( CdfEngine.getEnvironment().getSystemEncoding() );
     response.setHeader( "expires", "0" ); //$NON-NLS-1$ //$NON-NLS-2$
@@ -86,8 +85,12 @@ public class GetCDFResource extends ServletBase {
       // Copy the contents of the file to the output stream
       PluginIOUtils.writeOut( out, in );
     } finally {
-      IOUtils.closeQuietly( in );
-      IOUtils.closeQuietly( out );
+      if ( in != null ) {
+        in.close();
+      }
+      if ( out != null ) {
+        out.close();
+      }
     }
   }
 

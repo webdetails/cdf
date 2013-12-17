@@ -26,26 +26,22 @@ import org.dom4j.io.DOMReader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pentaho.cdf.util.Parameter;
 import org.pentaho.platform.api.engine.ICacheManager;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository.ISolutionRepositoryService;
-import org.pentaho.platform.engine.core.system.PentahoBase;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 /**
  * @author pedro
  */
-@SuppressWarnings( "serial" )
-public class NavigateComponent extends PentahoBase {
+public class NavigateComponent {
 
-  private static final String NAVIGATOR = "navigator";
-  private static final String CONTENTLIST = "contentList";
-  private static final String SOLUTIONTREE = "solutionTree";
   private static final String TYPE_DIR = "FOLDER";
-  private static final String TYPE_URL = "URL";
   private static final String CACHE_NAVIGATOR = "CDF_NAVIGATOR_JSON";
   private static final String CACHE_SOLUTIONTREE = "CDF_SOLUTIONTREE_JSON";
   private static final String CACHE_REPOSITORY_DOCUMENT = "CDF_REPOSITORY_DOCUMENT";
+
   protected static final Log logger = LogFactory.getLog( NavigateComponent.class );
   IPentahoSession userSession;
   ICacheManager cacheManager;
@@ -63,11 +59,11 @@ public class NavigateComponent extends PentahoBase {
   public String getNavigationElements( final String mode, final String solution, final String path )
     throws JSONException, ParserConfigurationException {
 
-    if ( mode.equals( NAVIGATOR ) ) {
+    if ( mode.equals( Parameter.NAVIGATOR ) ) {
       return getNavigatorJSON( solution, path );
-    } else if ( mode.equals( CONTENTLIST ) ) {
+    } else if ( mode.equals( Parameter.CONTENT_LIST ) ) {
       return getContentListJSON( solution, path );
-    } else if ( mode.equals( SOLUTIONTREE ) ) {
+    } else if ( mode.equals( Parameter.SOLUTION_TREE ) ) {
       return getSolutionTreeJSON();
     } else {
       logger.warn( "Invalid mode: " + mode );
@@ -76,16 +72,11 @@ public class NavigateComponent extends PentahoBase {
 
   }
 
-  @Override
-  public Log getLogger() {
-    return logger;
-  }
-
   private Document getRepositoryDocument( final IPentahoSession userSession ) throws ParserConfigurationException { //
     Document repositoryDocument;
     if ( cachingAvailable
         && ( repositoryDocument = (Document) cacheManager.getFromSessionCache( userSession, CACHE_REPOSITORY_DOCUMENT ) ) != null ) {
-      getLogger().debug( "Repository Document found in cache" );
+      logger.debug( "Repository Document found in cache" );
       return repositoryDocument;
     } else {
       // System.out.println(Calendar.getInstance().getTime() + ": Getting repository Document");
@@ -93,8 +84,7 @@ public class NavigateComponent extends PentahoBase {
       repositoryDocument =
           reader.read( PentahoSystem.get( ISolutionRepositoryService.class, userSession ).getSolutionRepositoryDoc(
               userSession, new String[0] ) );
-      // repositoryDocument = reader.read(new SolutionRepositoryService().getSolutionRepositoryDoc(userSession, new
-      // String[0]));
+
       cacheManager.putInSessionCache( userSession, CACHE_REPOSITORY_DOCUMENT, repositoryDocument );
       // System.out.println(Calendar.getInstance().getTime() + ": Repository Document Returned");
     }
@@ -107,7 +97,7 @@ public class NavigateComponent extends PentahoBase {
 
     if ( cachingAvailable
         && ( jsonString = (String) cacheManager.getFromSessionCache( userSession, CACHE_NAVIGATOR ) ) != null ) {
-      debug( "Navigator found in cache" );
+      logger.debug( "Navigator found in cache" );
     } else {
 
       try {
@@ -129,7 +119,7 @@ public class NavigateComponent extends PentahoBase {
 
       } catch ( Exception e ) {
         System.out.println( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
-        warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
+        logger.warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
       }
     }
 
@@ -143,7 +133,7 @@ public class NavigateComponent extends PentahoBase {
 
     if ( cachingAvailable
         && ( jsonString = (String) cacheManager.getFromSessionCache( userSession, CACHE_SOLUTIONTREE ) ) != null ) {
-      debug( "SolutionTree found in cache" );
+      logger.debug( "SolutionTree found in cache" );
     } else {
 
       try {
@@ -163,7 +153,7 @@ public class NavigateComponent extends PentahoBase {
 
       } catch ( Exception e ) {
         System.out.println( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
-        warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
+        logger.warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
       }
     }
 
@@ -196,7 +186,6 @@ public class NavigateComponent extends PentahoBase {
         final Node node = (Node) node1;
         final JSONObject json = new JSONObject();
         JSONArray children = null;
-        JSONArray files = null;
         String name = node.valueOf( "@name" );
 
         if ( parentPathArray.length > 0 ) {
@@ -259,7 +248,7 @@ public class NavigateComponent extends PentahoBase {
 
     } catch ( Exception e ) {
       System.out.println( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
-      warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
+      logger.warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
     }
 
     return array;
@@ -281,22 +270,6 @@ public class NavigateComponent extends PentahoBase {
       relativeUrl = relativeUrl.substring( 0, relativeUrl.length() - 1 );
     }
     final String path = type.equals( TYPE_DIR ) ? ( _path.length() > 0 ? _path + "/" + name : name ) : _path;
-    // final String url = (type != null && type.equals(TYPE_URL)) ? (!fileNode.valueOf("@url").startsWith("http") &&
-    // !fileNode.valueOf("@url").startsWith(relativeUrl) && !fileNode.valueOf("@url").startsWith("/") ?
-    // /*CdfContentGenerator.BASE_URL +*/ "/" + fileNode.valueOf("@url") : fileNode.valueOf("@url")) : null;
-
-    String url = null;
-
-    if ( type != null && type.equals( TYPE_URL ) ) {
-      if ( !fileNode.valueOf( "@url" ).startsWith( "http" ) && !fileNode.valueOf( "@url" ).startsWith( relativeUrl )
-          && !fileNode.valueOf( "@url" ).startsWith( "/" ) ) {
-        url = "/" + fileNode.valueOf( "@url" );
-      } else {
-        url = fileNode.valueOf( "@url" );
-      }
-    } else {
-      url = null;
-    }
 
     /* create the link */
     final String lowType = type.toLowerCase();
@@ -331,7 +304,6 @@ public class NavigateComponent extends PentahoBase {
 
   }
 
-  @SuppressWarnings( "unchecked" )
   private String getContentListJSON( final String _solution, final String _path ) {
 
     String jsonString = null;
@@ -374,7 +346,7 @@ public class NavigateComponent extends PentahoBase {
       jsonString = json.toString( 2 );
     } catch ( Exception e ) {
       System.out.println( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
-      warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
+      logger.warn( "Error: " + e.getClass().getName() + " - " + e.getMessage() );
     }
 
     // debug("Finished processing tree");
@@ -382,7 +354,6 @@ public class NavigateComponent extends PentahoBase {
 
   }
 
-  @SuppressWarnings( "unchecked" )
   private Node getDirectoryNode( Node node, final String _path ) {
 
     final String[] pathArray = _path.split( "/" );

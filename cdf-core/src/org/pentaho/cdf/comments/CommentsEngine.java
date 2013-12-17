@@ -203,34 +203,6 @@ public class CommentsEngine {
     return PluginHibernateUtil.getSession();
   }
 
-  // TODO move operationAuthorized to pentaho side
-  // private Boolean operationAuthorized( int operation, CommentEntry comment, IPentahoSession userSession )
-  // throws PluginHibernateException {
-  // SecurityParameterProvider securityParams = new SecurityParameterProvider( userSession );
-  // Boolean isAdministrator = Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) );
-  // Boolean isAuthenticated = userSession.isAuthenticated();
-  // Boolean isAuthorized = false;
-  // switch ( operation ) {
-  // case DELETE_OPERATION: {
-  // Boolean isUser = comment.getUser().equals( userSession.getName() );
-  // isAuthorized = ( isUser && isAdministrator && isAuthenticated );
-  // break;
-  // }
-  // case ARCHIVE_OPERATION: {
-  // Boolean isUser = comment.getUser().equals( userSession.getName() );
-  // isAuthorized = ( isUser && isAdministrator && isAuthenticated );
-  // break;
-  // }
-  // case ADD_OPERATION:
-  // isAuthorized = true;
-  // break;
-  // case LIST_OPERATION:
-  // isAuthorized = true;
-  // break;
-  // }
-  // return isAuthorized;
-  // }
-
   private void initialize() throws PluginHibernateException {
 
     try {

@@ -80,14 +80,6 @@ public class StorageEngine {
   public JSONObject store( String value, String user ) throws JSONException, InvalidCdfOperationException,
     PluginHibernateException {
 
-    // Do nothing for anonymousUser, we shouldn't even be here
-    // TODO move up to pentaho
-    // if ( user.equals( "anonymousUser" ) ) {
-    // JSONObject json = new JSONObject();
-    // json.put( "result", Boolean.FALSE );
-    // return json.toString( 2 );
-    // }
-
     if ( StringUtils.isEmpty( value ) ) {
       logger.error( "Parameter 'storageValue' cannot be empty" );
       throw new InvalidCdfOperationException( "Parameter 'storageValue' cannot be empty" );
@@ -123,12 +115,6 @@ public class StorageEngine {
 
     logger.debug( "Reading storage" );
 
-    // Do nothing for anonymousUser
-    // TODO move up to pentaho
-    // if ( user.equals( "anonymousUser" ) ) {
-    // return "{}";
-    // }
-
     Session session = getSession();
 
     Query query =
@@ -144,14 +130,6 @@ public class StorageEngine {
   }
 
   public JSONObject delete( String user ) throws JSONException, InvalidCdfOperationException, PluginHibernateException {
-
-    // Do nothing for anonymousUser, we shouldn't even be here
-    // TODO move up to pentaho
-    // if ( user.equals( "anonymousUser" ) ) {
-    // JSONObject json = new JSONObject();
-    // json.put( "result", Boolean.FALSE );
-    // return json.toString( 2 );
-    // }
 
     logger.debug( "Deleting storage for user " + user );
 

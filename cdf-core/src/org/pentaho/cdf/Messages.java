@@ -14,6 +14,7 @@
 package org.pentaho.cdf;
 
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -25,7 +26,6 @@ import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.environment.CdfEngine;
-import org.pentaho.cdf.utils.MessageUtil;
 
 import pt.webdetails.cpf.repository.api.IReadAccess;
 
@@ -96,35 +96,53 @@ public class Messages {
   }
 
   public static String getString( final String key, final String param1 ) {
-    return MessageUtil.getString( Messages.getBundle(), key, param1 );
+    return getString( Messages.getBundle(), key, param1 );
   }
 
   public static String getString( final String key, final String param1, final String param2 ) {
-    return MessageUtil.getString( Messages.getBundle(), key, param1, param2 );
+    return getString( Messages.getBundle(), key, param1, param2 );
   }
 
   public static String getString( final String key, final String param1, final String param2, final String param3 ) {
-    return MessageUtil.getString( Messages.getBundle(), key, param1, param2, param3 );
+    return getString( Messages.getBundle(), key, param1, param2, param3 );
   }
 
   public static String getString( final String key, final String param1, final String param2, final String param3,
       final String param4 ) {
-    return MessageUtil.getString( Messages.getBundle(), key, param1, param2, param3, param4 );
+    return getString( Messages.getBundle(), key, param1, param2, param3, param4 );
   }
 
   public static String getErrorString( final String key ) {
-    return MessageUtil.formatErrorMessage( key, Messages.getString( key ) );
+    return formatErrorMessage( key, Messages.getString( key ) );
   }
 
   public static String getErrorString( final String key, final String param1 ) {
-    return MessageUtil.getErrorString( Messages.getBundle(), key, param1 );
+    return getErrorString( Messages.getBundle(), key, param1 );
   }
 
   public static String getErrorString( final String key, final String param1, final String param2 ) {
-    return MessageUtil.getErrorString( Messages.getBundle(), key, param1, param2 );
+    return getErrorString( Messages.getBundle(), key, param1, param2 );
   }
 
   public static String getErrorString( final String key, final String param1, final String param2, final String param3 ) {
-    return MessageUtil.getErrorString( Messages.getBundle(), key, param1, param2, param3 );
+    return getErrorString( Messages.getBundle(), key, param1, param2, param3 );
+  }
+
+  private static String formatErrorMessage( final String key, final String msg ) {
+    int end = key.indexOf( ".ERROR_" ); //$NON-NLS-1$
+    end = ( end < 0 ) ? key.length() : Math.min( end + ".ERROR_0000".length(), key.length() ); //$NON-NLS-1$
+    return key.substring( 0, end ) + " - " + msg; //$NON-NLS-1$
+  }
+
+  private static String getString( final ResourceBundle bundle, final String key, final Object... params ) {
+    try {
+      return MessageFormat.format( bundle.getString( key ), params );
+    } catch ( Exception e ) {
+      return '!' + key + '!';
+    }
+  }
+
+  private static String getErrorString( final ResourceBundle bundle, final String key, final Object... params ) {
+    return formatErrorMessage( key, getString( bundle, key, params ) );
   }
 }

@@ -20,6 +20,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.PluginHibernateException;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.environment.ICdfEnvironment;
@@ -52,7 +53,8 @@ public class PluginHibernateUtil {
     ICdfEnvironment cdfEnvironment = CdfEngine.getEnvironment();
 
     final String hibernateAvailable =
-        cdfEnvironment.getResourceLoader().getPluginSetting( PluginHibernateUtil.class, "settings/hibernate-available" );
+        cdfEnvironment.getResourceLoader().getPluginSetting( PluginHibernateUtil.class,
+            CdfConstants.PLUGIN_SETTINGS_HIBERNATE_AVAILABLE );
 
     if ( "true".equalsIgnoreCase( hibernateAvailable ) ) {
       configuration.setProperties( cdfEnvironment.getHibernateConfigurations().getConfiguration().getProperties() );

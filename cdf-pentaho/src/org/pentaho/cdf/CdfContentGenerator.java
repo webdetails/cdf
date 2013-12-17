@@ -13,25 +13,17 @@
 
 package org.pentaho.cdf;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,20 +39,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.comments.CommentsEngine;
 import org.pentaho.cdf.comments.CommentsEngine.Operation;
+import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.export.Export;
 import org.pentaho.cdf.export.ExportCSV;
 import org.pentaho.cdf.export.ExportExcel;
-import org.pentaho.cdf.localization.MessageBundlesHelper;
-import org.pentaho.cdf.render.HtmlDashboardRenderer;
+import org.pentaho.cdf.export.IExport;
+import org.pentaho.cdf.render.CdfHtmlRenderer;
 import org.pentaho.cdf.render.XcdfRenderer;
 import org.pentaho.cdf.storage.StorageEngine;
-import org.pentaho.cdf.util.RequestParameters;
+import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.cdf.views.ViewEngine;
+import org.pentaho.cdf.xactions.ActionEngine;
 import org.pentaho.platform.api.engine.IParameterProvider;
 import org.pentaho.platform.api.engine.IPentahoSession;
-import org.pentaho.platform.api.engine.IUITemplater;
 import org.pentaho.platform.api.repository.ISchedule;
 import org.pentaho.platform.api.repository.ISubscribeContent;
 import org.pentaho.platform.api.repository.ISubscriptionRepository;
@@ -68,12 +61,11 @@ import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.engine.security.SecurityHelper;
 import org.pentaho.platform.engine.security.SecurityParameterProvider;
-import org.pentaho.platform.engine.services.solution.BaseContentGenerator;
 
+import pt.webdetails.cpf.SimpleContentGenerator;
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.cpf.repository.api.FileAccess;
-import pt.webdetails.cpf.repository.api.IBasicFile;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.repository.api.IUserContentAccess;
 import pt.webdetails.cpf.resources.IResourceLoader;
@@ -88,11 +80,10 @@ import pt.webdetails.cpf.utils.MimeTypes;
  * 
  * @author Will Gorman (wgorman@pentaho.com)
  */
-public class CdfContentGenerator extends BaseContentGenerator {
+public class CdfContentGenerator extends SimpleContentGenerator {
 
   private static final long serialVersionUID = 5608691656289862706L;
   private static final Log logger = LogFactory.getLog( CdfContentGenerator.class );
-  private static final String MIMETYPE = "text/html"; //$NON-NLS-1$
   public static final String SOLUTION_DIR = "cdf";
   // Possible actions
   private static final String GET_SCHEDULES = "/getSchedules";
@@ -111,12 +102,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
   private static final String CONTEXT = "/Context"; //$NON-NLS-1$
   private static final String PING = "/ping"; //$NON-NLS-1$
 
-  private static final String MIME_HTML = "text/html";
-  private static final String MIME_CSV = "text/csv";
   private static final String MIME_XLS = "application/vnd.ms-excel";
   // CDF Resource Relative URL
   private static final String RELATIVE_URL_TAG = "@RELATIVE_URL@";
   public String RELATIVE_URL;
+
+  private static final String PLUGIN_ID = CdfEngine.getEnvironment().getPluginId();
 
   @Override
   public void createContent() throws Exception {
@@ -128,19 +119,14 @@ public class CdfContentGenerator extends BaseContentGenerator {
         + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     try {
 
-      if ( parameterProviders.get( RequestParameters.PATH ) != null
-          && parameterProviders.get( RequestParameters.PATH ).getParameter( "httpresponse" ) != null ) {
-        out =
-            ( (HttpServletResponse) parameterProviders.get( RequestParameters.PATH ).getParameter( "httpresponse" ) )
-                .getOutputStream();
-      }
+      out = getResponseOutputStream( MimeTypes.HTML );
 
-      if ( parameterProviders.get( RequestParameters.PATH ) != null
-          && parameterProviders.get( RequestParameters.PATH ).getParameter( "httprequest" ) != null
-          && ( (HttpServletRequest) parameterProviders.get( RequestParameters.PATH ).getParameter( "httprequest" ) )
+      if ( parameterProviders.get( Parameter.PATH ) != null
+          && parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) != null
+          && ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
               .getContextPath() != null ) {
         RELATIVE_URL =
-            ( (HttpServletRequest) parameterProviders.get( RequestParameters.PATH ).getParameter( "httprequest" ) )
+            ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
                 .getContextPath();
       } else {
         RELATIVE_URL = CdfEngine.getEnvironment().getApplicationBaseContentUrl();
@@ -165,13 +151,13 @@ public class CdfContentGenerator extends BaseContentGenerator {
       // If callbacks is properly setup, we assume we're being called from another plugin
       if ( this.callbacks != null && callbacks.size() > 0 && HashMap.class.isInstance( callbacks.get( 0 ) ) ) {
         HashMap<String, Object> iface = (HashMap<String, Object>) callbacks.get( 0 );
-        pathParams = parameterProviders.get( RequestParameters.PATH );
+        pathParams = parameterProviders.get( Parameter.PATH );
         method = "/" + (String) iface.get( "method" );
         payload = (String) iface.get( "payload" );
         this.userSession = this.userSession != null ? this.userSession : (IPentahoSession) iface.get( "usersession" );
       } else { // if not, we handle the request normally
-        pathParams = parameterProviders.get( RequestParameters.PATH );
-        method = pathParams.getStringParameter( RequestParameters.PATH, null );
+        pathParams = parameterProviders.get( Parameter.PATH );
+        method = pathParams.getStringParameter( Parameter.PATH, null );
         payload = "";
       }
 
@@ -199,10 +185,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
     // Each block will call a different method. If in the future this extends a lot we can think
     // about using reflection for class loading, but I don't expect that to happen.
 
+    HttpServletRequest request =
+        ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
     final IParameterProvider requestParams = parameterProviders.get( IParameterProvider.SCOPE_REQUEST );
 
     if ( urlPath.equals( RENDER_XCDF ) ) {
-      renderXcdf( out, requestParams );
+      renderXcdfDashboard( out, requestParams );
     } else if ( urlPath.equals( JSON_SOLUTION ) ) {
       jsonSolution( out, requestParams );
     } else if ( urlPath.equals( GET_CDF_RESOURCE ) ) {
@@ -214,25 +202,26 @@ public class CdfContentGenerator extends BaseContentGenerator {
     } else if ( urlPath.equals( SETTINGS ) ) {
       cdfSettings( requestParams, out );
     } else if ( urlPath.equals( CALLACTION ) ) {
-      callAction( requestParams, out );
+      ActionEngine.getInstance().execute( requestParams, userSession, out );
     } else if ( urlPath.equals( COMMENTS ) ) {
       processComments( requestParams, out );
     } else if ( urlPath.equals( STORAGE ) ) {
       processStorage( requestParams, out );
     } else if ( urlPath.equals( CONTEXT ) ) {
-      generateContext( requestParams, out );
+      ContextEngine.generateContext( out, Parameter.asHashMap( request ) );
     } else if ( urlPath.equals( CLEAR_CACHE ) ) {
-      clearCache( requestParams, out );
+      clearCache( out );
     } else if ( urlPath.equals( VIEWS ) ) {
       views( requestParams, out );
     } else if ( urlPath.equals( GETHEADERS ) ) {
-      if ( !payload.equals( "" ) ) {
-        getHeaders( payload, requestParams, out );
+      if ( !StringUtils.isEmpty( payload ) ) {
+        CdfHtmlRenderer.getHeaders( payload, Parameter.asHashMap( requestParams ), out );
       } else {
-        getHeaders( requestParams, out );
+        CdfHtmlRenderer.getHeaders( requestParams.getStringParameter( Parameter.DASHBOARD_CONTENT, null ), Parameter
+            .asHashMap( requestParams ), out );
       }
     } else if ( urlPath.equalsIgnoreCase( PING ) ) {
-      out.write( "{\"ping\":\"ok\"}".getBytes( "UTF8" ) );
+      out.write( "{\"ping\":\"ok\"}".getBytes( CharsetHelper.getEncoding() ) );
     } else if ( urlPath.equalsIgnoreCase( GET_SCHEDULES ) )
       processGetSchedules( requestParams, out );
     else {
@@ -244,9 +233,9 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   private void processGetSchedules( final IParameterProvider requestParams, final OutputStream out ) throws Exception {
 
-    final String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, null ); //$NON-NLS-1$
-    final String path = requestParams.getStringParameter( RequestParameters.PATH, null ); //$NON-NLS-1$
-    final String action = requestParams.getStringParameter( RequestParameters.ACTION, null ); //$NON-NLS-1$
+    final String solution = requestParams.getStringParameter( Parameter.SOLUTION, null ); //$NON-NLS-1$
+    final String path = requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
+    final String action = requestParams.getStringParameter( Parameter.ACTION, null ); //$NON-NLS-1$
 
     final String fullPath = FilenameUtils.separatorsToUnix( Util.joinPath( solution, path, action ) );
 
@@ -270,48 +259,37 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   }
 
-  private void generateContext( final IParameterProvider requestParams, final OutputStream out ) throws Exception {
-    HttpServletRequest request =
-        ( (HttpServletRequest) parameterProviders.get( RequestParameters.PATH ).getParameter( "httprequest" ) );
-    DashboardContext context = new DashboardContext( userSession );
-    out.write( context.getContext( requestParams, request ).getBytes( CharsetHelper.getEncoding() ) );
-
-  }
-
-  private void generateStorage( final OutputStream out ) throws Exception {
-
-    JSONObject result = StorageEngine.getInstance().read( userSession.getName() );
-
-    StringBuilder s = new StringBuilder();
-    s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );
-    s.append( "  Dashboards.storage = " );
-    s.append( result.toString( 2 ) ).append( "\n" );
-    s.append( "</script>\n" );
-    // setResponseHeaders(MIME_PLAIN,0,null);
-    out.write( s.toString().getBytes( CharsetHelper.getEncoding() ) );
-  }
-
-  private void renderXcdf( final OutputStream out, final IParameterProvider requestParams ) throws Exception {
+  private void renderXcdfDashboard( final OutputStream out, final IParameterProvider requestParams ) throws Exception {
     long start = System.currentTimeMillis();
 
-    final String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, null ); //$NON-NLS-1$
-    final String path = requestParams.getStringParameter( RequestParameters.PATH, null ); //$NON-NLS-1$
-    final String template = requestParams.getStringParameter( RequestParameters.TEMPLATE, null ); //$NON-NLS-1$
-    final String action = requestParams.getStringParameter( RequestParameters.ACTION, null ); //$NON-NLS-1$
+    final String solution = requestParams.getStringParameter( Parameter.SOLUTION, null ); //$NON-NLS-1$
+    final String path = requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
+    final String template = requestParams.getStringParameter( Parameter.TEMPLATE, null ); //$NON-NLS-1$
+    final String action = requestParams.getStringParameter( Parameter.ACTION, null ); //$NON-NLS-1$
 
-    final String pluginId = CdfEngine.getEnvironment().getPluginId();
-
-    UUID uuid = CpfAuditHelper.startAudit( pluginId, action, getObjectName(), this.userSession, this, requestParams );
+    UUID uuid = CpfAuditHelper.startAudit( PLUGIN_ID, action, getObjectName(), this.userSession, this, requestParams );
 
     try {
-      renderXCDFDashboard( requestParams, out, solution, path, action, template );
+      XcdfRenderer renderer = new XcdfRenderer();
+
+      boolean success = renderer.determineDashboardTemplating( solution, path, action, template );
+
+      if ( success ) {
+        renderHtmlDashboard( out, solution, path, renderer.getTemplateName(), renderer.getTemplate(), renderer
+            .getMessagesBaseFilename() );
+
+        setResponseHeaders( MimeTypes.HTML, 0, null );
+
+      } else {
+        out.write( "Unable to render dashboard".getBytes( CharsetHelper.getEncoding() ) );
+      }
 
       long end = System.currentTimeMillis();
-      CpfAuditHelper.endAudit( pluginId, action, getObjectName(), this.userSession, this, start, uuid, end );
+      CpfAuditHelper.endAudit( PLUGIN_ID, action, getObjectName(), this.userSession, this, start, uuid, end );
 
     } catch ( Exception e ) {
       long end = System.currentTimeMillis();
-      CpfAuditHelper.endAudit( pluginId, action, getObjectName(), this.userSession, this, start, uuid, end );
+      CpfAuditHelper.endAudit( PLUGIN_ID, action, getObjectName(), this.userSession, this, start, uuid, end );
       throw e;
     }
   }
@@ -323,12 +301,12 @@ public class CdfContentGenerator extends BaseContentGenerator {
       throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
     }
 
-    final String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, null ); //$NON-NLS-1$
-    final String path = requestParams.getStringParameter( RequestParameters.PATH, null ); //$NON-NLS-1$
-    final String mode = requestParams.getStringParameter( RequestParameters.MODE, null ); //$NON-NLS-1$
+    final String solution = requestParams.getStringParameter( Parameter.SOLUTION, null ); //$NON-NLS-1$
+    final String path = requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
+    final String mode = requestParams.getStringParameter( Parameter.MODE, null ); //$NON-NLS-1$
 
     final String contextPath =
-        ( (HttpServletRequest) parameterProviders.get( RequestParameters.PATH ).getParameter( "httprequest" ) )
+        ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
             .getContextPath();
     final NavigateComponent nav = new NavigateComponent( userSession, contextPath );
     final String json = nav.getNavigationElements( mode, solution, path );
@@ -336,7 +314,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     final PrintWriter pw = new PrintWriter( out );
 
     // jsonp?
-    String callback = requestParams.getStringParameter( RequestParameters.CALLBACK, null );
+    String callback = requestParams.getStringParameter( Parameter.CALLBACK, null );
     if ( callback != null ) {
       pw.println( callback + "(" + json + ");" );
 
@@ -353,10 +331,10 @@ public class CdfContentGenerator extends BaseContentGenerator {
       throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
     }
 
-    final String resource = requestParams.getStringParameter( RequestParameters.RESOURCE, null ); //$NON-NLS-1$
+    final String resource = requestParams.getStringParameter( Parameter.RESOURCE, null ); //$NON-NLS-1$
 
     final HttpServletResponse response =
-        (HttpServletResponse) parameterProviders.get( RequestParameters.PATH ).getParameter( "httpresponse" );
+        (HttpServletResponse) parameterProviders.get( Parameter.PATH ).getParameter( "httpresponse" );
     try {
       response.setContentType( MimeTypes.getMimeType( resource ) );
       getSolutionFile( resource, out );
@@ -367,18 +345,18 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   private void renderHtml( final OutputStream out, final IParameterProvider requestParams ) throws Exception {
 
-    final String solution = requestParams.getStringParameter( RequestParameters.SOLUTION, null ); //$NON-NLS-1$
-    final String template = requestParams.getStringParameter( RequestParameters.TEMPLATE, null ); //$NON-NLS-1$
-    final String path = requestParams.getStringParameter( RequestParameters.PATH, null ); //$NON-NLS-1$
-    final String templateName = requestParams.getStringParameter( RequestParameters.DASHBOARD, null );
+    final String solution = requestParams.getStringParameter( Parameter.SOLUTION, null ); //$NON-NLS-1$
+    final String template = requestParams.getStringParameter( Parameter.TEMPLATE, null ); //$NON-NLS-1$
+    final String path = requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
+    final String templateName = requestParams.getStringParameter( Parameter.DASHBOARD, null );
     // Get messages base filename from url if given otherwise defaults to Messages
     String messageBaseFilename = requestParams.getStringParameter( "messages", null );
-    renderHtmlDashboard( requestParams, out, solution, path, templateName == null ? "template.html" : templateName,
-        template, messageBaseFilename );
+    renderHtmlDashboard( out, solution, path, templateName == null ? "template.html" : templateName, template,
+        messageBaseFilename );
   }
 
   private void returnResource( final String urlPath, final OutputStream out ) throws Exception {
-    final IParameterProvider pathParams = parameterProviders.get( RequestParameters.PATH ); //$NON-NLS-1$
+    final IParameterProvider pathParams = parameterProviders.get( Parameter.PATH ); //$NON-NLS-1$
 
     final IResourceLoader resLoader = CdfEngine.getEnvironment().getResourceLoader();
     final String maxAge = resLoader.getPluginSetting( CdfContentGenerator.class, "settings/max-age" );
@@ -391,191 +369,15 @@ public class CdfContentGenerator extends BaseContentGenerator {
     getContent( urlPath, out );
   }
 
-  public void renderXCDFDashboard( final IParameterProvider requestParams, final OutputStream out,
-      final String solution, final String path, final String action, String defaultTemplate ) throws Exception {
+  public void renderHtmlDashboard( final OutputStream out, final String solution, final String path,
+      String templateName, String template, String dashboardsMessagesBaseFilename ) throws Exception {
 
-    XcdfRenderer renderer = new XcdfRenderer();
+    HttpServletRequest request =
+        ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
 
-    boolean success = renderer.determineDashboardTemplating( solution, path, action, defaultTemplate );
-
-    if ( success ) {
-      renderHtmlDashboard( requestParams, out, solution, path, renderer.getTemplateName(), renderer.getTemplate(),
-          renderer.getMessagesBaseFilename() );
-
-    } else {
-      out.write( "Unable to render dashboard".getBytes( CharsetHelper.getEncoding() ) );
-    }
-  }
-
-  public void renderHtmlDashboard( final IParameterProvider requestParams, final OutputStream out,
-      final String solution, final String path, String templateName, String template,
-      String dashboardsMessagesBaseFilename ) throws Exception {
-
-    IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( solution, path, templateName );
-
-    String intro = ""; //$NON-NLS-1$
-    String footer = ""; //$NON-NLS-1$
-
-    IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
-    template = StringUtils.isEmpty( template ) ? "" : "-" + template;
-
-    final String dashboardTemplate = "template-dashboard" + template + ".html"; //$NON-NLS-1$
-
-    final IUITemplater templater = PentahoSystem.get( IUITemplater.class, userSession );
-    ArrayList<String> i18nTagsList = new ArrayList<String>();
-    if ( templater != null ) {
-
-      IBasicFile templateResourceFile = null;
-      IReadAccess pluginRepoAccess = CdfEngine.getPluginRepositoryReader( "templates/" );
-
-      if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
-        templateResourceFile = pluginRepoAccess.fetchFile( dashboardTemplate );
-
-      } else if ( systemAccess.fileExists( dashboardTemplate ) ) {
-        // then try in system
-        templateResourceFile = systemAccess.fetchFile( dashboardTemplate );
-      }
-
-      String templateContent = Util.toString( templateResourceFile.getContents() );
-      // Process i18n on dashboard outer template
-      templateContent = updateUserLanguageKey( templateContent );
-      templateContent = processi18nTags( templateContent, i18nTagsList );
-      // Process i18n on dashboard outer template - end
-      final String[] sections = templater.breakTemplateString( templateContent, "", userSession ); //$NON-NLS-1$
-      if ( sections != null && sections.length > 0 ) {
-        intro = sections[0];
-      }
-      if ( sections != null && sections.length > 1 ) {
-        footer = sections[1];
-      }
-    } else {
-      intro = Messages.getErrorString( "CdfContentGenerator.ERROR_0005_BAD_TEMPLATE_OBJECT" );
-    }
-
-    final String dashboardContent;
-
-    InputStream is = dashboardTemplateFile.getContents();
-
-    // Fixed ISSUE #CDF-113
-    // BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-    BufferedReader reader =
-        new BufferedReader(
-            new InputStreamReader( is, Charset.forName( CdfEngine.getEnvironment().getSystemEncoding() ) ) );
-
-    StringBuilder sb = new StringBuilder();
-    String line = null;
-    while ( ( line = reader.readLine() ) != null ) {
-      // Process i18n for each line of the dashboard output
-      line = processi18nTags( line, i18nTagsList );
-      // Process i18n - end
-      sb.append( line ).append( "\n" );
-    }
-    is.close();
-    dashboardContent = sb.toString();
-
-    String messageSetPath = null;
-    // Merge dashboard related message file with global message file and save it in the dashboard cache
-    MessageBundlesHelper mbh = new MessageBundlesHelper( solution, path, dashboardsMessagesBaseFilename );
-    mbh.saveI18NMessageFilesToCache();
-    messageSetPath = mbh.getMessageFilesCacheUrl() + "/";
-
-    // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
-    if ( dashboardsMessagesBaseFilename == null ) {
-      dashboardsMessagesBaseFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
-    }
-
-    intro = intro.replaceAll( "\\{load\\}", "onload=\"load()\"" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    intro = intro.replaceAll( "\\{body-tag-unload\\}", "" );
-    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET_NAME\\}", dashboardsMessagesBaseFilename );
-    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET_PATH\\}", messageSetPath );
-    intro = intro.replaceAll( "#\\{GLOBAL_MESSAGE_SET\\}", buildMessageSetCode( i18nTagsList ) );
-
-    /*
-     * Add cdf libraries
-     */
-    // final Date startDate = new Date();
-    final int headIndex = intro.indexOf( "<head>" );
-    final int length = intro.length();
-    // final Hashtable addedFiles = new Hashtable();
-
-    out.write( intro.substring( 0, headIndex + 6 ).getBytes( CharsetHelper.getEncoding() ) );
-    // Concat libraries to html head content
-    getHeaders( dashboardContent, requestParams, out );
-    out.write( intro.substring( headIndex + 6, length ).getBytes( CharsetHelper.getEncoding() ) );
-    // Add context
-    try {
-      generateContext( requestParams, out );
-    } catch ( Exception e ) {
-      logger.error( "Error generating cdf context.", e );
-    }
-    // Add storage
-    try {
-      generateStorage( out );
-    } catch ( Exception e ) {
-      logger.error( "Error in cdf storage.", e );
-    }
-
-    out.write( "<div id=\"dashboardContent\">".getBytes( CharsetHelper.getEncoding() ) );
-
-    out.write( dashboardContent.getBytes( CharsetHelper.getEncoding() ) );
-    out.write( "</div>".getBytes( CharsetHelper.getEncoding() ) );
-    out.write( footer.getBytes( CharsetHelper.getEncoding() ) );
-
-    setResponseHeaders( MIME_HTML, 0, null );
-  }
-
-  private String buildMessageSetCode( ArrayList<String> tagsList ) {
-    StringBuilder messageCodeSet = new StringBuilder();
-    for ( String tag : tagsList ) {
-      messageCodeSet.append( "\\$('#" ).append( updateSelectorName( tag ) ).append( "').html(jQuery.i18n.prop('" )
-          .append( tag ).append( "'));\n" );
-    }
-    return messageCodeSet.toString();
-  }
-
-  private String processi18nTags( String content, ArrayList<String> tagsList ) {
-    String tagPattern = "CDF.i18n\\(\"";
-    String[] test = content.split( tagPattern );
-    if ( test.length == 1 ) {
-      return content;
-    }
-    StringBuilder resBuffer = new StringBuilder();
-    int i;
-    String tagValue;
-    resBuffer.append( test[0] );
-    for ( i = 1; i < test.length; i++ ) {
-
-      // First tag is processed differently that other because is the only case where I don't
-      // have key in first position
-      resBuffer.append( "<span id=\"" );
-      if ( i != 0 ) {
-        // Right part of the string with the value of the tag herein
-        tagValue = test[i].substring( 0, test[i].indexOf( "\")" ) );
-        tagsList.add( tagValue );
-        resBuffer.append( updateSelectorName( tagValue ) );
-        resBuffer.append( "\"></span>" );
-        resBuffer.append( test[i].substring( test[i].indexOf( "\")" ) + 2, test[i].length() ) );
-      }
-    }
-    return resBuffer.toString();
-  }
-
-  private String updateSelectorName( String name ) {
-    // If we've the character . in the message key substitute it conventionally to _
-    // when dynamically generating the selector name. The "." character is not permitted in the
-    // selector id name
-    return name.replace( ".", "_" );
-  }
-
-  private String updateUserLanguageKey( String intro ) {
-
-    // Fill the template with the correct user locale
-    Locale locale = CdfEngine.getEnvironment().getLocale();
-    if ( logger.isDebugEnabled() ) {
-      logger.debug( "Current Pentaho user locale: " + locale.getLanguage() );
-    }
-    intro = intro.replaceAll( "#\\{LANGUAGE_CODE\\}", locale.getLanguage() );
-    return intro;
+    CdfHtmlRenderer renderer = new CdfHtmlRenderer();
+    renderer.execute( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, Parameter
+        .asHashMap( request ) );
   }
 
   private void exportFile( final IParameterProvider requestParams, final OutputStream output ) {
@@ -584,16 +386,16 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
       final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-      final ServiceCallAction serviceCallAction = ServiceCallAction.getInstance();
-      if ( serviceCallAction.execute( requestParams, userSession, out ) ) {
+      final ActionEngine actionEngine = ActionEngine.getInstance();
+      if ( actionEngine.execute( requestParams, userSession, out ) ) {
 
-        final String exportType = requestParams.getStringParameter( "exportType", "excel" );
+        final String exportType = requestParams.getStringParameter( Parameter.EXPORT_TYPE, IExport.EXPORT_TYPE_EXCEL );
 
         Export export;
 
-        if ( exportType.equals( "csv" ) ) {
+        if ( exportType.equals( IExport.EXPORT_TYPE_CSV ) ) {
           export = new ExportCSV( output );
-          setResponseHeaders( MIME_CSV, 0, "export" + export.getExtension() );
+          setResponseHeaders( MimeTypes.CSV, 0, "export" + export.getExtension() );
         } else {
           export = new ExportExcel( output );
           setResponseHeaders( MIME_XLS, 0, "export" + export.getExtension() );
@@ -612,21 +414,17 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
   private void cdfSettings( final IParameterProvider requestParams, final OutputStream out ) {
 
-    final String method = requestParams.getStringParameter( "method", null );
-    final String key = requestParams.getStringParameter( "key", null );
+    final String method = requestParams.getStringParameter( Parameter.METHOD, null );
+    final String key = requestParams.getStringParameter( Parameter.KEY, null );
 
     if ( method.equals( "set" ) ) {
-      CdfSettings.getInstance().setValue( key, requestParams.getParameter( "value" ), userSession );
+      CdfSettings.getInstance().setValue( key, requestParams.getParameter( Parameter.VALUE ), userSession );
     } else {
       final Object value = CdfSettings.getInstance().getValue( key, userSession );
       final PrintWriter pw = new PrintWriter( out );
       pw.println( value != null ? value.toString() : "" );
       pw.flush();
     }
-  }
-
-  private void callAction( final IParameterProvider requestParams, final OutputStream out ) {
-    ServiceCallAction.getInstance().execute( requestParams, userSession, out );
   }
 
   private void processComments( final IParameterProvider params, final OutputStream out ) throws JSONException {
@@ -640,7 +438,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
     try {
       final CommentsEngine engine = CommentsEngine.getInstance();
 
-      final String action = params.getStringParameter( RequestParameters.ACTION, "" );
+      final String action = params.getStringParameter( Parameter.ACTION, "" );
 
       final CommentsEngine.Operation operation = CommentsEngine.Operation.get( action );
 
@@ -659,30 +457,26 @@ public class CdfContentGenerator extends BaseContentGenerator {
       switch ( operation ) {
         case ADD:
           result =
-              engine.add( params.getStringParameter( RequestParameters.PAGE, "" ), params.getStringParameter(
-                  RequestParameters.COMMENT, "" ), userSession.getName() );
+              engine.add( params.getStringParameter( Parameter.PAGE, "" ), params.getStringParameter(
+                  Parameter.COMMENT, "" ), userSession.getName() );
           break;
         case DELETE:
           result =
-              engine.delete( Integer.parseInt( params.getStringParameter( RequestParameters.COMMENT_ID, "-1" ) ),
-                  Boolean.valueOf( params.getStringParameter( RequestParameters.VALUE, "true" ) ), userSession
-                      .getName() );
+              engine.delete( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
+                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName() );
           break;
         case ARCHIVE:
           result =
-              engine.archive( Integer.parseInt( params.getStringParameter( RequestParameters.COMMENT_ID, "-1" ) ),
-                  Boolean.valueOf( params.getStringParameter( RequestParameters.VALUE, "true" ) ), userSession
-                      .getName() );
+              engine.archive( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
+                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName() );
           break;
         case LIST:
           result =
-              engine.list( params.getStringParameter( RequestParameters.PAGE, "" ), Integer.parseInt( params
-                  .getStringParameter( RequestParameters.FIRST_RESULT, "0" ) ), Integer.parseInt( params
-                  .getStringParameter( RequestParameters.MAX_RESULTS, "20" ) ), ( isAdministrator ? Boolean
-                  .valueOf( params.getStringParameter( RequestParameters.DELETED, "false" ) ) : false ),
-                  ( isAdministrator ? Boolean
-                      .valueOf( params.getStringParameter( RequestParameters.ARCHIVED, "false" ) ) : false ),
-                  userSession.getName() );
+              engine.list( params.getStringParameter( Parameter.PAGE, "" ), Integer.parseInt( params
+                  .getStringParameter( Parameter.FIRST_RESULT, "0" ) ), Integer.parseInt( params.getStringParameter(
+                  Parameter.MAX_RESULTS, "20" ) ), ( isAdministrator ? Boolean.valueOf( params.getStringParameter(
+                  Parameter.DELETED, "false" ) ) : false ), ( isAdministrator ? Boolean.valueOf( params
+                  .getStringParameter( Parameter.ARCHIVED, "false" ) ) : false ), userSession.getName() );
           break;
 
         default:
@@ -708,7 +502,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
       final StorageEngine engine = StorageEngine.getInstance();
 
-      final String action = params.getStringParameter( RequestParameters.ACTION, "" );
+      final String action = params.getStringParameter( Parameter.ACTION, "" );
 
       final StorageEngine.Operation operation = StorageEngine.Operation.get( action );
 
@@ -720,8 +514,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
           result = engine.delete( userSession.getName() );
           break;
         case STORE:
-          result =
-              engine.store( params.getStringParameter( RequestParameters.STORAGE_VALUE, "" ), userSession.getName() );
+          result = engine.store( params.getStringParameter( Parameter.STORAGE_VALUE, "" ), userSession.getName() );
           break;
         default:
           result = JsonUtil.makeJsonErrorResponse( "Unknown Storage operation: " + action, true );
@@ -745,58 +538,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
     return null;
   }
 
-  public String concatFiles( String includeString, final Hashtable filesAdded, final Hashtable files ) {
-    // TODO: is this used?
-    final String newLine = System.getProperty( "line.separator" );
-    final Enumeration keys = files.keys();
-    while ( keys.hasMoreElements() ) {
-
-      final String key = (String) keys.nextElement();
-      final String[] includeFiles = (String[]) files.get( key );
-
-      for ( int i = 0; i < includeFiles.length; i++ ) {
-        if ( !filesAdded.containsKey( includeFiles[i] ) ) {
-
-          filesAdded.put( includeFiles[i], '1' );
-          if ( key.equals( "script" ) ) {
-            includeString +=
-                "<script language=\"javascript\" type=\"text/javascript\" src=\""
-                    + includeFiles[i].replaceAll( RELATIVE_URL_TAG, RELATIVE_URL ) + "\"></script>" + newLine;
-          } else {
-            includeString +=
-                "<link rel=\"stylesheet\" href=\"" + includeFiles[i].replaceAll( RELATIVE_URL_TAG, RELATIVE_URL )
-                    + "\" type=\"text/css\" />";
-          }
-        }
-      }
-    }
-
-    return includeString;
-  }
-
-  public boolean matchComponent( int keyIndex, final String key, final String content ) {
-
-    for ( int i = keyIndex - 1; i > 0; i-- ) {
-      if ( content.charAt( i ) == ':' || content.charAt( i ) == '"' || ( "" + content.charAt( i ) ).trim().equals( "" ) ) {
-        // no inspection UnnecessaryContinue
-        continue;
-      } else {
-        if ( ( i - 3 ) > 0 && content.substring( ( i - 3 ), i + 1 ).equals( "type" ) ) {
-          return true;
-        }
-
-        break;
-      }
-    }
-
-    keyIndex = content.indexOf( key, keyIndex + key.length() );
-    if ( keyIndex != -1 ) {
-      return matchComponent( keyIndex, key, content );
-    }
-
-    return false;
-  }
-
   public void getContent( final String fileName, final OutputStream out ) throws Exception {
 
     // write out the scripts
@@ -811,7 +552,8 @@ public class CdfContentGenerator extends BaseContentGenerator {
   public void getSolutionFile( final String resourcePath, final OutputStream out ) throws Exception {
 
     final IResourceLoader resLoader = CdfEngine.getEnvironment().getResourceLoader();
-    final String formats = resLoader.getPluginSetting( this.getClass(), "settings/resources/downloadable-formats" );
+    final String formats =
+        resLoader.getPluginSetting( this.getClass(), CdfConstants.PLUGIN_SETTINGS_DOWNLOADABLE_FORMATS );
 
     List<String> allowedFormats = Arrays.asList( StringUtils.split( formats, ',' ) );
     String extension = resourcePath.replaceAll( ".*\\.(.*)", "$1" );
@@ -827,24 +569,6 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
   }
 
-  private void setResponseHeaders( final String mimeType, final int cacheDuration, final String attachmentName ) {
-    // Make sure we have the correct mime type
-    final HttpServletResponse response =
-        (HttpServletResponse) parameterProviders.get( "path" ).getParameter( "httpresponse" );
-    response.setHeader( "Content-Type", mimeType );
-
-    if ( attachmentName != null ) {
-      response.setHeader( "content-disposition", "attachment; filename=" + attachmentName );
-    }
-
-    // Cache?
-    if ( cacheDuration > 0 ) {
-      response.setHeader( "Cache-Control", "max-age=" + cacheDuration );
-    } else {
-      response.setHeader( "Cache-Control", "max-age=0, no-store" );
-    }
-  }
-
   public void views( final IParameterProvider requestParams, final OutputStream out ) {
 
     String result = null;
@@ -853,7 +577,7 @@ public class CdfContentGenerator extends BaseContentGenerator {
 
       final ViewEngine engine = ViewEngine.getInstance();
 
-      String method = requestParams.getStringParameter( RequestParameters.METHOD, "" );
+      String method = requestParams.getStringParameter( Parameter.METHOD, "" );
 
       final ViewEngine.Operation operation = ViewEngine.Operation.get( method );
 
@@ -868,17 +592,17 @@ public class CdfContentGenerator extends BaseContentGenerator {
       switch ( operation ) {
         case GET_VIEW:
           result =
-              engine.getView( requestParams.getStringParameter( RequestParameters.NAME, "" ),
+              engine.getView( requestParams.getStringParameter( Parameter.NAME, "" ),
                   PentahoSessionHolder.getSession().getName() ).toJSON().toString();
           break;
         case SAVE_VIEW:
           result =
-              engine.saveView( requestParams.getStringParameter( RequestParameters.VIEW, "" ), PentahoSessionHolder
+              engine.saveView( requestParams.getStringParameter( Parameter.VIEW, "" ), PentahoSessionHolder
                   .getSession().getName() );
           break;
         case DELETE_VIEW:
           result =
-              engine.deleteView( requestParams.getStringParameter( RequestParameters.NAME, "" ), PentahoSessionHolder
+              engine.deleteView( requestParams.getStringParameter( Parameter.NAME, "" ), PentahoSessionHolder
                   .getSession().getName() );
           break;
         case LIST_VIEWS:
@@ -899,45 +623,17 @@ public class CdfContentGenerator extends BaseContentGenerator {
     }
   }
 
-  public void clearCache( final IParameterProvider requestParams, final OutputStream out ) {
+  public void clearCache( final OutputStream out ) {
     try {
-      DashboardContext.clearCache();
+      ContextEngine.clearCache();
       out.write( "Cache cleared".getBytes( CharsetHelper.getEncoding() ) );
     } catch ( IOException e ) {
       logger.error( "failed to clear CDFcache" );
     }
   }
 
-  private void getHeaders( IParameterProvider requestParams, OutputStream out ) throws Exception {
-
-    String dashboardContent = requestParams.getStringParameter( "dashboardContent", null );
-    getHeaders( dashboardContent, requestParams, out );
-  }
-
-  private void getHeaders( String dashboardContent, IParameterProvider requestParams, OutputStream out )
-    throws Exception {
-    org.pentaho.cdf.environment.packager.ICdfHeadersProvider cdfHeaders =
-        CdfEngine.getEnvironment().getCdfHeadersProvider();
-    boolean includeAll = dashboardContent != null;
-    String dashboardType = requestParams.getStringParameter( "dashboardType", "blueprint" );
-    if ( dashboardType.equals( "desktop" ) ) {
-      dashboardType = "blueprint";
-    }
-    final boolean isDebugMode = Boolean.parseBoolean( requestParams.getStringParameter( RequestParameters.DEBUG, "" ) );
-    String root = requestParams.getStringParameter( "root", null );
-    String headers;
-    if ( !StringUtils.isEmpty( root ) ) {
-      String scheme = requestParams.getStringParameter( "scheme", "http" );
-      // some dashboards need full absolute urls
-      if ( root.contains( "/" ) ) {
-        // file paths are already absolute, which didn't happen before
-        root = root.substring( 0, root.indexOf( "/" ) );
-      }
-      String absRoot = scheme + "://" + root;
-      headers = cdfHeaders.getHeaders( dashboardType, isDebugMode, absRoot, includeAll );
-    } else {
-      headers = cdfHeaders.getHeaders( dashboardType, isDebugMode, includeAll );
-    }
-    out.write( headers.getBytes( CharsetHelper.getEncoding() ) );
+  @Override
+  public String getPluginName() {
+    return PLUGIN_ID;
   }
 }

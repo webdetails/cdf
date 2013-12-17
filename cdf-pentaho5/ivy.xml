@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-module xmlns:m="http://ant.apache.org/ivy/maven" version="2.0">
-  <info organisation="pentaho" module="pentaho-cdf" revision="${project.revision}"/>
+  <info organisation="pentaho" module="${ivy.artifact.id}" revision="${project.revision}"/>
   <configurations>
     <conf name="default"/>
     <conf name="runtime"/>
@@ -10,10 +10,10 @@
     <conf name="js"/>
   </configurations>
   <publications>
-    <artifact name="pentaho-cdf" type="jar" conf="default"/>
-    <artifact name="pentaho-cdf" m:classifier="sources" type="source" ext="jar" conf="source"/>
-    <artifact name="pentaho-cdf" type="zip" conf="zip"/>
-    <artifact name="pentaho-cdf" m:classifier="js" type="js" ext="zip" conf="js"/>
+    <artifact name="${ivy.artifact.id}" type="jar" conf="default"/>
+    <artifact name="${ivy.artifact.id}" m:classifier="sources" type="source" ext="jar" conf="source"/>
+    <artifact name="${ivy.artifact.id}" type="zip" conf="zip"/>
+    <artifact name="${ivy.artifact.id}" m:classifier="js" type="js" ext="zip" conf="js"/>
   </publications>
   <dependencies defaultconf="default->default">
     <!--  third party dependencies -->
@@ -22,10 +22,10 @@
     <dependency org="dom4j" name="dom4j" rev="1.6.1" transitive="false"/>
     <dependency org="commons-lang" name="commons-lang" rev="2.2"/>
     <dependency org="org.json" name="json" rev="${dependency.json.revision}" transitive="false"/>
-    <dependency org="javax.servlet" name="servlet-api" rev="2.4"/>
-    <!--  pentaho dependencies -->
+    <dependency org="javax.servlet" name="servlet-api" rev="2.4" transitive="false"/>
+    <dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0" transitive="false"/>
 
-		
+    <!--  pentaho dependencies -->
     <dependency org="pentaho" name="pentaho-bi-platform-api" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
     <dependency org="pentaho" name="pentaho-bi-platform-util" rev="${dependency.bi-platform.revision}" transitive="false" changing="true"/>
     <dependency org="pentaho" name="pentaho-bi-platform-engine-security" rev="${dependency.bi-platform.revision}" transitive="true" changing="true"/>    
@@ -52,7 +52,7 @@
 
     <dependency org="pentaho" name="cdf-core" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
     <dependency org="pentaho" name="cpf-core" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
-    <dependency org="pentaho" name="cpf-pentaho" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
+    <dependency org="pentaho" name="cpf-pentaho5" rev="REFACTOR-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
 
 
     <!-- orient db (persistence) -->

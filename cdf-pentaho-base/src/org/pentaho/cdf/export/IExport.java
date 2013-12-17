@@ -16,6 +16,11 @@ package org.pentaho.cdf.export;
 
 public interface IExport {
 
+  public static final String EXPORT_TYPE_EXCEL = "excel";
+  public static final String EXPORT_TYPE_CSV = "csv";
+  
+  public static final String DEFAULT_EXPORT_TYPE = EXPORT_TYPE_EXCEL;
+  
 	public abstract void export(String[][] resultSet) ;
 	
 	public abstract String getExtension();

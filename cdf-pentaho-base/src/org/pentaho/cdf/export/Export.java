@@ -32,7 +32,7 @@ public abstract class Export extends PentahoBase implements IExport
   protected static final Log logger = LogFactory.getLog(Export.class);
   protected HttpOutputHandler httpHandler = null;
   protected OutputStream outputStream = null;
-
+  
   public Export(final OutputStream out) throws IOException
   {
     this.outputStream = out;
