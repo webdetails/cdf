@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.cdf.environment.CdfEngine;
@@ -21,6 +22,7 @@ import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import pt.webdetails.cpf.SimpleContentGenerator;
+import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.audit.CpfAuditHelper;
 import pt.webdetails.cpf.utils.CharsetHelper;
 import pt.webdetails.cpf.utils.MimeTypes;
@@ -99,7 +101,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       }
 
       if ( requestParams != null ) {
-        renderXcdfDashboard( out, requestParams, filePath, template );
+        renderXcdfDashboard( out, requestParams, FilenameUtils.separatorsToUnix( filePath ), template );
       }
 
     } catch ( Exception e ) {
@@ -121,7 +123,9 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
       if ( success ) {
 
-        renderHtmlDashboard( out, xcdfFilePath, defaultTemplate, renderer.getMessagesBaseFilename() );
+        String templatePath = Util.joinPath( FilenameUtils.getPath( xcdfFilePath ), renderer.getTemplate() );
+
+        renderHtmlDashboard( out, templatePath, renderer.getStyle(), renderer.getMessagesBaseFilename() );
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
 

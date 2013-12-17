@@ -275,7 +275,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       boolean success = renderer.determineDashboardTemplating( solution, path, action, template );
 
       if ( success ) {
-        renderHtmlDashboard( out, solution, path, renderer.getTemplateName(), renderer.getTemplate(), renderer
+        renderHtmlDashboard( out, solution, path, renderer.getTemplate(), renderer.getStyle(), renderer
             .getMessagesBaseFilename() );
 
         setResponseHeaders( MimeTypes.HTML, 0, null );

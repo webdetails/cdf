@@ -22,8 +22,8 @@ public class XcdfRenderer {
   private static final String NODE_MESSAGES = "/cdf/messages";
   private static final String NODE_STYLES = "/cdf/style";
 
+  private String style;
   private String template;
-  private String templateName;
   private String messagesBaseFilename;
 
   public boolean determineDashboardTemplating( final String solution, final String path, final String action,
@@ -50,8 +50,12 @@ public class XcdfRenderer {
 
         Document doc = XmlDom4JUtils.getDocumentFromFile( access.fetchFile( dashboard ) );
 
-        templateName = XmlDom4JUtils.getNodeText( NODE_TEMPLATE, doc, "" );
-
+        if ( doc.selectSingleNode( NODE_TEMPLATE ) != null ) {
+          template = XmlDom4JUtils.getNodeText( NODE_TEMPLATE, doc, "" );
+        }else{
+          template = defaultTemplate;
+        }
+        
         // Get message file base name if any
         if ( doc.selectSingleNode( NODE_MESSAGES ) != null ) {
           messagesBaseFilename = XmlDom4JUtils.getNodeText( NODE_MESSAGES, doc );
@@ -59,11 +63,9 @@ public class XcdfRenderer {
 
         // If a "style" tag exists, use that one
         if ( doc.selectSingleNode( NODE_STYLES ) != null ) {
-          template = XmlDom4JUtils.getNodeText( NODE_STYLES, doc );
-        } else {
-          template = defaultTemplate;
-        }
-
+          style = XmlDom4JUtils.getNodeText( NODE_STYLES, doc );
+        } 
+        
         success = true;
 
       } catch ( IOException e ) {
@@ -78,9 +80,9 @@ public class XcdfRenderer {
   public String getTemplate() {
     return template;
   }
-
-  public String getTemplateName() {
-    return templateName;
+  
+  public String getStyle() {
+    return style;
   }
 
   public String getMessagesBaseFilename() {

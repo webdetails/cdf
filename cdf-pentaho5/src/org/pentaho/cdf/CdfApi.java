@@ -91,7 +91,7 @@ public class CdfApi {
 
       PluginIOUtils.writeOut( response.getOutputStream(), systemAccess.getFileInputStream( path ) );
       response.getOutputStream().flush();
-
+      
     } catch ( Exception e ) {
       logger.error( e );
       response.sendError( HttpServletResponse.SC_FORBIDDEN );

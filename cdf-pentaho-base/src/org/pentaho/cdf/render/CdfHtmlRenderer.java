@@ -34,31 +34,31 @@ public class CdfHtmlRenderer {
   private static Log logger = LogFactory.getLog( CdfHtmlRenderer.class );
 
   public void execute( final OutputStream out, final String solution, final String path, String templateName,
-      String template, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap ) throws Exception {
+      String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap ) throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( solution, path, templateName );
 
-    execute( out, dashboardTemplateFile, template, dashboardsMessagesBaseFilename, parameterMap );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap );
   }
 
-  public void execute( final OutputStream out, final String templatePath, String template,
+  public void execute( final OutputStream out, final String templatePath, String style,
       String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap ) throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( templatePath );
 
-    execute( out, dashboardTemplateFile, template, dashboardsMessagesBaseFilename, parameterMap );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap );
   }
 
-  public void execute( OutputStream out, IBasicFile dashboardTemplateFile, String template,
+  public void execute( OutputStream out, IBasicFile dashboardTemplateFile, String style,
       String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap ) throws Exception {
 
     String intro = ""; //$NON-NLS-1$
     String footer = ""; //$NON-NLS-1$
 
     IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
-    template = StringUtils.isEmpty( template ) ? "" : "-" + template;
+    style = StringUtils.isEmpty( style ) ? "" : "-" + style;
 
-    final String dashboardTemplate = "template-dashboard" + template + ".html"; //$NON-NLS-1$
+    final String dashboardTemplate = "template-dashboard" + style + ".html"; //$NON-NLS-1$
 
     final IUITemplater templater = PentahoSystem.get( IUITemplater.class, PentahoSessionHolder.getSession() );
     ArrayList<String> i18nTagsList = new ArrayList<String>();

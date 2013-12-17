@@ -8,9 +8,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.utils.JsonUtil;
+import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
-import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
+import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 /**
  * @author pedro
@@ -27,10 +28,13 @@ public class NavigateComponent {
 
     try {
 
-      RepositoryFileTree tree = null;
+      RepositoryFileTree tree = PentahoSystem.get( IUnifiedRepository.class ).getTree( path, depth, "*" );
+
       // TODO
-        /*  RepositoryAccess.getRepository( PentahoSessionHolder.getSession() ).getRepositoryFileTree( path, depth,
-              showHiddenFiles, "*" );*/
+      /*
+       * RepositoryAccess.getRepository( PentahoSessionHolder.getSession() ).getRepositoryFileTree( path, depth,
+       * showHiddenFiles, "*" );
+       */
 
       if ( tree != null ) {
 
