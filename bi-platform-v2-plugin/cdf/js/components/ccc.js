@@ -1,6 +1,24 @@
-pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0"], function(pv, pvc){
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
+pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def"], function(_pv, _pvc, _def) {
+    // Publish globally
+    pvc = _pvc;
+    pv  = _pv;
+    def = _def;
+});
     
-var ProtovisComponent = UnmanagedComponent.extend({
+ProtovisComponent = UnmanagedComponent.extend({
 
   update : function() {
     if (this.parameters == undefined) {
@@ -27,10 +45,7 @@ var ProtovisComponent = UnmanagedComponent.extend({
 
 });
 
-
-this.ProtovisComponent = ProtovisComponent;
-
-var BaseCccComponent = UnmanagedComponent.extend({
+BaseCccComponent = UnmanagedComponent.extend({
     
     query: null,
     chart: null,
@@ -82,9 +97,7 @@ var BaseCccComponent = UnmanagedComponent.extend({
     
 });
 
-this.BaseCccComponent = BaseCccComponent;
-
-var CccComponent = BaseCccComponent.extend({
+CccComponent = BaseCccComponent.extend({
 
     query: null,
     chart: null,
@@ -154,12 +167,10 @@ var CccComponent = BaseCccComponent.extend({
 
 });
 
-this.CccComponent = CccComponent;
-
 /*
  *   Modified version of CccComponent which loads 2 datasources.
  */
-var CccComponent2 = BaseCccComponent.extend({
+CccComponent2 = BaseCccComponent.extend({
 
     query: null,
     sQuery: null,  // second datasource
@@ -260,93 +271,113 @@ var CccComponent2 = BaseCccComponent.extend({
 
 });
 
-this.CccComponent2 = CccComponent2;
 
-this.CccDotChartComponent = CccComponent.extend({
+CccAreaChartComponent = CccComponent.extend({
+
+    cccType: pvc.AreaChart
+
+});
+
+CccStackedDotChart = CccComponent.extend({
+
+    cccType: pvc.StackedDotChart
+});
+
+CccDotChartComponent = CccComponent.extend({
 
     cccType: pvc.DotChart
 
 });
 
-this.CccLineChartComponent = CccComponent.extend({
+CccLineChartComponent = CccComponent.extend({
 
     cccType: pvc.LineChart
 
 });
 
-this.CccStackedLineChartComponent = CccComponent.extend({
+CccStackedLineChartComponent = CccComponent.extend({
 
     cccType: pvc.StackedLineChart
 
 });
 
-this.CccStackedAreaChartComponent = CccComponent.extend({
+CccStackedAreaChartComponent = CccComponent.extend({
 
     cccType: pvc.StackedAreaChart
 
 });
 
-this.CccBarChartComponent = CccComponent.extend({
+CccBarChartComponent = CccComponent.extend({
 
     cccType: pvc.BarChart
 
 });
 
-this.CccPieChartComponent = CccComponent.extend({
+CccPieChartComponent = CccComponent.extend({
 
     cccType: pvc.PieChart
 
 });
 
-this.CccHeatGridChartComponent = CccComponent.extend({
+CccHeatGridChartComponent = CccComponent.extend({
 
     cccType: pvc.HeatGridChart
 
 });
 
-this.CccBulletChartComponent = CccComponent.extend({
+CccBulletChartComponent = CccComponent.extend({
 
     cccType: pvc.BulletChart
 
 });
 
-this.CccWaterfallChartComponent = CccComponent.extend({
+CccWaterfallChartComponent = CccComponent.extend({
 
     cccType: pvc.WaterfallChart
 
 });
 
 
-this.CccMetricDotChartComponent = CccComponent.extend({
+CccMetricDotChartComponent = CccComponent.extend({
 
     cccType: pvc.MetricDotChart
 
 });
 
-this.CccMetricLineChartComponent = CccComponent.extend({
+CccMetricLineChartComponent = CccComponent.extend({
 
     cccType: pvc.MetricLineChart
 
 });
 
 
-this.CccParCoordComponent = CccComponent.extend({
+CccParCoordComponent = CccComponent.extend({
 
     cccType: pvc.ParallelCoordinates
 
 });
 
-this.CccDataTreeComponent = CccComponent2.extend({
+CccDataTreeComponent = CccComponent2.extend({
 
     cccType: pvc.DataTree
 
 });
 
-this.CccBoxplotChartComponent = CccComponent.extend({
+CccBoxplotChartComponent = CccComponent.extend({
 
     cccType: pvc.BoxplotChart
 
 });
 
+CccTreemapChartComponent = CccComponent.extend({
+
+    cccType: pvc.TreemapChart
 
 });
+
+CccNormalizedBarChartComponent = CccComponent.extend({
+
+    cccType: pvc.NormalizedBarChart
+
+});
+

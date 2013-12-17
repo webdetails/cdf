@@ -1,4 +1,5 @@
 requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+
 requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/jquery.ui',
 	'cdf/jquery-impromptu.3.1',
@@ -43,12 +44,7 @@ requireCfg['shim']['cdf/Dashboards'] = [
 
 requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
 
-requireCfg['shim']['cdf/lib/CCC/pvc-d1.0']     = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/tipsy', 'cdf/lib/CCC/def'];
-requireCfg['shim']['cdf/lib/CCC/tipsy']        = ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/jquery.tipsy'];
-requireCfg['shim']['cdf/lib/CCC/jquery.tipsy'] = ['cdf/jquery'];
-
 requireCfg['shim']['cdf/components/core']       = ['cdf/Dashboards'];
-requireCfg['shim']['cdf/components/ccc']        = ['cdf/components/core', 'cdf/lib/CCC/pvc-d1.0'];
 requireCfg['shim']['cdf/components/input']      = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/maps']       = ['cdf/components/core'];

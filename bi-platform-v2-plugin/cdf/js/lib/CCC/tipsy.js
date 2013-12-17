@@ -1,4 +1,20 @@
-pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
+/*!
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+ 
+/*! VERSION TRUNK-20131101 */
+pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis", "cdf/jquery", "cdf/lib/CCC/jquery.tipsy"], function(pv, $) {
+
+
 (function(){
 
     var _nextTipsyId = 0;
@@ -57,16 +73,18 @@ pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
             
         function getTooltipText() {
             var instance = _mark.instance();
-            var title = (instance && instance.tooltip) ||
-                        // A mark method that is not a property?
-                        (!_mark.properties.tooltip && typeof _mark.tooltip == 'function' && _mark.tooltip()) ||
-                        instance.title ||
-                        instance.text;
+            var title = 
+                // Has a tooltip property?
+                _mark.properties.tooltip           ? instance.tooltip :
+
+                // A mark method that is not a property?
+                typeof _mark.tooltip == 'function' ? _mark.tooltip()  :
+
+                // Title or text
+                (instance.title || instance.text);
              
             // Allow deferred tooltip creation! 
-            if(typeof title === 'function') {
-                title = title();
-            }
+            if(typeof title === 'function') { title = title(); }
             
             return title || ""; // Prevent "undefined" from showing up
         }
@@ -708,4 +726,5 @@ pen.define("cdf/lib/CCC/tipsy", ["cdf/lib/CCC/protovis"], function(pv){
     }
 
 }());
+    return pv.Behavior.tipsy;
 });
