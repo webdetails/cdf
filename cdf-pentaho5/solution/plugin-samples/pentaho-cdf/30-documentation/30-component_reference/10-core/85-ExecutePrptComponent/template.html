@@ -1,5 +1,4 @@
-<script type="text/javascript"
-	src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+<script type="text/javascript" src="../../repo/files/:public:plugin-samples:pentaho-cdf:30-documentation:30-component_reference:MetaLayerSamples.js"></script>
 
 <div class="shadow">
 
@@ -89,11 +88,9 @@ var executeTopTenCustomers =
 {
   name: "executeTopTenCustomers",
   type: "ExecutePrpt",
-  solution: "steel-wheels",
-  path: "reports",
-  action: "Order Status.prpt",
+  path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
   listeners:["productLine", "territory"],
-  parameters: [["oStatus"," 'Shipped' "]],
+  parameters: [["productLine", '""'], ["territory", '""']],
   htmlObject: "sampleObject",
   paginate: false,
   showParameters: true,

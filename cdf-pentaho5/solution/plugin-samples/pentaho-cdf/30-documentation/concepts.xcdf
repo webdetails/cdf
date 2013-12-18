@@ -5,4 +5,5 @@
 	<description>CDF Async Lifecycle</description>
 	<icon></icon>
 	<template>lifecycle.html</template>
+	<style>mantle</style>
 </cdf>

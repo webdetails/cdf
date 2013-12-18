@@ -49,7 +49,7 @@
 	<property name="stage.dir" value="${bin.dir}/stage" description="Name of the resource directory" />
 	<property name="samples.stage.dir" value="${bin.dir}/stage-samples" description="Name of the resource directory" />
 	<property name="solution.stage.dir" value="${bin.dir}/stage-solution" description="Name of the resource directory" />
-	<property name="plugin.local.install.solutions.dir" value="../solution" />
+	<property name="plugin.local.install.solutions.dir" value="solution" />
 	<property name="plugin.artifact.id" value="${plugin.name}"/>
 	<property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
 	<property name="plugin.samples.zipfile" value="${plugin.artifact.id}-samples-${project.revision}.zip"/>
@@ -164,7 +164,7 @@
 
 	   	  <!-- copy over all the xactions within the cdf folder -->
 	    <copy todir="${stage.dir}/${plugin.name}/actions" overwrite="true" >
-		  <fileset dir="../solution/cdf/components">
+		  <fileset dir="solution/cdf/components">
 			  <include name="*.xaction*"/>
 			  <include name="*.xml"/>
 			  <include name="*.js"/>
@@ -264,7 +264,7 @@
 
 		  <!-- copy over all the xactions within the pentaho-cdf folder -->
 		  <copy todir="${samples.stage.dir}/plugin-samples" overwrite="true" >
-			  <fileset dir="../solution/plugin-samples"></fileset>
+			  <fileset dir="solution/plugin-samples"></fileset>
 		  </copy>
 
 		  <zip zipfile="${dist.dir}/${plugin.samples.zipfile}"
@@ -280,7 +280,7 @@
 <!--
 		  		  <mkdir dir="${solution.stage.dir}"/>
 				  			  		  <copy todir="${solution.stage.dir}" overwrite="true" >
-			  <fileset dir="../solution">
+			  <fileset dir="solution">
 				  <include name="cdf/**/*.xaction*"/>
 				  <include name="cdf/**/*.xml"/>
 				  <include name="cdf/**/*.js"/>

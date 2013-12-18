@@ -6,6 +6,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
+import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.InvalidCdfOperationException;
 import org.pentaho.cdf.environment.CdfEngine;
 
@@ -64,7 +65,9 @@ public class XcdfRenderer {
         // If a "style" tag exists, use that one
         if ( doc.selectSingleNode( NODE_STYLES ) != null ) {
           style = XmlDom4JUtils.getNodeText( NODE_STYLES, doc );
-        } 
+        } else {
+          style = CdfConstants.DEFAULT_DASHBOARD_STYLE;
+        }
         
         success = true;
 

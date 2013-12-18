@@ -37,6 +37,7 @@ public class CdfConstants {
     public static final String PLUGIN_SETTINGS_HIBERNATE_AVAILABLE = "settings/hibernate-available";
     
     public static final String DEFAULT_DASHBOARD_TEMPLATE_HTML = "default-dashboard-template.html";
+    public static final String DEFAULT_DASHBOARD_STYLE = "mantle";
     
     public static final String RESOURCES_BLUEPRINT_TXT = "resources-blueprint.txt";
     public static final String RESOURCES_MOBILE_TXT = "resources-mobile.txt";

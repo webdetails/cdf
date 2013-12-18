@@ -6,4 +6,5 @@
 	<icon></icon>
 	<template>template.html</template>
     <messages>Messages</messages>
+    <style>mantle</style>
 </cdf>

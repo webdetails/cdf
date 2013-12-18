@@ -88,7 +88,7 @@ var render_grid = {
 		panelSizeRatio: 0.8,
 		orientation: "vertical",
 		colors: [],
-		showValues: false,
+		valuesVisible: false,
 		valuesAnchor: "right",
 		titlePosition: "top",
 		titleSize: 25,
@@ -97,7 +97,7 @@ var render_grid = {
 		orthoAxisPosition: "left",
 		orthoAxisSize: 50,
 		axisGrid: false,
-		scalingType: "linear",
+		colorScaleType: "linear",
 		visualRoles: {
 			color: "value",
 			size: "value"
@@ -106,12 +106,12 @@ var render_grid = {
 		colorMissing: "#efc5ad",
 		extensionPoints: [],
         valuesAnchor: "right",
-		normPerBaseCategory: true,
+		colorNormByCategory: true,
 		useShapes: true,
-		minColor: "#0EDFF1",
-		maxColor: "#0119F9",
+		colorMin: "#0EDFF1",
+		colorMax: "#0119F9",
         isMultiValued: true,
-        useCompositeAxis:true
+        axisComposite:true
 },
 	parameters: [],
 	executeAtStart: false,

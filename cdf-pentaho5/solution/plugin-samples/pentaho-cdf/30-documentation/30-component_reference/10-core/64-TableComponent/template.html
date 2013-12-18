@@ -1,5 +1,4 @@
-<script type="text/javascript"
-        src="GetCDFResource?resource=/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/MetaLayerSamples.js"></script>
+<script type="text/javascript" src="../../repo/files/:public:plugin-samples:pentaho-cdf:30-documentation:30-component_reference:MetaLayerSamples.js"></script>
 <div class="shadow">
 
 <div class="contents">
@@ -101,10 +100,7 @@
     <dd>The pagination type to be used. Possible values: "two_button" and "full_numbers". Default: two_button</dd>
 
     <dt>paginateServerSide</dt>
-    <dd>Whether the pagination should be handled by the server instead of the client. This feature requires a CDA Datasource! Default: false.
-        When both paginateServerSide and filter features are set to true, then filtering of data will be performed server-side; the input typed
-        in the searchbox will be sent in request (paramsearchBox).
-    </dd>
+    <dd>Whether the pagination should be handled by the server instead of the client. This feature requires a CDA Datasource! Default: false</dd>
 
     <dt>filter</dt>
     <dd>Enable or disable filtering of data. Note that filtering in DataTables is smart in that it allows the end user
@@ -162,9 +158,9 @@
           oLanguage:{
           "sProcessing": "A processar...",
           "sLengthMenu": "Mostrar _MENU_ registos",
-          "sZeroRecords": "Não foram encontrados resultados",
-          "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registos",
-          "sInfoEmpty": "Mostrando de 0 até 0 de 0 registros",
+          "sZeroRecords": "N?o foram encontrados resultados",
+          "sInfo": "Mostrando de _START_ at? _END_ de _TOTAL_ registos",
+          "sInfoEmpty": "Mostrando de 0 at? 0 de 0 registros",
           "sInfoFiltered": "(filtrado de _MAX_ registos no total)",
           "sInfoPostFix": "",
           "sSearch": "Procurar:",
@@ -173,7 +169,7 @@
           "sFirst": "Primeiro",
           "sPrevious": "Anterior",
           "sNext": "Seguinte",
-          "sLast": "Último"
+          "sLast": "?ltimo"
           }
           }
         </pre>
@@ -221,7 +217,7 @@
         queryType: 'mdx',
         displayLength: 5,
 
-        catalog: 'solution:steel-wheels/analysis/steelwheels.mondrian.xml',
+        catalog: 'mondrian:/SteelWheels',
         jndi: "SampleData",
         query: function(){
 
