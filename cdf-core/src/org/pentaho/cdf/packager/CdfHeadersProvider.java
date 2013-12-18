@@ -148,7 +148,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
         getLog().warn( String.format( "Dependencies file %s not found.", filePath ) );
       } else {
         propertiesFile = reader.getFileInputStream( filePath );
-        properties.load( reader.getFileInputStream( filePath ) );
+        properties.load( propertiesFile );
       }
     } catch ( Exception e ) {
       logError( String.format( "Error reading resource definitions form file %s.", filePath ), e );
