@@ -1228,3 +1228,61 @@ var FreeformComponent = UnmanagedComponent.extend({
   }
 });
 
+var ActionComponent = UnmanagedComponent.extend({
+  _docstring: function (){
+    return "Abstract class for components calling a CPK endpoint";
+    /**
+       By default, uses a UnmanagedComponent.synchronous() lifecycle.
+       Methods/properties defined in CDE for all child classes:
+
+       this.actionDefinition (datasource used to trigger the action)
+       this.actionParameters (parameters to be passed to the datasource)
+       this.successCallback(data)
+       this.failureCallback()
+
+       Each descendant is expected to override this.draw()
+
+       Notes:
+       - in this.actionParameters, static values should be quoted, in order to survive the "eval" in Dashboards.getParameterValue
+
+    */
+  },
+
+  update: function () {
+    /**
+       Entry-point of the component, manages the actions. Follows a synchronous cycle by default.
+    */
+    var draw = _.bind(this.draw, this);
+    if(typeof this.manageCallee == "undefined" || this.manageCallee) {
+      this.synchronous(draw);
+    } else {
+      draw();
+    }
+
+  },
+
+  triggerAction: function () {
+    /**
+       Calls the endpoint, passing any parameters
+    */
+    var params = Dashboards.propertiesArrayToObject( this.actionParameters ),
+        failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function (){},
+        successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function (){};
+
+    return Dashboards.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
+  },
+
+  hasAction: function(){
+    /**
+       Detect if the endpoint associated with the Action is defined
+    */
+    if ( ! this.actionDefinition ){
+      return false;
+    }
+    if (Dashboards.detectQueryType){
+      return !! Dashboards.detectQueryType(this.actionDefinition);
+    } else {
+      return !! this.actionDefinition.queryType && Dashboards.hasQuery(this.actionDefinition.queryType);
+    }
+  }
+});
