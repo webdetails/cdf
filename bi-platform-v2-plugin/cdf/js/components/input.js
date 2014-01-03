@@ -1304,38 +1304,30 @@ var ButtonComponent = ActionComponent.extend({
     });
     if ( _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller"){
       b.button();
-      this._isJqueryButton = true;
-    } else {
-      this._isJqueryButton = false;
     }
-    b.appendTo(this.clear());
+    b.appendTo(this.placeholder().empty());
+    this._doAutoFocus();
   },
 
   disable: function(){
     /**
      * Disables the button (grays it out and prevents click events)
      */
-    if (this._isJqueryButton){
-      this.placeholder('button').attr('disabled', 'disabled');
-    }
+    this.placeholder('button').attr('disabled', 'disabled');
   },
 
   enable: function(){
     /**
      * Enables the button
      */
-    if (this._isJqueryButton){
-      this.placeholder('button').removeAttr('disabled');
-    }
+    this.placeholder('button').removeAttr('disabled');
   },
 
   setLabel: function(label){
     /**
-     * Changes the label shown on the button
-     */
-    if (this._isJqueryButton){
-      this.placeholder('button').text(label.toString());
-    }
+    * Changes the label shown on the button
+    */
+    this.label = label.toString();
+    this.placeholder('button').text(this.label);
   }
-
 });
