@@ -770,8 +770,7 @@ var SchedulePrptComponent = PrptComponent.extend({
                                     function(xml) {
                                         if (xml &&
                                                 xml.documentElement &&
-                                                xml.documentElement.attributes['result'] &&
-                                                xml.documentElement.attributes['result'].nodeValue == 'OK') {
+                                                xml.documentElement.getAttribute('result') === 'OK') {
                                             //get schedule id
                                             var scheduleId = sharedUuid;
                                             $.getJSON("getSchedules", {solution: myself.solution, path: myself.path, action: myself.action},
