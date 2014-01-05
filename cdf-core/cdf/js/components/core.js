@@ -1221,7 +1221,7 @@ var FreeformComponent = UnmanagedComponent.extend({
 
 var ActionComponent = UnmanagedComponent.extend({
   _docstring: function (){
-    return "Abstract class for components calling a CPK endpoint";
+    return "Abstract class for components calling a query/endpoint";
     /**
        By default, uses a UnmanagedComponent.synchronous() lifecycle.
        Methods/properties defined in CDE for all child classes:
@@ -1254,7 +1254,8 @@ var ActionComponent = UnmanagedComponent.extend({
 
   triggerAction: function () {
     /**
-       Calls the endpoint, passing any parameters
+       Calls the endpoint, passing any parameters.
+       This method is typically bound to the "click" event of the component.
     */
     var params = Dashboards.propertiesArrayToObject( this.actionParameters ),
         failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function (){},
