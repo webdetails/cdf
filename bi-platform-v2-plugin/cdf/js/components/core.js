@@ -1,6 +1,6 @@
 /*!
 * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
+*
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
 * this file except in compliance with the license. If you need a copy of the license,
@@ -1225,7 +1225,7 @@ var ActionComponent = UnmanagedComponent.extend({
        this.successCallback(data)
        this.failureCallback()
 
-       Each descendant is expected to override this.draw()
+       Each descendant is expected to override this.render()
 
        Notes:
        - in this.actionParameters, static values should be quoted, in order to survive the "eval" in Dashboards.getParameterValue
@@ -1237,11 +1237,11 @@ var ActionComponent = UnmanagedComponent.extend({
     /**
        Entry-point of the component, manages the actions. Follows a synchronous cycle by default.
     */
-    var draw = _.bind(this.draw, this);
-    if(typeof this.manageCallee == "undefined" || this.manageCallee) {
-      this.synchronous(draw);
+    var draw = _.bind(this.render, this);
+    if( _.isUndefined(this.manageCallee) || this.manageCallee) {
+      this.synchronous(render);
     } else {
-      draw();
+      render();
     }
 
   },
