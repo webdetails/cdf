@@ -1237,7 +1237,7 @@ var ActionComponent = UnmanagedComponent.extend({
     /**
        Entry-point of the component, manages the actions. Follows a synchronous cycle by default.
     */
-    var draw = _.bind(this.render, this);
+    var render = _.bind(this.render, this);
     if( _.isUndefined(this.manageCallee) || this.manageCallee) {
       this.synchronous(render);
     } else {
