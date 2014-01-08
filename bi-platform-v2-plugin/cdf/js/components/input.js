@@ -1292,7 +1292,7 @@ var ButtonComponent = ActionComponent.extend({
      */
   },
 
-  draw: function() {
+  render: function() {
     var myself = this;
     var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
       if ( _.isFunction(myself.expression) ){
