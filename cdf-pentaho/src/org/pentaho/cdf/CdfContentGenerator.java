@@ -377,7 +377,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
     renderer.execute( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, Parameter
-        .asHashMap( request ) );
+        .asHashMap( request ), userSession.getName() );
   }
 
   private void exportFile( final IParameterProvider requestParams, final OutputStream output ) {

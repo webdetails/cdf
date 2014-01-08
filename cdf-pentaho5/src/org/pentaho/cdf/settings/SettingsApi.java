@@ -5,7 +5,9 @@
 package org.pentaho.cdf.settings;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -33,9 +35,9 @@ public class SettingsApi {
   public SettingsApi() {
   }
 
-  @GET
+  @POST
   @Path( "/set" )
-  public void set( @QueryParam( Parameter.KEY ) String key, @QueryParam( Parameter.VALUE ) String value ) {
+  public void set( @FormParam( Parameter.KEY ) String key, @FormParam( Parameter.VALUE ) String value ) {
 
     if ( StringUtils.isEmpty( key ) || StringUtils.isEmpty( value ) ) {
       logger.equals( "empty values not allowed -> key:" + key + " | value:" + value );

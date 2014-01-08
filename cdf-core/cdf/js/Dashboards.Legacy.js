@@ -160,7 +160,7 @@ Dashboards.setSettingsValue = function(name,object){
     key: name,
     value: JSON.stringify(object)
   };
-  $.post("Settings", data, function(){});
+  $.post(Endpoints.getSettings("set"), data, function(){});
 };
 
 Dashboards.getSettingsValue = function(key,value){
@@ -169,7 +169,7 @@ Dashboards.getSettingsValue = function(key,value){
     value = json;
   };
 
-  $.getJSON("Settings?method=get&key=" + key , callback);
+  $.getJSON(Endpoints.getSettings("get") + "&key=" + key , callback);
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
@@ -179,8 +179,8 @@ Dashboards.fetchData = function(cd, params, callback) {
     for (var param in params) {
       cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
-    // TODO hcoded path
-    $.post(webAppPath + "/content/cda/doQuery?", cd,
+
+    $.post(Endpoints.getCdaBase() + "/doQuery?", cd,
       function(json) {
         callback(json);
       },'json').error(Dashboards.handleServerError);

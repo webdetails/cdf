@@ -150,7 +150,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
-    renderer.execute( out, xcdfPath, defaultTemplate, dashboardsMessagesBaseFilename, Parameter.asHashMap( request ) );
+    renderer.execute( out, xcdfPath, defaultTemplate, dashboardsMessagesBaseFilename, Parameter.asHashMap( request ),
+        userSession.getName() );
   }
 
   public String getPluginName() {

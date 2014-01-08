@@ -13,16 +13,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
-import org.pentaho.cdf.Messages;
 import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
+import org.pentaho.cdf.environment.templater.ITemplater;
+import org.pentaho.cdf.environment.templater.ITemplater.Section;
 import org.pentaho.cdf.localization.MessageBundlesHelper;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
-import org.pentaho.platform.api.engine.IUITemplater;
-import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
@@ -34,23 +32,24 @@ public class CdfHtmlRenderer {
   private static Log logger = LogFactory.getLog( CdfHtmlRenderer.class );
 
   public void execute( final OutputStream out, final String solution, final String path, String templateName,
-      String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap ) throws Exception {
+      String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user )
+    throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( solution, path, templateName );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user );
   }
 
   public void execute( final OutputStream out, final String templatePath, String style,
-      String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap ) throws Exception {
+      String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user ) throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( templatePath );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user );
   }
 
   public void execute( OutputStream out, IBasicFile dashboardTemplateFile, String style,
-      String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap ) throws Exception {
+      String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user ) throws Exception {
 
     String intro = ""; //$NON-NLS-1$
     String footer = ""; //$NON-NLS-1$
@@ -60,36 +59,29 @@ public class CdfHtmlRenderer {
 
     final String dashboardTemplate = "template-dashboard" + style + ".html"; //$NON-NLS-1$
 
-    final IUITemplater templater = PentahoSystem.get( IUITemplater.class, PentahoSessionHolder.getSession() );
     ArrayList<String> i18nTagsList = new ArrayList<String>();
-    if ( templater != null ) {
 
-      IBasicFile templateResourceFile = null;
-      IReadAccess pluginRepoAccess = CdfEngine.getPluginRepositoryReader( "templates/" );
+    IBasicFile templateResourceFile = null;
+    IReadAccess pluginRepoAccess = CdfEngine.getPluginRepositoryReader( "templates/" );
 
-      if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
-        templateResourceFile = pluginRepoAccess.fetchFile( dashboardTemplate );
+    if ( pluginRepoAccess.fileExists( dashboardTemplate ) ) {
+      templateResourceFile = pluginRepoAccess.fetchFile( dashboardTemplate );
 
-      } else if ( systemAccess.fileExists( dashboardTemplate ) ) {
-        // then try in system
-        templateResourceFile = systemAccess.fetchFile( dashboardTemplate );
-      }
-
-      String templateContent = Util.toString( templateResourceFile.getContents() );
-      // Process i18n on dashboard outer template
-      templateContent = updateUserLanguageKey( templateContent );
-      templateContent = processi18nTags( templateContent, i18nTagsList );
-      // Process i18n on dashboard outer template - end
-      final String[] sections = templater.breakTemplateString( templateContent, "", PentahoSessionHolder.getSession() ); //$NON-NLS-1$
-      if ( sections != null && sections.length > 0 ) {
-        intro = sections[0];
-      }
-      if ( sections != null && sections.length > 1 ) {
-        footer = sections[1];
-      }
-    } else {
-      intro = Messages.getErrorString( "CdfContentGenerator.ERROR_0005_BAD_TEMPLATE_OBJECT" );
+    } else if ( systemAccess.fileExists( dashboardTemplate ) ) {
+      // then try in system
+      templateResourceFile = systemAccess.fetchFile( dashboardTemplate );
     }
+
+    String templateContent = Util.toString( templateResourceFile.getContents() );
+    // Process i18n on dashboard outer template
+    templateContent = updateUserLanguageKey( templateContent );
+    templateContent = processi18nTags( templateContent, i18nTagsList );
+    // Process i18n on dashboard outer template - end
+
+    ITemplater templater = CdfEngine.getEnvironment().getTemplater();
+
+    intro = templater.getTemplateSection( templateContent, Section.HEADER );
+    footer = templater.getTemplateSection( templateContent, Section.FOOTER );
 
     final String dashboardContent = getDashboardContent( dashboardTemplateFile.getContents(), i18nTagsList );
 
@@ -119,7 +111,7 @@ public class CdfHtmlRenderer {
     }
     // Add storage
     try {
-      generateStorage( out );
+      generateStorage( out, user );
     } catch ( Exception e ) {
       logger.error( "Error in cdf storage.", e );
     }
@@ -277,9 +269,9 @@ public class CdfHtmlRenderer {
     out.write( headers.getBytes( CharsetHelper.getEncoding() ) );
   }
 
-  private void generateStorage( final OutputStream out ) throws Exception {
+  private void generateStorage( final OutputStream out, final String user ) throws Exception {
 
-    JSONObject result = StorageEngine.getInstance().read( PentahoSessionHolder.getSession().getName() );
+    JSONObject result = StorageEngine.getInstance().read( user );
 
     StringBuilder s = new StringBuilder();
     s.append( "\n<script language=\"javascript\" type=\"text/javascript\">\n" );

@@ -418,42 +418,48 @@ var CommentsComponent = BaseComponent.extend({
     myself.operations = {
 
       processOperation: function(operation, comment, collection, callback, defaults) {
-        var ajaxOptions = {};
+        var options = {};
         switch(operation) {
-          case 'LIST_ALL':
-            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults, where: false} };
+          case 'LIST_ALL' :
+            options = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults, where: false} };
             break;
+
           case 'LIST_ACTIVE':
-            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults} };
+            options = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults} };
             break;
+
           case 'GET_LAST':
-            ajaxOptions = {data: { action: 'list', page: defaults.page, firstResult: 0, maxResults: 1} };
+            options = {data: { action: 'list', page: defaults.page, firstResult: 0, maxResults: 1} };
             break;
+
           case 'DELETE_COMMENT':
-            ajaxOptions = {data: { action: 'delete', page: defaults.page, commentId: comment} };
+            options = {data: { action: 'delete', page: defaults.page, commentId: comment} };
             break;
+
           case 'ARCHIVE_COMMENT':
-            ajaxOptions = {data: { action: 'archive', page: defaults.page, commentId: comment} };
+            options = {data: { action: 'archive', page: defaults.page, commentId: comment} };
             break;
+
           case 'ADD_COMMENT':
-            ajaxOptions = {data: { action: 'add', page: defaults.page, comment: comment} };
+            options = {data: { action: 'add', page: defaults.page, comment: comment} };
             break;
         }
-        this.requestProcessing(ajaxOptions, operation, collection, callback);
+
+        this.requestProcessing( options, operation, collection, callback );
       },
 
-      requestProcessing: function(overrides, operation, collection, callback){
+      requestProcessing: function( options, operation, collection, callback ){
         var myself = this;
-        overrides = overrides || {};
+        options = options || {};
         var ajaxOpts = {
           type: 'GET',
-          url: "/pentaho/content/pentaho-cdf/Comments",// TODO hcoded path
+          url: Endpoints.getComments( operation ),
           success: function(data) {
             myself.requestResponse(data, operation, collection, callback)
           },
           dataType: 'json'
         };
-        ajaxOpts = _.extend( {}, ajaxOpts, overrides);
+        ajaxOpts = _.extend( {}, ajaxOpts, options);
         $.ajax(ajaxOpts);
       },
 

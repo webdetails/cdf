@@ -11,60 +11,6 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-$.ajaxSetup({
-  type: "POST",
-  async: false,
-  traditional: true,
-  scriptCharset: "utf-8",
-  contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-
-  dataFilter: function(data, dtype) {
-    // just tagging date
-    Dashboards.lastServerResponse = Date.now();
-    return data;
-  }
-});
-
-var pathArray = window.location.pathname.split( '/' );
-var webAppPath;
-if (!(typeof(CONTEXT_PATH) == 'undefined')){
-  webAppPath = CONTEXT_PATH;
-}
-if(webAppPath == undefined){
-  webAppPath = "/" + pathArray[1];
-}
-
-if(webAppPath.endsWith("/")) {
-  webAppPath = webAppPath.substr(0, webAppPath.length-1);
-}
-
-//TODO any refs to these global vars?
-//var GB_ANIMATION = true; 
-// var CDF_CHILDREN = 1;
-// var CDF_SELF = 2;
-
-
-
-if($.blockUI){
-  $.blockUI.defaults.fadeIn = 0;
-  $.blockUI.defaults.message = '<div class="blockUIDefaultImg"></div>';
-  $.blockUI.defaults.css.left = '50%';
-  $.blockUI.defaults.css.top = '40%';
-  $.blockUI.defaults.css.marginLeft = '-16px';
-  $.blockUI.defaults.css.width = '32px';
-  $.blockUI.defaults.css.background = 'none';
-  $.blockUI.defaults.overlayCSS = { backgroundColor: "#FFFFFF", opacity: 0.8, cursor: "wait"};
-  $.blockUI.defaults.css.border = "none";
-}
-
-
-
-if (typeof $.SetImpromptuDefaults == 'function')
-  $.SetImpromptuDefaults({
-    prefix: 'colsJqi',
-    show: 'slideDown'
-  });
-
 var Dashboards = {
 
   ERROR_CODES:{
@@ -74,8 +20,8 @@ var Dashboards = {
     "COMPONENT_ERROR" : {
       msg: "Error processing component"
     }
-  },// TODO hcoded paths
-  CDF_BASE_PATH: webAppPath + "/content/pentaho-cdf/",
+  },
+  CDF_BASE_PATH: Endpoints.getCdfBase(),
   parameterModel: new Backbone.Model(),
   viewFlags: {
     UNUSED: "unused",
@@ -139,7 +85,6 @@ Dashboards.log = function(m,type){
 Dashboards.error = function(m){
   this.log(m, 'error');
 }
-
 
 Dashboards.getWebAppPath = function (){
   return webAppPath;
@@ -1214,8 +1159,8 @@ Dashboards.loadStorage = function(){
     action: "read",
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
-  //TODO hcoded path
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+
+  $.getJSON(Endpoints.getStorage( args.action ), args, function(json) {
     $.extend(myself.storage,json);
   });
 };
@@ -1232,8 +1177,8 @@ Dashboards.saveStorage = function(){
     storageValue: JSON.stringify(this.storage),
     _: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
   };
-  //TODO hcoded path
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+
+  $.getJSON(Endpoints.getStorage( args.action ), args, function(json) {
     if(json.result != true){
       myself.log("Error saving storage",'error');
     }
@@ -1252,8 +1197,8 @@ Dashboards.cleanStorage = function(){
   var args = {
     action: "delete"
   };
-  //TODO hcoded path
-  $.getJSON(webAppPath + "/content/pentaho-cdf/Storage", args, function(json) {
+
+  $.getJSON(Endpoints.getStorage( args.action ), args, function(json) {
     if(json.result != true){
       myself.log("Error deleting storage", 'error');
     }

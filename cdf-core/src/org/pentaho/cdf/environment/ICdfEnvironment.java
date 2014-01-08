@@ -6,6 +6,7 @@ import org.pentaho.cdf.environment.configurations.IHibernateConfigurations;
 import org.pentaho.cdf.environment.factory.ICdfBeanFactory;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 import org.pentaho.cdf.environment.paths.ICdfApiPathProvider;
+import org.pentaho.cdf.environment.templater.ITemplater;
 
 import pt.webdetails.cpf.PluginEnvironment;
 import pt.webdetails.cpf.exceptions.InitializationException;
@@ -39,7 +40,9 @@ public interface ICdfEnvironment {
   public String getRepositoryBaseContentUrl();
 
   public IHibernateConfigurations getHibernateConfigurations();
-  
+
   public ICdfHeadersProvider getCdfHeadersProvider();
-  
+
+  public ITemplater getTemplater();
+
 }

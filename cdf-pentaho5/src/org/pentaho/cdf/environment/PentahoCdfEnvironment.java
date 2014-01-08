@@ -14,7 +14,9 @@ import org.pentaho.cdf.environment.factory.ICdfBeanFactory;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 import org.pentaho.cdf.environment.paths.CdfApiPathProvider;
 import org.pentaho.cdf.environment.paths.ICdfApiPathProvider;
+import org.pentaho.cdf.environment.templater.ITemplater;
 import org.pentaho.cdf.packager.CdfHeadersProvider;
+import org.pentaho.cdf.templater.PentahoUITemplater;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.util.messages.LocaleHelper;
 
@@ -112,5 +114,10 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
   @Override
   public ICdfHeadersProvider getCdfHeadersProvider() {
     return cdfHeadersProvider;
+  }
+
+  @Override
+  public ITemplater getTemplater() {
+    return PentahoUITemplater.getInstance();
   }
 }
