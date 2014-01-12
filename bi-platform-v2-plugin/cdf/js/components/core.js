@@ -64,17 +64,17 @@ BaseComponent = Base.extend(Backbone.Events).extend({
     /*
      * `dashboard` points back to this component, so we need to remove it from
      * the original component before cloning, lest we enter an infinite loop.
-     * `_callbacks` contains the event bindings for the Backbone Event mixin
+     * `_events` contains the event bindings for the Backbone Event mixin
      * and may also point back to the dashboard. We want to clone that as well,
      * but have to be careful about it.
      */
     dashboard = this.dashboard;
-    callbacks = this._callbacks;
+    callbacks = this._events;
     delete this.dashboard;
-    delete this._callbacks;
+    delete this._events;
     that = $.extend(true,{},this);
     that.dashboard = this.dashboard = dashboard;
-    this._callbacks = callbacks;
+    this._events = callbacks;
     this.copyEvents(that,callbacks);
 
     if (that.parameters) {
