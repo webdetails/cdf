@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 *
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,27 +11,27 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-
 package org.pentaho.test.cdf.views;
 
-
+import com.orientechnologies.orient.core.exception.OCommandExecutionException;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
+import junit.framework.Assert;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.cdf.views.ViewEntry;
 import org.pentaho.cdf.views.ViewsEngine;
+import org.pentaho.platform.api.engine.IPentahoSession;
+import pt.webdetails.cpf.persistence.Filter;
 import pt.webdetails.cpf.persistence.IPersistenceEngine;
 import pt.webdetails.cpf.persistence.ISimplePersistence;
-
-
 
 public class ViewsEngineTest {
 
   private class ViewsEngineForTest extends ViewsEngine {
     private IPersistenceEngine ipe;
     private ISimplePersistence isp;
-
-    public ViewsEngineForTest() {
-    }
 
     public ViewsEngineForTest( IPersistenceEngine ipe, ISimplePersistence isp ) {
       this.ipe = ipe;
@@ -48,15 +48,44 @@ public class ViewsEngineTest {
       return isp;
     }
 
+    @Override
+    protected IPentahoSession getSession() {
+      IPentahoSession ips =  Mockito.mock( IPentahoSession.class );
+      Mockito.when( ips.getName() ).thenReturn( "name" );
+      return ips;
+    }
+
   }
-
-
 
   @Test
-  //Even with PersistenceEngine throwing an exception, it should be able to finish initializatoin
+  //Even with PersistenceEngine throwing an exception, it should be able to finish initialization
   public void testInitializationException() {
     IPersistenceEngine ipe = Mockito.mock( IPersistenceEngine.class );
-    Mockito.when( ipe.classExists( "org.pentaho.cdf.views.ViewEntry" ) ).thenThrow( new ODatabaseException( "Exception" ) );
-    ViewsEngineForTest vet = new ViewsEngineForTest( ipe, null );
+    Mockito.when( ipe.classExists( "org.pentaho.cdf.views.ViewEntry" ) )
+            .thenThrow( new ODatabaseException( "Exception" ) );
+    new ViewsEngineForTest( ipe, null );
   }
+
+
+  //Should return null when ISimplePersistence.load fails
+  @Test
+  public void testGetViewFailOnLoad() {
+    ISimplePersistence isp = Mockito.mock( ISimplePersistence.class );
+    Mockito.when( isp.load( Mockito.eq( ViewEntry.class ), Mockito.any( Filter.class ) ) )
+            .thenThrow( new OCommandExecutionException( "Exception" ) );
+    ViewsEngineForTest vet = new ViewsEngineForTest( Mockito.mock( IPersistenceEngine.class ), isp );
+    Assert.assertNull( vet.getView( "x" ) );
+  }
+
+  //Should return error object when ISimplePersistence.load fails
+  @Test
+  public void testListViewsFailOnLoad() throws JSONException {
+    ISimplePersistence isp = Mockito.mock( ISimplePersistence.class );
+    Mockito.when( isp.load( Mockito.eq( ViewEntry.class ), Mockito.any( Filter.class ) ) )
+            .thenThrow( new OCommandExecutionException( "Exception" ) );
+    ViewsEngineForTest vet = new ViewsEngineForTest( Mockito.mock( IPersistenceEngine.class ), isp );
+    JSONObject result = vet.listViews();
+    Assert.assertEquals( "error", result.getString( "status" ) );
+  }
+
 }
