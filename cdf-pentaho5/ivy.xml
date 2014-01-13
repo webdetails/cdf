@@ -26,15 +26,11 @@
     <dependency org="javax.ws.rs"                 name="javax.ws.rs-api"                      rev="2.0"                                   transitive="false"/>
 
     <!--  pentaho dependencies -->
-    <dependency org="pentaho"                     name="pentaho-bi-platform-api"              rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
-    <dependency org="pentaho"                     name="pentaho-bi-platform-util"             rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
-    <dependency org="pentaho"                     name="pentaho-bi-platform-engine-security"  rev="${dependency.bi-platform.revision}"    transitive="true"       changing="true"/>    
-    <dependency org="pentaho"                     name="pentaho-bi-platform-engine-core"      rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
-    <dependency org="pentaho"                     name="pentaho-bi-platform-engine-services"  rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
-    <dependency org="pentaho"                     name="pentaho-bi-platform-repository"       rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
-    <dependency org="pentaho"                     name="pentaho-bi-platform-plugin-services"  rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
-    <dependency org="pentaho"                     name="pentaho-bi-platform-web"              rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
-    <dependency org="pentaho"                     name="pentaho-bi-platform-web-servlet"      rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
+    <dependency org="pentaho"                     name="pentaho-platform-api"              rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
+    <dependency org="pentaho"                     name="pentaho-platform-core"             rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
+    <dependency org="pentaho"                     name="pentaho-platform-repository"       rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
+    <dependency org="pentaho"                     name="pentaho-platform-extensions"       rev="${dependency.bi-platform.revision}"    transitive="false"      changing="true"/>
+
     <dependency org="org.hibernate"               name="hibernate"                            rev="3.2.6.ga"                              transitive="false">
       <!--
 			 

@@ -190,8 +190,7 @@ Dashboards.fetchData = function(cd, params, callback) {
 
     var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
 
-    // TODO hcoded path
-    $.post(webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=" + xactionFile, cd,
+    $.post(Endpoints.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
       function(result) {
         callback(result.values);
       },'json');

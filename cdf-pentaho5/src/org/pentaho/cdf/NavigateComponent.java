@@ -28,7 +28,7 @@ public class NavigateComponent {
 
     try {
 
-      RepositoryFileTree tree = PentahoSystem.get( IUnifiedRepository.class ).getTree( path, depth, "*" );
+      RepositoryFileTree tree = PentahoSystem.get( IUnifiedRepository.class ).getTree( path, depth, "*", false );
 
       // TODO
       /*

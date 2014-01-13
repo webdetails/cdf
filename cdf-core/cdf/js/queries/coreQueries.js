@@ -383,7 +383,7 @@
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: Dashboards.getWebAppPath() + "/content/cda/doQuery?",
+      url: Endpoints.getCdaBase() + "/doQuery?",
       file: '',
       id: '',
       outputIdx: '1',
@@ -580,7 +580,7 @@
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: webAppPath + "/ViewAction?solution=system&path=pentaho-cdf/actions&action=jtable.xaction",
+      url: Endpoints.getCdfXaction("pentaho-cdf/actions" , "jtable.xaction"),
       queryDef:{}
     },
     interfaces:{

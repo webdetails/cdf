@@ -56,7 +56,7 @@ public class ActionEngine {
       IUnifiedRepository unifiedRepository = PentahoSystem.get( IUnifiedRepository.class, null );
       RepositoryFile file = unifiedRepository.getFile( path );
 
-      String buffer = XactionUtil.execute( contentType, file, httpServletRequest, httpServletResponse, userSession );
+      String buffer = XactionUtil.execute( contentType, file, httpServletRequest, httpServletResponse, userSession, null );
 
       if ( !StringUtils.isEmpty( buffer ) ) {
         httpServletResponse.getOutputStream().write( buffer.getBytes( LocaleHelper.getSystemEncoding() ) );

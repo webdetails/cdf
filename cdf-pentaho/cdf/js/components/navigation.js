@@ -115,8 +115,8 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      //TODO hcoded path
-      $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
+
+      $.getJSON( Endpoints.getJSONSolution() + "?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path , function(json){
         myself.processNavigatorResponse(json);
       });
     }
@@ -197,7 +197,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 
       }
       else{
-        s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+        s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + Endpoints.getRenderHTML()+ "?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
       }
 
       /*
@@ -237,8 +237,8 @@ var ContentListComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     var path = this.mode != 4  ? NavigatorBaseComponent.path : NavigatorBaseComponent.getParentPath();
-    //TODO hcoded path
-    $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + path, function(json){
+
+    $.getJSON(Endpoints.getJSONSolution() + "?mode=contentList&solution=" + NavigatorBaseComponent.solution +"&path=" + path, function(json){
       myself.processContentListResponse(json);
     });
   },
@@ -295,8 +295,8 @@ var ContentListComponent = NavigatorBaseComponent.extend({
 		
         if (this.type=="FOLDER"){
           cls = "folder";
-          //TODO hcoded path
-          href = webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + this.solution + "&path=" + this.path + template;
+
+          href = Endpoints.getRenderHTML() + "?solution=" + this.solution + "&path=" + this.path + template;
         }
         else{
           if (this.url != undefined){
@@ -342,8 +342,8 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      //TODO hcoded path
-      $.getJSON(webAppPath + "/content/pentaho-cdf/JSONSolution?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
+
+      $.getJSON(Endpoints.getJSONSolution()+ "?mode=navigator&solution=" + NavigatorBaseComponent.solution +"&path=" + NavigatorBaseComponent.path, function(json){
         myself.processPageTitleResponse(json);
       });
     }

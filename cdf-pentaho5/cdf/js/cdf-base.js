@@ -26,6 +26,20 @@ var Endpoints = {
 
   getSettings: function ( action ) { return Endpoints.getCdfBase() + "/settings/" + action; },
 
+  getViewAction: function () { return Endpoints.getCdfBase() + "/viewAction"; },
+
+  getJSONSolution: function () { return Endpoints.getCdfBase() + "/getJSONSolution"; },
+
+  getRenderHTML: function () { return Endpoints.getCdfBase() + "/RenderHtml"; },
+
+  getExport: function () { return Endpoints.getCdfBase() + "/Export"; },
+
+  getResource: function() { return Endpoints.getCdfBase() + "/resource" },
+
+  getCdfXaction: function( path, action ) { 
+    return getViewAction() + "?path=" + "/public/plugin-samples/" + path + "/" + action; 
+  },
+
   getComments: function ( action ) { 
 
   	var endpoint = "";

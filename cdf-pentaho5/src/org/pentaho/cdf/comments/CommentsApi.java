@@ -77,7 +77,7 @@ public class CommentsApi {
     JSONObject json;
     String result = "";
 
-    boolean isAdministrator = SecurityHelper.isPentahoAdministrator( PentahoSessionHolder.getSession() );
+    boolean isAdministrator = SecurityHelper.getInstance().isPentahoAdministrator( PentahoSessionHolder.getSession() );
 
     if ( deleted && !isAdministrator ) {
       deleted = false;
@@ -113,7 +113,7 @@ public class CommentsApi {
     JSONObject json;
     String result = "";
 
-    boolean isAdministrator = SecurityHelper.isPentahoAdministrator( PentahoSessionHolder.getSession() );
+    boolean isAdministrator = SecurityHelper.getInstance().isPentahoAdministrator( PentahoSessionHolder.getSession() );
     boolean isAuthenticated = PentahoSessionHolder.getSession().isAuthenticated();
 
     if ( !isAdministrator || !isAuthenticated ) {
@@ -151,7 +151,7 @@ public class CommentsApi {
     JSONObject json;
     String result = "";
 
-    boolean isAdministrator = SecurityHelper.isPentahoAdministrator( PentahoSessionHolder.getSession() );
+    boolean isAdministrator = SecurityHelper.getInstance().isPentahoAdministrator( PentahoSessionHolder.getSession() );
     boolean isAuthenticated = PentahoSessionHolder.getSession().isAuthenticated();
 
     if ( !isAdministrator || !isAuthenticated ) {

@@ -22,10 +22,23 @@ var Endpoints = {
 
   getCdaBase: function () { return Endpoints.getWebapp() + "/content/cda"; },
 
-  getStorage: function ( action ) { return Endpoints.getWebapp() + "/Storage";  },
+  getStorage: function ( action ) { return Endpoints.getCdfBase() + "/Storage";  },
 
   getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; },
 
-  getSettings: function ( action ) { return Endpoints.getCdfBase() + "/Settings?method=" + action; }
+  getSettings: function ( action ) { return Endpoints.getCdfBase() + "/Settings?method=" + action; },
 
+  getViewAction: function () { return Endpoints.getWebapp() + "/ViewAction"; },
+
+  getJSONSolution: function () { return Endpoints.getCdfBase() + "/JSONSolution"; },
+
+  getRenderHTML: function () { return Endpoints.getCdfBase() + "/RenderHtml"; },
+
+  getExport: function () { return Endpoints.getCdfBase() + "/Export"; },
+
+  getResource: function() { return Endpoints.getCdfBase() + "/GetCDFResource" },
+
+  getCdfXaction: function( path, action ) { 
+    return Endpoints.getViewAction() +  "?solution=system&path=" + path + "&action=" + action; 
+  }
 };
