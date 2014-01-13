@@ -206,7 +206,6 @@ var PrptComponent = BaseComponent.extend({
   update: function(){
  
     this.clear();
- 
     var ts = "ts=" + new Date().getTime() + "&";
     var options = this.getOptions();
     var pathSegments = {
@@ -219,6 +218,7 @@ var PrptComponent = BaseComponent.extend({
     delete options.path;
     delete options.action;
     var downloadMode = this.downloadMode;
+    var callVar = options.showParameters ? 'viewer' : 'report';
     // if you really must use this component to download stuff
     if (downloadMode == null) {
       var outputTarget = options["output-target"];
@@ -227,10 +227,9 @@ var PrptComponent = BaseComponent.extend({
         !((outputTarget.indexOf('html') != -1 &&
            outputTarget.indexOf('mime-message') == -1)
           || outputTarget.indexOf('text') != -1);
-    }
-
-    if(options["dashboard-mode"]){      
-      var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
+    }    
+    if(options["dashboard-mode"]){
+      var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
       var myself=this;
       $.ajax({
         url: url,
@@ -263,12 +262,12 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
         this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts + $.param(options);
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
@@ -278,6 +277,15 @@ var PrptComponent = BaseComponent.extend({
         this.startLoading();
         var myself = this;
         iframe.load(function(){
+          if( options.showParameters ) {
+            var jqBody = $(this.contentWindow.document.body);
+            var reportContentFrame = jqBody.find('#reportContent');
+            reportContentFrame.load(function() {
+              if (myself.autoResize) {
+                myself._resizeToReportFrame(reportContentFrame[0],htmlObj, options);
+               }
+             });
+          }
           myself.stopLoading();
         });
         iframe[0].contentWindow.location = url;
@@ -1007,8 +1015,7 @@ var success = false;
                   function(xml) {
                     if (xml &&
                         xml.documentElement &&
-                        xml.documentElement.attributes['result'] &&
-                        xml.documentElement.attributes['result'].nodeValue == 'OK') {
+                        xml.documentElement.getAttribute('result') === 'OK') {
                         //get schedule id
                         var scheduleId = sharedUuid;
                         $.getJSON("getSchedules", {solution: myself.solution, path: myself.path, action:myself.action},
@@ -1102,8 +1109,9 @@ var ExecutePrptComponent = PrptComponent.extend({
   executePrptComponent: function(){
  
     var options = this.getOptions();
+    var callVar = options.showParameters ? 'viewer' : 'report';
     var ts = "ts=" + new Date().getTime() + "&";
-    var url = webAppPath + '/api/repos/' + this.composePath(options) + '/report?' + ts;
+    var url = webAppPath + '/api/repos/' + this.composePath(options) + '/' + callVar + '?' + ts;
     var a=[];
     var encodeArray = function(k,v) {
       var arr = [];
