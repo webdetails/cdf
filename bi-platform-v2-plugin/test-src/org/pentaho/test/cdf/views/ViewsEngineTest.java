@@ -15,10 +15,17 @@
 package org.pentaho.test.cdf.views;
 
 
+import com.orientechnologies.orient.core.exception.OCommandExecutionException;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
+import junit.framework.Assert;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.cdf.views.ViewEntry;
 import org.pentaho.cdf.views.ViewsEngine;
+import org.pentaho.platform.api.engine.IPentahoSession;
+import pt.webdetails.cpf.persistence.Filter;
 import pt.webdetails.cpf.persistence.IPersistenceEngine;
 import pt.webdetails.cpf.persistence.ISimplePersistence;
 
@@ -30,8 +37,6 @@ public class ViewsEngineTest {
     private IPersistenceEngine ipe;
     private ISimplePersistence isp;
 
-    public ViewsEngineForTest() {
-    }
 
     public ViewsEngineForTest( IPersistenceEngine ipe, ISimplePersistence isp ) {
       this.ipe = ipe;
@@ -48,6 +53,13 @@ public class ViewsEngineTest {
       return isp;
     }
 
+    @Override
+    protected IPentahoSession getSession() {
+      IPentahoSession ips =  Mockito.mock( IPentahoSession.class );
+      Mockito.when( ips.getName() ).thenReturn( "name" );
+      return ips;
+    }
+
   }
 
 
@@ -56,7 +68,31 @@ public class ViewsEngineTest {
   //Even with PersistenceEngine throwing an exception, it should be able to finish initializatoin
   public void testInitializationException() {
     IPersistenceEngine ipe = Mockito.mock( IPersistenceEngine.class );
-    Mockito.when( ipe.classExists( "org.pentaho.cdf.views.ViewEntry" ) ).thenThrow( new ODatabaseException( "Exception" ) );
-    ViewsEngineForTest vet = new ViewsEngineForTest( ipe, null );
+    Mockito.when( ipe.classExists( "org.pentaho.cdf.views.ViewEntry" ) )
+            .thenThrow( new ODatabaseException( "Exception" ) );
+    new ViewsEngineForTest( ipe, null );
   }
+
+
+  //Should return null when ISimplePersistence.load fails
+  @Test
+  public void testGetViewFailOnLoad() {
+    ISimplePersistence isp = Mockito.mock( ISimplePersistence.class );
+    Mockito.when( isp.load( Mockito.eq( ViewEntry.class ), Mockito.any( Filter.class ) ) )
+            .thenThrow( new OCommandExecutionException( "Exception" ) );
+    ViewsEngineForTest vet = new ViewsEngineForTest( Mockito.mock( IPersistenceEngine.class ), isp );
+    Assert.assertNull( vet.getView( "x" ) );
+  }
+
+  //Should return error object when ISimplePersistence.load fails
+  @Test
+  public void testListViewsFailOnLoad() throws JSONException {
+    ISimplePersistence isp = Mockito.mock( ISimplePersistence.class );
+    Mockito.when( isp.load( Mockito.eq( ViewEntry.class ), Mockito.any( Filter.class ) ) )
+            .thenThrow( new OCommandExecutionException( "Exception" ) );
+    ViewsEngineForTest vet = new ViewsEngineForTest( Mockito.mock( IPersistenceEngine.class ), isp );
+    JSONObject result = vet.listViews();
+    Assert.assertEquals( "error", result.getString( "status" ) );
+  }
+
 }

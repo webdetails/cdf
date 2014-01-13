@@ -62,6 +62,10 @@ public class ViewsEngine {
     return SimplePersistence.getInstance();
   }
 
+  protected IPentahoSession getSession() {
+    return PentahoSessionHolder.getSession();
+  }
+
 
   public static synchronized ViewsEngine getInstance() {
     if ( instance == null ) {
@@ -71,29 +75,36 @@ public class ViewsEngine {
   }
 
   public ViewEntry getView( String id ) {
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
+    IPentahoSession userSession = getSession();
     ISimplePersistence sp;
     try {
       sp = getSimplePersistence();
+      Filter filter = new Filter();
+      filter.where( "name" ).equalTo( id ).and().where( "user" ).equalTo( userSession.getName() );
+      List<ViewEntry> views = sp.load( ViewEntry.class, filter );
+
+      return ( views != null && views.size() > 0 ) ? views.get( 0 ) : null;
     } catch ( Exception e ) {
       logger.error( "Error while getting view.", e );
       return null;
     }
-    Filter filter = new Filter();
-    filter.where( "name" ).equalTo( id ).and().where( "user" ).equalTo( userSession.getName() );
-    List<ViewEntry> views = sp.load( ViewEntry.class, filter );
 
-    return ( views != null && views.size() > 0 ) ? views.get( 0 ) : null;
   }
 
   public JSONObject listViews() {
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
+    IPentahoSession userSession = getSession();
     ISimplePersistence sp;
     JSONObject obj = new JSONObject();
     JSONArray arr = new JSONArray();
 
     try {
       sp = getSimplePersistence();
+      Filter filter = new Filter();
+      filter.where( "user" ).equalTo( userSession.getName() );
+      List<ViewEntry> views = sp.load( ViewEntry.class, filter );
+      for ( ViewEntry v : views ) {
+        arr.put( v.toJSON() );
+      }
     } catch ( Exception e ) {
       logger.error( "Error while listing views", e );
       try {
@@ -104,12 +115,7 @@ public class ViewsEngine {
       }
       return obj;
     }
-    Filter filter = new Filter();
-    filter.where( "user" ).equalTo( userSession.getName() );
-    List<ViewEntry> views = sp.load( ViewEntry.class, filter );
-    for ( ViewEntry v : views ) {
-      arr.put( v.toJSON() );
-    }
+
     try {
       obj.put( "views", arr );
       obj.put( "status", "ok" );
@@ -121,7 +127,7 @@ public class ViewsEngine {
 
   public JSONObject saveView( String viewContent ) {
     ViewEntry view = new ViewEntry();
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
+    IPentahoSession userSession = getSession();
     JSONObject obj = new JSONObject();
 
     try {
@@ -162,7 +168,7 @@ public class ViewsEngine {
   }
 
   public JSONObject deleteView( String name ) {
-    IPentahoSession userSession = PentahoSessionHolder.getSession();
+    IPentahoSession userSession = getSession();
     JSONObject obj = new JSONObject();
 
     try {
