@@ -66,6 +66,11 @@
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
 
+    <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
+        <artifact name="ccc" type="zip" ext="zip"/>
+    </dependency>
+
+
     <dependency org="pentaho" name="cpf" rev="${dependency.pentaho-cpf-plugin.revision}" transitive="false" changing="true" conf="runtime->default"/>
 
     <!-- orient db (persistence) -->

@@ -157,7 +157,7 @@
 
 			Creates a distribution of this project's plugin zip
 			====================================================================-->
-	   <target name="dist-plugin" depends="jar" description="Creates a distribution">
+	   <target name="dist-plugin" depends="subfloor-js.resolve-js, jar" description="Creates a distribution">
 
 		   <!-- delete and re-create the plugin dist folder tree -->
 		   <delete dir="${bin.dir}"/>
@@ -166,8 +166,8 @@
 		   <mkdir dir="${stage.dir}/${plugin.name}" />
 		   <mkdir dir="${stage.dir}/${plugin.name}/lib" />
 
-<mkdir dir="${stage.dir}/${plugin.name}/resources/actions" />
-	
+            <mkdir dir="${stage.dir}/${plugin.name}/resources/actions" />
+
 		   <!-- copy the plugin jar to the plugin dist lib folder -->
 		   <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
 			   <fileset dir="${dist.dir}">
@@ -204,11 +204,18 @@
 			   </fileset>
 		   </copy>
 
+           <!-- copy ccc build -->
+           <copy todir="${stage.dir}/${plugin.name}/js/lib/CCC" >
+               <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
+           </copy>
+           <!-- rename ccc files -->
+           <move file="${stage.dir}/${plugin.name}/js/lib/CCC/pvc.js" tofile="${stage.dir}/${plugin.name}/js/lib/CCC/pvc-d1.0.js"/>
+
 		   <!-- create the version file -->
-		   <tstamp/>			
+		   <tstamp/>
 			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
 
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='${project.stage}' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='${project.stage}' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>
 
 
 		   <!-- Copy js folder into dist -->
@@ -217,8 +224,8 @@
 				   <include name="**/*" />
 			   </fileset>
 		   </copy>
-		   
-		   
+
+
         <echo file="${dist.dir}/marketplace.xml">&lt;version>
             &lt;branch>TRUNK&lt;/branch>
             &lt;version>${distribution.version}&lt;/version>
@@ -230,17 +237,17 @@
                 &lt;build_id>${sequential.build.id}&lt;/build_id>
             &lt;/version>
         </echo>
-		   
-		   
-		   
-    <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
-       <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>		   
-		   
 
-		   <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.revision}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.revision}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0" value="Version ${project.revision}"/> 
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0" value="Version ${project.revision}"/> 
+
+
+    <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
+       <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>
+
+
+		   <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0" value="Version ${project.revision}"/>
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0" value="Version ${project.revision}"/>
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0" value="Version ${project.revision}"/>
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0" value="Version ${project.revision}"/>
 
 
 
@@ -273,9 +280,9 @@
 				  <include name="**/*" />
 			  </fileset>
 		  </copy>
-		  
-		  
-		  <!-- Copy solution 
+
+
+		  <!-- Copy solution
 		  <copy todir="${plugin.local.install.solutions.dir}/system/${plugin.name}/actions">
 			  <fileset dir="${solution.stage.dir}/cdf/components">
 				  <include name="**/*" />
@@ -307,7 +314,7 @@
 		  <zip zipfile="${dist.dir}/${plugin.samples.zipfile}"
 			  basedir="${samples.stage.dir}/plugin-samples"
 			  includes="**/*"
-			  excludes="**/Thumbs.db" 
+			  excludes="**/Thumbs.db"
 			  />
 	  </target>
 
@@ -328,7 +335,7 @@
 		  <zip zipfile="${dist.dir}/${plugin.solution.zipfile}"
 basedir="${solution.stage.dir}"
 includes="**/*"
-excludes="**/Thumbs.db" 
+excludes="**/Thumbs.db"
 			  />
 			  -->
 	  </target>
@@ -370,7 +377,7 @@ excludes="**/Thumbs.db"
 		  <param name="publish.pomFile" value="solution-pom.xml" />
 		  <param name="publish.file" value="${dist.dir}/${plugin.solution.zipfile}" />
 	  </antcall>
--->	  
+-->
 		    </target>
 
   <target name="resolve"
@@ -389,19 +396,19 @@ excludes="**/Thumbs.db"
 	  <concat destfile="${CLIENT}/styles.css">
 		  <filelist dir='${CLIENT}' files='${styles}'/>
 	  </concat>
-	  <yui-compressor 
-		  warn="false" 
-		  munge="false" 
-		  preserveallsemicolons="false" 
-		  fromdir="${CLIENT}" 
+	  <yui-compressor
+		  warn="false"
+		  munge="false"
+		  preserveallsemicolons="false"
+		  fromdir="${CLIENT}"
 		  todir="${CLIENT}/mini/">
 
 		  <include name="scripts.js" />
 	  </yui-compressor>
-	  <yui-compressor 
-		  warn="false" 
-		  preserveallsemicolons="false" 
-		  fromdir="${CLIENT}" 
+	  <yui-compressor
+		  warn="false"
+		  preserveallsemicolons="false"
+		  fromdir="${CLIENT}"
 		  todir="${CLIENT}/mini">
 
 		  <include name="styles.css" />
@@ -435,17 +442,17 @@ excludes="**/Thumbs.db"
 		  </sequential>
 	  </for>
   </target>
-  
-  
-  
+
+
+
  <target name="ivy-clean-by-name" depends="install-ivy">
     <echo message="${ivy.local.default.root}"/>
         <echo message="${ivy.settingsurl}"/>
     <echo message="${ivy.default.ivy.user.dir}        "/>
    <ivy:configure url="${ivy.settingsurl}" override="true" />
-   
+
        <echo message="${ivy.local.default.root}"/>
-   
+
     <mkdir dir="${ivy.local.default.root}" />
     <!-- just in case it doesn't exist -->
     <for param="dir">
@@ -466,7 +473,7 @@ excludes="**/Thumbs.db"
         <delete file="@{file}" />
       </sequential>
     </for>
-  </target>  
+  </target>
   
   
 </project>

@@ -24,3 +24,5 @@ override.properties
 #IntelliJ files
 .idea/
 *.iml
+bi-platform-v2-plugin/js-lib
+bi-platform-v2-plugin/test-lib
