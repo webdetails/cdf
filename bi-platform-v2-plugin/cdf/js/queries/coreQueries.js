@@ -469,7 +469,7 @@
           queryDefinition.settingdtSearchableColumns = options.dtSearchableColumns;
         }
       }
-      queryDefinition.wrapItUp = 'wrapit';
+      queryDefinition.wrapItUp = 'true';
 
       var successCallback = function(uuid) {
         var _exportIframe = $('<iframe style="display:none">');
