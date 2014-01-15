@@ -211,7 +211,14 @@
            <!-- rename ccc files -->
            <move file="${stage.dir}/${plugin.name}/js/lib/CCC/pvc.js" tofile="${stage.dir}/${plugin.name}/js/lib/CCC/pvc-d1.0.js"/>
 
-		   <!-- create the version file -->
+           <!-- copy ccc build -->
+           <copy todir="bin/js-source/cdf/lib/CCC" >
+               <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
+           </copy>
+           <!-- rename ccc files -->
+           <move file="bin/js-source/cdf/lib/CCC/pvc.js" tofile="bin/js-source/cdf/lib/CCC/pvc-d1.0.js"/>
+
+           <!-- create the version file -->
 		   <tstamp/>
 			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
 
