@@ -295,7 +295,7 @@
   Dashboards.setBaseQuery ( BaseQuery );
 
 
-  var CpkEndpoints = BaseQuery.extend({
+  var CpkEndpointsOpts = {
     name: "cpk",
     label: "CPK",
     defaults: {
@@ -374,9 +374,8 @@
     /*
      * Public interface
      */
-  });
-  // Registering a class will use that class directly when getting new queries.
-  Dashboards.registerQuery( "cpk", CpkEndpoints );
+  };
+  Dashboards.registerQuery( "cpk", CpkEndpointsOpts );
 
 
   var cdaQueryOpts = {
