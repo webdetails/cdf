@@ -310,10 +310,10 @@ var PrptComponent = BaseComponent.extend({
 
     if (this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
-      options['accept-page'] = 0;
+      options['accepted-page'] = 0;
     } else {
       options["output-target"] = "table/html;page-mode=stream";
-      options['accept-page'] = -1;
+      options['accepted-page'] = -1;
     }
 
     // update options with report parameters
@@ -336,10 +336,10 @@ var PrptComponent = BaseComponent.extend({
 
     if (this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
-      options['accept-page'] = 0;
+      options['accepted-page'] = 0;
     } else {
       options["output-target"] = "table/html;page-mode=stream";
-      options['accept-page'] = -1;
+      options['accepted-page'] = -1;
     }
 
     // update options with report parameters
@@ -366,16 +366,15 @@ var PrptComponent = BaseComponent.extend({
       path: this.path,
       name: this.action,
       renderMode: 'REPORT',
-      htmlProportionalWidth:false,
-      'accepted-page':-1
+      htmlProportionalWidth:false
     };
 
     if (this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
-      options['accept-page'] = 0;
+      options['accepted-page'] = 0;
     } else {
       options["output-target"] = "table/html;page-mode=stream";
-      options['accept-page'] = -1;
+      options['accepted-page'] = -1;
     }
 
     return options;
