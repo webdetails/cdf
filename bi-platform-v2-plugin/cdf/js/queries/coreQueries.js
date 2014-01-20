@@ -314,10 +314,12 @@
         if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
           this.setOption('pluginId' , opts.pluginId);
           this.setOption('endpoint' , opts.endpoint);
-            var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , 'api', this.getOption('endpoint') ],
+          var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , 'api', this.getOption('endpoint') ],
               url = urlArray.join('/');
           this.setOption('url', url );
         }
+        this.setOption('kettleOutput', opts.kettleOutput);
+        this.setOption('stepName', opts.stepName);
         this.setOption('systemParams', opts.systemParams || {} );
         this.setOption('ajaxOptions' , $.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
         var ajaxOptions = this.getOption('ajaxOptions');
@@ -329,7 +331,13 @@
 
     buildQueryDefinition: function(overrides) {
       overrides = ( overrides instanceof Array) ? Dashboards.propertiesArrayToObject(overrides) : ( overrides || {} );
-      var queryDefinition = $.extend(true, {}, this.getOption('systemParams'));
+
+      var queryDefinition = {
+        kettleOutput: this.getOption('kettleOutput'),
+        stepName: this.getOption('stepName')
+      };
+      // We clone queryDefinition to remove undefined
+      queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
       var cachedParams = this.getOption('params'),
           params = $.extend( {}, cachedParams , overrides);
