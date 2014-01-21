@@ -299,7 +299,7 @@
     name: "cpk",
     label: "CPK",
     defaults: {
-      baseUrl:  Dashboards.getWebAppPath() + '/content',
+      url: '',
       pluginId: '',
       endpoint: '',
       systemParams: {},
@@ -314,9 +314,7 @@
         if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
           this.setOption('pluginId' , opts.pluginId);
           this.setOption('endpoint' , opts.endpoint);
-            var urlArray = [ this.getOption('baseUrl') , this.getOption('pluginId') , this.getOption('endpoint') ],
-              url = urlArray.join('/');
-          this.setOption('url', url );
+          this.setOption('url', Endpoints.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
         }
         this.setOption('kettleOutput', opts.kettleOutput);
         this.setOption('stepName', opts.stepName);
