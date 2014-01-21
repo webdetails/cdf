@@ -20,4 +20,9 @@ public class CdfApiPathProvider implements ICdfApiPathProvider {
   public String getPluginStaticBaseUrl() {
     return urlProvider.getPluginStaticBaseUrl();
   }
+  
+  @Override
+  public String getViewActionUrl() {
+    return "ViewAction?path={path}/{name}";
+  }
 }

@@ -22,4 +22,9 @@ public class CdfApiPathProvider implements ICdfApiPathProvider {
   public String getPluginStaticBaseUrl() {
     return pluginPath;
   }
+
+  @Override
+  public String getViewActionUrl() {
+    return "ViewAction?solution={solution}&path={path}&action={name}";
+  }
 }

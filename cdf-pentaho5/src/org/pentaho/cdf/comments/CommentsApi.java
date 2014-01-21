@@ -57,7 +57,7 @@ public class CommentsApi {
     }
 
     try {
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), result );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -97,7 +97,7 @@ public class CommentsApi {
     }
 
     try {
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), result );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -135,7 +135,7 @@ public class CommentsApi {
     }
 
     try {
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), result );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -158,7 +158,7 @@ public class CommentsApi {
       String msg = "Operation not authorized: requires administrator priviledges";
       logger.error( msg );
       try {
-        PluginIOUtils.writeOut( servletResponse.getOutputStream(), msg );
+        PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), msg );
       } catch ( IOException ex ) {
         logger.error( "Error while outputing result", ex );
       }
@@ -173,7 +173,7 @@ public class CommentsApi {
     }
 
     try {
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), result );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }

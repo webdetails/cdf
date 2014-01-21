@@ -205,7 +205,8 @@ public class CommentsEngine {
 
   private void initialize() throws PluginHibernateException {
 
-    try {
+    try {      
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
       // Get comments hbm file
       IBasicFile commentsHbmFile =

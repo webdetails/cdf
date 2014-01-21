@@ -90,7 +90,7 @@ public class CdfApi {
         return;
       }
 
-      PluginIOUtils.writeOut( response.getOutputStream(), systemAccess.getFileInputStream( path ) );
+      PluginIOUtils.writeOutAndFlush( response.getOutputStream(), systemAccess.getFileInputStream( path ) );
       response.getOutputStream().flush();
       
     } catch ( Exception e ) {
@@ -114,7 +114,7 @@ public class CdfApi {
   public void clearCache( @Context HttpServletResponse servletResponse ) {
     try {
       ContextEngine.clearCache();
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), "Cache Cleared" );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), "Cache Cleared" );
     } catch ( IOException e ) {
       logger.error( "failed to clear CDFcache" );
     }

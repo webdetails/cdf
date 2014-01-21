@@ -22,7 +22,7 @@ import java.util.Date;
  */
 public class CommentEntry implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -1301540966439813079L;
   private int commentId;
   private String page;
   private String user;
