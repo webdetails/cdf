@@ -41,30 +41,24 @@ var Endpoints = {
   getResource: function() { return Endpoints.getCdfBase() + "/resource" },
 
   getCdfXaction: function( path, action ) { 
-    return getViewAction() + "?path=" + "/public/plugin-samples/" + path + "/" + action; 
+    return Endpoints.getViewAction() + "?path=" + "/public/plugin-samples/" + path + "/" + action; 
   },
 
   getComments: function ( action ) { 
 
   	var endpoint = "";
 
-  	switch( action ) {
-
-      case 'LIST_ALL' || 'LIST_ACTIVE' || 'GET_LAST' :
-        endpoint = "list";
-        break;
-
-      case 'DELETE_COMMENT':
-        endpoint = "delete";
-        break;
-
-      case 'ARCHIVE_COMMENT':
-        endpoint = "archive";
-        break;
-
-      case 'ADD_COMMENT':
-        endpoint = "add";
-        break;
+  	if( action == "LIST_ALL" || action == "LIST_ACTIVE" || action == "GET_LAST" ) {
+      endpoint = "list";
+    
+    } else if( action == "DELETE_COMMENT" ) {
+      endpoint = "delete";
+    
+    } else if( action == "ARCHIVE_COMMENT" ) {
+      endpoint = "archive";
+      
+    } else if( action == "ADD_COMMENT" ) {
+      endpoint = "add";
     }
 
   	return Endpoints.getCdfBase() + "/comments/" + endpoint;

@@ -60,7 +60,7 @@ public class SettingsApi {
     final Object value = SettingsEngine.getInstance().getValue( key, PentahoSessionHolder.getSession() );
 
     try {
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), value.toString() );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), value.toString() );
     } catch ( Exception e ) {
       logger.error( e );
     }

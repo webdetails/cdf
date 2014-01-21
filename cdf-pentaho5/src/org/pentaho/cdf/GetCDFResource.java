@@ -83,7 +83,7 @@ public class GetCDFResource extends ServletBase {
     OutputStream out = response.getOutputStream();
     try {
       // Copy the contents of the file to the output stream
-      PluginIOUtils.writeOut( out, in );
+      PluginIOUtils.writeOutAndFlush( out, in );
     } finally {
       if ( in != null ) {
         in.close();

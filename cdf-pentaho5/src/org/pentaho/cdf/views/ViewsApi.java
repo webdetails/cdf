@@ -48,7 +48,7 @@ public class ViewsApi {
     }
 
     try {
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), result );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -64,7 +64,7 @@ public class ViewsApi {
     try {
 
       String result = ViewsEngine.getInstance().saveView( view, getUserName() );
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), result );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
 
     } catch ( Exception ex ) {
       logger.error( "Error while outputing result", ex );
@@ -81,7 +81,7 @@ public class ViewsApi {
     try {
 
       String result = ViewsEngine.getInstance().deleteView( name, getUserName() );
-      PluginIOUtils.writeOut( servletResponse.getOutputStream(), result );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
 
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
