@@ -17,10 +17,14 @@ var Endpoints = {
   getWebapp: function () { return webAppPath; },
 
   getXmla: function () { return Endpoints.getWebapp() + "/Xmla"; },
-  
-  getCdfBase: function () { return Endpoints.getWebapp() + "/plugin/pentaho-cdf/api"; },
 
-  getCdaBase: function () { return Endpoints.getWebapp() + "plugin/cda/api"; },
+  getPluginBase: function( plugin ) { return Endpoints.getWebapp() + "/plugin/" + plugin + "/api"; },
+
+  getCdfBase: function () { return Endpoints.getPluginBase('pentaho-cdf'); },
+
+  getCdaBase: function () { return Endpoints.getPluginBase('cda'); },
+
+  getPluginEndpoint: function( plugin, endpoint ) { return Endpoints.getPluginBase(plugin) + "/" + endpoint; },
 
   getStorage: function ( action ) { return Endpoints.getCdfBase() + "/storage/"  + action; },
 
