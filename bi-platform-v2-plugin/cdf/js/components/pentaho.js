@@ -534,6 +534,16 @@ update : function() {
 
     }
 
+    getFileName = function() {
+      var path = myself.path;
+      return path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+    }
+
+    getDefaultLocation = function() {
+      var path = myself.path;
+      return path.substring(0, path.lastIndexOf("/"));
+    }
+
     getHour = function(){
     var hour=$("#hours").val();
     if($("#amPm").val()=="pm") {
@@ -546,108 +556,21 @@ update : function() {
     }
     return hour;
     }
-    cronThis = function(){
-      var minute=$("#minutes").val();
-      var hour=getHour();
-      var choice= $("#recurrId").val();
-      var dayOfWeek="?";
-      var month ="*";
-      var dayOfMonth="?";
-      var year="*";//really necessary?
-      switch(choice)
-      {
-        case "daily":
-        dayOfWeek="mon-fri";
-        break;
-        case "weekly":
-        var i=0;
-        if ($("#monday").is(":checked")){
-          dayOfWeek+=",mon";
-          i++;
-        }
-        if ($("#tuesday").is(":checked")){
-          dayOfWeek+=",tue";
-          i++;
-      }
-        if ($("#wednesday").is(":checked")){
-          dayOfWeek+=",wed";
-          i++;
-      }
-        if ($("#thursday").is(":checked")){
-          dayOfWeek+=",thu";
-          i++;
-      }
-        if ($("#friday").is(":checked")){
-          dayOfWeek+=",fri";
-          i++;
-      }
-        if ($("#saturday").is(":checked")){
-          dayOfWeek+=",sat";
-          i++;
-      }
-        if ($("#sunday").is(":checked")){
-          dayOfWeek+=",sun";
-          i++;
-      }
-      if(i>0){
-        dayOfWeek=dayOfWeek.replace("\?","");
-        dayOfWeek=dayOfWeek.replace(",","");
-      }else{
 
-         $("#errWeek").css("color","rgb(255,159,159)");
-         $("#errorCheckboxes").show();
-         setTimeout(function(){
-         $("#errorCheckboxes").hide();
-            },2000);
-         error=true;
-
-      }
-        break;
-        case "monthly":
-        if($("#monthRadio").is(":checked"))
-        {
-          dayOfMonth=$("#recurrPatternIn").val();
-          if(dayOfMonth<1)
-            triggerError(">0","#recurrPatternIn");
-          else if(dayOfMonth>31)
-            triggerError("<=31","#recurrPatternIn");
-        }
-        else
-        {
-          dayOfMonth="?";
-          dayOfWeek=$("#monthOpt2Select").val().substring(0,3)+"#"+$("#monthOpt1Select").val();
-
-        }
-        break;
-        case "yearly":
-        if($("#yearRadio").is(":checked"))
-        {
-          dayOfWeek = "?";
-          month=$("#yearEveryMonth").val();
-          dayOfMonth=$("#yearDayMonth").val();
-          if(dayOfMonth<1)
-            triggerError(">0","#yearDayMonth");
-          else if(dayOfMonth>31)
-            triggerError("<=31","#yearDayMonth");
-
-        }
-        else
-        {
-          dayOfMonth="?";
-          dayOfWeek=$("#yearOpt2Select").val().substring(0,3)+"#"+$("#yearOpt1Select").val();
-          month=$("#yearMonthSelect").val();
-        }
-        break;
-
-      }
-      var builtCron = "0 "+minute+" "+hour+" "+dayOfMonth+" "+month+" "+dayOfWeek+" "+year;
-      return builtCron;
-
-    }
-    getUTC = function(exp){
+    getUTC = function(exp, end){
       var arr=exp.split("/");
-      return new Date(arr[2],arr[0]-1,arr[1],0,0,0,0).getTime();
+      if (end) {
+        return new Date(arr[2],arr[0]-1,arr[1],23,59,59,0).getTime();
+      } else {
+        return new Date(arr[2],arr[0]-1,arr[1],0,0,0,0).getTime();
+      }
     }
+
+    getISO = function(exp){
+      var arr=exp.split("/");
+      return new Date(arr[2],arr[0]-1,arr[1],0,0,0,0).toISOString();
+    }
+
      makeSelect = function(min,max,interval,id){
       var selectHtml = '<select id ="'+id+'">';
       for(var i=min;i<=max;i+=interval){
@@ -668,144 +591,261 @@ update : function() {
       if($("#endByRadio").is(":checked")){
       var now = new Date();
       var startDate = $("#rangeStartIn").val();
-      var mil=getUTC(startDate);
+      var mil = getUTC(startDate);
       if(isNaN(mil)){}
-      else if(mil>mili)
+      else if(mil > mili)
         triggerError("End Date > Start Date",id); 
-      else if(isNaN(mili)||mili<now.getTime())
+      else if(isNaN(mili) || mili < now.getTime())
         triggerError("Incorrect Date",id);
+      }
     }
+
+    validateName = function(name) {
+      if(name == "") {
+        triggerError("You must choose a name","#nameIn");
+      }
+      var pattern = /[^0-9a-zA-Z]/;
+      if (name.match(pattern)) {
+       triggerError('Invalid characters, alpha-numeric text only.',"#nameIn"); 
+      }
     }
-    startTimeGetter=function(){
+
+    startTimeGetter =function(selector){
         var hours = getHour();
         var minutes=$("#minutes").val();
-        var mili= (minutes*60000)+(hours*3600000);
-        var start = getUTC($("#rangeStartIn").val());
-        start+=mili;
-        validateStartDate(start,"#rangeStartIn");
-        return start;
+        var mili = (minutes*60000)+(hours*3600000);
+        var start;
+        if (selector != undefined){
+          start = getUTC($(selector).val()) + mili;
+          validateStartDate(start,selector);
+        } else {
+          start = getUTC($("#rangeStartIn").val()) + mili;
+          validateStartDate(start,"#rangeStartIn");
+        }
+        return new Date(start).toISOString();
     }
      endTimeGetter=function(){
-      var end =getUTC($("#endByIn").val());
+      var end = getUTC($("#endByIn").val(), true);
       validateEndDate(end,"#endByIn");
-        return end;
+        return new Date(end).toISOString();
+    }
+
+    getSelectedDaysOfWeek = function(){
+      var selectedDays = new Array();
+      var i = 0;
+      if ($("#sunday").is(":checked")){
+          selectedDays[i++] = 0;
+      }
+      if ($("#monday").is(":checked")){
+       selectedDays[i++] = 1;
+      }
+      if ($("#tuesday").is(":checked")){
+        selectedDays[i++] = 2;
+      }
+      if ($("#wednesday").is(":checked")){
+        selectedDays[i++] = 3;
+      }
+      if ($("#thursday").is(":checked")){
+        selectedDays[i++] = 4;
+      }
+      if ($("#friday").is(":checked")){
+        selectedDays[i++] = 5;
+      }
+      if ($("#saturday").is(":checked")){
+        selectedDays[i++] = 6;
+      }
+      return selectedDays;
+    } 
+    getDayOfMonth = function(){
+      dayOfMonth=$("#recurrPatternIn").val();
+      if(dayOfMonth<1)
+        triggerError(">0","#recurrPatternIn");
+      else if(dayOfMonth>31)
+        triggerError("<=31","#recurrPatternIn");
     }
 
       setParameters = function(){
 
          parameters = {
-                  name:  $("#nameIn").val(),
-                  title:  $("#nameIn").val(),
-                  desc:  $("#nameIn").val(),
-                  schedRef: sharedUuid,
-                  group:myself.group ? myself.group : "Default Schedule Group",
-                  requestedMimeType: "text/xml",
-                  actionRefs: myself.solution + "/" + myself.path + "/" + myself.action,
-                  schedulerAction: "doAddScheduleAndContent"
+                  inputFile: myself.path,
+                  jobName: $('#nameIn').val(),
+                  outputFile: $('#locationIn').val()
                 };
 
       error=false;                               
-      var choice= $("#recurrId").val();
-      var name=$("#nameIn").val();
-      if(name=="")
-        triggerError("You must choose a name","#nameIn");
-      parameters["name"]=name;
+      var choice = $("#recurrId").val();
+      var name = $("#nameIn").val();
+      validateName(name);
       switch (choice)
       {
 
          case "once":
-         var hours = getHour();
-        var minutes=$("#minutes").val();
-        var mili= (minutes*60000)+(hours*3600000);
-        var start = getUTC($("#startDateIn").val());
-        start+=mili;
-        validateStartDate(start,"#startDateIn"); 
-        parameters["start-date-time"]=start;
-        parameters["repeat-time-millisecs"]=0;
-        parameters["repeat-count"]=0;
+        var start = startTimeGetter("#startDateIn");
+        var simpleJobTrigger = {
+          repeatCount: 0,
+          repeatInterval: 0,
+          startTime: start,
+          uiPassParam: "RUN_ONCE"
+        };
+        parameters["simpleJobTrigger"] = simpleJobTrigger;
         break;
 
         case "seconds":
         var start = startTimeGetter();
-        parameters["start-date-time"]=start;
-        var repeatSec=$("#recurrPatternInSec").val();
-          if(repeatSec<1)
+        var repeatSec = $("#recurrPatternInSec").val();
+        if(repeatSec < 1) {
             triggerError(">0","#recurrPatternInSec");
-        parameters["repeat-time-millisecs"]=repeatSec*1000;
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter()
+        }
+        if($("#endByRadio").is(":checked")) {
+          var endDate = endTimeGetter();
+        }
+        var simpleJobTrigger = {
+          endTime: endDate,
+          repeatCount: -1,
+          repeatInterval: repeatSec,
+          startTime: start,
+          uiPassParam: "SECONDS"
+
+        };
+        parameters["simpleJobTrigger"] = simpleJobTrigger;
         break;
 
         case "minutes":
         var start = startTimeGetter();
-        parameters["start-date-time"]=start;
-        var repeatMin=$("#recurrPatternInMin").val();
-          if(repeatMin<1)
+        var repeatMin = $("#recurrPatternInMin").val();
+        if(repeatMin < 1) {
             triggerError(">0","#recurrPatternInMin");
-        parameters["repeat-time-millisecs"]=repeatMin*60000;
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter()
+          }
+        if($("#endByRadio").is(":checked")) {
+          var endDate = endTimeGetter();
+        }
+        var simpleJobTrigger = {
+          endTime: endDate,
+          repeatCount: -1,
+          repeatInterval: repeatMin,
+          startTime: start,
+          uiPassParam: "MINUTES"
+        };
+        parameters["simpleJobTrigger"] = simpleJobTrigger;
         break;
 
         case "hours":
         var start = startTimeGetter();
-        parameters["start-date-time"]=start;
-        var repeatHour=$("#recurrPatternInHour").val();
-          if(repeatHour<1)
-            triggerError(">0","#recurrPatternInHour");
-        parameters["repeat-time-millisecs"]=repeatHour*3600000;
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter();
+        var repeatHour = $("#recurrPatternInHour").val();
+        if(repeatHour < 1) {
+          triggerError(">0","#recurrPatternInHour");
+        }
+        if($("#endByRadio").is(":checked")) {
+          var endDate = endTimeGetter();
+        }
+        var simpleJobTrigger = {
+          endTime: endDate,
+          repeatCount: -1,
+          repeatInterval: repeatHour,
+          startTime: start,
+          uiPassParam: "HOURS"
+        };
+        parameters["simpleJobTrigger"] = simpleJobTrigger;
         break;
 
         case "daily":
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter();
-        if($("#weekDayRadio").is(":checked")){
-          parameters["cron"]=cronThis();
+        if($("#endByRadio").is(":checked")) {
+          var endDate = endTimeGetter();
         }
-        else if($("#dayRadio").is(":checked")){ 
-          var repeatDays=$("#recurrPatternInDay").val();
-          if(repeatDays<1)
+        var start = startTimeGetter();
+        if($("#weekDayRadio").is(":checked")){
+          var complexJobTrigger = {
+            daysOfWeek: [1, 2, 3, 4, 5],
+            endTime: endDate,
+            startTime: start,
+            uiPassParam: "DAILY"
+          };
+          parameters["complexJobTrigger"] = complexJobTrigger;
+        }
+        else if($("#dayRadio").is(":checked")){
+          var repeatDays = $("#recurrPatternInDay").val();
+          if(repeatDays < 1) {
             triggerError(">0","#recurrPatternInDay");
-          parameters["repeat-time-millisecs"]=repeatDays*86400000;
-          var start = startTimeGetter();
-        parameters["start-date-time"]=start;
+          }
+          var simpleJobTrigger = {
+            entTime: endDate,
+            repeatCount: -1,
+            repeatInterval: repeatDays,
+            startTime: start,
+            uiPassParam: "DAILY"
+          };
+          parameters["simpleJobTrigger"] = simpleJobTrigger;
         }
         break;
 
         case "weekly":
-        parameters["cron"]=cronThis();
         var start = startTimeGetter();
-        parameters["start-date-time"]=start;
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter();
+        if($("#endByRadio").is(":checked")) {
+          var endDate = endTimeGetter();
+        }
+        var complexJobTrigger = {
+          daysOfWeek: getSelectedDaysOfWeek() ,
+          endTime: endDate,
+          startTime: start,
+          uiPassParam: "WEEKLY"
+        };
+        parameters["complexJobTrigger"] = complexJobTrigger;
         break;
 
         case "monthly":
-        parameters["cron"]=cronThis();
         var start = startTimeGetter();
-        parameters["start-date-time"]=start;
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter();
+        if($("#endByRadio").is(":checked")) {
+          var endDate = endTimeGetter();
+        }
+        var complexJobTrigger = {
+          endTime: endDate,
+          startTime: start,
+          uiPassParam: "MONTHLY"
+        };
+        if($("#monthRadio").is(":checked")){
+          complexJobTrigger["daysOfMonth"] = getDayOfMonth();
+        } else {
+          complexJobTrigger["daysOfWeek"] = $("#monthOpt2Select").val();
+          complexJobTrigger["weeksOfMonth"] = $("#monthOpt1Select").val(); 
+        }
+      parameters["complexJobTrigger"] = complexJobTrigger;
         break;
 
         case "yearly":
-        parameters["cron"]=cronThis();
         var start = startTimeGetter();
-        parameters["start-date-time"]=start;
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter();
+        if($("#endByRadio").is(":checked")) {
+          var endDate = endTimeGetter();
+        }
+        var complexJobTrigger = {
+          endTime: endDate,
+          startTime: start,
+          uiPassParam: "YEARLY"
+        }
+        if($("#yearRadio").is(":checked")) {
+          complexJobTrigger["daysOfMonth"] = getDayOfMonth();
+          complexJobTrigger["monthsOfYear"] = $("#yearEveryMonth").val();
+        } else {
+          complexJobTrigger["daysOfWeek"] = $("#yearOpt2Select").val();
+          complexJobTrigger["monthsOfYear"] = $("#yearMonthSelect").val();
+          complexJobTrigger["weeksOfMonth"] = $("#yearOpt1Select").val();
+        }
+        parameters["complexJobTrigger"] = complexJobTrigger;
         break;
 
         case "cron":
-        var cronString=$("#cronString").val();
-        validateCron(cronString);
-        parameters["cron"]=cronString;
-        var start = getUTC($("#rangeStartIn").val());
-        parameters["start-date-time"]=start;
-        if($("#endByRadio").is(":checked"))
-          parameters["end-date-time"]=endTimeGetter();
+        var cron = $("#cronString").val();
+        validateCron(cron);
+        var start = getISO($("#rangeStartIn").val());
+        if($("#endByRadio").is(":checked")) {
+          endDate = endTimeGetter();
+        }
+        var cronJobTrigger = {
+          cronString: cron,
+          endTime: endDate,
+          startTime: start,
+          uiPassParam: "CRON"
+        };
+        parameters["cronJobTrigger"]  = cronJobTrigger;
         break;
       }
     }
@@ -895,19 +935,28 @@ update : function() {
 
     }
 
+    createJobParameter = function(paramName, paramValue, paramType) {
+      return {name: paramName, stringValue: new Array(paramValue), type: paramType};
+    }
 
-    var monthOpts = '<option value="1">January</option>'+'<option value="2">February</option>'+
-          '<option value="3">March</option>'+'<option value="4">April</option>'+
-          '<option value="5">May</option>'+'<option value="6">June</option>'+
-          '<option value="7">July</option>'+'<option value="8">August</option>'+
-          '<option value="9">September</option>'+'<option value="10">October</option>'+
-          '<option value="11">November</option>'+'<option value="12">December</option>';
-    var weekOpts = '<option value="sunday">sunday</option>'+'<option value="monday">monday</option>'+
-          '<option value="tuesday">tuesday</option>'+'<option value="wednesday">wednesday</option>'+
-          '<option value="thursday">thursday</option>'+'<option value="friday">friday</option>'+
-          '<option value="saturday">saturday</option>';
+    var myself = this;
+
+    var monthOpts = '<option value="0">January</option>'+'<option value="1">February</option>'+
+          '<option value="2">March</option>'+'<option value="3">April</option>'+
+          '<option value="4">May</option>'+'<option value="5">June</option>'+
+          '<option value="6">July</option>'+'<option value="7">August</option>'+
+          '<option value="8">September</option>'+'<option value="9">October</option>'+
+          '<option value="10">November</option>'+'<option value="11">December</option>';
+    var weekOpts = '<option value="0">sunday</option>'+'<option value="1">monday</option>'+
+          '<option value="2">tuesday</option>'+'<option value="3">wednesday</option>'+
+          '<option value="4">thursday</option>'+'<option value="5">friday</option>'+
+          '<option value="6">saturday</option>';
+    var firstLastDropdown = '<option value="0">first</option>'+'<option value="1">second</option>'+
+          '<option value="2">third</option>'+'<option value="3">fourth</option>'+
+          '<option value="4">last</option>';
     var errorMessage = '<label id="err" style="display:none">Incorrect Input</label>';
-    var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"><span class="dialog-label">Name:</span><input id="nameIn" type="text" value="' + this.action + ' Schedule"></form></div>';
+    var nameDiv= '<div id="nameDiv"><form style="display:inline-block" id="nameForm"><span class="dialog-label">Name:</span><input id="nameIn" type="text" value="' + getFileName() + '"></form></div>';
+    var locationDiv= '<div id="locationDiv"><form style="display:inline-block" id="nameForm"><span class="dialog-label">Location:</span><input id="locationIn" type="text" value="' + getDefaultLocation() + '"></form></div>';
     var groupDiv= '<div id="groupDiv"><form style="display:inline-block" id="groupForm"><span class="dialog-label">Group:</span><input id="groupIn" type="text" value=""></form></div>';
     var descriptionDiv= '<div><form style="display:inline-block" id="descForm"><span class="dialog-label">Description:</span><input id="descIn" type="text" value=""></form></div>';
     var recurrenceDiv = '<div>'+
@@ -967,9 +1016,7 @@ update : function() {
       '<form style="display:inline-block"><input id= "recurrPatternIn" type="text" size="3" style="width:205px;"></form>'+
       '<label style="display:inline-block; font-weight: 500;"> of every month</label></br>'+
       '<input type="radio" name ="month" value="the" style="margin-left: 100px;"> <label style="display:inline-block; font-weight: 500;">The</label>&nbsp;&nbsp;'+
-        '<select id="monthOpt1Select">'+'<option value="1">first</option>'+'<option value="2">second</option>'+
-          '<option value="3">third</option>'+'<option value="4">fourth</option>'+
-          '<option value="5">last</option>'+
+        '<select id="monthOpt1Select">'+firstLastDropdown+
         '</select>'+
         '<select id="monthOpt2Select">'+weekOpts+
         '</select><label style=" font-weight: 500;"> of every month</label>'+
@@ -979,9 +1026,7 @@ update : function() {
       '<select id="yearEveryMonth">'+monthOpts+
         '</select><input id="yearDayMonth"type="text" size="3">'+'</br>'+
       '<input type="radio" name ="year" value="the" style="margin-left: 100px;"> <label style="display:inline-block; font-weight: 500;">The</label>&nbsp;'+
-        '<select id="yearOpt1Select">'+'<option value="1">first</option>'+'<option value="2">second</option>'+
-          '<option value="3">third</option>'+'<option value="4">fourth</option>'+
-          '<option value="5">last</option>'+
+        '<select id="yearOpt1Select">'+firstLastDropdown+
         '</select>'+
         '<select id="yearOpt2Select">'+weekOpts+
         '</select><label style=" font-weight: 500;">of&nbsp;&nbsp;</label>'+
@@ -1000,28 +1045,9 @@ update : function() {
     var mailInfo = '<form><span class="dialog-label">To (Email):</span><input id="to" type="text" value=""></form>';
   
 
-        var fullPage = "";
-        if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles) >= 0)
-            fullPage= nameDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+ rangeOfRecurrence+rangeOfRecurrenceOnce;
-        else {
-            //Build selector
-            var subscriptionSelector = "<span class='dialog-label'>Subscription: </span><select name='subscriptionSelector' id='subscriptionSelector'>";
-            var x = $.ajaxSettings.async;
-            $.ajaxSetup({ async: false });
-            $.getJSON("getSchedules", {solution: this.solution, path: this.path, action:this.action},
-                function(response) {
-                    for (var i=0; i < response.length; i++) {
-                        if (response[i]) {
-                            subscriptionSelector += "<option value='" + response[i].id + "'>" + response[i].name + "</option>";
-                        }
-                    }
-                },'text');
-            $.ajaxSetup({ async: x });
-            subscriptionSelector += "</select>";
-            fullPage = nameDiv + mailInfo + subscriptionSelector;
-        }       
+        var fullPage = nameDiv+locationDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+rangeOfRecurrence+rangeOfRecurrenceOnce;
+        
 
-        var myself = this;
       var promp = {
 
       basicState : {
@@ -1033,99 +1059,53 @@ update : function() {
         },
         submit: function(e,v,m,f){
 
-          sharedUuid= guid();
+          sharedUuid = guid();
           if(e==-1) {$.prompt.close();}
           else if(e==1){
             setParameters();
-                  if(error){
-                    parameters={};
-                   return false;
-                  }
-                    
+            if (error) {
+              parameters = {};
+              return false;
+            }
+            var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
 
-                var parameters2 = {
-                  path : myself.path,
-                  solution: myself.solution,
-                  name : myself.action,
-                  subscribe : true,
-                  "subscription-name" :  $("#nameIn").val(),
-                  "schedule-id" : sharedUuid,
-                  showParameters : myself.showParameters,
-                  htmlProportionalWidth : false,
-                  "accepted-page":-1,
-                  "output-target":  myself.outputTarget ? myself.outputTarget: "table/html;page-mode=page",
-                  renderMode : "SUBSCRIBE"
-                };
-
-                for (var i = 0; i < myself.parameters.length; i++) {
-                    var param = myself.parameters[i];
-                    parameters2[param[0]] = param[1];
-                }
-
-                if ($("#to").val().length > 0 ) {
-                    parameters2.destination = $("#to").val();
-                }
-
-var success = false;
+            var jobParameters = new Array();//XXX confirm defaults?
+            jobParameters[0] = createJobParameter("output-target", outTarget, "string");
+            jobParameters[1] = createJobParameter("accepted-page", "0", "string");
+            jobParameters[2] = createJobParameter("session", "howToGetSession", "string");//XXX how to get this
+            jobParameters[3] = createJobParameter("showParameters", "true", "string");
+            jobParameters[4] = createJobParameter("renderMode", "XML", "string");
+            jobParameters[5] = createJobParameter("htmlProportionalWidth", "false", "string");
+            parameters["jobParameters"] = jobParameters;
+            
+            var success = false;
             var x = $.ajaxSettings.async;
-            $.ajaxSetup({ async: false });
+            $.ajaxSetup({
+              async: false
+            });
 
- if ($.inArray(this.adminRole ? this.adminRole : "Admin", Dashboards.context.roles)>= 0){
+            $.ajax({
+              url: webAppPath + "/api/scheduler/job",
+              type: "POST",
+              data: JSON.stringify(parameters),
+              contentType: "application/json",
+              success: function (response) {
+                alert("Scheduled.\n" + response);
+                success = true;
+                },
+              error: function (response) {
+                alert.log(response.responseText);
+                sucess = false;
+              }
+            });
 
-                $.post("../../SubscriptionAdminService", parameters,
-                  function(xml) {
-                    if (xml &&
-                        xml.documentElement &&
-                        xml.documentElement.getAttribute('result') === 'OK') {
-                        //get schedule id
-                        var scheduleId = sharedUuid;
-                        $.getJSON("getSchedules", {solution: myself.solution, path: myself.path, action:myself.action},
-                            function(response) {
-                                for (var i=0; i < response.length; i++) {
-                                    if (response[i]) {
-                                        if (response[i].name == $("#nameIn").val())
-                                            scheduleId = response[i].id;
-                                    }
-                                }
-                            },'text');                        
-                            parameters2["schedule-id"] = scheduleId;
-                        $.get("../../content/reporting", parameters2,
-                          function(response) {
-                            alert(response);
-                            success = response == 'Public Schedule saved/created';
-                          },'text');                
-                    } else {
-                        alert('Error while creating schedule');
-                    }
-                  },'xml');
-                
-} else {
-
-parameters2["schedule-id"] = $("#subscriptionSelector").val();
-$.get("../../content/reporting", parameters2,
-function(response) {
-alert(response);
-success = response == 'Public Schedule saved/created';
-},'text');
-
-
-}
-
-            $.ajaxSetup({ async: x });
-            return success;           
+            $.ajaxSetup({
+              async: x
+            });
+            return success;
           }
       }
-    }/*,
-
-      doneState : {
-
-        html: "Report Scheduled", 
-        title: "Schedule Report",
-        buttons: {"Ok" : true},
-        submit: function(e,v,m,f){
-        }
-      }
-    */
+    }
   };
       $.prompt(promp, {classes: 'scheduler'});
       $(".scheduler #jqi").css("width", "510px");
