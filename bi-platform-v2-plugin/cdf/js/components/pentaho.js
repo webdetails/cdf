@@ -1072,13 +1072,16 @@ update : function() {
             }
             var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
 
-            var jobParameters = new Array();//XXX confirm defaults?
-            var i = 0;
-            jobParameters[i++] = createJobParameter("output-target", outTarget, "string");
-            jobParameters[i++] = createJobParameter("accepted-page", "0", "string");
-            jobParameters[i++] = createJobParameter("showParameters", "true", "string");
-            jobParameters[i++] = createJobParameter("renderMode", "XML", "string");
-            jobParameters[i++] = createJobParameter("htmlProportionalWidth", "false", "string");
+            var jobParameters = new Array();
+            var k = 0;
+            jobParameters[k++] = createJobParameter("output-target", outTarget, "string");
+            jobParameters[k++] = createJobParameter("accepted-page", "0", "string");
+            jobParameters[k++] = createJobParameter("showParameters", "true", "string");
+            jobParameters[k++] = createJobParameter("renderMode", "XML", "string");
+            jobParameters[k++] = createJobParameter("htmlProportionalWidth", "false", "string");
+            for (var i = 0; i < myself.parameters.length; i++) {
+              jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string");
+            }
             parameters["jobParameters"] = jobParameters;
             
             var success = false;
