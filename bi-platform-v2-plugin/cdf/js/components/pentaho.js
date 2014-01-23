@@ -540,8 +540,7 @@ update : function() {
     }
 
     getDefaultLocation = function() {
-      var path = myself.path;
-      return path.substring(0, path.lastIndexOf("/"));
+      return "/home/" + Dashboards.context.user;
     }
 
     getHour = function(){
@@ -1043,12 +1042,9 @@ update : function() {
     '<input id= "endByIn" type="text" style="width:187px;"></form>'+
     '</div>';
    var rangeOfRecurrenceOnce='<div id="rangeOfRecurrOnceDiv"><form><span class="dialog-label">Start Date:</span><input id= "startDateIn" type="text" value=""></form></div>';
-
-
-    var mailInfo = '<form><span class="dialog-label">To (Email):</span><input id="to" type="text" value=""></form>';
   
 
-        var fullPage = nameDiv+locationDiv+mailInfo+recurrenceDiv+cronString+startTime+recurrencePattern+rangeOfRecurrence+rangeOfRecurrenceOnce;
+   var fullPage = nameDiv+locationDiv+recurrenceDiv+cronString+startTime+recurrencePattern+rangeOfRecurrence+rangeOfRecurrenceOnce;
         
 
       var promp = {
