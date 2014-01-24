@@ -235,7 +235,7 @@
 
         <echo file="${dist.dir}/marketplace.xml">&lt;version>
             &lt;branch>TRUNK&lt;/branch>
-            &lt;version>${distribution.version}&lt;/version>
+            &lt;version>${project.revision}&lt;/version>
             &lt;name>Trunk&lt;/name>
                 &lt;package_url>http://ci.pentaho.com/job/pentaho-cdf/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-TRUNK-SNAPSHOT.zip&lt;/package_url>
                 &lt;samples_url>http://ci.pentaho.com/job/pentaho-cdf/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-TRUNK-SNAPSHOT.zip&lt;/samples_url>
