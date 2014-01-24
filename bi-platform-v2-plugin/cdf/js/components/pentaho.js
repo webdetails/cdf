@@ -937,8 +937,12 @@ update : function() {
 
     }
 
-    createJobParameter = function(paramName, paramValue, paramType) {
-      return {name: paramName, stringValue: new Array(paramValue), type: paramType};
+    createJobParameter = function(paramName, defaultValue, paramType, forceDefault) {
+      if( !forceDefault && (myself.getReportOptions()[paramName] != undefined )){
+        return {name: paramName, stringValue: new Array( "" + myself.getReportOptions()[paramName]), type: paramType}
+      } else {
+        return {name: paramName, stringValue: new Array( "" + defaultValue), type: paramType};
+      }
     }
 
     var myself = this;
@@ -1070,13 +1074,13 @@ update : function() {
 
             var jobParameters = new Array();
             var k = 0;
-            jobParameters[k++] = createJobParameter("output-target", outTarget, "string");
+            jobParameters[k++] = createJobParameter("output-target", outTarget, "string", true);
             jobParameters[k++] = createJobParameter("accepted-page", "0", "string");
             jobParameters[k++] = createJobParameter("showParameters", "true", "string");
             jobParameters[k++] = createJobParameter("renderMode", "XML", "string");
             jobParameters[k++] = createJobParameter("htmlProportionalWidth", "false", "string");
             for (var i = 0; i < myself.parameters.length; i++) {
-              jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string");
+              jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string", true);
             }
             parameters["jobParameters"] = jobParameters;
             
@@ -1096,7 +1100,7 @@ update : function() {
                 success = true;
                 },
               error: function (response) {
-                alert.log(response.responseText);
+                alert(response.responseText);
                 sucess = false;
               }
             });
