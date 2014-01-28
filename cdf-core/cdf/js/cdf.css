@@ -508,6 +508,15 @@ div.scheduler  .jqimessage {
 	border: 1px solid #137bca;
 }
 
+.scheduler  textarea:focus {
+  border: 1px solid #137bca;
+}
+
+.scheduler  textarea {
+  width: 100%;
+  height: auto;
+}
+
 div.scheduler  label {
 	color: #137bca;
 	font-size: 13px;
@@ -546,7 +555,7 @@ div.scheduler  label {
 	cursor: pointer;
 }
 
-.scheduler  #jqi_basicState_buttonCancel {
+.scheduler  #jqi_basicState_buttonCancel, #jqi_mailState_buttonBack  {
 	width: 30%;
 	margin: 0;
 	left:0;
@@ -556,12 +565,12 @@ div.scheduler  label {
 	background-color: #333;
 }
 
-.scheduler  #jqi_basicState_buttonCancel:hover {
+.scheduler  #jqi_basicState_buttonCancel:hover, #jqi_mailState_buttonBack:hover {
 	background-color: #555;
 	transition: all 0.25s linear 0s;
 }
 
-.scheduler  #jqi_basicState_buttonOk {
+.scheduler  #jqi_basicState_buttonOk, #jqi_mailState_buttonOk {
 	width: 70%;
 	margin: 0;
 	left:0;
