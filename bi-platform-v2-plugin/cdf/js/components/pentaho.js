@@ -523,14 +523,14 @@ update : function() {
 
     }
     triggerError = function(msg,id){
-  error=true;
-  $(id).css("backgroundColor","rgb(255,159,159)");//error state color.
-  //$(id).css("backgroundColor","rgb(184,245,177)"); Valid state color. aplicable?
-  var temp = $(id).val();
-  $(id).val(msg);
+      error=true;
+      $(id).css("backgroundColor","rgb(255,159,159)");//error state color.
+      //$(id).css("backgroundColor","rgb(184,245,177)"); Valid state color. aplicable?
+      var temp = $(id).val();
+      $(id).val(msg);
 
-  setTimeout(function(){$(id).css("backgroundColor","white");
-  $(id).val(temp);},2000);
+      setTimeout(function(){$(id).css("backgroundColor","white");
+      $(id).val(temp);},2000);
 
     }
 
@@ -603,7 +603,7 @@ update : function() {
       if(name == "") {
         triggerError("You must choose a name","#nameIn");
       }
-      var pattern = /[^0-9a-zA-Z]/;
+      var pattern = /[^0-9a-zA-Z ]/;
       if (name.match(pattern)) {
        triggerError('Invalid characters, alpha-numeric text only.',"#nameIn"); 
       }
@@ -810,7 +810,7 @@ update : function() {
           complexJobTrigger["daysOfWeek"] = $("#monthOpt2Select").val();
           complexJobTrigger["weeksOfMonth"] = $("#monthOpt1Select").val(); 
         }
-      parameters["complexJobTrigger"] = complexJobTrigger;
+        parameters["complexJobTrigger"] = complexJobTrigger;
         break;
 
         case "yearly":
@@ -965,7 +965,7 @@ update : function() {
     var locationDiv= '<div id="locationDiv"><form style="display:inline-block" id="nameForm"><span class="dialog-label">Location:</span><input id="locationIn" type="text" value="' + getDefaultLocation() + '"></form></div>';
     var groupDiv= '<div id="groupDiv"><form style="display:inline-block" id="groupForm"><span class="dialog-label">Group:</span><input id="groupIn" type="text" value=""></form></div>';
     var descriptionDiv= '<div><form style="display:inline-block" id="descForm"><span class="dialog-label">Description:</span><input id="descIn" type="text" value=""></form></div>';
-    var recurrenceDiv = '<div>'+
+    var recurrenceDiv = '<div id = "recurrenceDiv">'+
     '<br><span class="dialog-title" style="width: 100px; display: inline-block;">Recurrence:</span>'+
     '<select id="recurrId" onChange="changeOpts()" style="margin-left: 0px;">'+
     '<option value = "once" selected>Run Once</option>'+
@@ -1048,9 +1048,83 @@ update : function() {
    var rangeOfRecurrenceOnce='<div id="rangeOfRecurrOnceDiv"><form><span class="dialog-label">Start Date:</span><input id= "startDateIn" type="text" value=""></form></div>';
   
 
-   var fullPage = nameDiv+locationDiv+recurrenceDiv+cronString+startTime+recurrencePattern+rangeOfRecurrence+rangeOfRecurrenceOnce;
-        
+   var mailQuestion = '<div id="mailQuestionDiv">'+'<label>Would you like to email a copy when the schedule runs?</label>'+
+   '<input type="radio" name="mailRadio" value="no" id="mailRadioNo" checked onClick=\'$("#mailInfoDiv").hide(350)\'>No</input>'+
+   '<input type="radio" name="mailRadio" value="yes" id="mailRadioYes" onClick=\'$("#mailInfoDiv").show(350)\'>Yes</input>'+
+   '</div>';
+   var mailInfo = '<div id="mailInfoDiv" style="display:none">'+
+   '<label>To: (Use a semi-colon or comma to separate multiple email adresses.)</label>'+
+   '<form><input id="toInput" style="width:100%" type="text"></input></form>'+
+   '<label>Subject:</label>'+
+   '<form><input id="subjectInput" style="width:100%" type="text" value="' +getFileName() + ' schedule has successfully run.'+'"></input></form>'+
+   '<label>Attachment Name:</label>'+
+   '<form><input id="attachmentNameInput" style="width:100%" type="text" value="'+ $('#nameIn').val() +'"></input></form>'+
+   '<label>Message (optional)</label>'+
+   '<textArea id="messageInput" type="text" rows="4"></textArea>'+
+   '</div>';
 
+   scheduleRequest = function(sendMail){
+    var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
+
+            var jobParameters = new Array();
+            var k = 0;
+            jobParameters[k++] = createJobParameter("output-target", outTarget, "string", true);
+            jobParameters[k++] = createJobParameter("accepted-page", "0", "string");
+            jobParameters[k++] = createJobParameter("showParameters", "true", "string");
+            jobParameters[k++] = createJobParameter("renderMode", "XML", "string");
+            jobParameters[k++] = createJobParameter("htmlProportionalWidth", "false", "string");
+
+            if ( sendMail ) {
+              jobParameters[k++] = createJobParameter("_SCH_EMAIL_TO", $("#toInput").val(), "string");
+              jobParameters[k++] = createJobParameter("_SCH_EMAIL_CC", "", "string");
+              jobParameters[k++] = createJobParameter("_SCH_EMAIL_BCC", "", "string");
+              jobParameters[k++] = createJobParameter("_SCH_EMAIL_SUBJECT", $("#subjectInput").val(), "string");
+              jobParameters[k++] = createJobParameter("_SCH_EMAIL_MESSAGE", $("#messageInput").val(), "string");
+              jobParameters[k++] = createJobParameter("_SCH_EMAIL_ATTACHMENT_NAME", $("#attachmentNameInput").val(), "string");
+            }
+            for (var i = 0; i < myself.parameters.length; i++) {
+              jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string", true);
+            }
+            parameters["jobParameters"] = jobParameters;
+
+            
+            var success = false;
+            var x = $.ajaxSettings.async;
+            $.ajaxSetup({
+              async: false
+            });
+
+            $.ajax({
+              url: webAppPath + "/api/scheduler/job",
+              type: "POST",
+              data: JSON.stringify(parameters),
+              contentType: "application/json",
+              success: function (response) {
+                alert("Successfully scheduled.");
+                success = true;
+                },
+              error: function (response) {
+                alert(response.responseText);
+                sucess = false;
+              }
+            });
+
+            $.ajaxSetup({
+              async: x
+            });
+            return success;
+   }
+
+   var fullPage = nameDiv+locationDiv+recurrenceDiv+cronString+startTime+recurrencePattern+rangeOfRecurrence+rangeOfRecurrenceOnce;
+   var mailPage = mailQuestion+mailInfo;
+
+   var validEmailConfig = false;
+    $.ajax({
+      type: "GET",
+      url: webAppPath + "/api/emailconfig/isValid",
+      success: function(data) {validEmailConfig = data}
+    });
+        
       var promp = {
 
       basicState : {
@@ -1070,48 +1144,43 @@ update : function() {
               parameters = {};
               return false;
             }
-            var outTarget = myself.outputTarget ? myself.outputTarget : "table/html;page-mode=page";
-
-            var jobParameters = new Array();
-            var k = 0;
-            jobParameters[k++] = createJobParameter("output-target", outTarget, "string", true);
-            jobParameters[k++] = createJobParameter("accepted-page", "0", "string");
-            jobParameters[k++] = createJobParameter("showParameters", "true", "string");
-            jobParameters[k++] = createJobParameter("renderMode", "XML", "string");
-            jobParameters[k++] = createJobParameter("htmlProportionalWidth", "false", "string");
-            for (var i = 0; i < myself.parameters.length; i++) {
-              jobParameters[k++] = createJobParameter(myself.parameters[i][0], myself.parameters[i][1], "string", true);
+            if(validEmailConfig) {
+              $("#attachmentNameInput").val($("#nameIn").val());
+              $.prompt.goToState('mailState');
+              return false;
+            } else {
+              return scheduleRequest();
             }
-            parameters["jobParameters"] = jobParameters;
             
-            var success = false;
-            var x = $.ajaxSettings.async;
-            $.ajaxSetup({
-              async: false
-            });
-
-            $.ajax({
-              url: webAppPath + "/api/scheduler/job",
-              type: "POST",
-              data: JSON.stringify(parameters),
-              contentType: "application/json",
-              success: function (response) {
-                alert("Scheduled.\n" + response);
-                success = true;
-                },
-              error: function (response) {
-                alert(response.responseText);
-                sucess = false;
-              }
-            });
-
-            $.ajaxSetup({
-              async: x
-            });
-            return success;
           }
       }
-    }
+    },
+      mailState : {
+        html: mailPage, 
+        title: "Schedule Report",
+        buttons: {
+          "Back" : -1,
+          "Ok" : 1
+        },
+        submit: function(e,v,m,f){
+          if(e==-1) {
+            $.prompt.goToState('basicState');
+            return false;
+          }
+          else if (e==1) {
+            if ($("#mailRadioNo").is(':checked')){
+              return scheduleRequest();
+            } else if ($("#mailRadioYes").is(':checked')) {
+              var pattern = /^\S+@\S+$/;
+              if(!$("#toInput").val().match(pattern)){
+              triggerError("Invalid email", "#toInput");
+              return false;
+            }
+              return scheduleRequest(true);
+            } else {return false;}
+          }
+        }
+      }
   };
       $.prompt(promp, {classes: 'scheduler'});
       $(".scheduler #jqi").css("width", "510px");
