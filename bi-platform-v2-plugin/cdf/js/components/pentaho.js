@@ -269,7 +269,14 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts + $.param(options);
+        $.each(options, function(key, value){
+          if(params[key] == undefined) {
+            params[key] = value;
+            delete options[key];
+          }
+        });
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts;
+        url = url.substring(0,url.length-1);
         this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
 
       } else {
