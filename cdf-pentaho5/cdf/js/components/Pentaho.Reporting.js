@@ -148,9 +148,11 @@ var PrptComponent = BaseComponent.extend({
                 $.each(options, function(key, value) {
                     if (params[key] == undefined) {
                         params[key] = value;
+                        delete options[key];
                     }
                 });
                 var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
+                url = url.substring(0,url.length-1);
                 this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
             } else {
                 var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
