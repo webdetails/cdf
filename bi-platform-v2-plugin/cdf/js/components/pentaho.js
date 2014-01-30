@@ -187,7 +187,7 @@ var PrptComponent = BaseComponent.extend({
       return segment
     };
     var solution = options.solution != undefined ? options.solution.replace(/\//g, ':') : "";
-    var path =  options.path != undefined ? options.path.replace(/\//g, ':') : "";
+    var path =  options.path != undefined ? options.path.replace(/\//g, ':') : ".";
     var action =  options.action != undefined ? options.action.replace(/\//g, ':') : "";
     var fullPath = ":";
     if (solution != "") {
@@ -226,6 +226,10 @@ var PrptComponent = BaseComponent.extend({
     delete options.solution;
     delete options.path;
     delete options.action;
+    delete reportOptions.solution;
+    delete reportOptions.path;
+    delete reportOptions.action;
+    
     var downloadMode = this.downloadMode;    // if you really must use this component to download stuff
     if (downloadMode == null) {
       var outputTarget = options["output-target"];
