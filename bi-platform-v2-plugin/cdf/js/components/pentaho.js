@@ -206,7 +206,7 @@ var PrptComponent = BaseComponent.extend({
   update: function(){
  
     this.clear();
-    var ts = "ts=" + new Date().getTime() + "&";
+    var ts = "ts=" + new Date().getTime();
     var options = this.getOptions(),
       params = this.getParams(),
       reportOptions = this.getReportOptions();
@@ -240,10 +240,17 @@ var PrptComponent = BaseComponent.extend({
           || outputTarget.indexOf('text') != -1);
     }    
     if(options["dashboard-mode"]){
-      var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer ?' + ts + $.param(reportOptions);
+      var requestType = this.usePost ? "POST" : "GET";
+      var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
+      $.each(reportOptions, function(key, value){
+          if(params[key] == undefined) {
+            params[key] = value;
+          }
+        });
       var myself=this;
       $.ajax({
         url: url,
+        type: requestType,
         data: params,
         dataType:"html",
         success: function(resp){
@@ -279,12 +286,11 @@ var PrptComponent = BaseComponent.extend({
           }
         });
         var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts;
-        url = url.substring(0,url.length-1);
         this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts + $.param(options);
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts + "&" + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
