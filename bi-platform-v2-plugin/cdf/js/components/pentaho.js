@@ -272,7 +272,6 @@ var PrptComponent = BaseComponent.extend({
         $.each(options, function(key, value){
           if(params[key] == undefined) {
             params[key] = value;
-            delete options[key];
           }
         });
         var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts;
