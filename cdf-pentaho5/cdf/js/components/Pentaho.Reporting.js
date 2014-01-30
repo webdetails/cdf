@@ -73,7 +73,7 @@ var PrptComponent = BaseComponent.extend({
     /*************************************************************************/
     update: function() {
         this.clear();
-        var ts = "ts=" + new Date().getTime() + "&";
+        var ts = "ts=" + new Date().getTime();
         var options = this.getOptions(),
                 params = this.getParams(),
                 reportOptions = this.getReportOptions();
@@ -151,7 +151,6 @@ var PrptComponent = BaseComponent.extend({
                     }
                 });
                 var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
-                url = url.substring(0,url.length-1);
                 this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
             } else {
                 var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
