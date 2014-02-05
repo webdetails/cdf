@@ -1295,10 +1295,11 @@ var ButtonComponent = ActionComponent.extend({
   render: function() {
     var myself = this;
     var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
+      var proceed = true;
       if ( _.isFunction(myself.expression) ){
-        myself.expression.apply(myself, arguments);
+        proceed = myself.expression.apply(myself, arguments);
       }
-      if ( myself.hasAction() ) {
+      if ( myself.hasAction() && !(proceed === false)) {
         return myself.triggerAction.apply(myself);
       }
     });
