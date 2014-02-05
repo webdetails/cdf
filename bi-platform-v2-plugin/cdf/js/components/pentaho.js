@@ -231,6 +231,7 @@ var PrptComponent = BaseComponent.extend({
     delete reportOptions.action;
     
     var downloadMode = this.downloadMode;    // if you really must use this component to download stuff
+    var callVar = options.showParameters ? 'viewer' : 'report';
     if (downloadMode == null) {
       var outputTarget = options["output-target"];
       // take a guess
@@ -285,12 +286,12 @@ var PrptComponent = BaseComponent.extend({
             params[key] = value;
           }
         });
-        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts;
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
         this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/viewer?' + ts + "&" + $.param(options);
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
