@@ -1,17 +1,17 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ *
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
- $.ajaxSetup({
+$.ajaxSetup({
   type: "POST",
   async: false,
   traditional: true,
@@ -115,7 +115,7 @@ var Dashboards = {
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 
-  lastServerResponse: Date.now(),
+  lastServerResponse: (Date.now) ? Date.now() : new Date().valueOf(),
   serverCheckResponseTimeout: 1800000, //ms, will be overridden at init
   /* Reference to current language code . Used in every place where jquery
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
@@ -132,7 +132,7 @@ Dashboards.log = function(m,type){
     if (type && console[type]) {
       console[type]("CDF: " + m);
     }else if (type === 'exception' &&
-      !console.exception) {
+        !console.exception) {
       console.error(m.stack);
     }
     else {
@@ -151,7 +151,7 @@ Dashboards.getWebAppPath = function (){
 }
 
 Dashboards.getCggDrawUrl = function() {
-    return "../../../plugin/cgg/api/services/draw";
+  return "../../../plugin/cgg/api/services/draw";
 };
 
 // REFRESH ENGINE begin
@@ -245,9 +245,9 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
     //if refresh period is too short, progress indicator will stay in user's face
     //    let(Dashboards.runningCalls = 0){
     Dashboards.update(component);
-  //      Dashboards.runningCalls = 0;
-  //      Dashboards.hideProgressIndicator()
-  //    }
+    //      Dashboards.runningCalls = 0;
+    //      Dashboards.hideProgressIndicator()
+    //    }
   };
 
   var insertInQueue = function(component){
@@ -308,14 +308,14 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       var currentTime = getCurrentTime();
 
       while(refreshQueue.length > 0 &&
-        refreshQueue[0].nextRefresh <= currentTime){
+          refreshQueue[0].nextRefresh <= currentTime){
         var info = refreshQueue.shift();//pop first
         //call update, which calls processComponent
         refreshComponent(info.component);
       }
       if(refreshQueue.length > 0){
         activeTimer = setTimeout("Dashboards.refreshEngine.fireRefresh()", refreshQueue[0].nextRefresh - currentTime );//ToDo: cleaner way to call
-      //activeTimer = setTimeout(this.fireRefresh, refreshQueue[0].nextRefresh - currentTime );
+        //activeTimer = setTimeout(this.fireRefresh, refreshQueue[0].nextRefresh - currentTime );
       }
     },
 
@@ -325,7 +325,7 @@ Dashboards.RefreshEngine = function(){// Manages periodic refresh of components
       for(i=0;i<Dashboards.components.length;i++){
         var comp = Dashboards.components[i];
         if (!(comp.refreshPeriod > 0) //only update those without refresh
-          && comp.type != "select") { //and that are not pov widgets
+            && comp.type != "select") { //and that are not pov widgets
           refreshComponent(comp);
         }
       }
@@ -415,7 +415,7 @@ Dashboards.bindExistingControl = function(control, Class) {
 
     // For legacy dashboards, we'll automatically assign some priority for component execution.
     if(control.priority == null || control.priority === "") {
-        control.priority = this.legacyPriority++;
+      control.priority = this.legacyPriority++;
     }
   }
 
@@ -463,13 +463,13 @@ Dashboards._castControlToComponent = function(control, Class) {
   // Also, avoid extending if _Class_ was already applied
   // and it is a subclass of BaseComponent.
   if(!(control instanceof BaseComponent) &&
-     (!Class || !(Class.prototype instanceof BaseComponent))) {
+      (!Class || !(Class.prototype instanceof BaseComponent))) {
 
     var baseProto = BaseComponent.prototype;
     for(var p in baseProto) {
       if(baseProto.hasOwnProperty(p) &&
-         (control[p] === undefined) &&
-         (typeof baseProto[p] === 'function')) {
+          (control[p] === undefined) &&
+          (typeof baseProto[p] === 'function')) {
         switch(p) {
           // Exceptions
           case 'base': break;
@@ -500,7 +500,7 @@ Dashboards._addLogLifecycleToControl = function(control) {
         case "error":         eventStr = "!Error"; break;
         default:              eventStr = "      "; break;
       }
-      
+
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
       console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
           eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
@@ -545,10 +545,10 @@ Dashboards.handleServerError = function() {
 Dashboards.errorNotification = function (err, ph) {
   if (ph){
     wd.cdf.notifications.component.render(
-      $(ph), {
-        title: err.msg,
-        desc: ""
-    });
+        $(ph), {
+          title: err.msg,
+          desc: ""
+        });
   } else {
     wd.cdf.notifications.growl.render({
       title: err.msg,
@@ -579,27 +579,27 @@ Dashboards.loginAlert = function(newOpts) {
  *
  */
 Dashboards.checkServer = function() {
-	//check if is connecting to server ok
-	//use post to avoid cache
-	var retVal = false;
-	$.ajax({
-		type: 'GET',
-		async: false,
-		dataType: 'json',
-		url: Dashboards.CDF_BASE_PATH + 'ping',
-		success: function(ok) {
+  //check if is connecting to server ok
+  //use post to avoid cache
+  var retVal = false;
+  $.ajax({
+    type: 'GET',
+    async: false,
+    dataType: 'json',
+    url: Dashboards.CDF_BASE_PATH + 'ping',
+    success: function(ok) {
       if(ok != null){
         retVal = false;
       } else {
         retVal = true;
       }
-		},
-		error: function() {
-			retVal = false;
-		}
+    },
+    error: function() {
+      retVal = false;
+    }
 
-	});
-	return retVal;
+  });
+  return retVal;
 };
 
 
@@ -625,16 +625,16 @@ Dashboards.restoreDuplicates = function() {
    * E.g. a parameter 'foo_1 = 1' yields '{_1: {foo: 1}}'
    */
   Object.keys(params).filter(function(e){
-      return /(_[0-9]+)+$/.test(e);
+    return /(_[0-9]+)+$/.test(e);
   }).map(function(e){
-      var parts = e.match(/(.*?)((_[0-9]+)+)$/),
-          name = parts[1],
-          suffix = parts[2];
-      if(!suffixes[suffix]){
-          suffixes[suffix] = {}
-      }
-      suffixes[suffix][name] = params[e];
-      return e;
+    var parts = e.match(/(.*?)((_[0-9]+)+)$/),
+        name = parts[1],
+        suffix = parts[2];
+    if(!suffixes[suffix]){
+      suffixes[suffix] = {}
+    }
+    suffixes[suffix][name] = params[e];
+    return e;
   });
 
 
@@ -676,72 +676,72 @@ Dashboards.blockUIwithDrag = function() {
 };
 
 Dashboards.updateLifecycle = function(object) {
-    var silent = object.lifecycle ? !!object.lifecycle.silent : false;
+  var silent = object.lifecycle ? !!object.lifecycle.silent : false;
 
-    if( object.disabled ){
-      return;
-    }
-    if(!silent) {
-      this.incrementRunningCalls();
-    }
-    var handler = _.bind(function() {
-      try {
-        var shouldExecute;
-        if(!(typeof(object.preExecution)=='undefined')){
-          shouldExecute = object.preExecution.apply(object);
-        }
-        /*
-         * If `preExecution` returns anything, we should use its truth value to
-         * determine whether the component should execute. If it doesn't return
-         * anything (or returns `undefined`), then by default the component
-         * should update.
-         */
-        shouldExecute = typeof shouldExecute != "undefined"? !!shouldExecute : true;
-        object.trigger('cdf cdf:preExecution', object, shouldExecute);
-        if (!shouldExecute) {
-          return; // if preExecution returns false, we'll skip the update
-        }
-        if (object.tooltip != undefined){
-          object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
-        }
-        // first see if there is an objectImpl
-        if ((object.update != undefined) &&
+  if( object.disabled ){
+    return;
+  }
+  if(!silent) {
+    this.incrementRunningCalls();
+  }
+  var handler = _.bind(function() {
+    try {
+      var shouldExecute;
+      if(!(typeof(object.preExecution)=='undefined')){
+        shouldExecute = object.preExecution.apply(object);
+      }
+      /*
+       * If `preExecution` returns anything, we should use its truth value to
+       * determine whether the component should execute. If it doesn't return
+       * anything (or returns `undefined`), then by default the component
+       * should update.
+       */
+      shouldExecute = typeof shouldExecute != "undefined"? !!shouldExecute : true;
+      object.trigger('cdf cdf:preExecution', object, shouldExecute);
+      if (!shouldExecute) {
+        return; // if preExecution returns false, we'll skip the update
+      }
+      if (object.tooltip != undefined){
+        object._tooltip = typeof object["tooltip"]=='function'?object.tooltip():object.tooltip;
+      }
+      // first see if there is an objectImpl
+      if ((object.update != undefined) &&
           (typeof object['update'] == 'function')) {
-          object.update();
+        object.update();
 
-          // check if component has periodic refresh and schedule next update
-          this.refreshEngine.processComponent(object);
+        // check if component has periodic refresh and schedule next update
+        this.refreshEngine.processComponent(object);
 
-        } else {
+      } else {
         // unsupported update call
-        }
-
-        if(!(typeof(object.postExecution)=='undefined')){
-          object.postExecution.apply(object);
-        }
-        // if we have a tooltip component, how is the time.
-        if (object._tooltip != undefined){
-          $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
-            delay:0,
-            track: true,
-            fade: 250
-          });
-        }
-      } catch (e) {
-        var ph = (object.htmlObject) ? $('#' + object.htmlObject) : undefined,
-            msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg
-                  + ' (' + object.name.replace('render_', '') + ')';
-        this.errorNotification( { msg: msg  } , ph );
-        this.log("Error updating " + object.name +":",'error');
-        this.log(e,'exception');
-      } finally {
-        if(!silent) {
-          this.decrementRunningCalls();
-        }
       }
 
-      // Triggering the event for the rest of the process
-      object.trigger('cdf cdf:postExecution', object);
+      if(!(typeof(object.postExecution)=='undefined')){
+        object.postExecution.apply(object);
+      }
+      // if we have a tooltip component, how is the time.
+      if (object._tooltip != undefined){
+        $("#" + object.htmlObject).attr("title",object._tooltip).tooltip({
+          delay:0,
+          track: true,
+          fade: 250
+        });
+      }
+    } catch (e) {
+      var ph = (object.htmlObject) ? $('#' + object.htmlObject) : undefined,
+          msg = Dashboards.getErrorObj('COMPONENT_ERROR').msg
+              + ' (' + object.name.replace('render_', '') + ')';
+      this.errorNotification( { msg: msg  } , ph );
+      this.log("Error updating " + object.name +":",'error');
+      this.log(e,'exception');
+    } finally {
+      if(!silent) {
+        this.decrementRunningCalls();
+      }
+    }
+
+    // Triggering the event for the rest of the process
+    object.trigger('cdf cdf:postExecution', object);
 
   },this);
   setTimeout(handler,1);
@@ -785,7 +785,7 @@ Dashboards.updateComponent = function(object) {
 
   if(object.isManaged === false && object.update) {
     object.update();
-  // check if component has periodic refresh and schedule next update
+    // check if component has periodic refresh and schedule next update
     this.refreshEngine.processComponent(object);
   } else {
     this.updateLifecycle(object);
@@ -850,9 +850,9 @@ Dashboards.getComponentIndex = function(compOrNameOrIndex) {
   if(compOrNameOrIndex != null) {
     switch(typeof compOrNameOrIndex) {
       case 'string':
-      for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
+        for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
           if(cs[i].name === compOrNameOrIndex) { return i; }
-      }
+        }
         break;
       case 'number':
         if(compOrNameOrIndex >= 0 && compOrNameOrIndex < this.components.length) {
@@ -874,7 +874,7 @@ Dashboards.removeComponent = function(compOrNameOrIndex) {
     comp = cs[index];
     cs.splice(index, 1);
     comp.dashboard = null;
-    
+
     comp.off('cdf:postExecution');
     comp.off('cdf:preExecution');
     comp.off('cdf:error');
@@ -915,18 +915,18 @@ Dashboards.init = function(components){
   } else {
     this.loadStorage();
   }
-  
+
   if(this.context != null && this.context.sessionTimeout != null ) {
     //defaulting to 90% of ms value of sessionTimeout
     Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
-  
+
   this.restoreBookmarkables();
   this.restoreView();
   this.syncParametersInit();
-  
+
   if($.isArray(components)) { this.addComponents(components); }
-  
+
   $(function() { myself.initEngine(); });
 };
 
@@ -1007,9 +1007,9 @@ Dashboards.syncParametersOnInit = function (master, slave){
       this.chains.splice(slaveChainIdx,1);
     }
   } else if (slaveChain) {
-      slaveChain.unshift(master);
+    slaveChain.unshift(master);
   } else if(masterChain) {
-      masterChain.push(slave)
+    masterChain.push(slave)
   } else {
     this.chains.push([master, slave]);
   }
@@ -1144,10 +1144,10 @@ Dashboards.syncDebugLevel = function() {
   try {
     var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
     var url = urlIfHasDebug(window.location.href) ||
-              urlIfHasDebug(window.top.location.href);
+        urlIfHasDebug(window.top.location.href);
     if(url) {
-        var m = /\bdebugLevel=(\d+)/.exec(url);
-        level = m ? (+m[1]) : 3;
+      var m = /\bdebugLevel=(\d+)/.exec(url);
+      level = m ? (+m[1]) : 3;
     }
   } catch(ex) {
     // swallow
@@ -1323,7 +1323,7 @@ Dashboards.updateAll = function(components) {
  * non-empty tier of components awaiting update, or null if no such tier exists.
  */
 Dashboards.getFirstTier = function(tiers) {
-      var keys = _.keys(tiers).sort(function(a,b){
+  var keys = _.keys(tiers).sort(function(a,b){
         return parseInt(a,10) - parseInt(b,10);
       }),
       i, tier;
@@ -1409,14 +1409,14 @@ Dashboards.deleteHashValue = function(key) {
   }
 }
 Dashboards.setBookmarkable = function(parameter, value) {
-    if(!this.bookmarkables) this.bookmarkables = {};
-    if (arguments.length === 1) value = true;
-    this.bookmarkables[parameter] = value;
+  if(!this.bookmarkables) this.bookmarkables = {};
+  if (arguments.length === 1) value = true;
+  this.bookmarkables[parameter] = value;
 };
 
 Dashboards.isBookmarkable = function(parameter) {
-    if(!this.bookmarkables) {return false;}
-    return Boolean(this.bookmarkables[parameter]);
+  if(!this.bookmarkables) {return false;}
+  return Boolean(this.bookmarkables[parameter]);
 };
 
 
@@ -1479,7 +1479,7 @@ Dashboards.getBookmarkState = function() {
    * bookmark state.
    */
   if (window.location.hash.length > 1) {
-  try {
+    try {
       return this.getHashValue('bookmark') || {};
     } catch (e) {
       /*
@@ -1489,9 +1489,9 @@ Dashboards.getBookmarkState = function() {
     }
   }
   var query = window.location.search.slice(1).split('&').map(function(e){
-          var pair = e.split('=');
-          pair[1] = decodeURIComponent(pair[1]);
-          return pair;
+        var pair = e.split('=');
+        pair[1] = decodeURIComponent(pair[1]);
+        return pair;
       }),
       params = this.propertiesArrayToObject(query);
   if(params.bookmarkState) {
@@ -1515,15 +1515,15 @@ Dashboards.restoreBookmarkables = function() {
 }
 
 Dashboards.setParameterViewMode = function(parameter, value) {
-    if(!this.viewParameters) this.viewParameters = {};
-    if (arguments.length === 1) value = this.viewFlags.VIEW;
-    //if(!Dashboards.viewFlags.hasOwnProperty(value)) throw
-    this.viewParameters[parameter] = value;
+  if(!this.viewParameters) this.viewParameters = {};
+  if (arguments.length === 1) value = this.viewFlags.VIEW;
+  //if(!Dashboards.viewFlags.hasOwnProperty(value)) throw
+  this.viewParameters[parameter] = value;
 };
 
 Dashboards.isViewParameter = function(parameter) {
-    if(!this.viewParameters) {return false;}
-    return this.viewParameters[parameter];
+  if(!this.viewParameters) {return false;}
+  return this.viewParameters[parameter];
 };
 
 /*
@@ -1683,10 +1683,10 @@ Dashboards.callPentahoAction = function(obj, path, parameters, callback ){
   // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
   if(typeof callback == 'function'){
     return this.pentahoAction( path, parameters,
-      function(json){
-        callback(myself.parseXActionResult(obj,json));
-      }
-      );
+        function(json){
+          callback(myself.parseXActionResult(obj,json));
+        }
+    );
   }
   else{
     return this.parseXActionResult(obj,this.pentahoAction( path, parameters, callback ));
@@ -1820,18 +1820,18 @@ Dashboards.fetchData = function(cd, params, callback) {
     }
 
     $.post(webAppPath + "/plugin/cda/api/doQuery?", cd,
-      function(json) {
-        callback(json);
-      },'json').error(Dashboards.handleServerError);
+        function(json) {
+          callback(json);
+        },'json').error(Dashboards.handleServerError);
   }
   // When we're not working with a CDA data source, we default to using jtable to fetch the data...
   else if (cd != undefined){
 
     var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
     $.post(webAppPath + "/api/repos/:public:plugin-samples:pentaho-cdf:actions:"+xactionFile+"/generatedContent?", cd,
-      function(result) {
-        callback(result.values);
-      },'json');
+        function(result) {
+          callback(result.values);
+        },'json');
   }
   // ... or just call the callback when no valid definition is passed
   else {
@@ -1841,11 +1841,11 @@ Dashboards.fetchData = function(cd, params, callback) {
 
 Dashboards.escapeHtml = function(input) {
   var escaped = input
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/'/g,"&#39;")
-  .replace(/"/g,"&#34;");
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/'/g,"&#39;")
+      .replace(/"/g,"&#34;");
   return escaped;
 };
 // STORAGE ENGINE
@@ -1907,14 +1907,14 @@ Dashboards.cleanStorage = function(){
 
 
 (function (D) {
-  
+
   // Conversion functions
   function _pa2obj (pArray) {
     var obj = {};
-      for (var p in pArray) if (pArray.hasOwnProperty(p)) {
-        var prop = pArray[p];
-        obj[prop[0]] = prop[1];
-      }
+    for (var p in pArray) if (pArray.hasOwnProperty(p)) {
+      var prop = pArray[p];
+      obj[prop[0]] = prop[1];
+    }
     return obj;
   };
   function _obj2pa (obj) {
@@ -1931,7 +1931,7 @@ Dashboards.cleanStorage = function(){
   D.propertiesArrayToObject = function(pArray) {
     // Mantra 1: "Order matters!"
     // Mantra 2: "Arrays are Objects!"
-    return ( _.isArray(pArray) && _pa2obj(pArray) ) || ( _.isObject(pArray) && pArray ) || undefined;  
+    return ( _.isArray(pArray) && _pa2obj(pArray) ) || ( _.isObject(pArray) && pArray ) || undefined;
   };
 
   D.objectToPropertiesArray = function(obj) {
@@ -2069,7 +2069,7 @@ Dashboards.normalizeValue = function(value) {
 Dashboards.isArray = function(value) {
   // An array or array like?
   return !!value &&
-         ((value instanceof Array) ||
+      ((value instanceof Array) ||
           (typeof value === 'object' && value.join && value.length != null));
 };
 
@@ -2102,7 +2102,7 @@ Dashboards.equalValues = function(a, b) {
 // Based on the algorithm described at http://en.wikipedia.org/wiki/HSL_and_HSV.
 /**
  * Converts an HSV to an RGB color value.
- * 
+ *
  * @param {number} h Hue as a value between 0 - 360 (degrees)
  * @param {number} s Saturation as a value between 0 - 100 (%)
  * @param {number} v Value as a value between 0 - 100 (%)
@@ -2111,34 +2111,34 @@ Dashboards.equalValues = function(a, b) {
  * @static
  */
 Dashboards.hsvToRgb = function(h, s, v) {
-    v = v / 100; // 0 - 1
-    s = s / 100; // idem
-    
-    var h6 = (h % 360) /60;
-    var chroma = v * s;
-    var m = v - chroma;
-    var h6t = Math.abs((h6 % 2) - 1);
-    //var r = 1 - h6t;
-    //var x = chroma * r;
-    var x_m = v * (1 - s * h6t); // x + m
-    var c_m = v; // chroma + m
-    // floor(h6) (0, 1, 2, 3, 4, 5)
+  v = v / 100; // 0 - 1
+  s = s / 100; // idem
 
-    var rgb;
-    switch(~~h6) {
-        case 0: rgb = [c_m, x_m, m  ]; break;
-        case 1: rgb = [x_m, c_m, m  ]; break;
-        case 2: rgb = [m,   c_m, x_m]; break;
-        case 3: rgb = [m,   x_m, c_m]; break;
-        case 4: rgb = [x_m, m,   c_m]; break;
-        case 5: rgb = [c_m, m,   x_m]; break;
-    }
+  var h6 = (h % 360) /60;
+  var chroma = v * s;
+  var m = v - chroma;
+  var h6t = Math.abs((h6 % 2) - 1);
+  //var r = 1 - h6t;
+  //var x = chroma * r;
+  var x_m = v * (1 - s * h6t); // x + m
+  var c_m = v; // chroma + m
+  // floor(h6) (0, 1, 2, 3, 4, 5)
 
-    rgb.forEach(function(val, i) {
-      rgb[i] = Math.min(255, Math.round(val * 256));
-    });
+  var rgb;
+  switch(~~h6) {
+    case 0: rgb = [c_m, x_m, m  ]; break;
+    case 1: rgb = [x_m, c_m, m  ]; break;
+    case 2: rgb = [m,   c_m, x_m]; break;
+    case 3: rgb = [m,   x_m, c_m]; break;
+    case 4: rgb = [x_m, m,   c_m]; break;
+    case 5: rgb = [c_m, m,   x_m]; break;
+  }
 
-    return "rgb(" + rgb.join(",") + ")";
+  rgb.forEach(function(val, i) {
+    rgb[i] = Math.min(255, Math.round(val * 256));
+  });
+
+  return "rgb(" + rgb.join(",") + ")";
 };
 
 /**
@@ -2173,11 +2173,11 @@ function encode_prepare( s )
 
 
 /**
-*
-* UTF-8 data encode / decode
-* http://www.webtoolkit.info/
-*
-**/ 
+ *
+ * UTF-8 data encode / decode
+ * http://www.webtoolkit.info/
+ *
+ **/
 
 
 var Utf8 = {
@@ -2296,12 +2296,12 @@ function doCsvQuoting(value, separator, alwaysEscape){
 }
 
 /**
-*
-*  Javascript sprintf
-*  http://www.webtoolkit.info/
-*
-*
-**/
+ *
+ *  Javascript sprintf
+ *  http://www.webtoolkit.info/
+ *
+ *
+ **/
 sprintfWrapper = {
 
   init : function () {
@@ -2451,187 +2451,187 @@ sprintf = sprintfWrapper.init;
 // CONTAINER begin
 ;(function (D){
 
-    function Container() {
+  function Container() {
 
-        // PUBLIC
+    // PUBLIC
 
-        // register(type, what [, scope])
-        // register(type, name, what [, scope])
-        this.register = function(type, name, what, scope) {
-            if(!type) { throw new Error("Argument 'type' is required."); }
-            if(typeof type !== 'string') { throw new Error("Argument 'type' must be a string."); }
+    // register(type, what [, scope])
+    // register(type, name, what [, scope])
+    this.register = function(type, name, what, scope) {
+      if(!type) { throw new Error("Argument 'type' is required."); }
+      if(typeof type !== 'string') { throw new Error("Argument 'type' must be a string."); }
 
-            if(name != null) {
-                if(typeof name !== 'string') {
-                    scope = what;
-                    what  = name;
-                    name  = null;
-                } else if(!name) {
-                    name = null;
-                }
-            }
+      if(name != null) {
+        if(typeof name !== 'string') {
+          scope = what;
+          what  = name;
+          name  = null;
+        } else if(!name) {
+          name = null;
+        }
+      }
 
-            if(!what) { throw new Error("Argument 'what' is required."); }
+      if(!what) { throw new Error("Argument 'what' is required."); }
 
-            var holder;
-            switch(typeof what) {
-                case 'function': holder = new FactoryHolder (this, what, scope); break;
-                case 'object':   holder = new InstanceHolder(this, what, scope); break;
-                default: throw new Error("Argument 'what' is of an invalid type.");
-            }
+      var holder;
+      switch(typeof what) {
+        case 'function': holder = new FactoryHolder (this, what, scope); break;
+        case 'object':   holder = new InstanceHolder(this, what, scope); break;
+        default: throw new Error("Argument 'what' is of an invalid type.");
+      }
 
-            if(!name) { name = ''; }
+      if(!name) { name = ''; }
 
-            var holdersByName = _typesTable[type] || (_typesTable[type] = {});
-            var currHolder = holdersByName[name];
-            if(currHolder) {
-                // throw? log?
-                currHolder.dispose();
-            }
-            holdersByName[name] = holder;
-        };
+      var holdersByName = _typesTable[type] || (_typesTable[type] = {});
+      var currHolder = holdersByName[name];
+      if(currHolder) {
+        // throw? log?
+        currHolder.dispose();
+      }
+      holdersByName[name] = holder;
+    };
 
-        this.has    = function(type, name) { return !!getHolder(type, name, true); };
-        this.canNew = function(type, name) { return getHolder(type, name, false) instanceof FactoryHolder; };
+    this.has    = function(type, name) { return !!getHolder(type, name, true); };
+    this.canNew = function(type, name) { return getHolder(type, name, false) instanceof FactoryHolder; };
 
-        this.get       = function(type, name)         { return get(type, name, null,   false, false); };
-        this.tryGet    = function(type, name)         { return get(type, name, null,   false, true ); };
+    this.get       = function(type, name)         { return get(type, name, null,   false, false); };
+    this.tryGet    = function(type, name)         { return get(type, name, null,   false, true ); };
 
-        this.getNew    = function(type, name, config) { return get(type, name, config, true,  false); };
-        this.tryGetNew = function(type, name, config) { return get(type, name, config, true,  true ); };
+    this.getNew    = function(type, name, config) { return get(type, name, config, true,  false); };
+    this.tryGetNew = function(type, name, config) { return get(type, name, config, true,  true ); };
 
-        this.getAll    = function(type) { return getAll(type, false); };
-        this.tryGetAll = function(type) { return getAll(type, true ); };
+    this.getAll    = function(type) { return getAll(type, false); };
+    this.tryGetAll = function(type) { return getAll(type, true ); };
 
-        this.listType = function(type) { return getType(type,false); };
-        this.tryListType = function(type) { return getType(type,true); };
+    this.listType = function(type) { return getType(type,false); };
+    this.tryListType = function(type) { return getType(type,true); };
 
-        this.dispose = function() {
-            if(_typesTable) {
-                for(var type in _typesTable) {
-                    var holdersByName = _typesTable[type];
-                    for(var name in holdersByName) {
-                        holdersByName[name].dispose();
-                    }
-                }
-
-                _typesTable = null;
-            }
-        };
-
-        // PRIVATE
-
-        var _typesTable = {}; // type -> []
-
-        function getType(type, isTry) {
-            if(!type) { throw new Error("Argument 'type' is required."); }
-            if(typeof type !== 'string') { throw new Error("Argument 'type' must be a string."); }
-
-            var holdersByName = _typesTable[type];
-            if(!isTry && (!holdersByName || isOwnEmpty(holdersByName))) {
-                throw new Error("There are no registrations for type '" + type + "'.");
-            }
-            return holdersByName;
+    this.dispose = function() {
+      if(_typesTable) {
+        for(var type in _typesTable) {
+          var holdersByName = _typesTable[type];
+          for(var name in holdersByName) {
+            holdersByName[name].dispose();
+          }
         }
 
-        function getHolder(type, name, isTry) {
-            var holder;
-            var holdersByName = getType(type, isTry);
-            if(holdersByName) {
-                holder = holdersByName[name || ''];
-                if(!holder && !isTry) {
-                    throw new Error(
-                        "There is no registration for type '" + type + "'" +
-                        (name ? (" and name '" + name + "'") : "") + ".");
-                }
-            }
+        _typesTable = null;
+      }
+    };
 
-            return holder;
+    // PRIVATE
+
+    var _typesTable = {}; // type -> []
+
+    function getType(type, isTry) {
+      if(!type) { throw new Error("Argument 'type' is required."); }
+      if(typeof type !== 'string') { throw new Error("Argument 'type' must be a string."); }
+
+      var holdersByName = _typesTable[type];
+      if(!isTry && (!holdersByName || isOwnEmpty(holdersByName))) {
+        throw new Error("There are no registrations for type '" + type + "'.");
+      }
+      return holdersByName;
+    }
+
+    function getHolder(type, name, isTry) {
+      var holder;
+      var holdersByName = getType(type, isTry);
+      if(holdersByName) {
+        holder = holdersByName[name || ''];
+        if(!holder && !isTry) {
+          throw new Error(
+              "There is no registration for type '" + type + "'" +
+                  (name ? (" and name '" + name + "'") : "") + ".");
         }
+      }
 
-        function get(type, name, config, isNew, isTry) {
-            if(typeof name !== 'string') {
-                config = name;
-                name = '';
-            }
-
-            var holder = getHolder(type, name, isTry);
-
-            // Can't store as singletons instances with special config params
-            if(config) { isNew = true;  } else
-            if(!isNew) { config = {}; }
-
-            return holder ? holder.build(config, isNew) : null;
-        }
-
-        function getAll(type, isTry) {
-            var holdersByName = getType(type, isTry);
-
-            // Includes the default (unnamed) instance
-            var instances = [];
-            for(var name in holdersByName) {
-                instances.push(holdersByName[name].build({}, false));
-            }
-            return instances;
-        }
+      return holder;
     }
 
-    // Shared/Static stuff
+    function get(type, name, config, isNew, isTry) {
+      if(typeof name !== 'string') {
+        config = name;
+        name = '';
+      }
 
-    // Allows creating multiple instances
-    function FactoryHolder(container, factory, scope) {
-        var instance;
+      var holder = getHolder(type, name, isTry);
 
-        if(!scope) { scope = 'instance'; }
+      // Can't store as singletons instances with special config params
+      if(config) { isNew = true;  } else
+      if(!isNew) { config = {}; }
 
-        this.build = function(config, buildNew) {
-            if(instance && !buildNew) { return instance; }
-
-            var inst = factory(container, config);
-
-            if(!buildNew && scope === 'singleton') { instance = inst; }
-
-            return inst;
-        };
-
-        this.dispose = function() {
-            if(instance) {
-                doDispose(instance);
-                instance = null;
-            }
-        };
+      return holder ? holder.build(config, isNew) : null;
     }
 
-    function InstanceHolder(container, instance, scope) {
-        if(!scope) { scope = 'external'; }
+    function getAll(type, isTry) {
+      var holdersByName = getType(type, isTry);
 
-        this.build = function(/*config, buildNew*/) { return instance; };
-
-        // external scope is managed outside the container
-        this.dispose = function() {
-            if(instance) {
-                scope === 'singleton' && doDispose(instance);
-                instance = null;
-            }
-        };
+      // Includes the default (unnamed) instance
+      var instances = [];
+      for(var name in holdersByName) {
+        instances.push(holdersByName[name].build({}, false));
+      }
+      return instances;
     }
+  }
 
-    // Fwk stuff
+  // Shared/Static stuff
 
-    function doDispose(instance) {
-        if(typeof instance.dispose === 'function') { instance.dispose(); }
-    }
+  // Allows creating multiple instances
+  function FactoryHolder(container, factory, scope) {
+    var instance;
 
-    var hasOwn = Object.prototype.hasOwnProperty;
+    if(!scope) { scope = 'instance'; }
 
-    function isOwnEmpty(o) {
-        // tolerates o == null
-        for(var n in o) { if(hasOwn.call(o, n)) { return false; } }
-        return true;
-    }
+    this.build = function(config, buildNew) {
+      if(instance && !buildNew) { return instance; }
 
-    // Export
-    D.Container = Container;
+      var inst = factory(container, config);
+
+      if(!buildNew && scope === 'singleton') { instance = inst; }
+
+      return inst;
+    };
+
+    this.dispose = function() {
+      if(instance) {
+        doDispose(instance);
+        instance = null;
+      }
+    };
+  }
+
+  function InstanceHolder(container, instance, scope) {
+    if(!scope) { scope = 'external'; }
+
+    this.build = function(/*config, buildNew*/) { return instance; };
+
+    // external scope is managed outside the container
+    this.dispose = function() {
+      if(instance) {
+        scope === 'singleton' && doDispose(instance);
+        instance = null;
+      }
+    };
+  }
+
+  // Fwk stuff
+
+  function doDispose(instance) {
+    if(typeof instance.dispose === 'function') { instance.dispose(); }
+  }
+
+  var hasOwn = Object.prototype.hasOwnProperty;
+
+  function isOwnEmpty(o) {
+    // tolerates o == null
+    for(var n in o) { if(hasOwn.call(o, n)) { return false; } }
+    return true;
+  }
+
+  // Export
+  D.Container = Container;
 })(Dashboards);
 // CONTAINER end 
 
@@ -2643,11 +2643,11 @@ sprintf = sprintfWrapper.init;
 
   //Normalization - Ensure component does not finish with component and capitalize first letter
   D.normalizeAddInKey = function(key, subKey) {
-      if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
-        key = key.substring(0, key.length - 'Component'.length);  
-      key = key.charAt(0).toUpperCase() + key.substring(1);
+    if (key.indexOf('Component', key.length - 'Component'.length) !== -1)
+      key = key.substring(0, key.length - 'Component'.length);
+    key = key.charAt(0).toUpperCase() + key.substring(1);
 
-      if(subKey) { key += "." + subKey; }
+    if(subKey) { key += "." + subKey; }
 
     return key;
   }
@@ -2680,7 +2680,7 @@ sprintf = sprintfWrapper.init;
     }
   };
   D.listAddIns = function(type, subType) {
-  var type = this.normalizeAddInKey(type, subType);
+    var type = this.normalizeAddInKey(type, subType);
     var addInList = [];
     try {
       return this.addIns.listType(type);
@@ -2698,10 +2698,10 @@ sprintf = sprintfWrapper.init;
 
 Dashboards.safeClone = function(){
   var options, name, src, copy, copyIsArray, clone,
-  target = arguments[0] || {},
-  i = 1,
-  length = arguments.length,
-  deep = false;
+      target = arguments[0] || {},
+      i = 1,
+      length = arguments.length,
+      deep = false;
 
   // Handle a deep copy situation
   if ( typeof target === "boolean" ) {
@@ -2742,7 +2742,7 @@ Dashboards.safeClone = function(){
           // Never move original objects, clone them
           target[ name ] = this.safeClone( deep, clone, copy );
 
-        // Don't bring in undefined values
+          // Don't bring in undefined values
         } else if ( copy !== undefined ) {
           target[ name ] = copy;
         }
@@ -2773,7 +2773,7 @@ Dashboards.safeClone = function(){
         tautology: function (value){ return true },
         isFunction: _.isFunction ,
         isPositive: function (value){ return (_.isNumber(value) && value > 0); },
-        isObjectOrPropertiesArray : function (value){ 
+        isObjectOrPropertiesArray : function (value){
           return _.isArray(value) || _.isObject(value);
         },
         isObject: _.isObject,
@@ -2795,7 +2795,7 @@ Dashboards.safeClone = function(){
 
     this.init = function (defaults, interfaces, libraries) {
       var myself = this;
-      
+
       defaults = $.extend(true, {}, defaults);
       interfaces = $.extend(true, {}, interfaces);
 
@@ -2827,7 +2827,7 @@ Dashboards.safeClone = function(){
       var writer = getWriter( opt ),
           value = getValue(opt);
       return writer( value );
-    }; 
+    };
 
     // PRIVATE
     function setInterfaces (opt, interfaces){
@@ -2837,17 +2837,17 @@ Dashboards.safeClone = function(){
       setValidator(opt, interfaces['validator']);
     };
 
-    function getReader(opt){ 
-      return get( myself._interfaces, opt, 'reader', myself._libraries.mappers['identity'] 
-    )};
+    function getReader(opt){
+      return get( myself._interfaces, opt, 'reader', myself._libraries.mappers['identity']
+      )};
     function getWriter(opt){
-      return get( myself._interfaces, opt, 'writer', myself._libraries.mappers['identity'] 
-    )};
-    function getValidator(opt){ 
-      return get( myself._interfaces, opt, 'validator', myself._libraries.predicates['tautology'] 
-    )};
+      return get( myself._interfaces, opt, 'writer', myself._libraries.mappers['identity']
+      )};
+    function getValidator(opt){
+      return get( myself._interfaces, opt, 'validator', myself._libraries.predicates['tautology']
+      )};
     function getValue(opt){ return get( myself._options, opt, 'value') };
-    
+
     // Reader, Writer and Validator work in the same way:
     // If the value is a function, use it. 
     // Otherwise, if it is a string and a valid library key, use it.
@@ -2857,14 +2857,14 @@ Dashboards.safeClone = function(){
     function setReader(opt, fn){
       var lib = myself._libraries.mappers;
       fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getReader(opt) || lib['identity'] ;
-      return set( myself._interfaces , opt, 'reader', fn) 
+      return set( myself._interfaces , opt, 'reader', fn)
     };
-    function setWriter(opt, fn){ 
+    function setWriter(opt, fn){
       var lib = myself._libraries.mappers;
       fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getWriter(opt) || lib['identity'] ;
-      return set( myself._interfaces, opt, 'writer', fn) 
+      return set( myself._interfaces, opt, 'writer', fn)
     };
-    function setValidator(opt, fn){ 
+    function setValidator(opt, fn){
       var lib = myself._libraries.predicates;
       fn = ( _.isFunction(fn) && fn ) || ( _.isString(fn) && lib[fn] ) || getValidator(opt) || lib['tautology'] ;
       return set( myself._interfaces, opt, 'validator', fn)
@@ -2878,7 +2878,7 @@ Dashboards.safeClone = function(){
 
   // Shared / Static
   function get ( container, opt, attr, defaultValue ){
-    var val = defaultValue || undefined ;   
+    var val = defaultValue || undefined ;
     if ( container && container[opt] && container[opt].hasOwnProperty(attr) ){
       val = container[opt][attr];
     }
@@ -2887,7 +2887,7 @@ Dashboards.safeClone = function(){
   function set (container, opt, attr, value){
     if (container && opt && attr){
       container[opt] = container[opt] || {};
-      container[opt][attr] = value ; 
+      container[opt][attr] = value ;
     }
   }
 
@@ -2921,13 +2921,13 @@ Dashboards.safeClone = function(){
     if (!_.isFunction(query) && _.isObject(query)){
       var deepProperties = {};
       _.each( BaseQuery.prototype.deepProperties, function (prop){
-          deepProperties[prop] = _.extend({} , BaseQuery.prototype[prop], query[prop]);
+        deepProperties[prop] = _.extend({} , BaseQuery.prototype[prop], query[prop]);
       });
     }
 
-    var QueryClass  = ( _.isFunction(query) && query ) || 
-          ( _.isObject(query) && BaseQuery.extend( _.extend( {}, query, deepProperties ) ) );
- 
+    var QueryClass  = ( _.isFunction(query) && query ) ||
+        ( _.isObject(query) && BaseQuery.extend( _.extend( {}, query, deepProperties ) ) );
+
     // Registers a new query factory with a custom class
     this.queryFactories.register('Query', type, function (container, config){
       return new QueryClass(config);
@@ -2970,15 +2970,15 @@ Query = function( cd, dataAccessId ) {
 
   if( _.isObject(cd) ){
     opts = $.extend(true, {}, cd);
-    queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') || 
-      ( !_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined ;
+    queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') ||
+        ( !_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined ;
   } else if ( _.isString(cd) && _.isString(dataAccessId) ) {
     queryType = 'cda';
     opts = {
       path: cd,
       dataAccessId: dataAccessId
     };
-  } 
+  }
 
   if (!queryType) { throw 'InvalidQuery' }
 
@@ -3043,13 +3043,13 @@ wd.cdf.popups = wd.cdf.popups || {};
 
 wd.cdf.popups.okPopup = {
   template: Mustache.compile(
-              "<div class='cdfPopup'>" +
-              "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
-              "  <div class='cdfPopupBody'>" +
-              "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
-              "    <div class='cdfPopupButton'>{{{button}}}</div>" +
-              "  </div>" +
-              "</div>"),
+      "<div class='cdfPopup'>" +
+          "  <div class='cdfPopupHeader'>{{{header}}}</div>" +
+          "  <div class='cdfPopupBody'>" +
+          "    <div class='cdfPopupDesc'>{{{desc}}}</div>" +
+          "    <div class='cdfPopupButton'>{{{button}}}</div>" +
+          "  </div>" +
+          "</div>"),
   defaults:{
     header: "Title",
     desc:"Description Text",
@@ -3073,8 +3073,8 @@ wd.cdf.popups.okPopup = {
     var myself = this;
     if (this.firstRender){
       this.$el = $('<div/>').addClass('cdfPopupContainer')
-        .hide()
-        .appendTo('body');
+          .hide()
+          .appendTo('body');
       this.firstRender = false;
     };
     this.$el.empty().html( this.template( opts ) );
@@ -3097,13 +3097,13 @@ wd.cdf.notifications = wd.cdf.notifications || {};
 
 wd.cdf.notifications.component = {
   template: Mustache.compile(
-              "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
-              "  <div class='cdfNotificationBody'>" +
-              "    <div class='cdfNotificationImg'>&nbsp;</div>" +
-              "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
-              "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
-              "  </div>" +
-              "</div>" ),
+      "<div class='cdfNotification component {{#isSmallComponent}}small{{/isSmallComponent}}'>" +
+          "  <div class='cdfNotificationBody'>" +
+          "    <div class='cdfNotificationImg'>&nbsp;</div>" +
+          "    <div class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</div>" +
+          "    <div class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</div>" +
+          "  </div>" +
+          "</div>" ),
   defaults:{
     title: "Component Error",
     desc: "Error processing component."
@@ -3119,20 +3119,20 @@ wd.cdf.notifications.component = {
 
 wd.cdf.notifications.growl = {
   template: Mustache.compile(
-              "<div class='cdfNotification growl'>" +
-              "  <div class='cdfNotificationBody'>" +
-              "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
-              "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
-              "  </div>" +
-              "</div>" ),
+      "<div class='cdfNotification growl'>" +
+          "  <div class='cdfNotificationBody'>" +
+          "    <h1 class='cdfNotificationTitle' title='{{title}}'>{{{title}}}</h1>" +
+          "    <h2 class='cdfNotificationDesc' title='{{desc}}'>{{{desc}}}</h2>" +
+          "  </div>" +
+          "</div>" ),
   defaults:{
     title: 'Title',
     desc: 'Default CDF notification.',
     timeout: 4000,
     onUnblock: function (){ return true },
     css: $.extend( {},
-      $.blockUI.defaults.growlCSS,
-      { position: 'absolute' , width: '100%' , top:'10px' } ),
+        $.blockUI.defaults.growlCSS,
+        { position: 'absolute' , width: '100%' , top:'10px' } ),
     showOverlay: false,
     fadeIn: 700,
     fadeOut: 1000,
@@ -3150,8 +3150,8 @@ wd.cdf.notifications.growl = {
     };
     if (this.firstRender){
       this.$el = $('<div/>').addClass('cdfNotificationContainer')
-        .hide()
-        .appendTo('body');
+          .hide()
+          .appendTo('body');
       this.firstRender = false;
     }
     this.$el.show().block(opts);
