@@ -11,7 +11,11 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+if(typeof CONTEXT_PATH != "undefined"){ // production
+  requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+} else { // build
+  requireCfg['paths']['cdf'] = "cdf";
+}
 
 requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/jquery.ui',

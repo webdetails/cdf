@@ -56,7 +56,7 @@ var Dashboards = {
   args: [],
   monthNames : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 
-  lastServerResponse: Date.now(),
+  lastServerResponse: (Date.now) ? Date.now() : new Date().valueOf(),
   serverCheckResponseTimeout: 1800000, //ms, will be overridden at init
   /* Reference to current language code . Used in every place where jquery
    * plugins used in CDF hasm native internationalization support (ex: Datepicker)
@@ -73,7 +73,7 @@ Dashboards.log = function(m,type){
     if (type && console[type]) {
       console[type]("CDF: " + m);
     }else if (type === 'exception' &&
-      !console.exception) {
+        !console.exception) {
       console.error(m.stack);
     }
     else {
