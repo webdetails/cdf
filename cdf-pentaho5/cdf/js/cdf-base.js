@@ -40,9 +40,7 @@ var Endpoints = {
 
   getResource: function() { return Endpoints.getCdfBase() + "/resource" },
 
-  getCdfXaction: function( path, action ) { 
-    return Endpoints.getViewAction() + "?path=" + "/public/plugin-samples/" + path + "/" + action; 
-  },
+  getCdfXaction: function( path, action ) { return Endpoints.getViewAction() + "?path=" + "/public/plugin-samples/" + path + "/" + action; },
 
   getComments: function ( action ) { 
 

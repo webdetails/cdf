@@ -28,8 +28,6 @@ var Endpoints = {
 
   getStorage: function ( action ) { return Endpoints.getCdfBase() + "/Storage";  },
 
-  getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; },
-
   getSettings: function ( action ) { return Endpoints.getCdfBase() + "/Settings?method=" + action; },
 
   getViewAction: function () { return Endpoints.getWebapp() + "/ViewAction"; },
@@ -42,7 +40,7 @@ var Endpoints = {
 
   getResource: function() { return Endpoints.getCdfBase() + "/GetCDFResource" },
 
-  getCdfXaction: function( path, action ) { 
-    return Endpoints.getViewAction() +  "?solution=system&path=" + path + "&action=" + action; 
-  }
+  getCdfXaction: function( path, action ) { return Endpoints.getViewAction() +  "?solution=system&path=" + path + "&action=" + action; },
+
+  getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; }
 };

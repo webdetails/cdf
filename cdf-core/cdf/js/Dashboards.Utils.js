@@ -22,6 +22,18 @@ Dashboards.escapeHtml = function(input) {
   return escaped;
 };
 
+
+Dashboards.getPathParameter = function ( url ) {  
+
+  url = ( url || window.location.pathname );
+
+  var pathRegex = url.match( "/:(.[^/]+)(.*)/" );
+  
+  if( pathRegex.length > 1 ){ 
+      return (":" + pathRegex[1]).replace(/:/g, "/"); 
+  }
+};
+
 Dashboards.getQueryParameter = function ( parameterName ) {
   // Add "=" to the parameter name (i.e. parameterName=value)
   var queryString = window.location.search.substring(1);
