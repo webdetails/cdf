@@ -3,6 +3,8 @@ package org.pentaho.cdf.xactions;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.cdf.util.CdfHttpServletRequestWrapper;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.engine.IRuntimeContext;
 import org.pentaho.platform.api.engine.ISolutionEngine;
@@ -55,8 +58,17 @@ public class ActionEngine {
 
       IUnifiedRepository unifiedRepository = PentahoSystem.get( IUnifiedRepository.class, null );
       RepositoryFile file = unifiedRepository.getFile( path );
-
-      String buffer = XactionUtil.execute( contentType, file, httpServletRequest, httpServletResponse, userSession, null );
+      
+      CdfHttpServletRequestWrapper request = new CdfHttpServletRequestWrapper( httpServletRequest );
+      if( params != null ){
+        Iterator<String> it = params.keySet().iterator();
+        while( it.hasNext() ){
+          String key = it.next();
+          request.addParameter( key, params.get( key ) );
+        }
+      }
+      
+      String buffer = XactionUtil.execute( contentType, file, request, httpServletResponse, userSession, null );
 
       if ( !StringUtils.isEmpty( buffer ) ) {
         httpServletResponse.getOutputStream().write( buffer.getBytes( LocaleHelper.getSystemEncoding() ) );

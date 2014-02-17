@@ -7,12 +7,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -191,9 +193,15 @@ public class CdfApi {
 
   @POST
   @Path( "/viewAction" )
-  public void viewAction( @QueryParam( Parameter.SOLUTION ) String solution, @QueryParam( Parameter.PATH ) String path,
+  public void viewAction( 
+      @QueryParam( Parameter.SOLUTION ) String solution, 
+      @QueryParam( Parameter.PATH ) String path,
       @QueryParam( Parameter.ACTION ) String action,
       @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+      @FormParam( Parameter.QUERY_TYPE ) String queryType,
+      @FormParam( Parameter.QUERY ) String query,
+      @FormParam( Parameter.CATALOG ) String catalog,
+      @FormParam( Parameter.JNDI ) String jndi,
       @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
 
     String value = "";
@@ -206,9 +214,31 @@ public class CdfApi {
       // 5.0 call using path
       value = path;
     }
-
-    ActionEngine.getInstance().executeAction( value, contentType, servletRequest, servletResponse,
-        PentahoSessionHolder.getSession(), Parameter.asHashMap( servletRequest ) );
+    
+    HashMap<String, String> paramMap = Parameter.asHashMap( servletRequest );
+    
+    if( !StringUtils.isEmpty( queryType ) && !paramMap.containsKey( Parameter.QUERY_TYPE ) ) {
+      paramMap.put( Parameter.QUERY_TYPE, queryType );
+    } 
+    
+    if( !StringUtils.isEmpty( query ) && !paramMap.containsKey( Parameter.QUERY ) ) {
+      paramMap.put( Parameter.QUERY, query );
+    } 
+    
+    if( !StringUtils.isEmpty( catalog ) && !paramMap.containsKey( Parameter.CATALOG ) ) {
+      paramMap.put( Parameter.CATALOG, catalog );
+    }
+    
+    if( !StringUtils.isEmpty( jndi ) && !paramMap.containsKey( Parameter.JNDI ) ) {
+      paramMap.put( Parameter.JNDI, jndi );
+    }
+    
+    boolean success = ActionEngine.getInstance().executeAction( value, contentType, servletRequest, servletResponse,
+        PentahoSessionHolder.getSession(), paramMap );
+    
+    if( success ){
+      servletResponse.getOutputStream().flush(); //flush
+    }
   }
 
   @GET
