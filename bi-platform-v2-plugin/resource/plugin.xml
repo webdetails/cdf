@@ -14,11 +14,25 @@
         	<description>Community Dashboard File</description>
 	        <icon-url>content/pentaho-cdf/resources/cdfFileType.png</icon-url>
 	        <meta-provider>org.pentaho.cdf.CdfFileInfoGenerator</meta-provider>
-    	</content-type>
+            <operations>
+                <operation>
+                    <id>SCHEDULE_NEW</id>
+                    <perspective>xcdf.schedule</perspective>
+                </operation>
+                <operation>
+                    <id>SCHEDULE_EDIT</id>
+                    <perspective>xcdf.schedule</perspective>
+                </operation>
+                <operation>
+                    <id>PARAMETER</id>
+                </operation>
+            </operations>
+        </content-type>
 	</content-types>
 
   <external-resources>
     <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
+    <file context="dashboards">content/pentaho-cdf/js/widget-cdf.js</file>
   </external-resources>
 
 </plugin>
