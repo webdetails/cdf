@@ -80,13 +80,12 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
 
-  var url = this.getWebAppPath() + "/" + serviceMethod;
+  var url = Endpoints.getServiceAction( serviceMethod, path , action );
 
   // Add the solution to the params
   var arr = {};
   arr.wrapper = false;
   arr.solution = solution;
-  arr.path = path;
   arr.action = action;
   $.each(params,function(i,val){
     arr[val[0]]=val[1];

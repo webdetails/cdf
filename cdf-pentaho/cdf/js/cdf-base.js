@@ -42,5 +42,7 @@ var Endpoints = {
 
   getCdfXaction: function( path, action ) { return Endpoints.getViewAction() +  "?solution=system&path=" + path + "&action=" + action; },
 
+  getServiceAction: function( serviceMethod, path, action ) { return Endpoints.getWebapp() + "/" + serviceMethod; },  
+
   getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; }
 };

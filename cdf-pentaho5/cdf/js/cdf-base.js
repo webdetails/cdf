@@ -11,6 +11,8 @@
 * the license for the specific language governing your rights and limitations.
 */
 
+var SAMPLES_BASE_PATH = "/public/plugin-samples/";
+
 var Endpoints = {
 
   // Dashboards.Startup.js determines webAppPath
@@ -40,7 +42,18 @@ var Endpoints = {
 
   getResource: function() { return Endpoints.getCdfBase() + "/resource" },
 
-  getCdfXaction: function( path, action ) { return Endpoints.getViewAction() + "?path=" + "/public/plugin-samples/" + path + "/" + action; },
+  getCdfXaction: function( path, action ) { 
+
+    var fullPath = path.indexOf( SAMPLES_BASE_PATH ) == -1 ? ( SAMPLES_BASE_PATH + path ) : path;
+    return Endpoints.getViewAction() + "?path=" + fullPath + "/" + action; 
+  },
+
+  getServiceAction: function( serviceMethod, path, action ) {
+
+    var fullPath = path.indexOf( SAMPLES_BASE_PATH ) == -1 ? ( SAMPLES_BASE_PATH + path ) : path;
+    fullPath = fullPath + ( action ? "/" + action : "" );
+    return Endpoints.getWebapp() + "/api/repos/" + fullPath.replace(/\//g, ":") + "/generatedContent"; 
+  },  
 
   getComments: function ( action ) { 
 
