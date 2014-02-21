@@ -241,6 +241,10 @@ var PrptComponent = BaseComponent.extend({
           || outputTarget.indexOf('text') != -1);
     }    
     if(options["dashboard-mode"]){
+      //IFrame = False, showParameters always false.
+      if(options.showParameters) {
+        Dashboards.log("showParameters not supported with IFrame = False");
+      }
       var requestType = this.usePost ? "POST" : "GET";
       var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
       $.each(reportOptions, function(key, value){
