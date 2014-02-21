@@ -8,8 +8,21 @@
 
 		<h3>Description</h3>
 		<p>
-		Generates a button to execute a custom command
+		Generates a button to execute a custom command and/or trigger a server action
 		</p>
+
+		<h3>Methods</h3>
+
+		<dl class="documentation">
+			<dt>enable()</dt>
+			<dd>Enables the button.</dd>
+
+			<dt>disable()</dt>
+			<dd>Disables the button.</dd>
+
+			<dt>setLabel(text)</dt>
+			<dd>Modifies the text label of the button.</dd>
+		</dl>
 
 		<h3>Options</h3>
 
@@ -36,7 +49,7 @@
 			<dd>The style of the button to render. Possible values: classic and themeroller. Default: themeroller</dd>
 
 			<dt>expression</dt>
-			<dd>javascript code to be executed</dd>
+			<dd>Javascript code to be executed when the button is clicked. It the expression evaluates to false, the Action Datasource is not called.</dd>
 
 			<dt>executeAtStart</dt>
 			<dd>True to execute the component at start, false otherwise</dd>
@@ -52,6 +65,15 @@
 
 			<dt>postChange</dt>
 			<dd><i>Function(value) - </i> Function to be called after the component is changed</dd>
+
+			<dt>actionDefinition</dt>
+			<dd>Datasource to be called when the button is clicked. If the server call is successful, successCallback is called, otherwise failureCallback is called. Optional.</dd>
+
+			<dt>successCallback</dt>
+			<dd><i>Function(resultset) </i> Function to be called when the call to the datasource defined in actionDefinition is successful. Optional.</dd>
+
+			<dt>failureCallback</dt>
+			<dd><i>Function - </i> Function to be called when the call to the datasource defined in actionDefinition fails. Optional.</dd>
 
 			<dt>tooltip</dt>
 			<dd>Tooltip to be displayed when mouse hovers</dd>
@@ -77,10 +99,12 @@ var executeTopTenCustomers =
   listeners:["productLine", "territory"],
   htmlObject: "sampleObject",
   label: "A button",
-  expression: function(){alert('Button was clicked')},
+  expression: function(){this.setLabel('Yes, a clickable button'); alert('Button was clicked');},
   executeAtStart: true,
   preChange: function(){return true;},
   postChange: function(){return true;},
+  successCallback: function(data){},
+  failureCallback: function(){},
   tooltip: "My first dashboard"
 }
 Dashboards.init([executeTopTenCustomers]);
@@ -89,11 +113,13 @@ Dashboards.init([executeTopTenCustomers]);
 				<button onclick="evaluateCode(true)">Try me</button>
 			</div>
 		</div>
-
 	</div>
 </div>
 
 <script language="javascript" type="text/javascript">
+
 	var tabs = $("#example").tabs();
 	evaluateCode(false);
 </script>
+
+
