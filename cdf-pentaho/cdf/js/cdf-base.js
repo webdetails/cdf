@@ -57,7 +57,8 @@ var Endpoints = {
     arr.action = action;
     arr.url = Endpoints.getWebapp() + "/" + method;
 
-    return arr; },  
+    return arr; 
+  },  
 
   getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; }
 };
