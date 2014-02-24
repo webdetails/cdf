@@ -53,5 +53,6 @@ public class CdfLifecycleListener implements IPluginLifecycleListener
 
   public void unLoaded() throws PluginLifecycleException
   {
+    PersistenceEngine.shutdown();
   }
 }
