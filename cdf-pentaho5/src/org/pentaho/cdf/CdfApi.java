@@ -191,9 +191,22 @@ public class CdfApi {
     }
   }
 
+  @GET
+  @Path( "/viewAction" )
+  public void doGetViewAction( 
+      @QueryParam( Parameter.SOLUTION ) String solution, 
+      @QueryParam( Parameter.PATH ) String path,
+      @QueryParam( Parameter.ACTION ) String action,
+      @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
+      @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
+
+    doPostViewAction(solution, path, action, contentType, null, null, null, null, servletRequest, servletResponse );
+    
+  }
+  
   @POST
   @Path( "/viewAction" )
-  public void viewAction( 
+  public void doPostViewAction( 
       @QueryParam( Parameter.SOLUTION ) String solution, 
       @QueryParam( Parameter.PATH ) String path,
       @QueryParam( Parameter.ACTION ) String action,
@@ -204,18 +217,9 @@ public class CdfApi {
       @FormParam( Parameter.JNDI ) String jndi,
       @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
 
-    String value = "";
-
-    if ( !StringUtils.isEmpty( solution ) || !StringUtils.isEmpty( action ) ) {
-      // legacy call using solution, path, action request parameters
-      value = Util.joinPath( solution, path, action );
-
-    } else if ( !StringUtils.isEmpty( path ) ) {
-      // 5.0 call using path
-      value = path;
-    }
+    String value = determineCorrectPath( solution, action, path );
     
-    HashMap<String, String> paramMap = Parameter.asHashMap( servletRequest );
+    HashMap<String, String> paramMap = new HashMap<String, String>();
     
     if( !StringUtils.isEmpty( queryType ) && !paramMap.containsKey( Parameter.QUERY_TYPE ) ) {
       paramMap.put( Parameter.QUERY_TYPE, queryType );

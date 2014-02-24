@@ -11,7 +11,24 @@
 * the license for the specific language governing your rights and limitations.
 */
 
+var CDF_PLUGIN_NAME = "pentaho-cdf";
 var SAMPLES_BASE_PATH = "/public/plugin-samples/";
+
+var Helper = {
+
+  getTimestamp: function() { return "ts=" + new Date().getTime(); },
+
+  getFullPath: function( path, action ) {
+
+    path = path || "";
+    action = action || "";
+
+    var fullPath = path.indexOf( CDF_PLUGIN_NAME ) == 0 ? ( SAMPLES_BASE_PATH + path ) : path;
+    fullPath = fullPath + ( action ? "/" + action : "" ).replace(/\/\//g, '/');
+
+    return fullPath;
+  }   
+};
 
 var Endpoints = {
 
@@ -22,7 +39,7 @@ var Endpoints = {
 
   getPluginBase: function( plugin ) { return Endpoints.getWebapp() + "/plugin/" + plugin + "/api"; },
 
-  getCdfBase: function () { return Endpoints.getPluginBase('pentaho-cdf'); },
+  getCdfBase: function () { return Endpoints.getPluginBase( CDF_PLUGIN_NAME ); },
 
   getCdaBase: function () { return Endpoints.getPluginBase('cda'); },
 
@@ -42,18 +59,19 @@ var Endpoints = {
 
   getResource: function() { return Endpoints.getCdfBase() + "/resource" },
 
-  getCdfXaction: function( path, action ) { 
-
-    var fullPath = path.indexOf( SAMPLES_BASE_PATH ) == -1 ? ( SAMPLES_BASE_PATH + path ) : path;
-    return Endpoints.getViewAction() + "?path=" + fullPath + "/" + action; 
+  getCdfXaction: function( path, action, solution ) { 
+    return Endpoints.getViewAction() + "?path=" + Helper.getFullPath( path, action ) + "&" + Helper.getTimestamp(); 
   },
 
-  getServiceAction: function( serviceMethod, path, action ) {
+  getServiceAction: function( method, solution, path, action ) { 
 
-    var fullPath = path.indexOf( SAMPLES_BASE_PATH ) == -1 ? ( SAMPLES_BASE_PATH + path ) : path;
-    fullPath = fullPath + ( action ? "/" + action : "" );
-    return Endpoints.getWebapp() + "/api/repos/" + fullPath.replace(/\//g, ":") + "/generatedContent"; 
-  },  
+    var arr = {};
+    arr.wrapper = false;
+    arr.action = action;
+    arr.url = Endpoints.getWebapp() + "/api/repos/" + Helper.getFullPath( path, action ).replace(/\//g, ":") + "/generatedContent";
+
+    return arr; 
+  }, 
 
   getComments: function ( action ) { 
 

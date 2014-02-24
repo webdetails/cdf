@@ -11,6 +11,12 @@
 * the license for the specific language governing your rights and limitations.
 */
 
+var Helper = {
+
+  getTimestamp: function() { return "ts=" + new Date().getTime(); }
+
+};
+
 var Endpoints = {
 
   // Dashboards.Startup.js determines webAppPath
@@ -40,9 +46,18 @@ var Endpoints = {
 
   getResource: function() { return Endpoints.getCdfBase() + "/GetCDFResource" },
 
-  getCdfXaction: function( path, action ) { return Endpoints.getViewAction() +  "?solution=system&path=" + path + "&action=" + action; },
+  getCdfXaction: function( path, action, solution ) { return Endpoints.getViewAction() + "?solution=" + (solution || "system") + "&path=" + path + "&action=" + action + "&" + Helper.getTimestamp(); },
 
-  getServiceAction: function( serviceMethod, path, action ) { return Endpoints.getWebapp() + "/" + serviceMethod; },  
+  getServiceAction: function( method, solution, path, action ) { 
+
+    var arr = {};
+    arr.wrapper = false;
+    arr.solution = solution;
+    arr.path = path;
+    arr.action = action;
+    arr.url = Endpoints.getWebapp() + "/" + method;
+
+    return arr; },  
 
   getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; }
 };
