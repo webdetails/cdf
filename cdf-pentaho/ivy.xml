@@ -51,18 +51,18 @@
     </dependency>
 
     <!-- cpf dependencies -->
-    <dependency org="pentaho"                 name="cpf-core"                       rev="REFACTOR-SNAPSHOT"                       transitive="false"    changing="true"     conf='runtime->default'/>
-    <dependency org="pentaho"                 name="cpf-pentaho"                    rev="REFACTOR-SNAPSHOT"                       transitive="false"    changing="true"     conf='runtime->default'/>
+    <dependency org="pentaho"                 name="cpf-core"                       rev="${dependency.pentaho-cpf-plugin.revision}"                       transitive="false"    changing="true"     conf='runtime->default'/>
+    <dependency org="pentaho"                 name="cpf-pentaho"                    rev="${dependency.pentaho-cpf-plugin.revision}"                       transitive="false"    changing="true"     conf='runtime->default'/>
                             
     <!-- cdf dependencies -->                           
-    <dependency org="pentaho"                 name="cdf-core"                       rev="REFACTOR-SNAPSHOT"                       transitive="false"    changing="true"     conf='runtime->default'/>
+    <dependency org="pentaho"                 name="cdf-core"                       rev="${project.revision}"                       transitive="false"    changing="true"     conf='runtime->default'/>
                             
     <!-- orient db (persistence) -->                            
-    <dependency org="com.orientechnologies"   name="orient-commons"                 rev="1.5.0"                                   transitive="false"                        conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies"   name="orientdb-core"                  rev="1.5.0"                                   transitive="false"                        conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies"   name="orientdb-server"                rev="1.5.0"                                   transitive="false"                        conf="runtime,default->default" />
-    <dependency org="com.orientechnologies"   name="orientdb-client"                rev="1.5.0"                                   transitive="false"                        conf="runtime,default->default" />
-    <dependency org="com.orientechnologies"   name="orientdb-enterprise"            rev="1.5.0"                                   transitive="false"                        conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"   name="orient-commons"                 rev="${dependency.orientdb.revision}"                                   transitive="false"                        conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies"   name="orientdb-core"                  rev="${dependency.orientdb.revision}"                                   transitive="false"                        conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies"   name="orientdb-server"                rev="${dependency.orientdb.revision}"                                   transitive="false"                        conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"   name="orientdb-client"                rev="${dependency.orientdb.revision}"                                   transitive="false"                        conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"   name="orientdb-enterprise"            rev="${dependency.orientdb.revision}"                                   transitive="false"                        conf="runtime,default->default" />
 
 
   </dependencies>
