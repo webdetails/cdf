@@ -37,8 +37,6 @@ public class CdfLifecycleListener extends SimpleLifeCycleListener {
     }
   }
 
-  public void unLoaded() throws PluginLifecycleException {
-  }
 
   @Override
   public PluginEnvironment getEnvironment() {
