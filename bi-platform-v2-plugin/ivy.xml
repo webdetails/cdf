@@ -50,16 +50,21 @@
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
 
-    <dependency org="pt.webdetails" name="cpf-core" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
-    <dependency org="pt.webdetails" name="cpf-pentaho" rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
+
+        <!-- tests -->
+    <dependency org="junit" name="junit" conf="test->default" rev='4.10' transitive="false"/>
 
 
+    <!-- Runtime -->
+    <dependency org="pt.webdetails"             name="cpf-core"            rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
+    <dependency org="pt.webdetails"             name="cpf-pentaho"         rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
+    <dependency org="net.sourceforge.jexcelapi" name="jxl"                 rev="2.6.12"          transitive="false"                 conf="test,runtime->default" />
     <!-- orient db (persistence) -->
-    <dependency org="com.orientechnologies" name="orient-commons" rev="1.5.0" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-core" rev="1.5.0" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-server" rev="1.5.0" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-client" rev="1.5.0" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-enterprise" rev="1.5.0" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"     name="orient-commons"      rev="1.5.0"          transitive="false"                 conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies"     name="orientdb-core"       rev="1.5.0"          transitive="false"                 conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies"     name="orientdb-server"     rev="1.5.0"          transitive="false"                 conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"     name="orientdb-client"     rev="1.5.0"          transitive="false"                 conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"     name="orientdb-enterprise" rev="1.5.0"          transitive="false"                 conf="runtime,default->default" />
 
 
   </dependencies>
