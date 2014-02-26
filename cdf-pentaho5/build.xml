@@ -217,7 +217,7 @@
 
 	    <!-- copy ccc build -->
         <copy todir="${stage.dir}/${plugin.name}/js/lib/CCC" >
-            <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
+            <fileset dir="${core.dir}/${js.expanded.lib.dir}/ccc/pen"/>
         </copy>
         
         <!-- rename ccc files -->
@@ -268,6 +268,14 @@
             	<include name="**/*"/>
             </fileset>
 	    </copy>
+
+	    <!-- copy ccc build -->
+        <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC" >
+            <fileset dir="${core.dir}/${js.expanded.lib.dir}/ccc/pen"/>
+        </copy>
+        
+        <!-- rename ccc files -->
+        <move file="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc-d1.0.js"/>
 
 	    <antcall target="replace-static-resource-labels">
 	    	<param name="base.js.path" value="${bin.dir}/js-source" />

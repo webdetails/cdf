@@ -53,10 +53,7 @@ var XactionComponent = BaseComponent.extend({
         " height=\"100%\"" +
         " width=\"100%\" />";        
         var iframe = $(xactionIFrameHTML);        
-        var url = Endpoints.getViewActionUrl() + "?wrapper=false" +
-              "&solution=" + this.solution +
-              "&path=" + this.path +
-              "&action="+ this.action;
+        var url = Endpoints.getCdfXaction( this.path, this.action, this.solution ) + "?wrapper=false";
 
         // Add args
         var p = new Array(this.parameters.length);
@@ -101,7 +98,7 @@ var JpivotComponent = BaseComponent.extend({
     }
      // Build IFrame and set url
     var jpivotHTML = "<iframe id=\"jpivot_"+ this.htmlObject + "\" scrolling=\""+this.iframeScrolling+"\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\""+this.iframeHeight+"\" width=\""+this.iframeWidth+"\" src=\"";
-    jpivotHTML += Endpoints.getViewActionUrl() + "?solution="  + this.solution + "&path=" +  this.path + "&action="+ this.action;
+    jpivotHTML += Endpoints.getCdfXaction( this.path, this.action, this.solution );
 
     // Add args
     var p = new Array(this.parameters.length);
@@ -1194,7 +1191,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
   },
 
   executeXAction : function() {
-    var url = Endpoints.getCdfXaction( this.solution , this.path, this.action ) + "&";
+    var url = Endpoints.getCdfXaction( this.path, this.action, this.solution ) + "&";
 
     var p = new Array(this.parameters.length);
     var parameters = [];

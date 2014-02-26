@@ -13,12 +13,18 @@
   <publications>
     <artifact name="${ivy.artifact.id}" type="jar" conf="default"/>
     <artifact name="${ivy.artifact.id}" m:classifier="sources" type="source" ext="jar" conf="source"/>
+    <artifact name="${ivy.artifact.id}" type="zip" conf="zip"/>
+    <artifact name="${ivy.artifact.id}" m:classifier="js" type="js" ext="zip" conf="js"/>
   </publications>
   
   <dependencies defaultconf="default->default">
     
     <!--  cpf dependencies -->
     <dependency org="pentaho"                       name="cpf-core"               rev="${dependency.pentaho-cpf-plugin.revision}"           transitive="false"    changing="true"     conf='runtime->default'/>
+
+    <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
+        <artifact name="ccc" type="zip" ext="zip"/>
+    </dependency>
 
     <!--  third party dependencies -->
     <dependency org="commons-logging"               name="commons-logging"        rev="1.1"                         transitive="false"/>

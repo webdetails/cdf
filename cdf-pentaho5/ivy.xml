@@ -50,10 +50,6 @@
     <dependency org="pentaho"                   name="cpf-core"                               rev="${dependency.pentaho-cpf-plugin.revision}"                     transitive="false"       changing="true"      conf='runtime->default'/>
     <dependency org="pentaho"                   name="cpf-pentaho5"                           rev="${dependency.pentaho-cpf-plugin.revision}"                     transitive="false"       changing="true"      conf='runtime->default'/>
 
-    <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
-        <artifact name="ccc" type="zip" ext="zip"/>
-    </dependency>
-
     <!-- orient db (persistence) -->
     <dependency org="com.orientechnologies"     name="orient-commons"                         rev="${dependency.orientdb.revision}"                                 transitive="false"                            conf="runtime,default->default"/>
     <dependency org="com.orientechnologies"     name="orientdb-core"                          rev="${dependency.orientdb.revision}"                                 transitive="false"                            conf="runtime,default->default"/>

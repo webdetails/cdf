@@ -103,7 +103,7 @@ var JFreeChartComponent = BaseComponent.extend({
         action: xactionFile,
         exportType: type
       },cd);
-      Dashboards.post(Endpoints.getExport() ,obj); //TODO hcoded path
+      Dashboards.post(Endpoints.getExport() ,obj);
     };
 
     var myself = this;
@@ -175,7 +175,6 @@ var JFreeChartComponent = BaseComponent.extend({
           };
           Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
             if(jXML != null){
-              //TODO hcoded path
               var openWindow = window.open(Endpoints.getResource() + "/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
               var maxTries = 10;
               var loadChart = function(){

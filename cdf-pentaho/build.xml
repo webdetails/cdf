@@ -220,6 +220,14 @@
 		   </fileset>
 	    </copy>
 
+	    <!-- copy ccc build -->
+        <copy todir="${stage.dir}/${plugin.name}/js/lib/CCC" >
+            <fileset dir="${core.dir}/${js.expanded.lib.dir}/ccc/ccc"/>
+        </copy>
+        
+        <!-- rename ccc files -->
+        <move file="${stage.dir}/${plugin.name}/js/lib/CCC/pvc.js" tofile="${stage.dir}/${plugin.name}/js/lib/CCC/pvc-d1.0.js"/>
+
     	<!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
         <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>		   
 		
@@ -252,7 +260,7 @@
 
 	<target name="dist-js" >    
 		<mkdir dir="${bin.dir}/js-source/${js.module.script.namespace}"/>
-	    
+
 		<!-- cdf-core/cdf/js -->
 	    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}" overwrite="true">
             <fileset dir='${core-js.dir}'>
@@ -266,6 +274,14 @@
             	<include name="**/*"/>
             </fileset>
 	    </copy>
+
+	    <!-- copy ccc build -->
+        <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC" >
+            <fileset dir="${core.dir}/${js.expanded.lib.dir}/ccc/ccc"/>
+        </copy>
+        
+        <!-- rename ccc files -->
+        <move file="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc-d1.0.js"/>
 
 	    <antcall target="replace-static-resource-labels">
 	    	<param name="base.js.path" value="${bin.dir}/js-source" />

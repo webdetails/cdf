@@ -24,6 +24,7 @@
 
   <!-- Import subfloor.xml which contains all the default tasks -->
   <import file="../build-res/subfloor-pkg.xml" id="subfloor"/>
+  <import file="../build-res/subfloor-js.xml"/>
 
   <!--
       AS STATED ABOVE, THE ONLY TASKS THAT SHOULD EXIST IN THIS BUILD FILE ARE
@@ -40,6 +41,10 @@
   </target>
 -->
 
+    <!-- overrides subfloor clean to also cleanup runtime-lib -->
+    <target name="clean" depends="subfloor.clean, subfloor-js.clean-js">
+      <delete dir="${runtimelib.dir}" />
+    </target>
 
     <target name="dist" depends="clean,resolve,jar,source.jar"/>
 
@@ -128,7 +133,7 @@
 
  <!-- Overriding resolve target so we can add resolve-dev -->
   <target name="resolve"
-          depends="resolve-default, resolve-test, resolve-runtime, ivy.check-releasable"
+          depends="resolve-default, resolve-test, resolve-runtime, subfloor-js.resolve-js, ivy.check-releasable"
           description="Retrieves all the dependent libraries" />
 
 
