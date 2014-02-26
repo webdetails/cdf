@@ -276,7 +276,7 @@ public class ContextEngine {
             params.put("dataAccessId", id);
             params.put("path", path);
             logger.info("[Timing] Executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
-            InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "doQueryGet", params);
+            InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "doQueryInterPluginOld", params);
             String reply = ipc.callInPluginClassLoader();
             logger.info("[Timing] Done executing autoinclude query: " + (new SimpleDateFormat("HH:mm:ss.SSS")).format(new Date()));
             try {
@@ -328,7 +328,7 @@ public class ContextEngine {
 
       params.put("path", cda);
       params.put("outputType", "xml");
-      InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "listQueries", params);
+      InterPluginCall ipc = new InterPluginCall(InterPluginCall.CDA, "listQueriesInterPluginOld", params);
       String reply = ipc.call();
       Document queryList = reader.read(new StringReader(reply));
       List<Node> queries = queryList.selectNodes("//ResultSet/Row/Col[1]");
