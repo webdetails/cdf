@@ -17,7 +17,7 @@
   </publications>
   <dependencies defaultconf="default->default">
     <!--  third party dependencies -->
-    <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false"/>
+    <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false"  conf="test, default->default"/>
     <dependency org="commons-io" name="commons-io" rev="2.1" transitive="false"/>
         <dependency org="commons-codec" name="commons-codec" rev="1.5" transitive="false"/>
     <dependency org="dom4j" name="dom4j" rev="1.6.1" transitive="false"/>
@@ -66,23 +66,32 @@
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
 
+
     <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
         <artifact name="ccc" type="zip" ext="zip"/>
     </dependency>
 
 
-    <dependency org="pentaho" name="cpf" rev="${dependency.pentaho-cpf-plugin.revision}" transitive="false" changing="true" conf="runtime->default"/>
 
+
+
+    <!-- Runtime -->
+    <dependency org="pentaho"                   name="cpf"                 rev="${dependency.pentaho-cpf-plugin.revision}" transitive="false" changing="true" conf="test,runtime->default"/>    
+    <dependency org="net.sourceforge.jexcelapi" name="jxl"                 rev="2.6.12"                                    transitive="false"                 conf="test,runtime->default" />
     <!-- orient db (persistence) -->
-    <dependency org="com.orientechnologies" name="orient-commons" rev="1.5.0" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-core" rev="1.5.0" transitive="false" conf="runtime,default->default"/>
-    <dependency org="com.orientechnologies" name="orientdb-server" rev="1.5.0" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-client" rev="1.5.0" transitive="false" conf="runtime,default->default" />
-    <dependency org="com.orientechnologies" name="orientdb-enterprise" rev="1.5.0" transitive="false" conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"     name="orient-commons"      rev="${dependency.orientdb.revision}"           transitive="false"                 conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies"     name="orientdb-core"       rev="${dependency.orientdb.revision}"           transitive="false"                 conf="runtime,default->default"/>
+    <dependency org="com.orientechnologies"     name="orientdb-server"     rev="${dependency.orientdb.revision}"           transitive="false"                 conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"     name="orientdb-client"     rev="${dependency.orientdb.revision}"           transitive="false"                 conf="runtime,default->default" />
+    <dependency org="com.orientechnologies"     name="orientdb-enterprise" rev="${dependency.orientdb.revision}"           transitive="false"                 conf="runtime,default->default" />
 
 
-    <dependency org="org.mockito" name="mockito-all" rev="1.8.4" conf="test, default->default"/>
-    <dependency org="junit"       name="junit"       rev="4.10"  conf="test, default->default"/>
+    <!-- Test -->
+    <dependency org="org.slf4j"           name="slf4j-api"           rev="1.7.5" transitive="false" conf="test, default->default"/>    
+    <dependency org="commons-collections" name="commons-collections" rev="3.2"   transitive="false" conf="test, default->default"/>    
+    <dependency org="org.mockito"         name="mockito-all"         rev="1.8.4"                    conf="test, default->default"/>
+    <dependency org="junit"               name="junit"               rev="4.10"                     conf="test, default->default"/>
+
 
 
   </dependencies>
