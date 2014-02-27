@@ -1,7 +1,8 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
 
 /**
  * @requires OpenLayers/BaseTypes/Class.js
@@ -13,7 +14,6 @@
  * Features are combinations of geography and attributes. The OpenLayers.Feature
  *     class specifically combines a marker and a lonlat.
  */
-
 OpenLayers.Feature = OpenLayers.Class({
 
     /** 
@@ -49,7 +49,7 @@ OpenLayers.Feature = OpenLayers.Class({
     /**
      * APIProperty: popupClass
      * {<OpenLayers.Class>} The class which will be used to instantiate
-     *     a new Popup. Default is <OpenLayers.Popup.AnchoredBubble>.
+     *     a new Popup. Default is <OpenLayers.Popup.Anchored>.
      */
     popupClass: null,
 
@@ -188,7 +188,7 @@ OpenLayers.Feature = OpenLayers.Class({
             if (!this.popup) {
                 var anchor = (this.marker) ? this.marker.icon : null;
                 var popupClass = this.popupClass ? 
-                    this.popupClass : OpenLayers.Popup.AnchoredBubble;
+                    this.popupClass : OpenLayers.Popup.Anchored;
                 this.popup = new popupClass(this.id + "_popup", 
                                             this.lonlat,
                                             this.data.popupSize,

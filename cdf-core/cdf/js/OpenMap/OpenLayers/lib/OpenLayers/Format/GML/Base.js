@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/XML.js
@@ -12,7 +12,6 @@
  * Though required in the full build, if the GML format is excluded, we set
  * the namespace here.
  */
-
 if(!OpenLayers.Format.GML) {
     OpenLayers.Format.GML = {};
 }
@@ -231,7 +230,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
         }
         return OpenLayers.Format.XML.prototype.readNode.apply(this, [node, obj]);
     },
-
+    
     /**
      * Property: readers
      * Contains public functions, grouped by namespace prefix, that will
@@ -242,6 +241,9 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
      */
     readers: {
         "gml": {
+            "_inherit": function(node, obj, container) {
+                // To be implemented by version specific parsers
+            },
             "featureMember": function(node, obj) {
                 this.readChildNodes(node, obj);
             },
@@ -310,6 +312,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "MultiPoint": function(node, container) {
                 var obj = {components: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 container.components = [
                     new OpenLayers.Geometry.MultiPoint(obj.components)
@@ -320,6 +323,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "LineString": function(node, container) {
                 var obj = {};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 if(!container.components) {
                     container.components = [];
@@ -330,6 +334,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "MultiLineString": function(node, container) {
                 var obj = {components: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 container.components = [
                     new OpenLayers.Geometry.MultiLineString(obj.components)
@@ -340,6 +345,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "Polygon": function(node, container) {
                 var obj = {outer: null, inner: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 obj.inner.unshift(obj.outer);
                 if(!container.components) {
@@ -351,6 +357,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "LinearRing": function(node, obj) {
                 var container = {};
+                this.readers.gml._inherit.apply(this, [node, container]);
                 this.readChildNodes(node, container);
                 obj.components = [new OpenLayers.Geometry.LinearRing(
                     container.points
@@ -358,6 +365,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "MultiPolygon": function(node, container) {
                 var obj = {components: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 container.components = [
                     new OpenLayers.Geometry.MultiPolygon(obj.components)
@@ -368,6 +376,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
             },
             "GeometryCollection": function(node, container) {
                 var obj = {components: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 container.components = [
                     new OpenLayers.Geometry.Collection(obj.components)
@@ -616,7 +625,7 @@ OpenLayers.Format.GML.Base = OpenLayers.Class(OpenLayers.Format.XML, {
     },
     
     /**
-     * Function: setGeometryTypes
+     * Method: setGeometryTypes
      * Sets the <geometryTypes> mapping.
      */
     setGeometryTypes: function() {

@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/BaseTypes/Class.js
@@ -11,7 +11,6 @@
  * Class: OpenLayers.Size
  * Instances of this class represent a width/height pair
  */
-
 OpenLayers.Size = OpenLayers.Class({
 
     /**
@@ -70,12 +69,12 @@ OpenLayers.Size = OpenLayers.Class({
      * Determine where this size is equal to another
      *
      * Parameters:
-     * sz - {<OpenLayers.Size>}
+     * sz - {<OpenLayers.Size>|Object} An OpenLayers.Size or an object with
+     *                                  a 'w' and 'h' properties.
      *
      * Returns: 
      * {Boolean} The passed in size has the same h and w properties as this one.
      * Note that if sz passed in is null, returns false.
-     *
      */
     equals:function(sz) {
         var equals = false;

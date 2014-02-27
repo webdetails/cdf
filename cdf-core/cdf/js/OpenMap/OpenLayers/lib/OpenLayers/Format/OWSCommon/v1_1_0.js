@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/OWSCommon/v1.js
@@ -10,8 +10,10 @@
 /**
  * Class: OpenLayers.Format.OWSCommon.v1_1_0
  * Parser for OWS Common version 1.1.0.
+ *
+ * Inherits from:
+ *  - <OpenLayers.Format.OWSCommon.v1>
  */
-
 OpenLayers.Format.OWSCommon.v1_1_0 = OpenLayers.Class(OpenLayers.Format.OWSCommon.v1, {
 
     /**
@@ -62,7 +64,7 @@ OpenLayers.Format.OWSCommon.v1_1_0 = OpenLayers.Class(OpenLayers.Format.OWSCommo
                 range.maxValue = this.getChildValue(node);
             },
             "Identifier": function(node, obj) {
-            	obj.identifier = this.getChildValue(node);
+                obj.identifier = this.getChildValue(node);
             },
             "SupportedCRS": function(node, obj) {
                 obj.supportedCRS = this.getChildValue(node);

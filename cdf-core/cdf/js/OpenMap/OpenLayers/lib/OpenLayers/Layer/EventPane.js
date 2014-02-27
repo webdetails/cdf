@@ -1,7 +1,8 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
 
 /**
  * @requires OpenLayers/Layer.js
@@ -10,13 +11,18 @@
 
 /**
  * Class: OpenLayers.Layer.EventPane
- * Base class for 3rd party layers.  Create a new event pane layer with the
+ * Base class for 3rd party layers, providing a DOM element which isolates
+ * the 3rd-party layer from mouse events.
+ * Only used by Google layers.
+ *
+ * Automatically instantiated by the Google constructor, and not usually instantiated directly.
+ *
+ * Create a new event pane layer with the
  * <OpenLayers.Layer.EventPane> constructor.
  * 
  * Inherits from:
  *  - <OpenLayers.Layer>
  */
-
 OpenLayers.Layer.EventPane = OpenLayers.Class(OpenLayers.Layer, {
     
     /**
@@ -104,11 +110,11 @@ OpenLayers.Layer.EventPane = OpenLayers.Class(OpenLayers.Layer, {
         this.pane.style.height="100%";
         if (OpenLayers.BROWSER_NAME == "msie") {
             this.pane.style.background = 
-                "url(" + OpenLayers.Util.getImagesLocation() + "blank.gif)";
+                "url(" + OpenLayers.Util.getImageLocation("blank.gif") + ")";
         }
 
         if (this.isFixed) {
-            this.map.eventsDiv.appendChild(this.pane);
+            this.map.viewPortDiv.appendChild(this.pane);
         } else {
             this.map.layerContainerDiv.appendChild(this.pane);
         }
@@ -255,8 +261,7 @@ OpenLayers.Layer.EventPane = OpenLayers.Class(OpenLayers.Layer, {
                 var moOldZoom = this.getMapObjectZoom();
                 var oldZoom= this.getOLZoomFromMapObjectZoom(moOldZoom);
 
-                if ( !(newCenter.equals(oldCenter)) || 
-                     !(newZoom == oldZoom) ) {
+                if (!(newCenter.equals(oldCenter)) || newZoom != oldZoom) {
 
                     if (!zoomChanged && oldCenter && this.dragPanMapObject && 
                         this.smoothDragPan) {
