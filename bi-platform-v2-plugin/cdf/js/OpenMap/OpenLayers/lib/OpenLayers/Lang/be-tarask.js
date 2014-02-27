@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /* Translators (2009 onwards):
  *  - EugeneZelenko
  *  - Jim-by
@@ -18,7 +13,6 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
-
 OpenLayers.Lang["be-tarask"] = OpenLayers.Util.applyDefaults({
 
     'unhandledRequest': "Неапрацаваны вынік запыту ${statusText}",
@@ -29,19 +23,9 @@ OpenLayers.Lang["be-tarask"] = OpenLayers.Util.applyDefaults({
 
     'Base Layer': "Базавы слой",
 
-    'readNotImplemented': "Функцыянальнасьць чытаньня ня створаная.",
-
-    'writeNotImplemented': "Функцыянальнасьць запісу ня створаная.",
-
     'noFID': "Немагчыма абнавіць магчымасьць, для якога не існуе FID.",
 
-    'errorLoadingGML': "Памылка загрузкі файла GML ${url}",
-
     'browserNotSupported': "Ваш браўзэр не падтрымлівае вэктарную графіку. У цяперашні момант падтрымліваюцца: ${renderers}",
-
-    'componentShouldBe': "addFeatures : кампанэнт павінен быць ${geomType}",
-
-    'getFeatureError': "getFeatureFromEvent выкліканы для слоя бяз рэндэру. Звычайна гэта азначае, што Вы зьнішчылі слой, але пакінулі зьвязаны зь ім апрацоўшчык.",
 
     'minZoomLevelError': "Уласьцівасьць minZoomLevel прызначана толькі для выкарыстаньня са слаямі вытворнымі ад FixedZoomLevels. Тое, што  гэты wfs-слой правяраецца на minZoomLevel — рэха прошлага. Але мы ня можам выдаліць гэтую магчымасьць, таму што ад яе залежаць некаторыя заснаваныя на OL дастасаваньні. Тым ня менш, праверка minZoomLevel будзе выдаленая ў вэрсіі 3.0. Калі ласка, выкарыстоўваеце замест яе ўстаноўкі мінімальнага/максымальнага памераў, як апісана тут: http://trac.openlayers.org/wiki/SettingZoomLevels",
 
@@ -63,20 +47,8 @@ OpenLayers.Lang["be-tarask"] = OpenLayers.Util.applyDefaults({
 
     'S': "Пд",
 
-    'layerAlreadyAdded': "Вы паспрабавалі дадаць слой ${layerName} на мапу, але ён ужо дададзены",
-
     'reprojectDeprecated': "Вы выкарыстоўваеце ўстаноўку \'reproject\' для слоя ${layerName}. Гэтая ўстаноўка зьяўляецца састарэлай: яна выкарыстоўвалася для падтрымкі паказу зьвестак на камэрцыйных базавых мапах, але гэта функцыя цяпер рэалізаваная ў убудаванай падтрымцы сфэрычнай праекцыі Мэркатара. Дадатковая інфармацыя ёсьць на http://trac.openlayers.org/wiki/SphericalMercator.",
 
-    'methodDeprecated': "Гэты мэтад састарэлы і будзе выдалены ў вэрсіі 3.0. Калі ласка, замест яго выкарыстоўвайце ${newMethod}.",
-
-    'boundsAddError': "Вам неабходна падаць абодва значэньні x і y для функцыі складаньня.",
-
-    'lonlatAddError': "Вам неабходна падаць абодва значэньні lon і lat для функцыі складаньня.",
-
-    'pixelAddError': "Вам неабходна падаць абодва значэньні x і y для функцыі складаньня.",
-
-    'unsupportedGeometryType': "Тып геамэтрыі не падтрымліваецца: ${geomType}",
-
-    'filterEvaluateNotImplemented': "evaluate не рэалізаваны для гэтага тыпу фільтру."
+    'methodDeprecated': "Гэты мэтад састарэлы і будзе выдалены ў вэрсіі 3.0. Калі ласка, замест яго выкарыстоўвайце ${newMethod}."
 
 });

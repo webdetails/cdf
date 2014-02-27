@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/WMC.js
@@ -15,7 +15,6 @@
  * Inherits from:
  *  - <OpenLayers.Format.XML>
  */
-
 OpenLayers.Format.WMC.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
     
     /**
@@ -148,10 +147,8 @@ OpenLayers.Format.WMC.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
     read_wmc_BoundingBox: function(context, node) {
         context.projection = node.getAttribute("SRS");
         context.bounds = new OpenLayers.Bounds(
-            parseFloat(node.getAttribute("minx")),
-            parseFloat(node.getAttribute("miny")),
-            parseFloat(node.getAttribute("maxx")),
-            parseFloat(node.getAttribute("maxy"))
+            node.getAttribute("minx"), node.getAttribute("miny"),
+            node.getAttribute("maxx"), node.getAttribute("maxy")
         );
     },
     
@@ -1014,7 +1011,7 @@ OpenLayers.Format.WMC.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
      *     null or undefined, null will be returned.
      *
      * Parameters:
-     * object - {Object} An object.
+     * obj - {Object} An object.
      * prop - {String} A property.
      *
      * Returns:
@@ -1047,7 +1044,7 @@ OpenLayers.Format.WMC.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
              version: server.version
          };
          if (server.title) {
-             attributes.title = server.title
+             attributes.title = server.title;
          }
          this.setAttributes(node, attributes);
         
@@ -1058,15 +1055,16 @@ OpenLayers.Format.WMC.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
     },
 
     /**
-      * Method: write_wmc_URLType
-      * Create a LogoURL/DescriptionURL/MetadataURL/DataURL/LegendURL node given a object and elementName.
+     * Method: write_wmc_URLType
+     * Create a LogoURL/DescriptionURL/MetadataURL/DataURL/LegendURL node given a object and elementName.
      *
      * Parameters:
-      * elName - {String} Name of element (LogoURL/DescriptionURL/MetadataURL/LegendURL)
-      * url - {String} URL string value
-      * attr - {Object} Optional attributes (width, height, format)
+     * elName - {String} Name of element (LogoURL/DescriptionURL/MetadataURL/LegendURL)
+     * url - {String} URL string value
+     * attr - {Object} Optional attributes (width, height, format)
+     *
      * Returns:
-      * {Element} A WMC element node.
+     * {Element} A WMC element node.
      */
      write_wmc_URLType: function(elName, url, attr) {
          var node = this.createElementDefaultNS(elName);
@@ -1146,7 +1144,7 @@ OpenLayers.Format.WMC.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
      * Create a StyleList node given a layer context.
      *
      * Parameters:
-     * context - {Object} Layer context object.
+     * layer - {Object} Layer context object.
      *
      * Returns:
      * {Element} A WMC StyleList element node.

@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -13,7 +8,6 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
-
 OpenLayers.Lang['da-DK'] = {
 
     'unhandledRequest': "En ikke håndteret forespørgsel returnerede ${statusText}",
@@ -24,23 +18,10 @@ OpenLayers.Lang['da-DK'] = {
 
     'Base Layer': "Baggrundslag",
 
-    'readNotImplemented': "Læsning er ikke implementeret.",
-
-    'writeNotImplemented': "Skrivning er ikke implementeret.",
-
     'noFID': "Kan ikke opdateret en feature (et objekt) der ikke har et FID.",
-
-    'errorLoadingGML': "Fejlede under indlæsning af GML fil ${url}",
 
     'browserNotSupported':
         "Din browser understøtter ikke vektor visning. Følgende vektor visninger understøttes:\n${renderers}",
-
-    'componentShouldBe': "addFeatures : komponenten skal være en ${geomType}",
-
-    // console message
-    'getFeatureError':
-        "getFeatureFromEvent blev kaldt på et lag uden en visning. Dette betyder som regel at du " +
-        "har destrueret et lag, men ikke de håndteringer der var tilknyttet.",
 
     // console message
     'minZoomLevelError':
@@ -84,10 +65,6 @@ OpenLayers.Lang['da-DK'] = {
     'Scale = 1 : ${scaleDenom}': "Målforhold = 1 : ${scaleDenom}",
 
     // console message
-    'layerAlreadyAdded':
-        "Du har forsøgt at tilføje laget: ${layerName} til kortet, men det er allerede tilføjet",
-
-    // console message
     'reprojectDeprecated':
         "Du anvender indstillingen 'reproject' på laget ${layerName}." + 
         "Denne indstilling bør ikke længere anvendes. Den var beregnet " +
@@ -99,20 +76,5 @@ OpenLayers.Lang['da-DK'] = {
     // console message
     'methodDeprecated':
         "Denne funktion bør ikke længere anvendes, og vil blive fjernet i version 3.0. " +
-        "Anvend venligst funktionen ${newMethod} istedet.",
-
-    // console message
-    'boundsAddError': "Du skal angive både x og y værdier i kaldet til add funktionen.",
-
-    // console message
-    'lonlatAddError': "Du skal angive både lon og lat værdier i kaldet til add funktionen.",
-
-    // console message
-    'pixelAddError': "Du skal angive både x og y værdier i kaldet til add funktionen.",
-
-    // console message
-    'unsupportedGeometryType': "Geometri typen: ${geomType} er ikke understøttet.",
-
-    // console message
-    'filterEvaluateNotImplemented': "evaluering er ikke implementeret for denne filter type."
+        "Anvend venligst funktionen ${newMethod} istedet."
 };
