@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Layer/Vector.js
@@ -27,7 +27,6 @@
  * Inherits from:
  *  - <OpenLayers.Layer.Vector>
  */
-
 OpenLayers.Layer.PointGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 
     /**
@@ -70,7 +69,7 @@ OpenLayers.Layer.PointGrid = OpenLayers.Class(OpenLayers.Layer.Vector, {
 
     /**
      * APIProperty: origin
-     * {OpenLayers.LonLat} Grid origin.  The grid lattice will be aligned with 
+     * {<OpenLayers.LonLat>} Grid origin.  The grid lattice will be aligned with 
      * the origin.  If not set at construction, the center of the map's maximum 
      * extent is used.  Read-only.  Use the <setOrigin> method to modify this 
      * value.

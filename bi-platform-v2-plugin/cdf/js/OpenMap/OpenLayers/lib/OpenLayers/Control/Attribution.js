@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Control.js
@@ -15,15 +15,22 @@
  * Inherits from:
  *  - <OpenLayers.Control>
  */
-
 OpenLayers.Control.Attribution = 
   OpenLayers.Class(OpenLayers.Control, {
     
     /**
-     * APIProperty: seperator
-     * {String} String used to seperate layers.
+     * APIProperty: separator
+     * {String} String used to separate layers.
      */
     separator: ", ",
+    
+    /**
+     * APIProperty: template
+     * {String} Template for the attribution. This has to include the substring
+     *     "${layers}", which will be replaced by the layer specific
+     *     attributions, separated by <separator>. The default is "${layers}".
+     */
+    template: "${layers}",
     
     /**
      * Constructor: OpenLayers.Control.Attribution 
@@ -87,7 +94,9 @@ OpenLayers.Control.Attribution =
                     }
                 }
             } 
-            this.div.innerHTML = attributions.join(this.separator);
+            this.div.innerHTML = OpenLayers.String.format(this.template, {
+                layers: attributions.join(this.separator)
+            });
         }
     },
 

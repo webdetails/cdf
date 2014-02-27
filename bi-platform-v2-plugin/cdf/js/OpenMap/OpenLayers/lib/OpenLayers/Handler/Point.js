@@ -1,7 +1,8 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
 
 /**
  * @requires OpenLayers/Handler.js
@@ -20,7 +21,6 @@
  * Inherits from:
  *  - <OpenLayers.Handler>
  */
-
 OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
     
     /**
@@ -41,6 +41,13 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
      *     layer.  Default is false.
      */
     multi: false,
+    
+    /**
+     * APIProperty: citeCompliant
+     * {Boolean} If set to true, coordinates of features drawn in a map extent
+     * crossing the date line won't exceed the world bounds. Default is false.
+     */
+    citeCompliant: false,
     
     /**
      * Property: mouseDown
@@ -107,12 +114,6 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
     pixelTolerance: 5,
 
     /**
-     * Property: touch
-     * {Boolean} Indcates the support of touch events.
-     */
-    touch: false,
-
-    /**
      * Property: lastTouchPx
      * {<OpenLayers.Pixel>} The last pixel used to know the distance between
      * two touches (for double touch).
@@ -164,7 +165,8 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
             // without this, resolution properties must be specified at the
             // map-level for this temporary layer to init its resolutions
             // correctly
-            calculateInRange: OpenLayers.Function.True
+            calculateInRange: OpenLayers.Function.True,
+            wrapDateLine: this.citeCompliant
         }, this.layerOptions);
         this.layer = new OpenLayers.Layer.Vector(this.CLASS_NAME, options);
         this.map.addLayer(this.layer);
@@ -179,7 +181,7 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
      * pixel - {<OpenLayers.Pixel>} A pixel location on the map.
      */
     createFeature: function(pixel) {
-        var lonlat = this.map.getLonLatFromPixel(pixel);
+        var lonlat = this.layer.getLonLatFromViewPortPx(pixel); 
         var geometry = new OpenLayers.Geometry.Point(
             lonlat.lon, lonlat.lat
         );
@@ -208,7 +210,6 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
             this.layer.destroy(false);
         }
         this.layer = null;
-        this.touch = false;
         return true;
     },
     
@@ -306,7 +307,7 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
         if(!this.point) {
             this.createFeature(pixel);
         }
-        var lonlat = this.map.getLonLatFromPixel(pixel);
+        var lonlat = this.layer.getLonLatFromViewPortPx(pixel); 
         this.point.geometry.x = lonlat.lon;
         this.point.geometry.y = lonlat.lat;
         this.callback("modify", [this.point.geometry, this.point, false]);
@@ -375,18 +376,7 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
      * {Boolean} Allow event propagation
      */
     touchstart: function(evt) {
-        if (!this.touch) {
-            this.touch = true;
-            // unregister mouse listeners
-            this.map.events.un({
-                mousedown: this.mousedown,
-                mouseup: this.mouseup,
-                mousemove: this.mousemove,
-                click: this.click,
-                dblclick: this.dblclick,
-                scope: this
-            });
-        }
+        this.startTouch();
         this.lastTouchPx = evt.xy;
         return this.down(evt);
     },
@@ -537,7 +527,7 @@ OpenLayers.Handler.Point = OpenLayers.Class(OpenLayers.Handler, {
      * evt - {Event} The browser event
      */
     mouseout: function(evt) {
-        if(OpenLayers.Util.mouseLeft(evt, this.map.eventsDiv)) {
+        if(OpenLayers.Util.mouseLeft(evt, this.map.viewPortDiv)) {
             this.stoppedDown = this.stopDown;
             this.mouseDown = false;
         }

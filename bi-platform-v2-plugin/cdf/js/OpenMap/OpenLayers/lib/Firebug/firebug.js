@@ -220,7 +220,7 @@ if (!window.console || !console.firebug) { (function()
             consoleBody = doc.getElementById("log");
             layout();
             flush();
-        }
+        };
 
         var baseURL = getFirebugURL();
 

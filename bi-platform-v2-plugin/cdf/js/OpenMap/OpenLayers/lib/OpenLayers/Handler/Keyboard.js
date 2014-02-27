@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Handler.js
@@ -16,7 +16,6 @@
  * Inherits from:
  *  - <OpenLayers.Handler> 
  */
-
 OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
 
     /* http://www.quirksmode.org/js/keys.html explains key x-browser
@@ -33,6 +32,13 @@ OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
     * {Function}
     */
     eventListener: null,
+
+    /**
+     * Property: observeElement
+     * {DOMElement|String} The DOM element on which we listen for
+     *     key events. Default to the document.
+     */
+    observeElement: null,
 
     /**
      * Constructor: OpenLayers.Handler.Keyboard
@@ -72,9 +78,10 @@ OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
      */
     activate: function() {
         if (OpenLayers.Handler.prototype.activate.apply(this, arguments)) {
+            this.observeElement = this.observeElement || document;
             for (var i=0, len=this.KEY_EVENTS.length; i<len; i++) {
                 OpenLayers.Event.observe(
-                    document, this.KEY_EVENTS[i], this.eventListener);
+                    this.observeElement, this.KEY_EVENTS[i], this.eventListener);
             }
             return true;
         } else {
@@ -90,7 +97,7 @@ OpenLayers.Handler.Keyboard = OpenLayers.Class(OpenLayers.Handler, {
         if (OpenLayers.Handler.prototype.deactivate.apply(this, arguments)) {
             for (var i=0, len=this.KEY_EVENTS.length; i<len; i++) {
                 OpenLayers.Event.stopObserving(
-                    document, this.KEY_EVENTS[i], this.eventListener);
+                    this.observeElement, this.KEY_EVENTS[i], this.eventListener);
             }
             deactivated = true;
         }

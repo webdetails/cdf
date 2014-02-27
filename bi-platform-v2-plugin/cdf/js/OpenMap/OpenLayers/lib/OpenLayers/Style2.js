@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/BaseTypes/Class.js
@@ -17,7 +17,6 @@
  * Class: OpenLayers.Style2
  * This class represents a collection of rules for rendering features.
  */
-
 OpenLayers.Style2 = OpenLayers.Class({
 
     /**
@@ -71,7 +70,7 @@ OpenLayers.Style2 = OpenLayers.Class({
      * config - {Object} An object containing properties to be set on the 
      *     style.  Any documented properties may be set at construction.
      *
-     * Return:
+     * Returns:
      * {<OpenLayers.Style2>} A new style object.
      */
     initialize: function(config) {

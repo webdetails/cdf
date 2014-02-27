@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/XML/VersionedOGC.js
@@ -15,7 +15,6 @@
  * Inherits from:
  *  - <OpenLayers.Format.XML.VersionedOGC>
  */
-
 OpenLayers.Format.WMSDescribeLayer = OpenLayers.Class(OpenLayers.Format.XML.VersionedOGC, {
 
     /**
@@ -24,28 +23,6 @@ OpenLayers.Format.WMSDescribeLayer = OpenLayers.Class(OpenLayers.Format.XML.Vers
      */
     defaultVersion: "1.1.1",
    
-    /**
-     * Method: getVersion
-     * Returns the version to use. Subclasses can override this function
-     * if a different version detection is needed.
-     *
-     * Parameters:
-     * root - {DOMElement}
-     * options - {Object} Optional configuration object.
-     *
-     * Returns:
-     * {String} The version to use.
-     */
-    getVersion: function(root, options) {
-        var version = OpenLayers.Format.XML.VersionedOGC.prototype.getVersion.apply(
-            this, arguments);
-        // these are identical to us, but some WMS use 1.1.1 and some use 1.1.0
-        if (version == "1.1.1" || version == "1.1.0") {
-            version = "1.1";
-        }
-        return version;
-    },
-
     /**
      * Constructor: OpenLayers.Format.WMSDescribeLayer
      * Create a new parser for WMS DescribeLayer responses.
