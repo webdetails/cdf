@@ -186,15 +186,63 @@ var PrptComponent = BaseComponent.extend({
     }
   },
   /*************************************************************************/
+  //util function to compose paths - solution:path:action
+  composePath: function(options) {
+    var clean = function(segment) {
+      if (segment.charAt(0) == ":") {
+        segment = segment.substring(1,segment.length);
+      }
+      if (segment.charAt(segment.length - 1) == ":") {
+        segment = segment.substring(0,segment.length - 1);
+      }
+      return segment
+    };
+    var solution = options.solution != undefined ? options.solution.replace(/\//g, ':') : "";
+    var path =  options.path != undefined ? options.path.replace(/\//g, ':') : ".";
+    var action =  options.action != undefined ? options.action.replace(/\//g, ':') : "";
+    var fullPath = ":";
+    if (solution != "") {
+      fullPath += clean(solution) + ":";
+    }
+    if (path != "") {
+      fullPath += clean(path);
+    }
+    if (action != "") {
+      fullPath += ":" + clean(action);
+    }
+    return fullPath;
+  },
+  /*************************************************************************/
 
   update: function(){
-
+ 
     this.clear();
+    var ts = "ts=" + new Date().getTime();
+    var options = this.getOptions(),
+      params = this.getParams(),
+      reportOptions = this.getReportOptions();
 
-    var options = this.getOptions();
+    $.each(reportOptions, function(key, value){
+      if(params[key] != undefined){
+        delete key;
+      } 
+    });
 
-    var downloadMode = this.downloadMode;
-    // if you really must use this component to download stuff
+    var pathSegments = {
+      solution: options.solution,
+      path: options.path,
+      action: options.action
+    }    
+    //we don't want to pass these as parameters
+    delete options.solution;
+    delete options.path;
+    delete options.action;
+    delete reportOptions.solution;
+    delete reportOptions.path;
+    delete reportOptions.action;
+    
+    var downloadMode = this.downloadMode;    // if you really must use this component to download stuff
+    var callVar = options.showParameters ? 'viewer' : 'report';
     if (downloadMode == null) {
       var outputTarget = options["output-target"];
       // take a guess
@@ -202,14 +250,24 @@ var PrptComponent = BaseComponent.extend({
         !((outputTarget.indexOf('html') != -1 &&
            outputTarget.indexOf('mime-message') == -1)
           || outputTarget.indexOf('text') != -1);
-    }
-
+    }    
     if(options["dashboard-mode"]){
-      var url = webAppPath + '/content/reporting';
+      //IFrame = False, showParameters always false.
+      if(options.showParameters) {
+        Dashboards.log("showParameters not supported with IFrame = False");
+      }
+      var requestType = this.usePost ? "POST" : "GET";
+      var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
+      $.each(reportOptions, function(key, value){
+          if(params[key] == undefined) {
+            params[key] = value;
+          }
+        });
       var myself=this;
       $.ajax({
         url: url,
-        data: options,
+        type: requestType,
+        data: params,
         dataType:"html",
         success: function(resp){
           $("#"+myself.htmlObject).html(resp);
@@ -238,12 +296,17 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/content/reporting';
-        this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
+        $.each(options, function(key, value){
+          if(params[key] == undefined) {
+            params[key] = value;
+          }
+        });
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
+        this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
 
       } else {
 
-        var url = webAppPath + '/content/reporting/reportviewer/report.html' + "?" + $.param(options);
+        var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
 
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
@@ -253,14 +316,16 @@ var PrptComponent = BaseComponent.extend({
         this.startLoading();
         var myself = this;
         iframe.load(function(){
-          var jqBody = $(this.contentWindow.document.body);
-          var reportContentFrame = jqBody.find('#reportContent');
-          reportContentFrame.load(function() {
-            if (myself.autoResize) {
-              myself._resizeToReportFrame(reportContentFrame[0],htmlObj, options);
-            }
-            myself.stopLoading();
-          });
+          if( options.showParameters ) {
+            var jqBody = $(this.contentWindow.document.body);
+            var reportContentFrame = jqBody.find('#reportContent');
+            reportContentFrame.load(function() {
+              if (myself.autoResize) {
+                myself._resizeToReportFrame(reportContentFrame[0],htmlObj, options);
+               }
+             });
+          }
+          myself.stopLoading();
         });
         iframe[0].contentWindow.location = url;
       }
@@ -275,7 +340,6 @@ var PrptComponent = BaseComponent.extend({
    * report options
    **/
   getOptions: function() {
-
     var options = {
       paginate : this.paginate || false,
       showParameters: this.showParameters || false,
@@ -283,13 +347,17 @@ var PrptComponent = BaseComponent.extend({
       "dashboard-mode": this.iframe==undefined?false:!this.iframe,
       solution: this.solution,
       path: this.path,
-      action: this.action
+      action: this.action,
+      renderMode: 'REPORT',
+      htmlProportionalWidth:false
     };
 
     if (this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
+      options['accept-page'] = 0;
     } else {
       options["output-target"] = "table/html;page-mode=stream";
+      options['accept-page'] = -1;
     }
 
     // update options with report parameters
@@ -305,6 +373,56 @@ var PrptComponent = BaseComponent.extend({
 
     return options;
 
+  },
+
+  getParams: function(){
+    var options = {};
+
+    if (this.paginate) {
+      options["output-target"] = "table/html;page-mode=page";
+      options['accept-page'] = 0;
+    } else {
+      options["output-target"] = "table/html;page-mode=stream";
+      options['accept-page'] = -1;
+    }
+
+    // update options with report parameters
+    for (var i=0; i < this.parameters.length; i++ ) {
+      // param: [<prptParam>, <dashParam>, <default>]
+      var param = this.parameters[i];
+      var value = Dashboards.getParameterValue(param[1]);
+      if(value == null && param.length == 3) {
+        value = param[2];
+      }
+      options[param[0]] = value;
+    }
+
+    return options;
+  },
+
+  getReportOptions: function(){
+    var options = {
+      paginate : this.paginate || false,
+      showParameters: this.showParameters || false,
+      autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
+      "dashboard-mode": this.iframe==undefined?false:!this.iframe,
+      solution: this.solution,
+      path: this.path,
+      name: this.action,
+      renderMode: 'REPORT',
+      htmlProportionalWidth:false,
+      'accepted-page':-1
+    };
+
+    if (this.paginate) {
+      options["output-target"] = "table/html;page-mode=page";
+      options['accept-page'] = 0;
+    } else {
+      options["output-target"] = "table/html;page-mode=stream";
+      options['accept-page'] = -1;
+    }
+
+    return options;
   },
 
 

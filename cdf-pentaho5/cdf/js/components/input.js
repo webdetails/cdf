@@ -1282,16 +1282,54 @@ var AutocompleteBoxComponent = BaseComponent.extend({
   }
 });
 
-var ButtonComponent = BaseComponent.extend({
-  update : function() {
+var ButtonComponent = ActionComponent.extend({
+  _docstring: function (){
+    return "Button Component that triggers a server action when clicked";
+    /**
+     * Button API:
+     *   enable()/disable()
+     *   setLabel()
+     */
+  },
+
+  render: function() {
     var myself = this;
     var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
-        return myself.expression.apply(myself,arguments);
+      var proceed = true;
+      if ( _.isFunction(myself.expression) ){
+        proceed = myself.expression.apply(myself, arguments);
+      }
+      if ( myself.hasAction() && !(proceed === false)) {
+        return myself.triggerAction.apply(myself);
+      }
     });
-    if (typeof this.buttonStyle === "undefined" || this.buttonStyle === "themeroller")
+    if ( _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller"){
       b.button();
+    }
     b.appendTo(this.placeholder().empty());
-
     this._doAutoFocus();
+  },
+
+  disable: function(){
+    /**
+     * Disables the button (grays it out and prevents click events)
+     */
+    this.placeholder('button').attr('disabled', 'disabled');
+  },
+
+  enable: function(){
+    /**
+     * Enables the button
+     */
+    this.placeholder('button').removeAttr('disabled');
+  },
+
+  setLabel: function(label){
+    /**
+    * Changes the label shown on the button
+    */
+    this.label = label.toString();
+    this.placeholder('button').text(this.label);
   }
 });
+

@@ -81,7 +81,7 @@ var TableComponent = UnmanagedComponent.extend({
         var handler = this.getSuccessHandler(success);
 
         this.queryState.setAjaxOptions({async:true});
-        this.queryState.fetchData(this.parameters, handler);
+        this.queryState.fetchData(this.parameters == undefined ? [] : this.parameters, handler);
       }
     } catch (e) {
       /*
