@@ -31,26 +31,38 @@ var DashboardsMap =
 			var lat = place[0];
 			var log = place[1];
 			var placeDesc = place[2];
-			var featureClass = object.featureClass != undefined ? '&featureClass=' + object.featureClass : '';
+			//var featureClass = object.featureClass != undefined ? '&featureClass=' + object.featureClass : '';
 
-			//request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(place)  + ',Portugal&maxRows=1&featureClass=P&coutry=PT&callback=getLocation';
-			if(lat == '' || log == '')
-			{
-				placeDesc = placeDesc.replace(/&/g,",");
-				request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1' + featureClass + '&callback=DashboardsMap.getLocation';
-			}
-			else
-				return DashboardsMap.getLocation({totalResultsCount:1, geonames: [{lat:lat,lng:log}]});
+      if (!(lat == '' || log == '')){
+        return DashboardsMap.getLocation({totalResultsCount:1, geonames: [{lat:lat,lng:log}]});
+      }
 
-
-			// Create a new script object
-			// (implementation of this class is in /export/jsr_class.js)
-			aObj = new JSONscriptRequest(request);
-			// Build the script tag
-			aObj.buildScriptTag();
-			// Execute (add) the script tag
-			aObj.addScriptTag();
-		},
+      var url = 'http://nominatim.openstreetmap.org/search';
+      var data = {
+        format: 'json',
+        limit: '1',
+        q:placeDesc
+      };
+      var success = function (result) {
+        var jData;
+        if (result && result.length > 0) {
+          jData = {
+            totalResultsCount: result.length,
+            geonames:[{
+              lng: result[0].lon,
+              lat: result[0].lat
+            }]
+          };
+        } else {
+          jData = {
+            totalResultsCount: 0,
+            geonames: []
+          };
+        }
+        DashboardsMap.getLocation(jData);
+      };
+      $.getJSON(url, data, success);
+    },
 
 		resetSearch: function (){
 			map.removeLayer(markers);
