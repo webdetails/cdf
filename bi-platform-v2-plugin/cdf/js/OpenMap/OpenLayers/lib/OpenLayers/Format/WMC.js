@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/XML.js
@@ -13,9 +13,8 @@
  * Read and write Web Map Context documents.
  *
  * Inherits from:
- *  - <OpenLayers.Format.XML>
+ *  - <OpenLayers.Format.Context>
  */
-
 OpenLayers.Format.WMC = OpenLayers.Class(OpenLayers.Format.Context, {
     
     /**
@@ -38,7 +37,7 @@ OpenLayers.Format.WMC = OpenLayers.Class(OpenLayers.Format.Context, {
      * Create a layer context object given a wms layer object.
      *
      * Parameters:
-     * obj - {<OpenLayers.Layer.WMS>} The layer.
+     * layer - {<OpenLayers.Layer.WMS>} The layer.
      *
      * Returns:
      * {Object} A layer context object.
@@ -62,7 +61,7 @@ OpenLayers.Format.WMC = OpenLayers.Class(OpenLayers.Format.Context, {
             numZoomLevels: layer.numZoomLevels,
             units: layer.units,
             isBaseLayer: layer.isBaseLayer,
-            opacity: layer.opacity,
+            opacity: layer.opacity == 1 ? undefined : layer.opacity,
             displayInLayerSwitcher: layer.displayInLayerSwitcher,
             singleTile: layer.singleTile,
             tileSize: (layer.singleTile || !layer.tileSize) ? 

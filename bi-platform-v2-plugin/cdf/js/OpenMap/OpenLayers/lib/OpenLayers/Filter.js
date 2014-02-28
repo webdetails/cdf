@@ -1,7 +1,8 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+
 
 /**
  * @requires OpenLayers/BaseTypes/Class.js
@@ -13,7 +14,6 @@
  * Class: OpenLayers.Filter
  * This class represents an OGC Filter.
  */
-
 OpenLayers.Filter = OpenLayers.Class({
     
     /** 
@@ -56,13 +56,31 @@ OpenLayers.Filter = OpenLayers.Class({
     
     /**
      * APIMethod: clone
-     * Clones this filter. Should be implementted by subclasses.
+     * Clones this filter. Should be implemented by subclasses.
      * 
      * Returns:
      * {<OpenLayers.Filter>} Clone of this filter.
      */
     clone: function() {
         return null;
+    },
+    
+    /**
+     * APIMethod: toString
+     *
+     * Returns:
+     * {String} Include <OpenLayers.Format.CQL> in your build to get a CQL
+     *     representation of the filter returned. Otherwise "[Object object]"
+     *     will be returned.
+     */
+    toString: function() {
+        var string;
+        if (OpenLayers.Format && OpenLayers.Format.CQL) {
+            string = OpenLayers.Format.CQL.prototype.write(this);
+        } else {
+            string = Object.prototype.toString.call(this);
+        }
+        return string;
     },
     
     CLASS_NAME: "OpenLayers.Filter"

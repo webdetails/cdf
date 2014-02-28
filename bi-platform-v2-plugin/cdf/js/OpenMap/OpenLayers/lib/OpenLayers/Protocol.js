@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/BaseTypes/Class.js
@@ -12,7 +12,6 @@
  * Abstract vector layer protocol class.  Not to be instantiated directly.  Use
  *     one of the protocol subclasses instead.
  */
-
 OpenLayers.Protocol = OpenLayers.Class({
     
     /**
@@ -37,7 +36,7 @@ OpenLayers.Protocol = OpenLayers.Class({
    
     /**
      * Property: defaultFilter
-     * {OpenLayers.Filter} Optional default filter to read requests
+     * {<OpenLayers.Filter>} Optional default filter to read requests
      */
     defaultFilter: null,
     
@@ -60,7 +59,7 @@ OpenLayers.Protocol = OpenLayers.Class({
      * Merge filter passed to the read method with the default one
      *
      * Parameters:
-     * filter - {OpenLayers.Filter}
+     * filter - {<OpenLayers.Filter>}
      */
     mergeWithDefaultFilter: function(filter) {
         var merged;
@@ -232,9 +231,18 @@ OpenLayers.Protocol.Response = OpenLayers.Class({
     /**
      * Property: features
      * {Array({<OpenLayers.Feature.Vector>})} or {<OpenLayers.Feature.Vector>}
-     * The features returned in the response by the server.
+     * The features returned in the response by the server. Depending on the 
+     * protocol's read payload, either features or data will be populated.
      */
     features: null,
+
+    /**
+     * Property: data
+     * {Object}
+     * The data returned in the response by the server. Depending on the 
+     * protocol's read payload, either features or data will be populated.
+     */
+    data: null,
 
     /**
      * Property: reqFeatures

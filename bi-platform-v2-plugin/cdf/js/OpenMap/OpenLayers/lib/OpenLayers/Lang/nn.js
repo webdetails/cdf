@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /* Translators (2009 onwards):
  *  - Harald Khan
  */
@@ -17,17 +12,8 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
-
 OpenLayers.Lang["nn"] = OpenLayers.Util.applyDefaults({
 
-    'Scale = 1 : ${scaleDenom}': "Skala = 1 : ${scaleDenom}",
-
-    'layerAlreadyAdded': "Du freista å leggja til laget «${layerName}» på kartet, men det har alt vorte lagt til.",
-
-    'boundsAddError': "Du er nøydd til å gje både ein x- og ein y-verdi til «add»-funksjonen.",
-
-    'lonlatAddError': "Du er nøydd til å gje både lon- og lat-verdiar til «add»-funksjonen.",
-
-    'pixelAddError': "Du er nøydd til å gje både ein x- og ein y-verdi til «add»-funksjonen."
+    'Scale = 1 : ${scaleDenom}': "Skala = 1 : ${scaleDenom}"
 
 });
