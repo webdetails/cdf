@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Layer/Vector.js
@@ -17,7 +17,6 @@
  * Inherits from:
  *  - <OpenLayers.Layer.Vector>
  */
-
 OpenLayers.Layer.Vector.RootContainer = OpenLayers.Class(OpenLayers.Layer.Vector, {
     
     /**
@@ -51,9 +50,6 @@ OpenLayers.Layer.Vector.RootContainer = OpenLayers.Class(OpenLayers.Layer.Vector
      * {<OpenLayers.Layer.Vector.RootContainer>} A new vector layer root
      *     container
      */
-    initialize: function(name, options) {
-        OpenLayers.Layer.Vector.prototype.initialize.apply(this, arguments);
-    },
     
     /**
      * Method: display

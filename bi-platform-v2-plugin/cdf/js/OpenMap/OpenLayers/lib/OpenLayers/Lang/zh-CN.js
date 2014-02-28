@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -13,7 +8,6 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
-
 OpenLayers.Lang["zh-CN"] = {
 
     'unhandledRequest': "未处理的请求，返回值为 ${statusText}",
@@ -24,23 +18,10 @@ OpenLayers.Lang["zh-CN"] = {
 
     'Base Layer': "基础图层",
 
-    'readNotImplemented': "读取功能没有实现。",
-
-    'writeNotImplemented': "写入功能没有实现。",
-
     'noFID': "无法更新feature，缺少FID。",
-
-    'errorLoadingGML': "加载GML文件 ${url} 出现错误。",
 
     'browserNotSupported':
         "你使用的浏览器不支持矢量渲染。当前支持的渲染方式包括：\n${renderers}",
-
-    'componentShouldBe': "addFeatures : 组件类型应该是 ${geomType}",
-
-    // console message
-    'getFeatureError':
-        "getFeatureFromEvent方法在一个没有渲染器的图层上被调用。 这通常意味着您" +
-        "销毁了一个图层，但并未销毁其关联的handler。",
 
     // console message
     'minZoomLevelError':
@@ -82,10 +63,6 @@ OpenLayers.Lang["zh-CN"] = {
     'Scale = 1 : ${scaleDenom}': "比例尺 = 1 : ${scaleDenom}",
 
     // console message
-    'layerAlreadyAdded':
-        "你尝试添加图层： ${layerName} 到地图中，但是它之前就已经被添加。",
-
-    // console message
     'reprojectDeprecated':
         "你正在使用 ${layerName} 图层上的'reproject'选项。" +
         "这个选项已经不再使用：" +
@@ -98,18 +75,6 @@ OpenLayers.Lang["zh-CN"] = {
     'methodDeprecated':
         "该方法已经不再被支持，并且将在3.0中被移除。" +
         "请使用 ${newMethod} 方法来替代。",
-
-    // console message
-    'boundsAddError': "您必须传递 x 和 y 两个参数值到 add 方法。",
-
-    // console message
-    'lonlatAddError': "您必须传递 lon 和 lat 两个参数值到 add 方法。",
-
-    // console message
-    'pixelAddError': "您必须传递 x and y 两个参数值到 add 方法。",
-
-    // console message
-    'unsupportedGeometryType': "不支持的几何体类型： ${geomType}",
 
     'end': ''
 };

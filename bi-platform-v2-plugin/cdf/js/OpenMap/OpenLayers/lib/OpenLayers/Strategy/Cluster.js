@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Strategy.js
@@ -14,7 +14,6 @@
  * Inherits from:
  *  - <OpenLayers.Strategy>
  */
-
 OpenLayers.Strategy.Cluster = OpenLayers.Class(OpenLayers.Strategy, {
     
     /**
@@ -80,6 +79,7 @@ OpenLayers.Strategy.Cluster = OpenLayers.Class(OpenLayers.Strategy, {
         if(activated) {
             this.layer.events.on({
                 "beforefeaturesadded": this.cacheFeatures,
+                "featuresremoved": this.clearCache,
                 "moveend": this.cluster,
                 scope: this
             });
@@ -101,6 +101,7 @@ OpenLayers.Strategy.Cluster = OpenLayers.Class(OpenLayers.Strategy, {
             this.clearCache();
             this.layer.events.un({
                 "beforefeaturesadded": this.cacheFeatures,
+                "featuresremoved": this.clearCache,
                 "moveend": this.cluster,
                 scope: this
             });
@@ -135,7 +136,9 @@ OpenLayers.Strategy.Cluster = OpenLayers.Class(OpenLayers.Strategy, {
      * Clear out the cached features.
      */
     clearCache: function() {
-        this.features = null;
+        if(!this.clustering) {
+            this.features = null;
+        }
     },
     
     /**
@@ -170,7 +173,9 @@ OpenLayers.Strategy.Cluster = OpenLayers.Class(OpenLayers.Strategy, {
                         }
                     }
                 }
+                this.clustering = true;
                 this.layer.removeAllFeatures();
+                this.clustering = false;
                 if(clusters.length > 0) {
                     if(this.threshold > 1) {
                         var clone = clusters.slice();

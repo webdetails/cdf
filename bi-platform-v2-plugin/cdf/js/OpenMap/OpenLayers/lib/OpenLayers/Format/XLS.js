@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/XML/VersionedOGC.js
@@ -9,14 +9,13 @@
 
 /**
  * Class: OpenLayers.Format.XLS
- * Read/Wite XLS (OpenLS). Create a new instance with the <OpenLayers.Format.XLS>
+ * Read/Write XLS (OpenLS). Create a new instance with the <OpenLayers.Format.XLS>
  *     constructor. Currently only implemented for Location Utility Services, more
  *     specifically only for Geocoding. No support for Reverse Geocoding as yet.
  * 
  * Inherits from:
  *  - <OpenLayers.Format.XML.VersionedOGC>
  */
-
 OpenLayers.Format.XLS = OpenLayers.Class(OpenLayers.Format.XML.VersionedOGC, {
     
     /**

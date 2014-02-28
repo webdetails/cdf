@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/JSON.js
@@ -23,7 +23,6 @@
  * Inherits from:
  *  - <OpenLayers.Format.JSON>
  */
-
 OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
 
     /**
@@ -288,7 +287,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          *     <OpenLayers.Geometry>.
          *
          * Parameters:
-         * array {Object} The coordinates array from the GeoJSON fragment.
+         * array - {Object} The coordinates array from the GeoJSON fragment.
          *
          * Returns:
          * {<OpenLayers.Geometry>} A geometry.
@@ -636,7 +635,7 @@ OpenLayers.Format.GeoJSON = OpenLayers.Class(OpenLayers.Format.JSON, {
          * Return an array of linestring arrays from a linestring.
          * 
          * Parameters:
-         * linestring - {<OpenLayers.Geometry.MultiLineString>}
+         * multilinestring - {<OpenLayers.Geometry.MultiLineString>}
          * 
          * Returns:
          * {Array} An array of linestring arrays representing

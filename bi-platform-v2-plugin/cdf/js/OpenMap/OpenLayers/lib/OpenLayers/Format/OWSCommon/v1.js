@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/OWSCommon.js
@@ -10,8 +10,10 @@
 /**
  * Class: OpenLayers.Format.OWSCommon.v1
  * Common readers and writers for OWSCommon v1.X formats
+ *
+ * Inherits from:
+ *  - <OpenLayers.Format.XML>
  */
-
 OpenLayers.Format.OWSCommon.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
    
     /**
@@ -172,12 +174,24 @@ OpenLayers.Format.OWSCommon.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
                 this.readChildNodes(node, dcp.http);
             },
             "Get": function(node, http) {
-                http.get = this.getAttributeNS(node, 
-                    this.namespaces.xlink, "href");
+                if (!http.get) {
+                    http.get = [];
+                }
+                var obj = {
+                    url: this.getAttributeNS(node, this.namespaces.xlink, "href")
+                };
+                this.readChildNodes(node, obj);
+                http.get.push(obj);
             },
             "Post": function(node, http) {
-                http.post = this.getAttributeNS(node, 
-                    this.namespaces.xlink, "href");
+                if (!http.post) {
+                    http.post = [];
+                }
+                var obj = {
+                    url: this.getAttributeNS(node, this.namespaces.xlink, "href")
+                };
+                this.readChildNodes(node, obj);
+                http.post.push(obj);
             },
             "Parameter": function(node, operation) {
                 if (!operation.parameters) {
@@ -186,6 +200,14 @@ OpenLayers.Format.OWSCommon.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
                 var name = node.getAttribute("name");
                 operation.parameters[name] = {};
                 this.readChildNodes(node, operation.parameters[name]);
+            },
+            "Constraint": function(node, obj) {
+                if (!obj.constraints) {
+                    obj.constraints = {};
+                }
+                var name = node.getAttribute("name");
+                obj.constraints[name] = {};
+                this.readChildNodes(node, obj.constraints[name]);
             },
             "Value": function(node, allowedValues) {
                 allowedValues[this.getChildValue(node)] = true;
@@ -248,8 +270,8 @@ OpenLayers.Format.OWSCommon.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
      */
     writers: {
         "ows": {
-            "BoundingBox": function(options) {
-                var node = this.createElementNSPlus("ows:BoundingBox", {
+            "BoundingBox": function(options, nodeName) {
+                var node = this.createElementNSPlus(nodeName || "ows:BoundingBox", {
                     attributes: {
                         crs: options.projection
                     }

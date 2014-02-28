@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Geometry.js
@@ -22,10 +22,9 @@
  *
  * Create a new instance with the <OpenLayers.Geometry.Collection> constructor.
  *
- * Inerhits from:
+ * Inherits from:
  *  - <OpenLayers.Geometry> 
  */
-
 OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
 
     /**
@@ -408,7 +407,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      * ratio - {Float} Optional x:y ratio for resizing.  Default ratio is 1.
      * 
      * Returns:
-     * {OpenLayers.Geometry} - The current geometry. 
+     * {<OpenLayers.Geometry>} - The current geometry. 
      */
     resize: function(scale, origin, ratio) {
         for(var i=0; i<this.components.length; ++i) {
@@ -469,7 +468,7 @@ OpenLayers.Geometry.Collection = OpenLayers.Class(OpenLayers.Geometry, {
      *     are considered equivalent if all components have the same coordinates.
      * 
      * Parameters:
-     * geom - {<OpenLayers.Geometry>} The geometry to test. 
+     * geometry - {<OpenLayers.Geometry>} The geometry to test. 
      *
      * Returns:
      * {Boolean} The supplied geometry is equivalent to this geometry.

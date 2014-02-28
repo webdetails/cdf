@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/XML.js
@@ -20,7 +20,6 @@
  * Inherits from:
  *  - <OpenLayers.Format.XML>
  */
-
 OpenLayers.Format.OWSContext.v0_3_1 = OpenLayers.Class(OpenLayers.Format.XML, {
     
     /**
@@ -229,7 +228,7 @@ OpenLayers.Format.OWSContext.v0_3_1 = OpenLayers.Class(OpenLayers.Format.XML, {
      *
      * Parameters:
      * layerArray - {Array({Object})} Array of layerContext objects
-     * layerContext - {Object} layerContext object
+     * layer - {Object} layerContext object
      */
     processLayer: function(layerArray, layer) {
         if (layer.layersContext) {
@@ -424,8 +423,11 @@ OpenLayers.Format.OWSContext.v0_3_1 = OpenLayers.Class(OpenLayers.Format.XML, {
                 return node;
             },
             "InlineGeometry": function(layer) {
-                var node = this.createElementNSPlus("InlineGeometry");
-                this.writeNode("gml:boundedBy", layer.getDataExtent(), node);
+                var node = this.createElementNSPlus("InlineGeometry"),
+                    dataExtent = layer.getDataExtent();
+                if (dataExtent !== null) {
+                    this.writeNode("gml:boundedBy", dataExtent, node);
+                }
                 for (var i=0, len=layer.features.length; i<len; i++) {
                     this.writeNode("gml:featureMember", layer.features[i], node);
                 }
@@ -467,7 +469,7 @@ OpenLayers.Format.OWSContext.v0_3_1 = OpenLayers.Class(OpenLayers.Format.XML, {
                     name: layer.params.LAYERS,
                     queryable: layer.queryable ? "1" : "0",
                     hidden: layer.visibility ? "0" : "1",
-                    opacity: layer.opacity ? layer.opacity: null}
+                    opacity: layer.hasOwnProperty("opacity") ? layer.opacity : null}
                 });
                 this.writeNode("ows:Title", layer.name, node);
                 this.writeNode("ows:OutputFormat", layer.params.FORMAT, node);

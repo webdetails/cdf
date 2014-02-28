@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 // XMLHttpRequest.js Copyright (C) 2010 Sergey Ilinsky (http://www.ilinsky.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -254,8 +249,8 @@
         // BUGFIX: Gecko - fails sending Element (this is up to the implementation either to standard)
         if (vData && vData.nodeType) {
             vData    = window.XMLSerializer ? new window.XMLSerializer().serializeToString(vData) : vData.xml;
-            if (!oRequest._headers["Content-Type"])
-                oRequest._object.setRequestHeader("Content-Type", "application/xml");
+            if (!this._headers["Content-Type"])
+                this._object.setRequestHeader("Content-Type", "application/xml");
         }
 
         this._data    = vData;
@@ -452,5 +447,12 @@
      *     XMLHttpRequest object.  From
      *     http://code.google.com/p/xmlhttprequest/.
      */
+    if (!OpenLayers.Request) {
+        /**
+         * This allows for OpenLayers/Request.js to be included
+         * before or after this script.
+         */
+        OpenLayers.Request = {};
+    }
     OpenLayers.Request.XMLHttpRequest = cXMLHttpRequest;
 })();

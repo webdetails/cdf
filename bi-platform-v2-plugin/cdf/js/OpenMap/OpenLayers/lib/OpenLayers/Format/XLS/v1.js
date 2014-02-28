@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/XLS.js
@@ -15,7 +15,6 @@
  * Inherits from:
  *  - <OpenLayers.Format.XML>
  */
-
 OpenLayers.Format.XLS.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
     
     /**
@@ -66,9 +65,6 @@ OpenLayers.Format.XLS.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
      * options - {Object} An optional object whose properties will be set on
      *     this instance.
      */
-    initialize: function(options) {
-        OpenLayers.Format.XML.prototype.initialize.apply(this, [options]);
-    },
     
     /**
      * Method: read
@@ -232,7 +228,7 @@ OpenLayers.Format.XLS.v1 = OpenLayers.Class(OpenLayers.Format.XML, {
                     }
                 });
                 if (address.freeFormAddress) {
-                    this.writeNode("freeFormAddess", address.freeFormAddress, node);
+                    this.writeNode("freeFormAddress", address.freeFormAddress, node);
                 } else {
                     if (address.street) {
                         this.writeNode("StreetAddress", address, node);

@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/GML/Base.js
@@ -14,7 +14,6 @@
  * Inherits from:
  *  - <OpenLayers.Format.GML.Base>
  */
-
 OpenLayers.Format.GML.v3 = OpenLayers.Class(OpenLayers.Format.GML.Base, {
     
     /**
@@ -91,11 +90,20 @@ OpenLayers.Format.GML.v3 = OpenLayers.Class(OpenLayers.Format.GML.Base, {
      */
     readers: {
         "gml": OpenLayers.Util.applyDefaults({
+            "_inherit": function(node, obj, container) {
+                // SRSReferenceGroup attributes
+                var dim = parseInt(node.getAttribute("srsDimension"), 10) ||
+                    (container && container.srsDimension);
+                if (dim) {
+                    obj.srsDimension = dim;
+                }
+            },
             "featureMembers": function(node, obj) {
                 this.readChildNodes(node, obj);
             },
             "Curve": function(node, container) {
                 var obj = {points: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 if(!container.components) {
                     container.components = [];
@@ -136,7 +144,9 @@ OpenLayers.Format.GML.v3 = OpenLayers.Class(OpenLayers.Format.GML.Base, {
                     this.regExes.trimSpace, ""
                 );
                 var coords = str.split(this.regExes.splitSpace);
-                var dim = parseInt(node.getAttribute("dimension")) || 2;
+                // The "dimension" attribute is from the GML 3.0.1 spec.
+                var dim = obj.srsDimension ||
+                    parseInt(node.getAttribute("srsDimension") || node.getAttribute("dimension"), 10) || 2;
                 var j, x, y, z;
                 var numPoints = coords.length / dim;
                 var points = new Array(numPoints);
@@ -173,6 +183,7 @@ OpenLayers.Format.GML.v3 = OpenLayers.Class(OpenLayers.Format.GML.Base, {
             },
             "MultiCurve": function(node, container) {
                 var obj = {components: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 if(obj.components.length > 0) {
                     container.components = [
@@ -185,6 +196,7 @@ OpenLayers.Format.GML.v3 = OpenLayers.Class(OpenLayers.Format.GML.Base, {
             },
             "MultiSurface": function(node, container) {
                 var obj = {components: []};
+                this.readers.gml._inherit.apply(this, [node, obj, container]);
                 this.readChildNodes(node, obj);
                 if(obj.components.length > 0) {
                     container.components = [
@@ -445,7 +457,7 @@ OpenLayers.Format.GML.v3 = OpenLayers.Class(OpenLayers.Format.GML.Base, {
     },
 
     /**
-     * Function: setGeometryTypes
+     * Method: setGeometryTypes
      * Sets the <geometryTypes> mapping.
      */
     setGeometryTypes: function() {

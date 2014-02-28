@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/BaseTypes.js
@@ -13,7 +13,6 @@
  * Internationalization namespace.  Contains dictionaries in various languages
  *     and methods to set and get the current language.
  */
-
 OpenLayers.Lang = {
     
     /** 
@@ -36,7 +35,7 @@ OpenLayers.Lang = {
      * Get the current language code.
      *
      * Returns:
-     * The current language code.
+     * {String} The current language code.
      */
     getCode: function() {
         if(!OpenLayers.Lang.code) {
@@ -50,7 +49,7 @@ OpenLayers.Lang = {
      * Set the language code for string translation.  This code is used by
      *     the <OpenLayers.Lang.translate> method.
      *
-     * Parameters-
+     * Parameters:
      * code - {String} These codes follow the IETF recommendations at
      *     http://www.ietf.org/rfc/rfc3066.txt.  If no value is set, the
      *     browser's language setting will be tested.  If no <OpenLayers.Lang>

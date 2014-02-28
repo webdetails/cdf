@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/WMTSCapabilities.js
@@ -15,7 +15,6 @@
  * Inherits from:
  *  - <OpenLayers.Format.WMTSCapabilities>
  */
-
 OpenLayers.Format.WMTSCapabilities.v1_0_0 = OpenLayers.Class(
     OpenLayers.Format.OWSCommon.v1_1_0, {
         
@@ -113,6 +112,7 @@ OpenLayers.Format.WMTSCapabilities.v1_0_0 = OpenLayers.Class(
                 var layer = {
                     styles: [],
                     formats: [],
+                    dimensions: [],
                     tileMatrixSetLinks: []
                 };
                 layer.layers = [];
@@ -195,10 +195,16 @@ OpenLayers.Format.WMTSCapabilities.v1_0_0 = OpenLayers.Class(
             },
             "ResourceURL": function(node, obj) {
                 obj.resourceUrl = obj.resourceUrl || {};
-                obj.resourceUrl[node.getAttribute("resourceType")] = {
+                var resourceType = node.getAttribute("resourceType");
+                if (!obj.resourceUrls) {
+                    obj.resourceUrls = [];
+                }
+                var resourceUrl = obj.resourceUrl[resourceType] = {
                     format: node.getAttribute("format"),
-                    template: node.getAttribute("template")
+                    template: node.getAttribute("template"),
+                    resourceType: resourceType
                 };
+                obj.resourceUrls.push(resourceUrl);
             },
             // not used for now, can be added in the future though
             /*"Themes": function(node, obj) {
@@ -219,7 +225,23 @@ OpenLayers.Format.WMTSCapabilities.v1_0_0 = OpenLayers.Class(
                 obj.serviceMetadataUrl = {};
                 obj.serviceMetadataUrl.href = node.getAttribute("xlink:href");
                 // TODO: other attributes of <ServiceMetadataURL> element                
-            }            
+            },
+            "LegendURL": function(node, obj) {
+                obj.legend = {};
+                obj.legend.href = node.getAttribute("xlink:href");
+                obj.legend.format = node.getAttribute("format");
+            },
+            "Dimension": function(node, obj) {
+                var dimension = {values: []};
+                this.readChildNodes(node, dimension);
+                obj.dimensions.push(dimension);
+            },
+            "Default": function(node, obj) {
+                obj["default"] = this.getChildValue(node);
+            },
+            "Value": function(node, obj) {
+                obj.values.push(this.getChildValue(node));
+            }
         },
         "ows": OpenLayers.Format.OWSCommon.v1_1_0.prototype.readers["ows"]
     },    

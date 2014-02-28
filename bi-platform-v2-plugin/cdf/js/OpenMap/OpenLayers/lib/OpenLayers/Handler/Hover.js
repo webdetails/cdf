@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Handler.js
@@ -17,7 +17,6 @@
  * Inherits from:
  *  - <OpenLayers.Handler> 
  */
-
 OpenLayers.Handler.Hover = OpenLayers.Class(OpenLayers.Handler, {
 
     /**
@@ -70,9 +69,6 @@ OpenLayers.Handler.Hover = OpenLayers.Class(OpenLayers.Handler, {
      * options - {Object} An optional object whose properties will be set on
      *     the handler.
      */
-    initialize: function(control, callbacks, options) {
-        OpenLayers.Handler.prototype.initialize.apply(this, arguments);
-    },
 
     /**
      * Method: mousemove
@@ -111,7 +107,7 @@ OpenLayers.Handler.Hover = OpenLayers.Class(OpenLayers.Handler, {
      * {Boolean} Continue propagating this event.
      */
     mouseout: function(evt) {
-        if (OpenLayers.Util.mouseLeft(evt, this.map.eventsDiv)) {
+        if (OpenLayers.Util.mouseLeft(evt, this.map.viewPortDiv)) {
             this.clearTimer();
             this.callback('move', [evt]);
         }
