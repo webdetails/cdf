@@ -182,7 +182,6 @@ getGUID: function() {
   
 
 	PentahoDashboardController.registerComponentForFileType("xcdf", PentahoCdfComponent);
-    PentahoDashboardController.registerWidgetType(new PentahoCdfComponent());
     	
 });
 
