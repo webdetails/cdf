@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Format/WFST/v1.js
@@ -18,7 +18,6 @@
  *  - <OpenLayers.Format.Filter.v1_1_0>
  *  - <OpenLayers.Format.WFST.v1>
  */
-
 OpenLayers.Format.WFST.v1_1_0 = OpenLayers.Class(
     OpenLayers.Format.Filter.v1_1_0, OpenLayers.Format.WFST.v1, {
     
@@ -82,7 +81,7 @@ OpenLayers.Format.WFST.v1_1_0 = OpenLayers.Class(
         // Not the superclass, only the mixin classes inherit from
         // Format.GML.v3. We need this because we don't want to get readNode
         // from the superclass's superclass, which is OpenLayers.Format.XML.
-        return OpenLayers.Format.GML.v3.prototype.readNode.apply(this, [node, obj]);
+        return OpenLayers.Format.GML.v3.prototype.readNode.apply(this, arguments);
     },
     
     /**
@@ -170,7 +169,7 @@ OpenLayers.Format.WFST.v1_1_0 = OpenLayers.Class(
                     }
                 }
                 if(options.filter) {
-                    this.setFilterProperty(options.filter);
+                    OpenLayers.Format.WFST.v1_1_0.prototype.setFilterProperty.call(this, options.filter);
                     this.writeNode("ogc:Filter", options.filter, node);
                 }
                 return node;

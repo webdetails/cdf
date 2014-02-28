@@ -1,8 +1,8 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
+ 
 /**
  * @requires OpenLayers/Layer.js
  * @requires OpenLayers/Tile/Image.js
@@ -12,9 +12,11 @@
  * Class: OpenLayers.Layer.Image
  * Instances of OpenLayers.Layer.Image are used to display data from a web
  * accessible image as a map layer.  Create a new image layer with the
- * <OpenLayers.Layer.Image> constructor.  Inherits from <OpenLayers.Layer>.
+ * <OpenLayers.Layer.Image> constructor.
+ *
+ * Inherits from:
+ *  - <OpenLayers.Layer>
  */
-
 OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
 
     /**
@@ -162,8 +164,10 @@ OpenLayers.Layer.Image = OpenLayers.Class(OpenLayers.Layer, {
             this.setTileSize();
 
             //determine new position (upper left corner of new bounds)
-            var ul = new OpenLayers.LonLat(this.extent.left, this.extent.top);
-            var ulPx = this.map.getLayerPxFromLonLat(ul);
+            var ulPx = this.map.getLayerPxFromLonLat({
+                lon: this.extent.left,
+                lat: this.extent.top
+            });
 
             if(firstRendering) {
                 //create the new tile

@@ -1,7 +1,7 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
+/* Copyright (c) 2006-2013 by OpenLayers Contributors (see authors.txt for
+ * full list of contributors). Published under the 2-clause BSD license.
+ * See license.txt in the OpenLayers distribution or repository for the
+ * full text of the license. */
 
 /**
  * @requires OpenLayers/Control/Panel.js
@@ -21,9 +21,15 @@
  * Inherits from:
  *  - <OpenLayers.Control.Panel>
  */
-
 OpenLayers.Control.EditingToolbar = OpenLayers.Class(
   OpenLayers.Control.Panel, {
+
+    /**
+     * APIProperty: citeCompliant
+     * {Boolean} If set to true, coordinates of features drawn in a map extent
+     * crossing the date line won't exceed the world bounds. Default is false.
+     */
+    citeCompliant: false,
 
     /**
      * Constructor: OpenLayers.Control.EditingToolbar
@@ -40,9 +46,18 @@ OpenLayers.Control.EditingToolbar = OpenLayers.Class(
           [ new OpenLayers.Control.Navigation() ]
         );  
         var controls = [
-          new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point, {'displayClass': 'olControlDrawFeaturePoint'}),
-          new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path, {'displayClass': 'olControlDrawFeaturePath'}),
-          new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {'displayClass': 'olControlDrawFeaturePolygon'})
+            new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Point, {
+                displayClass: 'olControlDrawFeaturePoint',
+                handlerOptions: {citeCompliant: this.citeCompliant}
+            }),
+            new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Path, {
+                displayClass: 'olControlDrawFeaturePath',
+                handlerOptions: {citeCompliant: this.citeCompliant}
+            }),
+            new OpenLayers.Control.DrawFeature(layer, OpenLayers.Handler.Polygon, {
+                displayClass: 'olControlDrawFeaturePolygon',
+                handlerOptions: {citeCompliant: this.citeCompliant}
+            })
         ];
         this.addControls(controls);
     },

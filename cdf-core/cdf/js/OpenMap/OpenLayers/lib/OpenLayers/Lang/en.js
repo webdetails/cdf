@@ -1,8 +1,3 @@
-/*! Copyright (c) 2006-2011 by OpenLayers Contributors (see authors.txt for
-* full list of contributors). Published under the Clear BSD license.
-* See http://svn.openlayers.org/trunk/openlayers/license.txt for the
-* full text of the license. */
-
 /**
  * @requires OpenLayers/Lang.js
  */
@@ -13,7 +8,6 @@
  *     <OpenLayers.Lang.translate>.  Entry bodies are normal strings or
  *     strings formatted for use with <OpenLayers.String.format> calls.
  */
-
 OpenLayers.Lang.en = {
 
     'unhandledRequest': "Unhandled request return ${statusText}",
@@ -24,23 +18,10 @@ OpenLayers.Lang.en = {
 
     'Base Layer': "Base Layer",
 
-    'readNotImplemented': "Read not implemented.",
-
-    'writeNotImplemented': "Write not implemented.",
-
     'noFID': "Can't update a feature for which there is no FID.",
-
-    'errorLoadingGML': "Error in loading GML file ${url}",
 
     'browserNotSupported':
         "Your browser does not support vector rendering. Currently supported renderers are:\n${renderers}",
-
-    'componentShouldBe': "addFeatures : component should be an ${geomType}",
-
-    // console message
-    'getFeatureError':
-        "getFeatureFromEvent called on layer with no renderer. This usually means you " +
-        "destroyed a layer, but not some handler which is associated with it.",
 
     // console message
     'minZoomLevelError':
@@ -89,10 +70,6 @@ OpenLayers.Lang.en = {
     'Graticule': 'Graticule',
 
     // console message
-    'layerAlreadyAdded':
-        "You tried to add the layer: ${layerName} to the map, but it has already been added",
-
-    // console message
     'reprojectDeprecated':
         "You are using the 'reproject' option " +
         "on the ${layerName} layer. This option is deprecated: " +
@@ -105,24 +82,6 @@ OpenLayers.Lang.en = {
     'methodDeprecated':
         "This method has been deprecated and will be removed in 3.0. " +
         "Please use ${newMethod} instead.",
-
-    // console message
-    'boundsAddError': "You must pass both x and y values to the add function.",
-
-    // console message
-    'lonlatAddError': "You must pass both lon and lat values to the add function.",
-
-    // console message
-    'pixelAddError': "You must pass both x and y values to the add function.",
-
-    // console message
-    'unsupportedGeometryType': "Unsupported geometry type: ${geomType}",
-
-    // console message
-    'filterEvaluateNotImplemented': "evaluate is not implemented for this filter type.",
-
-    'proxyNeeded': "You probably need to set OpenLayers.ProxyHost to access ${url}."+
-        "See http://trac.osgeo.org/openlayers/wiki/FrequentlyAskedQuestions#ProxyHost",
 
     // **** end ****
     'end': ''
