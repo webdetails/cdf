@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin title="pentaho-cdf">
+<plugin title="Pentaho Community Dashboard Framework" name="pentaho-cdf">>
 
 	<lifecycle-listener class="org.pentaho.cdf.CdfLifecycleListener"/>
     
@@ -16,19 +16,6 @@
         	<title>Dashboard</title>
         	<description>Community Dashboard File</description>
             <icon-url>content/pentaho-cdf/resources/cdfFileType.png</icon-url>
-            <!--<meta-provider>org.pentaho.cdf.CdfFileInfoGenerator</meta-provider>-->
-            <!--
-            <operations>
-    	    	<operation>
-        			<id>RUN</id>
-        			<command>content/pentaho-cdf/RenderXCDF?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
-        		</operation>
-    	    	<operation>
-        			<id>NEWWINDOW</id>
-        			<command>content/pentaho-cdf/RenderXCDF?solution={solution}&amp;path={path}&amp;action={name}&amp;template=mantle</command>
-        		</operation>        		
-            </operations>
-            -->
     	</content-type>
     </content-types>
 
@@ -36,5 +23,6 @@
 
     <external-resources>
         <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
+        <file context="dashboards">content/pentaho-cdf/js/widget-cdf.js</file>
     </external-resources>
 </plugin>

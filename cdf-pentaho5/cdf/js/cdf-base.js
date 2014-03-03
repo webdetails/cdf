@@ -91,5 +91,10 @@ var Endpoints = {
     }
 
   	return Endpoints.getCdfBase() + "/comments/" + endpoint;
-  }
+  },
+
+  getScheduledJob: function() { return Endpoints.getWebapp() + "/api/scheduler/job" },
+
+  getEmailConfig: function() { return Endpoints.getWebapp() + "/api/emailconfig" }
+
 };

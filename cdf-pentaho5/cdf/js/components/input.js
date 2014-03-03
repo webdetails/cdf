@@ -1332,4 +1332,3 @@ var ButtonComponent = ActionComponent.extend({
     this.placeholder('button').text(this.label);
   }
 });
-

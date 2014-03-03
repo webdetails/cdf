@@ -17,5 +17,10 @@
   <bean id="settings" class="org.pentaho.cdf.settings.SettingsApi"/>
   <bean id="views" class="org.pentaho.cdf.views.ViewsApi"/>
   <bean id="cdfApi" class="org.pentaho.cdf.CdfApi"/>
+
+  <!-- legacy -->
+  <bean id="xcdf.GetCDFResource" class="org.pentaho.cdf.CdfContentGenerator" scope="prototype">
+      <property name="cdfResource" value="true" />
+  </bean>
   
 </beans>
