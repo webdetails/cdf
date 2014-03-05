@@ -106,7 +106,7 @@
     name: "xmla",
     label: "XMLA",
     defaults: {
-      url: webAppPath + "/Xmla" //defaults to Pentaho's Mondrian servlet. can be overridden in options
+      url: Endpoints.getXmla(); //defaults to Pentaho's Mondrian servlet. can be overridden in options
     },
     init: function(){
       loadXmlaScript();
@@ -183,7 +183,7 @@
     name: "xmlaDiscover",
     label: "XMLA Discover",
     defaults: {
-      url: webAppPath + "/Xmla" //defaults to Pentaho's Mondrian servlet. can be overridden in options
+      url: Endpoints.getXmla(); //defaults to Pentaho's Mondrian servlet. can be overridden in options
     },
     init: function(){
       loadXmlaScript();

@@ -60,5 +60,7 @@ var Endpoints = {
     return arr; 
   },  
 
-  getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; }
+  getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; },
+
+  getCggDrawURL: function() { return "../cgg/draw"; }
 };

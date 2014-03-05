@@ -93,8 +93,10 @@ var Endpoints = {
   	return Endpoints.getCdfBase() + "/comments/" + endpoint;
   },
 
-  getScheduledJob: function() { return Endpoints.getWebapp() + "/api/scheduler/job" },
+  getScheduledJob: function() { return Endpoints.getWebapp() + "/api/scheduler/job"; },
 
-  getEmailConfig: function() { return Endpoints.getWebapp() + "/api/emailconfig" }
+  getEmailConfig: function() { return Endpoints.getWebapp() + "/api/emailconfig"; },
+
+  getCggDrawURL: function() { return "../../../plugin/cgg/api/services/draw"; }
 
 };

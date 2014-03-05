@@ -151,7 +151,7 @@ Dashboards.getWebAppPath = function (){
 }
 
 Dashboards.getCggDrawUrl = function() { 
-    return "../cgg/draw";
+    return Endpoints.getCggDrawURL();
 };
 
 // REFRESH ENGINE begin

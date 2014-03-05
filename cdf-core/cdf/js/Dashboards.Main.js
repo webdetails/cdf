@@ -90,8 +90,8 @@ Dashboards.getWebAppPath = function (){
   return webAppPath;
 }
 
-Dashboards.getCggDrawUrl = function() { 
-    return "../cgg/draw";// TODO hcoded path
+Dashboards.getCggDrawUrl = function() {
+    return Endpoints.getCggDrawURL();
 };
 
 Dashboards.setGlobalContext = function(globalContext) {
