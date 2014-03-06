@@ -132,8 +132,7 @@ var PivotLinkComponent = BaseComponent.extend({
   }
 },{
   openPivotLink : function(object) {
-    var url = webAppPath + "/Pivot?solution=system&path=pentaho-cdf/actions&action=jpivot.xaction&";
-
+    var url = Endpoints.getPivot("system","pentaho-cdf/actions","jpivot.xaction") + "&";
     var qd = object.pivotDefinition;
     var parameters = [];
     for(p in qd){
@@ -205,7 +204,7 @@ var PrptComponent = BaseComponent.extend({
     }
 
     if(options["dashboard-mode"]){
-      var url = webAppPath + '/content/reporting';
+      var url = Endpoints.getPluginBase("reporting");
       var myself=this;
       $.ajax({
         url: url,
@@ -237,14 +236,10 @@ var PrptComponent = BaseComponent.extend({
       }
 
       if (this.usePost) {
-
-        var url = webAppPath + '/content/reporting';
+        var url = Endpoints.getPluginBase("reporting");
         this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
-
       } else {
-
-        var url = webAppPath + '/content/reporting/reportviewer/report.html' + "?" + $.param(options);
-
+        var url = Endpoints.getReportViewer( $.param(options) );
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
           this.autoResize = false;
@@ -1085,7 +1080,7 @@ var ExecutePrptComponent = PrptComponent.extend({
   executePrptComponent: function(){
 
     var options = this.getOptions();
-    var url = webAppPath + '/content/reporting/reportviewer/report.html';
+    var url = Endpoints.getReportViewer();
     var a=[];
     var encodeArray = function(k,v) {
       var arr = [];
@@ -1119,11 +1114,11 @@ var AnalyzerComponent = BaseComponent.extend({
     this.clear();
 
     var options = this.getOptions();
-    var url = webAppPath + '/content/analyzer/';
+    var url = Endpoints.getPluginBase("analyzer/");
     var myself=this;
 
     // enable editing the view?
-    this.viewOnly?url+='viewer':url+='editor';
+    this.viewOnly ? url+='viewer' : url+='editor';
 
     var height = this.height? this.height: "480px";
     var width = this.width? this.width: "100%";

@@ -307,7 +307,7 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
     Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "openflashchart.xaction", this.getParameters(),function(jXML){
 
       if(jXML != null){
-        var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g,webAppPath + "/openflashchart");
+        var result = jXML.find("ExecuteActivityResponse:first-child").text().replace(/openflashchart/g, Endpoints.getOpenFlashChart() );
         getDataFuntion = result.match(/getData.*\(\)/gi);
         $("#"+myself.htmlObject).html(result);
       }

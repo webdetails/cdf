@@ -57,7 +57,7 @@ var Endpoints = {
 
   getExport: function () { return Endpoints.getCdfBase() + "/Export"; },
 
-  getResource: function() { return Endpoints.getCdfBase() + "/resource" },
+  getResource: function() { return Endpoints.getCdfBase() + "/resource"; },
 
   getCdfXaction: function( path, action, solution ) { 
     return Endpoints.getViewAction() + "?path=" + Helper.getFullPath( path, action ) + "&" + Helper.getTimestamp(); 
@@ -93,8 +93,11 @@ var Endpoints = {
   	return Endpoints.getCdfBase() + "/comments/" + endpoint;
   },
 
-  getScheduledJob: function() { return Endpoints.getWebapp() + "/api/scheduler/job" },
+  getScheduledJob: function() { return Endpoints.getWebapp() + "/api/scheduler/job"; },
 
-  getEmailConfig: function() { return Endpoints.getWebapp() + "/api/emailconfig" }
+  getEmailConfig: function() { return Endpoints.getWebapp() + "/api/emailconfig"; },
 
+  getPivot: function ( solution, path, action ) { return Endpoints.getWebapp() + "/Pivot?solution=" + (solution || "system") + "&path=" + path + "&action=" + action; },
+
+  getAnalyzer: function() { return Endpoints.getWebapp() + "/content/analyzer/"; }
 };
