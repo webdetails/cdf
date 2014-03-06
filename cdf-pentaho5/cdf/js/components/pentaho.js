@@ -65,7 +65,7 @@ var XactionComponent = BaseComponent.extend({
           } else {
             val =  encodeURIComponent(Dashboards.getParameterValue(this.parameters[i][1]));
             if(val == "NIL"){
-              val = encodeURIComponent(this.parameters[i][2])
+              val = encodeURIComponent(this.parameters[i][2]);
             }
           }
           url += arg + val;
@@ -132,8 +132,7 @@ var PivotLinkComponent = BaseComponent.extend({
   }
 },{
   openPivotLink : function(object) {
-    var url = webAppPath + "/Pivot?solution=system&path=pentaho-cdf/actions&action=jpivot.xaction&";
-
+    var url = Endpoints.getPivot("system","pentaho-cdf/actions","jpivot.xaction") + "&";
     var qd = object.pivotDefinition;
     var parameters = [];
     for(p in qd){
@@ -307,7 +306,6 @@ var PrptComponent = BaseComponent.extend({
       } else {
 
         var url = webAppPath + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
-
         if (options.showParameters && this.autoResize) {
           Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
           this.autoResize = false;
@@ -516,30 +514,6 @@ var PrptComponent = BaseComponent.extend({
 
 });//PrptComponent
 
-var SchedulePrptComponent = PrptComponent.extend({
-visible:false,
-
-update : function() {
-    // 2 modes of working; if it's a div, create a button inside it
-    var myself = this;
-    var o = $("#"+ this.htmlObject);
-    if ($.inArray(o[0].tagName.toUpperCase(),["SPAN","DIV"]) > -1){
-      // create a button
-      o = $("<button/>").appendTo(o.empty());
-      if (o[0].tagName=="DIV") o.wrap("<span/>");
-      if (this.label != undefined) o.text(this.label);
-      o.button();
-      o.addClass('scheduler_button');
-    }
-    o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
-    o.bind("click", function(){
-      var success = typeof(myself.preChange)=='undefined' ? true : myself.preChange();
-      if(success) {
-        myself.schedulePrptComponent();
-      }
-      typeof(myself.postChange)=='undefined' ? true : myself.postChange();
-    });
-  },
 
 var SchedulePrptComponent = PrptComponent.extend({
 visible:false,
@@ -578,7 +552,7 @@ update : function() {
             return v.toString(16);  
         });
 
-    }
+    };
     triggerError = function(msg,id){
       error=true;
       $(id).css("backgroundColor","rgb(255,159,159)");//error state color.
@@ -589,16 +563,16 @@ update : function() {
       setTimeout(function(){$(id).css("backgroundColor","white");
       $(id).val(temp);},2000);
 
-    }
+    };
 
     getFileName = function() {
       var path = myself.path;
       return path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
-    }
+    };
 
     getDefaultLocation = function() {
       return "/home/" + Dashboards.context.user;
-    }
+    };
 
     getHour = function(){
     var hour=$("#hours").val();
@@ -611,7 +585,7 @@ update : function() {
             hour = 0;
     }
     return hour;
-    }
+    };
 
     getUTC = function(exp, end){
       var arr=exp.split("/");
@@ -620,12 +594,12 @@ update : function() {
       } else {
         return new Date(arr[2],arr[0]-1,arr[1],0,0,0,0).getTime();
       }
-    }
+    };
 
     getISO = function(exp){
       var arr=exp.split("/");
       return new Date(arr[2],arr[0]-1,arr[1],0,0,0,0).toISOString();
-    }
+    };
 
      makeSelect = function(min,max,interval,id){
       var selectHtml = '<select id ="'+id+'">';
@@ -636,13 +610,12 @@ update : function() {
       }
       selectHtml += '</select>';
       return selectHtml;
-
-    }
+    };
     validateStartDate=function(mili,id){
       var now = new Date();
       if(isNaN(mili)||mili<now.getTime())
         triggerError("Incorrect Date, pick date from calendar",id);
-    }
+    };
     validateEndDate=function(mili,id){
       if($("#endByRadio").is(":checked")){
       var now = new Date();
@@ -654,7 +627,7 @@ update : function() {
       else if(isNaN(mili) || mili < now.getTime())
         triggerError("Incorrect Date",id);
       }
-    }
+    };
 
     validateName = function(name) {
       if(name == "") {
@@ -664,7 +637,7 @@ update : function() {
       if (name.match(pattern)) {
        triggerError('Invalid characters, alpha-numeric text only.',"#nameIn"); 
       }
-    }
+    };
 
     startTimeGetter =function(selector){
         var hours = getHour();
@@ -679,12 +652,12 @@ update : function() {
           validateStartDate(start,"#rangeStartIn");
         }
         return new Date(start).toISOString();
-    }
+    };
      endTimeGetter=function(){
       var end = getUTC($("#endByIn").val(), true);
       validateEndDate(end,"#endByIn");
         return new Date(end).toISOString();
-    }
+    };
 
     getSelectedDaysOfWeek = function(){
       var selectedDays = new Array();
@@ -711,7 +684,7 @@ update : function() {
         selectedDays[i++] = 6;
       }
       return selectedDays;
-    } 
+    };
     getDayOfMonth = function(){
       dayOfMonth = $("#recurrPatternIn").val();
       if(dayOfMonth<1) {
@@ -721,7 +694,7 @@ update : function() {
         triggerError("<=31","#recurrPatternIn");
       }
       return dayOfMonth;
-    }
+    };
 
       setParameters = function(){
 
@@ -879,7 +852,7 @@ update : function() {
           endTime: endDate,
           startTime: start,
           uiPassParam: "YEARLY"
-        }
+        };
         if($("#yearRadio").is(":checked")) {
           complexJobTrigger["daysOfMonth"] = getDayOfMonth();
           complexJobTrigger["monthsOfYear"] = $("#yearEveryMonth").val();
@@ -907,7 +880,7 @@ update : function() {
         parameters["cronJobTrigger"]  = cronJobTrigger;
         break;
       }
-    }
+    };
 
     validateCron=function(cron){
       var arr=cron.split(" ");//7 elements - sec min hour dayOfMonth month dayOfWeek year
@@ -919,7 +892,7 @@ update : function() {
         triggerError("M+W unsuported.(M+? or W+?)","#cronString");//day of month and day of week not suported at the same time
 
 
-    }
+    };
     hideAll = function(){
         $("#rangeOfRecurrDiv").hide();
         $("#cronDiv").hide();
@@ -933,7 +906,7 @@ update : function() {
         $("#patternWeek").hide();
         $("#patternMonth").hide();
         $("#patternYear").hide();
-    }
+    };
     changeOpts= function(){
       var choice= $("#recurrId").val();
       hideAll();
@@ -992,15 +965,15 @@ update : function() {
 
       }
 
-    }
+    };
 
     createJobParameter = function(paramName, defaultValue, paramType, forceDefault) {
       if( !forceDefault && (myself.getReportOptions()[paramName] != undefined )){
-        return {name: paramName, stringValue: new Array( "" + myself.getReportOptions()[paramName]), type: paramType}
+        return {name: paramName, stringValue: new Array( "" + myself.getReportOptions()[paramName]), type: paramType};
       } else {
         return {name: paramName, stringValue: new Array( "" + defaultValue), type: paramType};
       }
-    }
+    };
 
     var myself = this;
 
@@ -1170,7 +1143,7 @@ update : function() {
               async: x
             });
             return success;
-   }
+   };
 
    var fullPage = nameDiv+locationDiv+recurrenceDiv+cronString+startTime+recurrencePattern+rangeOfRecurrence+rangeOfRecurrenceOnce;
    var mailPage = mailQuestion+mailInfo;
@@ -1179,7 +1152,7 @@ update : function() {
     $.ajax({
       type: "GET",
       url: Endpoints.getEmailConfig()+ "/isValid",
-      success: function(data) {validEmailConfig = data}
+      success: function(data) {validEmailConfig = data;}
     });
         
       var promp = {
@@ -1247,13 +1220,9 @@ update : function() {
         $("#endByIn").datepicker({minDate:0});
          $("#startDateIn").datepicker("setDate",new Date());
         $("#rangeStartIn").datepicker("setDate",new Date());
-
-});
-      
+      });
 }
-
-
-});
+}); //SchedulePrptComponent
 
 var ExecutePrptComponent = PrptComponent.extend({
   visible: false,
@@ -1307,8 +1276,7 @@ var ExecutePrptComponent = PrptComponent.extend({
     });
 
   }
-}
-);
+});
 
 var AnalyzerComponent = BaseComponent.extend({
 
@@ -1317,7 +1285,8 @@ var AnalyzerComponent = BaseComponent.extend({
     this.clear();
 
     var options = this.getOptions();
-    var url = webAppPath + '/content/analyzer/';
+    /* !!! var url = webAppPath + '/content/analyzer/'; */
+    var url = Endpoints.getAnalyzer();
     var myself=this;
 
     // enable editing the view?

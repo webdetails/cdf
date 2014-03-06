@@ -90,10 +90,6 @@ Dashboards.getWebAppPath = function (){
   return webAppPath;
 }
 
-Dashboards.getCggDrawUrl = function() {
-    return Endpoints.getCggDrawURL();
-};
-
 Dashboards.setGlobalContext = function(globalContext) {
   this.globalContext = globalContext;
 };

@@ -44,7 +44,7 @@ var Endpoints = {
 
   getExport: function () { return Endpoints.getCdfBase() + "/Export"; },
 
-  getResource: function() { return Endpoints.getCdfBase() + "/GetCDFResource" },
+  getResource: function() { return Endpoints.getCdfBase() + "/GetCDFResource"; },
 
   getCdfXaction: function( path, action, solution ) { return Endpoints.getViewAction() + "?solution=" + (solution || "system") + "&path=" + path + "&action=" + action + "&" + Helper.getTimestamp(); },
 
@@ -62,5 +62,10 @@ var Endpoints = {
 
   getComments: function ( action ) { return Endpoints.getCdfBase() + "/Comments"; },
 
-  getCggDrawURL: function() { return "../cgg/draw"; }
+  getPivot: function ( solution, path, action ) { return Endpoints.getWebapp() + "/Pivot?solution=" + (solution || "system") + "&path=" + path + "&action=" + action; },
+
+  getReportViewer: function( parameters ){ return Endpoints.getPluginBase("reporting") + "/reportviewer/report.html" + ( (parameters) ? "?" + parameters : ""); },
+
+  getOpenFlashChart: function(){ return Endpoints.getWebapp() + "/openflashchart"; }
+
 };

@@ -67,7 +67,7 @@ var ChartComponent =  UnmanagedComponent.extend({
         var urlParams = buildUrlParameters(overrides);
         urlParams.outputType = outputType || 'png';
         
-        var url = Dashboards.getCggDrawUrl() + "?" + $.param(urlParams);
+        var url = wd.helpers.cggHelper.getCggDrawUrl() + "?" + $.param(urlParams);
 
         var $exportIFrame = $('#cccExportIFrame');
         if(!$exportIFrame.length) {

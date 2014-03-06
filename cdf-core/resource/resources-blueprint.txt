@@ -28,6 +28,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.4.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/wd.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Startup.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Main.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Notifications.js,\
