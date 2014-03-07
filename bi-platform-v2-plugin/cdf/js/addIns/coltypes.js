@@ -1,3 +1,16 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 ;
 (function() {
 
@@ -118,7 +131,7 @@
     defaults: {
       width: undefined,
       widthRatio:1,
-      height: 10,
+      height: undefined,
       startColor: "#55A4D6",
       endColor: "#448FC8",
       backgroundImage: undefined,
@@ -127,7 +140,7 @@
       min: undefined,
       includeValue: false,
       absValue: true,
-      valueFormat: function(v, format, st) {
+      valueFormat: function(v, format, st, opt) {
         return "" + sprintf(format || "%.1f",v) ;
       }
     },
@@ -169,7 +182,7 @@
       var ph =$("<div>&nbsp;</div>").addClass('dataBarContainer').appendTo(cell);
       var wtmp = opt.width || ph.width();
       wtmp *= opt.widthRatio;
-      var htmp = opt.height;       
+      var htmp = opt.height || ph.height();       
     
       var leftVal  = Math.min(val,0),
           rightVal = Math.max(val,0);
@@ -189,7 +202,7 @@
       });
 
       if(opt.includeValue) {
-        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st));
+        var valph = $("<span></span>").addClass('value').append(opt.valueFormat(st.value, st.colFormat, st, opt));
         valph.appendTo(ph);
       }
     }
@@ -203,7 +216,7 @@
     defaults: {
       good: true,
       includeValue: false,
-      valueFormat: function(v,format,st) {
+      valueFormat: function(v,format,st, opt) {
         return sprintf(format || "%.1f",v);
       },
       thresholds: { up: 0 , down: 0 }
@@ -226,7 +239,7 @@
       trend.addClass('trend ' + trendClass + ' '  + qualityClass);
       ph.empty();
       if(opt.includeValue) {
-        var valph = $("<div class='value'></div>").append(opt.valueFormat(st.value, st.colFormat, st));
+        var valph = $("<div class='value'></div>").append(opt.valueFormat(st.value, st.colFormat, st, opt));
         valph.appendTo(ph);
       }
       ph.append(trend);
@@ -289,7 +302,7 @@
       canvasSize: 10,
       radius: 4,
       color: 'black',
-      title: function(st) {return "Value: " + st.value;}
+      title: function(st, opt) {return "Value: " + st.value;}
     },
     
     implementation: function(tgt, st, opt){
@@ -303,7 +316,7 @@
       for (key in opt) if (opt.hasOwnProperty(key)) {
         op = opt[key];
         options[key] = typeof op == 'function' ?
-          op.call(this,st):
+          op.call(this,st, opt):
           op;
       }
       w = options.canvasSize;
@@ -389,7 +402,7 @@
     name: "formattedText",
     label: "Formatted Text",
     defaults: {
-      textFormat: function(v, st) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
+      textFormat: function(v, st, opt) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
     },
 
     init: function(){
@@ -409,7 +422,7 @@
     name: "localizedText",
     label: "Localized Text",
     defaults: {
-      localize: function(v) {return Dashboards.i18nSupport.prop(v);}
+      localize: function(v, st, opt) {return Dashboards.i18nSupport.prop(v);}
     },
 
     init: function(){
@@ -419,7 +432,7 @@
     
     implementation: function(tgt, st, opt){
       if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
-        var text = this.defaults.localize(st.value) ;
+        var text = this.defaults.localize(st.value, st, opt) ;
       	$(tgt).empty().append(text);
       	//change data, too, in order for search and sorting to work correctly on the localized text
       	st.tableData[st.rowIdx][st.colIdx] = text;
@@ -437,7 +450,7 @@
       hide:true,
       columnHeadersInGroups: false,
       replaceFirstHeader: true,
-      textFormat: function(v, st) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
+      textFormat: function(v, st, opt) {return st.colFormat ? sprintf(st.colFormat,v) : v;}
     },
 
     init: function(){

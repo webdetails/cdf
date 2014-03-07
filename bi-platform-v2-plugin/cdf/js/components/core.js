@@ -1,4 +1,18 @@
-BaseComponent = Base.extend({
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+*
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
+BaseComponent = Base.extend(Backbone.Events).extend({
+
   //type : "unknown",
   visible: true,
   isManaged: true,
@@ -9,9 +23,30 @@ BaseComponent = Base.extend({
   logColor: undefined,
   //valueAsId:
   //valuesArray:
+  //autoFocus: false,
+
+  placeholder: function(selector) {
+    var ho = this.htmlObject;
+    return ho ? $("#"+ ho + (selector ? (" " + selector) : "")) : $();
+  },
+
+  focus: function() {
+    try {
+      this
+        .placeholder("*:first")
+        .focus();
+    } catch(ex) { /* Swallow, maybe hidden. */ }
+  },
+
+  _doAutoFocus: function() {
+    if(this.autoFocus) {
+      delete this.autoFocus;
+      this.focus();
+    }
+  },
 
   clear : function() {
-    $("#"+this.htmlObject).empty();
+    this.placeholder().empty();
   },
 
   copyEvents: function(target,events) {
@@ -29,17 +64,17 @@ BaseComponent = Base.extend({
     /*
      * `dashboard` points back to this component, so we need to remove it from
      * the original component before cloning, lest we enter an infinite loop.
-     * `_callbacks` contains the event bindings for the Backbone Event mixin
+     * `_events` contains the event bindings for the Backbone Event mixin
      * and may also point back to the dashboard. We want to clone that as well,
      * but have to be careful about it.
      */
     dashboard = this.dashboard;
-    callbacks = this._callbacks;
+    callbacks = this._events;
     delete this.dashboard;
-    delete this._callbacks;
+    delete this._events;
     that = $.extend(true,{},this);
     that.dashboard = this.dashboard = dashboard;
-    this._callbacks = callbacks;
+    this._events = callbacks;
     this.copyEvents(that,callbacks);
 
     if (that.parameters) {
@@ -317,7 +352,7 @@ BaseComponent = Base.extend({
 
 var TextComponent = BaseComponent.extend({
   update : function() {
-    $("#"+this.htmlObject).html(this.expression());
+    this.placeholder().html(this.expression());
   }
 });
 
@@ -568,7 +603,6 @@ var CommentsComponent = BaseComponent.extend({
       render: function() {
         var $renderElem = $('#'+myself.options.htmlObject);
         var $commentsElem = $('<div/>').addClass('commentsGroup');
-        Dashboards.log("Comments Component: Render comments", "debug");
         _(this.collection.models).each(function(comment){
           $commentsElem.append(this.renderSingeComment(comment));
         }, this);
@@ -580,18 +614,15 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       renderSingeComment: function(comment) {
-        Dashboards.log("Comments Component: Render single comment", "debug");
         var singleCommentView = new myself.CommentView(comment);
         return singleCommentView.render();
       },
 
       addComment: function() {
-        Dashboards.log("Comments Component: Add comment", "debug");
         this.showAddComment();
       },
 
       saveComment: function() {
-        Dashboards.log("Comments Component: Save comment", "debug");
         var text = this.$el.find('.addCommentText').val();
         var callback = function(data, collection) {
           var paginate = myself.options.paginate;
@@ -603,12 +634,10 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       cancelComment: function() {
-        Dashboards.log("Comments Component: Cancel comment", "debug");
         this.hideAddComment();
       },
 
       navigateNext: function() {
-        Dashboards.log("Comments Component: Next", "debug");
         var paginate = myself.options.paginate;
         var start = paginate.activePageNumber*paginate.pageCommentsSize;
         if ((start+paginate.pageCommentsSize) < myself.options.queyResult.length) {
@@ -620,7 +649,6 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       navigatePrevious: function() {
-        Dashboards.log("Comments Component: Previous", "debug");
         var paginate = myself.options.paginate;
         var start = paginate.activePageNumber;
         if (paginate.activePageNumber > 0) {
@@ -632,7 +660,6 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       navigateRefresh: function() {
-        Dashboards.log("Comments Component: Refresh", "debug");
         var paginate = myself.options.paginate;
         myself.options.paginate.activePageNumber = 0;
         myself.operations.processOperation('LIST_ACTIVE', null, this.collection, null, myself.options);
@@ -652,15 +679,12 @@ var CommentsComponent = BaseComponent.extend({
       },
 
       commentsUpdateNotification: function() {
-        Dashboards.log("Comments Component: Comments notification", "debug");
         if (myself.options.queyResult.length > 0) {
           var lastCommentDate = myself.options.queyResult[0].createdOn;
           var callback = function(data) {
             if (data.result.length > 0) {
               if (!!(data.result[0].createdOn==lastCommentDate)) {
-                Dashboards.log("Comments Component: New Comments? false", "debug");
               } else {
-                Dashboards.log("Comments Component: New Comments? true", "debug");
                 var tipsyOptions = {
                   html: true,
                   fade: true,
@@ -712,10 +736,8 @@ var CommentsComponent = BaseComponent.extend({
 
       if (myself.options.intervalActive) {
         var refresh = function() {
-          Dashboards.log("Comments Component: Refresh", "debug");
           myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
         }
-        //setInterval(refresh, myself.options.interval);
         setInterval(function () { myself.commentsCollection.trigger('commentsUpdateNotification'); }, myself.options.interval);
       }
 
@@ -737,7 +759,7 @@ var CommentsComponent = BaseComponent.extend({
     this.pageCommentsSize = (typeof this.pageCommentsSize == 'undefined')? 10: this.pageCommentsSize;
     this.firstResult = (typeof this.firstResult == 'undefined')? 0: this.firstResult;
     this.maxResults  = (typeof this.maxResults  == 'undefined')? 100: this.maxResults;
-    this.interval  = (typeof this.interval  == 'undefined')? /*60000*/ 5000: this.interval;
+    this.interval  = (typeof this.interval  == 'undefined')? 60000: this.interval;
     this.intervalActive  = (typeof this.intervalActive  == 'undefined')? true: this.intervalActive;
 
     this.addPermission = (typeof this.addPermission == 'undefined')? true: this.addPermission;
@@ -772,9 +794,6 @@ var CommentsComponent = BaseComponent.extend({
     }
 
     this.processing().start(options);
-
-    // Old comment component definition
-    // this.firePageUpdate();
   }
 
 });
@@ -917,7 +936,7 @@ var UnmanagedComponent = BaseComponent.extend({
   },
   showTooltip: function() {
     if(typeof this._tooltip != "undefined") {
-      $("#" + this.htmlObject).attr("title",this._tooltip).tooltip({
+      this.placeholder().attr("title",this._tooltip).tooltip({
         delay:0,
         track: true,
         fade: 250
@@ -1139,7 +1158,7 @@ var UnmanagedComponent = BaseComponent.extend({
     this);
   },
   errorNotification: function (err, ph) {
-    ph = ph || ( ( this.htmlObject ) ? $('#' + this.htmlObject) : undefined );
+    ph = ph || (this.htmlObject ? this.placeholder() : undefined);
     var name = this.name.replace('render_', '');
     err.msg = err.msg + ' (' + name + ')';
     Dashboards.errorNotification( err, ph );
@@ -1194,3 +1213,62 @@ var FreeformComponent = UnmanagedComponent.extend({
   }
 });
 
+var ActionComponent = UnmanagedComponent.extend({
+  _docstring: function (){
+    return "Abstract class for components calling a query/endpoint";
+    /**
+       By default, uses a UnmanagedComponent.synchronous() lifecycle.
+       Methods/properties defined in CDE for all child classes:
+
+       this.actionDefinition (datasource used to trigger the action)
+       this.actionParameters (parameters to be passed to the datasource)
+       this.successCallback(data)
+       this.failureCallback()
+
+       Each descendant is expected to override this.render()
+
+       Notes:
+       - in this.actionParameters, static values should be quoted, in order to survive the "eval" in Dashboards.getParameterValue
+
+    */
+  },
+
+  update: function () {
+    /**
+       Entry-point of the component, manages the actions. Follows a synchronous cycle by default.
+    */
+    var render = _.bind(this.render, this);
+    if( _.isUndefined(this.manageCallee) || this.manageCallee) {
+      this.synchronous(render);
+    } else {
+      render();
+    }
+
+  },
+
+  triggerAction: function () {
+    /**
+       Calls the endpoint, passing any parameters.
+       This method is typically bound to the "click" event of the component.
+    */
+    var params = Dashboards.propertiesArrayToObject( this.actionParameters ),
+        failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function (){},
+        successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function (){};
+
+    return Dashboards.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
+  },
+
+  hasAction: function(){
+    /**
+       Detect if the endpoint associated with the Action is defined
+    */
+    if ( ! this.actionDefinition ){
+      return false;
+    }
+    if (Dashboards.detectQueryType){
+      return !! Dashboards.detectQueryType(this.actionDefinition);
+    } else {
+      return !! this.actionDefinition.queryType && Dashboards.hasQuery(this.actionDefinition.queryType);
+    }
+  }
+});

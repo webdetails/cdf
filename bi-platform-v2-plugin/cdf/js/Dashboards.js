@@ -1,3 +1,15 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
 
  $.ajaxSetup({
   type: "POST",
@@ -137,6 +149,10 @@ Dashboards.error = function(m){
 Dashboards.getWebAppPath = function (){
   return webAppPath
 }
+
+Dashboards.getCggDrawUrl = function() { 
+    return "../cgg/draw";
+};
 
 // REFRESH ENGINE begin
 
@@ -334,11 +350,11 @@ Dashboards.setGlobalContext = function(globalContext) {
 };
 
 Dashboards.showProgressIndicator = function() {
-  this.blockUIwithDrag();
+  $.blockUI && this.blockUIwithDrag();
 };
 
 Dashboards.hideProgressIndicator = function() {
-  $.unblockUI();
+  $.unblockUI && $.unblockUI();
   this.showErrorTooltip();
 };
 
@@ -378,7 +394,7 @@ Dashboards.bindControl = function(control) {
     this._castControlToClass(control, Class);
   }
 
-  this.bindExistingControl(control, Class);
+  return this.bindExistingControl(control, Class);
 };
 
 Dashboards.bindExistingControl = function(control, Class) {
@@ -392,7 +408,7 @@ Dashboards.bindExistingControl = function(control, Class) {
     if(typeof control.off === "function") { control.off("all"); }
 
     // Endow it with the Backbone event system.
-    $.extend(control, Backbone.Events);
+    if (!control.on){ $.extend(control, Backbone.Events); };
 
     // Add logging lifeCycle
     this._addLogLifecycleToControl(control);
@@ -487,7 +503,7 @@ Dashboards._addLogLifecycleToControl = function(control) {
       
       var timeInfo = Mustache.render("Timing: {{elapsedSinceStartDesc}} since start, {{elapsedSinceStartDesc}} since last event", this.splitTimer());
       console.log("%c          [Lifecycle " + eventStr + "] " + this.name + " [" + this.type + "]"  + " (P: "+ this.priority +" ): " +
-          e.substr(4) + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
+          eventName + " " + timeInfo +" (Running: "+ this.dashboard.runningCalls  +")","color: " + this.getLogColor());
     }
   });
 };
@@ -786,12 +802,14 @@ Dashboards.createAndCleanErrorDiv = function(){
 
 Dashboards.showErrorTooltip = function(){
   $(function(){
-    $(".cdf_error").tooltip({
-      delay:0,
-      track: true,
-      fade: 250,
-      showBody: " -- "
-    })
+    if($.tooltip) {
+      $(".cdf_error").tooltip({
+        delay:0,
+        track: true,
+        fade: 250,
+        showBody: " -- "
+      });
+    }
   });
 };
 
@@ -889,25 +907,28 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 };
 
 Dashboards.init = function(components){
-  var myself =this;
+  var myself = this;
+
+  this.syncDebugLevel();
+
   if(this.initialStorage) {
     _.extend(this.storage, this.initialStorage);
   } else {
     this.loadStorage();
   }
+  
   if(this.context != null && this.context.sessionTimeout != null ) {
     //defaulting to 90% of ms value of sessionTimeout
     Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
   }
+  
   this.restoreBookmarkables();
   this.restoreView();
   this.syncParametersInit();
-  if ($.isArray(components)) {
-    this.addComponents(components);
-  }
-  $(function() {
-    myself.initEngine();
-  });
+  
+  if($.isArray(components)) { this.addComponents(components); }
+  
+  $(function() { myself.initEngine(); });
 };
 
 
@@ -917,9 +938,12 @@ Dashboards.init = function(components){
  */
 Dashboards.syncParameters = function(master, slave) {
   this.setParameter(slave, this.getParameterValue(master));
-  this.parameterModel.change();
-  this.parameterModel.on("change:" + master,function(m,v){this.fireChange(slave,v)},this);
-  this.parameterModel.on("change:" + slave,function(m,v){this.fireChange(master,v)},this);
+  this.parameterModel.on("change:" + master,function(m,v,o){
+    this[o.notify?'fireChange':'setParameter'](slave,v)
+  },this);
+  this.parameterModel.on("change:" + slave,function(m,v,o){
+    this[o.notify?'fireChange':'setParameter'](master,v)
+  },this);
 }
 
 Dashboards.chains = [];
@@ -1114,6 +1138,25 @@ Dashboards.handlePostInit = function() {
   }
 };
 
+Dashboards.debug = 1;
+
+Dashboards.syncDebugLevel = function() {
+  var level = 1; // log errors
+  try {
+    var urlIfHasDebug = function(url) { return url && (/\bdebug=true\b/).test(url) ? url : null; };
+    var url = urlIfHasDebug(window.location.href) ||
+              urlIfHasDebug(window.top.location.href);
+    if(url) {
+        var m = /\bdebugLevel=(\d+)/.exec(url);
+        level = m ? (+m[1]) : 3;
+    }
+  } catch(ex) {
+    // swallow
+  }
+
+  return this.debug = level;
+};
+
 Dashboards.resetAll = function(){
   this.createAndCleanErrorDiv();
   var compCount = this.components.length;
@@ -1168,8 +1211,7 @@ Dashboards.fireChange = function(parameter, value) {
   var myself = this;
   this.createAndCleanErrorDiv();
 
-  this.setParameter(parameter, value);
-  this.parameterModel.change();
+  this.setParameter(parameter, value, true);
   var toUpdate = [];
   var workDone = false;
   for (var i= 0, len = this.components.length; i < len; i++){
@@ -1554,7 +1596,7 @@ Dashboards.getQueryParameter = function ( parameterName ) {
   }
 };
 
-Dashboards.setParameter = function(parameterName, parameterValue) {
+Dashboards.setParameter = function(parameterName, parameterValue, isNotified) {
   if(parameterName == undefined || parameterName == "undefined"){
     this.log('Dashboards.setParameter: trying to set undefined!!','warn');
     return;
@@ -1569,7 +1611,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
       this.parameters[parameterName] = parameterValue;
     }
   }
-  this.parameterModel.set(parameterName,parameterValue,{silent:true});
+  this.parameterModel.set(parameterName,parameterValue,{notify:isNotified});
   this.persistBookmarkables(parameterName);
 };
 
@@ -2759,6 +2801,10 @@ Dashboards.safeClone = function(){
 
     this.init = function (defaults, interfaces, libraries) {
       var myself = this;
+      
+      defaults = $.extend(true, {}, defaults);
+      interfaces = $.extend(true, {}, interfaces);
+
       this._libraries = $.extend(true, {}, this._libraries, libraries);
       _.each( interfaces, function (el,key){
         setInterfaces( key, el );
@@ -2898,6 +2944,19 @@ Dashboards.safeClone = function(){
     return Boolean(this.queryFactories && this.queryFactories.has('Query', type));
   };
 
+  D.detectQueryType = function(qd) {
+    if(qd) {
+      var qt = qd.queryType                 ? qd.queryType : // cpk goes here
+               qd.query                     ? 'legacy'     :
+               (qd.path && qd.dataAccessId) ? 'cda'        : 
+               undefined;
+      
+      qd.queryType = qt;
+
+      return this.hasQuery(qt)? qt : undefined;
+    }
+  };
+
   D.getQuery = function(type, opts){
     if (_.isUndefined(type) ) {
       type = 'cda';
@@ -2918,7 +2977,7 @@ Dashboards.safeClone = function(){
 /*
  * Query STUFF
  * (Here for legacy reasons)
- * 
+ * NOTE: The query type detection code should be kept in sync with CGG's UnmanagedComponent#detectQueryType.
  */
 //Ctors:
 // Query(queryString) --> DEPRECATED
@@ -2929,7 +2988,7 @@ Query = function( cd, dataAccessId ) {
   var opts, queryType;
 
   if( _.isObject(cd) ){
-    opts = Dashboards.safeClone(true, cd);
+    opts = $.extend(true, {}, cd);
     queryType = (_.isString(cd.queryType) && cd.queryType) || ( !_.isUndefined(cd.query) && 'legacy') || 
       ( !_.isUndefined(cd.path) && !_.isUndefined(cd.dataAccessId) && 'cda') || undefined ;
   } else if ( _.isString(cd) && _.isString(dataAccessId) ) {

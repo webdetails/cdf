@@ -1,3 +1,16 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 var DashboardsMap = 
 	{
 
@@ -18,26 +31,38 @@ var DashboardsMap =
 			var lat = place[0];
 			var log = place[1];
 			var placeDesc = place[2];
-			var featureClass = object.featureClass != undefined ? '&featureClass=' + object.featureClass : '';
+			//var featureClass = object.featureClass != undefined ? '&featureClass=' + object.featureClass : '';
 
-			//request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(place)  + ',Portugal&maxRows=1&featureClass=P&coutry=PT&callback=getLocation';
-			if(lat == '' || log == '')
-			{
-				placeDesc = placeDesc.replace(/&/g,",");
-				request = 'http://ws.geonames.org/searchJSON?q=' +  encodeURIComponent(placeDesc)  + '&maxRows=1' + featureClass + '&callback=DashboardsMap.getLocation';
-			}
-			else
-				return DashboardsMap.getLocation({totalResultsCount:1, geonames: [{lat:lat,lng:log}]});
+      if (!(lat == '' || log == '')){
+        return DashboardsMap.getLocation({totalResultsCount:1, geonames: [{lat:lat,lng:log}]});
+      }
 
-
-			// Create a new script object
-			// (implementation of this class is in /export/jsr_class.js)
-			aObj = new JSONscriptRequest(request);
-			// Build the script tag
-			aObj.buildScriptTag();
-			// Execute (add) the script tag
-			aObj.addScriptTag();
-		},
+      var url = 'http://nominatim.openstreetmap.org/search';
+      var data = {
+        format: 'json',
+        limit: '1',
+        q:placeDesc
+      };
+      var success = function (result) {
+        var jData;
+        if (result && result.length > 0) {
+          jData = {
+            totalResultsCount: result.length,
+            geonames:[{
+              lng: result[0].lon,
+              lat: result[0].lat
+            }]
+          };
+        } else {
+          jData = {
+            totalResultsCount: 0,
+            geonames: []
+          };
+        }
+        DashboardsMap.getLocation(jData);
+      };
+      $.getJSON(url, data, success);
+    },
 
 		resetSearch: function (){
 			map.removeLayer(markers);

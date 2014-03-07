@@ -1,3 +1,16 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 /*
  * corePentaho.js
  *
@@ -181,7 +194,21 @@ var PrptComponent = BaseComponent.extend({
 
     this.clear();
 
-    var options = this.getOptions();
+    var options = this.getOptions(),
+        params = this.getParams(),
+        reportOptions = this.getReportOptions(),
+        reportOptions2 = {};
+
+
+    $.each(reportOptions, function(key, value){
+      if(params[key] != undefined){
+        return true;
+      } else {
+        reportOptions2[key] = value;
+      } 
+    });
+
+    reportOptions = reportOptions2;
 
     var downloadMode = this.downloadMode;
     // if you really must use this component to download stuff
@@ -228,8 +255,11 @@ var PrptComponent = BaseComponent.extend({
 
       if (this.usePost) {
 
-        var url = webAppPath + '/content/reporting';
-        this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
+        var url = webAppPath + '/content/reporting/execute/';
+        url += options.solution;
+        url += "/"+options.path;
+        url += "/"+options.name + "?" + $.param(reportOptions);
+        this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
 
       } else {
 
@@ -273,13 +303,17 @@ var PrptComponent = BaseComponent.extend({
       "dashboard-mode": this.iframe==undefined?false:!this.iframe,
       solution: this.solution,
       path: this.path,
-      action: this.action
+      name: this.action,
+      renderMode: 'REPORT',
+      htmlProportionalWidth:false
     };
 
     if (this.paginate) {
       options["output-target"] = "table/html;page-mode=page";
+      options['accepted-page'] = 0;
     } else {
       options["output-target"] = "table/html;page-mode=stream";
+      options['accepted-page'] = -1;
     }
 
     // update options with report parameters
@@ -295,6 +329,55 @@ var PrptComponent = BaseComponent.extend({
 
     return options;
 
+  },
+
+  getParams: function(){
+    var options = {};
+
+    if (this.paginate) {
+      options["output-target"] = "table/html;page-mode=page";
+      options['accepted-page'] = 0;
+    } else {
+      options["output-target"] = "table/html;page-mode=stream";
+      options['accepted-page'] = -1;
+    }
+
+    // update options with report parameters
+    for (var i=0; i < this.parameters.length; i++ ) {
+      // param: [<prptParam>, <dashParam>, <default>]
+      var param = this.parameters[i];
+      var value = Dashboards.getParameterValue(param[1]);
+      if(value == null && param.length == 3) {
+        value = param[2];
+      }
+      options[param[0]] = value;
+    }
+
+    return options;
+  },
+
+  getReportOptions: function(){
+    var options = {
+      paginate : this.paginate || false,
+      showParameters: this.showParameters || false,
+      autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
+      "dashboard-mode": this.iframe==undefined?false:!this.iframe,
+      solution: this.solution,
+      path: this.path,
+      name: this.action,
+      renderMode: 'REPORT',
+      htmlProportionalWidth:false
+    };
+
+    if (this.paginate) {
+      options["output-target"] = "table/html;page-mode=page";
+      options['accepted-page'] = 0;
+    } else {
+      options["output-target"] = "table/html;page-mode=stream";
+      options['accepted-page'] = -1;
+    }
+
+    return options;
   },
 
 
@@ -980,8 +1063,7 @@ var success = false;
                   function(xml) {
                     if (xml &&
                         xml.documentElement &&
-                        xml.documentElement.attributes['result'] &&
-                        xml.documentElement.attributes['result'].nodeValue == 'OK') {
+                        xml.documentElement.getAttribute('result') === 'OK') {
                         //get schedule id
                         var scheduleId = sharedUuid;
                         $.getJSON("getSchedules", {solution: myself.solution, path: myself.path, action:myself.action},

@@ -1,3 +1,16 @@
+/*!
+* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* 
+* This software was developed by Webdetails and is provided under the terms
+* of the Mozilla Public License, Version 2.0, or any later version. You may not use
+* this file except in compliance with the license. If you need a copy of the license,
+* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+*
+* Software distributed under the Mozilla Public License is distributed on an "AS IS"
+* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+* the license for the specific language governing your rights and limitations.
+*/
+
 /*
  * Function: fnLengthChange
  * Purpose:  Change the number of records on display
@@ -5,6 +18,7 @@
  * Inputs:   object:oSettings - DataTables settings object
  *           int:iDisplay - New display length
  */
+
  // Ensure we load dataTables before this line. If not, just keep going
 if($.fn.dataTableExt != undefined){
   $.fn.dataTableExt.oApi.fnLengthChange = function ( oSettings, iDisplay )
@@ -85,7 +99,8 @@ var TableComponent = UnmanagedComponent.extend({
     this.extraOptions.push(["bServerSide",true]);
     this.extraOptions.push(["bProcessing",true]);
     this.queryState.setPageSize(parseInt(cd.displayLength || 10));
-    this.queryState.setCallback(_.bind(function(values) {
+    
+    var success = _.bind(function(values) {
       changedValues = undefined;
       if((typeof(this.postFetch)=='function')){
         changedValues = this.postFetch(values);
@@ -94,10 +109,12 @@ var TableComponent = UnmanagedComponent.extend({
         values = changedValues;
       }
       this.processTableComponentResponse(values);
-    },this));
+    },this);
+
+    this.queryState.setCallback(success);
     this.queryState.setParameters(this.parameters);
     this.queryState.setAjaxOptions({async:true});
-    this.processTableComponentResponse();
+    this.queryState.fetchData(this.parameters, success);
    },
 
   /* Initial setup: clearing out the htmlObject and building the query object */
