@@ -3226,12 +3226,6 @@ jQuery.event = {
 					if ( selMatch[ sel ] ) {
 						matches.push( handleObj );
 					}
-					if ( selMatch[ sel ] ) {
-						matches.push( handleObj );
-					}
-				}
-				if ( matches.length ) {
-					handlerQueue.push({ elem: cur, matches: matches });
 				}
 				if ( matches.length ) {
 					handlerQueue.push({ elem: cur, matches: matches });
