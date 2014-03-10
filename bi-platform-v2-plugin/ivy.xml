@@ -56,8 +56,8 @@
 
 
     <!-- Runtime -->
-    <dependency org="pt.webdetails"             name="cpf-core"            rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
-    <dependency org="pt.webdetails"             name="cpf-pentaho"         rev="TRUNK-SNAPSHOT" transitive="false" changing="true" conf='runtime->default'/>
+    <dependency org="pt.webdetails"             name="cpf-core"            rev="${dependency.pentaho-cpf-plugin.revision}" transitive="false" changing="true" conf='runtime->default'/>
+    <dependency org="pt.webdetails"             name="cpf-pentaho"         rev="${dependency.pentaho-cpf-plugin.revision}" transitive="false" changing="true" conf='runtime->default'/>
     <dependency org="net.sourceforge.jexcelapi" name="jxl"                 rev="2.6.12"          transitive="false"                 conf="test,runtime->default" />
     <!-- orient db (persistence) -->
     <dependency org="com.orientechnologies"     name="orient-commons"      rev="1.5.0"          transitive="false"                 conf="runtime,default->default"/>
