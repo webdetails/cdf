@@ -154,7 +154,7 @@
 		   <tstamp/>			
 			<property name="sequential.build.id" value="manual-${DSTAMP}"/>
 
-		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='TRUNK' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
+		   <echo file="${stage.dir}/${plugin.name}/version.xml" message="&lt;version branch='${project.stage}' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>		   
 
 		   <!-- Copy js folder into dist -->
 		   <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
@@ -183,7 +183,7 @@
 
 
 	<echo file="${dist.dir}/marketplace.xml">&lt;version>
-    	    &lt;branch>TRUNK&lt;/branch>
+    	    &lt;branch>${project.stage}&lt;/branch>
 	    	&lt;version>${project.revision}&lt;/version>
 		    &lt;name>Trunk&lt;/name>
 		    &lt;package_url>http://ci.analytical-labs.com/job/Webdetails-CDF/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-TRUNK-SNAPSHOT.zip&lt;/package_url>
