@@ -11,13 +11,10 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def", "cdf/components/core"], function(_pv, _pvc, _def) {
-    // Publish globally
-    pvc = _pvc;
-    pv  = _pv;
-    def = _def;
+@CDF_CCC_REQUIRE_HEADER@
+    @CDF_CCC_PUBLISHED_GLOBALLY@
 
-    ChartComponent =  UnmanagedComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ ChartComponent =  UnmanagedComponent.extend({
         exportChart: function(outputType, overrides) {
             var me = this;
 
@@ -56,11 +53,7 @@ pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def", 
 
                 var scriptName =  me.name.replace(/render_/, '');
 
-                // Dasboards.context path example:
-                // "/public/cde/mine/MySampleDash.wcdf"
-                // Remove the last segment.
-                // TODO: Using the script name without the dashboard name prefix, for backward compatibility.
-                urlParams.script = Dashboards.context.path.replace(/[^\/]+$/, "") + scriptName + ".js";
+                urlParams.script = wd.helpers.cccHelper.getCccScriptPath(scriptName);
 
                 urlParams.attachmentName = scriptName;
 
@@ -95,7 +88,7 @@ pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def", 
         }
     });
 
-    ProtovisComponent =  ChartComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ ProtovisComponent =  ChartComponent.extend({
 
       update : function() {
         if (this.parameters == undefined) {
@@ -122,7 +115,7 @@ pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def", 
       }
     });
 
-    BaseCccComponent = ChartComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ BaseCccComponent = ChartComponent.extend({
 
         query: null,
         chart: null,
@@ -161,7 +154,7 @@ pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def", 
         }
     });
 
-    CccComponent = BaseCccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccComponent = BaseCccComponent.extend({
 
         update: function() {
             if(this.parameters == null) {
@@ -220,7 +213,7 @@ pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def", 
     /*
      *   Modified version of CccComponent which loads 2 datasources.
      */
-    CccComponent2 = BaseCccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccComponent2 = BaseCccComponent.extend({
 
         query: null,
         sQuery: null,  // second datasource
@@ -323,113 +316,113 @@ pen.require(["cdf/lib/CCC/protovis", "cdf/lib/CCC/pvc-d1.0", "cdf/lib/CCC/def", 
     });
 
 
-    CccAreaChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccAreaChartComponent = CccComponent.extend({
 
         cccType: pvc.AreaChart
 
     });
 
-    CccStackedDotChart = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccStackedDotChart = CccComponent.extend({
 
         cccType: pvc.StackedDotChart
     });
 
-    CccDotChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccDotChartComponent = CccComponent.extend({
 
         cccType: pvc.DotChart
 
     });
 
-    CccLineChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccLineChartComponent = CccComponent.extend({
 
         cccType: pvc.LineChart
 
     });
 
-    CccStackedLineChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccStackedLineChartComponent = CccComponent.extend({
 
         cccType: pvc.StackedLineChart
 
     });
 
-    CccStackedAreaChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccStackedAreaChartComponent = CccComponent.extend({
 
         cccType: pvc.StackedAreaChart
 
     });
 
-    CccBarChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccBarChartComponent = CccComponent.extend({
 
         cccType: pvc.BarChart
 
     });
 
-    CccPieChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccPieChartComponent = CccComponent.extend({
 
         cccType: pvc.PieChart
 
     });
 
-    CccHeatGridChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccHeatGridChartComponent = CccComponent.extend({
 
         cccType: pvc.HeatGridChart
 
     });
 
-    CccBulletChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccBulletChartComponent = CccComponent.extend({
 
         cccType: pvc.BulletChart
 
     });
 
-    CccWaterfallChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccWaterfallChartComponent = CccComponent.extend({
 
         cccType: pvc.WaterfallChart
 
     });
 
 
-    CccMetricDotChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccMetricDotChartComponent = CccComponent.extend({
 
         cccType: pvc.MetricDotChart
 
     });
 
-    CccMetricLineChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccMetricLineChartComponent = CccComponent.extend({
 
         cccType: pvc.MetricLineChart
 
     });
 
 
-    CccParCoordComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccParCoordComponent = CccComponent.extend({
 
         cccType: pvc.ParallelCoordinates
 
     });
 
-    CccDataTreeComponent = CccComponent2.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccDataTreeComponent = CccComponent2.extend({
 
         cccType: pvc.DataTree
 
     });
 
-    CccBoxplotChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccBoxplotChartComponent = CccComponent.extend({
 
         cccType: pvc.BoxplotChart
 
     });
 
-    CccTreemapChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccTreemapChartComponent = CccComponent.extend({
 
         cccType: pvc.TreemapChart
 
     });
 
-    CccNormalizedBarChartComponent = CccComponent.extend({
+    @CDF_CCC_VAR_DECLARATION@ CccNormalizedBarChartComponent = CccComponent.extend({
 
         cccType: pvc.NormalizedBarChart
 
     });
 
-});
+@CDF_CCC_REQUIRE_FOOTER@
