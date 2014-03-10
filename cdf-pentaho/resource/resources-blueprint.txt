@@ -60,7 +60,10 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/input.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/pentaho.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/components/Pentaho.XAction.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/components/Pentaho.JPivot.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/components/Pentaho.Reporting.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/components/Pentaho.Analyzer.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/jfreechart.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.js
