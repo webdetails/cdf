@@ -32,7 +32,9 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/wd.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Startup.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/cdf-base.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/cccHelper.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/cggHelper.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/jfreechartHelper.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Main.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Notifications.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.RefreshEngine.js,\

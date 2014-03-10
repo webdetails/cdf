@@ -49,6 +49,7 @@
 	<property name='core-resource.dir' value='${core.dir}/${resource.dir}'/>
     <property name='pentaho-base-resource.dir' value='${pentaho-base.dir}/${resource.dir}'/>
     <property name='pentaho-base-src.dir' value='${pentaho-base.dir}/src'/>
+    <property name='pentaho-base-js.dir' value='${pentaho-base.dir}/${CLIENT}'/>
   	<property name="plugin.name" value="pentaho-cdf" description="Name of the plugin" />
 	<property name="bin.dir" value="bin" />
 	<property name="resource.dir" value="resource" description="Name of the resource directory" />
@@ -162,6 +163,13 @@
             </fileset>
         </copy>
 
+        <!-- Copy pentaho-base js -->
+        <copy todir='${stage.dir}/${plugin.name}/js'>
+            <fileset dir='${pentaho-base-js.dir}'>
+                <exclude name="${includes.name}"/>
+            </fileset>
+        </copy>
+
         <antcall target="replace-static-resource-labels">
 	    	<param name="base.js.path" value="${stage.dir}/${plugin.name}/js" />
 	    </antcall>
@@ -258,6 +266,13 @@
 		<!-- cdf-core/cdf/js -->
 	    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}" overwrite="true">
             <fileset dir='${core-js.dir}'>
+            	<include name="**/*"/>
+            </fileset>
+	    </copy>
+
+	    <!-- cdf-pentaho-base/cdf/js -->
+	    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}" overwrite="true">
+            <fileset dir='${pentaho-base-js.dir}'>
             	<include name="**/*"/>
             </fileset>
 	    </copy>
@@ -470,6 +485,11 @@ excludes="**/Thumbs.db"
 
     	<replace file="${base.js.path}/simile/timeplot/timeplot-api.js" token="@CDF_RESOURCES_BASE_URL@" value="${cdf.resources.base.url}" />
     	<replace file="${base.js.path}/simile/timeline/timeline-api.js" token="@CDF_RESOURCES_BASE_URL@" value="${cdf.resources.base.url}" />
+    	<!-- modifications needed for core-refator components/ccc.js -->
+    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_HEADER@" value="${cdf.ccc.require.header}" />
+    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_PUBLISHED_GLOBALLY@" value="${cdf.ccc.published.globally}" />
+    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_VAR_DECLARATION@" value="${cdf.ccc.var.declaration}" />
+    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_FOOTER@" value="${cdf.ccc.require.footer}" />
 
     </target>
   
