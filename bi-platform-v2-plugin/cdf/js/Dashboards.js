@@ -1044,6 +1044,10 @@ Dashboards.initEngine = function() {
   var myself = this;
   var components = this.components;
 
+  //reset dashboard's state
+  this.runningCalls = 0;
+  this.finishedInit = false;
+
   this.incrementRunningCalls();
   if( this.logLifecycle && typeof console != "undefined" ){
     console.log("%c          [Lifecycle >Start] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
