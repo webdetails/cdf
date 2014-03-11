@@ -66,6 +66,8 @@ var Endpoints = {
 
   getReportViewer: function( parameters ){ return Endpoints.getPluginBase("reporting") + "/reportviewer/report.html" + ( (parameters) ? "?" + parameters : ""); },
 
-  getOpenFlashChart: function(){ return Endpoints.getWebapp() + "/openflashchart"; }
+  getOpenFlashChart: function(){ return Endpoints.getWebapp() + "/openflashchart"; },
+
+  getAnalyzer: function() { Endpoints.getPluginBase("analyzer/"); }
 
 };

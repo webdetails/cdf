@@ -99,5 +99,8 @@ var Endpoints = {
 
   getPivot: function ( solution, path, action ) { return Endpoints.getWebapp() + "/Pivot?solution=" + (solution || "system") + "&path=" + path + "&action=" + action; },
 
-  getAnalyzer: function() { return Endpoints.getWebapp() + "/content/analyzer/"; }
+  getAnalyzer: function() { return Endpoints.getWebapp() + "/content/analyzer/"; },
+
+  getReportViewer: function( path, ts ) { return Endpoints.getWebapp() + '/api/repos/' + path + '/viewer?' + ts; }
+  
 };
