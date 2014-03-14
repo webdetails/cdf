@@ -1,3 +1,16 @@
+/*!
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
+
 package org.pentaho.cdf;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
@@ -94,7 +107,7 @@ public class CdfApi {
 
       PluginIOUtils.writeOutAndFlush( response.getOutputStream(), systemAccess.getFileInputStream( path ) );
       response.getOutputStream().flush();
-      
+
     } catch ( Exception e ) {
       logger.error( e );
       response.sendError( HttpServletResponse.SC_FORBIDDEN );
@@ -193,55 +206,50 @@ public class CdfApi {
 
   @GET
   @Path( "/viewAction" )
-  public void doGetViewAction( 
-      @QueryParam( Parameter.SOLUTION ) String solution, 
-      @QueryParam( Parameter.PATH ) String path,
-      @QueryParam( Parameter.ACTION ) String action,
+  public void doGetViewAction( @QueryParam( Parameter.SOLUTION ) String solution,
+      @QueryParam( Parameter.PATH ) String path, @QueryParam( Parameter.ACTION ) String action,
       @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
       @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
 
-    doPostViewAction(solution, path, action, contentType, null, null, null, null, servletRequest, servletResponse );
-    
+    doPostViewAction( solution, path, action, contentType, null, null, null, null, servletRequest, servletResponse );
+
   }
-  
+
   @POST
   @Path( "/viewAction" )
-  public void doPostViewAction( 
-      @QueryParam( Parameter.SOLUTION ) String solution, 
-      @QueryParam( Parameter.PATH ) String path,
-      @QueryParam( Parameter.ACTION ) String action,
+  public void doPostViewAction( @QueryParam( Parameter.SOLUTION ) String solution,
+      @QueryParam( Parameter.PATH ) String path, @QueryParam( Parameter.ACTION ) String action,
       @QueryParam( Parameter.CONTENT_TYPE ) @DefaultValue( MimeTypes.HTML ) String contentType,
-      @FormParam( Parameter.QUERY_TYPE ) String queryType,
-      @FormParam( Parameter.QUERY ) String query,
-      @FormParam( Parameter.CATALOG ) String catalog,
-      @FormParam( Parameter.JNDI ) String jndi,
+      @FormParam( Parameter.QUERY_TYPE ) String queryType, @FormParam( Parameter.QUERY ) String query,
+      @FormParam( Parameter.CATALOG ) String catalog, @FormParam( Parameter.JNDI ) String jndi,
       @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
 
     String value = determineCorrectPath( solution, action, path );
-    
+
     HashMap<String, String> paramMap = new HashMap<String, String>();
-    
-    if( !StringUtils.isEmpty( queryType ) && !paramMap.containsKey( Parameter.QUERY_TYPE ) ) {
+
+    if ( !StringUtils.isEmpty( queryType ) && !paramMap.containsKey( Parameter.QUERY_TYPE ) ) {
       paramMap.put( Parameter.QUERY_TYPE, queryType );
-    } 
-    
-    if( !StringUtils.isEmpty( query ) && !paramMap.containsKey( Parameter.QUERY ) ) {
+    }
+
+    if ( !StringUtils.isEmpty( query ) && !paramMap.containsKey( Parameter.QUERY ) ) {
       paramMap.put( Parameter.QUERY, query );
-    } 
-    
-    if( !StringUtils.isEmpty( catalog ) && !paramMap.containsKey( Parameter.CATALOG ) ) {
+    }
+
+    if ( !StringUtils.isEmpty( catalog ) && !paramMap.containsKey( Parameter.CATALOG ) ) {
       paramMap.put( Parameter.CATALOG, catalog );
     }
-    
-    if( !StringUtils.isEmpty( jndi ) && !paramMap.containsKey( Parameter.JNDI ) ) {
+
+    if ( !StringUtils.isEmpty( jndi ) && !paramMap.containsKey( Parameter.JNDI ) ) {
       paramMap.put( Parameter.JNDI, jndi );
     }
-    
-    boolean success = ActionEngine.getInstance().executeAction( value, contentType, servletRequest, servletResponse,
-        PentahoSessionHolder.getSession(), paramMap );
-    
-    if( success ){
-      servletResponse.getOutputStream().flush(); //flush
+
+    boolean success =
+        ActionEngine.getInstance().executeAction( value, contentType, servletRequest, servletResponse,
+            PentahoSessionHolder.getSession(), paramMap );
+
+    if ( success ) {
+      servletResponse.getOutputStream().flush(); // flush
     }
   }
 
@@ -249,8 +257,8 @@ public class CdfApi {
   @Path( "/getHeaders" )
   @Produces( "text/html" )
   public String getHeaders( @QueryParam( Parameter.DASHBOARD_CONTENT ) String dashboardContent,
-      @QueryParam( Parameter.DASHBOARD_TYPE ) String dashboardType, @QueryParam( Parameter.ROOT ) String root,
-      @QueryParam( Parameter.SCHEME ) String scheme,
+      @QueryParam( Parameter.DASHBOARD_TYPE ) String dashboardType,
+      @QueryParam( Parameter.ROOT ) String root, @QueryParam( Parameter.SCHEME ) String scheme,
       @QueryParam( Parameter.DEBUG ) @DefaultValue( "false" ) String debug, @Context HttpServletRequest servletRequest,
       @Context HttpServletResponse servletResponse ) throws Exception {
     try {
