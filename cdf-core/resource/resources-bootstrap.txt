@@ -1,9 +1,10 @@
-style=\
+core-bootstrap-style=\
 @RELATIVE_URL@/content/pentaho-cdf/js/theme/cupertino/jquery-ui-1.8.custom.css
 
-commonLibrariesScript=\
-@RELATIVE_URL@/content/pentaho-cdf/js/lib/shims.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/lib/pen-shim.js,\
+core-bootstrap-commonLibrariesScript-1=\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/shims.js
+
+core-bootstrap-commonLibrariesScript-2=\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
@@ -29,7 +30,18 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/fancybox/jquery.fancybox-1.3.4.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/wd.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Startup.js
+
+core-bootstrap-commonLibrariesScript-3=\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Main.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Notifications.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.RefreshEngine.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Query.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Utils.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Legacy.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.AddIns.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Bookmarks.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/AddIns.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/queries/coreQueries.js,\
@@ -40,21 +52,14 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/def.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/compatVersion.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/core.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/table.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/maps.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/navigation.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/input.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/pentaho.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/jfreechart.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/bootstrap/js/bootstrap.js
 
-commonLibrariesLink=\
+core-bootstrap-commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/tipsy.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.tooltip.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.jdMenu.css,\
@@ -70,53 +75,45 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/bootstrap/css/bootstrap.css
 
-
-mapScript=\
-js/OpenMap/open_map.js,\
-js/jsr_class.js,\
-js/OpenStreetMap.js
-
-dateRangeInputScript=\
+core-bootstrap-dateRangeInputScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
 
-dateRangeInputLink=\
+core-bootstrap-dateRangeInputLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
 
 # we need to support both CDE and CDF-style calls
-tableComponentScript=\
+core-bootstrap-tableComponentScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
-TableScript=\
+core-bootstrap-tableScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
-timePlotScript=\
+core-bootstrap-timePlotScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js
 
-autocompleteBoxScript=\
+core-bootstrap-autocompleteBoxScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.templating.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.ext.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.js
 
-autocompleteBoxLink=\
+core-bootstrap-autocompleteBoxLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.css
 
-mapScript=\
+core-bootstrap-mapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
-mapLink=\
+core-bootstrap-mapLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
-
-newMapScript=\
+core-bootstrap-newMapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
-newMapLink=\
+core-bootstrap-newMapLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
-

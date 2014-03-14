@@ -27,6 +27,7 @@
 	<property name="includes.name" value="resources.properties"/>
 	<property name="resources-blueprint.name" value="resources-blueprint.txt"/>
 	<property name="resources-mobile.name" value="resources-mobile.txt"/>
+	<property name="resources-bootstrap.name" value="resources-bootstrap.txt"/>
 
 	<property name="resource.dir" value="resource" description="Name of the resource directory"/>
   	<property name="runtimelib.dir" value="${basedir}/runtime-lib" 
@@ -53,15 +54,19 @@
 	<property name='stage-resources.path' value='${stage.dir}/${plugin.name}/${includes.name}'/>
 	<property name='stage-resources-blueprint.path' value='${stage.dir}/${plugin.name}/${resources-blueprint.name}'/>
 	<property name='stage-resources-mobile.path' value='${stage.dir}/${plugin.name}/${resources-mobile.name}'/>
+	<property name='stage-resources-bootstrap.path' value='${stage.dir}/${plugin.name}/${resources-bootstrap.name}'/>
 	<property name='core-resources.path' value='${core-resource.dir}/${includes.name}'/>
 	<property name='core-resources-blueprint.path' value='${core-resource.dir}/${resources-blueprint.name}'/>
 	<property name='core-resources-mobile.path' value='${core-resource.dir}/${resources-mobile.name}'/>
+	<property name='core-resources-bootstrap.path' value='${core-resource.dir}/${resources-bootstrap.name}'/>
 	<property name='base-resources.path' value='${pentaho-base-resource.dir}/${includes.name}'/>
 	<property name='base-resources-blueprint.path' value='${pentaho-base-resource.dir}/${resources-blueprint.name}'/>
 	<property name='base-resources-mobile.path' value='${pentaho-base-resource.dir}/${resources-mobile.name}'/>
+	<property name='base-resources-bootstrap.path' value='${pentaho-base-resource.dir}/${resources-bootstrap.name}'/>
 	<property name='resources.path' value='${resource.dir}/${includes.name}'/>
 	<property name='resources-blueprint.path' value='${resource.dir}/${resources-blueprint.name}'/>
 	<property name='resources-mobile.path' value='${resource.dir}/${resources-mobile.name}'/>
+	<property name='resources-bootstrap.path' value='${resource.dir}/${resources-bootstrap.name}'/>
 
 	<import file="../build-res/subfloor-js.xml"/>
 
@@ -138,6 +143,7 @@
                 <exclude name="${includes.name}"/>
                 <exclude name="${resources-blueprint.name}"/>
                 <exclude name="${resources-mobile.name}"/>
+                <exclude name="${resources-bootstrap.name}"/>
             </fileset>
         </copy>
 
@@ -175,6 +181,7 @@
 			   <exclude name="${includes.name}"/>
 			   <exclude name="${resources-blueprint.name}"/>
 			   <exclude name="${resources-mobile.name}"/>
+			   <exclude name="${resources-bootstrap.name}"/>
 		   </fileset>
 	    </copy>
 
@@ -536,7 +543,6 @@ excludes="**/Thumbs.db"
         </for>
     </target>
 
-
     <target name="write-resources-blueprint">
     	<!-- cdf-core/resource/resources-blueprint.txt -->
         <property file="${core-resources-blueprint.path}"/>
@@ -721,7 +727,6 @@ excludes="**/Thumbs.db"
         </for>
     </target>
 
-
     <target name="write-resources-mobile">
     	<!-- cdf-core/resource/resources-mobile.txt -->
         <property file="${core-resources-mobile.path}"/>
@@ -879,7 +884,191 @@ excludes="**/Thumbs.db"
         </for>
     </target>
 
-    <target name="write-properties" depends="write-resources-mobile,write-resources-blueprint,write-resources,make-stage">
+    <target name="write-resources-bootstrap">
+    	<!-- cdf-core/resource/resources-bootstrap.txt -->
+        <property file="${core-resources-bootstrap.path}"/>
+        <!-- cdf-pentaho-base/resource/resources-bootstrap.txt -->
+        <property file="${base-resources-bootstrap.path}"/>
+        <!-- cdf-pentaho/resource/resources-bootstrap.txt -->
+        <property file="${resources-bootstrap.path}"/>
+
+        <!-- cdf-core property core-bootstrap-style -->
+        <for list='${core-bootstrap-style}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="style" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- JS files need to maintain the original order -->
+        <!-- cdf-core property core-bootstrap-commonLibrariesScript-1 -->
+        <for list='${core-bootstrap-commonLibrariesScript-1}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+        <!-- cdf-pentaho property pentaho-bootstrap-commonLibrariesScript-1 -->
+        <for list='${pentaho-bootstrap-commonLibrariesScript-1}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+       	<!-- cdf-core property core-bootstrap-commonLibrariesScript-2 -->
+        <for list='${core-bootstrap-commonLibrariesScript-2}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+        <!-- cdf-pentaho property pentaho-bootstrap-commonLibrariesScript-2 -->
+        <for list='${pentaho-bootstrap-commonLibrariesScript-2}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+        <!-- cdf-core property core-bootstrap-commonLibrariesScript-3 -->
+        <for list='${core-bootstrap-commonLibrariesScript-3}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+        <!-- cdf-pentaho-base property pentaho-base-bootstrap-commonLibrariesScript -->
+        <for list='${pentaho-base-bootstrap-commonLibrariesScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+        <!-- cdf-pentaho property pentaho-bootstrap-commonLibrariesScript-3 -->
+        <for list='${pentaho-bootstrap-commonLibrariesScript-3}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-commonLibrariesLink -->
+        <for list='${core-bootstrap-commonLibrariesLink}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="commonLibrariesLink" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-dateRangeInputScript -->
+        <for list='${core-bootstrap-dateRangeInputScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="dateRangeInputScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-dateRangeInputLink -->
+        <for list='${core-bootstrap-dateRangeInputLink}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="dateRangeInputLink" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- we need to support both CDE and CDF-style calls -->
+        <!-- cdf-core property core-bootstrap-tableComponentScript -->
+        <for list='${core-bootstrap-tableComponentScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="tableComponentScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+        <!-- cdf-core property core-bootstrap-tableScript -->
+        <for list='${core-bootstrap-tableScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="TableScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-timePlotScript -->
+        <for list='${core-bootstrap-timePlotScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="timePlotScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-autocompleteBoxScript -->
+        <for list='${core-bootstrap-autocompleteBoxScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="autocompleteBoxScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-autocompleteBoxLink -->
+        <for list='${core-bootstrap-autocompleteBoxLink}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="autocompleteBoxLink" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-mapScript -->
+        <for list='${core-bootstrap-mapScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="mapScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-mapLink -->
+        <for list='${core-bootstrap-mapLink}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="mapLink" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-newMapScript -->
+        <for list='${core-bootstrap-newMapScript}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="newMapScript" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+
+        <!-- cdf-core property core-bootstrap-newMapLink -->
+        <for list='${core-bootstrap-newMapLink}' param='filename'>
+            <sequential>
+                <propertyfile file="${stage-resources-bootstrap.path}">
+                    <entry key="newMapLink" operation="+" value="@{filename},"/>
+                </propertyfile>
+            </sequential>
+        </for>
+    </target>
+
+    <target name="write-properties" depends="write-resources-mobile,write-resources-blueprint,write-resources-bootstrap,write-resources,make-stage">
     </target>
 
   	<target name="replace-static-resource-labels">
