@@ -1,8 +1,10 @@
-style=\
+core-blueprint-style=\
 @RELATIVE_URL@/content/pentaho-cdf/js/theme/cupertino/jquery-ui-1.8.custom.css
 
-commonLibrariesScript=\
-@RELATIVE_URL@/content/pentaho-cdf/js/lib/shims.js,\
+core-blueprint-commonLibrariesScript-1=\
+@RELATIVE_URL@/content/pentaho-cdf/js/lib/shims.js
+
+core-blueprint-commonLibrariesScript-2=\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
@@ -29,7 +31,9 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/wd.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Startup.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Startup.js
+
+core-blueprint-commonLibrariesScript-3=\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Main.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Notifications.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.RefreshEngine.js,\
@@ -48,20 +52,13 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/def.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/compatVersion.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/core.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/table.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/maps.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/navigation.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/input.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/pentaho.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/jfreechart.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.js
 
-commonLibrariesLink=\
+core-blueprint-commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/tipsy.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.tooltip.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.jdMenu.css,\
@@ -77,53 +74,45 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/blueprint/screen.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.css
 
-
-mapScript=\
-js/OpenMap/open_map.js,\
-js/jsr_class.js,\
-js/OpenStreetMap.js
-
-dateRangeInputScript=\
+core-blueprint-dateRangeInputScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
 
-dateRangeInputLink=\
+core-blueprint-dateRangeInputLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
 
 # we need to support both CDE and CDF-style calls
-tableComponentScript=\
+core-blueprint-tableComponentScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
-TableScript=\
+core-blueprint-tableScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
-timePlotScript=\
+core-blueprint-timePlotScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js
 
-autocompleteBoxScript=\
+core-blueprint-autocompleteBoxScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.templating.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.ext.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.js
 
-autocompleteBoxLink=\
+core-blueprint-autocompleteBoxLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.css
 
-mapScript=\
+core-blueprint-mapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
-mapLink=\
+core-blueprint-mapLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
-
-newMapScript=\
+core-blueprint-newMapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
-newMapLink=\
+core-blueprint-newMapLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
-

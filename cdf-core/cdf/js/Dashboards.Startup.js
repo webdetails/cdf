@@ -34,7 +34,7 @@ if(webAppPath == undefined){
   webAppPath = "/" + pathArray[1];
 }
 
-if(webAppPath.endsWith("/")) {
+if(webAppPath.lastIndexOf("/") == webAppPath.length-1) {
   webAppPath = webAppPath.substr(0, webAppPath.length-1);
 }
 

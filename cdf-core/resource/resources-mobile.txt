@@ -1,5 +1,7 @@
-commonLibrariesScript=\
+core-mobile-commonLibrariesScript-1=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/shims.js,\
+
+core-mobile-commonLibrariesScript-2=\
 @RELATIVE_URL@/content/pentaho-cdf/js/modernizr-2.0.6.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/underscore.js,\
@@ -26,7 +28,9 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/js/jquery.dataTables.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Base.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/wd.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Startup.js,\
+@RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Startup.js
+
+core-mobile-commonLibrariesScript-3=\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Main.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.Notifications.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/Dashboards.RefreshEngine.js,\
@@ -45,21 +49,13 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/def.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/pvc-d1.0.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/compatVersion.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/core.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/table.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/maps.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/navigation.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/ccc.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/simpleautocomplete.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/input.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/pentaho.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/components/jfreechart.js,\
-
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.js
 
-commonLibrariesLink=\
+core-mobile-commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/tipsy.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.tooltip.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.jdMenu.css,\
@@ -69,46 +65,39 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/cdf.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_page.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/dataTables/css/demo_table.css,\
-@RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css
+@RELATIVE_URL@/content/pentaho-cdf/js/captify/captify.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.css,\
 
-mapScript=\
-js/OpenMap/open_map.js,js/jsr_class.js,\
-js/OpenStreetMap.js
-
-dateRangeInputScript=\
+core-mobile-dateRangeInputScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
 
-dateRangeInputLink=\
+core-mobile-dateRangeInputLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/ui.daterangepicker.css
 
 # we need to support both CDE and CDF-style calls
-tableComponentScript=\
+core-mobile-tableComponentScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
-TableScript=\
+core-mobile-tableScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/jquery.sparkline.js
 
-timePlotScript=\
+core-mobile-timePlotScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/simile/timeplot/timeplot-api.js
 
-autocompleteBoxScript=\
+core-mobile-autocompleteBoxScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.templating.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.ext.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.js
 
-autocompleteBoxLink=\
+core-mobile-autocompleteBoxLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/autobox/jquery.ui.autobox.css
 
-mapScript=\
+core-mobile-mapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
-mapLink=\
+core-mobile-mapLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
-
-
-
