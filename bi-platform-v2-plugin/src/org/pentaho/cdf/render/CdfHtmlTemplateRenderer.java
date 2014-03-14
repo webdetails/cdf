@@ -209,27 +209,48 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     Packager packager = Packager.getInstance();
     
     final Properties resources = new Properties();
-    File resourceFile = new File(getPluginRootDir(), "resources-blueprint.txt");
-    resources.load(new FileInputStream(resourceFile));
+    File resourceFile = new File( getPluginRootDir(), "resources-blueprint.txt" );
+    resources.load( new FileInputStream( resourceFile ) );
+    final File bootstrapFile = new File( getPluginRootDir(), "resources-bootstrap.txt" );
+    final Properties bootstrapResources = new Properties();
+    bootstrapResources.load( new FileInputStream( bootstrapFile ) );
+    final File mobileFile = new File( getPluginRootDir(), "resources-mobile.txt" );
+    final Properties mobileResources = new Properties();
+    mobileResources.load( new FileInputStream( bootstrapFile ) );
+
+
 
     ArrayList<String> scriptsList = new ArrayList<String>();
     ArrayList<String> stylesList = new ArrayList<String>();
     
 
-    boolean scriptsAvailable = packager.isPackageRegistered("scripts");
-    boolean stylesAvailable = packager.isPackageRegistered("styles");
-    if (!scriptsAvailable)
+    boolean scriptsAvailable = packager.isPackageRegistered( "scripts" );
+    boolean stylesAvailable = packager.isPackageRegistered( "styles" );
+
+    boolean mobileScriptsAvailable = packager.isPackageRegistered( "scripts-mobile" );
+
+    boolean mobileStylesAvailable = packager.isPackageRegistered( "styles-mobile" );
+
+    boolean bootstrapScriptsAvailable = packager.isPackageRegistered( "scripts-bootstrap" );
+
+    boolean bootstrapStylesAvailable = packager.isPackageRegistered( "styles-bootstrap" );
+
+
+    if ( !scriptsAvailable )
     {
-      scriptsList.addAll(Arrays.asList(resources.get("commonLibrariesScript").toString().split(",")));
-      for (int i = 0; i < scriptsList.size(); i++)
+      scriptsList.addAll( Arrays.asList( resources.get( "commonLibrariesScript" ).toString().split( "," ) ) );
+      for ( int i = 0; i < scriptsList.size(); i++ )
       {
-        String fname = scriptsList.get(i);
-        scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + STATIC_CDF_PATH, ""));
+        String fname = scriptsList.get( i );
+        scriptsList.set( i, fname.replaceAll( RELATIVE_URL_TAG + STATIC_CDF_PATH, "" ) );
       }
-      packager.registerPackage("scripts", Packager.Filetype.JS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/scripts.js", scriptsList.toArray(new String[scriptsList.size()]));
+      packager.registerPackage( "scripts", Packager.Filetype.JS,
+              getPluginRootDir().getAbsolutePath(),
+              getPluginRootDir().getAbsolutePath() + "/js/scripts.js",
+              scriptsList.toArray( new String[scriptsList.size()] ) );
     }
 
-    if (!stylesAvailable)
+    if ( !stylesAvailable )
     {
       stylesList.addAll(Arrays.asList(resources.get("commonLibrariesLink").toString().split(",")));
       for (int i = 0; i < stylesList.size(); i++)
@@ -239,6 +260,53 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       }
       packager.registerPackage("styles", Packager.Filetype.CSS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/styles.css", stylesList.toArray(new String[stylesList.size()]));
     }
+
+    if ( !mobileScriptsAvailable ) {
+      scriptsList.clear();
+      scriptsList.addAll(Arrays.asList(mobileResources.get("commonLibrariesScript").toString().split(",")));
+      for ( int i = 0; i < scriptsList.size(); i++ ) {
+        String fname = scriptsList.get( i );
+        scriptsList.set( i, fname.replaceAll( RELATIVE_URL_TAG + "/content/pentaho-cdf", "" ) );
+      }
+      packager.registerPackage("scripts-mobile", Packager.Filetype.JS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/scripts-mobile.js", scriptsList.toArray(new String[scriptsList.size()]));
+    }
+
+    if ( !mobileStylesAvailable ) {
+      stylesList.clear();
+      stylesList.addAll(Arrays.asList(mobileResources.get("commonLibrariesLink").toString().split(",")));
+      for (int i = 0; i < stylesList.size(); i++) {
+        String fname = stylesList.get(i);
+        stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+      }
+      packager.registerPackage("styles-mobile", Packager.Filetype.CSS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/styles-mobile.css", stylesList.toArray(new String[stylesList.size()]));
+    }
+
+
+
+
+    if ( !bootstrapScriptsAvailable ) {
+      scriptsList.clear();
+      scriptsList.addAll(Arrays.asList(bootstrapResources.get("commonLibrariesScript").toString().split(",")));
+      for ( int i = 0; i < scriptsList.size(); i++ ) {
+        String fname = scriptsList.get(i);
+        scriptsList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+      }
+
+      packager.registerPackage("scripts-bootstrap", Packager.Filetype.JS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/scripts-bootstrap.js", scriptsList.toArray(new String[scriptsList.size()]));
+    }
+
+    if ( !bootstrapStylesAvailable)  {
+      stylesList.clear();
+      stylesList.addAll( Arrays.asList( bootstrapResources.get( "commonLibrariesLink" ).toString().split( "," ) ) );
+      for ( int i = 0; i < stylesList.size(); i++ ) {
+        String fname = stylesList.get( i );
+        stylesList.set(i, fname.replaceAll(RELATIVE_URL_TAG + "/content/pentaho-cdf", ""));
+      }
+      packager.registerPackage("styles-bootstrap", Packager.Filetype.CSS, getPluginRootDir().getAbsolutePath(), getPluginRootDir().getAbsolutePath() + "/js/styles-bootstrap.css", stylesList.toArray(new String[stylesList.size()]));
+    }
+
+
+
     return packager;
   }
   
@@ -248,7 +316,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
 
     outputStream.write(intro.substring(0, headIndex + 6).getBytes("UTF-8")); //$NON-NLS-1$   
     //Concat libraries to html head content
-    outputStream.write(getHeaders(dashboardContent).getBytes( "UTF-8" ));
+    outputStream.write(getHeaders(dashboardContent, getRequestParams().getStringParameter("dashboardType", "blueprint")).getBytes( "UTF-8" ));
     outputStream.write(intro.substring(headIndex + 7, length - 1).getBytes("UTF-8")); //$NON-NLS-1$
 
     IParameterProvider parameters = getRequestParams();
@@ -290,10 +358,10 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     }
   }
   
-  public String getHeaders(final String dashboardContent) throws Exception
+  public String getHeaders( final String dashboardContent, final String dashboardType ) throws Exception
   {
 
-    final File file = new File(getPluginRootDir(), "resources-blueprint.txt");
+    final File file = new File( getPluginRootDir(), "resources-" + dashboardType + ".txt" );
     HashMap<String, String> includes = new HashMap<String, String>();
     final Properties resources = new Properties();
     resources.load(new FileInputStream(file));

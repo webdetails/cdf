@@ -429,7 +429,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @Path("/getHeaders")
   @Produces("text/html")
   public String getHeaders(@QueryParam("dashboardContent") @DefaultValue("") String dashboardContent,
-                           @QueryParam("dashboardType") String dashboardType,
+                           @QueryParam("dashboardType") @DefaultValue("blueprint")  String dashboardType,
                            @QueryParam("debug") @DefaultValue("false") boolean debug) throws Exception {
     try {
       CdfHtmlTemplateRenderer renderer = new CdfHtmlTemplateRenderer();
@@ -438,7 +438,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         renderer.setDebug(debug);
         renderer.setTemplate(dashboardType);
       }
-      return renderer.getHeaders(dashboardContent);
+      return renderer.getHeaders( dashboardContent, dashboardType );
     } catch (IOException ex){
       logger.error("getHeaders: " + ex.getMessage(), ex);
       throw ex;
