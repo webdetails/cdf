@@ -15,6 +15,7 @@
 /bin
 override.properties
 .ant*
+/bi-platform-v2-plugin/dev-lib/*
 
 #Eclipse project files
 .classpath
@@ -24,3 +25,4 @@ override.properties
 #IntelliJ files
 .idea/
 *.iml
+bi-platform-v2-plugin/res/META-INF/MANIFEST.MF
