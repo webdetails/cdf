@@ -46,16 +46,45 @@ requireCfg['shim']['cdf/CoreComponents'] = [
 	'cdf/components/table'
 ];
 
+requireCfg['shim']['cdf/components/pentaho'] = [
+	'cdf/components/Pentaho.JPivot',
+	'cdf/components/Pentaho.XAction',
+	'cdf/components/Pentaho.Analyzer',
+	'cdf/components/Pentaho.Reporting'
+];
+
 requireCfg['shim']['cdf/Dashboards'] = [
-    'cdf/Base',
+	'cdf/Dashboards.Main',
+	'cdf/Dashboards.Query',
+    'cdf/Dashboards.AddIns',
+    'cdf/Dashboards.Bookmarks',
+    'cdf/Dashboards.Legacy',
+    'cdf/Dashboards.Notifications',
+    'cdf/Dashboards.RefreshEngine',
+    'cdf/Dashboards.Utils'
+];
+requireCfg['shim']['cdf/Dashboards.Main'] = [
+	'cdf/Base',
     'cdf/underscore',
     'cdf/backbone',
     'cdf/mustache', 
     'cdf/lib/shims',
-    'cdf/jquery.blockUI'
+    'cdf/jquery.blockUI',
+    'cdf/Dashboards.Startup',
+    'cdf/cdf-base'
 ];
 
 requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
+
+requireCfg['shim']['cdf/Dashboards.Startup'] 		= ['cdf/lib/shims'];
+
+requireCfg['shim']['cdf/Dashboards.AddIns'] 		= ['cdf/Dashboards.Main', 'cdf/Dashboards.Query'];
+requireCfg['shim']['cdf/Dashboards.Bookmarks'] 		= ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Legacy'] 		= ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Notifications'] 	= ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Query'] 			= ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.RefreshEngine'] 	= ['cdf/Dashboards.Main'];
+requireCfg['shim']['cdf/Dashboards.Utils'] 			= ['cdf/Dashboards.Main'];
 
 requireCfg['shim']['cdf/components/core']       = ['cdf/Dashboards'];
 requireCfg['shim']['cdf/components/input']      = ['cdf/components/core'];
