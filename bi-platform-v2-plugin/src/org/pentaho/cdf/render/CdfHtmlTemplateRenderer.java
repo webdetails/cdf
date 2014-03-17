@@ -364,7 +364,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     final File file = new File( getPluginRootDir(), "resources-" + dashboardType + ".txt" );
     HashMap<String, String> includes = new HashMap<String, String>();
     final Properties resources = new Properties();
-    resources.load(new FileInputStream(file));
+    resources.load( new FileInputStream( file ) );
 
     final ArrayList<String> miniscripts = new ArrayList<String>();
     final ArrayList<String> ministyles = new ArrayList<String>();
@@ -372,25 +372,34 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     final ArrayList<String> scripts = new ArrayList<String>();
     final ArrayList<String> styles = new ArrayList<String>();
 
-    miniscripts.addAll(Arrays.asList(resources.getProperty("commonLibrariesScript", "").split(",")));
-    ministyles.addAll(Arrays.asList(resources.getProperty("commonLibrariesLink", "").split(",")));
-    scripts.addAll(getExtraScripts(dashboardContent, resources));
-    styles.addAll(getExtraStyles(dashboardContent, resources));
-    styles.addAll(Arrays.asList(resources.getProperty("style", "").split(",")));
+    String suffix = "";
+    if ( dashboardType != null && dashboardType.equals( "mobile" ) ) {
+      suffix = "-mobile";
+    } else if ( dashboardType != null && dashboardType.equals( "bootstrap" ) ) {
+      suffix = "-bootstrap";
+    }
+
+    miniscripts.addAll( Arrays.asList( resources.getProperty ( "commonLibrariesScript", "" ).split( "," ) ) );
+    ministyles.addAll( Arrays.asList( resources.getProperty( "commonLibrariesLink", "" ).split( "," ) ) );
+    scripts.addAll( getExtraScripts( dashboardContent, resources ) );
+    styles.addAll( getExtraStyles( dashboardContent, resources ) );
+    styles.addAll( Arrays.asList( resources.getProperty( "style", "" ).split( "," ) ) );
     StringBuilder scriptsBuilders = new StringBuilder();
     StringBuilder stylesBuilders = new StringBuilder();
 
     // Add common libraries
-    if (debug)
+    if ( debug )
     {
       //DEBUG MODE
-      for (String header : miniscripts)
+      for ( String header : miniscripts )
       {
-        scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + replaceRelative(header) + "\"></script>\n");
+        scriptsBuilders.append( "<script type=\"text/javascript\" src=\""
+                + replaceRelative(header) + "\"></script>\n" );
       }
-      for (String header : ministyles)
+      for ( String header : ministyles )
       {
-        stylesBuilders.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + replaceRelative(header) + "\"/>\n");
+        stylesBuilders.append( "<link rel=\"stylesheet\" type=\"text/css\" href=\""
+                + replaceRelative(header) + "\"/>\n" );
       }
 
     }
@@ -398,10 +407,14 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     {
       // NORMAL MODE
       Packager packager = getPackager();
-      String stylesHash = packager.minifyPackage("styles");
-      String scriptsHash = packager.minifyPackage("scripts");
-      stylesBuilders.append("<link href=\"" + baseUrl + STATIC_CDF_PATH + "/js/styles.css?version=" + stylesHash + "\" rel=\"stylesheet\" type=\"text/css\" />");
-      scriptsBuilders.append("<script type=\"text/javascript\" src=\"" + baseUrl + STATIC_CDF_PATH + "/js/scripts.js?version=" + scriptsHash + "\"></script>");
+      String stylesHash = packager.minifyPackage( "styles" + suffix );
+      String scriptsHash = packager.minifyPackage( "scripts" + suffix );
+      stylesBuilders.append( "<link href=\"" ).append( baseUrl ).append( STATIC_CDF_PATH ).append( "/js/styles" )
+              .append( suffix ).append( ".css?version=" ).append( stylesHash )
+              .append( "\" rel=\"stylesheet\" type=\"text/css\" />" );
+      scriptsBuilders.append( "<script type=\"text/javascript\" src=\"" ).append( baseUrl )
+              .append( STATIC_CDF_PATH ).append( "/js/scripts" ).append( suffix )
+              .append( ".js?version=" ).append( scriptsHash ).append( "\"></script>" );
     }
     //Add extra components libraries
 
@@ -416,14 +429,16 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     }
 
     // Add ie8 blueprint condition
-    stylesBuilders.append("<!--[if lt IE 8]><link rel=\"stylesheet\" href=\"" + baseUrl + STATIC_CDF_PATH + "/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->");
+    stylesBuilders.append( "<!--[if lt IE 8]><link rel=\"stylesheet\" href=\""
+            + baseUrl + STATIC_CDF_PATH
+            + "/js/blueprint/ie.css\" type=\"text/css\" media=\"screen, projection\"><![endif]-->" );
 
     StringBuilder stuff = new StringBuilder();
-    includes.put("scripts", scriptsBuilders.toString());
-    includes.put("styles", stylesBuilders.toString());
-    for (String key : includes.keySet())
+    includes.put( "scripts", scriptsBuilders.toString() );
+    includes.put( "styles", stylesBuilders.toString() );
+    for ( String key : includes.keySet() )
     {
-      stuff.append(includes.get(key));
+      stuff.append( includes.get( key ) );
     }
     return stuff.toString();
     //out.write(stuff.toString().getBytes("UTF8"));
