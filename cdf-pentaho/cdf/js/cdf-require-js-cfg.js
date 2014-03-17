@@ -95,6 +95,7 @@ requireCfg['shim']['cdf/Dashboards.Main'] = [
     'cdf/Dashboards.Startup',
     'cdf/cdf-base'
 ];
+requireCfg['shim']['cdf/Dashboards.Startup']        = ['cdf/lib/shims'];
 requireCfg['shim']['cdf/Dashboards.AddIns'] 		= ['cdf/Dashboards.Main', 'cdf/Dashboards.Query'];
 requireCfg['shim']['cdf/Dashboards.Bookmarks'] 		= ['cdf/Dashboards.Main'];
 requireCfg['shim']['cdf/Dashboards.Legacy'] 		= ['cdf/Dashboards.Main'];
