@@ -9,10 +9,15 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.render.CdfHtmlRenderer;
 import org.pentaho.cdf.render.XcdfRenderer;
@@ -156,5 +161,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
   public String getPluginName() {
     return PLUGIN_ID;
+  }
+  
+  public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
+      @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
+      @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
+      @Context HttpServletRequest servletRequest ) {
+    return ContextEngine.getInstance().getContext( path, viewId, action, Parameter.asHashMap( servletRequest ) );
   }
 }
