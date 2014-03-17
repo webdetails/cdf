@@ -1,5 +1,6 @@
 package org.pentaho.cdf;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -163,10 +165,26 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     return PLUGIN_ID;
   }
   
+  // InterPluginBroker calls this method within bean id 'xcdf' 
   public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
       @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
       @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
       @Context HttpServletRequest servletRequest ) {
     return ContextEngine.getInstance().getContext( path, viewId, action, Parameter.asHashMap( servletRequest ) );
+  }
+  
+  //InterPluginBroker calls this method within bean id 'xcdf' 
+  public String getHeaders( @QueryParam( Parameter.DASHBOARD_CONTENT ) String dashboardContent,
+      @QueryParam( Parameter.DASHBOARD_TYPE ) String dashboardType, @QueryParam( Parameter.ROOT ) String root,
+      @QueryParam( Parameter.SCHEME ) String scheme, @QueryParam( Parameter.DEBUG ) @DefaultValue( "false" ) String debug, 
+      @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
+    try {
+      CdfHtmlRenderer.getHeaders( dashboardContent, dashboardType, root, scheme, Boolean.parseBoolean( debug ),
+          servletResponse.getOutputStream() );
+    } catch ( IOException ex ) {
+      logger.error( "getHeaders: " + ex.getMessage(), ex );
+      throw ex;
+    }
+    return null;
   }
 }
