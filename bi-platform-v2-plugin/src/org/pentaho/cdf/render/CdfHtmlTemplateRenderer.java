@@ -381,6 +381,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     final ArrayList<String> styles = new ArrayList<String>();
 
     String suffix = "";
+
     if ( dashboardType != null && dashboardType.equals( "mobile" ) ) {
       suffix = "-mobile";
     } else if ( dashboardType != null && dashboardType.equals( "bootstrap" ) ) {
@@ -392,7 +393,6 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     scripts.addAll( getExtraScripts( dashboardContent, resources ) );
     styles.addAll( getExtraStyles( dashboardContent, resources ) );
     styles.addAll( Arrays.asList( resources.getProperty( "style", "" ).split( "," ) ) );
-
     StringBuilder scriptsBuilders = new StringBuilder();
     StringBuilder stylesBuilders = new StringBuilder();
 
