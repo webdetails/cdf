@@ -91,11 +91,18 @@ public class PluginHibernateUtil {
   public static void rebuildSessionFactory() throws PluginHibernateException {
 
     synchronized ( PluginHibernateUtil.lock ) {
+      
+      ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+      
       try {
+        Thread.currentThread().setContextClassLoader(PluginHibernateUtil.class.getClassLoader());
         PluginHibernateUtil.sessionFactory = PluginHibernateUtil.getConfiguration().buildSessionFactory();
+        
       } catch ( Exception ex ) {
         logger.warn( "Error building session factory " + Util.getExceptionDescription( ex ) ); //$NON-NLS-1$
         throw new PluginHibernateException( "Error building session factory", ex ); //$NON-NLS-1$
+      } finally {
+        Thread.currentThread().setContextClassLoader(contextCL);
       }
     }
   }
