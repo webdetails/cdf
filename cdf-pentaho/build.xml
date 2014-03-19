@@ -63,7 +63,6 @@
 	<property name="plugin.samples.zipfile" value="${plugin.artifact.id}-samples-${project.revision}.zip"/>
 	<property name="plugin.solution.zipfile" value="${plugin.artifact.id}-solution-${project.revision}.zip"/>
 
-	<!-- novo: CDF-253 -->
 	<property name='stage-resources.path' value='${stage.dir}/${plugin.name}/${includes.name}'/>
 	<property name='stage-resources-blueprint.path' value='${stage.dir}/${plugin.name}/${resources-blueprint.name}'/>
 	<property name='stage-resources-mobile.path' value='${stage.dir}/${plugin.name}/${resources-mobile.name}'/>
@@ -112,7 +111,7 @@
 			  <src path="${pentaho-base-src.dir}"/>
 		  </javac>
 	</target>
-	<!-- novo: dependencia write-properties -->
+
 	<target name="dist" depends="clean-dist,resolve,jar,dist-plugin,write-properties,dist-solution,dist-samples,dist-js"/>
 
 	<target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
@@ -153,9 +152,8 @@
 
 			Creates a distribution of this project's plugin zip
 			====================================================================-->
-	<!-- novo: from top (2) dist-plugin -->
+
 	<target name="make-stage">
-        <!-- Make dirs-->
         <mkdir dir="${stage.dir}"/>
         <mkdir dir="${stage.dir}/${plugin.name}"/>
         <mkdir dir="${stage.dir}/${plugin.name}/lib"/>
@@ -163,13 +161,12 @@
 
         <mkdir dir="${stage.dir}/${plugin.name}/actions" />
     </target>
-    <!-- novo from top (1) dist-plugin-->
+
     <target name="clean-bin-dir">
     	<!-- delete and re-create the plugin dist folder tree -->
 	    <delete dir="${bin.dir}"/>
     </target>
 
-    <!-- novo: dependencias make-stage,clean-bin-dir -->
 	<target name="dist-plugin" depends="jar,make-stage,clean-bin-dir" description="Creates a distribution">
 
 		<!-- Copy core resources -->
@@ -208,7 +205,6 @@
 		   </fileset>
 	    </copy>
 
-	    <!-- !!! novo: exclude adicionado -->
 	    <!-- Copy the plugin.xml and any other files from the resource dir -->
 	    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
 		   <fileset dir="${resource.dir}">
@@ -646,7 +642,6 @@ excludes="**/Thumbs.db"
         <!-- cdf-core property core-blueprint-commonLibrariesLink -->
         <for list='${core-blueprint-commonLibrariesLink}' param='filename'>
             <sequential>
-            	<echo message="@{filename}"/>
                 <propertyfile file="${stage-resources-blueprint.path}">
                     <entry key="commonLibrariesLink" operation="+" value="@{filename},"/>
                 </propertyfile>

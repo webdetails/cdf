@@ -91,7 +91,7 @@ public class ContextEngine {
       contextObj.put( "user", getUserSession().getName() );
       contextObj.put( "locale", CdfEngine.getEnvironment().getLocale() );
 
-      buildContextPaths( contextObj, path );
+      buildContextPaths( contextObj, path, parameters );
 
       SecurityParameterProvider securityParams = new SecurityParameterProvider( getUserSession() );
       contextObj.put( "roles", securityParams.getParameter( "principalRoles" ) );
@@ -110,9 +110,13 @@ public class ContextEngine {
     }
   }
 
-  private JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath ) throws JSONException {
+  private JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath, Map<String, String> parameters ) throws JSONException {
     contextObj.put( "path", dashboardPath );
-
+    
+    if( parameters != null && parameters.containsKey( Parameter.SOLUTION )){
+    	contextObj.put( Parameter.SOLUTION, parameters.get( Parameter.SOLUTION ) ); 
+    } // TODO redo this
+    
     return contextObj;
   }
 
