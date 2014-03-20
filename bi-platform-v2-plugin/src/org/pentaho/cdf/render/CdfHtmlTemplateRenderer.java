@@ -360,8 +360,16 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   
   public String getHeaders( final String dashboardContent, final String dashboardType ) throws Exception
   {
+    String suffix = "", fileToRead = "-blueprint";
+    if ( dashboardType != null && dashboardType.equals( "mobile" ) ) {
+      suffix = fileToRead = "-mobile";
+    } else if ( dashboardType != null && dashboardType.equals( "bootstrap" ) ) {
+      suffix = fileToRead = "-bootstrap";
+    }
 
-    final File file = new File( getPluginRootDir(), "resources-" + dashboardType + ".txt" );
+
+
+    final File file = new File( getPluginRootDir(), "resources" + fileToRead + ".txt" );
     HashMap<String, String> includes = new HashMap<String, String>();
     final Properties resources = new Properties();
     resources.load( new FileInputStream( file ) );
@@ -372,12 +380,6 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     final ArrayList<String> scripts = new ArrayList<String>();
     final ArrayList<String> styles = new ArrayList<String>();
 
-    String suffix = "";
-    if ( dashboardType != null && dashboardType.equals( "mobile" ) ) {
-      suffix = "-mobile";
-    } else if ( dashboardType != null && dashboardType.equals( "bootstrap" ) ) {
-      suffix = "-bootstrap";
-    }
 
     miniscripts.addAll( Arrays.asList( resources.getProperty ( "commonLibrariesScript", "" ).split( "," ) ) );
     ministyles.addAll( Arrays.asList( resources.getProperty( "commonLibrariesLink", "" ).split( "," ) ) );
