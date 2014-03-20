@@ -116,7 +116,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      $.getJSON(Endpoints.getJSONSolution() + "?mode=navigator&path=" + (NavigatorBaseComponent.path || Dashboards.getPathParameter()), function(json){
+      $.getJSON(Endpoints.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json){
         myself.processNavigatorResponse(json);
       });
     }
