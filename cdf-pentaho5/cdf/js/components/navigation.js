@@ -84,11 +84,11 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       }
 
     }
-    alert("Fatal: path " + NavigatorBaseComponent.path +" not found in navigation object");
+    alert("Fatal: path " + (NavigatorBaseComponent.path || Dashboards.getPathParameter()) +" not found in navigation object");
     return;
   },
   getParentSolution : function(){
-    if (NavigatorBaseComponent.path.length>0){
+    if ( (NavigatorBaseComponent.path || Dashboards.getPathParameter()).length>0){
       return NavigatorBaseComponent.solution;
     } else {
       return "";
