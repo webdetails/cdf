@@ -37,9 +37,9 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   private static final String PREFIX_PARAMETER = "param";
   private static final String STATIC_CDF_PATH = "/api/repos/pentaho-cdf";
   private static final String CDF_TEMPLATES = "/public/cdf/templates/";
-  
+
   private static Log logger = LogFactory.getLog(CdfHtmlTemplateRenderer.class);
- 
+
   OutputStream outputStream = null;
   RepositoryFile jcrSourceFile;
   File sourceFile;
@@ -54,11 +54,11 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   File templateName;
   String filePath;
   IParameterProvider requestParams;
-  
+
   public void setFilePath(String arg0) {
     filePath = arg0;
   }
-  
+
   public String getMsgsFileBaseName() {
     return msgsFileBaseName;
   }
@@ -70,16 +70,16 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   public void setOutputStream(OutputStream arg0) {
     outputStream = arg0;
   }
-  
+
   protected OutputStream getOutputStream() {
     return outputStream;
   }
-  
-  
+
+
   public void setRequestParams(IParameterProvider params){
       requestParams = params;
   }
-  
+
   public IParameterProvider getRequestParams(){
       return requestParams;
   }
@@ -90,14 +90,14 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       sourceFile = null;
     }
   }
-  
+
   public void setFile(File htmlTemplateFile) {
     this.sourceFile = htmlTemplateFile;
     if (this.sourceFile != null) {
       setRepositoryFile(null);
     }
   }
-  
+
   public String getMimeType(String arg0) {
     return "text/html";
   }
@@ -113,15 +113,15 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   public void setVarArgs(Map<String, Object> arg0) {
     varArgs = arg0;
   }
-  
+
   public void setTemplate(String template) {
     this.template = template;
   }
-  
+
   public String getTemplate() {
     return template;
   }
-  
+
   public String getBaseUrl() {
     return baseUrl;
   }
@@ -137,7 +137,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   public void setDebug(boolean debug) {
     this.debug = debug;
   }
-  
+
   protected InputStream getTemplateFile() throws FileNotFoundException {
     RepositoryAccess repositoryAccess = RepositoryAccess.getRepository();
     String template = this.template;
@@ -154,17 +154,17 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       return new FileInputStream(file);
     }
   }
-  
+
   private Packager getPackager() throws IOException {
     if (packager == null) {
       packager = createPackager();
     }
     return packager;
   }
-  
+
   public void execute() throws Exception {
     RepositoryAccess repositoryAccess = RepositoryAccess.getRepository();
-    
+
     //IUnifiedRepository unifiedRepository = PentahoSystem.get(IUnifiedRepository.class, null);
 
    InputStream templateFile = getTemplateFile();
@@ -177,7 +177,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     if (sourceFile != null) {
       // Merge dashboard related message file with global message file and save it in the dashboard cache
       File file = new File(sourceFile.getPath());
-      mbh = new MessageBundlesHelper(sourceFile.getParentFile(), msgsFileBaseName);      
+      mbh = new MessageBundlesHelper(sourceFile.getParentFile(), msgsFileBaseName);
       fileInputStream = new FileInputStream(sourceFile);
     } else if (jcrSourceFile != null) {
       // Merge dashboard related message file with global message file and save it in the dashboard cache
@@ -187,27 +187,27 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       }
       parentDir = FilenameUtils.separatorsToUnix(parentDir);
       mbh = new MessageBundlesHelper(repositoryAccess.getRepositoryFile(parentDir, RepositoryAccess.FileAccess.READ), msgsFileBaseName);
-      fileInputStream = repositoryAccess.getResourceInputStream(jcrSourceFile.getPath()); 
+      fileInputStream = repositoryAccess.getResourceInputStream(jcrSourceFile.getPath());
     }
-    
+
     mbh.setPluginRootDir(getPluginRootDir());
     String intro = replaceIntroParameters(templateSections[0], mbh, i18nTagsList, msgsFileBaseName);
     String footer = templateSections[1];
     final String dashboardContent = getDashboardContent(fileInputStream, i18nTagsList);
     outputDashboardHtml(intro, dashboardContent, footer);
   }
-  
+
   public void setPluginRootDir(File pluginRootDir) {
     this.pluginRootDir = pluginRootDir;
   }
-  
+
   public File getPluginRootDir() {
     return pluginRootDir != null ? pluginRootDir : ((PluginClassLoader)MessageBundlesHelper.class.getClassLoader()).getPluginDir();
   }
-  
+
   private Packager createPackager() throws IOException {
     Packager packager = Packager.getInstance();
-    
+
     final Properties resources = new Properties();
     File resourceFile = new File( getPluginRootDir(), "resources-blueprint.txt" );
     resources.load( new FileInputStream( resourceFile ) );
@@ -222,7 +222,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
 
     ArrayList<String> scriptsList = new ArrayList<String>();
     ArrayList<String> stylesList = new ArrayList<String>();
-    
+
 
     boolean scriptsAvailable = packager.isPackageRegistered( "scripts" );
     boolean stylesAvailable = packager.isPackageRegistered( "styles" );
@@ -309,12 +309,12 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
 
     return packager;
   }
-  
+
   private void outputDashboardHtml(String intro, String dashboardContent, String footer) throws Exception{
     final int headIndex = intro.indexOf("<head>"); //$NON-NLS-1$
     final int length = intro.length();
 
-    outputStream.write(intro.substring(0, headIndex + 6).getBytes("UTF-8")); //$NON-NLS-1$   
+    outputStream.write(intro.substring(0, headIndex + 6).getBytes("UTF-8")); //$NON-NLS-1$
     //Concat libraries to html head content
     outputStream.write(getHeaders(dashboardContent, getRequestParams().getStringParameter("dashboardType", "blueprint")).getBytes( "UTF-8" ));
     outputStream.write(intro.substring(headIndex + 7, length - 1).getBytes("UTF-8")); //$NON-NLS-1$
@@ -344,10 +344,10 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
   protected List<String> getUserRoles() {
     IUserRoleListService service = PentahoSystem.get(IUserRoleListService.class);
     List<String> auths = service.getRolesForUser(null, userSession.getName());//.getAuthoritiesForUser(userSession.getName());
-    
+
     return auths;
   }
-  
+
   private String replaceRelative(String headerPath) {
     if (baseUrl != null) {
       return headerPath.replaceAll(RELATIVE_URL_TAG, baseUrl);
@@ -357,11 +357,19 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       return headerPath;
     }
   }
-  
+
   public String getHeaders( final String dashboardContent, final String dashboardType ) throws Exception
   {
+    String suffix = "", fileToRead = "-blueprint";
+    if ( dashboardType != null && dashboardType.equals( "mobile" ) ) {
+      suffix = fileToRead = "-mobile";
+    } else if ( dashboardType != null && dashboardType.equals( "bootstrap" ) ) {
+      suffix = fileToRead = "-bootstrap";
+    }
 
-    final File file = new File( getPluginRootDir(), "resources-" + dashboardType + ".txt" );
+
+
+    final File file = new File( getPluginRootDir(), "resources" + fileToRead + ".txt" );
     HashMap<String, String> includes = new HashMap<String, String>();
     final Properties resources = new Properties();
     resources.load(new FileInputStream(file));
@@ -372,11 +380,12 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     final ArrayList<String> scripts = new ArrayList<String>();
     final ArrayList<String> styles = new ArrayList<String>();
 
-    miniscripts.addAll(Arrays.asList(resources.getProperty("commonLibrariesScript", "").split(",")));
-    ministyles.addAll(Arrays.asList(resources.getProperty("commonLibrariesLink", "").split(",")));
-    scripts.addAll(getExtraScripts(dashboardContent, resources));
-    styles.addAll(getExtraStyles(dashboardContent, resources));
-    styles.addAll(Arrays.asList(resources.getProperty("style", "").split(",")));
+    miniscripts.addAll( Arrays.asList( resources.getProperty ( "commonLibrariesScript", "" ).split( "," ) ) );
+    ministyles.addAll( Arrays.asList( resources.getProperty( "commonLibrariesLink", "" ).split( "," ) ) );
+    scripts.addAll( getExtraScripts( dashboardContent, resources ) );
+    styles.addAll( getExtraStyles( dashboardContent, resources ) );
+    styles.addAll( Arrays.asList( resources.getProperty( "style", "" ).split( "," ) ) );
+
     StringBuilder scriptsBuilders = new StringBuilder();
     StringBuilder stylesBuilders = new StringBuilder();
 
@@ -409,7 +418,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       scriptsBuilders.append( "<script type=\"text/javascript\" src=\"" + replaceRelative(header) + "\"></script>\n" );
     }
     for ( String header : styles ) {
-      stylesBuilders.append( 
+      stylesBuilders.append(
           "<link rel=\"stylesheet\" type=\"text/css\" href=\""
           + replaceRelative( header )
           + "\"/>\n" );
@@ -428,7 +437,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     return stuff.toString();
     //out.write(stuff.toString().getBytes("UTF8"));
   }
-  
+
   private ArrayList<String> getExtraScripts(String dashboardContentOrig, Properties resources)
   {
 
@@ -559,7 +568,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
 
     return false;
   }
-  
+
   private String getDashboardContent(InputStream is, ArrayList<String> i18nTagsList) throws Exception {
     // Fixed ISSUE #CDF-113
     //BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -577,7 +586,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     is.close();
     return sb.toString();
   }
-  
+
   private String processi18nTags(String content, ArrayList<String> tagsList)
   {
     String tagPattern = "CDF.i18n\\(\""; //$NON-NLS-1$
@@ -608,7 +617,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     }
     return resBuffer.toString();
   }
-  
+
   private String updateSelectorName(String name)
   {
     // If we've the character . in the message key substitute it conventionally to _
@@ -616,7 +625,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     // selector id name
     return name.replace(".", "_");
   }
-  
+
   private String replaceIntroParameters(String intro, MessageBundlesHelper mbh, ArrayList<String> i18nTagsList, String dashboardsMessagesBaseFilename) throws Exception{
     mbh.saveI18NMessageFilesToCache();
     String messageSetPath = mbh.getMessageFilesCacheUrl() + "/"; //$NON-NLS-1$
@@ -632,7 +641,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     intro = intro.replaceAll("#\\{GLOBAL_MESSAGE_SET\\}", buildMessageSetCode(i18nTagsList)); //$NON-NLS-1$
     return intro;
   }
-  
+
   private String buildMessageSetCode(ArrayList<String> tagsList)
   {
     StringBuffer messageCodeSet = new StringBuffer();
@@ -664,7 +673,7 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
       }
     }
   }
-  
+
   private String updateUserLanguageKey(String intro)
   {
     // Fill the template with the correct user locale
@@ -672,5 +681,5 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     intro = intro.replaceAll("#\\{LANGUAGE_CODE\\}", locale.getLanguage()); //$NON-NLS-1$
     return intro;
   }
-  
+
 }
