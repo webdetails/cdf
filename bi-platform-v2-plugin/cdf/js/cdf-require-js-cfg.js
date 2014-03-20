@@ -70,6 +70,9 @@ requireCfg['shim']['cdf/components/pentaho']    = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/table']      = ['cdf/components/core'];
 
+requireCfg['shim']['cdf/jquery'] = {
+  exports: '$'
+}
 requireCfg['shim']['cdf/jquery.ui']              = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-impromptu.3.1']   = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-ui-datepicker-i18n'] = ['cdf/jquery.ui'];
