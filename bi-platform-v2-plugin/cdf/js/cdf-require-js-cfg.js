@@ -28,7 +28,6 @@ requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/jquery.i18n.properties',
 	'cdf/jquery.jdMenu',
 	'cdf/jquery.positionBy',
-	'cdf/jquery.sparkline',
 	'cdf/jquery.tooltip',
 	
 	'cdf/simile/ajax/scripts/json',
