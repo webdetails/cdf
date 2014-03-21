@@ -51,7 +51,7 @@ commonLibrariesScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/components/jfreechart.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.jquery.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/bootstrap/js/bootstrap.js
+@RELATIVE_URL@/content/pentaho-cdf/js/bootstrap/js/bootstrap.min.js
 
 commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/lib/CCC/tipsy.css,\
@@ -67,7 +67,8 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.css,\
-@RELATIVE_URL@/content/pentaho-cdf/js/bootstrap/css/bootstrap.css
+@RELATIVE_URL@/content/pentaho-cdf/js/bootstrap/css/bootstrap.min.css,\
+@RELATIVE_URL@/content/pentaho-cdf/js/bootstrap/font-awesome/css/font-awesome.min.css
 
 
 mapScript=\
