@@ -46,7 +46,18 @@ var PrptComponent = BaseComponent.extend({
     /*************************************************************************/
     update: function() {
         this.clear();
-        var options = this.getOptions();
+        var options = this.getOptions(),
+            params = this.getParams(),
+            reportOptions = this.getReportOptions(),
+            reportOptions2 = {};
+        $.each(reportOptions, function(key, value){
+            if(params[key] != undefined){
+                return true;
+            } else {
+                reportOptions2[key] = value;
+            } 
+        });
+        reportOptions = reportOptions2;
         var downloadMode = this.downloadMode;
         // if you really must use this component to download stuff
         if (downloadMode == null) {
@@ -86,8 +97,11 @@ var PrptComponent = BaseComponent.extend({
                 }
             }
             if (this.usePost) {
-                var url = Endpoints.getPluginBase("reporting");
-                this._postToUrl(htmlObj, iframe, url, options, this.getIframeName());
+                var url = Endpoints.getPluginBase("reporting") + "/execute/";
+                url += options.solution;
+                url += "/"+options.path;
+                url += "/"+options.name + "?" + $.param(reportOptions);
+                this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
             } else {
                 var url = Endpoints.getReportViewer($.param(options));
                 if (options.showParameters && this.autoResize) {
@@ -125,12 +139,16 @@ var PrptComponent = BaseComponent.extend({
             "dashboard-mode": this.iframe == undefined ? false : !this.iframe,
             solution: this.solution,
             path: this.path,
-            action: this.action
+            name: this.action,
+            renderMode: 'REPORT',
+            htmlProportionalWidth:false
         };
         if (this.paginate) {
             options["output-target"] = "table/html;page-mode=page";
+            options['accepted-page'] = 0;
         } else {
             options["output-target"] = "table/html;page-mode=stream";
+            options['accepted-page'] = -1;
         }
         // update options with report parameters
         for (var i = 0; i < this.parameters.length; i++) {
@@ -144,6 +162,54 @@ var PrptComponent = BaseComponent.extend({
         }
         return options;
     },
+    getParams: function(){
+     var options = {};
+ 
+     if (this.paginate) {
+       options["output-target"] = "table/html;page-mode=page";
+       options['accepted-page'] = 0;
+     } else {
+       options["output-target"] = "table/html;page-mode=stream";
+       options['accepted-page'] = -1;
+     }
+ 
+     // update options with report parameters
+     for (var i=0; i < this.parameters.length; i++ ) {
+       // param: [<prptParam>, <dashParam>, <default>]
+       var param = this.parameters[i];
+       var value = Dashboards.getParameterValue(param[1]);
+       if(value == null && param.length == 3) {
+         value = param[2];
+       }
+       options[param[0]] = value;
+     }
+ 
+     return options;
+   },
+ 
+   getReportOptions: function(){
+     var options = {
+       paginate : this.paginate || false,
+       showParameters: this.showParameters || false,
+       autoSubmit: (this.autoSubmit || this.executeAtStart) || false,
+       "dashboard-mode": this.iframe==undefined?false:!this.iframe,
+       solution: this.solution,
+       path: this.path,
+       name: this.action,
+       renderMode: 'REPORT',
+       htmlProportionalWidth:false
+     };
+ 
+     if (this.paginate) {
+       options["output-target"] = "table/html;page-mode=page";
+       options['accepted-page'] = 0;
+     } else {
+       options["output-target"] = "table/html;page-mode=stream";
+       options['accepted-page'] = -1;
+     }
+ 
+     return options;
+   },
     _postToUrl: function(htmlObj, iframe, path, params, target) {
         this.startLoading();
         // use a form to post, response will be set to iframe

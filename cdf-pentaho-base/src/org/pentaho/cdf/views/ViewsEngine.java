@@ -95,37 +95,40 @@ public class ViewsEngine {
     ISimplePersistence sp;
     try {
       sp = getSimplePersistence();
+      Filter filter = new Filter();
+      filter.where( "name" ).equalTo( viewName ).and().where( "user" ).equalTo( user );
+      List<View> views = sp.load( View.class, filter );
+
+      return ( views != null && views.size() > 0 ) ? views.get( 0 ) : null;
     } catch ( Exception e ) {
       logger.error( "Error while getting view.", e );
       return null;
     }
-    Filter filter = new Filter();
-    filter.where( "name" ).equalTo( viewName ).and().where( "user" ).equalTo( user );
-    List<View> views = sp.load( View.class, filter );
-
-    return ( views != null && views.size() > 0 ) ? views.get( 0 ) : null;
+    
   }
 
   public JSONObject listViews( String user ) {
     ISimplePersistence sp;
-    try {
-      sp = getSimplePersistence();
-    } catch ( Exception e ) {
-      logger.error( "Error while getting view.", e );
-      return null;
-    }
-    Filter filter = new Filter();
-    filter.where( "user" ).equalTo( user );
-    List<View> views = sp.load( View.class, filter );
     JSONObject obj = new JSONObject();
     JSONArray arr = new JSONArray();
-    for ( View v : views ) {
-      arr.put( v.toJSON() );
+    try {
+      sp = getSimplePersistence();
+      Filter filter = new Filter();
+      filter.where( "user" ).equalTo( user );
+      List<View> views = sp.load( View.class, filter );
+      for ( View v : views ) {
+        arr.put( v.toJSON() );
+      }
+    } catch ( Exception e ) {
+      logger.warn( "Exception while writing result to json array", e );
+      return null;
     }
+
     try {
       obj.put( "views", arr );
       obj.put( "status", RESULT_OK );
     } catch ( JSONException e ) {
+      logger.warn( "Exception while writing result to json object", e );
     }
     return obj;
   }

@@ -73,7 +73,7 @@ var PrptComponent = BaseComponent.extend({
     /*************************************************************************/
     update: function() {
         this.clear();
-        var ts = "ts=" + new Date().getTime() + "&";
+        var ts = "ts=" + new Date().getTime();
         var options = this.getOptions(),
                 params = this.getParams(),
                 reportOptions = this.getReportOptions();
