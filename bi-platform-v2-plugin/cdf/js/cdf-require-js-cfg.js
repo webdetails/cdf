@@ -11,7 +11,11 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+if(typeof CONTEXT_PATH != "undefined"){ // production
+  requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+} else { // build
+  requireCfg['paths']['cdf'] = "cdf";
+}
 
 requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/jquery.ui',
@@ -24,7 +28,6 @@ requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/jquery.i18n.properties',
 	'cdf/jquery.jdMenu',
 	'cdf/jquery.positionBy',
-	'cdf/jquery.sparkline',
 	'cdf/jquery.tooltip',
 	
 	'cdf/simile/ajax/scripts/json',
@@ -66,6 +69,9 @@ requireCfg['shim']['cdf/components/pentaho']    = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/table']      = ['cdf/components/core'];
 
+requireCfg['shim']['cdf/jquery'] = {
+  exports: '$'
+}
 requireCfg['shim']['cdf/jquery.ui']              = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-impromptu.3.1']   = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-ui-datepicker-i18n'] = ['cdf/jquery.ui'];
