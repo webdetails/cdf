@@ -570,9 +570,12 @@ Dashboards.init = function(components){
  */
 Dashboards.syncParameters = function(master, slave) {
   this.setParameter(slave, this.getParameterValue(master));
-  this.parameterModel.change();
-  this.parameterModel.on("change:" + master,function(m,v){this.fireChange(slave,v)},this);
-  this.parameterModel.on("change:" + slave,function(m,v){this.fireChange(master,v)},this);
+  this.parameterModel.on("change:" + master,function(m,v,o){
+    this[o.notify?'fireChange':'setParameter'](slave,v)
+  },this);
+  this.parameterModel.on("change:" + slave,function(m,v,o){
+    this[o.notify?'fireChange':'setParameter'](master,v)
+  },this);
 }
 
 Dashboards.chains = [];
@@ -841,8 +844,7 @@ Dashboards.fireChange = function(parameter, value) {
   var myself = this;
   this.createAndCleanErrorDiv(); //Dashboards.Legacy
 
-  this.setParameter(parameter, value);
-  this.parameterModel.change();
+  this.setParameter(parameter, value, true);
   var toUpdate = [];
   var workDone = false;
   for (var i= 0, len = this.components.length; i < len; i++){
@@ -1057,7 +1059,7 @@ Dashboards.getParameterValue = function (parameterName) {
   }
 };
 
-Dashboards.setParameter = function(parameterName, parameterValue) {
+Dashboards.setParameter = function(parameterName, parameterValue, isNotified) {
   if(parameterName == undefined || parameterName == "undefined"){
     this.log('Dashboards.setParameter: trying to set undefined!!','warn');
     return;
@@ -1072,7 +1074,7 @@ Dashboards.setParameter = function(parameterName, parameterValue) {
       this.parameters[parameterName] = parameterValue;
     }
   }
-  this.parameterModel.set(parameterName,parameterValue,{silent:true});
+  this.parameterModel.set(parameterName,parameterValue,{notify:isNotified});
   this.persistBookmarkables(parameterName);
 };
 
