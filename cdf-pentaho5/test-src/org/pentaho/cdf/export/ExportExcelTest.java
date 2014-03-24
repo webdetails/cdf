@@ -20,7 +20,7 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class TestExportExcel extends TestCase {
+public class ExportExcelTest extends TestCase {
 
 
   @Test
