@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-package org.pentaho.test.cdf.views;
+package org.pentaho.cdf.views;
 
 import com.orientechnologies.orient.core.exception.OCommandExecutionException;
 import com.orientechnologies.orient.core.exception.ODatabaseException;

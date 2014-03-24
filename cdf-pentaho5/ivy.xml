@@ -46,14 +46,12 @@
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
 
-    <dependency org="pentaho"                   name="cdf-core"                               rev="${project.revision}"                           transitive="false"       changing="true"      conf='runtime->default'/>
+    <dependency org="pentaho"                   name="cdf-core"                               rev="${project.revision}"                           transitive="false"       changing="true"      conf='test,runtime->default'/>
+    
+     <!-- Runtime -->
     <dependency org="pentaho"                   name="cpf-core"                               rev="${dependency.pentaho-cpf-plugin.revision}"     transitive="false"       changing="true"      conf='test, runtime->default'/>
     <dependency org="pentaho"                   name="cpf-pentaho5"                           rev="${dependency.pentaho-cpf-plugin.revision}"     transitive="false"       changing="true"      conf='test, runtime->default'/>
-
-    <!-- Runtime -->
-    <dependency org="pentaho"                   name="cpf"                                    rev="${dependency.pentaho-cpf-plugin.revision}"     transitive="false"        changing="true"     conf="test,runtime->default"/>    
     <dependency org="net.sourceforge.jexcelapi" name="jxl"                                    rev="${dependency.jxl.revision}"                    transitive="false"                            conf="test,runtime->default" />
-    
 
     <!-- orient db (persistence) -->
     <dependency org="com.orientechnologies"     name="orient-commons"                         rev="${dependency.orientdb.revision}"               transitive="false"                            conf="runtime,default->default"/>

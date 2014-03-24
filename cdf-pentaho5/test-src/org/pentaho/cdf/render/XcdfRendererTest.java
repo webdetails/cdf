@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-package org.pentaho.test.cdf;
+package org.pentaho.cdf.render;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

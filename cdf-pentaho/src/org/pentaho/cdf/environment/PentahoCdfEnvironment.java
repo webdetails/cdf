@@ -8,6 +8,8 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.cdf.environment.broker.ICdfInterPluginBroker;
+import org.pentaho.cdf.environment.broker.PentahoCdfInterPluginBroker;
 import org.pentaho.cdf.environment.configurations.IHibernateConfigurations;
 import org.pentaho.cdf.environment.configurations.PentahoHibernanteConfigurations;
 import org.pentaho.cdf.environment.factory.ICdfBeanFactory;
@@ -118,5 +120,10 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
   @Override
   public ITemplater getTemplater() {
     return PentahoUITemplater.getInstance();
+  }
+
+  @Override
+  public ICdfInterPluginBroker getCdfInterPluginBroker() {
+    return PentahoCdfInterPluginBroker.getInstance();
   }
 }

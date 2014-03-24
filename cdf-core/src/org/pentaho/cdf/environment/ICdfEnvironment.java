@@ -2,6 +2,7 @@ package org.pentaho.cdf.environment;
 
 import java.util.Locale;
 
+import org.pentaho.cdf.environment.broker.ICdfInterPluginBroker;
 import org.pentaho.cdf.environment.configurations.IHibernateConfigurations;
 import org.pentaho.cdf.environment.factory.ICdfBeanFactory;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
@@ -44,5 +45,7 @@ public interface ICdfEnvironment {
   public ICdfHeadersProvider getCdfHeadersProvider();
 
   public ITemplater getTemplater();
+
+  public ICdfInterPluginBroker getCdfInterPluginBroker();
 
 }
