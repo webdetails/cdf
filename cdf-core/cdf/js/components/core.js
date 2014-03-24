@@ -1044,11 +1044,13 @@ var UnmanagedComponent = BaseComponent.extend({
    * triggerAjax can be used with either of the following call conventions:
    * - this.triggerAjax(url,params,callback);
    * - this.triggerAjax({url: url, data: params, ...},callback);
+   * - this.triggerAjax({url: url, data: params, ...},callback, ajaxParameters);
    * In the second case, you can add any other jQuery.Ajax parameters you desire
    * to the object, but triggerAjax will take control over the success and error
    * callbacks.
+   * If passed, the supplied ajaxParameters will be passed to the default ajax call
    */
-  triggerAjax: function(url,params,callback) {
+  triggerAjax: function(url,params,callback,_ajaxParameters) {
     if(!this.preExec()) {
       return;
     }
@@ -1056,9 +1058,9 @@ var UnmanagedComponent = BaseComponent.extend({
     if (!silent){
       this.block();
     };
-    var ajaxParameters = {
+    var ajaxParameters = $.extend({
       async: true
-    };
+    },_ajaxParameters);
     /* Detect call convention used and adjust parameters */
     if (typeof callback != "function") {
       callback = params;
