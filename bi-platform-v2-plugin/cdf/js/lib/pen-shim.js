@@ -54,3 +54,17 @@ var pen = {
         return this.define.apply(this, args);
     }
 };
+
+
+if(typeof define === "undefined")  {
+    define = function() {
+        return pen.define.apply(pen, arguments);
+    }
+}
+
+
+if(typeof require === "undefined")  {
+    require = function() {
+        return pen.require.apply(pen, arguments);
+    }
+}
