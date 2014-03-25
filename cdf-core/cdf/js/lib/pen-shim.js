@@ -32,7 +32,10 @@ var pen = {
             
                 var newDeps = [];
                 for (var i=0; i < deps.length; i++) {
-                    newDeps.push( this._loadedModulesById[deps[i]] );
+                    if (deps[i] == 'cdf/jquery')
+                        newDeps.push($);
+                    else
+                        newDeps.push( this._loadedModulesById[deps[i]] );
                 }
             
       		deps = newDeps;
@@ -54,3 +57,17 @@ var pen = {
         return this.define.apply(this, args);
     }
 };
+
+if(typeof define === "undefined")  {
+    define = function() {
+        return pen.define.apply(pen, arguments);
+    }
+}
+
+
+if(typeof require === "undefined")  {
+    require = function() {
+        return pen.require.apply(pen, arguments);
+    }
+}
+

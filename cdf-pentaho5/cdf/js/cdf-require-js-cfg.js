@@ -99,7 +99,10 @@ requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'
 requireCfg['shim']['cdf/components/table']      = ['cdf/components/core'];
 
 requireCfg['shim']['cdf/jquery'] = {
-  exports: '$'
+  exports: '$',
+  init: function () {
+    return $;
+  }
 }
 requireCfg['shim']['cdf/jquery.ui']              = ['cdf/jquery'];
 requireCfg['shim']['cdf/jquery-impromptu.3.1']   = ['cdf/jquery'];
