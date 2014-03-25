@@ -240,7 +240,7 @@ public class ContextEngine {
     for ( AutoInclude autoInclude : autoIncludes ) {
       if ( autoInclude.canInclude( dashboardPath ) ) {
         String cdaPath = autoInclude.getCdaPath();
-        addCdaQueries( queries, cdaPath );
+        CdfEngine.getEnvironment().getCdfInterPluginBroker().addCdaQueries( queries, cdaPath );
       }
     }
     return queries;
@@ -254,36 +254,6 @@ public class ContextEngine {
       }
       return autoIncludes;
     }
-  }
-
-  private void addCdaQueries( JSONObject queries, String cdaPath ) {
-    List<String> dataAccessIds = listQueries( cdaPath );
-    // String idPattern = (String) cda.selectObject("string(ids)");
-    if ( logger.isDebugEnabled() ) {
-      logger.debug( String.format( "data access ids for %s:( %s )", cdaPath, StringUtils.join(
-          dataAccessIds.iterator(), ", " ) ) );
-    }
-    for ( String id : dataAccessIds ) {
-      String reply = executeQuery( cdaPath, id );
-      try {
-        queries.put( id, new JSONObject( reply ) );
-      } catch ( JSONException e ) {
-        logger.error( "Failed to add query " + id + " to contex object" );
-      }
-    }
-  }
-
-  private String executeQuery( String path, String id ) {
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put( "dataAccessId", id );
-    params.put( "path", path );
-    logger.info( "[Timing] Executing autoinclude query: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-    InterPluginCall ipc = new InterPluginCall( InterPluginCall.CDA, "doQuery", params );
-    String reply = ipc.callInPluginClassLoader();
-    logger.info( "[Timing] Done executing autoinclude query: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
-    return reply;
   }
 
   private Document getConfigFile() {

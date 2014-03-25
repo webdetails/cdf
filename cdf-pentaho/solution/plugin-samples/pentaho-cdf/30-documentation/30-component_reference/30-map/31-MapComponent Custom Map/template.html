@@ -148,7 +148,7 @@ mapComponent =
 	  initZoom: 1,
 	  mapDiv:"myMap",
 	  showCustomMap:true,
-	  customMapCode:"map = new OpenLayers.Map( map_div );layer = new OpenLayers.Layer.MapServer('OpenLayers WMS', 'http://labs.metacarta.com/wms/vmap0', {layers: 'basic'},{gutter: 15}); map.addLayer(layer);",
+	  customMapCode:"map = new OpenLayers.Map( map_div );layer = new OpenLayers.Layer.MapServer('OpenLayers WMS', 'http://vmap0.tiles.osgeo.org/wms/vmap0', {layers: 'basic'},{gutter: 15}); map.addLayer(layer);",
 	  useMercator:false,
 	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
 	  preExecution:function(){},
@@ -157,6 +157,7 @@ mapComponent =
 }
 	
 Dashboards.init([mapComponent,textElement]);
+Dashboards.finishedInit = false;
 
 				</textarea>
 				<br />
