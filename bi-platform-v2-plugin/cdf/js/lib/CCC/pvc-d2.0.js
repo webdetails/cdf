@@ -909,6 +909,7 @@ var pvc = function(def, pv) {
             return d.slice();
         });
     };
+    pvc.normAngle = pv.Shape.normalizeAngle;
     pvc.stringify = function(t, keyArgs) {
         var maxLevel = def.get(keyArgs, "maxLevel") || 5, out = [];
         pvc.stringifyRecursive(out, t, maxLevel, keyArgs);
@@ -1174,6 +1175,7 @@ var pvc = function(def, pv) {
         }).distinct().array();
         return a.length ? a : null;
     };
+    pvc.parseValuesOverflow = pvc.makeEnumParser("valuesOverflow", [ "show", "trim", "hide" ], "hide");
     pvc.parseMultiChartOverflow = pvc.makeEnumParser("multiChartOverflow", [ "grow", "fit", "clip" ], "grow");
     pvc.parseLegendClickMode = pvc.makeEnumParser("legendClickMode", [ "toggleSelected", "toggleVisible", "none" ], "toggleVisible");
     pvc.parseTooltipAutoContent = pvc.makeEnumParser("tooltipAutoContent", [ "summary", "value" ], "value");
@@ -5673,6 +5675,9 @@ var pvc = function(def, pv) {
         delegateExtension: function(dv) {
             return this.pvMark.delegate(dv, pvc.extensionTag);
         },
+        delegateNotExtension: function(dv) {
+            return this.pvMark.delegateExcept(dv, pvc.extensionTag);
+        },
         hasDelegate: function(tag) {
             return this.pvMark.hasDelegate(tag);
         },
@@ -6011,16 +6016,21 @@ var pvc = function(def, pv) {
         },
         defaultColor: def.fun.constant(pv.Color.names.black)
     });
+    var DEFAULT_BG_COLOR = pv.Color.names.white;
     def.type("pvc.visual.ValueLabel", pvc.visual.Label).init(function(panel, anchorMark, keyArgs) {
         this.valuesFont = def.get(keyArgs, "valuesFont") || panel.valuesFont;
         this.valuesMask = def.get(keyArgs, "valuesMask") || panel.valuesMask;
         this.valuesOptimizeLegibility = def.get(keyArgs, "valuesOptimizeLegibility", panel.valuesOptimizeLegibility);
+        this.valuesOverflow = def.get(keyArgs, "valuesOverflow", panel.valuesOverflow);
+        this.hideOverflowed = "hide" === this.valuesOverflow;
+        this.trimOverflowed = !this.hideOverflowed && "trim" === this.valuesOverflow;
+        this.hideOrTrimOverflowed = this.hideOverflowed || this.trimOverflowed;
         var protoMark;
         protoMark = def.get(keyArgs, "noAnchor", !1) ? anchorMark : anchorMark.anchor(panel.valuesAnchor);
         keyArgs && null == keyArgs.extensionId && (keyArgs.extensionId = "label");
         this.base(panel, protoMark, keyArgs);
         this.pvMark.font(this.valuesFont);
-        this._bindProperty("text", "text")._bindProperty("textStyle", "textColor", "color");
+        this._bindProperty("text", "text")._bindProperty("textStyle", "textColor", "color").intercept("visible", this.visible);
     }).prototype.property("text").property("textStyle").constructor.addStatic({
         maybeCreate: function(panel, anchorMark, keyArgs) {
             return panel.valuesVisible && panel.valuesMask ? new pvc.visual.ValueLabel(panel, anchorMark, keyArgs) : null;
@@ -6033,18 +6043,50 @@ var pvc = function(def, pv) {
             keyArgs = def.setDefaults(keyArgs, "showsInteraction", !0, "noSelect", !0, "noTooltip", !0, "noClick", !0, "noDoubleClick", !0, "noHover", !0);
             this.base(keyArgs);
         },
+        visible: function(scene) {
+            var anchoredToMark = this.getAnchoredToMark();
+            if (anchoredToMark && !anchoredToMark.visible()) return !1;
+            if (!this.hideOrTrimOverflowed) return this.delegate(!0);
+            var visible;
+            if (this.hasDelegate(pvc.extensionTag)) {
+                visible = this.delegateExtension();
+                if (null != visible) return visible;
+            }
+            visible = this.delegateNotExtension();
+            if (visible === !1) return !1;
+            if (scene.isActive && this.showsActivity()) return !0;
+            var fitInfo = this.textFitInfo(scene);
+            return !(fitInfo && fitInfo.hide);
+        },
+        textFitInfo: function(scene) {
+            var state = scene.renderState, value = state.textFitInfo;
+            return void 0 !== value ? value : state.textFitInfo = this.calcTextFitInfo(scene, this._evalBaseText()) || null;
+        },
+        calcTextFitInfo: function() {
+            return null;
+        },
+        _evalBaseText: function() {
+            var pvLabel = this.pvMark, pdelegate = pvLabel.binds.properties.text.proto;
+            return pvLabel.evalInPropertyContext(this.baseText.bind(this), pdelegate);
+        },
+        baseText: function(scene) {
+            var state = scene.renderState, text = state.baseText;
+            return void 0 !== text ? text : this.base(scene);
+        },
         defaultText: function(scene) {
-            var state = scene.renderState, text = state.defaultText;
-            return null != text ? text : state.defaultText = scene.format(this.valuesMask);
+            return scene.format(this.valuesMask);
         },
         normalText: function(scene, text) {
-            return this.trimText(scene, text);
+            var fitInfo;
+            return this.trimOverflowed && (fitInfo = this.textFitInfo(scene)) ? this.trimText(scene, text, fitInfo) : text;
         },
         interactiveText: function(scene, text) {
-            return this.showsActivity() && scene.isActive ? text : this.trimText(scene, text);
+            var fitInfo;
+            return !this.trimOverflowed || scene.isActive && this.showsActivity() || !(fitInfo = this.textFitInfo(scene)) ? text : this.trimText(scene, text, fitInfo);
         },
-        trimText: function(scene, text) {
-            return text;
+        trimText: function(scene, text, fitInfo) {
+            var twMax = fitInfo && fitInfo.widthMax;
+            return null != twMax ? pvc.text.trimToWidthB(twMax, text, this.pvMark.font(), "..") : text;
         },
         textColor: function(scene) {
             return this.color(scene, "text");
@@ -6056,19 +6098,43 @@ var pvc = function(def, pv) {
             color || (color = cache[type] = this.calcBackgroundColor(scene, type));
             return color;
         },
-        calcBackgroundColor: def.fun.constant(pv.Color.names.white),
-        optimizeLegibilityColor: function(scene, color, type) {
+        calcBackgroundColor: function(scene) {
+            var anchoredToMark = this.getAnchoredToMark();
+            if (anchoredToMark) {
+                var fillColor = anchoredToMark.fillStyle();
+                if (fillColor && fillColor !== DEFAULT_BG_COLOR && this.isAnchoredInside(scene, anchoredToMark)) return fillColor;
+            }
+            return DEFAULT_BG_COLOR;
+        },
+        getAnchoredToMark: function() {
+            return this.pvMark.target || this.pvMark.parent;
+        },
+        isAnchoredInside: function(scene, anchoredToMark) {
+            if (!anchoredToMark && !(anchoredToMark = this.getAnchoredToMark())) return !1;
+            var p, pvLabel = this.pvMark, text = pvLabel.text(), m = pv.Text.measure(text, pvLabel.font()), l = pvLabel.left(), t = pvLabel.top();
+            if (null == l) {
+                p = pvLabel.parent;
+                l = p.width() - (pvLabel.right() || 0);
+            }
+            if (null == t) {
+                p || (p = pvLabel.parent);
+                t = p.height() - (pvLabel.bottom() || 0);
+            }
+            var labelCenter = pv.Label.getPolygon(m.width, m.height, pvLabel.textAlign(), pvLabel.textBaseline(), pvLabel.textAngle(), pvLabel.textMargin()).center().plus(l, t), anchoredToShape = anchoredToMark.getShape(anchoredToMark.scene, pvLabel.index);
+            return anchoredToShape.containsPoint(labelCenter);
+        },
+        maybeOptimizeColorLegibility: function(scene, color, type) {
             if (this.valuesOptimizeLegibility) {
                 var bgColor = this.backgroundColor(scene, type);
-                return bgColor && bgColor.isDark() === color.isDark() ? color.complementary().alpha(.9) : color;
+                return bgColor && bgColor !== DEFAULT_BG_COLOR && bgColor.isDark() === color.isDark() ? color.complementary().alpha(.9) : color;
             }
             return color;
         },
         normalColor: function(scene, color, type) {
-            return this.optimizeLegibilityColor(scene, color, type);
+            return this.maybeOptimizeColorLegibility(scene, color, type);
         },
         interactiveColor: function(scene, color, type) {
-            return !this.mayShowActive(scene) && this.mayShowNotAmongSelected(scene) ? this.dimColor(color, type) : this.optimizeLegibilityColor(scene, color, type);
+            return !this.mayShowActive(scene) && this.mayShowNotAmongSelected(scene) ? this.dimColor(color, type) : this.maybeOptimizeColorLegibility(scene, color, type);
         }
     });
     def.type("pvc.visual.Dot", pvc.visual.Sign).init(function(panel, parentMark, keyArgs) {
@@ -8304,6 +8370,11 @@ var pvc = function(def, pv) {
             cast: Boolean,
             value: !1
         },
+        ValuesOverflow: {
+            resolve: "_resolveFull",
+            cast: pvc.parseValuesOverflow,
+            value: "hide"
+        },
         DataPart: {
             resolve: "_resolveFixed",
             cast: String,
@@ -8945,11 +9016,6 @@ var pvc = function(def, pv) {
             resolve: "_resolveFull",
             cast: String,
             value: ""
-        },
-        SubValuesVisible: {
-            resolve: "_resolveFull",
-            cast: Boolean,
-            value: !1
         }
     });
     def.type("pvc.Abstract").init(function() {
@@ -11462,6 +11528,7 @@ var pvc = function(def, pv) {
         this.valuesAnchor = plot.option("ValuesAnchor");
         this.valuesMask = plot.option("ValuesMask");
         this.valuesFont = plot.option("ValuesFont");
+        this.valuesOverflow = plot.option("ValuesOverflow");
         this.valuesOptimizeLegibility = plot.option("ValuesOptimizeLegibility");
         var roles = this.visualRoles = Object.create(chart.visualRoles), colorRoleName = plot.option("ColorRole");
         roles.color = colorRoleName ? chart.visualRole(colorRoleName) : null;
@@ -13855,13 +13922,33 @@ var pvc = function(def, pv) {
                 this.valuesFont = layoutInfo.labelFont;
                 if ("inside" === this.labelStyle) this.pvPieLabel = pvc.visual.ValueLabel.maybeCreate(this, this.pvPie, {
                     wrapper: wrapper
-                }).intercept("visible", function(scene) {
-                    return scene.vars.value.angle >= .001 && this.delegateExtension(!0);
                 }).override("defaultText", function(scene) {
                     return scene.vars.value.sliceLabel;
-                }).override("calcBackgroundColor", function(scene, type) {
-                    var bgColor = this.pvMark.target.fillStyle();
-                    return bgColor || this.base(scene, type);
+                }).override("calcTextFitInfo", function(scene, text) {
+                    var pvLabel = this.pvMark, tm = pvLabel.textMargin();
+                    if (!(-1e-6 > tm)) {
+                        var tb = pvLabel.textBaseline();
+                        if ("middle" === tb) {
+                            var sa = pvc.normAngle(me.pvPie.midAngle()), la = pvc.normAngle(pvLabel.textAngle()), sameAngle = Math.abs(sa - la) < 1e-6, oppoAngle = !1;
+                            if (!sameAngle) {
+                                var la2 = pvc.normAngle(la + Math.PI);
+                                oppoAngle = Math.abs(sa - la2) < 1e-6;
+                            }
+                            if (sameAngle || oppoAngle) {
+                                var va = pvLabel.name(), ta = pvLabel.textAlign(), canHandle = "outer" === va ? ta === (sameAngle ? "right" : "left") : !1;
+                                if (canHandle) {
+                                    var hide = !1, m = pv.Text.measure(text, pvLabel.font()), th = .85 * m.height, or = me.pvPie.outerRadius(), ir = me.pvPie.innerRadius(), a = scene.vars.value.angle, thEf = th + tm / 2, irmin = a < Math.PI ? Math.max(ir, thEf / (2 * Math.tan(a / 2))) : ir, twMax = or - tm - irmin;
+                                    hide |= 0 >= twMax;
+                                    twMax -= tm;
+                                    hide |= this.hideOverflowed && m.width > twMax;
+                                    return {
+                                        hide: hide,
+                                        widthMax: twMax
+                                    };
+                                }
+                            }
+                        }
+                    }
                 }).pvMark.textMargin(10); else if ("linked" === this.labelStyle) {
                     var linkLayout = layoutInfo.link;
                     rootScene.layoutLinkLabels(layoutInfo);
@@ -14193,7 +14280,7 @@ var pvc = function(def, pv) {
         },
         _createCore: function() {
             this.base();
-            var barWidth, barGroupedMargin, seriesCount, me = this, chart = me.chart, plot = me.plot, isStacked = !!me.stacked, isVertical = me.isOrientationVertical(), data = me.visibleData({
+            var barWidth, seriesCount, me = this, chart = me.chart, plot = me.plot, isStacked = !!me.stacked, isVertical = me.isOrientationVertical(), data = me.visibleData({
                 ignoreNulls: !1
             }), orthoAxis = me.axes.ortho, baseAxis = me.axes.base, axisCategDatas = baseAxis.domainItems(), axisSeriesDatas = me.visualRoles.series.flatten(me.partData(), {
                 visible: !0,
@@ -14207,7 +14294,6 @@ var pvc = function(def, pv) {
             if (isStacked) barWidth = bandWidth; else {
                 seriesCount = axisSeriesDatas.length;
                 barWidth = seriesCount ? 1 === seriesCount ? bandWidth : barSizeRatio * bandWidth / seriesCount : 0;
-                barGroupedMargin = 2 > seriesCount ? 0 : (1 - barSizeRatio) * bandWidth / (seriesCount - 1);
             }
             barWidth > barSizeMax && (barWidth = barSizeMax);
             me.barWidth = barWidth;
@@ -14251,14 +14337,45 @@ var pvc = function(def, pv) {
                 wrapper: wrapper
             });
             if (label) {
-                this.valuesAnchor;
-                me.pvBarLabel = label.override("calcBackgroundColor", function(scene, type) {
-                    var bgColor = this.pvMark.target.fillStyle();
-                    return bgColor || this.base(scene, type);
-                }).pvMark.visible(function() {
-                    var length = this.scene.target[this.index][isVertical ? "height" : "width"];
-                    return length >= 4;
-                });
+                var labelBarOrthoLen;
+                if (label.hideOrTrimOverflowed) {
+                    labelBarOrthoLen = bandWidth;
+                    !isStacked && seriesCount > 1 && (labelBarOrthoLen /= seriesCount);
+                }
+                me.pvBarLabel = label.override("calcTextFitInfo", function(scene, text) {
+                    var pvLabel = this.pvMark, tm = pvLabel.textMargin();
+                    if (!(-1e-6 > tm)) {
+                        var a = pvLabel.textAngle(), sinAngle = Math.sin(a), isHorizText = Math.abs(sinAngle) < 1e-6, isVertiText = !isHorizText && Math.abs(Math.cos(a)) < 1e-6;
+                        if (isHorizText || isVertiText && isVertical) {
+                            var twMax, isInside, isTaCenter, h = pvBar.height(), w = pvBar.width(), ml = isVertical ? h : w, al = isVertical ? w : h, m = pv.Text.measure(text, pvLabel.font()), th = .75 * m.height, tw = m.width, va = pvLabel.name(), tb = pvLabel.textBaseline(), ta = pvLabel.textAlign(), isVaCenter = "center" === va, hide = !1;
+                            if (isVertical) if (isHorizText) {
+                                isInside = isVaCenter || va === tb;
+                                if (!isInside) return;
+                                hide |= isVaCenter && "middle" !== tb ? th + tm > ml / 2 : th + 2 * tm > ml;
+                            } else {
+                                hide |= th > ml;
+                                isTaCenter = "center" === ta;
+                                isInside = isVaCenter;
+                                isInside || isTaCenter || (isInside = sinAngle >= 1e-6 ? "left" === ta ? "top" === va : "bottom" === va : "left" === ta ? "bottom" === va : "top" === va);
+                                if (isInside) {
+                                    twMax = !isVaCenter || isTaCenter ? ml - 2 * tm : (ml - tm) / 2;
+                                    hide |= ("middle" === tb ? th > al : th > al / 2) || this.hideOverflowed && tw > twMax;
+                                } else hide |= th >= Math.max(al, labelBarOrthoLen);
+                            } else {
+                                hide |= th > ml;
+                                isInside = isVaCenter || va === ta;
+                                if (isInside) {
+                                    twMax = isVaCenter && "center" !== ta ? (ml - tm) / 2 : ml - 2 * tm;
+                                    hide |= ("middle" === tb ? th > al : th > al / 2) || this.hideOverflowed && tw > twMax;
+                                } else hide |= th >= Math.max(al, labelBarOrthoLen);
+                            }
+                            return {
+                                hide: hide,
+                                widthMax: twMax
+                            };
+                        }
+                    }
+                }).pvMark;
             }
         },
         _barVerticalMode: function() {
@@ -17505,22 +17622,31 @@ var pvc = function(def, pv) {
                 var label = pvc.visual.ValueLabel.maybeCreate(me, panel.label, {
                     noAnchor: !0
                 });
-                label && label.optional("textAngle", function(scene) {
-                    var text = this.defaultText(scene);
-                    return scene.dx > pv.Text.measureWidth(text, scene.vars.font) ? 0 : scene.dx > scene.dy ? 0 : -Math.PI / 2;
-                }).intercept("visible", function(scene) {
-                    var visible = this.delegate();
-                    if (visible) {
-                        var side = this.pvMark.textAngle() ? "dx" : "dy";
-                        visible = scene[side] >= pv.Text.fontHeight(scene.vars.font);
+                label && label.pvMark.textMargin(3).sign.optional("textAngle", function(scene) {
+                    var text = this.defaultText(scene), pvLabel = this.pvMark;
+                    return scene.dx - 2 * pvLabel.textMargin() > pv.Text.measureWidth(text, pvLabel.font()) ? 0 : scene.dx >= scene.dy ? 0 : -Math.PI / 2;
+                }).override("calcTextFitInfo", function(scene, text) {
+                    var pvLabel = this.pvMark, tm = pvLabel.textMargin();
+                    if (!(-1e-6 > tm)) {
+                        var ta = pvLabel.textAngle();
+                        isHorizText = Math.abs(Math.sin(ta)) < 1e-6, isVertiText = !isHorizText && Math.abs(Math.cos(ta)) < 1e-6;
+                        if (isHorizText || isVertiText) {
+                            var twMax, hide = !1, m = pv.Text.measure(text, pvLabel.font()), th = .75 * m.height, thMax = scene[isVertiText ? "dx" : "dy"];
+                            "middle" !== pvLabel.textBaseline() && (thMax /= 2);
+                            thMax -= 2 * tm;
+                            hide |= th > thMax;
+                            var twMax = scene[isVertiText ? "dy" : "dx"];
+                            "center" !== pvLabel.textAlign() && (twMax /= 2);
+                            twMax -= 2 * tm;
+                            hide |= 0 >= twMax || this.hideOverflowed && m.width > twMax;
+                            return {
+                                hide: hide,
+                                widthMax: twMax
+                            };
+                        }
                     }
-                    return visible;
-                }).override("trimText", function(scene, text) {
-                    var side = this.pvMark.textAngle() ? "dy" : "dx", maxWidth = scene[side] - 2;
-                    return pvc.text.trimToWidthB(maxWidth, text, scene.vars.font, "..");
-                }).override("calcBackgroundColor", function() {
-                    var pvSiblingScenes = pvLeafMark.scene, pvLeafScene = pvSiblingScenes[this.pvMark.index];
-                    return pvLeafScene.fillStyle;
+                }).override("getAnchoredToMark", function() {
+                    return pvLeafMark;
                 });
             }
         },
@@ -17702,7 +17828,6 @@ var pvc = function(def, pv) {
         this.sliceOrder = plot.option("SliceOrder");
         this.emptySlicesVisible = plot.option("EmptySlicesVisible");
         this.emptySlicesLabel = this.emptySlicesVisible ? plot.option("EmptySlicesLabel") : "";
-        this.subValuesVisible = plot.option("SubValuesVisible");
     }).add({
         _createCore: function(layoutInfo) {
             var labelFont = this._getConstantExtension("label", "font");
@@ -17732,17 +17857,32 @@ var pvc = function(def, pv) {
                 });
                 label && label.override("defaultText", function(scene) {
                     return scene.isRoot() ? "" : this.base(scene);
-                }).override("trimText", function(scene, text) {
-                    var maxWidth = .7 * (scene.outerRadius - scene.innerRadius);
-                    if (scene.angle < Math.PI) {
-                        var L = maxWidth / 2 + scene.innerRadius, t2 = scene.angle / 2, h = 2 * L * Math.tan(t2);
-                        me.subValuesVisible && (h /= 2);
-                        if (pv.Text.fontHeight(this.valuesFont) > .75 * h) return "";
+                }).override("calcTextFitInfo", function(scene, text) {
+                    var pvLabel = this.pvMark, tm = pvLabel.textMargin();
+                    if (!(-1e-6 > tm) && "center" === pvLabel.textAlign() && text) {
+                        var ma = pvc.normAngle(scene.midAngle), la = pvc.normAngle(pvLabel.textAngle()), sameAngle = Math.abs(ma - la) < 1e-6, oppoAngle = !1;
+                        if (!sameAngle) {
+                            var la2 = pvc.normAngle(la + Math.PI);
+                            oppoAngle = Math.abs(ma - la2) < 1e-6;
+                        }
+                        if (sameAngle || oppoAngle) {
+                            var twMax, ir = scene.innerRadius, irmin = ir, or = scene.outerRadius, tm = pvLabel.textMargin(), a = scene.angle, m = pv.Text.measure(text, pvLabel.font()), hide = !1;
+                            if (a < Math.PI) {
+                                var th = .85 * m.height, tb = pvLabel.textBaseline(), thEf = "middle" === tb ? th + tm / 2 : 2 * (th + 3 * tm / 2);
+                                irmin = Math.max(irmin, thEf / (2 * Math.tan(a / 2)));
+                            }
+                            twMax = or - tm - irmin;
+                            hide |= 0 >= twMax;
+                            twMax -= tm;
+                            hide |= this.hideOverflowed && m.width > twMax;
+                            return {
+                                hide: hide,
+                                widthMax: twMax
+                            };
+                        }
                     }
-                    var valueText = scene.vars.size.label;
-                    return me.subValuesVisible && pv.Text.measureWidth(valueText, this.valuesFont) > maxWidth ? "" : pvc.text.trimToWidthB(maxWidth, text, this.valuesFont, "..");
-                }).override("calcBackgroundColor", function() {
-                    return slice.pvMark.scene[this.pvMark.index].fillStyle;
+                }).override("getAnchoredToMark", function() {
+                    return slice.pvMark;
                 });
             }
         },
