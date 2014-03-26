@@ -984,7 +984,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         firstVal = value;
       }
 
-      selectHTML = "<div class='" + classes +"'><button name='" + this.name + "'>" + label + "</button  >" +"</div>";
+      selectHTML = "<div class='" + classes +"'><button type='button' name='" + this.name + "'>" + label + "</button  >" +"</div>";
       selector = $(selectHTML);
       // We wrap the click handler in a self-executing function so that we can capture 'i'.
       var myself = this;

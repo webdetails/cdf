@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 
 import pt.webdetails.cpf.PluginEnvironment;
@@ -47,8 +48,9 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
 
   private static final List<String> acceptedDashboardTypes = new ArrayList<String>( 2 );
   static {
-    acceptedDashboardTypes.add( "blueprint" );
-    acceptedDashboardTypes.add( "mobile" );
+    acceptedDashboardTypes.add( CdfConstants.BLUEPRINT );
+    acceptedDashboardTypes.add( CdfConstants.MOBILE );
+    acceptedDashboardTypes.add( CdfConstants.BOOTSTRAP );
   }
   private static final String DEFAULT_DASHBOARD_TYPE = "blueprint";
 
