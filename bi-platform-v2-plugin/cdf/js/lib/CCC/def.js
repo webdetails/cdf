@@ -11,6 +11,9 @@
 * the license for the specific language governing your rights and limitations.
 */
 
+// NOTE: This version of the file is stopped in time... Don't know why.
+// If you see this comment in a long time from now (2014-03-25), it's probably safe to delete it.
+
 pen.define("cdf/lib/CCC/def", function(){
 /** @private */
 var arraySlice = Array.prototype.slice;
