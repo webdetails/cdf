@@ -1,14 +1,31 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
 *
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
+*   © Copyright The SIMILE Project 2003-2005.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+*
+* 1. Redistributions of source code must retain the above copyright
+*    notice, this list of conditions and the following disclaimer.
+*
+* 2. Redistributions in binary form must reproduce the above copyright
+*    notice, this list of conditions and the following disclaimer in the
+*    documentation and/or other materials provided with the distribution.
+*
+* 3. The name of the author may not be used to endorse or promote products
+*    derived from this software without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+* OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+* IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+* NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+* DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+* THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+* THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*==================================================
@@ -22,9 +39,9 @@
 (function() {
 
 	var debug = false;
-    var local = false;
+    var local = true;
 
-    // obtain local mode from the document URL    
+    // obtain local mode from the document URL
     if (document.location.search.length > 0) {
         var params = document.location.search.substr(1).split("&");
         for (var i = 0; i < params.length; i++) {
@@ -57,14 +74,14 @@
         if (typeof window.Timeplot != "undefined") {
             return;
         }
-        
+
         window.Timeplot = {
             loaded:     false,
             params:     { bundle: true, autoCreate: true },
             namespace:  "http://simile.mit.edu/2007/06/timeplot#",
             importers:  {}
         };
-    
+
         var javascriptFiles = [
             "timeplot.js",
             "plot.js",
@@ -77,7 +94,7 @@
         var cssFiles = [
             "timeplot.css"
         ];
-        
+
         var locales = [ "en" ];
 
         var defaultClientLocales = ("language" in navigator ? navigator.language : navigator.browserLanguage).split(";");
@@ -105,7 +122,7 @@
                 return;
             }
             Timeplot.urlPrefix = url.substr(0, url.indexOf("timeplot-api.js"));
-        
+
             SimileAjax.parseURLParameters(url, Timeplot.params, paramTypes);
         }
 
@@ -126,14 +143,14 @@
             var firebug = [ timeplotURLPrefix + "lib/firebug/firebug.js" ];
             SimileAjax.includeJavascriptFiles(document, "", firebug);
         }
-        
+
         var canvas = document.createElement("canvas");
 
         if (!canvas.getContext) {
             var excanvas = [ timeplotURLPrefix + "lib/excanvas.js" ];
             SimileAjax.includeJavascriptFiles(document, "", excanvas);
         }
-        
+
         var scriptURLs = Timeplot.params.js || [];
         var cssURLs = Timeplot.params.css || [];
 
@@ -145,19 +162,19 @@
             SimileAjax.prefixURLs(scriptURLs, timeplotURLPrefix + "scripts/", javascriptFiles);
             SimileAjax.prefixURLs(cssURLs, timeplotURLPrefix + "styles/", cssFiles);
         }
-        
+
         // Localization
         //for (var i = 0; i < locales.length; i++) {
         //    scriptURLs.push(Timeplot.urlPrefix + "locales/" + locales[i] + "/locale.js");
         //};
-        
+
         window.SimileAjax_onLoad = function() {
             if (debug && local && window.console.open) window.console.open();
             if (Timeplot.params.callback) {
                 eval(Timeplot.params.callback + "()");
             }
         }
-        
+
         SimileAjax.includeJavascriptFiles(document, "", scriptURLs);
         SimileAjax.includeCssFiles(document, "", cssURLs);
         Timeplot.loaded = true;
@@ -168,20 +185,20 @@
         if (typeof Timeline != "undefined") {
             loadTimeplot();
         } else {
-            var timelineURL = (local) ? webAppPath + "/content/pentaho-cdf/js/simile/timeline/timeline-api.js?bundle=false" : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js";
+            var timelineURL = (local) ? webAppPath + "/content/pentaho-cdf/js/simile/timeline/timeline-api.js?bundle=true" : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js";
             window.SimileAjax_onLoad = loadTimeplot;
             SimileAjax.includeJavascriptFile(document, timelineURL);
         }
     };
-    
+
     // Load SimileAjax if it's not already loaded
     if (typeof SimileAjax == "undefined") {
         window.SimileAjax_onLoad = loadTimeline;
-        
+
         var url = local ?
-            webAppPath + "/content/pentaho-cdf/js/simile/ajax/simile-ajax-api.js?bundle=false" :
+            webAppPath + "/content/pentaho-cdf/js/simile/ajax/simile-ajax-api.js?bundle=true" :
             "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";
-                
+
         var createScriptElement = function() {
             var script = document.createElement("script");
             script.type = "text/javascript";
@@ -189,7 +206,7 @@
             script.src = url;
             document.getElementsByTagName("head")[0].appendChild(script);
         }
-        
+
         if (document.body == null) {
             try {
                 document.write("<script src='" + url + "' type='text/javascript'></script>");
