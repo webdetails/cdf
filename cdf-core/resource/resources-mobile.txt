@@ -95,9 +95,7 @@ core-mobile-autocompleteBoxLink=\
 core-mobile-mapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
 core-mobile-mapLink=\
-@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
