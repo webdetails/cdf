@@ -64,9 +64,6 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/chosen/chosen.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/hynds/jquery.multiselect.css
 
-mapScript=\
-js/OpenMap/open_map.js,\
-js/jsr_class.js
 
 dateRangeInputScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
@@ -94,11 +91,9 @@ autocompleteBoxLink=\
 mapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
 mapLink=\
-@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
 
