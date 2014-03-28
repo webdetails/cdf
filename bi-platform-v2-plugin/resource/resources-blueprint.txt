@@ -69,11 +69,6 @@ commonLibrariesLink=\
 @RELATIVE_URL@/content/pentaho-cdf/js/addIns/coltypes.css
 
 
-mapScript=\
-js/OpenMap/open_map.js,\
-js/jsr_class.js,\
-js/OpenStreetMap.js
-
 dateRangeInputScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/daterangepicker/daterangepicker.jQuery.js
 
@@ -100,21 +95,16 @@ autocompleteBoxLink=\
 mapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
 mapLink=\
-@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
 
 newMapScript=\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/open_map.js,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/lib/OpenLayers.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/jsr_class.js,\
-@RELATIVE_URL@/content/pentaho-cdf/js/OpenStreetMap.js
 
 newMapLink=\
-@RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/framedCloud.css,\
 @RELATIVE_URL@/content/pentaho-cdf/js/OpenMap/OpenLayers/theme/default/style.css
 
