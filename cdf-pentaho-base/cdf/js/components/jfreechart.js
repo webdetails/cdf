@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 * 
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -108,104 +108,7 @@ var JFreeChartComponent = BaseComponent.extend({
 
     var myself = this;
     var cd = myself.chartDefinition;
-    var captionOptions = $.extend({
-      title:{
-        title: cd.title != undefined ? cd.title : "Details",
-        oclass: 'title'
-      },
-      chartType:{
-        title: "Chart Type",
-        show: function(){
-          return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")
-        },
-        icon: function(){
-          return cd.chartType == "BarChart" ? "jfPieIcon" : "jfBarIcon" ;
-        },
-        oclass: 'options',
-        callback: function(){
-          cd.chartType = cd.chartType == "BarChart" ? "PieChart" : "BarChart";
-          myself.update();
-        }
-      },
-      excel: {
-        title: "Excel",
-        icon: "jfExcelIcon",
-        oclass: 'options',
-        callback: function(){
-          exportFile("excel",cd);
-        }
-      },
-      csv: {
-        title: "CSV",
-        icon: "jfCsvIcon",
-        oclass: 'options',
-        callback: function(){
-          exportFile("csv",cd);
-        }
-      },
-      zoom: {
-        title:'Zoom',
-        icon: 'jfMagnifyIcon',
-        oclass: 'options',
-        callback: function(){
-          Dashboards.incrementRunningCalls();
-          var parameters = myself.getParameters();
-          var width = 200,height = 200;
-          var urlTemplate,parameterName = "";
-          for(p in parameters){
-            if(parameters[p][0] == 'width'){
-              width += parameters[p][1];
-              parameters[p] = ['width',width]
-            };
-            if(parameters[p][0] == 'height'){
-              height += parameters[p][1];
-              parameters[p] = ['height',height]
-            };
-            if(parameters[p][0] == 'parameterName'){
-              parameterName = parameters[p][1];
-              parameters[p] = ['parameterName','parameterValue']
-            };
-            if(parameters[p][0] == 'urlTemplate'){
-              urlTemplate = parameters[p][1];
-              parameters[p] = ['urlTemplate',"javascript:chartClick('" + myself.name +"','{parameterValue}');"]
-            };
-          }
-          myself.zoomCallBack = function(value){
-            eval(urlTemplate.replace("{" + parameterName + "}",value));
-          };
-          Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
-            if(jXML != null){
-              var openWindow = window.open(Endpoints.getResource() + "/js/captify/zoom.html","_blank",'width=' + (width+10) + ',height=' + (height+10));
-              var maxTries = 10;
-              var loadChart = function(){
-                if(openWindow.loadChart != undefined)openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())
-                else if(maxTries> 0) {
-                  maxTries-=1;
-                  setTimeout(loadChart,500);
-                }
-              };
-              loadChart();
-            }
-            Dashboards.decrementRunningCalls();
-          });
-        }
-      },
-      details:{
-        title:'Details',
-        icon: "jfTableIcon",//webAppPath + '/content/pentaho-cdf/resources/style/images/table.png',
-        oclass: 'options',
-        callback: function(){
-          myself.pivotDefinition = {
-            jndi: cd.jndi,
-            catalog:cd.catalog,
-            query:cd.query
-          };
-          PivotLinkComponent.openPivotLink(myself);
-        }
-
-      }
-
-    }, cd.caption);
+    var captionOptions = $.extend(wd.helpers.jfreechartHelper.getCaption(cd, myself, exportFile, cdfComponent), cd.caption);
 
     var captionId = myself.htmlObject + 'caption';
     var caption = $('<div id="' + captionId + '" ></div>');
@@ -223,8 +126,7 @@ var JFreeChartComponent = BaseComponent.extend({
       if(show){
         var icon = captionOptions[o].icon != undefined ? (typeof captionOptions[o].icon=='function'?captionOptions[o].icon():captionOptions[o].icon) : undefined;
         
-        //var op = icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
-        var op = icon != undefined ? $('<div id ="' + captionId + o + '" class=" img ' + icon + '"></div>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
+        var op = icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
         op.attr("class",captionOptions[o].oclass != undefined ? captionOptions[o].oclass : "options");
         op.attr("title",captionOptions[o].title);
         caption.append(op);
