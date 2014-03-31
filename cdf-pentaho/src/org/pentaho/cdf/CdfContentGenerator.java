@@ -234,10 +234,20 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   private void processGetSchedules( final IParameterProvider requestParams, final OutputStream out ) throws Exception {
 
     final String solution = requestParams.getStringParameter( Parameter.SOLUTION, null ); //$NON-NLS-1$
-    final String path = requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
-    final String action = requestParams.getStringParameter( Parameter.ACTION, null ); //$NON-NLS-1$
+    final String path;
+    final String action;
+    if ( requestParams.getStringParameter( Parameter.PATH, null ).startsWith( "/" ) ) {
+      path = requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
+    } else {
+      path = "/" + requestParams.getStringParameter( Parameter.PATH, null ); //$NON-NLS-1$
+    }
+    if ( requestParams.getStringParameter( Parameter.ACTION, null ).startsWith( "/" ) ) {
+      action = requestParams.getStringParameter( Parameter.ACTION, null ); //$NON-NLS-1$
+    } else {
+      action = "/" + requestParams.getStringParameter( Parameter.ACTION, null ); //$NON-NLS-1$
+    }
 
-    final String fullPath = FilenameUtils.separatorsToUnix( Util.joinPath( solution, path, action ) );
+    final String fullPath = FilenameUtils.separatorsToUnix( solution + path + action );
 
     ISubscriptionRepository subscriptionRepository = PentahoSystem.get( ISubscriptionRepository.class, userSession );
     ISubscribeContent subscribeContent = subscriptionRepository.getContentByActionReference( fullPath ); //$NON-NLS-1$
