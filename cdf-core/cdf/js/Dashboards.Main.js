@@ -42,6 +42,8 @@ var Dashboards = {
   // Holder for context
   context:{},
 
+  // Init Counter, for subdashboards
+  initCounter: 0,
 
   /*
    * Legacy dashboards don't have priority, so we'll assign a very low priority
@@ -541,26 +543,43 @@ Dashboards.setI18nSupport = function(lc, i18nRef) {
 Dashboards.init = function(components){
   var myself = this;
 
-  this.syncDebugLevel();
 
-  if(this.initialStorage) {
-    _.extend(this.storage, this.initialStorage);
-  } else {
-    this.loadStorage();
+  // We're now adding support for multiple inits. This part is only relevant for 
+  // the first execution. 
+
+  var initInstance = Dashboards.initCounter++;
+  Dashboards.log("InitInstance " + initInstance);
+
+  if( initInstance == 0 ){
+
+    this.syncDebugLevel();
+
+    if(this.initialStorage) {
+      _.extend(this.storage, this.initialStorage);
+    } else {
+      this.loadStorage();
+    }
+
+    if(this.context != null && this.context.sessionTimeout != null ) {
+      //defaulting to 90% of ms value of sessionTimeout
+      Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
+    }
+
+    this.restoreBookmarkables();
+    this.restoreView();
+    this.syncParametersInit();
+
   }
-  
-  if(this.context != null && this.context.sessionTimeout != null ) {
-    //defaulting to 90% of ms value of sessionTimeout
-    Dashboards.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
-  }
-  
-  this.restoreBookmarkables();
-  this.restoreView();
-  this.syncParametersInit();
   
   if($.isArray(components)) { this.addComponents(components); }
+
+  // Now we need to go through all components we have and attach this
+  // initInstance to all 
+  _.chain(Dashboards.components)
+  .where({initInstance:undefined})
+  .each(function(c){ c.initInstance = initInstance});
   
-  $(function() { myself.initEngine(); });
+  $(function() { myself.initEngine(initInstance); });
 };
 
 
@@ -668,26 +687,26 @@ Dashboards.syncParametersInit = function() {
 }
 
 
-Dashboards.initEngine = function() {
+Dashboards.initEngine = function(initInstance) {
   // Should really throw an error? Or return?
   if(this.waitingForInit && this.waitingForInit.length) {
     this.log("Overlapping initEngine!", 'warn');
   }
 
   var myself = this;
-  var components = this.components;
+  var components = _.where(this.components,{initInstance: initInstance});
 
-  //reset dashboard's state
-  this.runningCalls = 0;
-  this.finishedInit = false;
-
-  this.incrementRunningCalls();
-  if( this.logLifecycle && typeof console != "undefined" ){
-    console.log("%c          [Lifecycle >Start] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
+  if( (!this.waitingForInit || this.waitingForInit.length === 0) && !this.finishedInit ){
+    this.incrementRunningCalls();
   }
 
-  this.createAndCleanErrorDiv(); //Dashboards.Legacy
 
+  if( this.logLifecycle && typeof console != "undefined" ){
+    console.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: "+
+          this.getRunningCalls()  +")","color: #ddd ");
+  }
+
+  this.createAndCleanErrorDiv();
   // Fire all pre-initialization events
   if(typeof this.preInit == 'function') {
     this.preInit();
@@ -741,7 +760,7 @@ Dashboards.initEngine = function() {
     comp.off('cdf:postExecution',callback);
     comp.off('cdf:preExecution',callback);
     comp.off('cdf:error',callback);
-    this.handlePostInit();
+    this.handlePostInit(initInstance);
   }
 
   for(var i= 0, len = updating.length; i < len; i++){
@@ -750,12 +769,12 @@ Dashboards.initEngine = function() {
   }
   Dashboards.updateAll(updating);
   if(components.length > 0) {
-    myself.handlePostInit();
+    myself.handlePostInit(initInstance);
   }
 
 };
 
-Dashboards.handlePostInit = function() {
+Dashboards.handlePostInit = function(initInstance) {
   if( (!this.waitingForInit || this.waitingForInit.length === 0) && !this.finishedInit ) {
     this.trigger("cdf cdf:postInit",this);
     /* Legacy Event -- don't rely on this! */
@@ -769,7 +788,8 @@ Dashboards.handlePostInit = function() {
 
     this.decrementRunningCalls();
     if( this.logLifecycle && typeof console != "undefined" ){
-      console.log("%c          [Lifecycle <End  ] Init (Running: "+ this.getRunningCalls()  +")","color: #ddd ");
+      console.log("%c          [Lifecycle <End  ] Init[" + initInstance + "] (Running: "+
+            this.getRunningCalls()  +")","color: #ddd ");
     }
 
   }
