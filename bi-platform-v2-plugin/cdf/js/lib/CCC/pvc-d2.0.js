@@ -3707,6 +3707,20 @@ var pvc = function(def, pv) {
             var atoms = this.atoms(keyArgs), L = atoms.length;
             return L && null != atoms[L - 1].value ? atoms[L - 1] : void 0;
         },
+        sumAbs: function(keyArgs) {
+            return this.sum(def.create(keyArgs, {
+                abs: !0
+            }));
+        },
+        value: function(keyArgs) {
+            return this.sum(keyArgs && keyArgs.abs ? def.create(keyArgs, {
+                abs: !1
+            }) : keyArgs);
+        },
+        valueAbs: function(keyArgs) {
+            var value = this.value(keyArgs);
+            return value ? Math.abs(value) : value;
+        },
         sum: function(keyArgs) {
             var isAbs = !!def.get(keyArgs, "abs", !1), zeroIfNone = def.get(keyArgs, "zeroIfNone", !0), key = dim_buildDatumsFilterKey(keyArgs) + ":" + isAbs, sum = def.getOwn(this._sumCache, key);
             if (void 0 === sum) {
@@ -3723,18 +3737,19 @@ var pvc = function(def, pv) {
         percent: function(atomOrValue, keyArgs) {
             var value = atomOrValue instanceof pvc.data.Atom ? atomOrValue.value : atomOrValue;
             if (!value) return 0;
-            var sum = this.sum(def.create(keyArgs, {
-                abs: !0
-            }));
+            var sum = this.sumAbs(keyArgs);
             return sum ? Math.abs(value) / sum : 0;
         },
-        percentOverParent: function(keyArgs) {
-            var value = this.sum(keyArgs);
+        valuePercent: function(keyArgs) {
+            var value = this.valueAbs(keyArgs);
             if (!value) return 0;
             var parentData = this.data.parent;
             if (!parentData) return 1;
             var sum = parentData.dimensionsSumAbs(this.name, keyArgs);
-            return sum ? Math.abs(value) / sum : 0;
+            return value / sum;
+        },
+        percentOverParent: function(keyArgs) {
+            return this.valuePercent(keyArgs);
         },
         format: function(value, sourceValue) {
             return "" + (this.type._formatter ? this.type._formatter.call(null, value, sourceValue) : "");
@@ -4523,7 +4538,7 @@ var pvc = function(def, pv) {
             catInfo.serInfos = serDatas1.map(function(serData1) {
                 var group = catData;
                 group && serData1 && (group = group.child(serData1.key));
-                var value = group ? group.dimensions(valDim.name).sum(visibleKeyArgs) : null;
+                var value = group ? group.dimensions(valDim.name).value(visibleKeyArgs) : null;
                 return {
                     data: serData1,
                     group: group,
@@ -4643,7 +4658,7 @@ var pvc = function(def, pv) {
             catInfo.serInfos = serDatas1.map(function(serData1) {
                 var group = catData;
                 group && serData1 && (group = group.child(serData1.key));
-                var value = group ? group.dimensions(valDim.name).sum(visibleKeyArgs) : null;
+                var value = group ? group.dimensions(valDim.name).value(visibleKeyArgs) : null;
                 return {
                     data: serData1,
                     group: group,
@@ -4840,7 +4855,7 @@ var pvc = function(def, pv) {
                 sum = this.children().where(function(childData) {
                     return !childData._isFlattenGroup || childData._isDegenerateFlattenGroup;
                 }).select(function(childData) {
-                    return Math.abs(childData.dimensions(dimName).sum(keyArgs));
+                    return childData.dimensions(dimName).valueAbs(keyArgs) || 0;
                 }, this).reduce(def.add, 0);
                 (this._sumAbsCache || (this._sumAbsCache = {}))[key] = sum;
             }
@@ -5593,21 +5608,21 @@ var pvc = function(def, pv) {
                                     roleVar = pvc_ValueLabelVar.fromAtom(singleDatum.atoms[rootContDim.name]);
                                     if (null != roleVar.value && this.percentFormatter) if (group) {
                                         valueDim = group.dimensions(rootContDim.name);
-                                        valuePct = valueDim.percentOverParent({
+                                        valuePct = valueDim.valuePercent({
                                             visible: !0
                                         });
                                     } else valuePct = scene.data().dimensions(rootContDim.name).percent(roleVar.value);
                                 }
                             } else if (group) {
                                 valueDim = group.dimensions(rootContDim.name);
-                                var value = valueDim.sum({
+                                var value = valueDim.value({
                                     visible: !0,
                                     zeroIfNone: !1
                                 });
                                 if (null != value) {
                                     var label = rootContDim.format(value);
                                     roleVar = new pvc_ValueLabelVar(value, label, value);
-                                    this.percentFormatter && (valuePct = valueDim.percentOverParent({
+                                    this.percentFormatter && (valuePct = valueDim.valuePercent({
                                         visible: !0
                                     }));
                                 }
@@ -7903,7 +7918,7 @@ var pvc = function(def, pv) {
             value: !1
         }
     });
-    def.type("pvc.visual.AngleAxis", pvc_Axis).init(function(chart, type, index, keyArgs) {
+    def.type("pvc.visual.NormalizedAxis", pvc_Axis).init(function(chart, type, index, keyArgs) {
         keyArgs = def.set(keyArgs, "byNaked", !1);
         this.base(chart, type, index, keyArgs);
     }).add({
@@ -7913,27 +7928,24 @@ var pvc = function(def, pv) {
         scaleTreatsNullAs: function() {
             return "zero";
         },
-        scaleUsesAbs: function() {
-            return this.option("UseAbs");
-        },
+        scaleUsesAbs: def.retTrue,
         scaleSumNormalized: def.retTrue,
-        setScale: function(scale, noWrap) {
-            this.base(scale, noWrap);
-            this.scale.range(0, 2 * Math.PI);
+        setScaleRange: function(range) {
+            var scale = this.scale;
+            scale.min = range.min;
+            scale.max = range.max;
+            scale.size = range.max - range.min;
+            scale.range(scale.min, scale.max);
+            pvc.debug >= 4 && pvc.log("Scale: " + pvc.stringify(def.copyOwn(scale)));
             return this;
         },
         _getOptionsDefinition: function() {
-            return angleAxis_optionsDef;
+            return normAxis_optionsDef;
         }
     });
-    var angleAxis_optionsDef = def.create(axis_optionsDef, {
+    var normAxis_optionsDef = def.create(axis_optionsDef, {
         OriginIsZero: {
             value: !0
-        },
-        UseAbs: {
-            resolve: "_resolveFull",
-            cast: Boolean,
-            value: !1
         }
     });
     def.type("pvc.visual.Legend", pvc.visual.OptionsBase).init(function(chart, type, index, keyArgs) {
@@ -10182,17 +10194,15 @@ var pvc = function(def, pv) {
             var valueRole = valueDataCell.role;
             this._warnSingleContinuousValueRole(valueRole);
             if ("series" === valueRole.name) throw def.error.notImplemented();
-            var useAbs = valueAxis.scaleUsesAbs(), sumNorm = valueAxis.scaleSumNormalized(), data = this.visibleData(valueDataCell.dataPartValue), dimName = valueRole.firstDimensionName();
+            var sumNorm = valueAxis.scaleSumNormalized(), data = this.visibleData(valueDataCell.dataPartValue), dimName = valueRole.firstDimensionName();
             if (sumNorm) {
-                var sum = data.dimensionsSumAbs(dimName, {
-                    abs: useAbs
-                });
+                var sum = data.dimensionsSumAbs(dimName);
                 if (sum) return {
                     min: 0,
                     max: sum
                 };
             } else {
-                var extent = data.dimensions(dimName).extent({
+                var useAbs = valueAxis.scaleUsesAbs(), extent = data.dimensions(dimName).extent({
                     abs: useAbs
                 });
                 if (extent) {
@@ -11200,7 +11210,7 @@ var pvc = function(def, pv) {
             }
             function calcPercent(atom, dimName) {
                 var pct;
-                pct = group ? group.dimensions(dimName).percentOverParent(visibleKeyArgs) : data.dimensions(dimName).percent(atom.value, visibleKeyArgs);
+                pct = group ? group.dimensions(dimName).valuePercent(visibleKeyArgs) : data.dimensions(dimName).percent(atom.value, visibleKeyArgs);
                 return percentValueFormat(pct);
             }
             var scene = context.scene;
@@ -11229,7 +11239,7 @@ var pvc = function(def, pv) {
                     if (!dim.type.isHidden) {
                         var valueLabel, dimLabel = def.html.escape(dim.type.label);
                         if (dim.type.valueType === Number) {
-                            valueLabel = dim.format(dim.sum(visibleKeyArgs));
+                            valueLabel = dim.format(dim.value(visibleKeyArgs));
                             playingPercentMap && playingPercentMap.has(dimName) && (valueLabel += " (" + calcPercent(null, dimName) + ")");
                             dimLabel = "&sum; " + dimLabel;
                         } else valueLabel = dim.atoms(visibleKeyArgs).map(function(atom) {
@@ -12862,7 +12872,7 @@ var pvc = function(def, pv) {
                 }, funY = function(allCatData) {
                     var group = data.child(allCatData.key);
                     group && serData1 && (group = group.child(serData1.key));
-                    return group ? group.dimensions(yDimName).sum(sumKeyArgs) : null;
+                    return group ? group.dimensions(yDimName).value(sumKeyArgs) : null;
                 }, options = def.create(trendOptions, {
                     rows: def.query(allCatDatas),
                     x: funX,
@@ -12918,14 +12928,14 @@ var pvc = function(def, pv) {
             }, this).where(def.notNully).reduce(function(result, rangeInfo) {
                 return this._reduceStackedCategoryValueExtent(result, rangeInfo.range, rangeInfo.group);
             }.bind(this), null) : data.leafs().select(function(serGroup) {
-                var value = serGroup.dimensions(valueDimName).sum();
+                var value = serGroup.dimensions(valueDimName).value();
                 return useAbs && 0 > value ? -value : value;
             }).range();
         },
         _getStackedCategoryValueExtent: function(catGroup, valueDimName, useAbs) {
             var posSum = null, negSum = null;
             catGroup.children().select(function(serGroup) {
-                var value = serGroup.dimensions(valueDimName).sum();
+                var value = serGroup.dimensions(valueDimName).value();
                 return useAbs && 0 > value ? -value : value;
             }).each(function(value) {
                 null != value && (value >= 0 ? posSum += value : negSum += value);
@@ -14050,9 +14060,7 @@ var pvc = function(def, pv) {
         });
         var colorVarHelper = new pvc.visual.RoleVarHelper(this, panel.visualRoles.color, {
             roleVar: "color"
-        }), valueDimName = panel.visualRoles[panel.valueRoleName].firstDimensionName(), valueDim = categRootData.dimensions(valueDimName), pctValueFormat = panel.chart.options.percentValueFormat, angleAxis = panel.axes.angle, angleScale = angleAxis.scale, sumAbs = angleScale.isNull ? 0 : angleScale.domain()[1], angleKeyArgs = {
-            abs: angleAxis.scaleUsesAbs()
-        };
+        }), valueDimName = panel.visualRoles[panel.valueRoleName].firstDimensionName(), valueDim = categRootData.dimensions(valueDimName), pctValueFormat = panel.chart.options.percentValueFormat, angleScale = panel.axes.angle.scale, sumAbs = angleScale.isNull ? 0 : angleScale.domain()[1];
         this.vars.sumAbs = new pvc_ValueLabelVar(sumAbs, formatValue(sumAbs));
         var rootScene = this, CategSceneClass = def.type(pvc.visual.PieCategoryScene).init(function(categData, value) {
             this.base(rootScene, {
@@ -14071,7 +14079,7 @@ var pvc = function(def, pv) {
         var categDatas = categAxis.domainItems();
         if (categDatas.length) {
             categDatas.forEach(function(categData) {
-                var value = categData.dimensions(valueDimName).sum(angleKeyArgs);
+                var value = categData.dimensions(valueDimName).value();
                 0 !== value && new CategSceneClass(categData, value);
             });
             if (!rootScene.childNodes.length && !panel.visualRoles.multiChart.isBound()) throw new InvalidDataException("Unable to create a pie chart, please check the data values.");
@@ -14193,7 +14201,7 @@ var pvc = function(def, pv) {
         _animatable: !0,
         _axisClassByType: {
             category: pvc.visual.Axis,
-            angle: pvc.visual.AngleAxis
+            angle: pvc.visual.NormalizedAxis
         },
         _axisCreateChartLevel: {
             category: 2,
@@ -14239,6 +14247,13 @@ var pvc = function(def, pv) {
         },
         _createVisibleData: function(baseData, ka) {
             return this.visualRoles.category.flatten(baseData, ka);
+        },
+        _setAxisScale: function(axis, chartLevel) {
+            this.base(axis, chartLevel);
+            2 & chartLevel && "angle" === axis.type && axis.setScaleRange({
+                min: 0,
+                max: 2 * Math.PI
+            });
         },
         _createContent: function(contentOptions) {
             this.base();
@@ -15456,7 +15471,7 @@ var pvc = function(def, pv) {
                 tooltipArgs: me._buildShapesTooltipArgs(hasColor, hasSize)
             }, pvDot = new pvc.visual.DotSizeColor(me, me.pvHeatGrid, keyArgs).override("dimColor", function(color) {
                 return pvc.toGrayScale(color, .6);
-            }).pvMark.lock("shapeAngle");
+            }).pvMark;
             hasSize || pvDot.sign.override("defaultSize", def.fun.constant(areaRange.max));
             return pvDot;
         },
@@ -17300,7 +17315,7 @@ var pvc = function(def, pv) {
                 chart.measureVisualRoles().forEach(function(role) {
                     var svar, dimName = measureRolesDimNames[role.name];
                     if (dimName) {
-                        var dim = categData.dimensions(dimName), value = dim.sum(visibleKeyArgs);
+                        var dim = categData.dimensions(dimName), value = dim.value(visibleKeyArgs);
                         svar = new pvc_ValueLabelVar(value, dim.format(value));
                         svar.position = orthoScale(value);
                     } else {
@@ -17697,6 +17712,9 @@ var pvc = function(def, pv) {
     });
     def.type("pvc.TreemapChart", pvc.BaseChart).add({
         _animatable: !1,
+        _axisClassByType: {
+            size: pvc.visual.NormalizedAxis
+        },
         _axisCreateIfUnbound: {
             color: !0
         },
@@ -17740,13 +17758,6 @@ var pvc = function(def, pv) {
                 this._axisClassByType.color = pvc.visual.TreemapDiscreteColorAxis;
             } else delete this._axisClassByType;
             return this.base(hasMultiRole);
-        },
-        _setAxisScale: function(axis, chartLevel) {
-            this.base(axis, chartLevel);
-            2 & chartLevel && "size" === axis.type && axis.setScaleRange({
-                min: 100,
-                max: 1e3
-            });
         },
         _createContent: function(contentOptions) {
             this.base();
@@ -17966,6 +17977,9 @@ var pvc = function(def, pv) {
     });
     def.type("pvc.SunburstChart", pvc.BaseChart).add({
         _animatable: !1,
+        _axisClassByType: {
+            size: pvc.visual.NormalizedAxis
+        },
         _axisCreateIfUnbound: {
             color: !0
         },
@@ -18008,13 +18022,6 @@ var pvc = function(def, pv) {
             def.hasOwnProp.call(this, "_axisClassByType") || (this._axisClassByType = Object.create(this._axisClassByType));
             this._axisClassByType.color = pvc.visual.SunburstDiscreteColorAxis;
             return this.base(hasMultiRole);
-        },
-        _setAxisScale: function(axis, chartLevel) {
-            this.base(axis, chartLevel);
-            2 & chartLevel && "size" === axis.type && axis.setScaleRange({
-                min: 100,
-                max: 1e3
-            });
         },
         _createContent: function(contentOptions) {
             this.base();
