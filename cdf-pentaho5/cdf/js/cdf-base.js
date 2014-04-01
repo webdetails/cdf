@@ -102,22 +102,6 @@ var Endpoints = {
   getAnalyzer: function() { return Endpoints.getWebapp() + "/content/analyzer/"; },
 
   getReportViewer: function( path, ts ) { return Endpoints.getWebapp() + '/api/repos/' + path + '/viewer?' + ts; },
-
-  getImageIcon: function( icon ) {
-    if (icon == "jfPieIcon"){
-        return Endpoints.getWebapp() + "/content/pentaho-cdf/resources/style/images/pie_icon.png";
-    }else if (icon == "jfBarIcon"){
-        return Endpoints.getWebapp() + "/content/pentaho-cdf/resources/style/images/bar_icon.png";
-    }else if (icon == "jfExcelIcon"){
-        return Endpoints.getWebapp() + "/content/pentaho-cdf/resources/style/images/excel_icon.png";
-    }else if (icon == "jfCsvIcon"){
-        return Endpoints.getWebapp() + "/content/pentaho-cdf/resources/style/images/csv_icon.gif";
-    }else if (icon == "jfMagnifyIcon"){
-        return Endpoints.getWebapp() + "/content/pentaho-cdf/resources/style/images/magnify.png";
-    }else if (icon == "jfTableIcon"){
-        return Endpoints.getWebapp() + "/content/pentaho-cdf/resources/style/images/table.png";
-    }
-  },
   
   getCaptifyZoom: function(){ return Endpoints.getResource() + "/js/captify/zoom.html"; }
   

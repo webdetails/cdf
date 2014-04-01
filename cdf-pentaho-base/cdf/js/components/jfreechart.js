@@ -126,8 +126,10 @@ var JFreeChartComponent = BaseComponent.extend({
       if(show){
         var icon = captionOptions[o].icon != undefined ? (typeof captionOptions[o].icon=='function'?captionOptions[o].icon():captionOptions[o].icon) : undefined;
         
-        var op = icon != undefined ? $('<image id ="' + captionId + o + '" src = "' + icon + '"></image>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
-        op.attr("class",captionOptions[o].oclass != undefined ? captionOptions[o].oclass : "options");
+        var op = icon != undefined ? $('<div id ="' + captionId + o + '" class=" img ' + icon + '"></div>') : $('<span id ="' + captionId + o + '">' + captionOptions[o].title  +'</span>');
+        if(captionOptions[o].oclass != undefined){
+          op.addClass(captionOptions[o].oclass);
+        }
         op.attr("title",captionOptions[o].title);
         caption.append(op);
       }
