@@ -30,7 +30,7 @@ wd.helpers.jfreechartHelper = {
 	          return cd.chartType != 'function' && ( cd.chartType == "BarChart" ||  cd.chartType == "PieChart")
 	        },
 	        icon: function(){
-	          return cd.chartType == "BarChart" ? Endpoints.getImageIcon("jfPieIcon") : Endpoints.getImageIcon("jfBarIcon");
+	          return cd.chartType == "BarChart" ? "jfPieIcon" : "jfBarIcon";
 	        },
 	        oclass: 'options',
 	        callback: function(){
@@ -40,7 +40,7 @@ wd.helpers.jfreechartHelper = {
 	      },
 	      excel: {
 	        title: "Excel",
-	        icon: Endpoints.getImageIcon("jfExcelIcon"),
+	        icon: "jfExcelIcon",
 	        oclass: 'options',
 	        callback: function(){
 	          exportFile("excel",cd);
@@ -48,7 +48,7 @@ wd.helpers.jfreechartHelper = {
 	      },
 	      csv: {
 	        title: "CSV",
-	        icon: Endpoints.getImageIcon("jfCsvIcon"),
+	        icon: "jfCsvIcon",
 	        oclass: 'options',
 	        callback: function(){
 	          exportFile("csv",cd);
@@ -56,7 +56,7 @@ wd.helpers.jfreechartHelper = {
 	      },
 	      zoom: {
 	        title:'Zoom',
-	        icon: Endpoints.getImageIcon("jfMagnifyIcon"),
+	        icon: "jfMagnifyIcon",
 	        oclass: 'options',
 	        callback: function(){
 	          Dashboards.incrementRunningCalls();
@@ -103,7 +103,7 @@ wd.helpers.jfreechartHelper = {
 	      },
 	      details:{
 	        title:'Details',
-	        icon: Endpoints.getImageIcon("jfTableIcon"),
+	        icon: "jfTableIcon",
 	        oclass: 'options',
 	        callback: function(){
 	          myself.pivotDefinition = {

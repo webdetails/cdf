@@ -647,7 +647,7 @@ div.scheduler  label {
 /**
  * JFreeChartComponent
  **/
-.jsExcelIcon {
+.jfExcelIcon {
   background-image: url('../resources/style/images/excel_icon.png');
   width:34px;
   height:32px;
