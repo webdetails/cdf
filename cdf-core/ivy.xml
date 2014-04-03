@@ -9,16 +9,15 @@
     <conf name="test" visibility="private"/>
     <conf name="js"/>
   </configurations>
-  
+
   <publications>
     <artifact name="${ivy.artifact.id}" type="jar" conf="default"/>
     <artifact name="${ivy.artifact.id}" m:classifier="sources" type="source" ext="jar" conf="source"/>
-    <artifact name="${ivy.artifact.id}" type="zip" conf="zip"/>
     <artifact name="${ivy.artifact.id}" m:classifier="js" type="js" ext="zip" conf="js"/>
   </publications>
-  
+
   <dependencies defaultconf="default->default">
-    
+
     <!--  cpf dependencies -->
     <dependency org="pentaho"                       name="cpf-core"               rev="${dependency.pentaho-cpf-plugin.revision}"           transitive="false"    changing="true"     conf='runtime->default'/>
 
@@ -33,15 +32,15 @@
     <dependency org="commons-lang"                  name="commons-lang"           rev="2.2"                         transitive="false"/>
     <dependency org="org.json"                      name="json"                   rev="${dependency.json.revision}" transitive="false"/>
     <dependency org="org.springframework"           name="spring-core"            rev="3.0.3.RELEASE"               transitive="false"/>
-    <dependency org="org.springframework"           name="spring-beans"           rev="3.0.3.RELEASE"               transitive="false"/> 
+    <dependency org="org.springframework"           name="spring-beans"           rev="3.0.3.RELEASE"               transitive="false"/>
     <dependency org="org.springframework.security"  name="spring-security-core"   rev="3.0.3.RELEASE"               transitive="false"/>
     <dependency org="org.springframework"           name="spring-context"         rev="3.0.3.RELEASE"               transitive="false"/>
     <dependency org="org.hibernate"                 name="hibernate"              rev="3.2.6.ga"                    transitive="false">
       <!--
-			 
+
 			 include these jars, needed for unit tests.  child projects may choose
 			 to exclude these, if deploying to an app server, etc.
-			  
+
          	<exclude org="net.sf.ehcache" name="ehcache" />
         	<exclude org="asm" name="asm" />
         	<exclude org="asm" name="asm-attrs" />
@@ -51,7 +50,7 @@
       <exclude org="dom4j" name="dom4j"/>
     </dependency>
 
-    
+
 
     <!-- orient db (persistence) -->
     <dependency org="com.orientechnologies"         name="orient-commons"         rev="${dependency.orientdb.revision}"                       transitive="false"                        conf="runtime,default->default"/>
