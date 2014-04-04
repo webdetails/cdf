@@ -1256,8 +1256,10 @@ var ExecutePrptComponent = PrptComponent.extend({
       }
       return arr;
     };
-    $.each(options,function(k,v){
-      if (typeof v == 'object') {
+    $.each(options,function(k,v) {
+      if ( k === "solution" || k === "path" || k === "action" ) {
+        return;
+      } else if (typeof v == 'object') {
         a.push.apply(a,encodeArray(k,v));
       } else {
         a.push(encodeURIComponent(k)+"="+encodeURIComponent(v));
@@ -1265,7 +1267,7 @@ var ExecutePrptComponent = PrptComponent.extend({
     });
     $.fancybox({
       type:"iframe",
-      href: url + "?"+ a.join('&') ,
+      href: url + a.join('&') ,
       width: $(window).width(),
       height:$(window).height() - 50
     });
