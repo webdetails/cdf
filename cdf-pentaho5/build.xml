@@ -104,7 +104,7 @@
 		  </javac>
 	</target>
 
-	<target name="dist" depends="clean-dist,resolve,resolve-js,jar,dist-plugin,write-properties,dist-solution,dist-samples,dist-js"/>
+	<target name="dist" depends="clean-dist,resolve,resolve-js,jar,dist-plugin,dist-solution,dist-samples,dist-js"/>
 
 	<target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
 
@@ -214,6 +214,7 @@
 		   </fileset>
 	    </copy>
 
+	    <antcall target="write-properties" />
 	    <!-- copy ccc build -->
         <copy todir="${stage.dir}/${plugin.name}/js/lib/CCC" >
             <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
