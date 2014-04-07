@@ -478,20 +478,19 @@
       }
       queryDefinition.wrapItUp = 'true';
 
-      var successCallback = function(uuid) {
-        var _exportIframe = $('<iframe style="display:none">');
-        _exportIframe.detach();
-
-        _exportIframe[0].src = Endpoints.getCdaBase() + "/unwrapQuery?" + $.param( {"path": queryDefinition.path, "uuid": uuid});
-        _exportIframe.appendTo($('body'));
-      };
       $.ajax({
-        type:'POST',
-        async: false,
-        data: queryDefinition,
-        url: this.getOption('url'),
-        success: successCallback
-      });
+          type:'POST',
+          dataType: 'text',
+          async: false,
+          data: queryDefinition,
+          url: this.getOption('url') })
+        .done(function(uuid){
+          var _exportIframe = $('<iframe style="display:none">');
+          _exportIframe.detach();
+          _exportIframe[0].src = Endpoints.getCdaBase() + "/unwrapQuery?" + $.param( {"path": queryDefinition.path, "uuid": uuid});
+          _exportIframe.appendTo($('body')); })
+        .fail(function(jqXHR,textStatus,errorThrown){
+          console.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown); });
     },
 
     /* Sorting
