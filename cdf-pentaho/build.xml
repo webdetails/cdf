@@ -109,7 +109,7 @@
 	<target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
 
 	<!-- overrides subfloor clean to also cleanup runtime-lib -->
-	<target name="clean" depends="subfloor.clean">
+	<target name="clean" depends="subfloor.clean, subfloor-js.clean-js">
 		<delete dir="${runtimelib.dir}" />
 		<delete dir="${dist.dir}" />
 	</target>
