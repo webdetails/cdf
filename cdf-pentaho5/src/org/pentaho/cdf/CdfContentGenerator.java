@@ -1,15 +1,15 @@
 /*!
-* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
-* This software was developed by Webdetails and is provided under the terms
-* of the Mozilla Public License, Version 2.0, or any later version. You may not use
-* this file except in compliance with the license. If you need a copy of the license,
-* please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
-*
-* Software distributed under the Mozilla Public License is distributed on an "AS IS"
-* basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
-* the license for the specific language governing your rights and limitations.
-*/
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
+ */
 
 package org.pentaho.cdf;
 
@@ -145,7 +145,11 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
         String templatePath = Util.joinPath( FilenameUtils.getPath( xcdfFilePath ), renderer.getTemplate() );
 
-        renderHtmlDashboard( out, templatePath, renderer.getStyle(), renderer.getMessagesBaseFilename() );
+        if ( !StringUtils.isEmpty( defaultTemplate ) ) { // If style defined in URL parameter 'template'
+          renderHtmlDashboard( out, templatePath, defaultTemplate, renderer.getMessagesBaseFilename() );
+        } else { // use style provided via .xcdf or default
+          renderHtmlDashboard( out, templatePath, renderer.getStyle(), renderer.getMessagesBaseFilename() );
+        }
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
 
@@ -177,20 +181,21 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   public String getPluginName() {
     return PLUGIN_ID;
   }
-  
-  // InterPluginBroker calls this method within bean id 'xcdf' 
+
+  // InterPluginBroker calls this method within bean id 'xcdf'
   public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
       @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
       @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
       @Context HttpServletRequest servletRequest ) {
     return ContextEngine.getInstance().getContext( path, viewId, action, Parameter.asHashMap( servletRequest ) );
   }
-  
-  //InterPluginBroker calls this method within bean id 'xcdf' 
+
+  // InterPluginBroker calls this method within bean id 'xcdf'
   public String getHeaders( @QueryParam( Parameter.DASHBOARD_CONTENT ) String dashboardContent,
       @QueryParam( Parameter.DASHBOARD_TYPE ) String dashboardType, @QueryParam( Parameter.ROOT ) String root,
-      @QueryParam( Parameter.SCHEME ) String scheme, @QueryParam( Parameter.DEBUG ) @DefaultValue( "false" ) String debug, 
-      @Context HttpServletRequest servletRequest, @Context HttpServletResponse servletResponse ) throws Exception {
+      @QueryParam( Parameter.SCHEME ) String scheme,
+      @QueryParam( Parameter.DEBUG ) @DefaultValue( "false" ) String debug, @Context HttpServletRequest servletRequest,
+      @Context HttpServletResponse servletResponse ) throws Exception {
     try {
       CdfHtmlRenderer.getHeaders( dashboardContent, dashboardType, root, scheme, Boolean.parseBoolean( debug ),
           servletResponse.getOutputStream() );
