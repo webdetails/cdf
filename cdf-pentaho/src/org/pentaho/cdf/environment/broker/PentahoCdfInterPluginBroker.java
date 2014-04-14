@@ -17,7 +17,6 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.json.JSONObject;
 import org.json.JSONException;
-import org.pentaho.cdf.context.autoinclude.AutoInclude;
 
 import pt.webdetails.cpf.InterPluginCall;
 
@@ -44,7 +43,7 @@ public class PentahoCdfInterPluginBroker implements ICdfInterPluginBroker {
     for ( String id : dataAccessIds ) {
       String reply = executeCdaQuery( cdaPath, id );
       try {
-        queries.put( id, new JSONObject( reply ) );
+        queries.accumulate( id, new JSONObject( reply ) );
       } catch ( JSONException e ) {
         logger.error( "Failed to add query " + id + " to contex object" );
       }

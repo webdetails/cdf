@@ -35,4 +35,6 @@ public class CdfConstants {
   public static final String BLUEPRINT = "blueprint";
   public static final String MOBILE = "mobile";
   public static final String BOOTSTRAP = "bootstrap";
+  
+  public static final String INCLUDES_DIR = "/includes";
 }
