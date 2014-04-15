@@ -57,7 +57,7 @@ var Endpoints = {
 
   getExport: function () { return Endpoints.getCdfBase() + "/Export"; },
 
-  getResource: function() { return Endpoints.getCdfBase() + "/resources"; },
+  getResource: function() { return Endpoints.getCdfBase() + "/getResource"; },
 
   getCdfXaction: function( path, action, solution ) { 
     return Endpoints.getViewAction() + "?path=" + Helper.getFullPath( path, action ) + "&" + Helper.getTimestamp(); 
