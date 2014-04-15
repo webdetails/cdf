@@ -31,7 +31,7 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
 
   protected static Log logger = LogFactory.getLog( PentahoCdfEnvironment.class );
 
-  private final String PLUGIN_REPOSITORY_DIR = "/public/cdf";
+  private static final String PLUGIN_REPOSITORY_DIR = "/public/cdf";
   private static final String SYSTEM_DIR = "system";
   private static final String PLUGIN = "plugin";
 
