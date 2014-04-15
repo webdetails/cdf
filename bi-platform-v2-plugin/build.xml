@@ -190,7 +190,7 @@
     		&lt;samples_url>http://ci.analytical-labs.com/job/Webdetails-CDF/lastSuccessfulBuild/artifact/bi-platform-v2-plugin/dist/pentaho-cdf-samples-TRUNK-SNAPSHOT.zip&lt;/samples_url>
 	    	&lt;description>Trunk Snapshot. Get the latest, edgy, still work in progress features here...&lt;/description>
 		    &lt;build_id>${sequential.build.id}&lt;/build_id>
-            &lt;max_parent_version>4.8&lt;/max_parent_version>
+            &lt;max_parent_version>4.9&lt;/max_parent_version>
             &lt;min_parent_version>1.0&lt;/min_parent_version>		        							
 		&lt;/version>	</echo>         
 
