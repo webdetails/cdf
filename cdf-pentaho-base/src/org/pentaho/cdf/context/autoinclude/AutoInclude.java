@@ -10,11 +10,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.Node;
+import org.pentaho.cdf.CdfConstants;
+import org.pentaho.cdf.environment.CdfEngine;
 
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 import pt.webdetails.cpf.repository.api.IBasicFileFilter;
 import pt.webdetails.cpf.repository.api.IReadAccess;
+import pt.webdetails.cpf.repository.util.RepositoryHelper;
 
 /**
  * AutoIncludes add cda query results to dashboard context.<br>
@@ -26,6 +29,8 @@ public class AutoInclude {
 
   private static final Log log = LogFactory.getLog( AutoInclude.class );
 
+  private static final String PLUGIN_INCLUDES_DIR = CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR;
+  
   private String cdaFile;
   private Matcher cdaMatcher;
   private List<DashboardMatchRule> dashboardRules;
@@ -107,7 +112,7 @@ public class AutoInclude {
       @Override
       public boolean accept( IBasicFile file ) {
         for ( Pattern regex : cdaPathRegexes ) {
-          if ( regex.matcher( file.getPath() ).matches() ) {
+          if ( regex.matcher( RepositoryHelper.joinPaths( PLUGIN_INCLUDES_DIR, file.getPath() ) ).matches() ) {
             return true;
           }
         }
@@ -118,7 +123,7 @@ public class AutoInclude {
     List<IBasicFile> cdaFiles =
         cdaRoot.listFiles( null, cdaFilter, IReadAccess.DEPTH_ALL, false );
     if ( log.isDebugEnabled() ) {
-      String.format("%d matching cda files found (%s)" , cdaFiles.size(), Util.getElapsedSeconds( start ) );
+      log.debug( String.format( "%d matching cda files found (%s)", cdaFiles.size(), Util.getElapsedSeconds( start ) ) );
     }
     return cdaFiles;
   }
@@ -126,6 +131,7 @@ public class AutoInclude {
   private static List<AutoInclude> processAutoIncludes( AutoIncludeConfig config, List<String> cdaPaths ) {
     List<AutoInclude> autoIncludes = new ArrayList<AutoInclude>();
     for ( String cdaPath : cdaPaths ) {
+      cdaPath = RepositoryHelper.joinPaths( PLUGIN_INCLUDES_DIR, cdaPath );
       Matcher matcher = config.getCdaRegex().matcher( cdaPath );
       if ( matcher.matches() ) {
         AutoInclude include = new AutoInclude( cdaPath, matcher, config.getDashboardRules() );

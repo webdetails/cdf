@@ -32,8 +32,10 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.autoinclude.AutoInclude;
 import org.pentaho.cdf.environment.CdfEngine;
+import org.pentaho.cdf.environment.ICdfEnvironment;
 import org.pentaho.cdf.storage.StorageEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.cdf.views.View;
@@ -249,7 +251,9 @@ public class ContextEngine {
   private List<AutoInclude> getAutoIncludes( Document config ) {
     synchronized ( autoIncludesLock ) {
       if ( autoIncludes == null ) {
-        IReadAccess cdaRoot = CdfEngine.getUserContentReader( "/" );
+        IReadAccess cdaRoot =
+            CdfEngine.getUserContentReader( CdfEngine.getEnvironment().getCdfPluginRepositoryDir()
+                + CdfConstants.INCLUDES_DIR );
         autoIncludes = AutoInclude.buildAutoIncludeList( config, cdaRoot );
       }
       return autoIncludes;

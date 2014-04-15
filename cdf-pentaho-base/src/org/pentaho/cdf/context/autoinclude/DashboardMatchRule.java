@@ -73,7 +73,7 @@ class DashboardMatchRule {
     while ( token.find() ) {
       int group = Integer.parseInt( token.group( 1 ) );
       if ( group < cdaMatcher.groupCount() ) {
-        token.appendReplacement( sb, Pattern.quote( cdaMatcher.group( group ) ) );
+        token.appendReplacement( sb, Matcher.quoteReplacement( Pattern.quote( cdaMatcher.group( group ) ) ) );
       } else {
         log.error( String.format( "Error processing rule '%s', group %i does not exist.", regex, group ) );
       }

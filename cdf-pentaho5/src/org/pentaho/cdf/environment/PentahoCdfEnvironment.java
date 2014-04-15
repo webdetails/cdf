@@ -31,7 +31,7 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
 
   protected static Log logger = LogFactory.getLog( PentahoCdfEnvironment.class );
 
-  private static final String PLUGIN_REPOSITORY_DIR = "/public/cdf";
+  private final String PLUGIN_REPOSITORY_DIR = "/public/cdf";
   private static final String SYSTEM_DIR = "system";
   private static final String PLUGIN = "plugin";
 
@@ -126,5 +126,10 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
   @Override
   public ICdfInterPluginBroker getCdfInterPluginBroker() {
     return PentahoCdfInterPluginBroker.getInstance();
+  }
+
+  @Override
+  public String getCdfPluginRepositoryDir() {
+    return this.PLUGIN_REPOSITORY_DIR;
   }
 }

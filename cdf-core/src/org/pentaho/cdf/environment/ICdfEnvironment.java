@@ -48,4 +48,6 @@ public interface ICdfEnvironment {
 
   public ICdfInterPluginBroker getCdfInterPluginBroker();
 
+  public String getCdfPluginRepositoryDir();
+  
 }
