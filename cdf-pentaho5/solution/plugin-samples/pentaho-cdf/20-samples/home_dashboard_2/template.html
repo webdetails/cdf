@@ -1,0 +1,111 @@
+<script type="text/javascript" src="../../repo/files/:public:plugin-samples:pentaho-cdf:20-samples:home_dashboard_2:MetaLayer.js"></script>
+
+
+
+<table align="center" style="border: 1px solid #000;">
+	<tr>
+		<td align="center" colspan="2"><p><div id="titleObject"></div></p></td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+                    <td valign="top">
+                        <div id="territorySalesObject"></div>
+                    </td>
+				</tr>
+				<tr>
+					<td valign="top"><div id="productLineSalesObject"></div></td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<table>
+				<tr>
+                    <td align="right">
+                        <div id="topTenCustomersObject"></div>
+                        <div id="topTenCustomersDetailsObject"></div>
+                    </td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+titleString = 
+{
+  name: "titleString",
+  type: "text",
+  listeners:["MetaLayerHome2.filterMeasure"],
+  htmlObject: "titleObject",
+  executeAtStart: true,
+  expression: function(){return MetaLayerHome2.title},
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+topTenCustomers = 
+{
+  name: "topTenCustomers",
+  type: "jFreeChartComponent",
+  chartDefinition: MetaLayerHome2.topTenCustomerDefinition,
+  listeners:["MetaLayerHome2.filterMeasure"],
+  parameters: [["productLine", "productLine"], ["territory", "territory"]],
+  htmlObject: "topTenCustomersObject",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+topTenCustomersDetails   = {
+	name: "topTenCustomersDetails",
+	type: "pivotLink",
+	htmlObject: "topTenCustomersDetailsObject",
+	content: "Details...",
+	tooltip: "See the details for this component",
+	pivotDefinition: MetaLayerHome2.topTenCustomerDefinition,
+	executeAtStart: true
+}
+
+territorySales = 
+{
+  name: "territorySales",
+  type: "jFreeChartComponent",
+  chartDefinition: MetaLayerHome2.territorySalesDefinition,
+  listeners:[],
+  parameters: [],
+  htmlObject: "territorySalesObject",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+productLineSales = 
+{
+  name: "productLineSales",
+  type: "jFreeChartComponent",
+  chartDefinition: MetaLayerHome2.productLineSalesDefinition,
+  listeners:[],
+  parameters: [],
+  htmlObject: "productLineSalesObject",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+var components = [titleString, territorySales, productLineSales, topTenCustomers,
+    topTenCustomersDetails];
+
+</script>
+
+<script language="javascript" type="text/javascript">
+
+function load(){
+	Dashboards.init(components);
+}
+
+load();
+
+</script>

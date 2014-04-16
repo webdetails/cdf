@@ -1,0 +1,134 @@
+<SCRIPT LANGUAGE="JavaScript">
+
+// This is a custom function that is fired when a user selects a productLine and then want to select a territory
+// Its purpose is to reset the productLine variable back to null and pass the territory that has been selected
+// The function is executed from the url-template tag in the territorySales.xaction
+
+function clickOnRegion(value) {
+	department = "null";
+	Dashboards.fireChange('region',value);
+}
+
+</SCRIPT>
+
+<!-- The page_title_object -->
+<h1><span id=page_title_object></span></h1>
+
+<!-- The dashboard layout table -->
+<table align="center" cellpadding="3">
+	<tr>
+		<td align="center"><div id="RegionsPieChartObject"></div></td>
+		<td align="center"><div id="RegionVarianceBarChartObject"></div></td>
+	</tr>
+	<tr>
+		<td align="center"><div id="DepartmentDialChartObject"></div></td>
+		<td align="center"><div id="EmbeddedReportObject"></div></td>
+	</tr>
+	
+	
+	
+</table>
+
+<script language="javascript" type="text/javascript">
+
+// Define script variables before script execution
+var region = "null";
+var department = "null";
+
+// pageTitleString component generates the page title with any other parameters is may need to construct the string
+pageTitleString = 
+{
+  name: "pageTitleString",
+  type: "text",
+  listeners:["region", "department"],
+  htmlObject: "page_title_object",
+  executeAtStart: true,
+  expression: function(){return "title"},
+  preExecution:function(){
+    if(region == "null" && department == "null") {
+      title="Select a region";
+    }
+    else if (region != "null" && department == "null") {
+      title="This is headcount spending for " + region;
+    }
+    else if (region != "null" && department != "null") {
+      title = "This is headcount spending for " + region + ", " + department;
+    }
+  },
+  postExecution:function(){}
+}
+
+// RegionsPieChart component generates the 
+RegionsPieChart = 
+{
+  name: "RegionsPieChart",
+  type: "xaction",
+  solution: "plugin-samples",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/RegionsPieChart.xaction",
+  action: "RegionsPieChart.xaction",
+  listeners:[],
+  parameters: [],
+  htmlObject: "RegionsPieChartObject",
+  executeAtStart: true
+}
+
+// RegionVarianceBarChart component generates the 
+RegionVarianceBarChart = 
+{
+  name: "RegionVarianceBarChart",
+  type: "xaction",
+  solution: "plugin-samples",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/RegionVarianceBarChart.xaction",
+  action: "RegionVarianceBarChart.xaction",
+  listeners:["region"],
+  parameters: [["REGION","region"]],
+  htmlObject: "RegionVarianceBarChartObject",
+  executeAtStart: false,
+  preExecution:function(){document.getElementById('DepartmentDialChartObject').innerHTML="";document.getElementById('EmbeddedReportObject').innerHTML="";}
+}
+
+// DepartmentDialChart component generates the 
+DepartmentDialChart = 
+{
+  name: "DepartmentDialChart",
+  type: "xaction",
+  solution: "plugin-samples",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/DepartmentDialChart.xaction",
+  action: "DepartmentDialChart.xaction",
+  listeners:["department"],
+  parameters: [["DEPARTMENT","department"],["REGION","region"]],
+  htmlObject: "DepartmentDialChartObject",
+  executeAtStart: false
+}
+
+// EmbeddedReport component generates the 
+EmbeddedReport = 
+{
+  name: "EmbeddedReport",
+  type: "xaction",
+  solution: "plugin-samples",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/embedded_report.xaction",
+  action: "embedded_report.xaction",
+  listeners:["department"],
+  parameters: [["DEPARTMENT","department"],["REGION","region"]],
+  htmlObject: "EmbeddedReportObject",
+  executeAtStart: false
+}
+
+// These are the components to be loaded into the dashboard withing the [] seperated by ,
+var components = [pageTitleString, RegionsPieChart, RegionVarianceBarChart, DepartmentDialChart, EmbeddedReport];
+
+
+</script>
+
+<script language="javascript" type="text/javascript">
+
+// The intial dashboard load function definition
+function load(){
+	Dashboards.init(components);
+}
+
+// The intial dashboard load function execution
+load();
+
+</script>

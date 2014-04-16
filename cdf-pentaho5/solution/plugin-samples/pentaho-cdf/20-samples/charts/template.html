@@ -1,0 +1,75 @@
+<script type="text/javascript" src="../../repo/files/:public:plugin-samples:pentaho-cdf:20-samples:charts:MetaLayerCharts.js"></script>
+
+<!--span style="font-family: Arial;font-weight: bold ;margin-left:20pt;">CDF Samples - Charts</span>
+<br-->
+<table align="center" style="border: 0px solid #000;">	
+	<tr>
+		
+		<td valign="top"><div id="pieChart_object"></div></td>
+		<td valign="top"><div id="barChart_object"></div></td>
+		<td valign="top"><div id="dialChart_object"></div></td>
+	</tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+
+
+var productLine = "null";
+var territory = "null";
+
+title = 
+{
+  name: "title",
+  type: "text",
+  htmlObject: "title_object",
+  executeAtStart: true,
+  expression: function(){return "Charts examples"}
+}
+
+pieChart = 
+{
+  name: "pieChart",
+  type: "jFreeChartComponent",
+  listeners:["MetaLayerCharts.regionsMeasure"],
+  chartDefinition: MetaLayerCharts.pieChartDefinition,
+  htmlObject: "pieChart_object",
+  executeAtStart: true
+}
+
+barChart = 
+{
+  name: "barChart",
+  type: "jFreeChartComponent",
+  listeners:["MetaLayerCharts.selectedRegionMeasure"],
+  chartDefinition: MetaLayerCharts.barChartDefinition,
+  htmlObject: "barChart_object",
+  executeAtStart: true
+}
+
+dialChart = 
+{
+  name: "dialChart",
+  type: "dialComponent",
+  listeners:["MetaLayerCharts.departmentMeasure"],
+  chartDefinition: MetaLayerCharts.dialChartDefinition,
+  htmlObject: "dialChart_object",
+  executeAtStart: true
+}
+
+
+
+
+var components = [pieChart,barChart,dialChart];
+
+</script>
+
+<script language="javascript" type="text/javascript">
+
+function load(){
+	Dashboards.init(components);
+}
+
+load();
+
+</script>

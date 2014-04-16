@@ -1,0 +1,96 @@
+<style>
+	.contents li {font-weight: bold;}
+</style>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Storage</h2>
+
+		<h3>Description</h3>
+		<p>
+
+
+		It's now possible to maintain parameter states between different sessions. Instead of using simple 
+		parameters, objects inside the special namespace Dashboards.storage can be saved and restored using the
+		functions described in this page.
+
+
+		This works on a per user base, and the developer needs to be aware that the everything saved will be loaded
+		for every dashboard, so if too much is stored <b>one may have some performance penalty</b>
+
+		
+		</p>
+
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>Dashboards.saveStorage()</dt>
+			<dd>Saves the contents of the object</dd>
+		
+			<dt>Dashboards.loadStorage()</dt>
+			<dd>Reloads the object (this is done automatically at dashboard render time, useful only to undo certain operations)</dd>
+		
+			<dt>Dashboards.cleanStorage()</dt>
+			<dd>Empties the entire storage of that user</dd>
+		</dl>
+		
+		<h3>Example</h3>
+
+		<p>
+		Take the SelectComponent example in the component reference section. This is how it is currently:
+		</p>
+
+		<code>
+			<pre>
+
+	regionSelector = 
+	{
+		name: "regionSelector",
+		type: "select",
+		parameters:[],
+		valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
+		parameter:"region",
+		valueAsId: false,
+		htmlObject: "sampleObject",
+		executeAtStart: true,
+		postChange: function(){alert("You chose: " + region);}
+	};
+
+			</pre>
+		</code>
+
+		<p>
+		In order to make this selector persistent, all you need is the following changes:
+		</p>
+		
+		<code>
+			<pre>
+
+	regionSelector = 
+	{
+		name: "regionSelector",
+		type: "select",
+		parameters:[],
+		valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
+		parameter:"<b>Dashboards.storage.region</b>",
+		valueAsId: false,
+		htmlObject: "sampleObject",
+		executeAtStart: true,
+		postChange: function(){<b>Dashboards.saveStorage()</b>; alert("You chose: " + <b>Dashboards.storage.region</b>);}
+	};
+
+			</pre>
+		</code>
+
+
+
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+  <title>Chart Component Test (Bar Chart)</title>
+  <version>1</version>
+  <logging-level>DEBUG</logging-level>
+  <documentation> 
+    <author>Ingo Klose</author>  
+   <result-type>none</result-type> 
+    <description>The pie chart with the variance by region</description> 
+  </documentation>
+
+  <inputs/>
+
+  <outputs> 
+    <image-tag type="string"/> 
+  </outputs>
+
+  <resources/>
+  
+  <actions> 
+    <action-definition> 
+      <component-name>SQLLookupRule</component-name>
+      <action-type>Relational</action-type>
+      <action-outputs> 
+        <query-result type="result-set" mapping="query_result"/> 
+      </action-outputs>
+      <component-definition> 
+        <jndi><![CDATA[SampleData]]></jndi>  
+        <live><![CDATA[true]]></live>  
+        <query><![CDATA[select REGION, sum(ACTUAL) as ACTUAL
+from QUADRANT_ACTUALS
+group by REGION
+order by ACTUAL]]></query> 
+      </component-definition> 
+    </action-definition>
+  
+    <action-definition> 
+      <component-name>ChartComponent</component-name>
+      <action-type>Regions Pie Chart</action-type>
+      <action-inputs> 
+        <chart-data type="result-set" mapping="query_result"/> 
+      </action-inputs>
+      <action-outputs> 
+        <image-tag type="string"/> 
+      </action-outputs>
+      <component-definition> 
+        <chart-attributes> 
+          <chart-type>PieChart</chart-type>  
+          <border-visible>false</border-visible>  
+          <include-legend>false</include-legend>  
+          <is-3D>false</is-3D>  
+          <!--<url-template><![CDATA[javascript:Dashboards.fireChange('region', '{region}')]]></url-template> -->
+          <url-template><![CDATA[javascript:clickOnRegion('{region}')]]></url-template>   
+          <paramName>region</paramName>  
+          <title-font> 
+            <font-family>Arial</font-family>  
+            <size>12</size>  
+            <is-bold>false</is-bold>  
+            <is-italic>false</is-italic> 
+          </title-font>  
+          <use-base-url>false</use-base-url>  
+          <url-target>_self</url-target> 
+        </chart-attributes>  
+        <width><![CDATA[450]]></width>  
+        <height><![CDATA[300]]></height>  
+        <title><![CDATA[Headcount Spending by Region]]></title> 
+      </component-definition> 
+    </action-definition>
+ 
+  </actions> 
+</action-sequence>

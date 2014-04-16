@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+  <title>regions</title>
+  <version>1</version>
+  <logging-level>ERROR</logging-level>
+  <documentation> 
+    <author/>  
+    <description>Empty blank action sequence document</description>  
+    <help/>  
+     <result-type>none</result-type> 
+    <icon/> 
+  </documentation>
+
+  <inputs> 
+    <regions type="result-set"> 
+      <default-value type="result-set">
+        <row>
+          <region_id>1</region_id>
+          <region_name>Southern</region_name>
+        </row>
+        <row>
+          <region_id>2</region_id>
+          <region_name>Eastern</region_name>
+        </row>
+        <row>
+          <region_id>3</region_id>
+          <region_name>Central</region_name>
+        </row>
+        <row>
+          <region_id>4</region_id>
+          <region_name>Western</region_name>
+        </row>
+      </default-value>  
+      <columns>
+        <region_id type="string"/>
+        <region_name type="string"/>
+      </columns>
+    </regions> 
+  </inputs>
+
+  <outputs> 
+    <regions type="result-set"/> 
+  </outputs>
+
+  <resources/>
+  
+  <actions/> 
+</action-sequence>

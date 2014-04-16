@@ -1,0 +1,185 @@
+<script type="text/javascript" src="../../repo/files/:public:plugin-samples:pentaho-cdf:20-samples:charts:MetaLayerCharts.js"></script>
+
+<style type="text/css">
+
+	.alt {
+		color:#666666;
+		font-family:"Warnock Pro","Goudy Old Style","Palatino","Book Antiqua",Georgia,serif;
+		font-style:italic;
+		font-weight:normal;
+	}
+
+</style>
+
+
+
+<div class="container alt">
+	<div class="span-24 clearfix prepend-top append-bottom">
+	
+	
+		<h1>
+			Blueprint css framework
+		</h1>
+
+		<hr />
+
+		<p>
+			Blueprint is a CSS framework, which aims to cut down on your development time. 
+			It gives you a solid foundation to build your project on top of, with an easy-to-use 
+			grid, sensible typography, useful plugins, and even a stylesheet for printing.
+		</p>
+		<p class="small">
+			From the <a href="http://www.blueprintcss.org/">Blueprint homepage</a>.
+		</p>
+
+		<hr />
+
+	</div>
+
+	<div class="container span-24 append-bottom">
+		<div class="span-12 clearfix">
+			<b>What does Blueprint has to offer?</b>
+			<ul>
+				<li>A CSS reset that eliminates the discrepancies across browsers.</li>
+				<li>A solid grid that can support the most complex of layouts.</li>
+				<li>Typography based on expert principles that predate the web.</li>
+				<li>Form styles for great looking user interfaces.</li>
+				<li>Print styles for making any webpage ready for paper.</li>
+				<li>Plugins for buttons, tabs and sprites.</li>
+				<li>Tools, editors, and templates for every step in your workflow.</li>
+			</ul>
+				
+		</div>
+	
+	
+		<div class="span-12 clearfix last">
+			<b>Why use Blueprint with CDF?</b>
+			<ul>
+				<li>24 column layout allow an easy way to construct 2, 3 or 4 columns.</li>
+				<li>Layout stability across browsers frees the developer from webdesign debugging.</li>
+				<li>Rich set of classes allows flexible layouts.</li>
+				<li>Easy to do math: a span-8 div is 8*40-10 pixels wide</li>
+			</ul>
+		</div>
+	</div>
+	<div class="container span-24 append-bottom">	
+		<div class="span-8 clearfix">
+			<div id="pieChart_object"></div>
+		</div>
+
+		<div class="span-8">
+			<div id="barChart_object"></div>
+		</div>
+	
+		<div class="span-8 last">
+			<div id="dialChart_object"></div>
+		</div>	
+	</div>
+	
+	<div class="container span-24 append-bottom">
+		<div class="span-4">
+			<p>
+				Different columns may have different widths. This provides greater flexibility for dashboard design.
+				These columns are, respectively, span-5, span-12 and span-7.
+			</p>
+		</div>
+		<div class="span-12">
+			<p>
+				<b>Lorem ipsum dolor sit amet</b>
+			<p>
+			<p>
+				Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+				Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo 
+				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat 
+				nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt 
+				mollit anim id est laborum.
+			</p>
+		</div>
+		<div class="span-7 last">
+			<p>
+				More info about Blueprint:
+			</p>
+			<ul>
+				<li><a href="http://www.blueprintcss.org/">Blueprint homepage</a></li>
+				<li><a href="http://en.wikipedia.org/wiki/Blueprint_(CSS_framework)">Wikipedia article on Blueprint</a></li>
+				<li><a href="http://net.tutsplus.com/tutorials/html-css-techniques/a-closer-look-at-the-blueprint-css-framework/">A closer look at the Blueprint CSS Framework</a></li>
+				<li><a href="http://wiki.github.com/joshuaclayton/blueprint-css/">Blueprint wiki</a></li>
+			</ul>
+		</div>
+	</div>
+	
+	<div class="span-24 last">
+		<h2>
+			Less time worrying with html layout = More time developing dashboard components!
+		</h2>
+	</div>
+</div>
+
+
+	
+<script language="javascript" type="text/javascript">
+
+
+
+	var productLine = "null";
+	var territory = "null";
+
+	title =
+{
+name: "title",
+	  type: "text",
+	  htmlObject: "title_object",
+	  executeAtStart: true,
+	  expression: function(){return "Charts examples"}
+}
+
+
+pieChart =
+{
+name: "pieChart",
+	  type: "jFreeChartComponent",
+	  listeners:["MetaLayerCharts.regionsMeasure"],
+	  chartDefinition: MetaLayerCharts.pieChartDefinition,
+	  htmlObject: "pieChart_object",
+	  executeAtStart: true
+}
+
+barChart =
+{
+name: "barChart",
+	  type: "jFreeChartComponent",
+	  listeners:["MetaLayerCharts.selectedRegionMeasure"],
+	  chartDefinition: MetaLayerCharts.barChartDefinition,
+	  htmlObject: "barChart_object",
+	  width: 470,
+	  executeAtStart: true
+}
+
+		
+dialChart =
+{
+name: "dialChart",
+	  type: "dialComponent",
+	  listeners:["MetaLayerCharts.departmentMeasure"],
+	  chartDefinition: MetaLayerCharts.dialChartDefinition,
+	  htmlObject: "dialChart_object",
+	  width: 310,
+	  executeAtStart: true
+}
+
+
+
+
+var components = [pieChart,barChart,dialChart];
+
+</script>
+
+<script language="javascript" type="text/javascript">
+
+	function load(){
+		Dashboards.init(components);
+	}
+
+load();
+
+</script>

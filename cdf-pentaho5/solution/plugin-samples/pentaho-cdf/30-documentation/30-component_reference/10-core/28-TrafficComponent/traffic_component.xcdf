@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>TrafficComponent</title>
+	<author>Webdetails</author>
+	<description>TrafficComponent</description>
+	<icon></icon>
+	<template>template.html</template>
+	<style>mantle</style>
+</cdf>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<action-sequence> 
+	<name>BarChart2.xaction</name>
+	<title>CDF Demo</title>
+	<version>1</version>
+	<logging-level>TRACE</logging-level>
+	<documentation> 
+		<author>Pedro Alves</author>  
+		<description>BarChart component demonstration</description>  
+		<help/>  
+		<result-type>none</result-type> 
+		<icon/> 
+	</documentation>
+
+	<inputs> 
+		<territory type="string">
+			<sources>
+				<request>territory</request>
+			</sources>
+			<default-value><![CDATA[0]]></default-value>
+		</territory>
+	</inputs>
+
+	<outputs> 
+		<image-tag type="string"/>
+		<!--query_result/-->
+	</outputs>
+
+	<resources/> 
+
+	<actions> 
+		<action-definition>
+			<component-name>JavascriptRule</component-name>
+			<action-type>JavaScript</action-type>
+			<action-inputs>
+				<territory type="string"/>
+			</action-inputs>
+			<action-outputs>
+				<territory2 type="string"/>
+			</action-outputs>
+			<component-definition>
+				<script><![CDATA[
+					territory2 = "";
+					if (territory.length>1){
+					territory2=" where offices.TERRITORY='" + territory +"'"
+					}
+					]]></script>
+			</component-definition>
+		</action-definition>
+
+		<action-definition> 
+			<component-name>SQLLookupRule</component-name>
+			<action-type>Relational</action-type>
+			<action-inputs>
+				<territory2 type="string"/>
+			</action-inputs>
+			<action-outputs> 
+				<query-result type="result-set" mapping="query_result"/>  
+				<id type="integer"/>  
+				<name type="string"/> 
+			</action-outputs>
+			<component-definition> 
+				<jndi><![CDATA[SampleData]]></jndi>  
+				<query><![CDATA[
+					SELECT
+					PRODUCTS.PRODUCTLINE,
+					SUM(ORDERDETAILS.QUANTITYORDERED*ORDERDETAILS.PRICEEACH) AS REVENUE
+					FROM ORDERS
+					INNER JOIN ORDERDETAILS ON ORDERS.ORDERNUMBER = ORDERDETAILS.ORDERNUMBER
+					INNER JOIN PRODUCTS ON ORDERDETAILS.PRODUCTCODE =PRODUCTS.PRODUCTCODE
+					INNER JOIN CUSTOMERS ON ORDERS.CUSTOMERNUMBER =CUSTOMERS.CUSTOMERNUMBER
+					INNER JOIN EMPLOYEES ON CUSTOMERS.SALESREPEMPLOYEENUMBER = EMPLOYEES.EMPLOYEENUMBER
+					INNER JOIN OFFICES ON EMPLOYEES.OFFICECODE=OFFICES.OFFICECODE
+					{territory2}
+					GROUP BY PRODUCTS.PRODUCTLINE
+					ORDER BY 2 DESC
+					]]></query>  
+				<live><![CDATA[true]]></live> 
+			</component-definition> 
+		</action-definition>
+
+
+		<action-definition> 
+			<component-name>ChartComponent</component-name>
+			<action-type>Chart</action-type>
+			<action-inputs> 
+				<chart-data type="result-set" mapping="query_result"/> 
+			</action-inputs>
+			<action-outputs> 
+				<image-tag type="string"/> 
+			</action-outputs>
+			<component-definition> 
+				<chart-attributes> 
+					<chart-type>BarChart</chart-type>  
+					<by-row>false</by-row>
+					<title-font> 
+						<font-family>Arial</font-family>  
+						<size>14</size> 
+						<is-bold>true</is-bold>
+					</title-font>  
+					<border-visible>false</border-visible>  
+					<orientation>vertical</orientation>  
+					<include-legend>false</include-legend>  
+					<is-3D>true</is-3D>  
+					<foreground-alpha>0.8</foreground-alpha>
+					<background-alpha>1</background-alpha>
+					<url-template><![CDATA[javascript:Dashboards.fireChange('productLine',encode_prepare('{productLine}'))]]></url-template>  
+					<paramName>productLine</paramName>  
+					<series-name>Revenue</series-name>
+					<url-target>_self</url-target>  
+					<use-base-url>false</use-base-url>  
+					<domain-label-rotation>0.7</domain-label-rotation>
+					<chart-background type="color">#F8F8F8</chart-background>  
+					<plot-background type="color">#F8F8F8</plot-background>  
+					<label-font>
+						<font-family>Arial</font-family>
+						<size>8</size>
+						<is-bold>false</is-bold>
+						<is-italic>false</is-italic>
+					</label-font>
+					<color-palette> 
+						<color>#93cfc3</color>  
+						<color>#FFFF00</color>  
+						<color>#00FF00</color>  
+						<color>#006666</color>  
+						<color>#336699</color>  
+						<color>#99CCFF</color>  
+						<color>#999933</color>  
+						<color>#3399FF</color>  
+						<color>#993300</color>  
+						<color>#666666</color>  
+						<color>#FFCC66</color>  
+						<color>#6699CC</color>  
+						<color>#663366</color> 
+					</color-palette> 
+				</chart-attributes>  
+				<width><![CDATA[290]]></width>  
+				<height><![CDATA[300]]></height>  
+				<title><![CDATA[Sales by product type]]></title> 
+				<transparency>100</transparency>
+			</component-definition> 
+		</action-definition>
+
+	</actions> 
+</action-sequence>

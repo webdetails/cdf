@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Information Dashboard</title>
+	<author>Webdetails</author>
+	<description>Information Dashboard</description>
+	<icon></icon>
+	<template>template.html</template>
+	<style>mantle</style>
+</cdf>

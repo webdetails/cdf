@@ -1,0 +1,76 @@
+<!-- Created by Harris Ward - www.hazamonzo.co.uk -->
+
+<table align="center" style="border: 1px solid #000;width:900px; height:450px;">
+	<tr>
+		<td align="center"><p><div id="titleObject"></div></p></td>
+	</tr>
+	<tr>
+			<td valign="top"><div id="selectStatusObject"></div></td>
+	</tr>
+  <tr height="100%">
+		<td>
+				<div id="orderStatusPrptObject" style="height:100%; width:100%;"></div>
+		</td>
+	</tr>
+</table>
+
+<script language="javascript" type="text/javascript">
+
+
+var oStatus = "Shipped";
+
+titleString = 
+{
+  name: "titleString",
+  type: "text",
+  title: "Order Status",
+  listeners:["oStatus"],
+  htmlObject: "titleObject",
+  executeAtStart: true,
+  expression: function(){return this.title},
+  preExecution:function(){
+  	if( oStatus != "null" ) {
+		  this.title = "Shipping Status (" + oStatus + ")";
+	  }
+	  else  {
+		  this.title = "Shipping Status";
+	  }
+  },
+  postExecution:function(){}
+}
+
+
+statusSelector = 
+{
+  name: "statusSelector",
+  type: "select",
+  parameter:"oStatus",
+  parameters: [],
+  valuesArray: [ ["Shipped", "Shipped"], ["In Process", "In Process"]],
+  htmlObject: "selectStatusObject",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){Dashboards.processChange(this.name);}
+}
+
+orderStatusReport = 
+{
+  name: "orderStatus",
+  type: "prpt",
+  path: "/public/Steel Wheels/Widget Library/Report Snippets/Product Sales.prpt",
+  listeners:["oStatus"],
+  parameters: [["oStatus","oStatus", "Shipped"]],
+  htmlObject: "orderStatusPrptObject",
+  executeAtStart: true,
+  postExecution:function(){}
+}
+
+function load(){
+  var components = [titleString, statusSelector, orderStatusReport];
+	Dashboards.init(components);
+}
+
+load();
+
+</script>
+

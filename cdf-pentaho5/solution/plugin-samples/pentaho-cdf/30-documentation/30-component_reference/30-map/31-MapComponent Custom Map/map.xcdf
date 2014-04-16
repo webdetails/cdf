@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>MapComponent (Custom Map)</title>
+	<author>Webdetails</author>
+	<description>MapComponent (Custom Map)</description>
+	<icon></icon>
+	<template>template.html</template>
+	<style>mantle</style>
+</cdf>

@@ -1,0 +1,58 @@
+<style>
+	.contents li {font-weight: bold;}
+</style>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Metalayer</h2>
+		<p>
+		
+		MetaLayer is a concept introduced by <a href="http://daniele.livejournal.com/">Daniel Einspanjer</a> that allows:
+
+		
+		<ul>
+			<li>Separating presentation and logic</li>
+
+			<li>Reuse logic</li>
+		</ul>
+		</p>
+
+
+		<p>
+
+		Metalayers are simply javascript files that live in the solution folder. They can be imported
+		from the template files using the following command:
+			
+		</p>
+
+
+		<code>
+			<pre>
+&lt;script type="text/javascript"
+   src="../solution:path:MyMetaLayer.js"&gt;&lt;/script&gt;
+			</pre>
+		</code>
+
+		<p>
+
+		More than one file can be included. Using this method, a developer can
+		leave only html design in the template.html file and put all the
+		components definition in the MetaLayers.
+
+		</p>
+
+
+		<p>
+		This same method can be used to include other types of files from the 
+		solution directory, like images, css resources, etc.
+		</p>
+		
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

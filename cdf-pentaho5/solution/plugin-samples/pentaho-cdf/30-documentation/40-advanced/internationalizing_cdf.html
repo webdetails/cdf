@@ -1,0 +1,49 @@
+<style>
+	.contents li {font-weight: bold;}
+</style>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Internationalization support in CDF</h2>
+		<p>
+
+		Creating an dashboard for users in different regions can be hard in term of the message format for the local region.
+        CDF provide internationalization support through Resource bundles that help internationalize our application.
+        <p>
+        To create resources file for i18n (there are 18 letters between the first i and the final n) we need to create
+        a file for each locale our application supported. These files are named <i>&lt;name&gt;.properties</i>, or <i>&lt;name&gt;_&lt;language&gt;.properties</i> or
+        <i>&lt;name&gt;_&lt;language&gt;_&lt;country&gt;.properties</i>. For instance a resource bundle for Locale.UK will be 
+        <i>MessagesBundle_en_GB.properties</i>.
+        The &lt;language&gt; argument is a valid ISO Language Code. These codes are the lower-case,
+        two-letter codes as defined by ISO-639. You can find a full list of these codes at a
+        number of sites, such as: <a href="http://www.loc.gov/standards/iso639-2/englangn.html">http://www.loc.gov/standards/iso639-2/englangn.html</a>
+        The &lt;country&gt; argument is a valid ISO Country Code. These codes are the upper-case,
+        two-letter codes as defined by ISO-3166. You can find a full list of these codes at a
+        number of sites, such as: <a href="http://www.iso.ch/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">http://www.iso.ch/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html</a>
+        <p>
+        We have two level of messages files in CDF
+        <ul>
+            <li>Global message file: located in <i>&lt;biserver_home&gt;/pentaho_solutions/system/pentaho_cdf/resources/languages</i> and useful
+            when used in dashboard global templates.</li>
+            <li>Dashboard specific message file: located in <i>&lt;dashboard_home&gt;</i> they can be distributed together with single dashboard.</li>
+        </ul>
+        <p>
+				To use the internationalization support you've to use the CDF.i18n tag with the following syntax:
+        <p>
+        <i>CDF.i18n(&lt;message_key&gt;)</i>
+        <p>
+        where &lt;message_key&gt; is a message key that can be found in one of the message resource bundle files located as explained above.
+        <p>
+        To enable Dashboard specific message files support add a &lt;messages&gt; element to the .xcdf dashboard configuration file whose value is the base name
+        of the dashboard specific message file.
+        <p>
+        You can find a sample of a localized dashboard in the CDF samples section.
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

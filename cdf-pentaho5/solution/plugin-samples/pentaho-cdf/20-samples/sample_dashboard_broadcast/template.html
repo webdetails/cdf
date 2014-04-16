@@ -1,0 +1,161 @@
+
+<p style="font-family: Arial;" id="title">Select a region: <span
+        id=text_object></span></p>
+<form name="myForm">
+	<table
+		style="width: 100%; text-align: left; margin-left: auto; margin-right: auto;"
+		border="0" cellpadding="2" cellspacing="2">
+		<tbody>
+			<tr>
+				<td
+					style="width: 50%; text-align: center; vertical-align: middle;"><span
+						style="font-family: Arial;">Select a Region</span><br>
+				</td>
+			</tr>
+			<td  style="width: 50%; text-align: center; vertical-align: middle;">
+				Single Select: <div id="object_select"></div> 
+				<br/>
+				Multi Select: <div id="object_multi"></div> 
+				<br/>
+				Radio Buttons: <div id="object_radio"></div> 
+				<br/>
+				Check Boxes: <div id="object_check"></div> 
+				<br/>
+				Text: <div id="object_textInput"></div> (Press enter after entry)
+				<br/>
+				Date input: <div id="object_dateInput"></div>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 50%; text-align: center; vertical-align: middle;">
+					<div id="object_2"></div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
+
+</script>
+
+<script language="javascript" type="text/javascript">
+var region="test";
+var dateStart="2007-01-01";
+
+regionSelector = 
+{
+  name: "regionSelector",
+  type: "select",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  parameters:[],
+  parameter:"region",
+  valueAsId: true,
+  htmlObject: "object_select",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){Dashboards.processChange(this.name);}
+}
+
+regionSelectorMulti = 
+{
+  name: "regionSelectorMulti",
+  type: "selectMulti",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  valueAsId: true,
+  parameters:[],
+  parameter:"region",
+  htmlObject: "object_multi",
+  size: "4",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+regionCheck = 
+{
+  name: "regionCheck",
+  type: "check",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  parameters:[],
+  parameter:"region",
+  htmlObject: "object_check",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+regionRadio = 
+{
+  name: "regionRadio",
+  type: "radio",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+  parameters:[],
+  parameter:"region",
+  htmlObject: "object_radio",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+regionText = 
+{
+  name: "regionText",
+  type: "textInput",
+  parameter:"region",
+  htmlObject: "object_textInput",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+dateInput = 
+{
+  name: "dateInput",
+  type: "dateInput",
+  parameter:"dateStart",
+  htmlObject: "object_dateInput",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+regionVarianceBarChart = 
+{
+  name: "regionVarianceBarChart",
+  type: "xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/RegionVarianceBarChart.xaction",
+  listeners:["region"],
+  parameters: [["REGION","region"]],
+  htmlObject: "object_2",
+  executeAtStart: false,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+titleString = 
+{
+  name: "regionVarianceBarChart",
+  type: "text",
+  listeners:["region","dateStart"],
+  htmlObject: "text_object",
+  executeAtStart: true,
+  expression: function(){return 'Chosen region: ' + region + '; Start date: ' + dateStart},
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+
+var components = [regionSelector, regionSelectorMulti, regionRadio, regionCheck, regionText, regionVarianceBarChart, titleString, dateInput];
+
+
+</script>
+
+<script language="javascript" type="text/javascript">
+
+
+function load(){
+	Dashboards.init(components);
+}
+
+load();
+
+</script>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>MetaLayer Usage</title>
+	<author>Webdetails</author>
+	<description>MetaLayer Usage Description</description>
+	<icon></icon>
+	<template>metaLayer_usage.html</template>
+	<style>mantle</style>
+</cdf>

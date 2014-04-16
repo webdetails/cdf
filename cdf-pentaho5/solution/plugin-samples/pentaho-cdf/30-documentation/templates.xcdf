@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Templates</title>
+	<author>Webdetails</author>
+	<description>CDF Templates</description>
+	<icon></icon>
+	<template>templates.html</template>
+	<style>mantle</style>
+</cdf>

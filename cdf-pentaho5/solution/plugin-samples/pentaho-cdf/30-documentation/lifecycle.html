@@ -1,0 +1,306 @@
+<script type="text/javascript"
+	src="30-component_reference/MetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+  <div class="contents">
+
+
+    <h2>CDF Async Developer's Guide</h2>
+
+    <p>CDF now supports proper, asynchronous, AJAX calls for all its querying. The
+      following is a guide to converting old components and dashboards to the new
+      async style, and developing new ones based on asynchronous querying.</p>
+
+    <h2>Rationale</h2>
+
+    <p>The first step to understanding the changes in the async patch is understanding
+      the CDF component lifecycle. When a component is updated, the basic update
+      lifecycle looks like this:</p>
+
+    <pre><code>preExecution -&gt; update -&gt; postExecution
+	</code></pre>
+
+    <p>Usually, though, there will be a call to a data source, with a subsequent call
+      to postFetch, and only then is the component rendered:</p>
+
+    <pre><code>preExecution -&gt; update -&gt; query -&gt; postFetch -&gt; redraw -&gt; postExecution
+	</code></pre>
+
+    <p>This is a more typical lifecycle, and one that has some important limitations.
+      First, preExeuction and postExecution are entirely the responsibility of CDF
+      itself, rather than the  component. Because CDF has no control over the contents
+      of the update method, it has no way of ensuring that, should the component
+      execute an asynchronous query, postExecution only runs after redraw. In this
+      case, you're likely to see this instead:</p>
+
+    <pre><code>preExecution -&gt; update -&gt; postExecution -&gt; query -&gt; postFetch -&gt; redraw
+	</code></pre>
+
+    <p>Which breaks the contract for postExecution running after the component is done
+      updating. The solution here is that the component itself must take control of
+      postExecution, while keeping the burden of implementing the lifecycle in CDF
+      rather than passing it to the component developer. On a related topic, postFetch
+      has become a de facto standard part of the lifecycle, yet its implementation was
+      left to the component implenters, which leads to a fairly large amount of
+      boilerplate code.</p>
+
+    <p>Our objective here was to retool the base component so as to deal with both
+      of these issues, thus allowing queries to be performed asynchronously while 
+      reducing the developer effort involved in creating a component.</p>
+
+    <h2>Component execution order and Priority</h2>
+
+    <p>There are no major changes in the way components behave. There is, however an
+      important caveat - since all components (that have been converted) will be
+      executed simultaneously, we can no longer rely on the order of execution. </p>
+
+    <p>There's now an additional property named <em>priority</em>. The priority of component
+      execution, defaulting to 5. The lower the number, the higher priority the
+      component has. Components with same priority with be executed simultaneously.
+      Useful in places where we need to give higher priority to filters or other
+      components that need to be executed before other components.</p>
+
+    <p>This way there's no longer the need to use dummy parameters and postChange
+      tricks to do, for instance, cascade prompts.</p>
+    
+    
+    <h2>Backward compatibility and changes</h2>
+      
+    <p>We did a big effort in order to maintain backward compatibility, but some care
+      has to be taken. What we do is assume that if components have no priority, we
+      give them a sequential value, trying to emulate the old behavior. It's
+      recommended that proper priorities are set in order to take advantage of the new
+      improvements.</p>
+        
+    <p>If using <em>CDE</em>, please note that if you edit a dashboard and save it, <strong>all
+        components will have a default priority of 5</strong>. This may break the old behavior.
+      If you need to change a dashboard, make sure you tweak the priorities, if
+      needed.</p>
+        
+
+
+    <h2>Developing Components</h2>
+
+    <p>Components desiring to use asynchronous queries should inherit from the new
+      UnmanagedComponent, instead of BaseComponent. The UnmanagedComponent base class
+      provides pre-composed methods that implement the core lifecycle, for a variety
+      of different scenarios:</p>
+
+    <ul>
+      <li><code>synchronous</code> implements a synchronous lifecycle identical to the core
+        CDF lifecycle.</li>
+      <li><code>triggerQuery</code> implements a simple interface to a lifecycle built around
+        Query objects.</li>
+      <li><code>triggerAjax</code> implements a simple interface to a lifecycle built around
+        AJAX calls.</li>
+    </ul>
+
+    <p>Since all these lifecycle methods expect a callback that handles the actual
+      component rendering, it's conventional style to have that callback as a method
+      of the Component, called <code>redraw</code>. It's also considered standard practice to
+      use <code>Function#bind</code> or <code>_.bind</code> to ensure that, inside the <code>redraw</code> callback,
+      <code>this</code> points to the component itself.</p>
+
+    <h3>Use <code>synchronous</code> If Your Component Doesn't Use External Data</h3>
+
+    <p>Components that don't use any external data at all can continue subclassing
+      BaseComponent without any change of functionality. However, for the sake of
+      consistency (or because you want querying to be optional -- see the section for
+      details), your can use subclass UnmanagedComponent and use the <code>synchronous</code>
+      lifecycle method to emulate BaseComponent's behaviour:</p>
+
+    <pre><code>update: function() {
+		this.synchronous(this.redraw);
+	}
+	</code></pre>
+
+    <p>If you want to pass parameters to <code>redraw</code>, you can pass them as an array to
+      <code>synchronous</code>:</p>
+
+    <pre><code>
+update: function() {
+		/* Will call this.redraw(1,2,3) */
+		this.synchronous(this.redraw, [1,2,3]);
+}
+	</code></pre>
+
+    <h3>Use <code>triggerQuery</code> When You Want Your Component To Use CDA/Query Objects</h3>
+
+    <p>If you're using a CDA data source, you probably want to use <code>triggerQuery</code> to
+      handle the component lifecycle for you. <code>triggerQuery</code> expects at a minimum
+      a query definition and a redraw callback to process the query results. The
+      query definition is an object of the form:</p>
+
+    <pre><code>
+{
+  dataAccessId: 'myQuery',
+	file: '/path/to/my/datasourceDefinition.cda'
+}
+	</code></pre>
+
+    <p>Typically, if you're using CDE, these properties will be added to one of either
+      <code>this.queryDefinition</code> or <code>this.chartDefinition</code> so you can just use this
+      pattern:</p>
+
+    <pre><code>
+update: function() {
+	var redraw = _.bind(this.redraw,this);
+	this.triggerQuery(this.queryDefinition, redraw);
+}
+</code></pre>
+
+    <h3>Alternating Between Static And Query-Based Data</h3>
+
+    <p>As the lifecycle methods are completely self-contained, you can switch between
+      them at will, deciding on an appropriate lifecycle at runtime. A common pattern
+      (used e.g. in SelectComponent, and the CccComponent family) is exposing a
+      <code>valuesArray</code> property, and using static data if <code>valuesArray</code> is provided, or
+      a query if it is not. Using UnmanagedComponent, this convention would like like
+      this:</p>
+
+    <pre><code>
+update: function() {
+	var redraw = _.bind(this.redraw,this);
+	if(this.valuesArray &amp;&amp; this.valuesArray.length &gt; 0) {
+		this.synchronous(redraw,this.valuesArray);
+	} else {
+		this.triggerQuery(this.queryDefinition,redraw);
+	}
+}
+</code></pre>
+
+    <h3>Rolling Your Own</h3>
+
+    <p>If you prefer having absolute control over your component, you can eschew the
+      use of any of the lifecycle methods. Instead, you're expected to follow these
+      guidelines:</p>
+
+    <ul>
+      <li>Call <code>this.preExec()</code> as soon as possible, and bail out if it returns false.</li>
+      <li>If <code>this.preExec()</code> returned true, call <code>this.block()</code> before any meaningful
+        amount of work is done.</li>
+      <li>If you called <code>this.block()</code>, make sure to always call <code>this.unblock()</code> as
+        well once all relevant work is done.</li>
+      <li>If you want to use any sort of AJAX, consider using <code>triggerAjax</code></li>
+      <li>Call <code>this.postExec()</code> once all processing is done</li>
+      <li>You can override <code>this.block</code> and <code>this.unblock</code> to implement component
+        specific UI blocking. If you override either, you <em>must</em> override the other
+        as well.</li>
+    </ul>
+
+    <h2>New and Changed Features</h2>
+
+    <h3>Component Cloning</h3>
+
+    <p>If your component holds any references to other components, you need to override
+      the <code>clone</code> method so as to ensure that you don't accidentally clone the target
+      component. For example, if your component has a property named <code>otherComponent</code>
+      pointing at another component, you should override <code>clone</code> using this general
+      template:</p>
+
+    <pre><code>clone: function(parameterRemap,componentRemap,htmlRemap) {
+	var other = this.otherComponent;
+	delete this.otherComponent;
+	var that = this.base(parameterRemap,componentRemap,htmlRemap);
+	this.otherComponent = that.otherComponent = other;
+	return that;
+}
+</code></pre>
+
+    <h3>New Base Component Class: UnmanagedComponent</h3>
+
+    <p>UnmanagedComponent is a new base class for components. It provides the base on
+      which all asynchronous components should be built.</p>
+
+    <h3>Per-Component <code>isManaged</code> Flag</h3>
+
+    <p>Each component should have a member property with isManaged, indicating whether
+      CDF should managed the component's lifecycle. Components where <code>isManaged</code> is 
+      false need to implement it's own calls to the lifecycle</p>
+
+
+
+		<h2>Component Stub</h2>
+
+    <p>Here's an example of a stub to be used whenever you need to use a new component.
+    Just override the redraw function to what you need and define the component
+    as you'd usually do</p>
+    
+    
+		<div id="example">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+
+				<div id="sampleObject"></div>
+
+			</div>
+
+
+				<div id="code">
+					<textarea cols="80" rows="20" id="samplecode">
+
+ExampleComponent = UnmanagedComponent.extend({
+
+  update: function() {
+    var redraw = _.bind(this.redraw,this);
+    if(this.valuesArray && this.valuesArray.length > 0) {
+      this.synchronous(redraw,{resultset: this.valuesArray});
+    } else {
+      this.triggerQuery(this.queryDefinition,redraw);
+    }
+  },
+
+  redraw: function(data){
+
+    /* Specific code goes here */
+    if(!this.isInitialized){
+      this.compiledStr = Mustache.compile("<p> Got a result set with  {{nrRows}} rows and {{nrCols}} columns </p>");
+      this.isInitialized = true;
+    }
+    $("#"+this.htmlObject).html(this.compiledStr({
+      nrRows: data.resultset.length||0,
+      nrCols: data.resultset[0]?data.resultset[0].length || 0:0
+    }));
+
+  }
+
+});
+
+customComponent = 
+  {
+  name: "regionSelector",
+  type: "example",
+  parameters:[],
+  valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
+  priority: 5,
+  htmlObject: "sampleObject",
+  executeAtStart: true
+};
+Dashboards.init([customComponent]);
+
+
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
+				</div>
+			</div>
+
+
+
+
+  </div>
+</div>
+
+<script>
+  
+  var region;
+  var regionSelector;
+  var tabs = $("#example").tabs();
+  evaluateCode(false);
+        
+</script>

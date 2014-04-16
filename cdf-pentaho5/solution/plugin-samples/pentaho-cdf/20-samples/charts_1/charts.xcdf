@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Internationalized Charts Sample</title>
+	<author>Sergio Ramazzina</author>
+	<description>This dashboard shows a sample of a jFreeChartComponent with internationalization support</description>
+	<icon></icon>
+	<template>template.html</template>
+    <messages>Messages</messages>
+    <style>mantle</style>
+</cdf>

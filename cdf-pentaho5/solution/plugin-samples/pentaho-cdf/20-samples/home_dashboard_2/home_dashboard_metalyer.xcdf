@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Home Dashboard With MetaLayer</title>
+	<author>Webdetails</author>
+	<description>This shows how the classic home dashboard can be rewritten in CDF using metalayers</description>
+	<icon></icon>
+	<template>template.html</template>
+	<style>mantle</style>
+</cdf>
