@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,7 @@ import org.pentaho.cdf.util.Parameter;
 import pt.webdetails.cpf.Util;
 import pt.webdetails.cpf.repository.api.IBasicFile;
 import pt.webdetails.cpf.repository.api.IReadAccess;
+import pt.webdetails.cpf.repository.util.RepositoryHelper;
 import pt.webdetails.cpf.utils.CharsetHelper;
 
 public class CdfHtmlRenderer {
@@ -99,8 +101,12 @@ public class CdfHtmlRenderer {
     final String dashboardContent = getDashboardContent( dashboardTemplateFile.getContents(), i18nTagsList );
 
     // Merge dashboard related message file with global message file and save it in the dashboard cache
+    String path = StringUtils.defaultIfEmpty( FilenameUtils.getPathNoEndSeparator( dashboardTemplateFile.getPath() ) , 
+        CdfEngine.getEnvironment().getCdfPluginRepositoryDir() ) ;
+    path = !path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ? RepositoryHelper.SEPARATOR + path : path;
+    
     MessageBundlesHelper mbh =
-        new MessageBundlesHelper( dashboardTemplateFile.getPath(), dashboardsMessagesBaseFilename );
+        new MessageBundlesHelper( path, dashboardsMessagesBaseFilename );
 
     intro = replaceIntroParameters( intro, mbh, i18nTagsList, dashboardsMessagesBaseFilename );
 

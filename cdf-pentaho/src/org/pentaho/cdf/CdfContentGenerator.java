@@ -71,6 +71,7 @@ import pt.webdetails.cpf.repository.api.IUserContentAccess;
 import pt.webdetails.cpf.resources.IResourceLoader;
 import pt.webdetails.cpf.utils.CharsetHelper;
 import pt.webdetails.cpf.utils.MimeTypes;
+import pt.webdetails.cpf.utils.PluginIOUtils;
 
 /**
  * This is the main class of the CDF plugin. It handles all requests to /pentaho/content/pentaho-cdf. These requests
@@ -572,10 +573,15 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       throw new SecurityException( "Not allowed" );
     }
 
-    IUserContentAccess access = CdfEngine.getUserContentReader( null );
+    IUserContentAccess contentAccess = CdfEngine.getUserContentReader( null );
+    IReadAccess systemAccess = CdfEngine.getPluginSystemReader( null );
 
-    if ( access.fileExists( resourcePath ) && access.hasAccess( resourcePath, FileAccess.EXECUTE ) ) {
-      IOUtils.copy( access.getFileInputStream( resourcePath ), out );
+    if ( contentAccess.fileExists( resourcePath ) && contentAccess.hasAccess( resourcePath, FileAccess.EXECUTE ) ) {
+      PluginIOUtils.writeOutAndFlush( out, contentAccess.getFileInputStream( resourcePath ) );
+    }else if ( systemAccess.fileExists( resourcePath ) ){
+      PluginIOUtils.writeOutAndFlush( out, systemAccess.getFileInputStream( resourcePath ) );
+    }else{
+      logger.info( " resource not found: " + resourcePath );
     }
   }
 

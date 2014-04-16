@@ -113,6 +113,13 @@ public class CdfApi {
       response.sendError( HttpServletResponse.SC_FORBIDDEN );
     }
   }
+  
+  @POST
+  @Path( "/getResource" )
+  public void postResource( @QueryParam( Parameter.RESOURCE ) String resource,
+      @QueryParam( Parameter.PATH ) String path, @Context HttpServletResponse response ) throws Exception {
+    getResource( resource , path, response );
+  }
 
   @GET
   @Path( "/getContext" )
