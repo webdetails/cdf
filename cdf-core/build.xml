@@ -74,17 +74,6 @@
 		  	<isfalse value="${test.roundtrip}"/>
 	</condition>
 
-
-	<target name="init-tests" depends="clean-tests">
-	    <mkdir dir="${testclasses.dir}" />
-	    <mkdir dir="${testsrc.dir}" />
-
-	    <copy todir="${testclasses.dir}" overwrite='true'>
-	      <fileset dir='${testresources.dir}' />
-	    </copy>
-		  <unzip src="${testclasses.dir}/sampledata.zip" dest="${testclasses.dir}/sampledata" />
-	 </target>
-
 	  <target name="test" depends="compile,compile-tests" description="Compiles and runs unit tests">
 	    <junit printsummary="yes" haltonfailure="${junit.haltonfailure}" >
 	      <sysproperty key="java.awt.headless" value="${headless.unittest}"/>
