@@ -228,7 +228,6 @@
             &lt;description>${marketplace.metadata.description}&lt;/description>
             &lt;build_id>${sequential.build.id}&lt;/build_id>
             &lt;min_parent_version>${marketplace.metadata.min_parent_version}&lt;/min_parent_version>
-            &lt;max_parent_version>${marketplace.metadata.min_parent_version}&lt;/max_parent_version>
           &lt;/version>
       </echo>
 
@@ -563,7 +562,7 @@ excludes="**/Thumbs.db"
         <param name="publish.artifactId" value="${ivy.artifact.id}"/>
         <param name="publish.version" value="${project.revision}"/>
         <param name="publish.file" value="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip"/>
-      </antcall>            
+      </antcall>
     </target>
 
 </project>

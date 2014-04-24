@@ -229,7 +229,7 @@
             &lt;description>${marketplace.metadata.description}&lt;/description>
 		    &lt;build_id>${sequential.build.id}&lt;/build_id>
             &lt;min_parent_version>${marketplace.metadata.min_parent_version}&lt;/min_parent_version>
-            &lt;max_parent_version>${marketplace.metadata.min_parent_version}&lt;/max_parent_version>
+            &lt;max_parent_version>${marketplace.metadata.max_parent_version}&lt;/max_parent_version>
 	        &lt;/version>
 	    </echo>
 
