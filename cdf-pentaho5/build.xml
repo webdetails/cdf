@@ -355,41 +355,6 @@ excludes="**/Thumbs.db"
 	</target>
 
 
-	  <!--=======================================================================
-		publish-pentaho-nojar (override)
-
-		Publishes the jar and plugin zip package to the Maven repository
-		====================================================================-->
-	<target name="publish-pentaho-nojar" depends="install-antcontrib,create-pom,ivy.deliver,publish-nojar">
-		<ant antfile="common_build.xml" target="publish-pentaho-nojar" />
-
-		<ivy:makepom ivyfile="package-ivy.xml" pomfile="plugin-pom.xml" />
-		<ivy:makepom ivyfile="package-ivy.xml" pomfile="samples-pom.xml" />
-		<ivy:makepom ivyfile="package-ivy.xml" pomfile="solution-pom.xml" />
-
-		<replace file="plugin-pom.xml" token="jar" value="zip" />
-		<replace file="plugin-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}" />
-		<antcall target="maven-publish-artifact">
-			<param name="publish.pomFile" value="plugin-pom.xml" />
-			<param name="publish.file" value="${dist.dir}/${plugin.zipfile}" />
-		</antcall>
-
-		<replace file="samples-pom.xml" token="jar" value="zip" />
-		<replace file="samples-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-samples" />
-		<antcall target="maven-publish-artifact">
-			<param name="publish.pomFile" value="samples-pom.xml" />
-			<param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
-		</antcall>
-
-		  <!--
-		  <replace file="solution-pom.xml" token="jar" value="zip" />
-		  <replace file="solution-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-solution" />
-		  <antcall target="maven-publish-artifact">
-			  <param name="publish.pomFile" value="solution-pom.xml" />
-			  <param name="publish.file" value="${dist.dir}/${plugin.solution.zipfile}" />
-		  </antcall>
-	-->
-	</target>
 
   	<target name="resolve" depends="resolve-default, resolve-test, resolve-runtime, ivy.check-releasable"
           description="Retrieves all the dependent libraries" />
@@ -574,6 +539,31 @@ excludes="**/Thumbs.db"
 	    </for>
 	</target>
 
-  	<target name="publish-nojar" depends="subfloor-js.js.publish-nojar, subfloor.publish-nojar"/>
+  	<target name="publish-nojar" depends="subfloor-js.js.publish-nojar, subfloor.publish-nojar">
+      <ivy:makepom ivyfile="package-ivy.xml" pomfile="plugin-pom.xml" />
+      <ivy:makepom ivyfile="package-ivy.xml" pomfile="samples-pom.xml" />
+
+      <replace file="plugin-pom.xml" token="jar" value="zip" />
+      <replace file="plugin-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}" />
+      <antcall target="maven-publish-artifact">
+        <param name="publish.pomFile" value="plugin-pom.xml" />
+        <param name="publish.file" value="${dist.dir}/${plugin.zipfile}" />
+      </antcall>
+
+      <replace file="samples-pom.xml" token="jar" value="zip" />
+      <replace file="samples-pom.xml" token="%artifact-name%" value="${plugin.artifact.id}-samples" />
+      <antcall target="maven-publish-artifact">
+        <param name="publish.pomFile" value="samples-pom.xml" />
+        <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
+      </antcall>
+
+
+      <antcall target="maven-publish-js-source">
+        <param name="publish.groupId" value="pentaho-cdf"/>
+        <param name="publish.artifactId" value="${ivy.artifact.id}"/>
+        <param name="publish.version" value="${project.revision}"/>
+        <param name="publish.file" value="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip"/>
+      </antcall>            
+    </target>
 
 </project>

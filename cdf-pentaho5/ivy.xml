@@ -72,7 +72,7 @@
     <!-- js dependencies -->
     <dependency org="pentaho" name="ccc" rev="${dependency.pentaho-ccc-plugin.revision}" transitive="false" changing="true" conf="js->default">
       <artifact name="ccc" type="zip" ext="zip"/>
-    </dependency>    
+    </dependency>
 
 
   </dependencies>
