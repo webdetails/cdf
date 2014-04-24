@@ -8,7 +8,7 @@
   </configurations>
 
   <publications>
-    <artifact name="${plugin.artifact.id}" type="zip" />
+    <artifact name="${plugin.artifact.id}-samples" type="zip" />
   </publications>
 
   <dependencies defaultconf="default->default">
