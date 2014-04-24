@@ -558,8 +558,8 @@ excludes="**/Thumbs.db"
 
 
       <antcall target="maven-publish-js-source">
-        <param name="publish.groupId" value="pentaho-cdf"/>
-        <param name="publish.artifactId" value="${ivy.artifact.id}"/>
+        <param name="publish.groupId" value="${ivy.artifact.group}"/>
+        <param name="publish.artifactId" value="pentaho-cdf"/>
         <param name="publish.version" value="${project.revision}"/>
         <param name="publish.file" value="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip"/>
       </antcall>
