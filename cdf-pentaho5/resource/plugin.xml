@@ -2,8 +2,8 @@
 <plugin title="Pentaho Community Dashboard Framework" name="pentaho-cdf">>
 
 	<lifecycle-listener class="org.pentaho.cdf.CdfLifecycleListener"/>
-    
-    <content-types> 
+
+    <content-types>
 
         <static-paths>
             <static-path url="/pentaho-cdf/js" localFolder="js"/>
@@ -23,6 +23,5 @@
 
     <external-resources>
         <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
-        <file context="dashboards">content/pentaho-cdf/js/widget-cdf.js</file>
     </external-resources>
 </plugin>
