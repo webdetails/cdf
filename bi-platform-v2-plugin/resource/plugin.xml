@@ -7,7 +7,7 @@
 					<static-path url="/pentaho-cdf/js" localFolder="js"/>
 					<static-path url="/pentaho-cdf/resources" localFolder="resources"/>
 					<static-path url="/pentaho-cdf/tmp" localFolder="tmp"/>
-                </static-paths> 
+                </static-paths>
 
 		<content-type type="xcdf" mime-type="text/html">
         	<title>Dashboard</title>
@@ -18,8 +18,7 @@
 	</content-types>
 
   <external-resources>
-    <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
-    <file context="dashboards">content/pentaho-cdf/js/widget-cdf.js</file>
+    <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>  		
   </external-resources>
 
 </plugin>
