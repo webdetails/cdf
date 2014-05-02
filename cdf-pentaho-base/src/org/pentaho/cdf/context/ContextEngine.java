@@ -238,6 +238,13 @@ public class ContextEngine {
       return queries;
     }
 
+    /* Bail out if cdf/includes folder does not exists */
+    IReadAccess autoIncludesFolder = CdfEngine.getUserContentReader( null );
+    if( !autoIncludesFolder.fileExists(
+      CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR ) ){
+      return queries;
+    }
+
     List<AutoInclude> autoIncludes = getAutoIncludes( config );
     for ( AutoInclude autoInclude : autoIncludes ) {
       if ( autoInclude.canInclude( dashboardPath ) ) {
