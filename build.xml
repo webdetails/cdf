@@ -32,7 +32,7 @@
         <echo level="info">###############################</echo>
         <ant dir="@{proj}" antfile="build.xml" target="${target}" inheritAll="false"/>
         <echo level="info">###############################</echo>
-        <echo level="info">FINISHED</echo>        
+        <echo level="info">FINISHED</echo>
         <echo level="info">###############################</echo>
       </sequential>
     </for>
@@ -58,13 +58,13 @@
       <param name="projects" value="${all.projects}"/>
     </antcall>
   </target>
-  
+
   <target name="test">
     <antcall target="call">
       <param name="target" value="test"/>
       <param name="projects" value="${all.projects}"/>
-    </antcall>  
-  </target>    
+    </antcall>
+  </target>
 
   <target name="publish-local-core">
     <ant dir="${core.project}" antfile="build.xml" target="resolve" inheritAll="false" />
@@ -81,15 +81,30 @@
     <antcall target="call">
       <param name="target" value="publish"/>
       <param name="projects" value="${all.projects}"/>
-    </antcall>  
+    </antcall>
   </target>
 
-  <target name="dist" depends="publish-local-core, resolve-projects, subfloor.install-antcontrib"> 
+
+<target name="dist-source">
+  <antcall target="call">
+    <param name="target" value="dist-source"/>
+    <param name="projects" value="${projects.list}"/>
+  </antcall>
+</target>
+
+<target name="dist-javadoc">
+  <antcall target="call">
+    <param name="target" value="dist-javadoc"/>
+    <param name="projects" value="${projects.list}"/>
+  </antcall>
+</target>
+
+  <target name="dist" depends="publish-local-core, resolve-projects, subfloor.install-antcontrib">
     <antcall target="call">
       <param name="target" value="dist"/>
       <param name="projects" value="${projects.list}"/>
     </antcall>
-    
+
     <for list="${projects.list}" param="proj">
       <sequential>
         <mkdir dir="dist/@{proj}"/>
@@ -97,10 +112,10 @@
             <fileset dir='@{proj}/dist'/>
         </copy>
       </sequential>
-    </for>    
-    
+    </for>
+
   </target>
-  
+
   <target name="build-core" >
       <ant dir="${core.project}" antfile="build.xml" target="dist" inheritAll="false"/>
   </target>
@@ -124,5 +139,5 @@
       <param name="projects" value="${projects.list}"/>
     </antcall>
   </target>
-	
+
 </project>
