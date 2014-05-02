@@ -53,6 +53,10 @@
 	<property name='base-resources.path' value='${pentaho-base-resource.dir}/${resources.properties.name}'/>
 	<property name='resources.path' value='${resource.dir}/${resources.properties.name}'/>
 
+
+  <property name="js.module.script.namespace" value="cdf"/>
+  <property name="js.module.script.dir" value="cdf/js"/>
+
 	<import file="../build-res/subfloor-js.xml"/>
 
 	<!--
@@ -267,7 +271,7 @@
         <move file="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc-d1.0.js"/>
 
 	    <antcall target="replace-static-resource-labels">
-	    	<param name="base.js.path" value="${bin.dir}/js-source" />
+	    	<param name="base.js.path" value="${bin.dir}/js-source/${js.module.script.namespace}" />
 	    </antcall>
 
 	    <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
