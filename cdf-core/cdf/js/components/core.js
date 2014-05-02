@@ -453,7 +453,7 @@ var CommentsComponent = BaseComponent.extend({
         options = options || {};
         var ajaxOpts = {
           type: 'GET',
-          url: Endpoints.getComments( operation ),
+          url: wd.cdf.endpoints.getComments( operation ),
           success: function(data) {
             myself.requestResponse(data, operation, collection, callback)
           },

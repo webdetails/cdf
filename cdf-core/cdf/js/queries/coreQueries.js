@@ -314,7 +314,7 @@
         if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
           this.setOption('pluginId' , opts.pluginId);
           this.setOption('endpoint' , opts.endpoint);
-          this.setOption('url', Endpoints.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
+          this.setOption('url', wd.cdf.endpoints.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
         }
         this.setOption('kettleOutput', opts.kettleOutput);
         this.setOption('stepName', opts.stepName);
@@ -390,7 +390,7 @@
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: Endpoints.getCdaBase() + "/doQuery?",
+      url: wd.cdf.endpoints.getCdaBase() + "/doQuery?",
       file: '',
       id: '',
       outputIdx: '1',
@@ -487,7 +487,7 @@
         .done(function(uuid){
           var _exportIframe = $('<iframe style="display:none">');
           _exportIframe.detach();
-          _exportIframe[0].src = Endpoints.getCdaBase() + "/unwrapQuery?" + $.param( {"path": queryDefinition.path, "uuid": uuid});
+          _exportIframe[0].src = wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( {"path": queryDefinition.path, "uuid": uuid});
           _exportIframe.appendTo($('body')); })
         .fail(function(jqXHR,textStatus,errorThrown){
           console.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown); });
@@ -586,7 +586,7 @@
     name: "legacy",
     label: "Legacy",
     defaults: {
-      url: Endpoints.getCdfXaction("pentaho-cdf/actions" , "jtable.xaction"),
+      url: wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions" , "jtable.xaction"),
       queryDef:{}
     },
     interfaces:{

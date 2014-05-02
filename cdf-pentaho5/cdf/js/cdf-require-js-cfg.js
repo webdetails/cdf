@@ -76,6 +76,9 @@ requireCfg['shim']['cdf/Dashboards.Main'] = [
     'cdf/Dashboards.Startup',
     'cdf/cdf-base'
 ];
+requireCfg['shim']['cdf/cdf-base'] = [
+    'cdf/wd'
+];
 
 requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
 

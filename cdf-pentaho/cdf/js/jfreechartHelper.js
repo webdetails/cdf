@@ -16,7 +16,7 @@ wd.helpers = wd.helpers || {};
 
 wd.helpers.jfreechartHelper = {
     getOpenFlashChart: function( result ){
-        return result.replace( /openflashchart/g, Endpoints.getOpenFlashChart() );
+        return result.replace( /openflashchart/g, wd.cdf.endpoints.getOpenFlashChart() );
     },
     getCaption: function( cd, myself, exportFile, cdfComponent ){
     	return {
@@ -86,7 +86,7 @@ wd.helpers.jfreechartHelper = {
 	          };
 	          Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
 	            if(jXML != null){
-	              var openWindow = window.open(Endpoints.getCaptifyZoom(),"_blank",'width=' + (width+10) + ',height=' + (height+10));
+	              var openWindow = window.open(wd.cdf.endpoints.getCaptifyZoom(),"_blank",'width=' + (width+10) + ',height=' + (height+10));
 	              var maxTries = 10;
 	              var loadChart = function(){
 	                if(openWindow.loadChart != undefined)openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())

@@ -80,7 +80,7 @@ Dashboards.pentahoAction = function( solution, path, action, params, func ) {
 Dashboards.pentahoServiceAction = function( serviceMethod, returntype, solution, path, action, params, func ) {
   // execute an Action Sequence on the server
 
-  var arr = Endpoints.getServiceAction( serviceMethod, solution, path , action );
+  var arr = wd.cdf.endpoints.getServiceAction( serviceMethod, solution, path , action );
   var url = arr.url;
   delete arr.url;
 
@@ -156,7 +156,7 @@ Dashboards.setSettingsValue = function(name,object){
     key: name,
     value: JSON.stringify(object)
   };
-  $.post(Endpoints.getSettings("set"), data, function(){});
+  $.post(wd.cdf.endpoints.getSettings("set"), data, function(){});
 };
 
 Dashboards.getSettingsValue = function(key,value){
@@ -165,7 +165,7 @@ Dashboards.getSettingsValue = function(key,value){
     value = json;
   };
 
-  $.getJSON(Endpoints.getSettings("get") + "&key=" + key , callback);
+  $.getJSON(wd.cdf.endpoints.getSettings("get") + "&key=" + key , callback);
 };
 
 Dashboards.fetchData = function(cd, params, callback) {
@@ -176,7 +176,7 @@ Dashboards.fetchData = function(cd, params, callback) {
       cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
     }
 
-    $.post(Endpoints.getCdaBase() + "/doQuery?", cd,
+    $.post(wd.cdf.endpoints.getCdaBase() + "/doQuery?", cd,
       function(json) {
         callback(json);
       },'json').error(Dashboards.handleServerError);
@@ -186,7 +186,7 @@ Dashboards.fetchData = function(cd, params, callback) {
 
     var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
 
-    $.post(Endpoints.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
+    $.post(wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
       function(result) {
         callback(result.values);
       },'json');

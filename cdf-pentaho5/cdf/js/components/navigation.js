@@ -116,7 +116,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-      $.getJSON(Endpoints.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json){
+      $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=navigator&path=" + NavigatorBaseComponent.path, function(json){
         myself.processNavigatorResponse(json);
       });
     }
@@ -198,7 +198,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 
       }
       else{
-        s += "<li><a "+ classString +" title=\"" + file.title + "\" onClick=\"return false;\" href=\"" +Endpoints.getRenderHTML() + "?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+        s += "<li><a "+ classString +" title=\"" + file.title + "\" onClick=\"return false;\" href=\"" +wd.cdf.endpoints.getRenderHTML() + "?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
       }
 
       var files = file.folders || [];
@@ -233,7 +233,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
   },
   draw: function(path){
     var myself = this;
-    $.getJSON(Endpoints.getJSONSolution() + "?mode=contentList" + (path != "" ? "&path=" + path : ""), function(json){
+    $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentList" + (path != "" ? "&path=" + path : ""), function(json){
       myself.processContentListResponse(json,path);
     });
   },
@@ -339,7 +339,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-	  $.getJSON(Endpoints.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || Dashboards.getPathParameter()), function(json){
+	  $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || Dashboards.getPathParameter()), function(json){
         myself.processPageTitleResponse(json);
       });
     }

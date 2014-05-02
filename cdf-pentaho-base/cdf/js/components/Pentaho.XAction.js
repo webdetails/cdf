@@ -48,7 +48,7 @@ var XactionComponent = BaseComponent.extend({
                         " height=\"100%\"" +
                         " width=\"100%\" />";
                 var iframe = $(xactionIFrameHTML);
-                var url = Endpoints.getCdfXaction(this.path, this.action, this.solution) + "?wrapper=false";
+                var url = wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution) + "?wrapper=false";
                 // Add args
                 var p = new Array(this.parameters.length);
                 for (var i = 0, len = p.length; i < len; i++) {
@@ -108,7 +108,7 @@ var ExecuteXactionComponent = BaseComponent.extend({
         });
     },
     executeXAction: function() {
-        var url = Endpoints.getCdfXaction(this.path, this.action, this.solution) + "&";
+        var url = wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution) + "&";
         var p = new Array(this.parameters.length);
         var parameters = [];
         for (var i = 0, len = p.length; i < len; i++) {

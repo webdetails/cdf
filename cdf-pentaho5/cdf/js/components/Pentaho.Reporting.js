@@ -110,7 +110,7 @@ var PrptComponent = BaseComponent.extend({
                 Dashboards.log("showParameters not supported with IFrame = False");
             }
             var requestType = this.usePost ? "POST" : "GET";
-            var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
+            var url = wd.cdf.endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
             $.each(reportOptions, function(key, value) {
                 if (params[key] == undefined) {
                     params[key] = value;
@@ -150,10 +150,10 @@ var PrptComponent = BaseComponent.extend({
                         params[key] = value;
                     }
                 });
-                var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
+                var url = wd.cdf.endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
                 this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
             } else {
-                var url = Endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
+                var url = wd.cdf.endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
                 if (options.showParameters && this.autoResize) {
                     Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
                     this.autoResize = false;
@@ -908,7 +908,7 @@ var SchedulePrptComponent = PrptComponent.extend({
                 async: false
             });
             $.ajax({
-                url: Endpoints.getScheduledJob(),
+                url: wd.cdf.endpoints.getScheduledJob(),
                 type: "POST",
                 data: JSON.stringify(parameters),
                 contentType: "application/json",
@@ -931,7 +931,7 @@ var SchedulePrptComponent = PrptComponent.extend({
         var validEmailConfig = false;
         $.ajax({
             type: "GET",
-            url: Endpoints.getEmailConfig() + "/isValid",
+            url: wd.cdf.endpoints.getEmailConfig() + "/isValid",
             success: function(data) {
                 validEmailConfig = data;
             }
@@ -1035,7 +1035,7 @@ var ExecutePrptComponent = PrptComponent.extend({
     executePrptComponent: function() {
         var options = this.getOptions();
         var ts = "ts=" + new Date().getTime() + "&";
-        var url = Endpoints.getReportViewer(this.composePath(options),ts);
+        var url = wd.cdf.endpoints.getReportViewer(this.composePath(options),ts);
         var a = [];
         var encodeArray = function(k, v) {
             var arr = [];
