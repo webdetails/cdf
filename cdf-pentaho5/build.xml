@@ -53,6 +53,10 @@
 	<property name='base-resources.path' value='${pentaho-base-resource.dir}/${resources.properties.name}'/>
 	<property name='resources.path' value='${resource.dir}/${resources.properties.name}'/>
 
+
+  <property name="js.module.script.namespace" value="cdf"/>
+  <property name="js.module.script.dir" value="cdf/js"/>
+
 	<import file="../build-res/subfloor-js.xml"/>
 
 	<!--
