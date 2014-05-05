@@ -136,10 +136,14 @@ var PrptComponent = BaseComponent.extend({
  
     var options = this.getOptions();
     //options.showParameters = false;
- 
+
     if(options["dashboard-mode"]){
-    var ts = "ts=" + new Date().getTime() + "&";
-      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+      //IFrame = False, showParameters always false.
+      if(options.showParameters) {
+        Dashboards.log("showParameters not supported with IFrame = False");
+      }
+      var ts = "ts=" + new Date().getTime() + "&";
+      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/report?' + ts;
       var myself=this;
       $.ajax({
         url: url,
@@ -151,8 +155,9 @@ var PrptComponent = BaseComponent.extend({
       });
     }
     else{
-    var ts = "ts=" + new Date().getTime() + "&";
-      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/viewer?' + ts;
+      var callVar = options.showParameters ? 'viewer' : 'report';
+      var ts = "ts=" + new Date().getTime() + "&";
+      var url = webAppPath + '/api/repos/' + options.path.replace(/\//g, ':') + '/' + callVar + '?' + ts;
       var encodeArray = function(k,v) {
         var arr = [];
         for (var i = 0; i < v.length;i++) {
@@ -221,7 +226,7 @@ var PrptComponent = BaseComponent.extend({
     options["output-type"] = "";
  
     return options;
- 
+
   }
 });
  
