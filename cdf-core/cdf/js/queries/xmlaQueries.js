@@ -81,7 +81,7 @@
   var _sharedXmla = new SharedXmla();
   var _scriptName = 'Xmla.js';
   var _isScriptLoaded = false;
-  var _scriptLocation = Endpoints.getCdfBase() + '/js/queries/';
+  var _scriptLocation = wd.cdf.endpoints.getCdfBase() + '/js/queries/';
 
 
   function loadXmlaScript (){
@@ -106,7 +106,7 @@
     name: "xmla",
     label: "XMLA",
     defaults: {
-      url: Endpoints.getXmla() //defaults to Pentaho's Mondrian servlet. can be overridden in options
+      url: wd.cdf.endpoints.getXmla() //defaults to Pentaho's Mondrian servlet. can be overridden in options
     },
     init: function(){
       loadXmlaScript();
@@ -183,7 +183,7 @@
     name: "xmlaDiscover",
     label: "XMLA Discover",
     defaults: {
-      url: Endpoints.getXmla() //defaults to Pentaho's Mondrian servlet. can be overridden in options
+      url: wd.cdf.endpoints.getXmla() //defaults to Pentaho's Mondrian servlet. can be overridden in options
     },
     init: function(){
       loadXmlaScript();

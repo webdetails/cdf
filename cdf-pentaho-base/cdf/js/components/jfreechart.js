@@ -103,7 +103,7 @@ var JFreeChartComponent = BaseComponent.extend({
         action: xactionFile,
         exportType: type
       },cd);
-      Dashboards.post(Endpoints.getExport() ,obj);
+      Dashboards.post(wd.cdf.endpoints.getExport() ,obj);
     };
 
     var myself = this;
@@ -450,7 +450,7 @@ var TimePlotComponent = BaseComponent.extend({
       parameters.push(key+"="+value);
     }
     var allData = undefined;
-    var timePlotEventSourceUrl = Endpoints.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction") + "&" + parameters.join('&');
+    var timePlotEventSourceUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction") + "&" + parameters.join('&');
     var myself = this;
     if(cd.events && cd.events.show == true){
 
@@ -462,7 +462,7 @@ var TimePlotComponent = BaseComponent.extend({
         parameters.push(key+"="+value);
       }
 
-      var eventUrl = Endpoints.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction") + "&" + parameters.join('&');
+      var eventUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction") + "&" + parameters.join('&');
 
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){

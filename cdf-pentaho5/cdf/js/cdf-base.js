@@ -14,7 +14,10 @@
 var CDF_PLUGIN_NAME = "pentaho-cdf";
 var SAMPLES_BASE_PATH = "/public/plugin-samples/";
 
-var Helper = {
+wd = wd || {};
+wd.cdf = wd.cdf || {};
+
+wd.cdf.helper = {
 
   getTimestamp: function() { return "ts=" + new Date().getTime(); },
 
@@ -30,37 +33,37 @@ var Helper = {
   }   
 };
 
-var Endpoints = {
+wd.cdf.endpoints = {
 
   // Dashboards.Startup.js determines webAppPath
   getWebapp: function () { return webAppPath; },
 
-  getXmla: function () { return Endpoints.getWebapp() + "/Xmla"; },
+  getXmla: function () { return wd.cdf.endpoints.getWebapp() + "/Xmla"; },
 
-  getPluginBase: function( plugin ) { return Endpoints.getWebapp() + "/plugin/" + plugin + "/api"; },
+  getPluginBase: function( plugin ) { return wd.cdf.endpoints.getWebapp() + "/plugin/" + plugin + "/api"; },
 
-  getCdfBase: function () { return Endpoints.getPluginBase( CDF_PLUGIN_NAME ); },
+  getCdfBase: function () { return wd.cdf.endpoints.getPluginBase( CDF_PLUGIN_NAME ); },
 
-  getCdaBase: function () { return Endpoints.getPluginBase('cda'); },
+  getCdaBase: function () { return wd.cdf.endpoints.getPluginBase('cda'); },
 
-  getPluginEndpoint: function( plugin, endpoint ) { return Endpoints.getPluginBase(plugin) + "/" + endpoint; },
+  getPluginEndpoint: function( plugin, endpoint ) { return wd.cdf.endpoints.getPluginBase(plugin) + "/" + endpoint; },
 
-  getStorage: function ( action ) { return Endpoints.getCdfBase() + "/storage/"  + action; },
+  getStorage: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/storage/"  + action; },
 
-  getSettings: function ( action ) { return Endpoints.getCdfBase() + "/settings/" + action; },
+  getSettings: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/settings/" + action; },
 
-  getViewAction: function () { return Endpoints.getCdfBase() + "/viewAction"; },
+  getViewAction: function () { return wd.cdf.endpoints.getCdfBase() + "/viewAction"; },
 
-  getJSONSolution: function () { return Endpoints.getCdfBase() + "/getJSONSolution"; },
+  getJSONSolution: function () { return wd.cdf.endpoints.getCdfBase() + "/getJSONSolution"; },
 
-  getRenderHTML: function () { return Endpoints.getCdfBase() + "/RenderHtml"; },
+  getRenderHTML: function () { return wd.cdf.endpoints.getCdfBase() + "/RenderHtml"; },
 
-  getExport: function () { return Endpoints.getCdfBase() + "/Export"; },
+  getExport: function () { return wd.cdf.endpoints.getCdfBase() + "/Export"; },
 
-  getResource: function() { return Endpoints.getCdfBase() + "/getResource"; },
+  getResource: function() { return wd.cdf.endpoints.getCdfBase() + "/getResource"; },
 
   getCdfXaction: function( path, action, solution ) { 
-    return Endpoints.getViewAction() + "?path=" + Helper.getFullPath( path, action ) + "&" + Helper.getTimestamp(); 
+    return wd.cdf.endpoints.getViewAction() + "?path=" + wd.cdf.helper.getFullPath( path, action ) + "&" + wd.cdf.helper.getTimestamp(); 
   },
 
   getServiceAction: function( method, solution, path, action ) { 
@@ -68,7 +71,7 @@ var Endpoints = {
     var arr = {};
     arr.wrapper = false;
     arr.action = action;
-    arr.url = Endpoints.getWebapp() + "/api/repos/" + Helper.getFullPath( path, action ).replace(/\//g, ":") + "/generatedContent";
+    arr.url = wd.cdf.endpoints.getWebapp() + "/api/repos/" + wd.cdf.helper.getFullPath( path, action ).replace(/\//g, ":") + "/generatedContent";
 
     return arr; 
   }, 
@@ -90,19 +93,19 @@ var Endpoints = {
       endpoint = "add";
     }
 
-  	return Endpoints.getCdfBase() + "/comments/" + endpoint;
+  	return wd.cdf.endpoints.getCdfBase() + "/comments/" + endpoint;
   },
 
-  getScheduledJob: function() { return Endpoints.getWebapp() + "/api/scheduler/job"; },
+  getScheduledJob: function() { return wd.cdf.endpoints.getWebapp() + "/api/scheduler/job"; },
 
-  getEmailConfig: function() { return Endpoints.getWebapp() + "/api/emailconfig"; },
+  getEmailConfig: function() { return wd.cdf.endpoints.getWebapp() + "/api/emailconfig"; },
 
-  getPivot: function ( solution, path, action ) { return Endpoints.getWebapp() + "/Pivot?solution=" + (solution || "system") + "&path=" + path + "&action=" + action; },
+  getPivot: function ( solution, path, action ) { return wd.cdf.endpoints.getWebapp() + "/Pivot?solution=" + (solution || "system") + "&path=" + path + "&action=" + action; },
 
-  getAnalyzer: function() { return Endpoints.getWebapp() + "/content/analyzer/"; },
+  getAnalyzer: function() { return wd.cdf.endpoints.getWebapp() + "/content/analyzer/"; },
 
-  getReportViewer: function( path, ts ) { return Endpoints.getWebapp() + '/api/repos/' + path + '/viewer?' + ts; },
+  getReportViewer: function( path, ts ) { return wd.cdf.endpoints.getWebapp() + '/api/repos/' + path + '/viewer?' + ts; },
   
-  getCaptifyZoom: function(){ return Endpoints.getResource() + "/js/captify/zoom.html"; }
+  getCaptifyZoom: function(){ return wd.cdf.endpoints.getResource() + "/js/captify/zoom.html"; }
   
 };

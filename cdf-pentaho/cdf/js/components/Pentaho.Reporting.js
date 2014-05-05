@@ -69,7 +69,7 @@ var PrptComponent = BaseComponent.extend({
                             || outputTarget.indexOf('text') != -1);
         }
         if (options["dashboard-mode"]) {
-            var url = Endpoints.getPluginBase("reporting");
+            var url = wd.cdf.endpoints.getPluginBase("reporting");
             var myself = this;
             $.ajax({
                 url: url,
@@ -97,13 +97,13 @@ var PrptComponent = BaseComponent.extend({
                 }
             }
             if (this.usePost) {
-                var url = Endpoints.getPluginBase("reporting") + "/execute/";
+                var url = wd.cdf.endpoints.getPluginBase("reporting") + "/execute/";
                 url += options.solution;
                 url += "/"+options.path;
                 url += "/"+options.name + "?" + $.param(reportOptions);
                 this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
             } else {
-                var url = Endpoints.getReportViewer($.param(options));
+                var url = wd.cdf.endpoints.getReportViewer($.param(options));
                 if (options.showParameters && this.autoResize) {
                     Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
                     this.autoResize = false;
@@ -919,7 +919,7 @@ var ExecutePrptComponent = PrptComponent.extend({
     },
     executePrptComponent: function() {
         var options = this.getOptions();
-        var url = Endpoints.getReportViewer();
+        var url = wd.cdf.endpoints.getReportViewer();
         var a = [];
         var encodeArray = function(k, v) {
             var arr = [];

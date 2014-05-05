@@ -22,7 +22,7 @@
     update: function() {
         this.clear();
         var options = this.getOptions();
-        var url = Endpoints.getAnalyzer();
+        var url = wd.cdf.endpoints.getAnalyzer();
         var myself = this;
         // enable editing the view?
         this.viewOnly ? url += 'viewer' : url += 'editor';

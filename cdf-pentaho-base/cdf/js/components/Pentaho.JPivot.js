@@ -27,7 +27,7 @@ var JpivotComponent = BaseComponent.extend({
         }
         // Build IFrame and set url
         var jpivotHTML = "<iframe id=\"jpivot_" + this.htmlObject + "\" scrolling=\"" + this.iframeScrolling + "\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\"" + this.iframeHeight + "\" width=\"" + this.iframeWidth + "\" src=\"";
-        jpivotHTML += Endpoints.getCdfXaction(this.path, this.action, this.solution);
+        jpivotHTML += wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution);
         // Add args
         var p = new Array(this.parameters.length);
         for (var i = 0, len = p.length; i < len; i++) {
@@ -56,7 +56,7 @@ var PivotLinkComponent = BaseComponent.extend({
     }
 }, {
     openPivotLink: function(object) {
-        var url = Endpoints.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
+        var url = wd.cdf.endpoints.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
         var qd = object.pivotDefinition;
         var parameters = [];
         for (p in qd) {

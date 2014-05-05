@@ -66,7 +66,7 @@
             loadMessageBundles = function(lang) {
                 jQuery.i18n.properties({
                     name:'#{GLOBAL_MESSAGE_SET_NAME}',
-                    path: Endpoints.getResource() + "?resource=" + '#{GLOBAL_MESSAGE_SET_PATH}',
+                    path: wd.cdf.endpoints.getResource() + "?resource=" + '#{GLOBAL_MESSAGE_SET_PATH}',
                     mode:'both',
                     language:(lang == 'browser' ? jQuery.i18n.browserLang() : lang),
                     callback: function() {
