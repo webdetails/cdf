@@ -49,6 +49,8 @@ wd.cdf.endpoints = {
 
   getResource: function() { return wd.cdf.endpoints.getCdfBase() + "/GetCDFResource"; },
 
+  getStaticResource: function( resource ) { return wd.cdf.endpoints.getCdfBase() + "/" + resource; },
+
   getCdfXaction: function( path, action, solution ) { return wd.cdf.endpoints.getViewAction() + "?solution=" + (solution || "system") + "&path=" + path + "&action=" + action + "&" + wd.cdf.helper.getTimestamp(); },
 
   getServiceAction: function( method, solution, path, action ) { 
