@@ -62,6 +62,8 @@ wd.cdf.endpoints = {
 
   getResource: function() { return wd.cdf.endpoints.getCdfBase() + "/getResource"; },
 
+  getStaticResource: function( resource ) { return wd.cdf.endpoints.getCdfBase() + "/resources/" + resource; },
+
   getCdfXaction: function( path, action, solution ) { 
     return wd.cdf.endpoints.getViewAction() + "?path=" + wd.cdf.helper.getFullPath( path, action ) + "&" + wd.cdf.helper.getTimestamp(); 
   },

@@ -534,8 +534,6 @@ excludes="**/Thumbs.db"
     	<property file="${basedir}/build.properties"/>
     	<property name="base.js.path" value=""/>
 
-    	<replace file="${base.js.path}/simile/timeplot/timeplot-api.js" token="@CDF_RESOURCES_BASE_URL@" value="${cdf.resources.base.url}" />
-    	<replace file="${base.js.path}/simile/timeline/timeline-api.js" token="@CDF_RESOURCES_BASE_URL@" value="${cdf.resources.base.url}" />
     	<!-- modifications needed for core-refator components/ccc.js -->
     	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_HEADER@" value="${cdf.ccc.require.header}" />
     	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_PUBLISHED_GLOBALLY@" value="${cdf.ccc.published.globally}" />
