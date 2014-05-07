@@ -25,3 +25,7 @@ override.properties
 .idea/
 *.iml
 bi-platform-v2-plugin/res/META-INF/MANIFEST.MF
+cdf-core/js-lib
+cdf-pentaho5/js-lib
+cdf-pentaho5/test-lib
+dist

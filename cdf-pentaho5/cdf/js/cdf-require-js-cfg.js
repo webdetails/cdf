@@ -49,13 +49,6 @@ requireCfg['shim']['cdf/CoreComponents'] = [
 	'cdf/components/table'
 ];
 
-requireCfg['shim']['cdf/components/pentaho'] = [
-	'cdf/components/Pentaho.JPivot',
-	'cdf/components/Pentaho.XAction',
-	'cdf/components/Pentaho.Analyzer',
-	'cdf/components/Pentaho.Reporting'
-];
-
 requireCfg['shim']['cdf/Dashboards'] = [
 	'cdf/Dashboards.Main',
 	'cdf/Dashboards.Query',
@@ -97,9 +90,20 @@ requireCfg['shim']['cdf/components/input']      = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/maps']       = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/navigation'] = ['cdf/components/core'];
-requireCfg['shim']['cdf/components/pentaho']    = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/pentaho']    = [
+    'cdf/components/core',
+    'cdf/components/Pentaho.Analyzer',
+    'cdf/components/Pentaho.JPivot',
+    'cdf/components/Pentaho.Reporting',
+    'cdf/components/Pentaho.XAction'
+];
 requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/table']      = ['cdf/components/core'];
+
+requireCfg['shim']['cdf/components/Pentaho.Analyzer'] =  ['cdf/components/core'];
+requireCfg['shim']['cdf/components/Pentaho.JPivot'] =    ['cdf/components/core'];
+requireCfg['shim']['cdf/components/Pentaho.Reporting'] = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/Pentaho.XAction'] =   ['cdf/components/core'];
 
 requireCfg['shim']['cdf/jquery'] = {
   exports: '$',
