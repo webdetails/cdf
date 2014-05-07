@@ -1,3 +1,20 @@
+14.05.06
+
+Improvements
+  [CDE-192] -         Added bootstrap as renderer
+  [CDF-254] -         Deprecate JSONscriptRequest in favour of $.getJSON
+  [CDF-239] -         Added support in Dashboards for multiple instantiations (subdashboards)
+
+
+
+Bugs:
+  [CDF-257] -         Load of script should be local, breaks when using https
+  [CDF-267] -         Getting js error (&#39;define&#39; is undefined) in EE Dashboard Designer in Firefox becuase of CDE
+  [CDF-252] -         Load of script should be local, breaks when using https
+  [BISERVER-10656] -  Fixed issue with multiple dashboards.initEngine calls
+  [ANALYZER-2548]  -  Sunburst slice proportions are not equivalent to the represented values' proportions
+  [BISERVER-10077] -  ReportViewer:  When pressing ENTER to submit page number, parameters are also being toggled (in IE10)
+  [CDE-209] -         Execute prpt component working in CDE
+
 * 14.03.07
     * First stable release for Pentaho 5.0
-    

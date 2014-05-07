@@ -380,13 +380,6 @@ public class CdfHtmlTemplateRenderer implements IFileResourceRenderer {
     final ArrayList<String> scripts = new ArrayList<String>();
     final ArrayList<String> styles = new ArrayList<String>();
 
-    String suffix = "";
-
-    if ( dashboardType != null && dashboardType.equals( "mobile" ) ) {
-      suffix = "-mobile";
-    } else if ( dashboardType != null && dashboardType.equals( "bootstrap" ) ) {
-      suffix = "-bootstrap";
-    }
 
     miniscripts.addAll( Arrays.asList( resources.getProperty ( "commonLibrariesScript", "" ).split( "," ) ) );
     ministyles.addAll( Arrays.asList( resources.getProperty( "commonLibrariesLink", "" ).split( "," ) ) );
