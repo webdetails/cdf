@@ -20,7 +20,9 @@ $.ajaxSetup({
 
   dataFilter: function(data, dtype) {
     // just tagging date
+   if( !(typeof Dashboards === 'undefined') ){
     Dashboards.lastServerResponse = Date.now();
+   }
     return data;
   }
 });
