@@ -27,13 +27,15 @@ var JpivotComponent = BaseComponent.extend({
         }
         // Build IFrame and set url
         var jpivotHTML = "<iframe id=\"jpivot_" + this.htmlObject + "\" scrolling=\"" + this.iframeScrolling + "\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\"" + this.iframeHeight + "\" width=\"" + this.iframeWidth + "\" src=\"";
-        jpivotHTML += wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution);
         // Add args
+        var params = {};
         var p = new Array(this.parameters.length);
         for (var i = 0, len = p.length; i < len; i++) {
-            var arg = "&" + this.parameters[i][0] + "=";
-            jpivotHTML += arg + Dashboards.getParameterValue(this.parameters[i][1]);
+            var key = this.parameters[i][0];
+            var value = Dashboards.getParameterValue(this.parameters[i][1]);
+            params[key] = value;
         }
+        jpivotHTML += wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution, params);
         // Close IFrame
         jpivotHTML += "\"></iframe>";
         $("#" + this.htmlObject).html(jpivotHTML);

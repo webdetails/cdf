@@ -16,6 +16,7 @@ package org.pentaho.cdf;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -69,7 +70,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       if ( parameterProviders.get( Parameter.PATH ) != null ) {
         pathParams = parameterProviders.get( Parameter.PATH );
         requestParams = parameterProviders.get( IParameterProvider.SCOPE_REQUEST );
-        filePath = pathParams.getStringParameter( Parameter.PATH, null );
+        filePath = URLDecoder.decode( pathParams.getStringParameter( Parameter.PATH, null ), CharsetHelper.getEncoding() );
         template = requestParams.getStringParameter( Parameter.TEMPLATE, null );
 
         Object parameter = pathParams.getParameter( "httprequest" );

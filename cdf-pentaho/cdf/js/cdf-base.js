@@ -37,7 +37,13 @@ wd.cdf.endpoints = {
 
   getStorage: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/Storage";  },
 
-  getSettings: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/Settings?method=" + action; },
+  getSettings: function ( action, key ) {
+    if ( key ){
+      return wd.cdf.endpoints.getCdfBase() + "/Settings?method=" + action + "&key=" + key;
+    }else{
+      return wd.cdf.endpoints.getCdfBase() + "/Settings?method=" + action;
+    }
+  },
 
   getViewAction: function () { return wd.cdf.endpoints.getWebapp() + "/ViewAction"; },
 
@@ -51,7 +57,18 @@ wd.cdf.endpoints = {
 
   getStaticResource: function( resource ) { return wd.cdf.endpoints.getCdfBase() + "/" + resource; },
 
-  getCdfXaction: function( path, action, solution ) { return wd.cdf.endpoints.getViewAction() + "?solution=" + (solution || "system") + "&path=" + path + "&action=" + action + "&" + wd.cdf.helper.getTimestamp(); },
+  getCdfXaction: function( path, action, solution, params ) {
+    if (params){
+      // go through parametere array and update values
+      var parameters = [];
+      for(key in params){
+        ( typeof params[key]=='function' ? parameters.push( key+"="+params[key]() ) : parameters.push( key+"="+params[key] ) );
+      }
+      return wd.cdf.endpoints.getViewAction() + "?solution=" + (solution || "system") + "&path=" + path + "&action=" + action + "&" + wd.cdf.helper.getTimestamp() + "&" + parameters.join('&');
+    }else{
+      return wd.cdf.endpoints.getViewAction() + "?solution=" + (solution || "system") + "&path=" + path + "&action=" + action + "&" + wd.cdf.helper.getTimestamp();
+    }
+  },
 
   getServiceAction: function( method, solution, path, action ) { 
 
@@ -75,6 +92,10 @@ wd.cdf.endpoints = {
 
   getAnalyzer: function() { wd.cdf.endpoints.getPluginBase("analyzer/"); },
 
-  getCaptifyZoom: function(){ return wd.cdf.endpoints.getCdfBase() + "/js/captify/zoom.html"; }
+  getCaptifyZoom: function(){ return wd.cdf.endpoints.getCdfBase() + "/js/captify/zoom.html"; },
+
+  getDoQuery: function(){ return wd.cdf.endpoints.getCdaBase() + "/doQuery?"; },
+
+  getUnwrapQuery: function( parameters ){ return wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( parameters ); }
 
 };
