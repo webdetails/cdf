@@ -30,7 +30,29 @@ wd.cdf.helper = {
     fullPath = fullPath + ( action ? "/" + action : "" ).replace(/\/\//g, '/');
 
     return fullPath;
-  }   
+  },
+  composePath: function(options) {
+    var clean = function(segment) {
+      if (segment.charAt(0) == "/") {
+        segment = segment.substring(1, segment.length);
+      }
+      if (segment.charAt(segment.length - 1) == "/") {
+        segment = segment.substring(0, segment.length - 1);
+      }
+      return segment
+    };
+    var fullPath = "/";
+    if (options.solution) {
+        fullPath += clean(solution) + "/";
+    }
+    if (options.path) {
+        fullPath += clean(options.path);
+    }
+    if (options.action) {
+        fullPath += "/" + clean(action);
+    }
+    return fullPath;
+  }
 };
 
 wd.cdf.endpoints = {
@@ -50,7 +72,13 @@ wd.cdf.endpoints = {
 
   getStorage: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/storage/"  + action; },
 
-  getSettings: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/settings/" + action; },
+  getSettings: function ( action, key ) {
+    if ( key ){
+      return wd.cdf.endpoints.getCdfBase() + "/settings/" + action + "?" + $.param( {key: key} );
+    }else{
+      return wd.cdf.endpoints.getCdfBase() + "/settings/" + action;
+    }
+  },
 
   getViewAction: function () { return wd.cdf.endpoints.getCdfBase() + "/viewAction"; },
 
@@ -64,8 +92,16 @@ wd.cdf.endpoints = {
 
   getStaticResource: function( resource ) { return wd.cdf.endpoints.getCdfBase() + "/resources/" + resource; },
 
-  getCdfXaction: function( path, action, solution ) { 
-    return wd.cdf.endpoints.getViewAction() + "?path=" + wd.cdf.helper.getFullPath( path, action ) + "&" + wd.cdf.helper.getTimestamp(); 
+  getCdfXaction: function( path, action, solution, params ) {
+    if (params){
+      var parameters = {};
+      for(var key in params){
+        parameters[key] = ( typeof params[key]=='function' ? params[key]() : params[key] );
+      }
+      return Encoder.encode( wd.cdf.endpoints.getViewAction(), null, $.extend( { path: wd.cdf.helper.getFullPath( path, action ), ts: new Date().getTime() }, parameters ) );
+    }else{
+      return Encoder.encode( wd.cdf.endpoints.getViewAction(), null, { path: wd.cdf.helper.getFullPath( path, action ), ts: new Date().getTime() } );
+    }
   },
 
   getServiceAction: function( method, solution, path, action ) { 
@@ -73,7 +109,7 @@ wd.cdf.endpoints = {
     var arr = {};
     arr.wrapper = false;
     arr.action = action;
-    arr.url = wd.cdf.endpoints.getWebapp() + "/api/repos/" + wd.cdf.helper.getFullPath( path, action ).replace(/\//g, ":") + "/generatedContent";
+    arr.url = Encoder.encode( wd.cdf.endpoints.getWebapp()+"/api/repos/{0}/generatedContent", Encoder.encodeRepositoryPath( wd.cdf.helper.getFullPath( path, action ) ) );
 
     return arr; 
   }, 
@@ -102,12 +138,25 @@ wd.cdf.endpoints = {
 
   getEmailConfig: function() { return wd.cdf.endpoints.getWebapp() + "/api/emailconfig"; },
 
-  getPivot: function ( solution, path, action ) { return wd.cdf.endpoints.getWebapp() + "/Pivot?solution=" + (solution || "system") + "&path=" + path + "&action=" + action; },
+  getPivot: function ( solution, path, action ) { 
+    return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/Pivot", null, { solution: (solution || "system"), path:Encoder.encodeRepositoryPath( path ), action: action } );
+  },
 
   getAnalyzer: function() { return wd.cdf.endpoints.getWebapp() + "/content/analyzer/"; },
 
-  getReportViewer: function( path, ts ) { return wd.cdf.endpoints.getWebapp() + '/api/repos/' + path + '/viewer?' + ts; },
+  getReport: function( path, callvar, parameters ) {
+    /* callvar = report || viewer */
+    if (typeof path === "string" || path instanceof String){
+      return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, Encoder.encodeRepositoryPath( path ), parameters );
+    }else{
+      return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, Encoder.encodeRepositoryPath( wd.cdf.helper.composePath( path ) ), parameters );
+    }
+  },
   
-  getCaptifyZoom: function(){ return wd.cdf.endpoints.getResource() + "/js/captify/zoom.html"; }
+  getCaptifyZoom: function(){ return wd.cdf.endpoints.getResource() + "/js/captify/zoom.html"; },
+
+  getDoQuery: function(){ return wd.cdf.endpoints.getCdaBase() + "/doQuery?"; },
+
+  getUnwrapQuery: function( parameters ){ return wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( parameters ); }
   
 };

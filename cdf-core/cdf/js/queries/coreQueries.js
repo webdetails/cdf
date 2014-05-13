@@ -390,7 +390,7 @@
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: wd.cdf.endpoints.getCdaBase() + "/doQuery?",
+      url: wd.cdf.endpoints.getDoQuery(),
       file: '',
       id: '',
       outputIdx: '1',
@@ -487,7 +487,7 @@
         .done(function(uuid){
           var _exportIframe = $('<iframe style="display:none">');
           _exportIframe.detach();
-          _exportIframe[0].src = wd.cdf.endpoints.getCdaBase() + "/unwrapQuery?" + $.param( {"path": queryDefinition.path, "uuid": uuid});
+          _exportIframe[0].src = wd.cdf.endpoints.getUnwrapQuery( {"path": queryDefinition.path, "uuid": uuid} );
           _exportIframe.appendTo($('body')); })
         .fail(function(jqXHR,textStatus,errorThrown){
           console.log("Request failed: " + jqXHR.responseText + " :: " + textStatus + " ::: " + errorThrown); });

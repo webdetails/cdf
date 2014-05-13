@@ -44,36 +44,8 @@ var PrptComponent = BaseComponent.extend({
         }
     },
     /*************************************************************************/
-    //util function to compose paths - solution:path:action
-    composePath: function(options) {
-        var clean = function(segment) {
-            if (segment.charAt(0) == ":") {
-                segment = segment.substring(1, segment.length);
-            }
-            if (segment.charAt(segment.length - 1) == ":") {
-                segment = segment.substring(0, segment.length - 1);
-            }
-            return segment
-        };
-        var solution = options.solution != undefined ? options.solution.replace(/\//g, ':') : "";
-        var path = options.path != undefined ? options.path.replace(/\//g, ':') : ".";
-        var action = options.action != undefined ? options.action.replace(/\//g, ':') : "";
-        var fullPath = ":";
-        if (solution != "") {
-            fullPath += clean(solution) + ":";
-        }
-        if (path != "") {
-            fullPath += clean(path);
-        }
-        if (action != "") {
-            fullPath += ":" + clean(action);
-        }
-        return fullPath;
-    },
-    /*************************************************************************/
     update: function() {
         this.clear();
-        var ts = "ts=" + new Date().getTime();
         var options = this.getOptions(),
                 params = this.getParams(),
                 reportOptions = this.getReportOptions();
@@ -110,7 +82,7 @@ var PrptComponent = BaseComponent.extend({
                 Dashboards.log("showParameters not supported with IFrame = False");
             }
             var requestType = this.usePost ? "POST" : "GET";
-            var url = wd.cdf.endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/report?' + ts;
+            var url = wd.cdf.endpoints.getReport( pathSegments, "report", { ts: new Date().getTime() } );
             $.each(reportOptions, function(key, value) {
                 if (params[key] == undefined) {
                     params[key] = value;
@@ -150,10 +122,11 @@ var PrptComponent = BaseComponent.extend({
                         params[key] = value;
                     }
                 });
-                var url = wd.cdf.endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts;
+                var url = wd.cdf.endpoints.getReport( pathSegments, callVar, { ts: new Date().getTime() } );
                 this._postToUrl(htmlObj, iframe, url, params, this.getIframeName());
             } else {
-                var url = wd.cdf.endpoints.getWebapp() + '/api/repos/' + this.composePath(pathSegments) + '/' + callVar + '?' + ts + "&" + $.param(options);
+                $.extend( options, {ts: new Date().getTime()});
+                var url = wd.cdf.endpoints.getReport( pathSegments, callVar, options );
                 if (options.showParameters && this.autoResize) {
                     Dashboards.log('PrptComponent: autoResize disabled because showParameters=true');
                     this.autoResize = false;
@@ -1033,29 +1006,24 @@ var ExecutePrptComponent = PrptComponent.extend({
         });
     },
     executePrptComponent: function() {
-        var options = this.getOptions();
-        var ts = "ts=" + new Date().getTime() + "&";
-        var url = wd.cdf.endpoints.getReportViewer(this.composePath(options),ts);
-        var a = [];
-        var encodeArray = function(k, v) {
-            var arr = [];
-            for (var i = 0; i < v.length; i++) {
-                arr.push(encodeURIComponent(k) + '=' + encodeURIComponent(v[i]));
-            }
-            return arr;
-        };
-        $.each(options, function(k, v) {
-            if ( k === "solution" || k === "path" || k === "action" ) {
-                return;
-            } else if (typeof v == 'object') {
-                a.push.apply(a, encodeArray(k, v));
-            } else {
-                a.push(encodeURIComponent(k) + "=" + encodeURIComponent(v));
-            }
-        });
+        var parameters = this.getOptions();
+        var path = {};
+        if ( parameters.solution ) {
+            $.extend( path, {solution: parameters.solution});
+        }
+        if ( parameters.path ) {
+            $.extend( path, {path: parameters.path});
+        }
+        if ( parameters.action ) {
+            $.extend( path, {action: parameters.action});
+        }
+        delete parameters.solution;
+        delete parameters.path;
+        delete parameters.action;
+        $.extend( parameters, {ts: new Date().getTime()});
         $.fancybox({
             type: "iframe",
-            href: url + a.join('&'),
+            href: wd.cdf.endpoints.getReport( path, "viewer", parameters ),
             width: $(window).width(),
             height: $(window).height() - 50
         });

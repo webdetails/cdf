@@ -441,29 +441,11 @@ var TimePlotComponent = BaseComponent.extend({
     obj.timeplot = timeplot;
     obj.geometry = timePlotTimeGeometry;
 
-    // go through parametere array and update values
-    var parameters = [];
-    for(p in cd){
-      var key = p;
-      var value = typeof cd[p]=='function'?cd[p]():cd[p];
-      // parameters.push(encodeURIComponent(key)+"="+encodeURIComponent(value));
-      parameters.push(key+"="+value);
-    }
     var allData = undefined;
-    var timePlotEventSourceUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction") + "&" + parameters.join('&');
+    var timePlotEventSourceUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelinefeeder.xaction", null, cd);
     var myself = this;
     if(cd.events && cd.events.show == true){
-
-      // go through parametere array and update values
-      var parameters = [];
-      for(p in cd.events){
-        var key = p;
-        var value = typeof cd.events[p]=='function'?cd.events[p]():cd.events[p];
-        parameters.push(key+"="+value);
-      }
-
-      var eventUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction") + "&" + parameters.join('&');
-
+      var eventUrl = wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", "timelineeventfeeder.xaction", null, cd.events);
       timeplot.loadText(timePlotEventSourceUrl,",", timePlotEventSource, null,null,function(range){
         timeplot.loadJSON(eventUrl,eventSource2,function(data){
           data.events = myself.filterEvents(data.events, range);
