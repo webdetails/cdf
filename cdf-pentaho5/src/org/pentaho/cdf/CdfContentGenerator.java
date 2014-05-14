@@ -59,21 +59,17 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   @Override
   public void createContent() throws Exception {
 
-    IParameterProvider pathParams;
-    IParameterProvider requestParams = null;
     String filePath = "";
     String template = "";
 
     logger.info( "[Timing] CDF content generator took over: "
         + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     try {
-      if ( parameterProviders.get( Parameter.PATH ) != null ) {
-        pathParams = parameterProviders.get( Parameter.PATH );
-        requestParams = parameterProviders.get( IParameterProvider.SCOPE_REQUEST );
-        filePath = URLDecoder.decode( pathParams.getStringParameter( Parameter.PATH, null ), CharsetHelper.getEncoding() );
-        template = requestParams.getStringParameter( Parameter.TEMPLATE, null );
+      if ( getPathParameters() != null ) {
+        filePath = getPathParameterAsString( Parameter.PATH, null );
+        template = getRequestParameterAsString( Parameter.TEMPLATE, null );
 
-        Object parameter = pathParams.getParameter( "httprequest" );
+        Object parameter = getRequest();
 
         if ( parameter != null && ( (HttpServletRequest) parameter ).getContextPath() != null ) {
           RELATIVE_URL = ( (HttpServletRequest) parameter ).getContextPath();
@@ -121,8 +117,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         logger.error( "Calling cdf with an empty method" );
       }
 
-      if ( requestParams != null ) {
-        renderXcdfDashboard( out, requestParams, FilenameUtils.separatorsToUnix( filePath ), template );
+      if ( getRequestParameters() != null ) {
+        renderXcdfDashboard( out, getRequestParameters(), FilenameUtils.separatorsToUnix( filePath ), template );
       }
 
     } catch ( Exception e ) {
@@ -171,8 +167,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   public void renderHtmlDashboard( final OutputStream out, final String xcdfPath, String defaultTemplate,
       String dashboardsMessagesBaseFilename ) throws Exception {
 
-    HttpServletRequest request =
-        ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
+    HttpServletRequest request = getRequest();
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
     renderer.execute( out, xcdfPath, defaultTemplate, dashboardsMessagesBaseFilename, Parameter.asHashMap( request ),
