@@ -56,6 +56,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
   public String RELATIVE_URL;
 
+  private boolean cdfResource; // legacy resource feching support
+
   @Override
   public void createContent() throws Exception {
 
@@ -66,6 +68,13 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     try {
       if ( getPathParameters() != null ) {
+
+        // legacy resource feching support
+        if( isCdfResource() ){
+          new CdfApi().getResource( getPathParameterAsString( "cmd", null ), null, getResponse() );
+          return;
+        }
+
         filePath = getPathParameterAsString( Parameter.PATH, null );
         template = getRequestParameterAsString( Parameter.TEMPLATE, null );
 
@@ -200,5 +209,15 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       throw ex;
     }
     return null;
+  }
+
+  // legacy resource feching support
+  public boolean isCdfResource() {
+    return cdfResource;
+  }
+
+  // legacy resource feching support
+  public void setCdfResource( boolean cdfResource ) {
+    this.cdfResource = cdfResource;
   }
 }
