@@ -153,7 +153,7 @@ wd.cdf.endpoints = {
     }
   },
   
-  getCaptifyZoom: function(){ return wd.cdf.endpoints.getResource() + "/js/captify/zoom.html"; },
+  getCaptifyZoom: function(){ return wd.cdf.endpoints.getStaticResource("js/captify/zoom.html"); },
 
   getDoQuery: function(){ return wd.cdf.endpoints.getCdaBase() + "/doQuery?"; },
 
