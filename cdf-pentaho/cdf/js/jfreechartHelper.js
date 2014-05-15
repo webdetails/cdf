@@ -86,16 +86,22 @@ wd.helpers.jfreechartHelper = {
 	          };
 	          Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", cdfComponent, parameters,function(jXML){
 	            if(jXML != null){
-	              var openWindow = window.open(wd.cdf.endpoints.getCaptifyZoom(),"_blank",'width=' + (width+10) + ',height=' + (height+10));
-	              var maxTries = 10;
-	              var loadChart = function(){
-	                if(openWindow.loadChart != undefined)openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text())
-	                else if(maxTries> 0) {
-	                  maxTries-=1;
-	                  setTimeout(loadChart,500);
-	                }
-	              };
-	              loadChart();
+	              var openWindow = window.open(wd.cdf.endpoints.getCaptifyZoom(),"_blank",'width=' + (width+17) + ',height=' + (height+20));
+	              /* Requires disabling popup blockers */
+	              if ( !openWindow ){
+	                Dashboards.log("Please disable popup blockers and try again.");
+	              }else{
+	                var maxTries = 10;
+	                var loadChart = function(){
+	                  if(typeof openWindow.loadChart != "undefined"){
+	                    openWindow.loadChart(jXML.find("ExecuteActivityResponse:first-child").text());
+	                  }else if(maxTries> 0) {
+	                    maxTries-=1;
+	                    setTimeout(loadChart,500);
+	                  }
+	                };
+	                loadChart();
+	              }
 	            }
 	            Dashboards.decrementRunningCalls();
 	          });
