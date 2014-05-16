@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -285,6 +287,16 @@ public class CdfHtmlRenderer {
     } else {
       headers = cdfHeaders.getHeaders( dashboardType, isDebugMode, includeAll );
     }
+    
+    // ugly hack -- if we don't know for sure we need OpenStreetMaps, don't load it!
+    // check if dashboard has component type map
+    final Pattern patternMapType = Pattern.compile( "type:\\s+[\"']map[a-zA-Z]*[\"']" );
+    final Matcher matcherMapType = patternMapType.matcher( dashboardContent.toLowerCase() );
+    // if it doesn't, remove OpenStreetMap JSs and CSSs because of performance issues
+    if ( !matcherMapType.find() ){
+      headers = headers.replaceAll("\\s*<(script|link)\\s.*Open(Street)?Map.*(</script>|</link>|/>)", "");
+    }
+    
     out.write( headers.getBytes( CharsetHelper.getEncoding() ) );
   }
 
