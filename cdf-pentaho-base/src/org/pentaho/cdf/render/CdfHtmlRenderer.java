@@ -290,8 +290,8 @@ public class CdfHtmlRenderer {
     
     // ugly hack -- if we don't know for sure we need OpenStreetMaps, don't load it!
     // check if dashboard has component type map
-    final Pattern patternMapType = Pattern.compile( "type:\\s+[\"']map[a-zA-Z]*[\"']" );
-    final Matcher matcherMapType = patternMapType.matcher( dashboardContent.toLowerCase() );
+    final Pattern patternMapType = Pattern.compile( "type:\\s*[\"']map[a-zA-Z]*[\"']" );
+    final Matcher matcherMapType = patternMapType.matcher( dashboardContent );
     // if it doesn't, remove OpenStreetMap JSs and CSSs because of performance issues
     if ( !matcherMapType.find() ){
       headers = headers.replaceAll("\\s*<(script|link)\\s.*Open(Street)?Map.*(</script>|</link>|/>)", "");
