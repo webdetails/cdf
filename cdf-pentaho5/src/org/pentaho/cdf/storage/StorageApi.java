@@ -36,7 +36,7 @@ public class StorageApi {
   public Response store( @QueryParam( Parameter.STORAGE_VALUE ) String storageValue )
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
-    JSONObject json = StorageEngine.getInstance().store( getUserName(), storageValue );
+    JSONObject json = StorageEngine.getInstance().store( storageValue, getUserName() );
     return JsonUtil.isSuccessResponse( json ) ? Response.ok().build() : Response.serverError().build();
   }
 
