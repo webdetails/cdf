@@ -37,4 +37,12 @@ public class CdfConstants {
   public static final String BOOTSTRAP = "bootstrap";
   
   public static final String INCLUDES_DIR = "/includes";
+  
+  public static final String COMPONENT_TYPE_DATERANGEINPUT = "dateRangeInput";
+  public static final String COMPONENT_TYPE_TABLECOMPONENT = "tableComponent";
+  public static final String COMPONENT_TYPE_TIMEPLOT = "timePlot";
+  public static final String COMPONENT_TYPE_AUTOCOMPLETEBOX = "autocompleteBox";
+  public static final String COMPONENT_TYPE_MAP = "map";
+  public static final String[] DASHBOARD_COMPONENT_TYPES = {COMPONENT_TYPE_DATERANGEINPUT, COMPONENT_TYPE_TABLECOMPONENT,
+    COMPONENT_TYPE_TIMEPLOT, COMPONENT_TYPE_AUTOCOMPLETEBOX, COMPONENT_TYPE_MAP};
 }
