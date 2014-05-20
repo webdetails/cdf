@@ -37,7 +37,7 @@ public class StorageApi {
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
     JSONObject json = StorageEngine.getInstance().store( storageValue, getUserName() );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok().build() : Response.serverError().build();
+    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build() : Response.serverError().build();
   }
 
   @GET
@@ -62,7 +62,7 @@ public class StorageApi {
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
   public Response delete() throws JSONException, InvalidCdfOperationException, PluginHibernateException {
     JSONObject json = StorageEngine.getInstance().delete( getUserName() );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok().build() : Response.serverError().build();
+    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build() : Response.serverError().build();
   }
 
   private String getUserName() {
