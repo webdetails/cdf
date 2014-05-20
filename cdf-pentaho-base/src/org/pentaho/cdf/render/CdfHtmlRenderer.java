@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -272,20 +274,28 @@ public class CdfHtmlRenderer {
       boolean isDebugMode, OutputStream out ) throws Exception {
 
     ICdfHeadersProvider cdfHeaders = CdfEngine.getEnvironment().getCdfHeadersProvider();
-    boolean includeAll = dashboardContent != null;
-    String headers;
+    // Identify which extra JSs and CSSs to add to header, according to components being used
+    List<String> componentTypes = new ArrayList<String>( CdfConstants.DASHBOARD_COMPONENT_TYPES.length );
+    if ( dashboardContent != null ) {
+      componentTypes = new ArrayList<String>();
+    	// search for component types in dashboardsContent (e.g. template.html)
+    	for ( String componenType: CdfConstants.DASHBOARD_COMPONENT_TYPES ){
+    	  // Screen Scrap to get components from dashboardContent
+        if ( Pattern.compile( String.format( "type:\\s*[\"']%s[a-zA-Z]*[\"']", componenType ) ).matcher( dashboardContent ).find() ){
+        	componentTypes.add( componenType );
+        }
+    	}
+    }
     if ( !StringUtils.isEmpty( root ) ) {
       // some dashboards need full absolute urls
       if ( root.contains( "/" ) ) {
         // file paths are already absolute, which didn't happen before
         root = root.substring( 0, root.indexOf( "/" ) );
       }
-      String absRoot = scheme + "://" + root;
-      headers = cdfHeaders.getHeaders( dashboardType, isDebugMode, absRoot, includeAll );
+      out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, scheme + "://" + root, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
     } else {
-      headers = cdfHeaders.getHeaders( dashboardType, isDebugMode, includeAll );
+      out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
     }
-    out.write( headers.getBytes( CharsetHelper.getEncoding() ) );
   }
 
   private void generateStorage( final OutputStream out, final String user ) throws Exception {
