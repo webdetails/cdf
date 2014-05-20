@@ -152,9 +152,9 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         String templatePath = Util.joinPath( FilenameUtils.getPath( xcdfFilePath ), renderer.getTemplate() );
 
         if ( !StringUtils.isEmpty( defaultTemplate ) ) { // If style defined in URL parameter 'template'
-          renderHtmlDashboard( out, templatePath, defaultTemplate, renderer.getMessagesBaseFilename() );
+          renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, renderer.getMessagesBaseFilename() );
         } else { // use style provided via .xcdf or default
-          renderHtmlDashboard( out, templatePath, renderer.getStyle(), renderer.getMessagesBaseFilename() );
+          renderHtmlDashboard( out, xcdfFilePath, templatePath, renderer.getStyle(), renderer.getMessagesBaseFilename() );
         }
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
@@ -173,14 +173,19 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     }
   }
 
-  public void renderHtmlDashboard( final OutputStream out, final String xcdfPath, String defaultTemplate,
+  public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath, String defaultTemplate,
       String dashboardsMessagesBaseFilename ) throws Exception {
 
     HttpServletRequest request = getRequest();
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
-    renderer.execute( out, xcdfPath, defaultTemplate, dashboardsMessagesBaseFilename, Parameter.asHashMap( request ),
-        userSession.getName() );
+    
+    HashMap<String, String> paramMap = Parameter.asHashMap( request );
+    if ( paramMap.get( Parameter.FILE ) == null || paramMap.get( Parameter.FILE ).isEmpty() ) {
+      paramMap.put( Parameter.FILE, xcdfFilePath );
+    }
+    
+    renderer.execute( out, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, paramMap, userSession.getName() );
   }
 
   public String getPluginName() {
