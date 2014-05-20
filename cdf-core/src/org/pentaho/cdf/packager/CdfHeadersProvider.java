@@ -22,6 +22,8 @@ import pt.webdetails.cpf.context.api.IUrlProvider;
 import pt.webdetails.cpf.packager.DependenciesPackage;
 import pt.webdetails.cpf.packager.DependenciesPackage.PackageType;
 import pt.webdetails.cpf.packager.StringFilter;
+import pt.webdetails.cpf.packager.dependencies.Dependency;
+import pt.webdetails.cpf.packager.dependencies.FileDependency;
 import pt.webdetails.cpf.packager.origin.PathOrigin;
 import pt.webdetails.cpf.packager.origin.StaticSystemOrigin;
 import pt.webdetails.cpf.repository.api.IContentAccessFactory;
@@ -46,7 +48,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
   private static final String BASE_SCRIPTS_PROPERTY = "script";
   private static final String BASE_STYLES_PROPERTY = "link";
 
-  private static final List<String> acceptedDashboardTypes = new ArrayList<String>( 2 );
+  private static final List<String> acceptedDashboardTypes = new ArrayList<String>( 3 );
   static {
     acceptedDashboardTypes.add( CdfConstants.BLUEPRINT );
     acceptedDashboardTypes.add( CdfConstants.MOBILE );
@@ -56,6 +58,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
 
   // base properties cache
   private Properties baseProperties;
+  private Properties extraProperties;
   // for cdf dashboards
   private List<? extends DependenciesPackage> extraIncludes;
 
@@ -68,7 +71,7 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     baseProperties = new Properties();
     loadProperties( reader, BASE_DEPENDENCIES, baseProperties );
     // extra includes
-    Properties extraProperties = loadProperties( reader, CDF_DASHBOARD_DEPENDENCIES, new Properties() );
+    extraProperties = loadProperties( reader, CDF_DASHBOARD_DEPENDENCIES, new Properties() );
     PathSet pathSet = new PathSet();
     addCustomDependencies( pathSet, extraProperties );
     extraIncludes = createDependenciesPackages( "cdf-dashboard", pathSet );
@@ -89,11 +92,13 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
    *          blueprint|mobile
    * @param isDebugMode
    *          will concatenate/minify files if false
+   * @param componentTypes
+   *          components used in the dashboard
    * @return html script/style includes
    */
   @Override
-  public String getHeaders( String dashboardType, boolean isDebugMode, boolean includeExtra ) {
-    return getHeaders( dashboardType, isDebugMode, null, includeExtra );
+  public String getHeaders( String dashboardType, boolean isDebugMode, List<String> componentTypes ) {
+    return getHeaders( dashboardType, isDebugMode, null, componentTypes );
   }
 
   /**
@@ -105,10 +110,12 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
    *          will concatenate/minify files if false
    * @param absRoot
    *          if you really need to add protocol+domain for some reason
+   * @param componentTypes
+   *          components used in the dashboard
    * @return html script/style includes
    */
   @Override
-  public String getHeaders( String dashboardType, boolean isDebugMode, String absRoot, boolean includeExtra ) {
+  public String getHeaders( String dashboardType, boolean isDebugMode, String absRoot, List<String> componentTypes ) {
     if ( !isAcceptedDashboardType( dashboardType ) ) {
       getLog().error( dashboardType + " is not a valid dashboard type. Defaulting to " + DEFAULT_DASHBOARD_TYPE );
       dashboardType = DEFAULT_DASHBOARD_TYPE;
@@ -122,12 +129,75 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
         logError( "Error with dependencies package '" + pkg.getName() + "'.", e );
       }
     }
-    if ( includeExtra ) {
+    if ( componentTypes != null && !componentTypes.isEmpty() ) {
       for ( DependenciesPackage pkg : extraIncludes ) {
-        appendDependencies( deps, pkg, false, absRoot );
+        deps.append( String.format( "<!-- %s -->", pkg.getName() ) );
+        ArrayList<String> filePaths = new ArrayList<String>( componentTypes.size() );
+        String tmp;
+        // build new List with dependencies to be included
+        switch ( pkg.getType() ){
+          case JS:
+            for ( String name : componentTypes ) {
+              tmp = name.concat( SUFFIX_SCRIPT );
+              if (  extraProperties.containsKey ( tmp ) ) {
+                String[] value = extraProperties.getProperty( tmp ).split(",");
+                filePaths.addAll( Arrays.asList( value ) );
+              }
+            }
+            break;
+          case CSS:
+            for ( String name : componentTypes ) {
+              tmp = name.concat( SUFFIX_STYLE );
+              if (  extraProperties.containsKey ( tmp ) ) {
+                String[] value = extraProperties.getProperty( tmp ).split(",");
+                filePaths.addAll( Arrays.asList( value ) );
+              }
+              tmp = name.concat( SUFFIX_IE8_STYLE );
+              if (  extraProperties.containsKey ( tmp ) ) {
+                String[] value = extraProperties.getProperty( tmp ).split(",");
+                filePaths.addAll( Arrays.asList( value ) );
+              }
+            }
+            break;
+          default:
+            break;
+        }
+        if ( !filePaths.isEmpty() ) {
+          // map component cannot be minified for now because of OpenLayers.js
+          appendDependencies( deps, pkg, false, absRoot, filePaths );
+        }
       }
     }
     return deps.toString();
+  }
+  
+  private class CdfDependencyInclusionFilter implements DependenciesPackage.IDependencyInclusionFilter {
+    private List<String> filePaths;
+    public CdfDependencyInclusionFilter( List<String> filePaths ){
+      this.filePaths = filePaths;
+    }
+    @Override
+    public boolean include( Dependency dependency ) {
+      if ( filePaths == null ){
+        return false;
+      }
+      for ( String filePath: filePaths ){
+        if ( dependency.getClass().isAssignableFrom( FileDependency.class )  &&  
+            ((FileDependency)dependency).getUrlFilePath().endsWith( filePath ) ){
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+  
+  private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify, String absRoot, final ArrayList<String> files ) {
+    if ( absRoot != null ) {
+      StringFilter filter = new AbsolutizingStringFilter( absRoot, pkg.getDefaultFilter() );
+      deps.append( pkg.getDependencies( filter, minify, new CdfDependencyInclusionFilter( files ) ) );
+    } else {
+      deps.append( pkg.getDependencies( minify, new CdfDependencyInclusionFilter( files ) ) );
+    }
   }
 
   private void appendDependencies( StringBuilder deps, DependenciesPackage pkg, boolean minify, String absRoot ) {
