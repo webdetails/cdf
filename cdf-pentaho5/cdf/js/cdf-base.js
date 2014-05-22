@@ -60,6 +60,8 @@ wd.cdf.endpoints = {
   // Dashboards.Startup.js determines webAppPath
   getWebapp: function () { return webAppPath; },
 
+  getPing: function () { return wd.cdf.endpoints.getCdfBase() + "/ping"; },
+
   getXmla: function () { return wd.cdf.endpoints.getWebapp() + "/Xmla"; },
 
   getPluginBase: function( plugin ) { return wd.cdf.endpoints.getWebapp() + "/plugin/" + plugin + "/api"; },

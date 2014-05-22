@@ -89,7 +89,7 @@ Dashboards.checkServer = function() {
     type: 'POST',
     async: false,
     dataType: 'json',
-    url: Dashboards.CDF_BASE_PATH + 'ping',
+    url: wd.cdf.endpoints.getPing(),
     success: function(result) {
       if(result && result.ping == 'ok') {
         retVal = true;

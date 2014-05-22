@@ -67,8 +67,15 @@ public class CdfApi {
   @GET
   @Path( "/ping" )
   @Produces( "text/plain" )
-  public Response ping() throws InvalidCdfOperationException {
-    return Response.ok().build();
+  public Response doGetPing() throws InvalidCdfOperationException {
+    return Response.ok( "{\"ping\":\"ok\"}" ).build();
+  }
+
+  @POST
+  @Path( "/ping" )
+  @Produces( "text/plain" )
+  public Response doPostPing() throws InvalidCdfOperationException {
+    return Response.ok( "{\"ping\":\"ok\"}" ).build();
   }
 
   @GET
