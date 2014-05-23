@@ -39,18 +39,21 @@ public class JsonUtil {
   }
 
   public static JSONObject makeJsonSuccessResponse( Object payload ) throws JSONException {
-    JSONObject json = new JSONObject();
+    if ( payload == null){
+      return new JSONObject();
+    }
     try {
-      json.put( JsonFields.STATUS, JsonResult.SUCCESS );
-
-      if ( payload != null ) {
-        json.put( JsonFields.RESULT_PAYLOAD, payload );
+      if( payload instanceof String ){
+        return new JSONObject( payload.toString() );
       }
+      JSONObject json = new JSONObject();
+      json.put( JsonFields.STATUS, JsonResult.SUCCESS );
+      json.put( JsonFields.RESULT_PAYLOAD, payload );
+      return json;
     } catch ( JSONException e ) {
       logger.error( e );
       throw e;
     }
-    return json;
   }
 
   public static boolean isSuccessResponse( JSONObject json ) {
