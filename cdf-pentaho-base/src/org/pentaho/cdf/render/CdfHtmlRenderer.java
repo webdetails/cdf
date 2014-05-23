@@ -278,13 +278,13 @@ public class CdfHtmlRenderer {
     List<String> componentTypes = new ArrayList<String>( CdfConstants.DASHBOARD_COMPONENT_TYPES.length );
     if ( dashboardContent != null ) {
       componentTypes = new ArrayList<String>();
-    	// search for component types in dashboardsContent (e.g. template.html)
-    	for ( String componenType: CdfConstants.DASHBOARD_COMPONENT_TYPES ){
-    	  // Screen Scrap to get components from dashboardContent
-        if ( Pattern.compile( String.format( "type:\\s*[\"']%s[a-zA-Z]*[\"']", componenType ) ).matcher( dashboardContent ).find() ){
-        	componentTypes.add( componenType );
+      // search for component types in dashboardsContent (e.g. template.html)
+      for ( String[] componenType: CdfConstants.DASHBOARD_COMPONENT_TYPES ){
+        // Screen Scrap to get component types from dashboardContent
+        if ( Pattern.compile( String.format( "type:\\s*[\"'](?i)%s[a-z]*[\"']", componenType[0] ) ).matcher( dashboardContent ).find() ){
+          componentTypes.add( componenType[1] );
         }
-    	}
+      }
     }
     if ( !StringUtils.isEmpty( root ) ) {
       // some dashboards need full absolute urls

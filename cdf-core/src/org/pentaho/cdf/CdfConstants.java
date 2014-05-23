@@ -38,13 +38,22 @@ public class CdfConstants {
   
   public static final String INCLUDES_DIR = "/includes";
   
-  //public enum DASHBOARD_COMPONENT_TYPE {DATE_RANGE_INPUT, TABLE_COMPONENT, TIME_PLOT, AUTOCOMPLETE_BOX, MAP};
-  //public static final String[] DASHBOARD_COMPONENT_TYPES = {"dateRangeInput", "tableComponent", "timePlot", "autocompleteBox", "map"};
   public static final String COMPONENT_TYPE_DATERANGEINPUT = "dateRangeInput";
-  public static final String COMPONENT_TYPE_TABLECOMPONENT = "tableComponent";
+  public static final String COMPONENT_TYPE_TABLE = "tableComponent";
   public static final String COMPONENT_TYPE_TIMEPLOT = "timePlot";
   public static final String COMPONENT_TYPE_AUTOCOMPLETEBOX = "autocompleteBox";
   public static final String COMPONENT_TYPE_MAP = "map";
-  public static final String[] DASHBOARD_COMPONENT_TYPES = {COMPONENT_TYPE_DATERANGEINPUT, COMPONENT_TYPE_TABLECOMPONENT,
-    COMPONENT_TYPE_TIMEPLOT, COMPONENT_TYPE_AUTOCOMPLETEBOX, COMPONENT_TYPE_MAP};
+  
+  public static final String COMPONENT_TYPE_DATERANGEINPUT_REGEX = "daterangeinput";
+  public static final String COMPONENT_TYPE_TABLE_REGEX = "table";
+  public static final String COMPONENT_TYPE_TIMEPLOT_REGEX = "timeplot";
+  public static final String COMPONENT_TYPE_AUTOCOMPLETE_REGEX = "(simple)?autocomplete";
+  public static final String COMPONENT_TYPE_MAP_REGEX = "(new)?map";
+  
+  public static final String[][] DASHBOARD_COMPONENT_TYPES = {
+    { COMPONENT_TYPE_DATERANGEINPUT_REGEX, COMPONENT_TYPE_DATERANGEINPUT },
+    { COMPONENT_TYPE_TABLE_REGEX, COMPONENT_TYPE_TABLE },
+    { COMPONENT_TYPE_TIMEPLOT_REGEX, COMPONENT_TYPE_TIMEPLOT }, 
+    { COMPONENT_TYPE_AUTOCOMPLETE_REGEX, COMPONENT_TYPE_AUTOCOMPLETEBOX }, 
+    { COMPONENT_TYPE_MAP_REGEX, COMPONENT_TYPE_MAP } };
 }
