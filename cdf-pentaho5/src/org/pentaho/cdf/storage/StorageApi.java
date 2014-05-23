@@ -49,7 +49,7 @@ public class StorageApi {
     JSONObject json = StorageEngine.getInstance().read( getUserName() );
 
     if ( json != null ) {
-      return json.toString( 2 );
+      return json.toString();
     } else {
       logger.error( "json object is null" );
       return JsonUtil.JsonResult.ERROR;
