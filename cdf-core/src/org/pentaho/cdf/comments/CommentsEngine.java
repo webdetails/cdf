@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -109,11 +109,13 @@ public class CommentsEngine {
       logger.error( "Parameter 'page' is not optional" );
       throw new InvalidCdfOperationException( "Page cannot be null" );
     }
-
-    String queryName = "getCommentsByPage"; // default query
+    
+    final String queryName;
 
     if ( isDeleted || isArchived ) {
       queryName = "getCommentsByPageWhere";
+    } else {
+      queryName = "getCommentsByPage"; // default query
     }
 
     logger.debug( "Adding comment" );
@@ -122,10 +124,8 @@ public class CommentsEngine {
     Query query = session.getNamedQuery( "org.pentaho.cdf.comments.CommentEntry." + queryName );
     query.setString( "page", page );
 
-    if ( isDeleted ) {
+    if ( isDeleted || isArchived ) {
       query.setBoolean( "deleted", isDeleted );
-    }
-    if ( isArchived ) {
       query.setBoolean( "archived", isArchived );
     }
 
@@ -146,28 +146,29 @@ public class CommentsEngine {
     return JsonUtil.makeJsonSuccessResponse( jsonArray );
   }
 
-  public JSONObject delete( int commentId, boolean status, String user ) throws JSONException, PluginHibernateException {
+  public JSONObject delete( int commentId, boolean status, String user, boolean isAdmin ) throws JSONException,
+    PluginHibernateException {
     logger.debug( "Deleting comment " + commentId );
-    return changeCommentStatus( Operation.DELETE, commentId, status, user );
+    return changeCommentStatus( Operation.DELETE, commentId, status, user, isAdmin );
   }
 
-  public JSONObject archive( int commentId, boolean status, String user ) throws JSONException,
+  public JSONObject archive( int commentId, boolean status, String user, boolean isAdmin ) throws JSONException,
     PluginHibernateException {
     logger.debug( "Archiving comment " + commentId );
-    return changeCommentStatus( Operation.ARCHIVE, commentId, status, user );
+    return changeCommentStatus( Operation.ARCHIVE, commentId, status, user, isAdmin );
   }
 
   @SuppressWarnings( "incomplete-switch" )
-  private JSONObject changeCommentStatus( Operation operation, int commentId, boolean status, String user )
-    throws JSONException, PluginHibernateException {
+  private JSONObject changeCommentStatus( Operation operation, int commentId, boolean status, String user,
+      boolean isAdmin ) throws JSONException, PluginHibernateException {
     Session session = getSession();
     session.beginTransaction();
     CommentEntry comment = (CommentEntry) session.load( CommentEntry.class, commentId );
-    
+
     Boolean isUser = comment.getUser().equals( user );
-    
-    if( !isUser ){
-      return JsonUtil.makeJsonErrorResponse( "Operation not authorized: not comment owner", false );
+
+    if ( !isUser && !isAdmin ) {
+      return JsonUtil.makeJsonErrorResponse( "Operation not authorized: not comment owner or administrator", false );
     }
     
     // this switch-case does not need enum's full spectrum

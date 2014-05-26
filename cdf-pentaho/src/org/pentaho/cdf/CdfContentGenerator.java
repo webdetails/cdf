@@ -1,5 +1,5 @@
 /*!
- * Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
  * 
  * This software was developed by Webdetails and is provided under the terms
  * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -455,10 +455,10 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
       if ( Operation.DELETE == operation || Operation.ARCHIVE == operation ) {
 
-        if ( !isAdministrator || !isAuthenticated ) {
+        if ( !isAuthenticated ) {
 
           final PrintWriter pw = new PrintWriter( out );
-          pw.println( JsonUtil.makeJsonErrorResponse( "Operation not authorized: requires administrator priviledges",
+          pw.println( JsonUtil.makeJsonErrorResponse( "Operation not authorized: requires authentication",
               false ).toString( 2 ) );
           pw.flush();
           return;
@@ -474,12 +474,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         case DELETE:
           result =
               engine.delete( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
-                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName() );
+                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName(), isAdministrator );
           break;
         case ARCHIVE:
           result =
               engine.archive( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
-                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName() );
+                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName(), isAdministrator );
           break;
         case LIST:
           result =
