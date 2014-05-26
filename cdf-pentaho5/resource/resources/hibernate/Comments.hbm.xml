@@ -45,7 +45,7 @@
         </property>
         <query name="getCommentsByPage">
             <![CDATA[
-                from CommentEntry where page=:page order by commentId desc
+                from CommentEntry where page=:page and deleted=false and archived=false order by commentId desc
             ]]>
         </query>
          <query name="getCommentsByPageWhere">

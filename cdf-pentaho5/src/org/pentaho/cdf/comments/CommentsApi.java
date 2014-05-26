@@ -1,7 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/*!
+ * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
+ * 
+ * This software was developed by Webdetails and is provided under the terms
+ * of the Mozilla Public License, Version 2.0, or any later version. You may not use
+ * this file except in compliance with the license. If you need a copy of the license,
+ * please go to  http://mozilla.org/MPL/2.0/. The Initial Developer is Webdetails.
+ *
+ * Software distributed under the Mozilla Public License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
+ * the license for the specific language governing your rights and limitations.
  */
+
 package org.pentaho.cdf.comments;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
@@ -70,7 +79,7 @@ public class CommentsApi {
       @DefaultValue( "0" ) @QueryParam( Parameter.FIRST_RESULT ) int firstResult,
       @DefaultValue( "20" ) @QueryParam( Parameter.MAX_RESULTS ) int maxResults,
       @DefaultValue( "false" ) @QueryParam( Parameter.DELETED ) boolean deleted,
-      @DefaultValue( "false" ) @QueryParam( Parameter.MAX_RESULTS ) boolean archived,
+      @DefaultValue( "false" ) @QueryParam( Parameter.ARCHIVED ) boolean archived,
 
       @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
 
@@ -116,8 +125,8 @@ public class CommentsApi {
     boolean isAdministrator = SecurityHelper.getInstance().isPentahoAdministrator( PentahoSessionHolder.getSession() );
     boolean isAuthenticated = PentahoSessionHolder.getSession().isAuthenticated();
 
-    if ( !isAdministrator || !isAuthenticated ) {
-      String msg = "Operation not authorized: requires administrator priviledges";
+    if ( !isAuthenticated ) {
+      String msg = "Operation not authorized: requires authentication";
       logger.error( msg );
       try {
         IOUtils.write( msg, servletResponse.getOutputStream(), CharsetHelper.getEncoding() );
@@ -128,7 +137,7 @@ public class CommentsApi {
     }
 
     try {
-      json = CommentsEngine.getInstance().archive( commentId, value, getUserName() );
+      json = CommentsEngine.getInstance().archive( commentId, value, getUserName(), isAdministrator );
       result = json.toString( 2 );
     } catch ( Exception e ) {
       logger.error( "Error processing comment: " + e );
@@ -154,8 +163,8 @@ public class CommentsApi {
     boolean isAdministrator = SecurityHelper.getInstance().isPentahoAdministrator( PentahoSessionHolder.getSession() );
     boolean isAuthenticated = PentahoSessionHolder.getSession().isAuthenticated();
 
-    if ( !isAdministrator || !isAuthenticated ) {
-      String msg = "Operation not authorized: requires administrator priviledges";
+    if ( !isAuthenticated ) {
+      String msg = "Operation not authorized: requires authentication";
       logger.error( msg );
       try {
         PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), msg );
@@ -166,7 +175,7 @@ public class CommentsApi {
     }
 
     try {
-      json = CommentsEngine.getInstance().delete( commentId, value, getUserName() );
+      json = CommentsEngine.getInstance().delete( commentId, value, getUserName(), isAdministrator );
       result = json.toString( 2 );
     } catch ( Exception ex ) {
       logger.error( "Error processing comment: " + ex );
