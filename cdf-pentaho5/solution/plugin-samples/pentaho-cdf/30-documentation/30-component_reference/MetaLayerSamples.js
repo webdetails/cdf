@@ -20,7 +20,7 @@ var evaluateCode = function(cleanComponents){
 		eval($('#samplecode').val());
 	}
 	catch(e){
-		alert("Error: " + e);
+		Dashboards.log(e, 'exception');
 		return;
 	}
 	tabs.tabs("select",0);
