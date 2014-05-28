@@ -55,7 +55,7 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
 	
     }
     if (found == 0){
-      alert("Fatal: Solution " + solution +" not found in navigation object");
+      Dashboards.error("Fatal: Solution " + solution +" not found in navigation object");
       return;
     }
   },
@@ -84,7 +84,7 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       }
 
     }
-    alert("Fatal: path " + (NavigatorBaseComponent.path || Dashboards.getPathParameter()) +" not found in navigation object");
+    Dashboards.error("Fatal: path " + (NavigatorBaseComponent.path || Dashboards.getPathParameter()) +" not found in navigation object");
     return;
   },
   getParentSolution : function(){
