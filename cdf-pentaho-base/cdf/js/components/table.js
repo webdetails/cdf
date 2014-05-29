@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 * 
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -88,7 +88,7 @@ var TableComponent = UnmanagedComponent.extend({
        * Something went wrong and we won't have handlers firing in the future
        * that will trigger unblock, meaning we need to trigger unblock manually.
        */
-      this.dashboard.error(e);
+      Dashboards.log(e,'exception');
       this.unblock();
     }
   },
@@ -213,13 +213,15 @@ var TableComponent = UnmanagedComponent.extend({
            * where we didn't find a matching addIn
            */
           if(!foundAddIn && cd.colFormats) {
-            var position = dataTable.fnGetPosition(td),
-                rowIdx = position[0],
+            var position = dataTable.fnGetPosition(td);
+            if(position && typeof position[0] == "number"){
+              var rowIdx = position[0],
                 colIdx = position[2],
                 format = cd.colFormats[colIdx],
                 value = myself.rawData.resultset[rowIdx][colIdx];
-            if (format && (typeof value != "undefined" && value !== null)) {
-              $(td).text(sprintf(format,value));
+              if (format && (typeof value != "undefined" && value !== null)) {
+                $(td).text(sprintf(format,value));
+              }
             }
           }
       });
@@ -258,7 +260,10 @@ var TableComponent = UnmanagedComponent.extend({
    */
   handleAddIns: function(dataTable, td) {
     var cd = this.chartDefinition,
-        position = dataTable.fnGetPosition(td),
+        position = dataTable.fnGetPosition(td);
+        if(position && typeof position[0] != "number"){
+          return false;
+        }
         rowIdx = position[0],
         colIdx = position[2],
         colType = cd.colTypes[colIdx],
@@ -289,7 +294,7 @@ var TableComponent = UnmanagedComponent.extend({
       addIn.call(td,state,this.getAddInOptions("colType",addIn.getName()));
       return true;
     } catch (e) {
-      this.dashboard.error(e);
+      Dashboards.log(e,'exception');
       return false;
     }
   },
@@ -519,3 +524,19 @@ var TableComponent = UnmanagedComponent.extend({
     return dtData;
   }
 });
+
+/* If table elements have class 'numeric' and values are represented as strings (e.g. "234456.5675")
+ let's try and convert them to numeric values for sorting. Source based on version 1.7.5 of dataTables.js */
+jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+  "numeric-asc": function ( a, b ) {
+    a = (a=="-"||a=="") ? 0 : (jQuery.isNumeric(a) ? a*1 : 0);
+    b = (b=="-"||b=="") ? 0 : (jQuery.isNumeric(b) ? b*1 : 0);
+    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+  },
+
+  "numeric-desc": function ( a, b ) {
+    a = (a=="-"||a=="") ? 0 : (jQuery.isNumeric(a) ? a*1 :0);
+    b = (b=="-"||b=="") ? 0 : (jQuery.isNumeric(b) ? b*1 :0);
+    return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+  }
+} );
