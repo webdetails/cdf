@@ -63,9 +63,9 @@ Dashboards.getQueryParameter = function ( parameterName ) {
       // Return the string
       return decodeURIComponent ( queryString.substring ( begin, end ) );
     }
-    // Return "" if no parameter has been found
-    return "";
   }
+  // Return "" if no parameter has been found
+  return "";
 };
 
 (function (D) {
