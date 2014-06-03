@@ -28,7 +28,6 @@ import org.pentaho.cdf.environment.ICdfEnvironment;
 import pt.webdetails.cpf.Util;
 
 /**
- * 
  * @author pedro
  */
 public class PluginHibernateUtil {
@@ -39,34 +38,40 @@ public class PluginHibernateUtil {
   private static final byte[] lock = new byte[0];
   private static final ThreadLocal<Session> threadSession = new ThreadLocal<Session>();
   private static final ThreadLocal<Transaction> threadTransaction = new ThreadLocal<Transaction>();
+  private static boolean initialized;
 
   public PluginHibernateUtil() {
   }
 
   public static boolean initialize() {
 
-    logger.debug( "Initializing PluginHibernate" );
+    if ( !initialized ) {
+      logger.debug( "Initializing PluginHibernate" );
 
-    // Start our own hibernate session, copying everything from the original
-    configuration = new Configuration();
+      // Start our own hibernate session, copying everything from the original
+      configuration = new Configuration();
 
-    ICdfEnvironment cdfEnvironment = CdfEngine.getEnvironment();
+      ICdfEnvironment cdfEnvironment = CdfEngine.getEnvironment();
 
-    final String hibernateAvailable =
-        cdfEnvironment.getResourceLoader().getPluginSetting( PluginHibernateUtil.class,
-            CdfConstants.PLUGIN_SETTINGS_HIBERNATE_AVAILABLE );
+      final String hibernateAvailable =
+          cdfEnvironment.getResourceLoader().getPluginSetting( PluginHibernateUtil.class,
+              CdfConstants.PLUGIN_SETTINGS_HIBERNATE_AVAILABLE );
 
-    if ( "true".equalsIgnoreCase( hibernateAvailable ) ) {
-      configuration.setProperties( cdfEnvironment.getHibernateConfigurations().getConfiguration().getProperties() );
-      sessionFactory = configuration.buildSessionFactory();
+      if ( "true".equalsIgnoreCase( hibernateAvailable ) ) {
+        configuration.setProperties( cdfEnvironment.getHibernateConfigurations().getConfiguration().getProperties() );
+        sessionFactory = configuration.buildSessionFactory();
+      }
+      initialized = true;
+      return true;
     }
-    return true;
+    return false;
+
 
   }
 
   /**
    * Returns the SessionFactory used for this static class.
-   * 
+   *
    * @return SessionFactory
    */
   public static SessionFactory getSessionFactory() {
@@ -77,7 +82,7 @@ public class PluginHibernateUtil {
 
   /**
    * Returns the original Hibernate configuration.
-   * 
+   *
    * @return Configuration
    */
   public static Configuration getConfiguration() {
@@ -86,23 +91,22 @@ public class PluginHibernateUtil {
 
   /**
    * Rebuild the SessionFactory with the static Configuration.
-   * 
    */
   public static void rebuildSessionFactory() throws PluginHibernateException {
 
     synchronized ( PluginHibernateUtil.lock ) {
-      
+
       ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
-      
+
       try {
-        Thread.currentThread().setContextClassLoader(PluginHibernateUtil.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader( PluginHibernateUtil.class.getClassLoader() );
         PluginHibernateUtil.sessionFactory = PluginHibernateUtil.getConfiguration().buildSessionFactory();
-        
+
       } catch ( Exception ex ) {
         logger.warn( "Error building session factory " + Util.getExceptionDescription( ex ) ); //$NON-NLS-1$
         throw new PluginHibernateException( "Error building session factory", ex ); //$NON-NLS-1$
       } finally {
-        Thread.currentThread().setContextClassLoader(contextCL);
+        Thread.currentThread().setContextClassLoader( contextCL );
       }
     }
   }
@@ -111,7 +115,7 @@ public class PluginHibernateUtil {
    * Retrieves the current Session local to the thread.
    * <p/>
    * If no Session is open, opens a new Session for the running thread.
-   * 
+   *
    * @return Session
    */
   public static synchronized Session getSession() throws PluginHibernateException {

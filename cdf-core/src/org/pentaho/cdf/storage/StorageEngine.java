@@ -62,6 +62,7 @@ public class StorageEngine {
 
   public static synchronized StorageEngine getInstance() {
     if ( instance == null ) {
+      PluginHibernateUtil.initialize();
       instance = new StorageEngine();
     }
     return instance;
