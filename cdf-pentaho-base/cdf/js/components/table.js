@@ -51,6 +51,22 @@ if($.fn.dataTableExt != undefined){
  *    oTable.fnLengthChange( 100 );
  * } );
  */
+
+  /* If table elements have class 'numeric' and values are represented as strings (e.g. "234456.5675")
+   let's try and convert them to numeric values for sorting. Source based on version 1.7.5 of dataTables.js */
+  $.extend( $.fn.dataTableExt.oSort, {
+    "numeric-asc": function ( a, b ) {
+      a = (a=="-"||a=="") ? 0 : ($.isNumeric(a) ? a*1 : 0);
+      b = (b=="-"||b=="") ? 0 : ($.isNumeric(b) ? b*1 : 0);
+      return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+    },
+
+    "numeric-desc": function ( a, b ) {
+      a = (a=="-"||a=="") ? 0 : ($.isNumeric(a) ? a*1 :0);
+      b = (b=="-"||b=="") ? 0 : ($.isNumeric(b) ? b*1 :0);
+      return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+    }
+  });
 }
 
 var TableComponent = UnmanagedComponent.extend({
@@ -524,19 +540,3 @@ var TableComponent = UnmanagedComponent.extend({
     return dtData;
   }
 });
-
-/* If table elements have class 'numeric' and values are represented as strings (e.g. "234456.5675")
- let's try and convert them to numeric values for sorting. Source based on version 1.7.5 of dataTables.js */
-jQuery.extend( jQuery.fn.dataTableExt.oSort, {
-  "numeric-asc": function ( a, b ) {
-    a = (a=="-"||a=="") ? 0 : (jQuery.isNumeric(a) ? a*1 : 0);
-    b = (b=="-"||b=="") ? 0 : (jQuery.isNumeric(b) ? b*1 : 0);
-    return ((a < b) ? -1 : ((a > b) ? 1 : 0));
-  },
-
-  "numeric-desc": function ( a, b ) {
-    a = (a=="-"||a=="") ? 0 : (jQuery.isNumeric(a) ? a*1 :0);
-    b = (b=="-"||b=="") ? 0 : (jQuery.isNumeric(b) ? b*1 :0);
-    return ((a < b) ? 1 : ((a > b) ? -1 : 0));
-  }
-} );
