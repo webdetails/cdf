@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-var Dashboards = {
+var dash, Dashboards = dash = {
 
   ERROR_CODES:{
     'QUERY_TIMEOUT' : {
@@ -66,6 +66,7 @@ var Dashboards = {
   i18nCurrentLanguageCode : null,
   i18nSupport : null  // Reference to i18n objects
 };
+
 
 _.extend(Dashboards, Backbone.Events);
 
@@ -447,7 +448,7 @@ Dashboards.updateComponent = function(object) {
 };
 
 
-Dashboards.getComponent = function(name){
+Dashboards.getComponent = dash.getComp = function(name){
   for (var i in this.components){
     if (this.components[i].name == name)
       return this.components[i];
@@ -1069,7 +1070,7 @@ Dashboards.getUnboundParameters = function(){
   }
 };
 
-Dashboards.getParameterValue = function (parameterName) {
+Dashboards.getParameterValue = dash.getParam = function (parameterName) {
   if (this.globalContext) {
     try{
       return eval(parameterName);
@@ -1083,7 +1084,7 @@ Dashboards.getParameterValue = function (parameterName) {
   }
 };
 
-Dashboards.setParameter = function(parameterName, parameterValue, isNotified) {
+Dashboards.setParameter = dash.setParam = function(parameterName, parameterValue, isNotified) {
   if(parameterName == undefined || parameterName == "undefined"){
     this.log('Dashboards.setParameter: trying to set undefined!!','warn');
     return;
