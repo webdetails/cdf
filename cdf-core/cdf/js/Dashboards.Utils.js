@@ -36,6 +36,7 @@ Dashboards.escapeHtml = function(input) {
 Dashboards.getPathParameter = function ( url ) {  
 
   url = ( url || window.location.pathname );
+  url = decodeURIComponent(url);
 
   var pathRegex = url.match( "/:(.[^/]+)(.*)/" );
   

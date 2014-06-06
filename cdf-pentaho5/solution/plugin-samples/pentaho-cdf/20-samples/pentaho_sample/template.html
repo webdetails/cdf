@@ -43,16 +43,18 @@ pageTitleString =
   listeners:["region", "department"],
   htmlObject: "page_title_object",
   executeAtStart: true,
-  expression: function(){return "title"},
+  expression: function(){
+    return this.title;
+  },
   preExecution:function(){
     if(region == "null" && department == "null") {
-      title="Select a region";
+      this.title="Select a region";
     }
     else if (region != "null" && department == "null") {
-      title="This is headcount spending for " + region;
+      this.title="This is headcount spending for " + region;
     }
     else if (region != "null" && department != "null") {
-      title = "This is headcount spending for " + region + ", " + department;
+      this.title = "This is headcount spending for " + region + ", " + department;
     }
   },
   postExecution:function(){}
@@ -64,7 +66,7 @@ RegionsPieChart =
   name: "RegionsPieChart",
   type: "xaction",
   solution: "plugin-samples",
-  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/RegionsPieChart.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample",
   action: "RegionsPieChart.xaction",
   listeners:[],
   parameters: [],
@@ -78,7 +80,7 @@ RegionVarianceBarChart =
   name: "RegionVarianceBarChart",
   type: "xaction",
   solution: "plugin-samples",
-  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/RegionVarianceBarChart.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample",
   action: "RegionVarianceBarChart.xaction",
   listeners:["region"],
   parameters: [["REGION","region"]],
@@ -93,7 +95,7 @@ DepartmentDialChart =
   name: "DepartmentDialChart",
   type: "xaction",
   solution: "plugin-samples",
-  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/DepartmentDialChart.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample",
   action: "DepartmentDialChart.xaction",
   listeners:["department"],
   parameters: [["DEPARTMENT","department"],["REGION","region"]],
@@ -107,7 +109,7 @@ EmbeddedReport =
   name: "EmbeddedReport",
   type: "xaction",
   solution: "plugin-samples",
-  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample/embedded_report.xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/pentaho_sample",
   action: "embedded_report.xaction",
   listeners:["department"],
   parameters: [["DEPARTMENT","department"],["REGION","region"]],
