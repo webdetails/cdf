@@ -76,10 +76,11 @@ public class ContextEngine {
   }
 
   protected IPentahoSession getUserSession() {
-	return PentahoSessionHolder.getSession();
+    return PentahoSessionHolder.getSession();
   }
 
-  public String getContext( String path, String viewId, String action, Map<String, String> parameters ) {
+  public String getContext( String path, String viewId, String action, Map<String, String> parameters,
+                            int inactiveInterval ) {
     final JSONObject contextObj = new JSONObject();
 
     Document config = getConfigFile();
@@ -89,6 +90,7 @@ public class ContextEngine {
       String username = getUserSession().getName();
 
       buildContextConfig( contextObj, path, config, username );
+      buildContextSessionTimeout( contextObj, inactiveInterval );
       buildContextDates( contextObj );
 
       contextObj.put( "user", getUserSession().getName() );
@@ -104,7 +106,7 @@ public class ContextEngine {
       contextObj.put( "params", params );
 
       logger.info( "[Timing] Finished building context: "
-          + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
+        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
 
       return buildContextScript( contextObj, viewId, action, username );
 
@@ -113,13 +115,22 @@ public class ContextEngine {
     }
   }
 
-  private JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath, Map<String, String> parameters ) throws JSONException {
+  private JSONObject buildContextSessionTimeout( final JSONObject contextObj, int inactiveInterval )
+    throws JSONException {
+    if ( getUserSession().isAuthenticated() ) {
+      contextObj.put( "sessionTimeout", inactiveInterval );
+    }
+    return contextObj;
+  }
+
+  private JSONObject buildContextPaths( final JSONObject contextObj, String dashboardPath,
+                                        Map<String, String> parameters ) throws JSONException {
     contextObj.put( "path", dashboardPath );
-    
-    if( parameters != null && parameters.containsKey( Parameter.SOLUTION )){
-    	contextObj.put( Parameter.SOLUTION, parameters.get( Parameter.SOLUTION ) ); 
+
+    if ( parameters != null && parameters.containsKey( Parameter.SOLUTION ) ) {
+      contextObj.put( Parameter.SOLUTION, parameters.get( Parameter.SOLUTION ) );
     } // TODO redo this
-    
+
     return contextObj;
   }
 
@@ -163,7 +174,8 @@ public class ContextEngine {
     return s.toString();
   }
 
-  private JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params ) throws JSONException {
+  private JSONObject buildContextParams( final JSONObject contextObj, Map<String, String> params )
+    throws JSONException {
     for ( String param : params.values() ) {
       if ( param.startsWith( PREFIX_PARAMETER ) ) {
         contextObj.put( param.substring( PREFIX_PARAMETER.length() ), params.get( param ) );
@@ -240,8 +252,8 @@ public class ContextEngine {
 
     /* Bail out if cdf/includes folder does not exists */
     IReadAccess autoIncludesFolder = CdfEngine.getUserContentReader( null );
-    if( !autoIncludesFolder.fileExists(
-      CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR ) ){
+    if ( !autoIncludesFolder.fileExists(
+      CdfEngine.getEnvironment().getCdfPluginRepositoryDir() + CdfConstants.INCLUDES_DIR ) ) {
       return queries;
     }
 
@@ -256,11 +268,11 @@ public class ContextEngine {
   }
 
   private List<AutoInclude> getAutoIncludes( Document config ) {
-    synchronized ( autoIncludesLock ) {
+    synchronized( autoIncludesLock ) {
       if ( autoIncludes == null ) {
         IReadAccess cdaRoot =
-            CdfEngine.getUserContentReader( CdfEngine.getEnvironment().getCdfPluginRepositoryDir()
-                + CdfConstants.INCLUDES_DIR );
+          CdfEngine.getUserContentReader( CdfEngine.getEnvironment().getCdfPluginRepositoryDir()
+            + CdfConstants.INCLUDES_DIR );
         autoIncludes = AutoInclude.buildAutoIncludeList( config, cdaRoot );
       }
       return autoIncludes;
@@ -293,13 +305,14 @@ public class ContextEngine {
 
   public static void clearCache() {
     // TODO figure out what to clear
-    synchronized ( autoIncludesLock ) {
+    synchronized( autoIncludesLock ) {
       autoIncludes = null;
       logger.debug( "auto-includes cleared." );
     }
   }
 
-  public static void generateContext( final OutputStream out, HashMap<String, String> paramMap ) throws Exception {
+  public static void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
+    throws Exception {
 
     String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
     String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
@@ -314,7 +327,8 @@ public class ContextEngine {
       fullPath = RepositoryHelper.joinPaths( fullPath, action );
     }
 
-    String dashboardContext = ContextEngine.getInstance().getContext( fullPath, viewId, action, paramMap );
+    String dashboardContext =
+      ContextEngine.getInstance().getContext( fullPath, viewId, action, paramMap, inactiveInterval );
 
     if ( StringUtils.isEmpty( dashboardContext ) ) {
       logger.error( "empty dashboardContext" );

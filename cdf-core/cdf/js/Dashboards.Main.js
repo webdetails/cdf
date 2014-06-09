@@ -101,7 +101,10 @@ Dashboards.showProgressIndicator = function() {
   $.blockUI && this.blockUIwithDrag();
 };
 
-Dashboards.hideProgressIndicator = function() {
+Dashboards.hideProgressIndicator = function(force) {
+  if (force) {
+    this.runningCalls = 0;
+  }
   $.unblockUI && $.unblockUI();
   this.showErrorTooltip();// Dashboards.Legacy
 };

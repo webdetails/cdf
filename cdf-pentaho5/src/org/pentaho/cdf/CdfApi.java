@@ -135,7 +135,8 @@ public class CdfApi {
       @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
       @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
       @Context HttpServletRequest servletRequest ) {
-    return ContextEngine.getInstance().getContext( path, viewId, action, Parameter.asHashMap( servletRequest ) );
+    int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
+    return ContextEngine.getInstance().getContext( path, viewId, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   @GET

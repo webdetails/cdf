@@ -29,3 +29,5 @@ cdf-core/js-lib
 cdf-pentaho5/js-lib
 cdf-pentaho5/test-lib
 dist
+cdf-pentaho/js-lib
+cdf-pentaho/test-lib
