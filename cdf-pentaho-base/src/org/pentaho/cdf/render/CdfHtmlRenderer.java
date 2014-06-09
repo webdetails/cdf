@@ -49,24 +49,27 @@ public class CdfHtmlRenderer {
   private static Log logger = LogFactory.getLog( CdfHtmlRenderer.class );
 
   public void execute( final OutputStream out, final String solution, final String path, String templateName,
-      String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user )
+                       String style, String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap,
+                       String user, int inactiveInterval )
     throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( solution, path, templateName );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval );
   }
 
   public void execute( final OutputStream out, final String templatePath, String style,
-      String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user ) throws Exception {
+                       String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
+                       int inactiveInterval ) throws Exception {
 
     IBasicFile dashboardTemplateFile = HtmlDashboardRenderer.getDashboardTemplate( templatePath );
 
-    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user );
+    execute( out, dashboardTemplateFile, style, dashboardsMessagesBaseFilename, parameterMap, user, inactiveInterval );
   }
 
   public void execute( OutputStream out, IBasicFile dashboardTemplateFile, String style,
-      String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user ) throws Exception {
+                       String dashboardsMessagesBaseFilename, HashMap<String, String> parameterMap, String user,
+                       int inactiveInterval ) throws Exception {
 
     String intro = ""; //$NON-NLS-1$
     String footer = ""; //$NON-NLS-1$
@@ -103,12 +106,12 @@ public class CdfHtmlRenderer {
     final String dashboardContent = getDashboardContent( dashboardTemplateFile.getContents(), i18nTagsList );
 
     // Merge dashboard related message file with global message file and save it in the dashboard cache
-    String path = StringUtils.defaultIfEmpty( FilenameUtils.getPathNoEndSeparator( dashboardTemplateFile.getPath() ) , 
-        CdfEngine.getEnvironment().getCdfPluginRepositoryDir() ) ;
+    String path = StringUtils.defaultIfEmpty( FilenameUtils.getPathNoEndSeparator( dashboardTemplateFile.getPath() ),
+      CdfEngine.getEnvironment().getCdfPluginRepositoryDir() );
     path = !path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ? RepositoryHelper.SEPARATOR + path : path;
-    
+
     MessageBundlesHelper mbh =
-        new MessageBundlesHelper( path, dashboardsMessagesBaseFilename );
+      new MessageBundlesHelper( path, dashboardsMessagesBaseFilename );
 
     intro = replaceIntroParameters( intro, mbh, i18nTagsList, dashboardsMessagesBaseFilename );
 
@@ -126,7 +129,7 @@ public class CdfHtmlRenderer {
     out.write( intro.substring( headIndex + 6, length ).getBytes( CharsetHelper.getEncoding() ) );
     // Add context
     try {
-      ContextEngine.generateContext( out, parameterMap );
+      ContextEngine.generateContext( out, parameterMap, inactiveInterval );
     } catch ( Exception e ) {
       logger.error( "Error generating cdf context.", e );
     }
@@ -147,7 +150,8 @@ public class CdfHtmlRenderer {
   public boolean matchComponent( int keyIndex, final String key, final String content ) {
 
     for ( int i = keyIndex - 1; i > 0; i-- ) {
-      if ( content.charAt( i ) == ':' || content.charAt( i ) == '"' || ( "" + content.charAt( i ) ).trim().equals( "" ) ) {
+      if ( content.charAt( i ) == ':' || content.charAt( i ) == '"' || ( "" + content.charAt( i ) ).trim()
+        .equals( "" ) ) {
         // noinspection UnnecessaryContinue
         continue;
       } else {
@@ -171,8 +175,8 @@ public class CdfHtmlRenderer {
     // Fixed ISSUE #CDF-113
     // BufferedReader reader = new BufferedReader(new InputStreamReader(is));
     BufferedReader reader =
-        new BufferedReader(
-            new InputStreamReader( is, Charset.forName( CdfEngine.getEnvironment().getSystemEncoding() ) ) );
+      new BufferedReader(
+        new InputStreamReader( is, Charset.forName( CdfEngine.getEnvironment().getSystemEncoding() ) ) );
 
     StringBuilder sb = new StringBuilder();
     String line = null;
@@ -196,7 +200,7 @@ public class CdfHtmlRenderer {
     StringBuffer resBuffer = new StringBuffer();
     int i;
     String tagValue;
-    resBuffer.append( test[0] );
+    resBuffer.append( test[ 0 ] );
     for ( i = 1; i < test.length; i++ ) {
 
       // First tag is processed differently that other because is the only case where I don't
@@ -204,11 +208,11 @@ public class CdfHtmlRenderer {
       resBuffer.append( "<span id=\"" ); //$NON-NLS-1$
       if ( i != 0 ) {
         // Right part of the string with the value of the tag herein
-        tagValue = test[i].substring( 0, test[i].indexOf( "\")" ) ); //$NON-NLS-1$
+        tagValue = test[ i ].substring( 0, test[ i ].indexOf( "\")" ) ); //$NON-NLS-1$
         tagsList.add( tagValue );
         resBuffer.append( updateSelectorName( tagValue ) );
         resBuffer.append( "\"></span>" ); //$NON-NLS-1$
-        resBuffer.append( test[i].substring( test[i].indexOf( "\")" ) + 2, test[i].length() ) ); //$NON-NLS-1$
+        resBuffer.append( test[ i ].substring( test[ i ].indexOf( "\")" ) + 2, test[ i ].length() ) ); //$NON-NLS-1$
       }
     }
     return resBuffer.toString();
@@ -222,13 +226,14 @@ public class CdfHtmlRenderer {
   }
 
   private String replaceIntroParameters( String intro, MessageBundlesHelper mbh, ArrayList<String> i18nTagsList,
-      String dashboardsMessagesBaseFilename ) throws Exception {
+                                         String dashboardsMessagesBaseFilename ) throws Exception {
     mbh.saveI18NMessageFilesToCache();
     String messageSetPath = mbh.getMessageFilesCacheUrl() + "/"; //$NON-NLS-1$
 
     // If dashboard specific files aren't specified set message filename in cache to the global messages file filename
-    if ( dashboardsMessagesBaseFilename == null )
+    if ( dashboardsMessagesBaseFilename == null ) {
       dashboardsMessagesBaseFilename = CdfConstants.BASE_GLOBAL_MESSAGE_SET_FILENAME;
+    }
 
     intro = intro.replaceAll( "\\{load\\}", "onload=\"load()\"" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     intro = intro.replaceAll( "\\{body-tag-unload\\}", "" ); //$NON-NLS-1$
@@ -242,14 +247,16 @@ public class CdfHtmlRenderer {
     StringBuffer messageCodeSet = new StringBuffer();
     for ( String tag : tagsList ) {
       messageCodeSet
-          .append( "\\$('#" ).append( updateSelectorName( tag ) ).append( "').html(jQuery.i18n.prop('" ).append( tag ).append( "'));\n" ); //$NON-NLS-1$
+        .append( "\\$('#" ).append( updateSelectorName( tag ) ).append( "').html(jQuery.i18n.prop('" ).append( tag )
+        .append( "'));\n" ); //$NON-NLS-1$
     }
     return messageCodeSet.toString();
   }
 
   private String updateUserLanguageKey( String intro ) {
     // Fill the template with the correct user locale
-    intro = intro.replaceAll( "#\\{LANGUAGE_CODE\\}", CdfEngine.getEnvironment().getLocale().getLanguage() ); //$NON-NLS-1$
+    intro =
+      intro.replaceAll( "#\\{LANGUAGE_CODE\\}", CdfEngine.getEnvironment().getLocale().getLanguage() ); //$NON-NLS-1$
     return intro;
   }
 
@@ -271,7 +278,7 @@ public class CdfHtmlRenderer {
   }
 
   public static void getHeaders( String dashboardContent, String dashboardType, String root, String scheme,
-      boolean isDebugMode, OutputStream out ) throws Exception {
+                                 boolean isDebugMode, OutputStream out ) throws Exception {
 
     ICdfHeadersProvider cdfHeaders = CdfEngine.getEnvironment().getCdfHeadersProvider();
     // Identify which extra JSs and CSSs to add to header, according to components being used
@@ -279,10 +286,11 @@ public class CdfHtmlRenderer {
     if ( dashboardContent != null ) {
       componentTypes = new ArrayList<String>();
       // search for component types in dashboardsContent (e.g. template.html)
-      for ( String[] componenType: CdfConstants.DASHBOARD_COMPONENT_TYPES ){
+      for ( String[] componenType : CdfConstants.DASHBOARD_COMPONENT_TYPES ) {
         // Screen Scrap to get component types from dashboardContent
-        if ( Pattern.compile( String.format( "type:\\s*[\"'](?i)%s[a-z]*[\"']", componenType[0] ) ).matcher( dashboardContent ).find() ){
-          componentTypes.add( componenType[1] );
+        if ( Pattern.compile( String.format( "type:\\s*[\"'](?i)%s[a-z]*[\"']", componenType[ 0 ] ) )
+          .matcher( dashboardContent ).find() ) {
+          componentTypes.add( componenType[ 1 ] );
         }
       }
     }
@@ -292,9 +300,11 @@ public class CdfHtmlRenderer {
         // file paths are already absolute, which didn't happen before
         root = root.substring( 0, root.indexOf( "/" ) );
       }
-      out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, scheme + "://" + root, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
+      out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, scheme + "://" + root, componentTypes )
+        .getBytes( CharsetHelper.getEncoding() ) );
     } else {
-      out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
+      out.write(
+        cdfHeaders.getHeaders( dashboardType, isDebugMode, componentTypes ).getBytes( CharsetHelper.getEncoding() ) );
     }
   }
 

@@ -78,7 +78,7 @@ import pt.webdetails.cpf.utils.PluginIOUtils;
  * include:
  * <p/>
  * - JSONSolution - GetCDFResource - .xcdf requests - js files - files within resources
- * 
+ *
  * @author Will Gorman (wgorman@pentaho.com)
  */
 public class CdfContentGenerator extends SimpleContentGenerator {
@@ -117,18 +117,18 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     final String method;
     final String payload;
     logger.info( "[Timing] CDF content generator took over: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
+      + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     try {
 
       out = getResponseOutputStream( MimeTypes.HTML );
 
       if ( parameterProviders.get( Parameter.PATH ) != null
-          && parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) != null
-          && ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
-              .getContextPath() != null ) {
+        && parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) != null
+        && ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
+        .getContextPath() != null ) {
         RELATIVE_URL =
-            ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
-                .getContextPath();
+          ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
+            .getContextPath();
       } else {
         RELATIVE_URL = CdfEngine.getEnvironment().getApplicationBaseContentUrl();
         /*
@@ -165,10 +165,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       // make sure we have a workable state
       if ( outputHandler == null ) {
         error( Messages.getErrorString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
-        throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
+        throw new InvalidParameterException(
+          Messages.getString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
       } else if ( out == null ) {
         error( Messages.getErrorString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
-        throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
+        throw new InvalidParameterException(
+          Messages.getString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
       }
 
       findMethod( method, out, payload );
@@ -176,7 +178,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     } catch ( Exception e ) {
       logger.error( "Error creating cdf content: ", e );
       HttpServletResponse response =
-          (HttpServletResponse) parameterProviders.get( "path" ).getParameter( "httpresponse" );
+        (HttpServletResponse) parameterProviders.get( "path" ).getParameter( "httpresponse" );
       response.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getLocalizedMessage() );
     }
   }
@@ -187,7 +189,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     // about using reflection for class loading, but I don't expect that to happen.
 
     HttpServletRequest request =
-        ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
+      ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
     final IParameterProvider requestParams = parameterProviders.get( IParameterProvider.SCOPE_REQUEST );
 
     if ( urlPath.equals( RENDER_XCDF ) ) {
@@ -209,7 +211,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     } else if ( urlPath.equals( STORAGE ) ) {
       processStorage( requestParams, out );
     } else if ( urlPath.equals( CONTEXT ) ) {
-      ContextEngine.generateContext( out, Parameter.asHashMap( request ) );
+      ContextEngine
+        .generateContext( out, Parameter.asHashMap( request ), request.getSession().getMaxInactiveInterval() );
     } else if ( urlPath.equals( CLEAR_CACHE ) ) {
       clearCache( out );
     } else if ( urlPath.equals( VIEWS ) ) {
@@ -219,13 +222,13 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         CdfHtmlRenderer.getHeaders( payload, Parameter.asHashMap( requestParams ), out );
       } else {
         CdfHtmlRenderer.getHeaders( requestParams.getStringParameter( Parameter.DASHBOARD_CONTENT, null ), Parameter
-            .asHashMap( requestParams ), out );
+          .asHashMap( requestParams ), out );
       }
     } else if ( urlPath.equalsIgnoreCase( PING ) ) {
       out.write( "{\"ping\":\"ok\"}".getBytes( CharsetHelper.getEncoding() ) );
-    } else if ( urlPath.equalsIgnoreCase( GET_SCHEDULES ) )
+    } else if ( urlPath.equalsIgnoreCase( GET_SCHEDULES ) ) {
       processGetSchedules( requestParams, out );
-    else {
+    } else {
       // we'll be providing the actual content with cache
       logger.warn( "Getting resources via content generator is deprecated, please use static resources: " + urlPath );
       returnResource( urlPath, out );
@@ -257,8 +260,9 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     String result = "[";
     for ( ISchedule schedule : schedules ) {
-      if ( result.length() > 1 )
+      if ( result.length() > 1 ) {
         result += ",";
+      }
       result += "{";
       result += " \"id\": \"" + schedule.getId() + "\",";
       result += " \"name\": \"" + schedule.getTitle() + "\"";
@@ -287,7 +291,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
       if ( success ) {
         renderHtmlDashboard( out, solution, path, renderer.getTemplate(), renderer.getStyle(), renderer
-            .getMessagesBaseFilename() );
+          .getMessagesBaseFilename() );
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
 
@@ -309,7 +313,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     ParserConfigurationException {
     if ( requestParams == null ) {
       error( Messages.getErrorString( "CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
-      throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
+      throw new InvalidParameterException(
+        Messages.getString( "CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
     }
 
     final String solution = requestParams.getStringParameter( Parameter.SOLUTION, null ); //$NON-NLS-1$
@@ -317,8 +322,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     final String mode = requestParams.getStringParameter( Parameter.MODE, null ); //$NON-NLS-1$
 
     final String contextPath =
-        ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
-            .getContextPath();
+      ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) )
+        .getContextPath();
     final NavigateComponent nav = new NavigateComponent( userSession, contextPath );
     final String json = nav.getNavigationElements( mode, solution, path );
 
@@ -339,13 +344,14 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   private void getCDFResource( String urlPath, OutputStream out, IParameterProvider requestParams ) throws Exception {
     if ( requestParams == null ) {
       error( Messages.getErrorString( "CdfContentGenerator.ERROR_0004_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
-      throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
+      throw new InvalidParameterException(
+        Messages.getString( "CdfContentGenerator.ERROR_0017_NO_REQUEST_PARAMS" ) ); //$NON-NLS-1$
     }
 
     final String resource = requestParams.getStringParameter( Parameter.RESOURCE, null ); //$NON-NLS-1$
 
     final HttpServletResponse response =
-        (HttpServletResponse) parameterProviders.get( Parameter.PATH ).getParameter( "httpresponse" );
+      (HttpServletResponse) parameterProviders.get( Parameter.PATH ).getParameter( "httpresponse" );
     try {
       response.setContentType( MimeTypes.getMimeType( resource ) );
       getSolutionFile( resource, out );
@@ -363,7 +369,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     // Get messages base filename from url if given otherwise defaults to Messages
     String messageBaseFilename = requestParams.getStringParameter( "messages", null );
     renderHtmlDashboard( out, solution, path, templateName == null ? "template.html" : templateName, template,
-        messageBaseFilename );
+      messageBaseFilename );
   }
 
   private void returnResource( final String urlPath, final OutputStream out ) throws Exception {
@@ -381,14 +387,15 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   }
 
   public void renderHtmlDashboard( final OutputStream out, final String solution, final String path,
-      String templateName, String template, String dashboardsMessagesBaseFilename ) throws Exception {
+                                   String templateName, String template, String dashboardsMessagesBaseFilename )
+    throws Exception {
 
     HttpServletRequest request =
-        ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
+      ( (HttpServletRequest) parameterProviders.get( Parameter.PATH ).getParameter( "httprequest" ) );
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
     renderer.execute( out, solution, path, templateName, template, dashboardsMessagesBaseFilename, Parameter
-        .asHashMap( request ), userSession.getName() );
+      .asHashMap( request ), userSession.getName(), request.getSession().getMaxInactiveInterval() );
   }
 
   private void exportFile( final IParameterProvider requestParams, final OutputStream output ) {
@@ -459,35 +466,37 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
           final PrintWriter pw = new PrintWriter( out );
           pw.println( JsonUtil.makeJsonErrorResponse( "Operation not authorized: requires authentication",
-              false ).toString( 2 ) );
+            false ).toString( 2 ) );
           pw.flush();
           return;
         }
       }
 
-      switch ( operation ) {
+      switch( operation ) {
         case ADD:
           result =
-              engine.add( params.getStringParameter( Parameter.PAGE, "" ), params.getStringParameter(
-                  Parameter.COMMENT, "" ), userSession.getName() );
+            engine.add( params.getStringParameter( Parameter.PAGE, "" ), params.getStringParameter(
+              Parameter.COMMENT, "" ), userSession.getName() );
           break;
         case DELETE:
           result =
-              engine.delete( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
-                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName(), isAdministrator );
+            engine.delete( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
+              .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName(),
+              isAdministrator );
           break;
         case ARCHIVE:
           result =
-              engine.archive( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
-                  .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName(), isAdministrator );
+            engine.archive( Integer.parseInt( params.getStringParameter( Parameter.COMMENT_ID, "-1" ) ), Boolean
+              .valueOf( params.getStringParameter( Parameter.VALUE, "true" ) ), userSession.getName(),
+              isAdministrator );
           break;
         case LIST:
           result =
-              engine.list( params.getStringParameter( Parameter.PAGE, "" ), Integer.parseInt( params
-                  .getStringParameter( Parameter.FIRST_RESULT, "0" ) ), Integer.parseInt( params.getStringParameter(
-                  Parameter.MAX_RESULTS, "20" ) ), ( isAdministrator ? Boolean.valueOf( params.getStringParameter(
-                  Parameter.DELETED, "false" ) ) : false ), ( isAdministrator ? Boolean.valueOf( params
-                  .getStringParameter( Parameter.ARCHIVED, "false" ) ) : false ), userSession.getName() );
+            engine.list( params.getStringParameter( Parameter.PAGE, "" ), Integer.parseInt( params
+              .getStringParameter( Parameter.FIRST_RESULT, "0" ) ), Integer.parseInt( params.getStringParameter(
+              Parameter.MAX_RESULTS, "20" ) ), ( isAdministrator ? Boolean.valueOf( params.getStringParameter(
+              Parameter.DELETED, "false" ) ) : false ), ( isAdministrator ? Boolean.valueOf( params
+              .getStringParameter( Parameter.ARCHIVED, "false" ) ) : false ), userSession.getName() );
           break;
 
         default:
@@ -517,7 +526,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
       final StorageEngine.Operation operation = StorageEngine.Operation.get( action );
 
-      switch ( operation ) {
+      switch( operation ) {
         case READ:
           result = engine.read( userSession.getName() );
           break;
@@ -564,7 +573,7 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     final IResourceLoader resLoader = CdfEngine.getEnvironment().getResourceLoader();
     final String formats =
-        resLoader.getPluginSetting( this.getClass(), CdfConstants.PLUGIN_SETTINGS_DOWNLOADABLE_FORMATS );
+      resLoader.getPluginSetting( this.getClass(), CdfConstants.PLUGIN_SETTINGS_DOWNLOADABLE_FORMATS );
 
     List<String> allowedFormats = Arrays.asList( StringUtils.split( formats, ',' ) );
     String extension = resourcePath.replaceAll( ".*\\.(.*)", "$1" );
@@ -578,9 +587,9 @@ public class CdfContentGenerator extends SimpleContentGenerator {
 
     if ( contentAccess.fileExists( resourcePath ) && contentAccess.hasAccess( resourcePath, FileAccess.EXECUTE ) ) {
       PluginIOUtils.writeOutAndFlush( out, contentAccess.getFileInputStream( resourcePath ) );
-    }else if ( systemAccess.fileExists( resourcePath ) ){
+    } else if ( systemAccess.fileExists( resourcePath ) ) {
       PluginIOUtils.writeOutAndFlush( out, systemAccess.getFileInputStream( resourcePath ) );
-    }else{
+    } else {
       logger.info( " resource not found: " + resourcePath );
     }
   }
@@ -605,21 +614,21 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         }
       }
 
-      switch ( operation ) {
+      switch( operation ) {
         case GET_VIEW:
           result =
-              engine.getView( requestParams.getStringParameter( Parameter.NAME, "" ),
-                  PentahoSessionHolder.getSession().getName() ).toJSON().toString();
+            engine.getView( requestParams.getStringParameter( Parameter.NAME, "" ),
+              PentahoSessionHolder.getSession().getName() ).toJSON().toString();
           break;
         case SAVE_VIEW:
           result =
-              engine.saveView( requestParams.getStringParameter( Parameter.VIEW, "" ), PentahoSessionHolder
-                  .getSession().getName() );
+            engine.saveView( requestParams.getStringParameter( Parameter.VIEW, "" ), PentahoSessionHolder
+              .getSession().getName() );
           break;
         case DELETE_VIEW:
           result =
-              engine.deleteView( requestParams.getStringParameter( Parameter.NAME, "" ), PentahoSessionHolder
-                  .getSession().getName() );
+            engine.deleteView( requestParams.getStringParameter( Parameter.NAME, "" ), PentahoSessionHolder
+              .getSession().getName() );
           break;
         case LIST_VIEWS:
           result = engine.listViews( PentahoSessionHolder.getSession().getName() ).toString( 2 );

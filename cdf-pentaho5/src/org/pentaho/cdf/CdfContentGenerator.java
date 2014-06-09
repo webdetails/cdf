@@ -65,12 +65,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     String template = "";
 
     logger.info( "[Timing] CDF content generator took over: "
-        + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
+      + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
     try {
       if ( getPathParameters() != null ) {
 
         // legacy resource feching support
-        if( isCdfResource() ){
+        if ( isCdfResource() ) {
           new CdfApi().getResource( getPathParameterAsString( "cmd", null ), null, getResponse() );
           return;
         }
@@ -116,10 +116,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
       // make sure we have a workable state
       if ( outputHandler == null ) {
         error( Messages.getErrorString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
-        throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
+        throw new InvalidParameterException(
+          Messages.getString( "CdfContentGenerator.ERROR_0001_NO_OUTPUT_HANDLER" ) ); //$NON-NLS-1$
       } else if ( out == null ) {
         error( Messages.getErrorString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
-        throw new InvalidParameterException( Messages.getString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
+        throw new InvalidParameterException(
+          Messages.getString( "CdfContentGenerator.ERROR_0003_NO_OUTPUT_STREAM" ) ); //$NON-NLS-1$
       }
 
       if ( filePath.isEmpty() ) {
@@ -136,11 +138,11 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   }
 
   public void renderXcdfDashboard( final OutputStream out, final IParameterProvider requestParams, String xcdfFilePath,
-      String defaultTemplate ) throws Exception {
+                                   String defaultTemplate ) throws Exception {
     long start = System.currentTimeMillis();
 
     UUID uuid =
-        CpfAuditHelper.startAudit( PLUGIN_ID, xcdfFilePath, getObjectName(), this.userSession, this, requestParams );
+      CpfAuditHelper.startAudit( PLUGIN_ID, xcdfFilePath, getObjectName(), this.userSession, this, requestParams );
     try {
 
       XcdfRenderer renderer = new XcdfRenderer();
@@ -154,7 +156,8 @@ public class CdfContentGenerator extends SimpleContentGenerator {
         if ( !StringUtils.isEmpty( defaultTemplate ) ) { // If style defined in URL parameter 'template'
           renderHtmlDashboard( out, xcdfFilePath, templatePath, defaultTemplate, renderer.getMessagesBaseFilename() );
         } else { // use style provided via .xcdf or default
-          renderHtmlDashboard( out, xcdfFilePath, templatePath, renderer.getStyle(), renderer.getMessagesBaseFilename() );
+          renderHtmlDashboard( out, xcdfFilePath, templatePath, renderer.getStyle(),
+            renderer.getMessagesBaseFilename() );
         }
 
         setResponseHeaders( MimeTypes.HTML, 0, null );
@@ -173,19 +176,23 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     }
   }
 
-  public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath, String defaultTemplate,
-      String dashboardsMessagesBaseFilename ) throws Exception {
+  public void renderHtmlDashboard( final OutputStream out, final String xcdfFilePath, final String templatePath,
+                                   String defaultTemplate,
+                                   String dashboardsMessagesBaseFilename ) throws Exception {
 
     HttpServletRequest request = getRequest();
 
     CdfHtmlRenderer renderer = new CdfHtmlRenderer();
-    
+
     HashMap<String, String> paramMap = Parameter.asHashMap( request );
     if ( paramMap.get( Parameter.FILE ) == null || paramMap.get( Parameter.FILE ).isEmpty() ) {
       paramMap.put( Parameter.FILE, xcdfFilePath );
     }
-    
-    renderer.execute( out, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, paramMap, userSession.getName() );
+
+    int inactiveInterval = request.getSession().getMaxInactiveInterval();
+    renderer
+      .execute( out, templatePath, defaultTemplate, dashboardsMessagesBaseFilename, paramMap, userSession.getName(),
+        inactiveInterval );
   }
 
   public String getPluginName() {
@@ -193,22 +200,26 @@ public class CdfContentGenerator extends SimpleContentGenerator {
   }
 
   // InterPluginBroker calls this method within bean id 'xcdf'
-  public String getContext( @QueryParam( Parameter.PATH ) @DefaultValue( StringUtils.EMPTY ) String path,
-      @QueryParam( Parameter.ACTION ) @DefaultValue( StringUtils.EMPTY ) String action,
-      @DefaultValue( StringUtils.EMPTY ) @QueryParam( Parameter.VIEW_ID ) String viewId,
-      @Context HttpServletRequest servletRequest ) {
-    return ContextEngine.getInstance().getContext( path, viewId, action, Parameter.asHashMap( servletRequest ) );
+  public String getContext( @QueryParam(Parameter.PATH) @DefaultValue(StringUtils.EMPTY) String path,
+                            @QueryParam(Parameter.ACTION) @DefaultValue(StringUtils.EMPTY) String action,
+                            @DefaultValue(StringUtils.EMPTY) @QueryParam(Parameter.VIEW_ID) String viewId,
+                            @Context HttpServletRequest servletRequest ) {
+    int inactiveInterval = servletRequest.getSession().getMaxInactiveInterval();
+    return ContextEngine.getInstance()
+      .getContext( path, viewId, action, Parameter.asHashMap( servletRequest ), inactiveInterval );
   }
 
   // InterPluginBroker calls this method within bean id 'xcdf'
-  public String getHeaders( @QueryParam( Parameter.DASHBOARD_CONTENT ) String dashboardContent,
-      @QueryParam( Parameter.DASHBOARD_TYPE ) String dashboardType, @QueryParam( Parameter.ROOT ) String root,
-      @QueryParam( Parameter.SCHEME ) String scheme,
-      @QueryParam( Parameter.DEBUG ) @DefaultValue( "false" ) String debug, @Context HttpServletRequest servletRequest,
-      @Context HttpServletResponse servletResponse ) throws Exception {
+  public String getHeaders( @QueryParam(Parameter.DASHBOARD_CONTENT) String dashboardContent,
+                            @QueryParam(Parameter.DASHBOARD_TYPE) String dashboardType,
+                            @QueryParam(Parameter.ROOT) String root,
+                            @QueryParam(Parameter.SCHEME) String scheme,
+                            @QueryParam(Parameter.DEBUG) @DefaultValue("false") String debug,
+                            @Context HttpServletRequest servletRequest,
+                            @Context HttpServletResponse servletResponse ) throws Exception {
     try {
       CdfHtmlRenderer.getHeaders( dashboardContent, dashboardType, root, scheme, Boolean.parseBoolean( debug ),
-          servletResponse.getOutputStream() );
+        servletResponse.getOutputStream() );
     } catch ( IOException ex ) {
       logger.error( "getHeaders: " + ex.getMessage(), ex );
       throw ex;
