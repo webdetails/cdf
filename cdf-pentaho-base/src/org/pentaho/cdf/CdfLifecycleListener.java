@@ -24,7 +24,6 @@ public class CdfLifecycleListener extends SimpleLifeCycleListener {
 
   public void init() throws PluginLifecycleException {
     // Initialize plugin
-    PluginHibernateUtil.initialize();
   }
 
   public void loaded() throws PluginLifecycleException {

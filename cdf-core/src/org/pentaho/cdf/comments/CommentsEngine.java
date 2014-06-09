@@ -65,6 +65,7 @@ public class CommentsEngine {
 
   public static CommentsEngine getInstance() {
     if ( instance == null ) {
+      PluginHibernateUtil.initialize();
       instance = new CommentsEngine();
     }
     return instance;
