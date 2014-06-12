@@ -347,11 +347,17 @@ public class CdfHeadersProvider implements ICdfHeadersProvider {
     public AbsolutizingStringFilter( String absRoot, StringFilter delegate ) {
       assert delegate != null;
       this.delegate = delegate;
+      this.absRoot = absRoot;
     }
 
     @Override
     public String filter( String input ) {
-      return delegate.filter( Util.joinPath( absRoot, input ) );
+      return delegate.filter( input, absRoot );
+    }
+
+    @Override
+    public String filter( String input, String absRoot ) {
+      return delegate.filter( input, absRoot );
     }
   }
 
