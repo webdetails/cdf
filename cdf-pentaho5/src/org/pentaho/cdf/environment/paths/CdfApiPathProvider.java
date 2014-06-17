@@ -25,4 +25,7 @@ public class CdfApiPathProvider implements ICdfApiPathProvider {
   public String getViewActionUrl() {
     return "ViewAction?path={path}/{name}";
   }
+
+  @Override
+  public String getWebappContextRoot() { return urlProvider.getWebappContextRoot(); }
 }

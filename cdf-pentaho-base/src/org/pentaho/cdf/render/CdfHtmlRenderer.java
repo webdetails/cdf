@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import org.pentaho.cdf.CdfConstants;
 import org.pentaho.cdf.context.ContextEngine;
 import org.pentaho.cdf.environment.CdfEngine;
+import org.pentaho.cdf.environment.PentahoCdfEnvironment;
 import org.pentaho.cdf.environment.packager.ICdfHeadersProvider;
 import org.pentaho.cdf.environment.templater.ITemplater;
 import org.pentaho.cdf.environment.templater.ITemplater.Section;
@@ -273,12 +274,13 @@ public class CdfHtmlRenderer {
     final boolean isDebugMode = Boolean.TRUE.toString().equalsIgnoreCase( paramMap.get( Parameter.DEBUG ) );
     String root = StringUtils.defaultString( paramMap.get( Parameter.ROOT ) );
     String scheme = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SCHEME ), "http" );
+    boolean absolute = StringUtils.defaultIfEmpty( paramMap.get( Parameter.ABSOLUTE ), "false" ).equals( "true" );
 
-    getHeaders( dashboardContent, dashboardType, root, scheme, isDebugMode, out );
+    getHeaders( dashboardContent, dashboardType, absolute, root, scheme, isDebugMode, out );
   }
 
-  public static void getHeaders( String dashboardContent, String dashboardType, String root, String scheme,
-                                 boolean isDebugMode, OutputStream out ) throws Exception {
+  public static void getHeaders( String dashboardContent, String dashboardType, boolean absolute, String root,
+                                 String scheme, boolean isDebugMode, OutputStream out ) throws Exception {
 
     ICdfHeadersProvider cdfHeaders = CdfEngine.getEnvironment().getCdfHeadersProvider();
     // Identify which extra JSs and CSSs to add to header, according to components being used
@@ -294,13 +296,21 @@ public class CdfHtmlRenderer {
         }
       }
     }
-    if ( !StringUtils.isEmpty( root ) ) {
+    if ( absolute ) {
+      String webRoot;
+
       // some dashboards need full absolute urls
-      if ( root.contains( "/" ) ) {
-        // file paths are already absolute, which didn't happen before
-        root = root.substring( 0, root.indexOf( "/" ) );
+      if( !StringUtils.isEmpty( root ) ) {
+        if ( root.contains( "/" ) ) {
+          // file paths are already absolute, which didn't happen before
+          root = root.substring( 0, root.indexOf( "/" ) );
+        }
+        webRoot = scheme + "://" + root;
+      } else {
+        webRoot = CdfEngine.getEnvironment().getPathProvider().getWebappContextRoot();
       }
-      out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, scheme + "://" + root, componentTypes )
+
+      out.write( cdfHeaders.getHeaders( dashboardType, isDebugMode, webRoot, componentTypes )
         .getBytes( CharsetHelper.getEncoding() ) );
     } else {
       out.write(

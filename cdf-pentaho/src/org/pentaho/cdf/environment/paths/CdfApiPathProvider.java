@@ -8,9 +8,11 @@ public class CdfApiPathProvider implements ICdfApiPathProvider {
 
   // in 4.x there is only ContentGenerator
   private String pluginPath;
+  private IUrlProvider urlProvider;
 
   public CdfApiPathProvider( IUrlProvider urlProvider ) {
     this.pluginPath = StringUtils.removeEnd( urlProvider.getPluginBaseUrl(), "/" );
+    this.urlProvider = urlProvider;
   }
 
   @Override
@@ -26,5 +28,10 @@ public class CdfApiPathProvider implements ICdfApiPathProvider {
   @Override
   public String getViewActionUrl() {
     return "ViewAction?solution={solution}&path={path}&action={name}";
+  }
+
+  @Override
+  public String getWebappContextRoot() {
+    return urlProvider.getWebappContextRoot();
   }
 }

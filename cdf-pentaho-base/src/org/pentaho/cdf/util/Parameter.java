@@ -53,6 +53,7 @@ public class Parameter {
   public static final String SHOW_HIDDEN_FILES = "showHiddenFiles"; //$NON-NLS-1$
   public static final String DASHBOARD_CONTENT = "dashboardContent"; //$NON-NLS-1$
   public static final String DASHBOARD_TYPE = "dashboardType"; //$NON-NLS-1$
+  public static final String ABSOLUTE = "absolute"; //$NON-NLS-1$
   public static final String ROOT = "root"; //$NON-NLS-1$
   public static final String SCHEME = "scheme"; //$NON-NLS-1$
   public static final String KEY = "key"; //$NON-NLS-1$

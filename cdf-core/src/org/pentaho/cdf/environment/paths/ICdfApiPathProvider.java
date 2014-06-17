@@ -17,4 +17,9 @@ public interface ICdfApiPathProvider {
    */
   public String getViewActionUrl();
 
+  /**
+   * @return full webapp path
+   */
+  public String getWebappContextRoot();
+
 }
