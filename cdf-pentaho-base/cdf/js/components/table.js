@@ -259,20 +259,20 @@ var TableComponent = UnmanagedComponent.extend({
       }
       return null;
     }
-    var sortingCols = p("iSortingCols"),sort = [];
-    if (sortingCols > 0) {
-      for (var i = 0; i < sortingCols; i++) {
-        var col = p("iSortCol_" + i);
-        var dir = p("sSortDir_" + i);
-        sort.push( col + (dir == "asc" ? "A" : "D"));
+    var sortingCols = p("order"),sort = [];
+    if(sortingCols.length > 0) {
+      for(var i = 0; i < sortingCols.length; i++ ) {
+      var col = sortingCols[i].column;
+      var dir = sortingCols[i].dir;
+      sort.push(col + (dir == "asc" ? "A" : "D"));
       }
     }
     var query = this.queryState,
     myself = this;
     query.setSortBy(sort.join(","));
-    query.setPageSize(parseInt(p("iDisplayLength")));
-    query.setPageStartingAt(p("iDisplayStart"));
-    query.setSearchPattern(p("sSearch") ? p("sSearch") : "");
+    query.setPageSize(parseInt(p("length")));
+    query.setPageStartingAt(p("start"));
+    query.setSearchPattern(p("search") ? p("search") : "");
     query.fetchData(function(d) {
       if (myself.postFetch){
         var mod = myself.postFetch(d,dataTable);
