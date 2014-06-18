@@ -13,15 +13,31 @@ module.exports = function(config) {
 
 
     // list of files / patterns to load in the browser
-    files: [
-      //'resource/js/jquery.js',
-      //'resource/js/jquery.jeditable.js',
-      //'resource/js/Base.js',
-      //'test-js/mockDashboards.js',
-      //'resource/js/cdf-dd-config.js',
-      //'resource/js/cdf-dd-tablemanager.js',
-      //'resource/js/cdf-dd-wizardmanager.js',
-      //'resource/js/cdf-dd.js',
+   files: [
+      'cdf/js/lib/shims.js',
+      'cdf/js/lib/pen-shim.js',
+      'test-js/testUtils.js',
+      'cdf/js/wd.js',
+      'cdf/js/json.js',
+      'cdf/js/jquery.js',
+      'cdf/js/jquery.ui.js',
+      'cdf/js/jquery.blockUI.js',
+      'cdf/js/underscore.js',
+      'cdf/js/backbone.js',
+      'cdf/js/mustache.js',
+      'cdf/js/Base.js',
+      '../cdf-pentaho5/cdf/js/cdf-base.js',
+      'cdf/js/Dashboards.Main.js',
+      'cdf/js/Dashboards.Query.js',
+      'cdf/js/Dashboards.Bookmarks.js',
+      'cdf/js/Dashboards.Startup.js',
+      'cdf/js/Dashboards.Utils.js',
+      'cdf/js/Dashboards.Legacy.js',
+      'cdf/js/Dashboards.Notifications.js',
+      'cdf/js/Dashboards.RefreshEngine.js',
+      'cdf/js/components/core.js',
+      'cdf/js/queries/coreQueries.js',
+      'test-js/lib/test-components.js',
       'test-js/main.js',
       {pattern: 'test-js/**/*-spec.js', included: false}
     ],
@@ -33,18 +49,20 @@ module.exports = function(config) {
 
 
     preprocessors: {
-        "resource/js/cdf-dd.js" : 'coverage'
+        "cdf/js/*.js" : 'coverage'
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
     reporters: ['progress', 'junit', 'html', 'coverage'],
 
+    //reporter: coverage
     coverageReporter: {
         type : 'cobertura',
         dir : 'bin/coverage/reports/'
     },
 
+    //reporter: junit
     junitReporter: {
       outputFile: 'bin/test/test-results.xml',
       suite: 'unit'
@@ -56,13 +74,11 @@ module.exports = function(config) {
       templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
     },
 
-
-    // the default configuration
-    htmlReporter: {
-      outputDir:    'bin/test/karma_html',
-      templatePath: 'node_modules/karma-html-reporter/jasmine_template.html'
-    },
-
+  //hostname
+    hostname: [
+      'localhost'
+    ],
+    
     // web server port
     port: 9876,
 

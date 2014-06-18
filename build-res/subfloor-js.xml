@@ -70,13 +70,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <property name="js.expanded.lib.dir" value="${js.lib.dir}/expanded"/>
 
   <!-- Path to the karma configuration -->
-  <property name="js.karma.config" value="karma.conf.js"/>
-  <property name="js.karma.ci.config" value="karma.conf.js"/>
-
-  <!-- Path for node_modules dir -->
-  <property name="nodemodules.local.dir" value="node_modules" />
-  <property name="nodemodules.local.dir.bin" value="node_modules\.bin" />
-
+  <property name="js.karma.config" value="config/karma.ci.conf.js"/>
+  <property name="js.karma.ci.config" value="config/karma.ci.conf.js"/>
 
   <property environment="env"/>
 
@@ -288,99 +283,48 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   </target>
 
+
+  <!-- Check to see if karma is on the PATH -->
+  <available file="karma" filepath="${env.PATH}" property="karma-is-available"/>
+
   <!-- Only run if there is a package.json file -->
   <target name="npm-install" depends="check-pentaho-js-build-downloaded">
     <if>
       <available file="package.json"/>
       <then>
-        <if>
-          <isset property="isWindows"/>
-          <then>
-            <exec executable="npm.cmd">
-              <arg value="install"/>
-            </exec>
-          </then>
-          <else>
-            <exec executable="npm">
-              <arg value="install"/>
-            </exec>
-          </else>
-        </if>
+        <exec executable="npm">
+          <arg value="install"/>
+        </exec>
       </then>
       <else>
         <echo>No package.json found, using the default</echo>
-        <if>
-          <isset property="isWindows"/>
-          <then>
-            <exec executable="npm.cmd">
-              <arg value="install"/>
-              <arg value="build-res/pentaho-js-build"/>
-            </exec>
-          </then>
-          <else>
-            <exec executable="npm">
-              <arg value="install"/>
-              <arg value="build-res/pentaho-js-build"/>
-            </exec>
-          </else>
-        </if>
+        <exec executable="npm">
+          <arg value="install"/>
+          <arg value="build-res/pentaho-js-build"/>
+        </exec>
       </else>
     </if>
   </target>
 
   <target name="test-js" depends="install-antcontrib, npm-install">
-    <!-- Check to see if karma is on the PATH -->
-    <available file="karma" filepath="${env.PATH}" property="karma-is-available"/>
-    <available file="karma.cmd" filepath="${nodemodules.local.dir.bin}" property="karma-is-available-windows"/>
-
     <if>
-      <isset property="isWindows"/>
+      <not>
+        <isset property="karma-is-available"/>
+      </not>
       <then>
-        <if>
-          <not>
-            <isset property="karma-is-available-windows"/>
-          </not>
-          <then>
-            <echo message="${nodemodules.local.dir.bin}"/>
-            <fail>karma.cmd is not available on the '${nodemodules.local.dir.bin}'. Unit tests could not be run.</fail>
-          </then>
-        </if>
+        <fail>karma is not available on the PATH. Unit tests could not be run.</fail>
       </then>
-      <else>
-        <if>
-          <not>
-            <isset property="karma-is-available"/>
-          </not>
-          <then>
-            <fail>karma is not available on the PATH. Unit tests could not be run.</fail>
-          </then>
-        </if>
-      </else>
     </if>
     <if>
       <available file="${js.karma.ci.config}"/>
       <then>
-        <if>
-          <isset property="isWindows" />
-          <then>
-            <!-- we have karma available, use it to run the tests -->
-            <exec executable="${nodemodules.local.dir.bin}\karma.cmd">
-              <arg value="start"/>
-              <arg value="${js.karma.ci.config}"/>
-              <!-- if we are running via ant, then assume we must 'single-run' -->
-              <arg value="--single-run"/>
-            </exec>
-          </then>
-          <else>
-            <!-- we have karma available, use it to run the tests -->
-            <exec executable="karma">
-              <arg value="start"/>
-              <arg value="${js.karma.ci.config}"/>
-              <!-- if we are running via ant, then assume we must 'single-run' -->
-              <arg value="--single-run"/>
-            </exec>
-          </else>
-        </if>
+        <!-- we have karma available, use it to run the tests -->
+        <exec executable="karma">
+          <arg value="start"/>
+          <arg value="${js.karma.ci.config}"/>
+          <!-- if we are running via ant, then assume we must 'single-run' -->
+          <arg value="--single-run"/>
+        </exec>
       </then>
       <else>
         <fail>There is no karma configuration file available (looking for: ${js.karma.ci.config})</fail>
@@ -397,21 +341,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <fail>There is no karma configuration file available (looking for: ${js.karma.config})</fail>
       </then>
       <else>
-        <if>
-          <isset property="isWindows" />
-          <then>
-            <exec executable="${nodemodules.local.dir.bin}\karma.cmd">
-              <arg value="start"/>
-              <arg value="${js.karma.config}"/>
-            </exec>
-          </then>
-          <else>
-            <exec executable="karma">
-              <arg value="start"/>
-              <arg value="${js.karma.config}"/>
-            </exec>
-          </else>
-        </if>
+        <exec executable="karma">
+          <arg value="start"/>
+          <arg value="${js.karma.config}"/>
+        </exec>
       </else>
     </if>
 
