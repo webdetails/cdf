@@ -1,4 +1,3 @@
-
 // @see http://karma-runner.github.io/0.10/plus/requirejs.html
 
 (function() {
@@ -11,8 +10,7 @@
             // Load the file as an AMD module, or relative module ids won't work.
             tests.push(
                 file.replace(
-                    new RegExp("^" + baseUrl + "/(.*?)\\.js$", "i"),
-                    "$1"));
+                    new RegExp("^" + baseUrl + "/(.*?)\\.js$", "i"), "$1"));
 
     requirejs.config({
         // Karma serves files from '/base'
@@ -25,7 +23,6 @@
 //            'jquery': {exports: 'jQuery'}
         }
     });
-
 
     // Ask Require.js to load all test files and start test run
     require(tests, karma.start);

@@ -920,11 +920,13 @@ Dashboards.updateAll = function(components) {
   if(components && _.isArray(components) && !_.isArray(components[0])) {
     var comps = {};
     _.each(components,function(c) {
-      var prio = c.priority || 0;
-      if(!comps[prio]) {
-        comps[prio] = [];
+      if(c) {
+        var prio = c.priority || 0;
+        if (!comps[prio]) {
+          comps[prio] = [];
+        }
+        comps[prio].push(c);
       }
-      comps[prio].push(c);
     });
     components = comps;
   }

@@ -1,4 +1,31 @@
-describe("The CDF framework", function() {
+/**
+ * ## The CDF framework
+ */
+describe("The CDF framework #", function() {
+  /**
+   * ## Global settings for all suites.
+   * #begin
+   * - beforeEach
+   * - afterEach
+   */
+  beforeEach(function(done){
+    var a = 0;
+    setTimeout(function(){
+      a = 1;
+    }, 50);
+    done();
+  });
+
+  afterEach(function(done){
+    var a = 0;
+    setTimeout(function(){
+      a = 1;
+    }, 50);
+    done();
+  });
+  //#end
+
+
   var myDashboard = _.extend({},Dashboards);
 
   /*
@@ -22,71 +49,93 @@ describe("The CDF framework", function() {
 
   myDashboard.addComponents([shouldUpdate, shouldNotUpdate]);
 
-  /*
-   * Test Core Lifecycle
+  /************************
+   * Test Core Lifecycle  *
+   ************************/
+  /**
+   * ## The CDF framework # Updates Components
    */
-  it("updates Components",function() {
+  it("Updates Components",function(done) {
+    spyOn(shouldUpdate,"preExecution").and.callThrough();
+    spyOn(shouldUpdate,"customfunction").and.callThrough();
+    spyOn(shouldUpdate,"postExecution").and.callThrough();
 
-    spyOn(shouldUpdate,"preExecution").andCallThrough();
-    spyOn(shouldUpdate,"customfunction").andCallThrough();
-    spyOn(shouldUpdate,"postExecution").andCallThrough();
-
+    //Update
     myDashboard.update(shouldUpdate);
-    waits(100);
-    runs(function() {
+
+    //Data to validate
+    var dataToValidate = function(){
       expect(shouldUpdate.preExecution).toHaveBeenCalled();
       expect(shouldUpdate.postExecution).toHaveBeenCalled();
       expect(shouldUpdate.customfunction).toHaveBeenCalled();
-    })
+      done();
+    }
+
+    setTimeout(dataToValidate, 100);
   });
+  /**
+   * ## The CDF framework # Lets preExecution cancel updates
+   */
+  it("Lets preExecution cancel updates",function(done) {
+    spyOn(shouldNotUpdate,"preExecution").and.callThrough();
+    spyOn(shouldNotUpdate,"customfunction").and.callThrough();
+    spyOn(shouldNotUpdate,"postExecution").and.callThrough();
 
-  it("lets preExecution cancel updates",function() {
-
-    spyOn(shouldNotUpdate,"preExecution").andCallThrough();
-    spyOn(shouldNotUpdate,"customfunction").andCallThrough();
-    spyOn(shouldNotUpdate,"postExecution").andCallThrough();
-
+    //Update
     myDashboard.update(shouldNotUpdate);
-    waits(100);
-    runs(function(){
+
+    //Data to validate
+    var dataToValidate = function(){
       expect(shouldNotUpdate.preExecution).toHaveBeenCalled();
       expect(shouldNotUpdate.postExecution).not.toHaveBeenCalled();
       expect(shouldNotUpdate.customfunction).not.toHaveBeenCalled();
-    });
+      done();
+    }
+
+    setTimeout(dataToValidate, 100);
   });
 
-  /*
-   * Test Parameter setting and syncing
+  /**************************************
+   * Test Parameter setting and syncing *
+   **************************************/
+  /**
+   * ## The CDF framework # Sets parameters
    */
-  it("sets parameters", function() {
+  it("Sets parameters", function() {
     myDashboard.setParameter("parentParam",1);
     expect(myDashboard.getParameterValue("parentParam")).toEqual(1);
+
     myDashboard.setParameter("parentParam",2);
     expect(myDashboard.getParameterValue("parentParam")).toEqual(2);
   });
-
-  it("syncs parameters", function() {
+  /**
+   * ## The CDF framework # Syncs parameters
+   */
+  it("Syncs parameters", function() {
     myDashboard.setParameter("parentParam",1);
     myDashboard.setParameter("childParam",0);
-    /* Test initial syncing */
-    myDashboard.syncParameters("parentParam","childParam");
+    myDashboard.syncParameters("parentParam","childParam"); // Test initial syncing
     expect(myDashboard.getParameterValue("childParam")).toEqual(1);
-    /* Test change propagation */
-    myDashboard.fireChange("parentParam",2);
+
+    myDashboard.fireChange("parentParam",2);// Test change propagation
     expect(myDashboard.getParameterValue("childParam")).toEqual(2);
   });
+  /**
+   * ## The CDF framework # Triggers postInit when all components have finished rendering
+   */
+ it("Triggers postInit when all components have finished rendering", function(done) {
+   spyOn(myDashboard, "handlePostInit");
 
- it("triggers postInit when all components have finished rendering", function() {
-    myDashboard.postInit = function() {};
-    spyOn(myDashboard, "postInit");
-    spy = myDashboard.postInit;
-    myDashboard.waitigForInit = null;
-    myDashboard.finishedInit = false;
-    myDashboard.init();
-    waits(500);
-    runs(function(){
-      expect(spy).toHaveBeenCalled();
-    });
-  });
+   myDashboard.waitingForInit = null;
+   myDashboard.finishedInit = false;
+   myDashboard.init();
 
+   //Data to validate
+   var dataToValidate = function(){
+     expect(myDashboard.handlePostInit).toHaveBeenCalled();
+     done();
+   };
+
+   setTimeout(dataToValidate, 500);
+  })
 });

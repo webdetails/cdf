@@ -7,7 +7,6 @@ module.exports = function(config) {
     // base path, that will be used to resolve files and exclude
     basePath: '',
 
-
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
 
@@ -15,8 +14,10 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'cdf/js/lib/shims.js',
+      'cdf/js/lib/pen-shim.js',
       'test-js/testUtils.js',
       'cdf/js/wd.js',
+      'cdf/js/json.js',
       'cdf/js/jquery.js',
       'cdf/js/jquery.ui.js',
       'cdf/js/jquery.blockUI.js',
@@ -26,6 +27,7 @@ module.exports = function(config) {
       'cdf/js/Base.js',
       '../cdf-pentaho5/cdf/js/cdf-base.js',
       'cdf/js/Dashboards.Main.js',
+      'cdf/js/Dashboards.Query.js',
       'cdf/js/Dashboards.Bookmarks.js',
       'cdf/js/Dashboards.Startup.js',
       'cdf/js/Dashboards.Utils.js',
@@ -34,14 +36,14 @@ module.exports = function(config) {
       'cdf/js/Dashboards.RefreshEngine.js',
       'cdf/js/components/core.js',
       'cdf/js/queries/coreQueries.js',
+      'test-js/lib/test-components.js',
       'test-js/main.js',
       {pattern: 'test-js/**/*-spec.js', included: false}
     ],
 
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: [],
 
 
     preprocessors: {
@@ -52,16 +54,17 @@ module.exports = function(config) {
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
     reporters: ['progress', 'junit', 'html', 'coverage'],
 
+    //reporter: coverage
     coverageReporter: {
         type : 'cobertura',
         dir : 'bin/coverage/reports/'
     },
 
+    //reporter: junit
     junitReporter: {
       outputFile: 'bin/test/test-results.xml',
       suite: 'unit'
     },
-
 
     // the default configuration
     htmlReporter: {
@@ -72,10 +75,13 @@ module.exports = function(config) {
     // web server port
     port: 9876,
 
+    //hostname
+    hostname: [
+      'localhost'
+    ],
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,
-
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
@@ -84,6 +90,9 @@ module.exports = function(config) {
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: true,
+
+    // The configuration setting tells Karma how long to wait (in milliseconds) after any changes have occurred before starting the test process again.
+    autoWatchBatchDelay: 250,
 
 
     // Start these browsers, currently available:
@@ -96,13 +105,21 @@ module.exports = function(config) {
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
     browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
 
-
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
 
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false
+    singleRun: false,
+
+    plugins: [
+     'karma-jasmine',
+     'karma-requirejs',
+     'karma-junit-reporter',
+     'karma-html-reporter',
+     'karma-coverage',
+     'karma-phantomjs-launcher'
+    ]
   });
 };
