@@ -155,7 +155,10 @@
           break;
         default:
           /* We're just going to discard anything over two params */
-          this.setOption('params' , params );
+          if (params) {
+            this.setOption('params' , params );
+          }
+
           this.setOption('successCallback' , successCallback );
           this.setOption('errorCallback' , errorCallback );
           return this.doQuery();

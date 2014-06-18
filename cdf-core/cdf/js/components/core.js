@@ -1216,7 +1216,7 @@ var FreeformComponent = UnmanagedComponent.extend({
   },
 
   render : function() {
-    var parameters =this.parameters || [];
+    var parameters = this.parameters || [];
     this.customfunction(parameters);
   }
 });
