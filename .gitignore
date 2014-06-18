@@ -31,3 +31,4 @@ cdf-pentaho5/test-lib
 dist
 cdf-pentaho/js-lib
 cdf-pentaho/test-lib
+cdf-core/node_modules
