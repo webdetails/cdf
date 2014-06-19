@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
 	<cache>false</cache>
+	<cache-messages>true</cache-messages>
 	<max-age>2628001</max-age>
         <resources>
             <downloadable-formats>css,js,html,htm,png,jpg,jpeg,gif,swf,otf,woff,ico,zip,xml,properties</downloadable-formats>
