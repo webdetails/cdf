@@ -151,6 +151,7 @@ Dashboards.bindControl = function(control) {
 Dashboards.bindExistingControl = function(control, Class) {
   if(!control.dashboard) {
     control.dashboard = this;
+    delete control.initInstance;
 
     // Ensure BaseComponent's methods
     this._castControlToComponent(control, Class);
@@ -698,7 +699,9 @@ Dashboards.initEngine = function(initInstance) {
   }
 
   var myself = this;
-  var components = _.where(this.components,{initInstance: initInstance});
+  var components = initInstance != null 
+    ? _.where(this.components, {initInstance: initInstance})
+    : this.components;
 
   if( (!this.waitingForInit || this.waitingForInit.length === 0) && !this.finishedInit ){
     this.incrementRunningCalls();
