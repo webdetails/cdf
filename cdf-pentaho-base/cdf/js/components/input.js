@@ -103,6 +103,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
     switch(extPlugin) {
       case "chosen": selectHTML += " class='chzn-select'" ; break;
       case "hynds":  selectHTML += " class='hynds-select'"; break;
+      case "select2":  selectHTML += " class='select2-container'"; break;
     }
 
     selectHTML += ">";
@@ -187,6 +188,17 @@ var SelectBaseComponent = InputBaseComponent.extend({
     switch(extPlugin) {
       case "chosen": ph.find("select.chzn-select" ).chosen(this._readExtraOptions()); break;
       case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
+      case "select2":  {
+        var extraOps = this._readExtraOptions() || {};
+        if(!extraOps.dropdownAutoWidth) {
+          extraOps.dropdownAutoWidth = true;
+        }
+        if(!extraOps.width) {
+          extraOps.width = "off";
+        }
+        ph.find("select.select2-container").select2(extraOps);
+        break;
+      }
     }
 
     this._listenElement(ph);
@@ -226,7 +238,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
   },
 
   /**
-   * Currently, reads extra options for the "chosen" plugin,
+   * Currently, reads extra options for the "chosen" and "select2" plugins,
    * by transforming the array of key/value pair arrays
    * in {@link #extraOptions} into a JS object.
    *
