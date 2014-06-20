@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Start Here</title>
+	<author>Webdetails</author>
+	<description>Start Here</description>
+	<icon></icon>
+	<template>10-cdf/template.html</template>
+	<style>mantle</style>
+</cdf>

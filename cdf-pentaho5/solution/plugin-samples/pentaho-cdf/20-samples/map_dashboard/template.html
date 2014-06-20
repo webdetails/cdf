@@ -1,0 +1,191 @@
+<form>
+	<h2>SteelWheels Sales Analysis</h2>
+	<small>Sales trends based on the SteelWheels database</small>
+
+	<div id="map" style="width: 600px; height: 200px; z-index:0;">&nbsp;</div>
+	<small>
+		<br/>
+		Overall Sales:
+		<img src="js/OpenMap/OpenLayers/img/marker.png"/>  - sales &lt; 1M; 
+		<img src="js/OpenMap/OpenLayers/img/marker-gold.png"/>  - sales between 1M and 2M; 
+		<img src="js/OpenMap/OpenLayers/img/marker-green.png"/>  - sales &gt; 2M; 
+	</small>
+
+	<h2 class="title">Product Line and Territory analysis</h2>
+	<table class="links">
+		<tr>
+			<td>
+				<span id="second_chart">&nbsp;</span>
+			</td>
+			<td>
+				<span id="first_chart">&nbsp;</span>
+			</td>
+		</tr>
+	</table>
+
+	<div class="entry">
+		<p>
+		<span id="messages">&nbsp;</span>
+		</p>
+	</div>
+	<h3 class="title">Sales Overtime</h3>
+	<p class="meta"><small>Sales evolutions for all the activity time</small></p>
+
+	<p class="links">
+	<span id="third_chart">&nbsp;</span>
+	</p>
+	<!--
+	<h2 class="title">Pivot Analysis</h2>
+	<p class="meta"> 
+	<small>JPivot analysis based on the chosen conditions</small>
+	</p>
+
+	<p class="comment">
+	This interactive pivot table gives information on the conditions specified for territory and product line
+	</p>
+
+	<div id="pivot_object" style="width: 850px; height: 500px">&nbsp;</div>
+	-->
+	<!-- end content -->
+</form>
+	<!-- end sidebar -->
+<!-- end page -->
+<!-- Start of component definition -->
+
+<script language="javascript" type="text/javascript">
+
+var territory="";
+var productLine="";
+var dateStart="2003-04-01";
+var bottomThreshold = 1000000;
+var topThreshold = 2000000;
+var selectedPoint;
+
+territoryParameter = 
+{
+  name: "territoryParameter",
+  type: "text",
+  htmlObject: "parameter_territory",
+  expression: function(){return "territory.length>0?territory:'All territorys'"},
+  executeAtStart: true,
+  listeners:["territory"],
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+
+productLineParameter = 
+{
+  name: "productLineParameter",
+  type: "text",
+  htmlObject: "parameter_productLine",
+  expression: function(){return "productLine.length>0?productLine:'All products'"},
+  executeAtStart: true,
+  listeners:["productLine"],
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+
+territorySelector = 
+{
+  name: "territorySelector",
+  type: "select",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetTerritory.xaction",
+  parameters:[],
+  parameter:"territory",
+  htmlObject: "territory_selector",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){Dashboards.processChange(this.name);}
+}
+
+
+
+firstChart = 
+{
+  name: "Chart",
+  type: "xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/PieChart1.xaction",
+  parameters: [["productLine","productLine"]],
+  listeners:["productLine"],
+  htmlObject: "first_chart",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+secondChart = 
+{
+  name: "Chart",
+  type: "xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/BarChart2.xaction",
+  parameters:[["territory","territory"]],
+  listeners:["territory"],
+  htmlObject: "second_chart",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+
+thirdChart = 
+{
+  name: "Chart",
+  type: "xaction",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/LineChart3.xaction",
+  parameters:[["territory","territory"],["productLine","productLine"]],
+  listeners:["territory","productLine"],
+  htmlObject: "third_chart",
+  executeAtStart: true,
+  preExecution:function(){},
+  postExecution:function(){}
+}
+/*
+pivot = 
+{
+  name: "pivot",
+  type: "jpivot",
+  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/Pivot.xaction",
+  parameters:[["territory","territory"],["productLine","productLine"]],
+  listeners:["territory","productLine"],
+  htmlObject: "pivot_object",
+  executeAtStart: true,
+  iframeHeight: "500px",
+  iframeWidth: "850px",
+  preExecution:function(){},
+  postExecution:function(){}
+}*/
+
+map =
+{
+name: "map",
+	  type: "map",
+	  path: "/public/plugin-samples/pentaho-cdf/20-samples/map_dashboard/GetPoints.xaction",
+	  parameters:[["territory","territory"]],
+	  listeners:["territory"],
+	  messageElementId: "messages",
+	  evolutionElementId: "chart",
+	  htmlObject: "map",
+	  executeAtStart: true,
+	  initPosLon: -7.5,
+	  initPosLat: 39.8,
+	  initZoom: 1,
+	  expression: function(){return "var icon=''; icon = markers[0]; icon"},
+	  expression: function(){return "var icon=''; if (value < bottomThreshold){icon = markers[2];} else if (value > topThreshold){icon = markers[0];} else {icon = markers[1];}; icon"},
+	  preExecution:function(){},
+	  postExecution:function(){},
+	  markers: ["js/OpenMap/OpenLayers/img/marker-green.png","js/OpenMap/OpenLayers/img/marker-gold.png","js/OpenMap/OpenLayers/img/marker.png"]
+}
+
+
+var components = [ territoryParameter, productLineParameter, firstChart, secondChart, thirdChart, map, /*pivot*/];
+
+load();
+
+function load(){
+
+	Dashboards.init(components);
+}
+
+</script>
+

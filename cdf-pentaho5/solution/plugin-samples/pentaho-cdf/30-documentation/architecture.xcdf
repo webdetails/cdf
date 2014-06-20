@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Architecture</title>
+	<author>Webdetails</author>
+	<description>CDF Architecture</description>
+	<icon></icon>
+	<template>architecture.html</template>
+	<style>mantle</style>
+</cdf>

@@ -1,0 +1,152 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>MultiButtonComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		Renders a set of  buttons to choose option(s) from. It will read values from an xaction result set or from an array of values 
+		unless the parameter <code>valuesArray</code> is specified.
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>radioComponent</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>parameters</dt>
+			<dd><i>Array of Arrays - </i> Parameters to pass to the xaction</dd>
+
+			<dt>parameter</dt>
+			<dd>Variable where the selection is stored</dd>
+
+			<dt>valueAsId</dt>
+			<dd><i>Boolean - </i> False indicates the selector will have id/value. True indicates it will use value/value.</dd>
+
+			<dt>queryDefinition</dt>
+			<dd>MetaLayer object with the query definition (see MetaLayer options)</dd>
+			
+			<dt>valuesArray</dt>
+			<dd><i>Array of Arrays - </i> Use this to pass a default value to the selector</dd>
+
+			<dt>solution</dt>
+			<dd>Solution where the xaction solution is</dd>
+
+			<dt>path</dt>
+			<dd>Path where the xaction file is</dd>
+
+			<dt>action</dt>
+			<dd>Xaction file name</dd>
+
+			<dt>separator</dt>
+			<dd>How to separate the options</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+			<dt>isMultiple</dt>
+			<dd><i>Boolean - </i>If true the component will allow the selection of more than one value. </dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is changed</dd>
+
+
+	</dl>
+
+		<h3>MetaLayer options</h3>
+
+		<dl class="documentation">
+			<dt>queryType</dt>
+			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+			<dt>jndi</dt> 
+			<dd>Connection to use for the query</dd>
+
+			<dt>query</dt> 
+			<dd>sql or mdx Query to execute</dd>
+
+			<dt>cube</dt> 
+			<dd>Cube name to use when queryType is mdx</dd>
+
+			<dt>catalog</dt> 
+			<dd>Mondrian schema to use when queryType is mdx</dd>
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+
+				<div id="sampleObject"></div>
+
+			</div>
+
+
+				<div id="code">
+					<textarea cols="80" rows="20" id="samplecode">
+regionSelector = 
+{
+	name: "regionSelector",
+	type: "multiButtonComponent",
+	parameters:[],
+	path: "/public/plugin-samples/pentaho-cdf/20-samples/sample_dashboard_broadcast/regions.xaction",
+	parameter:"region",
+	separator: ",&nbsp;",
+	valueAsId: true,
+	isMultiple: false,
+	htmlObject: "sampleObject",
+	executeAtStart: true,
+	postChange: function(){alert("you chose: " + region);}
+};
+
+Dashboards.init([regionSelector]);
+Dashboards.finishedInit = false;
+
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<script language="javascript" type="text/javascript">
+		var region;
+		var regionSelector;
+		var tabs = $("#example").tabs();
+		evaluateCode(false);
+	</script>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+  <class name="org.pentaho.cdf.storage.StorageEntry" table="cdf_storage">
+    <cache usage="read-write" />
+
+    <!-- Important note: Hibernate SchemaUpdate doesn't create
+    the index on page automatically per
+    http://opensource.atlassian.com/projects/hibernate/browse/HHH-1012
+
+    If the table becomes larger the create index needs to be made manually
+    -->
+
+    <!--
+    private int storageId
+    private String user;
+    private String storageValue;
+    private Date lastUpdatedDate;
+    -->
+
+    <id column="storageid" name="storageId" type="int" unsaved-value="null" length="100">
+      <generator class="native" />
+    </id>
+    <property name="user" type="string" not-null="false">
+      <column name="pentahouser" length="255" not-null="false" index="cdf_storage_user_idx"/>
+    </property>
+    <property name="storageValue" type="text" not-null="false">
+      <column name="storagevalue" not-null="false" />
+    </property>
+    <property name="lastUpdatedDate" type="timestamp" not-null="true">
+      <column name="lastupdated" not-null="true" />
+    </property>
+    <query name="getStorageForUser"><![CDATA[
+    from StorageEntry where user=:user
+]]>
+    </query>
+  </class>
+</hibernate-mapping>
+

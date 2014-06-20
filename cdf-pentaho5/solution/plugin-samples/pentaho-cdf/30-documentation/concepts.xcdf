@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Lifecycle</title>
+	<author>Webdetails</author>
+	<description>CDF Async Lifecycle</description>
+	<icon></icon>
+	<template>lifecycle.html</template>
+	<style>mantle</style>
+</cdf>

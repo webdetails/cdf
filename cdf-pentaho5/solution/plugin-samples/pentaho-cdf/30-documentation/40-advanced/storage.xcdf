@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Storage</title>
+	<author>Webdetails</author>
+	<description>Documenting with CDF</description>
+	<icon></icon>
+	<template>storage.html</template>
+	<style>mantle</style>
+</cdf>

@@ -1,0 +1,63 @@
+<style>
+	.contents li {font-weight: bold;}
+</style>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Concepts</h2>
+		<p>
+		
+		This framework provides a standardized way to implement and publish dashboards to the Pentaho BI Platform.&nbsp
+		The main goal of this framework is to give the user an <b> easy and friendly way to build dashboards.</b>. 
+		<br>How can this be achieved?
+		</p>
+		
+		<ul>
+			<li>No need to create additional JSP pages to deliver new dashboards.</li>
+			<p>The user has no need to make jsp pages or even have the knowledge to deal with that kind of technology.</p>
+			
+			<li>Easy to design</li>
+			<p>It's all plain html, css and javascript</p>
+			
+			<li>No need to create pentaho Action Sequences. </li>
+			<p>On most cases, the components are configured using a friendly syntax.</b></p>
+			
+			<li>The dashboard objects can be easy reused.</li>
+			<p>The behaviors of dashboard objects (components) are related to their parameters values, and so
+			the user may use the same object on an different dashboard, modifying only the values 
+			of one or two parameters.</p>
+			
+			<li>Auto refresh and interaction between dashboard objects.</li>
+			<p>The user doesn't need to concern about interaction between components. The only thing 
+			the user must specify is what variable is bound to the object.</p>
+			
+			<li>The ability to auto generate a navigation bar that picks up new dashboards.</li>
+			<p>A new dashboard was added? No need do modify the menu, the navigation bar will
+			deal and present the new one.</p>
+			
+			<li>New form objects, timeplot charts, tooltips, openstreet maps integration, etc, that makes the dashboard richer. </li>
+			<p>What is need to get all this new stuff to work? Just add the desired component.</p>
+			
+			<li>Build your one dashboard component library.</li>
+			<p>When a particular component with a specific behavior is being used in all your projects,<br/> 
+			just add it to your javascript library for later use.</p>
+			
+		</ul>
+		
+		<p>Beyond this, the are other technical advantages that this framework brings to pentaho dashboard:</p>
+		
+		<ul>
+			<li>Enforces security via Pentaho's security model.</li>
+			<li>Separation of the html design and component definition.</li>
+			<li>Portlet integration.</li>
+		</ul>
+		
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<action-sequence> 
+	<title>CDF JPivot Component</title>
+	<version>1</version>
+	<logging-level>WARN</logging-level>
+	<documentation> 
+		<author>Pedro Alves</author>
+		<description>A JPivot component that can be embebed from a dashboard</description>  
+		<help/>  
+		<result-type/> 
+	</documentation>
+
+	<inputs> 
+		<mode type="string"> 
+			<default-value/>  
+			<sources> 
+				<request>mode</request> 
+			</sources> 
+		</mode> 
+
+		<title type="string"> 
+			<sources> 
+				<request>title</request> 
+			</sources>  
+			<default-value> </default-value>
+		</title>  
+		<jndi type="string"> 
+			<sources> 
+				<request>jndi</request> 
+			</sources>  
+			<default-value/> 
+		</jndi>  
+		<query type="string"> 
+			<sources> 
+				<request>query</request> 
+			</sources>  
+			<default-value/> 
+		</query>  
+		<cube type="string"> 
+			<sources> 
+				<request>cube</request> 
+			</sources>  
+			<default-value/> 
+		</cube>  
+		<role type="string"> 
+			<sources> 
+				<session>role</session> 
+			</sources>  
+			<default-value/> 
+		</role>  
+		<catalog type="string"> 
+			<sources> 
+				<request>catalog</request> 
+			</sources>  
+			<default-value/>
+		</catalog>  
+	</inputs>
+
+	<outputs> 
+		<model type="string"/>  
+		<connection type="string"/>  
+		<mdx type="string"/>  
+		<options type="string"/>  
+		<title type="string"/>  
+		<url type="string"> 
+			<destinations> 
+				<response>redirect</response> 
+			</destinations> 
+		</url> 
+		<role type="string"/>
+	</outputs>
+
+	<actions>
+		<action-definition> 
+			<component-name>PivotViewComponent</component-name>
+			<action-name>Pivot View</action-name> 
+			<action-inputs> 
+				<mode type="string"/>
+				<query type="string"/>  
+				<jndi type="string"/>  
+				<catalog type="string"/>  
+				<cube type="string"/>
+				<role type="string"/>
+				<title type="string"/>
+			</action-inputs>
+			<action-resources/> 
+			<action-outputs> 
+				<model type="string"/>  
+				<connection type="string"/>  
+				<mdx type="string"/>  
+				<options type="list"/>  
+				<title type="string"/>  
+				<url type="string"/>
+				<role type="string"/>
+			</action-outputs>
+			<component-definition> 
+				<viewer><![CDATA[Pivot]]></viewer>  
+				<title>{title}</title>  
+				<query>{query}</query>  
+				<jndi>{jndi}</jndi> 
+				<cube>{cube}</cube>
+				<role>{role}</role>
+				<model>{catalog}</model>
+				<options> 
+					<personal/>  
+					<cube-nav/>  
+					<mdx-edit/>  
+					<sort-conf/>  
+					<level-style/>  
+					<hide-spans/>  
+					<properties/>  
+					<non-empty/>  
+					<swap-axes/>  
+					<drill-member/>  
+					<drill-position/>  
+					<drill-replace/>  
+					<drill-thru/>  
+					<chart/>  
+					<chart-conf/>  
+					<print-conf/>  
+					<print-pdf/>  
+					<excel/> 
+				</options>  
+			</component-definition> 
+
+		</action-definition>
+
+
+	</actions> 
+</action-sequence>

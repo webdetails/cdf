@@ -1,0 +1,42 @@
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>Architecture</h2>
+		<p>
+		
+		<p>Here's a simplified diagram of the CDF Architecture:<p>
+		<img  style="border: 0px solid #000;"  src="architecture.png">
+			
+		<p>
+		The Dashboards.jsp page  (/pentaho/Dashboards) is called by the user and provides the access to all Dashboards.
+		</p>
+
+		<p> 
+
+		As common within the Pentaho Solutions, this framework works on a set of assumptions concerning
+		the organization and naming of the folder structure and files: Each dashboard is defined in a 
+		separate folder and must contain two files, index.xml and template.html.The index.xml is used to
+		identify the dashboard's name and description just as in any other folder in the Pentaho solution
+		repository. The template.html file determines the dashboard's design.</p>
+
+		<p> 
+		 The content layout as well as the static content are defined with regular HTML. Any kind of component 
+		can be used as a placeholder, being "div" and "span" tags the most commonly used. These information 
+		objects are defined as dashboard components. <br/>
+		</p>
+
+		<p> 
+		When the user calls up a dashboard, one or multiple components will be executed from the dashboard 
+		library. Some of them will result in the executions of Action Sequences on the BI Platform. The platform 
+		returns the results and the dashboard library will send the content to be displayed in the specified
+		tag back to the browser.
+		</p>
+	</div>
+</div>
+
+<script>
+
+	Dashboards.init([]);
+
+</script>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>OpenFlashChartComponent</title>
+	<author>Webdetails</author>
+	<description>OpenFlashChartComponent</description>
+	<icon></icon>
+	<template>template.html</template>
+	<style>mantle</style>
+</cdf>

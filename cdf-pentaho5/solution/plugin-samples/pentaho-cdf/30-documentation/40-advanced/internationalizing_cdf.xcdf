@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Internationalization in CDF</title>
+	<author>Sergio Ramazzina</author>
+	<description>Adding internationalization support to CDF dashboards</description>
+	<icon></icon>
+	<template>internationalizing_cdf.html</template>
+	<style>mantle</style>
+</cdf>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Chart Samples</title>
+	<author>Webdetails</author>
+	<description>This dashboard shows a sample of what can be done with the jFreeChartComponent</description>
+	<icon></icon>
+	<template>template.html</template>
+	<style>mantle</style>
+</cdf>

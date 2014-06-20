@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin title="Pentaho Community Dashboard Framework" name="pentaho-cdf">>
+
+	<lifecycle-listener class="org.pentaho.cdf.CdfLifecycleListener"/>
+
+    <content-types>
+
+        <static-paths>
+            <static-path url="/pentaho-cdf/js" localFolder="js"/>
+            <static-path url="/pentaho-cdf/css" localFolder="css"/>
+            <static-path url="/pentaho-cdf/resources" localFolder="resources"/>
+            <static-path url="/pentaho-cdf/tmp" localFolder="tmp"/>
+        </static-paths>
+
+    	<content-type type="xcdf" mime-type="text/html">
+        	<title>Dashboard</title>
+        	<description>Community Dashboard File</description>
+            <icon-url>content/pentaho-cdf/resources/cdfFileType.png</icon-url>
+    	</content-type>
+    </content-types>
+
+    <content-generator id="pentaho-cdf" type="xcdf" title="CDF Display Handler" class="org.pentaho.cdf.CdfContentGenerator"/>
+
+    <external-resources>
+        <file context="requirejs">content/pentaho-cdf/js/cdf-require-js-cfg.js</file>
+    </external-resources>
+</plugin>

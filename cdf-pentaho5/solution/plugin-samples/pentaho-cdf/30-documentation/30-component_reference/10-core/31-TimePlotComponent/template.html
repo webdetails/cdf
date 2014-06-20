@@ -1,0 +1,186 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>timePlotComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		This is a component that can easily generate a timeplot timeseries chart whithout needing a xaction file. The resultset is returned
+		from a mdx or sql query. In case of mdx queries, a role will be passed to mondrian if the session variable 'role' is
+		defined, allowing row level security.
+
+		Kettle transformations need to use db repository.
+
+		</p>
+		<p>
+
+		<b>Note:</b> Due to security restrictions, sql execution is disabled by default. If you want to enable sql copy the file 
+		"cdf/components/timelinefeeder.xaction.sql" to "cdf/components/timelinefeeder.xaction" in the solutions directory.
+
+		All parameters can optionally be functions.
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>timePlotComponent</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>chartDefinition</dt>
+			<dd>MetaLayer object with the definition of chart (see MetaLayer options)</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+		</dl>
+
+		<h3>MetaLayer options</h3>
+
+		The options related to charts map the ones described in pentaho wiki.
+
+		<dl class="documentation">
+
+			<dt>columns</dt>
+			<dd>Mandatory. An array of the columns that will be displayed. Unlike jFreeChartComponent, it has to be a fixed list of series</dd>
+
+			<dt>queryType</dt>
+			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+			<dt>jndi</dt> 
+			<dd>Connection to use for the query</dd>
+
+			<dt>query</dt> 
+			<dd>sql or mdx Query to execute</dd>
+
+			<dt>cube</dt> 
+			<dd>Cube name to use when queryType is mdx</dd>
+
+			<dt>catalog</dt> 
+			<dd>Mondrian schema to use when queryType is mdx</dd>
+
+			<dt>transformation</dt> 
+			<dd>Kettle transformation to use</dd>
+
+			<dt>directory</dt> 
+			<dd>Kettle db repository directory</dd>
+
+			<dt>importStep</dt> 
+			<dd>Kettle transformation's import step</dd>
+
+			<dt>parameterN</dt> 
+			<dd>with N being 0 to 10 (eg: parameter0), this are the parameters passed 
+			to the kettle transformation</dd>
+
+			<dt>width</dt> 
+			<dd>Width of the chart. Default: 200</dd>
+
+			<dt>height</dt> 
+			<dd>Height of the chart. Default: 200</dd>
+
+			<dt>title</dt>
+			<dd>Please check jFreeChart action documentation</dd>
+
+			<dt>showValues</dt>
+			<dd>Show a tooltip with the values. Default: true</dd>
+
+			<dt>hideZeroToolTipValues</dt>
+			<dd>Hides the tooltip when value is zero. Default: false</dd>
+
+			<dt>dots</dt>
+			<dd>Shows a dot for the values. Default: false</dd>
+
+			<dt>fill</dt>
+			<dd>Shows a color gradient on the plot. Default: false</dd>
+
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+
+				<div id="sampleObject"></div>
+
+			</div>
+
+
+				<div id="code">
+					<textarea cols="80" rows="40" id="samplecode">
+
+var MetaLayer = {
+timePlotDefinition: {
+        width: 500,
+        height: 300,
+        title: "Total order income",
+        queryType: 'mdx',
+        jndi: "SampleData",
+        catalog: "solution:/public/plugin-samples/pentaho-cdf/30-documentation/30-component_reference/10-core/31-TimePlotComponent/steelwheels.mondrian.xml",
+        query: function(){
+ 
+                var query = "SELECT Measures.Sales on columns, non empty [Time].[Date].Members on rows from SteelWheelsSales";
+                return query;
+        },
+        columns: ["Total Price"],
+        dots: false,
+        showValues: true,
+        fill: true
+}
+};
+ 
+var timePlotComponent =
+{
+        name: "timePlotComponent",
+        type: "timePlotComponent",
+        chartDefinition: MetaLayer.timePlotDefinition,
+        htmlObject: "sampleObject",
+        executeAtStart: true
+};
+ 
+$("#sampleObject").empty();
+Dashboards.init([timePlotComponent]);
+Dashboards.finishedInit = false;
+					</textarea>
+					<br />
+					<button onclick="evaluateCode(true)">Try me</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<script language="javascript" type="text/javascript">
+
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+
+</script>

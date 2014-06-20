@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdf>
+	<title>Components</title>
+	<author>Webdetails</author>
+	<description>Components</description>
+	<icon></icon>
+	<template>components.html</template>
+	<style>mantle</style>
+</cdf>

@@ -1,18 +1,16 @@
 # OS-generated files
 .DS_Store*
 # Here be passwords!
-/bi-platform-v2-plugin/override.properties
+/*/override.properties
 # Build/Staging related stuff
-/bi-platform-v2-plugin/bin/
-/bi-platform-v2-plugin/dist/
-/bi-platform-v2-plugin/lib/
-/bi-platform-v2-plugin/runtime-lib/
+/*/bin/
+/*/dist/
+/*/lib/
+/*/runtime-lib/
 /solution/system/
 /nbproject/private/
 /build
-/dist
 /manifest.mf
-/bin
 override.properties
 .ant*
 /bi-platform-v2-plugin/dev-lib/*
@@ -21,7 +19,16 @@ override.properties
 .classpath
 .project
 .settings
+.metadata
 
 #IntelliJ files
 .idea/
 *.iml
+bi-platform-v2-plugin/res/META-INF/MANIFEST.MF
+cdf-core/js-lib
+cdf-pentaho5/js-lib
+cdf-pentaho5/test-lib
+dist
+cdf-pentaho/js-lib
+cdf-pentaho/test-lib
+cdf-core/node_modules
