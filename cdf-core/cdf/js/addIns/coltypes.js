@@ -49,7 +49,28 @@
     
     implementation: function (tgt, st, opt) {
       var t = $(tgt);
-      t.sparkline(st.value.split(/,/),opt);
+      var data = st.value.split(/,/);
+
+      // Trim values
+      if(opt.trim){
+        if(opt.trim.type=="both"||opt.trim.type=="right"){
+          for (var i = data.length - 1; i >= 0; i--) {
+            if($.inArray(data[i].trim(),opt.trim.values)!=-1){
+              data.splice(i, 1);
+            }
+          };
+
+        }
+        if(opt.trim.type=="both"||opt.trim.type=="left"){
+          for (var i = 0; i < data.length; i++) {
+            if($.inArray(data[i].trim(),opt.trim.values)!=-1){
+              data.splice(i, 1);
+            }
+          };
+        }
+      }
+      
+      t.sparkline(data,opt);
       t.removeClass("sparkline");
     }
   };
@@ -93,6 +114,26 @@
       var ph = $(tgt),
       sparklineData = st.value,
       data = sparklineData.split(",");
+
+      // Trim values
+      if(opt.trim){
+        if(opt.trim.type=="both"||opt.trim.type=="right"){
+          for (var i = data.length - 1; i >= 0; i--) {
+            if($.inArray(data[i].trim(),opt.trim.values)!=-1){
+              data.splice(i, 1);
+            }
+          };
+
+        }
+        if(opt.trim.type=="both"||opt.trim.type=="left"){
+          for (var i = 0; i < data.length; i++) {
+            if($.inArray(data[i].trim(),opt.trim.values)!=-1){
+              data.splice(i, 1);
+            }
+          };
+        }
+      }
+      
       n = data.length,
       w = opt.width || ph.width() - opt.canvasMargin * 2,
       h = opt.height,
