@@ -540,27 +540,5 @@ excludes="**/Thumbs.db"
 	    </for>
 	</target>
 
-  	<target name="publish-nojar" depends="subfloor-js.js.publish-nojar, subfloor.publish-nojar">
-      <ivy:makepom ivyfile="package-ivy.xml" pomfile="plugin-pom.xml" />
-      <ivy:makepom ivyfile="package-ivy-samples.xml" pomfile="samples-pom.xml" />
-
-      <antcall target="maven-publish-artifact">
-        <param name="publish.pomFile" value="plugin-pom.xml" />
-        <param name="publish.file" value="${dist.dir}/${plugin.zipfile}" />
-      </antcall>
-
-      <antcall target="maven-publish-artifact">
-        <param name="publish.pomFile" value="samples-pom.xml" />
-        <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
-      </antcall>
-
-
-      <antcall target="maven-publish-js-source">
-        <param name="publish.groupId" value="${ivy.artifact.group}"/>
-        <param name="publish.artifactId" value="pentaho-cdf"/>
-        <param name="publish.version" value="${project.revision}"/>
-        <param name="publish.file" value="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip"/>
-      </antcall>
-    </target>
 
 </project>
