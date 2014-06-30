@@ -541,4 +541,7 @@ excludes="**/Thumbs.db"
 	</target>
 
 
+   <target name="publish-nojar" depends="subfloor-js.js.publish-nojar, subfloor.publish-nojar"/>
+
+
 </project>
