@@ -16,5 +16,12 @@
     <hibernate-available>true</hibernate-available>
     
     
+    <!--
+        legacy-dashboard-context: flag indicating if Dashboard.context should assume the legacy 
+        structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
+
+        accepted values are: true | false
+     -->
+    <legacy-dashboard-context>false</legacy-dashboard-context>
     
 </settings>

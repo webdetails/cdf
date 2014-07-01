@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,13 @@ public class ContextEngine {
   private static final String PREFIX_PARAMETER = "param";
   static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
   private static ContextEngine instance;
+
+  /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
+   * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
+   */
+  private final static boolean APPLY_LEGACY_DASHBOARD_CONTEXT = Boolean.valueOf(
+    StringUtils.defaultIfEmpty( CdfEngine.getEnvironment().getResourceLoader()
+    .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ) , "false" ) );
 
   private static String CONFIG_FILE = "dashboardContext.xml";
 
@@ -101,6 +109,10 @@ public class ContextEngine {
       SecurityParameterProvider securityParams = new SecurityParameterProvider( getUserSession() );
       contextObj.put( "roles", securityParams.getParameter( "principalRoles" ) );
 
+      if ( APPLY_LEGACY_DASHBOARD_CONTEXT ) {
+        buildLegacyStructure( contextObj, path, securityParams );
+      }
+
       final JSONObject params = new JSONObject();
       buildContextParams( params, parameters );
       contextObj.put( "params", params );
@@ -140,6 +152,67 @@ public class ContextEngine {
     long utcTime = cal.getTimeInMillis();
     contextObj.put( "serverLocalDate", utcTime + cal.getTimeZone().getOffset( utcTime ) );
     contextObj.put( "serverUTCDate", utcTime );
+    return contextObj;
+  }
+
+  // Maintain backward compatibility. This is a configurable option via plugin's settings.xml
+  private JSONObject buildLegacyStructure( final JSONObject contextObj, String path, SecurityParameterProvider securityParams )
+    throws JSONException {
+
+    logger.warn( "CDF: using legacy structure for Dashboard.context; " +
+      "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings.xml" );
+
+    if( securityParams != null ){
+      contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
+    }
+
+    if( !StringUtils.isEmpty( path ) ) {
+
+      if ( !contextObj.has( Parameter.FULL_PATH ) ) {
+        contextObj.put( Parameter.FULL_PATH, path ); // create fullPath ctx attribute
+      }
+
+      // now parse full path into legacy structure of solution, path, file
+
+      if ( path.startsWith( String.valueOf( RepositoryHelper.SEPARATOR ) ) ) {
+        path = path.replaceFirst( String.valueOf( RepositoryHelper.SEPARATOR ), StringUtils.EMPTY );
+      }
+
+      // we must determine if this is a full path to a folder or to a file
+      boolean isPathToFile = !StringUtils.isEmpty( FilenameUtils.getExtension( path ) );
+
+      if ( isPathToFile ) {
+        contextObj.put( Parameter.FILE, FilenameUtils.getName( path ) ); // create file ctx attribute
+        path = path.replace( FilenameUtils.getName( path ), StringUtils.EMPTY ); // remove and continue on
+      }
+
+      path = FilenameUtils.normalizeNoEndSeparator( path );
+
+      String[] parsedPath = path.split( String.valueOf( RepositoryHelper.SEPARATOR ) );
+
+      if ( parsedPath != null ) {
+
+        if ( parsedPath.length == 0 ) {
+
+          contextObj.put( Parameter.SOLUTION, StringUtils.EMPTY ); // create solution ctx attribute
+          contextObj.put( Parameter.PATH, StringUtils.EMPTY ); // create path ctx attribute
+
+        } else if ( parsedPath.length == 1 ) {
+
+
+          contextObj.put( Parameter.SOLUTION, parsedPath[ 0 ] );  // create solution ctx attribute
+          contextObj.put( Parameter.PATH, StringUtils.EMPTY ); // create path ctx attribute
+
+        } else {
+
+          contextObj.put( Parameter.SOLUTION, parsedPath[ 0 ] );  // create solution ctx attribute
+          path = path.replace( FilenameUtils.getName( parsedPath[ 0 ] ), StringUtils.EMPTY ); // remove and continue on
+          path = path.replaceFirst( String.valueOf( RepositoryHelper.SEPARATOR ), StringUtils.EMPTY );
+          contextObj.put( Parameter.PATH, path ); // create path ctx attribute
+        }
+      }
+    }
+
     return contextObj;
   }
 
