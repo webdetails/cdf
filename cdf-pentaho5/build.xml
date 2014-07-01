@@ -541,10 +541,7 @@ excludes="**/Thumbs.db"
 	</target>
 
 
-   <target name="publish-nojar" depends="subfloor-js.js.publish-nojar, subfloor.publish-nojar"/>
-   
-   
-   <target name="maven-publish.post" depends="subflor.maven-publish.post">
+   <target name="publish-nojar" depends="subfloor-js.js.publish-nojar, subfloor.publish-nojar">
     <antcall target="maven-publish-artifact">
         <param name="publish.pomFile" value="samples-pom.xml" />
         <param name="publish.file" value="${dist.dir}/${plugin.samples.zipfile}" />
