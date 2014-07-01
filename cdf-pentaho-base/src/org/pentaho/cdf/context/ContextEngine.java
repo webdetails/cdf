@@ -63,8 +63,8 @@ public class ContextEngine {
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
   private final static boolean APPLY_LEGACY_DASHBOARD_CONTEXT = Boolean.valueOf(
-    CdfEngine.getEnvironment().getResourceLoader()
-    .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ) );
+    StringUtils.defaultIfEmpty( CdfEngine.getEnvironment().getResourceLoader()
+    .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ) , "false" ) );
 
   private static String CONFIG_FILE = "dashboardContext.xml";
 
