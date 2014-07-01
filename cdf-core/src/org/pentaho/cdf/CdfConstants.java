@@ -28,6 +28,7 @@ public class CdfConstants {
 
   public static final String PLUGIN_SETTINGS_DOWNLOADABLE_FORMATS = "settings/resources/downloadable-formats";
   public static final String PLUGIN_SETTINGS_HIBERNATE_AVAILABLE = "settings/hibernate-available";
+  public static final String PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT = "settings/legacy-dashboard-context";
 
   public static final String DEFAULT_DASHBOARD_TEMPLATE_HTML = "default-dashboard-template.html";
   public static final String DEFAULT_DASHBOARD_STYLE = "mantle";

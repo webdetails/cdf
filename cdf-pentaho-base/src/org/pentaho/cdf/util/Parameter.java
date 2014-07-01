@@ -32,6 +32,7 @@ public class Parameter {
   public static final String STORAGE_VALUE = "storageValue"; //$NON-NLS-1$
   public static final String SOLUTION = "solution"; //$NON-NLS-1$
   public static final String PATH = "path"; //$NON-NLS-1$
+  public static final String FULL_PATH = "fullPath"; //$NON-NLS-1$
   public static final String FILE = "file"; //$NON-NLS-1$
   public static final String TEMPLATE = "template"; //$NON-NLS-1$
   public static final String MODE = "mode"; //$NON-NLS-1$
