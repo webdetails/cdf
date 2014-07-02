@@ -22,4 +22,9 @@ public interface ICdfApiPathProvider {
    */
   public String getWebappContextRoot();
 
+  /**
+   * @return plugin resource url
+   */
+  public String getResourcesBasePath();
+
 }

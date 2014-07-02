@@ -23,7 +23,9 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.util.messages.LocaleHelper;
 
 import pt.webdetails.cpf.PentahoPluginEnvironment;
+import pt.webdetails.cpf.PentahoUrlProvider;
 import pt.webdetails.cpf.Util;
+import pt.webdetails.cpf.context.api.IUrlProvider;
 import pt.webdetails.cpf.exceptions.InitializationException;
 import pt.webdetails.cpf.resources.IResourceLoader;
 
@@ -94,6 +96,11 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
   }
 
   @Override
+  protected String getPluginRepositoryDir() {
+    return PLUGIN_REPOSITORY_DIR;
+  }
+
+  @Override
   public PentahoPluginEnvironment getPluginEnv() {
     return PentahoPluginEnvironment.getInstance();
   }
@@ -131,5 +138,15 @@ public class PentahoCdfEnvironment extends PentahoPluginEnvironment implements I
   @Override
   public String getCdfPluginRepositoryDir() {
     return this.PLUGIN_REPOSITORY_DIR;
+  }
+
+  @Override
+  public IUrlProvider getUrlProvider(){
+    return new PentahoUrlProvider( getPluginId() ){
+      @Override
+      public String getResourcesBasePath(){
+        return getPathProvider().getResourcesBasePath();
+      }
+    };
   }
 }
