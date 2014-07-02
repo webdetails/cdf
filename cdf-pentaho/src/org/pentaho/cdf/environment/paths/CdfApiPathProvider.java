@@ -34,4 +34,9 @@ public class CdfApiPathProvider implements ICdfApiPathProvider {
   public String getWebappContextRoot() {
     return urlProvider.getWebappContextRoot();
   }
+
+  @Override
+  public String getResourcesBasePath() {
+    return pluginPath;
+  }
 }

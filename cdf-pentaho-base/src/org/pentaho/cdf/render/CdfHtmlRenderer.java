@@ -93,7 +93,14 @@ public class CdfHtmlRenderer {
       templateResourceFile = systemAccess.fetchFile( dashboardTemplate );
     }
 
-    String templateContent = Util.toString( templateResourceFile.getContents() );
+    String templateContent;
+    if ( templateResourceFile != null ) { //if a file was obtained correctly
+      templateContent = Util.toString( templateResourceFile.getContents() );
+    } else { //if not get a default one
+      logger.error( "Template " + dashboardTemplate + "not available on cdf/templates, loading fallback instead" );
+      templateContent = Util.toString( systemAccess.fetchFile( "template-dashboard.html" ).getContents() );
+    }
+
     // Process i18n on dashboard outer template
     templateContent = updateUserLanguageKey( templateContent );
     templateContent = processi18nTags( templateContent, i18nTagsList );
