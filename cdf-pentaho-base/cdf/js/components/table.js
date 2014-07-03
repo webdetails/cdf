@@ -74,6 +74,7 @@ if($.fn.dataTableExt != undefined){
  */
 if(jQuery.fn.DataTable != undefined && jQuery.fn.DataTable.ext != undefined) {
   jQuery.extend(jQuery.fn.DataTable.ext.classes, {
+    "sNoFooter" : "",
     "sPagePrevEnabled": "paginate_enabled_previous",
     "sPagePrevDisabled": "paginate_disabled_previous",
     "sPageNextEnabled": "paginate_enabled_next",
@@ -81,6 +82,11 @@ if(jQuery.fn.DataTable != undefined && jQuery.fn.DataTable.ext != undefined) {
   });
 
   jQuery.extend(jQuery.fn.DataTable.ext.oJUIClasses, {
+    "sNoFooter" : "",
+    "sSortable" : "",
+    "sSortAsc" : "",
+    "sSortDesc" : "",
+    "sSortColumn" : "",
     "sPagePrevEnabled": "fg-button ui-button ui-state-default ui-corner-left",
     "sPagePrevDisabled": "fg-button ui-button ui-state-default ui-corner-left ui-state-disabled",
     "sPageNextEnabled": "fg-button ui-button ui-state-default ui-corner-right",
