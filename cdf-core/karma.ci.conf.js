@@ -36,6 +36,7 @@ module.exports = function(config) {
       'cdf/js/Dashboards.Notifications.js',
       'cdf/js/Dashboards.RefreshEngine.js',
       'cdf/js/components/core.js',
+      'cdf/js/components/input.js',
       'cdf/js/queries/coreQueries.js',
       'test-js/lib/test-components.js',
       'test-js/main.js',
