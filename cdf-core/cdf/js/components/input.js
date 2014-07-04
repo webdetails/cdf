@@ -103,6 +103,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
     switch(extPlugin) {
       case "chosen": selectHTML += " class='chzn-select'" ; break;
       case "hynds":  selectHTML += " class='hynds-select'"; break;
+      case "select2":  selectHTML += " class='select2-container'"; break;
     }
 
     selectHTML += ">";
@@ -187,6 +188,17 @@ var SelectBaseComponent = InputBaseComponent.extend({
     switch(extPlugin) {
       case "chosen": ph.find("select.chzn-select" ).chosen(this._readExtraOptions()); break;
       case "hynds":  ph.find("select.hynds-select").multiselect({multiple: allowMultiple}); break;
+      case "select2":  {
+        var extraOps = this._readExtraOptions() || {};
+        if(!extraOps.dropdownAutoWidth) {
+          extraOps.dropdownAutoWidth = true;
+        }
+        if(!extraOps.width) {
+          extraOps.width = "off";
+        }
+        ph.find("select.select2-container").select2(extraOps);
+        break;
+      }
     }
 
     this._listenElement(ph);
@@ -226,7 +238,7 @@ var SelectBaseComponent = InputBaseComponent.extend({
   },
 
   /**
-   * Currently, reads extra options for the "chosen" plugin,
+   * Currently, reads extra options for the "chosen" and "select2" plugins,
    * by transforming the array of key/value pair arrays
    * in {@link #extraOptions} into a JS object.
    *
@@ -959,7 +971,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
   indexes: [],//used as static
   draw: function(myArray){
     this.cachedArray = myArray;
-    var cssWrapperClass= "pentaho-toggle-button pentaho-toggle-button-up "+ ((this.verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
+    var cssWrapperClass= wd.helpers.inputHelper.getCssWrapperClass(this.verticalOrientation);
     var selectHTML = "";
     var firstVal;
 
@@ -974,7 +986,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     for (var i = 0, len = myArray.length; i < len; i++){
       var value = myArray[i][valIdx],
         label = myArray[i][lblIdx],
-        classes = cssWrapperClass + this.getExtraCss(i,len,this.verticalOrientation),
+        classes = cssWrapperClass + wd.helpers.inputHelper.getExtraCss(i,len,this.verticalOrientation),
         selector;
 
       value = (value == null ? null : value.replace('"','&quot;' ));
@@ -1046,14 +1058,14 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     }
 
     // set up hovering
-    $(".pentaho-toggle-button").hover(function() {
-      $(this).addClass("pentaho-toggle-button-up-hovering");
+    $("." + wd.helpers.inputHelper.getToggleButtonClass() ).hover(function() {
+      $(this).addClass( wd.helpers.inputHelper.getToggleButtonHoveringClass() );
     }, function() {
-      $(this).removeClass("pentaho-toggle-button-up-hovering");
+      $(this).removeClass( wd.helpers.inputHelper.getToggleButtonHoveringClass() );
     });
     // set up hovering when inner button is hovered
-    $(".pentaho-toggle-button button").hover(function() {
-      $(this).parent().addClass("pentaho-toggle-button-up-hovering");
+    $("." + wd.helpers.inputHelper.getToggleButtonClass() + " button").hover(function() {
+      $(this).parent().addClass( wd.helpers.inputHelper.getToggleButtonHoveringClass() );
     }, function() {
       // don't remove it, since it's inside the outer div it will handle that
     });
@@ -1084,19 +1096,12 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     return this.cachedArray[idx][this.valueAsId ? 1 : 0];
   },
 
-  getSelecetedCss: function(verticalOrientation) {
-    return "pentaho-toggle-button pentaho-toggle-button-down "+ ((verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
-  },
-  getUnselectedCss: function(verticalOrientation) {
-    return "pentaho-toggle-button pentaho-toggle-button-up "+ ((verticalOrientation)? "pentaho-toggle-button-vertical" : "pentaho-toggle-button-horizontal");
-  },
-
   //static MultiButtonComponent.prototype.clickButton
   // This method should be broken up so the UI state code is reusable outside of event processing
   clickButton: function(htmlObject, name, index, isMultiple, verticalOrientation, updateUIOnly){
 
-    var cssWrapperClass= this.getUnselectedCss(verticalOrientation);
-    var cssWrapperClassSelected= this.getSelecetedCss(verticalOrientation);
+    var cssWrapperClass= wd.helpers.inputHelper.getUnselectedCss(verticalOrientation);
+    var cssWrapperClassSelected= wd.helpers.inputHelper.getSelectedCss(verticalOrientation);
 
     var buttons = $("#" + htmlObject + " button");
     if (isMultiple) {//toggle button
@@ -1112,16 +1117,16 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
         }
       }
       if (disable){
-        buttons[index].parentNode.className = cssWrapperClass + this.getExtraCss(index,buttons.length,verticalOrientation);
+        buttons[index].parentNode.className = cssWrapperClass + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
       } else {
-        buttons[index].parentNode.className = cssWrapperClassSelected + this.getExtraCss(index,buttons.length,verticalOrientation);
+        buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
         this.indexes[name].push(index);
       }
     }
     else {//de-select old, select new
       this.clearSelections(htmlObject, name, verticalOrientation);
       this.indexes[name] = index;
-      buttons[index].parentNode.className = cssWrapperClassSelected + this.getExtraCss(index,buttons.length,verticalOrientation);
+      buttons[index].parentNode.className = cssWrapperClassSelected + wd.helpers.inputHelper.getExtraCss(index,buttons.length,verticalOrientation);
     }
     if(!updateUIOnly){
       this.callAjaxAfterRender(name);
@@ -1130,26 +1135,12 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
   clearSelections: function(htmlObject, name, verticalOrientation) {
     var buttons = $("#" + htmlObject + " button");
-    var cssWrapperClass = this.getUnselectedCss(verticalOrientation);
+    var cssWrapperClass = wd.helpers.inputHelper.getUnselectedCss(verticalOrientation);
     for(var i = 0; i < buttons.length; i++){
-      buttons[i].parentNode.className = cssWrapperClass + this.getExtraCss(i,buttons.length,verticalOrientation);
+      buttons[i].parentNode.className = cssWrapperClass + wd.helpers.inputHelper.getExtraCss(i,buttons.length,verticalOrientation);
     }
 
     this.indexes[name] = [];
-  },
-
-  getExtraCss: function(index, count, verticalOrientation) {
-    var css = "";
-    if (index == 0 && count == 1) {
-      // both first & last
-      return " pentaho-toggle-button-single";
-    }
-    if (index == 0) {
-      css += " "+ ((verticalOrientation) ? " pentaho-toggle-button-vertical-first" : " pentaho-toggle-button-horizontal-first");
-    } else if (index == count-1) {
-      css += " "+ ((verticalOrientation) ? " pentaho-toggle-button-vertical-last" : " pentaho-toggle-button-horizontal-last");
-    }
-    return css;
   },
 
   //static MultiButtonComponent.prototype.getSelectedIndex
