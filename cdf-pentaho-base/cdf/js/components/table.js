@@ -450,14 +450,17 @@ var TableComponent = UnmanagedComponent.extend({
     if (json) {
       dtData.aaData = json.resultset;
     }
- 
-    this.ph.html("<table id='" + this.htmlObject + "Table' class='tableComponent' width='100%'></table>");
+    
+    var tableClassName = dtData.tableStyle == "bootstrap" ?  'table table-striped table-bordered form-inline table-responsive' : 'tableComponent';
+  
+    this.ph.html("<table id='" + this.htmlObject + "Table' class='" + tableClassName +"' width='100%'></table>");
+
     /* 
      * We'll first initialize a blank table so that we have a
      * table handle to work with while the table is redrawing
      */
     this.dataTable = $("#"+this.htmlObject+'Table').dataTable(dtData);
-  
+
     // We'll create an Array to keep track of the open expandable rows.
     this.dataTable.anOpen = [];
 
@@ -571,6 +574,7 @@ var TableComponent = UnmanagedComponent.extend({
     dtData.sPaginationType = options.paginationType;
     dtData.sDom = options.sDom;
     dtData.aaSorting = options.sortBy;
+    dtData.tableStyle = options.tableStyle;
     
     if (typeof options.oLanguage == "string"){
       dtData.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
