@@ -34,11 +34,11 @@
 
         var callVar = this.isEditMode() ? "editor" : "viewer";
 
-            $.extend( options, { ts: new Date().getTime() } );
-            var url = wd.cdf.endpoints.getAnalyzer( pathSegments, callVar, options );
+        $.extend( options, { ts: new Date().getTime() } );
+        var url = wd.cdf.endpoints.getAnalyzer( pathSegments, callVar, options );
 
-            var iframe = this.generateIframe( url );
-            $( "#" + this.htmlObject ).html( iframe );
+        var iframe = this.generateIframe( url );
+        $( "#" + this.htmlObject ).html( iframe );
 
     },
 
@@ -50,7 +50,7 @@
             command: this.command == undefined ? "open" : this.command,
             showFieldList: this.showFieldList == undefined ? false : this.showFieldList,
             showRepositoryButtons: this.showRepositoryButtons == undefined ? false : this.showRepositoryButtons,
-            frameless: this.frameless == undefined ? false : !this.frameless
+            frameless: this.frameless == undefined ? false : this.frameless
         };
         // process params and update options
         $.map(this.parameters, function(k) {

@@ -144,11 +144,6 @@ wd.cdf.endpoints = {
     return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/Pivot", null, { solution: (solution || "system"), path:Encoder.encodeRepositoryPath( path ), action: action } );
   },
 
-  /*getAnalyzer: function() { 
-    /eturn wd.cdf.endpoints.getWebapp() + "/content/analyzer/";
-    
-  },*/
-
   getAnalyzer: function( path, callvar, parameters ) {
     return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/api/repos/{0}/" + callvar, Encoder.encodeRepositoryPath( wd.cdf.helper.composePath( path ) ), parameters );
   },
