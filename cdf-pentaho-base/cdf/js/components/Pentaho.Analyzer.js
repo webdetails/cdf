@@ -107,6 +107,7 @@ var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
         });
     },
     executeAnalyzerComponent: function() {
+        var callVar = this.isEditMode() ? "editor" : "viewer";
         var parameters = this.getOptions();
         var path = {};
         if ( parameters.solution ) {
@@ -122,9 +123,10 @@ var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
         delete parameters.path;
         delete parameters.action;
         $.extend( parameters, {ts: new Date().getTime()});
+
         $.fancybox({
             type: "iframe",
-            href: wd.cdf.endpoints.getAnalyzer( path, "viewer", parameters ),
+            href: wd.cdf.endpoints.getAnalyzer( path, callVar, parameters ),
             width: $(window).width(),
             height: $(window).height() - 50
         });
