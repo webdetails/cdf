@@ -575,13 +575,13 @@ var TableComponent = UnmanagedComponent.extend({
     dtData.sDom = options.sDom;
     dtData.aaSorting = options.sortBy;
     dtData.tableStyle = options.tableStyle;
-    
+
     if (typeof options.oLanguage == "string"){
       dtData.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
-	  }
+    }
     else {
       dtData.oLanguage = options.oLanguage;
-	  }
+    }
 
     if (typeof options.language == "string"){
       dtData.language = eval("(" + options.language + ")");//TODO: er...
@@ -610,7 +610,7 @@ var TableComponent = UnmanagedComponent.extend({
         })
       };  // colTypes
       if(options.colFormats!=undefined){
-      // Changes are made directly to the json
+        // Changes are made directly to the json
 
       };  // colFormats
 
