@@ -578,10 +578,16 @@ var TableComponent = UnmanagedComponent.extend({
     
     if (typeof options.oLanguage == "string"){
       dtData.oLanguage = eval("(" + options.oLanguage + ")");//TODO: er...
-	}
+	  }
     else {
       dtData.oLanguage = options.oLanguage;
-	}
+	  }
+
+    if (typeof options.language == "string"){
+      dtData.language = eval("(" + options.language + ")");//TODO: er...
+    } else {
+      dtData.language = options.language;
+    }
 
     if(options.colHeaders != undefined){
       dtData.aoColumns = new Array(options.colHeaders.length);
