@@ -242,8 +242,7 @@ BaseComponent = Base.extend(Backbone.Events).extend({
   },
 
   setAddInDefaults: function(slot,addIn,defaults) {
-    var type = typeof this.type == "function" ? this.type() : this.type;
-    Dashboards.setAddInDefaults(type,slot,addIn,defaults)
+    Dashboards.log("BaseComponent.setAddInDefaults was removed. You should call setAddInOptions or Dashboards.setAddInDefaults");
   },
   setAddInOptions: function(slot, addIn,options) {
     if(!this.addInOptions) {
