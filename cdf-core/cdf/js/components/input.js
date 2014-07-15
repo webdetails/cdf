@@ -62,7 +62,7 @@ var InputBaseComponent = UnmanagedComponent.extend({
   _getParameterValue: function() {
     return Dashboards.normalizeValue(
             Dashboards.ev(
-              Dashboards.getParameterValue(this.parameter)));
+              this.dashboard.getParameterValue(this.parameter)));
   }
 });
 
@@ -179,8 +179,8 @@ var SelectBaseComponent = InputBaseComponent.extend({
 
     if(hasChanged) {
       // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
-      Dashboards.setParameter(this.parameter, currentVals);
-      Dashboards.processChange(name);
+      this.dashboard.setParameter(this.parameter, currentVals);
+      this.dashboard.processChange(name);
     }
 
     // TODO: shouldn't this be called right after setting the value of select?
@@ -507,21 +507,22 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 
 var TextInputComponent = BaseComponent.extend({
   update: function() {
-    var name = this.name;
+    var myself = this;
+    var name = myself.name;
     var selectHTML = "<input type='text' id='" + name +
       "' name='"  + name +
-      "' value='" + Dashboards.getParameterValue(this.parameter) +
-      (this.size ? ("' size='" + this.size) : "") +
-      (this.maxLength ? ("' maxlength='" + this.maxLength) : "") +
+      "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
+      (myself.size ? ("' size='" + myself.size) : "") +
+      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") +
       "'>";
 
-    this.placeholder().html(selectHTML);
+    myself.placeholder().html(selectHTML);
 
     $("#" + name)
-      .change(function() { Dashboards.processChange(name); })
-      .keyup(function(ev) { if (ev.keyCode == 13) { Dashboards.processChange(name); } });
+      .change(function() { myself.dashboard.processChange(name); })
+      .keyup(function(ev) { if (ev.keyCode == 13) { myself.dashboard.processChange(name); } });
 
-    this._doAutoFocus();
+    myself._doAutoFocus();
   },
   getValue : function() {
     return $("#"+this.name).val();
@@ -531,20 +532,21 @@ var TextInputComponent = BaseComponent.extend({
 
 var TextareaInputComponent = BaseComponent.extend({
   update: function() {
-    var name = this.name;
+    var myself = this;
+    var name = myself.name;
     var selectHTML = "<textarea id='" + name +
       "' name='" + name +
-      (this.numRows ? ("' rows='" + this.numRows) : "") +
-      (this.numColumns ? ("' cols='" + this.numColumns) : "") +
+      (myself.numRows ? ("' rows='" + myself.numRows) : "") +
+      (myself.numColumns ? ("' cols='" + myself.numColumns) : "") +
       "'>" +
-      Dashboards.getParameterValue(this.parameter) +
+      myself.dashboard.getParameterValue(myself.parameter) +
       '</textarea>';
 
-    this.placeholder().html(selectHTML);
+    myself.placeholder().html(selectHTML);
 
     $("#" + name)
-      .change(function() { Dashboards.processChange(name); })
-      .keyup(function(ev){ if (ev.keyCode == 13) { Dashboards.processChange(name); }
+      .change(function() { myself.dashboard.processChange(name); })
+      .keyup(function(ev){ if (ev.keyCode == 13) { myself.dashboard.processChange(name); }
     });
   },
   getValue : function() {
@@ -562,8 +564,8 @@ if($.datepicker) {
 
 var DateInputComponent = BaseComponent.extend({
   update: function(){
-    var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
     var myself = this;
+    var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
 
     var startDate, endDate;
 
@@ -574,9 +576,10 @@ var DateInputComponent = BaseComponent.extend({
     else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
 
     //ToDo: stretch interval to catch defaultValue?..
-    //Dashboards.getParameterValue(this.parameter))
+    //myself.dashboard.getParameterValue(this.parameter))
 
-    this.placeholder().html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
+    this.placeholder().html($("<input/>").attr("id", myself.name).attr("value", this.dashboard.getParameterValue(this.parameter)).css("width", "80px"));
+
     $(function(){
       myself.placeholder("input").datepicker({
         dateFormat: format,
@@ -585,14 +588,14 @@ var DateInputComponent = BaseComponent.extend({
         minDate: startDate,
         maxDate: endDate,
         onSelect: function(date, input){
-          Dashboards.processChange(myself.name);
+          myself.dashboard.processChange(myself.name);
         }
       });
       // Add JQuery DatePicker standard localization support only if the dashboard is localized
-      if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null) {
+      if (typeof myself.dashboard.i18nSupport !== "undefined" && myself.dashboard.i18nSupport != null) {
         var $input = myself.placeholder("input");
 
-        $input.datepicker('option', $.datepicker.regional[Dashboards.i18nCurrentLanguageCode]);
+        $input.datepicker('option', $.datepicker.regional[myself.dashboard.i18nCurrentLanguageCode]);
 
 
         //Setup alt field and format to keep iso format
@@ -604,10 +607,11 @@ var DateInputComponent = BaseComponent.extend({
     });
   },
   getValue : function() {
-    if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null)
-        return $("#" + this.name + "_hidden").val();
-    else
-        return $("#"+this.name).val();
+    if (typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null) {
+      return $("#" + this.name + "_hidden").val();
+    } else {
+      return $("#"+this.name).val();
+    }
   }
 });
 
@@ -616,12 +620,12 @@ var DateRangeInputComponent = BaseComponent.extend({
   update : function() {
     var dr;
     if (this.singleInput == undefined || this.singleInput == true){
-      dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0]) + " > " + Dashboards.getParameterValue(this.parameter[1]) ).css("width","170px");
+      dr = $("<input/>").attr("id",this.name).attr("value",this.dashboard.getParameterValue(this.parameter[0]) + " > " + this.dashboard.getParameterValue(this.parameter[1]) ).css("width","170px");
       this.placeholder().html(dr);
     } else {
-      dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0])).css("width","80px");
+      dr = $("<input/>").attr("id",this.name).attr("value",this.dashboard.getParameterValue(this.parameter[0])).css("width","80px");
       this.placeholder().html(dr);
-      dr.after($("<input/>").attr("id",this.name + "2").attr("value",Dashboards.getParameterValue(this.parameter[1])).css("width","80px"));
+      dr.after($("<input/>").attr("id",this.name + "2").attr("value",this.dashboard.getParameterValue(this.parameter[1])).css("width","80px"));
       if(this.inputSeparator != undefined){
         dr.after(this.inputSeparator);
       }
@@ -675,10 +679,9 @@ var DateRangeInputComponent = BaseComponent.extend({
       this.preChange(start, end);
     }
 
-    if(this.parameter)
-    {
-      if( this.parameter.length == 2) Dashboards.setParameter(this.parameter[1], end);
-      if( this.parameter.length > 0) Dashboards.fireChange(this.parameter[0], start);
+    if(this.parameter) {
+      if( this.parameter.length == 2) this.dashboard.setParameter(this.parameter[1], end);
+      if( this.parameter.length > 0) this.dashboard.fireChange(this.parameter[0], start);
     }
 
     if(this.postChange){
@@ -694,14 +697,14 @@ var DateRangeInputComponent = BaseComponent.extend({
 {
   fireDateRangeInputChange : function(name, rangeA, rangeB){
     // WPG: can we just use the parameter directly?
-    var object = Dashboards.getComponentByName(name);
+    var object = this.dashboard.getComponentByName(name);
     if(!(typeof(object.preChange)=='undefined')){
       object.preChange(rangeA, rangeB);
     }
     var parameters = eval(name + ".parameter");
     // set the second date and fireChange the first
-    Dashboards.setParameter(parameters[1], rangeB);
-    Dashboards.fireChange(parameters[0],rangeA);
+    this.dashboard.setParameter(parameters[1], rangeB);
+    this.dashboard.fireChange(parameters[0],rangeA);
     if(!(typeof(object.postChange)=='undefined')){
       object.postChange(rangeA, rangeB);
     }
@@ -711,11 +714,11 @@ var DateRangeInputComponent = BaseComponent.extend({
 
 var MonthPickerComponent = BaseComponent.extend({
   update : function() {
+    var myself = this;
     var selectHTML = this.getMonthPicker(this.name, this.size, this.initialDate, this.minDate, this.maxDate, this.months);
     this.placeholder().html(selectHTML);
-    var myself = this;
     $("#"+this.name).change(function() {
-      Dashboards.processChange(myself.name);
+      myself.dashboard.processChange(myself.name);
     });
     this._doAutoFocus();
   },
@@ -731,7 +734,7 @@ var MonthPickerComponent = BaseComponent.extend({
     this.placeholder().html(selectHTML);
     var myself = this;
     $("#"+this.name).change(function() {
-      Dashboards.processChange(myself.name);
+      this.dashboard.processChange(myself.name);
     });
     return value;
   },parseDate : function(aDateString){
@@ -816,7 +819,7 @@ var MonthPickerComponent = BaseComponent.extend({
     }
 
     //set size
-    if (object_size != undefined){
+    if (object_size != undefined) {
       selectHTML += " size='" + object_size + "'";
     }
     selectHTML += '>';
@@ -827,28 +830,24 @@ var MonthPickerComponent = BaseComponent.extend({
     * This block is to make sure the months are compared equally. A millisecond can ruin the comparation.
     */
 
-      if(monthCountUndefined == true){
-        currentDate.setMonth(currentDate.getMonth() - (this.getMonthsAppart(minDate,currentDate)) - 1);
-      }else{
-        currentDate.setMonth(currentDate.getMonth() - (monthCount/2) - 1);
-      }
+    if(monthCountUndefined == true) {
+      currentDate.setMonth(currentDate.getMonth() - (this.getMonthsAppart(minDate,currentDate)) - 1);
+    } else {
+      currentDate.setMonth(currentDate.getMonth() - (monthCount/2) - 1);
+    }
     currentDate = this.normalizeDateToCompare(currentDate);
     var normalizedMinDate = this.normalizeDateToCompare(minDate);
     var normalizedMaxDate = this.normalizeDateToCompare(maxDate);
 
-    for(var i= 0; i <= monthCount; i++){
-      
+    for(var i= 0; i <= monthCount; i++) {
       currentDate.setMonth(currentDate.getMonth() + 1);
-
-      if(currentDate >= normalizedMinDate && currentDate <= normalizedMaxDate)
-      {
+      if(currentDate >= normalizedMinDate && currentDate <= normalizedMaxDate) {
         selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad((currentDate.getMonth()+1),2) + "' ";
-
         if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()){
           selectHTML += "selected='selected'"
         }
 
-        selectHTML += ">" + Dashboards.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
+        selectHTML += ">" + this.dashboard.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
       }
     }
 
@@ -868,7 +867,7 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
     var selectHTML = "";
 
     //default
-    var currentVal = Dashboards.getParameterValue(this.parameter);
+    var currentVal = this.dashboard.getParameterValue(this.parameter);
     currentVal = (typeof currentVal == 'function') ? currentVal() : currentVal;
 
     var isSelected = false;
@@ -897,15 +896,17 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
       currentValArray = [myArray[0][vid]];
 
       this.currentVal = currentValArray;
-      Dashboards.setParameter(this.parameter,currentValArray);
-      Dashboards.processChange(this.name);
+      this.dashboard.setParameter(this.parameter,currentValArray);
+      this.dashboard.processChange(this.name);
     }
     // (currentValArray == null && this.defaultIfEmpty)? firstVal : null
 
 
     selectHTML += "<ul class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>"
     for (var i = 0, len = myArray.length; i < len; i++) {
-      selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'><label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
+      //TODO: review the callAjaxAfterRender call because it is calling the lifecycle and should not require the global Dashboards object
+      selectHTML += "<li class='"+ ((this.verticalOrientation)? "toggleGroup vertical":"toggleGroup horizontal")+"'>" +
+          "<label><input onclick='ToggleButtonBaseComponent.prototype.callAjaxAfterRender(\"" + this.name + "\")'";
 
       isSelected = false;
       for (var j = 0, valLength = currentValArray.length; j < valLength; j++) {
@@ -938,7 +939,7 @@ var ToggleButtonBaseComponent = InputBaseComponent.extend({
   },
   callAjaxAfterRender: function(name){
     setTimeout(function(){
-      Dashboards.processChange(name)
+      Dashboards.processChange(name);
     },1);
   }
 });
@@ -1011,7 +1012,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
 
 
     //default
-    var currentVal = Dashboards.ev(Dashboards.getParameterValue(this.parameter));
+    var currentVal = Dashboards.ev(this.dashboard.getParameterValue(this.parameter));
 
     var isSelected = false;
 
@@ -1051,7 +1052,7 @@ var MultiButtonComponent = ToggleButtonBaseComponent.extend({
     if(((!foundDefault && !this.isMultiple) || (!foundDefault && this.isMultiple && this.defaultIfEmpty)) && myArray.length > 0){
       //select first value
       if((currentVal == null || currentVal == "" || (typeof(currentVal) == "object" && currentVal.length == 0)) && this.parameter){
-        Dashboards.fireChange(this.parameter, (this.isMultiple) ? [firstVal] : firstVal);
+        this.dashboard.fireChange(this.parameter, (this.isMultiple) ? [firstVal] : firstVal);
       }
 
       MultiButtonComponent.prototype.clickButton(this.htmlObject, this.name, 0, this.isMultiple, this.verticalOrientation, true);
@@ -1168,7 +1169,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     if(this.maxResults){
       this.queryDefinition.pageSize = this.maxResults;
     }
-    Dashboards.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
+    this.dashboard.setParameter(this.getInnerParameterName(),this.getTextBoxValue());
     QueryComponent.makeQuery(this);
   },
 
@@ -1186,23 +1187,23 @@ var AutocompleteBoxComponent = BaseComponent.extend({
 
     var initialValue = null;
     if(this.parameter){
-      initialValue = Dashboards.getParameterValue(this.parameter);
+      initialValue = this.dashboard.getParameterValue(this.parameter);
     }
 
     var myself = this;
 
     //init parameter
     if(!Dashboards.getParameterValue(this.getInnerParameterName())){
-      Dashboards.setParameter(this.getInnerParameterName(), '' );
+      this.dashboard.setParameter(this.getInnerParameterName(), '' );
     }
 
     var processChange = myself.processChange == undefined ? function(objName){
-      Dashboards.processChange(objName);
+      this.dashboard.processChange(objName);
     } : function(objName) {
       myself.processChange();
     };
     var processElementChange = myself.processElementChange == true ? function(value){
-      Dashboards.fireChange(myself.parameter,value);
+      this.dashboard.fireChange(myself.parameter,value);
     } : undefined;
 
     //TODO:typo on minTextLength

@@ -323,7 +323,7 @@ describe("The CDF framework #", function() {
    * ## The CDF framework # Triggers postInit when all components have finished rendering
    */
  it("Triggers postInit when all components have finished rendering", function(done) {
-   spyOn(myDashboard, "handlePostInit");
+   spyOn(myDashboard, "_handlePostInit");
 
    myDashboard.waitingForInit = null;
    myDashboard.finishedInit = false;
@@ -331,7 +331,7 @@ describe("The CDF framework #", function() {
 
    //Data to validate
    var dataToValidate = function(){
-     expect(myDashboard.handlePostInit).toHaveBeenCalled();
+     expect(myDashboard._handlePostInit).toHaveBeenCalled();
      done();
    };
 

@@ -34,13 +34,13 @@ var PrptComponent = BaseComponent.extend({
     startLoading: function() {
         if (!this.loading) {
             this.loading = true;
-            Dashboards.incrementRunningCalls();
+          this.dashboard.incrementRunningCalls();
         }
     },
     stopLoading: function() {
         if (this.loading) {
             this.loading = false;
-            Dashboards.decrementRunningCalls();
+          this.dashboard.decrementRunningCalls();
         }
     },
     /*************************************************************************/
@@ -179,7 +179,7 @@ var PrptComponent = BaseComponent.extend({
         for (var i = 0; i < this.parameters.length; i++) {
             // param: [<prptParam>, <dashParam>, <default>]
             var param = this.parameters[i];
-            var value = Dashboards.getParameterValue(param[1]);
+            var value = this.dashboard.getParameterValue(param[1]);
             if (value == null && param.length == 3) {
                 value = param[2];
             }
@@ -200,7 +200,7 @@ var PrptComponent = BaseComponent.extend({
         for (var i = 0; i < this.parameters.length; i++) {
             // param: [<prptParam>, <dashParam>, <default>]
             var param = this.parameters[i];
-            var value = Dashboards.getParameterValue(param[1]);
+            var value = this.dashboard.getParameterValue(param[1]);
             if (value == null && param.length == 3) {
                 value = param[2];
             }
@@ -365,7 +365,7 @@ var SchedulePrptComponent = PrptComponent.extend({
             return path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
         };
         getDefaultLocation = function() {
-            return "/home/" + Dashboards.context.user;
+            return "/home/" + myself.dashboard.context.user;
         };
         getHour = function() {
             var hour = $("#hours").val();

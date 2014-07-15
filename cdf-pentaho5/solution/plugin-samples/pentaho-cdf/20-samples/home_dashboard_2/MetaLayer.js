@@ -39,7 +39,7 @@ var MetaLayerHome2 = {
 			MetaLayerHome2.productLine = null;
 			MetaLayerHome2.title = "Top Ten for " + MetaLayerHome2.territory;
 		}
-		Dashboards.fireChange("MetaLayerHome2.filterMeasure",MetaLayerHome2.filterMeasure);
+    this.dashboard.fireChange("MetaLayerHome2.filterMeasure",MetaLayerHome2.filterMeasure);
 
 	},
 	

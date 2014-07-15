@@ -85,10 +85,11 @@ function AddIn(options) {
     options = typeof options == "function" ? options(state) : options;
     var evaluatedDefaults = typeof _defaults == "function" ? _defaults(state) : _defaults;
     var compiledOptions = jQuery.extend(true,{},evaluatedDefaults,options);
-    try{
+    try {
       return _implementation.call(myself,target,state,compiledOptions);    
+    } catch(e) {
+      Dashboards.log("Addin Error [" + this.getName() + "]: " + e,"error");
     }
-    catch(e){Dashboards.log("Addin Error [" + this.getName() + "]: " + e,"error");}
   };
 
   this.setDefaults = function(defaults) {

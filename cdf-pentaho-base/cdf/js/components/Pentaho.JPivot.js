@@ -19,61 +19,61 @@
  */
 
 var JpivotComponent = BaseComponent.extend({
-    update: function() {
-        //to be backwards compatible set default value for iframeScolling
-        // also added 20px 
-        if (this.iframeScrolling == undefined) {
-            this.iframeScrolling = "no";
-        }
-        // Build IFrame and set url
-        var jpivotHTML = "<iframe id=\"jpivot_" + this.htmlObject + "\" scrolling=\"" + this.iframeScrolling + "\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\"" + this.iframeHeight + "\" width=\"" + this.iframeWidth + "\" src=\"";
-        // Add args
-        var params = {};
-        var p = new Array(this.parameters.length);
-        for (var i = 0, len = p.length; i < len; i++) {
-            var key = this.parameters[i][0];
-            var value = Dashboards.getParameterValue(this.parameters[i][1]);
-            params[key] = value;
-        }
-        jpivotHTML += wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution, params);
-        // Close IFrame
-        jpivotHTML += "\"></iframe>";
-        $("#" + this.htmlObject).html(jpivotHTML);
+  update: function() {
+    //to be backwards compatible set default value for iframeScolling
+    // also added 20px
+    if (this.iframeScrolling == undefined) {
+      this.iframeScrolling = "no";
     }
+    // Build IFrame and set url
+    var jpivotHTML = "<iframe id=\"jpivot_" + this.htmlObject + "\" scrolling=\"" + this.iframeScrolling + "\" onload=\"var dynamicHeight = this.contentWindow.document.body.offsetHeight+50; this.style.height = dynamicHeight + 'px';\" frameborder=\"0\" height=\"" + this.iframeHeight + "\" width=\"" + this.iframeWidth + "\" src=\"";
+    // Add args
+    var params = {};
+    var p = new Array(this.parameters.length);
+    for (var i = 0, len = p.length; i < len; i++) {
+      var key = this.parameters[i][0];
+      var value = this.dashboard.getParameterValue(this.parameters[i][1]);
+      params[key] = value;
+    }
+    jpivotHTML += wd.cdf.endpoints.getCdfXaction(this.path, this.action, this.solution, params);
+    // Close IFrame
+    jpivotHTML += "\"></iframe>";
+    $("#" + this.htmlObject).html(jpivotHTML);
+  }
 });//JpivotComponent
 
 var PivotLinkComponent = BaseComponent.extend({
-    update: function() {
-        var title = this.tooltip == undefined ? "View details in a Pivot table" : this.tooltip;
-        // WPG: this assumes name is global name, can I pass in the object directly instead?
-        var link = $('<a class="pivotLink"> </a>').html(this.content).attr("href", "javascript:PivotLinkComponent.openPivotLink(" + this.name + ")").attr("title", title);
-        $("#" + this.htmlObject).empty();
-        $("#" + this.htmlObject).html(link);
-        $('a.pivotLink').tooltip({
-            showURL: false,
-            track: true,
-            delay: 1000,
-            opacity: 0.5
-        });
-    }
+  update: function() {
+    var title = this.tooltip == undefined ? "View details in a Pivot table" : this.tooltip;
+    // WPG: this assumes name is global name, can I pass in the object directly instead?
+    var link = $('<a class="pivotLink"> </a>').html(this.content).attr("href", "javascript:PivotLinkComponent.openPivotLink(" + this.name + ")").attr("title", title);
+    $("#" + this.htmlObject).empty();
+    $("#" + this.htmlObject).html(link);
+    $('a.pivotLink').tooltip({
+      showURL: false,
+      track: true,
+      delay: 1000,
+      opacity: 0.5
+    });
+  }
 }, {
-    openPivotLink: function(object) {
-        var url = wd.cdf.endpoints.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
-        var qd = object.pivotDefinition;
-        var parameters = [];
-        for (p in qd) {
-            var key = p;
-            var value = typeof qd[p] == 'function' ? qd[p]() : qd[p];
-            //alert("key: " + key + "; Value: " + value);
-            parameters.push(key + "=" + encodeURIComponent(value));
-        }
-        url += parameters.join("&");
-        var _href = url.replace(/'/g, "&#39;");
-        $.fancybox({
-            type: "iframe",
-            href: _href,
-            width: $(window).width(),
-            height: $(window).height()
-        });
+  openPivotLink: function(object) {
+    var url = wd.cdf.endpoints.getPivot("system", "pentaho-cdf/actions", "jpivot.xaction") + "&";
+    var qd = object.pivotDefinition;
+    var parameters = [];
+    for (p in qd) {
+      var key = p;
+      var value = typeof qd[p] == 'function' ? qd[p]() : qd[p];
+      //alert("key: " + key + "; Value: " + value);
+      parameters.push(key + "=" + encodeURIComponent(value));
     }
+    url += parameters.join("&");
+    var _href = url.replace(/'/g, "&#39;");
+    $.fancybox({
+      type: "iframe",
+      href: _href,
+      width: $(window).width(),
+      height: $(window).height()
+    });
+  }
 });//PivotLinkComponent

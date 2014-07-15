@@ -12,22 +12,22 @@
 */
 
 var NavigatorBaseComponent = BaseComponent.extend({},{
-  path : Dashboards.getQueryParameter("path"),
-  solution : Dashboards.getQueryParameter("solution"),
+  path: Dashboards.getQueryParameter("path"),
+  solution: Dashboards.getQueryParameter("solution"),
   template: Dashboards.getQueryParameter("template"),
   navigatorResponse : -1,
   getSolutionJSON : function(solution) {
     var json = NavigatorBaseComponent.navigatorResponse;
     var files = json.solution.folders;
     var locationArray;
-	
+
     var found = 0;
     for(i = 0; i<files.length; i++){
       var file = files[i];
       if(NavigatorBaseComponent.solution == "" || file.solution == NavigatorBaseComponent.solution){
-				
+
         var solutionFiles = [];
-				
+
         // Process subFolders;
         var subFolders = file.folders;
         if(subFolders != undefined && subFolders.length == undefined){
@@ -38,7 +38,7 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
           // We have an array of files
           solutionFiles = solutionFiles.concat(subFolders);
         }
-				
+
         // Process subFiles;
         var subFiles = file.files;
         if(subFiles != undefined && subFiles.length == undefined){
@@ -52,8 +52,8 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
 
         return solutionFiles;
       }
-	
-    }
+
+   }
     if (found == 0){
       Dashboards.error("Fatal: Solution " + solution +" not found in navigation object");
       return;
@@ -67,13 +67,13 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       if(file.type == "FOLDER" && file.path == currentPath){
         files = file.folders;
         /*
-				 console.log("Files found for this path:");
-				 for (var j = 0; j < files.length; j++) {
-				 if (files[j].path != undefined) {
-				 console.log(files[j].path);
-			 }
-		 }
-		 */
+        console.log("Files found for this path:");
+        for (var j = 0; j < files.length; j++) {
+          if (files[j].path != undefined) {
+            console.log(files[j].path);
+          }
+        }
+        */
         if (files == undefined){
           return [];
         }
@@ -126,15 +126,15 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   },
   processNavigatorResponse : function(json) {
     NavigatorBaseComponent.navigatorResponse = json;
-	
+
     var files = this.includeSolutions?json.solution.folders:NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
-		
+
     files.sort(function(a,b){
       return a.name>b.name
     });
     var ret = this.generateMenuFromArray(files, 0);
     $("#"+this.htmlObject).html(ret);
-	
+
     $(function(){
       $('ul.jd_menu').jdMenu({
         activateDelay: 50,
@@ -162,8 +162,8 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 
       s += this.generateMenuFromFile(file, depth + 1);
     }
-		
-		
+
+
     if (s.length > 0){
 
       var className;
@@ -172,9 +172,9 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
         var cls=(this.mode == 'vertical')?"jd_menu jd_menu_slate jd_menu_vertical":"jd_menu jd_menu_slate";
         className = "class=\""+cls+"\"";
       }
-		
+
       s = "<ul " + className + ">"+ s + "</ul>";
-				
+
     }
 
     return s;
@@ -190,7 +190,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
       if(file.path.length>0){
         _path="path="+file.path;
       }
-			
+
       var _template = NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
       if (file.link != undefined){
         s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + file.link + "\">" + file.title + "</a>";
@@ -201,33 +201,34 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
       }
 
       /*
-			if(file.type == "wcdf")
-				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf-dd/Render?solution=" + file.solution + "&amp;path=" + file.path + "&amp;file=" + file.file + "\">" + file.title + "</a>";
-			else if (file.type == "xcdf")
-				s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf/RenderXCDF?solution=" + file.solution + "&amp;path=" + file.path + "&amp;action=" + file.file + "\">" + file.title + "</a>";
-			else
-				s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
-			*/
+      if(file.type == "wcdf") {
+        s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf-dd/Render?solution=" + file.solution + "&amp;path=" + file.path + "&amp;file=" + file.file + "\">" + file.title + "</a>";
+      } else if (file.type == "xcdf") {
+        s += "<li><a title=\"" + file.description + "\" href=\"" + webAppPath + "/content/pentaho-cdf/RenderXCDF?solution=" + file.solution + "&amp;path=" + file.path + "&amp;action=" + file.file + "\">" + file.title + "</a>";
+      } else {
+        s += "<li><a "+ classString +" title=\"" + file.description + "\"  href=\"" + webAppPath + "/content/pentaho-cdf/RenderHTML?solution=" + file.solution + "&amp;" +_path + _template + "\">" + file.title + "</a>";
+      }
+      */
 
       var files = file.folders || [];
       files.sort(function(a,b){
         return a.name>b.name
       });
-			
+
       var childFiles = file.files || [];
       childFiles.sort(function(a,b){
         return a.name>b.name
       });
-			
+
       var inner = this.generateMenuFromArray(files.concat(childFiles));
-			
+
       if (inner.length > 0 ){
         inner = " &raquo;" + inner;
       }
 
       s += inner+"</li>";
-			
-			
+
+
     }
     return s;
   }
@@ -273,7 +274,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
     }
 
     var myself = this;
-		
+
     $.each(files,function(i,val){
       // We want to iterate only depending on the options:
       // 1 - Files only
@@ -292,7 +293,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
         var target = "";
         var href = "";
         var template =  NavigatorBaseComponent.template.length > 0 ? "&template=" + NavigatorBaseComponent.template : "";
-		
+
         if (this.type=="FOLDER"){
           cls = "folder";
 
@@ -309,7 +310,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
             cls = "action greybox";
             href = webAppPath + this.link;
           }
-							
+
         }
 
 
@@ -354,7 +355,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   processPageTitleResponse : function(json) {
     // Store the value
     NavigatorBaseComponent.navigatorResponse = json;
-	
+
     var _id = json.solution.id +"/" + NavigatorBaseComponent.solution + (NavigatorBaseComponent.path.length > 1?
       (NavigatorBaseComponent.path.charAt(0) == '/' ? NavigatorBaseComponent.path : '/' + NavigatorBaseComponent.path) : "");
     var file = this.findPageTitleObject(json.solution.folders,_id);
