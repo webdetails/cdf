@@ -19,42 +19,44 @@
  */
 
  var AnalyzerComponent = BaseComponent.extend({
-    update: function() {
-        this.clear();
-        var options = this.getOptions();
-        var url = wd.cdf.endpoints.getAnalyzer();
-        var myself = this;
-        // enable editing the view?
-        this.viewOnly ? url += 'viewer' : url += 'editor';
-        var height = this.height ? this.height : "480px";
-        var width = this.width ? this.width : "100%";
-        var iFrameHTML = this.generateIframe(this.htmlObject, url, options, height, width);
-        $("#" + this.htmlObject).html(iFrameHTML);
-    },
-    getOptions: function() {
-        var options = {
-            solution: this.solution,
-            path: this.path,
-            action: this.action,
-            command: this.command == undefined ? "open" : this.command,
-            showFieldList: this.showFieldList == undefined ? false : this.showFieldList,
-            showRepositoryButtons: this.showRepositoryButtons == undefined ? false : this.showRepositoryButtons,
-            frameless: this.frameless
-        };
-        // process params and update options
-        $.map(this.parameters, function(k) {
-            options[k[0]] = k.length == 3 ? k[2] : Dashboards.getParameterValue(k[1]);
-        });
-        return options;
-    },
-    generateIframe: function(htmlObject, url, parameters, height, width) {
-        var iFrameHTML = '<iframe id="iframe_' + htmlObject + '"' +
-                ' frameborder="0"' +
-                ' height="' + height + '"' +
-                ' width="' + width + '"' +
-                ' src="' + url + "?";
-        iFrameHTML += $.param(parameters, true);
-        iFrameHTML += "\"></iframe>";
-        return iFrameHTML;
+   update: function() {
+     this.clear();
+     var options = this.getOptions();
+     var url = wd.cdf.endpoints.getAnalyzer();
+     var myself = this;
+     // enable editing the view?
+     this.viewOnly ? url += 'viewer' : url += 'editor';
+     var height = this.height ? this.height : "480px";
+     var width = this.width ? this.width : "100%";
+     var iFrameHTML = this.generateIframe(this.htmlObject, url, options, height, width);
+     $("#" + this.htmlObject).html(iFrameHTML);
+   },
+   getOptions: function() {
+     var options = {
+       solution: this.solution,
+       path: this.path,
+       action: this.action,
+       command: this.command == undefined ? "open" : this.command,
+       showFieldList: this.showFieldList == undefined ? false : this.showFieldList,
+       showRepositoryButtons: this.showRepositoryButtons == undefined ? false : this.showRepositoryButtons,
+       frameless: this.frameless
+     };
+
+     var myself = this;
+     // process params and update options
+     $.map(this.parameters, function (k) {
+       options[k[0]] = k.length == 3 ? k[2] : myself.dashboard.getParameterValue(k[1]);
+     });
+     return options;
+   },
+   generateIframe: function(htmlObject, url, parameters, height, width) {
+     var iFrameHTML = '<iframe id="iframe_' + htmlObject + '"' +
+                      ' frameborder="0"' +
+                      ' height="' + height + '"' +
+                      ' width="' + width + '"' +
+                      ' src="' + url + "?";
+     iFrameHTML += $.param(parameters, true);
+     iFrameHTML += "\"></iframe>";
+     return iFrameHTML;
     }
 });//AnalyzerComponent

@@ -26,19 +26,19 @@ MetaLayerCharts =  {
 	pieChartClicked:function(value){
 		if(value == "All Regions"){
 			MetaLayerCharts.regionsMeasure = "[Region].[All Regions].Children";
-			Dashboards.fireChange("MetaLayerCharts.regionsMeasure",MetaLayerCharts.regionsMeasure);
+      this.dashboard.fireChange("MetaLayerCharts.regionsMeasure",MetaLayerCharts.regionsMeasure);
 		}
 		else
 		{
 			MetaLayerCharts.selectedRegionMeasure = "[Region].[All Regions].["+ value + "]";
-			Dashboards.fireChange("MetaLayerCharts.selectedRegionMeasure",MetaLayerCharts.selectedRegionMeasure);
+      this.dashboard.fireChange("MetaLayerCharts.selectedRegionMeasure",MetaLayerCharts.selectedRegionMeasure);
 		}
 	},
 	
 	barChartClicked:function(value){
 	
 		MetaLayerCharts.departmentMeasure = "[Department].[All Departments].[" + value + "]";
-		Dashboards.fireChange("MetaLayerCharts.departmentMeasure",encode_prepare(MetaLayerCharts.departmentMeasure));
+    this.dashboard.fireChange("MetaLayerCharts.departmentMeasure",encode_prepare(MetaLayerCharts.departmentMeasure));
 	},
 
 	pieChartDefinition : {

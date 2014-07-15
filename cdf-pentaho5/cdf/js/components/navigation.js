@@ -12,22 +12,22 @@
 */
 
 var NavigatorBaseComponent = BaseComponent.extend({},{
-  path : Dashboards.getQueryParameter("path"),
-  solution : Dashboards.getQueryParameter("solution"),
+  path: Dashboards.getQueryParameter("path"),
+  solution: Dashboards.getQueryParameter("solution"),
   template: Dashboards.getQueryParameter("template"),
   navigatorResponse : -1,
   getSolutionJSON : function(solution) {
     var json = NavigatorBaseComponent.navigatorResponse;
     var files = json.solution.folders;
     var locationArray;
-	
+
     var found = 0;
     for(i = 0; i<files.length; i++){
       var file = files[i];
       if(NavigatorBaseComponent.solution == "" || file.solution == NavigatorBaseComponent.solution){
-				
+
         var solutionFiles = [];
-				
+
         // Process subFolders;
         var subFolders = file.folders;
         if(subFolders != undefined && subFolders.length == undefined){
@@ -38,7 +38,7 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
           // We have an array of files
           solutionFiles = solutionFiles.concat(subFolders);
         }
-				
+
         // Process subFiles;
         var subFiles = file.files;
         if(subFiles != undefined && subFiles.length == undefined){
@@ -52,7 +52,7 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
 
         return solutionFiles;
       }
-	
+
     }
     if (found == 0){
       Dashboards.error("Fatal: Solution " + solution +" not found in navigation object");
@@ -67,13 +67,13 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       if(file.type == "FOLDER" && file.path == currentPath){
         files = file.folders;
         /*
-				 console.log("Files found for this path:");
-				 for (var j = 0; j < files.length; j++) {
-				 if (files[j].path != undefined) {
-				 console.log(files[j].path);
-			 }
-		 }
-		 */
+         console.log("Files found for this path:");
+          for (var j = 0; j < files.length; j++) {
+            if (files[j].path != undefined) {
+              console.log(files[j].path);
+            }
+          }
+        */
         if (files == undefined){
           return [];
         }
@@ -84,18 +84,18 @@ var NavigatorBaseComponent = BaseComponent.extend({},{
       }
 
     }
-    Dashboards.error("Fatal: path " + (NavigatorBaseComponent.path || Dashboards.getPathParameter()) +" not found in navigation object");
+    Dashboards.error("Fatal: path " + (NavigatorBaseComponent.path || this.dashboard.getPathParameter()) + " not found in navigation object");
     return;
   },
   getParentSolution : function(){
-    if ( (NavigatorBaseComponent.path || Dashboards.getPathParameter()).length>0){
+    if ( (NavigatorBaseComponent.path || this.dashboard.getPathParameter()).length>0){
       return NavigatorBaseComponent.solution;
     } else {
       return "";
     }
   },
   getParentPath : function(){
-    var path = NavigatorBaseComponent.path || Dashboards.getPathParameter();
+    var path = NavigatorBaseComponent.path || this.dashboard.getPathParameter();
     var index = path.lastIndexOf("/");
     if (index==-1){
       return "";
@@ -126,15 +126,15 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
   },
   processNavigatorResponse : function(json) {
     NavigatorBaseComponent.navigatorResponse = json;
-	
+
     var files = this.includeSolutions?json.solution.folders[0].folders:NavigatorBaseComponent.getSolutionJSON(NavigatorBaseComponent.solution);
-		
+
     files.sort(function(a,b){
       return a.name>b.name
     });
     var ret = this.generateMenuFromArray(files, 0);
     $("#"+this.htmlObject).html(ret);
-	
+
     $(function(){
       $('ul.jd_menu').jdMenu({
         activateDelay: 50,
@@ -162,8 +162,8 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 
       s += this.generateMenuFromFile(file, depth + 1);
     }
-		
-		
+
+
     if (s.length > 0){
 
       var className;
@@ -172,9 +172,9 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
         var cls=(this.mode == 'vertical')?"jd_menu jd_menu_slate jd_menu_vertical":"jd_menu jd_menu_slate";
         className = "class=\""+cls+"\"";
       }
-		
+
       s = "<ul " + className + ">"+ s + "</ul>";
-				
+
     }
 
     return s;
@@ -190,7 +190,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
       if(file.path.length>0){
         _path="path="+file.path;
       }
-			
+
       var _template = NavigatorBaseComponent.template != undefined && NavigatorBaseComponent.template.length != undefined && 
           NavigatorBaseComponent.template.length > 0 ? "&amp;template=" + NavigatorBaseComponent.template : "";
       if (file.link != undefined){
@@ -205,21 +205,21 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
       files.sort(function(a,b){
         return a.name>b.name
       });
-			
+
       var childFiles = file.files || [];
       childFiles.sort(function(a,b){
         return a.name>b.name
       });
-			
+
       var inner = this.generateMenuFromArray(files.concat(childFiles));
-			
+
       if (inner.length > 0 ){
         inner = " &raquo;" + inner;
       }
 
       s += inner+"</li>";
-			
-			
+
+
     }
     return s;
   }
@@ -228,7 +228,7 @@ var NavigatorComponent = NavigatorBaseComponent.extend({
 var ContentListComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
-    var path = this.mode != 4  ? (NavigatorBaseComponent.path || Dashboards.getPathParameter()) : NavigatorBaseComponent.getParentPath();
+    var path = this.mode != 4  ? (NavigatorBaseComponent.path || this.dashboard.getPathParameter()) : NavigatorBaseComponent.getParentPath();
     myself.draw(path);
   },
   draw: function(path){
@@ -253,7 +253,7 @@ var ContentListComponent = NavigatorBaseComponent.extend({
     var container = $("<ul></ul>").attr("id","contentList-"+this.name).appendTo("#"+this.htmlObject);
 
     // We need to append the parent dir
-    if( this.mode != 1 && this.mode != 4 && (NavigatorBaseComponent.path || Dashboards.getPathParameter())){
+    if( this.mode != 1 && this.mode != 4 && (NavigatorBaseComponent.path || this.dashboard.getPathParameter())){
       var parentDir =  {
         name: "Up",
         title:"Up",
@@ -339,7 +339,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   update : function() {
     var myself = this;
     if( NavigatorBaseComponent.navigatorResponse == -1 ){
-	  $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || Dashboards.getPathParameter()), function(json){
+      $.getJSON(wd.cdf.endpoints.getJSONSolution() + "?mode=contentlist&path=" + (NavigatorBaseComponent.path || this.dashboard.getPathParameter()), function(json){
         myself.processPageTitleResponse(json);
       });
     }
@@ -350,7 +350,7 @@ var PageTitleComponent = NavigatorBaseComponent.extend({
   processPageTitleResponse : function(json) {
     // Store the value
     NavigatorBaseComponent.navigatorResponse = json;
-	
+
     var file = this.findPageTitleObject(json.content,json.id);
 
     if (file.title != undefined && file.description != undefined){

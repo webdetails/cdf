@@ -21,16 +21,15 @@ var SimpleAutoCompleteComponent = BaseComponent.extend({
       if(this.ph == undefined) {
       this.ph = $("#" + this.htmlObject).empty();
       this.input = $("<input type='text'>").appendTo(this.ph);
-      this.query = Dashboards.getQuery(this.queryDefinition);
-      var myself = this;
+      this.query = this.dashboard.getQuery(this.queryDefinition);
       this.input.autocomplete({
         source:function(obj,callback){return myself.triggerQuery(obj.term,callback);}
       });
       this.input.change(function(){
-        Dashboards.processChange(myself.name);
+        myself.dashboard.processChange(myself.name);
       }).keyup(function(event){
         if (event.keyCode == 13) {
-          Dashboards.processChange(myself.name);
+          myself.dashboard.processChange(myself.name);
         }
       });
 }

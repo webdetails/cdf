@@ -243,7 +243,7 @@ var TableComponent = UnmanagedComponent.extend({
     // it'll be called before we have an actual table...
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
-    this.queryState = Dashboards.getQuery(croppedCd);
+    this.queryState = this.dashboard.getQuery(croppedCd);
     this.query = this.queryState; // for analogy with ccc component's name
     // make sure to clean sort options
     var sortBy = this.chartDefinition.sortBy || [],
@@ -543,7 +543,7 @@ var TableComponent = UnmanagedComponent.extend({
         //Read parameters and fire changes
         var results = myself.queryState.lastResults();
         $(myself.expandParameters).each(function f(i, elt) {
-          Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);              
+          myself.dashboard.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
         });
 
       };

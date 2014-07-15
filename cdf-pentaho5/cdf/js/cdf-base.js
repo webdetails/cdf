@@ -57,8 +57,10 @@ wd.cdf.helper = {
 
 wd.cdf.endpoints = {
 
+  webAppPath: undefined,
+
   // Dashboards.Startup.js determines webAppPath
-  getWebapp: function () { return webAppPath; },
+  getWebapp: function () { return this.webAppPath; },
 
   getPing: function () { return wd.cdf.endpoints.getCdfBase() + "/ping"; },
 

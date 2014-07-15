@@ -112,11 +112,11 @@ BaseComponent = Base.extend(Backbone.Events).extend({
   },
   getAddIn: function (slot,addIn) {
     var type = typeof this.type == "function" ? this.type() : this.type;
-    return Dashboards.getAddIn(type,slot,addIn);
+    return this.dashboard.getAddIn(type,slot,addIn);
   },
   hasAddIn: function (slot,addIn) {
     var type = typeof this.type == "function" ? this.type() : this.type;
-    return Dashboards.hasAddIn(type,slot,addIn);
+    return this.dashboard.hasAddIn(type,slot,addIn);
   },
   getValuesArray : function() {
 
@@ -156,7 +156,7 @@ BaseComponent = Base.extend(Backbone.Events).extend({
         var p = new Array(this.parameters?this.parameters.length:0);
         for(var i= 0, len = p.length; i < len; i++){
           var key = this.parameters[i][0];
-          var value = this.parameters[i][1] == "" || this.parameters[i][1] == "NIL" ? this.parameters[i][2] : Dashboards.getParameterValue(this.parameters[i][1]);
+          var value = this.parameters[i][1] == "" || this.parameters[i][1] == "NIL" ? this.parameters[i][2] : this.dashboard.getParameterValue(this.parameters[i][1]);
           p[i] = [key,value];
         }
 
@@ -167,9 +167,9 @@ BaseComponent = Base.extend(Backbone.Events).extend({
           $.each(p,function(i,val){
             arr[val[0]]=val[1];
           });
-          jXML = Dashboards.parseXActionResult(myself, Dashboards.urlAction(this.url, arr));
+          jXML = this.dashboard.parseXActionResult(myself, this.dashboard.urlAction(this.url, arr));
         } else {
-          jXML = Dashboards.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
+          jXML = this.dashboard.callPentahoAction(myself, this.solution, this.path, this.action, p,null);
         }
         //transform the result int a javascript array
         var myArray = this.parseArray(jXML, false);
@@ -243,7 +243,7 @@ BaseComponent = Base.extend(Backbone.Events).extend({
 
   setAddInDefaults: function(slot,addIn,defaults) {
     var type = typeof this.type == "function" ? this.type() : this.type;
-    Dashboards.setAddInDefaults(type,slot,addIn,defaults)
+    this.dashboard.setAddInDefaults(type,slot,addIn,defaults)
   },
   setAddInOptions: function(slot, addIn,options) {
     if(!this.addInOptions) {
@@ -295,15 +295,14 @@ BaseComponent = Base.extend(Backbone.Events).extend({
   },
 
   getTimerInfo: function(){
-
-      return {
-        timerStart: this.timerStart,
-        timerSplit: this.timerSplit,
-        elapsedSinceStart: this.elapsedSinceStart,
-        elapsedSinceStartDesc: this.formatTimeDisplay(this.elapsedSinceStart),
-        elapsedSinceSplit: this.elapsedSinceSplit,
-        elapsedSinceSplitDesc: this.formatTimeDisplay(this.elapsedSinceSplit)
-      }
+    return {
+      timerStart: this.timerStart,
+      timerSplit: this.timerSplit,
+      elapsedSinceStart: this.elapsedSinceStart,
+      elapsedSinceStartDesc: this.formatTimeDisplay(this.elapsedSinceStart),
+      elapsedSinceSplit: this.elapsedSinceSplit,
+      elapsedSinceSplitDesc: this.formatTimeDisplay(this.elapsedSinceSplit)
+    }
 
   },
 
@@ -339,14 +338,13 @@ BaseComponent = Base.extend(Backbone.Events).extend({
       var saturationSeed = hash.substr(hash.length-2,2) || 0;
       var valueSeed = hash.substr(hash.length-4,2) || 0;
 
-      this.logColor = Dashboards.hsvToRgb(360/100*hueSeed, 75/100*saturationSeed, 45 + (80-45)/100*valueSeed);
+      this.logColor = this.dashboard.hsvToRgb(360/100*hueSeed, 75/100*saturationSeed, 45 + (80-45)/100*valueSeed);
       return this.logColor;
 
     }
 
 
   }
-
 });
 
 
@@ -367,50 +365,49 @@ var CommentsComponent = BaseComponent.extend({
     var myself = {};
 
     myself.defaults = {
-            dataTemplates: {
+      dataTemplates: {
+        comments:         '<div class="commentsDetails">'+
+                          ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
+                          '</div>'+
+                          '<div class="commentsBody">'+
+                          ' <div class="comment">'+
+                          '   {{{comment}}}'+
+                          ' </div>'+
+                          ' {{#user}}'+
+                          ' <div class="operation">'+
+                          ' {{#permissions.deletePermission}}'+
+                          '   <div class="delete">X</div>' +
+                          ' {{/permissions.deletePermission}}'+
+                          ' {{#permissions.archive}}'+
+                          '  <div class="archive">X</div>' +
+                          ' {{/permissions.archive}}'+
+                          ' </div>'+
+                          ' {{/user}}'+
+                          '</div>'
+                          ,
 
-              comments:         '<div class="commentsDetails">'+
-                                ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
-                                '</div>'+
-                                '<div class="commentsBody">'+
-                                ' <div class="comment">'+
-                                '   {{{comment}}}'+
-                                ' </div>'+
-                                ' {{#user}}'+
-                                ' <div class="operation">'+
-                                ' {{#permissions.deletePermission}}'+
-                                '   <div class="delete">X</div>' +
-                                ' {{/permissions.deletePermission}}'+
-                                ' {{#permissions.archive}}'+
-                                '  <div class="archive">X</div>' +
-                                ' {{/permissions.archive}}'+
-                                ' </div>'+
-                                ' {{/user}}'+
-                                '</div>'
-                                ,
+        addComments:      '<div class="commentsAdd">'+
+                          '{{#add}}'+
+                          ' <div class="addComment">Add Comment</div>'+
+                          ' <div class="addCommentWrapper">'+
+                          '   <textarea class=addCommentText></textarea>'+
+                          '   <div class="commentsButtons">'+
+                          '   <div class="saveComment">Save</div>'+
+                          '   <div class="cancelComment">Cancel</div>'+
+                          '   </div>'+
+                          ' </div>'+
+                          '{{/add}}'+
+                          '</div>'
+                          ,
 
-              addComments:      '<div class="commentsAdd">'+
-                                '{{#add}}'+
-                                ' <div class="addComment">Add Comment</div>'+
-                                ' <div class="addCommentWrapper">'+
-                                '   <textarea class=addCommentText></textarea>'+
-                                '   <div class="commentsButtons">'+
-                                '   <div class="saveComment">Save</div>'+
-                                '   <div class="cancelComment">Cancel</div>'+
-                                '   </div>'+
-                                ' </div>'+
-                                '{{/add}}'+
-                                '</div>'
-                                ,
-
-              paginateComments: '<div class="paginate commentPaginate"> '+
-                                '{{#active}}'+
-                                ' <div class="navigateRefresh"> Refresh </div>'+
-                                ' <div class="navigatePrevious"> Newest Comments </div>'+
-                                ' <div class="navigateNext"> Oldest Comments </div>'+
-                                '{{/active}}'+
-                                '</div>'
-            }
+        paginateComments: '<div class="paginate commentPaginate"> '+
+                          '{{#active}}'+
+                          ' <div class="navigateRefresh"> Refresh </div>'+
+                          ' <div class="navigatePrevious"> Newest Comments </div>'+
+                          ' <div class="navigateNext"> Oldest Comments </div>'+
+                          '{{/active}}'+
+                          '</div>'
+      }
 
     };
 
@@ -487,20 +484,20 @@ var CommentsComponent = BaseComponent.extend({
           collection.reset(this.resetCollection(json.result));
           if ((paginate.activePageNumber == 0) && ((json) && (typeof json.result != 'undefined')) && (json.result.length == 0)) {
             json.result = [{
-                id: 0,
-                comment: 'No Comments to show!',
-                createdOn: '',
-                elapsedMinutes: '',
-                isArchived: false,
-                isDeleted: false,
-                isMe: true,
-                page: '',
-                user: '',
-                permissions: {
-                  add: false,
-                  archive: false,
-                  remove: false
-                }
+              id: 0,
+              comment: 'No Comments to show!',
+              createdOn: '',
+              elapsedMinutes: '',
+              isArchived: false,
+              isDeleted: false,
+              isMe: true,
+              page: '',
+              user: '',
+              permissions: {
+                add: false,
+                archive: false,
+                remove: false
+              }
             }];
             if ((collection) && (typeof collection != 'undefined')) {
               collection.reset(this.resetCollection(json.result));
@@ -515,16 +512,16 @@ var CommentsComponent = BaseComponent.extend({
 
     myself.CommentModel = Backbone.Model.extend({
         defaults: {
-            id: 0,
-            comment: 'Guest User',
-            createdOn: '',
-            elapsedMinutes: '',
-            isArchived: false,
-            isDeleted: false,
-            isMe: true,
-            page: 'comments',
-            user: 'comments',
-            permissions: {}
+          id: 0,
+          comment: 'Guest User',
+          createdOn: '',
+          elapsedMinutes: '',
+          isArchived: false,
+          isDeleted: false,
+          isMe: true,
+          page: 'comments',
+          user: 'comments',
+          permissions: {}
         },
 
         initialize: function(){
@@ -811,7 +808,7 @@ var QueryComponent = BaseComponent.extend({
     QueryComponent.makeQuery(this);
   },
   warnOnce: function() {
-  Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
+    Dashboards.log("Warning: QueryComponent behaviour is due to change. See " +
     "http://http://www.webdetails.org/redmine/projects/cdf/wiki/QueryComponent" +
     " for more information");
     delete(this.warnOnce);
@@ -823,7 +820,7 @@ var QueryComponent = BaseComponent.extend({
     if (this.warnOnce) {this.warnOnce();}
     var cd = object.queryDefinition;
     if (cd == undefined){
-     Dashboards.log("Fatal - No query definition passed","error");
+      Dashboards.log("Fatal - No query definition passed","error");
       return;
     }
     var query = Dashboards.getQuery( cd );
@@ -849,7 +846,7 @@ var QueryComponent = BaseComponent.extend({
       }
 
       if (object.resultvar != undefined){
-        Dashboards.setParameter(object.resultvar, object.result);
+        object.dashboard.setParameter(object.resultvar, object.result);
       }
       object.result = values.resultset != undefined ? values.resultset: values;
       if (typeof values.resultset != "undefined"){
@@ -910,7 +907,7 @@ var UnmanagedComponent = BaseComponent.extend({
         ret = typeof ret == "undefined" || ret;
       } catch(e){
         this.error( Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
-        this.dashboard.log(e,"error");
+        Dashboards.log(e,"error");
         ret = false;
       }
     } else {
@@ -978,7 +975,7 @@ var UnmanagedComponent = BaseComponent.extend({
         this.showTooltip();
       } catch(e){
         this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e );
-        this.dashboard.log(e,"error");
+        Dashboards.log(e,"error");
       } finally {
         if(!silent) {
           this.unblock();
@@ -1022,7 +1019,7 @@ var UnmanagedComponent = BaseComponent.extend({
     var handler = this.getSuccessHandler(success, always),
         errorHandler = this.getErrorHandler();
 
-    var query = this.queryState = this.query = Dashboards.getQuery( queryDef);
+    var query = this.queryState = this.query = this.dashboard.getQuery( queryDef);
     var ajaxOptions = {
       async: true
     }
@@ -1148,7 +1145,7 @@ var UnmanagedComponent = BaseComponent.extend({
             success(data);
           } catch(e) {
             this.error(Dashboards.getErrorObj('COMPONENT_ERROR').msg, e);
-            this.dashboard.log(e,"error");
+            Dashboards.log(e,"error");
           }
         }
         if(typeof always == "function") {
@@ -1160,7 +1157,7 @@ var UnmanagedComponent = BaseComponent.extend({
 
   getErrorHandler: function() {
     return  _.bind(function() {
-      var err = Dashboards.parseServerError.apply(this, arguments );
+      var err = this.dashboard.parseServerError.apply(this, arguments );
       this.error( err.msg, err.error );
     },
     this);
@@ -1169,7 +1166,7 @@ var UnmanagedComponent = BaseComponent.extend({
     ph = ph || (this.htmlObject ? this.placeholder() : undefined);
     var name = this.name.replace('render_', '');
     err.msg = err.msg + ' (' + name + ')';
-    Dashboards.errorNotification( err, ph );
+    this.dashboard.errorNotification( err, ph );
   },
 
   /*
@@ -1236,7 +1233,7 @@ var ActionComponent = UnmanagedComponent.extend({
        Each descendant is expected to override this.render()
 
        Notes:
-       - in this.actionParameters, static values should be quoted, in order to survive the "eval" in Dashboards.getParameterValue
+       - in this.actionParameters, static values should be quoted, in order to survive the "eval" in this.dashboard.getParameterValue
 
     */
   },
@@ -1259,11 +1256,11 @@ var ActionComponent = UnmanagedComponent.extend({
        Calls the endpoint, passing any parameters.
        This method is typically bound to the "click" event of the component.
     */
-    var params = Dashboards.propertiesArrayToObject( this.actionParameters ),
+    var params = this.dashboard.propertiesArrayToObject( this.actionParameters ),
         failureCallback =  (this.failureCallback) ?  _.bind(this.failureCallback, this) : function (){},
         successCallback = this.successCallback ?  _.bind(this.successCallback, this) : function (){};
 
-    return Dashboards.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
+    return this.dashboard.getQuery(this.actionDefinition).fetchData(params, successCallback, failureCallback);
   },
 
   hasAction: function(){
@@ -1273,10 +1270,10 @@ var ActionComponent = UnmanagedComponent.extend({
     if ( ! this.actionDefinition ){
       return false;
     }
-    if (Dashboards.detectQueryType){
-      return !! Dashboards.detectQueryType(this.actionDefinition);
+    if (this.dashboard.detectQueryType){
+      return !! this.dashboard.detectQueryType(this.actionDefinition);
     } else {
-      return !! this.actionDefinition.queryType && Dashboards.hasQuery(this.actionDefinition.queryType);
+      return !! this.actionDefinition.queryType && this.dashboard.hasQuery(this.actionDefinition.queryType);
     }
   }
 });
