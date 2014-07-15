@@ -28,6 +28,7 @@ import org.pentaho.cdf.environment.CdfEngine;
 import org.pentaho.cdf.util.Parameter;
 import org.pentaho.platform.web.servlet.ServletBase;
 
+import pt.webdetails.cpf.MimeTypeHandler;
 import pt.webdetails.cpf.repository.api.IReadAccess;
 import pt.webdetails.cpf.utils.MimeTypes;
 import pt.webdetails.cpf.utils.PluginIOUtils;
@@ -69,7 +70,7 @@ public class GetCDFResource extends ServletBase {
     }
 
     InputStream in = systemAccess.getFileInputStream( resource );
-    String mimeType = MimeTypes.getMimeType( resource );
+    String mimeType = MimeTypeHandler.getMimeTypeFromFileName( resource );
 
     if ( StringUtils.isEmpty( mimeType ) ) {
       // Hard coded to PNG because BIRT does not give us a mime type at all...
