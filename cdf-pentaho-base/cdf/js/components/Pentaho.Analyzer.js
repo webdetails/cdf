@@ -19,44 +19,116 @@
  */
 
  var AnalyzerComponent = BaseComponent.extend({
-   update: function() {
-     this.clear();
-     var options = this.getOptions();
-     var url = wd.cdf.endpoints.getAnalyzer();
-     var myself = this;
-     // enable editing the view?
-     this.viewOnly ? url += 'viewer' : url += 'editor';
-     var height = this.height ? this.height : "480px";
-     var width = this.width ? this.width : "100%";
-     var iFrameHTML = this.generateIframe(this.htmlObject, url, options, height, width);
-     $("#" + this.htmlObject).html(iFrameHTML);
-   },
-   getOptions: function() {
-     var options = {
-       solution: this.solution,
-       path: this.path,
-       action: this.action,
-       command: this.command == undefined ? "open" : this.command,
-       showFieldList: this.showFieldList == undefined ? false : this.showFieldList,
-       showRepositoryButtons: this.showRepositoryButtons == undefined ? false : this.showRepositoryButtons,
-       frameless: this.frameless
-     };
+    update: function() {
+        this.clear();
+        var options = this.getOptions();
 
-     var myself = this;
-     // process params and update options
-     $.map(this.parameters, function (k) {
-       options[k[0]] = k.length == 3 ? k[2] : myself.dashboard.getParameterValue(k[1]);
-     });
-     return options;
-   },
-   generateIframe: function(htmlObject, url, parameters, height, width) {
-     var iFrameHTML = '<iframe id="iframe_' + htmlObject + '"' +
-                      ' frameborder="0"' +
-                      ' height="' + height + '"' +
-                      ' width="' + width + '"' +
-                      ' src="' + url + "?";
-     iFrameHTML += $.param(parameters, true);
-     iFrameHTML += "\"></iframe>";
-     return iFrameHTML;
+        var pathSegments = {
+            solution: options.solution,
+            path: options.path,
+            action: options.action
+        };
+        delete options.solution;
+        delete options.path;
+        delete options.action;
+
+        var callVar = this.isEditMode() ? "editor" : "viewer";
+
+        $.extend( options, { ts: new Date().getTime() } );
+        var url = wd.cdf.endpoints.getAnalyzer( pathSegments, callVar, options );
+
+        var iframe = this.generateIframe( url );
+        $( "#" + this.htmlObject ).html( iframe );
+
+    },
+
+    getOptions: function() {
+        var options = {
+            solution: this.solution,
+            path: this.path,
+            action: this.action,
+            command: this.command == undefined ? "open" : this.command,
+            showFieldList: this.showFieldList == undefined ? false : this.showFieldList,
+            showRepositoryButtons: this.showRepositoryButtons == undefined ? false : this.showRepositoryButtons,
+            frameless: this.frameless == undefined ? false : this.frameless
+        };
+        // process params and update options
+        $.map(this.parameters, function(k) {
+            options[k[0]] = k.length == 3 ? k[2] : Dashboards.getParameterValue(k[1]);
+        });
+        return options;
+    },
+
+    isEditMode: function() {
+        if ( this.viewOnly != undefined ) {
+            return !this.viewOnly || this.editMode;
+        } else {
+            return this.editMode;
+        }
+    },
+    
+    generateIframe: function(url) {
+        var height = this.height ? this.height : "480px";
+        var width = this.width ? this.width : "100%";
+
+        var iFrameHTML = "<iframe id ='iframe_" + this.htmlObject + "' "
+                + "style='height:100%;width:100%;border:0px' "
+                + "frameborder='0' src='" + url + "'/>"
+
+        return iFrameHTML;
     }
+
 });//AnalyzerComponent
+
+var ExecuteAnalyzerComponent = AnalyzerComponent.extend({
+    
+    update: function() {
+        // 2 modes of working; if it's a div, create a button inside it
+        var myself = this;
+        var o = $("#" + this.htmlObject);
+        if ($.inArray(o[0].tagName.toUpperCase(), ["SPAN", "DIV"]) > -1) {
+            // create a button
+            o = $("<button/>").appendTo(o.empty());
+            if (o[0].tagName == "DIV"){
+                o.wrap("<span/>");
+            }
+            if (this.label != undefined){
+                o.text(this.label);
+            }
+            o.button();
+        }
+        o.unbind("click"); // Needed to avoid multiple binds due to multiple updates(ex:component with listeners)
+        o.bind("click", function() {
+            var success = typeof (myself.preChange) == 'undefined' ? true : myself.preChange();
+            if (success) {
+                myself.executeAnalyzerComponent();
+            }
+            typeof (myself.postChange) == 'undefined' ? true : myself.postChange();
+        });
+    },
+    executeAnalyzerComponent: function() {
+        var callVar = this.isEditMode() ? "editor" : "viewer";
+        var parameters = this.getOptions();
+        var path = {};
+        if ( parameters.solution ) {
+            $.extend( path, {solution: parameters.solution});
+        }
+        if ( parameters.path ) {
+            $.extend( path, {path: parameters.path});
+        }
+        if ( parameters.action ) {
+            $.extend( path, {action: parameters.action});
+        }
+        delete parameters.solution;
+        delete parameters.path;
+        delete parameters.action;
+        $.extend( parameters, {ts: new Date().getTime()});
+
+        $.fancybox({
+            type: "iframe",
+            href: wd.cdf.endpoints.getAnalyzer( path, callVar, parameters ),
+            width: $(window).width(),
+            height: $(window).height() - 50
+        });
+    }
+});//ExecuteAnalyzerComponent

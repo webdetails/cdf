@@ -1,0 +1,130 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>AnalyzerComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		This is a component that can execute the new Pentaho Analyzer Reports. The result is displayed in the PUC Analysis Report Viewer, including the show
+		field list and show repository features. For better use in CDF, show field list and show repository in the analysis report viewer can be turned on or off.
+
+			<p>
+      			<b>Note:</b> To use this component, Pentaho Enterprise Edition is required.
+  			</p>
+
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>analyzerComponent</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+			
+			<dt>parameters</dt>
+			<dd><i>Array of Arrays - </i> Parameters to pass to the analyser report</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed. The component will be executed only if the result of preChange equals true.</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+			
+			<dt>solution</dt>
+			<dd>Solution where the Pentaho Analizer Report file is</dd>
+
+			<dt>path</dt>
+			<dd>Path where the Pentaho Analyzer Report file is</dd>
+
+			<dt>action</dt>
+			<dd>Pentaho Analyzer Report file name (unified file format *.xanalyzer)</dd>
+			
+			<dt>showRepositoryButtons</dt> 
+			<dd>Pentaho Analyzer showRepositoryButtons option. Default: true</dd>
+
+			<dt>showFieldList</dt> 
+			<dd>Pentaho Analyzer showFieldList option. Default: true</dd>
+
+			<dt>editMode</dt>
+			<dd>Pentaho Analyzer editMode option. Default: true</dd>
+			
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+				<div id="selectorObject"></div>
+				<div id="sampleObject" style="height:530px"></div>
+				<br/>
+			</div>
+
+
+			<div id="code">
+				<textarea cols="80" rows="20" id="samplecode">
+
+
+territorySalesAnalysis = 
+{
+  name: "territorySales",
+  type: "analyzer",
+  solution: "public",
+  path: "Steel Wheels/Widget Library/Analysis Views",
+  action: "Territory Sales.xanalyzer",
+  listeners:[],
+  parameters: [],
+  htmlObject: "sampleObject",
+  editMode: true,
+  showRepositoryButtons: false,
+  showFieldList: false,
+  executeAtStart: true
+}
+				
+
+Dashboards.init([territorySalesAnalysis]);
+Dashboards.finishedInit = false;
+
+
+				</textarea>
+				<br />
+				<button onclick="evaluateCode(true)">Try me</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script language="javascript" type="text/javascript">
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+</script>
