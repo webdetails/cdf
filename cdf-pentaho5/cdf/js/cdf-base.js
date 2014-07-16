@@ -141,7 +141,8 @@ wd.cdf.endpoints = {
   getEmailConfig: function() { return wd.cdf.endpoints.getWebapp() + "/api/emailconfig"; },
 
   getPivot: function ( solution, path, action ) { 
-    return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/Pivot", null, { solution: (solution || "system"), path:Encoder.encodeRepositoryPath( path ), action: action } );
+    var fullPath = path.indexOf( CDF_PLUGIN_NAME ) == 0 ? ( SAMPLES_BASE_PATH + path ) : path;
+    return Encoder.encode( wd.cdf.endpoints.getWebapp() + "/plugin/jpivot/Pivot", null, { solution: (solution || "system"), path: fullPath, action: action } );
   },
 
   getAnalyzer: function( path, callvar, parameters ) {
