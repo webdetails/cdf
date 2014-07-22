@@ -99,6 +99,16 @@ describe("The CDF framework #", function() {
    * Test Parameter setting and syncing *
    **************************************/
   /**
+   * ## The CDF framework # Adds parameters
+   */
+  it("Adds parameters", function() {
+    myDashboard.addParameter("parentParam",1);
+    expect(myDashboard.getParameterValue("parentParam")).toEqual(1);
+
+    myDashboard.addParameter("parentParam",2);
+    expect(myDashboard.getParameterValue("parentParam")).toEqual(1);
+  });
+  /**
    * ## The CDF framework # Sets parameters
    */
   it("Sets parameters", function() {

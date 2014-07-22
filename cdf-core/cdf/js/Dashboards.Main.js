@@ -1078,6 +1078,34 @@ Dashboards.getUnboundParameters = function(){
   }
 };
 
+/**
+ * Verifies if a parameter is available in the Parameter Model
+ *
+ * @param name of the parameter
+ * @returns boolean
+ * @private
+ */
+Dashboards._isParameterInModel = function(name){
+  return Dashboards.parameterModel.attributes.hasOwnProperty(name);
+};
+
+/**
+ * Adds a parameter new parameter to the parameter module.
+ * Receives a parameter name and an initial value, that will be used if the parameter is
+ * not available in the parameter model. Otherwise, the getParameterValue return is used
+ *
+ * @param name the name of the parameter
+ * @param initValue the initial value of the parameter
+ * @returns the value assigned to the parameter
+ */
+Dashboards.addParameter = function(name, initValue){
+  if(Dashboards._isParameterInModel(name)){
+    initValue = Dashboards.getParameterValue(name);
+  }
+  Dashboards.setParameter(name,initValue);
+  return initValue;
+};
+
 Dashboards.getParameterValue = dash.getParam = function (parameterName) {
   if (this.globalContext) {
     try{
