@@ -234,51 +234,87 @@ var OpenFlashChartComponent = JFreeChartComponent.extend({
 
 });
 
-var TrafficComponent = BaseComponent.extend({
+var TrafficComponent = UnmanagedComponent.extend({
+  trafficLight: function(result, xaction){
+    var cd = this.trafficDefinition;
+    var value; 
+    if (xaction) {
+      value = $(result).find("VALUE").text();
+    } else {
+      value = result[0][0];
+    }
+    var greenClass = "img trafficGreen", yellowClass = "img trafficYellow", redClass = "img trafficRed";
+    var i = $( "<div>" ).attr( "class",value<=cd.intervals[0]? redClass : ( value>=cd.intervals[1] ? greenClass : yellowClass ) );
+    var $htmlObject = $('#'+this.htmlObject);
+    $htmlObject.html(i);
+    if(cd.showValue != undefined && cd.showValue == true){
+      var tooltip = "Value: " + value + " <br /><div align='middle' class='" + redClass + "'/> &le; "  + cd.intervals[0] + " &lt;  <div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; <div align='middle' class='" + greenClass + "'/> <br/>" + (tooltip != undefined?tooltip:"");
+     var tooltipOpts = {};
+     if ($htmlObject.tooltip.Constructor) { //hack to know if we should use bootstrap's tooltip or jquery's
+      tooltipOpts = {
+        delay: 0,
+        html: true,
+        title: tooltip,
+        placement: "auto top"
+      }
+     } else {
+      tooltipOpts = {
+        delay:0,
+        track: true,
+        fade: 250
+      }
+      $htmlObject.attr("title",tooltip + ( this._tooltip != undefined? this._tooltip:""));
+     }
+      $htmlObject.tooltip(tooltipOpts);
+    }
+  },
+  doQuery : function() {
+    var cd = this.trafficDefinition;
+    if(cd.path && cd.dataAccessId){
+      var handler = _.bind(function(data){
+        var filtered;
+        if(this.valueAsId) {
+          filtered = data.resultset.map(function(e){
+            return [e[0],e[0]];
+          });
+        } else {
+          filtered = data.resultset;
+        }
+        this.trafficLight(filtered);
+        Dashboards.decrementRunningCalls();
+      },this);
+      this.triggerQuery(cd,handler);
+    } else {
+       // go through parameter array and update values
+      var parameters = [];
+      for(p in cd){
+        var key = p;
+        var value = typeof cd[p]=='function'?cd[p]():cd[p];
+        // alert("key: " + key + "; Value: " + value);
+        parameters.push([key,value]);
+      }
+      var myself = this;
+      var handler = _.bind(function() {
+        Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "traffic.xaction", parameters,
+        function(result){
+          myself.trafficLight(result, true);
+        });
+      },this);
+      this.synchronous(handler);
+    }
+  },
   update : function() {
     var cd = this.trafficDefinition;
     if (cd == undefined){
      Dashboards.log("Fatal - No trafficDefinition passed","error");
       return;
     }
-
     var intervals = cd.intervals;
     if (intervals == undefined){
       cd.intervals = [-1,1];
     }
-
-    // go through parametere array and update values
-    var parameters = [];
-    for(p in cd){
-      var key = p;
-      var value = typeof cd[p]=='function'?cd[p]():cd[p];
-      // alert("key: " + key + "; Value: " + value);
-      parameters.push([key,value]);
-    }
-
-    // increment runningCalls
-    Dashboards.incrementRunningCalls();
-
-    var myself = this;
-    // callback async mode
-    Dashboards.callPentahoAction(myself,"system", "pentaho-cdf/actions", "traffic.xaction", parameters,
-      function(result){
-        var value = $(result).find("VALUE").text();
-        var greenClass = "img trafficGreen", yellowClass = "img trafficYellow", redClass = "img trafficRed";
-        var i = $( "<div>" ).attr( "class",value<=cd.intervals[0]? redClass : ( value>=cd.intervals[1] ? greenClass : yellowClass ) );
-        $('#'+myself.htmlObject).html(i);
-
-        if(cd.showValue != undefined && cd.showValue == true){
-          var tooltip = "Value: " + value + " <br /><div align='middle' class='" + redClass + "'/> &le; "  + cd.intervals[0] + " &lt;  <div align='middle' class='" + yellowClass + "'/> &lt; " + cd.intervals[1] + " &le; <div align='middle' class='" + greenClass + "'/> <br/>" + (tooltip != undefined?tooltip:"");
-          $('#'+myself.htmlObject).attr("title",tooltip + ( myself._tooltip != undefined? myself._tooltip:"")).tooltip({
-            delay:0,
-            track: true,
-            fade: 250
-          });
-        }
-
-        Dashboards.decrementRunningCalls();
-      });
+    this.doQuery();
+    
   }
 });
 
