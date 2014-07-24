@@ -5,25 +5,21 @@ describe("The Select Component #", function() {
 
   var myDashboard = _.extend({},Dashboards);
 
-  //myDashboard.setParameterValue('selectorTestParameter',1);
-  //myDashboard.setParameterValue('multiSelectTestParameter',[1,2,3]);
+  myDashboard.addParameter('selectorTestParameter',1);
+  myDashboard.addParameter('multiSelectTestParameter',[1,2,3]);
 
   var selectComponent = window.selectComponent = {
     name: "selectComponent",
     type: "CommentsComponent",
     htmlObject: 'selectComponent',
-    parameter: {
-      "selectorTestParameter" : 1
-    }
+    parameter: "selectorTestParameter"
   };
 
   var multiSelectComponent = window.multiSelectComponent = {
     name: "multiSelectComponent",
     type: "CommentsComponent",
     htmlObject: 'multiSelectComponent',
-    parameter: {
-      "multiSelectTestParameter" : [1,2,3]
-    }
+    parameter: "multiSelectTestParameter"
   };
 
   var components = [
@@ -49,7 +45,7 @@ describe("The Select Component #", function() {
    */
   it("Holds the correct value", function() {
     var comp = myDashboard.getComponentByName("selectComponent");
-    expect(comp.parameter['selectorTestParameter']).toEqual(1);
+    expect(myDashboard.getParameterValue(comp.parameter)).toEqual(1);
   });
   /**
    * ## The Select Component # Allows overriding AJAX settings
@@ -78,9 +74,7 @@ describe("The Select Component #", function() {
       return {
         name: name,
         type: "SelectBaseComponent",
-        parameter: {
-          "selectParam": ["value"]
-        },
+        parameter: "selectParam",
         externalPlugin: externalPlugin,
         extraOptions: extraOptions,
         htmlObject: "htmlObject"
