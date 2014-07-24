@@ -75,6 +75,7 @@ if($.fn.dataTableExt != undefined){
 if(jQuery.fn.DataTable != undefined && jQuery.fn.DataTable.ext != undefined) {
   jQuery.extend(jQuery.fn.DataTable.ext.classes, {
     "sNoFooter" : "",
+
     "sPagePrevEnabled": "paginate_enabled_previous",
     "sPagePrevDisabled": "paginate_disabled_previous",
     "sPageNextEnabled": "paginate_enabled_next",
@@ -83,10 +84,12 @@ if(jQuery.fn.DataTable != undefined && jQuery.fn.DataTable.ext != undefined) {
 
   jQuery.extend(jQuery.fn.DataTable.ext.oJUIClasses, {
     "sNoFooter" : "",
+
     "sSortable" : "",
     "sSortAsc" : "",
     "sSortDesc" : "",
     "sSortColumn" : "",
+
     "sPagePrevEnabled": "fg-button ui-button ui-state-default ui-corner-left",
     "sPagePrevDisabled": "fg-button ui-button ui-state-default ui-corner-left ui-state-disabled",
     "sPageNextEnabled": "fg-button ui-button ui-state-default ui-corner-right",
@@ -107,8 +110,8 @@ if(jQuery.fn.DataTable != undefined && jQuery.fn.DataTable.ext != undefined) {
         };
 
         var sAppend = (!oSettings.bJUI) ?
-          '<a class="' + oSettings.oClasses.sPagePrevDisabled + '" tabindex="' + oSettings.iTabIndex + '" role="button">' + oLang.sPrevious + '</a>' +
-          '<a class="' + oSettings.oClasses.sPageNextDisabled + '" tabindex="' + oSettings.iTabIndex + '" role="button">' + oLang.sNext + '</a>' :
+          '<a class="' + oSettings.oClasses.sPagePrevDisabled + '" tabindex="' + oSettings.iTabIndex + '" role="button"></a>' +
+          '<a class="' + oSettings.oClasses.sPageNextDisabled + '" tabindex="' + oSettings.iTabIndex + '" role="button"></a>' :
           '<a class="' + oSettings.oClasses.sPagePrevDisabled + '" tabindex="' + oSettings.iTabIndex + '" role="button"><span class="' + oSettings.oClasses.sPageJUIPrev + '"></span></a>' +
           '<a class="' + oSettings.oClasses.sPageNextDisabled + '" tabindex="' + oSettings.iTabIndex + '" role="button"><span class="' + oSettings.oClasses.sPageJUINext + '"></span></a>';
         $(nPaging).append(sAppend);
@@ -451,7 +454,7 @@ var TableComponent = UnmanagedComponent.extend({
       dtData.aaData = json.resultset;
     }
     
-    var tableClassName = dtData.tableStyle == "bootstrap" ?  'table table-striped table-bordered form-inline table-responsive' : 'tableComponent';
+    var tableClassName = dtData.tableStyle == "bootstrap" ?  'table table-striped table-bordered form-inline table-responsive' : 'tableComponent compact';
   
     this.ph.html("<table id='" + this.htmlObject + "Table' class='" + tableClassName +"' width='100%'></table>");
 
