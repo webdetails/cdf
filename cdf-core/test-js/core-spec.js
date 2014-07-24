@@ -101,22 +101,211 @@ describe("The CDF framework #", function() {
   /**
    * ## The CDF framework # Adds parameters
    */
-  it("Adds parameters", function() {
-    myDashboard.addParameter("parentParam",1);
-    expect(myDashboard.getParameterValue("parentParam")).toEqual(1);
+  /**
+   * Auxiliary function to verify if a parameter has the expected value
+   *
+   * @param paramName
+   * @param value
+   */
+  var testSimpleParameter = function(paramName, value){
+    expect(myDashboard.getParameterValue(paramName)).toEqual(value);
+  };
+  /**
+   * Auxiliary function to verify if a parameter is a function, its return value and body are as expected
+   *
+   * @param parameterName
+   * @param func
+   * @param funcToString
+   * @param returnValue
+   */
+  var testFunctionParameter = function(parameterName, func, funcToString, returnValue) {
+    expect(myDashboard.getParameterValue(parameterName) instanceof Function).toBeTruthy();
+    expect(myDashboard.getParameterValue(parameterName)()).toBe(returnValue);
+    expect(myDashboard.getParameterValue(parameterName).toString()).toEqual(funcToString);
+  };
 
-    myDashboard.addParameter("parentParam",2);
-    expect(myDashboard.getParameterValue("parentParam")).toEqual(1);
+  it("Adds parameters", function() {
+    /**
+     * Tests the addParameter call. The second value will never be assigned because the parameter is already defined
+     *
+     * @param paramName
+     * @param firstValue
+     * @param secondValue
+     */
+    var testSimpleAddParameter = function(paramName, firstValue, secondValue){
+      myDashboard.addParameter(paramName,firstValue);
+      testSimpleParameter(paramName, firstValue);
+      myDashboard.addParameter(paramName,secondValue);
+      testSimpleParameter(paramName, firstValue);
+    };
+    /**
+     * Tests a function parameter, if its body and return value are the same
+     *
+     * @param parameterName
+     * @param func
+     * @param funcToString
+     * @param returnValue
+     */
+    var testFunctionAddParameter = function(parameterName, func, funcToString, returnValue){
+      myDashboard.addParameter(parameterName, func);
+      testFunctionParameter(parameterName, func, funcToString, returnValue);
+    };
+
+    testSimpleAddParameter("numberParam", 1, 2);
+    testSimpleAddParameter("stringParam", "test", "testtest");
+    testSimpleAddParameter("booleanParam", true, false);
+    testSimpleAddParameter("undefinedParam", undefined, "test");
+    testSimpleAddParameter("arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleAddParameter("objectParam1", {a: 1, b: 2}, {});
+
+    var func1 = function(){var v=0;return v;};
+    testFunctionAddParameter("functionParam", func1, func1.toString(), func1());
+
+    myDashboard.addParameter("objectParam2", {
+      testString: "testString",
+      testNumber: 1,
+      testBoolean: true,
+      testUndefined: undefined,
+      testNull: null,
+      testArray: [ "firstEntry", "secondEntry", "thirdEntry" ],
+      testObject: {}
+    });
+    expect(myDashboard.getParameterValue("objectParam2")).toEqual({
+      testString: "testString",
+      testNumber: 1,
+      testBoolean: true,
+      testUndefined: undefined,
+      testNull: null,
+      testArray: [ "firstEntry", "secondEntry", "thirdEntry" ],
+      testObject: {}
+    });
+    expect(myDashboard.getParameterValue("objectParam2")).not.toEqual({});
+    expect(typeof myDashboard.getParameterValue("objectParam2")).toEqual("object");
+
+    myDashboard.addParameter("functionsObjectParam", {
+      firstFunction: function(){
+        return "firstFunction";
+      },
+      secondFunction: function(){
+        return "secondFunction";
+      },
+      thirdFunction: function(){
+        return "thirdFunction";
+      }
+    });
+    expect(myDashboard.getParameterValue("functionsObjectParam").hasOwnProperty("firstFunction")).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").hasOwnProperty("secondFunction")).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").hasOwnProperty("thirdFunction")).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").firstFunction instanceof Function).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").secondFunction instanceof Function).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").thirdFunction instanceof Function).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").firstFunction()).toBe("firstFunction");
+    expect(myDashboard.getParameterValue("functionsObjectParam").secondFunction()).toBe("secondFunction");
+    expect(myDashboard.getParameterValue("functionsObjectParam").thirdFunction()).toBe("thirdFunction");
+
+    /*
+    storage params
+     */
+    testSimpleAddParameter("Dashboards.storage.numberParam", 1, 2);
+    testSimpleAddParameter("Dashboards.storage.stringParam", "test", "testtest");
+    testSimpleAddParameter("Dashboards.storage.booleanParam", true, false);
+    testSimpleAddParameter("Dashboards.storage.undefinedParam", undefined, "test");
+    testSimpleAddParameter("Dashboards.storage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleAddParameter("Dashboards.storage.objectParam1", {a: 1, b: 2}, {});
+
   });
   /**
    * ## The CDF framework # Sets parameters
    */
   it("Sets parameters", function() {
-    myDashboard.setParameter("parentParam",1);
-    expect(myDashboard.getParameterValue("parentParam")).toEqual(1);
+    /**
+     * Tests the addParameter call. The second value will never be assigned because the parameter is already defined
+     *
+     * @param paramName
+     * @param firstValue
+     * @param secondValue
+     */
+    var testSimpleSetParameter = function(paramName, firstValue, secondValue){
+      myDashboard.addParameter(paramName,firstValue);
+      testSimpleParameter(paramName, firstValue);
+      myDashboard.addParameter(paramName,secondValue);
+      testSimpleParameter(paramName, firstValue);
+    };
+    /**
+     * Tests a function parameter, if its body and return value are the same
+     *
+     * @param parameterName
+     * @param func
+     * @param funcToString
+     * @param returnValue
+     */
+    var testFunctionSetParameter = function(parameterName, func, funcToString, returnValue){
+      myDashboard.addParameter(parameterName, func);
+      testFunctionParameter(parameterName, func, funcToString, returnValue);
+    };
 
-    myDashboard.setParameter("parentParam",2);
-    expect(myDashboard.getParameterValue("parentParam")).toEqual(2);
+    testSimpleSetParameter("numberParam", 1, 2);
+    testSimpleSetParameter("stringParam", "test", "testtest");
+    testSimpleSetParameter("booleanParam", true, false);
+    testSimpleSetParameter("undefinedParam", undefined, "test");
+    testSimpleSetParameter("arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleSetParameter("objectParam1", {a: 1, b: 2}, {});
+
+    var func1 = function(){var v=0;return v;};
+    testFunctionSetParameter("functionParam", func1, func1.toString(), func1());
+
+    myDashboard.setParameter("objectParam2", {
+      testString: "testString",
+      testNumber: 1,
+      testBoolean: true,
+      testUndefined: undefined,
+      testNull: null,
+      testArray: [ "firstEntry", "secondEntry", "thirdEntry" ],
+      testObject: {}
+    });
+    expect(myDashboard.getParameterValue("objectParam2")).toEqual({
+      testString: "testString",
+      testNumber: 1,
+      testBoolean: true,
+      testUndefined: undefined,
+      testNull: null,
+      testArray: [ "firstEntry", "secondEntry", "thirdEntry" ],
+      testObject: {}
+    });
+    expect(myDashboard.getParameterValue("objectParam2")).not.toEqual({});
+    expect(typeof myDashboard.getParameterValue("objectParam2")).toEqual("object");
+
+    myDashboard.setParameter("functionsObjectParam", {
+      firstFunction: function(){
+        return "firstFunction";
+      },
+      secondFunction: function(){
+        return "secondFunction";
+      },
+      thirdFunction: function(){
+        return "thirdFunction";
+      }
+    });
+    expect(myDashboard.getParameterValue("functionsObjectParam").hasOwnProperty("firstFunction")).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").hasOwnProperty("secondFunction")).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").hasOwnProperty("thirdFunction")).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").firstFunction instanceof Function).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").secondFunction instanceof Function).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").thirdFunction instanceof Function).toBeTruthy();
+    expect(myDashboard.getParameterValue("functionsObjectParam").firstFunction()).toBe("firstFunction");
+    expect(myDashboard.getParameterValue("functionsObjectParam").secondFunction()).toBe("secondFunction");
+    expect(myDashboard.getParameterValue("functionsObjectParam").thirdFunction()).toBe("thirdFunction");
+
+    /*
+     storage params
+     */
+    testSimpleSetParameter("Dashboards.storage.numberParam", 1, 2);
+    testSimpleSetParameter("Dashboards.storage.stringParam", "test", "testtest");
+    testSimpleSetParameter("Dashboards.storage.booleanParam", true, false);
+    testSimpleSetParameter("Dashboards.storage.undefinedParam", undefined, "test");
+    testSimpleSetParameter("Dashboards.storage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleSetParameter("Dashboards.storage.objectParam1", {a: 1, b: 2}, {});
+
   });
   /**
    * ## The CDF framework # Syncs parameters
