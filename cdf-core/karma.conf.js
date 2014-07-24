@@ -37,6 +37,7 @@ module.exports = function(config) {
       'cdf/js/components/core.js',
       'cdf/js/components/input.js',
       'cdf/js/queries/coreQueries.js',
+      '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
       'test-js/lib/test-components.js',
       'test-js/main.js',
       {pattern: 'test-js/**/*-spec.js', included: false}
