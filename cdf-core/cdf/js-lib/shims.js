@@ -33,6 +33,25 @@ if(!Object.create){
 
 /* Some utility functions, backward compatibility with older browsers */
 
+
+
+
+
+/** 
+ * Utility function to add a method to a function's prototype
+ * @global
+ * @param {string} name - method name
+ * @param {function} func - function to register
+ *
+ */
+
+Function.prototype.method = Function.prototype.method || function(name, func) {
+    this.prototype[name] = func;
+    return this;
+};
+
+
+
 if ( !String.prototype.endsWith ) {
   String.prototype.endsWith = function(str){
     return (this.match(str+"$")==str);

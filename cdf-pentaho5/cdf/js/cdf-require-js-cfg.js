@@ -18,20 +18,20 @@ if(typeof CONTEXT_PATH != "undefined"){ // production
 }
 
 requireCfg['shim']['cdf/cdf-module'] = [
-	'cdf/jquery.ui',
-	'cdf/jquery-impromptu.3.1',
-	'cdf/jquery-ui-datepicker-i18n',
-	'cdf/jquery.bgiframe',
-	'cdf/jquery.blockUI',
-	'cdf/jquery.corner',
-	'cdf/jquery.eventstack',
-	'cdf/jquery.i18n.properties',
-	'cdf/jquery.jdMenu',
-	'cdf/jquery.positionBy',
-	'cdf/jquery.tooltip',
+	'cdf/lib/jquery.ui',
+	'cdf/lib/jquery-impromptu.3.1',
+	'cdf/lib/jquery-ui-datepicker-i18n',
+	'cdf/lib/jquery.bgiframe',
+	'cdf/lib/jquery.blockUI',
+	'cdf/lib/jquery.corner',
+	'cdf/lib/jquery.eventstack',
+	'cdf/lib/jquery.i18n.properties',
+	'cdf/lib/jquery.jdMenu',
+	'cdf/lib/jquery.positionBy',
+	'cdf/lib/jquery.tooltip',
 
-	'cdf/simile/ajax/scripts/json',
-	'cdf/json',
+	'cdf/lib/simile/ajax/scripts/json',
+	'cdf/lib/json',
 
 	'cdf/CoreComponents'
 ];
@@ -60,12 +60,12 @@ requireCfg['shim']['cdf/Dashboards'] = [
     'cdf/Dashboards.Utils'
 ];
 requireCfg['shim']['cdf/Dashboards.Main'] = [
-	'cdf/Base',
-    'cdf/underscore',
-    'cdf/backbone',
-    'cdf/mustache', 
+	'cdf/lib/Base',
+    'cdf/lib/underscore',
+    'cdf/lib/backbone',
+    'cdf/lib/mustache', 
     'cdf/lib/shims',
-    'cdf/jquery.blockUI',
+    'cdf/lib/jquery.blockUI',
     'cdf/Dashboards.Startup',
     'cdf/cdf-base'
 ];
@@ -73,7 +73,7 @@ requireCfg['shim']['cdf/cdf-base'] = [
     'cdf/wd'
 ];
 
-requireCfg['shim']['cdf/backbone'] = ['cdf/underscore'];
+requireCfg['shim']['cdf/lib/backbone'] = ['cdf/lib/underscore'];
 
 requireCfg['shim']['cdf/Dashboards.Startup'] 		= ['cdf/lib/shims'];
 
@@ -111,21 +111,21 @@ requireCfg['shim']['cdf/jquery'] = {
     return $;
   }
 }
-requireCfg['shim']['cdf/jquery.ui']              = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery-impromptu.3.1']   = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery-ui-datepicker-i18n'] = ['cdf/jquery.ui'];
-requireCfg['shim']['cdf/jquery.bgiframe']        = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.blockUI']         = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.corner']          = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.eventstack']      = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.i18n.properties'] = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.jdMenu']          = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.positionBy']      = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.sparkline']       = ['cdf/jquery'];
-requireCfg['shim']['cdf/jquery.tooltip']         = ['cdf/jquery'];
+requireCfg['shim']['cdf/lib/jquery.ui']              = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery-impromptu.3.1']   = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery-ui-datepicker-i18n'] = ['cdf/lib/query.ui'];
+requireCfg['shim']['cdf/lib/jquery.bgiframe']        = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.blockUI']         = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.corner']          = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.eventstack']      = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.i18n.properties'] = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.jdMenu']          = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.positionBy']      = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.sparkline']       = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.tooltip']         = ['cdf/lib/jquery'];
 
-requireCfg['shim']['cdf/simile/ajax/scripts/json'] = ['cdf/simile/ajax/simile-ajax-api'];
+requireCfg['shim']['cdf/lib/simile/ajax/scripts/json'] = ['cdf/lib/simile/ajax/simile-ajax-api'];
 
-requireCfg['shim']['cdf/json'] = ['cdf/simile/ajax/simile-ajax-api'];
+requireCfg['shim']['cdf/lib/json'] = ['cdf/lib/simile/ajax/simile-ajax-api'];
 
 
