@@ -56,10 +56,10 @@
 }
 
 /* Overriding jquery.dataTable.css table.dataTable box-sizing style*/
-table.dataTable, table.dataTable th, table.dataTable td {
-  -webkit-box-sizing: border-box !important;
-  -moz-box-sizing: border-box !important;
-  box-sizing: border-box !important;
+.dataTables_wrapper table.dataTable, .dataTables_wrapper table.dataTable th, .dataTables_wrapper table.dataTable td {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 /* Two-Button Classic Pagination */
@@ -69,7 +69,7 @@ table.dataTable, table.dataTable th, table.dataTable td {
   float: left;
   cursor: pointer;
   *cursor: hand;
-  color: #111 !important;
+  color: #111;
 }
 .paginate_disabled_previous:hover, .paginate_enabled_previous:hover,
 .paginate_disabled_next:hover, .paginate_enabled_next:hover {
@@ -82,7 +82,7 @@ table.dataTable, table.dataTable th, table.dataTable td {
 
 .paginate_disabled_previous,
 .paginate_disabled_next {
-  color: #666 !important;
+  color: #666;
 }
 .paginate_disabled_previous, .paginate_enabled_previous {
   padding-left: 23px;
