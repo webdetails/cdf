@@ -14,7 +14,7 @@
 var CDF_PLUGIN_NAME = "pentaho-cdf";
 var SAMPLES_BASE_PATH = "/public/plugin-samples/";
 
-wd = wd || {};
+var wd = wd || {};
 wd.cdf = wd.cdf || {};
 
 wd.cdf.helper = {

@@ -14,20 +14,22 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
    files: [
-      'cdf/js/lib/shims.js',
-      'cdf/js/lib/pen-shim.js',
+      'cdf/js-lib/shims.js',
+      'cdf/js-lib/pen-shim.js',
       'test-js/testUtils.js',
       'cdf/js/wd.js',
-      'cdf/js/json.js',
-      'cdf/js/jquery.js',
-      'cdf/js/jquery.ui.js',
-      'cdf/js/autobox/jquery.templating.js',
-      'cdf/js/autobox/jquery.ui.autobox.js',
-      'cdf/js/autobox/jquery.ui.autobox.ext.js',
-      'cdf/js/jquery.blockUI.js',
-      'cdf/js/underscore.js',
-      'cdf/js/backbone.js',
-      'cdf/js/mustache.js',
+      'cdf/js-lib/json.js',
+      'cdf/js-lib/jquery.js',
+      'cdf/js-lib/jquery.ui.js',
+      'cdf/js-lib/autobox/jquery.templating.js',
+      'cdf/js-lib/autobox/jquery.ui.autobox.js',
+      'cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
+      
+      'cdf/js-lib/jquery.blockUI.js',
+      'cdf/js-lib/underscore.js',
+      'cdf/js-lib/backbone.js',
+      'cdf/js-lib/mustache.js',
+
       'cdf/js/Base.js',
       'cdf/js/Dashboard/Dashboard.js',
       'cdf/js/Dashboard/Dashboard.bookmarkable.js',
@@ -61,7 +63,8 @@ module.exports = function(config) {
 
 
     preprocessors: {
-        "cdf/js/*.js" : 'coverage'
+        "cdf/js/*.js" : 'coverage',
+        "cdf/js/components/*.js" : 'coverage'        
     },
 
     // test results reporter to use

@@ -13,44 +13,19 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'cdf/js/lib/shims.js',
-      'cdf/js/lib/pen-shim.js',
+      'cdf/js-lib/shims.js',
+      'cdf/js-lib/pen-shim.js',
       'test-js/testUtils.js',
-      'cdf/js/wd.js',
-      'cdf/js/json.js',
-      'cdf/js/jquery.js',
-      'cdf/js/jquery.ui.js',
-      'cdf/js/autobox/jquery.templating.js',
-      'cdf/js/autobox/jquery.ui.autobox.js',
-      'cdf/js/autobox/jquery.ui.autobox.ext.js',
-      'cdf/js/jquery.blockUI.js',
-      'cdf/js/underscore.js',
-      'cdf/js/backbone.js',
-      'cdf/js/mustache.js',
-      'cdf/js/Base.js',
-      'cdf/js/Dashboard/Dashboard.js',
-      'cdf/js/Dashboard/Dashboard.bookmarkable.js',
-      'cdf/js/Dashboard/Dashboard.components.js',
-      'cdf/js/Dashboard/Dashboard.i18n.js',
-      'cdf/js/Dashboard/Dashboard.lifecycle.js',
-      'cdf/js/Dashboard/Dashboard.notifications.js',
-      'cdf/js/Dashboard/Dashboard.parameters.js',
-      'cdf/js/Dashboard/Dashboard.storage.js',
-      'cdf/js/Dashboard/Dashboard.views.js',
-      '../cdf-pentaho5/cdf/js/cdf-base.js',
-      'cdf/js/Dashboards.Main.js',
-      'cdf/js/Dashboards.Query.js',
-      'cdf/js/Dashboards.Utils.js',
-      'cdf/js/Dashboards.Legacy.js',
-      'cdf/js/Dashboards.Popups.js',
-      'cdf/js/Dashboards.RefreshEngine.js',
-      'cdf/js/components/core.js',
-      'cdf/js/components/input.js',
-      'cdf/js/queries/coreQueries.js',
       '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
       'test-js/lib/test-components.js',
+      'cdf/js-lib/json.js',
+//need to add      '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
+      '../cdf-pentaho5/cdf/js/cdf-base.js',
       'test-js/main.js',
-      {pattern: 'test-js/**/*-spec.js', included: false}
+     {pattern: 'cdf/js-lib/**/*.js', included: false},
+     {pattern: 'cdf/js-modules/**/*.js', included: false},
+    {pattern: 'test-js/**/*-spec.js', included: false}
+      
     ],
 
 
@@ -60,6 +35,7 @@ module.exports = function(config) {
 
     preprocessors: {
         "cdf/js/*.js" : 'coverage'
+        
     },
 
     // test results reporter to use
@@ -123,7 +99,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false,
+    singleRun: true,
 
     plugins: [
      'karma-jasmine',

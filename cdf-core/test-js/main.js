@@ -10,14 +10,19 @@
             // Load the file as an AMD module, or relative module ids won't work.
             tests.push(
                 file.replace(
-                    new RegExp("^" + baseUrl + "/(.*?)\\.js$", "i"), "$1"));
+                    new RegExp("^" + baseUrl + '/../..' + "/(.*?)\\.js$", "i"), "$1"));
 
     requirejs.config({
         // Karma serves files from '/base'
-        baseUrl: baseUrl,
+        baseUrl: "http://localhost:9876/base/cdf/js-modules",
         paths: {
 //            'ccc':    'bin/stage/ccc/amd',
-//            'jquery': 'package-res/cdf/jquery'
+           'jquery': '../../cdf/js-lib/jquery',
+           'jquery.blockUI': '../../cdf/js-lib/jquery.blockUI',           
+           'jquery.ui': '../../cdf/js-lib/jquery.ui',                      
+           'underscore': '../../cdf/js-lib/underscore',
+           'mustache': '../../cdf/js-lib/mustache',
+           'backbone': '../../cdf/js-lib/backbone'
         },
         shim: {
 //            'jquery': {exports: 'jQuery'}
