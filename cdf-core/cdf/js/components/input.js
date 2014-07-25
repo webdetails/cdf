@@ -1192,9 +1192,7 @@ var AutocompleteBoxComponent = BaseComponent.extend({
     var myself = this;
 
     //init parameter
-    // TODO: FIXME: dcl - Isn't the following
-    // this.getInnerParameterName missing parentesis?
-    if(!Dashboards.getParameterValue(this.getInnerParameterName)){
+    if(!Dashboards.getParameterValue(this.getInnerParameterName())){
       Dashboards.setParameter(this.getInnerParameterName(), '' );
     }
 
