@@ -3,6 +3,9 @@
  */
 describe("The Traffic Component #", function() {
     var myDashboard = _.extend({}, Dashboards);
+
+  myDashboard.addParameter('trafficTestParameter', 1);
+
     var trafficComponent = window.trafficComponent = new TrafficComponent();
     $.extend(trafficComponent, {
         name: "trafficComponent",
@@ -17,9 +20,7 @@ describe("The Traffic Component #", function() {
             path: "/test/path",
             showValue: true
         },
-        parameter: {
-            "trafficTestParameter": 1
-        }
+        parameter: "trafficTestParameter"
     });
     myDashboard.addComponent(trafficComponent);
 
