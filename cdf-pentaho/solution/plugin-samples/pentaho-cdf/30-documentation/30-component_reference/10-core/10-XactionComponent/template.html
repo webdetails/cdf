@@ -79,19 +79,22 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-var topTenCustomers = 
-{
+Dashboards.addParameter( "productLineParam", "null");
+Dashboards.addParameter( "territoryParam", "null");
+
+var topTenCustomers = {
   name: "topTenCustomers",
   type: "xaction",
   solution: "plugin-samples",
   path: "pentaho-cdf/20-samples/home_dashboard",
   action: "topTenCustomers.xaction",
-  listeners:["productLine", "territory"],
-  parameters: [["productLine", null], ["territory", null]],
+  listeners:["productLineParam", "territoryParam"],
+  parameters: [["productLine", productLineParam], ["territory", territoryParam]],
   htmlObject: "sampleObject",
   executeAtStart: true,
   tooltip: "My first dashboard"
 }
+
 Dashboards.init([topTenCustomers]);
 Dashboards.finishedInit = false;
 					</textarea>
