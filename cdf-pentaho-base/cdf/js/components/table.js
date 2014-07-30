@@ -58,6 +58,21 @@ if($.fn.dataTableExt != undefined){
   $.extend( $.fn.dataTableExt.oSort, {
 
     /*
+     * text sorting
+     */
+    "string-asc": function ( a, b ) {
+      var x = a.toLowerCase();
+      var y = b.toLowerCase();
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    },
+
+    "string-desc": function ( a, b ) {
+      var x = a.toLowerCase();
+      var y = b.toLowerCase();
+      return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+    },
+
+    /*
      * html sorting (ignore html tags)
      */
     "html-asc": function ( a, b ) {
@@ -298,7 +313,7 @@ var TableComponent = UnmanagedComponent.extend({
     // it'll be called before we have an actual table...
     var croppedCd = $.extend({},cd);
     croppedCd.drawCallback = undefined;
-    this.queryState = this.dashboard.getQuery(croppedCd);
+    this.queryState = Dashboards.getQuery(croppedCd);
     this.query = this.queryState; // for analogy with ccc component's name
     // make sure to clean sort options
     var sortBy = this.chartDefinition.sortBy || [],
@@ -598,7 +613,7 @@ var TableComponent = UnmanagedComponent.extend({
         //Read parameters and fire changes
         var results = myself.queryState.lastResults();
         $(myself.expandParameters).each(function f(i, elt) {
-          myself.dashboard.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+          Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);              
         });
 
       };
