@@ -255,13 +255,15 @@ var TrafficComponent = UnmanagedComponent.extend({
         delay: 0,
         html: true,
         title: tooltip,
+        content: tooltip,
         placement: "auto top"
       }
      } else {
       tooltipOpts = {
         delay:0,
         track: true,
-        fade: 250
+        fade: 250,
+        content: tooltip + ( this._tooltip != undefined? this._tooltip:"")
       }
       $htmlObject.attr("title",tooltip + ( this._tooltip != undefined? this._tooltip:""));
      }
@@ -443,6 +445,7 @@ var TimePlotComponent = BaseComponent.extend({
 
     }
 
+    var myself = this;
 
     // support for events
     var eventSource2 = undefined;

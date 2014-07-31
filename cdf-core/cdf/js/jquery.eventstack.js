@@ -31,12 +31,16 @@ jQuery.fn.extend({
 	
 	// reverse the order of events bound to an element
 	reverse: function( event ) {
-	    var events = $(this).data("events");
-	    var reverseEvent = new Array;
-	    for(var e in events[event]) {
-	        reverseEvent.unshift(events[event][e]);
-	    }
-	    events[event] = reverseEvent;
+		/* CDF-271 update jQuery to version 1.9.1 */
+	    //var events = $(this).data("events");
+	    var events;
+	    if ((events = $._data(this[0], "events")) && events[event]){
+		    var reverseEvent = new Array;
+		    for(var e in events[event]) {
+		        reverseEvent.unshift(events[event][e]);
+		    }
+		    events[event] = reverseEvent;
+		}
 		return this;
 	},
 	
