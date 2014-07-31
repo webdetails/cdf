@@ -62,6 +62,10 @@
   box-sizing: border-box;
 }
 
+.dataTables_wrapper table.dataTable thead th, .dataTables_wrapper table.dataTable thead td {
+  border-bottom: 0;
+} 
+
 /* Two-Button Classic Pagination */
 .paginate_disabled_previous, .paginate_enabled_previous,
 .paginate_disabled_next, .paginate_enabled_next {

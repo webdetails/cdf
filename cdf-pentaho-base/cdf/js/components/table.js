@@ -52,9 +52,61 @@ if($.fn.dataTableExt != undefined){
  * } );
  */
 
-  /* If table elements have class 'numeric' and values are represented as strings (e.g. "234456.5675")
-   let's try and convert them to numeric values for sorting. Source based on version 1.7.5 of dataTables.js */
+  /*
+   * DataTables 1.10 sorting functions compatibility extension
+   */  
   $.extend( $.fn.dataTableExt.oSort, {
+
+    /*
+     * html sorting (ignore html tags)
+     */
+    "html-asc": function ( a, b ) {
+      var x = a.replace( /<.*?>/g, "" ).toLowerCase();
+      var y = b.replace( /<.*?>/g, "" ).toLowerCase();
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    },
+
+    "html-desc": function ( a, b ) {
+      var x = a.replace( /<.*?>/g, "" ).toLowerCase();
+      var y = b.replace( /<.*?>/g, "" ).toLowerCase();
+      return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+    },
+
+    /*
+     * date sorting
+     */
+    "date-asc": function ( a, b ) {
+      var x = Date.parse( a );
+      var y = Date.parse( b );
+
+      if ( isNaN(x) || x==="" ) {
+        x = Date.parse( "01/01/1970 00:00:00" );
+      }
+      if ( isNaN(y) || y==="" ) {
+        y = Date.parse( "01/01/1970 00:00:00" );
+      }
+
+      return x - y;
+    },
+
+    "date-desc": function ( a, b ) {
+      var x = Date.parse( a );
+      var y = Date.parse( b );
+
+      if ( isNaN(x) || x==="" ) {
+        x = Date.parse( "01/01/1970 00:00:00" );
+      }
+      if ( isNaN(y) || y==="" ) {
+        y = Date.parse( "01/01/1970 00:00:00" );
+      }
+
+      return y - x;
+    },
+
+    /* 
+     * If table elements have class 'numeric' and values are represented as strings (e.g. "234456.5675")
+     * let's try and convert them to numeric values for sorting. Source based on version 1.7.5 of dataTables.js 
+     */
     "numeric-asc": function ( a, b ) {
       a = (a=="-"||a=="") ? 0 : ($.isNumeric(a) ? a*1 : 0);
       b = (b=="-"||b=="") ? 0 : ($.isNumeric(b) ? b*1 : 0);
