@@ -211,8 +211,12 @@ public class CdfContentGenerator extends SimpleContentGenerator {
     } else if ( urlPath.equals( STORAGE ) ) {
       processStorage( requestParams, out );
     } else if ( urlPath.equals( CONTEXT ) ) {
+      int inactiveInterval = 120 * 60;
+      if ( request != null && request.getSession() != null ) {
+        inactiveInterval = request.getSession().getMaxInactiveInterval();
+      }
       ContextEngine
-        .generateContext( out, Parameter.asHashMap( request ), request.getSession().getMaxInactiveInterval() );
+        .generateContext( out, Parameter.asHashMap( request ), inactiveInterval );
     } else if ( urlPath.equals( CLEAR_CACHE ) ) {
       clearCache( out );
     } else if ( urlPath.equals( VIEWS ) ) {
