@@ -114,8 +114,8 @@ requireCfg['shim']['cdf/backbone'] 				= ['cdf/underscore'];
 requireCfg['shim']['cdf/lib/CCC/compatVersion'] = ['cdf/lib/CCC/pvc-d1.0'];
 requireCfg['shim']['cdf/lib/CCC/pvc-d1.0'] 		= ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/tipsy', 'cdf/lib/CCC/jquery.tipsy', 'cdf/lib/CCC/def'];
 
-requireCfg['shim']['cdf/lib/CCC/tipsy'] 		= ['cdf/lib/CCC/protovis'];
-requireCfg['shim']['cdf/lib/CCC/jquery.tipsy'] 	= ['cdf/lib/CCC/tipsy'];
+requireCfg['shim']['cdf/lib/CCC/tipsy'] 		= ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/jquery.tipsy'];
+requireCfg['shim']['cdf/lib/CCC/jquery.tipsy'] 	= ['cdf/jquery'];
 
 requireCfg['shim']['cdf/components/core'] 		= ['cdf/Dashboards'];
 requireCfg['shim']['cdf/components/ccc'] 		= ['cdf/components/core', 'cdf/lib/CCC/pvc-d1.0'];
