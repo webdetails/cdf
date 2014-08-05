@@ -225,7 +225,7 @@
         query: function(){
 
         var query = "select NON EMPTY {[Measures].[Sales]} ON COLUMNS,"+
-        " NON EMPTY TopCount([Customers].[All Customers].Children, 10.0, [Measures].[Sales]) " +
+        " NON EMPTY TopCount([Customers].[All Customers].Children, 50.0, [Measures].[Sales]) " +
         " ON ROWS from [SteelWheelsSales]"
         return query;
         }
