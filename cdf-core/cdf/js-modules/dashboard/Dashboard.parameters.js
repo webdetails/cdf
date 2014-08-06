@@ -12,7 +12,7 @@
  */
  
  
- define(['dashboard/Dashboard', 'Logger', 'backbone'], function (Dashboard, Logger, Backbone) {
+ define(['dashboard/Dashboard', 'Logger', 'backbone', 'dashboard/Utils'], function (Dashboard, Logger, Backbone, Utils) {
 
     /**
      * A module representing a extension to Dashboard module for parameters.
@@ -35,25 +35,107 @@
         this.escapeParameterValues = true;
       },
     
-      /**
-       *
-       * @param parameterName
-       * @returns the parameterName value stored
-       */
-      getParameterValue: function (parameterName) {
-        if (this.globalContext) {
-          try {
-            return eval(parameterName);
-          }
-          catch (e) {
-            this.error(e);
-            //return undefined;
-          }
-        } else {
-          return this.parameters[parameterName];
-        }
-      },
     
+    /**
+     * Verifies if a parameter is available in the Parameter Model
+     *
+     * @param name of the parameter
+     * @returns boolean
+     * @private
+     */
+    _isParameterInModel : function(name){
+      return this.parameterModel.attributes.hasOwnProperty(name);
+    },
+    
+    /**
+     * Gets the value from a context o from the property with a given path
+     *
+     * @param o the context of the assignment
+     * @param path the path of the property
+     * @returns the value of the property
+     * @private
+     */
+    _getValueFromContext : function(o, path) {
+      if (!o) return; //undefined
+      if (null != path) {
+        var parts = (path instanceof Array) ? path : path.split("."), L = parts.length;
+        if (L) for (var i = 0; L > i; ) {
+          var part = parts[i++], value = o[part];
+          if (null == value) {
+            return; //the path requested is undefined
+          }
+          o = value;
+        }
+      }
+      return o;
+    },
+    
+    /**
+     * Sets a property path in a context o with v as value
+     *
+     * @param o the context of the assignment
+     * @param path the path of the property
+     * @param v the value of the property
+     * @returns the value of the property assigned
+     * @private
+     */
+    _setValueInContext : function(o, path, v) {
+      if (o && null != path) {
+        var parts = (path instanceof Array) ? path : path.split(".");
+        if (parts.length) {
+          var pLast = parts.pop();
+          o = this._getValueFromContext(o, parts);
+          if(o) o[pLast] = v;
+        }
+      }
+      return o;
+    },
+
+    /**
+     * Adds a parameter new parameter to the parameter module.
+     * Receives a parameter name and an initial value, that will be used if the parameter is
+     * not available in the parameter model. Otherwise, the getParameterValue return is used
+     *
+     * @param name the name of the parameter
+     * @param initValue the initial value of the parameter
+     * @returns the value assigned to the parameter
+     */
+    addParameter : function(name, initValue){
+        if(this._isParameterInModel(name)){
+            initValue = this.getParameterValue(name);
+        }
+        this.setParameter(name,initValue);
+        return initValue;
+    },
+
+    getParameterValue : function (parameterName) {
+        var parameterStore = this.globalContext ? window : this.parameters;
+        return this._getValueFromContext(parameterStore, parameterName);
+    },
+
+    /**
+      * Stores a parameter with a certain value
+      *
+      * @param parameterName is the parameter name
+      * @param parameterValue is the value of the parameter
+      * @param isNotified
+      */
+    setParameter : function(parameterName, parameterValue, isNotified) {
+        if(parameterName == undefined || parameterName == "undefined"){
+            Logger.log('Dashboards.setParameter: trying to set undefined!!','warn');
+            return;
+        }
+        var parameterStore = this.globalContext ? window : this.parameters;
+        if(!this.globalContext && this.escapeParameterValues){
+            this._setValueInContext(parameterStore, parameterName, Utils.encode_prepare_arr(parameterValue));
+        } else {
+            this._setValueInContext(parameterStore, parameterName, parameterValue);
+        }
+        this.parameterModel.set(parameterName,parameterValue,{notify:isNotified});
+        this.persistBookmarkables(parameterName);
+    },
+    
+        
       /**
        * Alias for getParameterValue
        *
@@ -64,33 +146,7 @@
         this.getParameterValue(parameterName);
       },
     
-      /**
-       * Stores a parameter with a certain value
-       *
-       * @param parameterName is the parameter name
-       * @param parameterValue is the value of the parameter
-       * @param isNotified
-       */
-      setParameter: function (parameterName, parameterValue, isNotified) {
-        if (parameterName == undefined || parameterName == "undefined") {
-          Logger.log('Dashboards.setParameter: trying to set undefined!!', 'warn');
-          return;
-        }
-        if (this.globalContext) {
-          //ToDo: this should really be sanitized!
-          eval(parameterName + " = " + JSON.stringify(parameterValue));
-        } else {
-          if (this.escapeParameterValues) {
-            this.parameters[parameterName] = encode_prepare_arr(parameterValue);
-          } else {
-            this.parameters[parameterName] = parameterValue;
-          }
-        }
-        this.parameterModel.set(parameterName, parameterValue, {notify: isNotified});
-        this.persistBookmarkables(parameterName);
-      },
-    
-    
+       
       /**
        * Alias for setPArameter
        *

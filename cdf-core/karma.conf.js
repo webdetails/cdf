@@ -16,8 +16,6 @@ module.exports = function(config) {
       'cdf/js-lib/shims.js',
       'cdf/js-lib/pen-shim.js',
       'test-js/testUtils.js',
-      '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
-      'test-js/lib/test-components.js',
       'cdf/js-lib/json.js',
 //need to add      '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
       '../cdf-pentaho5/cdf/js/cdf-base.js',

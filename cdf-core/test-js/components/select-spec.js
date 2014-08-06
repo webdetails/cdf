@@ -22,23 +22,21 @@ define(["Dashboard", "jquery", "underscore", "components/SelectBaseComponent", "
     
       //myDashboard.setParameterValue('selectorTestParameter',1);
       //myDashboard.setParameterValue('multiSelectTestParameter',[1,2,3]);
-    
+      myDashboard.addParameter('selectorTestParameter',1);
+      myDashboard.addParameter('multiSelectTestParameter',[1,2,3]);    
+      
       var selectComponent = window.selectComponent = new CommentsComponent(myDashboard, {
         name: "selectComponent",
         type: "CommentsComponent",
         htmlObject: 'selectComponent',
-        parameter: {
-          "selectorTestParameter" : 1
-        }
+        parameter: "selectorTestParameter" 
       });
     
       var multiSelectComponent = window.multiSelectComponent = new CommentsComponent(myDashboard, {
         name: "multiSelectComponent",
         type: "CommentsComponent",
         htmlObject: 'multiSelectComponent',
-        parameter: {
-          "multiSelectTestParameter" : [1,2,3]
-        }
+        parameter: "multiSelectTestParameter" 
       });
     
       var components = [
@@ -64,7 +62,7 @@ define(["Dashboard", "jquery", "underscore", "components/SelectBaseComponent", "
        */
       it("Holds the correct value", function() {
         var comp = myDashboard.getComponentByName("selectComponent");
-        expect(comp.parameter['selectorTestParameter']).toEqual(1);
+        expect(myDashboard.getParameterValue(comp.parameter)).toEqual(1);
       });
       /**
        * ## The Select Component # Allows overriding AJAX settings
@@ -93,9 +91,7 @@ define(["Dashboard", "jquery", "underscore", "components/SelectBaseComponent", "
           return new SelectBaseComponent(dashboard, {
             name: name,
             type: "SelectBaseComponent",
-            parameter: {
-              "selectParam": ["value"]
-            },
+            parameter: "selectParam",
             externalPlugin: externalPlugin,
             extraOptions: extraOptions,
             htmlObject: "htmlObject"
