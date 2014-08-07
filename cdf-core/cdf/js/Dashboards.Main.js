@@ -1096,7 +1096,7 @@ Dashboards._getParameterStore = function(){
  * @private
  */
 Dashboards._isParameterInModel = function(name){
-  return this._getParameterStore().hasOwnProperty(name);
+  return this.parameterModel.attributes.hasOwnProperty(name) ;
 };
 
 /**
