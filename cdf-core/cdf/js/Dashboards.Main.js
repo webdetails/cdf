@@ -1079,6 +1079,16 @@ Dashboards.getUnboundParameters = function(){
 };
 
 /**
+ * Gets the object where the parameters are being stored
+ *
+ * @returns the parameter store
+ * @private
+ */
+Dashboards._getParameterStore = function(){
+  return this.globalContext ? window : this.parameters;
+};
+
+/**
  * Verifies if a parameter is available in the Parameter Model
  *
  * @param name of the parameter
@@ -1086,7 +1096,7 @@ Dashboards.getUnboundParameters = function(){
  * @private
  */
 Dashboards._isParameterInModel = function(name){
-  return Dashboards.parameterModel.attributes.hasOwnProperty(name);
+  return this._getParameterStore().hasOwnProperty(name);
 };
 
 /**
@@ -1151,7 +1161,7 @@ Dashboards.addParameter = function(name, initValue){
 };
 
 Dashboards.getParameterValue = dash.getParam = function (parameterName) {
-  var parameterStore = this.globalContext ? window : this.parameters;
+  var parameterStore = this._getParameterStore();
   return this._getValueFromContext(parameterStore, parameterName);
 };
 
@@ -1160,7 +1170,7 @@ Dashboards.setParameter = dash.setParam = function(parameterName, parameterValue
     this.log('Dashboards.setParameter: trying to set undefined!!','warn');
     return;
   }
-  var parameterStore = this.globalContext ? window : this.parameters;
+  var parameterStore = this._getParameterStore();
   if(!this.globalContext && this.escapeParameterValues){
     this._setValueInContext(parameterStore, parameterName, encode_prepare_arr(parameterValue));
   } else {
