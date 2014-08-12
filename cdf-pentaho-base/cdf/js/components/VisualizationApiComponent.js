@@ -9,7 +9,7 @@ var VisualizationAPIComponent = UnmanagedComponent.extend({
 
   render: function (data) {
 
-    var vizDiv = this.getPlaceholder();
+    var vizDiv = this.placeholder()[0];
     var visualization = this.getVisualization();
     var vizOptions = this.getVizOptions();
     var gDataTable = this.createGoogleDataTable(data);
@@ -33,10 +33,6 @@ var VisualizationAPIComponent = UnmanagedComponent.extend({
 
   getVisualization: function () {
     return pentaho.visualizations.getById(this.vizId);
-  },
-
-  getPlaceholder: function () {
-    return $("#" + this.htmlObject)[0]
   },
 
   createGoogleDataTable: function (resultJson) {
