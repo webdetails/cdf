@@ -1,0 +1,161 @@
+<script type="text/javascript" src="../../repo/files/%3Apublic%3Aplugin-samples%3Apentaho-cdf%3A30-documentation%3A30-component_reference%3AMetaLayerSamples.js"></script>
+<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/VizController.js"></script>
+<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/DataTable.js"></script>
+<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/Events.js"></script>
+<script type="text/javascript" src="/pentaho/api/repos/common-ui/resources/web/vizapi/ccc/sample/sampleVisualization.js"></script>
+
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>VisualizationAPIComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+			This is a component that can execute visualizations that are registered in Pentaho Visualization API.<br>
+			To use it in CDF the user must include the following scripts in the dashboard template: 
+		</p>
+		<lu>
+			<li>/pentaho/api/repos/common-ui/resources/web/vizapi/VizController.js</li>
+			<li>/pentaho/api/repos/common-ui/resources/web/vizapi/DataTable.js</li>
+			<li>/pentaho/api/repos/common-ui/resources/web/vizapi/Events.js</li>
+		</lu><br>
+		<p>
+			And also register the visualizations that will be possible to use. Examples on how to register visualizations 
+			can be found here:
+		</p>
+		<lu>
+			<li>/pentaho/api/repos/common-ui/resources/web/vizapi/ccc/sample/sampleVisualization.js - the one used in this sample.</li>
+			<li>/pentaho/api/repos/common-ui/resources/web/vizapi/ccc/ccc_wrapper.js</li>
+		</lu>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>visualizationAPIComponent</code></dd>
+
+			<dt>vizId</dt> 
+			<dd>Id of the visualization to be rendered</dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>vizOptions</dt> 
+			<dd><i>Array - </i>Parameters to pass as options to the visualization</dd>
+
+			<dt>queryDefinition</dt>
+			<dd>MetaLayer object with the query definition (see MetaLayer options)</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed. The component will be executed only if the result of preChange equals true.</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+		</dl>
+
+		<h3>MetaLayer options</h3>
+
+		<dl class="documentation">
+			<dt>queryType</dt>
+			<dd>Type of query to read results from. Can be sql or mdx. Default: mdx</dd>
+
+			<dt>jndi</dt> 
+			<dd>Connection to use for the query</dd>
+
+			<dt>query</dt> 
+			<dd>sql or mdx Query to execute</dd>
+
+			<dt>cube</dt> 
+			<dd>Cube name to use when queryType is mdx</dd>
+
+			<dt>catalog</dt> 
+			<dd>Mondrian schema to use when queryType is mdx</dd>
+
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<ul>
+
+				<li><a href="#sample"><span>Sample</span></a></li>
+				<li><a href="#code"><span>Code</span></a></li>
+			</ul>
+			<div id="sample">
+				<div id="selectorObject"></div>
+				<div id="sampleObject" style="height:530px"></div>
+				<br/>
+			</div>
+
+
+			<div id="code">
+				<textarea cols="80" rows="20" id="samplecode">
+Dashboards.addParameter( "optionParam", "MAX");
+
+MetaLayer = {
+	sampleVisualization: {
+		queryType: 'mdx',
+		jndi: "SampleData",
+		catalog: "mondrian:/SteelWheels",
+		opts: {},
+		query: function(){
+			return "select " +
+			"NON EMPTY {[Measures].[Quantity]} ON COLUMNS, " +
+  			"NON EMPTY {[Markets].[Country].Members} ON ROWS " +
+			"from [SteelWheelsSales]";
+		}
+	}
+}
+
+sampleVisualization = {
+  name: "sampleVisualization",
+  type: "visualizationAPI",
+  listeners:[],
+  queryDefinition: MetaLayer.sampleVisualization,
+  vizId: "sample_calc",
+  vizOptions: [["calc", "optionParam"]],
+  htmlObject: "sampleObject",
+  executeAtStart: true
+}
+				
+
+Dashboards.init([sampleVisualization]);
+Dashboards.finishedInit = false;
+
+
+				</textarea>
+				<br />
+				<button onclick="evaluateCode(true)">Try me</button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script language="javascript" type="text/javascript">
+	var tabs = $("#example").tabs();
+	evaluateCode(false);
+</script>
