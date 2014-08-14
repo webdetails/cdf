@@ -582,6 +582,10 @@ var TableComponent = UnmanagedComponent.extend({
         myself.dataTable.fnClose( row );
         anOpen.splice(i,1);
 
+        $(myself.expandParameters).each(function f(i, elt) {
+          Dashboards.setParameter(elt[1], "");
+        });
+
       } else {
         // Closes all open expandable rows .
         for ( var j=0; j < anOpen.length; j++ ) {
@@ -597,9 +601,25 @@ var TableComponent = UnmanagedComponent.extend({
 
         //Read parameters and fire changes
         var results = myself.queryState.lastResults();
+        var firstChange = null;
+
         $(myself.expandParameters).each(function f(i, elt) {
-          Dashboards.fireChange(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);              
+          //finds and returns the first updated expandParameter
+          if(Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)]) {
+            firstChange = elt;
+            return false;
+          }
         });
+
+        if( firstChange !== null ) {
+          $(myself.expandParameters).each(function f(i, elt) {
+            //skips the first expandParameter that was updated and calls Dashboards.setParameter for all the others
+            if( elt[1] !== firstChange[1] ) {
+              Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
+            }
+          });
+          Dashboards.fireChange( firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)] );
+        }
 
       };
     };
