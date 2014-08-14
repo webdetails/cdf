@@ -113,7 +113,7 @@
 
 			<div id="code">
 				<textarea cols="80" rows="20" id="samplecode">
-Dashboards.addParameter( "optionParam", "MAX");
+Dashboards.setParameter( "optionParam", "MAX");
 
 MetaLayer = {
 	sampleVisualization: {
@@ -138,14 +138,22 @@ sampleVisualization = {
   vizId: "sample_calc",
   vizOptions: [["calc", "optionParam"]],
   htmlObject: "sampleObject",
-  executeAtStart: true
+  executeAtStart: true,
+  postFetch: function(data) {
+  	//Using postFetch to convert data types, because the query is passing 
+  	//a Numeric field as String and that breaks the sample visualization
+	var metaQuantity = data.metadata[1];
+	var resultset = data.resultset;
+
+	metaQuantity.colType = "Numeric";
+	for(var i = 0; i < resultset.length; i++) {
+		resultset[i][1] = parseInt(resultset[i][1]);
+	}
+  }
 }
 				
-
 Dashboards.init([sampleVisualization]);
 Dashboards.finishedInit = false;
-
-
 				</textarea>
 				<br />
 				<button onclick="evaluateCode(true)">Try me</button>
