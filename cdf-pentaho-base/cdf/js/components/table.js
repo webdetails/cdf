@@ -604,20 +604,14 @@ var TableComponent = UnmanagedComponent.extend({
         var firstChange = null;
 
         $(myself.expandParameters).each(function f(i, elt) {
-          //finds and returns the first updated expandParameter
-          if(Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)]) {
+          //skips the first expandParameter that was updated and calls Dashboards.setParameter for the all others
+          if( !firstChange && Dashboards.getParameterValue(elt[1]) !== results.resultset[event.rowIdx][parseInt(elt[0],10)] ) {
             firstChange = elt;
-            return false;
+          } else {
+            Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
           }
         });
-
         if( firstChange !== null ) {
-          $(myself.expandParameters).each(function f(i, elt) {
-            //skips the first expandParameter that was updated and calls Dashboards.setParameter for all the others
-            if( elt[1] !== firstChange[1] ) {
-              Dashboards.setParameter(elt[1], results.resultset[event.rowIdx][parseInt(elt[0],10)]);
-            }
-          });
           Dashboards.fireChange( firstChange[1], results.resultset[event.rowIdx][parseInt(firstChange[0],10)] );
         }
 
