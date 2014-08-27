@@ -74,7 +74,10 @@ var PivotLinkComponent = BaseComponent.extend({
             type: "iframe",
             href: url,
             width: $(window).width(),
-            height: $(window).height()
+            height: $(window).height(),
+            iframe: {
+                preload: false
+            }
         });
     }
 });//PivotLinkComponent
