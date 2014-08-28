@@ -84,7 +84,7 @@ wd.cdf.endpoints = {
     return arr; 
   },  
 
-  getComments: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/Comments"; },
+  getComments: function ( action ) { return wd.cdf.endpoints.getCdfBase() + "/Comments" + "?" + wd.cdf.helper.getTimestamp(); },
 
   getPivot: function ( solution, path, action ) { return wd.cdf.endpoints.getWebapp() + "/Pivot?solution=" + (solution || "system") + "&path=" + path + "&action=" + action; },
 
