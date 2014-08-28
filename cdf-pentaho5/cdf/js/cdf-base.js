@@ -133,7 +133,7 @@ wd.cdf.endpoints = {
       endpoint = "add";
     }
 
-  	return wd.cdf.endpoints.getCdfBase() + "/comments/" + endpoint;
+  	return wd.cdf.endpoints.getCdfBase() + "/comments/" + endpoint + "?" + wd.cdf.helper.getTimestamp();
   },
 
   getScheduledJob: function() { return wd.cdf.endpoints.getWebapp() + "/api/scheduler/job"; },
