@@ -10,14 +10,14 @@ describe("The Select Component #", function() {
 
   var selectComponent = window.selectComponent = {
     name: "selectComponent",
-    type: "CommentsComponent",
+    type: "selectComponent",
     htmlObject: 'selectComponent',
     parameter: "selectorTestParameter"
   };
 
   var multiSelectComponent = window.multiSelectComponent = {
     name: "multiSelectComponent",
-    type: "CommentsComponent",
+    type: "selectComponent",
     htmlObject: 'multiSelectComponent',
     parameter: "multiSelectTestParameter"
   };
