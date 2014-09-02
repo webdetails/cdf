@@ -615,17 +615,24 @@ var DateInputComponent = BaseComponent.extend({
 var DateRangeInputComponent = BaseComponent.extend({
   update : function() {
     var dr;
+
     if (this.singleInput == undefined || this.singleInput == true){
-      dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0]) + " > " + Dashboards.getParameterValue(this.parameter[1]) ).css("width","170px");
+      dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue()
+          + " " + this.inputSeparator + " " + this.getEndParamValue() ).css("width","170px");
       this.placeholder().html(dr);
     } else {
-      dr = $("<input/>").attr("id",this.name).attr("value",Dashboards.getParameterValue(this.parameter[0])).css("width","80px");
+      dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue() ).css("width","80px");
       this.placeholder().html(dr);
-      dr.after($("<input/>").attr("id",this.name + "2").attr("value",Dashboards.getParameterValue(this.parameter[1])).css("width","80px"));
+      dr.after($("<input/>").attr("id",this.name + "2").attr( "value", this.getEndParamValue() ).css("width","80px"));
       if(this.inputSeparator != undefined){
         dr.after(this.inputSeparator);
       }
     }
+
+    //onOpen and onClose events
+    this.on('onOpen:dateRangeInput', this.onOpenEvent );
+    this.on('onClose:dateRangeInput', this.onCloseEvent );
+
     var offset = dr.offset();
     var myself = this;
     var earliestDate = this.earliestDate != undefined  ?  this.earliestDate : Date.parse('-1years');
@@ -650,10 +657,15 @@ var DateRangeInputComponent = BaseComponent.extend({
         earliestDate: earliestDate,
         latestDate: latestDate,
         dateFormat: format,
+        rangeSplitter: myself.inputSeparator,
         onOpen: function() {
+          myself.triggerOnOpen();
+
           changed = closed = false;
           myself.startValue = null;
           myself.endValue = null;
+
+          myself.addCancelButton();
         },
         onDateSelect: function(rangeA, rangeB) {
           changed = true;
@@ -661,11 +673,84 @@ var DateRangeInputComponent = BaseComponent.extend({
           triggerWhenDone();
         },
         onClose: function() {
+          myself.triggerOnClose();
+
           closed = true;
           triggerWhenDone();
         }
       });
       myself._doAutoFocus();
+
+      if( myself.canClickOutsidePopup ) {
+        $(document).off('click');
+      }
+    });
+  },
+
+  triggerOnOpen: function() {
+    this.placeholder("input").toggleClass("driComponentExpanded", true);
+    this.trigger('onOpen:dateRangeInput');
+  },
+
+  triggerOnClose: function() {
+    this.placeholder("input").toggleClass("driComponentExpanded", false);
+    this.trigger('onClose:dateRangeInput');
+  },
+
+  getStartParamValue: function() {
+    return Dashboards.getParameterValue(this.parameter[0]);
+  },
+
+  getEndParamValue: function() {
+    return Dashboards.getParameterValue(this.parameter[1]);
+  },
+
+  addCancelButton: function() {
+    var start = this.getStartParamValue();
+    var end = this.getEndParamValue();
+    var rpPickers = $(".ui-daterangepickercontain .ranges");
+
+    var myself = this;
+    var cancelBtn = jQuery('<button class="btnCancel ui-state-default ui-corner-all">Cancel</button>')
+      .click(function(){
+        var input = myself.placeholder("input");
+        var rangePicker = $(".ui-daterangepickercontain .ui-daterangepicker");
+        var rangeStart = $(".ui-daterangepickercontain .range-start");
+        var rangeEnd = $(".ui-daterangepickercontain .range-end");
+
+        //reset value on input
+        if( myself.singleInput == undefined || myself.singleInput == true ) {
+          input.attr( "value", start + " " + myself.inputSeparator + " " + end );
+
+        } else {
+          input.find( myself.name).attr( "value", start );
+          input.find( myself.name + "2" ).attr( "value", end );
+
+        }
+
+        //set date to initial values
+        rangeStart.data("saveDate", new Date (start) ).restoreDateFromData();
+        rangeEnd.data("saveDate", new Date (end) ).restoreDateFromData();
+
+        //close dateRangeInput Component
+        myself.triggerOnClose();
+        rangePicker.data('state', 'closed');
+        rangePicker.fadeOut(300);
+
+      }).hover(
+      function(){
+        jQuery(this).addClass('ui-state-hover');
+      },
+      function(){
+        jQuery(this).removeClass('ui-state-hover');
+      }
+    ).appendTo(rpPickers);
+
+    //button animation when selecting other list element
+    var ul = $('.ui-daterangepickercontain ul');
+    ul.find("li").click( function() {
+      cancelBtn.hide();
+      setTimeout( function() {cancelBtn.fadeIn();}, 400);
     });
   },
 
