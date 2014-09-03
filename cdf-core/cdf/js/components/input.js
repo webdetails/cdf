@@ -615,18 +615,17 @@ var DateInputComponent = BaseComponent.extend({
 var DateRangeInputComponent = BaseComponent.extend({
   update : function() {
     var dr;
+    var inputSeparator = this.inputSeparator != undefined ? this.inputSeparator : ">";
 
     if (this.singleInput == undefined || this.singleInput == true){
       dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue()
-          + " " + this.inputSeparator + " " + this.getEndParamValue() ).css("width","170px");
+          + " " + inputSeparator + " " + this.getEndParamValue() ).css("width","170px");
       this.placeholder().html(dr);
     } else {
       dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue() ).css("width","80px");
       this.placeholder().html(dr);
       dr.after($("<input/>").attr("id",this.name + "2").attr( "value", this.getEndParamValue() ).css("width","80px"));
-      if(this.inputSeparator != undefined){
-        dr.after(this.inputSeparator);
-      }
+      dr.after(inputSeparator);
     }
 
     //onOpen and onClose events
@@ -657,7 +656,7 @@ var DateRangeInputComponent = BaseComponent.extend({
         earliestDate: earliestDate,
         latestDate: latestDate,
         dateFormat: format,
-        rangeSplitter: myself.inputSeparator,
+        rangeSplitter: inputSeparator,
         onOpen: function() {
           myself.triggerOnOpen();
 
