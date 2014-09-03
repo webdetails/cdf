@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 * 
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -636,7 +636,7 @@ var DateInputComponent = BaseComponent.extend({
 var DateRangeInputComponent = BaseComponent.extend({
   update : function() {
     var dr;
-    var inputSeparator = this.inputSeparator != undefined ? this.inputSeparator : ">";
+    var inputSeparator = this.inputSeparator = this.inputSeparator || ">";
 
     if (this.singleInput == undefined || this.singleInput == true){
       dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue()
@@ -740,11 +740,11 @@ var DateRangeInputComponent = BaseComponent.extend({
 
         //reset value on input
         if( myself.singleInput == undefined || myself.singleInput == true ) {
-          input.attr( "value", start + " " + myself.inputSeparator + " " + end );
+          input.val( start + " " + myself.inputSeparator + " " + end );
 
         } else {
-          input.find( myself.name).attr( "value", start );
-          input.find( myself.name + "2" ).attr( "value", end );
+          input.eq(0).val( start );
+          input.eq(1).val( end );
 
         }
 
