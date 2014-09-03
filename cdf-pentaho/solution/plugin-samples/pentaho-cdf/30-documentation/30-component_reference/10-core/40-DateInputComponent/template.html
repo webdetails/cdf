@@ -60,6 +60,12 @@
 
 			<dt>endDate</dt>
 			<dd><i>String - </i>Component will only allow selection of dates before this value. Value is a string containing a date compliant to this component's <i>dateFormat</i>. Special value 'TODAY' will translate to current date whenever the component is updated. Empty by default (no restriction)</dd>
+			
+			<dt>onOpenEvent</dt>
+			<dd><i>Function - </i> Function to be called when the 'onOpen' event is triggered</dd>
+
+			<dt>onCloseEvent</dt>
+			<dd><i>Function - </i> Function to be called when the 'onClose' event is triggered</dd>
 
 			<dt>executeAtStart</dt>
 			<dd>True to execute the component at start, false otherwise</dd>
@@ -99,8 +105,7 @@
 
 				<div id="code">
 					<textarea cols="80" rows="20" id="samplecode">
-myInput = 
-{
+myInput = {
 	name: "myInput",
 	type: "dateInputComponent",
 	parameters:[],
@@ -110,6 +115,12 @@ myInput =
 	startDate: "2006-05-31",
 	endDate: "TODAY",
 	executeAtStart: true,
+	onOpenEvent: function() {
+		this.placeholder("input").css('border', '2px solid red'); 
+	},
+	onCloseEvent: function() {
+		this.placeholder("input").css('border', '1px solid black'); 
+	},
 	tooltip: "Click me to select a date",
 	postChange: function(){alert("You chose: " + input);}
 };

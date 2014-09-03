@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 * 
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -573,12 +573,22 @@ var DateInputComponent = BaseComponent.extend({
     if(this.endDate == 'TODAY') endDate = new Date();
     else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
 
+    //onOpen and onClose events
+    this.on('onOpen:dateInput', this.onOpenEvent );
+    this.on('onClose:dateInput', this.onCloseEvent );
+
     //ToDo: stretch interval to catch defaultValue?..
     //Dashboards.getParameterValue(this.parameter))
 
     this.placeholder().html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
     $(function(){
       myself.placeholder("input").datepicker({
+        beforeShow: function() {
+          myself.triggerOnOpen();
+        },
+        onClose: function() {
+          myself.triggerOnClose();
+        },
         dateFormat: format,
         changeMonth: true,
         changeYear: true,
@@ -603,11 +613,22 @@ var DateInputComponent = BaseComponent.extend({
       myself._doAutoFocus();
     });
   },
+
+  triggerOnOpen: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", true);
+    this.trigger('onOpen:dateInput');
+  },
+
+  triggerOnClose: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", false);
+    this.trigger('onClose:dateInput');
+  },
+
   getValue : function() {
     if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null)
-        return $("#" + this.name + "_hidden").val();
+      return $("#" + this.name + "_hidden").val();
     else
-        return $("#"+this.name).val();
+      return $("#"+this.name).val();
   }
 });
 
@@ -615,7 +636,7 @@ var DateInputComponent = BaseComponent.extend({
 var DateRangeInputComponent = BaseComponent.extend({
   update : function() {
     var dr;
-    var inputSeparator = this.inputSeparator != undefined ? this.inputSeparator : ">";
+    var inputSeparator = this.inputSeparator = this.inputSeparator || ">";
 
     if (this.singleInput == undefined || this.singleInput == true){
       dr = $("<input/>").attr("id",this.name).attr( "value", this.getStartParamValue()
@@ -719,11 +740,11 @@ var DateRangeInputComponent = BaseComponent.extend({
 
         //reset value on input
         if( myself.singleInput == undefined || myself.singleInput == true ) {
-          input.attr( "value", start + " " + myself.inputSeparator + " " + end );
+          input.val( start + " " + myself.inputSeparator + " " + end );
 
         } else {
-          input.find( myself.name).attr( "value", start );
-          input.find( myself.name + "2" ).attr( "value", end );
+          input.eq(0).val( start );
+          input.eq(1).val( end );
 
         }
 
