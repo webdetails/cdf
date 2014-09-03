@@ -149,6 +149,21 @@
   width: auto;
 }
 
+/*******
+DateRangeInput Component
+********/
+
+.ui-daterangepicker button.btnCancel {
+  margin: 0px 5px 5px 0px;
+  position: absolute;
+        top: auto;
+        left: auto;
+  bottom: 0px;
+  right: 55px;
+  float: right;
+  cursor: pointer;
+  font-size: 1.1em;
+}
 
 /*******
 Comments Component
