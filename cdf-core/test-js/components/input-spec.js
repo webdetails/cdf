@@ -80,3 +80,65 @@ describe("The Autocomplete Component #", function() {
   });
 
 });
+
+/**
+ * ## The DateInput Component
+ */
+describe("The DateInput Component #", function() {
+
+  var myDashboard = _.extend({}, Dashboards);
+  var onOpen = false;
+  var onClose = false;
+
+  myDashboard.addParameter('dateInputTestParameter', "");
+
+  var dateInputComponent = window.DateInputComponent = new DateInputComponent();
+  $.extend(dateInputComponent, {
+    name: "dateInputComponent",
+    type: "dateInputComponent",
+    htmlObject: 'dateInputComponent',
+    parameter: "dateInputTestParameter",
+    dateFormat: "yy-mm-dd",
+    startDate: "2006-05-31",
+    endDate: "TODAY",
+    onOpenEvent: function() {
+      onOpen = true;
+    },
+    onCloseEvent: function() {
+      onClose = true;
+    },
+    executeAtStart: true
+  });
+
+  myDashboard.addComponent(dateInputComponent);
+
+
+  /**
+   * ## The DateInput Component # Update Called
+   */
+  it("Update Called", function(done) {
+    spyOn(dateInputComponent, 'update').and.callThrough();
+    myDashboard.update(dateInputComponent);
+    setTimeout(function(){
+      expect(dateInputComponent.update).toHaveBeenCalled();
+      done();
+    }, 100);
+  });
+
+  /**
+   * ## The DateInput Component # Trigger onOpenEvent and onCloseEvent called
+   */
+  it("Trigger onOpenEvent and onCloseEvent called", function(done) {
+    spyOn(dateInputComponent, 'update').and.callThrough();
+    myDashboard.update(dateInputComponent);
+    dateInputComponent.triggerOnOpen();
+    dateInputComponent.triggerOnClose();
+
+    setTimeout(function(){
+      expect(dateInputComponent.update).toHaveBeenCalled();
+      expect(onOpen).toBeTruthy();
+      expect(onClose).toBeTruthy();
+      done();
+    }, 100);
+  });
+});
