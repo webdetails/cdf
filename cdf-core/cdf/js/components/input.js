@@ -573,12 +573,22 @@ var DateInputComponent = BaseComponent.extend({
     if(this.endDate == 'TODAY') endDate = new Date();
     else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
 
+    //onOpen and onClose events
+    this.on('onOpen:dateInput', this.onOpenEvent );
+    this.on('onClose:dateInput', this.onCloseEvent );
+
     //ToDo: stretch interval to catch defaultValue?..
     //Dashboards.getParameterValue(this.parameter))
 
     this.placeholder().html($("<input/>").attr("id", this.name).attr("value", Dashboards.getParameterValue(this.parameter)).css("width", "80px"));
     $(function(){
       myself.placeholder("input").datepicker({
+        beforeShow: function() {
+          myself.triggerOnOpen();
+        },
+        onClose: function() {
+          myself.triggerOnClose();
+        },
         dateFormat: format,
         changeMonth: true,
         changeYear: true,
@@ -603,11 +613,22 @@ var DateInputComponent = BaseComponent.extend({
       myself._doAutoFocus();
     });
   },
+
+  triggerOnOpen: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", true);
+    this.trigger('onOpen:dateInput');
+  },
+
+  triggerOnClose: function() {
+    this.placeholder("input").toggleClass("dInputComponentExpanded", false);
+    this.trigger('onClose:dateInput');
+  },
+
   getValue : function() {
     if (typeof Dashboards.i18nSupport !== "undefined" && Dashboards.i18nSupport != null)
-        return $("#" + this.name + "_hidden").val();
+      return $("#" + this.name + "_hidden").val();
     else
-        return $("#"+this.name).val();
+      return $("#"+this.name).val();
   }
 });
 
