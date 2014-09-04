@@ -134,7 +134,7 @@ public class MessageBundlesHelper {
 
         // we append the content of global and base message files here,
         // then we write the end result to targetDashboardBaseMsgFile
-        String tempMessageFileName = "tempMessageFile_" + System.currentTimeMillis();
+        String tempMessageFileName = System.getProperty( "java.io.tmpdir" ) + "tempMessageFile_" + System.currentTimeMillis();
         tempMessageFile = new File( tempMessageFileName );
         BufferedWriter bwTempBaseMsgTarget = new BufferedWriter( new FileWriter( tempMessageFile, true ) );
 
