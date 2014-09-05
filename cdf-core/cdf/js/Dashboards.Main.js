@@ -451,63 +451,122 @@ Dashboards.updateComponent = function(object) {
   }
 };
 
-
-Dashboards.getComponent = dash.getComp = function(name){
-  for (var i in this.components){
-    if (this.components[i].name == name)
-      return this.components[i];
-  }
+/*
+ * Validate component's name.
+ *
+ * @param component the component or a string with a component's name
+ * @returns a string with the component's name
+ */
+Dashboards.getComponentName = function(component) {
+  if(!component) { return undefined; }
+  if(component.name && (typeof component.name === "string")) { return component.name; }
+  else if(typeof component === "string") { return component; }
+  else return undefined;
 };
-
+/*
+ * If `component` is an object with property name it calls Dashboards.getComponentByName to search for the component
+ * with name `component.name`. If `component` is a string it calls Dashboards.getComponentByName to search for the
+ * component with name `component`.
+ *
+ * @param component the component to search for
+ * @returns the component or undefined
+ */
+Dashboards.getComponent = dash.getComp = function(component) {
+  var name = this.getComponentName(component);
+  if(name) { return this.getComponentByName(name); } else { return undefined; }
+};
+/*
+ * If globalContext is true it searches the global window object for the component with name `name`, if the component
+ * is not found it searches Dashboards.components for it. If globalContext is false it only searches Dashboards.components
+ * for the component with name `name`.
+ *
+ * @param component the component to search for
+ * @returns the component with name `name` or undefined
+ */
 Dashboards.getComponentByName = function(name) {
-  if (this.globalContext) {
-    return eval(name);
-  } else {
-    return this.getComponent(name);
+  if(this.globalContext && window[name] && window[name].name === name) { return window[name]; }
+  for(var i in this.components){
+    if(this.components[i] && this.components[i].name === name) { return this.components[i]; }
   }
+  return undefined;
 };
 
+/*
+ * Adds/Replaces each component contained in the array `components` to the end of the `Dashboards.components` array.
+ * If there is a component in `Dashboards.components` with the same name the new component will replace the old.
+ * If globalContext is true it will also add the components in the global `window` object.
+ *
+ * @param components the array of components to be added
+ */
 Dashboards.addComponents = function(components) {
+  if(!$.isArray(components)) { 
+    this.log('Dashboards.addComponents: components in a structure other than an array will not be added!','warn');
+    return;
+  }
   components.forEach(function(component) {
-    this.bindControl(component);
-    this.components.push(component);
+    this.addComponent(component);
   }, this);
 };
 
+/*
+ * Adds/Replaces a component with name `component.name` at the end of the Dashboards.components array, or at position
+ * options.index if such value is provided. If globalContext is true it will also add the component into the 
+ * global `window` object.
+ *
+ * @param component the new component to be added
+ * @param options object containing the property `index` where the component will be added in the components array
+ * @returns boolean
+ */
 Dashboards.addComponent = function(component, options) {
-  this.removeComponent(component);
-
+  // Check if component has a name
+  var name = this.getComponentName(component);
+  if(!name) {
+    this.log('Dashboards.addComponent: failed attempting to add a component that has no name!','warn');
+    return;
+  }
+  // Remove any component that has name `component.name`
+  this.removeComponent(name);
   // Attempt to convert over to component implementation
   this.bindControl(component);
-
-  var index = options && options.index;
-  var L = this.components.length;
-  if(index == null || index < 0 || index > L) { index = L; } // <=> push
-  this.components[index] = component;
+  // If globalContext true add the component to the global `window` object
+  if(this.globalContext) { window[name] = component; }
+  // If options.index provided add the new component in the specified position of the array
+  (options && options.index && (options.index > -1) && (options.index < this.components.length)) 
+    ? this.components.splice(options.index,0,component)
+    : this.components.push(component);
+  
 };
 
-Dashboards.getComponentIndex = function(compOrNameOrIndex) {
-  if(compOrNameOrIndex != null) {
-    switch(typeof compOrNameOrIndex) {
-      case 'string':
-        for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
-          if(cs[i].name === compOrNameOrIndex) { return i; }
-        }
-        break;
-      case 'number': //really?
-        if(compOrNameOrIndex >= 0 && compOrNameOrIndex < this.components.length) {
-          return compOrNameOrIndex;
-        }
-        break;
-
-      default: return this.components.indexOf(compOrNameOrIndex);
+/*
+ * Get the index of the array `Dashboards.components` that contains the component with name `name`.
+ *
+ * @param name the name of the component to search
+ * @returns number the index where the component is at or -1 if not found
+ */
+Dashboards.getComponentIndex = function(name) {
+  if(name != null) {
+    for(var i in this.components) {
+      if(this.components[i] && this.components[i].name === name) { return i; }
     }
   }
   return -1;
 };
 
-Dashboards.removeComponent = function(compOrNameOrIndex) {
-  var index = this.getComponentIndex(compOrNameOrIndex);
+/*
+ * Removes a component with name `component` or `component.name` when an object is provided.
+ *
+ * @param component the component object or the component's name to be removed
+ * @returns the removed component or undefined
+ */
+Dashboards.removeComponent = function(component) {
+  var name = this.getComponentName(component);
+  if(!name) { return undefined; }
+  // If globalContext is true also remove the component from the global `window` object
+  if(this.globalContext && window[name] && window[name].name === name) {
+    try{ delete window[name]; }catch(e){ window[name] = undefined; } // catch IE8 exception
+  }
+
+  var index = this.getComponentIndex(name);
   var comp = null;
   if(index >= 0) {
     var cs = this.components;

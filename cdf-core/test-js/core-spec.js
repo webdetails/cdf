@@ -37,7 +37,8 @@ describe("The CDF framework #", function() {
     type: "managedFreeform",
     preExecution: function() {},
     customfunction: function() {},
-    postExecution: function(){}
+    postExecution: function(){},
+    size: "1"
   };
   var shouldNotUpdate =  {
     name: "shouldNotUpdate",
@@ -94,7 +95,134 @@ describe("The CDF framework #", function() {
 
     setTimeout(dataToValidate, 100);
   });
+  /**
+   * ## The CDF framework # getComponentName
+   */
+  describe("getComponentName", function(){
+    /**
+     * ## The CDF framework # getComponentName returns a string with the component's name when the component is provided
+     */
+    it("returns a string with the component's name when the component is provided",function(done) {
+      expect(myDashboard.getComponentName(shouldUpdate)).toEqual("shouldUpdate");
+      done();
+    });
+    /**
+     * ## The CDF framework # getComponentName returns a string with the component's name when the name is provided
+     */
+    it("returns a string with the component's name when the name is provided",function(done) {
+      expect(myDashboard.getComponentName(shouldUpdate.name)).toEqual("shouldUpdate");
+      done();
+    });
+    /**
+     * ## The CDF framework # getComponentName returns undefined when a component with no name property is provided
+     */
+    it("returns undefined when a component with no name property is provide",function(done) {
+      var tmp = {};
+      $.extend( tmp, shouldUpdate );
+      tmp.name = null;
+      expect(myDashboard.getComponentName(tmp)).toEqual(undefined);
+      tmp.name = shouldUpdate.name;
+      expect(myDashboard.getComponentName(tmp)).toEqual("shouldUpdate");
+      done();
+    });
+  });
+  /**
+   * ## The CDF framework # getComponent
+   */
+  describe("getComponent", function(){
+    /**
+     * ## The CDF framework # getComponent returns undefined if no component is found
+     */
+    it("returns undefined if no component is found",function(done) {
+      expect(myDashboard.getComponent("fake")).toEqual(undefined);
+      done();
+    });
+    /**
+     * ## The CDF framework # getComponent searches for a component when a string with the name is provided
+     */
+    it("searches for a component when a string with the name is provided",function(done) {
+      expect(myDashboard.getComponent("shouldUpdate")).toEqual(shouldUpdate);
+      done();
+    });
+    /**
+     * ## The CDF framework # getComponent searches for a component when a component with string property name is provided
+     */
+    it("searches for a component when a component with string property name is provided",function(done) {
+      expect(shouldUpdate.name).toEqual("shouldUpdate");
+      expect(myDashboard.getComponent(shouldUpdate)).toEqual(shouldUpdate);
+      done();
+    });
+  });
+  /**
+   * ## The CDF framework # addComponent
+   */
+  describe("addComponent", function(){
+    /**
+     * ## The CDF framework # addComponent replaces components when adding components with duplicate names
+     */
+    it("replaces components when adding components with duplicate names",function(done) {
+      expect(myDashboard.getComponent(shouldUpdate.name).size).toEqual("1");
+      shouldUpdate.size = "2";
+      myDashboard.addComponent(shouldUpdate);
+      expect(myDashboard.getComponent(shouldUpdate.name).size).toEqual("2");
+      done();
+    });
+    /**
+     * ## The CDF framework # addComponent also adds component to global object `window` when globalContext is true
+     */
+    it("also adds component to global object `window` when globalContext is true",function(done) {
+      var tmp = myDashboard.globalContext;
+      myDashboard.globalContext = true;
+      myDashboard.addComponent(shouldUpdate);
+      expect(myDashboard.getComponent(shouldUpdate.name).size).toEqual("2");
+      expect(myDashboard.components[myDashboard.getComponentIndex(shouldUpdate.name)]).toEqual(shouldUpdate);
+      expect(window[shouldUpdate.name]).toEqual(shouldUpdate);
+      myDashboard.globalContext = tmp;
+      done();
+    });
+  });
+  /**
+   * ## The CDF framework # removeComponent
+   */
+  describe("removeComponent", function(){
+    /**
+     * ## The CDF framework # removeComponent removes components with the same name, if the component object or name is provided
+     */
+    it("removes components with the same name, if the component object or name is provided",function(done) {
+      expect(myDashboard.getComponent(shouldUpdate)).toEqual(shouldUpdate);
+      expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(shouldUpdate);
+      expect(myDashboard.removeComponent(shouldUpdate)).toEqual(shouldUpdate);
+      expect(myDashboard.getComponentIndex(shouldUpdate)).toEqual(-1);
+      expect(myDashboard.getComponent(shouldUpdate)).toEqual(undefined);
+      expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(undefined);
+      myDashboard.addComponent(shouldUpdate);
+      expect(myDashboard.getComponent(shouldUpdate)).toEqual(shouldUpdate);
+      expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(shouldUpdate);
+      expect(myDashboard.removeComponent(shouldUpdate.name)).toEqual(shouldUpdate);
+      expect(myDashboard.getComponentIndex(shouldUpdate)).toEqual(-1);
+      expect(myDashboard.getComponent(shouldUpdate)).toEqual(undefined);
+      expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(undefined);
+      myDashboard.addComponent(shouldUpdate);
+      done();
+    });
+    /**
+     * ## The CDF framework # removeComponent also removes a component from the global object `window` when globalContext is true
+     */
+    it("also removes a component from the global object `window` when globalContext is true",function(done) {
+      var tmp = myDashboard.globalContext;
+      myDashboard.globalContext = true;
+      myDashboard.addComponent(shouldUpdate);
+      expect(myDashboard.getComponent(shouldUpdate.name).size).toEqual("2");
+      expect(window[shouldUpdate.name]).toEqual(shouldUpdate);
+      myDashboard.removeComponent(shouldUpdate);
+      expect(myDashboard.getComponent(shouldUpdate.name)).toEqual(undefined);
+      expect(myDashboard.components[myDashboard.getComponentIndex(shouldUpdate.name)]).toEqual(undefined);
+      expect(window[shouldUpdate.name]).toEqual((undefined));
+      myDashboard.globalContext = tmp;
+      done();
+    });
 
+  });
   /**************************************
    * Test Parameter setting and syncing *
    **************************************/
