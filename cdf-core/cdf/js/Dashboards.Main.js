@@ -1150,60 +1150,86 @@ Dashboards._getParameterStore = function(){
 /**
  * Verifies if a parameter is available in the Parameter Model
  *
- * @param name of the parameter
- * @returns boolean
+ * @param {string} name of the parameter
+ * @returns {boolean}
  * @private
  */
 Dashboards._isParameterInModel = function(name){
-  return this.parameterModel.attributes.hasOwnProperty(name) ;
+  return this._getValueFromContext(this._getParameterStore(), name) !== undefined;
 };
 
 /**
- * Gets the value from a context o from the property with a given path
+ * Gets the value of a path in a given object.
  *
- * @param o the context of the assignment
- * @param path the path of the property
- * @returns the value of the property
+ * @param {Object} o the context object
+ * @param {string|Array.<string>} path the path of the property
+ * @returns {*} the value of the property, if the path is present in <i>o</i>, or <tt>undefined</tt>, otherwise.
  * @private
  */
 Dashboards._getValueFromContext = function(o, path) {
-  if (!o) return; //undefined
-  if (null != path) {
-    var parts = (path instanceof Array) ? path : path.split("."), L = parts.length;
-    if (L) for (var i = 0; L > i; ) {
-      var part = parts[i++], value = o[part];
-      if (null == value) {
-        return; //the path requested is undefined
-      }
+  if(!o) return;
+
+  if(path != null) {
+    var parts, L;
+
+    if(path instanceof Array) {
+      parts = path;
+    } else {
+      if(path.indexOf('.') < 0) return o[path];
+
+      parts = path.split(".");
+    } 
+    L = parts.length;
+
+    for(var i = 0; i < L; i++) {
+      //if(!(o instanceof Object) return; // not an object
+      if(!o) return; // more efficient approximation
+
+      var part = parts[i],
+          value = o[part];
+      if(value === undefined) return;
+      
       o = value;
     }
   }
+
   return o;
 };
 
 /**
- * Sets a property path in a context o with v as value
+ * Sets a property path in a context <i>o</i> with value <i>v</i>
  *
- * @param o the context of the assignment
- * @param path the path of the property
- * @param v the value of the property
- * @returns the value of the property assigned
+ * @param {Object} o the context object
+ * @param {string|Array.<string>} path the path of the property
+ * @param {*} v the value of the property
+ * @returns the context object <i>o</i> or undefined
  * @private
  */
 Dashboards._setValueInContext = function(o, path, v) {
-  if (o && null != path) {
-    var parts = (path instanceof Array) ? path : path.split(".");
-    if (parts.length) {
-      var pLast = parts.pop();
-      o = this._getValueFromContext(o, parts);
-      if(o) o[pLast] = v;
+  if(!o || path == null || v === undefined) return; // undefined
+
+  var parts, pLast;
+  if(path instanceof Array) {
+    parts = path;
+    pLast = parts.pop();
+  } else {
+    if(path.indexOf(".") < 0) {
+      o[path] = v;
+      return o;
     }
+
+    parts = path.split(".");
+    pLast = parts.pop();
   }
+
+  o = this._getValueFromContext(o, parts);
+  if(o) o[pLast] = v;
+
   return o;
 };
 
 /**
- * Adds a parameter new parameter to the parameter module.
+ * Adds a new parameter to the parameter module.
  * Receives a parameter name and an initial value, that will be used if the parameter is
  * not available in the parameter model. Otherwise, the getParameterValue return is used
  *
@@ -1220,23 +1246,34 @@ Dashboards.addParameter = function(name, initValue){
 };
 
 Dashboards.getParameterValue = dash.getParam = function (parameterName) {
-  var parameterStore = this._getParameterStore();
-  return this._getValueFromContext(parameterStore, parameterName);
+  return this._getValueFromContext(this._getParameterStore(), parameterName);
 };
 
+/* Sets the value of a parameter if it's name is not undefined and is not an empty string. The
+ * parameter will also not be set when using a composed path that lacks more than the last
+ * parameter (eg: when setting parameter <i>dash.obj.prop</i> if <i>dash.obj</i> doesn't exist undefined will be returned).
+ *
+ * @param parameterName the name of the parameter
+ * @param parameterValue the value of the parameter
+ * @isNotified the value of notify passed to the Backbone Model setter
+ * @returns the new value of the parameter or undefined
+ */
 Dashboards.setParameter = dash.setParam = function(parameterName, parameterValue, isNotified) {
-  if(parameterName == undefined || parameterName == "undefined"){
-    this.log('Dashboards.setParameter: trying to set undefined!!','warn');
+  if(parameterName == undefined || parameterName == "undefined" || parameterName == ""){
+    this.log('Dashboards.setParameter: trying to set undefined or empty string as parameter name!!','warn');
     return;
   }
-  var parameterStore = this._getParameterStore();
+  var value;
   if(!this.globalContext && this.escapeParameterValues){
-    this._setValueInContext(parameterStore, parameterName, encode_prepare_arr(parameterValue));
+    value = encode_prepare_arr(parameterValue);
   } else {
-    this._setValueInContext(parameterStore, parameterName, parameterValue);
+    value = parameterValue;
   }
-  this.parameterModel.set(parameterName,parameterValue,{notify:isNotified});
-  this.persistBookmarkables(parameterName);
+  if(this._setValueInContext(this._getParameterStore(), parameterName, value) !== undefined){
+    this.parameterModel.set(parameterName,value,{notify:isNotified});
+    this.persistBookmarkables(parameterName);
+    return value;
+  }
 };
 
 
