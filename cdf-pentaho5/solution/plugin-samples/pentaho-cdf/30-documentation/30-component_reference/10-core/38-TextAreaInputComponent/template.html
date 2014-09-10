@@ -4,11 +4,11 @@
 
 	<div class="contents">
 
-		<h2>TextInputComponent</h2>
+		<h2>TextAreaInputComponent</h2>
 
 		<h3>Description</h3>
 		<p>
-		Renders a text input box to collect user input from. Press enter or remove focus from box to fire the change event.
+		Renders a multi-line text input box to collect user input. Change event is fired after user edits the content and removes the focus from the box.
 		Pre/postChange functions can be used to make data validation.
 		</p>
 
@@ -19,7 +19,7 @@
 			<dd>The name of the component</dd>
 
 			<dt>type</dt>
-			<dd><code>textInputComponent</code></dd>
+			<dd><code>textareaInputComponent</code></dd>
 
 			<dt>listeners</dt>
 			<dd><i>Array - </i> Parameters who this component will react to</dd>
@@ -80,7 +80,7 @@
 myInput = 
 {
 	name: "myInput",
-	type: "textInputComponent",
+	type: "textareaInputComponent",
 	parameters:[],
 	parameter: "input",
 	htmlObject: "sampleObject",
