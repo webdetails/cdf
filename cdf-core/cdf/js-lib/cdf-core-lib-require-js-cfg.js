@@ -174,6 +174,12 @@
     'cdf/lib/OpenLayers'
   ];
 
+  //jQuery uriQueryParser 2013
+  requirePaths['cdf/lib/queryParser'] = prefix + "/uriQueryParser/jquery-queryParser";
+  requireShims['cdf/lib/queryParser'] = [
+    'cdf/lib/jquery'
+  ];
+
   //shims
   requirePaths['cdf/lib/shims'] = prefix + "/shims";
 

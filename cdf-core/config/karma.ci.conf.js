@@ -26,6 +26,7 @@ module.exports = function(config) {
       'cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
       
       'cdf/js-lib/jquery/jquery.blockUI.js',
+      'cdf/js-lib/uriQueryParser/jquery-queryParser.js',
       'cdf/js-lib/underscore/underscore.js',
       'cdf/js-lib/underscore/backbone.js',
       'cdf/js-lib/underscore/mustache.js',
