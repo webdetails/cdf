@@ -1,1 +1,0 @@
-var requireCfg={paths:{},shim:{}};

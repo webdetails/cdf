@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(['components/BaseComponent', 'Base', 'Logger'], function (BaseComponent, Base, Logger) {
+define(['./BaseComponent', 'cdf/lib/Base', '../Logger'], function (BaseComponent, Base, Logger) {
 
     /*
      * UnmanagedComponent is an advanced version of the BaseComponent that allows

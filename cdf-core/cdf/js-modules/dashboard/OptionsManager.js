@@ -12,7 +12,7 @@
 */
 
 
-define(['dashboard/Utils', 'underscore'], function (Utils, _) {
+define(['./Utils', 'cdf/lib/underscore'], function (Utils, _) {
 
 
   // Shared / Static

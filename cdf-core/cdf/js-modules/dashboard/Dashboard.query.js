@@ -14,7 +14,7 @@
 
 
 
-define(['Base', 'dashboard/Dashboard', 'dashboard/Container', 'underscore', 'dashboard/Utils'], function (Base, Dashboard, Container,_, Utils) {
+define(['cdf/lib/Base', './Dashboard', './Container', 'cdf/lib/underscore', './Utils'], function (Base, Dashboard, Container,_, Utils) {
 
     var _BaseQuery = Base;
     
@@ -36,9 +36,8 @@ define(['Base', 'dashboard/Dashboard', 'dashboard/Container', 'underscore', 'das
        * @private
        */
       _initQuery: function(){
-        this.queryFactories = Utils.clone(globalQueryFactories);     
+        this.queryFactories = Utils.clone(globalQueryFactories);
       },
-    
 
         getBaseQuery : function (){
             return _BaseQuery;

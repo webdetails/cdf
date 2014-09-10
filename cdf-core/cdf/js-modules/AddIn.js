@@ -30,7 +30,7 @@
  */
 
 
-define(['dashboards/Utils', 'Logger', 'jquery'], function (Utils, Logger, $) {
+define(['./dashboard/Utils', './Logger', 'jquery'], function (Utils, Logger, $) {
 
 return function (options) {
   

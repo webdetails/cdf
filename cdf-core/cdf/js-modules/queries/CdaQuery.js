@@ -12,7 +12,7 @@
 */
 
 
-define(['queries/BaseQuery', 'dashboard/Dashboard.query', 'underscore', 'dashboard/Utils', 'Logger'], function (BaseQuery, Dashboards, _, Utils, Logger) {
+define(['./BaseQuery', '../dashboard/Dashboard.query', 'cdf/lib/underscore', '../dashboard/Utils', '../Logger'], function (BaseQuery, Dashboards, _, Utils, Logger) {
 
 
 
@@ -20,7 +20,7 @@ define(['queries/BaseQuery', 'dashboard/Dashboard.query', 'underscore', 'dashboa
     name: 'cda',
     label: 'CDA Query',
     defaults: {
-      url: wd.cdf.endpoints.getDoQuery(),
+      //  url: wd.cdf.endpoints.getDoQuery(),
       file: '',
       id: '',
       outputIdx: '1',

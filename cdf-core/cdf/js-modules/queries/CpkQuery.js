@@ -12,7 +12,7 @@
 */
 
 
-define(['queries/BaseQuery', 'dashboard/Dashboard.query', 'underscore', 'dashboard/Utils'], function (BaseQuery, Dashboards, _, Utils) {
+define(['./BaseQuery', '../dashboard/Dashboard.query', 'cdf/lib/underscore', '../dashboard/Utils'], function (BaseQuery, Dashboards, _, Utils) {
 
      var CpkEndpointsOpts = {
     name: "cpk",

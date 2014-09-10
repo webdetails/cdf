@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["dashboard/Query", "jquery", "Dashboard"], function(Query, jQuery, Dashboard) {
+define(["cdf/dashboard/Query", "cdf/lib/jquery", "cdf/Dashboard"], function(Query, jQuery, Dashboard) {
 
 
     /**

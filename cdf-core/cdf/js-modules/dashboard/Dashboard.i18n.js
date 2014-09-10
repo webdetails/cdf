@@ -12,7 +12,7 @@
  */
 
 
-define(['dashboard/Dashboard'], function (Dashboard) {
+define(['./Dashboard'], function (Dashboard) {
     /**
      * A module representing a extension to Dashboard module for i18n.
      * @module Dashboard.i18n

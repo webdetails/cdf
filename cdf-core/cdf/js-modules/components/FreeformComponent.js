@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(['components/UnmanagedComponent', 'Base'], function (UnmanagedComponent, Base) {
+define(['./UnmanagedComponent', 'cdf/lib/Base'], function (UnmanagedComponent, Base) {
 
 
     var FreeformComponent = UnmanagedComponent.extend({

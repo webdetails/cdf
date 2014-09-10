@@ -12,7 +12,7 @@
  */
 
 
-define(['dashboard/Dashboard', 'dashboard/Popups','Logger', 'underscore', 'jquery', 'jquery.ui', 'jquery.blockUI'], 
+define(['./Dashboard', './Popups','../Logger', 'cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/lib/jquery.ui', 'cdf/lib/jquery.blockUI'],
 function (Dashboard, Popups, Logger, _, $, jqueryUi, jqueryBlockUI) {
     /**
      * A module representing a extension to Dashboard module for notifications.
@@ -171,7 +171,7 @@ function (Dashboard, Popups, Logger, _, $, jqueryUi, jqueryBlockUI) {
           type: 'POST',
           async: false,
           dataType: 'json',
-          url: wd.cdf.endpoints.getPing(),
+          //url: wd.cdf.endpoints.getPing(),
           success: function(result) {
             if(result && result.ping == 'ok') {
               retVal = true;

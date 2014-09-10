@@ -15,7 +15,7 @@
 /* TODO requirejs: Review usage of datatables */
 /* TODO requirejs: Should Raphael be imported here ? */
 /* TODO requirejs: Should pvc be imported here ? */
-define(['AddIn', 'datatables', 'Dashboard', 'Logger', 'underscore'], function (AddIn, DataTables, Dashboards, Logger, _) {
+define(['../AddIn', 'cdf/lib/datatables', '../dashboard/Dashboard', '../Logger', 'cdf/lib/underscore'], function (AddIn, DataTables, Dashboards, Logger, _) {
   /* Sparkline AddIn, based on jquery.sparkline.js sparklines.
    * 
    */

@@ -5,7 +5,7 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '',
+    basePath: '../),
 
 
     // frameworks to use
@@ -14,7 +14,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
    files: [
-      'cdf/js-lib/shims.js',
+      '../cdf/js-lib/shims.js',
       'cdf/js-lib/pen-shim.js',
       'test-js/testUtils.js',
       'cdf/js/wd.js',

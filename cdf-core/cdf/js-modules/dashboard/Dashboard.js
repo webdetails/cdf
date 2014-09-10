@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define (['Base', 'jquery', 'Logger', 'dashboard/RefreshEngine', 'backbone', 'underscore'], 
-    function (Base, jQuery, Logger, RefreshEngine, Backbone, _) {
+define (['cdf/lib/Base', 'jquery', '../Logger', './RefreshEngine', 'cdf/lib/underscore', 'cdf/lib/backbone', 'cdf/lib/shims'],
+    function (Base, jQuery, Logger, RefreshEngine, _, Backbone) {
     /**
      * A module representing a Dashboard.
      * @module Dashboard
@@ -43,10 +43,10 @@ define (['Base', 'jquery', 'Logger', 'dashboard/RefreshEngine', 'backbone', 'und
         if(this.webAppPath.endsWith("/")) {
           this.webAppPath = this.webAppPath.substr(0, this.webAppPath.length-1);
         }
+
+        //wd.cdf.endpoints.webAppPath = this.webAppPath;
     
-        wd.cdf.endpoints.webAppPath = this.webAppPath;
-    
-        this.CDF_BASE_PATH = wd.cdf.endpoints.getCdfBase();
+        //this.CDF_BASE_PATH = wd.cdf.endpoints.getCdfBase();
     
         //initial storage
         this.initialStorage = {};
@@ -140,7 +140,7 @@ define (['Base', 'jquery', 'Logger', 'dashboard/RefreshEngine', 'backbone', 'und
       /* globalContext determines if components and params are retrieved
        * from the current window's object or from the Dashboards singleton
        */
-      globalContext: true,
+      globalContext: false,
     
     
     

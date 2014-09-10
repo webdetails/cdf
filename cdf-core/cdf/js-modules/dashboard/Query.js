@@ -14,7 +14,7 @@
 
 
 
-define(['underscore'], function (_) {
+define(['cdf/lib/underscore'], function (_) {
 
 
 

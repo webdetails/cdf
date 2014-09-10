@@ -14,7 +14,7 @@
 
 
 
-define(['dashboard/Dashboard', 'Logger', 'dashboard/Utils'], function (Dashboard, Logger, Utils) {
+define(['./Dashboard', '../Logger', './Utils'], function (Dashboard, Logger, Utils) {
 
     /**
      * A module representing a extension to Dashboard module for bookmarkable parameters.

@@ -1,5 +1,4 @@
 /*!
-/*!
 * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 * 
 * This software was developed by Webdetails and is provided under the terms
@@ -12,23 +11,23 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(['dashboard/Dashboard', 
-        'dashboard/Dashboard.addIns', 
-        'dashboard/Dashboard.bookmarkable', 
-        'dashboard/Dashboard.components',         
-        'dashboard/Dashboard.i18n', 
-        'dashboard/Dashboard.legacy',        
-        'dashboard/Dashboard.lifecycle', 
-        'dashboard/Dashboard.notifications', 
-        'dashboard/Dashboard.parameters', 
-        'dashboard/Dashboard.storage', 
-        'dashboard/Dashboard.query',         
-        'dashboard/Dashboard.views',
-        'queries/BaseQuery',
-        'queries/CpkQuery',
-        'queries/CdaQuery',        
-        'components/BaseComponent',        
-        'components/UnmanagedComponent'
+define(['./dashboard/Dashboard',
+        './dashboard/Dashboard.addIns',
+        './dashboard/Dashboard.bookmarkable',
+        './dashboard/Dashboard.components',
+        './dashboard/Dashboard.i18n',
+        './dashboard/Dashboard.legacy',
+        './dashboard/Dashboard.lifecycle',
+        './dashboard/Dashboard.notifications',
+        './dashboard/Dashboard.parameters',
+        './dashboard/Dashboard.storage',
+        './dashboard/Dashboard.query',
+        './dashboard/Dashboard.views',
+        './queries/BaseQuery',
+        './queries/CpkQuery',
+        './queries/CdaQuery',
+        './components/BaseComponent',
+        './components/UnmanagedComponent'
         ], 
         function (Dashboard, AddIns, Bookmarks, Components, I18n, Legacy, Lifecycle, Notifications, Parameters, Storage, Query, Views, BaseQuery, CpkQuery, BaseComponent, UnmanagedComponent) {            
             return Dashboard;
