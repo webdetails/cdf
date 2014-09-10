@@ -28,10 +28,9 @@ define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
       var el = $("#" + name);
 
       el.change(function() {
-        if(myself.dashboard.getParameterValue(myself.parameter) === el.val()) {
-          return;
+        if(myself.dashboard.getParameterValue(myself.parameter) !== el.val()) {
+          myself.dashboard.processChange(name);
         }
-        myself.dashboard.processChange(name);
       });
     },
 
