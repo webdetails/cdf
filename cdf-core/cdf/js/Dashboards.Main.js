@@ -451,52 +451,62 @@ Dashboards.updateComponent = function(object) {
   }
 };
 
-/*
- * Validate component's name.
+/**
+ * Gets the name of a component given an object with a property <i>name</i>.
+ * If a non-empty string is specified, or <i>component.name</i> is a non-empty string, it returns it.
+ * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
  *
- * @param component the component or a string with a component's name
- * @returns a string with the component's name
+ * @param {object|string} component the component or a string representing the component's name.
+ * @returns {string|undefined} a string with the component's name or <tt>undefined</tt>.
  */
 Dashboards.getComponentName = function(component) {
-  if(!component) { return undefined; }
+  if(!component) { return; }
   if(component.name && (typeof component.name === "string")) { return component.name; }
-  else if(typeof component === "string") { return component; }
-  else return undefined;
+  if(typeof component === "string") { return component; }
 };
-/*
- * If `component` is an object with property name it calls Dashboards.getComponentByName to search for the component
- * with name `component.name`. If `component` is a string it calls Dashboards.getComponentByName to search for the
- * component with name `component`.
+
+/**
+ * Gets the component given an object with a property <i>name</i> or a string containing the name.
+ * If <i>component</i> is an object with property <i>name</i> it calls {@link Dashboards.getComponentByName} to search for the component
+ * with name <i>component.name</i>. If <i>component</i> is a string it calls {@link Dashboards.getComponentByName} to search for the
+ * component with name <i>component</i>.
+ * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
  *
- * @param component the component to search for
- * @returns the component or undefined
+ * @param {object|string} component the component or a string representing the component's name.
+ * @returns {object|undefined} the component or <tt>undefined</tt>
  */
 Dashboards.getComponent = dash.getComp = function(component) {
   var name = this.getComponentName(component);
-  if(name) { return this.getComponentByName(name); } else { return undefined; }
-};
-/*
- * If globalContext is true it searches the global window object for the component with name `name`, if the component
- * is not found it searches Dashboards.components for it. If globalContext is false it only searches Dashboards.components
- * for the component with name `name`.
- *
- * @param component the component to search for
- * @returns the component with name `name` or undefined
- */
-Dashboards.getComponentByName = function(name) {
-  if(this.globalContext && window[name] && window[name].name === name) { return window[name]; }
-  for(var i in this.components){
-    if(this.components[i] && this.components[i].name === name) { return this.components[i]; }
-  }
-  return undefined;
+  if(name) { return this.getComponentByName(name); }
 };
 
-/*
- * Adds/Replaces each component contained in the array `components` to the end of the `Dashboards.components` array.
- * If there is a component in `Dashboards.components` with the same name the new component will replace the old.
- * If globalContext is true it will also add the components in the global `window` object.
+/**
+ * Gets the component given a string representing the component's name.
+ * If <i>Dashboards.globalContext</i> is <tt>true</tt> it searches the global <i>window</i> object for the component with name <i>name</i>.
+ * If <i>Dashboards.globalContext</i> is <tt>false</tt>, or the component is not found in the global <i>window</i> object, it searches the array
+ * <i>components</i> for the component with name <i>name</i>.
+ * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
  *
- * @param components the array of components to be added
+ * @param {string} name the component's name
+ * @returns {object|undefined} the component or <tt>undefined</tt>
+ */
+Dashboards.getComponentByName = function(name) {
+  if(!name) { return; }
+  if(this.globalContext && window[name]) { return window[name]; }
+  for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
+    var comp = cs[i];
+    if(comp && comp.name === name) { return comp; }
+  }
+};
+
+/**
+ * Adds one or more components to the dashboard, replacing existing components with the same name.
+ * If an array of components is specified it iterates through the array and calls {@link Dashboards.addComponent} for each
+ * component and in the end returns the <i>Dashboards</i> object.
+ * If a <i>falsy</i> value is specified, <tt>undefined</tt> is returned.
+ *
+ * @param {array} components the array of components to be added
+ * @returns {object|undefined} the Dashboards object or <tt>undefined</tt>
  */
 Dashboards.addComponents = function(components) {
   if(!$.isArray(components)) { 
@@ -506,67 +516,92 @@ Dashboards.addComponents = function(components) {
   components.forEach(function(component) {
     this.addComponent(component);
   }, this);
+  return this;
 };
 
-/*
- * Adds/Replaces a component with name `component.name` at the end of the Dashboards.components array, or at position
- * options.index if such value is provided. If globalContext is true it will also add the component into the 
- * global `window` object.
+/**
+ * Adds a component to the dashboard, replacing the first component that has the same name if any exist.
+ * If <i>component</i> doesn't have a property <i>component.name</i> or it isn't a valid string name undefined is returned.
+ * If <i>options.index</i> is <i>nuly</i> the component is appended to the end of the <i>Dashboards.components</i> array.
+ * If <i>options.index</i> is <i>truly</i> the component is appended to the <i>Dashboards.components</i> array at position <i>options.index</i>.
+ * If <i>Dashboards.globalContext</i> is <tt>true</tt> it will also add the component into the global <i>window</i> object.
  *
- * @param component the new component to be added
- * @param options object containing the property `index` where the component will be added in the components array
- * @returns boolean
+ * @param {object} component the new component to be added
+ * @param {object} options an object containing the property <i>options.index</i>
+ * @returns {boolean} <tt>true</tt> if the component was added and <tt>false</tt> otherwise
  */
 Dashboards.addComponent = function(component, options) {
-  // Check if component has a name
+  // get the component's name
   var name = this.getComponentName(component);
   if(!name) {
     this.log('Dashboards.addComponent: failed attempting to add a component that has no name!','warn');
-    return;
+    return false;
   }
-  // Remove any component that has name `component.name`
+  // Remove a component that has the same name
   this.removeComponent(name);
   // Attempt to convert over to component implementation
   this.bindControl(component);
-  // If globalContext true add the component to the global `window` object
+  // If globalContext is true add the component to the global window object
   if(this.globalContext) { window[name] = component; }
   // If options.index provided add the new component in the specified position of the array
-  (options && options.index && (options.index > -1) && (options.index < this.components.length)) 
-    ? this.components.splice(options.index,0,component)
-    : this.components.push(component);
-  
+  if (options && options.index && (options.index > -1) && (options.index < this.components.length)) {
+    this.components.splice(options.index,0,component)
+  } else {
+    this.components.push(component);
+  }
+  return true;
 };
 
-/*
- * Get the index of the array `Dashboards.components` that contains the component with name `name`.
+/**
+ * Get the index of the array <i>Dashboards.components</i> that contains the component.
+ * If <i>compOrNameOrIndex</i> is a <tt>string</tt> search the component that first matches such name.
+ * If <i>compOrNameOrIndex</i> is a <tt>number</tt> return it.
+ * If <i>compOrNameOrIndex</i> is a component return the index where it is in <i>Dashboards.components</i>.
  *
- * @param name the name of the component to search
- * @returns number the index where the component is at or -1 if not found
+ * @param {string|number|object} compOrNameOrIndex the name, index or the component to search
+ * @returns {number} the index where the component is at or <tt>-1</tt> if not found
  */
-Dashboards.getComponentIndex = function(name) {
-  if(name != null) {
-    for(var i in this.components) {
-      if(this.components[i] && this.components[i].name === name) { return i; }
+Dashboards.getComponentIndex = function(compOrNameOrIndex) {
+  if(compOrNameOrIndex) {
+    switch(typeof compOrNameOrIndex) {
+      case 'string':
+        for(var i = 0, cs = this.components, L = cs.length ; i < L ; i++) {
+          if(cs[i].name === compOrNameOrIndex) { return i; }
+        }
+        break;
+      case 'number': //really?
+        if(compOrNameOrIndex >= 0 && compOrNameOrIndex < this.components.length) {
+          return compOrNameOrIndex;
+        }
+        break;
+
+      default: return this.components.indexOf(compOrNameOrIndex);
     }
   }
   return -1;
 };
 
-/*
- * Removes a component with name `component` or `component.name` when an object is provided.
+/**
+ * Removes a component from the <i>Dashboards.components</i> array.
+ * If <i>compOrNameOrIndex</i> is a string the first component with such name is removed from the <i>components</i> array.
+ * If <i>compOrNameOrIndex</i> is a number the component in such position in the <i>components</i> array is removed.
+ * If <i>compOrNameOrIndex</i> is an object with a property <i>component.name</i> the first component with such name is
+ * removed from the <i>components</i> array.
+ * If <i>Dashboards.globalContext</i> is <tt>true</tt> it will also remove the component from the global <i>window</i> object.
  *
- * @param component the component object or the component's name to be removed
- * @returns the removed component or undefined
+ * @param {object|string|number} compOrNameOrIndex the component object, the name of the component or the index of the component to be removed
+ * @returns {object|undefined} the removed component or undefined
  */
-Dashboards.removeComponent = function(component) {
-  var name = this.getComponentName(component);
-  if(!name) { return undefined; }
-  // If globalContext is true also remove the component from the global `window` object
-  if(this.globalContext && window[name] && window[name].name === name) {
-    try{ delete window[name]; }catch(e){ window[name] = undefined; } // catch IE8 exception
+Dashboards.removeComponent = function(compOrNameOrIndex) {
+  var index = this.getComponentIndex(compOrNameOrIndex);
+  if(index === -1) { return; }
+  var name = this.components[index].name;
+  if(!name) {
+    this.log('Dashboards.removeComponent: failed attempting to remove a component that has no name!','warn');
+    return;
   }
-
-  var index = this.getComponentIndex(name);
+  // If globalContext is true also remove the component from the global `window` object
+  if(this.globalContext && window[name]) { window[name] = undefined; }
   var comp = null;
   if(index >= 0) {
     var cs = this.components;
