@@ -12,7 +12,7 @@
 */
 
 
-define(['components/UnmanagedComponent', 'Base', 'Logger', 'underscore', 'dashboard/Utils'], function (UnmanagedComponent, Base, Logger, _, Utils) {
+define(['./UnmanagedComponent', '../lib/Base', '../Logger', '../lib/underscore', '../dashboard/Utils'], function (UnmanagedComponent, Base, Logger, _, Utils) {
 
     var InputBaseComponent = UnmanagedComponent.extend({
       update: function(){

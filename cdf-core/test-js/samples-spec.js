@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["Dashboard", "jquery", "underscore", "components/BaseComponent", "components/UnmanagedComponent"], 
+define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components/BaseComponent", "cdf/components/UnmanagedComponent"],
     function(Dashboard, $, _, BaseComponent, UnmanagedComponent) {
 
 

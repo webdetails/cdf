@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(['components/BaseComponent', 'Base', 'Logger', 'jquery'], function (BaseComponent, Base, Logger, $) {
+define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent, Base, Logger, $) {
 
     var CommentsComponent = BaseComponent.extend({
     

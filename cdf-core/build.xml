@@ -24,8 +24,8 @@
 
 
 <!-- Overriding values in subfloor-js.xml -->
-  <property name="js.karma.config" value="karma.conf.js"/>
-  <property name="js.karma.ci.config" value="karma.conf.js"/>
+  <property name="js.karma.config" value="config/karma.conf.js"/>
+  <property name="js.karma.ci.config" value="config/karma.conf.js"/>
 
   <!-- Path for node_modules dir -->
   <property name="nodemodules.local.dir" value="node_modules" />
@@ -189,6 +189,16 @@
   </target>
 
   <target name="test-js" depends="install-antcontrib, npm-install">
+    <!-- compile the require file -->
+    <echo message="Collecting RequireJS Configurations"/>
+    <delete file="build-res/requireCfg-raw.js" />
+    <echo message="var requireCfg={paths:{},shim:{}};" file="build-res/requireCfg-raw.js" append="false"/>
+    <concat destfile="build-res/requireCfg-raw.js" append="true" force="yes">
+      <fileset dir="cdf" casesensitive="yes">
+        <include name="*/*-require-js-cfg.js"/>
+      </fileset>
+    </concat>
+
     <!-- Check to see if karma is on the PATH -->
     <available file="karma" filepath="${env.PATH}" property="karma-is-available"/>
     <available file="karma.cmd" filepath="${nodemodules.local.dir.bin}" property="karma-is-available-windows"/>

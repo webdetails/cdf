@@ -12,7 +12,7 @@
 */
 
 
-define(['underscore'], function (_) {
+define(['../lib/underscore'], function (_) {
 
 
     var utils = {};

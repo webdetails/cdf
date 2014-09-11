@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["Dashboard", "jquery", "underscore", "components/SelectBaseComponent", "components/CommentsComponent", 'dashboard/Query'], function(Dashboard, $, _, SelectBaseComponent, CommentsComponent, Query) {
+define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components/SelectBaseComponent", "cdf/components/CommentsComponent", 'cdf/dashboard/Query'], function(Dashboard, $, _, SelectBaseComponent, CommentsComponent, Query) {
 
     /**
      * ## The Select Component

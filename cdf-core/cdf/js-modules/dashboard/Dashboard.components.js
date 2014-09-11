@@ -12,7 +12,7 @@
  */
 
 
-define(['dashboard/Dashboard', 'backbone', "mustache", "Logger"], function (Dashboard, Backbone, Mustache, Logger) {
+define(['./Dashboard', '../lib/backbone', "../lib/mustache", "../Logger"], function (Dashboard, Backbone, Mustache, Logger) {
     /**
      * A module representing a extension to Dashboard module for storage.
      * @module Dashboard.components

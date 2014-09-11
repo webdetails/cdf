@@ -5,7 +5,7 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '',
+    basePath: '../',
 
 
     // frameworks to use
@@ -19,18 +19,18 @@ module.exports = function(config) {
       'test-js/testUtils.js',
       'cdf/js/wd.js',
       'cdf/js-lib/json.js',
-      'cdf/js-lib/jquery.js',
-      'cdf/js-lib/jquery.ui.js',
+      'cdf/js-lib/jquery/jquery.js',
+      'cdf/js-lib/jquery/jquery.ui.js',
       'cdf/js-lib/autobox/jquery.templating.js',
       'cdf/js-lib/autobox/jquery.ui.autobox.js',
       'cdf/js-lib/autobox/jquery.ui.autobox.ext.js',
       
-      'cdf/js-lib/jquery.blockUI.js',
-      'cdf/js-lib/underscore.js',
-      'cdf/js-lib/backbone.js',
-      'cdf/js-lib/mustache.js',
+      'cdf/js-lib/jquery/jquery.blockUI.js',
+      'cdf/js-lib/underscore/underscore.js',
+      'cdf/js-lib/underscore/backbone.js',
+      'cdf/js-lib/underscore/mustache.js',
 
-      'cdf/js/Base.js',
+      'cdf/js-lib/base/Base.js',
       'cdf/js/Dashboard/Dashboard.js',
       'cdf/js/Dashboard/Dashboard.bookmarkable.js',
       'cdf/js/Dashboard/Dashboard.components.js',

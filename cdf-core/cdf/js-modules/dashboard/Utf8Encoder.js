@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(function () {
+define(["../lib/jquery"], function ($) {
 
 
     /**
@@ -83,31 +83,34 @@ define(function () {
      * http://www.webtoolkit.info/
      **/
     var Utf8Encoder = {
-       encode_prepare_arr : function (value) {
-          if(typeof value == "number"){
-            return value;
-          } else if ($.isArray(value)){
-            var a = new Array(value.length);
-            $.each(value,function(i,val){
-              a[i] = encode_prepare(val);
-            });
-            return a;
+      encode_prepare : function ( s ) {
+        if (s != null) {
+          s = s.replace(/\+/g," ");
+          if ($.browser == "msie" || $.browser == "opera"){
+            return Utf8.decode(s);
           }
-          else{
-            return encode_prepare(value);
-          }
-        },
+        }
+        return s;
+      },
+
+      encode_prepare_arr : function (value) {
+        var myself = this;
+
+        if(typeof value == "number"){
+          return value;
+        } else if ($.isArray(value)){
+          var a = new Array(value.length);
+          $.each(value,function(i,val){
+            a[i] = myself.encode_prepare(val);
+          });
+          return a;
+        }
+        else {
+          return myself.encode_prepare(value);
+        }
+      }
     
-        encode_prepare : function ( s )
-        {
-            if (s != null) {
-                s = s.replace(/\+/g," ");
-                if ($.browser == "msie" || $.browser == "opera"){
-                    return Utf8.decode(s);
-                }
-            }
-            return s;
-        }              
+
     };
 
 

@@ -10,7 +10,7 @@
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
- define(['dashboard/Dashboard', 'Logger'], function (Dashboard, Logger) {
+ define(['./Dashboard', '../Logger'], function (Dashboard, Logger) {
 
     /**
      * A module representing a extension to Dashboard module for storage.

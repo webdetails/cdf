@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["Dashboard", "jquery", "underscore", "components/FreeformComponent"], function(Dashboard, $, _, FreeformComponent) {
+define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components/FreeformComponent"], function(Dashboard, $, _, FreeformComponent) {
 
 /*
  * Tests on the JS:

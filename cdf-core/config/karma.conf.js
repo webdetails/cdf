@@ -5,7 +5,7 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '',
+    basePath: '../',
 
     // frameworks to use
     frameworks: ['jasmine', 'requirejs'],
@@ -13,17 +13,12 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'cdf/js-lib/shims.js',
-      'cdf/js-lib/pen-shim.js',
-      'test-js/testUtils.js',
-      'cdf/js-lib/json.js',
-//need to add      '../cdf-pentaho-base/cdf/js/components/jfreechart.js',
-      '../cdf-pentaho5/cdf/js/cdf-base.js',
-      'test-js/main.js',
-     {pattern: 'cdf/js-lib/**/*.js', included: false},
-     {pattern: 'cdf/js-modules/**/*.js', included: false},
-    {pattern: 'test-js/**/*-spec.js', included: false}
-      
+      { pattern: 'cdf/js-lib/**/*.js', included: false },
+      { pattern: 'cdf/js-modules/**/*.js', included: false },
+      { pattern: 'test-js/**/*.js', included: false },
+      'config/context.js',
+      'build-res/requireCfg-raw.js',
+      'config/require-config.js'
     ],
 
 
@@ -105,7 +100,8 @@ module.exports = function(config) {
      'karma-junit-reporter',
      'karma-html-reporter',
      'karma-coverage',
-     'karma-phantomjs-launcher'
+     'karma-phantomjs-launcher',
+     'karma-chrome-launcher'
     ]
   });
 };

@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(['components/BaseComponent', 'Base'], function (BaseComponent, Base) {
+define(['./BaseComponent', '../lib/Base'], function (BaseComponent, Base) {
 
     var TextComponent = BaseComponent.extend({
       update : function() {

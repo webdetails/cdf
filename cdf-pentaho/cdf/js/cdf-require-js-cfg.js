@@ -13,12 +13,12 @@
 
 requireCfg['paths']['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
 requireCfg['shim']['cdf/cdf-module'] = [
-	'cdf/lib/jquery',
-	'cdf/lib/jquery.ui',
+	'cdf/lib/jquery/jquery',
+	'cdf/lib/jquery/jquery.ui',
 	'cdf/lib/jquery-impromptu.3.1',
 	'cdf/lib/jquery-ui-datepicker-i18n',
 	'cdf/lib/jquery.bgiframe',
-	'cdf/lib/jquery.blockUI',
+	'cdf/lib/jquery/jquery.blockUI',
 	'cdf/lib/jquery.corner',
 	'cdf/lib/jquery.eventstack',
 	'cdf/lib/jquery.i18n.properties',
@@ -29,10 +29,10 @@ requireCfg['shim']['cdf/cdf-module'] = [
 	'cdf/lib/simile/ajax/simile-ajax-api',
 	'cdf/lib/simile/ajax/scripts/json',
 	'cdf/lib/json',
-	'cdf/lib/underscore',
-	'cdf/lib/backbone',
-	'cdf/lib/mustache',	
-	'cdf/lib/Base',
+	'cdf/lib/underscore/underscore',
+	'cdf/lib/backbone/backbone',
+	'cdf/lib/mustache/mustache',
+	'cdf/lib/base/Base',
 	'cdf/Dashboards',	
     'cdf/lib/shims',
     'cdf/lib/CCC/protovis',
@@ -47,10 +47,10 @@ requireCfg['shim']['cdf/cdf-module'] = [
 
 
 requireCfg['shim']['cdf/Dashboards'] = [
-    'cdf/lib/Base',
-    'cdf/lib/underscore',
-    'cdf/lib/backbone',
-    'cdf/lib/mustache', 
+    'cdf/lib/base/Base',
+    'cdf/lib/underscore/underscore',
+    'cdf/lib/backbone/backbone',
+    'cdf/lib/mustache/mustache',
     'cdf/lib/shims',
     'cdf/Dashboards.Main',
 	'cdf/Dashboards.Query',
@@ -62,12 +62,12 @@ requireCfg['shim']['cdf/Dashboards'] = [
     'cdf/Dashboards.Utils'
 ];
 requireCfg['shim']['cdf/Dashboards.Main'] = [
-	'cdf/lib/Base',
-    'cdf/lib/underscore',
-    'cdf/lib/backbone',
-    'cdf/lib/mustache', 
+	'cdf/lib/base/Base',
+    'cdf/lib/underscore/underscore',
+    'cdf/lib/backbone/backbone',
+    'cdf/lib/mustache/mustache',
     'cdf/lib/shims',
-    'cdf/lib/jquery.blockUI',
+    'cdf/lib/jquery/jquery.blockUI',
     'cdf/Dashboards.Startup',
     'cdf/cdf-base'
 ];
@@ -85,8 +85,8 @@ requireCfg['shim']['cdf/Dashboards.RefreshEngine'] 	= ['cdf/Dashboards.Main'];
 requireCfg['shim']['cdf/Dashboards.Utils'] 			= ['cdf/Dashboards.Main'];
 
 
-requireCfg['shim']['cdf/lib/underscore'] 			= ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/backbone'] 				= ['cdf/lib/underscore'];
+requireCfg['shim']['cdf/lib/underscore/underscore'] 			= ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/backbone/backbone'] 				= ['cdf/lib/underscore/underscore'];
 requireCfg['shim']['cdf/lib/CCC/compatVersion'] = ['cdf/lib/CCC/pvc-d1.0'];
 requireCfg['shim']['cdf/lib/CCC/pvc-d1.0'] 		= ['cdf/lib/CCC/protovis', 'cdf/lib/CCC/tipsy', 'cdf/lib/CCC/jquery.tipsy', 'cdf/lib/CCC/def'];
 
@@ -110,18 +110,18 @@ requireCfg['shim']['cdf/components/simpleautocomplete'] = ['cdf/components/core'
 requireCfg['shim']['cdf/components/table'] = ['cdf/components/core'];
 
 
-requireCfg['shim']['cdf/lib/jquery.ui'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery-impromptu.3.1'] = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery/jquery.ui'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery-impromptu.3.1'] = ['cdf/lib/jquery/jquery'];
 requireCfg['shim']['cdf/lib/jquery-ui-datepicker-i18n'] = ['cdf/lib/jquery.ui'];
-requireCfg['shim']['cdf/lib/jquery.bgiframe'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.blockUI'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.corner'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.eventstack'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.i18n.properties'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.jdMenu'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.positionBy'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.sparkline'] = ['cdf/lib/jquery'];
-requireCfg['shim']['cdf/lib/jquery.tooltip'] = ['cdf/lib/jquery'];
+requireCfg['shim']['cdf/lib/jquery.bgiframe'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery/jquery.blockUI'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery.corner'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery.eventstack'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery.i18n.properties'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery.jdMenu'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery.positionBy'] = ['cdf/lib/jquery/jquery'];
+requireCfg['shim']['cdf/lib/jquery.sparkline'] = ['cdf/lib/jquey/jquery'];
+requireCfg['shim']['cdf/lib/jquery.tooltip'] = ['cdf/lib/jquery/jquery'];
 
 requireCfg['shim']['cdf/lib/simile/ajax/scripts/json'] = ['cdf/lib/simile/ajax/simile-ajax-api'];
 
