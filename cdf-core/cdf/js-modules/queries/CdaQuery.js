@@ -12,7 +12,7 @@
 */
 
 
-define(['./BaseQuery', '../dashboard/Dashboard.query', 'cdf/lib/underscore', '../dashboard/Utils', '../Logger'], function (BaseQuery, Dashboards, _, Utils, Logger) {
+define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils', '../Logger'], function (BaseQuery, Dashboards, _, Utils, Logger) {
 
 
 

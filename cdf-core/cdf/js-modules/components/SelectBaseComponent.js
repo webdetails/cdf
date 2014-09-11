@@ -12,7 +12,7 @@
 */
 
 
-define(['./InputBaseComponent', 'cdf/lib/Base', '../Logger', 'cdf/lib/underscore', '../dashboard/Utils'], function (InputBaseComponent, Base, Logger, _, Utils) {
+define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore', '../dashboard/Utils'], function (InputBaseComponent, Base, Logger, _, Utils) {
 
 
     var SelectBaseComponent = InputBaseComponent.extend({

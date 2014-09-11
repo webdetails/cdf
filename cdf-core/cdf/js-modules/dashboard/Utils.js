@@ -12,7 +12,7 @@
 */
 
 
-define(['cdf/lib/underscore'], function (_) {
+define(['../lib/underscore'], function (_) {
 
 
     var utils = {};

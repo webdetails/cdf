@@ -12,7 +12,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(['./BaseComponent', 'cdf/lib/Base'], function (BaseComponent, Base) {
+define(['./BaseComponent', '../lib/Base'], function (BaseComponent, Base) {
 
     var ManagedFreeformComponent = BaseComponent.extend({
       update : function() {

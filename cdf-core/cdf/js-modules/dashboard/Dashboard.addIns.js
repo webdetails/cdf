@@ -12,7 +12,7 @@
  */
 
 
-define(['cdf/lib/Base', './Dashboard', './Container', './Utils'], function (Base, Dashboard, Container, Utils) {
+define(['../lib/Base', './Dashboard', './Container', './Utils'], function (Base, Dashboard, Container, Utils) {
 
 
     var globalAddIns = new Container();

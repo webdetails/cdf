@@ -12,7 +12,7 @@
  */
 
 
-define(['./Dashboard', '../Logger', 'jquery'], function (Dashboard, Logger, $) {
+define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logger, $) {
 
  Dashboard.implement({
 

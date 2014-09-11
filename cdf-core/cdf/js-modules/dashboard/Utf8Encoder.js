@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["cdf/lib/jquery"], function ($) {
+define(["../lib/jquery"], function ($) {
 
 
     /**

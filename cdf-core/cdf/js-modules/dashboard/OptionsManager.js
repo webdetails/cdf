@@ -12,7 +12,7 @@
 */
 
 
-define(['./Utils', 'cdf/lib/underscore'], function (Utils, _) {
+define(['./Utils', '../lib/underscore'], function (Utils, _) {
 
 
   // Shared / Static

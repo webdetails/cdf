@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define (['cdf/lib/Base', 'jquery', '../Logger', './RefreshEngine', 'cdf/lib/underscore', 'cdf/lib/backbone', 'cdf/lib/shims'],
+define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib/underscore', '../lib/backbone', '../lib/shims'],
     function (Base, jQuery, Logger, RefreshEngine, _, Backbone) {
     /**
      * A module representing a Dashboard.

@@ -33,7 +33,7 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    //reporters: ['progress', 'junit', 'html', 'coverage'],
+    reporters: ['progress', 'junit', 'html', 'coverage'],
 
     //reporter: coverage
     coverageReporter: {
@@ -84,15 +84,15 @@ module.exports = function(config) {
     // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
     // - PhantomJS
     // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-    browsers: ['Chrome'],//, 'Firefox', 'IE', 'PhantomJS'],
+    browsers: ['PhantomJS'],//, 'Firefox', 'IE', 'PhantomJS'],
 
     // If browser does not capture in given timeout [ms], kill it
-    captureTimeout: 1000000,
+    captureTimeout: 60000,
 
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false,
+    singleRun: true,
 
     plugins: [
      'karma-jasmine',

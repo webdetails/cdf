@@ -12,7 +12,7 @@
  */
 
 
-define(['./Dashboard', './Popups','../Logger', 'cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/lib/jquery.ui', 'cdf/lib/jquery.blockUI'],
+define(['./Dashboard', './Popups','../Logger', '../lib/underscore', '../lib/jquery', '../lib/jquery.ui', '../lib/jquery.blockUI'],
 function (Dashboard, Popups, Logger, _, $, jqueryUi, jqueryBlockUI) {
     /**
      * A module representing a extension to Dashboard module for notifications.

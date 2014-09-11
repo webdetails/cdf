@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent'], function (BaseComponent) {
+define(['./BaseComponent', '../lib/autobox/jquery.templating', '../lib/autobox/jquery.ui.autobox', '../lib/autobox/jquery.ui.autobox.ext'], function (BaseComponent) {
 
   var AutocompleteBoxComponent = BaseComponent.extend({
 

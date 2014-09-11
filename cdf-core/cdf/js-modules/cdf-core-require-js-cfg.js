@@ -27,11 +27,5 @@
     requirePaths['cdf'] = "../cdf";
   }
 
-  requireShims['cdf/components/AutocompleteBoxComponent'] = [
-    'cdf/lib/autobox/jquery.templating',
-    'cdf/lib/autobox/jquery.ui.autobox',
-    'cdf/lib/autobox/jquery.ui.autobox.ext'
-  ];
-
 })();
 

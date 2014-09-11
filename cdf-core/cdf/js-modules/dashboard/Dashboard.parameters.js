@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', 'cdf/lib/backbone', './Utils', './Utf8Encoder'],
+define(['./Dashboard', '../Logger', '../lib/backbone', './Utils', './Utf8Encoder'],
     function (Dashboard, Logger, Backbone, Utils, Utf8Encoder) {
 
   /**

@@ -12,7 +12,7 @@
 */
 
 
-define(['cdf/lib/mustache', 'cdf/lib/underscore', 'cdf/lib/jquery', 'cdf/lib/jquery.blockUI'], function (Mustache, _, $, BlockUi) {
+define(['../lib/mustache', '../lib/underscore', '../lib/jquery', '../lib/jquery.blockUI'], function (Mustache, _, $, BlockUi) {
 
     var popups = {};
 

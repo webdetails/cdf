@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', 'cdf/lib/underscore', '../components/UnmanagedComponent'], function (Dashboard, Logger, _, UnmanagedComponent) {
+define(['./Dashboard', '../Logger', '../lib/underscore', '../components/UnmanagedComponent'], function (Dashboard, Logger, _, UnmanagedComponent) {
 
     /**
      * A module representing a extension to Dashboard module for lifecycle.
