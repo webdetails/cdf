@@ -15,51 +15,52 @@
   var requirePaths = requireCfg.paths,
       requireShims = requireCfg.shim;
 
+  var prefix = "";
   if(typeof CONTEXT_PATH !== "undefined"){ // production
-    requirePaths['cdf/lib'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH+'content/pentaho-cdf/js/lib';
   } else if(typeof KARMA_RUN !== "undefined") { // test
-    requirePaths['cdf/lib'] = 'cdf/js-lib';
+    prefix = requirePaths['cdf/lib'] = 'cdf/js-lib';
   } else {
     requirePaths['cdf/lib'] = "../cdf/js-lib";
   }
 
   //jquery 1.7.1
-  requirePaths['jquery'] = "cdf/js-lib/jquery/jquery";
-  requirePaths['cdf/lib/jquery'] = "cdf/js-lib/jquery/cdf-jquery";
+  requirePaths['jquery'] = prefix + "/jquery/jquery";
+  requirePaths['cdf/lib/jquery'] = prefix + "/jquery/cdf-jquery";
 
   //jquery.ui 1.8.14
-  requirePaths['cdf/lib/jquery.ui'] = "cdf/js-lib/jquery/jquery.ui";
+  requirePaths['cdf/lib/jquery.ui'] = prefix + "/jquery/jquery.ui";
   requireShims['cdf/lib/jquery.ui'] = {
     exports: '$',
     deps: ['cdf/lib/jquery']
   };
 
   //jquery.blockUI 2.66.0
-  requirePaths['cdf/lib/jquery.blockUI'] = "cdf/js-lib/jquery/jquery.blockUI";
+  requirePaths['cdf/lib/jquery.blockUI'] = prefix + "/jquery/jquery.blockUI";
   requireShims['cdf/lib/jquery.blockUI'] = {
     exports: '$',
     deps: ['cdf/lib/jquery']
   };
 
   //underscore 1.6.0
-  requirePaths['underscore'] = "cdf/js-lib/underscore/underscore";
+  requirePaths['underscore'] = prefix + "/underscore/underscore";
   requirePaths['cdf/lib/underscore'] = requirePaths['underscore'];
   requireShims['cdf/lib/underscore'] = {exports: '_'};
 
   //backbone 1.1.2
-  requirePaths['backbone'] = "cdf/js-lib/backbone/backbone";
+  requirePaths['backbone'] = prefix + "/backbone/backbone";
   requirePaths['cdf/lib/backbone'] = requirePaths['backbone'];
 
   //mustache 0.8.2
-  requirePaths['cdf/lib/mustache'] = "cdf/js-lib/mustache/mustache";
+  requirePaths['cdf/lib/mustache'] = prefix + "/mustache/mustache";
   requireShims['cdf/lib/mustache'] = {exports: 'Mustache'};
 
   //Base 1.1a
-  requirePaths['cdf/lib/Base'] = "cdf/js-lib/base/Base";
+  requirePaths['cdf/lib/Base'] = prefix + "/base/Base";
   requireShims['cdf/lib/Base'] = {exports: 'Base'};
 
   //datatables 1.10.1-dev
-  requirePaths['cdf/lib/datatables'] = "cdf/js-lib/datatables/js/jquery.datatables";
+  requirePaths['cdf/lib/datatables'] = prefix + "/datatables/js/jquery.datatables";
 
   //autobox
   requireShims['cdf/lib/autobox/jquery.templating'] = ["cdf/lib/jquery"];
@@ -67,7 +68,7 @@
   requireShims['cdf/lib/autobox/jquery.ui.autobox.ext'] = ["cdf/lib/jquery"];
 
   //shims
-  requirePaths['cdf/lib/shims'] = "cdf/js-lib/shims";
+  requirePaths['cdf/lib/shims'] = prefix + "/shims";
 
 })();
 

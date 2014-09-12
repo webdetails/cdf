@@ -11,14 +11,15 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', '../lib/underscore', '../components/UnmanagedComponent'], function (Dashboard, Logger, _, UnmanagedComponent) {
+define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../components/UnmanagedComponent'],
+    function (Dashboard, Logger, _, $, UnmanagedComponent) {
 
     /**
      * A module representing a extension to Dashboard module for lifecycle.
      * @module Dashboard.lifecycle
      */
     Dashboard.implement({
-    
+
       /**
        *
        * @private
@@ -26,15 +27,15 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
       _initLifecycle: function(){
         // Init Counter, for subdashboards
         this.initCounter = 0;
-    
+
         // Used to control progress indicator for async mode
         this.runningCalls = 0;
-    
+
         // Object properties used to keep the server track and identify if the session did expired
         this.lastServerResponse = (Date.now) ? Date.now() : new Date().valueOf();
         this.serverCheckResponseTimeout = 1800000; //ms, will be overridden at init
       },
-    
+
       /**
        *
        */
@@ -44,7 +45,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           this.hideProgressIndicator();
         },this),10);
       },
-    
+
       /**
        *
        * @returns {number}
@@ -52,7 +53,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
       getRunningCalls: function (){
         return this.runningCalls;
       },
-    
+
       /**
        *
        */
@@ -61,7 +62,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
         this.showProgressIndicator();
         Logger.log("+Running calls incremented to: " + this.getRunningCalls());
       },
-    
+
       /**
        *
        */
@@ -75,8 +76,8 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           }
         },this),10);
       },
-    
-    
+
+
       /**
        *
        * @param components
@@ -84,46 +85,46 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
        */
       init: function(components){
         var myself = this;
-    
+
         // We're now adding support for multiple inits. This part is only relevant for
         // the first execution.
-    
+
         var initInstance = this.initCounter++;
         Logger.log("InitInstance " + initInstance);
-    
+
         if( initInstance == 0 ){
-    
+
           this.syncDebugLevel();
-    
+
           if(this.initialStorage) {
             _.extend(this.storage, this.initialStorage);
           } else {
             this.loadStorage();
           }
-    
+
           if(this.context != null && this.context.sessionTimeout != null ) {
             //defaulting to 90% of ms value of sessionTimeout
             this.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
           }
-    
+
           this.restoreBookmarkables();
           this.restoreView();
           this.syncParametersInit();
-    
+
         }
-    
-        if($.isArray(components)) { this.addComponents(components); }
-    
+
+        if(_.isArray(components)) { this.addComponents(components); }
+
         // Now we need to go through all components we have and attach this
         // initInstance to all
         _.chain(this.components)
             .where({initInstance:undefined})
             .each(function(c){ c.initInstance = initInstance});
-    
+
         $(function() { myself._initEngine(initInstance); });
       },
-    
-    
+
+
       /**
        *
        * @param initInstance
@@ -131,35 +132,35 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
        */
       _initEngine: function(initInstance) {
         var myself = this;
-    
-    
-    
-    
-    
+
+
+
+
+
         // Should really throw an error? Or return?
         if(this.waitingForInit && this.waitingForInit.length) {
           Logger.log("Overlapping initEngine!", 'warn');
         }
-    
+
         var components = initInstance != null
             ? _.where(this.components, {initInstance: initInstance})
             : this.components;
-    
+
         if( (!this.waitingForInit || this.waitingForInit.length === 0) && !this.finishedInit ){
           this.incrementRunningCalls();
         }
-    
-    
+
+
         Logger.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: "+
               this.getRunningCalls()  +")","color: #ddd ");
 
-    
+
         this.createAndCleanErrorDiv();
         // Fire all pre-initialization events
         if(typeof this.preInit == 'function') {
           this.preInit();
         }
-                
+
         this.trigger("cdf cdf:preInit",this);
         /* Legacy Event -- don't rely on this! */
         $(window).trigger('cdfAboutToLoad');
@@ -170,12 +171,12 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
             updating.push(components[i]);
           }
         }
-    
+
         if (!updating.length) {
           this._handlePostInit();
           return;
         }
-    
+
         // Since we can get into racing conditions between last component's
         // preExecution and dashboard.postInit, we'll add a last component with very
         // low priority who's funcion is only to act as a marker.
@@ -190,10 +191,10 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
         });
         this.addComponent(postInitComponent);  //TODO: check this!!!!
         updating.push(postInitComponent);
-    
-    
+
+
         this.waitingForInit = updating.slice();
-    
+
         var callback = function(comp,isExecuting) {
           /*
            * The `preExecution` event will pass two arguments (the component proper
@@ -211,7 +212,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           comp.off('cdf:error',callback);
           this._handlePostInit(initInstance);
         };
-    
+
         for(var i= 0, len = updating.length; i < len; i++){
           var component = updating[i];
           component.on('cdf:postExecution cdf:preExecution cdf:error',callback,myself);
@@ -221,7 +222,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           this._handlePostInit(initInstance);
         }
       },
-    
+
       /**
        *
        * @param initInstance
@@ -229,7 +230,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
        */
       _handlePostInit: function(initInstance) {
         var myself = this;
-    
+
         /**
          *
          * @private
@@ -267,8 +268,8 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
             suffixes[suffix][name] = params[e];
             return e;
           });
-    
-    
+
+
           /*
            * Once we have the suffix list, we'll check each suffix's
            * parameter list against each of the DuplicateComponents
@@ -291,33 +292,33 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
             });
           }
         };
-    
+
         if( (!myself.waitingForInit || myself.waitingForInit.length === 0) && !myself.finishedInit ) {
           myself.trigger("cdf cdf:postInit",myself);
           /* Legacy Event -- don't rely on this! */
           $(window).trigger('cdfLoaded');
-    
+
           if(typeof myself.postInit == "function") {
             myself.postInit();
           }
           _restoreDuplicates();
           myself.finishedInit = true;
-    
+
           myself.decrementRunningCalls();
           Logger.log("%c          [Lifecycle <End  ] Init[" + initInstance + "] (Running: "+ myself.getRunningCalls()  +")","color: #ddd ");
-    
+
         }
-    
-    
+
+
       },
-    
+
       /**
        *
        * @param object
        */
       updateLifecycle: function(object) {
         var silent = object.lifecycle ? !!object.lifecycle.silent : false;
-    
+
         if( object.disabled ){
           return;
         }
@@ -348,14 +349,14 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
             if ((object.update != undefined) &&
                 (typeof object['update'] == 'function')) {
               object.update();
-    
+
               // check if component has periodic refresh and schedule next update
               this.refreshEngine.processComponent(object);
-    
+
             } else {
               // unsupported update call
             }
-    
+
             if(!(typeof(object.postExecution)=='undefined')){
               object.postExecution.apply(object);
             }
@@ -378,14 +379,14 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
               this.decrementRunningCalls();
             }
           }
-    
+
           // Triggering the event for the rest of the process
           object.trigger('cdf cdf:postExecution', object);
-    
+
         },this);
         setTimeout(handler,1);
       },
-    
+
       /**
        * Update components by priority. Expects as parameter an object where the keys
        * are the priorities, and the values are arrays of components that should be
@@ -428,7 +429,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
             }
           }
         };
-    
+
         /**
          *
          * Given a list of component priority tiers, returns the highest priority
@@ -442,7 +443,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           var keys = _.keys(tiers).sort(function(a,b){
             return parseInt(a,10) - parseInt(b,10);
           });
-    
+
           var tier;
           for(var i = 0;i < keys.length;i++) {
             tier = tiers[keys[i]];
@@ -452,8 +453,8 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           }
           return null;
         };
-    
-    
+
+
         if(!this.updating) {
           this.updating = {
             tiers: {},
@@ -474,13 +475,13 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           components = comps;
         }
         _mergePriorityLists(this.updating.tiers,components);
-    
+
         var updating = this.updating.current;
         if(updating === null || updating.components.length == 0) {
           var toUpdate = _getFirstTier(this.updating.tiers);
           if(!toUpdate) return;
           this.updating.current = toUpdate;
-    
+
           var postExec = function(component,isExecuting) {
             /*
              * We first need to figure out what event we're handling. `error` will
@@ -514,22 +515,22 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           for(var i = 0; i < comps.length;i++) {
             component = comps[i];
             // Start timer
-                    
-            
+
+
             component.startTimer();
             component.on("cdf:postExecution cdf:preExecution cdf:error",postExec,this);
-    
+
             // Logging this.updating. Uncomment if needed to trace issues with lifecycle
             // Dashboards.log("Processing "+ component.name +" (priority " + this.updating.current.priority +"); Next in queue: " +
             //  _(this.updating.tiers).map(function(v,k){return k + ": [" + _(v).pluck("name").join(",") + "]"}).join(", "));
             this.updateComponent(component);
           }
         }
-    
-    
-    
+
+
+
       },
-    
+
       /**
        *
        * @param component
@@ -552,14 +553,14 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
         if(this.updateTimeout) {
           clearTimeout(this.updateTimeout);
         }
-    
+
         var handler = _.bind(function(){
           this.updateAll(this.updateQueue);
           delete this.updateQueue;
         },this);
         this.updateTimeout = setTimeout(handler,5);
       },
-    
+
       /**
        *
        * @param object
@@ -573,7 +574,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
             throw "not logged in";
           }
         }
-    
+
         if(object.isManaged === false && object.update) {
           object.update();
           // check if component has periodic refresh and schedule next update
@@ -582,7 +583,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           this.updateLifecycle(object);
         }
       },
-    
+
       /**
        *
        */
@@ -599,14 +600,14 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           }
         }
       },
-    
+
       /**
        *
        * @param object_name
        */
       processChange: function(object_name){
         //Dashboards.log("Processing change on " + object_name);
-    
+
         var object = this.getComponentByName(object_name);
         var parameter = object.parameter;
         var value;
@@ -615,7 +616,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
         }
         if (value == null) // We won't process changes on null values
           return;
-    
+
         if(!(typeof(object.preChange)=='undefined')){
           var preChangeResult = object.preChange(value);
           value = preChangeResult != undefined ? preChangeResult : value;
@@ -627,7 +628,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
           object.postChange(value);
         }
       },
-    
+
       /**
        * fireChange must accomplish two things:
        * first, we must change the parameters
@@ -646,12 +647,12 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../components/Unmanage
       fireChange: function(parameter, value) {
         var myself = this;
         this.createAndCleanErrorDiv(); //Dashboards.Legacy
-    
+
         this.setParameter(parameter, value, true);
         var toUpdate = [];
         var workDone = false;
         for (var i= 0, len = this.components.length; i < len; i++){
-          if ($.isArray(this.components[i].listeners)){
+          if (_.isArray(this.components[i].listeners)){
             for (var j= 0 ; j < this.components[i].listeners.length; j++){
               var comp = this.components[i];
               if (comp.listeners[j] == parameter && !comp.disabled) {

@@ -11,8 +11,9 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib/underscore', '../lib/backbone', '../lib/shims'],
-    function (Base, jQuery, Logger, RefreshEngine, _, Backbone) {
+define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib/underscore', '../lib/backbone',
+      '../lib/shims'],
+    function (Base, $, Logger, RefreshEngine, _, Backbone) {
     /**
      * A module representing a Dashboard.
      * @module Dashboard
@@ -44,9 +45,9 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
           this.webAppPath = this.webAppPath.substr(0, this.webAppPath.length-1);
         }
 
-        //wd.cdf.endpoints.webAppPath = this.webAppPath;
+        //wd.cdf.endpoints.webAppPath = this.webAppPath; TODO: review
     
-        //this.CDF_BASE_PATH = wd.cdf.endpoints.getCdfBase();
+        //this.CDF_BASE_PATH = wd.cdf.endpoints.getCdfBase(); TODO: review
     
         //initial storage
         this.initialStorage = {};
@@ -112,7 +113,7 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
             }
     
             //blockUI
-            if(typeof jQuery.blockUI == 'function') {
+            if(typeof $.blockUI == 'function') {
               $.blockUI.defaults.fadeIn = 0;
               $.blockUI.defaults.message = '<div class="blockUIDefaultImg"></div>';
               $.blockUI.defaults.css.left = '50%';
