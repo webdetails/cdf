@@ -34,3 +34,4 @@ cdf-pentaho/test-lib
 cdf-core/node_modules
 cdf-core/build-res/pentaho-js-build
 pentaho-js-build.zip
+requireCfg-raw.js

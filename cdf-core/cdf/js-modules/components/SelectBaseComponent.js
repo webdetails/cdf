@@ -1,6 +1,6 @@
 /*!
 * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
+*
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
 * this file except in compliance with the license. If you need a copy of the license,
@@ -12,12 +12,13 @@
 */
 
 
-define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore', '../dashboard/Utils'], function (InputBaseComponent, Base, Logger, _, Utils) {
+define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/jquery', '../lib/underscore', '../dashboard/Utils'],
+  function (InputBaseComponent, Base, Logger, $, _, Utils) {
 
 
     var SelectBaseComponent = InputBaseComponent.extend({
       visible: false,
-    
+
       //defaultIfEmpty: [false]
       //isMultiple: [true]
       //size: when isMultiple==true, the default value is the number of possible values
@@ -30,59 +31,59 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
       //changeTimeoutChangeFraction: 5/8,
       //autoTopValue: ''
       //autoTopIndex: ''
-    
+
       draw: function(myArray) {
         var ph = this.placeholder();
         var name = this.name;
-    
+
         // Build the HTML
         var selectHTML = "<select";
-    
+
         var allowMultiple = this._allowMultipleValues();
         if(allowMultiple) { selectHTML += " multiple"; }
-    
+
         var placeholderText = this._getPlaceholderText();
         if(placeholderText) { selectHTML += " data-placeholder='" + placeholderText + "'" ; }
-    
+
         var size = this._getListSize(myArray);
         if(size != null) { selectHTML += " size='" + size + "'"; }
-    
+
         var extPlugin = this.externalPlugin;
         switch(extPlugin) {
           case "chosen": selectHTML += " class='chzn-select'" ; break;
           case "hynds":  selectHTML += " class='hynds-select'"; break;
           case "select2":  selectHTML += " class='select2-container'"; break;
         }
-    
+
         selectHTML += ">";
-    
+
         // ------
-    
+
         var currentVal  = this._getParameterValue();
         var currentVals = Utils.parseMultipleValues(currentVal); // may be null
         var valuesIndex = {};
         var firstVal;
-    
+
         Utils.eachValuesArray(myArray, {valueAsId: this.valueAsId},
           function(value, label, id, index) {
             selectHTML += "<option value = '" + Utils.escapeHtml(value) + "' >" +
                             Utils.escapeHtml(label) +
                           "</option>";
-    
+
             // For value validation, below
             if(!index) { firstVal = value; }
             valuesIndex[value] = true;
           },
           this);
-    
+
         selectHTML += "</select>";
         ph.html(selectHTML);
-    
+
         // ------
-    
+
         // All current values valid?
         var currentIsValid = true;
-    
+
         // Filter out invalid current values
         if(currentVals != null) {
           var i = currentVals.length;
@@ -95,7 +96,7 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
           }
           if(!currentVals.length) { currentVals = null; }
         }
-    
+
         /* If the current value for the parameter is invalid or empty,
          * we need to pick a sensible default.
          * If defaultIfEmpty is true, the first possible value is selected,
@@ -108,10 +109,10 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
           currentVals = [firstVal];
           hasChanged = true;
         }
-    
-        // jQuery only cleans the value if it receives an empty array. 
+
+        // jQuery only cleans the value if it receives an empty array.
         $("select", ph).val(currentVals == null ? [] : currentVals);
-    
+
         // Automatically assume a given top scroll position, given by value or index.
         if(allowMultiple) {
           if(this.autoTopValue != null) {
@@ -122,15 +123,15 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
             delete this.autoTopIndex;
           }
         }
-    
+
         this._doAutoFocus();
-    
+
         if(hasChanged) {
           // TODO: couldn't we just call fireChange(this.parameter, currentVals) ?
           this.dashboard.setParameter(this.parameter, currentVals);
           this.dashboard.processChange(name);
         }
-    
+
         // TODO: shouldn't this be called right after setting the value of select?
         // Before hasChanged firing?
         switch(extPlugin) {
@@ -148,10 +149,10 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
             break;
           }
         }
-    
+
         this._listenElement(ph);
       },
-    
+
       /**
        * Indicates if the user can select multiple values.
        * The default implementation returns <tt>false</tt>.
@@ -161,7 +162,7 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
       _allowMultipleValues: function() {
         return false;
       },
-    
+
       /**
        * Returns the placeholder label for empty values, or false if it is an non-empty String.
        * @protected
@@ -170,7 +171,7 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
         var txt = this.placeholderText;
         return ( _.isString(txt) && !_.isEmpty(txt) && txt ) || false;
       },
-    
+
       /**
        * The number of elements that the list should show
        * without scrolling.
@@ -184,7 +185,7 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
       _getListSize: function(values) {
         return this.size;
       },
-    
+
       /**
        * Currently, reads extra options for the "chosen" and "select2" plugins,
        * by transforming the array of key/value pair arrays
@@ -197,7 +198,7 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
           return Utils.propertiesArrayToObject(this.extraOptions);
         }
       },
-    
+
       /**
        * Installs listeners in the HTML element/object.
        * <p>
@@ -212,73 +213,74 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
         var stop;
         var check = function() {
           stop && stop();
-          
+
           // Have been disposed?
           var dash = me.dashboard;
           if(dash) {
           var currValue = me.getValue();
-            if(!dash.equalValues(prevValue, currValue)) {
+            if(!Utils.equalValues(prevValue, currValue)) {
             prevValue = currValue;
               dash.processChange(me.name);
             }
           }
         };
-        
+
         var selElem = $("select", elem);
-        
-        selElem
-            .keypress(function(ev) { if(ev.which === 13) { check(); } });
-    
+
+        selElem.keypress(function(ev) {
+          if(ev.which === 13) { check();
+          }
+        });
+
         var changeMode = this._getChangeMode();
         if(changeMode !== 'timeout-focus') {
-          selElem
-            .on(me._changeTrigger(), check);
+          selElem.on(me._changeTrigger(), check);
         } else {
-          
+
           var timScrollFraction = me.changeTimeoutScrollFraction;
           timScrollFraction = Math.max(0, timScrollFraction != null ? timScrollFraction : 1  );
-          
+
           var timChangeFraction = me.changeTimeoutChangeFraction;
           timChangeFraction = Math.max(0, timChangeFraction != null ? timChangeFraction : 5/8);
-          
+
           var changeTimeout = Math.max(100, me.changeTimeout || 2000);
           var changeTimeoutScroll = timScrollFraction * changeTimeout;
           var changeTimeoutChange = timChangeFraction * changeTimeout;
-          
+
           var timeoutHandle;
-    
+
           stop = function() {
             if(timeoutHandle != null) {
               clearTimeout(timeoutHandle);
               timeoutHandle = null;
             }
           };
-    
+
           var renew = function(tim) {
             stop();
             if(me.dashboard) {
-            timeoutHandle = setTimeout(check, tim || changeTimeout);
+              timeoutHandle = setTimeout(check, tim || changeTimeout);
             }
           };
-          
+
           selElem
             .change(function() { renew(changeTimeoutChange); })
             .scroll(function() { renew(changeTimeoutScroll); })
             .focusout(check);
         }
       },
-    
+
       /**
        * Obtains the change mode to use.
-       * 
+       *
        * <p>
        * The default implementation normalizes, validates and defaults
        * the change mode value.
        * </p>
        *
-       * @return {!string} one of values: 
-       * <tt>'immediate'</tt>, 
-       * <tt>'focus'</tt> or 
+       * @return {!string} one of values:
+       * <tt>'immediate'</tt>,
+       * <tt>'focus'</tt> or
        * <tt>'timeout-focus'</tt>.
        */
       _getChangeMode: function() {
@@ -288,23 +290,23 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
           switch(changeMode) {
             case 'immediate':
             case 'focus':  return changeMode;
-              
-            case 'timeout-focus': 
+
+            case 'timeout-focus':
               // Mobiles do not support this strategy. Downgrade to 'focus'.
               if((/android|ipad|iphone/i).test(navigator.userAgent)) { return 'focus'; }
               return changeMode;
-    
+
             default:
               Logger.log("Invalid 'changeMode' value: '" + changeMode + "'.", 'warn');
           }
         }
         return 'immediate';
       },
-    
+
       /**
        * Obtains an appropriate jQuery event name
        * for when testing for changes is done.
-       * 
+       *
        * @return {!string} the name of the event.
        */
       _changeTrigger: function() {
@@ -345,7 +347,9 @@ define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/underscore',
          *  On mobile devices the Done/OK is equiparated with the
          *  behavior of focus out and of the ENTER key.
          */
-        if(this._getChangeMode() === 'immediate') { return 'change'; }
+        if(this._getChangeMode() === 'immediate') {
+          return 'change';
+        }
         return (/android/i).test(navigator.userAgent) ? 'change' : 'focusout';
       }
     });

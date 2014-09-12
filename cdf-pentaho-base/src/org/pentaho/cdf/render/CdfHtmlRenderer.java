@@ -133,7 +133,7 @@ public class CdfHtmlRenderer {
 
     out.write( intro.substring( 0, headIndex + 6 ).getBytes( CharsetHelper.getEncoding() ) );
     // Concat libraries to html head content
-    getHeaders( dashboardContent, parameterMap, out );
+    //getHeaders( dashboardContent, parameterMap, out ); TODO: review headers
     out.write( intro.substring( headIndex + 6, length ).getBytes( CharsetHelper.getEncoding() ) );
     // Add context
     try {

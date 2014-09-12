@@ -23,7 +23,7 @@
 
 	<!-- Global properties -->
 
-	<property name='CLIENT' value='cdf/js' />
+	<property name='CLIENT' value='cdf/js-modules' />
 	<property name="resources.properties.name" value="resources.properties" />
 
 	<property name="resource.dir" value="resource" description="Name of the resource directory"/>
@@ -200,7 +200,7 @@
 
 	    <!-- Copy js folder into dist -->
 	    <copy todir="${stage.dir}/${plugin.name}/js" overwrite="true">
-		   <fileset dir="cdf/js">
+		   <fileset dir="${CLIENT}">
 			   <include name="**/*" />
 		   </fileset>
 	    </copy>
@@ -520,10 +520,11 @@ excludes="**/Thumbs.db"
     	<property name="base.js.path" value=""/>
 
     	<!-- modifications needed for core-refator components/ccc.js -->
-    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_HEADER@" value="${cdf.ccc.require.header}" />
+    <!-- TODO: review ccc dep
+      <replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_HEADER@" value="${cdf.ccc.require.header}" />
     	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_PUBLISHED_GLOBALLY@" value="${cdf.ccc.published.globally}" />
     	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_VAR_DECLARATION@" value="${cdf.ccc.var.declaration}" />
-    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_FOOTER@" value="${cdf.ccc.require.footer}" />
+    	<replace file="${base.js.path}/components/ccc.js" token="@CDF_CCC_REQUIRE_FOOTER@" value="${cdf.ccc.require.footer}" />  -->
 
     </target>
 

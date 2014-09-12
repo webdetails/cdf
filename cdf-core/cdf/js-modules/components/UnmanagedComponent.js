@@ -1,6 +1,6 @@
 /*!
 * Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
-* 
+*
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
 * this file except in compliance with the license. If you need a copy of the license,
@@ -11,7 +11,8 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent, Base, Logger) {
+define(['./BaseComponent', '../lib/Base', '../lib/underscore', '../lib/jquery', '../Logger'],
+    function (BaseComponent, Base, _, $, Logger) {
 
     /*
      * UnmanagedComponent is an advanced version of the BaseComponent that allows
@@ -23,7 +24,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
     var UnmanagedComponent = BaseComponent.extend({
       isManaged: false,
       isRunning: false,
-    
+
       /*
        * Handle calling preExecution when it exists. All components extending
        * UnmanagedComponent should either use one of the three lifecycles declared
@@ -56,7 +57,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
         this.trigger('cdf cdf:preExecution', this, ret);
         return ret;
       },
-    
+
       /*
        * Handle calling postExecution when it exists. All components extending
        * UnmanagedComponent should either use one of the three lifecycles declared
@@ -69,7 +70,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
         }
         this.trigger('cdf cdf:postExecution', this);
       },
-    
+
       drawTooltip: function() {
         if (this.tooltip) {
           this._tooltip = typeof this.tooltip == "function" ?
@@ -86,7 +87,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
           });
         }
       },
-    
+
       /*
        * The synchronous lifecycle handler closely resembles the core CDF lifecycle,
        * and is provided as an alternative for components that desire the option to
@@ -123,7 +124,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
           }
         },this), 10);
       },
-    
+
       /*
        * The triggerQuery lifecycle handler builds a lifecycle around Query objects.
        *
@@ -158,7 +159,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
         }, this);
         var handler = this.getSuccessHandler(success, always),
             errorHandler = this.getErrorHandler();
-    
+
         var query = this.queryState = this.query = this.dashboard.getQuery( queryDef);
         var ajaxOptions = {
           async: true
@@ -172,7 +173,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
         }
         query.fetchData(this.parameters, handler, errorHandler);
       },
-    
+
       /*
        * The triggerAjax method implements a lifecycle based on generic AJAX calls.
        * It implements the full preExecution->block->render->postExecution->unblock
@@ -220,10 +221,10 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
         }, this);
         ajaxParameters.success = this.getSuccessHandler(success,always);
         ajaxParameters.error = this.getErrorHandler();
-        jQuery.ajax(ajaxParameters);
+        $.ajax(ajaxParameters);
       },
-    
-    
+
+
       /*
        * Increment the call counter, so we can keep track of the order in which
        * requests were made.
@@ -231,7 +232,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
       callCounter: function() {
         return ++this.runCounter;
       },
-    
+
       /* Trigger an error event on the component. Takes as arguments the error
        * message and, optionally, a `cause` object.
        * Also
@@ -262,7 +263,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
        * - this.getSuccessHandler(success)
        */
       getSuccessHandler: function(counter,success,always) {
-    
+
         if (arguments.length === 1) {
         /* getSuccessHandler(success) */
           success = counter;
@@ -294,7 +295,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
         },
         this);
       },
-    
+
       getErrorHandler: function() {
         return  _.bind(function() {
           var err = this.dashboard.parseServerError.apply(this, arguments );
@@ -308,7 +309,7 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
         err.msg = err.msg + ' (' + name + ')';
         this.dashboard.errorNotification( err, ph );
       },
-    
+
       /*
        * Trigger UI blocking while the component is updating. Default implementation
        * uses the global CDF blockUI, but implementers are encouraged to override
@@ -320,22 +321,22 @@ define(['./BaseComponent', '../lib/Base', '../Logger'], function (BaseComponent,
           this.dashboard.incrementRunningCalls();
           this.isRunning = true;
         }
-    
+
       },
-    
+
       /*
        * Trigger UI unblock when the component finishes updating. Functionality is
        * defined as undoing whatever was done in the block method. Should also be
        * overridden in components that override UnmanagedComponent#block.
        */
       unblock: function() {
-    
+
         if(this.isRunning){
           this.dashboard.decrementRunningCalls();
           this.isRunning = false;
         }
       },
-    
+
       isSilent: function (){
         return (this.lifecycle) ? !!this.lifecycle.silent : false;
       }
