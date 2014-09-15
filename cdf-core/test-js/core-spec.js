@@ -154,9 +154,14 @@ describe("The CDF framework #", function() {
     testSimpleAddParameter("numberParam", 1, 2);
     testSimpleAddParameter("stringParam", "test", "testtest");
     testSimpleAddParameter("booleanParam", true, false);
-    testSimpleAddParameter("undefinedParam", undefined, "test");
+    testSimpleAddParameter("nullParam", null, "test");
     testSimpleAddParameter("arrayParam", ["test1", "test2"], ["test3", "test4"]);
     testSimpleAddParameter("objectParam1", {a: 1, b: 2}, {});
+
+    myDashboard.addParameter("undefinedParam", undefined);
+    expect(myDashboard.getParameterValue("undefinedParam")).toEqual(undefined);
+    myDashboard.addParameter("undefinedParam", 123);
+    expect(myDashboard.getParameterValue("undefinedParam")).toEqual(123);
 
     var func1 = function(){var v=0;return v;};
     testFunctionAddParameter("functionParam", func1, func1.toString(), func1());
@@ -209,9 +214,14 @@ describe("The CDF framework #", function() {
     testSimpleAddParameter("Dashboards.storage.numberParam", 1, 2);
     testSimpleAddParameter("Dashboards.storage.stringParam", "test", "testtest");
     testSimpleAddParameter("Dashboards.storage.booleanParam", true, false);
-    testSimpleAddParameter("Dashboards.storage.undefinedParam", undefined, "test");
+    testSimpleAddParameter("Dashboards.storage.nullParam", null, "test");
     testSimpleAddParameter("Dashboards.storage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
     testSimpleAddParameter("Dashboards.storage.objectParam1", {a: 1, b: 2}, {});
+
+    myDashboard.addParameter("Dashboards.storage.undefinedParam", undefined);
+    expect(myDashboard.getParameterValue("Dashboards.storage.undefinedParam")).toEqual(undefined);
+    myDashboard.addParameter("Dashboards.storage.undefinedParam", 123);
+    expect(myDashboard.getParameterValue("Dashboards.storage.undefinedParam")).toEqual(123);
 
   });
   /**
@@ -219,17 +229,17 @@ describe("The CDF framework #", function() {
    */
   it("Sets parameters", function() {
     /**
-     * Tests the addParameter call. The second value will never be assigned because the parameter is already defined
+     * Tests the setParameter call. The second value, when not undefined, will override the previous one
      *
      * @param paramName
      * @param firstValue
      * @param secondValue
      */
     var testSimpleSetParameter = function(paramName, firstValue, secondValue){
-      myDashboard.addParameter(paramName,firstValue);
+      myDashboard.setParameter(paramName,firstValue);
       testSimpleParameter(paramName, firstValue);
-      myDashboard.addParameter(paramName,secondValue);
-      testSimpleParameter(paramName, firstValue);
+      myDashboard.setParameter(paramName,secondValue);
+      testSimpleParameter(paramName, secondValue);
     };
     /**
      * Tests a function parameter, if its body and return value are the same
@@ -240,16 +250,27 @@ describe("The CDF framework #", function() {
      * @param returnValue
      */
     var testFunctionSetParameter = function(parameterName, func, funcToString, returnValue){
-      myDashboard.addParameter(parameterName, func);
+      myDashboard.setParameter(parameterName, func);
       testFunctionParameter(parameterName, func, funcToString, returnValue);
     };
 
     testSimpleSetParameter("numberParam", 1, 2);
     testSimpleSetParameter("stringParam", "test", "testtest");
     testSimpleSetParameter("booleanParam", true, false);
-    testSimpleSetParameter("undefinedParam", undefined, "test");
     testSimpleSetParameter("arrayParam", ["test1", "test2"], ["test3", "test4"]);
     testSimpleSetParameter("objectParam1", {a: 1, b: 2}, {});
+
+    testSimpleSetParameter("nullParam", null, "test");
+    expect(myDashboard.parameterModel.get("nullParam")).toEqual("test");
+    testSimpleSetParameter("nullParam", "test", null);
+    expect(myDashboard.parameterModel.get("nullParam")).toEqual(null);
+
+    myDashboard.setParameter("undefinedParam2", 123);
+    expect(myDashboard.getParameterValue("undefinedParam2")).toEqual(123);
+    expect(myDashboard.parameterModel.get("undefinedParam2")).toEqual(123);
+    myDashboard.setParameter("undefinedParam2", undefined);
+    expect(myDashboard.getParameterValue("undefinedParam2")).toEqual(123);
+    expect(myDashboard.parameterModel.get("undefinedParam2")).toEqual(123);
 
     var func1 = function(){var v=0;return v;};
     testFunctionSetParameter("functionParam", func1, func1.toString(), func1());
@@ -302,10 +323,48 @@ describe("The CDF framework #", function() {
     testSimpleSetParameter("Dashboards.storage.numberParam", 1, 2);
     testSimpleSetParameter("Dashboards.storage.stringParam", "test", "testtest");
     testSimpleSetParameter("Dashboards.storage.booleanParam", true, false);
-    testSimpleSetParameter("Dashboards.storage.undefinedParam", undefined, "test");
+    testSimpleSetParameter("Dashboards.storage.nullParam", null, "test");
+    testSimpleSetParameter("Dashboards.storage.nullParam", "test", null);
     testSimpleSetParameter("Dashboards.storage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
     testSimpleSetParameter("Dashboards.storage.objectParam1", {a: 1, b: 2}, {});
 
+    myDashboard.setParameter("Dashboards.storage.undefinedParam2", 123);
+    expect(myDashboard.getParameterValue("Dashboards.storage.undefinedParam2")).toEqual(123);
+    expect(myDashboard.parameterModel.get("Dashboards.storage.undefinedParam2")).toEqual(123);
+    myDashboard.setParameter("Dashboards.storage.undefinedParam2", undefined);
+    expect(myDashboard.getParameterValue("Dashboards.storage.undefinedParam2")).toEqual(123);
+    expect(myDashboard.parameterModel.get("Dashboards.storage.undefinedParam2")).toEqual(123);
+
+  });
+  /**
+   * ## The CDF framework # _isParameterInModel
+   */
+  describe("The CDF framework # _isParameterInModel", function() {
+    /**
+     * ## The CDF framework # Looks for parameters in the correct context, `window` when `Dashboards.globalContext` is true
+     */
+    it("Looks for parameters in the correct context, `window` when `Dashboards.globalContext` is true", function() {
+      myDashboard.globalContext = true;
+      expect(myDashboard._isParameterInModel("contextParam")).toEqual(false);
+      myDashboard.setParameter("contextParam",1);
+      expect(window["contextParam"]).toEqual(1);
+      expect(myDashboard.parameters["contextParam"]).toEqual(undefined);
+      expect(myDashboard.getParameterValue("contextParam")).toEqual(1);
+      expect(myDashboard._isParameterInModel("contextParam")).toEqual(true);
+    });
+    /**
+     * ## The CDF framework # Looks for parameters in the correct context, `Dashboards.parameters` when `Dashboards.globalContext` is false
+     */
+    it("Looks for parameters in the correct context, `Dashboards.parameters` when `Dashboards.globalContext` is false", function() {
+      myDashboard.globalContext = false;
+      expect(myDashboard._isParameterInModel("contextParam2")).toEqual(false);
+      myDashboard.setParameter("contextParam2",2);
+      expect(window["contextParam2"]).toEqual(undefined);
+      expect(myDashboard.parameters["contextParam2"]).toEqual(2);
+      expect(myDashboard.getParameterValue("contextParam2")).toEqual(2);
+      expect(myDashboard._isParameterInModel("contextParam2")).toEqual(true);
+      myDashboard.globalContext = true;
+    });
   });
   /**
    * ## The CDF framework # Syncs parameters
