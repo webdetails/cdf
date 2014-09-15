@@ -507,21 +507,30 @@ var SelectMultiComponent = SelectBaseComponent.extend({
 
 var TextInputComponent = BaseComponent.extend({
   update: function() {
-    var name = this.name;
-    var selectHTML = "<input type='text' id='" + name +
-      "' name='"  + name +
-      "' value='" + Dashboards.getParameterValue(this.parameter) +
-      (this.size ? ("' size='" + this.size) : "") +
-      (this.maxLength ? ("' maxlength='" + this.maxLength) : "") +
+    var value;
+    var myself = this;
+    var selectHTML = "<input type='text' id='" + myself.name +
+      "' name='"  + myself.name +
+      "' value='" + Dashboards.getParameterValue(myself.parameter) +
+      (myself.size ? ("' size='" + myself.size) : "") +
+      (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") +
       "'>";
 
-    this.placeholder().html(selectHTML);
+    myself.placeholder().html(selectHTML);
 
-    $("#" + name)
-      .change(function() { Dashboards.processChange(name); })
-      .keyup(function(ev) { if (ev.keyCode == 13) { Dashboards.processChange(name); } });
+    $("#" + myself.name)
+      .change(function() {
+        if(Dashboards.getParameterValue(myself.parameter) === $("#"+myself.name).val()) return;
+        Dashboards.processChange(myself.name);
+      })
+      .keyup(function(ev) {
+        if(ev.keyCode == 13) {
+          if(Dashboards.getParameterValue(myself.parameter) === $("#"+myself.name).val()) return;
+          Dashboards.processChange(myself.name);
+        }
+      });
 
-    this._doAutoFocus();
+    myself._doAutoFocus();
   },
   getValue : function() {
     return $("#"+this.name).val();
@@ -531,27 +540,27 @@ var TextInputComponent = BaseComponent.extend({
 
 var TextareaInputComponent = BaseComponent.extend({
   update: function() {
-    var name = this.name;
-    var selectHTML = "<textarea id='" + name +
-      "' name='" + name +
-      (this.numRows ? ("' rows='" + this.numRows) : "") +
-      (this.numColumns ? ("' cols='" + this.numColumns) : "") +
+    var myself = this;
+    var selectHTML = "<textarea id='" + myself.name +
+      "' name='" + myself.name +
+      (myself.numRows ? ("' rows='" + myself.numRows) : "") +
+      (myself.numColumns ? ("' cols='" + myself.numColumns) : "") +
       "'>" +
-      Dashboards.getParameterValue(this.parameter) +
+      Dashboards.getParameterValue(myself.parameter) +
       '</textarea>';
 
-    this.placeholder().html(selectHTML);
+    myself.placeholder().html(selectHTML);
 
-    $("#" + name)
-      .change(function() { Dashboards.processChange(name); })
-      .keyup(function(ev){ if (ev.keyCode == 13) { Dashboards.processChange(name); }
-    });
+    $("#" + myself.name)
+      .change(function() {
+        if(Dashboards.getParameterValue(myself.parameter) === $("#"+myself.name).val()) return;
+        Dashboards.processChange(myself.name);
+      });
   },
   getValue : function() {
     return $("#"+this.name).val();
   }
 });
-
 
 
 // Start by setting a sane i18n default to datepicker
