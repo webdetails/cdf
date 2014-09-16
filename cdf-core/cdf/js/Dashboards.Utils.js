@@ -54,19 +54,11 @@ Dashboards.getLocationSearchString = function() {
 
   D.getQueryParameter = function(parameterName) {
     if ( urlParams === undefined ) {
-      var match,
-          space = /\+/g,
-          search = /([^&=]+)=?([^&]*)/g,
-          decode = function (s) { return decodeURIComponent(s.replace(space, " ")); },
-          queryString  = this.getLocationSearchString().substring(1);
-
-      urlParams = {};
-
-      while (match = search.exec(queryString))
-        urlParams[decode(match[1])] = decode(match[2]);
+      var queryString = this.getLocationSearchString();
+      urlParams = $.parseQuery( queryString );
     }
-
     return urlParams[parameterName] || "";
+
   };
 
   // Conversion functions
