@@ -87,7 +87,10 @@ requireCfg['shim']['cdf/Dashboards.RefreshEngine'] 	= ['cdf/Dashboards.Main'];
 requireCfg['shim']['cdf/Dashboards.Utils'] 			= ['cdf/Dashboards.Main'];
 
 requireCfg['shim']['cdf/components/core']       = ['cdf/Dashboards'];
-requireCfg['shim']['cdf/components/input']      = ['cdf/components/core'];
+requireCfg['shim']['cdf/components/input']      = [
+    'cdf/components/core',
+    'cdf/inputHelper'
+];
 requireCfg['shim']['cdf/components/jfreechart'] = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/maps']       = ['cdf/components/core'];
 requireCfg['shim']['cdf/components/navigation'] = ['cdf/components/core'];
