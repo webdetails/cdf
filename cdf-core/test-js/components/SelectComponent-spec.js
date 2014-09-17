@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 *
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components/SelectBaseComponent", "cdf/components/CommentsComponent", 'cdf/dashboard/Query'], function(Dashboard, $, _, SelectBaseComponent, CommentsComponent, Query) {
+define(["cdf/Dashboard", "cdf/components/SelectComponent", 'cdf/dashboard/Query'], function(Dashboard, SelectComponent, Query) {
 
     /**
      * ## The Select Component
@@ -20,31 +20,16 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components
     
       var myDashboard = new Dashboard();
     
-      //myDashboard.setParameterValue('selectorTestParameter',1);
-      //myDashboard.setParameterValue('multiSelectTestParameter',[1,2,3]);
-      myDashboard.addParameter('selectorTestParameter',1);
-      myDashboard.addParameter('multiSelectTestParameter',[1,2,3]);    
+      myDashboard.addParameter('selectComponentParameter',1);    
       
-      var selectComponent = window.selectComponent = new CommentsComponent(myDashboard, {
+      var selectComponent = window.selectComponent = new SelectComponent(myDashboard, {
         name: "selectComponent",
-        type: "CommentsComponent",
+        type: "SelectComponent",
         htmlObject: 'selectComponent',
-        parameter: "selectorTestParameter" 
+        parameter: "selectComponentParameter" 
       });
     
-      var multiSelectComponent = window.multiSelectComponent = new CommentsComponent(myDashboard, {
-        name: "multiSelectComponent",
-        type: "CommentsComponent",
-        htmlObject: 'multiSelectComponent',
-        parameter: "multiSelectTestParameter" 
-      });
-    
-      var components = [
-        window.selectComponent,
-        window.multiSelectComponent
-      ];
-    
-      myDashboard.addComponents(components);
+      myDashboard.addComponent(selectComponent);
     
       /**
        * ## The Select Component # Draws the options
@@ -88,9 +73,9 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/lib/underscore", "cdf/components
       describe("The externalPlugin #", function () {
     
         var makeSelect = function (name, externalPlugin, extraOptions, dashboard) {
-          return new SelectBaseComponent(dashboard, {
+          return new SelectComponent(dashboard, {
             name: name,
-            type: "SelectBaseComponent",
+            type: "SelectComponent",
             parameter: "selectParam",
             externalPlugin: externalPlugin,
             extraOptions: extraOptions,

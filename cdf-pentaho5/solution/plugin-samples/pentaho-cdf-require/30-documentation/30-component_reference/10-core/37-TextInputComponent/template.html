@@ -1,0 +1,102 @@
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>TextInputComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		Renders a text input box to collect user input from. Press enter or remove focus from box to fire the change event.
+		Pre/postChange functions can be used to make data validation.
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>textInputComponent</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>parameter</dt>
+			<dd>Variable where the input is stored</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+			<dt>charWidth</dt>
+			<dd>Width of this component (in number of characters). </dd>
+
+			<dt>maxChars</dt>
+			<dd>Maximum number of characters allowed. By default this is not set (no restriction)</dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is changed</dd>
+
+
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example">
+			<div id="sample">
+				<div id="sampleObject"></div>
+			</div>
+		</div>
+    </div>
+</div>
+
+<script language="javascript" type="text/javascript">
+	var clearVariables = function() {
+	    window.jQuery = null;
+	    window.$ = null;
+	    window.backbone = null;
+	    window._ = null;
+	    window.Mustache = null;
+	};
+
+	require(['cdf/Dashboard', 'cdf/components/TextInputComponent'], function(Dashboard, TextInputComponent) {
+	    clearVariables();
+
+		var myDashboard = new Dashboard();
+
+		myDashboard.addParameter("input", "");
+
+		var textInputComponent = new TextInputComponent(myDashboard, {
+			name: "myInput",
+			type: "textInputComponent",
+			parameters:[],
+			parameter: "input",
+			htmlObject: "sampleObject",
+			executeAtStart: true,
+			postChange: function(){
+				alert("you typed: " + myDashboard.getParameterValue(this.parameter));
+			}
+		});
+
+		myDashboard.addComponent(textInputComponent);
+		myDashboard.init();
+	});
+</script>

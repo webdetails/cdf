@@ -1,0 +1,131 @@
+<div class="shadow">
+
+	<div class="contents">
+
+		<h2>DateInputComponent</h2>
+
+		<h3>Description</h3>
+		<p>
+		Renders a date input box to collect user input from. 
+
+		This component fires a event change where we select older months using the mouse. That
+		can be prevented using arrow keys. The component is fully localized according to the selected user locale.
+		</p>
+
+		<h3>Options</h3>
+
+		<dl class="documentation">
+			<dt>name</dt>
+			<dd>The name of the component</dd>
+
+			<dt>type</dt>
+			<dd><code>dateInputComponent</code></dd>
+
+			<dt>listeners</dt>
+			<dd><i>Array - </i> Parameters who this component will react to</dd>
+
+			<dt>parameter</dt>
+			<dd>Variable where the input is stored</dd>
+
+			<dt>htmlObject</dt>
+			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+			<dt>refreshPeriod</dt>
+			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+			<dt>dateFormat</dt>
+			<dd><i>String - </i>Format used for date output and parsing (including <i>startDate</i> and <i>endDate</i> fields). Must be a jquery datePicker format string:
+				<ul>
+					<li> d  - day of month (no leading zero)</li>
+					<li> dd - day of month (two digit)</li>
+					<li> D  - day name short</li>
+					<li> DD - day name long</li>
+					<li> m  - month of year (no leading zero)</li>
+					<li> mm - month of year (two digit)</li>
+					<li> M  - month name short</li>
+					<li> MM - month name long</li>
+					<li> y  - year (two digit)</li>
+					<li> yy - year (four digit)</li>
+					<li> @  - Unix timestamp (also known as epoch seconds or POSIX time) in milliseconds since 01/01/1970</li>
+					<li> '...' - literal text</li>
+					<li> '' - single quote</li>
+					<li> anything else - literal text</li>
+				</ul>Default is 'yy-mm-dd'.</dd>
+
+			<dt>startDate</dt>
+			<dd><i>String - </i>Component will only allow selection of dates after this value. Value is a string containing a date compliant to this component's <i>dateFormat</i>. Special value 'TODAY' will translate to current date whenever the component is updated. Empty by default (no restriction)</dd>
+
+			<dt>endDate</dt>
+			<dd><i>String - </i>Component will only allow selection of dates before this value. Value is a string containing a date compliant to this component's <i>dateFormat</i>. Special value 'TODAY' will translate to current date whenever the component is updated. Empty by default (no restriction)</dd>
+
+			<dt>executeAtStart</dt>
+			<dd>True to execute the component at start, false otherwise</dd>
+
+			<dt>tooltip</dt>
+			<dd>Tooltip to be displayed when mouse hovers</dd>
+
+			<dt>preExecution</dt>
+			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+			<dt>postExecution</dt>
+			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+			<dt>preChange</dt>
+			<dd><i>Function - </i> Function to be called before the component is changed</dd>
+
+			<dt>postChange</dt>
+			<dd><i>Function - </i> Function to be called after the component is changed</dd>
+
+
+		</dl>
+
+		<h3>Sample</h3>
+
+		<div id="example" class="flora">
+			<div id="sample">
+				<div style="font-size: 9pt" id="sampleObject"></div>
+			</div>
+		</div>
+    </div>
+</div>
+
+<script language="javascript" type="text/javascript">
+
+	var clearVariables = function() {
+		window.jQuery = null;
+		window.$ = null;
+		window.backbone = null;
+		window._ = null;
+		window.Mustache = null;
+	};
+
+	require(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'], function(Dashboard, $, DateInputComponent) {
+
+		$('head').append('<link rel="stylesheet" href="/pentaho/api/repos/pentaho-cdf/js/lib/theme/cupertino/jquery-ui-1.8.custom.css" type="text/css" />');
+
+        clearVariables();
+
+	    var myDashboard = new Dashboard();
+
+	    myDashboard.addParameter("input", "2009-01-01");
+
+	    var dateInputComponent = new DateInputComponent(myDashboard, {
+	        name: "myInput",
+			type: "dateInputComponent",
+			parameters:[],
+			parameter: "input",
+			htmlObject: "sampleObject",
+			dateFormat: "yy-mm-dd",
+			startDate: "2006-05-31",
+			endDate: "TODAY",
+			executeAtStart: true,
+			tooltip: "Click me to select a date",
+			postChange: function(){
+				alert("You chose: " + myDashboard.getParameterValue(this.parameter));
+			}
+	    });
+
+	    myDashboard.addComponent(dateInputComponent);
+	    myDashboard.init();
+	});
+</script>
