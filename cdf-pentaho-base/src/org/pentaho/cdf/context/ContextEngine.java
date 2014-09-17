@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.StringWriter;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -56,6 +57,16 @@ public class ContextEngine {
 
   private static final Log logger = LogFactory.getLog( ContextEngine.class );
   private static final String PREFIX_PARAMETER = "param";
+
+  // embedded constants
+  private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n" +
+    "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
+  private static final String REQUIRE_JS_CFG_START = "var requireCfg = {waitSeconds: 30, paths: {}, shim: {}};\n\n";
+  private static final String CDF_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
+  private static final String CDF_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
+  private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
+
+
   static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
   private static ContextEngine instance;
 
@@ -408,5 +419,25 @@ public class ContextEngine {
     }
 
     PluginIOUtils.writeOut( out, dashboardContext );
+  }
+
+  public String generateEmbeddedContext() throws Exception {
+    StringWriter output = new StringWriter();
+
+    output.append( INITIAL_COMMENT );
+    output.append( REQUIRE_JS_CFG_START );
+
+    output.append( "// injecting document writes to append the cdf require files\n" );
+    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
+      "FULLY_QUALIFIED_URL + \"" + CDF_PATH + "'></script>\");\n" );
+    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
+      "FULLY_QUALIFIED_URL + \"" + CDF_LIB_PATH + "'></script>\");\n" );
+    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
+      "FULLY_QUALIFIED_URL + \"" + REQUIRE_PATH + "'></script>\");\n" );
+    output.append( "document.write(\"<script language='javascript' type='text/javascript'>\");\n" );
+    output.append( "document.write(\"  requirejs.config(requireCfg);\");\n" );
+    output.append( "document.write(\"</script>\");\n" );
+
+    return output.toString();
   }
 }
