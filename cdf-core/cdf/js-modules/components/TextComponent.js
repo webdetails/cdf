@@ -13,12 +13,12 @@
 
 define(['./BaseComponent'], function (BaseComponent) {
 
-    var TextComponent = BaseComponent.extend({
-      update : function() {
-        this.placeholder().html(this.expression());
-      }
-    });
+  var TextComponent = BaseComponent.extend({
+    update : function() {
+      this.placeholder().html(this.expression());
+    }
+  });
 
-    return TextComponent;
+  return TextComponent;
 
 });

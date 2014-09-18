@@ -11,29 +11,34 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
+define(['../lib/jquery', './BaseComponent'], function ($, BaseComponent) {
 
   var DateInputComponent = BaseComponent.extend({
     update: function(){
-      var format = (this.dateFormat == undefined || this.dateFormat == null)? 'yy-mm-dd' : this.dateFormat;
       var myself = this;
-
+      var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
       var startDate, endDate;
 
-      if(this.startDate == 'TODAY') startDate = new Date();
-      else if(this.startDate) startDate = $.datepicker.parseDate( format, this.startDate);
+      if(myself.startDate == 'TODAY') {
+        startDate = new Date();
+      } else if(myself.startDate) {
+        startDate = $.datepicker.parseDate( format, myself.startDate);
+      }
 
-      if(this.endDate == 'TODAY') endDate = new Date();
-      else if(this.endDate) endDate = $.datepicker.parseDate( format, this.endDate);
+      if(myself.endDate == 'TODAY') {
+        endDate = new Date();
+      } else if(myself.endDate) {
+        endDate = $.datepicker.parseDate( format, myself.endDate);
+      }
 
       //onOpen and onClose events
-      this.on('onOpen:dateInput', this.onOpenEvent );
-      this.on('onClose:dateInput', this.onCloseEvent );
+      myself.on('onOpen:dateInput', myself.onOpenEvent );
+      myself.on('onClose:dateInput', myself.onCloseEvent );
 
       //ToDo: stretch interval to catch defaultValue?..
-      //Dashboards.getParameterValue(this.parameter))
+      //Dashboards.getParameterValue(myself.parameter))
 
-      this.placeholder().html($("<input/>").attr("id", this.name).attr("value", this.dashboard.getParameterValue(this.parameter)).css("width", "80px"));
+      myself.placeholder().html($("<input/>").attr("id", myself.name).attr("value", myself.dashboard.getParameterValue(myself.parameter)).css("width", "80px"));
       $(function(){
         myself.placeholder("input").datepicker({
           beforeShow: function() {
@@ -52,11 +57,10 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
           }
         });
         // Add JQuery DatePicker standard localization support only if the dashboard is localized
-        if (typeof myself.dashboard.i18nSupport !== "undefined" && myself.dashboard.i18nSupport != null) {
+        if(typeof myself.dashboard.i18nSupport !== "undefined" && myself.dashboard.i18nSupport != null) {
           var $input = myself.placeholder("input");
 
           $input.datepicker('option', $.datepicker.regional[myself.dashboard.i18nCurrentLanguageCode]);
-
 
           //Setup alt field and format to keep iso format
           $input.parent().append($('<hidden>').attr("id", myself.name + "_hidden"));
@@ -78,12 +82,14 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
     },
 
     getValue : function() {
-      if (typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null)
+      if(typeof this.dashboard.i18nSupport !== "undefined" && this.dashboard.i18nSupport != null) {
         return $("#" + this.name + "_hidden").val();
-      else
+      } else {
         return $("#"+this.name).val();
+      }
     }
   });
 
   return DateInputComponent;
+  
 });

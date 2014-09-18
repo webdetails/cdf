@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/ButtonComponent"], function(Dashboard, ButtonComponent){
+define(["cdf/Dashboard", "cdf/components/ButtonComponent"], function(Dashboard, ButtonComponent) {
   /**
    * ## The Button Component
    */
@@ -27,10 +27,16 @@ define(["cdf/Dashboard", "cdf/components/ButtonComponent"], function(Dashboard, 
       listeners:["productLine", "territory"],
       htmlObject: "sampleObject",
       label: "A button",
-      expression: function(){this.setLabel('Yes, a clickable button'); alert('Button was clicked');},
+      expression: function(){
+        this.setLabel('Yes, a clickable button'); alert('Button was clicked');
+      },
       executeAtStart: true,
-      preChange: function(){return true;},
-      postChange: function(){return true;},
+      preChange: function(){
+        return true;
+      },
+      postChange: function(){
+        return true;
+      },
       successCallback: function(data){},
       failureCallback: function(){},
       tooltip: "My first dashboard"
@@ -51,4 +57,3 @@ define(["cdf/Dashboard", "cdf/components/ButtonComponent"], function(Dashboard, 
     });
   });
 });
-

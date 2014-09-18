@@ -13,57 +13,52 @@
 
 define(['../lib/underscore', '../lib/jquery', './ActionComponent'], function (_, $, ActionComponent) {
 
-	var ButtonComponent = ActionComponent.extend({
-	  _docstring: function (){
-	    return "Button Component that triggers a server action when clicked";
-	    /**
-	     * Button API:
-	     *   enable()/disable()
-	     *   setLabel()
-	     */
-	  },
+  var ButtonComponent = ActionComponent.extend({
+    _docstring: function (){
+      return "Button Component that triggers a server action when clicked";
+    },
 
-	  render: function() {
-	    var myself = this;
-	    var b = $("<button type='button'/>").text(this.label).unbind("click").bind("click", function(){
-	      var proceed = true;
-	      if ( _.isFunction(myself.expression) ){
-	        proceed = myself.expression.apply(myself, arguments);
-	      }
-	      if ( myself.hasAction() && !(proceed === false)) {
-	        return myself.triggerAction.apply(myself);
-	      }
-	    });
-	    if ( _.isUndefined(this.buttonStyle) || this.buttonStyle === "themeroller"){
-	      b.button();
-	    }
-	    b.appendTo(this.placeholder().empty());
-	    this._doAutoFocus();
-	  },
+    render: function() {
+      var myself = this;
+      var b = $("<button type='button'/>").text(myself.label).unbind("click").bind("click", function(){
+        var proceed = true;
+        if(_.isFunction(myself.expression)) {
+          proceed = myself.expression.apply(myself, arguments);
+        }
+        if(myself.hasAction() && !(proceed === false)) {
+          return myself.triggerAction.apply(myself);
+        }
+      });
+      if(_.isUndefined(myself.buttonStyle) || myself.buttonStyle === "themeroller") {
+        b.button();
+      }
+      b.appendTo(myself.placeholder().empty());
+      myself._doAutoFocus();
+    },
 
-	  disable: function(){
-	    /**
-	     * Disables the button (grays it out and prevents click events)
-	     */
-	    this.placeholder('button').attr('disabled', 'disabled');
-	  },
+    /**
+     * Disables the button (grays it out and prevents click events)
+     */
+    disable: function(){
+      this.placeholder('button').attr('disabled', 'disabled');
+    },
 
-	  enable: function(){
-	    /**
-	     * Enables the button
-	     */
-	    this.placeholder('button').removeAttr('disabled');
-	  },
+    /**
+     * Enables the button
+     */
+    enable: function(){
+      this.placeholder('button').removeAttr('disabled');
+    },
 
-	  setLabel: function(label){
-	    /**
-	    * Changes the label shown on the button
-	    */
-	    this.label = label.toString();
-	    this.placeholder('button').text(this.label);
-	  }
-	});
+    /**
+     * Changes the label shown on the button
+     */
+    setLabel: function(label){
+      this.label = label.toString();
+      this.placeholder('button').text(this.label);
+    }
+  });
 
-    return ButtonComponent;
+  return ButtonComponent;
 
 });

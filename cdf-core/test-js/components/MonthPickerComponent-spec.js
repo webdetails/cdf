@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/MonthPickerComponent"], function(Dashboard, $, MonthPickerComponent){
+define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/MonthPickerComponent"], function(Dashboard, $, MonthPickerComponent) {
   /**
    * ## The Month Picker Component
    */
@@ -56,4 +56,3 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/MonthPickerComponent"
     });
   });
 });
-

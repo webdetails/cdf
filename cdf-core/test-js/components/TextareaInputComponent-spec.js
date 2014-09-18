@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/TextareaInputComponent"], function(Dashboard, TextareaInputComponent){
+define(["cdf/Dashboard", "cdf/components/TextareaInputComponent"], function(Dashboard, TextareaInputComponent) {
   /**
    * ## The Textarea Input Component
    */
@@ -26,7 +26,9 @@ define(["cdf/Dashboard", "cdf/components/TextareaInputComponent"], function(Dash
       type: "textareaInputComponent",
       htmlObject: 'textareaInputComponent',
       listeners:[],
-      expression: function(){return "My text generated in " + new Date()},
+      expression: function(){
+        return "My text generated in " + new Date()
+      },
       executeAtStart: true
     });
 

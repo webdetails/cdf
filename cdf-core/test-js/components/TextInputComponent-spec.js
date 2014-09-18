@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/TextInputComponent"], function(Dashboard, TextInputComponent){
+define(["cdf/Dashboard", "cdf/components/TextInputComponent"], function(Dashboard, TextInputComponent) {
   /**
    * ## The Text Input Component
    */
@@ -26,7 +26,9 @@ define(["cdf/Dashboard", "cdf/components/TextInputComponent"], function(Dashboar
       type: "textInputComponent",
       htmlObject: 'textInputComponent',
       listeners:[],
-      expression: function(){return "My text generated in " + new Date()},
+      expression: function(){
+        return "My text generated in " + new Date()
+      },
       executeAtStart: true
     });
 
@@ -45,4 +47,3 @@ define(["cdf/Dashboard", "cdf/components/TextInputComponent"], function(Dashboar
     });
   });
 });
-

@@ -1,86 +1,85 @@
 <div class="shadow">
 
-	<div class="contents">
+  <div class="contents">
 
-		<h2>TextComponent</h2>
+    <h2>TextComponent</h2>
 
-		<h3>Description</h3>
-		<p>
-		Simple component that renders text returned from a function specified in the <i>expression</i> property.
-		</p>
+    <h3>Description</h3>
+    <p>
+    Simple component that renders text returned from a function specified in the <i>expression</i> property.
+    </p>
 
-		<h3>Options</h3>
+    <h3>Options</h3>
 
-		<dl class="documentation">
-			<dt>name</dt>
-			<dd>The name of the component</dd>
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
 
-			<dt>type</dt>
-			<dd><code>textComponent</code></dd>
+      <dt>type</dt>
+      <dd><code>textComponent</code></dd>
 
-			<dt>listeners</dt>
-			<dd><i>Array - </i> Parameters who this component will react to</dd>
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
 
-			<dt>expression</dt>
-			<dd>Javascript expression to be evaluated</dd>
+      <dt>expression</dt>
+      <dd>Javascript expression to be evaluated</dd>
 
-			<dt>htmlObject</dt>
-			<dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+      <dt>htmlObject</dt>
+      <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
 
-			<dt>refreshPeriod</dt>
-			<dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+      <dt>refreshPeriod</dt>
+      <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
 
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
 
+      <dt>tooltip</dt>
+      <dd>Tooltip to be displayed when mouse hovers</dd>
 
-			<dt>executeAtStart</dt>
-			<dd>True to execute the component at start, false otherwise</dd>
+      <dt>preExecution</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed</dd>
 
-			<dt>tooltip</dt>
-			<dd>Tooltip to be displayed when mouse hovers</dd>
+      <dt>postExecution</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
 
-			<dt>preExecution</dt>
-			<dd><i>Function - </i> Function to be called before the component is executed</dd>
+    </dl>
 
-			<dt>postExecution</dt>
-			<dd><i>Function - </i> Function to be called after the component is executed</dd>
+    <h3>Sample</h3>
 
-
-		</dl>
-
-		<h3>Sample</h3>
-
-		<div id="example">
-			<div id="sample">
-				<div id="sampleObject"></div>
-			</div>
-		</div>
-	</div>
+    <div id="example">
+      <div id="sample">
+        <div id="sampleObject"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script language="javascript" type="text/javascript">
-	var clearVariables = function() {
-		window.jQuery = null;
-		window.$ = null;
-		window.backbone = null;
-		window._ = null;
-		window.Mustache = null;
-	};
+  var clearVariables = function() {
+    window.jQuery = null;
+    window.$ = null;
+    window.backbone = null;
+    window._ = null;
+    window.Mustache = null;
+  };
 
-  	require(['cdf/Dashboard', 'cdf/components/TextComponent'], function(Dashboard, TextComponent) {
-	    clearVariables();
+  require(['cdf/Dashboard', 'cdf/components/TextComponent'], function(Dashboard, TextComponent) {
+    clearVariables();
 
-	    var myDashboard = new Dashboard();
+    var myDashboard = new Dashboard();
 
-		var textComponent = new TextComponent(myDashboard, {
-			name: "textGenerator",
-			type: "textComponent",
-			listeners:[],
-			expression: function(){return "My text generated in " + new Date()},
-			htmlObject: "sampleObject",
-			executeAtStart: true
-		});
+    var textComponent = new TextComponent(myDashboard, {
+      name: "textGenerator",
+      type: "textComponent",
+      listeners:[],
+      expression: function(){
+        return "My text generated in " + new Date()
+      },
+      htmlObject: "sampleObject",
+      executeAtStart: true
+    });
 
-		myDashboard.addComponent(textComponent);
-		myDashboard.init();
-  	});
+    myDashboard.addComponent(textComponent);
+    myDashboard.init();
+  });
 </script>

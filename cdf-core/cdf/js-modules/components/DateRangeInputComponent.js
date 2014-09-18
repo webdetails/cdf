@@ -11,28 +11,28 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define(["../lib/jquery", "./BaseComponent", "../lib/daterangepicker.jQuery"], function ($, BaseComponent) {
+define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery'], function ($, BaseComponent) {
 
   var DateRangeInputComponent = BaseComponent.extend({
     update : function() {
+      var myself = this;
       var dr;
-      if (this.singleInput == undefined || this.singleInput == true){
-        dr = $("<input/>").attr("id",this.name).attr("value",this.dashboard.getParameterValue(this.parameter[0]) + " > " + this.dashboard.getParameterValue(this.parameter[1]) ).css("width","170px");
-        this.placeholder().html(dr);
+      if(myself.singleInput == undefined || myself.singleInput == true) {
+        dr = $("<input/>").attr("id",myself.name).attr("value",myself.dashboard.getParameterValue(myself.parameter[0]) + " > " + myself.dashboard.getParameterValue(myself.parameter[1]) ).css("width","170px");
+        myself.placeholder().html(dr);
       } else {
-        dr = $("<input/>").attr("id",this.name).attr("value",this.dashboard.getParameterValue(this.parameter[0])).css("width","80px");
-        this.placeholder().html(dr);
-        dr.after($("<input/>").attr("id",this.name + "2").attr("value",this.dashboard.getParameterValue(this.parameter[1])).css("width","80px"));
-        if(this.inputSeparator != undefined){
-          dr.after(this.inputSeparator);
+        dr = $("<input/>").attr("id",myself.name).attr("value",myself.dashboard.getParameterValue(myself.parameter[0])).css("width","80px");
+        myself.placeholder().html(dr);
+        dr.after($("<input/>").attr("id",myself.name + "2").attr("value",myself.dashboard.getParameterValue(myself.parameter[1])).css("width","80px"));
+        if(myself.inputSeparator != undefined) {
+          dr.after(myself.inputSeparator);
         }
       }
       var offset = dr.offset();
-      var myself = this;
-      var earliestDate = this.earliestDate != undefined  ?  this.earliestDate : Date.parse('-1years');
-      var latestDate = this.latestDate != undefined  ?  this.latestDate : Date.parse('+1years');
-      var leftOffset = this.leftOffset != undefined ?  this.leftOffset : 0;
-      var topOffset = this.topOffset != undefined ?  this.topOffset : 15;
+      var earliestDate = myself.earliestDate != undefined  ?  myself.earliestDate : Date.parse('-1years');
+      var latestDate = myself.latestDate != undefined  ?  myself.latestDate : Date.parse('+1years');
+      var leftOffset = myself.leftOffset != undefined ?  myself.leftOffset : 0;
+      var topOffset = myself.topOffset != undefined ?  myself.topOffset : 15;
 
       var changed, closed;
       function triggerWhenDone() {
@@ -72,16 +72,20 @@ define(["../lib/jquery", "./BaseComponent", "../lib/daterangepicker.jQuery"], fu
 
     fireInputChange : function(start, end){
       //TODO: review this!
-      if(this.preChange){
+      if(this.preChange) {
         this.preChange(start, end);
       }
 
       if(this.parameter) {
-        if( this.parameter.length == 2) this.dashboard.setParameter(this.parameter[1], end);
-        if( this.parameter.length > 0) this.dashboard.fireChange(this.parameter[0], start);
+        if(this.parameter.length == 2) {
+          this.dashboard.setParameter(this.parameter[1], end);
+        }
+        if(this.parameter.length > 0) {
+          this.dashboard.fireChange(this.parameter[0], start);
+        }
       }
 
-      if(this.postChange){
+      if(this.postChange) {
         this.postChange(start, end);
       }
     },
@@ -95,18 +99,19 @@ define(["../lib/jquery", "./BaseComponent", "../lib/daterangepicker.jQuery"], fu
     fireDateRangeInputChange : function(name, rangeA, rangeB){
       // WPG: can we just use the parameter directly?
       var object = this.dashboard.getComponentByName(name);
-      if(!(typeof(object.preChange)=='undefined')){
+      if(!(typeof(object.preChange)=='undefined')) {
         object.preChange(rangeA, rangeB);
       }
       var parameters = eval(name + ".parameter");
       // set the second date and fireChange the first
       this.dashboard.setParameter(parameters[1], rangeB);
       this.dashboard.fireChange(parameters[0],rangeA);
-      if(!(typeof(object.postChange)=='undefined')){
+      if(!(typeof(object.postChange)=='undefined')) {
         object.postChange(rangeA, rangeB);
       }
     }
   });
 
   return DateRangeInputComponent;
+
 });

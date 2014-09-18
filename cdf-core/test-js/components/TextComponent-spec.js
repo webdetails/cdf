@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/TextComponent"], function(Dashboard, TextComponent){
+define(["cdf/Dashboard", "cdf/components/TextComponent"], function(Dashboard, TextComponent) {
   /**
    * ## The Text Component
    */
@@ -26,7 +26,9 @@ define(["cdf/Dashboard", "cdf/components/TextComponent"], function(Dashboard, Te
       type: "textComponent",
       htmlObject: 'textComponent',
       listeners:[],
-      expression: function(){return "My text generated in " + new Date()},
+      expression: function(){
+        return "My text generated in " + new Date()
+      },
       executeAtStart: true
     });
 
@@ -57,4 +59,3 @@ define(["cdf/Dashboard", "cdf/components/TextComponent"], function(Dashboard, Te
     });
   });
 });
-

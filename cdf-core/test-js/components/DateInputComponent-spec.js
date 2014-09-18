@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/DateInputComponent"], function(Dashboard, $, DateInputComponent){
+define(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'], function(Dashboard, $, DateInputComponent) {
   /**
    * ## The Date Input Component
    */
@@ -45,7 +45,6 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/DateInputComponent"],
 
     myDashboard.addComponent(dateInputComponent);
 
-
     /**
      * ## The Date Input Component # Update Called
      */
@@ -76,4 +75,3 @@ define(["cdf/Dashboard", "cdf/lib/jquery", "cdf/components/DateInputComponent"],
     });
   });
 });
-

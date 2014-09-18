@@ -14,26 +14,29 @@
 define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
 
   var TextInputComponent = BaseComponent.extend({
-  	update: function() {
+    update: function() {
       var value;
       var myself = this;
       var selectHTML = "<input type='text' id='" + myself.name +
         "' name='"  + myself.name +
         "' value='" + myself.dashboard.getParameterValue(myself.parameter) +
         (myself.size ? ("' size='" + myself.size) : "") +
-        (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") +
-        "'>";
+        (myself.maxLength ? ("' maxlength='" + myself.maxLength) : "") + "'>";
 
       myself.placeholder().html(selectHTML);
 
       $("#" + myself.name)
         .change(function() {
-          if(myself.dashboard.getParameterValue(myself.parameter) === $("#"+myself.name).val()) return;
+          if(myself.dashboard.getParameterValue(myself.parameter) === $("#"+myself.name).val()) {
+            return;
+          }
           myself.dashboard.processChange(myself.name);
         })
         .keyup(function(ev) {
           if(ev.keyCode == 13) {
-            if(myself.dashboard.getParameterValue(myself.parameter) === $("#"+myself.name).val()) return;
+            if(myself.dashboard.getParameterValue(myself.parameter) === $("#"+myself.name).val()) {
+              return;
+            }
             myself.dashboard.processChange(myself.name);
           }
         });
@@ -46,4 +49,5 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
   });
 
   return TextInputComponent;
+
 });

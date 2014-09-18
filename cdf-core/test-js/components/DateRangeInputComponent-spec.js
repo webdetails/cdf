@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["cdf/Dashboard", "cdf/components/DateRangeInputComponent"], function(Dashboard, DateRangeInputComponent){
+define(['cdf/Dashboard', 'cdf/components/DateRangeInputComponent'], function(Dashboard, DateRangeInputComponent) {
   /**
    * ## The Date Range Input Component
    */
@@ -53,4 +53,3 @@ define(["cdf/Dashboard", "cdf/components/DateRangeInputComponent"], function(Das
     });
   });
 });
-
