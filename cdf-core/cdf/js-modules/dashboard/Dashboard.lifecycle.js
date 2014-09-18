@@ -24,7 +24,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
      *
      * @private
      */
-    _initLifecycle: function(){
+    _initLifecycle: function() {
       // Init Counter, for subdashboards
       this.initCounter = 0;
 
@@ -39,7 +39,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
     /**
      *
      */
-    resetRunningCalls: function(){
+    resetRunningCalls: function() {
       this.runningCalls = 0;
       setTimeout(_.bind(function(){
         this.hideProgressIndicator();
@@ -50,7 +50,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
      *
      * @returns {number}
      */
-    getRunningCalls: function (){
+    getRunningCalls: function () {
       return this.runningCalls;
     },
 
@@ -82,45 +82,45 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
      * @param components
      * @private
      */
-    init: function(components){
+    init: function(components) {
       var myself = this;
 
       // We're now adding support for multiple inits. This part is only relevant for
       // the first execution.
 
-      var initInstance = this.initCounter++;
+      var initInstance = myself.initCounter++;
       Logger.log("InitInstance " + initInstance);
 
       if(initInstance == 0) {
 
-        this.syncDebugLevel();
+        myself.syncDebugLevel();
 
-        if(this.initialStorage) {
-          _.extend(this.storage, this.initialStorage);
+        if(myself.initialStorage) {
+          _.extend(myself.storage, myself.initialStorage);
         } else {
-          this.loadStorage();
+          myself.loadStorage();
         }
 
-        if(this.context != null && this.context.sessionTimeout != null ) {
+        if(myself.context != null && myself.context.sessionTimeout != null ) {
           //defaulting to 90% of ms value of sessionTimeout
-          this.serverCheckResponseTimeout = this.context.sessionTimeout * 900;
+          myself.serverCheckResponseTimeout = myself.context.sessionTimeout * 900;
         }
 
-        this.restoreBookmarkables();
-        this.restoreView();
-        this.syncParametersInit();
+        myself.restoreBookmarkables();
+        myself.restoreView();
+        myself.syncParametersInit();
 
       }
 
       if(_.isArray(components)) {
-        this.addComponents(components);
+        myself.addComponents(components);
       }
 
       // Now we need to go through all components we have and attach this
       // initInstance to all
-      _.chain(this.components)
-          .where({initInstance:undefined})
-          .each(function(c){ c.initInstance = initInstance});
+      _.chain(myself.components)
+        .where({initInstance:undefined})
+        .each(function(c){ c.initInstance = initInstance});
 
       $(function() { myself._initEngine(initInstance); });
     },
@@ -134,32 +134,31 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
       var myself = this;
 
       // Should really throw an error? Or return?
-      if(this.waitingForInit && this.waitingForInit.length) {
+      if(myself.waitingForInit && myself.waitingForInit.length) {
         Logger.log("Overlapping initEngine!", 'warn');
       }
 
       var components = initInstance != null
-          ? _.where(this.components, {initInstance: initInstance})
-          : this.components;
+        ? _.where(myself.components, {initInstance: initInstance})
+        : myself.components;
 
-      if((!this.waitingForInit || this.waitingForInit.length === 0) && !this.finishedInit) {
-        this.incrementRunningCalls();
+      if((!myself.waitingForInit || myself.waitingForInit.length === 0) && !myself.finishedInit) {
+        myself.incrementRunningCalls();
       }
 
       Logger.log("%c          [Lifecycle >Start] Init[" + initInstance + "] (Running: "+
-            this.getRunningCalls()  +")","color: #ddd ");
+        myself.getRunningCalls()  +")","color: #ddd ");
 
-
-      this.createAndCleanErrorDiv();
+      myself.createAndCleanErrorDiv();
       // Fire all pre-initialization events
-      if(typeof this.preInit == 'function') {
-        this.preInit();
+      if(typeof myself.preInit == 'function') {
+        myself.preInit();
       }
 
-      this.trigger("cdf cdf:preInit",this);
+      myself.trigger("cdf cdf:preInit",myself);
       /* Legacy Event -- don't rely on this! */
       $(window).trigger('cdfAboutToLoad');
-      var myself = this;
+      var myself = myself;
       var updating = [],i;
       for(i = 0; i < components.length;i++) {
         if(components[i].executeAtStart) {
@@ -168,14 +167,14 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
       }
 
       if(!updating.length){
-        this._handlePostInit();
+        myself._handlePostInit();
         return;
       }
 
       // Since we can get into racing conditions between last component's
       // preExecution and dashboard.postInit, we'll add a last component with very
       // low priority who's funcion is only to act as a marker.
-      var postInitComponent = new UnmanagedComponent(this, {
+      var postInitComponent = new UnmanagedComponent(myself, {
         name: "PostInitMarker",
         type: "unmanaged",
         lifecycle: {
@@ -184,10 +183,10 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
         executeAtStart: true,
         priority:999999999
       });
-      this.addComponent(postInitComponent);  //TODO: check this!!!!
+      myself.addComponent(postInitComponent);  //TODO: check this!!!!
       updating.push(postInitComponent);
 
-      this.waitingForInit = updating.slice();
+      myself.waitingForInit = updating.slice();
 
       var callback = function(comp,isExecuting) {
         /*
@@ -200,20 +199,20 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
         if(arguments.length == 2 && isExecuting) {
           return;
         }
-        this.waitingForInit = _(this.waitingForInit).without(comp);
+        myself.waitingForInit = _(myself.waitingForInit).without(comp);
         comp.off('cdf:postExecution',callback);
         comp.off('cdf:preExecution',callback);
         comp.off('cdf:error',callback);
-        this._handlePostInit(initInstance);
+        myself._handlePostInit(initInstance);
       };
 
       for(var i= 0, len = updating.length; i < len; i++) {
         var component = updating[i];
         component.on('cdf:postExecution cdf:preExecution cdf:error',callback,myself);
       }
-      this.updateAll(updating);
+      myself.updateAll(updating);
       if(components.length > 0) {
-        this._handlePostInit(initInstance);
+        myself._handlePostInit(initInstance);
       }
     },
 
@@ -238,8 +237,8 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
          * state as well.
          */
         var dupes = myself.components.filter(function(c){return c.type == 'duplicate'}),
-            suffixes = {},
-            params = myself.getBookmarkState().params || {};
+          suffixes = {},
+          params = myself.getBookmarkState().params || {};
         /*
          * First step is to go over the bookmarked parameters and find
          * all of those that end with the _nn suffix (possibly several
@@ -250,12 +249,12 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
          * the root parameter names to their respective values.
          * E.g. a parameter 'foo_1 = 1' yields '{_1: {foo: 1}}'
          */
-        Object.keys(params).filter(function(e){
+        Object.keys(params).filter(function(e) {
           return /(_[0-9]+)+$/.test(e);
-        }).map(function(e){
+        }).map(function(e) {
           var parts = e.match(/(.*?)((_[0-9]+)+)$/),
-              name = parts[1],
-              suffix = parts[2];
+            name = parts[1],
+            suffix = parts[2];
           if(!suffixes[suffix]) {
             suffixes[suffix] = {}
           }
@@ -275,7 +274,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
         for(var s in suffixes) {
           if(suffixes.hasOwnProperty(s)) {
             var params = suffixes[s];
-            $.each(dupes,function(i,e){
+            $.each(dupes,function(i,e) {
               var p;
               for(p = 0; p < e.parameters.length;p++) {
                 if(!params.hasOwnProperty(e.parameters[p]) && myself.isBookmarkable(e.parameters[p])) {
@@ -544,7 +543,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
         clearTimeout(this.updateTimeout);
       }
 
-      var handler = _.bind(function(){
+      var handler = _.bind(function() {
         this.updateAll(this.updateQueue);
         delete this.updateQueue;
       },this);
@@ -636,15 +635,15 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
      */
     fireChange: function(parameter, value) {
       var myself = this;
-      this.createAndCleanErrorDiv(); //Dashboards.Legacy
+      myself.createAndCleanErrorDiv(); //Dashboards.Legacy
 
-      this.setParameter(parameter, value, true);
+      myself.setParameter(parameter, value, true);
       var toUpdate = [];
       var workDone = false;
-      for(var i= 0, len = this.components.length; i < len; i++) {
-        if(_.isArray(this.components[i].listeners)) {
-          for(var j= 0 ; j < this.components[i].listeners.length; j++) {
-            var comp = this.components[i];
+      for(var i= 0, len = myself.components.length; i < len; i++) {
+        if(_.isArray(myself.components[i].listeners)) {
+          for(var j= 0 ; j < myself.components[i].listeners.length; j++) {
+            var comp = myself.components[i];
             if(comp.listeners[j] == parameter && !comp.disabled) {
               toUpdate.push(comp);
               break;

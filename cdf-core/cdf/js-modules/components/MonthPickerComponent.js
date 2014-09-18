@@ -25,7 +25,7 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
     },
     getValue : function() {
       var myself = this;
-      var value = $("#" + this.name).val();
+      var value = $("#" + myself.name).val();
 
       var year = value.substring(0,4);
       var month = parseInt(value.substring(5,7) - 1);
