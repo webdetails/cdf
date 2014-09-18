@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>Community Dashboard Framework</title>
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+
+
+  <link rel="stylesheet" type="text/css" href="template.css"/>
+  <script type="text/javascript">
+    // change your server url here
+    var FULLY_QUALIFIED_URL = "http://localhost:8080/pentaho/";
+  </script>
+  <!-- change your server url here -->
+  <script type="text/javascript" src="http://localhost:8080/pentaho/plugin/pentaho-cdf/api/cdf-embed.js"></script>
+</head>
+
+<body>
+
+<div class="webdetailsWrapper">
+  <div class="webdetailsPanelsContainerWrapper">
+    <div class="webdetailsPanelsContainer">
+      <div class="panelContainer selectedPanel">
+        <div class="webdetailsPanelContainerLeft"></div>
+        <div class="webdetailsPanelContainerCenter">
+          <div id="content" class="webdetailsMainContent">
+            <div class="shadow">
+
+              <div class="contents">
+
+                <h2>CDF Embedded Example</h2>
+
+                <h3>Description</h3>
+
+                <p> Loads CDF require configs from a server and renders a new Dashboard with a Select Component. </p>
+                <p> It also allows to add custom require modules and load them along with the CDF modules. </p>
+
+                <h3>Configurations</h3>
+
+                <dl class="documentation">
+                  <dt>FULLY_QUALIFIED_URL</dt>
+                  <dd>The url for the server</dd>
+
+                  <dt>script tag</dt>
+                  <dd>The url for the server endpoint that injects the CDF dependencies</dd>
+
+                </dl>
+
+                <h3>Sample</h3>
+
+                <div id="example">
+                  <div id="sample">
+
+                    <div id="sampleObject"></div>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <script language="javascript" type="text/javascript">
+              require(['cdf/Dashboard', 'cdf/components/SelectComponent', 'myModule'], function(Dashboard, SelectComponent, m) {
+                console.log("MODULE getString() " + m.getString());
+
+                var myDashboard = new Dashboard();
+
+                myDashboard.addParameter("region", "1");
+
+                var selectComponent = new SelectComponent(myDashboard, {
+                  name: "regionSelector",
+                  type: "select",
+                  parameters:[],
+                  valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
+                  parameter:"region",
+                  valueAsId: false,
+                  htmlObject: "sampleObject",
+                  executeAtStart: true,
+                  postChange: function(){
+                    alert("You chose: " + myDashboard.getParameterValue(this.parameter));
+                  }
+                });
+
+                myDashboard.addComponent(selectComponent);
+                myDashboard.init();
+              });
+            </script>
+
+          </div>
+        </div>
+        <div class="webdetailsPanelContainerRight">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
