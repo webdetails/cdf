@@ -23,8 +23,8 @@
     requirePaths['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
   } else if(typeof KARMA_RUN !== "undefined") { // test
     requirePaths['cdf'] = 'cdf/js-modules';
-  } else {
-    requirePaths['cdf'] = "../cdf";
+  } else { // embedded
+    requirePaths['cdf'] = FULLY_QUALIFIED_URL + '/content/pentaho-cdf/js';
   }
 
 })();

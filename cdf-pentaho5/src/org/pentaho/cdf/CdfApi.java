@@ -302,4 +302,18 @@ public class CdfApi {
 
     return value;
   }
+
+  @GET
+  @Path( "/cdf-embed.js" )
+  @Produces( "text/javascript" )
+  public void getCdfEmbeddedContext( @Context HttpServletRequest servletRequest,
+    @Context HttpServletResponse servletResponse ) throws Exception {
+    try {
+      String cdfEmbedded = ContextEngine.getInstance().generateEmbeddedContext();
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), cdfEmbedded );
+    } catch ( IOException ex ) {
+      logger.error( "getCdfEmbeddedContext: " + ex.getMessage(), ex );
+      throw ex;
+    }
+  }
 }
