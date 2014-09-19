@@ -1,0 +1,117 @@
+<div class="shadow">
+
+  <div class="contents">
+
+    <h2>MonthPickerComponent</h2>
+
+    <h3>Description</h3>
+    <p>
+    Renders a selection box to collect a month from user input. It's usually faster/more 
+    intuitive than classic datepickers.
+
+    </p>
+
+    <h3>Options</h3>
+
+    <dl class="documentation">
+      <dt>name</dt>
+      <dd>The name of the component</dd>
+
+      <dt>type</dt>
+      <dd><code>monthPickerComponent</code></dd>
+
+      <dt>listeners</dt>
+      <dd><i>Array - </i> Parameters who this component will react to</dd>
+
+      <dt>parameter</dt>
+      <dd>Variable where the input is stored</dd>
+
+      <dt>initialDate</dt>
+      <dd>Initial date to display in the selector</dd>
+
+      <dt>months</dt>
+      <dd>The number of months to display (eg, months = 2 will display 1 month before and 1 month after the initialDate). If 0 or not specified, will use all entries between maxDate and minDate</dd>
+
+      <dt>size</dt>
+      <dd>The vertical size of the component. Default: 1</dd>
+
+      <dt>maxDate</dt>
+      <dd>Maximum date to display in the selector. Default: no restriction</dd>
+
+      <dt>minDate</dt>
+      <dd>Minimum date to display in the selector. Default: no restriction</dd>
+
+      <dt>htmlObject</dt>
+      <dd>Id of the component (usually a div or a span tag) to be replaced by the result</dd>
+
+      <dt>refreshPeriod</dt>
+      <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
+
+      <dt>executeAtStart</dt>
+      <dd>True to execute the component at start, false otherwise</dd>
+
+      <dt>tooltip</dt>
+      <dd>Tooltip to be displayed when mouse hovers</dd>
+
+      <dt>preExecution</dt>
+      <dd><i>Function - </i> Function to be called before the component is executed</dd>
+
+      <dt>postExecution</dt>
+      <dd><i>Function - </i> Function to be called after the component is executed</dd>
+
+      <dt>preChange</dt>
+      <dd><i>Function(date) - </i> Function to be called before the component is changed</dd>
+
+      <dt>postChange</dt>
+      <dd><i>Function(date) - </i> Function to be called after the component is changed</dd>
+
+    </dl>
+
+    <h3>Sample</h3>
+
+    <div id="example" class="flora">
+      <div id="sample">
+        <div id="sampleObject"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script language="javascript" type="text/javascript">
+  var clearVariables = function() {
+    window.jQuery = null;
+    window.$ = null;
+    window.backbone = null;
+    window._ = null;
+    window.Mustache = null;
+  };
+
+  require(['cdf/Dashboard', 'cdf/components/MonthPickerComponent'], function(Dashboard, MonthPickerComponent) {
+    clearVariables();
+
+    var myDashboard = new Dashboard();
+
+    myDashboard.addParameter("input", "2009-01-01");
+
+    var d = new Date();
+    d.setYear(2006);
+
+    var monthPickerComponent = new MonthPickerComponent(myDashboard, {
+      name: "monthPickerComponent",
+      type: "monthPickerComponent",
+      parameter: "input",
+      months: 10,
+      size: 1,
+      initialDate: d,
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      tooltip: "Click me to select a month",
+      postChange: function(date){
+        alert("You chose: " + date);
+      }
+    });
+
+    myDashboard.addComponent(monthPickerComponent);
+    myDashboard.init();
+  });
+</script>

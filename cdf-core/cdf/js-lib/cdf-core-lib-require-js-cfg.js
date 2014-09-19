@@ -29,6 +29,7 @@
   requirePaths['cdf/lib/jquery'] = prefix + "/jquery/cdf-jquery";
 
   //jquery.ui 1.8.14
+  // TODO: CSS to be included (js/lib/theme/*)
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jquery/jquery.ui";
   requireShims['cdf/lib/jquery.ui'] = {
     exports: '$',
@@ -38,7 +39,20 @@
   //jquery.blockUI 2.66.0
   requirePaths['cdf/lib/jquery.blockUI'] = prefix + "/jquery/jquery.blockUI";
   requireShims['cdf/lib/jquery.blockUI'] = {
-    exports: '$',
+    deps: ['cdf/lib/jquery']
+  };
+
+  //jquery.tooltip 1.3
+  // TODO: CSS to be included
+  requirePaths['cdf/lib/jquery.tooltip'] = prefix + "/jquery/jquery.tooltip";
+  requireShims['cdf/lib/jquery.tooltip'] = {
+    deps: ['cdf/lib/jquery']
+  };
+
+  //daterangepicker.jQuery 01.19.2008
+  // TODO: CSS to be included
+  requirePaths['cdf/lib/daterangepicker.jQuery'] = prefix + "/daterangepicker/daterangepicker.jQuery";
+  requireShims['cdf/lib/daterangepicker.jQuery'] = {
     deps: ['cdf/lib/jquery']
   };
 

@@ -51,7 +51,6 @@
       <dt>refreshPeriod</dt>
       <dd>Time in seconds for this component to refresh. Default is 0 (disabled)</dd>
 
-
       <dt>executeAtStart</dt>
       <dd>True to execute the component at start, false otherwise</dd>
 
@@ -94,12 +93,9 @@
 
     <div id="example">
       <div id="sample">
-
         <div id="sampleObject"></div>
-
       </div>
     </div>
-
   </div>
 </div>
 
@@ -120,8 +116,8 @@
     myDashboard.addParameter("region", "1");
 
     var selectComponent = new SelectComponent(myDashboard, {
-      name: "regionSelector",
-      type: "select",
+      name: "selectComponent",
+      type: "selectComponent",
       parameters:[],
       valuesArray:[["1","Lisbon"],["2","Dusseldorf"]],
       parameter:"region",

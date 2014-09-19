@@ -17,6 +17,7 @@
 * --------------------------------------------------------------------
 */
 
+define(['./jquery', './jquery.ui'], function(jQuery) {
 jQuery.fn.daterangepicker = function(settings){
 	var rangeInput = jQuery(this);
 	
@@ -149,7 +150,7 @@ jQuery.fn.daterangepicker = function(settings){
 			.click(function(){
 				rp.find('.ui-state-active').removeClass('ui-state-active');
 				jQuery(this).addClass('ui-state-active');
-                                clickActions($(this),rp, rpPickers, doneBtn);
+                                clickActions(jQuery(this),rp, rpPickers, doneBtn);
 				return false;
 			});
 		return ul;
@@ -758,3 +759,7 @@ var TimePeriod = function (years, months, days, hours, minutes, seconds, millise
     }
     return this;
 };
+
+
+});
+

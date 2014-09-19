@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<cdf>
-	<title>SelectComponent Require</title>
-	<author>Webdetails</author>
-	<description>SelectComponent Require</description>
-	<icon></icon>
-	<template>template.html</template>
-	<style>require</style>
-</cdf>
