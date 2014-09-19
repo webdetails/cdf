@@ -25,8 +25,10 @@
     prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js/lib';
   } else if(typeof KARMA_RUN !== "undefined") { // test
     prefix = requirePaths['cdf/lib'] = 'cdf/js-lib';
-  } else { // embedded
+  } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded
     prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js/lib';
+  } else {
+    prefix = requirePaths['cdf/lib'] = "cdf/lib";
   }
 
   //jquery 1.7.1

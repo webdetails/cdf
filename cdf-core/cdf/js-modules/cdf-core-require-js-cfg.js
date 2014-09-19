@@ -16,15 +16,16 @@
  */
 
 (function() {
-  var requirePaths = requireCfg.paths,
-      requireShims = requireCfg.shim;
+  var requirePaths = requireCfg.paths;
 
   if(typeof CONTEXT_PATH !== "undefined"){ // production
     requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js';
   } else if(typeof KARMA_RUN !== "undefined") { // test
     requirePaths['cdf'] = 'cdf/js-modules';
-  } else { // embedded
+  } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded
     requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js';
+  } else {
+    requirePaths['cdf'] = "cdf";
   }
 
 })();
