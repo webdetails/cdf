@@ -20,11 +20,11 @@
       requireShims = requireCfg.shim;
 
   if(typeof CONTEXT_PATH !== "undefined"){ // production
-    requirePaths['cdf'] = CONTEXT_PATH+'content/pentaho-cdf/js';
+    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js';
   } else if(typeof KARMA_RUN !== "undefined") { // test
     requirePaths['cdf'] = 'cdf/js-modules';
   } else { // embedded
-    requirePaths['cdf'] = FULLY_QUALIFIED_URL + '/content/pentaho-cdf/js';
+    requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js';
   }
 
 })();

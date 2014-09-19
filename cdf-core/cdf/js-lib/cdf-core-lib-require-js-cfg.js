@@ -12,16 +12,21 @@
  */
 
 (function() {
+  if(!requireCfg.map) requireCfg.map = {};
+  if(!requireCfg.map['*']) requireCfg.map['*'] = {};
+
+  requireCfg.map['*']['css'] = 'cdf/lib/require-css/css';
+
   var requirePaths = requireCfg.paths,
       requireShims = requireCfg.shim;
 
   var prefix = "";
   if(typeof CONTEXT_PATH !== "undefined"){ // production
-    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH+'content/pentaho-cdf/js/lib';
+    prefix = requirePaths['cdf/lib'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js/lib';
   } else if(typeof KARMA_RUN !== "undefined") { // test
     prefix = requirePaths['cdf/lib'] = 'cdf/js-lib';
   } else { // embedded
-    prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'content/pentaho-cdf/js/lib';
+    prefix = requirePaths['cdf/lib'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js/lib';
   }
 
   //jquery 1.7.1
@@ -33,7 +38,7 @@
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jquery/jquery.ui";
   requireShims['cdf/lib/jquery.ui'] = {
     exports: '$',
-    deps: ['cdf/lib/jquery']
+    deps: ['cdf/lib/jquery', 'css!cdf/lib/theme/cupertino/jquery-ui-1.8.custom']
   };
 
   //jquery.blockUI 2.66.0
@@ -85,7 +90,3 @@
   requirePaths['cdf/lib/shims'] = prefix + "/shims";
 
 })();
-
-
-
-

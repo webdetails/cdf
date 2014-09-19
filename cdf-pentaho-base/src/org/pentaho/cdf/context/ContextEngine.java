@@ -65,6 +65,7 @@ public class ContextEngine {
   private static final String CDF_PATH = "content/pentaho-cdf/js/cdf-core-require-js-cfg.js";
   private static final String CDF_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
   private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
+  private static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
 
 
   static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
@@ -434,9 +435,8 @@ public class ContextEngine {
       "FULLY_QUALIFIED_URL + \"" + CDF_LIB_PATH + "'></script>\");\n" );
     output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
       "FULLY_QUALIFIED_URL + \"" + REQUIRE_PATH + "'></script>\");\n" );
-    output.append( "document.write(\"<script language='javascript' type='text/javascript'>\");\n" );
-    output.append( "document.write(\"  requirejs.config(requireCfg);\");\n" );
-    output.append( "document.write(\"</script>\");\n" );
+    output.append( "document.write(\"<script language='javascript' type='text/javascript' src='\" + " +
+      "FULLY_QUALIFIED_URL + \"" + REQUIRE_START_PATH + "'></script>\");\n" );
 
     return output.toString();
   }
