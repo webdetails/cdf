@@ -225,7 +225,7 @@
 
     <echo file="${dist.dir}/marketplace.xml">      &lt;version&gt;
         &lt;branch&gt;${project.stage}&lt;/branch&gt;
-        &lt;version&gt;${distribution.version}&lt;/version&gt;
+        &lt;version&gt;${project.revision}&lt;/version&gt;
         &lt;name&gt;${marketplace.metadata.name}&lt;/name&gt;
         &lt;package_url&gt;
           ${marketplace.metadata.package_url}
