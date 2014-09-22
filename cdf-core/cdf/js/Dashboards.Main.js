@@ -33,6 +33,11 @@ var dash, Dashboards = dash = {
    */
   globalContext: true,
   escapeParameterValues : true,
+  /*
+    used to keep compatibility with analyzer parameters with dots that do not require the path to be
+    previously created
+   */
+  _flatParameters: false,
   /* Used to control progress indicator for async mode */
   runningCalls: 0,
   components: [],
@@ -95,6 +100,10 @@ Dashboards.getWebAppPath = function (){
 
 Dashboards.setGlobalContext = function(globalContext) {
   this.globalContext = globalContext;
+};
+
+Dashboards._setFlatParameters = function(flatParameters) {
+  this._flatParameters = flatParameters;
 };
 
 Dashboards.showProgressIndicator = function() {
@@ -1204,27 +1213,31 @@ Dashboards._isParameterInModel = function(name){
 Dashboards._getValueFromContext = function(o, path) {
   if(!o) return;
 
-  if(path != null) {
-    var parts, L;
+  if(this._flatParameters) {
+    return o[path];
+  } else {
+    if(path != null) {
+      var parts, L;
 
-    if(path instanceof Array) {
-      parts = path;
-    } else {
-      if(path.indexOf('.') < 0) return o[path];
+      if(path instanceof Array) {
+        parts = path;
+      } else {
+        if(path.indexOf('.') < 0) return o[path];
 
-      parts = path.split(".");
-    } 
-    L = parts.length;
+        parts = path.split(".");
+      }
+      L = parts.length;
 
-    for(var i = 0; i < L; i++) {
-      //if(!(o instanceof Object) return; // not an object
-      if(!o) return; // more efficient approximation
+      for(var i = 0; i < L; i++) {
+        //if(!(o instanceof Object) return; // not an object
+        if(!o) return; // more efficient approximation
 
-      var part = parts[i],
-          value = o[part];
-      if(value === undefined) return;
-      
-      o = value;
+        var part = parts[i],
+            value = o[part];
+        if(value === undefined) return;
+
+        o = value;
+      }
     }
   }
 
@@ -1243,23 +1256,26 @@ Dashboards._getValueFromContext = function(o, path) {
 Dashboards._setValueInContext = function(o, path, v) {
   if(!o || path == null || v === undefined) return; // undefined
 
-  var parts, pLast;
-  if(path instanceof Array) {
-    parts = path;
-    pLast = parts.pop();
+  if(this._flatParameters) { //to keep compatibility with dotted parameters without requiring the path created to work
+    o[path] = v;
   } else {
-    if(path.indexOf(".") < 0) {
-      o[path] = v;
-      return o;
+    var parts, pLast;
+    if(path instanceof Array) {
+      parts = path;
+      pLast = parts.pop();
+    } else {
+      if(path.indexOf(".") < 0) {
+        o[path] = v;
+        return o;
+      }
+
+      parts = path.split(".");
+      pLast = parts.pop();
     }
 
-    parts = path.split(".");
-    pLast = parts.pop();
+    o = this._getValueFromContext(o, parts);
+    if(o) o[pLast] = v;
   }
-
-  o = this._getValueFromContext(o, parts);
-  if(o) o[pLast] = v;
-
   return o;
 };
 
@@ -1273,10 +1289,10 @@ Dashboards._setValueInContext = function(o, path, v) {
  * @returns the value assigned to the parameter
  */
 Dashboards.addParameter = function(name, initValue){
-  if(Dashboards._isParameterInModel(name)){
-    initValue = Dashboards.getParameterValue(name);
+  if(this._isParameterInModel(name)){
+    initValue = this.getParameterValue(name);
   }
-  Dashboards.setParameter(name,initValue);
+  this.setParameter(name,initValue);
   return initValue;
 };
 

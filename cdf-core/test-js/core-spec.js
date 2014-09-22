@@ -513,6 +513,22 @@ describe("The CDF framework #", function() {
     myDashboard.addParameter("Dashboards.storage.undefinedParam", 123);
     expect(myDashboard.getParameterValue("Dashboards.storage.undefinedParam")).toEqual(123);
 
+    /*
+     flat parameters
+     */
+
+    myDashboard._setFlatParameters(true););
+    testSimpleAddParameter("mystorage.numberParam", 1, 2);
+    testSimpleAddParameter("mystorage.stringParam", "test", "testtest");
+    testSimpleAddParameter("mystorage.booleanParam", true, false);
+    testSimpleAddParameter("mystorage.nullParam", null, "test");
+    testSimpleAddParameter("mystorage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleAddParameter("mystorage.objectParam1", {a: 1, b: 2}, {});
+
+    myDashboard.addParameter("mystorage.undefinedParam", undefined);
+    expect(myDashboard.getParameterValue("mystorage.undefinedParam")).toEqual(undefined);
+    myDashboard.addParameter("mystorage.undefinedParam", 123);
+    expect(myDashboard.getParameterValue("mystorage.undefinedParam")).toEqual(123);
   });
   /**
    * ## The CDF framework # Sets parameters
@@ -624,6 +640,27 @@ describe("The CDF framework #", function() {
     myDashboard.setParameter("Dashboards.storage.undefinedParam2", undefined);
     expect(myDashboard.getParameterValue("Dashboards.storage.undefinedParam2")).toEqual(123);
     expect(myDashboard.parameterModel.get("Dashboards.storage.undefinedParam2")).toEqual(123);
+
+
+    /*
+     flat params
+     */
+
+    myDashboard._setFlatParameters(true);
+    testSimpleSetParameter("mystorage.numberParam", 1, 2);
+    testSimpleSetParameter("mystorage.stringParam", "test", "testtest");
+    testSimpleSetParameter("mystorage.booleanParam", true, false);
+    testSimpleSetParameter("mystorage.nullParam", null, "test");
+    testSimpleSetParameter("mystorage.nullParam", "test", null);
+    testSimpleSetParameter("mystorage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleSetParameter("mystorage.objectParam1", {a: 1, b: 2}, {});
+
+    myDashboard.setParameter("mystorage.undefinedParam2", 123);
+    expect(myDashboard.getParameterValue("mystorage.undefinedParam2")).toEqual(123);
+    expect(myDashboard.parameterModel.get("mystorage.undefinedParam2")).toEqual(123);
+    myDashboard.setParameter("mystorage.undefinedParam2", undefined);
+    expect(myDashboard.getParameterValue("mystorage.undefinedParam2")).toEqual(123);
+    expect(myDashboard.parameterModel.get("mystorage.undefinedParam2")).toEqual(123);
 
   });
   /**
