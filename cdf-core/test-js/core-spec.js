@@ -517,7 +517,7 @@ describe("The CDF framework #", function() {
      flat parameters
      */
 
-    myDashboard._setFlatParameters(true););
+    myDashboard._setFlatParameters(true);
     testSimpleAddParameter("mystorage.numberParam", 1, 2);
     testSimpleAddParameter("mystorage.stringParam", "test", "testtest");
     testSimpleAddParameter("mystorage.booleanParam", true, false);
