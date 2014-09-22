@@ -33,6 +33,7 @@ var dash, Dashboards = dash = {
    */
   globalContext: true,
   escapeParameterValues : true,
+  _flatParameters: false,
   /* Used to control progress indicator for async mode */
   runningCalls: 0,
   components: [],
@@ -95,6 +96,10 @@ Dashboards.getWebAppPath = function (){
 
 Dashboards.setGlobalContext = function(globalContext) {
   this.globalContext = globalContext;
+};
+
+Dashboards._setFlatParameters = function(flatParameters) {
+  this._flatParameters = flatParameters;
 };
 
 Dashboards.showProgressIndicator = function() {
@@ -1110,13 +1115,17 @@ Dashboards._isParameterInModel = function(name){
 Dashboards._getValueFromContext = function(o, path) {
   if (!o) return; //undefined
   if (null != path) {
-    var parts = (path instanceof Array) ? path : path.split("."), L = parts.length;
-    if (L) for (var i = 0; L > i; ) {
-      var part = parts[i++], value = o[part];
-      if (null == value) {
-        return; //the path requested is undefined
+    if (this._flatParameters) {
+      return o[path];
+    } else {
+      var parts = (path instanceof Array) ? path : path.split("."), L = parts.length;
+      if (L) for (var i = 0; L > i; ) {
+        var part = parts[i++], value = o[part];
+        if (null == value) {
+          return; //the path requested is undefined
+        }
+        o = value;
       }
-      o = value;
     }
   }
   return o;
@@ -1133,11 +1142,15 @@ Dashboards._getValueFromContext = function(o, path) {
  */
 Dashboards._setValueInContext = function(o, path, v) {
   if (o && null != path) {
-    var parts = (path instanceof Array) ? path : path.split(".");
-    if (parts.length) {
-      var pLast = parts.pop();
-      o = this._getValueFromContext(o, parts);
-      if(o) o[pLast] = v;
+    if (this._flatParameters) {
+      o[path] = v;
+    } else {
+      var parts = (path instanceof Array) ? path : path.split(".");
+      if (parts.length) {
+        var pLast = parts.pop();
+        o = this._getValueFromContext(o, parts);
+        if (o) o[pLast] = v;
+      }
     }
   }
   return o;
@@ -1153,10 +1166,10 @@ Dashboards._setValueInContext = function(o, path, v) {
  * @returns the value assigned to the parameter
  */
 Dashboards.addParameter = function(name, initValue){
-  if(Dashboards._isParameterInModel(name)){
-    initValue = Dashboards.getParameterValue(name);
+  if(this._isParameterInModel(name)){
+    initValue = this.getParameterValue(name);
   }
-  Dashboards.setParameter(name,initValue);
+  this.setParameter(name,initValue);
   return initValue;
 };
 

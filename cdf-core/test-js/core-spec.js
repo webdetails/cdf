@@ -206,12 +206,25 @@ describe("The CDF framework #", function() {
     /*
     storage params
      */
+    myDashboard._setFlatParameters(false);
     testSimpleAddParameter("Dashboards.storage.numberParam", 1, 2);
     testSimpleAddParameter("Dashboards.storage.stringParam", "test", "testtest");
     testSimpleAddParameter("Dashboards.storage.booleanParam", true, false);
     testSimpleAddParameter("Dashboards.storage.undefinedParam", undefined, "test");
     testSimpleAddParameter("Dashboards.storage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
     testSimpleAddParameter("Dashboards.storage.objectParam1", {a: 1, b: 2}, {});
+
+    /*
+     flat params
+     */
+
+    myDashboard._setFlatParameters(true);
+    testSimpleAddParameter("mystorage.numberParam", 1, 2);
+    testSimpleAddParameter("mystorage.stringParam", "test", "testtest");
+    testSimpleAddParameter("mystorage.booleanParam", true, false);
+    testSimpleAddParameter("mystorage.undefinedParam", undefined, "test");
+    testSimpleAddParameter("mystorage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleAddParameter("mystorage.objectParam1", {a: 1, b: 2}, {});
 
   });
   /**
@@ -299,12 +312,26 @@ describe("The CDF framework #", function() {
     /*
      storage params
      */
+    myDashboard._setFlatParameters(false);
     testSimpleSetParameter("Dashboards.storage.numberParam", 1, 2);
     testSimpleSetParameter("Dashboards.storage.stringParam", "test", "testtest");
     testSimpleSetParameter("Dashboards.storage.booleanParam", true, false);
     testSimpleSetParameter("Dashboards.storage.undefinedParam", undefined, "test");
     testSimpleSetParameter("Dashboards.storage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
     testSimpleSetParameter("Dashboards.storage.objectParam1", {a: 1, b: 2}, {});
+
+    /*
+     flat params
+     */
+
+    myDashboard._setFlatParameters(true);
+    testSimpleSetParameter("mystorage.numberParam", 1, 2);
+    testSimpleSetParameter("mystorage.stringParam", "test", "testtest");
+    testSimpleSetParameter("mystorage.booleanParam", true, false);
+    testSimpleSetParameter("mystorage.undefinedParam", undefined, "test");
+    testSimpleSetParameter("mystorage.arrayParam", ["test1", "test2"], ["test3", "test4"]);
+    testSimpleSetParameter("mystorage.objectParam1", {a: 1, b: 2}, {});
+
 
   });
   /**
