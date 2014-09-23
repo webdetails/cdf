@@ -345,33 +345,12 @@
           params = $.extend( {}, cachedParams , overrides);
 
       _.each( params , function (value, name) {
-        var paramValue;
-        try {
-          paramValue = Dashboards.getParameterValue(value);
-        } catch( e ) {
-          if(!_.isObject(value) || _.isFunction(value)) {
-            printValue = value;
-          } else {
-            printValue = JSON.stringify(value);
-          }
-          Dashboards.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
-              "The parameter will be used as value instead its value obtained from getParameterValue");
-          paramValue = value;
-        }
-        if( paramValue === undefined) {
-          paramValue = value;
-        }
-        if (_.isFunction(paramValue)){
+        var paramValue = Dashboards.getParameterValue(value);
+
+        if(_.isFunction(paramValue)) {
           paramValue = paramValue();
-        } else if (_.isObject(paramValue)){
-          // kettle does not handle arrays natively,
-          // nor does it interpret multiple parameters with the same name as elements of an array,
-          // nor does CPK do any sort of array handling.
-          // A stringify ensures the array is passed as a string, that can be parsed using kettle.
+        } else if(_.isObject(paramValue)) {
           paramValue = JSON.stringify(paramValue);
-          // Another option would be to add futher:
-          // value = value.split('],').join(';').split('[').join('').split(']').join('');
-          // which transforms [[0,1],[2,3]] into "0,1;2,3"
         }
         queryDefinition['param' + name] = paramValue;
       });
@@ -443,30 +422,15 @@
           params = $.extend( {}, cachedParams , overrides);
 
       _.each( params , function (value, name) {
-        var paramValue;
-        try {
-          paramValue = Dashboards.getParameterValue(value);
-        } catch( e ) {
-          var printValue = "";
-          if(!_.isObject(value) || _.isFunction(value)) {
-            printValue = value;
-          } else {
-            printValue = JSON.stringify(value);
-          }
-          Dashboards.log("BuildQueryDefinition detected static parameter " + name + "=" + printValue + ". " +
-              "The parameter will be used instead the parameter value");
-          paramValue = value;
-        }
-        if( paramValue === undefined) {
-          paramValue = value;
-        }
-        if($.isArray(paramValue) && paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0){
-          //special case where single element will wrongly be treated as a parseable array by cda
-          paramValue = doCsvQuoting(paramValue[0],';');
-        }
-        //else will not be correctly handled for functions that return arrays
-        if (typeof paramValue == 'function') {
+        var paramValue = Dashboards.getParameterValue(value);
+
+        if(_.isFunction(paramValue)) {
           paramValue = paramValue();
+        } else if(_.isArray(paramValue)) {
+          if(paramValue.length == 1 && ('' + paramValue[0]).indexOf(';') >= 0){
+            //special case where single element will wrongly be treated as a parseable array by cda
+            paramValue = doCsvQuoting(paramValue[0],';');
+          }
         }
         queryDefinition['param' + name] = paramValue;
       });
