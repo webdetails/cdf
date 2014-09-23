@@ -1199,7 +1199,13 @@ Dashboards._getParameterStore = function(){
  * @private
  */
 Dashboards._isParameterInModel = function(name){
-  return this._getValueFromContext(this._getParameterStore(), name) !== undefined;
+  try {
+    this._getValueFromContext(this._getParameterStore(), name);
+    return true;
+  } catch( e ){
+    console.log(e);
+    return false;
+  }
 };
 
 /**
@@ -1208,35 +1214,49 @@ Dashboards._isParameterInModel = function(name){
  * @param {Object} o the context object
  * @param {string|Array.<string>} path the path of the property
  * @returns {*} the value of the property, if the path is present in <i>o</i>, or <tt>undefined</tt>, otherwise.
+ * @throws {*} if <i>path</i> is not a <tt>string</tt> or an <tt>Array</tt> it throws the path, or if path is not defined
+ *          in the context <i>o</i>
  * @private
  */
 Dashboards._getValueFromContext = function(o, path) {
   if(!o) return;
 
   if(this._flatParameters) {
-    return o[path];
+    if(_.has(o, path)){
+      return o[path];
+    } else {
+      throw path + " not defined in context";
+    }
   } else {
     if(path != null) {
-      var parts, L;
+      var parts;
 
-      if(path instanceof Array) {
+      if(_.isArray(path)) {
         parts = path;
+      } else if(_.isString(path)) {
+        if(path.indexOf('.') < 0) {
+          if(_.has(o, path)){
+            return o[path];
+          } else {
+            throw path + " not defined in context";
+          }
+        } else {
+          parts = path.split(".");
+        }
       } else {
-        if(path.indexOf('.') < 0) return o[path];
-
-        parts = path.split(".");
+        throw path + " not defined in context";
       }
-      L = parts.length;
 
-      for(var i = 0; i < L; i++) {
-        //if(!(o instanceof Object) return; // not an object
-        if(!o) return; // more efficient approximation
+      for(var i = 0; i < parts.length; i++) {
+        if(!o) {
+          throw o + " not defined in context";
+        }
 
-        var part = parts[i],
-            value = o[part];
-        if(value === undefined) return;
-
-        o = value;
+        if(_.has(o,parts[i])) {
+          o = o[parts[i]];
+        } else {
+          throw parts[i] + " not defined in context";
+        }
       }
     }
   }
@@ -1254,7 +1274,11 @@ Dashboards._getValueFromContext = function(o, path) {
  * @private
  */
 Dashboards._setValueInContext = function(o, path, v) {
-  if(!o || path == null || v === undefined) return; // undefined
+  if(!o) {
+    this.getException(o, o + " is undefined");
+  } else if(path == null) {
+    throw path + " is undefined";
+  }
 
   if(this._flatParameters) { //to keep compatibility with dotted parameters without requiring the path created to work
     o[path] = v;
@@ -1297,7 +1321,14 @@ Dashboards.addParameter = function(name, initValue){
 };
 
 Dashboards.getParameterValue = dash.getParam = function (parameterName) {
-  return this._getValueFromContext(this._getParameterStore(), parameterName);
+  var returnValue;
+  try {
+    returnValue = this._getValueFromContext(this._getParameterStore(), parameterName);
+  } catch ( e ) {
+    console.log(e);
+    returnValue = parameterName;
+  }
+  return returnValue;
 };
 
 /* Sets the value of a parameter if it's name is not undefined and is not an empty string. The
