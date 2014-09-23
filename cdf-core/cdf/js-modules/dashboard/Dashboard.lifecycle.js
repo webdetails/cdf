@@ -236,7 +236,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
          * what duplications were triggered, allowing us to reproduce that
          * state as well.
          */
-        var dupes = myself.components.filter(function(c){return c.type == 'duplicate'}),
+        var dupes = _.filter(myself.components, function(c){return c.type == 'duplicate'}),
           suffixes = {},
           params = myself.getBookmarkState().params || {};
         /*
@@ -249,13 +249,13 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
          * the root parameter names to their respective values.
          * E.g. a parameter 'foo_1 = 1' yields '{_1: {foo: 1}}'
          */
-        Object.keys(params).filter(function(e) {
+        _.map(_.filter(Object.keys(params), function(e){
           return /(_[0-9]+)+$/.test(e);
-        }).map(function(e) {
+        }), function(e){
           var parts = e.match(/(.*?)((_[0-9]+)+)$/),
-            name = parts[1],
-            suffix = parts[2];
-          if(!suffixes[suffix]) {
+              name = parts[1],
+              suffix = parts[2];
+          if(!suffixes[suffix]){
             suffixes[suffix] = {}
           }
           suffixes[suffix][name] = params[e];

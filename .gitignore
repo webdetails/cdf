@@ -35,3 +35,8 @@ cdf-core/node_modules
 cdf-core/build-res/pentaho-js-build
 pentaho-js-build.zip
 requireCfg-raw.js
+cdf-pentaho5/build-res/module-scripts
+cdf-pentaho5/build-res/pentaho-js-build
+requireCfg.js
+cdf-pentaho5/build-res/script-output
+cdf-pentaho5/node_modules
