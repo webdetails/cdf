@@ -17,14 +17,15 @@
 
 (function() {
   var requirePaths = requireCfg.paths;
+  var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
-  if(typeof CONTEXT_PATH !== "undefined"){ // production
-    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js';
+  if(typeof CONTEXT_PATH !== "undefined"){ // production vs debug
+    requirePaths['cdf'] = CONTEXT_PATH + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
   } else if(typeof KARMA_RUN !== "undefined") { // test
     requirePaths['cdf'] = 'cdf/js-modules';
-  } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded
-    requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js';
-  } else {
+  } else if(typeof FULLY_QUALIFIED_URL != "undefined") { // embedded production vs debug
+    requirePaths['cdf'] = FULLY_QUALIFIED_URL + 'api/repos/pentaho-cdf/js' + (isDebug ? '' : '/compressed');
+  } else { // build
     requirePaths['cdf'] = "cdf";
   }
 

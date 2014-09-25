@@ -11,7 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-
 define(['./Dashboard', './Popups','../Logger', '../lib/underscore', '../lib/jquery', '../lib/jquery.ui', '../lib/jquery.blockUI'],
 function (Dashboard, Popups, Logger, _, $, jqueryUi, jqueryBlockUI) {
     /**

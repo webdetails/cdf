@@ -7,12 +7,10 @@
 
   See subfloor.xml for more details
 ============================================================================-->
-<project name="Community Dashboard Framework" basedir="." default="jar"
-         xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="Community Dashboard Framework" basedir="." default="jar" xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <description>
-    This build file is used to create the CDF project
-    and works with the subfloor.xml file.
+    This build file is used to create the CDF project and works with the subfloor.xml file.
   </description>
 
   <property file="../override.properties"
@@ -25,7 +23,6 @@
   <import file="../build-res/subfloor-pkg.xml" id="subfloor-pkg"/>
 
   <!-- Global properties -->
-
   <property name='js.dir' value='cdf' />
   <property name='js-modules.dir' value='${js.dir}/js-modules'/>
   <property name='js-lib.dir' value='${js.dir}/js-lib'/>
@@ -53,14 +50,11 @@
   <property name='pentaho-js-lib.dir' value='${pentaho.dir}/${js-lib.dir}'/>
   <property name='pentaho-resource.dir' value='${pentaho.dir}/${resource.dir}'/>
 
-
   <property name="plugin.name" value="pentaho-cdf" description="Name of the plugin"/>
   <property name="bin.dir" value="bin"/>
   <property name="stage.dir" value="${bin.dir}/stage" description="Name of the resource directory"/>
-  <property name="samples.stage.dir" value="${bin.dir}/stage-samples"
-            description="Name of the stage samples directory"/>
-  <property name="solution.stage.dir" value="${bin.dir}/stage-solution"
-            description="Name of the stage solution directory"/>
+  <property name="samples.stage.dir" value="${bin.dir}/stage-samples" description="Name of the stage samples directory"/>
+  <property name="solution.stage.dir" value="${bin.dir}/stage-solution" description="Name of the stage solution directory"/>
   <property name="plugin.local.install.solutions.dir" value="solution"/>
   <property name="plugin.artifact.id" value="${plugin.name}"/>
   <property name="plugin.zipfile" value="${plugin.artifact.id}-${project.revision}.zip"/>
@@ -72,14 +66,8 @@
 
   <property name="js.module.script.agg.dir" value="build-res/cdf-module-scripts" />
 
-  <!-- r.js location -->
-  <property name="rjs.path" value="node_modules/requirejs/bin/r.js"/>
-
-  <!--
-    AS STATED ABOVE, THE ONLY TASKS THAT SHOULD EXIST IN THIS BUILD FILE ARE
-    THE TASKS THAT NEED TO DIFFER FROM THE DEFAULT IMPLEMENTATION OF THE TASKS
-    FOUND IN common_build.xml.
-  -->
+  <property name="build.js.path" value="build-res/cdf.build.js" description="cdf.build.js location"/>
+  <property name="rjs.path" value="node_modules/requirejs/bin/r.js" description="r.js location"/>
 
   <path id="classpath">
     <fileset dir="${devlib.dir}">
@@ -108,7 +96,7 @@
     </javac>
   </target>
 
-  <target name="dist" depends="clean-dist,resolve,resolve-js,jar,dist-plugin,dist-samples,dist-js"/>
+  <target name="dist" depends="clean-dist,resolve,resolve-js,jar,dist-plugin,dist-samples"/>
 
   <target name="dist-compile" depends="clean-dist,jar,dist-plugin"/>
 
@@ -139,7 +127,99 @@
     <delete dir="${bin.dir}"/>
   </target>
 
-  <target name="my-dist-js" depends="clean-bin-dir, npm-install">
+  <target name="dist-plugin" depends="clean-bin-dir,subfloor-js.resolve-js,jar,make-stage,dist-js" description="Creates a distribution">
+
+    <!-- handle js -->
+    <copy todir="${stage.dir}/${plugin.name}/js/" overwrite="true">
+      <fileset dir="bin/js-source/raw/cdf"/>
+    </copy>
+    <copy todir="${stage.dir}/${plugin.name}/js/compressed" overwrite="true">
+      <fileset dir="bin/js-source/compressed/cdf">
+        <exclude name="**/*-require-js-cfg.js*"/>
+      </fileset>
+    </copy>
+
+    <!-- handle extra resources -->
+    <copy todir='${stage.dir}/${plugin.name}'>
+      <fileset dir='${core-resource.dir}' />
+    </copy>
+    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
+      <fileset dir="${resource.dir}">
+        <include name="**/*"/>
+        <exclude name="${resources.properties.name}"/>
+      </fileset>
+    </copy>
+
+    <!-- handle libs -->
+    <!--  Copy the plugin jar to the plugin dist lib folder -->
+    <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
+      <fileset dir="${dist.dir}">
+        <include name="${ivy.artifact.id}-${project.revision}.jar"/>
+      </fileset>
+      <fileset dir="${runtimelib.dir}">
+        <include name="*.jar"/>
+      </fileset>
+      <fileset dir="${devlib.dir}">
+        <include name="*.jar"/>
+      </fileset>
+    </copy>
+
+    <!-- copy over all the xactions within the cdf folder -->
+    <copy todir="${stage.dir}/${plugin.name}/actions" overwrite="true">
+      <fileset dir="solution/cdf/components">
+        <include name="*.xaction*"/>
+        <include name="*.xml"/>
+        <include name="*.js"/>
+        <exclude name="index.xml"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
+      <fileset dir="${basedir}">
+        <include name="readme.txt"/>
+      </fileset>
+    </copy>
+
+    <!-- create the version file -->
+    <tstamp/>
+    <property name="sequential.build.id" value="manual-${DSTAMP}"/>
+
+    <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
+    <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>
+
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0"
+             value="Version ${project.revision}"/>
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0"
+             value="Version ${project.revision}"/>
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0"
+             value="Version ${project.revision}"/>
+    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0"
+             value="Version ${project.revision}"/>
+
+    <echo file="${stage.dir}/${plugin.name}/version.xml"
+          message="&lt;version branch='${project.stage}' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>
+
+    <!-- create a zip file -->
+    <zip zipfile="${dist.dir}/${plugin.zipfile}"
+         basedir="${stage.dir}"
+         includes="pentaho-cdf/**/*"
+         excludes="**/Thumbs.db"/>
+
+    <echo file="${dist.dir}/marketplace.xml">&lt;version>
+      &lt;branch>${project.stage}&lt;/branch>
+      &lt;version>${project.revision}&lt;/version>
+      &lt;name>${marketplace.metadata.name}&lt;/name>
+      &lt;package_url>${marketplace.metadata.package_url}&lt;/package_url>
+      &lt;samples_url>${marketplace.metadata.samples_url}&lt;/samples_url>
+      &lt;description>${marketplace.metadata.description}&lt;/description>
+      &lt;build_id>${sequential.build.id}&lt;/build_id>
+      &lt;min_parent_version>${marketplace.metadata.min_parent_version}&lt;/min_parent_version>
+      &lt;/version>
+    </echo>
+
+  </target>
+
+  <target name="dist-js" depends="install-antcontrib, check-pentaho-js-build-downloaded">
     <delete dir="${js.build.output.dir}"/>
     <delete dir="${js.module.script.agg.dir}"/>
     <echo message="js.module.script.agg.dir: ${js.module.script.agg.dir}"/>
@@ -179,200 +259,36 @@
           args="build-res/pentaho-js-build/profileBuilder.js">
     </java>
 
+    <!-- run js compilation -->
     <exec command="node">
       <arg value="build-res/pentaho-js-build/r.js"/>
       <arg value="-o"/>
-      <arg value="build-res/cdf.build.js"/>
-      <arg value="optimize=${js.build.optimizer}"/>
+      <arg value="${build.js.path}"/>
     </exec>
 
-    <!-- run js compilation -->
-
-  </target>
-
-  <target name="my-dist-plugin" depends="subfloor-js.resolve-js,jar,make-stage,clean-bin-dir" >
-
-  </target>
-
-  <target name="dist-plugin" depends="subfloor-js.resolve-js,jar,make-stage,clean-bin-dir"
-          description="Creates a distribution">
-
-    <!-- handle js to temp location for compilation -->
-    <!-- Copy js -->
-    <copy todir='${js.module.script.agg.dir}/'>
-      <fileset dir='${core-js.dir}'/>
-      <fileset dir='${core-js-lib.dir}'/>
-      <fileset dir='${pentaho-base-js.dir}'/>
-      <fileset dir="${pentaho-js.dir}" />
+    <copy todir="${bin.dir}/js-source/compressed" >
+      <fileset dir="${js.build.output.dir}"/>
     </copy>
 
-    <!-- run js compilation -->
-    <antcall target="subfloor-js.build-js" />
-
-
-    <!-- handle extra resources -->
-
-    <!-- handle libs -->
-    <!--  Copy the plugin jar to the plugin dist lib folder -->
-    <copy todir="${stage.dir}/${plugin.name}/lib" overwrite="true">
-      <fileset dir="${dist.dir}">
-        <include name="${ivy.artifact.id}-${project.revision}.jar"/>
-      </fileset>
-      <fileset dir="${runtimelib.dir}">
-        <include name="*.jar"/>
-      </fileset>
-      <fileset dir="${devlib.dir}">
-        <include name="*.jar"/>
-      </fileset>
-    </copy>
-
-
-
-
-    <!-- handle ccc -->
-    <!--  copy ccc build -->
-    <copy todir="${stage.dir}/${plugin.name}/js/lib/CCC">
-      <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
-    </copy>
-    <!--  rename ccc files -->
-    <move file="${stage.dir}/${plugin.name}/js/lib/CCC/pvc.js" tofile="${stage.dir}/${plugin.name}/js/lib/CCC/pvc-d1.0.js"/>
-
-
-    <!-- Copy core resources -->
-    <copy todir='${stage.dir}/${plugin.name}'>
-      <fileset dir='${core-resource.dir}' />
-    </copy>
-
-
-
-
-
-
-
-
-
-
-    <!-- Copy the plugin.xml and any other files from the resource dir -->
-    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
-      <fileset dir="${resource.dir}">
-        <include name="**/*"/>
-        <exclude name="${resources.properties.name}"/>
-      </fileset>
-    </copy>
-
-    <!-- copy over all the xactions within the cdf folder -->
-    <copy todir="${stage.dir}/${plugin.name}/actions" overwrite="true">
-      <fileset dir="solution/cdf/components">
-        <include name="*.xaction*"/>
-        <include name="*.xml"/>
-        <include name="*.js"/>
-        <exclude name="index.xml"/>
-      </fileset>
-    </copy>
-
-    <copy todir="${stage.dir}/${plugin.name}" overwrite="true">
-      <fileset dir="${basedir}">
-        <include name="readme.txt"/>
-      </fileset>
-    </copy>
-
-    <!-- create the version file -->
-    <tstamp/>
-    <property name="sequential.build.id" value="manual-${DSTAMP}"/>
-
-    <echo file="${stage.dir}/${plugin.name}/version.xml"
-          message="&lt;version branch='${project.stage}' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>
-
-    <!-- Copy js folder into dist -->
-
-
-
-
-    <!-- blank out the AMD module as the Shim configuration is used at runtime instead -->
-    <echo message="" file="${stage.dir}/${plugin.name}/js/cdf-module.js"/>
-
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages.properties" token="Version 4.0"
-             value="Version ${project.revision}"/>
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_en.properties" token="Version 4.0"
-             value="Version ${project.revision}"/>
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_hr.properties" token="Version 4.0"
-             value="Version ${project.revision}"/>
-    <replace file="${stage.dir}/${plugin.name}/resources/languages/Messages_it.properties" token="Version 4.0"
-             value="Version ${project.revision}"/>
-
-    <echo file="${stage.dir}/${plugin.name}/version.xml"
-          message="&lt;version branch='${project.stage}' buildId='${sequential.build.id}'>${project.revision}&lt;/version>"/>
-
-    <!-- create a zip file -->
-    <zip zipfile="${dist.dir}/${plugin.zipfile}"
-         basedir="${stage.dir}"
-         includes="pentaho-cdf/**/*"
-         excludes="**/Thumbs.db"/>
-
-
-    <echo file="${dist.dir}/marketplace.xml">&lt;version>
-      &lt;branch>${project.stage}&lt;/branch>
-      &lt;version>${project.revision}&lt;/version>
-      &lt;name>${marketplace.metadata.name}&lt;/name>
-      &lt;package_url>${marketplace.metadata.package_url}&lt;/package_url>
-      &lt;samples_url>${marketplace.metadata.samples_url}&lt;/samples_url>
-      &lt;description>${marketplace.metadata.description}&lt;/description>
-      &lt;build_id>${sequential.build.id}&lt;/build_id>
-      &lt;min_parent_version>${marketplace.metadata.min_parent_version}&lt;/min_parent_version>
-      &lt;/version>
-    </echo>
-
-
-  </target>
-
-  <target name="dist-js">
-    <mkdir dir="${bin.dir}/js-source/${js.module.script.namespace}"/>
-
-    <!-- cdf-core/cdf/js -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}" overwrite="true">
-      <fileset dir='${core-js.dir}'>
-        <include name="**/*"/>
-      </fileset>
-    </copy>
-
-    <!-- cdf-core/cdf/js-lib -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/lib" overwrite="true">
-      <fileset dir='${core-js-lib.dir}'>
-        <include name="**/*"/>
-      </fileset>
-    </copy>
-
-
-    <!-- cdf-pentaho-base/cdf/js -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}" overwrite="true">
-      <fileset dir='${pentaho-base-js.dir}'>
-        <include name="**/*"/>
-      </fileset>
-    </copy>
-
-    <!-- cdf-pentaho/cdf/js -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}" overwrite="true">
-      <fileset dir='${CLIENT}'>
-        <include name="**/*"/>
-      </fileset>
+    <copy todir="${bin.dir}/js-source/raw" >
+      <fileset dir="${js.module.script.agg.dir}"/>
     </copy>
 
     <!-- copy ccc build -->
-    <copy todir="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC">
-      <fileset dir="${js.expanded.lib.dir}/ccc/pen"/>
+    <copy todir="${bin.dir}/js-source/compressed/cdf/lib/CCC">
+      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
     </copy>
-
-    <!-- rename ccc files -->
-    <move file="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc.js"
-          tofile="${bin.dir}/js-source/${js.module.script.namespace}/lib/CCC/pvc-d1.0.js"/>
+    <move file="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/compressed/cdf/lib/CCC/pvc-d1.0.js"/>
+    <copy todir="${bin.dir}/js-source/raw/cdf/lib/CCC">
+      <fileset dir="${js.expanded.lib.dir}/ccc/amd"/>
+    </copy>
+    <move file="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc.js" tofile="${bin.dir}/js-source/raw/cdf/lib/CCC/pvc-d1.0.js"/>
 
     <zip destfile="${dist.dir}/${ivy.artifact.id}-${project.revision}-js.zip">
       <zipfileset dir="${bin.dir}/js-source" includes="**/*"/>
     </zip>
+
   </target>
-
-
-
 
   <!--=======================================================================
    install-plugin
@@ -394,9 +310,7 @@
   </target>
 
   <target name="dist-samples" depends="init">
-
     <mkdir dir="${samples.stage.dir}"/>
-
     <!-- copy over all the xactions within the pentaho-cdf folder -->
     <copy todir="${samples.stage.dir}/plugin-samples" overwrite="true">
       <fileset dir="solution/plugin-samples"></fileset>
@@ -418,7 +332,6 @@
   </target>
 
   <target name="replace-static-resource-labels">
-
     <property file="${basedir}/build.properties"/>
     <property name="base.js.path" value=""/>
 

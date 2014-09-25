@@ -86,9 +86,9 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
         function configurePlugins() {
           var myself = this;
     
-          if(typeof jQuery == 'function') {
+          if(typeof $ == 'function') {
             //ajax
-            jQuery.ajaxSetup({
+            $.ajaxSetup({
               type: "POST",
               async: false,
               traditional: true,
@@ -103,13 +103,13 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
             });
     
             //SetImpromptuDefaults
-            if(typeof jQuery.SetImpromptuDefaults == 'function') {
-              jQuery.SetImpromptuDefaults({
+            if(typeof $.SetImpromptuDefaults == 'function') {
+              $.SetImpromptuDefaults({
                 prefix: 'colsJqi',
                 show: 'slideDown'
               });
             } else {
-              Logger.log("jQuery.SetImpromptuDefaults plugin not loaded!!!!!!!!");
+              Logger.log("$.SetImpromptuDefaults plugin not loaded!!!!!!!!");
             }
     
             //blockUI
@@ -128,10 +128,10 @@ define (['../lib/Base', '../lib/jquery', '../Logger', './RefreshEngine', '../lib
               };
               $.blockUI.defaults.css.border = "none";
             } else {
-              Logger.log("jQuery.blockUI plugin not loaded!!!!!!!!");
+              Logger.log("$.blockUI plugin not loaded!!!!!!!!");
             }
           } else {
-            Logger.log("jQuery plugin not loaded!!!!!!!!");
+            Logger.log("$ plugin not loaded!!!!!!!!");
           }
         }
       },
