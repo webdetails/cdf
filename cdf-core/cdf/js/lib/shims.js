@@ -272,4 +272,14 @@ if ( !Date.prototype.toISOString ) {
   }() );
 }
 
+if(!Array.prototype.forEach){
+  Array.prototype.forEach = function(f, o) {
+    for (var n = this.length >>> 0, i = 0; n > i; i++) i in this && f.call(o, this[i], i, this);
+  }
+}
+
+if (!Date.now) {
+  Date.now = function() { return new Date().valueOf(); }
+}
+
 
