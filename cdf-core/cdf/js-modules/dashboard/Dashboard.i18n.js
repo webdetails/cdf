@@ -11,7 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-
 define(['./Dashboard'], function (Dashboard) {
     /**
      * A module representing a extension to Dashboard module for i18n.

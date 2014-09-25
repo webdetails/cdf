@@ -11,27 +11,4 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./UnmanagedComponent', '../lib/Base'], function (UnmanagedComponent, Base) {
-
-
-    var FreeformComponent = UnmanagedComponent.extend({
-    
-      update: function() {
-        var render = _.bind(this.render,this);
-        if(typeof this.manageCallee == "undefined" || this.manageCallee) {
-          this.synchronous(render);
-        } else {
-          render();
-        }
-      },
-    
-      render : function() {
-        var parameters = this.parameters || [];
-        this.customfunction(parameters);
-      }
-    });
-    
-    
-    return FreeformComponent;
-
-});
+/* empty file to be loaded in debug allowing the r build to run */

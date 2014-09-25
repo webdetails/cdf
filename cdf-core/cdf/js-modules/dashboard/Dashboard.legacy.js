@@ -11,7 +11,6 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-
 define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logger, $) {
 
  Dashboard.implement({
