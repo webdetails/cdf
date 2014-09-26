@@ -1,0 +1,23 @@
+<div class="container">
+
+</div>
+
+<script language="javascript" type="text/javascript">
+  (function () {
+    window.jQuery = null;
+    window.$ = null;
+    window.backbone = null;
+    window._ = null;
+    window.Mustache = null;
+  })();
+
+  require(['cdf/Dashboard'], function (Dashboard) {
+    var dashboard = new Dashboard();
+    dashboard.addParameter("region", "1");
+
+    var theme = 'cdf/Dashboard.Blueprint';
+    require([theme], function () {
+      dashboard.init();
+    });
+  });
+</script>

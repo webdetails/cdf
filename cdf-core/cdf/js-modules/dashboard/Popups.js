@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/mustache', '../lib/underscore', '../lib/jquery', '../lib/jquery.blockUI'], function (Mustache, _, $, BlockUi) {
+define(['../lib/mustache', '../lib/underscore', '../lib/jquery', '../lib/jquery.blockUI'], function (Mustache, _, $) {
 
     var popups = {};
 

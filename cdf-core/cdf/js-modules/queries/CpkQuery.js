@@ -12,7 +12,7 @@
  */
 
 
-define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils'], function (BaseQuery, Dashboards, _, Utils) {
+define(['../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils'], function (Dashboard, _, Utils) {
 
      var CpkEndpointsOpts = {
     name: "cpk",
@@ -102,7 +102,7 @@ define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../
      */
   };
   // Registering a class will use that class directly when getting new queries.
-  Dashboards.registerGlobalQuery( "cpk", CpkEndpointsOpts );
+  Dashboard.registerGlobalQuery( "cpk", CpkEndpointsOpts );
 
 
  });

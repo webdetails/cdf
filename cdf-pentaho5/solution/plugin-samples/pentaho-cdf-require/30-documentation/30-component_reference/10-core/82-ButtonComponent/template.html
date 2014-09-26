@@ -88,35 +88,36 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  var clearVariables = function() {
+  (function () {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
     window._ = null;
     window.Mustache = null;
-  };
+  })();
 
-  require(['cdf/Dashboard', 'cdf/components/ButtonComponent'], function(Dashboard, ButtonComponent) {
-    clearVariables();
+  require(['cdf/Dashboard'], function (Dashboard) {
+    var dashboard = new Dashboard();
 
-    var myDashboard = new Dashboard();
-
-    var buttonComponent = new ButtonComponent(myDashboard, {
-      name: "buttonComponent",
-      type: "button",
-      listeners:["productLine", "territory"],
-      htmlObject: "sampleObject",
-      label: "A button",
-      expression: function(){this.setLabel('Yes, a clickable button'); alert('Button was clicked');},
-      executeAtStart: true,
-      preChange: function(){return true;},
-      postChange: function(){return true;},
-      successCallback: function(data){},
-      failureCallback: function(){},
-      tooltip: "My first dashboard"
+    var theme = 'cdf/Dashboard.Blueprint';
+    require([theme, 'cdf/components/ButtonComponent'], function (theme, ButtonComponent) {
+      dashboard.addComponent(new ButtonComponent(dashboard, {
+        name: "buttonComponent",
+        type: "button",
+        listeners:[],
+        htmlObject: "sampleObject",
+        label: "A button",
+        expression: function(){
+          this.setLabel('Yes, a clickable button'); alert('Button was clicked');
+        },
+        executeAtStart: true,
+        preChange: function(){return true;},
+        postChange: function(){return true;},
+        successCallback: function(data){},
+        failureCallback: function(){},
+        tooltip: "My first dashboard"
+      }));
+      dashboard.init();
     });
-
-    myDashboard.addComponent(buttonComponent);
-    myDashboard.init();
   });
 </script>

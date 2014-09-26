@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent', '../lib/Base', '../lib/underscore', '../lib/jquery', '../Logger'],
-    function (BaseComponent, Base, _, $, Logger) {
+define(['./BaseComponent', '../lib/underscore', '../lib/jquery', '../Logger'],
+    function (BaseComponent, _, $, Logger) {
 
     /*
      * UnmanagedComponent is an advanced version of the BaseComponent that allows

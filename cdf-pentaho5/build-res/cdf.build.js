@@ -29,6 +29,8 @@
     mangle: true
   },
 
+  siteRoot: 'cdf',
+
   buildCSS: true,
 
   removeCombined: true,

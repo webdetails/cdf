@@ -31,7 +31,8 @@
  */
  
  
- define(['../lib/Base', '../dashboard/Dashboard', '../lib/underscore', '../Logger', '../dashboard/OptionsManager', '../dashboard/Dashboard.query'], function (Base, Dashboards, _, Logger, OptionsManager, dashboardQuery) {
+ define(['../lib/Base', '../lib/underscore', '../Logger', '../dashboard/OptionsManager', '../dashboard/Dashboard.query'],
+     function (Base, _, Logger, OptionsManager, dashboardQuery) {
  
  
        var BaseQuery = Base.extend({

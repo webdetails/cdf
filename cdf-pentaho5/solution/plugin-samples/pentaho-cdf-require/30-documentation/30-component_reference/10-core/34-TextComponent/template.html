@@ -55,31 +55,31 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  var clearVariables = function() {
+  (function () {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
     window._ = null;
     window.Mustache = null;
-  };
+  })();
 
-  require(['cdf/Dashboard', 'cdf/components/TextComponent'], function(Dashboard, TextComponent) {
-    clearVariables();
+  require(['cdf/Dashboard'], function (Dashboard) {
+    var dashboard = new Dashboard();
+    dashboard.addParameter("region", "1");
 
-    var myDashboard = new Dashboard();
-
-    var textComponent = new TextComponent(myDashboard, {
-      name: "textGenerator",
-      type: "textComponent",
-      listeners:[],
-      expression: function(){
-        return "My text generated in " + new Date()
-      },
-      htmlObject: "sampleObject",
-      executeAtStart: true
+    var theme = 'cdf/Dashboard.Blueprint';
+    require([theme, 'cdf/components/TextComponent'], function (theme, TextComponent) {
+      dashboard.addComponent(new TextComponent(dashboard, {
+        name: "textGenerator",
+        type: "textComponent",
+        listeners:[],
+        expression: function(){
+          return "My text generated in " + new Date()
+        },
+        htmlObject: "sampleObject",
+        executeAtStart: true
+      }));
+      dashboard.init();
     });
-
-    myDashboard.addComponent(textComponent);
-    myDashboard.init();
   });
 </script>
