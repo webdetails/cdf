@@ -68,34 +68,32 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  var clearVariables = function() {
+  (function () {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
     window._ = null;
     window.Mustache = null;
-  };
+  })();
 
-  require(['cdf/Dashboard', 'cdf/components/TextareaInputComponent'], function(Dashboard, TextareaInputComponent) {
-    clearVariables();
+  require(['cdf/Dashboard'], function (Dashboard) {
+    var dashboard = new Dashboard();
+    dashboard.addParameter("input", "");
 
-    var myDashboard = new Dashboard();
-
-    myDashboard.addParameter("input", "");
-
-    var textareaInputComponent = new TextareaInputComponent(myDashboard, {
-      name: "myInput",
-      type: "textareaInputComponent",
-      parameters:[],
-      parameter: "input",
-      htmlObject: "sampleObject",
-      executeAtStart: true,
-      postChange: function(){
-        alert("you typed: " + myDashboard.getParameterValue(this.parameter));
-      }
+    var theme = 'cdf/Dashboard.Blueprint';
+    require([theme, 'cdf/components/TextareaInputComponent'], function (theme, TextareaInputComponent) {
+      dashboard.addComponent(new TextareaInputComponent(dashboard, {
+        name: "myInput",
+        type: "textareaInputComponent",
+        parameters:[],
+        parameter: "input",
+        htmlObject: "sampleObject",
+        executeAtStart: true,
+        postChange: function(){
+          alert("you typed: " + this.dashboard.getParameterValue(this.parameter));
+        }
+      }));
+      dashboard.init();
     });
-
-    myDashboard.addComponent(textareaInputComponent);
-    myDashboard.init();
   });
 </script>

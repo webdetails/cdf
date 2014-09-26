@@ -1,0 +1,73 @@
+.trendArrow {
+  text-align: right;
+}
+
+.trendArrow > div{
+  display: inline-block;
+}
+
+.trend {
+  width: 10px;
+  height: 10px;
+  margin-left: 5px;
+}
+.trend.up.good {
+  background: url("img/up-good.png");
+}
+
+.trend.neutral {
+  background: url("img/neutral.png");
+}
+
+.trend.invalid {
+}
+
+.trend.down.good {
+  background: url("img/down-good.png");
+}
+.trend.up.bad {
+  background: url("img/up-bad.png");
+}
+.trend.down.bad {
+  background: url("img/down-bad.png");
+}
+
+a.hiperlinkAddIn{
+  
+}
+
+
+.dataBarContainer {
+  position: relative;
+  width:100%;
+}
+.dataBarContainer svg {
+  float:left;
+}
+.dataBarContainer .value{
+  position:relative;
+  float:right;
+  z-index:100;
+}
+
+
+.hiddenCol{
+  display:none;  
+}
+.groupHeader {
+  background: #DDDDFF;  
+}
+.groupHeader.group0 {
+    background: #FFDDDD;
+}
+.groupHeader.group1 {
+    background: #DDFFDD;
+}
+.groupHeader.group2 {
+    background: #DDDDFF;  
+}
+
+.clippedText {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

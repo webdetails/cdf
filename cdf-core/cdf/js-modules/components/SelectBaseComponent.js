@@ -11,8 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./InputBaseComponent', '../lib/Base', '../Logger', '../lib/jquery', '../lib/underscore', '../dashboard/Utils'],
-  function (InputBaseComponent, Base, Logger, $, _, Utils) {
+define(['./InputBaseComponent', '../Logger', '../lib/jquery', '../lib/underscore', '../dashboard/Utils'],
+  function (InputBaseComponent, Logger, $, _, Utils) {
 
 
     var SelectBaseComponent = InputBaseComponent.extend({

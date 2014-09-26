@@ -12,7 +12,7 @@
  */
 
 define(['./Dashboard', './Popups','../Logger', '../lib/underscore', '../lib/jquery', '../lib/jquery.ui', '../lib/jquery.blockUI'],
-function (Dashboard, Popups, Logger, _, $, jqueryUi, jqueryBlockUI) {
+function (Dashboard, Popups, Logger, _, $) {
     /**
      * A module representing a extension to Dashboard module for notifications.
      * It requires the parameter lifecycle module

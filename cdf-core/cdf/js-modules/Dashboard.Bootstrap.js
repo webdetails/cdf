@@ -11,27 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./UnmanagedComponent'], function (UnmanagedComponent) {
-
-
-    var FreeformComponent = UnmanagedComponent.extend({
-    
-      update: function() {
-        var render = _.bind(this.render,this);
-        if(typeof this.manageCallee == "undefined" || this.manageCallee) {
-          this.synchronous(render);
-        } else {
-          render();
-        }
-      },
-    
-      render : function() {
-        var parameters = this.parameters || [];
-        this.customfunction(parameters);
-      }
-    });
-    
-    
-    return FreeformComponent;
-
-});
+define(['./lib/bootstrap/bootstrap', 'css!./lib/bootstrap/css/bootstrap.min', 'css!./lib/bootstrap/font-awesome/css/font-awesome.min'], function () {
+      return;
+    }
+);

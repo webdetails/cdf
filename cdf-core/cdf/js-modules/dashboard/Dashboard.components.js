@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../lib/backbone', "../lib/mustache", "../Logger"], function (Dashboard, Backbone, Mustache, Logger) {
+define(['./Dashboard', '../lib/backbone', "../lib/mustache", "../Logger"], function (Dashboard, Backbone, Mustache) {
     /**
      * A module representing a extension to Dashboard module for storage.
      * @module Dashboard.components

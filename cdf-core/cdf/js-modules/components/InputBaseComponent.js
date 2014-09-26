@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./UnmanagedComponent', '../lib/Base', '../Logger', '../lib/underscore', '../dashboard/Utils'], function (UnmanagedComponent, Base, Logger, _, Utils) {
+define(['./UnmanagedComponent', '../lib/underscore', '../dashboard/Utils'], function (UnmanagedComponent, _, Utils) {
 
     var InputBaseComponent = UnmanagedComponent.extend({
       update: function(){

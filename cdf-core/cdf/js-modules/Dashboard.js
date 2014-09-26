@@ -29,7 +29,7 @@ define(['./dashboard/Dashboard',
         './components/BaseComponent',
         './components/UnmanagedComponent',
         'css!./Dashboard'
-        ], 
+        ],
         function (Dashboard, AddIns, Bookmarks, Components, I18n, Legacy, Lifecycle, Notifications, Parameters, Storage, Query, Views, BaseQuery, CpkQuery, BaseComponent, UnmanagedComponent, css) {
             return Dashboard;
         }

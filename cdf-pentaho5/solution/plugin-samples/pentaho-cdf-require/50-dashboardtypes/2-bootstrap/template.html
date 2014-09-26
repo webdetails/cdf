@@ -1,0 +1,22 @@
+<div class="container theme-showcase" role="main">
+</div>
+
+<script language="javascript" type="text/javascript">
+  (function () {
+    window.jQuery = null;
+    window.$ = null;
+    window.backbone = null;
+    window._ = null;
+    window.Mustache = null;
+  })();
+
+  require(['cdf/Dashboard'], function (Dashboard) {
+    var dashboard = new Dashboard();
+
+    var theme = 'cdf/Dashboard.Bootstrap';
+    require([theme], function () {
+      dashboard.init();
+    });
+
+  });
+</script>

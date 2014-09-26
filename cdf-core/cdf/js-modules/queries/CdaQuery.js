@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils', '../Logger'], function (BaseQuery, Dashboards, _, Utils, Logger) {
+define(['../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils', '../Logger'],
+    function (Dashboard, _, Utils, Logger) {
 
 
 
@@ -202,7 +203,7 @@ define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../
   };
   // Registering an object will use it to create a class by extending Dashboards.BaseQuery,
   // and use that class to generate new queries.
-  Dashboards.registerGlobalQuery( "cda", cdaQueryOpts );
+  Dashboard.registerGlobalQuery( "cda", cdaQueryOpts );
 
 
 

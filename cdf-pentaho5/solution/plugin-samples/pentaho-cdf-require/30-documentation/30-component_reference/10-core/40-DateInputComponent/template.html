@@ -90,42 +90,36 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-
-  var clearVariables = function() {
+  (function () {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
     window._ = null;
     window.Mustache = null;
-  };
+  })();
 
-  require(['cdf/Dashboard', 'cdf/lib/jquery', 'cdf/components/DateInputComponent'], function(Dashboard, $, DateInputComponent) {
+  require(['cdf/Dashboard'], function (Dashboard) {
+    var dashboard = new Dashboard();
+    dashboard.addParameter("input", "");
 
-    $('head').append('<link rel="stylesheet" href="/pentaho/api/repos/pentaho-cdf/js/lib/theme/cupertino/jquery-ui-1.8.custom.css" type="text/css" />');
-
-    clearVariables();
-
-    var myDashboard = new Dashboard();
-
-    myDashboard.addParameter("input", "2009-01-01");
-
-    var dateInputComponent = new DateInputComponent(myDashboard, {
-      name: "myInput",
-      type: "dateInputComponent",
-      parameters:[],
-      parameter: "input",
-      htmlObject: "sampleObject",
-      dateFormat: "yy-mm-dd",
-      startDate: "2006-05-31",
-      endDate: "TODAY",
-      executeAtStart: true,
-      tooltip: "Click me to select a date",
-      postChange: function(){
-        alert("You chose: " + myDashboard.getParameterValue(this.parameter));
-      }
+    var theme = 'cdf/Dashboard.Blueprint';
+    require([theme, 'cdf/components/DateInputComponent'], function (theme, DateInputComponent) {
+      dashboard.addComponent(new DateInputComponent(dashboard, {
+        name: "myInput",
+        type: "dateInputComponent",
+        parameters:[],
+        parameter: "input",
+        htmlObject: "sampleObject",
+        dateFormat: "yy-mm-dd",
+        startDate: "2006-05-31",
+        endDate: "TODAY",
+        executeAtStart: true,
+        tooltip: "Click me to select a date",
+        postChange: function(){
+          alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
+        }
+      }));
+      dashboard.init();
     });
-
-    myDashboard.addComponent(dateInputComponent);
-    myDashboard.init();
   });
 </script>

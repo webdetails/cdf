@@ -112,8 +112,7 @@
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme, 'cdf/components/SelectComponent'], function (theme, SelectComponent) {
+    require(['cdf/components/SelectComponent'], function (SelectComponent) {
       dashboard.addComponent(new SelectComponent(dashboard, {
         name: "selectComponent",
         type: "selectComponent",

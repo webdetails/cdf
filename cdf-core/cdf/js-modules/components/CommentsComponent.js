@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../lib/Base', '../Logger', '../lib/jquery'], function (Mustache, _, BaseComponent, Base, Logger, $) {
+define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', '../lib/jquery'],
+    function (Mustache, _, BaseComponent, Logger, $) {
 
   var CommentsComponent = BaseComponent.extend({
   
