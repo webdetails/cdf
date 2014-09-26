@@ -722,5 +722,20 @@ describe("The CDF framework #", function() {
    };
 
    setTimeout(dataToValidate, 500);
-  })
+  });
+
+  /**
+   * ## The CDF framework # Get Query Parameter
+   */
+  it("Get Query Parameter", function() {
+    spyOn(myDashboard, "getLocationSearchString")
+        .and.returnValue("?debug=true&randomName&noValue=&bug=false");
+
+    expect(myDashboard.getQueryParameter("debug")).toBe("true");
+    expect(myDashboard.getQueryParameter("bug")).toBe("false");
+    expect(myDashboard.getQueryParameter("randomName")).toBe("");
+    expect(myDashboard.getQueryParameter("noValue")).toBe("");
+    expect(myDashboard.getQueryParameter("notThere")).toBe("");
+
+  });
 });

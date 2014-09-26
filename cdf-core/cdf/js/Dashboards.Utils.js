@@ -1,5 +1,5 @@
 /*!
-* Copyright 2002 - 2013 Webdetails, a Pentaho company.  All rights reserved.
+* Copyright 2002 - 2014 Webdetails, a Pentaho company.  All rights reserved.
 * 
 * This software was developed by Webdetails and is provided under the terms
 * of the Mozilla Public License, Version 2.0, or any later version. You may not use
@@ -33,7 +33,7 @@ Dashboards.escapeHtml = function(input) {
 };
 
 
-Dashboards.getPathParameter = function ( url ) {  
+Dashboards.getPathParameter = function ( url ) {
 
   url = ( url || window.location.pathname );
   url = decodeURIComponent(url);
@@ -45,32 +45,22 @@ Dashboards.getPathParameter = function ( url ) {
   }
 };
 
-Dashboards.getQueryParameter = function ( parameterName ) {
-  // Add "=" to the parameter name (i.e. parameterName=value)
-  var queryString = window.location.search.substring(1);
-  var parameterName = parameterName + "=";
-  if ( queryString.length > 0 ) {
-    // Find the beginning of the string
-    var begin = queryString.indexOf ( parameterName );
-    // If the parameter name is not found, skip it, otherwise return the value
-    if ( begin != -1 ) {
-      // Add the length (integer) to the beginning
-      begin += parameterName.length;
-      // Multiple parameters are separated by the "&" sign
-      var end = queryString.indexOf ( "&" , begin );
-      if ( end == -1 ) {
-        end = queryString.length
-      }
-      // Return the string
-      return decodeURIComponent ( queryString.substring ( begin, end ) );
-    }
-  }
-  // Return "" if no parameter has been found
-  return "";
+Dashboards.getLocationSearchString = function() {
+  return window.location.search;
 };
 
 (function (D) {
-  
+  var urlParams = undefined;
+
+  D.getQueryParameter = function(parameterName) {
+    if ( urlParams === undefined ) {
+      var queryString = this.getLocationSearchString();
+      urlParams = $.parseQuery( queryString );
+    }
+    return urlParams[parameterName] || "";
+
+  };
+
   // Conversion functions
   function _pa2obj (pArray) {
     var obj = {};
