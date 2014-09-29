@@ -11,13 +11,8 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint'], function (Dashboard) {
     var dashboard = new Dashboard();
-    dashboard.addParameter("region", "1");
-
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme], function () {
-      dashboard.init();
-    });
+    dashboard.init();
   });
 </script>

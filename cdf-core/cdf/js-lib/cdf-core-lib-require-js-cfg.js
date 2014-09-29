@@ -39,37 +39,28 @@
 
   //jquery.ui 1.8.14
   requirePaths['cdf/lib/jquery.ui'] = prefix + "/jquery/jquery.ui";
-  requireShims['cdf/lib/jquery.ui'] = {
-    exports: '$',
-    deps: [
-      'cdf/lib/jquery',
-      'css!cdf/lib/theme/cupertino/jquery-ui-1.8.custom'
-    ]
-  };
+  requireShims['cdf/lib/jquery.ui'] = [
+    'cdf/lib/jquery',
+    'css!cdf/lib/theme/cupertino/jquery-ui-1.8.custom'
+  ];
 
   //jquery.blockUI 2.66.0
   requirePaths['cdf/lib/jquery.blockUI'] = prefix + "/jquery/jquery.blockUI";
-  requireShims['cdf/lib/jquery.blockUI'] = {
-    deps: ['cdf/lib/jquery']
-  };
+  requireShims['cdf/lib/jquery.blockUI'] = ['cdf/lib/jquery'];
 
   //jquery.tooltip 1.3
   requirePaths['cdf/lib/jquery.tooltip'] = prefix + "/jquery/jquery.tooltip";
-  requireShims['cdf/lib/jquery.tooltip'] = {
-    deps: [
-      'cdf/lib/jquery',
-      'css!cdf/lib/jquery.tooltip'
-    ]
-  };
+  requireShims['cdf/lib/jquery.tooltip'] = [
+    'cdf/lib/jquery',
+    'css!cdf/lib/jquery.tooltip'
+  ];
 
   //daterangepicker.jQuery 01.19.2008
   requirePaths['cdf/lib/daterangepicker.jQuery'] = prefix + "/daterangepicker/daterangepicker.jQuery";
-  requireShims['cdf/lib/daterangepicker.jQuery'] = {
-    deps: [
-      'cdf/lib/jquery',
-      'css!cdf/lib/daterangepicker/ui.daterangepicker'
-    ]
-  };
+  requireShims['cdf/lib/daterangepicker.jQuery'] = [
+    'cdf/lib/jquery',
+    'css!cdf/lib/daterangepicker/ui.daterangepicker'
+  ];
 
   //underscore 1.6.0
   requirePaths['underscore'] = prefix + "/underscore/underscore";
@@ -99,11 +90,11 @@
   //shims
   requirePaths['cdf/lib/shims'] = prefix + "/shims";
 
+  /*
+   * Dashboard types shims
+   */
   //bootstrap 3.1.1
   requirePaths['cdf/lib/bootstrap/bootstrap'] = prefix + '/bootstrap/js/bootstrap';
-  requireShims['cdf/lib/bootstrap/bootstrap'] = {
-    exports: '$',
-    deps: ['cdf/lib/jquery']
-  };
+  requireShims['cdf/lib/bootstrap/bootstrap'] = ['cdf/Dashboard'];
 
 })();

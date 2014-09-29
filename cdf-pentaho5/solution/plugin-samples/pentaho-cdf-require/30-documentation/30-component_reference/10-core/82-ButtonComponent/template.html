@@ -96,28 +96,25 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/ButtonComponent'], function (Dashboard, ButtonComponent) {
     var dashboard = new Dashboard();
 
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme, 'cdf/components/ButtonComponent'], function (theme, ButtonComponent) {
-      dashboard.addComponent(new ButtonComponent(dashboard, {
-        name: "buttonComponent",
-        type: "button",
-        listeners:[],
-        htmlObject: "sampleObject",
-        label: "A button",
-        expression: function(){
-          this.setLabel('Yes, a clickable button'); alert('Button was clicked');
-        },
-        executeAtStart: true,
-        preChange: function(){return true;},
-        postChange: function(){return true;},
-        successCallback: function(data){},
-        failureCallback: function(){},
-        tooltip: "My first dashboard"
-      }));
-      dashboard.init();
-    });
+    dashboard.addComponent(new ButtonComponent(dashboard, {
+      name: "buttonComponent",
+      type: "button",
+      listeners:[],
+      htmlObject: "sampleObject",
+      label: "A button",
+      expression: function(){
+        this.setLabel('Yes, a clickable button'); alert('Button was clicked');
+      },
+      executeAtStart: true,
+      preChange: function(){return true;},
+      postChange: function(){return true;},
+      successCallback: function(data){},
+      failureCallback: function(){},
+      tooltip: "My first dashboard"
+    }));
+    dashboard.init();
   });
 </script>
