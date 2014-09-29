@@ -108,30 +108,26 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent'], function (Dashboard, SelectComponent) {
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme, 'cdf/components/SelectComponent'], function (theme, SelectComponent) {
-      dashboard.addComponent(new SelectComponent(dashboard, {
-        name: "selectComponent",
-        type: "selectComponent",
-        parameters: [],
-        valuesArray: [
-          ["1", "Lisbon"],
-          ["2", "Dusseldorf"]
-        ],
-        parameter: "region",
-        valueAsId: false,
-        htmlObject: "sampleObject",
-        executeAtStart: true,
-        postChange: function () {
-          alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
-        }
-      }));
-      dashboard.init();
-    });
-
+    dashboard.addComponent(new SelectComponent(dashboard, {
+      name: "selectComponent",
+      type: "selectComponent",
+      parameters: [],
+      valuesArray: [
+        ["1", "Lisbon"],
+        ["2", "Dusseldorf"]
+      ],
+      parameter: "region",
+      valueAsId: false,
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      postChange: function () {
+        alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
+      }
+    }));
+    dashboard.init();
   });
 </script>

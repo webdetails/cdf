@@ -16,7 +16,8 @@
  */
 
 (function() {
-  var requirePaths = requireCfg.paths;
+  var requirePaths = requireCfg.paths,
+      requireShims = requireCfg.shim;
   var isDebug = typeof document == "undefined" || document.location.href.indexOf("debug=true") > 0;
 
   if(typeof CONTEXT_PATH !== "undefined"){ // production vs debug
@@ -28,6 +29,19 @@
   } else { // build
     requirePaths['cdf'] = "cdf";
   }
+
+  /*
+   * component shim for Dashboard
+   */
+
+  requireShims['cdf/components/ButtonComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/SelectComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/TextComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/TextInputComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/TextareaInputComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/DateInputComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/DateRangeInputComponent'] = ['cdf/Dashboard'];
+  requireShims['cdf/components/MonthPickerComponent'] = ['cdf/Dashboard'];
 
 })();
 

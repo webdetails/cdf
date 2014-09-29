@@ -11,7 +11,9 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['css!./lib/blueprint/screen'], function () {
-      return;
+define([
+      './Dashboard',
+      'css!./lib/blueprint/screen'], function (Dashboard) {
+      return Dashboard;
     }
 );

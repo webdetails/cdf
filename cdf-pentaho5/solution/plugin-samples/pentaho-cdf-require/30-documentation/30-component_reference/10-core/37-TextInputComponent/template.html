@@ -76,24 +76,21 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/TextInputComponent'], function (Dashboard, TextInputComponent) {
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "");
 
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme, 'cdf/components/TextInputComponent'], function (theme, TextInputComponent) {
-      dashboard.addComponent(new TextInputComponent(dashboard, {
-        name: "myInput",
-        type: "textInputComponent",
-        parameters:[],
-        parameter: "input",
-        htmlObject: "sampleObject",
-        executeAtStart: true,
-        postChange: function(){
-          alert("you typed: " + this.dashboard.getParameterValue(this.parameter));
-        }
-      }));
-      dashboard.init();
-    });
+    dashboard.addComponent(new TextInputComponent(dashboard, {
+      name: "myInput",
+      type: "textInputComponent",
+      parameters:[],
+      parameter: "input",
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      postChange: function(){
+        alert("you typed: " + this.dashboard.getParameterValue(this.parameter));
+      }
+    }));
+    dashboard.init();
   });
 </script>

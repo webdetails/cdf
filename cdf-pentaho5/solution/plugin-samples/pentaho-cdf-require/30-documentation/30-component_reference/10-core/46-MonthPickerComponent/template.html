@@ -86,30 +86,27 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/MonthPickerComponent'], function (Dashboard, MonthPickerComponent) {
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "2009-01-01");
 
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme, 'cdf/components/MonthPickerComponent'], function (theme, MonthPickerComponent) {
-      var d = new Date();
-      d.setYear(2006);
+    var d = new Date();
+    d.setYear(2006);
 
-      dashboard.addComponent(new MonthPickerComponent(dashboard, {
-        name: "monthPickerComponent",
-        type: "monthPickerComponent",
-        parameter: "input",
-        months: 10,
-        size: 1,
-        initialDate: d,
-        htmlObject: "sampleObject",
-        executeAtStart: true,
-        tooltip: "Click me to select a month",
-        postChange: function(date){
-          alert("You chose: " + date);
-        }
-      }));
-      dashboard.init();
+    dashboard.addComponent(new MonthPickerComponent(dashboard, {
+      name: "monthPickerComponent",
+      type: "monthPickerComponent",
+      parameter: "input",
+      months: 10,
+      size: 1,
+      initialDate: d,
+      htmlObject: "sampleObject",
+      executeAtStart: true,
+      tooltip: "Click me to select a month",
+      postChange: function(date){
+        alert("You chose: " + date);
+      }
+    }));
+    dashboard.init();
     });
-  });
 </script>

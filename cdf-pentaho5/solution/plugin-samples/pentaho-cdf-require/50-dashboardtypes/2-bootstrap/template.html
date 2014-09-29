@@ -10,13 +10,8 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Bootstrap'], function (Dashboard) {
     var dashboard = new Dashboard();
-
-    var theme = 'cdf/Dashboard.Bootstrap';
-    require([theme], function () {
-      dashboard.init();
-    });
-
+    dashboard.init();
   });
 </script>

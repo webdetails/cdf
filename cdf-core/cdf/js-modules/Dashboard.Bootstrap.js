@@ -11,7 +11,13 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./lib/bootstrap/bootstrap', 'css!./lib/bootstrap/css/bootstrap.min', 'css!./lib/bootstrap/font-awesome/css/font-awesome.min'], function () {
-      return;
+define([
+      './Dashboard',
+      './lib/bootstrap/bootstrap',
+      'css!./lib/bootstrap/css/bootstrap.min',
+      'css!./lib/bootstrap/font-awesome/css/font-awesome.min'],
+
+    function (Dashboard) {
+      return Dashboard;
     }
 );

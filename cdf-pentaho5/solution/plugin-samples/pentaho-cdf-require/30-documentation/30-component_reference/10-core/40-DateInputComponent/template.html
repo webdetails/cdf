@@ -98,28 +98,25 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'], function (Dashboard, DateInputComponent) {
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "");
 
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme, 'cdf/components/DateInputComponent'], function (theme, DateInputComponent) {
-      dashboard.addComponent(new DateInputComponent(dashboard, {
-        name: "myInput",
-        type: "dateInputComponent",
-        parameters:[],
-        parameter: "input",
-        htmlObject: "sampleObject",
-        dateFormat: "yy-mm-dd",
-        startDate: "2006-05-31",
-        endDate: "TODAY",
-        executeAtStart: true,
-        tooltip: "Click me to select a date",
-        postChange: function(){
-          alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
-        }
-      }));
-      dashboard.init();
-    });
+    dashboard.addComponent(new DateInputComponent(dashboard, {
+      name: "myInput",
+      type: "dateInputComponent",
+      parameters:[],
+      parameter: "input",
+      htmlObject: "sampleObject",
+      dateFormat: "yy-mm-dd",
+      startDate: "2006-05-31",
+      endDate: "TODAY",
+      executeAtStart: true,
+      tooltip: "Click me to select a date",
+      postChange: function(){
+        alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
+      }
+    }));
+    dashboard.init();
   });
 </script>

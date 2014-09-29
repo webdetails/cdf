@@ -63,23 +63,20 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/TextComponent'], function (Dashboard, TextComponent) {
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
-    var theme = 'cdf/Dashboard.Blueprint';
-    require([theme, 'cdf/components/TextComponent'], function (theme, TextComponent) {
-      dashboard.addComponent(new TextComponent(dashboard, {
-        name: "textGenerator",
-        type: "textComponent",
-        listeners:[],
-        expression: function(){
-          return "My text generated in " + new Date()
-        },
-        htmlObject: "sampleObject",
-        executeAtStart: true
-      }));
-      dashboard.init();
-    });
+    dashboard.addComponent(new TextComponent(dashboard, {
+      name: "textGenerator",
+      type: "textComponent",
+      listeners: [],
+      expression: function () {
+        return "My text generated in " + new Date()
+      },
+      htmlObject: "sampleObject",
+      executeAtStart: true
+    }));
+    dashboard.init();
   });
 </script>
