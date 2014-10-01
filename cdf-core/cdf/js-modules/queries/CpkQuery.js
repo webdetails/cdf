@@ -11,12 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
+define(['./BaseQuery', '../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils'],
+  function(BaseQuery, Dashboard, _, Utils) {
 
-define(['../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils'], function (Dashboard, _, Utils) {
-
-     var CpkEndpointsOpts = {
+  var CpkEndpointsOpts = {
     name: "cpk",
+
     label: "CPK",
+
     defaults: {
       url: '',
       pluginId: '',
@@ -29,25 +31,27 @@ define(['../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils
       }
     },
 
-    init: function (opts){
-        if ( _.isString(opts.pluginId) && _.isString(opts.endpoint) ){
-          this.setOption('pluginId' , opts.pluginId);
-          this.setOption('endpoint' , opts.endpoint);
-          this.setOption('url', wd.cdf.endpoints.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
-        }
-        this.setOption('kettleOutput', opts.kettleOutput);
-        this.setOption('stepName', opts.stepName);
-        this.setOption('systemParams', opts.systemParams || {} );
-        this.setOption('ajaxOptions' , $.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
-        var ajaxOptions = this.getOption('ajaxOptions');
-        if (ajaxOptions.dataType == 'json'){
-            ajaxOptions.mimeType = 'application/json; charset utf-8'; //solves "not well formed" error in Firefox 24
-            this.setOption('ajaxOptions', ajaxOptions);
-        }
+    init: function(opts) {
+      if(_.isString(opts.pluginId) && _.isString(opts.endpoint)) {
+        this.setOption('pluginId' , opts.pluginId);
+        this.setOption('endpoint' , opts.endpoint);
+        this.setOption('url', wd.cdf.endpoints.getPluginEndpoint( opts.pluginId , opts.endpoint ) );
+      }
+      this.setOption('kettleOutput', opts.kettleOutput);
+      this.setOption('stepName', opts.stepName);
+      this.setOption('systemParams', opts.systemParams || {} );
+      this.setOption('ajaxOptions' , $.extend({}, this.getOption('ajaxOptions'), opts.ajaxOptions));
+      var ajaxOptions = this.getOption('ajaxOptions');
+      if(ajaxOptions.dataType == 'json') {
+        ajaxOptions.mimeType = 'application/json; charset utf-8'; //solves "not well formed" error in Firefox 24
+        this.setOption('ajaxOptions', ajaxOptions);
+      }
     },
 
     buildQueryDefinition: function(overrides, dashboard) {
-      overrides = ( overrides instanceof Array) ? Utils.propertiesArrayToObject(overrides) : ( overrides || {} );
+      overrides = (overrides instanceof Array) 
+        ? Utils.propertiesArrayToObject(overrides)
+        : (overrides || {});
 
       var queryDefinition = {
         kettleOutput: this.getOption('kettleOutput'),
@@ -56,24 +60,23 @@ define(['../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils
       // We clone queryDefinition to remove undefined
       queryDefinition = $.extend(true, {}, queryDefinition, this.getOption('systemParams'));
 
-
       var cachedParams = this.getOption('params'),
           params = $.extend( {}, cachedParams , overrides);
 
       _.each( params , function (value, name) {
         value = dashboard ? dashboard.getParameterValue(value) : value;
-          if (_.isObject(value)){
-              // kettle does not handle arrays natively,
-              // nor does it interpret multiple parameters with the same name as elements of an array,
-              // nor does CPK do any sort of array handling.
-              // A stringify ensures the array is passed as a string, that can be parsed using kettle.
-              value = JSON.stringify(value);
-              // Another option would be to add futher:
-              // value = value.split('],').join(';').split('[').join('').split(']').join('');
-              // which transforms [[0,1],[2,3]] into "0,1;2,3"
+          if(_.isObject(value)) {
+            // kettle does not handle arrays natively,
+            // nor does it interpret multiple parameters with the same name as elements of an array,
+            // nor does CPK do any sort of array handling.
+            // A stringify ensures the array is passed as a string, that can be parsed using kettle.
+            value = JSON.stringify(value);
+            // Another option would be to add futher:
+            // value = value.split('],').join(';').split('[').join('').split(']').join('');
+            // which transforms [[0,1],[2,3]] into "0,1;2,3"
           }
-          if (typeof value == 'function') {
-              value = value();
+          if(typeof value == 'function') {
+            value = value();
           }
         queryDefinition['param' + name] = value;
       });
@@ -81,28 +84,27 @@ define(['../dashboard/Dashboard.query', '../lib/underscore', '../dashboard/Utils
       return queryDefinition;
     },
 
-      getSuccessHandler: function (callback){
-          // copy-pasted from BaseQuery + added errorCallback
-          var myself = this;
-          return function(json) {
-              myself.setOption('lastResultSet' , json );
-              var clone = $.extend(true,{}, myself.getOption('lastResultSet') );
-              if ( json && json.result == false ) {
-                  // the ajax call might have been successful (no network erros),
-                  // but the endpoint might have failed, which is signalled by json.result
-                  var errorCallback = myself.getErrorHandler( myself.getOption('errorCallback') );
-                  errorCallback(clone);
-              } else {
-                  callback(clone);
-              }
-          };
-      }
+    getSuccessHandler: function(callback) {
+      // copy-pasted from BaseQuery + added errorCallback
+      var myself = this;
+      return function(json) {
+        myself.setOption('lastResultSet' , json);
+        var clone = $.extend(true,{}, myself.getOption('lastResultSet'));
+        if(json && json.result == false) {
+          // the ajax call might have been successful (no network erros),
+          // but the endpoint might have failed, which is signalled by json.result
+          var errorCallback = myself.getErrorHandler( myself.getOption('errorCallback'));
+          errorCallback(clone);
+        } else {
+          callback(clone);
+        }
+      };
+    }
     /*
      * Public interface
      */
   };
   // Registering a class will use that class directly when getting new queries.
-  Dashboard.registerGlobalQuery( "cpk", CpkEndpointsOpts );
-
+  Dashboard.registerGlobalQuery("cpk", CpkEndpointsOpts);
 
  });

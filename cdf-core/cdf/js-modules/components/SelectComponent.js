@@ -12,6 +12,7 @@
  */
 
 define(['./SelectBaseComponent'], function(SelectBaseComponent) {
+  
   var SelectComponent = SelectBaseComponent.extend({
 
     defaultIfEmpty: true,

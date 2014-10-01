@@ -11,16 +11,17 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/underscore', '../lib/jquery', './ActionComponent'], function (_, $, ActionComponent) {
+define(['../lib/underscore', '../lib/jquery', './ActionComponent'],
+  function(_, $, ActionComponent) {
 
   var ButtonComponent = ActionComponent.extend({
-    _docstring: function (){
+    _docstring: function() {
       return "Button Component that triggers a server action when clicked";
     },
 
     render: function() {
       var myself = this;
-      var b = $("<button type='button'/>").text(myself.label).unbind("click").bind("click", function(){
+      var b = $("<button type='button'/>").text(myself.label).unbind("click").bind("click", function() {
         var proceed = true;
         if(_.isFunction(myself.expression)) {
           proceed = myself.expression.apply(myself, arguments);
@@ -39,21 +40,21 @@ define(['../lib/underscore', '../lib/jquery', './ActionComponent'], function (_,
     /**
      * Disables the button (grays it out and prevents click events)
      */
-    disable: function(){
+    disable: function() {
       this.placeholder('button').attr('disabled', 'disabled');
     },
 
     /**
      * Enables the button
      */
-    enable: function(){
+    enable: function() {
       this.placeholder('button').removeAttr('disabled');
     },
 
     /**
      * Changes the label shown on the button
      */
-    setLabel: function(label){
+    setLabel: function(label) {
       this.label = label.toString();
       this.placeholder('button').text(this.label);
     }

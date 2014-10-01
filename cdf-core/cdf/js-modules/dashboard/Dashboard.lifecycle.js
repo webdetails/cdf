@@ -12,7 +12,7 @@
  */
 
 define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../components/UnmanagedComponent', '../lib/jquery.tooltip'],
-  function (Dashboard, Logger, _, $, UnmanagedComponent) {
+  function(Dashboard, Logger, _, $, UnmanagedComponent) {
 
   /**
    * A module representing a extension to Dashboard module for lifecycle.
@@ -50,7 +50,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
      *
      * @returns {number}
      */
-    getRunningCalls: function () {
+    getRunningCalls: function() {
       return this.runningCalls;
     },
 
@@ -70,7 +70,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
       this.runningCalls--;
       Logger.log("-Running calls decremented to: " + this.getRunningCalls());
       setTimeout(_.bind(function(){
-        if(this.runningCalls<=0) {
+        if(this.runningCalls <= 0) {
           this.hideProgressIndicator();
           this.runningCalls = 0; // Just in case
         }
@@ -101,7 +101,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
           myself.loadStorage();
         }
 
-        if(myself.context != null && myself.context.sessionTimeout != null ) {
+        if(myself.context != null && myself.context.sessionTimeout != null) {
           //defaulting to 90% of ms value of sessionTimeout
           myself.serverCheckResponseTimeout = myself.context.sessionTimeout * 900;
         }
@@ -120,7 +120,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
       // initInstance to all
       _.chain(myself.components)
         .where({initInstance:undefined})
-        .each(function(c){ c.initInstance = initInstance});
+        .each(function(c) { c.initInstance = initInstance});
 
       $(function() { myself._initEngine(initInstance); });
     },
@@ -236,7 +236,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
          * what duplications were triggered, allowing us to reproduce that
          * state as well.
          */
-        var dupes = _.filter(myself.components, function(c){return c.type == 'duplicate'}),
+        var dupes = _.filter(myself.components, function(c) { return c.type == 'duplicate'; }),
           suffixes = {},
           params = myself.getBookmarkState().params || {};
         /*
@@ -249,14 +249,14 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
          * the root parameter names to their respective values.
          * E.g. a parameter 'foo_1 = 1' yields '{_1: {foo: 1}}'
          */
-        _.map(_.filter(Object.keys(params), function(e){
+        _.map(_.filter(Object.keys(params), function(e) {
           return /(_[0-9]+)+$/.test(e);
-        }), function(e){
+        }), function(e) {
           var parts = e.match(/(.*?)((_[0-9]+)+)$/),
               name = parts[1],
               suffix = parts[2];
-          if(!suffixes[suffix]){
-            suffixes[suffix] = {}
+          if(!suffixes[suffix]) {
+            suffixes[suffix] = {};
           }
           suffixes[suffix][name] = params[e];
           return e;
@@ -594,7 +594,7 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
      *
      * @param object_name
      */
-    processChange: function(object_name){
+    processChange: function(object_name) {
       //Dashboards.log("Processing change on " + object_name);
 
       var object = this.getComponentByName(object_name);
@@ -654,4 +654,5 @@ define(['./Dashboard', '../Logger', '../lib/underscore', '../lib/jquery', '../co
       myself.updateAll(toUpdate);
     }
   });
+
 });

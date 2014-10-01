@@ -1,22 +1,23 @@
 <html>
 <head>
-  <script language="javascript" type="text/javascript" src="../jquery.js"></script> 
+  <script language="javascript" type="text/javascript" src="../jquery/jquery.js"></script> 
 </head>
 <body>
-	<div id="chart"></div>
+  <div id="chart"></div>
 </body>
 <script>
 
-function loadChart(chart) {
+  function loadChart(chart) {
     $("#chart").html(chart);
-}
+  }
 
-function chartClick(object,value){
+  function chartClick(componentName, value) {
 
-window.close();
-window.opener.Dashboards.getComponent(object).zoomCallBack(value);
+    window.close();
+    //Access parent window dashboard component zoom callback function
+    window.opener.dashboard.getComponentByName(componentName).zoomCallBack(value);
 
-}
+  }
 
 </script>
 </html>

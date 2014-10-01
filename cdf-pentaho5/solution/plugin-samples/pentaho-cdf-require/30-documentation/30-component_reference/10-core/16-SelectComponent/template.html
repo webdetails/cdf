@@ -100,7 +100,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -108,7 +108,9 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent'], function (Dashboard, SelectComponent) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/SelectComponent'],
+    function(Dashboard, SelectComponent) {
+
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
@@ -124,7 +126,7 @@
       valueAsId: false,
       htmlObject: "sampleObject",
       executeAtStart: true,
-      postChange: function () {
+      postChange: function() {
         alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
       }
     }));

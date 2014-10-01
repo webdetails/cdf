@@ -3,7 +3,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -11,7 +11,7 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard.Blueprint'], function (Dashboard) {
+  require(['cdf/Dashboard.Blueprint'], function(Dashboard) {
     var dashboard = new Dashboard();
     dashboard.init();
   });

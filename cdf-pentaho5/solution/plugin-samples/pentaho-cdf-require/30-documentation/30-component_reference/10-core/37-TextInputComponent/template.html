@@ -68,7 +68,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -76,7 +76,9 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/TextInputComponent'], function (Dashboard, TextInputComponent) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/TextInputComponent'],
+    function(Dashboard, TextInputComponent) {
+      
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "");
 
@@ -87,7 +89,7 @@
       parameter: "input",
       htmlObject: "sampleObject",
       executeAtStart: true,
-      postChange: function(){
+      postChange: function() {
         alert("you typed: " + this.dashboard.getParameterValue(this.parameter));
       }
     }));

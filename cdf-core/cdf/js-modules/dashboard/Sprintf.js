@@ -11,7 +11,7 @@
 * the license for the specific language governing your rights and limitations.
 */
 
-define([], function () {
+define(['./Utils'], function (utils) {
 
 
 
@@ -103,11 +103,11 @@ define([], function () {
             substitution = sprintfWrapper.convert(m, true);
           }
           else if (m.code == 'd') {
-            m.argument = toFormatedString(String(Math.abs(parseInt(m.argument))));
+            m.argument = utils.toFormatedString(String(Math.abs(parseInt(m.argument))));
             substitution = sprintfWrapper.convert(m);
           }
           else if (m.code == 'f') {
-            m.argument = toFormatedString(String(Math.abs(parseFloat(m.argument)).toFixed(m.precision ? m.precision : 6)));
+            m.argument = utils.toFormatedString(String(Math.abs(parseFloat(m.argument)).toFixed(m.precision ? m.precision : 6)));
             substitution = sprintfWrapper.convert(m);
           }
           else if (m.code == 'o') {

@@ -78,7 +78,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -86,7 +86,9 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/MonthPickerComponent'], function (Dashboard, MonthPickerComponent) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/MonthPickerComponent'],
+    function(Dashboard, MonthPickerComponent) {
+
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "2009-01-01");
 
@@ -103,10 +105,10 @@
       htmlObject: "sampleObject",
       executeAtStart: true,
       tooltip: "Click me to select a month",
-      postChange: function(date){
+      postChange: function(date) {
         alert("You chose: " + date);
       }
     }));
     dashboard.init();
-    });
+  });
 </script>

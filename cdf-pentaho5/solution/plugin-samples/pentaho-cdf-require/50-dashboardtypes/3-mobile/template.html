@@ -100,7 +100,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -108,11 +108,11 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard'], function (Dashboard) {
+  require(['cdf/Dashboard'], function(Dashboard) {
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
-    require(['cdf/components/SelectComponent'], function (SelectComponent) {
+    require(['cdf/components/SelectComponent'], function(SelectComponent) {
       dashboard.addComponent(new SelectComponent(dashboard, {
         name: "selectComponent",
         type: "selectComponent",
@@ -125,12 +125,11 @@
         valueAsId: false,
         htmlObject: "sampleObject",
         executeAtStart: true,
-        postChange: function () {
+        postChange: function() {
           alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
         }
       }));
       dashboard.init();
     });
-
   });
 </script>

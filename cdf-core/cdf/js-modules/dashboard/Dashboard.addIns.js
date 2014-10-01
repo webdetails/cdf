@@ -11,74 +11,75 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', './Container', './Utils'], function (Dashboard, Container, Utils) {
+define(['./Dashboard', './Container', './Utils'],
+  function(Dashboard, Container, Utils) {
 
 
-    var globalAddIns = new Container();
+  var globalAddIns = new Container();
 
-    Dashboard.implement({
-        
-      _initAddIns: function(){
-        this.addIns = Utils.clone(globalAddIns);
-      },
+  Dashboard.implement({
       
+    _initAddIns: function(){
+      this.addIns = Utils.clone(globalAddIns);
+    },
     
-      //Normalization - Ensure component does not finish with component and capitalize first letter
-      normalizeAddInKey : function(key, subKey) {
-          if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
-            key = key.substring(0, key.length - 'Component'.length);  
-          key = key.charAt(0).toUpperCase() + key.substring(1);
-    
-          if(subKey) { key += "." + subKey; }
-    
-        return key;
-      },
-    
-      registerGlobalAddIn : function(type,subType,addIn){
-        var type = this.normalizeAddInKey(type, subType),
-            name = addIn.getName ? addIn.getName() : null;
-        globalAddIns.register(type, name, addIn);
-      },
+  
+    //Normalization - Ensure component does not finish with component and capitalize first letter
+    normalizeAddInKey : function(key, subKey) {
+        if (key.indexOf('Component', key.length - 'Component'.length) !== -1) 
+          key = key.substring(0, key.length - 'Component'.length);  
+        key = key.charAt(0).toUpperCase() + key.substring(1);
+  
+        if(subKey) { key += "." + subKey; }
+  
+      return key;
+    },
+  
+    registerGlobalAddIn : function(type,subType,addIn){
+      var type = this.normalizeAddInKey(type, subType),
+          name = addIn.getName ? addIn.getName() : null;
+      globalAddIns.register(type, name, addIn);
+    },
 
-      registerAddIn : function(type,subType,addIn){
-        var type = this.normalizeAddInKey(type, subType),
-            name = addIn.getName ? addIn.getName() : null;
-        this.addIns.register(type, name, addIn);
-      },
+    registerAddIn : function(type,subType,addIn){
+      var type = this.normalizeAddInKey(type, subType),
+          name = addIn.getName ? addIn.getName() : null;
+      this.addIns.register(type, name, addIn);
+    },
 
-    
-      hasAddIn : function(type,subType,addInName){
-        var type = this.normalizeAddInKey(type, subType);
-        return Boolean(this.addIns && this.addIns.has(type,addInName));
-      },
-    
-      getAddIn : function(type,subType,addInName){
-        var type = this.normalizeAddInKey(type, subType);
-        try {
-          var addIn = this.addIns.get(type,addInName);
-          return addIn;
-        } catch (e) {
-          return null;
-        }
-      },
-    
-      setAddInDefaults : function(type, subType, addInName, defaults) {
-        var addIn = this.getAddIn(type, subType,addInName);
-        if(addIn) {
-          addIn.setDefaults(defaults);
-        }
-      },
-      
-      
-      listAddIns : function(type, subType) {
+  
+    hasAddIn : function(type,subType,addInName){
       var type = this.normalizeAddInKey(type, subType);
-        var addInList = [];
-        try {
-          return this.addIns.listType(type);
-        } catch (e) {
-          return [];
-        }
-      }                              
-    });
+      return Boolean(this.addIns && this.addIns.has(type,addInName));
+    },
+  
+    getAddIn : function(type,subType,addInName){
+      var type = this.normalizeAddInKey(type, subType);
+      try {
+        var addIn = this.addIns.get(type,addInName);
+        return addIn;
+      } catch (e) {
+        return null;
+      }
+    },
+  
+    setAddInDefaults : function(type, subType, addInName, defaults) {
+      var addIn = this.getAddIn(type, subType,addInName);
+      if(addIn) {
+        addIn.setDefaults(defaults);
+      }
+    },
+    
+    
+    listAddIns : function(type, subType) {
+    var type = this.normalizeAddInKey(type, subType);
+      var addInList = [];
+      try {
+        return this.addIns.listType(type);
+      } catch (e) {
+        return [];
+      }
+    }                              
+  });
     
 });

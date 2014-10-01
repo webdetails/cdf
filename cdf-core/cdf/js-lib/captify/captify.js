@@ -5,7 +5,7 @@
 *
 */
 
-jQuery.fn.extend({
+$.fn.extend({
 	captify: function(o,object) {
 		var o = $.extend({
 			speedOver: 'fast',				// speed of the mouseover effect
@@ -67,7 +67,7 @@ jQuery.fn.extend({
 				$('*', wrapper).css({ margin: 0 }).show();
 
 				//ensure the background is on bottom
-				var captionPositioning = jQuery.browser.msie ? 'static' : 'relative';
+				var captionPositioning = $.browser.msie ? 'static' : 'relative';
 				caption.css({
 					zIndex: 1,
 					position: captionPositioning,
@@ -94,7 +94,7 @@ jQuery.fn.extend({
 				
 
 				// represents caption margin positioning for hide and show states
-				var topBorderAdj = (o.position == 'bottom' && jQuery.browser.msie) ? -4 : 0;
+				var topBorderAdj = (o.position == 'bottom' && $.browser.msie) ? -4 : 0;
 				var captionPosition = (o.position == 'top')
 				   ? { hide: -$(img).height() - caption.outerHeight() - 1, show: -$(img).height() }
 				   : { hide: 0, show: -caption.outerHeight() + topBorderAdj };

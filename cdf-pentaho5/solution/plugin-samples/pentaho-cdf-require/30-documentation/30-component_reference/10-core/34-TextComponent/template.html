@@ -55,7 +55,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -63,7 +63,9 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/TextComponent'], function (Dashboard, TextComponent) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/TextComponent'],
+    function(Dashboard, TextComponent) {
+
     var dashboard = new Dashboard();
     dashboard.addParameter("region", "1");
 
@@ -71,8 +73,8 @@
       name: "textGenerator",
       type: "textComponent",
       listeners: [],
-      expression: function () {
-        return "My text generated in " + new Date()
+      expression: function() {
+        return "My text generated in " + new Date();
       },
       htmlObject: "sampleObject",
       executeAtStart: true

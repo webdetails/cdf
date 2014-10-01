@@ -2,7 +2,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -10,7 +10,7 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard.Bootstrap'], function (Dashboard) {
+  require(['cdf/Dashboard.Bootstrap'], function(Dashboard) {
     var dashboard = new Dashboard();
     dashboard.init();
   });
