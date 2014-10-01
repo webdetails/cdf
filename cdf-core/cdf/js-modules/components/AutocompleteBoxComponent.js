@@ -11,7 +11,8 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent', '../lib/autobox/jquery.templating', '../lib/autobox/jquery.ui.autobox', '../lib/autobox/jquery.ui.autobox.ext'], function (BaseComponent) {
+define(['./QueryComponent', './BaseComponent', '../lib/jquery.ui.autobox.ext'],
+  function(QueryComponent, BaseComponent) {
 
   var AutocompleteBoxComponent = BaseComponent.extend({
 
@@ -23,18 +24,19 @@ define(['./BaseComponent', '../lib/autobox/jquery.templating', '../lib/autobox/j
      * @param searchString
      * @private
      */
-    _queryServer : function(searchString){
+    _queryServer : function(searchString) {
 
-      if(!this.parameters) this.parameters = [];
+      if(!this.parameters) {
+        this.parameters = []
+      };
 
-      if(this.searchParam){
+      if(this.searchParam) {
         this.parameters = [ [this.searchParam, this._getInnerParameterName()] ];
-      }
-      else if (this.parameters.length > 0){
+      } else if (this.parameters.length > 0) {
         this.parameters[0][1] = this._getInnerParameterName();
       }
 
-      if(this.maxResults){
+      if(this.maxResults) {
         this.queryDefinition.pageSize = this.maxResults;
       }
       this.dashboard.setParameter(this._getInnerParameterName(),this._getTextBoxValue());
@@ -45,7 +47,7 @@ define(['./BaseComponent', '../lib/autobox/jquery.templating', '../lib/autobox/j
      *
      * @returns {*}
      */
-    _getTextBoxValue: function(){
+    _getTextBoxValue: function() {
       return this.textbox.val();
     },
 
@@ -53,7 +55,7 @@ define(['./BaseComponent', '../lib/autobox/jquery.templating', '../lib/autobox/j
      *
      * @returns {string}
      */
-    _getInnerParameterName : function(){
+    _getInnerParameterName : function() {
       return this.parameter + '_textboxValue';
     },
 
@@ -62,53 +64,58 @@ define(['./BaseComponent', '../lib/autobox/jquery.templating', '../lib/autobox/j
      */
     update : function() {
 
-      this.placeholder().empty();
-
-      var initialValue = null;
-      if(this.parameter){
-        initialValue = this.dashboard.getParameterValue(this.parameter);
-      }
-
       var myself = this;
 
-      //init parameter
-      if(!this.dashboard.getParameterValue(this._getInnerParameterName())){
-        this.dashboard.setParameter(this._getInnerParameterName(), '' );
+      myself.placeholder().empty();
+
+      var initialValue = null;
+      if(myself.parameter) {
+        initialValue = myself.dashboard.getParameterValue(myself.parameter);
       }
 
-      var processChange = myself.processChange == undefined ? function(objName){
-        this.dashboard.processChange(objName);
-      } : function(objName) {
-        myself.processChange();
-      };
-      var processElementChange = myself.processElementChange == true ? function(value){
-        this.dashboard.fireChange(myself.parameter,value);
-      } : undefined;
+      //init parameter
+      if(!myself.dashboard.getParameterValue(myself._getInnerParameterName())) {
+        myself.dashboard.setParameter(myself._getInnerParameterName(), '');
+      }
+
+      var processChange = ((myself.processChange == undefined)
+        ? function(objName) {
+            myself.dashboard.processChange(objName);
+          }
+        : function(objName) {
+          myself.processChange();
+        }
+      );
+      var processElementChange = ((myself.processElementChange == true)
+        ? function(value) {
+            myself.dashboard.fireChange(myself.parameter,value);
+          }
+        : undefined
+      );
 
       //TODO:typo on minTextLength
-      if(this.minTextLenght == undefined){
-        this.minTextLenght = 0;
+      if(myself.minTextLenght == undefined) {
+        myself.minTextLenght = 0;
       }
 
       var opt = {
-        list: function(){
+        list: function() {
           var val = myself.textbox.val();
-          if(val.length >= myself.minTextLenght &&
-              !(val == '' //nothing to search
-                  ||
-                  val == myself.searchedWord
-                  ||
-                  ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows) && //has all results
-                      myself.searchedWord != '' &&
-                      ((myself.matchType == "fromStart")?
-                          val.indexOf(myself.searchedWord) == 0 :
-                          val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
+          if(val.length >= myself.minTextLenght
+            && !(val == '' //nothing to search
+              || val == myself.searchedWord
+              || ((myself.queryInfo != null && myself.result.length == myself.queryInfo.totalRows)
+                //has all results
+                && myself.searchedWord != ''
+                && ((myself.matchType == "fromStart")
+                    ? val.indexOf(myself.searchedWord) == 0
+                    : val.indexOf(myself.searchedWord) > -1)))) //searchable in local results
           {
             myself._queryServer(val);
             myself.searchedWord = val;
           }
           var list = [];
-          for(p in myself.result) if (myself.result.hasOwnProperty(p)){
+          for(p in myself.result) if (myself.result.hasOwnProperty(p)) {
             var obj = {};
             obj.text = myself.result[p][0];
             list.push(obj);
@@ -133,15 +140,14 @@ define(['./BaseComponent', '../lib/autobox/jquery.templating', '../lib/autobox/j
         parent: myself
       };
 
-
-      this.autoBoxOpt = this.placeholder().autobox(opt);
+      myself.autoBoxOpt = myself.placeholder().autobox(opt);
 
       //setInitialValue
-      this.autoBoxOpt.setInitialValue(this.htmlObject, initialValue, this.name);
+      myself.autoBoxOpt.setInitialValue(myself.htmlObject, initialValue, myself.name);
 
-      this.textbox = this.placeholder('input');
+      myself.textbox = myself.placeholder('input');
 
-      this._doAutoFocus();
+      myself._doAutoFocus();
     },
 
     /**

@@ -11,8 +11,10 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/Base', './Dashboard', './Container', '../lib/underscore', './Utils'],
-    function (Base, Dashboard, Container, _, Utils) {
+
+
+
+define(['../lib/Base', './Dashboard', './Container', '../lib/underscore', './Utils'], function (Base, Dashboard, Container,_, Utils) {
 
     var _BaseQuery = Base;
     

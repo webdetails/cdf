@@ -11,46 +11,46 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logger, $) {
 
- Dashboard.implement({
+define(['./Dashboard', '../Logger', '../lib/jquery', '../wd'],
+  function(Dashboard, Logger, $, wd) {
 
-    callPentahoAction : function(obj, solution, path, action, parameters, callback ){
+  Dashboard.implement({
+
+    callPentahoAction : function(obj, solution, path, action, parameters, callback) {
       var myself = this;
     
       // Encapsulate pentahoAction call
       // Dashboards.log("Calling pentahoAction for " + obj.type + " " + obj.name + "; Is it visible?: " + obj.visible);
-      if(typeof callback == 'function'){
-        return this.pentahoAction( solution, path, action, parameters,
-          function(json){
-            callback(myself.parseXActionResult(obj,json));
-          }
-          );
-      }
-      else{
-        return this.parseXActionResult(obj,this.pentahoAction( solution, path, action, parameters, callback ));
+      if(typeof callback == 'function') {
+        return myself.pentahoAction( solution, path, action, parameters, function(json) {
+          callback(myself.parseXActionResult(obj,json));
+        });
+      } else {
+        return myself.parseXActionResult(obj,myself.pentahoAction(solution, path, action, parameters, callback));
       }
     },
     
-   urlAction : function ( url, params, func) {
+    urlAction : function(url, params, func) {
       return this.executeAjax('xml', url, params, func);
     },
     
-    executeAjax : function( returnType, url, params, func ) {
+    executeAjax : function(returnType, url, params, func) {
       var myself = this;
       // execute a url
-      if (typeof func == "function"){
+      if(typeof func == "function") {
         // async
         return $.ajax({
           url: url,
           type: "POST",
+          traditional: true,
           dataType: returnType,
           async: true,
           data: params,
-          complete: function (XMLHttpRequest, textStatus) {
+          complete: function(XMLHttpRequest, textStatus) {
             func(XMLHttpRequest.responseXML);
           },
-          error: function (XMLHttpRequest, textStatus, errorThrown) {
+          error: function(XMLHttpRequest, textStatus, errorThrown) {
             Logger.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
           }
         });
@@ -63,12 +63,12 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
         dataType:returnType,
         async: false,
         data: params,
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
           Logger.log("Found error: " + XMLHttpRequest + " - " + textStatus + ", Error: " +  errorThrown,"error");
         }
     
       });
-      if (returnType == 'xml') {
+      if(returnType == 'xml') {
         return result.responseXML;
       } else {
         return result.responseText;
@@ -76,33 +76,33 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
     
     },
     
-    pentahoAction : function( solution, path, action, params, func ) {
+    pentahoAction : function(solution, path, action, params, func) {
       return this.pentahoServiceAction('ServiceAction', 'xml', solution, path, action, params, func);
     },
     
-    pentahoServiceAction : function( serviceMethod, returntype, solution, path, action, params, func ) {
+    pentahoServiceAction : function(serviceMethod, returntype, solution, path, action, params, func) {
       // execute an Action Sequence on the server
     
-      var arr = wd.cdf.endpoints.getServiceAction( serviceMethod, solution, path , action );
+      var arr = wd.cdf.endpoints.getServiceAction(serviceMethod, solution, path , action);
       var url = arr.url;
       delete arr.url;
     
-      $.each(params,function(i,val){
-        arr[val[0]]=val[1];
+      $.each(params,function(i, val) {
+        arr[val[0]] = val[1];
       });
       return this.executeAjax(returntype, url, arr, func);
     },
     
     CDF_ERROR_DIV : 'cdfErrorDiv',
     
-    createAndCleanErrorDiv : function(){
-      if ($("#" + this.CDF_ERROR_DIV).length == 0){
+    createAndCleanErrorDiv : function() {
+      if($("#" + this.CDF_ERROR_DIV).length == 0) {
         $("body").append("<div id='" +  this.CDF_ERROR_DIV + "'></div>");
       }
       $("#" + this.CDF_ERROR_DIV).empty();
     },
     
-    showErrorTooltip : function(){
+    showErrorTooltip : function() {
       $(function(){
         if($.tooltip) {
           $(".cdf_error").tooltip({
@@ -115,11 +115,11 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
       });
     },
     
-    parseXActionResult : function(obj,html){
+    parseXActionResult : function(obj,html) {
     
       var jXML = $(html);
       var error = jXML.find("SOAP-ENV\\:Fault");
-      if (error.length == 0){
+      if(error.length == 0) {
         return jXML;
       }
     
@@ -131,7 +131,7 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
       error.find("SOAP-ENV\\:Detail").find("message").each(function(){
         errorDetails.push($(this).text())
       });
-      if (errorDetails.length > 8){
+      if(errorDetails.length > 8) {
         errorDetails = errorDetails.slice(0,7);
         errorDetails.push("...");
       }
@@ -140,19 +140,17 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
       var out = "<table class='errorMessageTable' border='0'><tr><td class='errorIcon'></td><td><span class='cdf_error' title=\"" + errorDetails.join('<br/>').replace(/"/g,"'") +"\" >" + errorMessage + " </span></td></tr></table/>";
     
       // if this is a hidden component, we'll place this in the error div
-      if (obj.visible == false){
+      if(obj.visible == false) {
         $("#" + this.CDF_ERROR_DIV).append("<br />" + out);
-      }
-      else{
+      } else{
         $('#'+obj.htmlObject).html(out);
       }
-    
     
       return null;
     
     },
     
-    setSettingsValue : function(name,object){
+    setSettingsValue : function(name,object) {
     
       var data = {
         method: "set",
@@ -162,9 +160,9 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
       $.post(wd.cdf.endpoints.getSettings("set", null), data, function(){});
     },
     
-    getSettingsValue : function(key,value){
+    getSettingsValue : function(key,value) {
     
-      var callback = typeof value == 'function' ? value : function(json){
+      var callback = typeof value == 'function' ? value : function(json) {
         value = json;
       };
     
@@ -174,8 +172,8 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
     fetchData : function(cd, params, callback) {
       Logger.log('Dashboards.fetchData() is deprecated. Use Query objects instead','warn');
       // Detect and handle CDA data sources
-      if (cd != undefined && cd.dataAccessId != undefined) {
-        for (var param in params) {
+      if(cd != undefined && cd.dataAccessId != undefined) {
+        for(var param in params) {
           cd['param' + params[param][0]] = this.getParameterValue(params[param][1]);
         }
     
@@ -185,9 +183,9 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
           },'json').error(this.handleServerError);
       }
       // When we're not working with a CDA data source, we default to using jtable to fetch the data...
-      else if (cd != undefined){
+      else if(cd != undefined) {
     
-        var xactionFile = (cd.queryType == 'cda')? "jtable-cda.xaction" : "jtable.xaction";
+        var xactionFile = (cd.queryType == 'cda') ? "jtable-cda.xaction" : "jtable.xaction";
     
         $.post(wd.cdf.endpoints.getCdfXaction("pentaho-cdf/actions", xactionFile), cd,
           function(result) {
@@ -200,7 +198,6 @@ define(['./Dashboard', '../Logger', '../lib/jquery'], function (Dashboard, Logge
       }
     }
 
-    });
-
+  });
 
 });

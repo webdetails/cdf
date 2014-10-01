@@ -13,7 +13,7 @@
 
 define([
       './Dashboard',
-      'css!./lib/blueprint/screen'], function (Dashboard) {
+      'css!./lib/blueprint/screen'], function(Dashboard) {
       return Dashboard;
     }
 );

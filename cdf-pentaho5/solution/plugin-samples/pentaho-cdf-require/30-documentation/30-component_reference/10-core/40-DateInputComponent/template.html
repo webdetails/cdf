@@ -90,7 +90,7 @@
 </div>
 
 <script language="javascript" type="text/javascript">
-  (function () {
+  (function() {
     window.jQuery = null;
     window.$ = null;
     window.backbone = null;
@@ -98,7 +98,9 @@
     window.Mustache = null;
   })();
 
-  require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'], function (Dashboard, DateInputComponent) {
+  require(['cdf/Dashboard.Blueprint', 'cdf/components/DateInputComponent'],
+    function(Dashboard, DateInputComponent) {
+
     var dashboard = new Dashboard();
     dashboard.addParameter("input", "");
 
@@ -113,7 +115,7 @@
       endDate: "TODAY",
       executeAtStart: true,
       tooltip: "Click me to select a date",
-      postChange: function(){
+      postChange: function() {
         alert("You chose: " + this.dashboard.getParameterValue(this.parameter));
       }
     }));

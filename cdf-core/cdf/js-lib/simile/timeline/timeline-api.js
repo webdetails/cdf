@@ -213,7 +213,7 @@
         window.SimileAjax_onLoad = loadMe;
         
         var url = useLocalResources ?
-            wd.cdf.endpoints.getStaticResource( "js/simile/ajax/simile-ajax-api.js?bundle=false" ) :
+            "/pentaho/api/repos/pentaho-cdf/js/lib/simile/ajax/simile-ajax-api.js?bundle=false" :
             "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js";
         var createScriptElement = function() {
             var script = document.createElement("script");

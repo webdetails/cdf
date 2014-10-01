@@ -11,63 +11,63 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./UnmanagedComponent', '../lib/underscore', '../dashboard/Utils'], function (UnmanagedComponent, _, Utils) {
+define(['./UnmanagedComponent', '../lib/underscore', '../dashboard/Utils'],
+  function(UnmanagedComponent, _, Utils) {
 
-    var InputBaseComponent = UnmanagedComponent.extend({
-      update: function(){
-        var qd = this.queryDefinition;
-        if(this.valuesArray && this.valuesArray.length > 0) {
-          var handler = _.bind(function() {
-            this.draw(this.valuesArray);
-          },this);
-          this.synchronous(handler);
-        } else if(qd){
-          var handler = _.bind(function(data){
-            var filtered;
-            if(this.valueAsId) {
-              filtered = data.resultset.map(function(e){
-                return [e[0],e[0]];
-              });
-            } else {
-              filtered = data.resultset;
-            }
-            this.draw(filtered);
-          },this);
-          this.triggerQuery(qd,handler);
-        } else {
-          /* Legacy XAction-based components are a wasps' nest, so
-           * we'll steer clearfrom updating those for the time being
-           */
-          var handler = _.bind(function() {
-            var data = this.getValuesArray();
-            this.draw(data);
-          },this);
-          this.synchronous(handler);
-    
-        }
-      },
-    
-      // TODO: is the result of Dashboards.getParameterValue subject or not to HTML encoding?
-      // Some controls in this file do html encode the result while others don't.
-    
-      /**
-       * Obtains the value of this component's parameter.
-       * <p>
-       * If the parameter value is a function, the result of evaluating it is returned instead.
-       * </p>
-       * <p>
-       * Normalizes return values by using {@link Dashboards.normalizeValue}.
-       * </p>
-       *
-       * @return {*} the parameter value.
-       */
-      _getParameterValue: function() {
-        return Utils.normalizeValue(
-               Utils.ev(
-                  this.dashboard.getParameterValue(this.parameter)));
+  var InputBaseComponent = UnmanagedComponent.extend({
+    update: function() {
+      var qd = this.queryDefinition;
+      if(this.valuesArray && this.valuesArray.length > 0) {
+        var handler = _.bind(function() {
+          this.draw(this.valuesArray);
+        },this);
+        this.synchronous(handler);
+      } else if(qd) {
+        var handler = _.bind(function(data) {
+          var filtered;
+          if(this.valueAsId) {
+            filtered = data.resultset.map(function(e) {
+              return [e[0],e[0]];
+            });
+          } else {
+            filtered = data.resultset;
+          }
+          this.draw(filtered);
+        },this);
+        this.triggerQuery(qd,handler);
+      } else {
+        /* Legacy XAction-based components are a wasps' nest, so
+         * we'll steer clearfrom updating those for the time being
+         */
+        var handler = _.bind(function() {
+          var data = this.getValuesArray();
+          this.draw(data);
+        },this);
+        this.synchronous(handler);
+  
       }
-    });
+    },
+  
+    // TODO: is the result of Dashboards.getParameterValue subject or not to HTML encoding?
+    // Some controls in this file do html encode the result while others don't.
+  
+    /**
+     * Obtains the value of this component's parameter.
+     * <p>
+     * If the parameter value is a function, the result of evaluating it is returned instead.
+     * </p>
+     * <p>
+     * Normalizes return values by using {@link Dashboards.normalizeValue}.
+     * </p>
+     *
+     * @return {*} the parameter value.
+     */
+    _getParameterValue: function() {
+      return Utils.normalizeValue(
+        Utils.ev(this.dashboard.getParameterValue(this.parameter)));
+    }
+  });
 
-    return InputBaseComponent;
+  return InputBaseComponent;
 
 });

@@ -11,13 +11,14 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./BaseComponent'], function (BaseComponent) {
+define(['./BaseComponent'], function(BaseComponent) {
 
-    var ManagedFreeformComponent = BaseComponent.extend({
-      update : function() {
-        this.customfunction(this.parameters || []);
-      }
-    });
-    
-    return ManagedFreeformComponent;
+  var ManagedFreeformComponent = BaseComponent.extend({
+    update : function() {
+      this.customfunction(this.parameters || []);
+    }
+  });
+  
+  return ManagedFreeformComponent;
+
 });

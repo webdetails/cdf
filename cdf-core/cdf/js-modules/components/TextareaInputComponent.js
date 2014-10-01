@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
+define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
   var TextareaInputComponent = BaseComponent.extend({
     update: function() {
@@ -38,4 +38,5 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
   });
 
   return TextareaInputComponent;
+
 });

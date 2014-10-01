@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
+define(["../lib/jquery", "./BaseComponent"], function($, BaseComponent) {
 
   var MonthPickerComponent = BaseComponent.extend({
     update : function() {
@@ -39,7 +39,8 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
         myself.dashboard.processChange(myself.name);
       });
       return value;
-    },parseDate : function(aDateString){
+    },
+    parseDate : function(aDateString) {
       //This works assuming the Date comes in this format -> yyyy-mm-dd or yyyy-mm
       //Date.UTC(year[year after 1900],month[0 to 11],day[1 to 31], hours[0 to 23], min[0 to 59], sec[0 to 59], ms[0 to 999])
       var parsedDate = null;
@@ -59,7 +60,8 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
       }
 
       return parsedDate;
-    },getMonthsAppart : function(aDateOne, aDateTwo){
+    },
+    getMonthsAppart : function(aDateOne, aDateTwo) {
       var min, max;
       if(aDateOne < aDateTwo) {
         min = aDateOne;
@@ -74,7 +76,8 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
       var monthCount = (max.getMonth() - min.getMonth()) + monthsToAdd; //TODO verify this calculation
       
       return monthCount;
-    },normalizeDateToCompare : function(dateObject){
+    },
+    normalizeDateToCompare : function(dateObject) {
       var normalizedDate = dateObject;
       normalizedDate.setDate(1);
       normalizedDate.setHours(0);
@@ -84,7 +87,8 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
 
       return normalizedDate;
 
-    },getMonthPicker : function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
+    },
+    getMonthPicker : function(object_name, object_size, initialDate, minDate, maxDate, monthCount) {
 
 
       var selectHTML = "<select";
@@ -103,15 +107,9 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
       }
 
       //if any of the dates comes in string format this will parse them
-      if(typeof initialDate === "string") {
-        initialDate = this.parseDate(initialDate);
-      }
-      if(typeof minDate === "string") {
-        minDate = this.parseDate(minDate);
-      }
-      if(typeof maxDate === "string") {
-        maxDate = this.parseDate(maxDate);
-      }
+      if(typeof initialDate === "string") { initialDate = this.parseDate(initialDate); }
+      if(typeof minDate === "string") { minDate = this.parseDate(minDate); }
+      if(typeof maxDate === "string") { maxDate = this.parseDate(maxDate); }
 
       // if monthCount is not defined we'll use everything between max and mindate
       var monthCountUndefined = false;
@@ -142,14 +140,23 @@ define(["../lib/jquery", "./BaseComponent"], function ($, BaseComponent) {
       var normalizedMaxDate = this.normalizeDateToCompare(maxDate);
 
       for(var i= 0; i <= monthCount; i++) {
+
         currentDate.setMonth(currentDate.getMonth() + 1);
+
         if(currentDate >= normalizedMinDate && currentDate <= normalizedMaxDate) {
-          selectHTML += "<option value = '" + currentDate.getFullYear() + "-" + this.zeroPad((currentDate.getMonth()+1),2) + "' ";
-          if(currentDate.getFullYear() == initialDate.getFullYear() && currentDate.getMonth() == initialDate.getMonth()) {
+
+          selectHTML += "<option value = '" 
+            + currentDate.getFullYear() + "-" 
+            + this.zeroPad((currentDate.getMonth() + 1),2) + "' ";
+
+          if(currentDate.getFullYear() == initialDate.getFullYear() 
+            && currentDate.getMonth() == initialDate.getMonth()) {
+
             selectHTML += "selected='selected'"
           }
 
-          selectHTML += ">" + this.dashboard.monthNames[currentDate.getMonth()] + " " +currentDate.getFullYear()  + "</option>";
+          selectHTML += ">" + this.dashboard.monthNames[currentDate.getMonth()] + " "
+            + currentDate.getFullYear()  + "</option>";
         }
       }
 

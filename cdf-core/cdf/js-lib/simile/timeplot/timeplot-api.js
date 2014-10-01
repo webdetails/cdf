@@ -38,7 +38,7 @@
 
 (function() {
 
-	var debug = false;
+    var debug = false;
     var local = true;
 
     // obtain local mode from the document URL
@@ -137,7 +137,7 @@
             }
         }
 
-        var timeplotURLPrefix = (local) ? wd.cdf.endpoints.getStaticResource( "js/simile/timeplot/" ) : Timeplot.urlPrefix;
+        var timeplotURLPrefix = (local) ? "/pentaho/api/repos/pentaho-cdf/js/lib/simile/timeplot/" : Timeplot.urlPrefix;
 
         if (debug && local && !("console" in window)) {
             var firebug = [ timeplotURLPrefix + "lib/firebug/firebug.js" ];
@@ -155,7 +155,7 @@
         var cssURLs = Timeplot.params.css || [];
 
         // Core scripts and styles
-        if (Timeplot.params.bundle && !local) {
+        if (Timeplot.params.bundle) {
             scriptURLs.push(timeplotURLPrefix + "timeplot-bundle.js");
             cssURLs.push(timeplotURLPrefix + "timeplot-bundle.css");
         } else {
@@ -185,7 +185,7 @@
         if (typeof Timeline != "undefined") {
             loadTimeplot();
         } else {
-            var timelineURL = (local) ? wd.cdf.endpoints.getStaticResource( "js/simile/timeline/timeline-api.js?bundle=true" ) : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js?bundle=true";
+            var timelineURL = (local) ? "/pentaho/api/repos/pentaho-cdf/js/lib/simile/timeline/timeline-api.js?bundle=true" : "http://static.simile.mit.edu/timeline/api-2.0/timeline-api.js?bundle=true";
             window.SimileAjax_onLoad = loadTimeplot;
             SimileAjax.includeJavascriptFile(document, timelineURL);
         }
@@ -194,7 +194,7 @@
     // Load SimileAjax if it's not already loaded
     if (typeof SimileAjax == "undefined") {
         window.SimileAjax_onLoad = loadTimeline;
-        var url = local ? wd.cdf.endpoints.getStaticResource( "js/simile/ajax/simile-ajax-api.js?bundle=true" ) : "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";
+        var url = local ? "/pentaho/api/repos/pentaho-cdf/js/lib/simile/ajax/simile-ajax-api.js?bundle=true" : "http://static.simile.mit.edu/ajax/api-2.0/simile-ajax-api.js?bundle=true";
         var createScriptElement = function() {
             var script = document.createElement("script");
             script.type = "text/javascript";

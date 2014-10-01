@@ -10,19 +10,29 @@
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
  * the license for the specific language governing your rights and limitations.
  */
-define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery'], function ($, BaseComponent) {
+
+define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery'],
+  function($, BaseComponent) {
 
   var DateRangeInputComponent = BaseComponent.extend({
     update : function() {
       var myself = this;
       var dr;
       if(myself.singleInput == undefined || myself.singleInput == true) {
-        dr = $("<input/>").attr("id",myself.name).attr("value",myself.dashboard.getParameterValue(myself.parameter[0]) + " > " + myself.dashboard.getParameterValue(myself.parameter[1]) ).css("width","170px");
+        dr = $("<input/>")
+          .attr("id",myself.name).attr("value",myself.dashboard.getParameterValue(myself.parameter[0])
+            + " > " + myself.dashboard.getParameterValue(myself.parameter[1]))
+          .css("width","170px");
         myself.placeholder().html(dr);
       } else {
-        dr = $("<input/>").attr("id",myself.name).attr("value",myself.dashboard.getParameterValue(myself.parameter[0])).css("width","80px");
+        dr = $("<input/>").attr("id",myself.name)
+          .attr("value", myself.dashboard.getParameterValue(myself.parameter[0]))
+          .css("width","80px");
         myself.placeholder().html(dr);
-        dr.after($("<input/>").attr("id",myself.name + "2").attr("value",myself.dashboard.getParameterValue(myself.parameter[1])).css("width","80px"));
+        dr.after($("<input/>")
+          .attr("id",myself.name + "2")
+          .attr("value",myself.dashboard.getParameterValue(myself.parameter[1]))
+          .css("width","80px"));
         if(myself.inputSeparator != undefined) {
           dr.after(myself.inputSeparator);
         }
@@ -41,9 +51,11 @@ define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery'], fu
         }
       };
 
-      var format = (myself.dateFormat == undefined || myself.dateFormat == null)? 'yy-mm-dd' : myself.dateFormat;
+      var format = (myself.dateFormat == undefined || myself.dateFormat == null) 
+        ? 'yy-mm-dd'
+        : myself.dateFormat;
 
-      $(function(){
+      $(function() {
         myself.placeholder("input").daterangepicker({
           posX: offset.left + leftOffset,
           posY: offset.top + topOffset,
@@ -69,7 +81,7 @@ define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery'], fu
       });
     },
 
-    fireInputChange : function(start, end){
+    fireInputChange : function(start, end) {
       //TODO: review this!
       if(this.preChange) {
         this.preChange(start, end);
@@ -89,23 +101,23 @@ define(['../lib/jquery', './BaseComponent', '../lib/daterangepicker.jQuery'], fu
       }
     },
 
-    storeChanges : function(start,end){
+    storeChanges : function(start,end) {
       this.startValue = start;
       this.endValue = end;
     }
   },
   {
-    fireDateRangeInputChange : function(name, rangeA, rangeB){
+    fireDateRangeInputChange : function(name, rangeA, rangeB) {
       // WPG: can we just use the parameter directly?
       var object = this.dashboard.getComponentByName(name);
-      if(!(typeof(object.preChange)=='undefined')) {
+      if(!(typeof(object.preChange) == 'undefined')) {
         object.preChange(rangeA, rangeB);
       }
       var parameters = eval(name + ".parameter");
       // set the second date and fireChange the first
       this.dashboard.setParameter(parameters[1], rangeB);
       this.dashboard.fireChange(parameters[0],rangeA);
-      if(!(typeof(object.postChange)=='undefined')) {
+      if(!(typeof(object.postChange) == 'undefined')) {
         object.postChange(rangeA, rangeB);
       }
     }

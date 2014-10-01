@@ -19,7 +19,7 @@
 
 
 
-define([], function () {
+define(['./Dashboard'], function (Dashboard) {
 
     var OlapUtils = {
 	    mdxGroups: {},
@@ -79,7 +79,7 @@ define([], function () {
          *SERIES, otherwise it's PARAM.					   */
     
         if(param2 != undefined && param3 != undefined){
-          cType = Dashboards.ev(param1.chartType);
+          cType = Dashboard.ev(param1.chartType);
     
             if(cType == "AreaChart")
               value = encode_prepare(param3);
@@ -172,7 +172,7 @@ define([], function () {
     }
     
     OlapUtils.mdxQuery.prototype.resetFilters = function(){
-        this.query["filters"] = Dashboards.clone((this.originalHash["filters"] || {rows:[],columns: []}));
+        this.query["filters"] = Dashboard.clone((this.originalHash["filters"] || {rows:[],columns: []}));
     }
     
     OlapUtils.mdxQuery.prototype.resetCondition = function(key){
@@ -187,7 +187,7 @@ define([], function () {
     
     OlapUtils.mdxQuery.prototype.update = function(hash){
     
-        this.originalHash = Dashboards.clone(hash);
+        this.originalHash = Dashboard.clone(hash);
         this.query["members"] = hash["members"]||[];
         this.query["sets"] = hash["sets"] || [];
         this.query["rows"] = hash["rows"]||"";
@@ -210,7 +210,7 @@ define([], function () {
     
     
     OlapUtils.mdxQuery.prototype.clone = function() {
-        var c = Dashboards.clone(this);
+        var c = Dashboard.clone(this);
         return c;
     };
     
@@ -532,7 +532,7 @@ define([], function () {
     
     OlapUtils.mdxQueryGroup.prototype.drillDown = function(key,value){
     
-        Dashboards.incrementRunningCalls();
+        Dashboard.incrementRunningCalls();
         var conditions = [];
         
         //CLean previous conditions,drill, and exclude messages for this id
@@ -548,18 +548,18 @@ define([], function () {
             else
                 conditions = obj.mdxQuery.replaceConditionsByDrill(key,value);
                     
-            Dashboards.update(obj.chartObject);
+            Dashboard.update(obj.chartObject);
         }
         if(conditions.length > 0)
             this.activeConditions[key] = conditions;
             
-        Dashboards.update(Dashboards.getComponent(this.name));
-        Dashboards.decrementRunningCalls();
+        Dashboard.update(Dashboard.getComponent(this.name));
+        Dashboard.decrementRunningCalls();
     }
     
     OlapUtils.mdxQueryGroup.prototype.drillUp = function(key){
     
-        Dashboards.incrementRunningCalls();
+        Dashboard.incrementRunningCalls();
         var conditions = [];
         
         //CLean previous conditions,drill, and exclude messages for this id
@@ -578,14 +578,14 @@ define([], function () {
                     obj.mdxQuery.removeCondition(key,value,'drill');
             }
                     
-            Dashboards.update(obj.chartObject);
+            Dashboard.update(obj.chartObject);
         }
         if(conditions.length > 0)
             this.activeConditions[key] = conditions;
     
             
-        Dashboards.update(Dashboards.getComponent(this.name));
-        Dashboards.decrementRunningCalls();
+        Dashboard.update(Dashboard.getComponent(this.name));
+        Dashboard.decrementRunningCalls();
     }
     
     OlapUtils.mdxQueryGroup.prototype.replaceFocus = function(key,values){
@@ -601,7 +601,7 @@ define([], function () {
         
         var conditions = [];
         
-        Dashboards.incrementRunningCalls();
+        Dashboard.incrementRunningCalls();
         
         //CLean previous conditions,drill, and exclude messages for this id
         if(this.activeFilters != undefined) delete this.activeFilters[key];
@@ -615,24 +615,24 @@ define([], function () {
                     conditions = obj.mdxQuery.addCondition(key,values[i]);
                 }
                     
-                Dashboards.update(obj.chartObject);
+                Dashboard.update(obj.chartObject);
                 
             }
         }
         if(conditions.length > 0)
             this.activeConditions[key] = conditions;
             
-        Dashboards.update(Dashboards.getComponent(this.name));
-        Dashboards.decrementRunningCalls();
+        Dashboard.update(Dashboard.getComponent(this.name));
+        Dashboard.decrementRunningCalls();
     }
     
     OlapUtils.mdxQueryGroup.prototype.exclude = function(key,value){
     
-            Dashboards.incrementRunningCalls();
+            Dashboard.incrementRunningCalls();
             var members = value.split("].[");
             var memberValue = members[members.length-1].replace("]","");
             this.mdxQueries[key].mdxQuery.exclude(memberValue)
-            Dashboards.update(this.mdxQueries[key].chartObject);
+            Dashboard.update(this.mdxQueries[key].chartObject);
             
             var a = this.activeFilters[key] || [];
             a.push([memberValue,value]);
@@ -643,7 +643,7 @@ define([], function () {
                 var query = this.mdxQueries[i];
                 if (i != key){
                     query.mdxQuery.replaceConditionByExclude(key,value);
-                    Dashboards.update(query.chartObject);
+                    Dashboard.update(query.chartObject);
                 }
             }
             
@@ -653,40 +653,40 @@ define([], function () {
                 if(indexCondition >= 0)
                     this.activeConditions[key].splice(indexCondition,1);
             
-            Dashboards.decrementRunningCalls();
+            Dashboard.decrementRunningCalls();
             
     }
     
     OlapUtils.mdxQueryGroup.prototype.expand = function(key){
         this.mdxQueries[key].mdxQuery.axisDepth++;
-        Dashboards.update(this.mdxQueries[key].chartObject);
+        Dashboard.update(this.mdxQueries[key].chartObject);
     }
     
     OlapUtils.mdxQueryGroup.prototype.collapse = function(key){
         this.mdxQueries[key].mdxQuery.axisDepth--;
-        Dashboards.update(this.mdxQueries[key].chartObject);
+        Dashboard.update(this.mdxQueries[key].chartObject);
     }
     
     OlapUtils.mdxQueryGroup.prototype.resetAll = function(){
     
-        Dashboards.incrementRunningCalls();
+        Dashboard.incrementRunningCalls();
         for (i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             obj.mdxQuery.reset();
             obj.mdxQuery.axisPos = 0;
             obj.mdxQuery.axisDepth = 0;
-            Dashboards.update(obj.chartObject);
+            Dashboard.update(obj.chartObject);
         }
         this.activeFilters = {};
         this.activeConditions = {};
-        Dashboards.update(Dashboards.getComponent(this.name));
-        Dashboards.decrementRunningCalls();
+        Dashboard.update(Dashboard.getComponent(this.name));
+        Dashboard.decrementRunningCalls();
     
     }
     
     OlapUtils.mdxQueryGroup.prototype.removeCondition = function(key,value){
         
-        Dashboards.incrementRunningCalls();
+        Dashboard.incrementRunningCalls();
         
         for (i in this.mdxQueries){
             var obj = this.mdxQueries[i];
@@ -701,31 +701,31 @@ define([], function () {
                 obj.mdxQuery.resetFilters();
             }
             
-            Dashboards.update(obj.chartObject);
+            Dashboard.update(obj.chartObject);
         }
     
         this.activeConditions[key].splice(this.activeConditions[key].indexOf(value),1);
             
-        Dashboards.update(Dashboards.getComponent(this.name));
-        Dashboards.decrementRunningCalls();
+        Dashboard.update(Dashboard.getComponent(this.name));
+        Dashboard.decrementRunningCalls();
     }
     
     OlapUtils.mdxQueryGroup.prototype.removeFilter = function(key,value){
         
-        Dashboards.incrementRunningCalls();
+        Dashboard.incrementRunningCalls();
         var index = this.mdxQueries[key].mdxQuery.resetFilter(value);
         for (i in this.mdxQueries){
             var obj = this.mdxQueries[i];
             if(i != key)
                 obj.mdxQuery.removeFilter(key,this.activeFilters[key][index][1]);
-            Dashboards.update(obj.chartObject);
+            Dashboard.update(obj.chartObject);
         }
         this.activeFilters[key].splice(index,1);
         if(this.activeFilters[key].length ==0)
             delete this.activeFilters[key];
             
-        Dashboards.update(Dashboards.getComponent(this.name));
-        Dashboards.decrementRunningCalls();
+        Dashboard.update(Dashboard.getComponent(this.name));
+        Dashboard.decrementRunningCalls();
     }
     
     OlapUtils.mdxQueryGroupActionCallback = function(value,m){
@@ -733,7 +733,7 @@ define([], function () {
         if (value == "cancel")
             return;  // do nothing.
     
-        Dashboards.incrementRunningCalls();
+        Dashboard.incrementRunningCalls();
         
         var mqg = OlapUtils.lastClickedMdxQueryGroup;
         var clickedObj = mqg.mdxQueries[mqg.clickedIdx];
@@ -761,8 +761,8 @@ define([], function () {
             mqg.resetAll();
         }
         
-        Dashboards.update(Dashboards.getComponent(mqg.name));
-        Dashboards.decrementRunningCalls();
+        Dashboard.update(Dashboard.getComponent(mqg.name));
+        Dashboard.decrementRunningCalls();
     }
     
     OlapUtils.getAxisPathString = function(axis,axisPath){
@@ -890,10 +890,10 @@ define([], function () {
                     swapRowsAndColumns: false,
                     orderBy: options.orderBy,
                     sets: {
-                        "now": function(){return "now as [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(30.0)" + ":" + " [Date].[Date].[" + Dashboards.ev(options.baseDate) + "]" },
-                        "oneMonthAgo": function(){return "oneMonthAgo as [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(60.0)" + ":" + " [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(30.0)" },
-                        "oneYearAgo": function(){return "oneYearAgo as [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(395.0)" + ":" + " [Date].[Date].[" + Dashboards.ev(options.baseDate) + "].Lag(365.0)" },
-                        "last12Months":	function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboards.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
+                        "now": function(){return "now as [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(30.0)" + ":" + " [Date].[Date].[" + Dashboard.ev(options.baseDate) + "]" },
+                        "oneMonthAgo": function(){return "oneMonthAgo as [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(60.0)" + ":" + " [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(30.0)" },
+                        "oneYearAgo": function(){return "oneYearAgo as [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(395.0)" + ":" + " [Date].[Date].[" + Dashboard.ev(options.baseDate) + "].Lag(365.0)" },
+                        "last12Months":	function(){return "last12Months as LastPeriods(12.0, Ancestor("+options.dateDim+"."+options.dateLevel+".["+  Dashboard.ev(options.baseDate) + "],"+options.dateDim+"."+options.dateLevelMonth+")) "}
                     },
                     members: {
                         todaysMonth: function(){return "[Date].[TodaysMonth] as Aggregate( now )"},
@@ -1018,7 +1018,7 @@ define([], function () {
     
                     sets: {
                         "a":
-                        function(){return "a as '("+options.dateDim+"."+options.dateLevel+".[" + Dashboards.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateLevel+".["+ Dashboards.ev(options.endDate) + "])'"}
+                        function(){return "a as '("+options.dateDim+"."+options.dateLevel+".[" + Dashboard.ev(options.startDate) + "]:"+options.dateDim+"."+options.dateLevel+".["+ Dashboard.ev(options.endDate) + "])'"}
                     },
                     members: {
                         daterange: ""+options.dateDim+".[Date Range] as Aggregate(a)",
@@ -1029,7 +1029,7 @@ define([], function () {
                 };
     
                 // pass the properties of this to the chartDefaults
-                var _chart = Dashboards.clone(this);
+                var _chart = Dashboard.clone(this);
                 delete _chart.chartDefaults;
                 this.chartDefaults.parent = _chart;
                 

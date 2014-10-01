@@ -55,6 +55,24 @@
     'css!cdf/lib/jquery.tooltip'
   ];
 
+  //jquery-impromptu 3.1
+  requirePaths['cdf/lib/jquery.impromptu'] = prefix + "/impromptu/jquery-impromptu.3.1";
+  requireShims['cdf/lib/jquery.impromptu'] = {
+    deps: [
+      'cdf/lib/jquery',
+      'css!cdf/lib/impromptu/jquery-impromptu'
+    ]
+  };
+
+  //jquery.fancybox 1.3.4 11/11/2010
+  requirePaths['cdf/lib/jquery.fancybox'] = prefix + "/fancybox/jquery.fancybox-1.3.4";
+  requireShims['cdf/lib/jquery.fancybox'] = {
+    deps: [
+      'cdf/lib/jquery',
+      'css!cdf/lib/fancybox/jquery.fancybox-1.3.4'
+    ]
+  };
+
   //daterangepicker.jQuery 01.19.2008
   requirePaths['cdf/lib/daterangepicker.jQuery'] = prefix + "/daterangepicker/daterangepicker.jQuery";
   requireShims['cdf/lib/daterangepicker.jQuery'] = [
@@ -71,7 +89,7 @@
   requirePaths['backbone'] = prefix + "/backbone/backbone";
   requirePaths['cdf/lib/backbone'] = requirePaths['backbone'];
 
-  //mustache 0.8.2
+  //mustache 0.8.1
   requirePaths['cdf/lib/mustache'] = prefix + "/mustache/mustache";
   requireShims['cdf/lib/mustache'] = {exports: 'Mustache'};
 
@@ -80,12 +98,39 @@
   requireShims['cdf/lib/Base'] = {exports: 'Base'};
 
   //datatables 1.10.1-dev
-  requirePaths['cdf/lib/datatables'] = prefix + "/datatables/js/jquery.datatables";
+  // http://datatables.net/forums/discussion/19412/datatables-and-require-js-conflict
+  requirePaths['datatables'] = prefix + "/dataTables/js/jquery.dataTables";
+  requirePaths['cdf/lib/datatables'] = prefix + '/dataTables/cdf-datatables';
+  requireShims['cdf/lib/datatables'] = [
+    'cdf/lib/jquery',
+    'css!cdf/lib/dataTables/css/jquery.dataTables.css'
+  ];
 
-  //autobox
-  requireShims['cdf/lib/autobox/jquery.templating'] = ["cdf/lib/jquery"];
-  requireShims['cdf/lib/autobox/jquery.ui.autobox'] = ["cdf/lib/jquery"];
-  requireShims['cdf/lib/autobox/jquery.ui.autobox.ext'] = ["cdf/lib/jquery"];
+  //autobox 0.7.0
+  requirePaths['cdf/lib/jquery.ui.autobox'] = prefix + '/autobox/jquery.ui.autobox';
+  requireShims['cdf/lib/jquery.ui.autobox'] = [
+    'cdf/lib/jquery',
+    'cdf/lib/jquery.ui',
+    'css!cdf/lib/autobox/jquery.ui.autobox.css'
+  ];
+  requirePaths['cdf/lib/jquery.ui.autobox.templating'] = prefix + '/autobox/jquery.templating';
+  requireShims['cdf/lib/jquery.ui.autobox.templating'] = [
+    'cdf/lib/jquery'
+  ];
+  requirePaths['cdf/lib/jquery.ui.autobox.ext'] = prefix + '/autobox/jquery.ui.autobox.ext';
+  requireShims['cdf/lib/jquery.ui.autobox.ext'] = [
+    'cdf/lib/jquery',
+    'cdf/lib/jquery.ui',
+    'cdf/lib/jquery.ui.autobox',
+    'cdf/lib/jquery.ui.autobox.templating'
+  ];
+
+  //captify
+  requirePaths['cdf/lib/captify'] = prefix + "/captify/captify";
+  requireShims['cdf/lib/captify'] = [
+    'cdf/lib/jquery',
+    'css!cdf/lib/captify.css'
+  ];
 
   //shims
   requirePaths['cdf/lib/shims'] = prefix + "/shims";

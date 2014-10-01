@@ -11,61 +11,61 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', '../lib/jquery'],
-    function (Mustache, _, BaseComponent, Logger, $) {
+define(['../wd', '../lib/mustache', "../lib/underscore", "../lib/backbone", './BaseComponent', '../Logger', '../lib/jquery'],
+  function(wd, Mustache, _, Backbone, BaseComponent, Logger, $) {
 
   var CommentsComponent = BaseComponent.extend({
   
-    processing: function () {
+    processing: function() {
   
       var myself = {};
   
       myself.defaults = {
-              dataTemplates: {
-  
-                comments:         '<div class="commentsDetails">'+
-                                  ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
-                                  '</div>'+
-                                  '<div class="commentsBody">'+
-                                  ' <div class="comment">'+
-                                  '   {{{comment}}}'+
-                                  ' </div>'+
-                                  ' {{#user}}'+
-                                  ' <div class="operation">'+
-                                  ' {{#permissions.deletePermission}}'+
-                                  '   <div class="delete">X</div>' +
-                                  ' {{/permissions.deletePermission}}'+
-                                  ' {{#permissions.archive}}'+
-                                  '  <div class="archive">X</div>' +
-                                  ' {{/permissions.archive}}'+
-                                  ' </div>'+
-                                  ' {{/user}}'+
-                                  '</div>'
-                                  ,
-  
-                addComments:      '<div class="commentsAdd">'+
-                                  '{{#add}}'+
-                                  ' <div class="addComment">Add Comment</div>'+
-                                  ' <div class="addCommentWrapper">'+
-                                  '   <textarea class=addCommentText></textarea>'+
-                                  '   <div class="commentsButtons">'+
-                                  '   <div class="saveComment">Save</div>'+
-                                  '   <div class="cancelComment">Cancel</div>'+
-                                  '   </div>'+
-                                  ' </div>'+
-                                  '{{/add}}'+
-                                  '</div>'
-                                  ,
-  
-                paginateComments: '<div class="paginate commentPaginate"> '+
-                                  '{{#active}}'+
-                                  ' <div class="navigateRefresh"> Refresh </div>'+
-                                  ' <div class="navigatePrevious"> Newest Comments </div>'+
-                                  ' <div class="navigateNext"> Oldest Comments </div>'+
-                                  '{{/active}}'+
-                                  '</div>'
-              }
-  
+        dataTemplates: {
+
+          comments:
+            '<div class="commentsDetails">'+
+            ' {{#user}} {{{user}}}, {{/user}} {{{createdOn}}}'+
+            '</div>'+
+            '<div class="commentsBody">'+
+            ' <div class="comment">'+
+            '   {{{comment}}}'+
+            ' </div>'+
+            ' {{#user}}'+
+            ' <div class="operation">'+
+            ' {{#permissions.deletePermission}}'+
+            '   <div class="delete">X</div>' +
+            ' {{/permissions.deletePermission}}'+
+            ' {{#permissions.archive}}'+
+            '  <div class="archive">X</div>' +
+            ' {{/permissions.archive}}'+
+            ' </div>'+
+            ' {{/user}}'+
+            '</div>',
+
+          addComments:
+            '<div class="commentsAdd">'+
+            '{{#add}}'+
+            ' <div class="addComment">Add Comment</div>'+
+            ' <div class="addCommentWrapper">'+
+            '   <textarea class=addCommentText></textarea>'+
+            '   <div class="commentsButtons">'+
+            '   <div class="saveComment">Save</div>'+
+            '   <div class="cancelComment">Cancel</div>'+
+            '   </div>'+
+            ' </div>'+
+            '{{/add}}'+
+            '</div>',
+
+          paginateComments:
+            '<div class="paginate commentPaginate"> '+
+            '{{#active}}'+
+            ' <div class="navigateRefresh"> Refresh </div>'+
+            ' <div class="navigatePrevious"> Newest Comments </div>'+
+            ' <div class="navigateNext"> Oldest Comments </div>'+
+            '{{/active}}'+
+            '</div>'
+        }
       };
   
       // Process operations
@@ -75,41 +75,41 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
           var options = {};
           switch(operation) {
             case 'LIST_ALL' :
-              options = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults, where: false} };
+              options = {data: {action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults, where: false}};
               break;
   
             case 'LIST_ACTIVE':
-              options = {data: { action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults} };
+              options = {data: {action: 'list', page: defaults.page, firstResult: defaults.paginate.firstResult, maxResults: defaults.paginate.maxResults}};
               break;
   
             case 'GET_LAST':
-              options = {data: { action: 'list', page: defaults.page, firstResult: 0, maxResults: 1} };
+              options = {data: {action: 'list', page: defaults.page, firstResult: 0, maxResults: 1}};
               break;
   
             case 'DELETE_COMMENT':
-              options = {data: { action: 'delete', page: defaults.page, commentId: comment} };
+              options = {data: {action: 'delete', page: defaults.page, commentId: comment}};
               break;
   
             case 'ARCHIVE_COMMENT':
-              options = {data: { action: 'archive', page: defaults.page, commentId: comment} };
+              options = {data: {action: 'archive', page: defaults.page, commentId: comment}};
               break;
   
             case 'ADD_COMMENT':
-              options = {data: { action: 'add', page: defaults.page, comment: comment} };
+              options = {data: {action: 'add', page: defaults.page, comment: comment}};
               break;
           }
   
-          this.requestProcessing( options, operation, collection, callback );
+          this.requestProcessing(options, operation, collection, callback);
         },
   
-        requestProcessing: function( options, operation, collection, callback ){
+        requestProcessing: function(options, operation, collection, callback) {
           var myself = this;
           options = options || {};
           var ajaxOpts = {
             type: 'GET',
-            url: wd.cdf.endpoints.getComments( operation ),
+            url: wd.cdf.endpoints.getComments(operation),
             success: function(data) {
-              myself.requestResponse(data, operation, collection, callback)
+              myself.requestResponse(data, operation, collection, callback);
             },
             dataType: 'json'
           };
@@ -123,7 +123,7 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
           var end = ((start+paginate.pageCommentsSize) < result.length) ? (start+paginate.pageCommentsSize) : result.length;
           var commentsArray = [];
   
-          for (var idx = start; idx < end; idx++) {
+          for(var idx = start; idx < end; idx++) {
             var singleComment = new myself.CommentModel(result[idx]);
             commentsArray.push(singleComment)
           }
@@ -131,60 +131,65 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
         },
   
         requestResponse: function (json, operation, collection, callback) {
-          if ((operation == 'LIST_ALL') || (operation == 'LIST_ACTIVE')) {
+          if((operation == 'LIST_ALL') || (operation == 'LIST_ACTIVE')) {
             var paginate = myself.options.paginate;
-            if (paginate.activePageNumber > 0) {
-              if ((paginate.activePageNumber+1) > Math.ceil(json.result.length/paginate.pageCommentsSize))
+            if(paginate.activePageNumber > 0) {
+              if((paginate.activePageNumber+1) > Math.ceil(json.result.length/paginate.pageCommentsSize)) {
                paginate.activePageNumber--;
+             }
             }
             myself.options.queyResult = json.result;
             collection.reset(this.resetCollection(json.result));
-            if ((paginate.activePageNumber == 0) && ((json) && (typeof json.result != 'undefined')) && (json.result.length == 0)) {
+
+            if(paginate.activePageNumber == 0
+              && ((json) 
+              && (typeof json.result != 'undefined'))
+              && (json.result.length == 0)) {
+
               json.result = [{
-                  id: 0,
-                  comment: 'No Comments to show!',
-                  createdOn: '',
-                  elapsedMinutes: '',
-                  isArchived: false,
-                  isDeleted: false,
-                  isMe: true,
-                  page: '',
-                  user: '',
-                  permissions: {
-                    add: false,
-                    archive: false,
-                    remove: false
-                  }
-              }];
-              if ((collection) && (typeof collection != 'undefined')) {
+                id: 0,
+                comment: 'No Comments to show!',
+                createdOn: '',
+                elapsedMinutes: '',
+                isArchived: false,
+                isDeleted: false,
+                isMe: true,
+                page: '',
+                user: '',
+                permissions: {
+                  add: false,
+                  archive: false,
+                  remove: false
+                }}];
+
+              if((collection) && (typeof collection != 'undefined')) {
                 collection.reset(this.resetCollection(json.result));
               }
             }
           }
-          if ((callback) && (typeof callback != 'undefined')) {
+          if((callback) && (typeof callback != 'undefined')) {
             callback.apply(this, [json, collection]);
           }
         }
       };
   
       myself.CommentModel = Backbone.Model.extend({
-          defaults: {
-              id: 0,
-              comment: 'Guest User',
-              createdOn: '',
-              elapsedMinutes: '',
-              isArchived: false,
-              isDeleted: false,
-              isMe: true,
-              page: 'comments',
-              user: 'comments',
-              permissions: {}
-          },
+        defaults: {
+          id: 0,
+          comment: 'Guest User',
+          createdOn: '',
+          elapsedMinutes: '',
+          isArchived: false,
+          isDeleted: false,
+          isMe: true,
+          page: 'comments',
+          user: 'comments',
+          permissions: {}
+        },
   
-          initialize: function(){
-            this.set('permissions', myself.options.permissions);
-          }
-  
+        initialize: function() {
+          this.set('permissions', myself.options.permissions);
+        }
       });
   
       myself.CommentView = Backbone.View.extend({
@@ -196,13 +201,13 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
           "click .archive": "archiveComment"
         },
   
-        initialize: function(model){
+        initialize: function(model) {
           _.bindAll(this, 'render', 'deleteComment', 'archiveComment');
           this.model = model;
         },
   
-        render: function(){
-          this.$el.append(myself.dataTemplates.comments(this.attributes));
+        render: function() {
+          this.$el.append(Mustache.render(myself.defaults.dataTemplates.comments, this.attributes));//myself.dataTemplates.comments(this.attributes));
           return this.$el;
         },
   
@@ -239,18 +244,21 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
           "click .navigateRefresh": "navigateRefresh"
         },
   
-        initialize: function(collection){
-           _.bindAll(this, 'render',
-                           'addComment',
-                           'saveComment',
-                           'cancelComment',
-                           'renderSingeComment',
-                           'addComment',
-                           'saveComment',
-                           'cancelComment',
-                           'navigateNext',
-                           'navigatePrevious',
-                           'commentsUpdateNotification');
+        initialize: function(collection) {
+          _.bindAll(
+            this,
+            'render',
+            'addComment',
+            'saveComment',
+            'cancelComment',
+            'renderSingeComment',
+            'addComment',
+            'saveComment',
+            'cancelComment',
+            'navigateNext',
+            'navigatePrevious',
+            'commentsUpdateNotification'
+          );
   
           this.collection = collection;
   
@@ -263,11 +271,11 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
         render: function() {
           var $renderElem = $('#'+myself.options.htmlObject);
           var $commentsElem = $('<div/>').addClass('commentsGroup');
-          _(this.collection.models).each(function(comment){
+          _(this.collection.models).each(function(comment) {
             $commentsElem.append(this.renderSingeComment(comment));
           }, this);
-          var $add = $(myself.dataTemplates.addComments(myself.options.permissions));
-          var $paginate = $(myself.dataTemplates.paginateComments(myself.options.paginate));
+          var $add = $(Mustache.render(myself.defaults.dataTemplates.addComments, myself.options.permissions));//myself.dataTemplates.addComments(myself.options.permissions));
+          var $paginate = $(Mustache.render(myself.defaults.dataTemplates.paginateComments, myself.options.paginate));//myself.dataTemplates.paginateComments(myself.options.paginate));
           this.$el.empty().append($commentsElem, $add, $paginate)
           $renderElem.append(this.$el);
           this.updateNavigateButtons();
@@ -300,7 +308,7 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
         navigateNext: function() {
           var paginate = myself.options.paginate;
           var start = paginate.activePageNumber*paginate.pageCommentsSize;
-          if ((start+paginate.pageCommentsSize) < myself.options.queyResult.length) {
+          if((start+paginate.pageCommentsSize) < myself.options.queyResult.length) {
             paginate.activePageNumber++;
             this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
           }
@@ -311,7 +319,7 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
         navigatePrevious: function() {
           var paginate = myself.options.paginate;
           var start = paginate.activePageNumber;
-          if (paginate.activePageNumber > 0) {
+          if(paginate.activePageNumber > 0) {
             paginate.activePageNumber--;
             this.collection.reset(myself.operations.resetCollection(myself.options.queyResult));
           }
@@ -330,20 +338,20 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
           var paginate = myself.options.paginate;
           $('.navigatePrevious').addClass("disabled");
           $('.navigateNext').addClass("disabled");
-          if (paginate.activePageNumber > 0){
+          if(paginate.activePageNumber > 0) {
             $('.navigatePrevious').removeClass("disabled");
           }
-          if ((paginate.activePageNumber+1) < Math.ceil(myself.options.queyResult.length/paginate.pageCommentsSize)) {
+          if((paginate.activePageNumber+1) < Math.ceil(myself.options.queyResult.length/paginate.pageCommentsSize)) {
             $('.navigateNext').removeClass("disabled");
           }
         },
   
         commentsUpdateNotification: function() {
-          if (myself.options.queyResult.length > 0) {
+          if(myself.options.queyResult.length > 0) {
             var lastCommentDate = myself.options.queyResult[0].createdOn;
             var callback = function(data) {
-              if (data.result.length > 0) {
-                if (!!(data.result[0].createdOn==lastCommentDate)) {
+              if(data.result.length > 0) {
+                if(!!(data.result[0].createdOn==lastCommentDate)) {
                 } else {
                   var tipsyOptions = {
                     html: true,
@@ -354,9 +362,11 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
                       return 'New comments, please refresh!';
                     }
                   }
-                  $('.commentComponent .navigateRefresh').attr('title','New comments, please refresh!').tipsy(tipsyOptions);
-                  $('.commentComponent .navigateRefresh').tipsy('show');
-  
+                  $('.commentComponent .navigateRefresh')
+                    .attr('title','New comments, please refresh!')
+                    .tipsy(tipsyOptions);
+                  $('.commentComponent .navigateRefresh')
+                    .tipsy('show');
                 }
               }
             }
@@ -378,27 +388,21 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
   
       });
   
-      myself.compileTemplates = function() {
-        myself.dataTemplates = myself.dataTemplates || {};
-        _(myself.defaults.dataTemplates).each(function(value, key) {
-          myself.dataTemplates[key] = Mustache.parse(value);
-        });
-      };
-  
       myself.start = function(options) {
         myself.options = options;
         myself.defaults = _.extend({}, myself.defaults, options.defaults);
-        myself.compileTemplates();
   
         myself.commentsCollection = new myself.CommentsCollection();
         myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
         myself.commentsView = new myself.CommentsView(myself.commentsCollection);
   
-        if (myself.options.intervalActive) {
+        if(myself.options.intervalActive) {
           var refresh = function() {
             myself.operations.processOperation('LIST_ACTIVE', null, myself.commentsCollection, null, myself.options);
           }
-          setInterval(function () { myself.commentsCollection.trigger('commentsUpdateNotification'); }, myself.options.interval);
+          setInterval(function() {
+            myself.commentsCollection.trigger('commentsUpdateNotification');
+          }, myself.options.interval);
         }
   
       };
@@ -407,7 +411,6 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
   
     },
   
-  
     /*****
      Process component
     *****/
@@ -415,21 +418,21 @@ define(['../lib/mustache', '../lib/underscore', './BaseComponent', '../Logger', 
     update: function() {
   
       // Set page start and length for pagination
-      this.paginateActive = (typeof this.paginate == 'undefined')? true: this.paginate;
-      this.pageCommentsSize = (typeof this.pageCommentsSize == 'undefined')? 10: this.pageCommentsSize;
-      this.firstResult = (typeof this.firstResult == 'undefined')? 0: this.firstResult;
-      this.maxResults  = (typeof this.maxResults  == 'undefined')? 100: this.maxResults;
-      this.interval  = (typeof this.interval  == 'undefined')? 60000: this.interval;
-      this.intervalActive  = (typeof this.intervalActive  == 'undefined')? true: this.intervalActive;
+      this.paginateActive = (typeof this.paginate == 'undefined') ? true : this.paginate;
+      this.pageCommentsSize = (typeof this.pageCommentsSize == 'undefined') ? 10 : this.pageCommentsSize;
+      this.firstResult = (typeof this.firstResult == 'undefined') ? 0 : this.firstResult;
+      this.maxResults  = (typeof this.maxResults  == 'undefined') ? 100 : this.maxResults;
+      this.interval  = (typeof this.interval  == 'undefined') ? 60000 : this.interval;
+      this.intervalActive  = (typeof this.intervalActive  == 'undefined') ? true : this.intervalActive;
   
-      this.addPermission = (typeof this.addPermission == 'undefined')? true: this.addPermission;
-      this.deletePermission = (typeof this.deletePermission == 'undefined')? false: this.deletePermission;
-      this.archivePermission = (typeof this.archivePermission == 'undefined')? true: this.archivePermission;
+      this.addPermission = (typeof this.addPermission == 'undefined') ? true : this.addPermission;
+      this.deletePermission = (typeof this.deletePermission == 'undefined') ? false : this.deletePermission;
+      this.archivePermission = (typeof this.archivePermission == 'undefined') ? true : this.archivePermission;
   
-      this.options = (typeof this.options == 'undefined')? {}: this.options;
+      this.options = (typeof this.options == 'undefined') ? {} : this.options;
   
       // set the page name for the comments
-      if (this.page == undefined){
+      if(this.page == undefined) {
         Logger.log("Fatal - no page definition passed","error");
         return;
       }

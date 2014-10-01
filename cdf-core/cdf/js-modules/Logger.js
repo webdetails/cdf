@@ -11,46 +11,43 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(function () {
+define(function() {
 
-    var logger = {
-        loglevels: ['debug', 'info', 'warn', 'error', 'exception'],
-        loglevel: 'debug',
-        log: function (m, type){    
-                type = type || "info";
-                if (this.loglevels.indexOf(type) < this.loglevels.indexOf(this.loglevel)) {
-                    return;
-                }
-                if (typeof console !== "undefined" ){                
-                    if (type && console[type]) {
-                        console[type]("["+ type +"] WD: " + m);
-                    }else if (type === 'exception' &&
-                        !console.exception) {
-                        console.error("["+ type +"] WD: "  + (m.stack || m));
-                    }
-                    else {
-                        console.log("WD: " + m);
-                    }
-                }
-            },
-        debug: function(m){
-                return this.log(m, "debug");
-            },
-        info: function(m){
-                return this.log(m, "info");
-            },
-        warn: function(m){
-                return this.log(m, "warn");
-            },
-        error: function(m){
-                return this.log(m, "error");
-            },
-        exception: function(m){
-                return this.log(m, "exception");
-            }                       
-    };
-    
-    
-    return logger;
+  var logger = {
+    loglevels: ['debug', 'info', 'warn', 'error', 'exception'],
+    loglevel: 'debug',
+    log: function (m, type){    
+      type = type || "info";
+      if(this.loglevels.indexOf(type) < this.loglevels.indexOf(this.loglevel)) {
+        return;
+      }
+      if(typeof console !== "undefined") {                
+          if(type && console[type]) {
+            console[type]("["+ type +"] WD: " + m);
+          } else if (type === 'exception' && !console.exception) {
+            console.error("["+ type +"] WD: "  + (m.stack || m));
+          } else {
+            console.log("WD: " + m);
+          }
+      }
+    },
+    debug: function(m){
+      return this.log(m, "debug");
+    },
+    info: function(m){
+      return this.log(m, "info");
+    },
+    warn: function(m){
+      return this.log(m, "warn");
+    },
+    error: function(m){
+      return this.log(m, "error");
+    },
+    exception: function(m){
+      return this.log(m, "exception");
+    }                       
+  };
+
+  return logger;
 
 });

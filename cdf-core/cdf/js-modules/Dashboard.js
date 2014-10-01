@@ -11,25 +11,27 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./dashboard/Dashboard',
-        './dashboard/Dashboard.addIns',
-        './dashboard/Dashboard.bookmarkable',
-        './dashboard/Dashboard.components',
-        './dashboard/Dashboard.i18n',
-        './dashboard/Dashboard.legacy',
-        './dashboard/Dashboard.lifecycle',
-        './dashboard/Dashboard.notifications',
-        './dashboard/Dashboard.parameters',
-        './dashboard/Dashboard.storage',
-        './dashboard/Dashboard.query',
-        './dashboard/Dashboard.views',
-        './queries/BaseQuery',
-        './queries/CpkQuery',
-        './queries/CdaQuery',
-        './components/BaseComponent',
-        './components/UnmanagedComponent',
-        'css!./Dashboard'],
-        function (Dashboard) {
-            return Dashboard;
-        }
+define([
+  './dashboard/Dashboard',
+  './dashboard/Dashboard.addIns',
+  './dashboard/Dashboard.bookmarkable',
+  './dashboard/Dashboard.components',
+  './dashboard/Dashboard.i18n',
+  './dashboard/Dashboard.legacy',
+  './dashboard/Dashboard.lifecycle',
+  './dashboard/Dashboard.notifications',
+  './dashboard/Dashboard.parameters',
+  './dashboard/Dashboard.storage',
+  './dashboard/Dashboard.query',
+  './dashboard/Dashboard.views',
+  './queries/BaseQuery',
+  './queries/CpkQuery',
+  './queries/CdaQuery',
+  './queries/LegacyQuery',
+  './components/BaseComponent',
+  './components/UnmanagedComponent',
+  'css!./Dashboard'],
+  function(Dashboard) {
+    return Dashboard;
+  }
 );
