@@ -13,11 +13,15 @@
 
 package org.pentaho.cdf.views;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-
-import java.io.IOException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.pentaho.cdf.comments.CommentsApi;
+import org.pentaho.cdf.util.Parameter;
+import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
+import pt.webdetails.cpf.utils.PluginIOUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,15 +31,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
-import org.pentaho.cdf.comments.CommentsApi;
-import org.pentaho.cdf.util.Parameter;
-import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
-
-import pt.webdetails.cpf.utils.PluginIOUtils;
+import static javax.ws.rs.core.MediaType.*;
 
 @Path( "/pentaho-cdf/api/views" )
 public class ViewsApi {
@@ -67,14 +65,10 @@ public class ViewsApi {
   @Path( "/save" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public void saveView( @DefaultValue( "" ) @QueryParam( Parameter.NAME ) String view,
-
-  @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
-
+                        @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
     try {
-
       String result = ViewsEngine.getInstance().saveView( view, getUserName() );
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
-
     } catch ( Exception ex ) {
       logger.error( "Error while outputing result", ex );
     }
@@ -84,14 +78,26 @@ public class ViewsApi {
   @Path( "/delete" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
   public void deleteView( @DefaultValue( "" ) @QueryParam( Parameter.NAME ) String name,
-
-  @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
-
+                          @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest ) {
     try {
-
       String result = ViewsEngine.getInstance().deleteView( name, getUserName() );
       PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result );
+    } catch ( IOException ex ) {
+      logger.error( "Error while outputing result", ex );
+    }
+  }
 
+  @GET
+  @Path( "/get" )
+  @Consumes( { APPLICATION_XML, APPLICATION_JSON, APPLICATION_FORM_URLENCODED } )
+  public void getView( @DefaultValue( "" ) @QueryParam( Parameter.NAME ) String view,
+                       @DefaultValue( "" ) @QueryParam( Parameter.USER ) String user,
+                       @Context HttpServletResponse servletResponse, @Context HttpServletRequest servletRequest )
+    throws JSONException {
+    try {
+      View result = ViewsEngine.getInstance().getView( view, StringUtils.isEmpty( user ) ? getUserName() : user );
+      PluginIOUtils.writeOutAndFlush( servletResponse.getOutputStream(), result == null ? "{}"
+        : result.toJSON().toString( 2 ) );
     } catch ( IOException ex ) {
       logger.error( "Error while outputing result", ex );
     }

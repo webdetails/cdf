@@ -11,7 +11,7 @@
  * the license for the specific language governing your rights and limitations.
  */
 
-define(['./Dashboard', '../Logger'], function (Dashboard, Logger) {
+define(['./Dashboard', './Dashboard.views.ext'], function (Dashboard, ext) {
     /**
      * A module representing a extension to Dashboard module for views.
      * @module Dashboard.views
@@ -34,6 +34,22 @@ define(['./Dashboard', '../Logger'], function (Dashboard, Logger) {
        */
       _initViews: function(){
         this.viewParameters = {};
+        this.view = undefined;
+
+        var viewId = ext.getViewIdFromUrl();
+
+        if(viewId != "") {
+          var args = {
+            user: this.context.user,
+            name: viewId,
+            ts: (new Date()).getTime() // Needed so IE doesn't try to be clever and retrieve the response from cache
+          };
+
+          $.getJSON(ext.getView(), args, function(json){
+            this.view = json;
+          });
+        }
+
       },
     
       /**

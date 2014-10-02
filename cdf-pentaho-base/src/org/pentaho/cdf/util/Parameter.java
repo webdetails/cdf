@@ -64,7 +64,8 @@ public class Parameter {
   public static final String QUERY_TYPE = "queryType"; //$NON-NLS-1$
   public static final String QUERY = "query"; //$NON-NLS-1$  
   public static final String CATALOG = "catalog"; //$NON-NLS-1$ 
-  public static final String JNDI = "jndi"; //$NON-NLS-1$ 
+  public static final String JNDI = "jndi"; //$NON-NLS-1$
+  public static final String USER = "user"; //$NON-NLS-1$
 
   /**
    * extracts all parameter from a given http request

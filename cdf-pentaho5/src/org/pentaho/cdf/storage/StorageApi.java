@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -21,7 +22,6 @@ import org.pentaho.cdf.utils.JsonUtil;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 
 /**
- * 
  * @author rmansoor
  */
 @Path( "/pentaho-cdf/api/storage" )
@@ -33,20 +33,24 @@ public class StorageApi {
   @Path( "/store" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public Response store( @QueryParam( Parameter.STORAGE_VALUE ) String storageValue )
+  public Response store( @QueryParam( Parameter.STORAGE_VALUE ) String storageValue,
+                         @QueryParam( Parameter.USER ) String user )
     throws InvalidCdfOperationException, JSONException, PluginHibernateException {
 
-    JSONObject json = StorageEngine.getInstance().store( storageValue, getUserName() );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build() : Response.serverError().build();
+    JSONObject json =
+      StorageEngine.getInstance().store( storageValue, StringUtils.isEmpty( user ) ? getUserName() : user );
+    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
+      : Response.serverError().build();
   }
 
   @GET
   @Path( "/read" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public String read() throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+  public String read( @QueryParam( Parameter.USER ) String user ) throws JSONException, InvalidCdfOperationException,
+    PluginHibernateException {
 
-    JSONObject json = StorageEngine.getInstance().read( getUserName() );
+    JSONObject json = StorageEngine.getInstance().read( StringUtils.isEmpty( user ) ? getUserName() : user );
 
     if ( json != null ) {
       return json.toString();
@@ -60,9 +64,11 @@ public class StorageApi {
   @Path( "/delete" )
   @Produces( "text/plain" )
   @Consumes( { APPLICATION_XML, APPLICATION_JSON } )
-  public Response delete() throws JSONException, InvalidCdfOperationException, PluginHibernateException {
-    JSONObject json = StorageEngine.getInstance().delete( getUserName() );
-    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build() : Response.serverError().build();
+  public Response delete( @QueryParam( Parameter.USER ) String user )
+    throws JSONException, InvalidCdfOperationException, PluginHibernateException {
+    JSONObject json = StorageEngine.getInstance().delete( StringUtils.isEmpty( user ) ? getUserName() : user );
+    return JsonUtil.isSuccessResponse( json ) ? Response.ok( json.toString( 2 ) ).build()
+      : Response.serverError().build();
   }
 
   private String getUserName() {

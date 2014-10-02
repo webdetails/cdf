@@ -13,6 +13,7 @@
 
 define([
   './dashboard/Dashboard',
+  './dashboard/Dashboard.context',
   './dashboard/Dashboard.addIns',
   './dashboard/Dashboard.bookmarkable',
   './dashboard/Dashboard.components',

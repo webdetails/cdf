@@ -13,8 +13,11 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      { pattern: 'cdf/js-lib/**/*.css', included: false },
       { pattern: 'cdf/js-lib/**/*.js', included: false },
+      { pattern: 'cdf/js-modules/**/*.css', included: false },
       { pattern: 'cdf/js-modules/**/*.js', included: false },
+      { pattern: 'test-js/**/*.ext.js', included: true },
       { pattern: 'test-js/**/*.js', included: false },
       'config/context.js',
       'build-res/requireCfg-raw.js',

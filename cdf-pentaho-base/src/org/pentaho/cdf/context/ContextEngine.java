@@ -55,9 +55,9 @@ import pt.webdetails.cpf.utils.XmlDom4JUtils;
 
 public class ContextEngine {
 
+  static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
   private static final Log logger = LogFactory.getLog( ContextEngine.class );
   private static final String PREFIX_PARAMETER = "param";
-
   // embedded constants
   private static final String INITIAL_COMMENT = "/** This file is generated in cdf to allow using cdf embedded.\n" +
     "It will append to the head tag the dependencies needed, like the FULLY_QUALIFIED_URL**/\n\n";
@@ -66,18 +66,13 @@ public class ContextEngine {
   private static final String CDF_LIB_PATH = "content/pentaho-cdf/js/lib/cdf-core-lib-require-js-cfg.js";
   private static final String REQUIRE_PATH = "content/common-ui/resources/web/require.js";
   private static final String REQUIRE_START_PATH = "content/common-ui/resources/web/require-cfg.js";
-
-
-  static final String SESSION_PRINCIPAL = "SECURITY_PRINCIPAL";
-  private static ContextEngine instance;
-
   /* [settings.xml] legacy-dashboard-context: flag indicating if Dashboard.context should assume the
    * legacy structure, including deprecated attributes such as: solution, path, file, fullPath, isAdmin
    */
   private final static boolean APPLY_LEGACY_DASHBOARD_CONTEXT = Boolean.valueOf(
     StringUtils.defaultIfEmpty( CdfEngine.getEnvironment().getResourceLoader()
-    .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ) , "false" ) );
-
+      .getPluginSetting( ContextEngine.class, CdfConstants.PLUGIN_SETTINGS_LEGACY_DASHBOARD_CONTEXT ), "false" ) );
+  private static ContextEngine instance;
   private static String CONFIG_FILE = "dashboardContext.xml";
 
   private static List<AutoInclude> autoIncludes;
@@ -95,25 +90,67 @@ public class ContextEngine {
     return instance;
   }
 
+  public static void clearCache() {
+    // TODO figure out what to clear
+    synchronized( autoIncludesLock ) {
+      autoIncludes = null;
+      logger.debug( "auto-includes cleared." );
+    }
+  }
+
+  public static void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
+    throws Exception {
+
+    String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
+    String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
+    String file = StringUtils.defaultIfEmpty( paramMap.get( Parameter.FILE ), StringUtils.EMPTY );
+    String action = StringUtils.defaultIfEmpty( paramMap.get( Parameter.ACTION ), StringUtils.EMPTY );
+    // TODO: why does view default to action?
+    String viewId = StringUtils.defaultIfEmpty( paramMap.get( Parameter.VIEW ), action );
+    String fullPath = RepositoryHelper.joinPaths( solution, path, file );
+
+    // old xcdf dashboards use solution + path + action
+    if ( RepositoryHelper.getExtension( action ).equals( "xcdf" ) ) {
+      fullPath = RepositoryHelper.joinPaths( fullPath, action );
+    }
+
+    String dashboardContext =
+      ContextEngine.getInstance().getContext( fullPath, viewId, action, paramMap, inactiveInterval );
+
+    if ( StringUtils.isEmpty( dashboardContext ) ) {
+      logger.error( "empty dashboardContext" );
+    }
+
+    PluginIOUtils.writeOut( out, dashboardContext );
+  }
+
   protected IPentahoSession getUserSession() {
     return PentahoSessionHolder.getSession();
   }
 
   public String getContext( String path, String viewId, String action, Map<String, String> parameters,
                             int inactiveInterval ) {
-    final JSONObject contextObj = new JSONObject();
+    String username = getUserSession().getName();
+
+    try {
+      return buildContextScript( buildContext( path, username, parameters, inactiveInterval ), viewId, action,
+        username );
+    } catch ( JSONException e ) {
+      return "";
+    }
+  }
+
+  public JSONObject buildContext( String path, String username, Map<String, String> parameters, int inactiveInterval ) {
+    JSONObject contextObj = new JSONObject();
 
     Document config = getConfigFile();
 
     try {
-
-      String username = getUserSession().getName();
-
       buildContextConfig( contextObj, path, config, username );
       buildContextSessionTimeout( contextObj, inactiveInterval );
       buildContextDates( contextObj );
 
-      contextObj.put( "user", getUserSession().getName() );
+      contextObj.put( "user", username );
       contextObj.put( "locale", CdfEngine.getEnvironment().getLocale() );
 
       buildContextPaths( contextObj, path, parameters );
@@ -132,11 +169,11 @@ public class ContextEngine {
       logger.info( "[Timing] Finished building context: "
         + ( new SimpleDateFormat( "HH:mm:ss.SSS" ) ).format( new Date() ) );
 
-      return buildContextScript( contextObj, viewId, action, username );
-
     } catch ( JSONException e ) {
-      return "";
+      logger.error( "Error building context" );
     }
+
+    return contextObj;
   }
 
   private JSONObject buildContextSessionTimeout( final JSONObject contextObj, int inactiveInterval )
@@ -168,17 +205,19 @@ public class ContextEngine {
   }
 
   // Maintain backward compatibility. This is a configurable option via plugin's settings.xml
-  private JSONObject buildLegacyStructure( final JSONObject contextObj, String path, SecurityParameterProvider securityParams )
+  private JSONObject buildLegacyStructure( final JSONObject contextObj, String path,
+                                           SecurityParameterProvider securityParams )
     throws JSONException {
 
     logger.warn( "CDF: using legacy structure for Dashboard.context; " +
-      "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings.xml" );
+      "this is a deprecated structure and should not be used. This is a configurable option via plugin's settings" +
+      ".xml" );
 
-    if( securityParams != null ){
+    if ( securityParams != null ) {
       contextObj.put( "isAdmin", Boolean.valueOf( (String) securityParams.getParameter( "principalAdministrator" ) ) );
     }
 
-    if( !StringUtils.isEmpty( path ) ) {
+    if ( !StringUtils.isEmpty( path ) ) {
 
       if ( !contextObj.has( Parameter.FULL_PATH ) ) {
         contextObj.put( Parameter.FULL_PATH, path ); // create fullPath ctx attribute
@@ -386,40 +425,6 @@ public class ContextEngine {
       logger.error( "Couldn't read context configuration file.", e );
       return null;
     }
-  }
-
-  public static void clearCache() {
-    // TODO figure out what to clear
-    synchronized( autoIncludesLock ) {
-      autoIncludes = null;
-      logger.debug( "auto-includes cleared." );
-    }
-  }
-
-  public static void generateContext( final OutputStream out, HashMap<String, String> paramMap, int inactiveInterval )
-    throws Exception {
-
-    String solution = StringUtils.defaultIfEmpty( paramMap.get( Parameter.SOLUTION ), StringUtils.EMPTY );
-    String path = StringUtils.defaultIfEmpty( paramMap.get( Parameter.PATH ), StringUtils.EMPTY );
-    String file = StringUtils.defaultIfEmpty( paramMap.get( Parameter.FILE ), StringUtils.EMPTY );
-    String action = StringUtils.defaultIfEmpty( paramMap.get( Parameter.ACTION ), StringUtils.EMPTY );
-    // TODO: why does view default to action?
-    String viewId = StringUtils.defaultIfEmpty( paramMap.get( Parameter.VIEW ), action );
-    String fullPath = RepositoryHelper.joinPaths( solution, path, file );
-
-    // old xcdf dashboards use solution + path + action
-    if ( RepositoryHelper.getExtension( action ).equals( "xcdf" ) ) {
-      fullPath = RepositoryHelper.joinPaths( fullPath, action );
-    }
-
-    String dashboardContext =
-      ContextEngine.getInstance().getContext( fullPath, viewId, action, paramMap, inactiveInterval );
-
-    if ( StringUtils.isEmpty( dashboardContext ) ) {
-      logger.error( "empty dashboardContext" );
-    }
-
-    PluginIOUtils.writeOut( out, dashboardContext );
   }
 
   public String generateEmbeddedContext() throws Exception {
